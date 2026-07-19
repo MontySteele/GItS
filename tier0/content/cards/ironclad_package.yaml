@@ -1,0 +1,67 @@
+# REF_IRONCLAD 10-card "archetype package" (spec §7): strength ramp.
+# Names are -like analogues, numbers simplified from public StS1 knowledge.
+- id: inflame_like
+  name: "Inflame-like"
+  cost: 1
+  type: power
+  rarity: uncommon
+  solve: [scaling]
+  role: enabler
+  effects:
+    - {op: apply_power, power: strength, amount: 2, target: self}
+
+- id: heavy_blade_like
+  name: "Heavy-Blade-like"
+  cost: 2
+  type: attack
+  rarity: common
+  solve: [scaling]
+  role: payoff
+  effects:
+    # STR x3 modeled as base 14 + strength applied thrice: approximated as
+    # base 14 damage plus two extra strength-only swings is NOT expressible
+    # in the v1 DSL, so we model it as a big single hit; strength still adds
+    # once via the pipeline. Good enough for a reference deck.
+    - {op: damage, amount: 14, target: enemy}
+
+- id: pommel_strike_like
+  name: "Pommel-Strike-like"
+  cost: 1
+  type: attack
+  rarity: common
+  solve: [frontload, velocity]
+  role: glue
+  effects:
+    - {op: damage, amount: 9, target: enemy}
+    - {op: draw, amount: 1}
+
+- id: shrug_it_off_like
+  name: "Shrug-It-Off-like"
+  cost: 1
+  type: skill
+  rarity: common
+  solve: [block, velocity]
+  role: glue
+  effects:
+    - {op: block, amount: 8}
+    - {op: draw, amount: 1}
+
+- id: cleave_like
+  name: "Cleave-like"
+  cost: 1
+  type: attack
+  rarity: common
+  solve: [utility]
+  role: glue
+  effects:
+    - {op: damage, amount: 8, target: all_enemies}
+
+- id: metallicize_like
+  name: "Metallicize-like"
+  cost: 1
+  type: power
+  rarity: uncommon
+  solve: [block, sustain]
+  role: enabler
+  effects:
+    - {op: apply_power, power: metallicize, amount: 3, target: self}

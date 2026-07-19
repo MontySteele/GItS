@@ -1,0 +1,97 @@
+"""YAML content loading: cards, characters, encounters, pilots.
+
+Card files may hold one card or a list. Everything is validated minimally —
+this is design tooling; a loud KeyError beats a validation framework.
+"""
+
+from __future__ import annotations
+
+import copy
+from functools import lru_cache
+from pathlib import Path
+
+import yaml
+
+from tier0.engine.state import Card, Enemy, Player
+
+CONTENT_DIR = Path(__file__).parent
+
+
+def _load_yaml_dir(sub: str) -> list[dict]:
+    docs = []
+    for path in sorted((CONTENT_DIR / sub).glob("*.yaml")):
+        data = yaml.safe_load(path.read_text())
+        docs.extend(data if isinstance(data, list) else [data])
+    return docs
+
+
+@lru_cache(maxsize=1)
+def _card_index() -> dict[str, Card]:
+    cards = [Card.from_dict(d) for d in _load_yaml_dir("cards")]
+    index = {c.id: c for c in cards}
+    if len(index) != len(cards):
+        seen: set[str] = set()
+        dupes = {c.id for c in cards if c.id in seen or seen.add(c.id)}
+        raise ValueError(f"duplicate card ids: {sorted(dupes)}")
+    return index
+
+
+def get_card(card_id: str) -> Card:
+    return copy.deepcopy(_card_index()[card_id])
+
+
+@lru_cache(maxsize=1)
+def _character_index() -> dict[str, dict]:
+    return {d["id"]: d for d in _load_yaml_dir("characters")}
+
+
+def build_player(character_id: str, deck: str = "starter") -> Player:
+    """deck: 'starter' or the name of a package list in the character yaml
+    (e.g. 'archetype_package') appended to the starter deck."""
+    spec = _character_index()[character_id]
+    card_ids = list(spec["starting_deck"])
+    if deck != "starter":
+        card_ids += spec["packages"][deck]
+    return Player(hp=spec["hp"], max_hp=spec["hp"],
+                  draw_pile=[get_card(cid) for cid in card_ids],
+                  relic_hooks=list(spec.get("relic_hooks", [])))
+
+
+@lru_cache(maxsize=1)
+def _encounter_index() -> dict[str, dict]:
+    return {d["id"]: d for d in _load_yaml_dir("encounters")}
+
+
+def encounter_ids() -> list[str]:
+    return sorted(_encounter_index())
+
+
+def encounter_stages(encounter_id: str) -> list[str]:
+    """A plain encounter is one stage; a 'sequence' encounter (GAUNTLET)
+    lists stage encounter ids fought back-to-back with HP carryover."""
+    spec = _encounter_index()[encounter_id]
+    return list(spec.get("sequence", [encounter_id]))
+
+
+def build_encounter(encounter_id: str) -> list[Enemy]:
+    spec = _encounter_index()[encounter_id]
+    if "sequence" in spec:
+        raise ValueError(f"{encounter_id} is a sequence; use encounter_stages()")
+    enemies = []
+    for e in spec["enemies"]:
+        for _ in range(e.get("count", 1)):
+            enemies.append(Enemy(
+                hp=e["hp"], max_hp=e["hp"], name=e["name"],
+                intents=copy.deepcopy(e["intents"]),
+                is_boss=e.get("is_boss", False),
+                sleep_turns=e.get("sleep_turns", 0)))
+    return enemies
+
+
+@lru_cache(maxsize=1)
+def _pilot_index() -> dict[str, dict]:
+    return {d["id"]: d for d in _load_yaml_dir("pilots")}
+
+
+def pilot_weights(pilot_id: str) -> dict:
+    return _pilot_index()[pilot_id]["weights"]

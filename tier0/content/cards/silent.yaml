@@ -1,0 +1,68 @@
+# REF_SILENT (spec §7): starter equivalent + shiv package — the
+# multiplicative reference. Numbers simplified from public StS1 knowledge.
+- id: neutralize_like
+  name: "Neutralize-like"
+  cost: 0
+  type: attack
+  rarity: basic
+  solve: [frontload, utility]
+  role: glue
+  effects:
+    - {op: damage, amount: 3, target: enemy}
+    - {op: apply_power, power: weak, amount: 1, target: enemy}
+
+- id: shiv
+  name: "Shiv"
+  cost: 0
+  type: attack
+  rarity: common
+  exhaust: true
+  tags: [shiv]
+  solve: [frontload]
+  role: glue
+  effects:
+    - {op: damage, amount: 4, target: enemy}
+
+- id: blade_dance_like
+  name: "Blade-Dance-like"
+  cost: 1
+  type: skill
+  rarity: common
+  solve: [velocity]
+  role: enabler
+  effects:
+    - {op: add_card, card_id: shiv, to: hand}
+    - {op: add_card, card_id: shiv, to: hand}
+    - {op: add_card, card_id: shiv, to: hand}
+
+- id: cloak_and_dagger_like
+  name: "Cloak-and-Dagger-like"
+  cost: 1
+  type: skill
+  rarity: common
+  solve: [block, velocity]
+  role: glue
+  effects:
+    - {op: block, amount: 6}
+    - {op: add_card, card_id: shiv, to: hand}
+    - {op: add_card, card_id: shiv, to: hand}
+
+- id: accuracy_like
+  name: "Accuracy-like"
+  cost: 1
+  type: power
+  rarity: uncommon
+  solve: [scaling]
+  role: payoff
+  effects:
+    - {op: apply_power, power: tag_damage_shiv, amount: 4, target: self}
+
+- id: acrobatics_like
+  name: "Acrobatics-like"
+  cost: 1
+  type: skill
+  rarity: common
+  solve: [velocity]
+  role: glue
+  effects:
+    - {op: draw, amount: 3}

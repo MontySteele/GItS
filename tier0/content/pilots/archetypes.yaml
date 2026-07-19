@@ -1,0 +1,29 @@
+# Per-archetype pilot weights (spec §6) so archetype comparisons aren't
+# confounded by pilot behavior. block stays at the frozen 1.2 everywhere
+# (part of battery calibration — see DECISIONS.md #9).
+- id: demolition
+  weights:
+    damage: 1.1
+    block: 1.2
+    scaling: 1.0
+    reaction: 0.6
+    tempo: 0.6
+    cost: 0.1
+
+- id: reaction
+  weights:
+    damage: 0.9
+    block: 1.2
+    scaling: 1.0
+    reaction: 2.0
+    tempo: 0.7
+    cost: 0.1
+
+- id: spark
+  weights:
+    damage: 1.0
+    block: 1.2
+    scaling: 1.0
+    reaction: 0.6
+    tempo: 1.0
+    cost: 0.0

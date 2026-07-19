@@ -1,0 +1,51 @@
+"""Counter-based powers with four hooks (spec §4.3).
+
+Implemented: strength, weak, vulnerable, dot (generic poison-like),
+metallicize, plus elemental auras which live on Enemy directly (reactions.py).
+Nothing else until a card needs it.
+
+Powers are plain stack counts in Fighter.powers; this module holds the
+rules for how stacks modify damage and what ticks at turn boundaries.
+"""
+
+from __future__ import annotations
+
+from tier0 import constants as C
+from tier0.engine.state import CombatState, Fighter
+
+DECAYING = ("weak", "vulnerable")   # tick down at their owner's turn end
+
+
+def modify_damage_dealt(attacker: Fighter, base: float) -> float:
+    dmg = base + attacker.powers.get("strength", 0)
+    if attacker.powers.get("weak", 0) > 0:
+        dmg *= C.WEAK_DEALT_MULT
+    return dmg
+
+
+def modify_damage_taken(defender: Fighter, dmg: float) -> float:
+    if defender.powers.get("vulnerable", 0) > 0:
+        dmg *= C.VULNERABLE_TAKEN_MULT
+    return dmg
+
+
+def on_turn_start(state: CombatState, fighter: Fighter) -> None:
+    if fighter.powers.get("metallicize", 0):
+        fighter.block += fighter.powers["metallicize"]
+    dot = fighter.powers.get("dot", 0)
+    if dot > 0:
+        fighter.hp -= dot                       # DoT ignores block, StS-poison-like
+        state.emit("dot_tick", amount=dot, target=getattr(fighter, "name", "player"))
+        fighter.powers["dot"] = dot - 1         # decays by 1 per tick
+
+
+def on_turn_end(state: CombatState, fighter: Fighter) -> None:
+    for name in DECAYING:
+        if fighter.powers.get(name, 0) > 0:
+            fighter.powers[name] -= 1
+
+
+def apply_power(state: CombatState, target: Fighter, name: str, stacks: int) -> None:
+    target.powers[name] = target.powers.get(name, 0) + stacks
+    state.emit("apply_power", power=name, stacks=stacks,
+               target=getattr(target, "name", "player"))

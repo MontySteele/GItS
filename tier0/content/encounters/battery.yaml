@@ -1,0 +1,56 @@
+# The remaining five battery encounters (spec §5), calibrated in M2 with
+# the block_w=1.2 generic pilot (see DECISIONS.md).
+# *** FROZEN 2026-07-19 — do not retune; all comparisons depend on it. ***
+- id: swarm
+  name: "SWARM"
+  # Target: starter clears 5-7 turns, loses 8-14 HP. Calibrated: 6.3
+  # turns, -16.6 HP (spec's atk 4 gave -45; atk 2 is the frozen value).
+  enemies:
+    - name: swarmling
+      count: 5
+      hp: 14
+      intents:
+        - {kind: attack, amount: 2}
+
+- id: attrition
+  name: "ATTRITION"
+  # 12+ turn grind; tests block economy (A3) and sustain (A4).
+  # Calibrated: 15.0 turns at hp 75 (spec's 45 ended in 7).
+  enemies:
+    - name: grinder
+      count: 2
+      hp: 75
+      intents:
+        - {kind: attack, amount: 6}
+        - {kind: block, amount: 8}
+        - {kind: debuff, power: weak, amount: 2}
+
+- id: burst_check
+  name: "BURST CHECK"
+  # Deal 60 by turn 4 or eat a 24 hit. Tests burst-on-demand (A6).
+  enemies:
+    - name: sleeper
+      hp: 60
+      sleep_turns: 3
+      intents:
+        - {kind: attack, amount: 24}
+
+- id: tank_boss
+  name: "TANK BOSS"
+  # Tests A2 scaling shape over a long fight. Calibrated so the starter
+  # survives to turn ~14 (A2 needs turn-10 data; spec's 12/+2/6x3 killed
+  # it at 8.5). Starter losing every boss fight is intended — scaling
+  # decks (package: 78-93% win) are what this fight measures.
+  enemies:
+    - name: tank_boss
+      hp: 240
+      is_boss: true
+      intents:
+        - {kind: attack, amount: 8}
+        - {kind: buff, power: strength, amount: 1}
+        - {kind: attack, amount: 4, times: 3}
+
+- id: gauntlet
+  name: "GAUNTLET"
+  # SWARM then PUNISHER back-to-back; player HP carries over (A4/A7).
+  sequence: [swarm, punisher]

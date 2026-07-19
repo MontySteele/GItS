@@ -1,0 +1,10 @@
+# Generic pilot weights (spec §6). One file per archetype later so archetype
+# comparisons aren't confounded by pilot behavior.
+id: generic
+weights:
+  damage: 1.0
+  block: 1.2
+  scaling: 1.2      # value of strength/power setup, decays late-fight
+  reaction: 1.0     # reaction setup or trigger value (unused until M4)
+  tempo: 0.6        # draw + energy
+  cost: 0.1         # slight preference for cheap cards at equal value

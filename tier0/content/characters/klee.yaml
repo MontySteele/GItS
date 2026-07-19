@@ -1,0 +1,51 @@
+# Klee (PLACEHOLDER numbers — real character doc forthcoming).
+# Starting relic "Pounding Surprise": +1 Spark per Bomb detonation.
+id: klee
+name: "Klee"
+hp: 60
+starting_deck:
+  - pyro_jab
+  - pyro_jab
+  - pyro_jab
+  - pyro_jab
+  - dodge
+  - dodge
+  - dodge
+  - dodge
+  - jumpy_dumpty
+  - bomb_toss
+packages:
+  demolition_package:
+    - jumpy_dumpty
+    - jumpy_dumpty
+    - bomb_toss
+    - bomb_toss
+    - big_badaboom
+    - sparkly_surprise
+    - dodge
+    - pyro_jab
+    - pyro_jab
+    - chain_reaction
+  reaction_package:
+    - xingqiu_raincutter
+    - xingqiu_raincutter
+    - fischl_oz
+    - fischl_oz
+    - kaeya_frostgnaw
+    - kaeya_frostgnaw
+    - albedo_solar_isotoma
+    - chain_reaction
+    - chain_reaction
+    - sparkly_surprise
+  spark_package:
+    - sparkly_surprise
+    - sparkly_surprise
+    - sparkly_surprise
+    - bomb_toss
+    - bomb_toss
+    - jumpy_dumpty
+    - pyro_jab
+    - pyro_jab
+    - dodge
+    - chain_reaction
+relic_hooks: [spark_on_detonation]

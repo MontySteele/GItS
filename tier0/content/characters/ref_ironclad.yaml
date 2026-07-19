@@ -1,0 +1,31 @@
+# REF_IRONCLAD (spec §7): the calibration baseline. Starter deck = 3.0 on
+# all axes by construction once the battery is frozen.
+id: ref_ironclad
+name: "REF_IRONCLAD"
+hp: 80
+starting_deck:
+  - strike
+  - strike
+  - strike
+  - strike
+  - strike
+  - defend
+  - defend
+  - defend
+  - defend
+  - bash
+packages:
+  # 10-card strength-ramp package: 2x each of the 5 package cards minus one
+  # cleave (spec says ~10 cards; exact mix is tunable).
+  archetype_package:
+    - inflame_like
+    - inflame_like
+    - heavy_blade_like
+    - heavy_blade_like
+    - pommel_strike_like
+    - pommel_strike_like
+    - shrug_it_off_like
+    - shrug_it_off_like
+    - cleave_like
+    - metallicize_like
+relic_hooks: []

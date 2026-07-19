@@ -1,0 +1,11 @@
+# PUNISHER (spec §5.2). Behavioral target: starter REF_IRONCLAD wins
+# ~50-60%. Calibrated M2 (block_w=1.2 pilot): 115 HP / atk 9 / ramp +2
+# -> 55% starter winrate, 100% package deck.
+# *** FROZEN 2026-07-19 — do not retune; all comparisons depend on it. ***
+id: punisher
+name: "PUNISHER"
+enemies:
+  - name: punisher
+    hp: 115
+    intents:
+      - {kind: attack, amount: 9, times: 1, ramp: 2, ramp_after: 3}

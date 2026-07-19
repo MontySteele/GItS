@@ -1,0 +1,30 @@
+# REF_SILENT (spec §7): validity check for the axis math. Expected
+# scorecard: A1 ≈ 2, A5 ≈ 4.5, A2 superlinear vs REF_IRONCLAD.
+id: ref_silent
+name: "REF_SILENT"
+hp: 70
+starting_deck:
+  - strike
+  - strike
+  - strike
+  - strike
+  - strike
+  - defend
+  - defend
+  - defend
+  - defend
+  - defend
+  - neutralize_like
+packages:
+  shiv_package:
+    - blade_dance_like
+    - blade_dance_like
+    - blade_dance_like
+    - cloak_and_dagger_like
+    - cloak_and_dagger_like
+    - cloak_and_dagger_like
+    - accuracy_like
+    - accuracy_like
+    - acrobatics_like
+    - acrobatics_like
+relic_hooks: []

@@ -1,0 +1,150 @@
+# ~10 PLACEHOLDER Klee cards (spec §9 M4): these exercise the schema and
+# the bomb/spark/reaction systems. They are NOT designs — the real card
+# sheet arrives separately. Klee is catalyst-grade (design doc §2.3):
+# every attack applies pyro.
+- id: pyro_jab
+  name: "Pyro Jab"
+  cost: 1
+  type: attack
+  rarity: basic
+  element: pyro
+  solve: [frontload]
+  archetypes: [generic]
+  role: glue
+  effects:
+    - {op: damage, amount: 5, target: enemy, applies_element: true}
+
+- id: dodge
+  name: "Dodge"
+  cost: 1
+  type: skill
+  rarity: basic
+  solve: [block]
+  archetypes: [generic]
+  role: glue
+  effects:
+    - {op: block, amount: 5}
+
+- id: jumpy_dumpty
+  name: "Jumpy Dumpty"
+  cost: 2
+  type: attack
+  rarity: common
+  element: pyro
+  solve: [frontload, utility]
+  archetypes: [demolition]
+  role: enabler
+  effects:
+    - {op: damage, amount: 7, target: random_enemy, times: 2, applies_element: true}
+    - {op: place_bomb, amount: 2, target: random_enemy, bomb_damage: 6}
+
+- id: bomb_toss
+  name: "Bomb Toss"
+  cost: 1
+  type: skill
+  rarity: common
+  element: pyro
+  solve: [frontload]
+  archetypes: [demolition]
+  role: enabler
+  effects:
+    - {op: place_bomb, amount: 1, target: enemy, bomb_damage: 8}
+
+- id: big_badaboom
+  name: "Big Badaboom"
+  cost: 3
+  type: attack
+  rarity: rare
+  element: pyro
+  solve: [utility, frontload]
+  archetypes: [demolition]
+  role: payoff
+  effects:
+    - {op: damage, amount: 10, target: all_enemies, applies_element: true}
+    - {op: place_bomb, amount: 2, target: random_enemy, bomb_damage: 8}
+
+- id: sparkly_surprise
+  name: "Sparkly Surprise"
+  cost: 0
+  type: skill
+  rarity: common
+  solve: [velocity]
+  archetypes: [spark]
+  role: enabler
+  effects:
+    - {op: gain_spark, amount: 1}
+    - {op: draw, amount: 1}
+
+- id: chain_reaction
+  name: "Chain Reaction"
+  cost: 1
+  type: attack
+  rarity: uncommon
+  element: pyro
+  solve: [scaling, utility]
+  archetypes: [reaction]
+  role: payoff
+  effects:
+    - {op: damage, amount: 6, target: enemy, applies_element: true}
+    - {op: draw, amount: 1}
+
+# --- Companion cards (design doc §4: enabler-not-carry, off-element
+# access; uncommon-grade ceiling, no scaling) ---
+- id: xingqiu_raincutter
+  name: "Xingqiu — Raincutter"
+  cost: 1
+  type: attack
+  rarity: uncommon
+  element: hydro
+  solve: [utility]
+  archetypes: [reaction]
+  role: enabler
+  tags: [companion]
+  companion: {nation: liyue, unit: xingqiu}
+  effects:
+    - {op: damage, amount: 4, target: enemy, applies_element: true}
+    - {op: block, amount: 3}
+
+- id: fischl_oz
+  name: "Fischl — Oz, at your side"
+  cost: 1
+  type: skill
+  rarity: uncommon
+  element: electro
+  solve: [utility]
+  archetypes: [reaction]
+  role: enabler
+  tags: [companion]
+  companion: {nation: mondstadt, unit: fischl}
+  effects:
+    - {op: apply_aura, element: electro, target: enemy}
+    - {op: draw, amount: 1}
+
+- id: kaeya_frostgnaw
+  name: "Kaeya — Frostgnaw"
+  cost: 1
+  type: attack
+  rarity: uncommon
+  element: cryo
+  solve: [utility]
+  archetypes: [reaction]
+  role: enabler
+  tags: [companion]
+  companion: {nation: mondstadt, unit: kaeya}
+  effects:
+    - {op: damage, amount: 4, target: enemy, applies_element: true}
+
+- id: albedo_solar_isotoma
+  name: "Albedo — Solar Isotoma"
+  cost: 1
+  type: skill
+  rarity: uncommon
+  element: geo
+  solve: [block, utility]
+  archetypes: [reaction]
+  role: enabler
+  tags: [companion]
+  companion: {nation: mondstadt, unit: albedo}
+  effects:
+    - {op: apply_aura, element: geo, target: enemy}
+    - {op: block, amount: 4}
