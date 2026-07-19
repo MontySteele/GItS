@@ -1,0 +1,42 @@
+# Mondstadt companion pool — v0.1 (ships with Klee)
+# Shared colorless-style pool. Roles: applier | buffer | trigger (see principles doc §4.3)
+# 4-star = common/uncommon (multi-card kits allowed). 5-star = rare, ONE card each, max 3.
+# Companion cards NEVER scale and route power through the player character.
+
+# ---------- 4-STAR (common/uncommon) ----------
+- {id: xingqiu_raincutter, name: "Xingqiu — Raincutter", star: 4, rarity: common, role_c: applier, element: hydro, cost: 1, type: attack,
+   effects: [{op: damage, amount: 4, target: enemy, applies_element: true}]}
+- {id: xingqiu_rain_swords, name: "Xingqiu — Rain Swords", star: 4, rarity: uncommon, role_c: applier, element: hydro, cost: 1, type: skill,
+   effects: [{op: block, amount: 5}, {op: apply_aura, element: hydro, target: random_enemy}]}
+- {id: fischl_nightrider, name: "Fischl — Nightrider", star: 4, rarity: common, role_c: applier, element: electro, cost: 1, type: attack,
+   effects: [{op: damage, amount: 5, target: enemy, applies_element: true}]}
+- {id: fischl_oz, name: "Fischl — Oz, at Your Side", star: 4, rarity: uncommon, role_c: applier, element: electro, cost: 1, type: power,
+   effects: [{op: apply_power, power: oz_summon, amount: 3, target: self, note: "3 turns: end of turn 3 dmg + electro to random enemy"}]}
+- {id: barbara_melody, name: "Barbara — Soothing Melody", star: 4, rarity: common, role_c: buffer, element: hydro, cost: 1, type: skill,
+   effects: [{op: heal, amount: 3}]}
+- {id: barbara_shining_idol, name: "Barbara — Shining Idol", star: 4, rarity: uncommon, role_c: buffer, element: hydro, cost: 2, type: skill,
+   effects: [{op: heal, amount: 6}, {op: apply_aura, element: hydro, target: random_enemy}]}
+- {id: sucrose_gust, name: "Sucrose — Wind Spirit Creation", star: 4, rarity: common, role_c: trigger, element: anemo, cost: 1, type: skill,
+   effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
+- {id: sucrose_astable, name: "Sucrose — Astable Anemohypostasis", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 2, type: skill,
+   effects: [{op: swirl, target: enemy}, {op: burst_energy, amount: 8}]}
+- {id: bennett_passion, name: "Bennett — Passion Overload", star: 4, rarity: common, role_c: buffer, element: pyro, cost: 1, type: skill,
+   effects: [{op: buff_next_attack, amount: 4}, {op: burst_energy, amount: 5}]}
+- {id: bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage", star: 4, rarity: uncommon, role_c: buffer, element: pyro, cost: 2, type: skill,
+   effects: [{op: heal, amount: 4}, {op: apply_power, power: attack_up_this_turn, amount: 3, target: self}]}
+- {id: kaeya_frostgnaw, name: "Kaeya — Frostgnaw", star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: attack,
+   effects: [{op: damage, amount: 5, target: enemy, applies_element: true}]}
+- {id: diona_icy_paws, name: "Diona — Icy Paws", star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: skill,
+   effects: [{op: block, amount: 5}, {op: apply_aura, element: cryo, target: random_enemy}]}
+
+# ---------- 5-STAR (rare, one card each, max 3 per nation) ----------
+- {id: albedo_solar_isotoma, name: "Albedo — Solar Isotoma", star: 5, rarity: rare, role_c: trigger, element: geo, cost: 1, type: power,
+   effects: [{op: apply_power, power: solar_isotoma, amount: 3, target: self, note: "3 turns: your attacks vs aura'd enemies grant 3 block (Crystallize engine)"}]}
+- {id: durin_witchs_flame, name: "Durin — Witch's Flame", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 2, type: power,
+   effects: [{op: apply_power, power: witchs_flame, amount: 30, target: self, note: "PERCENT: amplifying reactions +30%; end of turn 4 dmg + pyro to random enemy. Support payoff: routes through player's reactions."}]}
+- {id: nicole_celestial_gift, name: "Nicole — Celestial Gift", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 2, type: power,
+   effects: [{op: apply_power, power: celestial_gift, amount: 2, target: self, note: "your attacks +2 dmg; gain 4 block at start of turn"}]}
+
+# ---------- PERSONAL POOL (Klee — designated teammate, not in shared pool) ----------
+- {id: prune_witch_hunt, name: "Prune — Little Witch's Hunt", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 1, type: skill, personal_pool: klee,
+   effects: [{op: swirl, target: all_enemies}, {op: gain_spark, amount: 1}]}

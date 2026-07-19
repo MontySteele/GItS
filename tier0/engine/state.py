@@ -30,6 +30,15 @@ class Card:
     role: str = "glue"
     tags: list[str] = field(default_factory=list)
     companion: Optional[dict] = None
+    # Companion-sheet fields (mondstadt-companions.yaml)
+    star: Optional[int] = None
+    role_c: Optional[str] = None          # applier | buffer | trigger
+    personal_pool: Optional[str] = None
+    requires: Optional[str] = None        # e.g. burst_energy_full
+
+    @property
+    def is_companion(self) -> bool:
+        return self.role_c is not None or "companion" in self.tags
 
     @classmethod
     def from_dict(cls, d: dict) -> "Card":
@@ -45,6 +54,7 @@ class Bomb:
     """Delayed damage charge on an enemy (Klee signature, spec §4.2)."""
     damage: int
     element: str = "pyro"
+    turn_placed: int = 0          # for modify_bombs scope: placed_this_turn
 
 
 @dataclass
@@ -63,6 +73,10 @@ class Fighter:
 class Player(Fighter):
     energy: int = 0
     sparks: int = 0
+    element: str = "none"         # character element (catalyst cadence)
+    cadence: str = "skill"        # catalyst: every attack applies element
+    burst_energy: int = 0
+    burst_max: int = 0            # 0 = character has no burst meter
     draw_pile: list[Card] = field(default_factory=list)
     hand: list[Card] = field(default_factory=list)
     discard_pile: list[Card] = field(default_factory=list)
@@ -97,6 +111,15 @@ class CombatState:
     turn: int = 0
     cards_played_this_turn: int = 0
     log: list[dict] = field(default_factory=list)          # event stream for metrics
+    # Formula / conditional context (reset per card play in resolve_card)
+    detonations_total: int = 0            # Grand Finale formula
+    reactions_this_card: int = 0          # reaction_triggered_by_this
+    kills_this_card: int = 0              # killed_target
+    current_card_cost: int = 0            # this_cost_zero
+    current_x: int = 0                    # X-cost cards
+    companions_played: list[str] = field(default_factory=list)
+    companion_cost_delta_this_turn: int = 0   # cost_mod op
+    replay_next_companion: int = 0            # Study Buddy
 
     def emit(self, event: str, **data: Any) -> None:
         self.log.append({"turn": self.turn, "event": event, **data})

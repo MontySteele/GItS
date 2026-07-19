@@ -56,19 +56,17 @@ def run_full_battery(character: str, deck: str, pilot_id: str, fights: int,
 
 def score_config(character: str, deck: str, pilot_id: str, fights: int,
                  seed: int) -> dict:
-    """Full battery for baseline + target config -> 7-axis scorecard."""
-    base_stats = run_full_battery(*BASELINE, pilot_id, fights, seed)
+    """Full battery for baseline + target config -> 7-axis scorecard.
+    The baseline ALWAYS uses the generic pilot — a floating anchor would
+    make scores incomparable across archetype-pilot runs."""
+    base_stats = run_full_battery(*BASELINE, "generic", fights, seed)
     base_raw = axes.raw_axes(base_stats)
-    base_dpt = None                      # baseline is self-referential for A7
     target_is_baseline = (character, deck) == BASELINE
     if target_is_baseline:
         stats, raw = base_stats, base_raw
     else:
-        pooled = [s for ss in base_stats.values() for s in ss]
-        base_dpt = sum(s.total_damage_dealt / max(1, s.turns)
-                       for s in pooled) / len(pooled)
         stats = run_full_battery(character, deck, pilot_id, fights, seed)
-        raw = axes.raw_axes(stats, baseline_dpt=base_dpt)
+        raw = axes.raw_axes(stats)
     scores = axes.normalize(raw, base_raw)
     pressure_delta = (metrics.summarize(stats["punisher"])["winrate"]
                       - metrics.summarize(stats["attrition"])["winrate"])

@@ -1,51 +1,118 @@
-# Klee (PLACEHOLDER numbers — real character doc forthcoming).
-# Starting relic "Pounding Surprise": +1 Spark per Bomb detonation.
+# Klee — real design (klee-character-design.md §3). Card pool lives in
+# docs/klee-cards.yaml + docs/mondstadt-companions.yaml (loader reads the
+# docs sheets directly; single source of truth).
+# Declared statline targets (±0.5): A1 4.5, A6 4.0, A3 2.0, A4 1.5.
 id: klee
 name: "Klee"
-hp: 60
+hp: 62
+element: pyro
+cadence: catalyst        # every attack applies pyro
+burst_max: 60
+relic_hooks: [spark_on_detonation]   # Pounding Surprise
 starting_deck:
-  - pyro_jab
-  - pyro_jab
-  - pyro_jab
-  - pyro_jab
-  - dodge
-  - dodge
-  - dodge
-  - dodge
+  - kaboom
+  - kaboom
+  - kaboom
+  - kaboom
+  - duck_and_cover
+  - duck_and_cover
+  - duck_and_cover
+  - duck_and_cover
   - jumpy_dumpty
-  - bomb_toss
+  - pop
 packages:
-  demolition_package:
-    - jumpy_dumpty
-    - jumpy_dumpty
-    - bomb_toss
-    - bomb_toss
-    - big_badaboom
-    - sparkly_surprise
-    - dodge
-    - pyro_jab
-    - pyro_jab
-    - chain_reaction
-  reaction_package:
+  # §7.2 archetype-weighted decks (~12 drafted cards each).
+  demolition_weighted:
+    - mine_toss
+    - mine_toss
+    - fish_flavored_bait
+    - double_pop
+    - bomb_voyage
+    - chain_fuse
+    - quick_fuse
+    - ammo_scavenging
+    - remote_detonator
+    - explosives_workshop
+    - blazing_delight
+    - sorry_jean
+  spark_weighted:
+    - sparkly_treasure
+    - sparkly_treasure
+    - crackle
+    - spark_collection
+    - pocket_fireworks
+    - tail_of_flame
+    - skip_and_hop
+    - spark_knight_style
+    - endless_fireworks
+    - gleeful_barrage
+    - patched_dress
+    - cant_catch_me
+  # §7.2: reaction-weighted = 12 companions at realistic draft rates
+  # + her personal reaction cards.
+  reaction_weighted:
     - xingqiu_raincutter
-    - xingqiu_raincutter
-    - fischl_oz
+    - xingqiu_rain_swords
+    - fischl_nightrider
     - fischl_oz
     - kaeya_frostgnaw
+    - diona_icy_paws
+    - sucrose_gust
+    - sucrose_astable
+    - barbara_melody
+    - barbara_shining_idol
+    - bennett_passion
+    - bennett_fantastic_voyage
+    - sizzle
+    - perfect_timing
+    - flame_dance
+    - combustion_study
+  # §7.3 watchlist configs (degeneracy hunts, not realistic decks).
+  melt_stack:
+    - vermillion_pact
+    - durin_witchs_flame
     - kaeya_frostgnaw
+    - kaeya_frostgnaw
+    - diona_icy_paws
+    - sizzle
+    - boom_goes_the_dynamite
+    - big_badda_boom
+    - alchemical_curiosity
+    - combustion_study
+  barrage_engine:
+    - gleeful_barrage
+    - gleeful_barrage
+    - endless_fireworks
+    - true_spark_knight
+    - sparkly_treasure
+    - sparkly_treasure
+    - spark_collection
+    - sugar_rush
+    - da_da_da
+    - skip_and_hop
+    - cant_catch_me
+  loop_density:
+    - playtime_forever
+    - blazing_delight
+    - chained_reactions
+    - quick_fuse
+    - all_my_treasures
+    - mine_toss
+    - bomb_voyage
+    - double_pop
+    - ammo_scavenging
+    - secret_stash
+  # §7.4 dream team: Prune + Durin + Nicole + Albedo forced in.
+  dream_team:
+    - prune_witch_hunt
+    - durin_witchs_flame
+    - nicole_celestial_gift
     - albedo_solar_isotoma
-    - chain_reaction
-    - chain_reaction
-    - sparkly_surprise
-  spark_package:
-    - sparkly_surprise
-    - sparkly_surprise
-    - sparkly_surprise
-    - bomb_toss
-    - bomb_toss
-    - jumpy_dumpty
-    - pyro_jab
-    - pyro_jab
-    - dodge
-    - chain_reaction
-relic_hooks: [spark_on_detonation]
+    - xingqiu_raincutter
+    - fischl_nightrider
+    - kaeya_frostgnaw
+    - sizzle
+    - flame_dance
+    - mine_toss
+    - hide_and_seek
+    - alchemical_curiosity

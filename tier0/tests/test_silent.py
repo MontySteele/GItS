@@ -34,14 +34,24 @@ def test_silent_velocity_above_baseline(silent, ironclad_pkg):
     assert silent["scores"]["A5_velocity"] > ironclad_pkg["scores"]["A5_velocity"]
 
 
-def test_silent_weakness_is_utility(silent):
-    # Single-target shivs, no AoE: A6 must be the statline hole.
+def test_silent_weakness_is_utility_or_setup(silent):
+    # Single-target shivs, no AoE: A6 must be a statline hole. Under the
+    # self-referential A7 (review ruling #3), Silent's slow engine ramp
+    # makes A7 a legitimate co-weakness — expected sanity: Silent comes
+    # online slower than Ironclad's package.
     assert silent["scores"]["A6_utility"] <= 2.5
-    assert min(silent["scores"], key=silent["scores"].get) == "A6_utility"
+    bottom_two = sorted(silent["scores"], key=silent["scores"].get)[:2]
+    assert "A6_utility" in bottom_two
 
 
 def test_silent_frontload_not_above_baseline(silent):
     assert silent["scores"]["A1_frontload"] <= 3.0
+
+
+def test_silent_comes_online_slower_than_ironclad_package(silent, ironclad_pkg):
+    # Review ruling #3 expected sanity for the self-referential A7.
+    assert (silent["raw"]["A7_setup_tax"]
+            > ironclad_pkg["raw"]["A7_setup_tax"])
 
 
 def test_tag_damage_power_scopes_to_tag():

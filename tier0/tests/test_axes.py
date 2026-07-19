@@ -86,6 +86,12 @@ def test_frozen_battery_fight_lengths():
     assert boss["avg_turns"] >= 10     # A2 needs turn-10 data
 
 
+def test_a7_self_referential_sanity(baseline):
+    # Review ruling #3: REF_IRONCLAD starter reaches 70% of its own peak
+    # window within the first few turns (no engine to assemble).
+    assert baseline["raw"]["A7_setup_tax"] < 6
+
+
 def test_heuristic_flag_logic():
     flat = {ax: 3.0 for ax in axes.AXES}
     assert any("FLAT" in f for f in axes.heuristic_flags(flat))

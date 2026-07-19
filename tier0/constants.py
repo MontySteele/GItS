@@ -30,8 +30,21 @@ CRYSTALLIZE_BLOCK = 4         # player Block gained
 FROZEN_BOSS_RESIST = True     # bosses consume Frozen with no skipped intent
                               # (decision logged in DECISIONS.md)
 
-# --- Klee resources (spec §4.2) ---
+# --- Klee resources (spec §4.2; klee-character-design.md §3) ---
 SPARKS_FOR_FREE_ATTACK = 3    # at 3 Sparks, next Attack costs 0
+BURST_PER_SKILL_TAG = 5       # burst energy per Skill-tagged card played
+BURST_PER_REACTION = 5        # burst energy per reaction triggered
+
+# --- Klee power tunables (notes in klee-cards.yaml / companions sheet) ---
+SPARKS_N_SPLASH_HITS = 4          # end of turn: N hits...
+SPARKS_N_SPLASH_HIT_DMG = 5       # ...of this damage, each applies pyro
+PLAYTIME_BOMB_DAMAGE = 5          # Playtime Forever's per-turn bomb
+DETONATION_SPLASH_BURST = 3       # Blazing Delight: burst energy per detonation
+OZ_DMG = 3                        # Oz end-of-turn hit (applies electro)
+WITCHS_FLAME_DMG = 4              # Durin end-of-turn hit (applies pyro)
+SOLAR_ISOTOMA_BLOCK = 3           # block per attack hit vs aura'd enemy
+CELESTIAL_GIFT_BLOCK = 4          # Nicole: block at start of turn
+CATALYTIC_BURST_PER_REACTION = 5  # Catalytic Conversion bonus burst/reaction
 
 # --- Pilot policy (spec §6) ---
 BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP

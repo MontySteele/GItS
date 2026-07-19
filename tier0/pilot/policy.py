@@ -14,14 +14,17 @@ from typing import Optional
 
 from tier0 import constants as C
 from tier0.engine import powers
-from tier0.engine.combat import card_cost
+from tier0.engine.combat import card_cost, card_playable
 from tier0.engine.state import Card, CombatState
+
+
+def _places_bombs(card: Card) -> bool:
+    return any(fx["op"] == "place_bomb" for fx in card.effects)
 
 
 def make_pilot(weights: dict):
     def pilot(state: CombatState) -> Optional[Card]:
-        playable = [c for c in state.player.hand
-                    if card_cost(state, c) <= state.player.energy]
+        playable = [c for c in state.player.hand if card_playable(state, c)]
         if not playable:
             return None
 
@@ -40,20 +43,57 @@ def make_pilot(weights: dict):
         best_score, _, best = max(scored, key=lambda t: t[:2])
         if best_score <= 0:
             return None
+        # Bomb sequencing: attacks resolve BEFORE new placements, so this
+        # turn's attacks don't pop bombs placed this turn (forfeiting
+        # next-turn detonation + Pounding Surprise sparks).
+        if _places_bombs(best):
+            attacks = [(s, i, c) for s, i, c in scored
+                       if c.type == "attack" and s > 0]
+            if attacks:
+                return max(attacks, key=lambda t: t[:2])[2]
         return best
 
     return pilot
 
 
+def _est(state: CombatState, val, default: int = 0) -> float:
+    """Estimate a possibly-formulaic amount for scoring purposes."""
+    if isinstance(val, (int, float)):
+        return val
+    if val in ("X", "X_plus_1"):        # X-cards spend all remaining energy
+        return state.player.energy + (1 if val == "X_plus_1" else 0)
+    return default
+
+
 def _expected_damage(state: CombatState, card: Card) -> float:
     total = 0.0
+    living = state.living_enemies
     for fx in card.effects:
         if fx["op"] == "damage":
-            n_targets = len(state.living_enemies) if fx.get("target") == "all_enemies" else 1
-            per_hit = powers.modify_damage_dealt(state.player, fx["amount"])
-            total += per_hit * fx.get("times", 1) * n_targets
+            if fx.get("target") == "self":
+                total -= fx["amount"] * 0.5          # HP loss is a cost
+                continue
+            n_targets = len(living) if fx.get("target") == "all_enemies" else 1
+            times = _est(state, fx.get("times", 1), 1)
+            if fx.get("times_formula") == "2_plus_sparks":
+                times = 2 + state.player.sparks
+            per_hit = powers.modify_damage_dealt(state.player,
+                                                 _est(state, fx["amount"]))
+            if fx.get("bonus_formula") == "3_per_detonation_this_combat":
+                per_hit += 3 * state.detonations_total
+            total += per_hit * times * n_targets
         elif fx["op"] == "place_bomb":
-            total += fx["bomb_damage"] * fx.get("amount", 1)
+            total += fx["bomb_damage"] * _est(state, fx.get("amount", 1), 1)
+        elif fx["op"] == "detonate":
+            # Early detonation realizes bomb damage now but forfeits the
+            # next-turn detonation it would get anyway — value it only
+            # when the target would die this turn (review ruling #6).
+            for e in living:
+                pending = sum(b.damage for b in e.bombs)
+                if pending and pending >= e.hp + e.block:
+                    total += pending
+                if fx.get("target") != "all_enemies":
+                    break
     return total
 
 
@@ -75,27 +115,47 @@ def _scaling_value(state: CombatState, card: Card) -> float:
     val = 0.0
     for fx in card.effects:
         if fx["op"] == "apply_power" and fx.get("target", "self") == "self":
-            val += fx["amount"] * 3
+            # Cap per-power contribution: percent-stack powers (Vermillion
+            # Pact 25, Durin 30) would otherwise dwarf everything.
+            val += min(fx["amount"], 6) * 3
         elif fx["op"] == "apply_power":                  # enemy debuff
             val += fx["amount"] * 2
     # Setup is worth less as the fight winds down.
     return val * max(0.0, 1.0 - state.turn / 12.0) if val else 0.0
 
 
+def _card_element(state: CombatState, card: Card) -> Optional[str]:
+    if card.element != "none":
+        return card.element
+    if card.type == "attack" and state.player.cadence == "catalyst":
+        return state.player.element
+    return None
+
+
 def _reaction_value(state: CombatState, card: Card) -> float:
-    if card.element == "none":
+    elem = _card_element(state, card)
+    swirls = any(fx["op"] == "swirl" for fx in card.effects)
+    applies = elem is not None or swirls or any(
+        fx["op"] == "apply_aura" for fx in card.effects)
+    if not applies:
         return 0.0
-    # Triggering beats seeding: any living enemy holding a different aura.
+    # Triggering beats seeding: any living enemy holding a reactable aura.
     for e in state.living_enemies:
-        if e.aura and e.aura != card.element:
+        if e.aura and (swirls or (elem and e.aura != elem)):
             return 6.0
-    return 2.0 if any(fx.get("applies_element") or fx["op"] == "apply_aura"
-                      for fx in card.effects) else 0.0
+    return 2.0
 
 
 def _tempo_value(card: Card) -> float:
-    return sum(fx["amount"] for fx in card.effects
-               if fx["op"] in ("draw", "energy"))
+    val = 0.0
+    for fx in card.effects:
+        if fx["op"] in ("draw", "energy"):
+            val += fx.get("amount", 1)
+        elif fx["op"] == "gain_spark":
+            val += fx.get("amount", 1) * 0.7    # sparks -> free attacks
+        elif fx["op"] == "burst_energy":
+            val += fx["amount"] / 10
+    return val
 
 
 def _score(state: CombatState, card: Card, w: dict) -> float:

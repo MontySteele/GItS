@@ -18,27 +18,60 @@ from tier0.engine.state import Card, CombatState, Enemy, Player
 Pilot = Callable[[CombatState], Card | None]
 
 
+def spark_threshold(state: CombatState) -> int:
+    # True Spark Knight: free attack at 2 sparks instead of 3.
+    return max(1, C.SPARKS_FOR_FREE_ATTACK
+               - state.player.powers.get("spark_threshold_down", 0))
+
+
+def card_playable(state: CombatState, card: Card) -> bool:
+    if card.requires == "burst_energy_full":
+        if state.player.burst_energy < state.player.burst_max:
+            return False
+    elif card.requires:
+        raise ValueError(f"unknown requires {card.requires!r}")
+    return card_cost(state, card) <= state.player.energy
+
+
 def card_cost(state: CombatState, card: Card) -> int:
     if card.cost == "X":
         return state.player.energy
+    cost = card.cost
+    if card.is_companion and state.companion_cost_delta_this_turn:
+        cost = max(0, cost + state.companion_cost_delta_this_turn)
     if (card.type == "attack"
-            and state.player.sparks >= C.SPARKS_FOR_FREE_ATTACK):
+            and state.player.sparks >= spark_threshold(state)):
         return 0
-    return card.cost
+    return cost
 
 
 def play_card(state: CombatState, card: Card) -> None:
     p = state.player
     cost = card_cost(state, card)
     if (card.type == "attack" and cost == 0
-            and p.sparks >= C.SPARKS_FOR_FREE_ATTACK and card.cost != 0):
-        p.sparks -= C.SPARKS_FOR_FREE_ATTACK
+            and p.sparks >= spark_threshold(state) and card.cost != 0):
+        p.sparks -= spark_threshold(state)
         state.emit("sparks_spent")
+    if card.cost == "X":
+        state.current_x = cost                # X = energy actually spent
+    state.current_card_cost = cost
     p.energy -= cost
     p.hand.remove(card)
     state.cards_played_this_turn += 1
     state.emit("play", card=card.id, cost=cost, energy_left=p.energy)
-    effects.resolve_card(state, card)
+    if card.requires == "burst_energy_full":
+        p.burst_energy = 0                    # playing the Burst empties it
+        state.emit("burst_cast", card=card.id)
+    if p.burst_max and "skill_tag" in card.tags:
+        p.burst_energy += C.BURST_PER_SKILL_TAG
+    replays = 1
+    if card.is_companion:
+        state.companions_played.append(card.id)
+        if state.replay_next_companion > 0:   # Study Buddy
+            replays += state.replay_next_companion
+            state.replay_next_companion = 0
+    for _ in range(replays):
+        effects.resolve_card(state, card)
     if card.exhaust or card.type == "power":
         p.exhaust_pile.append(card)
     else:
@@ -51,12 +84,16 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     state.cards_played_this_turn = 0
     p.block = 0
 
+    state.companion_cost_delta_this_turn = 0     # Friendly Visit expires
+    state.replay_next_companion = 0              # Study Buddy expires
+
     for enemy in list(state.living_enemies):     # bombs from last turn go off
         if enemy.bombs:
             effects.detonate_bombs(state, enemy)
     reactions.tick_auras(state)
     powers.on_turn_start(state, p)
-    if not p.alive:
+    effects.player_turn_start_triggers(state)
+    if not p.alive or state.over:
         return
 
     p.energy = C.BASE_ENERGY_PER_TURN
@@ -78,6 +115,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         seen_states.add(snapshot)
         play_card(state, card)
 
+    effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
     p.discard_pile.extend(p.hand)
     p.hand = []
     powers.on_turn_end(state, p)

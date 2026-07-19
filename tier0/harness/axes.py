@@ -30,10 +30,7 @@ def _avg(xs) -> float:
     return sum(xs) / len(xs) if xs else 0.0
 
 
-def raw_axes(stats_by_enc: dict[str, list[FightStats]],
-             baseline_dpt: float | None = None) -> dict[str, float]:
-    """baseline_dpt: starter-deck avg DPT, needed for A7's 1.5x threshold.
-    Pass None when computing the baseline itself (self-referential)."""
+def raw_axes(stats_by_enc: dict[str, list[FightStats]]) -> dict[str, float]:
     pooled = _pool(stats_by_enc)
 
     # A1: damage dealt turns 1-3 per energy spent turns 1-3.
@@ -74,24 +71,26 @@ def raw_axes(stats_by_enc: dict[str, list[FightStats]],
               / max(1, sum(s.total_intents for s in pooled)))
     a6 = (single_ttk / swarm_ttk) * (1.0 + uptime)
 
-    # A7: setup tax — avg first turn where 3-turn-window DPT exceeds
-    # 1.5x the starter baseline DPT (lower = better; MAX_TURNS if never).
-    if baseline_dpt is None:
-        baseline_dpt = _avg(s.total_damage_dealt / max(1, s.turns)
-                            for s in pooled)
-    threshold = 1.5 * baseline_dpt
-    a7 = _avg(_first_crossing(s, threshold) for s in pooled)
+    # A7: setup tax — avg first turn where the 3-turn-window DPT reaches
+    # 70% of the config's OWN peak window (self-referential: "when does
+    # YOUR plan come online", independent of absolute power). The old
+    # 1.5x-baseline threshold saturated for any competent deck.
+    a7 = _avg(_turns_to_own_peak(s) for s in pooled)
 
     return {"A1_frontload": a1, "A2_scaling": a2, "A3_block": a3,
             "A4_sustain": a4, "A5_velocity": a5, "A6_utility": a6,
             "A7_setup_tax": a7}
 
 
-def _first_crossing(s: FightStats, threshold: float) -> int:
+def _turns_to_own_peak(s: FightStats) -> int:
+    windows = {t: _avg(s.damage_by_turn.get(x, 0)
+                       for x in range(max(1, t - 2), t + 1))
+               for t in range(1, s.turns + 1)}
+    if not windows:
+        return C.MAX_TURNS
+    threshold = 0.7 * max(windows.values())
     for t in range(1, s.turns + 1):
-        window = [s.damage_by_turn.get(x, 0)
-                  for x in range(max(1, t - 2), t + 1)]
-        if _avg(window) > threshold:
+        if windows[t] >= threshold and threshold > 0:
             return t
     return C.MAX_TURNS
 

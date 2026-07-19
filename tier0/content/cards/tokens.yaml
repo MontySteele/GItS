@@ -1,0 +1,7 @@
+# Token/status cards referenced by real cards.
+- id: confiscated
+  name: "Confiscated"
+  cost: 1
+  type: skill
+  rarity: status       # Fish Blasting's downside; Dodge Roll can exhaust it
+  effects: []

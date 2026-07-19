@@ -27,8 +27,14 @@ _AMPLIFY = {
 }
 
 
-def _amp_mult(name: str) -> float:
-    return C.VAPORIZE_MULT if name == "vaporize" else C.MELT_MULT
+def _amp_mult(state: CombatState, name: str) -> float:
+    base = C.VAPORIZE_MULT if name == "vaporize" else C.MELT_MULT
+    # amp_reaction_up / witchs_flame stacks are PERCENT boosts to the
+    # amplifier (Vermillion Pact +25, Durin +30). Additive with each
+    # other, multiplicative on the base: 1.75 * (1 + 0.55) = 2.71 < 4x cap.
+    pct = (state.player.powers.get("amp_reaction_up", 0)
+           + state.player.powers.get("witchs_flame", 0))
+    return base * (1 + pct / 100)
 
 
 def apply_aura(state: CombatState, enemy: Enemy, element: str) -> None:
@@ -85,7 +91,7 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         state.player.block += C.CRYSTALLIZE_BLOCK
     elif pair in _AMPLIFY:
         name = _AMPLIFY[pair][0]
-        out = damage * _amp_mult(name)
+        out = damage * _amp_mult(state, name)
     elif pair == frozenset(("pyro", "electro")):
         name = "overload"
         for other in state.living_enemies:
@@ -104,6 +110,15 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
             enemy.frozen = True
 
     if name:
+        state.reactions_this_card += 1
+        p = state.player
+        if p.burst_max:
+            p.burst_energy += C.BURST_PER_REACTION
+        # Catalytic Conversion: reactions grant bonus sparks + burst energy.
+        bonus = p.powers.get("reaction_bonus_spark_energy", 0)
+        if bonus:
+            p.sparks += bonus
+            p.burst_energy += C.CATALYTIC_BURST_PER_REACTION * bonus
         state.emit("reaction", reaction=name, trigger=trigger, aura=aura,
                    target=enemy.name,
                    amp_delta=(out - damage) if out != damage else 0)

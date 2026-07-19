@@ -15,6 +15,10 @@ import yaml
 from tier0.engine.state import Card, Enemy, Player
 
 CONTENT_DIR = Path(__file__).parent
+# Design sheets in docs/ are the single source of truth for real card
+# pools — the sim reads them directly so design and sim never drift.
+DOCS_DIR = CONTENT_DIR.parents[1] / "docs"
+DOCS_CARD_SHEETS = ("klee-cards.yaml", "mondstadt-companions.yaml")
 
 
 def _load_yaml_dir(sub: str) -> list[dict]:
@@ -27,13 +31,33 @@ def _load_yaml_dir(sub: str) -> list[dict]:
 
 @lru_cache(maxsize=1)
 def _card_index() -> dict[str, Card]:
-    cards = [Card.from_dict(d) for d in _load_yaml_dir("cards")]
+    raw = _load_yaml_dir("cards")
+    for sheet in DOCS_CARD_SHEETS:
+        path = DOCS_DIR / sheet
+        if path.exists():
+            raw.extend(yaml.safe_load(path.read_text()))
+    cards = [Card.from_dict(d) for d in raw]
+    for c in cards:
+        if c.role_c and "companion" not in c.tags:   # sheet marks via role_c
+            c.tags.append("companion")
     index = {c.id: c for c in cards}
     if len(index) != len(cards):
         seen: set[str] = set()
         dupes = {c.id for c in cards if c.id in seen or seen.add(c.id)}
         raise ValueError(f"duplicate card ids: {sorted(dupes)}")
     return index
+
+
+def cards_in_pool(pool: str) -> list[Card]:
+    """Named draft pools for add_card (e.g. Secret Stash's
+    'demolition_commons')."""
+    archetype, _, rarity = pool.rpartition("_")
+    rarity = rarity.rstrip("s")                      # commons -> common
+    cards = [c for c in _card_index().values()
+             if rarity == c.rarity and archetype in c.archetypes]
+    if not cards:
+        raise ValueError(f"empty card pool {pool!r}")
+    return cards
 
 
 def get_card(card_id: str) -> Card:
@@ -54,6 +78,9 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
         card_ids += spec["packages"][deck]
     return Player(hp=spec["hp"], max_hp=spec["hp"],
                   draw_pile=[get_card(cid) for cid in card_ids],
+                  element=spec.get("element", "none"),
+                  cadence=spec.get("cadence", "skill"),
+                  burst_max=spec.get("burst_max", 0),
                   relic_hooks=list(spec.get("relic_hooks", [])))
 
 

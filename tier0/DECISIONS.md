@@ -109,3 +109,40 @@ Amend here, not in chat history.
     pending the real character doc. The smoke tests assert systems
     behavior (bombs detonate, sparks flow, no INFINITE/AMP_STACK), never
     placeholder balance numbers.
+
+## Klee pass 1 (2026-07-19, post-review)
+
+24. **Review rulings 1-3 applied:** calibration deviations blessed as-is;
+    Frozen-on-bosses stays (revisit flagged for the v0.2 Cryo/Hydro
+    character); **A7 redefined self-referentially** — first turn the
+    3-turn-window DPT reaches 70% of the config's OWN peak window.
+    Battery/pilots untouched (not unfrozen). Regression tests added.
+25. **Baseline pilot pinned to `generic` in score_config** — previously
+    the baseline ran under the target's archetype pilot, silently moving
+    the 3.0 anchor between runs (caught via inconsistent A7 baselines).
+26. **The docs sheets are the card source of truth:** loader reads
+    docs/klee-cards.yaml + docs/mondstadt-companions.yaml directly; no
+    copies into tier0/content. Placeholder Klee content deleted.
+27. **Full §6 DSL implemented, nothing stubbed** (incl. the companion-copy
+    trio the review said could wait) — Reaction rows are readable in
+    pass 1. Strict schema kept; whitelist extended (requires, star,
+    role_c, personal_pool, formula fields, cost: X).
+28. **Pilot bomb sequencing (review #6):** attacks resolve before new
+    placements within a turn; early detonation valued at bomb damage only
+    when the target dies this turn. pilot_regret instrumentation still
+    deferred.
+29. **Catalyst cadence implemented character-level** (element+cadence on
+    Player): attacks with no explicit applies_element apply the card's
+    element, falling back to the character's. Companion cards keep their
+    own element. Skill-grade characters (v0.2) will simply not set it.
+30. **Underspecified card numbers decided** (all in constants.py):
+    Playtime Forever bomb = 5; Sparks 'n' Splash = 4x5 pyro hits/turn,
+    3 turns; Oz = 3 electro end-of-turn; Durin end-of-turn hit = 4 pyro;
+    Solar Isotoma = 3 block per attack-hit vs aura'd enemy, 3 turns;
+    Celestial Gift = +2 attacks / 4 block; Catalytic Conversion = +1
+    spark +5 burst per reaction. Amp %: multiplicative on base, additive
+    with each other (melt x1.75 x1.55 = 2.71 < 4x cap).
+31. **Pass 1 verdict recorded in docs/klee-pass-1-report.md** — headline:
+    watchlist all clean, dream team strong-not-dominant, A1/A3/A7 near
+    declared; A4/A6 metric definitions need chat-side rulings; A2-solo
+    and spark-A3 are real sheet findings; Burst cards likely need Retain.
