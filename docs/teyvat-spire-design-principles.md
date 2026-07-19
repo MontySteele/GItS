@@ -59,7 +59,7 @@ This dial is our main cross-character balance lever for reaction frequency.
 
 ### 2.4 Burst Energy
 - Per-character meter, per-combat, starts at 0. Gained by: playing Skill-tagged cards (+N) and triggering reactions (+N; the "particle economy").
-- Each character's **Burst** is a signature rare card, in the starting deck or early pool, unplayable until the meter is full; playing it empties the meter.
+- Each character's **Burst** is a signature rare card, in the starting deck or early pool, unplayable until the meter is full; playing it empties the meter. **Burst cards have Retain** — they stay in hand at end of turn. (v1.4 ruling: without Retain, StS's discard rhythm cycles the Burst away before the meter fills — sim-verified. Retain is also faithful: a charged burst doesn't evaporate.)
 - Relic space may carry partial energy between fights (Favonius-flavored). Meter size is a per-character balance knob (Klee ~60-grade; a nuke burst like a Raiden-analogue ~90-grade).
 
 ### 2.5 Co-op rules
@@ -146,3 +146,4 @@ Flagged for v0.2+ planning: characters whose Genshin identity is *support* (Colu
 - v1 (initial): decisions as above. Open items intentionally deferred: Dendro design, Wish banner economy, weapon-choice UI, second-character selection.
 - v1.1: Corrected Albedo to 5-star. Added two-tier companion structure (§4.2): 5-star supports as Rares (one card each, ≤3/nation), 4-stars at common/uncommon with multi-card kits. Companion roles taxonomy (Applier/Buffer/Trigger) — buffers promoted to first-class after checking Klee's live best team (Klee/Durin/Nicole/Prune) is buffer+swirl, not applier-based. Prune replaces Albedo as Klee's personal-pool signature companion (Little Hexenzirkel lore); Albedo/Durin/Nicole become Mondstadt shared Rares. Added companion-appetite lever (§4.4). Guardrail 3 amended to match.
 - v1.2: Added Appendix A (support-protagonist design space / Columbina). No changes to v1 systems; Columbina explicitly targets the §4.4 High-appetite slot.
+- v1.4: Burst cards gain Retain (§2.4), per Tier 0 pass-1 finding that discard rhythm made Bursts uncastable.

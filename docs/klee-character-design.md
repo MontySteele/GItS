@@ -9,9 +9,9 @@ The Spark Knight. Pyro, **catalyst-grade cadence** (every attack applies Pyro �
 | Axis | Target | Rationale |
 |---|---|---|
 | A1 Frontload | **4.5** | Bombs + spray; her signature strength |
-| A2 Scaling | 3.0 solo → 4.0 drafted | Grand Finale/Workshop are linear; real ceiling is draft-gated (companions/artifacts) |
+| A2 Scaling | ≤4.0, and always < A1 | REVISED after pass 1: engine decks intrinsically show mild positive curve; 'draft-gated ceiling' was empirically inverted (solo powers out-scaled companion configs). Scaling powers now stack-capped; her curve must never top her frontload |
 | A3 Block | **2.0** | Reluctant, conditional defense |
-| A4 Sustain | **1.5** | Declared weakness. 62 HP. Barbara is the drafted answer |
+| A4 Sustain | **~0.5 by construction** | REVISED after pass 1: A4 redefined as healing/recovery only (kill-speed already credits A1/A3; three metric variants all showed fight-level HP metrics can't express 'fragile-but-fast'). Klee heals ~nothing → floor score. Fragility signal = pressure-winrate delta, printed alongside. Barbara-injection is the canonical A4 probe |
 | A5 Velocity | 3.5 | Sparks = free plays; modest draw |
 | A6 Utility | **4.0** | Excellent AoE / poor precision (random targeting is the tax) |
 | A7 Setup tax | 3.5 | Online turn 1–2; folds to sustained pressure (see A3/A4) |
@@ -45,3 +45,6 @@ Bridges: Sorry Jean (block↔demolition), Sparkly Explosion (demolition↔spark)
 
 ## 8. Asset punch list (for eventual art pass)
 75 card portraits (500×380), ~24 power icons, ~10 relic icons, 16 companion portraits, char select art, energy icon, map marker, combat visual (layered-PNG Godot scene, Hexaghost-style — no Spine needed for v1), ~4 SFX. All original/commissioned per principles §9.
+
+## 9. Pass-1 changelog (card sheet v0.2)
+Seven number shaves (Workshop/Spark-Knight-Style/Grand-Finale scaling −1 each; four spark block riders −1 block each) + stack caps on scaling powers (bomb_damage_up ≤4, zero_cost_attacks_up ≤4, bomb_and_spark_per_turn unique). Bursts gain Retain per principles v1.4. Rationale + empirical elasticity in code-review round 2 notes.

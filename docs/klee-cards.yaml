@@ -49,11 +49,11 @@
 - {id: eager_to_help, name: "Eager to Help", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [spark, generic], role: glue,
    effects: [{op: conditional, if: has_spark, then: [{op: draw, amount: 2}], else: [{op: draw, amount: 1}]}]}
 - {id: skip_and_hop, name: "Skip and Hop", cost: 0, type: skill, rarity: common, solve: [block], archetypes: [spark], role: glue,
-   effects: [{op: block, amount: 3}, {op: gain_spark, amount: 1}]}
+   effects: [{op: block, amount: 2}, {op: gain_spark, amount: 1}]}
 - {id: rapid_fire, name: "Rapid Fire", cost: 2, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: enabler,
    effects: [{op: damage, amount: 3, target: random_enemy, times: 4}]}
 - {id: warm_glow, name: "Warm Glow", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [spark], role: glue,
-   effects: [{op: block, amount: 4}, {op: gain_spark, amount: 1}]}
+   effects: [{op: block, amount: 3}, {op: gain_spark, amount: 1}]}
 # Reaction (6)
 - {id: sizzle, name: "Sizzle", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [reaction], role: payoff,
    effects: [{op: damage, amount: 7, target: enemy}, {op: conditional, if: target_has_nonpyro_aura, then: [{op: damage, amount: 5, target: enemy}]}]}
@@ -79,7 +79,7 @@
 - {id: run_away, name: "Run Away!", cost: 0, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 4}]}
 - {id: patched_dress, name: "Patched Dress", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [spark, generic], role: glue,
-   effects: [{op: block, amount: 6}, {op: conditional, if: has_spark, then: [{op: block, amount: 3}]}]}
+   effects: [{op: block, amount: 5}, {op: conditional, if: has_spark, then: [{op: block, amount: 2}]}]}
 
 # ---------- UNCOMMON (25) ----------
 # Demolition (8)
@@ -90,7 +90,7 @@
 - {id: bombs_away, name: "Bombs Away!", cost: 3, type: skill, rarity: uncommon, solve: [frontload], archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 5, target: random_enemies, bomb_damage: 5}]}
 - {id: explosives_workshop, name: "Explosives Workshop", cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [demolition], role: payoff,
-   effects: [{op: apply_power, power: bomb_damage_up, amount: 3, target: self}]}
+   effects: [{op: apply_power, power: bomb_damage_up, amount: 2, target: self, max_stacks: 4}]}
 - {id: cluster_charge, name: "Cluster Charge", cost: 2, type: attack, rarity: uncommon, solve: [frontload], archetypes: [demolition], role: enabler,
    effects: [{op: damage, amount: 10, target: enemy}, {op: place_bomb, amount: 2, target: random_enemies, bomb_damage: 5}]}
 - {id: trip_wire, name: "Trip Wire", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [demolition], role: glue, tags: [skill_tag],
@@ -101,7 +101,7 @@
    effects: [{op: damage, amount: 5, target: random_enemy, times: 3, bonus_vs_bombed: 3}]}
 # Spark (7)
 - {id: spark_knight_style, name: "Spark Knight Style", cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [spark], role: payoff,
-   effects: [{op: apply_power, power: zero_cost_attacks_up, amount: 3, target: self}]}
+   effects: [{op: apply_power, power: zero_cost_attacks_up, amount: 2, target: self, max_stacks: 4}]}
 - {id: endless_fireworks, name: "Endless Fireworks", cost: 1, type: power, rarity: uncommon, solve: [velocity], archetypes: [spark], role: enabler,
    effects: [{op: apply_power, power: spark_per_turn, amount: 1, target: self}]}
 - {id: flame_on_the_wick, name: "Flame on the Wick", cost: 0, type: attack, rarity: uncommon, solve: [frontload], archetypes: [spark], role: glue,
@@ -111,7 +111,7 @@
 - {id: hot_hands, name: "Hot Hands", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [spark], role: enabler,
    effects: [{op: gain_spark, amount: 3}, {op: damage, amount: 2, target: self}]}
 - {id: cant_catch_me, name: "Can't Catch Me!", cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], archetypes: [spark], role: glue,
-   effects: [{op: block, amount: 6}, {op: gain_spark, amount: 1}, {op: draw, amount: 1}]}
+   effects: [{op: block, amount: 4}, {op: gain_spark, amount: 1}, {op: draw, amount: 1}]}
 - {id: sugar_rush, name: "Sugar Rush", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [spark], role: glue, exhaust: true,
    effects: [{op: energy, amount: 1}, {op: gain_spark, amount: 1}]}
 # Reaction (6)
@@ -158,13 +158,13 @@
 - {id: da_da_da, name: "Da-da-da!", cost: 0, type: attack, rarity: rare, solve: [frontload], archetypes: [spark], role: payoff, exhaust: true,
    effects: [{op: damage, amount: 4, target: random_enemy, times: 3}, {op: gain_spark, amount: 1}]}
 - {id: grand_finale, name: "Grand Finale", cost: 2, type: attack, rarity: rare, solve: [scaling], archetypes: [demolition], role: payoff,
-   effects: [{op: damage, amount: 10, target: enemy, bonus_formula: 3_per_detonation_this_combat}]}
+   effects: [{op: damage, amount: 10, target: enemy, bonus_formula: 2_per_detonation_this_combat}]}
 - {id: secret_stash, name: "Secret Stash", cost: 1, type: skill, rarity: rare, solve: [velocity], archetypes: [demolition], role: glue, exhaust: true,
    effects: [{op: add_card, pool: demolition_commons, amount: 2, zone: hand, cost_override: 0}]}
 - {id: vermillion_pact, name: "Vermillion Pact", cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [reaction], role: payoff,
    effects: [{op: apply_power, power: amp_reaction_up, amount: 25, target: self, note: "PERCENT. Watch the 4x amp-cap detector."}]}
 - {id: playtime_forever, name: "Playtime Forever", cost: 3, type: power, rarity: rare, solve: [scaling, velocity], archetypes: [demolition, spark], role: payoff,
-   effects: [{op: apply_power, power: bomb_and_spark_per_turn, amount: 1, target: self}]}
+   effects: [{op: apply_power, power: bomb_and_spark_per_turn, amount: 1, target: self, max_stacks: 1}]}
 - {id: best_friends_forever, name: "Best Friends Forever", cost: 1, type: skill, rarity: rare, solve: [utility], archetypes: [reaction], role: payoff, exhaust: true,
    effects: [{op: copy_companions_played_this_combat, zone: hand, cost_override: 0}]}
 - {id: no_holding_back, name: "No Holding Back", cost: 2, type: attack, rarity: rare, solve: [frontload], archetypes: [generic], role: payoff,
