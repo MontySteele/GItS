@@ -57,19 +57,34 @@ public sealed class KleeElementalHooks : AbstractModel
     }
 
     /// <summary>
-    /// Burst economy, skill-tag half: +5 AFTER a skill-tagged card resolves.
-    /// The sim's play_card adds BURST_PER_SKILL_TAG after the effect loop, so
-    /// AfterCardPlayed (post-resolution) is the matching phase -- a
-    /// burst_energy op on the same card lands first, then the tag bonus,
-    /// same order and same total as tier0.
+    /// Burst economy, skill-tag half: +5 BEFORE a skill-tagged card resolves,
+    /// once per play. The sim's play_card adds BURST_PER_SKILL_TAG ahead of
+    /// its effect/replay loop (combat.py, right before resolve_card), so any
+    /// effect that rules on the meter mid-card must already see the tag
+    /// bonus. The game fires this hook once per replay in a series, so the
+    /// IsFirstInSeries gate is what reproduces "once per play_card call".
+    /// Resource only -- this hook carries no PlayerChoiceContext.
+    /// </summary>
+    public override Task BeforeCardPlayed(CardPlay cardPlay)
+    {
+        if (cardPlay.Card is ISkillTagCard && cardPlay.IsFirstInSeries)
+        {
+            KleeBurstResource.GainPreResolution(
+                cardPlay.Card.Owner.Creature, BurstConstants.PerSkillTag);
+        }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Display half of the skill-tag gain: the first hook with a context
+    /// after BeforeCardPlayed, so the badge catches up to the resource here.
     /// </summary>
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         if (cardPlay.Card is not ISkillTagCard) return;
-        await KleeBurstResource.Gain(
-            choiceContext, cardPlay.Card.Owner.Creature,
-            BurstConstants.PerSkillTag, cardPlay.Card);
+        await KleeBurstResource.SyncBadge(
+            choiceContext, cardPlay.Card.Owner.Creature, cardPlay.Card);
     }
 
     public override async Task BeforeDamageReceived(

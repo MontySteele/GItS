@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using MegaCrit.Sts2.Core.Commands;
@@ -50,12 +51,17 @@ public interface ISkillTagCard
 /// sim's per-fight state reset.
 ///
 /// Port of tier0's burst economy (engine/combat.py, engine/reactions.py):
-///   +5 per skill-tagged card played, AFTER its effects resolve
-///     (KleeElementalHooks.AfterCardPlayed -- same post-resolution order as
-///     play_card's tag check);
+///   +5 per skill-tagged card played, BEFORE its effects resolve and once
+///     per play regardless of replays (play_card adds the tag bonus ahead of
+///     its replay loop -- KleeElementalHooks.BeforeCardPlayed gated on
+///     IsFirstInSeries is the matching phase; the game fires card hooks once
+///     per replay, so an unguarded hook would double-grant where the sim
+///     grants once);
 ///   +5 per Elemental Reaction, amplifiers included (ReactionEffects.Resolve
-///     is the single funnel every reaction passes through);
-///   +N from the burst_energy card op (codegen);
+///     is the single funnel every reaction passes through, mid-resolution
+///     like the sim's resolve_hit);
+///   +N from the burst_energy card op (codegen, mid-resolution like the
+///     sim's effect loop);
 ///   accrual is UNCAPPED past 60 (the sim never clamps; the grant check is
 ///     >=, and casting resets to 0 -- overflow is lost at cast, not at gain).
 ///
@@ -69,8 +75,13 @@ public interface ISkillTagCard
 /// cost-side card visuals only; BasicResourceVisualsHandler is an empty
 /// marker), so the meter renders through <see cref="BurstMeterPower"/> on
 /// Klee -- the SparkPower display idiom. The resource is canonical; the
-/// badge is display. Gain() is the ONLY mutation path in the spike and
-/// writes both, which is the sync invariant to preserve when cast lands.
+/// badge is display. Two writers, one invariant: Gain() moves both together
+/// (every context-carrying site), GainPreResolution() moves the resource
+/// alone -- BeforeCardPlayed has no PlayerChoiceContext, so the skill-tag
+/// bonus lands resource-first and SyncBadge() restores badge == resource in
+/// AfterCardPlayed. The badge may lag the resource only WITHIN a single card
+/// play, never across plays. Anything that RULES on the meter (the future
+/// cast gate included) must read the resource.
 /// </summary>
 public sealed class KleeBurstResource : BasicCustomResource
 {
@@ -79,33 +90,72 @@ public sealed class KleeBurstResource : BasicCustomResource
     }
 
     /// <summary>
-    /// The single gain path for every source (skill tags, reactions, the
-    /// burst_energy op, and future powers) -- mirrors SparkPower.Gain so the
-    /// economy stays one line to instrument.
-    ///
+    /// Klee's meter for this combat, or null when no gain should happen.
     /// Gates on the owner being Klee: the sim guards every gain site with
     /// `if p.burst_max`, i.e. characters without a meter gain nothing.
+    /// </summary>
+    private static KleeBurstResource? Find(Creature player)
+    {
+        var owner = player.Player;
+        if (owner?.Character is not Klee) return null;
+        var combatState = owner.PlayerCombatState;
+        if (combatState == null) return null;
+        return CustomResources<KleeBurstResource>.Get(combatState);
+    }
+
+    /// <summary>
+    /// The gain path for every context-carrying source (reactions, the
+    /// burst_energy op, and future powers) -- mirrors SparkPower.Gain so the
+    /// economy stays easy to instrument. Moves resource and badge together.
     /// </summary>
     public static async Task Gain(
         PlayerChoiceContext choiceContext, Creature player, int amount,
         CardModel? cardSource)
     {
         if (amount <= 0) return;
-        var owner = player.Player;
-        if (owner?.Character is not Klee) return;
-        var combatState = owner.PlayerCombatState;
-        if (combatState == null) return;
+        var resource = Find(player);
+        if (resource == null) return;
 
-        CustomResources<KleeBurstResource>.Get(combatState).ModifyAmount(amount);
+        resource.ModifyAmount(amount);
         await PowerCmd.Apply<BurstMeterPower>(
             choiceContext, player, amount, applier: player, cardSource: cardSource);
+    }
+
+    /// <summary>
+    /// The gain path for the skill-tag bonus, which fires in BeforeCardPlayed
+    /// where the game hands hooks no PlayerChoiceContext. Resource only; the
+    /// paired SyncBadge call in AfterCardPlayed catches the display up.
+    /// </summary>
+    public static void GainPreResolution(Creature player, int amount)
+    {
+        if (amount <= 0) return;
+        Find(player)?.ModifyAmount(amount);
+    }
+
+    /// <summary>
+    /// Re-establish badge == resource (sync-to-truth, so it also self-heals
+    /// any drift rather than replaying a remembered delta).
+    /// </summary>
+    public static async Task SyncBadge(
+        PlayerChoiceContext choiceContext, Creature player, CardModel? cardSource)
+    {
+        var resource = Find(player);
+        if (resource == null) return;
+
+        var badge = player.Powers.OfType<BurstMeterPower>().FirstOrDefault();
+        decimal delta = resource.Amount - (badge?.Amount ?? 0m);
+        if (delta == 0m) return;
+        await PowerCmd.Apply<BurstMeterPower>(
+            choiceContext, player, delta, applier: player, cardSource: cardSource);
     }
 }
 
 /// <summary>
 /// Display badge for the Burst meter (see KleeBurstResource: BaseLib has no
-/// ambient resource UI, so the meter shows the way Sparks do). Amount always
-/// equals the resource's Amount -- KleeBurstResource.Gain is the only writer.
+/// ambient resource UI, so the meter shows the way Sparks do). Amount equals
+/// the resource's Amount between card plays; within a skill-tagged play it
+/// may lag by the tag bonus until SyncBadge runs in AfterCardPlayed. Rules
+/// read the resource, never this.
 /// </summary>
 public sealed class BurstMeterPower : PowerModel, ILocalizationProvider
 {
