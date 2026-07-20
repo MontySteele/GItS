@@ -142,7 +142,7 @@
    requires: burst_energy_full,
    effects: [{op: apply_power, power: sparks_n_splash, amount: 3, target: self, note: "3 turns: end of turn, 4 sparks x 5 dmg to random enemies, each applies pyro"}]}
 - {id: blazing_delight, name: "Blazing Delight", cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [demolition], role: payoff,
-   effects: [{op: apply_power, power: detonation_splash, amount: 3, target: self, note: "bomb detonations: 3 dmg ALL enemies + 3 burst energy"}]}
+   effects: [{op: apply_power, power: detonation_splash, amount: 3, target: self, splash_procs_per_turn: 3, note: "bomb detonations: 3 dmg ALL enemies + 3 burst energy; splash capped at 3 procs/turn (armed by errata triage — demolition band ceiling knob)"}]}
 - {id: chained_reactions, name: "Chained Reactions", cost: 1, type: skill, rarity: rare, solve: [frontload], archetypes: [demolition], role: payoff,
    effects: [{op: detonate, target: all_enemies}, {op: chance_bomb_per_detonation, chance: 0.5, bomb_damage: 5}]}
 - {id: explosive_frags, name: "Explosive Frags", cost: 1, type: power, rarity: rare, solve: [utility], archetypes: [demolition], role: payoff,
