@@ -19,7 +19,7 @@ namespace KleeMod.Cards;
 /// and mechanically wrong -- the whole point of Pop is the delayed
 /// place-then-detonate rhythm. Now a real bomb (C2.2).
 /// </summary>
-public sealed class Pop : CustomCardModel
+public sealed class Pop : CustomCardModel, ISkillTagCard
 {
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("pop");
 

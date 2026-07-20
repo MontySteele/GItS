@@ -61,7 +61,10 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<BombVoyage>(),
             ModelDb.Card<BombsAway>(),
             ModelDb.Card<CantCatchMe>(),
+            // Burst spike: unblocked by the burst_energy op.
+            ModelDb.Card<ClockworkToy>(),
             ModelDb.Card<ClusterCharge>(),
+            ModelDb.Card<CombustionStudy>(),
             ModelDb.Card<Crackle>(),
             ModelDb.Card<DaDaDa>(),
             ModelDb.Card<DoublePop>(),

@@ -28,7 +28,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Generated;
 
-public sealed class AllMyTreasures : CustomCardModel
+public sealed class AllMyTreasures : CustomCardModel, ISkillTagCard
 {
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Exhaust };

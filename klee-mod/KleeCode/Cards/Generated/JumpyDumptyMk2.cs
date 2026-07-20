@@ -28,7 +28,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Generated;
 
-public sealed class JumpyDumptyMk2 : CustomCardModel, IElementalCard
+public sealed class JumpyDumptyMk2 : CustomCardModel, IElementalCard, ISkillTagCard
 {
     /// <summary>Sheet: all Klee attacks apply Pyro (catalyst-grade cadence).</summary>
     public Element Element => Element.Pyro;

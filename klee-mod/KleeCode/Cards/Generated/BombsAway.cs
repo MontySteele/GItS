@@ -28,7 +28,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Generated;
 
-public sealed class BombsAway : CustomCardModel
+public sealed class BombsAway : CustomCardModel, ISkillTagCard
 {
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("bombs_away");
 

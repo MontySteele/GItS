@@ -139,6 +139,9 @@ def extract_cs(text: str) -> dict:
         "hits": [int(h) for h in HIT_RE.findall(text)],
         "upgrade_vars": [int(float(v)) for v in UPG_RE.findall(text)],
         "upgrade_cost": [int(c) for c in COST_UPG_RE.findall(text)],
+        # Burst-energy spike: sheet `skill_tag` must land as the ISkillTagCard
+        # marker or the card silently generates no burst energy.
+        "skill_tag": "ISkillTagCard" in text,
     }
 
 
@@ -193,6 +196,11 @@ def lint() -> int:
         if got["upgrade_cost"] != exp_upg_cost_list:
             fail(card_id, f"cost delta: sheet {exp_upg_cost_list}, "
                           f"C# EnergyCost.UpgradeBy {got['upgrade_cost']}")
+        exp_skill_tag = "skill_tag" in row.get("tags", [])
+        if got["skill_tag"] != exp_skill_tag:
+            fail(card_id, f"skill_tag: sheet {exp_skill_tag}, "
+                          f"C# ISkillTagCard {got['skill_tag']} "
+                          "(a missing marker generates no burst energy)")
 
     if findings:
         print(f"handwritten-parity: {len(findings)} finding(s)")
