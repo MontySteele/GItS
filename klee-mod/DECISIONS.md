@@ -654,3 +654,39 @@ stopped one property short of the one that throws.
 assumptions (`First()` with no fallback), throwing inside UI/async flows
 where the symptom is a half-updated screen, not a crash. Siblings: findings
 11, 21, 24.
+
+---
+
+## Finding 28 — first-encounter softlock: `new()` on an AbstractModel (FIXED, 915dd0e)
+
+**Found by playtest, 2026-07-20 (first combat after the R23 deploy).** Combat
+start hung with no crash. godot.log had the real story:
+`TypeInitializationException` wrapping `DuplicateModelException: Trying to
+create a duplicate canonical model of type KleeMod.Powers.KleeElementalHooks.
+Don't call constructors on models! Use ModelDb instead.`
+
+The new combat-hook subscriber held its singleton as
+`private static readonly KleeElementalHooks Instance = new();`. But ModelDb
+scans the mod assembly and constructs one canonical of EVERY AbstractModel
+subclass itself — the `new()` in our field initializer was the duplicate.
+
+**Fix:** resolve the canonical lazily inside the subscriber delegate —
+`_instance ??= ModelDb.GetById<KleeElementalHooks>(ModelDb.GetId<...>())`
+(lazy because mod `Initialize` can run before the ModelDb scan).
+
+**Ownership family (finding 27's lesson, one layer down):** ModelDb owns
+model construction the way BaseLib owns character registration. If a
+mechanism has an owner, calling it yourself is the bug — the engine's own
+exception message says so verbatim. Siblings: findings 21, 27.
+
+**New symptom family worth naming:** a static-initializer exception is
+CACHED by the runtime as `TypeInitializationException` and re-fires on
+every subsequent touch of the type. Here that meant the throw re-fired
+inside every combat hook broadcast — hanging the async command pipeline —
+so the crash site (every hook iteration) was arbitrarily far from the
+fault (one `new()` in a field initializer). When a log shows the same
+TypeInitializationException storming from unrelated call sites, read the
+INNER exception of the FIRST occurrence; everything after it is echo.
+Corollary: keep AbstractModel statics trivial — anything that can throw
+belongs in a lazy path where the exception surfaces once, at a call site
+that names the actual problem.
