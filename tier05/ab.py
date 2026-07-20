@@ -57,14 +57,35 @@ def divergence(results: list[RunResult]) -> dict:
 
 
 def relevance(results: list[RunResult]) -> dict:
-    """P(>=1 offer advances the run's plan), over reward screens."""
+    """P(>=1 offer advances the run's plan), over screens where a plan is LIVE.
+
+    Conditioning on `plan_live` is the whole correctness of this metric, not a
+    refinement. Core progress caps at 1.0, so once the core is online no offer
+    can advance it and `advanced_plan` is structurally False from then on --
+    measured at exactly 0.0% after completion for all three archetypes. Those
+    screens are not the pool failing to offer anything; they are the plan
+    already being finished.
+
+    It matters most where the claim is judged hardest: 50.1% of demolition's
+    screens fall after its core completes, so counting them dragged its
+    relevance from 45.8% to 23.3% for a reason that has nothing to do with the
+    pool. Spark sees 10.3% and reaction 2.3%, so the unconditioned number also
+    penalised the archetypes unequally -- the fastest-assembling one worst.
+
+    `after_core_share` is reported because it is a finding in its own right: an
+    archetype that finishes half a run early is one whose remaining rewards are
+    all off-plan by construction.
+    """
     screens = [d for r in results for d in r.decisions]
     if not screens:
         return {}
-    advanced = sum(1 for d in screens if d.get("advanced_plan"))
-    rate = advanced / len(screens)
+    live = [d for d in screens if d.get("plan_live", True)]
+    advanced = sum(1 for d in live if d.get("advanced_plan"))
+    rate = advanced / len(live) if live else 0.0
     return {
         "screens": len(screens),
+        "live_screens": len(live),
+        "after_core_share": 1 - len(live) / len(screens),
         "relevance": rate,
         "in_claimed_band": 0.60 <= rate <= 0.70,   # spec §5 claim
     }
@@ -80,7 +101,12 @@ def achievability(results: list[RunResult]) -> dict:
     is measuring pool odds, not achievability. Flagged rather than silently
     reported as a policy result.
     """
-    online = [r.time_to_online for r in results if r.time_to_online]
+    # `is not None`, NOT truthiness. time_to_online is a fight COUNT, and a
+    # falsy test silently drops any run that came online on fight 0. The
+    # observed floor is 1 today (fights is incremented before the check), so
+    # this is not a live bug -- but it is one reordering away from being one,
+    # and a metric that quietly discards its best runs fails safe-looking.
+    online = [r.time_to_online for r in results if r.time_to_online is not None]
     if not results:
         return {}
     med = sorted(online)[len(online) // 2] if online else None
@@ -109,7 +135,12 @@ def run_ab(character: str, archetype: str, pilot_id: str,
             "winrate": sum(r.won for r in results) / max(1, len(results)),
             "relevance": relevance(results),
             "achievability": achievability(results),
-            "divergence": divergence(results),
+            # Divergence ONLY for adaptive. Under the assigned policy the
+            # deck's shape is the target it was handed, so the distribution
+            # would restate the input and read like a finding. Storing it for
+            # both was a loaded gun in the dict: the printer ignored it, the
+            # next caller would not have.
+            "divergence": divergence(results) if name == "adaptive" else None,
             "avg_deck": sum(len(r.deck_ids) for r in results)
                         / max(1, len(results)),
             "regretted": sum(r.regret_samples for r in results),

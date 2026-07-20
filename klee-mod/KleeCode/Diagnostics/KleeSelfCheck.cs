@@ -78,7 +78,14 @@ internal static class KleeSelfCheck
         }
     }
 
-    private const int RuleCount = 8;
+    // Distinct rule labels that can actually reach the log:
+    //   R1, R2, R3, R3a, R3b, R3c, R4, R5, R6a, R6b
+    // This was 8 while R5/R6a/R6b were documented but unattributable -- the
+    // helpers that emit them hardcoded R4 and R6, so those three strings could
+    // never appear. Fixing the labels is what makes 10 the honest count. Note
+    // R4 and R5 come from a `rule` parameter, so grepping for Fail("R... will
+    // not find them; count the call sites, not the literals.
+    private const int RuleCount = 10;
 
     private static void Fail(string rule, string detail) => Findings.Add($"[{rule}] {detail}");
 
@@ -133,8 +140,21 @@ internal static class KleeSelfCheck
         // wrap to its start and return CardRarity.None, which throws. This is
         // the real shape of finding 17: not "no rares", but "nothing but
         // Basic". It is the one condition here that locks every reward screen.
+        // The test is "is Common/Uncommon/Rare", NOT "is not Basic/Ancient".
+        // Those differ, and the difference is a false negative: CardRarity also
+        // has Event, Token, Status, Curse and Quest. Those survive a
+        // not-Basic-not-Ancient filter but can never satisfy the rarity roll,
+        // because RollForRarity only ever produces Common/Uncommon/Rare and the
+        // wrapping fallback only cycles between them. A pool of 1 Common and 2
+        // Curses would pass both R3a and R3b under the old filter and still
+        // throw on the second draw of a three-card screen.
+        // (`!= Basic && != Ancient` is correct for exactly one caller -- the
+        // Uniform-odds branch at `sts2.decompiled.cs:452938` -- which is not
+        // the branch ordinary reward screens take.)
         var generatable = pool
-            .Where(c => c.Rarity != CardRarity.Basic && c.Rarity != CardRarity.Ancient)
+            .Where(c => c.Rarity == CardRarity.Common
+                     || c.Rarity == CardRarity.Uncommon
+                     || c.Rarity == CardRarity.Rare)
             .ToList();
         if (generatable.Count == 0)
         {
@@ -148,14 +168,26 @@ internal static class KleeSelfCheck
         // before the next draw. If the whole generatable pool is smaller than
         // one screen's worth of offers, the last draw sees an empty pool and
         // throws -- and no rarity fallback can save it, because there is
-        // nothing of any rarity left. Three is the standard reward count;
-        // Discovery-style effects can ask for more, so this is a floor.
-        const int MaxRewardOffers = 3;
-        if (generatable.Count > 0 && generatable.Count < MaxRewardOffers)
+        // nothing of any rarity left.
+        //
+        // The bound is NOT 3. Three is an ordinary reward screen, but the
+        // largest single draw in the base game is SealedDeck's Neow option
+        // asking for 30 (`sts2.decompiled.cs:403214`); RoomFullOfCheese.Gorge
+        // asks for 8. A threshold of 3 passed Klee's 20-card pool without
+        // comment while Sealed Deck was a guaranteed throw -- the earlier
+        // comment here conceded that "Discovery-style effects can ask for more"
+        // and then used the floor anyway, which is how the gap survived review.
+        //
+        // KleeMod's CreateForReward prefix now clamps oversized draws, so this
+        // is a WARNING about pool depth rather than a live soft lock: below
+        // this bound, some effects quietly offer fewer cards than designed.
+        const int LargestRewardDraw = 30;
+        if (generatable.Count > 0 && generatable.Count < LargestRewardDraw)
         {
-            Fail("R3b", $"CardPool has only {generatable.Count} generatable card(s), fewer than the "
-                      + $"{MaxRewardOffers} a reward screen offers. Each pick is blacklisted from the "
-                      + "next draw, so the screen will exhaust the pool and throw.");
+            Fail("R3b", $"CardPool has {generatable.Count} generatable card(s), fewer than the "
+                      + $"{LargestRewardDraw} the largest reward draw (SealedDeck) requests. Each "
+                      + "pick is blacklisted from the next draw, so without the clamp patch this "
+                      + "would throw; with it, such effects silently offer fewer cards.");
         }
 
         // R3c. Rarity coverage. Not a soft lock on its own, per the fallback
@@ -201,14 +233,20 @@ internal static class KleeSelfCheck
             // against an id nothing looks up, and the UI renders the raw key.
             // Reading Id.Entry back off the live model is the only way to be
             // certain the string we wrote is the string that will be read.
-            CheckLocEntry(cards, "cards", entry, card.GetType().Name);
+            CheckLocEntry(cards, "cards", entry, card.GetType().Name, "R4");
         }
 
         // R5. Same check for the character surface.
-        CheckLocEntry(characters, "characters", klee.Id.Entry, nameof(Klee));
+        CheckLocEntry(characters, "characters", klee.Id.Entry, nameof(Klee), "R5");
     }
 
-    private static void CheckLocEntry(LocTable table, string tableName, string entry, string owner)
+    // `rule` is a parameter rather than a literal because this helper serves
+    // both R4 (cards) and R5 (character). It used to hardcode "R4", which meant
+    // a missing CHARACTER loc key reported as R4 and the string "R5" could
+    // never appear in output at all -- the rule was documented, reachable, and
+    // unattributable.
+    private static void CheckLocEntry(LocTable table, string tableName, string entry,
+                                      string owner, string rule)
     {
         foreach (var suffix in new[] { "title", "description" })
         {
@@ -216,7 +254,7 @@ internal static class KleeSelfCheck
 
             if (!table.HasEntry(key))
             {
-                Fail("R4", $"{owner}: missing loc key \"{key}\" in table \"{tableName}\". "
+                Fail(rule, $"{owner}: missing loc key \"{key}\" in table \"{tableName}\". "
                          + "The UI will render the raw key.");
                 continue;
             }
@@ -233,8 +271,8 @@ internal static class KleeSelfCheck
         // "{{Damage}}" is not a placeholder and renders literally.
         if (raw.Contains("{{", StringComparison.Ordinal))
         {
-            Fail("R6", $"{owner} [{key}]: contains \"{{{{\". SmartFormat uses single braces; "
-                     + "doubled braces render literally.");
+            Fail("R6a", $"{owner} [{key}]: contains \"{{{{\". SmartFormat uses single braces; "
+                      + "doubled braces render literally.");
         }
 
         // R6b. Square brackets are BBCode, not keyword markup. A DynamicVar
@@ -245,9 +283,9 @@ internal static class KleeSelfCheck
             var tag = m.Groups[1].Value;
             if (!KnownBbcodeTags.Contains(tag))
             {
-                Fail("R6", $"{owner} [{key}]: \"[{tag}]\" is not a known BBCode tag. "
-                         + "If this is a variable it must be written {" + tag + "}; "
-                         + "an unknown tag throws \"Found end tag center, expected " + tag + "\".");
+                Fail("R6b", $"{owner} [{key}]: \"[{tag}]\" is not a known BBCode tag. "
+                          + "If this is a variable it must be written {" + tag + "}; "
+                          + "an unknown tag throws \"Found end tag center, expected " + tag + "\".");
             }
         }
     }

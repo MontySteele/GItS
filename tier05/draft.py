@@ -258,17 +258,29 @@ def offer_advances_plan(offers: list[Card], deck: list[Card],
 
     Deliberately NOT 'did the policy take something' -- a screen can be worth
     taking from without advancing the plan (defense quota, raw power), and
-    conflating the two would measure the policy instead of the pool. Advancing
-    means strictly increasing core progress, or being an on-plan enabler or
-    payoff the deck can still use.
+    conflating the two would measure the policy instead of the pool.
+
+    STRICT: an offer advances the plan iff it strictly increases core progress.
+
+    The old second clause -- "or is an on-plan enabler/payoff" -- was removed
+    because it was not a widening, it was the whole test. For demolition and
+    spark, `_core_progress` rises exactly when a card is an on-plan
+    enabler/payoff, so clause 2 subsumed clause 1 and the function never read
+    the deck at all: predicting from the offers alone was correct in 214/214
+    cases for both archetypes. That made the docstring's "the deck can still
+    use" untrue, and it counted a 7th demolition enabler handed to an
+    already-online deck as advancing a plan that was already finished.
+
+    Only reaction behaved differently (14/214), because appliers and Burst move
+    its core without carrying an archetype tag -- which is why reaction was the
+    one archetype whose relevance moved with the policy.
+
+    The measured effect of tightening this is small and downward: it removes
+    offers that were already complete-core no-ops. Relevance was NOT rescued by
+    the stricter reading, so the 60-70% claim fails under both.
     """
     progress = _core_progress(deck, archetype)
-    for c in offers:
-        if _core_progress(deck + [c], archetype) > progress:
-            return True
-        if archetype in c.archetypes and c.role in ("enabler", "payoff"):
-            return True
-    return False
+    return any(_core_progress(deck + [c], archetype) > progress for c in offers)
 
 
 def draft_regret(rng: random.Random, decisions: list[dict],

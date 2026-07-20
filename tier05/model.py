@@ -194,11 +194,18 @@ def run_one(character: str, archetype: str, pilot_id: str,
             # SHOWN, before the pick lands -- judging after would let the pick
             # itself change the answer.
             advanced = draft.offer_advances_plan(offers, deck_cards, archetype)
+            # Whether there was still a plan to advance. Core progress caps at
+            # 1.0, so once the core is online NOTHING can advance it and
+            # `advanced` is structurally False for the rest of the run. Without
+            # this flag, relevance charges those screens to the pool as misses
+            # -- and half of demolition's screens fall after its core completes.
+            plan_live = not draft.core_complete(deck_cards, archetype)
             pick = policy(rng, deck_cards, offers, archetype)
             res.decisions.append({
                 "node": i, "offers": offers,
                 "picked": pick.id if pick else None,
-                "advanced_plan": advanced})
+                "advanced_plan": advanced,
+                "plan_live": plan_live})
             if pick is not None:
                 deck_ids.append(pick.id)
             if pick is not None and pick.is_companion:

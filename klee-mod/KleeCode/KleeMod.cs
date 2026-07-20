@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
+using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Characters;
+using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Saves.Managers;
 using MegaCrit.Sts2.Core.Unlocks;
 
@@ -74,8 +78,6 @@ public static class KleeMod
                 // Pop is now a CustomCardModel and declares its own loc.
             });
 
-            ProbeBaseGameLocSyntax();
-
             LocManager.Instance.GetTable("characters").MergeWith(new Dictionary<string, string>
             {
                 // Same UPPER_SNAKE_CASE Entry convention as cards.
@@ -96,56 +98,11 @@ public static class KleeMod
         }
     }
 
-    /// <summary>
-    /// TEMPORARY DIAGNOSTIC. Dumps the raw text of a few base-game card
-    /// descriptions so the real SmartFormat placeholder syntax is observed
-    /// rather than inferred. The loc tables ship compressed inside the .pck, so
-    /// reading them at runtime is the only way to see ground truth short of
-    /// extracting assets with GDRE.
-    ///
-    /// Delete once the card text renders correctly.
-    /// </summary>
-    private static void ProbeBaseGameLocSyntax()
-    {
-        try
-        {
-            var cards = LocManager.Instance.GetTable("cards");
-
-            foreach (var key in new[]
-                     {
-                         "STRIKE_SILENT.description",
-                         "DEFEND_SILENT.description",
-                         "STRIKE_IRONCLAD.description",
-                         "DEFEND_IRONCLAD.description",
-                     })
-            {
-                if (cards.HasEntry(key))
-                {
-                    Log.Info($"[{ModId}] LOCPROBE {key} => {cards.GetRawText(key)}");
-                }
-                else
-                {
-                    Log.Info($"[{ModId}] LOCPROBE {key} => (no such entry)");
-                }
-            }
-
-            // Fallback: if none of the guessed keys exist, show real ones so we
-            // can read both the key convention and the template syntax.
-            var sample = cards.Keys
-                .Where(k => k.EndsWith(".description", StringComparison.Ordinal))
-                .Take(8)
-                .ToList();
-
-            foreach (var key in sample)
-            {
-                Log.Info($"[{ModId}] LOCPROBE sample {key} => {cards.GetRawText(key)}");
-            }
-        }
-        catch (Exception e)
-        {
-            Log.Error($"[{ModId}] LOCPROBE failed: {e}");
-        }
-    }
+    // O5: ProbeBaseGameLocSyntax removed. It existed to read base-game loc
+    // templates at runtime and settle the SmartFormat syntax question (single
+    // braces, :diff()); that is now settled, encoded in the codegen emitter,
+    // and enforced by KleeSelfCheck R6a/R6b. Keeping it meant a dozen INFO
+    // lines per boot in the log we now read for telemetry.
 }
 
 // ---------------------------------------------------------------------------
@@ -185,6 +142,64 @@ internal static class ModelDb_AllCharacters_Patch
         if (!__result.Contains(klee))
         {
             __result = __result.Append(klee);
+        }
+    }
+}
+
+/// <summary>
+/// Finding 22: any effect that draws N reward cards throws once N exceeds the
+/// character's generatable pool, and Klee's pool is smaller than the largest N
+/// in the game.
+///
+/// CardFactory.CreateForReward(player, cardCount, options) loops cardCount
+/// times against an accumulating blacklist. Once every generatable card is
+/// blacklisted, the surviving options are all Basic, RollForRarity walks
+/// Common->Uncommon->Rare->Common, revisits its own start, returns None, and
+/// the method throws (`sts2.decompiled.cs:452947`).
+///
+/// The largest N in the base game is SealedDeck's Neow option, which asks for
+/// 30 (`:403214`). Klee ships 24 cards, 4 of them Basic, so 20 are generatable
+/// and draw 21 is a guaranteed throw. RoomFullOfCheese.Gorge asks for 8 Commons
+/// against her 14 and survives, but only by margin.
+///
+/// CLAMPING RATHER THAN BLOCKING THE OPTION, deliberately. Sealed Deck's
+/// selector asks the player to keep 10, so offering 20 instead of 30 is a
+/// smaller, still-playable choice rather than a missing Neow option — and the
+/// clamp stops applying by itself the moment the pool grows past 30, which is
+/// what C3 does. Removing the option would have to be remembered and undone.
+///
+/// Base characters are unaffected: their pools exceed every N in the game, so
+/// the clamp never triggers for them. The rarity test mirrors the two branches
+/// of CreateForReward exactly — Uniform excludes Basic and Ancient, everything
+/// else can only roll Common/Uncommon/Rare — because a pool of Curses passes a
+/// naive "not Basic" count and still throws.
+/// </summary>
+[HarmonyPatch(typeof(CardFactory), nameof(CardFactory.CreateForReward),
+    new[] { typeof(Player), typeof(int), typeof(CardCreationOptions) })]
+internal static class CardFactory_CreateForReward_Clamp_Patch
+{
+    [HarmonyPrefix]
+    public static void Prefix(Player player, ref int cardCount,
+                              CardCreationOptions options)
+    {
+        if (cardCount <= 0)
+        {
+            return;
+        }
+
+        var uniform = options.RarityOdds == CardRarityOddsType.Uniform;
+        var available = options.GetPossibleCards(player).Count(c => uniform
+            ? c.Rarity != CardRarity.Basic && c.Rarity != CardRarity.Ancient
+            : c.Rarity == CardRarity.Common
+              || c.Rarity == CardRarity.Uncommon
+              || c.Rarity == CardRarity.Rare);
+
+        if (cardCount > available)
+        {
+            Log.Warn($"[{KleeMod.ModId}] clamped a {cardCount}-card reward draw "
+                   + $"to {available}: the pool cannot generate more without "
+                   + "exhausting its blacklist and throwing.");
+            cardCount = available;
         }
     }
 }

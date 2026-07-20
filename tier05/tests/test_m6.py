@@ -110,16 +110,44 @@ def test_relevance_is_judged_before_the_pick_lands():
 
 
 def test_relevance_measures_the_pool_not_the_policy():
-    """Same seeds, different policy: the offers shown are identical, so the
-    relevance of those offers must be too. If this drifts, relevance has
-    started measuring what the policy took."""
-    common = ("klee", "demolition", "demolition")
+    """Same seeds, different policy: the FIRST screen is offered before any
+    pick diverges, so its relevance must match regardless of policy.
+
+    Parameterized on REACTION deliberately. On demolition this test was
+    vacuous: `offer_advances_plan` there is a pure function of the offers, so
+    every screen matched by construction and the assertion would have held even
+    if relevance were badly broken. Reaction is the one archetype whose core
+    progress moves on cards that carry no archetype tag (appliers, Burst), so
+    it is the only place the deck genuinely enters the answer -- and therefore
+    the only place this invariant can fail.
+    """
+    common = ("klee", "reaction", "reaction")
     a = model.run_many(*common, draft.assigned_policy, runs=25, seed=8)
     b = model.run_many(*common, draft.adaptive_policy, runs=25, seed=8)
-    # First screen of each run is offered before any pick diverges.
     first_a = [r.decisions[0]["advanced_plan"] for r in a if r.decisions]
     first_b = [r.decisions[0]["advanced_plan"] for r in b if r.decisions]
-    assert first_a == first_b
+    assert first_a and first_a == first_b
+
+
+def test_relevance_is_deck_sensitive_for_reaction():
+    """The guard that would have caught the subsumption bug.
+
+    A completed reaction core cannot be advanced further, so a screen that
+    advances an empty deck's plan must NOT advance a finished one. Under the
+    old two-clause definition this failed: any reaction-tagged enabler counted
+    as advancing a plan that was already complete.
+    """
+    starter = _cards(*loader.starting_deck("klee"))
+    offers = _cards("crackle", "mine_toss", "sizzle")
+    assert not draft.core_complete(starter, "reaction")
+
+    done = starter + [c for c in loader._card_index().values()
+                      if draft._is_applier(c)][:2]
+    done += [c for c in loader._card_index().values()
+             if draft._is_amp_payoff(c)][:1]
+    done += [c for c in loader._card_index().values() if "burst" in c.tags][:1]
+    assert draft.core_complete(done, "reaction"), "premise: core must be online"
+    assert not draft.offer_advances_plan(offers, done, "reaction")
 
 
 def test_achievability_alarm_threshold():
