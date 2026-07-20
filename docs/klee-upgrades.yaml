@@ -30,6 +30,7 @@ eager_to_help:     {draw: +1}                      # both branches
 skip_and_hop:      {block: +2}                     # 2->4
 rapid_fire:        {damage: +1}                    # 3->4 per hit (x4)
 warm_glow:         {block: +2}                     # 3->5
+snap:              {damage: +3}                    # 5->8, standard common-attack bump; Spark rider untouched (R1: the upgrade must not move the resource curve)
 sizzle:            {conditional_bonus: +3}         # aura bonus 5->8
 combustion_study:  {burst_energy: +5}              # 10->15
 alchemical_curiosity: {draw: +1}                   # 2->3

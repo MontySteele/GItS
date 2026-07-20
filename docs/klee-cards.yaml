@@ -35,7 +35,7 @@
    effects: [{op: move_bombs, target: enemy, bonus: 2}]}
 - {id: bomb_voyage, name: "Bomb Voyage", cost: 2, type: skill, rarity: common, solve: [frontload], archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 3, target: random_enemies, bomb_damage: 5}]}
-# Spark (9)
+# Spark (10) — snap added v0.6 per M7 ruling R1 (margin-supply content fix)
 - {id: sparkly_treasure, name: "Sparkly Treasure", cost: 0, type: skill, rarity: common, solve: [velocity], archetypes: [spark], role: enabler,
    effects: [{op: gain_spark, amount: 1}]}
 - {id: pocket_fireworks, name: "Pocket Fireworks", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: enabler,
@@ -54,6 +54,8 @@
    effects: [{op: damage, amount: 3, target: random_enemy, times: 4}]}
 - {id: warm_glow, name: "Warm Glow", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [spark], role: glue,
    effects: [{op: block, amount: 3}, {op: gain_spark, amount: 1}]}
+- {id: snap, name: "Snap!", cost: 1, type: attack, rarity: common, solve: [frontload, velocity], archetypes: [spark], role: enabler,
+   effects: [{op: damage, amount: 5, target: enemy}, {op: gain_spark, amount: 1}]}
 # Reaction (6)
 - {id: sizzle, name: "Sizzle", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [reaction], role: payoff,
    effects: [{op: damage, amount: 7, target: enemy}, {op: conditional, if: target_has_nonpyro_aura, then: [{op: damage, amount: 5, target: enemy}]}]}
