@@ -9,11 +9,11 @@ import yaml
 from tier0.content import loader, upgrades
 
 
-# R20 (2026-07-20): klee-cards.yaml keeps its inline fields until the M9
-# session lands its revert (their file, their revert — the deltas already
-# live in klee-upgrades.yaml). Remove the entry when that happens; an
-# EMPTY allowlist is this test's steady state.
-INLINE_UPGRADE_ALLOWLIST = {"klee-cards.yaml"}
+# R20 (2026-07-20): empty is this allowlist's steady state — the M9
+# revert landed (commit 587a902) and no sheet may carry inline
+# `upgrade:` fields again (R27 sequencing: the drop follows the revert
+# in history, so every commit is green on clean checkout).
+INLINE_UPGRADE_ALLOWLIST: set = set()
 
 
 def test_no_inline_upgrades_on_docs_sheets():

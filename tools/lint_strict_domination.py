@@ -7,13 +7,18 @@ one's effect set is a superset of the other's with every shared amount
 Confirmed class: cant_catch_me over warm_glow (Klee, queued errata),
 pit_orchestra over macaron_break (Furina, resolves pass 2).
 
-Scope per the assigning worknote: same-cost CROSS-RARITY pairs within a
-sheet. Basics are excluded — starters are supposed to be outclassed
-(Strike is strictly dominated by half the base game, by design). Cards
-are only compared inside an identical (cost, type, encore_cost,
-exhaust, tags) group, so a playability gate or Exhaust rider makes a
-pair incomparable rather than falsely dominated; formula amounts also
-mark a card incomparable.
+Scope per the assigning worknote, narrowed by R26 (2026-07-20): the law
+protects draft decisions between cards competing at similar weight —
+an ADJACENT-RARITY phenomenon (common<->uncommon, uncommon<->rare).
+Adjacent-rarity strict dominations are findings; two-step gaps (rare
+over common) print as informational only — rares are the designated
+power spike, and a rare obsoleting a common's slot is the rarity ladder
+working. Basics are excluded entirely — starters are supposed to be
+outclassed (Strike is strictly dominated by half the base game, by
+design). Cards are only compared inside an identical (cost, type,
+encore_cost, exhaust, tags) group, so a playability gate or Exhaust
+rider makes a pair incomparable rather than falsely dominated; formula
+amounts also mark a card incomparable.
 
 Effects are split into benefits and COSTS (self-damage, discard,
 spend_encore): domination needs benefits superset-with-all->= AND costs
@@ -52,14 +57,14 @@ KNOWN = {
 # not fail the lint — the sheets belong to their sessions and edits need
 # red-pen first — but they print as NEEDS RULING until dispositioned:
 # move to KNOWN with a schedule, fix the rows, or rule them accepted.
+# (sparkly_explosion/big_badda_boom was here; CLEARED by R26 — a
+# rare-over-common two-step gap is informational, not a finding.)
 PENDING_RULING = {
     # block 8 + exhaust-a-status vs block 7: the CCM shape exactly.
     frozenset({"dodge_roll", "hide_and_seek"}),
-    # rare 18 dmg + on-kill riders vs common 12 at cost 2. May be ruled
-    # acceptable (rare payoff obsoleting a common), but the law as
-    # stated ("rarity does not excuse strict supersets") flags it.
-    frozenset({"sparkly_explosion", "big_badda_boom"}),
 }
+
+RARITY_ORDER = {"common": 0, "uncommon": 1, "rare": 2}
 
 
 def is_cost(eff: dict) -> bool:
@@ -122,8 +127,15 @@ def lint_sheet(path: Path) -> tuple[list[str], list[str]]:
                 msg = (f"{path.name}: {a['id']} ({a['rarity']}) strictly "
                        f"dominates {b['id']} ({b['rarity']}) at cost "
                        f"{a.get('cost')}")
+                ra = RARITY_ORDER.get(a["rarity"])
+                rb = RARITY_ORDER.get(b["rarity"])
+                adjacent = (ra is not None and rb is not None
+                            and abs(ra - rb) == 1)
                 if pair in KNOWN:
                     notes.append(f"known (allowlisted): {msg}")
+                elif not adjacent:
+                    notes.append(f"informational (non-adjacent rarities, "
+                                 f"R26): {msg}")
                 elif pair in PENDING_RULING:
                     notes.append(f"NEEDS RULING (pending, DECISIONS 76): "
                                  f"{msg}")

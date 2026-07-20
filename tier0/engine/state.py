@@ -66,8 +66,8 @@ class Card:
     # this field, and the loader now emits a loud warning per offending
     # sheet (silent-ignore risked an inline-only upgrade that never
     # applies). The field itself stays so the loader never hard-fails on
-    # a shared sheet again; once the M9 revert lands, the
-    # no-inline-upgrades test (test_upgrades) loses its allowlist.
+    # a shared sheet again; the M9 revert landed 2026-07-20 and the
+    # no-inline-upgrades test (test_upgrades) now runs un-allowlisted.
     upgrade: Optional[dict] = None
 
     @property

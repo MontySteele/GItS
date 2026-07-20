@@ -491,4 +491,24 @@ Amend here, not in chat history.
     NOTE: M9's inline-upgrade revert is IN THE WORKING TREE (loader
     warning silent) but uncommitted — the test_upgrades allowlist
     entry comes out only after their commit lands, to keep every
-    commit green on clean checkout.
+    commit green on clean checkout. (Both resolved same day — see 77.)
+77. **R26 — domination law scoped to ADJACENT rarities** (2026-07-20).
+    The law protects draft decisions between cards competing at
+    similar weight — common<->uncommon and uncommon<->rare. Two-step
+    gaps (rare over common) downgrade to informational lint lines:
+    rares are the designated power spike, and a rare obsoleting a
+    common's slot is the rarity ladder working. sparkly_explosion >
+    big_badda_boom CLEARED under the scoped law (removed from
+    PENDING_RULING; stays visible as an informational line).
+    sparkly_explosion stays as-is — ratified, banded, live in C#.
+    Style note for FUTURE authoring, not retroactive law: base StS
+    attaches twists to big rares (Ethereal, Exhaust, wounds) rather
+    than printing pure supersets; prefer that shape. dodge_roll >
+    hide_and_seek is adjacent-rarity and remains PENDING_RULING.
+78. **R27 — inline-upgrade allowlist dropped** (2026-07-20). The M9
+    revert landed as commit 587a902; INLINE_UPGRADE_ALLOWLIST in
+    test_upgrades.py is now EMPTY (its steady state) and the R20
+    convention is fully enforced on every docs sheet. Sequencing
+    endorsed by R27: the drop follows the revert in commit history, so
+    every commit is green on clean checkout. (Origin push pending —
+    interactive auth; user pushes.)
