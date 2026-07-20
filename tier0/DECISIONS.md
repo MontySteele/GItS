@@ -463,10 +463,14 @@ Amend here, not in chat history.
     upgrades away the law). (c) house_call KEPT at 5+3: red-pen flag 9's
     own finding — consistent with the ratified threshold family's
     flat-base + kicker grammar and priced by the A7 setup tax the
-    kickoff declares (~2.0 weak by design). (d) Naming/lore audit
-    CLEARED per the red-pen naming section: talent/summon names
-    pre-verified (sheet header), authored theatrical names on register,
-    constellation namespace correctly reserved for upgrades (§3.6).
+    kickoff declares (~2.0 weak by design). (d) ~~Naming/lore audit
+    CLEARED per the red-pen naming section~~ **AMENDED by R29
+    (2026-07-20): audit PREPARED (talent/summon names pre-verified,
+    theatrical names on register, constellation namespace reserved
+    §3.6) — but a document citing another document cannot close a
+    [USER] gate (the v1.7 lesson). User eyes-on naming/lore pass OWED
+    BEFORE SHIP; the pass itself is the closure.** (a)-(c) ratified by
+    R29; veto window closed.
 76. **Strict-domination lint built** (2026-07-20, assigned via
     klee-session-worknote item 2; this session owns tools/lint_*).
     tools/lint_strict_domination.py + suite gate
@@ -515,7 +519,20 @@ Amend here, not in chat history.
 
 ## Furina pass 2 executed (2026-07-20, R28 GO; plan + report in docs/)
 
-79. **R16 card-mediated boosting SHIPPED**: spotlight_mult_bonus /
+79. **CORRECTION (2026-07-20, R33 — the M7 banner precedent): the
+    "MEASURED at 1.0" record below is VETOED, errata-grade.** E1's
+    identical cells were GUARANTEED by selector heuristic v2 (the
+    companion branch is unreachable at ~20 self cards vs 3–5-card
+    kits), not informative about the knob: the swept constant was
+    never read in any cell. E1 is RE-SCOPED to a valid median-depth
+    null; the "dead knob" generalization is struck — never summarize
+    E1 as "the knob is dead." Recording 1.0 also inverted the R17
+    lever (self 1.25 > companion 1.0 makes the degenerate play optimal
+    BY CONSTANT). SPOTLIGHT_BASE_MULT returned to PLACEHOLDER at 1.5
+    (pass-1 geometry); window-zero ceiling experiment pre-registered
+    in furina-pass3-rulings.md. The R16 shipping record and the
+    delete-test result below STAND — only the knob record is struck.
+    **R16 card-mediated boosting SHIPPED**: spotlight_mult_bonus /
     spotlight_mult_bonus_turn / spotlight_flat_damage_turn powers read
     inside the existing spotlight_mult pipe (numbers-only inherited
     structurally). Spotlight list re-authored: limelight, stage_lights,
@@ -537,6 +554,8 @@ Amend here, not in chat history.
     for such rows (an upgraded row must not silently cap at the old
     value). Pass-1 self_carry cells carried the bug (punisher 38.0% ->
     49.3% post-fix, same constants). User ratification: report ask 5.
+    (RATIFIED by R30, 2026-07-20 — the +3/3 encoding is what the sheet
+    always said; convention codified; no sweep invalidated.)
 81. **A6 INSTRUMENT v2 LANDED** (R18): application-uptime component
     (aura'd enemy intents / total intents) at 0.5 aoe + 0.3 debuff +
     0.2 uptime, uptime anchored ADDITIVELY (baseline uptime is 0).
@@ -561,3 +580,148 @@ Amend here, not in chat history.
     pit_orchestra errata landed (encore 2 -> 1, domination broken,
     pair removed from lint KNOWN). Winrate bands for spotlight/fanfare
     PROPOSED in report §7, not landed.
+
+## Furina pass 3 rulings (2026-07-20, furina-pass3-rulings.md — chat-
+## ratified; chat draft numbered R28–R32, renumbered R29–R33 here per
+## the collision convention: R28 was already the pass-2 GO)
+
+84. **R29 — DECISIONS 75 veto window CLOSED, with one amendment**:
+    (a) commanding_gaze, (b) blood 6, (c) house_call all RATIFIED as
+    resolved. (d) AMENDED — "naming audit CLEARED" struck from the 75
+    record (banner in place): audit prepared; user eyes-on
+    naming/lore pass owed before ship. A document citing another
+    document cannot close a [USER] gate (the v1.7 lesson).
+85. **R30 — star_of_the_show errata RATIFIED** (note added to entry
+    80). max_stacks convention codified as law: POWER UNITS;
+    single-application rows encode max_stacks == amount; applier
+    bumps both. No sweep invalidated.
+86. **R31 — instrument gaps resolved PATH 2: the declarations are
+    DEFENDED.** Report asks 1+2 closed together against
+    accept-the-world: "good at surviving" is not the identity and
+    clashes with spend-buffer-for-power. A4 4.3 / A6 4.2 two-elite
+    shape STANDS; the R16 measurements are design defects. Root cause
+    on record: standing_ovation is a generator in the only archetype
+    with NO Encore sinks (spend-line census: fanfare 7, salon 2,
+    spotlight 0) — under structurally-guaranteed self-Spotlight it
+    reads "2–4 Encore per card played", spend rate zero, absorption
+    pools into A4 (correctly credited). Secondary: R16 glue commons
+    carry BLOCK riders. Median math: A6 4.2 needs at least TWO decks
+    >= 4.2 (the statistic is the middle deck of three).
+87. **R33 — SPOTLIGHT_BASE_MULT 1.0 record VETOED (errata-grade)**;
+    see the correction banner on entry 79. New lint-law from the
+    catch (the 6th, first against a MEASUREMENT record): dead-knob
+    claims require an EXERCISE COUNTER — a sweep concluding "no
+    effect" must show the swept constant was read >= once per cell,
+    instrument-side. E1 would have failed it loudly. Executed:
+    knob-read counter in effects.spotlight_mult's companion branch +
+    engine test; constant restored to PLACEHOLDER 1.5 (un-inverts the
+    R17 lever; measurement-neutral TODAY precisely because the
+    counter proves the branch never runs under selector v2).
+    Window-zero ceiling experiment pre-registered (forced-self vs
+    forced-companion, oracle-style, mult {1.25, 1.5} on the companion
+    arm; R14 — diagnostics feeding a ruling, no acceptance targets).
+    Selector v3 is a follow-on BEHIND window zero, full instrument
+    discipline if built. "Director offstage" content hook stays on
+    the user's shelf.
+88. **R32 — pass-3 scope, RESEQUENCED under R33**: window zero first;
+    then (1) standing_ovation FLIP generator -> spend-payoff (the A4
+    lever AND identity fix; rate-tune 2->1 is fallback only), (2)
+    shared_billing/stage_lights block riders -> application/debuff
+    riders with an A3 rehoming check, (3) salon+spotlight A6 lift
+    (two decks >= 4.2; freeze-cell steering HARD: nothing routes
+    through undercurrent/rain_of_roses/guest_neuvillette_judgment).
+    Fanfare saturation (A4 10.0) NOTED, NOT IN SCOPE — no touch
+    without a new ruling. Binding: FANFARE_CAP re-check inside the
+    pass-3 battery (E2 valid only pre-flip); Encore absorption stays
+    A4-credited (content-side fix only); §7 band ratification
+    DEFERRED to post-pass-3 (salon's ratified bands remain law);
+    success = A4 4.3-shaped at median, A6 4.2 at median, A3 held,
+    A1/A7 weaknesses intact.
+
+## Furina pass 3 executed (2026-07-20, furina-sheet-pass-3-plan.md /
+## -report.md)
+
+89. **W0 ceiling designation experiment RUN** (R33 registration;
+    tier05/exp_furina_pass3.py w0, 1000 fights/cell). Validity gates
+    PASS on first use of the exercise-counter law: forced-companion
+    cells read SPOTLIGHT_BASE_MULT 55k-128k times, forced-self cells
+    exactly 0 — the E1 failure mode is now structurally excluded.
+    RESULT: at full-kit depth (best companion 4 cards) and mult 1.5,
+    forced-companion clears the registered bar (battery-mean +0.25pt)
+    carried by attrition +12.5pt (85.4% -> 97.9%) against tank_boss
+    -10.0pt (10.0% -> 0.0%) and punisher -1.5pt; at mult 1.25 mean
+    -2.40pt (attrition niche +2.4pt survives); at depth 2 a clean no
+    at both mults. READING: outward designation is REAL but
+    ENCOUNTER-CONTINGENT — it wins crowds and grinds, loses duels.
+    The registered consequence fired: selector v3 justified. Dose
+    evidence favors 1.5 as the placeholder value (1.25 is not
+    value-rational anywhere); ratification is red-pen's.
+90. **Selector v3 BUILT** (registered follow-on; full instrument
+    discipline: SPOTLIGHT_SELECTOR_VERSION = 3 stamped in constants
+    with the v1/v2 archive note; never compare selector-v2 and v3
+    numbers unlabeled). Value-aware threshold: designate the deepest
+    companion iff its per-character depth >=
+    SPOTLIGHT_COMPANION_DEPTH_MIN (4 = full kit; W0 brackets the
+    threshold in (2, 4]) AND the stage holds >=
+    SPOTLIGHT_COMPANION_MIN_ENEMIES (2) living enemies; otherwise the
+    kickoff self fallback; last-resort any-companion only when zero
+    self cards exist (any stage beats none). v3-world baseline
+    (pre-W1, archived in pass-3 report): delete-test PASS (+7.0pt
+    attrition, +9.3pt tank_boss — a HARDER bar, the probe now
+    designates its own kit in crowds and reads the base mult),
+    spotlight attrition 85.4% -> 95.2% (the W0 niche captured),
+    tank_boss floor HELD at 10.0% (the duel protection is the point),
+    salon/fanfare worlds untouched (threshold unreachable), A2 4.1
+    inside the ratified 4.3 band, median A4 7.7 / A6 3.4. Both new
+    constants PROPOSED pending red-pen.
+91. **W1 — standing_ovation FLIP LANDED after a four-dose window**
+    (R32.1; the dose record is the window's real finding). Landed row:
+    ovation_spend_boost 10 (two-copy cap 20, §2.2a pipe via
+    spotlight_mult_bonus_turn) + spotlight_encore_first 1 (first
+    Spotlighted play each turn — activity-gated, the sheet's
+    no-passive-accrual law holds). Spend lines: limelight spend_encore
+    1 (overdraw op — an encore_cost gate bricked opening hands),
+    top_billing encore_cost 2. DOSE RECORD: pure sink A4 2.1 (starter
+    level, delete-test collapses); per-play trickle A4 9.5 with a
+    REAL punisher deficit (-0.38pt at the pre-declared 4000-fight
+    resolver); first-play trickle 2 A4 8.2; first-play trickle 1
+    A4 4.6 -> landed. STRUCTURAL FINDING: absorption COMPOUNDS with
+    survival (longer fights -> more income -> more absorption), so no
+    income dose gives A4-at-declaration AND absorption-funded
+    tank_boss floors simultaneously — long-fight survival must come
+    from prevention texture (the R32.2/3 windows), not buffer volume.
+    Engine: on-spend hook in resources.spend_encore, first-play
+    window in combat.play_card; spotlight_encore (per-play) stays
+    engine-supported as the archived fallback rate.
+92. **W2 — rider swap EXECUTED** (R32.2): shared_billing block 4 ->
+    apply_aura hydro random_enemy (single-target, freeze cell
+    untouched); stage_lights block 3 -> weak 1; blocking_notes 5 -> 6
+    (rehome). Measured: spotlight A4 4.2 ON the declaration; A3
+    median dipped 2.4 -> 1.9 (the +1 rehome under-covered losing 7
+    rider block — the axis-dip branch of the plan fired); A6 moved
+    only +0.1 (single-target texture is dilute); punisher 0.5% ->
+    0.0%. Upgrades re-authored (shared_billing mined cost line).
+93. **W3 + final battery** (R32.3): usher_the_waves + weak 1 (salon
+    debuff line), stage_lights weak -> ALL enemies (ratified mass-weak
+    common grammar), blocking_notes 6 -> 7 (A3 repair; [USER] flag —
+    ties Klee's Hide and Seek with a rider on top). FINAL WORLD:
+    **A4 median 4.3 EXACT on the declaration** (the pass headline;
+    starter 4.4 unchanged); A1 2.6 / A7 1.5 weaknesses intact; salon
+    lifted for free (punisher 92.8 -> 94.3, tank_boss 61.0 -> 68.5);
+    all ratified WINRATE bands hold; Klee verified; FANFARE_CAP 0.5
+    re-confirmed post-flip (fanfare punisher 37.6%, the flip is
+    spotlight-scoped). SHORTFALLS, quantified: A6 median 3.5 vs 4.2 —
+    the term decomposition shows the debuff term nearly dead (salon
+    0.14 / spotlight 0.46 / fanfare 0.09 vs the baseline's 0.90;
+    ref_ironclad is a DEBUFF-HEAVY anchor, so texture-grain riders are
+    ratio-invisible) and uptime near ceiling — closing it needs
+    number-grain AoE/debuff volume OR an anchoring ruling (report
+    ask). A3 median 1.9 vs ~2.5 (rehome under-covered; further block
+    collides with Klee-parity pins — ask). A2 spotlight 4.5 exceeds
+    the ratified 4.3 band (the boost-cadence world scales harder;
+    re-band ask — deck bands were measured in a struck world).
+    Delete-test FINAL RECORD (pre-declared 4000-fight resolver):
+    attrition +7.0pt PASS, swarm level, punisher -1.85pt FAIL,
+    tank_boss -0.50pt FAIL — in the A4-corrected world the machinery
+    no longer buys single-target survival (the 91 coupling, at
+    resolution). Disposition is red-pen's (report ask 1).

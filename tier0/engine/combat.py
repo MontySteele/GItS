@@ -108,12 +108,19 @@ def play_card(state: CombatState, card: Card) -> None:
         resources.gain_fanfare(state, C.FANFARE_PER_SPOTLIGHT_CARD, "ovation")
         # Card-level Spotlight texture (sheet pass 1, ratified design
         # space): Supporting Cast draws on the FIRST Spotlighted card
-        # each turn; Standing Ovation grants Encore on EVERY one.
+        # each turn; post-flip Standing Ovation's trickle uses the same
+        # first-play window (spotlight_encore_first, pass 3 — the
+        # per-play rate was the hot-sustain driver both times it was
+        # tried). spotlight_encore (EVERY play) remains engine-supported
+        # as the archived pre-flip rate.
         if state.spotlighted_cards_this_turn == 1:
             n = p.powers.get("spotlight_draw", 0)
             if n:
                 state.draw(n)
                 state.emit("extra_draw", amount=n)
+            n = p.powers.get("spotlight_encore_first", 0)
+            if n:
+                resources.gain_encore(state, n)
         n = p.powers.get("spotlight_encore", 0)
         if n:
             resources.gain_encore(state, n)

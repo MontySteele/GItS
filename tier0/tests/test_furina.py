@@ -7,7 +7,7 @@ import random
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier0.engine import combat, effects, powers
+from tier0.engine import combat, effects, powers, resources
 from tier0.engine.state import Card, CombatState
 from tier0.harness import metrics
 from tier0.harness.axes import raw_axes
@@ -163,13 +163,91 @@ def _stock_deck(p, *card_ids):
     p.draw_pile.extend(loader.get_card(cid) for cid in card_ids)
 
 
-def test_selector_designates_deepest_companion_character():
-    st = furina_state()
-    st.player.draw_pile.clear()      # isolate: her real starter is now 10
+def test_selector_v3_designates_companion_at_kit_depth_with_a_crowd():
+    """Selector v3 (pass 3, W0-derived): companion designation needs BOTH
+    a full-kit-depth companion AND a crowd on stage; anything less is the
+    kickoff's self-Spotlight fallback. v2's raw depth contest is archived
+    (R33: its companion branch was unreachable)."""
+    two = [make_enemy(hp=50), make_enemy(hp=50)]
+    st = furina_state(enemies=two)   # starter: 10 furina cards vs kit of 4
     _stock_deck(st.player, "chevreuse_interdiction_fire",
-                "chevreuse_vanguards_valor", "lynette_box_trick")
+                "chevreuse_interdiction_fire", "chevreuse_vanguards_valor",
+                "chevreuse_bursting_grenades", "lynette_box_trick")
     effects.resolve_card(st, loader.get_card("ethereal_spotlight"))
-    assert st.player.spotlight == "chevreuse"
+    assert st.player.spotlight == "chevreuse"    # depth 4 + crowd: outward
+    # Same deck, single enemy: the duel belongs to her own kit (W0:
+    # forced-companion zeroed tank_boss).
+    st2 = furina_state()
+    _stock_deck(st2.player, "chevreuse_interdiction_fire",
+                "chevreuse_interdiction_fire", "chevreuse_vanguards_valor",
+                "chevreuse_bursting_grenades")
+    effects.resolve_card(st2, loader.get_card("ethereal_spotlight"))
+    assert st2.player.spotlight == "furina"
+    # Crowd but sub-threshold kit (W0 depth-3 arm: clean no): self.
+    st3 = furina_state(enemies=[make_enemy(hp=50), make_enemy(hp=50)])
+    _stock_deck(st3.player, "chevreuse_interdiction_fire",
+                "chevreuse_vanguards_valor")
+    effects.resolve_card(st3, loader.get_card("ethereal_spotlight"))
+    assert st3.player.spotlight == "furina"
+
+
+def test_ovation_spend_boost_converts_spend_events_into_turn_boost():
+    """R32.1 flip (pass 3): with Standing Ovation up, every Encore spend
+    EVENT grants turn-scoped Spotlighted percentage points through the
+    §2.2a pipe; the window closes at turn end (EXPIRING), and a
+    dry-buffer spend is not an event."""
+    st = furina_state()
+    p = st.player
+    p.powers["ovation_spend_boost"] = 10
+    p.encore = 5
+    resources.spend_encore(st, 2)
+    assert p.powers.get("spotlight_mult_bonus_turn", 0) == 10
+    resources.spend_encore(st, 3)
+    assert p.powers["spotlight_mult_bonus_turn"] == 20
+    powers.on_turn_end(st, p)
+    assert "spotlight_mult_bonus_turn" not in p.powers
+    resources.spend_encore(st, 2)                # buffer is dry: no event
+    assert "spotlight_mult_bonus_turn" not in p.powers
+
+
+def test_knob_exercise_counter_counts_companion_reads_only():
+    """R33 lint-law (DECISIONS 87): dead-knob claims require an exercise
+    counter. The tally increments exactly when SPOTLIGHT_BASE_MULT is
+    read into a live computation -- the companion branch -- and never on
+    the self branch. E1's null would have shown 0 reads per cell."""
+    st = furina_state()
+    p = st.player
+    effects.reset_knob_reads()
+    p.spotlight = "furina"
+    effects.spotlight_mult(st, furina_card())
+    assert effects.KNOB_READS.get("SPOTLIGHT_BASE_MULT", 0) == 0
+    p.spotlight = "chevreuse"
+    effects.spotlight_mult(st, loader.get_card("chevreuse_interdiction_fire"))
+    assert effects.KNOB_READS["SPOTLIGHT_BASE_MULT"] == 1
+    effects.reset_knob_reads()
+    assert effects.KNOB_READS == {}
+
+
+def test_spotlight_force_oracle_arms_bypass_heuristic_v2():
+    """R33 window zero: forced-companion designates the deepest companion
+    even against her 10-card starter (unreachable for heuristic v2), and
+    has NO self fallback when no companion exists -- a quietly self-aiming
+    oracle would re-create the circularity the veto struck."""
+    st = furina_state()          # starter: 10 furina cards in draw pile
+    p = st.player
+    selector = loader.get_card("ethereal_spotlight")
+    try:
+        effects.SPOTLIGHT_FORCE = "companion"
+        effects.resolve_card(st, selector)
+        assert p.spotlight is None           # no companion cards: no aim
+        _stock_deck(p, "chevreuse_interdiction_fire")
+        effects.resolve_card(st, selector)
+        assert p.spotlight == "chevreuse"    # 1-card kit beats 10-card self
+        effects.SPOTLIGHT_FORCE = "self"
+        effects.resolve_card(st, selector)
+        assert p.spotlight == "furina"
+    finally:
+        effects.SPOTLIGHT_FORCE = None
 
 
 def test_spotlight_empowers_damage_and_block_only():
