@@ -207,6 +207,14 @@ attrition = attack scaling on plain normals only):
   12th fight (one extra N), so its rows are mildly confounded (more
   attrition AND one more draft screen). The stamped 3-rest template is
   exact; the 4-rest rows are directional only.
+- Review-pass correction, validated by re-run: the attrition knob
+  originally scaled `amount` but not `ramp` (punisher_lite, ⅓ of
+  normals), understating the labeled 0.7× on late turns. Fixed to the
+  sibling-scaler convention and the whole grid re-swept (post-R8 pool):
+  **every cell reproduces within noise** (e.g. 37.9 vs 37.6, 84.7 vs
+  85.0) — because punisher_lite's ramp is 1 and integer rounding keeps
+  it at 1 under any scale, the defect was real in convention but nil in
+  effect at current statlines. Knob verdicts stand on the current world.
 
 **Directive 3 — re-measure under the calibrated economy** (drafter v2,
 template v2 — the new standing baseline):

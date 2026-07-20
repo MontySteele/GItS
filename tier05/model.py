@@ -86,13 +86,18 @@ def build_node_encounter(node_kind: str, rng: random.Random) -> list[Enemy]:
     else:
         raise ValueError(f"unknown normal pool entry {pick!r}")
     if C.NORMAL_ATTRITION_SCALE != 1.0:
-        # R7 sweep knob: attack amounts only, plain normals only -- HP is
+        # R7 sweep knob: attack damage only, plain normals only -- HP is
         # untouched so fight length (and thus draft economy) stays put.
+        # Scales ramp alongside amount, same convention as the sibling
+        # scalers above (review-pass fix: amount-only left punisher_lite
+        # at ~0.85 effective late-fight scale in the "0.7x" sweep cells).
         for e in out:
             for intent in e.intents:
                 if intent["kind"] == "attack":
-                    intent["amount"] = max(1, round(
-                        intent["amount"] * C.NORMAL_ATTRITION_SCALE))
+                    for key in ("amount", "ramp"):
+                        if key in intent:
+                            intent[key] = max(1, round(
+                                intent[key] * C.NORMAL_ATTRITION_SCALE))
     return _apply_compensator(out, "normal")
 
 
