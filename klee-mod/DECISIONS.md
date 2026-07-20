@@ -218,3 +218,34 @@ failure mode it exists to prevent. Findings log as `SELFCHECK` errors.
 
 S4 is a source regex, not a proof; proving it needs IL analysis of the base
 constructor call. It catches the shape that shipped.
+
+## Finding 18 — power icons cannot use the loose-PNG trick (2026-07-20)
+
+Observed in playtest: BombPower renders the "Nope" missing-resource placeholder
+under the enemy. This is NOT the same situation as card art, and the difference
+is structural rather than a matter of shipping more files.
+
+    public string PackedIconPath => ImageHelper.GetImagePath(
+        "atlases/power_atlas.sprites/" + Id.Entry.ToLowerInvariant() + ".tres");
+    public Texture2D Icon => ResourceLoader.Load<Texture2D>(PackedIconPath, ...);
+
+Two independent blockers: `ResourceLoader.Load` resolves `res://` only, so an
+absolute OS path cannot be handed to it; and the target is a `.tres`
+AtlasTexture entry inside a packed sprite atlas, not a raw PNG, so there is no
+image file to point at even in principle. BaseLib's `CustomPowerModel` offers
+only path overrides (`CustomPackedIconPath`, `CustomBigIconPath`) and its patch
+merely substitutes the string -- the load is still the base game's.
+
+**Ruling: power icons join character art behind the `.pck` gate.** The Windows
+MegaDot 4.5.1 editor download is therefore blocking more than the character
+select surface, and its priority goes up accordingly.
+
+UNVERIFIED lead, worth one experiment before accepting the gate: `Icon` returns
+a `Texture2D`, so a Harmony patch on that getter could hand back an
+`ImageTexture` built from a loose PNG, exactly as `KleeArt` does for cards. This
+only works if the UI consumes `Icon` rather than resolving `PackedIconPath`
+itself. BaseLib patches the *path* getter, which hints the path is what gets
+consumed -- so this may not work. Do not assume it does.
+
+Cosmetic only; bombs function correctly. Confirmed in playtest: Pop places a
+bomb, it detonates early when the enemy is hit, and the debuff name renders.
