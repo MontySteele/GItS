@@ -14,6 +14,9 @@ from tier0 import constants as C
 from tier0.engine.state import CombatState, Fighter
 
 DECAYING = ("weak", "vulnerable")   # tick down at their owner's turn end
+# This-turn windows: cleared entirely at their owner's turn end (R16
+# card-mediated Spotlight boosts; a _turn power is a window, not a stack).
+EXPIRING = ("spotlight_mult_bonus_turn", "spotlight_flat_damage_turn")
 
 
 def modify_damage_dealt(attacker: Fighter, base: float) -> float:
@@ -54,6 +57,8 @@ def on_turn_end(state: CombatState, fighter: Fighter) -> None:
     for name in DECAYING:
         if fighter.powers.get(name, 0) > 0:
             fighter.powers[name] -= 1
+    for name in EXPIRING:
+        fighter.powers.pop(name, None)
 
 
 def apply_power(state: CombatState, target: Fighter, name: str, stacks: int,

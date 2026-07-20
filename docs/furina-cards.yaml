@@ -1,8 +1,10 @@
 # Furina card pool — v0.1 design sheet (Tier 0 simulator schema). RED-PEN 2026-07-20 (furina-sheet-redpen.md):
 # basics RATIFIED as a set; salon/fanfare/generic approved as measured. [USER] items RESOLVED from docs 2026-07-20
 # (DECISIONS 75): commanding_gaze parity verified vs Klee's ratified Spooked!; the_sea_is_my_stage blood raised to 6
-# per kickoff §4 "nasty setup cost" law; house_call kept (threshold-family + A7 setup-tax consistent). The SPOTLIGHT list is
-# NOT red-penned — it gets re-authored under R16 (card-mediated boosting) at pass 2 and reviewed then.
+# per kickoff §4 "nasty setup cost" law; house_call kept (threshold-family + A7 setup-tax consistent). The SPOTLIGHT list
+# was RE-AUTHORED at pass 2 under R16 (card-mediated boosting): limelight/stage_lights/top_billing replace
+# warm_reception/props_department/constant_star, shared_billing reworked; boosts flow through spotlight_mult_bonus powers
+# (the same §2.2a numbers-only pipe). ALL RE-AUTHORED NUMBERS PROPOSED pending red-pen (furina-sheet-pass-2-report.md).
 # Numbers tuned through 4 measured rounds against the declared statline (see furina-sheet-pass-1-report.md §2); 76 cards.
 # Element: hydro | Cadence: SKILL-grade (kickoff §1): damage on type:skill / burst-tag / skill_tag cards applies hydro; plain attacks never do.
 # Archetypes: salon (default plan / solo floor) | spotlight (draft-gated high-ceiling) | fanfare (tempo/velocity flux) | generic
@@ -93,18 +95,19 @@
 - {id: an_invitation, name: "An Invitation", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: enabler, exhaust: true,
    effects: [{op: generate_guest_star, rarity: common, amount: 1}]}
    # THE base generator (kickoff §9 grammar verbatim): create a common from the companion pool + Guest Star set. Exhausts. This-combat-only.
-- {id: warm_reception, name: "Warm Reception", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [spotlight, generic], role: glue,
-   effects: [{op: conditional, if: spotlight_set, then: [{op: draw, amount: 2}], else: [{op: draw, amount: 1}]}]}
-   # Draw glue that pays for directing. Eager to Help parity shape.
-- {id: shared_billing, name: "Shared Billing", cost: 1, type: skill, rarity: common, solve: [block, sustain], archetypes: [spotlight], role: glue,
-   effects: [{op: block, amount: 4}, {op: conditional, if: spotlighted_card_played_this_turn, then: [{op: gain_encore, amount: 3}]}]}
-   # The co-star clause: defend the stage, get paid when the star performs.
+- {id: limelight, name: "Limelight", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: enabler,
+   effects: [{op: apply_power, power: spotlight_mult_bonus_turn, amount: 25, target: self}, {op: draw, amount: 1}]}
+   # R16 re-author (replaces Warm Reception): the beam finds the star — Spotlighted numbers +25% this turn.
+   # The bread-and-butter boost; delete her cards and the empowerment leaves with them. (lint-ok: pct points)
+- {id: shared_billing, name: "Shared Billing", cost: 1, type: skill, rarity: common, solve: [block, utility], archetypes: [spotlight], role: glue,
+   effects: [{op: block, amount: 4}, {op: apply_power, power: spotlight_mult_bonus_turn, amount: 25, target: self}]}
+   # R16 REWORK: defend the stage while the star shines (was: conditional Encore rider). (lint-ok: pct points)
 - {id: blocking_notes, name: "Blocking Notes", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [spotlight, generic], role: glue,
    effects: [{op: block, amount: 5}, {op: conditional, if: spotlight_moved_this_turn, then: [{op: draw, amount: 1}]}]}
-   # Theatre blocking, the pun fully intended. Re-staging pays a card.
-- {id: props_department, name: "Props Department", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [spotlight], role: glue,
-   effects: [{op: conditional, if: spotlight_set, then: [{op: energy, amount: 1}, {op: draw, amount: 1}], else: [{op: draw, amount: 1}]}]}
-   # Economy when the production is running. HER cards may grant turn-economy — §2.2a binds the multiplier, not her pool.
+   # Theatre blocking, the pun fully intended. Re-staging pays a card. KEPT at re-author: selector glue, not administration.
+- {id: stage_lights, name: "Stage Lights", cost: 1, type: skill, rarity: common, solve: [block, utility], archetypes: [spotlight], role: glue,
+   effects: [{op: apply_power, power: spotlight_flat_damage_turn, amount: 2, target: self}, {op: block, amount: 3}]}
+   # R16 re-author (replaces Props Department): the follow spot holds — Spotlighted damage +2 this turn, flat-rider texture.
 - {id: curtain_cue, name: "Curtain Cue", cost: 0, type: skill, rarity: common, solve: [sustain], archetypes: [spotlight, fanfare], role: glue,
    effects: [{op: conditional, if: spotlight_moved_this_turn, then: [{op: gain_encore, amount: 3}, {op: draw, amount: 1}], else: [{op: gain_encore, amount: 1}]}]}
    # Free beat that rewards the re-aim. Selector-payoff texture at common.
@@ -174,8 +177,9 @@
    effects: [{op: apply_power, power: fanfare_attack_per10, amount: 1, target: self, max_stacks: 2, note: "attacks +1 damage per 10 Fanfare"}]}
    # "Stacks grant flat power bonuses" (kickoff §4), the card. Reads the pool, spends nothing.
 - {id: pit_orchestra, name: "Pit Orchestra", cost: 1, type: skill, rarity: uncommon, solve: [block, sustain], archetypes: [fanfare, generic], role: glue,
-   effects: [{op: block, amount: 5}, {op: gain_encore, amount: 2}]}
-   # Hybrid glue: the band plays through anything.
+   effects: [{op: block, amount: 5}, {op: gain_encore, amount: 1}]}
+   # Hybrid glue: the band plays through anything. PASS-2 ERRATA (DECISIONS 76/R26 law): Encore rider trimmed —
+   # the old row strictly dominated Macaron Break. Now strictly tankier / strictly less flux: a real choice.
 - {id: flood_of_emotion, name: "Flood of Emotion", cost: 2, type: skill, rarity: uncommon, solve: [frontload], archetypes: [fanfare], role: payoff, encore_cost: 5, tags: [skill_tag],
    effects: [{op: damage, amount: 12, target: enemy}]}
    # Spend 5 Encore: a 12-point hydro-applying torrent. The flux cycle's damage face, priced in buffer.
@@ -192,9 +196,10 @@
 - {id: directors_cut, name: "Director's Cut", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [spotlight], role: glue,
    effects: [{op: conditional, if: spotlight_moved_this_turn, then: [{op: energy, amount: 1}, {op: draw, amount: 2}], else: [{op: draw, amount: 1}]}]}
    # Re-aim payoff: the scene changes and the production surges.
-- {id: constant_star, name: "Constant Star", cost: 1, type: skill, rarity: uncommon, solve: [block, sustain], archetypes: [spotlight], role: glue,
-   effects: [{op: block, amount: 4}, {op: conditional, if: spotlight_unmoved_this_combat, then: [{op: gain_encore, amount: 4}]}]}
-   # The commitment payoff: one star, all combat. Commitment rewarded through throughput, never enforced (kickoff §3.1).
+- {id: top_billing, name: "Top Billing", cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [spotlight], role: payoff,
+   effects: [{op: apply_power, power: spotlight_mult_bonus, amount: 25, target: self, max_stacks: 50, note: "Spotlighted numbers +25% for the rest of combat; stacks to +50%"}]}
+   # R16 re-author (replaces Constant Star): the name above the title — the archetype's core scaling engine.
+   # Combat-duration mult through the SAME pipe (§2.2a numbers-only inherited). Two copies is the ceiling. (lint-ok: pct points)
 - {id: duet, name: "Duet", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [spotlight], role: payoff,
    effects: [{op: replay_next_companion, times: 1, duration: this_turn}, {op: draw, amount: 1}]}
    # Study Buddy parity: the next companion performs twice. Star-agnostic — works on any guest.
@@ -246,8 +251,10 @@
    effects: [{op: damage, amount: 9, target: all_enemies, bonus_formula: 1_per_3_fanfare}]}
    # The crescendo finisher: the whole room, paid in accumulated roar. At placeholder cap: 9+10 to all. No application — pure theatre.
 - {id: star_of_the_show, name: "Star of the Show", cost: 2, type: power, rarity: rare, solve: [scaling], archetypes: [spotlight], role: payoff,
-   effects: [{op: apply_power, power: spotlight_flat_damage, amount: 3, target: self, max_stacks: 1, note: "Spotlighted cards' damage ops +3 printed"}]}
+   effects: [{op: apply_power, power: spotlight_flat_damage, amount: 3, target: self, max_stacks: 3, note: "Spotlighted cards' damage ops +3 printed; does not re-stack"}]}
    # Numbers-texture on the star (legal under §2.2a: numbers, never economy). Stacks with the baseline mult additively AFTER it.
+   # PASS-2 ERRATA: max_stacks is in POWER UNITS (engine caps the total) — the pass-1 row's max_stacks 1 silently
+   # shipped this card at +1, not its printed +3. Encoded correctly now; pass-1 self_carry numbers carried the bug.
 - {id: prima_donna, name: "Prima Donna", cost: 2, type: power, rarity: rare, solve: [velocity], archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self, max_stacks: 1}, {op: apply_power, power: spotlight_draw, amount: 1, target: self, max_stacks: 1}]}
    # Both texture lines in one rare: the production revolves around her star.

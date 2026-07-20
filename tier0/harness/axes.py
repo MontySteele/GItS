@@ -17,6 +17,14 @@ from tier0.harness.metrics import FightStats
 AXES = ["A1_frontload", "A2_scaling", "A3_block", "A4_sustain",
         "A5_velocity", "A6_utility", "A7_setup_tax"]
 
+# A6 instrument version (R18, pass 2) -- same archive discipline as
+# CONSTANTS_VERSION: v1 = 0.7*AoE + 0.3*debuff (Klee M-reports and the
+# Furina pass-1 report are its archive; Furina measured 3.6 under it).
+# v2 adds APPLICATION UPTIME (fraction of enemy intents taken under an
+# elemental aura) at 0.5*AoE + 0.3*debuff + 0.2*uptime-factor. Numbers
+# are discontinuous BY DESIGN; never compare v1/v2 A6 unlabeled.
+A6_INSTRUMENT_VERSION = 2
+
 SCORE_CAP = 10.0
 _BASE_ECONOMY = C.CARDS_DRAWN_PER_TURN + C.BASE_ENERGY_PER_TURN  # A5 anchor
 
@@ -76,6 +84,11 @@ def raw_axes(stats_by_enc: dict[str, list[FightStats]]) -> dict[str, float]:
     swarm = stats_by_enc.get("swarm", pooled)
     a6_aoe = _avg(s.total_damage_dealt / max(1, s.turns) for s in swarm)
     a6_debuff = _avg(s.debuff_stacks_applied for s in pooled)
+    # A6 v2 (R18): application uptime, pooled across the battery. The
+    # baseline applies nothing (uptime 0), so this term is anchored
+    # additively in normalize(), never as a ratio.
+    a6_app = (sum(s.aura_intents for s in pooled)
+              / max(1, sum(s.total_intents for s in pooled)))
 
     # A7: setup tax — avg first turn where the 3-turn-window DPT reaches
     # 70% of the config's OWN peak window (self-referential: "when does
@@ -86,7 +99,7 @@ def raw_axes(stats_by_enc: dict[str, list[FightStats]]) -> dict[str, float]:
     return {"A1_frontload": a1, "A2_scaling": a2, "A3_block": a3,
             "A4_sustain": a4, "A5_velocity": a5,
             "A6_utility": a6_aoe,          # headline raw = swarm DPT
-            "A6_aoe": a6_aoe, "A6_debuff": a6_debuff,
+            "A6_aoe": a6_aoe, "A6_debuff": a6_debuff, "A6_app": a6_app,
             "A7_setup_tax": a7}
 
 
@@ -115,10 +128,14 @@ def normalize(raw: dict[str, float], baseline: dict[str, float]) -> dict[str, fl
         if ax == "A4_sustain":
             score = max(A4_FLOOR, 3.0 * r / max(eps, b))
         elif ax == "A6_utility":
-            # 0.7 AoE + 0.3 debuff composite, each term baseline-anchored.
+            # v2 composite (R18): AoE and debuff ratio-anchored as
+            # before; application uptime anchored ADDITIVELY (the
+            # baseline's uptime is 0 -- a ratio would divide by it).
+            # At baseline every term is 1 -> exactly 3.0: anchor held.
             aoe = raw["A6_aoe"] / max(eps, baseline["A6_aoe"])
             deb = raw["A6_debuff"] / max(eps, baseline["A6_debuff"])
-            score = 3.0 * (0.7 * aoe + 0.3 * deb)
+            app = 1.0 + raw["A6_app"] - baseline["A6_app"]
+            score = 3.0 * (0.5 * aoe + 0.3 * deb + 0.2 * app)
         elif ax == "A7_setup_tax":
             score = 3.0 * b / max(eps, r)      # fewer setup turns = better
         else:

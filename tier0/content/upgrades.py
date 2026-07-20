@@ -166,9 +166,16 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                               and word in fx.get("power", "")), "amount", val)
         elif key in ("power_amount", "amp_percent", "splash_damage",
                      "duration", "buff"):
-            ok = _bump_first((fx for fx in top if fx.get("op")
-                              in ("apply_power", "buff_next_attack")),
-                             "amount", val)
+            hit = next((fx for fx in top if fx.get("op")
+                        in ("apply_power", "buff_next_attack")), None)
+            ok = hit is not None
+            if hit:
+                # Single-application powers encode max_stacks == amount
+                # (the cap is in POWER UNITS — pass-2 fix; a stale cap
+                # would silently swallow the upgrade).
+                if hit.get("max_stacks") == hit["amount"]:
+                    hit["max_stacks"] += val
+                hit["amount"] += val
         elif key in ("bonus", "bonus_vs_bombed", "bomb_damage"):
             ok = _bump_first(everywhere, key, val)   # field name == key
         elif key == "conditional_bonus":

@@ -173,18 +173,23 @@ def test_selector_designates_deepest_companion_character():
 
 
 def test_spotlight_empowers_damage_and_block_only():
+    # R16 world: the empowerment is CARD-MEDIATED. The base mult is the
+    # relic's residual passive (E1-swept); her cards grant the rest via
+    # spotlight_mult_bonus. This test pins the card-granted path.
     st = furina_state()
     st.player.spotlight = "charlotte"
+    st.player.powers["spotlight_mult_bonus"] = 50    # e.g. two top_billing
     e = st.enemies[0]
-    # Damage: Freezing Point prints 3 -> int(3 * 1.5) = 4.
+    mult = C.SPOTLIGHT_BASE_MULT + 0.5
+    # Damage: Freezing Point prints 3 -> int(3 * mult).
     _stock_deck(st.player, "charlotte_freezing_point")   # draw target
     effects.resolve_card(st, loader.get_card("charlotte_freezing_point"))
     dmg = [ev for ev in st.log if ev["event"] == "damage"][0]
-    assert dmg["base"] == 4
-    # Block: Frosthelm prints 3 now + 3 next turn -> 4 and 4.
+    assert dmg["base"] == int(3 * mult)
+    # Block: Frosthelm prints 3 now + 3 next turn -> scaled both.
     effects.resolve_card(st, loader.get_card("charlotte_enduring_frosthelm"))
-    assert st.player.block == 4
-    assert st.player.powers["block_next_turn"] == 4
+    assert st.player.block == int(3 * mult)
+    assert st.player.powers["block_next_turn"] == int(3 * mult)
     # §2.2a extension: numbers only, never turn-economy or power stacks --
     # Snappy Silhouette's Vulnerable 2 and cantrip stay printed.
     effects.resolve_card(st, loader.get_card("charlotte_snappy_silhouette"))

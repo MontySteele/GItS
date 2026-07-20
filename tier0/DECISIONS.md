@@ -512,3 +512,52 @@ Amend here, not in chat history.
     endorsed by R27: the drop follows the revert in commit history, so
     every commit is green on clean checkout. (Origin push pending —
     interactive auth; user pushes.)
+
+## Furina pass 2 executed (2026-07-20, R28 GO; plan + report in docs/)
+
+79. **R16 card-mediated boosting SHIPPED**: spotlight_mult_bonus /
+    spotlight_mult_bonus_turn / spotlight_flat_damage_turn powers read
+    inside the existing spotlight_mult pipe (numbers-only inherited
+    structurally). Spotlight list re-authored: limelight, stage_lights,
+    top_billing in; warm_reception, props_department, constant_star
+    out; shared_billing reworked. SPOTLIGHT_MULT renamed
+    SPOTLIGHT_BASE_MULT and MEASURED at 1.0: the pre-registered E1
+    sweep {1.0, 1.25} was cell-for-cell identical — the depth contest
+    self-Spotlights at committed-median, so the companion base rate
+    never fires there; 1.0 makes her cards the only companion
+    empowerment at the drafted ceiling. **§8 criterion-2 delete-test
+    now PASSES** (attrition +16.4pt, tank_boss +9.3pt over the
+    companions-only probe; pass-1's headline FAIL reversed). Pass-1
+    Spotlight numbers were taken at base 1.5 — never compare unlabeled.
+80. **star_of_the_show max_stacks errata (live bug)**: the engine caps
+    a power's TOTAL at max_stacks; the pass-1 row (amount 3,
+    max_stacks 1) silently shipped +1. Convention codified: max_stacks
+    is in POWER UNITS; single-application rows encode max_stacks ==
+    amount, and the upgrade applier bumps max_stacks alongside amount
+    for such rows (an upgraded row must not silently cap at the old
+    value). Pass-1 self_carry cells carried the bug (punisher 38.0% ->
+    49.3% post-fix, same constants). User ratification: report ask 5.
+81. **A6 INSTRUMENT v2 LANDED** (R18): application-uptime component
+    (aura'd enemy intents / total intents) at 0.5 aoe + 0.3 debuff +
+    0.2 uptime, uptime anchored ADDITIVELY (baseline uptime is 0).
+    A6_INSTRUMENT_VERSION = 2 stamped; v1 numbers archived in the
+    pass-2 report §4 table. ref anchor exactly 3.00 under v2; Klee
+    re-derived 3.52 -> 3.61 median (all Klee bands hold); Furina 3.39
+    -> 3.31 median. HEADLINE: the sighted instrument says her declared
+    A6 4.2 is genuinely short (fanfare deck 12.7% uptime is the drag)
+    — sheet-real gap, report ask 2.
+82. **R21 graded-encounter EP battery RUN**: the graded ladder resolves
+    pass-1's quantization; at committed depth-5, +EP scores mean 0.45
+    grades / P90 1 vs warm-body control 0.57 / 2 — duplication is
+    MEASURED-NEGATIVE at current cost (not "no effect"). Registration
+    (i) disposition proposed to red-pen: close as measured-negative and
+    re-cost Encore Performance (report ask 3).
+83. **E2 cap confirmation + spotlight band**: FANFARE_CAP_FRACTION 0.5
+    re-confirmed under the R16 world with the 6-blood uncapper
+    (punisher 37.6%, inside the registered [10,55] band; cells match
+    pass 1 — the deeper blood is invisible at deck scale, no ask).
+    spotlight_weighted A2 BANDED at 4.3 (measured 4.0 + the R19/Klee
+    0.3 margin) per R19's pass-2 schedule; red-pen may adjust.
+    pit_orchestra errata landed (encore 2 -> 1, domination broken,
+    pair removed from lint KNOWN). Winrate bands for spotlight/fanfare
+    PROPOSED in report §7, not landed.

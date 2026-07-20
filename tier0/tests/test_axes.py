@@ -90,6 +90,20 @@ def test_a7_self_referential_sanity(baseline):
     assert baseline["raw"]["A7_setup_tax"] < 6
 
 
+def test_a6_v2_uptime_component_and_anchor():
+    """A6 instrument v2 (R18): application uptime credits the axis
+    ADDITIVELY (the baseline applies nothing, so its uptime is 0 and a
+    ratio anchor would divide by it). Anchor: identical raws score 3.0;
+    50% uptime over baseline adds exactly 3.0 * 0.2 * 0.5 = 0.3."""
+    assert axes.A6_INSTRUMENT_VERSION == 2
+    base = {ax: 2.0 for ax in axes.AXES}
+    base.update(A6_aoe=10.0, A6_debuff=2.0, A6_app=0.0)
+    assert axes.normalize(dict(base), base)["A6_utility"] == pytest.approx(3.0)
+    lifted = dict(base, A6_app=0.5)
+    assert (axes.normalize(lifted, base)["A6_utility"]
+            == pytest.approx(3.3))
+
+
 def test_heuristic_flag_logic():
     flat = {ax: 3.0 for ax in axes.AXES}
     assert any("FLAT" in f for f in axes.heuristic_flags(flat))

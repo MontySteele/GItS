@@ -64,12 +64,19 @@ CELESTIAL_GIFT_BLOCK = 4          # Nicole: block at start of turn
 CATALYTIC_BURST_PER_REACTION = 5  # Catalytic Conversion bonus burst/reaction
 
 # --- Furina: Spotlight (kickoff §3) ---
-SPOTLIGHT_MULT = 1.5          # baseline: +50% printed numbers on the
-                              # Spotlighted character's cards. R16
-                              # (2026-07-20): the empowerment moves into
-                              # her cards at pass 2 -- this passive
-                              # baseline gets swept over {1.0, 1.25}
-                              # there, not guessed.
+SPOTLIGHT_BASE_MULT = 1.0     # MEASURED (E1 sweep, pass 2, 2026-07-20):
+                              # the relic's residual passive on
+                              # companion cards -- renamed from
+                              # SPOTLIGHT_MULT (was 1.5) when R16 moved
+                              # the empowerment into her cards
+                              # (spotlight_mult_bonus powers). The
+                              # {1.0, 1.25} sweep was cell-for-cell
+                              # IDENTICAL: at committed-median the depth
+                              # contest self-Spotlights, so this knob
+                              # never fires there; 1.0 makes her cards
+                              # the ONLY companion empowerment at the
+                              # drafted ceiling too. Pass-1 numbers were
+                              # taken at 1.5 -- never compare unlabeled.
 SPOTLIGHT_SELF_MULT = 1.25    # RATIFIED (R17, 2026-07-20) -- a measured
                               # design constant, no longer a placeholder:
                               # the sweep proved the reduced rate IS the

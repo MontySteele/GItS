@@ -81,9 +81,12 @@ def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
 
 
 def spotlight_mult(state: CombatState, card: Card) -> float:
-    """Spotlight empowerment (kickoff §3.2): flat +50% on the designated
-    character's printed numbers; reduced rate on the player's own
-    character (the anti-self-buff lever, legible on card text).
+    """Spotlight empowerment, card-mediated (R16, pass 2): the BASE rate
+    is the relic's residual passive (reduced self rate stays the
+    anti-self-buff lever); the real power arrives as spotlight_mult_bonus
+    stacks that HER cards grant (percentage points, combat- or
+    turn-scoped). Delete her cards and the bonus goes with them -- the
+    delete-test passes by construction.
 
     §2.2a extension, ENGINE-ENFORCED: this helper is plumbed into damage,
     Block, and (when the DSL grows one) element-application counts -- and
@@ -95,9 +98,11 @@ def spotlight_mult(state: CombatState, card: Card) -> float:
     cap = C.SPOTLIGHT_CARDS_PER_TURN_CAP     # schematized, OFF by default
     if cap is not None and state.spotlighted_cards_this_turn > cap:
         return 1.0
-    if card.character == p.character_id:
-        return C.SPOTLIGHT_SELF_MULT
-    return C.SPOTLIGHT_MULT
+    base = (C.SPOTLIGHT_SELF_MULT if card.character == p.character_id
+            else C.SPOTLIGHT_BASE_MULT)
+    bonus = (p.powers.get("spotlight_mult_bonus", 0)
+             + p.powers.get("spotlight_mult_bonus_turn", 0))
+    return base + bonus / 100.0
 
 
 def _spotlight_scale(state: CombatState, card: Card, amount: int) -> int:
@@ -229,8 +234,10 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     base = _spotlight_scale(state, card, base)
     # Star of the Show: flat rider on Spotlighted cards' damage. Card-level
     # texture (kickoff §3.2 ratified design space), NOT the baseline knob.
+    # Pass 2 adds the this-turn variant (stage_lights) on the same pipe.
     if state.player.spotlight and card.character == state.player.spotlight:
-        base += state.player.powers.get("spotlight_flat_damage", 0)
+        base += (state.player.powers.get("spotlight_flat_damage", 0)
+                 + state.player.powers.get("spotlight_flat_damage_turn", 0))
     if card.type == "attack":
         base += state.current_attack_bonus
     # tag_damage_<tag> powers (Accuracy-like -> shiv) add per-hit.

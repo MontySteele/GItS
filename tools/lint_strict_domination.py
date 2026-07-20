@@ -49,8 +49,8 @@ KNOWN = {
     # Queued errata (worknote item 1): cant_catch_me {block: -2}, lands
     # AFTER the R10 Crackle measurement window. Drop this entry then.
     frozenset({"cant_catch_me", "warm_glow"}),
-    # Resolves at Furina pass 2 with the R16 re-costing. Drop then.
-    frozenset({"pit_orchestra", "macaron_break"}),
+    # (pit_orchestra/macaron_break was here; FIXED at Furina pass 2 —
+    # Encore rider trimmed to 1. The lint now guards the fix.)
 }
 
 # Lint-discovered dominations with NO ruling yet (DECISIONS 76). They do

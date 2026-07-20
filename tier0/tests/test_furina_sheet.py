@@ -291,8 +291,62 @@ def test_star_of_the_show_flat_rider_on_spotlighted_damage():
     p.powers["spotlight_flat_damage"] = 3
     hp0 = st.enemies[0].hp
     effects.resolve_card(st, loader.get_card("chevreuse_interdiction_fire"))
-    # 5 printed -> x1.5 spotlight = 7 -> +3 flat = 10
-    assert st.enemies[0].hp == hp0 - 10
+    # R16 world: 5 printed -> x BASE_MULT -> +3 flat.
+    expect = int(5 * C.SPOTLIGHT_BASE_MULT) + 3
+    assert st.enemies[0].hp == hp0 - expect
+
+
+# --- R16 card-mediated boosting (pass 2) ---
+
+def test_card_mediated_boosts_stack_through_the_pipe():
+    """R16: her cards grant the multiplier. top_billing stacks to +50%
+    and no further; limelight's turn window closes at end of turn."""
+    from tier0.engine import powers
+    st = furina_state()
+    p = st.player
+    p.spotlight = "chevreuse"
+    for _ in range(3):                       # third copy hits the ceiling
+        effects.resolve_card(st, loader.get_card("top_billing"))
+    assert p.powers["spotlight_mult_bonus"] == 50
+    card = loader.get_card("chevreuse_interdiction_fire")
+    assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT + 0.5
+    effects.resolve_card(st, loader.get_card("limelight"))
+    assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT + 0.75
+    powers.on_turn_end(st, p)                # the window closes
+    assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT + 0.5
+    assert "spotlight_mult_bonus_turn" not in p.powers
+
+
+def test_delete_test_passes_by_construction():
+    """R16.4: with no Furina boost cards played, a companion card sees
+    only the residual base rate -- remove her cards and the empowerment
+    leaves with them."""
+    st = furina_state()
+    st.player.spotlight = "chevreuse"
+    card = loader.get_card("chevreuse_interdiction_fire")
+    assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT
+
+
+def test_star_of_the_show_errata_grants_printed_three():
+    """Pass-2 errata: max_stacks is in POWER UNITS -- the pass-1 row
+    (max_stacks 1) silently shipped +1. Printed +3 applies once and
+    never re-stacks."""
+    st = furina_state()
+    effects.resolve_card(st, loader.get_card("star_of_the_show"))
+    assert st.player.powers["spotlight_flat_damage"] == 3
+    effects.resolve_card(st, loader.get_card("star_of_the_show"))
+    assert st.player.powers["spotlight_flat_damage"] == 3
+
+
+def test_upgraded_power_amount_lifts_its_own_stack_cap():
+    """The applier bumps max_stacks alongside amount when they are equal
+    (single-application encoding) -- an upgraded Star of the Show must
+    actually grant +4, not silently cap at the old 3."""
+    from tier0.content import upgrades
+    st = furina_state()
+    effects.resolve_card(st, upgrades.apply_upgrade(
+        loader.get_card("star_of_the_show")))
+    assert st.player.powers["spotlight_flat_damage"] == 4
 
 
 # --- selector aiming v2 (the depth contest; DECISIONS-bound in report) ---

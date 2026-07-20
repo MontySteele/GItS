@@ -31,13 +31,14 @@ archetype_decks:
 # spotlight/fanfare deliberately held until the R16 world lands).
 # A2 deck bands RATIFIED by R19 (2026-07-20) under the lag-not-growth
 # reading (curve exponents 0.07-0.28: the ratio instrument inflates
-# A1-dreadful engines; Klee deck-band precedent). spotlight_weighted's
-# band is HELD -- banding a known-broken archetype would freeze the
-# wrong world; it gets banded at pass 2 under R16.
+# A1-dreadful engines; Klee deck-band precedent). spotlight_weighted
+# BANDED AT PASS 2 per R19's schedule, in the R16 world: measured 4.0
+# at 1000 fights + the 0.3 margin convention. Red-pen may adjust.
 deck_bands:
   A2_scaling:
     salon_weighted: 7.6
     fanfare_weighted: 4.2
+    spotlight_weighted: 4.3
 starting_deck:
   - soloists_solicitation
   - soloists_solicitation
@@ -83,18 +84,19 @@ packages:
     - lynette_box_trick
     - an_invitation
     - guest_list
-    - warm_reception
-    - props_department
+    - limelight
+    - stage_lights
     - shared_billing
+    - top_billing
     - leading_role
     - standing_ovation
     - directors_cut
     - encore_performance
     - undercurrent
-    # draft-ins:
+    # draft-ins (R16 re-author: a human takes the scaling engine first —
+    # top_billing displaced courtroom_drama):
     - graceful_retreat
     - commanding_gaze
-    - courtroom_drama
   fanfare_weighted:
     - curtain_up
     - curtain_up

@@ -227,6 +227,18 @@ def _spotlight_value(state: CombatState, card: Card) -> float:
             # Aiming an empty stage is the whole archetype; re-aiming is
             # nearly free but rarely urgent.
             val += 4.0 if p.spotlight is None else 0.3
+        elif (fx["op"] == "apply_power"
+              and fx.get("power") in ("spotlight_mult_bonus",
+                                      "spotlight_mult_bonus_turn",
+                                      "spotlight_flat_damage_turn")):
+            # R16 card-mediated boosts: worth playing when a stage exists
+            # (combat-scoped stacks compound; turn windows want same-turn
+            # Spotlighted plays, which the depth contest makes likely).
+            if p.spotlight is not None:
+                val += (3.0 if fx["power"] == "spotlight_mult_bonus"
+                        else 1.5)
+            else:
+                val += 0.3                       # not dead, just early
         elif fx["op"] == "generate_guest_star":
             val += 2.5 * fx.get("amount", 1)     # a card in hand, roughly
         elif fx["op"] == "copy_spotlighted_in_hand":

@@ -110,8 +110,12 @@ SCREENS = 10
 RUNS = 400
 EP_CARDS = ["encore_performance"]
 GS_CARDS = ["an_invitation", "guest_list"]
-FILLER_PRIORITY = ("graceful_retreat", "warm_reception", "shared_billing",
-                   "props_department", "swelling_overture")
+# ARCHIVE NOTE (pass 2): the R16 re-author replaced warm_reception /
+# props_department (limelight / stage_lights). The pass-1 REPORT is this
+# experiment's archive; a re-run measures the CURRENT sheet, not pass 1.
+# Fillers updated to existing ids so the script still executes.
+FILLER_PRIORITY = ("graceful_retreat", "limelight", "shared_billing",
+                   "stage_lights", "swelling_overture")
 
 
 def _draft_committed(rng: random.Random) -> list[str]:

@@ -218,7 +218,11 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
                    by_companion=enemy.frozen_by_companion)
     state.emit("intent", enemy=enemy.name, kind=kind,
                debuffed=bool(enemy.powers.get("weak", 0)
-                             or enemy.powers.get("vulnerable", 0)))
+                             or enemy.powers.get("vulnerable", 0)),
+               # A6 v2 (R18): application uptime = intents taken while
+               # carrying an elemental aura. ref_ironclad applies
+               # nothing, so the baseline's uptime is 0 by construction.
+               aura=enemy.aura is not None)
 
     if kind == "attack":
         amount = intent["amount"] + intent.get("ramp", 0) * max(

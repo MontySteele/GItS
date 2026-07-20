@@ -31,6 +31,8 @@ class FightStats:
                                     # §2 harness note, BINDING: never A3)
     debuff_stacks_applied: int      # A6: weak+vuln stacks put on enemies
     debuffed_intents: int           # enemy intents taken while weak/vuln
+    aura_intents: int               # A6 v2 (R18): intents taken while
+                                    # the actor carried an elemental aura
     total_intents: int
     reactions: int
     reaction_damage: int
@@ -72,6 +74,7 @@ def merge_stages(stages: list["FightStats"]) -> "FightStats":
         merged.encore_absorbed += s.encore_absorbed
         merged.debuff_stacks_applied += s.debuff_stacks_applied
         merged.debuffed_intents += s.debuffed_intents
+        merged.aura_intents += s.aura_intents
         merged.total_intents += s.total_intents
         merged.reactions += s.reactions
         merged.reaction_damage += s.reaction_damage
@@ -90,7 +93,8 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
     energy_by_turn: dict[int, int] = {}
     total_dmg = block = blocked = energy = 0
     extra_draws = extra_energy = healing = encore_absorbed = debuff_stacks = 0
-    debuffed_intents = total_intents = cards_played = regrets = 0
+    debuffed_intents = aura_intents = total_intents = cards_played = 0
+    regrets = 0
     reactions = reaction_dmg = auras_wasted = sleeps = 0
     control_negated = 0.0
     flags: list[str] = []
@@ -132,6 +136,8 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
             total_intents += 1
             if ev["debuffed"]:
                 debuffed_intents += 1
+            if ev.get("aura"):          # A6 v2 (R18) application uptime
+                aura_intents += 1
         elif e == "enemy_sleep":
             sleeps += 1             # scripted self-sleep: an action, but
                                     # never companion-sourced negation
@@ -174,7 +180,8 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
         cards_drawn_extra=extra_draws, energy_generated_extra=extra_energy,
         healing=healing, encore_absorbed=encore_absorbed,
         debuff_stacks_applied=debuff_stacks,
-        debuffed_intents=debuffed_intents, total_intents=total_intents,
+        debuffed_intents=debuffed_intents, aura_intents=aura_intents,
+        total_intents=total_intents,
         reactions=reactions,
         reaction_damage=reaction_dmg, auras_wasted=auras_wasted,
         cards_played=cards_played, regrets=regrets,

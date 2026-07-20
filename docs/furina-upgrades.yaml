@@ -32,10 +32,10 @@ warmup_act:            {damage: +2}          # 3->5
 audience_participation: {encore: +1}         # 2->3
 ebb_and_flow:          {encore: +1}          # gain 3->4; the Spend 1 stays (net flux grows)
 an_invitation:         {generate_cost_override: 0}   # kickoff §9 upgrade grammar VERBATIM: the guest costs 0
-warm_reception:        {draw: +1}            # both branches: 2->3 / 1->2
-shared_billing:        {block: +2}           # 4->6
+limelight:             {draw: +1}            # 1->2; the boost stays 25 (R16: the mult is authored, not upgraded)
+shared_billing:        {block: +2}           # 4->6; the boost stays 25
 blocking_notes:        {block: +2}           # 5->7
-props_department:      {draw: +1}            # both branches
+stage_lights:          {power_amount: +1}    # flat rider +2->+3 this turn; block stays 3
 curtain_cue:           {encore: +1}          # both branches: 3->4 / 1->2
 graceful_retreat:      {block: +3}           # 6->9
 poised_riposte:        {damage: +3}          # 6->9
@@ -64,7 +64,7 @@ leading_role:          {cost: -1}            # 1->0 (endless_fireworks engine-po
 supporting_cast:       {power_amount: +1}    # first Spotlighted card draws 1->2
 guest_list:            {generate_cost_override: 0}   # Discovery parity
 directors_cut:         {draw: +1}            # both branches: 2->3 / 1->2
-constant_star:         {encore: +1}          # commitment rider 4->5
+top_billing:           {cost: -1}            # 1->0 (mined power-cost line); the boost and its two-copy ceiling stay
 duet:                  {draw: +1}            # 1->2
 standing_ovation:      {power_amount: +1}    # 2->3 Encore per Spotlighted card, cap 2 unchanged
 fortissimo_guard:      {block: +3}           # 11->14
