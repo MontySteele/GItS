@@ -155,6 +155,34 @@ foreach ($f in Get-ChildItem $SourceDir -Recurse -Filter *.cs) {
 }
 
 # ---------------------------------------------------------------------------
+# S6. Hand-written cards match the ratified sheets.
+#
+# Generated cards match by construction (R24); hand-written cards have no
+# bridge, which is the drift class that shipped cant_catch_me at +3 against a
+# ratified +2. tools/lint_handwritten_parity.py extracts each hand-written
+# card's idioms (vars, cost, hit counts, upgrade calls) and compares against
+# klee-cards.yaml + klee-upgrades.yaml. A missing interpreter is a FINDING,
+# not a skip -- a gate that silently steps aside is not a gate.
+# ---------------------------------------------------------------------------
+$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$venvPython = Join-Path $repoRoot '.venv\Scripts\python.exe'
+$parityLint = Join-Path $repoRoot 'tools\lint_handwritten_parity.py'
+if (-not (Test-Path $venvPython)) {
+    Fail 'S6' "repo venv python not found at $venvPython; cannot run hand-written parity lint."
+} elseif (-not (Test-Path $parityLint)) {
+    Fail 'S6' "tools/lint_handwritten_parity.py is missing."
+} else {
+    # No 2>&1: under ErrorActionPreference Stop, PS 5.1 turns redirected
+    # native stderr into a terminating NativeCommandError. The lint reports
+    # findings on stdout; a crash's traceback shows on the console and the
+    # exit code still lands here.
+    $parityOut = & $venvPython $parityLint
+    if ($LASTEXITCODE -ne 0) {
+        Fail 'S6' "hand-written parity lint failed:`n    $($parityOut -join "`n    ")"
+    }
+}
+
+# ---------------------------------------------------------------------------
 # Report
 # ---------------------------------------------------------------------------
 if ($findings.Count -eq 0) {
