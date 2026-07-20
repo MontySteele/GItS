@@ -1,5 +1,17 @@
 # Tier 0.5 M6 — Report (adaptive policy, divergence, relevance, achievability)
 
+> **ARCHIVED (CONSTANTS_VERSION 1).** All four asks below were ruled in
+> docs/morning-triage-rulings.md, and every number in this report predates
+> three changes that move it: companion archetype tagging (commit f885ea3),
+> v1.9 Burst-as-kit, and the CONSTANTS_VERSION 2 skip-threshold retune.
+> The current grid lives in **tier05-m7-report.md**. This document stays
+> unedited below this banner as the archived v1 snapshot — do not compare
+> its numbers against v2 numbers without saying so. Resolution map:
+> finding 1 numbers → superseded by tagging fix (reaction was never
+> nearly-starved); finding 2 → ruled strict ≥35% floor, clears; finding 3
+> → skip threshold retuned + hybrid discriminator run; finding 4 → spark
+> decomposed, reaction resolved by v1.9.
+
 **Date:** 2026-07-20. **Input:** tier05-draft-sim-spec.md §§4–6, overnight queue.
 145 tests green. All numbers at **1000 runs per policy per archetype** (the spec's
 threshold for reading divergence alarms), seed 1, post-compensator.
