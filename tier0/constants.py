@@ -87,6 +87,12 @@ RUN_NODE_TEMPLATE = "NNNENRNNENRNB"
 BURST_CHECK_NODE = 6              # this mid N is swapped to burst_check
 REST_HEAL_FRACTION = 0.30         # rest option A: heal 30% of max HP
 REST_HEAL_THRESHOLD = 0.65        # rest policy: heal below this HP
+# M7: below DANGER always heal; between DANGER and HEAL_THRESHOLD an
+# on-plan smith outranks the heal (the classic rest-vs-smith call). At
+# 0.65 the heal branch swallowed every rest of a bruised run and the
+# third option was dead by construction -- measured: 0 upgrades in 30
+# demolition runs.
+REST_SMITH_DANGER = 0.40
                                   # fraction, otherwise remove a card
 PUNISHER_LITE_SCALE = 0.70        # normal-pool punisher at 70% statline
 ATTRITION_LITE_HP = 45            # normal-pool attrition: ONE 45 HP unit
@@ -119,11 +125,23 @@ NATION_WEIGHTS = {"mondstadt": 1.0}   # §4.1 mechanism; single-nation v0.1
 BANNER_FEATURED_SLOTS = 3
 
 # --- Tier 0.5 assigned draft policy (spec §4) ---
+# CONSTANTS_VERSION 2 (morning-triage ruling 3.1). v1 measurements (M5/M6
+# reports) were taken at DRAFT_SKIP_THRESHOLD = 1.0 and stay in those
+# documents as the archived snapshot; every currently-load-bearing
+# comparison is re-run under v2 in the M7 report. Do not compare a v1
+# number against a v2 number without saying so.
+CONSTANTS_VERSION = 2
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
-DRAFT_SKIP_THRESHOLD = 1.0        # skip the reward if best offer scores less
+# Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).
+# 1.0 was pessimal: it starved assigned mode of ~4 cards of deck volume vs
+# adaptive, and most of the "assigned loses by 14.5" finding was that
+# missing volume, not drafting skill. 0.5 matches deck sizes (~18.3 both)
+# and is measurement-identical to 0.0, so it is not knife-edge -- while
+# keeping skip a real pick for negative-scoring screens.
+DRAFT_SKIP_THRESHOLD = 0.5
 DRAFT_CORE_SIZE = 4               # generic archetype core (reaction has its
-                                  # own rule: 2 appliers + amp payoff + Burst)
+                                  # own rule, v1.9: 2 appliers + amp payoff)
 
 # --- Tier 0.5 M6: adaptive policy + divergence (spec §4-§5) ---
 ADAPTIVE_COMMIT_THRESHOLD = 0.40  # share of tagged cards before a deck counts

@@ -21,8 +21,8 @@ def _amount(state: CombatState, val) -> int:
         return val
     if val == "X":
         return state.current_x
-    if val == "X_plus_1":
-        return state.current_x + 1
+    if isinstance(val, str) and val.startswith("X_plus_"):
+        return state.current_x + int(val[len("X_plus_"):])
     raise ValueError(f"unknown amount formula {val!r}")
 
 
@@ -408,6 +408,8 @@ def _op_copy_companion_in_hand(state: CombatState, fx: dict, card: Card) -> None
         return
     for _ in range(fx.get("amount", 1)):
         chosen = _copy.deepcopy(state.rng.choice(comps))
+        if "cost_override" in fx:            # Borrowed Brilliance upgrade
+            chosen.cost = fx["cost_override"]
         _add_token(state, chosen, "hand")
 
 

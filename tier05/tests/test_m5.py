@@ -7,7 +7,7 @@ import random
 import pytest
 
 from tier0 import constants as C
-from tier0.content import loader
+from tier0.content import loader, upgrades
 from tier05 import draft, model, rewards
 from tier05.run_metrics import summarize_runs
 
@@ -62,11 +62,21 @@ def test_lite_encounters_are_derived_not_tuned():
     assert seen["swarmling"].hp == 14           # frozen battery, untouched
 
 
-def test_rest_policy_heals_when_hurt_else_removes():
+def test_rest_policy_heals_when_hurt_else_upgrades_then_removes():
     deck = loader.starting_deck("klee")
     action, _ = model.rest_action(deck, hp=20, max_hp=62)
-    assert action == "heal"
-    action, removed = model.rest_action(deck, hp=60, max_hp=62)
+    assert action == "heal"                     # hurt always heals first
+    # M7: healthy rests smith an on-plan card before thinning.
+    action, target = model.rest_action(deck, hp=60, max_hp=62,
+                                       archetype="demolition")
+    assert action == "upgrade"
+    assert "demolition" in loader.get_card(target).archetypes
+    # With every on-plan card already upgraded, the old removal preference
+    # returns: basic attacks first.
+    upgraded = [cid + "+" if upgrades.has_upgrade(cid) else cid
+                for cid in deck]
+    action, removed = model.rest_action(upgraded, hp=60, max_hp=62,
+                                        archetype="demolition")
     assert action == "remove"
     assert loader.get_card(removed).rarity == "basic"
     assert not any(fx.get("op") == "block"

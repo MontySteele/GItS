@@ -13,6 +13,7 @@ from pathlib import Path
 import yaml
 
 from tier0 import constants as C
+from tier0.content import upgrades
 from tier0.engine.state import Card, Enemy, Player
 
 CONTENT_DIR = Path(__file__).parent
@@ -112,6 +113,10 @@ def cards_in_pool(pool: str) -> list[Card]:
 
 
 def get_card(card_id: str) -> Card:
+    """`<id>+` returns the upgraded form (M7) -- deck lists stay strings."""
+    if card_id.endswith(upgrades.SUFFIX):
+        base = copy.deepcopy(_card_index()[card_id[:-len(upgrades.SUFFIX)]])
+        return upgrades.apply_upgrade(base)
     return copy.deepcopy(_card_index()[card_id])
 
 

@@ -280,6 +280,37 @@ def adaptive_policy(rng: random.Random, deck: list[Card],
     return best
 
 
+def hybrid_policy(rng: random.Random, deck: list[Card],
+                  offers: list[Card], archetype: str) -> Optional[Card]:
+    """The discriminating experiment for the assigned-vs-adaptive gap
+    (morning-triage ruling, finding 3.2).
+
+    Assigned's archetype scorer plus the ONE term adaptive has that
+    assigned lacks: raw printed power (assigned only consults it for the
+    generic anchor). Adaptive's share-weighted synergy term is deliberately
+    NOT blended in -- assigned already prices archetype fit off its target,
+    and stacking share-synergy on top would double-count the same signal.
+
+    Reading: if hybrid closes most of the 14.5-point winrate gap,
+    explanation 2 (hand-set weights ignore power) wins and the fix is a
+    tuning pass. If the gap persists, explanation 3 (the sim truncates
+    payoff scaling) is confirmed by elimination -- finding 1 already shows
+    the archetypes pull when power-drafted. Compare at matched deck size:
+    a gap that tracks deck size is tempo, not scaling.
+    """
+    if not offers:
+        return None
+    scored = sorted(((score_offer(c, deck, archetype)
+                      + min(3.0, _static_power(c) / 3.0), i, c)
+                     for i, c in enumerate(offers)), reverse=True)
+    best_score, _, best = scored[0]
+    if best_score < C.DRAFT_SKIP_THRESHOLD:
+        return None
+    return best
+
+
+# The A/B pair. hybrid_policy is a diagnostic run on demand (see its
+# docstring), not a third arm of the standing A/B.
 POLICIES = {"assigned": assigned_policy, "adaptive": adaptive_policy}
 
 

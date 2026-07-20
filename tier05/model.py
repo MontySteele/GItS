@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from typing import Callable, Optional
 
 from tier0 import constants as C
-from tier0.content import loader
+from tier0.content import loader, upgrades
 from tier0.engine.combat import run_fight
 from tier0.engine.state import Card, Enemy
 from tier0.harness import metrics as t0_metrics
@@ -87,13 +87,32 @@ def build_node_encounter(node_kind: str, rng: random.Random) -> list[Enemy]:
     return _apply_compensator(out, "normal")
 
 
-def rest_action(deck_ids: list[str], hp: int, max_hp: int) -> tuple[str, Optional[str]]:
-    """Rest policy (spec §2): heal 30% max HP OR remove 1 card. Heal when
-    hurt below the threshold; otherwise thin a basic. Removal preference:
-    basic attacks first — basic block only if the defense quota survives."""
-    if hp < C.REST_HEAL_THRESHOLD * max_hp:
+def rest_action(deck_ids: list[str], hp: int, max_hp: int,
+                archetype: str = "generic") -> tuple[str, Optional[str]]:
+    """Rest policy (spec §2 as amended by M7): heal 30% max HP OR remove 1
+    card OR upgrade 1 card (rest-site smithing). Heal when hurt below the
+    threshold. Then upgrade an ON-PLAN card -- payoffs before enablers,
+    because upgrades are where payoffs traditionally sharpen and that
+    late-game scaling is exactly what the pre-M7 sim truncated. Then thin
+    a basic (attacks first; basic block only if the defense quota
+    survives), then upgrade anything upgradable, then heal.
+
+    Two HP lines, deliberately: below REST_SMITH_DANGER the heal always
+    wins; between DANGER and HEAL_THRESHOLD an on-plan smith outranks it
+    (the classic rest-vs-smith call). With one line at 0.65 the heal
+    swallowed every rest of a bruised run and the third option never
+    fired at all."""
+    if hp < C.REST_SMITH_DANGER * max_hp:
         return "heal", None
     deck = [loader.get_card(cid) for cid in deck_ids]
+    upgradable = [c for c in deck if upgrades.has_upgrade(c.id)]
+    on_plan = [c for c in upgradable if archetype in c.archetypes]
+    if on_plan:
+        best = max(on_plan, key=lambda c: (c.role == "payoff",
+                                           c.role == "enabler"))
+        return "upgrade", best.id
+    if hp < C.REST_HEAL_THRESHOLD * max_hp:
+        return "heal", None
     basics = [c for c in deck if c.rarity == "basic"]
     atk = [c for c in basics if not any(fx.get("op") == "block"
                                        for fx in c.effects)]
@@ -105,6 +124,8 @@ def rest_action(deck_ids: list[str], hp: int, max_hp: int) -> tuple[str, Optiona
                       if any(fx.get("op") == "block" for fx in c.effects))
         if (n_block - 1) / max(1, len(deck) - 1) >= C.DRAFT_BLOCK_DENSITY_MIN:
             return "remove", blockers[0].id
+    if upgradable:
+        return "upgrade", upgradable[0].id
     return "heal", None
 
 
@@ -158,12 +179,14 @@ def run_one(character: str, archetype: str, pilot_id: str,
     fights = 0
     for i, kind in enumerate(nodes):
         if kind == "R":
-            action, removed = rest_action(deck_ids, hp, max_hp)
+            action, target = rest_action(deck_ids, hp, max_hp, archetype)
             if action == "heal":
                 hp = min(max_hp, hp + round(C.REST_HEAL_FRACTION * max_hp))
-            else:
-                deck_ids.remove(removed)
-            res.rests.append((i, action, removed))
+            elif action == "remove":
+                deck_ids.remove(target)
+            else:                               # M7: rest-site smithing
+                deck_ids[deck_ids.index(target)] = target + upgrades.SUFFIX
+            res.rests.append((i, action, target))
             res.hp_by_node.append(hp)
             continue
         enemies = build_node_encounter(kind, rng)
