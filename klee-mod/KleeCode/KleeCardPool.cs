@@ -1,5 +1,6 @@
 using Godot;
 using KleeMod.Cards;
+using KleeMod.Cards.Generated;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.CardPools;
 
@@ -32,10 +33,31 @@ public sealed class KleeCardPool : CardPoolModel
     {
         return new CardModel[]
         {
+            // Starters (hand-written).
             ModelDb.Card<Kaboom>(),
             ModelDb.Card<DuckAndCover>(),
             ModelDb.Card<JumpyDumpty>(),
             ModelDb.Card<Pop>(),
+
+            // Generated from docs/klee-cards.yaml by tools/gen_klee_cards.py.
+            // This is the mechanical subset only -- damage/block/draw. Cards
+            // needing bombs, sparks, burst energy or conditionals are blocked
+            // in Generated/manifest.json until those systems land.
+            //
+            // These carry the pool's rarity coverage: reward and transform
+            // generation draws Common/Uncommon/Rare, and a pool with none of
+            // those soft locks the reward screen after every combat (finding 17).
+            ModelDb.Card<AlchemicalCuriosity>(),
+            ModelDb.Card<BigBaddaBoom>(),
+            ModelDb.Card<BlastRadius>(),
+            ModelDb.Card<Crackle>(),
+            ModelDb.Card<FlameOnTheWick>(),
+            ModelDb.Card<HideAndSeek>(),
+            ModelDb.Card<NoHoldingBack>(),
+            ModelDb.Card<PocketFireworks>(),
+            ModelDb.Card<RapidFire>(),
+            ModelDb.Card<RunAway>(),
+            ModelDb.Card<SpiritedAway>(),
         };
     }
 }
