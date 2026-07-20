@@ -138,7 +138,7 @@
    effects: [{op: apply_power, power: vulnerable, amount: 2, target: enemy}]}
 
 # ---------- RARE (15) ----------
-- {id: sparks_n_splash, name: "Sparks 'n' Splash", cost: 3, type: power, rarity: rare, solve: [scaling], archetypes: [generic], role: payoff, tags: [burst],
+- {id: sparks_n_splash, name: "Sparks 'n' Splash", cost: 3, type: power, rarity: rare, solve: [scaling], archetypes: [generic], role: payoff, tags: [burst], kit_card: true,  # v0.5: NOT in draftable pool; granted to hand when Burst meter first fills (innate-on-charge)
    requires: burst_energy_full,
    effects: [{op: apply_power, power: sparks_n_splash, amount: 3, target: self, note: "3 turns: end of turn, 4 sparks x 5 dmg to random enemies, each applies pyro"}]}
 - {id: blazing_delight, name: "Blazing Delight", cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [demolition], role: payoff,

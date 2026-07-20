@@ -104,7 +104,8 @@ def cards_in_pool(pool: str) -> list[Card]:
     archetype, _, rarity = pool.rpartition("_")
     rarity = rarity.rstrip("s")                      # commons -> common
     cards = [c for c in _card_index().values()
-             if rarity == c.rarity and archetype in c.archetypes]
+             if rarity == c.rarity and archetype in c.archetypes
+             and not c.kit_card]              # kit is never draftable (v1.9)
     if not cards:
         raise ValueError(f"empty card pool {pool!r}")
     return cards
@@ -119,6 +120,23 @@ def _character_index() -> dict[str, dict]:
     return {d["id"]: d for d in _load_yaml_dir("characters")}
 
 
+def _kit_cards(spec: dict) -> list[Card]:
+    """v1.9: the character's kit Bursts, attached to the Player rather than
+    shuffled into any deck. The character yaml names them (`kit:`) and the
+    card sheet marks them (`kit_card: true`); requiring both to agree is the
+    cross-check -- a card in a kit list that the sheet does not mark would
+    silently dodge the pool exclusion, so it is a loud error instead."""
+    kit = []
+    for cid in spec.get("kit", []):
+        card = get_card(cid)
+        if not card.kit_card:
+            raise ValueError(
+                f"{spec['id']}: kit lists {cid!r} but the sheet does not "
+                f"mark it kit_card")
+        kit.append(card)
+    return kit
+
+
 def build_player(character_id: str, deck: str = "starter") -> Player:
     """deck: 'starter' or the name of a package list in the character yaml
     (e.g. 'archetype_package') appended to the starter deck."""
@@ -131,7 +149,8 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
                   element=spec.get("element", "none"),
                   cadence=spec.get("cadence", "skill"),
                   burst_max=spec.get("burst_max", 0),
-                  relic_hooks=list(spec.get("relic_hooks", [])))
+                  relic_hooks=list(spec.get("relic_hooks", [])),
+                  kit_cards=_kit_cards(spec))
 
 
 def build_player_from_ids(character_id: str, card_ids: list[str]) -> Player:
@@ -142,7 +161,8 @@ def build_player_from_ids(character_id: str, card_ids: list[str]) -> Player:
                   element=spec.get("element", "none"),
                   cadence=spec.get("cadence", "skill"),
                   burst_max=spec.get("burst_max", 0),
-                  relic_hooks=list(spec.get("relic_hooks", [])))
+                  relic_hooks=list(spec.get("relic_hooks", [])),
+                  kit_cards=_kit_cards(spec))
 
 
 def starting_deck(character_id: str) -> list[str]:

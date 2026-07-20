@@ -31,34 +31,40 @@ def test_n_per_detonation_formula():
     assert dmg["base"] == 10 + 2 * 5
 
 
-def test_burst_retain_keeps_card_in_hand():
+def test_burst_arrives_by_grant_and_never_cycles():
+    # v1.9: the Burst is kit -- granted to hand when the meter fills (no
+    # card is seeded into the deck), retained across turns (v1.4), and
+    # returned to the kit on cast. It must never appear in ANY pile: not
+    # discarded (Retain), not exhausted (kit, not deck contents).
     pilot = make_pilot(loader.pilot_weights("reaction"))
-    player = loader.build_player("klee", "reaction_weighted")
-    player.draw_pile.insert(0, loader.get_card("sparks_n_splash"))
-    state = run_fight(player, loader.build_encounter("attrition"), pilot,
-                      seed=3)
-    drawn = any(e["event"] == "draw" and e["card"] == "sparks_n_splash"
-                for e in state.log)
-    discarded_burst = any(c.id == "sparks_n_splash"
-                          for c in state.player.discard_pile)
-    assert drawn and not discarded_burst    # retained or cast, never cycled
+    granted = 0
+    for seed in range(10):
+        player = loader.build_player("klee", "reaction_weighted")
+        state = run_fight(player, loader.build_encounter("attrition"), pilot,
+                          seed=seed)
+        if any(e["event"] == "kit_burst_granted" for e in state.log):
+            granted += 1
+        for pile in (state.player.discard_pile, state.player.exhaust_pile,
+                     state.player.draw_pile):
+            assert not any(c.id == "sparks_n_splash" for c in pile)
+    assert granted > 0
 
 
 def test_burst_cast_rate_with_retain():
     # Ruling 5 acceptance: cast in the majority of fights that reach a
-    # full meter (was ~never before Retain).
+    # full meter (was ~never before Retain). v1.9 makes the reach-full
+    # condition observable as the grant event.
     pilot = make_pilot(loader.pilot_weights("reaction"))
     full, cast = 0, 0
     for seed in range(30):
         player = loader.build_player("klee", "reaction_weighted")
-        player.draw_pile.append(loader.get_card("sparks_n_splash"))
         state = run_fight(player, loader.build_encounter("attrition"), pilot,
                           seed=seed)
         events = [e["event"] for e in state.log]
         if "burst_cast" in events:
             full += 1
             cast += 1
-        elif state.player.burst_energy >= state.player.burst_max:
+        elif "kit_burst_granted" in events:
             full += 1
     assert full > 0
     assert cast / full > 0.5

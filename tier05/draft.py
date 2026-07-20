@@ -4,7 +4,9 @@ Assigned mode: the run is seeded with a target archetype. Scoring terms:
 - archetype fit: enabler value DECAYS as the core completes; payoff value
   is GATED on the core being online (else you draft win-more blanks)
 - universal: defense quota (the real-draft principle codified), curve
-  awareness, deck-size penalty, Burst priority for reaction
+  awareness, deck-size penalty
+(The old Burst-priority term left with v1.9: the Burst is kit, never
+offered, so a scoring term for it in offers was dead code.)
 The adaptive policy (the goodstuff detector) lands in M6; the A/B harness
 is structural, so this module keeps policies behind one callable shape:
   policy(rng, deck_cards, offers, archetype) -> Card | None (None = skip)
@@ -44,14 +46,17 @@ def _is_amp_payoff(card: Card) -> bool:
 
 
 def core_complete(deck: list[Card], archetype: str) -> bool:
-    """Is the archetype 'online'? (spec §5: reaction core := 2 appliers +
-    1 amp payoff + Burst; other archetypes: DRAFT_CORE_SIZE on-plan
-    enabler/payoff cards.)"""
+    """Is the archetype 'online'? (spec §5 as amended by v1.9: reaction
+    core := 2 appliers + 1 amp payoff. The Burst left the assembly
+    definition when it became kit -- it arrives by charging the meter, not
+    by drafting, so requiring it in the DECK measured pool odds, not
+    assembly. That 10% 'ever saw the Burst' factor was the binding term in
+    reaction's 5.8% achievability. Other archetypes: DRAFT_CORE_SIZE
+    on-plan enabler/payoff cards.)"""
     if archetype == "reaction":
         appliers = sum(1 for c in deck if _is_applier(c))
         amps = sum(1 for c in deck if _is_amp_payoff(c))
-        burst = any("burst" in c.tags for c in deck)
-        return appliers >= 2 and amps >= 1 and burst
+        return appliers >= 2 and amps >= 1
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))
     return on_plan >= C.DRAFT_CORE_SIZE
@@ -61,8 +66,7 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
     if archetype == "reaction":
         appliers = min(2, sum(1 for c in deck if _is_applier(c)))
         amps = min(1, sum(1 for c in deck if _is_amp_payoff(c)))
-        burst = 1 if any("burst" in c.tags for c in deck) else 0
-        return (appliers + amps + burst) / 4
+        return (appliers + amps) / 3
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))
     return min(1.0, on_plan / C.DRAFT_CORE_SIZE)
@@ -118,8 +122,6 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
             s += 3.5 * max(0.25, 1.0 - progress) if _is_applier(card) else 1.5
         else:
             s += 0.5
-    if archetype == "reaction" and "burst" in card.tags:
-        s += 3.0                                     # Burst priority
     if _has_block(card) and _block_density(deck) < C.DRAFT_BLOCK_DENSITY_MIN:
         s += 2.5                                     # defense quota
     cost = card.cost if isinstance(card.cost, int) else 2
@@ -252,8 +254,6 @@ def adaptive_score(card: Card, deck: list[Card]) -> float:
         # Companions are off-plan power: always playable, never scaling.
         s += 1.5 if _is_applier(card) else 1.0
         s += 2.0 * shares["reaction"]      # they are reaction's enablers
-    if "burst" in card.tags:
-        s += 1.0 + 2.5 * shares["reaction"]
     if _has_block(card) and _block_density(deck) < C.DRAFT_BLOCK_DENSITY_MIN:
         s += 2.5                            # defense quota is universal
     cost = card.cost if isinstance(card.cost, int) else 2
@@ -303,9 +303,9 @@ def offer_advances_plan(offers: list[Card], deck: list[Card],
     use" untrue, and it counted a 7th demolition enabler handed to an
     already-online deck as advancing a plan that was already finished.
 
-    Only reaction behaved differently (14/214), because appliers and Burst move
-    its core without carrying an archetype tag -- which is why reaction was the
-    one archetype whose relevance moved with the policy.
+    Only reaction behaved differently (14/214), because appliers move its core
+    without carrying an archetype tag -- which is why reaction was the one
+    archetype whose relevance moved with the policy.
 
     The measured effect of tightening this is small and downward: it removes
     offers that were already complete-core no-ops. Relevance was NOT rescued by
@@ -313,6 +313,24 @@ def offer_advances_plan(offers: list[Card], deck: list[Card],
     """
     progress = _core_progress(deck, archetype)
     return any(_core_progress(deck + [c], archetype) > progress for c in offers)
+
+
+def offer_worth_engaging(offers: list[Card], deck: list[Card],
+                         archetype: str) -> bool:
+    """The LOOSE read, reported as a secondary and never enforced.
+
+    This is the two-clause definition that was removed from
+    offer_advances_plan for subsuming the strict one -- reintroduced here
+    deliberately, under the name that says what it measures. The morning
+    triage ruling revised the 60-70% claim rather than failing it: the
+    faith-era number conflated "advances the plan" (strict, now the
+    enforced >=35% floor) with "worth engaging with" (this: an on-plan
+    card is on offer, even if the plan no longer needs it). Expected
+    60-75%, unenforced."""
+    if offer_advances_plan(offers, deck, archetype):
+        return True
+    return any(archetype in c.archetypes and c.role in ("enabler", "payoff")
+               for c in offers)
 
 
 def draft_regret(rng: random.Random, decisions: list[dict],

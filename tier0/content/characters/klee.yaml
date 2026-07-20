@@ -8,6 +8,9 @@ hp: 62
 element: pyro
 cadence: catalyst        # every attack applies pyro
 burst_max: 60
+# v1.9: the Burst is kit, not loot -- granted to hand when the meter first
+# fills. The sheet's kit_card flag and this list must agree (loader checks).
+kit: [sparks_n_splash]
 relic_hooks: [spark_on_detonation]   # Pounding Surprise
 # Ruling 3.4 as restructured in round 3: A1>A2 is HARD on starter and on
 # the median across archetype decks; a warning on individual packages.
@@ -85,8 +88,9 @@ packages:
     - hide_and_seek
   # Canonical reaction deck (round-3 ruling: the "reaction_burst" build).
   # Real draft: 6 companions, her amp payoffs, defense a drafter takes
-  # before a boss, and — the piece every earlier test deck missed — her
-  # Burst plus accelerators. Solo floors: tank_boss >=35%, gauntlet >=75%.
+  # before a boss, and her Burst ACCELERATORS -- the Burst itself is kit
+  # (v1.9), arrives by charging, and no longer sits in any deck list.
+  # Solo floors: tank_boss >=35%, gauntlet >=75%.
   # TIER2-VALIDATE: reaction co-op (partner as boss plan; Tier 0 can't).
   reaction_weighted:
     - dahlia_sacramental_shower
@@ -101,7 +105,6 @@ packages:
     - perfect_timing
     - boom_goes_the_dynamite
     - flame_dance
-    - sparks_n_splash
     - combustion_study
     - hide_and_seek
     - spooked

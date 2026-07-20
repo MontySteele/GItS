@@ -97,6 +97,30 @@ def test_burst_card_gated_and_empties_meter():
     play_card(st, sns)
     assert st.player.burst_energy == 0      # casting empties the meter
     assert st.player.powers["sparks_n_splash"] == 3
+    # v1.9: kit returns to the kit, not to a pile (a power would have
+    # exhausted before this).
+    assert not st.player.exhaust_pile and not st.player.discard_pile
+
+
+def test_kit_burst_grant_and_regrant():
+    from tier0.engine.combat import grant_charged_kit, play_card
+    from tier0.tests.conftest import make_state
+    st = make_state()
+    st.player.burst_max = 60
+    st.player.energy = 6
+    st.player.kit_cards = [loader.get_card("sparks_n_splash")]
+    grant_charged_kit(st)
+    assert not st.player.hand               # meter not full: nothing yet
+    st.player.burst_energy = 60
+    grant_charged_kit(st)
+    assert [c.id for c in st.player.hand] == ["sparks_n_splash"]
+    grant_charged_kit(st)
+    assert len(st.player.hand) == 1         # no duplicate grant
+    play_card(st, st.player.hand[0])
+    assert st.player.burst_energy == 0
+    st.player.burst_energy = 60             # refill re-grants
+    grant_charged_kit(st)
+    assert [c.id for c in st.player.hand] == ["sparks_n_splash"]
 
 
 def test_sparks_make_attack_free():

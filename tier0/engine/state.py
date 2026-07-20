@@ -36,6 +36,10 @@ class Card:
     personal_pool: Optional[str] = None
     requires: Optional[str] = None        # e.g. burst_energy_full
     nation: Optional[str] = None          # set by the loader from the sheet name
+    # principles v1.9: kit, not loot. Never in the draftable pool or the
+    # starting deck; granted to hand when the Burst meter first fills, and
+    # returns to the kit (no pile) after play so a refill re-grants it.
+    kit_card: bool = False
     # principles v1.8: standard-banner 5-stars (Jean/Mona/Diluc) are ordinary
     # nation-pool rares that participate in the banner roll like anyone else.
     # The tag exists so that IF banner-variance data shows bad-roll bricking,
@@ -90,6 +94,7 @@ class Player(Fighter):
     discard_pile: list[Card] = field(default_factory=list)
     exhaust_pile: list[Card] = field(default_factory=list)
     relic_hooks: list[str] = field(default_factory=list)   # e.g. ["spark_on_detonation"]
+    kit_cards: list[Card] = field(default_factory=list)    # v1.9: the Burst(s)
 
 
 @dataclass

@@ -1,10 +1,15 @@
 """M6: divergence / relevance / achievability metrics and the A/B harness
 (spec §4-§6).
 
-The three alarms this module owns come straight from spec §5:
+The three alarms this module owns come from spec §5 as amended by the
+morning triage rulings:
   divergence     adaptive-mode shape distribution over >=1000 runs; alarm if
                  any single shape > 55% or any archetype < 10%
-  relevance      P(>=1 offer advances the run's plan); claim 60-70%
+  relevance      P(>=1 offer advances the run's LIVE plan); enforced floor
+                 >=35% per archetype (the revised claim -- the original
+                 60-70% was a faith-era number that conflated advancing the
+                 plan with being worth engaging; the loose read is reported
+                 alongside, expected 60-75, unenforced)
   achievability  assigned-mode median time-to-online; alarm above 7 fights
 
 The A/B is structural, not a stretch goal: assigned and adaptive run over the
@@ -82,24 +87,27 @@ def relevance(results: list[RunResult]) -> dict:
     live = [d for d in screens if d.get("plan_live", True)]
     advanced = sum(1 for d in live if d.get("advanced_plan"))
     rate = advanced / len(live) if live else 0.0
+    engaging = sum(1 for d in screens if d.get("engaging"))
     return {
         "screens": len(screens),
         "live_screens": len(live),
         "after_core_share": 1 - len(live) / len(screens),
         "relevance": rate,
-        "in_claimed_band": 0.60 <= rate <= 0.70,   # spec §5 claim
+        "meets_floor": rate >= C.RELEVANCE_FLOOR,   # ruled acceptance
+        # Loose secondary, over ALL screens: an on-plan card was on offer,
+        # whether or not the plan still needed it. Unenforced by ruling.
+        "engaging_rate": engaging / len(screens),
     }
 
 
 def achievability(results: list[RunResult]) -> dict:
     """Assigned-mode time-to-online. Alarm above ACHIEVABILITY_ALARM_FIGHTS.
 
-    CAVEAT, carried from the triage report: for the reaction archetype this
-    number is currently dominated by one design question -- sparks_n_splash is
-    one of 15 rares at 5% odds, so ~10% of runs ever SEE the Burst its core
-    requires. Until the Burst-acquisition ruling lands, a reaction alarm here
-    is measuring pool odds, not achievability. Flagged rather than silently
-    reported as a policy result.
+    The old caveat here -- reaction's number being dominated by 10%-ever-
+    sees-the-Burst pool odds -- is RESOLVED by v1.9: the Burst is kit, it
+    left both the pool and the core definition, and reaction's
+    achievability now measures applier + amp assembly, which is what it
+    always claimed to measure.
     """
     # `is not None`, NOT truthiness. time_to_online is a fight COUNT, and a
     # falsy test silently drops any run that came online on fight 0. The
@@ -157,9 +165,11 @@ def print_ab_report(character: str, archetype: str, ab: dict) -> None:
         print(f"  avg deck       {d['avg_deck']:.1f}")
         rel = d["relevance"]
         if rel:
-            band = "in band" if rel["in_claimed_band"] else "OUT OF BAND"
+            floor = "clears" if rel["meets_floor"] else "BELOW FLOOR"
             print(f"  relevance      {rel['relevance']:.1%} "
-                  f"({band}, claim 60-70%)")
+                  f"({floor}, floor {C.RELEVANCE_FLOOR:.0%})")
+            print(f"  engaging       {rel['engaging_rate']:.1%} "
+                  f"(loose secondary, expected 60-75, unenforced)")
         ach = d["achievability"]
         if ach:
             print(f"  online rate    {ach['online_rate']:.1%}")

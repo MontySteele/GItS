@@ -121,7 +121,7 @@ def test_payoff_gated_beyond_core():
     assert not draft.core_complete(offline, "reaction")
     cold = draft.score_offer(amp, offline, "reaction")   # 2nd amp, offline
     online = starter + [amp] + _cards("dahlia_sacramental_shower",
-                                      "kaeya_frostgnaw", "sparks_n_splash")
+                                      "kaeya_frostgnaw")
     assert draft.core_complete(online, "reaction")
     hot = draft.score_offer(amp, online, "reaction")
     assert hot > cold
@@ -138,10 +138,12 @@ def test_enabler_value_decays():
 
 
 def test_reaction_core_rule():
+    # v1.9: the Burst left the core definition -- it arrives by charging
+    # the meter, not by drafting, so assembly is 2 appliers + 1 amp payoff.
     starter = _cards(*loader.starting_deck("klee"))
     assert not draft.core_complete(starter, "reaction")
     core = starter + _cards("dahlia_sacramental_shower", "kaeya_frostgnaw",
-                            "sizzle", "sparks_n_splash")
+                            "sizzle")
     assert draft.core_complete(core, "reaction")
 
 

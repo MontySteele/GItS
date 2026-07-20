@@ -41,6 +41,17 @@ def test_basics_are_never_draftable_so_the_exclusion_is_exact():
     assert "basic" not in rewards.character_pool("klee")
 
 
+def test_kit_burst_never_draftable():
+    """v1.9: Bursts are kit, not loot. The sheet's kit_card flag is the
+    pool exclusion; if it stops working the Burst quietly re-enters the
+    rare tier and every acquisition number reverts to measuring odds."""
+    from tier05 import rewards
+    pool = rewards.character_pool("klee")
+    assert all(not c.kit_card for cs in pool.values() for c in cs)
+    assert not any(c.id == "sparks_n_splash"
+                   for cs in pool.values() for c in cs)
+
+
 def test_companions_feed_scoring_but_not_commitment():
     """Companions are reaction fuel, not evidence of a plan.
 
@@ -179,7 +190,6 @@ def test_relevance_is_deck_sensitive_for_reaction():
                       if draft._is_applier(c)][:2]
     done += [c for c in loader._card_index().values()
              if draft._is_amp_payoff(c)][:1]
-    done += [c for c in loader._card_index().values() if "burst" in c.tags][:1]
     assert draft.core_complete(done, "reaction"), "premise: core must be online"
     assert not draft.offer_advances_plan(offers, done, "reaction")
 

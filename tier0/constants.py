@@ -132,6 +132,11 @@ ADAPTIVE_COMMIT_THRESHOLD = 0.40  # share of tagged cards before a deck counts
                                   # the finding divergence looks for.
 DIVERGENCE_DOMINANCE_ALARM = 0.55 # alarm if one shape exceeds this share
 DIVERGENCE_STARVATION_ALARM = 0.10  # alarm if an archetype falls below this
+# Morning-triage ruling: the enforced relevance acceptance. Strict
+# advances-the-live-plan >=35% per archetype -- the anti-brick floor the
+# original 60-70% claim was spiritually about. Loose "worth engaging" is
+# reported alongside, unenforced.
+RELEVANCE_FLOOR = 0.35
 ACHIEVABILITY_ALARM_FIGHTS = 7    # alarm if median time-to-online exceeds this
 DRAFT_REGRET_SAMPLE = 0.10        # fraction of decisions re-scored post-run
 

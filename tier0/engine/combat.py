@@ -25,6 +25,32 @@ def spark_threshold(state: CombatState) -> int:
                - state.player.powers.get("spark_threshold_down", 0))
 
 
+def grant_charged_kit(state: CombatState) -> None:
+    """v1.9: the Burst is kit, not loot. When the meter is full, the kit
+    card is granted to hand; casting empties the meter (play_card), so a
+    refill re-grants it.
+
+    Two call sites cover every gain: all burst-energy sources (reactions,
+    detonation splash, the burst_energy op, skill tags) fire inside the
+    player-turn window, either in the turn-start trigger block or during a
+    card's resolution -- so checking at turn start and after each play is
+    exhaustive without instrumenting the five gain sites individually.
+
+    Respects MAX_HAND_SIZE: a full hand defers the grant to the next check
+    rather than dropping it -- the meter stays full, so it cannot be lost.
+    """
+    p = state.player
+    if not p.burst_max or p.burst_energy < p.burst_max:
+        return
+    for kit in p.kit_cards:
+        if any(c.id == kit.id for c in p.hand):
+            continue
+        if len(p.hand) >= C.MAX_HAND_SIZE:
+            return
+        p.hand.append(kit)
+        state.emit("kit_burst_granted", card=kit.id)
+
+
 def card_playable(state: CombatState, card: Card) -> bool:
     if card.requires == "burst_energy_full":
         if state.player.burst_energy < state.player.burst_max:
@@ -73,10 +99,13 @@ def play_card(state: CombatState, card: Card) -> None:
             state.replay_next_companion = 0
     for _ in range(replays):
         effects.resolve_card(state, card)
-    if card.exhaust or card.type == "power":
+    if card.kit_card:
+        pass                                  # returns to the kit, no pile
+    elif card.exhaust or card.type == "power":
         p.exhaust_pile.append(card)
     else:
         p.discard_pile.append(card)
+    grant_charged_kit(state)
 
 
 def _player_turn(state: CombatState, pilot: Pilot) -> None:
@@ -100,6 +129,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
 
     p.energy = C.BASE_ENERGY_PER_TURN
     state.draw(C.CARDS_DRAWN_PER_TURN)
+    grant_charged_kit(state)                 # turn-start gains + full-hand defer
 
     seen_states: set[tuple] = set()
     while not state.over:

@@ -36,7 +36,9 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
     index = loader._card_index()
     pool = {}
     for c in index.values():
-        if c.is_companion or c.rarity not in C.RARITY_ODDS:
+        # kit_card (v1.9): Bursts are kit, not loot -- never offered. This
+        # is what makes the rare tier 14 draftable instead of 15.
+        if c.is_companion or c.kit_card or c.rarity not in C.RARITY_ODDS:
             continue
         pool.setdefault(c.rarity, []).append(c)
     return {r: sorted(cs, key=lambda c: c.id) for r, cs in pool.items()}
