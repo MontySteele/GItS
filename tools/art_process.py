@@ -38,6 +38,12 @@ sys.path.insert(0, str(ROOT / "tools"))
 from art_fetch import read_plan, rawname  # noqa: E402
 
 UPSCALE_FLAG = 1.6  # source-to-target scale factor above which we warn
+
+# Flat backing for item renders on card portraits (taste-pass directive 1):
+# transparent renders under `cover` smear their edge pixels across the frame,
+# and transparent padding reads as a hole in the card. Warm parchment, close
+# to the game's card-art paper. Icons keep transparent padding.
+CARD_BG = (0xEF, 0xE4, 0xCE, 0xFF)
 flags = []
 
 
@@ -49,6 +55,11 @@ def load_source(row):
             png = render_svg(p, max(row["w"], row["h"]))
             if png is not None:
                 return png
+        # Wiki-rendered raster (fetched by art_fetch on every platform;
+        # qlmanage only exists on macOS).
+        thumb = RAW / (rawname(row["title"]) + ".thumb.png")
+        if thumb.exists():
+            return Image.open(thumb).convert("RGBA")
         fb = RAW / rawname(row["title"][:-4] + ".png")
         if fb.exists():
             flags.append(f"{row['asset_id']}: svg render failed, using 64px png fallback (upscale)")
@@ -66,9 +77,14 @@ def load_source(row):
 
 def render_svg(path, size):
     with tempfile.TemporaryDirectory() as td:
-        r = subprocess.run(
-            ["qlmanage", "-t", "-s", str(max(size, 256)), "-o", td, str(path)],
-            capture_output=True)
+        try:
+            r = subprocess.run(
+                ["qlmanage", "-t", "-s", str(max(size, 256)), "-o", td, str(path)],
+                capture_output=True)
+        except FileNotFoundError:
+            # qlmanage is macOS-only; on Windows fall through to the wiki's
+            # same-name .png fallback that load_source already handles.
+            return None
         outs = list(Path(td).glob("*.png"))
         if r.returncode == 0 and outs:
             return Image.open(outs[0]).convert("RGBA")
@@ -76,7 +92,13 @@ def render_svg(path, size):
 
 
 def cover(img, w, h, focus):
-    scale = max(w / img.width, h / img.height)
+    # focus "center@1.5" punches the crop 1.5x into the frame (taste-pass
+    # directive 2: VFX gif frames want the blast, not the whole battlefield).
+    zoom = 1.0
+    if "@" in focus:
+        focus, z = focus.split("@", 1)
+        zoom = float(z)
+    scale = max(w / img.width, h / img.height) * zoom
     if scale > UPSCALE_FLAG:
         flags.append(f"upscale x{scale:.1f}")
     img = img.resize((round(img.width * scale), round(img.height * scale)), Image.LANCZOS)
@@ -85,12 +107,12 @@ def cover(img, w, h, focus):
     return img.crop((x, y, x + w, y + h))
 
 
-def contain(img, w, h):
+def contain(img, w, h, bg=(0, 0, 0, 0)):
     scale = min(w / img.width, h / img.height)
     if scale > UPSCALE_FLAG:
         flags.append(f"upscale x{scale:.1f}")
     img = img.resize((max(1, round(img.width * scale)), max(1, round(img.height * scale))), Image.LANCZOS)
-    canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    canvas = Image.new("RGBA", (w, h), bg)
     canvas.paste(img, ((w - img.width) // 2, (h - img.height) // 2), img)
     return canvas
 
@@ -112,8 +134,19 @@ def process(row, dest):
         dx, dy = round(img.width * 0.065), round(img.height * 0.045)
         img = img.crop((dx, dy, img.width - dx, img.height - dy))
     n0 = len(flags)
-    out = cover(img, row["w"], row["h"], row["focus"]) if row["mode"] == "cover" \
-        else contain(img, row["w"], row["h"])
+    if row["mode"] == "cover":
+        out = cover(img, row["w"], row["h"], row["focus"])
+    else:
+        # Card portraits get the flat backing; icons keep transparency.
+        bg = CARD_BG if "/cards/" in row["out"] else (0, 0, 0, 0)
+        out = contain(img, row["w"], row["h"], bg)
+    # Card portraits must be opaque regardless of mode: several official
+    # splashes (e.g. Klee Wish) ship on transparency, and alpha holes read as
+    # missing art over the card frame.
+    if "/cards/" in row["out"]:
+        flat = Image.new("RGBA", out.size, CARD_BG)
+        flat.paste(out, (0, 0), out)
+        out = flat
     for i in range(n0, len(flags)):
         flags[i] = f"{row['asset_id']} r{row['rank']}: {flags[i]}"
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -170,6 +203,13 @@ class _ListWriter:
 
 def main():
     rows = read_plan()
+    # Taste-pass directive 3: the plan must lint clean before any pixels move.
+    from art_lint import lint
+    problems = lint(rows)
+    if problems:
+        for p in problems:
+            print("LINT: " + p, file=sys.stderr)
+        sys.exit(1)
     if len(sys.argv) > 2 and sys.argv[1] == "--apply-picks":
         apply_picks(rows, sys.argv[2])
         return

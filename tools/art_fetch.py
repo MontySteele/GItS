@@ -46,6 +46,10 @@ def read_plan():
                 "mode": parts[4], "focus": parts[5], "pick": parts[6], "rank": int(parts[7]),
                 "source": parts[8], "title": parts[9],
                 "frame": int(parts[10]) if len(parts) > 10 and parts[10] else None,
+                # art register (taste pass directive 4): sticker|item|vfx|tcg|
+                # splash|icon. Declares the pick's art class so art_lint can
+                # check class-appropriateness mechanically.
+                "register": parts[11] if len(parts) > 11 and parts[11] else None,
             })
     return rows
 
@@ -87,6 +91,31 @@ def rawname(title: str) -> str:
     return title.replace("/", "_").replace(" ", "_")
 
 
+def resolve_thumbs(titles, width):
+    """title -> server-rendered raster thumb URL at `width` px.
+
+    MediaWiki renders SVGs to PNG server-side for thumbnails, which is the
+    only cross-platform path to a crisp raster: qlmanage is macOS-only, and
+    the wiki's same-name .png fallbacks are 64px (a 4x upscale at icon size,
+    visibly soft -- shipped that way 2026-07-20 before this existed)."""
+    out = {}
+    titles = sorted(set(titles))
+    for i in range(0, len(titles), 50):
+        batch = ["File:" + t for t in titles[i:i + 50]]
+        d = api_get({"action": "query", "prop": "imageinfo", "iiprop": "url",
+                     "iiurlwidth": width, "titles": "|".join(batch)})
+        q = d.get("query", {})
+        norm = {n["from"]: n["to"] for n in q.get("normalized", [])}
+        canon_to_orig = {norm.get(t, t): t[len("File:"):] for t in batch}
+        for p in q.get("pages", {}).values():
+            orig = canon_to_orig.get(p.get("title"))
+            ii = p.get("imageinfo")
+            if orig and ii and ii[0].get("thumburl"):
+                out[orig] = ii[0]["thumburl"]
+        time.sleep(0.3)
+    return out
+
+
 def main():
     rows = read_plan()
     resolved = resolve([r["title"] for r in rows])
@@ -97,6 +126,26 @@ def main():
 
     missing = sorted({r["title"] for r in rows if r["title"] not in resolved})
     RAW.mkdir(parents=True, exist_ok=True)
+
+    # SVG rows: fetch a server-rendered raster next to the original as
+    # <rawname>.thumb.png; art_process prefers it over the 64px png fallback.
+    # Width must be BELOW the svg's nominal size: at >= original width Fandom
+    # returns the svg itself, below it the rasterizer kicks in (webp bytes --
+    # Pillow sniffs content, the extension does not matter). 500 < the 512
+    # nominal of every element icon.
+    svg_titles = [r["title"] for r in rows if r["source"] == "svg" and r["title"] in resolved]
+    for title, url in sorted(resolve_thumbs(svg_titles, 500).items()):
+        dest = RAW / (rawname(title) + ".thumb.png")
+        if not dest.exists():
+            req = urllib.request.Request(url, headers=HEADERS)
+            with urllib.request.urlopen(req, timeout=120) as r:
+                data = r.read()
+            if data[:1] == b"<":
+                print(f"  WARNING: thumb for {title} came back as svg/xml, skipped")
+                continue
+            dest.write_bytes(data)
+            print(f"  {title} -> 500px raster thumb")
+            time.sleep(0.4)
 
     downloaded, srcrows = 0, []
     for title, (url, dims) in sorted(resolved.items()):
