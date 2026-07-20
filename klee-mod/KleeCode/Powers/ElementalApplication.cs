@@ -39,16 +39,20 @@ public sealed class KleeElementalHooks : AbstractModel
     public override bool ShouldReceiveCombatHooks => true;
 
     /// <summary>
-    /// One canonical, stateless instance for the whole session. AbstractModel's
-    /// ctor derives an Id from the type and asserts uniqueness, so this must
-    /// only ever be constructed once.
+    /// The canonical instance. ModelDb auto-scans the mod assembly and
+    /// constructs one canonical of every AbstractModel subclass itself --
+    /// calling `new()` here threw DuplicateModelException at first combat
+    /// (playtest 2026-07-20 softlock: the throw re-fired inside every hook
+    /// broadcast). Resolved lazily because mod Initialize can run before the
+    /// ModelDb scan.
     /// </summary>
-    private static readonly KleeElementalHooks Instance = new();
+    private static KleeElementalHooks? _instance;
 
     /// <summary>The CombatHookSubscriptionDelegate KleeMod.Initialize registers.</summary>
     public static IEnumerable<AbstractModel> Subscribe(CombatState combatState)
     {
-        yield return Instance;
+        _instance ??= ModelDb.GetById<KleeElementalHooks>(ModelDb.GetId<KleeElementalHooks>());
+        yield return _instance;
     }
 
     public override async Task BeforeDamageReceived(
