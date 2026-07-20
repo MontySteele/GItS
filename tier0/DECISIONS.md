@@ -467,3 +467,28 @@ Amend here, not in chat history.
     CLEARED per the red-pen naming section: talent/summon names
     pre-verified (sheet header), authored theatrical names on register,
     constellation namespace correctly reserved for upgrades (§3.6).
+76. **Strict-domination lint built** (2026-07-20, assigned via
+    klee-session-worknote item 2; this session owns tools/lint_*).
+    tools/lint_strict_domination.py + suite gate
+    (test_sheet_lints.py) over all DOCS_CARD_SHEETS: same-cost
+    cross-rarity pairs, benefits superset-with-all->= AND costs
+    subset-with-all-<= (self-damage/discard/spend_encore count as
+    costs — without that split the first run false-flagged three
+    ratified bigger-with-a-twist shapes: hot_hands, bright_idea,
+    quick_change). Basics excluded (starters are outclassed by
+    design). Confirms both known hits (cant_catch_me>warm_glow —
+    KNOWN, errata queued behind R10 window; pit_orchestra>
+    macaron_break — KNOWN, resolves Furina pass 2). **NEW findings,
+    NEEDS RULING (Klee sheet — their session's file, no edits made):**
+    (a) dodge_roll (uncommon, block 8 + exhaust-a-status) strictly
+    dominates hide_and_seek (common, block 7) — the CCM shape exactly;
+    (b) sparkly_explosion (rare, 18 dmg + on-kill riders) strictly
+    dominates big_badda_boom (common, 12 dmg) at cost 2 — may be ruled
+    acceptable as rare-payoff-obsoletes-common, but the CCM law as
+    stated ("rarity does not excuse strict supersets") flags it. Both
+    sit in the lint's PENDING_RULING tier: printed loudly, exit stays
+    0 so the shared suite doesn't go red on an unruled finding.
+    NOTE: M9's inline-upgrade revert is IN THE WORKING TREE (loader
+    warning silent) but uncommitted — the test_upgrades allowlist
+    entry comes out only after their commit lands, to keep every
+    commit green on clean checkout.
