@@ -4,3 +4,11 @@ __pycache__/
 .pytest_cache/
 *.csv
 .DS_Store
+
+# Tier F art (principles §9: never ships, never distributed — repo is public).
+# Only the ledgers (SOURCES.tsv, plan.tsv) and tools are tracked.
+art/raw/
+art/candidates/
+art/contact_sheet.html
+art/picks.tsv
+ImageGen/images/

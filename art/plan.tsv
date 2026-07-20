@@ -1,0 +1,127 @@
+# Art sprint fetch/process plan (docs/art-sprint-spec.md). Tier F — private build only, never ships.
+# Columns: asset_id	out	w	h	mode	focus	pick	rank	source	wiki_title	frame_pct
+# mode: cover (crop to fill) | contain (fit + transparent pad) | raw (copy untouched)
+# pick: auto (rank 1 goes straight to `out`) | shortlist (all ranks render to art/candidates/<asset_id>/ for the contact sheet)
+# source: png | gif (frame_pct = % through the clip) | svg (rendered; falls back to same-name .png)
+#
+# ---------- CARDS: direct official matches (auto) ----------
+kaboom	ImageGen/images/cards/klee/kaboom.png	500	380	cover	top	auto	1	png	Klee Character Card.png
+jumpy_dumpty	ImageGen/images/cards/klee/jumpy_dumpty.png	500	380	cover	center	auto	1	gif	Jumpy Dumpty Preview.gif	55
+sparks_n_splash	ImageGen/images/cards/klee/sparks_n_splash.png	500	380	cover	center	auto	1	gif	Sparks 'n' Splash Preview.gif	55
+hide_and_seek	ImageGen/images/cards/klee/hide_and_seek.png	500	380	cover	center	auto	1	png	Namecard Background Celebration Peekaboo!.png
+explosives_workshop	ImageGen/images/cards/klee/explosives_workshop.png	500	380	cover	center	auto	1	png	Namecard Background Klee Explosive.png
+# ---------- CARDS: shortlists (contact sheet; rank 1 = suggested) ----------
+duck_and_cover	ImageGen/images/cards/klee/duck_and_cover.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 2.png
+duck_and_cover	ImageGen/images/cards/klee/duck_and_cover.png	500	380	cover	top	shortlist	2	png	Klee Birthday 2020 2.png
+duck_and_cover	ImageGen/images/cards/klee/duck_and_cover.png	500	380	cover	center	shortlist	3	png	Item Imaginary Friend Dodoco.png
+pop	ImageGen/images/cards/klee/pop.png	500	380	cover	center	shortlist	1	gif	Jumpy Dumpty Preview.gif	30
+pop	ImageGen/images/cards/klee/pop.png	500	380	cover	center	shortlist	2	png	Item Kaboom Box.png
+pop	ImageGen/images/cards/klee/pop.png	500	380	cover	center	shortlist	3	png	Dodoco's Bomb-Tastic Adventure Mint Jelly Jumpy Dumpty.png
+mine_toss	ImageGen/images/cards/klee/mine_toss.png	500	380	cover	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine.png
+mine_toss	ImageGen/images/cards/klee/mine_toss.png	500	380	cover	center	shortlist	2	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine AoE.png
+mine_toss	ImageGen/images/cards/klee/mine_toss.png	500	380	cover	center	shortlist	3	gif	Jumpy Dumpty Preview.gif	80
+fish_flavored_bait	ImageGen/images/cards/klee/fish_flavored_bait.png	500	380	cover	center	shortlist	1	png	Item Fish-Flavored Toast.png
+fish_flavored_bait	ImageGen/images/cards/klee/fish_flavored_bait.png	500	380	cover	center	shortlist	2	png	Item Dodoco's Beach Nap.png
+fish_flavored_bait	ImageGen/images/cards/klee/fish_flavored_bait.png	500	380	cover	center	shortlist	3	png	JTP Encounter Jumpy Dumpty.png
+quick_fuse	ImageGen/images/cards/klee/quick_fuse.png	500	380	cover	center	shortlist	1	gif	Constellation Sparkly Explosion.gif	50
+quick_fuse	ImageGen/images/cards/klee/quick_fuse.png	500	380	cover	center	shortlist	2	gif	Kaboom! Charged Preview.gif	55
+quick_fuse	ImageGen/images/cards/klee/quick_fuse.png	500	380	cover	center	shortlist	3	png	Item Kaboom King.png
+ammo_scavenging	ImageGen/images/cards/klee/ammo_scavenging.png	500	380	cover	center	shortlist	1	png	Item Dodoco's Travel Bag.png
+ammo_scavenging	ImageGen/images/cards/klee/ammo_scavenging.png	500	380	cover	center	shortlist	2	png	Item Dodoco's Collection Cupboard.png
+ammo_scavenging	ImageGen/images/cards/klee/ammo_scavenging.png	500	380	cover	center	shortlist	3	png	Item Kaboom Box.png
+bomb_voyage	ImageGen/images/cards/klee/bomb_voyage.png	500	380	cover	center	shortlist	1	png	Item Dodoco's Bomb-Tastic Adventure.png
+bomb_voyage	ImageGen/images/cards/klee/bomb_voyage.png	500	380	cover	center	shortlist	2	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty.png
+bomb_voyage	ImageGen/images/cards/klee/bomb_voyage.png	500	380	cover	center	shortlist	3	png	Item Let's Go, Dodoco!.png
+big_badda_boom	ImageGen/images/cards/klee/big_badda_boom.png	500	380	cover	center	shortlist	1	gif	Kaboom! Plunging Preview.gif	55
+big_badda_boom	ImageGen/images/cards/klee/big_badda_boom.png	500	380	cover	center	shortlist	2	gif	Sparks 'n' Splash Preview.gif	80
+big_badda_boom	ImageGen/images/cards/klee/big_badda_boom.png	500	380	cover	center	shortlist	3	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine AoE.png
+blast_radius	ImageGen/images/cards/klee/blast_radius.png	500	380	cover	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty AoE.png
+blast_radius	ImageGen/images/cards/klee/blast_radius.png	500	380	cover	center	shortlist	2	gif	Kaboom! Plunging Preview.gif	80
+blast_radius	ImageGen/images/cards/klee/blast_radius.png	500	380	cover	center	shortlist	3	gif	Jumpy Dumpty Preview.gif	80
+sorry_jean	ImageGen/images/cards/klee/sorry_jean.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 2.png
+sorry_jean	ImageGen/images/cards/klee/sorry_jean.png	500	380	cover	center	shortlist	2	png	Icon Emoji Paimon's Paintings 25 Klee 1.png
+sorry_jean	ImageGen/images/cards/klee/sorry_jean.png	500	380	cover	top	shortlist	3	png	Klee Birthday 2020.png
+remote_detonator	ImageGen/images/cards/klee/remote_detonator.png	500	380	cover	center	shortlist	1	png	Pounding Surprise Explosive Spark Effect.png
+remote_detonator	ImageGen/images/cards/klee/remote_detonator.png	500	380	cover	center	shortlist	2	png	Item Dodoco's Marvelous Magic.png
+remote_detonator	ImageGen/images/cards/klee/remote_detonator.png	500	380	cover	center	shortlist	3	png	Constellation Explosive Frags.png
+sparkly_treasure	ImageGen/images/cards/klee/sparkly_treasure.png	500	380	cover	center	shortlist	1	png	Item Sparkly Shiny Dodoco!.png
+sparkly_treasure	ImageGen/images/cards/klee/sparkly_treasure.png	500	380	cover	center	shortlist	2	png	Icon Emoji Paimon's Paintings 07 Klee 1.png
+sparkly_treasure	ImageGen/images/cards/klee/sparkly_treasure.png	500	380	cover	top	shortlist	3	png	Klee Birthday 2024.png
+pocket_fireworks	ImageGen/images/cards/klee/pocket_fireworks.png	500	380	cover	center	shortlist	1	png	Item Fizzy Fireworks.png
+pocket_fireworks	ImageGen/images/cards/klee/pocket_fireworks.png	500	380	cover	center	shortlist	2	png	Item Glimmering Firework.png
+pocket_fireworks	ImageGen/images/cards/klee/pocket_fireworks.png	500	380	cover	center	shortlist	3	png	Item Leisurely Fireworks.png
+crackle	ImageGen/images/cards/klee/crackle.png	500	380	cover	center	shortlist	1	gif	Kaboom! Normal Preview.gif	55
+crackle	ImageGen/images/cards/klee/crackle.png	500	380	cover	center	shortlist	2	gif	Constellation Sparkly Explosion.gif	50
+crackle	ImageGen/images/cards/klee/crackle.png	500	380	cover	center	shortlist	3	png	Item Supersized Firework.png
+spark_collection	ImageGen/images/cards/klee/spark_collection.png	500	380	cover	center	shortlist	1	png	Item Dodoco's Marvelous Magic.png
+spark_collection	ImageGen/images/cards/klee/spark_collection.png	500	380	cover	center	shortlist	2	png	Item Dodoco's Duet.png
+spark_collection	ImageGen/images/cards/klee/spark_collection.png	500	380	cover	center	shortlist	3	png	Icon Emoji Paimon's Paintings 25 Klee 2.png
+skip_and_hop	ImageGen/images/cards/klee/skip_and_hop.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 4.png
+skip_and_hop	ImageGen/images/cards/klee/skip_and_hop.png	500	380	cover	center	shortlist	2	png	Sparkling Steps 2021-06-09 - Klee Emoji 1.png
+skip_and_hop	ImageGen/images/cards/klee/skip_and_hop.png	500	380	cover	top	shortlist	3	png	Klee Birthday 2021.png
+rapid_fire	ImageGen/images/cards/klee/rapid_fire.png	500	380	cover	center	shortlist	1	gif	Kaboom! Normal Preview.gif	30
+rapid_fire	ImageGen/images/cards/klee/rapid_fire.png	500	380	cover	center	shortlist	2	gif	Kaboom! Normal Preview.gif	55
+rapid_fire	ImageGen/images/cards/klee/rapid_fire.png	500	380	cover	center	shortlist	3	gif	Kaboom! Normal Preview.gif	80
+eager_to_help	ImageGen/images/cards/klee/eager_to_help.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 3.png
+eager_to_help	ImageGen/images/cards/klee/eager_to_help.png	500	380	cover	center	shortlist	2	png	Sparkling Steps 2021-06-09 - Klee Emoji 2.png
+eager_to_help	ImageGen/images/cards/klee/eager_to_help.png	500	380	cover	top	shortlist	3	png	Klee Birthday 2023.png
+cant_catch_me	ImageGen/images/cards/klee/cant_catch_me.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 46 Klee 1.png
+cant_catch_me	ImageGen/images/cards/klee/cant_catch_me.png	500	380	cover	top	shortlist	2	png	Klee Birthday 2021.png
+cant_catch_me	ImageGen/images/cards/klee/cant_catch_me.png	500	380	cover	center	shortlist	3	png	Sparkling Steps 2021-06-09 - Klee Emoji 3.png
+endless_fireworks	ImageGen/images/cards/klee/endless_fireworks.png	500	380	cover	center	shortlist	1	png	Item Slumbering Fireworks.png
+endless_fireworks	ImageGen/images/cards/klee/endless_fireworks.png	500	380	cover	center	shortlist	2	png	Item Mountain Fireworks.png
+endless_fireworks	ImageGen/images/cards/klee/endless_fireworks.png	500	380	cover	center	shortlist	3	png	Item Fireworks Dance Amidst a Snowy Sky.png
+gleeful_barrage	ImageGen/images/cards/klee/gleeful_barrage.png	500	380	cover	center	shortlist	1	gif	Sparks 'n' Splash Preview.gif	30
+gleeful_barrage	ImageGen/images/cards/klee/gleeful_barrage.png	500	380	cover	center	shortlist	2	png	Item Jumbo Sparks 'n' Splash Statue.png
+gleeful_barrage	ImageGen/images/cards/klee/gleeful_barrage.png	500	380	cover	center	shortlist	3	gif	Sparks 'n' Splash Preview.gif	55
+sizzle	ImageGen/images/cards/klee/sizzle.png	500	380	cover	center	shortlist	1	gif	Kaboom! Charged Preview.gif	80
+sizzle	ImageGen/images/cards/klee/sizzle.png	500	380	cover	center	shortlist	2	png	Constellation Nova Burst.png
+sizzle	ImageGen/images/cards/klee/sizzle.png	500	380	cover	center	shortlist	3	png	Item Dodoco's Dodo Stove.png
+combustion_study	ImageGen/images/cards/klee/combustion_study.png	500	380	cover	center	shortlist	1	png	Item Klee Explosive.png
+combustion_study	ImageGen/images/cards/klee/combustion_study.png	500	380	cover	center	shortlist	2	png	Item Naganohara Fireworks Note.png
+combustion_study	ImageGen/images/cards/klee/combustion_study.png	500	380	cover	center	shortlist	3	png	Namecard Background Klee Explosive.png
+perfect_timing	ImageGen/images/cards/klee/perfect_timing.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 3.png
+perfect_timing	ImageGen/images/cards/klee/perfect_timing.png	500	380	cover	center	shortlist	2	png	Constellation Exquisite Compound.png
+perfect_timing	ImageGen/images/cards/klee/perfect_timing.png	500	380	cover	center	shortlist	3	png	Sparkling Steps 2021-06-09 - Klee Emoji 1.png
+boom_goes_the_dynamite	ImageGen/images/cards/klee/boom_goes_the_dynamite.png	500	380	cover	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine AoE.png
+boom_goes_the_dynamite	ImageGen/images/cards/klee/boom_goes_the_dynamite.png	500	380	cover	center	shortlist	2	gif	Kaboom! Plunging Preview.gif	55
+boom_goes_the_dynamite	ImageGen/images/cards/klee/boom_goes_the_dynamite.png	500	380	cover	center	shortlist	3	png	Item Supersized Firework.png
+flame_dance	ImageGen/images/cards/klee/flame_dance.png	500	380	cover	center	shortlist	1	gif	Sparks 'n' Splash Preview.gif	30
+flame_dance	ImageGen/images/cards/klee/flame_dance.png	500	380	cover	center	shortlist	2	png	Constellation Chained Reactions.png
+flame_dance	ImageGen/images/cards/klee/flame_dance.png	500	380	cover	top	shortlist	3	png	Klee Birthday 2025.png
+blazing_delight	ImageGen/images/cards/klee/blazing_delight.png	500	380	cover	top	shortlist	1	png	Klee Character Card Golden.png
+blazing_delight	ImageGen/images/cards/klee/blazing_delight.png	500	380	cover	center	shortlist	2	png	Constellation Blazing Delight.png
+blazing_delight	ImageGen/images/cards/klee/blazing_delight.png	500	380	cover	center	shortlist	3	png	Klee Multi Wish.png
+spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 46 Klee 1.png
+spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	cover	center	shortlist	2	png	Item Dodoco's Summertime.png
+spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	cover	top	shortlist	3	png	Klee Birthday 2020 2.png
+# ---------- COMPANIONS: TCG talent-card art (auto; art fills upper card) ----------
+xingqiu_raincutter	ImageGen/images/cards/companions/xingqiu_raincutter.png	500	380	cover	center	auto	1	png	The Scent Remained Equipment Card.png
+fischl_nightrider	ImageGen/images/cards/companions/fischl_nightrider.png	500	380	cover	center	auto	1	png	Stellar Predator Equipment Card.png
+kaeya_frostgnaw	ImageGen/images/cards/companions/kaeya_frostgnaw.png	500	380	cover	center	auto	1	png	Cold-Blooded Strike Equipment Card.png
+sucrose_gust	ImageGen/images/cards/companions/sucrose_gust.png	500	380	cover	center	auto	1	png	Chaotic Entropy Equipment Card.png
+bennett_passion	ImageGen/images/cards/companions/bennett_passion.png	500	380	cover	center	auto	1	png	Grand Expectation Equipment Card.png
+barbara_melody	ImageGen/images/cards/companions/barbara_melody.png	500	380	cover	center	auto	1	png	Glorious Season Equipment Card.png
+prune_witch_hunt	ImageGen/images/cards/companions/prune_witch_hunt.png	500	380	cover	center	shortlist	1	gif	Prune Talent Demo 2.gif	55
+prune_witch_hunt	ImageGen/images/cards/companions/prune_witch_hunt.png	500	380	cover	center	shortlist	2	gif	Prune Talent Demo 1.gif	55
+prune_witch_hunt	ImageGen/images/cards/companions/prune_witch_hunt.png	500	380	cover	center	shortlist	3	gif	The Bell Tolls! The Hunt is On! Preview.gif	55
+# ---------- ICONS ----------
+power_aura_pyro	ImageGen/images/powers/aura_pyro.png	256	256	contain	center	auto	1	svg	Element Pyro.svg
+power_aura_hydro	ImageGen/images/powers/aura_hydro.png	256	256	contain	center	auto	1	svg	Element Hydro.svg
+power_aura_cryo	ImageGen/images/powers/aura_cryo.png	256	256	contain	center	auto	1	svg	Element Cryo.svg
+power_aura_electro	ImageGen/images/powers/aura_electro.png	256	256	contain	center	auto	1	svg	Element Electro.svg
+power_aura_anemo	ImageGen/images/powers/aura_anemo.png	256	256	contain	center	auto	1	svg	Element Anemo.svg
+power_aura_geo	ImageGen/images/powers/aura_geo.png	256	256	contain	center	auto	1	svg	Element Geo.svg
+power_bomb	ImageGen/images/powers/bomb.png	256	256	contain	center	auto	1	png	Item Special Jumpy Dumpty Dodoco.png
+power_spark	ImageGen/images/powers/spark.png	256	256	contain	center	auto	1	png	Sparks 'n' Splash Buff Icon.png
+relic_pounding_surprise	ImageGen/images/relics/pounding_surprise.png	256	256	cover	top	auto	1	png	Pounding Surprise Equipment Card.png
+# ---------- UI ----------
+select_portrait	ImageGen/images/ui/select_portrait.png	132	195	cover	top	auto	1	png	Character Klee Full Wish.png
+char_icon	ImageGen/images/ui/char_icon.png	88	88	cover	top	auto	1	png	Klee Icon.png
+energy_icon_large	ImageGen/images/ui/energy_icon_74.png	74	74	contain	center	auto	1	svg	Element Pyro.svg
+energy_icon_small	ImageGen/images/ui/energy_icon_22.png	22	22	contain	center	auto	1	svg	Element Pyro.svg
+map_marker	ImageGen/images/ui/map_marker.png	49	64	cover	top	auto	1	png	Klee Side Icon.png
+selection_splash	ImageGen/images/ui/selection_splash.png	1920	1200	cover	center	auto	1	png	Klee Wish.png
+# ---------- COMBAT MODEL SOURCE (raw; hand-cut into layers per manifest recipe) ----------
+model_source_full_wish	ImageGen/images/model/character_klee_full_wish.png	0	0	raw	center	auto	1	png	Character Klee Full Wish.png
+model_source_tcg_alt	ImageGen/images/model/klee_character_card.png	0	0	raw	center	auto	1	png	Klee Character Card.png
