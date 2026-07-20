@@ -190,10 +190,15 @@ def run_one(character: str, archetype: str, pilot_id: str,
                                           companion_offers=n_comp,
                                           banner=banner)
             deck_cards = [loader.get_card(cid) for cid in deck_ids]
+            # Relevance is judged on the deck as it stood WHEN THE SCREEN WAS
+            # SHOWN, before the pick lands -- judging after would let the pick
+            # itself change the answer.
+            advanced = draft.offer_advances_plan(offers, deck_cards, archetype)
             pick = policy(rng, deck_cards, offers, archetype)
             res.decisions.append({
                 "node": i, "offers": offers,
-                "picked": pick.id if pick else None})
+                "picked": pick.id if pick else None,
+                "advanced_plan": advanced})
             if pick is not None:
                 deck_ids.append(pick.id)
             if pick is not None and pick.is_companion:
@@ -211,10 +216,12 @@ def run_one(character: str, archetype: str, pilot_id: str,
 
 
 def run_many(character: str, archetype: str, pilot_id: str,
-             policy: DraftPolicy, runs: int, seed: int) -> list[RunResult]:
+             policy: DraftPolicy, runs: int, seed: int,
+             slot_mode: str = "standard") -> list[RunResult]:
     out = []
     for i in range(runs):
-        r = run_one(character, archetype, pilot_id, policy, seed + i)
+        r = run_one(character, archetype, pilot_id, policy, seed + i,
+                    slot_mode=slot_mode)
         # draft_regret: sampled re-score in the final-deck context, using
         # a DEDICATED rng stream so sampling can't perturb run decisions.
         r.regret_samples = draft.draft_regret(

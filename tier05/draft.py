@@ -139,6 +139,138 @@ def assigned_policy(rng: random.Random, deck: list[Card],
     return best
 
 
+# ---------------------------------------------------------------------------
+#  M6: the adaptive policy -- the goodstuff detector
+# ---------------------------------------------------------------------------
+
+ARCHETYPES = ("demolition", "spark", "reaction")
+
+
+def archetype_shares(deck: list[Card]) -> dict[str, float]:
+    """What fraction of the deck's *drafted, committed* cards belong to each
+    archetype.
+
+    Committed means carrying a real archetype tag: generic glue is excluded,
+    because counting it would dilute every share toward zero and flatten
+    exactly the signal this is here to detect.
+
+    BASICS ARE EXCLUDED, and that exclusion is load-bearing rather than
+    tidiness. Klee's starting deck contains Jumpy Dumpty and Pop, both tagged
+    `demolition`, so including basics puts every run at demolition share 1.0
+    before a single reward screen is shown. Measured with basics in, adaptive
+    drafting "converged" on demolition in 100% of runs -- which was the
+    starting deck being read back, not a pool finding. Spec §4 asks for
+    commitment emerging from *what has been drafted*, and the starter was not
+    drafted. Rarity separates the two exactly: every starter card is basic and
+    basic never appears in the draftable pool.
+
+    Klee's starter does give demolition a real head start in play, and that is
+    deliberate design. It is a fact about her kit, not evidence about whether
+    the pool's archetypes pull -- so it belongs in the report, not in this
+    number.
+    """
+    tagged = [c for c in deck
+              if c.rarity != "basic"
+              and any(a in ARCHETYPES for a in c.archetypes)]
+    if not tagged:
+        return {a: 0.0 for a in ARCHETYPES}
+    return {a: sum(1 for c in tagged if a in c.archetypes) / len(tagged)
+            for a in ARCHETYPES}
+
+
+def dominant_archetype(deck: list[Card],
+                       threshold: float = C.ADAPTIVE_COMMIT_THRESHOLD) -> str:
+    """The deck's emergent shape, or 'goodstuff' if it never committed.
+
+    'goodstuff' is not a failure of the classifier -- it is the finding the
+    divergence metric exists to surface. A pool where adaptive drafting never
+    commits is a pool whose archetypes are not pulling.
+    """
+    shares = archetype_shares(deck)
+    top = max(shares, key=lambda a: shares[a])
+    return top if shares[top] >= threshold else "goodstuff"
+
+
+def adaptive_score(card: Card, deck: list[Card]) -> float:
+    """Pure power + synergy. NO assigned archetype anywhere in here.
+
+    Commitment is emergent: synergy is weighted by the share each archetype
+    already holds in the deck, so early picks are near-pure power and later
+    picks are pulled toward whatever happened to accumulate. That rich-get-
+    richer term is the whole experiment -- if the pool still converges on one
+    shape across many seeds, the convergence is the pool's, not the policy's.
+    """
+    s = min(3.0, _static_power(card) / 3.0)
+    shares = archetype_shares(deck)
+    for a in card.archetypes:
+        if a not in ARCHETYPES:
+            continue
+        share = shares[a]
+        if card.role == "payoff":
+            # Payoffs are worth what their enablers make them worth. Unlike
+            # assigned mode this is a smooth ramp rather than a core gate:
+            # adaptive has no core to be online, so a hard gate would make
+            # payoffs permanently unpickable and no shape could ever finish.
+            s += 5.0 * share
+        elif card.role == "enabler":
+            s += 1.2 + 2.0 * share
+        else:
+            s += 0.8 + 1.0 * share
+    if card.is_companion:
+        # Companions are off-plan power: always playable, never scaling.
+        s += 1.5 if _is_applier(card) else 1.0
+        s += 2.0 * shares["reaction"]      # they are reaction's enablers
+    if "burst" in card.tags:
+        s += 1.0 + 2.5 * shares["reaction"]
+    if _has_block(card) and _block_density(deck) < C.DRAFT_BLOCK_DENSITY_MIN:
+        s += 2.5                            # defense quota is universal
+    cost = card.cost if isinstance(card.cost, int) else 2
+    avg_cost = (sum(c.cost for c in deck if isinstance(c.cost, int))
+                / max(1, sum(1 for c in deck if isinstance(c.cost, int))))
+    if cost >= 2 and avg_cost > 1.3:
+        s -= 1.0
+    s -= max(0, len(deck) - C.DRAFT_DECK_SOFT_CAP) * 0.4
+    return s
+
+
+def adaptive_policy(rng: random.Random, deck: list[Card],
+                    offers: list[Card], archetype: str) -> Optional[Card]:
+    """Same callable shape as assigned_policy; `archetype` is ignored by
+    construction -- that is the point, and the A/B harness depends on the two
+    policies being swappable."""
+    if not offers:
+        return None
+    scored = sorted(((adaptive_score(c, deck), i, c)
+                     for i, c in enumerate(offers)), reverse=True)
+    best_score, _, best = scored[0]
+    if best_score < C.DRAFT_SKIP_THRESHOLD:
+        return None
+    return best
+
+
+POLICIES = {"assigned": assigned_policy, "adaptive": adaptive_policy}
+
+
+def offer_advances_plan(offers: list[Card], deck: list[Card],
+                        archetype: str) -> bool:
+    """Reward relevance (spec §5): did this screen offer anything that moves
+    the run's plan forward?
+
+    Deliberately NOT 'did the policy take something' -- a screen can be worth
+    taking from without advancing the plan (defense quota, raw power), and
+    conflating the two would measure the policy instead of the pool. Advancing
+    means strictly increasing core progress, or being an on-plan enabler or
+    payoff the deck can still use.
+    """
+    progress = _core_progress(deck, archetype)
+    for c in offers:
+        if _core_progress(deck + [c], archetype) > progress:
+            return True
+        if archetype in c.archetypes and c.role in ("enabler", "payoff"):
+            return True
+    return False
+
+
 def draft_regret(rng: random.Random, decisions: list[dict],
                  final_deck: list[Card], archetype: str) -> int:
     """Post-run re-scoring of sampled decisions in the final-deck context.

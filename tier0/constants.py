@@ -124,4 +124,13 @@ DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 DRAFT_SKIP_THRESHOLD = 1.0        # skip the reward if best offer scores less
 DRAFT_CORE_SIZE = 4               # generic archetype core (reaction has its
                                   # own rule: 2 appliers + amp payoff + Burst)
+
+# --- Tier 0.5 M6: adaptive policy + divergence (spec §4-§5) ---
+ADAPTIVE_COMMIT_THRESHOLD = 0.40  # share of tagged cards before a deck counts
+                                  # as committed to a shape; below it the deck
+                                  # is classified 'goodstuff', which is itself
+                                  # the finding divergence looks for.
+DIVERGENCE_DOMINANCE_ALARM = 0.55 # alarm if one shape exceeds this share
+DIVERGENCE_STARVATION_ALARM = 0.10  # alarm if an archetype falls below this
+ACHIEVABILITY_ALARM_FIGHTS = 7    # alarm if median time-to-online exceeds this
 DRAFT_REGRET_SAMPLE = 0.10        # fraction of decisions re-scored post-run
