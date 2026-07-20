@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using BaseLib.Abstracts;
 using System.Linq;
 using System.Threading.Tasks;
+using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -199,17 +200,44 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
 
         foreach (var damage in payloads)
         {
+            // R23: each detonation is a Pyro-tagged hit (tier0 detonate_bombs
+            // -> deal_damage_to_enemy(element=bomb.element), default pyro).
+            // The damage below is Unpowered with no card source, so AuraPower
+            // cannot see it -- the elemental interaction is resolved here
+            // explicitly, BEFORE the damage lands, exactly where the sim's
+            // pipeline does it. That single path also guarantees detonation is
+            // never elementally resolved twice.
+            var dealt = damage;
+            var aura = AuraCmd.Find(target);
+            if (aura == null)
+            {
+                await AuraCmd.Apply(
+                    choiceContext, target, Element.Pyro, applier, cardSource: null);
+            }
+            else if (aura.Element == Element.Pyro)
+            {
+                await AuraCmd.Refresh(choiceContext, aura, applier, cardSource: null);
+            }
+            else
+            {
+                // Different element: consume and react. Vaporize/Melt amplify
+                // THIS detonation (aura x Pyro trigger); Overload etc. resolve
+                // their side effects in ReactionEffects. Consume before
+                // resolving, same as AuraPower (Swirl must not re-trigger).
+                var reaction = ReactionTable.Lookup(aura.Element, Element.Pyro);
+                var consumed = aura.Element;
+                dealt = (int)(dealt * ReactionTable.AmplifierMultiplier(reaction));
+                await PowerCmd.Remove(aura);
+                await ReactionEffects.Resolve(
+                    choiceContext, reaction, target, applier, null, consumed);
+            }
+
             // Unpowered so bomb damage is not scaled by Strength and does not
             // read as an attack; bombs are a fixed charge, and this is also
             // what keeps them from chain-detonating each other.
             await CreatureCmd.Damage(
-                choiceContext, target, damage,
+                choiceContext, target, dealt,
                 ValueProp.Unpowered, dealer: null, cardSource: null);
-
-            // TODO(C2): bombs apply Pyro on detonation, which is what makes the
-            // demolition deck feed the reaction system. Deliberately not wired
-            // yet -- nothing applies auras at all, so doing it here alone would
-            // be untestable. Lands with the aura-application pass.
 
             await NotifyDetonationListeners(choiceContext, applier, target, damage);
         }

@@ -44,6 +44,11 @@ public static class KleeMod
         // logs proof-of-merge so a stale/missing pack shows up in godot.log.
         KleePck.LogStatus();
 
+        // Aura application (R23): a standing combat-hook listener, registered
+        // through the game's own mod-subscriber API. Elemental card hits apply
+        // auras; AuraPower handles everything after that. See ElementalApplication.cs.
+        ModHelper.SubscribeForCombatStateHooks(ModId, Powers.KleeElementalHooks.Subscribe);
+
         Log.Info($"[{ModId}] Klee registered.");
     }
 

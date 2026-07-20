@@ -38,6 +38,13 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<DuckAndCover>(),
             ModelDb.Card<Pop>(),
 
+            // Aura-application batch (R23, hand-written): conditional and
+            // per-target aura/bomb bonuses are not codegen ops.
+            ModelDb.Card<Sizzle>(),
+            ModelDb.Card<FlameDance>(),
+            ModelDb.Card<KaboomBeetleSwarm>(),
+            ModelDb.Card<ElementalEcstasy>(),
+
             // Generated from docs/klee-cards.yaml by tools/gen_klee_cards.py.
             // Mechanical subset: damage/block/draw/place_bomb/gain_spark.
             // Cards needing powers, burst energy, auras or conditionals are
