@@ -16,7 +16,7 @@ Official-first, for the *right* reasons: official assets are NOT lower-risk for 
 | da_da_da | The famous Klee sticker — official Paimon's Paintings emoji set |
 | pop, mine_toss, bomb_voyage, all bomb cards | Jumpy Dumpty / mine visuals: skill preview stills, TCG art crops at different zooms |
 | Aura power icons ×6 | Official element symbols (Pyro/Hydro/Cryo/Electro/Anemo/Geo) — instantly legible, shared mod-wide forever |
-| Companion cards ×7 | Each companion's TCG skill-card art (Xingqiu's swords, Fischl's Oz, Kaeya's Frostgnaw, Sucrose's gust, Bennett, Barbara, Prune's kit art) |
+| Companion cards ×7 | Each companion's TCG skill-card art (Dahlia's psalter, Fischl's Oz, Kaeya's Frostgnaw, Sucrose's gust, Bennett, Barbara, Prune's kit art) |
 | char select / selection screen / icon | Klee splash art (wish art) at crops; official chibi/icon renders for the 88×88 |
 | energy icon | Pyro symbol variant |
 

@@ -61,3 +61,6 @@ Two policies, both shipped in M5–M6 (the A/B is structural, not a stretch goal
 
 ## 7. Non-goals (v1)
 Map pathing/branching, events, gold/shop economy (visiting-companion shop offer folded into slot modes instead), relics beyond existing hooks, potions, upgrades (logged gap), multiplayer (Tier 2), and any enemy content beyond re-skinned battery statlines. If a finding seems to require one of these, it's a Tier 1/2 question — write it down, don't build it.
+
+## Addendum (v1.8 ruling) — Featured Banner lands in M7
+The reward generator gains the seeded banner roll: 3 limited 5-stars per nation per run (degenerate at v0.1 roster size — no behavior change until the roster grows). Metrics updates: dream-team assembly becomes *conditional* (P(assembly | featured)) plus a banner-variance stat (spread of run outcomes across banner rolls per archetype — the bad-roll-bricking detector that decides whether `standard: true` companions flip to off-banner floor status). Banner is part of the run's seed determinism.

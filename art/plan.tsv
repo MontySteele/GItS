@@ -96,7 +96,12 @@ spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	cover	center	
 spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	cover	center	shortlist	2	png	Item Dodoco's Summertime.png
 spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	cover	top	shortlist	3	png	Klee Birthday 2020 2.png
 # ---------- COMPANIONS: TCG talent-card art (auto; art fills upper card) ----------
-xingqiu_raincutter	ImageGen/images/cards/companions/xingqiu_raincutter.png	500	380	cover	center	auto	1	png	The Scent Remained Equipment Card.png
+# Dahlia (companion-lore-errata.md): re-flavored from Xingqiu, who is Liyue. He
+# is not in Genius Invokation, so there is no Equipment Card to source -- falls
+# back to ranked talent-demo gifs, the same shortlist pattern Prune uses below.
+dahlia_sacramental_shower	ImageGen/images/cards/companions/dahlia_sacramental_shower.png	500	380	cover	center	shortlist	1	gif	Dahlia Talent Demo 1.gif	55
+dahlia_sacramental_shower	ImageGen/images/cards/companions/dahlia_sacramental_shower.png	500	380	cover	center	shortlist	2	gif	Dahlia Talent Demo 2.gif	55
+dahlia_sacramental_shower	ImageGen/images/cards/companions/dahlia_sacramental_shower.png	500	380	cover	center	shortlist	3	gif	Dahlia Talent Demo 3.gif	55
 fischl_nightrider	ImageGen/images/cards/companions/fischl_nightrider.png	500	380	cover	center	auto	1	png	Stellar Predator Equipment Card.png
 kaeya_frostgnaw	ImageGen/images/cards/companions/kaeya_frostgnaw.png	500	380	cover	center	auto	1	png	Cold-Blooded Strike Equipment Card.png
 sucrose_gust	ImageGen/images/cards/companions/sucrose_gust.png	500	380	cover	center	auto	1	png	Chaotic Entropy Equipment Card.png

@@ -42,7 +42,7 @@ Everything downstream re-plans on spike results; that's why they're first.
 - Reaction: sizzle, combustion_study, perfect_timing, boom_goes_the_dynamite (v0.3 rework), flame_dance
 - Rares: sparks_n_splash, blazing_delight
 - Generic block: hide_and_seek, spirited_away
-- Companions: xingqiu_raincutter, fischl_nightrider, kaeya_frostgnaw, sucrose_gust, bennett_passion, barbara_melody (Exhaust, v0.3.1), prune_witch_hunt
+- Companions: dahlia_sacramental_shower, fischl_nightrider, kaeya_frostgnaw, sucrose_gust, bennett_passion, barbara_melody (Exhaust, v0.3.1), prune_witch_hunt
 - Relic: pounding_surprise
 **Codegen (build it during C2, not after):** emitter script reading the canonical YAML sheets → C# card classes for the mechanical 60% (damage/block/bomb/spark/draw combinations map straight onto the 20-line Downfall card pattern) + localization JSON for all cards. Hand-finish conditionals, companion ops, power rares. Generated files carry a DO-NOT-EDIT header; hand-finished ones are listed in a manifest. The sheet stays the single source of truth through implementation.
 **Telemetry (in the slice from day one):** JSON-lines per fight to a local log — per-fight: reactions by type, detonations, sparks gained/spent, burst energy at end, burst cast y/n, damage by source category, HP delta, turns. Plus an `analyze.py` that aggregates a play session and prints the comparison against Tier 0's frozen predictions (reactions/fight, reaction damage share, burst cast rate). This is the first real sim-vs-reality calibration and directly prices how much to trust the harness for Furina.

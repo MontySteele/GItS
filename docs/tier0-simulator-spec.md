@@ -105,7 +105,7 @@ effects:
   - {op: damage, amount: 7, target: random_enemy, times: 2, applies_element: true}
   - {op: place_bomb, amount: 2, target: random_enemies, bomb_damage: 6}
 exhaust: false
-tags: [companion?]       # companion cards get companion: {nation: mondstadt, unit: xingqiu}
+tags: [companion?]       # companion cards get companion: {nation: mondstadt, unit: dahlia}
 ```
 
 ### 4.2 Effect DSL — atomic ops (v1 complete list; extend only when a designed card demands it)

@@ -41,7 +41,7 @@ def _freeze_via_companion(st):
     """Seed hydro, then freeze with a companion cryo attack."""
     from tier0.engine import effects
     e = st.enemies[0]
-    effects.resolve_card(st, loader.get_card("xingqiu_raincutter"))
+    effects.resolve_card(st, loader.get_card("dahlia_sacramental_shower"))
     st.player.hand.append(loader.get_card("kaeya_frostgnaw"))
     effects.resolve_card(st, loader.get_card("kaeya_frostgnaw"))
     return e

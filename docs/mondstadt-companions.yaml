@@ -4,9 +4,9 @@
 # Companion cards NEVER scale and route power through the player character.
 
 # ---------- 4-STAR (common/uncommon) ----------
-- {id: xingqiu_raincutter, name: "Xingqiu — Raincutter", star: 4, rarity: common, role_c: applier, element: hydro, cost: 1, type: attack,
+- {id: dahlia_sacramental_shower, name: "Dahlia — Sacramental Shower", star: 4, rarity: common, role_c: applier, element: hydro, cost: 1, type: attack,
    effects: [{op: damage, amount: 4, target: enemy, applies_element: true}]}
-- {id: xingqiu_rain_swords, name: "Xingqiu — Rain Swords", star: 4, rarity: uncommon, role_c: applier, element: hydro, cost: 1, type: skill,
+- {id: dahlia_favonian_favor, name: "Dahlia — Favonian Favor", star: 4, rarity: uncommon, role_c: applier, element: hydro, cost: 1, type: skill,
    effects: [{op: block, amount: 5}, {op: apply_aura, element: hydro, target: random_enemy}]}
 - {id: fischl_nightrider, name: "Fischl — Nightrider", star: 4, rarity: common, role_c: applier, element: electro, cost: 1, type: attack,
    effects: [{op: damage, amount: 5, target: enemy, applies_element: true}]}

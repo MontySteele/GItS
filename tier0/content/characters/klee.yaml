@@ -89,8 +89,8 @@ packages:
   # Burst plus accelerators. Solo floors: tank_boss >=35%, gauntlet >=75%.
   # TIER2-VALIDATE: reaction co-op (partner as boss plan; Tier 0 can't).
   reaction_weighted:
-    - xingqiu_raincutter
-    - xingqiu_rain_swords
+    - dahlia_sacramental_shower
+    - dahlia_favonian_favor
     - fischl_nightrider
     - fischl_nightrider
     - fischl_oz
@@ -147,7 +147,7 @@ packages:
     - barbara_melody
     - barbara_shining_idol
     - bennett_fantastic_voyage
-    - xingqiu_raincutter
+    - dahlia_sacramental_shower
     - fischl_nightrider
     - kaeya_frostgnaw
     - sizzle
@@ -161,7 +161,7 @@ packages:
     - durin_witchs_flame
     - nicole_celestial_gift
     - albedo_solar_isotoma
-    - xingqiu_raincutter
+    - dahlia_sacramental_shower
     - fischl_nightrider
     - kaeya_frostgnaw
     - sizzle

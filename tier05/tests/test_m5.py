@@ -117,10 +117,10 @@ def test_payoff_gated_beyond_core():
     starter = _cards(*loader.starting_deck("klee"))
     amp = next(c for c in loader._card_index().values()
                if "reaction" in c.archetypes and c.role == "payoff")
-    offline = starter + [amp, loader.get_card("xingqiu_raincutter")]
+    offline = starter + [amp, loader.get_card("dahlia_sacramental_shower")]
     assert not draft.core_complete(offline, "reaction")
     cold = draft.score_offer(amp, offline, "reaction")   # 2nd amp, offline
-    online = starter + [amp] + _cards("xingqiu_raincutter",
+    online = starter + [amp] + _cards("dahlia_sacramental_shower",
                                       "kaeya_frostgnaw", "sparks_n_splash")
     assert draft.core_complete(online, "reaction")
     hot = draft.score_offer(amp, online, "reaction")
@@ -140,7 +140,7 @@ def test_enabler_value_decays():
 def test_reaction_core_rule():
     starter = _cards(*loader.starting_deck("klee"))
     assert not draft.core_complete(starter, "reaction")
-    core = starter + _cards("xingqiu_raincutter", "kaeya_frostgnaw",
+    core = starter + _cards("dahlia_sacramental_shower", "kaeya_frostgnaw",
                             "sizzle", "sparks_n_splash")
     assert draft.core_complete(core, "reaction")
 
@@ -194,7 +194,7 @@ def test_core_advance_never_dead_pick():
     # Regression for the reaction deadlock: an amp payoff must outscore
     # nothing-burger offers even before the core is online.
     starter = _cards(*loader.starting_deck("klee"))
-    deck = starter + _cards("xingqiu_raincutter", "kaeya_frostgnaw")
+    deck = starter + _cards("dahlia_sacramental_shower", "kaeya_frostgnaw")
     amp = next(c for c in loader._card_index().values()
                if "reaction" in c.archetypes and c.role == "payoff")
     assert draft.score_offer(amp, deck, "reaction") \
