@@ -77,13 +77,78 @@ Steam update is diagnosable rather than mysterious.
    - Card frame and energy colour borrow Ironclad's red assets; we ship no
      `.pck` yet (`has_pck: false`).
 
+## C1 findings from live boot testing (2026-07-19)
+
+Four bugs, found in this order. All four came from *inferring* an API contract
+instead of decompiling it — the decompiler was installed and each answer was
+one command away. Worth remembering in C2, where the codegen will multiply any
+wrong assumption across 60+ cards.
+
+9. **`ModelDb.AllCharacters` is a hardcoded 5-element array, not a registry
+   scan.** Subclassing `CharacterModel` registers the type with
+   `ModelDb.Get<T>()` (so `ModelDb.Character<Klee>()` resolves fine and throws
+   nothing) but never adds it to that array. `NCharacterSelectScreen` iterates
+   `AllCharacters` for membership and consults `UnlockState.Characters` only as
+   a lock filter — so patching `UnlockState`, as we first did, makes a character
+   "unlocked" in a list nothing checks for existence. **Append to
+   `ModelDb.AllCharacters`**; it also feeds `UnlockState`, `AllCards`,
+   `AllRelics`, and the pool collections.
+
+10. **`StartingRelics` must be non-empty.** `SelectCharacter` does an
+    unconditional `characterModel.StartingRelics[0]`. With an empty list the
+    `ArgumentOutOfRangeException` lands *mid-method*: name/HP/gold are already
+    written to the panel, but the relic widget keeps the previous character's
+    data and the lobby's character assignment never runs. Presents as "the
+    character is visible but not selectable, and the run starts as whoever was
+    picked before" — not as a crash. A character with no starting relic is not
+    a supported state.
+
+11. **Loc keys are `ModelId.Entry`, i.e. UPPER_SNAKE_CASE** derived from the
+    class name: `DuckAndCover` -> `DUCK_AND_COVER`. Missing keys render as the
+    literal `table.key` on the card. The convention was already visible in an
+    early log line (`Unknown card ID: CARD.QUICK_FINGERS`) and was missed.
+
+12. **Card description text uses two different syntaxes, and both are easy to
+    get wrong.** Values are SmartFormat templates over `DynamicVarSet`
+    (keys `Damage`, `Block`, ... per `BlockVar.defaultName`), so placeholders
+    are **single** braces — `{Damage}`, not `{{Damage}}`. Square brackets are
+    **BBCode**, not keyword markup: descriptions are wrapped in
+    `[center]...[/center]`, so a stray `[Block]` throws
+    `Found end tag center, expected Block`. Keyword tooltips come from a
+    per-mod `card_keywords.json` (Downfall pattern; see
+    `docs/card_keywords.json`), which we do not ship yet.
+
+13. **Reward generation requires non-Basic cards in the pool.** With only the
+    four Basic starters, `CardFactory.CreateForReward` throws
+    `InvalidOperationException: ... couldn't generate a valid card`. Observed
+    via `ArcaneScroll.AfterObtained()`, but it applies to every combat card
+    reward. Not fixable inside C1: **no** uncommon/rare card on the sheet is
+    implementable without the bomb/spark/reaction/burst systems, because those
+    systems *are* Klee's identity. Resolves in C2 with the slice list.
+
+## C1 acceptance (2026-07-19)
+
+Met per spec C1.5: game boots modded, Klee appears in character select, a fight
+starts and completes with the stub starter deck. Full-run play is explicitly a
+C2 activity ("THE PLAYTEST BUILD"), and finding 13 above means card rewards
+cannot work until the slice list exists.
+
 ## Open items
 
-- **O1 — `quick_fingers` boot spam.** Its `src/bin` and `src/obj` sit inside the
-  game's `mods/` tree and error on every launch. Harmless but noisy, and it
-  makes our own logs harder to read. Deleting it touches files outside the repo,
-  so it needs the user's go-ahead (§0.4).
-- **O2 — Klee with no starting relic is untested.** Every base character has
-  one; if the run/reward flow assumes it, this is where a boot failure will
-  surface first.
-- **O3 — Spikes S1 and S2 not yet run.** Both are still gating C2 per spec.
+- **O1 — RESOLVED.** `quick_fingers` `src/bin` and `src/obj` deleted from the
+  game's `mods/` tree (user approved); boot spam gone. Its *source* still has
+  the D3 API drift and will not rebuild until the `choiceContext` fix is
+  applied. The prebuilt dll still loads, and the mod is disabled in settings.
+- **O2 — RESOLVED**, the hard way; see finding 10.
+- **O3 — Spikes S1 and S2 not yet run.** Both still gate C2 per spec. S1 is now
+  cheaper than budgeted: ilspycmd is installed and the decompile loop is fast.
+- **O4 — `RunWonAchievement` will throw on a win.** It does
+  `Enum.Parse<Achievement>(Id.Entry.Capitalize() + "Win")` and no `KleeWin`
+  member exists. Harmless for C1 (acceptance is one fight) but a guaranteed
+  crash the first time anyone completes a run. Fix before any real playtest.
+- **O5 — `LOCPROBE` diagnostic still in `KleeMod.cs`.** Temporary; dumps
+  base-game card descriptions to confirm loc syntax. Delete once C2 text is
+  rendering correctly.
+- **O6 — Placeholder art is load-bearing.** `KleePlaceholderArt.cs` rewrites 22
+  asset/sfx paths from `klee` to `ironclad`. Deleting it without shipping a real
+  `.pck` returns us to missing-resource crashes on the select screen.

@@ -47,18 +47,34 @@ public static class KleeMod
             // CardModel.Description reads "cards" -> "<ENTRY>.description".
             LocManager.Instance.GetTable("cards").MergeWith(new Dictionary<string, string>
             {
+                // Two separate syntaxes are in play here, and both bit us:
+                //
+                // 1. Values are SmartFormat templates over DynamicVarSet, whose
+                //    keys are "Damage" / "Block" (see BlockVar.defaultName).
+                //    SmartFormat uses SINGLE braces - "{{Damage}}" is not a
+                //    placeholder and is emitted literally.
+                //
+                // 2. Square brackets are BBCode, NOT keyword markup. The game
+                //    wraps descriptions in [center]...[/center], so a stray
+                //    "[Block]" parses as an unclosed tag and throws
+                //    "Found end tag center, expected Block". Keyword tooltips
+                //    are declared per-mod via a card_keywords.json (the Downfall
+                //    pattern, see docs/card_keywords.json); we ship none yet, so
+                //    C1 uses plain text and keywords land with the C2 text pass.
                 ["KABOOM.title"] = "Kaboom!",
-                ["KABOOM.description"] = "Deal {{Damage}} damage.",
+                ["KABOOM.description"] = "Deal {Damage} damage.",
 
                 ["DUCK_AND_COVER.title"] = "Duck and Cover",
-                ["DUCK_AND_COVER.description"] = "Gain {{Block}} [Block].",
+                ["DUCK_AND_COVER.description"] = "Gain {Block} Block.",
 
                 ["JUMPY_DUMPTY.title"] = "Jumpy Dumpty",
-                ["JUMPY_DUMPTY.description"] = "Deal {{Damage}} damage twice.",
+                ["JUMPY_DUMPTY.description"] = "Deal {Damage} damage twice.",
 
                 ["POP.title"] = "Pop!",
-                ["POP.description"] = "Deal {{Damage}} damage.",
+                ["POP.description"] = "Deal {Damage} damage.",
             });
+
+            ProbeBaseGameLocSyntax();
 
             LocManager.Instance.GetTable("characters").MergeWith(new Dictionary<string, string>
             {
@@ -77,6 +93,57 @@ public static class KleeMod
         catch (Exception e)
         {
             Log.Error($"[{ModId}] Failed to inject loc strings: {e}");
+        }
+    }
+
+    /// <summary>
+    /// TEMPORARY DIAGNOSTIC. Dumps the raw text of a few base-game card
+    /// descriptions so the real SmartFormat placeholder syntax is observed
+    /// rather than inferred. The loc tables ship compressed inside the .pck, so
+    /// reading them at runtime is the only way to see ground truth short of
+    /// extracting assets with GDRE.
+    ///
+    /// Delete once the card text renders correctly.
+    /// </summary>
+    private static void ProbeBaseGameLocSyntax()
+    {
+        try
+        {
+            var cards = LocManager.Instance.GetTable("cards");
+
+            foreach (var key in new[]
+                     {
+                         "STRIKE_SILENT.description",
+                         "DEFEND_SILENT.description",
+                         "STRIKE_IRONCLAD.description",
+                         "DEFEND_IRONCLAD.description",
+                     })
+            {
+                if (cards.HasEntry(key))
+                {
+                    Log.Info($"[{ModId}] LOCPROBE {key} => {cards.GetRawText(key)}");
+                }
+                else
+                {
+                    Log.Info($"[{ModId}] LOCPROBE {key} => (no such entry)");
+                }
+            }
+
+            // Fallback: if none of the guessed keys exist, show real ones so we
+            // can read both the key convention and the template syntax.
+            var sample = cards.Keys
+                .Where(k => k.EndsWith(".description", StringComparison.Ordinal))
+                .Take(8)
+                .ToList();
+
+            foreach (var key in sample)
+            {
+                Log.Info($"[{ModId}] LOCPROBE sample {key} => {cards.GetRawText(key)}");
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[{ModId}] LOCPROBE failed: {e}");
         }
     }
 }
