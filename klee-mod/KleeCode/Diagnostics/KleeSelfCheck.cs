@@ -79,13 +79,13 @@ internal static class KleeSelfCheck
     }
 
     // Distinct rule labels that can actually reach the log:
-    //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7
+    //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8
     // This was 8 while R5/R6a/R6b were documented but unattributable -- the
     // helpers that emit them hardcoded R4 and R6, so those three strings could
     // never appear. Fixing the labels is what makes the count honest. Note
     // R4 and R5 come from a `rule` parameter, so grepping for Fail("R... will
     // not find them; count the call sites, not the literals.
-    private const int RuleCount = 12;
+    private const int RuleCount = 13;
 
     private static void Fail(string rule, string detail) => Findings.Add($"[{rule}] {detail}");
 
@@ -281,6 +281,18 @@ internal static class KleeSelfCheck
 
         // R5. Same check for the character surface.
         CheckLocEntry(characters, "characters", klee.Id.Entry, nameof(Klee), "R5");
+
+        // R8. Every power this mod ships must have loc. R4 only walks the card
+        // pool, so powers were unswept -- and the four AuraPowers shipped
+        // without ILocalizationProvider, rendering "powers.PYRO_AURA_POWER.title"
+        // as a raw tooltip key (playtest 2026-07-20). ModelDb.AllPowers includes
+        // mod models; filter to our assembly so we never police base-game text.
+        var powersTable = LocManager.Instance.GetTable("powers");
+        foreach (var power in ModelDb.AllPowers
+                     .Where(p => p.GetType().Assembly == typeof(KleeSelfCheck).Assembly))
+        {
+            CheckLocEntry(powersTable, "powers", power.Id.Entry, power.GetType().Name, "R8");
+        }
     }
 
     // `rule` is a parameter rather than a literal because this helper serves

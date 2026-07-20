@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using BaseLib.Abstracts;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -28,10 +30,33 @@ namespace KleeMod.Powers;
 /// This is a direct port of resolve_hit() in tier0/engine/reactions.py, which
 /// is the ratified behavior.
 /// </summary>
-public abstract class AuraPower : PowerModel
+public abstract class AuraPower : PowerModel, ILocalizationProvider
 {
     /// <summary>Which element this aura is.</summary>
     public abstract Element Element { get; }
+
+    /// <summary>
+    /// BaseLib's AddModelLoc keys off Id.Entry for any model implementing this
+    /// interface (see BombPower.Localization). Declared once here, specialized
+    /// per element -- BaseLib reads it off each concrete canonical, so every
+    /// subclass gets its own PYRO/HYDRO/... entry. Playtest 2026-07-20: these
+    /// powers shipped without loc and tooltips rendered the raw keys; self-check
+    /// R8 now sweeps every mod power for exactly this.
+    /// </summary>
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", $"{Element} Aura"),
+        ("description",
+            $"{Element} clings to this enemy. A hit of a different element consumes "
+          + "the aura and triggers an [gold]Elemental Reaction[/gold]; "
+          + $"a {Element} hit refreshes its duration."),
+        // Smart (in-combat) tooltip adds the live duration; {Amount} is the
+        // turns remaining, same var the badge shows.
+        ("smartDescription",
+            $"{Element} clings to this enemy for {{Amount}} more turn{{Amount:plural:|s}}. "
+          + "A hit of a different element consumes the aura and triggers an "
+          + $"[gold]Elemental Reaction[/gold]; a {Element} hit refreshes its duration."),
+    };
 
     public override PowerType Type => PowerType.Debuff;
 
