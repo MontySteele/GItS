@@ -351,3 +351,31 @@ Amend here, not in chat history.
     pass with the real Encore Performance card AND combat coupled; the
     same experiment measures the Guest Star draw-variance value that
     offer geometry cannot see. One experiment, two registrations.
+
+## Furina sheet pass 1 (2026-07-20, furina-sheet-pass-1-plan.md)
+
+65. **Salon ticks at the START of the player turn** (Klee-bomb timing,
+    not Oz timing). Measured cause: end-of-turn upkeep drained the Encore
+    buffer BEFORE enemy hits, so the DEFAULT archetype zeroed her elite
+    A4 (salon deck A4 0.5-0.8 vs the 4.3 target — the constraint warn
+    fired). Start-of-turn ticks let absorption take first bite; upkeep
+    eats what survived the night. The overdraw identity is unchanged
+    (dry buffer still drains true HP).
+66. **Salon economy numbers** (all PROPOSED pending sheet red-pen):
+    SALON_MEMBER_DMG 4 (may out-tick Oz's 3 — the upkeep is what Oz
+    doesn't pay), SALON_TICK_ENCORE_COST 1, SALON_TICK_BURST 2,
+    BURST_PER_ENCORE_SPENT 1. burst_max declared 70.
+67. **Inline-upgrade schema tolerance** (coordination incident): a
+    parallel M9 session added `upgrade:` fields to klee-cards.yaml rows
+    mid-day, which hard-failed Card.from_dict and bricked the loader for
+    every session. Card now carries an IGNORED `upgrade` field; Tier 0
+    upgrades continue to load from *-upgrades.yaml via content/upgrades.py.
+    The two conventions duplicate each other on the rows seen
+    (sparkly_treasure/spark_collection inline entries == existing
+    klee-upgrades.yaml deltas) and MUST be reconciled by ruling — flagged
+    in the sheet-pass report.
+68. **character_pool gains the personal-sheet filter** (tier05/rewards):
+    with two personal sheets loaded, Klee's card rewards would have
+    offered Furina's cards — same bug class as the Prune catch, one slot
+    over. Cards tagged with another character's name are never offered.
+    Guarded by test_personal_card_pools_do_not_cross_characters.

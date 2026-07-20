@@ -89,6 +89,20 @@ FANFARE_PER_SPOTLIGHT_CARD = 2    # the Ovation merge: per Spotlighted
                               # card played. NO passive per-turn accrual
                               # constant exists; do not add one (§4).
 
+# --- Furina: Salon Members (kickoff §5; sheet pass 1) ---
+# The oz_summon rails, stacking: each member is one end-of-turn hydro
+# tick to a random enemy. Every tick drains Encore; when the buffer is
+# dry it drains TRUE HP instead (the overdraw identity -- greed is legal
+# and priced). All PROPOSED numbers pending sheet red-pen.
+SALON_MEMBER_DMG = 4          # per-member tick damage (v0.2: 3->4 -- her
+                              # signature engine may out-tick Oz's 3; the
+                              # upkeep cost is what Oz doesn't pay)
+SALON_TICK_ENCORE_COST = 1    # Encore drained per member tick
+SALON_TICK_BURST = 2          # burst energy per member tick (her particle
+                              # economy leans on Salon application, §1)
+BURST_PER_ENCORE_SPENT = 1    # burst energy per point of Encore spent
+                              # (the other half of her particle economy)
+
 # --- Reference relics ---
 BURNING_BLOOD_HEAL = 6        # REF_IRONCLAD: heal after each won fight
                               # (ruling 1: gives A4 a nonzero anchor)

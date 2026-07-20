@@ -29,7 +29,9 @@ from pathlib import Path
 
 import yaml
 
-UPGRADE_SHEET = Path(__file__).parents[2] / "docs" / "klee-upgrades.yaml"
+_DOCS = Path(__file__).parents[2] / "docs"
+UPGRADE_SHEETS = (_DOCS / "klee-upgrades.yaml",
+                  _DOCS / "furina-upgrades.yaml")
 SUFFIX = "+"
 
 # Deltas the engine cannot express per-card yet (constants-encoded).
@@ -42,7 +44,16 @@ UNAPPLIABLE = frozenset({
 
 @lru_cache(maxsize=1)
 def _upgrade_index() -> dict[str, dict]:
-    return yaml.safe_load(UPGRADE_SHEET.read_text()) or {}
+    merged: dict[str, dict] = {}
+    for sheet in UPGRADE_SHEETS:
+        if not sheet.exists():
+            continue
+        entries = yaml.safe_load(sheet.read_text()) or {}
+        dupes = set(entries) & set(merged)
+        if dupes:
+            raise ValueError(f"{sheet.name}: duplicate upgrade ids {sorted(dupes)}")
+        merged.update(entries)
+    return merged
 
 
 def has_upgrade(card_id: str) -> bool:
@@ -119,6 +130,32 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "spark":
             ok = _bump_first((fx for fx in top if fx.get("op") == "gain_spark"),
                              "amount", val)
+        elif key == "encore":
+            # ALL gain_encore ops, branches included (mirrors "draw": a
+            # conditional Encore rider is still the card's Encore story).
+            hits = [fx for fx in everywhere if fx.get("op") == "gain_encore"]
+            for fx in hits:
+                fx["amount"] += val
+            ok = bool(hits)
+        elif key == "encore_cost":
+            ok = card.encore_cost > 0
+            card.encore_cost = max(0, card.encore_cost + val)
+        elif key == "fanfare_cap":
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "raise_fanfare_cap"),
+                             "amount", val)
+        elif key == "generate_cost_override":
+            # Discovery-parity upgrade: the generated card costs 0 this
+            # combat (kickoff §9 upgrade grammar).
+            hit = next((fx for fx in top
+                        if fx.get("op") == "generate_guest_star"), None)
+            ok = hit is not None
+            if hit:
+                hit["cost_override"] = val
+        elif key == "generated":
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "generate_guest_star"),
+                             "amount", val)
         elif key == "burst_energy":
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "burst_energy"),
@@ -150,7 +187,8 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                              "amount", val)
         elif key == "copy_cost_override":
             hit = next((fx for fx in top
-                        if fx.get("op") == "copy_companion_in_hand"), None)
+                        if fx.get("op") in ("copy_companion_in_hand",
+                                            "copy_spotlighted_in_hand")), None)
             ok = hit is not None
             if hit:
                 hit["cost_override"] = val

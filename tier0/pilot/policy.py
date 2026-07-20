@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine import powers
+from tier0.engine import effects, powers
 from tier0.engine.combat import card_cost, card_playable
 from tier0.engine.state import Card, CombatState
 
@@ -100,10 +100,15 @@ def _expected_damage(state: CombatState, card: Card) -> float:
                 times = 2 + state.player.sparks
             per_hit = powers.modify_damage_dealt(state.player,
                                                  _est(state, fx["amount"]))
-            if "bonus_formula" in fx:       # N_per_detonation_this_combat
-                n = fx["bonus_formula"].partition("_per_")[0]
-                if n.isdigit():
-                    per_hit += int(n) * state.detonations_total
+            if "bonus_formula" in fx:       # detonation / fanfare formulas
+                try:
+                    per_hit += effects._bonus_formula(state,
+                                                      fx["bonus_formula"])
+                except ValueError:
+                    pass
+            # Spotlight empowerment is real damage the pilot should see --
+            # this is also what makes it PREFER Spotlighted cards.
+            per_hit *= effects.spotlight_mult(state, card)
             total += per_hit * times * n_targets
         elif fx["op"] == "place_bomb":
             total += fx["bomb_damage"] * _est(state, fx.get("amount", 1), 1)
@@ -201,6 +206,37 @@ def _tempo_value(card: Card) -> float:
     return val
 
 
+def _sustain_value(state: CombatState, card: Card) -> float:
+    """Encore is deferred HP economy (absorbs after Block). Worth most of
+    its face -- it keeps until used, unlike Block -- but discounted for
+    not stopping THIS turn's hits when drawn late."""
+    encore = sum(fx.get("amount", 0) for fx in card.effects
+                 if fx["op"] == "gain_encore"
+                 and isinstance(fx.get("amount"), int))
+    return encore * 0.8
+
+
+def _spotlight_value(state: CombatState, card: Card) -> float:
+    """Selector + Spotlight-machinery value (sheet pass 1). Without this
+    her pilots score the selector 0 and never designate -- the exact
+    anchor-drafted-nothing failure M5 logged (DECISIONS 53)."""
+    p = state.player
+    val = 0.0
+    for fx in card.effects:
+        if fx["op"] == "spotlight_designate":
+            # Aiming an empty stage is the whole archetype; re-aiming is
+            # nearly free but rarely urgent.
+            val += 4.0 if p.spotlight is None else 0.3
+        elif fx["op"] == "generate_guest_star":
+            val += 2.5 * fx.get("amount", 1)     # a card in hand, roughly
+        elif fx["op"] == "copy_spotlighted_in_hand":
+            has_target = p.spotlight and any(
+                c.character == p.spotlight and not c.kit_card
+                for c in p.hand)
+            val += 3.5 if has_target else 0.0    # dead without a target,
+    return val                                   # and the pilot knows it
+
+
 def _score(state: CombatState, card: Card, w: dict) -> float:
     cost = card_cost(state, card)
     return (w["damage"] * _expected_damage(state, card)
@@ -208,6 +244,8 @@ def _score(state: CombatState, card: Card, w: dict) -> float:
             + w["scaling"] * _scaling_value(state, card)
             + w["reaction"] * _reaction_value(state, card)
             + w["tempo"] * _tempo_value(card)
+            + w.get("sustain", 1.0) * _sustain_value(state, card)
+            + w.get("spotlight", 0.0) * _spotlight_value(state, card)
             - w["cost"] * cost)
 
 

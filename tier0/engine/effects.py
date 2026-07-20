@@ -26,6 +26,21 @@ def _amount(state: CombatState, val) -> int:
     raise ValueError(f"unknown amount formula {val!r}")
 
 
+def _bonus_formula(state: CombatState, formula: str) -> int:
+    """Scaling damage riders. Grammar: 'N_per_detonation_this_combat'
+    (Grand Finale) and 'N_per_M_fanfare' (the Fanfare crescendo — stacks
+    grant flat bonuses, kickoff §4 / principles v1.10)."""
+    n, _, rest = formula.partition("_per_")
+    if not n.isdigit():
+        raise ValueError(f"unknown bonus_formula {formula!r}")
+    if rest == "detonation_this_combat":
+        return int(n) * state.detonations_total
+    m, _, what = rest.partition("_")
+    if what == "fanfare" and m.isdigit():
+        return int(n) * (state.player.fanfare // int(m))
+    raise ValueError(f"unknown bonus_formula {formula!r}")
+
+
 def _pick_targets(state: CombatState, spec: str) -> list[Enemy]:
     living = state.living_enemies
     if not living:
@@ -206,16 +221,16 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     times = _amount(state, times)
 
     base = _amount(state, fx["amount"])
-    if "bonus_formula" in fx:                 # Grand Finale: N_per_detonation
-        formula = fx["bonus_formula"]
-        n, _, rest = formula.partition("_per_")
-        if rest != "detonation_this_combat" or not n.isdigit():
-            raise ValueError(f"unknown bonus_formula {formula!r}")
-        base += int(n) * state.detonations_total
+    if "bonus_formula" in fx:
+        base += _bonus_formula(state, fx["bonus_formula"])
     # Spotlight scales the card's own printed damage -- before external
     # buffs (strength/next_attack_up are not printed numbers) and before
     # per-target riders (v1 boring baseline; riders logged as design room).
     base = _spotlight_scale(state, card, base)
+    # Star of the Show: flat rider on Spotlighted cards' damage. Card-level
+    # texture (kickoff §3.2 ratified design space), NOT the baseline knob.
+    if state.player.spotlight and card.character == state.player.spotlight:
+        base += state.player.powers.get("spotlight_flat_damage", 0)
     if card.type == "attack":
         base += state.current_attack_bonus
     # tag_damage_<tag> powers (Accuracy-like -> shiv) add per-hit.
@@ -362,13 +377,7 @@ def _op_spend_encore(state: CombatState, fx: dict, card: Card) -> None:
     first; any shortfall drains TRUE HP -- greed is legal and priced.
     Cards that must not overdraw use the encore_cost field (playability
     gate in combat.card_playable) instead of this op."""
-    n = _amount(state, fx["amount"])
-    spent = resources.spend_encore(state, n)
-    short = n - spent
-    if short:
-        state.player.hp -= short
-        state.emit("encore_overdraw", amount=short)
-        resources.note_player_hp_loss(state, short)
+    resources.spend_encore_or_hp(state, _amount(state, fx["amount"]))
 
 
 def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
@@ -376,25 +385,83 @@ def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
     tags to designate; cards with no tag are invalid targets. Movable
     freely; persists until moved; a duplicate designation is inert.
 
-    PILOT HEURISTIC (v1, placeholder): designate the character with the
-    most tagged cards across the player's piles, preferring any companion
-    character (full rate) over self (reduced rate). A real aiming policy
-    is sheet-pass scope alongside her pilot weights."""
+    PILOT HEURISTIC (v2, sheet pass 1): designate the character with the
+    most tagged cards across the player's piles; a companion wins TIES
+    against self (full rate beats reduced rate at equal depth) but no
+    longer wins outright. v1's companions-always-preferred rule was
+    measured harmful in the EP/GS experiment: a single generated guest
+    hijacked the Spotlight from a 20-card self-kit and HALVED Ovation
+    throughput (block B, 41.7 -> 20.7 spotlighted plays/run)."""
     p = state.player
     counts: dict[str, int] = {}
     for c in (p.hand + p.draw_pile + p.discard_pile):
         if c.character and not c.kit_card:
             counts[c.character] = counts.get(c.character, 0) + 1
     others = {ch: n for ch, n in counts.items() if ch != p.character_id}
-    if others:
-        target = max(sorted(others), key=lambda ch: others[ch])
-    elif p.character_id and counts.get(p.character_id):
+    self_n = counts.get(p.character_id, 0) if p.character_id else 0
+    best = max(sorted(others), key=lambda ch: others[ch]) if others else None
+    if best is not None and others[best] >= self_n:
+        target = best
+    elif self_n:
         target = p.character_id                  # self-Spotlight fallback
     else:
         return                                   # nothing valid to aim at
     if target != p.spotlight:
         p.spotlight = target
+        state.spotlight_moved_this_turn = True      # selector-payoff window
+        state.spotlight_moves_this_combat += 1
         state.emit("spotlight_designated", character=target)
+
+
+def _op_raise_fanfare_cap(state: CombatState, fx: dict, card: Card) -> None:
+    """Rare uncapper (kickoff §4): raises the Fanfare cap. The nasty setup
+    cost is authored on the card (self-damage rider), not here. Inert for
+    characters without the resource, like every Fanfare path."""
+    p = state.player
+    if not p.fanfare_cap:
+        return
+    p.fanfare_cap += fx["amount"]
+    state.emit("fanfare_cap_raised", amount=fx["amount"], cap=p.fanfare_cap)
+
+
+def _op_generate_guest_star(state: CombatState, fx: dict, card: Card) -> None:
+    """Guest Star generation (kickoff §9), four guardrails all structural:
+    this-combat-only (tokens live in combat piles; decks rebuild from ids
+    per fight), generators Exhaust (sheet field), equal-rarity (the pool
+    is filtered to fx['rarity'] == the generator's own printed rarity),
+    and the pool is shared companions + the Guest Star set ONLY — playable
+    characters' personal cards are structurally absent because they are
+    neither companions nor guest_star rows."""
+    import copy as _copy
+    from tier0.content import loader                # late import avoids cycle
+    pool = loader.guest_star_generation_pool(fx["rarity"])
+    for _ in range(fx.get("amount", 1)):
+        pick = _copy.deepcopy(state.rng.choice(pool))
+        if "cost_override" in fx:                   # upgraded form: 0 this turn
+            pick.cost = fx["cost_override"]
+        _add_token(state, pick, "hand")
+        state.emit("guest_star_generated", card=pick.id)
+
+
+def _op_copy_spotlighted_in_hand(state: CombatState, fx: dict,
+                                 card: Card) -> None:
+    """Encore Performance (kickoff §9): duplicate a Spotlighted card in
+    hand. Dead without a designation and a drafted target — BY DESIGN
+    (duplication deepens a committed kit; it must not conjure one)."""
+    import copy as _copy
+    p = state.player
+    if not p.spotlight:
+        return
+    targets = [c for c in p.hand
+               if c.character == p.spotlight and not c.kit_card]
+    if not targets:
+        return
+    for _ in range(fx.get("amount", 1)):
+        chosen = _copy.deepcopy(state.rng.choice(targets))
+        if "cost_override" in fx:
+            chosen.cost = fx["cost_override"]
+        _add_token(state, chosen, "hand")
+        state.emit("encore_performance_copy", card=chosen.id)
 
 
 def _op_heal(state: CombatState, fx: dict, card: Card) -> None:
@@ -493,6 +560,24 @@ def _predicate(state: CombatState, name: str) -> bool:
         return any(e.current_intent()["kind"] == "attack"
                    and e.sleep_turns == 0
                    for e in state.living_enemies)
+    # --- Furina sheet-pass predicates ---
+    if name == "has_salon_members":
+        return state.player.powers.get("salon_member", 0) > 0
+    if name == "spotlight_set":
+        return state.player.spotlight is not None
+    if name == "spotlight_moved_this_turn":
+        return state.spotlight_moved_this_turn
+    if name == "spotlight_unmoved_this_combat":
+        # Commitment payoff: designated once and never re-aimed. False
+        # while nothing is designated (an empty stage is not commitment).
+        return (state.player.spotlight is not None
+                and state.spotlight_moves_this_combat <= 1)
+    if name == "spotlighted_card_played_this_turn":
+        return state.spotlighted_cards_this_turn > 0
+    if name.startswith("fanfare_at_least_"):
+        return state.player.fanfare >= int(name.rsplit("_", 1)[1])
+    if name.startswith("encore_at_least_"):
+        return state.player.encore >= int(name.rsplit("_", 1)[1])
     raise ValueError(f"unknown predicate {name!r}")
 
 
@@ -560,6 +645,9 @@ OPS = {
     "gain_encore": _op_gain_encore,
     "spend_encore": _op_spend_encore,
     "spotlight_designate": _op_spotlight_designate,
+    "raise_fanfare_cap": _op_raise_fanfare_cap,
+    "generate_guest_star": _op_generate_guest_star,
+    "copy_spotlighted_in_hand": _op_copy_spotlighted_in_hand,
     "heal": _op_heal,
     "add_card": _op_add_card,
     "discard": _op_discard,
@@ -604,6 +692,11 @@ def resolve_card(state: CombatState, card: Card) -> None:
                  + p.powers.get("attack_up_this_turn", 0))
         if state.current_card_cost == 0:
             bonus += p.powers.get("zero_cost_attacks_up", 0)
+        # Rapturous Applause: attacks +N per 10 Fanfare ("stacks grant
+        # flat power bonuses", kickoff §4). Reads the pool, spends nothing.
+        n = p.powers.get("fanfare_attack_per10", 0)
+        if n:
+            bonus += n * (p.fanfare // 10)
     state.current_attack_bonus = bonus
 
     _resolve_effects(state, card.effects, card)
@@ -638,6 +731,7 @@ def player_turn_start_triggers(state: CombatState) -> None:
     if n:
         p.block += n
         state.emit("block", amount=n)
+    salon_tick(state)                                   # Furina (kickoff §5)
     if p.powers.get("celestial_gift", 0):               # Nicole
         p.block += C.CELESTIAL_GIFT_BLOCK
     n = p.powers.get("spark_per_turn", 0)               # Endless Fireworks
@@ -652,6 +746,32 @@ def player_turn_start_triggers(state: CombatState) -> None:
             state.emit("bomb_placed", target=enemy.name,
                        damage=C.PLAYTIME_BOMB_DAMAGE)
         gain_sparks(state, 1)
+
+
+def salon_tick(state: CombatState) -> None:
+    """Salon Members (kickoff §5, on the summon rails per the audit): each
+    member is one hydro tick to a random enemy at the START of the player
+    turn (Klee-bomb timing, not Oz timing -- a sheet-pass measurement
+    decision: end-of-turn upkeep drained the buffer BEFORE enemy hits, so
+    the default archetype zeroed her elite A4; start-of-turn ticks let
+    absorption take first bite and the upkeep eats what survived the
+    night). Every tick FIRST drains Encore -- true HP when the buffer is
+    dry (the overdraw identity; greed is legal and priced). Members
+    persist for the combat; the upkeep is the governor."""
+    p = state.player
+    members = p.powers.get("salon_member", 0)
+    for _ in range(members):
+        if not state.living_enemies or not p.alive:
+            break
+        resources.spend_encore_or_hp(state, C.SALON_TICK_ENCORE_COST)
+        if not p.alive:
+            break
+        enemy = state.rng.choice(state.living_enemies)
+        dmg = C.SALON_MEMBER_DMG + p.powers.get("salon_damage_up", 0)
+        deal_damage_to_enemy(state, enemy, dmg, element="hydro",
+                             source="salon")
+        if p.burst_max:
+            p.burst_energy += C.SALON_TICK_BURST     # §1 particle economy
 
 
 def player_turn_end_triggers(state: CombatState) -> None:

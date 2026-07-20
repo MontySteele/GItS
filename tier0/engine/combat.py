@@ -69,6 +69,14 @@ def card_cost(state: CombatState, card: Card) -> int:
     cost = card.cost
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
+    # Leading Role (card-level texture, kickoff §3.2): the FIRST
+    # Spotlighted card each turn costs less. This is a Furina-card power
+    # granting economy, not the Spotlight baseline -- §2.2a governs the
+    # multiplier, and the multiplier has no path here.
+    p = state.player
+    if (p.spotlight and card.character == p.spotlight
+            and state.spotlighted_cards_this_turn == 0):
+        cost = max(0, cost - p.powers.get("spotlight_discount", 0))
     if (card.type == "attack"
             and state.player.sparks >= spark_threshold(state)):
         return 0
@@ -98,6 +106,17 @@ def play_card(state: CombatState, card: Card) -> None:
         state.spotlighted_cards_this_turn += 1
         state.emit("spotlight_card_played", card=card.id)
         resources.gain_fanfare(state, C.FANFARE_PER_SPOTLIGHT_CARD, "ovation")
+        # Card-level Spotlight texture (sheet pass 1, ratified design
+        # space): Supporting Cast draws on the FIRST Spotlighted card
+        # each turn; Standing Ovation grants Encore on EVERY one.
+        if state.spotlighted_cards_this_turn == 1:
+            n = p.powers.get("spotlight_draw", 0)
+            if n:
+                state.draw(n)
+                state.emit("extra_draw", amount=n)
+        n = p.powers.get("spotlight_encore", 0)
+        if n:
+            resources.gain_encore(state, n)
     if card.requires == "burst_energy_full":
         p.burst_energy = 0                    # playing the Burst empties it
         state.emit("burst_cast", card=card.id)
@@ -131,6 +150,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     state.splash_procs_this_turn = 0             # detonation_splash cap
     state.reactions_this_turn = 0                # Chevreuse predicate window
     state.spotlighted_cards_this_turn = 0        # Ovation / reserve cap
+    state.spotlight_moved_this_turn = False      # selector-payoff window
 
     for enemy in list(state.living_enemies):     # bombs from last turn go off
         if enemy.bombs:
@@ -162,6 +182,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         play_card(state, card)
 
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
+    grant_charged_kit(state)     # Salon-tick particles can fill the meter
+                                 # at turn end; the Burst's Retain keeps it
     # Burst cards have Retain (principles v1.4): they stay in hand.
     # Ethereal cards (the Spotlight selector) vanish to exhaust instead of
     # discarding -- an unplayed selector must never circulate as loot.

@@ -43,14 +43,29 @@ def gain_encore(state: CombatState, n: int) -> None:
 
 def spend_encore(state: CombatState, n: int) -> int:
     """Drain up to n from the buffer; returns what was actually drained.
-    Spending is Fanfare flux (the drain->refill->spend cycle)."""
+    Spending is Fanfare flux (the drain->refill->spend cycle) and burst
+    particles (kickoff §1: her economy leans on Encore spend)."""
     p = state.player
     spent = min(p.encore, n)
     if spent:
         p.encore -= spent
         state.emit("encore_spent", amount=spent)
         gain_fanfare(state, spent * C.FANFARE_PER_ENCORE_SPENT, "encore_spent")
+        if p.burst_max:
+            p.burst_energy += spent * C.BURST_PER_ENCORE_SPENT
     return spent
+
+
+def spend_encore_or_hp(state: CombatState, n: int) -> None:
+    """The overdraw primitive shared by the spend_encore op and the Salon
+    tick upkeep: drain Encore first, any shortfall drains TRUE HP --
+    greed is legal and priced (kickoff §4/§5)."""
+    spent = spend_encore(state, n)
+    short = n - spent
+    if short:
+        state.player.hp -= short
+        state.emit("encore_overdraw", amount=short)
+        note_player_hp_loss(state, short)
 
 
 def absorb_into_encore(state: CombatState, dmg: int) -> int:

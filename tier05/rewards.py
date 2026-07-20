@@ -40,6 +40,13 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
         # is what makes the rare tier 14 draftable instead of 15.
         if c.is_companion or c.kit_card or c.rarity not in C.RARITY_ODDS:
             continue
+        # Personal sheets are per-character pools (sheet pass 1): a card
+        # tagged with another character's name must never be offered here.
+        # Same bug class as the Prune catch, one slot over -- with two
+        # personal sheets loaded, Klee's card rewards would have offered
+        # Furina's cards without this line.
+        if c.character and c.character != character_id:
+            continue
         pool.setdefault(c.rarity, []).append(c)
     return {r: sorted(cs, key=lambda c: c.id) for r, cs in pool.items()}
 

@@ -60,6 +60,14 @@ class Card:
     # overdraw: cards that may legally overdraw into HP use the
     # spend_encore op instead.
     encore_cost: int = 0
+    # SCHEMA TOLERANCE (2026-07-20): a parallel M9 session introduced
+    # inline `upgrade:` fields on klee-cards.yaml rows mid-day. Tier 0
+    # IGNORES this field -- upgrades load from the *-upgrades.yaml sheets
+    # via content/upgrades.py, and the two conventions must be reconciled
+    # by ruling (the inline entries seen so far DUPLICATE existing
+    # klee-upgrades.yaml deltas). Without this field the loader hard-fails
+    # on the shared sheet, bricking both sessions.
+    upgrade: Optional[dict] = None
 
     @property
     def is_companion(self) -> bool:
@@ -161,6 +169,8 @@ class CombatState:
     current_card_companion: bool = False      # control provenance (§2.2a)
     spotlighted_cards_this_turn: int = 0      # Ovation + the reserve cap
                                               # (SPOTLIGHT_CARDS_PER_TURN_CAP)
+    spotlight_moved_this_turn: bool = False   # selector-payoff predicates
+    spotlight_moves_this_combat: int = 0      # (sheet pass 1)
 
     def emit(self, event: str, **data: Any) -> None:
         self.log.append({"turn": self.turn, "event": event, **data})

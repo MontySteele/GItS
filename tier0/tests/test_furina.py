@@ -165,6 +165,7 @@ def _stock_deck(p, *card_ids):
 
 def test_selector_designates_deepest_companion_character():
     st = furina_state()
+    st.player.draw_pile.clear()      # isolate: her real starter is now 10
     _stock_deck(st.player, "chevreuse_interdiction_fire",
                 "chevreuse_vanguards_valor", "lynette_box_trick")
     effects.resolve_card(st, loader.get_card("ethereal_spotlight"))
@@ -226,6 +227,7 @@ def test_ovation_fanfare_on_spotlighted_play():
 
 def test_designation_moves_freely_and_duplicates_inert():
     st = furina_state()
+    st.player.draw_pile.clear()      # isolate from the real starter's depth
     _stock_deck(st.player, "chevreuse_interdiction_fire",
                 "chevreuse_vanguards_valor", "lynette_box_trick")
     sel = loader.get_card("ethereal_spotlight")

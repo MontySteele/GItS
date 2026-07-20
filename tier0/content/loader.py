@@ -20,8 +20,8 @@ CONTENT_DIR = Path(__file__).parent
 # Design sheets in docs/ are the single source of truth for real card
 # pools — the sim reads them directly so design and sim never drift.
 DOCS_DIR = CONTENT_DIR.parents[1] / "docs"
-DOCS_CARD_SHEETS = ("klee-cards.yaml", "mondstadt-companions.yaml",
-                    "fontaine-companions.yaml")
+DOCS_CARD_SHEETS = ("klee-cards.yaml", "furina-cards.yaml",
+                    "mondstadt-companions.yaml", "fontaine-companions.yaml")
 
 
 def _load_yaml_dir(sub: str) -> list[dict]:
@@ -110,6 +110,21 @@ def _card_index() -> dict[str, Card]:
         dupes = {c.id for c in cards if c.id in seen or seen.add(c.id)}
         raise ValueError(f"duplicate card ids: {sorted(dupes)}")
     return index
+
+
+def guest_star_generation_pool(rarity: str) -> list[Card]:
+    """Guest Star generation pool (kickoff §9, guardrails c+d): shared
+    companions plus the purpose-built Guest Star set, at EXACTLY the
+    generator's rarity. Playable characters' personal cards are absent by
+    construction (neither companions nor guest_star rows); 5-star shared
+    Rares are unreachable from sub-Rare generators because their rarity
+    is 'rare' (the equal-rarity clause is the banner's bodyguard)."""
+    pool = [c for c in _card_index().values()
+            if (c.is_companion or c.guest_star)
+            and c.rarity == rarity and not c.kit_card]
+    if not pool:
+        raise ValueError(f"empty guest-star pool at rarity {rarity!r}")
+    return sorted(pool, key=lambda c: c.id)
 
 
 def cards_in_pool(pool: str) -> list[Card]:
