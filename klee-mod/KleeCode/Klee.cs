@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using KleeMod.Cards;
+using KleeMod.Cards.Generated;
 using MegaCrit.Sts2.Core.Entities.Characters;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.CardPools;

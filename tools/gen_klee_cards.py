@@ -40,13 +40,23 @@ MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.js
 # Ops this generator can express with verified Cmd APIs. Anything else blocks
 # the card. Keep this set honest -- widening it without a verified call site is
 # how we ship silently-wrong cards.
-MECHANICAL_OPS = {"damage", "block", "draw"}
+MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb"}
+
+# Bomb placement targets we have a verified selection idiom for.
+BOMB_TARGETS = {"enemy", "random_enemy", "random_enemies"}
 
 # Damage targets we have a confirmed builder for (see AttackCommand).
 DAMAGE_TARGETS = {"enemy", "all_enemies", "random_enemy", "random_enemies", "self"}
 
 # Cards already hand-written; never overwrite them.
-HAND_WRITTEN = {"kaboom", "duck_and_cover", "jumpy_dumpty", "pop"}
+#
+# jumpy_dumpty came off this list once place_bomb landed: its whole sheet entry
+# (damage x2 at random enemies + a bomb) is now expressible, and its C1 stub was
+# actively wrong -- it dropped the bomb half and retargeted to a chosen enemy.
+# Kaboom and DuckAndCover stay hand-written as the reference examples the rest
+# of the codebase's comments point at; Pop stays because it is the verified
+# bomb card the playtest signed off on.
+HAND_WRITTEN = {"kaboom", "duck_and_cover", "pop"}
 
 # Upgrade deltas are NOT in the sheet. These are codegen defaults, flagged in
 # the manifest for design triage -- they are a placeholder for a ruling, not a
@@ -55,6 +65,7 @@ UPGRADE_DAMAGE_SINGLE = 3
 UPGRADE_DAMAGE_MULTI = 2  # aoe or multi-hit: +N applies per hit, so smaller
 UPGRADE_BLOCK = 3
 UPGRADE_DRAW = 1
+UPGRADE_BOMB_DAMAGE = 2
 
 RARITY_CS = {
     "basic": "CardRarity.Basic",
@@ -102,7 +113,31 @@ def blocked_reason(card: dict) -> str | None:
                 return "formula-driven damage"
             if "bonus_vs_bombed" in eff or "bonus_vs_aura" in eff:
                 return "conditional damage bonus (needs aura/bomb systems)"
+        if op == "place_bomb":
+            if eff.get("target") not in BOMB_TARGETS:
+                return f"bomb target '{eff.get('target')}'"
+            if not isinstance(eff.get("amount"), int):
+                return "formula-driven bomb count"
     return None
+
+
+def bomb_var(card: dict) -> str:
+    """
+    Which DynamicVar carries bomb damage.
+
+    A card that both attacks and places a bomb needs two distinct numbers, and
+    both cannot be "Damage" -- DynamicVarSet is keyed by name, so the second
+    would overwrite the first. ExtraDamage is a real base-game var with its own
+    accessor, so the loc system resolves {ExtraDamage} without inventing a
+    custom name whose placeholder support is unverified.
+
+    Cards that only place bombs keep plain Damage, which matches the
+    hand-written Pop and keeps their card text reading naturally.
+    """
+    has_attack = any(
+        e["op"] == "damage" and e["target"] != "self" for e in card.get("effects", [])
+    )
+    return "ExtraDamage" if has_attack else "Damage"
 
 
 def build_vars(card: dict) -> list[str]:
@@ -122,6 +157,11 @@ def build_vars(card: dict) -> list[str]:
             out.append(f'new BlockVar({eff["amount"]}m, ValueProp.Move)')
         elif op == "draw":
             out.append(f'new CardsVar({int(eff["amount"])})')
+        elif op == "place_bomb":
+            if bomb_var(card) == "ExtraDamage":
+                out.append(f'new ExtraDamageVar({eff["bomb_damage"]}m)')
+            else:
+                out.append(f'new DamageVar({eff["bomb_damage"]}m, ValueProp.Move)')
     return out
 
 
@@ -149,6 +189,44 @@ def build_body(card: dict) -> list[str]:
                 "DynamicVars.HpLoss.BaseValue, "
                 "ValueProp.Unblockable | ValueProp.Unpowered, this);"
             )
+
+        elif op == "place_bomb":
+            var = bomb_var(card)
+            n = eff["amount"]
+            dmg = f"(int)DynamicVars.{var}.BaseValue"
+
+            if eff["target"] == "enemy":
+                if not any("ThrowIfNull" in l for l in lines):
+                    lines.append(
+                        'ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");'
+                    )
+                place = (
+                    f"await BombPower.Place(choiceContext, cardPlay.Target, {dmg}, "
+                    "Owner.Creature, this);"
+                )
+                if n == 1:
+                    lines.append(place)
+                else:
+                    lines.append(
+                        f"for (var i = 0; i < {n}; i++)\n        {{\n"
+                        f"            {place}\n        }}"
+                    )
+            else:
+                # Each bomb rolls its own target, so N bombs can land on N
+                # different enemies -- matching Tier 0's per-bomb target pick.
+                # HittableEnemies can be empty if the last enemy died earlier in
+                # this card's resolution, and NextItem would throw on that.
+                lines.append(
+                    f"for (var i = 0; i < {n}; i++)\n"
+                    "        {\n"
+                    "            var candidates = CombatState!.HittableEnemies.ToList();\n"
+                    "            if (candidates.Count == 0) break;\n"
+                    "            var bombTarget = Owner.RunState.Rng.CombatTargets.NextItem(candidates);\n"
+                    "            if (bombTarget == null) break;\n"
+                    f"            await BombPower.Place(choiceContext, bombTarget, {dmg}, "
+                    "Owner.Creature, this);\n"
+                    "        }"
+                )
 
         elif op == "damage":
             times = eff.get("times", 1)
@@ -203,6 +281,21 @@ def build_description(card: dict) -> str:
             n = eff["amount"]
             parts.append("Draw {Cards:diff()} card." if n == 1 else "Draw {Cards:diff()} cards.")
 
+        elif op == "place_bomb":
+            var = bomb_var(card)
+            n = eff["amount"]
+            where = "" if eff["target"] == "enemy" else " on random enemies"
+            if n == 1:
+                where = "" if eff["target"] == "enemy" else " on a random enemy"
+                parts.append(
+                    f"Place a [gold]Bomb[/gold]{where} dealing {{{var}:diff()}} damage."
+                )
+            else:
+                parts.append(
+                    f"Place {n} [gold]Bombs[/gold]{where}, each dealing "
+                    f"{{{var}:diff()}} damage."
+                )
+
         elif op == "damage" and eff["target"] == "self":
             parts.append("Lose {HpLoss} HP.")
 
@@ -231,6 +324,10 @@ def build_upgrade(card: dict) -> list[str]:
             lines.append(f"DynamicVars.Block.UpgradeValueBy({UPGRADE_BLOCK}m);")
         elif op == "draw":
             lines.append(f"DynamicVars.Cards.UpgradeValueBy({UPGRADE_DRAW}m);")
+        elif op == "place_bomb":
+            lines.append(
+                f"DynamicVars.{bomb_var(card)}.UpgradeValueBy({UPGRADE_BOMB_DAMAGE}m);"
+            )
         elif op == "damage" and eff["target"] != "self":
             multi = eff.get("times", 1) > 1 or eff["target"] in ("all_enemies", "random_enemies")
             delta = UPGRADE_DAMAGE_MULTI if multi else UPGRADE_DAMAGE_SINGLE
@@ -250,6 +347,11 @@ def emit(card: dict) -> str:
     target_type = "TargetType.Self"
     for eff in card["effects"]:
         if eff["op"] == "damage" and eff["target"] != "self":
+            target_type = TARGET_CS[eff["target"]]
+            break
+        # A bomb aimed at a chosen enemy makes the whole card enemy-targeted,
+        # even when nothing about it deals direct damage (e.g. Double Pop).
+        if eff["op"] == "place_bomb":
             target_type = TARGET_CS[eff["target"]]
             break
 
@@ -289,10 +391,12 @@ def emit(card: dict) -> str:
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using Godot;
 using KleeMod.Elements;
+using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;

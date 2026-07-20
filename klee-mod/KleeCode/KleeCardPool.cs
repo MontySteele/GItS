@@ -36,7 +36,6 @@ public sealed class KleeCardPool : CardPoolModel
             // Starters (hand-written).
             ModelDb.Card<Kaboom>(),
             ModelDb.Card<DuckAndCover>(),
-            ModelDb.Card<JumpyDumpty>(),
             ModelDb.Card<Pop>(),
 
             // Generated from docs/klee-cards.yaml by tools/gen_klee_cards.py.
@@ -48,15 +47,25 @@ public sealed class KleeCardPool : CardPoolModel
             // generation draws Common/Uncommon/Rare, and a pool with none of
             // those soft locks the reward screen after every combat (finding 17).
             ModelDb.Card<AlchemicalCuriosity>(),
+            ModelDb.Card<AmmoScavenging>(),
             ModelDb.Card<BigBaddaBoom>(),
             ModelDb.Card<BlastRadius>(),
+            ModelDb.Card<BombVoyage>(),
+            ModelDb.Card<BombsAway>(),
+            ModelDb.Card<ClusterCharge>(),
             ModelDb.Card<Crackle>(),
+            ModelDb.Card<DoublePop>(),
+            ModelDb.Card<FishFlavoredBait>(),
             ModelDb.Card<FlameOnTheWick>(),
             ModelDb.Card<HideAndSeek>(),
+            ModelDb.Card<JumpyDumpty>(),
+            ModelDb.Card<JumpyDumptyMk2>(),
+            ModelDb.Card<MineToss>(),
             ModelDb.Card<NoHoldingBack>(),
             ModelDb.Card<PocketFireworks>(),
             ModelDb.Card<RapidFire>(),
             ModelDb.Card<RunAway>(),
+            ModelDb.Card<SorryJean>(),
             ModelDb.Card<SpiritedAway>(),
         };
     }
