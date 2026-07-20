@@ -201,3 +201,44 @@ Amend here, not in chat history.
     forced.
 43. **v0.1 scorecard baseline recorded in docs/klee-pass-3-report.md**;
     freezes on ratification of the two band asks.
+
+## Errata pass (2026-07-19, pass-3 ratification + furina-predesign Part 1)
+
+44. **Frozen v2 implemented** (principles v1.5 §2.2): non-boss Frozen no
+    longer skips — the enemy's next action deals -50% damage
+    (FROZEN_DAMAGE_MULT), and while Frozen the first Attack hit Shatters
+    it (SHATTER_DAMAGE 6, removes Frozen). Shatter is direct HP damage
+    (like reaction splash), Attack-source hits only, and a hit can never
+    shatter the freeze it just applied (snapshot at pipeline entry).
+    Boss path (Vulnerable 2) unchanged — the ratification kept it.
+45. **control_uptime detector** (§2.2a): enemy actions = intents + sleep
+    skips; a frozen ATTACK action counts (1 - FROZEN_DAMAGE_MULT) = 0.5
+    negated, credited only when the freeze-triggering card was a
+    companion (provenance on Enemy.frozen_by_companion). Won fights
+    above CONTROL_UPTIME_CARRY (0.40) flag SUPPORT_CARRY. Under Frozen
+    v2 the flag needs >80% frozen-attack uptime, so it is quiet by
+    design today — it exists to police future payoff-tier stuns.
+46. **Errata null result, logged as the trail demands:** solo-battery
+    Frozen fires 0.01x/fight on punisher — Klee's pyro cadence consumes
+    hydro/cryo auras (overload 2.4, vaporize 1.7/fight) before a freeze
+    pair can meet. Pre/post-errata reaction hp-delta is identical
+    (punisher -38.5 vs -38.6). The predicted elite drop nulled because
+    the skip was never load-bearing SOLO; the mispricing is a co-op
+    concern, now guarded by the detector + §2.2a pricing rule.
+47. **Ratified winrate bands codified** in klee.yaml (winrate_bands:
+    tank_boss demo 85-97 / spark 45-65 / reaction >=35; gauntlet
+    reaction >=75), checked in score_character only at >=1000 fights
+    (WINRATE_BAND_MIN_FIGHTS — the ratification's noise process fix).
+    Matchup texture is archetype identity now, and regression-locked.
+48. **Demolition tank_boss 97.4% at 1000 fights** — exceeds the widened
+    97 cap; the ratification pre-registered this as "real and comes
+    back." Measured the designated damper preemptively: splash proc-cap
+    3 lands it at 96.5% with swarm 100 / gauntlet 99.4 unharmed. NOT
+    armed (its round-3 trigger was A2 drag, not winrate); test xfailed
+    pending ruling. Ask filed in docs/klee-errata-report.md.
+49. **v0.1 median identity regression-locked** (test_errata.V01_MEDIAN,
+    300 fights / seed 42, +-0.3): errata moved every median axis by
+    <=0.05. Companion-heal Exhaust (Barbara/Bennett, sheet v0.3.1)
+    loads through the existing Card.exhaust field; the barbara_injection
+    A4 probe still clears its raw-healing floor, so its expectation
+    needed no recalibration after all.

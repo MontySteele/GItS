@@ -122,6 +122,11 @@ def _expected_damage(state: CombatState, card: Card) -> float:
                     total += pending
                 if fx.get("target") != "all_enemies":
                     break
+    # Shatter (v1.5): an attack hitting the frozen default target adds
+    # bonus damage (and thaws it — the tradeoff vs keeping the -50%).
+    if (total > 0 and card.type == "attack" and living
+            and min(living, key=lambda e: e.hp).frozen):
+        total += C.SHATTER_DAMAGE
     return total
 
 
@@ -209,13 +214,15 @@ def _score(state: CombatState, card: Card, w: dict) -> float:
 def _incoming_damage(state: CombatState) -> float:
     total = 0.0
     for e in state.living_enemies:
-        if e.sleep_turns > 0 or e.frozen:
+        if e.sleep_turns > 0:
             continue
         intent = e.current_intent()
         if intent["kind"] == "attack":
             amount = intent["amount"] + intent.get("ramp", 0) * max(
                 0, state.turn - intent.get("ramp_after", 0))
             per_hit = powers.modify_damage_dealt(e, amount)
+            if e.frozen:                # v1.5: halved, not skipped — and an
+                per_hit *= C.FROZEN_DAMAGE_MULT   # attack this turn thaws it
             per_hit = powers.modify_damage_taken(state.player, per_hit)
             total += int(per_hit) * intent.get("times", 1)
     return total

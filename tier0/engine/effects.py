@@ -61,7 +61,8 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     if (source == "attack" and enemy.aura
             and state.player.powers.get("solar_isotoma", 0)):
         state.player.block += C.SOLAR_ISOTOMA_BLOCK
-    dmg = powers.modify_damage_dealt(state.player, base)
+    was_frozen = enemy.frozen       # snapshot: a hit can't shatter the
+    dmg = powers.modify_damage_dealt(state.player, base)  # freeze it applies
     dmg = reactions.resolve_hit(state, enemy, element, dmg)
     dmg = powers.modify_damage_taken(enemy, dmg)
     dmg = int(dmg)
@@ -75,6 +76,16 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     enemy.hp -= hp_dmg
     state.emit("damage", target=enemy.name, amount=effective, blocked=blocked,
                base=base, source=source)
+    # Frozen v2 Shatter (v1.5): the first Attack hit on a frozen enemy
+    # deals bonus damage and removes Frozen. Direct HP, like splash.
+    if was_frozen and enemy.frozen and source == "attack" and enemy.alive:
+        enemy.frozen = False
+        sh = min(C.SHATTER_DAMAGE, max(0, enemy.hp))
+        enemy.hp -= C.SHATTER_DAMAGE
+        state.emit("damage", target=enemy.name, amount=sh, blocked=0,
+                   base=C.SHATTER_DAMAGE, source="shatter")
+        state.emit("shatter", target=enemy.name)
+        hp_dmg += C.SHATTER_DAMAGE
     if was_alive and not enemy.alive:
         state.kills_this_card += 1
     if hp_dmg > 0:
@@ -365,8 +376,9 @@ def _predicate(state: CombatState, name: str) -> bool:
     if name == "killed_target":
         return state.kills_this_card > 0
     if name == "enemy_intends_attack":
+        # Frozen enemies still attack under v1.5 (at -50%), so they count.
         return any(e.current_intent()["kind"] == "attack"
-                   and not e.frozen and e.sleep_turns == 0
+                   and e.sleep_turns == 0
                    for e in state.living_enemies)
     raise ValueError(f"unknown predicate {name!r}")
 
@@ -452,6 +464,7 @@ def _resolve_effects(state: CombatState, effects: list[dict],
 
 
 def resolve_card(state: CombatState, card: Card) -> None:
+    state.current_card_companion = card.is_companion    # control provenance
     state.reactions_this_card = 0
     state.kills_this_card = 0
     state.detonations_at_card_start = state.detonations_total

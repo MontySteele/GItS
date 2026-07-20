@@ -2,7 +2,8 @@
 
 Player turn: bombs detonate -> auras tick -> power hooks -> draw + energy ->
 pilot plays until done -> discard hand -> power decay.
-Enemy turns: scripted intents, no AI. Frozen/asleep enemies skip.
+Enemy turns: scripted intents, no AI. Asleep enemies skip; frozen enemies
+act at -50% damage (Frozen v2, principles v1.5).
 """
 
 from __future__ import annotations
@@ -131,18 +132,19 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
         enemy.sleep_turns -= 1
         state.emit("enemy_sleep", enemy=enemy.name)
         return
-    if enemy.frozen:
-        enemy.frozen = False
-        enemy.advance_intent()
-        state.emit("enemy_frozen_skip", enemy=enemy.name)
-        return
-
     enemy.block = 0
     powers.on_turn_start(state, enemy)
     if not enemy.alive:
         return
     intent = enemy.current_intent()
     kind = intent["kind"]
+    # Frozen v2 (v1.5): the enemy still acts, but its action deals -50%
+    # damage. Consumed by acting (or by Shatter before this turn).
+    frozen = enemy.frozen
+    if frozen:
+        enemy.frozen = False
+        state.emit("frozen_action", enemy=enemy.name, kind=kind,
+                   by_companion=enemy.frozen_by_companion)
     state.emit("intent", enemy=enemy.name, kind=kind,
                debuffed=bool(enemy.powers.get("weak", 0)
                              or enemy.powers.get("vulnerable", 0)))
@@ -152,6 +154,8 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             0, state.turn - intent.get("ramp_after", 0))
         for _ in range(intent.get("times", 1)):
             dmg = powers.modify_damage_dealt(enemy, amount)
+            if frozen:
+                dmg *= C.FROZEN_DAMAGE_MULT
             dmg = powers.modify_damage_taken(state.player, dmg)
             dmg = int(dmg)
             blocked = min(state.player.block, dmg)

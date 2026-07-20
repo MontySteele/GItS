@@ -139,3 +139,11 @@ def archetype_decks(character_id: str) -> dict[str, str]:
 def deck_bands(character_id: str) -> dict[str, dict[str, float]]:
     """Per-axis, per-deck score ceilings, e.g. A2_scaling caps."""
     return dict(_character_index()[character_id].get("deck_bands", {}))
+
+
+def winrate_bands(character_id: str) -> dict[str, dict[str, tuple]]:
+    """Ratified per-encounter winrate bands: enc -> deck -> (lo, hi).
+    hi may be None (floor only). Checked at >=WINRATE_BAND_MIN_FIGHTS."""
+    raw = _character_index()[character_id].get("winrate_bands", {})
+    return {enc: {deck: (band[0], band[1]) for deck, band in per_deck.items()}
+            for enc, per_deck in raw.items()}

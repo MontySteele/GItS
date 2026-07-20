@@ -45,9 +45,11 @@ Damage tagged element E hitting an enemy holding aura A ≠ E consumes A and tri
 | Pyro×Electro | Overload | +damage splash to ALL enemies |
 | Electro×Cryo | Superconduct | Apply Vulnerable |
 | Hydro×Electro | Electro-Charged | Apply stacking DoT |
-| Hydro×Cryo | Frozen | Enemy skips next intent (bosses: reduced effect) |
+| Hydro×Cryo | Frozen | Enemy's next action −50% damage; while Frozen, first attack that hits it **Shatters**: bonus damage, removes Frozen. Bosses: Vulnerable 2 instead. **No skip/stun at base** — see §2.2a |
 | Anemo trigger | Swirl | Copy target's aura to all enemies |
 | Geo trigger | Crystallize | Gain Block |
+
+**§2.2a — Hard-CC pricing rule (v1.5).** Base StS2 deliberately makes reliable stun scarce (an act-3 Ancient reward at 3 energy + Exhaust; looping it is a known degenerate win). No reaction, and no companion card, may produce an intent-skip at repeatable-common economics. Frozen's base effect is soft control (above); **full stun is payoff-tier design space only** (rare character cards, artifact sets, 5-star kits), priced at or above the base game's stun scarcity, with per-combat diminishing returns (an enemy that thaws gains Freeze Resist). Detector: `control_uptime` — % of enemy actions negated by companion-sourced effects; winning fights above threshold flag SUPPORT_CARRY.
 
 **Iron rule: amplifiers are per-hit and consume the aura.** No persistent damage multipliers from reactions, ever. This is the balance governor; it's also faithful. `Rejected:` reaction-stacks-as-buff designs — they turn ×1.5 into a compounding engine and every deck becomes Vaporize goodstuff.
 
@@ -98,7 +100,7 @@ Companion cards come in three **roles**, all of which route their power *through
 - **Appliers** put off-element auras on enemies (Xingqiu, Fischl) — reaction fuel.
 - **Buffers** boost your character's own output or defenses (Nicole, Bennett) — note Klee's real best team is buffer-based, not applier-based; both roles are first-class.
 - **Triggers** act on existing auras (Prune's Swirl, Albedo's Crystallize).
-4-star cards stay at uncommon-grade power. 5-star Rares may be payoff-grade **support** payoffs: strong buffs, reaction amplification, aura manipulation — never an independent damage engine, never self-scaling. Test stands: if deleting your character's own cards from a winning deck wouldn't gut it, companions are too strong.
+4-star cards stay at uncommon-grade power. 5-star Rares may be payoff-grade **support** payoffs: strong buffs, reaction amplification, aura manipulation — never an independent damage engine, never self-scaling. Test stands: if deleting your character's own cards from a winning deck wouldn't gut it, companions are too strong. **This applies to the control axis too (v1.5):** if companions negate the enemy while 'your character does stuff,' the supports are the key ingredient — companions never source hard CC, and the SUPPORT_CARRY detector enforces it.
 
 ### 4.4 Companion appetite (character-design lever)
 A character's statline declaration includes a **companion appetite**: Low (self-sufficient; companions are seasoning), Standard (Klee: reactions are a real archetype but not mandatory), or High (a hypothetical Venti/swirl-themed character *designed* to fish the companion pool — higher aura-starvation tolerance in Tier 0, more companion-synergy hooks in their personal cards). High-appetite characters are the only sanctioned case where companion-fishing outcompetes the character's own plan.
@@ -147,3 +149,4 @@ Flagged for v0.2+ planning: characters whose Genshin identity is *support* (Colu
 - v1.1: Corrected Albedo to 5-star. Added two-tier companion structure (§4.2): 5-star supports as Rares (one card each, ≤3/nation), 4-stars at common/uncommon with multi-card kits. Companion roles taxonomy (Applier/Buffer/Trigger) — buffers promoted to first-class after checking Klee's live best team (Klee/Durin/Nicole/Prune) is buffer+swirl, not applier-based. Prune replaces Albedo as Klee's personal-pool signature companion (Little Hexenzirkel lore); Albedo/Durin/Nicole become Mondstadt shared Rares. Added companion-appetite lever (§4.4). Guardrail 3 amended to match.
 - v1.2: Added Appendix A (support-protagonist design space / Columbina). No changes to v1 systems; Columbina explicitly targets the §4.4 High-appetite slot.
 - v1.4: Burst cards gain Retain (§2.4), per Tier 0 pass-1 finding that discard rhythm made Bursts uncastable.
+- v1.5: Frozen redesigned (soft control + Shatter; stun becomes payoff-tier per §2.2a hard-CC pricing rule) after user caught the base-game stun-scarcity mismatch. Enabler-not-carry extended to the control axis with SUPPORT_CARRY detector. Healing-grade policy added: true in-combat healing is rare-tier or Exhausts; repeatable sustain routes through capped buffer pools (see furina-predesign-notes.md — the pattern debuts with Furina and becomes mod-wide). Companion sheet errata: Barbara/Bennett heals gain Exhaust.

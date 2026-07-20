@@ -12,7 +12,7 @@
    effects: [{op: damage, amount: 5, target: enemy, applies_element: true}]}
 - {id: fischl_oz, name: "Fischl — Oz, at Your Side", star: 4, rarity: uncommon, role_c: applier, element: electro, cost: 1, type: power,
    effects: [{op: apply_power, power: oz_summon, amount: 3, target: self, note: "3 turns: end of turn 3 dmg + electro to random enemy"}]}
-- {id: barbara_melody, name: "Barbara — Soothing Melody", star: 4, rarity: common, role_c: buffer, element: hydro, cost: 1, type: skill,
+- {id: barbara_melody, name: "Barbara — Soothing Melody", star: 4, rarity: common, role_c: buffer, element: hydro, cost: 1, type: skill, exhaust: true,
    effects: [{op: heal, amount: 3}]}
 - {id: barbara_shining_idol, name: "Barbara — Shining Idol", star: 4, rarity: uncommon, role_c: buffer, element: hydro, cost: 2, type: skill,
    effects: [{op: heal, amount: 6}, {op: apply_aura, element: hydro, target: random_enemy}]}
@@ -22,7 +22,7 @@
    effects: [{op: swirl, target: enemy}, {op: burst_energy, amount: 8}]}
 - {id: bennett_passion, name: "Bennett — Passion Overload", star: 4, rarity: common, role_c: buffer, element: pyro, cost: 1, type: skill,
    effects: [{op: buff_next_attack, amount: 4}, {op: burst_energy, amount: 5}]}
-- {id: bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage", star: 4, rarity: uncommon, role_c: buffer, element: pyro, cost: 2, type: skill,
+- {id: bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage", star: 4, rarity: uncommon, role_c: buffer, element: pyro, cost: 2, type: skill, exhaust: true,
    effects: [{op: heal, amount: 4}, {op: apply_power, power: attack_up_this_turn, amount: 3, target: self}]}
 - {id: kaeya_frostgnaw, name: "Kaeya — Frostgnaw", star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: attack,
    effects: [{op: damage, amount: 5, target: enemy, applies_element: true}]}

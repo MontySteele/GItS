@@ -27,10 +27,19 @@ SUPERCONDUCT_VULN = 2         # Vulnerable stacks applied
 ELECTROCHARGED_DOT = 4        # DoT amount
 ELECTROCHARGED_DOT_TURNS = 2
 CRYSTALLIZE_BLOCK = 4         # player Block gained
-FROZEN_BOSS_VULN = 2          # bosses consume Frozen for Vulnerable 2, not
-                              # a skipped intent (decision-2 contingency,
-                              # triggered by round-3 ruling: Frozen must
-                              # not be a dead pick vs bosses)
+FROZEN_BOSS_VULN = 2          # bosses consume Frozen for Vulnerable 2
+                              # (round-3 ruling; STANDS through the v1.5
+                              # errata — the freeze-team control identity)
+# Frozen v2 (principles v1.5 §2.2 errata): no skip/stun at base. The
+# frozen enemy's next action deals -50% damage; while Frozen, the first
+# Attack hit Shatters it (bonus damage, removes Frozen).
+FROZEN_DAMAGE_MULT = 0.5      # frozen enemy's next action damage multiplier
+SHATTER_DAMAGE = 6            # bonus damage on shattering hit (the knob —
+                              # errata: if gauntlet floor dips, tune this)
+CONTROL_UPTIME_CARRY = 0.40   # §2.2a detector: won fights with more than
+                              # this fraction of enemy actions negated by
+                              # companion-sourced control flag SUPPORT_CARRY
+                              # (propose-and-tune value from the errata)
 
 # --- Klee resources (spec §4.2; klee-character-design.md §3) ---
 SPARKS_FOR_FREE_ATTACK = 3    # at 3 Sparks, next Attack costs 0
@@ -66,3 +75,5 @@ AMP_STACK_LIMIT = 4.0         # single hit > 4x base damage -> log provenance
 # --- Harness defaults ---
 DEFAULT_FIGHTS_PER_ENCOUNTER = 1000
 DEFAULT_SEED = 20260719
+WINRATE_BAND_MIN_FIGHTS = 1000    # ratification process fix: winrate band
+                                  # checks only run at >=1000 fights

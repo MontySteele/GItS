@@ -94,7 +94,9 @@ class Enemy(Fighter):
     bombs: list[Bomb] = field(default_factory=list)
     is_boss: bool = False
     sleep_turns: int = 0        # skips its turn while > 0 (BURST CHECK)
-    frozen: bool = False        # skips next intent
+    frozen: bool = False        # v1.5: next action -50% dmg; first attack
+                                # hit Shatters (bonus dmg, removes Frozen)
+    frozen_by_companion: bool = False   # control_uptime provenance (§2.2a)
 
     def current_intent(self) -> dict:
         return self.intents[self.intent_index % len(self.intents)]
@@ -120,6 +122,7 @@ class CombatState:
     companions_played: list[str] = field(default_factory=list)
     companion_cost_delta_this_turn: int = 0   # cost_mod op
     replay_next_companion: int = 0            # Study Buddy
+    current_card_companion: bool = False      # control provenance (§2.2a)
 
     def emit(self, event: str, **data: Any) -> None:
         self.log.append({"turn": self.turn, "event": event, **data})

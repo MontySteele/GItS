@@ -50,6 +50,11 @@ def print_median(character: str, rep: dict) -> None:
         print(f"  ⚠ {flag}")
     if not rep["median_flags"]:
         print("  ✓ median statline passes heuristic + identity constraints")
+    for flag in rep.get("band_flags", []):
+        marker = "⚠" if flag.startswith("WINRATE BAND") else "·"
+        print(f"  {marker} {flag}")
+    if rep.get("band_flags") == []:
+        print("  ✓ all ratified winrate bands hold")
 
 
 def print_summary(character: str, deck: str, encounter: str, s: dict) -> None:

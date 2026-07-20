@@ -67,11 +67,38 @@ def test_electrocharged_applies_dot(state):
     assert e.powers["dot"] == C.ELECTROCHARGED_DOT
 
 
-def test_frozen_skips_next_intent(state):
+def test_frozen_soft_control(state):
+    # Frozen v2 (principles v1.5): no skip — next action -50% damage.
+    from tier0.engine.combat import _enemy_turn
     e = state.enemies[0]
+    e.intents = [{"kind": "attack", "amount": 10}]
     hit(state, e, "hydro", 0)
     hit(state, e, "cryo", 5)
     assert e.frozen
+    hp = state.player.hp
+    _enemy_turn(state, e)
+    assert state.player.hp == hp - int(10 * C.FROZEN_DAMAGE_MULT)
+    assert not e.frozen                     # consumed by acting
+    hp = state.player.hp
+    _enemy_turn(state, e)
+    assert state.player.hp == hp - 10       # back to full damage
+
+
+def test_shatter_on_attack_hit(state):
+    # v1.5: while Frozen, the first Attack hit Shatters — bonus damage,
+    # removes Frozen. The freezing hit itself must NOT shatter.
+    from tier0.engine.effects import deal_damage_to_enemy
+    e = state.enemies[0]
+    hit(state, e, "hydro", 0)
+    hp_before = e.hp
+    deal_damage_to_enemy(state, e, 5, element="cryo", source="attack")
+    assert e.frozen                         # freezing hit didn't self-shatter
+    assert e.hp == hp_before - 5
+    hp_before = e.hp
+    deal_damage_to_enemy(state, e, 5, element=None, source="attack")
+    assert not e.frozen
+    assert e.hp == hp_before - 5 - C.SHATTER_DAMAGE
+    assert any(ev["event"] == "shatter" for ev in state.log)
 
 
 def test_frozen_boss_becomes_vulnerable():

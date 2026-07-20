@@ -105,10 +105,12 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
     elif pair == frozenset(("hydro", "cryo")):
         name = "frozen"
         if enemy.is_boss:
-            # Bosses don't skip; they take Vulnerable instead (round 3).
+            # Bosses take Vulnerable instead (round 3; stands post-errata).
             powers.apply_power(state, enemy, "vulnerable", C.FROZEN_BOSS_VULN)
         else:
+            # v1.5: soft control — next action -50%, shatterable. No skip.
             enemy.frozen = True
+            enemy.frozen_by_companion = state.current_card_companion
 
     if name:
         state.reactions_this_card += 1

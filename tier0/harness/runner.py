@@ -119,8 +119,25 @@ def score_character(character: str, fights: int, seed: int) -> dict:
             median_flags.append(
                 f"CONSTRAINT VIOLATED on median: {con} "
                 f"({median_scores[left]:.1f} vs {median_scores[right]:.1f})")
+    # Ratified winrate bands (pass-3 closeout): matchup texture is part of
+    # each archetype's identity. Process fix: only checked at >=1000
+    # fights — below that, binomial noise makes band edges meaningless.
+    band_flags = []
+    wr_bands = loader.winrate_bands(character)
+    if wr_bands and fights < C.WINRATE_BAND_MIN_FIGHTS:
+        band_flags.append(f"winrate bands not checked "
+                          f"({fights} < {C.WINRATE_BAND_MIN_FIGHTS} fights)")
+    elif wr_bands:
+        for enc, per_deck in wr_bands.items():
+            for deck, (lo, hi) in per_deck.items():
+                wr = metrics.summarize(results[deck]["stats"][enc])["winrate"]
+                if wr < lo or (hi is not None and wr > hi):
+                    hi_s = f"{hi:.0%}" if hi is not None else "-"
+                    band_flags.append(
+                        f"WINRATE BAND: {deck} vs {enc} {wr:.1%} "
+                        f"outside [{lo:.0%}, {hi_s}]")
     return {"per_deck": results, "median_scores": median_scores,
-            "median_flags": median_flags}
+            "median_flags": median_flags, "band_flags": band_flags}
 
 
 def main(argv: list[str] | None = None) -> int:

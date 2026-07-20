@@ -35,6 +35,10 @@ class FightStats:
     auras_wasted: int
     cards_played: int = 0
     regrets: int = 0                # pilot_regret samples (spec §6)
+    enemy_actions: int = 0          # intents taken + sleep skips (§2.2a)
+    control_negated: float = 0.0    # action-equivalents negated by
+                                    # COMPANION-sourced control (frozen
+                                    # attack = 0.5; future full stuns = 1.0)
     flags: list[str] = field(default_factory=list)
 
     @property
@@ -71,6 +75,8 @@ def merge_stages(stages: list["FightStats"]) -> "FightStats":
         merged.auras_wasted += s.auras_wasted
         merged.cards_played += s.cards_played
         merged.regrets += s.regrets
+        merged.enemy_actions += s.enemy_actions
+        merged.control_negated += s.control_negated
         merged.flags = sorted(set(merged.flags) | set(s.flags))
     merged.won = all(s.won for s in stages)
     return merged
@@ -82,7 +88,8 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
     total_dmg = block = blocked = energy = 0
     extra_draws = extra_energy = healing = debuff_stacks = 0
     debuffed_intents = total_intents = cards_played = regrets = 0
-    reactions = reaction_dmg = auras_wasted = 0
+    reactions = reaction_dmg = auras_wasted = sleeps = 0
+    control_negated = 0.0
     flags: list[str] = []
     won = False
     turns = state.turn
@@ -120,6 +127,13 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
             total_intents += 1
             if ev["debuffed"]:
                 debuffed_intents += 1
+        elif e == "enemy_sleep":
+            sleeps += 1             # scripted self-sleep: an action, but
+                                    # never companion-sourced negation
+        elif e == "frozen_action":
+            # §2.2a control_uptime: a frozen attack is half-negated.
+            if ev["kind"] == "attack" and ev["by_companion"]:
+                control_negated += 1 - C.FROZEN_DAMAGE_MULT
         elif e == "reaction":
             reactions += 1
             reaction_dmg += int(ev["amp_delta"])
@@ -138,6 +152,13 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
     if t3 > 0 and t10 / t3 > C.RUNAWAY_SCALING_RATIO:
         flags.append("SUPERLINEAR")
 
+    enemy_actions = total_intents + sleeps
+    # §2.2a: a won fight where companions negated most of the enemy's
+    # output means the supports were the key ingredient.
+    if (won and enemy_actions
+            and control_negated / enemy_actions > C.CONTROL_UPTIME_CARRY):
+        flags.append("SUPPORT_CARRY")
+
     return FightStats(
         won=won, turns=turns, hp_start=hp_start,
         hp_end=max(0, state.player.hp),
@@ -151,6 +172,7 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
         reactions=reactions,
         reaction_damage=reaction_dmg, auras_wasted=auras_wasted,
         cards_played=cards_played, regrets=regrets,
+        enemy_actions=enemy_actions, control_negated=control_negated,
         flags=sorted(set(flags)))
 
 
@@ -179,6 +201,9 @@ def summarize(all_stats: list[FightStats]) -> dict:
         "auras_wasted_per_fight": sum(s.auras_wasted for s in all_stats) / n,
         "pilot_regret_rate": (sum(s.regrets for s in all_stats)
                               / max(1, sum(s.cards_played for s in all_stats))),
+        # §2.2a: fraction of enemy actions negated by companion control.
+        "control_uptime": (sum(s.control_negated for s in all_stats)
+                           / max(1, sum(s.enemy_actions for s in all_stats))),
         "flagged_fights": sum(1 for s in all_stats if s.flags),
         "flags": sorted({f for s in all_stats for f in s.flags}),
     }
