@@ -142,10 +142,13 @@ cannot work until the slice list exists.
 - **O2 — RESOLVED**, the hard way; see finding 10.
 - **O3 — Spikes S1 and S2 not yet run.** Both still gate C2 per spec. S1 is now
   cheaper than budgeted: ilspycmd is installed and the decompile loop is fast.
-- **O4 — `RunWonAchievement` will throw on a win.** It does
-  `Enum.Parse<Achievement>(Id.Entry.Capitalize() + "Win")` and no `KleeWin`
-  member exists. Harmless for C1 (acceptance is one fight) but a guaranteed
-  crash the first time anyone completes a run. Fix before any real playtest.
+- **O4 — `RunWonAchievement` — DOWNGRADED to latent; see finding 19.** The
+  earlier "guaranteed crash the first time anyone completes a run" claim was
+  wrong for v0.107.1: the property has *zero callers* in either sts2.dll or
+  BaseLib.dll, and every `AchievementsHelper` method is an empty stub. It
+  cannot fire in this build. Deliberately NOT patched — see finding 19 for why
+  a defensive patch would be worse than the bug. Re-check if MegaCrit wires
+  achievements up.
 - **O5 — `LOCPROBE` diagnostic still in `KleeMod.cs`.** Temporary; dumps
   base-game card descriptions to confirm loc syntax. Delete once C2 text is
   rendering correctly.
@@ -249,3 +252,68 @@ consumed -- so this may not work. Do not assume it does.
 
 Cosmetic only; bombs function correctly. Confirmed in playtest: Pop places a
 bomb, it detonates early when the enemy is hit, and the debuff name renders.
+
+**Finding 19 — O4 was overstated, and the safe fix is no fix.**
+`CharacterModel.RunWonAchievement` really does evaluate
+`Enum.Parse<Achievement>(Id.Entry.Capitalize() + "Win")`, and `KleeWin` really
+is not a member of the enum -- but the property has **zero callers** in
+sts2.dll or BaseLib.dll (checked `RunWonAchievement`, `WonAchievement` and
+`get_RunWon*`), and every method on `AchievementsHelper` (`AfterRunEnded`,
+`CheckTimelineComplete`, `CheckForDefeatedAllEnemiesAchievement`) is an empty
+body in v0.107.1. Achievements are declared but not wired up. The property is
+dead code, so it cannot throw in this build, and O4 was never a playtest
+blocker.
+
+Deliberately NOT patched. The `Achievement` enum has no `None`/`Invalid`
+member -- the lowest value is `IroncladWin = 0`. Any Harmony patch that
+swallowed the parse failure would have to return *some* real achievement, i.e.
+silently grant the player a Steam achievement they did not earn. That is a
+worse failure than a crash, because it is invisible and not locally
+reversible. There is no safe return value, so the correct action is to leave
+the landmine documented and disarmed by circumstance rather than to defuse it
+wrongly.
+
+Re-check when MegaCrit implements achievements. At that point this stops being
+a null-safety question and becomes a design one -- what, if anything, a Klee
+run completion should award -- which is a chat ruling, not a local edit.
+
+Method note: this is the decompile-before-asserting rule catching one of our
+own claims rather than an assumption about the base game. The original entry
+inferred the crash from the source line alone and never checked for callers.
+
+**Finding 20 — keyword tooltips: the Downfall pattern does not apply, and BaseLib
+already has the real one.**
+Finding 12 recorded that keyword tooltips "come from a per-mod
+`card_keywords.json` (Downfall pattern)". That was carried over from StS1 and is
+wrong here. Nothing in sts2.dll reads such a file. What actually exists:
+
+- `CardKeyword` is a closed 8-member enum (None, Exhaust, Ethereal, Innate,
+  Unplayable, Retain, Sly, Eternal). Not extensible by declaration.
+- `CardKeywordExtensions.GetTitle/GetDescription` resolve against the
+  **`card_keywords` loc table**, as `<slug>.title` / `<slug>.description`.
+- BaseLib extends the enum at runtime: a `public static CardKeyword` field
+  marked `[CustomEnum]` + `[KeywordProperties]` on a holder class gets an
+  allocated ID during its `ModelDb.Init` prefix patch, registered into
+  `CustomKeywords.KeywordIDs`. BaseLib then patches `GetLocKeyPrefix` to return
+  the custom key and `HoverTipFactory.FromKeyword` to build the tip. The key is
+  `<ModPrefix> + FIELDNAME.ToUpperInvariant()`, e.g. `KLEEMOD-BOMB`.
+  `BaseLib.Cards.BaseLibKeywords.Purge` is the worked example.
+
+One trap worth recording before anyone implements it: `AutoKeywordPosition`
+`Before`/`After` push the keyword onto `AutoKeywordText.Additional*Keywords`,
+which are **global lists appended to every card's text**. That is correct for
+Exhaust-shaped keywords and wrong for Bomb/Spark, which are terms referenced
+inside specific card descriptions. These want `AutoKeywordPosition.None`.
+
+NOT implemented tonight, deliberately. The queue item asked for drafted strings
+with placeholder wording, and those are done (`docs/card_keywords.json`, with a
+`_mechanism` note pointing here). Registering custom enum values touches model
+init -- the same surface that produced findings 14 and 9 -- and doing it
+unattended hours before a playtest, to gain a hover tooltip, is a bad trade.
+The API above is verified, so it is a cheap change to make deliberately.
+
+**Correctness fix shipped alongside:** the drafted `bomb` tooltip said the charge
+explodes "at the start of that enemy's turn". Canon (klee-character-design.md
+§3) and our own `BombPower.BeforeSideTurnStart` both detonate at the start of
+*Klee's* turn. Text corrected, and it now also states that bombs stack and each
+keeps its own damage, which is the rule players are most likely to guess wrong.

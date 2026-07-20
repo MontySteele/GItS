@@ -1,5 +1,6 @@
 {
-  "_comment": "Keyword tooltip strings, Downfall card_keywords.json pattern (art-sprint-spec §4). Drafted from principles §2; review alongside C2 card text. One sentence each, player-facing.",
+  "_comment": "Keyword tooltip strings. Drafted from principles §2; review alongside C2 card text. One sentence each, player-facing.",
+  "_mechanism": "NOT the Downfall card_keywords.json pattern -- that was an assumption and it is wrong for StS2 (see DECISIONS finding 20). This file is a text staging area, not something the game reads. Real path: declare `public static CardKeyword Foo;` fields carrying [CustomEnum] + [KeywordProperties] on a holder class; BaseLib assigns IDs at ModelDb.Init and registers them in CustomKeywords.KeywordIDs. Strings then go in the `card_keywords` loc table under `<PREFIX>FOO.title` / `<PREFIX>FOO.description`, where PREFIX is BaseLib's mod prefix (KLEEMOD-). Use AutoKeywordPosition.None for these -- Before/After append the keyword to EVERY card's text globally, which is right for Exhaust and wrong for Bomb.",
   "aura": "An element clinging to an enemy for 2 turns; hitting it with a different element consumes it and triggers a Reaction.",
   "pyro": "Fire. All of Klee's attacks apply Pyro.",
   "hydro": "Water. Leaves a Hydro aura on the enemy.",
@@ -16,7 +17,7 @@
   "shatter": "Hitting a Frozen enemy: bonus damage, and the Frozen state is removed.",
   "swirl": "Anemo trigger: copies the target's aura onto all enemies.",
   "crystallize": "Geo trigger: you gain Block.",
-  "bomb": "A charge placed on an enemy: it explodes at the start of that enemy's turn, and your attacks on it can set it off early.",
+  "bomb": "A charge placed on an enemy: it explodes at the start of YOUR turn, and your Attacks on that enemy can set it off early. Bombs stack, and each keeps its own damage.",
   "spark": "Klee's counter: at 3 Sparks, her next Attack costs 0 and the Sparks are spent.",
   "burst": "Fills from Skill-tagged cards and Reactions; when full, your signature Burst card becomes playable and casting it empties the meter.",
   "retain": "This card stays in your hand at end of turn.",

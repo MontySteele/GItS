@@ -78,7 +78,7 @@ internal static class KleeSelfCheck
         }
     }
 
-    private const int RuleCount = 6;
+    private const int RuleCount = 8;
 
     private static void Fail(string rule, string detail) => Findings.Add($"[{rule}] {detail}");
 
@@ -108,26 +108,67 @@ internal static class KleeSelfCheck
             Fail("R2", "StartingDeck is empty; first combat will have nothing to draw.");
         }
 
-        // R3. Card rewards and transforms draw by RARITY, so "pool is non-empty"
-        // is not the invariant that matters -- a pool of four Basic cards has
-        // zero valid reward candidates and soft locks the reward screen after
-        // EVERY combat, deterministically. That is exactly how this shipped:
-        // the pool looked populated, and the check that would have caught it was
-        // testing the wrong property.
+        // R3. The reward-screen small-pool guard. Kept permanently: finding 17
+        // was fixed incidentally, by the codegen happening to produce a rarity
+        // spread, and an incidental fix is one refactor away from regressing.
+        //
+        // The rules below are derived from CardFactory.CreateForReward as it is
+        // actually written, not from the symptom we observed. Reading it
+        // corrected our own earlier comment here, which claimed any missing
+        // rarity soft locks deterministically. It does not: RollForRarity is
+        // handed the set of rarities present in the *post-blacklist* pool and
+        // GetNextAllowedRarity walks to the next one with wrapping, so a single
+        // dry rarity degrades gracefully. Three narrower things do throw.
         var pool = klee.CardPool?.AllCards?.ToList() ?? new();
         if (pool.Count == 0)
         {
             Fail("R3", "CardPool.AllCards is empty; card rewards and transforms will soft lock.");
+            return;
         }
-        else
+
+        // R3a. THE softlock invariant. Basic and Ancient are excluded from
+        // reward generation outright, and the rarity-wrapping fallback cycles
+        // only Common/Uncommon/Rare -- it can never land back on Basic. So a
+        // pool with no card in those three rarities makes GetNextAllowedRarity
+        // wrap to its start and return CardRarity.None, which throws. This is
+        // the real shape of finding 17: not "no rares", but "nothing but
+        // Basic". It is the one condition here that locks every reward screen.
+        var generatable = pool
+            .Where(c => c.Rarity != CardRarity.Basic && c.Rarity != CardRarity.Ancient)
+            .ToList();
+        if (generatable.Count == 0)
         {
-            foreach (var rarity in new[] { CardRarity.Common, CardRarity.Uncommon, CardRarity.Rare })
+            Fail("R3a", "CardPool has no Common/Uncommon/Rare cards. Reward generation excludes "
+                      + "Basic and Ancient and its rarity fallback cannot wrap back onto them, "
+                      + "so every reward screen will throw. This is the finding-17 soft lock.");
+        }
+
+        // R3b. Blacklist exhaustion. CreateForReward draws cardCount times,
+        // adding each pick to a blacklist that is subtracted from the pool
+        // before the next draw. If the whole generatable pool is smaller than
+        // one screen's worth of offers, the last draw sees an empty pool and
+        // throws -- and no rarity fallback can save it, because there is
+        // nothing of any rarity left. Three is the standard reward count;
+        // Discovery-style effects can ask for more, so this is a floor.
+        const int MaxRewardOffers = 3;
+        if (generatable.Count > 0 && generatable.Count < MaxRewardOffers)
+        {
+            Fail("R3b", $"CardPool has only {generatable.Count} generatable card(s), fewer than the "
+                      + $"{MaxRewardOffers} a reward screen offers. Each pick is blacklisted from the "
+                      + "next draw, so the screen will exhaust the pool and throw.");
+        }
+
+        // R3c. Rarity coverage. Not a soft lock on its own, per the fallback
+        // above -- but a missing rarity means the declared rarity odds silently
+        // collapse onto whatever remains, so the pool no longer plays the way
+        // the sheet says it does. Worth knowing about; distinct from R3a.
+        foreach (var rarity in new[] { CardRarity.Common, CardRarity.Uncommon, CardRarity.Rare })
+        {
+            if (!pool.Any(c => c.Rarity == rarity))
             {
-                if (!pool.Any(c => c.Rarity == rarity))
-                {
-                    Fail("R3", $"CardPool has no {rarity} cards. Reward and transform screens draw "
-                             + "by rarity and will soft lock with nothing valid to offer.");
-                }
+                Fail("R3c", $"CardPool has no {rarity} cards. Not a soft lock -- reward generation "
+                          + "falls through to the next rarity -- but the rarity odds collapse onto "
+                          + "the remaining tiers, so drafts will not match the sheet.");
             }
         }
     }
