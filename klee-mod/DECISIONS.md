@@ -395,3 +395,28 @@ character set. `ObtainCharUnlockEpoch` (`:36990`) is the same shape but safe —
 it builds an epoch id by string concat and logs on miss. Others are likely.
 Worth a decompiler sweep for `ArgumentOutOfRangeException("character"` before
 the next milestone rather than finding them one playtest at a time.
+
+## Standing rule — sweep before building (2026-07-20, chat ruling)
+
+**Before building infrastructure or reasoning around a limitation, sweep
+BaseLib and the decompiled game for an existing solution.**
+
+Codified from the morning triage after three hits in one night, each of
+which would otherwise have been built or agonized over redundantly:
+
+1. **The achievement guard** (O4): a long risk analysis about patching an
+   achievement method, dissolved by `AchievementsHelper`'s existing
+   `ICustomModel` guard.
+2. **The character-model guards** (finding 21): 29 separate BaseLib guards
+   gated on `is ICustomModel`, all forfeited silently by deriving from raw
+   `CharacterModel`. The soft lock was the *last* symptom, not the first.
+3. **RunHistory** (Tier 1): the planned telemetry writer was already
+   written — by MegaCrit. `CreateRunHistoryEntry` records more per run
+   than our design specced, for modded profiles too.
+
+The pattern behind all three: the base game and BaseLib are mature
+codebases whose authors hit our problems first. The cost of a sweep is
+minutes; the cost of missing the existing mechanism ranges from redundant
+code (best case) to hours-later soft locks with misleading symptoms
+(finding 21). The sweep is now a required step, same standing as "read
+the decompiled reference before patching."
