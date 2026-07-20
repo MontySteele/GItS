@@ -25,6 +25,7 @@ internal static class KleePowerIcons
     {
         SparkPower => KleePck.Path("klee/powers/spark.png"),
         BombPower => KleePck.Path("klee/powers/bomb.png"),
+        BurstMeterPower => KleePck.Path("klee/powers/burst.png"),
         AuraPower aura => KleePck.Path(
             "klee/powers/aura_" + aura.Element.ToString().ToLowerInvariant() + ".png"),
         _ => null,

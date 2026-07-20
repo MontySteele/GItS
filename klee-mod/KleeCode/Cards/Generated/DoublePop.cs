@@ -28,7 +28,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Generated;
 
-public sealed class DoublePop : CustomCardModel
+public sealed class DoublePop : CustomCardModel, ISkillTagCard
 {
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("double_pop");
 

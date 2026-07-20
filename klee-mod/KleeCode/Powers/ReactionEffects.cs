@@ -28,6 +28,20 @@ internal static class ReactionEffects
         CardModel? cardSource,
         Element consumedAura)
     {
+        // Burst economy, reaction half: +5 for EVERY named reaction --
+        // amplifiers included (the sim credits BURST_PER_REACTION whenever
+        // resolve_hit names a reaction, and Vaporize/Melt are named). This is
+        // the single funnel: AuraPower.AfterDamageReceived and
+        // BombPower.Detonate both route here, so no gain site is missed and
+        // none double-counts. Dealer-credited; Gain gates on Klee (sim:
+        // `if p.burst_max`), so a dealer-less detonation edge case no-ops
+        // harmlessly rather than crediting the wrong side.
+        if (reaction != Reaction.None && dealer != null)
+        {
+            await KleeBurstResource.Gain(
+                choiceContext, dealer, BurstConstants.PerReaction, cardSource);
+        }
+
         switch (reaction)
         {
             case Reaction.Vaporize:

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
@@ -53,6 +54,22 @@ public sealed class KleeElementalHooks : AbstractModel
     {
         _instance ??= ModelDb.GetById<KleeElementalHooks>(ModelDb.GetId<KleeElementalHooks>());
         yield return _instance;
+    }
+
+    /// <summary>
+    /// Burst economy, skill-tag half: +5 AFTER a skill-tagged card resolves.
+    /// The sim's play_card adds BURST_PER_SKILL_TAG after the effect loop, so
+    /// AfterCardPlayed (post-resolution) is the matching phase -- a
+    /// burst_energy op on the same card lands first, then the tag bonus,
+    /// same order and same total as tier0.
+    /// </summary>
+    public override async Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        if (cardPlay.Card is not ISkillTagCard) return;
+        await KleeBurstResource.Gain(
+            choiceContext, cardPlay.Card.Owner.Creature,
+            BurstConstants.PerSkillTag, cardPlay.Card);
     }
 
     public override async Task BeforeDamageReceived(

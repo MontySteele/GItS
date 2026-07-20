@@ -690,3 +690,49 @@ INNER exception of the FIRST occurrence; everything after it is echo.
 Corollary: keep AbstractModel statics trivial — anything that can throw
 belongs in a lazy path where the exception surfaces once, at a call site
 that names the actual problem.
+
+---
+
+## Burst-energy spike — the meter lands (standing plan item 2, 2026-07-20)
+
+**The CustomResource shape won.** BaseLib auto-registers every concrete
+`CustomResource` subclass at early post-init (reflection scan over mod
+types → `CustomResources<T>.Register`) — finding 28's ownership family
+again: we define `KleeBurstResource`, we never register it. Instances are
+per-player per-combat, created lazily by BaseLib's SpireField;
+`BasicCustomResource.PrepForCombat` zeroes them, which is exactly the
+sim's per-fight reset. The cost machinery is verified for the Burst card
+later: `SetCanonicalCost(card, 60)` gates playability through
+`CanAfford`/`UnplayableReason`, and `Spend` is virtual so casting can
+reset the meter to 0 (sim law: overflow is lost at cast, not at gain).
+
+**BaseLib ships NO ambient meter UI.** Its resource UI is cost-side card
+visuals only; `BasicResourceVisualsHandler` is an empty marker interface
+with no consumers. So the meter renders as `BurstMeterPower` on Klee —
+the SparkPower display idiom. The resource is CANONICAL, the badge is
+DISPLAY, and `KleeBurstResource.Gain` is the only writer of either; that
+sync invariant must survive when cast lands.
+
+**The economy is LAW (R23 note):** BurstConstants mirrors tier0 —
+BURST_PER_SKILL_TAG 5, BURST_PER_REACTION 5, klee.yaml burst_max 60.
+Accrual is deliberately uncapped past 60 (sim never clamps; the grant
+check is >=).
+
+**Two funnels, both single:** skill tags gain in
+`KleeElementalHooks.AfterCardPlayed` (post-resolution, the same phase as
+play_card's tag check — an on-card burst_energy op lands first, then the
+tag bonus, same total as the sim); reactions gain at the top of
+`ReactionEffects.Resolve`, which every reaction passes through exactly
+once (AuraPower and BombPower.Detonate both route there), amplifiers
+included because the sim credits any NAMED reaction.
+
+**Deliberately deferred to the power-card pass:** the kit-grant machinery
+(grant-to-hand at >= 60, hand-size deferral, Retain) and Sparks 'n'
+Splash itself — the Burst lands LAST per the standing plan. Until then a
+full meter is visible and spends nothing, which is honest.
+
+**Unblocked by the burst_energy op:** combustion_study AND clockwork_toy
+(pool 37 → 39). Sheet `skill_tag` now emits an `ISkillTagCard` marker
+(codegen) — Pop is the one hand-written carrier, and the parity lint
+gained a tag-parity check so a missing marker (= silently no burst
+energy) is a deploy-gate failure, not a playtest surprise.

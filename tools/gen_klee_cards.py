@@ -52,7 +52,13 @@ MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.js
 # DynamicVar(string, decimal), DynamicVarSet has a public string indexer,
 # and the base game itself ships name-only vars (DynamicVar("Times", ...)
 # in CardModel's hover tips) -- all verified in the sts2 decompile.
-MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark"}
+#
+# burst_energy landed with the Burst-energy spike (standing plan item 2): the
+# call site is KleeBurstResource.Gain -> CustomResources<T> + PowerCmd, the
+# same verified shape SparkPower.Gain uses. Amount is a LITERAL unless
+# klee-upgrades.yaml carries a `burst_energy: +N` delta; then it becomes a
+# named DynamicVar("BurstEnergy", n) -- the Sparks idiom exactly.
+MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_energy"}
 
 # Bomb placement targets we have a verified selection idiom for.
 BOMB_TARGETS = {"enemy", "random_enemy", "random_enemies"}
@@ -93,7 +99,7 @@ HAND_WRITTEN |= {"sizzle", "flame_dance", "kaboom_beetle_swarm", "elemental_ecst
 #                  own doc comment prescribes (verified in the decompile)
 # Anything else (remove:, add:, condition:, ...) is structural and blocks the
 # card's upgrade path until it is hand-finished or re-ruled numeric.
-EXPRESSIBLE_DELTAS = {"damage", "block", "draw", "spark", "bomb_damage", "cost"}
+EXPRESSIBLE_DELTAS = {"damage", "block", "draw", "spark", "bomb_damage", "burst_energy", "cost"}
 
 RARITY_CS = {
     "basic": "CardRarity.Basic",
@@ -201,6 +207,9 @@ def build_vars(card: dict) -> list[str]:
             # render); "Sparks" collides with no base-game var name. Cards
             # without a sheet upgrade keep the literal (see MECHANICAL_OPS).
             out.append(f'new DynamicVar("Sparks", {int(eff["amount"])}m)')
+        elif op == "burst_energy" and burst_upgrade(card):
+            # Same rule as Sparks: a var only when the upgrade must render.
+            out.append(f'new DynamicVar("BurstEnergy", {int(eff["amount"])}m)')
     return out
 
 
@@ -235,6 +244,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "draw": any(e["op"] == "draw" for e in effects),
         "spark": any(e["op"] == "gain_spark" for e in effects),
         "bomb_damage": any(e["op"] == "place_bomb" for e in effects),
+        "burst_energy": any(e["op"] == "burst_energy" for e in effects),
         "cost": str(card.get("cost")) != "X",
     }
     for key, value in deltas.items():
@@ -249,6 +259,11 @@ def spark_upgrade(card: dict) -> int:
     """Ruled Spark upgrade delta (M9): `spark: +N` in klee-upgrades.yaml. 0 = none.
     Zero when the card's upgrade plan is unappliable -- no upgrade renders."""
     return int(upgrade_plan(card)[0].get("spark", 0))
+
+
+def burst_upgrade(card: dict) -> int:
+    """Ruled Burst-energy upgrade delta: `burst_energy: +N`. 0 = none."""
+    return int(upgrade_plan(card)[0].get("burst_energy", 0))
 
 
 def build_body(card: dict) -> list[str]:
@@ -357,6 +372,16 @@ def build_body(card: dict) -> list[str]:
                 f"await SparkPower.Gain(choiceContext, Owner.Creature, {amount}, this);"
             )
 
+        elif op == "burst_energy":
+            amount = (
+                'DynamicVars["BurstEnergy"].IntValue'
+                if burst_upgrade(card)
+                else str(int(eff["amount"]))
+            )
+            lines.append(
+                f"await KleeBurstResource.Gain(choiceContext, Owner.Creature, {amount}, this);"
+            )
+
     return lines
 
 
@@ -425,6 +450,12 @@ def build_description(card: dict) -> str:
                     else f"Gain {n} [gold]Sparks[/gold]."
                 )
 
+        elif op == "burst_energy":
+            if burst_upgrade(card):
+                parts.append("Gain {BurstEnergy:diff()} [gold]Burst Energy[/gold].")
+            else:
+                parts.append(f'Gain {int(eff["amount"])} [gold]Burst Energy[/gold].')
+
     return " ".join(parts)
 
 
@@ -438,8 +469,10 @@ def build_upgrade(card: dict) -> list[str]:
     deltas, reason = upgrade_plan(card)
     if reason:
         return []
-    key_for = {"block": "block", "draw": "draw", "gain_spark": "spark", "place_bomb": "bomb_damage"}
-    var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]'}
+    key_for = {"block": "block", "draw": "draw", "gain_spark": "spark", "place_bomb": "bomb_damage",
+               "burst_energy": "burst_energy"}
+    var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
+               "burst_energy": 'DynamicVars["BurstEnergy"]'}
     lines, done = [], set()
     for eff in card["effects"]:
         op = eff["op"]
@@ -484,6 +517,10 @@ def emit(card: dict) -> str:
     interfaces = "CustomCardModel"
     if elemental:
         interfaces += ", IElementalCard"
+    # Sheet `skill_tag` -> ISkillTagCard: worth BURST_PER_SKILL_TAG burst
+    # energy when played (KleeElementalHooks.AfterCardPlayed reads the marker).
+    if "skill_tag" in card.get("tags", []):
+        interfaces += ", ISkillTagCard"
 
     ind = "\n        "
     vars_cs = (",".join(f"{ind}    {v}" for v in vars_)).lstrip()

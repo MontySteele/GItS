@@ -28,7 +28,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Generated;
 
-public sealed class AmmoScavenging : CustomCardModel
+public sealed class AmmoScavenging : CustomCardModel, ISkillTagCard
 {
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("ammo_scavenging");
 
