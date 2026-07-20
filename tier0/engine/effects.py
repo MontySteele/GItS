@@ -319,10 +319,16 @@ def _op_add_card(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
+    # Kit cards are exempt: the v1.9 invariant is that the Burst never
+    # enters a pile. Without this, a random discard (Bright Idea) moved
+    # the granted Burst to discard, it circulated as loot on reshuffle,
+    # and grant_charged_kit -- which dedups against HAND only -- appended
+    # the same object a second time. Review-workflow catch, repro'd.
     for _ in range(fx.get("amount", 1)):
-        if not state.player.hand:
+        pool = [c for c in state.player.hand if not c.kit_card]
+        if not pool:
             return
-        victim = state.rng.choice(state.player.hand)
+        victim = state.rng.choice(pool)
         state.player.hand.remove(victim)
         state.player.discard_pile.append(victim)
         state.emit("discard", card=victim.id)
@@ -330,7 +336,7 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
 
 def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
     hand = state.player.hand
-    pool = hand
+    pool = [c for c in hand if not c.kit_card]   # same invariant as discard
     if fx.get("filter") == "status":
         pool = [c for c in hand if c.rarity == "status"]
     for _ in range(fx.get("amount", 1)):

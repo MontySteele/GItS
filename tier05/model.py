@@ -179,7 +179,14 @@ def run_one(character: str, archetype: str, pilot_id: str,
     fights = 0
     for i, kind in enumerate(nodes):
         if kind == "R":
-            action, target = rest_action(deck_ids, hp, max_hp, archetype)
+            # Policies flagged emergent_plan (adaptive) smith toward the
+            # deck's own dominant shape, never the assigned label -- the
+            # A/B contract is that adaptive ignores the label everywhere.
+            rest_plan = archetype
+            if getattr(policy, "emergent_plan", False):
+                rest_plan = draft.dominant_archetype(
+                    [loader.get_card(cid) for cid in deck_ids])
+            action, target = rest_action(deck_ids, hp, max_hp, rest_plan)
             if action == "heal":
                 hp = min(max_hp, hp + round(C.REST_HEAL_FRACTION * max_hp))
             elif action == "remove":

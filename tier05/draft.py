@@ -280,6 +280,15 @@ def adaptive_policy(rng: random.Random, deck: list[Card],
     return best
 
 
+# Adaptive's plan is EMERGENT, and that must hold at rest sites too, not
+# just reward screens. M7 smithing picks an on-plan card, and passing the
+# assigned label into that choice made adaptive runs vary with a label the
+# policy is defined not to see -- measured: 5/40 seeds diverged, 2/40 win
+# flips (review-workflow catch). run_one reads this flag and derives the
+# rest plan from dominant_archetype(deck) instead.
+adaptive_policy.emergent_plan = True
+
+
 def hybrid_policy(rng: random.Random, deck: list[Card],
                   offers: list[Card], archetype: str) -> Optional[Card]:
     """The discriminating experiment for the assigned-vs-adaptive gap

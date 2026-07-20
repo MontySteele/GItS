@@ -123,6 +123,28 @@ def test_kit_burst_grant_and_regrant():
     assert [c.id for c in st.player.hand] == ["sparks_n_splash"]
 
 
+def test_random_discard_cannot_touch_the_kit_burst():
+    """Review-workflow regression: Bright Idea's random discard moved the
+    granted Burst into discard, it recirculated as loot, and the grant
+    dedup (hand-only) then aliased a second copy. Kit cards are exempt
+    from discard and exhaust-from-hand victim pools."""
+    from tier0.engine import effects
+    from tier0.tests.conftest import make_state
+    st = make_state()
+    st.player.burst_max = 60
+    st.player.burst_energy = 60
+    sns = loader.get_card("sparks_n_splash")
+    filler = loader.get_card("kaboom")
+    st.player.hand = [sns, filler]
+    effects._op_discard(st, {"op": "discard", "amount": 2}, filler)
+    assert sns in st.player.hand            # only the filler discarded
+    assert not any(c.kit_card for c in st.player.discard_pile)
+    effects._op_exhaust_from(st, {"op": "exhaust_from", "zone": "hand",
+                                  "amount": 2}, filler)
+    assert sns in st.player.hand
+    assert not any(c.kit_card for c in st.player.exhaust_pile)
+
+
 def test_sparks_make_attack_free():
     from tier0.engine.combat import card_cost, play_card
     from tier0.tests.conftest import make_state

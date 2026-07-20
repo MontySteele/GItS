@@ -36,6 +36,19 @@ def test_upgraded_ids_flow_through_metrics_unchanged():
     assert draft.archetype_shares(plain) == draft.archetype_shares(smithed)
 
 
+def test_adaptive_runs_are_label_independent_including_rests():
+    """Review-workflow regression: M7 smithing consulted the assigned
+    label, so adaptive runs (defined to ignore it) diverged by label at
+    rest sites. Pilot held fixed so the only remaining label channel --
+    the archetype-matched pilot -- cannot mask the rest channel."""
+    decks = {}
+    for label in ("demolition", "spark", "reaction"):
+        rs = model.run_many("klee", label, "generic",
+                            draft.adaptive_policy, runs=25, seed=1000)
+        decks[label] = [r.deck_ids for r in rs]
+    assert decks["demolition"] == decks["spark"] == decks["reaction"]
+
+
 def test_unappliable_upgrades_never_chosen_at_rest():
     deck = loader.starting_deck("klee") + ["catalytic_conversion"]
     # All on-plan reaction candidates for this deck are the unappliable
