@@ -109,23 +109,37 @@ def main():
             time.sleep(0.4)  # be polite to the wiki CDN
         print(f"  {title}  ({dims})")
 
-    # SOURCES.tsv: one row per plan row (final target or candidate), per spec §0
+    # SOURCES.tsv: one row per plan row (final target or candidate), per spec §0.
+    # MERGE with the existing file, never rewrite: the wiki API rate-limits and
+    # returns partial batches under load, and a rewrite from a partial `resolved`
+    # silently truncated the release checklist from 115 rows to 30 (2026-07-20).
+    # Existing rows are kept verbatim; only rows for titles resolved THIS run are
+    # added or updated (keyed by filename, so a re-source replaces its old row).
+    existing = []
+    if SOURCES.exists():
+        with open(SOURCES, newline="") as f:
+            existing = [row for row in csv.reader(f, delimiter="\t")][1:]
+    by_filename = {row[0]: row for row in existing if row}
+
+    seen = set()
+    for r in rows:
+        if r["title"] not in resolved:
+            continue
+        if r["pick"] == "shortlist":
+            fn = f"art/candidates/{r['asset_id']}/r{r['rank']}.png"
+        else:
+            fn = r["out"]
+        key = (fn, r["title"])
+        if key in seen:
+            continue
+        seen.add(key)
+        by_filename[fn] = [fn, resolved[r["title"]][0], "F", priority(r["out"])]
+
     with open(SOURCES, "w", newline="") as f:
         w = csv.writer(f, delimiter="\t")
         w.writerow(["filename", "source_url", "tier", "replace_priority"])
-        seen = set()
-        for r in rows:
-            if r["title"] not in resolved:
-                continue
-            if r["pick"] == "shortlist":
-                fn = f"art/candidates/{r['asset_id']}/r{r['rank']}.png"
-            else:
-                fn = r["out"]
-            key = (fn, r["title"])
-            if key in seen:
-                continue
-            seen.add(key)
-            w.writerow([fn, resolved[r["title"]][0], "F", priority(r["out"])])
+        for row in by_filename.values():
+            w.writerow(row)
 
     print(f"\n{len(resolved)} titles resolved, {downloaded} new downloads -> {RAW}")
     print(f"SOURCES.tsv: {len(seen)} rows")
