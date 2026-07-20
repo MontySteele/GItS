@@ -13,6 +13,15 @@ Ratification item 3 is therefore **partially superseded**:
 
 ## Part 2 — Furina design direction (pre-design; full doc after character kickoff)
 
+> **SUPERSEDED (2026-07-20, per furina-kickoff-v0.1.md §4/§12).** This
+> part predates the v1.6 buffer-pool amendment and the R8 conjunctive
+> healing law. Where it conflicts with the kickoff doc, the kickoff doc
+> governs. Known inversions: Encore is now **unbounded per-combat**
+> (Part 2's ~25%-maxHP hard cap is dead — the capped resource is
+> **Fanfare**, at %maxHP); true healing is now **Rare-tier AND Exhausts**
+> (Part 2's disjunctive form is dead). Part 1 (Frozen v2 errata) is NOT
+> superseded — it is settled principles v1.5.
+
 **The healing red flag, adopted as a mod-wide law.** Any repeatable true healing hands stall/loop decks the payoff "top my HP forever." Base StS prices in-combat healing accordingly (rare, exhausting, or relic-scale trickles). Policy (principles v1.5): true in-combat healing is rare-tier or Exhausts; repeatable sustain routes through **capped buffer pools** — and Furina is where the pattern debuts.
 
 **The Encore pool (working name).** Osty is the base-game precedent: a persistent, non-Block damage buffer that's mechanically legal in this ecosystem. Furina's version:

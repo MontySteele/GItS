@@ -63,6 +63,32 @@ SOLAR_ISOTOMA_BLOCK = 3           # block per attack hit vs aura'd enemy
 CELESTIAL_GIFT_BLOCK = 4          # Nicole: block at start of turn
 CATALYTIC_BURST_PER_REACTION = 5  # Catalytic Conversion bonus burst/reaction
 
+# --- Furina: Spotlight (kickoff §3) ---
+SPOTLIGHT_MULT = 1.5          # ratified baseline: +50% printed numbers on
+                              # the Spotlighted character's cards. The flat
+                              # rate is the knob; texture lives in cards.
+SPOTLIGHT_SELF_MULT = 1.25    # PLACEHOLDER -- self-Spotlight reduced rate.
+                              # The asymmetry is the primary anti-self-buff
+                              # lever; the NUMBER is a sheet-pass sweep and
+                              # a user call (kickoff open item 3).
+SPOTLIGHT_CARDS_PER_TURN_CAP = None   # schematized but OFF (kickoff §3.2):
+                              # turns on only if Tier 0 shows the rate
+                              # asymmetry alone fails the §6 criterion.
+                              # When set: empowered plays per turn beyond
+                              # the cap resolve at printed numbers.
+
+# --- Furina: Encore & Fanfare (kickoff §4) ---
+# Encore is unbounded per-combat (v1.6) -- no cap constant by design.
+FANFARE_CAP_FRACTION = 0.5    # Fanfare cap = fraction of maxHP.
+                              # PLACEHOLDER pending sheet pass (kickoff
+                              # declares "capped at %maxHP", number TBD).
+FANFARE_PER_HP_LOST = 1       # per point of true HP lost
+FANFARE_PER_ENCORE_GAINED = 1 # per point of Encore gained
+FANFARE_PER_ENCORE_SPENT = 1  # per point of Encore spent
+FANFARE_PER_SPOTLIGHT_CARD = 2    # the Ovation merge: per Spotlighted
+                              # card played. NO passive per-turn accrual
+                              # constant exists; do not add one (§4).
+
 # --- Reference relics ---
 BURNING_BLOOD_HEAL = 6        # REF_IRONCLAD: heal after each won fight
                               # (ruling 1: gives A4 a nonzero anchor)
@@ -134,7 +160,15 @@ PROGRESSION_GAP_COMPENSATOR = {"normal": 1.0, "elite": 0.8, "boss": 0.7}
 # --- Tier 0.5 rewards (spec §3 — the thing under test) ---
 REWARD_CARD_OFFERS = 3
 RARITY_ODDS = {"common": 0.60, "uncommon": 0.35, "rare": 0.05}
-NATION_WEIGHTS = {"mondstadt": 1.0}   # §4.1 mechanism; single-nation v0.1
+# §4.1 made real (Furina kickoff §10, sprint 1): the companion reward slot
+# concentrates SAME_NATION_REWARD_SHARE of its weight on the run
+# character's own nation; the remainder spreads across ALL nations
+# (relative cross-nation weights in NATION_WEIGHTS -- all 1.0 today).
+# A single-nation world reduces exactly to the old uniform pick, so every
+# archived pre-Fontaine number is unchanged by the mechanism itself; what
+# changed the world is the Fontaine sheet loading (12 new 4-star cards).
+SAME_NATION_REWARD_SHARE = 0.5
+NATION_WEIGHTS = {"mondstadt": 1.0, "fontaine": 1.0}
 
 # principles v1.8 / draft-sim addendum: the Featured Banner. Each run rolls
 # this many limited 5-stars per nation from the full designed roster, and only

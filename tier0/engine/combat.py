@@ -12,7 +12,7 @@ import random
 from typing import Callable
 
 from tier0 import constants as C
-from tier0.engine import effects, powers, reactions
+from tier0.engine import effects, powers, reactions, resources
 from tier0.engine.state import Card, CombatState, Enemy, Player
 
 # A pilot is a callable: (state) -> Card | None (None = end turn).
@@ -57,6 +57,9 @@ def card_playable(state: CombatState, card: Card) -> bool:
             return False
     elif card.requires:
         raise ValueError(f"unknown requires {card.requires!r}")
+    if card.encore_cost and state.player.encore < card.encore_cost:
+        return False        # "Spend N Encore:" cost line -- a gate, never
+                            # an overdraw (that is the spend_encore op)
     return card_cost(state, card) <= state.player.energy
 
 
@@ -83,9 +86,18 @@ def play_card(state: CombatState, card: Card) -> None:
         state.current_x = cost                # X = energy actually spent
     state.current_card_cost = cost
     p.energy -= cost
+    if card.encore_cost:
+        resources.spend_encore(state, card.encore_cost)   # gated playable
     p.hand.remove(card)
     state.cards_played_this_turn += 1
     state.emit("play", card=card.id, cost=cost, energy_left=p.energy)
+    if p.spotlight and card.character == p.spotlight:
+        # Ovation (kickoff §4): each Spotlighted card played is Fanfare.
+        # Counted BEFORE resolution so the reserve per-turn cap (OFF by
+        # default) can compare against this play's own ordinal.
+        state.spotlighted_cards_this_turn += 1
+        state.emit("spotlight_card_played", card=card.id)
+        resources.gain_fanfare(state, C.FANFARE_PER_SPOTLIGHT_CARD, "ovation")
     if card.requires == "burst_energy_full":
         p.burst_energy = 0                    # playing the Burst empties it
         state.emit("burst_cast", card=card.id)
@@ -117,6 +129,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     state.companion_cost_delta_this_turn = 0     # Friendly Visit expires
     state.replay_next_companion = 0              # Study Buddy expires
     state.splash_procs_this_turn = 0             # detonation_splash cap
+    state.reactions_this_turn = 0                # Chevreuse predicate window
+    state.spotlighted_cards_this_turn = 0        # Ovation / reserve cap
 
     for enemy in list(state.living_enemies):     # bombs from last turn go off
         if enemy.bombs:
@@ -149,8 +163,13 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
 
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
     # Burst cards have Retain (principles v1.4): they stay in hand.
+    # Ethereal cards (the Spotlight selector) vanish to exhaust instead of
+    # discarding -- an unplayed selector must never circulate as loot.
     retained = [c for c in p.hand if "burst" in c.tags]
-    p.discard_pile.extend(c for c in p.hand if "burst" not in c.tags)
+    p.exhaust_pile.extend(c for c in p.hand
+                          if "ethereal" in c.tags and "burst" not in c.tags)
+    p.discard_pile.extend(c for c in p.hand
+                          if "burst" not in c.tags and "ethereal" not in c.tags)
     p.hand = retained
     powers.on_turn_end(state, p)
 
@@ -190,8 +209,13 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             dmg = int(dmg)
             blocked = min(state.player.block, dmg)
             state.player.block -= blocked
-            state.player.hp -= dmg - blocked
-            state.emit("player_hit", amount=dmg - blocked, blocked=blocked)
+            # Encore absorbs after Block, before HP (kickoff §4). Its own
+            # event stream credits A4 sustain -- NEVER folded into
+            # `blocked` (§2 harness note, Tier 0 binding).
+            hp_loss = resources.absorb_into_encore(state, dmg - blocked)
+            state.player.hp -= hp_loss
+            resources.note_player_hp_loss(state, hp_loss)
+            state.emit("player_hit", amount=hp_loss, blocked=blocked)
             if not state.player.alive:
                 return
     elif kind == "block":
@@ -217,6 +241,11 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
               seed: int) -> CombatState:
     state = CombatState(player=player, enemies=enemies,
                         rng=random.Random(seed))
+    # Per-combat resources (v1.6: the reset IS the safety on unbounded
+    # Encore). Spotlight designation likewise re-aims fresh each combat.
+    player.encore = 0
+    player.fanfare = 0
+    player.spotlight = None
     state.rng.shuffle(player.draw_pile)
     while not state.over and state.turn < C.MAX_TURNS:
         _player_turn(state, pilot)

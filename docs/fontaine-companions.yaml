@@ -1,0 +1,116 @@
+# Fontaine companion pool — v0.1 DRAFT (ships with Furina; kickoff doc §10 governs)
+# Shared colorless-style pool, same schema as mondstadt-companions.yaml.
+# Roster ratified: the complete Fontaine 4-star bench (4 characters × 3-card kits = 12 cards).
+# Cryo application budget: exactly ONE applying card each for Charlotte and Freminet (2 of 12 cards ≈ 17% of the set) — convergence lever 1.
+# Chevreuse authored as the Overload/Vaporize counterweight — convergence lever 2.
+# No Fontaine Electro exists; Furina's Electro-Charged scarcity is BY CONSTRUCTION — do not "fix."
+# DSL additions needed (flagged inline): predicate `reaction_triggered_this_turn`; power `shatter_bonus`.
+
+# ---------- CHEVREUSE (Pyro | applier + buffer | the non-freeze evangelist) ----------
+- {id: chevreuse_interdiction_fire, name: "Chevreuse — Interdiction Fire", star: 4, rarity: common, role_c: applier, element: pyro, cost: 1, type: attack,
+   effects: [{op: damage, amount: 5, target: enemy, applies_element: true}]}
+   # Musket shot. Pyro on Furina's Hydro auras = the Vaporize route, offered at common. Fischl Nightrider parity pricing.
+- {id: chevreuse_vanguards_valor, name: "Chevreuse — Vanguard's Valor", star: 4, rarity: common, role_c: buffer, element: pyro, cost: 1, type: skill,
+   effects: [{op: buff_next_attack, amount: 3}, {op: conditional, if: reaction_triggered_this_turn, then: [{op: buff_next_attack, amount: 3}]}]}
+   # RULED (user): generalized to ANY reaction, not Overload-only — must never be a dead draw in an off-Pyro/Electro deck.
+   # Her Genshin "trigger reaction → party ATK up" identity, universalized. NEW PREDICATE: reaction_triggered_this_turn.
+- {id: chevreuse_bursting_grenades, name: "Chevreuse — Ring of Bursting Grenades", star: 4, rarity: uncommon, role_c: applier, element: pyro, cost: 2, type: attack,
+   effects: [{op: damage, amount: 7, target: all_enemies, applies_element: true}]}
+   # AoE Pyro application: mass Vaporize on spread Hydro auras (Salon/Lynette synergy), Overload splash-chainer when Electro exists cross-nation/co-op.
+
+# ---------- LYNETTE (Anemo | trigger + velocity glue | the multiplier) ----------
+- {id: lynette_enigmatic_feint, name: "Lynette — Enigmatic Feint", star: 4, rarity: common, role_c: trigger, element: anemo, cost: 1, type: skill,
+   effects: [{op: swirl, target: enemy}, {op: block, amount: 3}]}
+   # Dash-through. Sucrose Gust parity (swirl + rider at 1 cost); block rider instead of draw differentiates them.
+- {id: lynette_box_trick, name: "Lynette — Box Trick", star: 4, rarity: common, role_c: buffer, element: anemo, cost: 1, type: skill,
+   effects: [{op: draw, amount: 2}]}
+   # Pure velocity glue. Plain by design: the pool's honest draw common; every archetype takes it, none warps around it.
+- {id: lynette_astonishing_shift, name: "Lynette — Magic Trick: Astonishing Shift", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 2, type: skill,
+   effects: [{op: swirl, target: enemy}, {op: damage, amount: 4, target: all_enemies, applies_element: false}]}
+   # The stage vanishes, the room reacts. Swirl + AoE rider (untagged damage — Anemo leaves no aura).
+   # applies_element: false is explicit, not implied: a catalyst-cadence drafter must not auto-apply through this hit.
+
+# ---------- CHARLOTTE (Cryo | applier[1] + buffer | sustain and coverage) ----------
+- {id: charlotte_freezing_point, name: "Charlotte — Framing: Freezing Point Composition", star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: attack,
+   effects: [{op: damage, amount: 3, target: enemy, applies_element: true}, {op: draw, amount: 1}]}
+   # Her ONE Cryo-applying card (budget). The snapshot is information: light damage, applies Cryo, cantrips.
+- {id: charlotte_enduring_frosthelm, name: "Charlotte — Enduring Frosthelm", star: 4, rarity: common, role_c: buffer, element: cryo, cost: 1, type: skill,
+   effects: [{op: block, amount: 3}, {op: block_next_turn, amount: 3}]}
+   # REDESIGNED per healing-policy tightening (heal = Rare AND Exhaust; sub-Rare sustain = Block only).
+   # Pre-emptive block: 3 now + 3 at start of next turn — sustain-over-time identity without true healing.
+   # Named for her actual passive. NEW OP: block_next_turn. Spotlighted in a Furina deck the empowered
+   # block is still Encore-adjacent tempo; the quiet synergy survives the conversion.
+- {id: charlotte_snappy_silhouette, name: "Charlotte — Snappy Silhouette", star: 4, rarity: uncommon, role_c: buffer, element: cryo, cost: 1, type: skill,
+   effects: [{op: apply_power, power: vulnerable, amount: 2, target: enemy}, {op: draw, amount: 1}]}
+   # The exposé. Vulnerable is soft amplification — inside §2.2a, no turn-economy theft. No element application (budget).
+
+# ---------- FREMINET (Cryo | applier[1] + Shatter specialist | re-shaped per kickoff §10) ----------
+- {id: freminet_pers_deploy, name: "Freminet — Pers, Deploy!", star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: attack,
+   effects: [{op: damage, amount: 5, target: enemy, applies_element: true}]}
+   # His ONE Cryo-applying card (budget). RULED (user): his commons must produce the Shatter themselves —
+   # this is step 1: a Cryo ATTACK (not a skill), so hitting a Hydro-aura'd enemy triggers Frozen directly.
+   # NOTE: Kaeya Frostgnaw statline parity (5 dmg Cryo attack). Cross-nation freeze redundancy — watchlist entry below.
+- {id: freminet_pressurized_floe, name: "Freminet — Pressurized Floe: Backstroke", star: 4, rarity: common, role_c: trigger, element: cryo, cost: 2, type: attack,
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: false}, {op: block, amount: 4}]}
+   # Step 2: the Shatter-casher. UNTAGGED attack (no Cryo application — budget preserved; the flag is explicit
+   # so no cadence dial can ever re-tag it): any hit on a Frozen
+   # enemy Shatters per Frozen v2. Dive in, break the ice, surface behind the bell. Big Badda Boom value parity (2 cost ≈ 12).
+- {id: freminet_shattering_pressure, name: "Freminet — Shattering Pressure", star: 4, rarity: uncommon, role_c: trigger, element: cryo, cost: 1, type: power,
+   effects: [{op: apply_power, power: shatter_bonus, amount: 4, target: self, note: "your Shatters deal +4 damage"}]}
+   # The payoff, self-sufficient by construction: Pers freezes (given ambient Hydro), Backstroke shatters, this pays it.
+   # NEW POWER: shatter_bonus. Convergence note FOR THE RECORD: this makes the freeze package MORE attractive but bends
+   # it away from control uptime toward burst damage — every Shatter ENDS a freeze. Growth direction, not a leak.
+
+# ---------- OPEN ITEMS ----------
+# 1. Furina personal-pool: RESOLVED (user design, session ruling) — the "Guest Star" generation suite.
+#    Personal-pool cards that generate companion cards, Discovery-class machinery (solved; Klee's
+#    copy_companion ops are the in-project precedent). Scoping guardrails, all four binding:
+#      a. Generated cards are THIS-COMBAT-ONLY (never join the permanent deck — no rewards bypass).
+#      b. Generators Exhaust.
+#      c. Equal-rarity clause: a generator creates cards of its own rarity (sub-Rare generators
+#         cannot create 5-star Rares — banner governor untouched).
+#      d. Generation pulls from the shared companion pool PLUS a purpose-built GUEST STAR set —
+#         never from playable characters' actual pools (cadence rules live on the character dial;
+#         generated playable-cards would have undefined element behavior).
+#    Guest Star set v0.1: 2–3 Neuvillette cards at common/uncommon, support-shaped, explicit
+#    applies_element flags, personal-pool scoped (banner-exempt: temporary cameos, not drafted 5-stars).
+#    Seeds his future playable identity; his shared-pool 5-star Rare remains banner-governed.
+#    Upgrade grammar per user: base "create a card of equal rarity from a companion's kit, Exhaust";
+#    better versions "choose 1 of 3 from different companions" / "it costs 0 this turn" (Discovery parity).
+#    Generated cards ARE legal Spotlight targets — generation is Spotlight's bricking mitigation
+#    (the soft form of Appendix A.3; Columbina gets the hard guarantee).
+#    Registered bet: generation lifts Spotlight's FLOOR, not its ceiling — one-shot cameos can't match
+#    drafted-kit Fanfare throughput. If the sim shows generation beating real drafting, the knob is
+#    generator cost, not the concept.
+# 2. Fontaine 5-star Rares: later scope (Neuvillette, Clorinde, Navia, Sigewinne, Lyney, Wriothesley — banner roll
+#    per v1.8; lore audit per v1.7 before any ship).
+# 3. WATCHLIST: Kaeya+Freminet cross-nation Cryo-attack redundancy — a Furina drafting both has doubled freeze
+#    initiation. Monitor in the hydro+cryo convergence checks; roster geometry, not a card bug.
+# 4. DSL asks for this set: Chevreuse's reaction_triggered_this_turn predicate, Freminet's shatter_bonus power,
+#    Charlotte's block_next_turn op — all trivially loggable as UNIMPLEMENTED stubs for pass 1 per house convention.
+
+# ---------- GUEST STAR SET v0.1 — NEUVILLETTE (Furina personal-pool ONLY; never in shared rewards) ----------
+# Access: exclusively via Furina's Guest Star generators (this-combat-only, generators Exhaust, equal-rarity).
+# `guest_star: true` exempts these from the §4.2 5-star rule (rare, one card) — they are temporary cameos,
+# not drafted 5-stars; his shared-pool 5-star Rare remains banner-governed and is a DIFFERENT card.
+# Burst name "O Tides, I Have Returned" RESERVED for his future playable kit-Burst (v1.9: bursts are kit).
+# Generated mid-combat -> all three deliberately dead-simple: legible in a choose-1-of-3 at a glance.
+- {id: guest_neuvillette_tears, name: "Neuvillette — O Tears, I Shall Repay", star: 5, rarity: common, role_c: applier, element: hydro, cost: 1, type: attack, guest_star: true, character: neuvillette,
+   effects: [{op: damage, amount: 5, target: enemy, applies_element: true}]}
+   # His skill name; the honest Hydro applier. Fischl Nightrider parity.
+- {id: guest_neuvillette_droplets, name: "Neuvillette — Sourcewater Droplets", star: 5, rarity: common, role_c: buffer, element: hydro, cost: 1, type: skill, guest_star: true, character: neuvillette,
+   effects: [{op: block, amount: 4}, {op: apply_aura, element: hydro, target: random_enemy}]}
+   # His sustain identity CONVERTED to Block per R8 — the droplets protect rather than heal.
+   # Diona Icy Paws parity minus 1 block (shared/guest colorless discount, per the Charlotte ruling).
+- {id: guest_neuvillette_judgment, name: "Neuvillette — Equitable Judgment", star: 5, rarity: uncommon, role_c: applier, element: hydro, cost: 2, type: attack, guest_star: true, character: neuvillette,
+   effects: [{op: damage, amount: 3, target: self}, {op: damage, amount: 7, target: all_enemies, applies_element: true}]}
+   # The charged-attack identity: the Iudex draws on his own life to render judgment.
+   # In Furina's deck the 3 self-damage is Fanfare flux BY DESIGN — the interlock is the point, not a leak.
+   # Ring of Bursting Grenades parity (7 all + element, 2-cost uncommon), priced with the HP rider for
+   # mass-Hydro application upside. WATCHLIST: mass Hydro + the Cryo pair = mass-Frozen potential —
+   # add to the hydro+cryo convergence checks (the self-damage cost is the intended brake: spamming
+   # judgment to fish freezes costs HP that a freeze deck cannot easily recoup under R8).
+
+# Generator cards ("An Invitation," etc.) are Furina personal-pool cards and arrive with her sheet pass —
+# base grammar per kickoff §9: "create a card of equal rarity from a companion's kit, Exhaust";
+# upgraded forms: choose-1-of-3 across companions / costs-0-this-turn (Discovery parity).

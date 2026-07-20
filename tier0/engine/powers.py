@@ -34,8 +34,19 @@ def on_turn_start(state: CombatState, fighter: Fighter) -> None:
         fighter.block += fighter.powers["metallicize"]
     dot = fighter.powers.get("dot", 0)
     if dot > 0:
-        fighter.hp -= dot                       # DoT ignores block, StS-poison-like
+        # DoT ignores block, StS-poison-like -- but the player's Encore
+        # buffer absorbs it first (kickoff §4: chip-reduction, credited
+        # A4). Enemies have no encore; the import is late to keep powers
+        # below resources in the module graph.
+        hp_loss = dot
+        if getattr(fighter, "encore", 0) > 0:
+            from tier0.engine import resources
+            hp_loss = resources.absorb_into_encore(state, dot)
+        fighter.hp -= hp_loss
         state.emit("dot_tick", amount=dot, target=getattr(fighter, "name", "player"))
+        if hp_loss and getattr(fighter, "fanfare_cap", 0):
+            from tier0.engine import resources
+            resources.note_player_hp_loss(state, hp_loss)
         fighter.powers["dot"] = dot - 1         # decays by 1 per tick
 
 

@@ -1,0 +1,35 @@
+# Furina — SPRINT 1 SKELETON. furina-kickoff-v0.1.md governs everything
+# here; card sheet NOT YET BEGUN (sheet pass gated on the statline
+# red-pen, kickoff open item 5).
+#
+# The starter below is a REF-PROXY deck (engine calibration cards) so
+# engine-level tests and draft-geometry experiments can run before her
+# sheet exists. NEVER read statline numbers off this proxy. Declared
+# 7-axis targets (kickoff §2, pending red-pen): A1 1.0-1.5 (load-bearing
+# weakness), A2 ~3.0, A3 ~2.5, A4 4.3 (elite), A5 3.7, A6 4.2 (elite),
+# A7 ~2.0 (declared weakness). Identity constraint direction: sustain
+# and utility elite, frontload dreadful BY DESIGN.
+id: furina
+name: "Furina"
+hp: 60                   # PLACEHOLDER -- sheet-pass knob, not declared yet
+nation: fontaine         # §4.1 reward weighting: Fontaine is her half
+element: hydro
+cadence: skill           # Skill-grade (kickoff §1): only Skill/Burst-tagged
+                         # cards apply hydro; engine rule in effects._element_for
+burst_max: 0             # kit-Burst meter size = sheet-pass scope (open item)
+fanfare: true            # enables the Fanfare resource (cap = FANFARE_CAP_FRACTION x maxHP)
+kit: []                  # her Burst card arrives with the sheet
+# Ethereal Spotlight (kickoff §3.1): her starting relic adds the selector
+# card to hand each turn. Registry + empowerment in engine/spotlight.py.
+relic_hooks: [ethereal_spotlight]
+starting_deck:
+  - strike
+  - strike
+  - strike
+  - strike
+  - strike
+  - defend
+  - defend
+  - defend
+  - defend
+  - bash

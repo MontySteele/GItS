@@ -49,7 +49,9 @@ def companion_pool() -> dict[str, list[Card]]:
     """rarity -> companion cards. 5-star cards ARE the rares (§3)."""
     pool: dict[str, list[Card]] = {}
     for c in loader._card_index().values():
-        if c.is_companion:
+        # guest_star (Furina kickoff §9): generated cameos, personal-pool
+        # scoped. Never offered as rewards -- the only door is a generator.
+        if c.is_companion and not c.guest_star:
             pool.setdefault(c.rarity, []).append(c)
     return {r: sorted(cs, key=lambda c: c.id) for r, cs in pool.items()}
 
@@ -65,7 +67,7 @@ def five_star_roster(nation: str) -> list[Card]:
     return sorted(
         (c for c in loader._card_index().values()
          if c.is_companion and c.star == 5 and c.nation == nation
-         and c.personal_pool is None),
+         and c.personal_pool is None and not c.guest_star),
         key=lambda c: c.id)
 
 
@@ -111,10 +113,23 @@ def _roll_rarity(rng: random.Random) -> str:
     return "common"
 
 
-def _nation_weighted_choice(rng: random.Random, cards: list[Card]) -> Card:
-    # §4.1 mechanism: weight by nation. v0.1 is all-Mondstadt, so this is
-    # a uniform pick wearing its future shape.
-    weights = [C.NATION_WEIGHTS.get("mondstadt", 1.0) for _ in cards]
+def _nation_weighted_choice(rng: random.Random, cards: list[Card],
+                            home_nation: str | None = None) -> Card:
+    # §4.1, real as of Furina sprint 1: SAME_NATION_REWARD_SHARE of the
+    # slot's weight concentrates on the run character's nation; the rest
+    # spreads across ALL cards (relative nation weights, all 1.0 today).
+    # With a single-nation pool this reduces exactly to the old uniform
+    # pick -- same rng consumption, same picks, archived numbers intact.
+    w_all = [C.NATION_WEIGHTS.get(c.nation or "", 1.0) for c in cards]
+    n_home = sum(1 for c in cards if home_nation and c.nation == home_nation)
+    if not n_home:
+        weights = w_all
+    else:
+        total = sum(w_all)
+        share = C.SAME_NATION_REWARD_SHARE
+        weights = [(1 - share) * w / total
+                   + (share / n_home if c.nation == home_nation else 0.0)
+                   for c, w in zip(cards, w_all)]
     return rng.choices(cards, weights=weights, k=1)[0]
 
 
@@ -139,13 +154,18 @@ def roll_rewards(rng: random.Random, character_id: str,
             rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
         offers.append(loader.get_card(rng.choice(pool[rarity]).id))
     if character_id != "ref_ironclad":       # no companions for the anchor
+        # personal_pool cards are only offered to their own character --
+        # a no-op while Klee is the only character, load-bearing the moment
+        # a second one exists (Prune must not show up in Furina's rewards).
         comps = {r: cs for r, cs in
-                 ((r, _banner_filtered(cs, banner))
+                 ((r, [c for c in _banner_filtered(cs, banner)
+                       if c.personal_pool in (None, character_id)])
                   for r, cs in companion_pool().items()) if cs}
+        home = loader.character_nation(character_id)
         for _ in range(companion_offers):
             rarity = _roll_rarity(rng)
             while rarity not in comps:
                 rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
             offers.append(loader.get_card(
-                _nation_weighted_choice(rng, comps[rarity]).id))
+                _nation_weighted_choice(rng, comps[rarity], home).id))
     return offers

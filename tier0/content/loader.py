@@ -20,7 +20,8 @@ CONTENT_DIR = Path(__file__).parent
 # Design sheets in docs/ are the single source of truth for real card
 # pools — the sim reads them directly so design and sim never drift.
 DOCS_DIR = CONTENT_DIR.parents[1] / "docs"
-DOCS_CARD_SHEETS = ("klee-cards.yaml", "mondstadt-companions.yaml")
+DOCS_CARD_SHEETS = ("klee-cards.yaml", "mondstadt-companions.yaml",
+                    "fontaine-companions.yaml")
 
 
 def _load_yaml_dir(sub: str) -> list[dict]:
@@ -84,6 +85,17 @@ def _card_index() -> dict[str, Card]:
                 nation = sheet.split("-", 1)[0]
                 for d in docs:
                     d.setdefault("nation", nation)
+                    # character derives from the id prefix ("fischl_oz" ->
+                    # fischl): same drift argument as nation-from-filename.
+                    # Explicit field wins (Guest Star rows name their cameo
+                    # because their ids are prefixed "guest_").
+                    d.setdefault("character", d["id"].split("_", 1)[0])
+            elif sheet.endswith("-cards.yaml"):
+                # Personal sheets: every row belongs to the character in the
+                # filename. This is what makes self-Spotlight legible.
+                char = sheet[:-len("-cards.yaml")]
+                for d in docs:
+                    d.setdefault("character", char)
             raw.extend(docs)
     cards = [Card.from_dict(d) for d in raw]
     for c in cards:
@@ -161,7 +173,10 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
                   cadence=spec.get("cadence", "skill"),
                   burst_max=spec.get("burst_max", 0),
                   relic_hooks=hooks,
-                  kit_cards=_kit_cards(spec))
+                  kit_cards=_kit_cards(spec),
+                  character_id=spec["id"],
+                  fanfare_cap=(int(C.FANFARE_CAP_FRACTION * spec["hp"])
+                               if spec.get("fanfare") else 0))
 
 
 def build_player_from_ids(character_id: str, card_ids: list[str]) -> Player:
@@ -173,7 +188,10 @@ def build_player_from_ids(character_id: str, card_ids: list[str]) -> Player:
                   cadence=spec.get("cadence", "skill"),
                   burst_max=spec.get("burst_max", 0),
                   relic_hooks=list(spec.get("relic_hooks", [])),
-                  kit_cards=_kit_cards(spec))
+                  kit_cards=_kit_cards(spec),
+                  character_id=spec["id"],
+                  fanfare_cap=(int(C.FANFARE_CAP_FRACTION * spec["hp"])
+                               if spec.get("fanfare") else 0))
 
 
 def starting_deck(character_id: str) -> list[str]:
@@ -223,6 +241,12 @@ def _pilot_index() -> dict[str, dict]:
 
 def pilot_weights(pilot_id: str) -> dict:
     return _pilot_index()[pilot_id]["weights"]
+
+
+def character_nation(character_id: str) -> str | None:
+    """Home nation for reward weighting (§4.1). None for the refs, which
+    never reach the companion slot anyway."""
+    return _character_index().get(character_id, {}).get("nation")
 
 
 def character_constraints(character_id: str) -> list[str]:

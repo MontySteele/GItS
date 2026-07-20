@@ -114,6 +114,7 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
 
     if name:
         state.reactions_this_card += 1
+        state.reactions_this_turn += 1
         p = state.player
         if p.burst_max:
             p.burst_energy += C.BURST_PER_REACTION

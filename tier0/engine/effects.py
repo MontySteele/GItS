@@ -11,7 +11,7 @@ from __future__ import annotations
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine import powers, reactions
+from tier0.engine import powers, reactions, resources
 from tier0.engine.state import Bomb, Card, CombatState, Enemy
 
 
@@ -40,15 +40,54 @@ def _pick_targets(state: CombatState, spec: str) -> list[Enemy]:
 
 
 def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
-    """Catalyst cadence (design doc §2.3): every attack applies the
-    character's element unless the sheet says applies_element: false.
-    Cards with their own element (companions) apply that instead."""
+    """Cadence dial (design doc §2.3; Furina kickoff §1).
+
+    catalyst: every attack applies the character's element unless the
+    sheet says applies_element: false. Cards with their own element
+    (companions) apply that instead.
+
+    skill (Furina, Skill-grade): only Skill/Burst-tagged cards apply the
+    CHARACTER's element -- attacks never auto-apply, which is what buys
+    the higher base numbers within her low-statline identity. Companion
+    cards are exempt from cadence entirely: what a companion applies is
+    the sheet's explicit call (application budgets depend on it)."""
     if "applies_element" in fx:
         return card.element if fx["applies_element"] else None
     if (card.type == "attack" and fx["op"] == "damage"
             and state.player.cadence == "catalyst"):
         return card.element if card.element != "none" else state.player.element
+    if (state.player.cadence == "skill" and fx["op"] == "damage"
+            and not card.is_companion
+            and state.player.element != "none"
+            and (card.type == "skill" or "burst" in card.tags
+                 or "skill_tag" in card.tags)):
+        return state.player.element
     return None
+
+
+def spotlight_mult(state: CombatState, card: Card) -> float:
+    """Spotlight empowerment (kickoff §3.2): flat +50% on the designated
+    character's printed numbers; reduced rate on the player's own
+    character (the anti-self-buff lever, legible on card text).
+
+    §2.2a extension, ENGINE-ENFORCED: this helper is plumbed into damage,
+    Block, and (when the DSL grows one) element-application counts -- and
+    nowhere else. Draw, energy, cost, and turn-economy ops have no path
+    to it, so 'numbers only' is structure, not per-card discipline."""
+    p = state.player
+    if not p.spotlight or card.character != p.spotlight:
+        return 1.0
+    cap = C.SPOTLIGHT_CARDS_PER_TURN_CAP     # schematized, OFF by default
+    if cap is not None and state.spotlighted_cards_this_turn > cap:
+        return 1.0
+    if card.character == p.character_id:
+        return C.SPOTLIGHT_SELF_MULT
+    return C.SPOTLIGHT_MULT
+
+
+def _spotlight_scale(state: CombatState, card: Card, amount: int) -> int:
+    m = spotlight_mult(state, card)
+    return int(amount * m) if m != 1.0 else amount
 
 
 def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
@@ -80,12 +119,16 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # deals bonus damage and removes Frozen. Direct HP, like splash.
     if was_frozen and enemy.frozen and source == "attack" and enemy.alive:
         enemy.frozen = False
-        sh = min(C.SHATTER_DAMAGE, max(0, enemy.hp))
-        enemy.hp -= C.SHATTER_DAMAGE
+        # shatter_bonus (Freminet, Shattering Pressure): flat rider on the
+        # Shatter itself. Burst-direction growth -- every Shatter still
+        # ENDS a freeze, so this cannot become control uptime.
+        shatter = C.SHATTER_DAMAGE + state.player.powers.get("shatter_bonus", 0)
+        sh = min(shatter, max(0, enemy.hp))
+        enemy.hp -= shatter
         state.emit("damage", target=enemy.name, amount=sh, blocked=0,
-                   base=C.SHATTER_DAMAGE, source="shatter")
+                   base=shatter, source="shatter")
         state.emit("shatter", target=enemy.name)
-        hp_dmg += C.SHATTER_DAMAGE
+        hp_dmg += shatter
     if was_alive and not enemy.alive:
         state.kills_this_card += 1
     if hp_dmg > 0:
@@ -150,8 +193,9 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     source = "attack" if card.type == "attack" else "card"
 
     if fx.get("target") == "self":            # Hot Hands / No Holding Back
-        state.player.hp -= fx["amount"]       # HP loss, ignores block
-        state.emit("self_damage", amount=fx["amount"])
+        state.player.hp -= fx["amount"]       # HP loss, ignores block AND
+        state.emit("self_damage", amount=fx["amount"])   # Encore: a priced
+        resources.note_player_hp_loss(state, fx["amount"])  # cost stays paid
         return
 
     times = fx.get("times", 1)
@@ -168,6 +212,10 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         if rest != "detonation_this_combat" or not n.isdigit():
             raise ValueError(f"unknown bonus_formula {formula!r}")
         base += int(n) * state.detonations_total
+    # Spotlight scales the card's own printed damage -- before external
+    # buffs (strength/next_attack_up are not printed numbers) and before
+    # per-target riders (v1 boring baseline; riders logged as design room).
+    base = _spotlight_scale(state, card, base)
     if card.type == "attack":
         base += state.current_attack_bonus
     # tag_damage_<tag> powers (Accuracy-like -> shiv) add per-hit.
@@ -186,8 +234,18 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_block(state: CombatState, fx: dict, card: Card) -> None:
-    state.player.block += fx["amount"]
-    state.emit("block", amount=fx["amount"])
+    amount = _spotlight_scale(state, card, fx["amount"])
+    state.player.block += amount
+    state.emit("block", amount=amount)
+
+
+def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
+    # Charlotte, Enduring Frosthelm: pre-emptive block that lands at the
+    # start of the player's NEXT turn (after the turn-start block reset).
+    # Sustain-over-time identity without true healing (R8-shaped).
+    # Spotlight scales it at play time (printed Block is printed Block).
+    powers.apply_power(state, state.player, "block_next_turn",
+                       _spotlight_scale(state, card, fx["amount"]))
 
 
 def _op_draw(state: CombatState, fx: dict, card: Card) -> None:
@@ -294,6 +352,51 @@ def _op_gain_spark(state: CombatState, fx: dict, card: Card) -> None:
     gain_sparks(state, fx.get("amount", 1))
 
 
+def _op_gain_encore(state: CombatState, fx: dict, card: Card) -> None:
+    # Her "healing" effects grant Encore (kickoff §4). Unbounded per-combat.
+    resources.gain_encore(state, _amount(state, fx["amount"]))
+
+
+def _op_spend_encore(state: CombatState, fx: dict, card: Card) -> None:
+    """The OVERDRAW primitive (kickoff §4, Salon grammar): drains Encore
+    first; any shortfall drains TRUE HP -- greed is legal and priced.
+    Cards that must not overdraw use the encore_cost field (playability
+    gate in combat.card_playable) instead of this op."""
+    n = _amount(state, fx["amount"])
+    spent = resources.spend_encore(state, n)
+    short = n - spent
+    if short:
+        state.player.hp -= short
+        state.emit("encore_overdraw", amount=short)
+        resources.note_player_hp_loss(state, short)
+
+
+def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
+    """The Ethereal Spotlight selector (kickoff §3.1). Reads character
+    tags to designate; cards with no tag are invalid targets. Movable
+    freely; persists until moved; a duplicate designation is inert.
+
+    PILOT HEURISTIC (v1, placeholder): designate the character with the
+    most tagged cards across the player's piles, preferring any companion
+    character (full rate) over self (reduced rate). A real aiming policy
+    is sheet-pass scope alongside her pilot weights."""
+    p = state.player
+    counts: dict[str, int] = {}
+    for c in (p.hand + p.draw_pile + p.discard_pile):
+        if c.character and not c.kit_card:
+            counts[c.character] = counts.get(c.character, 0) + 1
+    others = {ch: n for ch, n in counts.items() if ch != p.character_id}
+    if others:
+        target = max(sorted(others), key=lambda ch: others[ch])
+    elif p.character_id and counts.get(p.character_id):
+        target = p.character_id                  # self-Spotlight fallback
+    else:
+        return                                   # nothing valid to aim at
+    if target != p.spotlight:
+        p.spotlight = target
+        state.emit("spotlight_designated", character=target)
+
+
 def _op_heal(state: CombatState, fx: dict, card: Card) -> None:
     p = state.player
     healed = min(fx["amount"], p.max_hp - p.hp)
@@ -379,6 +482,10 @@ def _predicate(state: CombatState, name: str) -> bool:
         return state.target_had_offelement_aura
     if name == "reaction_triggered_by_this":
         return state.reactions_this_card > 0
+    if name == "reaction_triggered_this_turn":
+        # Chevreuse Vanguard's Valor. RULED: ANY reaction counts, not
+        # Overload-only -- must never be a dead draw off-Pyro/Electro.
+        return state.reactions_this_turn > 0
     if name == "killed_target":
         return state.kills_this_card > 0
     if name == "enemy_intends_attack":
@@ -435,6 +542,7 @@ def _op_copy_companions_played(state: CombatState, fx: dict, card: Card) -> None
 OPS = {
     "damage": _op_damage,
     "block": _op_block,
+    "block_next_turn": _op_block_next_turn,
     "draw": _op_draw,
     "energy": _op_energy,
     "apply_power": _op_apply_power,
@@ -449,6 +557,9 @@ OPS = {
     "buff_next_attack": _op_buff_next_attack,
     "cost_mod": _op_cost_mod,
     "gain_spark": _op_gain_spark,
+    "gain_encore": _op_gain_encore,
+    "spend_encore": _op_spend_encore,
+    "spotlight_designate": _op_spotlight_designate,
     "heal": _op_heal,
     "add_card": _op_add_card,
     "discard": _op_discard,
@@ -512,6 +623,21 @@ def resolve_card(state: CombatState, card: Card) -> None:
 
 def player_turn_start_triggers(state: CombatState) -> None:
     p = state.player
+    if "ethereal_spotlight" in p.relic_hooks:           # Furina's relic
+        # Selector to hand each turn (kickoff §3.1). Ethereal: unplayed
+        # copies vanish at end of turn (combat loop), so the deck never
+        # silts up with selectors. Emits its own event, NOT add_card --
+        # whether selector cadence counts toward A5 velocity is an open
+        # accounting ruling; until ruled it must not inflate the axis.
+        from tier0.content import loader                # late import (cycle)
+        if (not any(c.id == "ethereal_spotlight" for c in p.hand)
+                and len(p.hand) < C.MAX_HAND_SIZE):
+            p.hand.append(loader.get_card("ethereal_spotlight"))
+            state.emit("selector_granted")
+    n = p.powers.pop("block_next_turn", 0)              # Charlotte
+    if n:
+        p.block += n
+        state.emit("block", amount=n)
     if p.powers.get("celestial_gift", 0):               # Nicole
         p.block += C.CELESTIAL_GIFT_BLOCK
     n = p.powers.get("spark_per_turn", 0)               # Endless Fireworks

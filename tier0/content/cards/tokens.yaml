@@ -5,3 +5,16 @@
   type: skill
   rarity: status       # Fish Blasting's downside; Dodge Roll can exhaust it
   effects: []
+# Furina's selector (kickoff §3.1): delivered to hand each turn by her
+# ethereal_spotlight relic hook, never drafted (rarity token keeps it out
+# of every reward pool). Ethereal: an unplayed copy vanishes at end of
+# turn; a played one exhausts. Duplicate designations are inert by
+# construction -- the registry is a single per-player field.
+- id: ethereal_spotlight
+  name: "Ethereal Spotlight"
+  cost: 0
+  type: skill
+  rarity: token
+  exhaust: true
+  tags: [ethereal, selector]
+  effects: [{op: spotlight_designate}]

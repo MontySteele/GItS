@@ -27,6 +27,8 @@ class FightStats:
     cards_drawn_extra: int          # draws beyond the base 5/turn
     energy_generated_extra: int     # energy beyond the base 3/turn
     healing: int                    # A4: healing done (incl. post-fight)
+    encore_absorbed: int            # A4: chip absorbed by Encore (kickoff
+                                    # §2 harness note, BINDING: never A3)
     debuff_stacks_applied: int      # A6: weak+vuln stacks put on enemies
     debuffed_intents: int           # enemy intents taken while weak/vuln
     total_intents: int
@@ -67,6 +69,7 @@ def merge_stages(stages: list["FightStats"]) -> "FightStats":
         merged.cards_drawn_extra += s.cards_drawn_extra
         merged.energy_generated_extra += s.energy_generated_extra
         merged.healing += s.healing
+        merged.encore_absorbed += s.encore_absorbed
         merged.debuff_stacks_applied += s.debuff_stacks_applied
         merged.debuffed_intents += s.debuffed_intents
         merged.total_intents += s.total_intents
@@ -86,7 +89,7 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
     dmg_by_turn: dict[int, int] = {}
     energy_by_turn: dict[int, int] = {}
     total_dmg = block = blocked = energy = 0
-    extra_draws = extra_energy = healing = debuff_stacks = 0
+    extra_draws = extra_energy = healing = encore_absorbed = debuff_stacks = 0
     debuffed_intents = total_intents = cards_played = regrets = 0
     reactions = reaction_dmg = auras_wasted = sleeps = 0
     control_negated = 0.0
@@ -120,6 +123,8 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
             extra_energy += ev["amount"]
         elif e == "heal":
             healing += ev["amount"]
+        elif e == "encore_absorb":
+            encore_absorbed += ev["amount"]
         elif e == "apply_power":
             if ev["power"] in ("weak", "vulnerable") and ev["target"] != "player":
                 debuff_stacks += ev["stacks"]
@@ -167,7 +172,8 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
         total_block_gained=block, damage_blocked=blocked,
         energy_spent=energy,
         cards_drawn_extra=extra_draws, energy_generated_extra=extra_energy,
-        healing=healing, debuff_stacks_applied=debuff_stacks,
+        healing=healing, encore_absorbed=encore_absorbed,
+        debuff_stacks_applied=debuff_stacks,
         debuffed_intents=debuffed_intents, total_intents=total_intents,
         reactions=reactions,
         reaction_damage=reaction_dmg, auras_wasted=auras_wasted,

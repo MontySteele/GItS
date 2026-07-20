@@ -59,7 +59,10 @@ def raw_axes(stats_by_enc: dict[str, list[FightStats]]) -> dict[str, float]:
     # A4: healing/recovery per fight (ruling 1). Chip-avoidance belongs to
     # A3, speed to A1 — every HP-delta variant let kill-speed masquerade
     # as durability. Includes post-fight relic healing (Burning Blood).
-    a4 = _avg(s.healing for s in pooled)
+    # Encore absorption credits HERE, never A3 (Furina kickoff §2 harness
+    # note, binding): the buffer is her healing metric's chip-reduction
+    # form, and folding it into block would grow a phantom elite axis.
+    a4 = _avg(s.healing + s.encore_absorbed for s in pooled)
 
     # A5: (extra draws + extra energy) per turn, anchored on base economy
     # so the starter baseline (0 extra) still normalizes.

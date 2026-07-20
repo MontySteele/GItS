@@ -47,6 +47,19 @@ class Card:
     # rather than a redesign. No card carries it yet -- those 5-stars are not
     # designed (Mona's Omen is blocked on the amp-cap conversation).
     standard: bool = False
+    # Furina kickoff §3.1: shared schema, all sheets. Companion rows derive
+    # it from the id prefix and personal sheets from the filename (loader);
+    # an explicit field wins. Cards with no character are invalid Spotlight
+    # targets -- the selector greys them out rather than erroring.
+    character: Optional[str] = None
+    # Guest Star rows (fontaine-companions.yaml): generated cameos, scoped
+    # to a personal pool. Never in shared rewards or the banner roll; the
+    # equal-rarity clause on generators is what respects 5-star scarcity.
+    guest_star: bool = False
+    # "Spend N Encore:" cost line (kickoff §4). A playability gate, not an
+    # overdraw: cards that may legally overdraw into HP use the
+    # spend_encore op instead.
+    encore_cost: int = 0
 
     @property
     def is_companion(self) -> bool:
@@ -95,6 +108,14 @@ class Player(Fighter):
     exhaust_pile: list[Card] = field(default_factory=list)
     relic_hooks: list[str] = field(default_factory=list)   # e.g. ["spark_on_detonation"]
     kit_cards: list[Card] = field(default_factory=list)    # v1.9: the Burst(s)
+    # --- Furina (kickoff §3/§4); inert defaults for everyone else ---
+    character_id: str = ""        # who this player IS (self-Spotlight rate)
+    encore: int = 0               # unbounded per-combat buffer (v1.6 style)
+    fanfare: int = 0              # capped activity stacks; global pool
+    fanfare_cap: int = 0          # 0 = character has no Fanfare resource
+    spotlight: Optional[str] = None   # THE per-player registry: one
+                                  # designated character at a time; a second
+                                  # designation re-aims, never stacks
 
 
 @dataclass
@@ -129,6 +150,8 @@ class CombatState:
     # Formula / conditional context (reset per card play in resolve_card)
     detonations_total: int = 0            # Grand Finale formula
     reactions_this_card: int = 0          # reaction_triggered_by_this
+    reactions_this_turn: int = 0          # reaction_triggered_this_turn
+                                          # (Chevreuse; reset per turn)
     kills_this_card: int = 0              # killed_target
     current_card_cost: int = 0            # this_cost_zero
     current_x: int = 0                    # X-cost cards
@@ -136,6 +159,8 @@ class CombatState:
     companion_cost_delta_this_turn: int = 0   # cost_mod op
     replay_next_companion: int = 0            # Study Buddy
     current_card_companion: bool = False      # control provenance (§2.2a)
+    spotlighted_cards_this_turn: int = 0      # Ovation + the reserve cap
+                                              # (SPOTLIGHT_CARDS_PER_TURN_CAP)
 
     def emit(self, event: str, **data: Any) -> None:
         self.log.append({"turn": self.turn, "event": event, **data})

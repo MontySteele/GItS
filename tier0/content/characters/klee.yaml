@@ -5,6 +5,7 @@
 id: klee
 name: "Klee"
 hp: 62
+nation: mondstadt        # §4.1 reward weighting: her same-nation half
 element: pyro
 cadence: catalyst        # every attack applies pyro
 burst_max: 60

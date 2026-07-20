@@ -1,0 +1,72 @@
+"""Furina resources (kickoff §4): the Encore buffer and Fanfare stacks.
+
+Deliberately low in the import graph (state + constants only) so both
+effects.py and powers.py can use these hooks without a cycle.
+
+Encore: unbounded per-combat buffer (v1.6 house style -- governed by
+opportunity cost, made safe by the per-combat reset in run_fight). It
+absorbs damage before HP; absorption emits its own event and is credited
+to A4 sustain, NEVER A3 block (kickoff §2 harness note, Tier 0 binding --
+without this accounting rule she grows a phantom third elite axis).
+
+Fanfare: capped at a fraction of maxHP; generation is activity-based
+ONLY (HP lost, Encore gained, Encore spent, Spotlighted card played).
+There is deliberately no per-turn passive accrual path in this module or
+anywhere else -- passive accrual is stall payoff, and the healing policy
+exists to kill exactly that. The gate is Player.fanfare_cap (0 = the
+character has no Fanfare resource; mirrors the burst_max pattern).
+"""
+
+from __future__ import annotations
+
+from tier0 import constants as C
+from tier0.engine.state import CombatState
+
+
+def gain_fanfare(state: CombatState, n: int, source: str) -> None:
+    p = state.player
+    if not p.fanfare_cap or n <= 0:
+        return
+    before = p.fanfare
+    p.fanfare = min(p.fanfare_cap, p.fanfare + n)
+    if p.fanfare != before:
+        state.emit("gain_fanfare", amount=p.fanfare - before, source=source,
+                   total=p.fanfare)
+
+
+def gain_encore(state: CombatState, n: int) -> None:
+    p = state.player
+    p.encore += n
+    state.emit("gain_encore", amount=n, total=p.encore)
+    gain_fanfare(state, n * C.FANFARE_PER_ENCORE_GAINED, "encore_gained")
+
+
+def spend_encore(state: CombatState, n: int) -> int:
+    """Drain up to n from the buffer; returns what was actually drained.
+    Spending is Fanfare flux (the drain->refill->spend cycle)."""
+    p = state.player
+    spent = min(p.encore, n)
+    if spent:
+        p.encore -= spent
+        state.emit("encore_spent", amount=spent)
+        gain_fanfare(state, spent * C.FANFARE_PER_ENCORE_SPENT, "encore_spent")
+    return spent
+
+
+def absorb_into_encore(state: CombatState, dmg: int) -> int:
+    """Route incoming player damage through the Encore buffer AFTER block.
+    Returns the damage that still reaches HP. The emitted event is what
+    metrics route to A4 -- it must never be folded into `blocked`."""
+    p = state.player
+    absorbed = min(p.encore, dmg)
+    if absorbed:
+        p.encore -= absorbed
+        state.emit("encore_absorb", amount=absorbed)
+    return dmg - absorbed
+
+
+def note_player_hp_loss(state: CombatState, n: int) -> None:
+    """Fanfare hook for TRUE HP loss (enemy hits reaching HP, DoT,
+    self-damage, Encore overdraw). Callers deduct HP themselves; this
+    only records the flux."""
+    gain_fanfare(state, n * C.FANFARE_PER_HP_LOST, "hp_lost")
