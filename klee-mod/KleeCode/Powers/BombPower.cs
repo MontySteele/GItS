@@ -1,0 +1,275 @@
+using System.Collections.Generic;
+using BaseLib.Abstracts;
+using System.Linq;
+using System.Threading.Tasks;
+using KleeMod.Elements;
+using MegaCrit.Sts2.Core.Combat;
+using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Powers;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Logging;
+using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
+using MegaCrit.Sts2.Core.ValueProps;
+
+namespace KleeMod.Powers;
+
+/// <summary>
+/// Klee's signature Bomb: a delayed charge on an enemy.
+///
+/// Canonical rules (klee-character-design.md line 22, tier0-simulator-spec.md
+/// line 115, reference implementation tier0/engine/effects.py):
+///   - Detonates at the start of Klee's next turn for its damage, applying Pyro.
+///   - Detonates EARLY if that enemy is hit by an Attack card.
+///   - Multiple bombs STACK INDEPENDENTLY, each carrying its own damage.
+///   - Detonations fire relic/power hooks (Pounding Surprise, Blazing Delight).
+///
+/// The independent-stacking rule is why this is not a plain counter power: Pop
+/// places a 5, Jumpy Dumpty a 6, Trip Wire a 7, and each must detonate for its
+/// own value. Amount tracks the COUNT (stack semantics, multiplayer sync);
+/// _damages carries the values.
+///
+/// DISPLAY (worknote ruling 2026-07-20 item 3): the number under the enemy is
+/// TOTAL pending detonation damage, not the bomb count. Enemy-side status
+/// numbers read as incoming damage (Poison trains this), and a count display
+/// makes per-bomb buffs (Chain Fuse, Careful Arrangement) invisible. This is
+/// display-layer only -- DisplayAmount is the game's own virtual for exactly
+/// this split, and the NPower badge renders DisplayAmount and refreshes on
+/// DisplayAmountChanged (verified in the NPower decompile). Detonation still
+/// iterates bombs individually; every listener sees per-bomb events.
+/// </summary>
+public sealed class BombPower : PowerModel, ILocalizationProvider
+{
+    /// <summary>
+    /// BaseLib's AddModelLoc keys off Id.Entry for ANY model implementing this
+    /// interface -- it is not restricted to Custom*Model subclasses. Declaring
+    /// loc here rather than in a hand-written table is what stops the key from
+    /// drifting out of sync with the id (see Kaboom.Localization).
+    /// </summary>
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Bomb"),
+        ("description",
+            "Detonates at the start of your turn for its damage. "
+          + "Detonates early if this enemy is hit by an [gold]Attack[/gold]."),
+        // The smart (in-combat, mutable-instance) tooltip carries the count;
+        // the badge already shows the total. {Damage} is our DynamicVar,
+        // {Amount} is the stack count the game adds to every smart tip.
+        ("smartDescription",
+            "Detonates at the start of your turn for {Damage} total damage "
+          + "({Amount} Bomb{Amount:plural:|s}). "
+          + "Detonates early if this enemy is hit by an [gold]Attack[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Debuff;
+
+    /// <summary>Counter, not Duration: bombs are consumed by detonation, not by time.</summary>
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>
+    /// One entry per live bomb, in placement order.
+    ///
+    /// MUST be deep-cloned -- see DeepCloneFields. AbstractModel.MutableClone
+    /// uses MemberwiseClone, so without that override every bombed enemy would
+    /// share ONE list with each other and with the canonical model.
+    /// </summary>
+    private List<int> _damages = new();
+
+    /// <summary>
+    /// AbstractModel.MutableClone is a shallow MemberwiseClone; the base class
+    /// exposes this hook precisely so reference-typed fields get their own copy.
+    /// Omitting it is a silent cross-enemy corruption bug, not a crash.
+    /// </summary>
+    protected override void DeepCloneFields()
+    {
+        base.DeepCloneFields();
+        _damages = new List<int>(_damages);
+    }
+
+    /// <summary>Total damage sitting on this enemy, for intent/tooltip display.</summary>
+    public int PendingDamage => _damages.Sum();
+
+    /// <summary>The badge under the enemy shows total pending damage; Amount
+    /// itself stays the bomb count (see class doc). Ruled 2026-07-20.</summary>
+    public override int DisplayAmount => PendingDamage;
+
+    /// <summary>{Damage} in the smart tooltip. Kept in sync by SyncDisplay.</summary>
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new[] { new DynamicVar("Damage", 0m) };
+
+    /// <summary>
+    /// MUST be called after every _damages mutation (there is exactly one
+    /// grow site and one clear site today; modify_bombs / move_bombs land
+    /// here too when those cards arrive). The badge and the tooltip both
+    /// derive from _damages -- the same list detonation consumes -- so the
+    /// displayed number can never diverge from what will actually hit.
+    /// _damages itself is client-local; the count (Amount) is what the stack
+    /// system syncs, which is the pre-existing multiplayer situation for the
+    /// per-bomb values and unchanged by this display ruling.
+    /// </summary>
+    private void SyncDisplay()
+    {
+        var damage = DynamicVars["Damage"];
+        damage.BaseValue = PendingDamage;
+        damage.ResetToBase();
+        InvokeDisplayAmountChanged();
+    }
+
+    /// <summary>
+    /// Places a bomb on <paramref name="target"/>, stacking with any already there.
+    /// </summary>
+    public static async Task Place(
+        PlayerChoiceContext choiceContext, Creature target, int damage,
+        Creature applier, CardModel? cardSource)
+    {
+        var power = await PowerCmd.Apply<BombPower>(
+            choiceContext, target, 1, applier: applier, cardSource: cardSource);
+
+        if (power is BombPower bomb)
+        {
+            bomb._damages.Add(damage);
+            bomb.SyncDisplay();
+        }
+        else
+        {
+            Log.Warn($"[{KleeMod.ModId}] BombPower.Place: could not resolve applied power instance; "
+                   + "bomb damage not recorded.");
+        }
+    }
+
+    /// <summary>
+    /// Start-of-turn detonation. Tier 0 orders the player turn as
+    /// "bombs detonate -> auras tick -> power hooks -> draw + energy", so this
+    /// uses BeforeSideTurnStart -- which is also the only turn-start hook that
+    /// carries a PlayerChoiceContext, and dealing damage requires one.
+    /// </summary>
+    public override async Task BeforeSideTurnStart(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IReadOnlyList<Creature> participants, ICombatState combatState)
+    {
+        if (side != CombatSide.Player) return;
+        await Detonate(choiceContext);
+    }
+
+    /// <summary>
+    /// Early detonation: being hit by an Attack card pops every bomb on this
+    /// enemy immediately.
+    ///
+    /// The source guard is load-bearing. Bomb damage is dealt below with
+    /// ValueProp.Unpowered and no card source, so it is not a "powered attack"
+    /// and cannot re-enter here -- which, combined with clearing the list
+    /// before dealing damage, is what stops a bomb from detonating itself.
+    /// </summary>
+    public override async Task AfterDamageReceived(
+        PlayerChoiceContext choiceContext, Creature target, DamageResult result,
+        ValueProp props, Creature? dealer, CardModel? cardSource)
+    {
+        if (target != Owner) return;
+        if (!props.IsPoweredAttack()) return;
+        if (cardSource is not { Type: CardType.Attack }) return;
+
+        // Tier 0 only pops on damage that actually landed on HP, so an attack
+        // fully absorbed by Block does not trigger an early detonation.
+        if (result.UnblockedDamage <= 0) return;
+
+        await Detonate(choiceContext);
+    }
+
+    /// <summary>
+    /// Detonates every bomb on this enemy.
+    ///
+    /// Clears the list BEFORE dealing any damage. Tier 0 does the same
+    /// (`bombs, enemy.bombs = enemy.bombs, []`) and it is the recursion guard:
+    /// detonation damage can kill, trigger hooks, and re-enter combat logic, so
+    /// the charges must already be spent by then.
+    /// </summary>
+    private async Task Detonate(PlayerChoiceContext choiceContext)
+    {
+        if (_damages.Count == 0) return;
+
+        var payloads = _damages.ToList();
+        _damages.Clear();
+        SyncDisplay();
+
+        var target = Owner;
+        var applier = Applier;
+        await PowerCmd.Remove(this);
+
+        foreach (var damage in payloads)
+        {
+            // R23: each detonation is a Pyro-tagged hit (tier0 detonate_bombs
+            // -> deal_damage_to_enemy(element=bomb.element), default pyro).
+            // The damage below is Unpowered with no card source, so AuraPower
+            // cannot see it -- the elemental interaction is resolved here
+            // explicitly, BEFORE the damage lands, exactly where the sim's
+            // pipeline does it. That single path also guarantees detonation is
+            // never elementally resolved twice.
+            var dealt = damage;
+            var aura = AuraCmd.Find(target);
+            if (aura == null)
+            {
+                await AuraCmd.Apply(
+                    choiceContext, target, Element.Pyro, applier, cardSource: null);
+            }
+            else if (aura.Element == Element.Pyro)
+            {
+                await AuraCmd.Refresh(choiceContext, aura, applier, cardSource: null);
+            }
+            else
+            {
+                // Different element: consume and react. Vaporize/Melt amplify
+                // THIS detonation (aura x Pyro trigger); Overload etc. resolve
+                // their side effects in ReactionEffects. Consume before
+                // resolving, same as AuraPower (Swirl must not re-trigger).
+                var reaction = ReactionTable.Lookup(aura.Element, Element.Pyro);
+                var consumed = aura.Element;
+                dealt = (int)(dealt * ReactionTable.AmplifierMultiplier(reaction));
+                await PowerCmd.Remove(aura);
+                await ReactionEffects.Resolve(
+                    choiceContext, reaction, target, applier, null, consumed);
+            }
+
+            // Unpowered so bomb damage is not scaled by Strength and does not
+            // read as an attack; bombs are a fixed charge, and this is also
+            // what keeps them from chain-detonating each other.
+            await CreatureCmd.Damage(
+                choiceContext, target, dealt,
+                ValueProp.Unpowered, dealer: null, cardSource: null);
+
+            await NotifyDetonationListeners(choiceContext, applier, target, damage);
+        }
+    }
+
+    /// <summary>
+    /// The detonation event bus. Once per bomb (sim parity: the spark grant
+    /// sits inside the per-bomb loop in tier0/engine/effects.py). Listeners
+    /// are the applying player's relics and creature powers implementing
+    /// <see cref="IBombDetonationListener"/> -- snapshot with ToList() because
+    /// a listener may add or remove powers while handling the event.
+    /// </summary>
+    private static async Task NotifyDetonationListeners(
+        PlayerChoiceContext choiceContext, Creature? applier, Creature target, int damage)
+    {
+        var player = applier?.Player;
+        if (player == null) return;
+
+        foreach (var relic in player.Relics.ToList())
+        {
+            if (relic is IBombDetonationListener listener)
+            {
+                await listener.OnBombDetonated(choiceContext, applier, target, damage);
+            }
+        }
+
+        foreach (var power in applier!.Powers.ToList())
+        {
+            if (power is IBombDetonationListener listener)
+            {
+                await listener.OnBombDetonated(choiceContext, applier, target, damage);
+            }
+        }
+    }
+}
