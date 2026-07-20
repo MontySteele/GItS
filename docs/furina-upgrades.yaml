@@ -79,7 +79,7 @@ singer_of_many_waters: {heal: +4}            # 12->16; Exhaust NEVER removes (he
 unheard_confession:    {heal: +3}            # 8->11; Exhaust stays, Encore stays 6
 endless_waltz:         {cost: -1}            # 3->2 (rare cost privilege)
 grand_gala:            {encore: +3}          # 3->6 (covers more of its own upkeep); Exhaust stays
-the_sea_is_my_stage:   {fanfare_cap: +5}     # +15->+20 cap; the blood price stays 4
+the_sea_is_my_stage:   {fanfare_cap: +5}     # +15->+20 cap; the blood price stays 6 (raised at red-pen, DECISIONS 75)
 universal_revelry:     {damage: +3}          # 9->12 base; formula stays 1_per_3
 star_of_the_show:      {power_amount: +1}    # +3->+4 printed on Spotlighted damage
 prima_donna:           {cost: -1}            # 2->1

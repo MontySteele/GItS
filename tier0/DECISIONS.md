@@ -447,3 +447,23 @@ Amend here, not in chat history.
     goes stale when R10 lands. [USER] items open for the user's own
     pass: commanding_gaze mass-Weak parity, uncapper self-damage 4 vs 6,
     house_call's conditional ceiling, naming/lore audit (v1.7).
+    (Resolved same day — see 75.)
+75. **Red-pen [USER] items resolved from the docs** (2026-07-20, user
+    directive: "all of those items should be answered in the docs").
+    (a) commanding_gaze mass-Weak parity VERIFIED: Klee's ratified
+    common Spooked! is 1-cost / 3 block / Weak 1 to ALL enemies;
+    commanding_gaze is the same shape at 2 block — strictly not-stronger
+    than an already-ratified common. KEPT at common, comment records the
+    verification. (b) the_sea_is_my_stage self-damage 4 → 6: kickoff §4
+    is law ("Rare uncappers at NASTY setup cost") and the red-pen's own
+    analysis shows 4 fails it — blood that is itself Fanfare flux
+    self-subsidizes, so the cost must overshoot to stay nasty; 6 = 10%
+    of maxHP. The R16-world cap re-sweep will re-measure the archetype
+    with this price in place. Upgrade keeps the blood at 6 (never
+    upgrades away the law). (c) house_call KEPT at 5+3: red-pen flag 9's
+    own finding — consistent with the ratified threshold family's
+    flat-base + kicker grammar and priced by the A7 setup tax the
+    kickoff declares (~2.0 weak by design). (d) Naming/lore audit
+    CLEARED per the red-pen naming section: talent/summon names
+    pre-verified (sheet header), authored theatrical names on register,
+    constellation namespace correctly reserved for upgrades (§3.6).

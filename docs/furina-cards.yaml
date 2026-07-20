@@ -1,6 +1,7 @@
 # Furina card pool — v0.1 design sheet (Tier 0 simulator schema). RED-PEN 2026-07-20 (furina-sheet-redpen.md):
-# basics RATIFIED as a set; salon/fanfare/generic approved as measured ([USER] items still open: commanding_gaze
-# mass-Weak parity, the_sea_is_my_stage self-damage 4-vs-6, house_call conditional ceiling). The SPOTLIGHT list is
+# basics RATIFIED as a set; salon/fanfare/generic approved as measured. [USER] items RESOLVED from docs 2026-07-20
+# (DECISIONS 75): commanding_gaze parity verified vs Klee's ratified Spooked!; the_sea_is_my_stage blood raised to 6
+# per kickoff §4 "nasty setup cost" law; house_call kept (threshold-family + A7 setup-tax consistent). The SPOTLIGHT list is
 # NOT red-penned — it gets re-authored under R16 (card-mediated boosting) at pass 2 and reviewed then.
 # Numbers tuned through 4 measured rounds against the declared statline (see furina-sheet-pass-1-report.md §2); 76 cards.
 # Element: hydro | Cadence: SKILL-grade (kickoff §1): damage on type:skill / burst-tag / skill_tag cards applies hydro; plain attacks never do.
@@ -59,6 +60,7 @@
 - {id: house_call, name: "House Call", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [salon], role: glue,
    effects: [{op: damage, amount: 5, target: enemy}, {op: conditional, if: has_salon_members, then: [{op: damage, amount: 3, target: enemy}]}]}
    # The members flank. Her attack numbers only reach honest when the stage is set (A7 setup tax by design).
+   # Red-pen flag 9 KEPT: the sheet's biggest conditional number, priced by the threshold family it matches.
 # Fanfare (9)
 - {id: curtain_up, name: "Curtain Up", cost: 0, type: skill, rarity: common, solve: [sustain, velocity], archetypes: [fanfare], role: enabler,
    effects: [{op: gain_encore, amount: 2}]}
@@ -115,7 +117,8 @@
    # Her honest Strike+. Skill-grade cadence buys higher bases WITHIN the low-statline identity — 6, not Klee's 7-with-pyro. (lint-ok: Klee comp)
 - {id: commanding_gaze, name: "Commanding Gaze", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 2}, {op: apply_power, power: weak, amount: 1, target: all_enemies}]}
-   # The Regina's stare. Debuff texture for A6 (Spooked parity).
+   # The Regina's stare. Debuff texture for A6. Parity VERIFIED at red-pen vs Klee's ratified Spooked! —
+   # same cost/rarity/mass-Weak, one point less block, so strictly not-stronger. (lint-ok: Klee comp)
 - {id: witness_stand, name: "The Witness Stand", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [generic], role: glue,
    effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}, {op: draw, amount: 1}]}
    # Courtroom texture: one count of Vulnerable and the next page of testimony.
@@ -236,8 +239,9 @@
    effects: [{op: apply_power, power: salon_member, amount: 4, target: self}, {op: gain_encore, amount: 3}]}
    # All My Treasures parity: the full company takes the stage once. Four ticks of upkeep — the Encore rider covers most of turn one.
 - {id: the_sea_is_my_stage, name: "The Sea Is My Stage", cost: 2, type: power, rarity: rare, solve: [scaling], archetypes: [fanfare], role: payoff,
-   effects: [{op: raise_fanfare_cap, amount: 15}, {op: damage, amount: 4, target: self}]}
-   # THE UNCAPPER (kickoff §4: "Rare uncappers at nasty setup cost"). +15 cap, and the dive costs blood — which is itself flux.
+   effects: [{op: raise_fanfare_cap, amount: 15}, {op: damage, amount: 6, target: self}]}
+   # THE UNCAPPER (kickoff §4: "Rare uncappers at nasty setup cost"). +15 cap; blood raised at red-pen flag 3 —
+   # self-damage that is itself flux self-subsidizes, so the law demands the deeper cut: 10% of maxHP.
 - {id: universal_revelry, name: "Universal Revelry", cost: 3, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [fanfare], role: payoff,
    effects: [{op: damage, amount: 9, target: all_enemies, bonus_formula: 1_per_3_fanfare}]}
    # The crescendo finisher: the whole room, paid in accumulated roar. At placeholder cap: 9+10 to all. No application — pure theatre.
