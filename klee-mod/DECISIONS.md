@@ -719,12 +719,37 @@ Accrual is deliberately uncapped past 60 (sim never clamps; the grant
 check is >=).
 
 **Two funnels, both single:** skill tags gain in
-`KleeElementalHooks.AfterCardPlayed` (post-resolution, the same phase as
-play_card's tag check — an on-card burst_energy op lands first, then the
-tag bonus, same total as the sim); reactions gain at the top of
-`ReactionEffects.Resolve`, which every reaction passes through exactly
-once (AuraPower and BombPower.Detonate both route there), amplifiers
-included because the sim credits any NAMED reaction.
+`KleeElementalHooks.BeforeCardPlayed` (see the correction below);
+reactions gain at the top of `ReactionEffects.Resolve`, which every
+reaction passes through exactly once (AuraPower and BombPower.Detonate
+both route there), amplifiers included because the sim credits any NAMED
+reaction. The funnels are exhaustive TODAY, not forever — the sim's gain
+sites are greppable (`burst_energy +=` in tier0/engine): beyond the two
+funnels and the burst_energy op, Klee-reachable content still to land
+must carry its own gain line — the detonation-splash power's
+DETONATION_SPLASH_BURST (effects.py) and Catalytic Conversion's
+CATALYTIC_BURST_PER_REACTION * bonus (reactions.py). Two further engine
+sites (encore spend, Salon tick) are Furina-stream mechanics Klee never
+reaches.
+
+**CORRECTION (2026-07-20, review catch): the skill-tag phase claim above
+was wrong as shipped.** The spike originally gained in `AfterCardPlayed`
+and recorded "post-resolution, the same phase as play_card's tag check" —
+but tier0's play_card adds BURST_PER_SKILL_TAG BEFORE resolve_card (and
+before its replay loop; combat.py, the `skill_tag in card.tags` check
+sits above `for _ in range(replays)`). Outcome-identical while burst is
+pure accumulation, but load-bearing the moment anything rules on the
+meter mid-play (the kit grant, a "if meter full" effect). Fixed same day:
+the gain moved to `BeforeCardPlayed` gated on `cardPlay.IsFirstInSeries`
+— the game fires card hooks once per replay in a series, so the gate is
+what reproduces the sim's once-per-play_card grant (the unguarded hook
+was ALSO a latent double-grant under future Replay effects; no current
+pool card replays, so nothing shipped wrong). `BeforeCardPlayed` carries
+no PlayerChoiceContext, so the invariant is now: resource moves
+pre-resolution via `GainPreResolution` (context-less ModifyAmount), the
+badge catches up in `AfterCardPlayed` via `SyncBadge` (sync-to-truth,
+self-healing). The badge may lag the resource only WITHIN a single card
+play; rules read the resource, never the badge.
 
 **Deliberately deferred to the power-card pass:** the kit-grant machinery
 (grant-to-hand at >= 60, hand-size deferral, Retain) and Sparks 'n'
