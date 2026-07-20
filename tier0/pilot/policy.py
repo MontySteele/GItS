@@ -230,12 +230,15 @@ def _spotlight_value(state: CombatState, card: Card) -> float:
         elif (fx["op"] == "apply_power"
               and fx.get("power") in ("spotlight_mult_bonus",
                                       "spotlight_mult_bonus_turn",
-                                      "spotlight_flat_damage_turn")):
+                                      "spotlight_flat_damage_turn",
+                                      "ovation_spend_boost")):
             # R16 card-mediated boosts: worth playing when a stage exists
             # (combat-scoped stacks compound; turn windows want same-turn
-            # Spotlighted plays, which the depth contest makes likely).
+            # Spotlighted plays). ovation_spend_boost (R32.1 flip) is a
+            # combat-scoped engine like top_billing's mult.
             if p.spotlight is not None:
-                val += (3.0 if fx["power"] == "spotlight_mult_bonus"
+                val += (3.0 if fx["power"] in ("spotlight_mult_bonus",
+                                               "ovation_spend_boost")
                         else 1.5)
             else:
                 val += 0.3                       # not dead, just early

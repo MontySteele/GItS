@@ -80,6 +80,25 @@ def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
     return None
 
 
+# R33 lint-law (DECISIONS 87, the dead-knob exercise counter): a sweep
+# that concludes "no effect" must show its swept constant was READ at
+# least once per cell. This is the instrument-side tally; experiments
+# reset it per cell and assert before publishing a null. E1 (pass 2)
+# would have failed this loudly -- that catch is why it exists.
+KNOB_READS: dict = {}
+
+
+def reset_knob_reads() -> None:
+    KNOB_READS.clear()
+
+
+# R33 window-zero oracle switch: None = selector heuristic v2 (the only
+# shipping value); "self" / "companion" force designation for the
+# pre-registered forced arms (diagnostics feeding a ruling, R14 -- the
+# harness never sets this outside tier05 experiments and tests).
+SPOTLIGHT_FORCE: Optional[str] = None
+
+
 def spotlight_mult(state: CombatState, card: Card) -> float:
     """Spotlight empowerment, card-mediated (R16, pass 2): the BASE rate
     is the relic's residual passive (reduced self rate stays the
@@ -98,8 +117,12 @@ def spotlight_mult(state: CombatState, card: Card) -> float:
     cap = C.SPOTLIGHT_CARDS_PER_TURN_CAP     # schematized, OFF by default
     if cap is not None and state.spotlighted_cards_this_turn > cap:
         return 1.0
-    base = (C.SPOTLIGHT_SELF_MULT if card.character == p.character_id
-            else C.SPOTLIGHT_BASE_MULT)
+    if card.character == p.character_id:
+        base = C.SPOTLIGHT_SELF_MULT
+    else:
+        base = C.SPOTLIGHT_BASE_MULT
+        KNOB_READS["SPOTLIGHT_BASE_MULT"] = (
+            KNOB_READS.get("SPOTLIGHT_BASE_MULT", 0) + 1)
     bonus = (p.powers.get("spotlight_mult_bonus", 0)
              + p.powers.get("spotlight_mult_bonus_turn", 0))
     return base + bonus / 100.0
@@ -392,13 +415,24 @@ def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
     tags to designate; cards with no tag are invalid targets. Movable
     freely; persists until moved; a duplicate designation is inert.
 
-    PILOT HEURISTIC (v2, sheet pass 1): designate the character with the
-    most tagged cards across the player's piles; a companion wins TIES
-    against self (full rate beats reduced rate at equal depth) but no
-    longer wins outright. v1's companions-always-preferred rule was
-    measured harmful in the EP/GS experiment: a single generated guest
-    hijacked the Spotlight from a 20-card self-kit and HALVED Ovation
-    throughput (block B, 41.7 -> 20.7 spotlighted plays/run)."""
+    PILOT HEURISTIC v3 (pass 3, W0-derived; SPOTLIGHT_SELECTOR_VERSION
+    in constants carries the full version history and archive rule):
+    designate the deepest companion iff its per-character depth reaches
+    SPOTLIGHT_COMPANION_DEPTH_MIN and the stage holds a crowd
+    (living enemies >= SPOTLIGHT_COMPANION_MIN_ENEMIES); otherwise
+    self-Spotlight (the kickoff fallback). Value-aware, not
+    depth-greedy: the W0 oracle showed outward aim wins crowds/grinds
+    (+12.5pt attrition at full-kit depth) and loses duels (-10pt
+    tank_boss), so the selector reads the fight state a human reads.
+    ARCHIVE: v2 (passes 1-2) was a raw depth contest whose companion
+    branch was unreachable (R33) -- every pass-2 number is a
+    self-Spotlight world; never compare unlabeled.
+
+    R33 DIAGNOSTIC OVERRIDE: SPOTLIGHT_FORCE ("self"/"companion")
+    bypasses the heuristic entirely for the window-zero oracle arms.
+    Forced arms feed a ruling and never ship (R14); the forced-companion
+    arm has NO self fallback -- an oracle that quietly self-aims would
+    re-create exactly the circularity R33 vetoed."""
     p = state.player
     counts: dict[str, int] = {}
     for c in (p.hand + p.draw_pile + p.discard_pile):
@@ -407,11 +441,21 @@ def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
     others = {ch: n for ch, n in counts.items() if ch != p.character_id}
     self_n = counts.get(p.character_id, 0) if p.character_id else 0
     best = max(sorted(others), key=lambda ch: others[ch]) if others else None
-    if best is not None and others[best] >= self_n:
+    if SPOTLIGHT_FORCE == "self":
+        target = p.character_id if self_n else None
+    elif SPOTLIGHT_FORCE == "companion":
+        target = best
+    elif (best is not None
+          and others[best] >= C.SPOTLIGHT_COMPANION_DEPTH_MIN
+          and len(state.living_enemies) >= C.SPOTLIGHT_COMPANION_MIN_ENEMIES):
         target = best
     elif self_n:
         target = p.character_id                  # self-Spotlight fallback
+    elif best is not None:
+        target = best        # no self cards at all: any stage beats none
     else:
+        target = None
+    if target is None:
         return                                   # nothing valid to aim at
     if target != p.spotlight:
         p.spotlight = target

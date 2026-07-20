@@ -33,9 +33,10 @@ audience_participation: {encore: +1}         # 2->3
 ebb_and_flow:          {encore: +1}          # gain 3->4; the Spend 1 stays (net flux grows)
 an_invitation:         {generate_cost_override: 0}   # kickoff §9 upgrade grammar VERBATIM: the guest costs 0
 limelight:             {draw: +1}            # 1->2; the boost stays 25 (R16: the mult is authored, not upgraded)
-shared_billing:        {block: +2}           # 4->6; the boost stays 25
-blocking_notes:        {block: +2}           # 5->7
-stage_lights:          {power_amount: +1}    # flat rider +2->+3 this turn; block stays 3
+shared_billing:        {cost: -1}            # 1->0 (R32.2 rider swap took the block; mined cost line — the
+                                             # aura and the boost are authored, not upgraded)
+blocking_notes:        {block: +2}           # 7->9 (base lifted by the R32.2/R32.3 A3 rehome)
+stage_lights:          {power_amount: +1}    # flat rider +2->+3 this turn; the Weak rider stays 1 (R32.2)
 curtain_cue:           {encore: +1}          # both branches: 3->4 / 1->2
 graceful_retreat:      {block: +3}           # 6->9
 poised_riposte:        {damage: +3}          # 6->9
@@ -66,7 +67,9 @@ guest_list:            {generate_cost_override: 0}   # Discovery parity
 directors_cut:         {draw: +1}            # both branches: 2->3 / 1->2
 top_billing:           {cost: -1}            # 1->0 (mined power-cost line); the boost and its two-copy ceiling stay
 duet:                  {draw: +1}            # 1->2
-standing_ovation:      {power_amount: +1}    # 2->3 Encore per Spotlighted card, cap 2 unchanged
+standing_ovation:      {cost: -1}            # 2->1 (mined power-cost line, the top_billing grammar). R32.1 flip:
+                                             # upgrading the +10%/spend amount would outgrow the two-copy cap
+                                             # (20 != amount, applier correctly won't bump it) — cost is the lever.
 fortissimo_guard:      {block: +3}           # 11->14
 courtroom_drama:       {vulnerable: +1}      # 2->3; weak stays 1
 quick_change:          {draw: +1}            # 3->4, discard stays 1

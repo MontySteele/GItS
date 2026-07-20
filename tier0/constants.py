@@ -64,24 +64,53 @@ CELESTIAL_GIFT_BLOCK = 4          # Nicole: block at start of turn
 CATALYTIC_BURST_PER_REACTION = 5  # Catalytic Conversion bonus burst/reaction
 
 # --- Furina: Spotlight (kickoff §3) ---
-SPOTLIGHT_BASE_MULT = 1.0     # MEASURED (E1 sweep, pass 2, 2026-07-20):
-                              # the relic's residual passive on
-                              # companion cards -- renamed from
-                              # SPOTLIGHT_MULT (was 1.5) when R16 moved
-                              # the empowerment into her cards
-                              # (spotlight_mult_bonus powers). The
-                              # {1.0, 1.25} sweep was cell-for-cell
-                              # IDENTICAL: at committed-median the depth
-                              # contest self-Spotlights, so this knob
-                              # never fires there; 1.0 makes her cards
-                              # the ONLY companion empowerment at the
-                              # drafted ceiling too. Pass-1 numbers were
-                              # taken at 1.5 -- never compare unlabeled.
+SPOTLIGHT_BASE_MULT = 1.5     # PLACEHOLDER (R33 veto, 2026-07-20): the
+                              # pass-2 "MEASURED 1.0" record is STRUCK.
+                              # E1's identical cells were guaranteed by
+                              # selector v2 (companion branch
+                              # unreachable at ~20 self cards vs 3-5
+                              # card kits) -- the constant was never
+                              # READ in any cell (exercise-counter law,
+                              # DECISIONS 87). E1 re-scoped to a valid
+                              # MEDIAN-DEPTH null only; never summarize
+                              # it as "the knob is dead". 1.5 restores
+                              # the pass-1 geometry (companion 1.5 >
+                              # self 1.25 -- the R17 anti-self-buff
+                              # lever un-inverted; 1.0 made degenerate
+                              # self-aim optimal BY CONSTANT).
+                              # Measurement-neutral today for the same
+                              # structural reason the veto exists.
+                              # Window-zero forced-arm sweep {1.25,
+                              # 1.5} decides (furina-pass3-rulings.md).
 SPOTLIGHT_SELF_MULT = 1.25    # RATIFIED (R17, 2026-07-20) -- a measured
                               # design constant, no longer a placeholder:
                               # the sweep proved the reduced rate IS the
                               # anti-self-buff lever (1.5x companion
                               # parity borderline-fails criterion 1).
+# Selector heuristic version (instrument stamp, the A6-v2 pattern —
+# never compare selector-v2 and selector-v3 numbers unlabeled):
+# v1 companions-always (sprint 1; measured harmful — 1-card guest
+#    hijack halved Ovation throughput);
+# v2 raw depth contest (passes 1-2; R33 found the companion branch
+#    UNREACHABLE at ~20 self cards vs 3-5-card kits — every pass-2
+#    number is a self-Spotlight world);
+# v3 value-aware threshold (pass 3, derived from the W0 oracle arms):
+#    designate the deepest companion iff its per-character depth
+#    reaches SPOTLIGHT_COMPANION_DEPTH_MIN AND the stage holds a
+#    crowd (>= SPOTLIGHT_COMPANION_MIN_ENEMIES living enemies);
+#    otherwise self. W0 evidence: forced-companion at full-kit depth
+#    is +12.5pt on attrition and -10pt on tank_boss — outward aim is
+#    encounter-contingent, so the selector reads the fight, not just
+#    the deck.
+SPOTLIGHT_SELECTOR_VERSION = 3
+SPOTLIGHT_COMPANION_DEPTH_MIN = 4     # W0 bracket: best-companion depth 4
+                                      # (full Chevreuse kit) rational,
+                                      # depth 2 not; (2, 4] -> full-kit
+                                      # conservative. PROPOSED pending
+                                      # red-pen; swept only by ruling.
+SPOTLIGHT_COMPANION_MIN_ENEMIES = 2   # outward aim wants crowds (W0:
+                                      # single-target cells were the
+                                      # -10pt/-2pt losses).
 SPOTLIGHT_CARDS_PER_TURN_CAP = None   # schematized but OFF (kickoff §3.2):
                               # turns on only if Tier 0 shows the rate
                               # asymmetry alone fails the §6 criterion.

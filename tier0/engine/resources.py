@@ -53,6 +53,18 @@ def spend_encore(state: CombatState, n: int) -> int:
         gain_fanfare(state, spent * C.FANFARE_PER_ENCORE_SPENT, "encore_spent")
         if p.burst_max:
             p.burst_energy += spent * C.BURST_PER_ENCORE_SPENT
+        # Standing Ovation, R32.1 FLIP (pass 3): the spend-payoff power.
+        # Per spend EVENT (not per point -- points already pay Fanfare and
+        # burst above), grant turn-scoped Spotlight percentage points
+        # through the same §2.2a pipe. Direct dict add by design: this
+        # module stays low in the import graph (no powers import), and
+        # spotlight_mult_bonus_turn is uncapped-expiring (powers.EXPIRING
+        # pops it at turn end).
+        boost = p.powers.get("ovation_spend_boost", 0)
+        if boost:
+            p.powers["spotlight_mult_bonus_turn"] = (
+                p.powers.get("spotlight_mult_bonus_turn", 0) + boost)
+            state.emit("ovation_spend_boost", amount=boost)
     return spent
 
 

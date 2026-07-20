@@ -4,7 +4,10 @@
 # per kickoff §4 "nasty setup cost" law; house_call kept (threshold-family + A7 setup-tax consistent). The SPOTLIGHT list
 # was RE-AUTHORED at pass 2 under R16 (card-mediated boosting): limelight/stage_lights/top_billing replace
 # warm_reception/props_department/constant_star, shared_billing reworked; boosts flow through spotlight_mult_bonus powers
-# (the same §2.2a numbers-only pipe). ALL RE-AUTHORED NUMBERS PROPOSED pending red-pen (furina-sheet-pass-2-report.md).
+# (the same §2.2a numbers-only pipe). PASS 3 (R32/R33, selector-v3 world): standing_ovation FLIPPED to spend-payoff
+# (+ first-play trickle), limelight/top_billing gained spend lines, shared_billing/stage_lights riders swapped to
+# application/debuff, usher_the_waves gained Weak, blocking_notes rehomed block. ALL RE-AUTHORED NUMBERS PROPOSED
+# pending red-pen (furina-sheet-pass-3-report.md; pass-2 numbers are the selector-v2 archive).
 # Numbers tuned through 4 measured rounds against the declared statline (see furina-sheet-pass-1-report.md §2); 76 cards.
 # Element: hydro | Cadence: SKILL-grade (kickoff §1): damage on type:skill / burst-tag / skill_tag cards applies hydro; plain attacks never do.
 # Archetypes: salon (default plan / solo floor) | spotlight (draft-gated high-ceiling) | fanfare (tempo/velocity flux) | generic
@@ -48,8 +51,10 @@
    effects: [{op: gain_encore, amount: 2}, {op: conditional, if: has_salon_members, then: [{op: gain_encore, amount: 2}]}]}
    # Feeding the household. Upkeep economy: better with a salon to feed.
 - {id: usher_the_waves, name: "Usher the Waves", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [salon], role: enabler, tags: [skill_tag],
-   effects: [{op: damage, amount: 4, target: enemy}]}
+   effects: [{op: damage, amount: 4, target: enemy}, {op: apply_power, power: weak, amount: 1, target: enemy}]}
    # Damaging SKILL = hydro applier under her cadence. Her repeatable hand-cast application at common.
+   # R32.3 UTILITY LIFT: the wave staggers — Weak rides the application (salon's debuff line; the deck's
+   # utility was application-only and the axis said so).
 - {id: torrential_turn, name: "Torrential Turn", cost: 2, type: attack, rarity: common, solve: [frontload], archetypes: [salon, generic], role: payoff,
    effects: [{op: damage, amount: 9, target: enemy, bonus_vs_aura: 3}]}
    # Plain attack (no application) that CASHES auras without consuming them — rewards the Salon's uptime.
@@ -96,18 +101,31 @@
    effects: [{op: generate_guest_star, rarity: common, amount: 1}]}
    # THE base generator (kickoff §9 grammar verbatim): create a common from the companion pool + Guest Star set. Exhausts. This-combat-only.
 - {id: limelight, name: "Limelight", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: enabler,
-   effects: [{op: apply_power, power: spotlight_mult_bonus_turn, amount: 25, target: self}, {op: draw, amount: 1}]}
+   effects: [{op: spend_encore, amount: 1}, {op: apply_power, power: spotlight_mult_bonus_turn, amount: 25, target: self}, {op: draw, amount: 1}]}
    # R16 re-author (replaces Warm Reception): the beam finds the star — Spotlighted numbers +25% this turn.
    # The bread-and-butter boost; delete her cards and the empowerment leaves with them. (lint-ok: pct points)
-- {id: shared_billing, name: "Shared Billing", cost: 1, type: skill, rarity: common, solve: [block, utility], archetypes: [spotlight], role: glue,
-   effects: [{op: block, amount: 4}, {op: apply_power, power: spotlight_mult_bonus_turn, amount: 25, target: self}]}
-   # R16 REWORK: defend the stage while the star shines (was: conditional Encore rider). (lint-ok: pct points)
+   # R32.1 spend line, third iteration: the beam is priced in buffer-or-blood (overdraw op, the greed grammar —
+   # an encore_cost gate bricked opening hands and bled the punisher floor). Dry overdraw moves no Encore, so it
+   # rightly does not ring the Ovation bell.
+- {id: shared_billing, name: "Shared Billing", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: glue,
+   effects: [{op: apply_aura, element: hydro, target: random_enemy}, {op: apply_power, power: spotlight_mult_bonus_turn, amount: 25, target: self}]}
+   # R32.2 RIDER SWAP: the water shares the stage — hydro application replaces the block rider (the boost cards
+   # were defensive texture, R31 secondary root cause; application bills to utility, not sustain). Seeds Vaporize
+   # for the deck's own Chevreuse kit. NOT freeze-cell routed (single random target; no cryo in-archetype —
+   # the named cell is untouched). Boost stays 25. (lint-ok: pct points)
 - {id: blocking_notes, name: "Blocking Notes", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [spotlight, generic], role: glue,
-   effects: [{op: block, amount: 5}, {op: conditional, if: spotlight_moved_this_turn, then: [{op: draw, amount: 1}]}]}
+   effects: [{op: block, amount: 7}, {op: conditional, if: spotlight_moved_this_turn, then: [{op: draw, amount: 1}]}]}
    # Theatre blocking, the pun fully intended. Re-staging pays a card. KEPT at re-author: selector glue, not administration.
-- {id: stage_lights, name: "Stage Lights", cost: 1, type: skill, rarity: common, solve: [block, utility], archetypes: [spotlight], role: glue,
-   effects: [{op: apply_power, power: spotlight_flat_damage_turn, amount: 2, target: self}, {op: block, amount: 3}]}
-   # R16 re-author (replaces Props Department): the follow spot holds — Spotlighted damage +2 this turn, flat-rider texture.
+   # R32.2/R32.3 A3 REHOME: block carries what the swapped riders dropped (the +1 alone under-covered; the
+   # axis dipped and the repair continued here). [USER] FLAG: this TIES Klee's Hide and Seek at common with a
+   # conditional rider on top — graceful_retreat's stays-under pin never covered this card, but the cross-sheet
+   # courtesy question is red-pen's.
+- {id: stage_lights, name: "Stage Lights", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: glue,
+   effects: [{op: apply_power, power: spotlight_flat_damage_turn, amount: 2, target: self}, {op: apply_power, power: weak, amount: 1, target: all_enemies}]}
+   # R16 re-author (replaces Props Department): the follow spot holds — Spotlighted damage +2 this turn.
+   # R32.2 RIDER SWAP: the glare blinds the front row — Weak replaces the block rider. Debuff texture bills to
+   # utility AND defends by prevention (not absorption — the sustain axis stays honest, the W1 dose record's law).
+   # R32.3: the glare goes house-wide (mass Weak at common is ratified grammar — Spooked!/commanding_gaze).
 - {id: curtain_cue, name: "Curtain Cue", cost: 0, type: skill, rarity: common, solve: [sustain], archetypes: [spotlight, fanfare], role: glue,
    effects: [{op: conditional, if: spotlight_moved_this_turn, then: [{op: gain_encore, amount: 3}, {op: draw, amount: 1}], else: [{op: gain_encore, amount: 1}]}]}
    # Free beat that rewards the re-aim. Selector-payoff texture at common.
@@ -196,16 +214,28 @@
 - {id: directors_cut, name: "Director's Cut", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [spotlight], role: glue,
    effects: [{op: conditional, if: spotlight_moved_this_turn, then: [{op: energy, amount: 1}, {op: draw, amount: 2}], else: [{op: draw, amount: 1}]}]}
    # Re-aim payoff: the scene changes and the production surges.
-- {id: top_billing, name: "Top Billing", cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [spotlight], role: payoff,
+- {id: top_billing, name: "Top Billing", cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [spotlight], role: payoff, encore_cost: 2,
    effects: [{op: apply_power, power: spotlight_mult_bonus, amount: 25, target: self, max_stacks: 50, note: "Spotlighted numbers +25% for the rest of combat; stacks to +50%"}]}
    # R16 re-author (replaces Constant Star): the name above the title — the archetype's core scaling engine.
    # Combat-duration mult through the SAME pipe (§2.2a numbers-only inherited). Two copies is the ceiling. (lint-ok: pct points)
+   # R32.1 spend line: installing the engine costs 2 from the buffer (gate, never overdraws).
 - {id: duet, name: "Duet", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [spotlight], role: payoff,
    effects: [{op: replay_next_companion, times: 1, duration: this_turn}, {op: draw, amount: 1}]}
    # Study Buddy parity: the next companion performs twice. Star-agnostic — works on any guest.
-- {id: standing_ovation, name: "Standing Ovation", cost: 2, type: power, rarity: uncommon, solve: [sustain, scaling], archetypes: [spotlight], role: payoff,
-   effects: [{op: apply_power, power: spotlight_encore, amount: 2, target: self, max_stacks: 2, note: "gain 2 Encore whenever you play a Spotlighted card"}]}
-   # Activity-based by construction: Encore flows only when the star ACTS. Throughput texture for the committed deck.
+- {id: standing_ovation, name: "Standing Ovation", cost: 2, type: power, rarity: uncommon, solve: [scaling, sustain], archetypes: [spotlight], role: payoff,
+   effects: [{op: apply_power, power: ovation_spend_boost, amount: 10, target: self, max_stacks: 20, note: "whenever you spend Encore, Spotlighted +10% this turn"},
+             {op: apply_power, power: spotlight_encore_first, amount: 1, target: self, max_stacks: 1, note: "gain 1 Encore on the first Spotlighted card each turn"}]}
+   # R32.1 FLIP, landed: spend-payoff + first-play trickle. Each spend EVENT grants Spotlighted +10% this turn
+   # through the same §2.2a pipe; the applause keeps a per-TURN trickle coming (Supporting Cast's first-play
+   # window). DOSE RECORD from the window (see the pass report): per-play rates and the doubled trickle both re-heat
+   # sustain past the declaration; the pure sink collapses it to starter level; the trickle at this rate lands
+   # sustain ON the declared shape — and long-fight survival must come from the rider-swap windows' debuff
+   # texture, not from re-fattening the buffer (absorption compounds with survival; the axis bills it all).
+   # The identity is FLUX: the buffer moves BOTH ways. Was: gain 2 Encore per Spotlighted play, no spend
+   # trigger (the hot-sustain root cause, R31). Boost has a two-copy ceiling (10+10,
+   # top_billing's cap grammar); the trickle never stacks. Header law honored: the trickle is ACTIVITY-gated
+   # (first Spotlighted PLAY each turn — a silent turn pays nothing), not passive per-turn accrual.
+   # PROPOSED pending red-pen. (lint-ok: pct points)
 # Generic (4)
 - {id: fortissimo_guard, name: "Fortissimo Guard", cost: 2, type: skill, rarity: uncommon, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 11}]}

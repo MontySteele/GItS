@@ -274,6 +274,7 @@ def test_supporting_cast_draws_on_first_spotlighted_play_only():
 
 
 def test_standing_ovation_pays_encore_per_spotlighted_play():
+    # Archived pre-flip rate: the per-play power stays engine-supported.
     st = furina_state()
     p = st.player
     p.energy = 9
@@ -282,6 +283,19 @@ def test_standing_ovation_pays_encore_per_spotlighted_play():
     for _ in range(2):
         combat.play_card(st, hand_card(st, "chevreuse_interdiction_fire"))
     assert p.encore == 4                            # EVERY play, not first
+
+
+def test_ovation_first_play_trickle_once_per_turn():
+    # R32.1 iteration three: the flipped Ovation's income floor uses the
+    # Supporting Cast first-play window — once per turn, never per play.
+    st = furina_state()
+    p = st.player
+    p.energy = 9
+    p.spotlight = "chevreuse"
+    p.powers["spotlight_encore_first"] = 1
+    for _ in range(2):
+        combat.play_card(st, hand_card(st, "chevreuse_interdiction_fire"))
+    assert p.encore == 1                            # first play only
 
 
 def test_star_of_the_show_flat_rider_on_spotlighted_damage():
@@ -352,9 +366,11 @@ def test_upgraded_power_amount_lifts_its_own_stack_cap():
 # --- selector aiming v2 (the depth contest; DECISIONS-bound in report) ---
 
 def test_selector_depth_contest_self_beats_shallow_companion():
-    """v2: a 1-card guest must NOT hijack the Spotlight from a deep
-    self-kit (measured harmful: halved Ovation throughput in the EP/GS
-    experiment). Companions still win TIES (full rate beats reduced)."""
+    """v3 keeps v1's lesson: a shallow guest must NOT hijack the
+    Spotlight from a deep self-kit (sub-threshold depth -> self
+    fallback). With NO self cards at all, any stage beats none -- the
+    guest gets the beam as the last resort (v2's tie rule, archived,
+    happened to agree here)."""
     st = furina_state()                       # real starter: 10 furina cards
     hand_card(st, "lynette_box_trick")        # one shallow companion
     effects.resolve_card(st, loader.get_card("ethereal_spotlight"))
