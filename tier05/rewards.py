@@ -70,8 +70,10 @@ def _nation_weighted_choice(rng: random.Random, cards: list[Card]) -> Card:
 
 
 def roll_rewards(rng: random.Random, character_id: str,
-                 slot_mode: str = "standard") -> list[Card]:
-    """One post-fight reward screen: card offers + the companion slot."""
+                 companion_offers: int = 1) -> list[Card]:
+    """One post-fight reward screen: card offers + the companion slot.
+    companion_offers > 1 is the pity/choose-3 slot (triage ruling 4
+    pulled the mechanism forward from M7; the run model decides when)."""
     pool = character_pool(character_id)
     offers = []
     for _ in range(C.REWARD_CARD_OFFERS):
@@ -80,12 +82,11 @@ def roll_rewards(rng: random.Random, character_id: str,
             rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
         offers.append(loader.get_card(rng.choice(pool[rarity]).id))
     if character_id != "ref_ironclad":       # no companions for the anchor
-        if slot_mode != "standard":
-            raise ValueError(f"slot mode {slot_mode!r} lands in M7")
         comps = companion_pool()
-        rarity = _roll_rarity(rng)
-        while rarity not in comps:
-            rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
-        offers.append(loader.get_card(
-            _nation_weighted_choice(rng, comps[rarity]).id))
+        for _ in range(companion_offers):
+            rarity = _roll_rarity(rng)
+            while rarity not in comps:
+                rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
+            offers.append(loader.get_card(
+                _nation_weighted_choice(rng, comps[rarity]).id))
     return offers

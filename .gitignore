@@ -5,6 +5,18 @@ __pycache__/
 *.csv
 .DS_Store
 
+# Tier F art (principles §9: never ships, never distributed — repo is public).
+# Only the ledgers (SOURCES.tsv, plan.tsv) and tools are tracked.
+art/raw/
+art/candidates/
+art/contact_sheet.html
+art/picks.tsv
+ImageGen/images/
+
+# Raw art asset zips are shared out-of-band and dropped in the repo root on
+# purpose. They must never be committed (same §9 reasoning as above).
+*.zip
+
 # --- C-milestones: machine-local build files (spec csharp-build-spec.md §0.3) ---
 # Never commit anything that points at this machine's Steam install.
 local.props
@@ -20,7 +32,3 @@ game_assets/
 *.pck
 *.dll
 *.pdb
-
-# Raw art asset zips are shared out-of-band and dropped in the repo root on
-# purpose. They must never be committed (principles §9: repo is public).
-*.zip

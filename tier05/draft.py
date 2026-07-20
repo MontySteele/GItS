@@ -89,6 +89,11 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     s = 0.0
     progress = _core_progress(deck, archetype)
     online = core_complete(deck, archetype)
+    # A card that ADVANCES the core is never a dead pick — without this,
+    # reaction deadlocks: its core contains an amp payoff, but payoffs
+    # were gated on the core being online (measured: 1% amp assembly).
+    if _core_progress(deck + [card], archetype) > progress:
+        s += 3.0
     if archetype == "generic" and not card.is_companion:
         # The anchor drafts on raw power; roles stand in for engine cards.
         s += min(2.5, _static_power(card) / 3.0)

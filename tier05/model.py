@@ -37,32 +37,54 @@ def _scale_enemy_spec(spec: dict, scale: float) -> dict:
     return out
 
 
+def _apply_compensator(enemies: list[Enemy], tier: str) -> list[Enemy]:
+    """Triage ruling 3b: the progression-gap compensator scales enemy hp
+    and attack damage per node tier — one number standing in for the
+    missing upgrades+relics growth, not a model of them. Tier 0 battery
+    statlines themselves stay frozen; this is run-context only."""
+    f = C.PROGRESSION_GAP_COMPENSATOR[tier]
+    if f == 1.0:
+        return enemies
+    for e in enemies:
+        e.hp = max(1, round(e.hp * f))
+        e.max_hp = e.hp
+        for intent in e.intents:
+            if intent["kind"] == "attack":
+                intent["amount"] = max(1, round(intent["amount"] * f))
+                if "ramp" in intent:
+                    intent["ramp"] = max(1, round(intent["ramp"] * f))
+    return enemies
+
+
 def build_node_encounter(node_kind: str, rng: random.Random) -> list[Enemy]:
     """Battery-derived encounters only — same frozen statlines, no new
     tuning (spec §2). Lites are mechanical derivations, not designs."""
     if node_kind == "E":
-        return loader.build_encounter("punisher")
+        return _apply_compensator(loader.build_encounter("punisher"), "elite")
     if node_kind == "B":
-        return loader.build_encounter("tank_boss")
+        return _apply_compensator(loader.build_encounter("tank_boss"), "boss")
     if node_kind == "BC":
-        return loader.build_encounter("burst_check")
+        return _apply_compensator(loader.build_encounter("burst_check"),
+                                  "normal")
     pool = list(C.NORMAL_POOL_WEIGHTS)
     weights = [C.NORMAL_POOL_WEIGHTS[p] for p in pool]
     pick = rng.choices(pool, weights=weights, k=1)[0]
     if pick == "swarm":
-        return loader.build_encounter("swarm")
-    if pick == "attrition_lite":
+        out = loader.build_encounter("swarm")
+    elif pick == "attrition_lite":
         spec = loader._encounter_index()["attrition"]["enemies"][0]
         lite = copy.deepcopy(spec)
         lite["hp"] = C.ATTRITION_LITE_HP
-        return [Enemy(hp=lite["hp"], max_hp=lite["hp"], name="grinder_lite",
-                      intents=copy.deepcopy(lite["intents"]))]
-    if pick == "punisher_lite":
+        out = [Enemy(hp=lite["hp"], max_hp=lite["hp"], name="grinder_lite",
+                     intents=copy.deepcopy(lite["intents"]))]
+    elif pick == "punisher_lite":
         spec = loader._encounter_index()["punisher"]["enemies"][0]
         lite = _scale_enemy_spec(spec, C.PUNISHER_LITE_SCALE)
-        return [Enemy(hp=lite["hp"], max_hp=lite["hp"], name="punisher_lite",
-                      intents=lite["intents"])]
-    raise ValueError(f"unknown normal pool entry {pick!r}")
+        out = [Enemy(hp=lite["hp"], max_hp=lite["hp"], name="punisher_lite",
+                     intents=lite["intents"])]
+    else:
+        raise ValueError(f"unknown normal pool entry {pick!r}")
+    return _apply_compensator(out, "normal")
 
 
 def rest_action(deck_ids: list[str], hp: int, max_hp: int) -> tuple[str, Optional[str]]:
@@ -108,7 +130,16 @@ def node_template() -> list[str]:
 
 
 def run_one(character: str, archetype: str, pilot_id: str,
-            policy: DraftPolicy, seed: int) -> RunResult:
+            policy: DraftPolicy, seed: int,
+            slot_mode: str = "standard") -> RunResult:
+    """slot_mode: 'standard' (1 companion offer) or 'pity(k)' — k screens
+    without taking a companion make the next slot a choose-3."""
+    pity_k = None
+    if slot_mode.startswith("pity(") and slot_mode.endswith(")"):
+        pity_k = int(slot_mode[5:-1])
+    elif slot_mode != "standard":
+        raise ValueError(f"unknown slot mode {slot_mode!r}")
+    screens_since_companion = 0
     rng = random.Random(seed)
     pilot = make_pilot(loader.pilot_weights(pilot_id))
     deck_ids = loader.starting_deck(character)
@@ -145,7 +176,11 @@ def run_one(character: str, archetype: str, pilot_id: str,
             res.deck_ids = deck_ids
             return res
         if kind != "B":                     # boss ends the run — no reward
-            offers = rewards.roll_rewards(rng, character)
+            n_comp = 1
+            if pity_k is not None and screens_since_companion >= pity_k:
+                n_comp = 3                  # pity fires: choose-3 slot
+            offers = rewards.roll_rewards(rng, character,
+                                          companion_offers=n_comp)
             deck_cards = [loader.get_card(cid) for cid in deck_ids]
             pick = policy(rng, deck_cards, offers, archetype)
             res.decisions.append({
@@ -153,6 +188,10 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 "picked": pick.id if pick else None})
             if pick is not None:
                 deck_ids.append(pick.id)
+            if pick is not None and pick.is_companion:
+                screens_since_companion = 0
+            else:
+                screens_since_companion += 1
             if (res.time_to_online is None
                     and draft.core_complete(
                         [loader.get_card(cid) for cid in deck_ids],
