@@ -1,0 +1,17 @@
+<Project>
+
+  <!-- Machine-local paths live in local.props (gitignored). Committed builds
+       must never hardcode a Steam path — see spec §0.3. -->
+  <Import Project="$(MSBuildThisFileDirectory)local.props"
+          Condition="Exists('$(MSBuildThisFileDirectory)local.props')" />
+
+  <Target Name="RequireLocalProps" BeforeTargets="PrepareForBuild"
+          Condition="'$(GameDir)' == ''">
+    <Error Text="GameDir is not set. Copy local.props.example to local.props and point GameDir at your Slay the Spire 2 install root." />
+  </Target>
+
+  <PropertyGroup>
+    <GameDataDir>$(GameDir)\data_sts2_windows_x86_64</GameDataDir>
+  </PropertyGroup>
+
+</Project>

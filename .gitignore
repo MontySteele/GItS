@@ -4,3 +4,23 @@ __pycache__/
 .pytest_cache/
 *.csv
 .DS_Store
+
+# --- C-milestones: machine-local build files (spec csharp-build-spec.md §0.3) ---
+# Never commit anything that points at this machine's Steam install.
+local.props
+bin/
+obj/
+dist/
+*.user
+
+# Extracted / decompiled base-game material is REFERENCE ONLY and stays out
+# of the repo entirely (§0.3). Decompiled MegaCrit code is not ours to vendor.
+sts2_decompiled/
+game_assets/
+*.pck
+*.dll
+*.pdb
+
+# Raw art asset zips are shared out-of-band and dropped in the repo root on
+# purpose. They must never be committed (principles §9: repo is public).
+*.zip
