@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BaseLib.Abstracts;
 using Godot;
 using KleeMod.Cards;
 using KleeMod.Cards.Generated;
@@ -17,12 +18,21 @@ namespace KleeMod;
 /// <summary>
 /// Klee — Spark Knight of Mondstadt.
 ///
-/// C1 "boots": implements only the 14 abstract members of CharacterModel.
 /// GenerateAnimator is deliberately NOT overridden — it is virtual with a
 /// working base implementation, so C1 needs no spine art (verified against
 /// decompiled CharacterModel, v0.107.1).
+///
+/// DERIVES FROM CustomCharacterModel, NOT CharacterModel — see DECISIONS
+/// finding 21. BaseLib gates 29 separate guards on <c>is ICustomModel</c>,
+/// which only CustomCharacterModel implements. Deriving from the raw game
+/// type compiled and booted fine and silently opted us out of every one of
+/// them, including the prefix that skips base-character epoch tracking; the
+/// visible symptom was that winning any Elite or Boss soft locked the run.
+/// It also adds no abstract members of its own — everything it declares is
+/// virtual with a default — so there is no cost to being on the right base
+/// type and no signal when you are not.
 /// </summary>
-public sealed class Klee : CharacterModel
+public sealed class Klee : CustomCharacterModel
 {
     // Klee red per spec C1.4; artist's final call later.
     public override Color NameColor => new Color("E85A4F");

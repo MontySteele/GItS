@@ -317,3 +317,81 @@ explodes "at the start of that enemy's turn". Canon (klee-character-design.md
 §3) and our own `BombPower.BeforeSideTurnStart` both detonate at the start of
 *Klee's* turn. Text corrected, and it now also states that bombs stack and each
 keeps its own damage, which is the rule players are most likely to guess wrong.
+
+---
+
+## Finding 21 — Elite and Boss wins soft lock the run (FIXED)
+
+**Found by playtest, 2026-07-20.** Reported as "duplicator on Jumpy Dumpty Mk.II
+soft locks when bombs have no valid target". The card was a red herring — the
+mechanic is unrelated and the bomb code is correct.
+
+`ProgressSaveManager.CheckFifteenElitesDefeatedEpoch` (`sts2.decompiled.cs:36648`)
+and `CheckFifteenBossesDefeatedEpoch` are closed type-switches over the six base
+characters ending in `throw new ArgumentOutOfRangeException("character", ...)`.
+`UpdateAfterCombatWon` calls the Elite one on `RoomType.Elite` and the Boss one
+on `RoomType.Boss` (`:37003-37010`).
+
+The call chain is `CombatManager.CheckWinCondition -> EndCombatInternal ->
+SaveManager.UpdateProgressAfterCombatWon -> UpdateAfterCombatWon`. The throw
+escapes into an async continuation, so `EndCombatInternal` never completes:
+enemies dead, win logged ("CHARACTER.KLEE fought ENCOUNTER.PHROG_PARASITE_ELITE
+... and WON"), combat never ends, End Turn does nothing, run unrecoverable.
+No crash dialog — it surfaces only in `godot.log`.
+
+Severity: **every elite and every boss**, deterministic, not a rare interaction.
+The playtest reached it on the first elite. It was reachable from the moment
+Klee became selectable and no test we own could have caught it, because both
+Tier 0 and the self-check model our code, not the base game's progression
+tracking.
+
+### The actual root cause — we had opted out of BaseLib
+
+The first fix was a `[HarmonyFinalizer]` suppressing that exception. It worked,
+and it was treating a symptom.
+
+BaseLib **already patches all three** of these methods
+(`BaseLib.decompiled.cs:20058-20084`) with a prefix reading
+`return !(localPlayer.Character is ICustomModel);`. It never fired because
+`Klee` derived from the game's `CharacterModel` rather than BaseLib's
+`CustomCharacterModel`, and `ICustomModel` is what
+`CustomCharacterModel` implements.
+
+**BaseLib gates 29 guards on `is ICustomModel`. None of them were active for
+Klee.** Beyond the three epoch methods: `SavedProperties` (×3, save/load for
+custom models), `CharacterModel.GenerateAnimator` (×3 — the path Klee.cs
+assumes "just works"), `CardModel.CostsEnergyOrStars` (×3), `NPotionLab.
+LoadPotions` (×3), `ModelDb.GetEntry`, `NCardLibraryGrid.RefreshVisibility`,
+`ImageHelper` room icons (×2), and `AchievementsHelper.
+CheckForDefeatedAllEnemiesAchievement`.
+
+**This retires O4.** We reasoned at length about whether patching an
+achievement method was worth the risk of granting an unearned Steam
+achievement. BaseLib had already solved it; the dilemma existed only because we
+were off the mechanism that reaches the solution. The lesson is not about
+achievements — it is that deriving from the raw game type **compiles, boots,
+and plays**, and the only signal that anything is wrong arrives as an unrelated
+soft lock hours later.
+
+**Real fix:** `Klee : CustomCharacterModel`. It declares no abstract members of
+its own — every member is virtual with a default — so the migration is a base
+type change plus a `using BaseLib.Abstracts`, and there was never a cost to
+being on the right type.
+
+**`ModelDb_AllCharacters_Patch` stays.** Checked before assuming: BaseLib does
+not append custom characters to `ModelDb.AllCharacters`. It transpiles call
+sites to a `VisibleCharacters` filter (`:39172`, `:39484`) that *removes*
+characters flagged `HideFromVanillaCharacterSelect`. Nothing adds them, so our
+postfix is still the mechanism that makes Klee appear — and there is no
+double-add.
+
+**The finalizer is kept as a canary,** not as the fix. Post-migration BaseLib's
+prefix short-circuits both methods, so the finalizer can no longer be reached;
+it now logs at WARN if it ever is, which would mean the guard has stopped
+applying to Klee. Cheaper detector than another soft locked playtest.
+
+**Class of bug, for the C3 sweep:** base-game code that switches on a closed
+character set. `ObtainCharUnlockEpoch` (`:36990`) is the same shape but safe —
+it builds an epoch id by string concat and logs on miss. Others are likely.
+Worth a decompiler sweep for `ArgumentOutOfRangeException("character"` before
+the next milestone rather than finding them one playtest at a time.

@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Characters;
+using MegaCrit.Sts2.Core.Saves.Managers;
 using MegaCrit.Sts2.Core.Unlocks;
 
 namespace KleeMod;
@@ -184,5 +186,66 @@ internal static class ModelDb_AllCharacters_Patch
         {
             __result = __result.Append(klee);
         }
+    }
+}
+
+/// <summary>
+/// Finding 21: winning an Elite or Boss room SOFT LOCKS the run for any
+/// character outside the base six.
+///
+/// ProgressSaveManager.CheckFifteenElitesDefeatedEpoch and its Boss twin are
+/// closed type-switches over Ironclad/Silent/Regent/Defect/Necrobinder/Deprived
+/// that end in `throw new ArgumentOutOfRangeException("character", ...)`. They
+/// are called from UpdateAfterCombatWon, which runs inside
+/// CombatManager.EndCombatInternal -> CheckWinCondition. The throw escapes into
+/// an async continuation, so EndCombatInternal never completes: the enemies are
+/// dead, the win is logged, and combat simply never ends. No crash dialog, no
+/// recovery — End Turn does nothing and the run is lost.
+///
+/// NOW A CANARY, NOT THE FIX. The real cause was that Klee derived from
+/// CharacterModel instead of CustomCharacterModel, so BaseLib's own prefix on
+/// these exact three methods — `return !(localPlayer.Character is ICustomModel)`
+/// — never skipped them. That is fixed at the source in Klee.cs, which means
+/// BaseLib now short-circuits both methods before they can throw and this
+/// finalizer should NEVER run again.
+///
+/// It is kept precisely because it logs when it fires. If that line ever
+/// appears, BaseLib's guard has stopped applying to Klee — most likely because
+/// someone changed her base type back or a BaseLib upgrade moved the interface
+/// — and the log line is a far cheaper way to learn that than another soft
+/// locked playtest. Deleting it would remove the detector, not dead code.
+///
+/// A Finalizer rather than a Prefix, deliberately: a Prefix would have to name
+/// the six base types to decide whether to skip, and would break again the day
+/// MegaCrit adds a seventh. Both methods read Character and then immediately
+/// switch, with no side effect before the throw, so suppressing after the fact
+/// loses nothing. The ParamName test keeps this narrow — any other exception
+/// from these methods still propagates rather than being swallowed.
+/// </summary>
+[HarmonyPatch]
+internal static class ProgressSaveManager_EpochCheck_Patch
+{
+    [HarmonyTargetMethods]
+    public static IEnumerable<MethodBase> TargetMethods()
+    {
+        yield return AccessTools.Method(typeof(ProgressSaveManager),
+            "CheckFifteenElitesDefeatedEpoch");
+        yield return AccessTools.Method(typeof(ProgressSaveManager),
+            "CheckFifteenBossesDefeatedEpoch");
+    }
+
+    [HarmonyFinalizer]
+    public static Exception? Finalizer(Exception __exception, MethodBase __originalMethod)
+    {
+        if (__exception is ArgumentOutOfRangeException { ParamName: "character" })
+        {
+            Log.Warn($"[{KleeMod.ModId}] CANARY: suppressed {__originalMethod.Name}. "
+                   + "BaseLib's ICustomModel prefix should have skipped this "
+                   + "already -- check that Klee still derives from "
+                   + "CustomCharacterModel (DECISIONS finding 21).");
+            return null;                 // suppress; combat can now end
+        }
+
+        return __exception;              // anything else is not ours to eat
     }
 }
