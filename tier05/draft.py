@@ -3,8 +3,10 @@
 Assigned mode: the run is seeded with a target archetype. Scoring terms:
 - archetype fit: enabler value DECAYS as the core completes; payoff value
   is GATED on the core being online (else you draft win-more blanks)
+- raw printed power (DRAFTER_VERSION 2, ruling R2.1 — adopted from the
+  hybrid experiment after it beat both parents everywhere)
 - universal: defense quota (the real-draft principle codified), curve
-  awareness, deck-size penalty
+  awareness, deck-size penalty (steeper for reaction — ruling R2.2)
 (The old Burst-priority term left with v1.9: the Burst is kit, never
 offered, so a scoring term for it in offers was dead code.)
 The adaptive policy (the goodstuff detector) lands in M6; the A/B harness
@@ -89,6 +91,20 @@ def _static_power(card: Card) -> float:
     return total / max(1, cost)
 
 
+# DRAFTER_VERSION 2 reaction weights (ruling R2.2) — swept at 1000
+# runs/cell (M8 report). The sweep's verdict: the twice-convicted
+# reaction scorer was guilty of exactly one thing, power blindness —
+# the R2.1 power term alone took assigned-reaction 10.7% -> 34.4%,
+# past adaptive. Raising applier (4.5) or offline-amp (2.5) valuations
+# measured WORSE (33.4%); only the lean-deck line helped (+1.9), which
+# is §3's density finding expressed as scorer behavior. Module-level so
+# sweeps can vary them without editing the scorer.
+REACTION_APPLIER_WEIGHT = 3.5     # sweep: 4.5 hurts
+REACTION_AMP_OFFLINE = 1.0        # sweep: 2.5 hurts
+REACTION_LEAN_CAP = 13            # reaction's own bloat line (§3: lean decks)
+REACTION_LEAN_PENALTY = 0.4       # winner at x0.4; x0.8 overshoots (16.6 cards)
+
+
 def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     s = 0.0
     progress = _core_progress(deck, archetype)
@@ -98,11 +114,18 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     # were gated on the core being online (measured: 1% amp assembly).
     if _core_progress(deck + [card], archetype) > progress:
         s += 3.0
-    if archetype == "generic" and not card.is_companion:
-        # The anchor drafts on raw power; roles stand in for engine cards.
-        s += min(2.5, _static_power(card) / 3.0)
-        if card.role in ("enabler", "payoff"):
-            s += 1.0
+    # DRAFTER_VERSION 2 (ruling R2.1): the raw-power term, adopted from
+    # the hybrid experiment after it beat both parents in all three
+    # archetypes. A plan-committed drafter with zero power awareness is
+    # an implausible human, and the acceptance law requires plausible
+    # drafts. Share-synergy stays excluded — assigned already prices fit
+    # off its target, and stacking share-synergy would double-count it.
+    s += min(3.0, _static_power(card) / 3.0)
+    if (archetype == "generic" and not card.is_companion
+            and card.role in ("enabler", "payoff")):
+        # The anchor's roles stand in for engine cards. (Its old private
+        # power term dissolved into the universal one above.)
+        s += 1.0
     # Same exclusion as adaptive_score: companions get the dedicated block
     # below. Without this the derived reaction tag silently re-tunes assigned
     # mode too, which would move the frozen M5 numbers for a reason that has
@@ -111,7 +134,10 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
         if card.role == "enabler":
             s += 3.0 * max(0.25, 1.0 - progress)     # decays as core fills
         elif card.role == "payoff":
-            s += 4.0 if online else 1.0              # gated on the core
+            if archetype == "reaction" and _is_amp_payoff(card):
+                s += 4.0 if online else REACTION_AMP_OFFLINE
+            else:
+                s += 4.0 if online else 1.0          # gated on the core
         else:
             s += 1.5
     elif "generic" in card.archetypes:
@@ -119,7 +145,8 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     if card.is_companion:
         if archetype == "reaction":
             # Companions ARE reaction's enablers (deliberate asymmetry).
-            s += 3.5 * max(0.25, 1.0 - progress) if _is_applier(card) else 1.5
+            s += (REACTION_APPLIER_WEIGHT * max(0.25, 1.0 - progress)
+                  if _is_applier(card) else 1.5)
         else:
             s += 0.5
     if _has_block(card) and _block_density(deck) < C.DRAFT_BLOCK_DENSITY_MIN:
@@ -130,6 +157,12 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     if cost >= 2 and avg_cost > 1.3:
         s -= 1.0                                     # curve awareness
     s -= max(0, len(deck) - C.DRAFT_DECK_SOFT_CAP) * 0.4   # deck bloat
+    if archetype == "reaction":
+        # Ruling R2.2 folds in the §3 finding: reaction uniquely prefers
+        # lean decks (20.2% at 13.4 cards under threshold 2.0). Expressed
+        # as scorer behavior — a steeper bloat line for reaction — so the
+        # skip threshold stays one global constant instead of forking.
+        s -= max(0, len(deck) - REACTION_LEAN_CAP) * REACTION_LEAN_PENALTY
     return s
 
 
@@ -289,33 +322,12 @@ def adaptive_policy(rng: random.Random, deck: list[Card],
 adaptive_policy.emergent_plan = True
 
 
-def hybrid_policy(rng: random.Random, deck: list[Card],
-                  offers: list[Card], archetype: str) -> Optional[Card]:
-    """The discriminating experiment for the assigned-vs-adaptive gap
-    (morning-triage ruling, finding 3.2).
-
-    Assigned's archetype scorer plus the ONE term adaptive has that
-    assigned lacks: raw printed power (assigned only consults it for the
-    generic anchor). Adaptive's share-weighted synergy term is deliberately
-    NOT blended in -- assigned already prices archetype fit off its target,
-    and stacking share-synergy on top would double-count the same signal.
-
-    Reading: if hybrid closes most of the 14.5-point winrate gap,
-    explanation 2 (hand-set weights ignore power) wins and the fix is a
-    tuning pass. If the gap persists, explanation 3 (the sim truncates
-    payoff scaling) is confirmed by elimination -- finding 1 already shows
-    the archetypes pull when power-drafted. Compare at matched deck size:
-    a gap that tracks deck size is tempo, not scaling.
-    """
-    if not offers:
-        return None
-    scored = sorted(((score_offer(c, deck, archetype)
-                      + min(3.0, _static_power(c) / 3.0), i, c)
-                     for i, c in enumerate(offers)), reverse=True)
-    best_score, _, best = scored[0]
-    if best_score < C.DRAFT_SKIP_THRESHOLD:
-        return None
-    return best
+# DRAFTER_VERSION 2: the hybrid IS the assigned drafter now — ruling
+# R2.1 adopted its power term into score_offer, so the diagnostic that
+# beat both parents (M7 §4) graduated to the standard model. The alias
+# stays so experiment scripts and grid tables keep running; it is not a
+# third arm of anything anymore.
+hybrid_policy = assigned_policy
 
 
 # The A/B pair. hybrid_policy is a diagnostic run on demand (see its
