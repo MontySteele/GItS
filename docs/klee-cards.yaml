@@ -137,6 +137,12 @@
 # Generic (4)
 - {id: spirited_away, name: "Spirited Away", cost: 2, type: skill, rarity: uncommon, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 12}]}
+# QUEUED ERRATA (R25, 2026-07-20): dodge_roll {block: -2}, 8 -> 6; the
+# status-exhaust rider is unchanged. Hide and Seek stays the bigger flat block
+# at common; dodge_roll becomes the utility trade at uncommon -- conditional
+# cleanup for less wall. Rides in the CCM errata batch (same sheet, same
+# window discipline; neither touches spark generation, so they may land
+# together) -- but only AFTER the R10 Crackle measurement window runs.
 - {id: dodge_roll, name: "Dodge Roll", cost: 1, type: skill, rarity: uncommon, solve: [block, utility], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 8}, {op: exhaust_from, zone: hand, filter: status, amount: 1}]}
 - {id: bright_idea, name: "Bright Idea", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [generic], role: glue,
