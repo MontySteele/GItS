@@ -146,3 +146,31 @@ Amend here, not in chat history.
     watchlist all clean, dream team strong-not-dominant, A1/A3/A7 near
     declared; A4/A6 metric definitions need chat-side rulings; A2-solo
     and spark-A3 are real sheet findings; Burst cards likely need Retain.
+
+## Pass 2 (2026-07-19, round-2 rulings)
+
+32. **All five round-2 rulings implemented:** A4 = healing/fight (Burning
+    Blood anchors baseline; 0.5 floor; barbara_injection probe), A6 =
+    baseline-anchored 0.7 AoE + 0.3 debuff-stacks composite, A2 early
+    window 2-4 + max_stacks engine support + N_per_detonation formulas,
+    Burst Retain (burst-tagged cards keep hand slot), pilot_regret.
+33. **Overkill clamped in damage logs** (combat unchanged): without it,
+    big single hits out-scored real AoE on A6 (Heavy Blade vs 14-HP
+    swarmlings). Uniform across configs; ruling 2's ordering anchor
+    (Silent < Ironclad-pkg < Klee on AoE) only holds with the clamp.
+34. **pilot_regret defined as:** another playable card had strictly
+    higher immediate value (expected damage + effective block/heal) at
+    no greater cost. No rng consumed (determinism preserved). Caught two
+    pilot bugs on first run: phantom reaction value on elemental heals,
+    and a missing heal term (heals now valued like block, capped by
+    missing HP). Reaction decks' residual ~25% is partly definitional
+    (setup sacrifices immediate value).
+35. **Pilot values the Burst payoff explicitly** (sparks_n_splash ~ 48
+    expected damage): Retain alone didn't cast it — per-character burst
+    cards need bespoke pilot valuation.
+36. **skip_and_hop conditional experiment: NULL** (A3 4.05 -> 4.03);
+    sheet reverted, residual confirmed structural. Escalated.
+37. **Global common-attack shave NOT armed:** demolition tank_boss 95.4%
+    (trigger was ~98%) and the band miss is a spread (spark 69%,
+    reaction 2%), which a global shave would worsen. Escalated with the
+    A2-knob and reaction-boss-collapse questions (see pass-2 report).

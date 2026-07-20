@@ -68,6 +68,13 @@ def score_config(character: str, deck: str, pilot_id: str, fights: int,
         stats = run_full_battery(character, deck, pilot_id, fights, seed)
         raw = axes.raw_axes(stats)
     scores = axes.normalize(raw, base_raw)
+    constraint_flags = []
+    for con in loader.character_constraints(character):
+        left, right = con.split(">")
+        if not scores[left] > scores[right]:
+            constraint_flags.append(
+                f"CONSTRAINT VIOLATED: {con} "
+                f"({scores[left]:.1f} vs {scores[right]:.1f})")
     pressure_delta = (metrics.summarize(stats["punisher"])["winrate"]
                       - metrics.summarize(stats["attrition"])["winrate"])
     return {
@@ -76,8 +83,8 @@ def score_config(character: str, deck: str, pilot_id: str, fights: int,
         "pressure_delta": pressure_delta,
         # The baseline is flat-3.0 by construction; the shape heuristic
         # only means something for compared configs.
-        "heuristic_flags": ([] if target_is_baseline
-                            else axes.heuristic_flags(scores)),
+        "heuristic_flags": (constraint_flags if target_is_baseline
+                            else axes.heuristic_flags(scores) + constraint_flags),
         "stats": stats,
     }
 

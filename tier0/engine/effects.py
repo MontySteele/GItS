@@ -71,8 +71,9 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     enemy.block -= blocked
     hp_dmg = dmg - blocked
     was_alive = enemy.alive
+    effective = min(hp_dmg, max(0, enemy.hp))   # overkill doesn't count
     enemy.hp -= hp_dmg
-    state.emit("damage", target=enemy.name, amount=hp_dmg, blocked=blocked,
+    state.emit("damage", target=enemy.name, amount=effective, blocked=blocked,
                base=base, source=source)
     if was_alive and not enemy.alive:
         state.kills_this_card += 1
@@ -144,10 +145,12 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     times = _amount(state, times)
 
     base = _amount(state, fx["amount"])
-    if "bonus_formula" in fx:
-        if fx["bonus_formula"] != "3_per_detonation_this_combat":
-            raise ValueError(f"unknown bonus_formula {fx['bonus_formula']!r}")
-        base += 3 * state.detonations_total   # Grand Finale
+    if "bonus_formula" in fx:                 # Grand Finale: N_per_detonation
+        formula = fx["bonus_formula"]
+        n, _, rest = formula.partition("_per_")
+        if rest != "detonation_this_combat" or not n.isdigit():
+            raise ValueError(f"unknown bonus_formula {formula!r}")
+        base += int(n) * state.detonations_total
     if card.type == "attack":
         base += state.current_attack_bonus
     # tag_damage_<tag> powers (Accuracy-like -> shiv) add per-hit.
@@ -184,11 +187,14 @@ def _op_energy(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
+    cap = fx.get("max_stacks")
     if fx.get("target", "self") == "self":
-        powers.apply_power(state, state.player, fx["power"], fx["amount"])
+        powers.apply_power(state, state.player, fx["power"], fx["amount"],
+                           max_stacks=cap)
     else:
         for enemy in _pick_targets(state, fx["target"]):
-            powers.apply_power(state, enemy, fx["power"], fx["amount"])
+            powers.apply_power(state, enemy, fx["power"], fx["amount"],
+                               max_stacks=cap)
 
 
 def _op_apply_aura(state: CombatState, fx: dict, card: Card) -> None:
@@ -352,6 +358,10 @@ def _predicate(state: CombatState, name: str) -> bool:
         return state.reactions_this_card > 0
     if name == "killed_target":
         return state.kills_this_card > 0
+    if name == "enemy_intends_attack":
+        return any(e.current_intent()["kind"] == "attack"
+                   and not e.frozen and e.sleep_turns == 0
+                   for e in state.living_enemies)
     raise ValueError(f"unknown predicate {name!r}")
 
 

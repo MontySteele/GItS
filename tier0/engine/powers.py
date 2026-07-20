@@ -45,7 +45,11 @@ def on_turn_end(state: CombatState, fighter: Fighter) -> None:
             fighter.powers[name] -= 1
 
 
-def apply_power(state: CombatState, target: Fighter, name: str, stacks: int) -> None:
-    target.powers[name] = target.powers.get(name, 0) + stacks
+def apply_power(state: CombatState, target: Fighter, name: str, stacks: int,
+                max_stacks: int | None = None) -> None:
+    new = target.powers.get(name, 0) + stacks
+    if max_stacks is not None:              # sheet v0.2 stack caps
+        new = min(new, max_stacks)
+    target.powers[name] = new
     state.emit("apply_power", power=name, stacks=stacks,
                target=getattr(target, "name", "player"))

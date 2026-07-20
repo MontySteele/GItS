@@ -50,10 +50,31 @@ def make_pilot(weights: dict):
             attacks = [(s, i, c) for s, i, c in scored
                        if c.type == "attack" and s > 0]
             if attacks:
-                return max(attacks, key=lambda t: t[:2])[2]
+                best = max(attacks, key=lambda t: t[:2])[2]
+        _log_regret(state, best, playable)
         return best
 
     return pilot
+
+
+def _immediate_value(state: CombatState, card: Card) -> float:
+    return _expected_damage(state, card) + _block_value(state, card)
+
+
+def _log_regret(state: CombatState, chosen: Card, playable: list[Card]) -> None:
+    """Spec §6 pilot_regret: was a strictly-better single play available?
+    'Strictly better' = higher immediate value (damage + effective block)
+    at no greater cost. Sanity instrument, not a target — no rng used, so
+    determinism is preserved."""
+    chosen_val = _immediate_value(state, chosen)
+    chosen_cost = card_cost(state, chosen)
+    for other in playable:
+        if other is chosen:
+            continue
+        if (card_cost(state, other) <= chosen_cost
+                and _immediate_value(state, other) > chosen_val):
+            state.emit("pilot_regret", chosen=chosen.id, better=other.id)
+            return
 
 
 def _est(state: CombatState, val, default: int = 0) -> float:
@@ -79,11 +100,18 @@ def _expected_damage(state: CombatState, card: Card) -> float:
                 times = 2 + state.player.sparks
             per_hit = powers.modify_damage_dealt(state.player,
                                                  _est(state, fx["amount"]))
-            if fx.get("bonus_formula") == "3_per_detonation_this_combat":
-                per_hit += 3 * state.detonations_total
+            if "bonus_formula" in fx:       # N_per_detonation_this_combat
+                n = fx["bonus_formula"].partition("_per_")[0]
+                if n.isdigit():
+                    per_hit += int(n) * state.detonations_total
             total += per_hit * times * n_targets
         elif fx["op"] == "place_bomb":
             total += fx["bomb_damage"] * _est(state, fx.get("amount", 1), 1)
+        elif (fx["op"] == "apply_power"
+              and fx.get("power") == "sparks_n_splash"):
+            # The Burst payoff: stacks x 4 hits x 5 dmg over coming turns.
+            total += (fx["amount"] * C.SPARKS_N_SPLASH_HITS
+                      * C.SPARKS_N_SPLASH_HIT_DMG * 0.8)
         elif fx["op"] == "detonate":
             # Early detonation realizes bomb damage now but forfeits the
             # next-turn detonation it would get anyway — value it only
@@ -104,11 +132,16 @@ def _raw_block(card: Card) -> float:
 def _block_value(state: CombatState, card: Card) -> float:
     # Block is worth the damage it actually prevents this turn, not its
     # printed number — otherwise the pilot never blocks chip damage.
+    # Healing is the same HP economy, capped by missing HP.
+    val = 0.0
     raw = _raw_block(card)
-    if raw == 0:
-        return 0.0
-    prevented = max(0.0, _incoming_damage(state) - state.player.block)
-    return min(raw, prevented)
+    if raw:
+        prevented = max(0.0, _incoming_damage(state) - state.player.block)
+        val += min(raw, prevented)
+    heal = sum(fx["amount"] for fx in card.effects if fx["op"] == "heal")
+    if heal:
+        val += min(heal, state.player.max_hp - state.player.hp)
+    return val
 
 
 def _scaling_value(state: CombatState, card: Card) -> float:
@@ -133,10 +166,15 @@ def _card_element(state: CombatState, card: Card) -> Optional[str]:
 
 
 def _reaction_value(state: CombatState, card: Card) -> float:
+    # Only ops that actually carry an element count — a hydro-flavored
+    # heal (Barbara's Melody) applies nothing and must score 0 here.
     elem = _card_element(state, card)
     swirls = any(fx["op"] == "swirl" for fx in card.effects)
-    applies = elem is not None or swirls or any(
-        fx["op"] == "apply_aura" for fx in card.effects)
+    applies = swirls or any(
+        fx["op"] == "apply_aura"
+        or (fx["op"] == "damage" and elem is not None
+            and fx.get("applies_element", card.type == "attack"))
+        for fx in card.effects)
     if not applies:
         return 0.0
     # Triggering beats seeding: any living enemy holding a reactable aura.

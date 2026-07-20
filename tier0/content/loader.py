@@ -122,3 +122,9 @@ def _pilot_index() -> dict[str, dict]:
 
 def pilot_weights(pilot_id: str) -> dict:
     return _pilot_index()[pilot_id]["weights"]
+
+
+def character_constraints(character_id: str) -> list[str]:
+    """Identity constraints like "A1_frontload>A2_scaling" — evaluated
+    against scores by the scorecard, flagged loudly when violated."""
+    return list(_character_index()[character_id].get("constraints", []))

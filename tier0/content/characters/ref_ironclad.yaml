@@ -28,4 +28,7 @@ packages:
     - shrug_it_off_like
     - cleave_like
     - metallicize_like
-relic_hooks: []
+# Burning Blood (ruling 1): heal 6 after each won fight. Post-fight, so
+# combat behavior — and the frozen battery — are untouched; it exists to
+# give the A4 healing metric a faithful nonzero anchor.
+relic_hooks: [heal_after_won_fight]

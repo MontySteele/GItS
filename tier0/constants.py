@@ -46,6 +46,10 @@ SOLAR_ISOTOMA_BLOCK = 3           # block per attack hit vs aura'd enemy
 CELESTIAL_GIFT_BLOCK = 4          # Nicole: block at start of turn
 CATALYTIC_BURST_PER_REACTION = 5  # Catalytic Conversion bonus burst/reaction
 
+# --- Reference relics ---
+BURNING_BLOOD_HEAL = 6        # REF_IRONCLAD: heal after each won fight
+                              # (ruling 1: gives A4 a nonzero anchor)
+
 # --- Pilot policy (spec §6) ---
 BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP
 PILOT_REGRET_SAMPLE_RATE = 0.01

@@ -26,11 +26,15 @@ class FightStats:
     energy_spent: int
     cards_drawn_extra: int          # draws beyond the base 5/turn
     energy_generated_extra: int     # energy beyond the base 3/turn
+    healing: int                    # A4: healing done (incl. post-fight)
+    debuff_stacks_applied: int      # A6: weak+vuln stacks put on enemies
     debuffed_intents: int           # enemy intents taken while weak/vuln
     total_intents: int
     reactions: int
     reaction_damage: int
     auras_wasted: int
+    cards_played: int = 0
+    regrets: int = 0                # pilot_regret samples (spec §6)
     flags: list[str] = field(default_factory=list)
 
     @property
@@ -58,11 +62,15 @@ def merge_stages(stages: list["FightStats"]) -> "FightStats":
         merged.energy_spent += s.energy_spent
         merged.cards_drawn_extra += s.cards_drawn_extra
         merged.energy_generated_extra += s.energy_generated_extra
+        merged.healing += s.healing
+        merged.debuff_stacks_applied += s.debuff_stacks_applied
         merged.debuffed_intents += s.debuffed_intents
         merged.total_intents += s.total_intents
         merged.reactions += s.reactions
         merged.reaction_damage += s.reaction_damage
         merged.auras_wasted += s.auras_wasted
+        merged.cards_played += s.cards_played
+        merged.regrets += s.regrets
         merged.flags = sorted(set(merged.flags) | set(s.flags))
     merged.won = all(s.won for s in stages)
     return merged
@@ -72,8 +80,8 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
     dmg_by_turn: dict[int, int] = {}
     energy_by_turn: dict[int, int] = {}
     total_dmg = block = blocked = energy = 0
-    extra_draws = extra_energy = 0
-    debuffed_intents = total_intents = 0
+    extra_draws = extra_energy = healing = debuff_stacks = 0
+    debuffed_intents = total_intents = cards_played = regrets = 0
     reactions = reaction_dmg = auras_wasted = 0
     flags: list[str] = []
     won = False
@@ -92,14 +100,22 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
             blocked += ev["blocked"]
         elif e == "play":
             energy += ev["cost"]
+            cards_played += 1
             energy_by_turn[ev["turn"]] = (energy_by_turn.get(ev["turn"], 0)
                                           + ev["cost"])
+        elif e == "pilot_regret":
+            regrets += 1
         elif e == "extra_draw":
             extra_draws += ev["amount"]
         elif e == "add_card" and ev["to"] == "hand":
             extra_draws += 1        # tokens-to-hand are velocity (A5)
         elif e == "energy":
             extra_energy += ev["amount"]
+        elif e == "heal":
+            healing += ev["amount"]
+        elif e == "apply_power":
+            if ev["power"] in ("weak", "vulnerable") and ev["target"] != "player":
+                debuff_stacks += ev["stacks"]
         elif e == "intent":
             total_intents += 1
             if ev["debuffed"]:
@@ -130,9 +146,11 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
         total_block_gained=block, damage_blocked=blocked,
         energy_spent=energy,
         cards_drawn_extra=extra_draws, energy_generated_extra=extra_energy,
+        healing=healing, debuff_stacks_applied=debuff_stacks,
         debuffed_intents=debuffed_intents, total_intents=total_intents,
         reactions=reactions,
         reaction_damage=reaction_dmg, auras_wasted=auras_wasted,
+        cards_played=cards_played, regrets=regrets,
         flags=sorted(set(flags)))
 
 
@@ -159,6 +177,8 @@ def summarize(all_stats: list[FightStats]) -> dict:
         "aura_starved_fights": sum(1 for s in all_stats
                                    if s.reactions == 0) / n,
         "auras_wasted_per_fight": sum(s.auras_wasted for s in all_stats) / n,
+        "pilot_regret_rate": (sum(s.regrets for s in all_stats)
+                              / max(1, sum(s.cards_played for s in all_stats))),
         "flagged_fights": sum(1 for s in all_stats if s.flags),
         "flags": sorted({f for s in all_stats for f in s.flags}),
     }

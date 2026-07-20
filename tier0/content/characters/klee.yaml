@@ -9,6 +9,8 @@ element: pyro
 cadence: catalyst        # every attack applies pyro
 burst_max: 60
 relic_hooks: [spark_on_detonation]   # Pounding Surprise
+# Ruling 3.4: her curve never tops her frontload — scorecard flags this.
+constraints: ["A1_frontload>A2_scaling"]
 starting_deck:
   - kaboom
   - kaboom
@@ -102,6 +104,21 @@ packages:
     - double_pop
     - ammo_scavenging
     - secret_stash
+  # Ruling 1: canonical A4 probe — Barbara at realistic draft rates.
+  # Doubles as the companion-sustain-patching validation.
+  barbara_injection:
+    - barbara_melody
+    - barbara_melody
+    - barbara_shining_idol
+    - bennett_fantastic_voyage
+    - xingqiu_raincutter
+    - fischl_nightrider
+    - kaeya_frostgnaw
+    - sizzle
+    - flame_dance
+    - combustion_study
+    - mine_toss
+    - hide_and_seek
   # §7.4 dream team: Prune + Durin + Nicole + Albedo forced in.
   dream_team:
     - prune_witch_hunt

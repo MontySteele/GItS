@@ -31,6 +31,10 @@ def print_scorecard(character: str, deck: str, result: dict) -> None:
           f"{result['curve_exponent']:.2f}")
     print(f"  pressure delta (punisher - attrition winrate): "
           f"{result['pressure_delta']:+.2f}")
+    regret = sum(sum(s.regrets for s in ss) for ss in result["stats"].values())
+    plays = sum(sum(s.cards_played for s in ss)
+                for ss in result["stats"].values())
+    print(f"  pilot regret rate: {regret / max(1, plays):.1%}")
     for flag in result["heuristic_flags"]:
         print(f"  ⚠ {flag}")
     if not result["heuristic_flags"]:

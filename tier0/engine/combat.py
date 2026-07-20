@@ -116,8 +116,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         play_card(state, card)
 
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
-    p.discard_pile.extend(p.hand)
-    p.hand = []
+    # Burst cards have Retain (principles v1.4): they stay in hand.
+    retained = [c for c in p.hand if "burst" in c.tags]
+    p.discard_pile.extend(c for c in p.hand if "burst" not in c.tags)
+    p.hand = retained
     powers.on_turn_end(state, p)
 
 
@@ -190,6 +192,10 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
             if state.over:
                 break
     won = bool(state.player.alive) and not state.living_enemies
+    if won and "heal_after_won_fight" in state.player.relic_hooks:
+        # Burning Blood (ruling 1): post-fight, can't affect combat —
+        # counts toward the A4 healing metric, not hp_left.
+        state.emit("heal", amount=C.BURNING_BLOOD_HEAL, post_fight=True)
     state.emit("fight_end", won=won, turns=state.turn,
                hp_left=max(0, state.player.hp))
     return state

@@ -34,14 +34,15 @@ def test_silent_velocity_above_baseline(silent, ironclad_pkg):
     assert silent["scores"]["A5_velocity"] > ironclad_pkg["scores"]["A5_velocity"]
 
 
-def test_silent_weakness_is_utility_or_setup(silent):
-    # Single-target shivs, no AoE: A6 must be a statline hole. Under the
-    # self-referential A7 (review ruling #3), Silent's slow engine ramp
-    # makes A7 a legitimate co-weakness — expected sanity: Silent comes
-    # online slower than Ironclad's package.
-    assert silent["scores"]["A6_utility"] <= 2.5
-    bottom_two = sorted(silent["scores"], key=silent["scores"].get)[:2]
-    assert "A6_utility" in bottom_two
+def test_silent_weakness_is_utility_or_setup(silent, ironclad_pkg):
+    # Single-target shivs, no AoE: A6 must sit below baseline, and ruling
+    # 2's ordering anchor must hold on the AoE term:
+    # Silent < Ironclad-package (< Klee, asserted in test_klee).
+    assert silent["scores"]["A6_utility"] < 3.0
+    assert silent["raw"]["A6_aoe"] < ironclad_pkg["raw"]["A6_aoe"]
+    bottom_two = sorted((ax for ax in silent["scores"]),
+                        key=silent["scores"].get)[:2]
+    assert "A6_utility" in bottom_two or "A7_setup_tax" in bottom_two
 
 
 def test_silent_frontload_not_above_baseline(silent):

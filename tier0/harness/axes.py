@@ -38,11 +38,13 @@ def raw_axes(stats_by_enc: dict[str, list[FightStats]]) -> dict[str, float]:
     d13 = sum(sum(s.damage_by_turn.get(t, 0) for t in (1, 2, 3)) for s in pooled)
     a1 = d13 / max(1, e13)
 
-    # A2: DPT t8-10 / DPT t1-3, fights that reached turn 10 (TANK BOSS mostly).
+    # A2: DPT t8-10 / DPT t2-4, fights that reached turn 10 (TANK BOSS
+    # mostly). Early window is 2-4, not 1-3 (ruling 3.1): bombs placed
+    # turn 1 pay on turn 2, and the 1-3 window read that lag as scaling.
     ratios = []
     for s in pooled:
         if s.turns >= 10:
-            lo = _avg(s.damage_by_turn.get(t, 0) for t in (1, 2, 3))
+            lo = _avg(s.damage_by_turn.get(t, 0) for t in (2, 3, 4))
             hi = _avg(s.damage_by_turn.get(t, 0) for t in (8, 9, 10))
             if lo > 0:
                 ratios.append(hi / lo)
@@ -54,8 +56,10 @@ def raw_axes(stats_by_enc: dict[str, list[FightStats]]) -> dict[str, float]:
     a3 = (sum(s.damage_blocked for s in a3_pool)
           / max(1, sum(s.energy_spent for s in a3_pool)))
 
-    # A4: net HP delta per fight (negative = chip taken).
-    a4 = _avg(s.hp_delta for s in pooled)
+    # A4: healing/recovery per fight (ruling 1). Chip-avoidance belongs to
+    # A3, speed to A1 — every HP-delta variant let kill-speed masquerade
+    # as durability. Includes post-fight relic healing (Burning Blood).
+    a4 = _avg(s.healing for s in pooled)
 
     # A5: (extra draws + extra energy) per turn, anchored on base economy
     # so the starter baseline (0 extra) still normalizes.
@@ -63,13 +67,12 @@ def raw_axes(stats_by_enc: dict[str, list[FightStats]]) -> dict[str, float]:
                               for s in pooled)
                           / max(1, sum(s.turns for s in pooled)))
 
-    # A6: composite utility — AoE coverage (single-target TTK / swarm TTK;
-    # AoE decks push it up) x (1 + debuff uptime).
-    swarm_ttk = _avg(s.turns for s in stats_by_enc.get("swarm", [])) or 1.0
-    single_ttk = _avg(s.turns for s in stats_by_enc.get("punisher", [])) or 1.0
-    uptime = (sum(s.debuffed_intents for s in pooled)
-              / max(1, sum(s.total_intents for s in pooled)))
-    a6 = (single_ttk / swarm_ttk) * (1.0 + uptime)
+    # A6 components (ruling 2): both baseline-anchored in normalize().
+    # Self-relative AoE penalized characters who are also fast single-
+    # target; absolute swarm DPT vs baseline measures AoE directly.
+    swarm = stats_by_enc.get("swarm", pooled)
+    a6_aoe = _avg(s.total_damage_dealt / max(1, s.turns) for s in swarm)
+    a6_debuff = _avg(s.debuff_stacks_applied for s in pooled)
 
     # A7: setup tax — avg first turn where the 3-turn-window DPT reaches
     # 70% of the config's OWN peak window (self-referential: "when does
@@ -78,7 +81,9 @@ def raw_axes(stats_by_enc: dict[str, list[FightStats]]) -> dict[str, float]:
     a7 = _avg(_turns_to_own_peak(s) for s in pooled)
 
     return {"A1_frontload": a1, "A2_scaling": a2, "A3_block": a3,
-            "A4_sustain": a4, "A5_velocity": a5, "A6_utility": a6,
+            "A4_sustain": a4, "A5_velocity": a5,
+            "A6_utility": a6_aoe,          # headline raw = swarm DPT
+            "A6_aoe": a6_aoe, "A6_debuff": a6_debuff,
             "A7_setup_tax": a7}
 
 
@@ -95,6 +100,9 @@ def _turns_to_own_peak(s: FightStats) -> int:
     return C.MAX_TURNS
 
 
+A4_FLOOR = 0.5     # zero-healing configs score the floor, not zero
+
+
 def normalize(raw: dict[str, float], baseline: dict[str, float]) -> dict[str, float]:
     """Score each axis so baseline = 3.0. Higher = better on every axis."""
     eps = 1e-9
@@ -102,9 +110,12 @@ def normalize(raw: dict[str, float], baseline: dict[str, float]) -> dict[str, fl
     for ax in AXES:
         r, b = raw[ax], baseline[ax]
         if ax == "A4_sustain":
-            # Lower HP loss is better; net healing caps out.
-            loss_r, loss_b = max(eps, -r), max(eps, -b)
-            score = 3.0 * loss_b / loss_r
+            score = max(A4_FLOOR, 3.0 * r / max(eps, b))
+        elif ax == "A6_utility":
+            # 0.7 AoE + 0.3 debuff composite, each term baseline-anchored.
+            aoe = raw["A6_aoe"] / max(eps, baseline["A6_aoe"])
+            deb = raw["A6_debuff"] / max(eps, baseline["A6_debuff"])
+            score = 3.0 * (0.7 * aoe + 0.3 * deb)
         elif ax == "A7_setup_tax":
             score = 3.0 * b / max(eps, r)      # fewer setup turns = better
         else:
