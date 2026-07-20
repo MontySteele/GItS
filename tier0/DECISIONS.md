@@ -304,3 +304,14 @@ Amend here, not in chat history.
     1-of-15 rare at 5% odds (~10% of runs SEE the Burst). Escalated with
     options (innate Burst recommended) in docs/triage-execution-report.md.
     Pity mechanism kept in-code for M7.
+60. **A4 instrument replaced (R8 healing-law ruling): barbara_injection →
+    sustain_probe.** The conjunctive healing law (true heal = Rare AND
+    Exhausts; no 4-star companion may true-heal) converted every pool
+    heal to block/meter, so a card-based A4 probe can no longer exist in
+    Mondstadt. New instrument: the anchor's exempt relic trickle
+    (heal_after_won_fight) injected probe-only via package_relic_hooks —
+    never on starter, never in Tier 0.5 runs, leak-guarded by test.
+    A4 raw for the probe changes class and magnitude (card heals
+    ~10-12/fight → relic 6/fight): A4 numbers are NOT continuous across
+    R8, by design. Klee solo A4 = 0.5 re-derived (still floor — now
+    ecosystem-wide by law, not merely by draft).

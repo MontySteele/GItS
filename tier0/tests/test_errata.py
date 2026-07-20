@@ -18,21 +18,35 @@ BAND_FIGHTS = 1000
 SEED = 42
 
 
-# --- companion healing errata (sheet v0.3.1) ---
+# --- healing law (R8, supersedes the v0.3.1 exhaust errata) ---
 
-def test_companion_heals_exhaust():
-    # Healing-grade policy (principles v1.5): repeatable true healing is
-    # not a thing companions provide. Barbara/Bennett heals now Exhaust.
-    from tier0.engine.combat import play_card
-    for cid in ("barbara_melody", "bennett_fantastic_voyage"):
-        card = loader.get_card(cid)
-        assert card.exhaust, cid
-        st = make_state()
-        st.player.hp = 40
-        st.player.energy = 3
-        st.player.hand.append(card)
-        play_card(st, card)
-        assert card in st.player.exhaust_pile
+def test_healing_law_is_conjunctive():
+    """R8: true in-combat healing is Rare-tier AND Exhausts; no 4-star
+    companion may true-heal (4-stars cap at uncommon). This replaces the
+    v0.3.1 test that asserted Barbara/Bennett heals Exhaust -- those
+    heals no longer exist (converted to block/meter). Enforced over the
+    WHOLE sheet so the next heal that lands in the pool answers to the
+    law, not to a review."""
+    for card in loader._card_index().values():
+        heals = any(fx.get("op") == "heal" for fx in card.effects)
+        if not heals:
+            continue
+        assert card.rarity == "rare" and card.exhaust, (
+            f"{card.id}: true heal below Rare-and-Exhausts (R8 law)")
+        assert not (card.is_companion and card.star == 4), (
+            f"{card.id}: 4-star companion may not true-heal (R8)")
+
+
+def test_r8_conversions_landed():
+    # The three ruled conversions: no heal op remains, riders intact.
+    melody = loader.get_card("barbara_melody")
+    assert not melody.exhaust
+    assert {fx["op"] for fx in melody.effects} == {"block", "burst_energy"}
+    idol = loader.get_card("barbara_shining_idol")
+    assert {fx["op"] for fx in idol.effects} == {"block", "apply_aura", "draw"}
+    voyage = loader.get_card("bennett_fantastic_voyage")
+    assert not voyage.exhaust
+    assert {fx["op"] for fx in voyage.effects} == {"block", "apply_power"}
 
 
 # --- control_uptime / SUPPORT_CARRY (§2.2a) ---

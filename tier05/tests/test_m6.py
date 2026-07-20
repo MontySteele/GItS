@@ -80,7 +80,7 @@ def test_companion_tag_is_derived_from_effects_not_hand_written():
     idx = loader._card_index()
     fuel = idx["dahlia_sacramental_shower"]      # applies_element
     swirl = idx["sucrose_gust"]                  # swirl IS a reaction
-    plain = idx["barbara_melody"]                # heal only
+    plain = idx["barbara_melody"]                # block + meter (R8), no element
     assert "reaction" in fuel.archetypes
     assert "reaction" in swirl.archetypes
     assert "reaction" not in plain.archetypes

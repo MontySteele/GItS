@@ -23,7 +23,12 @@ naturally.
 The clean cell the ruling ordered: each policy upgrades its own first-N
 eligible picks (assigned/hybrid: on-plan; adaptive: its goodstuff picks),
 N swept, realized dose reported. Current-world basis as directed
-(drafter v1, template v1, pre-Snap — same as M7's dose cell).
+(drafter v1, template v1, pre-Snap). One basis caveat the review pass
+caught: R4's derived-tag migration (albedo/oz gain the reaction tag)
+had already landed, so the reaction cells are not bit-identical to
+M7's dose-cell world — demolition/spark replay M7's assigned numbers
+exactly (47.4/58.2 at N=8), reaction differs by 0.4 (40.5 vs 40.9).
+Nothing in the verdict turns on it.
 
 | N | demolition asgn/adpt (dose) | spark | reaction |
 |---|---|---|---|
@@ -246,6 +251,63 @@ where it lives.
 
 ---
 
+## 8. R8 — healing-policy tightening (mid-sprint amendment): landed
+
+**The law** (conjunctive: true in-combat healing is Rare-tier AND
+Exhausts; below Rare, sustain routes through Block or buffer pools; no
+4-star companion may true-heal) is now **enforced by test over the whole
+sheet** — `test_healing_law_is_conjunctive` fails the next heal that
+lands anywhere below Rare-and-Exhausts, so future cards answer to the
+law rather than to a review. The three ruled conversions landed verbatim
+(melody → block 4 + meter 4; shining_idol → block 5 + aura + cantrip;
+fantastic_voyage → block 4 + courage, Exhaust removed). This resolves
+§5's shining_idol audit by conversion, as ruled.
+
+**Consequential edits under your red pen:**
+- Upgrade deltas for the three converted cards re-pointed at their new
+  numbers (melody/idol `{block: +2}`; voyage keeps `{buff: +1}`) —
+  proposed designs, modest-single-bump guardrail respected.
+- The v0.3.1 errata test (asserted heals Exhaust) is superseded and was
+  rewritten as the law test above plus a conversion pin.
+
+**A4 instrumentation (directive executed; NUMBERS ARE DISCONTINUOUS BY
+DESIGN).** The barbara_injection probe died with its heals. Replacement
+instrument: the anchor's exempt relic trickle (`heal_after_won_fight`,
+Burning Blood — the same hook anchoring ref_ironclad's A4 baseline at
+3.0), injected probe-only via a new `package_relic_hooks` mechanism
+(never on starter, never in Tier 0.5 runs, leak-guarded by test). The
+probe (`sustain_probe`, same 12-card deck) reads raw ~6 healing/fight vs
+the old card-based ~10–12: **A4 numbers do not continue across R8.**
+Klee solo A4 = 0.5 re-derived under the new world (still the floor — now
+ecosystem-wide by law, not merely by draft). DECISIONS entry 60.
+
+**Tier 0 exposure:** none of the weighted/watchlist decks contain the
+converted cards (only the probe did), so the ratified winrate bands and
+the snapshot-locked scorecard are structurally untouched — confirmed by
+the full suite at 1000-fight regression locks (163 green).
+
+**Tier 0.5 grid under the post-R8 pool** (drafter v2, template v2 — the
+standing baseline, re-stamped because companion valuations changed):
+
+| target | assigned | adaptive | vs pre-R8 (asgn/adpt) |
+|---|---|---|---|
+| demolition | 59.1% | 45.8% | ±0.0 / −7.1 |
+| spark | 57.1% | 45.8% | +0.2 / −8.3 |
+| reaction | 49.0% | 39.9% | **−11.4** / −6.8 |
+
+Assigned's lead holds everywhere (+13.3/+11.3/+9.1); all floors clear;
+no divergence alarms (reaction 38.6–40.6% dominant, goodstuff 7.7–9.5%).
+**The across-the-board winrate drop is the law working, priced:** the
+converted heals were RUN-level sustain (HP persists across fights;
+Block evaporates end of turn), and the archetypes that draft buffers
+and grind long fights paid most — reaction assigned −11.4. This is
+real difficulty added to the run economy, not noise. If the drop reads
+as too steep, the law-compliant levers are rest economy or a designed
+5-star Rare healer (Qiqi-shaped — the corollary's native slot), not
+softening the law.
+
+---
+
 ## Asks
 
 1. **R1 validation gate — ratify or note (§2):** engine+3 clears the
@@ -268,6 +330,11 @@ where it lives.
    46.7% under the calibrated economy while assigned hit 60.4 — the
    instrument still shows no alarms, and adaptive's numbers moved with
    the pool changes (Snap + derived tags), all labeled in §3.
+7. **R8 aftermath (§8):** removing pool sustain cost 7–11 winrate pts
+   (reaction assigned worst). Accept as the law's price, or authorize
+   the 5-star Rare healer design (Qiqi-shaped — the corollary's native
+   slot) to restore premium sustain through the front door? The upgrade
+   deltas for the three conversions also await your red pen.
 
 ## Not in this milestone
 

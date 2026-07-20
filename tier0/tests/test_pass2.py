@@ -79,11 +79,20 @@ def test_a4_baseline_heals_and_klee_floors():
     assert klee["scores"]["A4_sustain"] == 0.5      # zero-healing floor
 
 
-def test_barbara_injection_raises_a4():
-    klee = score_config("klee", "barbara_injection", "reaction",
+def test_sustain_probe_raises_a4():
+    """R8: the barbara_injection instrument died with the conjunctive
+    healing law (its heals converted to block/meter). The A4 probe now
+    borrows the anchor's exempt relic trickle (heal_after_won_fight via
+    package_relic_hooks) -- instrument class change flagged in the M8
+    report; the axis must still respond to healing when it exists."""
+    klee = score_config("klee", "sustain_probe", "reaction",
                         FIGHTS, SEED)
     assert klee["scores"]["A4_sustain"] > 0.5
     assert klee["raw"]["A4_sustain"] > 3            # actual healing/fight
+    # And the probe hook must not leak outside its package:
+    from tier0.content import loader
+    assert "heal_after_won_fight" not in loader.build_player(
+        "klee", "reaction_weighted").relic_hooks
 
 
 def test_a6_ordering_anchor():

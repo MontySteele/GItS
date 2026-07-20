@@ -143,9 +143,17 @@ packages:
     - double_pop
     - ammo_scavenging
     - secret_stash
-  # Ruling 1: canonical A4 probe — Barbara at realistic draft rates.
-  # Doubles as the companion-sustain-patching validation.
-  barbara_injection:
+  # A4 probe, v2 (R8). The old barbara_injection instrument died with the
+  # conjunctive healing law -- its heals converted to block/meter, so a
+  # card-based probe can no longer exist below 5-star Rare (and Mondstadt
+  # has no rare healer designed). New instrument: the heal_after_won_fight
+  # relic hook (Burning Blood -- the SAME trickle anchoring ref_ironclad's
+  # A4 baseline, and a shape the law explicitly exempts), injected via
+  # package_relic_hooks below. Deck list unchanged from barbara_injection
+  # (the converted cards stay as sustain-through-block support). A4 raw
+  # for this probe changes class and magnitude (card heals ~12/fight ->
+  # relic 6/fight): flagged in the M8 report, not silently continuous.
+  sustain_probe:
     - barbara_melody
     - barbara_melody
     - barbara_shining_idol
@@ -172,3 +180,9 @@ packages:
     - mine_toss
     - hide_and_seek
     - alchemical_curiosity
+# R8 A4 instrument: probe-only relic hooks, merged into relic_hooks when
+# the named package is built. HARNESS INSTRUMENTATION, not character kit —
+# Klee does not ship with Burning Blood; the probe borrows the anchor's
+# exempt relic trickle so the A4 axis keeps a validated instrument.
+package_relic_hooks:
+  sustain_probe: [heal_after_won_fight]

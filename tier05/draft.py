@@ -162,6 +162,13 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
         # lean decks (20.2% at 13.4 cards under threshold 2.0). Expressed
         # as scorer behavior — a steeper bloat line for reaction — so the
         # skip threshold stays one global constant instead of forking.
+        # LATENT (review pass): past DRAFT_DECK_SOFT_CAP this line STACKS
+        # with the global penalty (combined 0.8/card — the slope the R2.2
+        # sweep rejected from cap 13). Unreachable today: 10 reward
+        # screens cap decks at 20, so the global line has never fired in
+        # tier05. The sweep measured the stacked form as-is; if a future
+        # template exceeds ~12 screens, re-sweep before trusting either
+        # coefficient past 22.
         s -= max(0, len(deck) - REACTION_LEAN_CAP) * REACTION_LEAN_PENALTY
     return s
 
@@ -326,7 +333,12 @@ adaptive_policy.emergent_plan = True
 # R2.1 adopted its power term into score_offer, so the diagnostic that
 # beat both parents (M7 §4) graduated to the standard model. The alias
 # stays so experiment scripts and grid tables keep running; it is not a
-# third arm of anything anymore.
+# third arm of anything anymore. CAVEAT (review pass): the alias
+# reproduces the archived hybrid only for the three measured archetypes.
+# In GENERIC-anchor mode the old hybrid double-counted power (private
+# anchor term + hybrid term); v2 removed the double-count, so a generic
+# hybrid re-run will not match any pre-v2 generic number (none were
+# published — M7's hybrid tables cover the three archetypes only).
 hybrid_policy = assigned_policy
 
 

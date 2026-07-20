@@ -148,14 +148,19 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
     (e.g. 'archetype_package') appended to the starter deck."""
     spec = _character_index()[character_id]
     card_ids = list(spec["starting_deck"])
+    hooks = list(spec.get("relic_hooks", []))
     if deck != "starter":
         card_ids += spec["packages"][deck]
+        # R8: probe-only relic hooks (harness instrumentation, e.g. the
+        # sustain_probe's exempt heal trickle). Never on 'starter', never
+        # in Tier 0.5 runs (build_player_from_ids does not read this).
+        hooks += spec.get("package_relic_hooks", {}).get(deck, [])
     return Player(hp=spec["hp"], max_hp=spec["hp"],
                   draw_pile=[get_card(cid) for cid in card_ids],
                   element=spec.get("element", "none"),
                   cadence=spec.get("cadence", "skill"),
                   burst_max=spec.get("burst_max", 0),
-                  relic_hooks=list(spec.get("relic_hooks", [])),
+                  relic_hooks=hooks,
                   kit_cards=_kit_cards(spec))
 
 

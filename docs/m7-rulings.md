@@ -169,6 +169,40 @@ smith uptake rises substantially but remains below dose-controlled benefit
 because timing is late; attrition proves to be the stronger knob of the two.
 Null or contrary results are binding and get documented per house rules.
 
+## R8 — NEW (mid-sprint amendment): healing-policy tightening
+
+**Ruled (user, verbatim intent):** the v1.5 healing policy's disjunctive
+clause ("rare-tier OR Exhausts") is too loose — reliable per-combat true
+healing at common is relic-grade attrition math in a card slot, stackable
+across copies in a shared pool. **New law, conjunctive: true in-combat
+healing is Rare-tier AND Exhausts.** Below Rare, sustain routes through
+Block (including pre-emptive/delayed Block) or character-specific buffer
+pools.
+
+**Structural corollary** (for the principles amendment): 4-star companion
+cards cap at uncommon, so no 4-star companion may true-heal — companion
+healing is exclusively 5-star Rare territory (Qiqi-shaped; later
+Sigewinne). The rarity system now models premium sustain natively.
+
+**Sheet conversions (Mondstadt errata, proposed designs, user red-pen
+applies):** barbara_melody → block 4 + burst_energy 4 (Bennett Passion
+pricing precedent); barbara_shining_idol → block 5 + hydro aura + draw 1
+(resolves the M7 ask-5 / M8 §5 exhaust audit by conversion); bennett
+_fantastic_voyage → block 4 + attack_up_this_turn 3, Exhaust removed.
+Exempt by existing policy: potions (base-game-priced consumables) and
+relic-scale trickles. Furina's rare true heals gain Exhaust (kickoff doc,
+chat-side).
+
+**Instrumentation directive:** the A4/sustain probe used barbara_melody's
+heal as its instrument; with the pool's common heal gone the harness
+needs a replacement probe — Code's choice of instrument; flag the change
+so A4 numbers aren't silently discontinuous. Klee's A4-0.5 is re-derived
+under the new probe, not assumed.
+
+**Principles amendment queued** (chat-side): conjunctive healing law +
+5-star-only companion-healing corollary, shipping with the Furina
+kickoff amendments.
+
 ## Sequencing note
 
 R6 (matched-dose cell) and R7 (recalibration) both touch the upgrade story;
