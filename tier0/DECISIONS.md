@@ -276,3 +276,31 @@ Amend here, not in chat history.
     "shipped on faith" fails first contact for the archetype whose
     enablers live in the companion pool. For M6 metrics / M7 slot
     modes; no action taken.
+
+## Triage execution (2026-07-19, errata-m5-triage.md)
+
+56. **Splash proc-cap ARMED** (triage ruling 1): constant 3, sheet v0.4
+    codifies splash_procs_per_turn on blazing_delight, drift guard in
+    test_errata, xfail flipped. Re-measured: demolition tank_boss 96.5%
+    at 1000 fights (in band, exactly the pre-measured value); 1000-fight
+    band flags all clear; medians moved <=0.03 (V01 snapshot holds).
+    Trigger definition extended per ruling: the cap is the sanctioned
+    demolition ceiling knob for band violations as well as A2 drag.
+57. **PROGRESSION_GAP_COMPENSATOR frozen at {normal 1.0, elite 0.8,
+    boss 0.7}** (triage 3b): 48-combo grid on the anchor, winner
+    confirmed 47.9% completion at 1000 runs (target 45+-10). Normals
+    deliberately untouched — only the full-HP-calibrated solo gates
+    (punisher/tank_boss) are compensated in run context.
+58. **Draft-policy deadlock found & fixed via the ruling-4 decomposition:**
+    payoff gating gated reaction's amp payoffs on a core that CONTAINS
+    an amp payoff (amp assembly 1%). Fix: cards that advance the core
+    are never dead picks (+3.0, regression-tested). Post-fix, full-length
+    assembly: demolition 89% (watch-item resolved — truncation was the
+    whole story), spark 43%, reaction 5.8%.
+59. **Pity escalation executed per pre-authorization; NULL result with a
+    decomposition:** pity(3)/pity(2) move reaction assembly ~0 because
+    assembly = 79% appliers x 71% amp x 10% Burst — the companion slot
+    was never the bottleneck. Binding constraint: sparks_n_splash is a
+    1-of-15 rare at 5% odds (~10% of runs SEE the Burst). Escalated with
+    options (innate Burst recommended) in docs/triage-execution-report.md.
+    Pity mechanism kept in-code for M7.

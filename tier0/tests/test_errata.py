@@ -108,14 +108,17 @@ def test_winrate_bands_skipped_below_min_fights():
     assert any("not checked" in f for f in rep["band_flags"])
 
 
+def test_sheet_splash_cap_matches_engine_constant():
+    # Triage ruling 1: sheet v0.4 carries the knob so the design artifact
+    # is authoritative; this guard catches sheet/engine drift.
+    blazing = loader.get_card("blazing_delight")
+    fx = next(f for f in blazing.effects
+              if f.get("power") == "detonation_splash")
+    assert fx["splash_procs_per_turn"] == C.DETONATION_SPLASH_PROC_CAP
+
+
 @pytest.mark.parametrize("deck,pilot,enc", [
-    pytest.param("demolition_weighted", "demolition", "tank_boss",
-                 marks=pytest.mark.xfail(
-                     reason="97.4% at 1000 fights > 97 cap — the "
-                            "ratification's pre-registered comeback case; "
-                            "awaiting ruling (docs/klee-errata-report.md). "
-                            "Splash cap 3 would land it at 96.5%.",
-                     strict=True)),
+    ("demolition_weighted", "demolition", "tank_boss"),
     ("spark_weighted", "spark", "tank_boss"),
     ("reaction_weighted", "reaction", "tank_boss"),
     ("reaction_weighted", "reaction", "gauntlet"),

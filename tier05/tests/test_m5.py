@@ -111,15 +111,19 @@ def _cards(*ids):
     return [loader.get_card(i) for i in ids]
 
 
-def test_payoff_gated_on_core():
-    payoff = next(c for c in loader._card_index().values()
-                  if "demolition" in c.archetypes and c.role == "payoff")
+def test_payoff_gated_beyond_core():
+    # Post-triage shape: a payoff that ADVANCES the core is a fine early
+    # pick (the deadlock fix); the gate bites on payoffs BEYOND the core.
     starter = _cards(*loader.starting_deck("klee"))
-    cold = draft.score_offer(payoff, starter, "demolition")
-    online_deck = starter + _cards("mine_toss", "mine_toss", "double_pop",
-                                   "bomb_voyage", "quick_fuse")
-    assert draft.core_complete(online_deck, "demolition")
-    hot = draft.score_offer(payoff, online_deck, "demolition")
+    amp = next(c for c in loader._card_index().values()
+               if "reaction" in c.archetypes and c.role == "payoff")
+    offline = starter + [amp, loader.get_card("xingqiu_raincutter")]
+    assert not draft.core_complete(offline, "reaction")
+    cold = draft.score_offer(amp, offline, "reaction")   # 2nd amp, offline
+    online = starter + [amp] + _cards("xingqiu_raincutter",
+                                      "kaeya_frostgnaw", "sparks_n_splash")
+    assert draft.core_complete(online, "reaction")
+    hot = draft.score_offer(amp, online, "reaction")
     assert hot > cold
 
 
@@ -159,6 +163,44 @@ def test_draft_regret_deterministic():
            sum(x.regret_samples for x in r2)
 
 
+# --- triage ruling 3b/4 mechanisms ---
+
+def test_progression_compensator_scales_elite_and_boss_only():
+    rng = random.Random(SEED)
+    full = loader._encounter_index()["punisher"]["enemies"][0]
+    elite = model.build_node_encounter("E", rng)[0]
+    assert elite.hp == round(full["hp"]
+                             * C.PROGRESSION_GAP_COMPENSATOR["elite"])
+    boss = model.build_node_encounter("B", rng)[0]
+    assert boss.hp == round(240 * C.PROGRESSION_GAP_COMPENSATOR["boss"])
+    assert C.PROGRESSION_GAP_COMPENSATOR["normal"] == 1.0   # untouched
+
+
+def test_pity_slot_fires_after_k_companionless_screens():
+    # pity(k) mechanism (pulled forward from M7 by triage ruling 4):
+    # k screens without taking a companion -> next slot offers 3.
+    def no_companions(rng, deck, offers, archetype):
+        picks = [c for c in offers if not c.is_companion]
+        return picks[0] if picks else None
+    r = model.run_one("klee", "demolition", "demolition", no_companions,
+                      SEED, slot_mode="pity(2)")
+    comp_counts = [sum(1 for c in d["offers"] if c.is_companion)
+                   for d in r.decisions]
+    assert comp_counts[:2] == [1, 1]        # standard until pity builds
+    assert 3 in comp_counts                 # then the choose-3 fires
+
+
+def test_core_advance_never_dead_pick():
+    # Regression for the reaction deadlock: an amp payoff must outscore
+    # nothing-burger offers even before the core is online.
+    starter = _cards(*loader.starting_deck("klee"))
+    deck = starter + _cards("xingqiu_raincutter", "kaeya_frostgnaw")
+    amp = next(c for c in loader._card_index().values()
+               if "reaction" in c.archetypes and c.role == "payoff")
+    assert draft.score_offer(amp, deck, "reaction") \
+        >= C.DRAFT_SKIP_THRESHOLD
+
+
 # --- fragility metrics ---
 
 def test_summarize_runs_fragility_shape():
@@ -171,7 +213,9 @@ def test_summarize_runs_fragility_shape():
     reached = [b["reached"] for b in s["hp_bands"] if b]
     assert reached[0] == 40                    # everyone fights node 0
     assert all(x >= y for x, y in zip(reached, reached[1:]))  # monotone
-    # Elite death clustering — the spec's declared expectation.
-    e_deaths = sum(s["death_heatmap"].get(i, 0)
-                   for i, k in enumerate(model.node_template()) if k == "E")
-    assert e_deaths >= sum(s["death_heatmap"].values()) * 0.5
+    # Elite/boss death clustering — the spec's declared expectation
+    # (post-compensator, the boss carries a healthy share of it).
+    eb_deaths = sum(s["death_heatmap"].get(i, 0)
+                    for i, k in enumerate(model.node_template())
+                    if k in ("E", "B"))
+    assert eb_deaths >= sum(s["death_heatmap"].values()) * 0.6

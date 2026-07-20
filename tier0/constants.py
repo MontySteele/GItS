@@ -51,9 +51,12 @@ SPARKS_N_SPLASH_HITS = 4          # end of turn: N hits...
 SPARKS_N_SPLASH_HIT_DMG = 5       # ...of this damage, each applies pyro
 PLAYTIME_BOMB_DAMAGE = 5          # Playtime Forever's per-turn bomb
 DETONATION_SPLASH_BURST = 3       # Blazing Delight: burst energy per detonation
-DETONATION_SPLASH_PROC_CAP = None  # max splash procs/turn; None = uncapped.
-                                   # DORMANT knob (round-3 ruling): set to 3
-                                   # only if demolition's median A2 drags.
+DETONATION_SPLASH_PROC_CAP = 3     # max splash procs/turn. ARMED by the
+                                   # errata/M5 triage (ruling 1): sanctioned
+                                   # demolition ceiling knob for band
+                                   # violations too. Sheet v0.4 codifies it
+                                   # on blazing_delight (drift-guarded in
+                                   # test_errata).
 OZ_DMG = 3                        # Oz end-of-turn hit (applies electro)
 WITCHS_FLAME_DMG = 4              # Durin end-of-turn hit (applies pyro)
 SOLAR_ISOTOMA_BLOCK = 3           # block per attack hit vs aura'd enemy
@@ -89,6 +92,17 @@ PUNISHER_LITE_SCALE = 0.70        # normal-pool punisher at 70% statline
 ATTRITION_LITE_HP = 45            # normal-pool attrition: ONE 45 HP unit
 NORMAL_POOL_WEIGHTS = {           # weighted normal-encounter pool
     "swarm": 1.0, "attrition_lite": 1.0, "punisher_lite": 1.0}
+
+# Triage ruling 3b: ONE number per node-tier standing in for the missing
+# upgrades+relics power growth — NOT a model of them. Grid-searched on the
+# REF_IRONCLAD anchor only, until anchor run completion hit 45%+-10, then
+# frozen (same behavioral-calibration method as the M2 battery). Applied
+# to enemy hp + attack damage in tier05 node encounters ONLY; the Tier 0
+# battery is untouched.
+# FROZEN 2026-07-19: anchor completion 47.9% at 1000 runs. Normals kept
+# at 1.0 — only the checks calibrated as full-HP solo gates (punisher,
+# tank_boss) get compensated in run context.
+PROGRESSION_GAP_COMPENSATOR = {"normal": 1.0, "elite": 0.8, "boss": 0.7}
 
 # --- Tier 0.5 rewards (spec §3 — the thing under test) ---
 REWARD_CARD_OFFERS = 3
