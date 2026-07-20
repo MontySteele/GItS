@@ -109,6 +109,32 @@ public sealed class Klee : CustomCharacterModel
         ModelDb.Relic<Relics.PoundingSurprise>(),
     };
 
+    // ---- pck-backed art (klee.pck; the game loads it via manifest has_pck).
+    // Each override returns null when the resource is absent, which BaseLib's
+    // prefixes treat as "fall through to the base game's default" -- so a
+    // build without the pack behaves exactly like today.
+    //
+    // CustomCharacterSelectTransitionPath is deliberately NOT wired: the base
+    // getter names a transition MATERIAL (materials/transitions/*_mat.tres),
+    // not an image, so selection_splash.png cannot back it. A real transition
+    // material is a follow-up pck item.
+
+    /// <summary>Roster tile on the character-select screen. This is the
+    /// surface that casts to CompressedTexture2D, which forced the pck route
+    /// in the first place (see KleeArt / KleePck).</summary>
+    public override string? CustomCharacterSelectIconPath =>
+        KleePck.Path("klee/ui/select_portrait.png");
+
+    public override string? CustomCharacterSelectLockedIconPath =>
+        KleePck.Path("klee/ui/select_portrait_locked.png");
+
+    /// <summary>Top-panel character icon during a run.</summary>
+    public override string? CustomIconTexturePath =>
+        KleePck.Path("klee/ui/char_icon.png");
+
+    public override string? CustomMapMarkerPath =>
+        KleePck.Path("klee/ui/map_marker.png");
+
     public override float AttackAnimDelay => 0.15f;
 
     public override float CastAnimDelay => 0.25f;

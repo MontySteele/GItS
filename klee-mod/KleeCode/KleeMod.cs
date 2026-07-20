@@ -40,6 +40,10 @@ public static class KleeMod
             Log.Error($"[{ModId}] Harmony patching failed: {e}");
         }
 
+        // The game already merged klee.pck (has_pck) before invoking us; this
+        // logs proof-of-merge so a stale/missing pack shows up in godot.log.
+        KleePck.LogStatus();
+
         Log.Info($"[{ModId}] Klee registered.");
     }
 

@@ -41,15 +41,19 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
     };
 
     /// <summary>
-    /// PLACEHOLDER ICON. Relic icons are `.tres` atlas entries resolved
-    /// through ResourceLoader, so finding 18's `.pck` gate applies to
-    /// relic_atlas exactly as it does to power_atlas — the fetched
-    /// pounding_surprise.png cannot be wired until the pack lands. Borrowing
-    /// Burning Blood's slug (a known-good atlas entry) instead of shipping the
-    /// "Nope" placeholder; there is no in-run collision because this relic
+    /// FALLBACK ICON. RelicModel's icon-path getters are virtual, so the pck
+    /// texture wires in directly below; the Burning Blood slug remains for
+    /// when the pack is absent, and for the OUTLINE atlas entry, which we
+    /// ship no asset for yet. There is no in-run collision because this relic
     /// exists precisely to REPLACE Burning Blood in Klee's starting slot.
     /// </summary>
     protected override string IconBaseName => "burning_blood";
+
+    public override string PackedIconPath =>
+        KleePck.Path("klee/relics/pounding_surprise.png") ?? base.PackedIconPath;
+
+    protected override string BigIconPath =>
+        KleePck.Path("klee/relics/pounding_surprise.png") ?? base.BigIconPath;
 
     public async Task OnBombDetonated(
         PlayerChoiceContext choiceContext, Creature? applier, Creature target, int damage)

@@ -71,6 +71,19 @@ if (Test-Path $artSrc) {
     Write-Host "WARNING: no card art found at $artSrc (cards will fall back to BETA placeholder)" -ForegroundColor Yellow
 }
 
+# The pck carries the res://-bound art (select screen, top-panel icon, map
+# marker, power/relic icons). It is built locally by tools\build_pck.ps1 --
+# *.pck is gitignored (public repo, Tier F art) -- and the manifest declares
+# has_pck, so validate.ps1's S2 rule fails the deploy if it is missing rather
+# than shipping a manifest that lies to ModManager.
+$pck = Join-Path $root 'assets\klee.pck'
+if (Test-Path $pck) {
+    Copy-Item $pck -Destination $stage
+    Write-Host "Staged klee.pck ($((Get-Item $pck).Length) bytes)" -ForegroundColor Cyan
+} else {
+    Write-Host "WARNING: no klee.pck at $pck; run tools\build_pck.ps1 first (validate will fail below)." -ForegroundColor Yellow
+}
+
 # Gate the deploy on the static checks. These run against the STAGED package,
 # so they see exactly what the game will see -- including any stray *.json that
 # would break ModManager's recursive scan.

@@ -5,7 +5,7 @@
   "description": "Klee — Spark Knight of Mondstadt. C1 'boots' milestone: selectable character with a stub starter deck.",
   "version": "0.1.0",
   "has_dll": true,
-  "has_pck": false,
+  "has_pck": true,
   "min_game_version": "0.107.1",
   "dependencies": [
     {
