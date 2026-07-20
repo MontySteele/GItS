@@ -23,7 +23,7 @@ from typing import Optional
 from tier0 import constants as C
 from tier0.engine.state import Card
 
-AMP_PAYOFF_POWERS = {"amp_reaction_up", "witchs_flame"}
+AMP_PAYOFF_POWERS = C.AMP_PAYOFF_POWERS   # shared with the content loader
 
 
 def _has_block(card: Card) -> bool:
@@ -99,7 +99,11 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
         s += min(2.5, _static_power(card) / 3.0)
         if card.role in ("enabler", "payoff"):
             s += 1.0
-    if archetype in card.archetypes:
+    # Same exclusion as adaptive_score: companions get the dedicated block
+    # below. Without this the derived reaction tag silently re-tunes assigned
+    # mode too, which would move the frozen M5 numbers for a reason that has
+    # nothing to do with the drafting question they were measuring.
+    if archetype in card.archetypes and not card.is_companion:
         if card.role == "enabler":
             s += 3.0 * max(0.25, 1.0 - progress)     # decays as core fills
         elif card.role == "payoff":
@@ -146,7 +150,7 @@ def assigned_policy(rng: random.Random, deck: list[Card],
 ARCHETYPES = ("demolition", "spark", "reaction")
 
 
-def archetype_shares(deck: list[Card]) -> dict[str, float]:
+def archetype_shares(deck: list[Card], *, companions: bool = True) -> dict[str, float]:
     """What fraction of the deck's *drafted, committed* cards belong to each
     archetype.
 
@@ -168,9 +172,30 @@ def archetype_shares(deck: list[Card]) -> dict[str, float]:
     deliberate design. It is a fact about her kit, not evidence about whether
     the pool's archetypes pull -- so it belongs in the report, not in this
     number.
+
+    COMPANIONS ARE EXCLUDED WHEN MEASURING COMMITMENT (`companions=False`), for
+    the same reason basics are: commitment means choosing something scarce, and
+    companions are not scarce. The reward screen carries a GUARANTEED companion
+    slot, so every deck is offered one every screen and drafting them signals
+    nothing about a plan.
+
+    Counting them measured that directly. With companions in, 65.6% of decks
+    classified as reaction and the dominance alarm fired -- but only 3.5% of
+    those decks had an online reaction core, and 60.7% of their tagged cards
+    were companions. The classifier had stopped reporting "what plan did this
+    deck commit to" and started reporting "how many companions did it draft",
+    which is nearly constant across runs.
+
+    Scoring still counts them (`companions=True`, the default): a deck holding
+    six appliers really should value Burst and an amp payoff more highly. That
+    is a claim about what the deck can DO. Classification is a claim about what
+    the drafter CHOSE. Those are different questions and they get different
+    card sets -- deliberately, and documented, rather than the accidental
+    disagreement that existed when companions carried no tag at all.
     """
     tagged = [c for c in deck
               if c.rarity != "basic"
+              and (companions or not c.is_companion)
               and any(a in ARCHETYPES for a in c.archetypes)]
     if not tagged:
         return {a: 0.0 for a in ARCHETYPES}
@@ -186,7 +211,7 @@ def dominant_archetype(deck: list[Card],
     divergence metric exists to surface. A pool where adaptive drafting never
     commits is a pool whose archetypes are not pulling.
     """
-    shares = archetype_shares(deck)
+    shares = archetype_shares(deck, companions=False)   # commitment == scarce
     top = max(shares, key=lambda a: shares[a])
     return top if shares[top] >= threshold else "goodstuff"
 
@@ -202,7 +227,14 @@ def adaptive_score(card: Card, deck: list[Card]) -> float:
     """
     s = min(3.0, _static_power(card) / 3.0)
     shares = archetype_shares(deck)
-    for a in card.archetypes:
+    # Companions are scored by the dedicated block below, NOT here. They now
+    # carry a derived `reaction` tag so that archetype_shares can see them --
+    # that was the actual bug -- but the scorers always had bespoke companion
+    # handling, so running them through the generic archetype term as well pays
+    # reaction's share twice and turns the rich-get-richer loop into a runaway:
+    # measured, it drove reaction from 13.2% to 85.5% of decks with both
+    # divergence alarms firing. The tag fixes the METRIC; it is not new scoring.
+    for a in (card.archetypes if not card.is_companion else ()):
         if a not in ARCHETYPES:
             continue
         share = shares[a]

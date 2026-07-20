@@ -134,3 +134,8 @@ DIVERGENCE_DOMINANCE_ALARM = 0.55 # alarm if one shape exceeds this share
 DIVERGENCE_STARVATION_ALARM = 0.10  # alarm if an archetype falls below this
 ACHIEVABILITY_ALARM_FIGHTS = 7    # alarm if median time-to-online exceeds this
 DRAFT_REGRET_SAMPLE = 0.10        # fraction of decisions re-scored post-run
+
+# Powers that AMPLIFY reactions rather than causing them. Lives here rather
+# than in tier05.draft because the content loader also needs it, and tier0 must
+# not import tier05.
+AMP_PAYOFF_POWERS = {"amp_reaction_up", "witchs_flame"}

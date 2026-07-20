@@ -41,6 +41,40 @@ def test_basics_are_never_draftable_so_the_exclusion_is_exact():
     assert "basic" not in rewards.character_pool("klee")
 
 
+def test_companions_feed_scoring_but_not_commitment():
+    """Companions are reaction fuel, not evidence of a plan.
+
+    They now carry a derived `reaction` tag so the adaptive scorer can value
+    Burst and amp payoffs in a deck full of appliers -- that bootstrap was
+    genuinely broken. But the reward screen has a GUARANTEED companion slot, so
+    every deck is offered one every screen and taking them signals nothing
+    about commitment. Counting them for classification put 65.6% of decks in
+    'reaction' while only 3.5% of those had an online reaction core.
+    """
+    starter = _cards(*loader.starting_deck("klee"))
+    comps = [c for c in loader._card_index().values()
+             if c.is_companion and "reaction" in c.archetypes][:4]
+    assert comps, "premise: some companions must derive a reaction tag"
+    deck = starter + comps
+
+    # Scoring sees them...
+    assert draft.archetype_shares(deck)["reaction"] > 0.0
+    # ...commitment does not.
+    assert draft.archetype_shares(deck, companions=False)["reaction"] == 0.0
+    assert draft.dominant_archetype(deck) == "goodstuff"
+
+
+def test_companion_tag_is_derived_from_effects_not_hand_written():
+    """The tag must follow what the card does, or it drifts."""
+    idx = loader._card_index()
+    fuel = idx["dahlia_sacramental_shower"]      # applies_element
+    swirl = idx["sucrose_gust"]                  # swirl IS a reaction
+    plain = idx["barbara_melody"]                # heal only
+    assert "reaction" in fuel.archetypes
+    assert "reaction" in swirl.archetypes
+    assert "reaction" not in plain.archetypes
+
+
 # --- adaptive policy ---------------------------------------------------
 
 

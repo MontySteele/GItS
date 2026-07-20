@@ -12,6 +12,7 @@ from pathlib import Path
 
 import yaml
 
+from tier0 import constants as C
 from tier0.engine.state import Card, Enemy, Player
 
 CONTENT_DIR = Path(__file__).parent
@@ -27,6 +28,42 @@ def _load_yaml_dir(sub: str) -> list[dict]:
         data = yaml.safe_load(path.read_text())
         docs.extend(data if isinstance(data, list) else [data])
     return docs
+
+
+def _is_reaction_fuel(card: Card) -> bool:
+    """Does this companion feed or amplify the reaction system?
+
+    DERIVED, not written per-row in the sheet, and that is the design decision
+    rather than an implementation shortcut. Companions carried NO archetype tag
+    at all, while tier05's adaptive scorer handed them a bonus scaled by
+    reaction's share -- a share they could never raise, because untagged cards
+    are invisible to `archetype_shares`. Reaction could not bootstrap through
+    its own enablers.
+
+    Deriving from effects keeps the tag from drifting away from what the card
+    does. The rule is: a companion is reaction fuel iff it applies an element,
+    places an aura, swirls (swirl IS a reaction), or amplifies reactions.
+
+    DELIBERATE MISSES, flagged rather than fudged. Two cards read as reaction
+    cards to a human but are not tagged, because the only evidence is a prose
+    `note`, and inferring intent from prose is exactly the drift this avoids:
+      - albedo_solar_isotoma -- CONSUMES auras ("attacks vs aura'd enemies")
+        rather than applying them. It is a reaction payoff with no structured
+        field saying so.
+      - fischl_oz -- its summon applies Electro per its note, but the effect
+        itself is a bare apply_power.
+    Both want a structured field (`consumes_aura`, or elements on summon
+    effects) before they can be tagged honestly.
+    """
+    for fx in card.effects:
+        if fx.get("applies_element"):
+            return True
+        if fx.get("op") in ("apply_aura", "swirl"):
+            return True
+        if (fx.get("op") == "apply_power"
+                and fx.get("power") in C.AMP_PAYOFF_POWERS):
+            return True
+    return False
 
 
 @lru_cache(maxsize=1)
@@ -50,6 +87,9 @@ def _card_index() -> dict[str, Card]:
     for c in cards:
         if c.role_c and "companion" not in c.tags:   # sheet marks via role_c
             c.tags.append("companion")
+        if c.is_companion and _is_reaction_fuel(c):
+            if "reaction" not in c.archetypes:
+                c.archetypes.append("reaction")
     index = {c.id: c for c in cards}
     if len(index) != len(cards):
         seen: set[str] = set()
