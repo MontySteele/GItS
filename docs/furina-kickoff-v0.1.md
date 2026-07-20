@@ -39,7 +39,7 @@ Columbina inherits proven parts.
 | A2 Scaling | ~3.0 | Fanfare gives her a curve; her scaling *identity* routes through others. Declared on starter+median per acceptance law — companion-dense decks measuring higher is the design working, not a violation. |
 | A3 Block economy | ~2.5 | Encore is not Block; see harness note. |
 | A4 Sustain | **4.3** | The healing metric's protagonist. Encore absorption + rare-tier true heals. |
-| A5 Velocity | 3.7 | Encore-spend tempo, selector cadence. Strong, deliberately sub-elite (heuristic: exactly two elite axes). |
+| A5 Velocity | 3.7 | Encore-spend tempo, card-level velocity texture. Strong, deliberately sub-elite (heuristic: exactly two elite axes). *(Redpen 2026-07-20, ruling (a): selector cadence struck — the Ethereal selector is kit-delivery machinery and does NOT count toward A5.)* |
 | A6 Utility | **4.2** | Hydro aura uptime (Klee's dream co-op partner), party buffs, debuff texture. |
 | A7 Setup tax | ~2.0 | Second declared weakness. Punisher fights should genuinely hurt. |
 

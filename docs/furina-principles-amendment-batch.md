@@ -1,12 +1,11 @@
-# Principles amendment batch — Furina kickoff (PROPOSED, awaiting user red-pen)
+# Principles amendment batch — Furina kickoff (RATIFIED 2026-07-20)
 
-**Status: DRAFT. Nothing here is applied to
-teyvat-spire-design-principles.md until ratified** (house rule: version
-bumps are user calls; once red-penned this lands as the next dated entry
-in the §10 amendment log). Sources: furina-kickoff-v0.1.md §12,
-m7-rulings R8. Engineering for items 1, 2 and 5 already exists behind
-tests (sprint 1) — the amendments codify what the kickoff ratified; the
-text below is what needs your pen.
+**Status: RATIFIED with the two redpen edits applied** (Amendment 2's
+engine note corrected to the actual plumbing; Amendment 6 carries R8's
+exemption clause). Red-pen record: `furina-sprint-1-redpen.md` Gate 2.
+Landed in teyvat-spire-design-principles.md as **v1.10** in the §10
+amendment log. Sources: furina-kickoff-v0.1.md §12, m7-rulings R8.
+Engineering for items 1, 2 and 5 already exists behind tests (sprint 1).
 
 ## 1. New section: the Spotlight system + `character:` schema field
 
@@ -27,8 +26,10 @@ schema but ships OFF.
 effects**. Character-level designation touches a companion's entire kit;
 if any companion ever ships a soft-control card, Spotlight must not be
 the thing that upgrades it into stun economics."
-*(Engine note: enforced structurally — the multiplier is plumbed into
-damage, Block, and element-application counts only.)*
+*(Engine note: enforced structurally for damage and Block;
+element-application counts are covered by the law and will join the
+plumbing when a card first prints a numeric count — documented gap in
+`spotlight_mult`.)*
 
 ## 3. Guardrail 5 amendment (ratified as exception in kickoff §6; text
 pending red-pen)
@@ -65,7 +66,10 @@ applied — sprint 1.)*
 
 True in-combat healing is Rare-tier AND Exhausts; below Rare, sustain
 routes through Block or character-specific buffer pools; no 4-star
-companion may true-heal. (Ships with this batch per m7-rulings R8.)
+companion may true-heal. **Exempt: potions (base-game-priced
+consumables) and relic-scale trickles.** (Ships with this batch per
+m7-rulings R8; exemptions carried per redpen — they are part of the
+ruling's paper trail.)
 
 ## 7. Roadmap addition
 
@@ -75,16 +79,17 @@ Furina's release scope. Loaded and simming as of sprint 1.
 
 ---
 
-### Open questions attached to this batch (not amendments; need rulings)
+### Open questions attached to this batch — ALL RULED 2026-07-20 (furina-sprint-1-redpen.md)
 
-a. **Selector cadence vs A5:** the Ethereal Spotlight selector arriving
-   each turn currently emits its own event and does NOT count toward A5
-   velocity. Kickoff §2 lists "selector cadence" in the A5 rationale —
-   rule whether it should count (and how) before the statline pass reads
-   A5 off the sim.
-b. **test_m5 fragility-shape lock** relaxed 0.6 → 0.5 majority-clustering
-   after the Fontaine world change (measured 0.588 at n=40, binomial sd
-   ~0.12). Bless or revert with a better lock.
-c. **Fanfare cap fraction** (0.5 × maxHP) and **self-Spotlight rate**
-   (1.25×) ship as flagged placeholders; both are sheet-pass sweeps and
-   user picks.
+a. **Selector cadence vs A5: does NOT count** — confirmed as
+   implemented (`selector_granted`, never `add_card`). The selector is
+   kit-delivery machinery, same class as the kit-Burst grant.
+   Consequential edit applied: "selector cadence" struck from kickoff
+   §2's A5 rationale.
+b. **test_m5 relaxation BLESSED** (0.588 vs 0.6 at n=40 is noise);
+   guardrail codified in tier0/DECISIONS.md: small-n heuristic locks may
+   be retuned to measured noise with a dated comment + disclosure;
+   ratified bands never — those change only by ruling, with archives.
+c. **Placeholders BLESSED as sweep anchors only** (FANFARE_CAP_FRACTION
+   0.5, SPOTLIGHT_SELF_MULT 1.25). Final values are user picks at sheet
+   pass; neither number may be cited as design intent before then.

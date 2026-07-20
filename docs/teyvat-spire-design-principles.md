@@ -51,6 +51,8 @@ Damage tagged element E hitting an enemy holding aura A ≠ E consumes A and tri
 
 **§2.2a — Hard-CC pricing rule (v1.5).** Base StS2 deliberately makes reliable stun scarce (an act-3 Ancient reward at 3 energy + Exhaust; looping it is a known degenerate win). No reaction, and no companion card, may produce an intent-skip at repeatable-common economics. Frozen's base effect is soft control (above); **full stun is payoff-tier design space only** (rare character cards, artifact sets, 5-star kits), priced at or above the base game's stun scarcity, with per-combat diminishing returns (an enemy that thaws gains Freeze Resist). Detector: `control_uptime` — % of enemy actions negated by companion-sourced effects; winning fights above threshold flag SUPPORT_CARRY.
 
+**§2.2a extension (v1.10):** Spotlight empowerment applies to numbers only — **never turn-economy effects**. Character-level designation touches a companion's entire kit; if any companion ever ships a soft-control card, Spotlight must not be the thing that upgrades it into stun economics. *(Engine note: enforced structurally for damage and Block; element-application counts are covered by the law and will join the plumbing when a card first prints a numeric count — documented gap in `spotlight_mult`.)*
+
 **Iron rule: amplifiers are per-hit and consume the aura.** No persistent damage multipliers from reactions, ever. This is the balance governor; it's also faithful. `Rejected:` reaction-stacks-as-buff designs — they turn ×1.5 into a compounding engine and every deck becomes Vaporize goodstuff.
 
 ### 2.3 Application cadence (the "ICD dial")
@@ -106,7 +108,12 @@ Companion cards come in three **roles**, all of which route their power *through
 ### 4.4 Companion appetite (character-design lever)
 A character's statline declaration includes a **companion appetite**: Low (self-sufficient; companions are seasoning), Standard (Klee: reactions are a real archetype but not mandatory), or High (a hypothetical Venti/swirl-themed character *designed* to fish the companion pool — higher aura-starvation tolerance in Tier 0, more companion-synergy hooks in their personal cards). High-appetite characters are the only sanctioned case where companion-fishing outcompetes the character's own plan.
 
-### 4.5 v2 candidate — the Wish banner
+### 4.5 The Spotlight system & `character:` schema field (v1.10)
+Every card carries an optional `character:` field (shared schema — all sheets; companion rows derive it from their id prefix, personal sheets from the filename, explicit field wins). Cards with no character tag are invalid Spotlight targets. One Spotlighted character per Furina-class player at a time (per-player in co-op); designation is movable freely and persists until moved; duplicate selectors are inert. Baseline empowerment: +50% printed numbers (flat rate is the knob; texture lives in cards). Self-Spotlight at a reduced rate is the solo fallback and the primary anti-self-buff lever. A per-turn Spotlighted-card cap exists in schema but ships OFF. Empowerment is numbers-only per §2.2a's extension.
+
+**Generated companion cards (Guardrail 2 ruling, v1.10):** generated companion cards retain their element application. Stochastic, exhausting, drafted off-element access via a personal pool is consistent with "scarce and drafted" — explicit ruling, not silent precedent. Guest Star guardrails: this-combat-only; generators Exhaust; equal-rarity clause; pulls from shared companion pool + purpose-built Guest Star sets, never from playable characters' pools.
+
+### 4.6 v2 candidate — the Wish banner
 Shop-integrated "Wish" draw (pay gold, draw from companion pool, duplicate protection as pity). Pengo's Tarot pack proves shop-draw UI is fully moddable. Deferred: v1 validates the pool via reward slot first. (Also: keep it gold-only and generous. We are not building a real gacha as a joke. The joke stops being funny immediately.)
 
 ## 5. Artifacts → Relic Sets
@@ -120,14 +127,15 @@ Shop-integrated "Wish" draw (pay gold, draw from companion pool, duplicate prote
 
 ## 7. Balance guardrails (enforced via Tier 0 + review)
 1. Amplifier hits capped at 4× base in provenance logs; investigate anything above.
-2. No character card may apply an off-element aura. Off-element = companions/co-op only. (This is Pillar 2 in card form.)
+2. No character card may apply an off-element aura. Off-element = companions/co-op only. (This is Pillar 2 in card form.) **v1.10 ruling:** generated companion cards retain their element application (§4.5) — stochastic, exhausting, drafted access stays consistent with "scarce and drafted."
 3. Companion cards: 4-star cards ≤ uncommon power grade; 5-star Rares (max 3/nation, one card each) may be payoff-grade but only as support payoffs (buff/amplify/aura work) — no independent damage engines, no self-scaling.
 4. Every archetype must pass the aura-starvation / bricking checks in the simulator before implementation.
-5. New keywords per character: ≤2 beyond the shared element system.
+5. New keywords per character: ≤2 beyond the shared element system; support-protagonists (§4.4 High-appetite or Appendix A lineage) may carry one additional keyword via logged amendment with compensating cuts. (v1.10 — the amendment sanctions *one* extra, not open season; Columbina will pressure even this budget.)
+6. True in-combat healing is Rare-tier AND Exhausts (conjunctive — R8 law, v1.10); below Rare, sustain routes through Block or character-specific buffer pools; no 4-star companion may true-heal. Exempt: potions (base-game-priced consumables) and relic-scale trickles.
 
 ## 8. Content roadmap
 - **v0.1 (vertical slice):** Element system + Klee (full pool) + 12–16 companion cards (Mondstadt-weighted) + 2 artifact sets. Solo + co-op.
-- **v0.2:** Second character, deliberately Skill-grade cadence and Hydro or Cryo (maximizes reaction coverage with Klee in co-op; candidates: Ayaka, Furina, Xiao — pick after Klee data). Wish banner. Weapon choice.
+- **v0.2:** Second character: **Furina** (Skill-grade, Hydro — picked; kickoff docs/furina-kickoff-v0.1.md), shipping with the **Fontaine 4-star companion set v0.1** (Lynette, Freminet, Charlotte, Chevreuse at 3-card kits — the complete Fontaine 4-star bench; loaded and simming as of 2026-07-20). Wish banner. Weapon choice.
 - **v0.3+:** Dendro + third character + artifact set expansion.
 
 ## 9. Asset & IP policy
@@ -155,3 +163,4 @@ Flagged for v0.2+ planning: characters whose Genshin identity is *support* (Colu
 - v1.7: Lore-audit correction — Xingqiu (Liyue) removed from Mondstadt pool, cards re-flavored to Dahlia. Lore audit added to companion checklist.
 - v1.8: 3-per-release cap replaced by the seeded **Featured Banner** (3 limited 5-stars per nation rolled per run; per-player in co-op; shown at run start). Rotation moves from authoring-time (which someone must remember) to runtime (which the seed remembers). Standard 5-stars subsumed as ordinary support-shaped nation Rares with a `standard` tag as the off-banner-floor escape hatch. v1.7's rotation-bench concept superseded. Mona's Omen card flagged for the amp-cap watchlist when designed.
 - v1.9: Bursts become kit cards (innate-on-charge) after Tier 0.5 decomposition showed Burst acquisition was the binding constraint on reaction assembly (5.8% = 79% × 71% × 10%, the 10% being 'ever saw the Burst'). Retain (v1.4) is retained for the in-hand behavior. Rare pool: 14 draftable rares.
+- v1.10 (2026-07-20): **Furina kickoff batch ratified** (furina-principles-amendment-batch.md; red-pen record furina-sprint-1-redpen.md). New §4.5 Spotlight system + `character:` schema field; §2.2a extension (Spotlight numbers-only, never turn-economy); Guardrail 5 support-protagonist keyword exception; Guardrail 2 generated-companion-cards ruling; R8 conjunctive healing law codified as Guardrail 6 with potion/relic-trickle exemptions; Fontaine 4-star set v0.1 into Furina's release scope (§8). **Encore & Fanfare final definitions (supersede furina-predesign-notes.md Part 2):** Encore = unbounded per-combat buffer (v1.6 house style), absorbs after Block and before HP; potent cards carry "Spend N Encore:" cost lines; overdraw drains true HP; Tier 0 accounting binding — Encore absorption credits A4, never A3. Fanfare = capped at %maxHP; generation strictly activity-based (HP lost, Encore gained, Encore spent, Spotlighted card played); no passive per-turn accrual, ever; a global pool that survives Spotlight moves. Wish banner renumbered §4.5→§4.6.

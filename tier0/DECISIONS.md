@@ -315,3 +315,39 @@ Amend here, not in chat history.
     ~10-12/fight → relic 6/fight): A4 numbers are NOT continuous across
     R8, by design. Klee solo A4 = 0.5 re-derived (still floor — now
     ecosystem-wide by law, not merely by draft).
+
+## Furina sprint 1 redpen (2026-07-20, furina-sprint-1-redpen.md)
+
+61. **Selector cadence does NOT count toward A5** (ruling a): the
+    Ethereal Spotlight selector is kit-delivery machinery, same class as
+    the kit-Burst grant — counting it would award Furina +1 card/turn by
+    existing, structurally inflating A5 toward elite against her
+    declared sub-elite 3.7. Implementation confirmed as ruled: emits
+    `selector_granted`, never `add_card`. Kickoff §2 A5 rationale edited
+    to match.
+62. **Lock-retuning guardrail codified** (ruling b): small-n heuristic
+    locks (like test_m5's n=40 fragility shape) MAY be retuned to
+    measured-noise reality with a dated comment and disclosure in the
+    next report. Ratified 1000-fight bands may NEVER be retuned this
+    way — they change only by ruling, with archives. The 0.6→0.5
+    majority-clustering relaxation is blessed (0.588 measured, binomial
+    sd ~0.12 at n=40).
+63. **Spotlight baseline (+50% relic-delivered) carried into sheet pass
+    with pre-registered instrumentation** (ruling a2): the sheet-pass
+    Tier 0 report MUST measure the Spotlight baseline delta —
+    median-deck winrate, relic disabled vs enabled. Watch-items: the two
+    AoE appliers under 1.5× (chevreuse_bursting_grenades,
+    guest_neuvillette_judgment — both 7→10 all + element). Knob order if
+    hot, pre-committed: (1) SPOTLIGHT_MULT, (2) selector economics
+    (cost-1 to aim / effect begins next turn), (3) self-rate. Companion
+    card numbers are NEVER the knob — the shared pool does not pay for
+    one character's multiplier. Delete-test note: with the mult
+    relic-sourced, criterion #2 genuinely bites; if boosted companions
+    alone win, that signals card-mediated boosting (the Columbina
+    shape), not a carve-out.
+64. **EP-prototype registration held open** (ruling ask-4): prediction 2
+    (duplication separates median from ceiling) is unmeasurable by the
+    sprint-1 scaffolding — not failed, not confirmed. Re-test at sheet
+    pass with the real Encore Performance card AND combat coupled; the
+    same experiment measures the Guest Star draw-variance value that
+    offer geometry cannot see. One experiment, two registrations.

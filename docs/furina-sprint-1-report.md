@@ -5,6 +5,11 @@ doc:** furina-kickoff-v0.1.md. **Environment:** CONSTANTS_VERSION 2,
 DRAFTER_VERSION 2, RUNTEMPLATE_VERSION 2, post-R8 pool — **plus the
 Fontaine world change this sprint introduces** (see §4).
 
+> **RESOLVED 2026-07-20** (furina-sprint-1-redpen.md): all §6 asks
+> ruled. Statline CLEARED; amendment batch RATIFIED as principles v1.10
+> (with two redpen edits); rulings a/b/c + ask 4 in
+> tier0/DECISIONS.md 61–64. **Sheet pass 1 unblocked.**
+
 ## 1. Shipped (all behind tests; suite green)
 
 - **`character:` schema field** (shared, all sheets). Companion rows
