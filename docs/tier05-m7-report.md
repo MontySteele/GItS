@@ -1,5 +1,16 @@
 # Tier 0.5 M7 — Report (v1.9 Burst-as-kit, upgrades, CONSTANTS_VERSION 2)
 
+> **ARCHIVED 2026-07-20 — drafter-v1 / template-v1 snapshot.** The
+> m7-rulings execution (tier05-m8-report.md) superseded this world twice:
+> DRAFTER_VERSION 2 (assigned adopts the power term; the §4/§7 gap story
+> INVERTS — assigned now beats adaptive everywhere) and
+> RUNTEMPLATE_VERSION 2 (real campfire economy; §6's natural-uptake
+> numbers were measured in a 2-rest world). **Correction of record (M8
+> §1): §6's dose-controlled inversion was a dose artifact** — at matched
+> upgrade dose the inversion vanishes; do not cite "committed drafting
+> beats goodstuff by 13–17 under scaling" from this document. Everything
+> else stands as the archived v1 measurement.
+
 **Date:** 2026-07-20. **Input:** morning-triage-rulings.md (all six rulings),
 upgrade-conventions.md, klee-upgrades.yaml v0.6, sheet v0.5, principles v1.9.
 160 tests green. All numbers at 1000 runs per cell unless noted;
