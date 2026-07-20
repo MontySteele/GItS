@@ -64,13 +64,17 @@ CELESTIAL_GIFT_BLOCK = 4          # Nicole: block at start of turn
 CATALYTIC_BURST_PER_REACTION = 5  # Catalytic Conversion bonus burst/reaction
 
 # --- Furina: Spotlight (kickoff §3) ---
-SPOTLIGHT_MULT = 1.5          # ratified baseline: +50% printed numbers on
-                              # the Spotlighted character's cards. The flat
-                              # rate is the knob; texture lives in cards.
-SPOTLIGHT_SELF_MULT = 1.25    # PLACEHOLDER -- self-Spotlight reduced rate.
-                              # The asymmetry is the primary anti-self-buff
-                              # lever; the NUMBER is a sheet-pass sweep and
-                              # a user call (kickoff open item 3).
+SPOTLIGHT_MULT = 1.5          # baseline: +50% printed numbers on the
+                              # Spotlighted character's cards. R16
+                              # (2026-07-20): the empowerment moves into
+                              # her cards at pass 2 -- this passive
+                              # baseline gets swept over {1.0, 1.25}
+                              # there, not guessed.
+SPOTLIGHT_SELF_MULT = 1.25    # RATIFIED (R17, 2026-07-20) -- a measured
+                              # design constant, no longer a placeholder:
+                              # the sweep proved the reduced rate IS the
+                              # anti-self-buff lever (1.5x companion
+                              # parity borderline-fails criterion 1).
 SPOTLIGHT_CARDS_PER_TURN_CAP = None   # schematized but OFF (kickoff §3.2):
                               # turns on only if Tier 0 shows the rate
                               # asymmetry alone fails the §6 criterion.
@@ -80,8 +84,12 @@ SPOTLIGHT_CARDS_PER_TURN_CAP = None   # schematized but OFF (kickoff §3.2):
 # --- Furina: Encore & Fanfare (kickoff §4) ---
 # Encore is unbounded per-combat (v1.6) -- no cap constant by design.
 FANFARE_CAP_FRACTION = 0.5    # Fanfare cap = fraction of maxHP.
-                              # PLACEHOLDER pending sheet pass (kickoff
-                              # declares "capped at %maxHP", number TBD).
+                              # RATIFIED (R17, 2026-07-20): the sweep
+                              # brackets it (0.25 cripples punisher at
+                              # 2.4%, 0.75 overheats at 63%). First-order
+                              # dial -- re-check under R16 at pass 2
+                              # (Ovation economics shift with
+                              # card-mediation).
 FANFARE_PER_HP_LOST = 1       # per point of true HP lost
 FANFARE_PER_ENCORE_GAINED = 1 # per point of Encore gained
 FANFARE_PER_ENCORE_SPENT = 1  # per point of Encore spent

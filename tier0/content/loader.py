@@ -7,6 +7,7 @@ this is design tooling; a loud KeyError beats a validation framework.
 from __future__ import annotations
 
 import copy
+import warnings
 from functools import lru_cache
 from pathlib import Path
 
@@ -76,6 +77,19 @@ def _card_index() -> dict[str, Card]:
         path = DOCS_DIR / sheet
         if path.exists():
             docs = yaml.safe_load(path.read_text())
+            # R20 (2026-07-20): *-upgrades.yaml sheets are the ONE upgrade
+            # convention. Inline `upgrade:` fields are IGNORED by Tier 0,
+            # and silently ignoring them risks an inline-only upgrade that
+            # never applies -- so the tolerance is loud, not silent.
+            # UserWarning on purpose: DeprecationWarning is filtered out
+            # of non-__main__ code by default, which would be silence.
+            inline = [d["id"] for d in docs if "upgrade" in d]
+            if inline:
+                warnings.warn(
+                    f"{sheet}: DEPRECATED inline `upgrade:` fields on "
+                    f"{inline} (R20, 2026-07-20). Upgrades live in the "
+                    "*-upgrades.yaml sheets; these fields are IGNORED "
+                    "and must be reverted to the upgrade sheet.")
             # Nation comes from the sheet name ("mondstadt-companions.yaml"),
             # not a per-card field: it is a property of the pool a card ships
             # in, and repeating it on every row is just drift waiting to

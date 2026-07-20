@@ -16,6 +16,20 @@ from tier0.tests.conftest import make_enemy
 NULL_PILOT = lambda s: None
 
 
+def test_sheet_comments_match_numbers():
+    """Sheet red-pen flag 1 (2026-07-20): comments quoting stale numbers
+    are tuning-round drift ("Eight points" over amount: 6, caught live).
+    The lint is heuristic; a `lint-ok` marker exempts a comment line."""
+    import subprocess
+    import sys
+    repo = loader.DOCS_DIR.parent
+    proc = subprocess.run(
+        [sys.executable, str(repo / "tools" / "lint_sheet_comments.py"),
+         str(loader.DOCS_DIR / "furina-cards.yaml")],
+        capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+
+
 def furina_state(enemies=None, seed=0):
     p = loader.build_player("furina")
     return CombatState(player=p, enemies=enemies or [make_enemy(hp=300)],

@@ -4,8 +4,34 @@ card wearing an upgrade name without the upgrade.
 """
 
 import pytest
+import yaml
 
 from tier0.content import loader, upgrades
+
+
+# R20 (2026-07-20): klee-cards.yaml keeps its inline fields until the M9
+# session lands its revert (their file, their revert — the deltas already
+# live in klee-upgrades.yaml). Remove the entry when that happens; an
+# EMPTY allowlist is this test's steady state.
+INLINE_UPGRADE_ALLOWLIST = {"klee-cards.yaml"}
+
+
+def test_no_inline_upgrades_on_docs_sheets():
+    """R20: *-upgrades.yaml sheets are the ONE upgrade convention. Inline
+    `upgrade:` fields on card sheets are deprecated, ignored by Tier 0,
+    and — outside the temporary allowlist — forbidden: an inline-only
+    upgrade would silently never apply."""
+    for sheet in loader.DOCS_CARD_SHEETS:
+        if sheet in INLINE_UPGRADE_ALLOWLIST:
+            continue
+        path = loader.DOCS_DIR / sheet
+        if not path.exists():
+            continue
+        rows = yaml.safe_load(path.read_text())
+        inline = [d["id"] for d in rows if "upgrade" in d]
+        assert not inline, (
+            f"{sheet}: inline `upgrade:` on {inline} — R20 rules these "
+            "belong in the *-upgrades.yaml sheet")
 
 
 def test_every_sheet_entry_applies_or_is_declared_unappliable():

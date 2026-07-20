@@ -60,13 +60,14 @@ class Card:
     # overdraw: cards that may legally overdraw into HP use the
     # spend_encore op instead.
     encore_cost: int = 0
-    # SCHEMA TOLERANCE (2026-07-20): a parallel M9 session introduced
-    # inline `upgrade:` fields on klee-cards.yaml rows mid-day. Tier 0
-    # IGNORES this field -- upgrades load from the *-upgrades.yaml sheets
-    # via content/upgrades.py, and the two conventions must be reconciled
-    # by ruling (the inline entries seen so far DUPLICATE existing
-    # klee-upgrades.yaml deltas). Without this field the loader hard-fails
-    # on the shared sheet, bricking both sessions.
+    # DEPRECATED (ruled R20, 2026-07-20): a parallel M9 session introduced
+    # inline `upgrade:` fields on klee-cards.yaml rows; the ruling made
+    # *-upgrades.yaml sheets the ONE upgrade convention. Tier 0 IGNORES
+    # this field, and the loader now emits a loud warning per offending
+    # sheet (silent-ignore risked an inline-only upgrade that never
+    # applies). The field itself stays so the loader never hard-fails on
+    # a shared sheet again; once the M9 revert lands, the
+    # no-inline-upgrades test (test_upgrades) loses its allowlist.
     upgrade: Optional[dict] = None
 
     @property

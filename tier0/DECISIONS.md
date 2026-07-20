@@ -379,3 +379,71 @@ Amend here, not in chat history.
     offered Furina's cards — same bug class as the Prune catch, one slot
     over. Cards tagged with another character's name are never offered.
     Guarded by test_personal_card_pools_do_not_cross_characters.
+
+## Furina pass-1 rulings executed (2026-07-20, furina-pass1-rulings.md
+## + furina-sheet-redpen.md)
+
+69. **R16 — card-mediated boosting** (criterion-2 direction, the
+    centerpiece): the empowerment moves from the relic's passive
+    multiplier into her cards. The §3A decomposition decided it — the
+    relic's measured value for her decks is the Ovation-Fanfare economy,
+    while the damage multiplier's biggest beneficiary was the
+    companions-only probe, the exact deck the delete-test convicts (the
+    always-on mult was a subsidy paid to the failure mode). The relic
+    keeps selector delivery, the registry, and the Ovation-Fanfare
+    hooks; the passive baseline is swept over {1.0, 1.25} at pass 2;
+    her commons/uncommons grant Spotlight boosts through the EXISTING
+    spotlight_mult pipe (no new keyword; §2.2a numbers-only applies
+    identically). Delete-test then passes by construction. The Spotlight
+    card list is re-authored under this at pass 2 (deliberately NOT
+    red-penned as-is, R22); salon/fanfare/basics lists are NOT gated.
+    Median self-Spotlight (§3B) accepted as the depth floor working —
+    re-measure the framing under card-mediation before worrying further.
+70. **R17 — knobs ratified**: SPOTLIGHT_SELF_MULT 1.25 promoted from
+    placeholder to MEASURED DESIGN CONSTANT (the sweep proved the
+    reduced rate is the anti-self-buff lever; 1.5x companion parity
+    borderline-fails criterion 1). FANFARE_CAP_FRACTION 0.5 ratified
+    (re-check under R16 — Ovation economics shift). hp 60, burst_max 70
+    ratified. Constants/yaml comments updated in place.
+71. **R18 — A6 instrument v2 authorized** (pass-2 scope): aura uptime
+    has no axis credit anywhere — the mod's core system is invisible to
+    the utility axis, and every applier-identity character after Furina
+    would misread the same way. A6 v2 adds an application-uptime
+    component; ref_ironclad stays the 3.0 anchor (he applies nothing —
+    the composite must preserve him); Klee's A6 re-derived under v2;
+    numbers discontinuous BY DESIGN, labeled, old snapshots archived
+    (the R8 A4-probe-v2 pattern). Co-op value staying Tier-2-invisible:
+    accepted scope.
+72. **R19 — A2 deck bands**: salon_weighted 7.6 and fanfare_weighted 4.2
+    RATIFIED under the lag-not-growth reading (exponents 0.07–0.28; the
+    ratio instrument structurally inflates A1-dreadful engines; Klee
+    precedent). spotlight_weighted's band HELD until the R16 re-author —
+    banding a known-broken archetype freezes the wrong world. A5/A7
+    shortfalls deliberately left un-spent (their levers interact with
+    R16's re-costing). Winrate bands remain PROPOSALS, not ratified.
+73. **R20 — upgrade convention: separate *-upgrades.yaml sheets WIN**;
+    inline `upgrade:` fields on card sheets are deprecated. Executed:
+    loader tolerance promoted from silent-ignore to a loud per-sheet
+    warning, plus test_no_inline_upgrades_on_docs_sheets with
+    klee-cards.yaml TEMPORARILY allowlisted until the M9 session reverts
+    its inline fields (their file, their revert; the deltas already live
+    in klee-upgrades.yaml). WORKING AGREEMENT (standing): schema changes
+    to shared loaders require a cross-session note BEFORE landing.
+74. **R21 + R22 + sheet-redpen dispositions**: EP registration (i) stays
+    OPEN — graded-encounter battery approved for pass 2; never summarize
+    it as "EP showed no effect". Sheet red-pen: basics RATIFIED as a
+    set; salon/fanfare/generic approved as measured. Executed from the
+    flags: comment/number lint (tools/lint_sheet_comments.py + suite
+    test) — caught exactly the predicted class (hearts_swelling "Eight"
+    over 6, reginas_mercy "twelve" over 10; both fixed, plus the
+    grand_gala rider-covers-upkeep arithmetic); undercurrent added to
+    the hydro+cryo convergence CELL = {undercurrent, rain_of_roses,
+    guest_neuvillette_judgment} — one measurement covers the full
+    mass-application set. Watch items logged, no change now:
+    suffering_for_art free-value (the cap governs its ceiling),
+    ebb_and_flow/audience_participation as the sheet's closest twins
+    (first cut if a slot is needed), universal_revelry × uncapper
+    ceiling (re-check under R16), warmup_act's Crackle-parity comment
+    goes stale when R10 lands. [USER] items open for the user's own
+    pass: commanding_gaze mass-Weak parity, uncapper self-damage 4 vs 6,
+    house_call's conditional ceiling, naming/lore audit (v1.7).

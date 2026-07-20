@@ -1,4 +1,7 @@
-# Furina card pool — v0.1 design sheet (Tier 0 simulator schema). SHEET PASS 1: all numbers PROPOSED pending user red-pen.
+# Furina card pool — v0.1 design sheet (Tier 0 simulator schema). RED-PEN 2026-07-20 (furina-sheet-redpen.md):
+# basics RATIFIED as a set; salon/fanfare/generic approved as measured ([USER] items still open: commanding_gaze
+# mass-Weak parity, the_sea_is_my_stage self-damage 4-vs-6, house_call conditional ceiling). The SPOTLIGHT list is
+# NOT red-penned — it gets re-authored under R16 (card-mediated boosting) at pass 2 and reviewed then.
 # Numbers tuned through 4 measured rounds against the declared statline (see furina-sheet-pass-1-report.md §2); 76 cards.
 # Element: hydro | Cadence: SKILL-grade (kickoff §1): damage on type:skill / burst-tag / skill_tag cards applies hydro; plain attacks never do.
 # Archetypes: salon (default plan / solo floor) | spotlight (draft-gated high-ceiling) | fanfare (tempo/velocity flux) | generic
@@ -109,7 +112,7 @@
    # Hide and Seek minus one: her generic block stays under Klee's (A3 ~2.5 declared).
 - {id: poised_riposte, name: "Poised Riposte", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [generic], role: glue,
    effects: [{op: damage, amount: 6, target: enemy}]}
-   # Her honest Strike+. Skill-grade cadence buys higher bases WITHIN the low-statline identity — 6, not Klee's 7-with-pyro.
+   # Her honest Strike+. Skill-grade cadence buys higher bases WITHIN the low-statline identity — 6, not Klee's 7-with-pyro. (lint-ok: Klee comp)
 - {id: commanding_gaze, name: "Commanding Gaze", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 2}, {op: apply_power, power: weak, amount: 1, target: all_enemies}]}
    # The Regina's stare. Debuff texture for A6 (Spooked parity).
@@ -124,8 +127,9 @@
    # Alchemical Curiosity parity: the pool's honest draw common.
 - {id: undercurrent, name: "Undercurrent", cost: 2, type: skill, rarity: common, solve: [utility], archetypes: [salon, generic], role: enabler, tags: [skill_tag],
    effects: [{op: damage, amount: 6, target: all_enemies}]}
-   # AoE hydro application (damaging skill). A6's swarm face. WATCHLIST: mass hydro + the Cryo bench = mass-Frozen potential
-   # (hydro+cryo convergence checks; same entry as guest_neuvillette_judgment).
+   # AoE hydro application (damaging skill). A6's swarm face. WATCHLIST (redpen flag 8): member of the hydro+cryo
+   # convergence CELL = {undercurrent, rain_of_roses, guest_neuvillette_judgment} — one measurement covers the
+   # full mass-application set.
 
 # ---------- UNCOMMON (25) ----------
 # Salon (7)
@@ -162,7 +166,7 @@
    # Spend 4 Encore: the deep spend-tempo payoff. A5's ceiling card.
 - {id: hearts_swelling, name: "Hearts Swelling", cost: 2, type: skill, rarity: uncommon, solve: [sustain], archetypes: [fanfare, salon], role: enabler,
    effects: [{op: gain_encore, amount: 6}]}
-   # The big buffer draught. Eight points of deferred HP and eight Fanfare flux.
+   # The big buffer draught. Six points of deferred HP and six Fanfare flux.
 - {id: rapturous_applause, name: "Rapturous Applause", cost: 2, type: power, rarity: uncommon, solve: [scaling], archetypes: [fanfare], role: payoff,
    effects: [{op: apply_power, power: fanfare_attack_per10, amount: 1, target: self, max_stacks: 2, note: "attacks +1 damage per 10 Fanfare"}]}
    # "Stacks grant flat power bonuses" (kickoff §4), the card. Reads the pool, spends nothing.
@@ -230,7 +234,7 @@
    # Named for her passive. Two members and a standing crescendo — the Salon's rare engine piece.
 - {id: grand_gala, name: "Grand Gala", cost: 3, type: skill, rarity: rare, solve: [scaling, utility], archetypes: [salon], role: payoff, exhaust: true, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 4, target: self}, {op: gain_encore, amount: 3}]}
-   # All My Treasures parity: the full company takes the stage once. Four ticks of upkeep — the Encore rider covers turn one of it.
+   # All My Treasures parity: the full company takes the stage once. Four ticks of upkeep — the Encore rider covers most of turn one.
 - {id: the_sea_is_my_stage, name: "The Sea Is My Stage", cost: 2, type: power, rarity: rare, solve: [scaling], archetypes: [fanfare], role: payoff,
    effects: [{op: raise_fanfare_cap, amount: 15}, {op: damage, amount: 4, target: self}]}
    # THE UNCAPPER (kickoff §4: "Rare uncappers at nasty setup cost"). +15 cap, and the dive costs blood — which is itself flux.
@@ -248,7 +252,8 @@
    # Spend 3 Encore: her one big single-target number, hydro-applying (skill-tagged attack). No Holding Back parity, buffer-priced.
 - {id: rain_of_roses, name: "Rain of Roses", cost: 2, type: skill, rarity: rare, solve: [utility], archetypes: [salon, spotlight], role: payoff, tags: [skill_tag],
    effects: [{op: apply_aura, element: hydro, target: all_enemies}, {op: gain_encore, amount: 4}]}
-   # Mass application + buffer. A6's rare ceiling. WATCHLIST: hydro+cryo convergence (mass-Frozen enabler with the Fontaine bench).
+   # Mass application + buffer. A6's rare ceiling. WATCHLIST (redpen flag 8): hydro+cryo convergence CELL member,
+   # with undercurrent and guest_neuvillette_judgment (one measurement covers the full mass-application set).
 - {id: the_final_verdict, name: "The Final Verdict", cost: 3, type: attack, rarity: rare, solve: [frontload], archetypes: [generic], role: payoff,
    effects: [{op: damage, amount: 18, target: enemy}, {op: conditional, if: reaction_triggered_by_this, then: [{op: gain_encore, amount: 6}]}]}
    # The gavel falls. Plain attack — but landing it through a companion-seeded aura (triggering the reaction) refills the buffer.
@@ -258,4 +263,4 @@
    # rarity, and this card's own grammar keeps it under the banner: it creates uncommons, never 5-star Rares).
 - {id: reginas_mercy, name: "The Regina's Mercy", cost: 1, type: skill, rarity: rare, solve: [sustain], archetypes: [generic, fanfare], role: payoff, exhaust: true,
    effects: [{op: gain_encore, amount: 10}]}
-   # The buffer nuke: twelve points of grace, once. Not a heal — the law stays clean; the Fanfare flux is enormous.
+   # The buffer nuke: ten points of grace, once. Not a heal — the law stays clean; the Fanfare flux is enormous.

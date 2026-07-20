@@ -6,12 +6,12 @@
 # (declared weakness). Exactly two elite axes: A4 + A6.
 id: furina
 name: "Furina"
-hp: 60                   # sheet-pass knob, measured this pass, user pick at red-pen
+hp: 60                   # RATIFIED (R17, 2026-07-20)
 nation: fontaine         # §4.1 reward weighting: Fontaine is her half
 element: hydro
 cadence: skill           # Skill-grade (kickoff §1): only Skill/Burst-tagged
                          # cards apply hydro; engine rule in effects._element_for
-burst_max: 70            # DECLARED this pass (knob): particles from skill
+burst_max: 70            # RATIFIED (R17, 2026-07-20): particles from skill
                          # tags (5), reactions (5), Salon ticks (2/member/
                          # turn), Encore spend (1/point). Klee=60, nuke~90.
 fanfare: true            # Fanfare cap = FANFARE_CAP_FRACTION x maxHP
@@ -26,9 +26,18 @@ archetype_decks:
   salon_weighted: salon
   spotlight_weighted: spotlight
   fanfare_weighted: fanfare
-# NO winrate_bands yet: bands are ratified artifacts (pass-3 pattern).
-# This pass MEASURES and PROPOSES them in the report; the user's red-pen
-# ratifies. Same for deck_bands.
+# NO winrate_bands yet: bands are ratified artifacts (pass-3 pattern);
+# the report's winrate proposals remain proposals (salon bands proposed,
+# spotlight/fanfare deliberately held until the R16 world lands).
+# A2 deck bands RATIFIED by R19 (2026-07-20) under the lag-not-growth
+# reading (curve exponents 0.07-0.28: the ratio instrument inflates
+# A1-dreadful engines; Klee deck-band precedent). spotlight_weighted's
+# band is HELD -- banding a known-broken archetype would freeze the
+# wrong world; it gets banded at pass 2 under R16.
+deck_bands:
+  A2_scaling:
+    salon_weighted: 7.6
+    fanfare_weighted: 4.2
 starting_deck:
   - soloists_solicitation
   - soloists_solicitation
