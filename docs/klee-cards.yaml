@@ -62,7 +62,7 @@
 - {id: alchemical_curiosity, name: "Alchemical Curiosity", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [reaction, generic], role: glue,
    effects: [{op: draw, amount: 2}]}
 - {id: boom_goes_the_dynamite, name: "Boom Goes the Dynamite", cost: 2, type: attack, rarity: common, solve: [frontload], archetypes: [reaction], role: payoff,
-   effects: [{op: damage, amount: 10, target: enemy}, {op: conditional, if: reaction_triggered_by_this, then: [{op: energy, amount: 1}]}]}
+   effects: [{op: damage, amount: 16, target: enemy}, {op: conditional, if: reaction_triggered_by_this, then: [{op: repeat_this, times: 1}]}]}
 - {id: study_of_explosions, name: "Study of Explosions", cost: 0, type: skill, rarity: common, solve: [velocity], archetypes: [reaction], role: glue, tags: [skill_tag],
    effects: [{op: scry_discard, amount: 2}, {op: burst_energy, amount: 5}]}
 - {id: friendly_visit, name: "Friendly Visit", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [reaction], role: glue,

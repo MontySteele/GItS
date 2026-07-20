@@ -27,7 +27,7 @@ Companion appetite: **Standard**. Balance check: 4–5 on exactly two primary ax
 ## 4. Archetypes (tag matrix validated by `validate.py` output)
 1. **Demolition** (28 cards, enabler-rich) — default plan. Setup/payoff rhythm; payoffs: Blazing Delight, Chained Reactions, Grand Finale.
 2. **Spark Spray** (21 cards, even role mix) — velocity plan; zero-cost volume, Gleeful Barrage as the scaler. Structural Shiv-analogue.
-3. **Reaction** (14 personal cards, **payoff-heavy by design**) — DELIBERATE ASYMMETRY: this archetype's *enablers live in the companion pool* (Xingqiu/Fischl/Kaeya appliers, Sucrose/Prune triggers, Durin amp). Her personal cards only reward auras (Sizzle, Perfect Timing, Flame Dance) or accelerate Burst. Aura-starvation detector (Tier 0 §8) is this archetype's health metric; target <15% zero-reaction fights in a Reaction-weighted deck.
+3. **Reaction** (14 personal cards, **payoff-heavy by design; co-op-primary, boss-weak by ruling** — see pass-2 round-3 rulings: solo tank_boss floor ~35% is her accepted hard matchup; the archetype's home is co-op and act fights) — DELIBERATE ASYMMETRY: this archetype's *enablers live in the companion pool* (Xingqiu/Fischl/Kaeya appliers, Sucrose/Prune triggers, Durin amp). Her personal cards only reward auras (Sizzle, Perfect Timing, Flame Dance) or accelerate Burst. Aura-starvation detector (Tier 0 §8) is this archetype's health metric; target <15% zero-reaction fights in a Reaction-weighted deck.
 Bridges: Sorry Jean (block↔demolition), Sparkly Explosion (demolition↔spark), Friendly Visit / Study Buddy / Best Friends Forever (anything↔companions).
 
 ## 5. Relics & potions (v0.1 sketch — design after sim pass 1)
