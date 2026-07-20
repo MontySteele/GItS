@@ -11,7 +11,7 @@
 - {id: fischl_nightrider, name: "Fischl — Nightrider", star: 4, rarity: common, role_c: applier, element: electro, cost: 1, type: attack,
    effects: [{op: damage, amount: 5, target: enemy, applies_element: true}]}
 - {id: fischl_oz, name: "Fischl — Oz, at Your Side", star: 4, rarity: uncommon, role_c: applier, element: electro, cost: 1, type: power,
-   effects: [{op: apply_power, power: oz_summon, amount: 3, target: self, note: "3 turns: end of turn 3 dmg + electro to random enemy"}]}
+   effects: [{op: apply_power, power: oz_summon, amount: 3, target: self, summon_element: electro, note: "3 turns: end of turn 3 dmg + electro to random enemy"}]}
 - {id: barbara_melody, name: "Barbara — Soothing Melody", star: 4, rarity: common, role_c: buffer, element: hydro, cost: 1, type: skill, exhaust: true,
    effects: [{op: heal, amount: 3}]}
 - {id: barbara_shining_idol, name: "Barbara — Shining Idol", star: 4, rarity: uncommon, role_c: buffer, element: hydro, cost: 2, type: skill,
@@ -31,7 +31,7 @@
 
 # ---------- 5-STAR (rare, one card each, max 3 per nation) ----------
 - {id: albedo_solar_isotoma, name: "Albedo — Solar Isotoma", star: 5, rarity: rare, role_c: trigger, element: geo, cost: 1, type: power,
-   effects: [{op: apply_power, power: solar_isotoma, amount: 3, target: self, note: "3 turns: your attacks vs aura'd enemies grant 3 block (Crystallize engine)"}]}
+   effects: [{op: apply_power, power: solar_isotoma, amount: 3, target: self, consumes_aura: true, note: "3 turns: your attacks vs aura'd enemies grant 3 block (Crystallize engine)"}]}
 - {id: durin_witchs_flame, name: "Durin — Witch's Flame", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 2, type: power,
    effects: [{op: apply_power, power: witchs_flame, amount: 30, target: self, note: "PERCENT: amplifying reactions +30%; end of turn 4 dmg + pyro to random enemy. Support payoff: routes through player's reactions."}]}
 - {id: nicole_celestial_gift, name: "Nicole — Celestial Gift", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 2, type: power,

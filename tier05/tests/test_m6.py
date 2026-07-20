@@ -84,6 +84,15 @@ def test_companion_tag_is_derived_from_effects_not_hand_written():
     assert "reaction" in fuel.archetypes
     assert "reaction" in swirl.archetypes
     assert "reaction" not in plain.archetypes
+    # M7 ruling R4: the two prose-only misses got structured fields, and
+    # the tag derives from those fields (no hand-tag survived migration).
+    albedo = idx["albedo_solar_isotoma"]         # consumes_aura
+    oz = idx["fischl_oz"]                        # summon_element
+    assert "reaction" in albedo.archetypes
+    assert "reaction" in oz.archetypes
+    # Drift guard: the engine's oz_summon tick applies the literal
+    # "electro"; the sheet's structured field must agree with it.
+    assert any(fx.get("summon_element") == "electro" for fx in oz.effects)
 
 
 # --- adaptive policy ---------------------------------------------------

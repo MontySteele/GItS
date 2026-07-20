@@ -43,23 +43,24 @@ def _is_reaction_fuel(card: Card) -> bool:
 
     Deriving from effects keeps the tag from drifting away from what the card
     does. The rule is: a companion is reaction fuel iff it applies an element,
-    places an aura, swirls (swirl IS a reaction), or amplifies reactions.
+    places an aura, swirls (swirl IS a reaction), amplifies reactions, keys
+    off existing auras (`consumes_aura` -- Albedo's Crystallize engine reads
+    them, a reaction payoff), or summons something that applies an element
+    (`summon_element` -- Oz).
 
-    DELIBERATE MISSES, flagged rather than fudged. Two cards read as reaction
-    cards to a human but are not tagged, because the only evidence is a prose
-    `note`, and inferring intent from prose is exactly the drift this avoids:
-      - albedo_solar_isotoma -- CONSUMES auras ("attacks vs aura'd enemies")
-        rather than applying them. It is a reaction payoff with no structured
-        field saying so.
-      - fischl_oz -- its summon applies Electro per its note, but the effect
-        itself is a bare apply_power.
-    Both want a structured field (`consumes_aura`, or elements on summon
-    effects) before they can be tagged honestly.
+    The last two fields exist because of this function (M7 ruling R4): both
+    cards read as reaction cards to a human, but the only evidence was a
+    prose `note`, and inferring intent from prose is exactly the drift this
+    avoids. The sheet now says it structurally, so the tag can be honest.
+    (The engine's oz_summon tick hardcodes electro; test_m6 pins the sheet
+    field to that literal so the two cannot drift apart silently.)
     """
     for fx in card.effects:
         if fx.get("applies_element"):
             return True
         if fx.get("op") in ("apply_aura", "swirl"):
+            return True
+        if fx.get("consumes_aura") or fx.get("summon_element"):
             return True
         if (fx.get("op") == "apply_power"
                 and fx.get("power") in C.AMP_PAYOFF_POWERS):
