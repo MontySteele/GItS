@@ -30,14 +30,17 @@ on meter-fill, returns to kit on cast, re-grants on refill; Retain v1.4
 unchanged), so every archetype now has reliable Burst access.
 
 Divergence under the full v1.9 + v2 world is stable and healthy:
-**reaction 41.4 / spark 28.0 / demolition 24.8 / goodstuff 5.8 — no
+**reaction 41.5 / spark 27.9 / demolition 24.8 / goodstuff 5.8 — no
 alarms**, identical across assigned targets (the adaptive-ignores-target
-correctness check still holds).
+correctness check still holds — and was tightened this milestone: a
+review-workflow pass caught rest-site smithing consulting the assigned
+label in adaptive runs, fixed and regression-tested; adaptive numbers
+below are post-fix).
 
 ## 2. Relevance: the ruled ≥35% floor clears everywhere ✓ — with one definitional finding
 
 Strict advances-the-live-plan, v2 constants: **demolition 47.6 / spark 39.9
-/ reaction 47.3** (adaptive: 47.0 / 40.4 / 50.4). All clear the floor.
+/ reaction 47.3** (adaptive: 47.0 / 40.4 / 50.3). All clear the floor.
 
 **Finding:** the loose "worth engaging" secondary measures within noise of
 the strict number everywhere (e.g. demolition 47.3 vs 47.6), not the
@@ -80,15 +83,15 @@ target). Natural world, v2 + upgrades live, matched deck sizes:
 | target | assigned | adaptive | hybrid |
 |---|---|---|---|
 | demolition | 25.0% | 28.8% | **39.3%** |
-| spark | 26.9% | 31.9% | **36.6%** |
-| reaction | 10.7% | 26.2% | **34.8%** |
+| spark | 26.9% | 30.8% | **36.6%** |
+| reaction | 10.7% | 25.9% | **34.8%** |
 
-Hybrid does not close the gap — it overshoots it by 5–10 points in all
+Hybrid does not close the gap — it overshoots it by 6–10 points in all
 three archetypes. Committed-plan drafting **with power awareness** is the
 best drafter in the pool, which is itself evidence the archetypes pull
 (consistent with divergence). The residual assigned-vs-adaptive gap on
-demolition/spark (~4–5 pts) is the missing power term; **reaction's
-residual (+15.5) is its scorer's weights** — the one place hand-set
+demolition/spark (~4 pts) is the missing power term; **reaction's
+residual (+15.2) is its scorer's weights** — the one place hand-set
 weights are genuinely miscalibrated.
 
 ## 5. Spark decomposition: the prediction is REFUTED — the constraint is marginal supply, not engines
@@ -146,11 +149,11 @@ removed: picks arrive pre-upgraded, no rest cost.
 | target | assigned | adaptive | hybrid | gap (adpt − asgn) |
 |---|---|---|---|---|
 | demolition | **47.4%** | 34.0% | 54.2% | **−13.4** (inverts) |
-| spark | **58.2%** | 42.6% | 64.4% | **−15.6** (inverts) |
-| reaction | 40.9% | 52.0% | 60.5% | +11.1 (persists) |
+| spark | **58.2%** | 41.0% | 64.4% | **−17.2** (inverts) |
+| reaction | 40.9% | 51.0% | 60.5% | +10.1 (persists) |
 
 **When on-plan cards scale, the archetype plan beats goodstuff drafting by
-13–16 points.** Explanation 3 confirmed for demolition and spark: the
+13–17 points.** Explanation 3 confirmed for demolition and spark: the
 pre-M7 sim graded plans in a world where the scaling that commitment buys
 never arrived. (Prediction said demolition gains most; spark actually
 does — reported as measured.) Reaction's gap survives even here, which
