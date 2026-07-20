@@ -58,9 +58,12 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<AmmoScavenging>(),
             ModelDb.Card<BigBaddaBoom>(),
             ModelDb.Card<BlastRadius>(),
+            // Power-card pass: unblocked by the apply_power op.
+            ModelDb.Card<BlazingDelight>(),
             ModelDb.Card<BombVoyage>(),
             ModelDb.Card<BombsAway>(),
             ModelDb.Card<CantCatchMe>(),
+            ModelDb.Card<CatalyticConversion>(),
             // Burst spike: unblocked by the burst_energy op.
             ModelDb.Card<ClockworkToy>(),
             ModelDb.Card<ClusterCharge>(),
@@ -68,6 +71,9 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<Crackle>(),
             ModelDb.Card<DaDaDa>(),
             ModelDb.Card<DoublePop>(),
+            ModelDb.Card<EndlessFireworks>(),
+            ModelDb.Card<ExplosiveFrags>(),
+            ModelDb.Card<ExplosivesWorkshop>(),
             ModelDb.Card<FishFlavoredBait>(),
             ModelDb.Card<FlameOnTheWick>(),
             ModelDb.Card<HideAndSeek>(),
@@ -76,6 +82,7 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<JumpyDumptyMk2>(),
             ModelDb.Card<MineToss>(),
             ModelDb.Card<NoHoldingBack>(),
+            ModelDb.Card<PlaytimeForever>(),
             ModelDb.Card<PocketFireworks>(),
             ModelDb.Card<RapidFire>(),
             ModelDb.Card<RunAway>(),
@@ -83,8 +90,11 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<Snap>(),
             ModelDb.Card<SorryJean>(),
             ModelDb.Card<SparkCollection>(),
+            ModelDb.Card<SparkKnightStyle>(),
             ModelDb.Card<SparklyTreasure>(),
             ModelDb.Card<SpiritedAway>(),
+            ModelDb.Card<TrueSparkKnight>(),
+            ModelDb.Card<VermillionPact>(),
             ModelDb.Card<WarmGlow>(),
         };
     }

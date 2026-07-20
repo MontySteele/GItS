@@ -198,6 +198,12 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         var applier = Applier;
         await PowerCmd.Remove(this);
 
+        // Explosives Workshop: flat bonus per detonation, added BEFORE
+        // amplification -- the sim totals `bomb.damage + bonus + bomb_damage_up`
+        // and only then enters the elemental pipeline (effects.py detonate_bombs).
+        var damageUp =
+            applier?.Powers.OfType<BombDamageUpPower>().FirstOrDefault()?.Amount ?? 0;
+
         foreach (var damage in payloads)
         {
             // R23: each detonation is a Pyro-tagged hit (tier0 detonate_bombs
@@ -207,7 +213,7 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
             // explicitly, BEFORE the damage lands, exactly where the sim's
             // pipeline does it. That single path also guarantees detonation is
             // never elementally resolved twice.
-            var dealt = damage;
+            var dealt = damage + damageUp;
             var aura = AuraCmd.Find(target);
             if (aura == null)
             {
@@ -226,7 +232,7 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
                 // resolving, same as AuraPower (Swirl must not re-trigger).
                 var reaction = ReactionTable.Lookup(aura.Element, Element.Pyro);
                 var consumed = aura.Element;
-                dealt = (int)(dealt * ReactionTable.AmplifierMultiplier(reaction));
+                dealt = (int)(dealt * ReactionTable.AmplifierMultiplier(reaction, applier));
                 await PowerCmd.Remove(aura);
                 await ReactionEffects.Resolve(
                     choiceContext, reaction, target, applier, null, consumed);

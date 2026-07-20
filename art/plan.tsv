@@ -101,6 +101,25 @@ hot_hands	ImageGen/images/cards/klee/hot_hands.png	500	380	cover	center@1.5	shor
 hot_hands	ImageGen/images/cards/klee/hot_hands.png	500	380	cover	center	shortlist	2	png	Sparkling Steps 2021-06-09 - Klee Emoji 2.png		sticker
 warm_glow	ImageGen/images/cards/klee/warm_glow.png	500	380	cover	center	auto	1	png	Klee Birthday 2023.png		splash
 all_my_treasures	ImageGen/images/cards/klee/all_my_treasures.png	500	380	contain	center	auto	1	png	Item Dodoco's Collection Cupboard.png		item
+# ---------- CARDS: power-card pass (2026-07-20) ----------
+# Six power cards predate no portrait row (the sprint ran while they were
+# blocked). Picks below are thematic reads on free sources -- ALL flagged for
+# red-pen: playtime_forever (Let's Go, Dodoco! = playing with Dodoco forever),
+# vermillion_pact (Dodoco's Duet = the pair-bond read for a reaction-pair
+# power), catalytic_conversion (Marvelous Magic = conversion), explosive_frags
+# (Krash-Kaboom Mine = frag mine), true_spark_knight (the GOLDEN character
+# card = the ascended/true knight), spark_knight_style (Glimmering Firework --
+# weakest pick of the six, an eyeball candidate). L1 repicks after first
+# lint: explosive_frags takes the AoE (exploding) mine frame, its non-AoE
+# sibling being mine_toss's; catalytic_conversion takes the Jumbo statue
+# ("reactions feed the Burst statue" read -- shared with the power_burst
+# icon, which L1 permits, but an eyeball candidate for exactly that reason).
+spark_knight_style	ImageGen/images/cards/klee/spark_knight_style.png	500	380	contain	center	shortlist	1	png	Item Glimmering Firework.png		item
+catalytic_conversion	ImageGen/images/cards/klee/catalytic_conversion.png	500	380	contain	center	shortlist	1	png	Item Jumbo Sparks 'n' Splash Statue.png		item
+explosive_frags	ImageGen/images/cards/klee/explosive_frags.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine AoE.png		item
+true_spark_knight	ImageGen/images/cards/klee/true_spark_knight.png	500	380	cover	top	shortlist	1	png	Klee Character Card Golden.png		tcg
+vermillion_pact	ImageGen/images/cards/klee/vermillion_pact.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Duet.png		item
+playtime_forever	ImageGen/images/cards/klee/playtime_forever.png	500	380	contain	center	shortlist	1	png	Item Let's Go, Dodoco!.png		item
 # ---------- COMPANIONS: TCG talent-card art where it exists (register 4) ----------
 # Dahlia and Prune have no Genius Invokation equipment card; taste pass rules
 # their official character-card/wish splashes in (register 5) over the dark,
@@ -129,14 +148,35 @@ power_spark	ImageGen/images/powers/spark.png	256	256	contain	center	auto	1	png	S
 # item render (register match: bomb/spark icons are item renders too); only
 # other holder is gleeful_barrage at non-rendered shortlist rank 2.
 power_burst	ImageGen/images/powers/burst.png	256	256	contain	center	auto	1	png	Item Jumbo Sparks 'n' Splash Statue.png		icon
+# Power-card pass (2026-07-20): badge icons for the nine kit powers. Three
+# come off the constellation redirect queue below (native icon-shaped sigils,
+# exactly the slots the queue foresaw); the rest reuse each card's own item
+# render so the badge visually recalls the card that applied it (L1 is
+# cards-only, so card/icon sharing is legal -- power_burst/gleeful_barrage
+# precedent). bomb_damage_up gets Kaboom Box (a workshop's box of charges)
+# and spark_threshold_down gets Sparkly Shiny Dodoco! -- its tcg card
+# portrait is no icon. reaction_bonus_spark_energy keeps Marvelous Magic
+# (the conversion read) rather than its card's statue: the statue is
+# already the burst badge, and two identical badges would defeat badge
+# disambiguation. All flagged for red-pen with the cards.
+power_bomb_damage_up	ImageGen/images/powers/bomb_damage_up.png	256	256	contain	center	auto	1	png	Item Kaboom Box.png		icon
+power_detonation_splash	ImageGen/images/powers/detonation_splash.png	256	256	contain	center	auto	1	png	Constellation Blazing Delight.png		icon
+power_detonation_vuln	ImageGen/images/powers/detonation_vuln.png	256	256	contain	center	auto	1	png	Constellation Explosive Frags.png		icon
+power_bomb_and_spark_per_turn	ImageGen/images/powers/bomb_and_spark_per_turn.png	256	256	contain	center	auto	1	png	Item Let's Go, Dodoco!.png		icon
+power_spark_per_turn	ImageGen/images/powers/spark_per_turn.png	256	256	contain	center	auto	1	png	Item Slumbering Fireworks.png		icon
+power_zero_cost_attacks_up	ImageGen/images/powers/zero_cost_attacks_up.png	256	256	contain	center	auto	1	png	Constellation Nova Burst.png		icon
+power_spark_threshold_down	ImageGen/images/powers/spark_threshold_down.png	256	256	contain	center	auto	1	png	Item Sparkly Shiny Dodoco!.png		icon
+power_reaction_bonus_spark_energy	ImageGen/images/powers/reaction_bonus_spark_energy.png	256	256	contain	center	auto	1	png	Item Dodoco's Marvelous Magic.png		icon
+power_amp_reaction_up	ImageGen/images/powers/amp_reaction_up.png	256	256	contain	center	auto	1	png	Item Dodoco's Duet.png		icon
 relic_pounding_surprise	ImageGen/images/relics/pounding_surprise.png	256	256	cover	top	auto	1	png	Pounding Surprise Equipment Card.png		icon
 # Constellation-sigil redirect queue (taste pass: sigils are BANNED from card
 # portraits but are native 128px icon-shaped art — they fill future C3 power
-# and relic/upgrade icon slots as those land; keep the mapping here):
-#   spark_knight_style power <- Constellation Nova Burst.png
-#   blazing_delight power    <- Constellation Blazing Delight.png
+# and relic/upgrade icon slots as those land; keep the mapping here).
+# 2026-07-20 power-card pass: Nova Burst, Blazing Delight and Explosive Frags
+# came off the queue into the power icon rows above (Explosive Frags was
+# queued as an upgrade icon; the power badge is the slot that actually
+# exists, so it landed there).
 #   chained_reactions relic  <- Constellation Chained Reactions.png
-#   explosive_frags upgrade  <- Constellation Explosive Frags.png
 #   exquisite_compound relic <- Constellation Exquisite Compound.png
 #   sparkly_explosion power  <- Constellation Sparkly Explosion.png
 # ---------- UI ----------
