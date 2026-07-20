@@ -43,10 +43,13 @@ MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.js
 #
 # gain_spark landed with the Sparks system (C3 gap-list unlock #1): the call
 # site is SparkPower.Gain -> PowerCmd.Apply, the same verified idiom
-# BombPower.Place uses. The amount is emitted as a LITERAL, not a DynamicVar:
-# no base-game var renders a Spark count, and finding 15's lesson is not to
-# invent placeholder names whose SmartFormat support is unverified. The cost
-# is that a spark amount cannot carry an upgrade delta -- see build_upgrade.
+# BombPower.Place uses. The amount is a LITERAL unless the sheet rules in an
+# upgrade delta (`upgrade: {gain_spark: N}`, M9 ruling 2026-07-20); then it
+# becomes a named DynamicVar("Sparks", n). That name is not an invented
+# placeholder (finding 15's lesson): the base class ctor is
+# DynamicVar(string, decimal), DynamicVarSet has a public string indexer,
+# and the base game itself ships name-only vars (DynamicVar("Times", ...)
+# in CardModel's hover tips) -- all verified in the sts2 decompile.
 MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark"}
 
 # Bomb placement targets we have a verified selection idiom for.
@@ -107,6 +110,12 @@ def blocked_reason(card: dict) -> str | None:
 
     if card.get("type") == "power":
         return "power card (needs a PowerModel, hand-finished)"
+
+    # Sheet upgrade deltas exist only where a ruling created them; anything
+    # beyond gain_spark has no verified emission path yet, so block loudly.
+    for k in card.get("upgrade", {}):
+        if k != "gain_spark":
+            return f"upgrade op '{k}' (only gain_spark deltas are ruled/emittable)"
 
     for eff in card.get("effects", []):
         op = eff.get("op")
@@ -169,9 +178,17 @@ def build_vars(card: dict) -> list[str]:
                 out.append(f'new ExtraDamageVar({eff["bomb_damage"]}m)')
             else:
                 out.append(f'new DamageVar({eff["bomb_damage"]}m, ValueProp.Move)')
-        # gain_spark: deliberately no DynamicVar -- the amount is a literal in
-        # both body and description (see MECHANICAL_OPS note).
+        elif op == "gain_spark" and spark_upgrade(card):
+            # Only an upgradeable spark amount needs a var (the new value must
+            # render); "Sparks" collides with no base-game var name. Cards
+            # without a sheet upgrade keep the literal (see MECHANICAL_OPS).
+            out.append(f'new DynamicVar("Sparks", {int(eff["amount"])}m)')
     return out
+
+
+def spark_upgrade(card: dict) -> int:
+    """Sheet-ruled Spark upgrade delta (M9): `upgrade: {gain_spark: N}`. 0 = none."""
+    return int(card.get("upgrade", {}).get("gain_spark", 0))
 
 
 def build_body(card: dict) -> list[str]:
@@ -271,9 +288,13 @@ def build_body(card: dict) -> list[str]:
             lines.append("\n            ".join(call))
 
         elif op == "gain_spark":
+            amount = (
+                'DynamicVars["Sparks"].IntValue'
+                if spark_upgrade(card)
+                else str(int(eff["amount"]))
+            )
             lines.append(
-                f"await SparkPower.Gain(choiceContext, Owner.Creature, "
-                f'{int(eff["amount"])}, this);'
+                f"await SparkPower.Gain(choiceContext, Owner.Creature, {amount}, this);"
             )
 
     return lines
@@ -332,26 +353,35 @@ def build_description(card: dict) -> str:
                 parts.append(f"Deal {{Damage:diff()}} damage to {plural}{suffix}.")
 
         elif op == "gain_spark":
-            n = int(eff["amount"])
-            parts.append(
-                "Gain 1 [gold]Spark[/gold]." if n == 1
-                else f"Gain {n} [gold]Sparks[/gold]."
-            )
+            if spark_upgrade(card):
+                # Plural token off the LIVE value, same idiom as draw above.
+                parts.append(
+                    "Gain {Sparks:diff()} [gold]Spark{Sparks:plural:|s}[/gold]."
+                )
+            else:
+                n = int(eff["amount"])
+                parts.append(
+                    "Gain 1 [gold]Spark[/gold]." if n == 1
+                    else f"Gain {n} [gold]Sparks[/gold]."
+                )
 
     return " ".join(parts)
 
 
 def build_upgrade(card: dict) -> list[str]:
-    # gain_spark contributes NO upgrade line: its amount is a literal (no
-    # DynamicVar), so an upgraded value could not render in the card text --
-    # a number that changes invisibly is worse than one that does not change.
-    # Cards whose ONLY effect is gain_spark therefore emit an empty OnUpgrade;
-    # their upgrade shape is an open design question flagged in the manifest
-    # (M9 ask). Mixed cards upgrade their other components as usual.
+    # gain_spark carries an upgrade line only when the sheet rules one in
+    # (`upgrade: {gain_spark: N}`, M9 ruling 2026-07-20). Without the key the
+    # amount stays a literal -- no var, so an upgraded value could not render,
+    # and a number that changes invisibly is worse than one that does not
+    # change. Mixed cards upgrade their other components as usual.
     lines = []
     for eff in card["effects"]:
         op = eff["op"]
-        if op == "block":
+        if op == "gain_spark" and spark_upgrade(card):
+            lines.append(
+                f'DynamicVars["Sparks"].UpgradeValueBy({spark_upgrade(card)}m);'
+            )
+        elif op == "block":
             lines.append(f"DynamicVars.Block.UpgradeValueBy({UPGRADE_BLOCK}m);")
         elif op == "draw":
             lines.append(f"DynamicVars.Cards.UpgradeValueBy({UPGRADE_DRAW}m);")
@@ -425,8 +455,8 @@ def emit(card: dict) -> str:
 //     DO NOT EDIT. Edits are lost on the next regen -- change the sheet instead.
 //
 //     Sheet entry: id={card["id"]} rarity={card["rarity"]} cost={card["cost"]}
-//     Upgrade values are a CODEGEN DEFAULT, not a design ruling; the sheet does
-//     not specify them. See tools/gen_klee_cards.py.
+//     Upgrade values are a CODEGEN DEFAULT unless the sheet's `upgrade:` key
+//     supplies a ruled delta (M9: gain_spark). See tools/gen_klee_cards.py.
 // </auto-generated>
 
 // Roslyn treats <auto-generated> files as outside the project's nullable
@@ -517,8 +547,10 @@ def main() -> int:
             "block": UPGRADE_BLOCK,
             "draw": UPGRADE_DRAW,
             "bomb_damage": UPGRADE_BOMB_DAMAGE,
-            "gain_spark": "none -- literal amount, no DynamicVar to render a "
-                          "delta; upgrade shape for pure-spark cards is an M9 ask",
+            "gain_spark": "sheet-driven: `upgrade: {gain_spark: N}` on the card "
+                          "(M9 ruling 2026-07-20: +1 on sparkly_treasure and "
+                          "spark_collection). Cards without the key emit no "
+                          "spark upgrade line.",
         },
     }
 

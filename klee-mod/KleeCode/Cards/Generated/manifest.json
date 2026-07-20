@@ -87,6 +87,6 @@
     "block": 3,
     "draw": 1,
     "bomb_damage": 2,
-    "gain_spark": "none -- literal amount, no DynamicVar to render a delta; upgrade shape for pure-spark cards is an M9 ask"
+    "gain_spark": "sheet-driven: `upgrade: {gain_spark: N}` on the card (M9 ruling 2026-07-20: +1 on sparkly_treasure and spark_collection). Cards without the key emit no spark upgrade line."
   }
 }
