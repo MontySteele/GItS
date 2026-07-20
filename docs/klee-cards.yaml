@@ -40,6 +40,12 @@
    effects: [{op: gain_spark, amount: 1}]}  # M9 upgrade delta lives in klee-upgrades.yaml (R20: no inline upgrade fields)
 - {id: pocket_fireworks, name: "Pocket Fireworks", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: enabler,
    effects: [{op: damage, amount: 4, target: random_enemy, times: 2}]}
+# R10 buff (+ {op: gain_spark, amount: 1}) AUTHORIZED but NOT landed.
+# Pre-measurement 2026-07-20: landing it moves spark_weighted/tank_boss to
+# 0.668 vs the RATIFIED ceiling 0.65 (seed 42, 1000 fights) -- a deterministic
+# band-lock breach. Bands change only by ruling with archives (tier0 DECISIONS
+# 62), so the landing must ride WITH the user's window declaration + band
+# disposition; landing it alone reds the suite.
 - {id: crackle, name: "Crackle", cost: 0, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: enabler,
    effects: [{op: damage, amount: 3, target: random_enemy}]}
 - {id: spark_collection, name: "Spark Collection", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [spark], role: enabler,
@@ -115,8 +121,9 @@
 # QUEUED ERRATA (worknote 2026-07-20 item 1): cant_catch_me {block: -2}, 4 -> 2.
 # CCM strictly dominates warm_glow (same cost, effect superset, all amounts >=).
 # Sequencing rule: land only AFTER the R10 Crackle measurement window runs
-# (crackle has no gain_spark yet, so the window has NOT run) -- never both in
-# one window, so spark-deck attribution stays clean.
+# (crackle has no gain_spark yet -- see the pre-measurement note above its
+# row -- so the window has NOT run) -- never both in one window, so
+# spark-deck attribution stays clean.
 - {id: cant_catch_me, name: "Can't Catch Me!", cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], archetypes: [spark], role: glue,
    effects: [{op: block, amount: 4}, {op: gain_spark, amount: 1}, {op: draw, amount: 1}]}
 - {id: sugar_rush, name: "Sugar Rush", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [spark], role: glue, exhaust: true,
