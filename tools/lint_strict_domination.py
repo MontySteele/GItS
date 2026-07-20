@@ -61,6 +61,11 @@ KNOWN = {
 # rare-over-common two-step gap is informational, not a finding.)
 PENDING_RULING = {
     # block 8 + exhaust-a-status vs block 7: the CCM shape exactly.
+    # NOTE: the R25 errata queued behind the R10 window is dodge_roll
+    # {block: -2} (8 -> 6) -- when that batch lands, this pair likely
+    # resolves itself. Releasing the window also closes (or re-measures)
+    # this domination question, not just the costing one; re-run this lint
+    # with the batch and disposition the entry then.
     frozenset({"dodge_roll", "hide_and_seek"}),
 }
 
