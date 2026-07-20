@@ -34,6 +34,7 @@ import yaml
 
 REPO = Path(__file__).resolve().parent.parent
 SHEET = REPO / "docs" / "klee-cards.yaml"
+UPGRADES_SHEET = REPO / "docs" / "klee-upgrades.yaml"
 OUT_DIR = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated"
 MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.json"
 
@@ -43,8 +44,9 @@ MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.js
 #
 # gain_spark landed with the Sparks system (C3 gap-list unlock #1): the call
 # site is SparkPower.Gain -> PowerCmd.Apply, the same verified idiom
-# BombPower.Place uses. The amount is a LITERAL unless the sheet rules in an
-# upgrade delta (`upgrade: {gain_spark: N}`, M9 ruling 2026-07-20); then it
+# BombPower.Place uses. The amount is a LITERAL unless klee-upgrades.yaml
+# carries a `spark: +N` delta for the card (M9 ruling 2026-07-20, moved off
+# the inline `upgrade:` key by R20); then it
 # becomes a named DynamicVar("Sparks", n). That name is not an invented
 # placeholder (finding 15's lesson): the base class ctor is
 # DynamicVar(string, decimal), DynamicVarSet has a public string indexer,
@@ -111,11 +113,11 @@ def blocked_reason(card: dict) -> str | None:
     if card.get("type") == "power":
         return "power card (needs a PowerModel, hand-finished)"
 
-    # Sheet upgrade deltas exist only where a ruling created them; anything
-    # beyond gain_spark has no verified emission path yet, so block loudly.
-    for k in card.get("upgrade", {}):
-        if k != "gain_spark":
-            return f"upgrade op '{k}' (only gain_spark deltas are ruled/emittable)"
+    # R20: inline upgrade fields are deprecated repo-wide -- deltas live in
+    # *-upgrades.yaml sheets. Block loudly so a stray inline key can never
+    # silently diverge from the upgrades sheet.
+    if "upgrade" in card:
+        return "inline `upgrade:` field (deprecated by R20 -- put the delta in klee-upgrades.yaml)"
 
     for eff in card.get("effects", []):
         op = eff.get("op")
@@ -186,9 +188,28 @@ def build_vars(card: dict) -> list[str]:
     return out
 
 
+_upgrade_deltas: dict | None = None
+
+
+def upgrade_deltas() -> dict:
+    """Per-card delta maps from klee-upgrades.yaml (R20: the upgrades sheet is
+    the only home for upgrade deltas; inline `upgrade:` keys block the card)."""
+    global _upgrade_deltas
+    if _upgrade_deltas is None:
+        _upgrade_deltas = yaml.safe_load(UPGRADES_SHEET.read_text(encoding="utf-8")) or {}
+    return _upgrade_deltas
+
+
 def spark_upgrade(card: dict) -> int:
-    """Sheet-ruled Spark upgrade delta (M9): `upgrade: {gain_spark: N}`. 0 = none."""
-    return int(card.get("upgrade", {}).get("gain_spark", 0))
+    """Ruled Spark upgrade delta (M9): `spark: +N` in klee-upgrades.yaml. 0 = none.
+
+    Only spark deltas are consumed here for now -- the other keys in the
+    upgrades sheet (damage/block/...) are NOT wired to codegen yet; generated
+    cards still carry the codegen-default bumps pending a ruling that swaps
+    them over. Widening this without that ruling would silently change every
+    generated card's upgrade line.
+    """
+    return int(upgrade_deltas().get(card["id"], {}).get("spark", 0))
 
 
 def build_body(card: dict) -> list[str]:
@@ -369,8 +390,8 @@ def build_description(card: dict) -> str:
 
 
 def build_upgrade(card: dict) -> list[str]:
-    # gain_spark carries an upgrade line only when the sheet rules one in
-    # (`upgrade: {gain_spark: N}`, M9 ruling 2026-07-20). Without the key the
+    # gain_spark carries an upgrade line only when klee-upgrades.yaml rules
+    # one in (`spark: +N`, M9 ruling 2026-07-20). Without the delta the
     # amount stays a literal -- no var, so an upgraded value could not render,
     # and a number that changes invisibly is worse than one that does not
     # change. Mixed cards upgrade their other components as usual.
@@ -547,10 +568,11 @@ def main() -> int:
             "block": UPGRADE_BLOCK,
             "draw": UPGRADE_DRAW,
             "bomb_damage": UPGRADE_BOMB_DAMAGE,
-            "gain_spark": "sheet-driven: `upgrade: {gain_spark: N}` on the card "
+            "gain_spark": "sheet-driven: `spark: +N` in klee-upgrades.yaml "
                           "(M9 ruling 2026-07-20: +1 on sparkly_treasure and "
-                          "spark_collection). Cards without the key emit no "
-                          "spark upgrade line.",
+                          "spark_collection; R20 moved deltas off inline "
+                          "keys). Cards without a delta emit no spark "
+                          "upgrade line.",
         },
     }
 

@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -27,8 +28,17 @@ namespace KleeMod.Powers;
 ///
 /// The independent-stacking rule is why this is not a plain counter power: Pop
 /// places a 5, Jumpy Dumpty a 6, Trip Wire a 7, and each must detonate for its
-/// own value. Amount tracks the COUNT (that is what the UI shows); _damages
-/// carries the values.
+/// own value. Amount tracks the COUNT (stack semantics, multiplayer sync);
+/// _damages carries the values.
+///
+/// DISPLAY (worknote ruling 2026-07-20 item 3): the number under the enemy is
+/// TOTAL pending detonation damage, not the bomb count. Enemy-side status
+/// numbers read as incoming damage (Poison trains this), and a count display
+/// makes per-bomb buffs (Chain Fuse, Careful Arrangement) invisible. This is
+/// display-layer only -- DisplayAmount is the game's own virtual for exactly
+/// this split, and the NPower badge renders DisplayAmount and refreshes on
+/// DisplayAmountChanged (verified in the NPower decompile). Detonation still
+/// iterates bombs individually; every listener sees per-bomb events.
 /// </summary>
 public sealed class BombPower : PowerModel, ILocalizationProvider
 {
@@ -43,6 +53,13 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         ("title", "Bomb"),
         ("description",
             "Detonates at the start of your turn for its damage. "
+          + "Detonates early if this enemy is hit by an [gold]Attack[/gold]."),
+        // The smart (in-combat, mutable-instance) tooltip carries the count;
+        // the badge already shows the total. {Damage} is our DynamicVar,
+        // {Amount} is the stack count the game adds to every smart tip.
+        ("smartDescription",
+            "Detonates at the start of your turn for {Damage} total damage "
+          + "({Amount} Bomb{Amount:plural:|s}). "
           + "Detonates early if this enemy is hit by an [gold]Attack[/gold]."),
     };
 
@@ -74,6 +91,32 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// <summary>Total damage sitting on this enemy, for intent/tooltip display.</summary>
     public int PendingDamage => _damages.Sum();
 
+    /// <summary>The badge under the enemy shows total pending damage; Amount
+    /// itself stays the bomb count (see class doc). Ruled 2026-07-20.</summary>
+    public override int DisplayAmount => PendingDamage;
+
+    /// <summary>{Damage} in the smart tooltip. Kept in sync by SyncDisplay.</summary>
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new[] { new DynamicVar("Damage", 0m) };
+
+    /// <summary>
+    /// MUST be called after every _damages mutation (there is exactly one
+    /// grow site and one clear site today; modify_bombs / move_bombs land
+    /// here too when those cards arrive). The badge and the tooltip both
+    /// derive from _damages -- the same list detonation consumes -- so the
+    /// displayed number can never diverge from what will actually hit.
+    /// _damages itself is client-local; the count (Amount) is what the stack
+    /// system syncs, which is the pre-existing multiplayer situation for the
+    /// per-bomb values and unchanged by this display ruling.
+    /// </summary>
+    private void SyncDisplay()
+    {
+        var damage = DynamicVars["Damage"];
+        damage.BaseValue = PendingDamage;
+        damage.ResetToBase();
+        InvokeDisplayAmountChanged();
+    }
+
     /// <summary>
     /// Places a bomb on <paramref name="target"/>, stacking with any already there.
     /// </summary>
@@ -87,6 +130,7 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         if (power is BombPower bomb)
         {
             bomb._damages.Add(damage);
+            bomb.SyncDisplay();
         }
         else
         {
@@ -147,6 +191,7 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
 
         var payloads = _damages.ToList();
         _damages.Clear();
+        SyncDisplay();
 
         var target = Owner;
         var applier = Applier;
