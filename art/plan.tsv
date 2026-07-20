@@ -10,7 +10,7 @@
 # ---------- CARDS: direct official matches (auto) ----------
 kaboom	ImageGen/images/cards/klee/kaboom.png	500	380	cover	top	auto	1	png	Klee Character Card.png		tcg
 jumpy_dumpty	ImageGen/images/cards/klee/jumpy_dumpty.png	500	380	contain	center	auto	1	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty.png		item
-sparks_n_splash	ImageGen/images/cards/klee/sparks_n_splash.png	500	380	contain	center	auto	1	png	Item Jumbo Sparks 'n' Splash Statue.png		item
+sparks_n_splash	ImageGen/images/cards/klee/sparks_n_splash.png	500	380	cover	top	auto	1	png	Character Klee Full Wish.png		splash
 hide_and_seek	ImageGen/images/cards/klee/hide_and_seek.png	500	380	cover	center	auto	1	png	Namecard Background Celebration Peekaboo!.png		splash
 explosives_workshop	ImageGen/images/cards/klee/explosives_workshop.png	500	380	cover	center	auto	1	png	Namecard Background Klee Explosive.png		splash
 # ---------- CARDS: shortlists (contact sheet; rank 1 = effective pick) ----------
@@ -33,8 +33,8 @@ bomb_voyage	ImageGen/images/cards/klee/bomb_voyage.png	500	380	contain	center	sh
 bomb_voyage	ImageGen/images/cards/klee/bomb_voyage.png	500	380	contain	center	shortlist	2	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty.png		item
 bomb_voyage	ImageGen/images/cards/klee/bomb_voyage.png	500	380	contain	center	shortlist	3	png	Item Let's Go, Dodoco!.png		item
 big_badda_boom	ImageGen/images/cards/klee/big_badda_boom.png	500	380	cover	center@1.6	shortlist	1	png	Klee Wish.png		splash
-blast_radius	ImageGen/images/cards/klee/blast_radius.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty AoE.png		item
-blast_radius	ImageGen/images/cards/klee/blast_radius.png	500	380	cover	center@1.4	shortlist	2	gif	Kaboom! Plunging Preview.gif	80	vfx
+blast_radius	ImageGen/images/cards/klee/blast_radius.png	500	380	cover	top@1.15	auto	1	png	Starlit Sky Firework Card 2.png		splash
+# blast_radius r2 (Plunging gif) retired with the r1 board-diagram pick: worknote 2026-07-20 item 4.1
 sorry_jean	ImageGen/images/cards/klee/sorry_jean.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 2.png		sticker
 sorry_jean	ImageGen/images/cards/klee/sorry_jean.png	500	380	cover	center	shortlist	2	png	Icon Emoji Paimon's Paintings 25 Klee 1.png		sticker
 sorry_jean	ImageGen/images/cards/klee/sorry_jean.png	500	380	cover	top	shortlist	3	png	Klee Birthday 2020.png		splash
@@ -86,7 +86,7 @@ alchemical_curiosity	ImageGen/images/cards/klee/alchemical_curiosity.png	500	380
 run_away	ImageGen/images/cards/klee/run_away.png	500	380	cover	center	auto	1	png	Icon Emoji Paimon's Paintings 46 Klee 1.png		sticker
 jumpy_dumpty_mk2	ImageGen/images/cards/klee/jumpy_dumpty_mk2.png	500	380	cover	center	auto	1	png	JTP Encounter Jumpy Dumpty.png		splash
 bombs_away	ImageGen/images/cards/klee/bombs_away.png	500	380	cover	center@1.3	auto	1	gif	Kaboom! Plunging Preview.gif	45	vfx
-cluster_charge	ImageGen/images/cards/klee/cluster_charge.png	500	380	contain	center	auto	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine AoE.png		item
+cluster_charge	ImageGen/images/cards/klee/cluster_charge.png	500	380	cover	top@1.15	auto	1	png	Starlit Sky Firework Card 10.png		splash
 flame_on_the_wick	ImageGen/images/cards/klee/flame_on_the_wick.png	500	380	contain	center	auto	1	png	Item Leisurely Fireworks.png		item
 no_holding_back	ImageGen/images/cards/klee/no_holding_back.png	500	380	cover	top	auto	1	png	Klee Multi Wish.png		splash
 # ---------- CARDS: spark-set additions (taste-pass re-picks applied; da_da_da and
@@ -139,6 +139,8 @@ energy_icon_large	ImageGen/images/ui/energy_icon_74.png	74	74	contain	center	aut
 energy_icon_small	ImageGen/images/ui/energy_icon_22.png	22	22	contain	center	auto	1	svg	Element Pyro.svg		icon
 map_marker	ImageGen/images/ui/map_marker.png	49	64	cover	top	auto	1	png	Klee Side Icon.png		icon
 selection_splash	ImageGen/images/ui/selection_splash.png	1920	1200	cover	center	auto	1	png	Klee Wish.png		splash
+select_bg	ImageGen/images/ui/select_bg.png	1920	1080	cover	center	auto	1	png	Namecard Background Klee Explosive.png		splash
 # ---------- COMBAT MODEL SOURCE (raw; hand-cut into layers per manifest recipe) ----------
+combat_model	ImageGen/images/model/combat_model.png	240	280	sprite	center	auto	1	png	Character Klee Full Wish.png		splash
 model_source_full_wish	ImageGen/images/model/character_klee_full_wish.png	0	0	raw	center	auto	1	png	Character Klee Full Wish.png		splash
 model_source_tcg_alt	ImageGen/images/model/klee_character_card.png	0	0	raw	center	auto	1	png	Klee Character Card.png		splash

@@ -107,14 +107,37 @@ def cover(img, w, h, focus):
     return img.crop((x, y, x + w, y + h))
 
 
+def sprite(img, w, h):
+    """Combat/rest-site model sprites: trim to the alpha bbox, fit in W×H, and
+    anchor the feet on the bottom edge -- the game positions these textures
+    with their bottom at ground level, so bottom padding floats the character.
+    """
+    bbox = img.getbbox()
+    if bbox:
+        img = img.crop(bbox)
+    scale = min(w / img.width, h / img.height)
+    if scale > UPSCALE_FLAG:
+        flags.append(f"upscale x{scale:.1f}")
+    img = img.resize((max(1, round(img.width * scale)), max(1, round(img.height * scale))), Image.LANCZOS)
+    canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    # plain paste (no mask): copies pixels alpha included; a mask here would
+    # square the alpha of soft edges -- see contain() note.
+    canvas.paste(img, ((w - img.width) // 2, h - img.height))
+    return canvas
+
+
 def contain(img, w, h, bg=(0, 0, 0, 0)):
     scale = min(w / img.width, h / img.height)
     if scale > UPSCALE_FLAG:
         flags.append(f"upscale x{scale:.1f}")
     img = img.resize((max(1, round(img.width * scale)), max(1, round(img.height * scale))), Image.LANCZOS)
     canvas = Image.new("RGBA", (w, h), bg)
-    canvas.paste(img, ((w - img.width) // 2, (h - img.height) // 2), img)
-    return canvas
+    # alpha_composite, NOT paste-with-mask: paste blends the alpha channel
+    # itself, so soft edges stay semi-transparent even over an opaque bg and
+    # render as black fringing in-game (found 2026-07-20 on big_badda_boom).
+    overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    overlay.paste(img, ((w - img.width) // 2, (h - img.height) // 2))
+    return Image.alpha_composite(canvas, overlay)
 
 
 def process(row, dest):
@@ -136,17 +159,18 @@ def process(row, dest):
     n0 = len(flags)
     if row["mode"] == "cover":
         out = cover(img, row["w"], row["h"], row["focus"])
+    elif row["mode"] == "sprite":
+        out = sprite(img, row["w"], row["h"])
     else:
         # Card portraits get the flat backing; icons keep transparency.
         bg = CARD_BG if "/cards/" in row["out"] else (0, 0, 0, 0)
         out = contain(img, row["w"], row["h"], bg)
     # Card portraits must be opaque regardless of mode: several official
     # splashes (e.g. Klee Wish) ship on transparency, and alpha holes read as
-    # missing art over the card frame.
+    # missing art over the card frame. alpha_composite (not paste) so edge
+    # pixels come out fully opaque -- see contain() note.
     if "/cards/" in row["out"]:
-        flat = Image.new("RGBA", out.size, CARD_BG)
-        flat.paste(out, (0, 0), out)
-        out = flat
+        out = Image.alpha_composite(Image.new("RGBA", out.size, CARD_BG), out)
     for i in range(n0, len(flags)):
         flags[i] = f"{row['asset_id']} r{row['rank']}: {flags[i]}"
     dest.parent.mkdir(parents=True, exist_ok=True)
