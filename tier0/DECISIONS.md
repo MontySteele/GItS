@@ -174,3 +174,30 @@ Amend here, not in chat history.
     (trigger was ~98%) and the band miss is a spread (spark 69%,
     reaction 2%), which a global shave would worsen. Escalated with the
     A2-knob and reaction-boss-collapse questions (see pass-2 report).
+
+## Pass 3 (2026-07-19, round-3 rulings)
+
+38. **Frozen-on-boss -> Vulnerable 2** (decision-2 contingency formally
+    triggered). Measured consequence: reaction tank_boss 58% vs the
+    trail's predicted ~37% — the hydro+cryo companion pair now sustains
+    boss Vulnerable uptime. Floors met; flagged in pass-3 report for an
+    optional identity ruling (co-op-primary framing vs 1-stack knob).
+39. **Identity is judged on starter + archetype-deck MEDIAN** (hard
+    heuristic + A1>A2), with per-deck A2 bands (demo 4.8 / spark 4.5 /
+    reaction 3.5); packages themselves warn instead of fail. Monoculture
+    packages are dead as identity evidence — codified from ask 4:
+    **archetype test packages must model plausible drafts.**
+40. **reaction_burst reconstructed** (chat-Claude's canonical list lived
+    only in their clone): 6 companions, sizzle x2 / fischl x2 for early
+    pressure, reworked Boom, Burst + combustion_study, 2 defense cards.
+    Tuned to the stated acceptance (A2 3.4 <= 3.5, tank_boss 58% >= 35,
+    gauntlet 92% >= 75), not to maximize winrate.
+41. **Splash proc-cap: implemented, DORMANT.** Trigger (median A2 drag)
+    did not fire; armed behavior locked by test.
+42. **Spark band deviation left standing** (56% vs 65-85): 8-variant
+    trail shows plausible-draft spark clusters 44-61% and block riders
+    are load-bearing vs bosses (dropping them: 56 -> 44). The band was
+    derived from a monoculture measurement; ratification asked, deck not
+    forced.
+43. **v0.1 scorecard baseline recorded in docs/klee-pass-3-report.md**;
+    freezes on ratification of the two band asks.

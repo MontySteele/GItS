@@ -27,8 +27,10 @@ SUPERCONDUCT_VULN = 2         # Vulnerable stacks applied
 ELECTROCHARGED_DOT = 4        # DoT amount
 ELECTROCHARGED_DOT_TURNS = 2
 CRYSTALLIZE_BLOCK = 4         # player Block gained
-FROZEN_BOSS_RESIST = True     # bosses consume Frozen with no skipped intent
-                              # (decision logged in DECISIONS.md)
+FROZEN_BOSS_VULN = 2          # bosses consume Frozen for Vulnerable 2, not
+                              # a skipped intent (decision-2 contingency,
+                              # triggered by round-3 ruling: Frozen must
+                              # not be a dead pick vs bosses)
 
 # --- Klee resources (spec §4.2; klee-character-design.md §3) ---
 SPARKS_FOR_FREE_ATTACK = 3    # at 3 Sparks, next Attack costs 0
@@ -40,6 +42,9 @@ SPARKS_N_SPLASH_HITS = 4          # end of turn: N hits...
 SPARKS_N_SPLASH_HIT_DMG = 5       # ...of this damage, each applies pyro
 PLAYTIME_BOMB_DAMAGE = 5          # Playtime Forever's per-turn bomb
 DETONATION_SPLASH_BURST = 3       # Blazing Delight: burst energy per detonation
+DETONATION_SPLASH_PROC_CAP = None  # max splash procs/turn; None = uncapped.
+                                   # DORMANT knob (round-3 ruling): set to 3
+                                   # only if demolition's median A2 drags.
 OZ_DMG = 3                        # Oz end-of-turn hit (applies electro)
 WITCHS_FLAME_DMG = 4              # Durin end-of-turn hit (applies pyro)
 SOLAR_ISOTOMA_BLOCK = 3           # block per attack hit vs aura'd enemy

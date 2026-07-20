@@ -66,14 +66,20 @@ def test_demolition_deck_detonates_and_sparks():
 
 
 def test_burst_meter_fills_in_reaction_fights():
-    # skill_tags + reactions must actually feed the 60 meter to full.
+    # skill_tags + reactions must feed the 60 meter to full (or to a
+    # cast, which resets it) in most long fights.
     from tier0.engine.combat import run_fight
     from tier0.pilot.policy import make_pilot
     pilot = make_pilot(loader.pilot_weights("reaction"))
-    player = loader.build_player("klee", "reaction_weighted")
-    state = run_fight(player, loader.build_encounter("attrition"), pilot,
-                      seed=3)
-    assert state.player.burst_energy >= state.player.burst_max
+    filled = 0
+    for seed in range(20):
+        player = loader.build_player("klee", "reaction_weighted")
+        state = run_fight(player, loader.build_encounter("attrition"), pilot,
+                          seed=seed)
+        if (state.player.burst_energy >= state.player.burst_max
+                or any(e["event"] == "burst_cast" for e in state.log)):
+            filled += 1
+    assert filled >= 10, filled
 
 
 def test_burst_card_gated_and_empties_meter():

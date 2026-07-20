@@ -9,8 +9,20 @@ element: pyro
 cadence: catalyst        # every attack applies pyro
 burst_max: 60
 relic_hooks: [spark_on_detonation]   # Pounding Surprise
-# Ruling 3.4: her curve never tops her frontload — scorecard flags this.
+# Ruling 3.4 as restructured in round 3: A1>A2 is HARD on starter and on
+# the median across archetype decks; a warning on individual packages.
 constraints: ["A1_frontload>A2_scaling"]
+# Round-3 heuristic restructure: identity is judged on starter + the
+# per-axis median of these decks, with per-deck A2 bands.
+archetype_decks:
+  demolition_weighted: demolition   # deck: pilot
+  spark_weighted: spark
+  reaction_weighted: reaction
+deck_bands:
+  A2_scaling:
+    demolition_weighted: 4.8
+    spark_weighted: 4.5
+    reaction_weighted: 3.5
 starting_deck:
   - kaboom
   - kaboom
@@ -23,7 +35,8 @@ starting_deck:
   - jumpy_dumpty
   - pop
 packages:
-  # §7.2 archetype-weighted decks (~12 drafted cards each).
+  # Round-3 principle: archetype packages model PLAUSIBLE DRAFTS, not
+  # monocultures — each carries its natural cross-archetype draft-ins.
   demolition_weighted:
     - mine_toss
     - mine_toss
@@ -37,6 +50,10 @@ packages:
     - explosives_workshop
     - blazing_delight
     - sorry_jean
+    # draft-ins a human obviously takes:
+    - blast_radius
+    - hide_and_seek
+    - spooked
   spark_weighted:
     - sparkly_treasure
     - sparkly_treasure
@@ -50,25 +67,32 @@ packages:
     - gleeful_barrage
     - patched_dress
     - cant_catch_me
-  # §7.2: reaction-weighted = 12 companions at realistic draft rates
-  # + her personal reaction cards.
+    # draft-ins:
+    - blast_radius
+    - alchemical_curiosity
+    - hide_and_seek
+  # Canonical reaction deck (round-3 ruling: the "reaction_burst" build).
+  # Real draft: 6 companions, her amp payoffs, defense a drafter takes
+  # before a boss, and — the piece every earlier test deck missed — her
+  # Burst plus accelerators. Solo floors: tank_boss >=35%, gauntlet >=75%.
+  # TIER2-VALIDATE: reaction co-op (partner as boss plan; Tier 0 can't).
   reaction_weighted:
     - xingqiu_raincutter
     - xingqiu_rain_swords
     - fischl_nightrider
+    - fischl_nightrider
     - fischl_oz
     - kaeya_frostgnaw
-    - diona_icy_paws
     - sucrose_gust
-    - sucrose_astable
-    - barbara_melody
-    - barbara_shining_idol
-    - bennett_passion
-    - bennett_fantastic_voyage
+    - sizzle
     - sizzle
     - perfect_timing
+    - boom_goes_the_dynamite
     - flame_dance
+    - sparks_n_splash
     - combustion_study
+    - hide_and_seek
+    - spooked
   # §7.3 watchlist configs (degeneracy hunts, not realistic decks).
   melt_stack:
     - vermillion_pact

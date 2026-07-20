@@ -101,6 +101,12 @@ def detonate_bombs(state: CombatState, enemy: Enemy, bonus: int = 0) -> None:
         if "spark_on_detonation" in p.relic_hooks:
             gain_sparks(state, 1)
         splash = p.powers.get("detonation_splash", 0)     # Blazing Delight
+        if splash and C.DETONATION_SPLASH_PROC_CAP is not None:
+            procs = getattr(state, "splash_procs_this_turn", 0)
+            if procs >= C.DETONATION_SPLASH_PROC_CAP:
+                splash = 0
+            else:
+                state.splash_procs_this_turn = procs + 1
         if splash:
             for other in state.living_enemies:
                 other.hp -= splash

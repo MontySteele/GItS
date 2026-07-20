@@ -125,6 +125,17 @@ def pilot_weights(pilot_id: str) -> dict:
 
 
 def character_constraints(character_id: str) -> list[str]:
-    """Identity constraints like "A1_frontload>A2_scaling" — evaluated
-    against scores by the scorecard, flagged loudly when violated."""
+    """Identity constraints like "A1_frontload>A2_scaling" — hard on
+    starter and the archetype-deck median, a warning on package decks
+    (round-3 restructure)."""
     return list(_character_index()[character_id].get("constraints", []))
+
+
+def archetype_decks(character_id: str) -> dict[str, str]:
+    """deck -> pilot mapping for the median identity evaluation."""
+    return dict(_character_index()[character_id].get("archetype_decks", {}))
+
+
+def deck_bands(character_id: str) -> dict[str, dict[str, float]]:
+    """Per-axis, per-deck score ceilings, e.g. A2_scaling caps."""
+    return dict(_character_index()[character_id].get("deck_bands", {}))

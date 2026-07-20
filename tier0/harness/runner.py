@@ -68,25 +68,59 @@ def score_config(character: str, deck: str, pilot_id: str, fights: int,
         stats = run_full_battery(character, deck, pilot_id, fights, seed)
         raw = axes.raw_axes(stats)
     scores = axes.normalize(raw, base_raw)
+    # Round-3 restructure: constraints are HARD on starter (and on the
+    # median, checked in score_character); informational on package decks.
     constraint_flags = []
+    severity = "CONSTRAINT VIOLATED" if deck == "starter" else "warn (package deck)"
     for con in loader.character_constraints(character):
         left, right = con.split(">")
         if not scores[left] > scores[right]:
             constraint_flags.append(
-                f"CONSTRAINT VIOLATED: {con} "
+                f"{severity}: {con} "
                 f"({scores[left]:.1f} vs {scores[right]:.1f})")
+    for axis, per_deck in loader.deck_bands(character).items():
+        if deck in per_deck and scores[axis] > per_deck[deck]:
+            constraint_flags.append(
+                f"BAND EXCEEDED: {axis} {scores[axis]:.1f} > "
+                f"{per_deck[deck]} for {deck}")
     pressure_delta = (metrics.summarize(stats["punisher"])["winrate"]
                       - metrics.summarize(stats["attrition"])["winrate"])
     return {
         "scores": scores, "raw": raw,
         "curve_exponent": axes.curve_exponent(stats["tank_boss"]),
         "pressure_delta": pressure_delta,
-        # The baseline is flat-3.0 by construction; the shape heuristic
-        # only means something for compared configs.
-        "heuristic_flags": (constraint_flags if target_is_baseline
+        # The baseline is flat 3.0 by construction. The SHAPE heuristic
+        # runs on starter and the archetype-median only (round 3) —
+        # monoculture packages always read extreme and taught us nothing.
+        "heuristic_flags": (constraint_flags
+                            if target_is_baseline or deck != "starter"
                             else axes.heuristic_flags(scores) + constraint_flags),
         "stats": stats,
     }
+
+
+def score_character(character: str, fights: int, seed: int) -> dict:
+    """Round-3 identity evaluation: starter + per-axis MEDIAN across the
+    character's archetype decks. Shape heuristic and constraints are hard
+    here; per-deck results carry only their band checks."""
+    import statistics
+    decks = loader.archetype_decks(character)
+    results = {"starter": score_config(character, "starter", "generic",
+                                       fights, seed)}
+    for deck, pilot in decks.items():
+        results[deck] = score_config(character, deck, pilot, fights, seed)
+    median_scores = {
+        ax: statistics.median(results[d]["scores"][ax] for d in decks)
+        for ax in axes.AXES}
+    median_flags = axes.heuristic_flags(median_scores)
+    for con in loader.character_constraints(character):
+        left, right = con.split(">")
+        if not median_scores[left] > median_scores[right]:
+            median_flags.append(
+                f"CONSTRAINT VIOLATED on median: {con} "
+                f"({median_scores[left]:.1f} vs {median_scores[right]:.1f})")
+    return {"per_deck": results, "median_scores": median_scores,
+            "median_flags": median_flags}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -103,7 +137,19 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--score", action="store_true",
                     help="run full battery + baseline and print the "
                          "7-axis scorecard")
+    ap.add_argument("--report-character", action="store_true",
+                    help="starter + all archetype decks + the median "
+                         "identity evaluation (round-3 canon)")
     args = ap.parse_args(argv)
+
+    if args.report_character:
+        t0 = time.perf_counter()
+        rep = score_character(args.character, args.fights, args.seed)
+        for deck, result in rep["per_deck"].items():
+            report.print_scorecard(args.character, deck, result)
+        report.print_median(args.character, rep)
+        print(f"\n(character report in {time.perf_counter() - t0:.1f}s)")
+        return 0
 
     if args.score:
         t0 = time.perf_counter()

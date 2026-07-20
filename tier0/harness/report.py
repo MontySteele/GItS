@@ -41,6 +41,17 @@ def print_scorecard(character: str, deck: str, result: dict) -> None:
         print("  ✓ statline shape passes the balance heuristic")
 
 
+def print_median(character: str, rep: dict) -> None:
+    print(f"\n=== {character}: archetype-median identity (round-3 canon) ===")
+    for ax in AXES:
+        score = rep["median_scores"][ax]
+        print(f"  {_AXIS_LABELS[ax]:<14} {score:>4.1f}  {_bar(score)}")
+    for flag in rep["median_flags"]:
+        print(f"  ⚠ {flag}")
+    if not rep["median_flags"]:
+        print("  ✓ median statline passes heuristic + identity constraints")
+
+
 def print_summary(character: str, deck: str, encounter: str, s: dict) -> None:
     flags = f"  FLAGS: {','.join(s['flags'])} ({s['flagged_fights']} fights)" \
         if s.get("flags") else ""

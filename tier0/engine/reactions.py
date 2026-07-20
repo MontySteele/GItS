@@ -104,8 +104,9 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         powers.apply_power(state, enemy, "dot", C.ELECTROCHARGED_DOT)
     elif pair == frozenset(("hydro", "cryo")):
         name = "frozen"
-        if enemy.is_boss and C.FROZEN_BOSS_RESIST:
-            pass                                        # consumed, no skip
+        if enemy.is_boss:
+            # Bosses don't skip; they take Vulnerable instead (round 3).
+            powers.apply_power(state, enemy, "vulnerable", C.FROZEN_BOSS_VULN)
         else:
             enemy.frozen = True
 

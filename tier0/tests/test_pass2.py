@@ -91,17 +91,15 @@ def test_a6_ordering_anchor():
 
 
 def test_a1_gt_a2_constraint_wired():
-    # The mechanism, not the verdict: whether v0.2 satisfies A1>A2 at
-    # scorecard fight-counts is reported in the pass-2 report. Here we
-    # assert the constraint is loaded and, when violated, flagged with
-    # both scores in the message.
+    # Round-3 restructure: hard on starter/median, warning on packages.
     assert loader.character_constraints("klee") == [
         "A1_frontload>A2_scaling"]
     klee = score_config("klee", "demolition_weighted", "demolition",
                         FIGHTS, SEED)
     for f in klee["heuristic_flags"]:
-        if "CONSTRAINT" in f:
-            assert "A1_frontload>A2_scaling" in f and "vs" in f
+        assert "CONSTRAINT VIOLATED" not in f    # packages warn, not fail
+        if "warn" in f:
+            assert "A1_frontload>A2_scaling" in f
 
 
 def test_pilot_regret_reported():

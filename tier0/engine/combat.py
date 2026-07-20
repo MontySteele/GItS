@@ -86,6 +86,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
 
     state.companion_cost_delta_this_turn = 0     # Friendly Visit expires
     state.replay_next_companion = 0              # Study Buddy expires
+    state.splash_procs_this_turn = 0             # detonation_splash cap
 
     for enemy in list(state.living_enemies):     # bombs from last turn go off
         if enemy.bombs:

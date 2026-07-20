@@ -74,12 +74,15 @@ def test_frozen_skips_next_intent(state):
     assert e.frozen
 
 
-def test_frozen_boss_resist():
+def test_frozen_boss_becomes_vulnerable():
+    # Round-3 ruling (decision-2 contingency triggered): bosses consume
+    # Frozen for Vulnerable 2 instead of a skipped intent.
     st = make_state(enemies=[make_enemy(hp=100, name="boss", is_boss=True)])
     e = st.enemies[0]
     hit(st, e, "hydro", 0)
     hit(st, e, "cryo", 5)
-    assert not e.frozen            # consumed with no effect (DECISIONS.md)
+    assert not e.frozen
+    assert e.powers["vulnerable"] == C.FROZEN_BOSS_VULN
     assert e.aura is None
 
 
