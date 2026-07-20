@@ -152,3 +152,69 @@ cannot work until the slice list exists.
 - **O6 — Placeholder art is load-bearing.** `KleePlaceholderArt.cs` rewrites 22
   asset/sfx paths from `klee` to `ironclad`. Deleting it without shipping a real
   `.pck` returns us to missing-resource crashes on the select screen.
+
+## C1 findings from art + BaseLib integration (2026-07-20)
+
+**Finding 14 — `CustomCardModel` requires pool registration, and fails at boot.**
+BaseLib's `CustomCardModel(..., bool autoAdd = true)` calls
+`CustomContentDictionary.AddModel`, which throws unless the class carries
+`[Pool(typeof(...))]`. This is a *startup crash*, not a soft failure: it happens
+during model construction and drops the game to an error screen. `KleeCardPool`
+already declares membership in `GenerateAllCards`, so the correct answer is
+`autoAdd: false` (opting out of a registration path we do not use), not adding
+the attribute — which would register every card twice.
+
+**Finding 15 — BaseLib prefixes custom model ids, silently moving loc keys.**
+Deriving from `CustomCardModel` changed Kaboom's `Id.Entry` from `KABOOM` to
+`KLEEMOD-KABOOM`. The hardcoded `KABOOM.title` strings then pointed at an id
+nothing looks up, and the UI rendered the raw key. `JumpyDumpty`, still a plain
+`CardModel`, was unaffected — which is what made the failure look selective.
+**Ruling: custom models declare loc via the `ILocalizationProvider.Localization`
+override, never via the hand-rolled dictionary.** BaseLib writes those against
+`Id.Entry` itself (`AddModelLoc`), so the key cannot drift. The dictionary in
+`KleeMod.cs` is now reserved for plain `CardModel` stubs only.
+
+**Finding 16 — loose PNG card art works; no `.pck` required. CONFIRMED IN GAME.**
+`Image.Load` on an absolute OS path + `ImageTexture.CreateFromImage`, returned
+through `CustomPortrait`, renders correctly. Wiring the remaining card portraits
+is mechanical. This does NOT extend to character art: `CharacterSelectIcon`
+returns `CompressedTexture2D` and the select surface is `res://`-bound, so
+character art still gates on the MegaDot editor.
+
+**Finding 17 — the card-reward softlock is a rarity gap, not an empty pool.**
+All four C1 cards are `CardRarity.Basic`. Reward and transform generation draws
+Common/Uncommon/Rare, finds zero candidates, and leaves a screen that never
+becomes dismissable. It is deterministic after every combat, not intermittent.
+No workaround short of content: **the pool needs real Common/Uncommon/Rare
+cards, which is the C2 slice.**
+
+**Loc syntax, now observed rather than inferred** (via `LOCPROBE`, O5):
+`STRIKE_SILENT.description` is `Deal {Damage:diff()} damage.` and
+`DEFEND_SILENT.description` is `Gain {Block:diff()} [gold]Block[/gold].`
+Single braces; `:diff()` renders the upgrade delta; `[gold]` is the keyword
+highlight. Adopted for all four starters.
+
+## Validator (2026-07-20)
+
+Every bug above cost a debug cycle, and each was mechanically detectable. Two
+layers, split by what is observable when:
+
+- **`build/validate.ps1`** — gates `deploy.ps1`, runs against the *staged*
+  package. S1 stray `*.json` (ModManager recursion), S2 manifest vs. shipped
+  reality, S3 dependencies installed (note: workshop mods ship as `<Name>.json`,
+  not `manifest.json`), S4 `Custom*Model` without `[Pool]` or `autoAdd: false`
+  (finding 14), S5 doubled braces / unknown BBCode tags (findings 12-13).
+- **`KleeCode/Diagnostics/KleeSelfCheck.cs`** — postfix on `ModelDb.Init` at
+  `Priority.Last`. R1 empty `StartingRelics` (finding 11), R2/R3 empty deck and
+  **pool rarity coverage** (finding 17), R4 loc keys resolved through the live
+  `Id.Entry` (finding 15), R6 template syntax as it actually landed in the table.
+
+The split is forced, not stylistic: `StartingRelics` is a computed property, loc
+keys are rewritten by BaseLib at registration, and the loc tables ship
+compressed inside the `.pck`. None of that is visible to a static pass.
+
+The runtime half **never throws** — a validator that bricks the boot is the
+failure mode it exists to prevent. Findings log as `SELFCHECK` errors.
+
+S4 is a source regex, not a proof; proving it needs IL analysis of the base
+constructor call. It catches the shape that shipped.

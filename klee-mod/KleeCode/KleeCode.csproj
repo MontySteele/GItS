@@ -27,6 +27,13 @@
       <HintPath>$(GameDataDir)\GodotSharp.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <!-- BaseLib is a Workshop mod loaded before us (see manifest dependencies).
+         Needed for CustomCardModel.CustomPortrait, which accepts a Texture2D
+         object and so lets us ship loose PNGs instead of building a .pck. -->
+    <Reference Include="BaseLib">
+      <HintPath>$(BaseLibDll)</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -61,17 +61,16 @@ public static class KleeMod
                 //    are declared per-mod via a card_keywords.json (the Downfall
                 //    pattern, see docs/card_keywords.json); we ship none yet, so
                 //    C1 uses plain text and keywords land with the C2 text pass.
-                ["KABOOM.title"] = "Kaboom!",
-                ["KABOOM.description"] = "Deal {Damage} damage.",
-
-                ["DUCK_AND_COVER.title"] = "Duck and Cover",
-                ["DUCK_AND_COVER.description"] = "Gain {Block} Block.",
-
+                // ONLY plain CardModel stubs belong here. Cards that derive from
+                // BaseLib's CustomCardModel get a prefixed id (KLEEMOD-KABOOM),
+                // so they declare loc via an ILocalizationProvider.Localization
+                // override on the model instead -- see Kaboom.Localization.
+                // KleeSelfCheck.Run() enforces that split at boot.
                 ["JUMPY_DUMPTY.title"] = "Jumpy Dumpty",
-                ["JUMPY_DUMPTY.description"] = "Deal {Damage} damage twice.",
+                ["JUMPY_DUMPTY.description"] = "Deal {Damage:diff()} damage twice.",
 
                 ["POP.title"] = "Pop!",
-                ["POP.description"] = "Deal {Damage} damage.",
+                ["POP.description"] = "Deal {Damage:diff()} damage.",
             });
 
             ProbeBaseGameLocSyntax();

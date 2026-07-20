@@ -57,6 +57,29 @@ New-Item -ItemType Directory -Force -Path $stage | Out-Null
 Copy-Item (Join-Path $package 'manifest.json') -Destination $stage
 Copy-Item $dll -Destination $stage
 
+# Card art ships as loose PNGs next to the dll -- no .pck needed, because
+# BaseLib's CustomPortrait accepts a Texture2D object we build at runtime.
+# Source of truth is the art pipeline's output dir, which is gitignored.
+$artSrc = Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\klee'
+$artDst = Join-Path $stage 'images\cards'
+if (Test-Path $artSrc) {
+    New-Item -ItemType Directory -Force -Path $artDst | Out-Null
+    Copy-Item (Join-Path $artSrc '*.png') -Destination $artDst
+    $artCount = (Get-ChildItem $artDst -Filter *.png).Count
+    Write-Host "Staged $artCount card images" -ForegroundColor Cyan
+} else {
+    Write-Host "WARNING: no card art found at $artSrc (cards will fall back to BETA placeholder)" -ForegroundColor Yellow
+}
+
+# Gate the deploy on the static checks. These run against the STAGED package,
+# so they see exactly what the game will see -- including any stray *.json that
+# would break ModManager's recursive scan.
+Write-Host "Validating package..." -ForegroundColor Cyan
+& (Join-Path $PSScriptRoot 'validate.ps1') `
+    -StageDir $stage `
+    -SourceDir (Join-Path $root 'KleeCode') `
+    -GameDir $gameDir
+
 $target = Join-Path $gameDir 'mods\klee'
 Write-Host "Deploying to $target" -ForegroundColor Cyan
 if (Test-Path $target) { Remove-Item $target -Recurse -Force }
