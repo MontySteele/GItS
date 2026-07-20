@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Commands;
@@ -40,6 +41,21 @@ internal static class ReactionEffects
         {
             await KleeBurstResource.Gain(
                 choiceContext, dealer, BurstConstants.PerReaction, cardSource);
+
+            // Catalytic Conversion, right after the flat +5 exactly as in the
+            // sim (reactions.py _react): +Amount Sparks and +Amount x 5 Burst
+            // Energy per reaction. Same funnel, so it can neither miss a
+            // reaction nor double-count one.
+            var catalytic = dealer.Powers
+                .OfType<ReactionBonusSparkEnergyPower>().FirstOrDefault()?.Amount ?? 0;
+            if (catalytic > 0)
+            {
+                await SparkPower.Gain(choiceContext, dealer, catalytic, cardSource);
+                await KleeBurstResource.Gain(
+                    choiceContext, dealer,
+                    ReactionKitConstants.CatalyticBurstPerReaction * catalytic,
+                    cardSource);
+            }
         }
 
         switch (reaction)

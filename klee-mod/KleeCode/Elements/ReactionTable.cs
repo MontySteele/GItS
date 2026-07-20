@@ -1,3 +1,8 @@
+using System.Linq;
+using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Logging;
+
 namespace KleeMod.Elements;
 
 /// <summary>The reactions the resolver can produce.</summary>
@@ -85,4 +90,32 @@ public static class ReactionTable
         Reaction.Melt => ReactionConstants.MeltMult,
         _ => 1m,
     };
+
+    /// <summary>
+    /// Dealer-aware amplifier: percent amp boosts on the dealer (Vermillion
+    /// Pact; Durin's witchs_flame joins when companions land) are additive
+    /// with each other and multiplicative on the base -- sim law,
+    /// reactions.py _amp_mult: `base * (1 + pct / 100)`.
+    ///
+    /// This overload also owns the sim's amp-cap detector (AMP_STACK_LIMIT):
+    /// the boosted multiplier is the one that can run away, so the guard
+    /// lives beside the boost. Pure -- callable from preview paths.
+    /// </summary>
+    public static decimal AmplifierMultiplier(Reaction reaction, Creature? dealer)
+    {
+        var baseMult = AmplifierMultiplier(reaction);
+        if (baseMult == 1m || dealer == null) return baseMult;
+
+        var pct = dealer.Powers.OfType<AmpReactionUpPower>().FirstOrDefault()?.Amount ?? 0;
+        var mult = baseMult * (1m + pct / 100m);
+
+        if (mult > ReactionConstants.AmpStackLimit)
+        {
+            Log.Warn($"[{KleeMod.ModId}] AMP_STACK guard: multiplier {mult} exceeds " +
+                     $"{ReactionConstants.AmpStackLimit} on {reaction} " +
+                     $"(amp boost {pct}%).");
+        }
+
+        return mult;
+    }
 }

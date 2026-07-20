@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using MegaCrit.Sts2.Core.Commands;
@@ -39,6 +40,17 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     /// <summary>Mirrors tier0 constants.py SPARKS_FOR_FREE_ATTACK = 3.</summary>
     public const int Threshold = 3;
 
+    /// <summary>
+    /// The live threshold: True Spark Knight lowers it, floored at 1 (sim:
+    /// combat.py spark_threshold, `max(1, 3 - spark_threshold_down)`). Used
+    /// for BOTH the cost gate and the spend, so they can never disagree --
+    /// the sim reads spark_threshold(state) at both sites too.
+    /// </summary>
+    private int CurrentThreshold => System.Math.Max(
+        1, Threshold
+           - (Owner?.Powers.OfType<SparkThresholdDownPower>()
+                  .FirstOrDefault()?.Amount ?? 0));
+
     public List<(string, string)>? Localization => new()
     {
         ("title", "Spark"),
@@ -66,7 +78,7 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     }
 
     private bool AppliesTo(CardModel card) =>
-        Amount >= Threshold
+        Amount >= CurrentThreshold
         && card.Type == CardType.Attack
         && !card.EnergyCost.CostsX
         && card.Owner?.Creature == Owner;
@@ -103,6 +115,6 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
         // anyone; keeping it out of the ModifyPowerAmountGiven hook chain
         // means nothing can inflate or shrink the exact -3.
         await PowerCmd.ModifyAmount(
-            choiceContext, this, -Threshold, applier: null, cardSource: card);
+            choiceContext, this, -CurrentThreshold, applier: null, cardSource: card);
     }
 }

@@ -58,7 +58,53 @@ MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.js
 # same verified shape SparkPower.Gain uses. Amount is a LITERAL unless
 # klee-upgrades.yaml carries a `burst_energy: +N` delta; then it becomes a
 # named DynamicVar("BurstEnergy", n) -- the Sparks idiom exactly.
-MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_energy"}
+MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_energy",
+                  "apply_power"}
+
+# apply_power (power-card pass): sheet power id -> (C# PowerModel class,
+# stack cap or None, card-text template with {X} for the amount).
+#
+# The cap is DOUBLE-ENTERED deliberately: the C# class enforces it in
+# TryModifyPowerAmountReceived (the sim clamps in powers.py apply_power), and
+# codegen cross-checks the sheet's max_stacks against this table so cap drift
+# between sheet and C# fails the regen loudly instead of shipping.
+#
+# sparks_n_splash is deliberately ABSENT: the Burst kit card lands LAST in
+# the power-card pass (standing plan) with its own cost/grant machinery.
+APPLY_POWERS = {
+    "bomb_damage_up": ("BombDamageUpPower", 4,
+        "Your [gold]Bombs[/gold] detonate for {X} more damage. (Max 4.)"),
+    "zero_cost_attacks_up": ("ZeroCostAttacksUpPower", 4,
+        "Your Attacks that cost 0 deal {X} more damage. (Max 4.)"),
+    "spark_per_turn": ("SparkPerTurnPower", None,
+        "At the start of your turn, gain {X} [gold]Spark[/gold]."),
+    "reaction_bonus_spark_energy": ("ReactionBonusSparkEnergyPower", None,
+        "[gold]Elemental Reactions[/gold] grant {X} extra [gold]Spark[/gold] "
+        "and 5 extra [gold]Burst Energy[/gold]."),
+    "detonation_splash": ("DetonationSplashPower", None,
+        "When a [gold]Bomb[/gold] detonates: deal {X} damage to ALL enemies, "
+        "ignoring Block, and gain 3 [gold]Burst Energy[/gold]. "
+        "Up to 3 times per turn."),
+    "detonation_vuln": ("DetonationVulnPower", None,
+        "When a [gold]Bomb[/gold] detonates, apply {X} [gold]Vulnerable[/gold] "
+        "to that enemy."),
+    "spark_threshold_down": ("SparkThresholdDownPower", None,
+        "You need {X} fewer [gold]Spark[/gold] for your Attacks to cost 0."),
+    "amp_reaction_up": ("AmpReactionUpPower", None,
+        "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
+    "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", 1,
+        "At the start of your turn, place a 5-damage [gold]Bomb[/gold] on a "
+        "random enemy and gain {X} [gold]Spark[/gold]."),
+}
+
+# Sheet fields apply_power may carry. Anything else encodes a mechanic this
+# generator does not understand -- fail loudly (UNPARSEABLE discipline).
+APPLY_POWER_FIELDS = {"op", "power", "amount", "target", "max_stacks", "note",
+                      "splash_procs_per_turn"}
+
+# Upgrade keys that all mean "bump the applied power amount" at card level
+# (tier0 upgrades.py handles them in one branch too).
+POWER_UPGRADE_KEYS = {"power_amount", "amp_percent", "splash_damage", "vulnerable"}
 
 # Bomb placement targets we have a verified selection idiom for.
 BOMB_TARGETS = {"enemy", "random_enemy", "random_enemies"}
@@ -99,7 +145,8 @@ HAND_WRITTEN |= {"sizzle", "flame_dance", "kaboom_beetle_swarm", "elemental_ecst
 #                  own doc comment prescribes (verified in the decompile)
 # Anything else (remove:, add:, condition:, ...) is structural and blocks the
 # card's upgrade path until it is hand-finished or re-ruled numeric.
-EXPRESSIBLE_DELTAS = {"damage", "block", "draw", "spark", "bomb_damage", "burst_energy", "cost"}
+EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "bomb_damage", "burst_energy", "cost"}
+                      | POWER_UPGRADE_KEYS)
 
 RARITY_CS = {
     "basic": "CardRarity.Basic",
@@ -132,8 +179,11 @@ def blocked_reason(card: dict) -> str | None:
     if str(card.get("cost")) == "X":
         return "X cost (needs energy-scaling support)"
 
-    if card.get("type") == "power":
-        return "power card (needs a PowerModel, hand-finished)"
+    # The Burst kit card: granted-not-drafted, requires-full gate, meter
+    # spend. All of that is the kit-grant machinery, which lands LAST in the
+    # power-card pass (standing plan).
+    if card.get("kit_card") or card.get("requires"):
+        return "kit card (Burst grant/cost machinery, lands last)"
 
     # R20: inline upgrade fields are deprecated repo-wide -- deltas live in
     # *-upgrades.yaml sheets. Block loudly so a stray inline key can never
@@ -158,6 +208,29 @@ def blocked_reason(card: dict) -> str | None:
                 return f"bomb target '{eff.get('target')}'"
             if not isinstance(eff.get("amount"), int):
                 return "formula-driven bomb count"
+        if op == "apply_power":
+            power = eff.get("power")
+            if power not in APPLY_POWERS:
+                return f"apply_power power '{power}' (no PowerModel in the registry)"
+            if eff.get("target") != "self":
+                return f"apply_power target '{eff.get('target')}' (only self powers land this pass)"
+            unknown = set(eff) - APPLY_POWER_FIELDS
+            if unknown:
+                # UNPARSEABLE discipline: an unrecognized field encodes a
+                # mechanic; block loudly, never approximate.
+                return f"apply_power field(s) {sorted(unknown)} not understood"
+            cap = APPLY_POWERS[power][1]
+            if eff.get("max_stacks") != cap and not (eff.get("max_stacks") is None and cap is None):
+                # Cap drift between the sheet and the C# power class const.
+                raise SystemExit(
+                    f"gen_klee_cards: {card['id']}: sheet max_stacks "
+                    f"{eff.get('max_stacks')!r} != registered cap {cap!r} for "
+                    f"power '{power}' -- update BOTH the C# power and the registry.")
+            if power == "detonation_splash" and eff.get("splash_procs_per_turn") != 3:
+                raise SystemExit(
+                    f"gen_klee_cards: {card['id']}: splash_procs_per_turn "
+                    f"{eff.get('splash_procs_per_turn')!r} != 3; the C# cap is the "
+                    f"DemolitionConstants.SplashProcCapPerTurn const -- change both.")
     return None
 
 
@@ -210,6 +283,9 @@ def build_vars(card: dict) -> list[str]:
         elif op == "burst_energy" and burst_upgrade(card):
             # Same rule as Sparks: a var only when the upgrade must render.
             out.append(f'new DynamicVar("BurstEnergy", {int(eff["amount"])}m)')
+        elif op == "apply_power" and power_upgrade(card):
+            # Same rule again: only an upgradeable amount needs a var.
+            out.append(f'new DynamicVar("PowerAmount", {int(eff["amount"])}m)')
     return out
 
 
@@ -247,6 +323,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
         "cost": str(card.get("cost")) != "X",
     }
+    for pkey in POWER_UPGRADE_KEYS:
+        has[pkey] = any(e["op"] == "apply_power" for e in effects)
     for key, value in deltas.items():
         if key not in EXPRESSIBLE_DELTAS:
             return {}, f"delta key '{key}: {value}' not expressible by codegen (structural upgrade)"
@@ -264,6 +342,19 @@ def spark_upgrade(card: dict) -> int:
 def burst_upgrade(card: dict) -> int:
     """Ruled Burst-energy upgrade delta: `burst_energy: +N`. 0 = none."""
     return int(upgrade_plan(card)[0].get("burst_energy", 0))
+
+
+def power_upgrade(card: dict) -> int:
+    """Ruled power-amount delta (power_amount/amp_percent/splash_damage/
+    vulnerable all bump the applied amount -- tier0 upgrades.py handles them
+    in one branch too). 0 = none."""
+    deltas = upgrade_plan(card)[0]
+    keys = [k for k in POWER_UPGRADE_KEYS if k in deltas]
+    if len(keys) > 1:
+        raise SystemExit(
+            f"gen_klee_cards: {card['id']}: multiple power upgrade keys {keys} "
+            "-- one apply_power effect cannot take two amount deltas.")
+    return int(deltas[keys[0]]) if keys else 0
 
 
 def build_body(card: dict) -> list[str]:
@@ -382,6 +473,21 @@ def build_body(card: dict) -> list[str]:
                 f"await KleeBurstResource.Gain(choiceContext, Owner.Creature, {amount}, this);"
             )
 
+        elif op == "apply_power":
+            cls = APPLY_POWERS[eff["power"]][0]
+            amount = (
+                'DynamicVars["PowerAmount"].IntValue'
+                if power_upgrade(card)
+                else str(int(eff["amount"]))
+            )
+            # Stack caps are enforced by the power's own
+            # TryModifyPowerAmountReceived (the sim clamps at apply too), so
+            # the call site stays a plain Apply.
+            lines.append(
+                f"await PowerCmd.Apply<{cls}>(choiceContext, Owner.Creature, "
+                f"{amount}, applier: Owner.Creature, cardSource: this);"
+            )
+
     return lines
 
 
@@ -456,6 +562,12 @@ def build_description(card: dict) -> str:
             else:
                 parts.append(f'Gain {int(eff["amount"])} [gold]Burst Energy[/gold].')
 
+        elif op == "apply_power":
+            template = APPLY_POWERS[eff["power"]][2]
+            x = ("{PowerAmount:diff()}" if power_upgrade(card)
+                 else str(int(eff["amount"])))
+            parts.append(template.replace("{X}", x))
+
     return " ".join(parts)
 
 
@@ -472,11 +584,16 @@ def build_upgrade(card: dict) -> list[str]:
     key_for = {"block": "block", "draw": "draw", "gain_spark": "spark", "place_bomb": "bomb_damage",
                "burst_energy": "burst_energy"}
     var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
-               "burst_energy": 'DynamicVars["BurstEnergy"]'}
+               "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]'}
     lines, done = [], set()
     for eff in card["effects"]:
         op = eff["op"]
-        key = "damage" if op == "damage" and eff["target"] != "self" else key_for.get(op)
+        if op == "apply_power":
+            key = next((k for k in POWER_UPGRADE_KEYS if k in deltas), None)
+        elif op == "damage" and eff["target"] != "self":
+            key = "damage"
+        else:
+            key = key_for.get(op)
         if key is None or key not in deltas or key in done:
             continue
         done.add(key)

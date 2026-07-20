@@ -89,16 +89,10 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         if (trigger == Element.None) return 1m;
 
         var reaction = ReactionTable.Lookup(Element, trigger);
-        var mult = ReactionTable.AmplifierMultiplier(reaction);
 
-        if (mult > ReactionConstants.AmpStackLimit)
-        {
-            Log.Warn($"[{KleeMod.ModId}] AMP_STACK guard: multiplier {mult} exceeds " +
-                     $"{ReactionConstants.AmpStackLimit} on {reaction} " +
-                     $"({Element} aura x {trigger} trigger).");
-        }
-
-        return mult;
+        // Dealer-aware: Vermillion Pact's percent boost rides the multiplier
+        // (sim _amp_mult). The amp-cap detector lives inside the overload.
+        return ReactionTable.AmplifierMultiplier(reaction, dealer);
     }
 
     /// <summary>

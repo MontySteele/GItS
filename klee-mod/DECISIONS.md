@@ -761,3 +761,76 @@ full meter is visible and spends nothing, which is honest.
 (codegen) — Pop is the one hand-written carrier, and the parity lint
 gained a tag-parity check so a missing marker (= silently no burst
 energy) is a deploy-gate failure, not a playtest surprise.
+
+## Power-card pass — nine kit powers land (standing plan item 3, 2026-07-20)
+
+**Scope:** every sheet power card except Sparks 'n' Splash (kit card, lands
+LAST with the grant/cost machinery). Nine PowerModels, each hooked at the
+C# site matching its tier0 read site; the codegen `apply_power` op; pool
+39 → 48. All numbers LAW from tier0 — mirrored, never re-derived.
+
+**The powers and their read sites:**
+- `BombDamageUpPower` (Explosives Workshop, cap 4): read in
+  `BombPower.Detonate`, added BEFORE amplification — the sim totals
+  `bomb.damage + bonus + bomb_damage_up` and only then enters the
+  elemental pipeline.
+- `DetonationSplashPower` (Blazing Delight): `IBombDetonationListener` —
+  the bus BombPower already had. Per BOMB; splash is element-less and
+  block-bypassing (sim: raw `hp -=`), hence Unblockable|Unpowered; the
+  +3 Burst sits INSIDE the 3-procs/turn gate (a capped detonation grants
+  nothing); the counter resets at player side-turn END, equivalent to the
+  sim's turn-start reset because nothing can proc between the two.
+- `DetonationVulnPower` (Explosive Frags): same bus, applies Vulnerable
+  to the detonated enemy only if it survived (sim: `if enemy.alive`).
+- `BombAndSparkPerTurnPower` (Playtime Forever, cap 1): turn-start bomb
+  (PLAYTIME_BOMB_DAMAGE 5) on a random enemy + 1 Spark; the Spark is
+  unconditional, the bomb needs a living target — sim's exact branch.
+- `SparkPerTurnPower` (Endless Fireworks): turn-start Sparks.
+- `ZeroCostAttacksUpPower` (Spark Knight Style, cap 4): the sim's
+  predicate is PAID cost == 0, not printed — `EnergyCost.GetResolved()`
+  is the game's own after-play cost accessor (IntimidatingHelmet
+  precedent) and reads 0 mid-resolution for Spark-freed attacks because
+  the Spark spend is post-resolution.
+- `SparkThresholdDownPower` (True Spark Knight): pure marker.
+  `SparkPower.CurrentThreshold` = max(1, 3 − stacks), read at BOTH the
+  cost gate and the spend so they can never disagree (the sim calls
+  spark_threshold(state) at both sites too).
+- `ReactionBonusSparkEnergyPower` (Catalytic Conversion): read in the
+  `ReactionEffects.Resolve` funnel right after the flat +5 — same single
+  funnel, so it can neither miss nor double-count. **NO upgrade path:**
+  tier0's upgrade engine marks it UNAPPLIABLE
+  (CATALYTIC_BURST_PER_REACTION is a constant), so the sheet upgrade was
+  never measured — hot_hands disposition, awaiting user ruling.
+- `AmpReactionUpPower` (Vermillion Pact): percent on the amplifier. New
+  dealer-aware `ReactionTable.AmplifierMultiplier(reaction, dealer)` =
+  `base * (1 + pct/100)`, additive with future witchs_flame — and it now
+  owns the 4x amp-cap detector (moved from AuraPower; the boosted
+  multiplier is the one that can run away). Both amp sites (AuraPower
+  hit amplification, BombPower detonation) pass the dealer.
+
+**Stack caps** are enforced in `TryModifyPowerAmountReceived` (the sim
+clamps at apply in powers.py, POWER UNITS), and the cap is deliberately
+double-entered: the C# const enforces, codegen cross-checks the sheet's
+max_stacks against its registry and hard-fails the regen on drift.
+Blazing Delight's proc cap gets the same treatment.
+
+**Codegen:** `apply_power` op (registry: sheet power id → C# class, cap,
+card-text template; self-target only this pass), and the four power
+upgrade keys — power_amount / amp_percent / splash_damage / vulnerable —
+all meaning "bump the applied amount" (tier0 upgrades.py handles them in
+one branch too), rendered via DynamicVar("PowerAmount") only when a
+ruled delta exists. Unknown apply_power fields fail loudly (UNPARSEABLE).
+The kit card is blocked on `kit_card`/`requires:` explicitly.
+
+**Delivered content unblocked:** blazing_delight, catalytic_conversion,
+endless_fireworks, explosive_frags, explosives_workshop,
+playtime_forever, spark_knight_style, true_spark_knight, vermillion_pact.
+Six needed new portrait rows (the art sprint predates their unblock) and
+all nine needed badge icons — three came off the constellation redirect
+queue (Nova Burst, Blazing Delight, Explosive Frags), the rest are item
+renders; all flagged for red-pen in plan.tsv comments.
+
+**Forward obligations discharged:** the burst gain-site map from the
+phase-correction entry is now two entries shorter — detonation-splash
+burst and Catalytic Conversion both carry their gain lines. Remaining
+sim gain sites are Furina-stream only (encore, Salon).
