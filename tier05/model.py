@@ -1,6 +1,7 @@
-"""The run model (spec §2): 14-slot fixed template, HP persistence,
-rest nodes, battery-derived normals. No pathing, no gold, no upgrades
-(logged gap — DECISIONS.md).
+"""The run model (spec §2): fixed node template (RUNTEMPLATE_VERSION 2:
+11 fights, 3 rests with the pre-boss campfire guaranteed — ruling R7),
+HP persistence, rest nodes with smithing (M7), battery-derived normals.
+No pathing, no gold.
 
 All randomness for a run flows through ONE random.Random seeded by the
 harness (fight seeds, reward rolls, regret sampling) — determinism at
@@ -84,6 +85,14 @@ def build_node_encounter(node_kind: str, rng: random.Random) -> list[Enemy]:
                      intents=lite["intents"])]
     else:
         raise ValueError(f"unknown normal pool entry {pick!r}")
+    if C.NORMAL_ATTRITION_SCALE != 1.0:
+        # R7 sweep knob: attack amounts only, plain normals only -- HP is
+        # untouched so fight length (and thus draft economy) stays put.
+        for e in out:
+            for intent in e.intents:
+                if intent["kind"] == "attack":
+                    intent["amount"] = max(1, round(
+                        intent["amount"] * C.NORMAL_ATTRITION_SCALE))
     return _apply_compensator(out, "normal")
 
 

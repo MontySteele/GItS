@@ -21,7 +21,12 @@ def test_node_template_shape():
     assert len(nodes) == len(C.RUN_NODE_TEMPLATE)
     assert nodes[C.BURST_CHECK_NODE] == "BC"
     assert nodes[-1] == "B"
-    assert nodes.count("E") == 2 and nodes.count("R") == 2
+    # RUNTEMPLATE_VERSION 2 (ruling R7): 3 rests, and the campfire
+    # immediately before the boss is GUARANTEED -- the user's real-StS2
+    # node economy. Fight count stays at v1's 11 on purpose.
+    assert nodes.count("E") == 2 and nodes.count("R") == 3
+    assert nodes[-2] == "R"
+    assert nodes.count("N") + nodes.count("BC") + nodes.count("E") + 1 == 11
 
 
 def test_run_determinism():

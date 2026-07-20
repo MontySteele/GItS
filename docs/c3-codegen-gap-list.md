@@ -70,6 +70,17 @@ done last and possibly trimmed. Several are "anything↔companions" bridge cards
 whose value depends on the companion pool being interesting, which is a Tier 0.5
 question that now has data.
 
+## Standing obligation (M7 ruling R5): kit-Burst grant behavior
+
+The build owes v1.9 Burst semantics alongside the Burst-meter system
+above: Bursts are **kit, not deck contents** — never in the draftable
+pool or any pile; granted to hand when the meter first fills; Retain
+(v1.4); cast empties the meter and returns the card to the kit; a
+refill re-grants it. The sim's reference implementation is
+`grant_charged_kit` in `tier0/engine/combat.py` (including the
+random-discard/exhaust exemption the review workflow caught). Logged
+per ruling R5; no action until the C3 sweep.
+
 ## Pool-shape consequence
 
 The current 21-card generated pool is **14 common / 5 uncommon / 1 rare** plus 3

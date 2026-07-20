@@ -83,8 +83,29 @@ WINRATE_BAND_MIN_FIGHTS = 1000    # ratification process fix: winrate band
 
 # --- Tier 0.5 run model (tier05-draft-sim-spec.md §2) ---
 # Fixed node template, no pathing choice (map design is theirs, not ours).
-RUN_NODE_TEMPLATE = "NNNENRNNENRNB"
+# RUNTEMPLATE_VERSION 2 (M7 ruling R7): the node economy recalibrated to
+# the user's real-StS2 numbers -- one GUARANTEED campfire immediately
+# before the act boss plus 1-2 pathed ones; a busy path averages ~7
+# shop/elite/campfire "cool things" per act. As a shopless single-act
+# proxy that lands at 2 elites + 3 rests = 5 cool nodes, guaranteed
+# pre-boss R included. Fight count (11) and screen count (10) are
+# UNCHANGED from v1, so draft-economy numbers stay comparable and the
+# change is purely rest economy.
+# v1 = "NNNENRNNENRNB" (2 rests, none guaranteed pre-boss): the archive
+# world of every report through the M8 grid tables labeled template-v1.
+# M7's natural-uptake finding (0.06 smiths/run) measured a world with
+# ~3-6x less upgrade access than the real economy; ruling R7 parks all
+# upgrade-access content design until the re-measure under this.
+RUNTEMPLATE_VERSION = 2
+RUN_NODE_TEMPLATE = "NNNENRNNENRNRB"
 BURST_CHECK_NODE = 6              # this mid N is swapped to burst_check
+# R7 directive 2: the second knob of the 2D rest-economy sweep. Scales
+# enemy ATTACK amounts in plain normal-pool fights only (not E/B/BC --
+# those are calibrated checks) to probe whether the 95%-of-rest-arrivals-
+# under-danger finding is a template attrition artifact. 1.0 = measured
+# reality of the battery statlines; the sweep varies it, the stamped
+# default does not move without a ruling.
+NORMAL_ATTRITION_SCALE = 1.0
 REST_HEAL_FRACTION = 0.30         # rest option A: heal 30% of max HP
 REST_HEAL_THRESHOLD = 0.65        # rest policy: heal below this HP
 # M7: below DANGER always heal; between DANGER and HEAL_THRESHOLD an
