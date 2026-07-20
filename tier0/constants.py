@@ -77,3 +77,28 @@ DEFAULT_FIGHTS_PER_ENCOUNTER = 1000
 DEFAULT_SEED = 20260719
 WINRATE_BAND_MIN_FIGHTS = 1000    # ratification process fix: winrate band
                                   # checks only run at >=1000 fights
+
+# --- Tier 0.5 run model (tier05-draft-sim-spec.md §2) ---
+# Fixed node template, no pathing choice (map design is theirs, not ours).
+RUN_NODE_TEMPLATE = "NNNENRNNENRNB"
+BURST_CHECK_NODE = 6              # this mid N is swapped to burst_check
+REST_HEAL_FRACTION = 0.30         # rest option A: heal 30% of max HP
+REST_HEAL_THRESHOLD = 0.65        # rest policy: heal below this HP
+                                  # fraction, otherwise remove a card
+PUNISHER_LITE_SCALE = 0.70        # normal-pool punisher at 70% statline
+ATTRITION_LITE_HP = 45            # normal-pool attrition: ONE 45 HP unit
+NORMAL_POOL_WEIGHTS = {           # weighted normal-encounter pool
+    "swarm": 1.0, "attrition_lite": 1.0, "punisher_lite": 1.0}
+
+# --- Tier 0.5 rewards (spec §3 — the thing under test) ---
+REWARD_CARD_OFFERS = 3
+RARITY_ODDS = {"common": 0.60, "uncommon": 0.35, "rare": 0.05}
+NATION_WEIGHTS = {"mondstadt": 1.0}   # §4.1 mechanism; single-nation v0.1
+
+# --- Tier 0.5 assigned draft policy (spec §4) ---
+DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
+DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
+DRAFT_SKIP_THRESHOLD = 1.0        # skip the reward if best offer scores less
+DRAFT_CORE_SIZE = 4               # generic archetype core (reaction has its
+                                  # own rule: 2 appliers + amp payoff + Burst)
+DRAFT_REGRET_SAMPLE = 0.10        # fraction of decisions re-scored post-run

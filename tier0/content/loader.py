@@ -84,6 +84,26 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
                   relic_hooks=list(spec.get("relic_hooks", [])))
 
 
+def build_player_from_ids(character_id: str, card_ids: list[str]) -> Player:
+    """Tier 0.5: build a player around an arbitrary (drafted) deck list."""
+    spec = _character_index()[character_id]
+    return Player(hp=spec["hp"], max_hp=spec["hp"],
+                  draw_pile=[get_card(cid) for cid in card_ids],
+                  element=spec.get("element", "none"),
+                  cadence=spec.get("cadence", "skill"),
+                  burst_max=spec.get("burst_max", 0),
+                  relic_hooks=list(spec.get("relic_hooks", [])))
+
+
+def starting_deck(character_id: str) -> list[str]:
+    return list(_character_index()[character_id]["starting_deck"])
+
+
+def character_packages(character_id: str) -> dict[str, list[str]]:
+    return {k: list(v) for k, v in
+            _character_index()[character_id].get("packages", {}).items()}
+
+
 @lru_cache(maxsize=1)
 def _encounter_index() -> dict[str, dict]:
     return {d["id"]: d for d in _load_yaml_dir("encounters")}

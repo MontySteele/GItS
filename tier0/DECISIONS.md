@@ -242,3 +242,37 @@ Amend here, not in chat history.
     loads through the existing Card.exhaust field; the barbara_injection
     A4 probe still clears its raw-healing floor, so its expectation
     needed no recalibration after all.
+
+## Tier 0.5 M5 (2026-07-19, tier05-draft-sim-spec.md)
+
+50. **tier05/ package built on the Tier 0 engine untouched.** One rng
+    stream per run (fight seeds, reward rolls) — determinism at run
+    granularity, test-locked. Spec discrepancy logged: the template
+    string is 13 nodes; §2's header says "14 nodes." Implemented the
+    literal template (burst_check swapped over node 6).
+51. **No card upgrades** — the spec's accepted fidelity gap, logged here
+    as mandated. M5 measured it as FIRST-ORDER (see 54), not cosmetic.
+52. **Lite normals are mechanical derivations** (punisher x0.70 on hp &
+    attack amounts, attrition 1x45), never tuned; test asserts they track
+    the frozen statlines by formula.
+53. **Generic-anchor power proxy added to the assigned policy** — the
+    spec's §4 scoring has no power term, and REF_IRONCLAD's untagged
+    cards scored 0, so the anchor drafted NOTHING (pick rate 0%).
+    Added static (damage+block)/cost for archetype=="generic" only.
+    Flagged confounder-relevant; M6's mandatory A/B covers it.
+54. **M5 headline finding: run completion ~0% for anchor and all
+    archetypes at spec constants.** Death clustering at full-statline
+    E/B nodes (the spec's predicted signature — instrument works).
+    Knob trail: rest 50% -> +1.5pt; elite 85% -> deaths migrate to
+    boss; both -> 3-10% with the boss killing 117/200. Cause: in-run
+    decks (12-14 cards, ~60% HP) face battery checks calibrated for
+    full-HP 25-card authored decks; the only power growth modeled is
+    ~8 card picks. Recommendation filed (docs/tier05-m5-report.md):
+    run winrate is not a v1 acceptance metric; M6 harvests
+    boss-reached decks into the Tier 0 battery. No unilateral tuning.
+55. **Reaction achievability pre-alarm:** <1% of reaction runs assemble
+    the core (2 appliers + amp payoff + Burst) from 8 screens x 1
+    companion slot (demolition 26%, spark 4%). The pool-math that
+    "shipped on faith" fails first contact for the archetype whose
+    enablers live in the companion pool. For M6 metrics / M7 slot
+    modes; no action taken.
