@@ -69,8 +69,7 @@ public static class KleeMod
                 ["JUMPY_DUMPTY.title"] = "Jumpy Dumpty",
                 ["JUMPY_DUMPTY.description"] = "Deal {Damage:diff()} damage twice.",
 
-                ["POP.title"] = "Pop!",
-                ["POP.description"] = "Deal {Damage:diff()} damage.",
+                // Pop is now a CustomCardModel and declares its own loc.
             });
 
             ProbeBaseGameLocSyntax();
