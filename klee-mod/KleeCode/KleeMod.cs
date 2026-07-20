@@ -78,17 +78,12 @@ public static class KleeMod
                 // Pop is now a CustomCardModel and declares its own loc.
             });
 
-            LocManager.Instance.GetTable("characters").MergeWith(new Dictionary<string, string>
-            {
-                // Same UPPER_SNAKE_CASE Entry convention as cards.
-                ["KLEE.title"] = "Klee",
-                ["KLEE.description"] = "The Spark Knight of Mondstadt.",
-                ["KLEE.titleObject"] = "Klee",
-                ["KLEE.pronounSubject"] = "she",
-                ["KLEE.pronounObject"] = "her",
-                ["KLEE.pronounPossessive"] = "hers",
-                ["KLEE.possessiveAdjective"] = "her",
-            });
+            // Klee's character strings moved onto the model itself
+            // (Klee.Localization) when she became a CustomCharacterModel:
+            // BaseLib prefixed her id to KLEEMOD-KLEE, so the hardcoded
+            // "KLEE.*" keys that used to live here targeted an id nothing
+            // looks up -- finding 23, same failure mode R4 documents for
+            // cards. The self-check's R5 rule caught it at boot.
 
             Log.Info($"[{ModId}] Localization strings injected.");
         }
@@ -117,34 +112,18 @@ internal static class LocManager_Initialize_Patch
     public static void Postfix() => KleeMod.InjectLocStrings();
 }
 
-/// <summary>
-/// C1: make Klee selectable.
-///
-/// ModelDb.AllCharacters is a HARDCODED five-element array, not a registry
-/// scan — defining a CharacterModel subclass registers it with ModelDb.Get&lt;T&gt;()
-/// but never puts it in that array. The character-select screen iterates
-/// AllCharacters and uses UnlockState.Characters only as a lock filter, so
-/// appending here is what actually makes Klee appear.
-///
-/// It also feeds every downstream consumer for free: UnlockState.Characters
-/// derives from AllCharacters (removing only locked characters), as do
-/// AllCards, AllRelics, and the pool collections. This is the single correct
-/// injection point; patching UnlockState instead — as this mod originally did
-/// — moves nothing, because the screen never consults it for membership.
-/// </summary>
-[HarmonyPatch(typeof(ModelDb), nameof(ModelDb.AllCharacters), MethodType.Getter)]
-internal static class ModelDb_AllCharacters_Patch
-{
-    [HarmonyPostfix]
-    public static void Postfix(ref IEnumerable<CharacterModel> __result)
-    {
-        var klee = ModelDb.Character<Klee>();
-        if (!__result.Contains(klee))
-        {
-            __result = __result.Append(klee);
-        }
-    }
-}
+// ---------------------------------------------------------------------------
+// ModelDb_AllCharacters_Patch — REMOVED (finding 27). BaseLib's
+// AddCustomCharacters postfix appends every CustomContentDictionary character
+// to ModelDb.AllCharacters, unconditionally and with no duplicate check.
+// Klee has been in that dictionary since the CustomCharacterModel migration
+// (her base ctor registers her), so from finding 21 onward BOTH appends ran
+// and character select showed two Klees. Finding 21's "verified BaseLib does
+// not append custom characters" was wrong — that check found the
+// GetVisibleCharacters FILTER transpiler and stopped there, missing the
+// separate append postfix. The append is BaseLib's job now; a mod-side
+// append patch would be reintroducing the duplicate.
+// ---------------------------------------------------------------------------
 
 /// <summary>
 /// Finding 22: any effect that draws N reward cards throws once N exceeds the
@@ -201,6 +180,71 @@ internal static class CardFactory_CreateForReward_Clamp_Patch
                    + "exhausting its blacklist and throwing.");
             cardCount = available;
         }
+    }
+}
+
+/// <summary>
+/// Finding 24: entering ANY shop soft locks the run while Klee's pool has no
+/// Power cards.
+///
+/// MerchantInventory.PopulateCharacterCardEntries stocks a hardcoded slot
+/// layout — 2 Attacks, 2 Skills, 1 Power — and CreateForMerchant(player,
+/// options, type) rolls a rarity that must contain a card of that type.
+/// GetNextAllowedRarity wraps Common->Uncommon->Rare and returns None when no
+/// rarity has one, and the method throws. The throw happens inside
+/// MerchantRoom.EnterInternal's async continuation, so the room never finishes
+/// entering: black screen, no crash dialog, run lost. Klee ships 24 cards and
+/// not one is a Power, so this was every shop, deterministically.
+///
+/// SUBSTITUTING THE TYPE RATHER THAN EMPTYING THE SLOT, deliberately. The
+/// merchant's 5-slot layout is load-bearing UI — Populate has no "no card"
+/// path — so the safe degradation is offering a Skill or Attack where the
+/// Power would sit. The fallback order prefers Skill (the closer analogue of
+/// a Power purchase: utility, not damage). Like the reward-draw clamp above,
+/// this patch stops changing anything the moment the pool contains a Power
+/// card, which is the real fix and a C3 content item.
+///
+/// The eligibility test mirrors CreateForMerchant exactly: it excludes Basic
+/// (the method's own filter) and demands Common/Uncommon/Rare, because the
+/// shop rarity roll can only ever land on those three (same reasoning as
+/// self-check R3a). Base characters stock every type and never hit the
+/// fallback.
+/// </summary>
+[HarmonyPatch(typeof(CardFactory), nameof(CardFactory.CreateForMerchant),
+    new[] { typeof(Player), typeof(IEnumerable<CardModel>), typeof(CardType) })]
+internal static class CardFactory_CreateForMerchant_TypeFallback_Patch
+{
+    [HarmonyPrefix]
+    public static void Prefix(IEnumerable<CardModel> options, ref CardType type)
+    {
+        // Callers pass materialized lists; guard anyway so a lazy sequence is
+        // only enumerated here once.
+        var pool = options as IReadOnlyCollection<CardModel> ?? options.ToList();
+
+        bool Stocks(CardType t) => pool.Any(c => c.Type == t
+            && (c.Rarity == CardRarity.Common
+                || c.Rarity == CardRarity.Uncommon
+                || c.Rarity == CardRarity.Rare));
+
+        if (Stocks(type))
+        {
+            return;
+        }
+
+        foreach (var fallback in new[] { CardType.Skill, CardType.Attack, CardType.Power })
+        {
+            if (Stocks(fallback))
+            {
+                Log.Warn($"[{KleeMod.ModId}] merchant slot wanted a {type} card but the "
+                       + $"pool has none at a rollable rarity; offering a {fallback} "
+                       + "instead. This stops happening once the pool stocks that type.");
+                type = fallback;
+                return;
+            }
+        }
+
+        // Nothing of any type is rollable; fall through and let the game's own
+        // descriptive exception surface the truly-broken pool.
     }
 }
 

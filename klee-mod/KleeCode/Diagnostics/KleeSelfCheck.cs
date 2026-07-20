@@ -79,13 +79,13 @@ internal static class KleeSelfCheck
     }
 
     // Distinct rule labels that can actually reach the log:
-    //   R1, R2, R3, R3a, R3b, R3c, R4, R5, R6a, R6b
+    //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7
     // This was 8 while R5/R6a/R6b were documented but unattributable -- the
     // helpers that emit them hardcoded R4 and R6, so those three strings could
-    // never appear. Fixing the labels is what makes 10 the honest count. Note
+    // never appear. Fixing the labels is what makes the count honest. Note
     // R4 and R5 come from a `rule` parameter, so grepping for Fail("R... will
     // not find them; count the call sites, not the literals.
-    private const int RuleCount = 10;
+    private const int RuleCount = 12;
 
     private static void Fail(string rule, string detail) => Findings.Add($"[{rule}] {detail}");
 
@@ -105,6 +105,28 @@ internal static class KleeSelfCheck
         {
             Fail("R1", "StartingRelics is empty; SelectCharacter indexes [0] unconditionally "
                      + "and will throw, making the character appear selectable but not select.");
+        }
+
+        // R7. Every starting relic must RESOLVE ITS POOL. RelicModel.Pool is
+        // non-virtual First() over AllRelicPools; a relic in no pool throws
+        // InvalidOperationException — and that getter runs inside
+        // SelectCharacter via DynamicDescription, aborting selection after the
+        // panel updates but before the lobby assignment (finding 27: Pounding
+        // Surprise shipped poolless and Klee looked selected while the run
+        // would start as the previously clicked character — finding 11's
+        // symptom through a new door).
+        foreach (var relic in relics)
+        {
+            try
+            {
+                _ = relic.Pool;
+            }
+            catch (InvalidOperationException)
+            {
+                Fail("R7", $"starting relic {relic.GetType().Name} is in NO relic pool; "
+                         + "RelicModel.Pool throws and SelectCharacter aborts mid-method, "
+                         + "so the character looks selected but is not.");
+            }
         }
 
         // R2. An empty starting deck means no draw pile and an immediate soft
@@ -188,6 +210,27 @@ internal static class KleeSelfCheck
                       + $"{LargestRewardDraw} the largest reward draw (SealedDeck) requests. Each "
                       + "pick is blacklisted from the next draw, so without the clamp patch this "
                       + "would throw; with it, such effects silently offer fewer cards.");
+        }
+
+        // R3d. Merchant type coverage. MerchantInventory stocks a hardcoded
+        // slot layout from the character pool -- 2 Attacks, 2 Skills, 1 Power
+        // -- and CreateForMerchant throws if the requested type has no card at
+        // a rollable rarity (Common/Uncommon/Rare; Basic is filtered and the
+        // shop roll cannot produce anything else). The throw escapes into
+        // MerchantRoom.EnterInternal's async continuation, so entering ANY
+        // shop is a black-screen soft lock -- finding 24, hit on the first
+        // shop playtest. KleeMod's CreateForMerchant prefix now substitutes a
+        // stocked type, so this reports as pool-depth truth rather than a live
+        // soft lock: below full coverage, some shop slots sell a different
+        // type than designed.
+        foreach (var type in new[] { CardType.Attack, CardType.Skill, CardType.Power })
+        {
+            if (!generatable.Any(c => c.Type == type))
+            {
+                Fail("R3d", $"CardPool has no {type} cards at a rollable rarity. The merchant "
+                          + "always stocks this type; without the type-fallback patch every "
+                          + "shop soft locks, with it the slot silently sells another type.");
+            }
         }
 
         // R3c. Rarity coverage. Not a soft lock on its own, per the fallback

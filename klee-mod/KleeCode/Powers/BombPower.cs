@@ -149,6 +149,7 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         _damages.Clear();
 
         var target = Owner;
+        var applier = Applier;
         await PowerCmd.Remove(this);
 
         foreach (var damage in payloads)
@@ -164,6 +165,38 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
             // demolition deck feed the reaction system. Deliberately not wired
             // yet -- nothing applies auras at all, so doing it here alone would
             // be untestable. Lands with the aura-application pass.
+
+            await NotifyDetonationListeners(choiceContext, applier, target, damage);
+        }
+    }
+
+    /// <summary>
+    /// The detonation event bus. Once per bomb (sim parity: the spark grant
+    /// sits inside the per-bomb loop in tier0/engine/effects.py). Listeners
+    /// are the applying player's relics and creature powers implementing
+    /// <see cref="IBombDetonationListener"/> -- snapshot with ToList() because
+    /// a listener may add or remove powers while handling the event.
+    /// </summary>
+    private static async Task NotifyDetonationListeners(
+        PlayerChoiceContext choiceContext, Creature? applier, Creature target, int damage)
+    {
+        var player = applier?.Player;
+        if (player == null) return;
+
+        foreach (var relic in player.Relics.ToList())
+        {
+            if (relic is IBombDetonationListener listener)
+            {
+                await listener.OnBombDetonated(choiceContext, applier, target, damage);
+            }
+        }
+
+        foreach (var power in applier!.Powers.ToList())
+        {
+            if (power is IBombDetonationListener listener)
+            {
+                await listener.OnBombDetonated(choiceContext, applier, target, damage);
+            }
         }
     }
 }

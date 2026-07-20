@@ -77,9 +77,15 @@ internal static class KleePlaceholderArt
     [HarmonyPostfix]
     private static void RedirectToPlaceholder(CharacterModel __instance, ref string __result)
     {
-        if (__instance is Klee && !string.IsNullOrEmpty(__result))
+        if (__instance is Klee klee && !string.IsNullOrEmpty(__result))
         {
-            __result = __result.Replace(KleeMod.ModId, Placeholder);
+            // The paths embed Id.Entry lowercased, NOT the mod id. BaseLib
+            // prefixes custom model ids (KLEE -> KLEEMOD-KLEE), so replacing
+            // the bare mod id produced "char_select_ironcladmod-ironclad.png"
+            // -- a black box where the select icon should be (finding 23).
+            // Read the entry off the live model so the substring we replace is
+            // by construction the one the paths contain.
+            __result = __result.Replace(klee.Id.Entry.ToLowerInvariant(), Placeholder);
         }
     }
 }

@@ -34,6 +34,24 @@ namespace KleeMod;
 /// </summary>
 public sealed class Klee : CustomCharacterModel
 {
+    /// <remarks>
+    /// Loc MUST live here, not in KleeMod's hand-rolled dictionary. BaseLib
+    /// prefixes custom model ids (KLEE -> KLEEMOD-KLEE) and writes these
+    /// against Id.Entry itself (AddModelLoc), so the keys can never drift.
+    /// Hardcoded "KLEE.*" keys stopped resolving the moment the base type
+    /// changed to CustomCharacterModel -- see DECISIONS finding 23.
+    /// </remarks>
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "Klee"),
+        ("description", "The Spark Knight of Mondstadt."),
+        ("titleObject", "Klee"),
+        ("pronounSubject", "she"),
+        ("pronounObject", "her"),
+        ("pronounPossessive", "hers"),
+        ("possessiveAdjective", "her"),
+    };
+
     // Klee red per spec C1.4; artist's final call later.
     public override Color NameColor => new Color("E85A4F");
 
@@ -50,9 +68,11 @@ public sealed class Klee : CustomCharacterModel
 
     public override CardPoolModel CardPool => ModelDb.CardPool<KleeCardPool>();
 
-    // C1 STUB: Klee has no relic/potion pools yet. Borrowing Silent's keeps the
-    // run loop functional; character relics/potions v0.1 are a C3 item.
-    public override RelicPoolModel RelicPool => ModelDb.RelicPool<SilentRelicPool>();
+    // KleeRelicPool = Silent's borrowed contents + Pounding Surprise. The own
+    // pool is REQUIRED, not cosmetic: RelicModel.Pool resolves through
+    // AllRelicPools and throws for a relic in no pool, aborting character
+    // select mid-method (finding 27). Real Klee relics (~8) are a C3 item.
+    public override RelicPoolModel RelicPool => ModelDb.RelicPool<KleeRelicPool>();
 
     public override PotionPoolModel PotionPool => ModelDb.PotionPool<SilentPotionPool>();
 
@@ -72,8 +92,9 @@ public sealed class Klee : CustomCharacterModel
     };
 
     /// <remarks>
-    /// C1 STUB: borrows Ironclad's Burning Blood. Klee's real starting relic is
-    /// Pounding Surprise, which depends on the Sparks system (spec C2.3).
+    /// Pounding Surprise (+1 Spark per Bomb detonation) — the real starting
+    /// relic, replacing the C1 Burning Blood stub now that the Sparks system
+    /// exists (C3 gap-list unlock #1).
     ///
     /// This MUST be non-empty. NCharacterSelectScreen.SelectCharacter does an
     /// unconditional <c>StartingRelics[0]</c>, so an empty list throws
@@ -85,7 +106,7 @@ public sealed class Klee : CustomCharacterModel
     /// </remarks>
     public override IReadOnlyList<RelicModel> StartingRelics => new RelicModel[]
     {
-        ModelDb.Relic<BurningBlood>(),
+        ModelDb.Relic<Relics.PoundingSurprise>(),
     };
 
     public override float AttackAnimDelay => 0.15f;

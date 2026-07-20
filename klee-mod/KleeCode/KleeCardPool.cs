@@ -39,25 +39,29 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<Pop>(),
 
             // Generated from docs/klee-cards.yaml by tools/gen_klee_cards.py.
-            // This is the mechanical subset only -- damage/block/draw. Cards
-            // needing bombs, sparks, burst energy or conditionals are blocked
-            // in Generated/manifest.json until those systems land.
+            // Mechanical subset: damage/block/draw/place_bomb/gain_spark.
+            // Cards needing powers, burst energy, auras or conditionals are
+            // blocked in Generated/manifest.json until those systems land.
             //
             // These carry the pool's rarity coverage: reward and transform
             // generation draws Common/Uncommon/Rare, and a pool with none of
             // those soft locks the reward screen after every combat (finding 17).
             ModelDb.Card<AlchemicalCuriosity>(),
+            ModelDb.Card<AllMyTreasures>(),
             ModelDb.Card<AmmoScavenging>(),
             ModelDb.Card<BigBaddaBoom>(),
             ModelDb.Card<BlastRadius>(),
             ModelDb.Card<BombVoyage>(),
             ModelDb.Card<BombsAway>(),
+            ModelDb.Card<CantCatchMe>(),
             ModelDb.Card<ClusterCharge>(),
             ModelDb.Card<Crackle>(),
+            ModelDb.Card<DaDaDa>(),
             ModelDb.Card<DoublePop>(),
             ModelDb.Card<FishFlavoredBait>(),
             ModelDb.Card<FlameOnTheWick>(),
             ModelDb.Card<HideAndSeek>(),
+            ModelDb.Card<HotHands>(),
             ModelDb.Card<JumpyDumpty>(),
             ModelDb.Card<JumpyDumptyMk2>(),
             ModelDb.Card<MineToss>(),
@@ -65,8 +69,13 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<PocketFireworks>(),
             ModelDb.Card<RapidFire>(),
             ModelDb.Card<RunAway>(),
+            ModelDb.Card<SkipAndHop>(),
+            ModelDb.Card<Snap>(),
             ModelDb.Card<SorryJean>(),
+            ModelDb.Card<SparkCollection>(),
+            ModelDb.Card<SparklyTreasure>(),
             ModelDb.Card<SpiritedAway>(),
+            ModelDb.Card<WarmGlow>(),
         };
     }
 }

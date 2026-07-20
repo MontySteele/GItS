@@ -35,7 +35,7 @@ public sealed class AmmoScavenging : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ammo Scavenging"),
-        ("description", "Place a [gold]Bomb[/gold] on a random enemy dealing {Damage:diff()} damage. Draw {Cards:diff()} card."),
+        ("description", "Place a [gold]Bomb[/gold] on a random enemy dealing {Damage:diff()} damage. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

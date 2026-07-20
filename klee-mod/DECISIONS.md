@@ -420,3 +420,237 @@ minutes; the cost of missing the existing mechanism ranges from redundant
 code (best case) to hours-later soft locks with misleading symptoms
 (finding 21). The sweep is now a required step, same standing as "read
 the decompiled reference before patching."
+
+---
+
+## Finding 23 — the finding-21 migration renamed Klee's id, and two consumers hardcoded the old one (FIXED)
+
+**Found by playtest, 2026-07-20** ("Klee is a black box in character select and
+can't be picked"). Regression introduced by the finding-21 fix: deriving from
+`CustomCharacterModel` puts Klee through BaseLib's id prefixing, so `Id.Entry`
+changed from `KLEE` to `KLEEMOD-KLEE` — exactly the rename R4 documents for
+cards, applied to the character we forgot also has an id.
+
+Two places still assumed the unprefixed id:
+
+1. **`KleePlaceholderArt`** rewrote asset paths with
+   `Replace(KleeMod.ModId, "ironclad")`. Every path embeds
+   `Id.Entry.ToLowerInvariant()`, so `char_select_kleemod-klee.png` became
+   `char_select_ironcladmod-ironclad.png` ("klee" matches twice) — godot.log:
+   `ERROR: No loader found for resource: .../char_select_ironcladmod-ironclad.png`.
+   Black select icon, and selection dead because the select surface can't load
+   her assets. Fix: replace the live `Id.Entry.ToLowerInvariant()` instead, so
+   the substring is by construction the one the paths contain.
+
+2. **Character loc** was still merged under `KLEE.*` in `InjectLocStrings`.
+   Fix: moved onto the model as a `Localization` override — BaseLib's
+   `AddModelLoc` writes against `Id.Entry` itself, so the keys cannot drift.
+   This is the same split the cards already follow; the character was the
+   remaining hand-rolled holdout.
+
+**The self-check caught half of this at boot.** `[R5] missing loc key
+"KLEEMOD-KLEE.title"` was in the log before anyone clicked character select.
+The art half had no rule: R-rules validate models and loc, not asset-path
+resolution. If placeholder art outlives the next milestone, a rule that
+resolves the select-icon path against the pack would close that gap.
+
+**Not fixed, known:** the progress save carries `CharStats` under
+`CHARACTER.KLEE` from pre-migration runs; the game logs a non-fatal
+`Unknown character ID` warning and Klee's prior stats don't carry over to
+`CHARACTER.KLEEMOD-KLEE`. Cosmetic for a dev profile; a save migration is not
+worth writing unless we rename ids again.
+
+**Ruled out during diagnosis:** stale deploy. The deployed dll (built 11:21)
+already contained ffd0941 — the log shows R5-labelled findings and the
+reward-draw clamp, both of which only exist post-ffd0941. The newest code was
+running; the newest code was the regression.
+
+**Class of bug:** an id is an API. Anything that changes `Id.Entry` — base
+type migrations especially — must be followed by a sweep for consumers of the
+old spelling (loc keys, asset paths, save data, epoch strings). R4/R5 cover
+loc; paths and saves have no rule yet.
+
+---
+
+## Finding 24 — every shop soft locks: the merchant unconditionally stocks a Power slot (FIXED)
+
+**Found by playtest, 2026-07-20** — first playtest to reach a shop; black
+screen on entry, no crash dialog. Pre-existing since the C2 pool landed, NOT a
+regression from findings 21/23: Klee's 24 cards contain zero Power-type cards,
+and nothing before this playtest ever entered a merchant.
+
+`MerchantInventory.PopulateCharacterCardEntries` stocks a hardcoded slot
+layout from the character pool — `{Attack, Attack, Skill, Skill, Power}` —
+and `CardFactory.CreateForMerchant(player, options, type)` rolls a rarity
+that must contain a card of the requested type. `GetNextAllowedRarity` wraps
+Common→Uncommon→Rare and returns `None` when no rarity qualifies, and the
+method throws. godot.log:
+
+    InvalidOperationException: Can't generate valid rarity for merchant card
+    type Power with card options: CARD.KLEEMOD-ALCHEMICAL_CURIOSITY, ...
+      at CardFactory.CreateForMerchant → MerchantCardEntry.Populate
+      → MerchantInventory.CreateForNormalMerchant → MerchantRoom.EnterInternal
+
+The throw escapes into `MerchantRoom.EnterInternal`'s async continuation —
+the same swallowed-async shape as finding 21 — so the room never finishes
+entering. Deterministic on every shop until the pool stocks a Power.
+
+**Fix:** prefix on `CreateForMerchant` that substitutes a type the pool does
+stock (fallback order Skill → Attack → Power; Skill is the closer analogue of
+a Power purchase). Substituting rather than emptying the slot because the
+5-slot layout is load-bearing — `Populate` has no "no card" path. The
+eligibility test mirrors the method exactly: Basic excluded, and only
+Common/Uncommon/Rare count, because the shop roll can produce nothing else
+(R3a reasoning). The patch self-retires the moment Klee's pool contains a
+Power card. Base characters stock every type and never hit the fallback.
+
+**Self-check:** new rule R3d fails the boot check when any of Attack/Skill/
+Power is missing from the generatable pool. This gap was knowable statically
+— the merchant layout is a constant — and R3d would have flagged it before
+the playtest.
+
+**The real fix is content:** Klee needs Power cards on the sheet. Logged as a
+C3 item; until then R3d keeps reporting the truth (some shop slots sell a
+different type than designed).
+
+**Class of bug, same family as findings 21/22:** base-game code that assumes
+base-character pool shape (closed character switches, pool-size floors, and
+now per-type coverage), throwing inside async continuations where the failure
+surfaces as a hang, not a crash. The C3 decompiler sweep should also grep
+factory methods for `InvalidOperationException` with pool-shape preconditions.
+
+---
+
+## Finding 25 — art plan predated the C2 sheet: 8 shipped cards had no sourcing rows (FIXED)
+
+The BETA placeholders the 2026-07-20 playtest showed were not pipeline
+failures: `alchemical_curiosity`, `bombs_away`, `cluster_charge`,
+`double_pop`, `flame_on_the_wick`, `jumpy_dumpty_mk2`, `no_holding_back` and
+`run_away` simply had **no rows in art/plan.tsv** — the plan was written
+against an earlier card list. Rows added as provisional `auto` picks reusing
+already-resolved wiki titles (demote to `shortlist` for a taste pass any
+time); same for the spark-set additions when they shipped (snap, da_da_da,
+hot_hands, warm_glow, all_my_treasures). All 33 shipped cards now have
+portraits.
+
+**Tool fix that rode along:** `art_fetch.py` rewrote SOURCES.tsv from
+scratch out of the current API resolution, and the Fandom API returns
+PARTIAL batches under rate limiting — one flaky run truncated the release
+checklist from 115 rows to 30 (restored from git). The fetch now MERGES by
+filename instead of rewriting, and single-file fallback goes through
+`Special:FilePath` (which, note, serves WebP under .png names — Pillow
+sniffs content, so processing is unaffected).
+
+## Finding 26 — Sparks, Pounding Surprise, and the spark card set (C3 gap-list unlock #1)
+
+**SparkPower** (player Buff/Counter): while at 3+ Sparks the player's
+Attacks cost 0; playing an Attack with nonzero PRINTED cost at threshold
+consumes 3. Cost side rides `Hook.ModifyEnergyCostInCombat` via the
+`TryModifyEnergyCostInCombat` virtual — CardEnergyCost consults the same
+hook for display and payment, so cards visibly read 0 in hand with no UI
+patch. Spend side is `AfterCardPlayed` on the same power. Reference:
+tier0/engine/combat.py `card_cost`/`play_card`.
+
+**Known divergence from the sim, deliberate:** X-cost attacks are EXEMPT
+(sim applies sparks to them). Zeroing an X-card sets X=0 and turns the buff
+into a trap; both X-cost cards are blocked on X support anyway, so nothing
+observable differs. Reconcile when X-cost lands.
+
+**Detonation event bus** (csharp-build-spec item 2): `BombPower.Detonate`
+notifies `IBombDetonationListener`s — discovered by interface over the
+applying player's relics and creature powers, once PER BOMB (sim grants the
+spark inside the per-bomb loop). Blazing Delight subscribes here when its
+power lands.
+
+**Pounding Surprise** (`CustomRelicModel`, Starter, autoAdd: false per
+finding 14): +1 Spark per detonation, own-bombs-only in co-op. Replaces the
+Burning Blood stub in `Klee.StartingRelics`. Icon borrows Burning Blood's
+atlas slug — relic icons are `.tres` atlas entries, so finding 18's `.pck`
+gate applies to relic_atlas identically; no collision since the relic it
+borrows from is the one it replaces.
+
+**Codegen learned `gain_spark`** (literal amount — no base-game DynamicVar
+renders a Spark count, and finding 15 says don't invent placeholder names)
+**and `exhaust: true`** (`CanonicalKeywords => Exhaust`; needed the moment
+da_da_da/all_my_treasures unblocked — every earlier exhaust card was
+blocked, so the gap was invisible). Pool grows 24 -> 33: the 8 spark cards
+plus Snap! (sheet v0.6, M8/R1). Rare tier is now 3 deep (was 1).
+
+**Open (M9 ask): upgrade shape for pure-spark cards.** sparkly_treasure and
+spark_collection emit an empty OnUpgrade — a literal amount cannot render
+an upgrade delta, and an invisibly-changing number is worse than none.
+Flagged in Generated/manifest.json `upgrade_defaults`.
+
+## M8 rulings — what binds this build (2026-07-20)
+
+- **R10 (Crackle +gain_spark):** authorized SIM-SIDE in its own measurement
+  window; sheet v0.6 does NOT yet carry it. The C# build now has everything
+  needed (`gain_spark` op) — when the sheet lands the buff, `gen_klee_cards
+  .py` regen picks it up with zero code changes. Do NOT hand-add it first.
+- **R11 (upgrade deltas):** ruling-supplied upgrade values are DELTAS.
+  Codegen already conforms (`UpgradeValueBy`); manifest `upgrade_defaults`
+  comment now states it.
+- **R9/R12–R15:** sim-side only (spark online definition, shining_idol,
+  divergence note, upgrade economy, R8 aftermath). No build action; R14's
+  "dose cells are diagnostics, never acceptance targets" applies to any
+  future build-vs-sim comparison we quote.
+
+---
+
+## Finding 27 — two Klees in character select, and neither selectable (FIXED; corrects finding 21)
+
+**Found by playtest, 2026-07-20 (post-Sparks deploy).** Two Klee tiles on the
+select screen; clicking either updated the panel but the run would start as
+the previously selected character. Suspected Furina-stream contamination;
+was not — both halves were klee-mod's own.
+
+### Half 1 — the duplicate: finding 21's "no double-add" verification was WRONG
+
+BaseLib's `AddCustomCharacters` postfix appends every
+`CustomContentDictionary.CustomCharacters` entry to `ModelDb.AllCharacters`
+— unconditionally, no duplicate check. Klee has been in that dictionary
+since the CustomCharacterModel migration (the base ctor registers her), so
+BaseLib appended her AND our `ModelDb_AllCharacters_Patch` appended her.
+Its `Contains` guard did not save it: the guard sees the enumeration state
+at ITS patch position, and the two appends are separate postfixes.
+
+**Correction of record for finding 21:** "Checked before assuming: BaseLib
+does not append custom characters" found the `GetVisibleCharacters` FILTER
+transpiler and stopped there. The append lives in a different patch class
+(`AddCustomCharacters`, undecodable attribute args in the decompile — the
+sweep grep missed it). The duplicate appeared the moment finding 21's
+migration landed and hid in plain sight among the other mods' tiles until
+today's shorter roster made it obvious.
+
+**Fix: the mod-side append patch is DELETED.** Registration is BaseLib's job
+for ICustomModel characters — that is the same lesson as finding 21 itself,
+one layer up: we were duplicating a mechanism BaseLib already owns.
+
+### Half 2 — unselectable: Pounding Surprise was in no relic pool
+
+`RelicModel.Pool` is non-virtual `AllRelicPools.First(p =>
+p.AllRelicIds.Contains(Id))` and it runs inside
+`NCharacterSelectScreen.SelectCharacter` (DynamicDescription -> energy icon
+lookup). A relic in NO pool throws `InvalidOperationException: Sequence
+contains no matching element` right there — godot.log caught it — aborting
+SelectCharacter after the panel text updates but before the lobby
+assignment. Finding 11's looks-selected-but-is-not failure, reached through
+a relic instead of an empty StartingRelics. The screenshot even showed the
+mid-throw state: Pounding Surprise's TITLE with the Necrobinder relic's
+DESCRIPTION ("Summon 1") — stale widget data from the aborted update.
+
+**Fix: `KleeRelicPool`** — Silent's borrowed contents plus Pounding
+Surprise, wired via `Klee.RelicPool`. `AllRelicPools` derives from
+`AllCharacters.Select(c => c.RelicPool)`, so the override is the entire
+registration. Reward safety: relic rewards never roll Starter, so the relic
+cannot drop as loot; Silent relics still resolve their Pool to
+SilentRelicPool because Silent precedes Klee in AllCharacters.
+
+**Self-check: new rule R7** — every starting relic must resolve `.Pool`
+without throwing. This was knowable at boot; R1 checked non-empty and
+stopped one property short of the one that throws.
+
+**Class of bug, again:** non-virtual base-game getters with closed-world
+assumptions (`First()` with no fallback), throwing inside UI/async flows
+where the symptom is a half-updated screen, not a crash. Siblings: findings
+11, 21, 24.
