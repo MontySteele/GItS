@@ -109,6 +109,15 @@ REWARD_CARD_OFFERS = 3
 RARITY_ODDS = {"common": 0.60, "uncommon": 0.35, "rare": 0.05}
 NATION_WEIGHTS = {"mondstadt": 1.0}   # §4.1 mechanism; single-nation v0.1
 
+# principles v1.8 / draft-sim addendum: the Featured Banner. Each run rolls
+# this many limited 5-stars per nation from the full designed roster, and only
+# featured 5-stars appear in that run's companion offers. Rotation moves from
+# authoring time (which someone must remember) to runtime (which the seed
+# remembers), so the 5-star roster per nation can grow without a cap.
+# DEGENERATE AT v0.1: Mondstadt has exactly 3 designed 5-stars, so the roll
+# features all of them and current numbers are unaffected. This is plumbing.
+BANNER_FEATURED_SLOTS = 3
+
 # --- Tier 0.5 assigned draft policy (spec §4) ---
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this

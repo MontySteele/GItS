@@ -121,6 +121,7 @@ class RunResult:
     time_to_online: Optional[int] = None    # fights until core complete
     fight_stats: list = field(default_factory=list)       # t0 FightStats
     rests: list[tuple] = field(default_factory=list)
+    banner: frozenset[str] = field(default_factory=frozenset)   # v1.8 featured
 
 
 def node_template() -> list[str]:
@@ -141,13 +142,19 @@ def run_one(character: str, archetype: str, pilot_id: str,
         raise ValueError(f"unknown slot mode {slot_mode!r}")
     screens_since_companion = 0
     rng = random.Random(seed)
+    # v1.8 Featured Banner: rolled once per run and fixed for its duration.
+    # DEDICATED rng stream, the same trick draft_regret uses, for a specific
+    # reason: drawing the banner from `rng` would advance the main stream and
+    # silently renumber every existing measurement, including the frozen v0.1
+    # snapshot. Seed-determined either way, which is all the spec asks for.
+    banner = rewards.roll_banner(random.Random(seed + 2 * 10 ** 9))
     pilot = make_pilot(loader.pilot_weights(pilot_id))
     deck_ids = loader.starting_deck(character)
     max_hp = loader._character_index()[character]["hp"]
     hp = max_hp
     nodes = node_template()
     res = RunResult(seed=seed, won=False, death_node=None, hp_by_node=[],
-                    deck_ids=deck_ids, node_kinds=nodes)
+                    deck_ids=deck_ids, node_kinds=nodes, banner=banner)
     fights = 0
     for i, kind in enumerate(nodes):
         if kind == "R":
@@ -180,7 +187,8 @@ def run_one(character: str, archetype: str, pilot_id: str,
             if pity_k is not None and screens_since_companion >= pity_k:
                 n_comp = 3                  # pity fires: choose-3 slot
             offers = rewards.roll_rewards(rng, character,
-                                          companion_offers=n_comp)
+                                          companion_offers=n_comp,
+                                          banner=banner)
             deck_cards = [loader.get_card(cid) for cid in deck_ids]
             pick = policy(rng, deck_cards, offers, archetype)
             res.decisions.append({

@@ -52,6 +52,53 @@ def companion_pool() -> dict[str, list[Card]]:
     return {r: sorted(cs, key=lambda c: c.id) for r, cs in pool.items()}
 
 
+@lru_cache(maxsize=8)
+def five_star_roster(nation: str) -> list[Card]:
+    """Every designed 5-star companion for a nation, banner-eligible.
+
+    Standard-banner 5-stars are NOT excluded: per principles v1.8 they
+    participate in the roll like anyone else, and the `standard` flag is
+    only the escape hatch if banner variance turns out to brick runs.
+    """
+    return sorted(
+        (c for c in loader._card_index().values()
+         if c.is_companion and c.star == 5 and c.nation == nation
+         and c.personal_pool is None),
+        key=lambda c: c.id)
+
+
+def roll_banner(rng: random.Random,
+                nations: tuple[str, ...] = ("mondstadt",)) -> frozenset[str]:
+    """The run's Featured Banner: BANNER_FEATURED_SLOTS limited 5-stars per
+    nation, drawn once per run and fixed for its duration.
+
+    Returns the set of featured 5-star card ids. Nations with no more
+    designed 5-stars than slots feature all of them, which is why this is a
+    no-op at the v0.1 roster and why the roll is still worth having: the
+    governor exists before the roster needs it.
+
+    In co-op each player rolls their own banner -- divergent lineups are the
+    point -- so this deliberately takes an rng rather than reading a global.
+    """
+    featured: set[str] = set()
+    for nation in nations:
+        roster = five_star_roster(nation)
+        if len(roster) <= C.BANNER_FEATURED_SLOTS:
+            featured.update(c.id for c in roster)
+        else:
+            featured.update(c.id for c in
+                            rng.sample(roster, C.BANNER_FEATURED_SLOTS))
+    return frozenset(featured)
+
+
+def _banner_filtered(cards: list[Card],
+                     banner: frozenset[str] | None) -> list[Card]:
+    """Drop off-banner 5-stars from an offer pool. 4-stars are never gated."""
+    if banner is None:
+        return cards
+    return [c for c in cards if c.star != 5 or c.id in banner]
+
+
 def _roll_rarity(rng: random.Random) -> str:
     roll = rng.random()
     acc = 0.0
@@ -70,10 +117,18 @@ def _nation_weighted_choice(rng: random.Random, cards: list[Card]) -> Card:
 
 
 def roll_rewards(rng: random.Random, character_id: str,
-                 companion_offers: int = 1) -> list[Card]:
+                 companion_offers: int = 1,
+                 banner: frozenset[str] | None = None) -> list[Card]:
     """One post-fight reward screen: card offers + the companion slot.
     companion_offers > 1 is the pity/choose-3 slot (triage ruling 4
-    pulled the mechanism forward from M7; the run model decides when)."""
+    pulled the mechanism forward from M7; the run model decides when).
+
+    banner is the run's Featured Banner (v1.8); None means unrestricted,
+    which is the pre-v1.8 behaviour and what the Tier 0 fight-level tests
+    still want. Off-banner 5-stars are removed before the rarity roll, so a
+    banner that empties the rare tier falls through to uncommon exactly as a
+    naturally rare-less pool already does.
+    """
     pool = character_pool(character_id)
     offers = []
     for _ in range(C.REWARD_CARD_OFFERS):
@@ -82,7 +137,9 @@ def roll_rewards(rng: random.Random, character_id: str,
             rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
         offers.append(loader.get_card(rng.choice(pool[rarity]).id))
     if character_id != "ref_ironclad":       # no companions for the anchor
-        comps = companion_pool()
+        comps = {r: cs for r, cs in
+                 ((r, _banner_filtered(cs, banner))
+                  for r, cs in companion_pool().items()) if cs}
         for _ in range(companion_offers):
             rarity = _roll_rarity(rng)
             while rarity not in comps:

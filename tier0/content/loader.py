@@ -35,7 +35,17 @@ def _card_index() -> dict[str, Card]:
     for sheet in DOCS_CARD_SHEETS:
         path = DOCS_DIR / sheet
         if path.exists():
-            raw.extend(yaml.safe_load(path.read_text()))
+            docs = yaml.safe_load(path.read_text())
+            # Nation comes from the sheet name ("mondstadt-companions.yaml"),
+            # not a per-card field: it is a property of the pool a card ships
+            # in, and repeating it on every row is just drift waiting to
+            # happen. This is what makes the v1.8 banner roll per-nation
+            # without touching the sheets when Liyue lands.
+            if sheet.endswith("-companions.yaml"):
+                nation = sheet.split("-", 1)[0]
+                for d in docs:
+                    d.setdefault("nation", nation)
+            raw.extend(docs)
     cards = [Card.from_dict(d) for d in raw]
     for c in cards:
         if c.role_c and "companion" not in c.tags:   # sheet marks via role_c

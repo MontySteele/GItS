@@ -35,6 +35,14 @@ class Card:
     role_c: Optional[str] = None          # applier | buffer | trigger
     personal_pool: Optional[str] = None
     requires: Optional[str] = None        # e.g. burst_energy_full
+    nation: Optional[str] = None          # set by the loader from the sheet name
+    # principles v1.8: standard-banner 5-stars (Jean/Mona/Diluc) are ordinary
+    # nation-pool rares that participate in the banner roll like anyone else.
+    # The tag exists so that IF banner-variance data shows bad-roll bricking,
+    # flipping them to always-available "off-banner floor" status is one flag
+    # rather than a redesign. No card carries it yet -- those 5-stars are not
+    # designed (Mona's Omen is blocked on the amp-cap conversation).
+    standard: bool = False
 
     @property
     def is_companion(self) -> bool:

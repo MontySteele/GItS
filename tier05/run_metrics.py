@@ -56,6 +56,70 @@ def summarize_runs(results: list[RunResult]) -> dict:
     }
 
 
+def banner_variance(results: list[RunResult]) -> dict:
+    """v1.8 addendum: the bad-roll-bricking detector.
+
+    Groups runs by the banner they rolled and reports the spread of winrate
+    across those groups. If some featured lineups are meaningfully worse than
+    others, this is where it shows up -- and a large spread is the evidence
+    that would flip `standard: true` companions to off-banner floor status.
+
+    Degenerate while a nation has no more 5-stars than banner slots: every run
+    rolls the same lineup, so there is exactly one group and the spread is 0.
+    Reported as `degenerate` rather than silently looking like a clean result,
+    because "no variance" and "no variation possible" are different claims.
+    """
+    if not results:
+        return {}
+    groups: dict[frozenset[str], list[RunResult]] = {}
+    for r in results:
+        groups.setdefault(r.banner, []).append(r)
+    rates = {b: sum(x.won for x in rs) / len(rs) for b, rs in groups.items()}
+    values = list(rates.values())
+    return {
+        "distinct_banners": len(groups),
+        "degenerate": len(groups) <= 1,
+        "winrate_by_banner": {tuple(sorted(b)): v for b, v in rates.items()},
+        "spread": (max(values) - min(values)) if len(values) > 1 else 0.0,
+        "runs_per_banner": {tuple(sorted(b)): len(rs)
+                            for b, rs in groups.items()},
+    }
+
+
+def conditional_assembly(results: list[RunResult], card_ids: list[str]) -> dict:
+    """v1.8 addendum: dream-team assembly becomes P(assembly | featured).
+
+    Unconditional assembly stops being the meaningful number once a banner
+    gates availability -- a run that never had the card featured was never in
+    the running, and averaging it in measures the banner rather than the
+    draft. Denominator is runs where every required 5-star was featured;
+    4-stars are never gated, so they impose no condition.
+    """
+    if not results:
+        return {}
+    required = set(card_ids)
+    eligible = [r for r in results
+                if required.issubset(r.banner | _ungated(required, r))]
+    assembled = [r for r in eligible if required.issubset(set(r.deck_ids))]
+    return {
+        "eligible_runs": len(eligible),
+        "eligible_rate": len(eligible) / len(results),
+        "assembled": len(assembled),
+        "conditional_rate": (len(assembled) / len(eligible)
+                             if eligible else None),
+        "unconditional_rate": sum(
+            1 for r in results if required.issubset(set(r.deck_ids))
+        ) / len(results),
+    }
+
+
+def _ungated(required: set[str], r: RunResult) -> set[str]:
+    """Required ids that the banner does not gate (anything not a 5-star)."""
+    from tier0.content import loader
+    return {cid for cid in required
+            if loader.get_card(cid).star != 5}
+
+
 def print_run_report(character: str, archetype: str, s: dict,
                      node_kinds: list[str]) -> None:
     print(f"\n=== Tier 0.5 runs: {character}/{archetype} "
