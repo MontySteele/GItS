@@ -70,14 +70,30 @@ DAMAGE_TARGETS = {"enemy", "all_enemies", "random_enemy", "random_enemies", "sel
 # bomb card the playtest signed off on.
 HAND_WRITTEN = {"kaboom", "duck_and_cover", "pop"}
 
-# Upgrade deltas are NOT in the sheet. These are codegen defaults, flagged in
-# the manifest for design triage -- they are a placeholder for a ruling, not a
-# ruling. Matches the hand-written basics (Kaboom +3, Duck and Cover +3).
-UPGRADE_DAMAGE_SINGLE = 3
-UPGRADE_DAMAGE_MULTI = 2  # aoe or multi-hit: +N applies per hit, so smaller
-UPGRADE_BLOCK = 3
-UPGRADE_DRAW = 1
-UPGRADE_BOMB_DAMAGE = 2
+# R23 aura-application batch (2026-07-20): hand-written because their ops read
+# aura/bomb state (conditional-vs-aura, bonus_vs_aura, bonus_vs_bombed,
+# refresh_all_auras) -- per-target bonuses live in ModifyDamageAdditive, which
+# codegen does not emit.
+HAND_WRITTEN |= {"sizzle", "flame_dance", "kaboom_beetle_swarm", "elemental_ecstasy"}
+
+# R24 (2026-07-20): codegen upgrade defaults are ABOLISHED, not demoted.
+# docs/klee-upgrades.yaml is the single source of truth for upgrade deltas.
+# A generated card whose sheet entry is missing, or whose ruled delta this
+# generator cannot express, ships with NO upgrade path and a loud manifest
+# flag (the tier0 UNAPPLIABLE discipline, applied to C#) -- silent defaults
+# are how cant_catch_me shipped +3 block against a ruled +2.
+#
+# Delta keys this generator can express on a card's effects:
+#   damage      -> the card's non-self damage effect (DynamicVars.Damage)
+#   block       -> block effect (DynamicVars.Block)
+#   draw        -> draw effect (DynamicVars.Cards)
+#   spark       -> gain_spark effect (DynamicVars["Sparks"], M9 ruling)
+#   bomb_damage -> place_bomb effect (Damage or ExtraDamage, see bomb_var)
+#   cost        -> EnergyCost.UpgradeBy(n) -- the idiom CardModel.OnUpgrade's
+#                  own doc comment prescribes (verified in the decompile)
+# Anything else (remove:, add:, condition:, ...) is structural and blocks the
+# card's upgrade path until it is hand-finished or re-ruled numeric.
+EXPRESSIBLE_DELTAS = {"damage", "block", "draw", "spark", "bomb_damage", "cost"}
 
 RARITY_CS = {
     "basic": "CardRarity.Basic",
@@ -200,16 +216,39 @@ def upgrade_deltas() -> dict:
     return _upgrade_deltas
 
 
+def upgrade_plan(card: dict) -> tuple[dict, str | None]:
+    """(deltas, None) when every ruled delta key is expressible on this card,
+    ({}, reason) otherwise.
+
+    Partial application is forbidden (R24): expressing half a ruled upgrade
+    silently approximates the other half, which is exactly the failure mode
+    the UNAPPLIABLE discipline exists to prevent. A card with an inexpressible
+    key gets no upgrade lines at all and a manifest flag naming the key.
+    """
+    deltas = upgrade_deltas().get(card["id"])
+    if not deltas:
+        return {}, "no ratified delta in klee-upgrades.yaml"
+    effects = card.get("effects", [])
+    has = {
+        "damage": any(e["op"] == "damage" and e["target"] != "self" for e in effects),
+        "block": any(e["op"] == "block" for e in effects),
+        "draw": any(e["op"] == "draw" for e in effects),
+        "spark": any(e["op"] == "gain_spark" for e in effects),
+        "bomb_damage": any(e["op"] == "place_bomb" for e in effects),
+        "cost": str(card.get("cost")) != "X",
+    }
+    for key, value in deltas.items():
+        if key not in EXPRESSIBLE_DELTAS:
+            return {}, f"delta key '{key}: {value}' not expressible by codegen (structural upgrade)"
+        if not has[key]:
+            return {}, f"delta key '{key}' has no matching effect on this card (sheet/card mismatch)"
+    return dict(deltas), None
+
+
 def spark_upgrade(card: dict) -> int:
     """Ruled Spark upgrade delta (M9): `spark: +N` in klee-upgrades.yaml. 0 = none.
-
-    Only spark deltas are consumed here for now -- the other keys in the
-    upgrades sheet (damage/block/...) are NOT wired to codegen yet; generated
-    cards still carry the codegen-default bumps pending a ruling that swaps
-    them over. Widening this without that ruling would silently change every
-    generated card's upgrade line.
-    """
-    return int(upgrade_deltas().get(card["id"], {}).get("spark", 0))
+    Zero when the card's upgrade plan is unappliable -- no upgrade renders."""
+    return int(upgrade_plan(card)[0].get("spark", 0))
 
 
 def build_body(card: dict) -> list[str]:
@@ -390,30 +429,29 @@ def build_description(card: dict) -> str:
 
 
 def build_upgrade(card: dict) -> list[str]:
-    # gain_spark carries an upgrade line only when klee-upgrades.yaml rules
-    # one in (`spark: +N`, M9 ruling 2026-07-20). Without the delta the
-    # amount stays a literal -- no var, so an upgraded value could not render,
-    # and a number that changes invisibly is worse than one that does not
-    # change. Mixed cards upgrade their other components as usual.
-    lines = []
+    # R24: every line comes from a ruled delta in klee-upgrades.yaml; effects
+    # without a delta key upgrade nothing (e.g. snap's Spark rider stays put
+    # while its damage bumps -- R1: the upgrade must not move the resource
+    # curve). Lines follow effect order; a cost delta lands last. The `done`
+    # set guards against a delta double-applying if a card ever carries two
+    # effects of the same op.
+    deltas, reason = upgrade_plan(card)
+    if reason:
+        return []
+    key_for = {"block": "block", "draw": "draw", "gain_spark": "spark", "place_bomb": "bomb_damage"}
+    var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]'}
+    lines, done = [], set()
     for eff in card["effects"]:
         op = eff["op"]
-        if op == "gain_spark" and spark_upgrade(card):
-            lines.append(
-                f'DynamicVars["Sparks"].UpgradeValueBy({spark_upgrade(card)}m);'
-            )
-        elif op == "block":
-            lines.append(f"DynamicVars.Block.UpgradeValueBy({UPGRADE_BLOCK}m);")
-        elif op == "draw":
-            lines.append(f"DynamicVars.Cards.UpgradeValueBy({UPGRADE_DRAW}m);")
-        elif op == "place_bomb":
-            lines.append(
-                f"DynamicVars.{bomb_var(card)}.UpgradeValueBy({UPGRADE_BOMB_DAMAGE}m);"
-            )
-        elif op == "damage" and eff["target"] != "self":
-            multi = eff.get("times", 1) > 1 or eff["target"] in ("all_enemies", "random_enemies")
-            delta = UPGRADE_DAMAGE_MULTI if multi else UPGRADE_DAMAGE_SINGLE
-            lines.append(f"DynamicVars.Damage.UpgradeValueBy({delta}m);")
+        key = "damage" if op == "damage" and eff["target"] != "self" else key_for.get(op)
+        if key is None or key not in deltas or key in done:
+            continue
+        done.add(key)
+        var = "DynamicVars.Damage" if key == "damage" else (
+            f"DynamicVars.{bomb_var(card)}" if key == "bomb_damage" else var_for[op])
+        lines.append(f"{var}.UpgradeValueBy({int(deltas[key])}m);")
+    if "cost" in deltas:
+        lines.append(f'EnergyCost.UpgradeBy({int(deltas["cost"])});')
     return lines
 
 
@@ -440,6 +478,7 @@ def emit(card: dict) -> str:
     vars_ = build_vars(card)
     body = build_body(card)
     upgrade = build_upgrade(card)
+    _, no_upgrade_reason = upgrade_plan(card)
     desc = build_description(card)
 
     interfaces = "CustomCardModel"
@@ -449,7 +488,11 @@ def emit(card: dict) -> str:
     ind = "\n        "
     vars_cs = (",".join(f"{ind}    {v}" for v in vars_)).lstrip()
     body_cs = ind.join(body)
-    upgrade_cs = ind.join(upgrade) if upgrade else "// No upgrade defined by the sheet."
+    upgrade_cs = (
+        ind.join(upgrade)
+        if upgrade
+        else f"// R24: NO upgrade path -- {no_upgrade_reason}. Flagged in manifest."
+    )
 
     element_member = ""
     if elemental:
@@ -476,8 +519,8 @@ def emit(card: dict) -> str:
 //     DO NOT EDIT. Edits are lost on the next regen -- change the sheet instead.
 //
 //     Sheet entry: id={card["id"]} rarity={card["rarity"]} cost={card["cost"]}
-//     Upgrade values are a CODEGEN DEFAULT unless the sheet's `upgrade:` key
-//     supplies a ruled delta (M9: gain_spark). See tools/gen_klee_cards.py.
+//     Upgrade deltas come from docs/klee-upgrades.yaml (R24 2026-07-20: the
+//     upgrades sheet is the single source of truth; codegen defaults abolished).
 // </auto-generated>
 
 // Roslyn treats <auto-generated> files as outside the project's nullable
@@ -545,13 +588,16 @@ def main() -> int:
 
     cards = yaml.safe_load(SHEET.read_text(encoding="utf-8"))
 
-    generated, blocked = {}, {}
+    generated, blocked, no_upgrade = {}, {}, {}
     for card in cards:
         reason = blocked_reason(card)
         if reason:
             blocked[card["id"]] = reason
         else:
             generated[card["id"]] = emit(card)
+            _, upgrade_reason = upgrade_plan(card)
+            if upgrade_reason:
+                no_upgrade[card["id"]] = upgrade_reason
 
     manifest = {
         "_comment": (
@@ -560,19 +606,13 @@ def main() -> int:
         ),
         "generated": sorted(generated),
         "blocked": dict(sorted(blocked.items())),
-        "upgrade_defaults": {
-            "_comment": "NOT from the sheet. Placeholder pending a design ruling. "
-                        "Per M8 ruling R11, any values a ruling supplies are DELTAS.",
-            "damage_single": UPGRADE_DAMAGE_SINGLE,
-            "damage_multi": UPGRADE_DAMAGE_MULTI,
-            "block": UPGRADE_BLOCK,
-            "draw": UPGRADE_DRAW,
-            "bomb_damage": UPGRADE_BOMB_DAMAGE,
-            "gain_spark": "sheet-driven: `spark: +N` in klee-upgrades.yaml "
-                          "(M9 ruling 2026-07-20: +1 on sparkly_treasure and "
-                          "spark_collection; R20 moved deltas off inline "
-                          "keys). Cards without a delta emit no spark "
-                          "upgrade line.",
+        "upgrades": {
+            "_comment": "R24 (2026-07-20): docs/klee-upgrades.yaml is the single "
+                        "source of truth for upgrade deltas; codegen defaults are "
+                        "ABOLISHED. Generated cards listed below ship with NO "
+                        "upgrade path (UNAPPLIABLE discipline) until their delta "
+                        "is ratified, made numeric, or hand-finished.",
+            "no_upgrade_path": dict(sorted(no_upgrade.items())),
         },
     }
 
@@ -605,6 +645,8 @@ def main() -> int:
         by_reason[key] = by_reason.get(key, 0) + 1
     for reason, n in sorted(by_reason.items(), key=lambda kv: -kv[1]):
         print(f"  blocked x{n}: {reason}")
+    for cid, why in sorted(no_upgrade.items()):
+        print(f"  no upgrade path: {cid} -- {why}")
     return 0
 
 
