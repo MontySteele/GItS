@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using BaseLib.Abstracts;
+using BaseLib.Utils.NodeFactories;
 using Godot;
+using MegaCrit.Sts2.Core.Nodes.Combat;
 using KleeMod.Cards;
 using KleeMod.Cards.Generated;
 using MegaCrit.Sts2.Core.Entities.Characters;
@@ -113,11 +115,6 @@ public sealed class Klee : CustomCharacterModel
     // Each override returns null when the resource is absent, which BaseLib's
     // prefixes treat as "fall through to the base game's default" -- so a
     // build without the pack behaves exactly like today.
-    //
-    // CustomCharacterSelectTransitionPath is deliberately NOT wired: the base
-    // getter names a transition MATERIAL (materials/transitions/*_mat.tres),
-    // not an image, so selection_splash.png cannot back it. A real transition
-    // material is a follow-up pck item.
 
     /// <summary>Roster tile on the character-select screen. This is the
     /// surface that casts to CompressedTexture2D, which forced the pck route
@@ -134,6 +131,44 @@ public sealed class Klee : CustomCharacterModel
 
     public override string? CustomMapMarkerPath =>
         KleePck.Path("klee/ui/map_marker.png");
+
+    /// <summary>The big splash behind the info panel when Klee is picked on
+    /// the select screen. The scene mirrors the base game's char_select_bg_*
+    /// structure (center-anchored Control) with the Klee Wish splash as a
+    /// covered TextureRect instead of a spine rig.</summary>
+    public override string? CustomCharacterSelectBg =>
+        KleePck.Path("klee/ui/char_select_bg_klee.tscn");
+
+    /// <summary>Threshold-wipe ShaderMaterial (same shader as the base game's
+    /// transition materials) over a procedural radial-blast texture.</summary>
+    public override string? CustomCharacterSelectTransitionPath =>
+        KleePck.Path("klee/materials/klee_transition_mat.tres");
+
+    // Rest-site and merchant art: BaseLib registers these paths for scene
+    // conversion (RegisterSceneConversions) and its factories accept a bare
+    // Sprite2D root, generating the full NRestSiteCharacter /
+    // NMerchantCharacter node trees around the texture.
+    public override string? CustomRestSiteAnimPath =>
+        KleePck.Path("klee/model/character_sprite.tscn");
+
+    public override string? CustomMerchantAnimPath =>
+        KleePck.Path("klee/model/character_sprite.tscn");
+
+    /// <summary>On-screen combat model. BaseLib's factory builds the whole
+    /// NCreatureVisuals tree (Bounds, CenterPos, IntentPos, ...) from a bare
+    /// Texture2D, sized from the texture with feet at ground level -- which is
+    /// exactly how combat_model.png is authored (alpha-trimmed, bottom
+    /// anchored, 240x280). Null falls through to the base scene lookup.</summary>
+    public override NCreatureVisuals? CreateCustomVisuals()
+    {
+        string? path = KleePck.Path("klee/model/combat_model.png");
+        if (path == null)
+        {
+            return null;
+        }
+        return NodeFactory<NCreatureVisuals>.CreateFromResource(
+            ResourceLoader.Load<Texture2D>(path));
+    }
 
     public override float AttackAnimDelay => 0.15f;
 

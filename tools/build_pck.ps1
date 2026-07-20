@@ -86,6 +86,93 @@ foreach ($d in 'ui', 'powers', 'relics', 'model') {
     Copy-Item (Join-Path $from '*.png') -Destination $to
 }
 
+# Text resources authored here, not in ImageGen: the character-select bg scene
+# (a Control the game instantiates into its AnimatedBg container -- structure
+# mirrors the base game's char_select_bg_ironclad.tscn, minus spine/particles),
+# the model sprite scene (BaseLib auto-converts a Sprite2D root into the full
+# NRestSiteCharacter/NMerchantCharacter node trees), and the select-transition
+# ShaderMaterial (same 10-line threshold-wipe shader as the base game's
+# ironclad_transition_mat.tres, pointed at our procedural wipe texture).
+# No scripts anywhere in these scenes: script resources can't ship in a mod
+# pck, and none are needed.
+New-Item -ItemType Directory -Force -Path (Join-Path $work 'klee\materials') | Out-Null
+
+[IO.File]::WriteAllText((Join-Path $work 'klee\ui\char_select_bg_klee.tscn'), @'
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://klee/ui/selection_splash.png" id="1_art"]
+[ext_resource type="Texture2D" path="res://klee/ui/select_bg.png" id="2_bg"]
+
+[node name="KleeBg" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -960.0
+offset_top = -540.0
+offset_right = 960.0
+offset_bottom = 540.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(960, 540)
+
+[node name="Backdrop" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+self_modulate = Color(0.52, 0.42, 0.42, 1)
+
+[node name="Splash" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("1_art")
+expand_mode = 1
+stretch_mode = 6
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'klee\model\character_sprite.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://klee/model/combat_model.png" id="1_tex"]
+
+[node name="KleeSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'klee\materials\klee_transition_mat.tres'), @'
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://klee/ui/transition_wipe.png" id="1_wipe"]
+
+[sub_resource type="Shader" id="Shader_klee"]
+code = "shader_type canvas_item;
+
+uniform sampler2D transitionTex;
+uniform float threshold : hint_range(0,1);
+
+void fragment() {
+    float falloff = 1.0 - texture(transitionTex, UV).r;
+
+    // helps with falloff artifacts issues towards the transition extremes
+    float remap  = mix(-0.1, 1.1, threshold);
+    falloff = step(falloff, remap);
+    COLOR.a = falloff;
+}
+"
+
+[resource]
+resource_local_to_scene = true
+shader = SubResource("Shader_klee")
+shader_parameter/threshold = 0.332
+shader_parameter/transitionTex = ExtResource("1_wipe")
+'@)
+
 # Some fetched files are WebP with a .png extension (the wiki serves them that
 # way); Godot's PNG importer hard-fails on them. Re-encode in place, in the
 # scratch copy only -- ImageGen sources belong to the art pipeline.
