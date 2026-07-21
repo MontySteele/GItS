@@ -83,6 +83,8 @@ Four companions are `power`-type permanent engines (`fischl_oz`, `albedo_solar_i
 
 ## 2. Base-colorless reference band
 
+> 🔄 **SUPERSEDED (2026-07-21):** the StS1-anchored band below has since been replaced with real StS2 wiki data — **see §7**. §2 is kept for provenance; §7 is the live band. The headline: StS2 colorless has *no common tier at all*, which voids the bottom rung of the hypothesis.
+
 > ⚠️ **BIGGEST SOURCING UNCERTAINTY — read first.** No base-game colorless card data exists in this repo. The band below is built from **Slay the Spire 1** colorless cards, which is the well-documented convention the mod's own design docs already reference. **StS2 is early-access; its colorless pool and exact numbers differ from StS1 and are still patch-volatile.** The bar the companion pool must actually clear is the *StS2* one, which I cannot verify from here. Treat every number in this section as an StS1-anchored estimate the user must re-check against current StS2 values. A second, subtler caveat: **most premium colorless cards are 0-cost utility (Blind, Dark Shackles, Discovery, Apotheosis, Mayhem)** whose "value per energy" is undefined/infinite — value-per-energy is a poor metric for half the colorless pool, so the band below is drawn only from the *costed, body-bearing* colorless cards where the metric is meaningful.**
 
 **Colorless commons** (costed bodies, StS1): Swift Strike (7 dmg, treated as if 1-cost) ≈ 7; Good Instincts (6 block) ≈ 6; Flash of Steel (3 dmg + draw) ≈ 5; Dramatic Entrance (8 AoE, exhaust/innate) ≈ 8.
@@ -230,6 +232,46 @@ Hypothesis: `companion commons < colorless commons < companion uncommons < color
 6. **Guest-star and personal-pool cards are gated.** The Neuvillette guest-stars (`fontaine-companions.yaml`) are personal-pool, this-combat-only, generator-gated (`rewards.py::companion_pool` excludes `guest_star`); `prune_witch_hunt` is Klee-only. They were scored for completeness but do not sit in the shared reward band the hypothesis is about.
 
 ---
+
+## 7. StS2 colorless band — real wiki data (SUPERSEDES the StS1 estimate in §2)
+
+Pulled from the StS2 wiki + untapped.gg card list (2026-07, early access). This closes §2's biggest hole. StS2 is still patch-volatile, so re-pull before a final balance lock, but the *structural* findings below are unlikely to move.
+
+### 7.1 Headline correction — StS2 colorless has NO common tier
+
+Every colorless card in StS2 is **Uncommon, Rare, or Ancient** — **zero Commons** (confirmed against the full A–Z list). Base StS2 even files its plain stat-sticks — *Ultimate Strike* (14 dmg), *Ultimate Defend* (11 Block) — as **Uncommon**, not Common.
+
+**Consequence for the hypothesis:** the `companion commons < colorless commons` link is **void — there is no colorless-common bar.** The mod's companion commons (the 1-cost appliers) are a tier this mod *adds below* anything base colorless offers; they cannot "fail to clear" a bar that doesn't exist. This deletes the weakest rung of the original worry outright.
+
+### 7.2 Recomputed bands (costed, body-bearing cards; 0-cost utility excluded)
+
+| Card | Rarity | Cost | Body | v/e |
+|---|---|---|---|---|
+| Fisticuffs | Uncommon | 1 | 7 dmg + Block = dmg (≈14 value) | **14** |
+| Thrumming Hatchet | Uncommon | 1 | 11 dmg, returns to hand | **11** (recurs) |
+| Ultimate Strike | Uncommon | ~2 | 14 dmg | **~7** |
+| Equilibrium | Uncommon | 2 | 13 Block + Retain hand | **6.5** + retain |
+| Gang Up | Uncommon | 1 | 5 dmg (+co-op scaling) | **5** base |
+| Hand of Greed | Rare | 2 | 20 dmg (+20 gold if Fatal) | **10** |
+| Jackpot | Rare | 3 | 25 dmg + 3 zero-cost cards | **8.3** + value |
+| Rend | Rare | 2 | 15 dmg + 5 / unique debuff | **7.5** + scales |
+| Salvo | Rare | ~2 | 12 dmg + Retain hand | **~6** + retain |
+| Whistle | **Ancient** | — | 33 dmg + **stun** | payoff |
+| Wish | **Ancient** | — | tutor a card to hand | payoff |
+
+- **Uncommon costed bodies:** ~6–14 v/e, clustering **~7–11**, midpoint ~8–9. (Fisticuffs/Thrumming Hatchet are conditional/recursion highs; Equilibrium and Ultimate Strike are the floor.)
+- **Rare costed bodies:** ~7.5–10 v/e for clean attacks — **Hand of Greed (20/2 = 10) is the clean-burst ceiling** — plus scaling/co-op cards (Gold Axe, Rolling Boulder, Beat Down) that beat it only situationally.
+- **Surprise:** StS2 rare clean bodies top out ~10 v/e — *lower* than StS1's Ritual Dagger (15+). MegaCrit rebalanced colorless down. And a huge share of the pool is **0-cost utility** (Master of Strategy, Panache, Production, Dark Shackles) where v/e is undefined — so value-per-energy is an *even worse* lens for StS2 colorless than for StS1.
+
+### 7.3 Net effect on the verdict — companions clear the bar MORE comfortably
+
+Three shifts, all favouring the pool: (1) no colorless commons → bottom rung void; (2) rare clean bodies are ~10 not 15+ → companion support-rares look relatively stronger; (3) the uncommon bar (~8–9) is still bracketed by applier **expected 6–8 / ceiling 10–13**. The one genuinely-low spot is unchanged — uncommon appliers at their *floor* — but there's no colorless-common floor beneath them to be embarrassed by, and it's the designed conditional signature. **`sucrose_astable` remains the sole real buff candidate.**
+
+### 7.4 Design implications for §4.7 (the shop split)
+
+- **Slot 1 (guaranteed Uncommon+) is faithful.** StS2 colorless is inherently uncommon/rare, so a shop slot that never dips below uncommon mirrors base StS2 exactly. No change needed.
+- **Slot 2 (card-reward odds, ~60% common) is a deliberate DEPARTURE.** It will frequently surface companion *commons*, which base-StS2 colorless never does. Fine — the wildcard slot is where cheap appliers get a home — but it's a conscious deviation, not accidental fidelity. **Decision point:** keep it (cheap-applier wildcard flavour), or raise slot 2 to Uncommon+ too (stricter fidelity, but then commons appear *only* in the free reward slot). *Leaning keep; logged for the user.*
+- **Bonus — the Ancients bucket just got a gift.** StS2 files **Whistle** ("33 dmg + stun the enemy") and **Wish** as rarity **Ancient**. The stun effect §2.2a treats as the mod's scarcity anchor is *literally an Ancient-tier card* in base StS2 — direct confirmation for how to price the Archon-boon reskin when we get to it.
 
 ## Appendix — Companion inventory scored
 
