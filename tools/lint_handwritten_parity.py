@@ -96,6 +96,14 @@ def walk_effects(effects: list, exp_vars: list, exp_hits: list) -> None:
             walk_effects(eff.get("then", []), exp_vars, exp_hits)
             walk_effects(eff.get("else", []), exp_vars, exp_hits)
             keys -= {"then", "else"}
+        elif op == "apply_power":
+            # Power amount -> a DynamicVar on the card (generated cards emit
+            # "PowerAmount"; hand-written sparks_n_splash follows the idiom).
+            # power/max_stacks/splash_procs_per_turn carry no card-side
+            # number -- caps are enforced in the power class and cross-checked
+            # by gen_klee_cards' APPLY_POWERS registry.
+            exp_vars.append(int(eff["amount"]))
+            keys -= {"amount", "power", "max_stacks", "splash_procs_per_turn"}
         elif op == "refresh_all_auras":
             pass  # no numbers
         else:
@@ -142,6 +150,11 @@ def extract_cs(text: str) -> dict:
         # Burst-energy spike: sheet `skill_tag` must land as the ISkillTagCard
         # marker or the card silently generates no burst energy.
         "skill_tag": "ISkillTagCard" in text,
+        # Kit sprint: sheet `kit_card` + `requires: burst_energy_full` land as
+        # the custom-resource cost (the CanAfford gate AND the meter spend);
+        # sheet tag `burst` lands as Retain (the sim's turn-end filter).
+        "kit_cost": "SetCanonicalCost" in text,
+        "retain": "CardKeyword.Retain" in text,
     }
 
 
@@ -201,6 +214,16 @@ def lint() -> int:
             fail(card_id, f"skill_tag: sheet {exp_skill_tag}, "
                           f"C# ISkillTagCard {got['skill_tag']} "
                           "(a missing marker generates no burst energy)")
+        exp_kit = bool(row.get("kit_card")) or bool(row.get("requires"))
+        if got["kit_cost"] != exp_kit:
+            fail(card_id, f"kit cost: sheet kit_card/requires {exp_kit}, "
+                          f"C# SetCanonicalCost {got['kit_cost']} "
+                          "(no resource cost = no full-meter gate, no spend)")
+        exp_retain = "burst" in row.get("tags", [])
+        if got["retain"] != exp_retain:
+            fail(card_id, f"retain: sheet burst tag {exp_retain}, "
+                          f"C# CardKeyword.Retain {got['retain']} "
+                          "(the sim's turn-end filter keeps burst cards in hand)")
 
     if findings:
         print(f"handwritten-parity: {len(findings)} finding(s)")

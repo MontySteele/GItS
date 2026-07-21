@@ -128,6 +128,12 @@ HAND_WRITTEN = {"kaboom", "duck_and_cover", "pop"}
 # codegen does not emit.
 HAND_WRITTEN |= {"sizzle", "flame_dance", "kaboom_beetle_swarm", "elemental_ecstasy"}
 
+# Kit-grant sprint (2026-07-20): the Burst card is hand-written because its
+# lifecycle is machinery, not ops -- granted by KitGrant at a full meter,
+# BaseLib custom-resource cost (SetCanonicalCost 60 / full-meter Spend),
+# Retain keyword, never pool-registered. See Powers/KitBurst.cs.
+HAND_WRITTEN |= {"sparks_n_splash"}
+
 # R24 (2026-07-20): codegen upgrade defaults are ABOLISHED, not demoted.
 # docs/klee-upgrades.yaml is the single source of truth for upgrade deltas.
 # A generated card whose sheet entry is missing, or whose ruled delta this
@@ -179,11 +185,13 @@ def blocked_reason(card: dict) -> str | None:
     if str(card.get("cost")) == "X":
         return "X cost (needs energy-scaling support)"
 
-    # The Burst kit card: granted-not-drafted, requires-full gate, meter
-    # spend. All of that is the kit-grant machinery, which lands LAST in the
-    # power-card pass (standing plan).
+    # Kit cards: granted-not-drafted, requires-full gate, meter spend. The
+    # machinery landed 2026-07-20 (Powers/KitBurst.cs) with sparks_n_splash
+    # hand-written; a FUTURE kit card hitting this guard needs the same
+    # decision (hand-write it or teach codegen the kit lifecycle) -- loud
+    # either way, never generated as ordinary loot.
     if card.get("kit_card") or card.get("requires"):
-        return "kit card (Burst grant/cost machinery, lands last)"
+        return "kit card (hand-write it against the KitBurst machinery)"
 
     # R20: inline upgrade fields are deprecated repo-wide -- deltas live in
     # *-upgrades.yaml sheets. Block loudly so a stray inline key can never

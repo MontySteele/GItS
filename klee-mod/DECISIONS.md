@@ -834,3 +834,88 @@ renders; all flagged for red-pen in plan.tsv comments.
 phase-correction entry is now two entries shorter — detonation-splash
 burst and Catalytic Conversion both carry their gain lines. Remaining
 sim gain sites are Furina-stream only (encore, Salon).
+
+## Kit-grant sprint -- Sparks 'n' Splash lands (standing plan item 3 closes, 2026-07-20)
+
+The power-card pass's deliberately-last card. The Burst is kit, not loot
+(tier0 v1.9): never draftable, granted to hand when the meter fills,
+casting empties the whole meter, and a refill re-grants it. Everything
+below is a port of `grant_charged_kit` / `play_card` (combat.py) and
+`player_turn_end_triggers` (effects.py); constants LAW
+(SPARKS_N_SPLASH_HITS=4, HIT_DMG=5, burst_max=60, turns=3 from the sheet).
+
+**Cost model (BaseLib CustomResourceCost).** The card costs 3 energy AND
+the full meter. `CustomResources<KleeBurstResource>.SetCanonicalCost(card,
+60)` in the ctor wires BaseLib's registered ResourceHandler: `CanAfford`
+(Amount >= 60) joins the game's own playability check -- the sim's
+`requires: burst_energy_full` gate -- and the play pipeline calls
+`Spend`. `KleeBurstResource.Spend` is overridden to drain `Amount` (the
+WHOLE meter), not the canonical 60: sim law is `p.burst_energy = 0` at
+cast -- overflow is lost at cast, never clamped at gain. The ctor site
+covers clones (BaseLib's canonical-cost SpireField is CopyOnClone).
+
+**Grant machinery (`KitGrant.GrantIfCharged`).** Port of
+grant_charged_kit's three rules: full meter only (>=, uncapped accrual);
+no duplicate while a copy is in hand; full hand DEFERS (meter stays full,
+grant retried at the next check) -- load-bearing because the game's own
+`AddGeneratedCardToCombat` on a full hand redirects to DISCARD
+(CardPileCmd), which would recirculate the Burst as loot, the exact bug
+the sim's regression test forbids. Creation is the first-party Shiv
+idiom: `combatState.CreateCard<SparksNSplash>(owner)` +
+`AddGeneratedCardToCombat(PileType.Hand)`. A fresh instance per grant is
+the game-side reading of "returns to the kit, no pile": a played Power
+leaves combat entirely.
+
+**Check sites (KleeElementalHooks), the sim's three call sites:**
+- `AfterPlayerTurnStart` -- the game fires this AFTER the hand draw
+  (CombatManager: energy, draw, then the hook), the sim's exact
+  turn-start phase; turn-start meter gains (Blazing Delight splash on
+  detonation) land earlier, in BeforeSideTurnStart.
+- `AfterCardPlayed` -- after every play, like the sim's end-of-play_card
+  call; also now runs the badge sync UNCONDITIONALLY (sync-to-truth is a
+  no-op when in sync, and the cast's meter drain happens in the cost
+  machinery where no Klee call site sees it).
+- `BeforeSideTurnEnd` (player side) -- maps to Hook.BeforeTurnEnd, which
+  fires BEFORE the hand flush; mod-model hooks run after power hooks in
+  the same broadcast, so the volley (and any reactions it raised) has
+  already resolved, the sim's end-triggers-then-grant order. Retain
+  carries the granted card through the flush.
+
+**The power (`SparksNSplashPower`).** Amount = turns remaining (3). At
+`BeforeSideTurnEnd`: 4 hits of 5, each to a random living enemy
+(re-snapshot per hit; `Rng.CombatTargets.NextItem`, the shipped
+turn-start-power idiom), each a full Pyro hit through the BombPower
+Detonate pipeline -- element resolved first (apply/refresh/react,
+Vaporize/Melt amplify the hit, reactions grant burst + Catalytic through
+the normal funnel), then `CreatureCmd.Damage` Unpowered with no card
+source. Unpowered + sourceless is also what keeps volley hits from
+early-detonating bombs, mirroring `_detonate_bombs_on_hit`'s
+`source == "attack"` gate for free. Volley first, THEN
+`PowerCmd.TickDownDuration` -- the sim decrements after the hits.
+
+**Retain** via `CanonicalKeywords` (the game auto-renders the keyword
+text); the sim's turn-end filter keeps burst-tagged cards in hand and the
+game's FlushPlayerHand honors Retain identically.
+
+**Enforcement widened with the mechanism, per the lint's own charter:**
+sparks_n_splash joins HAND_WRITTEN; lint_handwritten_parity gains an
+`apply_power` rule (amount -> DynamicVar multiset) plus two structural
+checks -- sheet `kit_card`/`requires` must land as `SetCanonicalCost`
+(no resource cost = no gate, no spend) and sheet tag `burst` as
+`CardKeyword.Retain`. Upgrades sheet says NO UPGRADE (kit card; Talent
+Training = v2 design space): empty OnUpgrade, unreachable anyway since
+the kit card is never in the deck. gen_klee_cards' kit guard stays for
+FUTURE kit cards (loud, "hand-write it against the KitBurst machinery").
+
+**Art:** power badge = the ability's own wiki talent icon (Talent Sparks
+'n' Splash.png, native 128px icon register, x2.0 upscale -- flagged
+red-pen with the rest). Card portrait row (Klee Full Wish splash)
+predates this sprint.
+
+**Not ported, recorded:** the sim exempts kit cards from random
+discard/exhaust-from-hand victim pools (test_random_discard_cannot_touch
+the_kit_burst). No Klee card ships a random hand discard today, so there
+is no game-side victim pool to filter; the FIRST discard/exhaust_from op
+that lands C#-side must add the kit exemption or it recreates the sim's
+regression. Codegen still blocks those ops, so the gap cannot ship
+silently.

@@ -71,7 +71,7 @@
     "secret_stash": "op 'add_card'",
     "sizzle": "hand-written",
     "sparkly_explosion": "op 'conditional'",
-    "sparks_n_splash": "kit card (Burst grant/cost machinery, lands last)",
+    "sparks_n_splash": "hand-written",
     "spooked": "apply_power power 'weak' (no PowerModel in the registry)",
     "study_buddy": "op 'replay_next_companion'",
     "study_of_explosions": "op 'scry_discard'",

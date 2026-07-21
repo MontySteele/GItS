@@ -168,6 +168,10 @@ power_zero_cost_attacks_up	ImageGen/images/powers/zero_cost_attacks_up.png	256	2
 power_spark_threshold_down	ImageGen/images/powers/spark_threshold_down.png	256	256	contain	center	auto	1	png	Item Sparkly Shiny Dodoco!.png		icon
 power_reaction_bonus_spark_energy	ImageGen/images/powers/reaction_bonus_spark_energy.png	256	256	contain	center	auto	1	png	Item Dodoco's Marvelous Magic.png		icon
 power_amp_reaction_up	ImageGen/images/powers/amp_reaction_up.png	256	256	contain	center	auto	1	png	Item Dodoco's Duet.png		icon
+# Kit sprint (2026-07-20): the Burst power's badge uses the ability's own
+# in-game talent icon -- native icon-shaped art, the exact register, and
+# unmistakably "the Burst is running" next to the burst meter badge.
+power_sparks_n_splash	ImageGen/images/powers/sparks_n_splash.png	256	256	contain	center	auto	1	png	Talent Sparks 'n' Splash.png		icon
 relic_pounding_surprise	ImageGen/images/relics/pounding_surprise.png	256	256	cover	top	auto	1	png	Pounding Surprise Equipment Card.png		icon
 # Constellation-sigil redirect queue (taste pass: sigils are BANNED from card
 # portraits but are native 128px icon-shaped art — they fill future C3 power

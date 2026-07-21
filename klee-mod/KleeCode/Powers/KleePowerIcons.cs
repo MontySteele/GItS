@@ -35,6 +35,7 @@ internal static class KleePowerIcons
         SparkThresholdDownPower => KleePck.Path("klee/powers/spark_threshold_down.png"),
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),
+        SparksNSplashPower => KleePck.Path("klee/powers/sparks_n_splash.png"),
         AuraPower aura => KleePck.Path(
             "klee/powers/aura_" + aura.Element.ToString().ToLowerInvariant() + ".png"),
         _ => null,
