@@ -1265,3 +1265,83 @@ Verification: every batch closed with the FULL repo suite green (237),
 gen --check clean, handwritten-parity OK, Release build clean. NOT
 deployed; the last deploy predates this sprint, so the running game has
 none of it.
+
+## Companions land -- reaction table completes, 17 cards + the 4th slot + companion ops (2026-07-21)
+
+Four commits (f032cf1, 22b6d86, e307ad2, db06d8c). THE SHEET IS
+COMPLETE: every Klee card and every Mondstadt companion is expressed;
+the manifest's blocked list is exactly the 8 deliberately hand-written
+cards.
+
+**Reaction table completes.** Overload / ElectroCharged / Swirl /
+Crystallize were loud stubs because no electro/hydro/cryo/anemo applier
+existed C#-side; the roster makes all four reachable, so they became
+real: Overload = OVERLOAD_SPLASH Unblockable|Unpowered to all living
+enemies dealer-less (sim _splash: raw hp-=; no detonation, no attack
+hooks); ElectroCharged = the core's own PoisonPower (the sim's dot IS
+poison: owner-turn-start tick of Amount then decrement -- exact match);
+Swirl = consumed aura onto EVERY living enemy, target included,
+overwrite-or-refresh at full duration; Crystallize = CRYSTALLIZE_BLOCK
+to the dealer (Afterimage GainBlock idiom), loud no-op if dealer-less.
+RECORDED CAVEAT: overload splash can kill, and the C# killed_target
+snapshot counts that death while the sim's kills_this_card (fed only by
+deal_damage_to_enemy) does not -- a micro-edge on sparkly_explosion
+that only a ruling could align; surfaced, not hidden.
+
+**ElementalHit** is the new single pipeline for every non-attack
+element-tagged hit (Deal) and the damage-less ops (ApplyOnly =
+resolve_hit at 0 damage). BombPower.Detonate and the Burst volley
+refactored onto it; Oz and Witch's Flame ride it too -- one path, no
+drift.
+
+**Companion powers** (CompanionPowers.cs), each mirroring its tier0
+trigger: OzSummon (end-turn 3-dmg Electro hit, tick after -- sim
+order), WitchsFlame (permanent, +Amount% amp additive with Vermillion
+Pact inside AmplifierMultiplier, end-turn 4-dmg Pyro hit), SolarIsotoma
+(BeforeDamageReceived: powered-attack hits vs aura'd enemies grant 3
+Block BEFORE the hit consumes the aura -- the sim's check-then-hit
+order), CelestialGift (+2 per attack hit + 4 Block at turn start),
+AttackUpThisTurn (removed at player turn end), NextAttackUp (consumed
+after the next attack card's series -- the repeat tail is the same
+CardPlay, so a repeated Boom Goes the Dynamite keeps the bonus for both
+resolutions, exactly the sim's per-resolve pop).
+
+**Companion cards** generate from the sheet with ICompanionCard
+(Star/CompanionElement/PersonalPool) + MaxUpgradeLevel 0 (never scale);
+cadence exemption honored -- IElementalCard only where the sheet says
+applies_element, with the companion's own element. New ops apply_aura /
+swirl (swirl IS trigger-anemo) / buff_next_attack. Companions are NOT
+in KleeCardPool: the reward slot is their only door (tier05
+character_pool excludes them).
+
+**The 4th reward slot** (CompanionSlot.Roll, hosted on
+PoundingSurprise.TryModifyRewards -- the starter relic is the one model
+guaranteed present all run; relics are the hook's intended listeners
+per the AbstractModel doc). tier05 roll_rewards mirrored exactly:
+RARITY_ODDS walk, 5-stars ARE the rare tier, empty-tier fall-through,
+uniform in-tier pick (nation weighting reduces to uniform
+single-nation, deliberately unmirrored until a second nation),
+personal-pool gating, the player's Rewards rng stream, native
+SpecialCardReward (take-or-skip; fresh RunState.CreateCard instance).
+Pity/choose-3 OUT (measured null, ruled); Featured Banner skipped
+(no-op at roster size, ruled).
+
+**Companion-op cards**: CompanionCostThisTurnPower (cost hook, removed
+next turn start), ReplayNextCompanionPower (ModifyCardPlayCount; the
+game's replay series is the sim's replay loop), CompanionPlays ledger
+(combat-keyed unique first-play order, recorded in
+KleeElementalHooks.BeforeCardPlayed). borrowed_brilliance's
+copy_cost_override = play-time IsUpgraded read + IfUpgraded text swap;
+`temp: true` accepted and IGNORED because tier0 ignores it (sim is
+LAW). study_buddy ships upgrade-less (add-a-draw is structural).
+
+RECORDED CAVEATS: DetonationsThisCombat and CompanionPlays are keyed to
+the combat-state instance -- a mid-combat reload restarts the combat
+and the counters with it (correct if the game restarts combats on
+load, which is the observed model). ART: all 26 new cards
+(weak/vuln 3, conditionals 6, X 1, formulas 2, small-ops 5, companions
+17 minus overlap, companion-ops 4, Confiscated) have no plan.tsv rows
+-- portraitless until the art pass; hunt terms are art-pass work.
+
+Verification: full suite 237 green at every commit, gen --check clean,
+handwritten-parity OK, Release build clean. NOT deployed.
