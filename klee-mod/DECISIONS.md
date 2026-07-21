@@ -1345,3 +1345,68 @@ load, which is the observed model). ART: all 26 new cards
 
 Verification: full suite 237 green at every commit, gen --check clean,
 handwritten-parity OK, Release build clean. NOT deployed.
+
+## Playtest 1 crash triage -- pool membership is not optional (2026-07-21)
+
+First real playtest of the companion build produced two reports: the
+companion offer "did nothing when clicked", and the run softlocked when
+a card was drawn. Both are ONE root cause, and the game told us exactly
+what it was in godot.log:
+
+    System.InvalidOperationException: You monster!
+      at CardModel.NeverEverCallThisOutsideOfTests_ClearOwner()
+      at MockCardModel.MockCanonical()
+      at MockCardPool.GenerateAllCards()
+      at CardPoolModel.get_AllCards()  ->  CardModel.get_Pool()
+      at NCard.Reload -> NCard.Create
+
+**Mechanism.** `CardModel.Pool` walks `ModelDb.AllCardPools` for a pool
+whose `AllCardIds` contains the card. When nothing matches it probes
+`MockCardPool` as a last resort -- and MockCardPool's generator calls a
+test-only method that throws in a shipped build. So a card in NO pool
+throws. `Pool` is read by `NCard.Reload` (frame + energy visuals), i.e.
+on every card NODE creation -- which is why this did not fail on PLAY,
+it failed on DRAW and on PREVIEW, taking down whichever task owned the
+node. `SpecialCardReward.OnSelect` threw during its take animation
+AFTER the card was already added (hence "nothing happened" -- the card
+was in fact in the deck), and `CombatManager.SetupPlayerTurn`'s draw
+threw and left the turn half-built: the softlock.
+
+**Who was affected.** Everything we deliberately kept out of
+KleeCardPool: the 16 companions (the reward slot is their only door),
+Confiscated (created at play time), and -- found by the new lint on its
+first run, never yet reported by a player -- SparksNSplash, the kit
+Burst card, which would have crashed the moment the meter first filled.
+"Not rollable" was the right design call; "in no pool at all" was never
+a legitimate way to express it.
+
+**Fix.** KleeExtraCardPool: a second pool holding exactly the
+never-rollable cards, mirroring KleeCardPool's visuals. Klee.CardPool
+still returns KleeCardPool, and reward/transform generation draws from
+the CHARACTER's pool, so nothing here became rollable. Membership
+tracks CompanionRoster.All wholesale, so a new companion cannot be
+added to the roster and forgotten. tools/lint_pool_membership.py fails
+the deploy (validate S6b) if any CustomCardModel class escapes both
+pools.
+
+**Second finding, same playtest: the slot was the wrong SHAPE.** The
+companion arrived as its own reward row, so the player took a card AND
+a companion. tier05 roll_rewards returns ONE offers list --
+REWARD_CARD_OFFERS cards with the companion appended -- and the policy
+picks one from it. SpecialCardReward could not express that. Moved to
+`TryModifyCardRewardOptions` (fired from CardFactory.CreateForReward
+after the cards roll, gated Source == Encounter), which appends to the
+card reward's own option list: the companion is now a genuine 4th
+choice competing with the three cards, which is the law. The offer is
+instantiated exactly as the native path instantiates its own three
+(RunState.CreateCard) and takes no upgrade roll, matching
+MaxUpgradeLevel 0.
+
+LESSON: the deploy gate had five static rules and a full test suite,
+and none of them could see a runtime-only invariant of the host engine.
+Every host invariant we learn the hard way should leave a lint behind;
+this one did, and it caught a third victim immediately.
+
+Verification: full suite 237 green, gen --check clean,
+handwritten-parity OK, pool-membership OK (93 classes), Release build
+clean, DEPLOYED 2026-07-21 (game closed, user go-ahead).

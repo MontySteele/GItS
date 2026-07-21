@@ -11,9 +11,11 @@ namespace KleeMod.Cards;
 /// <summary>
 /// Fish Blasting's downside token (tier0 tokens.yaml): a Status that costs 1
 /// and does nothing -- the tax is the energy and the draw it wastes, and
-/// Dodge Roll can exhaust it. Status rarity keeps it out of every reward
-/// pool; it is deliberately NOT in KleeCardPool.GenerateAllCards, and
-/// generated add_card bodies create instances via CombatState.CreateCard.
+/// Dodge Roll can exhaust it. Deliberately NOT in KleeCardPool, so it is never
+/// rolled as a reward; generated add_card bodies create instances via
+/// CombatState.CreateCard. It IS in KleeExtraCardPool -- a card that belongs
+/// to no pool at all throws "You monster!" out of CardModel.Pool the moment it
+/// is drawn (see that file).
 /// </summary>
 public sealed class Confiscated : CustomCardModel
 {
