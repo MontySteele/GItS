@@ -476,7 +476,7 @@ def blocked_reason(card: dict) -> str | None:
             if bf is not None and not (
                     bf.endswith("_per_detonation_this_combat")
                     and bf.partition("_per_")[0].isdigit()):
-                # Grand Finale's grammar; the fanfare variant is Furina-stream.
+                # The Big One's grammar; the fanfare variant is Furina-stream.
                 return f"bonus_formula '{bf}'"
             if "bonus_vs_bombed" in eff or "bonus_vs_aura" in eff:
                 return "conditional damage bonus (needs aura/bomb systems)"
@@ -1252,7 +1252,7 @@ def build_body(card: dict) -> list[str]:
         elif op == "damage":
             amount_expr = "DynamicVars.Damage.BaseValue"
             if "bonus_formula" in eff:
-                # N_per_detonation_this_combat (Grand Finale): flat rider on
+                # N_per_detonation_this_combat (The Big One): flat rider on
                 # the printed number, before external buffs -- adding into
                 # the Attack amount is exactly the sim's `base +=`.
                 per = ('DynamicVars["BonusPer"].IntValue'

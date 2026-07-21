@@ -192,7 +192,12 @@
    effects: [{op: apply_power, power: spark_threshold_down, amount: 1, target: self, note: "free attack at 2 sparks instead of 3"}]}
 - {id: da_da_da, name: "Da-da-da!", cost: 0, type: attack, rarity: rare, solve: [frontload], archetypes: [spark], role: payoff, exhaust: true,
    effects: [{op: damage, amount: 4, target: random_enemy, times: 3}, {op: gain_spark, amount: 1}]}
-- {id: grand_finale, name: "Grand Finale", cost: 2, type: attack, rarity: rare, solve: [scaling], archetypes: [demolition], role: payoff,
+# NAME COLLISION (user-caught 2026-07-21): "Grand Finale" is a Silent card
+# in the base game / Downfall. The engine resolves cross-mod name clashes
+# unpredictably, and the repo has no base-game card list to check against --
+# see docs/reserved-card-names.txt, enforced by tools/lint_unique_names.py.
+# Renamed display-only; the id stays grand_finale per the id-stability rule.
+- {id: grand_finale, name: "The Big One", cost: 2, type: attack, rarity: rare, solve: [scaling], archetypes: [demolition], role: payoff,
    effects: [{op: damage, amount: 10, target: enemy, bonus_formula: 2_per_detonation_this_combat}]}
 - {id: secret_stash, name: "Secret Stash", cost: 1, type: skill, rarity: rare, solve: [velocity], archetypes: [demolition], role: glue, exhaust: true,
    effects: [{op: add_card, pool: demolition_commons, amount: 2, zone: hand, cost_override: 0}]}

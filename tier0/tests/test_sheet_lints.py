@@ -21,3 +21,21 @@ def test_no_strict_domination_on_docs_sheets():
          *sheets],
         capture_output=True, text=True)
     assert res.returncode == 0, res.stdout + res.stderr
+
+
+def test_card_names_are_unique():
+    """Display names: unique internally, and clear of docs/reserved-card-names.txt.
+
+    The reserved list exists because this class of bug is STRUCTURALLY
+    INVISIBLE to the repo -- we ship alongside base-game and third-party
+    cards whose name lists we cannot read, and the engine resolves a clash
+    unpredictably. It was a human who noticed our "Grand Finale" was also
+    the Silent's. No instrument here could have. The list is the record of
+    those catches; append to it, and don't prune without a reason on file.
+    """
+    sheets = [str(loader.DOCS_DIR / s) for s in loader.DOCS_CARD_SHEETS]
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_unique_names.py"),
+         *sheets],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
