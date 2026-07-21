@@ -4,12 +4,14 @@
     "alchemical_curiosity",
     "all_my_treasures",
     "ammo_scavenging",
+    "best_friends_forever",
     "big_badda_boom",
     "blast_radius",
     "blazing_delight",
     "bomb_voyage",
     "bombs_away",
     "boom_goes_the_dynamite",
+    "borrowed_brilliance",
     "bright_idea",
     "cant_catch_me",
     "careful_arrangement",
@@ -31,6 +33,7 @@
     "fish_blasting",
     "fish_flavored_bait",
     "flame_on_the_wick",
+    "friendly_visit",
     "gleeful_barrage",
     "grand_finale",
     "hide_and_seek",
@@ -57,6 +60,7 @@
     "sparkly_treasure",
     "spirited_away",
     "spooked",
+    "study_buddy",
     "study_of_explosions",
     "sugar_rush",
     "surprise_visit",
@@ -85,23 +89,20 @@
     "sucrose_gust"
   ],
   "blocked": {
-    "best_friends_forever": "op 'copy_companions_played_this_combat'",
-    "borrowed_brilliance": "op 'copy_companion_in_hand'",
     "duck_and_cover": "hand-written",
     "elemental_ecstasy": "hand-written",
     "flame_dance": "hand-written",
-    "friendly_visit": "op 'cost_mod'",
     "kaboom": "hand-written",
     "kaboom_beetle_swarm": "hand-written",
     "pop": "hand-written",
     "sizzle": "hand-written",
-    "sparks_n_splash": "hand-written",
-    "study_buddy": "op 'replay_next_companion'"
+    "sparks_n_splash": "hand-written"
   },
   "upgrades": {
     "_comment": "R24 (2026-07-20): docs/klee-upgrades.yaml is the single source of truth for upgrade deltas; codegen defaults are ABOLISHED. Generated cards listed below ship with NO upgrade path (UNAPPLIABLE discipline) until their delta is ratified, made numeric, or hand-finished.",
     "no_upgrade_path": {
-      "quick_fuse": "delta key 'add: {'op': 'draw', 'amount': 1}' not expressible by codegen (structural upgrade)"
+      "quick_fuse": "delta key 'add: {'op': 'draw', 'amount': 1}' not expressible by codegen (structural upgrade)",
+      "study_buddy": "delta key 'add: {'op': 'draw', 'amount': 1}' not expressible by codegen (structural upgrade)"
     }
   }
 }
