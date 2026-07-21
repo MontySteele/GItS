@@ -86,34 +86,12 @@ public sealed class SparksNSplashPower : PowerModel, ILocalizationProvider
             var target = CombatState.RunState.Rng.CombatTargets.NextItem(candidates);
             if (target == null) break;
 
-            // Sim parity: volley hits go through deal_damage_to_enemy too, so
-            // Strength/Weak (pre-amp) and Vulnerable (post-amp) apply, decimal
-            // until the single truncation (see SimDamagePipeline).
-            var dealt = SimDamagePipeline.DealerMods(
-                Owner, KitBurstConstants.VolleyHitDamage);
-            var aura = AuraCmd.Find(target);
-            if (aura == null)
-            {
-                await AuraCmd.Apply(
-                    choiceContext, target, Element.Pyro, Owner, cardSource: null);
-            }
-            else if (aura.Element == Element.Pyro)
-            {
-                await AuraCmd.Refresh(choiceContext, aura, Owner, cardSource: null);
-            }
-            else
-            {
-                var reaction = ReactionTable.Lookup(aura.Element, Element.Pyro);
-                var consumed = aura.Element;
-                dealt *= ReactionTable.AmplifierMultiplier(reaction, Owner);
-                await PowerCmd.Remove(aura);
-                await ReactionEffects.Resolve(
-                    choiceContext, reaction, target, Owner, null, consumed);
-            }
-
-            await CreatureCmd.Damage(
-                choiceContext, target, (int)SimDamagePipeline.TargetMods(target, dealt),
-                ValueProp.Unpowered, dealer: null, cardSource: null);
+            // Sim parity: volley hits go through deal_damage_to_enemy, and
+            // ElementalHit.Deal IS that pipeline (Strength/Weak pre-amp,
+            // element resolve, Vulnerable post-amp, single truncation).
+            await ElementalHit.Deal(
+                choiceContext, target, Element.Pyro,
+                KitBurstConstants.VolleyHitDamage, Owner);
         }
 
         await PowerCmd.TickDownDuration(this);

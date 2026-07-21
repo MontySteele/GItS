@@ -356,49 +356,13 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
 
             // R23: each detonation is a Pyro-tagged hit (tier0 detonate_bombs
             // -> deal_damage_to_enemy(element=bomb.element), default pyro).
-            // The damage below is Unpowered with no card source, so AuraPower
-            // cannot see it -- the elemental interaction is resolved here
-            // explicitly, BEFORE the damage lands, exactly where the sim's
-            // pipeline does it. That single path also guarantees detonation is
-            // never elementally resolved twice.
-            // Strength/Weak on the applier, pre-amp; Vulnerable on the
-            // target, post-amp; ONE truncation at the end. The value stays
-            // decimal through the chain (SimDamagePipeline mirrors tier0
-            // deal_damage_to_enemy, which int()s exactly once).
-            var dealt = SimDamagePipeline.DealerMods(applier, damage + bonus + damageUp);
-            var aura = AuraCmd.Find(target);
-            if (aura == null)
-            {
-                await AuraCmd.Apply(
-                    choiceContext, target, Element.Pyro, applier, cardSource: null);
-            }
-            else if (aura.Element == Element.Pyro)
-            {
-                await AuraCmd.Refresh(choiceContext, aura, applier, cardSource: null);
-            }
-            else
-            {
-                // Different element: consume and react. Vaporize/Melt amplify
-                // THIS detonation (aura x Pyro trigger); Overload etc. resolve
-                // their side effects in ReactionEffects. Consume before
-                // resolving, same as AuraPower (Swirl must not re-trigger).
-                var reaction = ReactionTable.Lookup(aura.Element, Element.Pyro);
-                var consumed = aura.Element;
-                dealt *= ReactionTable.AmplifierMultiplier(reaction, applier);
-                await PowerCmd.Remove(aura);
-                await ReactionEffects.Resolve(
-                    choiceContext, reaction, target, applier, null, consumed);
-            }
-
-            // Unpowered so the hit does not read as an attack: that is what
-            // keeps bombs from chain-detonating each other and out of
-            // attack-hooks. The pipeline modifiers the sim DOES apply to bomb
-            // damage (Strength/Weak above, Vulnerable here) are mirrored via
-            // SimDamagePipeline instead, since Unpowered opts out of the
-            // native powers' IsPoweredAttack gate.
-            await CreatureCmd.Damage(
-                choiceContext, target, (int)SimDamagePipeline.TargetMods(target, dealt),
-                ValueProp.Unpowered, dealer: null, cardSource: null);
+            // ElementalHit.Deal owns the whole pipeline -- Strength/Weak
+            // pre-amp, element resolve (amplifiers scale THIS detonation),
+            // Vulnerable post-amp, one truncation, Unpowered damage (which
+            // is what keeps bombs from chain-detonating each other).
+            await ElementalHit.Deal(
+                choiceContext, target, Element.Pyro,
+                damage + bonus + damageUp, applier);
 
             await NotifyDetonationListeners(choiceContext, applier, target, damage);
         }
