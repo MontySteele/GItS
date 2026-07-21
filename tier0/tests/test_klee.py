@@ -159,6 +159,56 @@ def test_sparks_make_attack_free():
     assert st.player.energy == 0
 
 
+def test_gleeful_barrage_counts_the_prespend_bank():
+    # R39 (user ruling 2026-07-21): "2 + Sparks hits" reads the bank as it
+    # stood at PLAY time, before the card's own spark spend. The bug it locks
+    # out is self-cannibalization: reaching the threshold that makes the card
+    # free is exactly what deleted the sparks it counts, so at exactly 3
+    # sparks it went free AND collapsed to the 2-hit floor.
+    from tier0.engine.combat import card_cost, play_card
+    from tier0.tests.conftest import make_enemy, make_state
+
+    def hits(st):
+        return sum(1 for e in st.log
+                   if e["event"] == "damage" and e["source"] == "attack")
+
+    # Arm 1: at the threshold. Free AND still 2 + 3 = 5 hits (the bug: 2).
+    st = make_state(enemies=[make_enemy(hp=200)])
+    st.player.sparks = 3
+    st.player.energy = 0
+    barrage = loader.get_card("gleeful_barrage")
+    st.player.hand.append(barrage)
+    assert card_cost(st, barrage) == 0
+    play_card(st, barrage)
+    assert hits(st) == 5
+    assert st.player.sparks == 0             # the spend still happened
+
+    # Arm 2: True Spark Knight (threshold 2). The payload is
+    # threshold-agnostic -- it reads the bank, not the distance to free --
+    # which is why R39 took the pre-spend read over "+3 hits if it costs 0".
+    st = make_state(enemies=[make_enemy(hp=200)])
+    st.player.powers["spark_threshold_down"] = 1
+    st.player.sparks = 3
+    st.player.energy = 0
+    barrage = loader.get_card("gleeful_barrage")
+    st.player.hand.append(barrage)
+    assert card_cost(st, barrage) == 0
+    play_card(st, barrage)
+    assert hits(st) == 5                     # 2 + 3, not 2 + (3 - 2)
+    assert st.player.sparks == 1             # spent 2, the live threshold
+
+    # Arm 3: below threshold. Same read on the not-free branch, bank intact.
+    st = make_state(enemies=[make_enemy(hp=200)])
+    st.player.sparks = 1
+    st.player.energy = 3
+    barrage = loader.get_card("gleeful_barrage")
+    st.player.hand.append(barrage)
+    assert card_cost(st, barrage) == 2
+    play_card(st, barrage)
+    assert hits(st) == 3                     # 2 + 1
+    assert st.player.sparks == 1             # no spend below threshold
+
+
 def test_crackle_spark_is_priced_by_the_discard():
     # R36 (user-ratified): "Discard 1: add a Spark". The Spark is priced BY
     # the discard -- empty hand = no fodder = no Spark; kit cards are never
