@@ -148,9 +148,20 @@ public sealed class Klee : CustomCharacterModel
     // conversion (RegisterSceneConversions) and its factories accept a bare
     // Sprite2D root, generating the full NRestSiteCharacter /
     // NMerchantCharacter node trees around the texture.
+    //
+    // The two paths MUST differ even though the scenes are identical:
+    // BaseLib's conversion registry is keyed by path, and a second
+    // registration overwrites the first -- sharing one scene sent an
+    // NMerchantCharacter to the campfire and softlocked NRestSiteRoom._Ready
+    // on the cast (first-campfire softlock, fixed 2026-07-20).
     public override string? CustomRestSiteAnimPath =>
-        KleePck.Path("klee/model/character_sprite.tscn");
+        KleePck.Path("klee/model/rest_character.tscn");
 
+    // Known-benign log error at each merchant visit: NMerchantCharacter._Ready
+    // unconditionally builds a MegaSpineBinding on its first child and throws
+    // on a static Sprite2D. Godot's bridge logs and swallows it; the sprite
+    // still renders, only the "relaxed_loop" idle is lost. Unfixable without
+    // patching game code -- accepted.
     public override string? CustomMerchantAnimPath =>
         KleePck.Path("klee/model/character_sprite.tscn");
 

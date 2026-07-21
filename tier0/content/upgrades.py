@@ -35,8 +35,10 @@ UPGRADE_SHEETS = (_DOCS / "klee-upgrades.yaml",
 SUFFIX = "+"
 
 # Deltas the engine cannot express per-card yet (constants-encoded).
+# catalytic_conversion LEFT this set with R37 (2026-07-20): its upgrade is
+# now {innate: true}, which IS sim-expressible -- the R24 no-unmeasured-
+# upgrades law is satisfied rather than waived.
 UNAPPLIABLE = frozenset({
-    "catalytic_conversion",   # CATALYTIC_BURST_PER_REACTION is a constant
     "durin_witchs_flame",     # WITCHS_FLAME_DMG is a constant
     "nicole_celestial_gift",  # CELESTIAL_GIFT_BLOCK is a constant
 })
@@ -103,6 +105,11 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                                     and fx.get("target") == "self")]
         elif key == "add":
             card.effects.append(copy.deepcopy(val))
+        elif key == "innate":
+            # R37 (Catalytic Conversion+): boolean, only True is a ruling.
+            if val is not True:
+                raise ValueError(f"innate delta on {base_id!r} must be true")
+            card.innate = True
         elif key == "condition" and val == "unconditional":
             # Hoist the conditional's then-branch into the effect list.
             out = []
@@ -130,6 +137,18 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "spark":
             ok = _bump_first((fx for fx in top if fx.get("op") == "gain_spark"),
                              "amount", val)
+        elif key == "discard":
+            # R36 grammar: moves the chosen-discard count on Crackle's op.
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "discard_for_sparks"),
+                             "amount", val)
+        elif key == "sparks":
+            # R36 grammar: moves the Spark cap on the SAME op ("discard 2,
+            # add 2 Sparks"). Distinct from "spark" (gain_spark) on purpose:
+            # these Sparks stay priced by the discard count.
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "discard_for_sparks"),
+                             "sparks", val)
         elif key == "encore":
             # ALL gain_encore ops, branches included (mirrors "draw": a
             # conditional Encore rider is still the card's Encore story).

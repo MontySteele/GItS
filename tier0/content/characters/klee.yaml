@@ -144,6 +144,37 @@ packages:
     - double_pop
     - ammo_scavenging
     - secret_stash
+  # R37 measurement cells (2026-07-20): Catalytic Conversion's upgrade is
+  # now {innate: true} -- sim-expressible, so the R24 no-unmeasured-upgrades
+  # law is SATISFIED, not waived. Two cells, ONE variable (the +): the
+  # reaction deck with the power drawn normally vs opening-hand. Not an
+  # archetype deck; never enters the identity median.
+  catalytic_cell_base:
+    - catalytic_conversion
+    - dahlia_sacramental_shower
+    - dahlia_favonian_favor
+    - fischl_nightrider
+    - fischl_nightrider
+    - fischl_oz
+    - kaeya_frostgnaw
+    - sucrose_gust
+    - sizzle
+    - sizzle
+    - combustion_study
+    - hide_and_seek
+  catalytic_cell_innate:
+    - catalytic_conversion+
+    - dahlia_sacramental_shower
+    - dahlia_favonian_favor
+    - fischl_nightrider
+    - fischl_nightrider
+    - fischl_oz
+    - kaeya_frostgnaw
+    - sucrose_gust
+    - sizzle
+    - sizzle
+    - combustion_study
+    - hide_and_seek
   # A4 probe, v2 (R8). The old barbara_injection instrument died with the
   # conjunctive healing law -- its heals converted to block/meter, so a
   # card-based probe can no longer exist below 5-star Rare (and Mondstadt

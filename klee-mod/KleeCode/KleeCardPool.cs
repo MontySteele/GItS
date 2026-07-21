@@ -62,6 +62,9 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<BlazingDelight>(),
             ModelDb.Card<BombVoyage>(),
             ModelDb.Card<BombsAway>(),
+            // R36 batch: unblocked by the discard op (random victim,
+            // kit-exempt pool).
+            ModelDb.Card<BrightIdea>(),
             ModelDb.Card<CantCatchMe>(),
             ModelDb.Card<CatalyticConversion>(),
             // Burst spike: unblocked by the burst_energy op.

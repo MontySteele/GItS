@@ -145,6 +145,36 @@ stretch_mode = 6
 texture = ExtResource("1_tex")
 '@)
 
+# Identical scene under a SECOND path: BaseLib's scene-conversion registry is
+# keyed by path, so one scene cannot serve two conversion targets. Reusing
+# character_sprite.tscn for both rest site and merchant made the merchant
+# registration overwrite the rest-site one (BaseLib warns "Overwriting scene
+# registration"), the campfire instantiated an NMerchantCharacter, and
+# NRestSiteCharacter.Create's cast threw inside NRestSiteRoom._Ready -- the
+# first-campfire softlock (godot.log 2026-07-20).
+[IO.File]::WriteAllText((Join-Path $work 'klee\model\rest_character.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://klee/model/combat_model.png" id="1_tex"]
+
+[node name="KleeSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
+# Loc rows for the ElementalSkill custom keyword (KleeKeywords.cs). The game
+# merges res://<modid>/localization/<lang>/<table>.json into the base table of
+# the same name; the key prefix KLEEMOD-ELEMENTAL_SKILL comes from BaseLib's
+# GenEnumValues (namespace prefix + CustomEnum name). The 5 is LAW: tier0
+# constants.py BURST_PER_SKILL_TAG (mirrored, never re-derived).
+$locDir = Join-Path $work 'klee\localization\eng'
+New-Item -ItemType Directory -Force $locDir | Out-Null
+[IO.File]::WriteAllText((Join-Path $locDir 'card_keywords.json'), @'
+{
+  "KLEEMOD-ELEMENTAL_SKILL.title": "Elemental Skill",
+  "KLEEMOD-ELEMENTAL_SKILL.description": "Playing this card grants 5 Burst Energy."
+}
+'@)
+
 [IO.File]::WriteAllText((Join-Path $work 'klee\materials\klee_transition_mat.tres'), @'
 [gd_resource type="ShaderMaterial" load_steps=3 format=3]
 

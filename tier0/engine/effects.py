@@ -570,15 +570,45 @@ def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
         state.emit("exhaust", card=victim.id)
 
 
+def _worst_card(cards: list[Card]) -> Card:
+    # Shared v1 "lowest-value" pick: highest cost non-attack first (pilot
+    # heuristic placeholder; spec allows dumb). INSTRUMENT SURFACE: every
+    # chosen-discard measurement rides this choice -- if a window result
+    # looks heuristic-shaped, this is the knob to probe.
+    return max(cards, key=lambda c: (c.type != "attack",
+                                     c.cost if isinstance(c.cost, int) else 99))
+
+
+def _op_discard_for_sparks(state: CombatState, fx: dict, card: Card) -> None:
+    """R36 (Crackle redesign, user-ratified 2026-07-20): FORCED,
+    PLAYER-CHOSEN discard; 1 Spark per card ACTUALLY discarded, capped at
+    fx["sparks"]. Short hand discards min(amount, hand); an empty hand
+    yields no fodder and NO Spark -- the Spark is priced BY the discard
+    (an empty-hand free Spark converges on the exact design the ratified
+    band rejected, 0.668 vs 0.65). Kit cards are exempt fodder (the v1.9
+    invariant, same pool rule as _op_discard)."""
+    discarded = 0
+    for _ in range(fx.get("amount", 1)):
+        pool = [c for c in state.player.hand if not c.kit_card]
+        if not pool:
+            break
+        victim = _worst_card(pool)          # the pilot's chosen discard
+        state.player.hand.remove(victim)
+        state.player.discard_pile.append(victim)
+        state.emit("discard", card=victim.id, chosen=True)
+        discarded += 1
+    gain = min(fx.get("sparks", discarded), discarded)
+    if gain:
+        gain_sparks(state, gain)
+
+
 def _op_scry_discard(state: CombatState, fx: dict, card: Card) -> None:
-    # Look at top N, discard the "worst" by a cheap heuristic: highest cost
-    # non-attack first (pilot heuristic placeholder; spec allows dumb).
+    # Look at top N, discard the "worst" (shared heuristic above).
     n = fx.get("amount", 1)
     top = state.player.draw_pile[:n]
     if not top:
         return
-    worst = max(top, key=lambda c: (c.type != "attack",
-                                    c.cost if isinstance(c.cost, int) else 99))
+    worst = _worst_card(top)
     state.player.draw_pile.remove(worst)
     state.player.discard_pile.append(worst)
     state.emit("scry_discard", card=worst.id)
@@ -702,6 +732,7 @@ OPS = {
     "heal": _op_heal,
     "add_card": _op_add_card,
     "discard": _op_discard,
+    "discard_for_sparks": _op_discard_for_sparks,
     "exhaust_from": _op_exhaust_from,
     "scry_discard": _op_scry_discard,
     "conditional": _op_conditional,

@@ -40,6 +40,10 @@ class Card:
     # starting deck; granted to hand when the Burst meter first fills, and
     # returns to the kit (no pile) after play so a refill re-grants it.
     kit_card: bool = False
+    # R37: starts in the opening hand (top of the shuffled draw pile).
+    # Today only upgrades set this ({innate: true} -- Catalytic Conversion+);
+    # sparks_n_splash's "innate-on-charge" is its OWN mechanism, untouched.
+    innate: bool = False
     # principles v1.8: standard-banner 5-stars (Jean/Mona/Diluc) are ordinary
     # nation-pool rares that participate in the banner roll like anyone else.
     # The tag exists so that IF banner-variance data shows bad-roll bricking,

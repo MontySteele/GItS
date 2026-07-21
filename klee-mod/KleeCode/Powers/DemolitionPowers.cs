@@ -79,9 +79,12 @@ public sealed class BombDamageUpPower : PowerModel, ILocalizationProvider
 /// splash is a raw `hp -=` -- element-less (no aura, no reaction) and
 /// block-bypassing, hence Unblockable|Unpowered here; the Burst grant sits
 /// INSIDE the proc gate, so a capped detonation grants nothing. The cap
-/// counter resets when the player's turn ends -- the sim zeroes it at turn
-/// start before bombs detonate, and nothing can proc between our reset and
-/// the next turn's detonations, so the two are equivalent.
+/// counter zeroes at TURN START before bombs detonate, exactly like the sim
+/// (R35: the earlier end-of-turn reset leaned on a closed-world "nothing
+/// procs on enemy turns" argument -- the ruling replaces the argument with
+/// the sim's structure). Ordering proof: hook listeners iterate allies
+/// before enemies, so this player-power reset runs before any enemy
+/// BombPower detonation in the same BeforeSideTurnStart broadcast.
 /// </summary>
 public sealed class DetonationSplashPower
     : PowerModel, ILocalizationProvider, IBombDetonationListener
@@ -123,9 +126,9 @@ public sealed class DetonationSplashPower
             cardSource: null);
     }
 
-    public override Task AfterSideTurnEnd(
+    public override Task BeforeSideTurnStart(
         PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
+        IReadOnlyList<Creature> participants, ICombatState combatState)
     {
         if (side == CombatSide.Player) _procsThisTurn = 0;
         return Task.CompletedTask;
