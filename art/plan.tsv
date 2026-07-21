@@ -48,6 +48,13 @@ pocket_fireworks	ImageGen/images/cards/klee/pocket_fireworks.png	500	380	contain
 pocket_fireworks	ImageGen/images/cards/klee/pocket_fireworks.png	500	380	contain	center	shortlist	3	png	Item Leisurely Fireworks.png		item
 crackle	ImageGen/images/cards/klee/crackle.png	500	380	contain	center	shortlist	1	png	Pounding Surprise Explosive Spark Effect.png		vfx
 crackle	ImageGen/images/cards/klee/crackle.png	500	380	contain	center	shortlist	2	png	Item Supersized Firework.png		item
+# Bomb-op batch (2026-07-20): chain_fuse, careful_arrangement, and
+# chained_reactions entered the pool with NO art rows -- all three ship
+# portrait-less (null-safe governs) and need hunts at the art pass.
+# Hunt notes: chain_fuse = linked/sequenced charges; careful_arrangement =
+# deliberate bomb placement/tidying (Dodoco arranging?); chained_reactions =
+# cascade/chain-explosion VFX. quick_fuse and remote_detonator already
+# carry shortlists.
 # bright_idea unblocked by the R36 discard op (draw 3, discard 1). REHUNT
 # (vibe-check ruling 2026-07-20): both candidates confirmed weak by eyes (r1
 # generic cheer, r2 reads as crying/panic -- the opposite of the card). Hunt

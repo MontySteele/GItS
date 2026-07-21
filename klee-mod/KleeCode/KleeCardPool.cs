@@ -66,7 +66,12 @@ public sealed class KleeCardPool : CardPoolModel
             // kit-exempt pool).
             ModelDb.Card<BrightIdea>(),
             ModelDb.Card<CantCatchMe>(),
+            // Bomb-op batch: unblocked by detonate/modify_bombs/move_bombs/
+            // chance_bomb_per_detonation riding the new BombPower surface.
+            ModelDb.Card<CarefulArrangement>(),
             ModelDb.Card<CatalyticConversion>(),
+            ModelDb.Card<ChainFuse>(),
+            ModelDb.Card<ChainedReactions>(),
             // Burst spike: unblocked by the burst_energy op.
             ModelDb.Card<ClockworkToy>(),
             ModelDb.Card<ClusterCharge>(),
@@ -87,7 +92,10 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<NoHoldingBack>(),
             ModelDb.Card<PlaytimeForever>(),
             ModelDb.Card<PocketFireworks>(),
+            // Bomb-op batch.
+            ModelDb.Card<QuickFuse>(),
             ModelDb.Card<RapidFire>(),
+            ModelDb.Card<RemoteDetonator>(),
             ModelDb.Card<RunAway>(),
             ModelDb.Card<SkipAndHop>(),
             ModelDb.Card<Snap>(),

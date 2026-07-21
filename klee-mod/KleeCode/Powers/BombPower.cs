@@ -70,13 +70,23 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 
     /// <summary>
+    /// One live bomb: its charge and the combat round it was placed in.
+    /// The round stamp mirrors tier0's Bomb.turn_placed and exists for
+    /// modify_bombs scope 'placed_this_turn' (Chain Fuse). Today every live
+    /// bomb was necessarily placed this round -- BeforeSideTurnStart
+    /// detonates them all -- but the stamp keeps the semantics exact if a
+    /// future mechanic ever places bombs outside the player's own turn.
+    /// </summary>
+    private readonly record struct BombCharge(int Damage, int RoundPlaced);
+
+    /// <summary>
     /// One entry per live bomb, in placement order.
     ///
     /// MUST be deep-cloned -- see DeepCloneFields. AbstractModel.MutableClone
     /// uses MemberwiseClone, so without that override every bombed enemy would
     /// share ONE list with each other and with the canonical model.
     /// </summary>
-    private List<int> _damages = new();
+    private List<BombCharge> _damages = new();
 
     /// <summary>
     /// AbstractModel.MutableClone is a shallow MemberwiseClone; the base class
@@ -86,11 +96,11 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     protected override void DeepCloneFields()
     {
         base.DeepCloneFields();
-        _damages = new List<int>(_damages);
+        _damages = new List<BombCharge>(_damages);
     }
 
     /// <summary>Total damage sitting on this enemy, for intent/tooltip display.</summary>
-    public int PendingDamage => _damages.Sum();
+    public int PendingDamage => _damages.Sum(c => c.Damage);
 
     /// <summary>The badge under the enemy shows total pending damage; Amount
     /// itself stays the bomb count (see class doc). Ruled 2026-07-20.</summary>
@@ -130,13 +140,116 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
 
         if (power is BombPower bomb)
         {
-            bomb._damages.Add(damage);
+            // Round stamp read off the applied instance (PowerModel exposes
+            // CombatState) so no call site has to thread it through.
+            bomb._damages.Add(new BombCharge(
+                damage, bomb.CombatState?.RoundNumber ?? 0));
             bomb.SyncDisplay();
         }
         else
         {
             Log.Warn($"[{KleeMod.ModId}] BombPower.Place: could not resolve applied power instance; "
                    + "bomb damage not recorded.");
+        }
+    }
+
+    /// <summary>
+    /// Card-triggered detonation of one enemy's bombs (tier0 _op_detonate:
+    /// only enemies that HAVE bombs detonate; bonus rides each bomb).
+    /// Returns the number of bombs detonated -- Chained Reactions prices its
+    /// re-bomb chance per detonation caused by the play (the sim diffs its
+    /// detonations counter around the card; here the count is returned
+    /// directly).
+    /// </summary>
+    public static async Task<int> DetonateOn(
+        PlayerChoiceContext choiceContext, Creature target, int bonus = 0)
+    {
+        var bomb = target.Powers.OfType<BombPower>().FirstOrDefault();
+        if (bomb == null) return 0;
+        return await bomb.Detonate(choiceContext, bonus);
+    }
+
+    /// <summary>Detonate across enemies (tier0 detonate target all_enemies);
+    /// returns total bombs detonated.</summary>
+    public static async Task<int> DetonateAll(
+        PlayerChoiceContext choiceContext, IEnumerable<Creature> targets,
+        int bonus = 0)
+    {
+        var total = 0;
+        foreach (var target in targets.ToList())
+        {
+            total += await DetonateOn(choiceContext, target, bonus);
+        }
+        return total;
+    }
+
+    /// <summary>
+    /// modify_bombs (Chain Fuse): +bonus to every live bomb, optionally only
+    /// those placed this round (tier0 scope 'placed_this_turn' -- runs BEFORE
+    /// the card's own place_bomb in effect order, so the new bomb is not
+    /// buffed; effect order preserves that here too). Pure mutation, no
+    /// commands -- synchronous by design.
+    /// </summary>
+    public static void ModifyAll(
+        IEnumerable<Creature> enemies, int bonus, bool placedThisRoundOnly,
+        int currentRound)
+    {
+        foreach (var enemy in enemies)
+        {
+            var bomb = enemy.Powers.OfType<BombPower>().FirstOrDefault();
+            if (bomb == null) continue;
+            for (var i = 0; i < bomb._damages.Count; i++)
+            {
+                var charge = bomb._damages[i];
+                if (placedThisRoundOnly && charge.RoundPlaced != currentRound)
+                {
+                    continue;
+                }
+                bomb._damages[i] = charge with { Damage = charge.Damage + bonus };
+            }
+            bomb.SyncDisplay();
+        }
+    }
+
+    /// <summary>
+    /// move_bombs (Careful Arrangement): gather every bomb from OTHER enemies
+    /// onto <paramref name="dest"/>, +bonus each; round stamps travel with
+    /// the charges (tier0 keeps turn_placed on moved bombs). Source powers
+    /// are removed once emptied.
+    /// </summary>
+    public static async Task MoveAllTo(
+        PlayerChoiceContext choiceContext, Creature dest,
+        IEnumerable<Creature> enemies, int bonus,
+        Creature? applier, CardModel? cardSource)
+    {
+        var moved = new List<BombCharge>();
+        foreach (var enemy in enemies.ToList())
+        {
+            if (enemy == dest) continue;
+            var source = enemy.Powers.OfType<BombPower>().FirstOrDefault();
+            if (source == null || source._damages.Count == 0) continue;
+            moved.AddRange(source._damages);
+            source._damages.Clear();
+            source.SyncDisplay();
+            await PowerCmd.Remove(source);
+        }
+        if (moved.Count == 0) return;
+
+        var power = await PowerCmd.Apply<BombPower>(
+            choiceContext, dest, moved.Count, applier: applier,
+            cardSource: cardSource);
+        if (power is BombPower bomb)
+        {
+            foreach (var charge in moved)
+            {
+                bomb._damages.Add(charge with { Damage = charge.Damage + bonus });
+            }
+            bomb.SyncDisplay();
+        }
+        else
+        {
+            Log.Warn($"[{KleeMod.ModId}] BombPower.MoveAllTo: could not resolve "
+                   + "applied power instance; moved bombs lost their charges.");
         }
     }
 
@@ -179,18 +292,22 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// Detonates every bomb on this enemy.
+    /// Detonates every bomb on this enemy; returns how many detonated.
+    /// <paramref name="bonus"/> is the card-carried detonation bonus (tier0
+    /// detonate_bombs: `dmg = bomb.damage + bonus + bomb_damage_up` -- Remote
+    /// Detonator's +2 rides here, before amplification, exactly like the
+    /// Explosives Workshop bonus).
     ///
     /// Clears the list BEFORE dealing any damage. Tier 0 does the same
     /// (`bombs, enemy.bombs = enemy.bombs, []`) and it is the recursion guard:
     /// detonation damage can kill, trigger hooks, and re-enter combat logic, so
     /// the charges must already be spent by then.
     /// </summary>
-    private async Task Detonate(PlayerChoiceContext choiceContext)
+    private async Task<int> Detonate(PlayerChoiceContext choiceContext, int bonus = 0)
     {
-        if (_damages.Count == 0) return;
+        if (_damages.Count == 0) return 0;
 
-        var payloads = _damages.ToList();
+        var payloads = _damages.Select(c => c.Damage).ToList();
         _damages.Clear();
         SyncDisplay();
 
@@ -213,7 +330,7 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
             // explicitly, BEFORE the damage lands, exactly where the sim's
             // pipeline does it. That single path also guarantees detonation is
             // never elementally resolved twice.
-            var dealt = damage + damageUp;
+            var dealt = damage + bonus + damageUp;
             var aura = AuraCmd.Find(target);
             if (aura == null)
             {
@@ -247,6 +364,8 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
 
             await NotifyDetonationListeners(choiceContext, applier, target, damage);
         }
+
+        return payloads.Count;
     }
 
     /// <summary>

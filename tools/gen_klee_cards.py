@@ -65,8 +65,25 @@ MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.js
 # SAME kit-exempt filter. KitGrant.NotKitCard is the exemption both ride
 # (v1.9 invariant: the Burst is never fodder -- the obligation DECISIONS
 # recorded when the kit sprint landed).
+# Bomb-manipulation ops (standing-plan batch, 2026-07-20): detonate rides
+# BombPower.DetonateOn/DetonateAll (returns the count -- Chained Reactions
+# prices its re-bomb per detonation caused by the play, the sim's counter
+# diff); modify_bombs rides BombPower.ModifyAll (round stamps mirror
+# tier0's Bomb.turn_placed); move_bombs rides BombPower.MoveAllTo (charges
+# keep their stamps, +bonus each). chance_bomb_per_detonation rolls
+# Rng.CombatTargets.NextFloat() < chance (verified decompile; CombatTargets
+# is the established in-combat pick stream).
 MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_energy",
-                  "apply_power", "discard", "discard_for_sparks"}
+                  "apply_power", "discard", "discard_for_sparks",
+                  "detonate", "move_bombs", "modify_bombs",
+                  "chance_bomb_per_detonation"}
+
+# Field whitelists for the bomb ops (UNPARSEABLE discipline: an unknown
+# field encodes a mechanic; block loudly, never approximate).
+DETONATE_FIELDS = {"op", "target", "bonus"}
+MOVE_BOMBS_FIELDS = {"op", "target", "bonus"}
+MODIFY_BOMBS_FIELDS = {"op", "scope", "bonus"}
+CHANCE_BOMB_FIELDS = {"op", "chance", "bomb_damage"}
 
 # apply_power (power-card pass): sheet power id -> (C# PowerModel class,
 # stack cap or None, card-text template with {X} for the amount).
@@ -164,9 +181,18 @@ HAND_WRITTEN |= {"sparks_n_splash"}
 #   innate      -> AddKeyword(CardKeyword.Innate) in OnUpgrade (R37; keywords
 #                  are instance-owned LocalKeywords, and the base game's own
 #                  Innate drives opening-hand placement + keyword text)
+#   bonus       -> the detonate/move_bombs/modify_bombs bonus field
+#                  (DynamicVars["Bonus"]; single bonus-carrying effect per
+#                  card, guarded)
+#   chance      -> chance_bomb_per_detonation REPLACEMENT (tier0 upgrades.py
+#                  replaces, not bumps); codegen renders percent and emits
+#                  the delta in points, computed from the sheet's base
 EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "bomb_damage", "burst_energy", "cost",
-                       "discard", "sparks", "innate"}
+                       "discard", "sparks", "innate", "bonus", "chance"}
                       | POWER_UPGRADE_KEYS)
+
+# Ops whose `bonus` field the "bonus" upgrade delta may target.
+BONUS_OPS = ("detonate", "move_bombs", "modify_bombs")
 
 RARITY_CS = {
     "basic": "CardRarity.Basic",
@@ -237,6 +263,34 @@ def blocked_reason(card: dict) -> str | None:
                 return f"bomb target '{eff.get('target')}'"
             if not isinstance(eff.get("amount"), int):
                 return "formula-driven bomb count"
+        if op == "detonate":
+            if eff.get("target") not in {"enemy", "all_enemies"}:
+                return f"detonate target '{eff.get('target')}'"
+            unknown = set(eff) - DETONATE_FIELDS
+            if unknown:
+                return f"detonate field(s) {sorted(unknown)} not understood"
+        if op == "move_bombs":
+            if eff.get("target") != "enemy":
+                return f"move_bombs target '{eff.get('target')}' (only a chosen enemy has a selection idiom)"
+            unknown = set(eff) - MOVE_BOMBS_FIELDS
+            if unknown:
+                return f"move_bombs field(s) {sorted(unknown)} not understood"
+        if op == "modify_bombs":
+            if eff.get("scope", "all") not in {"all", "placed_this_turn"}:
+                return f"modify_bombs scope '{eff.get('scope')}'"
+            unknown = set(eff) - MODIFY_BOMBS_FIELDS
+            if unknown:
+                return f"modify_bombs field(s) {sorted(unknown)} not understood"
+        if op == "chance_bomb_per_detonation":
+            unknown = set(eff) - CHANCE_BOMB_FIELDS
+            if unknown:
+                return f"chance_bomb_per_detonation field(s) {sorted(unknown)} not understood"
+            # The count source is the detonate call earlier in THIS card's
+            # effect list (tier0 diffs its counter around the card play; the
+            # generated body reads the DetonateOn/DetonateAll return).
+            idx = card["effects"].index(eff)
+            if not any(e.get("op") == "detonate" for e in card["effects"][:idx]):
+                return "chance_bomb_per_detonation without a preceding detonate (no count source)"
         if op == "apply_power":
             power = eff.get("power")
             if power not in APPLY_POWERS:
@@ -260,6 +314,8 @@ def blocked_reason(card: dict) -> str | None:
                     f"gen_klee_cards: {card['id']}: splash_procs_per_turn "
                     f"{eff.get('splash_procs_per_turn')!r} != 3; the C# cap is the "
                     f"DemolitionConstants.SplashProcCapPerTurn const -- change both.")
+    if sum(1 for e in card.get("effects", []) if e.get("op") == "detonate") > 1:
+        return "two detonate effects on one card (count variable collision)"
     return None
 
 
@@ -319,6 +375,13 @@ def build_vars(card: dict) -> list[str]:
             # R36: both numbers render, so both become vars together.
             out.append(f'new DynamicVar("Discards", {int(eff["amount"])}m)')
             out.append(f'new DynamicVar("Sparks", {int(eff["sparks"])}m)')
+        elif op in BONUS_OPS and "bonus" in eff and bonus_upgrade(card):
+            # Same rule as Sparks: a var only when the upgrade must render.
+            out.append(f'new DynamicVar("Bonus", {int(eff["bonus"])}m)')
+        elif op == "chance_bomb_per_detonation" and chance_upgrade(card):
+            # Rendered as a PERCENT (50 -> 75); the body divides by 100.
+            out.append(
+                f'new DynamicVar("Chance", {int(round(float(eff["chance"]) * 100))}m)')
     return out
 
 
@@ -360,6 +423,10 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "sparks": any(e["op"] == "discard_for_sparks" for e in effects),
         # R37: card-level, any card can become Innate.
         "innate": True,
+        # Bomb-op batch: bonus rides a bonus-carrying bomb op; chance is
+        # the chance_bomb_per_detonation replacement.
+        "bonus": any(e["op"] in BONUS_OPS and "bonus" in e for e in effects),
+        "chance": any(e["op"] == "chance_bomb_per_detonation" for e in effects),
     }
     for pkey in POWER_UPGRADE_KEYS:
         has[pkey] = any(e["op"] == "apply_power" for e in effects)
@@ -387,6 +454,27 @@ def discard_upgrade(card: dict) -> tuple[int, int]:
     (0, 0) = none; either key alone still upgrades both vars' rendering."""
     deltas = upgrade_plan(card)[0]
     return int(deltas.get("discard", 0)), int(deltas.get("sparks", 0))
+
+
+def bonus_upgrade(card: dict) -> int:
+    """Ruled `bonus: +N` delta on the card's bomb op. 0 = none. One
+    DynamicVar name ("Bonus") serves it, so a second bonus-carrying effect
+    on the same card is a loud stop, not a silent overwrite."""
+    delta = int(upgrade_plan(card)[0].get("bonus", 0))
+    if delta:
+        n = sum(1 for e in card["effects"]
+                if e.get("op") in BONUS_OPS and "bonus" in e)
+        if n > 1:
+            raise SystemExit(
+                f"gen_klee_cards: {card['id']}: {n} bonus-carrying bomb ops "
+                "-- one 'Bonus' var cannot serve two effects.")
+    return delta
+
+
+def chance_upgrade(card: dict) -> float:
+    """Ruled `chance: X` REPLACEMENT (tier0 upgrades.py replaces, never
+    bumps). 0.0 = none."""
+    return float(upgrade_plan(card)[0].get("chance", 0.0))
 
 
 def power_upgrade(card: dict) -> int:
@@ -533,6 +621,91 @@ def build_body(card: dict) -> list[str]:
                 f"{amount}, applier: Owner.Creature, cardSource: this);"
             )
 
+        elif op == "detonate":
+            # tier0 _op_detonate: only enemies WITH bombs detonate (DetonateOn
+            # returns 0 on a bombless target); bonus rides each bomb inside
+            # the same pre-amplification sum as bomb_damage_up. The count
+            # feeds chance_bomb_per_detonation when the card carries one.
+            bonus = int(eff.get("bonus", 0))
+            bonus_arg = (
+                ', DynamicVars["Bonus"].IntValue' if bonus_upgrade(card)
+                else (f", {bonus}" if bonus else "")
+            )
+            prefix = (
+                "var detonations = "
+                if any(e.get("op") == "chance_bomb_per_detonation"
+                       for e in card["effects"])
+                else ""
+            )
+            if eff["target"] == "enemy":
+                if not any("ThrowIfNull" in l for l in lines):
+                    lines.append(
+                        'ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");'
+                    )
+                lines.append(
+                    f"{prefix}await BombPower.DetonateOn(choiceContext, "
+                    f"cardPlay.Target{bonus_arg});"
+                )
+            else:  # all_enemies
+                lines.append(
+                    f"{prefix}await BombPower.DetonateAll(choiceContext, "
+                    f"CombatState!.HittableEnemies.ToList(){bonus_arg});"
+                )
+
+        elif op == "modify_bombs":
+            # tier0 _op_modify_bombs: every live bomb (or only this round's --
+            # the stamp mirrors Bomb.turn_placed) gains the bonus. Effect
+            # order is preserved by this loop, so Chain Fuse's own bomb,
+            # placed by the NEXT effect, is not buffed -- same as the sim.
+            this_round = "true" if eff.get("scope", "all") == "placed_this_turn" else "false"
+            bonus_expr = (
+                'DynamicVars["Bonus"].IntValue' if bonus_upgrade(card)
+                else str(int(eff["bonus"]))
+            )
+            lines.append(
+                f"BombPower.ModifyAll(CombatState!.HittableEnemies, {bonus_expr}, "
+                f"placedThisRoundOnly: {this_round}, CombatState!.RoundNumber);"
+            )
+
+        elif op == "move_bombs":
+            # tier0 _op_move_bombs: gather ALL bombs from other enemies onto
+            # the chosen target, +bonus each; stamps travel with the charges.
+            bonus_expr = (
+                'DynamicVars["Bonus"].IntValue' if bonus_upgrade(card)
+                else str(int(eff.get("bonus", 0)))
+            )
+            if not any("ThrowIfNull" in l for l in lines):
+                lines.append(
+                    'ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");'
+                )
+            lines.append(
+                f"await BombPower.MoveAllTo(choiceContext, cardPlay.Target, "
+                f"CombatState!.HittableEnemies, {bonus_expr}, Owner.Creature, this);"
+            )
+
+        elif op == "chance_bomb_per_detonation":
+            # tier0: per detonation this card caused, roll < chance -> fresh
+            # bomb on a random living enemy. `detonations` is the DetonateOn/
+            # DetonateAll return captured above (blocked_reason guarantees
+            # the preceding detonate). Roll and pick both ride CombatTargets,
+            # the established in-combat stream.
+            chance_expr = (
+                'DynamicVars["Chance"].IntValue / 100f' if chance_upgrade(card)
+                else f'{float(eff["chance"])}f'
+            )
+            lines.append(
+                "for (var i = 0; i < detonations; i++)\n"
+                "        {\n"
+                f"            if (Owner.RunState.Rng.CombatTargets.NextFloat() >= {chance_expr}) continue;\n"
+                "            var candidates = CombatState!.HittableEnemies.ToList();\n"
+                "            if (candidates.Count == 0) break;\n"
+                "            var bombTarget = Owner.RunState.Rng.CombatTargets.NextItem(candidates);\n"
+                "            if (bombTarget == null) break;\n"
+                f'            await BombPower.Place(choiceContext, bombTarget, {int(eff["bomb_damage"])}, '
+                "Owner.Creature, this);\n"
+                "        }"
+            )
+
         elif op == "discard":
             # Random discard, kit-exempt pool (tier0 _op_discard: re-pool per
             # pick, stop when empty). CombatTargets is the established rng
@@ -655,6 +828,41 @@ def build_description(card: dict) -> str:
                  else str(int(eff["amount"])))
             parts.append(template.replace("{X}", x))
 
+        elif op == "detonate":
+            where = ("an enemy's" if eff["target"] == "enemy" else "ALL")
+            parts.append(f"Detonate {where} [gold]Bombs[/gold].")
+            bonus = int(eff.get("bonus", 0))
+            if bonus_upgrade(card):
+                parts.append("Detonations deal {Bonus:diff()} more damage.")
+            elif bonus:
+                parts.append(f"Detonations deal {bonus} more damage.")
+
+        elif op == "modify_bombs":
+            scope = ("placed this turn "
+                     if eff.get("scope", "all") == "placed_this_turn" else "")
+            amt = ("{Bonus:diff()}" if bonus_upgrade(card)
+                   else str(int(eff["bonus"])))
+            parts.append(
+                f"[gold]Bombs[/gold] {scope}deal {amt} more damage."
+            )
+
+        elif op == "move_bombs":
+            parts.append("Move ALL [gold]Bombs[/gold] to an enemy.")
+            bonus = int(eff.get("bonus", 0))
+            if bonus_upgrade(card):
+                parts.append("Moved [gold]Bombs[/gold] deal {Bonus:diff()} more damage.")
+            elif bonus:
+                parts.append(f"Moved [gold]Bombs[/gold] deal {bonus} more damage.")
+
+        elif op == "chance_bomb_per_detonation":
+            chance = ("{Chance:diff()}" if chance_upgrade(card)
+                      else str(int(round(float(eff["chance"]) * 100))))
+            parts.append(
+                f"Each detonation: {chance}% chance to place a new "
+                f'{int(eff["bomb_damage"])}-damage [gold]Bomb[/gold] on a '
+                "random enemy."
+            )
+
         elif op == "discard":
             n = int(eff.get("amount", 1))
             parts.append(
@@ -704,6 +912,22 @@ def build_upgrade(card: dict) -> list[str]:
                     done.add(key)
                     lines.append(f"{var}.UpgradeValueBy({int(deltas[key])}m);")
             continue
+        if op in BONUS_OPS and "bonus" in eff and "bonus" in deltas \
+                and "bonus" not in done:
+            done.add("bonus")
+            lines.append(
+                f'DynamicVars["Bonus"].UpgradeValueBy({int(deltas["bonus"])}m);')
+            continue
+        if op == "chance_bomb_per_detonation" and "chance" in deltas \
+                and "chance" not in done:
+            # tier0 upgrades.py REPLACES chance; a DynamicVar only bumps, so
+            # the delta is computed here from the sheet's base -- both values
+            # are static, so the rendered number is exact.
+            done.add("chance")
+            pts = int(round(float(deltas["chance"]) * 100
+                            - float(eff["chance"]) * 100))
+            lines.append(f'DynamicVars["Chance"].UpgradeValueBy({pts}m);')
+            continue
         if op == "apply_power":
             key = next((k for k in POWER_UPGRADE_KEYS if k in deltas), None)
         elif op == "damage" and eff["target"] != "self":
@@ -746,6 +970,12 @@ def emit(card: dict) -> str:
         # A bomb aimed at a chosen enemy makes the whole card enemy-targeted,
         # even when nothing about it deals direct damage (e.g. Double Pop).
         if eff["op"] == "place_bomb":
+            target_type = TARGET_CS[eff["target"]]
+            break
+        # Same rule for the bomb-manipulation ops: a chosen-enemy detonate
+        # (Quick Fuse) or move destination (Careful Arrangement) makes the
+        # card enemy-targeted; detonate-all reads as AllEnemies.
+        if eff["op"] in ("detonate", "move_bombs"):
             target_type = TARGET_CS[eff["target"]]
             break
 

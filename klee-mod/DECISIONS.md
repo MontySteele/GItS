@@ -1140,3 +1140,45 @@ swarm sets off the mines" is coherent demolition flavor and the detonation
 damage usually exceeds the forgone +6, (b) snapshot bombed-state at cast
 (the Sizzle idiom), (c) bonus keys off "detonated this play". Sheet
 unchanged until ruled.
+
+## Bomb-manipulation ops -- standing plan item 4 lands (2026-07-20 night)
+
+Five cards unblock: quick_fuse (detonate chosen enemy), remote_detonator
+(detonate ALL +2, upgradeable), chain_fuse (modify placed-this-turn +3 then
+place -- effect order preserved, so its own bomb is NOT buffed, sim-exact),
+careful_arrangement (move ALL bombs to chosen enemy +2 each),
+chained_reactions (detonate ALL, then per detonation 50% -> fresh 5-dmg
+bomb on a random enemy; upgrade replaces chance at 75%). Pool 49 -> 54.
+
+**BombPower surface grown (all tier0-mirrored):** _damages becomes
+List<BombCharge>(Damage, RoundPlaced) -- the stamp mirrors Bomb.turn_placed
+for modify's placed_this_turn scope (today every live bomb is this-round by
+construction, the stamp keeps semantics exact if that ever changes);
+private Detonate gains a bonus param (dealt = damage + bonus +
+bomb_damage_up, pre-amplification, tier0 detonate_bombs) and returns the
+count; public DetonateOn/DetonateAll (count feeds Chained Reactions -- the
+sim diffs a counter, here the return IS the count); ModifyAll (pure
+mutation, synchronous); MoveAllTo (charges travel with stamps, +bonus,
+source powers removed; PowerCmd.Apply with the moved count keeps Amount =
+bomb count in sync).
+
+**Codegen widened:** 4 new ops with field whitelists (UNPARSEABLE
+discipline), chance-needs-preceding-detonate + single-detonate +
+single-bonus-effect guards; deltas `bonus` (DynamicVar "Bonus") and
+`chance` (REPLACEMENT per tier0 upgrades.py -- rendered as percent,
+codegen computes the delta in points from the sheet base: 50 -> 75 emits
+UpgradeValueBy(25m)); enemy-targeted detonate/move set the card's
+TargetType. Rng: roll and pick both ride Rng.CombatTargets
+(NextFloat/NextItem, decompile-verified).
+
+**quick_fuse ships with NO upgrade path** (delta `add: {draw 1}` is
+structural -- codegen cannot add a whole effect+sentence on upgrade; the
+same honesty that flagged hot_hands). It re-opens the manifest
+no_upgrade_path list that R38 had emptied; hand-finish or re-rule numeric.
+
+Art: chain_fuse / careful_arrangement / chained_reactions have NO plan.tsv
+rows -- portrait-less (null-safe) with hunt notes queued for the art pass.
+
+Verification: full suite 237 passed (repo scope; includes the new Beetle
+Swarm pinning test), parity lint OK, art lint OK, Release build clean.
+NOT deployed (game still running).
