@@ -58,8 +58,12 @@ def test_number_bumps_follow_the_mined_grammar():
 
 def test_condition_and_keyword_class_upgrades():
     assert loader.get_card("sugar_rush+").exhaust is False
-    hot = loader.get_card("hot_hands+")                  # self-damage removed
-    assert not any(fx.get("target") == "self" for fx in hot.effects)
+    # R38: hot_hands+ adopts the R37 Innate disposition. The old
+    # {remove: self_damage} delta is DEAD -- the self-damage stays on the
+    # upgrade (it's the card's cost); Innate is the quality.
+    hot = loader.get_card("hot_hands+")
+    assert hot.innate is True
+    assert any(fx.get("target") == "self" for fx in hot.effects)
     pd = loader.get_card("patched_dress+")               # hoisted then-branch
     assert not any(fx.get("op") == "conditional" for fx in pd.effects)
     assert sum(fx["amount"] for fx in pd.effects

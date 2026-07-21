@@ -175,6 +175,37 @@ packages:
     - sizzle
     - combustion_study
     - hide_and_seek
+  # R38 measurement cells (2026-07-20): hot_hands adopts the R37 innate
+  # disposition (its old {remove: self_damage} delta was codegen-
+  # inexpressible; R24 law: measure before it ships). Two cells, ONE
+  # variable (the +): the spark deck with the enabler drawn normally vs
+  # opening-hand. Not an archetype deck; never enters the identity median.
+  hot_hands_cell_base:
+    - hot_hands
+    - sparkly_treasure
+    - sparkly_treasure
+    - crackle
+    - spark_collection
+    - pocket_fireworks
+    - tail_of_flame
+    - skip_and_hop
+    - spark_knight_style
+    - endless_fireworks
+    - gleeful_barrage
+    - cant_catch_me
+  hot_hands_cell_innate:
+    - hot_hands+
+    - sparkly_treasure
+    - sparkly_treasure
+    - crackle
+    - spark_collection
+    - pocket_fireworks
+    - tail_of_flame
+    - skip_and_hop
+    - spark_knight_style
+    - endless_fireworks
+    - gleeful_barrage
+    - cant_catch_me
   # A4 probe, v2 (R8). The old barbara_injection instrument died with the
   # conjunctive healing law -- its heals converted to block/meter, so a
   # card-based probe can no longer exist below 5-star Rare (and Mondstadt

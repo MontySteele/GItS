@@ -82,8 +82,6 @@
   },
   "upgrades": {
     "_comment": "R24 (2026-07-20): docs/klee-upgrades.yaml is the single source of truth for upgrade deltas; codegen defaults are ABOLISHED. Generated cards listed below ship with NO upgrade path (UNAPPLIABLE discipline) until their delta is ratified, made numeric, or hand-finished.",
-    "no_upgrade_path": {
-      "hot_hands": "delta key 'remove: self_damage' not expressible by codegen (structural upgrade)"
-    }
+    "no_upgrade_path": {}
   }
 }

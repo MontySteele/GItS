@@ -50,9 +50,20 @@ def test_adaptive_runs_are_label_independent_including_rests():
 
 
 def test_unappliable_upgrades_never_chosen_at_rest():
-    deck = loader.starting_deck("klee") + ["catalytic_conversion"]
-    # All on-plan reaction candidates for this deck are the unappliable
-    # one; the policy must fall through rather than burn a rest on it.
-    action, target = model.rest_action(deck, hp=62, max_hp=62,
-                                       archetype="reaction")
-    assert (action, target) != ("upgrade", "catalytic_conversion")
+    """Derived from the upgrade engine, NOT hard-coded card names. The
+    original hard-coded catalytic_conversion as forever-unappliable; R37
+    then made that upgrade real and stranded the assertion (caught by the
+    first full-suite run -- the cross-tier coupling the full-suite gate
+    exists for). Whatever UNAPPLIABLE holds today, a rest must never
+    smith it -- and the next disposition ruling can't strand this again."""
+    assert upgrades.UNAPPLIABLE, \
+        "UNAPPLIABLE is empty -- retire this test with a ruling, not a skip"
+    for cid in sorted(upgrades.UNAPPLIABLE):
+        # Coherence: unappliable ids must be real sheet entries, or the
+        # set is guarding against nothing.
+        assert cid in upgrades._upgrade_index(), cid
+        deck = loader.starting_deck("klee") + [cid]
+        for plan in ("demolition", "spark", "reaction", "generic"):
+            action, target = model.rest_action(deck, hp=62, max_hp=62,
+                                               archetype=plan)
+            assert (action, target) != ("upgrade", cid), plan
