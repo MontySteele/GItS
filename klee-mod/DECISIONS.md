@@ -1593,3 +1593,38 @@ the art pass: 21 Klee, 9 Mondstadt companions, 12 Fontaine, Confiscated).
 Verification: full suite 237 green, gen --check clean,
 handwritten-parity OK, pool-membership OK (105 classes), Release build
 clean. NOT deployed -- the game was running.
+
+## Corpse detonation -- OPEN parity question, awaiting playtest (2026-07-21)
+
+STATUS: **OPEN. Do not baseline bomb numbers against it until settled.**
+Recorded here deliberately UNRESOLVED rather than closed, because it
+cannot be settled from the repo.
+
+QUESTION: does a killing blow on a bombed enemy early-detonate that
+enemy's bombs?
+
+EVIDENCE FOR A DEFECT: BombPower.AfterDamageReceived lacks the
+`target.IsDead` guard that both of its siblings carry. If the engine
+broadcasts AfterDamageReceived on a creature the hit just killed, the
+bombs resolve one turn early on the death turn.
+
+EVIDENCE AGAINST: one refuter in the bug-hunt panel claimed the engine
+suppresses AfterDamageReceived on a killed creature, which would make
+the missing guard harmless. That claim is UNVERIFIED -- no decompile
+site was produced for it, and the finding survived the panel on a
+contested premise rather than a clean one.
+
+STAKES (why this is worth a real answer despite low probability): the
+sim detonates unconditionally. If the game suppresses on death and the
+sim does not, then every sim bomb-damage measurement taken against a
+KILLABLE enemy overcounts at the margin on the killing-blow turn. Low
+probability, high blast radius -- it would touch bomb numbers broadly
+rather than one card.
+
+SETTLEMENT (user playtest, ~10 seconds): bombed enemy + Pounding
+Surprise equipped, land the kill, watch for the Spark. The relic's
+spark-on-detonation is the tell.
+  - Spark appears  -> hook fires on death, sim and game agree, close it.
+  - No Spark       -> real divergence, opens a sim-side correction.
+
+NOT self-closed from the repo: this needs the eyes-on result.
