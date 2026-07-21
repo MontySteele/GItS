@@ -1182,3 +1182,86 @@ rows -- portrait-less (null-safe) with hunt notes queued for the art pass.
 Verification: full suite 237 passed (repo scope; includes the new Beetle
 Swarm pinning test), parity lint OK, art lint OK, Release build clean.
 NOT deployed (game still running).
+
+## Codegen widening sprint -- 21 cards unblock in five batches (2026-07-21)
+
+Five commits (364acf0, bc02b76, 90c9b58, bc8995f, 7480847), pool 54 -> 71.
+Every non-companion sheet card now generates; the blocked list is down to
+friendly_visit (cost_mod companion_cards) and the three companion-op
+rares, all of which land with the companions phase.
+
+**Weak/Vulnerable (3 cards: spooked, trip_wire, surprise_visit).** The
+CORE's own WeakPower/VulnerablePower, decompile-verified == tier0 law
+(x0.75 dealt / x1.5 taken, Counter stacks, enemy-side turn-end tick).
+APPLY_POWERS grows an ENEMY_APPLY_POWERS split with chosen-target and
+all-enemies emission; a debuff-only card (Surprise Visit) gets its
+TargetType from the apply.
+
+**Parity bug found and fixed while wiring it: Unpowered mirror hits
+skipped the sim's damage modifiers.** tier0 deal_damage_to_enemy runs
+EVERY hit -- bombs and the Burst volley included -- through
+strength/weak (pre-amp) and vulnerable (post-amp) with ONE final
+truncation. The C# Unpowered idiom opts out of the native powers'
+IsPoweredAttack gate, so Explosive Frags' Vulnerable amplified follow-up
+detonations in the sim but not in the game -- live since the R23 power
+pass, observable via explosive_frags or the battery encounter's
+weak-on-player. New SimDamagePipeline (DealerMods/TargetMods, constants
+mirroring WEAK_DEALT_MULT/VULNERABLE_TAKEN_MULT, NOT the native
+DynamicVars -- Paper Krane/Phrog hooks are relics the sim doesn't have)
+applied at both call sites; values stay decimal until the single (int).
+
+**Conditionals (6 cards).** Four predicates with verified reads:
+this_cost_zero = EnergyCost.GetResolved() == 0 (cost with all modifiers,
+so a spark-freed attack reads 0 = sim current_card_cost); has_spark;
+reaction_triggered_by_this = diff of the new
+ReactionEffects.TotalResolved (monotonic, incremented in the single
+funnel for every named reaction, dealer or not); killed_target =
+card-start enemy snapshot .Any(IsDead). Snapshots are captured at the
+TOP of OnPlay -- the sim resets its per-card counters at resolve_card
+start, not at the conditional's site. repeat_this is honored by a repeat
+tail exactly like sim resolve_card (re-resolve minus the repeat
+machinery); REPEAT_SAFE_OPS keeps the replayed block free of local
+redeclarations. Upgrade grammar: conditional_bonus (ExtraDamage var),
+draw-both-branches (Cards + DrawElse), and condition: unconditional --
+play-time (IsUpgraded || pred) plus a text swap via
+{IfUpgraded:show:upgraded|normal}, the runtime form BaseLib SimpleLoc's
+MakeUpgradeSwap generates (pipes inside either arm are a loud stop).
+
+**X cost (controlled_demolition; R34).** HasEnergyCostX => true +
+ResolveEnergyXValue() (CapturedXValue through Hook.ModifyXValue -- the
+game-canonical read, so Chemical-X-style relics compose). X / X_plus_N
+amount grammar; times: "X" gates the whole attack on x > 0 (range(0) =
+no hits). bombs delta rides a Bombs var ("X+{Bombs:diff()}").
+SparkPower.AppliesTo already carried the R34 exemption (!CostsX).
+
+**Formulas (gleeful_barrage, grand_finale).** 2_plus_sparks reads the
+NEW SparkPower.SparksAsResolved -- the bank minus the pending spend.
+This is the Snap-fix caveat landing on schedule: the sim spends the
+charge BEFORE effects resolve, our consume executes in AfterCardPlayed,
+so mid-play readers must subtract the pending spend or a spark-freed
+Gleeful Barrage counts sparks the sim already spent. has_spark
+predicates switched to the same accessor (one truth).
+N_per_detonation_this_combat reads BombPower.DetonationsThisCombat --
+keyed to the combat-state instance so a fresh combat starts at zero with
+no reset hook; incremented per bomb inside Detonate before the damage
+lands (sim order); combat-state snapshot taken before PowerCmd.Remove.
+
+**Small ops.** energy -> PlayerCmd.GainEnergy. scry_discard -> top-N
+peek (index 0 IS the top; Take(n) = draw_pile[:n]) + FromSimpleGrid
+player choice -- the sim's _worst_card is the pilot's stand-in for
+player choice (R36 Crackle precedent); the unpicked card stays on top.
+add_card both forms: id -> hand-written token class (NEW Confiscated:
+Status, cost 1, does nothing, never pooled, outside the parity lint's
+sheet charter) and pool -> resolved from the SHEET at generation time
+(archetype/rarity live only there), every member verified generated,
+picks WITH replacement (tier0 rng.choice per pick), cost_override ->
+SetThisCombat (the token keeps it all combat), AddGeneratedCardToCombat's
+full-hand redirect-to-discard = the sim's _add_token rule. exhaust_from
+status -> RANDOM Status from hand (sim rolls rng, no choice UI).
+remove: exhaust delta -> RemoveKeyword(CardKeyword.Exhaust), the base
+game's own idiom (sugar_rush).
+
+Verification: every batch closed with the FULL repo suite green (237),
+gen --check clean, handwritten-parity OK, Release build clean. NOT
+deployed; the last deploy predates this sprint, so the running game has
+none of it.
