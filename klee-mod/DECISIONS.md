@@ -1056,3 +1056,56 @@ domination lint CLEAN (both retired entries guard their fixes); parity
 lint OK (8 cards); Release build 0 warnings. NOT deployed: the user is
 mid-playtest and the game is running (never kill the game); the dll
 rides the next deploy window.
+
+## Art vibe-check addendum -- renames, dedupe law, replace list (2026-07-20 night)
+
+User-ratified chat addendum (contact-sheet review, user's eyes on sources).
+Rides alongside the standing GO; nothing here blocks bomb ops -> codegen
+widening -> companions.
+
+**Display renames (ids STABLE -- future greps must try BOTH names):**
+- elemental_ecstasy -> "Sweet Dreams" (the sleeping Birthday-2025 art: the
+  nap IS the aura refresh, the draws are the dreams). Hand-written
+  ElementalEcstasy.cs title updated.
+- clockwork_toy -> "Imaginary Friend" (the chosen item's own name; block 5
+  + Burst = a friend who shields and encourages). Generated; regen picked
+  up the sheet name. skill_tag stays. The elemental_ecstasy crop question
+  is DEAD -- the rename makes the uncropped art correct.
+Id-renames were considered and rejected on record: class/manifest/upgrade/
+DECISIONS churn for zero player-visible gain.
+
+**Dedupe law codified in art_lint:** L1 (which already implemented the
+rule) gains the ruling's vocabulary in its docstring -- effective pick =
+auto or shortlist rank 1 unless red-pen resolves otherwise; register-
+crossing reuse legal by construction (worked example: Klee Wish =
+big_badda_boom card + selection splash); dead shortlist ranks blessed
+(Imaginary Friend Dodoco on duck_and_cover r3). NEW: PENDING_RED_PEN
+allowlist (the domination lint's KNOWN pattern) -- known collisions print
+as notes until resolved, then the entry is DELETED so the lint guards the
+resolution.
+
+**Replace list executed, with two premise corrections (PARKED, not
+resolved -- both in PENDING_RED_PEN for the red-pen session):**
+- spark_knight_style <- Klee Character Card (regular/golden = Style/True
+  pairing); Glimmering Firework RETIRED. BUT the ruling's "only a model
+  source" premise was wrong: Klee Character Card is kaboom's auto pick.
+  Kaboom re-picks or spark_knight_style re-hunts -- user's call.
+- catalytic_conversion <- Dodoco's Marvelous Magic (promoted from its
+  power icon, which keeps it); Jumbo statue now EXCLUSIVELY the Burst
+  badge. BUT Marvelous Magic is ALSO spark_collection's effective r1, and
+  spark_collection's r2 (Dodoco's Duet) is vermillion_pact's passed pick.
+- bright_idea: REHUNT ruled (r1 generic cheer, r2 reads as crying/panic).
+  Hunt term on file: a realization gesture (exclamation, lightbulb,
+  raised finger) across emoji/sticker sets. Demoted both candidates to
+  ranks 2/3 -- the dead r1 placeholder was tripping L1 (it is
+  eager_to_help's pick) and L3 (icon register on a card slot); the card
+  ships portrait-less by design until the hunt lands.
+- dahlia_*: RESOLVED immediately -- the ruled hunt (Equipment Card first)
+  already ran during the taste pass (none exists, recorded in plan.tsv),
+  so r1 Character Card is accepted per the ruling's fallback.
+- Passed as-is: crackle r1, playtime_forever, true_spark_knight,
+  vermillion_pact, the icon queue.
+
+Verification: art_lint OK (2 allowlisted notes), parity lint OK, full
+suite 236 passed, Release build clean. Regen delta: ClockworkToy.cs title
+only.

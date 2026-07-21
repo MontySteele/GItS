@@ -26,7 +26,9 @@ public sealed class ElementalEcstasy : CustomCardModel
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Elemental Ecstasy"),
+        // Display rename (art vibe-check ruling 2026-07-20): id stays
+        // elemental_ecstasy; only the player-facing name changed.
+        ("title", "Sweet Dreams"),
         ("description",
             "Refresh all elemental auras. Draw 1 card for each aura."),
     };

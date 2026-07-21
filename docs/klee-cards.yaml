@@ -84,7 +84,12 @@
    effects: [{op: block, amount: 4}, {op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 4}]}
 - {id: spooked, name: "Spooked!", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 3}, {op: apply_power, power: weak, amount: 1, target: all_enemies}]}
-- {id: clockwork_toy, name: "Clockwork Toy", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue, tags: [skill_tag],
+# Display rename (art vibe-check ruling 2026-07-20): "Imaginary Friend", from
+# the chosen art's own item name (Imaginary Friend Dodoco) -- block 5 + Burst
+# encouragement reads as a friend who shields and cheers. ID stays clockwork_toy
+# (id-renames churn class files/manifest/upgrades/DECISIONS for zero
+# player-visible gain). Future greps: try BOTH names.
+- {id: clockwork_toy, name: "Imaginary Friend", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue, tags: [skill_tag],
    effects: [{op: block, amount: 5}, {op: burst_energy, amount: 3}]}
 - {id: run_away, name: "Run Away!", cost: 0, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 4}]}
@@ -134,7 +139,11 @@
    effects: [{op: apply_power, power: reaction_bonus_spark_energy, amount: 1, target: self}]}
 - {id: perfect_timing, name: "Perfect Timing", cost: 1, type: attack, rarity: uncommon, solve: [frontload], archetypes: [reaction], role: payoff,
    effects: [{op: damage, amount: 8, target: enemy}, {op: conditional, if: reaction_triggered_by_this, then: [{op: repeat_this, times: 1}]}]}
-- {id: elemental_ecstasy, name: "Elemental Ecstasy", cost: 2, type: skill, rarity: uncommon, solve: [velocity], archetypes: [reaction], role: glue,
+# Display rename (art vibe-check ruling 2026-07-20): "Sweet Dreams" -- the
+# sleeping Birthday-2025 art fits the effect (the nap IS the aura refresh, the
+# draws are the dreams); the old name implied reaction-rapture the card never
+# delivers. ID stays elemental_ecstasy. Future greps: try BOTH names.
+- {id: elemental_ecstasy, name: "Sweet Dreams", cost: 2, type: skill, rarity: uncommon, solve: [velocity], archetypes: [reaction], role: glue,
    effects: [{op: refresh_all_auras}, {op: draw, amount_formula: per_aura}]}
 - {id: borrowed_brilliance, name: "Borrowed Brilliance", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [reaction], role: glue,
    effects: [{op: copy_companion_in_hand, amount: 1, temp: true}]}

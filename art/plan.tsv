@@ -48,10 +48,17 @@ pocket_fireworks	ImageGen/images/cards/klee/pocket_fireworks.png	500	380	contain
 pocket_fireworks	ImageGen/images/cards/klee/pocket_fireworks.png	500	380	contain	center	shortlist	3	png	Item Leisurely Fireworks.png		item
 crackle	ImageGen/images/cards/klee/crackle.png	500	380	contain	center	shortlist	1	png	Pounding Surprise Explosive Spark Effect.png		vfx
 crackle	ImageGen/images/cards/klee/crackle.png	500	380	contain	center	shortlist	2	png	Item Supersized Firework.png		item
-# bright_idea unblocked by the R36 discard op (draw 3, discard 1). RED-PEN: both
-# candidates are already-used emoji poses; ships portrait-less (null-safe) until picked.
-bright_idea	ImageGen/images/cards/klee/bright_idea.png	500	380	contain	center	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 3.png		icon
-bright_idea	ImageGen/images/cards/klee/bright_idea.png	500	380	contain	center	shortlist	2	png	Sparkling Steps 2021-06-09 - Klee Emoji 1.png		icon
+# bright_idea unblocked by the R36 discard op (draw 3, discard 1). REHUNT
+# (vibe-check ruling 2026-07-20): both candidates confirmed weak by eyes (r1
+# generic cheer, r2 reads as crying/panic -- the opposite of the card). Hunt
+# term: a REALIZATION gesture -- exclamation, lightbulb, raised-finger --
+# across the emoji/sticker sets. r1 stays placeholder (ships portrait-less,
+# null-safe governs) until the hunt lands at the art pass. NO rank 1 row on
+# purpose: an effective pick here tripped L1 (r1 is eager_to_help's pick) and
+# L3 (icon register on a card slot) -- the dead placeholder was masquerading
+# as a real pick. The rehunt's winner takes rank 1.
+bright_idea	ImageGen/images/cards/klee/bright_idea.png	500	380	contain	center	shortlist	2	png	Icon Emoji Paimon's Paintings 07 Klee 3.png		icon
+bright_idea	ImageGen/images/cards/klee/bright_idea.png	500	380	contain	center	shortlist	3	png	Sparkling Steps 2021-06-09 - Klee Emoji 1.png		icon
 spark_collection	ImageGen/images/cards/klee/spark_collection.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Marvelous Magic.png		item
 spark_collection	ImageGen/images/cards/klee/spark_collection.png	500	380	contain	center	shortlist	2	png	Item Dodoco's Duet.png		item
 spark_collection	ImageGen/images/cards/klee/spark_collection.png	500	380	cover	center	shortlist	3	png	Icon Emoji Paimon's Paintings 25 Klee 2.png		sticker
@@ -107,19 +114,25 @@ warm_glow	ImageGen/images/cards/klee/warm_glow.png	500	380	cover	center	auto	1	p
 all_my_treasures	ImageGen/images/cards/klee/all_my_treasures.png	500	380	contain	center	auto	1	png	Item Dodoco's Collection Cupboard.png		item
 # ---------- CARDS: power-card pass (2026-07-20) ----------
 # Six power cards predate no portrait row (the sprint ran while they were
-# blocked). Picks below are thematic reads on free sources -- ALL flagged for
-# red-pen: playtime_forever (Let's Go, Dodoco! = playing with Dodoco forever),
-# vermillion_pact (Dodoco's Duet = the pair-bond read for a reaction-pair
-# power), catalytic_conversion (Marvelous Magic = conversion), explosive_frags
-# (Krash-Kaboom Mine = frag mine), true_spark_knight (the GOLDEN character
-# card = the ascended/true knight), spark_knight_style (Glimmering Firework --
-# weakest pick of the six, an eyeball candidate). L1 repicks after first
-# lint: explosive_frags takes the AoE (exploding) mine frame, its non-AoE
-# sibling being mine_toss's; catalytic_conversion takes the Jumbo statue
-# ("reactions feed the Burst statue" read -- shared with the power_burst
-# icon, which L1 permits, but an eyeball candidate for exactly that reason).
-spark_knight_style	ImageGen/images/cards/klee/spark_knight_style.png	500	380	contain	center	shortlist	1	png	Item Glimmering Firework.png		item
-catalytic_conversion	ImageGen/images/cards/klee/catalytic_conversion.png	500	380	contain	center	shortlist	1	png	Item Jumbo Sparks 'n' Splash Statue.png		item
+# blocked). Picks below are thematic reads on free sources; the 2026-07-20
+# art vibe-check ruling PASSED playtime_forever, vermillion_pact, and
+# true_spark_knight as-is, and REPLACED two:
+#   spark_knight_style <- Klee Character Card (regular TCG card; pairs with
+#     true_spark_knight's golden card: regular = the Style, golden = the
+#     True). Glimmering Firework RETIRED (teal Fontaine flora, wrong
+#     everything -- confirmed by eyes).
+#   catalytic_conversion <- Dodoco's Marvelous Magic, promoted from its
+#     power icon (which keeps it; same-referent register-crossing is legal).
+#     The Jumbo statue is now EXCLUSIVELY the Burst meter badge.
+# RED-PEN (both collisions missed by the ruling's premises, parked in
+# art_lint PENDING_RED_PEN -- resolve at the red-pen session):
+#   a. Klee Character Card is ALSO kaboom's auto card pick (not "only a
+#      model source"): kaboom re-picks, or spark_knight_style re-hunts.
+#   b. Marvelous Magic is ALSO spark_collection's effective r1 -- and
+#      spark_collection's r2 (Dodoco's Duet) is vermillion_pact's passed
+#      r1, so it cannot quietly fall through either.
+spark_knight_style	ImageGen/images/cards/klee/spark_knight_style.png	500	380	cover	top	shortlist	1	png	Klee Character Card.png		tcg
+catalytic_conversion	ImageGen/images/cards/klee/catalytic_conversion.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Marvelous Magic.png		item
 explosive_frags	ImageGen/images/cards/klee/explosive_frags.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine AoE.png		item
 true_spark_knight	ImageGen/images/cards/klee/true_spark_knight.png	500	380	cover	top	shortlist	1	png	Klee Character Card Golden.png		tcg
 vermillion_pact	ImageGen/images/cards/klee/vermillion_pact.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Duet.png		item
@@ -128,6 +141,11 @@ playtime_forever	ImageGen/images/cards/klee/playtime_forever.png	500	380	contain
 # Dahlia and Prune have no Genius Invokation equipment card; taste pass rules
 # their official character-card/wish splashes in (register 5) over the dark,
 # illegible talent-demo frames the first sprint used.
+# dahlia_*: RESOLVED by the vibe-check ruling (2026-07-20) -- "hunt for an
+# Equipment Card first; if none exists, take r1". The hunt already ran (no
+# equipment card exists, recorded above), so r1 Character Card is ACCEPTED
+# (legible; frame clash accepted) over r2 Wish (floats small at card scale).
+# r2/r3 are dead unless a future red-pen revives them.
 dahlia_sacramental_shower	ImageGen/images/cards/companions/dahlia_sacramental_shower.png	500	380	cover	top	shortlist	1	png	Dahlia Character Card.png		tcg
 dahlia_sacramental_shower	ImageGen/images/cards/companions/dahlia_sacramental_shower.png	500	380	cover	top	shortlist	2	png	Dahlia Wish.png		splash
 dahlia_sacramental_shower	ImageGen/images/cards/companions/dahlia_sacramental_shower.png	500	380	cover	top	shortlist	3	png	Character Dahlia Full Wish.png		splash

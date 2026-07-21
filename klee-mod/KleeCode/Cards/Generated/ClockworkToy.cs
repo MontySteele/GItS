@@ -38,7 +38,7 @@ public sealed class ClockworkToy : CustomCardModel, ISkillTagCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Clockwork Toy"),
+        ("title", "Imaginary Friend"),
         ("description", "Gain {Block:diff()} [gold]Block[/gold]. Gain 3 [gold]Burst Energy[/gold]."),
     };
 
