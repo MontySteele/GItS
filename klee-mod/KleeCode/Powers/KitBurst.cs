@@ -86,7 +86,11 @@ public sealed class SparksNSplashPower : PowerModel, ILocalizationProvider
             var target = CombatState.RunState.Rng.CombatTargets.NextItem(candidates);
             if (target == null) break;
 
-            var dealt = KitBurstConstants.VolleyHitDamage;
+            // Sim parity: volley hits go through deal_damage_to_enemy too, so
+            // Strength/Weak (pre-amp) and Vulnerable (post-amp) apply, decimal
+            // until the single truncation (see SimDamagePipeline).
+            var dealt = SimDamagePipeline.DealerMods(
+                Owner, KitBurstConstants.VolleyHitDamage);
             var aura = AuraCmd.Find(target);
             if (aura == null)
             {
@@ -101,14 +105,14 @@ public sealed class SparksNSplashPower : PowerModel, ILocalizationProvider
             {
                 var reaction = ReactionTable.Lookup(aura.Element, Element.Pyro);
                 var consumed = aura.Element;
-                dealt = (int)(dealt * ReactionTable.AmplifierMultiplier(reaction, Owner));
+                dealt *= ReactionTable.AmplifierMultiplier(reaction, Owner);
                 await PowerCmd.Remove(aura);
                 await ReactionEffects.Resolve(
                     choiceContext, reaction, target, Owner, null, consumed);
             }
 
             await CreatureCmd.Damage(
-                choiceContext, target, dealt,
+                choiceContext, target, (int)SimDamagePipeline.TargetMods(target, dealt),
                 ValueProp.Unpowered, dealer: null, cardSource: null);
         }
 
