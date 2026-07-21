@@ -62,6 +62,10 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<BlazingDelight>(),
             ModelDb.Card<BombVoyage>(),
             ModelDb.Card<BombsAway>(),
+            // Conditional batch: predicate reads verified against the sim
+            // (this_cost_zero / has_spark / reaction_triggered_by_this /
+            // killed_target) plus the repeat tail (sim resolve_card).
+            ModelDb.Card<BoomGoesTheDynamite>(),
             // R36 batch: unblocked by the discard op (random victim,
             // kit-exempt pool).
             ModelDb.Card<BrightIdea>(),
@@ -79,6 +83,7 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<Crackle>(),
             ModelDb.Card<DaDaDa>(),
             ModelDb.Card<DoublePop>(),
+            ModelDb.Card<EagerToHelp>(),
             ModelDb.Card<EndlessFireworks>(),
             ModelDb.Card<ExplosiveFrags>(),
             ModelDb.Card<ExplosivesWorkshop>(),
@@ -90,6 +95,8 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<JumpyDumptyMk2>(),
             ModelDb.Card<MineToss>(),
             ModelDb.Card<NoHoldingBack>(),
+            ModelDb.Card<PatchedDress>(),
+            ModelDb.Card<PerfectTiming>(),
             ModelDb.Card<PlaytimeForever>(),
             ModelDb.Card<PocketFireworks>(),
             // Bomb-op batch.
@@ -102,12 +109,14 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<SorryJean>(),
             ModelDb.Card<SparkCollection>(),
             ModelDb.Card<SparkKnightStyle>(),
+            ModelDb.Card<SparklyExplosion>(),
             ModelDb.Card<SparklyTreasure>(),
             ModelDb.Card<SpiritedAway>(),
             // Weak/Vulnerable batch: native core debuff PowerModels
             // (WeakPower/VulnerablePower), semantics verified == tier0.
             ModelDb.Card<Spooked>(),
             ModelDb.Card<SurpriseVisit>(),
+            ModelDb.Card<TailOfFlame>(),
             ModelDb.Card<TripWire>(),
             ModelDb.Card<TrueSparkKnight>(),
             ModelDb.Card<VermillionPact>(),
