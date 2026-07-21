@@ -65,11 +65,13 @@ public interface ISkillTagCard
 ///   accrual is UNCAPPED past 60 (the sim never clamps; the grant check is
 ///     >=, and casting resets to 0 -- overflow is lost at cast, not at gain).
 ///
-/// What this spike deliberately does NOT ship: the kit-grant machinery and
-/// the Burst card itself. Sparks 'n' Splash lands LAST in the power-card
-/// pass (standing plan), where the meter becomes its CustomResourceCost
-/// (SetCanonicalCost 60 gates playability via CanAfford) and casting empties
-/// the meter. Until then a full meter is visible but spends nothing.
+/// The kit half (landed with the kit-grant machinery, standing-plan item):
+/// Sparks 'n' Splash carries this resource as a BaseLib CustomResourceCost
+/// (SetCanonicalCost 60 -- CanAfford >= 60 gates playability, the sim's
+/// requires: burst_energy_full), KitGrant grants the card to hand at a full
+/// meter, and the Spend override below drains the WHOLE meter at cast --
+/// overflow is lost at cast, never at gain (combat.py: playing the Burst
+/// sets burst_energy = 0).
 ///
 /// The badge: BaseLib ships NO ambient on-screen meter (its resource UI is
 /// cost-side card visuals only; BasicResourceVisualsHandler is an empty
@@ -87,6 +89,21 @@ public sealed class KleeBurstResource : BasicCustomResource
 {
     public KleeBurstResource() : base("KLEEMOD_BURST")
     {
+    }
+
+    /// <summary>
+    /// Casting the Burst empties the METER, not just the canonical cost --
+    /// sim law (combat.py): `p.burst_energy = 0` on a requires-full play;
+    /// overflow past 60 is lost at cast, never clamped at gain. The cost
+    /// machinery passes amount = 60 (GetAmountToSpend); this resource's only
+    /// spender is the kit card, so the full drain is the rule, not a special
+    /// case.
+    /// </summary>
+    public override async Task Spend<T>(
+        MegaCrit.Sts2.Core.Combat.ICombatState combatState,
+        AbstractModel? spender, int amount)
+    {
+        await base.Spend<T>(combatState, spender, Amount);
     }
 
     /// <summary>
@@ -164,7 +181,8 @@ public sealed class BurstMeterPower : PowerModel, ILocalizationProvider
         ("title", "Burst Energy"),
         ("description",
             "Skill-tagged cards grant 5 [gold]Burst Energy[/gold]; Elemental "
-          + "Reactions grant 5. At 60, Klee's Burst is charged."),
+          + "Reactions grant 5. At 60, [gold]Sparks 'n' Splash[/gold] is "
+          + "added to your hand; casting it spends ALL Burst Energy."),
     };
 
     public override PowerType Type => PowerType.Buff;

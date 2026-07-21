@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -76,15 +77,59 @@ public sealed class KleeElementalHooks : AbstractModel
     }
 
     /// <summary>
-    /// Display half of the skill-tag gain: the first hook with a context
-    /// after BeforeCardPlayed, so the badge catches up to the resource here.
+    /// Display half of the burst economy: sync-to-truth after EVERY card
+    /// play. Unconditional because two writers move the resource without the
+    /// badge -- the skill-tag gain in BeforeCardPlayed (no context there) and
+    /// the full-meter drain when the Burst itself is cast (the cost
+    /// machinery's Spend, outside our call sites entirely). Delta-zero syncs
+    /// are no-ops, so the common case costs nothing.
+    ///
+    /// Also a kit-grant check site: the sim calls grant_charged_kit at the
+    /// end of every play_card (mid-turn gains -- reactions, splash, the
+    /// skill tag itself -- fill the meter during plays).
     /// </summary>
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (cardPlay.Card is not ISkillTagCard) return;
+        var owner = cardPlay.Card.Owner;
         await KleeBurstResource.SyncBadge(
-            choiceContext, cardPlay.Card.Owner.Creature, cardPlay.Card);
+            choiceContext, owner.Creature, cardPlay.Card);
+        await KitGrant.GrantIfCharged(choiceContext, owner);
+    }
+
+    /// <summary>
+    /// Kit-grant check, turn-start site: fires AFTER the hand draw
+    /// (CombatManager: draw, then this hook), the sim's exact phase -- so
+    /// turn-start meter gains (bomb detonations with Blazing Delight splash
+    /// land in BeforeSideTurnStart, earlier) grant before the player acts,
+    /// and the full-hand deferral sees the drawn hand.
+    /// </summary>
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        await KitGrant.GrantIfCharged(choiceContext, player);
+    }
+
+    /// <summary>
+    /// Kit-grant check, turn-end site: the sim checks after
+    /// player_turn_end_triggers (the Sparks 'n' Splash volley can react and
+    /// fill the meter) and before the discard filter. This hook maps to
+    /// Hook.BeforeTurnEnd -- before the flush -- and mod models run after
+    /// power hooks in the same broadcast, so the volley has already fired.
+    /// The granted card's Retain then carries it through the flush.
+    /// </summary>
+    public override async Task BeforeSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        foreach (var creature in participants)
+        {
+            if (creature.Player != null)
+            {
+                await KitGrant.GrantIfCharged(choiceContext, creature.Player);
+            }
+        }
     }
 
     public override async Task BeforeDamageReceived(
