@@ -57,7 +57,7 @@ public sealed class PatchedDress : CustomCardModel
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        if (IsUpgraded || (Owner.Creature.Powers.OfType<SparkPower>().FirstOrDefault()?.Amount ?? 0) > 0)
+        if (IsUpgraded || SparkPower.SparksAsResolved(Owner.Creature) > 0)
         {
             await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(2m, ValueProp.Move), cardPlay);
         }

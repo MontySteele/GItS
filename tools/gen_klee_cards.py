@@ -92,8 +92,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_
 #                      counters at resolve_card start).
 PREDICATES_CS = {
     "this_cost_zero": "EnergyCost.GetResolved() == 0",
-    "has_spark":
-        "(Owner.Creature.Powers.OfType<SparkPower>().FirstOrDefault()?.Amount ?? 0) > 0",
+    # SparksAsResolved, NOT the raw Amount: the sim spends the spark charge
+    # BEFORE effects resolve; the C# consume executes after (Snap fix), so
+    # mid-play reads subtract the pending spend.
+    "has_spark": "SparkPower.SparksAsResolved(Owner.Creature) > 0",
     "reaction_triggered_by_this": "ReactionEffects.TotalResolved > reactionsAtStart",
     "killed_target": "enemiesAtStart.Any(e => e.IsDead)",
 }
@@ -254,7 +256,8 @@ HAND_WRITTEN |= {"sparks_n_splash"}
 #                  codegen renders "X+{Bombs:diff()}" off a Bombs var
 EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "bomb_damage", "burst_energy", "cost",
                        "discard", "sparks", "innate", "bonus", "chance",
-                       "conditional_bonus", "condition", "bombs"}
+                       "conditional_bonus", "condition", "bombs",
+                       "bonus_per_detonation"}
                       | POWER_UPGRADE_KEYS)
 
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
@@ -344,8 +347,15 @@ def blocked_reason(card: dict) -> str | None:
             tgt = eff.get("target")
             if tgt not in DAMAGE_TARGETS:
                 return f"damage target '{tgt}'"
-            if "times_formula" in eff or "bonus_formula" in eff:
-                return "formula-driven damage"
+            if eff.get("times_formula", "2_plus_sparks") != "2_plus_sparks":
+                # The sim's only times formula (effects.py raises on others).
+                return f"times_formula '{eff['times_formula']}'"
+            bf = eff.get("bonus_formula")
+            if bf is not None and not (
+                    bf.endswith("_per_detonation_this_combat")
+                    and bf.partition("_per_")[0].isdigit()):
+                # Grand Finale's grammar; the fanfare variant is Furina-stream.
+                return f"bonus_formula '{bf}'"
             if "bonus_vs_bombed" in eff or "bonus_vs_aura" in eff:
                 return "conditional damage bonus (needs aura/bomb systems)"
             times = eff.get("times", 1)
@@ -501,6 +511,9 @@ def build_vars(card: dict) -> list[str]:
             out.append(f'new HpLossVar({eff["amount"]}m)')
         elif op == "damage":
             out.append(f'new DamageVar({eff["amount"]}m, ValueProp.Move)')
+            if "bonus_formula" in eff and bonus_per_upgrade(card):
+                n = int(eff["bonus_formula"].partition("_per_")[0])
+                out.append(f'new DynamicVar("BonusPer", {n}m)')
         elif op == "block":
             out.append(f'new BlockVar({eff["amount"]}m, ValueProp.Move)')
         elif op == "draw":
@@ -609,6 +622,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # bombs: tier0 rewrites X_plus_N -> X_plus_(N+val).
         "bombs": any(e["op"] == "place_bomb"
                      and isinstance(e.get("amount"), str) for e in effects),
+        # bonus_per_detonation: tier0 rewrites the bonus_formula's N.
+        "bonus_per_detonation": any("bonus_formula" in e for e in effects),
         "spark": any(e["op"] == "gain_spark" for e in effects),
         "bomb_damage": any(e["op"] == "place_bomb" for e in effects),
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
@@ -672,6 +687,12 @@ def chance_upgrade(card: dict) -> float:
     """Ruled `chance: X` REPLACEMENT (tier0 upgrades.py replaces, never
     bumps). 0.0 = none."""
     return float(upgrade_plan(card)[0].get("chance", 0.0))
+
+
+def bonus_per_upgrade(card: dict) -> int:
+    """Ruled `bonus_per_detonation: +N` (grand_finale): the bonus_formula's
+    per-detonation rate, rendered/upgraded via the BonusPer var. 0 = none."""
+    return int(upgrade_plan(card)[0].get("bonus_per_detonation", 0))
 
 
 def bombs_upgrade(card: dict) -> int:
@@ -764,7 +785,12 @@ def _emit_damage(card: dict, eff: dict, lines: list[str], ctx: dict,
 
     call = [f"await DamageCmd.Attack({amount_expr})"]
     x_times = isinstance(times, str)
-    if x_times:
+    if "times_formula" in eff:
+        # 2_plus_sparks (Gleeful Barrage), the sim's only times formula.
+        # SparksAsResolved: the sim computes times AFTER play_card's spend.
+        call.append(
+            ".WithHitCount(2 + SparkPower.SparksAsResolved(Owner.Creature))")
+    elif x_times:
         # times: "X" (fish_blasting). tier0 loops range(times): X = 0 means
         # NO hits, so the whole attack statement is gated below.
         call.append(f".WithHitCount({_x_expr(times)})")
@@ -937,7 +963,17 @@ def build_body(card: dict) -> list[str]:
                              f"(int)DynamicVars.{bomb_var(card)}.BaseValue")
 
         elif op == "damage":
-            _emit_damage(card, eff, lines, ctx, "DynamicVars.Damage.BaseValue")
+            amount_expr = "DynamicVars.Damage.BaseValue"
+            if "bonus_formula" in eff:
+                # N_per_detonation_this_combat (Grand Finale): flat rider on
+                # the printed number, before external buffs -- adding into
+                # the Attack amount is exactly the sim's `base +=`.
+                per = ('DynamicVars["BonusPer"].IntValue'
+                       if bonus_per_upgrade(card)
+                       else eff["bonus_formula"].partition("_per_")[0])
+                amount_expr += (f" + {per} * "
+                                "BombPower.DetonationsThisCombat(CombatState!)")
+            _emit_damage(card, eff, lines, ctx, amount_expr)
 
         elif op == "gain_spark":
             lines.append(_stmt_gain_spark(card, eff))
@@ -1253,8 +1289,14 @@ def build_description(card: dict) -> str:
         elif op == "damage":
             times = eff.get("times", 1)
             target = eff["target"]
+            if "times_formula" in eff:        # 2_plus_sparks
+                parts.append(
+                    "Deal {Damage:diff()} damage to a random enemy, "
+                    "2+[gold]Sparks[/gold] times.")
+                continue
             if isinstance(times, str):        # times: "X"
                 suffix = " X times"
+                times = 2                     # phrasing: plural targets
             else:
                 suffix = {1: "", 2: " twice", 3: " three times", 4: " four times"}.get(
                     times, f" {times} times"
@@ -1266,6 +1308,11 @@ def build_description(card: dict) -> str:
             else:
                 plural = "random enemies" if times > 1 else "a random enemy"
                 parts.append(f"Deal {{Damage:diff()}} damage to {plural}{suffix}.")
+            if "bonus_formula" in eff:
+                per = ("{BonusPer:diff()}" if bonus_per_upgrade(card)
+                       else eff["bonus_formula"].partition("_per_")[0])
+                parts.append(
+                    f"+{per} damage per [gold]Bomb[/gold] detonated this combat.")
 
         elif op == "gain_spark":
             if spark_upgrade(card):
@@ -1446,6 +1493,9 @@ def build_upgrade(card: dict) -> list[str]:
             "(IsUpgraded || predicate); the text swaps via {IfUpgraded:show:...}.")
     if "bombs" in deltas:
         lines.append(f'DynamicVars["Bombs"].UpgradeValueBy({int(deltas["bombs"])}m);')
+    if "bonus_per_detonation" in deltas:
+        lines.append(
+            f'DynamicVars["BonusPer"].UpgradeValueBy({int(deltas["bonus_per_detonation"])}m);')
     if "cost" in deltas:
         lines.append(f'EnergyCost.UpgradeBy({int(deltas["cost"])});')
     if "innate" in deltas:
