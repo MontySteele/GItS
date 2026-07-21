@@ -80,6 +80,8 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<ClockworkToy>(),
             ModelDb.Card<ClusterCharge>(),
             ModelDb.Card<CombustionStudy>(),
+            // X-cost batch (R34): HasEnergyCostX + ResolveEnergyXValue.
+            ModelDb.Card<ControlledDemolition>(),
             ModelDb.Card<Crackle>(),
             ModelDb.Card<DaDaDa>(),
             ModelDb.Card<DoublePop>(),
