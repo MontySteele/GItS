@@ -76,7 +76,22 @@ MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.js
 MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_energy",
                   "apply_power", "discard", "discard_for_sparks",
                   "detonate", "move_bombs", "modify_bombs",
-                  "chance_bomb_per_detonation", "conditional"}
+                  "chance_bomb_per_detonation", "conditional",
+                  "energy", "scry_discard", "add_card", "exhaust_from"}
+
+# --- small ops (2026-07-20 batch) --------------------------------------------
+# add_card token registry: sheet card id -> hand-written C# class. A pool
+# reference resolves against the SHEET at generation time instead (the
+# archetype/rarity data lives only there), and every resolved member must
+# itself be a generated class -- both enforced in blocked_reason.
+ADD_CARD_CLASSES = {"confiscated": "Confiscated"}
+ADD_CARD_FIELDS = {"op", "card", "card_id", "pool", "zone", "to", "amount",
+                   "cost_override"}
+ENERGY_FIELDS = {"op", "amount"}
+SCRY_FIELDS = {"op", "amount"}
+# exhaust_from: dodge_roll's shape only -- a random Status from hand. The
+# filterless form (kit-exempt any-card) blocks until a card needs it.
+EXHAUST_FROM_FIELDS = {"op", "zone", "filter", "amount"}
 
 # --- conditional op (2026-07-20 batch) ---------------------------------------
 # Predicates with a verified C# read, each mirroring tier0 effects.py
@@ -257,7 +272,7 @@ HAND_WRITTEN |= {"sparks_n_splash"}
 EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "bomb_damage", "burst_energy", "cost",
                        "discard", "sparks", "innate", "bonus", "chance",
                        "conditional_bonus", "condition", "bombs",
-                       "bonus_per_detonation"}
+                       "bonus_per_detonation", "cards", "remove"}
                       | POWER_UPGRADE_KEYS)
 
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
@@ -284,6 +299,28 @@ TARGET_CS = {
 def pascal(card_id: str) -> str:
     """kaboom -> Kaboom, sorry_jean -> SorryJean, jumpy_dumpty_mk2 -> JumpyDumptyMk2."""
     return "".join(p.capitalize() for p in re.split(r"[_\-]", card_id) if p)
+
+
+_sheet_cards_cache: list | None = None
+
+
+def _sheet_cards() -> list[dict]:
+    global _sheet_cards_cache
+    if _sheet_cards_cache is None:
+        _sheet_cards_cache = yaml.safe_load(SHEET.read_text(encoding="utf-8"))
+    return _sheet_cards_cache
+
+
+def _pool_members(pool: str) -> list[dict]:
+    """tier0 loader.cards_in_pool, resolved against the sheet at generation
+    time (archetype/rarity live only there): '<archetype>_<rarity>s'."""
+    archetype, _, rarity = pool.rpartition("_")
+    rarity = rarity.rstrip("s")
+    return sorted((c for c in _sheet_cards()
+                   if c.get("rarity") == rarity
+                   and archetype in c.get("archetypes", [])
+                   and not c.get("kit_card")),
+                  key=lambda c: c["id"])
 
 
 def _x_formula_reason(card: dict, val) -> str | None:
@@ -424,6 +461,49 @@ def blocked_reason(card: dict) -> str | None:
                     f"gen_klee_cards: {card['id']}: splash_procs_per_turn "
                     f"{eff.get('splash_procs_per_turn')!r} != 3; the C# cap is the "
                     f"DemolitionConstants.SplashProcCapPerTurn const -- change both.")
+        if op == "energy":
+            unknown = set(eff) - ENERGY_FIELDS
+            if unknown:
+                return f"energy field(s) {sorted(unknown)} not understood"
+            if not isinstance(eff.get("amount"), int):
+                return "energy amount must be a literal int"
+        if op == "scry_discard":
+            unknown = set(eff) - SCRY_FIELDS
+            if unknown:
+                return f"scry_discard field(s) {sorted(unknown)} not understood"
+            if not isinstance(eff.get("amount"), int):
+                return "scry_discard amount must be a literal int"
+        if op == "exhaust_from":
+            unknown = set(eff) - EXHAUST_FROM_FIELDS
+            if unknown:
+                return f"exhaust_from field(s) {sorted(unknown)} not understood"
+            if eff.get("zone") != "hand":
+                return f"exhaust_from zone '{eff.get('zone')}'"
+            if eff.get("filter") != "status":
+                return "exhaust_from without status filter (any-card pool not built)"
+            if eff.get("amount", 1) != 1:
+                return "exhaust_from amount > 1 (re-pool loop not built)"
+        if op == "add_card":
+            unknown = set(eff) - ADD_CARD_FIELDS
+            if unknown:
+                return f"add_card field(s) {sorted(unknown)} not understood"
+            zone = eff.get("zone") or eff.get("to", "discard")
+            if zone not in ("hand", "discard"):
+                return f"add_card zone '{zone}'"
+            if "pool" in eff:
+                members = _pool_members(eff["pool"])
+                if not members:
+                    return f"add_card pool '{eff['pool']}' resolves empty"
+                # Every member must itself generate: CreateCard needs a class.
+                bad = [m["id"] for m in members
+                       if m["id"] == card["id"] or blocked_reason(m)]
+                if bad:
+                    return (f"add_card pool '{eff['pool']}' contains "
+                            f"ungenerated card(s) {bad}")
+            else:
+                cid = eff.get("card_id") or eff.get("card")
+                if cid not in ADD_CARD_CLASSES:
+                    return f"add_card card '{cid}' (no C# token class registered)"
         if op == "conditional":
             unknown = set(eff) - CONDITIONAL_FIELDS
             if unknown:
@@ -549,6 +629,8 @@ def build_vars(card: dict) -> list[str]:
             # Rendered as a PERCENT (50 -> 75); the body divides by 100.
             out.append(
                 f'new DynamicVar("Chance", {int(round(float(eff["chance"]) * 100))}m)')
+        elif op == "add_card" and stash_upgrade(card):
+            out.append(f'new DynamicVar("Stash", {int(eff.get("amount", 1))}m)')
         elif op == "conditional":
             # Branch amounts are literals unless a ruled delta targets them:
             # conditional_bonus -> then-first damage (ExtraDamage), draw ->
@@ -624,6 +706,11 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                      and isinstance(e.get("amount"), str) for e in effects),
         # bonus_per_detonation: tier0 rewrites the bonus_formula's N.
         "bonus_per_detonation": any("bonus_formula" in e for e in effects),
+        # cards: tier0 bumps the add_card amount.
+        "cards": any(e["op"] == "add_card" for e in effects),
+        # remove: value-checked in the loop below (only 'exhaust' lands;
+        # 'self_damage' remains structural).
+        "remove": bool(card.get("exhaust")),
         "spark": any(e["op"] == "gain_spark" for e in effects),
         "bomb_damage": any(e["op"] == "place_bomb" for e in effects),
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
@@ -645,6 +732,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             return {}, f"delta key '{key}: {value}' not expressible by codegen (structural upgrade)"
         if key == "condition" and value != "unconditional":
             return {}, f"delta 'condition: {value}' (only 'unconditional' is tier0 grammar)"
+        if key == "remove" and value != "exhaust":
+            return {}, f"delta 'remove: {value}' not expressible by codegen (structural upgrade)"
         if not has[key]:
             return {}, f"delta key '{key}' has no matching effect on this card (sheet/card mismatch)"
     return dict(deltas), None
@@ -687,6 +776,12 @@ def chance_upgrade(card: dict) -> float:
     """Ruled `chance: X` REPLACEMENT (tier0 upgrades.py replaces, never
     bumps). 0.0 = none."""
     return float(upgrade_plan(card)[0].get("chance", 0.0))
+
+
+def stash_upgrade(card: dict) -> int:
+    """Ruled `cards: +N` (secret_stash): bumps the add_card amount. Rides a
+    'Stash' var ('Cards' is the draw CardsVar's name). 0 = none."""
+    return int(upgrade_plan(card)[0].get("cards", 0))
 
 
 def bonus_per_upgrade(card: dict) -> int:
@@ -1136,6 +1231,102 @@ def build_body(card: dict) -> list[str]:
                 "        }"
             )
 
+        elif op == "energy":
+            # tier0 _op_energy: flat gain, no cap (the game clamps nothing
+            # either -- PlayerCmd.GainEnergy is the base-game call).
+            lines.append(f'await PlayerCmd.GainEnergy({int(eff["amount"])}, Owner);')
+
+        elif op == "scry_discard":
+            # tier0 _op_scry_discard looks at the top N and discards the
+            # "worst" via the shared pilot heuristic -- which is the sim's
+            # stand-in for PLAYER CHOICE (R36 precedent: Crackle's heuristic
+            # discard landed as FromHandForDiscard). Top of pile is index 0
+            # (CardPile.MoveToTopInternal inserts at 0), so Take(N) is the
+            # sim's draw_pile[:n]. The unpicked card stays in place.
+            n = int(eff["amount"])
+            lines.append(
+                "{\n"
+                f"            var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take({n}).ToList();\n"
+                "            if (top != null && top.Count > 0)\n"
+                "            {\n"
+                "                var scryPick = (await CardSelectCmd.FromSimpleGrid(\n"
+                "                    choiceContext, top, Owner,\n"
+                "                    new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 1))).ToList();\n"
+                "                await CardCmd.Discard(choiceContext, scryPick);\n"
+                "            }\n"
+                "        }"
+            )
+
+        elif op == "exhaust_from":
+            # tier0 _op_exhaust_from with filter status: RANDOM victim from
+            # the hand's Status cards (not chosen -- the sim rolls rng).
+            lines.append(
+                "{\n"
+                "            var statusCards = CardPile.Get(PileType.Hand, Owner)?\n"
+                "                .Cards.Where(c => c.Rarity == CardRarity.Status).ToList();\n"
+                "            if (statusCards != null && statusCards.Count > 0)\n"
+                "            {\n"
+                "                var victim = Owner.RunState.Rng.CombatTargets.NextItem(statusCards);\n"
+                "                if (victim != null)\n"
+                "                {\n"
+                "                    await CardCmd.Exhaust(choiceContext, victim);\n"
+                "                }\n"
+                "            }\n"
+                "        }"
+            )
+
+        elif op == "add_card":
+            zone = eff.get("zone") or eff.get("to", "discard")
+            pile = "PileType.Hand" if zone == "hand" else "PileType.Discard"
+            n = int(eff.get("amount", 1))
+            if "pool" in eff:
+                # Pool resolved from the sheet at generation time; picks are
+                # WITH replacement (tier0: rng.choice per pick), each pick a
+                # fresh instance. AddGeneratedCardToCombat's own full-hand
+                # rule (redirect to discard) is the sim's _add_token rule.
+                members = _pool_members(eff["pool"])
+                count = ('DynamicVars["Stash"].IntValue'
+                         if stash_upgrade(card) else str(n))
+                model_list = ",\n".join(
+                    f"                ModelDb.Card<{pascal(m['id'])}>()"
+                    for m in members)
+                cost_line = ""
+                if "cost_override" in eff:
+                    # tier0 token.cost stays overridden for the token's whole
+                    # combat lifetime -> SetThisCombat.
+                    cost_line = (f"                token.EnergyCost.SetThisCombat("
+                                 f'{int(eff["cost_override"])});\n')
+                lines.append(
+                    "{\n"
+                    "            var stashPool = new List<CardModel>\n"
+                    "            {\n"
+                    f"{model_list}\n"
+                    "            };\n"
+                    f"            for (var i = 0; i < {count}; i++)\n"
+                    "            {\n"
+                    "                var canonical = Owner.RunState.Rng.CombatTargets.NextItem(stashPool);\n"
+                    "                if (canonical == null) break;\n"
+                    "                var token = CombatState!.CreateCard(canonical, Owner);\n"
+                    f"{cost_line}"
+                    f"                await CardPileCmd.AddGeneratedCardToCombat(token, {pile}, Owner);\n"
+                    "            }\n"
+                    "        }"
+                )
+            else:
+                cid = eff.get("card_id") or eff.get("card")
+                cls = ADD_CARD_CLASSES[cid]
+                token_lines = (
+                    f"            var token = CombatState!.CreateCard<{cls}>(Owner);\n"
+                    f"            await CardPileCmd.AddGeneratedCardToCombat(token, {pile}, Owner);\n"
+                )
+                body = token_lines if n == 1 else (
+                    f"            for (var i = 0; i < {n}; i++)\n"
+                    "            {\n"
+                    + token_lines.replace("            ", "                ")
+                    + "            }\n"
+                )
+                lines.append("{\n" + body + "        }")
+
         elif op == "conditional":
             then = eff.get("then", [])
             if any(e.get("op") == "repeat_this" for e in then):
@@ -1375,6 +1566,41 @@ def build_description(card: dict) -> str:
                 "random enemy."
             )
 
+        elif op == "energy":
+            n = int(eff["amount"])
+            parts.append(f"Gain {n} Energy.")
+
+        elif op == "scry_discard":
+            parts.append(
+                f'Look at the top {int(eff["amount"])} cards of your draw '
+                "pile; discard one.")
+
+        elif op == "exhaust_from":
+            parts.append("Exhaust a random Status card from your hand.")
+
+        elif op == "add_card":
+            n = eff.get("amount", 1)
+            zone_txt = ("your hand"
+                        if (eff.get("zone") or eff.get("to", "discard")) == "hand"
+                        else "your discard pile")
+            if "pool" in eff:
+                archetype, _, rarity = eff["pool"].rpartition("_")
+                rarity = rarity.rstrip("s").capitalize()
+                count = "{Stash:diff()}" if stash_upgrade(card) else str(int(n))
+                clause = (f"Add {count} random [gold]{archetype}[/gold] "
+                          f"{rarity} cards to {zone_txt}.")
+                if eff.get("cost_override") == 0:
+                    clause += " They cost 0 this combat."
+                elif "cost_override" in eff:
+                    clause += f' They cost {int(eff["cost_override"])} this combat.'
+                parts.append(clause)
+            else:
+                name = eff.get("card_id") or eff.get("card")
+                name = name.replace("_", " ").title()
+                a_card = (f"a [gold]{name}[/gold]" if int(n) == 1
+                          else f"{int(n)} [gold]{name}[/gold] cards")
+                parts.append(f"Add {a_card} to {zone_txt}.")
+
         elif op == "conditional":
             pred_txt = PREDICATE_TEXT[eff["if"]]
             then = eff.get("then", [])
@@ -1496,6 +1722,12 @@ def build_upgrade(card: dict) -> list[str]:
     if "bonus_per_detonation" in deltas:
         lines.append(
             f'DynamicVars["BonusPer"].UpgradeValueBy({int(deltas["bonus_per_detonation"])}m);')
+    if "cards" in deltas:
+        lines.append(f'DynamicVars["Stash"].UpgradeValueBy({int(deltas["cards"])}m);')
+    if deltas.get("remove") == "exhaust":
+        # tier0: card.exhaust = False. Keywords are instance-owned, so this
+        # touches only the upgraded copy; the auto-keyword text follows.
+        lines.append("RemoveKeyword(CardKeyword.Exhaust);")
     if "cost" in deltas:
         lines.append(f'EnergyCost.UpgradeBy({int(deltas["cost"])});')
     if "innate" in deltas:

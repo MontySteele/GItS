@@ -84,11 +84,16 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<ControlledDemolition>(),
             ModelDb.Card<Crackle>(),
             ModelDb.Card<DaDaDa>(),
+            // Small-ops batch: energy / scry_discard / add_card /
+            // exhaust_from. Confiscated (Fish Blasting's Status token) is
+            // deliberately NOT pooled -- Status rarity, created at play.
+            ModelDb.Card<DodgeRoll>(),
             ModelDb.Card<DoublePop>(),
             ModelDb.Card<EagerToHelp>(),
             ModelDb.Card<EndlessFireworks>(),
             ModelDb.Card<ExplosiveFrags>(),
             ModelDb.Card<ExplosivesWorkshop>(),
+            ModelDb.Card<FishBlasting>(),
             ModelDb.Card<FishFlavoredBait>(),
             ModelDb.Card<FlameOnTheWick>(),
             // Formula batch: 2+Sparks hit count (SparksAsResolved -- the
@@ -111,6 +116,7 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<RapidFire>(),
             ModelDb.Card<RemoteDetonator>(),
             ModelDb.Card<RunAway>(),
+            ModelDb.Card<SecretStash>(),
             ModelDb.Card<SkipAndHop>(),
             ModelDb.Card<Snap>(),
             ModelDb.Card<SorryJean>(),
@@ -122,6 +128,8 @@ public sealed class KleeCardPool : CardPoolModel
             // Weak/Vulnerable batch: native core debuff PowerModels
             // (WeakPower/VulnerablePower), semantics verified == tier0.
             ModelDb.Card<Spooked>(),
+            ModelDb.Card<StudyOfExplosions>(),
+            ModelDb.Card<SugarRush>(),
             ModelDb.Card<SurpriseVisit>(),
             ModelDb.Card<TailOfFlame>(),
             ModelDb.Card<TripWire>(),
