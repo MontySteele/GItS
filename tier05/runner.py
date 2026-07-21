@@ -15,6 +15,7 @@ import sys
 import time
 
 from tier0 import constants as C
+from tier0.content import loader
 from tier05 import ab, draft, model, run_metrics
 
 ARCHETYPE_PILOTS = {"demolition": "demolition", "spark": "spark",
@@ -35,6 +36,16 @@ def main(argv: list[str] | None = None) -> int:
                     help="M6 A/B: assigned vs adaptive over the same seeds")
     args = ap.parse_args(argv)
 
+    # The death-heatmap bar is a block glyph; a cp1252 console (Windows
+    # default) raises UnicodeEncodeError the moment ANY node records a
+    # death, which killed the report mid-table. Pre-existing, found
+    # 2026-07-21 -- and a plausible reason the HP bands this module has
+    # always printed were never actually read.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, OSError):       # non-reconfigurable stream
+        pass
+
     archetype = args.archetype
     if args.character == "ref_ironclad":
         archetype = "generic"           # the anchor drafts power, not plans
@@ -52,8 +63,10 @@ def main(argv: list[str] | None = None) -> int:
     results = model.run_many(args.character, archetype, pilot,
                              draft.POLICIES[args.policy], args.runs, args.seed)
     summary = run_metrics.summarize_runs(results)
+    max_hp = loader._character_index()[args.character]["hp"]
+    survival = run_metrics.survival_profile(results, max_hp)
     run_metrics.print_run_report(args.character, archetype, summary,
-                                 results[0].node_kinds)
+                                 results[0].node_kinds, survival)
     print(f"\n({args.runs} runs in {time.perf_counter() - t0:.1f}s)")
 
     if args.csv:

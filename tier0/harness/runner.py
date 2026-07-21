@@ -159,6 +159,16 @@ def main(argv: list[str] | None = None) -> int:
                          "identity evaluation (round-3 canon)")
     args = ap.parse_args(argv)
 
+    # The summary line prints "hpΔ" and the scorecard prints block-glyph
+    # bars; a cp1252 console (Windows default) raises UnicodeEncodeError on
+    # both, killing the run AFTER the battery has been computed. Same
+    # pre-existing bug already fixed in tier05/runner.py -- found here
+    # 2026-07-21 when the real_ironclad comparison could not be printed.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, OSError):       # non-reconfigurable stream
+        pass
+
     if args.report_character:
         t0 = time.perf_counter()
         rep = score_character(args.character, args.fights, args.seed)

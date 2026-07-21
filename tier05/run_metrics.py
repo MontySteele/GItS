@@ -56,6 +56,48 @@ def summarize_runs(results: list[RunResult]) -> dict:
     }
 
 
+NEAR_DEATH_FRACTION = 0.15      # "one bad turn from dead"
+
+
+def survival_profile(results: list[RunResult], max_hp: int) -> dict:
+    """Fragility as SCALARS, normalized by max HP.
+
+    Pass-4 sim-fidelity finding (2026-07-21): `hp_bands` already carried
+    this signal and was already printed, but the design conversation
+    travelled on the run-winrate scalar alone, which compresses "she
+    spends the whole act one bad turn from dead" into a single percent.
+    Absolute HP is also uninterpretable across characters with different
+    max HP (Klee 62 vs REF_IRONCLAD 80) -- so everything here is a
+    FRACTION of max, which is what makes an anchor comparison possible.
+
+    Not banded, deliberately: bands are user-ratified (house rule). This
+    reports; a ruling decides what is acceptable.
+    """
+    if not results:
+        return {}
+    kinds = results[0].node_kinds
+    fight_pos = [i for i, k in enumerate(kinds) if k != "R"]
+    pct = []
+    for pos in fight_pos:
+        vals = [r.hp_by_node[pos] for r in results if len(r.hp_by_node) > pos]
+        pct.append(_percentile(vals, 0.50) / max_hp if vals else 0.0)
+    floor = NEAR_DEATH_FRACTION * max_hp
+    ever_near = sum(1 for r in results
+                    if any(0 < h <= floor for h in r.hp_by_node))
+    return {
+        "median_hp_pct_by_fight": pct,
+        # Mean of the median HP fraction across the act: one number for
+        # "how much health does this character actually run on".
+        "act_median_hp_pct": sum(pct) / len(pct) if pct else 0.0,
+        # Share of the act the median run spends under 30% HP.
+        "act_share_below_30pct": (sum(1 for p in pct if p < 0.30)
+                                  / len(pct) if pct else 0.0),
+        # Share of runs that ever touch the near-death floor while alive.
+        "near_death_rate": ever_near / len(results),
+        "max_hp": max_hp,
+    }
+
+
 def banner_variance(results: list[RunResult]) -> dict:
     """v1.8 addendum: the bad-roll-bricking detector.
 
@@ -121,10 +163,19 @@ def _ungated(required: set[str], r: RunResult) -> set[str]:
 
 
 def print_run_report(character: str, archetype: str, s: dict,
-                     node_kinds: list[str]) -> None:
+                     node_kinds: list[str], survival: dict | None = None) -> None:
     print(f"\n=== Tier 0.5 runs: {character}/{archetype} "
           f"({s['runs']} runs) ===")
     print(f"  run winrate      {s['winrate']:.1%}")
+    if survival:
+        print(f"  survival         act median HP "
+              f"{survival['act_median_hp_pct']:.0%} of max "
+              f"({survival['max_hp']} HP)   "
+              f"{survival['act_share_below_30pct']:.0%} of the act under 30%"
+              f"   near-death {survival['near_death_rate']:.0%} of runs")
+        print("                   median HP% by fight: "
+              + " ".join(f"{p:.0%}" for p in
+                         survival["median_hp_pct_by_fight"]))
     print(f"  final deck size  {s['avg_final_deck']:.1f}   "
           f"pick rate {s['pick_rate']:.0%}   "
           f"regrets {s['regretted_decisions']}")

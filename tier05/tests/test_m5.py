@@ -9,7 +9,7 @@ import pytest
 from tier0 import constants as C
 from tier0.content import loader, upgrades
 from tier05 import draft, model, rewards
-from tier05.run_metrics import summarize_runs
+from tier05.run_metrics import summarize_runs, survival_profile
 
 SEED = 42
 
@@ -219,6 +219,51 @@ def test_core_advance_never_dead_pick():
 
 
 # --- fragility metrics ---
+
+def _fake_run(hp_by_node, kinds):
+    """A RunResult with a hand-built HP curve, for metric unit tests."""
+    return model.RunResult(seed=0, won=True, death_node=None,
+                           hp_by_node=list(hp_by_node), deck_ids=[],
+                           node_kinds=list(kinds))
+
+
+def test_survival_profile_reads_the_curve_it_is_given():
+    """Pass-4 instrument: fragility as max-HP-normalized scalars.
+
+    Unit-tested on synthetic curves rather than sim output, so the metric
+    is pinned independently of any balance number that may later move.
+    """
+    kinds = ["N", "N", "R", "N"]          # 3 fights, one rest (excluded)
+    # max_hp 100: fights at 80, 40, 20 -> mean 46.7%, 2 of 3 under 30%.
+    s = survival_profile([_fake_run([80, 40, 99, 20], kinds)], 100)
+    assert s["median_hp_pct_by_fight"] == [0.8, 0.4, 0.2]   # rest dropped
+    assert s["act_median_hp_pct"] == pytest.approx(0.4667, abs=1e-3)
+    assert s["act_share_below_30pct"] == pytest.approx(1 / 3)  # only 20%
+
+    # Near-death floor is 15% of max: 20/100 is above it, 10/100 below.
+    assert s["near_death_rate"] == 0.0
+    assert survival_profile([_fake_run([80, 40, 99, 10], kinds)],
+                            100)["near_death_rate"] == 1.0
+    # Dead (0 HP) is not "near death" -- the floor is for LIVING runs.
+    assert survival_profile([_fake_run([80, 40, 99, 0], kinds)],
+                            100)["near_death_rate"] == 0.0
+
+
+def test_survival_profile_separates_a_fragile_run_from_a_sturdy_one():
+    """The seen-to-FAIL half: the metric must actually discriminate.
+
+    Two characters with the SAME max HP and different curves -- every
+    scalar must move in the fragile direction. This is the comparison the
+    run-winrate scalar cannot make: both runs below could complete the
+    act and report an identical 100% winrate.
+    """
+    kinds = ["N", "N", "N"]
+    sturdy = survival_profile([_fake_run([80, 60, 45], kinds)], 100)
+    fragile = survival_profile([_fake_run([50, 25, 12], kinds)], 100)
+    assert fragile["act_median_hp_pct"] < sturdy["act_median_hp_pct"]
+    assert fragile["act_share_below_30pct"] > sturdy["act_share_below_30pct"]
+    assert fragile["near_death_rate"] > sturdy["near_death_rate"]
+
 
 def test_summarize_runs_fragility_shape():
     res = model.run_many("klee", "demolition", "demolition",
