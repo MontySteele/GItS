@@ -58,7 +58,10 @@ public static class CompanionSlot
 
         var pick = rng.NextItem(pool);
         if (pick == null) return null;
-        // SpecialCardReward asserts mutability -- hand it a fresh instance.
+        // Same instantiation the native reward path uses for its own rolled
+        // cards (CardFactory.CreateForReward ends in exactly this call), so
+        // the appended 4th option is indistinguishable from the other three.
+        // No upgrade roll: companions never scale (MaxUpgradeLevel 0).
         return ((ICardScope)player.RunState).CreateCard(pick, player);
     }
 }

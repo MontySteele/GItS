@@ -2,12 +2,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.Rewards;
-using MegaCrit.Sts2.Core.Rooms;
+using MegaCrit.Sts2.Core.Runs;
 
 namespace KleeMod.Relics;
 
@@ -60,23 +60,37 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
 
     /// <summary>
     /// The companion reward slot (tier05 roll_rewards, standard mode): one
-    /// companion offered on every FIGHT reward screen, riding
-    /// SpecialCardReward (the native take-or-skip single-card reward).
+    /// companion appended to the FIGHT card reward's options.
+    ///
     /// Hosted here because the starter relic is the one model guaranteed
-    /// present for the whole of every Klee run and relics are the hook's
+    /// present for the whole of every Klee run, and relics are this hook's
     /// intended listeners (AbstractModel doc: Orrery, Tiny Mailbox).
-    /// room is CombatRoom = end-of-encounter rewards only; null room
-    /// (relic pickups, events) and non-combat rooms get no slot.
+    ///
+    /// CORRECTION OF RECORD (playtest 2026-07-21). This first shipped as
+    /// TryModifyRewards + SpecialCardReward, which put the companion in its
+    /// own reward row -- so the player could take a card AND the companion.
+    /// That is not the law: tier05 roll_rewards returns ONE offers list,
+    /// REWARD_CARD_OFFERS cards with the companion appended, and the draft
+    /// policy picks one from it. TryModifyCardRewardOptions is the hook that
+    /// mirrors that exactly -- it appends to the card reward's own option
+    /// list, so the companion is a genuine 4th choice competing with the
+    /// three cards. Fired from CardFactory.CreateForReward after the cards
+    /// are rolled.
+    ///
+    /// Source == Encounter is the "post-fight reward" gate (the enum's own
+    /// doc); Shop and Other (events, relic-granted picks) get no companion,
+    /// matching roll_rewards being the post-fight function.
     /// </summary>
-    public override bool TryModifyRewards(
-        Player player, List<Reward> rewards, AbstractRoom? room)
+    public override bool TryModifyCardRewardOptions(
+        Player player, List<CardCreationResult> cardRewardOptions,
+        CardCreationOptions creationOptions)
     {
-        if (room is not CombatRoom) return false;
+        if (creationOptions.Source != CardCreationSource.Encounter) return false;
         if (player.Character is not Klee) return false;
 
         var offer = CompanionSlot.Roll(player);
         if (offer == null) return false;
-        rewards.Add(new SpecialCardReward(offer, player));
+        cardRewardOptions.Add(new CardCreationResult(offer));
         return true;
     }
 

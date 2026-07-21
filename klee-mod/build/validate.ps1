@@ -183,6 +183,29 @@ if (-not (Test-Path $venvPython)) {
 }
 
 # ---------------------------------------------------------------------------
+# S6b. Every card class belongs to a card pool.
+#
+# Playtest 2026-07-21: companions, the kit Burst card and the Confiscated token
+# were all deliberately kept out of KleeCardPool (correctly -- none of them are
+# rollable), but a card in NO pool makes CardModel.Pool fall through to
+# MockCardPool, which throws "You monster!" in a shipped build. Pool is read
+# when a card NODE is built, so it crashed on DRAW, not on play: one softlocked
+# combat and one dead-looking reward button. KleeExtraCardPool holds the
+# never-rollable cards; this lint makes forgetting it impossible.
+# ---------------------------------------------------------------------------
+$poolLint = Join-Path $repoRoot 'tools\lint_pool_membership.py'
+if (-not (Test-Path $venvPython)) {
+    Fail 'S6b' "repo venv python not found at $venvPython; cannot run pool membership lint."
+} elseif (-not (Test-Path $poolLint)) {
+    Fail 'S6b' "tools/lint_pool_membership.py is missing."
+} else {
+    $poolOut = & $venvPython $poolLint
+    if ($LASTEXITCODE -ne 0) {
+        Fail 'S6b' "pool membership lint failed:`n    $($poolOut -join "`n    ")"
+    }
+}
+
+# ---------------------------------------------------------------------------
 # S7. The FULL repo test suite must be green before anything deploys.
 #
 # Lesson (2026-07-20): a compaction-narrowed "pytest tier0" habit reported
