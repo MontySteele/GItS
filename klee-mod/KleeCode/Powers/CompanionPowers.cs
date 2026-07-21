@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
+using KleeMod.Cards;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -25,6 +26,128 @@ public static class CompanionConstants
     public const int WitchsFlameDamage = 4;    // WITCHS_FLAME_DMG (applies pyro)
     public const int SolarIsotomaBlock = 3;    // SOLAR_ISOTOMA_BLOCK per hit
     public const int CelestialGiftBlock = 4;   // CELESTIAL_GIFT_BLOCK per turn
+}
+
+/// <summary>
+/// Which companions have been played this combat, unique in first-play
+/// order (tier0 companions_played + dict.fromkeys) -- Best Friends Forever
+/// reads it. Keyed to the combat-state instance, the
+/// DetonationsThisCombat pattern: a fresh combat starts empty with no
+/// reset hook. Recorded from KleeElementalHooks.BeforeCardPlayed
+/// (IsFirstInSeries = once per play, the sim's play_card append site).
+/// </summary>
+public static class CompanionPlays
+{
+    private static ICombatState? _combat;
+    private static readonly List<ModelId> _played = new();
+
+    public static void Record(ICombatState? combatState, CardModel card)
+    {
+        if (combatState == null) return;
+        if (!ReferenceEquals(combatState, _combat))
+        {
+            _combat = combatState;
+            _played.Clear();
+        }
+        if (!_played.Contains(card.Id))
+        {
+            _played.Add(card.Id);
+        }
+    }
+
+    public static IReadOnlyList<ModelId> PlayedThisCombat(ICombatState combatState)
+        => ReferenceEquals(combatState, _combat)
+            ? _played
+            : (IReadOnlyList<ModelId>)System.Array.Empty<ModelId>();
+}
+
+/// <summary>
+/// Friendly Visit: Companion cards cost Amount less this turn (tier0
+/// companion_cost_delta_this_turn, reset at the next player turn start).
+/// Rides the same Hook.ModifyEnergyCostInCombat surface as SparkPower's
+/// zeroing; the game clamps at 0 via GetAmountToSpend's Math.Max.
+/// </summary>
+public sealed class CompanionCostThisTurnPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Friendly Visit"),
+        ("description",
+            "[gold]Companion[/gold] cards cost {Amount} less this turn."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override bool TryModifyEnergyCostInCombat(
+        CardModel card, decimal originalCost, out decimal modifiedCost)
+    {
+        modifiedCost = originalCost;
+        if (card is not ICompanionCard) return false;
+        if (card.Owner?.Creature != Owner) return false;
+        if (originalCost <= 0m) return false;
+        modifiedCost = System.Math.Max(0m, originalCost - Amount);
+        return true;
+    }
+
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (player.Creature != Owner) return;
+        await PowerCmd.Remove(this);
+    }
+}
+
+/// <summary>
+/// Study Buddy: the next Companion card played this turn is played Amount
+/// extra times (tier0 replay_next_companion: consumed whole by the next
+/// companion play_card, reset at turn start). ModifyCardPlayCount is the
+/// game's replay surface -- the extra plays are a series on one CardPlay,
+/// which is also what the sim's `for _ in range(replays)` is.
+/// </summary>
+public sealed class ReplayNextCompanionPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Study Buddy"),
+        ("description",
+            "The next [gold]Companion[/gold] card you play this turn is "
+          + "played {Amount} extra time{Amount:plural:|s}."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override int ModifyCardPlayCount(
+        CardModel card, Creature? target, int playCount)
+    {
+        if (card is not ICompanionCard) return playCount;
+        if (card.Owner?.Creature != Owner) return playCount;
+        return playCount + Amount;
+    }
+
+    public override async Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        // Consumed by that one companion play (sim zeroes the counter as it
+        // captures the replays); the play count was read at play creation,
+        // so removing after the series cannot shorten it.
+        if (cardPlay.Card is not ICompanionCard) return;
+        if (cardPlay.Card.Owner.Creature != Owner) return;
+        if (!cardPlay.IsLastInSeries) return;
+        await PowerCmd.Remove(this);
+    }
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        // Expires with the turn (sim resets at the next turn start).
+        if (side != CombatSide.Player) return;
+        await PowerCmd.Remove(this);
+    }
 }
 
 /// <summary>

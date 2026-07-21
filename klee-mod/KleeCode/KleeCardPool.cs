@@ -56,6 +56,9 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<AlchemicalCuriosity>(),
             ModelDb.Card<AllMyTreasures>(),
             ModelDb.Card<AmmoScavenging>(),
+            // Companion-op batch: the four cards that read the companion
+            // system (cost mod / copy / replay / played-ledger).
+            ModelDb.Card<BestFriendsForever>(),
             ModelDb.Card<BigBaddaBoom>(),
             ModelDb.Card<BlastRadius>(),
             // Power-card pass: unblocked by the apply_power op.
@@ -66,6 +69,7 @@ public sealed class KleeCardPool : CardPoolModel
             // (this_cost_zero / has_spark / reaction_triggered_by_this /
             // killed_target) plus the repeat tail (sim resolve_card).
             ModelDb.Card<BoomGoesTheDynamite>(),
+            ModelDb.Card<BorrowedBrilliance>(),
             // R36 batch: unblocked by the discard op (random victim,
             // kit-exempt pool).
             ModelDb.Card<BrightIdea>(),
@@ -96,6 +100,7 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<FishBlasting>(),
             ModelDb.Card<FishFlavoredBait>(),
             ModelDb.Card<FlameOnTheWick>(),
+            ModelDb.Card<FriendlyVisit>(),
             // Formula batch: 2+Sparks hit count (SparksAsResolved -- the
             // post-spend bank) and per-detonation damage rider
             // (BombPower.DetonationsThisCombat).
@@ -128,6 +133,7 @@ public sealed class KleeCardPool : CardPoolModel
             // Weak/Vulnerable batch: native core debuff PowerModels
             // (WeakPower/VulnerablePower), semantics verified == tier0.
             ModelDb.Card<Spooked>(),
+            ModelDb.Card<StudyBuddy>(),
             ModelDb.Card<StudyOfExplosions>(),
             ModelDb.Card<SugarRush>(),
             ModelDb.Card<SurpriseVisit>(),

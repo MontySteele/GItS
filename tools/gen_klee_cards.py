@@ -79,7 +79,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_
                   "detonate", "move_bombs", "modify_bombs",
                   "chance_bomb_per_detonation", "conditional",
                   "energy", "scry_discard", "add_card", "exhaust_from",
-                  "apply_aura", "swirl", "buff_next_attack"}
+                  "apply_aura", "swirl", "buff_next_attack",
+                  "cost_mod", "copy_companion_in_hand",
+                  "replay_next_companion", "copy_companions_played_this_combat"}
 
 # --- companion batch (2026-07-21) --------------------------------------------
 def is_companion(card: dict) -> bool:
@@ -310,7 +312,8 @@ HAND_WRITTEN |= {"sparks_n_splash"}
 EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "bomb_damage", "burst_energy", "cost",
                        "discard", "sparks", "innate", "bonus", "chance",
                        "conditional_bonus", "condition", "bombs",
-                       "bonus_per_detonation", "cards", "remove"}
+                       "bonus_per_detonation", "cards", "remove",
+                       "copy_cost_override"}
                       | POWER_UPGRADE_KEYS)
 
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
@@ -508,6 +511,41 @@ def blocked_reason(card: dict) -> str | None:
                     f"gen_klee_cards: {card['id']}: splash_procs_per_turn "
                     f"{eff.get('splash_procs_per_turn')!r} != 3; the C# cap is the "
                     f"DemolitionConstants.SplashProcCapPerTurn const -- change both.")
+        if op == "cost_mod":
+            unknown = set(eff) - {"op", "scope", "delta", "duration"}
+            if unknown:
+                return f"cost_mod field(s) {sorted(unknown)} not understood"
+            if eff.get("scope") != "companion_cards":
+                return f"cost_mod scope '{eff.get('scope')}'"
+            if eff.get("duration") != "this_turn":
+                return f"cost_mod duration '{eff.get('duration')}'"
+            if not isinstance(eff.get("delta"), int) or eff["delta"] >= 0:
+                return "cost_mod delta must be a negative literal int"
+        if op == "copy_companion_in_hand":
+            # `temp` accepted and IGNORED: tier0 _op_copy_companion_in_hand
+            # never reads it (the copy persists) -- the sim is LAW, so the
+            # mirror ignores it too rather than inventing a mechanic.
+            unknown = set(eff) - {"op", "amount", "temp"}
+            if unknown:
+                return f"copy_companion_in_hand field(s) {sorted(unknown)} not understood"
+            if eff.get("amount", 1) != 1:
+                return "copy_companion_in_hand amount > 1 (single-pick idiom only)"
+        if op == "replay_next_companion":
+            unknown = set(eff) - {"op", "times", "duration"}
+            if unknown:
+                return f"replay_next_companion field(s) {sorted(unknown)} not understood"
+            if eff.get("duration") != "this_turn":
+                return f"replay_next_companion duration '{eff.get('duration')}'"
+            if not isinstance(eff.get("times", 1), int):
+                return "replay_next_companion times must be a literal int"
+        if op == "copy_companions_played_this_combat":
+            unknown = set(eff) - {"op", "zone", "cost_override"}
+            if unknown:
+                return f"copy_companions_played field(s) {sorted(unknown)} not understood"
+            if eff.get("zone", "hand") != "hand":
+                return f"copy_companions_played zone '{eff.get('zone')}'"
+            if "cost_override" in eff and not isinstance(eff["cost_override"], int):
+                return "copy_companions_played cost_override must be a literal int"
         if op == "apply_aura":
             unknown = set(eff) - APPLY_AURA_FIELDS
             if unknown:
@@ -780,6 +818,9 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # remove: value-checked in the loop below (only 'exhaust' lands;
         # 'self_damage' remains structural).
         "remove": bool(card.get("exhaust")),
+        # copy_cost_override: play-time IsUpgraded read in the copy emission.
+        "copy_cost_override": any(e["op"] == "copy_companion_in_hand"
+                                  for e in effects),
         "spark": any(e["op"] == "gain_spark" for e in effects),
         "bomb_damage": any(e["op"] == "place_bomb" for e in effects),
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
@@ -1300,6 +1341,73 @@ def build_body(card: dict) -> list[str]:
                 "        }"
             )
 
+        elif op == "cost_mod":
+            # tier0 _op_cost_mod: companion_cost_delta_this_turn += delta.
+            # Amount is the REDUCTION (positive; PowerModel amounts are
+            # non-negative by default).
+            lines.append(
+                f"await PowerCmd.Apply<CompanionCostThisTurnPower>(choiceContext, "
+                f'Owner.Creature, {-int(eff["delta"])}, '
+                "applier: Owner.Creature, cardSource: this);"
+            )
+
+        elif op == "copy_companion_in_hand":
+            # tier0: random companion in hand, fresh copy to hand. The
+            # upgrade's copy_cost_override is a play-time IsUpgraded read
+            # (patched_dress precedent -- codegen cannot rewrite OnPlay from
+            # OnUpgrade).
+            cost_line = ""
+            if "copy_cost_override" in upgrade_plan(card)[0]:
+                override = int(upgrade_plan(card)[0]["copy_cost_override"])
+                cost_line = (
+                    "                    if (IsUpgraded)\n"
+                    "                    {\n"
+                    f"                        copyToken.EnergyCost.SetThisCombat({override});\n"
+                    "                    }\n"
+                )
+            lines.append(
+                "{\n"
+                "            var companionsInHand = CardPile.Get(PileType.Hand, Owner)?\n"
+                "                .Cards.Where(c => c is ICompanionCard).ToList();\n"
+                "            if (companionsInHand != null && companionsInHand.Count > 0)\n"
+                "            {\n"
+                "                var pickedCompanion = Owner.RunState.Rng.CombatTargets.NextItem(companionsInHand);\n"
+                "                if (pickedCompanion != null)\n"
+                "                {\n"
+                "                    var copyToken = CombatState!.CreateCard(\n"
+                "                        ModelDb.GetById<CardModel>(pickedCompanion.Id), Owner);\n"
+                + cost_line
+                + "                    await CardPileCmd.AddGeneratedCardToCombat(copyToken, PileType.Hand, Owner);\n"
+                "                }\n"
+                "            }\n"
+                "        }"
+            )
+
+        elif op == "replay_next_companion":
+            lines.append(
+                f"await PowerCmd.Apply<ReplayNextCompanionPower>(choiceContext, "
+                f'Owner.Creature, {int(eff.get("times", 1))}, '
+                "applier: Owner.Creature, cardSource: this);"
+            )
+
+        elif op == "copy_companions_played_this_combat":
+            # tier0: unique companions played this combat, in first-play
+            # order, fresh tokens (cost_override) to hand.
+            override_line = ""
+            if "cost_override" in eff:
+                override_line = (
+                    f"            playedToken.EnergyCost.SetThisCombat({int(eff['cost_override'])});\n"
+                )
+            lines.append(
+                "foreach (var companionId in CompanionPlays.PlayedThisCombat(CombatState!))\n"
+                "        {\n"
+                "            var playedToken = CombatState!.CreateCard(\n"
+                "                ModelDb.GetById<CardModel>(companionId), Owner);\n"
+                + override_line
+                + "            await CardPileCmd.AddGeneratedCardToCombat(playedToken, PileType.Hand, Owner);\n"
+                "        }"
+            )
+
         elif op in ("apply_aura", "swirl"):
             # tier0 _op_apply_aura / _op_swirl: resolve_hit with 0 damage --
             # ElementalHit.ApplyOnly is exactly that (apply / refresh /
@@ -1681,6 +1789,36 @@ def build_description(card: dict) -> str:
                 "random enemy."
             )
 
+        elif op == "cost_mod":
+            n = -int(eff["delta"])
+            parts.append(
+                f"[gold]Companion[/gold] cards cost {n} less this turn.")
+
+        elif op == "copy_companion_in_hand":
+            base_txt = ("Add a copy of a random [gold]Companion[/gold] card "
+                        "in your hand to your hand.")
+            if "copy_cost_override" in upgrade_plan(card)[0]:
+                o = int(upgrade_plan(card)[0]["copy_cost_override"])
+                parts.append(
+                    "{IfUpgraded:show:" + base_txt + f" The copy costs {o}.|"
+                    + base_txt + "}")
+            else:
+                parts.append(base_txt)
+
+        elif op == "replay_next_companion":
+            t = int(eff.get("times", 1))
+            times_txt = "an extra time" if t == 1 else f"{t} extra times"
+            parts.append(
+                "The next [gold]Companion[/gold] card you play this turn "
+                f"is played {times_txt}.")
+
+        elif op == "copy_companions_played_this_combat":
+            clause = ("Add a copy of every [gold]Companion[/gold] card "
+                      "played this combat to your hand.")
+            if eff.get("cost_override") is not None:
+                clause += f' They cost {int(eff["cost_override"])}.'
+            parts.append(clause)
+
         elif op == "apply_aura":
             el = eff["element"].capitalize()
             where = {"enemy": "", "random_enemy": " to a random enemy",
@@ -1859,6 +1997,10 @@ def build_upgrade(card: dict) -> list[str]:
         # tier0: card.exhaust = False. Keywords are instance-owned, so this
         # touches only the upgraded copy; the auto-keyword text follows.
         lines.append("RemoveKeyword(CardKeyword.Exhaust);")
+    if "copy_cost_override" in deltas:
+        lines.append(
+            "// copy_cost_override: expressed at play time as an IsUpgraded "
+            "read in OnPlay; the text swaps via {IfUpgraded:show:...}.")
     if "cost" in deltas:
         lines.append(f'EnergyCost.UpgradeBy({int(deltas["cost"])});')
     if "innate" in deltas:

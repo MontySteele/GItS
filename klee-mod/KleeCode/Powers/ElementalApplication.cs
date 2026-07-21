@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KleeMod.Cards;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -72,6 +73,12 @@ public sealed class KleeElementalHooks : AbstractModel
         {
             KleeBurstResource.GainPreResolution(
                 cardPlay.Card.Owner.Creature, BurstConstants.PerSkillTag);
+        }
+        // Best Friends Forever's ledger (tier0 play_card appends
+        // companions_played before resolution; once per play).
+        if (cardPlay.Card is ICompanionCard && cardPlay.IsFirstInSeries)
+        {
+            CompanionPlays.Record(cardPlay.Card.CombatState, cardPlay.Card);
         }
         return Task.CompletedTask;
     }
