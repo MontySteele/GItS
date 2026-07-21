@@ -28,6 +28,13 @@
    # strictly dominated by 1-cost sucrose_gust. 0-cost fits its purely-conditional payoff
    # (swirl needs a live aura); Exhaust caps burst_energy from becoming a repeatable /
    # multi-copy Burst battery for Klee/Furina (guards §2.4 meter tuning + §4.3 enabler-not-carry).
+- {id: sucrose_catalyst_conversion, name: "Sucrose — Catalyst Conversion", star: 4, rarity: uncommon, role_c: buffer, element: anemo, cost: 0, type: skill, exhaust: true,
+   effects: [{op: energy, amount: 1}, {op: draw, amount: 1}]}
+   # v1.11a: the neutral-energy FIXER the pool owed every character (§4.7 corrected audit).
+   # Production-analog gated as enabler utility (0-cost, one-shot, Exhaust). Anemo leaves no
+   # aura, so it's a clean fixer, not stealth reaction-fuel — draftable by any character to
+   # patch an energy/tempo gap, exactly as base colorless let any kit grab Production.
+   # Reliably shoppable at shop slot-1 (home-region, Uncommon-floor, §4.7).
 - {id: bennett_passion, name: "Bennett — Passion Overload", star: 4, rarity: common, role_c: buffer, element: pyro, cost: 1, type: skill,
    effects: [{op: buff_next_attack, amount: 4}, {op: burst_energy, amount: 5}]}
 - {id: bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage", star: 4, rarity: uncommon, role_c: buffer, element: pyro, cost: 2, type: skill,

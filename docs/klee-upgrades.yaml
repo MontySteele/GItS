@@ -97,6 +97,7 @@ barbara_melody:            {block: +2}             # R8 conversion: 4->6 (heal i
 barbara_shining_idol:      {block: +2}             # R8 conversion: 5->7 (cantrip + aura untouched)
 sucrose_gust:              {draw: +1}
 sucrose_astable:           {burst_energy: +4}      # 8->12; base now 0-cost+Exhaust (v1.11), upgrade stays a modest one-shot bump
+sucrose_catalyst_conversion: {draw: +1}            # draw 1->2; energy stays 1 (energy bump would over-swing the fixer)
 bennett_passion:           {buff: +2}              # next attack +4->+6
 bennett_fantastic_voyage:  {buff: +1}              # attack-up 3->4 (R8: heal became block 4, base untouched)
 kaeya_frostgnaw:           {damage: +2}
