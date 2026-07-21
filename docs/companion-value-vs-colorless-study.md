@@ -276,17 +276,17 @@ Three shifts, all favouring the pool: (1) no colorless commons → bottom rung v
 
 ## 8. Utility-coverage audit (§4.7 checklist, resolved)
 
-Base colorless carried neutral fixing/velocity that the companion pool must now cover. Audited against the live pool (Klee + Furina + both companion sheets):
+Base colorless let *any* character draft a fixer to patch a kit gap; the companion pool inherited that mandate. **The right test is pool-scoped — "can any character, present or future, draft this?" — not "does a current character have it."** Audited on that basis:
 
-| Role | Covered? | Source |
+| Role | Draftable from the pool? | Source |
 |---|---|---|
-| Card draw | ✅ | Character pools (Klee 8, Furina 15 draw effects) + companions (Lynette *Box Trick* draw 2, Charlotte, Sucrose) |
-| Block splash | ✅ | Companions (Charlotte, Dahlia, Barbara, Bennett) + character defense |
+| Card draw | ✅ | Companions: Lynette *Box Trick* (draw 2, pure neutral glue), Charlotte, Sucrose |
+| Block splash | ✅ | Companions: Charlotte, Dahlia, Barbara, Bennett |
 | Permanent thin/removal | ✅ | Shop card-removal *service* (not a colorless card — unaffected) |
-| In-combat exhaust/thin | ✅ partial | Character-scoped only (Klee status-exhaust: `boom_goes_the_dynamite`, `study_of_explosions`); no neutral Purity-analog — minor, acceptable |
-| **Energy generation** | ⚠️ **ruling** | **No neutral/companion source survives.** Companions grant `burst_energy` (meter), never real energy. Real energy lives only in character kits: Klee ×1 (`sugar_rush`), Furina ×3 (`deep_breath`, `directors_cut`, `tempo_change`) |
+| In-combat exhaust/thin | ⚠️ lesser gap | No neutral Purity-analog companion; character-scoped only (Klee). Low priority — permanent removal covers the main need |
+| **Energy generation** | ❌ **pool gap** | **No companion sources real (StS action-) energy** — only `burst_energy` (meter). Current characters self-provide (Klee ×1 `sugar_rush`, Furina ×3) but that does not help a *future* energy-thin character |
 
-**The one finding: neutral energy generation is gone.** Resolved as a *design ruling*, not a patch — **raw energy is character-kit-only** (keeps energy economies character-defined; a companion energy source would breach §4.3 on the most premium resource). Obligation: each character's pool must self-provide enough energy/tempo. **Klee ships exactly one energy card — validate sufficiency in Tier 0 before lock.** Everything else clears.
+**The one real finding: no neutral energy fixer is draftable.** Base colorless let any kit patch this with Production; the pool must too. **Corrected ruling (supersedes the earlier "character-kit-only" wording):** neutral **action-energy / draw / thin** are legal enabler-grade companion utility — one-shot, Exhaust-gated fixers like Production, which do *not* breach §4.3 (a one-shot fixer enables, it doesn't carry). Separately, **Burst-meter (`burst_energy`) generation stays character-kit-scoped** and never cheaply repeatable from companions (the two "energies" are different resources). **Action: add a neutral-energy companion** (Production-analog: ~2 energy, Exhaust, uncommon; a Mondstadt support such as Sucrose is the natural home) so the shipping nation's pool covers the gap for every character, not just the current two.
 
 ## Appendix — Companion inventory scored
 
