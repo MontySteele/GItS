@@ -1,4 +1,5 @@
 using System.Linq;
+using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models.Powers;
 
@@ -45,7 +46,7 @@ public static class SimDamagePipeline
     {
         if ((target.Powers.OfType<VulnerablePower>().FirstOrDefault()?.Amount ?? 0) > 0)
         {
-            damage *= 1.5m;
+            damage *= ReactionConstants.VulnerableTakenMult;
         }
         return damage;
     }

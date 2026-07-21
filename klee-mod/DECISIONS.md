@@ -1410,3 +1410,105 @@ this one did, and it caught a third victim immediately.
 Verification: full suite 237 green, gen --check clean,
 handwritten-parity OK, pool-membership OK (93 classes), Release build
 clean, DEPLOYED 2026-07-21 (game closed, user go-ahead).
+
+## Bug-hunt parity fixes -- three phase errors and a lying card (2026-07-21)
+
+An adversarial bug hunt (9 finders, each finding put to a 3-lens
+refutation panel) returned 14 survivors. These are the ones that needed
+no ruling. Its sharpest structural observation: three separate defects
+all reduce to the same mistake -- a sim PRE-step implemented in a POST
+hook, or the reverse -- and no pass has ever systematically mapped each
+sim pipeline step to its C# hook. That sweep is owed.
+
+**Superconduct did not amplify its own triggering hit -- on the card
+path only.** tier0 applies the Vulnerable inside resolve_hit (_react)
+and only then runs modify_damage_taken, so the triggering hit is itself
+x1.5. C# applied VulnerablePower in AfterDamageReceived, after the
+number was final: 10 where the sim dealt 15. The tell was
+self-inconsistency -- ElementalHit resolves the reaction BEFORE its
+TargetMods, so the same reaction off a bomb correctly dealt 15. One
+reaction, two payouts. AuraPower.ModifyDamageMultiplicative now carries
+the triggering hit's share in the same multiplicative phase the sim
+uses, guarded on the target not already being Vulnerable (the sim's
+modify_damage_taken is a flat x1.5 on any nonzero stack, never per
+stack, so double-counting would be the easy wrong fix).
+
+**Shatter rode ModifyDamageAdditive**, whose own doc claimed the
+additive phase kept it from scaling with Vulnerable. Exactly inverted:
+the pipeline is (base + additive) * vuln * amp, so Vulnerable scaled it
+AND enemy Block absorbed it. tier0 deals it as raw `enemy.hp -=` after
+the main hit's block subtraction, commented "Direct HP, like splash".
+Frozen + Vulnerable 2 on a 10-damage attack: sim 21, game 24; into 12
+Block: sim 6 through, game 4. Now dealt from AfterDamageReceived with
+the Overload-splash idiom (Unblockable | Unpowered, no dealer), with the
+sim's `enemy.alive` and `source == "attack"` gates mirrored.
+
+**Auras ticked before start-of-turn detonation; the sim ticks after.**
+The tick sat in AfterSideTurnEnd(Enemy) -- immediately BEFORE
+BombPower.BeforeSideTurnStart(Player) -- so an aura on its last turn
+expired before the detonation could react with it. A Hydro aura plus a
+bomb lost its Vaporize entirely, and the detonation then left a fresh
+Pyro aura the sim never creates. Moved to AfterSideTurnStart(Player):
+CombatManager awaits Hook.BeforeSideTurnStart to completion, then
+AfterSideTurnStart, both before energy reset and the draw -- separate
+broadcasts, so this needs no ordering assumption between two
+enemy-owned powers.
+
+**NextAttackUpPower survived a replay series.** tier0 resolve_card POPS
+next_attack_up (its siblings celestial_gift/attack_up_this_turn
+deliberately use .get(), which is what makes the pop load-bearing), and
+the replay loop issues N separate resolve_card calls. Passion Overload
+-> Study Buddy -> Kaeya dealt 18 where the sim deals 14. Removal moved
+from IsLastInSeries to IsFirstInSeries. The repeat tail is deliberately
+unaffected and must be: repeat_this re-runs _resolve_effects INSIDE one
+resolve_card, after current_attack_bonus is snapshotted, so the tail
+keeps the bonus. A series is the replay loop; the tail is a for-loop.
+
+**Crackle+ lied about its own Sparks.** `sparks` is a CAP
+(`gain = min(fx["sparks"], discarded)`), but the template printed it as
+a per-card RATE. At 1/1 the two coincide, so only the upgrade lied:
+"discard 2: gain 2 Sparks per card discarded" reads as 4 and grants 2 --
+the difference between crossing the 3-Spark free-attack threshold and
+not. The rate is now printed as the constant 1 it is, and the cap only
+when it can actually bind.
+
+**R24 manifest hole closed.** The companion emission loop never called
+upgrade_plan, so no_upgrade_path covered zero companions -- and the
+safety net that exists to surface "the sim can upgrade this and the mod
+cannot" was blind to 14 real cases. All 16 companions now carry a
+reason. QUEUED FOR USER RULING: the companion sheet header says
+companions never scale (hence MaxUpgradeLevel 0) while
+klee-upgrades.yaml ships deltas the sim honors and tier05 smiths at rest
+sites. Two ratified documents disagree; every companion-deck power curve
+tier05 has produced is unreachable in game until one of them yields.
+
+## Pool fix, attempt 2 -- the first one could never have worked (2026-07-21)
+
+Same playtest, one deploy later. The "You monster!" crash was unchanged:
+1137 occurrences in the log, cards rendering with the engine's own
+"If you can read this, there is a bug." placeholder (NCard.Reload throws
+at the Pool read BEFORE it populates the description label, so the
+scene's default text survives), mangled reward layout, empty deck
+screen, softlock on draw.
+
+KleeExtraCardPool was never visible. ModelDb.AllCardPools is
+`AllCharacters.Select(c => c.CardPool)` concatenated with a HARDCODED
+array of 7 shared pools. There is no registration hook. A mod pool that
+is not some character's CardPool cannot participate in the very lookup
+it was created to satisfy -- so the fix was inert from the moment it was
+written, and the lint shipped alongside it went green the whole time.
+
+The correct split is the engine's own: AllCards means "belongs to this
+pool" and backs CardModel.Pool; GetUnlockedCards means "may be
+generated" and is the SOLE path into both reward rolls
+(CardCreationOptions.GetPossibleCards) and transforms (CardFactory).
+So the off-pool cards now live in KleeCardPool.GenerateAllCards, and
+KleeCardPool overrides FilterThroughEpochs to strip them from
+GetUnlockedCards. Pool resolves; no generator can reach them; the design
+constraint (companions arrive only via the companion slot) is unchanged.
+
+LESSON, sharper than the first one: the lint checked source membership
+and reported OK while the bug was live in front of the player. A static
+lint can confirm a card is listed somewhere; it cannot confirm the
+engine can see the thing it is listed in. Recorded in the lint's own
+docstring so the next person does not read a green line as proof.

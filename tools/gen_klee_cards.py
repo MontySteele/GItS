@@ -1903,18 +1903,34 @@ def build_description(card: dict) -> str:
             )
 
         elif op == "discard_for_sparks":
-            if discard_upgrade(card) != (0, 0):
-                parts.append(
-                    "Discard {Discards:diff()} card{Discards:plural:|s}: gain "
-                    "{Sparks:diff()} [gold]Spark{Sparks:plural:|s}[/gold] per "
-                    "card discarded."
-                )
+            # `sparks` is a CAP on the total, never a rate: tier0
+            # _op_discard_for_sparks does `gain = min(fx["sparks"], discarded)`
+            # -- 1 Spark per card ACTUALLY discarded, capped (R36 ratifies the
+            # same reading, and the emitted C# matches with Math.Min).
+            #
+            # Bug hunt 2026-07-21: the old template substituted that cap into
+            # "gain {Sparks} Sparks PER CARD DISCARDED", which reads as a rate.
+            # At 1/1 the two coincide, so only the upgrade lied -- Crackle+ read
+            # "discard 2: gain 2 Sparks per card discarded" (parsed as 4) and
+            # granted 2, which is the difference between crossing the 3-Spark
+            # free-attack threshold and not. The rate is always 1; the cap is
+            # printed separately, and only when it can actually bind.
+            n, m = int(eff["amount"]), int(eff["sparks"])
+            d_n, d_m = discard_upgrade(card)
+            if (d_n, d_m) != (0, 0):
+                text = ("Discard {Discards:diff()} card{Discards:plural:|s}: "
+                        "gain 1 [gold]Spark[/gold] per card discarded.")
+                # The cap binds only if it can be lower than the discard count
+                # in some reachable state (base or upgraded).
+                if m < n or (m + d_m) < (n + d_n):
+                    text += " Maximum {Sparks:diff()}."
+                parts.append(text)
             else:
-                n, m = int(eff["amount"]), int(eff["sparks"])
                 cards_w = "a card" if n == 1 else f"{n} cards"
-                sparks_w = ("1 [gold]Spark[/gold]" if m == 1
-                            else f"{m} [gold]Sparks[/gold]")
-                parts.append(f"Discard {cards_w}: gain {sparks_w} per card discarded.")
+                text = f"Discard {cards_w}: gain 1 [gold]Spark[/gold] per card discarded."
+                if m < n:
+                    text += f" Maximum {m}."
+                parts.append(text)
 
     return " ".join(parts)
 
@@ -2241,6 +2257,22 @@ def main() -> int:
                 "-- the whole roster is ratified in scope; extend the "
                 "generator, do not skip.")
         companions[card["id"]] = emit(card)
+
+        # MANIFEST HOLE CLOSED (bug hunt 2026-07-21). This loop used to skip
+        # upgrade_plan entirely, so no_upgrade_path listed only klee-cards.yaml
+        # rows -- and the R24 safety net, which exists precisely to make
+        # "the sim can upgrade this and the mod cannot" visible, silently
+        # covered zero companions. It is a real divergence for 14 of them:
+        # the companion sheet header says companions never scale (hence
+        # MaxUpgradeLevel 0), but klee-upgrades.yaml ships deltas the sim
+        # honors and tier05 smiths at rest sites. Recording the reason does
+        # not resolve that contradiction -- it needs a user ruling -- but it
+        # stops the manifest from implying the mod is in parity.
+        _, upgrade_reason = upgrade_plan(card)
+        no_upgrade[card["id"]] = upgrade_reason or (
+            "companion: MaxUpgradeLevel 0 (companion sheet header, 'companions "
+            "never scale') but klee-upgrades.yaml HAS an expressible delta for "
+            "this id and the sim applies it -- DIVERGENCE, awaiting user ruling")
     generated.update(companions)
 
     # The roster class the reward slot draws from (CompanionSlot.Roll):

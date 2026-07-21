@@ -40,7 +40,7 @@ public sealed class Crackle : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crackle"),
-        ("description", "Deal {Damage:diff()} damage to a random enemy. Discard {Discards:diff()} card{Discards:plural:|s}: gain {Sparks:diff()} [gold]Spark{Sparks:plural:|s}[/gold] per card discarded."),
+        ("description", "Deal {Damage:diff()} damage to a random enemy. Discard {Discards:diff()} card{Discards:plural:|s}: gain 1 [gold]Spark[/gold] per card discarded."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

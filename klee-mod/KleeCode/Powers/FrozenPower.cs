@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -46,23 +47,24 @@ public sealed class FrozenPower : PowerModel
     /// Shatter: the first Attack to land on a Frozen enemy deals bonus damage
     /// and removes Frozen.
     ///
-    /// The bonus is additive, so it goes through ModifyDamageAdditive rather
-    /// than the multiplicative phase -- SHATTER_DAMAGE is a flat +6 in the sim,
-    /// not a multiplier, and putting it in the wrong phase would make it scale
-    /// with Vulnerable.
-    /// </summary>
-    public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
-    {
-        if (target != base.Owner) return 0m;
-        if (!props.IsPoweredAttack()) return 0m;
-
-        return ReactionConstants.ShatterDamage;
-    }
-
-    /// <summary>
-    /// Removal half of Shatter. Kept out of ModifyDamageAdditive because that
-    /// runs in preview/tooltip paths and must stay pure.
+    /// PHASE CORRECTION (bug hunt 2026-07-21). This was a ModifyDamageAdditive
+    /// override, whose doc claimed the additive phase kept SHATTER_DAMAGE from
+    /// scaling with Vulnerable. That is inverted: the pipeline is
+    /// (base + additive) * vuln * amp, so riding the additive phase made the
+    /// bonus scale with Vulnerable AND made enemy Block absorb it. The sim does
+    /// neither -- effects.py deals it as raw `enemy.hp -= shatter` AFTER the
+    /// main hit's block subtraction, commented "Direct HP, like splash".
+    /// Frozen + Vulnerable 2 on a 10-damage attack: sim 21, game 24. Into 12
+    /// Block: sim 6 through, game 4.
+    ///
+    /// So it is dealt here instead, with the Overload-splash idiom
+    /// (ReactionEffects: Unblockable | Unpowered, no dealer, no card source) --
+    /// Unpowered also keeps the Shatter from re-entering this hook or
+    /// early-detonating bombs, which the sim's `source == "attack"` gate
+    /// likewise prevents.
+    ///
+    /// The sim's `enemy.alive` gate is mirrored: a hit that kills does not
+    /// Shatter.
     /// </summary>
     public override async Task AfterDamageReceived(
         PlayerChoiceContext choiceContext, Creature target, DamageResult result,
@@ -70,8 +72,18 @@ public sealed class FrozenPower : PowerModel
     {
         if (target != base.Owner) return;
         if (!props.IsPoweredAttack()) return;
+        // tier0 gates Shatter on source == "attack" -- the same attack-card
+        // predicate BombPower's early detonation uses.
+        if (cardSource is not { Type: CardType.Attack }) return;
 
         await PowerCmd.Remove(this);
+
+        if (target.IsDead) return;
+
+        await CreatureCmd.Damage(
+            choiceContext, target, ReactionConstants.ShatterDamage,
+            ValueProp.Unblockable | ValueProp.Unpowered,
+            dealer: null, cardSource: null);
     }
 
     /// <summary>

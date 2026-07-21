@@ -101,8 +101,24 @@
   "upgrades": {
     "_comment": "R24 (2026-07-20): docs/klee-upgrades.yaml is the single source of truth for upgrade deltas; codegen defaults are ABOLISHED. Generated cards listed below ship with NO upgrade path (UNAPPLIABLE discipline) until their delta is ratified, made numeric, or hand-finished.",
     "no_upgrade_path": {
+      "albedo_solar_isotoma": "delta key 'duration: 1' not expressible by codegen (structural upgrade)",
+      "barbara_melody": "companion: MaxUpgradeLevel 0 (companion sheet header, 'companions never scale') but klee-upgrades.yaml HAS an expressible delta for this id and the sim applies it -- DIVERGENCE, awaiting user ruling",
+      "barbara_shining_idol": "companion: MaxUpgradeLevel 0 (companion sheet header, 'companions never scale') but klee-upgrades.yaml HAS an expressible delta for this id and the sim applies it -- DIVERGENCE, awaiting user ruling",
+      "bennett_fantastic_voyage": "delta key 'buff: 1' not expressible by codegen (structural upgrade)",
+      "bennett_passion": "delta key 'buff: 2' not expressible by codegen (structural upgrade)",
+      "dahlia_favonian_favor": "companion: MaxUpgradeLevel 0 (companion sheet header, 'companions never scale') but klee-upgrades.yaml HAS an expressible delta for this id and the sim applies it -- DIVERGENCE, awaiting user ruling",
+      "dahlia_sacramental_shower": "companion: MaxUpgradeLevel 0 (companion sheet header, 'companions never scale') but klee-upgrades.yaml HAS an expressible delta for this id and the sim applies it -- DIVERGENCE, awaiting user ruling",
+      "diona_icy_paws": "companion: MaxUpgradeLevel 0 (companion sheet header, 'companions never scale') but klee-upgrades.yaml HAS an expressible delta for this id and the sim applies it -- DIVERGENCE, awaiting user ruling",
+      "durin_witchs_flame": "delta key 'ping_damage: 2' not expressible by codegen (structural upgrade)",
+      "fischl_nightrider": "companion: MaxUpgradeLevel 0 (companion sheet header, 'companions never scale') but klee-upgrades.yaml HAS an expressible delta for this id and the sim applies it -- DIVERGENCE, awaiting user ruling",
+      "fischl_oz": "delta key 'duration: 1' not expressible by codegen (structural upgrade)",
+      "kaeya_frostgnaw": "companion: MaxUpgradeLevel 0 (companion sheet header, 'companions never scale') but klee-upgrades.yaml HAS an expressible delta for this id and the sim applies it -- DIVERGENCE, awaiting user ruling",
+      "nicole_celestial_gift": "delta key 'block_per_turn: 2' not expressible by codegen (structural upgrade)",
+      "prune_witch_hunt": "companion: MaxUpgradeLevel 0 (companion sheet header, 'companions never scale') but klee-upgrades.yaml HAS an expressible delta for this id and the sim applies it -- DIVERGENCE, awaiting user ruling",
       "quick_fuse": "delta key 'add: {'op': 'draw', 'amount': 1}' not expressible by codegen (structural upgrade)",
-      "study_buddy": "delta key 'add: {'op': 'draw', 'amount': 1}' not expressible by codegen (structural upgrade)"
+      "study_buddy": "delta key 'add: {'op': 'draw', 'amount': 1}' not expressible by codegen (structural upgrade)",
+      "sucrose_astable": "companion: MaxUpgradeLevel 0 (companion sheet header, 'companions never scale') but klee-upgrades.yaml HAS an expressible delta for this id and the sim applies it -- DIVERGENCE, awaiting user ruling",
+      "sucrose_gust": "companion: MaxUpgradeLevel 0 (companion sheet header, 'companions never scale') but klee-upgrades.yaml HAS an expressible delta for this id and the sim applies it -- DIVERGENCE, awaiting user ruling"
     }
   }
 }

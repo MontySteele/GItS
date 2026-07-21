@@ -14,10 +14,20 @@ SpecialCardReward.OnSelect after the card was already added) and a combat
 softlock at turn start (the throw escaped CombatManager.SetupPlayerTurn).
 
 Both cases were cards deliberately kept OUT of KleeCardPool -- companions
-(the 4th reward slot is their only door) and token statuses (created at play
-time). "Not rollable" is a legitimate design position; "in no pool at all" is
-never legitimate. KleeExtraCardPool exists to hold exactly those, and this lint
-is what makes forgetting it impossible.
+(the 4th reward slot is their only door), the kit Burst card, and token
+statuses (created at play time). "Not rollable" is a legitimate design
+position; "in no pool at all" is never legitimate.
+
+THE POOL THAT COUNTS IS KleeCardPool. First fix attempt put those cards in a
+second CardPoolModel, and this lint went green while the crash continued
+unchanged in game: ModelDb.AllCardPools is AllCharacters.Select(c => c.CardPool)
+plus a HARDCODED array of 7 shared pools, so a mod pool that is not a
+character's CardPool is invisible to the Pool lookup. Membership therefore
+means "reachable from KleeCardPool.GenerateAllCards" and nothing else --
+KleeOffPoolCards is spliced in there, and KleeCardPool.FilterThroughEpochs is
+what keeps those cards out of generation. A lint that checks source text can
+confirm membership; it CANNOT confirm the engine sees the pool. That gap is why
+the first fix shipped.
 
 Usage: python tools/lint_pool_membership.py
 Exit 1 with findings on stdout if any card class is unpooled.
@@ -34,11 +44,11 @@ CARD_DIRS = [
     REPO / "klee-mod" / "KleeCode" / "Cards",
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated",
 ]
-# Files that establish pool membership. CompanionRoster counts because
-# KleeExtraCardPool.GenerateAllCards splices CompanionRoster.All in wholesale.
+# Files reachable from KleeCardPool.GenerateAllCards. KleeOffPoolCards is
+# spliced into it; CompanionRoster.All is spliced into KleeOffPoolCards.
 MEMBERSHIP_FILES = [
     REPO / "klee-mod" / "KleeCode" / "KleeCardPool.cs",
-    REPO / "klee-mod" / "KleeCode" / "KleeExtraCardPool.cs",
+    REPO / "klee-mod" / "KleeCode" / "KleeOffPoolCards.cs",
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "CompanionRoster.cs",
 ]
 
