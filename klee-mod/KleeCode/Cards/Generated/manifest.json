@@ -11,7 +11,10 @@
     "bombs_away",
     "bright_idea",
     "cant_catch_me",
+    "careful_arrangement",
     "catalytic_conversion",
+    "chain_fuse",
+    "chained_reactions",
     "clockwork_toy",
     "cluster_charge",
     "combustion_study",
@@ -31,7 +34,9 @@
     "no_holding_back",
     "playtime_forever",
     "pocket_fireworks",
+    "quick_fuse",
     "rapid_fire",
+    "remote_detonator",
     "run_away",
     "skip_and_hop",
     "snap",
@@ -48,9 +53,6 @@
     "best_friends_forever": "op 'copy_companions_played_this_combat'",
     "boom_goes_the_dynamite": "op 'conditional'",
     "borrowed_brilliance": "op 'copy_companion_in_hand'",
-    "careful_arrangement": "op 'move_bombs'",
-    "chain_fuse": "op 'modify_bombs'",
-    "chained_reactions": "op 'detonate'",
     "controlled_demolition": "X cost (needs energy-scaling support)",
     "dodge_roll": "op 'exhaust_from'",
     "duck_and_cover": "hand-written",
@@ -66,8 +68,6 @@
     "patched_dress": "op 'conditional'",
     "perfect_timing": "op 'conditional'",
     "pop": "hand-written",
-    "quick_fuse": "op 'detonate'",
-    "remote_detonator": "op 'detonate'",
     "secret_stash": "op 'add_card'",
     "sizzle": "hand-written",
     "sparkly_explosion": "op 'conditional'",
@@ -82,6 +82,8 @@
   },
   "upgrades": {
     "_comment": "R24 (2026-07-20): docs/klee-upgrades.yaml is the single source of truth for upgrade deltas; codegen defaults are ABOLISHED. Generated cards listed below ship with NO upgrade path (UNAPPLIABLE discipline) until their delta is ratified, made numeric, or hand-finished.",
-    "no_upgrade_path": {}
+    "no_upgrade_path": {
+      "quick_fuse": "delta key 'add: {'op': 'draw', 'amount': 1}' not expressible by codegen (structural upgrade)"
+    }
   }
 }
