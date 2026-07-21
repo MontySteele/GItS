@@ -1,0 +1,9 @@
+# Card names taken by content OUTSIDE this repo -- base game and other
+# installed mods. The repo can't see those card lists, so this file is the
+# hand-maintained record of known external collisions. A mod card whose
+# name appears here fails lint_unique_names.py. Format: Name | source
+#
+# USER-CONFIRMED collisions:
+Grand Finale | base game / Downfall Silent (user-flagged 2026-07-21)
+#
+# Add more as they're found in playtest or cross-mod testing.

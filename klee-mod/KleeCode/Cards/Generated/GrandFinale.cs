@@ -39,7 +39,7 @@ public sealed class GrandFinale : CustomCardModel, IElementalCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Grand Finale"),
+        ("title", "The Big One"),
         ("description", "Deal {Damage:diff()} damage. +{BonusPer:diff()} damage per [gold]Bomb[/gold] detonated this combat."),
     };
 

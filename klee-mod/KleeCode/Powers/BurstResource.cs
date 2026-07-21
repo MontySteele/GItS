@@ -98,12 +98,25 @@ public sealed class KleeBurstResource : BasicCustomResource
     /// machinery passes amount = 60 (GetAmountToSpend); this resource's only
     /// spender is the kit card, so the full drain is the rule, not a special
     /// case.
+    ///
+    /// BASELIB SIGNATURE CHANGE (2026-07-21): the Workshop auto-updated
+    /// BaseLib.dll under us and CustomResource.Spend changed shape --
+    ///   was: Task       Spend&lt;T&gt;(ICombatState, AbstractModel?, int)
+    ///   now: Task&lt;bool&gt; Spend&lt;T&gt;(ICombatState, AbstractModel?, int, bool optional)
+    /// The bool return reports whether the spend happened; `optional` makes
+    /// an unaffordable spend a no-op returning false instead of a clamped
+    /// spend with a warning. We forward `optional` unchanged rather than
+    /// hardcoding it, so the caller's intent survives. The forwarded amount
+    /// stays `Amount` (not `amount`) -- that IS the whole-meter drain, and
+    /// because Amount is never > Amount the new insufficient-funds branch
+    /// cannot fire here, so this always reports a true spend. The sim law
+    /// above is unchanged by any of it.
     /// </summary>
-    public override async Task Spend<T>(
+    public override async Task<bool> Spend<T>(
         MegaCrit.Sts2.Core.Combat.ICombatState combatState,
-        AbstractModel? spender, int amount)
+        AbstractModel? spender, int amount, bool optional)
     {
-        await base.Spend<T>(combatState, spender, Amount);
+        return await base.Spend<T>(combatState, spender, Amount, optional);
     }
 
     /// <summary>

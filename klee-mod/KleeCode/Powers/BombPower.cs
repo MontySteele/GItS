@@ -305,7 +305,7 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// </summary>
     /// <summary>
     /// Per-combat detonation total (sim: state.detonations_total), read by
-    /// Grand Finale's bonus_formula. Keyed to the combat-state instance so a
+    /// The Big One's (grand_finale) bonus_formula. Keyed to the combat-state instance so a
     /// new combat starts at zero without a reset hook; every detonation path
     /// funnels through Detonate, so the count cannot miss one. A mid-combat
     /// reload restarts the combat (and this count with it).

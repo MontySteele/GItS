@@ -161,7 +161,7 @@ class CombatState:
     cards_played_this_turn: int = 0
     log: list[dict] = field(default_factory=list)          # event stream for metrics
     # Formula / conditional context (reset per card play in resolve_card)
-    detonations_total: int = 0            # Grand Finale formula
+    detonations_total: int = 0            # The Big One formula
     reactions_this_card: int = 0          # reaction_triggered_by_this
     reactions_this_turn: int = 0          # reaction_triggered_this_turn
                                           # (Chevreuse; reset per turn)

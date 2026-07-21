@@ -28,7 +28,7 @@ def _amount(state: CombatState, val) -> int:
 
 def _bonus_formula(state: CombatState, formula: str) -> int:
     """Scaling damage riders. Grammar: 'N_per_detonation_this_combat'
-    (Grand Finale) and 'N_per_M_fanfare' (the Fanfare crescendo — stacks
+    (The Big One) and 'N_per_M_fanfare' (the Fanfare crescendo — stacks
     grant flat bonuses, kickoff §4 / principles v1.10)."""
     n, _, rest = formula.partition("_per_")
     if not n.isdigit():
