@@ -1,8 +1,8 @@
 """Counter-based powers with four hooks (spec §4.3).
 
-Implemented: strength, weak, vulnerable, dot (generic poison-like),
-metallicize, plus elemental auras which live on Enemy directly (reactions.py).
-Nothing else until a card needs it.
+Implemented: strength, weak, vulnerable, frail (block-gain reduction), dot
+(generic poison-like), metallicize, plus elemental auras which live on Enemy
+directly (reactions.py). Nothing else until a card needs it.
 
 Powers are plain stack counts in Fighter.powers; this module holds the
 rules for how stacks modify damage and what ticks at turn boundaries.
@@ -13,7 +13,7 @@ from __future__ import annotations
 from tier0 import constants as C
 from tier0.engine.state import CombatState, Fighter
 
-DECAYING = ("weak", "vulnerable")   # tick down at their owner's turn end
+DECAYING = ("weak", "vulnerable", "frail")   # tick down at owner's turn end
 # This-turn windows: cleared entirely at their owner's turn end (R16
 # card-mediated Spotlight boosts; a _turn power is a window, not a stack).
 EXPIRING = ("spotlight_mult_bonus_turn", "spotlight_flat_damage_turn")
@@ -53,6 +53,21 @@ def modify_damage_taken(defender: Fighter, dmg: float,
     # same -- Klee and Furina have no dealer-keyed power.
     from tier0.engine import refpowers          # late import avoids cycle
     return _floor(refpowers.modify_damage_taken(defender, dmg, attacker))
+
+
+def modify_block_gained(fighter: Fighter, amount: int) -> int:
+    """Frail: the affected creature gains -25% block (StS Frail, floored).
+
+    The single funnel every card-block site routes through so the debuff
+    actually bites -- StS applies Frail to card block via
+    AbstractCard.applyPowersToBlock, so passive/power block (Metallicize,
+    Crystallize, Solar Isotoma) is deliberately NOT reduced here.
+    """
+    if amount <= 0:
+        return amount
+    if fighter.powers.get("frail", 0) > 0:
+        return int(amount * C.FRAIL_BLOCK_MULT)   # StS floors block*0.75
+    return amount
 
 
 def on_turn_start(state: CombatState, fighter: Fighter) -> None:

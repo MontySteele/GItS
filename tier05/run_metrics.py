@@ -76,7 +76,10 @@ def survival_profile(results: list[RunResult], max_hp: int) -> dict:
     if not results:
         return {}
     kinds = results[0].node_kinds
-    fight_pos = [i for i, k in enumerate(kinds) if k != "R"]
+    # Fights only: N/E/B. R (rest), T (treasure) and $ (shop) are non-fight
+    # nodes -- their HP entries carry the previous value and must not be
+    # read as a fight's survival sample (RUNTEMPLATE_VERSION 3).
+    fight_pos = [i for i, k in enumerate(kinds) if k in ("N", "E", "B")]
     pct = []
     for pos in fight_pos:
         vals = [r.hp_by_node[pos] for r in results if len(r.hp_by_node) > pos]

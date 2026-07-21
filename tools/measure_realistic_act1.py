@@ -1,0 +1,39 @@
+import math
+from tier05 import draft, model, run_metrics
+from tier0.content import loader
+
+
+def wilson(k, n, z=1.96):
+    if n == 0:
+        return (0.0, 0.0, 0.0)
+    p = k / n
+    denom = 1 + z * z / n
+    center = (p + z * z / (2 * n)) / denom
+    half = (z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n))) / denom
+    return (p, center - half, center + half)
+
+
+def measure(character, runs=1500, seed=11):
+    archetype = "generic"
+    pilot = "generic"
+    policy = draft.POLICIES["assigned"]
+    results = model.run_many(character, archetype, pilot, policy, runs, seed)
+    max_hp = loader._character_index()[character]["hp"]
+    surv = run_metrics.survival_profile(results, max_hp)
+    n = len(results)
+    k = sum(r.won for r in results)
+    p, lo, hi = wilson(k, n)
+    print(f"=== {character} ({n} runs, seed {seed}) ===")
+    print(f"  winrate            {p:.4f} ({k}/{n})  Wilson95 [{lo:.4f}, {hi:.4f}]  = {p:.1%} [{lo:.1%}, {hi:.1%}]")
+    print(f"  act_median_hp_pct  {surv['act_median_hp_pct']:.4f}  = {surv['act_median_hp_pct']:.1%}")
+    print(f"  act_share_below_30 {surv['act_share_below_30pct']:.4f}  = {surv['act_share_below_30pct']:.1%}")
+    print(f"  near_death_rate    {surv['near_death_rate']:.4f}  = {surv['near_death_rate']:.1%}")
+    print(f"  max_hp             {max_hp}")
+    print(f"  median HP% by fight: " + " ".join(f"{x:.0%}" for x in surv['median_hp_pct_by_fight']))
+    print()
+    return results
+
+
+if __name__ == "__main__":
+    for ch in ("ref_ironclad", "real_ironclad", "klee"):
+        measure(ch)

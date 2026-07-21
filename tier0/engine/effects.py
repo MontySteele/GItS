@@ -358,6 +358,8 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
 
 def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     amount = _spotlight_scale(state, card, fx["amount"])
+    # Frail bites card block here (the affected creature's -25%, floored).
+    amount = powers.modify_block_gained(state.player, amount)
     state.player.block += amount
     state.emit("block", amount=amount)
 

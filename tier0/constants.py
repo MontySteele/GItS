@@ -17,6 +17,12 @@ MAX_CARDS_PER_TURN = 25   # beyond this the infinite detector flags the fight
 # --- Powers ---
 WEAK_DEALT_MULT = 0.75        # Weak: -25% damage dealt
 VULNERABLE_TAKEN_MULT = 1.50  # Vulnerable: +50% damage taken
+FRAIL_BLOCK_MULT = 0.75       # Frail: -25% BLOCK GAINED by the affected
+                              # creature (StS Frail). A real DECAYING debuff
+                              # in its own right -- NOT mapped to Weak (which
+                              # is -damage dealt). Run-model rework §4/§8.
+                              # StS floors block*0.75; the affected creature's
+                              # card block is what it bites.
 
 # --- Base-game Ironclad parity powers (engine/refpowers.py) ---
 # Structural rates from the decompiled sources, not balance dials: the
@@ -171,24 +177,48 @@ DEFAULT_SEED = 20260719
 WINRATE_BAND_MIN_FIGHTS = 1000    # ratification process fix: winrate band
                                   # checks only run at >=1000 fights
 
-# --- Tier 0.5 run model (tier05-draft-sim-spec.md §2) ---
+# --- Tier 0.5 run model (tier05-draft-sim-spec.md §2; run-model rework) ---
 # Fixed node template, no pathing choice (map design is theirs, not ours).
-# RUNTEMPLATE_VERSION 2 (M7 ruling R7): the node economy recalibrated to
-# the user's real-StS2 numbers -- one GUARANTEED campfire immediately
-# before the act boss plus 1-2 pathed ones; a busy path averages ~7
-# shop/elite/campfire "cool things" per act. As a shopless single-act
-# proxy that lands at 2 elites + 3 rests = 5 cool nodes, guaranteed
-# pre-boss R included. Fight count (11) and screen count (10) are
-# UNCHANGED from v1, so draft-economy numbers stay comparable and the
-# change is purely rest economy.
-# v1 = "NNNENRNNENRNB" (2 rests, none guaranteed pre-boss): the archive
-# world of every report through the M8 grid tables labeled template-v1.
-# M7's natural-uptake finding (0.06 smiths/run) measured a world with
-# ~3-6x less upgrade access than the real economy; ruling R7 parks all
-# upgrade-access content design until the re-measure under this.
-RUNTEMPLATE_VERSION = 2
-RUN_NODE_TEMPLATE = "NNNENRNNENRNRB"
-BURST_CHECK_NODE = 6              # this mid N is swapped to burst_check
+# RUNTEMPLATE_VERSION 3 (run-model rework §3.1, RATIFIED 2026-07-21): a
+# realistic-ish Act 1 gauntlet. 11 nodes, 7 fights (4 normal + 2 elite +
+# 1 boss), 2 rests, 1 treasure (T), 1 shop ($). The burst-check NODE is
+# DROPPED (it was an A6 instrument, not a fight; the burst_check BATTERY
+# encounter file stays frozen for test_klee). New node kinds T (treasure:
+# gold + relic stub) and $ (shop: gold spend, stub this phase).
+#
+#   RATIFIED:  N N N R E T N $ E R B          (11 nodes, 7 fights)
+#
+# The first R sits BEFORE the first E (§3.1 red-pen): you never path to an
+# early elite without a chance to heal/smith first. The second R guards the
+# boss. Both elites and the boss are reachable off a rest.
+#
+# v3 DELIBERATELY BREAKS v2's "fight count (11) and screen count (10)
+# UNCHANGED" promise -- the whole point of the rework is 11 fights -> 7 so
+# per-fight effects (Burning Blood, future per-fight relics) read correctly.
+# Draft-economy numbers are therefore NOT comparable across v2/v3.
+# v2 = "NNNENRNNENRNRB" (11 fights, 3 rests incl. guaranteed pre-boss): the
+#      archive world of the Furina sprint-1 and Klee pass-4 reports.
+# v1 = "NNNENRNNENRNB"  (11 fights, 2 rests): the M5-M8 archive world.
+RUNTEMPLATE_VERSION = 3
+RUN_NODE_TEMPLATE = "NNNRETN$ERB"
+
+# --- Tier 0.5 economy (run-model rework §5; defaults RATIFIED §8) ---
+GOLD_START = 99                  # StS default starting gold
+GOLD_INCOME = {"N": 10, "E": 25, "B": 40}  # per WON fight, by node tier
+TREASURE_GOLD = 40               # T node lump (relic slot is a stub)
+# Shop ($): offers SHOP_CARD_OFFERS cards from the character's OWN draft pool
+# (rewards.character_pool, ownership-required, companion-free) plus one card
+# removal. Buy policy REUSES the draft policy's valuation (§5). Prices below
+# are the ratified defaults (§8).
+SHOP_CARD_PRICE = 60             # §5: card ~60
+SHOP_REMOVAL_PRICE = 75          # §5: removal ~75 base
+SHOP_REMOVAL_PRICE_STEP = 25     # §5: "rising per use" -- +25 each removal
+#                                  bought across the run (StS-real). OPEN
+#                                  NUMBER (§8 ratifies base ~75, not the step);
+#                                  only bites once multi-act adds a 2nd shop.
+SHOP_CARD_OFFERS = 3             # "a few cards" (§5). OPEN NUMBER -- §8 does
+#                                  not fix a count; 3 mirrors REWARD_CARD_OFFERS.
+
 # R7 directive 2: the second knob of the 2D rest-economy sweep. Scales
 # enemy ATTACK amounts in plain normal-pool fights only (not E/B/BC --
 # those are calibrated checks) to probe whether the 95%-of-rest-arrivals-

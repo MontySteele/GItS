@@ -1,7 +1,12 @@
-"""The run model (spec §2): fixed node template (RUNTEMPLATE_VERSION 2:
-11 fights, 3 rests with the pre-boss campfire guaranteed — ruling R7),
-HP persistence, rest nodes with smithing (M7), battery-derived normals.
-No pathing, no gold.
+"""The run model (spec §2; run-model rework §3-§5): fixed node template
+(RUNTEMPLATE_VERSION 3: "NNNRETN$ERB" -- 11 nodes, 7 fights, 2 rests, plus
+a treasure T and a shop $), HP persistence, rest nodes with smithing (M7),
+battery-derived fights (the realistic roster lands in a later phase).
+
+Run-layer relics: Burning Blood (heal_after_won_fight) is applied HERE,
+after each won fight (run-model rework §2) -- combat.py stays emit-only so
+tier0's frozen battery and the anchor lock are untouched. Economy: a gold
+field, per-fight income and a treasure lump; the shop is a stub this phase.
 
 All randomness for a run flows through ONE random.Random seeded by the
 harness (fight seeds, reward rolls, regret sampling) — determinism at
@@ -10,7 +15,6 @@ run granularity, same contract as Tier 0.
 
 from __future__ import annotations
 
-import copy
 import random
 from dataclasses import dataclass, field
 from typing import Callable, Optional
@@ -21,84 +25,26 @@ from tier0.engine.combat import run_fight
 from tier0.engine.state import Card, Enemy
 from tier0.harness import metrics as t0_metrics
 from tier0.pilot.policy import make_pilot
-from tier05 import draft, rewards
+from tier05 import act1, draft, rewards, shop
 
 # policy(rng, deck_cards, offers, archetype) -> Card | None
 DraftPolicy = Callable[[random.Random, list[Card], list[Card], str],
                        Optional[Card]]
 
 
-def _scale_enemy_spec(spec: dict, scale: float) -> dict:
-    out = copy.deepcopy(spec)
-    out["hp"] = max(1, round(out["hp"] * scale))
-    for intent in out["intents"]:
-        for key in ("amount", "ramp"):
-            if key in intent and intent["kind"] in ("attack",):
-                intent[key] = max(1, round(intent[key] * scale))
-    return out
+def build_node_encounter(node_kind: str, rng: random.Random,
+                         draw: act1.ActDraw) -> list[Enemy]:
+    """Realistic Act-1 roster (run-model rework §4). `draw` is the per-run
+    ActDraw: it resolves node kind -> encounter (easy pool for the first
+    three N nodes, hard pool for later N, the run's two drawn elites for E,
+    Vantom for B), then `act1.spawn` rolls each body's HP within its band
+    via the run rng.
 
-
-def _apply_compensator(enemies: list[Enemy], tier: str) -> list[Enemy]:
-    """Triage ruling 3b: the progression-gap compensator scales enemy hp
-    and attack damage per node tier — one number standing in for the
-    missing upgrades+relics growth, not a model of them. Tier 0 battery
-    statlines themselves stay frozen; this is run-context only."""
-    f = C.PROGRESSION_GAP_COMPENSATOR[tier]
-    if f == 1.0:
-        return enemies
-    for e in enemies:
-        e.hp = max(1, round(e.hp * f))
-        e.max_hp = e.hp
-        for intent in e.intents:
-            if intent["kind"] == "attack":
-                intent["amount"] = max(1, round(intent["amount"] * f))
-                if "ramp" in intent:
-                    intent["ramp"] = max(1, round(intent["ramp"] * f))
-    return enemies
-
-
-def build_node_encounter(node_kind: str, rng: random.Random) -> list[Enemy]:
-    """Battery-derived encounters only — same frozen statlines, no new
-    tuning (spec §2). Lites are mechanical derivations, not designs."""
-    if node_kind == "E":
-        return _apply_compensator(loader.build_encounter("punisher"), "elite")
-    if node_kind == "B":
-        return _apply_compensator(loader.build_encounter("tank_boss"), "boss")
-    if node_kind == "BC":
-        return _apply_compensator(loader.build_encounter("burst_check"),
-                                  "normal")
-    pool = list(C.NORMAL_POOL_WEIGHTS)
-    weights = [C.NORMAL_POOL_WEIGHTS[p] for p in pool]
-    pick = rng.choices(pool, weights=weights, k=1)[0]
-    if pick == "swarm":
-        out = loader.build_encounter("swarm")
-    elif pick == "attrition_lite":
-        spec = loader._encounter_index()["attrition"]["enemies"][0]
-        lite = copy.deepcopy(spec)
-        lite["hp"] = C.ATTRITION_LITE_HP
-        out = [Enemy(hp=lite["hp"], max_hp=lite["hp"], name="grinder_lite",
-                     intents=copy.deepcopy(lite["intents"]))]
-    elif pick == "punisher_lite":
-        spec = loader._encounter_index()["punisher"]["enemies"][0]
-        lite = _scale_enemy_spec(spec, C.PUNISHER_LITE_SCALE)
-        out = [Enemy(hp=lite["hp"], max_hp=lite["hp"], name="punisher_lite",
-                     intents=lite["intents"])]
-    else:
-        raise ValueError(f"unknown normal pool entry {pick!r}")
-    if C.NORMAL_ATTRITION_SCALE != 1.0:
-        # R7 sweep knob: attack damage only, plain normals only -- HP is
-        # untouched so fight length (and thus draft economy) stays put.
-        # Scales ramp alongside amount, same convention as the sibling
-        # scalers above (review-pass fix: amount-only left punisher_lite
-        # at ~0.85 effective late-fight scale in the "0.7x" sweep cells).
-        for e in out:
-            for intent in e.intents:
-                if intent["kind"] == "attack":
-                    for key in ("amount", "ramp"):
-                        if key in intent:
-                            intent[key] = max(1, round(
-                                intent[key] * C.NORMAL_ATTRITION_SCALE))
-    return _apply_compensator(out, "normal")
+    NO progression-gap compensator: this roster uses REAL StS2 numbers (§4),
+    so the old battery-calibrated PROGRESSION_GAP_COMPENSATOR does not apply.
+    The tier0 battery stays frozen and is no longer read at the run layer."""
+    encounter = draw.encounter_for(node_kind, rng)
+    return act1.spawn(encounter, rng)
 
 
 def rest_action(deck_ids: list[str], hp: int, max_hp: int,
@@ -157,12 +103,15 @@ class RunResult:
     fight_stats: list = field(default_factory=list)       # t0 FightStats
     rests: list[tuple] = field(default_factory=list)
     banner: frozenset[str] = field(default_factory=frozenset)   # v1.8 featured
+    gold: int = 0                       # run-model rework §5: economy state
+    shop: list[dict] = field(default_factory=list)   # §5: shop purchase log
+    removal_uses: int = 0               # §5: running removal count (rising price)
 
 
 def node_template() -> list[str]:
-    nodes = list(C.RUN_NODE_TEMPLATE)
-    nodes[C.BURST_CHECK_NODE] = "BC"    # the swapped-in burst check
-    return nodes
+    # RUNTEMPLATE_VERSION 3: "NNNRETN$ERB" -- the burst-check NODE is gone
+    # (no BC swap). Node kinds: N/E/B fights, R rest, T treasure, $ shop.
+    return list(C.RUN_NODE_TEMPLATE)
 
 
 def run_one(character: str, archetype: str, pilot_id: str,
@@ -187,11 +136,40 @@ def run_one(character: str, archetype: str, pilot_id: str,
     deck_ids = loader.starting_deck(character)
     max_hp = loader._character_index()[character]["hp"]
     hp = max_hp
+    gold = C.GOLD_START
+    removal_uses = 0
     nodes = node_template()
+    # Per-run encounter draw (run-model rework §4): easy/hard identity and
+    # the 2-of-3 elite draw are fixed here from the run rng, so the roster
+    # replays identically under the same seed.
+    act_draw = act1.ActDraw(rng)
     res = RunResult(seed=seed, won=False, death_node=None, hp_by_node=[],
                     deck_ids=deck_ids, node_kinds=nodes, banner=banner)
     fights = 0
     for i, kind in enumerate(nodes):
+        if kind == "T":                     # treasure: gold lump + relic stub
+            gold += C.TREASURE_GOLD
+            shop.grant_treasure_relic(character, deck_ids)   # no-op (§1 stub)
+            res.gold = gold
+            res.hp_by_node.append(hp)       # non-fight: HP carries, index holds
+            continue
+        if kind == "$":                     # shop (§5): buy from OWN pool
+            # Adaptive policies buy toward the deck's emergent shape, never
+            # the assigned label -- same contract as rest-site smithing.
+            shop_plan = archetype
+            if getattr(policy, "emergent_plan", False):
+                shop_plan = draft.dominant_archetype(
+                    [loader.get_card(cid) for cid in deck_ids])
+            outcome = shop.visit_shop(rng, character, deck_ids, gold,
+                                      shop_plan, policy, removal_uses)
+            deck_ids = outcome.deck_ids
+            gold = outcome.gold
+            removal_uses = outcome.removal_uses
+            res.shop.extend(outcome.purchases)
+            res.removal_uses = removal_uses
+            res.gold = gold
+            res.hp_by_node.append(hp)
+            continue
         if kind == "R":
             # Policies flagged emergent_plan (adaptive) smith toward the
             # deck's own dominant shape, never the assigned label -- the
@@ -210,7 +188,7 @@ def run_one(character: str, archetype: str, pilot_id: str,
             res.rests.append((i, action, target))
             res.hp_by_node.append(hp)
             continue
-        enemies = build_node_encounter(kind, rng)
+        enemies = build_node_encounter(kind, rng, act_draw)
         player = loader.build_player_from_ids(character, deck_ids)
         player.hp = hp
         player.max_hp = max_hp
@@ -220,8 +198,17 @@ def run_one(character: str, archetype: str, pilot_id: str,
         res.fight_stats.append(t0_metrics.extract(state, hp_start))
         fights += 1
         hp = state.player.hp
-        res.hp_by_node.append(max(0, hp))
         fight_won = state.player.alive and not state.living_enemies
+        if fight_won:
+            # Burning Blood in the RUN LAYER (run-model rework §2): heal after
+            # each won fight for relic-bearing characters. combat.py stays
+            # emit-only; the heal that carries HP across fights lives ONLY
+            # here, capped at max_hp.
+            if "heal_after_won_fight" in player.relic_hooks:
+                hp = min(max_hp, hp + C.BURNING_BLOOD_HEAL)
+            gold += C.GOLD_INCOME.get(kind, 0)     # §5 per-fight income
+            res.gold = gold
+        res.hp_by_node.append(max(0, hp))
         if not fight_won:                   # death OR stall-out = run over
             res.death_node = i
             res.deck_ids = deck_ids

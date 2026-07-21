@@ -19,14 +19,23 @@ SEED = 42
 def test_node_template_shape():
     nodes = model.node_template()
     assert len(nodes) == len(C.RUN_NODE_TEMPLATE)
-    assert nodes[C.BURST_CHECK_NODE] == "BC"
+    # RUNTEMPLATE_VERSION 3 (run-model rework §3.1): "NNNRETN$ERB" -- 11
+    # nodes, 7 fights (4 normal + 2 elite + 1 boss), 2 rests, 1 treasure,
+    # 1 shop. The burst-check NODE is DROPPED. SURVIVING INVARIANTS: the
+    # boss is last, and a rest guards the boss (pre-boss campfire).
     assert nodes[-1] == "B"
-    # RUNTEMPLATE_VERSION 2 (ruling R7): 3 rests, and the campfire
-    # immediately before the boss is GUARANTEED -- the user's real-StS2
-    # node economy. Fight count stays at v1's 11 on purpose.
-    assert nodes.count("E") == 2 and nodes.count("R") == 3
     assert nodes[-2] == "R"
-    assert nodes.count("N") + nodes.count("BC") + nodes.count("E") + 1 == 11
+    assert nodes.count("N") == 4
+    assert nodes.count("E") == 2
+    assert nodes.count("R") == 2
+    assert nodes.count("T") == 1
+    assert nodes.count("$") == 1
+    assert nodes.count("B") == 1
+    # 7 fights: normals + elites + the boss.
+    assert nodes.count("N") + nodes.count("E") + nodes.count("B") == 7
+    # The first rest precedes the first elite (§3.1 red-pen: never path to
+    # an early elite without a chance to heal/smith first).
+    assert nodes.index("R") < nodes.index("E")
 
 
 def test_run_determinism():
@@ -52,19 +61,27 @@ def test_death_logs_node_index_and_hp_persists():
         assert len(r.fight_stats) >= 1          # instrumentation attached
 
 
-def test_lite_encounters_are_derived_not_tuned():
+def test_realistic_normals_easy_then_hard():
+    """Run-model rework §4/§3.2: the realistic roster REPLACED the old
+    battery-derived lites in build_node_encounter. The first three N nodes
+    draw distinct easy-pool encounters; the fourth N draws the hard pool.
+    HP lands inside each enemy's spawn band, rolled through the run rng."""
+    from tier05 import act1
+    easy_ids = {e["id"] for e in act1.pools()["easy"]}
+    hard_ids = {e["id"] for e in act1.pools()["hard"]}
     rng = random.Random(SEED)
-    seen = {}
-    for _ in range(50):
-        for e in model.build_node_encounter("N", rng):
-            seen[e.name] = e
-    lite = seen["punisher_lite"]
-    full = loader._encounter_index()["punisher"]["enemies"][0]
-    assert lite.hp == round(full["hp"] * C.PUNISHER_LITE_SCALE)
-    assert lite.intents[0]["amount"] == round(
-        full["intents"][0]["amount"] * C.PUNISHER_LITE_SCALE)
-    assert seen["grinder_lite"].hp == C.ATTRITION_LITE_HP
-    assert seen["swarmling"].hp == 14           # frozen battery, untouched
+    draw = act1.ActDraw(rng)
+    easy_picks = [draw.encounter_for("N", rng)["id"]
+                  for _ in range(act1.EASY_FIGHTS)]
+    assert set(easy_picks) <= easy_ids
+    assert len(set(easy_picks)) == act1.EASY_FIGHTS   # no repeat within act
+    assert draw.encounter_for("N", rng)["id"] in hard_ids   # fight 4 = hard
+    # Spawn-time HP range: Nibbit's band is [42, 46]; every roll lands in it.
+    nibbit = next(e for e in act1.pools()["easy"] if e["id"] == "nibbit")
+    lo, hi = nibbit["enemies"][0]["hp"]
+    for s in range(40):
+        body = act1.spawn(nibbit, random.Random(s))[0]
+        assert lo <= body.hp <= hi and body.max_hp == body.hp
 
 
 def test_rest_policy_heals_when_hurt_else_upgrades_then_removes():
@@ -182,15 +199,22 @@ def test_draft_regret_deterministic():
 
 # --- triage ruling 3b/4 mechanisms ---
 
-def test_progression_compensator_scales_elite_and_boss_only():
+def test_elite_pool_draws_two_distinct_and_boss_is_vantom():
+    """Run-model rework §4.3/§4.4: E nodes draw two DISTINCT enemies from
+    the 3-enemy elite pool; B is Vantom at his real 173 HP. The old
+    compensator (punisher*0.8 elite / 240*0.7 boss) is GONE -- the roster
+    carries real StS2 numbers with no run-context scaling."""
+    from tier05 import act1
     rng = random.Random(SEED)
-    full = loader._encounter_index()["punisher"]["enemies"][0]
-    elite = model.build_node_encounter("E", rng)[0]
-    assert elite.hp == round(full["hp"]
-                             * C.PROGRESSION_GAP_COMPENSATOR["elite"])
-    boss = model.build_node_encounter("B", rng)[0]
-    assert boss.hp == round(240 * C.PROGRESSION_GAP_COMPENSATOR["boss"])
-    assert C.PROGRESSION_GAP_COMPENSATOR["normal"] == 1.0   # untouched
+    draw = act1.ActDraw(rng)
+    e1 = draw.encounter_for("E", rng)["id"]
+    e2 = draw.encounter_for("E", rng)["id"]
+    assert e1 != e2                                  # 2 distinct elites
+    assert {e1, e2} <= {e["id"] for e in act1.pools()["elite"]}
+    boss = act1.spawn(draw.encounter_for("B", rng), rng)
+    assert len(boss) == 1
+    assert boss[0].name == "vantom"
+    assert boss[0].hp == 173 and boss[0].is_boss     # real HP, uncompensated
 
 
 def test_pity_slot_fires_after_k_companionless_screens():
