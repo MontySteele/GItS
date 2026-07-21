@@ -104,6 +104,11 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<SparkKnightStyle>(),
             ModelDb.Card<SparklyTreasure>(),
             ModelDb.Card<SpiritedAway>(),
+            // Weak/Vulnerable batch: native core debuff PowerModels
+            // (WeakPower/VulnerablePower), semantics verified == tier0.
+            ModelDb.Card<Spooked>(),
+            ModelDb.Card<SurpriseVisit>(),
+            ModelDb.Card<TripWire>(),
             ModelDb.Card<TrueSparkKnight>(),
             ModelDb.Card<VermillionPact>(),
             ModelDb.Card<WarmGlow>(),

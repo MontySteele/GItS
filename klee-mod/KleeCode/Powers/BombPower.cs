@@ -330,7 +330,11 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
             // explicitly, BEFORE the damage lands, exactly where the sim's
             // pipeline does it. That single path also guarantees detonation is
             // never elementally resolved twice.
-            var dealt = damage + bonus + damageUp;
+            // Strength/Weak on the applier, pre-amp; Vulnerable on the
+            // target, post-amp; ONE truncation at the end. The value stays
+            // decimal through the chain (SimDamagePipeline mirrors tier0
+            // deal_damage_to_enemy, which int()s exactly once).
+            var dealt = SimDamagePipeline.DealerMods(applier, damage + bonus + damageUp);
             var aura = AuraCmd.Find(target);
             if (aura == null)
             {
@@ -349,17 +353,20 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
                 // resolving, same as AuraPower (Swirl must not re-trigger).
                 var reaction = ReactionTable.Lookup(aura.Element, Element.Pyro);
                 var consumed = aura.Element;
-                dealt = (int)(dealt * ReactionTable.AmplifierMultiplier(reaction, applier));
+                dealt *= ReactionTable.AmplifierMultiplier(reaction, applier);
                 await PowerCmd.Remove(aura);
                 await ReactionEffects.Resolve(
                     choiceContext, reaction, target, applier, null, consumed);
             }
 
-            // Unpowered so bomb damage is not scaled by Strength and does not
-            // read as an attack; bombs are a fixed charge, and this is also
-            // what keeps them from chain-detonating each other.
+            // Unpowered so the hit does not read as an attack: that is what
+            // keeps bombs from chain-detonating each other and out of
+            // attack-hooks. The pipeline modifiers the sim DOES apply to bomb
+            // damage (Strength/Weak above, Vulnerable here) are mirrored via
+            // SimDamagePipeline instead, since Unpowered opts out of the
+            // native powers' IsPoweredAttack gate.
             await CreatureCmd.Damage(
-                choiceContext, target, dealt,
+                choiceContext, target, (int)SimDamagePipeline.TargetMods(target, dealt),
                 ValueProp.Unpowered, dealer: null, cardSource: null);
 
             await NotifyDetonationListeners(choiceContext, applier, target, damage);

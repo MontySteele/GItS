@@ -119,7 +119,20 @@ APPLY_POWERS = {
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", 1,
         "At the start of your turn, place a 5-damage [gold]Bomb[/gold] on a "
         "random enemy and gain {X} [gold]Spark[/gold]."),
+    # Native debuffs (weak/vulnerable batch, 2026-07-20). Semantics verified
+    # against the decompiled core: WeakPower x0.75 dealt / VulnerablePower
+    # x1.5 taken, Counter stacks, tick at enemy side turn end -- exactly
+    # tier0's WEAK_DEALT_MULT / VULNERABLE_TAKEN_MULT and DECAYING rule.
+    # No cap either side. {TO} renders the target clause (build_description).
+    "weak": ("WeakPower", None,
+        "Apply {X} [gold]Weak[/gold]{TO}."),
+    "vulnerable": ("VulnerablePower", None,
+        "Apply {X} [gold]Vulnerable[/gold]{TO}."),
 }
+
+# Powers applied to ENEMIES (native debuffs). Everything else in APPLY_POWERS
+# is a self power; blocked_reason enforces the split both ways.
+ENEMY_APPLY_POWERS = {"weak", "vulnerable"}
 
 # Sheet fields apply_power may carry. Anything else encodes a mechanic this
 # generator does not understand -- fail loudly (UNPARSEABLE discipline).
@@ -128,7 +141,8 @@ APPLY_POWER_FIELDS = {"op", "power", "amount", "target", "max_stacks", "note",
 
 # Upgrade keys that all mean "bump the applied power amount" at card level
 # (tier0 upgrades.py handles them in one branch too).
-POWER_UPGRADE_KEYS = {"power_amount", "amp_percent", "splash_damage", "vulnerable"}
+POWER_UPGRADE_KEYS = {"power_amount", "amp_percent", "splash_damage", "vulnerable",
+                      "weak"}
 
 # Bomb placement targets we have a verified selection idiom for.
 BOMB_TARGETS = {"enemy", "random_enemy", "random_enemies"}
@@ -295,8 +309,14 @@ def blocked_reason(card: dict) -> str | None:
             power = eff.get("power")
             if power not in APPLY_POWERS:
                 return f"apply_power power '{power}' (no PowerModel in the registry)"
-            if eff.get("target") != "self":
-                return f"apply_power target '{eff.get('target')}' (only self powers land this pass)"
+            if power in ENEMY_APPLY_POWERS:
+                # Native debuffs aim at enemies (tier0 _op_apply_power ->
+                # _pick_targets). random targeting has no verified idiom yet.
+                if eff.get("target") not in ("enemy", "all_enemies"):
+                    return (f"apply_power target '{eff.get('target')}' "
+                            f"for enemy debuff '{power}'")
+            elif eff.get("target") != "self":
+                return f"apply_power target '{eff.get('target')}' (self power aimed at enemies)"
             unknown = set(eff) - APPLY_POWER_FIELDS
             if unknown:
                 # UNPARSEABLE discipline: an unrecognized field encodes a
@@ -616,10 +636,32 @@ def build_body(card: dict) -> list[str]:
             # Stack caps are enforced by the power's own
             # TryModifyPowerAmountReceived (the sim clamps at apply too), so
             # the call site stays a plain Apply.
-            lines.append(
-                f"await PowerCmd.Apply<{cls}>(choiceContext, Owner.Creature, "
-                f"{amount}, applier: Owner.Creature, cardSource: this);"
-            )
+            if eff["power"] in ENEMY_APPLY_POWERS:
+                # tier0 _op_apply_power -> _pick_targets: chosen enemy or
+                # every living enemy. Native debuff classes; applier is us.
+                if eff["target"] == "enemy":
+                    if not any("ThrowIfNull" in l for l in lines):
+                        lines.append(
+                            'ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");'
+                        )
+                    lines.append(
+                        f"await PowerCmd.Apply<{cls}>(choiceContext, cardPlay.Target, "
+                        f"{amount}, applier: Owner.Creature, cardSource: this);"
+                    )
+                else:  # all_enemies (snapshot: an apply cannot kill, but stay
+                    # consistent with every other all-enemies loop we emit)
+                    lines.append(
+                        "foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())\n"
+                        "        {\n"
+                        f"            await PowerCmd.Apply<{cls}>(choiceContext, debuffTarget, "
+                        f"{amount}, applier: Owner.Creature, cardSource: this);\n"
+                        "        }"
+                    )
+            else:
+                lines.append(
+                    f"await PowerCmd.Apply<{cls}>(choiceContext, Owner.Creature, "
+                    f"{amount}, applier: Owner.Creature, cardSource: this);"
+                )
 
         elif op == "detonate":
             # tier0 _op_detonate: only enemies WITH bombs detonate (DetonateOn
@@ -826,7 +868,8 @@ def build_description(card: dict) -> str:
             template = APPLY_POWERS[eff["power"]][2]
             x = ("{PowerAmount:diff()}" if power_upgrade(card)
                  else str(int(eff["amount"])))
-            parts.append(template.replace("{X}", x))
+            to = " to ALL enemies" if eff.get("target") == "all_enemies" else ""
+            parts.append(template.replace("{X}", x).replace("{TO}", to))
 
         elif op == "detonate":
             where = ("an enemy's" if eff["target"] == "enemy" else "ALL")
@@ -978,6 +1021,12 @@ def emit(card: dict) -> str:
         if eff["op"] in ("detonate", "move_bombs"):
             target_type = TARGET_CS[eff["target"]]
             break
+        # Enemy debuffs too: Surprise Visit is nothing but a chosen-enemy
+        # Vulnerable, so the apply is what makes the card aimable.
+        if (eff["op"] == "apply_power"
+                and eff.get("power") in ENEMY_APPLY_POWERS):
+            target_type = TARGET_CS[eff["target"]]
+            break
 
     vars_ = build_vars(card)
     body = build_body(card)
@@ -1058,6 +1107,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Generated;
