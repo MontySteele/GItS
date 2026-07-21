@@ -48,12 +48,23 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
         # is what makes the rare tier 14 draftable instead of 15.
         if c.is_companion or c.kit_card or c.rarity not in C.RARITY_ODDS:
             continue
-        # Personal sheets are per-character pools (sheet pass 1): a card
-        # tagged with another character's name must never be offered here.
-        # Same bug class as the Prune catch, one slot over -- with two
-        # personal sheets loaded, Klee's card rewards would have offered
-        # Furina's cards without this line.
-        if c.character and c.character != character_id:
+        # Ownership is REQUIRED, not merely non-conflicting. The old test
+        # was `if c.character and c.character != character_id` -- it dropped
+        # cards belonging to someone ELSE but let cards belonging to NOBODY
+        # through to everybody. The cards/ reference sheets predate the
+        # drafting layer entirely (commit 8b5ac16, when every deck was
+        # passed in explicitly and card ownership was not yet a concept), so
+        # they carried character=None and leaked into every character's
+        # rewards: 11 stand-ins, ~12% of Klee's offers and ~32% of
+        # real_ironclad's, including Silent cards on the Ironclad.
+        #
+        # This one MATTERS to balance, it is not hygiene: shrug_it_off_like
+        # is 8 block + draw for 1 energy, which beat 11 of Klee's own 12
+        # block cards. Her measured survivability was propped up by borrowed
+        # Ironclad block that will never ship in the mod. Ratified
+        # 2026-07-21: "We NEED to make the sim results reflect the real card
+        # pool. If that damages the baseline, so be it."
+        if c.character != character_id:
             continue
         pool.setdefault(c.rarity, []).append(c)
     return {r: sorted(cs, key=lambda c: c.id) for r, cs in pool.items()}
@@ -162,6 +173,16 @@ def roll_rewards(rng: random.Random, character_id: str,
     naturally rare-less pool already does.
     """
     pool = character_pool(character_id)
+    if not pool:
+        # Reachable since ownership became REQUIRED above: a character with
+        # no cards of its own now has a genuinely empty pool where it used
+        # to inherit the ownerless reference cards. The old code walked the
+        # rare->uncommon->common fallback off the end and died on a bare
+        # KeyError deep in a dict literal; say what is actually wrong.
+        raise ValueError(
+            f"no draftable cards for character {character_id!r} -- every "
+            "reward card must be owned by the character being offered it. "
+            "Check the id, or that its sheet sets `character`.")
     offers = []
     for _ in range(C.REWARD_CARD_OFFERS):
         rarity = _roll_rarity(rng)

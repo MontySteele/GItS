@@ -39,12 +39,43 @@ DOCS_CARD_SHEETS = ("klee-cards.yaml", "furina-cards.yaml",
 GAME_REF_DIR = CONTENT_DIR.parents[1] / "game_ref"
 EXTERNAL_CARD_SHEETS = {"ironclad_pool.yaml": "real_ironclad"}
 
+# The two hand-approximated reference characters own the cards/ sheets.
+# Same sheet-name convention as DOCS_CARD_SHEETS: ownership is a property
+# of the pool a card ships in, not a field repeated on every row.
+#
+# This tagging is what makes the rewards.character_pool ownership filter
+# work. Before it, these rows had character=None and the filter only
+# dropped cards belonging to SOMEONE ELSE -- so cards belonging to NOBODY
+# were offered to everybody, and ~12% of Klee's reward screens were
+# Ironclad/Silent stand-ins. tokens.yaml stays untagged on purpose:
+# generated tokens are genuinely shared and are excluded from draft pools
+# by rarity, not by ownership.
+REF_CARD_SHEETS = {"ironclad_starter.yaml": "ref_ironclad",
+                   "ironclad_package.yaml": "ref_ironclad",
+                   "silent.yaml": "ref_silent"}
 
-def _load_yaml_dir(sub: str) -> list[dict]:
+
+def _load_yaml_dir(sub: str, owners: dict[str, str] | None = None
+                   ) -> list[dict]:
     docs = []
     for path in sorted((CONTENT_DIR / sub).glob("*.yaml")):
         data = yaml.safe_load(path.read_text())
-        docs.extend(data if isinstance(data, list) else [data])
+        rows = data if isinstance(data, list) else [data]
+        owner = (owners or {}).get(path.name)
+        if owner:
+            for d in rows:
+                # DRAFTABLE RARITIES ONLY. Basics/tokens/statuses stay
+                # deliberately ownerless: rewards.character_pool already
+                # excludes them by rarity, so tagging buys nothing there --
+                # while `character` is ALSO Furina's Spotlight key
+                # (combat.py:92, effects.py:127/459/578). Engine test states
+                # use strike/defend as filler, and tagging those would make
+                # them valid Spotlight targets, changing a shared path for a
+                # draft-layer fix. test_fontaine.test_character_field_
+                # derivation locks that invariant.
+                if d.get("rarity") in C.RARITY_ODDS:
+                    d.setdefault("character", owner)
+        docs.extend(rows)
     return docs
 
 
@@ -119,7 +150,7 @@ def _external_cards() -> list[dict]:
 
 @lru_cache(maxsize=1)
 def _card_index() -> dict[str, Card]:
-    raw = _load_yaml_dir("cards")
+    raw = _load_yaml_dir("cards", REF_CARD_SHEETS)
     for sheet in DOCS_CARD_SHEETS:
         path = DOCS_DIR / sheet
         if path.exists():

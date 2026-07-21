@@ -9,6 +9,8 @@ shatter_bonus) and the Guest Star reward exclusions.
 
 import random
 
+import pytest
+
 from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import combat, effects
@@ -85,12 +87,36 @@ def test_guest_star_never_in_shared_rewards():
 
 
 def test_personal_pool_not_offered_cross_character():
+    """Probed on a REAL character. This used the invented id
+    "furina_probe" until 2026-07-21; once card ownership became required
+    (rewards.character_pool) that id had an empty pool, so the assertions
+    below passed vacuously against zero offers."""
     from tier05 import rewards
     rng = random.Random(7)
     offered = {c.id for _ in range(300)
-               for c in rewards.roll_rewards(rng, "furina_probe")}
+               for c in rewards.roll_rewards(rng, "furina")}
+    assert offered, "empty offer set would make this test vacuous"
     assert "prune_witch_hunt" not in offered
-    assert not any(cid.startswith("guest_") for cid in offered)
+    # Checked on the guest_star FLAG, not an id prefix. The prefix form
+    # ("guest_") silently false-positives on Furina's own uncommon
+    # "The Guest List" (guest_list) -- it only ever passed because the
+    # probe character had no Furina cards to offer in the first place.
+    assert not any(loader.get_card(cid).guest_star for cid in offered)
+    # The leak this file was written to catch, stated directly: a reward
+    # screen only ever offers cards the character owns (companions aside,
+    # which are a shared pool by design).
+    assert all(loader.get_card(cid).character == "furina"
+               for cid in offered
+               if not loader.get_card(cid).is_companion)
+
+
+def test_unowned_character_pool_fails_loudly():
+    """The rare->uncommon->common fallback used to run off the end and
+    raise a bare KeyError from a dict literal. An empty pool is a config
+    error and must say so."""
+    from tier05 import rewards
+    with pytest.raises(ValueError, match="no draftable cards"):
+        rewards.roll_rewards(random.Random(1), "furina_probe")
 
 
 # --- DSL: reaction_triggered_this_turn (Chevreuse) ---
