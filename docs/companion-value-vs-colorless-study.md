@@ -198,6 +198,7 @@ Hypothesis: `companion commons < colorless commons < companion uncommons < color
 
 - **`sucrose_astable`** (Sucrose — Astable Anemohypostasis; 2-cost uncommon: swirl + burst_energy 8). This is the pool's weakest card by a clear margin. It is **double-conditional**: swirl is worth 0 without a *pre-existing* aura, and burst_energy 8 is worth ~0 to any character without a Burst meter. Floor ≈ 0–2, ceiling only ~5 *at 2 cost*. Even the compact common `sucrose_gust` (swirl + draw 1 @ 1 cost) strictly dominates it for most decks because draw is unconditional and it costs half as much.
   - **Recommendation:** either drop it to 1 cost, or swap burst_energy for an unconditional body (e.g., draw 1 or block 4) so its floor isn't near-zero for non-Burst characters. **Verify in-context first:** for Klee/Furina (who *do* have Burst meters), burst_energy 8 is not dead — measure its actual pilot value before changing it. Flag, don't reflexively buff.
+  - **RESOLVED (v1.11): 2→0 cost + Exhaust.** Went to 0 cost (its payoff is purely conditional, so a zero floor at zero cost is honest) rather than 1, and added **Exhaust** to stop the *un*conditional `burst_energy 8` from becoming a repeatable / multi-copy Burst battery for meter characters — which would undercut the §2.4 meter tuning and breach §4.3 on the mod's most premium resource. This also ends the `sucrose_gust` domination (gust = repeatable 1-cost swirl+draw; astable = one-shot 0-cost swirl + burst-spike — now differentiated, not dominated). Upgrade unchanged (`burst_energy +4` → one-shot 12). Tier-0 pilot check still worthwhile but no longer blocking.
 
 ### Looks weak statically but is correctly-costed conditional fuel — leave alone
 
@@ -272,6 +273,20 @@ Three shifts, all favouring the pool: (1) no colorless commons → bottom rung v
 - **Slot 1 (guaranteed Uncommon+) is faithful.** StS2 colorless is inherently uncommon/rare, so a shop slot that never dips below uncommon mirrors base StS2 exactly. No change needed.
 - **Slot 2 (card-reward odds, ~60% common) is a deliberate DEPARTURE.** It will frequently surface companion *commons*, which base-StS2 colorless never does. Fine — the wildcard slot is where cheap appliers get a home — but it's a conscious deviation, not accidental fidelity. **Decision point:** keep it (cheap-applier wildcard flavour), or raise slot 2 to Uncommon+ too (stricter fidelity, but then commons appear *only* in the free reward slot). *Leaning keep; logged for the user.*
 - **Bonus — the Ancients bucket just got a gift.** StS2 files **Whistle** ("33 dmg + stun the enemy") and **Wish** as rarity **Ancient**. The stun effect §2.2a treats as the mod's scarcity anchor is *literally an Ancient-tier card* in base StS2 — direct confirmation for how to price the Archon-boon reskin when we get to it.
+
+## 8. Utility-coverage audit (§4.7 checklist, resolved)
+
+Base colorless carried neutral fixing/velocity that the companion pool must now cover. Audited against the live pool (Klee + Furina + both companion sheets):
+
+| Role | Covered? | Source |
+|---|---|---|
+| Card draw | ✅ | Character pools (Klee 8, Furina 15 draw effects) + companions (Lynette *Box Trick* draw 2, Charlotte, Sucrose) |
+| Block splash | ✅ | Companions (Charlotte, Dahlia, Barbara, Bennett) + character defense |
+| Permanent thin/removal | ✅ | Shop card-removal *service* (not a colorless card — unaffected) |
+| In-combat exhaust/thin | ✅ partial | Character-scoped only (Klee status-exhaust: `boom_goes_the_dynamite`, `study_of_explosions`); no neutral Purity-analog — minor, acceptable |
+| **Energy generation** | ⚠️ **ruling** | **No neutral/companion source survives.** Companions grant `burst_energy` (meter), never real energy. Real energy lives only in character kits: Klee ×1 (`sugar_rush`), Furina ×3 (`deep_breath`, `directors_cut`, `tempo_change`) |
+
+**The one finding: neutral energy generation is gone.** Resolved as a *design ruling*, not a patch — **raw energy is character-kit-only** (keeps energy economies character-defined; a companion energy source would breach §4.3 on the most premium resource). Obligation: each character's pool must self-provide enough energy/tempo. **Klee ships exactly one energy card — validate sufficiency in Tier 0 before lock.** Everything else clears.
 
 ## Appendix — Companion inventory scored
 

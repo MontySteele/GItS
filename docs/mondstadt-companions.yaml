@@ -22,8 +22,12 @@
    # Distinct from Dahlia Favonian Favor (cost 1, block 5 + aura) by the cantrip at +1 cost.
 - {id: sucrose_gust, name: "Sucrose — Wind Spirit Creation", star: 4, rarity: common, role_c: trigger, element: anemo, cost: 1, type: skill,
    effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
-- {id: sucrose_astable, name: "Sucrose — Astable Anemohypostasis", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 2, type: skill,
+- {id: sucrose_astable, name: "Sucrose — Astable Anemohypostasis", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 0, type: skill, exhaust: true,
    effects: [{op: swirl, target: enemy}, {op: burst_energy, amount: 8}]}
+   # v1.11 rebalance (value study §5): 2→0 cost + Exhaust. Was the pool's weakest card,
+   # strictly dominated by 1-cost sucrose_gust. 0-cost fits its purely-conditional payoff
+   # (swirl needs a live aura); Exhaust caps burst_energy from becoming a repeatable /
+   # multi-copy Burst battery for Klee/Furina (guards §2.4 meter tuning + §4.3 enabler-not-carry).
 - {id: bennett_passion, name: "Bennett — Passion Overload", star: 4, rarity: common, role_c: buffer, element: pyro, cost: 1, type: skill,
    effects: [{op: buff_next_attack, amount: 4}, {op: burst_energy, amount: 5}]}
 - {id: bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage", star: 4, rarity: uncommon, role_c: buffer, element: pyro, cost: 2, type: skill,
