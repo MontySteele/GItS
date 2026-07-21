@@ -91,6 +91,11 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<ExplosivesWorkshop>(),
             ModelDb.Card<FishFlavoredBait>(),
             ModelDb.Card<FlameOnTheWick>(),
+            // Formula batch: 2+Sparks hit count (SparksAsResolved -- the
+            // post-spend bank) and per-detonation damage rider
+            // (BombPower.DetonationsThisCombat).
+            ModelDb.Card<GleefulBarrage>(),
+            ModelDb.Card<GrandFinale>(),
             ModelDb.Card<HideAndSeek>(),
             ModelDb.Card<HotHands>(),
             ModelDb.Card<JumpyDumpty>(),

@@ -303,6 +303,30 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// detonation damage can kill, trigger hooks, and re-enter combat logic, so
     /// the charges must already be spent by then.
     /// </summary>
+    /// <summary>
+    /// Per-combat detonation total (sim: state.detonations_total), read by
+    /// Grand Finale's bonus_formula. Keyed to the combat-state instance so a
+    /// new combat starts at zero without a reset hook; every detonation path
+    /// funnels through Detonate, so the count cannot miss one. A mid-combat
+    /// reload restarts the combat (and this count with it).
+    /// </summary>
+    private static ICombatState? _countCombat;
+    private static int _detonationsThisCombat;
+
+    public static int DetonationsThisCombat(ICombatState combatState)
+        => ReferenceEquals(combatState, _countCombat) ? _detonationsThisCombat : 0;
+
+    private static void RecordDetonation(ICombatState? combatState)
+    {
+        if (combatState == null) return;
+        if (!ReferenceEquals(combatState, _countCombat))
+        {
+            _countCombat = combatState;
+            _detonationsThisCombat = 0;
+        }
+        _detonationsThisCombat++;
+    }
+
     private async Task<int> Detonate(PlayerChoiceContext choiceContext, int bonus = 0)
     {
         if (_damages.Count == 0) return 0;
@@ -313,6 +337,9 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
 
         var target = Owner;
         var applier = Applier;
+        // Snapshot before Remove: the power's state references may not
+        // survive removal, and RecordDetonation below needs the combat.
+        var combatState = CombatState;
         await PowerCmd.Remove(this);
 
         // Explosives Workshop: flat bonus per detonation, added BEFORE
@@ -323,6 +350,10 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
 
         foreach (var damage in payloads)
         {
+            // Sim order: detonations_total increments before the damage
+            // lands (effects.py detonate_bombs).
+            RecordDetonation(combatState);
+
             // R23: each detonation is a Pyro-tagged hit (tier0 detonate_bombs
             // -> deal_damage_to_enemy(element=bomb.element), default pyro).
             // The damage below is Unpowered with no card source, so AuraPower

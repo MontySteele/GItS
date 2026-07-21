@@ -137,6 +137,24 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     private int _pendingSpendAmount;
 
     /// <summary>
+    /// The Spark bank as the sim sees it DURING a card's resolution. The
+    /// sim's play_card spends BEFORE resolve_card, but our consume executes
+    /// in AfterCardPlayed (payment-ordering safety, above) -- so mid-play
+    /// readers (Gleeful Barrage's 2+Sparks hit count, has_spark predicates)
+    /// must subtract the pending spend, or they read a pre-spend bank the
+    /// sim never shows. This is the caveat recorded with the Snap fix,
+    /// landing with the first formula card that reads the bank mid-play.
+    /// </summary>
+    public static int SparksAsResolved(Creature owner)
+    {
+        var power = owner.Powers.OfType<SparkPower>().FirstOrDefault();
+        if (power == null) return 0;
+        return power._pendingSpendPlay == null
+            ? power.Amount
+            : power.Amount - power._pendingSpendAmount;
+    }
+
+    /// <summary>
     /// The consume, executing the play-time decision. Kept AFTER resolution:
     /// mutating the bank in BeforeCardPlayed could drop Amount below
     /// threshold before the payment machinery reads the (zeroed) cost --
