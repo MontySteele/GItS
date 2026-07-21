@@ -18,6 +18,12 @@ MAX_CARDS_PER_TURN = 25   # beyond this the infinite detector flags the fight
 WEAK_DEALT_MULT = 0.75        # Weak: -25% damage dealt
 VULNERABLE_TAKEN_MULT = 1.50  # Vulnerable: +50% damage taken
 
+# --- Base-game Ironclad parity powers (engine/refpowers.py) ---
+# Structural rates from the decompiled sources, not balance dials: the
+# per-card Amounts live in game_ref/ironclad.json (gitignored) and never here.
+COLOSSUS_TAKEN_MULT = 0.5     # ColossusPower.ModifyDamageMultiplicative
+JUGGLING_ATTACK_TRIGGER = 3   # JugglingPower fires on the ==3rd attack/turn
+
 # --- Elemental auras & reactions (spec §4.4; validate in M4) ---
 AURA_DURATION_TURNS = 2       # owner-turns an aura persists unconsumed
 VAPORIZE_MULT = 1.5           # Pyro x Hydro, that hit only

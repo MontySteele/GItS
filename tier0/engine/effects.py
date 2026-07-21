@@ -23,6 +23,11 @@ def _amount(state: CombatState, val) -> int:
         return state.current_x
     if isinstance(val, str) and val.startswith("X_plus_"):
         return state.current_x + int(val[len("X_plus_"):])
+    if val == "exhausted_this_card":
+        # Stoke: "exhaust your hand, generate that many cards". The count is
+        # captured by the exhaust op as it runs, matching the dll, which
+        # reads exhaustCount off the selection list before exhausting.
+        return state.exhausted_this_card
     raise ValueError(f"unknown amount formula {val!r}")
 
 
@@ -46,6 +51,13 @@ def _pick_targets(state: CombatState, spec: str) -> list[Enemy]:
     if not living:
         return []
     if spec in ("enemy", "lowest_hp_enemy"):        # pilot aims at lowest HP
+        # PARITY, not fidelity: the base game rolls a RANDOM enemy for
+        # TargetType.AnyEnemy on an autoplay, and the variance profile is
+        # the whole identity of Havoc/Cascade. Keeping tier0's lowest-HP aim
+        # for free plays would hand those cards a pilot's judgement they do
+        # not have. Set only for the duration of a free play.
+        if state.force_random_targeting:
+            return [state.rng.choice(living)]
         return [min(living, key=lambda e: e.hp)]
     if spec == "all_enemies":
         return list(living)
@@ -174,6 +186,11 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
         hp_dmg += shatter
     if was_alive and not enemy.alive:
         state.kills_this_card += 1
+        # The base game's Fatal gate: cardPlay.Target.Powers.All(p =>
+        # p.ShouldOwnerDeathTriggerFatal()). Summoned adds are excluded, so
+        # Feed cannot farm them for permanent max HP.
+        if enemy.counts_for_fatal:
+            state.fatal_kills_this_card += 1
     if hp_dmg > 0:
         _detonate_bombs_on_hit(state, enemy, source)
     return hp_dmg
@@ -486,15 +503,66 @@ def _op_generate_guest_star(state: CombatState, fx: dict, card: Card) -> None:
     and the pool is shared companions + the Guest Star set ONLY — playable
     characters' personal cards are structurally absent because they are
     neither companions nor guest_star rows."""
-    import copy as _copy
+    _generate(state, fx, "guest_star")
+
+
+def _generation_pool(state: CombatState, fx: dict, which: str) -> list[Card]:
     from tier0.content import loader                # late import avoids cycle
-    pool = loader.guest_star_generation_pool(fx["rarity"])
-    for _ in range(fx.get("amount", 1)):
+    if which == "guest_star":
+        return loader.guest_star_generation_pool(fx["rarity"])
+    if which == "character":
+        # Stoke: CardFactory.GetForCombat over the character's own unlocked
+        # pool, ALL rarities (no equal-rarity clause -- that guardrail is
+        # specific to Guest Star generation, not the base game's).
+        get_pool = getattr(loader, "character_generation_pool", None)
+        if get_pool is None:
+            raise NotImplementedError(
+                "UNIMPLEMENTED: generate_from_pool(pool: character) needs "
+                "loader.character_generation_pool(character_id), which does "
+                "not exist yet. Refusing to substitute another pool -- a "
+                "silently wrong generation pool is exactly the invisible "
+                "bias this project exists to catch. Exclude Stoke until the "
+                "loader entry point lands.")
+        # CanBeGeneratedInCombat, honored HERE so no pool source can forget
+        # it: Feed opts out, and generating it would hand the character a
+        # permanent max-HP engine it never drafted.
+        pool = [c for c in get_pool(state.player.character_id)
+                if c.generatable and not c.kit_card]
+        if not pool:
+            raise ValueError(
+                f"empty generation pool for {state.player.character_id!r}")
+        return sorted(pool, key=lambda c: c.id)     # determinism under seed
+    raise ValueError(f"unknown generation pool {which!r}")
+
+
+def _generate(state: CombatState, fx: dict, which: str) -> None:
+    import copy as _copy
+    from tier0.content import loader, upgrades      # late import avoids cycle
+    pool = _generation_pool(state, fx, which)
+    amount = fx.get("amount", fx.get("amount_formula", 1))
+    for _ in range(_amount(state, amount)):
         pick = _copy.deepcopy(state.rng.choice(pool))
+        if fx.get("upgraded") and upgrades.has_upgrade(pick.id):
+            # Stoke+ generates upgraded cards. The `+` id convention in
+            # loader.get_card carries the upgraded form for free; a card
+            # with no expressible upgrade simply arrives unupgraded, which
+            # is the same visible-skip policy upgrades.UNAPPLIABLE uses.
+            pick = loader.get_card(pick.id + upgrades.SUFFIX)
         if "cost_override" in fx:                   # upgraded form: 0 this turn
             pick.cost = fx["cost_override"]
-        _add_token(state, pick, "hand")
-        state.emit("guest_star_generated", card=pick.id)
+        _add_token(state, pick, fx.get("to", "hand"))
+        if which == "guest_star":
+            state.emit("guest_star_generated", card=pick.id)
+        else:
+            state.emit("card_generated", card=pick.id, pool=which)
+
+
+def _op_generate_from_pool(state: CombatState, fx: dict, card: Card) -> None:
+    """Base-game CardPileCmd.AddGeneratedCardsToCombat (Stoke). The singular
+    AddGeneratedCardToCombat (Anger, InfernalBlade) is this same op with a
+    fixed id and amount 1 -- use add_card for those. Anger's
+    CardCmd.PreviewCardPileAdd is pure UI and is implemented as nothing."""
+    _generate(state, fx, fx.get("pool", "character"))
 
 
 def _op_copy_spotlighted_in_hand(state: CombatState, fx: dict,
@@ -560,17 +628,34 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
 
 def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
     hand = state.player.hand
+    # DEFECT FIX: the status branch used to rebuild the pool from `hand` and
+    # so dropped the kit-card exemption two lines above -- a status-filtered
+    # exhaust could eat the granted Burst, breaking the v1.9 invariant that
+    # the kit never enters a pile. Filter the exempt pool instead.
     pool = [c for c in hand if not c.kit_card]   # same invariant as discard
     if fx.get("filter") == "status":
-        pool = [c for c in hand if c.rarity == "status"]
-    for _ in range(fx.get("amount", 1)):
+        pool = [c for c in pool if c.rarity == "status"]
+    n = fx.get("amount", 1)
+    # Stoke exhausts the WHOLE hand and then generates that many cards. The
+    # count is fixed BEFORE any exhausting (the dll reads exhaustCount off
+    # the selection list up front), which is what len(pool) here gives us.
+    n = len(pool) if n == "all" else _amount(state, n)
+    # TrueGrit's split: base form exhausts at RANDOM, the upgrade lets the
+    # player choose -- exactly the split _op_discard_for_sparks already
+    # makes, and it reuses the same _worst_card instrument surface.
+    chosen = fx.get("select", "random") == "chosen"
+    for _ in range(n):
         if not pool:
             break
-        victim = state.rng.choice(pool)
+        victim = _worst_card(pool) if chosen else state.rng.choice(pool)
         pool = [c for c in pool if c is not victim]
         hand.remove(victim)
         state.player.exhaust_pile.append(victim)
-        state.emit("exhaust", card=victim.id)
+        state.exhausted_this_card += 1
+        if chosen:
+            state.emit("exhaust", card=victim.id, chosen=True)
+        else:
+            state.emit("exhaust", card=victim.id)
 
 
 def _worst_card(cards: list[Card]) -> Card:
@@ -580,6 +665,52 @@ def _worst_card(cards: list[Card]) -> Card:
     # looks heuristic-shaped, this is the knob to probe.
     return max(cards, key=lambda c: (c.type != "attack",
                                      c.cost if isinstance(c.cost, int) else 99))
+
+
+def _best_card(cards: list[Card]) -> Card:
+    # Mirror of _worst_card for "pick a GOOD card" selections (Headbutt's
+    # recall). Prefer an attack, then the most printed power. INSTRUMENT
+    # SURFACE: every recall measurement rides this choice.
+    return max(cards, key=lambda c: (c.type == "attack", _printed_power(c)))
+
+
+def _walk_effects(effects: list[dict]):
+    """Effect list walk including conditional branches."""
+    for fx in effects:
+        yield fx
+        for branch in ("then", "else"):
+            if isinstance(fx.get(branch), list):
+                yield from _walk_effects(fx[branch])
+
+
+def _printed_power(card: Card) -> int:
+    """Sum of printed damage and Block on a card — the crude 'how big is
+    this card' scalar the choice heuristics rank by. Deliberately reads
+    PRINTED numbers only (no strength, no Spotlight, no formulas): the
+    pilot is choosing before resolution, and a formula amount is not a
+    number it could compare anyway."""
+    total = 0
+    for fx in _walk_effects(card.effects):
+        if fx.get("op") not in ("damage", "block"):
+            continue
+        amount, times = fx.get("amount"), fx.get("times", 1)
+        if isinstance(amount, int) and isinstance(times, int):
+            total += amount * times
+    return total
+
+
+def _best_upgrade_target(hand: list[Card], idxs: list[int]) -> int:
+    """Armaments' choice: greedy delta — the eligible card that gains the
+    most printed damage+block from being upgraded. Ties break to the lowest
+    hand index so the pick stays deterministic under a fixed seed.
+    INSTRUMENT SURFACE (same convention as _worst_card)."""
+    from tier0.content import loader, upgrades      # late import avoids cycle
+
+    def delta(i: int) -> int:
+        upped = loader.get_card(hand[i].id + upgrades.SUFFIX)
+        return _printed_power(upped) - _printed_power(hand[i])
+
+    return max(idxs, key=lambda i: (delta(i), -i))
 
 
 def _op_discard_for_sparks(state: CombatState, fx: dict, card: Card) -> None:
@@ -639,6 +770,12 @@ def _predicate(state: CombatState, name: str) -> bool:
         return state.reactions_this_turn > 0
     if name == "killed_target":
         return state.kills_this_card > 0
+    if name == "killed_target_fatal":
+        # Feed. The base game's Fatal gate ignores deaths whose owner says
+        # they should not trigger it (summoned adds) -- see
+        # Enemy.counts_for_fatal. Distinct from killed_target so Klee's and
+        # Furina's existing kill riders keep their exact meaning.
+        return state.fatal_kills_this_card > 0
     if name == "enemy_intends_attack":
         # Frozen enemies still attack under v1.5 (at -50%), so they count.
         return any(e.current_intent()["kind"] == "attack"
@@ -708,6 +845,178 @@ def _op_copy_companions_played(state: CombatState, fx: dict, card: Card) -> None
         _add_token(state, token, fx.get("zone", "hand"))
 
 
+def _op_upgrade_in_hand(state: CombatState, fx: dict, card: Card) -> None:
+    """Armaments (base: choose 1; upgraded: every upgradable card in hand).
+
+    Eligibility is upgrades.has_upgrade, which already excludes `+` ids and
+    the UNAPPLIABLE set -- so a card whose upgrade the sim cannot express is
+    visibly skipped rather than pretend-upgraded.
+    """
+    from tier0.content import loader, upgrades      # late import avoids cycle
+    hand = state.player.hand
+    idxs = [i for i, c in enumerate(hand) if upgrades.has_upgrade(c.id)]
+    if not idxs:
+        return
+    if fx.get("scope", "chosen") == "chosen":
+        idxs = [_best_upgrade_target(hand, idxs)]
+    # Replace BY INDEX. Card is a plain dataclass with eq=True, so
+    # list.remove matches by value (combat.play_card already relies on
+    # that); a remove/append rebuild would silently reorder the hand and
+    # perturb every downstream heuristic that reads hand order.
+    for i in idxs:
+        hand[i] = loader.get_card(hand[i].id + upgrades.SUFFIX)
+        state.emit("upgrade_in_hand", card=hand[i].id)
+
+
+def _op_gain_max_hp(state: CombatState, fx: dict, card: Card) -> None:
+    """Feed. CreatureCmd.GainMaxHp raises max HP by `amount` AND heals by
+    the same amount -- the heal is part of the command, not a second effect.
+
+    CROSS-TIER FLAG: in the real game this is PERMANENT for the run.
+    combat.run_fight is single-combat and never persists hp/max_hp, so
+    unless tier05 carries the gain between fights, Feed is systematically
+    undervalued and the point of the card vanishes.
+    """
+    p = state.player
+    n = _amount(state, fx["amount"])
+    p.max_hp += n
+    p.hp += n
+    state.emit("gain_max_hp", amount=n)
+
+
+def _op_recall_to_draw(state: CombatState, fx: dict, card: Card) -> None:
+    """Headbutt: put a chosen card from the discard pile on TOP of the draw
+    pile. Index 0 IS the top -- state.draw pops index 0 and
+    combat.surface_innate prepends. No-op on an empty discard pile."""
+    p = state.player
+    src = fx.get("from", "discard")
+    if src != "discard":
+        raise ValueError(f"unknown recall_to_draw source {src!r}")
+    pos = fx.get("position", "top")
+    if pos != "top":
+        raise ValueError(f"unknown recall_to_draw position {pos!r}")
+    for _ in range(_amount(state, fx.get("amount", 1))):
+        if not p.discard_pile:
+            return
+        pick = _best_card(p.discard_pile)
+        p.discard_pile.remove(pick)
+        p.draw_pile.insert(0, pick)
+        state.emit("recall_to_draw", card=pick.id)
+
+
+def _op_transform_in_hand(state: CombatState, fx: dict, card: Card) -> None:
+    """PrimalForce: transform every Attack in hand into GiantRock.
+
+    CardCmd.Transform replaces the original AT ITS ORIGINAL PILE INDEX, so
+    this replaces in place (same ordering argument as upgrade_in_hand).
+    The `+` suffix convention in loader.get_card carries the upgraded
+    variant, so the upgrade is a plain `into` string replace.
+
+    The base game also gates on Card.IsTransformable. No tier0 flag exists
+    for it: whether any Ironclad Attack is untransformable must be verified
+    against the sheet, and adding a flag nothing sets would be an assumption
+    wearing the costume of a check. Kit cards ARE excluded -- the v1.9
+    invariant is that the Burst never leaves the kit.
+    """
+    from tier0.content import loader                # late import avoids cycle
+    hand = state.player.hand
+    filt = fx.get("filter")
+    for i, c in enumerate(hand):
+        if c.kit_card or (filt and c.type != filt):
+            continue
+        hand[i] = loader.get_card(fx["into"])
+        state.emit("transform", was=c.id, into=hand[i].id)
+
+
+# Backstop for nested free plays. The seen_states guard in
+# combat._player_turn only samples BETWEEN pilot plays, so a Havoc chain
+# that flips more Havocs is structurally invisible to it. Belongs in
+# tier0/constants.py; it lives here because that file is owned by a
+# concurrent edit -- move it when the sheet lands.
+MAX_FREE_PLAY_DEPTH = 10
+
+
+def _free_play(state: CombatState, card: Card,
+               force_exhaust: bool = False) -> None:
+    """Shared driver for the two base-game free plays: autoplay_from_draw
+    (Havoc, Cascade) and the on-exhaust autoplay sweep (HowlFromBeyond).
+
+    The actual play MUST go through combat.resolve_free_play, not
+    _resolve_effects: every piece of card-play bookkeeping (pile routing,
+    cards_played_this_turn, the `play` event, the per-card context block)
+    lives in combat.play_card. Resolving effects directly here would let a
+    free play silently clobber the OUTER card's killed_target and
+    repeat_this state mid-resolution, and that corruption is invisible in
+    results -- which is precisely why this is an engine change and not an op.
+
+    CONTRACT with combat.resolve_free_play(state, card, force_exhaust):
+      1. no energy deduction, no spark spend, no encore_cost gate;
+      2. save and RESTORE the whole per-card context block resolve_card
+         sets (current_card_companion, reactions_this_card,
+         kills_this_card, fatal_kills_this_card, exhausted_this_card,
+         detonations_at_card_start, repeat_requested,
+         target_had_offelement_aura, current_attack_bonus, sparks_at_play,
+         current_x, current_card_cost);
+      3. current_card_cost = 0 for the free play (this_cost_zero and
+         zero_cost_attacks_up both read it), then restore;
+      4. route afterwards: force_exhaust -> exhaust; else card.exhaust or
+         type == "power" -> exhaust; else discard. The card is NOT in hand,
+         so it must not attempt hand.remove;
+      5. increment cards_played_this_turn and emit play(cost=0, free=True),
+         so MAX_CARDS_PER_TURN can see free plays;
+      6. current_x = player.energy when card.cost == "X" (CardCmd.AutoPlay
+         sets CapturedXValue from remaining energy).
+    """
+    from tier0.engine import combat                 # late import avoids cycle
+    play = getattr(combat, "resolve_free_play", None)
+    if play is None:
+        raise NotImplementedError(
+            "UNIMPLEMENTED: combat.resolve_free_play(state, card, "
+            "force_exhaust) does not exist. Havoc, Cascade and "
+            "HowlFromBeyond CANNOT be scored without it and must be "
+            "excluded from the sheet. Refusing to approximate a free play "
+            "by resolving effects inline: that silently corrupts the outer "
+            "card's per-card context. See _free_play's contract docstring.")
+    if state.free_play_depth >= MAX_FREE_PLAY_DEPTH:
+        state.emit("degeneracy", kind="INFINITE", reason="free_play_depth")
+        return
+    state.free_play_depth += 1
+    prev_random = state.force_random_targeting
+    state.force_random_targeting = True
+    try:
+        play(state, card, force_exhaust=force_exhaust)
+    finally:
+        state.force_random_targeting = prev_random
+        state.free_play_depth -= 1
+
+
+def _op_autoplay_from_draw(state: CombatState, fx: dict, card: Card) -> None:
+    """Havoc (1, forceExhaust) and Cascade (X, no forceExhaust).
+
+    ORDERING, observable and deliberate: the dll selects ALL n cards first
+    (moving each to the Play pile inside the selection loop) and only THEN
+    plays them in order. Cascade for 3 therefore takes the top 3 up front
+    and cannot re-select a card it already queued. ShuffleIfNecessary runs
+    before EACH selection, not once.
+    """
+    p = state.player
+    pos = fx.get("position", "top")
+    if pos != "top":
+        raise ValueError(f"unknown autoplay_from_draw position {pos!r}")
+    queued = []
+    for _ in range(_amount(state, fx.get("amount", 1))):
+        if not p.draw_pile:
+            state.shuffle_discard_into_draw()       # ShuffleIfNecessary
+        if not p.draw_pile:
+            break                                   # deck genuinely empty
+        queued.append(p.draw_pile.pop(0))
+    for queued_card in queued:
+        if state.over:
+            break
+        _free_play(state, queued_card,
+                   force_exhaust=fx.get("force_exhaust", False))
+
+
 OPS = {
     "damage": _op_damage,
     "block": _op_block,
@@ -744,6 +1053,13 @@ OPS = {
     "copy_companion_in_hand": _op_copy_companion_in_hand,
     "replay_next_companion": _op_replay_next_companion,
     "copy_companions_played_this_combat": _op_copy_companions_played,
+    # --- base-game parity ops (the real Ironclad pool) ---
+    "upgrade_in_hand": _op_upgrade_in_hand,
+    "gain_max_hp": _op_gain_max_hp,
+    "recall_to_draw": _op_recall_to_draw,
+    "transform_in_hand": _op_transform_in_hand,
+    "generate_from_pool": _op_generate_from_pool,
+    "autoplay_from_draw": _op_autoplay_from_draw,
 }
 
 
@@ -759,6 +1075,8 @@ def resolve_card(state: CombatState, card: Card) -> None:
     state.current_card_companion = card.is_companion    # control provenance
     state.reactions_this_card = 0
     state.kills_this_card = 0
+    state.fatal_kills_this_card = 0
+    state.exhausted_this_card = 0
     state.detonations_at_card_start = state.detonations_total
     state.repeat_requested = 0
     # Predicate snapshot: does the default target hold an off-element aura?
@@ -859,8 +1177,39 @@ def salon_tick(state: CombatState) -> None:
             p.burst_energy += C.SALON_TICK_BURST     # §1 particle economy
 
 
+def _exhaust_autoplay_sweep(state: CombatState) -> None:
+    """HowlFromBeyond: Hook.AfterAutoPostPlayPhaseEntered, which the game's
+    CombatManager invokes ONCE per player turn while ending the turn
+    (Phase = AutoPostPlay, immediately before BeforeTurnEnd). Howl's
+    override fires when the card is sitting in the player's EXHAUST pile
+    and auto-plays it for free; it carries no Exhaust keyword, so
+    GetResultPileTypeForCardPlay sends it to DISCARD afterwards.
+
+    ONE-SHOT, NOT A LOOP. The flagged cards are snapshotted before any of
+    them plays, and each is pulled out of the exhaust pile first -- so a
+    card that re-exhausts itself cannot trigger again this sweep. The loop
+    reading is the obvious wrong implementation; this must stay pinned by a
+    test.
+
+    Only reachable via another card exhausting Howl (Brand, BurningPact,
+    TrueGrit+, Stoke, Havoc's forceExhaust). Zero flagged cards is the
+    universal case -- Klee and Furina never enter this loop body.
+    """
+    p = state.player
+    flagged = [c for c in p.exhaust_pile if c.on_exhaust_autoplay]
+    for c in flagged:
+        if state.over or not p.alive:
+            return
+        p.exhaust_pile.remove(c)
+        _free_play(state, c, force_exhaust=False)
+
+
 def player_turn_end_triggers(state: CombatState) -> None:
     p = state.player
+    # Runs FIRST: the game's AutoPostPlay phase lands after the player's
+    # plays and before turn end, so the free play resolves ahead of the
+    # other end-of-turn triggers and well ahead of the enemy turn.
+    _exhaust_autoplay_sweep(state)
     if p.powers.get("sparks_n_splash", 0):              # the Burst
         for _ in range(C.SPARKS_N_SPLASH_HITS):
             if not state.living_enemies:

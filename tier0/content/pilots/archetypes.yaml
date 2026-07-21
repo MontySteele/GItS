@@ -65,3 +65,29 @@
     sustain: 1.2
     spotlight: 0.3
     cost: 0.1
+
+# --- real_ironclad (the real base-game reference pool). block stays at the
+# frozen 1.2 everywhere. sustain/spotlight are OMITTED, not zeroed: the
+# policy defaults make them inert, while writing 0.0 would imply he has an
+# Encore buffer worth devaluing.
+#
+# KNOWN UNDERSTATEMENT -- on the record so a low score is not read as a
+# finding about his pool (see the pass report):
+#   1. _scaling_value caps a self-power at min(amount,6)*3 and decays it by
+#      max(0, 1-turn/12). Demon Form compounds +2 Str EVERY turn and scores
+#      as a one-shot +2 worth nothing by turn 12 -- exactly when it wins.
+#      Raising `scaling` does not fix this; it inflates one-shot buffs too.
+#   2. Vulnerable scores a flat amount*2 with no reference to
+#      C.VULNERABLE_TAKEN_MULT, so Bash -- his STARTER -- is undervalued,
+#      and starter is the config where constraints are hard.
+#   3. Block-as-damage (Body Slam) and non-expiring block (Barricade) are
+#      not expressible at all. Per house rule those are UNIMPLEMENTED and
+#      excluded by the sheet generator, never approximated.
+- id: ironclad
+  weights:
+    damage: 1.1      # no elements, no engine: hits are the plan
+    block: 1.2       # FROZEN. do not tune.
+    scaling: 1.4     # the Strength ramp is his identity (Salon's slot)
+    reaction: 0.0    # applies no elements; the term is inert, said out loud
+    tempo: 0.7       # Battle Trance / Offering draw
+    cost: 0.1

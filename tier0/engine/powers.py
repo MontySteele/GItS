@@ -19,17 +19,40 @@ DECAYING = ("weak", "vulnerable")   # tick down at their owner's turn end
 EXPIRING = ("spotlight_mult_bonus_turn", "spotlight_flat_damage_turn")
 
 
+def _floor(dmg: float) -> float:
+    """Hooks.Hook.ModifyDamage's last statement is `return Math.Max(0m, num)`:
+    the whole additive+multiplicative chain is clamped at zero BEFORE the
+    number ever reaches Creature.DamageBlockInternal.
+
+    tier0 splits that chain across modify_damage_dealt / modify_damage_taken,
+    so both ends clamp. Without it a big negative Strength (Mangle's
+    StrengthLoss is far larger than a typical tier0 intent) reaches
+    combat._enemy_turn's `blocked = min(block, dmg); block -= blocked`, where a
+    dmg of -4 makes the player GAIN 4 block from being attacked -- an
+    invisible gift to the block and survival axes. No multiplier in the chain
+    is negative, so clamping at both ends is identical to clamping once.
+    """
+    return dmg if dmg > 0 else 0.0
+
+
 def modify_damage_dealt(attacker: Fighter, base: float) -> float:
     dmg = base + attacker.powers.get("strength", 0)
     if attacker.powers.get("weak", 0) > 0:
         dmg *= C.WEAK_DEALT_MULT
-    return dmg
+    return _floor(dmg)
 
 
-def modify_damage_taken(defender: Fighter, dmg: float) -> float:
+def modify_damage_taken(defender: Fighter, dmg: float,
+                        attacker: Fighter | None = None) -> float:
     if defender.powers.get("vulnerable", 0) > 0:
         dmg *= C.VULNERABLE_TAKEN_MULT
-    return dmg
+    # `attacker` exists for the base-game parity powers that key off the
+    # DEALER rather than the target (Cruelty scales the Vulnerable multiplier
+    # it deals; Colossus halves what its owner takes from a Vulnerable dealer).
+    # It defaults to None so every existing two-argument call still reads the
+    # same -- Klee and Furina have no dealer-keyed power.
+    from tier0.engine import refpowers          # late import avoids cycle
+    return _floor(refpowers.modify_damage_taken(defender, dmg, attacker))
 
 
 def on_turn_start(state: CombatState, fighter: Fighter) -> None:
@@ -59,13 +82,25 @@ def on_turn_end(state: CombatState, fighter: Fighter) -> None:
             fighter.powers[name] -= 1
     for name in EXPIRING:
         fighter.powers.pop(name, None)
+    # StS2 site M (AfterSideTurnEnd) for the base-game parity powers. This is
+    # the correct site for BOTH sides: the player reaches it after the hand
+    # flush, each enemy after its intent -- which is exactly where Mangle's
+    # temporary Strength has to unwind (one enemy action, no more).
+    from tier0.engine import refpowers          # late import avoids cycle
+    refpowers.on_fighter_turn_end(state, fighter)
 
 
 def apply_power(state: CombatState, target: Fighter, name: str, stacks: int,
-                max_stacks: int | None = None) -> None:
+                max_stacks: int | None = None,
+                applier: Fighter | None = None) -> None:
     new = target.powers.get(name, 0) + stacks
     if max_stacks is not None:              # sheet v0.2 stack caps
         new = min(new, max_stacks)
     target.powers[name] = new
     state.emit("apply_power", power=name, stacks=stacks,
                target=getattr(target, "name", "player"))
+    # `applier` is StS2's AfterPowerAmountChanged argument. Vicious is the only
+    # power that needs it; callers that do not know it (effects._op_apply_power)
+    # leave it None and refpowers recovers it from the acting side.
+    from tier0.engine import refpowers          # late import avoids cycle
+    refpowers.on_power_applied(state, target, name, stacks, applier)

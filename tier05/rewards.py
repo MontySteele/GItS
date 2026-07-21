@@ -18,6 +18,14 @@ from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine.state import Card
 
+# The calibration references draft only from their own pool. For
+# real_ironclad this is the PARITY rule, not a flavour call: companions are
+# Klee/Furina content and would inject elements and reactions into a run
+# whose whole purpose is to be scored in the same relic-less, potion-less,
+# element-less world Klee was. The guard is a bare string, so it stays inert
+# on a clone where game_ref/ (and therefore real_ironclad) does not exist.
+NO_COMPANION_CHARACTERS = frozenset({"ref_ironclad", "real_ironclad"})
+
 
 @lru_cache(maxsize=8)
 def character_pool(character_id: str) -> dict[str, list[Card]]:
@@ -160,7 +168,7 @@ def roll_rewards(rng: random.Random, character_id: str,
         while rarity not in pool:            # ref pool may lack a rarity
             rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
         offers.append(loader.get_card(rng.choice(pool[rarity]).id))
-    if character_id != "ref_ironclad":       # no companions for the anchor
+    if character_id not in NO_COMPANION_CHARACTERS:   # none for the refs
         # personal_pool cards are only offered to their own character --
         # a no-op while Klee is the only character, load-bearing the moment
         # a second one exists (Prune must not show up in Furina's rewards).

@@ -24,6 +24,21 @@ DOCS_DIR = CONTENT_DIR.parents[1] / "docs"
 DOCS_CARD_SHEETS = ("klee-cards.yaml", "furina-cards.yaml",
                     "mondstadt-companions.yaml", "fontaine-companions.yaml")
 
+# The real base-game pool (tools/extract_base_game_pool.py ->
+# tools/build_ironclad_sheet.py). game_ref/ is gitignored (.gitignore:28):
+# decompiled material is REFERENCE ONLY, so this is a regenerable LOCAL
+# artifact that is simply absent on a fresh clone.
+#
+# Absence is TOTAL and that is the design, not an accident: the cards live
+# here AND so does the character yaml (char_*.yaml below). Committing a
+# character whose starting_deck ids ship in a gitignored file would leave
+# `build_player("real_ironclad")` a KeyError on every fresh clone -- a
+# committed reference to a missing thing. Nothing in the repo names
+# real_ironclad except inert guards (tier05.rewards.NO_COMPANION_CHARACTERS)
+# and a skip-guarded test module.
+GAME_REF_DIR = CONTENT_DIR.parents[1] / "game_ref"
+EXTERNAL_CARD_SHEETS = {"ironclad_pool.yaml": "real_ironclad"}
+
 
 def _load_yaml_dir(sub: str) -> list[dict]:
     docs = []
@@ -70,6 +85,38 @@ def _is_reaction_fuel(card: Card) -> bool:
     return False
 
 
+def _external_cards() -> list[dict]:
+    """Rows from the gitignored game_ref/ reference sheets, if present.
+
+    Deliberately NOT the docs/ path's post-processing: no nation inference
+    (a base-game pool has no Teyvat nation), and `character` is FORCED
+    rather than `setdefault`-ed. That force is load-bearing, not cosmetic:
+    rewards.character_pool drops cards tagged with another character
+    (rewards.py:48), so without it every Klee reward screen could offer a
+    Bash -- and every Ironclad screen a Jumpy Dumpty.
+    """
+    raw: list[dict] = []
+    for sheet, char in EXTERNAL_CARD_SHEETS.items():
+        path = GAME_REF_DIR / sheet
+        if not path.exists():
+            continue          # fresh clone: the reference simply is not here
+        docs = yaml.safe_load(path.read_text()) or []
+        for d in docs:
+            d["character"] = char
+        # LOUD, per the no-silent-approximation rule: upgrades.UPGRADE_SHEETS
+        # is a fixed docs/ tuple, so an external sheet's `+` forms do not
+        # exist and this reference is scored ENTIRELY UNUPGRADED. That is a
+        # real handicap against any character whose pass used upgrades, and
+        # it must appear in the report rather than be discovered later.
+        warnings.warn(
+            f"{sheet}: {len(docs)} reference cards loaded UNUPGRADED -- "
+            "upgrades.UPGRADE_SHEETS only reads docs/*-upgrades.yaml, so "
+            "no `<id>+` form exists for them. Any scorecard built from "
+            "this sheet must say so.")
+        raw.extend(docs)
+    return raw
+
+
 @lru_cache(maxsize=1)
 def _card_index() -> dict[str, Card]:
     raw = _load_yaml_dir("cards")
@@ -111,6 +158,7 @@ def _card_index() -> dict[str, Card]:
                 for d in docs:
                     d.setdefault("character", char)
             raw.extend(docs)
+    raw.extend(_external_cards())
     cards = [Card.from_dict(d) for d in raw]
     for c in cards:
         if c.role_c and "companion" not in c.tags:   # sheet marks via role_c
@@ -164,7 +212,15 @@ def get_card(card_id: str) -> Card:
 
 @lru_cache(maxsize=1)
 def _character_index() -> dict[str, dict]:
-    return {d["id"]: d for d in _load_yaml_dir("characters")}
+    index = {d["id"]: d for d in _load_yaml_dir("characters")}
+    # Reference characters live beside their (gitignored) card sheet -- see
+    # GAME_REF_DIR. glob() on a missing directory yields nothing, so no
+    # exists() guard is needed; the `char_` prefix keeps this from ever
+    # picking up ironclad.json's siblings.
+    for path in sorted(GAME_REF_DIR.glob("char_*.yaml")):
+        d = yaml.safe_load(path.read_text())
+        index[d["id"]] = d
+    return index
 
 
 def _kit_cards(spec: dict) -> list[Card]:

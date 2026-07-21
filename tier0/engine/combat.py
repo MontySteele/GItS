@@ -12,7 +12,7 @@ import random
 from typing import Callable
 
 from tier0 import constants as C
-from tier0.engine import effects, powers, reactions, resources
+from tier0.engine import effects, powers, reactions, refpowers, resources
 from tier0.engine.state import Card, CombatState, Enemy, Player
 
 # A pilot is a callable: (state) -> Card | None (None = end turn).
@@ -65,6 +65,21 @@ def card_playable(state: CombatState, card: Card) -> bool:
 
 def card_cost(state: CombatState, card: Card) -> int:
     if card.cost == "X":
+        # An X card spends the whole bank and NO cost modifier is consulted --
+        # this early return is the game's own shape, not a tier0 shortcut.
+        # CardEnergyCost.GetAmountToSpend() opens with
+        # `if (CostsX) return Owner.PlayerCombatState?.Energy ?? 0;`, returning
+        # before GetWithModifiers; and GetWithModifiers itself opens with
+        # `if (CostsX) return num;` BEFORE its
+        # `Hook.ModifyEnergyCostInCombat(...)` line. So the ...InCombatLate
+        # hook that FreeAttack (Unrelenting) and Corruption implement never
+        # runs on an X card, even though each sets modifiedCost = 0
+        # unconditionally once reached. Whirlwind is therefore never freed by a
+        # FreeAttack stack -- and must not be, since X is the energy actually
+        # spent (EnergyCost.CapturedXValue), so a freed Whirlwind would resolve
+        # at X = 0 and deal nothing. Same conclusion as the R34 spark exemption
+        # below, reached independently. Pinned by
+        # test_refpowers.test_free_attack_does_not_zero_an_x_cost_attack.
         return state.player.energy
     cost = card.cost
     if card.is_companion and state.companion_cost_delta_this_turn:
@@ -79,6 +94,12 @@ def card_cost(state: CombatState, card: Card) -> int:
         cost = max(0, cost - p.powers.get("spotlight_discount", 0))
     if (card.type == "attack"
             and state.player.sparks >= spark_threshold(state)):
+        return 0
+    # Base-game parity (FreeAttack / Corruption): checked AFTER the spark
+    # branch, so a spark-freed attack spends the bank rather than a stack.
+    # Precedence pinned by
+    # test_refpowers.test_free_attack_and_spark_are_both_consumed.
+    if refpowers.free_cost(state, card):
         return 0
     return cost
 
@@ -148,14 +169,26 @@ def play_card(state: CombatState, card: Card) -> None:
         if state.replay_next_companion > 0:   # Study Buddy
             replays += state.replay_next_companion
             state.replay_next_companion = 0
+    # OneTwoPunch resolves the play COUNT once, but Before/AfterCardPlayed fire
+    # per play index -- so a doubled attack pays Rage twice, counts twice for
+    # Juggling, and burns two FreeAttack stacks.
+    replays += refpowers.extra_replays(state, card)
     for _ in range(replays):
+        snap = refpowers.before_card_played(state, card)
         effects.resolve_card(state, card)
+        refpowers.after_card_played(state, card, snap)
     if card.kit_card:
         pass                                  # returns to the kit, no pile
-    elif card.exhaust or card.type == "power":
-        p.exhaust_pile.append(card)
     else:
-        p.discard_pile.append(card)
+        # CardModel.GetResultPileTypeForCardPlay: a played Power card is
+        # REMOVED FROM COMBAT (PileType.None), not exhausted. tier0 used to
+        # exhaust it, which would have paid out FeelNoPain and DarkEmbrace on
+        # all 11 of Ironclad's Power cards (recon BUG 1).
+        dest = refpowers.result_pile(state, card)
+        if dest == "exhaust":
+            refpowers.exhaust_card(state, card)
+        elif dest == "discard":
+            p.discard_pile.append(card)
     grant_charged_kit(state)
 
 
@@ -163,7 +196,14 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     p = state.player
     state.turn += 1
     state.cards_played_this_turn = 0
-    p.block = 0
+    state.in_player_turn = True              # StS2 CombatState.CurrentSide
+    refpowers.reset_turn_counters(state)
+    # StS2 site A (BeforeSideTurnStart) -- BEFORE the block clear and BEFORE
+    # the draw. Aggression pulls Attacks out of the discard pile here; running
+    # it after the draw would over-fill the hand versus the real game.
+    refpowers.side_turn_start_early(state)
+    if refpowers.should_clear_block(p):      # Barricade suppresses the clear
+        p.block = 0
 
     state.companion_cost_delta_this_turn = 0     # Friendly Visit expires
     state.replay_next_companion = 0              # Study Buddy expires
@@ -181,8 +221,14 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     if not p.alive or state.over:
         return
 
-    p.energy = C.BASE_ENERGY_PER_TURN
-    state.draw(C.CARDS_DRAWN_PER_TURN)
+    p.energy = refpowers.energy_for_turn(state)      # site C, + Pyre
+    state.draw(C.CARDS_DRAWN_PER_TURN, from_hand_draw=True)   # site D
+    # StS2 sites E/F (AfterPlayerTurnStart, AfterSideTurnStart) -- AFTER the
+    # draw. tier0's powers.on_turn_start above is a PRE site; anything that
+    # reads the hand or must land post-draw belongs here instead.
+    refpowers.player_turn_start_late(state)
+    if not p.alive or state.over:
+        return
     grant_charged_kit(state)                 # turn-start gains + full-hand defer
 
     seen_states: set[tuple] = set()
@@ -201,6 +247,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         seen_states.add(snapshot)
         play_card(state, card)
 
+    # StS2 site I (BeforeSideTurnEndEarly). PlatingPower's own source comment:
+    # "We do this in early so that it triggers before end-of-turn damage
+    # effects" -- which is precisely what player_turn_end_triggers holds.
+    refpowers.before_side_turn_end_early(state)
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
     grant_charged_kit(state)     # Salon-tick particles can fill the meter
                                  # at turn end; the Burst's Retain keeps it
@@ -208,11 +258,17 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Ethereal cards (the Spotlight selector) vanish to exhaust instead of
     # discarding -- an unplayed selector must never circulate as loot.
     retained = [c for c in p.hand if "burst" in c.tags]
-    p.exhaust_pile.extend(c for c in p.hand
-                          if "ethereal" in c.tags and "burst" not in c.tags)
+    ethereal = [c for c in p.hand
+                if "ethereal" in c.tags and "burst" not in c.tags]
     p.discard_pile.extend(c for c in p.hand
                           if "burst" not in c.tags and "ethereal" not in c.tags)
     p.hand = retained
+    for c in ethereal:
+        # DarkEmbrace counts ethereal exhausts instead of drawing on them; the
+        # deferred draw is flushed in powers.on_turn_end below, i.e. AFTER this
+        # hand flush -- which is the stated reason the source defers it.
+        refpowers.exhaust_card(state, c, caused_by_ethereal=True)
+    state.in_player_turn = False
     powers.on_turn_end(state, p)
 
 
@@ -251,7 +307,10 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             dmg = powers.modify_damage_dealt(enemy, amount)
             if frozen:
                 dmg *= C.FROZEN_DAMAGE_MULT
-            dmg = powers.modify_damage_taken(state.player, dmg)
+            # `enemy` is passed as the dealer so Colossus can read ITS
+            # Vulnerable (ColossusPower halves only what a Vulnerable attacker
+            # lands on its owner).
+            dmg = powers.modify_damage_taken(state.player, dmg, enemy)
             dmg = int(dmg)
             blocked = min(state.player.block, dmg)
             state.player.block -= blocked
@@ -262,15 +321,26 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             state.player.hp -= hp_loss
             resources.note_player_hp_loss(state, hp_loss)
             state.emit("player_hit", amount=hp_loss, blocked=blocked)
+            # AfterDamageReceived fires per HIT, not per intent -- FlameBarrier
+            # retaliates against every hit of a multi-hit attack. Inferno and
+            # Rupture are silent here: both require CurrentSide == Owner.Side,
+            # and state.in_player_turn is False.
+            refpowers.on_damage_received(state, state.player,
+                                         unblocked=dmg - blocked, dealer=enemy,
+                                         powered_attack=True)
             if not state.player.alive:
                 return
+            if not enemy.alive:
+                break               # FlameBarrier can kill the dealer
     elif kind == "block":
         enemy.block += intent["amount"]
     elif kind == "buff":
         powers.apply_power(state, enemy, intent.get("power", "strength"),
                            intent["amount"])
     elif kind == "debuff":
-        powers.apply_power(state, state.player, intent["power"], intent["amount"])
+        # applier=enemy: Vicious must NOT draw off an enemy-applied Vulnerable.
+        powers.apply_power(state, state.player, intent["power"],
+                           intent["amount"], applier=enemy)
     elif kind == "summon":
         for spawn in intent["wave"]:
             state.enemies.append(Enemy(hp=spawn["hp"], max_hp=spawn["hp"],
@@ -293,6 +363,22 @@ def surface_innate(draw_pile: list) -> None:
         draw_pile[:] = innate + [c for c in draw_pile if not c.innate]
 
 
+def _run_rounds(state: CombatState, pilot: Pilot) -> None:
+    while not state.over and state.turn < C.MAX_TURNS:
+        _player_turn(state, pilot)
+        if state.over:
+            break
+        for enemy in list(state.enemies):
+            _enemy_turn(state, enemy)
+            if state.over:
+                break
+        # AfterSideTurnEnd(side == Enemy): the once-per-round enemy tick. This
+        # is where FlameBarrier is removed and Colossus decrements -- doing
+        # either at the PLAYER's turn end instead makes Flame Barrier do
+        # literally nothing.
+        refpowers.after_enemy_side_turn_end(state)
+
+
 def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
               seed: int) -> CombatState:
     state = CombatState(player=player, enemies=enemies,
@@ -304,14 +390,14 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     player.spotlight = None
     state.rng.shuffle(player.draw_pile)
     surface_innate(player.draw_pile)
-    while not state.over and state.turn < C.MAX_TURNS:
-        _player_turn(state, pilot)
-        if state.over:
-            break
-        for enemy in list(state.enemies):
-            _enemy_turn(state, enemy)
-            if state.over:
-                break
+    # Bound so refpowers can recover the dealer/applier identity that
+    # effects.py cannot pass; try/finally so a raising fight never leaks a
+    # stale state into the next one.
+    outer = refpowers.bind(state)
+    try:
+        _run_rounds(state, pilot)
+    finally:
+        refpowers.bind(outer)
     won = bool(state.player.alive) and not state.living_enemies
     if won and "heal_after_won_fight" in state.player.relic_hooks:
         # Burning Blood (ruling 1): post-fight, can't affect combat —

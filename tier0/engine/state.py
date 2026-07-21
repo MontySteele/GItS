@@ -64,6 +64,18 @@ class Card:
     # overdraw: cards that may legally overdraw into HP use the
     # spend_encore op instead.
     encore_cost: int = 0
+    # Base-game parity (Ironclad pool): CanBeGeneratedInCombat. Feed sets it
+    # false so a generator cannot conjure the card that permanently raises
+    # max HP. MUST be honored by generate_from_pool -- otherwise Stoke
+    # over-generates and the whole comparison biases upward.
+    generatable: bool = True
+    # Base-game parity: HowlFromBeyond's AfterAutoPostPlayPhaseEntered hook.
+    # When this card is sitting in the EXHAUST pile at the end of the player
+    # turn it plays itself once for free and then goes to discard. A narrow
+    # boolean on purpose -- one card in 87 does not justify a general
+    # `triggers:` framework, and the house rule is implement-or-log, not
+    # generalize. Read by effects.player_turn_end_triggers.
+    on_exhaust_autoplay: bool = False
     # DEPRECATED (ruled R20, 2026-07-20): a parallel M9 session introduced
     # inline `upgrade:` fields on klee-cards.yaml rows; the ruling made
     # *-upgrades.yaml sheets the ONE upgrade convention. Tier 0 IGNORES
@@ -144,6 +156,13 @@ class Enemy(Fighter):
     frozen: bool = False        # v1.5: next action -50% dmg; first attack
                                 # hit Shatters (bonus dmg, removes Frozen)
     frozen_by_companion: bool = False   # control_uptime provenance (§2.2a)
+    # Base-game parity: ShouldOwnerDeathTriggerFatal. The game gates Fatal
+    # effects (Feed) on the target's powers all agreeing the death counts --
+    # summoned adds do not. Defaults True; the summon intent in
+    # combat._enemy_turn must set it False or Feed farms minions for
+    # permanent max HP, which is exactly the invisible upward bias this
+    # project exists to catch. Read by effects.deal_damage_to_enemy.
+    counts_for_fatal: bool = True
 
     def current_intent(self) -> dict:
         return self.intents[self.intent_index % len(self.intents)]
@@ -166,6 +185,19 @@ class CombatState:
     reactions_this_turn: int = 0          # reaction_triggered_this_turn
                                           # (Chevreuse; reset per turn)
     kills_this_card: int = 0              # killed_target
+    # Kills that the base game's Fatal gate would honor (Enemy
+    # .counts_for_fatal). Separate from kills_this_card so the existing
+    # killed_target predicate keeps its exact meaning for Klee/Furina.
+    fatal_kills_this_card: int = 0        # killed_target_fatal (Feed)
+    exhausted_this_card: int = 0          # generate_from_pool amount_formula
+    # Free-play machinery (Havoc / Cascade / HowlFromBeyond). The depth
+    # counter backstops the seen_states guard in combat._player_turn, which
+    # only samples BETWEEN pilot plays and is structurally blind to a nested
+    # free-play chain. force_random_targeting matches the base game, which
+    # rolls a random enemy for TargetType.AnyEnemy autoplays rather than
+    # using tier0's lowest-HP pilot aim -- variance IS the point of Havoc.
+    free_play_depth: int = 0
+    force_random_targeting: bool = False
     current_card_cost: int = 0            # this_cost_zero
     current_x: int = 0                    # X-cost cards
     sparks_at_play: int = 0               # bank BEFORE this card's own spark
@@ -178,6 +210,17 @@ class CombatState:
                                               # (SPOTLIGHT_CARDS_PER_TURN_CAP)
     spotlight_moved_this_turn: bool = False   # selector-payoff predicates
     spotlight_moves_this_combat: int = 0      # (sheet pass 1)
+    # --- base-game Ironclad parity (engine/refpowers.py); inert otherwise ---
+    in_player_turn: bool = False          # StS2 CombatState.CurrentSide, which
+                                          # Inferno and Rupture both gate on
+    card_play_depth: int = 0              # >0 while a card is mid-play
+                                          # (Rupture's deferral window)
+    rupture_pending: int = 0              # strength owed to the card in play
+    dark_embrace_ethereal_count: int = 0  # deferred to after the hand flush
+    attacks_played_this_turn: int = 0     # Juggling's ==3 trigger
+    block_gain_card_plays_this_turn: int = 0   # Unmovable's per-turn allowance
+    no_energy_gain_ceiling: Optional[int] = None  # NoEnergyGain, seeded when
+                                          # the power lands (not at the refill)
 
     def emit(self, event: str, **data: Any) -> None:
         self.log.append({"turn": self.turn, "event": event, **data})
@@ -197,8 +240,15 @@ class CombatState:
         self.player.draw_pile = self.player.discard_pile + self.player.draw_pile
         self.player.discard_pile = []
 
-    def draw(self, n: int) -> None:
+    def draw(self, n: int, from_hand_draw: bool = False) -> None:
+        # StS2 gates every draw behind Hook.ShouldDraw. Only NoDrawPower
+        # (Battle Trance) uses it, and it lets the turn-start hand draw
+        # through -- hence the flag, which combat._player_turn sets.
+        from tier0.engine import refpowers        # late import avoids cycle
         p = self.player
+        if not refpowers.should_draw(p, from_hand_draw):
+            self.emit("draw_denied", amount=n)
+            return
         for _ in range(n):
             if not p.draw_pile:
                 if not p.discard_pile:

@@ -29,6 +29,8 @@ dist/
 # of the repo entirely (§0.3). Decompiled MegaCrit code is not ours to vendor.
 sts2_decompiled/
 game_assets/
+# tools/extract_base_game_pool.py output -- regenerate locally, never commit
+game_ref/
 *.pck
 *.dll
 *.pdb
