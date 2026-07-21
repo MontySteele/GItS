@@ -66,6 +66,24 @@
     "vermillion_pact",
     "warm_glow"
   ],
+  "companions": [
+    "albedo_solar_isotoma",
+    "barbara_melody",
+    "barbara_shining_idol",
+    "bennett_fantastic_voyage",
+    "bennett_passion",
+    "dahlia_favonian_favor",
+    "dahlia_sacramental_shower",
+    "diona_icy_paws",
+    "durin_witchs_flame",
+    "fischl_nightrider",
+    "fischl_oz",
+    "kaeya_frostgnaw",
+    "nicole_celestial_gift",
+    "prune_witch_hunt",
+    "sucrose_astable",
+    "sucrose_gust"
+  ],
   "blocked": {
     "best_friends_forever": "op 'copy_companions_played_this_combat'",
     "borrowed_brilliance": "op 'copy_companion_in_hand'",

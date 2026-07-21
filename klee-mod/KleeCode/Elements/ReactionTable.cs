@@ -106,7 +106,11 @@ public static class ReactionTable
         var baseMult = AmplifierMultiplier(reaction);
         if (baseMult == 1m || dealer == null) return baseMult;
 
+        // Additive with each other, multiplicative on the base (sim
+        // _amp_mult): Vermillion Pact's +25 and Durin's +30 stack to +55.
         var pct = dealer.Powers.OfType<AmpReactionUpPower>().FirstOrDefault()?.Amount ?? 0;
+        pct += dealer.Powers.OfType<WitchsFlamePower>()
+            .FirstOrDefault()?.Amount ?? 0;
         var mult = baseMult * (1m + pct / 100m);
 
         if (mult > ReactionConstants.AmpStackLimit)

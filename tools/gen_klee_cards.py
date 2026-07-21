@@ -35,6 +35,7 @@ import yaml
 REPO = Path(__file__).resolve().parent.parent
 SHEET = REPO / "docs" / "klee-cards.yaml"
 UPGRADES_SHEET = REPO / "docs" / "klee-upgrades.yaml"
+COMPANIONS_SHEET = REPO / "docs" / "mondstadt-companions.yaml"
 OUT_DIR = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated"
 MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.json"
 
@@ -77,7 +78,22 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_
                   "apply_power", "discard", "discard_for_sparks",
                   "detonate", "move_bombs", "modify_bombs",
                   "chance_bomb_per_detonation", "conditional",
-                  "energy", "scry_discard", "add_card", "exhaust_from"}
+                  "energy", "scry_discard", "add_card", "exhaust_from",
+                  "apply_aura", "swirl", "buff_next_attack"}
+
+# --- companion batch (2026-07-21) --------------------------------------------
+def is_companion(card: dict) -> bool:
+    """Companion sheet rows carry `star` (4/5); Klee's sheet never does."""
+    return "star" in card
+
+
+ELEMENT_CS = {"pyro": "Element.Pyro", "hydro": "Element.Hydro",
+              "electro": "Element.Electro", "cryo": "Element.Cryo",
+              "anemo": "Element.Anemo", "geo": "Element.Geo"}
+
+APPLY_AURA_FIELDS = {"op", "element", "target"}
+SWIRL_FIELDS = {"op", "target"}
+BUFF_NEXT_FIELDS = {"op", "amount"}
 
 # --- small ops (2026-07-20 batch) --------------------------------------------
 # add_card token registry: sheet card id -> hand-written C# class. A pool
@@ -186,6 +202,24 @@ APPLY_POWERS = {
         "Apply {X} [gold]Weak[/gold]{TO}."),
     "vulnerable": ("VulnerablePower", None,
         "Apply {X} [gold]Vulnerable[/gold]{TO}."),
+    # Companion powers (2026-07-21, CompanionPowers.cs): each mirrors a
+    # tier0 player_turn_start/end trigger or attack-bonus branch. No caps
+    # (the sim clamps none of these).
+    "oz_summon": ("OzSummonPower", None,
+        "Summon Oz for {X} turns: at the end of your turn, he deals 3 damage "
+        "and applies [gold]Electro[/gold] to a random enemy."),
+    "witchs_flame": ("WitchsFlamePower", None,
+        "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more. "
+        "At the end of your turn, deal 4 damage and apply [gold]Pyro[/gold] "
+        "to a random enemy."),
+    "celestial_gift": ("CelestialGiftPower", None,
+        "Your Attacks deal {X} more damage. At the start of your turn, "
+        "gain 4 [gold]Block[/gold]."),
+    "solar_isotoma": ("SolarIsotomaPower", None,
+        "For {X} turns: your Attacks against enemies holding an elemental "
+        "aura grant 3 [gold]Block[/gold] per hit."),
+    "attack_up_this_turn": ("AttackUpThisTurnPower", None,
+        "Your Attacks deal {X} more damage this turn."),
 }
 
 # Powers applied to ENEMIES (native debuffs). Everything else in APPLY_POWERS
@@ -195,7 +229,11 @@ ENEMY_APPLY_POWERS = {"weak", "vulnerable"}
 # Sheet fields apply_power may carry. Anything else encodes a mechanic this
 # generator does not understand -- fail loudly (UNPARSEABLE discipline).
 APPLY_POWER_FIELDS = {"op", "power", "amount", "target", "max_stacks", "note",
-                      "splash_procs_per_turn"}
+                      "splash_procs_per_turn",
+                      # Companion sheet annotations (oz/albedo): the summon's
+                      # element and aura consumption live in the POWER's C#
+                      # implementation; the fields are documentation.
+                      "summon_element", "consumes_aura"}
 
 # Upgrade keys that all mean "bump the applied power amount" at card level
 # (tier0 upgrades.py handles them in one branch too).
@@ -350,6 +388,15 @@ def blocked_reason(card: dict) -> str | None:
     if card["id"] in HAND_WRITTEN:
         return "hand-written"
 
+    if is_companion(card):
+        # Companions apply their element via the card-level IElementalCard,
+        # so mixed elemental/non-elemental damage on one card cannot be
+        # expressed (tier0 reads applies_element per effect).
+        applies = {bool(e.get("applies_element"))
+                   for e in card.get("effects", []) if e.get("op") == "damage"}
+        if len(applies) > 1:
+            return "mixed applies_element damage on one companion card"
+
     # X cost (R34 batch): HasEnergyCostX => true + ResolveEnergyXValue()
     # (CapturedXValue through Hook.ModifyXValue -- the game-canonical X
     # read). The spark-spend exemption for X attacks is already in
@@ -461,6 +508,28 @@ def blocked_reason(card: dict) -> str | None:
                     f"gen_klee_cards: {card['id']}: splash_procs_per_turn "
                     f"{eff.get('splash_procs_per_turn')!r} != 3; the C# cap is the "
                     f"DemolitionConstants.SplashProcCapPerTurn const -- change both.")
+        if op == "apply_aura":
+            unknown = set(eff) - APPLY_AURA_FIELDS
+            if unknown:
+                return f"apply_aura field(s) {sorted(unknown)} not understood"
+            if eff.get("element") not in ELEMENT_CS:
+                return f"apply_aura element '{eff.get('element')}'"
+            if eff.get("target", "enemy") not in ("enemy", "random_enemy",
+                                                  "all_enemies"):
+                return f"apply_aura target '{eff.get('target')}'"
+        if op == "swirl":
+            unknown = set(eff) - SWIRL_FIELDS
+            if unknown:
+                return f"swirl field(s) {sorted(unknown)} not understood"
+            if eff.get("target", "enemy") not in ("enemy", "random_enemy",
+                                                  "all_enemies"):
+                return f"swirl target '{eff.get('target')}'"
+        if op == "buff_next_attack":
+            unknown = set(eff) - BUFF_NEXT_FIELDS
+            if unknown:
+                return f"buff_next_attack field(s) {sorted(unknown)} not understood"
+            if not isinstance(eff.get("amount"), int):
+                return "buff_next_attack amount must be a literal int"
         if op == "energy":
             unknown = set(eff) - ENERGY_FIELDS
             if unknown:
@@ -1231,6 +1300,52 @@ def build_body(card: dict) -> list[str]:
                 "        }"
             )
 
+        elif op in ("apply_aura", "swirl"):
+            # tier0 _op_apply_aura / _op_swirl: resolve_hit with 0 damage --
+            # ElementalHit.ApplyOnly is exactly that (apply / refresh /
+            # consume+react, no damage call). Swirl IS "trigger anemo".
+            element = (ELEMENT_CS[eff["element"]] if op == "apply_aura"
+                       else "Element.Anemo")
+            tgt = eff.get("target", "enemy")
+            if tgt == "enemy":
+                _target_guard(lines, ctx)
+                lines.append(
+                    f"await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, "
+                    f"{element}, Owner.Creature);"
+                )
+            elif tgt == "all_enemies":
+                lines.append(
+                    "foreach (var auraTarget in CombatState!.HittableEnemies.ToList())\n"
+                    "        {\n"
+                    f"            await ElementalHit.ApplyOnly(choiceContext, auraTarget, "
+                    f"{element}, Owner.Creature);\n"
+                    "        }"
+                )
+            else:  # random_enemy
+                lines.append(
+                    "{\n"
+                    "            var auraCandidates = CombatState!.HittableEnemies.ToList();\n"
+                    "            if (auraCandidates.Count > 0)\n"
+                    "            {\n"
+                    "                var auraTarget = Owner.RunState.Rng.CombatTargets.NextItem(auraCandidates);\n"
+                    "                if (auraTarget != null)\n"
+                    "                {\n"
+                    f"                    await ElementalHit.ApplyOnly(choiceContext, auraTarget, "
+                    f"{element}, Owner.Creature);\n"
+                    "                }\n"
+                    "            }\n"
+                    "        }"
+                )
+
+        elif op == "buff_next_attack":
+            # tier0 _op_buff_next_attack -> next_attack_up, consumed by the
+            # next attack card (NextAttackUpPower's AfterCardPlayed).
+            lines.append(
+                f"await PowerCmd.Apply<NextAttackUpPower>(choiceContext, "
+                f'Owner.Creature, {int(eff["amount"])}, '
+                "applier: Owner.Creature, cardSource: this);"
+            )
+
         elif op == "energy":
             # tier0 _op_energy: flat gain, no cap (the game clamps nothing
             # either -- PlayerCmd.GainEnergy is the base-game call).
@@ -1566,6 +1681,22 @@ def build_description(card: dict) -> str:
                 "random enemy."
             )
 
+        elif op == "apply_aura":
+            el = eff["element"].capitalize()
+            where = {"enemy": "", "random_enemy": " to a random enemy",
+                     "all_enemies": " to ALL enemies"}[eff.get("target", "enemy")]
+            parts.append(f"Apply [gold]{el}[/gold]{where}.")
+
+        elif op == "swirl":
+            tgt = eff.get("target", "enemy")
+            parts.append("[gold]Swirl[/gold] ALL enemies' auras."
+                         if tgt == "all_enemies"
+                         else "[gold]Swirl[/gold] an enemy's aura.")
+
+        elif op == "buff_next_attack":
+            parts.append(
+                f'Your next Attack deals {int(eff["amount"])} more damage.')
+
         elif op == "energy":
             n = int(eff["amount"])
             parts.append(f"Gain {n} Energy.")
@@ -1745,8 +1876,18 @@ def emit(card: dict) -> str:
     cls = pascal(card["id"])
     is_attack = card["type"] == "attack"
     # Sheet header: "ALL attacks apply pyro; applies_element omitted = true for
-    # attacks". Skills carry no element.
-    elemental = is_attack
+    # attacks". Skills carry no element. COMPANIONS are exempt from cadence
+    # (tier0 _element_for): they apply their element only where the sheet
+    # says applies_element -- the card-level interface carries it, so a
+    # companion card mixing elemental and non-elemental damage would be
+    # inexpressible (blocked_reason guards it).
+    if is_companion(card):
+        elemental = any(e.get("op") == "damage" and e.get("applies_element")
+                        for e in card.get("effects", []))
+        element_cs = ELEMENT_CS[card["element"]]
+    else:
+        elemental = is_attack
+        element_cs = "Element.Pyro"
 
     # The card's declared TargetType follows its FIRST damaging effect; a card
     # that only blocks or draws targets Self.
@@ -1772,6 +1913,11 @@ def emit(card: dict) -> str:
                 and eff.get("power") in ENEMY_APPLY_POWERS):
             target_type = TARGET_CS[eff["target"]]
             break
+        # Element ops (companions): a chosen-enemy swirl/apply_aura makes
+        # the card aimable, same rule as place_bomb.
+        if eff["op"] in ("apply_aura", "swirl"):
+            target_type = TARGET_CS[eff.get("target", "enemy")]
+            break
 
     vars_ = build_vars(card)
     body = build_body(card)
@@ -1782,6 +1928,8 @@ def emit(card: dict) -> str:
     interfaces = "CustomCardModel"
     if elemental:
         interfaces += ", IElementalCard"
+    if is_companion(card):
+        interfaces += ", ICompanionCard"
     # Sheet `skill_tag` -> ISkillTagCard: worth BURST_PER_SKILL_TAG burst
     # energy when played (KleeElementalHooks.AfterCardPlayed reads the marker).
     if "skill_tag" in card.get("tags", []):
@@ -1790,17 +1938,39 @@ def emit(card: dict) -> str:
     ind = "\n        "
     vars_cs = (",".join(f"{ind}    {v}" for v in vars_)).lstrip()
     body_cs = ind.join(body)
-    upgrade_cs = (
-        ind.join(upgrade)
-        if upgrade
-        else f"// R24: NO upgrade path -- {no_upgrade_reason}. Flagged in manifest."
-    )
+    if is_companion(card):
+        upgrade_cs = ("// Companions never scale (sheet header law); "
+                      "MaxUpgradeLevel 0 makes this unreachable.")
+    else:
+        upgrade_cs = (
+            ind.join(upgrade)
+            if upgrade
+            else f"// R24: NO upgrade path -- {no_upgrade_reason}. Flagged in manifest."
+        )
 
     element_member = ""
-    if elemental:
+    if elemental and is_companion(card):
+        element_member = (
+            "\n    /// <summary>Sheet applies_element: this companion attack applies its element.</summary>\n"
+            f"    public Element Element => {element_cs};\n"
+        )
+    elif elemental:
         element_member = (
             "\n    /// <summary>Sheet: all Klee attacks apply Pyro (catalyst-grade cadence).</summary>\n"
             "    public Element Element => Element.Pyro;\n"
+        )
+    if is_companion(card):
+        personal = card.get("personal_pool")
+        personal_cs = f'"{personal}"' if personal else "null"
+        element_member += (
+            "\n    /// <summary>Companion identity (docs/mondstadt-companions.yaml): "
+            "star drives the\n    /// reward slot's rarity tier; PersonalPool gates "
+            "per-character offers.</summary>\n"
+            f"    public int Star => {int(card['star'])};\n\n"
+            f"    public Element CompanionElement => {element_cs};\n\n"
+            f"    public string? PersonalPool => {personal_cs};\n\n"
+            "    /// <summary>Companion cards NEVER scale (sheet header law).</summary>\n"
+            "    public override int MaxUpgradeLevel => 0;\n"
         )
     if str(card["cost"]) == "X":
         # X cost: canonical 0 + the CardModel virtual (CardEnergyCost ctor
@@ -1918,12 +2088,26 @@ def main() -> int:
             if upgrade_reason:
                 no_upgrade[card["id"]] = upgrade_reason
 
+    # Companions (2026-07-21, user-ratified: the WHOLE Mondstadt roster is in
+    # scope) -- a blocked companion is a build failure, not a manifest entry.
+    companions = {}
+    for card in yaml.safe_load(COMPANIONS_SHEET.read_text(encoding="utf-8")):
+        reason = blocked_reason(card)
+        if reason:
+            raise SystemExit(
+                f"gen_klee_cards: companion {card['id']} blocked: {reason} "
+                "-- the whole roster is ratified in scope; extend the "
+                "generator, do not skip.")
+        companions[card["id"]] = emit(card)
+    generated.update(companions)
+
     manifest = {
         "_comment": (
             "Generated by tools/gen_klee_cards.py from docs/klee-cards.yaml. "
             "'blocked' cards need systems or hand-finishing; the reason names what stopped codegen."
         ),
-        "generated": sorted(generated),
+        "generated": sorted(set(generated) - set(companions)),
+        "companions": sorted(companions),
         "blocked": dict(sorted(blocked.items())),
         "upgrades": {
             "_comment": "R24 (2026-07-20): docs/klee-upgrades.yaml is the single "
