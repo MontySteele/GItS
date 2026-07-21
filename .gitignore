@@ -32,3 +32,6 @@ game_assets/
 *.pck
 *.dll
 *.pdb
+
+# card gallery (tools/render_card_gallery.py) -- a local eyeball view, regenerated on demand
+card_gallery.html

@@ -19,7 +19,14 @@ explosives_workshop	ImageGen/images/cards/klee/explosives_workshop.png	500	380	c
 duck_and_cover	ImageGen/images/cards/klee/duck_and_cover.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 2.png		sticker
 duck_and_cover	ImageGen/images/cards/klee/duck_and_cover.png	500	380	cover	top	shortlist	2	png	Klee Birthday 2020 2.png		splash
 duck_and_cover	ImageGen/images/cards/klee/duck_and_cover.png	500	380	contain	center	shortlist	3	png	Item Imaginary Friend Dodoco.png		item
-pop	ImageGen/images/cards/klee/pop.png	500	380	contain	center	shortlist	1	png	Item Kaboom Box.png		item
+secret_stash	ImageGen/images/cards/klee/secret_stash.png	500	380	cover_autocrop	contain	shortlist	1	png	Item Kaboom Box.png		item
+# YIELDED 2026-07-21: pop r1 was Item Kaboom Box; the red-pen gave the box to
+# secret_stash ("stash" = box) and pop's claim was r1 seniority only. Left
+# commented rather than deleted, and r2/r3 left at THEIR OWN ranks rather than
+# renumbered -- promoting r2 to the vacancy would be a taste call nobody made.
+# pop therefore has no effective pick and renders no portrait until the rehunt
+# lands; null-safe governs, and the gallery lists it under MISSING ART.
+# pop	ImageGen/images/cards/klee/pop.png	500	380	contain	center	shortlist	1	png	Item Kaboom Box.png		item
 pop	ImageGen/images/cards/klee/pop.png	500	380	cover	center	shortlist	2	gif	Jumpy Dumpty Preview.gif	30	vfx
 pop	ImageGen/images/cards/klee/pop.png	500	380	contain	center	shortlist	3	png	Dodoco's Bomb-Tastic Adventure Mint Jelly Jumpy Dumpty.png		item
 mine_toss	ImageGen/images/cards/klee/mine_toss.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine.png		item
@@ -234,15 +241,19 @@ model_source_tcg_alt	ImageGen/images/model/klee_character_card.png	0	0	raw	cente
 # they are commented out ONLY because enabling them would double-book art.
 # Uncomment a row once the red-pen rules which card keeps the source (and
 # re-point or retire the loser). See docs/klee-art-redpen-round3.md.
-# CONFLICT: Item Supersized Firework.png is boom_goes_the_dynamite r1 (and crackle r2)
+# RULED 2026-07-21 (user red-pen). One flip approved, five keeps confirmed.
+# The five DECLINED rows stay dead below as the record of what was asked and
+# refused -- do not re-propose these pairings; the challenger goes to rehunt.
+# DECLINED: incumbent boom_goes_the_dynamite keeps Item Supersized Firework
 # grand_finale	ImageGen/images/cards/klee/grand_finale.png	500	380	cover_autocrop	contain	shortlist	1	png	Item Supersized Firework.png		item
-# CONFLICT: Pounding Surprise Explosive Spark Effect.png is crackle r1
+# DECLINED: incumbent crackle keeps Pounding Surprise Explosive Spark Effect
 # tail_of_flame	ImageGen/images/cards/klee/tail_of_flame.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Pounding Surprise Explosive Spark Effect.png		vfx
-# CONFLICT: Klee Birthday 2023.png is warm_glow's AUTO pick
+# DECLINED: incumbent warm_glow keeps Klee Birthday 2023 (an AUTO pick, the
+# weakest claim in the table -- the red-pen upheld it anyway, on purpose)
 # patched_dress	ImageGen/images/cards/klee/patched_dress.png	500	380	contain	center	shortlist	1	png	Klee Birthday 2023.png		splash
-# CONFLICT: Klee Birthday 2021.png is cant_catch_me r1
+# DECLINED: incumbent cant_catch_me keeps Klee Birthday 2021
 # sparkly_explosion	ImageGen/images/cards/klee/sparkly_explosion.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Klee Birthday 2021.png		splash
-# CONFLICT: Item Kaboom Box.png is pop r1 (power_bomb_damage_up also, but icon = legal)
-# secret_stash	ImageGen/images/cards/klee/secret_stash.png	500	380	cover_autocrop	contain	shortlist	1	png	Item Kaboom Box.png		item
-# CONFLICT: Item Fish-Flavored Toast.png is fish_flavored_bait r1
+# APPROVED -> the live row now sits with the cards, above. "stash" = box;
+# pop's only claim was r1 seniority, so pop yielded and went to rehunt.
+# DECLINED: incumbent fish_flavored_bait keeps Item Fish-Flavored Toast
 # fish_blasting	ImageGen/images/cards/klee/fish_blasting.png	500	380	cover_autocrop	contain	shortlist	1	png	Item Fish-Flavored Toast.png		item
