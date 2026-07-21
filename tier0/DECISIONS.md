@@ -725,3 +725,52 @@ Amend here, not in chat history.
     tank_boss -0.50pt FAIL — in the A4-corrected world the machinery
     no longer buys single-target survival (the 91 coupling, at
     resolution). Disposition is red-pen's (report ask 1).
+
+## R39 -- spark-reading effects see the bank at play time (2026-07-21)
+
+USER RULING, from playtest: "Gleeful Barrage attacks based on the number
+of sparks, but if that number is 3+, those sparks are consumed to lower
+its cost before the card checks how many attacks to do (potentially
+stopping it from attacking). Let's have it check the spark count before
+they are consumed instead."
+
+The card fought itself: reaching the threshold that makes it FREE was
+exactly what deleted the sparks it counts, so at exactly 3 sparks it
+went free AND dropped from 5 hits to 2. This was NOT a port bug -- the
+C# mirrored the sim faithfully (the recorded Snap-fix caveat). The law
+moved first, then the mod.
+
+MECHANISM: state.sparks_at_play snapshots the bank in play_card before
+the spend; the 2_plus_sparks formula reads that instead of
+state.player.sparks. BLAST RADIUS IS EXACTLY ONE CARD: only attacks
+spend sparks, and both has_spark cards (eager_to_help, patched_dress)
+are skills, so nothing else can observe the difference.
+
+The user's own alternative framing -- "or add 3 attacks if the card
+costs 0, same effect" -- is NOT equivalent and was not taken: True Spark
+Knight / spark_threshold_down make the threshold 2, so a literal +3
+would over-pay. The pre-spend read is threshold-agnostic by
+construction.
+
+BAND CONSEQUENCE, measured 1000 fights/seed 42 before shipping: at the
+ratified 4 damage the buff put spark/tank_boss at 0.701 against a
+ceiling of 0.65, and tied A1_frontload with A2_scaling (4.2 vs 4.2),
+violating the identity constraint. Two ratified surfaces, so this went
+back to the user rather than being re-baselined (DECISIONS 62).
+
+RULED COMPENSATION: gleeful_barrage per-hit damage 4 -> 3. Re-measured:
+spark/tank_boss 0.587 (mid-band), identity constraint holds, other three
+band cells unmoved (demolition 0.957, reaction tank_boss 0.521, reaction
+gauntlet 0.926). The upgrade delta stays {damage: +1}, now 3->4.
+
+SIDE EFFECT WORTH RECORDING: this retires the queued "spark tank_boss
+margin" concern. That cell sat at 0.485 against a floor of 0.45 -- 3.5
+points of headroom, flagged to the user as uncomfortably thin. It now
+sits at 0.587, near the middle of [0.45, 0.65]. The margin was fixed by
+a mechanic ruling, not by a balance patch aimed at it.
+
+C# MIRROR: SparkPower.SparksAtPlay (the raw Amount -- our consume runs
+in AfterCardPlayed, so during OnPlay the bank has not yet been spent,
+which makes the pre-spend read the PLAIN one). SparksAsResolved is kept
+and documented as the correct accessor for any future attack that wants
+the post-spend view; it currently has no reader.

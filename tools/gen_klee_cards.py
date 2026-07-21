@@ -1061,9 +1061,12 @@ def _emit_damage(card: dict, eff: dict, lines: list[str], ctx: dict,
     x_times = isinstance(times, str)
     if "times_formula" in eff:
         # 2_plus_sparks (Gleeful Barrage), the sim's only times formula.
-        # SparksAsResolved: the sim computes times AFTER play_card's spend.
+        # SparksAtPlay: R39 (2026-07-21 ruling) -- the sim computes times from
+        # state.sparks_at_play, the bank BEFORE this card's own spend, because
+        # hitting the threshold that makes the card free was otherwise exactly
+        # what deleted the sparks it counts.
         call.append(
-            ".WithHitCount(2 + SparkPower.SparksAsResolved(Owner.Creature))")
+            ".WithHitCount(2 + SparkPower.SparksAtPlay(Owner.Creature))")
     elif x_times:
         # times: "X" (fish_blasting). tier0 loops range(times): X = 0 means
         # NO hits, so the whole attack statement is gated below.

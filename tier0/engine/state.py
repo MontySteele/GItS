@@ -168,6 +168,8 @@ class CombatState:
     kills_this_card: int = 0              # killed_target
     current_card_cost: int = 0            # this_cost_zero
     current_x: int = 0                    # X-cost cards
+    sparks_at_play: int = 0               # bank BEFORE this card's own spark
+                                          # spend (Gleeful Barrage; R39)
     companions_played: list[str] = field(default_factory=list)
     companion_cost_delta_this_turn: int = 0   # cost_mod op
     replay_next_companion: int = 0            # Study Buddy

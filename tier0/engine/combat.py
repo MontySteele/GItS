@@ -90,6 +90,14 @@ def play_card(state: CombatState, card: Card) -> None:
     # would resolve at X = 0 -- the mechanic cannot coherently apply, and
     # without the exemption an X attack at 0 energy trips this predicate
     # (paid 0, printed != 0) and whiffs the whole spark bank.
+    # R39 (user ruling 2026-07-21): effects that READ the spark bank see it
+    # as it was when the card was played, before this card's own spend.
+    # Gleeful Barrage ("2 + Sparks hits") otherwise fought itself: reaching
+    # the threshold that makes it free is exactly what deleted the sparks it
+    # counts, so at exactly 3 sparks it went free AND dropped to 2 hits. Only
+    # attacks spend, and the two has_spark cards are skills, so this card is
+    # the whole blast radius.
+    state.sparks_at_play = p.sparks
     if (card.type == "attack" and cost == 0
             and p.sparks >= spark_threshold(state)
             and card.cost != 0 and card.cost != "X"):
