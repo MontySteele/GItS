@@ -140,10 +140,16 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     /// The Spark bank as the sim sees it DURING a card's resolution. The
     /// sim's play_card spends BEFORE resolve_card, but our consume executes
     /// in AfterCardPlayed (payment-ordering safety, above) -- so mid-play
-    /// readers (Gleeful Barrage's 2+Sparks hit count, has_spark predicates)
-    /// must subtract the pending spend, or they read a pre-spend bank the
-    /// sim never shows. This is the caveat recorded with the Snap fix,
-    /// landing with the first formula card that reads the bank mid-play.
+    /// readers must subtract the pending spend, or they read a pre-spend bank
+    /// the sim never shows. This is the caveat recorded with the Snap fix.
+    ///
+    /// R39 NARROWED ITS SCOPE (2026-07-21): the only reader that ever needed
+    /// this was Gleeful Barrage's hit count, and that card now deliberately
+    /// reads the PRE-spend bank instead (SparksAtPlay). Spark spend fires on
+    /// attacks only, and both has_spark cards are skills, so no current
+    /// reader can observe a pending spend at all. Kept because the accessor
+    /// is the correct one for any FUTURE attack that reads the bank mid-play
+    /// and wants the sim's post-spend view.
     /// </summary>
     public static int SparksAsResolved(Creature owner)
     {
@@ -153,6 +159,19 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
             ? power.Amount
             : power.Amount - power._pendingSpendAmount;
     }
+
+    /// <summary>
+    /// The Spark bank as it stood when the card was played, BEFORE that
+    /// card's own spark spend -- tier0 state.sparks_at_play (R39).
+    ///
+    /// Our consume runs in AfterCardPlayed, so during OnPlay the power's
+    /// Amount IS still the pre-spend bank; the pending spend is a decision
+    /// that has not been executed. That makes this the plain read, and it is
+    /// spelled out as its own accessor so the intent is legible at the call
+    /// site rather than looking like someone forgot SparksAsResolved.
+    /// </summary>
+    public static int SparksAtPlay(Creature owner) =>
+        owner.Powers.OfType<SparkPower>().FirstOrDefault()?.Amount ?? 0;
 
     /// <summary>
     /// The consume, executing the play-time decision. Kept AFTER resolution:

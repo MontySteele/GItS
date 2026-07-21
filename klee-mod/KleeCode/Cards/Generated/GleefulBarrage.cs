@@ -46,7 +46,7 @@ public sealed class GleefulBarrage : CustomCardModel, IElementalCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(4m, ValueProp.Move)
+            new DamageVar(3m, ValueProp.Move)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -60,7 +60,7 @@ public sealed class GleefulBarrage : CustomCardModel, IElementalCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .WithHitCount(2 + SparkPower.SparksAsResolved(Owner.Creature))
+            .WithHitCount(2 + SparkPower.SparksAtPlay(Owner.Creature))
             .FromCard(this)
             .TargetingRandomOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")

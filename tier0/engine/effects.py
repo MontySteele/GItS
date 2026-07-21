@@ -245,7 +245,10 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     if "times_formula" in fx:
         if fx["times_formula"] != "2_plus_sparks":
             raise ValueError(f"unknown times_formula {fx['times_formula']!r}")
-        times = 2 + state.player.sparks       # Gleeful Barrage
+        # R39: the bank as it was at play time, NOT the post-spend bank --
+        # otherwise going free at the threshold is what removes the sparks
+        # the card counts.
+        times = 2 + state.sparks_at_play      # Gleeful Barrage
     times = _amount(state, times)
 
     base = _amount(state, fx["amount"])

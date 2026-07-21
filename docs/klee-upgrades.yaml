@@ -56,7 +56,7 @@ kaboom_beetle_swarm: {bonus_vs_bombed: +2}         # 3->5
 spark_knight_style: {power_amount: +1}             # +2->+3 on free attacks
 endless_fireworks: {cost: -1}                      # 1->0 (engine-power precedent)
 flame_on_the_wick: {damage: +3}                    # 6->9
-gleeful_barrage:   {damage: +1}                    # 4->5 per hit
+gleeful_barrage:   {damage: +1}                    # R39: 3->4 per hit
 hot_hands:         {innate: true}                  # R38 (user 2026-07-20): adopts the R37 disposition. The old {remove: self_damage} delta was codegen-inexpressible (structural) and left the card with no C# upgrade path; self-damage now STAYS on the upgrade (it's the card's cost), Innate is the quality.
 cant_catch_me:     {block: +2}                     # 2->4 (base errata'd 4->2, R25 batch)
 sugar_rush:        {remove: exhaust}               # classic quality upgrade (net-0 energy loop is spark-bounded)

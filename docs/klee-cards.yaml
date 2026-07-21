@@ -121,8 +121,14 @@
    effects: [{op: apply_power, power: spark_per_turn, amount: 1, target: self}]}
 - {id: flame_on_the_wick, name: "Flame on the Wick", cost: 0, type: attack, rarity: uncommon, solve: [frontload], archetypes: [spark], role: glue,
    effects: [{op: damage, amount: 6, target: enemy}]}
+# R39 (2026-07-21): the hit count now reads the bank BEFORE this card's own
+# spark spend -- reaching the threshold that makes the card free used to be
+# exactly what deleted the sparks it counts. Per-hit damage 4 -> 3 is the
+# ruled compensation: at 4 the buff put spark/tank_boss at 0.701 (ceiling
+# 0.65) and tied A1_frontload with A2_scaling; at 3 both gates pass and the
+# cell sits at 0.587, mid-band.
 - {id: gleeful_barrage, name: "Gleeful Barrage", cost: 2, type: attack, rarity: uncommon, solve: [scaling], archetypes: [spark], role: payoff,
-   effects: [{op: damage, amount: 4, target: random_enemy, times_formula: 2_plus_sparks}]}
+   effects: [{op: damage, amount: 3, target: random_enemy, times_formula: 2_plus_sparks}]}
 - {id: hot_hands, name: "Hot Hands", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [spark], role: enabler,
    effects: [{op: gain_spark, amount: 3}, {op: damage, amount: 2, target: self}]}
 # ERRATA LANDED (R25 batch, 2026-07-20): block 4 -> 2. Queued behind the
