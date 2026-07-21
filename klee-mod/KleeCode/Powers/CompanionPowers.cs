@@ -413,3 +413,41 @@ public sealed class NextAttackUpPower : PowerModel, ILocalizationProvider
         await PowerCmd.Remove(this);
     }
 }
+
+/// <summary>
+/// Charlotte, Enduring Frosthelm (tier0 op block_next_turn) uses the game's
+/// OWN BlockNextTurnPower -- no mod power needed. Verified by decompile
+/// against the sim: it grants Amount Block from AfterBlockCleared (the hook
+/// that fires right after the turn's block reset, which is exactly where
+/// tier0 grants it -- combat.py zeroes p.block, then player_turn_start_
+/// triggers pops block_next_turn) and then removes itself, which IS the sim's
+/// `powers.pop`. Unpowered, with a Block hover tip already wired.
+/// Same house rule as WeakPower / VulnerablePower / PoisonPower: when the
+/// core already ships the exact semantics, mirror by USING it.
+/// </summary>
+
+/// <summary>
+/// Freminet, Shattering Pressure (tier0 power shatter_bonus): your Shatters
+/// deal +Amount damage.
+///
+/// Read by FrozenPower, which is where the Shatter is dealt. The sim adds it
+/// to SHATTER_DAMAGE inside the same raw `enemy.hp -=` (effects.py), so the
+/// rider is unblockable and unamplified exactly like the base Shatter.
+/// Permanent for the combat -- a power card, no duration tick.
+/// </summary>
+public sealed class ShatterBonusPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Shattering Pressure"),
+        ("description", "Your [gold]Shatters[/gold] deal {Amount} more damage."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>Total bonus on a Shatter dealt by this creature, 0 if none.</summary>
+    public static int BonusFor(Creature? dealer) =>
+        dealer?.Powers.OfType<ShatterBonusPower>().FirstOrDefault()?.Amount ?? 0;
+}

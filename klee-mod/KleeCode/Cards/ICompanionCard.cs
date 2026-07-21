@@ -24,4 +24,12 @@ public interface ICompanionCard
     /// cards are only ever offered to their own character.
     /// </summary>
     string? PersonalPool => null;
+
+    /// <summary>
+    /// Home nation ("mondstadt", "fontaine"), from the companion sheet the
+    /// card came from. The reward slot concentrates
+    /// SAME_NATION_REWARD_SHARE of its weight on the run character's nation
+    /// (tier05 _nation_weighted_choice); null spreads with the remainder.
+    /// </summary>
+    string? Nation => null;
 }

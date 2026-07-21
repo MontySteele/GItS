@@ -1512,3 +1512,84 @@ and reported OK while the bug was live in front of the player. A static
 lint can confirm a card is listed somewhere; it cannot confirm the
 engine can see the thing it is listed in. Recorded in the lint's own
 docstring so the next person does not read a green line as proof.
+
+## Two rulings executed: companions scale, Fontaine joins the slot (2026-07-21)
+
+USER RULING 1: "the cards should be upgrade-able as per the sheet."
+USER RULING 2: "it's fine for Fontaine companions to show up as long as the
+50% nationality weighting is respected... it's probably best to have some
+non-Mondstadt cards in the pool to make sure Klee doesn't inadvertently
+overperform with a 100% Mondstadt roster."
+
+**Companions scale.** MaxUpgradeLevel 0 is gone; companions emit real
+upgrade paths from the merged upgrade index. The contradiction is
+resolved in the upgrade sheets' favour, so the mod now reproduces the
+power curve tier05 has been measuring at rest sites. The remaining
+no-upgrade companions are exactly the sim's own UNAPPLIABLE set --
+durin_witchs_flame and nicole_celestial_gift, both constants-encoded --
+which is the cross-check that the two sides now agree.
+
+New delta grammar: `duration` (Oz, Solar Isotoma) and `buff` (both
+Bennetts, Chevreuse) join POWER_UPGRADE_KEYS, and the keys bind to the
+first TOP-LEVEL apply_power OR buff_next_attack, mirroring the sim's
+`next(fx for fx in top if fx["op"] in (...))`. That precedence is
+load-bearing: Chevreuse's base buff scales while her conditional rider
+stays at its printed value, exactly as her sheet comment specifies.
+
+**The upgrade index is now merged**, klee-upgrades.yaml + furina-
+upgrades.yaml, the same two sheets in the same order as
+tier0/content/upgrades.py, duplicate ids a hard error on both sides.
+Without this the Fontaine companions would have generated
+unupgradeable while the sim smithed them -- the divergence we had just
+finished closing, one sheet over.
+
+**Fontaine in the slot.** COMPANION_SHEETS maps each companion sheet to
+its home nation (tier0's loader derives the same thing from the
+filename) and the roster is 16 + 12 = 28. Guest Star cards are skipped:
+they are Furina personal-pool cameos her own generators create
+mid-combat, tier05 filters them out of companion_pool, and nothing in
+the Klee mod can create one.
+
+**Nation weighting went live**, CompanionSlot.NationWeightedChoice, a
+port of tier05 _nation_weighted_choice: SAME_NATION_REWARD_SHARE (0.5)
+split evenly across home-nation cards, the remaining half spread across
+all cards by NATION_WEIGHTS (1.0 each today). It had always been a
+no-op -- with one nation it reduces exactly to a uniform pick -- so this
+is the first build where it bites. The no-home-nation fallback is
+mirrored too, because a Fontaine-only rare tier actually reaches it.
+
+**Three DSL asks wired** -- the sheet flagged them and the user asked
+the right question ("the only issue would be if there are any ops needed
+by the Fontaine cards that aren't actually wired yet, meaning we've
+shipped something broken"). All three were live in tier0 already:
+  - `reaction_triggered_this_turn`: ReactionEffects keeps the per-turn
+    window as a snapshot of the existing monotonic counter, opened at
+    AfterSideTurnEnd(Enemy) -- one broadcast EARLIER than the
+    start-of-turn detonation, so detonation reactions count toward the
+    new turn as they do in the sim -- and at BeforeCombatStart, because
+    turn 1 has no preceding enemy turn and the counter crosses combats.
+  - `block_next_turn`: the game ALREADY SHIPS BlockNextTurnPower, and
+    the decompile is an exact tier0 match (grants Amount from
+    AfterBlockCleared -- right after the turn's block reset, where the
+    sim grants it -- then removes itself, which is the sim's `pop`). A
+    mod power was written and then deleted in favour of it, same house
+    rule as WeakPower / VulnerablePower / PoisonPower.
+  - `shatter_bonus`: ShatterBonusPower, read by FrozenPower inside the
+    Shatter it had just been taught to deal as raw unblockable damage.
+
+Nothing shipped broken: a blocked companion is a SystemExit in the
+generator, not a manifest entry, so the three unwired ops could never
+have reached a build.
+
+CAUGHT IN REVIEW OF OWN OUTPUT: Chevreuse first generated "If an
+Elemental Reaction triggered this turn: ." -- BRANCH_OPS gained
+buff_next_attack while _branch_text did not, and the empty clause
+rendered silently. _branch_text's fallthrough is now a SystemExit
+naming the op, so the two tables cannot drift apart again.
+
+ART: 12 Fontaine companions ship portraitless (43 cards now awaiting
+the art pass: 21 Klee, 9 Mondstadt companions, 12 Fontaine, Confiscated).
+
+Verification: full suite 237 green, gen --check clean,
+handwritten-parity OK, pool-membership OK (105 classes), Release build
+clean. NOT deployed -- the game was running.

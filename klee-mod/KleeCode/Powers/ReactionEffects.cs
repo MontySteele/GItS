@@ -33,6 +33,33 @@ internal static class ReactionEffects
     /// </summary>
     public static int TotalResolved { get; private set; }
 
+    /// <summary>
+    /// TotalResolved as of the start of the current player turn. The sim keeps
+    /// an explicit state.reactions_this_turn and zeroes it at the top of the
+    /// player turn (combat.py) BEFORE start-of-turn bomb detonation, so
+    /// detonation-triggered reactions count toward the new turn. Mirrored as a
+    /// snapshot rather than a second counter so there is still exactly one
+    /// increment site.
+    /// </summary>
+    private static int _turnStartTotal;
+
+    /// <summary>
+    /// Reset the per-turn window. Called from KleeElementalHooks at
+    /// AfterSideTurnEnd(Enemy) -- a strictly EARLIER broadcast than
+    /// BeforeSideTurnStart(Player), where bombs detonate, so this needs no
+    /// ordering assumption inside a single broadcast -- and at combat start,
+    /// because the first player turn has no preceding enemy turn and the
+    /// monotonic counter carries over between combats.
+    /// </summary>
+    public static void MarkTurnStart() => _turnStartTotal = TotalResolved;
+
+    /// <summary>
+    /// tier0 predicate reaction_triggered_this_turn (Chevreuse, Vanguard's
+    /// Valor): `state.reactions_this_turn > 0`. RULED in the sheet as ANY
+    /// reaction, not Overload-only.
+    /// </summary>
+    public static bool ReactionTriggeredThisTurn => TotalResolved > _turnStartTotal;
+
     public static async Task Resolve(
         PlayerChoiceContext choiceContext,
         Reaction reaction,

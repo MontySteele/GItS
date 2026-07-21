@@ -139,6 +139,33 @@ public sealed class KleeElementalHooks : AbstractModel
         }
     }
 
+    /// <summary>
+    /// Opens the reaction_triggered_this_turn window. tier0 zeroes
+    /// reactions_this_turn at the top of the player turn, before start-of-turn
+    /// bomb detonation -- so this fires one broadcast EARLIER, at the end of
+    /// the enemy turn, which reaches the same state without depending on hook
+    /// order inside BeforeSideTurnStart.
+    /// </summary>
+    public override Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side == CombatSide.Enemy) ReactionEffects.MarkTurnStart();
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// The first player turn has no preceding enemy turn, and TotalResolved is
+    /// monotonic across combats -- without this, turn 1 of every combat after
+    /// the first would inherit a stale window and read "a reaction already
+    /// happened this turn".
+    /// </summary>
+    public override Task BeforeCombatStart()
+    {
+        ReactionEffects.MarkTurnStart();
+        return Task.CompletedTask;
+    }
+
     public override async Task BeforeDamageReceived(
         PlayerChoiceContext choiceContext, Creature target, decimal amount,
         ValueProp props, Creature? dealer, CardModel? cardSource)
