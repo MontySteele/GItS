@@ -76,7 +76,48 @@ MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.js
 MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_energy",
                   "apply_power", "discard", "discard_for_sparks",
                   "detonate", "move_bombs", "modify_bombs",
-                  "chance_bomb_per_detonation"}
+                  "chance_bomb_per_detonation", "conditional"}
+
+# --- conditional op (2026-07-20 batch) ---------------------------------------
+# Predicates with a verified C# read, each mirroring tier0 effects.py
+# _predicate exactly:
+#   this_cost_zero  -> EnergyCost.GetResolved(): "current cost including all
+#                      modifiers clamped to 0" (decompile doc) -- the spark
+#                      zeroing rides Hook.ModifyEnergyCostInCombat, so a
+#                      spark-freed attack reads 0 here, same as the sim's
+#                      current_card_cost.
+#   has_spark       -> SparkPower.Amount is the bank.
+#   reaction_triggered_by_this / killed_target -> snapshot diffs captured at
+#                      the top of OnPlay (the sim resets its per-card
+#                      counters at resolve_card start).
+PREDICATES_CS = {
+    "this_cost_zero": "EnergyCost.GetResolved() == 0",
+    "has_spark":
+        "(Owner.Creature.Powers.OfType<SparkPower>().FirstOrDefault()?.Amount ?? 0) > 0",
+    "reaction_triggered_by_this": "ReactionEffects.TotalResolved > reactionsAtStart",
+    "killed_target": "enemiesAtStart.Any(e => e.IsDead)",
+}
+
+# The if-clause each predicate renders on the card.
+PREDICATE_TEXT = {
+    "this_cost_zero": "If this cost 0",
+    "has_spark": "If you have [gold]Spark[/gold]",
+    "reaction_triggered_by_this": "If it triggered an [gold]Elemental Reaction[/gold]",
+    "killed_target": "If it kills",
+}
+
+CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
+
+# Ops legal inside a conditional branch: plain resolvers with literal (or
+# delta-var) amounts and no local declarations outside their own braces.
+# repeat_this is legal ONLY as a conditional's entire then-branch.
+BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "place_bomb", "burst_energy"}
+
+# Cards carrying a repeat-conditional re-resolve their other effects (sim
+# resolve_card: the repeat excludes only the repeat machinery). The repeated
+# body lands inside a for-block, so those other effects must not declare
+# method-scope locals a second time -- restrict them to declaration-free ops.
+REPEAT_SAFE_OPS = {"damage", "block", "draw", "gain_spark", "burst_energy"}
 
 # Field whitelists for the bomb ops (UNPARSEABLE discipline: an unknown
 # field encodes a mechanic; block loudly, never approximate).
@@ -201,8 +242,17 @@ HAND_WRITTEN |= {"sparks_n_splash"}
 #   chance      -> chance_bomb_per_detonation REPLACEMENT (tier0 upgrades.py
 #                  replaces, not bumps); codegen renders percent and emits
 #                  the delta in points, computed from the sheet's base
+#   conditional_bonus -> bumps the then-branch's first damage (tier0
+#                  upgrades.py bumps first damage|block in then; codegen
+#                  expresses the damage form via the ExtraDamage var and
+#                  flags a then-block card as structural)
+#   condition   -> "unconditional" only: tier0 hoists the then-branch out of
+#                  the conditional; C# reads (IsUpgraded || pred) at play and
+#                  swaps the text via {IfUpgraded:show:...|...} (the runtime
+#                  form BaseLib's SimpleLoc generates for upgrade swaps)
 EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "bomb_damage", "burst_energy", "cost",
-                       "discard", "sparks", "innate", "bonus", "chance"}
+                       "discard", "sparks", "innate", "bonus", "chance",
+                       "conditional_bonus", "condition"}
                       | POWER_UPGRADE_KEYS)
 
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
@@ -334,8 +384,58 @@ def blocked_reason(card: dict) -> str | None:
                     f"gen_klee_cards: {card['id']}: splash_procs_per_turn "
                     f"{eff.get('splash_procs_per_turn')!r} != 3; the C# cap is the "
                     f"DemolitionConstants.SplashProcCapPerTurn const -- change both.")
+        if op == "conditional":
+            unknown = set(eff) - CONDITIONAL_FIELDS
+            if unknown:
+                return f"conditional field(s) {sorted(unknown)} not understood"
+            if eff.get("if") not in PREDICATES_CS:
+                return f"conditional predicate '{eff.get('if')}' (no verified C# read)"
+            then, els = eff.get("then", []), eff.get("else", [])
+            if any(e.get("op") == "repeat_this" for e in then + els):
+                # Sim law (resolve_card): repeat_requested re-resolves the
+                # effect list minus the repeat machinery. Codegen expresses
+                # exactly the sheet's shape: a then-branch that IS the repeat.
+                if len(then) != 1 or els:
+                    return "repeat_this must be the conditional's entire then-branch"
+                if not isinstance(then[0].get("times", 1), int):
+                    return "repeat_this times must be a literal int"
+                bad = [e["op"] for e in card["effects"]
+                       if e is not eff and e["op"] not in REPEAT_SAFE_OPS]
+                if bad:
+                    return (f"repeat-conditional beside op(s) {sorted(set(bad))} "
+                            "(repeated body would redeclare locals)")
+            else:
+                branch_fields = {
+                    "damage": {"op", "amount", "target"},
+                    "block": {"op", "amount"},
+                    "draw": {"op", "amount"},
+                    "gain_spark": {"op", "amount"},
+                    "burst_energy": {"op", "amount"},
+                    "place_bomb": {"op", "amount", "target", "bomb_damage"},
+                }
+                for branch in (then, els):
+                    for e in branch:
+                        if e.get("op") not in BRANCH_OPS:
+                            return f"op '{e.get('op')}' inside a conditional branch"
+                        unknown = set(e) - branch_fields[e["op"]]
+                        if unknown:
+                            return (f"branch {e['op']} field(s) {sorted(unknown)} "
+                                    "not understood")
+                        if (e.get("op") == "damage"
+                                and (e.get("target") not in DAMAGE_TARGETS
+                                     or e.get("target") == "self")):
+                            return f"branch damage target '{e.get('target')}'"
+                        if (e.get("op") == "place_bomb"
+                                and e.get("target") not in BOMB_TARGETS):
+                            return f"branch place_bomb target '{e.get('target')}'"
+                        if not isinstance(e.get("amount", e.get("bomb_damage")), int):
+                            return f"branch {e['op']} amount must be a literal int"
     if sum(1 for e in card.get("effects", []) if e.get("op") == "detonate") > 1:
         return "two detonate effects on one card (count variable collision)"
+    if sum(1 for e in card.get("effects", [])
+           if e.get("op") == "conditional"
+           and any(x.get("op") == "repeat_this" for x in e.get("then", []))) > 1:
+        return "two repeat-conditionals on one card (repeatTimes collision)"
     return None
 
 
@@ -402,6 +502,24 @@ def build_vars(card: dict) -> list[str]:
             # Rendered as a PERCENT (50 -> 75); the body divides by 100.
             out.append(
                 f'new DynamicVar("Chance", {int(round(float(eff["chance"]) * 100))}m)')
+        elif op == "conditional":
+            # Branch amounts are literals unless a ruled delta targets them:
+            # conditional_bonus -> then-first damage (ExtraDamage), draw ->
+            # branch draws (Cards then / DrawElse else). repeat-conditionals
+            # carry no numbers of their own.
+            if any(e.get("op") == "repeat_this" for e in eff.get("then", [])):
+                continue
+            cb = conditional_bonus_upgrade(card)
+            bd = branch_draw_upgrade(card)
+            for e in eff.get("then", []):
+                if e["op"] == "damage" and cb:
+                    out.append(f'new ExtraDamageVar({e["amount"]}m)')
+                    cb = 0                       # first damage only
+                elif e["op"] == "draw" and bd:
+                    out.append(f'new CardsVar({int(e["amount"])})')
+            for e in eff.get("else", []):
+                if e["op"] == "draw" and bd:
+                    out.append(f'new DynamicVar("DrawElse", {int(e["amount"])}m)')
     return out
 
 
@@ -430,10 +548,30 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
     if not deltas:
         return {}, "no ratified delta in klee-upgrades.yaml"
     effects = card.get("effects", [])
+    # Branch effects too: tier0's `everywhere` (draw deltas bump ALL draw
+    # ops, branches included -- "both branches" is sheet law).
+    everywhere = list(effects)
+    for e in effects:
+        if e.get("op") == "conditional":
+            everywhere.extend(e.get("then", []))
+            everywhere.extend(e.get("else", []))
+    non_repeat_conditionals = [
+        e for e in effects
+        if e.get("op") == "conditional"
+        and not any(x.get("op") == "repeat_this" for x in e.get("then", []))]
     has = {
         "damage": any(e["op"] == "damage" and e["target"] != "self" for e in effects),
         "block": any(e["op"] == "block" for e in effects),
-        "draw": any(e["op"] == "draw" for e in effects),
+        "draw": any(e["op"] == "draw" for e in everywhere),
+        # conditional_bonus: tier0 bumps the then-branch's first damage|block;
+        # codegen expresses the damage form (ExtraDamage var). A then-block
+        # first would need a second Block var -- structural until needed.
+        "conditional_bonus": any(
+            next((x for x in c.get("then", [])
+                  if x.get("op") in ("damage", "block")), {}
+                 ).get("op") == "damage"
+            for c in non_repeat_conditionals),
+        "condition": bool(non_repeat_conditionals),
         "spark": any(e["op"] == "gain_spark" for e in effects),
         "bomb_damage": any(e["op"] == "place_bomb" for e in effects),
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
@@ -453,6 +591,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
     for key, value in deltas.items():
         if key not in EXPRESSIBLE_DELTAS:
             return {}, f"delta key '{key}: {value}' not expressible by codegen (structural upgrade)"
+        if key == "condition" and value != "unconditional":
+            return {}, f"delta 'condition: {value}' (only 'unconditional' is tier0 grammar)"
         if not has[key]:
             return {}, f"delta key '{key}' has no matching effect on this card (sheet/card mismatch)"
     return dict(deltas), None
@@ -497,6 +637,55 @@ def chance_upgrade(card: dict) -> float:
     return float(upgrade_plan(card)[0].get("chance", 0.0))
 
 
+def conditional_bonus_upgrade(card: dict) -> int:
+    """Ruled `conditional_bonus: +N` (tail_of_flame): bumps the then-branch's
+    first damage. 0 = none. The bump rides the ExtraDamage var, so a card
+    whose bombs already claim ExtraDamage is a loud stop."""
+    delta = int(upgrade_plan(card)[0].get("conditional_bonus", 0))
+    if delta and any(e.get("op") == "place_bomb"
+                     for e in _effects_everywhere(card)):
+        raise SystemExit(
+            f"gen_klee_cards: {card['id']}: conditional_bonus needs the "
+            "ExtraDamage var but the card also places bombs -- two claims "
+            "on one var name.")
+    return delta
+
+
+def condition_upgrade(card: dict) -> bool:
+    """Ruled `condition: unconditional` (patched_dress): the upgraded card
+    runs the then-branch always. C#: predicate reads (IsUpgraded || pred);
+    text swaps via {IfUpgraded:show:...|...}."""
+    return upgrade_plan(card)[0].get("condition") == "unconditional"
+
+
+def branch_draw_upgrade(card: dict) -> int:
+    """Ruled `draw: +N` when the card's draws live inside conditional
+    branches (eager_to_help). tier0 bumps ALL draw ops; the branch draws ride
+    the Cards (then) and DrawElse (else) vars. A card with BOTH a top-level
+    draw and branch draws would need three vars -- loud stop until real."""
+    delta = int(upgrade_plan(card)[0].get("draw", 0))
+    if not delta:
+        return 0
+    branch_draws = [e for e in _effects_everywhere(card)
+                    if e.get("op") == "draw"]
+    top_draws = [e for e in card["effects"] if e.get("op") == "draw"]
+    if len(branch_draws) > len(top_draws) and top_draws:
+        raise SystemExit(
+            f"gen_klee_cards: {card['id']}: draw delta with draws both at "
+            "top level and inside branches -- var plan has no third name.")
+    return delta if len(branch_draws) > len(top_draws) else 0
+
+
+def _effects_everywhere(card: dict) -> list[dict]:
+    out = []
+    for e in card.get("effects", []):
+        out.append(e)
+        if e.get("op") == "conditional":
+            out.extend(e.get("then", []))
+            out.extend(e.get("else", []))
+    return out
+
+
 def power_upgrade(card: dict) -> int:
     """Ruled power-amount delta (power_amount/amp_percent/splash_damage/
     vulnerable all bump the applied amount -- tier0 upgrades.py handles them
@@ -510,9 +699,157 @@ def power_upgrade(card: dict) -> int:
     return int(deltas[keys[0]]) if keys else 0
 
 
+def _target_guard(lines: list[str], ctx: dict) -> None:
+    """One ThrowIfNull per OnPlay (cardPlay.Target is nullable; a
+    single-target card played with no target is a bug in the caller, so fail
+    loudly rather than silently no-op -- mirrors the hand-written Kaboom).
+    ctx-tracked because conditional branches emit into sub-lists, where a
+    text scan of `lines` cannot see the outer guard."""
+    if not ctx["thrown"]:
+        ctx["thrown"] = True
+        lines.append(
+            'ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");'
+        )
+
+
+def _emit_damage(card: dict, eff: dict, lines: list[str], ctx: dict,
+                 amount_expr: str) -> None:
+    """The one attack-damage builder -- top level, conditional branches and
+    the repeat tail all route here so the targeting idiom cannot drift."""
+    times = eff.get("times", 1)
+    target = eff["target"]
+
+    call = [f"await DamageCmd.Attack({amount_expr})"]
+    if times > 1:
+        call.append(f".WithHitCount({times})")
+    call.append(".FromCard(this)")
+
+    if target == "enemy":
+        _target_guard(lines, ctx)
+        call.append(".Targeting(cardPlay.Target)")
+    elif target == "all_enemies":
+        # CombatState is declared nullable but is always set while a
+        # card is resolving -- every base-game AoE card dereferences it
+        # unguarded.
+        call.append(".TargetingAllOpponents(CombatState!)")
+    else:  # random_enemy / random_enemies
+        call.append(".TargetingRandomOpponents(CombatState!)")
+
+    call.append('.WithHitFx("vfx/vfx_attack_slash")')
+    if target == "all_enemies":
+        call.append(".SpawningHitVfxOnEachCreature()")
+    call.append(".Execute(choiceContext);")
+
+    lines.append("\n            ".join(call))
+
+
+def _emit_place_bomb(card: dict, eff: dict, lines: list[str], ctx: dict,
+                     dmg_expr: str) -> None:
+    n = eff["amount"]
+    if eff["target"] == "enemy":
+        _target_guard(lines, ctx)
+        place = (
+            f"await BombPower.Place(choiceContext, cardPlay.Target, {dmg_expr}, "
+            "Owner.Creature, this);"
+        )
+        if n == 1:
+            lines.append(place)
+        else:
+            lines.append(
+                f"for (var i = 0; i < {n}; i++)\n        {{\n"
+                f"            {place}\n        }}"
+            )
+    else:
+        # Each bomb rolls its own target, so N bombs can land on N
+        # different enemies -- matching Tier 0's per-bomb target pick.
+        # HittableEnemies can be empty if the last enemy died earlier in
+        # this card's resolution, and NextItem would throw on that.
+        lines.append(
+            f"for (var i = 0; i < {n}; i++)\n"
+            "        {\n"
+            "            var candidates = CombatState!.HittableEnemies.ToList();\n"
+            "            if (candidates.Count == 0) break;\n"
+            "            var bombTarget = Owner.RunState.Rng.CombatTargets.NextItem(candidates);\n"
+            "            if (bombTarget == null) break;\n"
+            f"            await BombPower.Place(choiceContext, bombTarget, {dmg_expr}, "
+            "Owner.Creature, this);\n"
+            "        }"
+        )
+
+
+def _stmt_gain_spark(card: dict, eff: dict) -> str:
+    amount = ('DynamicVars["Sparks"].IntValue' if spark_upgrade(card)
+              else str(int(eff["amount"])))
+    return f"await SparkPower.Gain(choiceContext, Owner.Creature, {amount}, this);"
+
+
+def _stmt_burst_energy(card: dict, eff: dict) -> str:
+    amount = ('DynamicVars["BurstEnergy"].IntValue' if burst_upgrade(card)
+              else str(int(eff["amount"])))
+    return f"await KleeBurstResource.Gain(choiceContext, Owner.Creature, {amount}, this);"
+
+
+def _emit_branch_op(card: dict, eff: dict, lines: list[str], ctx: dict,
+                    in_then: bool, cb_state: dict) -> None:
+    """Conditional-branch resolvers. Amounts are literals unless a ruled
+    delta claims them (see build_vars): conditional_bonus -> then-first
+    damage via ExtraDamage; draw delta -> Cards (then) / DrawElse (else)."""
+    op = eff["op"]
+    if op == "damage":
+        if in_then and cb_state.get("pending"):
+            cb_state["pending"] = False
+            _emit_damage(card, eff, lines, ctx, "DynamicVars.ExtraDamage.BaseValue")
+        else:
+            _emit_damage(card, eff, lines, ctx, f'{int(eff["amount"])}m')
+    elif op == "block":
+        lines.append(
+            "await CreatureCmd.GainBlock(Owner.Creature, "
+            f'new BlockVar({int(eff["amount"])}m, ValueProp.Move), cardPlay);'
+        )
+    elif op == "draw":
+        if branch_draw_upgrade(card):
+            expr = ("DynamicVars.Cards.BaseValue" if in_then
+                    else 'DynamicVars["DrawElse"].IntValue')
+        else:
+            expr = f'{int(eff["amount"])}m'
+        lines.append(f"await CardPileCmd.Draw(choiceContext, {expr}, Owner);")
+    elif op == "gain_spark":
+        # Branch sparks are literal (no delta grammar reaches them yet;
+        # spark_upgrade targets the top-level gain_spark).
+        lines.append(
+            f'await SparkPower.Gain(choiceContext, Owner.Creature, {int(eff["amount"])}, this);'
+        )
+    elif op == "burst_energy":
+        lines.append(
+            f'await KleeBurstResource.Gain(choiceContext, Owner.Creature, {int(eff["amount"])}, this);'
+        )
+    elif op == "place_bomb":
+        _emit_place_bomb(card, eff, lines, ctx, str(int(eff["bomb_damage"])))
+
+
+def _conditional_block(pred: str, then_lines: list[str],
+                       else_lines: list[str]) -> str:
+    def body(stmts: list[str]) -> str:
+        return "\n".join("            " + s.replace("\n", "\n    ")
+                         for s in stmts)
+    out = f"if ({pred})\n        {{\n{body(then_lines)}\n        }}"
+    if else_lines:
+        out += f"\n        else\n        {{\n{body(else_lines)}\n        }}"
+    return out
+
+
 def build_body(card: dict) -> list[str]:
     """OnPlay statements. Every call here has a verified base-game call site."""
     lines = []
+    ctx = {"thrown": False}
+    # Predicate snapshots: the sim resets its per-card counters at
+    # resolve_card START, so the C# diff bases are captured at the top of
+    # OnPlay, before any effect resolves -- not at the conditional's site.
+    preds = {e["if"] for e in card["effects"] if e.get("op") == "conditional"}
+    if "reaction_triggered_by_this" in preds:
+        lines.append("var reactionsAtStart = ReactionEffects.TotalResolved;")
+    if "killed_target" in preds:
+        lines.append("var enemiesAtStart = CombatState!.HittableEnemies.ToList();")
     for eff in card["effects"]:
         op = eff["op"]
 
@@ -536,95 +873,17 @@ def build_body(card: dict) -> list[str]:
             )
 
         elif op == "place_bomb":
-            var = bomb_var(card)
-            n = eff["amount"]
-            dmg = f"(int)DynamicVars.{var}.BaseValue"
-
-            if eff["target"] == "enemy":
-                if not any("ThrowIfNull" in l for l in lines):
-                    lines.append(
-                        'ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");'
-                    )
-                place = (
-                    f"await BombPower.Place(choiceContext, cardPlay.Target, {dmg}, "
-                    "Owner.Creature, this);"
-                )
-                if n == 1:
-                    lines.append(place)
-                else:
-                    lines.append(
-                        f"for (var i = 0; i < {n}; i++)\n        {{\n"
-                        f"            {place}\n        }}"
-                    )
-            else:
-                # Each bomb rolls its own target, so N bombs can land on N
-                # different enemies -- matching Tier 0's per-bomb target pick.
-                # HittableEnemies can be empty if the last enemy died earlier in
-                # this card's resolution, and NextItem would throw on that.
-                lines.append(
-                    f"for (var i = 0; i < {n}; i++)\n"
-                    "        {\n"
-                    "            var candidates = CombatState!.HittableEnemies.ToList();\n"
-                    "            if (candidates.Count == 0) break;\n"
-                    "            var bombTarget = Owner.RunState.Rng.CombatTargets.NextItem(candidates);\n"
-                    "            if (bombTarget == null) break;\n"
-                    f"            await BombPower.Place(choiceContext, bombTarget, {dmg}, "
-                    "Owner.Creature, this);\n"
-                    "        }"
-                )
+            _emit_place_bomb(card, eff, lines, ctx,
+                             f"(int)DynamicVars.{bomb_var(card)}.BaseValue")
 
         elif op == "damage":
-            times = eff.get("times", 1)
-            target = eff["target"]
-
-            call = ["await DamageCmd.Attack(DynamicVars.Damage.BaseValue)"]
-            if times > 1:
-                call.append(f".WithHitCount({times})")
-            call.append(".FromCard(this)")
-
-            if target == "enemy":
-                # cardPlay.Target is nullable; a single-target card played with
-                # no target is a bug in the caller, so fail loudly rather than
-                # silently no-op. Mirrors the hand-written Kaboom.
-                if not any("ThrowIfNull" in l for l in lines):
-                    lines.append(
-                        'ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");'
-                    )
-                call.append(".Targeting(cardPlay.Target)")
-            elif target == "all_enemies":
-                # CombatState is declared nullable but is always set while a
-                # card is resolving -- every base-game AoE card dereferences it
-                # unguarded.
-                call.append(".TargetingAllOpponents(CombatState!)")
-            else:  # random_enemy / random_enemies
-                call.append(".TargetingRandomOpponents(CombatState!)")
-
-            call.append('.WithHitFx("vfx/vfx_attack_slash")')
-            if target == "all_enemies":
-                call.append(".SpawningHitVfxOnEachCreature()")
-            call.append(".Execute(choiceContext);")
-
-            lines.append("\n            ".join(call))
+            _emit_damage(card, eff, lines, ctx, "DynamicVars.Damage.BaseValue")
 
         elif op == "gain_spark":
-            amount = (
-                'DynamicVars["Sparks"].IntValue'
-                if spark_upgrade(card)
-                else str(int(eff["amount"]))
-            )
-            lines.append(
-                f"await SparkPower.Gain(choiceContext, Owner.Creature, {amount}, this);"
-            )
+            lines.append(_stmt_gain_spark(card, eff))
 
         elif op == "burst_energy":
-            amount = (
-                'DynamicVars["BurstEnergy"].IntValue'
-                if burst_upgrade(card)
-                else str(int(eff["amount"]))
-            )
-            lines.append(
-                f"await KleeBurstResource.Gain(choiceContext, Owner.Creature, {amount}, this);"
-            )
+            lines.append(_stmt_burst_energy(card, eff))
 
         elif op == "apply_power":
             cls = APPLY_POWERS[eff["power"]][0]
@@ -640,10 +899,7 @@ def build_body(card: dict) -> list[str]:
                 # tier0 _op_apply_power -> _pick_targets: chosen enemy or
                 # every living enemy. Native debuff classes; applier is us.
                 if eff["target"] == "enemy":
-                    if not any("ThrowIfNull" in l for l in lines):
-                        lines.append(
-                            'ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");'
-                        )
+                    _target_guard(lines, ctx)
                     lines.append(
                         f"await PowerCmd.Apply<{cls}>(choiceContext, cardPlay.Target, "
                         f"{amount}, applier: Owner.Creature, cardSource: this);"
@@ -680,10 +936,7 @@ def build_body(card: dict) -> list[str]:
                 else ""
             )
             if eff["target"] == "enemy":
-                if not any("ThrowIfNull" in l for l in lines):
-                    lines.append(
-                        'ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");'
-                    )
+                _target_guard(lines, ctx)
                 lines.append(
                     f"{prefix}await BombPower.DetonateOn(choiceContext, "
                     f"cardPlay.Target{bonus_arg});"
@@ -716,10 +969,7 @@ def build_body(card: dict) -> list[str]:
                 'DynamicVars["Bonus"].IntValue' if bonus_upgrade(card)
                 else str(int(eff.get("bonus", 0)))
             )
-            if not any("ThrowIfNull" in l for l in lines):
-                lines.append(
-                    'ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");'
-                )
+            _target_guard(lines, ctx)
             lines.append(
                 f"await BombPower.MoveAllTo(choiceContext, cardPlay.Target, "
                 f"CombatState!.HittableEnemies, {bonus_expr}, Owner.Creature, this);"
@@ -790,7 +1040,109 @@ def build_body(card: dict) -> list[str]:
                 "        }"
             )
 
+        elif op == "conditional":
+            then = eff.get("then", [])
+            if any(e.get("op") == "repeat_this" for e in then):
+                # Evaluated at the conditional's position (sim: the predicate
+                # reads counters as of this point in the effect list); the
+                # replay itself lands after the list (repeat tail below).
+                times = int(then[0].get("times", 1))
+                lines.append(
+                    f"var repeatTimes = ({PREDICATES_CS[eff['if']]}) ? {times} : 0;"
+                )
+            else:
+                pred = PREDICATES_CS[eff["if"]]
+                if condition_upgrade(card):
+                    # condition: unconditional (tier0 hoists the then-branch
+                    # on upgrade) -- the upgraded card runs it always.
+                    pred = f"IsUpgraded || {pred}"
+                cb_state = {"pending": conditional_bonus_upgrade(card) > 0}
+                then_lines: list[str] = []
+                for e in then:
+                    _emit_branch_op(card, e, then_lines, ctx, True, cb_state)
+                else_lines: list[str] = []
+                for e in eff.get("else", []):
+                    _emit_branch_op(card, e, else_lines, ctx, False, cb_state)
+                lines.append(_conditional_block(pred, then_lines, else_lines))
+
+    # Repeat tail (sim resolve_card): a repeat-conditional re-resolves the
+    # effect list minus the repeat machinery, `times` more times. The
+    # replayed ops are REPEAT_SAFE_OPS only (blocked_reason), so the block
+    # declares no method-scope locals twice.
+    rep = next((e for e in card["effects"] if e.get("op") == "conditional"
+                and any(x.get("op") == "repeat_this"
+                        for x in e.get("then", []))), None)
+    if rep is not None:
+        body: list[str] = []
+        for eff in card["effects"]:
+            if eff is rep:
+                continue
+            op = eff["op"]
+            if op == "damage":
+                _emit_damage(card, eff, body, ctx, "DynamicVars.Damage.BaseValue")
+            elif op == "block":
+                body.append(
+                    "await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);"
+                )
+            elif op == "draw":
+                body.append(
+                    "await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);"
+                )
+            elif op == "gain_spark":
+                body.append(_stmt_gain_spark(card, eff))
+            elif op == "burst_energy":
+                body.append(_stmt_burst_energy(card, eff))
+        lines.append(
+            "for (var r = 0; r < repeatTimes; r++)\n        {\n"
+            + "\n".join("            " + s.replace("\n", "\n    ") for s in body)
+            + "\n        }"
+        )
+
     return lines
+
+
+def _branch_text(card: dict, branch: list[dict], in_then: bool) -> str:
+    """Card text for a conditional branch: literal numbers unless a ruled
+    delta claims the var (mirrors _emit_branch_op's amount policy)."""
+    bits = []
+    cb_pending = in_then and conditional_bonus_upgrade(card) > 0
+    for e in branch:
+        op = e["op"]
+        if op == "damage":
+            tgt = {"all_enemies": " to ALL enemies",
+                   "random_enemy": " to a random enemy",
+                   "random_enemies": " to a random enemy"}.get(e["target"], "")
+            if cb_pending:
+                cb_pending = False
+                bits.append(f"deal {{ExtraDamage:diff()}} damage{tgt}")
+            else:
+                bits.append(f'deal {int(e["amount"])} damage{tgt}')
+        elif op == "block":
+            bits.append(f'gain {int(e["amount"])} [gold]Block[/gold]')
+        elif op == "draw":
+            if branch_draw_upgrade(card):
+                var = "Cards" if in_then else "DrawElse"
+                bits.append(
+                    f"draw {{{var}:diff()}} card{{{var}:plural:|s}}")
+            else:
+                n = int(e["amount"])
+                bits.append("draw 1 card" if n == 1 else f"draw {n} cards")
+        elif op == "gain_spark":
+            n = int(e["amount"])
+            bits.append("gain 1 [gold]Spark[/gold]" if n == 1
+                        else f"gain {n} [gold]Sparks[/gold]")
+        elif op == "burst_energy":
+            bits.append(f'gain {int(e["amount"])} [gold]Burst Energy[/gold]')
+        elif op == "place_bomb":
+            n, d = e["amount"], int(e["bomb_damage"])
+            if n == 1:
+                where = "" if e["target"] == "enemy" else " on a random enemy"
+                bits.append(f"place a [gold]Bomb[/gold]{where} dealing {d} damage")
+            else:
+                where = "" if e["target"] == "enemy" else " on random enemies"
+                bits.append(
+                    f"place {n} [gold]Bombs[/gold]{where}, each dealing {d} damage")
+    return " and ".join(bits) + "."
 
 
 def build_description(card: dict) -> str:
@@ -906,6 +1258,31 @@ def build_description(card: dict) -> str:
                 "random enemy."
             )
 
+        elif op == "conditional":
+            pred_txt = PREDICATE_TEXT[eff["if"]]
+            then = eff.get("then", [])
+            if any(e.get("op") == "repeat_this" for e in then):
+                parts.append(f"{pred_txt}: play this card again.")
+            else:
+                then_txt = _branch_text(card, then, in_then=True)
+                clause = f"{pred_txt}: {then_txt}"
+                els = eff.get("else", [])
+                if els:
+                    clause += f" Otherwise: {_branch_text(card, els, in_then=False)}"
+                if condition_upgrade(card):
+                    # {IfUpgraded:show:upgraded|normal} -- the runtime form
+                    # BaseLib's SimpleLoc MakeUpgradeSwap generates. Pipe is
+                    # the separator, so pipes in either arm (e.g. plural
+                    # tokens) would break parsing -- stop loudly.
+                    upgraded = then_txt[0].upper() + then_txt[1:]
+                    if "|" in upgraded or "|" in clause:
+                        raise SystemExit(
+                            f"gen_klee_cards: {card['id']}: condition-swap "
+                            "text contains '|' -- cannot nest in "
+                            "{IfUpgraded:show:...}.")
+                    clause = "{IfUpgraded:show:" + upgraded + "|" + clause + "}"
+                parts.append(clause)
+
         elif op == "discard":
             n = int(eff.get("amount", 1))
             parts.append(
@@ -983,6 +1360,20 @@ def build_upgrade(card: dict) -> list[str]:
         var = "DynamicVars.Damage" if key == "damage" else (
             f"DynamicVars.{bomb_var(card)}" if key == "bomb_damage" else var_for[op])
         lines.append(f"{var}.UpgradeValueBy({int(deltas[key])}m);")
+    if "conditional_bonus" in deltas:
+        # tier0: bump the then-branch's first damage (the ExtraDamage var;
+        # expressibility gated in upgrade_plan/conditional_bonus_upgrade).
+        lines.append(
+            f'DynamicVars.ExtraDamage.UpgradeValueBy({int(deltas["conditional_bonus"])}m);')
+    if branch_draw_upgrade(card):
+        # tier0 draw deltas bump ALL draw ops, branches included.
+        d = int(deltas["draw"])
+        lines.append(f"DynamicVars.Cards.UpgradeValueBy({d}m);")
+        lines.append(f'DynamicVars["DrawElse"].UpgradeValueBy({d}m);')
+    if "condition" in deltas:
+        lines.append(
+            "// condition: unconditional -- expressed at play time as "
+            "(IsUpgraded || predicate); the text swaps via {IfUpgraded:show:...}.")
     if "cost" in deltas:
         lines.append(f'EnergyCost.UpgradeBy({int(deltas["cost"])});')
     if "innate" in deltas:

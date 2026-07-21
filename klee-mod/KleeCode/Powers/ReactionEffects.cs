@@ -21,6 +21,17 @@ namespace KleeMod.Powers;
 /// </summary>
 internal static class ReactionEffects
 {
+    /// <summary>
+    /// Monotonic count of named reactions resolved. Generated conditionals
+    /// (reaction_triggered_by_this) diff it around a card play -- the sim
+    /// resets reactions_this_card at resolve_card start and this funnel is
+    /// the single place reactions resolve, so a snapshot diff is the same
+    /// number. Counts EVERY named reaction, dealer or not (the sim
+    /// increments before any dealer-gated credit); never reset -- only
+    /// diffs are read.
+    /// </summary>
+    public static int TotalResolved { get; private set; }
+
     public static async Task Resolve(
         PlayerChoiceContext choiceContext,
         Reaction reaction,
@@ -29,6 +40,11 @@ internal static class ReactionEffects
         CardModel? cardSource,
         Element consumedAura)
     {
+        if (reaction != Reaction.None)
+        {
+            TotalResolved++;
+        }
+
         // Burst economy, reaction half: +5 for EVERY named reaction --
         // amplifiers included (the sim credits BURST_PER_REACTION whenever
         // resolve_hit names a reaction, and Vaporize/Melt are named). This is
