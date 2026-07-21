@@ -38,7 +38,14 @@ def read_plan():
         for line in f:
             if not line.strip() or line.startswith("#"):
                 continue
-            parts = line.rstrip("\n").split("\t")
+            # rstrip the line, not just "\n": the file is CRLF, and opening
+            # with newline="" leaves the "\r" glued to the LAST column. That
+            # column is `register`, so every register compared as "item\r" --
+            # which silently killed art_lint's L3 and L4 (they test
+            # `reg == "icon"` / `== "item"`) for as long as they have existed.
+            # L2 was left shouting "unknown register 'item'" about a register
+            # plainly in the allowed set, which is how it was finally noticed.
+            parts = line.rstrip("\r\n").split("\t")
             if len(parts) < 10:
                 sys.exit(f"bad plan row: {line!r}")
             rows.append({
