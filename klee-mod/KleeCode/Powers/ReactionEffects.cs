@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
 
@@ -101,31 +102,84 @@ internal static class ReactionEffects
                     applier: dealer, cardSource: cardSource);
                 break;
 
-            // ---------------------------------------------------------------
-            // NOT YET IMPLEMENTED. Each of these needs an API I have not
-            // verified against the decompiled assembly yet, and after this
-            // session's run of "it compiled so I assumed it worked" bugs I am
-            // not guessing at them. They log loudly rather than failing silently
-            // so a playtest cannot mistake them for balance.
-            //
-            //  - Overload       needs the live enemy list + CreatureCmd.Damage
-            //                   splash (OVERLOAD_SPLASH = 6, all enemies,
-            //                   ignores block per sim simplification)
-            //  - ElectroCharged needs a stacking DoT power (4 dmg, 2 turns);
-            //                   check whether a base-game poison-like power can
-            //                   be reused before writing one
-            //  - Swirl          needs the live enemy list to copy `consumedAura`
-            //                   onto every other enemy
-            //  - Crystallize    needs the player Creature + a block-gain path
-            //                   that does not require a CardPlay
-            // ---------------------------------------------------------------
+            // Completed with the companions batch (2026-07-21): the roster's
+            // hydro/electro/cryo/anemo appliers make all four REACHABLE for
+            // the first time -- until Oz there was no electro in the mod, so
+            // the loud stubs never fired in play. Every API below is the
+            // verified idiom from elsewhere in the codebase.
+
             case Reaction.Overload:
+                // tier0 _react -> _splash: OVERLOAD_SPLASH flat to ALL living
+                // enemies, ignores block (sim: raw `hp -=`), hence
+                // Unblockable | Unpowered with no dealer -- which also keeps
+                // splash from early-detonating bombs or counting as an attack.
+                var splashTargets = target.CombatState?.HittableEnemies.ToList();
+                if (splashTargets != null)
+                {
+                    foreach (var e in splashTargets)
+                    {
+                        await CreatureCmd.Damage(
+                            choiceContext, e, ReactionConstants.OverloadSplash,
+                            ValueProp.Unblockable | ValueProp.Unpowered,
+                            dealer: null, cardSource: null);
+                    }
+                }
+                break;
+
             case Reaction.ElectroCharged:
+                // tier0: apply_power(enemy, "dot", ELECTROCHARGED_DOT). The
+                // sim's dot IS poison (owner-turn-start tick of Amount, then
+                // decrement -- powers.py on_turn_start), so the core's own
+                // PoisonPower is the exact mirror; no custom power needed.
+                await PowerCmd.Apply<PoisonPower>(
+                    choiceContext, target, ReactionConstants.ElectroChargedDot,
+                    applier: dealer, cardSource: cardSource);
+                break;
+
             case Reaction.Swirl:
+                // tier0 _react anemo branch: the consumed aura is applied to
+                // EVERY living enemy -- the original target included (its own
+                // aura was consumed first, so it gets a fresh copy).
+                // apply_aura overwrites: same element refreshes, different
+                // element is replaced outright, full duration either way.
+                var swirlTargets = target.CombatState?.HittableEnemies.ToList();
+                if (swirlTargets != null)
+                {
+                    foreach (var e in swirlTargets)
+                    {
+                        var existing = AuraCmd.Find(e);
+                        if (existing != null)
+                        {
+                            if (existing.Element == consumedAura)
+                            {
+                                await AuraCmd.Refresh(
+                                    choiceContext, existing, dealer, cardSource);
+                                continue;
+                            }
+                            await PowerCmd.Remove(existing);
+                        }
+                        await AuraCmd.Apply(
+                            choiceContext, e, consumedAura, dealer, cardSource);
+                    }
+                }
+                break;
+
             case Reaction.Crystallize:
-                Log.Warn($"[{KleeMod.ModId}] Reaction {reaction} triggered " +
-                         $"({consumedAura} aura consumed) but its effect is NOT " +
-                         $"IMPLEMENTED yet -- no effect applied.");
+                // tier0: state.player.block += CRYSTALLIZE_BLOCK. The dealer
+                // IS the player for every reachable path; a dealer-less
+                // crystallize has no one to credit, so it logs loudly
+                // instead of guessing (sim always has a player).
+                if (dealer != null)
+                {
+                    await CreatureCmd.GainBlock(
+                        dealer, ReactionConstants.CrystallizeBlock,
+                        ValueProp.Unpowered, null, fast: true);
+                }
+                else
+                {
+                    Log.Warn($"[{KleeMod.ModId}] Crystallize with no dealer " +
+                             "-- no one to credit the Block to; skipped.");
+                }
                 break;
 
             case Reaction.None:
