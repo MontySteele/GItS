@@ -3,8 +3,11 @@ using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Rewards;
+using MegaCrit.Sts2.Core.Rooms;
 
 namespace KleeMod.Relics;
 
@@ -54,6 +57,28 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
 
     protected override string BigIconPath =>
         KleePck.Path("klee/relics/pounding_surprise.png") ?? base.BigIconPath;
+
+    /// <summary>
+    /// The companion reward slot (tier05 roll_rewards, standard mode): one
+    /// companion offered on every FIGHT reward screen, riding
+    /// SpecialCardReward (the native take-or-skip single-card reward).
+    /// Hosted here because the starter relic is the one model guaranteed
+    /// present for the whole of every Klee run and relics are the hook's
+    /// intended listeners (AbstractModel doc: Orrery, Tiny Mailbox).
+    /// room is CombatRoom = end-of-encounter rewards only; null room
+    /// (relic pickups, events) and non-combat rooms get no slot.
+    /// </summary>
+    public override bool TryModifyRewards(
+        Player player, List<Reward> rewards, AbstractRoom? room)
+    {
+        if (room is not CombatRoom) return false;
+        if (player.Character is not Klee) return false;
+
+        var offer = CompanionSlot.Roll(player);
+        if (offer == null) return false;
+        rewards.Add(new SpecialCardReward(offer, player));
+        return true;
+    }
 
     public async Task OnBombDetonated(
         PlayerChoiceContext choiceContext, Creature? applier, Creature target, int damage)
