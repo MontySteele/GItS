@@ -183,6 +183,29 @@ if (-not (Test-Path $venvPython)) {
 }
 
 # ---------------------------------------------------------------------------
+# S7. The FULL repo test suite must be green before anything deploys.
+#
+# Lesson (2026-07-20): a compaction-narrowed "pytest tier0" habit reported
+# "188 tests green" while the full suite was 236 with one failure -- a tier05
+# rest-policy test stranded by the R37 ruling. Cross-tier coupling is exactly
+# what full-suite discipline exists to catch, and it caught one on its first
+# opportunity. This gate runs pytest over the WHOLE repo (tier0 + tier05 +
+# tools tests), 1000-fight band checks included -- deploys are supposed to
+# pay that price. Green claims must name their scope; this one is "the repo".
+# ---------------------------------------------------------------------------
+if (Test-Path $venvPython) {
+    # No 2>&1 (same PS 5.1 NativeCommandError reason as S6). -q keeps the
+    # output to the summary line plus failures.
+    $pytestOut = & $venvPython -m pytest $repoRoot -q
+    if ($LASTEXITCODE -ne 0) {
+        $tail = ($pytestOut | Select-Object -Last 25) -join "`n    "
+        Fail 'S7' "full test suite not green (pytest exit $LASTEXITCODE):`n    $tail"
+    }
+} else {
+    Fail 'S7' "repo venv python not found at $venvPython; cannot run the full suite."
+}
+
+# ---------------------------------------------------------------------------
 # Report
 # ---------------------------------------------------------------------------
 if ($findings.Count -eq 0) {

@@ -61,6 +61,6 @@ public sealed class HotHands : CustomCardModel
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- delta key 'remove: self_damage' not expressible by codegen (structural upgrade). Flagged in manifest.
+        AddKeyword(CardKeyword.Innate);
     }
 }

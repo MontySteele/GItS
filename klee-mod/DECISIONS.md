@@ -1001,3 +1001,58 @@ C# side: codegen `innate: true` delta -> `AddKeyword(CardKeyword.Innate)`
 in OnUpgrade (keywords are instance-owned LocalKeywords; Innate is the
 base game's own keyword, driving opening-hand placement and card text).
 hot_hands adopting the same disposition stays QUEUED for the user.
+
+## Full-suite discipline + R25 errata + R38 -- the gate catches its first bug (2026-07-20 night)
+
+**The finding (user-diagnosed):** "188 tier0 tests green" was a true
+statement about a SUBSET. The full repo suite was 236 tests with one
+failure: tier05/tests/test_m7.py::test_unappliable_upgrades_never_chosen_
+at_rest hard-coded catalytic_conversion as forever-unappliable; R37 made
+that upgrade real, tier0 legitimately smiths it at campfires, the stale
+assertion tripped. Stale test, not a broken feature -- the deployed build
+and the R36 window result stand. The narrowed test command was most
+likely a compaction artifact (session compacted mid-sprint).
+
+**Fixes (all landed this batch):**
+- **Structural test fix:** the tier05 test now DERIVES the unappliable
+  set from the upgrade engine (tier0.content.upgrades.UNAPPLIABLE --
+  currently durin_witchs_flame + nicole_celestial_gift, the two
+  constants-encoded companion deltas) instead of hard-coding names, and
+  sweeps all four rest plans. The next disposition ruling cannot strand
+  it. An empty UNAPPLIABLE fails loudly (retire by ruling, not by skip).
+- **Process fix:** validate.ps1 gains S7 -- the FULL repo suite
+  (pytest at repo root, 1000-fight band locks included) runs before any
+  deploy. Green claims name their scope. Memory files updated so the
+  narrowed-command compaction artifact does not recur.
+
+**R25 errata batch RELEASED** (sequencing satisfied: R36 window ran,
+bands held, user read the result and gave the word): cant_catch_me
+block 4 -> 2 (kills the strict domination over warm_glow; lint KNOWN
+entry retired, the lint now guards the fix) and dodge_roll block 8 -> 6
+(resolves the dodge_roll/hide_and_seek PENDING_RULING domination -- 6 < 7;
+entry retired likewise). Upgrades ride unchanged (+2 -> 2->4, +3 -> 6->9).
+**Post-errata window (1000 fights, seed 42): all ratified bands hold;
+median identity passes. spark_weighted vs tank_boss 56.8% -> 48.5%** --
+the CCM nerf is real spark-boss power, band floor 45% now 3.5pt away.
+Flagged for the user's eyes; no ruling required while bands hold.
+C# side: CantCatchMe regenerated (BlockVar 2). dodge_roll stays
+codegen-blocked on exhaust_from; its errata is sheet/tier0-side.
+
+**R38 (user-ratified 2026-07-20 chat, "hot hands as suggested with
+innate"):** hot_hands+ adopts the R37 disposition -- upgrade delta is now
+`{innate: true}`; the old `{remove: self_damage}` delta is DEAD (it was
+codegen-inexpressible, leaving hot_hands the sole no-upgrade-path card;
+self-damage now stays on the upgrade as the card's cost). **Measured in
+its own cells first (hot_hands_cell_base vs _innate, spark pilot, 1000
+fights/enc, seed 42): tank_boss 45.9% -> 49.5% (+3.6pt, ~1.6 SE of the
+paired diff), gauntlet +1.6pt, all other encounters <=0.2pt** -- a
+modest real consistency gain vs bosses, unlike catalytic's pure noise;
+cells only, never the identity median. C# HotHands.cs regenerated with
+OnUpgrade AddKeyword(Innate); the codegen no_upgrade_path manifest list
+is now EMPTY -- every generated card has an upgrade path.
+
+**Verification:** full suite 236 passed (82s) -- the scope IS the repo;
+domination lint CLEAN (both retired entries guard their fixes); parity
+lint OK (8 cards); Release build 0 warnings. NOT deployed: the user is
+mid-playtest and the game is running (never kill the game); the dll
+rides the next deploy window.

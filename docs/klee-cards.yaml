@@ -120,14 +120,13 @@
    effects: [{op: damage, amount: 4, target: random_enemy, times_formula: 2_plus_sparks}]}
 - {id: hot_hands, name: "Hot Hands", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [spark], role: enabler,
    effects: [{op: gain_spark, amount: 3}, {op: damage, amount: 2, target: self}]}
-# QUEUED ERRATA (worknote 2026-07-20 item 1): cant_catch_me {block: -2}, 4 -> 2.
-# CCM strictly dominates warm_glow (same cost, effect superset, all amounts >=).
-# Sequencing rule: land only AFTER the R10 Crackle measurement window runs
-# (crackle has no gain_spark yet -- see the pre-measurement note above its
-# row -- so the window has NOT run) -- never both in one window, so
-# spark-deck attribution stays clean.
+# ERRATA LANDED (R25 batch, 2026-07-20): block 4 -> 2. Queued behind the
+# R36 Crackle window per the sequencing rule; the window ran (bands hold,
+# spark tank_boss 56.8% in [45,65]) and the user released the batch. This
+# ends the strict domination over warm_glow (block 2 < 3) -- the
+# lint's KNOWN allowlist entry is retired with this row.
 - {id: cant_catch_me, name: "Can't Catch Me!", cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], archetypes: [spark], role: glue,
-   effects: [{op: block, amount: 4}, {op: gain_spark, amount: 1}, {op: draw, amount: 1}]}
+   effects: [{op: block, amount: 2}, {op: gain_spark, amount: 1}, {op: draw, amount: 1}]}
 - {id: sugar_rush, name: "Sugar Rush", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [spark], role: glue, exhaust: true,
    effects: [{op: energy, amount: 1}, {op: gain_spark, amount: 1}]}
 # Reaction (6)
@@ -146,14 +145,13 @@
 # Generic (4)
 - {id: spirited_away, name: "Spirited Away", cost: 2, type: skill, rarity: uncommon, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 12}]}
-# QUEUED ERRATA (R25, 2026-07-20): dodge_roll {block: -2}, 8 -> 6; the
-# status-exhaust rider is unchanged. Hide and Seek stays the bigger flat block
-# at common; dodge_roll becomes the utility trade at uncommon -- conditional
-# cleanup for less wall. Rides in the CCM errata batch (same sheet, same
-# window discipline; neither touches spark generation, so they may land
-# together) -- but only AFTER the R10 Crackle measurement window runs.
+# ERRATA LANDED (R25 batch, 2026-07-20, same release as cant_catch_me):
+# block 8 -> 6; the status-exhaust rider is unchanged. Hide and Seek stays
+# the bigger flat block at common; dodge_roll is now the utility trade at
+# uncommon -- conditional cleanup for less wall. This also resolves the
+# dodge_roll/hide_and_seek pending-domination question (6 < 7).
 - {id: dodge_roll, name: "Dodge Roll", cost: 1, type: skill, rarity: uncommon, solve: [block, utility], archetypes: [generic], role: glue,
-   effects: [{op: block, amount: 8}, {op: exhaust_from, zone: hand, filter: status, amount: 1}]}
+   effects: [{op: block, amount: 6}, {op: exhaust_from, zone: hand, filter: status, amount: 1}]}
 - {id: bright_idea, name: "Bright Idea", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [generic], role: glue,
    effects: [{op: draw, amount: 3}, {op: discard, amount: 1}]}
 - {id: surprise_visit, name: "Surprise Visit", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [generic], role: glue,

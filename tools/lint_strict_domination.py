@@ -45,13 +45,11 @@ import yaml
 REPO = Path(__file__).resolve().parents[1]
 
 # Known dominations awaiting their scheduled fix. Remove when landed.
-KNOWN = {
-    # Queued errata (worknote item 1): cant_catch_me {block: -2}, lands
-    # AFTER the R10 Crackle measurement window. Drop this entry then.
-    frozenset({"cant_catch_me", "warm_glow"}),
-    # (pit_orchestra/macaron_break was here; FIXED at Furina pass 2 —
-    # Encore rider trimmed to 1. The lint now guards the fix.)
-}
+# (cant_catch_me/warm_glow was here; FIXED by the R25 errata batch,
+# 2026-07-20 — CCM block 4 -> 2. The lint now guards the fix.)
+# (pit_orchestra/macaron_break was here; FIXED at Furina pass 2 —
+# Encore rider trimmed to 1. The lint now guards the fix.)
+KNOWN: set[frozenset] = set()
 
 # Lint-discovered dominations with NO ruling yet (DECISIONS 76). They do
 # not fail the lint — the sheets belong to their sessions and edits need
@@ -59,15 +57,10 @@ KNOWN = {
 # move to KNOWN with a schedule, fix the rows, or rule them accepted.
 # (sparkly_explosion/big_badda_boom was here; CLEARED by R26 — a
 # rare-over-common two-step gap is informational, not a finding.)
-PENDING_RULING = {
-    # block 8 + exhaust-a-status vs block 7: the CCM shape exactly.
-    # NOTE: the R25 errata queued behind the R10 window is dodge_roll
-    # {block: -2} (8 -> 6) -- when that batch lands, this pair likely
-    # resolves itself. Releasing the window also closes (or re-measures)
-    # this domination question, not just the costing one; re-run this lint
-    # with the batch and disposition the entry then.
-    frozenset({"dodge_roll", "hide_and_seek"}),
-}
+# (dodge_roll/hide_and_seek was here; RESOLVED by the R25 errata batch,
+# 2026-07-20 — dodge_roll block 8 -> 6 < hide_and_seek's 7, so the
+# superset no longer dominates. The lint now guards the fix.)
+PENDING_RULING: set[frozenset] = set()
 
 RARITY_ORDER = {"common": 0, "uncommon": 1, "rare": 2}
 

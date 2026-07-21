@@ -57,8 +57,8 @@ spark_knight_style: {power_amount: +1}             # +2->+3 on free attacks
 endless_fireworks: {cost: -1}                      # 1->0 (engine-power precedent)
 flame_on_the_wick: {damage: +3}                    # 6->9
 gleeful_barrage:   {damage: +1}                    # 4->5 per hit
-hot_hands:         {remove: self_damage}           # condition-class: no longer hurts
-cant_catch_me:     {block: +2}                     # 4->6
+hot_hands:         {innate: true}                  # R38 (user 2026-07-20): adopts the R37 disposition. The old {remove: self_damage} delta was codegen-inexpressible (structural) and left the card with no C# upgrade path; self-damage now STAYS on the upgrade (it's the card's cost), Innate is the quality.
+cant_catch_me:     {block: +2}                     # 2->4 (base errata'd 4->2, R25 batch)
 sugar_rush:        {remove: exhaust}               # classic quality upgrade (net-0 energy loop is spark-bounded)
 catalytic_conversion: {innate: true}               # R37: classic power disposition -- starts in the opening hand
 perfect_timing:    {damage: +2}                    # 8->10
@@ -67,7 +67,7 @@ borrowed_brilliance: {copy_cost_override: 0}       # the copy costs 0
 study_buddy:       {add: {op: draw, amount: 1}}
 flame_dance:       {damage: +2}                    # 7->9 all
 spirited_away:     {block: +4}                     # 12->16
-dodge_roll:        {block: +3}                     # 8->11
+dodge_roll:        {block: +3}                     # 6->9 (base errata'd 8->6, R25 batch)
 bright_idea:       {draw: +1}                      # 3->4, discard stays 1
 surprise_visit:    {vulnerable: +1}                # 2->3
 

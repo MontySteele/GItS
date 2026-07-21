@@ -42,7 +42,7 @@ public sealed class CantCatchMe : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(4m, ValueProp.Move),
+            new BlockVar(2m, ValueProp.Move),
             new CardsVar(1)
         };
 
