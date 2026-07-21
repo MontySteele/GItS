@@ -46,6 +46,56 @@ def _bonus_formula(state: CombatState, formula: str) -> int:
     raise ValueError(f"unknown bonus_formula {formula!r}")
 
 
+def _runtime_count(state: CombatState, token: str) -> int:
+    """A live integer the base-game CalculatedX/CalculatedDamage vars read at
+    resolution time, not a number the pilot could pre-compute -- which is
+    exactly why the real game defers them to play time:
+
+      exhaust_pile   AshenStrike (ExtraDamage x cards in the exhaust pile)
+      player_block   BodySlam (ExtraDamage x the owner's CURRENT Block)
+      attacks_in_hand ExpectAFight (Energy x Attacks in hand at play time)
+    """
+    p = state.player
+    if token == "exhaust_pile":
+        return len(p.exhaust_pile)
+    if token == "player_block":
+        return p.block
+    if token == "attacks_in_hand":
+        return sum(1 for c in p.hand if c.type == "attack")
+    raise ValueError(f"unknown runtime count {token!r}")
+
+
+def _calc_amount(state: CombatState, formula: dict) -> int:
+    """CalculatedDamageVar / CalculatedVar grammar: base + per * count, where
+    count is a _runtime_count token. base defaults 0 (BodySlam), per defaults
+    1 (ExpectAFight's 1-per-Attack)."""
+    return (formula.get("base", 0)
+            + formula.get("per", 1) * _runtime_count(state, formula["count"]))
+
+
+def _power_amount_formula(state: CombatState, formula: dict) -> int:
+    """apply_power Amount read off a live power stack on the default-aim
+    enemy (Dominate's StrengthPerVulnerable, MoltenFist's Vulnerable
+    doubling). Evaluated AFTER any preceding op in the same card, so Dominate
+    reads the +1 Vulnerable it just applied."""
+    if "target_power" in formula:
+        tgt = _default_target(state)
+        return tgt.powers.get(formula["target_power"], 0) if tgt else 0
+    raise ValueError(f"unknown apply_power amount_formula {formula!r}")
+
+
+def _default_target(state: CombatState) -> Optional[Enemy]:
+    """tier0's single-target aim -- the lowest-HP living enemy, the same one
+    _pick_targets('enemy') returns and resolve_card snapshots for its aura
+    predicate. Dismantle's hit-count predicate and Dominate/MoltenFist's
+    power-reading formula both need the enemy the card is about to (or just
+    did) hit. CAVEAT, inherent to the model and shared with Bash/Uppercut:
+    across ops the aim is RE-picked, so a hit that kills the aimed enemy
+    hands the rider to whoever is lowest-HP next, not to a corpse."""
+    living = state.living_enemies
+    return min(living, key=lambda e: e.hp) if living else None
+
+
 def _pick_targets(state: CombatState, spec: str) -> list[Enemy]:
     living = state.living_enemies
     if not living:
@@ -268,7 +318,10 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         times = 2 + state.sparks_at_play      # Gleeful Barrage
     times = _amount(state, times)
 
-    base = _amount(state, fx["amount"])
+    if "amount_formula" in fx:                # AshenStrike, BodySlam
+        base = _calc_amount(state, fx["amount_formula"])
+    else:
+        base = _amount(state, fx["amount"])
     if "bonus_formula" in fx:
         base += _bonus_formula(state, fx["bonus_formula"])
     # Spotlight scales the card's own printed damage -- before external
@@ -294,6 +347,11 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
                 hit += fx["bonus_vs_bombed"]
             if fx.get("bonus_vs_aura") and enemy.aura:
                 hit += fx["bonus_vs_aura"]
+            # Bully: ExtraDamage x the DEFENDER's own stacks of a named power,
+            # evaluated per target -- same shape as the aura/bomb riders above.
+            rider = fx.get("bonus_per_target_power")
+            if rider:
+                hit += rider["per"] * enemy.powers.get(rider["power"], 0)
             deal_damage_to_enemy(state, enemy, hit, element=element,
                                  source=source)
 
@@ -321,19 +379,56 @@ def _op_draw(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("extra_draw", amount=n)   # A5 velocity accounting
 
 
+def _op_draw_while(state: CombatState, fx: dict, card: Card) -> None:
+    """Pillage: draw one card at a time and KEEP drawing while the card just
+    drawn is of `while_type` (Attack) and the hand is not full.
+
+    A fixed CombatState.draw(n) cannot express this -- the exit condition is
+    WHAT was drawn -- so this drives the draw one card at a time and inspects
+    the card that actually landed in hand (draw() appends, so it is hand[-1]).
+
+    The non-matching card that ends the loop is KEPT: the stop condition is a
+    LOOK at the drawn card, not a rejection of it, matching the base game.
+    Bounded by the deck -- draw() adds nothing once the hand is full, both
+    piles are empty, or NoDraw denies, and a hand that did not grow ends the
+    loop. The count guard is a pure backstop against an impossible infinite.
+    """
+    want = fx.get("while_type", "attack")
+    p = state.player
+    for _ in range(2 * C.MAX_HAND_SIZE):
+        before = len(p.hand)
+        state.draw(1)
+        if len(p.hand) == before:
+            break                          # hand full, deck empty, or denied
+        state.emit("extra_draw", amount=1)   # A5 velocity, like _op_draw
+        if p.hand[-1].type != want:
+            break
+
+
 def _op_energy(state: CombatState, fx: dict, card: Card) -> None:
-    state.player.energy += fx["amount"]
-    state.emit("energy", amount=fx["amount"])
+    amount = (_calc_amount(state, fx["amount_formula"])  # ExpectAFight
+              if "amount_formula" in fx else fx["amount"])
+    state.player.energy += amount
+    state.emit("energy", amount=amount)
 
 
 def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
     cap = fx.get("max_stacks")
+    if "amount_formula" in fx:                 # Dominate, MoltenFist
+        amount = _power_amount_formula(state, fx["amount_formula"])
+    else:
+        amount = fx["amount"]
+    # MoltenFist reads the target's current Vulnerable and applies that many
+    # MORE -- inert against a target with none, so the guard skips the apply.
+    # Dominate needs no guard: it applies 1 first, so its read is always >= 1.
+    if fx.get("guard") == "nonzero" and amount <= 0:
+        return
     if fx.get("target", "self") == "self":
-        powers.apply_power(state, state.player, fx["power"], fx["amount"],
+        powers.apply_power(state, state.player, fx["power"], amount,
                            max_stacks=cap)
     else:
         for enemy in _pick_targets(state, fx["target"]):
-            powers.apply_power(state, enemy, fx["power"], fx["amount"],
+            powers.apply_power(state, enemy, fx["power"], amount,
                                max_stacks=cap)
 
 
@@ -597,6 +692,18 @@ def _op_add_card(state: CombatState, fx: dict, card: Card) -> None:
     from tier0.content import loader                # late import avoids cycle
     zone = fx.get("zone") or fx.get("to", "discard")
     n = fx.get("amount", 1)
+    if fx.get("card") == "self":                    # Anger: clone THIS card
+        # CreateClone() of the playing instance -- so Anger+ clones an
+        # UPGRADED copy. A fixed card_id add would reload the base id and
+        # silently downgrade the clone (the whole point of the mechanic is
+        # that the clone inherits this instance's upgrade state).
+        import copy as _copy
+        for _ in range(n):
+            clone = _copy.deepcopy(card)
+            if "cost_override" in fx:
+                clone.cost = fx["cost_override"]
+            _add_token(state, clone, zone)
+        return
     if "pool" in fx:                                # Secret Stash
         pool_cards = loader.cards_in_pool(fx["pool"])
         picks = [state.rng.choice(pool_cards) for _ in range(n)]
@@ -776,6 +883,20 @@ def _predicate(state: CombatState, name: str) -> bool:
         # Enemy.counts_for_fatal. Distinct from killed_target so Klee's and
         # Furina's existing kill riders keep their exact meaning.
         return state.fatal_kills_this_card > 0
+    if name.startswith("target_has_power_"):
+        # Dismantle: the hit-count branch reads whether the default-aim enemy
+        # carries a named power AT PLAY TIME. The conditional resolves the
+        # predicate before any damage op inside its branch, so this is a clean
+        # pre-hit read. Parameterised on the power name (target_has_power_
+        # vulnerable today) so the next such card needs no new predicate.
+        tgt = _default_target(state)
+        power = name[len("target_has_power_"):]
+        return bool(tgt and tgt.powers.get(power, 0) > 0)
+    if name.startswith("exhaust_pile_at_least_"):
+        # PactsEnd: the AoE fires only when the exhaust pile already holds at
+        # least N cards; otherwise the card resolves as nothing.
+        n = int(name.rsplit("_", 1)[1])
+        return len(state.player.exhaust_pile) >= n
     if name == "enemy_intends_attack":
         # Frozen enemies still attack under v1.5 (at -50%), so they count.
         return any(e.current_intent()["kind"] == "attack"
@@ -1022,6 +1143,7 @@ OPS = {
     "block": _op_block,
     "block_next_turn": _op_block_next_turn,
     "draw": _op_draw,
+    "draw_while": _op_draw_while,
     "energy": _op_energy,
     "apply_power": _op_apply_power,
     "apply_aura": _op_apply_aura,

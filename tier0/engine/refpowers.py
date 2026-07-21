@@ -625,7 +625,10 @@ def modify_damage_taken(defender: Fighter, dmg: float,
 
     # ColossusPower.ModifyDamageMultiplicative -> 0.5 when the target is the
     # owner, the hit is a powered attack, AND THE DEALER HAS VULNERABLE. The
-    # Colossus card applies Vulnerable itself, so the power is self-enabling.
+    # Colossus card does NOT apply Vulnerable -- its decompiled OnPlay only
+    # gains Block and applies the power; VulnerablePower appears solely as a
+    # hover tip. So the halving fires only against a dealer that got Vulnerable
+    # from ELSEWHERE (Bash, Cruelty targets, etc.), never self-enabling.
     if (defender.powers.get("colossus", 0)
             and attacker.powers.get("vulnerable", 0) > 0):
         dmg *= C.COLOSSUS_TAKEN_MULT
