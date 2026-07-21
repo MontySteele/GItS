@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Elements;
@@ -70,11 +71,28 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         cardSource is IElementalCard elemental ? elemental.Element : Element.None;
 
     /// <summary>
-    /// AMPLIFIER ONLY. Vaporize/Melt multiply the hit that triggers them, so
-    /// they must land here in the multiplicative phase -- after Strength (which
-    /// is additive) and alongside Vulnerable. Because that phase is a plain
-    /// product accumulation, this commutes with Vulnerable regardless of
+    /// The multiplicative phase of the triggering hit. Vaporize/Melt multiply
+    /// the hit that triggers them, so they must land here -- after Strength
+    /// (which is additive) and alongside Vulnerable. Because that phase is a
+    /// plain product accumulation, this commutes with Vulnerable regardless of
     /// listener order, giving (base + Strength) * vuln * amp.
+    ///
+    /// SUPERCONDUCT (bug hunt 2026-07-21): the sim applies Superconduct's
+    /// Vulnerable INSIDE resolve_hit (reactions.py _react) and only then runs
+    /// modify_damage_taken, so the triggering hit is itself x1.5. The C# power
+    /// cannot be applied that early -- by the time any hook can apply it the
+    /// damage number is already final -- so the triggering hit's share is
+    /// mirrored here, in the same multiplicative phase the sim uses, and
+    /// ReactionEffects still applies the real VulnerablePower for later hits.
+    /// Shipped without this, a card-triggered Superconduct dealt 10 where the
+    /// sim dealt 15, while the SAME reaction off a bomb correctly dealt 15
+    /// (ElementalHit resolves the reaction before its TargetMods) -- one
+    /// reaction, two payouts.
+    ///
+    /// The already-Vulnerable guard is what keeps that faithful: the sim's
+    /// modify_damage_taken is a flat x1.5 on any nonzero vulnerable stack, not
+    /// per stack, so when the target is already Vulnerable the native pipeline
+    /// has applied the 1.5 and adding it again would double-count.
     ///
     /// This runs in preview/tooltip paths too, so it MUST stay pure -- no aura
     /// consumption, no side effects. Consumption happens in AfterDamageReceived.
@@ -92,7 +110,15 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
 
         // Dealer-aware: Vermillion Pact's percent boost rides the multiplier
         // (sim _amp_mult). The amp-cap detector lives inside the overload.
-        return ReactionTable.AmplifierMultiplier(reaction, dealer);
+        var mult = ReactionTable.AmplifierMultiplier(reaction, dealer);
+
+        if (reaction == Reaction.Superconduct
+            && !target.Powers.OfType<VulnerablePower>().Any())
+        {
+            mult *= ReactionConstants.VulnerableTakenMult;
+        }
+
+        return mult;
     }
 
     /// <summary>
@@ -132,13 +158,28 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// Auras persist AURA_DURATION_TURNS unconsumed, then expire. Mirrors
-    /// VulnerablePower's duration tick.
+    /// Auras persist AURA_DURATION_TURNS unconsumed, then expire.
+    ///
+    /// PHASE CORRECTION (bug hunt 2026-07-21). This ticked in
+    /// AfterSideTurnEnd(Enemy) -- the phase immediately BEFORE
+    /// BombPower.BeforeSideTurnStart(Player). tier0's player turn is ordered
+    /// "bombs detonate -> auras tick" (combat.py: detonate every bombed enemy,
+    /// then reactions.tick_auras), which is also what BombPower's own doc
+    /// claims the contract is, so the mod had it exactly backwards: an aura on
+    /// its last turn expired before the start-of-turn detonation could react
+    /// with it. A Hydro aura + a bomb lost its Vaporize -- no x1.5, no +5 Burst
+    /// -- and the detonation then left a fresh Pyro aura the sim never creates.
+    ///
+    /// AfterSideTurnStart is the right slot and needs no ordering assumption
+    /// between two enemy-owned powers: CombatManager awaits
+    /// Hook.BeforeSideTurnStart (where bombs detonate) to completion, then
+    /// AfterBlockCleared, then Hook.AfterSideTurnStart -- all strictly before
+    /// energy reset and the hand draw. Separate broadcasts, guaranteed order.
     /// </summary>
-    public override async Task AfterSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side, System.Collections.Generic.IEnumerable<Creature> participants)
+    public override async Task AfterSideTurnStart(
+        CombatSide side, IReadOnlyList<Creature> participants, ICombatState combatState)
     {
-        if (side == CombatSide.Enemy)
+        if (side == CombatSide.Player)
         {
             await PowerCmd.TickDownDuration(this);
         }

@@ -387,12 +387,29 @@ public sealed class NextAttackUpPower : PowerModel, ILocalizationProvider
         return Amount;
     }
 
+    /// <summary>
+    /// Consumed by the FIRST resolution of an attack card, not the last.
+    ///
+    /// CORRECTION (bug hunt 2026-07-21). This gated on IsLastInSeries, which
+    /// let the bonus ride every replay of a Study Buddy series: Passion
+    /// Overload (+4) -> Study Buddy -> Kaeya dealt 18 where the sim deals 14.
+    /// tier0 resolve_card POPS next_attack_up (its siblings celestial_gift and
+    /// attack_up_this_turn deliberately use .get(), which is what makes the pop
+    /// load-bearing rather than incidental), and combat.py's replay loop issues
+    /// N separate resolve_card calls -- so replay #2 sees nothing.
+    ///
+    /// The repeat tail is unaffected and must be: repeat_this re-runs
+    /// _resolve_effects INSIDE one resolve_card, after current_attack_bonus is
+    /// already snapshotted, so the tail keeps the bonus. A series is the replay
+    /// loop; the tail is an in-OnPlay for-loop. Removing at IsFirstInSeries
+    /// draws the line in exactly the same place the sim does.
+    /// </summary>
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         if (cardPlay.Card.Type != CardType.Attack) return;
         if (cardPlay.Card.Owner.Creature != Owner) return;
-        if (!cardPlay.IsLastInSeries) return;
+        if (!cardPlay.IsFirstInSeries) return;
         await PowerCmd.Remove(this);
     }
 }

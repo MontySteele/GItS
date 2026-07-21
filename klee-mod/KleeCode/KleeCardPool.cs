@@ -1,8 +1,10 @@
+using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using KleeMod.Cards;
 using KleeMod.Cards.Generated;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.CardPools;
+using MegaCrit.Sts2.Core.Unlocks;
 
 namespace KleeMod;
 
@@ -29,9 +31,25 @@ public sealed class KleeCardPool : CardPoolModel
 
     public override bool IsColorless => false;
 
+    /// <summary>
+    /// GENERATION FILTER (playtest 2026-07-21). GetUnlockedCards is the only
+    /// path into reward rolls (CardCreationOptions.GetPossibleCards) and card
+    /// transforms (CardFactory), so stripping the off-pool cards here is what
+    /// keeps companions, the kit Burst card and the token statuses out of every
+    /// generator -- while GenerateAllCards below still lists them, because
+    /// CardModel.Pool resolves against AllCards and a card in no pool crashes
+    /// the moment it is drawn. See KleeOffPoolCards for the full story.
+    /// </summary>
+    protected override IEnumerable<CardModel> FilterThroughEpochs(
+        UnlockState unlockState, IEnumerable<CardModel> cards)
+    {
+        return base.FilterThroughEpochs(unlockState, cards)
+            .Where(c => !KleeOffPoolCards.Ids.Contains(c.Id));
+    }
+
     protected override CardModel[] GenerateAllCards()
     {
-        return new CardModel[]
+        var pooled = new CardModel[]
         {
             // Starters (hand-written).
             ModelDb.Card<Kaboom>(),
@@ -143,5 +161,9 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<VermillionPact>(),
             ModelDb.Card<WarmGlow>(),
         };
+
+        // Off-pool cards are pool MEMBERS (so CardModel.Pool resolves) but are
+        // filtered out of GetUnlockedCards above, so no generator sees them.
+        return pooled.Concat(KleeOffPoolCards.All).ToArray();
     }
 }

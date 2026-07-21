@@ -32,6 +32,12 @@ public static class ReactionConstants
     public const decimal VaporizeMult = 1.5m;    // VAPORIZE_MULT
     public const decimal MeltMult = 1.75m;       // MELT_MULT
 
+    /// <summary>VULNERABLE_TAKEN_MULT. The sim's modify_damage_taken applies a
+    /// flat x1.5 on ANY nonzero vulnerable stack -- never per stack. Named here
+    /// because two sites mirror it: SimDamagePipeline.TargetMods and
+    /// AuraPower's Superconduct self-amplification.</summary>
+    public const decimal VulnerableTakenMult = 1.5m;
+
     public const int OverloadSplash = 6;         // OVERLOAD_SPLASH, flat, all enemies
     public const int SuperconductVuln = 2;       // SUPERCONDUCT_VULN
     public const int ElectroChargedDot = 4;      // ELECTROCHARGED_DOT
