@@ -1,6 +1,8 @@
 # Art sprint fetch/process plan (docs/art-sprint-spec.md). Tier F — private build only, never ships.
 # Columns: asset_id	out	w	h	mode	focus	pick	rank	source	wiki_title	frame_pct	register
 # mode: cover (crop to fill) | contain (fit + pad: flat card-bg for /cards/, transparent for icons) | raw (copy untouched)
+#       | cover_autocrop (crop to the art's content FIRST, then fit -- for splash/Wish sources that
+#         float the figure in a transparent void; focus carries `cover|contain[@margin]`, default cover@0.06)
 # focus: center | top; optional @ZOOM suffix (e.g. center@1.5) punches the crop into the frame (VFX gifs)
 # pick: auto (rank 1 goes straight to `out`) | shortlist (all ranks render to art/candidates/<asset_id>/ for the contact sheet)
 # source: png | gif (frame_pct = % through the clip) | svg (rendered; falls back to same-name .png)
@@ -32,7 +34,7 @@ ammo_scavenging	ImageGen/images/cards/klee/ammo_scavenging.png	500	380	contain	c
 bomb_voyage	ImageGen/images/cards/klee/bomb_voyage.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Bomb-Tastic Adventure.png		item
 bomb_voyage	ImageGen/images/cards/klee/bomb_voyage.png	500	380	contain	center	shortlist	2	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty.png		item
 bomb_voyage	ImageGen/images/cards/klee/bomb_voyage.png	500	380	contain	center	shortlist	3	png	Item Let's Go, Dodoco!.png		item
-big_badda_boom	ImageGen/images/cards/klee/big_badda_boom.png	500	380	cover	center@1.6	shortlist	1	png	Klee Wish.png		splash
+big_badda_boom	ImageGen/images/cards/klee/big_badda_boom.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Klee Wish.png		splash
 blast_radius	ImageGen/images/cards/klee/blast_radius.png	500	380	cover	top@1.15	auto	1	png	Starlit Sky Firework Card 2.png		splash
 # blast_radius r2 (Plunging gif) retired with the r1 board-diagram pick: worknote 2026-07-20 item 4.1
 sorry_jean	ImageGen/images/cards/klee/sorry_jean.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 2.png		sticker
@@ -94,7 +96,7 @@ boom_goes_the_dynamite	ImageGen/images/cards/klee/boom_goes_the_dynamite.png	500
 boom_goes_the_dynamite	ImageGen/images/cards/klee/boom_goes_the_dynamite.png	500	380	contain	center	shortlist	3	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine AoE.png		item
 flame_dance	ImageGen/images/cards/klee/flame_dance.png	500	380	contain	center	shortlist	1	png	Item Fireworks Dance Amidst a Snowy Sky.png		item
 kaboom_beetle_swarm	ImageGen/images/cards/klee/kaboom_beetle_swarm.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty AoE.png		item
-elemental_ecstasy	ImageGen/images/cards/klee/elemental_ecstasy.png	500	380	cover	center	shortlist	1	png	Klee Birthday 2025.png		splash
+elemental_ecstasy	ImageGen/images/cards/klee/elemental_ecstasy.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Klee Birthday 2025.png		splash
 blazing_delight	ImageGen/images/cards/klee/blazing_delight.png	500	380	cover	top	shortlist	2	png	Klee Multi Wish.png		splash
 spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Summertime.png		item
 spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	cover	center	shortlist	2	png	Icon Emoji Paimon's Paintings 46 Klee 1.png		sticker
@@ -224,3 +226,23 @@ select_bg	ImageGen/images/ui/select_bg.png	1920	1080	cover	center	auto	1	png	Nam
 combat_model	ImageGen/images/model/combat_model.png	240	280	sprite	center	auto	1	png	Character Klee Full Wish.png		splash
 model_source_full_wish	ImageGen/images/model/character_klee_full_wish.png	0	0	raw	center	auto	1	png	Character Klee Full Wish.png		splash
 model_source_tcg_alt	ImageGen/images/model/klee_character_card.png	0	0	raw	center	auto	1	png	Klee Character Card.png		splash
+
+# --- Art red-pen round 3 (2026-07-21) -- PARKED, NOT ACTIVE ------------
+# Every source round 3 locked is ALREADY the effective pick of a shipped
+# card; the hunt treated the source pool as unclaimed. L1 caught all six.
+# These rows are correct in mode/fit/register and were verified to render;
+# they are commented out ONLY because enabling them would double-book art.
+# Uncomment a row once the red-pen rules which card keeps the source (and
+# re-point or retire the loser). See docs/klee-art-redpen-round3.md.
+# CONFLICT: Item Supersized Firework.png is boom_goes_the_dynamite r1 (and crackle r2)
+# grand_finale	ImageGen/images/cards/klee/grand_finale.png	500	380	cover_autocrop	contain	shortlist	1	png	Item Supersized Firework.png		item
+# CONFLICT: Pounding Surprise Explosive Spark Effect.png is crackle r1
+# tail_of_flame	ImageGen/images/cards/klee/tail_of_flame.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Pounding Surprise Explosive Spark Effect.png		vfx
+# CONFLICT: Klee Birthday 2023.png is warm_glow's AUTO pick
+# patched_dress	ImageGen/images/cards/klee/patched_dress.png	500	380	contain	center	shortlist	1	png	Klee Birthday 2023.png		splash
+# CONFLICT: Klee Birthday 2021.png is cant_catch_me r1
+# sparkly_explosion	ImageGen/images/cards/klee/sparkly_explosion.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Klee Birthday 2021.png		splash
+# CONFLICT: Item Kaboom Box.png is pop r1 (power_bomb_damage_up also, but icon = legal)
+# secret_stash	ImageGen/images/cards/klee/secret_stash.png	500	380	cover_autocrop	contain	shortlist	1	png	Item Kaboom Box.png		item
+# CONFLICT: Item Fish-Flavored Toast.png is fish_flavored_bait r1
+# fish_blasting	ImageGen/images/cards/klee/fish_blasting.png	500	380	cover_autocrop	contain	shortlist	1	png	Item Fish-Flavored Toast.png		item

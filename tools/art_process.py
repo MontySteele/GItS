@@ -4,6 +4,9 @@
 - cover: scale to fill W×H, crop (focus=top keeps the top of the frame — right
   for TCG card art and full-body renders; center otherwise)
 - contain: fit inside W×H, pad to exact size on transparency (icons)
+- cover_autocrop: crop to the art's content first (splash/Wish sources float
+  the figure in a large transparent void), then fit — focus carries
+  `cover|contain[@margin]`, default cover@0.06
 - raw: byte-for-byte copy (combat-model source art)
 - gif sources: extract the frame at frame_pct% through the clip
 - svg sources: render via macOS qlmanage; fall back to the wiki's same-name PNG
@@ -107,6 +110,77 @@ def cover(img, w, h, focus):
     return img.crop((x, y, x + w, y + h))
 
 
+CENTER_THRESH = 200   # opaque FIGURE: what composition centers on
+INCLUDE_THRESH = 10   # figure + faint FX: what the crop must not clip
+AUTOCROP_MARGIN = 0.06
+
+
+def _alpha_box(img, thresh):
+    """Bbox of pixels whose alpha exceeds `thresh` (PIL-only, no numpy)."""
+    return img.getchannel("A").point(lambda v: 255 if v > thresh else 0).getbbox()
+
+
+def cover_autocrop(img, w, h, spec):
+    """Crop a float-in-void splash to its content, then fit the card.
+
+    Wish/splash sources frame the figure inside a large transparent void
+    (Klee Wish: 2048x1024 canvas, content only 35% of it), so under plain
+    `cover` the character shrinks to a blob. This finds the content first.
+
+    Two thresholds, deliberately: the CENTER box is the opaque figure, so
+    composition centres on the CHARACTER and not on asymmetric VFX that
+    would drag it off-centre; the INCLUDE box adds faint effects so the
+    splash (Fischl's raven, Chevreuse's musket-flash) is not clipped.
+
+    spec (the plan's `focus` column) is `fit[@margin]`:
+      cover   - scale to FILL w*h and centre-crop on the figure. Default.
+      contain - scale to FIT inside w*h, pad on the card backing. The
+                per-card fallback for sources where cover clips the figure.
+    Margin defaults to 6% (user-ratified: reviewed tight-vs-14%, tight won
+    everywhere; medium only added dead canvas). It stays a parameter.
+
+    Thin FX tips (Barbara's staff, Bennett's flare) MAY clip the frame edge
+    by design -- that is a wisp, not the figure. Do not widen to chase them.
+    """
+    fit, margin = "cover", AUTOCROP_MARGIN
+    if spec and spec not in ("center", "top"):
+        if "@" in spec:
+            fit, m = spec.split("@", 1)
+            margin = float(m)
+        else:
+            fit = spec
+    if fit not in ("cover", "contain"):
+        raise SystemExit(
+            f"cover_autocrop: unknown fit {fit!r} (want cover|contain[@margin])")
+
+    inc = _alpha_box(img, INCLUDE_THRESH)
+    if inc is None:                      # fully transparent: nothing to crop
+        return cover(img, w, h, "center") if fit == "cover" else contain(img, w, h)
+    ctr = _alpha_box(img, CENTER_THRESH) or inc
+
+    mx = int((inc[2] - inc[0]) * margin)
+    my = int((inc[3] - inc[1]) * margin)
+    x0, y0 = max(0, inc[0] - mx), max(0, inc[1] - my)
+    x1, y1 = min(img.width, inc[2] + mx), min(img.height, inc[3] + my)
+    crop = img.crop((x0, y0, x1, y1))
+
+    if fit == "contain":
+        return contain(crop, w, h)
+
+    # cover: scale to fill, then centre the crop window on the FIGURE centre
+    # (clamped into the image) rather than on the geometric middle.
+    scale = max(w / crop.width, h / crop.height)
+    if scale > UPSCALE_FLAG:
+        flags.append(f"upscale x{scale:.1f}")
+    crop = crop.resize((max(1, round(crop.width * scale)),
+                        max(1, round(crop.height * scale))), Image.LANCZOS)
+    fx = ((ctr[0] + ctr[2]) / 2 - x0) * scale
+    fy = ((ctr[1] + ctr[3]) / 2 - y0) * scale
+    x = max(0, min(crop.width - w, round(fx - w / 2)))
+    y = max(0, min(crop.height - h, round(fy - h / 2)))
+    return crop.crop((x, y, x + w, y + h))
+
+
 def sprite(img, w, h):
     """Combat/rest-site model sprites: trim to the alpha bbox, fit in W×H, and
     anchor the feet on the bottom edge -- the game positions these textures
@@ -159,6 +233,8 @@ def process(row, dest):
     n0 = len(flags)
     if row["mode"] == "cover":
         out = cover(img, row["w"], row["h"], row["focus"])
+    elif row["mode"] == "cover_autocrop":
+        out = cover_autocrop(img, row["w"], row["h"], row["focus"])
     elif row["mode"] == "sprite":
         out = sprite(img, row["w"], row["h"])
     else:
