@@ -32,29 +32,29 @@ namespace KleeMod.Cards.Generated;
 
 public sealed class AlbedoSolarIsotoma : CustomCardModel, ICompanionCard
 {
-    /// <summary>Companion identity (docs/mondstadt-companions.yaml): star drives the
-    /// reward slot's rarity tier; PersonalPool gates per-character offers.</summary>
+    /// <summary>Companion identity (companion sheet): star drives the
+    /// reward slot's rarity tier; PersonalPool gates per-character
+    /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
     public int Star => 5;
 
     public Element CompanionElement => Element.Geo;
 
     public string? PersonalPool => null;
 
-    /// <summary>Companion cards NEVER scale (sheet header law).</summary>
-    public override int MaxUpgradeLevel => 0;
+    public string? Nation => "mondstadt";
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("albedo_solar_isotoma");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Albedo — Solar Isotoma"),
-        ("description", "For 3 turns: your Attacks against enemies holding an elemental aura grant 3 [gold]Block[/gold] per hit."),
+        ("description", "For {PowerAmount:diff()} turns: your Attacks against enemies holding an elemental aura grant 3 [gold]Block[/gold] per hit."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            
+            new DynamicVar("PowerAmount", 3m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -67,11 +67,11 @@ public sealed class AlbedoSolarIsotoma : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<SolarIsotomaPower>(choiceContext, Owner.Creature, 3, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<SolarIsotomaPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // Companions never scale (sheet header law); MaxUpgradeLevel 0 makes this unreachable.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

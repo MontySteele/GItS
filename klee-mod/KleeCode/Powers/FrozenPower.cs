@@ -80,8 +80,16 @@ public sealed class FrozenPower : PowerModel
 
         if (target.IsDead) return;
 
+        // shatter_bonus (Freminet, Shattering Pressure): a flat rider the sim
+        // adds inside the same raw `enemy.hp -=`, so it is unblockable and
+        // unamplified exactly like the base Shatter. Read off the DEALER --
+        // the sim reads state.player.powers, and the dealer is who broke the
+        // ice.
+        var shatter = ReactionConstants.ShatterDamage
+            + ShatterBonusPower.BonusFor(dealer);
+
         await CreatureCmd.Damage(
-            choiceContext, target, ReactionConstants.ShatterDamage,
+            choiceContext, target, shatter,
             ValueProp.Unblockable | ValueProp.Unpowered,
             dealer: null, cardSource: null);
     }

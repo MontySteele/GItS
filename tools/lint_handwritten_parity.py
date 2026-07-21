@@ -167,7 +167,10 @@ def extract_cs(text: str) -> dict:
 
 def lint() -> int:
     cards = {c["id"]: c for c in yaml.safe_load(gen.SHEET.read_text(encoding="utf-8"))}
-    upgrades = yaml.safe_load(gen.UPGRADES_SHEET.read_text(encoding="utf-8"))
+    # gen.upgrade_deltas() is the merged index across every upgrade sheet
+    # (klee + furina), matching tier0/content/upgrades.py. It replaced the
+    # single-sheet read when the Fontaine companions entered Klee's slot.
+    upgrades = gen.upgrade_deltas()
 
     findings: list[str] = []
 

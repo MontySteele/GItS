@@ -34,8 +34,20 @@ import yaml
 
 REPO = Path(__file__).resolve().parent.parent
 SHEET = REPO / "docs" / "klee-cards.yaml"
-UPGRADES_SHEET = REPO / "docs" / "klee-upgrades.yaml"
-COMPANIONS_SHEET = REPO / "docs" / "mondstadt-companions.yaml"
+# Mirrors tier0/content/upgrades.py UPGRADE_SHEETS, in the same order.
+UPGRADE_SHEETS = (REPO / "docs" / "klee-upgrades.yaml",
+                  REPO / "docs" / "furina-upgrades.yaml")
+
+# Companion sheets -> home nation. The nation is what the reward slot's
+# SAME_NATION_REWARD_SHARE weighting keys on, and tier0's loader derives it
+# from the sheet FILENAME (loader.py: `nation = sheet.split("-", 1)[0]`), so
+# the mapping is stated once here rather than re-derived per card.
+#
+# Fontaine entered Klee's slot by user ruling (2026-07-21): "it's probably
+# best to have some non-Mondstadt cards in the pool to make sure Klee doesn't
+# inadvertently overperform with a 100% Mondstadt roster."
+COMPANION_SHEETS = ((REPO / "docs" / "mondstadt-companions.yaml", "mondstadt"),
+                    (REPO / "docs" / "fontaine-companions.yaml", "fontaine"))
 OUT_DIR = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated"
 MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.json"
 
@@ -79,7 +91,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_
                   "detonate", "move_bombs", "modify_bombs",
                   "chance_bomb_per_detonation", "conditional",
                   "energy", "scry_discard", "add_card", "exhaust_from",
-                  "apply_aura", "swirl", "buff_next_attack",
+                  "apply_aura", "swirl", "buff_next_attack", "block_next_turn",
                   "cost_mod", "copy_companion_in_hand",
                   "replay_next_companion", "copy_companions_played_this_combat"}
 
@@ -96,6 +108,9 @@ ELEMENT_CS = {"pyro": "Element.Pyro", "hydro": "Element.Hydro",
 APPLY_AURA_FIELDS = {"op", "element", "target"}
 SWIRL_FIELDS = {"op", "target"}
 BUFF_NEXT_FIELDS = {"op", "amount"}
+
+# Charlotte, Enduring Frosthelm (tier0 _op_block_next_turn).
+BLOCK_NEXT_TURN_FIELDS = {"op", "amount"}
 
 # --- small ops (2026-07-20 batch) --------------------------------------------
 # add_card token registry: sheet card id -> hand-written C# class. A pool
@@ -130,6 +145,10 @@ PREDICATES_CS = {
     # mid-play reads subtract the pending spend.
     "has_spark": "SparkPower.SparksAsResolved(Owner.Creature) > 0",
     "reaction_triggered_by_this": "ReactionEffects.TotalResolved > reactionsAtStart",
+    # tier0: state.reactions_this_turn > 0, a window opened at the top of the
+    # player turn BEFORE start-of-turn detonation. ReactionEffects keeps the
+    # window as a snapshot of the same monotonic counter.
+    "reaction_triggered_this_turn": "ReactionEffects.ReactionTriggeredThisTurn",
     "killed_target": "enemiesAtStart.Any(e => e.IsDead)",
 }
 
@@ -138,6 +157,7 @@ PREDICATE_TEXT = {
     "this_cost_zero": "If this cost 0",
     "has_spark": "If you have [gold]Spark[/gold]",
     "reaction_triggered_by_this": "If it triggered an [gold]Elemental Reaction[/gold]",
+    "reaction_triggered_this_turn": "If an [gold]Elemental Reaction[/gold] triggered this turn",
     "killed_target": "If it kills",
 }
 
@@ -146,7 +166,8 @@ CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
 # Ops legal inside a conditional branch: plain resolvers with literal (or
 # delta-var) amounts and no local declarations outside their own braces.
 # repeat_this is legal ONLY as a conditional's entire then-branch.
-BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "place_bomb", "burst_energy"}
+BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "place_bomb", "burst_energy",
+              "buff_next_attack"}
 
 # Cards carrying a repeat-conditional re-resolve their other effects (sim
 # resolve_card: the repeat excludes only the repeat machinery). The repeated
@@ -222,6 +243,10 @@ APPLY_POWERS = {
         "aura grant 3 [gold]Block[/gold] per hit."),
     "attack_up_this_turn": ("AttackUpThisTurnPower", None,
         "Your Attacks deal {X} more damage this turn."),
+    # Fontaine (2026-07-21 ruling). shatter_bonus is a flat rider the sim adds
+    # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
+    "shatter_bonus": ("ShatterBonusPower", None,
+        "Your [gold]Shatters[/gold] deal {X} more damage."),
 }
 
 # Powers applied to ENEMIES (native debuffs). Everything else in APPLY_POWERS
@@ -239,8 +264,18 @@ APPLY_POWER_FIELDS = {"op", "power", "amount", "target", "max_stacks", "note",
 
 # Upgrade keys that all mean "bump the applied power amount" at card level
 # (tier0 upgrades.py handles them in one branch too).
+# All of these bump the amount of the card's FIRST apply_power/buff_next_attack
+# effect -- tier0 upgrades.py handles them in one branch, and `duration` (Oz,
+# Solar Isotoma) and `buff` (both Bennetts) join it because the "amount" of
+# those powers IS the duration / the attack bonus.
 POWER_UPGRADE_KEYS = {"power_amount", "amp_percent", "splash_damage", "vulnerable",
-                      "weak"}
+                      "weak", "duration", "buff"}
+
+# Ops the POWER_UPGRADE_KEYS deltas may land on, in the sim's own precedence:
+# `next(fx for fx in top if fx["op"] in (...))` -- the FIRST top-level one
+# only, which is why Chevreuse's conditional rider stays at its printed value
+# while her base buff scales.
+POWER_UPGRADE_OPS = ("apply_power", "buff_next_attack")
 
 # Bomb placement targets we have a verified selection idiom for.
 BOMB_TARGETS = {"enemy", "random_enemy", "random_enemies"}
@@ -562,6 +597,12 @@ def blocked_reason(card: dict) -> str | None:
             if eff.get("target", "enemy") not in ("enemy", "random_enemy",
                                                   "all_enemies"):
                 return f"swirl target '{eff.get('target')}'"
+        if op == "block_next_turn":
+            unknown = set(eff) - BLOCK_NEXT_TURN_FIELDS
+            if unknown:
+                return f"block_next_turn field(s) {sorted(unknown)} not understood"
+            if not isinstance(eff.get("amount"), int):
+                return "block_next_turn amount must be a literal int"
         if op == "buff_next_attack":
             unknown = set(eff) - BUFF_NEXT_FIELDS
             if unknown:
@@ -639,6 +680,7 @@ def blocked_reason(card: dict) -> str | None:
                     "gain_spark": {"op", "amount"},
                     "burst_energy": {"op", "amount"},
                     "place_bomb": {"op", "amount", "target", "bomb_damage"},
+                    "buff_next_attack": {"op", "amount"},
                 }
                 for branch in (then, els):
                     for e in branch:
@@ -722,8 +764,11 @@ def build_vars(card: dict) -> list[str]:
         elif op == "burst_energy" and burst_upgrade(card):
             # Same rule as Sparks: a var only when the upgrade must render.
             out.append(f'new DynamicVar("BurstEnergy", {int(eff["amount"])}m)')
-        elif op == "apply_power" and power_upgrade(card):
-            # Same rule again: only an upgradeable amount needs a var.
+        elif op in POWER_UPGRADE_OPS and power_upgrade(card):
+            # Same rule again: only an upgradeable amount needs a var. The
+            # sim binds these deltas to the FIRST top-level apply_power or
+            # buff_next_attack, and build_vars only walks top level, so a
+            # conditional rider never claims the var.
             out.append(f'new DynamicVar("PowerAmount", {int(eff["amount"])}m)')
         elif op == "discard_for_sparks" and discard_upgrade(card) != (0, 0):
             # R36: both numbers render, so both become vars together.
@@ -763,11 +808,31 @@ _upgrade_deltas: dict | None = None
 
 
 def upgrade_deltas() -> dict:
-    """Per-card delta maps from klee-upgrades.yaml (R20: the upgrades sheet is
-    the only home for upgrade deltas; inline `upgrade:` keys block the card)."""
+    """Per-card delta maps, merged across the upgrade sheets exactly as
+    tier0/content/upgrades.py._upgrade_index does (R20: the upgrade sheets are
+    the only home for deltas; inline `upgrade:` keys block the card).
+
+    Two sheets since the Fontaine companions entered Klee's reward slot
+    (2026-07-21 ruling): their deltas live in furina-upgrades.yaml, and the
+    sim merges both, so a generator reading only klee-upgrades.yaml would emit
+    unupgradeable cards the sim happily smiths. Duplicate ids across sheets are
+    a hard error on the sim side; mirrored here rather than silently
+    last-wins.
+    """
     global _upgrade_deltas
     if _upgrade_deltas is None:
-        _upgrade_deltas = yaml.safe_load(UPGRADES_SHEET.read_text(encoding="utf-8")) or {}
+        merged: dict = {}
+        for sheet in UPGRADE_SHEETS:
+            if not sheet.exists():
+                continue
+            entries = yaml.safe_load(sheet.read_text(encoding="utf-8")) or {}
+            dupes = set(entries) & set(merged)
+            if dupes:
+                raise SystemExit(
+                    f"gen_klee_cards: {sheet.name}: duplicate upgrade ids "
+                    f"{sorted(dupes)} -- the sim raises on this too.")
+            merged.update(entries)
+        _upgrade_deltas = merged
     return _upgrade_deltas
 
 
@@ -835,8 +900,12 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "bonus": any(e["op"] in BONUS_OPS and "bonus" in e for e in effects),
         "chance": any(e["op"] == "chance_bomb_per_detonation" for e in effects),
     }
+    # tier0 binds every POWER_UPGRADE_KEYS delta to the first TOP-LEVEL
+    # apply_power OR buff_next_attack (upgrades.py takes `next(fx for fx in
+    # top if fx["op"] in (...))`), which is how `buff` reaches both Bennett's
+    # apply_power and Chevreuse's buff_next_attack.
     for pkey in POWER_UPGRADE_KEYS:
-        has[pkey] = any(e["op"] == "apply_power" for e in effects)
+        has[pkey] = any(e["op"] in POWER_UPGRADE_OPS for e in effects)
     for key, value in deltas.items():
         if key not in EXPRESSIBLE_DELTAS:
             return {}, f"delta key '{key}: {value}' not expressible by codegen (structural upgrade)"
@@ -1112,6 +1181,16 @@ def _emit_branch_op(card: dict, eff: dict, lines: list[str], ctx: dict,
         )
     elif op == "place_bomb":
         _emit_place_bomb(card, eff, lines, ctx, str(int(eff["bomb_damage"])))
+    elif op == "buff_next_attack":
+        # Always literal in a branch: the POWER_UPGRADE_KEYS deltas bind to
+        # the first TOP-LEVEL effect only (tier0 upgrades.py), which is what
+        # keeps Chevreuse's reaction rider at its printed value while her base
+        # buff scales.
+        lines.append(
+            f"await PowerCmd.Apply<NextAttackUpPower>(choiceContext, "
+            f'Owner.Creature, {int(eff["amount"])}, '
+            "applier: Owner.Creature, cardSource: this);"
+        )
 
 
 def _conditional_block(pred: str, then_lines: list[str],
@@ -1448,8 +1527,19 @@ def build_body(card: dict) -> list[str]:
         elif op == "buff_next_attack":
             # tier0 _op_buff_next_attack -> next_attack_up, consumed by the
             # next attack card (NextAttackUpPower's AfterCardPlayed).
+            amount = ('DynamicVars["PowerAmount"].IntValue'
+                      if power_upgrade(card) else str(int(eff["amount"])))
             lines.append(
                 f"await PowerCmd.Apply<NextAttackUpPower>(choiceContext, "
+                f"Owner.Creature, {amount}, "
+                "applier: Owner.Creature, cardSource: this);"
+            )
+
+        elif op == "block_next_turn":
+            # tier0 _op_block_next_turn: a power the sim POPS at the next
+            # player turn start, granting the Block after that turn's reset.
+            lines.append(
+                f"await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, "
                 f'Owner.Creature, {int(eff["amount"])}, '
                 "applier: Owner.Creature, cardSource: this);"
             )
@@ -1652,6 +1742,19 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool) -> str:
                 where = "" if e["target"] == "enemy" else " on random enemies"
                 bits.append(
                     f"place {n} [gold]Bombs[/gold]{where}, each dealing {d} damage")
+        elif op == "buff_next_attack":
+            # Literal: POWER_UPGRADE_KEYS deltas bind to the first TOP-LEVEL
+            # effect, so a branch rider never renders a var.
+            bits.append(
+                f'your next Attack deals {int(e["amount"])} more damage')
+        else:
+            # A branch op with no text arm renders an EMPTY clause -- which is
+            # how Chevreuse first generated "If a reaction triggered: ."
+            # BRANCH_OPS and this table must move together.
+            raise SystemExit(
+                f"gen_klee_cards: {card['id']}: branch op '{op}' is in "
+                "BRANCH_OPS but has no _branch_text arm -- it would render an "
+                "empty clause.")
     return " and ".join(bits) + "."
 
 
@@ -1667,6 +1770,13 @@ def build_description(card: dict) -> str:
 
         if op == "block":
             parts.append("Gain {Block:diff()} [gold]Block[/gold].")
+
+        elif op == "block_next_turn":
+            # Literal: the `block` delta binds to the plain block op (sheet:
+            # "now-block 3->5; next-turn block stays 3").
+            parts.append(
+                f'At the start of your next turn, gain {int(eff["amount"])} '
+                "[gold]Block[/gold].")
 
         elif op == "draw":
             # {Cards:plural:|s} pluralizes off the LIVE value, so "Draw 1
@@ -1832,8 +1942,9 @@ def build_description(card: dict) -> str:
                          else "[gold]Swirl[/gold] an enemy's aura.")
 
         elif op == "buff_next_attack":
-            parts.append(
-                f'Your next Attack deals {int(eff["amount"])} more damage.')
+            n = ("{PowerAmount:diff()}" if power_upgrade(card)
+                 else str(int(eff["amount"])))
+            parts.append(f"Your next Attack deals {n} more damage.")
 
         elif op == "energy":
             n = int(eff["amount"])
@@ -1948,7 +2059,8 @@ def build_upgrade(card: dict) -> list[str]:
     key_for = {"block": "block", "draw": "draw", "gain_spark": "spark", "place_bomb": "bomb_damage",
                "burst_energy": "burst_energy"}
     var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
-               "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]'}
+               "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
+               "buff_next_attack": 'DynamicVars["PowerAmount"]'}
     lines, done = [], set()
     for eff in card["effects"]:
         op = eff["op"]
@@ -1976,7 +2088,7 @@ def build_upgrade(card: dict) -> list[str]:
                             - float(eff["chance"]) * 100))
             lines.append(f'DynamicVars["Chance"].UpgradeValueBy({pts}m);')
             continue
-        if op == "apply_power":
+        if op in POWER_UPGRADE_OPS:
             key = next((k for k in POWER_UPGRADE_KEYS if k in deltas), None)
         elif op == "damage" and eff["target"] != "self":
             key = "damage"
@@ -2096,15 +2208,16 @@ def emit(card: dict) -> str:
     ind = "\n        "
     vars_cs = (",".join(f"{ind}    {v}" for v in vars_)).lstrip()
     body_cs = ind.join(body)
-    if is_companion(card):
-        upgrade_cs = ("// Companions never scale (sheet header law); "
-                      "MaxUpgradeLevel 0 makes this unreachable.")
-    else:
-        upgrade_cs = (
-            ind.join(upgrade)
-            if upgrade
-            else f"// R24: NO upgrade path -- {no_upgrade_reason}. Flagged in manifest."
-        )
+    # RULED 2026-07-21: companions upgrade like any other card. They used to
+    # emit MaxUpgradeLevel 0 on the companion sheets' "companions never scale"
+    # header, which contradicted the upgrade sheets -- the sim honours those
+    # deltas and tier05 smiths companions at rest sites, so the mod was
+    # measuring a power curve it could not produce.
+    upgrade_cs = (
+        ind.join(upgrade)
+        if upgrade
+        else f"// R24: NO upgrade path -- {no_upgrade_reason}. Flagged in manifest."
+    )
 
     element_member = ""
     if elemental and is_companion(card):
@@ -2121,14 +2234,13 @@ def emit(card: dict) -> str:
         personal = card.get("personal_pool")
         personal_cs = f'"{personal}"' if personal else "null"
         element_member += (
-            "\n    /// <summary>Companion identity (docs/mondstadt-companions.yaml): "
-            "star drives the\n    /// reward slot's rarity tier; PersonalPool gates "
-            "per-character offers.</summary>\n"
+            "\n    /// <summary>Companion identity (companion sheet): star drives the\n"
+            "    /// reward slot's rarity tier; PersonalPool gates per-character\n"
+            "    /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>\n"
             f"    public int Star => {int(card['star'])};\n\n"
             f"    public Element CompanionElement => {element_cs};\n\n"
             f"    public string? PersonalPool => {personal_cs};\n\n"
-            "    /// <summary>Companion cards NEVER scale (sheet header law).</summary>\n"
-            "    public override int MaxUpgradeLevel => 0;\n"
+            f'    public string? Nation => "{card["nation"]}";\n'
         )
     if str(card["cost"]) == "X":
         # X cost: canonical 0 + the CardModel virtual (CardEnergyCost ctor
@@ -2246,33 +2358,38 @@ def main() -> int:
             if upgrade_reason:
                 no_upgrade[card["id"]] = upgrade_reason
 
-    # Companions (2026-07-21, user-ratified: the WHOLE Mondstadt roster is in
-    # scope) -- a blocked companion is a build failure, not a manifest entry.
+    # Companions -- a blocked companion is a build failure, not a manifest
+    # entry. Both rosters are user-ratified in scope (Mondstadt 2026-07-21;
+    # Fontaine same day, "as long as the 50% nationality weighting is
+    # respected"). Guest Star cards are skipped: they are Furina personal-pool
+    # cameos generated mid-combat by her own cards, never offered in a reward
+    # slot (tier05 companion_pool filters `not c.guest_star`), and nothing in
+    # the Klee mod can create one.
     companions = {}
-    for card in yaml.safe_load(COMPANIONS_SHEET.read_text(encoding="utf-8")):
-        reason = blocked_reason(card)
-        if reason:
-            raise SystemExit(
-                f"gen_klee_cards: companion {card['id']} blocked: {reason} "
-                "-- the whole roster is ratified in scope; extend the "
-                "generator, do not skip.")
-        companions[card["id"]] = emit(card)
+    for sheet_path, nation in COMPANION_SHEETS:
+        for card in yaml.safe_load(sheet_path.read_text(encoding="utf-8")):
+            if card.get("guest_star"):
+                continue
+            card.setdefault("nation", nation)
+            reason = blocked_reason(card)
+            if reason:
+                raise SystemExit(
+                    f"gen_klee_cards: companion {card['id']} blocked: {reason} "
+                    "-- the whole roster is ratified in scope; extend the "
+                    "generator, do not skip.")
+            companions[card["id"]] = emit(card)
 
-        # MANIFEST HOLE CLOSED (bug hunt 2026-07-21). This loop used to skip
-        # upgrade_plan entirely, so no_upgrade_path listed only klee-cards.yaml
-        # rows -- and the R24 safety net, which exists precisely to make
-        # "the sim can upgrade this and the mod cannot" visible, silently
-        # covered zero companions. It is a real divergence for 14 of them:
-        # the companion sheet header says companions never scale (hence
-        # MaxUpgradeLevel 0), but klee-upgrades.yaml ships deltas the sim
-        # honors and tier05 smiths at rest sites. Recording the reason does
-        # not resolve that contradiction -- it needs a user ruling -- but it
-        # stops the manifest from implying the mod is in parity.
-        _, upgrade_reason = upgrade_plan(card)
-        no_upgrade[card["id"]] = upgrade_reason or (
-            "companion: MaxUpgradeLevel 0 (companion sheet header, 'companions "
-            "never scale') but klee-upgrades.yaml HAS an expressible delta for "
-            "this id and the sim applies it -- DIVERGENCE, awaiting user ruling")
+            # MANIFEST HOLE CLOSED (bug hunt 2026-07-21). This loop used to
+            # skip upgrade_plan entirely, so no_upgrade_path listed only
+            # klee-cards.yaml rows -- and the R24 safety net, which exists to
+            # make "the sim can upgrade this and the mod cannot" visible,
+            # covered zero companions while hiding 14 real divergences.
+            # RULED 2026-07-21: companions upgrade per the sheets, so the
+            # divergence is closed at the source; what remains here are the
+            # genuinely inexpressible deltas, same as any other card.
+            _, upgrade_reason = upgrade_plan(card)
+            if upgrade_reason:
+                no_upgrade[card["id"]] = upgrade_reason
     generated.update(companions)
 
     # The roster class the reward slot draws from (CompanionSlot.Roll):

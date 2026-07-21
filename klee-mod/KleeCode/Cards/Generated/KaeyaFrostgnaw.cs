@@ -35,16 +35,16 @@ public sealed class KaeyaFrostgnaw : CustomCardModel, IElementalCard, ICompanion
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Cryo;
 
-    /// <summary>Companion identity (docs/mondstadt-companions.yaml): star drives the
-    /// reward slot's rarity tier; PersonalPool gates per-character offers.</summary>
+    /// <summary>Companion identity (companion sheet): star drives the
+    /// reward slot's rarity tier; PersonalPool gates per-character
+    /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
     public int Star => 4;
 
     public Element CompanionElement => Element.Cryo;
 
     public string? PersonalPool => null;
 
-    /// <summary>Companion cards NEVER scale (sheet header law).</summary>
-    public override int MaxUpgradeLevel => 0;
+    public string? Nation => "mondstadt";
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("kaeya_frostgnaw");
 
@@ -80,6 +80,6 @@ public sealed class KaeyaFrostgnaw : CustomCardModel, IElementalCard, ICompanion
 
     protected override void OnUpgrade()
     {
-        // Companions never scale (sheet header law); MaxUpgradeLevel 0 makes this unreachable.
+        DynamicVars.Damage.UpgradeValueBy(2m);
     }
 }

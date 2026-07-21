@@ -32,16 +32,16 @@ namespace KleeMod.Cards.Generated;
 
 public sealed class NicoleCelestialGift : CustomCardModel, ICompanionCard
 {
-    /// <summary>Companion identity (docs/mondstadt-companions.yaml): star drives the
-    /// reward slot's rarity tier; PersonalPool gates per-character offers.</summary>
+    /// <summary>Companion identity (companion sheet): star drives the
+    /// reward slot's rarity tier; PersonalPool gates per-character
+    /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
     public int Star => 5;
 
     public Element CompanionElement => Element.Pyro;
 
     public string? PersonalPool => null;
 
-    /// <summary>Companion cards NEVER scale (sheet header law).</summary>
-    public override int MaxUpgradeLevel => 0;
+    public string? Nation => "mondstadt";
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("nicole_celestial_gift");
 
@@ -72,6 +72,6 @@ public sealed class NicoleCelestialGift : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        // Companions never scale (sheet header law); MaxUpgradeLevel 0 makes this unreachable.
+        // R24: NO upgrade path -- delta key 'block_per_turn: 2' not expressible by codegen (structural upgrade). Flagged in manifest.
     }
 }

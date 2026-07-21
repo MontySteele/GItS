@@ -32,16 +32,16 @@ namespace KleeMod.Cards.Generated;
 
 public sealed class BarbaraMelody : CustomCardModel, ICompanionCard
 {
-    /// <summary>Companion identity (docs/mondstadt-companions.yaml): star drives the
-    /// reward slot's rarity tier; PersonalPool gates per-character offers.</summary>
+    /// <summary>Companion identity (companion sheet): star drives the
+    /// reward slot's rarity tier; PersonalPool gates per-character
+    /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
     public int Star => 4;
 
     public Element CompanionElement => Element.Hydro;
 
     public string? PersonalPool => null;
 
-    /// <summary>Companion cards NEVER scale (sheet header law).</summary>
-    public override int MaxUpgradeLevel => 0;
+    public string? Nation => "mondstadt";
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("barbara_melody");
 
@@ -73,6 +73,6 @@ public sealed class BarbaraMelody : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        // Companions never scale (sheet header law); MaxUpgradeLevel 0 makes this unreachable.
+        DynamicVars.Block.UpgradeValueBy(2m);
     }
 }
