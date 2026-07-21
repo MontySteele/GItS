@@ -9,6 +9,7 @@
     "blazing_delight",
     "bomb_voyage",
     "bombs_away",
+    "bright_idea",
     "cant_catch_me",
     "catalytic_conversion",
     "clockwork_toy",
@@ -47,7 +48,6 @@
     "best_friends_forever": "op 'copy_companions_played_this_combat'",
     "boom_goes_the_dynamite": "op 'conditional'",
     "borrowed_brilliance": "op 'copy_companion_in_hand'",
-    "bright_idea": "op 'discard'",
     "careful_arrangement": "op 'move_bombs'",
     "chain_fuse": "op 'modify_bombs'",
     "chained_reactions": "op 'detonate'",
@@ -83,7 +83,6 @@
   "upgrades": {
     "_comment": "R24 (2026-07-20): docs/klee-upgrades.yaml is the single source of truth for upgrade deltas; codegen defaults are ABOLISHED. Generated cards listed below ship with NO upgrade path (UNAPPLIABLE discipline) until their delta is ratified, made numeric, or hand-finished.",
     "no_upgrade_path": {
-      "catalytic_conversion": "delta key 'power_energy_bonus: 3' not expressible by codegen (structural upgrade)",
       "hot_hands": "delta key 'remove: self_damage' not expressible by codegen (structural upgrade)"
     }
   }

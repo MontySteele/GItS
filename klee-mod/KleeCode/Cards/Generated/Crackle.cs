@@ -19,6 +19,7 @@ using BaseLib.Abstracts;
 using Godot;
 using KleeMod.Elements;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -38,13 +39,15 @@ public sealed class Crackle : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crackle"),
-        ("description", "Deal {Damage:diff()} damage to a random enemy."),
+        ("description", "Deal {Damage:diff()} damage to a random enemy. Discard {Discards:diff()} card{Discards:plural:|s}: gain {Sparks:diff()} [gold]Spark{Sparks:plural:|s}[/gold] per card discarded."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(3m, ValueProp.Move)
+            new DamageVar(3m, ValueProp.Move),
+            new DynamicVar("Discards", 1m),
+            new DynamicVar("Sparks", 1m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -62,10 +65,21 @@ public sealed class Crackle : CustomCardModel, IElementalCard
             .TargetingRandomOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
+        var picked = (await CardSelectCmd.FromHandForDiscard(
+            choiceContext, Owner,
+            new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, DynamicVars["Discards"].IntValue),
+            KitGrant.NotKitCard, this)).ToList();
+        await CardCmd.Discard(choiceContext, picked);
+        var sparkGain = Math.Min(DynamicVars["Sparks"].IntValue, picked.Count);
+        if (sparkGain > 0)
+        {
+            await SparkPower.Gain(choiceContext, Owner.Creature, sparkGain, this);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars["Discards"].UpgradeValueBy(1m);
+        DynamicVars["Sparks"].UpgradeValueBy(1m);
     }
 }

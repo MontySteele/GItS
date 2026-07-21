@@ -40,14 +40,16 @@
    effects: [{op: gain_spark, amount: 1}]}  # M9 upgrade delta lives in klee-upgrades.yaml (R20: no inline upgrade fields)
 - {id: pocket_fireworks, name: "Pocket Fireworks", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: enabler,
    effects: [{op: damage, amount: 4, target: random_enemy, times: 2}]}
-# R10 buff (+ {op: gain_spark, amount: 1}) AUTHORIZED but NOT landed.
-# Pre-measurement 2026-07-20: landing it moves spark_weighted/tank_boss to
-# 0.668 vs the RATIFIED ceiling 0.65 (seed 42, 1000 fights) -- a deterministic
-# band-lock breach. Bands change only by ruling with archives (tier0 DECISIONS
-# 62), so the landing must ride WITH the user's window declaration + band
-# disposition; landing it alone reds the suite.
+# R36 REDESIGN (user-ratified 2026-07-20, supersedes the R10 buff): the
+# unconditional gain_spark 1 that breached the ratified band (0.668 vs the
+# 0.65 tank_boss ceiling, 4de7125) is DEAD. Replacement prices the Spark BY
+# a forced player-chosen discard: 1 Spark per card actually discarded, empty
+# hand = no Spark. Design intent on record: discard is a real cost, not an
+# engine, for Klee. The R10 measurement window now measures THIS design
+# (one variable, band check included); the CCM + dodge_roll errata batch
+# stays queued behind that window as before.
 - {id: crackle, name: "Crackle", cost: 0, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: enabler,
-   effects: [{op: damage, amount: 3, target: random_enemy}]}
+   effects: [{op: damage, amount: 3, target: random_enemy}, {op: discard_for_sparks, amount: 1, sparks: 1}]}
 - {id: spark_collection, name: "Spark Collection", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [spark], role: enabler,
    effects: [{op: gain_spark, amount: 2}]}  # M9 upgrade delta lives in klee-upgrades.yaml (R20: no inline upgrade fields)
 - {id: tail_of_flame, name: "Tail of Flame", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: payoff,

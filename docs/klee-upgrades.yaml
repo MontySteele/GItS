@@ -23,7 +23,7 @@ careful_arrangement: {bonus: +2}                   # 2->4 per moved bomb
 bomb_voyage:       {bomb_damage: +2}
 sparkly_treasure:  {spark: +1}                     # 1->2
 pocket_fireworks:  {damage: +2}                    # 4->6 x2
-crackle:           {damage: +2}                    # 3->5
+crackle:           {discard: +1, sparks: +1}       # R36: discard 2, add 2 Sparks (damage delta dead with the R10 buff)
 spark_collection:  {spark: +1}                     # 2->3
 tail_of_flame:     {conditional_bonus: +3}         # 4->7 when free
 eager_to_help:     {draw: +1}                      # both branches
@@ -60,7 +60,7 @@ gleeful_barrage:   {damage: +1}                    # 4->5 per hit
 hot_hands:         {remove: self_damage}           # condition-class: no longer hurts
 cant_catch_me:     {block: +2}                     # 4->6
 sugar_rush:        {remove: exhaust}               # classic quality upgrade (net-0 energy loop is spark-bounded)
-catalytic_conversion: {power_energy_bonus: +3}     # reaction burst-energy 5->8 (spark grant unchanged)
+catalytic_conversion: {innate: true}               # R37: classic power disposition -- starts in the opening hand
 perfect_timing:    {damage: +2}                    # 8->10
 elemental_ecstasy: {cost: -1}                      # 2->1 (uncommon cost slot)
 borrowed_brilliance: {copy_cost_override: 0}       # the copy costs 0

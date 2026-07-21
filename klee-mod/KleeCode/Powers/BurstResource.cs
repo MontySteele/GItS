@@ -180,9 +180,10 @@ public sealed class BurstMeterPower : PowerModel, ILocalizationProvider
     {
         ("title", "Burst Energy"),
         ("description",
-            "Skill-tagged cards grant 5 [gold]Burst Energy[/gold]; Elemental "
-          + "Reactions grant 5. At 60, [gold]Sparks 'n' Splash[/gold] is "
-          + "added to your hand; casting it spends ALL Burst Energy."),
+            "Cards with [gold]Elemental Skill[/gold] grant 5 [gold]Burst "
+          + "Energy[/gold]; Elemental Reactions grant 5. At 60, [gold]Sparks "
+          + "'n' Splash[/gold] is added to your hand; casting it spends ALL "
+          + "Burst Energy."),
     };
 
     public override PowerType Type => PowerType.Buff;

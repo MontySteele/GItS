@@ -86,8 +86,13 @@ def card_cost(state: CombatState, card: Card) -> int:
 def play_card(state: CombatState, card: Card) -> None:
     p = state.player
     cost = card_cost(state, card)
+    # R34: X-cost cards are exempt from spark spend. A Spark-freed X card
+    # would resolve at X = 0 -- the mechanic cannot coherently apply, and
+    # without the exemption an X attack at 0 energy trips this predicate
+    # (paid 0, printed != 0) and whiffs the whole spark bank.
     if (card.type == "attack" and cost == 0
-            and p.sparks >= spark_threshold(state) and card.cost != 0):
+            and p.sparks >= spark_threshold(state)
+            and card.cost != 0 and card.cost != "X"):
         p.sparks -= spark_threshold(state)
         state.emit("sparks_spent")
     if card.cost == "X":
@@ -270,6 +275,16 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
     powers.on_turn_end(state, enemy)
 
 
+def surface_innate(draw_pile: list) -> None:
+    """Innate (R37): innate cards surface to the TOP of the shuffled draw
+    pile, so the first hand contains them (base-game semantics; hand-size
+    overflow degrades to "drawn first", which is also base-game). Order
+    among innate cards stays shuffle-relative -- no hidden second sort."""
+    innate = [c for c in draw_pile if c.innate]
+    if innate:
+        draw_pile[:] = innate + [c for c in draw_pile if not c.innate]
+
+
 def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
               seed: int) -> CombatState:
     state = CombatState(player=player, enemies=enemies,
@@ -280,6 +295,7 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     player.fanfare = 0
     player.spotlight = None
     state.rng.shuffle(player.draw_pile)
+    surface_innate(player.draw_pile)
     while not state.over and state.turn < C.MAX_TURNS:
         _player_turn(state, pilot)
         if state.over:

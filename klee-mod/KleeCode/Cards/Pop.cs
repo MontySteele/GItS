@@ -36,6 +36,12 @@ public sealed class Pop : CustomCardModel, ISkillTagCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar> { new DamageVar(5m, ValueProp.Move) };
 
+    /// <summary>Sheet `skill_tag`, made visible (display only -- gameplay
+    /// reads ISkillTagCard). Same emission codegen produces for generated
+    /// skill-tag cards.</summary>
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.ElementalSkill };
+
     // autoAdd: false -- KleeCardPool owns membership. See Kaboom.
     public Pop()
         : base(0, CardType.Skill, CardRarity.Basic, TargetType.AnyEnemy, autoAdd: false)

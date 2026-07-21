@@ -145,6 +145,17 @@ public sealed class SparksNSplashPower : PowerModel, ILocalizationProvider
 /// </summary>
 public static class KitGrant
 {
+    /// <summary>
+    /// Victim-pool filter for discard/exhaust-from-hand effects: kit cards
+    /// are NEVER fodder (tier0 _op_discard/_op_exhaust_from, the v1.9
+    /// invariant -- the Burst never enters a pile; a discarded kit card
+    /// would recirculate as loot on reshuffle and defeat the hand-only
+    /// dedup above). This discharges the forward obligation recorded in
+    /// DECISIONS when the kit sprint landed: the FIRST discard op to ship
+    /// C#-side carries the exemption (R36 Crackle / bright_idea unblock).
+    /// </summary>
+    public static bool NotKitCard(CardModel card) => card is not SparksNSplash;
+
     public static async Task GrantIfCharged(PlayerChoiceContext choiceContext, Player? owner)
     {
         if (owner?.Character is not Klee) return;

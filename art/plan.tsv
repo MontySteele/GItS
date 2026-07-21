@@ -48,6 +48,10 @@ pocket_fireworks	ImageGen/images/cards/klee/pocket_fireworks.png	500	380	contain
 pocket_fireworks	ImageGen/images/cards/klee/pocket_fireworks.png	500	380	contain	center	shortlist	3	png	Item Leisurely Fireworks.png		item
 crackle	ImageGen/images/cards/klee/crackle.png	500	380	contain	center	shortlist	1	png	Pounding Surprise Explosive Spark Effect.png		vfx
 crackle	ImageGen/images/cards/klee/crackle.png	500	380	contain	center	shortlist	2	png	Item Supersized Firework.png		item
+# bright_idea unblocked by the R36 discard op (draw 3, discard 1). RED-PEN: both
+# candidates are already-used emoji poses; ships portrait-less (null-safe) until picked.
+bright_idea	ImageGen/images/cards/klee/bright_idea.png	500	380	contain	center	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 3.png		icon
+bright_idea	ImageGen/images/cards/klee/bright_idea.png	500	380	contain	center	shortlist	2	png	Sparkling Steps 2021-06-09 - Klee Emoji 1.png		icon
 spark_collection	ImageGen/images/cards/klee/spark_collection.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Marvelous Magic.png		item
 spark_collection	ImageGen/images/cards/klee/spark_collection.png	500	380	contain	center	shortlist	2	png	Item Dodoco's Duet.png		item
 spark_collection	ImageGen/images/cards/klee/spark_collection.png	500	380	cover	center	shortlist	3	png	Icon Emoji Paimon's Paintings 25 Klee 2.png		sticker

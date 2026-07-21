@@ -150,6 +150,9 @@ def extract_cs(text: str) -> dict:
         # Burst-energy spike: sheet `skill_tag` must land as the ISkillTagCard
         # marker or the card silently generates no burst energy.
         "skill_tag": "ISkillTagCard" in text,
+        # Keyword sprint: skill_tag must ALSO land as the ElementalSkill
+        # display keyword (playtest finding: the tag was invisible on cards).
+        "skill_kw": "KleeKeywords.ElementalSkill" in text,
         # Kit sprint: sheet `kit_card` + `requires: burst_energy_full` land as
         # the custom-resource cost (the CanAfford gate AND the meter spend);
         # sheet tag `burst` lands as Retain (the sim's turn-end filter).
@@ -214,6 +217,10 @@ def lint() -> int:
             fail(card_id, f"skill_tag: sheet {exp_skill_tag}, "
                           f"C# ISkillTagCard {got['skill_tag']} "
                           "(a missing marker generates no burst energy)")
+        if got["skill_kw"] != exp_skill_tag:
+            fail(card_id, f"skill keyword: sheet skill_tag {exp_skill_tag}, "
+                          f"C# KleeKeywords.ElementalSkill {got['skill_kw']} "
+                          "(the display keyword is how players see the tag)")
         exp_kit = bool(row.get("kit_card")) or bool(row.get("requires"))
         if got["kit_cost"] != exp_kit:
             fail(card_id, f"kit cost: sheet kit_card/requires {exp_kit}, "

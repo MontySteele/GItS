@@ -58,8 +58,15 @@ MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.js
 # same verified shape SparkPower.Gain uses. Amount is a LITERAL unless
 # klee-upgrades.yaml carries a `burst_energy: +N` delta; then it becomes a
 # named DynamicVar("BurstEnergy", n) -- the Sparks idiom exactly.
+# discard + discard_for_sparks (R36 batch): random discard is
+# CardCmd.Discard on a random pick from the kit-exempt pool; chosen discard
+# is CardSelectCmd.FromHandForDiscard (the MockDiscardAndAddShivsPotion
+# idiom -- forced pick of N, auto-selects-all on a short hand) with the
+# SAME kit-exempt filter. KitGrant.NotKitCard is the exemption both ride
+# (v1.9 invariant: the Burst is never fodder -- the obligation DECISIONS
+# recorded when the kit sprint landed).
 MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_energy",
-                  "apply_power"}
+                  "apply_power", "discard", "discard_for_sparks"}
 
 # apply_power (power-card pass): sheet power id -> (C# PowerModel class,
 # stack cap or None, card-text template with {X} for the amount).
@@ -151,7 +158,14 @@ HAND_WRITTEN |= {"sparks_n_splash"}
 #                  own doc comment prescribes (verified in the decompile)
 # Anything else (remove:, add:, condition:, ...) is structural and blocks the
 # card's upgrade path until it is hand-finished or re-ruled numeric.
-EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "bomb_damage", "burst_energy", "cost"}
+#   discard     -> discard_for_sparks count (DynamicVars["Discards"], R36)
+#   sparks      -> discard_for_sparks Spark cap (DynamicVars["Sparks"], R36;
+#                  distinct from `spark` = gain_spark on purpose)
+#   innate      -> AddKeyword(CardKeyword.Innate) in OnUpgrade (R37; keywords
+#                  are instance-owned LocalKeywords, and the base game's own
+#                  Innate drives opening-hand placement + keyword text)
+EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "bomb_damage", "burst_energy", "cost",
+                       "discard", "sparks", "innate"}
                       | POWER_UPGRADE_KEYS)
 
 RARITY_CS = {
@@ -198,6 +212,13 @@ def blocked_reason(card: dict) -> str | None:
     # silently diverge from the upgrades sheet.
     if "upgrade" in card:
         return "inline `upgrade:` field (deprecated by R20 -- put the delta in klee-upgrades.yaml)"
+
+    # "Sparks" is one DynamicVar name: a card carrying BOTH gain_spark and
+    # discard_for_sparks would collide on it. No such card exists; block
+    # loudly if one appears rather than silently overwrite.
+    ops_present = {e.get("op") for e in card.get("effects", [])}
+    if {"gain_spark", "discard_for_sparks"} <= ops_present:
+        return "gain_spark + discard_for_sparks on one card (Sparks var collision)"
 
     for eff in card.get("effects", []):
         op = eff.get("op")
@@ -294,6 +315,10 @@ def build_vars(card: dict) -> list[str]:
         elif op == "apply_power" and power_upgrade(card):
             # Same rule again: only an upgradeable amount needs a var.
             out.append(f'new DynamicVar("PowerAmount", {int(eff["amount"])}m)')
+        elif op == "discard_for_sparks" and discard_upgrade(card) != (0, 0):
+            # R36: both numbers render, so both become vars together.
+            out.append(f'new DynamicVar("Discards", {int(eff["amount"])}m)')
+            out.append(f'new DynamicVar("Sparks", {int(eff["sparks"])}m)')
     return out
 
 
@@ -330,6 +355,11 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "bomb_damage": any(e["op"] == "place_bomb" for e in effects),
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
         "cost": str(card.get("cost")) != "X",
+        # R36: both keys ride the one discard_for_sparks effect.
+        "discard": any(e["op"] == "discard_for_sparks" for e in effects),
+        "sparks": any(e["op"] == "discard_for_sparks" for e in effects),
+        # R37: card-level, any card can become Innate.
+        "innate": True,
     }
     for pkey in POWER_UPGRADE_KEYS:
         has[pkey] = any(e["op"] == "apply_power" for e in effects)
@@ -350,6 +380,13 @@ def spark_upgrade(card: dict) -> int:
 def burst_upgrade(card: dict) -> int:
     """Ruled Burst-energy upgrade delta: `burst_energy: +N`. 0 = none."""
     return int(upgrade_plan(card)[0].get("burst_energy", 0))
+
+
+def discard_upgrade(card: dict) -> tuple[int, int]:
+    """Ruled R36 deltas on discard_for_sparks: (discard: +N, sparks: +M).
+    (0, 0) = none; either key alone still upgrades both vars' rendering."""
+    deltas = upgrade_plan(card)[0]
+    return int(deltas.get("discard", 0)), int(deltas.get("sparks", 0))
 
 
 def power_upgrade(card: dict) -> int:
@@ -496,6 +533,48 @@ def build_body(card: dict) -> list[str]:
                 f"{amount}, applier: Owner.Creature, cardSource: this);"
             )
 
+        elif op == "discard":
+            # Random discard, kit-exempt pool (tier0 _op_discard: re-pool per
+            # pick, stop when empty). CombatTargets is the established rng
+            # stream for in-combat random picks (bomb targeting idiom).
+            n = int(eff.get("amount", 1))
+            lines.append(
+                f"for (var i = 0; i < {n}; i++)\n"
+                "        {\n"
+                "            var pool = CardPile.Get(PileType.Hand, Owner)?"
+                ".Cards.Where(KitGrant.NotKitCard).ToList();\n"
+                "            if (pool == null || pool.Count == 0) break;\n"
+                "            var victim = Owner.RunState.Rng.CombatTargets.NextItem(pool);\n"
+                "            if (victim == null) break;\n"
+                "            await CardCmd.Discard(choiceContext, victim);\n"
+                "        }"
+            )
+
+        elif op == "discard_for_sparks":
+            # R36: forced player-chosen discard of N (auto-selects-all on a
+            # short hand -- FromHand's own rule), kit-exempt filter; then
+            # Sparks priced by the cards ACTUALLY discarded, capped at M.
+            # Empty eligible hand -> empty selection -> no Spark.
+            if discard_upgrade(card) != (0, 0):
+                n = 'DynamicVars["Discards"].IntValue'
+                m = 'DynamicVars["Sparks"].IntValue'
+            else:
+                n = str(int(eff["amount"]))
+                m = str(int(eff["sparks"]))
+            lines.append(
+                "var picked = (await CardSelectCmd.FromHandForDiscard(\n"
+                "            choiceContext, Owner,\n"
+                "            new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, "
+                f"{n}),\n"
+                "            KitGrant.NotKitCard, this)).ToList();\n"
+                "        await CardCmd.Discard(choiceContext, picked);\n"
+                f"        var sparkGain = Math.Min({m}, picked.Count);\n"
+                "        if (sparkGain > 0)\n"
+                "        {\n"
+                "            await SparkPower.Gain(choiceContext, Owner.Creature, sparkGain, this);\n"
+                "        }"
+            )
+
     return lines
 
 
@@ -576,6 +655,27 @@ def build_description(card: dict) -> str:
                  else str(int(eff["amount"])))
             parts.append(template.replace("{X}", x))
 
+        elif op == "discard":
+            n = int(eff.get("amount", 1))
+            parts.append(
+                "Discard a random card." if n == 1
+                else f"Discard {n} random cards."
+            )
+
+        elif op == "discard_for_sparks":
+            if discard_upgrade(card) != (0, 0):
+                parts.append(
+                    "Discard {Discards:diff()} card{Discards:plural:|s}: gain "
+                    "{Sparks:diff()} [gold]Spark{Sparks:plural:|s}[/gold] per "
+                    "card discarded."
+                )
+            else:
+                n, m = int(eff["amount"]), int(eff["sparks"])
+                cards_w = "a card" if n == 1 else f"{n} cards"
+                sparks_w = ("1 [gold]Spark[/gold]" if m == 1
+                            else f"{m} [gold]Sparks[/gold]")
+                parts.append(f"Discard {cards_w}: gain {sparks_w} per card discarded.")
+
     return " ".join(parts)
 
 
@@ -596,6 +696,14 @@ def build_upgrade(card: dict) -> list[str]:
     lines, done = [], set()
     for eff in card["effects"]:
         op = eff["op"]
+        if op == "discard_for_sparks":
+            # R36: one effect, two delta keys -- both vars move together.
+            for key, var in (("discard", 'DynamicVars["Discards"]'),
+                             ("sparks", 'DynamicVars["Sparks"]')):
+                if key in deltas and key not in done:
+                    done.add(key)
+                    lines.append(f"{var}.UpgradeValueBy({int(deltas[key])}m);")
+            continue
         if op == "apply_power":
             key = next((k for k in POWER_UPGRADE_KEYS if k in deltas), None)
         elif op == "damage" and eff["target"] != "self":
@@ -610,6 +718,14 @@ def build_upgrade(card: dict) -> list[str]:
         lines.append(f"{var}.UpgradeValueBy({int(deltas[key])}m);")
     if "cost" in deltas:
         lines.append(f'EnergyCost.UpgradeBy({int(deltas["cost"])});')
+    if "innate" in deltas:
+        # R37: boolean, only `true` is a ruling (tier0 applier enforces the
+        # same). Keywords are instance-owned, so this touches only the
+        # upgraded copy.
+        if deltas["innate"] is not True:
+            raise SystemExit(
+                f"gen_klee_cards: {card['id']}: innate delta must be `true`")
+        lines.append("AddKeyword(CardKeyword.Innate);")
     return lines
 
 
@@ -669,11 +785,20 @@ def emit(card: dict) -> str:
     # hand-write "Exhaust." (first exercised by da_da_da/all_my_treasures when
     # gain_spark unblocked them -- every earlier exhaust card was blocked, so
     # the generator never needed this before).
-    keywords_member = ""
+    #
+    # skill_tag additionally emits the ElementalSkill DISPLAY keyword
+    # (playtest finding 2026-07-20: the tag was invisible on cards). Gameplay
+    # still reads ISkillTagCard; the keyword is what the player sees.
+    keywords = []
     if card.get("exhaust"):
+        keywords.append("CardKeyword.Exhaust")
+    if "skill_tag" in card.get("tags", []):
+        keywords.append("KleeKeywords.ElementalSkill")
+    keywords_member = ""
+    if keywords:
         keywords_member = (
             "\n    public override IEnumerable<CardKeyword> CanonicalKeywords =>\n"
-            "        new[] { CardKeyword.Exhaust };\n"
+            "        new[] { " + ", ".join(keywords) + " };\n"
         )
 
     return f'''// <auto-generated>
@@ -697,6 +822,7 @@ using BaseLib.Abstracts;
 using Godot;
 using KleeMod.Elements;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;

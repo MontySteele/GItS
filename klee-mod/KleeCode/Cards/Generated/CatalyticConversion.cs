@@ -19,6 +19,7 @@ using BaseLib.Abstracts;
 using Godot;
 using KleeMod.Elements;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -59,6 +60,6 @@ public sealed class CatalyticConversion : CustomCardModel
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- delta key 'power_energy_bonus: 3' not expressible by codegen (structural upgrade). Flagged in manifest.
+        AddKeyword(CardKeyword.Innate);
     }
 }

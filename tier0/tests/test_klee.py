@@ -159,6 +159,86 @@ def test_sparks_make_attack_free():
     assert st.player.energy == 0
 
 
+def test_crackle_spark_is_priced_by_the_discard():
+    # R36 (user-ratified): "Discard 1: add a Spark". The Spark is priced BY
+    # the discard -- empty hand = no fodder = no Spark; kit cards are never
+    # fodder; short hand discards what it can and pays Sparks to match.
+    from tier0.engine import effects
+    from tier0.tests.conftest import make_state
+    fx = {"op": "discard_for_sparks", "amount": 1, "sparks": 1}
+    crackle = loader.get_card("crackle")
+    assert fx in crackle.effects            # sheet carries the redesign
+
+    st = make_state()
+    st.player.hand = []                     # empty hand: no free Spark
+    effects._op_discard_for_sparks(st, fx, crackle)
+    assert st.player.sparks == 0
+
+    filler = loader.get_card("kaboom")
+    st.player.hand = [filler]               # fodder: discard pays the Spark
+    effects._op_discard_for_sparks(st, fx, crackle)
+    assert st.player.sparks == 1
+    assert st.player.hand == []
+    assert filler in st.player.discard_pile
+
+    sns = loader.get_card("sparks_n_splash")
+    st.player.hand = [sns]                  # kit card: exempt fodder
+    effects._op_discard_for_sparks(st, fx, crackle)
+    assert st.player.sparks == 1            # unchanged
+    assert sns in st.player.hand
+
+    st.player.hand = [loader.get_card("kaboom")]
+    fx2 = {"op": "discard_for_sparks", "amount": 2, "sparks": 2}
+    effects._op_discard_for_sparks(st, fx2, crackle)   # upgraded, short hand
+    assert st.player.sparks == 2            # +1: one card, one Spark
+
+
+def test_crackle_upgrade_applies_r36_deltas():
+    up = loader.get_card("crackle+")
+    fx = next(f for f in up.effects if f["op"] == "discard_for_sparks")
+    assert fx["amount"] == 2 and fx["sparks"] == 2
+    dmg = next(f for f in up.effects if f["op"] == "damage")
+    assert dmg["amount"] == 3               # damage delta died with R10
+
+
+def test_innate_card_starts_in_the_opening_hand():
+    # R37: catalytic_conversion+ is Innate -- top of the shuffled draw
+    # pile, so the first hand contains it, every fight.
+    from tier0.engine.combat import surface_innate
+    ccu = loader.get_card("catalytic_conversion+")
+    assert ccu.innate is True
+    assert loader.get_card("catalytic_conversion").innate is False
+
+    player = loader.build_player("klee", "catalytic_cell_innate")
+    import random
+    random.Random(7).shuffle(player.draw_pile)
+    surface_innate(player.draw_pile)
+    assert player.draw_pile[0].id == "catalytic_conversion+"
+    # sparks_n_splash's innate-on-charge is its own mechanism: the kit
+    # card is not in the draw pile at all.
+    assert not any(c.kit_card for c in player.draw_pile)
+
+
+def test_x_cost_attack_never_spends_sparks():
+    # R34 (user-ratified): a Spark-freed X card would resolve at X = 0, so
+    # X-cost cards are exempt from spark spend. Without the exemption, an X
+    # attack at 0 energy trips the spend predicate (paid 0, printed != 0)
+    # and whiffs the whole spark bank.
+    import dataclasses
+    from tier0.engine.combat import card_cost, play_card
+    from tier0.tests.conftest import make_state
+    st = make_state()
+    st.player.sparks = 3
+    st.player.energy = 0
+    x_attack = dataclasses.replace(
+        loader.get_card("kaboom"), id="x_probe", cost="X")
+    st.player.hand.append(x_attack)
+    assert card_cost(st, x_attack) == 0     # X = current energy, not sparks
+    play_card(st, x_attack)
+    assert st.player.sparks == 3            # bank untouched
+    assert st.current_x == 0                # resolved at X = 0
+
+
 def test_mono_pyro_deck_cannot_react_alone():
     # Design doc Pillar 2: reactions are earned. Demolition (mono-pyro)
     # should trigger ~zero reactions without companions.

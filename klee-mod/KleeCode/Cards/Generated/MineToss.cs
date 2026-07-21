@@ -19,6 +19,7 @@ using BaseLib.Abstracts;
 using Godot;
 using KleeMod.Elements;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -30,6 +31,9 @@ namespace KleeMod.Cards.Generated;
 
 public sealed class MineToss : CustomCardModel, ISkillTagCard
 {
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.ElementalSkill };
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("mine_toss");
 
     public override List<(string, string)>? Localization => new()

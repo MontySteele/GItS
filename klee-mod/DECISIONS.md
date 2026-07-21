@@ -556,6 +556,15 @@ tier0/engine/combat.py `card_cost`/`play_card`.
 into a trap; both X-cost cards are blocked on X support anyway, so nothing
 observable differs. Reconcile when X-cost lands.
 
+> **CLOSED by R34 (user-ratified 2026-07-20):** the sim adopts the C#
+> exemption — `card.cost == "X"` is exempt from the spark-spend branch in
+> tier0 `play_card` (the verified hazard: an X attack at 0 energy tripped
+> the spend predicate and whiffed the whole bank for an X=0 cast), with
+> `test_x_cost_attack_never_spends_sparks` pinning it. No divergence
+> remains. Standing obligation unchanged: when X-cost lands C#-side, the
+> SparkPower gate must carry the same exemption — which it already does;
+> the codegen X-guard keeps any drift from shipping silently.
+
 **Detonation event bus** (csharp-build-spec item 2): `BombPower.Detonate`
 notifies `IBombDetonationListener`s — discovered by interface over the
 applying player's relics and creature powers, once PER BOMB (sim grants the
@@ -919,3 +928,76 @@ is no game-side victim pool to filter; the FIRST discard/exhaust_from op
 that lands C#-side must add the kit exemption or it recreates the sim's
 regression. Codegen still blocks those ops, so the gap cannot ship
 silently.
+
+## Playtest-fix + rulings batch -- softlock, keyword, R34-R37 (2026-07-20 night)
+
+**Campfire softlock, root-caused and fixed.** godot.log showed it plainly:
+BaseLib's scene-conversion registry is keyed by PATH, and sharing
+`character_sprite.tscn` between `CustomRestSiteAnimPath` and
+`CustomMerchantAnimPath` made the merchant registration overwrite the
+rest-site one ("Overwriting scene registration ... NRestSiteCharacter ->
+NMerchantCharacter" -- BaseLib warned at startup). The campfire then
+instantiated an NMerchantCharacter, `NRestSiteCharacter.Create`'s cast
+threw inside `NRestSiteRoom._Ready`, and the room never finished setup.
+Fix: build_pck emits an identical scene under a second path
+(`rest_character.tscn`); the rest site points there. Lesson recorded in
+Klee.cs: one conversion registry entry per scene path, ever.
+
+**Known-benign merchant error, accepted:** `NMerchantCharacter._Ready`
+unconditionally builds a MegaSpineBinding on its first child and throws
+on a static Sprite2D ("Expected BoundObject to be a SpineSprite"). The
+Godot bridge logs and swallows it; the sprite renders, only the
+`relaxed_loop` idle is lost. Unfixable without patching game code.
+
+**ElementalSkill keyword (playtest finding: skill_tag was invisible).**
+BaseLib custom keyword: `[CustomEnum("elemental_skill")]` +
+`[KeywordProperties(AutoKeywordPosition.After)]` static CardKeyword field
+(KleeKeywords.cs) -> key KLEEMOD-ELEMENTAL_SKILL; loc rows ship in the
+pck at `klee/localization/eng/card_keywords.json` (the game merges
+modded loc JSON per-table; verified in LocManager.LoadTablesFromPath).
+Renders a gold "Elemental Skill." line + hover tip on all 16 skill_tag
+cards (codegen emits it beside ISkillTagCard; Pop hand-carries it;
+parity lint enforces the pairing). DISPLAY ONLY -- gameplay still reads
+ISkillTagCard. Badge description reworded to name the keyword.
+
+**R34 executed (X-cost spark exemption):** tier0 play_card exempts
+`cost == "X"` from spark spend (verified hazard: X attack at 0 energy
+tripped the paid-0/printed-nonzero predicate and whiffed the bank on an
+X=0 cast); test pins it. The finding-26 divergence entry is CLOSED --
+sim now matches the C# exemption; the codegen X-guard keeps drift loud.
+
+**R35 executed (Blazing Delight reset):** proc-cap reset moved from
+side-turn END to BeforeSideTurnStart (player side), structurally the
+sim's zero-at-turn-start-before-bombs. Ordering proof: hook listeners
+iterate allies before enemies, so the player-power reset always precedes
+enemy BombPower detonations in the same broadcast.
+
+**R36 executed (Crackle redesign):** the band-breaching R10 buff is
+dead; Crackle = damage 3 + `discard_for_sparks {amount: 1, sparks: 1}`
+(forced player-chosen discard, 1 Spark per card ACTUALLY discarded,
+empty hand = no Spark, kit cards exempt fodder). Upgrade deltas
+{discard: +1, sparks: +1}; the old damage delta died with R10. New tier0
+op with shared worst-card heuristic (instrument surface, noted); pilot
+unchanged. **Measurement window RUN (1000 fights, seed 42): all
+ratified winrate bands hold; spark_weighted vs tank_boss = 56.8% inside
+[45%, 65%]** (the R10 buff had hit 66.8%). The CCM + dodge_roll errata
+batch may now land per the standing sequencing (window has run).
+C# side: codegen learned `discard` (random victim, kit-exempt pool --
+bright_idea unblocks, pool 48 -> 49, art shortlist flagged red-pen) and
+`discard_for_sparks` (CardSelectCmd.FromHandForDiscard, the
+MockDiscardAndAddShivsPotion idiom: forced pick of N, auto-select-all on
+short hand, kit-exempt filter). **The kit-exemption forward obligation
+above is DISCHARGED** by KitGrant.NotKitCard, the filter both ops ride.
+
+**R37 executed (Catalytic Conversion upgrade = Innate):** upgrade delta
+is now `{innate: true}` -- sim-expressible (tier0 Card.innate +
+surface_innate: innate cards top the shuffled draw pile), so the R24
+no-unmeasured-upgrades law is SATISFIED, not waived; catalytic_conversion
+left UNAPPLIABLE. **Measured in its own cells (catalytic_cell_base vs
+_innate, 1000 fights/enc, seed 42): flat everywhere within noise
+(tank_boss 79.0% vs 77.4%, others <=0.5pt)** -- a consistency upgrade,
+not a power upgrade, exactly the safe disposition the ruling wanted.
+C# side: codegen `innate: true` delta -> `AddKeyword(CardKeyword.Innate)`
+in OnUpgrade (keywords are instance-owned LocalKeywords; Innate is the
+base game's own keyword, driving opening-hand placement and card text).
+hot_hands adopting the same disposition stays QUEUED for the user.
