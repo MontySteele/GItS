@@ -250,9 +250,11 @@ HAND_WRITTEN |= {"sparks_n_splash"}
 #                  the conditional; C# reads (IsUpgraded || pred) at play and
 #                  swaps the text via {IfUpgraded:show:...|...} (the runtime
 #                  form BaseLib's SimpleLoc generates for upgrade swaps)
+#   bombs       -> X-cost bomb count: X_plus_N -> X_plus_(N+val) in tier0;
+#                  codegen renders "X+{Bombs:diff()}" off a Bombs var
 EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "bomb_damage", "burst_energy", "cost",
                        "discard", "sparks", "innate", "bonus", "chance",
-                       "conditional_bonus", "condition"}
+                       "conditional_bonus", "condition", "bombs"}
                       | POWER_UPGRADE_KEYS)
 
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
@@ -281,13 +283,37 @@ def pascal(card_id: str) -> str:
     return "".join(p.capitalize() for p in re.split(r"[_\-]", card_id) if p)
 
 
+def _x_formula_reason(card: dict, val) -> str | None:
+    """tier0 _amount grammar: 'X' or 'X_plus_N', legal only on an X-cost
+    card (state.current_x is the energy spent). None = expressible."""
+    if str(card.get("cost")) != "X":
+        return f"amount formula '{val}' on a non-X-cost card"
+    if val == "X" or (isinstance(val, str) and val.startswith("X_plus_")
+                      and val[len("X_plus_"):].isdigit()):
+        return None
+    return f"amount formula '{val}'"
+
+
+def _x_expr(val, bombs_var: bool = False) -> str:
+    """C# expression for a tier0 amount formula ('x' is ResolveEnergyXValue,
+    declared at the top of OnPlay)."""
+    if val == "X":
+        return "x"
+    n = int(val[len("X_plus_"):])
+    if bombs_var:
+        return 'x + DynamicVars["Bombs"].IntValue'
+    return f"x + {n}"
+
+
 def blocked_reason(card: dict) -> str | None:
     """Return why this card cannot be generated, or None if it can."""
     if card["id"] in HAND_WRITTEN:
         return "hand-written"
 
-    if str(card.get("cost")) == "X":
-        return "X cost (needs energy-scaling support)"
+    # X cost (R34 batch): HasEnergyCostX => true + ResolveEnergyXValue()
+    # (CapturedXValue through Hook.ModifyXValue -- the game-canonical X
+    # read). The spark-spend exemption for X attacks is already in
+    # SparkPower.AppliesTo (!CostsX), the sim's R34 rule.
 
     # Kit cards: granted-not-drafted, requires-full gate, meter spend. The
     # machinery landed 2026-07-20 (Powers/KitBurst.cs) with sparks_n_splash
@@ -322,11 +348,15 @@ def blocked_reason(card: dict) -> str | None:
                 return "formula-driven damage"
             if "bonus_vs_bombed" in eff or "bonus_vs_aura" in eff:
                 return "conditional damage bonus (needs aura/bomb systems)"
+            times = eff.get("times", 1)
+            if not isinstance(times, int) and _x_formula_reason(card, times):
+                return _x_formula_reason(card, times)
         if op == "place_bomb":
             if eff.get("target") not in BOMB_TARGETS:
                 return f"bomb target '{eff.get('target')}'"
-            if not isinstance(eff.get("amount"), int):
-                return "formula-driven bomb count"
+            amt = eff.get("amount")
+            if not isinstance(amt, int) and _x_formula_reason(card, amt):
+                return _x_formula_reason(card, amt)
         if op == "detonate":
             if eff.get("target") not in {"enemy", "all_enemies"}:
                 return f"detonate target '{eff.get('target')}'"
@@ -480,6 +510,10 @@ def build_vars(card: dict) -> list[str]:
                 out.append(f'new ExtraDamageVar({eff["bomb_damage"]}m)')
             else:
                 out.append(f'new DamageVar({eff["bomb_damage"]}m, ValueProp.Move)')
+            if isinstance(eff.get("amount"), str) and bombs_upgrade(card):
+                # X_plus_N with a ruled bombs delta: the +N renders/upgrades.
+                n = int(eff["amount"][len("X_plus_"):])
+                out.append(f'new DynamicVar("Bombs", {n}m)')
         elif op == "gain_spark" and spark_upgrade(card):
             # Only an upgradeable spark amount needs a var (the new value must
             # render); "Sparks" collides with no base-game var name. Cards
@@ -572,6 +606,9 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                  ).get("op") == "damage"
             for c in non_repeat_conditionals),
         "condition": bool(non_repeat_conditionals),
+        # bombs: tier0 rewrites X_plus_N -> X_plus_(N+val).
+        "bombs": any(e["op"] == "place_bomb"
+                     and isinstance(e.get("amount"), str) for e in effects),
         "spark": any(e["op"] == "gain_spark" for e in effects),
         "bomb_damage": any(e["op"] == "place_bomb" for e in effects),
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
@@ -635,6 +672,12 @@ def chance_upgrade(card: dict) -> float:
     """Ruled `chance: X` REPLACEMENT (tier0 upgrades.py replaces, never
     bumps). 0.0 = none."""
     return float(upgrade_plan(card)[0].get("chance", 0.0))
+
+
+def bombs_upgrade(card: dict) -> int:
+    """Ruled `bombs: +N` (controlled_demolition): X_plus_1 -> X_plus_2.
+    Rides the Bombs var so the +1 renders with diff(). 0 = none."""
+    return int(upgrade_plan(card)[0].get("bombs", 0))
 
 
 def conditional_bonus_upgrade(card: dict) -> int:
@@ -720,7 +763,12 @@ def _emit_damage(card: dict, eff: dict, lines: list[str], ctx: dict,
     target = eff["target"]
 
     call = [f"await DamageCmd.Attack({amount_expr})"]
-    if times > 1:
+    x_times = isinstance(times, str)
+    if x_times:
+        # times: "X" (fish_blasting). tier0 loops range(times): X = 0 means
+        # NO hits, so the whole attack statement is gated below.
+        call.append(f".WithHitCount({_x_expr(times)})")
+    elif times > 1:
         call.append(f".WithHitCount({times})")
     call.append(".FromCard(this)")
 
@@ -740,12 +788,20 @@ def _emit_damage(card: dict, eff: dict, lines: list[str], ctx: dict,
         call.append(".SpawningHitVfxOnEachCreature()")
     call.append(".Execute(choiceContext);")
 
-    lines.append("\n            ".join(call))
+    stmt = "\n            ".join(call)
+    if x_times:
+        stmt = ("if (x > 0)\n        {\n            "
+                + stmt.replace("\n", "\n    ")
+                + "\n        }")
+    lines.append(stmt)
 
 
 def _emit_place_bomb(card: dict, eff: dict, lines: list[str], ctx: dict,
                      dmg_expr: str) -> None:
     n = eff["amount"]
+    if isinstance(n, str):
+        # X-cost count (controlled_demolition): tier0 _amount, X or X_plus_N.
+        n = _x_expr(n, bombs_var=bombs_upgrade(card) > 0)
     if eff["target"] == "enemy":
         _target_guard(lines, ctx)
         place = (
@@ -850,6 +906,10 @@ def build_body(card: dict) -> list[str]:
         lines.append("var reactionsAtStart = ReactionEffects.TotalResolved;")
     if "killed_target" in preds:
         lines.append("var enemiesAtStart = CombatState!.HittableEnemies.ToList();")
+    if str(card.get("cost")) == "X":
+        # tier0 play_card: current_x = energy actually spent. The captured
+        # X value (through Hook.ModifyXValue) is the game's same number.
+        lines.append("var x = ResolveEnergyXValue();")
     for eff in card["effects"]:
         op = eff["op"]
 
@@ -1168,6 +1228,13 @@ def build_description(card: dict) -> str:
         elif op == "place_bomb":
             var = bomb_var(card)
             n = eff["amount"]
+            if isinstance(n, str):
+                # X_plus_N renders "X+N"; with a ruled bombs delta the +N
+                # rides the Bombs var so the upgrade shows.
+                if bombs_upgrade(card):
+                    n = "X+{Bombs:diff()}"
+                else:
+                    n = f'X+{int(n[len("X_plus_"):])}' if n != "X" else "X"
             where = "" if eff["target"] == "enemy" else " on random enemies"
             if n == 1:
                 where = "" if eff["target"] == "enemy" else " on a random enemy"
@@ -1186,9 +1253,12 @@ def build_description(card: dict) -> str:
         elif op == "damage":
             times = eff.get("times", 1)
             target = eff["target"]
-            suffix = {1: "", 2: " twice", 3: " three times", 4: " four times"}.get(
-                times, f" {times} times"
-            )
+            if isinstance(times, str):        # times: "X"
+                suffix = " X times"
+            else:
+                suffix = {1: "", 2: " twice", 3: " three times", 4: " four times"}.get(
+                    times, f" {times} times"
+                )
             if target == "enemy":
                 parts.append(f"Deal {{Damage:diff()}} damage{suffix}.")
             elif target == "all_enemies":
@@ -1374,6 +1444,8 @@ def build_upgrade(card: dict) -> list[str]:
         lines.append(
             "// condition: unconditional -- expressed at play time as "
             "(IsUpgraded || predicate); the text swaps via {IfUpgraded:show:...}.")
+    if "bombs" in deltas:
+        lines.append(f'DynamicVars["Bombs"].UpgradeValueBy({int(deltas["bombs"])}m);')
     if "cost" in deltas:
         lines.append(f'EnergyCost.UpgradeBy({int(deltas["cost"])});')
     if "innate" in deltas:
@@ -1447,6 +1519,12 @@ def emit(card: dict) -> str:
         element_member = (
             "\n    /// <summary>Sheet: all Klee attacks apply Pyro (catalyst-grade cadence).</summary>\n"
             "    public Element Element => Element.Pyro;\n"
+        )
+    if str(card["cost"]) == "X":
+        # X cost: canonical 0 + the CardModel virtual (CardEnergyCost ctor
+        # ignores the canonical when CostsX).
+        element_member += (
+            "\n    protected override bool HasEnergyCostX => true;\n"
         )
 
     # exhaust: true -> the base game's own Exhaust keyword. CanonicalKeywords
@@ -1523,7 +1601,7 @@ public sealed class {cls} : {interfaces}
     // GenerateAllCards. BaseLib's auto-registration would need a [Pool]
     // attribute and would register every card a second time.
     public {cls}()
-        : base({card["cost"]}, {TYPE_CS[card["type"]]}, {RARITY_CS[card["rarity"]]}, {target_type}, autoAdd: false)
+        : base({0 if str(card["cost"]) == "X" else card["cost"]}, {TYPE_CS[card["type"]]}, {RARITY_CS[card["rarity"]]}, {target_type}, autoAdd: false)
     {{
     }}
 
