@@ -25,6 +25,51 @@ def test_whole_sheet_parses():
                 if c.id not in ("strike", "defend", "bash")]) >= 90
 
 
+def _klee_pool():
+    return [c for c in loader._card_index().values()
+            if c.character == "klee" and not c.is_companion]
+
+
+# --- pool composition (template §3.4), mirroring test_furina_sheet.py ---
+# v1 review 2026-07-21: Klee had no composition lock while Furina did, which
+# is exactly how the Snap! (M7 R1) drift reached v1 unnoticed -- the sheet
+# grew 75 -> 76 and three counters were never re-derived. This locks the
+# TRUE current shape; the stale "(31)" / "(10)" headers were corrected to
+# match rather than the reverse.
+def test_pool_composition():
+    by_rarity = {}
+    for c in _klee_pool():
+        by_rarity.setdefault(c.rarity, []).append(c)
+    assert len(by_rarity["basic"]) == 4           # template §3.4 allows 4-5
+    assert len(by_rarity["common"]) == 32         # 31 + snap (M7 R1)
+    assert len(by_rarity["uncommon"]) == 25
+    assert len(by_rarity["rare"]) == 15
+    assert sum(len(v) for v in by_rarity.values()) == 76
+    kit = [c for c in by_rarity["rare"] if c.kit_card]
+    assert [c.id for c in kit] == ["sparks_n_splash"]   # 14 draftable rares
+
+
+def test_archetype_tag_counts():
+    """Drift detector for the archetype tag matrix.
+
+    NOTE: deliberately locks the ACTUAL counts rather than asserting the
+    template §3.4 "15-20 tagged cards per archetype" band, which all three
+    archetypes currently sit outside (28 / 22 / 14) with no amendment in
+    the v1->v1.10 log. Reaction's 14 is rationalized in the character doc
+    ("enablers live in the companion pool") but never formally waived.
+    QUEUED FOR USER at the v1 review -- amend the band or accept the
+    deviation on record; until then this test only catches silent drift.
+    """
+    counts = {}
+    for c in _klee_pool():
+        for arch in c.archetypes:
+            counts[arch] = counts.get(arch, 0) + 1
+    assert counts["demolition"] == 28
+    assert counts["spark"] == 22          # 21 + snap (M7 R1)
+    assert counts["reaction"] == 14
+    assert counts["generic"] == 19
+
+
 @pytest.mark.parametrize("deck,pilot", DECKS)
 @pytest.mark.parametrize("enc", ["swarm", "punisher", "attrition",
                                  "burst_check", "tank_boss", "gauntlet"])

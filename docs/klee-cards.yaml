@@ -13,7 +13,7 @@
 - {id: pop, name: "Pop!", cost: 0, type: skill, rarity: basic, solve: [frontload], archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 1, target: enemy, bomb_damage: 5}]}
 
-# ---------- COMMON (31) ----------
+# ---------- COMMON (32) ----------
 # Demolition (10)
 - {id: mine_toss, name: "Mine Toss", cost: 1, type: skill, rarity: common, solve: [frontload], archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 2, target: random_enemies, bomb_damage: 5}]}
@@ -35,7 +35,7 @@
    effects: [{op: move_bombs, target: enemy, bonus: 2}]}
 - {id: bomb_voyage, name: "Bomb Voyage", cost: 2, type: skill, rarity: common, solve: [frontload], archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 3, target: random_enemies, bomb_damage: 5}]}
-# Spark (10) — snap added v0.6 per M7 ruling R1 (margin-supply content fix)
+# Spark (11) — snap added v0.6 per M7 ruling R1 (margin-supply content fix)
 - {id: sparkly_treasure, name: "Sparkly Treasure", cost: 0, type: skill, rarity: common, solve: [velocity], archetypes: [spark], role: enabler,
    effects: [{op: gain_spark, amount: 1}]}  # M9 upgrade delta lives in klee-upgrades.yaml (R20: no inline upgrade fields)
 - {id: pocket_fireworks, name: "Pocket Fireworks", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: enabler,
