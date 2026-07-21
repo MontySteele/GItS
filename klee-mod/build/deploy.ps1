@@ -60,15 +60,30 @@ Copy-Item $dll -Destination $stage
 # Card art ships as loose PNGs next to the dll -- no .pck needed, because
 # BaseLib's CustomPortrait accepts a Texture2D object we build at runtime.
 # Source of truth is the art pipeline's output dir, which is gitignored.
-$artSrc = Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\klee'
+# KleeArt.CardPortrait looks up images/cards/<cardId>.png -- one FLAT dir keyed
+# by sheet id. The pipeline keeps Klee cards and companion cards in separate
+# source dirs, so both are staged into that one flat destination. Ids are unique
+# across the two sheets, so nothing collides.
+$artSrcDirs = @(
+    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\klee'),
+    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\companions')
+)
 $artDst = Join-Path $stage 'images\cards'
-if (Test-Path $artSrc) {
-    New-Item -ItemType Directory -Force -Path $artDst | Out-Null
-    Copy-Item (Join-Path $artSrc '*.png') -Destination $artDst
+$foundAny = $false
+foreach ($artSrc in $artSrcDirs) {
+    if (Test-Path $artSrc) {
+        New-Item -ItemType Directory -Force -Path $artDst | Out-Null
+        Copy-Item (Join-Path $artSrc '*.png') -Destination $artDst
+        $foundAny = $true
+    } else {
+        Write-Host "WARNING: no card art at $artSrc" -ForegroundColor Yellow
+    }
+}
+if ($foundAny) {
     $artCount = (Get-ChildItem $artDst -Filter *.png).Count
     Write-Host "Staged $artCount card images" -ForegroundColor Cyan
 } else {
-    Write-Host "WARNING: no card art found at $artSrc (cards will fall back to BETA placeholder)" -ForegroundColor Yellow
+    Write-Host "WARNING: no card art found (cards will fall back to BETA placeholder)" -ForegroundColor Yellow
 }
 
 # The pck carries the res://-bound art (select screen, top-panel icon, map
