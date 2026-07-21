@@ -27,7 +27,10 @@ namespace KleeMod.Powers;
 /// The cost side rides Hook.ModifyEnergyCostInCombat, which CardEnergyCost
 /// consults for BOTH display and payment (GetWithModifiers -> the hook), so
 /// the card visibly reads 0 in hand the moment the third Spark lands -- no UI
-/// patch needed. The spend side is AfterCardPlayed on the same power.
+/// patch needed. The spend DECISION is snapshotted in BeforeCardPlayed
+/// (pre-resolution, the sim's timing); the consume executes in
+/// AfterCardPlayed. See the method comments for the Snap finding that
+/// forced the split.
 ///
 /// X-cost attacks are EXEMPT from both sides, deliberately: zeroing an X-card
 /// sets X = 0 and makes the card do nothing, which converts the buff into a
@@ -97,24 +100,65 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// The consume. Printed cost is read off EnergyCost.Canonical -- the
-    /// sim's rule is "printed cost != 0", NOT "paid cost was 0", so an attack
-    /// zeroed by some other effect still eats the charge at threshold, and a
-    /// printed-0 attack never does.
+    /// The spend DECISION, snapshotted at play start (playtest finding
+    /// 2026-07-20, the Snap bug): the sim's play_card evaluates
+    /// `sparks >= threshold` BEFORE the card's effects resolve, so a card
+    /// whose own rider pushes the bank to threshold mid-resolution must NOT
+    /// eat the charge -- the player paid energy for that play. Deciding in
+    /// AfterCardPlayed (the old shape) read the post-rider bank: Snap at 2
+    /// Sparks cost 1 energy, granted the 3rd Spark, then wrongly consumed
+    /// all 3. Printed cost is read off EnergyCost.Canonical -- the sim's
+    /// guard is `card.cost != 0` (a printed-0 attack never consumes).
+    ///
+    /// IsFirstInSeries reproduces "once per play_card call" across replays,
+    /// same as the burst grant in KleeElementalHooks. The threshold is
+    /// snapshotted with the decision (sim: `p.sparks -= spark_threshold(state)`
+    /// reads the state at play time).
+    /// </summary>
+    public override Task BeforeCardPlayed(CardPlay cardPlay)
+    {
+        if (cardPlay.IsFirstInSeries
+            && AppliesTo(cardPlay.Card)
+            && cardPlay.Card.EnergyCost.Canonical != 0)
+        {
+            _pendingSpendPlay = cardPlay;
+            _pendingSpendAmount = CurrentThreshold;
+        }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Transient decision state; only ever set between a BeforeCardPlayed and
+    /// its AfterCardPlayed (one card resolves at a time). Not cloned
+    /// meaningfully by MutableClone -- a stale reference on a clone can never
+    /// equal a live CardPlay, so the worst case is a no-op.
+    /// </summary>
+    private CardPlay? _pendingSpendPlay;
+    private int _pendingSpendAmount;
+
+    /// <summary>
+    /// The consume, executing the play-time decision. Kept AFTER resolution:
+    /// mutating the bank in BeforeCardPlayed could drop Amount below
+    /// threshold before the payment machinery reads the (zeroed) cost --
+    /// that ordering has no decompile evidence, so the safe side wins. The
+    /// sim spends pre-resolution, which only differs observably for cards
+    /// that READ the bank mid-play (formula cards; none are shipped --
+    /// revisit with evidence when formula codegen lands).
     /// </summary>
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var card = cardPlay.Card;
-        if (!AppliesTo(card) || card.EnergyCost.Canonical == 0)
+        if (cardPlay != _pendingSpendPlay)
         {
             return;
         }
+        _pendingSpendPlay = null;
 
         // applier: null -- the spend is bookkeeping, not a power "given" by
         // anyone; keeping it out of the ModifyPowerAmountGiven hook chain
-        // means nothing can inflate or shrink the exact -3.
+        // means nothing can inflate or shrink the exact spend.
         await PowerCmd.ModifyAmount(
-            choiceContext, this, -CurrentThreshold, applier: null, cardSource: card);
+            choiceContext, this, -_pendingSpendAmount, applier: null,
+            cardSource: cardPlay.Card);
     }
 }

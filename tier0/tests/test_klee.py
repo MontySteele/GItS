@@ -239,6 +239,29 @@ def test_x_cost_attack_never_spends_sparks():
     assert st.current_x == 0                # resolved at X = 0
 
 
+def test_beetle_swarm_bonus_reads_live_bomb_state_per_hit():
+    """Playtest finding 2026-07-20 (QUEUED for user ruling -- this is the
+    LAW as simulated, not a bug): bonus_vs_bombed is read per hit at damage
+    time, and the first hit's HP damage detonates that enemy's bombs early,
+    so vs a single bombed enemy only hit 1 is ever buffed. The C# mirrors
+    this exactly (ModifyDamageAdditive reads live state). If the user
+    re-rules (e.g. snapshot bombed-state at cast), this test changes WITH
+    the sheet -- until then it pins what both engines do."""
+    from tier0.engine.combat import play_card
+    from tier0.engine.state import Bomb
+    from tier0.tests.conftest import make_state
+    st = make_state()
+    st.enemies[0].bombs.append(Bomb(damage=5, turn_placed=0))
+    st.player.energy = 3
+    kbs = loader.get_card("kaboom_beetle_swarm")
+    st.player.hand.append(kbs)
+    play_card(st, kbs)
+    hits = [e["base"] for e in st.log
+            if e["event"] == "damage" and e["source"] == "attack"]
+    assert hits == [8, 5, 5]                # +3 on hit 1 only
+    assert any(e["event"] == "bomb_detonation" for e in st.log)
+
+
 def test_mono_pyro_deck_cannot_react_alone():
     # Design doc Pillar 2: reactions are earned. Demolition (mono-pyro)
     # should trigger ~zero reactions without companions.

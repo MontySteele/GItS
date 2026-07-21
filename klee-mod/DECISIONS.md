@@ -1109,3 +1109,34 @@ resolved -- both in PENDING_RED_PEN for the red-pen session):**
 Verification: art_lint OK (2 allowlisted notes), parity lint OK, full
 suite 236 passed, Release build clean. Regen delta: ClockworkToy.cs title
 only.
+
+## Playtest findings: Snap spark-spend bug (FIXED) + Beetle Swarm design question (QUEUED) (2026-07-20 night)
+
+**Finding: Snap eats the bank it just filled (FIXED, C# divergence).**
+Reported: play a 1-cost spark-granting card at 2 Sparks -> energy paid,
+3rd Spark granted, then ALL 3 Sparks consumed, no free attack. Root
+cause: SparkPower made the spend DECISION in AfterCardPlayed, reading the
+POST-RESOLUTION bank -- Snap's own rider pushed 2 -> 3, and the handler
+then saw "attack at threshold, printed cost != 0" and consumed. The sim's
+play_card evaluates `sparks >= threshold` BEFORE effects resolve (the
+spend belongs to spark-freed plays only). Fix: decision snapshotted in
+BeforeCardPlayed (IsFirstInSeries = once per play, the burst-grant idiom;
+threshold snapshotted with it), consume still executes in AfterCardPlayed
+-- mutating the bank pre-payment could un-zero the cost mid-play, and
+that ordering has no decompile evidence. Recorded caveat: the sim spends
+pre-resolution, so a card that READS the bank mid-play (formula cards,
+none shipped) would see sim-vs-C# skew -- revisit with evidence when
+formula codegen lands.
+
+**Finding: Kaboom Beetle Swarm's first hit pops the mines (QUEUED for
+ruling -- working as simulated, NOT fixed).** Reported: subsequent hits
+never get the +3 vs-bombed bonus. Verified against tier0: bonus_vs_bombed
+is read per hit at damage time, and hit 1's HP damage detonates that
+enemy's bombs early -- [8, 5, 5] vs a single bombed enemy in BOTH
+engines (new pinning test test_beetle_swarm_bonus_reads_live_bomb_state_
+per_hit). The C# is a faithful mirror, so per house law this is a DESIGN
+question, not a bug: options at ruling time include (a) accept -- "the
+swarm sets off the mines" is coherent demolition flavor and the detonation
+damage usually exceeds the forgone +6, (b) snapshot bombed-state at cast
+(the Sizzle idiom), (c) bonus keys off "detonated this play". Sheet
+unchanged until ruled.
