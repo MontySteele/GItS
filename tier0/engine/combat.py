@@ -12,7 +12,8 @@ import random
 from typing import Callable
 
 from tier0 import constants as C
-from tier0.engine import effects, powers, reactions, refpowers, relics, resources
+from tier0.engine import (effects, potions, powers, reactions, refpowers,
+                          relics, resources)
 from tier0.engine.state import Card, CombatState, Enemy, Player
 
 # A pilot is a callable: (state) -> Card | None (None = end turn).
@@ -241,6 +242,12 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
             relics.apply_combat_start(state)
         relics.on_player_turn_start(state, state.turn)
 
+    # Combat-side potions (dead branch on the battery: potions empty). Bounded
+    # greedy use-policy at turn start, AFTER the draw/energy/relic setup so a
+    # defensive block or an offensive strength lands on this turn's real state.
+    if p.potions:
+        potions.try_use_potions(state)
+
     seen_states: set[tuple] = set()
     while not state.over:
         if state.cards_played_this_turn >= C.MAX_CARDS_PER_TURN:
@@ -343,7 +350,13 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
                                          unblocked=dmg - blocked, dealer=enemy,
                                          powered_attack=True)
             if not state.player.alive:
-                return
+                # Fairy in a Bottle (dead branch on the battery: potions
+                # empty). Passive revive at the lethal hit; if it saves the
+                # player the turn continues and a later hit of a multi-hit
+                # intent can still kill (the fairy is spent).
+                if not (state.player.potions
+                        and potions.try_fairy_revive(state)):
+                    return
             if not enemy.alive:
                 break               # FlameBarrier can kill the dealer
     elif kind == "block":

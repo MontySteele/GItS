@@ -120,6 +120,14 @@ common:
     effects:
       - {hook: book_of_five_rings, per: 5, heal: 20}
 
+  potion_belt:
+    name: "Potion Belt"
+    # Deferred from W1. Run-scoped: on pickup it raises the run's held-potion
+    # capacity by 2 (handled in tier05/relics.py + model.py). Inert unless the
+    # run also grants potions -- a grant_relics-only run holds it harmlessly.
+    effects:
+      - {hook: potion_slots, amount: 2}
+
   red_skull:
     name: "Red Skull"
     # Ironclad-ONLY: while at/below 50% max HP, +3 Strength. Combat-scoped

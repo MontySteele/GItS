@@ -48,7 +48,7 @@ COMBAT_HOOKS = frozenset(engine_relics.COMBAT_HOOKS)
 # rides in a combat player's relic_effects, so the engine's UNIMPLEMENTED alarm
 # never sees them.
 RUN_HOOKS = (frozenset(engine_relics.RUN_HOOKS)
-             | {"pickup_upgrade", "grant_random_common"})
+             | {"pickup_upgrade", "grant_random_common", "potion_slots"})
 
 
 # ---------------------------------------------------------------------------
@@ -412,3 +412,9 @@ class HeldRelics:
 
     def shop_heal(self) -> int:
         return sum(int(fx["amount"]) for fx in self._run("shop_heal"))
+
+    def potion_slot_bonus(self) -> int:
+        """Extra held-potion slots this relic set grants (Potion Belt: +2).
+        Read by tier05/model.py to size the run's PotionBag. 0 when no
+        slot-bumping relic is held -- so a relics-only run is unaffected."""
+        return sum(int(fx["amount"]) for fx in self._run("potion_slots"))

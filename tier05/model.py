@@ -25,12 +25,41 @@ from tier0.engine.combat import run_fight
 from tier0.engine.state import Card, Enemy
 from tier0.harness import metrics as t0_metrics
 from tier0.pilot.policy import make_pilot
-from tier05 import act1, draft, rewards, shop
+from tier05 import act1, draft, potions as potion_pool, rewards, shop
 from tier05 import relics as relic_pool
 
 # policy(rng, deck_cards, offers, archetype) -> Card | None
 DraftPolicy = Callable[[random.Random, list[Card], list[Card], str],
                        Optional[Card]]
+
+# Run node kind (N/E/B) -> the combat-side node_kind context the potion
+# offensive use-policy reads (engine/potions.py). Only fight nodes reach the
+# combat builder; "" everywhere else keeps the offensive branch dead.
+_NODE_KIND_CTX = {"N": "normal", "E": "elite", "B": "boss"}
+
+
+def _potion_slots(held: "Optional[relic_pool.HeldRelics]") -> int:
+    """The run's held-potion capacity: the POTION_SLOTS default, plus any
+    slot-bumping relic bonus (Potion Belt: +2). Recomputed at each use site so
+    a Potion Belt granted MID-RUN raises the cap immediately."""
+    base = C.POTION_SLOTS
+    if held is not None:
+        base += held.potion_slot_bonus()
+    return base
+
+
+def _consumed(before: list[str], after: list[str]) -> list[str]:
+    """The potions used during a fight: the multiset (before - after), in the
+    order they sat in `before`. Combat removes each drunk/spent potion from
+    player.potions, so what's missing afterwards is exactly what was used."""
+    remaining = list(after)
+    used: list[str] = []
+    for pid in before:
+        if pid in remaining:
+            remaining.remove(pid)
+        else:
+            used.append(pid)
+    return used
 
 
 def build_node_encounter(node_kind: str, rng: random.Random,
@@ -110,6 +139,11 @@ class RunResult:
     relics: list[str] = field(default_factory=list)  # W2: relics GRANTED this
     #                    run (Neow + treasure + elite + boss + shop), in order;
     #                    excludes any relics= SEED. Empty when grant_relics=False.
+    potions_used: list[str] = field(default_factory=list)   # potion pass: ids
+    #                    consumed in combat across the run, in order. Empty when
+    #                    grant_potions=False (no potions ever held).
+    potions_end: list[str] = field(default_factory=list)    # potions still held
+    #                    at run end (or at death). Empty when grant_potions=False.
 
 
 def node_template() -> list[str]:
@@ -122,7 +156,8 @@ def run_one(character: str, archetype: str, pilot_id: str,
             policy: DraftPolicy, seed: int,
             slot_mode: str = "standard",
             relics: list[str] | None = None,
-            grant_relics: bool = False) -> RunResult:
+            grant_relics: bool = False,
+            grant_potions: bool = False) -> RunResult:
     """slot_mode: 'standard' (1 companion offer) or 'pity(k)' — k screens
     without taking a companion make the next slot a choose-3.
 
@@ -135,7 +170,15 @@ def run_one(character: str, archetype: str, pilot_id: str,
     relic path is dead: build_player_from_ids is called with relic_effects=None
     exactly as before, so it is byte-identical to the pre-relic model. Seeded
     (relics=[...]) runs with grant_relics=False keep the W1 behaviour unchanged:
-    the granting sites are ALL gated on grant_relics, never on `held`."""
+    the granting sites are ALL gated on grant_relics, never on `held`.
+
+    grant_potions (potion pass): when True, the run holds a PotionBag (3 slots,
+    +2 if Potion Belt is held), takes a POTION_DROP_CHANCE drop after each won
+    normal/elite fight, buys 1-2 shop potions when a slot and gold allow, and
+    builds each fight with the held bag + node_kind context (so the combat
+    use-policy can drink). Default False. When grant_potions=False the bag is
+    never constructed and potions are never passed to build_player_from_ids, so
+    the potions=None path is byte-identical to the pre-potion model."""
     pity_k = None
     if slot_mode.startswith("pity(") and slot_mode.endswith(")"):
         pity_k = int(slot_mode[5:-1])
@@ -175,6 +218,13 @@ def run_one(character: str, archetype: str, pilot_id: str,
         if pick is not None:
             hp, max_hp, gold = held.add(pick, character, hp, max_hp, gold,
                                         deck_ids, rng)
+    # Held-potion bag (potion pass). Constructed ONLY on grant_potions runs, so
+    # a grant_potions=False run never holds potions and every combat is built
+    # exactly as before. Slot count is recomputed at each use site from `held`
+    # so a Potion Belt granted mid-run raises the cap immediately.
+    bag = None
+    if grant_potions:
+        bag = potion_pool.PotionBag(potions=[], slots=_potion_slots(held))
     just_rested = False
     nodes = node_template()
     # Per-run encounter draw (run-model rework §4): easy/hard identity and
@@ -246,6 +296,20 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 res.shop.extend(p for p in outcome.purchases
                                 if p.get("buy") == "relic")
                 res.gold = gold
+            if grant_potions and bag is not None:
+                # Potion pass: stock 1-2 potions; auto-buy each iff a slot is
+                # free AND gold allows. The shelf is rolled first (deterministic
+                # off the run rng); an unaffordable / no-slot potion is simply
+                # not bought (no swap prompt in this model).
+                bag.slots = _potion_slots(held)
+                for _ in range(rng.randint(1, 2)):
+                    pid = potion_pool.roll_potion(rng)
+                    if not bag.full() and gold >= C.POTION_PRICE:
+                        gold -= C.POTION_PRICE
+                        bag.add(pid)
+                        res.shop.append({"buy": "potion", "id": pid,
+                                         "price": C.POTION_PRICE})
+                res.gold = gold
             res.hp_by_node.append(hp)
             continue
         if kind == "R":
@@ -281,8 +345,21 @@ def run_one(character: str, archetype: str, pilot_id: str,
         if held is not None:
             relic_fx = held.combat_effects_for(kind, just_rested)
             just_rested = False
-        player = loader.build_player_from_ids(character, deck_ids,
-                                              relic_effects=relic_fx)
+        if grant_potions and bag is not None:
+            # Potion pass: build the fight with the held bag + node_kind context
+            # so the combat use-policy can drink (offensive drinks gated to
+            # elite/boss by node_kind). A COPY of bag.potions goes in; combat
+            # mutates the player's own list, which we sync back after the fight.
+            bag.slots = _potion_slots(held)
+            potions_before = list(bag.potions)
+            player = loader.build_player_from_ids(
+                character, deck_ids, relic_effects=relic_fx,
+                potions=list(bag.potions), potion_slots=bag.slots,
+                node_kind=_NODE_KIND_CTX.get(kind, ""))
+        else:
+            potions_before = None
+            player = loader.build_player_from_ids(character, deck_ids,
+                                                  relic_effects=relic_fx)
         player.hp = hp
         player.max_hp = max_hp
         hp_start = hp
@@ -292,6 +369,13 @@ def run_one(character: str, archetype: str, pilot_id: str,
         fights += 1
         hp = state.player.hp
         fight_won = state.player.alive and not state.living_enemies
+        if grant_potions and bag is not None:
+            # Sync consumed potions back: combat removed each drunk/spent potion
+            # (incl. an auto-consumed Fairy) from player.potions, so the survivor
+            # list IS the bag, and the difference is what was used this fight.
+            res.potions_used.extend(
+                _consumed(potions_before, state.player.potions))
+            bag.potions = list(state.player.potions)
         if fight_won:
             # Burning Blood in the RUN LAYER (run-model rework §2): heal after
             # each won fight for relic-bearing characters. combat.py stays
@@ -313,6 +397,13 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 if rid is not None:
                     hp, max_hp, gold = held.add(rid, character, hp, max_hp,
                                                 gold, deck_ids, rng)
+            # Potion pass: a POTION_DROP_CHANCE drop after a won NORMAL/ELITE
+            # fight (bosses end the run, so no boss drop). Slot-permitting: a
+            # full bag discards the drop (logged in bag.discarded).
+            if grant_potions and bag is not None and kind in ("N", "E"):
+                if rng.random() < C.POTION_DROP_CHANCE:
+                    bag.slots = _potion_slots(held)
+                    bag.add(potion_pool.roll_potion(rng))
             res.gold = gold
         res.hp_by_node.append(max(0, hp))
         if not fight_won:                   # death OR stall-out = run over
@@ -320,6 +411,8 @@ def run_one(character: str, archetype: str, pilot_id: str,
             res.deck_ids = deck_ids
             if held is not None:
                 res.relics = [r for r in held.ids if r not in seed_ids]
+            if bag is not None:
+                res.potions_end = list(bag.potions)
             return res
         if kind != "B":                     # boss ends the run — no reward
             n_comp = 1
@@ -367,6 +460,8 @@ def run_one(character: str, archetype: str, pilot_id: str,
         # W2: relics GRANTED this run (held minus any seed), in acquisition
         # order -- includes commons pulled by a grant_random_common boon.
         res.relics = [r for r in held.ids if r not in seed_ids]
+    if bag is not None:
+        res.potions_end = list(bag.potions)
     return res
 
 
@@ -374,12 +469,13 @@ def run_many(character: str, archetype: str, pilot_id: str,
              policy: DraftPolicy, runs: int, seed: int,
              slot_mode: str = "standard",
              relics: list[str] | None = None,
-             grant_relics: bool = False) -> list[RunResult]:
+             grant_relics: bool = False,
+             grant_potions: bool = False) -> list[RunResult]:
     out = []
     for i in range(runs):
         r = run_one(character, archetype, pilot_id, policy, seed + i,
                     slot_mode=slot_mode, relics=relics,
-                    grant_relics=grant_relics)
+                    grant_relics=grant_relics, grant_potions=grant_potions)
         # draft_regret: sampled re-score in the final-deck context, using
         # a DEDICATED rng stream so sampling can't perturb run decisions.
         r.regret_samples = draft.draft_regret(

@@ -142,6 +142,15 @@ class Player(Fighter):
     #                                        # conditional_power (Red Skull):
     #                                        # key -> delta currently applied,
     #                                        # so re-eval never drifts/doubles
+    # --- combat-side potions (engine/potions.py); EMPTY on the frozen battery,
+    # so every potion code path is a dead branch there (anchor lock). Battery
+    # players are built by loader.build_player, which never sets these; only
+    # build_player_from_ids in the run layer does. potion_slots is the held
+    # capacity (Potion Belt relic raises it); node_kind gives combat.py the
+    # elite/boss context the offensive branch reads, "" everywhere else. ---
+    potions: list[str] = field(default_factory=list)
+    potion_slots: int = C.POTION_SLOTS
+    node_kind: str = ""           # "", "normal", "elite", or "boss"
     kit_cards: list[Card] = field(default_factory=list)    # v1.9: the Burst(s)
     # --- Furina (kickoff §3/§4); inert defaults for everyone else ---
     character_id: str = ""        # who this player IS (self-Spotlight rate)

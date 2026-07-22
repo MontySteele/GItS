@@ -163,6 +163,28 @@ BURST_PER_ENCORE_SPENT = 1    # burst energy per point of Encore spent
 BURNING_BLOOD_HEAL = 6        # REF_IRONCLAD: heal after each won fight
                               # (ruling 1: gives A4 a nonzero anchor)
 
+# --- Combat-side potions (engine/potions.py; potion pass) ---
+# Payload amounts and the bounded-greedy use-policy thresholds. Inert on the
+# frozen battery: battery players carry no potions, so every path below is a
+# dead branch (Player.potions empty -> engine/potions.py fast-guards out).
+POTION_SLOTS = 3                  # StS default held-potion capacity
+POTION_BELT_BONUS_SLOTS = 2       # Potion Belt relic: +2 slots on pickup
+POTION_BLOCK = 12                 # block_potion: gain Block
+POTION_FIRE_DAMAGE = 20           # fire_potion: unpowered damage to ONE enemy
+POTION_BLOOD_HEAL_FRACTION = 0.20 # blood_potion: heal this fraction of max HP
+POTION_STRENGTH = 2               # strength_potion: +Strength this combat
+POTION_SWIFT_DRAW = 3             # swift_potion: draw N
+POTION_WEAK = 3                   # weak_potion: Weak stacks to one enemy
+POTION_FEAR_VULN = 3              # fear_potion: Vulnerable stacks to one enemy
+POTION_ENERGY = 2                 # energy_potion: +Energy
+POTION_FAIRY_REVIVE_FRACTION = 0.30   # fairy_in_a_bottle: revive at this
+                                      # fraction of max HP on lethal damage
+# Use-policy thresholds (bounded greedy heuristic, NOT a solver).
+POTION_DEFENSIVE_MARGIN = 0       # drink a defensive potion when predicted
+                                  # end-of-turn HP would be <= this
+POTION_BIG_HIT_FRACTION = 0.35    # a telegraphed enemy attack this large a
+                                  # fraction of max HP is "big" (weak/fear/str)
+
 # --- Pilot policy (spec §6) ---
 BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP
 PILOT_REGRET_SAMPLE_RATE = 0.01
@@ -222,6 +244,13 @@ SHOP_CARD_OFFERS = 3             # "a few cards" (§5). OPEN NUMBER -- §8 does
 # this price. NEW economy number (relics were a stub before W2); auto-take-all
 # policy buys an offered relic iff gold allows (relics are near-strictly-good).
 SHOP_RELIC_PRICE = 150
+
+# --- Tier 0.5 potion run-layer economy (potion pass; gated on grant_potions).
+# Inert when grant_potions=False -- a run that never grants potions never reads
+# these, so the pre-potion model is byte-identical. Drops land after WON
+# normal/elite fights; the shop stocks 1-2 potions at POTION_PRICE.
+POTION_DROP_CHANCE = 0.40        # chance of a potion drop after a won N/E fight
+POTION_PRICE = 50                # shop price per potion ($ node auto-buy)
 
 # R7 directive 2: the second knob of the 2D rest-economy sweep. Scales
 # enemy ATTACK amounts in plain normal-pool fights only (not E/B/BC --
