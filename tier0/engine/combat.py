@@ -353,6 +353,7 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # lands on its owner).
             dmg = powers.modify_damage_taken(state.player, dmg, enemy)
             dmg = int(dmg)
+            block_before = state.player.block
             blocked = min(state.player.block, dmg)
             state.player.block -= blocked
             # Encore absorbs after Block, before HP (kickoff §4). Its own
@@ -365,7 +366,8 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # battery). Fires at most once per combat, on real HP loss.
             if hp_loss > 0 and state.player.relic_effects:
                 relics.note_hp_loss(state)
-            state.emit("player_hit", amount=hp_loss, blocked=blocked)
+            state.emit("player_hit", amount=hp_loss, blocked=blocked,
+                       block_before=block_before)
             # AfterDamageReceived fires per HIT, not per intent -- FlameBarrier
             # retaliates against every hit of a multi-hit attack. Inferno and
             # Rupture are silent here: both require CurrentSide == Owner.Side,
