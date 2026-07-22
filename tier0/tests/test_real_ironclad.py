@@ -137,10 +137,15 @@ def test_the_ironclad_pilot_has_every_mandatory_weight():
     assert w["block"] == 1.2          # DECISIONS.md #9: frozen everywhere
 
 
-def test_reference_cards_are_unupgraded_and_say_so(ref_cards):
-    # LOGGED, not fixed: upgrades.UPGRADE_SHEETS is a fixed docs/ tuple, so
-    # no `<id>+` form exists for the reference pool and he is scored
-    # entirely unupgraded. If someone wires external upgrades in, this test
-    # fails and the report's caveat has to be revisited with it.
+def test_every_reference_card_has_an_applicable_upgrade(ref_cards):
+    # Atomic external-artifact contract: partial coverage would bias smithing,
+    # shop removal, Armaments and Aggression toward whichever cards happened
+    # to receive a `+` form. The loader also fails closed on this condition;
+    # this test names and pins the complete local reference when it is present.
     from tier0.content import upgrades
-    assert not any(upgrades.has_upgrade(c.id) for c in ref_cards)
+    assert len(ref_cards) == 57
+    assert all(upgrades.has_upgrade(c.id) for c in ref_cards)
+    for card in ref_cards:
+        upgraded = loader.get_card(card.id + upgrades.SUFFIX)
+        assert upgraded.id == card.id + upgrades.SUFFIX
+        assert upgraded.name == card.name + upgrades.SUFFIX

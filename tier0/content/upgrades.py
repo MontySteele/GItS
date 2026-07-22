@@ -1,9 +1,10 @@
-"""Upgrade application (M7): docs/klee-upgrades.yaml -> upgraded Card copies.
+"""Upgrade application: local/docs delta sheets -> upgraded Card copies.
 
-The sheet is the design artifact (grammar: docs/upgrade-conventions.md);
-this module is only the mechanical applier. An upgraded card is requested
-as `<id>+` through loader.get_card, so deck lists stay plain strings and
-every existing consumer keeps working.
+Committed character sheets are design artifacts; the real-Ironclad sheet is a
+gitignored DLL-derived reference (grammar: docs/upgrade-conventions.md). This
+module is only the mechanical applier. An upgraded card is requested as
+`<id>+` through loader.get_card, so deck lists stay plain strings and every
+existing consumer keeps working.
 
 Delta semantics are PER-KEY, not guessed from values: each key in the
 dispatch below names which effect field it moves and how (bump vs
@@ -30,8 +31,10 @@ from pathlib import Path
 import yaml
 
 _DOCS = Path(__file__).parents[2] / "docs"
+_GAME_REF = Path(__file__).parents[2] / "game_ref"
 UPGRADE_SHEETS = (_DOCS / "klee-upgrades.yaml",
                   _DOCS / "furina-upgrades.yaml")
+EXTERNAL_UPGRADE_SHEETS = (_GAME_REF / "ironclad-upgrades.yaml",)
 SUFFIX = "+"
 
 # Deltas the engine cannot express per-card yet (constants-encoded).
@@ -47,7 +50,7 @@ UNAPPLIABLE = frozenset({
 @lru_cache(maxsize=1)
 def _upgrade_index() -> dict[str, dict]:
     merged: dict[str, dict] = {}
-    for sheet in UPGRADE_SHEETS:
+    for sheet in (*UPGRADE_SHEETS, *EXTERNAL_UPGRADE_SHEETS):
         if not sheet.exists():
             continue
         entries = yaml.safe_load(sheet.read_text()) or {}
@@ -60,7 +63,10 @@ def _upgrade_index() -> dict[str, dict]:
 
 def has_upgrade(card_id: str) -> bool:
     """Can this card be upgraded AND can the sim express the result?"""
-    return (card_id in _upgrade_index()
+    delta = _upgrade_index().get(card_id)
+    return (isinstance(delta, dict)
+            and bool(delta)
+            and "_unexpressible" not in delta
             and card_id not in UNAPPLIABLE
             and not card_id.endswith(SUFFIX))
 
@@ -85,7 +91,8 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
     """Mutate a (deep-copied) base card into its upgraded form."""
     base_id = card.id
     delta = _upgrade_index().get(base_id)
-    if delta is None or base_id in UNAPPLIABLE:
+    if (not isinstance(delta, dict) or not delta
+            or "_unexpressible" in delta or base_id in UNAPPLIABLE):
         raise ValueError(f"no applicable upgrade for {base_id!r}")
     card.id = base_id + SUFFIX
     card.name = card.name + SUFFIX
@@ -134,6 +141,34 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             for fx in hits:
                 fx["amount"] += val
             ok = bool(hits)
+        elif key == "energy":
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "energy"), "amount", val)
+        elif key == "times":
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "damage"), "times", val)
+        elif key == "max_hp":
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "gain_max_hp"),
+                             "amount", val)
+        elif key == "upgrade_scope":
+            if val != "all":
+                raise ValueError(
+                    f"upgrade_scope on {base_id!r} must be 'all'")
+            hit = next((fx for fx in everywhere
+                        if fx.get("op") == "upgrade_in_hand"), None)
+            ok = hit is not None
+            if hit:
+                hit["scope"] = val
+        elif key == "exhaust_select":
+            if val != "chosen":
+                raise ValueError(
+                    f"exhaust_select on {base_id!r} must be 'chosen'")
+            hit = next((fx for fx in everywhere
+                        if fx.get("op") == "exhaust_from"), None)
+            ok = hit is not None
+            if hit:
+                hit["select"] = val
         elif key == "spark":
             ok = _bump_first((fx for fx in top if fx.get("op") == "gain_spark"),
                              "amount", val)

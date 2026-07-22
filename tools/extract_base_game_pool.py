@@ -20,8 +20,9 @@ IP / REPO RULE  (.gitignore:28, csharp-build-spec.md §0.3)
 Decompiled base-game material is REFERENCE ONLY and stays out of the
 repo. THIS SCRIPT contains no game data and is safe to commit; everything
 it WRITES is game data and must not be. Output therefore goes to
-`game_ref/`, which is gitignored. Regenerating takes ~90s, so the extract
-is a local build artifact, never a checked-in asset.
+`game_ref/`, which is gitignored. ILSpy's full temporary source tree is also
+deleted after each run. The extract is a local build artifact, never a
+checked-in asset.
 
 USAGE
 -----
@@ -37,7 +38,10 @@ is exactly one place a machine path is configured.
 ------------
 Writes a Tier 0 card sheet (`game_ref/<char>-cards.yaml`) plus its upgrade
 companion, so the real pool can be SCORED on the same seven axes as Klee
-and Furina instead of against the six-card `ref_ironclad` construct.
+and Furina instead of against the six-card `ref_ironclad` construct. If the
+conventional local supplement (`game_ref/<char>_pool_pass4.yaml`) exists, its
+rows are validated and their upgrade deltas are derived from the same DLL in
+that pass. Both outputs remain gitignored reference artifacts.
 
 Two rules govern that translation and they are the reason this mode is
 worth having at all:
@@ -64,6 +68,8 @@ import json
 import re
 import subprocess
 import sys
+import tempfile
+import time
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -97,27 +103,93 @@ def game_dll() -> Path:
     m = re.search(r"<GameDir>(.*?)</GameDir>", LOCAL_PROPS.read_text())
     if not m:
         sys.exit("no <GameDir> in local.props")
-    dll = Path(m.group(1)) / "data_sts2_windows_x86_64" / "sts2.dll"
-    if not dll.exists():
-        sys.exit(f"sts2.dll not found at {dll}")
-    return dll
+    game_dir = Path(m.group(1)).expanduser()
+    resource_roots = (
+        game_dir,
+        game_dir / "SlayTheSpire2.app" / "Contents" / "Resources",
+    )
+    data_dirs = (
+        "data_sts2_windows_x86_64",
+        "data_sts2_macos_arm64",
+        "data_sts2_macos_x86_64",
+    )
+    candidates = [root / data_dir / "sts2.dll"
+                  for root in resource_roots for data_dir in data_dirs]
+    for dll in candidates:
+        if dll.exists():
+            return dll
+    searched = "\n  ".join(str(path) for path in candidates)
+    sys.exit(f"sts2.dll not found; searched:\n  {searched}")
 
 
-def ilspy(dll: Path, type_name: str) -> str:
+def _run_ilspy_project(dll: Path, output_dir: Path) -> None:
+    """Decompile the assembly once into an ephemeral source tree.
+
+    Starting ilspycmd dominates runtime: loading and analysing sts2.dll once
+    per card took roughly eight minutes for Ironclad. Project mode does the
+    same work once (about 13 seconds on the reference machine), after which
+    individual types are ordinary file reads. The caller owns ``output_dir``;
+    production uses a TemporaryDirectory so decompiled game source never
+    becomes a persistent repository artifact.
+    """
     try:
-        p = subprocess.run(["ilspycmd", "-t", type_name, str(dll)],
-                           capture_output=True, text=True, timeout=120)
+        # Resolving the game's adjacent assemblies is required for ILSpy to
+        # reconstruct async methods. Without it, OnPlay is left as a generated
+        # state-machine wrapper and the structural translator sees no effects.
+        p = subprocess.run([
+            "ilspycmd", "--disable-updatecheck",
+            "-r", str(dll.parent),
+            "--project", "--nested-directories",
+            "-o", str(output_dir),
+            str(dll),
+        ], capture_output=True, text=True, timeout=300)
     except FileNotFoundError:
         sys.exit("ilspycmd not on PATH -- dotnet tool install -g ilspycmd")
-    return p.stdout
+    except subprocess.TimeoutExpired:
+        sys.exit("ilspycmd timed out while decompiling sts2.dll")
+    if p.returncode:
+        sys.exit(f"ilspycmd failed ({p.returncode}):\n{p.stderr}")
 
 
-def pool_card_names(dll: Path, character: str) -> list[str]:
-    src = ilspy(dll, f"{POOL_NS}{character}CardPool")
-    names = re.findall(r"ModelDb\.Card<(\w+)>", src)
-    if not names:
-        sys.exit(f"no cards found in {character}CardPool -- check the name")
-    return names
+def _read_decompiled_type(root: Path, type_name: str) -> str:
+    """Read one project-mode type, rejecting same-name namespace collisions."""
+    namespace, short_name = type_name.rsplit(".", 1)
+    namespace_decl = re.compile(
+        rf"\bnamespace\s+{re.escape(namespace)}(?:;|\s*\{{)"
+    )
+    matches: list[tuple[Path, str]] = []
+    for path in root.rglob(f"{short_name}.cs"):
+        src = path.read_text()
+        if namespace_decl.search(src):
+            matches.append((path, src))
+    if not matches:
+        sys.exit(f"{type_name} not found in the decompiled project")
+    if len(matches) > 1:
+        paths = "\n  ".join(str(path.relative_to(root)) for path, _ in matches)
+        sys.exit(f"multiple decompiled files matched {type_name}:\n  {paths}")
+    return matches[0][1]
+
+
+def decompile_character(
+        dll: Path, character: str) -> tuple[list[str], dict[str, str]]:
+    """Return the pool's card names and sources from one ILSpy invocation."""
+    started = time.monotonic()
+    print("  decompiling sts2.dll once...", file=sys.stderr, flush=True)
+    with tempfile.TemporaryDirectory(prefix="gits-ilspy-") as temp_dir:
+        root = Path(temp_dir)
+        _run_ilspy_project(dll, root)
+        pool_src = _read_decompiled_type(root, f"{POOL_NS}{character}CardPool")
+        names = re.findall(r"ModelDb\.Card<(\w+)>", pool_src)
+        if not names:
+            sys.exit(f"no cards found in {character}CardPool -- check the name")
+        sources = {
+            name: _read_decompiled_type(root, f"{CARD_NS}{name}")
+            for name in names
+        }
+    elapsed = time.monotonic() - started
+    print(f"  decompiled and loaded {len(names)} card types in {elapsed:.1f}s",
+          file=sys.stderr)
+    return names, sources
 
 
 def parse_card(src: str, name: str) -> dict | None:
@@ -693,16 +765,107 @@ def _upgrade_delta(src: str, fed: dict) -> dict:
 
 
 def _delta_key(fx: dict, field: str) -> str | None:
+    if field == "times" and fx["op"] == "damage":
+        return "times"
     if field != "amount":
-        return None                       # e.g. hit count: no applier key
+        return None
     op = fx["op"]
     if op == "damage":
         return None if fx.get("target") == "self" else "damage"
     if op in ("block", "heal", "draw"):
         return op
+    if op == "energy":
+        return "energy"
     if op == "apply_power":
         return UPGRADE_POWER_KEY.get(fx["power"])
-    return None                           # energy, and anything new
+    return None
+
+
+def _walk_row_effects(effects: list[dict]):
+    """Yield supplement effects, including conditional branches."""
+    for fx in effects:
+        yield fx
+        for branch in ("then", "else"):
+            nested = fx.get(branch)
+            if isinstance(nested, list):
+                yield from _walk_row_effects(nested)
+
+
+def _row_delta_key(row: dict, var: str) -> str | None:
+    """Map one DLL DynamicVar upgrade onto a hand-translated row.
+
+    The supplement supplies effect provenance that the structural translator
+    could not derive. This function still matches by effect shape, never card
+    id: values continue to come from the local DLL and no per-card data enters
+    the committed tool.
+    """
+    effects = list(_walk_row_effects(row["effects"]))
+    if var == "Damage" and any(
+            fx.get("op") == "damage" and fx.get("target") != "self"
+            for fx in effects):
+        return "damage"
+    if var == "Block" and any(fx.get("op") == "block" for fx in effects):
+        return "block"
+    if var == "MaxHp" and any(fx.get("op") == "gain_max_hp"
+                              for fx in effects):
+        return "max_hp"
+    if var == "Repeat" and any(fx.get("op") == "damage"
+                               and isinstance(fx.get("times"), int)
+                               for fx in effects):
+        return "times"
+    if var in ("Cards", "Draw") and any(
+            fx.get("op") == "draw" for fx in effects):
+        return "draw"
+    if var == "Energy" and any(fx.get("op") == "energy" for fx in effects):
+        return "energy"
+    if sum(fx.get("op") == "apply_power" for fx in effects) == 1:
+        return "power_amount"
+    return None
+
+
+def _supplement_upgrade_delta(row: dict, src: str) -> dict:
+    """Derive a supplement row's upgrade from its DLL source and DSL shape."""
+    delta: dict = {}
+    unexpressible: list[str] = []
+    for stmt in _statements(_method_body(src, "OnUpgrade")):
+        if "AddKeyword(CardKeyword.Innate)" in stmt:
+            delta["innate"] = True
+            continue
+        if "RemoveKeyword(CardKeyword.Exhaust)" in stmt:
+            delta["remove"] = "exhaust"
+            continue
+        m = re.search(r"base\.EnergyCost\.UpgradeBy\((-?\d+)\)", stmt)
+        if m:
+            delta["cost"] = int(m.group(1))
+            continue
+        m = re.search(r'base\.DynamicVars(?:\.(\w+)|\["(\w+)"\])'
+                      r'\.UpgradeValueBy\((-?[\d.]+)m\)', stmt)
+        if not m:
+            unexpressible.append("unrecognised upgrade statement")
+            continue
+        var, amount = m.group(1) or m.group(2), _num(m.group(3))
+        key = _row_delta_key(row, var)
+        if key is None:
+            unexpressible.append(f"{var} feeds nothing the row expresses")
+        elif key in delta:
+            unexpressible.append(f"multiple upgrade vars map to {key}")
+        else:
+            delta[key] = amount
+
+    # Two base-game upgrades change an IsUpgraded branch rather than a
+    # DynamicVar. The local row tells us which generic DSL operation the
+    # branch controls; no card-name table or extracted value is committed.
+    if "IsUpgraded" in src:
+        effects = list(_walk_row_effects(row["effects"]))
+        if any(fx.get("op") == "upgrade_in_hand" for fx in effects):
+            delta["upgrade_scope"] = "all"
+        if any(fx.get("op") == "exhaust_from" and "select" not in fx
+               for fx in effects):
+            delta["exhaust_select"] = "chosen"
+
+    if unexpressible:
+        delta["_unexpressible"] = unexpressible
+    return delta
 
 
 def _snake(name: str) -> str:
@@ -804,6 +967,41 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
         if delta:
             upgrades[row["id"]] = delta
 
+    # A hand-translated local supplement may carry DSL rows that the strict
+    # structural card translator refuses to invent. Its upgrades are still
+    # recoverable mechanically: values come from OnUpgrade in the DLL, while
+    # the local row supplies the effect provenance needed to choose a delta
+    # key. The conventional name keeps this generic for future characters.
+    supplement = OUT_DIR / f"{character.lower()}_pool_pass4.yaml"
+    supplement_upgrades = 0
+    if supplement.exists():
+        try:
+            import yaml
+        except ImportError:
+            sys.exit("PyYAML is required to derive supplement upgrades")
+        supplement_rows = yaml.safe_load(supplement.read_text()) or []
+        if not isinstance(supplement_rows, list):
+            sys.exit(f"{supplement}: expected a list of card rows")
+        source_by_id = {
+            ID_PREFIX + _snake(card["name"]): sources[card["name"]]
+            for card in cards
+        }
+        seen: set[str] = set()
+        for row in supplement_rows:
+            cid = row.get("id")
+            if not cid or cid in seen:
+                sys.exit(f"{supplement}: missing or duplicate card id {cid!r}")
+            if cid in upgrades:
+                sys.exit(f"{supplement}: {cid} overlaps the emitted sheet")
+            if cid not in source_by_id:
+                sys.exit(f"{supplement}: no DLL card source found for {cid}")
+            seen.add(cid)
+            delta = _supplement_upgrade_delta(row, source_by_id[cid])
+            if not delta:
+                sys.exit(f"{supplement}: no upgrade recovered for {cid}")
+            upgrades[cid] = delta
+            supplement_upgrades += 1
+
     OUT_DIR.mkdir(exist_ok=True)
     sheet = OUT_DIR / f"{character.lower()}-cards.yaml"
     out = [SHEET_HEADER.format(char=character, n_ok=len(rows),
@@ -819,6 +1017,8 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
     # R20: upgrades live in their OWN sheet, never inline on a card row.
     ups = OUT_DIR / f"{character.lower()}-upgrades.yaml"
     lines = [f"# {character} upgrade deltas -- MACHINE-GENERATED, gitignored.",
+             f"# {len(rows)} extractor rows + {supplement_upgrades} local "
+             "supplement rows.",
              "# Grammar: docs/upgrade-conventions.md. `_unexpressible` lists "
              "deltas",
              "# tier0/content/upgrades.py has no key for; they are reported, "
@@ -852,11 +1052,10 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     dll = game_dll()
-    names = pool_card_names(dll, args.character)
-    cards, failed, sources = [], [], {}
+    names, sources = decompile_character(dll, args.character)
+    cards, failed = [], []
     for i, name in enumerate(names, 1):
         print(f"\r  {i}/{len(names)} {name:<26}", end="", file=sys.stderr)
-        sources[name] = ilspy(dll, CARD_NS + name)
         card = parse_card(sources[name], name)
         (cards if card else failed).append(card or name)
     print(f"\r  parsed {len(cards)}/{len(names)}"

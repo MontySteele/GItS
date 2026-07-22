@@ -23,15 +23,18 @@ her whole pool ships in `docs/klee-cards.yaml`. The `real_ironclad` **target
 line (40%) needs the local `game_ref/` artifact**: a gitignored decompiled
 reference, intentionally absent on a bare clone. On a machine that has it
 (e.g. after a normal `git pull`, which leaves gitignored files untouched) the
-target line reproduces exactly — verified: `python -m tools.klee_lever_sweep
---knob damage` returns the table above verbatim. `tools/build_ironclad_sheet.py`
-ASSEMBLES the two loader inputs from local `game_ref/` data —
+target line reproduced exactly in the historical unupgraded world — verified
+at the time by `python -m tools.klee_lever_sweep --knob damage`.
+`tools/build_ironclad_sheet.py` assembles the card and character inputs from
+local `game_ref/` data —
 `ironclad_pool.yaml` = the extractor's 35 cards + the local
 `ironclad_pool_pass4.yaml` supplement; `char_real_ironclad.yaml` = generated
-from local `ironclad_char_facts.yaml` when absent. It fails closed if either
-input is missing (never writes a partial pool), rejects supplement/extractor id
-overlap (no silent drift), and `--verify` compares against the on-disk pool as
-an ordered, duplicate-checked list.
+from local `ironclad_char_facts.yaml` when absent. The extractor also generates
+`ironclad-upgrades.yaml`: 35 deltas from translated effect provenance plus 22
+from the local supplement rows and their DLL `OnUpgrade` methods. The pipeline
+fails closed if an input is missing, if the pool overlaps/drifts, or unless all
+57 upgrades are applicable; `--verify` checks the ordered, duplicate-free pool
+and complete upgrade coverage.
 
 **But the pipeline is NOT fully tool-regenerable, and this is a real limit, not
 a wording nicety.** The 22-card supplement is hand-authored pass-4 design work:
@@ -45,6 +48,12 @@ without it can build the 35-card extractor pool but cannot instantiate the
 pass-4 is re-run. On this machine (game_ref present, survives `git pull`) it
 reproduces exactly; on a bare clone the `real_ironclad` tests skip and the
 target line is skipped gracefully — the Klee sweep still runs.
+
+**Upgrade correction (2026-07-22).** The archived 40% target above was measured
+before external upgrade sheets existed. That omission disabled smithing and
+parts of Armaments/Aggression, so 40% is historical evidence, not the current
+parity target. Full 57/57 upgrades are now generated locally; the balance pass
+must stamp its replacement target rather than silently carrying 40% forward.
 
 ---
 

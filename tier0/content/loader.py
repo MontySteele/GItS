@@ -134,16 +134,19 @@ def _external_cards() -> list[dict]:
         docs = yaml.safe_load(path.read_text()) or []
         for d in docs:
             d["character"] = char
-        # LOUD, per the no-silent-approximation rule: upgrades.UPGRADE_SHEETS
-        # is a fixed docs/ tuple, so an external sheet's `+` forms do not
-        # exist and this reference is scored ENTIRELY UNUPGRADED. That is a
-        # real handicap against any character whose pass used upgrades, and
-        # it must appear in the report rather than be discovered later.
-        warnings.warn(
-            f"{sheet}: {len(docs)} reference cards loaded UNUPGRADED -- "
-            "upgrades.UPGRADE_SHEETS only reads docs/*-upgrades.yaml, so "
-            "no `<id>+` form exists for them. Any scorecard built from "
-            "this sheet must say so.")
+        # A partial external upgrade population biases both combat (Armaments,
+        # Aggression) and run decisions (smithing versus removal). Treat the
+        # 57-card reference as one atomic artifact: either every row resolves
+        # through the shared `<id>+` path, or real_ironclad does not load.
+        missing_upgrades = sorted(
+            d["id"] for d in docs if not upgrades.has_upgrade(d["id"])
+        )
+        if missing_upgrades:
+            raise ValueError(
+                f"{sheet}: incomplete external upgrade coverage for "
+                f"{missing_upgrades}; rebuild game_ref with "
+                "extract_base_game_pool.py --emit-sheet before loading "
+                "real_ironclad")
         raw.extend(docs)
     return raw
 
