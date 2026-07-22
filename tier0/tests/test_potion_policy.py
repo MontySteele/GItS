@@ -26,6 +26,7 @@ import pytest
 from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import combat, potions
+from tier0.engine.state import Card
 from tier0.harness import metrics
 from tier0.harness.runner import run_battery, score_config
 from tier0.tests import test_anchor_lock, test_axes
@@ -71,6 +72,18 @@ def test_blood_potion_saves_from_a_lethal_hit_control_dies():
     # heal was 20% of max = 16, so entry HP 15 -> 31, minus the 20 hit -> 11.
     assert saved.player.hp == 15 + int(C.POTION_BLOOD_HEAL_FRACTION * 80) - 20
     assert not _run_defensive(None).player.alive          # CONTROL
+
+
+def test_blood_potion_is_not_wasted_when_it_would_heal_zero():
+    st = make_state(hp=80, enemies=[_attacker(100)])
+    st.player.max_hp = 80
+    st.player.potions = ["blood_potion"]
+
+    potions.try_use_potions(st)
+
+    assert st.player.hp == 80
+    assert st.player.potions == ["blood_potion"]
+    assert not any(e["event"] == "potion_used" for e in st.log)
 
 
 # ==========================================================================
@@ -161,6 +174,55 @@ def test_fairy_is_not_proactively_drunk_by_the_use_policy():
     assert st.player.potions == ["fairy_in_a_bottle"]     # not drunk
     assert st.player.hp == before_hp                      # no heal/effect landed
     assert "fairy_in_a_bottle" not in potions.DRINKABLE   # by construction
+
+
+def test_fairy_revives_lethal_card_self_damage():
+    st = make_state(hp=3)
+    st.player.max_hp = 80
+    st.player.potions = ["fairy_in_a_bottle"]
+    card = Card(id="self_hit", name="self hit", cost=0, type="skill",
+                effects=[{"op": "damage", "target": "self", "amount": 5}])
+    st.player.hand = [card]
+    st.player.energy = 99
+
+    combat.play_card(st, card)
+
+    assert st.player.hp == max(1, int(C.POTION_FAIRY_REVIVE_FRACTION * 80))
+    assert st.player.potions == []
+
+
+def test_fairy_revives_lethal_encore_overdraw():
+    st = make_state(hp=3)
+    st.player.max_hp = 80
+    st.player.potions = ["fairy_in_a_bottle"]
+    card = Card(id="overdraw", name="overdraw", cost=0, type="skill",
+                effects=[{"op": "spend_encore", "amount": 5}])
+    st.player.hand = [card]
+
+    combat.play_card(st, card)
+
+    assert st.player.hp == max(1, int(C.POTION_FAIRY_REVIVE_FRACTION * 80))
+    assert st.player.potions == []
+
+
+def test_fairy_revives_lethal_player_dot_at_turn_start():
+    st = make_state(hp=3)
+    st.player.max_hp = 80
+    st.player.potions = ["fairy_in_a_bottle"]
+    st.player.powers["dot"] = 5
+
+    combat._player_turn(st, lambda state: None)
+
+    assert st.player.hp == max(1, int(C.POTION_FAIRY_REVIVE_FRACTION * 80))
+    assert st.player.potions == []
+
+
+def test_fairy_helper_does_not_consume_while_player_is_alive():
+    st = make_state(hp=1)
+    st.player.potions = ["fairy_in_a_bottle"]
+
+    assert not potions.try_fairy_revive(st)
+    assert st.player.potions == ["fairy_in_a_bottle"]
 
 
 # ==========================================================================

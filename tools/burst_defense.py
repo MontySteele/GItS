@@ -13,7 +13,7 @@ a thin-block character's fragility, and doubly so for a no-heal HP bar
 This probe measures the thing A3 cannot: on the roster's spike turns, how
 much of the incoming did the player's wall actually absorb? It runs the
 character with its FULL realistic loadout (drafted deck + relics + potion
-belt, node_kind=elite so block potions are live) against the bursty pool
+belt, with the real elite/boss node context) against the bursty pool
 (the 3 Act-1 elites + Vantom), and reads per-turn incoming vs blocked
 straight off the combat log (player_hit: amount=HP lost, blocked=block
 consumed; incoming = amount+blocked). Spike turn = incoming >= THRESHOLD.
@@ -21,6 +21,8 @@ consumed; incoming = amount+blocked). Spike turn = incoming >= THRESHOLD.
 Reported per character: how often a spike turn is survived intact, the
 median share of a spike the wall covers, the median HP torn off on a spike,
 and the block CEILING (largest wall the deck ever raised in one turn).
+The ceiling reads the block present immediately before a hit, not merely the
+portion of that wall the hit happened to consume.
 """
 
 from __future__ import annotations
@@ -38,22 +40,25 @@ from tools.realistic_axis_scores import _loadout, _reached_boss, _percentile
 SPIKE = 20          # a turn whose total incoming >= this is a "spike"
 
 
-def _bursty_specs() -> list[dict]:
+def _bursty_specs() -> list[tuple[str, dict]]:
     """The roster's spike-dealers: all 3 elites + the boss."""
-    return list(act1.pools()["elite"]) + [act1.boss_encounter()]
+    return ([("E", spec) for spec in act1.pools()["elite"]]
+            + [("B", act1.boss_encounter())])
 
 
-def _turn_incoming(state) -> dict[int, tuple[int, int]]:
-    """turn -> (incoming, blocked) from the log. incoming = HP lost + block
-    consumed across every hit that turn; blocked = block consumed."""
+def _turn_incoming(state) -> dict[int, tuple[int, int, int]]:
+    """turn -> (incoming, blocked, peak wall) from the combat log."""
     inc: dict[int, int] = {}
     blk: dict[int, int] = {}
+    wall: dict[int, int] = {}
     for ev in state.log:
         if ev["event"] == "player_hit":
             t = ev["turn"]
             inc[t] = inc.get(t, 0) + ev["amount"] + ev["blocked"]
             blk[t] = blk.get(t, 0) + ev["blocked"]
-    return {t: (inc[t], blk.get(t, 0)) for t in inc}
+            wall[t] = max(wall.get(t, 0),
+                          ev.get("block_before", ev["blocked"]))
+    return {t: (inc[t], blk.get(t, 0), wall.get(t, 0)) for t in inc}
 
 
 def probe(character: str, runs: int, sample: int, fights: int,
@@ -72,13 +77,13 @@ def probe(character: str, runs: int, sample: int, fights: int,
     spike_hp_loss: list[float] = []  # HP torn off on each spike turn
     survived_intact = 0             # spike turns with 0 HP loss
     spike_turns = 0
-    ceilings: list[float] = []      # per-fight max block consumed in a turn
+    ceilings: list[float] = []      # per-fight peak wall present before a hit
     deaths = 0
     n_fights = 0
 
     for idx, r in enumerate(loaded):
-        deck, relic_fx, belt, slots = _loadout(r, character)
-        for si, spec in enumerate(specs):
+        for si, (kind, spec) in enumerate(specs):
+            deck, relic_fx, belt, slots = _loadout(r, character, kind)
             for k in range(fights):
                 rng = random.Random(seed + 1009 * idx + 31 * si + k)
                 enemies = act1.spawn(spec, rng)
@@ -86,7 +91,8 @@ def probe(character: str, runs: int, sample: int, fights: int,
                     character, deck,
                     relic_effects=list(relic_fx) if relic_fx else None,
                     potions=list(belt) if belt else None,
-                    potion_slots=slots, node_kind="elite")
+                    potion_slots=slots,
+                    node_kind={"E": "elite", "B": "boss"}[kind])
                 state = run_fight(player, enemies, pilot,
                                   seed=rng.randrange(2 ** 31))
                 n_fights += 1
@@ -94,8 +100,8 @@ def probe(character: str, runs: int, sample: int, fights: int,
                     deaths += 1
                 per_turn = _turn_incoming(state)
                 fight_ceiling = 0
-                for t, (inc, blk) in per_turn.items():
-                    fight_ceiling = max(fight_ceiling, blk)
+                for _turn, (inc, blk, wall) in per_turn.items():
+                    fight_ceiling = max(fight_ceiling, wall)
                     if inc >= SPIKE:
                         spike_turns += 1
                         coverage.append(blk / inc)

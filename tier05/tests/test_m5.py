@@ -8,6 +8,7 @@ import pytest
 
 from tier0 import constants as C
 from tier0.content import loader, upgrades
+from tier0.engine.state import CombatState
 from tier05 import draft, model, rewards
 from tier05.run_metrics import summarize_runs, survival_profile
 
@@ -59,6 +60,28 @@ def test_death_logs_node_index_and_hp_persists():
             assert r.hp_by_node[-1] == 0
             assert len(r.hp_by_node) == r.death_node + 1
         assert len(r.fight_stats) >= 1          # instrumentation attached
+
+
+def test_combat_max_hp_gain_carries_to_the_next_fight(monkeypatch):
+    """Permanent combat gains survive player reconstruction between nodes."""
+    seen = []
+
+    def gain_once(player, enemies, pilot, seed):
+        seen.append((player.hp, player.max_hp))
+        if len(seen) == 1:
+            player.max_hp += 3
+            player.hp += 3
+        for enemy in enemies:
+            enemy.hp = 0
+        return CombatState(player=player, enemies=enemies,
+                           rng=random.Random(seed))
+
+    monkeypatch.setattr(model, "node_template", lambda: ["N", "N"])
+    monkeypatch.setattr(model, "run_fight", gain_once)
+    model.run_one("klee", "demolition", "demolition",
+                  lambda rng, deck, offers, archetype: None, SEED)
+
+    assert seen == [(62, 62), (65, 65)]
 
 
 def test_realistic_normals_easy_then_hard():
@@ -287,6 +310,22 @@ def test_survival_profile_separates_a_fragile_run_from_a_sturdy_one():
     assert fragile["act_median_hp_pct"] < sturdy["act_median_hp_pct"]
     assert fragile["act_share_below_30pct"] > sturdy["act_share_below_30pct"]
     assert fragile["near_death_rate"] > sturdy["near_death_rate"]
+
+
+def test_survival_profile_keeps_dead_runs_in_later_fight_cohorts():
+    """Dying early must not improve the later median by removing the run."""
+    kinds = ["N", "N"]
+    sturdy = _fake_run([100, 100], kinds)
+    fragile_survivor = _fake_run([1, 1], kinds)
+    fragile_death = model.RunResult(
+        seed=1, won=False, death_node=0, hp_by_node=[0], deck_ids=[],
+        node_kinds=kinds)
+
+    survived = survival_profile([sturdy, fragile_survivor], 100)
+    died = survival_profile([sturdy, fragile_death], 100)
+
+    assert died["median_hp_pct_by_fight"] == [0.5, 0.5]
+    assert died["act_median_hp_pct"] < survived["act_median_hp_pct"]
 
 
 def test_summarize_runs_fragility_shape():

@@ -52,6 +52,13 @@ def grant_charged_kit(state: CombatState) -> None:
         state.emit("kit_burst_granted", card=kit.id)
 
 
+def _revive_player_if_needed(state: CombatState) -> bool:
+    """Resolve a held Fairy at combat checkpoints after player HP can move."""
+    if state.player.alive or not state.player.potions:
+        return False
+    return potions.try_fairy_revive(state)
+
+
 def card_playable(state: CombatState, card: Card) -> bool:
     if card.requires == "burst_energy_full":
         if state.player.burst_energy < state.player.burst_max:
@@ -191,6 +198,12 @@ def play_card(state: CombatState, card: Card) -> None:
         elif dest == "discard":
             p.discard_pile.append(card)
     grant_charged_kit(state)
+    # Self-damage and Encore overdraw resolve inside a card play rather than
+    # the enemy-hit funnel. Give Fairy the same lethal checkpoint, then update
+    # HP-threshold relics before the pilot chooses another card.
+    _revive_player_if_needed(state)
+    if p.relic_effects:
+        relics.reevaluate_conditionals(state)
 
 
 def _player_turn(state: CombatState, pilot: Pilot) -> None:
@@ -218,7 +231,11 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
             effects.detonate_bombs(state, enemy)
     reactions.tick_auras(state)
     powers.on_turn_start(state, p)
+    _revive_player_if_needed(state)             # player DoT can be lethal
+    if not p.alive or state.over:
+        return
     effects.player_turn_start_triggers(state)
+    _revive_player_if_needed(state)             # Salon upkeep can overdraw HP
     if not p.alive or state.over:
         return
 
@@ -228,6 +245,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # draw. tier0's powers.on_turn_start above is a PRE site; anything that
     # reads the hand or must land post-draw belongs here instead.
     refpowers.player_turn_start_late(state)
+    _revive_player_if_needed(state)             # Inferno / Mantle self-damage
     if not p.alive or state.over:
         return
     grant_charged_kit(state)                 # turn-start gains + full-hand defer
@@ -247,6 +265,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # defensive block or an offensive strength lands on this turn's real state.
     if p.potions:
         potions.try_use_potions(state)
+        if p.relic_effects:
+            # Blood Potion can cross Red Skull's HP threshold after its normal
+            # turn-start evaluation and before the first card is chosen.
+            relics.reevaluate_conditionals(state)
 
     seen_states: set[tuple] = set()
     while not state.over:
@@ -269,6 +291,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # effects" -- which is precisely what player_turn_end_triggers holds.
     refpowers.before_side_turn_end_early(state)
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
+    _revive_player_if_needed(state)
     grant_charged_kit(state)     # Salon-tick particles can fill the meter
                                  # at turn end; the Burst's Retain keeps it
     # Burst cards have Retain (principles v1.4): they stay in hand.
@@ -287,6 +310,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         refpowers.exhaust_card(state, c, caused_by_ethereal=True)
     state.in_player_turn = False
     powers.on_turn_end(state, p)
+    _revive_player_if_needed(state)
 
 
 def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
@@ -329,6 +353,7 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # lands on its owner).
             dmg = powers.modify_damage_taken(state.player, dmg, enemy)
             dmg = int(dmg)
+            block_before = state.player.block
             blocked = min(state.player.block, dmg)
             state.player.block -= blocked
             # Encore absorbs after Block, before HP (kickoff §4). Its own
@@ -341,7 +366,8 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # battery). Fires at most once per combat, on real HP loss.
             if hp_loss > 0 and state.player.relic_effects:
                 relics.note_hp_loss(state)
-            state.emit("player_hit", amount=hp_loss, blocked=blocked)
+            state.emit("player_hit", amount=hp_loss, blocked=blocked,
+                       block_before=block_before)
             # AfterDamageReceived fires per HIT, not per intent -- FlameBarrier
             # retaliates against every hit of a multi-hit attack. Inferno and
             # Rupture are silent here: both require CurrentSide == Owner.Side,
@@ -354,8 +380,7 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
                 # empty). Passive revive at the lethal hit; if it saves the
                 # player the turn continues and a later hit of a multi-hit
                 # intent can still kill (the fairy is spent).
-                if not (state.player.potions
-                        and potions.try_fairy_revive(state)):
+                if not _revive_player_if_needed(state):
                     return
             if not enemy.alive:
                 break               # FlameBarrier can kill the dealer
@@ -372,7 +397,8 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
         for spawn in intent["wave"]:
             state.enemies.append(Enemy(hp=spawn["hp"], max_hp=spawn["hp"],
                                        name=spawn.get("name", "add"),
-                                       intents=spawn["intents"]))
+                                       intents=spawn["intents"],
+                                       counts_for_fatal=False))
     else:
         raise ValueError(f"unknown intent kind {kind!r}")
 

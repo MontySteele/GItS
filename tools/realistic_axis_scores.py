@@ -30,9 +30,9 @@ answer different questions; we show both):
   attrition/swarm/tank_boss pools intact, so the axes stay well-defined and
   directly comparable to 3.0 -- with everything on. Approximations, stated:
   relic max-HP pickups are not re-applied (battery uses base max HP), and
-  each independent battery fight starts with a FRESH copy of the belt (they
-  do not carry/deplete across fights the way a run does), so A4's potion
-  contribution is an upper edge.
+  each independent battery fight starts with a FRESH copy of the belt. Within
+  a multi-stage gauntlet, however, HP/max HP and potion depletion carry from
+  stage to stage just as they do in the existing battery contract.
 
 Both surfaces are reported beside the bare-deck STARTER fingerprint, so the
 lift from "identity" to "loaded" is legible per axis.
@@ -57,7 +57,7 @@ BASELINE = ("ref_ironclad", "starter")     # the 3.0 anchor, by construction
 # ---------------------------------------------------------------------------
 # Battery over an arbitrary drafted deck, optionally with a full loadout.
 # Mirrors runner.run_battery but build_player_from_ids, and threads relic
-# combat effects + a (fresh-per-fight) potion belt through.
+# combat effects + a (fresh-per-independent-fight) potion belt through.
 # ---------------------------------------------------------------------------
 
 def _battery(character: str, card_ids: list[str], pilot, fights: int, seed: int,
@@ -70,21 +70,30 @@ def _battery(character: str, card_ids: list[str], pilot, fights: int, seed: int,
         for i in range(fights):
             stage_stats = []
             carry_hp = None
+            carry_max_hp = None
+            carry_potions = None
             for stage in stages:
-                # Fresh belt each fight: independent battery fights do not
-                # share a depleting bag (surface-2 approximation, documented).
+                # Each independent replicate starts with the reconstructed
+                # belt. A gauntlet's later stages inherit what survived the
+                # prior stage instead of silently refreshing consumables.
+                stage_potions = (potions if carry_potions is None
+                                  else carry_potions)
                 player = loader.build_player_from_ids(
                     character, card_ids,
                     relic_effects=list(relic_effects) if relic_effects else None,
-                    potions=list(potions) if potions else None,
+                    potions=(list(stage_potions)
+                             if stage_potions is not None else None),
                     potion_slots=potion_slots, node_kind=node_kind)
                 if carry_hp is not None:
+                    player.max_hp = carry_max_hp
                     player.hp = carry_hp        # HP carries; deck/powers reset
                 hp_start = player.hp
                 state = run_fight(player, loader.build_encounter(stage), pilot,
                                   seed=seed + i)
                 stage_stats.append(metrics.extract(state, hp_start))
                 carry_hp = state.player.hp
+                carry_max_hp = state.player.max_hp
+                carry_potions = list(state.player.potions)
                 if not state.player.alive:
                     break
             stats.append(metrics.merge_stages(stage_stats))
@@ -112,10 +121,10 @@ def _reached_boss(r) -> bool:
     return r.won or (r.death_node is not None and r.death_node >= bi)
 
 
-def _loadout(r, character: str):
-    """(deck_ids, relic combat_effects, potion belt, potion_slots) for a run."""
+def _loadout(r, character: str, node_kind: str = "E"):
+    """(deck, combat effects, belt, slots) in the requested fight context."""
     held = relic_pool.HeldRelics.hold(list(r.relics), character)
-    relic_fx = held.combat_effects_for("N", just_rested=False)
+    relic_fx = held.combat_effects_for(node_kind, just_rested=False)
     slots = C.POTION_SLOTS + held.potion_slot_bonus()
     # A representative belt: what the run still held at the end, backfilled
     # with what it spent, truncated to the run's slot capacity.

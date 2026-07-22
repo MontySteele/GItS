@@ -134,7 +134,7 @@ def apply_combat_start(state: CombatState) -> None:
                 refpowers.unpowered_damage(state, enemy, amt)
     # conditional_power is evaluated at combat start too (Red Skull may already
     # be active if the fight opens below the HP threshold).
-    _reeval_conditionals(state)
+    reevaluate_conditionals(state)
 
 
 def _heal(state: CombatState, amount: int) -> None:
@@ -174,14 +174,15 @@ def on_player_turn_start(state: CombatState, turn: int) -> None:
                 if amt > 0:
                     state.draw(amt)
                     state.emit("extra_draw", amount=amt)
-    _reeval_conditionals(state)
+    reevaluate_conditionals(state)
 
 
-def _reeval_conditionals(state: CombatState) -> None:
+def reevaluate_conditionals(state: CombatState) -> None:
     """conditional_power (Red Skull): while a condition holds, the player has
     +amount of a power. Re-evaluated cleanly against the delta ALREADY applied,
     so toggling never drifts or double-applies -- the stored delta is the single
     source of truth for what this relic currently contributes to the stack.
+    Public because combat HP changes can cross the threshold between turns.
     """
     p = state.player
     for fx in p.relic_effects:

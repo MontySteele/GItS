@@ -25,7 +25,7 @@ skipped only if content notes recorded conditional_power as dropped.
 import pytest
 
 from tier0.content import loader
-from tier0.engine import effects, relics
+from tier0.engine import combat, effects, relics
 from tier0.engine.state import Card
 from tier0.harness import metrics
 from tier0.harness.runner import run_battery, score_config
@@ -132,6 +132,39 @@ def test_red_skull_strength_tracks_hp_threshold():
     p.hp = 60                            # healed back above 50%
     relics.on_player_turn_start(st, 3)
     assert p.powers.get("strength", 0) == 0   # removed cleanly, no drift
+
+
+def test_red_skull_deactivates_after_turn_start_blood_potion():
+    st = make_state(hp=35, enemies=[make_enemy(
+        intents=[{"kind": "attack", "amount": 50}])])
+    p = st.player
+    p.max_hp = 80
+    p.potions = ["blood_potion"]
+    p.relic_effects = [{"hook": "conditional_power", "power": "strength",
+                        "amount": 3, "when": "hp_below", "threshold": 0.5}]
+    relics.reset_combat(st)
+
+    combat._player_turn(st, lambda state: None)
+
+    assert p.hp == 51                     # 35 + floor(20% of 80)
+    assert p.powers.get("strength", 0) == 0
+
+
+def test_red_skull_activates_between_cards_after_self_damage():
+    st = make_state(hp=80)
+    p = st.player
+    p.relic_effects = [{"hook": "conditional_power", "power": "strength",
+                        "amount": 3, "when": "hp_below", "threshold": 0.5}]
+    relics.reset_combat(st)
+    relics.on_player_turn_start(st, 1)
+    card = Card(id="self_hit", name="self hit", cost=0, type="skill",
+                effects=[{"op": "damage", "target": "self", "amount": 45}])
+    p.hand = [card]
+
+    combat.play_card(st, card)
+
+    assert p.hp == 35
+    assert p.powers.get("strength", 0) == 3
 
 
 # ==========================================================================

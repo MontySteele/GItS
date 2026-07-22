@@ -9,7 +9,7 @@ game appears here; stacks and amounts are chosen for readability.
 """
 
 from tier0 import constants as C
-from tier0.engine import effects, powers
+from tier0.engine import combat, effects, powers
 from tier0.engine.state import Card
 from tier0.tests.conftest import make_enemy, make_state
 
@@ -44,6 +44,25 @@ def test_anger_clone_inherits_upgrade_state_not_a_downgrade():
     effects.resolve_card(state, anger_plus)
     clone = state.player.discard_pile[0]
     assert clone.effects[0]["amount"] == 8
+
+
+def test_summoned_enemies_are_ineligible_for_fatal_kills():
+    summoner = make_enemy(hp=50, intents=[{
+        "kind": "summon",
+        "wave": [{"hp": 3, "name": "add",
+                  "intents": [{"kind": "attack", "amount": 1}]}],
+    }])
+    state = make_state(enemies=[summoner])
+
+    combat._enemy_turn(state, summoner)
+    add = state.enemies[-1]
+    assert not add.counts_for_fatal
+
+    effects.resolve_card(state, card(
+        "kill_add", fx=[{"op": "damage", "amount": 3,
+                         "target": "enemy"}]))
+    assert state.kills_this_card == 1
+    assert state.fatal_kills_this_card == 0
 
 
 # --- AshenStrike / BodySlam: base + per * runtime count --------------------

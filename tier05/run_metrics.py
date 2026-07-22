@@ -82,7 +82,12 @@ def survival_profile(results: list[RunResult], max_hp: int) -> dict:
     fight_pos = [i for i, k in enumerate(kinds) if k in ("N", "E", "B")]
     pct = []
     for pos in fight_pos:
-        vals = [r.hp_by_node[pos] for r in results if len(r.hp_by_node) > pos]
+        # Keep the original run cohort at every fight. A run that died before
+        # this position contributes 0 HP instead of disappearing from the
+        # sample; otherwise later medians are conditional on survival and an
+        # early death can make the reported act-health curve look healthier.
+        vals = [r.hp_by_node[pos] if len(r.hp_by_node) > pos else 0
+                for r in results]
         pct.append(_percentile(vals, 0.50) / max_hp if vals else 0.0)
     floor = NEAR_DEATH_FRACTION * max_hp
     ever_near = sum(1 for r in results
