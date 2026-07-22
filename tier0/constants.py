@@ -317,10 +317,12 @@ CONSTANTS_VERSION = 2
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:
-# assigned adopts the hybrid experiment's raw-power term, plus the
-# reaction weights pass (values + sweep in tier05/draft.py and the M8
-# report). Never compare drafter-v1 and drafter-v2 numbers unlabeled.
-DRAFTER_VERSION = 2
+# assigned adopts the hybrid experiment's damage/Block term plus the reaction
+# weights pass. v3 = conservative Bomb/debuff proxies and safe conditional
+# Block. A measured flat draw/resource proxy was rejected rather than folded
+# into the stamp. Never compare measurements across drafter versions without
+# labeling them.
+DRAFTER_VERSION = 3
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).

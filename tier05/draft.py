@@ -3,8 +3,8 @@
 Assigned mode: the run is seeded with a target archetype. Scoring terms:
 - archetype fit: enabler value DECAYS as the core completes; payoff value
   is GATED on the core being online (else you draft win-more blanks)
-- raw printed power (DRAFTER_VERSION 2, ruling R2.1 — adopted from the
-  hybrid experiment after it beat both parents everywhere)
+- printed power and conservative mitigation proxies (DRAFTER_VERSION 3;
+  v2 counted only direct damage/Block and made Bombs/debuffs invisible)
 - universal: defense quota (the real-draft principle codified), curve
   awareness, deck-size penalty (steeper for reaction — ruling R2.2)
 (The old Burst-priority term left with v1.9: the Burst is kit, never
@@ -27,6 +27,64 @@ from typing import Optional
 from tier0 import constants as C
 from tier0.engine.state import Card
 
+
+# DRAFTER_VERSION 3: values are expressed in the same rough units as one
+# point of printed damage or Block. They are deliberately conservative: the
+# assigned drafter only needs to distinguish direct mitigation/power from
+# blank cardboard, not solve an engine before choosing a reward. A measured
+# sweep rejected flat draw/energy/Spark/Burst proxies: raising them monotonically
+# reduced Klee's real-run result, because their value is deck/context dependent.
+STATIC_DEBUFF_VALUE = 2.0
+STATIC_BOMB_DAMAGE_SHARE = 0.5
+STATIC_BOMB_GUARD_VALUE = 1.5
+STATIC_KLEE_CONDITIONAL_SHARE = 0.5
+
+# These predicates are readable before a card is played. Mid-resolution
+# conditions such as reaction_triggered_by_this and killed_target remain out:
+# valuing their best branch unconditionally would recreate the old power bias.
+STATIC_STATE_CONDITIONS = frozenset({
+    "has_spark",
+    "target_has_nonpyro_aura",
+    "target_has_power_vulnerable",
+    "card_exhausted_this_turn",
+    "hp_lost_this_turn",
+})
+
+
+def _static_condition(name: str) -> bool:
+    return (
+        name in STATIC_STATE_CONDITIONS
+        or name.startswith("target_has_power_")
+        or name.startswith("exhaust_pile_at_least_")
+    )
+
+
+def _static_condition_share(name: str) -> float:
+    if name in ("has_spark", "target_has_nonpyro_aura"):
+        return STATIC_KLEE_CONDITIONAL_SHARE
+    return 1.0
+
+
+def _nested_effects(effect_list: list[dict]):
+    """Walk every printed branch for card classification only."""
+    for fx in effect_list:
+        yield fx
+        if fx.get("op") == "conditional":
+            yield from _nested_effects(fx.get("then", []))
+            yield from _nested_effects(fx.get("else", []))
+
+
+def _neutral_amount(fx: dict, default: float = 1.0) -> float:
+    amount = fx.get("amount")
+    if isinstance(amount, (int, float)):
+        return amount
+    formula = fx.get("amount_formula")
+    if isinstance(formula, dict):
+        return formula.get("base", 0) + formula.get("per", default)
+    if formula == "per_aura":
+        return default
+    return default
+
 AMP_PAYOFF_POWERS = C.AMP_PAYOFF_POWERS   # shared with the content loader
 
 
@@ -36,11 +94,7 @@ def _has_block(card: Card) -> bool:
             if fx.get("op") == "block":
                 return True
             if (fx.get("op") == "conditional"
-                    and (fx.get("if", "").startswith("target_has_power_")
-                         or fx.get("if", "").startswith(
-                             "exhaust_pile_at_least_")
-                         or fx.get("if") in ("card_exhausted_this_turn",
-                                             "hp_lost_this_turn"))
+                    and _static_condition(fx.get("if", ""))
                     and (contains(fx.get("then", []))
                          or contains(fx.get("else", [])))):
                 return True
@@ -90,22 +144,39 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
 
 
 def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
-    """Printed damage+block per energy — a deliberately dumb immediate-
-    value proxy for the generic (anchor) archetype, whose cards carry no
-    archetype tags. The real power/synergy scorer is M6's adaptive policy."""
+    """Conservative printed power per energy for reward decisions.
+
+    Damage and Block remain face value. Enemy debuffs and Bombs receive small,
+    explicit proxies so the generic anchor no longer treats direct mitigation
+    and delayed damage as zero. Draw/energy/resource engines remain with the
+    archetype scorer and M6 adaptive policy: a flat proxy sweep made both
+    reference characters draft worse decks.
+    """
+    all_effects = list(_nested_effects(card.effects))
+    has_enemy_weak = any(
+        fx.get("op") == "apply_power"
+        and fx.get("power") == "weak"
+        and fx.get("target") != "self"
+        for fx in all_effects
+    )
+    has_bomb = any(fx.get("op") == "place_bomb" for fx in all_effects)
+
     def effect_power(effect_list: list[dict]) -> float:
         total = 0.0
         for fx in effect_list:
             if fx.get("op") == "conditional":
                 name = fx.get("if", "")
-                if (name.startswith("target_has_power_")
-                        or name.startswith("exhaust_pile_at_least_")
-                        or name in ("card_exhausted_this_turn",
-                                    "hp_lost_this_turn")):
-                    # These two pass-5 predicates describe reachable payoff
-                    # states without depending on mid-resolution context.
-                    total += max(effect_power(fx.get("then", [])),
-                                 effect_power(fx.get("else", [])))
+                if _static_condition(name):
+                    # Drafting has no combat state. Klee's Spark/aura branches
+                    # receive a neutral availability discount; predicates
+                    # backed by a deck/pile condition retain the established
+                    # reachable-branch convention. Actual play always reads
+                    # the live predicate in tier0.pilot.policy.
+                    then_power = effect_power(fx.get("then", []))
+                    else_power = effect_power(fx.get("else", []))
+                    share = _static_condition_share(name)
+                    total += (else_power
+                              + share * (then_power - else_power))
             elif fx.get("op") == "damage" and fx.get("target") != "self":
                 amt = fx.get("amount", 0)
                 formula = fx.get("amount_formula")
@@ -132,11 +203,24 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
             elif fx.get("op") == "block":
                 times = 2 if fx.get("times") == "exhausted_this_card" else 1
                 total += fx.get("amount", 0) * times
+            elif fx.get("op") == "place_bomb":
+                total += (fx.get("bomb_damage", 0)
+                          * _neutral_amount(fx)
+                          * STATIC_BOMB_DAMAGE_SHARE)
+            elif (fx.get("op") == "apply_power"
+                  and fx.get("target") != "self"
+                  and fx.get("power") in ("weak", "vulnerable")):
+                total += _neutral_amount(fx) * STATIC_DEBUFF_VALUE
             elif fx.get("op") == "grow_damage":
                 total += fx.get("amount", 0) * 0.5  # one discounted redraw
         return total
 
     total = effect_power(card.effects)
+    # An armed Bomb suppresses one enemy attack action. Do not also price that
+    # protection when the same card applies Weak: the two reductions share one
+    # branch at runtime and never multiply.
+    if has_bomb and not has_enemy_weak:
+        total += STATIC_BOMB_GUARD_VALUE
     cost = card.cost if isinstance(card.cost, int) else 2
     return total / max(1, cost)
 
@@ -164,12 +248,13 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     # were gated on the core being online (measured: 1% amp assembly).
     if _core_progress(deck + [card], archetype) > progress:
         s += 3.0
-    # DRAFTER_VERSION 2 (ruling R2.1): the raw-power term, adopted from
-    # the hybrid experiment after it beat both parents in all three
-    # archetypes. A plan-committed drafter with zero power awareness is
-    # an implausible human, and the acceptance law requires plausible
-    # drafts. Share-synergy stays excluded — assigned already prices fit
-    # off its target, and stacking share-synergy would double-count it.
+    # DRAFTER_VERSION 3: v2's raw-power term now includes conservative
+    # Bomb/debuff/conditional-Block proxies. A plan-committed drafter that
+    # reads those direct effects as literal zero is no more plausible than one
+    # with no power awareness. Flat draw/resource proxies were measured and
+    # rejected; those effects need deck context rather than a face-value bump.
+    # Share-synergy stays excluded -- assigned already prices fit off its
+    # target, and stacking share-synergy would double-count it.
     s += min(3.0, _static_power(card, deck) / 3.0)
     if (archetype == "generic" and not card.is_companion
             and card.role in ("enabler", "payoff")):

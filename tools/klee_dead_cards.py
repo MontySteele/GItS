@@ -12,12 +12,13 @@ Classification:
                as designed: a synergy card that needs its plan.
   (blank)   -- picked reasonably somewhere; fine.
 
-CAVEAT, load-bearing: the assigned drafter's power sense is draft._static_power,
-which counts ONLY op=damage(non-self) + op=block. place_bomb / gain_spark /
-detonate / apply_power all read as ZERO printed power, so in GENERIC mode the
-entire bomb+spark ENABLER suite looks powerless by construction. That is why we
-also run each card's OWN archetype: a card dead in generic but taken in its
-archetype is locked, not dead. Truly-dead = dead even where it belongs.
+CAVEAT, load-bearing: DRAFTER_VERSION 3 gives conservative value to enemy
+Weak/Vulnerable, Bombs, and safe conditional Block. Draw, energy, and resource
+engines still read as zero printed power because a measured flat proxy made
+both reference characters draft worse decks; those effects need deck context.
+That is why we also run each card's OWN archetype: a card dead in generic but
+taken in its archetype is locked, not dead. Truly-dead = dead even where it
+belongs.
 """
 from __future__ import annotations
 import sys

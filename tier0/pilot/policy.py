@@ -89,17 +89,21 @@ def _est(state: CombatState, val, default: int = 0) -> float:
 def _active_effects(state: CombatState, effect_list: list[dict]):
     """Yield runtime-formula branches the pilot is explicitly able to read.
 
-    Existing Klee/Furina conditionals deliberately keep their historic
-    top-level-only valuation. Their predicates can depend on context created
-    during card resolution (reaction_triggered_by_this, killed_target, the
-    snapshotted aura), which a pre-play scorer cannot evaluate faithfully.
-    The pass-5/pass-6 Ironclad predicates below are pure reads of current
-    state.
+    Mid-resolution predicates (reaction_triggered_by_this, killed_target)
+    deliberately keep their historic top-level-only valuation. Pure current-
+    state Klee predicates are safe to read here, as are the pass-5/pass-6
+    Ironclad predicates below.
     """
     for fx in effect_list:
         if fx["op"] == "conditional":
             name = fx["if"]
-            if name.startswith("target_has_power_"):
+            if name == "has_spark":
+                ready = state.player.sparks > 0
+            elif name == "target_has_nonpyro_aura":
+                target = effects._default_target(state)
+                ready = bool(target and target.aura
+                             and target.aura != state.player.element)
+            elif name.startswith("target_has_power_"):
                 target = effects._default_target(state)
                 power = name[len("target_has_power_"):]
                 ready = bool(target and target.powers.get(power, 0))

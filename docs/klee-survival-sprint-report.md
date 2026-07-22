@@ -95,13 +95,38 @@ Marginal reads:
 
 ## Companion telemetry checkpoint
 
-The current 120-run × four-plan dead-card scan shows that the visible bodies
-resurrect Friendly Visit and Study Buddy: neither remains in the bottom-15
-pick list. Borrowed Brilliance and Sweet Dreams are still picked 0% because
-the assigned drafter's printed-power proxy does not value copying, aura
-refresh, or conditional Block. That is an instrumentation limitation, not
-evidence that the new text never has value. Played-when-drawn and forced-copy
-experiments remain the required next evidence before further buffs.
+The DRAFTER_VERSION 2 checkpoint's 120-run × four-plan dead-card scan showed
+that the visible bodies resurrected Friendly Visit and Study Buddy: neither
+remained in the bottom-15 pick list. Borrowed Brilliance and Sweet Dreams were
+still picked 0% because that drafter did not value copying, aura refresh, or
+conditional Block. See the v3 follow-up below for the corrected result.
+
+## DRAFTER_VERSION 3 mitigation follow-up
+
+The reward drafter and combat pilot now recognize Klee's safe pre-play
+conditions (`has_spark`, `target_has_nonpyro_aura`). Reward scoring prices the
+Spark/aura branch at 50% availability, counts delayed Bomb damage at half face,
+and gives conservative value to the armed-Bomb guard and enemy Weak/Vulnerable.
+Printed Weak and the Bomb guard never double-count on the same card.
+
+A broader candidate also priced draw, energy, Sparks, scry, and Burst charge.
+It made newly visible cards more popular but made both controls worse: Klee
+Generic fell from 32.5% to 30.7%, and generic-pilot real Ironclad from 46.1%
+to 44.4%. A 0/0.25/0.5/1.0 proxy-strength sweep was monotonic in the wrong
+direction, so those flat values were rejected; resource engines need deck
+context rather than a face-value constant.
+
+The final narrow patch is effectively power-neutral at 1,500 runs, seed 11:
+
+| Generic-pilot cell | DRAFTER v2 | DRAFTER v3 | Delta |
+|---|---:|---:|---:|
+| Klee | 32.5% | 32.6% | +0.1 pp |
+| real Ironclad (76 cards) | 46.1% | 45.4% | -0.7 pp |
+
+The telemetry correction is nevertheless real. Sweet Dreams rises from 0% to
+37% in Reaction, and Trip Wire and Surprise Visit leave the dead-card set.
+The remaining bodyless draw/resource engines still require played-when-drawn
+or deck-context scoring evidence before either the bot or the cards are buffed.
 
 ## Shared-system guard
 
@@ -140,9 +165,9 @@ the two ceilings above and the frozen v0.1 A1 median (current 4.75 versus the
 old 4.19 ±0.3). Its other nine checks pass. No lock was silently edited or
 weakened.
 
-Full-suite result after the Ironclad upgrade-pipeline patch: **454 passed, 3
-failed**. All three failures are
-the declared legacy locks above; there are no unrelated test regressions.
+Current full-suite result after the 76-card Ironclad and DRAFTER_VERSION 3
+passes: **481 passed, 3 failed**. All three failures are the declared legacy
+locks above; there are no unrelated test regressions.
 
 ## Recommendation and next sprint gate
 

@@ -139,6 +139,25 @@ def test_survival_sprint_companion_interfaces_have_live_bodies():
     assert loader.get_card("elemental_ecstasy+").cost == 1
 
 
+def test_pilot_reads_klee_pure_state_conditional_block():
+    """Combat scoring sees Block that is live before the card is played."""
+    from tier0.pilot import policy
+    from tier0.tests.conftest import make_state
+
+    state = make_state()
+    state.player.element = "pyro"
+    dreams = loader.get_card("elemental_ecstasy")
+    dress = loader.get_card("patched_dress")
+
+    assert policy._raw_block(state, dreams) == 0
+    state.enemies[0].aura = "hydro"
+    assert policy._raw_block(state, dreams) == 8
+
+    assert policy._raw_block(state, dress) == 5
+    state.player.sparks = 1
+    assert policy._raw_block(state, dress) == 7
+
+
 @pytest.mark.parametrize("deck,pilot", DECKS)
 @pytest.mark.parametrize("enc", ["swarm", "punisher", "attrition",
                                  "burst_check", "tank_boss", "gauntlet"])

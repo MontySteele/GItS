@@ -205,10 +205,35 @@ def test_reaction_core_rule():
 def test_skip_is_a_real_pick():
     # A hand of off-plan cards below threshold gets skipped.
     starter = _cards(*loader.starting_deck("klee"))
-    offers = _cards("combustion_study")      # reaction card, demolition run
+    offers = _cards("borrowed_brilliance")   # deep reaction machinery
     pick = draft.assigned_policy(random.Random(0), starter, offers,
                                  "demolition")
     assert pick is None
+
+
+def test_drafter_v3_values_klee_visible_utility():
+    """Direct mitigation is visible; deck-context engines stay neutral."""
+    assert draft._static_power(loader.get_card("alchemical_curiosity")) == 0
+    assert draft._static_power(loader.get_card("trip_wire")) == 5.5
+    assert draft._static_power(loader.get_card("skip_and_hop")) == 2
+
+    dreams = loader.get_card("elemental_ecstasy")
+    assert draft._has_block(dreams)
+    # Conditional 8 Block is available at the draft-time 50% share.
+    assert draft._static_power(dreams) == 2
+    assert draft._static_power(loader.get_card("patched_dress")) == 6
+
+
+def test_bomb_guard_proxy_does_not_stack_with_printed_weak():
+    trip = loader.get_card("trip_wire")
+    sorry = loader.get_card("sorry_jean")
+
+    # Trip Wire's Bomb and Weak share one runtime reduction branch, so the
+    # card gets delayed damage + Weak but not a second guard allowance.
+    assert draft._static_power(trip) == 7 * 0.5 + 2
+    # Sorry, Jean has no printed Weak, so its pending Bomb receives the one
+    # conservative guard allowance in addition to damage and Block.
+    assert draft._static_power(sorry) == 4 + 4 * 0.5 + 1.5
 
 
 def test_draft_regret_deterministic():
