@@ -145,6 +145,34 @@ mediocre axes; on a burst roster they MULTIPLY into a death spiral neither axis
 flags alone. This is why potions (which add BOTH burst block AND Fairy/heal)
 moved Klee 0→11% while her axis fingerprint never moved.
 
+### The bleed number (net HP lost per fight, everything on; `scratchpad/hp_per_fight.py`)
+
+RULING (2026-07-21): battery adapts to the roster, not vice versa. The battery
+answers "does this identity survive a cursory look at the kit"; the roster
+answers "is this character fairly balanced." When they disagree the battery is
+wrong. (So calibration lever "3, tune economy, leave axes" is OUT.) A3 is a
+metric only Ironclad benefits from — keep it as a guard against runaway healing
+synergies, but it is not the axis to optimize. The real goal: stop Klee imploding
+(damage bump / status-as-pseudo-mitigation / block above Ironclad) — a DESIGN
+REVIEW, not a numbers tweak.
+
+| char | max HP | gross loss/fight | net loss/fight | net %HP | net on normals |
+|---|---|---|---|---|---|
+| ref_ironclad  | 80 | 20.5 | 15.4 | 19.3% | 4.0 (5.0%) |
+| real_ironclad | 80 | 19.5 | 14.1 | 17.6% | 3.7 (4.6%) |
+| klee          | 62 | 13.5 | 13.5 | **21.7%** | **9.4 (15.1%)** |
+
+Sharper than "Klee takes Ironclad damage without the sustain": she takes LESS
+raw damage (13.5 vs ~20 gross — faster kills, less HP to lose), but (1) no
+Burning Blood means she carries 3x the normal-fight chip (15% vs 5%) into the
+elites already wounded, and (2) her near-equal ABSOLUTE net bleed (13.5 vs 14.1)
+comes from a 22%-smaller bar → worst %HP bleed in the cast. The number to lower
+is her net %HP bleed; the cleanest gap is NORMALS (15%→5%). Caveat: gross
+elite/boss losses are survivorship-deflated (a death caps recorded loss at
+remaining HP, and Klee dies more) — trust the net-% and normals rows, not the raw
+elite/boss magnitudes. NEXT: Klee design review (damage / status-mitigation /
+block ceiling).
+
 ### Next (calibration levers, from the above)
 
 1. The 7 axes were calibrated on the battery's profile (sustained grind +
