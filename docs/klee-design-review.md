@@ -14,8 +14,21 @@ lever. All numbers: 150 runs, seed 11, full loadout (relics + potions +
 drafted deck), assigned drafter, generic pilot. Target line = **real_ironclad
 @ 40% winrate**, the balanced reference.
 
-Tools (scratchpad, re-runnable): `klee_lever_sweep.py` (buckets 1–2),
-`klee_dead_cards.py` (bucket 3), `klee_rework_sim.py` (rework validation).
+Tools (committed, re-runnable): `tools/klee_lever_sweep.py` (buckets 1–2),
+`tools/klee_dead_cards.py` (bucket 3), `tools/klee_rework_sim.py` (rework
+validation). Run e.g. `python -m tools.klee_lever_sweep --knob damage`.
+
+**Reproducibility caveat.** The Klee numbers reproduce from the repo alone —
+her whole pool ships in `docs/klee-cards.yaml`. The `real_ironclad` **target
+line (40%) does NOT**: that reference lives in `game_ref/`, a gitignored
+decompiled artifact that is intentionally absent on a fresh clone, and its
+regeneration path is currently broken (`loader.py` names a last-mile tool
+`tools/build_ironclad_sheet.py` that was never committed; the committed
+`tools/extract_base_game_pool.py` emits `ironclad-cards.yaml`/`ironclad.json`,
+not the `ironclad_pool.yaml` + `char_real_ironclad.yaml` the loader reads). So
+on a fresh clone the `real_ironclad`-dependent tests skip and the target line
+is skipped gracefully — the Klee sweep still runs. Fixing the regen path is a
+separate pre-existing repo issue, tracked apart from this review.
 
 ---
 
