@@ -295,8 +295,15 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
                                if spec.get("fanfare") else 0))
 
 
-def build_player_from_ids(character_id: str, card_ids: list[str]) -> Player:
-    """Tier 0.5: build a player around an arbitrary (drafted) deck list."""
+def build_player_from_ids(character_id: str, card_ids: list[str],
+                          relic_effects: list[dict] | None = None) -> Player:
+    """Tier 0.5: build a player around an arbitrary (drafted) deck list.
+
+    ``relic_effects`` is the combat-side relic engine's seam (engine/relics.py):
+    a list of dicts keyed by ``hook``. It defaults to None -> [] so the battery
+    path (build_player, which never passes it) stays byte-identical and every
+    relic code path remains a dead branch there. The run layer (tier05/model)
+    computes the effective per-fight list and passes it in."""
     spec = _character_index()[character_id]
     return Player(hp=spec["hp"], max_hp=spec["hp"],
                   draw_pile=[get_card(cid) for cid in card_ids],
@@ -304,6 +311,7 @@ def build_player_from_ids(character_id: str, card_ids: list[str]) -> Player:
                   cadence=spec.get("cadence", "skill"),
                   burst_max=spec.get("burst_max", 0),
                   relic_hooks=list(spec.get("relic_hooks", [])),
+                  relic_effects=list(relic_effects or []),
                   kit_cards=_kit_cards(spec),
                   character_id=spec["id"],
                   fanfare_cap=(int(C.FANFARE_CAP_FRACTION * spec["hp"])

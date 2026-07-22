@@ -336,6 +336,12 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
                  + state.player.powers.get("spotlight_flat_damage_turn", 0))
     if card.type == "attack":
         base += state.current_attack_bonus
+        # card_name_damage_bonus relic rider (dead branch on the battery:
+        # relic_effects is empty). Flat, folded in BEFORE strength/vulnerable,
+        # matching current_attack_bonus above.
+        if state.player.relic_effects:
+            from tier0.engine import relics       # late import avoids cycle
+            base += relics.card_damage_bonus(state.player, card)
     # tag_damage_<tag> powers (Accuracy-like -> shiv) add per-hit.
     base += sum(state.player.powers.get(f"tag_damage_{t}", 0)
                 for t in card.tags)

@@ -132,6 +132,16 @@ class Player(Fighter):
     discard_pile: list[Card] = field(default_factory=list)
     exhaust_pile: list[Card] = field(default_factory=list)
     relic_hooks: list[str] = field(default_factory=list)   # e.g. ["spark_on_detonation"]
+    # --- combat-side relic engine (engine/relics.py); EMPTY on the frozen
+    # battery, so every relic code path is a dead branch there (anchor lock).
+    # Battery players are built by loader.build_player, which never sets this;
+    # only build_player_from_ids(relic_effects=...) in the run layer does. ---
+    relic_effects: list[dict] = field(default_factory=list)  # dicts keyed 'hook'
+    first_hp_loss_fired: bool = False        # on_first_hp_loss_draw, per combat
+    relic_conditional_applied: dict[str, int] = field(default_factory=dict)
+    #                                        # conditional_power (Red Skull):
+    #                                        # key -> delta currently applied,
+    #                                        # so re-eval never drifts/doubles
     kit_cards: list[Card] = field(default_factory=list)    # v1.9: the Burst(s)
     # --- Furina (kickoff §3/§4); inert defaults for everyone else ---
     character_id: str = ""        # who this player IS (self-Spotlight rate)

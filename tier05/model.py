@@ -26,6 +26,7 @@ from tier0.engine.state import Card, Enemy
 from tier0.harness import metrics as t0_metrics
 from tier0.pilot.policy import make_pilot
 from tier05 import act1, draft, rewards, shop
+from tier05 import relics as relic_pool
 
 # policy(rng, deck_cards, offers, archetype) -> Card | None
 DraftPolicy = Callable[[random.Random, list[Card], list[Card], str],
@@ -116,9 +117,16 @@ def node_template() -> list[str]:
 
 def run_one(character: str, archetype: str, pilot_id: str,
             policy: DraftPolicy, seed: int,
-            slot_mode: str = "standard") -> RunResult:
+            slot_mode: str = "standard",
+            relics: list[str] | None = None) -> RunResult:
     """slot_mode: 'standard' (1 companion offer) or 'pity(k)' — k screens
-    without taking a companion make the next slot a choose-3."""
+    without taking a companion make the next slot a choose-3.
+
+    relics: relic ids the run STARTS holding (the W2 seam -- Neow + loot will
+    populate it; for now the test/seed entry point). None -> no relics held,
+    and the whole relic path is dead: build_player_from_ids is called with
+    relic_effects=None exactly as before, so a relics=None run is byte-identical
+    to the pre-relic model."""
     pity_k = None
     if slot_mode.startswith("pity(") and slot_mode.endswith(")"):
         pity_k = int(slot_mode[5:-1])
@@ -138,6 +146,14 @@ def run_one(character: str, archetype: str, pilot_id: str,
     hp = max_hp
     gold = C.GOLD_START
     removal_uses = 0
+    # Held relics (the run-layer half). Constructed ONLY when a run actually
+    # holds relics, so relics=None keeps every relic branch dead. Pickup relics
+    # (max-HP / gold / deck upgrades) are applied ONCE, here at run start.
+    held = None
+    if relics:
+        held = relic_pool.HeldRelics.hold(relics, character)
+        hp, max_hp, gold = held.apply_pickups(hp, max_hp, gold, deck_ids, rng)
+    just_rested = False
     nodes = node_template()
     # Per-run encounter draw (run-model rework §4): easy/hard identity and
     # the 2-of-3 elite draw are fixed here from the run rng, so the roster
@@ -168,6 +184,14 @@ def run_one(character: str, archetype: str, pilot_id: str,
             res.shop.extend(outcome.purchases)
             res.removal_uses = removal_uses
             res.gold = gold
+            if held is not None:
+                # Book of Five Rings counts cards bought here; Meal Ticket heals.
+                added = sum(1 for p in outcome.purchases
+                            if p.get("buy") == "card")
+                hp = held.note_cards_added(added, hp, max_hp)
+                heal = held.shop_heal()
+                if heal:
+                    hp = min(max_hp, hp + heal)
             res.hp_by_node.append(hp)
             continue
         if kind == "R":
@@ -185,11 +209,26 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 deck_ids.remove(target)
             else:                               # M7: rest-site smithing
                 deck_ids[deck_ids.index(target)] = target + upgrades.SUFFIX
+            if held is not None:
+                # Regal Pillow: extra heal at the campfire. Venerable Tea Set's
+                # post_rest_energy is injected into the NEXT fight (just_rested).
+                heal = held.post_rest_heal()
+                if heal:
+                    hp = min(max_hp, hp + heal)
+            just_rested = True
             res.rests.append((i, action, target))
             res.hp_by_node.append(hp)
             continue
         enemies = build_node_encounter(kind, rng, act_draw)
-        player = loader.build_player_from_ids(character, deck_ids)
+        # Context-dependent combat effects (spec): base held-relic combat
+        # effects + post_rest_energy (if we just rested) + elite_combat_start
+        # (on E nodes). None when no relics are held -> identical to before.
+        relic_fx = None
+        if held is not None:
+            relic_fx = held.combat_effects_for(kind, just_rested)
+            just_rested = False
+        player = loader.build_player_from_ids(character, deck_ids,
+                                              relic_effects=relic_fx)
         player.hp = hp
         player.max_hp = max_hp
         hp_start = hp
@@ -207,6 +246,11 @@ def run_one(character: str, archetype: str, pilot_id: str,
             if "heal_after_won_fight" in player.relic_hooks:
                 hp = min(max_hp, hp + C.BURNING_BLOOD_HEAL)
             gold += C.GOLD_INCOME.get(kind, 0)     # §5 per-fight income
+            # Run-layer relic payouts on a won fight: gold_per_fight (Amethyst/
+            # Aubergine) and fishing_rod's every-3rd-N-win upgrade.
+            if held is not None:
+                gold, hp = held.post_fight(kind, gold, hp, max_hp,
+                                           deck_ids, rng)
             res.gold = gold
         res.hp_by_node.append(max(0, hp))
         if not fight_won:                   # death OR stall-out = run over
@@ -242,6 +286,8 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 "engaging": engaging})
             if pick is not None:
                 deck_ids.append(pick.id)
+                if held is not None:               # Book of Five Rings tally
+                    hp = held.note_cards_added(1, hp, max_hp)
             if pick is not None and pick.is_companion:
                 screens_since_companion = 0
             else:
@@ -258,11 +304,12 @@ def run_one(character: str, archetype: str, pilot_id: str,
 
 def run_many(character: str, archetype: str, pilot_id: str,
              policy: DraftPolicy, runs: int, seed: int,
-             slot_mode: str = "standard") -> list[RunResult]:
+             slot_mode: str = "standard",
+             relics: list[str] | None = None) -> list[RunResult]:
     out = []
     for i in range(runs):
         r = run_one(character, archetype, pilot_id, policy, seed + i,
-                    slot_mode=slot_mode)
+                    slot_mode=slot_mode, relics=relics)
         # draft_regret: sampled re-score in the final-deck context, using
         # a DEDICATED rng stream so sampling can't perturb run decisions.
         r.regret_samples = draft.draft_regret(

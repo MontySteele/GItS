@@ -12,7 +12,7 @@ import random
 from typing import Callable
 
 from tier0 import constants as C
-from tier0.engine import effects, powers, reactions, refpowers, resources
+from tier0.engine import effects, powers, reactions, refpowers, relics, resources
 from tier0.engine.state import Card, CombatState, Enemy, Player
 
 # A pilot is a callable: (state) -> Card | None (None = end turn).
@@ -231,6 +231,16 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         return
     grant_charged_kit(state)                 # turn-start gains + full-hand defer
 
+    # Combat-side relics (dead branch on the battery). combat_start_* fires
+    # once, HERE on turn 1 -- AFTER the block clear / energy reset / draw above,
+    # so combat-start block survives the clear and the turn-1-only energy/draw
+    # riders stack on the turn's own refill and draw. Per-turn hooks
+    # (every_n_turns_*, conditional_power re-eval) run every turn.
+    if p.relic_effects:
+        if state.turn == 1:
+            relics.apply_combat_start(state)
+        relics.on_player_turn_start(state, state.turn)
+
     seen_states: set[tuple] = set()
     while not state.over:
         if state.cards_played_this_turn >= C.MAX_CARDS_PER_TURN:
@@ -320,6 +330,10 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             hp_loss = resources.absorb_into_encore(state, dmg - blocked)
             state.player.hp -= hp_loss
             resources.note_player_hp_loss(state, hp_loss)
+            # Combat-side relic on_first_hp_loss_draw (dead branch on the
+            # battery). Fires at most once per combat, on real HP loss.
+            if hp_loss > 0 and state.player.relic_effects:
+                relics.note_hp_loss(state)
             state.emit("player_hit", amount=hp_loss, blocked=blocked)
             # AfterDamageReceived fires per HIT, not per intent -- FlameBarrier
             # retaliates against every hit of a multi-hit attack. Inferno and
@@ -390,6 +404,11 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     player.spotlight = None
     state.rng.shuffle(player.draw_pile)
     surface_innate(player.draw_pile)
+    # Combat-side relics: clear per-combat counters at true fight start. Dead
+    # branch on the battery (relic_effects empty); the combat_start_* effects
+    # themselves fire on the first player turn (see _player_turn).
+    if player.relic_effects:
+        relics.reset_combat(state)
     # Bound so refpowers can recover the dealer/applier identity that
     # effects.py cannot pass; try/finally so a raising fight never leaks a
     # stale state into the next one.

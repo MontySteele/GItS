@@ -1,0 +1,164 @@
+# The common relic pool (relic-content pass). Real StS2 wiki numbers, each
+# expressed as a list of relic_effects dicts keyed by `hook` (mirroring the
+# card DSL's `op` idiom). Combat-scoped hooks are consumed by
+# tier0/engine/relics.py off Player.relic_effects; run-scoped hooks are applied
+# in tier05/relics.py + tier05/model.py. See MEMORY / workflow spec.
+#
+# LAYER BOUNDARY: nothing here touches the frozen tier0 battery. Battery players
+# carry no relic_effects, so every relic code path is a dead branch there.
+
+# --- COMMON pool: shared by both characters (the reward/loot pool). ----------
+common:
+  anchor:
+    name: "Anchor"
+    effects:
+      - {hook: combat_start_block, amount: 10}
+
+  vajra:
+    name: "Vajra"
+    effects:
+      - {hook: combat_start_power, power: strength, amount: 1}
+
+  blood_vial:
+    name: "Blood Vial"
+    effects:
+      - {hook: combat_start_heal, amount: 2}
+
+  lantern:
+    name: "Lantern"
+    effects:
+      - {hook: combat_start_energy, amount: 1}
+
+  bag_of_preparation:
+    name: "Bag of Preparation"
+    effects:
+      - {hook: combat_start_draw, amount: 2}
+
+  bag_of_marbles:
+    name: "Bag of Marbles"
+    effects:
+      - {hook: combat_start_enemy_power, power: vulnerable, amount: 1}
+
+  red_mask:
+    name: "Red Mask"
+    effects:
+      - {hook: combat_start_enemy_power, power: weak, amount: 1}
+
+  festive_popper:
+    name: "Festive Popper"
+    effects:
+      - {hook: combat_start_aoe, amount: 9}
+
+  gorget:
+    name: "Gorget"
+    # `plating` already exists in refpowers.py -- combat_start_power routes it
+    # through powers.apply_power like any other power.
+    effects:
+      - {hook: combat_start_power, power: plating, amount: 4}
+
+  happy_flower:
+    name: "Happy Flower"
+    effects:
+      - {hook: every_n_turns_energy, n: 3, amount: 1}
+
+  pendulum:
+    name: "Pendulum"
+    effects:
+      - {hook: every_n_turns_draw, n: 3, amount: 1}
+
+  centennial_puzzle:
+    name: "Centennial Puzzle"
+    effects:
+      - {hook: on_first_hp_loss_draw, amount: 3}
+
+  strike_dummy:
+    name: "Strike Dummy"
+    # substring match against card id OR name (engine folds it in before
+    # strength/vulnerable). Lowercase 'strike' matches our snake_case ids.
+    effects:
+      - {hook: card_name_damage_bonus, substring: strike, amount: 3}
+
+  # --- run-scoped commons (applied in tier05, never handed to combat) --------
+  strawberry:
+    name: "Strawberry"
+    effects:
+      - {hook: on_pickup_maxhp, amount: 7}
+
+  amethyst_aubergine:
+    name: "Amethyst / Aubergine"
+    effects:
+      - {hook: gold_per_fight, amount: 15}
+
+  meal_ticket:
+    name: "Meal Ticket"
+    effects:
+      - {hook: shop_heal, amount: 15}
+
+  regal_pillow:
+    name: "Regal Pillow"
+    effects:
+      - {hook: post_rest_heal, amount: 15}
+
+  venerable_tea_set:
+    name: "Venerable Tea Set"
+    effects:
+      - {hook: post_rest_energy, amount: 2}
+
+  war_paint:
+    name: "War Paint"
+    # upgrade 2 random Skills on pickup (run-layer deck op).
+    effects:
+      - {hook: pickup_upgrade, kind: skill, count: 2}
+
+  whetstone:
+    name: "Whetstone"
+    effects:
+      - {hook: pickup_upgrade, kind: attack, count: 2}
+
+  book_of_five_rings:
+    name: "Book of Five Rings"
+    effects:
+      - {hook: book_of_five_rings, per: 5, heal: 20}
+
+  red_skull:
+    name: "Red Skull"
+    # Ironclad-ONLY: while at/below 50% max HP, +3 Strength. Combat-scoped
+    # conditional_power; owner-gated so a non-Ironclad holder gets nothing.
+    owner: [ref_ironclad, real_ironclad]
+    effects:
+      - {hook: conditional_power, power: strength, amount: 3, when: hp_below, threshold: 0.5}
+
+# --- NEOW persistent relics (define now; the run-start PICK is W2). ----------
+neow:
+  booming_conch:
+    name: "Booming Conch"
+    # On ELITE fights only: model injects combat_start_draw + combat_start_energy
+    # into that fight's effects.
+    effects:
+      - {hook: elite_combat_start, draw: 2, energy: 1}
+
+  fishing_rod:
+    name: "Fishing Rod"
+    # Every 3rd normal (N) combat won: upgrade a random upgradable deck card.
+    effects:
+      - {hook: fishing_rod, per: 3}
+
+  golden_pearl:
+    name: "Golden Pearl"
+    effects:
+      - {hook: gold_on_pickup, amount: 150}
+
+# --- SKIP: relics whose mechanic tier0 lacks. NOT faked -- listed here so the
+# loader emits a loud UNIMPLEMENTED warning naming the missing mechanic, and
+# get_relic() refuses to hand back a hollow relic. (House rule: never
+# approximate a DSL gap silently.)
+skip:
+  bronze_scales:
+    name: "Bronze Scales"
+    missing: "Thorns power (retaliation damage) is absent from tier0"
+  oddly_smooth_stone:
+    name: "Oddly Smooth Stone"
+    missing: "Dexterity power (block scaling) is absent from tier0"
+  juzu_bracelet:
+    name: "Juzu Bracelet"
+    missing: "no ?-room / non-combat events exist in the run model"
