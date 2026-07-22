@@ -368,6 +368,11 @@ def run_one(character: str, archetype: str, pilot_id: str,
         res.fight_stats.append(t0_metrics.extract(state, hp_start))
         fights += 1
         hp = state.player.hp
+        # Combat-scoped effects such as Feed can raise max HP permanently.
+        # Keep that mutation on the existing run-local state so the next
+        # fight is not rebuilt with the old ceiling (a fuller RunState object
+        # is a separate architecture decision, not required for correctness).
+        max_hp = state.player.max_hp
         fight_won = state.player.alive and not state.living_enemies
         if grant_potions and bag is not None:
             # Sync consumed potions back: combat removed each drunk/spent potion
