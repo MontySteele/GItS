@@ -218,6 +218,10 @@ SHOP_REMOVAL_PRICE_STEP = 25     # §5: "rising per use" -- +25 each removal
 #                                  only bites once multi-act adds a 2nd shop.
 SHOP_CARD_OFFERS = 3             # "a few cards" (§5). OPEN NUMBER -- §8 does
 #                                  not fix a count; 3 mirrors REWARD_CARD_OFFERS.
+# W2 relic granting cadence: shops stock 1-2 Common-pool relics for sale at
+# this price. NEW economy number (relics were a stub before W2); auto-take-all
+# policy buys an offered relic iff gold allows (relics are near-strictly-good).
+SHOP_RELIC_PRICE = 150
 
 # R7 directive 2: the second knob of the 2D rest-economy sweep. Scales
 # enemy ATTACK amounts in plain normal-pool fights only (not E/B/BC --

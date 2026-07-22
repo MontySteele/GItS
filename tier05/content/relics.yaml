@@ -148,6 +148,25 @@ neow:
     effects:
       - {hook: gold_on_pickup, amount: 150}
 
+  # --- W2: three more CODEABLE Neow boons so pick-1-of-3 is meaningful. Only
+  # positive, codeable boons are added -- curse/transform/colorless/cross-
+  # character boons are OUT OF SCOPE this pass (unshipped mechanics; logged
+  # here rather than faked) and are deliberately absent from the pool.
+  ossified_relic:
+    name: "Ossified Relic"          # Neow max-HP boon
+    effects:
+      - {hook: on_pickup_maxhp, amount: 8}
+
+  hand_of_greed:
+    name: "Hand of Greed"           # bigger gold boon (> golden_pearl's 150)
+    effects:
+      - {hook: gold_on_pickup, amount: 250}
+
+  astrolabe:
+    name: "Astrolabe"               # "gain a random Common relic" at pickup
+    effects:
+      - {hook: grant_random_common}
+
 # --- SKIP: relics whose mechanic tier0 lacks. NOT faked -- listed here so the
 # loader emits a loud UNIMPLEMENTED warning naming the missing mechanic, and
 # get_relic() refuses to hand back a hollow relic. (House rule: never

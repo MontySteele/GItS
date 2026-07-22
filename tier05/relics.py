@@ -41,8 +41,14 @@ _POOL_PATH = Path(__file__).parent / "content" / "relics.yaml"
 COMBAT_HOOKS = frozenset(engine_relics.COMBAT_HOOKS)
 
 # Run-scoped hooks handled in this module + model.py. Engine RUN_HOOKS plus
-# pickup_upgrade (a pure deck op that never rides in relic_effects).
-RUN_HOOKS = frozenset(engine_relics.RUN_HOOKS) | {"pickup_upgrade"}
+# pickup_upgrade (a pure deck op that never rides in relic_effects) and
+# grant_random_common (a Neow-boon pickup that grants a random Common relic --
+# W2; also run-only, never handed to the combat engine). Both are added ONLY to
+# this tier05 set: the frozen tier0 engine is untouched, and neither hook ever
+# rides in a combat player's relic_effects, so the engine's UNIMPLEMENTED alarm
+# never sees them.
+RUN_HOOKS = (frozenset(engine_relics.RUN_HOOKS)
+             | {"pickup_upgrade", "grant_random_common"})
 
 
 # ---------------------------------------------------------------------------
@@ -87,6 +93,98 @@ def get_relic(rid: str) -> dict:
         raise KeyError(f"relic {rid!r} is a SKIP relic (missing mechanic) and "
                        f"cannot be held -- see loader warning.")
     raise KeyError(f"unknown relic id {rid!r}")
+
+
+def _owner_ok(spec: dict, character: str) -> bool:
+    """True unless the relic is owner-locked to a set that excludes character
+    (Red Skull on a non-Ironclad). Mirrors the gate in `_relic_effects`, but
+    used at ROLL time so a non-owner is never even OFFERED the relic."""
+    owner = spec.get("owner")
+    return not owner or character in owner
+
+
+# ---------------------------------------------------------------------------
+# Relic-reward rolling (W2 granting cadence). The reward/loot pool is the
+# COMMON pool minus already-held relics, owner-gated. Boss-tier relics are NOT
+# modeled this pass (ratified focus = the Common pool): the boss simply grants
+# from the Common pool like every other site.
+# ---------------------------------------------------------------------------
+
+def unowned_common(held_ids, character: str) -> list[str]:
+    """Sorted Common-pool ids that `character` may still be offered: not already
+    held, and owner-eligible. Sorted for deterministic rolls."""
+    owned = set(held_ids)
+    return [rid for rid, spec in sorted(common_pool().items())
+            if rid not in owned and _owner_ok(spec, character)]
+
+
+def roll_relic_reward(rng: random.Random, held, character: str
+                      ) -> Optional[str]:
+    """Draw one Common-pool relic the run does not already hold, owner-gated,
+    through the run rng. `held` may be a HeldRelics or any iterable of held ids.
+    If the unowned pool is exhausted, grant nothing (return None) -- never
+    crash. (Boss uses this same Common draw; boss-tier relics are out of scope
+    this pass.)"""
+    held_ids = held.ids if isinstance(held, HeldRelics) else (held or [])
+    pool = unowned_common(held_ids, character)
+    if not pool:
+        return None
+    return rng.choice(pool)
+
+
+# ---------------------------------------------------------------------------
+# Neow run-start pick. Real StS2 offers 1 curse + 2 positive, pick 1; curses
+# are unshipped (out of scope -- no curse/transform/colorless/cross-character
+# boons are modeled, they are logged here as out-of-scope rather than faked),
+# so v1 offers 3 POSITIVE codeable boons and the pilot takes the best.
+# ---------------------------------------------------------------------------
+
+# Static per-hook valuation (spec §3): energy/draw > combat_start_power/block >
+# gold. A boon's value is the sum of its hooks' weights; ties break by id.
+_NEOW_HOOK_WEIGHT = {
+    "combat_start_energy": 10,
+    "combat_start_draw": 10,
+    "post_rest_energy": 9,
+    "elite_combat_start": 9,
+    "grant_random_common": 8,
+    "on_first_hp_loss_draw": 8,
+    "combat_start_power": 7,
+    "combat_start_block": 6,
+    "combat_start_heal": 5,
+    "on_pickup_maxhp": 5,
+    "fishing_rod": 4,
+    "pickup_upgrade": 4,
+    "book_of_five_rings": 4,
+    "gold_per_fight": 3,
+    "post_rest_heal": 3,
+    "shop_heal": 3,
+    "gold_on_pickup": 2,
+}
+
+
+def _neow_value(rid: str, character: str) -> int:
+    spec = get_relic(rid)
+    if not _owner_ok(spec, character):
+        return 0
+    return sum(_NEOW_HOOK_WEIGHT.get(fx.get("hook"), 0)
+               for fx in (spec.get("effects") or []))
+
+
+def neow_offer(rng: random.Random, k: int = 3) -> list[str]:
+    """Sample `k` DISTINCT boons from the Neow pool through the run rng. If the
+    pool has <= k boons, offer them all."""
+    ids = sorted(neow_pool())
+    if len(ids) <= k:
+        return ids
+    return rng.sample(ids, k)
+
+
+def neow_pick(offer: list[str], character: str) -> Optional[str]:
+    """The pilot's Neow pick: highest static valuation, ties broken by lowest
+    id (deterministic). No rng -- the offer already consumed it."""
+    if not offer:
+        return None
+    return max(sorted(offer), key=lambda rid: _neow_value(rid, character))
 
 
 # ---------------------------------------------------------------------------
@@ -152,6 +250,32 @@ class HeldRelics:
         return cls(ids=list(ids), character=character,
                    combat_effects=combat, run_effects=run)
 
+    @classmethod
+    def empty(cls, character: str) -> "HeldRelics":
+        """An empty holder: a grant_relics run starts with no relics and accrues
+        them (Neow may add the first)."""
+        return cls(ids=[], character=character,
+                   combat_effects=[], run_effects=[])
+
+    # --- mid-run acquisition (W2 granting cadence) ------------------------
+
+    def add(self, relic_id: str, character: str, hp: int, max_hp: int,
+            gold: int, deck_ids: list[str], rng: random.Random
+            ) -> tuple[int, int, int]:
+        """Acquire `relic_id` MID-RUN: extend the held combat + run effect sets
+        so subsequent fights see it, and apply its pickup effects ONCE
+        (on_pickup_maxhp / gold_on_pickup / pickup_upgrade / grant_random_common).
+        Idempotent per id -- re-adding a held relic is a no-op. Returns the
+        updated (hp, max_hp, gold)."""
+        if relic_id in self.ids:
+            return hp, max_hp, gold          # never double-grant the same relic
+        self.ids.append(relic_id)
+        combat, run = split_effects([relic_id], character)
+        self.combat_effects.extend(combat)
+        self.run_effects.extend(run)
+        # Apply ONLY this relic's pickup effects (not the whole run set again).
+        return self._apply_pickup_fx(run, hp, max_hp, gold, deck_ids, rng)
+
     # --- run-hook lookups -------------------------------------------------
 
     def _run(self, hook: str) -> list[dict]:
@@ -187,9 +311,19 @@ class HeldRelics:
     def apply_pickups(self, hp: int, max_hp: int, gold: int,
                       deck_ids: list[str], rng: random.Random
                       ) -> tuple[int, int, int]:
-        """on_pickup_maxhp / gold_on_pickup / pickup_upgrade. Mutates deck_ids
-        in place (upgrades); returns updated (hp, max_hp, gold)."""
-        for fx in self.run_effects:
+        """Apply the pickup effects of ALL currently-held relics (run start,
+        seeded relics). Mutates deck_ids in place (upgrades); returns updated
+        (hp, max_hp, gold)."""
+        return self._apply_pickup_fx(self.run_effects, hp, max_hp, gold,
+                                     deck_ids, rng)
+
+    def _apply_pickup_fx(self, effects: list[dict], hp: int, max_hp: int,
+                         gold: int, deck_ids: list[str], rng: random.Random
+                         ) -> tuple[int, int, int]:
+        """on_pickup_maxhp / gold_on_pickup / pickup_upgrade / grant_random_common
+        for a SPECIFIC effect list (the whole held set at run start, or one
+        relic's effects when added mid-run)."""
+        for fx in effects:
             hook = fx.get("hook")
             if hook == "on_pickup_maxhp":
                 amt = int(fx["amount"])
@@ -200,6 +334,13 @@ class HeldRelics:
             elif hook == "pickup_upgrade":
                 self._pickup_upgrade(deck_ids, fx.get("kind"),
                                      int(fx.get("count", 0)), rng)
+            elif hook == "grant_random_common":
+                # Neow "gain a random Common relic": roll one the run does not
+                # already hold and add it (which applies ITS pickup effects too).
+                rid = roll_relic_reward(rng, self, self.character)
+                if rid is not None:
+                    hp, max_hp, gold = self.add(rid, self.character, hp, max_hp,
+                                                gold, deck_ids, rng)
         return hp, max_hp, gold
 
     def _pickup_upgrade(self, deck_ids: list[str], kind: Optional[str],

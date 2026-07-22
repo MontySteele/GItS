@@ -1,3 +1,4 @@
+import argparse
 import math
 from tier05 import draft, model, run_metrics
 from tier0.content import loader
@@ -13,17 +14,19 @@ def wilson(k, n, z=1.96):
     return (p, center - half, center + half)
 
 
-def measure(character, runs=1500, seed=11):
+def measure(character, runs=1500, seed=11, grant_relics=False):
     archetype = "generic"
     pilot = "generic"
     policy = draft.POLICIES["assigned"]
-    results = model.run_many(character, archetype, pilot, policy, runs, seed)
+    results = model.run_many(character, archetype, pilot, policy, runs, seed,
+                             grant_relics=grant_relics)
     max_hp = loader._character_index()[character]["hp"]
     surv = run_metrics.survival_profile(results, max_hp)
     n = len(results)
     k = sum(r.won for r in results)
     p, lo, hi = wilson(k, n)
-    print(f"=== {character} ({n} runs, seed {seed}) ===")
+    tag = " +relics" if grant_relics else ""
+    print(f"=== {character}{tag} ({n} runs, seed {seed}) ===")
     print(f"  winrate            {p:.4f} ({k}/{n})  Wilson95 [{lo:.4f}, {hi:.4f}]  = {p:.1%} [{lo:.1%}, {hi:.1%}]")
     print(f"  act_median_hp_pct  {surv['act_median_hp_pct']:.4f}  = {surv['act_median_hp_pct']:.1%}")
     print(f"  act_share_below_30 {surv['act_share_below_30pct']:.4f}  = {surv['act_share_below_30pct']:.1%}")
@@ -35,5 +38,15 @@ def measure(character, runs=1500, seed=11):
 
 
 if __name__ == "__main__":
-    for ch in ("ref_ironclad", "real_ironclad", "klee"):
-        measure(ch)
+    ap = argparse.ArgumentParser(description="Realistic Act 1 gauntlet.")
+    ap.add_argument("--grant-relics", action="store_true",
+                    help="accrue relics through the StS Act-1 cadence (W2)")
+    ap.add_argument("--both", action="store_true",
+                    help="measure OFF then ON, to show the winrate shift")
+    ap.add_argument("--runs", type=int, default=1500)
+    ap.add_argument("--seed", type=int, default=11)
+    args = ap.parse_args()
+    modes = [False, True] if args.both else [args.grant_relics]
+    for gr in modes:
+        for ch in ("ref_ironclad", "real_ironclad", "klee"):
+            measure(ch, runs=args.runs, seed=args.seed, grant_relics=gr)

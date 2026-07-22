@@ -107,6 +107,9 @@ class RunResult:
     gold: int = 0                       # run-model rework §5: economy state
     shop: list[dict] = field(default_factory=list)   # §5: shop purchase log
     removal_uses: int = 0               # §5: running removal count (rising price)
+    relics: list[str] = field(default_factory=list)  # W2: relics GRANTED this
+    #                    run (Neow + treasure + elite + boss + shop), in order;
+    #                    excludes any relics= SEED. Empty when grant_relics=False.
 
 
 def node_template() -> list[str]:
@@ -118,15 +121,21 @@ def node_template() -> list[str]:
 def run_one(character: str, archetype: str, pilot_id: str,
             policy: DraftPolicy, seed: int,
             slot_mode: str = "standard",
-            relics: list[str] | None = None) -> RunResult:
+            relics: list[str] | None = None,
+            grant_relics: bool = False) -> RunResult:
     """slot_mode: 'standard' (1 companion offer) or 'pity(k)' — k screens
     without taking a companion make the next slot a choose-3.
 
-    relics: relic ids the run STARTS holding (the W2 seam -- Neow + loot will
-    populate it; for now the test/seed entry point). None -> no relics held,
-    and the whole relic path is dead: build_player_from_ids is called with
-    relic_effects=None exactly as before, so a relics=None run is byte-identical
-    to the pre-relic model."""
+    relics: relic ids the run STARTS holding (the W1 seed seam). None -> no
+    relics seeded.
+
+    grant_relics (W2): when True, the run ACCRUES relics through the StS Act-1
+    cadence -- a Neow run-start pick, treasure/elite/boss grants, and shop
+    stock. Default False. When grant_relics=False AND relics=None the whole
+    relic path is dead: build_player_from_ids is called with relic_effects=None
+    exactly as before, so it is byte-identical to the pre-relic model. Seeded
+    (relics=[...]) runs with grant_relics=False keep the W1 behaviour unchanged:
+    the granting sites are ALL gated on grant_relics, never on `held`."""
     pity_k = None
     if slot_mode.startswith("pity(") and slot_mode.endswith(")"):
         pity_k = int(slot_mode[5:-1])
@@ -150,9 +159,22 @@ def run_one(character: str, archetype: str, pilot_id: str,
     # holds relics, so relics=None keeps every relic branch dead. Pickup relics
     # (max-HP / gold / deck upgrades) are applied ONCE, here at run start.
     held = None
+    seed_ids = set(relics or [])
     if relics:
         held = relic_pool.HeldRelics.hold(relics, character)
         hp, max_hp, gold = held.apply_pickups(hp, max_hp, gold, deck_ids, rng)
+    if grant_relics:
+        # W2 granting cadence. Build an empty holder if the run wasn't seeded,
+        # so relics accrue onto it. Honour BOTH when seeded: seed first (above),
+        # then the Neow pick. All accrual is gated on grant_relics, so a seeded
+        # run with grant_relics=False never grants -- the W1 world is intact.
+        if held is None:
+            held = relic_pool.HeldRelics.empty(character)
+        offer = relic_pool.neow_offer(rng)                  # 1-of-3 (positive)
+        pick = relic_pool.neow_pick(offer, character)
+        if pick is not None:
+            hp, max_hp, gold = held.add(pick, character, hp, max_hp, gold,
+                                        deck_ids, rng)
     just_rested = False
     nodes = node_template()
     # Per-run encounter draw (run-model rework §4): easy/hard identity and
@@ -163,9 +185,17 @@ def run_one(character: str, archetype: str, pilot_id: str,
                     deck_ids=deck_ids, node_kinds=nodes, banner=banner)
     fights = 0
     for i, kind in enumerate(nodes):
-        if kind == "T":                     # treasure: gold lump + relic stub
+        if kind == "T":                     # treasure: gold lump + relic
             gold += C.TREASURE_GOLD
-            shop.grant_treasure_relic(character, deck_ids)   # no-op (§1 stub)
+            if grant_relics and held is not None:
+                # W2: the 'ancient' step grants one Common-pool relic IN
+                # ADDITION to the gold lump.
+                rid = relic_pool.roll_relic_reward(rng, held, character)
+                if rid is not None:
+                    hp, max_hp, gold = held.add(rid, character, hp, max_hp,
+                                                gold, deck_ids, rng)
+            else:
+                shop.grant_treasure_relic(character, deck_ids)   # no-op stub
             res.gold = gold
             res.hp_by_node.append(hp)       # non-fight: HP carries, index holds
             continue
@@ -192,6 +222,30 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 heal = held.shop_heal()
                 if heal:
                     hp = min(max_hp, hp + heal)
+            if grant_relics and held is not None:
+                # W2: stock 1-2 Common-pool relics for sale; auto-take-all
+                # (relics are near-strictly-good) -- buy each iff gold allows.
+                # A distinct shelf is rolled so no relic is offered twice.
+                exclude = set(held.ids)
+                shelf: list[str] = []
+                for _ in range(rng.randint(1, 2)):
+                    stock = relic_pool.unowned_common(exclude, character)
+                    if not stock:
+                        break
+                    rid = rng.choice(stock)
+                    shelf.append(rid)
+                    exclude.add(rid)
+                for rid in shelf:
+                    if gold >= C.SHOP_RELIC_PRICE:
+                        gold -= C.SHOP_RELIC_PRICE
+                        hp, max_hp, gold = held.add(rid, character, hp, max_hp,
+                                                    gold, deck_ids, rng)
+                        outcome.purchases.append(
+                            {"buy": "relic", "id": rid,
+                             "price": C.SHOP_RELIC_PRICE})
+                res.shop.extend(p for p in outcome.purchases
+                                if p.get("buy") == "relic")
+                res.gold = gold
             res.hp_by_node.append(hp)
             continue
         if kind == "R":
@@ -251,11 +305,21 @@ def run_one(character: str, archetype: str, pilot_id: str,
             if held is not None:
                 gold, hp = held.post_fight(kind, gold, hp, max_hp,
                                            deck_ids, rng)
+            # W2: ELITE and BOSS wins grant a relic (Common pool -- boss-tier
+            # relics are out of scope this pass). Normals give cards, not
+            # relics, so N wins grant nothing here.
+            if grant_relics and held is not None and kind in ("E", "B"):
+                rid = relic_pool.roll_relic_reward(rng, held, character)
+                if rid is not None:
+                    hp, max_hp, gold = held.add(rid, character, hp, max_hp,
+                                                gold, deck_ids, rng)
             res.gold = gold
         res.hp_by_node.append(max(0, hp))
         if not fight_won:                   # death OR stall-out = run over
             res.death_node = i
             res.deck_ids = deck_ids
+            if held is not None:
+                res.relics = [r for r in held.ids if r not in seed_ids]
             return res
         if kind != "B":                     # boss ends the run — no reward
             n_comp = 1
@@ -299,17 +363,23 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 res.time_to_online = fights
     res.won = True
     res.deck_ids = deck_ids
+    if held is not None:
+        # W2: relics GRANTED this run (held minus any seed), in acquisition
+        # order -- includes commons pulled by a grant_random_common boon.
+        res.relics = [r for r in held.ids if r not in seed_ids]
     return res
 
 
 def run_many(character: str, archetype: str, pilot_id: str,
              policy: DraftPolicy, runs: int, seed: int,
              slot_mode: str = "standard",
-             relics: list[str] | None = None) -> list[RunResult]:
+             relics: list[str] | None = None,
+             grant_relics: bool = False) -> list[RunResult]:
     out = []
     for i in range(runs):
         r = run_one(character, archetype, pilot_id, policy, seed + i,
-                    slot_mode=slot_mode, relics=relics)
+                    slot_mode=slot_mode, relics=relics,
+                    grant_relics=grant_relics)
         # draft_regret: sampled re-score in the final-deck context, using
         # a DEDICATED rng stream so sampling can't perturb run decisions.
         r.regret_samples = draft.draft_regret(
