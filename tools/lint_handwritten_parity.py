@@ -153,6 +153,11 @@ def extract_cs(text: str) -> dict:
         # Keyword sprint: skill_tag must ALSO land as the ElementalSkill
         # display keyword (playtest finding: the tag was invisible on cards).
         "skill_kw": "KleeKeywords.ElementalSkill" in text,
+        # Elemental UI pass: every Klee Attack is catalyst-Pyro, so it needs
+        # both the visible aura badge and the board-aware preview helper.
+        "pyro_aura_kw": "KleeKeywords.AppliesPyro" in text,
+        "reaction_tips": "KleeCardTooltips.ForCard" in text and "Element.Pyro" in text,
+        "bomb_tips": "includesBombRules: true" in text,
         # Kit sprint: sheet `kit_card` + `requires: burst_energy_full` land as
         # the custom-resource cost (the CanAfford gate AND the meter spend);
         # sheet tag `burst` lands as Retain (the sim's turn-end filter).
@@ -224,6 +229,20 @@ def lint() -> int:
             fail(card_id, f"skill keyword: sheet skill_tag {exp_skill_tag}, "
                           f"C# KleeKeywords.ElementalSkill {got['skill_kw']} "
                           "(the display keyword is how players see the tag)")
+        exp_pyro_ui = row.get("type") == "attack"
+        if got["pyro_aura_kw"] != exp_pyro_ui:
+            fail(card_id, f"aura keyword: sheet catalyst Attack {exp_pyro_ui}, "
+                          f"C# KleeKeywords.AppliesPyro {got['pyro_aura_kw']}")
+        if got["reaction_tips"] != exp_pyro_ui:
+            fail(card_id, f"reaction previews: sheet catalyst Attack {exp_pyro_ui}, "
+                          f"C# KleeCardTooltips/Element.Pyro {got['reaction_tips']}")
+        exp_bomb_tips = any(e.get("op") in {
+            "place_bomb", "detonate", "modify_bombs", "move_bombs",
+            "chance_bomb_per_detonation"
+        } for e in row.get("effects", []))
+        if got["bomb_tips"] != exp_bomb_tips:
+            fail(card_id, f"Bomb tooltip: sheet Bomb mechanic {exp_bomb_tips}, "
+                          f"C# includesBombRules {got['bomb_tips']}")
         exp_kit = bool(row.get("kit_card")) or bool(row.get("requires"))
         if got["kit_cost"] != exp_kit:
             fail(card_id, f"kit cost: sheet kit_card/requires {exp_kit}, "

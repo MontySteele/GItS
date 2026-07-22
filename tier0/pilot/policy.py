@@ -265,22 +265,66 @@ def _card_element(state: CombatState, card: Card) -> Optional[str]:
 
 
 def _reaction_value(state: CombatState, card: Card) -> float:
-    # Only ops that actually carry an element count — a hydro-flavored
-    # heal (Barbara's Melody) applies nothing and must score 0 here.
-    elem = _card_element(state, card)
-    swirls = any(fx["op"] == "swirl" for fx in card.effects)
-    applies = swirls or any(
-        fx["op"] == "apply_aura"
-        or (fx["op"] == "damage" and elem is not None
-            and fx.get("applies_element", card.type == "attack"))
-        for fx in card.effects)
-    if not applies:
+    """Expected reaction opportunities from this play.
+
+    This remains a deliberately compact strategic score (the concrete damage,
+    block, and debuffs still live in their own terms), but it must model the
+    card's REAL targeting. The old any-enemy check credited a single-target
+    card with a reaction when the aura sat on a different enemy, and capped an
+    all-enemy trigger at the same value as one reaction. Both distort the
+    dedicated pilot more than a coarse constant does.
+    """
+    living = state.living_enemies
+    if not living:
         return 0.0
-    # Triggering beats seeding: any living enemy holding a reactable aura.
-    for e in state.living_enemies:
-        if e.aura and (swirls or (elem and e.aura != elem)):
-            return 6.0
-    return 2.0
+
+    card_elem = _card_element(state, card)
+    capable = False
+    best_expected_triggers = 0.0
+
+    for fx in card.effects:
+        op = fx["op"]
+        if op == "swirl":
+            elem = "anemo"
+        elif op == "apply_aura":
+            # Apply-only skills carry their element on the effect. Relying on
+            # card.element made a neutral utility wrapper seed-aware but blind
+            # to the reaction it would actually trigger.
+            elem = fx.get("element") or card_elem
+        elif (op == "damage" and card_elem is not None
+              and fx.get("applies_element", card.type == "attack")):
+            elem = card_elem
+        else:
+            continue
+
+        if not elem or elem == "none":
+            continue
+        capable = True
+        reactable = [e for e in living if e.aura and e.aura != elem]
+        target = fx.get("target", "enemy")
+
+        if target == "enemy":
+            aimed = effects._default_target(state)
+            expected = float(bool(aimed and aimed in reactable))
+        elif target == "all_enemies":
+            expected = float(len(reactable))
+        else:  # random_enemy / random_enemies
+            hits = max(1.0, _est(state, fx.get("times", 1), 1))
+            # Expected distinct aura-bearing targets hit at least once in N
+            # independent random hits. A target can react only on its first
+            # hit because that consumes its aura.
+            expected = len(reactable) * (1.0 - (1.0 - 1.0 / len(living)) ** hits)
+
+        # Multiple elemental effects on one card usually revisit the same
+        # targets after their aura was consumed. Taking the strongest effect
+        # avoids double-credit without mutating a preview copy of combat.
+        best_expected_triggers = max(best_expected_triggers, expected)
+
+    if not capable:
+        return 0.0
+    # Preserve the calibrated strategic scale: seeding=2, one trigger=6.
+    # AoE and random cards now scale by their expected reaction count.
+    return 6.0 * best_expected_triggers if best_expected_triggers else 2.0
 
 
 def _tempo_value(state: CombatState, card: Card) -> float:

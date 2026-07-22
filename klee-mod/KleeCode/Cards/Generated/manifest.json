@@ -114,9 +114,7 @@
     "_comment": "R24 (2026-07-20): docs/klee-upgrades.yaml is the single source of truth for upgrade deltas; codegen defaults are ABOLISHED. Generated cards listed below ship with NO upgrade path (UNAPPLIABLE discipline) until their delta is ratified, made numeric, or hand-finished.",
     "no_upgrade_path": {
       "durin_witchs_flame": "delta key 'ping_damage: 2' not expressible by codegen (structural upgrade)",
-      "nicole_celestial_gift": "delta key 'block_per_turn: 2' not expressible by codegen (structural upgrade)",
-      "quick_fuse": "delta key 'add: {'op': 'draw', 'amount': 1}' not expressible by codegen (structural upgrade)",
-      "study_buddy": "delta key 'add: {'op': 'draw', 'amount': 1}' not expressible by codegen (structural upgrade)"
+      "nicole_celestial_gift": "delta key 'block_per_turn: 2' not expressible by codegen (structural upgrade)"
     }
   }
 }

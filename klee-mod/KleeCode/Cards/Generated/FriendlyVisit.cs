@@ -37,12 +37,13 @@ public sealed class FriendlyVisit : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Friendly Visit"),
-        ("description", "[gold]Companion[/gold] cards cost 1 less this turn. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Companion[/gold] cards cost 1 less this turn. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new BlockVar(5m, ValueProp.Move),
             new CardsVar(1)
         };
 
@@ -56,6 +57,7 @@ public sealed class FriendlyVisit : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         await PowerCmd.Apply<CompanionCostThisTurnPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }

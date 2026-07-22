@@ -37,13 +37,13 @@ public sealed class BorrowedBrilliance : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Borrowed Brilliance"),
-        ("description", "{IfUpgraded:show:Add a copy of a random [gold]Companion[/gold] card in your hand to your hand. The copy costs 0.|Add a copy of a random [gold]Companion[/gold] card in your hand to your hand.}"),
+        ("description", "Add a copy of a random [gold]Companion[/gold] card in your hand to your hand. The copy costs 0. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            
+            new CardsVar(1)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -66,18 +66,19 @@ public sealed class BorrowedBrilliance : CustomCardModel
                 {
                     var copyToken = CombatState!.CreateCard(
                         ModelDb.GetById<CardModel>(pickedCompanion.Id), Owner);
-                    if (IsUpgraded)
-                    {
-                        copyToken.EnergyCost.SetThisCombat(0);
-                    }
+                    copyToken.EnergyCost.SetThisCombat(0);
                     await CardPileCmd.AddGeneratedCardToCombat(copyToken, PileType.Hand, Owner);
                 }
             }
+        }
+        if (IsUpgraded)
+        {
+            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
         }
     }
 
     protected override void OnUpgrade()
     {
-        // copy_cost_override: expressed at play time as an IsUpgraded read in OnPlay; the text swaps via {IfUpgraded:show:...}.
+        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
     }
 }

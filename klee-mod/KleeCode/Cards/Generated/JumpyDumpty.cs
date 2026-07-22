@@ -23,6 +23,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,7 +37,10 @@ public sealed class JumpyDumpty : CustomCardModel, IElementalCard, ISkillTagCard
     public Element Element => Element.Pyro;
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.ElementalSkill };
+        new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesPyro };
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: true);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("jumpy_dumpty");
 
@@ -49,7 +53,7 @@ public sealed class JumpyDumpty : CustomCardModel, IElementalCard, ISkillTagCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(7m, ValueProp.Move),
+            new DamageVar(8m, ValueProp.Move),
             new ExtraDamageVar(6m)
         };
 

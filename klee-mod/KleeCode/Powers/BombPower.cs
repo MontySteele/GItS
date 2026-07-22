@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Commands.Builders;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
@@ -54,14 +55,18 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         ("title", "Bomb"),
         ("description",
             "Detonates at the start of your turn for its damage. "
-          + "Detonates early if this enemy is hit by an [gold]Attack[/gold]."),
+          + "Detonates early if this enemy takes unblocked [gold]Attack[/gold] damage. "
+          + "The first attack this enemy makes while Bombed each combat "
+          + "deals 25% less damage."),
         // The smart (in-combat, mutable-instance) tooltip carries the count;
         // the badge already shows the total. {Damage} is our DynamicVar,
         // {Amount} is the stack count the game adds to every smart tip.
         ("smartDescription",
             "Detonates at the start of your turn for {Damage} total damage "
           + "({Amount} Bomb{Amount:plural:|s}). "
-          + "Detonates early if this enemy is hit by an [gold]Attack[/gold]."),
+          + "Detonates early if this enemy takes unblocked [gold]Attack[/gold] damage. "
+          + "The first attack this enemy makes while Bombed each combat "
+          + "deals 25% less damage."),
     };
 
     public override PowerType Type => PowerType.Debuff;
@@ -88,6 +93,23 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// </summary>
     private List<BombCharge> _damages = new();
 
+    // Survival sprint: one armed-Bomb suppression per enemy per combat. The
+    // spent latch must outlive this power because early detonation removes the
+    // Bomb, and a later Bomb must not incorrectly reset an already-spent proc.
+    private static ICombatState? _suppressionCombat;
+    private static readonly HashSet<Creature> SuppressionSpent = new();
+    private bool _suppressionArmedForAttack;
+
+    private static bool HasSpentSuppression(Creature enemy, ICombatState? combat)
+    {
+        if (!ReferenceEquals(combat, _suppressionCombat))
+        {
+            _suppressionCombat = combat;
+            SuppressionSpent.Clear();
+        }
+        return SuppressionSpent.Contains(enemy);
+    }
+
     /// <summary>
     /// AbstractModel.MutableClone is a shallow MemberwiseClone; the base class
     /// exposes this hook precisely so reference-typed fields get their own copy.
@@ -97,6 +119,48 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     {
         base.DeepCloneFields();
         _damages = new List<BombCharge>(_damages);
+        _suppressionArmedForAttack = false;
+    }
+
+    /// <summary>
+    /// Snapshot at the attack-command boundary, not per hit. That keeps every
+    /// hit of a multi-hit enemy intent at the Weak rate, then spends the latch
+    /// only after the whole action. A real Weak stack shares the same branch
+    /// below, so the two reductions never multiply.
+    /// </summary>
+    public override Task BeforeAttack(AttackCommand attack)
+    {
+        _suppressionArmedForAttack = attack.Attacker == Owner
+            && _damages.Count > 0
+            && !HasSpentSuppression(Owner, CombatState);
+        return Task.CompletedTask;
+    }
+
+    public override decimal ModifyDamageMultiplicative(
+        Creature? target, decimal amount, ValueProp props,
+        Creature? dealer, CardModel? cardSource)
+    {
+        if (dealer != Owner || !props.IsPoweredAttack() || _damages.Count == 0)
+        {
+            return 1m;
+        }
+        if (HasSpentSuppression(Owner, CombatState)) return 1m;
+
+        var hasRealWeak = Owner.Powers.OfType<WeakPower>()
+            .Any(power => power.Amount > 0);
+        return hasRealWeak ? 1m : 0.75m;
+    }
+
+    public override Task AfterAttack(
+        PlayerChoiceContext choiceContext, AttackCommand attack)
+    {
+        if (_suppressionArmedForAttack && attack.Attacker == Owner)
+        {
+            HasSpentSuppression(Owner, CombatState); // resets on combat change
+            SuppressionSpent.Add(Owner);
+        }
+        _suppressionArmedForAttack = false;
+        return Task.CompletedTask;
     }
 
     /// <summary>Total damage sitting on this enemy, for intent/tooltip display.</summary>

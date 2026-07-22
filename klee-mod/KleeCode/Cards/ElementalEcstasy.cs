@@ -3,11 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using Godot;
+using KleeMod.Elements;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards;
 
@@ -30,8 +33,13 @@ public sealed class ElementalEcstasy : CustomCardModel
         // elemental_ecstasy; only the player-facing name changed.
         ("title", "Sweet Dreams"),
         ("description",
-            "Refresh all elemental auras. Draw 1 card for each aura."),
+            "Refresh all elemental auras. Draw 1 card for each aura. "
+          + "If the lowest-HP enemy has a non-[gold]Pyro[/gold] aura, "
+          + "gain {Block} [gold]Block[/gold]."),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar> { new BlockVar(8m, ValueProp.Move) };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself (see Kaboom).
     public ElementalEcstasy()
@@ -41,6 +49,14 @@ public sealed class ElementalEcstasy : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        // tier0 snapshots target_has_nonpyro_aura against its default aim:
+        // the lowest-HP living enemy, even for this self-targeted utility.
+        var defaultTarget = CombatState!.HittableEnemies
+            .OrderBy(e => e.CurrentHp).FirstOrDefault();
+        var shouldBlock = defaultTarget != null
+            && AuraCmd.Find(defaultTarget) is { } targetAura
+            && targetAura.Element != Element.Pyro;
+
         // HittableEnemies is the verified live-enemy accessor the generated
         // random-target cards use; the sim iterates living_enemies.
         var refreshed = 0;
@@ -55,6 +71,11 @@ public sealed class ElementalEcstasy : CustomCardModel
         if (refreshed > 0)
         {
             await CardPileCmd.Draw(choiceContext, refreshed, Owner);
+        }
+
+        if (shouldBlock)
+        {
+            await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         }
     }
 

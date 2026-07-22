@@ -72,10 +72,9 @@ public static class KleeMod
                 // 2. Square brackets are BBCode, NOT keyword markup. The game
                 //    wraps descriptions in [center]...[/center], so a stray
                 //    "[Block]" parses as an unclosed tag and throws
-                //    "Found end tag center, expected Block". Keyword tooltips
-                //    are declared per-mod via a card_keywords.json (the Downfall
-                //    pattern, see docs/card_keywords.json); we ship none yet, so
-                //    C1 uses plain text and keywords land with the C2 text pass.
+                //    "Found end tag center, expected Block". Custom keyword
+                //    ids are allocated by BaseLib from KleeKeywords; their
+                //    strings ship in the pck's card_keywords loc table.
                 // ONLY plain CardModel stubs belong here. Cards that derive from
                 // BaseLib's CustomCardModel get a prefixed id (KLEEMOD-KABOOM),
                 // so they declare loc via an ILocalizationProvider.Localization
@@ -86,6 +85,61 @@ public static class KleeMod
 
                 // Pop is now a CustomCardModel and declares its own loc.
             });
+
+            // Runtime copy of the custom-keyword loc. The pck carries the
+            // same table for normal packaged builds, but keeping these rows in
+            // the DLL makes a code-only playtest rebuild safe: newly generated
+            // aura badges and combat-aware reaction tips never render raw keys
+            // merely because the local art pack predates this code pass.
+            var keywordTable = LocManager.Instance.GetTable("card_keywords");
+            var keywordFallback = new Dictionary<string, string>
+                {
+                    ["KLEEMOD-ELEMENTAL_SKILL.title"] = "Elemental Skill",
+                    ["KLEEMOD-ELEMENTAL_SKILL.description"] =
+                        "Playing this card grants 5 Burst Energy.",
+                    ["KLEEMOD-APPLIES_PYRO.title"] = "Applies Pyro",
+                    ["KLEEMOD-APPLIES_PYRO.description"] =
+                        "If the target has no aura, this applies Pyro for 2 turns. A different aura is consumed to trigger a Reaction instead.",
+                    ["KLEEMOD-APPLIES_HYDRO.title"] = "Applies Hydro",
+                    ["KLEEMOD-APPLIES_HYDRO.description"] =
+                        "If the target has no aura, this applies Hydro for 2 turns. A different aura is consumed to trigger a Reaction instead.",
+                    ["KLEEMOD-APPLIES_ELECTRO.title"] = "Applies Electro",
+                    ["KLEEMOD-APPLIES_ELECTRO.description"] =
+                        "If the target has no aura, this applies Electro for 2 turns. A different aura is consumed to trigger a Reaction instead.",
+                    ["KLEEMOD-APPLIES_CRYO.title"] = "Applies Cryo",
+                    ["KLEEMOD-APPLIES_CRYO.description"] =
+                        "If the target has no aura, this applies Cryo for 2 turns. A different aura is consumed to trigger a Reaction instead.",
+                    ["KLEEMOD-BOMB.title"] = "Bomb",
+                    ["KLEEMOD-BOMB.description"] =
+                        "Detonates at the start of your turn or early when its enemy takes unblocked Attack damage. The first attack that enemy makes while Bombed each combat deals 25% less damage.",
+                    ["KLEEMOD-VAPORIZE_PREVIEW.title"] = "Reaction preview: Vaporize",
+                    ["KLEEMOD-VAPORIZE_PREVIEW.description"] =
+                        "This card supplies Pyro or Hydro while an enemy has the other aura. The triggering hit deals 1.5x damage and consumes the aura.",
+                    ["KLEEMOD-MELT_PREVIEW.title"] = "Reaction preview: Melt",
+                    ["KLEEMOD-MELT_PREVIEW.description"] =
+                        "This card supplies Pyro or Cryo while an enemy has the other aura. The triggering hit deals 1.75x damage and consumes the aura.",
+                    ["KLEEMOD-OVERLOAD_PREVIEW.title"] = "Reaction preview: Overload",
+                    ["KLEEMOD-OVERLOAD_PREVIEW.description"] =
+                        "This card supplies Pyro or Electro while an enemy has the other aura. It deals 6 splash damage to all enemies and applies 1 Weak to the reacted enemy.",
+                    ["KLEEMOD-SUPERCONDUCT_PREVIEW.title"] = "Reaction preview: Superconduct",
+                    ["KLEEMOD-SUPERCONDUCT_PREVIEW.description"] =
+                        "This card supplies Electro or Cryo while an enemy has the other aura. The reacted enemy gains 2 Vulnerable.",
+                    ["KLEEMOD-ELECTRO_CHARGED_PREVIEW.title"] = "Reaction preview: Electro-Charged",
+                    ["KLEEMOD-ELECTRO_CHARGED_PREVIEW.description"] =
+                        "This card supplies Hydro or Electro while an enemy has the other aura. The reacted enemy gains a 4-damage decaying damage-over-time effect.",
+                    ["KLEEMOD-FROZEN_PREVIEW.title"] = "Reaction preview: Frozen",
+                    ["KLEEMOD-FROZEN_PREVIEW.description"] =
+                        "This card supplies Hydro or Cryo while an enemy has the other aura. Its next action deals half damage; attacking it Shatters for 6 damage.",
+                    ["KLEEMOD-SWIRL_PREVIEW.title"] = "Reaction preview: Swirl",
+                    ["KLEEMOD-SWIRL_PREVIEW.description"] =
+                        "This card supplies Anemo to an existing aura. The aura is consumed and copied onto all enemies.",
+                    ["KLEEMOD-CRYSTALLIZE_PREVIEW.title"] = "Reaction preview: Crystallize",
+                    ["KLEEMOD-CRYSTALLIZE_PREVIEW.description"] =
+                        "This card supplies Geo to an existing aura. The aura is consumed and you gain 4 Block.",
+                };
+            keywordTable.MergeWith(keywordFallback
+                .Where(pair => !keywordTable.HasEntry(pair.Key))
+                .ToDictionary(pair => pair.Key, pair => pair.Value));
 
             // Klee's character strings moved onto the model itself
             // (Klee.Localization) when she became a CustomCharacterModel:

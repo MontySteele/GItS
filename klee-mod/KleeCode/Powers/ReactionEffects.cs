@@ -151,6 +151,12 @@ internal static class ReactionEffects
                             dealer: null, cardSource: null);
                     }
                 }
+                // Survival sprint: the explosion staggers the reacted target.
+                // Ordinary Weak composes naturally with Bomb suppression: the
+                // Bomb hook detects a real stack and does not multiply 0.75 twice.
+                await PowerCmd.Apply<WeakPower>(
+                    choiceContext, target, ReactionConstants.OverloadWeak,
+                    applier: dealer, cardSource: cardSource);
                 break;
 
             case Reaction.ElectroCharged:

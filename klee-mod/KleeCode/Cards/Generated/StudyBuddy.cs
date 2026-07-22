@@ -37,13 +37,14 @@ public sealed class StudyBuddy : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Study Buddy"),
-        ("description", "The next [gold]Companion[/gold] card you play this turn is played an extra time."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. The next [gold]Companion[/gold] card you play this turn is played an extra time. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            
+            new BlockVar(6m, ValueProp.Move),
+            new CardsVar(1)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -56,11 +57,16 @@ public sealed class StudyBuddy : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         await PowerCmd.Apply<ReplayNextCompanionPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        if (IsUpgraded)
+        {
+            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- delta key 'add: {'op': 'draw', 'amount': 1}' not expressible by codegen (structural upgrade). Flagged in manifest.
+        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
     }
 }

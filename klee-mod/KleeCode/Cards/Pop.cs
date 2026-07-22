@@ -6,6 +6,7 @@ using Godot;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -41,6 +42,10 @@ public sealed class Pop : CustomCardModel, ISkillTagCard
     /// skill-tag cards.</summary>
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { KleeKeywords.ElementalSkill };
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KleeCardTooltips.ForCard(
+            base.ExtraHoverTips, this, includesBombRules: true);
 
     // autoAdd: false -- KleeCardPool owns membership. See Kaboom.
     public Pop()

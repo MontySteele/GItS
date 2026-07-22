@@ -9,6 +9,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -29,6 +30,12 @@ public sealed class KaboomBeetleSwarm : CustomCardModel, IElementalCard
 {
     /// <summary>All of Klee's attacks apply Pyro (sheet: catalyst-grade cadence).</summary>
     public Element Element => Element.Pyro;
+
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesPyro };
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("kaboom_beetle_swarm");
 

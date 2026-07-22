@@ -23,6 +23,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -32,18 +33,21 @@ namespace KleeMod.Cards.Generated;
 
 public sealed class QuickFuse : CustomCardModel
 {
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.None, includesBombRules: true);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("quick_fuse");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Quick Fuse"),
-        ("description", "Detonate an enemy's [gold]Bombs[/gold]."),
+        ("description", "Detonate an enemy's [gold]Bombs[/gold]. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            
+            new CardsVar(1)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -58,10 +62,14 @@ public sealed class QuickFuse : CustomCardModel
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await BombPower.DetonateOn(choiceContext, cardPlay.Target);
+        if (IsUpgraded)
+        {
+            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- delta key 'add: {'op': 'draw', 'amount': 1}' not expressible by codegen (structural upgrade). Flagged in manifest.
+        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
     }
 }

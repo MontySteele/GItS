@@ -39,6 +39,7 @@ public static class ReactionConstants
     public const decimal VulnerableTakenMult = 1.5m;
 
     public const int OverloadSplash = 6;         // OVERLOAD_SPLASH, flat, all enemies
+    public const int OverloadWeak = 1;            // OVERLOAD_WEAK
     public const int SuperconductVuln = 2;       // SUPERCONDUCT_VULN
     public const int ElectroChargedDot = 4;      // ELECTROCHARGED_DOT
     public const int ElectroChargedDotTurns = 2; // ELECTROCHARGED_DOT_TURNS

@@ -320,8 +320,9 @@ HAND_WRITTEN |= {"sparks_n_splash"}
 #   bomb_damage -> place_bomb effect (Damage or ExtraDamage, see bomb_var)
 #   cost        -> EnergyCost.UpgradeBy(n) -- the idiom CardModel.OnUpgrade's
 #                  own doc comment prescribes (verified in the decompile)
-# Anything else (remove:, add:, condition:, ...) is structural and blocks the
-# card's upgrade path until it is hand-finished or re-ruled numeric.
+# Structural upgrades stay blocked unless an exact play-time mirror exists.
+# `add: {op: draw, amount: N}` is the current exception: codegen appends an
+# IsUpgraded-gated draw after the base effects, matching upgrades.py.
 #   discard     -> discard_for_sparks count (DynamicVars["Discards"], R36)
 #   sparks      -> discard_for_sparks Spark cap (DynamicVars["Sparks"], R36;
 #                  distinct from `spark` = gain_spark on purpose)
@@ -348,7 +349,7 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "bomb_damage", "burst
                        "discard", "sparks", "innate", "bonus", "chance",
                        "conditional_bonus", "condition", "bombs",
                        "bonus_per_detonation", "cards", "remove",
-                       "copy_cost_override"}
+                       "copy_cost_override", "add"}
                       | POWER_UPGRADE_KEYS)
 
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
@@ -560,11 +561,13 @@ def blocked_reason(card: dict) -> str | None:
             # `temp` accepted and IGNORED: tier0 _op_copy_companion_in_hand
             # never reads it (the copy persists) -- the sim is LAW, so the
             # mirror ignores it too rather than inventing a mechanic.
-            unknown = set(eff) - {"op", "amount", "temp"}
+            unknown = set(eff) - {"op", "amount", "temp", "cost_override"}
             if unknown:
                 return f"copy_companion_in_hand field(s) {sorted(unknown)} not understood"
             if eff.get("amount", 1) != 1:
                 return "copy_companion_in_hand amount > 1 (single-pick idiom only)"
+            if "cost_override" in eff and not isinstance(eff["cost_override"], int):
+                return "copy_companion_in_hand cost_override must be a literal int"
         if op == "replay_next_companion":
             unknown = set(eff) - {"op", "times", "duration"}
             if unknown:
@@ -801,6 +804,8 @@ def build_vars(card: dict) -> list[str]:
             for e in eff.get("else", []):
                 if e["op"] == "draw" and bd:
                     out.append(f'new DynamicVar("DrawElse", {int(e["amount"])}m)')
+    if added_draw_upgrade(card):
+        out.append(f"new CardsVar({added_draw_upgrade(card)})")
     return out
 
 
@@ -899,6 +904,10 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # the chance_bomb_per_detonation replacement.
         "bonus": any(e["op"] in BONUS_OPS and "bonus" in e for e in effects),
         "chance": any(e["op"] == "chance_bomb_per_detonation" for e in effects),
+        # Structural `add` upgrades currently support one exact, verified
+        # shape: append a draw effect. It is emitted as an IsUpgraded-gated
+        # draw at the end of OnPlay, matching upgrades.py's list append.
+        "add": True,
     }
     # tier0 binds every POWER_UPGRADE_KEYS delta to the first TOP-LEVEL
     # apply_power OR buff_next_attack (upgrades.py takes `next(fx for fx in
@@ -909,6 +918,19 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
     for key, value in deltas.items():
         if key not in EXPRESSIBLE_DELTAS:
             return {}, f"delta key '{key}: {value}' not expressible by codegen (structural upgrade)"
+        if key == "add":
+            if not (isinstance(value, dict)
+                    and set(value) == {"op", "amount"}
+                    and value.get("op") == "draw"
+                    and isinstance(value.get("amount"), int)
+                    and value["amount"] > 0):
+                return {}, f"delta 'add: {value}' (only a positive draw effect is expressible)"
+            if any(e.get("op") == "draw" for e in everywhere):
+                return {}, "delta 'add: draw' on a card with an existing draw (Cards var collision)"
+            if any(e.get("op") == "conditional" and any(
+                    x.get("op") == "repeat_this" for x in e.get("then", []))
+                   for e in effects):
+                return {}, "delta 'add: draw' on a repeating card (repeat semantics not expressible)"
         if key == "condition" and value != "unconditional":
             return {}, f"delta 'condition: {value}' (only 'unconditional' is tier0 grammar)"
         if key == "remove" and value != "exhaust":
@@ -916,6 +938,16 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         if not has[key]:
             return {}, f"delta key '{key}' has no matching effect on this card (sheet/card mismatch)"
     return dict(deltas), None
+
+
+def added_draw_upgrade(card: dict) -> int:
+    """Amount of an upgrade-only draw appended by `add`, or zero.
+
+    The full upgrade plan validates the structural shape and collision rules;
+    callers only need the amount for vars, text, and play-time emission.
+    """
+    added = upgrade_plan(card)[0].get("add")
+    return int(added["amount"]) if isinstance(added, dict) else 0
 
 
 def spark_upgrade(card: dict) -> int:
@@ -1439,7 +1471,11 @@ def build_body(card: dict) -> list[str]:
             # (patched_dress precedent -- codegen cannot rewrite OnPlay from
             # OnUpgrade).
             cost_line = ""
-            if "copy_cost_override" in upgrade_plan(card)[0]:
+            if "cost_override" in eff:
+                cost_line = (
+                    f"                    copyToken.EnergyCost.SetThisCombat({int(eff['cost_override'])});\n"
+                )
+            elif "copy_cost_override" in upgrade_plan(card)[0]:
                 override = int(upgrade_plan(card)[0]["copy_cost_override"])
                 cost_line = (
                     "                    if (IsUpgraded)\n"
@@ -1667,6 +1703,16 @@ def build_body(card: dict) -> list[str]:
                 for e in eff.get("else", []):
                     _emit_branch_op(card, e, else_lines, ctx, False, cb_state)
                 lines.append(_conditional_block(pred, then_lines, else_lines))
+
+    # Structural upgrade append (tier0 upgrades.py: card.effects.append).
+    # It resolves after every base effect and before the repeat tail.
+    if added_draw_upgrade(card):
+        lines.append(
+            "if (IsUpgraded)\n"
+            "        {\n"
+            "            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);\n"
+            "        }"
+        )
 
     # Repeat tail (sim resolve_card): a repeat-conditional re-resolves the
     # effect list minus the repeat machinery, `times` more times. The
@@ -1910,7 +1956,9 @@ def build_description(card: dict) -> str:
         elif op == "copy_companion_in_hand":
             base_txt = ("Add a copy of a random [gold]Companion[/gold] card "
                         "in your hand to your hand.")
-            if "copy_cost_override" in upgrade_plan(card)[0]:
+            if "cost_override" in eff:
+                parts.append(base_txt + f" The copy costs {int(eff['cost_override'])}.")
+            elif "copy_cost_override" in upgrade_plan(card)[0]:
                 o = int(upgrade_plan(card)[0]["copy_cost_override"])
                 parts.append(
                     "{IfUpgraded:show:" + base_txt + f" The copy costs {o}.|"
@@ -2046,6 +2094,11 @@ def build_description(card: dict) -> str:
                     text += f" Maximum {m}."
                 parts.append(text)
 
+    if added_draw_upgrade(card):
+        n = added_draw_upgrade(card)
+        draw = "Draw 1 card." if n == 1 else f"Draw {n} cards."
+        parts.append("{IfUpgraded:show:" + draw + "|}")
+
     return " ".join(parts)
 
 
@@ -2132,6 +2185,10 @@ def build_upgrade(card: dict) -> list[str]:
         lines.append(
             "// copy_cost_override: expressed at play time as an IsUpgraded "
             "read in OnPlay; the text swaps via {IfUpgraded:show:...}.")
+    if "add" in deltas:
+        lines.append(
+            "// add: draw -- expressed at play time as an IsUpgraded-gated "
+            "draw appended after the base effects.")
     if "cost" in deltas:
         lines.append(f'EnergyCost.UpgradeBy({int(deltas["cost"])});')
     if "innate" in deltas:
@@ -2161,6 +2218,39 @@ def emit(card: dict) -> str:
     else:
         elemental = is_attack
         element_cs = "Element.Pyro"
+
+    # UI affordances derive from the same mechanics as play resolution.
+    # A damage-bearing IElementalCard supplies its card element; apply-only
+    # skills supply the element written on their effect; Swirl supplies Anemo.
+    preview_element_cs = element_cs if elemental else None
+    if preview_element_cs is None:
+        elemental_effect = next((e for e in card.get("effects", [])
+                                 if e.get("op") in ("apply_aura", "swirl")), None)
+        if elemental_effect is not None:
+            preview_element_cs = (
+                ELEMENT_CS[elemental_effect["element"]]
+                if elemental_effect["op"] == "apply_aura"
+                else "Element.Anemo")
+
+    aura_keyword_by_element = {
+        "pyro": "KleeKeywords.AppliesPyro",
+        "hydro": "KleeKeywords.AppliesHydro",
+        "electro": "KleeKeywords.AppliesElectro",
+        "cryo": "KleeKeywords.AppliesCryo",
+    }
+    aura_elements = []
+    if elemental:
+        source_element = card["element"] if is_companion(card) else "pyro"
+        if source_element in aura_keyword_by_element:
+            aura_elements.append(source_element)
+    for e in card.get("effects", []):
+        if e.get("op") == "apply_aura" and e.get("element") in aura_keyword_by_element:
+            aura_elements.append(e["element"])
+    aura_elements = list(dict.fromkeys(aura_elements))
+    includes_bomb_rules = any(e.get("op") in {
+        "place_bomb", "detonate", "modify_bombs", "move_bombs",
+        "chance_bomb_per_detonation"
+    } for e in card.get("effects", []))
 
     # The card's declared TargetType follows its FIRST damaging effect; a card
     # that only blocks or draws targets Self.
@@ -2267,12 +2357,25 @@ def emit(card: dict) -> str:
         keywords.append("CardKeyword.Exhaust")
     if "skill_tag" in card.get("tags", []):
         keywords.append("KleeKeywords.ElementalSkill")
+    keywords.extend(aura_keyword_by_element[e] for e in aura_elements)
     keywords_member = ""
     if keywords:
         keywords_member = (
             "\n    public override IEnumerable<CardKeyword> CanonicalKeywords =>\n"
             "        new[] { " + ", ".join(keywords) + " };\n"
         )
+
+    tooltip_member = ""
+    if preview_element_cs is not None or includes_bomb_rules:
+        trigger_arg = preview_element_cs or "Element.None"
+        bomb_arg = "true" if includes_bomb_rules else "false"
+        tooltip_member = (
+            "\n    protected override IEnumerable<IHoverTip> ExtraHoverTips =>\n"
+            "        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, "
+            f"{trigger_arg}, includesBombRules: {bomb_arg});\n"
+        )
+    hover_using = (
+        "\nusing MegaCrit.Sts2.Core.HoverTips;" if tooltip_member else "")
 
     return f'''// <auto-generated>
 //     Generated by tools/gen_klee_cards.py from docs/klee-cards.yaml.
@@ -2298,7 +2401,7 @@ using KleeMod.Powers;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
-using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;{hover_using}
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -2307,7 +2410,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Cards.Generated;
 
 public sealed class {cls} : {interfaces}
-{{{element_member}{keywords_member}
+{{{element_member}{keywords_member}{tooltip_member}
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("{card["id"]}");
 
     public override List<(string, string)>? Localization => new()
@@ -2445,6 +2548,7 @@ public static class CompanionRoster
             "no_upgrade_path": dict(sorted(no_upgrade.items())),
         },
     }
+    manifest_src = json.dumps(manifest, indent=2) + "\n"
 
     if args.check:
         stale = []
@@ -2452,8 +2556,20 @@ public static class CompanionRoster
             p = OUT_DIR / f"{pascal(cid)}.cs"
             if not p.exists() or p.read_text(encoding="utf-8") != src:
                 stale.append(cid)
-        if stale:
-            print(f"stale generated cards: {', '.join(sorted(stale))}", file=sys.stderr)
+        expected_files = {f"{pascal(cid)}.cs" for cid in generated}
+        actual_files = {p.name for p in OUT_DIR.glob("*.cs")}
+        extra_files = sorted(actual_files - expected_files)
+        manifest_stale = (
+            not MANIFEST.exists()
+            or MANIFEST.read_text(encoding="utf-8") != manifest_src
+        )
+        if stale or extra_files or manifest_stale:
+            if stale:
+                print(f"stale generated cards: {', '.join(sorted(stale))}", file=sys.stderr)
+            if extra_files:
+                print(f"stale generated files: {', '.join(extra_files)}", file=sys.stderr)
+            if manifest_stale:
+                print("stale generated manifest", file=sys.stderr)
             return 1
         print("gen_klee_cards: up to date")
         return 0
@@ -2466,7 +2582,7 @@ public static class CompanionRoster
     for cid, src in generated.items():
         (OUT_DIR / f"{pascal(cid)}.cs").write_text(src, encoding="utf-8")
 
-    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    MANIFEST.write_text(manifest_src, encoding="utf-8")
 
     print(f"generated {len(generated)} cards, blocked {len(blocked)}")
     by_reason: dict[str, int] = {}
