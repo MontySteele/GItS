@@ -132,6 +132,13 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "block":
             ok = _bump_first((fx for fx in top if fx.get("op") == "block"),
                              "amount", val)
+        elif key == "conditional_block":
+            hits = [fx for fx in everywhere
+                    if fx.get("op") == "block"
+                    and isinstance(fx.get("amount"), int)]
+            for fx in hits:
+                fx["amount"] += val
+            ok = bool(hits)
         elif key == "heal":
             ok = _bump_first((fx for fx in top if fx.get("op") == "heal"),
                              "amount", val)
@@ -147,6 +154,40 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "times":
             ok = _bump_first((fx for fx in everywhere
                               if fx.get("op") == "damage"), "times", val)
+        elif key == "conditional_damage":
+            hits = [fx for fx in everywhere
+                    if fx.get("op") == "damage"
+                    and fx.get("target") != "self"
+                    and isinstance(fx.get("amount"), int)]
+            for fx in hits:
+                fx["amount"] += val
+            ok = bool(hits)
+        elif key == "formula_per":
+            hit = next((fx for fx in everywhere
+                        if fx.get("op") == "damage"
+                        and isinstance(fx.get("amount_formula"), dict)
+                        and isinstance(fx["amount_formula"].get("per"), int)),
+                       None)
+            ok = hit is not None
+            if hit:
+                hit["amount_formula"]["per"] += val
+        elif key == "target_power_per":
+            hit = next((fx for fx in everywhere
+                        if fx.get("op") == "damage"
+                        and isinstance(fx.get("bonus_per_target_power"), dict)
+                        and isinstance(
+                            fx["bonus_per_target_power"].get("per"), int)),
+                       None)
+            ok = hit is not None
+            if hit:
+                hit["bonus_per_target_power"]["per"] += val
+        elif key == "damage_growth":
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "grow_damage"),
+                             "amount", val)
+        elif key == "on_exhaust_energy":
+            ok = card.on_exhaust_energy > 0
+            card.on_exhaust_energy += val
         elif key == "max_hp":
             ok = _bump_first((fx for fx in everywhere
                               if fx.get("op") == "gain_max_hp"),

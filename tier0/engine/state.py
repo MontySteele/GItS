@@ -76,6 +76,14 @@ class Card:
     # `triggers:` framework, and the house rule is implement-or-log, not
     # generalize. Read by effects.player_turn_end_triggers.
     on_exhaust_autoplay: bool = False
+    # DrumOfBattle: an explicit AfterCardExhausted payout. This is card
+    # metadata rather than an on-play effect: playing Drum normally sends it
+    # to discard; only another effect exhausting it grants the energy.
+    on_exhaust_energy: int = 0
+    # Stomp: its combat hook applies a this-turn discount for each Attack the
+    # owner has already played. Keeping the rate on the card lets card_cost()
+    # read the live turn counter without mutating the printed/base cost.
+    cost_reduction_per_attack_this_turn: int = 0
     # DEPRECATED (ruled R20, 2026-07-20): a parallel M9 session introduced
     # inline `upgrade:` fields on klee-cards.yaml rows; the ruling made
     # *-upgrades.yaml sheets the ONE upgrade convention. Tier 0 IGNORES
@@ -213,6 +221,10 @@ class CombatState:
     # killed_target predicate keeps its exact meaning for Klee/Furina.
     fatal_kills_this_card: int = 0        # killed_target_fatal (Feed)
     exhausted_this_card: int = 0          # generate_from_pool amount_formula
+    block_gains_this_card: int = 0        # exact multi-gain block hooks
+    cards_exhausted_this_turn: int = 0     # EvilEye / ForgottenRitual
+    hp_lost_this_turn: int = 0             # Spite's live history predicate
+    player_damage_events: int = 0          # TearAsunder hit-count history
     # Free-play machinery (Havoc / Cascade / HowlFromBeyond). The depth
     # counter backstops the seen_states guard in combat._player_turn, which
     # only samples BETWEEN pilot plays and is structurally blind to a nested

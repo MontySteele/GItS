@@ -9,6 +9,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from tier0.content import loader
 from tools import build_ironclad_sheet as build
 from tools import extract_base_game_pool as extract
 
@@ -47,11 +48,13 @@ def test_project_mode_passes_reference_path_and_runs_once(
         calls.append((command, kwargs))
         return SimpleNamespace(returncode=0, stdout="", stderr="")
 
+    monkeypatch.setattr(extract.shutil, "which", lambda _name: "/fake/ilspycmd")
     monkeypatch.setattr(extract.subprocess, "run", fake_run)
     extract._run_ilspy_project(dll, tmp_path / "out")
 
     assert len(calls) == 1
     command, kwargs = calls[0]
+    assert command[0] == "/fake/ilspycmd"
     assert command[command.index("-r") + 1] == str(dll.parent)
     assert "--project" in command
     assert "--nested-directories" in command
@@ -94,6 +97,18 @@ def test_emitted_upgrade_delta_supports_energy_and_hit_count():
     assert extract._delta_key({"op": "damage"}, "times") == "times"
 
 
+def test_canonical_tags_reads_only_the_declared_tag_property():
+    source = """
+    HashSet<CardTag> CanonicalTags => new HashSet<CardTag> {
+        CardTag.Strike
+    };
+    bool ReadsOtherCards => card.Tags.Contains(CardTag.Skill);
+    """
+    assert extract._canonical_tags(source) == ["strike"]
+    assert extract._canonical_tags(
+        "bool ReadsOtherCards => card.Tags.Contains(CardTag.Strike);") == []
+
+
 def test_supplement_upgrade_uses_row_shape_not_card_identity():
     row = {"effects": [
         {"op": "conditional", "then": [
@@ -119,6 +134,96 @@ class SyntheticCard
         "upgrade_scope": "all",
         "exhaust_select": "chosen",
     }
+
+
+def test_supplement_upgrade_keys_cover_runtime_formula_shapes():
+    assert extract._row_delta_key({"effects": [{
+        "op": "damage", "target": "enemy",
+        "amount_formula": {"base": 1, "per": 2, "count": "pile"},
+    }]}, "ExtraDamage") == "formula_per"
+    assert extract._row_delta_key({"effects": [{
+        "op": "damage", "amount": 1, "target": "enemy",
+        "bonus_per_target_power": {"power": "vulnerable", "per": 2},
+    }]}, "ExtraDamage") == "target_power_per"
+    # Standard DLL variable names take precedence over the structural
+    # fallback when a future formula card upgrades more than one field.
+    assert extract._row_delta_key({"effects": [
+        {"op": "damage", "target": "enemy",
+         "amount_formula": {"base": 1, "per": 2, "count": "pile"}},
+        {"op": "block", "amount": 4},
+    ]}, "Block") == "block"
+    assert extract._row_delta_key({"effects": [{
+        "op": "damage", "amount": 1, "target": "enemy",
+        "bonus_per_target_power": {"power": "vulnerable", "per": 2},
+    }]}, "Damage") == "damage"
+    assert extract._row_delta_key({"effects": [{
+        "op": "conditional", "if": "ready", "then": [
+            {"op": "damage", "amount": 3, "target": "enemy"},
+        ], "else": [
+            {"op": "damage", "amount": 3, "target": "enemy"},
+        ],
+    }]}, "Damage") == "conditional_damage"
+    assert extract._row_delta_key({"effects": [
+        {"op": "apply_power", "power": "vulnerable", "amount": 1,
+         "target": "enemy"},
+        {"op": "apply_power", "power": "strength", "amount": 1,
+         "target": "self"},
+    ]}, "VulnerablePower") == "vulnerable"
+
+
+def test_supplement_upgrade_keys_cover_bounded_history_shapes():
+    assert extract._row_delta_key({
+        "effects": [{"op": "draw", "amount": 2}],
+        "on_exhaust_energy": 2,
+    }, "Energy") == "on_exhaust_energy"
+    assert extract._row_delta_key({"effects": [{
+        "op": "conditional", "if": "ready",
+        "then": [{"op": "block", "amount": 4},
+                 {"op": "block", "amount": 4}],
+        "else": [{"op": "block", "amount": 4}],
+    }]}, "Block") == "conditional_block"
+    assert extract._row_delta_key({"effects": [
+        {"op": "damage", "amount": 3, "target": "enemy"},
+        {"op": "grow_damage", "amount": 2},
+    ]}, "Increase") == "damage_growth"
+
+
+def test_builder_merges_required_supplement_layers(tmp_path, monkeypatch):
+    first = tmp_path / "pass4.yaml"
+    second = tmp_path / "pass5.yaml"
+    first.write_text("- {id: two}\n")
+    second.write_text("- {id: three}\n")
+    monkeypatch.setattr(build, "SUPPLEMENTS", (first, second))
+    monkeypatch.setattr(build, "_doc1_cards", lambda: [{"id": "one"}])
+
+    assert [row["id"] for row in build._validated_pool_cards()] == [
+        "one", "three", "two",
+    ]
+
+
+def test_builder_rejects_cross_layer_overlap(tmp_path, monkeypatch):
+    first = tmp_path / "pass4.yaml"
+    second = tmp_path / "pass5.yaml"
+    first.write_text("- {id: repeated}\n")
+    second.write_text("- {id: repeated}\n")
+    monkeypatch.setattr(build, "SUPPLEMENTS", (first, second))
+    monkeypatch.setattr(build, "_doc1_cards", lambda: [{"id": "one"}])
+
+    with pytest.raises(SystemExit, match="overlaps earlier layers"):
+        build._validated_pool_cards()
+
+
+def test_loader_rejects_a_missing_required_external_layer(
+        tmp_path, monkeypatch):
+    (tmp_path / "pool.yaml").write_text("- {id: one}\n")
+    monkeypatch.setattr(loader, "GAME_REF_DIR", tmp_path)
+    monkeypatch.setattr(loader, "EXTERNAL_CARD_SHEETS",
+                        {"pool.yaml": "reference"})
+    monkeypatch.setattr(loader, "EXTERNAL_CARD_LAYERS",
+                        {"pool.yaml": ("missing.yaml",)})
+
+    with pytest.raises(ValueError, match="missing required local layer"):
+        loader._external_cards()
 
 
 def test_builder_rejects_partial_upgrade_coverage(tmp_path, monkeypatch):

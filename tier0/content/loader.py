@@ -38,6 +38,13 @@ DOCS_CARD_SHEETS = ("klee-cards.yaml", "furina-cards.yaml",
 # and a skip-guarded test module.
 GAME_REF_DIR = CONTENT_DIR.parents[1] / "game_ref"
 EXTERNAL_CARD_SHEETS = {"ironclad_pool.yaml": "real_ironclad"}
+EXTERNAL_CARD_LAYERS = {
+    "ironclad_pool.yaml": (
+        "ironclad_pool_pass4.yaml",
+        "ironclad_pool_pass5.yaml",
+        "ironclad_pool_pass6.yaml",
+    ),
+}
 
 # The two hand-approximated reference characters own the cards/ sheets.
 # Same sheet-name convention as DOCS_CARD_SHEETS: ownership is a property
@@ -134,9 +141,23 @@ def _external_cards() -> list[dict]:
         docs = yaml.safe_load(path.read_text()) or []
         for d in docs:
             d["character"] = char
+        pool_ids = {d["id"] for d in docs}
+        for layer_name in EXTERNAL_CARD_LAYERS.get(sheet, ()):
+            layer_path = GAME_REF_DIR / layer_name
+            if not layer_path.exists():
+                raise ValueError(
+                    f"{sheet}: missing required local layer {layer_name}; "
+                    "rebuild/restore game_ref before loading real_ironclad")
+            layer = yaml.safe_load(layer_path.read_text()) or []
+            layer_ids = {d["id"] for d in layer}
+            stale = sorted(layer_ids - pool_ids)
+            if stale:
+                raise ValueError(
+                    f"{sheet}: stale merged pool is missing {layer_name} "
+                    f"cards {stale}; run build_ironclad_sheet.py")
         # A partial external upgrade population biases both combat (Armaments,
         # Aggression) and run decisions (smithing versus removal). Treat the
-        # 57-card reference as one atomic artifact: either every row resolves
+        # external reference as one atomic artifact: either every row resolves
         # through the shared `<id>+` path, or real_ironclad does not load.
         missing_upgrades = sorted(
             d["id"] for d in docs if not upgrades.has_upgrade(d["id"])

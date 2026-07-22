@@ -35,9 +35,9 @@ def make_pilot(weights: dict):
         incoming = _incoming_damage(state)
         if (incoming >= C.BLOCK_PANIC_THRESHOLD * max(1, state.player.hp)
                 and state.player.block < incoming):
-            blockers = [c for c in playable if _raw_block(c) > 0]
+            blockers = [c for c in playable if _raw_block(state, c) > 0]
             if blockers:
-                return max(blockers, key=_raw_block)
+                return max(blockers, key=lambda c: _raw_block(state, c))
 
         scored = [(_score(state, c, weights), -i, c) for i, c in enumerate(playable)]
         best_score, _, best = max(scored, key=lambda t: t[:2])
@@ -86,20 +86,63 @@ def _est(state: CombatState, val, default: int = 0) -> float:
     return default
 
 
+def _active_effects(state: CombatState, effect_list: list[dict]):
+    """Yield runtime-formula branches the pilot is explicitly able to read.
+
+    Existing Klee/Furina conditionals deliberately keep their historic
+    top-level-only valuation. Their predicates can depend on context created
+    during card resolution (reaction_triggered_by_this, killed_target, the
+    snapshotted aura), which a pre-play scorer cannot evaluate faithfully.
+    The pass-5/pass-6 Ironclad predicates below are pure reads of current
+    state.
+    """
+    for fx in effect_list:
+        if fx["op"] == "conditional":
+            name = fx["if"]
+            if name.startswith("target_has_power_"):
+                target = effects._default_target(state)
+                power = name[len("target_has_power_"):]
+                ready = bool(target and target.powers.get(power, 0))
+            elif name.startswith("exhaust_pile_at_least_"):
+                ready = (len(state.player.exhaust_pile)
+                         >= int(name.rsplit("_", 1)[1]))
+            elif name == "card_exhausted_this_turn":
+                ready = state.cards_exhausted_this_turn > 0
+            elif name == "hp_lost_this_turn":
+                ready = state.hp_lost_this_turn > 0
+            else:
+                continue
+            branch = fx["then"] if ready else fx.get("else", [])
+            yield from _active_effects(state, branch)
+        else:
+            yield fx
+
+
 def _expected_damage(state: CombatState, card: Card) -> float:
     total = 0.0
     living = state.living_enemies
-    for fx in card.effects:
+    for fx in _active_effects(state, card.effects):
         if fx["op"] == "damage":
             if fx.get("target") == "self":
                 total -= fx["amount"] * 0.5          # HP loss is a cost
                 continue
             n_targets = len(living) if fx.get("target") == "all_enemies" else 1
             times = _est(state, fx.get("times", 1), 1)
-            if fx.get("times_formula") == "2_plus_sparks":
+            times_formula = fx.get("times_formula")
+            if isinstance(times_formula, dict):
+                times = effects._calc_amount(state, times_formula, card)
+            elif times_formula == "2_plus_sparks":
                 times = 2 + state.player.sparks
+            amount = (effects._calc_amount(state, fx["amount_formula"], card)
+                      if "amount_formula" in fx
+                      else _est(state, fx.get("amount", 0)))
             per_hit = powers.modify_damage_dealt(state.player,
-                                                 _est(state, fx["amount"]))
+                                                 amount)
+            rider = fx.get("bonus_per_target_power")
+            target = effects._default_target(state)
+            if rider and target:
+                per_hit += (rider["per"]
+                            * target.powers.get(rider["power"], 0))
             if "bonus_formula" in fx:       # detonation / fanfare formulas
                 try:
                     per_hit += effects._bonus_formula(state,
@@ -135,8 +178,34 @@ def _expected_damage(state: CombatState, card: Card) -> float:
     return total
 
 
-def _raw_block(card: Card) -> float:
-    return sum(fx["amount"] for fx in card.effects if fx["op"] == "block")
+def _estimated_exhausts(state: CombatState, card: Card) -> int:
+    """Pre-play estimate for SecondWind's exhausted_this_card multiplier."""
+    for fx in card.effects:
+        if fx.get("op") != "exhaust_from":
+            continue
+        pool = [c for c in state.player.hand
+                if c is not card and not c.kit_card]
+        if fx.get("filter") == "non_attack":
+            pool = [c for c in pool if c.type != "attack"]
+        elif fx.get("filter") == "status":
+            pool = [c for c in pool if c.rarity == "status"]
+        return len(pool) if fx.get("amount") == "all" else min(
+            len(pool), int(fx.get("amount", 1)))
+    return 0
+
+
+def _raw_block(state: CombatState, card: Card) -> float:
+    total = 0.0
+    for fx in _active_effects(state, card.effects):
+        if fx["op"] != "block":
+            continue
+        amount = (effects._calc_amount(state, fx["amount_formula"], card)
+                  if "amount_formula" in fx else fx["amount"])
+        times = fx.get("times", 1)
+        if times == "exhausted_this_card":
+            times = _estimated_exhausts(state, card)
+        total += amount * times
+    return total
 
 
 def _block_value(state: CombatState, card: Card) -> float:
@@ -144,7 +213,7 @@ def _block_value(state: CombatState, card: Card) -> float:
     # printed number — otherwise the pilot never blocks chip damage.
     # Healing is the same HP economy, capped by missing HP.
     val = 0.0
-    raw = _raw_block(card)
+    raw = _raw_block(state, card)
     if raw:
         prevented = max(0.0, _incoming_damage(state) - state.player.block)
         val += min(raw, prevented)
@@ -156,13 +225,29 @@ def _block_value(state: CombatState, card: Card) -> float:
 
 def _scaling_value(state: CombatState, card: Card) -> float:
     val = 0.0
-    for fx in card.effects:
+    target = effects._default_target(state)
+    applied_to_target: dict[str, int] = {}
+    for fx in _active_effects(state, card.effects):
+        amount = fx.get("amount", 0)
+        formula = fx.get("amount_formula")
+        if formula and "target_power" in formula:
+            power = formula["target_power"]
+            amount = ((target.powers.get(power, 0) if target else 0)
+                      + applied_to_target.get(power, 0))
         if fx["op"] == "apply_power" and fx.get("target", "self") == "self":
             # Cap per-power contribution: percent-stack powers (Vermillion
             # Pact 25, Durin 30) would otherwise dwarf everything.
-            val += min(fx["amount"], 6) * 3
+            val += min(amount, 6) * 3
         elif fx["op"] == "apply_power":                  # enemy debuff
-            val += fx["amount"] * 2
+            val += amount * 2
+            if fx.get("target") == "enemy":
+                applied_to_target[fx["power"]] = (
+                    applied_to_target.get(fx["power"], 0) + amount)
+        elif fx["op"] == "grow_damage":
+            # Rampage's increase applies to the circulating card instance;
+            # price one future redraw, then let the usual fight-end decay
+            # discount late setup.
+            val += fx["amount"]
     # Setup is worth less as the fight winds down.
     return val * max(0.0, 1.0 - state.turn / 12.0) if val else 0.0
 
@@ -194,11 +279,20 @@ def _reaction_value(state: CombatState, card: Card) -> float:
     return 2.0
 
 
-def _tempo_value(card: Card) -> float:
+def _tempo_value(state: CombatState, card: Card) -> float:
     val = 0.0
-    for fx in card.effects:
+    for fx in _active_effects(state, card.effects):
         if fx["op"] in ("draw", "energy"):
-            val += fx.get("amount", 1)
+            formula = fx.get("amount_formula")
+            if isinstance(formula, dict):
+                val += effects._calc_amount(state, formula, card)
+            elif formula == "per_aura":
+                val += sum(1 for enemy in state.living_enemies if enemy.aura)
+            else:
+                val += fx.get("amount", 1)
+        elif fx["op"] == "draw_while":
+            # One matching card plus the non-matching stopper in a mixed deck.
+            val += 2.0
         elif fx["op"] == "gain_spark":
             val += fx.get("amount", 1) * 0.7    # sparks -> free attacks
         elif fx["op"] == "burst_energy":
@@ -258,7 +352,7 @@ def _score(state: CombatState, card: Card, w: dict) -> float:
             + w["block"] * _block_value(state, card)
             + w["scaling"] * _scaling_value(state, card)
             + w["reaction"] * _reaction_value(state, card)
-            + w["tempo"] * _tempo_value(card)
+            + w["tempo"] * _tempo_value(state, card)
             + w.get("sustain", 1.0) * _sustain_value(state, card)
             + w.get("spotlight", 0.0) * _spotlight_value(state, card)
             - w["cost"] * cost)

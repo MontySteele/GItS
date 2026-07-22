@@ -31,7 +31,22 @@ AMP_PAYOFF_POWERS = C.AMP_PAYOFF_POWERS   # shared with the content loader
 
 
 def _has_block(card: Card) -> bool:
-    return any(fx.get("op") == "block" for fx in card.effects)
+    def contains(effect_list: list[dict]) -> bool:
+        for fx in effect_list:
+            if fx.get("op") == "block":
+                return True
+            if (fx.get("op") == "conditional"
+                    and (fx.get("if", "").startswith("target_has_power_")
+                         or fx.get("if", "").startswith(
+                             "exhaust_pile_at_least_")
+                         or fx.get("if") in ("card_exhausted_this_turn",
+                                             "hp_lost_this_turn"))
+                    and (contains(fx.get("then", []))
+                         or contains(fx.get("else", [])))):
+                return True
+        return False
+
+    return contains(card.effects)
 
 
 def _block_density(deck: list[Card]) -> float:
@@ -74,19 +89,54 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
     return min(1.0, on_plan / C.DRAFT_CORE_SIZE)
 
 
-def _static_power(card: Card) -> float:
+def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
     """Printed damage+block per energy — a deliberately dumb immediate-
     value proxy for the generic (anchor) archetype, whose cards carry no
     archetype tags. The real power/synergy scorer is M6's adaptive policy."""
-    total = 0.0
-    for fx in card.effects:
-        if fx.get("op") == "damage" and fx.get("target") != "self":
-            amt = fx.get("amount", 0)
-            if isinstance(amt, int):
-                total += amt * (fx.get("times", 1)
-                                if isinstance(fx.get("times", 1), int) else 1)
-        elif fx.get("op") == "block":
-            total += fx.get("amount", 0)
+    def effect_power(effect_list: list[dict]) -> float:
+        total = 0.0
+        for fx in effect_list:
+            if fx.get("op") == "conditional":
+                name = fx.get("if", "")
+                if (name.startswith("target_has_power_")
+                        or name.startswith("exhaust_pile_at_least_")
+                        or name in ("card_exhausted_this_turn",
+                                    "hp_lost_this_turn")):
+                    # These two pass-5 predicates describe reachable payoff
+                    # states without depending on mid-resolution context.
+                    total += max(effect_power(fx.get("then", [])),
+                                 effect_power(fx.get("else", [])))
+            elif fx.get("op") == "damage" and fx.get("target") != "self":
+                amt = fx.get("amount", 0)
+                formula = fx.get("amount_formula")
+                if isinstance(formula, dict):
+                    count = 1
+                    if formula.get("count") == "strike_cards" and deck is not None:
+                        count = (sum("strike" in c.tags for c in deck)
+                                 + int("strike" in card.tags))
+                    # Otherwise one unit of the live count is a conservative
+                    # neutral offer-state estimate (pile, current Block, ...).
+                    amt = (formula.get("base", 0)
+                           + formula.get("per", 1) * count)
+                rider = fx.get("bonus_per_target_power")
+                if isinstance(rider, dict):
+                    amt += rider.get("per", 0)  # one matching stack
+                if isinstance(amt, (int, float)):
+                    times = (fx.get("times", 1)
+                             if isinstance(fx.get("times", 1), int) else 1)
+                    times_formula = fx.get("times_formula")
+                    if isinstance(times_formula, dict):
+                        times = (times_formula.get("base", 0)
+                                 + times_formula.get("per", 1))
+                    total += amt * times
+            elif fx.get("op") == "block":
+                times = 2 if fx.get("times") == "exhausted_this_card" else 1
+                total += fx.get("amount", 0) * times
+            elif fx.get("op") == "grow_damage":
+                total += fx.get("amount", 0) * 0.5  # one discounted redraw
+        return total
+
+    total = effect_power(card.effects)
     cost = card.cost if isinstance(card.cost, int) else 2
     return total / max(1, cost)
 
@@ -120,7 +170,7 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     # an implausible human, and the acceptance law requires plausible
     # drafts. Share-synergy stays excluded — assigned already prices fit
     # off its target, and stacking share-synergy would double-count it.
-    s += min(3.0, _static_power(card) / 3.0)
+    s += min(3.0, _static_power(card, deck) / 3.0)
     if (archetype == "generic" and not card.is_companion
             and card.role in ("enabler", "payoff")):
         # The anchor's roles stand in for engine cards. (Its old private
@@ -267,7 +317,7 @@ def adaptive_score(card: Card, deck: list[Card]) -> float:
     richer term is the whole experiment -- if the pool still converges on one
     shape across many seeds, the convergence is the pool's, not the policy's.
     """
-    s = min(3.0, _static_power(card) / 3.0)
+    s = min(3.0, _static_power(card, deck) / 3.0)
     shares = archetype_shares(deck)
     # Companions are scored by the dedicated block below, NOT here. They now
     # carry a derived `reaction` tag so that archetype_shares can see them --

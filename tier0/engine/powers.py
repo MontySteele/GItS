@@ -93,7 +93,7 @@ def on_turn_start(state: CombatState, fighter: Fighter) -> None:
             hp_loss = resources.absorb_into_encore(state, dot)
         fighter.hp -= hp_loss
         state.emit("dot_tick", amount=dot, target=getattr(fighter, "name", "player"))
-        if hp_loss and getattr(fighter, "fanfare_cap", 0):
+        if hp_loss and fighter is state.player:
             from tier0.engine import resources
             resources.note_player_hp_loss(state, hp_loss)
         fighter.powers["dot"] = dot - 1         # decays by 1 per tick

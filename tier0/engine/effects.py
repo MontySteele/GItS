@@ -46,7 +46,8 @@ def _bonus_formula(state: CombatState, formula: str) -> int:
     raise ValueError(f"unknown bonus_formula {formula!r}")
 
 
-def _runtime_count(state: CombatState, token: str) -> int:
+def _runtime_count(state: CombatState, token: str,
+                   current_card: Optional[Card] = None) -> int:
     """A live integer the base-game CalculatedX/CalculatedDamage vars read at
     resolution time, not a number the pilot could pre-compute -- which is
     exactly why the real game defers them to play time:
@@ -54,6 +55,10 @@ def _runtime_count(state: CombatState, token: str) -> int:
       exhaust_pile   AshenStrike (ExtraDamage x cards in the exhaust pile)
       player_block   BodySlam (ExtraDamage x the owner's CURRENT Block)
       attacks_in_hand ExpectAFight (Energy x Attacks in hand at play time)
+      strike_cards   PerfectedStrike (all cards carrying the structurally
+                     extracted Strike tag, including the playing card)
+      player_damage_events TearAsunder (unblocked player-damage entries this
+                     combat, counted per event rather than per HP)
     """
     p = state.player
     if token == "exhaust_pile":
@@ -62,15 +67,28 @@ def _runtime_count(state: CombatState, token: str) -> int:
         return p.block
     if token == "attacks_in_hand":
         return sum(1 for c in p.hand if c.type == "attack")
+    if token == "strike_cards":
+        piles = (p.draw_pile, p.hand, p.discard_pile, p.exhaust_pile)
+        cards = [c for pile in piles for c in pile]
+        if (current_card is not None
+                and all(c is not current_card for c in cards)):
+            cards.append(current_card)  # play_card has removed it from hand
+        return sum("strike" in c.tags for c in cards)
+    if token == "player_damage_events":
+        return state.player_damage_events
+    if token == "exhausted_this_card":
+        return state.exhausted_this_card
     raise ValueError(f"unknown runtime count {token!r}")
 
 
-def _calc_amount(state: CombatState, formula: dict) -> int:
+def _calc_amount(state: CombatState, formula: dict,
+                 current_card: Optional[Card] = None) -> int:
     """CalculatedDamageVar / CalculatedVar grammar: base + per * count, where
     count is a _runtime_count token. base defaults 0 (BodySlam), per defaults
     1 (ExpectAFight's 1-per-Attack)."""
     return (formula.get("base", 0)
-            + formula.get("per", 1) * _runtime_count(state, formula["count"]))
+            + formula.get("per", 1)
+            * _runtime_count(state, formula["count"], current_card))
 
 
 def _power_amount_formula(state: CombatState, formula: dict) -> int:
@@ -310,16 +328,20 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
 
     times = fx.get("times", 1)
     if "times_formula" in fx:
-        if fx["times_formula"] != "2_plus_sparks":
+        formula = fx["times_formula"]
+        if isinstance(formula, dict):
+            times = _calc_amount(state, formula, card)
+        elif formula != "2_plus_sparks":
             raise ValueError(f"unknown times_formula {fx['times_formula']!r}")
-        # R39: the bank as it was at play time, NOT the post-spend bank --
-        # otherwise going free at the threshold is what removes the sparks
-        # the card counts.
-        times = 2 + state.sparks_at_play      # Gleeful Barrage
+        else:
+            # R39: the bank as it was at play time, NOT the post-spend bank --
+            # otherwise going free at the threshold is what removes the sparks
+            # the card counts.
+            times = 2 + state.sparks_at_play  # Gleeful Barrage
     times = _amount(state, times)
 
     if "amount_formula" in fx:                # AshenStrike, BodySlam
-        base = _calc_amount(state, fx["amount_formula"])
+        base = _calc_amount(state, fx["amount_formula"], card)
     else:
         base = _amount(state, fx["amount"])
     if "bonus_formula" in fx:
@@ -363,11 +385,18 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_block(state: CombatState, fx: dict, card: Card) -> None:
-    amount = _spotlight_scale(state, card, fx["amount"])
-    # Frail bites card block here (the affected creature's -25%, floored).
-    amount = powers.modify_block_gained(state.player, amount)
-    state.player.block += amount
-    state.emit("block", amount=amount)
+    raw = (_calc_amount(state, fx["amount_formula"], card)
+           if "amount_formula" in fx else fx["amount"])
+    times = fx.get("times", 1)
+    times = (_runtime_count(state, times, card)
+             if isinstance(times, str) else times)
+    for _ in range(times):
+        amount = _spotlight_scale(state, card, raw)
+        # Frail bites each printed card-block gain before the refpower funnel.
+        amount = powers.modify_block_gained(state.player, amount)
+        state.player.block += amount
+        state.block_gains_this_card += 1
+        state.emit("block", amount=amount)
 
 
 def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
@@ -414,7 +443,7 @@ def _op_draw_while(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_energy(state: CombatState, fx: dict, card: Card) -> None:
-    amount = (_calc_amount(state, fx["amount_formula"])  # ExpectAFight
+    amount = (_calc_amount(state, fx["amount_formula"], card)  # ExpectAFight
               if "amount_formula" in fx else fx["amount"])
     state.player.energy += amount
     state.emit("energy", amount=amount)
@@ -750,6 +779,8 @@ def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
     pool = [c for c in hand if not c.kit_card]   # same invariant as discard
     if fx.get("filter") == "status":
         pool = [c for c in pool if c.rarity == "status"]
+    elif fx.get("filter") == "non_attack":
+        pool = [c for c in pool if c.type != "attack"]
     n = fx.get("amount", 1)
     # Stoke exhausts the WHOLE hand and then generates that many cards. The
     # count is fixed BEFORE any exhausting (the dll reads exhaustCount off
@@ -819,10 +850,13 @@ def _best_upgrade_target(hand: list[Card], idxs: list[int]) -> int:
     most printed damage+block from being upgraded. Ties break to the lowest
     hand index so the pick stays deterministic under a fixed seed.
     INSTRUMENT SURFACE (same convention as _worst_card)."""
-    from tier0.content import loader, upgrades      # late import avoids cycle
+    import copy as _copy
+    from tier0.content import upgrades              # late import avoids cycle
 
     def delta(i: int) -> int:
-        upped = loader.get_card(hand[i].id + upgrades.SUFFIX)
+        # Score the same live instance the upgrade will mutate. Reloading the
+        # base row erases Rampage growth and temporary generated-card state.
+        upped = upgrades.apply_upgrade(_copy.deepcopy(hand[i]))
         return _printed_power(upped) - _printed_power(hand[i])
 
     return max(idxs, key=lambda i: (delta(i), -i))
@@ -905,6 +939,10 @@ def _predicate(state: CombatState, name: str) -> bool:
         # least N cards; otherwise the card resolves as nothing.
         n = int(name.rsplit("_", 1)[1])
         return len(state.player.exhaust_pile) >= n
+    if name == "card_exhausted_this_turn":
+        return state.cards_exhausted_this_turn > 0
+    if name == "hp_lost_this_turn":
+        return state.hp_lost_this_turn > 0
     if name == "enemy_intends_attack":
         # Frozen enemies still attack under v1.5 (at -50%), so they count.
         return any(e.current_intent()["kind"] == "attack"
@@ -933,6 +971,23 @@ def _predicate(state: CombatState, name: str) -> bool:
 
 def _op_repeat_this(state: CombatState, fx: dict, card: Card) -> None:
     state.repeat_requested = fx.get("times", 1)     # honored by resolve_card
+
+
+def _op_grow_damage(state: CombatState, fx: dict, card: Card) -> None:
+    """Rampage: permanently raise this card instance's printed damage.
+
+    The card object circulates through the combat piles, so mutating its own
+    first damage op preserves growth across redraws; deepcopy-based clones
+    inherit the amount they cloned from, matching CardModel clone semantics.
+    """
+    hit = next((effect for effect in card.effects
+                if effect.get("op") == "damage"
+                and isinstance(effect.get("amount"), int)), None)
+    if hit is None:
+        raise ValueError(f"{card.id}: grow_damage has no literal damage op")
+    hit["amount"] += fx["amount"]
+    state.emit("grow_damage", card=card.id, amount=fx["amount"],
+               total=hit["amount"])
 
 
 def _op_chance_bomb_per_detonation(state: CombatState, fx: dict,
@@ -981,7 +1036,8 @@ def _op_upgrade_in_hand(state: CombatState, fx: dict, card: Card) -> None:
     the UNAPPLIABLE set -- so a card whose upgrade the sim cannot express is
     visibly skipped rather than pretend-upgraded.
     """
-    from tier0.content import loader, upgrades      # late import avoids cycle
+    import copy as _copy
+    from tier0.content import upgrades              # late import avoids cycle
     hand = state.player.hand
     idxs = [i for i, c in enumerate(hand) if upgrades.has_upgrade(c.id)]
     if not idxs:
@@ -993,7 +1049,10 @@ def _op_upgrade_in_hand(state: CombatState, fx: dict, card: Card) -> None:
     # that); a remove/append rebuild would silently reorder the hand and
     # perturb every downstream heuristic that reads hand order.
     for i in idxs:
-        hand[i] = loader.get_card(hand[i].id + upgrades.SUFFIX)
+        # Upgrade the LIVE instance rather than reloading a pristine base row.
+        # Rampage's accumulated damage, generated-card cost overrides, and
+        # clone state are all combat mutations the real CardModel preserves.
+        hand[i] = upgrades.apply_upgrade(_copy.deepcopy(hand[i]))
         state.emit("upgrade_in_hand", card=hand[i].id)
 
 
@@ -1179,6 +1238,7 @@ OPS = {
     "scry_discard": _op_scry_discard,
     "conditional": _op_conditional,
     "repeat_this": _op_repeat_this,
+    "grow_damage": _op_grow_damage,
     "chance_bomb_per_detonation": _op_chance_bomb_per_detonation,
     "copy_companion_in_hand": _op_copy_companion_in_hand,
     "replay_next_companion": _op_replay_next_companion,
@@ -1207,6 +1267,7 @@ def resolve_card(state: CombatState, card: Card) -> None:
     state.kills_this_card = 0
     state.fatal_kills_this_card = 0
     state.exhausted_this_card = 0
+    state.block_gains_this_card = 0
     state.detonations_at_card_start = state.detonations_total
     state.repeat_requested = 0
     # Predicate snapshot: does the default target hold an off-element aura?

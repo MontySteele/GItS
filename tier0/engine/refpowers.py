@@ -38,23 +38,18 @@ tier0's pre-existing `powers.on_turn_start` runs BEFORE energy and BEFORE the
 draw, so anything implemented there is a POST step running at a PRE site. That
 is why DemonForm, Plating, CrimsonMantle and Inferno all use the late hook.
 
-KNOWN FUNNEL GRANULARITY (declared, not silent)
------------------------------------------------
-Three of the funnels below observe a DELTA across one card play rather than
-each individual event, because effects.py is owned by a concurrent agent and
-could not be edited in this pass:
+FUNNEL GRANULARITY
+------------------
+The block funnel observes the total amount across one CardPlay, while
+`block_gains_this_card` preserves how many BlockGained rows produced it. That
+is exact for Unmovable (one multiplier decision for the current CardPlay,
+every prior row consuming allowance) and Juggernaut (one trigger per row),
+including EvilEye and SecondWind. The exhaust funnel is per-card and exact.
 
-  * card-sourced BLOCK  (Unmovable, Juggernaut)
-  * card-caused EXHAUST (FeelNoPain, DarkEmbrace)
-  * card-caused SELF-DAMAGE (Inferno, Rupture)
-
-For block and self-damage this is EXACTLY right for Unmovable (whose own rule
-groups block gains by CardPlay) and EXACTLY right for Rupture (whose own rule
-defers strength to AfterCardPlayed). It under-counts only for a card that
-raises the same quantity twice in one play: such a card fires Juggernaut/Inferno
-once instead of twice. No Ironclad card in the pool does this today; if one is
-added, `state.emit("refpower_funnel_collapse", ...)` below makes it visible.
-The exhaust funnel is per-card and therefore exact.
+Card-caused self-damage still observes a DELTA across the CardPlay. That is
+exact for Rupture's deferral, but a future card with several distinct
+self-damage ops would fire Inferno only once. Such a card emits the existing
+`refpower_funnel_collapse` event and must not enter the pool unreviewed.
 
 UNIMPLEMENTED (see UNIMPLEMENTED below): Stampede and Hellraiser. Their cards
 must be excluded from the pool -- they are NOT approximated.
@@ -87,9 +82,8 @@ UNIMPLEMENTED: dict[str, str] = {
         "HellraiserPower autoplays every drawn card tagged Strike from inside "
         "AfterCardDrawnEarly, which makes CombatState.draw REENTRANT: the "
         "autoplay resolves a card that can draw more cards that autoplay in "
-        "turn. tier0's draw() is a tight mutating loop with no depth guard, "
-        "and tools/extract_base_game_pool.py does not yet capture CardTag so "
-        "the Strike tag is not even present. Card: Hellraiser."
+        "turn. tier0's draw() is a tight mutating loop with no depth guard. "
+        "Card: Hellraiser."
     ),
 }
 
@@ -183,14 +177,10 @@ def _apply_unmovable(state: CombatState, fighter: Fighter, amount: int) -> int:
 
     The source counts BlockGainedEntry ROWS, filtered by
     `e.Props.IsCardOrMonsterMove() && e.CardPlay != cardPlay`. The CardPlay
-    filter self-excludes only the IN-FLIGHT play, so several block gains inside
-    the CURRENT play are one event for the allowance -- which is exactly
-    tier0's per-card-play funnel. A PRIOR play that emitted two rows, however,
-    consumes TWO units, where tier0 counts it as one. Declared, not silent:
-    unreachable while the card applies 1 (a second drafted copy is needed for
-    Amount >= 2) and any multi-block-op card already emits
-    refpower_funnel_collapse. Stacks raise the per-turn allowance; they do not
-    raise the multiplier.
+    filter self-excludes every row from the IN-FLIGHT play, so several gains
+    inside the CURRENT play share the multiplier decision. A PRIOR play that
+    emitted two rows consumes TWO units; block_gains_this_card preserves that
+    row count. Stacks raise the per-turn allowance, not the multiplier.
     """
     n = fighter.powers.get("unmovable", 0)
     if not n or fighter is not state.player:
@@ -251,6 +241,18 @@ def after_card_exhausted(state: CombatState, card: Card,
     discarded on the very next line.
     """
     p = state.player
+    state.cards_exhausted_this_turn += 1
+    if card.on_exhaust_energy:
+        # DrumOfBattle uses PlayerCmd.GainEnergy, so ExpectAFight's
+        # NoEnergyGain hook must deny this payout too. Normal on-play energy
+        # is clamped later in after_card_played; Drum fires from this later
+        # exhaust sweep and therefore needs the same gate here.
+        if state.no_energy_gain_ceiling is not None:
+            state.emit("energy_gain_denied", amount=card.on_exhaust_energy)
+        else:
+            p.energy += card.on_exhaust_energy
+            state.emit("energy", amount=card.on_exhaust_energy,
+                       source="on_exhaust")
     n = p.powers.get("feel_no_pain", 0)
     if n:
         gain_block(state, p, n)                  # Unpowered: no Unmovable
@@ -468,13 +470,18 @@ def after_card_played(state: CombatState, card: Card, snap: dict) -> None:
     # Card-sourced block: Unmovable's doubling and Juggernaut's payout.
     delta = p.block - snap["block"]
     if delta > 0:
-        if _counts_multiple_block_ops(card):
-            state.emit("refpower_funnel_collapse", kind="block", card=card.id)
         doubled = _apply_unmovable(state, p, delta)
         if doubled != delta:
             p.block += doubled - delta
-        state.block_gain_card_plays_this_turn += 1
-        _after_block_gained(state, p, doubled)
+        gains = max(1, state.block_gains_this_card)
+        # Unmovable excludes rows from the CURRENT CardPlay and therefore
+        # applies one multiplier decision to the aggregate, but later card
+        # plays count every row this card emitted. Juggernaut also fires once
+        # per row. Tracking the count makes EvilEye and SecondWind exact
+        # without changing the block amount pipeline.
+        state.block_gain_card_plays_this_turn += gains
+        for _ in range(gains):
+            _after_block_gained(state, p, doubled)
 
     # Card-caused self damage -> Inferno / Rupture.
     lost = snap["hp"] - p.hp
@@ -523,10 +530,6 @@ def after_card_played(state: CombatState, card: Card, snap: dict) -> None:
                 p.discard_pile.append(clone)
                 zone = "discard"
             state.emit("juggling_clone", card=clone.id, zone=zone)
-
-
-def _counts_multiple_block_ops(card: Card) -> bool:
-    return sum(1 for fx in card.effects if fx.get("op") == "block") > 1
 
 
 def _counts_multiple_damage_ops(card: Card) -> bool:
@@ -803,6 +806,8 @@ def reset_turn_counters(state: CombatState) -> None:
     """Per-player-turn windows owned by this module."""
     state.attacks_played_this_turn = 0            # Juggling
     state.block_gain_card_plays_this_turn = 0     # Unmovable's allowance
+    state.cards_exhausted_this_turn = 0           # EvilEye / ForgottenRitual
+    state.hp_lost_this_turn = 0                   # Spite
     state.rupture_pending = 0
 
 

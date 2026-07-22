@@ -80,9 +80,10 @@
 #   2. Vulnerable scores a flat amount*2 with no reference to
 #      C.VULNERABLE_TAKEN_MULT, so Bash -- his STARTER -- is undervalued,
 #      and starter is the config where constraints are hard.
-#   3. Block-as-damage (Body Slam) and non-expiring block (Barricade) are
-#      not expressible at all. Per house rule those are UNIMPLEMENTED and
-#      excluded by the sheet generator, never approximated.
+#   3. Body Slam's live Block formula is now visible, but persistent and
+#      history payoffs are still priced conservatively: Barricade's retained
+#      Block is not valued as future-turn sustain, and Rampage/Tear Asunder
+#      receive only bounded one-redraw / one-event estimates.
 - id: ironclad
   weights:
     damage: 1.1      # no elements, no engine: hits are the plan

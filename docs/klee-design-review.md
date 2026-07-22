@@ -27,33 +27,39 @@ target line reproduced exactly in the historical unupgraded world — verified
 at the time by `python -m tools.klee_lever_sweep --knob damage`.
 `tools/build_ironclad_sheet.py` assembles the card and character inputs from
 local `game_ref/` data —
-`ironclad_pool.yaml` = the extractor's 35 cards + the local
-`ironclad_pool_pass4.yaml` supplement; `char_real_ironclad.yaml` = generated
+`ironclad_pool.yaml` = the extractor's 35 cards + the local pass-4 (22 cards),
+pass-5 (10 cards), and pass-6 (9 cards) supplements;
+`char_real_ironclad.yaml` = generated
 from local `ironclad_char_facts.yaml` when absent. The extractor also generates
-`ironclad-upgrades.yaml`: 35 deltas from translated effect provenance plus 22
+`ironclad-upgrades.yaml`: 35 deltas from translated effect provenance plus 41
 from the local supplement rows and their DLL `OnUpgrade` methods. The pipeline
-fails closed if an input is missing, if the pool overlaps/drifts, or unless all
-57 upgrades are applicable; `--verify` checks the ordered, duplicate-free pool
+fails closed if an input is missing, if any layer overlaps/drifts, or unless all
+76 upgrades are applicable; `--verify` checks the ordered, duplicate-free pool
 and complete upgrade coverage.
 
 **But the pipeline is NOT fully tool-regenerable, and this is a real limit, not
-a wording nicety.** The 22-card supplement is hand-authored pass-4 design work:
-14 cards use powers held behind the extractor's SUPPORTED_POWERS verification
-dial, and 8 branch on runtime state (Feed, Fiend Fire, Headbutt, …) — cards the
-extractor deliberately refuses to auto-translate. So the supplement is neither
-committable (decompiled-data-derived) nor reconstructable by tools alone
-(it needs the pass-4 design pass, `docs/klee-pass-4-plan.md`). A machine
-without it can build the 35-card extractor pool but cannot instantiate the
-57-card `real_ironclad` until the supplement is supplied as a local artifact or
-pass-4 is re-run. On this machine (game_ref present, survives `git pull`) it
-reproduces exactly; on a bare clone the `real_ironclad` tests skip and the
-target line is skipped gracefully — the Klee sweep still runs.
+a wording nicety.** The supplements are hand-authored design work. Pass 4's 22
+cards include 14 powers behind the extractor's SUPPORTED_POWERS verification
+dial and 8 runtime branches (Feed, Fiend Fire, Headbutt, ...). Pass 5 adds ten
+reviewed mappings for formula-driven effects whose Tier-0 primitives were
+already implemented and tested. Pass 6 adds nine bounded history/formula cards
+and preserves the exact DLL Strike-tag, multi-block, on-exhaust, and live-card
+mutation semantics they require. These are cards the strict extractor
+deliberately refuses to auto-translate. The layers are therefore neither
+committable (decompiled-data-derived) nor reconstructable by tools alone; they
+need their review passes. A machine without them can build the 35-card
+extractor pool but cannot instantiate the 76-card `real_ironclad` until all
+three local artifacts are supplied. On this machine (`game_ref` survives
+`git pull`) the result reproduces exactly; on a bare clone the
+`real_ironclad` tests skip and the target line is skipped gracefully.
 
 **Upgrade correction (2026-07-22).** The archived 40% target above was measured
 before external upgrade sheets existed. That omission disabled smithing and
-parts of Armaments/Aggression, so 40% is historical evidence, not the current
-parity target. Full 57/57 upgrades are now generated locally; the balance pass
-must stamp its replacement target rather than silently carrying 40% forward.
+parts of Armaments/Aggression, so 40% was historical evidence rather than a
+valid carry-forward target. Full 76/76 upgrades are now generated locally.
+Pass 5 measured 40.3% at 67 cards; pass 6 measures 38.1% at 76 cards against an
+exact same-world 67-card control of 40.3%. Neither numerical proximity
+retroactively validates the old methodology.
 
 ---
 

@@ -30,18 +30,19 @@ USAGE
     python tools/extract_base_game_pool.py Silent --json game_ref/silent.json
     python tools/extract_base_game_pool.py Ironclad --emit-sheet
 
-Requires: ilspycmd on PATH (`dotnet tool install -g ilspycmd`) and a
-local install; the game path is read from klee-mod/local.props so there
-is exactly one place a machine path is configured.
+Requires: ilspycmd (`dotnet tool install -g ilspycmd`) and a local install.
+The default dotnet-tool location is accepted even when it is not on PATH; the
+game path is read from klee-mod/local.props so there is exactly one place a
+machine path is configured.
 
 --emit-sheet
 ------------
 Writes a Tier 0 card sheet (`game_ref/<char>-cards.yaml`) plus its upgrade
 companion, so the real pool can be SCORED on the same seven axes as Klee
-and Furina instead of against the six-card `ref_ironclad` construct. If the
-conventional local supplement (`game_ref/<char>_pool_pass4.yaml`) exists, its
-rows are validated and their upgrade deltas are derived from the same DLL in
-that pass. Both outputs remain gitignored reference artifacts.
+and Furina instead of against the six-card `ref_ironclad` construct. Every
+conventional local supplement (`game_ref/<char>_pool_pass*.yaml`) is layered in
+pass order; its rows are validated and their upgrade deltas are derived from
+the same DLL. All outputs remain gitignored reference artifacts.
 
 Two rules govern that translation and they are the reason this mode is
 worth having at all:
@@ -66,6 +67,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -132,19 +134,35 @@ def _run_ilspy_project(dll: Path, output_dir: Path) -> None:
     production uses a TemporaryDirectory so decompiled game source never
     becomes a persistent repository artifact.
     """
+    executable = shutil.which("ilspycmd")
+    if executable is None:
+        dotnet_tool = Path.home() / ".dotnet" / "tools" / "ilspycmd"
+        executable = str(dotnet_tool) if dotnet_tool.is_file() else None
+    if executable is None:
+        sys.exit("ilspycmd not found -- dotnet tool install -g ilspycmd")
+    command = [executable]
+    # A globally installed dotnet tool is an apphost. On Homebrew-managed
+    # Macs the runtime can be present but unregistered, so that apphost fails
+    # before ILSpy starts. Invoking the installed DLL through the discoverable
+    # `dotnet` host avoids machine-specific DOTNET_ROOT configuration.
+    dotnet = shutil.which("dotnet")
+    tool_store = Path.home() / ".dotnet" / "tools" / ".store" / "ilspycmd"
+    tool_dlls = sorted(tool_store.rglob("ilspycmd.dll"))
+    if dotnet and tool_dlls:
+        command = [dotnet, str(tool_dlls[-1])]
     try:
         # Resolving the game's adjacent assemblies is required for ILSpy to
         # reconstruct async methods. Without it, OnPlay is left as a generated
         # state-machine wrapper and the structural translator sees no effects.
-        p = subprocess.run([
-            "ilspycmd", "--disable-updatecheck",
+        p = subprocess.run(command + [
+            "--disable-updatecheck",
             "-r", str(dll.parent),
             "--project", "--nested-directories",
             "-o", str(output_dir),
             str(dll),
         ], capture_output=True, text=True, timeout=300)
     except FileNotFoundError:
-        sys.exit("ilspycmd not on PATH -- dotnet tool install -g ilspycmd")
+        sys.exit("ilspycmd disappeared before it could be run")
     except subprocess.TimeoutExpired:
         sys.exit("ilspycmd timed out while decompiling sts2.dll")
     if p.returncode:
@@ -715,11 +733,30 @@ def _sheet_row(card: dict, src: str) -> tuple[dict, dict]:
         "role": _role(effects, card["type"]),
         "effects": effects,
     }
+    tags = _canonical_tags(src)
+    if tags:
+        row["tags"] = tags
     # Self-exhaust is a printed keyword; a card that exhausts SOMETHING ELSE
     # only mentions Exhaust in a hover tip, and must not be marked.
     if re.search(r"CanonicalKeywords[^;]*CardKeyword\.Exhaust", src, re.S):
         row["exhaust"] = True
     return row, _upgrade_delta(src, fed)
+
+
+def _canonical_tags(src: str) -> list[str]:
+    """Structurally recover tags declared by the card's CanonicalTags.
+
+    Searching the whole source for ``CardTag.Strike`` is not safe: a card can
+    READ another card's tag without carrying it (Hellraiser is the canonical
+    counterexample). Restrict extraction to the expression-bodied property.
+    """
+    match = re.search(
+        r"CanonicalTags\s*=>\s*new HashSet<CardTag>\s*\{(.*?)\};",
+        src, re.S)
+    if not match:
+        return []
+    return [_snake(tag) for tag in re.findall(r"CardTag\.(\w+)",
+                                               match.group(1))]
 
 
 def _upgrade_delta(src: str, fed: dict) -> dict:
@@ -803,9 +840,13 @@ def _row_delta_key(row: dict, var: str) -> str | None:
     if var == "Damage" and any(
             fx.get("op") == "damage" and fx.get("target") != "self"
             for fx in effects):
-        return "damage"
+        top_damage = [fx for fx in row["effects"]
+                      if fx.get("op") == "damage"
+                      and fx.get("target") != "self"]
+        return "damage" if top_damage else "conditional_damage"
     if var == "Block" and any(fx.get("op") == "block" for fx in effects):
-        return "block"
+        top_block = any(fx.get("op") == "block" for fx in row["effects"])
+        return "block" if top_block else "conditional_block"
     if var == "MaxHp" and any(fx.get("op") == "gain_max_hp"
                               for fx in effects):
         return "max_hp"
@@ -818,6 +859,29 @@ def _row_delta_key(row: dict, var: str) -> str | None:
         return "draw"
     if var == "Energy" and any(fx.get("op") == "energy" for fx in effects):
         return "energy"
+    if var == "Energy" and isinstance(row.get("on_exhaust_energy"), int):
+        return "on_exhaust_energy"
+    power = SUPPORTED_POWERS.get(var)
+    if power and any(fx.get("op") == "apply_power"
+                     and fx.get("power") == power for fx in effects):
+        return UPGRADE_POWER_KEY.get(power)
+    # A few runtime-formula cards name their scaling DynamicVar something
+    # card-specific (for example, ExtraDamage). Only use the structural
+    # fallback after all standard variable meanings above have failed, and
+    # require it to identify exactly one formula field.
+    formula_keys = []
+    if any(fx.get("op") == "damage"
+           and isinstance(fx.get("amount_formula"), dict)
+           and "per" in fx["amount_formula"] for fx in effects):
+        formula_keys.append("formula_per")
+    if any(fx.get("op") == "damage"
+           and isinstance(fx.get("bonus_per_target_power"), dict)
+           for fx in effects):
+        formula_keys.append("target_power_per")
+    if len(formula_keys) == 1:
+        return formula_keys[0]
+    if any(fx.get("op") == "grow_damage" for fx in effects):
+        return "damage_growth"
     if sum(fx.get("op") == "apply_power" for fx in effects) == 1:
         return "power_amount"
     return None
@@ -972,35 +1036,46 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
     # recoverable mechanically: values come from OnUpgrade in the DLL, while
     # the local row supplies the effect provenance needed to choose a delta
     # key. The conventional name keeps this generic for future characters.
-    supplement = OUT_DIR / f"{character.lower()}_pool_pass4.yaml"
+    supplements = sorted(
+        OUT_DIR.glob(f"{character.lower()}_pool_pass*.yaml"),
+        key=lambda path: path.name,
+    )
     supplement_upgrades = 0
-    if supplement.exists():
+    supplement_counts: list[tuple[str, int]] = []
+    if supplements:
         try:
             import yaml
         except ImportError:
             sys.exit("PyYAML is required to derive supplement upgrades")
-        supplement_rows = yaml.safe_load(supplement.read_text()) or []
-        if not isinstance(supplement_rows, list):
-            sys.exit(f"{supplement}: expected a list of card rows")
         source_by_id = {
             ID_PREFIX + _snake(card["name"]): sources[card["name"]]
             for card in cards
         }
+        emitted_ids = {row["id"] for row in rows}
         seen: set[str] = set()
-        for row in supplement_rows:
-            cid = row.get("id")
-            if not cid or cid in seen:
-                sys.exit(f"{supplement}: missing or duplicate card id {cid!r}")
-            if cid in upgrades:
-                sys.exit(f"{supplement}: {cid} overlaps the emitted sheet")
-            if cid not in source_by_id:
-                sys.exit(f"{supplement}: no DLL card source found for {cid}")
-            seen.add(cid)
-            delta = _supplement_upgrade_delta(row, source_by_id[cid])
-            if not delta:
-                sys.exit(f"{supplement}: no upgrade recovered for {cid}")
-            upgrades[cid] = delta
-            supplement_upgrades += 1
+        for supplement in supplements:
+            supplement_rows = yaml.safe_load(supplement.read_text()) or []
+            if not isinstance(supplement_rows, list) or not supplement_rows:
+                sys.exit(f"{supplement}: expected a non-empty list of cards")
+            count = 0
+            for row in supplement_rows:
+                cid = row.get("id")
+                if not cid or cid in seen:
+                    sys.exit(
+                        f"{supplement}: missing or cross-layer duplicate "
+                        f"card id {cid!r}")
+                if cid in emitted_ids:
+                    sys.exit(f"{supplement}: {cid} overlaps the emitted sheet")
+                if cid not in source_by_id:
+                    sys.exit(f"{supplement}: no DLL card source found for {cid}")
+                seen.add(cid)
+                delta = _supplement_upgrade_delta(row, source_by_id[cid])
+                if not delta:
+                    sys.exit(f"{supplement}: no upgrade recovered for {cid}")
+                upgrades[cid] = delta
+                supplement_upgrades += 1
+                count += 1
+            supplement_counts.append((supplement.name, count))
 
     OUT_DIR.mkdir(exist_ok=True)
     sheet = OUT_DIR / f"{character.lower()}-cards.yaml"
@@ -1018,7 +1093,8 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
     ups = OUT_DIR / f"{character.lower()}-upgrades.yaml"
     lines = [f"# {character} upgrade deltas -- MACHINE-GENERATED, gitignored.",
              f"# {len(rows)} extractor rows + {supplement_upgrades} local "
-             "supplement rows.",
+             "supplement rows "
+             f"({', '.join(f'{name}: {count}' for name, count in supplement_counts)}).",
              "# Grammar: docs/upgrade-conventions.md. `_unexpressible` lists "
              "deltas",
              "# tier0/content/upgrades.py has no key for; they are reported, "

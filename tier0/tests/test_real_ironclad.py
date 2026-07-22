@@ -10,6 +10,7 @@ contract is pinned unguarded in test_anchor_lock.py.
 import random
 
 import pytest
+import yaml
 
 from tier0.content import loader
 from tier05 import draft, rewards
@@ -143,7 +144,11 @@ def test_every_reference_card_has_an_applicable_upgrade(ref_cards):
     # to receive a `+` form. The loader also fails closed on this condition;
     # this test names and pins the complete local reference when it is present.
     from tier0.content import upgrades
-    assert len(ref_cards) == 57
+    assert len(ref_cards) == 76
+    pool_ids = {card.id for card in ref_cards}
+    for layer_name in loader.EXTERNAL_CARD_LAYERS["ironclad_pool.yaml"]:
+        layer = yaml.safe_load((loader.GAME_REF_DIR / layer_name).read_text())
+        assert {row["id"] for row in layer} <= pool_ids
     assert all(upgrades.has_upgrade(c.id) for c in ref_cards)
     for card in ref_cards:
         upgraded = loader.get_card(card.id + upgrades.SUFFIX)

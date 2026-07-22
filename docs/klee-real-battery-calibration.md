@@ -62,7 +62,7 @@ The likely choices after the Ironclad line is restored are:
 
 No band or encounter change should land before that comparison.
 
-## Current-world Ironclad result
+## 57-card Ironclad upgrade baseline
 
 The upgrade blocker is resolved. The extractor now produces applicable deltas
 for all 57 cards (35 extractor rows plus the 22-card supplement), and the
@@ -97,3 +97,72 @@ python -m tools.build_ironclad_sheet --verify
 python -m tools.real_battery_calibration \
   --runs 1500 --sample 40 --fights 50 --seed 11 --configs ironclad
 ```
+
+## Pass-5 67-card Ironclad result
+
+Pass 5 adds the ten cards whose runtime primitives were already implemented
+and pinned in Tier 0. It does not add free-play, generation-pool, reentrant
+draw, or mutable-card-state foundations. The builder now treats pass 4 and
+pass 5 as ordered, required, mutually disjoint local layers and derives clean
+upgrades for all 67 cards.
+
+Measurement world: Git `ba48777`, tracked-worktree digest `274e468f977e`,
+1,500 runs, seed 11, with the same 40-loadout / 50-fight battery cell. The
+57-card counterfactual filters only the ten pass-5 IDs in memory; everything
+else, including upgrades, seeds, Klee balance work, relics and potions, is
+identical.
+
+| Surface | 57-card counterfactual | Full 67/67 pool | Delta |
+|---|---:|---:|---:|
+| Real-run clear | 33.1% | 40.3% | +7.2 pp |
+| Boss reached | 656/1500 | 746/1500 | +90 |
+| Tank boss, deck | 97.5% | 99.4% | +1.9 pp |
+
+The exact reproduction of the prior 57-card result in the same-world control
+rules out worktree drift as the cause of the gain. The expanded reward pool is
+the treatment. Molten Fist is the strongest visible draft-pressure signal:
+the assigned drafter selected it on 707 of 766 offers (92.3%). Conditional
+winrates by card are selection-biased and are not treated as causal.
+
+The real-run line has therefore returned near the old nominal 40% target for a
+new and valid reason: a broader, fully upgraded local reference pool. The
+synthetic battery has become even less discriminating (99.4% deck-only tank
+boss; every other deck cell 99.9--100%), so no legacy battery band should be
+restored from this coincidence.
+
+## Pass-6 76-card Ironclad result
+
+Pass 6 adds the nine bounded cards that read turn/combat history or mutate one
+circulating card instance: Drum of Battle, Evil Eye, Forgotten Ritual,
+Perfected Strike, Rampage, Second Wind, Spite, Stomp, and Tear Asunder. The
+implementation does not open the remaining autoplay or generation paths. It
+does pin the exact Strike-tag set, preserves Rampage growth through Armaments,
+and counts Evil Eye / Second Wind's individual BlockGained hooks.
+
+Measurement world: Git `ba48777`, tracked-worktree digest `4ed8553c10e0`,
+1,500 runs, seed 11, with the same 40-loadout / 50-fight battery cell. The
+67-card counterfactual filters only the nine pass-6 reward IDs in memory; code,
+upgrades, seeds, relics, potions, and the local 76-card artifact are identical.
+
+| Surface | 67-card counterfactual | Full 76/76 pool | Delta |
+|---|---:|---:|---:|
+| Real-run clear | 40.3% | 38.1% | -2.2 pp |
+| Boss reached | 746/1500 | 742/1500 | -4 |
+| Tank boss, deck | 99.4% | 97.2% | -2.2 pp |
+| Tank boss, loaded | 99.9% | 100.0% | +0.1 pp |
+
+The exact reproduction of the 67-card result rules out shared-engine drift.
+This is the reward-pool treatment under the current assigned drafter: several
+new cards are situational and dilute prior offers. Reward pick rates ranged
+from 0% for Drum of Battle / Forgotten Ritual to roughly 28--34% for Evil Eye,
+Perfected Strike, Rampage, Second Wind, and Spite; Stomp was 4.8% and Tear
+Asunder 1.8%. Those rates and conditional winrates are selection-biased, so
+they diagnose policy pressure rather than prove individual-card causality.
+
+Coverage is now 76 of 87 discovered classes. Eleven remain: Demonic Shield and
+Tank are multiplayer-only; Hellraiser and Stampede remain explicitly unsafe
+because their reentrant/autoplay behavior runs below the current degeneracy
+guard; and the seven ordinary hard cards are Cascade, Havoc, Howl From Beyond,
+Infernal Blade, Primal Force, Stoke, and Thrash. Those seven require autoplay,
+generation/transform, or random cross-card mutation semantics and should be a
+separate foundation decision rather than another low-risk supplement pass.

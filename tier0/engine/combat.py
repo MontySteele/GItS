@@ -90,6 +90,9 @@ def card_cost(state: CombatState, card: Card) -> int:
         # test_refpowers.test_free_attack_does_not_zero_an_x_cost_attack.
         return state.player.energy
     cost = card.cost
+    if card.cost_reduction_per_attack_this_turn:
+        cost = max(0, cost - (card.cost_reduction_per_attack_this_turn
+                              * state.attacks_played_this_turn))
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
     # Leading Role (card-level texture, kickoff §3.2): the FIRST

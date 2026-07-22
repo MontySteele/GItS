@@ -11,7 +11,9 @@ game appears here; stacks and amounts are chosen for readability.
 from tier0 import constants as C
 from tier0.engine import combat, effects, powers
 from tier0.engine.state import Card
+from tier0.pilot import policy
 from tier0.tests.conftest import make_enemy, make_state
+from tier05 import draft
 
 
 def card(cid="c", type="attack", cost=0, fx=None, **kw):
@@ -204,3 +206,68 @@ def test_pillage_is_safe_on_an_empty_deck():
                                      fx=[{"op": "draw_while",
                                           "while_type": "attack"}]))
     assert state.player.hand == []
+
+
+# --- Pilot/drafter parity: the same runtime grammar must be visible --------
+
+def test_formula_damage_is_visible_to_pilot_and_drafter():
+    state = make_state()
+    state.player.exhaust_pile = [card("x"), card("y")]
+    formula_card = card("formula", cost=1, fx=[{
+        "op": "damage", "target": "enemy",
+        "amount_formula": {"base": 5, "per": 2, "count": "exhaust_pile"},
+    }])
+
+    assert policy._expected_damage(state, formula_card) == 9
+    # Offer scoring has no combat state and uses one count as its neutral
+    # estimate: (5 + 2) / 1 energy.
+    assert draft._static_power(formula_card) == 7
+
+
+def test_conditional_damage_uses_the_live_branch_for_pilot_scoring():
+    state = make_state()
+    state.enemies[0].powers["vulnerable"] = 1
+    conditional = card("conditional", fx=[{
+        "op": "conditional", "if": "target_has_power_vulnerable",
+        "then": [{"op": "damage", "amount": 4, "times": 2,
+                  "target": "enemy"}],
+        "else": [{"op": "damage", "amount": 4, "target": "enemy"}],
+    }])
+
+    assert policy._expected_damage(state, conditional) == 8
+    assert draft._static_power(conditional) == 8
+
+
+def test_formula_power_scoring_observes_prior_debuff_on_the_same_card():
+    state = make_state()
+    state.enemies[0].powers["vulnerable"] = 2
+    dominate_shape = card("power_formula", type="skill", fx=[
+        {"op": "apply_power", "power": "vulnerable", "amount": 1,
+         "target": "enemy"},
+        {"op": "apply_power", "power": "strength", "target": "self",
+         "amount_formula": {"target_power": "vulnerable"}},
+    ])
+
+    # Enemy debuff 1*2 plus self Strength (2 existing + 1 applied)*3.
+    assert policy._scaling_value(state, dominate_shape) == 11
+
+
+def test_formula_energy_is_visible_to_tempo_scoring():
+    state = make_state()
+    state.player.hand = [card("a"), card("b"), card("s", type="skill")]
+    energy = card("energy", type="skill", fx=[{
+        "op": "energy",
+        "amount_formula": {"per": 1, "count": "attacks_in_hand"},
+    }])
+
+    assert policy._tempo_value(state, energy) == 2
+
+
+def test_existing_symbolic_draw_formula_remains_visible_to_tempo_scoring():
+    state = make_state(enemies=[make_enemy(), make_enemy()])
+    state.enemies[0].aura = "hydro"
+    draw = card("draw", type="skill", fx=[{
+        "op": "draw", "amount_formula": "per_aura",
+    }])
+
+    assert policy._tempo_value(state, draw) == 1
