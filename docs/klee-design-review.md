@@ -20,15 +20,18 @@ validation). Run e.g. `python -m tools.klee_lever_sweep --knob damage`.
 
 **Reproducibility caveat.** The Klee numbers reproduce from the repo alone —
 her whole pool ships in `docs/klee-cards.yaml`. The `real_ironclad` **target
-line (40%) does NOT**: that reference lives in `game_ref/`, a gitignored
-decompiled artifact that is intentionally absent on a fresh clone, and its
-regeneration path is currently broken (`loader.py` names a last-mile tool
-`tools/build_ironclad_sheet.py` that was never committed; the committed
-`tools/extract_base_game_pool.py` emits `ironclad-cards.yaml`/`ironclad.json`,
-not the `ironclad_pool.yaml` + `char_real_ironclad.yaml` the loader reads). So
-on a fresh clone the `real_ironclad`-dependent tests skip and the target line
-is skipped gracefully — the Klee sweep still runs. Fixing the regen path is a
-separate pre-existing repo issue, tracked apart from this review.
+line (40%) needs the local `game_ref/` artifact**: a gitignored decompiled
+reference, intentionally absent on a bare clone. On a machine that has it
+(e.g. after a normal `git pull`, which leaves gitignored files untouched) the
+target line reproduces exactly — verified: `python -m tools.klee_lever_sweep
+--knob damage` returns the table above verbatim. The regeneration path is now
+complete: `tools/extract_base_game_pool.py` → `tools/build_ironclad_sheet.py`
+merges the extractor's 35 cards with the local `ironclad_pool_pass4.yaml`
+supplement (22 cards hand-recovered from the DLL) into the loader's 57-card
+`ironclad_pool.yaml` (`--verify` confirms the rebuild is byte-faithful). Both
+data inputs stay in gitignored `game_ref/`; only the tools are committed. On a
+bare clone the `real_ironclad` tests skip and the target line is skipped
+gracefully — the Klee sweep still runs.
 
 ---
 
