@@ -13,9 +13,13 @@ reference material):
 
   ironclad-cards.yaml        extractor output; TWO docs (doc 1 = the 35 cards
                              the JSON extractor can express, doc 2 = excluded:).
-  ironclad_pool_pass4.yaml   the 22 "pass-4" cards, hand-recovered from the
-                             sts2.dll PowerVar/DynamicVar ctor args the JSON
-                             extractor cannot parse.
+  ironclad_pool_pass4.yaml   the 22 "pass-4" cards: hand-authored tier0-DSL
+                             translations the extractor deliberately holds back
+                             (14 use powers behind the SUPPORTED_POWERS
+                             verification dial; 8 branch on runtime state, e.g.
+                             Feed/Fiend Fire/Headbutt). NOT tool-regenerable --
+                             they embody pass-4 design judgment (see
+                             docs/klee-pass-4-plan.md), not a parse gap.
   ironclad_char_facts.yaml   the character facts (id/name/hp/starting_deck/
                              relic_hooks), decompiled from the Ironclad model.
 

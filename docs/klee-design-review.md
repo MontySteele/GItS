@@ -24,18 +24,27 @@ line (40%) needs the local `game_ref/` artifact**: a gitignored decompiled
 reference, intentionally absent on a bare clone. On a machine that has it
 (e.g. after a normal `git pull`, which leaves gitignored files untouched) the
 target line reproduces exactly — verified: `python -m tools.klee_lever_sweep
---knob damage` returns the table above verbatim. The regeneration path is now
-complete for both loader inputs: `tools/build_ironclad_sheet.py` merges the
-extractor's 35 cards with the local `ironclad_pool_pass4.yaml` supplement (22
-cards hand-recovered from the DLL) into the loader's 57-card
-`ironclad_pool.yaml`, and generates `char_real_ironclad.yaml` from local
-`ironclad_char_facts.yaml` when absent. It fails closed if either data input is
-missing (never writes a partial pool), rejects supplement/extractor id overlap
-(no silent drift), and `--verify` compares the rebuild against the on-disk pool
-as an ordered, duplicate-checked list — semantically identical, 57 cards. All
-data inputs stay in gitignored `game_ref/`; only the tools are committed. On a
-bare clone the `real_ironclad` tests skip and the target line is skipped
-gracefully — the Klee sweep still runs.
+--knob damage` returns the table above verbatim. `tools/build_ironclad_sheet.py`
+ASSEMBLES the two loader inputs from local `game_ref/` data —
+`ironclad_pool.yaml` = the extractor's 35 cards + the local
+`ironclad_pool_pass4.yaml` supplement; `char_real_ironclad.yaml` = generated
+from local `ironclad_char_facts.yaml` when absent. It fails closed if either
+input is missing (never writes a partial pool), rejects supplement/extractor id
+overlap (no silent drift), and `--verify` compares against the on-disk pool as
+an ordered, duplicate-checked list.
+
+**But the pipeline is NOT fully tool-regenerable, and this is a real limit, not
+a wording nicety.** The 22-card supplement is hand-authored pass-4 design work:
+14 cards use powers held behind the extractor's SUPPORTED_POWERS verification
+dial, and 8 branch on runtime state (Feed, Fiend Fire, Headbutt, …) — cards the
+extractor deliberately refuses to auto-translate. So the supplement is neither
+committable (decompiled-data-derived) nor reconstructable by tools alone
+(it needs the pass-4 design pass, `docs/klee-pass-4-plan.md`). A machine
+without it can build the 35-card extractor pool but cannot instantiate the
+57-card `real_ironclad` until the supplement is supplied as a local artifact or
+pass-4 is re-run. On this machine (game_ref present, survives `git pull`) it
+reproduces exactly; on a bare clone the `real_ironclad` tests skip and the
+target line is skipped gracefully — the Klee sweep still runs.
 
 ---
 
