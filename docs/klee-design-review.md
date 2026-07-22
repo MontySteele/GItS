@@ -25,10 +25,14 @@ reference, intentionally absent on a bare clone. On a machine that has it
 (e.g. after a normal `git pull`, which leaves gitignored files untouched) the
 target line reproduces exactly — verified: `python -m tools.klee_lever_sweep
 --knob damage` returns the table above verbatim. The regeneration path is now
-complete: `tools/extract_base_game_pool.py` → `tools/build_ironclad_sheet.py`
-merges the extractor's 35 cards with the local `ironclad_pool_pass4.yaml`
-supplement (22 cards hand-recovered from the DLL) into the loader's 57-card
-`ironclad_pool.yaml` (`--verify` confirms the rebuild is byte-faithful). Both
+complete for both loader inputs: `tools/build_ironclad_sheet.py` merges the
+extractor's 35 cards with the local `ironclad_pool_pass4.yaml` supplement (22
+cards hand-recovered from the DLL) into the loader's 57-card
+`ironclad_pool.yaml`, and generates `char_real_ironclad.yaml` from local
+`ironclad_char_facts.yaml` when absent. It fails closed if either data input is
+missing (never writes a partial pool), rejects supplement/extractor id overlap
+(no silent drift), and `--verify` compares the rebuild against the on-disk pool
+as an ordered, duplicate-checked list — semantically identical, 57 cards. All
 data inputs stay in gitignored `game_ref/`; only the tools are committed. On a
 bare clone the `real_ironclad` tests skip and the target line is skipped
 gracefully — the Klee sweep still runs.
