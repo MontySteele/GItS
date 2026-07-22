@@ -37,7 +37,15 @@ def _floor(dmg: float) -> float:
 
 def modify_damage_dealt(attacker: Fighter, base: float) -> float:
     dmg = base + attacker.powers.get("strength", 0)
-    if attacker.powers.get("weak", 0) > 0:
+    # Klee survival sprint Window A: the first attack action an enemy makes
+    # while Bombed is suppressed at the Weak rate. Combat marks the per-enemy
+    # latch after the whole action, so every hit of a multi-hit intent shares
+    # the reduction. Real Weak and Bomb suppression use one branch.
+    bomb_suppressed = (
+        bool(getattr(attacker, "bombs", ()))
+        and not getattr(attacker, "bomb_suppression_spent", True)
+    )
+    if attacker.powers.get("weak", 0) > 0 or bomb_suppressed:
         dmg *= C.WEAK_DEALT_MULT
     return _floor(dmg)
 

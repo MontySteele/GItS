@@ -5,9 +5,9 @@
 # Grammar authority: upgrade-conventions.md. Bursts excluded (kit, v1.9; Talent Training = v2).
 
 # ---- BASICS ----
-kaboom:            {damage: +3}                    # 6->9, Strike-exact
+kaboom:            {damage: +3}                    # 7->10, survival-sprint frontload
 duck_and_cover:    {block: +3}                     # 5->8, Defend-exact
-jumpy_dumpty:      {damage: +2, bomb_damage: +2}   # dual bump: signature-basic privilege (Bash precedent)
+jumpy_dumpty:      {damage: +2, bomb_damage: +2}   # hits 8->10; bomb 6->8
 pop:               {bomb_damage: +2}               # 5->7
 
 # ---- COMMONS (one number bump each; zero cost reductions) ----
@@ -16,25 +16,25 @@ fish_flavored_bait: {bomb_damage: +2}
 quick_fuse:        {add: {op: draw, amount: 1}}    # 0-cost utility gains rider
 double_pop:        {bomb_damage: +2}               # 4->6 each
 ammo_scavenging:   {bomb_damage: +2}
-big_badda_boom:    {damage: +4}                    # 12->16, big-base row
-blast_radius:      {damage: +3}                    # 6->9 AoE
+big_badda_boom:    {damage: +4}                    # 16->20, big-base row
+blast_radius:      {damage: +3}                    # 9->12 AoE
 chain_fuse:        {bonus: +2}                     # placed-this-turn bonus 3->5
 careful_arrangement: {bonus: +2}                   # 2->4 per moved bomb
 bomb_voyage:       {bomb_damage: +2}
 sparkly_treasure:  {spark: +1}                     # 1->2
-pocket_fireworks:  {damage: +2}                    # 4->6 x2
+pocket_fireworks:  {damage: +2}                    # 5->7 x2
 crackle:           {discard: +1, sparks: +1}       # R36: discard 2, add 2 Sparks (damage delta dead with the R10 buff)
 spark_collection:  {spark: +1}                     # 2->3
 tail_of_flame:     {conditional_bonus: +3}         # 4->7 when free
 eager_to_help:     {draw: +1}                      # both branches
 skip_and_hop:      {block: +2}                     # 2->4
-rapid_fire:        {damage: +1}                    # 3->4 per hit (x4)
+rapid_fire:        {damage: +1}                    # 4->5 per hit (x4)
 warm_glow:         {block: +2}                     # 3->5
-snap:              {damage: +3}                    # 5->8, standard common-attack bump; Spark rider untouched (R1: the upgrade must not move the resource curve)
-sizzle:            {conditional_bonus: +3}         # aura bonus 5->8
+snap:              {damage: +3}                    # 6->9; Spark rider untouched (R1: the upgrade must not move the resource curve)
+sizzle:            {conditional_bonus: +3}         # aura bonus 6->9
 combustion_study:  {burst_energy: +5}              # 10->15
 alchemical_curiosity: {draw: +1}                   # 2->3
-boom_goes_the_dynamite: {damage: +4}               # 16->20
+boom_goes_the_dynamite: {damage: +4}               # 18->22
 study_of_explosions: {burst_energy: +5}            # 5->10
 friendly_visit:    {draw: +1}                      # 1->2
 hide_and_seek:     {block: +3}                     # 7->10
@@ -63,9 +63,9 @@ sugar_rush:        {remove: exhaust}               # classic quality upgrade (ne
 catalytic_conversion: {innate: true}               # R37: classic power disposition -- starts in the opening hand
 perfect_timing:    {damage: +2}                    # 8->10
 elemental_ecstasy: {cost: -1}                      # 2->1 (uncommon cost slot)
-borrowed_brilliance: {copy_cost_override: 0}       # the copy costs 0
+borrowed_brilliance: {add: {op: draw, amount: 1}}  # base copy already costs 0; + replaces itself
 study_buddy:       {add: {op: draw, amount: 1}}
-flame_dance:       {damage: +2}                    # 7->9 all
+flame_dance:       {damage: +2}                    # 9->11 all
 spirited_away:     {block: +4}                     # 12->16
 dodge_roll:        {block: +3}                     # 6->9 (base errata'd 8->6, R25 batch)
 bright_idea:       {draw: +1}                      # 3->4, discard stays 1

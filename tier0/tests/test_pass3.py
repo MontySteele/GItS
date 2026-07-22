@@ -20,7 +20,7 @@ def klee_report():
 
 def test_boom_rework_is_amp_nuke():
     boom = loader.get_card("boom_goes_the_dynamite")    # sheet v0.3
-    assert boom.effects[0]["amount"] == 16
+    assert boom.effects[0]["amount"] == 18               # survival sprint B
     assert boom.effects[1]["then"][0]["op"] == "repeat_this"
 
 

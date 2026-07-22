@@ -170,6 +170,10 @@ class Enemy(Fighter):
     aura: Optional[str] = None
     aura_turns_left: int = 0
     bombs: list[Bomb] = field(default_factory=list)
+    # Klee survival sprint: the first attack action this enemy makes while
+    # Bombed is suppressed. This per-enemy combat latch keeps an armed-Bomb
+    # engine from becoming permanent Weak against bosses.
+    bomb_suppression_spent: bool = False
     is_boss: bool = False
     sleep_turns: int = 0        # skips its turn while > 0 (BURST CHECK)
     frozen: bool = False        # v1.5: next action -50% dmg; first attack

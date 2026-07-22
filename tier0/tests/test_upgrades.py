@@ -48,12 +48,12 @@ def test_every_sheet_entry_applies_or_is_declared_unappliable():
 
 
 def test_number_bumps_follow_the_mined_grammar():
-    assert loader.get_card("kaboom+").effects[0]["amount"] == 9      # 6->9
+    assert loader.get_card("kaboom+").effects[0]["amount"] == 10     # 7->10
     assert loader.get_card("duck_and_cover+").effects[0]["amount"] == 8
     jd = loader.get_card("jumpy_dumpty+")                # dual bump privilege
-    assert jd.effects[0]["amount"] == 9                  # 7->9
+    assert jd.effects[0]["amount"] == 10                 # 8->10
     assert jd.effects[1]["bomb_damage"] == 8             # 6->8
-    assert loader.get_card("big_badda_boom+").effects[0]["amount"] == 16
+    assert loader.get_card("big_badda_boom+").effects[0]["amount"] == 20
 
 
 def test_condition_and_keyword_class_upgrades():
@@ -82,6 +82,7 @@ def test_cost_formula_and_override_upgrades():
     assert gf.effects[0]["bonus_formula"] == "3_per_detonation_this_combat"
     bb = loader.get_card("borrowed_brilliance+")
     assert bb.effects[0]["cost_override"] == 0
+    assert bb.effects[-1] == {"op": "draw", "amount": 1}
     cr = loader.get_card("chained_reactions+")
     assert cr.effects[1]["chance"] == 0.75               # replace, not bump
 

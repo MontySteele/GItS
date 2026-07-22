@@ -35,6 +35,7 @@ AURA_DURATION_TURNS = 2       # owner-turns an aura persists unconsumed
 VAPORIZE_MULT = 1.5           # Pyro x Hydro, that hit only
 MELT_MULT = 1.75              # Pyro x Cryo, that hit only
 OVERLOAD_SPLASH = 6           # flat damage to ALL enemies
+OVERLOAD_WEAK = 1             # stagger: reacted target's next attack is Weak
 SUPERCONDUCT_VULN = 2         # Vulnerable stacks applied
 ELECTROCHARGED_DOT = 4        # DoT amount
 ELECTROCHARGED_DOT_TURNS = 2

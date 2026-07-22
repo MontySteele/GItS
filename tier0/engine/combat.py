@@ -342,6 +342,11 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
                aura=enemy.aura is not None)
 
     if kind == "attack":
+        # Snapshot before resolving the action. The latch is spent only after
+        # the hit loop so a multi-hit intent receives one coherent modifier.
+        bomb_suppressed = (
+            bool(enemy.bombs) and not enemy.bomb_suppression_spent
+        )
         amount = intent["amount"] + intent.get("ramp", 0) * max(
             0, state.turn - intent.get("ramp_after", 0))
         for _ in range(intent.get("times", 1)):
@@ -384,6 +389,9 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
                     return
             if not enemy.alive:
                 break               # FlameBarrier can kill the dealer
+        if bomb_suppressed:
+            enemy.bomb_suppression_spent = True
+            state.emit("bomb_suppression_spent", enemy=enemy.name)
     elif kind == "block":
         enemy.block += intent["amount"]
     elif kind == "buff":

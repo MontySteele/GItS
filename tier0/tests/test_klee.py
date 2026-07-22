@@ -70,6 +70,75 @@ def test_archetype_tag_counts():
     assert counts["generic"] == 19
 
 
+def test_survival_sprint_frontload_endpoints():
+    """Window B changes immediate bodies, never the scaling engines."""
+
+    def damage(card_id):
+        card = loader.get_card(card_id)
+        return next(fx["amount"] for fx in card.effects
+                    if fx.get("op") == "damage" and fx.get("target") != "self")
+
+    base = {
+        "kaboom": 7,
+        "jumpy_dumpty": 8,
+        "big_badda_boom": 16,
+        "blast_radius": 9,
+        "pocket_fireworks": 5,
+        "rapid_fire": 4,
+        "snap": 6,
+        "sizzle": 8,
+        "boom_goes_the_dynamite": 18,
+        "flame_dance": 9,
+    }
+    upgraded = {
+        "kaboom+": 10,
+        "jumpy_dumpty+": 10,
+        "big_badda_boom+": 20,
+        "blast_radius+": 12,
+        "pocket_fireworks+": 7,
+        "rapid_fire+": 5,
+        "snap+": 9,
+        "sizzle+": 8,
+        "boom_goes_the_dynamite+": 22,
+        "flame_dance+": 11,
+    }
+    assert {card_id: damage(card_id) for card_id in base} == base
+    assert {card_id: damage(card_id) for card_id in upgraded} == upgraded
+
+    sizzle = loader.get_card("sizzle")
+    rider = next(fx for fx in sizzle.effects if fx.get("op") == "conditional")
+    assert rider["then"][0]["amount"] == 6
+    assert loader.get_card("sizzle+").effects[1]["then"][0]["amount"] == 9
+
+    flame = loader.get_card("flame_dance")
+    assert flame.effects[0]["bonus_vs_aura"] == 4  # rider deliberately stable
+
+
+def test_survival_sprint_companion_interfaces_have_live_bodies():
+    """Window D setup cards do something even before the combo resolves."""
+    friendly = loader.get_card("friendly_visit")
+    assert friendly.effects[0] == {"op": "block", "amount": 5}
+    assert loader.get_card("friendly_visit+").effects[-1]["amount"] == 2
+
+    buddy = loader.get_card("study_buddy")
+    assert buddy.effects[0] == {"op": "block", "amount": 6}
+    assert loader.get_card("study_buddy+").effects[-1] == {
+        "op": "draw", "amount": 1,
+    }
+
+    borrowed = loader.get_card("borrowed_brilliance")
+    assert borrowed.effects[0]["cost_override"] == 0
+    assert loader.get_card("borrowed_brilliance+").effects[-1] == {
+        "op": "draw", "amount": 1,
+    }
+
+    dreams = loader.get_card("elemental_ecstasy")
+    mitigation = dreams.effects[-1]
+    assert mitigation["if"] == "target_has_nonpyro_aura"
+    assert mitigation["then"] == [{"op": "block", "amount": 8}]
+    assert loader.get_card("elemental_ecstasy+").cost == 1
+
+
 @pytest.mark.parametrize("deck,pilot", DECKS)
 @pytest.mark.parametrize("enc", ["swarm", "punisher", "attrition",
                                  "burst_check", "tank_boss", "gauntlet"])
@@ -108,6 +177,53 @@ def test_demolition_deck_detonates_and_sparks():
     events = {e["event"] for e in state.log}
     assert "bomb_detonation" in events
     assert "gain_spark" in events           # Pounding Surprise fired
+
+
+def test_first_pending_bomb_suppresses_one_attack_without_stacking_weak():
+    """Survival sprint Window A: the first armed Bomb is conditional defense.
+
+    One whole attack action acts as though Weak, but the Bomb is not itself a
+    Weak stack. Multiple Bombs do not deepen or refresh the reduction, and
+    real Weak does not multiply with it. Early detonation leaves the latch
+    available for a later Bomb.
+    """
+    from tier0.engine import combat, effects
+    from tier0.engine.state import Bomb
+    from tier0.tests.conftest import make_enemy, make_state
+
+    def incoming(*, bombs=1, weak=0, detonate=False):
+        enemy = make_enemy(hp=100, intents=[{"kind": "attack", "amount": 12}])
+        enemy.bombs = [Bomb(damage=1) for _ in range(bombs)]
+        enemy.powers["weak"] = weak
+        state = make_state(enemies=[enemy], hp=100)
+        state.turn = 1
+        if detonate:
+            effects.detonate_bombs(state, enemy)
+        combat._enemy_turn(state, enemy)
+        return 100 - state.player.hp
+
+    assert incoming() == 9                 # 12 x Weak's 0.75
+    assert incoming(bombs=3) == 9          # count does not deepen it
+    assert incoming(weak=1) == 9           # no 0.75 x 0.75 double dip
+    assert incoming(detonate=True) == 12   # cashing the Bomb ends safety
+    assert incoming(bombs=0) == 12         # ordinary enemies unchanged
+
+    enemy = make_enemy(hp=100, intents=[{"kind": "attack", "amount": 12}])
+    enemy.bombs = [Bomb(damage=1)]
+    state = make_state(enemies=[enemy], hp=100)
+    combat._enemy_turn(state, enemy)
+    combat._enemy_turn(state, enemy)
+    assert state.player.hp == 79            # 9 once, then the full 12
+
+    multi = make_enemy(
+        hp=100,
+        intents=[{"kind": "attack", "amount": 4, "times": 3}],
+    )
+    multi.bombs = [Bomb(damage=1)]
+    multi_state = make_state(enemies=[multi], hp=100)
+    combat._enemy_turn(multi_state, multi)
+    assert multi_state.player.hp == 91      # all three hits share the action
+    assert multi.bomb_suppression_spent
 
 
 def test_burst_meter_fills_in_reaction_fights():

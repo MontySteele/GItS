@@ -5,11 +5,11 @@
 
 # ---------- BASIC (4) ----------
 - {id: kaboom, name: "Kaboom!", cost: 1, type: attack, rarity: basic, solve: [frontload], archetypes: [generic], role: glue,
-   effects: [{op: damage, amount: 6, target: enemy}]}
+   effects: [{op: damage, amount: 7, target: enemy}]}
 - {id: duck_and_cover, name: "Duck and Cover", cost: 1, type: skill, rarity: basic, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 5}]}
 - {id: jumpy_dumpty, name: "Jumpy Dumpty", cost: 2, type: attack, rarity: basic, solve: [frontload, utility], archetypes: [demolition], role: enabler, tags: [skill_tag],
-   effects: [{op: damage, amount: 7, target: random_enemy, times: 2}, {op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 6}]}
+   effects: [{op: damage, amount: 8, target: random_enemy, times: 2}, {op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 6}]}
 - {id: pop, name: "Pop!", cost: 0, type: skill, rarity: basic, solve: [frontload], archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 1, target: enemy, bomb_damage: 5}]}
 
@@ -26,9 +26,9 @@
 - {id: ammo_scavenging, name: "Ammo Scavenging", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [demolition], role: glue, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 5}, {op: draw, amount: 1}]}
 - {id: big_badda_boom, name: "Big Badda Boom", cost: 2, type: attack, rarity: common, solve: [frontload], archetypes: [demolition, generic], role: glue,
-   effects: [{op: damage, amount: 12, target: enemy}]}
+   effects: [{op: damage, amount: 16, target: enemy}]}
 - {id: blast_radius, name: "Blast Radius", cost: 1, type: attack, rarity: common, solve: [utility], archetypes: [generic], role: glue,
-   effects: [{op: damage, amount: 6, target: all_enemies}]}
+   effects: [{op: damage, amount: 9, target: all_enemies}]}
 - {id: chain_fuse, name: "Chain Fuse", cost: 1, type: skill, rarity: common, solve: [scaling], archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: modify_bombs, scope: placed_this_turn, bonus: 3}, {op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 4}]}
 - {id: careful_arrangement, name: "Careful Arrangement", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [demolition], role: glue,
@@ -39,7 +39,7 @@
 - {id: sparkly_treasure, name: "Sparkly Treasure", cost: 0, type: skill, rarity: common, solve: [velocity], archetypes: [spark], role: enabler,
    effects: [{op: gain_spark, amount: 1}]}  # M9 upgrade delta lives in klee-upgrades.yaml (R20: no inline upgrade fields)
 - {id: pocket_fireworks, name: "Pocket Fireworks", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: enabler,
-   effects: [{op: damage, amount: 4, target: random_enemy, times: 2}]}
+   effects: [{op: damage, amount: 5, target: random_enemy, times: 2}]}
 # R36 REDESIGN (user-ratified 2026-07-20, supersedes the R10 buff): the
 # unconditional gain_spark 1 that breached the ratified band (0.668 vs the
 # 0.65 tank_boss ceiling, 4de7125) is DEAD. Replacement prices the Spark BY
@@ -59,24 +59,24 @@
 - {id: skip_and_hop, name: "Skip and Hop", cost: 0, type: skill, rarity: common, solve: [block], archetypes: [spark], role: glue,
    effects: [{op: block, amount: 2}, {op: gain_spark, amount: 1}]}
 - {id: rapid_fire, name: "Rapid Fire", cost: 2, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: enabler,
-   effects: [{op: damage, amount: 3, target: random_enemy, times: 4}]}
+   effects: [{op: damage, amount: 4, target: random_enemy, times: 4}]}
 - {id: warm_glow, name: "Warm Glow", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [spark], role: glue,
    effects: [{op: block, amount: 3}, {op: gain_spark, amount: 1}]}
 - {id: snap, name: "Snap!", cost: 1, type: attack, rarity: common, solve: [frontload, velocity], archetypes: [spark], role: enabler,
-   effects: [{op: damage, amount: 5, target: enemy}, {op: gain_spark, amount: 1}]}
+   effects: [{op: damage, amount: 6, target: enemy}, {op: gain_spark, amount: 1}]}
 # Reaction (6)
 - {id: sizzle, name: "Sizzle", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [reaction], role: payoff,
-   effects: [{op: damage, amount: 7, target: enemy}, {op: conditional, if: target_has_nonpyro_aura, then: [{op: damage, amount: 5, target: enemy}]}]}
+   effects: [{op: damage, amount: 8, target: enemy}, {op: conditional, if: target_has_nonpyro_aura, then: [{op: damage, amount: 6, target: enemy}]}]}
 - {id: combustion_study, name: "Combustion Study", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [reaction], role: enabler, tags: [skill_tag],
    effects: [{op: burst_energy, amount: 10}, {op: draw, amount: 1}]}
 - {id: alchemical_curiosity, name: "Alchemical Curiosity", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [reaction, generic], role: glue,
    effects: [{op: draw, amount: 2}]}
 - {id: boom_goes_the_dynamite, name: "Boom Goes the Dynamite", cost: 2, type: attack, rarity: common, solve: [frontload], archetypes: [reaction], role: payoff,
-   effects: [{op: damage, amount: 16, target: enemy}, {op: conditional, if: reaction_triggered_by_this, then: [{op: repeat_this, times: 1}]}]}
+   effects: [{op: damage, amount: 18, target: enemy}, {op: conditional, if: reaction_triggered_by_this, then: [{op: repeat_this, times: 1}]}]}
 - {id: study_of_explosions, name: "Study of Explosions", cost: 0, type: skill, rarity: common, solve: [velocity], archetypes: [reaction], role: glue, tags: [skill_tag],
    effects: [{op: scry_discard, amount: 2}, {op: burst_energy, amount: 5}]}
 - {id: friendly_visit, name: "Friendly Visit", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [reaction], role: glue,
-   effects: [{op: cost_mod, scope: companion_cards, delta: -1, duration: this_turn}, {op: draw, amount: 1}]}
+   effects: [{op: block, amount: 5}, {op: cost_mod, scope: companion_cards, delta: -1, duration: this_turn}, {op: draw, amount: 1}]}
 # Generic block/utility (6)
 - {id: hide_and_seek, name: "Hide and Seek", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 7}]}
@@ -150,13 +150,13 @@
 # draws are the dreams); the old name implied reaction-rapture the card never
 # delivers. ID stays elemental_ecstasy. Future greps: try BOTH names.
 - {id: elemental_ecstasy, name: "Sweet Dreams", cost: 2, type: skill, rarity: uncommon, solve: [velocity], archetypes: [reaction], role: glue,
-   effects: [{op: refresh_all_auras}, {op: draw, amount_formula: per_aura}]}
+   effects: [{op: refresh_all_auras}, {op: draw, amount_formula: per_aura}, {op: conditional, if: target_has_nonpyro_aura, then: [{op: block, amount: 8}]}]}
 - {id: borrowed_brilliance, name: "Borrowed Brilliance", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [reaction], role: glue,
-   effects: [{op: copy_companion_in_hand, amount: 1, temp: true}]}
+   effects: [{op: copy_companion_in_hand, amount: 1, temp: true, cost_override: 0}]}
 - {id: study_buddy, name: "Study Buddy", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [reaction], role: payoff,
-   effects: [{op: replay_next_companion, times: 1, duration: this_turn}]}
+   effects: [{op: block, amount: 6}, {op: replay_next_companion, times: 1, duration: this_turn}]}
 - {id: flame_dance, name: "Flame Dance", cost: 2, type: attack, rarity: uncommon, solve: [utility], archetypes: [reaction], role: payoff,
-   effects: [{op: damage, amount: 7, target: all_enemies, bonus_vs_aura: 4}]}
+   effects: [{op: damage, amount: 9, target: all_enemies, bonus_vs_aura: 4}]}
 # Generic (4)
 - {id: spirited_away, name: "Spirited Away", cost: 2, type: skill, rarity: uncommon, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 12}]}

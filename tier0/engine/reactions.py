@@ -96,6 +96,11 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         name = "overload"
         for other in state.living_enemies:
             _splash(state, other, C.OVERLOAD_SPLASH)
+        # The explosion staggers the reacted target. This is ordinary Weak,
+        # so it uses the shared debuff rules and never multiplies with Klee's
+        # armed-Bomb suppression.
+        if C.OVERLOAD_WEAK:
+            powers.apply_power(state, enemy, "weak", C.OVERLOAD_WEAK)
     elif pair == frozenset(("electro", "cryo")):
         name = "superconduct"
         powers.apply_power(state, enemy, "vulnerable", C.SUPERCONDUCT_VULN)
