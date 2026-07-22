@@ -29,11 +29,11 @@ POTION VOCABULARY (id -> effect; amounts in constants.py):
     energy_potion     +POTION_ENERGY Energy
     fairy_in_a_bottle PASSIVE: on lethal damage, revive at
                       POTION_FAIRY_REVIVE_FRACTION of max HP (see
-                      try_fairy_revive, called at the enemy-damage site)
+                      try_fairy_revive, called from combat HP checkpoints)
 
 USE POLICY: a bounded greedy heuristic, NOT a solver. try_use_potions runs at
 the player's turn start (after the draw, before the pilot loop). Fairy is never
-proactively drunk -- it is a passive revive handled at the lethal-damage site.
+proactively drunk -- it is a passive revive handled at combat HP checkpoints.
 """
 
 from __future__ import annotations
@@ -185,10 +185,13 @@ def _try_defensive(state: CombatState) -> None:
         return
     if p.hp - net > C.POTION_DEFENSIVE_MARGIN:
         return                                # projected to survive the turn
-    for pid in ("block_potion", "blood_potion"):   # priority order
-        if pid in p.potions:
-            _drink(state, pid)
-            return
+    if "block_potion" in p.potions:                 # priority order
+        _drink(state, "block_potion")
+        return
+    # At full HP Blood Potion heals zero. Keep it for a later turn rather than
+    # consuming it merely because the current telegraph is lethal.
+    if "blood_potion" in p.potions and p.hp < p.max_hp:
+        _drink(state, "blood_potion")
 
 
 def _try_offensive(state: CombatState) -> None:
@@ -229,17 +232,17 @@ def _try_offensive(state: CombatState) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Fairy in a Bottle: passive revive, called at the lethal-damage site.
+# Fairy in a Bottle: passive revive, called at combat HP checkpoints.
 # ---------------------------------------------------------------------------
 
 def try_fairy_revive(state: CombatState) -> bool:
-    """At the moment the player would die (hp <= 0 from a hit), if a fairy is
+    """At the moment the player would die (hp <= 0), if a fairy is
     held, consume it and set hp to POTION_FAIRY_REVIVE_FRACTION of max HP
     instead. Returns whether it saved the player. Dead branch on the battery
     (no potions). A multi-hit intent can still kill after the fairy is spent:
     once consumed it is gone, so the next lethal hit finds nothing to save it."""
     p = state.player
-    if not p.potions or "fairy_in_a_bottle" not in p.potions:
+    if p.alive or not p.potions or "fairy_in_a_bottle" not in p.potions:
         return False
     p.potions.remove("fairy_in_a_bottle")
     p.hp = max(1, int(C.POTION_FAIRY_REVIVE_FRACTION * p.max_hp))
