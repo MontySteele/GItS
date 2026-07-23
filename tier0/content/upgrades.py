@@ -30,8 +30,10 @@ from pathlib import Path
 
 import yaml
 
+from tier0.content import local_reference
+
 _DOCS = Path(__file__).parents[2] / "docs"
-_GAME_REF = Path(__file__).parents[2] / "game_ref"
+_GAME_REF = local_reference.game_ref_dir()
 UPGRADE_SHEETS = (_DOCS / "klee-upgrades.yaml",
                   _DOCS / "furina-upgrades.yaml")
 EXTERNAL_UPGRADE_SHEETS = (_GAME_REF / "ironclad-upgrades.yaml",)

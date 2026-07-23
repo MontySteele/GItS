@@ -5,8 +5,6 @@ card id comes from gitignored game_ref artifacts rather than committed game
 data. The assertions pin mechanics, completeness, and provenance boundaries.
 """
 
-from pathlib import Path
-
 import pytest
 import yaml
 
@@ -16,7 +14,7 @@ from tier0.tests.conftest import make_state
 from tier05 import model, shop
 
 
-UPGRADE_PATH = Path(__file__).parents[2] / "game_ref" / "ironclad-upgrades.yaml"
+UPGRADE_PATH = upgrades.EXTERNAL_UPGRADE_SHEETS[0]
 pytestmark = pytest.mark.skipif(
     not UPGRADE_PATH.exists(),
     reason="real Ironclad upgrades are a local game_ref artifact",

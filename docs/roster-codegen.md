@@ -78,3 +78,11 @@ derivable from the game install.
 
 The Windows deployment script stages Klee, Furina, and Companion card-art
 directories into the roster mod's flat `images/cards` package.
+
+Deployment validation treats `game_ref/` as an optional, atomic local
+reference. When all required Ironclad layers exist, it runs
+`tools.build_ironclad_sheet --verify` and includes those tests. When the
+directory is absent or incomplete, it runs pytest with
+`GITS_REFERENCE_MODE=committed-only`: every repository-owned test still runs,
+while the local-reference modules skip exactly as on a fresh clone. Normal
+simulation loading remains fail-closed for partial references.

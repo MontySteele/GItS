@@ -225,23 +225,72 @@ if (-not (Test-Path $venvPython)) {
 }
 
 # ---------------------------------------------------------------------------
-# S7. The FULL repo test suite must be green before anything deploys.
+# S7. The portable repo test suite must be green before anything deploys.
 #
 # Lesson (2026-07-20): a compaction-narrowed "pytest tier0" habit reported
 # "188 tests green" while the full suite was 236 with one failure -- a tier05
 # rest-policy test stranded by the R37 ruling. Cross-tier coupling is exactly
 # what full-suite discipline exists to catch, and it caught one on its first
-# opportunity. This gate runs pytest over the WHOLE repo (tier0 + tier05 +
-# tools tests), 1000-fight band checks included -- deploys are supposed to
-# pay that price. Green claims must name their scope; this one is "the repo".
+# opportunity. This gate collects the WHOLE repo (tier0 + tier05 + tools
+# tests), 1000-fight band checks included.
+#
+# game_ref/ is deliberately gitignored local/decompiled reference data. A
+# complete copy receives its own --verify gate and participates in pytest.
+# An incomplete/absent copy is atomically disabled with
+# GITS_REFERENCE_MODE=committed-only: local-reference modules skip exactly as
+# on a fresh clone, while every repository-owned test still runs. This is NOT
+# accepting a partial reference. The loader remains fail-closed in normal
+# mode, and tools.build_ironclad_sheet --verify remains the only validity
+# claim for real_ironclad.
 # ---------------------------------------------------------------------------
 if (Test-Path $venvPython) {
+    $gameRef = Join-Path $repoRoot 'game_ref'
+    $referenceFiles = @(
+        'ironclad-cards.yaml',
+        'ironclad_pool_pass4.yaml',
+        'ironclad_pool_pass5.yaml',
+        'ironclad_pool_pass6.yaml',
+        'ironclad_pool.yaml',
+        'ironclad-upgrades.yaml',
+        'ironclad_char_facts.yaml',
+        'char_real_ironclad.yaml'
+    )
+    $referenceComplete = $true
+    foreach ($name in $referenceFiles) {
+        if (-not (Test-Path (Join-Path $gameRef $name))) {
+            $referenceComplete = $false
+            break
+        }
+    }
+
+    $oldReferenceMode = [Environment]::GetEnvironmentVariable(
+        'GITS_REFERENCE_MODE', 'Process')
+    if ($referenceComplete) {
+        Write-Host 'Verifying complete local game_ref...' -ForegroundColor Cyan
+        $verifyOut = & $venvPython -m tools.build_ironclad_sheet --verify
+        if ($LASTEXITCODE -ne 0) {
+            Fail 'S7a' "complete local game_ref failed verification:`n    $($verifyOut -join "`n    ")"
+        }
+        $env:GITS_REFERENCE_MODE = 'auto'
+    } else {
+        Write-Host 'Local game_ref incomplete/absent; testing committed content only.' -ForegroundColor Yellow
+        $env:GITS_REFERENCE_MODE = 'committed-only'
+    }
+
     # No 2>&1 (same PS 5.1 NativeCommandError reason as S6). -q keeps the
     # output to the summary line plus failures.
-    $pytestOut = & $venvPython -m pytest $repoRoot -q
-    if ($LASTEXITCODE -ne 0) {
-        $tail = ($pytestOut | Select-Object -Last 25) -join "`n    "
-        Fail 'S7' "full test suite not green (pytest exit $LASTEXITCODE):`n    $tail"
+    try {
+        $pytestOut = & $venvPython -m pytest $repoRoot -q
+        if ($LASTEXITCODE -ne 0) {
+            $tail = ($pytestOut | Select-Object -Last 25) -join "`n    "
+            Fail 'S7' "portable repo suite not green (pytest exit $LASTEXITCODE):`n    $tail"
+        }
+    } finally {
+        if ($null -eq $oldReferenceMode) {
+            Remove-Item Env:GITS_REFERENCE_MODE -ErrorAction SilentlyContinue
+        } else {
+            $env:GITS_REFERENCE_MODE = $oldReferenceMode
+        }
     }
 } else {
     Fail 'S7' "repo venv python not found at $venvPython; cannot run the full suite."

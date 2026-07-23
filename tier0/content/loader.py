@@ -14,6 +14,7 @@ from pathlib import Path
 import yaml
 
 from tier0 import constants as C
+from tier0.content import local_reference
 from tier0.content import upgrades
 from tier0.engine.state import Card, Enemy, Player
 
@@ -36,7 +37,7 @@ DOCS_CARD_SHEETS = ("klee-cards.yaml", "furina-cards.yaml",
 # committed reference to a missing thing. Nothing in the repo names
 # real_ironclad except inert guards (tier05.rewards.NO_COMPANION_CHARACTERS)
 # and a skip-guarded test module.
-GAME_REF_DIR = CONTENT_DIR.parents[1] / "game_ref"
+GAME_REF_DIR = local_reference.game_ref_dir()
 EXTERNAL_CARD_SHEETS = {"ironclad_pool.yaml": "real_ironclad"}
 EXTERNAL_CARD_LAYERS = {
     "ironclad_pool.yaml": (
