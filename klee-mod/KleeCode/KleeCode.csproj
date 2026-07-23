@@ -12,16 +12,6 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
 
-  <!-- Furina codegen lands in verified slices before her character pool and
-       runtime systems do. Keep those partial classes out of the shipping
-       assembly until FurinaCardPool can give every card valid pool membership;
-       Cards/Furina/Generated/manifest.json is the activation checklist.
-       EnableFurinaGenerated=true is a compile-only validation path. -->
-  <ItemGroup>
-    <Compile Remove="Cards/Furina/Generated/**/*.cs"
-             Condition="'$(EnableFurinaGenerated)' != 'true'" />
-  </ItemGroup>
-
   <!-- Reference the game assembly + Harmony directly. Private=false: the game
        loads these from its own data folder, we must not ship copies. -->
   <ItemGroup>

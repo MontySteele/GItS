@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using KleeMod.Cards;
+using KleeMod.Cards.Furina.Generated;
 using KleeMod.Cards.Generated;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Helpers;
@@ -30,30 +31,60 @@ internal static class KleeStartingCompanionsPatch
         for (var slot = 0; slot < players.Count; slot++)
         {
             var player = players[slot];
-            if (player.Character is not Klee)
+            if (player.Character is Klee)
             {
-                continue;
+                ResolveKlee(player, seed, slot);
             }
-
-            var playerSeed = unchecked(
-                (uint)(StringHelper.GetDeterministicHashCode(seed) + slot));
-            var rng = new Rng(playerSeed, "klee_starting_companions");
-
-            CardModel attack = rng.NextBool()
-                ? ModelDb.Card<DahliaSacramentalShower>()
-                : ModelDb.Card<KaeyaFrostgnaw>();
-            CardModel support = rng.NextBool()
-                ? ModelDb.Card<BarbaraMelody>()
-                : ModelDb.Card<PruneWitchHunt>();
-
-            var attackOk = ReplaceFirst<Kaboom>(player, attack);
-            var supportOk = ReplaceFirst<DuckAndCover>(player, support);
-            if (!attackOk || !supportOk)
+            else if (player.Character is Furina)
             {
-                Log.Error($"[{KleeMod.ModId}] could not resolve Klee's "
-                        + "randomized starter Companion slots; keeping any "
-                        + "unreplaced basics.");
+                ResolveFurina(player, seed, slot);
             }
+        }
+    }
+
+    private static void ResolveKlee(Player player, string seed, int slot)
+    {
+        var playerSeed = unchecked(
+            (uint)(StringHelper.GetDeterministicHashCode(seed) + slot));
+        var rng = new Rng(playerSeed, "klee_starting_companions");
+
+        CardModel attack = rng.NextBool()
+            ? ModelDb.Card<DahliaSacramentalShower>()
+            : ModelDb.Card<KaeyaFrostgnaw>();
+        CardModel support = rng.NextBool()
+            ? ModelDb.Card<BarbaraMelody>()
+            : ModelDb.Card<PruneWitchHunt>();
+
+        var attackOk = ReplaceFirst<Kaboom>(player, attack);
+        var supportOk = ReplaceFirst<DuckAndCover>(player, support);
+        if (!attackOk || !supportOk)
+        {
+            Log.Error($"[{KleeMod.ModId}] could not resolve Klee's "
+                    + "randomized starter Companion slots; keeping any "
+                    + "unreplaced basics.");
+        }
+    }
+
+    private static void ResolveFurina(Player player, string seed, int slot)
+    {
+        var playerSeed = unchecked(
+            (uint)(StringHelper.GetDeterministicHashCode(seed) + slot));
+        var rng = new Rng(playerSeed, "furina_starting_companions");
+
+        CardModel attack = rng.NextBool()
+            ? ModelDb.Card<ChevreuseInterdictionFire>()
+            : ModelDb.Card<FreminetPersDeploy>();
+        CardModel support = rng.NextBool()
+            ? ModelDb.Card<CharlotteEnduringFrosthelm>()
+            : ModelDb.Card<LynetteEnigmaticFeint>();
+
+        var attackOk = ReplaceFirst<SoloistsSolicitation>(player, attack);
+        var supportOk = ReplaceFirst<StagePresence>(player, support);
+        if (!attackOk || !supportOk)
+        {
+            Log.Error($"[{KleeMod.ModId}] could not resolve Furina's "
+                    + "randomized starter Companion slots; keeping any "
+                    + "unreplaced basics.");
         }
     }
 

@@ -46,7 +46,7 @@ public sealed class BestFriendsForever : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            
+
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in

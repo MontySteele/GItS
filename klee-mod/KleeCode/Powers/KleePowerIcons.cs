@@ -36,6 +36,18 @@ internal static class KleePowerIcons
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),
         SparksNSplashPower => KleePck.Path("klee/powers/sparks_n_splash.png"),
+        FurinaBurstMeterPower => KleePck.Path("klee/powers/burst.png"),
+        EncoreMeterPower => KleePck.Path("klee/powers/spark.png"),
+        FanfareMeterPower or FanfareAttackPer10Power =>
+            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        SalonMemberPower or SalonDamageUpPower =>
+            KleePck.Path("klee/powers/bomb.png"),
+        CappedSpotlightPower
+            or SpotlightMultBonusTurnPower
+            or SpotlightFlatDamageTurnPower
+            or CenterStagePower
+            or GuestCastPower =>
+            KleePck.Path("klee/powers/amp_reaction_up.png"),
         AuraPower aura => KleePck.Path(
             "klee/powers/aura_" + aura.Element.ToString().ToLowerInvariant() + ".png"),
         _ => null,

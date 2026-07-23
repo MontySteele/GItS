@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Cards;
+using KleeMod.Cards.Furina;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -137,7 +138,8 @@ public static class KitGrant
     /// DECISIONS when the kit sprint landed: the FIRST discard op to ship
     /// C#-side carries the exemption (R36 Crackle / bright_idea unblock).
     /// </summary>
-    public static bool NotKitCard(CardModel card) => card is not SparksNSplash;
+    public static bool NotKitCard(CardModel card) =>
+        card is not SparksNSplash and not LetThePeopleRejoice;
 
     public static async Task GrantIfCharged(PlayerChoiceContext choiceContext, Player? owner)
     {

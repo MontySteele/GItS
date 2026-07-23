@@ -86,6 +86,8 @@ internal static class ReactionEffects
         {
             await KleeBurstResource.Gain(
                 choiceContext, dealer, BurstConstants.PerReaction, cardSource);
+            FurinaResources.GainBurst(
+                dealer, FurinaResourceConstants.BurstPerReaction);
 
             // Catalytic Conversion, right after the flat +5 exactly as in the
             // sim (reactions.py _react): +Amount Sparks and +Amount x 5 Burst

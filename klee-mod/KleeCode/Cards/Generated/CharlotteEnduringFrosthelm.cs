@@ -67,8 +67,8 @@ public sealed class CharlotteEnduringFrosthelm : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, Owner.Creature, 4, applier: Owner.Creature, cardSource: this);
+        await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue), ValueProp.Move), cardPlay);
+        await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, Owner.Creature, (int)SpotlightSystem.PrintedBlock(this, 4), applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

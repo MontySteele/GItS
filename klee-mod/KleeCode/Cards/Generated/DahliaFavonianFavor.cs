@@ -74,7 +74,7 @@ public sealed class DahliaFavonianFavor : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue), ValueProp.Move), cardPlay);
         {
             var auraCandidates = CombatState!.HittableEnemies.ToList();
             if (auraCandidates.Count > 0)

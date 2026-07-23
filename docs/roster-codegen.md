@@ -1,8 +1,7 @@
 # Roster card codegen
 
-The mod now has one character-aware card generator. Klee remains the shipping
-compatibility baseline; Furina is staged behind an explicit activation gate
-until her runtime systems and character pool are complete.
+The mod has one character-aware card generator. Klee remains the compatibility
+baseline and Furina is active as the second playable character.
 
 ## Commands
 
@@ -52,36 +51,22 @@ Partial upgrades are forbidden. A card either receives its complete ruled
 upgrade from the authoritative upgrade sheet or appears under
 `upgrades.no_upgrade_path` in its manifest.
 
-Generated Furina classes use `autoAdd: false`. They are excluded from the
-shipping assembly until a Furina character pool can give every active card
-valid pool membership. They can still be compiler-checked with:
-
-```text
-dotnet build klee-mod/KleeCode/KleeCode.csproj \
-  -p:EnableFurinaGenerated=true
-```
+Generated Furina classes use `autoAdd: false`; `FurinaCardPool` owns their
+membership. `FurinaCardRoster` is generated from the personal sheet, while
+Guest Stars, the selector tokens, and the hand-written kit Burst are pool
+members filtered out of rewards.
 
 ## Current Furina coverage
 
 `klee-mod/KleeCode/Cards/Furina/Generated/manifest.json` is the live coverage
-ledger. The first tranche emits 16 of 76 cards: the cards whose complete
-damage, Block, draw, debuff, Energy, aura, and existing Companion-replay
-semantics are already implemented.
+ledger. It emits 75 of 76 personal cards plus all three Neuvillette Guest
+Stars. The sole blocked row is `let_the_people_rejoice`, intentionally
+hand-written because its full-meter grant/spend lifecycle is kit machinery.
 
-The other 60 remain blocked and grouped by runtime cluster. The implementation
-order is:
-
-1. Encore and Fanfare resource lifecycle, costs, spend timing, predicates, and
-   meter UI.
-2. Salon member slots, paid/dry ticks, final-bow replacement effects, and
-   related powers.
-3. Spotlight selector, character/category designation, numeric transforms,
-   texture powers, and copy/replay hooks.
-4. Guest Star generation and the selector token.
-5. Furina healing conversion, Fanfare cap changes, and the hand-written kit
-   Burst lifecycle.
-6. Furina character, starting relic/deck randomization, full card pool, and
-   removal of the shipping compile gate.
+The active runtime includes Encore/Fanfare/Burst resources and meters, Salon
+slots and replacement bows, Spotlight selection and numeric transforms,
+Guest Star generation, healing, Fanfare-cap changes, the kit Burst, Furina's
+starting relic/deck, and deterministic Fontaine starter substitutions.
 
 ## Build paths
 

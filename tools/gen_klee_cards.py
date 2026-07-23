@@ -168,6 +168,10 @@ PROFILES = {
 # Rng.CombatTargets.NextFloat() < chance (verified decompile; CombatTargets
 # is the established in-combat pick stream).
 MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_energy",
+                  "gain_encore", "spend_encore", "raise_fanfare_cap",
+                  "generate_guest_star",
+                  "copy_spotlighted_in_hand",
+                  "heal",
                   "apply_power", "discard", "discard_for_sparks",
                   "detonate", "move_bombs", "modify_bombs",
                   "chance_bomb_per_detonation", "conditional",
@@ -201,6 +205,7 @@ BLOCK_NEXT_TURN_FIELDS = {"op", "amount"}
 ADD_CARD_CLASSES = {"confiscated": "Confiscated"}
 ADD_CARD_FIELDS = {"op", "card", "card_id", "pool", "zone", "to", "amount",
                    "cost_override"}
+GUEST_STAR_FIELDS = {"op", "rarity", "amount", "to", "cost_override"}
 ENERGY_FIELDS = {"op", "amount"}
 SCRY_FIELDS = {"op", "amount"}
 # exhaust_from: dodge_roll's shape only -- a random Status from hand. The
@@ -231,6 +236,11 @@ PREDICATES_CS = {
     # window as a snapshot of the same monotonic counter.
     "reaction_triggered_this_turn": "ReactionEffects.ReactionTriggeredThisTurn",
     "killed_target": "enemiesAtStart.Any(e => e.IsDead)",
+    "fanfare_at_least_5": "FurinaResources.Fanfare(Owner.Creature) >= 5",
+    "fanfare_at_least_20": "FurinaResources.Fanfare(Owner.Creature) >= 20",
+    "has_salon_members": "SalonMemberPower.Count(Owner.Creature) > 0",
+    "spotlight_moved_this_turn":
+        "SpotlightSystem.MovedThisTurn(Owner.Creature)",
 }
 
 # The if-clause each predicate renders on the card.
@@ -240,6 +250,11 @@ PREDICATE_TEXT = {
     "reaction_triggered_by_this": "If it triggered an [gold]Elemental Reaction[/gold]",
     "reaction_triggered_this_turn": "If an [gold]Elemental Reaction[/gold] triggered this turn",
     "killed_target": "If it kills",
+    "fanfare_at_least_5": "If you have at least 5 [gold]Fanfare[/gold]",
+    "fanfare_at_least_20": "If you have at least 20 [gold]Fanfare[/gold]",
+    "has_salon_members": "If you have a [gold]Salon Member[/gold]",
+    "spotlight_moved_this_turn":
+        "If you moved the [gold]Spotlight[/gold] this turn",
 }
 
 CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
@@ -247,7 +262,8 @@ CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
 # Ops legal inside a conditional branch: plain resolvers with literal (or
 # delta-var) amounts and no local declarations outside their own braces.
 # repeat_this is legal ONLY as a conditional's entire then-branch.
-BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "place_bomb", "burst_energy",
+BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
+              "place_bomb", "burst_energy", "energy",
               "buff_next_attack"}
 
 # Cards carrying a repeat-conditional re-resolve their other effects (sim
@@ -328,6 +344,33 @@ APPLY_POWERS = {
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,
         "Your [gold]Shatters[/gold] deal {X} more damage."),
+    "fanfare_attack_per10": ("FanfareAttackPer10Power", 2,
+        "Your Attacks deal {X} more damage per 10 [gold]Fanfare[/gold]. "
+        "Maximum 2 stacks."),
+    "salon_member": ("SalonMemberPower", None,
+        "Add {X} [gold]Salon Member(s)[/gold]. Maximum 3. "
+        "Replacements perform a final bow and empower this card's later effects."),
+    "salon_damage_up": ("SalonDamageUpPower", 6,
+        "[gold]Salon Members[/gold] deal {X} more damage. Maximum 6."),
+    "spotlight_discount": ("SpotlightDiscountPower", 1,
+        "The first [gold]Spotlighted[/gold] card each turn costs {X} less."),
+    "spotlight_draw": ("SpotlightDrawPower", 1,
+        "The first [gold]Spotlighted[/gold] card each turn draws {X} card."),
+    "spotlight_mult_bonus": ("SpotlightMultBonusPower", 50,
+        "[gold]Spotlighted[/gold] Companion numbers are {X}% stronger "
+        "this combat. Maximum +50%."),
+    "spotlight_mult_bonus_turn": ("SpotlightMultBonusTurnPower", None,
+        "[gold]Spotlighted[/gold] Companion numbers are {X}% stronger "
+        "this turn."),
+    "spotlight_flat_damage": ("SpotlightFlatDamagePower", 3,
+        "[gold]Spotlighted[/gold] Companion damage gains {X}. Maximum +3."),
+    "spotlight_flat_damage_turn": ("SpotlightFlatDamageTurnPower", None,
+        "[gold]Spotlighted[/gold] Companion damage gains {X} this turn."),
+    "ovation_spend_boost": ("OvationSpendBoostPower", 20,
+        "Whenever you spend Encore, [gold]Spotlighted[/gold] Companion "
+        "numbers are {X}% stronger this turn. Maximum +20%."),
+    "spotlight_encore_first": ("SpotlightEncoreFirstPower", 1,
+        "The first [gold]Spotlighted[/gold] card each turn grants {X} Encore."),
 }
 
 # Powers applied to ENEMIES (native debuffs). Everything else in APPLY_POWERS
@@ -426,11 +469,14 @@ HAND_WRITTEN |= {"sparks_n_splash"}
 #                  form BaseLib's SimpleLoc generates for upgrade swaps)
 #   bombs       -> X-cost bomb count: X_plus_N -> X_plus_(N+val) in tier0;
 #                  codegen renders "X+{Bombs:diff()}" off a Bombs var
-EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "bomb_damage", "burst_energy", "cost",
+EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "encore",
+                       "encore_cost", "fanfare_cost", "fanfare_cap", "heal",
+                       "bomb_damage", "burst_energy", "cost",
                        "discard", "sparks", "innate", "retain", "bonus", "chance",
                        "conditional_bonus", "condition", "bombs",
                        "bonus_per_detonation", "cards", "remove",
                        "copy_cost_override", "add"}
+                      | {"generate_cost_override"}
                       | POWER_UPGRADE_KEYS)
 
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
@@ -464,8 +510,8 @@ CARD_FIELDS = {
     # Companion identity/reward metadata.
     "star", "element", "role_c", "personal_pool", "nation", "character",
     "guest_star",
-    # Furina resource gates. These are known grammar, but remain blockers
-    # until their runtime spend/check hooks land.
+    # Furina resource gates. BaseLib provides affordability and post-effect
+    # Fanfare spend; FurinaResourceHooks moves Encore spend pre-effect.
     "encore_cost", "fanfare_cost",
 }
 
@@ -477,10 +523,6 @@ def card_level_reason(
     unknown = set(card) - CARD_FIELDS
     if unknown:
         return f"card field(s) {sorted(unknown)} not understood"
-    if card.get("encore_cost") is not None:
-        return "encore_cost (Furina runtime resource gate not implemented)"
-    if card.get("fanfare_cost") is not None:
-        return "fanfare_cost (Furina runtime resource gate not implemented)"
     return None
 
 
@@ -549,7 +591,8 @@ def blocked_reason(
         # so mixed elemental/non-elemental damage on one card cannot be
         # expressed (tier0 reads applies_element per effect).
         applies = {bool(e.get("applies_element"))
-                   for e in card.get("effects", []) if e.get("op") == "damage"}
+                   for e in card.get("effects", [])
+                   if e.get("op") == "damage" and e.get("target") != "self"}
         if len(applies) > 1:
             return "mixed applies_element damage on one companion card"
 
@@ -593,11 +636,17 @@ def blocked_reason(
             bf = eff.get("bonus_formula")
             if bf is not None and not (
                     bf.endswith("_per_detonation_this_combat")
-                    and bf.partition("_per_")[0].isdigit()):
-                # The Big One's grammar; the fanfare variant is Furina-stream.
+                    and bf.partition("_per_")[0].isdigit()) and not re.fullmatch(
+                        r"\d+_per_\d+_fanfare", bf):
                 return f"bonus_formula '{bf}'"
-            if "bonus_vs_bombed" in eff or "bonus_vs_aura" in eff:
-                return "conditional damage bonus (needs aura/bomb systems)"
+            if "bonus_vs_bombed" in eff:
+                return "conditional damage bonus (needs bomb system)"
+            if "bonus_vs_aura" in eff:
+                if eff.get("target") not in {"enemy", "all_enemies"} \
+                        or not isinstance(eff["bonus_vs_aura"], int):
+                    return (
+                        "bonus_vs_aura requires enemy damage and "
+                        "a literal int")
             times = eff.get("times", 1)
             if not isinstance(times, int) and _x_formula_reason(card, times):
                 return _x_formula_reason(card, times)
@@ -607,6 +656,20 @@ def blocked_reason(
             amt = eff.get("amount")
             if not isinstance(amt, int) and _x_formula_reason(card, amt):
                 return _x_formula_reason(card, amt)
+        if op in {"gain_encore", "spend_encore", "raise_fanfare_cap"}:
+            unknown = set(eff) - {"op", "amount"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
+                return f"{op} amount must be a positive literal int"
+        if op == "heal":
+            unknown = set(eff) - {"op", "amount"}
+            if unknown:
+                return f"heal field(s) {sorted(unknown)} not understood"
+            if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
+                return "heal amount must be a positive literal int"
+            if card.get("rarity") != "rare" or not card.get("exhaust"):
+                return "heal requires a Rare card with Exhaust"
         if op == "detonate":
             if eff.get("target") not in {"enemy", "all_enemies"}:
                 return f"detonate target '{eff.get('target')}'"
@@ -685,6 +748,21 @@ def blocked_reason(
                 return "copy_companion_in_hand amount > 1 (single-pick idiom only)"
             if "cost_override" in eff and not isinstance(eff["cost_override"], int):
                 return "copy_companion_in_hand cost_override must be a literal int"
+        if op == "copy_spotlighted_in_hand":
+            unknown = set(eff) - {"op", "amount", "cost_override"}
+            if unknown:
+                return (
+                    "copy_spotlighted_in_hand field(s) "
+                    f"{sorted(unknown)} not understood")
+            if eff.get("amount", 1) != 1:
+                return (
+                    "copy_spotlighted_in_hand amount > 1 "
+                    "(single-pick idiom only)")
+            if "cost_override" in eff and not isinstance(
+                    eff["cost_override"], int):
+                return (
+                    "copy_spotlighted_in_hand cost_override must be "
+                    "a literal int")
         if op == "replay_next_companion":
             unknown = set(eff) - {"op", "times", "duration"}
             if unknown:
@@ -772,6 +850,33 @@ def blocked_reason(
                 cid = eff.get("card_id") or eff.get("card")
                 if cid not in ADD_CARD_CLASSES:
                     return f"add_card card '{cid}' (no C# token class registered)"
+        if op == "generate_guest_star":
+            unknown = set(eff) - GUEST_STAR_FIELDS
+            if unknown:
+                return (
+                    "generate_guest_star field(s) "
+                    f"{sorted(unknown)} not understood")
+            if eff.get("rarity") not in {"common", "uncommon"}:
+                return (
+                    "generate_guest_star rarity "
+                    f"'{eff.get('rarity')}'")
+            rarity_rank = {"common": 0, "uncommon": 1, "rare": 2}
+            if rarity_rank[eff["rarity"]] > rarity_rank.get(
+                    card.get("rarity"), -1):
+                return (
+                    "generate_guest_star cannot create above generator rarity")
+            if not isinstance(eff.get("amount", 1), int) \
+                    or eff.get("amount", 1) <= 0:
+                return "generate_guest_star amount must be a positive literal int"
+            if eff.get("to", "hand") != "hand":
+                return (
+                    "generate_guest_star destination "
+                    f"'{eff.get('to')}'")
+            if "cost_override" in eff and not isinstance(
+                    eff["cost_override"], int):
+                return "generate_guest_star cost_override must be a literal int"
+            if not card.get("exhaust"):
+                return "generate_guest_star generator must Exhaust"
         if op == "conditional":
             unknown = set(eff) - CONDITIONAL_FIELDS
             if unknown:
@@ -798,7 +903,9 @@ def blocked_reason(
                     "block": {"op", "amount"},
                     "draw": {"op", "amount"},
                     "gain_spark": {"op", "amount"},
+                    "gain_encore": {"op", "amount"},
                     "burst_energy": {"op", "amount"},
+                    "energy": {"op", "amount"},
                     "place_bomb": {"op", "amount", "target", "bomb_damage"},
                     "buff_next_attack": {"op", "amount"},
                 }
@@ -884,6 +991,11 @@ def build_vars(card: dict) -> list[str]:
         elif op == "burst_energy" and burst_upgrade(card):
             # Same rule as Sparks: a var only when the upgrade must render.
             out.append(f'new DynamicVar("BurstEnergy", {int(eff["amount"])}m)')
+        elif op == "raise_fanfare_cap":
+            out.append(
+                f'new DynamicVar("FanfareCap", {int(eff["amount"])}m)')
+        elif op == "heal":
+            out.append(f'new DynamicVar("Heal", {int(eff["amount"])}m)')
         elif op in POWER_UPGRADE_OPS and power_upgrade(card):
             # Same rule again: only an upgradeable amount needs a var. The
             # sim binds these deltas to the FIRST top-level apply_power or
@@ -1007,8 +1119,16 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "remove": bool(card.get("exhaust")),
         # copy_cost_override: play-time IsUpgraded read in the copy emission.
         "copy_cost_override": any(e["op"] == "copy_companion_in_hand"
-                                  for e in effects),
+                                  for e in effects) or any(
+            e["op"] == "copy_spotlighted_in_hand" for e in effects),
+        "generate_cost_override": any(
+            e["op"] == "generate_guest_star" for e in effects),
         "spark": any(e["op"] == "gain_spark" for e in effects),
+        "encore": any(e["op"] == "gain_encore" for e in everywhere),
+        "encore_cost": int(card.get("encore_cost", 0)) > 0,
+        "fanfare_cost": int(card.get("fanfare_cost", 0)) > 0,
+        "fanfare_cap": any(e["op"] == "raise_fanfare_cap" for e in effects),
+        "heal": any(e["op"] == "heal" for e in effects),
         "bomb_damage": any(e["op"] == "place_bomb" for e in effects),
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
         "cost": str(card.get("cost")) != "X",
@@ -1039,11 +1159,14 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         if key == "add":
             if not (isinstance(value, dict)
                     and set(value) == {"op", "amount"}
-                    and value.get("op") == "draw"
+                    and value.get("op") in {"draw", "gain_encore"}
                     and isinstance(value.get("amount"), int)
                     and value["amount"] > 0):
-                return {}, f"delta 'add: {value}' (only a positive draw effect is expressible)"
-            if any(e.get("op") == "draw" for e in everywhere):
+                return {}, (
+                    f"delta 'add: {value}' (only a positive draw or "
+                    "gain_encore effect is expressible)")
+            if value["op"] == "draw" and any(
+                    e.get("op") == "draw" for e in everywhere):
                 return {}, "delta 'add: draw' on a card with an existing draw (Cards var collision)"
             if any(e.get("op") == "conditional" and any(
                     x.get("op") == "repeat_this" for x in e.get("then", []))
@@ -1065,7 +1188,22 @@ def added_draw_upgrade(card: dict) -> int:
     callers only need the amount for vars, text, and play-time emission.
     """
     added = upgrade_plan(card)[0].get("add")
-    return int(added["amount"]) if isinstance(added, dict) else 0
+    return (int(added["amount"])
+            if isinstance(added, dict) and added.get("op") == "draw" else 0)
+
+
+def added_encore_upgrade(card: dict) -> int:
+    """Upgrade-only gain_encore effect appended by `add`, or zero."""
+    added = upgrade_plan(card)[0].get("add")
+    return (int(added["amount"])
+            if isinstance(added, dict)
+            and added.get("op") == "gain_encore" else 0)
+
+
+def encore_upgrade(card: dict) -> int:
+    """Ruled Encore delta. The sim applies it to every gain_encore effect,
+    branches included; generated play/text use IsUpgraded at each site."""
+    return int(upgrade_plan(card)[0].get("encore", 0))
 
 
 def spark_upgrade(card: dict) -> int:
@@ -1298,8 +1436,27 @@ def _stmt_burst_energy(card: dict, eff: dict) -> str:
     return f"await KleeBurstResource.Gain(choiceContext, Owner.Creature, {amount}, this);"
 
 
-def _emit_branch_op(card: dict, eff: dict, lines: list[str], ctx: dict,
-                    in_then: bool, cb_state: dict) -> None:
+def _encore_amount_expr(card: dict, eff: dict) -> str:
+    base = int(eff["amount"])
+    delta = encore_upgrade(card)
+    return f"(IsUpgraded ? {base + delta} : {base})" if delta else str(base)
+
+
+def _stmt_gain_encore(
+    card: dict, eff: dict, *, salon_scaled: bool = False
+) -> str:
+    amount = _encore_amount_expr(card, eff)
+    if salon_scaled:
+        amount = f"{amount} * (salonReplacements > 0 ? 2 : 1)"
+    return (
+        "FurinaResources.GainEncore(Owner.Creature, "
+        f"{amount});")
+
+
+def _emit_branch_op(
+    card: dict, eff: dict, lines: list[str], ctx: dict,
+    in_then: bool, cb_state: dict, spotlight_capable: bool
+) -> None:
     """Conditional-branch resolvers. Amounts are literals unless a ruled
     delta claims them (see build_vars): conditional_bonus -> then-first
     damage via ExtraDamage; draw delta -> Cards (then) / DrawElse (else)."""
@@ -1307,13 +1464,19 @@ def _emit_branch_op(card: dict, eff: dict, lines: list[str], ctx: dict,
     if op == "damage":
         if in_then and cb_state.get("pending"):
             cb_state["pending"] = False
-            _emit_damage(card, eff, lines, ctx, "DynamicVars.ExtraDamage.BaseValue")
+            amount = "DynamicVars.ExtraDamage.BaseValue"
         else:
-            _emit_damage(card, eff, lines, ctx, f'{int(eff["amount"])}m')
+            amount = f'{int(eff["amount"])}m'
+        if spotlight_capable:
+            amount = f"SpotlightSystem.PrintedDamage(this, {amount})"
+        _emit_damage(card, eff, lines, ctx, amount)
     elif op == "block":
+        amount = f'{int(eff["amount"])}m'
+        if spotlight_capable:
+            amount = f"SpotlightSystem.PrintedBlock(this, {amount})"
         lines.append(
             "await CreatureCmd.GainBlock(Owner.Creature, "
-            f'new BlockVar({int(eff["amount"])}m, ValueProp.Move), cardPlay);'
+            f"new BlockVar({amount}, ValueProp.Move), cardPlay);"
         )
     elif op == "draw":
         if branch_draw_upgrade(card):
@@ -1332,6 +1495,11 @@ def _emit_branch_op(card: dict, eff: dict, lines: list[str], ctx: dict,
         lines.append(
             f'await KleeBurstResource.Gain(choiceContext, Owner.Creature, {int(eff["amount"])}, this);'
         )
+    elif op == "gain_encore":
+        lines.append(_stmt_gain_encore(card, eff))
+    elif op == "energy":
+        lines.append(
+            f"await PlayerCmd.GainEnergy({int(eff['amount'])}, Owner);")
     elif op == "place_bomb":
         _emit_place_bomb(card, eff, lines, ctx, str(int(eff["bomb_damage"])))
     elif op == "buff_next_attack":
@@ -1357,10 +1525,20 @@ def _conditional_block(pred: str, then_lines: list[str],
     return out
 
 
-def build_body(card: dict) -> list[str]:
+def build_body(
+    card: dict, profile: CharacterProfile = KLEE_PROFILE
+) -> list[str]:
     """OnPlay statements. Every call here has a verified base-game call site."""
     lines = []
     ctx = {"thrown": False}
+    spotlight_capable = is_companion(card) or profile is FURINA_PROFILE
+    salon_deploy_present = any(
+        effect.get("op") == "apply_power"
+        and effect.get("power") == "salon_member"
+        for effect in card.get("effects", []))
+    salon_deployed = False
+    if salon_deploy_present:
+        lines.append("var salonReplacements = 0;")
     # Predicate snapshots: the sim resets its per-card counters at
     # resolve_card START, so the C# diff bases are captured at the top of
     # OnPlay, before any effect resolves -- not at the conditional's site.
@@ -1377,13 +1555,29 @@ def build_body(card: dict) -> list[str]:
         op = eff["op"]
 
         if op == "block":
+            amount = "DynamicVars.Block"
+            if salon_deployed:
+                amount = (
+                    "new BlockVar(DynamicVars.Block.BaseValue * "
+                    "(salonReplacements > 0 ? 3 : 1), ValueProp.Move)")
+            if spotlight_capable:
+                raw = (
+                    "DynamicVars.Block.BaseValue * "
+                    "(salonReplacements > 0 ? 3 : 1)"
+                    if salon_deployed else "DynamicVars.Block.BaseValue")
+                amount = (
+                    "new BlockVar(SpotlightSystem.PrintedBlock("
+                    f"this, {raw}), ValueProp.Move)")
             lines.append(
-                "await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);"
+                f"await CreatureCmd.GainBlock(Owner.Creature, {amount}, cardPlay);"
             )
 
         elif op == "draw":
+            amount = "DynamicVars.Cards.BaseValue"
+            if salon_deployed:
+                amount += " * (salonReplacements > 0 ? 2 : 1)"
             lines.append(
-                "await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);"
+                f"await CardPileCmd.Draw(choiceContext, {amount}, Owner);"
             )
 
         elif op == "damage" and eff["target"] == "self":
@@ -1401,22 +1595,76 @@ def build_body(card: dict) -> list[str]:
 
         elif op == "damage":
             amount_expr = "DynamicVars.Damage.BaseValue"
+            if "bonus_vs_aura" in eff:
+                aura_target = (
+                    "cardPlay.Target!" if eff["target"] == "enemy"
+                    else "auraTarget")
+                amount_expr += (
+                    f" + (AuraCmd.Find({aura_target}) != null ? "
+                    f"{int(eff['bonus_vs_aura'])} : 0)")
             if "bonus_formula" in eff:
-                # N_per_detonation_this_combat (The Big One): flat rider on
-                # the printed number, before external buffs -- adding into
-                # the Attack amount is exactly the sim's `base +=`.
-                per = ('DynamicVars["BonusPer"].IntValue'
-                       if bonus_per_upgrade(card)
-                       else eff["bonus_formula"].partition("_per_")[0])
-                amount_expr += (f" + {per} * "
-                                "BombPower.DetonationsThisCombat(CombatState!)")
-            _emit_damage(card, eff, lines, ctx, amount_expr)
+                formula = eff["bonus_formula"]
+                if formula.endswith("_per_detonation_this_combat"):
+                    # The Big One: flat rider on the printed number, before
+                    # external buffs -- exactly the sim's `base +=`.
+                    per = ('DynamicVars["BonusPer"].IntValue'
+                           if bonus_per_upgrade(card)
+                           else formula.partition("_per_")[0])
+                    amount_expr += (
+                        f" + {per} * "
+                        "BombPower.DetonationsThisCombat(CombatState!)")
+                else:
+                    n, _, rest = formula.partition("_per_")
+                    per_fanfare = rest.partition("_")[0]
+                    amount_expr += (
+                        f" + {n} * "
+                        f"(FurinaResources.Fanfare(Owner.Creature) / {per_fanfare})")
+            if salon_deployed:
+                amount_expr = (
+                    f"({amount_expr}) * "
+                    "(salonReplacements > 0 ? 3 : 1)")
+            if spotlight_capable:
+                amount_expr = (
+                    f"SpotlightSystem.PrintedDamage(this, {amount_expr})")
+            if "bonus_vs_aura" in eff and eff["target"] == "all_enemies":
+                lines.append(
+                    "foreach (var auraTarget in "
+                    "CombatState!.HittableEnemies.ToList())\n"
+                    "        {\n"
+                    f"            await DamageCmd.Attack({amount_expr})\n"
+                    "                .FromCard(this)\n"
+                    "                .Targeting(auraTarget)\n"
+                    '                .WithHitFx("vfx/vfx_attack_slash")\n'
+                    "                .Execute(choiceContext);\n"
+                    "        }")
+            else:
+                _emit_damage(card, eff, lines, ctx, amount_expr)
 
         elif op == "gain_spark":
             lines.append(_stmt_gain_spark(card, eff))
 
         elif op == "burst_energy":
             lines.append(_stmt_burst_energy(card, eff))
+
+        elif op == "gain_encore":
+            lines.append(
+                _stmt_gain_encore(
+                    card, eff, salon_scaled=salon_deployed))
+
+        elif op == "spend_encore":
+            lines.append(
+                "await FurinaResources.SpendEncoreOrHp("
+                f"choiceContext, Owner.Creature, {int(eff['amount'])}, this);")
+
+        elif op == "raise_fanfare_cap":
+            lines.append(
+                "FurinaResources.RaiseFanfareCap("
+                "Owner.Creature, DynamicVars[\"FanfareCap\"].IntValue);")
+
+        elif op == "heal":
+            lines.append(
+                "await CreatureCmd.Heal(Owner.Creature, "
+                "DynamicVars[\"Heal\"].BaseValue);")
 
         elif op == "apply_power":
             cls = APPLY_POWERS[eff["power"]][0]
@@ -1425,10 +1673,17 @@ def build_body(card: dict) -> list[str]:
                 if power_upgrade(card)
                 else str(int(eff["amount"]))
             )
+            if salon_deployed and eff["power"] != "salon_member":
+                amount = f"{amount} * (salonReplacements > 0 ? 2 : 1)"
             # Stack caps are enforced by the power's own
             # TryModifyPowerAmountReceived (the sim clamps at apply too), so
             # the call site stays a plain Apply.
-            if eff["power"] in ENEMY_APPLY_POWERS:
+            if eff["power"] == "salon_member":
+                lines.append(
+                    "salonReplacements += await SalonMemberPower.Deploy("
+                    f"choiceContext, Owner.Creature, {amount}, this);")
+                salon_deployed = True
+            elif eff["power"] in ENEMY_APPLY_POWERS:
                 # tier0 _op_apply_power -> _pick_targets: chosen enemy or
                 # every living enemy. Native debuff classes; applier is us.
                 if eff["target"] == "enemy":
@@ -1619,6 +1874,47 @@ def build_body(card: dict) -> list[str]:
                 "        }"
             )
 
+        elif op == "copy_spotlighted_in_hand":
+            cost_line = ""
+            if "cost_override" in eff:
+                cost_line = (
+                    "                    spotlightCopy.EnergyCost.SetThisCombat("
+                    f"{int(eff['cost_override'])});\n")
+            elif "copy_cost_override" in upgrade_plan(card)[0]:
+                override = int(
+                    upgrade_plan(card)[0]["copy_cost_override"])
+                cost_line = (
+                    "                    if (IsUpgraded)\n"
+                    "                    {\n"
+                    "                        spotlightCopy.EnergyCost"
+                    f".SetThisCombat({override});\n"
+                    "                    }\n")
+            lines.append(
+                "{\n"
+                "            var spotlightTargets = CardPile.Get("
+                "PileType.Hand, Owner)?.Cards\n"
+                "                .Where(SpotlightSystem.IsSpotlighted)"
+                ".ToList();\n"
+                "            if (spotlightTargets != null "
+                "&& spotlightTargets.Count > 0)\n"
+                "            {\n"
+                "                var selectedSpotlight = Owner.RunState.Rng"
+                ".CombatTargets.NextItem(spotlightTargets);\n"
+                "                if (selectedSpotlight != null)\n"
+                "                {\n"
+                "                    var spotlightCopy = CombatState!"
+                ".CreateCard(\n"
+                "                        ModelDb.GetById<CardModel>("
+                "selectedSpotlight.Id), Owner);\n"
+                + cost_line
+                + "                    await CardPileCmd"
+                ".AddGeneratedCardToCombat(\n"
+                "                        spotlightCopy, PileType.Hand, "
+                "Owner);\n"
+                "                }\n"
+                "            }\n"
+                "        }")
+
         elif op == "replay_next_companion":
             lines.append(
                 f"await PowerCmd.Apply<ReplayNextCompanionPower>(choiceContext, "
@@ -1651,14 +1947,15 @@ def build_body(card: dict) -> list[str]:
             element = (ELEMENT_CS[eff["element"]] if op == "apply_aura"
                        else "Element.Anemo")
             tgt = eff.get("target", "enemy")
+            aura_lines: list[str] = []
             if tgt == "enemy":
-                _target_guard(lines, ctx)
-                lines.append(
+                _target_guard(aura_lines, ctx)
+                aura_lines.append(
                     f"await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, "
                     f"{element}, Owner.Creature);"
                 )
             elif tgt == "all_enemies":
-                lines.append(
+                aura_lines.append(
                     "foreach (var auraTarget in CombatState!.HittableEnemies.ToList())\n"
                     "        {\n"
                     f"            await ElementalHit.ApplyOnly(choiceContext, auraTarget, "
@@ -1666,7 +1963,7 @@ def build_body(card: dict) -> list[str]:
                     "        }"
                 )
             else:  # random_enemy
-                lines.append(
+                aura_lines.append(
                     "{\n"
                     "            var auraCandidates = CombatState!.HittableEnemies.ToList();\n"
                     "            if (auraCandidates.Count > 0)\n"
@@ -1680,6 +1977,18 @@ def build_body(card: dict) -> list[str]:
                     "            }\n"
                     "        }"
                 )
+            if salon_deployed:
+                body = "\n".join(
+                    "            " + statement.replace("\n", "\n    ")
+                    for statement in aura_lines)
+                lines.append(
+                    "for (var salonRepeat = 0; salonRepeat < "
+                    "(salonReplacements > 0 ? 2 : 1); salonRepeat++)\n"
+                    "        {\n"
+                    f"{body}\n"
+                    "        }")
+            else:
+                lines.extend(aura_lines)
 
         elif op == "buff_next_attack":
             # tier0 _op_buff_next_attack -> next_attack_up, consumed by the
@@ -1695,9 +2004,12 @@ def build_body(card: dict) -> list[str]:
         elif op == "block_next_turn":
             # tier0 _op_block_next_turn: a power the sim POPS at the next
             # player turn start, granting the Block after that turn's reset.
+            amount = str(int(eff["amount"]))
+            if spotlight_capable:
+                amount = f"(int)SpotlightSystem.PrintedBlock(this, {amount})"
             lines.append(
                 f"await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, "
-                f'Owner.Creature, {int(eff["amount"])}, '
+                f"Owner.Creature, {amount}, "
                 "applier: Owner.Creature, cardSource: this);"
             )
 
@@ -1797,6 +2109,22 @@ def build_body(card: dict) -> list[str]:
                 )
                 lines.append("{\n" + body + "        }")
 
+        elif op == "generate_guest_star":
+            override = eff.get("cost_override")
+            ruled_override = upgrade_plan(card)[0].get(
+                "generate_cost_override")
+            if override is not None:
+                override_expr = str(int(override))
+            elif ruled_override is not None:
+                override_expr = (
+                    f"IsUpgraded ? {int(ruled_override)} : (int?)null")
+            else:
+                override_expr = "null"
+            lines.append(
+                "await GuestStarGenerator.Generate("
+                f"choiceContext, this, \"{eff['rarity']}\", "
+                f"{int(eff.get('amount', 1))}, {override_expr});")
+
         elif op == "conditional":
             then = eff.get("then", [])
             if any(e.get("op") == "repeat_this" for e in then):
@@ -1816,10 +2144,14 @@ def build_body(card: dict) -> list[str]:
                 cb_state = {"pending": conditional_bonus_upgrade(card) > 0}
                 then_lines: list[str] = []
                 for e in then:
-                    _emit_branch_op(card, e, then_lines, ctx, True, cb_state)
+                    _emit_branch_op(
+                        card, e, then_lines, ctx, True, cb_state,
+                        spotlight_capable)
                 else_lines: list[str] = []
                 for e in eff.get("else", []):
-                    _emit_branch_op(card, e, else_lines, ctx, False, cb_state)
+                    _emit_branch_op(
+                        card, e, else_lines, ctx, False, cb_state,
+                        spotlight_capable)
                 lines.append(_conditional_block(pred, then_lines, else_lines))
 
     # Structural upgrade append (tier0 upgrades.py: card.effects.append).
@@ -1829,6 +2161,17 @@ def build_body(card: dict) -> list[str]:
             "if (IsUpgraded)\n"
             "        {\n"
             "            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);\n"
+            "        }"
+        )
+    if added_encore_upgrade(card):
+        amount = str(added_encore_upgrade(card))
+        if salon_deploy_present:
+            amount += " * (salonReplacements > 0 ? 2 : 1)"
+        lines.append(
+            "if (IsUpgraded)\n"
+            "        {\n"
+            "            FurinaResources.GainEncore("
+            f"Owner.Creature, {amount});\n"
             "        }"
         )
 
@@ -1900,6 +2243,15 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool) -> str:
                         else f"gain {n} [gold]Sparks[/gold]")
         elif op == "burst_energy":
             bits.append(f'gain {int(e["amount"])} [gold]Burst Energy[/gold]')
+        elif op == "gain_encore":
+            base = int(e["amount"])
+            delta = encore_upgrade(card)
+            amount = (
+                f"{{IfUpgraded:show:{base + delta}|{base}}}"
+                if delta else str(base))
+            bits.append(f"gain {amount} [gold]Encore[/gold]")
+        elif op == "energy":
+            bits.append(f"gain {int(e['amount'])} Energy")
         elif op == "place_bomb":
             n, d = e["amount"], int(e["bomb_damage"])
             if n == 1:
@@ -1932,6 +2284,17 @@ def build_description(card: dict) -> str:
     [gold] for keyword highlight.
     """
     parts = []
+    deltas = upgrade_plan(card)[0]
+    for field, label in (("encore_cost", "Encore"),
+                         ("fanfare_cost", "Fanfare")):
+        base_cost = int(card.get(field, 0))
+        if not base_cost:
+            continue
+        delta = int(deltas.get(field, 0))
+        rendered = (
+            f"{{IfUpgraded:show:{max(0, base_cost + delta)}|{base_cost}}}"
+            if delta else str(base_cost))
+        parts.append(f"Spend {rendered} [gold]{label}[/gold].")
     for eff in card["effects"]:
         op = eff["op"]
 
@@ -2000,10 +2363,21 @@ def build_description(card: dict) -> str:
                 plural = "random enemies" if times > 1 else "a random enemy"
                 parts.append(f"Deal {{Damage:diff()}} damage to {plural}{suffix}.")
             if "bonus_formula" in eff:
-                per = ("{BonusPer:diff()}" if bonus_per_upgrade(card)
-                       else eff["bonus_formula"].partition("_per_")[0])
+                formula = eff["bonus_formula"]
+                if formula.endswith("_per_detonation_this_combat"):
+                    per = ("{BonusPer:diff()}" if bonus_per_upgrade(card)
+                           else formula.partition("_per_")[0])
+                    parts.append(
+                        f"+{per} damage per [gold]Bomb[/gold] detonated this combat.")
+                else:
+                    n, _, rest = formula.partition("_per_")
+                    fanfare_step = rest.partition("_")[0]
+                    parts.append(
+                        f"+{n} damage per {fanfare_step} [gold]Fanfare[/gold].")
+            if "bonus_vs_aura" in eff:
                 parts.append(
-                    f"+{per} damage per [gold]Bomb[/gold] detonated this combat.")
+                    f"+{int(eff['bonus_vs_aura'])} damage if the enemy "
+                    "has an elemental aura.")
 
         elif op == "gain_spark":
             if spark_upgrade(card):
@@ -2023,6 +2397,27 @@ def build_description(card: dict) -> str:
                 parts.append("Gain {BurstEnergy:diff()} [gold]Burst Energy[/gold].")
             else:
                 parts.append(f'Gain {int(eff["amount"])} [gold]Burst Energy[/gold].')
+
+        elif op == "gain_encore":
+            base = int(eff["amount"])
+            delta = encore_upgrade(card)
+            amount = (
+                f"{{IfUpgraded:show:{base + delta}|{base}}}"
+                if delta else str(base))
+            parts.append(f"Gain {amount} [gold]Encore[/gold].")
+
+        elif op == "spend_encore":
+            parts.append(
+                f"Spend {int(eff['amount'])} [gold]Encore[/gold]; "
+                "lose HP for any shortfall.")
+
+        elif op == "raise_fanfare_cap":
+            parts.append(
+                "Increase your [gold]Fanfare[/gold] cap by "
+                "{FanfareCap:diff()} this combat.")
+
+        elif op == "heal":
+            parts.append("Heal {Heal:diff()} HP.")
 
         elif op == "apply_power":
             template = APPLY_POWERS[eff["power"]][2]
@@ -2066,6 +2461,17 @@ def build_description(card: dict) -> str:
                 "random enemy."
             )
 
+        elif op == "generate_guest_star":
+            amount = int(eff.get("amount", 1))
+            rarity = eff["rarity"].capitalize()
+            noun = "card" if amount == 1 else "cards"
+            parts.append(
+                f"Add {amount} random {rarity} [gold]Companion[/gold] "
+                f"{noun} to your hand.")
+            if "generate_cost_override" in deltas:
+                parts.append(
+                    "{IfUpgraded:show:They cost 0 this turn.|}")
+
         elif op == "cost_mod":
             n = -int(eff["delta"])
             parts.append(
@@ -2080,6 +2486,24 @@ def build_description(card: dict) -> str:
                 o = int(upgrade_plan(card)[0]["copy_cost_override"])
                 parts.append(
                     "{IfUpgraded:show:" + base_txt + f" The copy costs {o}.|"
+                    + base_txt + "}")
+            else:
+                parts.append(base_txt)
+
+        elif op == "copy_spotlighted_in_hand":
+            base_txt = (
+                "Add a copy of a random [gold]Spotlighted[/gold] card "
+                "in your hand to your hand.")
+            if "cost_override" in eff:
+                parts.append(
+                    base_txt
+                    + f" The copy costs {int(eff['cost_override'])}.")
+            elif "copy_cost_override" in upgrade_plan(card)[0]:
+                override = int(
+                    upgrade_plan(card)[0]["copy_cost_override"])
+                parts.append(
+                    "{IfUpgraded:show:" + base_txt
+                    + f" The copy costs {override}.|"
                     + base_txt + "}")
             else:
                 parts.append(base_txt)
@@ -2216,6 +2640,11 @@ def build_description(card: dict) -> str:
         n = added_draw_upgrade(card)
         draw = "Draw 1 card." if n == 1 else f"Draw {n} cards."
         parts.append("{IfUpgraded:show:" + draw + "|}")
+    if added_encore_upgrade(card):
+        n = added_encore_upgrade(card)
+        parts.append(
+            "{IfUpgraded:show:Gain "
+            f"{n} [gold]Encore[/gold].|}}")
 
     return " ".join(parts)
 
@@ -2230,11 +2659,13 @@ def build_upgrade(card: dict) -> list[str]:
     deltas, reason = upgrade_plan(card)
     if reason:
         return []
-    key_for = {"block": "block", "draw": "draw", "gain_spark": "spark", "place_bomb": "bomb_damage",
-               "burst_energy": "burst_energy"}
+    key_for = {"block": "block", "draw": "draw", "gain_spark": "spark",
+               "place_bomb": "bomb_damage", "burst_energy": "burst_energy",
+               "heal": "heal"}
     var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
-               "buff_next_attack": 'DynamicVars["PowerAmount"]'}
+               "buff_next_attack": 'DynamicVars["PowerAmount"]',
+               "heal": 'DynamicVars["Heal"]'}
     lines, done = [], set()
     for eff in card["effects"]:
         op = eff["op"]
@@ -2293,6 +2724,14 @@ def build_upgrade(card: dict) -> list[str]:
     if "bonus_per_detonation" in deltas:
         lines.append(
             f'DynamicVars["BonusPer"].UpgradeValueBy({int(deltas["bonus_per_detonation"])}m);')
+    if "encore" in deltas:
+        lines.append(
+            "// encore: every gain_encore site reads IsUpgraded at play time "
+            "(branches included).")
+    if "fanfare_cap" in deltas:
+        lines.append(
+            'DynamicVars["FanfareCap"].UpgradeValueBy('
+            f'{int(deltas["fanfare_cap"])}m);')
     if "cards" in deltas:
         lines.append(f'DynamicVars["Stash"].UpgradeValueBy({int(deltas["cards"])}m);')
     if deltas.get("remove") == "exhaust":
@@ -2303,10 +2742,28 @@ def build_upgrade(card: dict) -> list[str]:
         lines.append(
             "// copy_cost_override: expressed at play time as an IsUpgraded "
             "read in OnPlay; the text swaps via {IfUpgraded:show:...}.")
-    if "add" in deltas:
+    if "generate_cost_override" in deltas:
         lines.append(
-            "// add: draw -- expressed at play time as an IsUpgraded-gated "
-            "draw appended after the base effects.")
+            "// generate_cost_override: applied to each generated card at "
+            "play time when IsUpgraded.")
+    if "add" in deltas:
+        add_op = deltas["add"]["op"]
+        if add_op == "draw":
+            lines.append(
+                "// add: draw -- expressed at play time as an IsUpgraded-gated "
+                "draw appended after the base effects.")
+        else:
+            lines.append(
+                "// add: gain_encore -- expressed at play time as an "
+                "IsUpgraded-gated effect appended after the base effects.")
+    if "encore_cost" in deltas:
+        lines.append(
+            "CustomResources<EncoreResource>.Cost(this)!.UpgradeCostBy("
+            f'{int(deltas["encore_cost"])});')
+    if "fanfare_cost" in deltas:
+        lines.append(
+            "CustomResources<FanfareResource>.Cost(this)!.UpgradeCostBy("
+            f'{int(deltas["fanfare_cost"])});')
     if "cost" in deltas:
         lines.append(f'EnergyCost.UpgradeBy({int(deltas["cost"])});')
     if "innate" in deltas:
@@ -2410,7 +2867,7 @@ def emit(
             break
 
     vars_ = build_vars(card)
-    body = build_body(card)
+    body = build_body(card, profile)
     upgrade = build_upgrade(card)
     _, no_upgrade_reason = upgrade_plan(card)
     desc = build_description(card)
@@ -2429,6 +2886,7 @@ def emit(
 
     ind = "\n        "
     vars_cs = (",".join(f"{ind}    {v}" for v in vars_)).lstrip()
+    vars_block = f"            {vars_cs}\n" if vars_cs else ""
     body_cs = ind.join(body)
     # RULED 2026-07-21: companions upgrade like any other card. They used to
     # emit MaxUpgradeLevel 0 on the companion sheets' "companions never scale"
@@ -2556,6 +3014,18 @@ def emit(
             "    // Partially generated character sheets must never auto-register cards."
         )
     )
+    resource_cost_setup = []
+    if int(card.get("encore_cost", 0)) > 0:
+        resource_cost_setup.append(
+            "CustomResources<EncoreResource>.SetCanonicalCost("
+            f"this, {int(card['encore_cost'])});")
+    if int(card.get("fanfare_cost", 0)) > 0:
+        resource_cost_setup.append(
+            "CustomResources<FanfareResource>.SetCanonicalCost("
+            f"this, {int(card['fanfare_cost'])});")
+    resource_cost_cs = (
+        "        " + "\n        ".join(resource_cost_setup) + "\n"
+        if resource_cost_setup else "")
 
     return f'''// <auto-generated>
 {source_header.rstrip()}
@@ -2601,14 +3071,14 @@ public sealed class {cls} : {interfaces}
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {{
-            {vars_cs}
+{vars_block.rstrip()}
         }};
 
 {pool_comment}
     public {cls}()
         : base({0 if str(card["cost"]) == "X" else card["cost"]}, {TYPE_CS[card["type"]]}, {RARITY_CS[card["rarity"]]}, {target_type}, autoAdd: false)
     {{
-    }}
+{resource_cost_cs}    }}
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {{
@@ -2841,6 +3311,78 @@ def _run_furina(check: bool) -> int:
         if upgrade_reason:
             no_upgrade[card["id"]] = upgrade_reason
 
+    main_generated_ids = set(generated)
+
+    main_entries = "\n".join(
+        f"        ModelDb.Card<{pascal(card_id)}>(),"
+        for card_id in sorted(main_generated_ids))
+    generated["furina_card_roster"] = f'''// <auto-generated>
+//     Generated by tools/gen_roster_cards.py from docs/furina-cards.yaml.
+//     Every generated personal-pool card; FurinaCardPool owns membership.
+// </auto-generated>
+
+#nullable enable
+
+using System.Collections.Generic;
+using MegaCrit.Sts2.Core.Models;
+
+namespace KleeMod.Cards.Furina.Generated;
+
+public static class FurinaCardRoster
+{{
+    private static List<CardModel>? _all;
+
+    public static IReadOnlyList<CardModel> All => _all ??= new List<CardModel>
+    {{
+{main_entries}
+    }};
+}}
+'''
+
+    # Guest Stars are temporary Companion cards generated only by Furina's
+    # personal-pool cards. They are emitted beside Furina (not into the shared
+    # reward roster), and are intentionally not smithable.
+    guest_star_ids: list[str] = []
+    fontaine_sheet = next(
+        path for path, nation in COMPANION_SHEETS if nation == "fontaine")
+    for guest in yaml.safe_load(fontaine_sheet.read_text(encoding="utf-8")):
+        if not guest.get("guest_star"):
+            continue
+        guest.setdefault("nation", "fontaine")
+        reason = blocked_reason(guest, FURINA_PROFILE)
+        if reason:
+            raise SystemExit(
+                f"gen_roster_cards: guest star {guest['id']} blocked: "
+                f"{reason}")
+        generated[guest["id"]] = emit(guest, FURINA_PROFILE)
+        guest_star_ids.append(guest["id"])
+
+    guest_entries = "\n".join(
+        f"        ModelDb.Card<{pascal(card_id)}>(),"
+        for card_id in sorted(guest_star_ids))
+    generated["guest_star_roster"] = f'''// <auto-generated>
+//     Generated by tools/gen_roster_cards.py from docs/fontaine-companions.yaml.
+//     Guest Stars are temporary Furina generation targets, never reward cards.
+// </auto-generated>
+
+#nullable enable
+
+using System.Collections.Generic;
+using MegaCrit.Sts2.Core.Models;
+
+namespace KleeMod.Cards.Furina.Generated;
+
+public static class GuestStarRoster
+{{
+    private static List<CardModel>? _all;
+
+    public static IReadOnlyList<CardModel> All => _all ??= new List<CardModel>
+    {{
+{guest_entries}
+    }};
+}}
+'''
+
     clusters: dict[str, list[str]] = {}
     cards_by_id = {card["id"]: card for card in cards}
     for card_id, reason in blocked.items():
@@ -2864,10 +3406,11 @@ def _run_furina(check: bool) -> int:
         },
         "coverage": {
             "total": len(cards),
-            "generated": len(generated),
+            "generated": len(main_generated_ids),
             "blocked": len(blocked),
         },
-        "generated": sorted(generated),
+        "generated": sorted(main_generated_ids),
+        "guest_stars": sorted(guest_star_ids),
         "blocked": dict(sorted(blocked.items())),
         "runtime_clusters": {
             key: sorted(value) for key, value in sorted(clusters.items())
@@ -2925,7 +3468,8 @@ def _run_furina(check: bool) -> int:
     FURINA_PROFILE.manifest.write_text(manifest_src, encoding="utf-8")
 
     print(
-        f"furina: generated {len(generated)} cards, "
+        f"furina: generated {len(main_generated_ids)} cards "
+        f"(+{len(guest_star_ids)} Guest Stars), "
         f"blocked {len(blocked)}"
     )
     for cluster, card_ids in sorted(clusters.items()):

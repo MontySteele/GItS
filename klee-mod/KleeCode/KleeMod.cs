@@ -28,7 +28,7 @@ public static class KleeMod
 
     public static void Initialize()
     {
-        Log.Info($"[{ModId}] Initializing Klee (C1 boots)...");
+        Log.Info($"[{ModId}] Initializing Teyvat Spire roster...");
 
         try
         {
@@ -48,8 +48,9 @@ public static class KleeMod
         // through the game's own mod-subscriber API. Elemental card hits apply
         // auras; AuraPower handles everything after that. See ElementalApplication.cs.
         ModHelper.SubscribeForCombatStateHooks(ModId, Powers.KleeElementalHooks.Subscribe);
+        ModHelper.SubscribeForCombatStateHooks(ModId, Powers.FurinaResourceHooks.Subscribe);
 
-        Log.Info($"[{ModId}] Klee registered.");
+        Log.Info($"[{ModId}] Klee and Furina registered.");
     }
 
     /// <summary>English strings for the character and the four starter stubs.</summary>

@@ -49,7 +49,9 @@ public static class CompanionSlot
         foreach (var canonical in CompanionRoster.All)
         {
             if (canonical is not ICompanionCard comp) continue;
-            if (comp.PersonalPool is not null && comp.PersonalPool != "klee") continue;
+            var characterId = CharacterId(player);
+            if (comp.PersonalPool is not null
+                && comp.PersonalPool != characterId) continue;
             if (!tiers.TryGetValue(canonical.Rarity, out var tier))
             {
                 tiers[canonical.Rarity] = tier = new List<CardModel>();
@@ -68,7 +70,7 @@ public static class CompanionSlot
         if (forcedRarity == null && !tiers.ContainsKey(rarity)) rarity = CardRarity.Common;
         if (!tiers.TryGetValue(rarity, out var pool)) return null;
 
-        var pick = NationWeightedChoice(rng, pool, HomeNation);
+        var pick = NationWeightedChoice(rng, pool, HomeNation(player));
         if (pick == null) return null;
         // Same instantiation the native reward path uses for its own rolled
         // cards (CardFactory.CreateForReward ends in exactly this call), so
@@ -86,8 +88,21 @@ public static class CompanionSlot
             : CardRarity.Rare;
     }
 
-    /// <summary>Klee's home nation (tier0 loader.character_nation).</summary>
-    private const string HomeNation = "mondstadt";
+    private static string? CharacterId(Player player) =>
+        player.Character switch
+        {
+            Klee => "klee",
+            Furina => "furina",
+            _ => null,
+        };
+
+    private static string? HomeNation(Player player) =>
+        player.Character switch
+        {
+            Klee => "mondstadt",
+            Furina => "fontaine",
+            _ => null,
+        };
 
     /// <summary>
     /// Port of tier05 rewards._nation_weighted_choice. SAME_NATION_REWARD_SHARE

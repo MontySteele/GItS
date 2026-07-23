@@ -54,7 +54,7 @@ public sealed class NicoleCelestialGift : CustomCardModel, ICompanionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            
+
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in

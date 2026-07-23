@@ -80,7 +80,7 @@ public sealed class PruneWitchHunt : CustomCardModel, ICompanionCard
         }
         else
         {
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(5m, ValueProp.Move), cardPlay);
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, 5m), ValueProp.Move), cardPlay);
         }
         await SparkPower.Gain(choiceContext, Owner.Creature, DynamicVars["Sparks"].IntValue, this);
     }

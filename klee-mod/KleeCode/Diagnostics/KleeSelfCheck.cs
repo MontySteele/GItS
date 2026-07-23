@@ -52,10 +52,15 @@ internal static class KleeSelfCheck
 
         try
         {
-            var klee = ModelDb.Character<Klee>();
-
-            CheckCharacterInvariants(klee);
-            CheckLocalization(klee);
+            foreach (var character in new CharacterModel[]
+                     {
+                         ModelDb.Character<Klee>(),
+                         ModelDb.Character<Furina>(),
+                     })
+            {
+                CheckCharacterInvariants(character);
+                CheckLocalization(character);
+            }
         }
         catch (Exception e)
         {
@@ -67,7 +72,8 @@ internal static class KleeSelfCheck
 
         if (Findings.Count == 0)
         {
-            Log.Info($"[{KleeMod.ModId}] {Tag} passed ({RuleCount} rules).");
+            Log.Info($"[{KleeMod.ModId}] {Tag} passed "
+                   + $"({RuleCount} rule families across 2 characters).");
             return;
         }
 
@@ -93,14 +99,14 @@ internal static class KleeSelfCheck
     //  Character invariants
     // -----------------------------------------------------------------------
 
-    private static void CheckCharacterInvariants(Klee klee)
+    private static void CheckCharacterInvariants(CharacterModel character)
     {
         // R1. CharacterSelectScreen.SelectCharacter does an unconditional
         // StartingRelics[0]. An empty array does not degrade -- it throws
         // mid-method, leaving the screen in a state where Klee looks selectable
         // but silently starts the run as whoever was highlighted before.
         // This shipped once (finding 11) and cost a full debug cycle.
-        var relics = klee.StartingRelics?.ToList() ?? new();
+        var relics = character.StartingRelics?.ToList() ?? new();
         if (relics.Count == 0)
         {
             Fail("R1", "StartingRelics is empty; SelectCharacter indexes [0] unconditionally "
@@ -131,7 +137,7 @@ internal static class KleeSelfCheck
 
         // R2. An empty starting deck means no draw pile and an immediate soft
         // lock on the first combat turn.
-        var deck = klee.StartingDeck?.ToList() ?? new();
+        var deck = character.StartingDeck?.ToList() ?? new();
         if (deck.Count == 0)
         {
             Fail("R2", "StartingDeck is empty; first combat will have nothing to draw.");
@@ -148,7 +154,7 @@ internal static class KleeSelfCheck
         // handed the set of rarities present in the *post-blacklist* pool and
         // GetNextAllowedRarity walks to the next one with wrapping, so a single
         // dry rarity degrades gracefully. Three narrower things do throw.
-        var pool = klee.CardPool?.AllCards?.ToList() ?? new();
+        var pool = character.CardPool?.AllCards?.ToList() ?? new();
         if (pool.Count == 0)
         {
             Fail("R3", "CardPool.AllCards is empty; card rewards and transforms will soft lock.");
@@ -252,7 +258,7 @@ internal static class KleeSelfCheck
     //  Localization
     // -----------------------------------------------------------------------
 
-    private static void CheckLocalization(Klee klee)
+    private static void CheckLocalization(CharacterModel character)
     {
         var cards = LocManager.Instance.GetTable("cards");
         var characters = LocManager.Instance.GetTable("characters");
@@ -260,8 +266,10 @@ internal static class KleeSelfCheck
         // Union of pool and starting deck: a starter stub can legitimately sit
         // outside the pool, and both surfaces render text.
         var allCards = new List<CardModel>();
-        allCards.AddRange(klee.CardPool?.AllCards ?? Enumerable.Empty<CardModel>());
-        allCards.AddRange(klee.StartingDeck ?? Enumerable.Empty<CardModel>());
+        allCards.AddRange(character.CardPool?.AllCards
+                          ?? Enumerable.Empty<CardModel>());
+        allCards.AddRange(character.StartingDeck
+                          ?? Enumerable.Empty<CardModel>());
 
         var seen = new HashSet<string>(StringComparer.Ordinal);
 
@@ -280,7 +288,9 @@ internal static class KleeSelfCheck
         }
 
         // R5. Same check for the character surface.
-        CheckLocEntry(characters, "characters", klee.Id.Entry, nameof(Klee), "R5");
+        CheckLocEntry(
+            characters, "characters", character.Id.Entry,
+            character.GetType().Name, "R5");
 
         // R8. Every power this mod ships must have loc. R4 only walks the card
         // pool, so powers were unswept -- and the four AuraPowers shipped
