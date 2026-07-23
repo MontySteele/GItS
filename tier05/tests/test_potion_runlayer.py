@@ -27,6 +27,14 @@ from tier0.tests import test_anchor_lock
 from tier05 import draft, model, potions as potion_pool
 from tier05 import relics as relic_pool
 
+
+@pytest.fixture(autouse=True)
+def _single_act(monkeypatch):
+    """§10 re-stamp: this suite asserts ACT-1 drop/shop cadence and the
+    fixed 329 income. Pin the registry so acts 2-3 never silently double
+    the counts under test."""
+    monkeypatch.setattr(C, "RUN_ACTS", C.RUN_ACTS[:1])
+
 CHAR = "klee"
 ARCH = "demolition"
 PILOT = "demolition"
@@ -142,8 +150,8 @@ def test_shop_stocks_and_sells_a_potion(monkeypatch):
         assert p["price"] == C.POTION_PRICE
         assert p["id"] in potion_pool.pool()         # a real pool potion
         assert p["id"] in r.potions_end              # actually entered the bag
-    # Income is the fixed 269 (see test_shop_economy); the only spend is potions.
-    assert r.gold == 269 - C.POTION_PRICE * len(buys)
+    # Income is the fixed 329 (see test_shop_economy); the only spend is potions.
+    assert r.gold == 329 - C.POTION_PRICE * len(buys)
 
 
 def test_shop_skips_purchase_when_no_slot(monkeypatch):

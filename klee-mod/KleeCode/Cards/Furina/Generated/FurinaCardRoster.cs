@@ -73,6 +73,7 @@ public static class FurinaCardRoster
         ModelDb.Card<StageLights>(),
         ModelDb.Card<StagePresence>(),
         ModelDb.Card<StandingOvation>(),
+        ModelDb.Card<StandingRoomOnly>(),
         ModelDb.Card<StarOfTheShow>(),
         ModelDb.Card<SufferingForArt>(),
         ModelDb.Card<SupportingCast>(),

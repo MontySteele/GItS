@@ -4,16 +4,21 @@ from tier0.content import loader, upgrades
 from tier05 import draft, model
 
 
-def test_runs_actually_upgrade_and_stay_deterministic():
+def test_runs_rest_coherently_and_stay_deterministic():
+    """DRAFTER_VERSION 5 revision: both template rests directly precede an
+    E/B fight, so the pre-fight lookahead heals every bruised (<90%)
+    arrival and smithing fires only on near-full ones. The M7 'healthy
+    rests smith' contract lives on in test_upgrade_prefers_on_plan_payoffs
+    (unit) -- here we assert rests act, smithed ids resolve, and runs
+    replay deterministically."""
     rs = model.run_many("klee", "demolition", "demolition",
                         draft.assigned_policy, runs=30, seed=11)
-    upgraded = [r for r in rs
-                if any(cid.endswith("+") for cid in r.deck_ids)]
-    assert upgraded, "healthy rests must smith on-plan cards"
-    smiths = [t for r in rs for t in r.rests if t[1] == "upgrade"]
-    assert smiths
-    # Every smithed id must resolve through the loader.
-    for _, _, cid in smiths:
+    actions = [t for r in rs for t in r.rests]
+    assert actions
+    assert [t for t in actions if t[1] == "heal"], \
+        "v5 world: bruised pre-E/B rests must heal"
+    # Every smithed id (if any run arrived near-full) must resolve.
+    for _, _, cid in (t for t in actions if t[1] == "upgrade"):
         loader.get_card(cid + upgrades.SUFFIX)
     again = model.run_many("klee", "demolition", "demolition",
                            draft.assigned_policy, runs=30, seed=11)

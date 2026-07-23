@@ -7,8 +7,8 @@
     "namespace": "KleeMod.Cards.Furina.Generated"
   },
   "coverage": {
-    "total": 76,
-    "generated": 75,
+    "total": 77,
+    "generated": 76,
     "blocked": 1
   },
   "generated": [
@@ -69,6 +69,7 @@
     "stage_lights",
     "stage_presence",
     "standing_ovation",
+    "standing_room_only",
     "star_of_the_show",
     "suffering_for_art",
     "supporting_cast",

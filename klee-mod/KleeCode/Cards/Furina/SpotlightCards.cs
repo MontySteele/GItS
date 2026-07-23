@@ -43,16 +43,22 @@ public sealed class EtherealSpotlight : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        // The choose-a-card screen reads card.Owner, which asserts
-        // mutability -- canonical ModelDb templates softlock it.
+        // The choose-a-card screen dereferences the first option's Owner
+        // (asserting mutability, then initializing the pile viewer from it),
+        // so the options must be combat-scoped owned instances -- canonical
+        // ModelDb templates softlock it, and so do bare ToMutable() copies
+        // (Owner == null). CombatState.CreateCard is the base game's own
+        // pattern for screen options (AttackPotion / Discovery via
+        // CardFactory.GetDistinctForCombat).
+        var combatState = Owner.Creature!.CombatState!;
         var options = new List<CardModel>
         {
-            ModelDb.Card<CenterStageOption>().ToMutable(),
+            combatState.CreateCard(ModelDb.Card<CenterStageOption>(), Owner),
         };
         if (Owner.PlayerCombatState?.AllCards.Any(
                 card => card is ICompanionCard) == true)
         {
-            options.Add(ModelDb.Card<GuestCastOption>().ToMutable());
+            options.Add(combatState.CreateCard(ModelDb.Card<GuestCastOption>(), Owner));
         }
         var selected = await CardSelectCmd.FromChooseACardScreen(
             choiceContext, options, Owner, canSkip: false);

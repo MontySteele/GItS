@@ -59,7 +59,42 @@ def _revive_player_if_needed(state: CombatState) -> bool:
     return potions.try_fairy_revive(state)
 
 
+def _settle_phases(state: CombatState) -> None:
+    """HP-threshold boss phases (§10.2, RATIFIED 2026-07-23). An enemy at
+    hp <= 0 with phases remaining REVIVES into its next phase instead of
+    dying: fresh bar, fresh moveset, powers/aura/bombs cleared (a new body).
+    Called at every site that can drop enemy HP -- after each card play,
+    the bomb-detonation sweep, turn-start potion use, the player-turn-end
+    triggers, and each enemy turn (retaliation kills) -- always BEFORE the
+    loop re-reads state.over, so a phased boss never ends the fight early.
+    Dead branch for every enemy without phases (the whole roster today).
+
+    Known approximation: kill-counting predicates (killed_target et al.)
+    observe the hp <= 0 moment before the revive, so a phase-down counts as
+    a kill for those card effects. Fatal (Feed) does NOT: counts_for_fatal
+    stays False until the last phase is entered."""
+    for e in state.enemies:
+        while e.phases and e.hp <= 0:
+            ph = e.phases.pop(0)
+            e.hp = e.max_hp = int(ph["hp"])
+            e.intents = ph["intents"]
+            e.intent_index = 0
+            e.block = 0
+            e.powers = {}
+            e.aura = None
+            e.aura_turns_left = 0
+            e.bombs = []
+            e.frozen = False
+            e.sleep_turns = 0
+            if not e.phases:
+                e.counts_for_fatal = True     # the last bar is a real death
+            state.emit("phase_change", enemy=e.name, hp=e.hp,
+                       remaining=len(e.phases))
+
+
 def card_playable(state: CombatState, card: Card) -> bool:
+    if card.type == "status":
+        return False        # §10.2 injected statuses: unplayable clogs
     if card.requires == "burst_energy_full":
         if state.player.burst_energy < state.player.burst_max:
             return False
@@ -208,6 +243,8 @@ def play_card(state: CombatState, card: Card) -> None:
         elif dest == "discard":
             p.discard_pile.append(card)
     grant_charged_kit(state)
+    _settle_phases(state)        # a phased boss dropped to 0 revives BEFORE
+    #                              the play loop re-reads state.over
     # Self-damage and Encore overdraw resolve inside a card play rather than
     # the enemy-hit funnel. Give Fairy the same lethal checkpoint, then update
     # HP-threshold relics before the pilot chooses another card.
@@ -220,6 +257,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     p = state.player
     state.turn += 1
     state.cards_played_this_turn = 0
+    for e in state.enemies:
+        e.skittish_fired = False     # Skittish latch is per-turn (§10.9)
     state.in_player_turn = True              # StS2 CombatState.CurrentSide
     refpowers.reset_turn_counters(state)
     # StS2 site A (BeforeSideTurnStart) -- BEFORE the block clear and BEFORE
@@ -239,6 +278,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     for enemy in list(state.living_enemies):     # bombs from last turn go off
         if enemy.bombs:
             effects.detonate_bombs(state, enemy)
+    _settle_phases(state)
     reactions.tick_auras(state)
     powers.on_turn_start(state, p)
     _revive_player_if_needed(state)             # player DoT can be lethal
@@ -275,6 +315,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # defensive block or an offensive strength lands on this turn's real state.
     if p.potions:
         potions.try_use_potions(state)
+        _settle_phases(state)    # an offensive potion can drop a phased boss
         if p.relic_effects:
             # Blood Potion can cross Red Skull's HP threshold after its normal
             # turn-start evaluation and before the first card is chosen.
@@ -301,6 +342,20 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # effects" -- which is precisely what player_turn_end_triggers holds.
     refpowers.before_side_turn_end_early(state)
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
+    _settle_phases(state)        # turn-end burst (Sparks 'n' Splash) can
+    #                              drop a phased boss
+    # Injected Burn/Wither (§10.2): end-of-turn damage while in hand,
+    # BLOCKABLE (the real cards' shape) -- fires before the hand flush
+    # discards them. Dead branch unless an enemy injected this combat.
+    eot_statuses = [c for c in p.hand if c.status_eot_damage]
+    for c in eot_statuses:
+        dmg = c.status_eot_damage
+        blocked = min(p.block, dmg)
+        p.block -= blocked
+        p.hp -= dmg - blocked
+        resources.note_player_hp_loss(state, dmg - blocked)
+        state.emit("status_eot_damage", card=c.id, amount=dmg - blocked,
+                   blocked=blocked)
     _revive_player_if_needed(state)
     grant_charged_kit(state)     # Salon-tick particles can fill the meter
                                  # at turn end; the Burst's Retain keeps it
@@ -336,6 +391,21 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
     powers.on_turn_start(state, enemy)
     if not enemy.alive:
         return
+    # Crab Rage (§10.2, gated on the spec field -- inert everywhere else):
+    # once, at this enemy's first turn start after any ally has died, apply
+    # the buff. Polled here rather than at the death site so one choke point
+    # covers every way an ally can die; the at-most-one-turn lag is accepted
+    # (§10.3). Applied AFTER the block reset so the block survives into the
+    # player's next turn, which is the real power's shape.
+    if (enemy.ally_death_buff is not None and not enemy.ally_death_fired
+            and any(not e.alive for e in state.enemies if e is not enemy)):
+        enemy.ally_death_fired = True
+        for pname, amt in (enemy.ally_death_buff.get("powers") or {}).items():
+            powers.apply_power(state, enemy, pname, int(amt))
+        blk = int(enemy.ally_death_buff.get("block", 0))
+        if blk:
+            enemy.block += blk
+        state.emit("ally_death_trigger", enemy=enemy.name)
     intent = enemy.current_intent()
     kind = intent["kind"]
     # Frozen v2 (v1.5): the enemy still acts, but its action deals -50%
@@ -419,6 +489,37 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
                                        name=spawn.get("name", "add"),
                                        intents=spawn["intents"],
                                        counts_for_fatal=False))
+    elif kind == "inject":
+        # §10.2 (RATIFIED 2026-07-23): shuffle status cards into a player
+        # pile. Default pile is the discard (the common StS shape); "draw"
+        # inserts at a random depth via the combat rng; "hand" respects
+        # MAX_HAND_SIZE with overflow to discard (base-game overflow rule).
+        from tier0.engine import statuses     # late import, engine-internal
+        pile = intent.get("pile", "discard")
+        p = state.player
+        for _ in range(intent.get("count", 1)):
+            card = statuses.make_status(intent["status"])
+            if pile == "draw":
+                p.draw_pile.insert(
+                    state.rng.randrange(len(p.draw_pile) + 1), card)
+            elif pile == "hand":
+                if len(p.hand) < C.MAX_HAND_SIZE:
+                    p.hand.append(card)
+                else:
+                    p.discard_pile.append(card)
+            elif pile == "discard":
+                p.discard_pile.append(card)
+            else:
+                raise ValueError(f"unknown inject pile {pile!r}")
+        state.emit("status_injected", enemy=enemy.name,
+                   status=intent["status"], count=intent.get("count", 1),
+                   pile=pile)
+    elif kind == "heal":
+        # §10.2: enemy self-heal (Knowledge Demon's Ponder), capped at max.
+        amt = min(int(intent["amount"]), enemy.max_hp - enemy.hp)
+        if amt > 0:
+            enemy.hp += amt
+        state.emit("enemy_heal", enemy=enemy.name, amount=max(0, amt))
     else:
         raise ValueError(f"unknown intent kind {kind!r}")
 
@@ -443,6 +544,8 @@ def _run_rounds(state: CombatState, pilot: Pilot) -> None:
             break
         for enemy in list(state.enemies):
             _enemy_turn(state, enemy)
+            _settle_phases(state)    # FlameBarrier retaliation can drop a
+            #                          phased boss mid-enemy-round
             if state.over:
                 break
         # AfterSideTurnEnd(side == Enemy): the once-per-round enemy tick. This

@@ -78,9 +78,10 @@ def test_furina_profile_emits_every_non_kit_card():
     manifest = json.loads(
         gen.FURINA_PROFILE.manifest.read_text(encoding="utf-8")
     )
+    # 77 cards since the Salon-v2 rework added standing_room_only.
     assert manifest["coverage"] == {
-        "total": 76,
-        "generated": 75,
+        "total": 77,
+        "generated": 76,
         "blocked": 1,
     }
     assert set(manifest["generated"]) == generated

@@ -79,9 +79,14 @@ def main(argv: list[str] | None = None) -> int:
                     help="M6 A/B: assigned vs adaptive over the same seeds")
     ap.add_argument(
         "--realistic", action="store_true",
-        help="enable the realistic Act-1 power budget: relic granting and "
+        help="enable the realistic run power budget: relic granting and "
              "potion drops/shop/use (default preserves the historical bare "
              "run world)",
+    )
+    ap.add_argument(
+        "--acts", type=int, default=None,
+        help="acts the run spans (§10.1); default = every act registered in "
+             "RUN_ACTS. --acts 1 is the supported single-act instrument.",
     )
     args = ap.parse_args(argv)
 
@@ -111,7 +116,8 @@ def main(argv: list[str] | None = None) -> int:
         result = ab.run_ab(args.character, archetype, pilot,
                            args.runs, args.seed,
                            grant_relics=args.realistic,
-                           grant_potions=args.realistic)
+                           grant_potions=args.realistic,
+                           n_acts=args.acts)
         ab.print_ab_report(args.character, archetype, result)
         print(f"  loadout         "
               f"{'realistic (relics + potions)' if args.realistic else 'bare'}")
@@ -122,7 +128,8 @@ def main(argv: list[str] | None = None) -> int:
     results = model.run_many(args.character, archetype, pilot,
                              draft.POLICIES[args.policy], args.runs, args.seed,
                              grant_relics=args.realistic,
-                             grant_potions=args.realistic)
+                             grant_potions=args.realistic,
+                             n_acts=args.acts)
     summary = run_metrics.summarize_runs(results)
     max_hp = loader._character_index()[args.character]["hp"]
     survival = run_metrics.survival_profile(results, max_hp)

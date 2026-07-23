@@ -44,7 +44,7 @@ public sealed class GentilhommeUsher : CustomCardModel, ICharacterCard, ISkillTa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gentilhomme Usher"),
-        ("description", "Add 1 [gold]Salon Member(s)[/gold]. Maximum 3. Replacements perform a final bow and empower this card's later effects. Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class GentilhommeUsher : CustomCardModel, ICharacterCard, ISkillTa
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var salonReplacements = 0;
-        salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this);
+        salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Usher);
         await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue * (salonReplacements > 0 ? 3 : 1)), ValueProp.Move), cardPlay);
     }
 

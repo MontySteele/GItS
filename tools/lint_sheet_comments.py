@@ -74,9 +74,16 @@ def card_numbers(row_lines: list[str], max_hp: int) -> set[int]:
 def lint_sheet(path: Path) -> list[str]:
     max_hp = 60  # Furina; per-sheet if a third character ever needs it
     globals_ok = {0, 1, 2, max_hp, 70, int(max_hp * C.FANFARE_CAP_FRACTION),
-                  C.SALON_MEMBER_DMG, C.SALON_TICK_ENCORE_COST,
-                  C.SALON_TICK_BURST,
-                  int(C.SALON_MEMBER_DMG * C.SALON_DRY_DAMAGE_MULT)}
+                  C.SALON_TICK_ENCORE_COST, C.SALON_TICK_BURST,
+                  C.SALON_FOCUS_PER}
+    # Salon v2: every member tick/bow number is quotable in comments, plus
+    # its dry three-quarters form (the v1 SALON_MEMBER_DMG family's heir).
+    for spec in C.SALON_MEMBERS.values():
+        for half in ("tick", "bow"):
+            for v in spec[half].values():
+                if isinstance(v, int):
+                    globals_ok.add(v)
+                    globals_ok.add(int(v * C.SALON_DRY_DAMAGE_MULT))
     findings: list[str] = []
     card_id, row_lines, comments = None, [], []
 

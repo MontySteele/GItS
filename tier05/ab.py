@@ -129,7 +129,8 @@ def achievability(results: list[RunResult]) -> dict:
 def run_ab(character: str, archetype: str, pilot_id: str,
            runs: int, seed: int,
            grant_relics: bool = False,
-           grant_potions: bool = False) -> dict:
+           grant_potions: bool = False,
+           n_acts: int | None = None) -> dict:
     """Assigned vs adaptive over identical seeds.
 
     Adaptive ignores `archetype` by construction, so it is passed through only
@@ -141,7 +142,8 @@ def run_ab(character: str, archetype: str, pilot_id: str,
         results = model.run_many(character, archetype, pilot_id,
                                  policy, runs, seed,
                                  grant_relics=grant_relics,
-                                 grant_potions=grant_potions)
+                                 grant_potions=grant_potions,
+                                 n_acts=n_acts)
         out[name] = {
             "results": results,
             "winrate": sum(r.won for r in results) / max(1, len(results)),

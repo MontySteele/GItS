@@ -1,0 +1,258 @@
+# Act 3 roster: GLORY -- multi-act extension §10.4 (RATIFIED 2026-07-23).
+#
+# REAL StS2 numbers (slaythespire.wiki.gg harvest 2026-07-23,
+# docs/act2-act3-roster-research.md §2). HP is a spawn-time RANGE [lo, hi];
+# a bare int is fixed. Intents use the engine kinds plus the §10.2
+# promotions (`inject`, `heal`, `phases`, `on_ally_death`). Bundled real
+# cards split into beats (battery precedent); every skip is flagged
+# UNIMPLEMENTED and tracked on §10.9 -- skip-loudly, never fake.
+#
+# Dropped enemies (identity = a skipped op; §10.9 re-add list): Owl
+# Magistrate (Soar/untargetable), The Lost + The Forgotten (stat-theft).
+# Dropped boss: Queen (Chains of Binding + 99-stack scripted duet).
+#
+# LAYER BOUNDARY: tier0.5-only source; the tier0 battery is frozen.
+
+# --- EASY pool: the first TWO N nodes (§10.1). --------------------------
+easy:
+  - id: devoted_sculptor
+    name: "DEVOTED SCULPTOR"
+    # Cultist-shape ritual ramp. Forbidden Incantation's +9 Ritual is
+    # modeled as ramp on Savage (12, 21, 30, ... -- the per-turn growth an
+    # attacking ritualist actually shows), the Byrdonis precedent.
+    enemies:
+      - name: devoted_sculptor
+        hp: 162
+        intents:
+          - {kind: attack, amount: 12, ramp: 9, ramp_after: 1}   # Savage
+            # (+9/turn = Incantation's ritual)
+
+  - id: scrolls_of_biting
+    name: "SCROLLS OF BITING x3"
+    # Multi-body chip. UNIMPLEMENTED: 2 Paper Cuts (unmodeled power).
+    enemies:
+      - name: scroll_of_biting
+        count: 3
+        stagger: true
+        hp: [31, 38]
+        intents:
+          - {kind: attack, amount: 14}                  # Chomp
+          - {kind: buff, power: strength, amount: 2}    # More Teeth
+          - {kind: attack, amount: 5, times: 2}         # Chew
+
+  - id: shield_and_turret
+    name: "LIVING SHIELD + TURRET OPERATOR"
+    # Rampart 25 (start-block) is modeled as the Shield's opening block
+    # beat -- one enemy-turn late versus the real power, accepted.
+    enemies:
+      - name: living_shield
+        hp: 55
+        intents:
+          - {kind: block, amount: 25}                   # Rampart (opener)
+          - {kind: attack, amount: 6}                   # Shield Slam
+          - {kind: attack, amount: 16}                  # Smash
+      - name: turret_operator
+        hp: 41
+        intents:
+          - {kind: attack, amount: 3, times: 5}         # Unload!
+          - {kind: buff, power: strength, amount: 1}    # Loading
+
+# --- HARD pool ----------------------------------------------------------
+hard:
+  - id: axebot
+    name: "AXEBOT"
+    # UNIMPLEMENTED: 2 Stock (unmodeled power).
+    enemies:
+      - name: axebot
+        hp: [70, 78]
+        intents:
+          - {kind: block, amount: 10}                   # Boot Up
+          - {kind: buff, power: strength, amount: 3}    # Boot Up's Str (beat)
+          - {kind: attack, amount: 9, times: 2}         # The One-Two
+          - {kind: attack, amount: 12}                  # Hammer Uppercut
+          - {kind: debuff, power: weak, amount: 1}      # Uppercut Weak (beat)
+          - {kind: debuff, power: frail, amount: 1}     # Uppercut Frail (beat)
+
+  - id: construct_gang
+    name: "PUNCH CONSTRUCT + 2 CUBEX"
+    # Str-snowball check. UNIMPLEMENTED: Artifact 1 on each construct.
+    enemies:
+      - name: punch_construct
+        hp: 55
+        intents:
+          - {kind: block, amount: 10}                   # READY
+          - {kind: attack, amount: 14}                  # Strong Punch
+          - {kind: attack, amount: 5, times: 2}         # Fast Punch
+          - {kind: debuff, power: weak, amount: 1}      # Fast Punch Weak (beat)
+      - name: cubex_construct
+        count: 2
+        stagger: true
+        hp: 65
+        intents:
+          - {kind: buff, power: strength, amount: 2}    # Charge Up
+          - {kind: attack, amount: 7}                   # Repeater Blast
+          - {kind: buff, power: strength, amount: 2}    # Blast's +2 Str (beat)
+          - {kind: attack, amount: 7}                   # Repeater Blast
+          - {kind: attack, amount: 5, times: 2}         # Expel Blast
+
+  - id: fabricator
+    name: "FABRICATOR"
+    # Summon check. UNIMPLEMENTED: Guardbot (block-an-ally op) and the
+    # Noisebot Dazed minion (§10.4 optional skip) -- the wave keeps the
+    # attacking bots only.
+    enemies:
+      - name: fabricator
+        hp: 150
+        intents:
+          - {kind: summon, wave: [{name: zapbot, hp: 20,
+                intents: [{kind: attack, amount: 14}]},
+              {name: stabbot, hp: 20,
+                intents: [{kind: attack, amount: 11},
+                          {kind: debuff, power: frail, amount: 1}]}]}
+          - {kind: attack, amount: 18}                  # Fabricating Strike
+          - {kind: summon, wave: [{name: zapbot, hp: 20,
+                intents: [{kind: attack, amount: 14}]}]}  # Strike's summon
+          - {kind: attack, amount: 11}                  # Disintegrate
+
+  - id: frog_knight
+    name: "FROG KNIGHT"
+    # UNIMPLEMENTED: Plating 15 (damage cap).
+    enemies:
+      - name: frog_knight
+        hp: 191
+        intents:
+          - {kind: attack, amount: 13}                  # Tongue Lash
+          - {kind: debuff, power: frail, amount: 1}     # Lash's Frail (beat)
+          - {kind: attack, amount: 21}                  # Strike Down Evil
+          - {kind: buff, power: strength, amount: 5}    # For the Queen
+          - {kind: attack, amount: 35}                  # Beetle Charge
+
+  - id: globe_head
+    name: "GLOBE HEAD"
+    # UNIMPLEMENTED: Galvanic 6 (unmodeled power).
+    enemies:
+      - name: globe_head
+        hp: 148
+        intents:
+          - {kind: attack, amount: 13}                  # Shocking Slap
+          - {kind: debuff, power: frail, amount: 1}     # Slap's Frail (beat)
+          - {kind: attack, amount: 6, times: 3}         # Thunder Strike
+          - {kind: attack, amount: 16}                  # Galvanic Burst
+          - {kind: buff, power: strength, amount: 1}    # Burst's Str (beat)
+
+  - id: slimed_berserker
+    name: "SLIMED BERSERKER"
+    # THE deck-pollution stress test: Vomit Ichor injects 10 Slimed.
+    enemies:
+      - name: slimed_berserker
+        hp: 266
+        intents:
+          - {kind: inject, status: slimed, count: 10}   # Vomit Ichor
+          - {kind: attack, amount: 4, times: 4}         # Furious Pummeling
+          - {kind: debuff, power: weak, amount: 1}      # Leeching Hug
+          - {kind: buff, power: strength, amount: 2}    # Hug's Str (beat)
+          - {kind: attack, amount: 30}                  # Smother
+
+# --- ELITE pool: 3, draw 2 (multi-body / burst+pollution / damage race). --
+elite:
+  - id: knight_gang
+    name: "KNIGHT GANG"
+    # Three distinct knights -- the Act-3 multi-body check.
+    # UNIMPLEMENTED: Hex, the Ethereal aura (Spectral) and the Downgrade
+    # aura (Magi) -- the gang is modeled as its statlines.
+    enemies:
+      - name: flail_knight
+        hp: 101
+        intents:
+          - {kind: attack, amount: 15}                  # Ram
+          - {kind: attack, amount: 9, times: 2}         # Flail
+          - {kind: buff, power: strength, amount: 3}    # Breaker
+      - name: spectral_knight
+        hp: 93
+        intents:
+          - {kind: attack, amount: 15}                  # Soul Slash
+          - {kind: attack, amount: 3, times: 3}         # Soul Flame
+      - name: magi_knight
+        hp: 82
+        intents:
+          - {kind: attack, amount: 6}                   # Power Shield
+          - {kind: block, amount: 5}                    # Shield's block (beat)
+          - {kind: attack, amount: 10}                  # Ram
+          - {kind: block, amount: 5}                    # Prep
+          - {kind: attack, amount: 35}                  # Magic Bomb
+
+  - id: mecha_knight
+    name: "MECHA KNIGHT"
+    # Burst + hand pollution: Flamethrower puts 4 Burn IN HAND.
+    # UNIMPLEMENTED: Artifact 3.
+    enemies:
+      - name: mecha_knight
+        hp: 300
+        intents:
+          - {kind: attack, amount: 25}                  # Charge (opener)
+          - {kind: inject, status: burn, count: 4, pile: hand}   # Flamethrower
+          - {kind: block, amount: 15}                   # Windup
+          - {kind: buff, power: strength, amount: 5}    # Windup's Str (beat)
+          - {kind: attack, amount: 35}                  # Heavy Cleave
+
+  - id: soul_nexus
+    name: "SOUL NEXUS"
+    # Pure damage race. The real random-no-repeat draw is modeled as a
+    # fixed cycle of the same moves (fully codeable otherwise).
+    enemies:
+      - name: soul_nexus
+        hp: 234
+        intents:
+          - {kind: attack, amount: 29}                  # Soul Burn
+          - {kind: attack, amount: 6, times: 4}         # Maelstrom
+          - {kind: attack, amount: 18}                  # Drain Life
+          - {kind: debuff, power: vulnerable, amount: 2}  # Drain's Vuln (beat)
+          - {kind: debuff, power: weak, amount: 2}      # Drain's Weak (beat)
+
+# --- BOSS pool: draw 1 of 2 (§10.4 RATIFIED: Test Subject + Aeonglass;
+# Queen dropped, §10.9). --------------------------------------------------
+boss:
+  - id: test_subject
+    name: "TEST SUBJECT"
+    # THE phase boss (§10.2 op): 100 -> 200 -> 300 HP, revives with a new
+    # moveset each bar (600 total). Approximations, all §10.9-logged:
+    # P1 Enrage 2 skipped; P2's grow-a-hit-per-turn Multi-Claw is ramp 3
+    # per hit (30 -> 39 -> 48 vs real 30 -> 40 -> 50) and Painful Stabs'
+    # on-unblocked Wounds become an inject beat (every other turn); P3
+    # Intangible skipped (the 300 bar carries the weight).
+    enemies:
+      - name: test_subject
+        hp: 100
+        is_boss: true
+        intents:
+          - {kind: attack, amount: 20}                  # Bite
+          - {kind: attack, amount: 14}                  # Skull Bash
+          - {kind: debuff, power: vulnerable, amount: 1}  # Bash's Vuln (beat)
+        phases:
+          - hp: 200
+            intents:
+              - {kind: attack, amount: 10, times: 3, ramp: 3}   # Multi-Claw
+              - {kind: inject, status: wound, count: 1}  # Painful Stabs
+          - hp: 300
+            intents:
+              - {kind: attack, amount: 10, times: 3}    # Lacerate
+              - {kind: attack, amount: 45}              # Big Pounce
+              - {kind: inject, status: burn, count: 3}  # Burning Growl
+              - {kind: buff, power: strength, amount: 2}  # Growl's Str (beat)
+
+  - id: aeonglass
+    name: "AEONGLASS"
+    # Wither pollution + Str escalation. The every-6-cards Withering
+    # Presence trigger is modeled as the cycle's inject beat (per-cycle,
+    # §10.9); Increasing Intensity's growing X is a fixed +3 Str; Wither
+    # upgrade-on-reapply skipped. UNIMPLEMENTED: Artifact 3.
+    enemies:
+      - name: aeonglass
+        hp: 512
+        is_boss: true
+        intents:
+          - {kind: attack, amount: 22}                  # Ebb
+          - {kind: block, amount: 33}                   # Ebb's block (beat)
+          - {kind: attack, amount: 11, times: 2}        # Eye Lasers
+          - {kind: inject, status: wither, count: 1}    # Increasing Intensity
+          - {kind: buff, power: strength, amount: 3}    # Intensity's Str (beat)

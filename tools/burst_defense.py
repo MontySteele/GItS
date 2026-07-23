@@ -34,16 +34,21 @@ import sys
 from tier0.content import loader
 from tier0.engine.combat import run_fight
 from tier0.pilot.policy import make_pilot
-from tier05 import act1, draft, model
+from tier05 import acts, draft, model
 from tools.realistic_axis_scores import _loadout, _reached_boss, _percentile
 
 SPIKE = 20          # a turn whose total incoming >= this is a "spike"
 
+# This instrument probes the ACT-1 roster specifically (the calibration
+# surface); the act index is pinned rather than parameterized.
+ACT = 0
+
 
 def _bursty_specs() -> list[tuple[str, dict]]:
-    """The roster's spike-dealers: all 3 elites + the boss."""
-    return ([("E", spec) for spec in act1.pools()["elite"]]
-            + [("B", act1.boss_encounter())])
+    """The roster's spike-dealers: all 3 elites + every pool boss (§10.5:
+    the boss slot is a pool now; probe each so neither is undersampled)."""
+    return ([("E", spec) for spec in acts.pools(ACT)["elite"]]
+            + [("B", spec) for spec in acts.boss_pool(ACT)])
 
 
 def _turn_incoming(state) -> dict[int, tuple[int, int, int]]:
@@ -66,7 +71,8 @@ def probe(character: str, runs: int, sample: int, fights: int,
     pilot = make_pilot(loader.pilot_weights("generic"))
     results = model.run_many(character, "generic", "generic",
                              draft.POLICIES["assigned"], runs, seed,
-                             grant_relics=True, grant_potions=True)
+                             grant_relics=True, grant_potions=True,
+                             n_acts=1)   # §10: Act-1 instrument, pinned
     loaded = [r for r in results if _reached_boss(r)]
     if len(loaded) > sample:
         stride = len(loaded) / sample
@@ -86,7 +92,7 @@ def probe(character: str, runs: int, sample: int, fights: int,
             deck, relic_fx, belt, slots = _loadout(r, character, kind)
             for k in range(fights):
                 rng = random.Random(seed + 1009 * idx + 31 * si + k)
-                enemies = act1.spawn(spec, rng)
+                enemies = acts.spawn(spec, rng)
                 player = loader.build_player_from_ids(
                     character, deck,
                     relic_effects=list(relic_fx) if relic_fx else None,

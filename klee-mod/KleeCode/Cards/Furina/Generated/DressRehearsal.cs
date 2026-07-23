@@ -44,7 +44,7 @@ public sealed class DressRehearsal : CustomCardModel, ICharacterCard, ISkillTagC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dress Rehearsal"),
-        ("description", "Spend {IfUpgraded:show:1|2} [gold]Encore[/gold]. Add 1 [gold]Salon Member(s)[/gold]. Maximum 3. Replacements perform a final bow and empower this card's later effects. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Spend {IfUpgraded:show:1|2} [gold]Encore[/gold]. Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -64,7 +64,7 @@ public sealed class DressRehearsal : CustomCardModel, ICharacterCard, ISkillTagC
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var salonReplacements = 0;
-        salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this);
+        salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Usher);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue * (salonReplacements > 0 ? 2 : 1), Owner);
     }
 

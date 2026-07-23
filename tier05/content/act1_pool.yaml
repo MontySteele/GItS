@@ -116,11 +116,15 @@ elite:
     # Block/burst check. Sleep -> Wake +10 Str -> Slashes 13/turn.
     # The one-shot +10 Str wake buff is FOLDED into the Slash amount (23 =
     # 13 + 10): a one-time buff cannot be a looping rotation beat without
-    # re-applying every cycle. UNIMPLEMENTED: Slow (per-card +10% dmg, §4.5).
+    # re-applying every cycle. Slow 10 PROMOTED from the §4.5 skip line
+    # (red-pen 2026-07-23): the per-card +10%-damage-taken counterplay is
+    # the fight's design, not flavor -- she killed 45% of runs facing her
+    # without it (§10.8.1).
     enemies:
       - name: bygone_effigy
         hp: 127
         sleep_turns: 2
+        slow: 10                                        # +10% dmg taken/card/turn
         intents:
           - {kind: attack, amount: 23}                  # Slashes (13 + baked +10 Str)
 
@@ -128,11 +132,14 @@ elite:
     name: "PHANTASMAL GARDENER x4"
     # AoE check: 4 bodies present from turn 1 on staggered standard cycles.
     # Bite 5 · Lash 7 · Flail 1x3 · Enlarge +2 Str.
-    # UNIMPLEMENTED: Skittish 6 (§4.5 skip).
+    # Skittish 6 PROMOTED from the §4.5 skip line (red-pen 2026-07-23):
+    # "the first time it is hit each turn, it gains 6 Block" -- punishes
+    # many-small-hits AoE, rewards one big hit per body per turn.
     enemies:
       - name: phantasmal_gardener
         count: 4
         stagger: true                                   # each body starts a beat apart
+        skittish: 6                                     # first hit/turn: +6 Block after
         hp: [26, 31]
         intents:
           - {kind: attack, amount: 5}                   # Bite
@@ -140,7 +147,11 @@ elite:
           - {kind: attack, amount: 1, times: 3}         # Flail
           - {kind: buff, power: strength, amount: 2}     # Enlarge
 
-# --- BOSS: act finale. §4.4 -------------------------------------------
+# --- BOSS pool: act finale, DRAW 1 per run (§10.0/§10.5 RATIFIED
+# 2026-07-23: >= 2 bosses per act, including Act 1). The two check opposite
+# shapes: Vantom is the single-target burst race; Lagavulin Matriarch is the
+# anti-turtle clock (user pick 2026-07-23 -- "punishes slow scaling and
+# turtling, the opposite of Vantom").
 boss:
   - id: vantom
     name: "VANTOM"
@@ -155,3 +166,24 @@ boss:
           - {kind: attack, amount: 6, times: 2}         # Inky Lance
           - {kind: buff, power: strength, amount: 2}     # Prepare
           - {kind: attack, amount: 27}                  # Dismember
+
+  - id: lagavulin_matriarch
+    name: "LAGAVULIN MATRIARCH"
+    # §10.5 second Act-1 boss (Underdocks; wiki harvest 2026-07-23). Sleeps
+    # 3 turns (free setup), then Slash 19 · Disembowel 9x2 · Slash 12 (+12
+    # block beat) · Soul Siphon -- her +2 Str half is kept, so every cycle
+    # she hits harder: the long fight gets strictly worse.
+    # UNIMPLEMENTED (§10.9): Plating 12 damage-cap while asleep; Soul
+    # Siphon's PLAYER stat-drain (-2 Str / -2 Dex permanently -- the
+    # stat-theft op). Both skipped loudly, never faked.
+    enemies:
+      - name: lagavulin_matriarch
+        hp: 222
+        is_boss: true
+        sleep_turns: 3
+        intents:
+          - {kind: attack, amount: 19}                  # Slash
+          - {kind: attack, amount: 9, times: 2}         # Disembowel
+          - {kind: attack, amount: 12}                  # Slash (second)
+          - {kind: block, amount: 12}                   # Slash's +12 block (beat)
+          - {kind: buff, power: strength, amount: 2}     # Soul Siphon (her half)

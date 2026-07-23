@@ -18,10 +18,20 @@ SEEN-TO-FAIL (hard rule 7): each lock fails against the pre-Economy stub.
 
 import random
 
+import pytest
+
 from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine.state import Card, CombatState
 from tier05 import draft, model, rewards, shop
+
+
+@pytest.fixture(autouse=True)
+def _single_act(monkeypatch):
+    """§10 re-stamp: this suite asserts ACT-1 cadence totals (7 fights, one
+    shop/treasure, income 329). Pin the registry to act 1 so registering
+    acts 2-3 never silently doubles the counts under test."""
+    monkeypatch.setattr(C, "RUN_ACTS", C.RUN_ACTS[:1])
 
 HIT = 8
 
@@ -57,11 +67,12 @@ def test_shop_offers_only_owned_noncompanion_cards():
 def test_run_gold_rises_on_wins_and_falls_on_buy(monkeypatch):
     monkeypatch.setattr(model, "run_fight", _win_fights)
     # Skip policy: wins all 7 fights + treasure, buys nothing -> pure income.
-    # 99 start + N 10*4 + E 25*2 + B 40 + treasure 40 = 269.
+    # 99 start + N 10*4 + E 25*2 + B 100 + treasure 40 = 329 (boss pays the
+    # §10.1 act-transition 100 as of RUNTEMPLATE v4; was 40 / total 269).
     r_skip = model.run_one("klee", "demolition", "demolition", _skip, 1)
     assert r_skip.won
     assert r_skip.gold > C.GOLD_START         # gold ROSE on wins + treasure
-    assert r_skip.gold == 269
+    assert r_skip.gold == 329
     assert r_skip.shop == []                   # nothing bought
 
     # Same wins, but the assigned policy spends at the shop. rng consumption

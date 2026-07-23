@@ -45,7 +45,8 @@ def measure():
     out = {}
     for arch in ARCHES:
         res = model.run_many("klee", arch, "generic", draft.POLICIES["assigned"],
-                             RUNS, SEED, grant_relics=True, grant_potions=True)
+                             RUNS, SEED, grant_relics=True, grant_potions=True,
+                             n_acts=1)   # §10: Act-1 instrument, pinned
         won = sum(1 for r in res if r.won)
         off = defaultdict(int)
         pick = defaultdict(int)

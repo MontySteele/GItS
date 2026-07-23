@@ -19,9 +19,18 @@ import random
 
 import pytest
 
+from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine.state import CombatState
 from tier05 import draft, model
+
+
+@pytest.fixture(autouse=True)
+def _single_act(monkeypatch):
+    """§10 re-stamp: this suite asserts ACT-1 per-node cadence (7 fights,
+    node_template() indices). Pin the registry so acts 2-3 never silently
+    change the counts under test."""
+    monkeypatch.setattr(C, "RUN_ACTS", C.RUN_ACTS[:1])
 
 CHAR = "klee"
 ARCH = "demolition"
@@ -161,7 +170,9 @@ def test_fishing_rod_upgrades_after_three_normal_wins(monkeypatch):
     # Skip drafting so the deck only moves via rest-smithing + the fishing
     # upgrade; both runs rest-smith identically (same HP curve under the fixed
     # hit), so the sole delta is fishing_rod's every-3rd-N-win upgrade.
-    monkeypatch.setattr(model, "run_fight", _win_stub(8))
+    # Hit 0 (was 8): the v5 pre-E/B lookahead heals any bruised rest arrival,
+    # so rests only smith when the run arrives near-full.
+    monkeypatch.setattr(model, "run_fight", _win_stub(0))
     base = model.run_one(CHAR, ARCH, PILOT, _skip, SEED)
     relic = model.run_one(CHAR, ARCH, PILOT, _skip, SEED, relics=["fishing_rod"])
     assert _n_upgraded(base.deck_ids) >= 1                  # rests smith too

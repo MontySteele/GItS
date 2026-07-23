@@ -1,0 +1,266 @@
+# Act 2 roster: the HIVE -- multi-act extension §10.3 (RATIFIED 2026-07-23).
+#
+# REAL StS2 numbers (slaythespire.wiki.gg harvest 2026-07-23,
+# docs/act2-act3-roster-research.md §1). HP is a spawn-time RANGE [lo, hi]
+# rolled per spawn via the run rng (tier05.acts.spawn); a bare int is fixed.
+#
+# Intents use the engine kinds attack / block / buff / debuff / summon plus
+# the §10.2 promotions: `inject` (status cards into player piles -- the
+# act's signature pressure) and `heal` (enemy self-heal). Bundled real cards
+# ("attack 8 AND +2 Str") are split into separate rotation BEATS, the
+# frozen-battery precedent. Every skipped mechanic is flagged UNIMPLEMENTED
+# on its enemy and tracked on the §10.9 backlog -- skip-loudly, never fake.
+#
+# Dropped enemies (identity = a skipped op; §10.9 re-add list): Thieving
+# Hopper (card theft + flee), Spiny Toad (Thorns), Slumbering Beetle
+# (Plating; sleep is covered by Bygone Effigy in Act 1).
+#
+# LAYER BOUNDARY: tier0.5-only source; the tier0 battery is frozen. No
+# progression-gap compensator -- real numbers, uncompensated.
+
+# --- EASY pool: the first TWO N nodes (Acts 2-3 rule, §10.1). -----------
+easy:
+  - id: bowlbug_pod
+    name: "BOWLBUG (ROCK + SILK)"
+    # Rock: Headbutt 15; Dizzy = a self-stunned idle beat (block 0 -- the
+    # engine has no stun op; an empty beat IS the lost turn).
+    # UNIMPLEMENTED: 2 Imbalanced (unmodeled power).
+    enemies:
+      - name: bowlbug_rock
+        hp: [45, 48]
+        intents:
+          - {kind: attack, amount: 15}                  # Headbutt
+          - {kind: block, amount: 0}                    # Dizzy (self-stun beat)
+      - name: bowlbug_silk
+        hp: [40, 43]
+        intents:
+          - {kind: attack, amount: 4, times: 2}         # Thrash
+          - {kind: debuff, power: weak, amount: 1}      # Spin Web
+
+  - id: exoskeleton_trio
+    name: "EXOSKELETONS x3"
+    # Swarm-shape check. Skitter 1x3 · Mandibles 8 · Enrage +2 Str.
+    # UNIMPLEMENTED: Hard to Kill 9 (damage cap, §4.5/§10.9).
+    enemies:
+      - name: exoskeleton
+        count: 3
+        stagger: true
+        hp: [24, 28]
+        intents:
+          - {kind: attack, amount: 1, times: 3}         # Skitter
+          - {kind: attack, amount: 8}                   # Mandibles
+          - {kind: buff, power: strength, amount: 2}    # Enrage
+
+  - id: tunneler
+    name: "TUNNELER"
+    # Bite 13 · Burrow +32 block · Attack from Below 23.
+    # UNIMPLEMENTED: untargetable-while-burrowed + Emerging Strike stun --
+    # the huge block wall keeps the rhythm without faking either.
+    enemies:
+      - name: tunneler
+        hp: 87
+        intents:
+          - {kind: attack, amount: 13}                  # Bite
+          - {kind: block, amount: 32}                   # Burrow
+          - {kind: attack, amount: 23}                  # Attack from Below
+
+# --- HARD pool: N fights 3+ and nothing else. ---------------------------
+hard:
+  - id: chomper_pair
+    name: "CHOMPERS x2"
+    # THE Dazed-pollution normal: each Chomper's Screech shuffles 3 Dazed
+    # into the draw pile (§10.2 inject op). UNIMPLEMENTED: Artifact 2.
+    enemies:
+      - name: chomper
+        count: 2
+        stagger: true
+        hp: [60, 64]
+        intents:
+          - {kind: attack, amount: 8, times: 2}         # Clamp
+          - {kind: inject, status: dazed, count: 3, pile: draw}   # Screech
+
+  - id: hunter_killer
+    name: "HUNTER KILLER"
+    # Tenderizing Goop's Tender is MAPPED to 2 Vulnerable (§10.3 ratified
+    # approximation) -- the soften-then-burst rhythm is the point.
+    enemies:
+      - name: hunter_killer
+        hp: 121
+        intents:
+          - {kind: debuff, power: vulnerable, amount: 2}  # Tenderizing Goop
+          - {kind: attack, amount: 17}                  # Bite
+          - {kind: attack, amount: 7, times: 3}         # Puncture
+
+  - id: louse_progenitor
+    name: "LOUSE PROGENITOR"
+    # Web Cannon 9 (+2 Frail beat) · Curl and Grow +14 block / +5 Str beats
+    # · Pounce 14. UNIMPLEMENTED: Curl Up 14 (folded into the block beat).
+    enemies:
+      - name: louse_progenitor
+        hp: [134, 136]
+        intents:
+          - {kind: attack, amount: 9}                   # Web Cannon
+          - {kind: debuff, power: frail, amount: 2}     # Cannon's Frail (beat)
+          - {kind: block, amount: 14}                   # Curl and Grow
+          - {kind: buff, power: strength, amount: 5}    # Grow's +5 Str (beat)
+          - {kind: attack, amount: 14}                  # Pounce
+
+  - id: myte_pair
+    name: "MYTES x2"
+    # Toxic Cornucopia: 2 Toxic into the DISCARD (unplayable, 2 HP on draw
+    # -- §10.3 ratified semantics). Suck's +2 Str split to a beat.
+    enemies:
+      - name: myte
+        count: 2
+        stagger: true
+        hp: [61, 67]
+        intents:
+          - {kind: inject, status: toxic, count: 2}     # Toxic Cornucopia
+          - {kind: attack, amount: 13}                  # Bite
+          - {kind: attack, amount: 4}                   # Suck
+          - {kind: buff, power: strength, amount: 2}    # Suck's +2 Str (beat)
+
+  - id: ovicopter
+    name: "OVICOPTER"
+    # Lay Eggs summons 3 Tough Eggs (Nibble 4). UNIMPLEMENTED: the
+    # Hatch->Hatchling upgrade step (eggs stay eggs).
+    enemies:
+      - name: ovicopter
+        hp: [124, 130]
+        intents:
+          - {kind: summon, wave: [{name: tough_egg, hp: 16,
+                intents: [{kind: attack, amount: 4}]},
+              {name: tough_egg, hp: 16,
+                intents: [{kind: attack, amount: 4}]},
+              {name: tough_egg, hp: 16,
+                intents: [{kind: attack, amount: 4}]}]}  # Lay Eggs
+          - {kind: attack, amount: 16}                  # Smash
+          - {kind: attack, amount: 7}                   # Tenderizer
+          - {kind: debuff, power: vulnerable, amount: 2}  # Tenderizer (beat)
+          - {kind: buff, power: strength, amount: 3}    # Nutritional Paste
+
+  - id: obscura
+    name: "THE OBSCURA"
+    # Illusion summons the Parafright (21 hp, Slam 16). Wail is modeled as
+    # SELF +3 Str only -- UNIMPLEMENTED: the all-enemies half (no buff-all
+    # op, §10.9). Hardening Strike split into attack + block beats.
+    enemies:
+      - name: obscura
+        hp: 123
+        intents:
+          - {kind: summon, wave: [{name: parafright, hp: 21,
+                intents: [{kind: attack, amount: 16}]}]}  # Illusion
+          - {kind: attack, amount: 10}                  # Piercing Gaze
+          - {kind: buff, power: strength, amount: 3}    # Wail (self half)
+          - {kind: attack, amount: 6}                   # Hardening Strike
+          - {kind: block, amount: 6}                    # Strike's block (beat)
+
+# --- ELITE pool: 3 enemies, draw 2 per act (§4.3 doctrine: each checks a
+# different shape -- multi-body / ramp+pollution / block-burst clock). -----
+elite:
+  - id: decimillipede
+    name: "DECIMILLIPEDE"
+    # 3 segments on offset cycles -- the Act-2 multi-body check.
+    # UNIMPLEMENTED: Reattach (dead segments stay dead).
+    enemies:
+      - name: decimillipede_segment
+        count: 3
+        stagger: true
+        hp: [46, 52]
+        intents:
+          - {kind: block, amount: 7}                    # Bulk
+          - {kind: buff, power: strength, amount: 2}    # Bulk's +2 Str (beat)
+          - {kind: attack, amount: 6, times: 2}         # Writhe
+          - {kind: attack, amount: 9}                   # Outgas
+          - {kind: debuff, power: weak, amount: 1}      # Outgas' Weak (beat)
+
+  - id: entomancer
+    name: "ENTOMANCER"
+    # Ramp + pollution check. Personal Hive (on-hit Dazed) is approximated
+    # as PERIODIC escalating injection (§10.3 ratified): the script walks
+    # 1 -> 2 -> 3 Dazed across its first three cycles, then repeats at 3.
+    # UNIMPLEMENTED: the on-hit trigger itself (§10.9).
+    enemies:
+      - name: entomancer
+        hp: 145
+        intents:
+          - {kind: attack, amount: 3, times: 7}         # Beeeees!
+          - {kind: attack, amount: 18}                  # Spear!
+          - {kind: buff, power: strength, amount: 1}    # Pheromone Spit
+          - {kind: inject, status: dazed, count: 1, pile: draw}
+          - {kind: attack, amount: 3, times: 7}         # Beeeees!
+          - {kind: attack, amount: 18}                  # Spear!
+          - {kind: buff, power: strength, amount: 1}    # Pheromone Spit
+          - {kind: inject, status: dazed, count: 2, pile: draw}
+          - {kind: attack, amount: 3, times: 7}         # Beeeees!
+          - {kind: attack, amount: 18}                  # Spear!
+          - {kind: buff, power: strength, amount: 2}    # Spit at Hive 3
+          - {kind: inject, status: dazed, count: 3, pile: draw}
+
+  - id: infested_prism
+    name: "INFESTED PRISM"
+    # Block/burst clock. Jab 15 · Radiate 11 + 16 blk · Whirlwind 5x3 ·
+    # Pulsate 8 + 20 blk. UNIMPLEMENTED: Vital Spark (skill-tainting).
+    enemies:
+      - name: infested_prism
+        hp: 161
+        intents:
+          - {kind: attack, amount: 15}                  # Jab
+          - {kind: attack, amount: 11}                  # Radiate
+          - {kind: block, amount: 16}                   # Radiate's block (beat)
+          - {kind: attack, amount: 5, times: 3}         # Whirlwind
+          - {kind: attack, amount: 8}                   # Pulsate
+          - {kind: block, amount: 20}                   # Pulsate's block (beat)
+
+# --- BOSS pool: draw 1 of 2 (§10.3 RATIFIED: Knowledge Demon + Kaiser
+# Crab; The Insatiable dropped -- its identity is the Frantic-Escape death
+# timer, §10.9). ---------------------------------------------------------
+boss:
+  - id: knowledge_demon
+    name: "KNOWLEDGE DEMON"
+    # Curse of Knowledge is modeled as the engine's decaying `dot` power at
+    # 6 stacks (ignores block, ticks 6,5,4,...) -- the cycle re-applies it,
+    # approximating the real constant Disintegration 6/turn. UNIMPLEMENTED:
+    # the pick-your-poison choice (draw/hand/energy arms, §10.9). Ponder
+    # split into attack + self-heal + Str beats (§10.2 heal op).
+    enemies:
+      - name: knowledge_demon
+        hp: 379
+        is_boss: true
+        intents:
+          - {kind: debuff, power: dot, amount: 6}       # Curse of Knowledge
+          - {kind: attack, amount: 17}                  # Slap
+          - {kind: attack, amount: 8, times: 3}         # Knowledge Overwhelming
+          - {kind: attack, amount: 11}                  # Ponder
+          - {kind: heal, amount: 30}                    # Ponder's self-heal
+          - {kind: buff, power: strength, amount: 2}    # Ponder's +2 Str
+
+  - id: kaiser_crab
+    name: "KAISER CRAB"
+    # Two claws fought at once; when one dies the survivor triggers Crab
+    # Rage (§10.2 on_ally_death: +6 Str and 99 block at its next turn
+    # start). UNIMPLEMENTED: Back Attack positioning (§10.9); Enlarging
+    # Strike's growth (kept at its printed 4).
+    enemies:
+      - name: kaiser_crusher
+        hp: 209
+        is_boss: true
+        on_ally_death: {powers: {strength: 6}, block: 99}   # Crab Rage
+        intents:
+          - {kind: attack, amount: 12}                  # Thrash
+          - {kind: attack, amount: 4}                   # Enlarging Strike
+          - {kind: attack, amount: 6, times: 2}         # Bug Sting
+          - {kind: debuff, power: weak, amount: 2}      # Sting's Weak (beat)
+          - {kind: debuff, power: frail, amount: 2}     # Sting's Frail (beat)
+          - {kind: buff, power: strength, amount: 2}    # Adapt
+          - {kind: attack, amount: 12}                  # Guarded Strike
+          - {kind: block, amount: 18}                   # Guarded's block (beat)
+      - name: kaiser_rocket
+        hp: 199
+        on_ally_death: {powers: {strength: 6}, block: 99}   # Crab Rage
+        intents:
+          - {kind: attack, amount: 3}                   # Targeting Reticle
+          - {kind: attack, amount: 18}                  # Precision Beam
+          - {kind: buff, power: strength, amount: 2}    # Charge Up
+          - {kind: attack, amount: 31}                  # Laser
+          - {kind: block, amount: 0}                    # Recharge (idle beat)

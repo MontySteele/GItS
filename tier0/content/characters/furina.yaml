@@ -34,6 +34,10 @@ archetype_decks:
 # A1-dreadful engines; Klee deck-band precedent). spotlight_weighted
 # BANDED AT PASS 2 per R19's schedule, in the R16 world: measured 4.0
 # at 1000 fights + the 0.3 margin convention. Red-pen may adjust.
+# STALE SINCE THE SALON-V2 REWORK (2026-07-23, furina-salon-rework-plan.md):
+# these A2 values were measured in the v1 anonymous-tick world and the
+# rework deliberately moved Salon output. NOT silently retuned (ratified-
+# band law) -- re-measure + red-pen at the rework's ratification.
 deck_bands:
   A2_scaling:
     salon_weighted: 7.6

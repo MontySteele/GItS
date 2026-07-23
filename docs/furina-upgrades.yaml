@@ -15,7 +15,7 @@ salon_debut:           {add: {op: gain_encore, amount: 2}}   # signature: deploy
 # ---- COMMONS (one number bump each; zero cost reductions) ----
 gentilhomme_usher:     {block: +2}           # 4->6
 surintendante_chevalmarin: {encore: +2}      # 3->5
-mademoiselle_crabaletta: {power_amount: +1}  # 2->3 members
+mademoiselle_crabaletta: {power_amount: +1}  # v2: 1->2 Crabalettas (double hammer)
 dinner_service:        {encore: +1}          # 3->4 base and rider (both branches)
 usher_the_waves:       {damage: +2}          # 5->7 (still applies hydro)
 torrential_turn:       {damage: +3}          # 10->13, aura bonus stays 4
@@ -45,9 +45,10 @@ witness_stand:         {vulnerable: +1}      # 1->2
 macaron_break:         {encore: +1}          # 2->3
 swelling_overture:     {draw: +1}            # 2->3
 undercurrent:          {damage: +2}          # 7->9 all (still applies; convergence watchlist notes the upgrade too)
+standing_room_only:    {damage: +2}          # 4->6 all base; the 1_per_5_fanfare formula stays (rework, PROPOSED)
 
 # ---- UNCOMMONS (bump OR keyword/condition; two cost slots + one 1->0) ----
-full_ensemble:         {cost: -1}            # 3->2 (uncommon cost slot; bombs_away precedent)
+full_ensemble:         {cost: -1}            # 2->1 after the rework reprice (uncommon cost slot; bombs_away precedent)
 grand_salon:           {power_amount: +1}    # +3->+4, cap 6 unchanged
 many_waters_melody:    {encore: +1}          # 5->6 base, 3->4 rider
 dress_rehearsal:       {encore_cost: -1}     # Spend 2 -> Spend 1 (condition-soften class)
@@ -80,7 +81,7 @@ deep_breath:           {remove: exhaust}     # sugar_rush-exact quality upgrade
 encore_performance:    {copy_cost_override: 0}   # the copy costs 0 (borrowed_brilliance precedent)
 singer_of_many_waters: {heal: +4}            # 14->18; Exhaust NEVER removes (healing law)
 unheard_confession:    {heal: +3}            # 8->11; Exhaust stays, Encore stays 6
-endless_waltz:         {cost: -1}            # 3->2 (rare cost privilege)
+endless_waltz:         {cost: -1}            # 2->1 after the rework reprice (rare cost privilege)
 grand_gala:            {encore: +3}          # 4->7; Exhaust stays
 the_sea_is_my_stage:   {fanfare_cap: +5}     # +15->+20 cap; the blood price stays 6 (raised at red-pen, DECISIONS 75)
 universal_revelry:     {damage: +3}          # 9->12 base; spend 20 and 1_per_2 formula stay

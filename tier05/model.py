@@ -1,7 +1,15 @@
-"""The run model (spec §2; run-model rework §3-§5): fixed node template
-(RUNTEMPLATE_VERSION 3: "NNNRETN$ERB" -- 11 nodes, 7 fights, 2 rests, plus
-a treasure T and a shop $), HP persistence, rest nodes with smithing (M7),
-battery-derived fights (the realistic roster lands in a later phase).
+"""The run model (spec §2; run-model rework §3-§5, multi-act §10): the fixed
+node template ("NNNRETN$ERB" -- 11 nodes, 7 fights, 2 rests, a treasure T
+and a shop $) repeated once per registered act (RUNTEMPLATE_VERSION 5), HP
+persistence, rest nodes with smithing (M7), the realistic per-act rosters.
+
+Multi-act (§10.1, RATIFIED 2026-07-23): the run walks every act registered
+in constants.RUN_ACTS (or the first `n_acts` of them). A non-final boss win
+triggers the act boundary: the reward screen's CARD offers are forced Rare
+(§10.1's choice-of-3-Rares boss drop, v5) and the companion slot is forced
+Rare too, then the Ancient heals 100% of missing HP and -- on grant_relics
+runs -- offers a 1-of-3 Ancient-relic pick. Deck, gold, relics and potions
+carry forward; HP resets to max.
 
 Run-layer relics: Burning Blood (heal_after_won_fight) is applied HERE,
 after each won fight (run-model rework §2) -- combat.py stays emit-only so
@@ -25,7 +33,7 @@ from tier0.engine.combat import run_fight
 from tier0.engine.state import Card, Enemy
 from tier0.harness import metrics as t0_metrics
 from tier0.pilot.policy import make_pilot
-from tier05 import act1, draft, potions as potion_pool, rewards, shop
+from tier05 import acts, draft, potions as potion_pool, rewards, shop
 from tier05 import relics as relic_pool
 
 # policy(rng, deck_cards, offers, archetype) -> Card | None
@@ -63,22 +71,23 @@ def _consumed(before: list[str], after: list[str]) -> list[str]:
 
 
 def build_node_encounter(node_kind: str, rng: random.Random,
-                         draw: act1.ActDraw) -> list[Enemy]:
-    """Realistic Act-1 roster (run-model rework §4). `draw` is the per-run
-    ActDraw: it resolves node kind -> encounter (easy pool for the first
-    three N nodes, hard pool for later N, the run's two drawn elites for E,
-    Vantom for B), then `act1.spawn` rolls each body's HP within its band
-    via the run rng.
+                         draw: acts.ActDraw) -> list[Enemy]:
+    """Realistic per-act roster (run-model rework §4/§10). `draw` is the
+    per-ACT ActDraw: it resolves node kind -> encounter (easy pool for the
+    act's first easy_fights N nodes, hard pool for later N, the act's two
+    drawn elites for E, the act's drawn boss for B), then `acts.spawn` rolls
+    each body's HP within its band via the run rng.
 
-    NO progression-gap compensator: this roster uses REAL StS2 numbers (§4),
+    NO progression-gap compensator: rosters use REAL StS2 numbers (§4),
     so the old battery-calibrated PROGRESSION_GAP_COMPENSATOR does not apply.
     The tier0 battery stays frozen and is no longer read at the run layer."""
     encounter = draw.encounter_for(node_kind, rng)
-    return act1.spawn(encounter, rng)
+    return acts.spawn(encounter, rng)
 
 
 def rest_action(deck_ids: list[str], hp: int, max_hp: int,
-                archetype: str = "generic") -> tuple[str, Optional[str]]:
+                archetype: str = "generic",
+                next_fight: bool = False) -> tuple[str, Optional[str]]:
     """Rest policy (spec §2 as amended by M7): heal 30% max HP OR remove 1
     card OR upgrade 1 card (rest-site smithing). Heal when hurt below the
     threshold. Then upgrade an ON-PLAN card -- payoffs before enablers,
@@ -91,8 +100,16 @@ def rest_action(deck_ids: list[str], hp: int, max_hp: int,
     wins; between DANGER and HEAL_THRESHOLD an on-plan smith outranks it
     (the classic rest-vs-smith call). With one line at 0.65 the heal
     swallowed every rest of a bruised run and the third option never
-    fired at all."""
+    fired at all.
+
+    DRAFTER_VERSION 5 (b): `next_fight` is the lookahead -- True when the
+    node after this rest is an Elite/Boss fight. Both template rests
+    directly precede E/B, so under v4 the smith band sent runs into
+    guaranteed elites at ~48/80 HP (§10.8.1). With the flag set, the heal
+    outranks the smith below REST_PREFIGHT_HEAL_THRESHOLD."""
     if hp < C.REST_SMITH_DANGER * max_hp:
+        return "heal", None
+    if next_fight and hp < C.REST_PREFIGHT_HEAL_THRESHOLD * max_hp:
         return "heal", None
     deck = [loader.get_card(cid) for cid in deck_ids]
     upgradable = [c for c in deck if upgrades.has_upgrade(c.id)]
@@ -144,11 +161,16 @@ class RunResult:
     #                    grant_potions=False (no potions ever held).
     potions_end: list[str] = field(default_factory=list)    # potions still held
     #                    at run end (or at death). Empty when grant_potions=False.
+    n_acts: int = 1                     # §10.1: acts this run spans; node_kinds
+    #                    is the per-act template repeated n_acts times, so act
+    #                    boundaries sit at multiples of len(node_template()).
+    acts_completed: int = 0             # §10.1: boss wins (final boss included)
 
 
 def node_template() -> list[str]:
-    # RUNTEMPLATE_VERSION 3: "NNNRETN$ERB" -- the burst-check NODE is gone
-    # (no BC swap). Node kinds: N/E/B fights, R rest, T treasure, $ shop.
+    # RUNTEMPLATE_VERSION 5: the PER-ACT template ("NNNRETN$ERB"); a run is
+    # this repeated once per act (§10.1). Node kinds: N/E/B fights, R rest,
+    # T treasure, $ shop.
     return list(C.RUN_NODE_TEMPLATE)
 
 
@@ -157,9 +179,14 @@ def run_one(character: str, archetype: str, pilot_id: str,
             slot_mode: str = "standard",
             relics: list[str] | None = None,
             grant_relics: bool = False,
-            grant_potions: bool = False) -> RunResult:
+            grant_potions: bool = False,
+            n_acts: int | None = None) -> RunResult:
     """slot_mode: 'standard' (1 companion offer) or 'pity(k)' — k screens
     without taking a companion make the next slot a choose-3.
+
+    n_acts (§10.1): how many acts the run spans -- None (default) spans every
+    act registered in constants.RUN_ACTS; an explicit count must not exceed
+    the registry (`--acts 1` is the supported single-act instrument).
 
     relics: relic ids the run STARTS holding (the W1 seed seam). None -> no
     relics seeded.
@@ -229,15 +256,26 @@ def run_one(character: str, archetype: str, pilot_id: str,
     if grant_potions:
         bag = potion_pool.PotionBag(potions=[], slots=_potion_slots(held))
     just_rested = False
-    nodes = node_template()
-    # Per-run encounter draw (run-model rework §4): easy/hard identity and
-    # the 2-of-3 elite draw are fixed here from the run rng, so the roster
-    # replays identically under the same seed.
-    act_draw = act1.ActDraw(rng)
+    template = node_template()
+    total_acts = acts.n_acts()
+    n = total_acts if n_acts is None else n_acts
+    if not 1 <= n <= total_acts:
+        raise ValueError(f"n_acts={n} out of range: {total_acts} act(s) "
+                         f"registered in RUN_ACTS")
+    nodes = template * n
     res = RunResult(seed=seed, won=False, death_node=None, hp_by_node=[],
-                    deck_ids=deck_ids, node_kinds=nodes, banner=banner)
+                    deck_ids=deck_ids, node_kinds=nodes, banner=banner,
+                    n_acts=n)
     fights = 0
+    act_draw = None
+    act_i = -1
     for i, kind in enumerate(nodes):
+        if i % len(template) == 0:
+            # Per-ACT encounter draw (§4/§10): easy/hard identity, the 2-of-3
+            # elite draw and the boss-pool draw are fixed at each act's start
+            # from the run rng, so the roster replays under the same seed.
+            act_i += 1
+            act_draw = acts.ActDraw(rng, act_i)
         if kind == "T":                     # treasure: gold lump + relic
             gold += C.TREASURE_GOLD
             if grant_relics and held is not None:
@@ -323,7 +361,10 @@ def run_one(character: str, archetype: str, pilot_id: str,
             if getattr(policy, "emergent_plan", False):
                 rest_plan = draft.dominant_archetype(
                     [loader.get_card(cid) for cid in deck_ids])
-            action, target = rest_action(deck_ids, hp, max_hp, rest_plan)
+            action, target = rest_action(
+                deck_ids, hp, max_hp, rest_plan,
+                next_fight=(i + 1 < len(nodes)
+                            and nodes[i + 1] in ("E", "B")))
             if action == "heal":
                 hp = min(max_hp, hp + round(C.REST_HEAL_FRACTION * max_hp))
             elif action == "remove":
@@ -422,13 +463,24 @@ def run_one(character: str, archetype: str, pilot_id: str,
             if bag is not None:
                 res.potions_end = list(bag.potions)
             return res
-        if kind != "B":                     # boss ends the run — no reward
+        final_act = act_i == n - 1
+        if kind == "B":
+            res.acts_completed += 1
+        if kind != "B" or not final_act:
+            # Reward screen. A FINAL boss ends the run with no reward; a
+            # non-final boss shows the act-transition screen (§10.1): the
+            # CARD offers are forced Rare -- the ratified "choice-of-3
+            # Rares" boss drop -- and the companion slot is forced Rare
+            # too. (Shipped Pass 1 forced only the companion slot; a
+            # no-companion character got ordinary commons at the boundary
+            # -- the Ironclad-0.6% diagnosis, 2026-07-23.)
             n_comp = 1
             if pity_k is not None and screens_since_companion >= pity_k:
                 n_comp = 3                  # pity fires: choose-3 slot
-            offers = rewards.roll_rewards(rng, character,
-                                          companion_offers=n_comp,
-                                          banner=banner)
+            offers = rewards.roll_rewards(
+                rng, character, companion_offers=n_comp, banner=banner,
+                companion_rarity="rare" if kind == "B" else None,
+                card_rarity="rare" if kind == "B" else None)
             deck_cards = [loader.get_card(cid) for cid in deck_ids]
             # Relevance is judged on the deck as it stood WHEN THE SCREEN WAS
             # SHOWN, before the pick lands -- judging after would let the pick
@@ -462,6 +514,18 @@ def run_one(character: str, archetype: str, pilot_id: str,
                         [loader.get_card(cid) for cid in deck_ids],
                         archetype)):
                 res.time_to_online = fights
+        if kind == "B" and not final_act:
+            # Act boundary (§10.1): the Ancient heals 100% of missing HP,
+            # and on grant_relics runs offers a 1-of-3 Ancient-relic pick.
+            # Deck, gold, relics and potions persist in their run locals;
+            # only HP resets.
+            hp = max_hp
+            if grant_relics and held is not None:
+                offer = relic_pool.ancient_offer(rng, held, character)
+                pick = relic_pool.ancient_pick(offer, character)
+                if pick is not None:
+                    hp, max_hp, gold = held.add(pick, character, hp, max_hp,
+                                                gold, deck_ids, rng)
     res.won = True
     res.deck_ids = deck_ids
     if held is not None:
@@ -478,12 +542,14 @@ def run_many(character: str, archetype: str, pilot_id: str,
              slot_mode: str = "standard",
              relics: list[str] | None = None,
              grant_relics: bool = False,
-             grant_potions: bool = False) -> list[RunResult]:
+             grant_potions: bool = False,
+             n_acts: int | None = None) -> list[RunResult]:
     out = []
     for i in range(runs):
         r = run_one(character, archetype, pilot_id, policy, seed + i,
                     slot_mode=slot_mode, relics=relics,
-                    grant_relics=grant_relics, grant_potions=grant_potions)
+                    grant_relics=grant_relics, grant_potions=grant_potions,
+                    n_acts=n_acts)
         # draft_regret: sampled re-score in the final-deck context, using
         # a DEDICATED rng stream so sampling can't perturb run decisions.
         r.regret_samples = draft.draft_regret(
