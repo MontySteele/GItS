@@ -351,8 +351,12 @@ if (-not (Test-Path $pckBuilder)) {
                 'KleePck\.Path\("(?<path>[^"]+\.(?:tscn|tres))"\)')) {
             $relative = $match.Groups['path'].Value
             $builderResource = $relative.Replace('/', '\')
-            if (-not $pckText.Contains($builderResource)) {
-                Fail 'S6c' "$($source.File.Name): PCK resource '$builderResource' is not authored by tools\build_pck.ps1."
+            # Two authoring channels: heredoc text inside build_pck.ps1, or a
+            # git-tracked source file under klee-mod\pck-src (animation sprint
+            # 1 convention; the build overlays pck-src into the work dir).
+            $pckSrcFile = Join-Path $repoRoot "klee-mod\pck-src\$builderResource"
+            if (-not $pckText.Contains($builderResource) -and -not (Test-Path $pckSrcFile)) {
+                Fail 'S6c' "$($source.File.Name): PCK resource '$builderResource' is neither authored by tools\build_pck.ps1 nor present in klee-mod\pck-src."
             }
             $contractResource = "resource=res://$relative"
             if (-not $contractText.Contains($contractResource)) {

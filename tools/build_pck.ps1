@@ -430,6 +430,28 @@ shader_parameter/threshold = 0.332
 shader_parameter/transitionTex = ExtResource("1_wipe")
 '@)
 
+# Git-tracked scene sources (klee-mod\pck-src) overlay the work dir verbatim.
+# Scenes with real animation data are unmaintainable as heredocs; they live in
+# the repo as text and ship through the same import/export as everything else.
+$pckSrc = Join-Path $repo 'klee-mod\pck-src'
+if (Test-Path $pckSrc) {
+    Copy-Item (Join-Path $pckSrc '*') -Destination $work -Recurse -Force -Exclude 'README.md'
+    Write-Host "Overlaid pck-src scene sources." -ForegroundColor Cyan
+}
+
+# Build id stamp: boot telemetry logs this, so a stale pck announces itself in
+# godot.log instead of silently rendering old art (animation sprint 1, A3).
+try { $gitSha = (& git -C $repo rev-parse --short HEAD) } catch { $gitSha = $null }
+if (-not $gitSha) { $gitSha = 'nogit' }
+$buildId = '{0}+{1}' -f (Get-Date -Format 'yyyyMMdd-HHmmss'), $gitSha
+[IO.File]::WriteAllText((Join-Path $work 'klee\build_id.tres'), @"
+[gd_resource type="Resource" format=3]
+
+[resource]
+resource_name = "$buildId"
+"@)
+Write-Host "Stamped build id $buildId" -ForegroundColor Cyan
+
 # Some fetched files are WebP with a .png extension (the wiki serves them that
 # way); Godot's PNG importer hard-fails on them. Re-encode in place, in the
 # scratch copy only -- ImageGen sources belong to the art pipeline.
@@ -470,6 +492,8 @@ $contractLines = @(
     'contract=roster-pck-v2',
     "sha256=$hash",
     'resource=res://klee/model/combat_visuals.tscn',
+    'resource=res://klee/model/combat.tscn',
+    'resource=res://klee/build_id.tres',
     'resource=res://klee/ui/character_icon.tscn',
     'resource=res://klee/ui/char_select_bg_klee.tscn',
     'resource=res://klee/materials/klee_transition_mat.tres',

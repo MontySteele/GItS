@@ -65,6 +65,11 @@ def test_scene_conversion_paths_are_unique_across_the_roster():
 
 
 def test_pck_builder_authors_every_character_scene_and_material():
+    # Two authoring channels (animation sprint 1): heredoc text inside
+    # build_pck.ps1, or a git-tracked scene source under klee-mod/pck-src/
+    # that the build overlays into the pck work dir. Either way the contract
+    # list at the bottom of build_pck.ps1 must name the resource.
+    pck_src = ROOT / "klee-mod" / "pck-src"
     for character, source in CHARACTERS.items():
         resources = re.findall(
             r'KleePck\.Path\("([^"]+\.(?:tscn|tres))"\)',
@@ -73,9 +78,9 @@ def test_pck_builder_authors_every_character_scene_and_material():
         assert resources, f"{character} has no packaged scene resources"
         for resource in resources:
             windows_path = resource.replace("/", "\\")
-            assert windows_path in PCK_BUILDER, (
+            assert windows_path in PCK_BUILDER or (pck_src / resource).is_file(), (
                 f"{character} references {resource}, but build_pck.ps1 "
-                "does not author it"
+                "does not author it and klee-mod/pck-src does not carry it"
             )
             assert f"resource=res://{resource}" in PCK_BUILDER
 

@@ -1663,3 +1663,53 @@ delegate; source tests and S6c enforce one call containing both listeners.
 Finally, FrozenPower now supplies the title/description localization that R8
 was correctly reporting. The previous four findings were the same two missing
 keys observed once during each character sweep.
+
+## Animation sprint 1 opens: scene binding architecture (2026-07-23)
+
+Sprint doc: docs/animation-sprint-1-plan.md (Tracks A-E; A is a hard gate).
+
+LICENSE NOTE (standing for the whole sprint): Downfall (github.com/lamali292/
+Downfall) is reference-reading ONLY. Patterns, node inventories, and patch
+shapes may be mirrored; scene files, art, and code are never copied verbatim
+into our tree. The clone lives in a session scratchpad, not the repo.
+
+Track A architecture finding — how a mod scene becomes the combat model.
+Verified against decompiled game v0.107.1 (2026-07-21 decompile; game binary
+unchanged since 07-18) and BaseLib.dll 2026-07-21 (re-decompiled this
+session; CustomCharacterModel surface unchanged by the 07-21 update):
+
+- `CharacterModel.VisualsPath` is private/non-virtual, but BaseLib patches it
+  to return `CustomCharacterModel.CustomVisualPath`, and patches
+  `CreateVisuals` to prefer `CreateCustomVisuals()` when non-null.
+- BaseLib postfixes `PackedScene.Instantiate` and auto-converts any
+  registered scene root via `NodeFactory<T>` (`RegisterSceneForConversion`,
+  path-keyed — the campfire-softlock registry). `NCreatureVisualsFactory`
+  declares the named-node inventory `%Visuals, %PhobiaModeVisuals, Bounds,
+  %CenterPos, IntentPos, %OrbPos, %TalkPos` and GENERATES missing Bounds/
+  CenterPos/IntentPos with defaults (Bounds 240x280 at (-120,-280)).
+- Therefore a combat scene needs NO script attached. Downfall attaches C#
+  scripts to scene roots (`[GlobalClass]` + Godot.NET.Sdk source generators
+  give their assembly ScriptPath mapping); our KleeCode builds with plain
+  Microsoft.NET.Sdk and our pck pipeline is deliberately script-less
+  (build_pck.ps1 standing note). We get the same behavior from the outside:
+  script-less `klee/model/combat.tscn` converted by BaseLib's factory, plus
+  a Harmony postfix pair on `NCreature.SetAnimationTrigger` /
+  `NCreature.StartDeathAnim` (Downfall's own patch shape) that routes
+  triggers into an `%AnimationTree` inside the scene when one exists.
+  `SetAnimationTrigger` is `_spineAnimator?.SetTrigger(...)` — a no-op
+  without spine — so the postfix is purely additive and inert for every
+  creature whose visuals carry no AnimationTree.
+- `GenerateAnimator` stays un-overridden: NCreature only builds the base
+  CreatureAnimator when `Visuals.HasSpineAnimation`, and we ship no spine.
+
+New conventions this sprint:
+- `klee-mod/pck-src/` — git-tracked text scene sources copied verbatim into
+  the pck work dir by build_pck.ps1. Scenes too large for heredocs
+  (AnimationPlayer tracks) live here; the historical heredoc scenes stay in
+  the script until they next need editing.
+- build id: build_pck.ps1 stamps `klee/build_id.tres` (resource_name =
+  timestamp + git short sha) into every pack; boot telemetry logs it, so a
+  stale pck is visible in godot.log instead of silently showing old art.
+- Boot telemetry (permanent, house pattern): one line per convention scene —
+  path, found/missing, root node type from SceneState (no instantiation, so
+  logging cannot trigger conversion side effects).
