@@ -43,14 +43,16 @@ public sealed class EtherealSpotlight : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        // The choose-a-card screen reads card.Owner, which asserts
+        // mutability -- canonical ModelDb templates softlock it.
         var options = new List<CardModel>
         {
-            ModelDb.Card<CenterStageOption>(),
+            ModelDb.Card<CenterStageOption>().ToMutable(),
         };
         if (Owner.PlayerCombatState?.AllCards.Any(
                 card => card is ICompanionCard) == true)
         {
-            options.Add(ModelDb.Card<GuestCastOption>());
+            options.Add(ModelDb.Card<GuestCastOption>().ToMutable());
         }
         var selected = await CardSelectCmd.FromChooseACardScreen(
             choiceContext, options, Owner, canSkip: false);
