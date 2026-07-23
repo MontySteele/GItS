@@ -201,10 +201,46 @@ nodes all literally named "Portrait" collides — unique names are
 per-scene, so the NODES must be named Slot1Portrait/Slot2Portrait/…;
 MegaDot's export warning caught it.)
 
-## Track E prep notes
+## Track E — Per-card VFX (bomb lob, Dodoco pop)
 
-- E: GhostflameModel.SpawnVfx recipe verified (fire-and-forget,
-  AddChildSafely, self-free).
+Status: **CODE COMPLETE — [USER] timing-feel look pass pending (E4).**
+
+- E1 ✅ Recipe per GhostflameModel.SpawnVfx (mirrored): small PackedScenes,
+  instantiate → CombatVfxContainer.AddChildSafely → position → self-free.
+  Self-free is SCENE-contained (script-less twist on the reference): each
+  scene's animation carries a method-call track that queue_free()s the
+  root, so cleanup cannot depend on C# remembering the node. The spawner
+  adds a 4s SceneTreeTimer leak guard for stragglers (E4's no-leak rule).
+- E2 ✅ `pck-src/klee/vfx/bomb_lob.tscn` + KleeCombatVfx.SpawnBombLob:
+  bomb icon arcs applier→target over 0.45s (C#-driven tween — linear x,
+  quad-out/quad-in y through an apex; positions are dynamic so the arc
+  can't live in the scene), then the scene's "explode" plays (sprite off,
+  one-shot orange particle burst, self-free). Trigger = BombPower.Detonate,
+  which IS the per-detonation-event funnel — one lob covers the whole
+  stack (spam guard as designed). Fire-and-forget: damage resolves with
+  the numbers, the arc is the payoff frame over them.
+- E3 ✅ `pck-src/klee/vfx/dodoco_pop.tscn` + SpawnDodocoPop: the dodoco
+  layer sprite (reused from Track B's cut) pops up + sparkles over Klee
+  on the Sparks-spend event (SparkPower.AfterCardPlayed's pending-spend
+  resolution — the single spend funnel). Autoplay scene, self-freeing.
+  Concurrency cap 3 live instances (plan's suggested cap), with slight
+  horizontal scatter so simultaneous pops read separately.
+- E4 ⏳ acceptance in playtest: no leaked nodes after a long fight
+  (method-track free + timer guard; verify with remote scene tree), cap
+  holds on a worst-case spark-dump turn, effects never outlive combat
+  (children of CombatVfxContainer die with the room). [USER] timing feel.
+
+Gates green: dotnet build 0 errors, pck rebuilt (both VFX scenes in
+pack, build id 20260723-174842+ebcf1b2), staged validate OK, suite 587
+passed.
+
+## Sprint status after Tracks A–E
+
+All five tracks are code-complete and committed. The sprint's remaining
+work is entirely [USER] eyes-on: B4 (Klee motion), C4 (gauge behavior
+in play), D4 (Salon layout), E4 (VFX timing feel) — one deploy + a
+Klee fight and a Furina fight cover all four. Definition-of-done items
+that survive the look passes: captures into this log per track.
 
 ## Open [USER] items
 

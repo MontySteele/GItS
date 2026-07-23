@@ -197,5 +197,9 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
         await PowerCmd.ModifyAmount(
             choiceContext, this, -_pendingSpendAmount, applier: null,
             cardSource: cardPlay.Card);
+
+        // Sparks-spend VFX (sprint plan E3); concurrency-capped in the
+        // spawner so burst turns cannot particle-storm the screen.
+        Vfx.KleeCombatVfx.SpawnDodocoPop(Owner);
     }
 }
