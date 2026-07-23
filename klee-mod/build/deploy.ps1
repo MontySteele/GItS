@@ -16,7 +16,11 @@
 [CmdletBinding()]
 param(
     [ValidateSet('Debug', 'Release')]
-    [string]$Configuration = 'Release'
+    [string]$Configuration = 'Release',
+    # Passed through to validate.ps1 S7: allow deploying when game_ref/
+    # exists but is incomplete (falls back to committed-only with a loud
+    # banner instead of failing validation).
+    [switch]$AllowIncompleteGameRef
 )
 
 $ErrorActionPreference = 'Stop'
@@ -113,7 +117,8 @@ Write-Host "Validating package..." -ForegroundColor Cyan
 & (Join-Path $PSScriptRoot 'validate.ps1') `
     -StageDir $stage `
     -SourceDir (Join-Path $root 'KleeCode') `
-    -GameDir $gameDir
+    -GameDir $gameDir `
+    -AllowIncompleteGameRef:$AllowIncompleteGameRef
 
 $target = Join-Path $gameDir 'mods\klee'
 Write-Host "Deploying to $target" -ForegroundColor Cyan

@@ -17,7 +17,11 @@
 param(
     [Parameter(Mandatory = $true)][string]$StageDir,
     [Parameter(Mandatory = $true)][string]$SourceDir,
-    [Parameter(Mandatory = $true)][string]$GameDir
+    [Parameter(Mandatory = $true)][string]$GameDir,
+    # S7 escape hatch: a game_ref/ directory that EXISTS but is INCOMPLETE
+    # fails validation by default (see S7 comment). Pass this switch to
+    # acknowledge the stale local reference and test committed content only.
+    [switch]$AllowIncompleteGameRef
 )
 
 $ErrorActionPreference = 'Stop'
@@ -370,13 +374,37 @@ if (-not (Test-Path $pckBuilder)) {
 #
 # game_ref/ is deliberately gitignored local/decompiled reference data. A
 # complete copy receives its own --verify gate and participates in pytest.
-# An incomplete/absent copy is atomically disabled with
-# GITS_REFERENCE_MODE=committed-only: local-reference modules skip exactly as
-# on a fresh clone, while every repository-owned test still runs. This is NOT
-# accepting a partial reference. The loader remains fail-closed in normal
-# mode, and tools.build_ironclad_sheet --verify remains the only validity
-# claim for real_ironclad.
+#
+# The fallback semantics were split on 2026-07-23 after a silent fallback
+# masked a red auto-mode suite for a day (2026-07-22/23 cross-machine
+# divergence). The decision table:
+#
+#   game_ref ABSENT entirely (fresh clone)
+#       -> committed-only mode with a loud warning banner. Local-reference
+#          modules skip exactly as on a fresh clone; every repository-owned
+#          test still runs.
+#   game_ref EXISTS but is INCOMPLETE (stale local reference)
+#       -> FAIL by default, naming the missing pieces and the rebuild
+#          commands. This is the dangerous case: the machine's real
+#          (auto-mode) suite may be red while committed-only is green.
+#          Pass -AllowIncompleteGameRef to fall back to committed-only
+#          anyway, with the same loud banner.
+#   game_ref COMPLETE
+#       -> --verify gate, then the full suite in auto mode.
+#
+# Committed-only is NOT accepting a partial reference. The loader remains
+# fail-closed in normal mode, and tools.build_ironclad_sheet --verify
+# remains the only validity claim for real_ironclad.
 # ---------------------------------------------------------------------------
+function Write-GameRefBanner($reason) {
+    Write-Host '===============================================================' -ForegroundColor Yellow
+    Write-Host ' WARNING: S7 is running in committed-only mode.' -ForegroundColor Yellow
+    Write-Host " $reason" -ForegroundColor Yellow
+    Write-Host ' Local-reference modules (real_ironclad) are NOT being tested.' -ForegroundColor Yellow
+    Write-Host ' A green result here says nothing about the auto-mode suite.' -ForegroundColor Yellow
+    Write-Host '===============================================================' -ForegroundColor Yellow
+}
+
 if (Test-Path $venvPython) {
     $gameRef = Join-Path $repoRoot 'game_ref'
     $referenceFiles = @(
@@ -389,41 +417,61 @@ if (Test-Path $venvPython) {
         'ironclad_char_facts.yaml',
         'char_real_ironclad.yaml'
     )
-    $referenceComplete = $true
+    $missingReferenceFiles = @()
     foreach ($name in $referenceFiles) {
         if (-not (Test-Path (Join-Path $gameRef $name))) {
-            $referenceComplete = $false
-            break
+            $missingReferenceFiles += $name
         }
     }
+    $referenceComplete = ($missingReferenceFiles.Count -eq 0)
 
-    $oldReferenceMode = [Environment]::GetEnvironmentVariable(
-        'GITS_REFERENCE_MODE', 'Process')
+    # $null = do not run the suite at all (the incomplete-game_ref failure).
+    $referenceMode = $null
     if ($referenceComplete) {
         Write-Host 'Verifying complete local game_ref...' -ForegroundColor Cyan
         $verifyOut = & $venvPython -m tools.build_ironclad_sheet --verify
         if ($LASTEXITCODE -ne 0) {
             Fail 'S7a' "complete local game_ref failed verification:`n    $($verifyOut -join "`n    ")"
         }
-        $env:GITS_REFERENCE_MODE = 'auto'
+        $referenceMode = 'auto'
+    } elseif (-not (Test-Path $gameRef)) {
+        # Fresh clone: nothing local to be stale about.
+        Write-GameRefBanner 'game_ref/ is absent (fresh clone).'
+        $referenceMode = 'committed-only'
+    } elseif ($AllowIncompleteGameRef) {
+        Write-GameRefBanner "-AllowIncompleteGameRef: game_ref/ exists but is missing $($missingReferenceFiles -join ', ')."
+        $referenceMode = 'committed-only'
     } else {
-        Write-Host 'Local game_ref incomplete/absent; testing committed content only.' -ForegroundColor Yellow
-        $env:GITS_REFERENCE_MODE = 'committed-only'
+        # The stale-local-reference case that masked a red auto-mode suite
+        # on 2026-07-22/23: a partial game_ref silently downgraded the gate
+        # to committed-only and the full-suite check passed anyway.
+        Fail 'S7' ("game_ref/ exists but is incomplete; missing: $($missingReferenceFiles -join ', ').`n" +
+            "    The machine's real (auto-mode) suite cannot be trusted from a committed-only pass.`n" +
+            "    Rebuild the local reference:`n" +
+            "        python -m tools.extract_base_game_pool Ironclad --emit-sheet`n" +
+            "        python -m tools.build_ironclad_sheet`n" +
+            "    or re-run with -AllowIncompleteGameRef to test committed content only.")
     }
 
-    # No 2>&1 (same PS 5.1 NativeCommandError reason as S6). -q keeps the
-    # output to the summary line plus failures.
-    try {
-        $pytestOut = & $venvPython -m pytest $repoRoot -q
-        if ($LASTEXITCODE -ne 0) {
-            $tail = ($pytestOut | Select-Object -Last 25) -join "`n    "
-            Fail 'S7' "portable repo suite not green (pytest exit $LASTEXITCODE):`n    $tail"
-        }
-    } finally {
-        if ($null -eq $oldReferenceMode) {
-            Remove-Item Env:GITS_REFERENCE_MODE -ErrorAction SilentlyContinue
-        } else {
-            $env:GITS_REFERENCE_MODE = $oldReferenceMode
+    if ($null -ne $referenceMode) {
+        $oldReferenceMode = [Environment]::GetEnvironmentVariable(
+            'GITS_REFERENCE_MODE', 'Process')
+        $env:GITS_REFERENCE_MODE = $referenceMode
+
+        # No 2>&1 (same PS 5.1 NativeCommandError reason as S6). -q keeps the
+        # output to the summary line plus failures.
+        try {
+            $pytestOut = & $venvPython -m pytest $repoRoot -q
+            if ($LASTEXITCODE -ne 0) {
+                $tail = ($pytestOut | Select-Object -Last 25) -join "`n    "
+                Fail 'S7' "portable repo suite not green (pytest exit $LASTEXITCODE):`n    $tail"
+            }
+        } finally {
+            if ($null -eq $oldReferenceMode) {
+                Remove-Item Env:GITS_REFERENCE_MODE -ErrorAction SilentlyContinue
+            } else {
+                $env:GITS_REFERENCE_MODE = $oldReferenceMode
+            }
         }
     }
 } else {

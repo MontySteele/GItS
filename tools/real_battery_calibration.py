@@ -27,7 +27,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 
-from tier0.content import loader
+from tier0.content import loader, local_reference
 from tier0.engine.combat import run_fight
 from tier0.harness import metrics
 from tier0.pilot.policy import make_pilot
@@ -64,6 +64,33 @@ def _git_world() -> tuple[str, str]:
     except (OSError, subprocess.CalledProcessError):
         return "unknown", "unknown"
     return commit, hashlib.sha256(diff).hexdigest()[:12]
+
+
+def _game_ref_digest() -> str:
+    """Digest of the gitignored game_ref/ sheets the loader consumes.
+
+    WHY: on 2026-07-22/23 a measurement world diverged between two machines
+    while their world lines matched, because ``tracked_diff`` hashes only
+    ``git diff --binary`` over TRACKED files -- gitignored game_ref content
+    (ironclad_pool.yaml, ironclad-upgrades.yaml, char_real_ironclad.yaml,
+    the ironclad_pool_pass*.yaml layers) was invisible to provenance. Hash
+    every ``*.yaml`` in game_ref/, sorted by name, name and content both,
+    so any local-reference difference changes the digest. Absence of the
+    directory (or committed-only mode, where the loader consumes none of
+    it) is labeled distinctly rather than hashed as empty.
+    """
+    if local_reference.mode() == local_reference.COMMITTED_ONLY:
+        return "committed-only"
+    ref_dir = local_reference.game_ref_dir()
+    if not ref_dir.is_dir():
+        return "absent"
+    digest = hashlib.sha256()
+    for path in sorted(ref_dir.glob("*.yaml"), key=lambda p: p.name):
+        digest.update(path.name.encode("utf-8"))
+        digest.update(b"\x00")
+        digest.update(path.read_bytes())
+        digest.update(b"\x00")
+    return digest.hexdigest()[:12]
 
 
 def _percentile(values: list[float], q: float) -> float:
@@ -234,7 +261,8 @@ def main() -> None:
     chosen = {label for label in args.configs}
     commit, dirty = _git_world()
     print(
-        f"world: git={commit} tracked_diff={dirty} runs={args.runs} "
+        f"world: git={commit} tracked_diff={dirty} "
+        f"game_ref={_game_ref_digest()} runs={args.runs} "
         f"sample={args.sample} fights={args.fights} seed={args.seed}"
     )
     available = loader._character_index()
