@@ -116,3 +116,22 @@ def test_frozen_power_supplies_the_localization_checked_by_r8():
     assert "FrozenPower : PowerModel, ILocalizationProvider" in frozen
     assert '("title", "Frozen")' in frozen
     assert '("description",' in frozen
+
+
+def test_bomb_suppression_latch_is_per_creature_and_snapshotted():
+    """Armed-Bomb suppression, C# side (sim law: combat.py snapshots
+    eligibility BEFORE the enemy action resolves; state.py keeps the spent
+    latch on the enemy). The port once re-derived eligibility live per hit
+    and kept the latch in process-global statics keyed by combat reference
+    equality, which reload or a second live combat silently reset."""
+    bomb = (SOURCE / "Powers" / "BombPower.cs").read_text()
+    # Spent latch lives on the enemy creature, not in combat-keyed statics.
+    assert "SpireField<Creature, bool> SuppressionSpent" in bomb
+    assert "_suppressionCombat" not in bomb
+    assert "HashSet<Creature>" not in bomb
+    # The multiplier honors the BeforeAttack snapshot for the whole action
+    # instead of re-reading _damages per hit.
+    assert re.search(
+        r"_suppressionAttack != null\s*\?\s*_suppressionArmedForAttack",
+        bomb,
+    )

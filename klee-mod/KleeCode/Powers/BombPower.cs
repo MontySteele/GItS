@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using BaseLib.Abstracts;
+using BaseLib.Utils;
 using System.Linq;
 using System.Threading.Tasks;
 using KleeMod.Elements;
@@ -96,19 +97,20 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     // Survival sprint: one armed-Bomb suppression per enemy per combat. The
     // spent latch must outlive this power because early detonation removes the
     // Bomb, and a later Bomb must not incorrectly reset an already-spent proc.
-    private static ICombatState? _suppressionCombat;
-    private static readonly HashSet<Creature> SuppressionSpent = new();
-    private bool _suppressionArmedForAttack;
+    // It lives ON the enemy (sim: state.py Enemy.bomb_suppression_spent) via
+    // BaseLib's SpireField, the same attached-per-instance idiom the resource
+    // layer uses: creatures are per-combat objects, so a second live combat
+    // can never read this one's latch, and the weak keying frees each entry
+    // with its creature -- no reset hook, no reference-equality combat check.
+    private static readonly SpireField<Creature, bool> SuppressionSpent =
+        new(() => false);
 
-    private static bool HasSpentSuppression(Creature enemy, ICombatState? combat)
-    {
-        if (!ReferenceEquals(combat, _suppressionCombat))
-        {
-            _suppressionCombat = combat;
-            SuppressionSpent.Clear();
-        }
-        return SuppressionSpent.Contains(enemy);
-    }
+    // The enemy action in flight, latched at the attack-command boundary.
+    // Compared by reference so a nested AttackCommand fired by a hook
+    // mid-action (a retaliation, a detonation) can neither re-arm nor clear
+    // the snapshot before AfterAttack sees the original command.
+    private AttackCommand? _suppressionAttack;
+    private bool _suppressionArmedForAttack;
 
     /// <summary>
     /// AbstractModel.MutableClone is a shallow MemberwiseClone; the base class
@@ -119,20 +121,27 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     {
         base.DeepCloneFields();
         _damages = new List<BombCharge>(_damages);
+        _suppressionAttack = null;
         _suppressionArmedForAttack = false;
     }
 
     /// <summary>
     /// Snapshot at the attack-command boundary, not per hit. That keeps every
     /// hit of a multi-hit enemy intent at the Weak rate, then spends the latch
-    /// only after the whole action. A real Weak stack shares the same branch
-    /// below, so the two reductions never multiply.
+    /// only after the whole action -- sim law (combat.py _enemy_turn):
+    /// eligibility is read BEFORE the action resolves, so bombs detonating
+    /// mid-action never strip later hits. A real Weak stack shares the same
+    /// branch below, so the two reductions never multiply.
     /// </summary>
     public override Task BeforeAttack(AttackCommand attack)
     {
-        _suppressionArmedForAttack = attack.Attacker == Owner
-            && _damages.Count > 0
-            && !HasSpentSuppression(Owner, CombatState);
+        if (attack.Attacker != Owner || _suppressionAttack != null)
+        {
+            return Task.CompletedTask;
+        }
+        _suppressionAttack = attack;
+        _suppressionArmedForAttack =
+            _damages.Count > 0 && !SuppressionSpent[Owner];
         return Task.CompletedTask;
     }
 
@@ -140,11 +149,17 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         Creature? target, decimal amount, ValueProp props,
         Creature? dealer, CardModel? cardSource)
     {
-        if (dealer != Owner || !props.IsPoweredAttack() || _damages.Count == 0)
+        if (dealer != Owner || !props.IsPoweredAttack())
         {
             return 1m;
         }
-        if (HasSpentSuppression(Owner, CombatState)) return 1m;
+        // Inside an action the BeforeAttack snapshot rules every hit. Outside
+        // one (intent preview -- same idiom as GigantificationPower's null
+        // branch) the live state IS the snapshot the next action will take.
+        var suppressed = _suppressionAttack != null
+            ? _suppressionArmedForAttack
+            : _damages.Count > 0 && !SuppressionSpent[Owner];
+        if (!suppressed) return 1m;
 
         var hasRealWeak = Owner.Powers.OfType<WeakPower>()
             .Any(power => power.Amount > 0);
@@ -154,11 +169,12 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     public override Task AfterAttack(
         PlayerChoiceContext choiceContext, AttackCommand attack)
     {
-        if (_suppressionArmedForAttack && attack.Attacker == Owner)
+        if (attack != _suppressionAttack) return Task.CompletedTask;
+        if (_suppressionArmedForAttack)
         {
-            HasSpentSuppression(Owner, CombatState); // resets on combat change
-            SuppressionSpent.Add(Owner);
+            SuppressionSpent[Owner] = true;
         }
+        _suppressionAttack = null;
         _suppressionArmedForAttack = false;
         return Task.CompletedTask;
     }

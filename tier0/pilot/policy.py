@@ -346,6 +346,8 @@ def _tempo_value(state: CombatState, card: Card) -> float:
             if isinstance(formula, dict):
                 val += effects._calc_amount(state, formula, card)
             elif formula == "per_aura":
+                # DRAFTER_VERSION 4: live aura count instead of the flat
+                # default -- moves elemental_ecstasy's committed scoring.
                 val += sum(1 for enemy in state.living_enemies if enemy.aura)
             else:
                 val += fx.get("amount", 1)

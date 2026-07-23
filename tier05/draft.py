@@ -40,8 +40,8 @@ STATIC_DEBUFF_VALUE = 2.0
 STATIC_BOMB_DAMAGE_SHARE = 0.5
 STATIC_BOMB_GUARD_VALUE = 1.5
 STATIC_KLEE_CONDITIONAL_SHARE = 0.5
-STATIC_STRENGTH_VALUE = 2.0        # conservative two future Attack hits
-STATIC_PERSISTENT_PROC_SHARE = 1.0  # one turn of a repeatable Power
+STATIC_STRENGTH_VALUE = 2.0        # conservative two future Attack hits (v4)
+STATIC_PERSISTENT_PROC_SHARE = 1.0  # one turn of a repeatable Power (v4)
 
 # These predicates are readable before a card is played. Mid-resolution
 # conditions such as reaction_triggered_by_this and killed_target remain out:

@@ -321,9 +321,14 @@ CONSTANTS_VERSION = 2
 # assigned adopts the hybrid experiment's damage/Block term plus the reaction
 # weights pass. v3 = conservative Bomb/debuff proxies and safe conditional
 # Block. A measured flat draw/resource proxy was rejected rather than folded
-# into the stamp. Never compare measurements across drafter versions without
+# into the stamp. v4 (2026-07-23) = retroactive stamp for two world changes
+# that shipped unstamped: the pilot's per_aura tempo valuation (b8891b2 --
+# changes elemental_ecstasy's in-combat scoring) and the drafter's
+# STATIC_STRENGTH_VALUE / witchs_flame persistent-proc terms in
+# tier05/draft.py (bab07b2). Numbers measured Wed 2026-07-22 before 14:01
+# are v3-world. Never compare measurements across drafter versions without
 # labeling them.
-DRAFTER_VERSION = 3
+DRAFTER_VERSION = 4
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).
