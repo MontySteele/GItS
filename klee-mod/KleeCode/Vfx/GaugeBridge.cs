@@ -284,6 +284,7 @@ internal static class NCombatUi_Activate_GaugeSetup
         foreach (var player in state.Players)
         {
             GaugeBridge.Setup(combatRoom, player);
+            SalonVisualsBridge.Setup(combatRoom, player);
         }
     }
 }

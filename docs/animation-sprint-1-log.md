@@ -161,11 +161,48 @@ Status: **CODE COMPLETE — acceptance rides the B4/D playtest passes.**
 Gates green: dotnet build 0 errors, pck rebuilt (gauge.scn in pack,
 build id 20260723-173024+102e99a), staged validate OK, suite 586 passed.
 
-## Track D–E prep notes
+## Track D — Onscreen Salon members
 
-- D: ghostflames.tscn wheel composition verified; ours is a flank line.
-  SalonVisualsBridge reuses the GaugeBridge skeleton (extract a common
-  base only AFTER both concrete bridges work — plan D2).
+Status: **CODE COMPLETE — [USER] layout/composition look pass pending (D4).**
+
+- D1 ✅ `pck-src/furina/ui/salon.tscn`: three square slots (StyleBoxFlat
+  frame + TextureRect portrait + badge dot) in a flank line rising behind
+  Furina's left shoulder (slots at (0,0)/(-36,-46)/(-72,-92) around a
+  (-88,-70) creature anchor). Portraits are NOT placeholder discs after
+  all: the three members are cards, so their loose card art already ships
+  — the bridge assigns gentilhomme_usher / surintendante_chevalmarin /
+  mademoiselle_crabaletta via KleeArt.CardPortrait; a missing PNG leaves
+  a framed empty slot. Empty slots render as ghost frames (28% alpha).
+- D2 ✅ `Vfx/SalonVisualsBridge.cs`: GaugeBridge skeleton verbatim
+  (Displays dict, staleness, lazy re-Setup, RemoteTransform2D tracking,
+  same NCombatUi.Activate postfix). Common-base extraction deliberately
+  NOT done yet, per the plan's own rule (refactor after the second
+  concrete bridge survives a playtest).
+- D3 ✅ Minimal state animation: activate = scene-authored slotN_pop
+  scale pop (multi-member deploys queue into a cascade — one
+  AnimationPlayer can't play two pops at once); deactivate/dry =
+  bridge-set desaturation (occupied+dry slots grey out and the badge dot
+  flips hydro-blue→grey when Encore < the tick cost, i.e. members will
+  attack dry at 0.75x).
+- D4 ⏳ acceptance: composition changes within the same action resolution
+  (Refresh sites: SalonMemberPower.Deploy — the single composition
+  funnel, every gain goes through it and members are never removed
+  mid-combat — plus FurinaResources.SyncMeters for the dry badge at
+  every meter-sync moment); displays die with the room (staleness dict);
+  non-Furina players never spawn the scene (IFurinaCharacter guard,
+  mirroring the reference's is-not-Hexaghost check). [USER] look pass on
+  layout/composition. No player-visible text on the scene — badge is a
+  color dot, so no naming audit surface.
+
+Gates green: dotnet build 0 errors, pck rebuilt (salon.scn in pack,
+build id 20260723-174007+6d75d37), staged validate OK, suite 587 passed.
+(One build stumble recorded for posterity: unique_name_in_owner on three
+nodes all literally named "Portrait" collides — unique names are
+per-scene, so the NODES must be named Slot1Portrait/Slot2Portrait/…;
+MegaDot's export warning caught it.)
+
+## Track E prep notes
+
 - E: GhostflameModel.SpawnVfx recipe verified (fire-and-forget,
   AddChildSafely, self-free).
 
