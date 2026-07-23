@@ -803,6 +803,276 @@ cross-card multiplier leak. Disposition: keep this as the measured pass;
 further work should redistribute power toward early access/frontload rather
 than add more global Salon scaling.
 
+## R41 -- Spotlight two-mode rework and spendable Fanfare (2026-07-22)
+
+USER RULING: test the Spotlight/Fanfare rework before adding more Companion
+cards to Furina's starting deck. CENTER STAGE designates Furina: her cards
+generate 2 Fanfare per play and receive no numeric Spotlight bonus, including
+card-granted bonus powers. GUEST CAST designates the Companion category rather
+than one character: every Companion card receives the outward multiplier and
+Spotlight texture, while those plays generate no Fanfare. The selector chooses
+Guest Cast for a ready Companion in hand and Center Stage otherwise.
+
+FANFARE becomes a cyclic spendable pool. Crescendo spends 10 after resolving
+(8 + 1 per 2 pre-spend Fanfare); Florid Cadenza spends 10 (7 upgraded); Flood
+of Emotion spends 15 and deals 20; Universal Revelry spends 20 and uses 1 per
+2; High Tide spends 15 and deals 22. Rapturous Applause costs 1 Energy. The
+resource gate is checked before play and paid once after resolution so the
+payoff reads the audience level that funded it.
+
+DRAFT CORE: Spotlight requires two cast-access pieces (Companions or Guest
+Star generators) and two machinery pieces. Companions receive explicit
+Spotlight draft value; same-character depth is retired.
+
+MEASUREMENT, 1,500 realistic runs/plan seed 11 in the CURRENT WORKTREE
+(including the concurrent companion-card number pass): first-elite survival /
+Act clear = Salon 42.8% / 5.9%, Spotlight 32.3% / 1.1%, Fanfare 28.9% / 0.2%.
+Spotlight drafted at least one Companion before the first elite in 100% of
+runs (one 39.2%, two 44.6%, three 16.2%); 100% gained extra cast access,
+49.8% found any machinery, and 8.3% completed the full core. Therefore the
+starter-Companion injection is HELD: cast access is fixed, machinery density
+and payoff efficiency are the remaining bottlenecks.
+
+## R42 -- Spotlight machinery efficiency and starter-density bracket (2026-07-22)
+
+USER DIRECTION: evaluate balance on full Act-1 clears, not merely reaching or
+passing the first boss/elite; Klee's current Act target is 40-50%. Current
+realistic reference at 1,500 runs, seed 11: Klee Demolition 39.4%, Spark
+33.6%, Reaction 40.4%. Furina Spotlight's R41 1.1% therefore represents an
+order-of-magnitude delivery failure.
+
+MACHINERY PASS: Limelight, Shared Billing, Guest List, and Encore Performance
+refund their setup Energy; Limelight still replaces itself, Stage Lights now
+draws 1, Top Billing loses its Spend-2-Encore gate, and Standing Ovation costs
+1 (0 upgraded). The Spotlight core is two access pieces (the starter Invitation
+plus a Companion/generator) and ONE machinery piece, not two.
+
+RESULT, 1,500 realistic Spotlight runs: Act clear 10.6%, first-elite survival
+50.5%, core online 66% overall. Deep package win rates are 79.4% punisher,
+100% swarm, 100% attrition, 63.2% tank. The assembled package now delivers;
+the realistic run remains diluted by ten starter cards against one-to-three
+early drafted Companions.
+
+STARTER DIAGNOSTIC, 1,000 realistic runs/arm, randomized from Fontaine common
+Companions on a dedicated RNG stream: unchanged 11.4%; replace one Soloist
+with a Companion Attack 26.4%; replace one Stage Presence with a Companion
+Support 9.6%; Attack+Support 30.3%; replace TWO Soloists with two distinct
+Companion Attacks 46.6%; two Attacks+Support 51.9%. This is diagnostic, NOT YET
+A USER RULING. The clean in-band proposal is two randomized common Fontaine
+Companion Attacks replacing two Soloist's Solicitations, while all three Stage
+Presence cards remain.
+
+## R43 -- Post-Klee companion rerun and Fontaine starter pair (2026-07-22)
+
+POST-COMMIT BASELINE: after aa5277f's shared Companion uplift, but before a
+randomized Furina starter, 1,500 realistic runs/plan at seed 11 produced Act
+clears of Salon 8.9%, Spotlight 10.7%, and Fanfare 1.2%. Spotlight was
+effectively unchanged from R42's 10.6%; Salon and Fanfare rose from 5.9% and
+0.2%, respectively, but remained far below the 40-50% Act target. Therefore
+the earlier Spotlight diagnosis had already been made in substantially the
+buffed-Companion world.
+
+USER RULING: mirror Klee's role-locked random starter, but replace ONE weak
+Attack and ONE basic support rather than two Attacks. Furina rolls one of
+Chevreuse -- Interdiction Fire / Freminet -- Pers, Deploy! in place of one
+Soloist's Solicitation, plus one Fontaine support in place of one Stage
+Presence, on the existing dedicated replayable starter RNG stream.
+
+SUPPORT SELECTION: the first pass used Charlotte -- Enduring Frosthelm and
+Lynette -- Box Trick. At 1,000 identical seeds per exact pairing, Charlotte
+arms cleared 37.8% / 35.5%, while Box Trick arms cleared only 22.9% / 21.6%.
+This was structural: Guest Cast amplifies Charlotte's printed Block from 4+4
+to 6+6, while its numbers-only law deliberately does not amplify Box Trick's
+Draw 2; Box Trick also displaced a 5-Block basic. Lynette -- Enigmatic Feint
+was substituted as the defensive support texture. Before any personal-card
+nudge its two arms cleared 30.5% / 30.6%, eliminating the severe low roll.
+
+BASE-KIT BRACKET, 1,000 realistic runs/arm with the Charlotte/Enigmatic slate:
+the prior Soloist 4 / Stage Presence 5 baseline cleared 32.9%; Soloist 5 alone
+fell to 30.4%; Stage Presence 6 alone rose to 39.7%; both changes cleared
+37.6%. The damage lift made a still-mediocre Attack attractive enough for the
+pilot to spend more Energy on it. SHIPPED DOSE: Stage Presence 6 Block (9
+upgraded), with Soloist held at 4.
+
+FINAL SUITE, 1,500 realistic runs/plan at seed 11: Salon 27.3% Act / 76.7%
+first-elite survival; Spotlight 39.7% / 82.0%; Fanfare 9.5% / 61.4%.
+Spotlight now reaches the lower edge of the Klee-derived target; the same
+starter substantially helps the other plans without concealing that Fanfare
+is still the next balance problem.
+
+FINAL PAIR MATRIX, 1,000 identical seeds/arm: Chevreuse+Charlotte 44.1%,
+Freminet+Charlotte 44.3%, Chevreuse+Lynette 36.6%, Freminet+Lynette 36.4%.
+The Attack choice has no measurable value skew (at most 0.2pt); Charlotte is
+a meaningful 7.5-7.9pt high roll over Lynette, but both are viable and the
+random aggregate is 39.7%. Keep that bounded starter texture rather than add a
+second global buff solely to flatten it; revisit after human playtest.
+
+## R44 -- Fanfare conversion diagnosis (2026-07-22)
+
+SCOPE: diagnostic sweep after R43's randomized starter raised the realistic
+Fanfare plan to 9.5% Act clears. No card-balance dose is shipped in this
+record.
+
+RUNNER FIX: the combat pilot's readable-conditional list omitted
+fanfare_at_least_* and encore_at_least_* even though the engine resolved both.
+It therefore valued Dramatic Entrance as 6 rather than 9 damage, Showstopper
+as 5 rather than 12, and Thunderous Ovation as 3 rather than 7 Block while
+their thresholds were live. The predicates are now visible to play selection
+and test-locked. This was a real accuracy bug but not the balance cause:
+1,500-run Fanfare Act clears remained 9.5%.
+
+RESOURCE TRACE, 1,500 realistic runs at seed 11: per reached fight, Furina
+gained 24.6 Fanfare, spent only 3.2, peaked at 22.7, and ended at 21.4.
+Threshold reach was 94.1% at 10, 80.8% at 15, 64.8% at 20, and 40.8% at the
+30 cap. Generation is therefore abundant. True spender play rates were tiny:
+Crescendo 0.05/fight, Flood of Emotion 0.04, Florid Cadenza 0.02, High Tide
+0.01; the meter is full because realistic decks rarely own and play a
+converter, not because the resource rate is low.
+
+DRAFT-CORE NULL: the generic four-piece definition produced 8.8% Act clears
+at 1,000 seeds. Re-defining online as Aria+one piece yielded 9.1%; first
+payoff completes yielded 9.9%; treating the native resource as online from
+run start yielded 9.8%. The old core@E1 scalar (about 9-10%) badly describes
+the live resource, but payoff gating in the assigned drafter is not causing
+the balance failure.
+
+PILOT NULL, 1,000 identical seeds/arm: current 8.8%; tempo 0.6/sustain 1.0
+8.1%; damage weight 1.4 5.4%; a damage-forward converter profile 5.7%; the
+most aggressive profile 4.5%. Furina genuinely needs the current sustain and
+tempo play, so the answer is not instructing the pilot to ignore setup.
+
+ASSEMBLED PACKAGE: Fanfare wins 48.4% Punisher, 100% swarm, 100% attrition,
+and only 24.6% tank boss, versus Salon 98.8/100/100/99.6 and Spotlight
+85.6/100/100/73.6. Its DPT is only 11.0/12.2/9.3/13.4 despite spending
+27-88 Fanfare per fight. The full engine can cycle, but conversion is too
+Energy- and density-inefficient for single-target fights.
+
+SINGLE-CARD SEED SCREEN, 300 identical seeds/arm, one extra card (directional
+because n is deliberately small and the eleventh card pays deck bloat):
+Curtain Up and Warm-up Act were the best sub-Rares (+8.3pt and +7.0pt Act);
+Rapturous Applause was +3.3pt. Most nominal engine pieces were neutral or
+negative, including Crescendo -1.7pt, Showstopper -2.3pt, Ebb and Flow -2.0pt,
+Audience Participation -3.3pt, Suffering for Art -3.7pt, and Florid Cadenza
+-4.7pt. Regina's Mercy led overall at +8.7pt. The shape favors free activity,
+durable scaling, and large actual sustain over more meter generation.
+
+SPENDER-TAX BRACKET, 1,000 identical seeds/arm across Crescendo, Florid
+Cadenza, Flood of Emotion, Universal Revelry, and High Tide: current 8.8%;
+each costs one less Energy 14.3%; each costs five less Fanfare 9.2%; both
+discounts 18.9%. Energy is the binding half of the double cost, while Fanfare
+price alone is not. Even both discounts remain far below target, confirming a
+second density problem: every true spender is Uncommon or Rare, while the
+Common suite is dominated by generation, thresholds, and cycling.
+
+DISPOSITION FOR THE NEXT DESIGN WINDOW: do not increase global Fanfare gain or
+lower the cap. Start with spender Energy efficiency, then re-author at least
+one Common into a small real converter so early decks can cycle the meter;
+separately review the low-output generator/cycler bodies. Rapturous Applause
+is the clearest existing model for a payoff that actually helps. Re-run both
+realistic Act clears and the Punisher/tank assembled-package cells after a
+concrete dose.
+
+## R45 -- Fanfare conversion-efficiency dose and ceiling boundary (2026-07-22)
+
+USER RULING: apply R44's proposed spender-efficiency and Common-converter
+patches, then measure before proceeding.
+
+SHIPPED FIRST DOSE:
+
+- Crescendo 2->1 Energy, still Spend 10 Fanfare.
+- Florid Cadenza 1->0 Energy, still Draw 3 / Spend 10.
+- Flood of Emotion 2->1 Energy, still 20 damage / Spend 15.
+- Universal Revelry 3->2 Energy, still scaling AoE / Spend 20.
+- High Tide 2->1 Energy, still 22 damage / Spend 15.
+- Dramatic Entrance becomes the Common converter: 1 Energy, gated at and
+  spending 5 Fanfare after dealing 6+4=10 damage. Its upgrade raises the rider
+  4->7.
+
+REALISTIC RESULT, 1,500 runs/plan at seed 11: Fanfare Act clear 9.5%->15.7%,
+first-elite survival 61.4%->68.2%, second-elite survival 22.9%->32.3%.
+Spending doubled from 3.2 to 6.4 per reached fight; end-of-fight Fanfare moved
+only 21.4->20.2, so access remains sparse. Cross-plan movement was healthy:
+Salon 27.3%->31.3%, Spotlight 39.7%->42.9%.
+
+ASSEMBLED RESULT, 500 fights/cell: Punisher 48.4%->87.2%, tank boss
+24.6%->72.2%, swarm/attrition remain 100%. This nearly matches Spotlight's
+85.6%/73.6% single-target ceiling. The payoff package now works when assembled;
+the remaining realistic gap must not be repaired by another blanket ceiling
+increase.
+
+POST-DOSE SINGLE-CARD SCREEN, 300 identical seeds/arm with one conservative
+extra card: High Tide +9.7pt Act, Crescendo +7.7pt, Flood +6.7pt, and Dramatic
+Entrance +2.0pt. The spender repairs succeeded. Florid Cadenza remained -5.7pt
+and Showstopper -6.7pt; Suffering for Art -5.0pt and Hearts Swelling -3.7pt.
+Those identify low-floor cards but do not by themselves authorize global
+buffs in an already-healthy assembled package.
+
+REJECTED FOLLOW-UP BRACKET, 1,000 realistic runs/arm:
+
+- "bottom-card repairs" (Florid Spend 5; Showstopper 7+8 at 15; Suffering
+  self-damage 1; Hearts cost 1) lifted 15.1%->22.6%, but overheated the deep
+  package to 98.0% Punisher / 96.0% tank.
+- "common efficiency" (Crowd Work and Ebb Energy refunds; Audience Encore 3;
+  Tempo Spend 1 Encore; Thunderous base Block 4) reached only 17.1%, while
+  deep rose to 94.8% / 90.8%.
+- Combined reached 25.8% realistic but 99.6% Punisher / 100% tank.
+
+DISPOSITION: keep only the first dose. Do not ship the follow-up groups. The
+balance problem has changed shape: the assembled ceiling is healthy, while the
+realistic floor lacks timely conversion access and is offered several cards
+that are poor isolated additions. The next experiment should change access or
+draft density/selection without increasing the completed package's power.
+
+## R46 -- Fanfare offer trace and targeted floor repairs (2026-07-23)
+
+USER DIRECTION: identify Fanfare cards that are skipped or underperforming and
+buff them selectively rather than applying another package-wide increase.
+
+OFFER/PICK TRACE, 1,500 realistic runs at seed 11: the assigned drafter already
+passes most obvious low-output glue. Early pick rates were Dress Rehearsal
+5.3%, Curtain Cue 5.3%, Crowd Work 6.0%, Tempo Change 6.6%, and Audience
+Participation 9.6%. Those cards do not explain the low result by being forced
+into decks; the policy mostly avoids them.
+
+The more important signal was OVERPICKED underperformance. Early take/pass Act
+rates when the same card was offered (directional, not randomized) included:
+Suffering for Art 11.2%/20.4% at an 81.4% pick rate; Ebb and Flow 11.0%/18.4%
+at 84.0%; Hearts Swelling 13.2%/17.9% at 87.1%; Showstopper 9.0%/17.6% at
+90.8%; and The Sea Is My Stage 2.4%/18.8% at 72.4%. Florid Cadenza was picked
+70.5% and remained negative in the controlled extra-card screen. These
+relationships include offer-strength confounding, so the controlled seed and
+individual-dose arms remain the ruling evidence.
+
+SAFE-TARGET NULL: Thunderous Ovation and The Sea Is My Stage are absent from
+the assembled Fanfare package, so they were tested first. Thunderous base
+Block 3->5 moved realistic Act 15.1%->16.1%. Adding 6 Encore to The Sea Is My
+Stage, with or without reducing its Energy cost 2->1, was inert at 15.2-15.3%
+because the Rare appears in too few runs. Thunderous was retained as a safe
+one-point floor repair; the Sea redesign was rejected.
+
+INDIVIDUAL REPAIR MATRIX, 1,000 realistic runs plus 500 Punisher/tank fights
+per arm:
+
+- Current: 15.1% Act; deep 87.2% / 72.2%.
+- Florid Spend 10->5: 14.9%; deep 89.6% / 74.0% -- reject.
+- Showstopper 7+8 at 15: 17.1%; deep 91.4% / 78.6% -- poor ratio.
+- Suffering self-damage 2->1: 17.3%; deep 88.4% / 75.6% -- best ratio.
+- Hearts Swelling 2->1 Energy: 18.1%; deep 93.4% / 87.0% -- overheats tank.
+
+SHIPPED TARGETED DOSE: Suffering for Art now loses 1 HP and gains 3 Encore;
+Thunderous Ovation now Blocks 5 plus 4 at 15 Fanfare. Together they measured
+18.2% Act / 69.5% first-elite / 35.0% second-elite at 1,000 seeds, with the
+assembled package held to 88.4% Punisher / 75.6% tank.
+
+FINAL SUITE, 1,500 runs/plan: Salon 31.2%, Spotlight 43.6%, Fanfare 18.7%.
+This is a controlled +3pt floor improvement over R45 and +9.2pt over the
+pre-converter world, but still far below the 40-50% target. The ceiling is
+healthy and individual card buffs now have sharply diminishing returns. The
+remaining high-impact work is draft selection/access: stop overvaluing harmful
+isolated on-plan pieces or improve the chance that a realistic deck finds one
+of the already-successful converters, without adding more power to the full
+package.
+
 ## R47 -- Klee second-playtest card and Burst pass (2026-07-23)
 
 USER FINDING: the starter/Companion uplift made Klee feel materially healthier
@@ -844,3 +1114,160 @@ spark 95.5%, reaction 100%). Their old upper bands no longer model real drafts;
 Tier 0.5 owns the upper-power comparison, while the authored batteries retain
 only their matchup floors. The v0.2 median scorecard at 300 fights/seed 42 is
 4.77 / 3.82 / 2.09 / 0.50 / 3.07 / 4.05 / 2.37.
+
+## R48 -- Contextual Fanfare drafting before further card buffs (2026-07-23)
+
+USER RULING: update the runner's Fanfare draft logic before buffing more cards,
+then remeasure the realistic plan and preserve the assembled-package ceiling.
+
+RUNNER DIAGNOSIS: the generic assigned scorer defined every non-reaction plan
+as four tagged enabler/payoff cards. Furina already starts with Aria of
+Recompense (five points of printed Encore/Fanfare movement), but each additional
+generator still advanced that false four-card core and received a +3 assembly
+bonus. The global 0.5 skip threshold then made nearly every tagged generator a
+live pick. Conversely, the definition did not distinguish cards that actually
+spent Fanfare for immediate output from cards that merely generated, read, or
+cycled the resource.
+
+SHIPPED RUNNER MODEL:
+
+- Fanfare core progress has two structural halves: five points of printed meter
+  movement and one direct damage/Block card with a positive Fanfare cost.
+- The first output converter receives priority; further converters retain a
+  smaller plan bonus.
+- Additional generation has sharply diminishing value once the native five
+  points are covered. Threshold/scaling readers receive supporting rather than
+  core value, and a pure draw spender does not masquerade as the damage/survival
+  converter.
+- Printed self-damage is charged against the Fanfare-specific score even though
+  it moves the meter. Fanfare uses a 1.5 engagement threshold; the other assigned
+  archetypes retain the global 0.5 threshold and their existing scoring paths.
+- The rule is structural (effects and resource costs), with no card-ID whitelist.
+
+PAIRED A/B, 1,500 identical seeds with relics and potions: the legacy Fanfare
+policy cleared 19.3% of Acts, survived E1 69.2% and E2 35.1%, averaged 16.09
+cards, and skipped 0.0% of screens. The contextual policy cleared 24.4%,
+survived E1 72.7% and E2 40.0%, averaged 15.13 cards, and skipped 8.8%.
+There were 197 legacy-loss/contextual-win flips versus 120 flips in the other
+direction.
+
+The change did not reduce access to successful converters. Per-run acquisition
+rates moved Dramatic Entrance 24.3%->25.0%, Crescendo 17.1%->17.9%, Flood of
+Emotion 21.0%->21.4%, and High Tide 4.9%->5.4%. The cards removed from realistic
+decks were the surplus generators/cyclers: Suffering for Art 19.3%->0%, Ebb and
+Flow 19.0%->0%, Hearts Swelling 16.0%->0%, and Curtain Up 18.3%->0%.
+Showstopper fell 17.5%->13.8%, while the self-damaging Sea uncapper fell
+4.1%->0%.
+
+THRESHOLD SENSITIVITY, 600 identical seeds: raising the Fanfare cutoff from 1.0
+through 3.0 monotonically raised the measured win rate, but the 3.0 arm skipped
+74% of rewards and finished with 11.43-card decks. That is the simulator's
+known lean-deck pressure, not a credible human drafting policy. Retain the
+moderate 1.5 threshold (about 9% skips) rather than optimize the scalar by
+refusing nearly every reward.
+
+REGRESSIONS: the final 1,500-run Furina suite is Salon 31.1%, Spotlight 43.9%,
+and Fanfare 24.4%. The fixed Fanfare package is unchanged at 88.4% Punisher and
+75.6% tank boss, confirming that this is an access/selection improvement rather
+than more ceiling power. Klee does not enter any new Fanfare branch; its current
+1,500-run assigned results are Demolition 53.4%, Spark 47.5%, and Reaction
+61.6%. Reaction's current post-buff result is above the stated 40-50% Act
+target, but that is independent balance evidence rather than a regression from
+this runner patch.
+
+DISPOSITION: keep the runner correction. It recovers 5.1 Act points without a
+card buff and confirms that the old policy was materially understating Furina.
+At 24.4%, however, Fanfare remains well below target while its assembled ceiling
+is already healthy. Any next dose should improve the floor of cards that the
+contextual runner still rationally skips (or broaden converter access), with
+the deep Punisher/tank cells held as hard guards.
+
+## R49 -- Thunderous Ovation defensive converter (2026-07-23)
+
+USER RULING: Furina still needs buffs after the runner correction. Ignore the
+independent Klee work and test Thunderous Ovation as a defensive Common
+converter that broadens early Fanfare access without touching the assembled
+Fanfare package.
+
+SHIPPED CARD: Thunderous Ovation now costs 1 Energy plus 5 Fanfare, gains 7
+Block plus 4 at the live 5-Fanfare threshold (11 total), and spends its Fanfare
+after resolving. Its upgrade raises the base 7->9 for 13 total; the rider and
+Fanfare price stay fixed.
+
+The first 5+4=9 Block version succeeded at access but not survival. In a paired
+1,500-seed A/B it raised Thunder's early pick rate 66.5%->90.4% and Fanfare
+core-online-by-E1 39.1%->49.1%, yet Act clears moved only 24.4%->24.9% and E1
+survival fell 72.7%->72.1%. The loss of its unconditional pre-meter fallback
+roughly canceled the value of the new conversion route.
+
+BLOCK BRACKET, 800 identical seeds with Spend 5 and every other rule fixed:
+9/10/11/12 total Block produced 24.0%/24.4%/25.0%/24.9% Act clears. Eleven is
+the smallest saturated value; twelve adds no measured win rate and was
+rejected.
+
+FINAL PAIRED A/B, 1,500 identical seeds: the pre-change card produced 24.4%
+Act / 72.7% E1 / 40.0% E2. The 11-Block converter produced 25.9% / 72.8% /
+41.3%, with 41 old-loss/new-win flips versus 19 in the other direction.
+Thunder's early pick rate rose 66.5%->93.7%, and core-online-by-E1 rose
+39.1%->49.1%.
+
+FINAL SUITE: Salon 32.4%, Spotlight 44.9%, Fanfare 25.9%. The fixed Fanfare
+package remains exactly 88.4% Punisher / 75.6% tank boss, because Thunderous
+Ovation is absent from that package. The change is therefore a safe +1.5-point
+realistic-floor repair with no measured ceiling movement.
+
+DISPOSITION: retain the 11-Block defensive converter. It is not the whole
+Fanfare answer—E1 is flat and Act clears remain far below target—but it
+successfully adds a second Common conversion axis and improves later survival.
+Continue with targeted floor/card-quality work rather than global Fanfare
+power.
+
+## R50 -- Dry Salon floor valve and playtest-ready aggregate (2026-07-23)
+
+USER DIRECTION: raise Salon and Fanfare without making the already-leading
+Spotlight plan automatically stronger, then move to real-game feel testing if
+the overall Act-1 clear rate approaches 40%.
+
+TESTED FLOOR VALVES:
+
+- Salon: dry Member ticks deal 75% rather than 50% power—3 versus the paid
+  tick's 4 damage. Paid ticks, replacement bows, slot count, Encore upkeep,
+  and all authored card numbers are unchanged.
+- Fanfare: Dramatic Entrance and Thunderous Ovation were tested as fail-soft
+  Commons, playable for their 6-damage/7-Block base below 5 Fanfare and paying
+  nothing unless fully charged.
+
+ISOLATION, 800 identical seeds: the old Salon/Fanfare rates were 32.9%/25.0%.
+Dry ticks alone produced 38.8%/26.0%. Fail-soft Commons alone produced
+32.8%/24.1%; combined produced 38.6%/25.5%. The Fanfare fallback is rejected:
+the pilot spends Energy on the ordinary branch instead of waiting for a charged
+conversion, reducing rather than improving the plan.
+
+A simpler hard-gate price bracket was also rejected. With dry ticks retained,
+Common converter Spend 5/4/3 produced 26.0%/26.4%/26.4% Fanfare at 800 seeds.
+The gain saturates at four tenths of a point and would make Dramatic Entrance
+more efficient inside the already-healthy assembled package.
+
+SHIPPED CHANGE: only `SALON_DRY_DAMAGE_MULT` 0.50->0.75. The Common converters
+retain their hard Spend-5 gate and R49 numbers.
+
+FINAL SUITE, 1,500 realistic runs/plan: Salon 38.6%, Spotlight 46.7%, Fanfare
+27.5%. The equal-plan aggregate is 37.6%, up from R49's 34.4%. Spotlight gains
+only 1.8 points from the universal starter Member while Salon gains 6.2, so its
+lead narrows rather than widens.
+
+ASSEMBLED CHECK, 300 fights/cell, old->new dry multiplier:
+
+- Salon: Punisher 98.7%->99.3%; tank 99.3%->99.7%.
+- Spotlight: Punisher 86.0%->87.0%; tank 78.3%->78.7%.
+- Fanfare: Punisher 88.7%->89.7%; tank 74.3%->75.3%.
+
+The completed Salon package was already ceiling-saturated; the movement is
+small and does not create a new matchup result. The realistic gain is
+concentrated where intended: incomplete Salon decks that run out of upkeep.
+
+DISPOSITION: Furina is playtest-ready at a 37.6% equal-plan Act aggregate.
+Stop simulator tuning here and use real play to judge whether dry Members feel
+appropriately weakened, whether hard-gated Common converters create engaging
+meter decisions or frustrating dead draws, and whether the 27.5% simulated
+Fanfare plan understates a human pilot's ability to wait for charged turns.

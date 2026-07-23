@@ -68,6 +68,8 @@ def card_playable(state: CombatState, card: Card) -> bool:
     if card.encore_cost and state.player.encore < card.encore_cost:
         return False        # "Spend N Encore:" cost line -- a gate, never
                             # an overdraw (that is the spend_encore op)
+    if card.fanfare_cost and state.player.fanfare < card.fanfare_cost:
+        return False
     return card_cost(state, card) <= state.player.energy
 
 
@@ -100,7 +102,7 @@ def card_cost(state: CombatState, card: Card) -> int:
     # granting economy, not the Spotlight baseline -- §2.2a governs the
     # multiplier, and the multiplier has no path here.
     p = state.player
-    if (p.spotlight and card.character == p.spotlight
+    if (effects.is_spotlighted(state, card)
             and state.spotlighted_cards_this_turn == 0):
         cost = max(0, cost - p.powers.get("spotlight_discount", 0))
     if (card.type == "attack"
@@ -144,13 +146,16 @@ def play_card(state: CombatState, card: Card) -> None:
     p.hand.remove(card)
     state.cards_played_this_turn += 1
     state.emit("play", card=card.id, cost=cost, energy_left=p.energy)
-    if p.spotlight and card.character == p.spotlight:
-        # Ovation (kickoff §4): each Spotlighted card played is Fanfare.
+    if effects.is_spotlighted(state, card):
+        # Spotlight texture applies in both modes. Only Center Stage creates
+        # Fanfare; Guest Cast spends the light on Companion empowerment.
         # Counted BEFORE resolution so the reserve per-turn cap (OFF by
         # default) can compare against this play's own ordinal.
         state.spotlighted_cards_this_turn += 1
         state.emit("spotlight_card_played", card=card.id)
-        resources.gain_fanfare(state, C.FANFARE_PER_SPOTLIGHT_CARD, "ovation")
+        if p.spotlight == p.character_id:
+            resources.gain_fanfare(
+                state, C.FANFARE_PER_SPOTLIGHT_CARD, "center_stage")
         # Card-level Spotlight texture (sheet pass 1, ratified design
         # space): Supporting Cast draws on the FIRST Spotlighted card
         # each turn; post-flip Standing Ovation's trickle uses the same
@@ -188,6 +193,8 @@ def play_card(state: CombatState, card: Card) -> None:
         snap = refpowers.before_card_played(state, card)
         effects.resolve_card(state, card)
         refpowers.after_card_played(state, card, snap)
+    if card.fanfare_cost:
+        resources.spend_fanfare(state, card.fanfare_cost)  # gated playable
     if card.kit_card:
         pass                                  # returns to the kit, no pile
     else:
@@ -200,15 +207,6 @@ def play_card(state: CombatState, card: Card) -> None:
             refpowers.exhaust_card(state, card)
         elif dest == "discard":
             p.discard_pile.append(card)
-    # Selector-v4 Guest Star exception: a generated guest can take the light
-    # at depth one, but it is a one-card cameo rather than a persistent partner.
-    # Return the Spotlight to Furina after that card performs so the designation
-    # cannot strand itself on an absent temporary character. This automatic
-    # stage reset is not a player move and therefore triggers no move payoffs.
-    if (card.generated_by_guest_star and card.character
-            and p.spotlight == card.character and p.character_id):
-        p.spotlight = p.character_id
-        state.emit("spotlight_returned", character=p.character_id)
     grant_charged_kit(state)
     # Self-damage and Encore overdraw resolve inside a card play rather than
     # the enemy-hit funnel. Give Fairy the same lethal checkpoint, then update

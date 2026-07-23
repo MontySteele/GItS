@@ -50,6 +50,13 @@ starting_deck:
   - aria_of_recompense
   - salon_debut
   - an_invitation
+# Run-start Fontaine ensemble, mirroring Klee's Mondstadt starter rule.
+# One weak basic Attack and one basic defense are replaced on a dedicated,
+# replayable RNG stream. Each of the four shortlisted characters appears in
+# exactly one role: Pyro/Cryo attack choice, two defensive support textures.
+randomized_starter:
+  attack: {replace: soloists_solicitation, choices: [chevreuse_interdiction_fire, freminet_pers_deploy]}
+  support: {replace: stage_presence, choices: [charlotte_enduring_frosthelm, lynette_enigmatic_feint]}
 packages:
   # Plausible drafts (round-3 principle), not monocultures — each carries
   # natural cross-archetype draft-ins.
@@ -73,9 +80,9 @@ packages:
     # draft-ins a human obviously takes:
     - graceful_retreat
     - swelling_overture
-  # The companion-depth plan: Chevreuse's full 3-card kit as the star
-  # (the §10 counterweight route — Vaporize off her own hydro), plus the
-  # Spotlight machinery. Draft-gated high-ceiling; luck-gated is the slot.
+  # Guest Cast package: a mixed Companion ensemble (all share Spotlight v5),
+  # plus the Spotlight machinery. Draft-gated high-ceiling; luck-gated is the
+  # access-plus-machinery assembly, not same-character depth.
   spotlight_weighted:
     - chevreuse_interdiction_fire
     - chevreuse_interdiction_fire

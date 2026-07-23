@@ -10,11 +10,12 @@ to A4 sustain, NEVER A3 block (kickoff §2 harness note, Tier 0 binding --
 without this accounting rule she grows a phantom third elite axis).
 
 Fanfare: capped at a fraction of maxHP; generation is activity-based
-ONLY (HP lost, Encore gained, Encore spent, Spotlighted card played).
+ONLY (HP lost, Encore gained, Encore spent, Center Stage card played).
 There is deliberately no per-turn passive accrual path in this module or
 anywhere else -- passive accrual is stall payoff, and the healing policy
-exists to kill exactly that. The gate is Player.fanfare_cap (0 = the
-character has no Fanfare resource; mirrors the burst_max pattern).
+exists to kill exactly that. Payoff cards may spend the pool to reopen room
+beneath its cap. The gate is Player.fanfare_cap (0 = the character has no
+Fanfare resource; mirrors the burst_max pattern).
 """
 
 from __future__ import annotations
@@ -32,6 +33,16 @@ def gain_fanfare(state: CombatState, n: int, source: str) -> None:
     if p.fanfare != before:
         state.emit("gain_fanfare", amount=p.fanfare - before, source=source,
                    total=p.fanfare)
+
+
+def spend_fanfare(state: CombatState, n: int) -> int:
+    """Pay a gated Fanfare cost and reopen room beneath the cap."""
+    p = state.player
+    spent = min(p.fanfare, n)
+    if spent:
+        p.fanfare -= spent
+        state.emit("fanfare_spent", amount=spent, total=p.fanfare)
+    return spent
 
 
 def gain_encore(state: CombatState, n: int) -> None:

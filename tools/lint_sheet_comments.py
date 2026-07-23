@@ -75,7 +75,8 @@ def lint_sheet(path: Path) -> list[str]:
     max_hp = 60  # Furina; per-sheet if a third character ever needs it
     globals_ok = {0, 1, 2, max_hp, 70, int(max_hp * C.FANFARE_CAP_FRACTION),
                   C.SALON_MEMBER_DMG, C.SALON_TICK_ENCORE_COST,
-                  C.SALON_TICK_BURST}
+                  C.SALON_TICK_BURST,
+                  int(C.SALON_MEMBER_DMG * C.SALON_DRY_DAMAGE_MULT)}
     findings: list[str] = []
     card_id, row_lines, comments = None, [], []
 

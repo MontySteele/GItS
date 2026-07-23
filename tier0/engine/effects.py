@@ -172,37 +172,45 @@ def reset_knob_reads() -> None:
     KNOB_READS.clear()
 
 
-# R33 window-zero oracle switch: None = selector heuristic v2 (the only
-# shipping value); "self" / "companion" force designation for the
-# pre-registered forced arms (diagnostics feeding a ruling, R14 -- the
-# harness never sets this outside tier05 experiments and tests).
+# Diagnostic switch retained for controlled Center/Guest comparisons;
+# production never sets it outside experiments and tests.
 SPOTLIGHT_FORCE: Optional[str] = None
 
 
+def is_spotlighted(state: CombatState, card: Card) -> bool:
+    """Whether a card receives Spotlight play texture in the active mode."""
+    target = state.player.spotlight
+    if target == C.SPOTLIGHT_GUEST_CAST:
+        return card.is_companion
+    return bool(target and card.character == target)
+
+
+def is_outward_spotlighted(state: CombatState, card: Card) -> bool:
+    """Whether Spotlight may change this card's printed numbers."""
+    return (is_spotlighted(state, card)
+            and state.player.spotlight != state.player.character_id)
+
+
 def spotlight_mult(state: CombatState, card: Card) -> float:
-    """Spotlight empowerment, card-mediated (R16, pass 2): the BASE rate
-    is the relic's residual passive (reduced self rate stays the
-    anti-self-buff lever); the real power arrives as spotlight_mult_bonus
-    stacks that HER cards grant (percentage points, combat- or
-    turn-scoped). Delete her cards and the bonus goes with them -- the
-    delete-test passes by construction.
+    """Guest Cast numeric empowerment, including card-mediated bonuses.
+
+    Center Stage always returns 1.0, even if Spotlight bonus powers are
+    installed. Guest Cast and the legacy named-partner diagnostic path read
+    the outward base plus combat- or turn-scoped bonuses.
 
     §2.2a extension, ENGINE-ENFORCED: this helper is plumbed into damage,
     Block, and (when the DSL grows one) element-application counts -- and
     nowhere else. Draw, energy, cost, and turn-economy ops have no path
     to it, so 'numbers only' is structure, not per-card discipline."""
     p = state.player
-    if not p.spotlight or card.character != p.spotlight:
+    if not is_outward_spotlighted(state, card):
         return 1.0
     cap = C.SPOTLIGHT_CARDS_PER_TURN_CAP     # schematized, OFF by default
     if cap is not None and state.spotlighted_cards_this_turn > cap:
         return 1.0
-    if card.character == p.character_id:
-        base = C.SPOTLIGHT_SELF_MULT
-    else:
-        base = C.SPOTLIGHT_BASE_MULT
-        KNOB_READS["SPOTLIGHT_BASE_MULT"] = (
-            KNOB_READS.get("SPOTLIGHT_BASE_MULT", 0) + 1)
+    base = C.SPOTLIGHT_BASE_MULT
+    KNOB_READS["SPOTLIGHT_BASE_MULT"] = (
+        KNOB_READS.get("SPOTLIGHT_BASE_MULT", 0) + 1)
     bonus = (p.powers.get("spotlight_mult_bonus", 0)
              + p.powers.get("spotlight_mult_bonus_turn", 0))
     return base + bonus / 100.0
@@ -355,7 +363,7 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     # Star of the Show: flat rider on Spotlighted cards' damage. Card-level
     # texture (kickoff §3.2 ratified design space), NOT the baseline knob.
     # Pass 2 adds the this-turn variant (stage_lights) on the same pipe.
-    if state.player.spotlight and card.character == state.player.spotlight:
+    if is_outward_spotlighted(state, card):
         base += (state.player.powers.get("spotlight_flat_damage", 0)
                  + state.player.powers.get("spotlight_flat_damage_turn", 0))
     if card.type == "attack":
@@ -621,64 +629,37 @@ def _op_spend_encore(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
-    """The Ethereal Spotlight selector (kickoff §3.1). Reads character
-    tags to designate; cards with no tag are invalid targets. Movable
-    freely; persists until moved; a duplicate designation is inert.
+    """Choose between Center Stage and Guest Cast.
 
-    PILOT HEURISTIC v4: a temporary card created by a Guest Star generator
-    and currently in hand is eligible at depth one. Otherwise v3 remains:
-    designate the deepest companion iff its per-character depth reaches
-    SPOTLIGHT_COMPANION_DEPTH_MIN and the stage holds a crowd; otherwise
-    self-Spotlight (the kickoff fallback). Value-aware, not
-    depth-greedy: the W0 oracle showed outward aim wins crowds/grinds
-    (+12.5pt attrition at full-kit depth) and loses duels (-10pt
-    tank_boss), so the selector reads the fight state a human reads.
-    ARCHIVE: v2 (passes 1-2) was a raw depth contest whose companion
-    branch was unreachable (R33) -- every pass-2 number is a
-    self-Spotlight world; never compare unlabeled.
-
-    R33 DIAGNOSTIC OVERRIDE: SPOTLIGHT_FORCE ("self"/"companion")
-    bypasses the heuristic entirely for the window-zero oracle arms.
-    Forced arms feed a ruling and never ship (R14); the forced-companion
-    arm has NO self fallback -- an oracle that quietly self-aims would
-    re-create exactly the circularity R33 vetoed."""
+    Center Stage designates Furina: her cards create Fanfare but receive no
+    numeric Spotlight bonus. Guest Cast designates the Companion category:
+    every Companion card is empowered, but those plays create no Fanfare.
+    A ready Companion in hand makes Guest Cast immediately useful; otherwise
+    the selector defaults to Center Stage. The diagnostic override retains
+    forced self/companion arms for experiments."""
     p = state.player
-    counts: dict[str, int] = {}
-    for c in (p.hand + p.draw_pile + p.discard_pile):
-        if c.character and not c.kit_card:
-            counts[c.character] = counts.get(c.character, 0) + 1
-    others = {ch: n for ch, n in counts.items() if ch != p.character_id}
-    generated = sorted({c.character for c in p.hand
-                        if c.generated_by_guest_star and c.character
-                        and c.character != p.character_id})
-    self_n = counts.get(p.character_id, 0) if p.character_id else 0
-    best = max(sorted(others), key=lambda ch: others[ch]) if others else None
+    companion_in_hand = any(c.is_companion and not c.kit_card for c in p.hand)
+    companion_anywhere = any(
+        c.is_companion and not c.kit_card
+        for c in (p.hand + p.draw_pile + p.discard_pile))
     if SPOTLIGHT_FORCE == "self":
-        target = p.character_id if self_n else None
+        target = p.character_id or None
     elif SPOTLIGHT_FORCE == "companion":
-        target = best
-    elif generated:
-        # Temporary guests in hand are the archetype's bricking mitigation:
-        # they can take the light at depth one. Permanent drafted companions
-        # still use the full depth-and-crowd commitment below.
-        target = generated[0]
-    elif (best is not None
-          and others[best] >= C.SPOTLIGHT_COMPANION_DEPTH_MIN
-          and len(state.living_enemies) >= C.SPOTLIGHT_COMPANION_MIN_ENEMIES):
-        target = best
-    elif self_n:
-        target = p.character_id                  # self-Spotlight fallback
-    elif best is not None:
-        target = best        # no self cards at all: any stage beats none
+        target = C.SPOTLIGHT_GUEST_CAST if companion_anywhere else None
+    elif companion_in_hand:
+        target = C.SPOTLIGHT_GUEST_CAST
     else:
-        target = None
+        target = p.character_id or (
+            C.SPOTLIGHT_GUEST_CAST if companion_anywhere else None)
     if target is None:
         return                                   # nothing valid to aim at
     if target != p.spotlight:
         p.spotlight = target
         state.spotlight_moved_this_turn = True      # selector-payoff window
         state.spotlight_moves_this_combat += 1
-        state.emit("spotlight_designated", character=target)
+        mode = ("guest_cast" if target == C.SPOTLIGHT_GUEST_CAST
+                else "center_stage")
+        state.emit("spotlight_designated", character=target, mode=mode)
 
 
 def _op_raise_fanfare_cap(state: CombatState, fx: dict, card: Card) -> None:
@@ -773,8 +754,8 @@ def _op_copy_spotlighted_in_hand(state: CombatState, fx: dict,
     p = state.player
     if not p.spotlight:
         return
-    targets = [c for c in p.hand
-               if c.character == p.spotlight and not c.kit_card]
+    targets = [c for c in p.hand if is_spotlighted(state, c)
+               and not c.kit_card]
     if not targets:
         return
     for _ in range(fx.get("amount", 1)):
@@ -1421,7 +1402,7 @@ def salon_tick(state: CombatState) -> None:
     the default archetype zeroed her elite A4; start-of-turn ticks let
     absorption take first bite and the upkeep eats what survived the
     night). A tick pays Encore for full damage. When Encore is too low,
-    it cannot overdraw HP: it attacks at half power instead. Members persist
+    it cannot overdraw HP: it attacks at three-quarter power instead. Members persist
     for the combat; fixed slots and replacement effects govern the ceiling."""
     p = state.player
     members = p.powers.get("salon_member", 0)

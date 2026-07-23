@@ -96,6 +96,7 @@ SPOTLIGHT_BASE_MULT = 1.5     # PLACEHOLDER (R33 veto, 2026-07-20): the
 SPOTLIGHT_SELF_MULT = 1.0     # Furina pays no hidden baseline tax: self aim
                               # still drives Ovation/Fanfare, while numeric
                               # empowerment is reserved for companions.
+SPOTLIGHT_GUEST_CAST = "__guest_cast__"  # all Companion cards share the light
 # Selector heuristic version (instrument stamp, the A6-v2 pattern —
 # never compare selector versions unlabeled):
 # v1 companions-always (sprint 1; measured harmful — 1-card guest
@@ -112,18 +113,13 @@ SPOTLIGHT_SELF_MULT = 1.0     # Furina pays no hidden baseline tax: self aim
 #    encounter-contingent, so the selector reads the fight, not just
 #    the deck.
 # v4 keeps v3 for drafted companions, but a card created into hand by a
-#    Guest Star generator is eligible at depth one. This is the promised
-#    bricking exception, scoped by combat-local provenance rather than card id;
-#    after the cameo is played, the light returns to Furina automatically.
-SPOTLIGHT_SELECTOR_VERSION = 4
-SPOTLIGHT_COMPANION_DEPTH_MIN = 4     # W0 bracket: best-companion depth 4
-                                      # (full Chevreuse kit) rational,
-                                      # depth 2 not; (2, 4] -> full-kit
-                                      # conservative. PROPOSED pending
-                                      # red-pen; swept only by ruling.
-SPOTLIGHT_COMPANION_MIN_ENEMIES = 2   # outward aim wants crowds (W0:
-                                      # single-target cells were the
-                                      # -10pt/-2pt losses).
+#    Guest Star generator is eligible at depth one.
+# v5 replaces character-depth targeting with the explicit two-mode design:
+#    Center Stage Spotlights Furina and generates Fanfare without a numeric
+#    multiplier; Guest Cast Spotlights every Companion card at the outward
+#    multiplier and generates no Fanfare from those plays. The selector picks
+#    Guest Cast when a Companion is ready in hand, otherwise Center Stage.
+SPOTLIGHT_SELECTOR_VERSION = 5
 SPOTLIGHT_CARDS_PER_TURN_CAP = None   # schematized but OFF (kickoff §3.2):
                               # turns on only if Tier 0 shows the rate
                               # asymmetry alone fails the §6 criterion.
@@ -150,7 +146,7 @@ FANFARE_PER_SPOTLIGHT_CARD = 2    # the Ovation merge: per Spotlighted
 # The oz_summon rails with Defect-style fixed slots: each active member is one
 # start-of-turn Hydro tick. Overflowed deployments take an immediate stronger
 # final bow. A tick that can pay Encore deals full damage; a dry tick never
-# overdraws HP and instead deals half damage.
+# overdraws HP and instead deals three-quarter damage.
 SALON_MEMBER_DMG = 4          # per-member tick damage (v0.2: 3->4 -- her
                               # signature engine may out-tick Oz's 3; the
                               # upkeep cost is what Oz doesn't pay)
@@ -158,7 +154,8 @@ SALON_MEMBER_SLOTS = 3        # Defect-orb shape: fixed active company
 SALON_REPLACE_NUMERIC_MULT = 2  # draw/Encore/power/etc. on replacement
 SALON_REPLACE_DAMAGE_MULT = 3   # final-bow damage and Block on replacement
 SALON_TICK_ENCORE_COST = 1    # Encore drained per member tick
-SALON_DRY_DAMAGE_MULT = 0.5   # no Encore: half damage, never true-HP loss
+SALON_DRY_DAMAGE_MULT = 0.75  # no Encore: 3 vs the paid tick's 4 damage;
+                              # never true-HP loss
 SALON_TICK_BURST = 2          # burst energy per member tick (her particle
                               # economy leans on Salon application, §1)
 BURST_PER_ENCORE_SPENT = 1    # burst energy per point of Encore spent

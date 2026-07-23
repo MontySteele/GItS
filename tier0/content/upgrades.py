@@ -238,6 +238,9 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "encore_cost":
             ok = card.encore_cost > 0
             card.encore_cost = max(0, card.encore_cost + val)
+        elif key == "fanfare_cost":
+            ok = card.fanfare_cost > 0
+            card.fanfare_cost = max(0, card.fanfare_cost + val)
         elif key == "fanfare_cap":
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "raise_fanfare_cap"),

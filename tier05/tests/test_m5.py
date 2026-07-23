@@ -75,6 +75,30 @@ def test_klee_randomized_starter_is_mondstadt_locked_and_role_locked():
     assert seen_supports == supports
 
 
+def test_furina_randomized_starter_is_fontaine_locked_and_role_locked():
+    attacks = {"chevreuse_interdiction_fire", "freminet_pers_deploy"}
+    supports = {"charlotte_enduring_frosthelm", "lynette_enigmatic_feint"}
+    seen_attacks = set()
+    seen_supports = set()
+
+    for seed in range(40):
+        deck = loader.starting_deck("furina", random.Random(seed))
+        rolled_attacks = attacks.intersection(deck)
+        rolled_supports = supports.intersection(deck)
+        assert len(deck) == 10
+        assert len(rolled_attacks) == 1
+        assert len(rolled_supports) == 1
+        assert deck.count("soloists_solicitation") == 2
+        assert deck.count("stage_presence") == 2
+        assert all(loader.get_card(cid).nation == "fontaine"
+                   for cid in rolled_attacks | rolled_supports)
+        seen_attacks.update(rolled_attacks)
+        seen_supports.update(rolled_supports)
+
+    assert seen_attacks == attacks
+    assert seen_supports == supports
+
+
 def test_randomized_starter_uses_a_dedicated_replayable_stream():
     first = model.run_one("klee", "generic", "generic",
                           draft.assigned_policy, SEED)
@@ -248,6 +272,51 @@ def test_reaction_core_rule():
     core = starter + _cards("dahlia_sacramental_shower", "kaeya_frostgnaw",
                             "sizzle")
     assert draft.core_complete(core, "reaction")
+
+
+def test_spotlight_core_requires_cast_access_and_machinery():
+    starter = _cards(*loader.starting_deck("furina"))
+    assert not draft.core_complete(starter, "spotlight")
+    access = starter + _cards("lynette_box_trick")
+    assert not draft.core_complete(access, "spotlight")
+    online = access + _cards("limelight")
+    assert draft.core_complete(online, "spotlight")
+    companion = loader.get_card("chevreuse_interdiction_fire")
+    assert (draft.score_offer(companion, starter, "spotlight")
+            > draft.score_offer(companion, starter, "generic"))
+
+
+def test_fanfare_core_is_native_generation_plus_output_converter():
+    starter = _cards(*loader.starting_deck("furina"))
+    assert draft._fanfare_generation_total(starter) \
+        >= draft.FANFARE_GENERATION_COVERAGE
+    assert not draft.core_complete(starter, "fanfare")
+
+    # The common attack cashes Fanfare into immediate output and completes
+    # the plan.  A pure draw-spender is useful machinery, but not the piece
+    # that makes a survival/damage plan functional.
+    converter = loader.get_card("dramatic_entrance")
+    utility_spender = loader.get_card("florid_cadenza")
+    assert draft._is_fanfare_converter(converter)
+    assert not draft._is_fanfare_converter(utility_spender)
+    assert draft.core_complete(starter + [converter], "fanfare")
+    assert not draft.core_complete(starter + [utility_spender], "fanfare")
+
+
+def test_fanfare_drafter_prioritizes_conversion_over_surplus_generation():
+    starter = _cards(*loader.starting_deck("furina"))
+    converter = loader.get_card("dramatic_entrance")
+    generator = loader.get_card("suffering_for_art")
+
+    assert draft.score_offer(converter, starter, "fanfare") \
+        > draft.score_offer(generator, starter, "fanfare")
+    assert draft.assigned_policy(
+        random.Random(0), starter, [generator], "fanfare") is None
+
+    # Generation has real setup value for a hypothetical uncovered deck, but
+    # no longer receives a permanent core-assembly bonus after Aria covers it.
+    assert draft.score_offer(generator, [], "fanfare") \
+        > draft.score_offer(generator, starter, "fanfare")
 
 
 def test_skip_is_a_real_pick():

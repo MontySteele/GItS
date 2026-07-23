@@ -3,6 +3,8 @@
 Assigned mode: the run is seeded with a target archetype. Scoring terms:
 - archetype fit: enabler value DECAYS as the core completes; payoff value
   is GATED on the core being online (else you draft win-more blanks)
+- Fanfare exception: native meter movement + one direct-output spender is
+  the core; surplus generation diminishes instead of filling four fake slots
 - printed power and conservative mitigation proxies (DRAFTER_VERSION 3;
   v2 counted only direct damage/Block and made Bombs/debuffs invisible)
 - universal: defense quota (the real-draft principle codified), curve
@@ -118,6 +120,80 @@ def _is_amp_payoff(card: Card) -> bool:
     return ("reaction" in card.archetypes and card.role == "payoff")
 
 
+def _generates_guest_star(card: Card) -> bool:
+    return any(fx.get("op") == "generate_guest_star"
+               for fx in _nested_effects(card.effects))
+
+
+def _is_spotlight_access(card: Card) -> bool:
+    """A Companion itself or a card that guarantees one in combat."""
+    return card.is_companion or _generates_guest_star(card)
+
+
+def _is_spotlight_machinery(card: Card) -> bool:
+    """A real Spotlight engine piece, distinct from finding the cast."""
+    return ("spotlight" in card.archetypes
+            and card.role in ("enabler", "payoff")
+            and not _is_spotlight_access(card))
+
+
+def _fanfare_generation(card: Card) -> float:
+    """Printed Fanfare access supplied by one card.
+
+    Furina gains Fanfare when Encore moves in either direction and when she
+    loses HP.  This is an intentionally coarse draft-time estimate: it is
+    used to distinguish "the deck has a way to move the meter" from "this
+    card turns the meter into output", not to predict exact combat totals.
+    """
+    total = max(0, card.encore_cost)
+    for fx in _nested_effects(card.effects):
+        if fx.get("op") == "gain_encore":
+            total += max(0, _neutral_amount(fx, 0))
+        elif fx.get("op") == "damage" and fx.get("target") == "self":
+            total += max(0, _neutral_amount(fx, 0))
+    return total
+
+
+def _fanfare_generation_total(deck: list[Card]) -> float:
+    return sum(_fanfare_generation(card) for card in deck)
+
+
+def _self_damage(card: Card) -> float:
+    return sum(
+        max(0, _neutral_amount(fx, 0))
+        for fx in _nested_effects(card.effects)
+        if fx.get("op") == "damage" and fx.get("target") == "self"
+    )
+
+
+def _has_direct_output(card: Card) -> bool:
+    """Damage/Block that can cash a resource into immediate survival."""
+    return any(
+        fx.get("op") == "block"
+        or (fx.get("op") == "damage" and fx.get("target") != "self")
+        for fx in _nested_effects(card.effects)
+    )
+
+
+def _is_fanfare_converter(card: Card) -> bool:
+    """A real output converter, not merely a threshold reader or cantrip."""
+    return card.fanfare_cost > 0 and _has_direct_output(card)
+
+
+def _reads_fanfare(card: Card) -> bool:
+    """Does the printed output scale with or unlock from held Fanfare?"""
+    for fx in _nested_effects(card.effects):
+        if str(fx.get("if", "")).startswith("fanfare_"):
+            return True
+        if str(fx.get("power", "")).startswith("fanfare_"):
+            return True
+        if fx.get("op") == "raise_fanfare_cap":
+            return True
+        if "fanfare" in str(fx.get("bonus_formula", "")):
+            return True
+    return False
+
+
 def core_complete(deck: list[Card], archetype: str) -> bool:
     """Is the archetype 'online'? (spec §5 as amended by v1.9: reaction
     core := 2 appliers + 1 amp payoff. The Burst left the assembly
@@ -130,6 +206,17 @@ def core_complete(deck: list[Card], archetype: str) -> bool:
         appliers = sum(1 for c in deck if _is_applier(c))
         amps = sum(1 for c in deck if _is_amp_payoff(c))
         return appliers >= 2 and amps >= 1
+    if archetype == "spotlight":
+        access = sum(1 for c in deck if _is_spotlight_access(c))
+        machinery = sum(1 for c in deck if _is_spotlight_machinery(c))
+        return access >= 2 and machinery >= 1
+    if archetype == "fanfare":
+        # Furina's starter already supplies the first half in practice, but
+        # keep the definition honest for synthetic/modified decks.
+        return (
+            _fanfare_generation_total(deck) >= FANFARE_GENERATION_COVERAGE
+            and any(_is_fanfare_converter(c) for c in deck)
+        )
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))
     return on_plan >= C.DRAFT_CORE_SIZE
@@ -140,6 +227,18 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
         appliers = min(2, sum(1 for c in deck if _is_applier(c)))
         amps = min(1, sum(1 for c in deck if _is_amp_payoff(c)))
         return (appliers + amps) / 3
+    if archetype == "spotlight":
+        access = min(2, sum(1 for c in deck if _is_spotlight_access(c)))
+        machinery = min(1, sum(
+            1 for c in deck if _is_spotlight_machinery(c)))
+        return (access + machinery) / 3
+    if archetype == "fanfare":
+        generation = min(
+            1.0,
+            _fanfare_generation_total(deck) / FANFARE_GENERATION_COVERAGE,
+        )
+        conversion = float(any(_is_fanfare_converter(c) for c in deck))
+        return (generation + conversion) / 2
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))
     return min(1.0, on_plan / C.DRAFT_CORE_SIZE)
@@ -251,6 +350,43 @@ REACTION_AMP_OFFLINE = 1.0        # sweep: 2.5 hurts
 REACTION_LEAN_CAP = 13            # reaction's own bloat line (§3: lean decks)
 REACTION_LEAN_PENALTY = 0.4       # winner at x0.4; x0.8 overshoots (16.6 cards)
 
+# Fanfare is a native-resource plan, not a four-card assembly puzzle.  One
+# Aria of Recompense supplies five printed points of meter movement before the
+# first reward screen.  Once that coverage exists, more generation is useful
+# support but has sharply diminishing draft value; the priority is securing a
+# card that converts held Fanfare into immediate output.
+FANFARE_GENERATION_COVERAGE = 5
+FANFARE_FIRST_CONVERTER = 2.0
+FANFARE_LATER_CONVERTER = 1.5
+FANFARE_READER_VALUE = 1.0
+FANFARE_SURPLUS_GENERATION_CAP = 1.0
+FANFARE_SELF_DAMAGE_COST = 0.5
+FANFARE_SKIP_THRESHOLD = 1.5
+
+
+def _fanfare_plan_score(card: Card, deck: list[Card],
+                        online: bool) -> float:
+    """Contextual plan value after universal printed power is counted."""
+    if _is_fanfare_converter(card):
+        return (FANFARE_LATER_CONVERTER if online
+                else FANFARE_FIRST_CONVERTER)
+
+    score = FANFARE_READER_VALUE if _reads_fanfare(card) else 0.0
+    generation = _fanfare_generation(card)
+    if generation:
+        covered = _fanfare_generation_total(deck)
+        if covered < FANFARE_GENERATION_COVERAGE:
+            missing = FANFARE_GENERATION_COVERAGE - covered
+            score += min(3.0, generation, missing) * 0.6
+        else:
+            score += min(FANFARE_SURPLUS_GENERATION_CAP,
+                         generation / FANFARE_GENERATION_COVERAGE)
+    # HP loss does move the meter, but it is not free generation in a run
+    # where deaths persist.  The ordinary static-power proxy cannot express
+    # printed downsides, so price that risk here rather than teaching the
+    # Fanfare drafter to prefer the six-damage uncapping setup card.
+    return score - _self_damage(card) * FANFARE_SELF_DAMAGE_COST
+
 
 def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     s = 0.0
@@ -278,7 +414,11 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     # below. Without this the derived reaction tag silently re-tunes assigned
     # mode too, which would move the frozen M5 numbers for a reason that has
     # nothing to do with the drafting question they were measuring.
-    if archetype in card.archetypes and not card.is_companion:
+    if (archetype == "fanfare"
+            and "fanfare" in card.archetypes
+            and not card.is_companion):
+        s += _fanfare_plan_score(card, deck, online)
+    elif archetype in card.archetypes and not card.is_companion:
         if card.role == "enabler":
             s += 3.0 * max(0.25, 1.0 - progress)     # decays as core fills
         elif card.role == "payoff":
@@ -295,6 +435,10 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
             # Companions ARE reaction's enablers (deliberate asymmetry).
             s += (REACTION_APPLIER_WEIGHT * max(0.25, 1.0 - progress)
                   if _is_applier(card) else 1.5)
+        elif archetype == "spotlight":
+            # Guest Cast buffs every Companion, so a mixed cast is coherent:
+            # no same-character depth requirement and no selector-v3 trap.
+            s += 3.0 * max(0.25, 1.0 - progress)
         else:
             s += 0.5
     if _has_block(card) and _block_density(deck) < C.DRAFT_BLOCK_DENSITY_MIN:
@@ -328,7 +472,9 @@ def assigned_policy(rng: random.Random, deck: list[Card],
     scored = sorted(((score_offer(c, deck, archetype), i, c)
                      for i, c in enumerate(offers)), reverse=True)
     best_score, _, best = scored[0]
-    if best_score < C.DRAFT_SKIP_THRESHOLD:
+    threshold = (FANFARE_SKIP_THRESHOLD
+                 if archetype == "fanfare" else C.DRAFT_SKIP_THRESHOLD)
+    if best_score < threshold:
         return None                                  # skip is a real pick
     return best
 

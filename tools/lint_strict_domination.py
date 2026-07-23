@@ -16,7 +16,7 @@ power spike, and a rare obsoleting a common's slot is the rarity ladder
 working. Basics are excluded entirely — starters are supposed to be
 outclassed (Strike is strictly dominated by half the base game, by
 design). Cards are only compared inside an identical (cost, type,
-encore_cost, exhaust, tags) group, so a playability gate or Exhaust
+encore_cost, fanfare_cost, exhaust, tags) group, so a resource gate or Exhaust
 rider makes a pair incomparable rather than falsely dominated; formula
 amounts also mark a card incomparable.
 
@@ -104,7 +104,8 @@ def dominates(a: dict, b: dict) -> bool:
 
 def comparison_group(card: dict) -> tuple:
     return (card.get("cost"), card.get("type"), card.get("encore_cost"),
-            card.get("exhaust"), tuple(sorted(card.get("tags", []))))
+            card.get("fanfare_cost"), card.get("exhaust"),
+            tuple(sorted(card.get("tags", []))))
 
 
 def lint_sheet(path: Path) -> tuple[list[str], list[str]]:

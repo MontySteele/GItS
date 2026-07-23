@@ -1,4 +1,7 @@
-"""Furina sheet pass 3 — pre-registered experiment battery.
+"""Furina sheet pass 3 — ARCHIVED pre-registered experiment battery.
+
+Selector v5 superseded the character-depth experiment this file describes.
+Do not use its W0/world labels for current balance; use exp_furina_modes.
 
 Registered in furina-sheet-pass-3-plan.md BEFORE running (null results
 binding). Blocks:

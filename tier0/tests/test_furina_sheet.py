@@ -71,8 +71,33 @@ def test_starter_invitation_and_aria_curve():
 
     stage = loader.get_card("stage_presence")
     stage_plus = loader.get_card("stage_presence+")
-    assert stage.effects == [{"op": "block", "amount": 5}]
-    assert stage_plus.effects == [{"op": "block", "amount": 8}]
+    assert stage.effects == [{"op": "block", "amount": 6}]
+    assert stage_plus.effects == [{"op": "block", "amount": 9}]
+
+
+def test_fanfare_spenders_pay_less_energy_than_ordinary_finishers():
+    assert loader.get_card("dramatic_entrance").fanfare_cost == 5
+    assert loader.get_card("thunderous_ovation").fanfare_cost == 5
+    assert loader.get_card("crescendo").cost == 1
+    assert loader.get_card("florid_cadenza").cost == 0
+    assert loader.get_card("flood_of_emotion").cost == 1
+    assert loader.get_card("universal_revelry").cost == 2
+    assert loader.get_card("high_tide").cost == 1
+
+
+def test_targeted_fanfare_floor_repairs():
+    suffering = loader.get_card("suffering_for_art")
+    thunder = loader.get_card("thunderous_ovation")
+    assert suffering.effects == [
+        {"op": "damage", "amount": 1, "target": "self"},
+        {"op": "gain_encore", "amount": 3},
+    ]
+    assert thunder.effects == [
+        {"op": "block", "amount": 7},
+        {"op": "conditional", "if": "fanfare_at_least_5",
+         "then": [{"op": "block", "amount": 4}]},
+    ]
+    assert thunder.fanfare_cost == 5
 
 
 def test_every_archetype_has_the_template_shape():
@@ -122,7 +147,7 @@ def test_salon_tick_damages_applies_hydro_and_drains_encore():
     assert p.encore == 5 - 2 * C.SALON_TICK_ENCORE_COST
 
 
-def test_dry_salon_ticks_deal_half_damage_without_overdraw():
+def test_dry_salon_ticks_deal_three_quarter_damage_without_overdraw():
     st = furina_state()
     p = st.player
     p.powers["salon_member"] = 2
@@ -131,6 +156,7 @@ def test_dry_salon_ticks_deal_half_damage_without_overdraw():
     enemy_hp0 = st.enemies[0].hp
     effects.salon_tick(st)
     assert p.hp == hp0
+    assert int(C.SALON_MEMBER_DMG * C.SALON_DRY_DAMAGE_MULT) == 3
     assert st.enemies[0].hp == (
         enemy_hp0 - 2 * int(C.SALON_MEMBER_DMG * C.SALON_DRY_DAMAGE_MULT))
     assert not any(e["event"] == "encore_overdraw" for e in st.log)
@@ -329,7 +355,7 @@ def test_generators_exhaust_and_generate_to_hand():
     made = st.player.hand[0]
     assert made.rarity == "common"                  # guardrail c
     assert made.is_companion or made.guest_star     # guardrail d
-    assert made.generated_by_guest_star              # selector-v4 provenance
+    assert made.generated_by_guest_star              # combat-local provenance
 
 
 def test_upgraded_generator_discounts_the_guest():
@@ -351,6 +377,17 @@ def test_encore_performance_copies_only_the_spotlighted_character():
     assert len(copies) == 2 and copies[1].id == chev.id
 
 
+def test_encore_performance_guest_cast_can_copy_any_companion():
+    st = furina_state()
+    p = st.player
+    hand_card(st, "chevreuse_interdiction_fire")
+    hand_card(st, "lynette_box_trick")
+    p.spotlight = C.SPOTLIGHT_GUEST_CAST
+    effects.resolve_card(st, loader.get_card("encore_performance"))
+    assert len(p.hand) == 3
+    assert all(c.is_companion for c in p.hand)
+
+
 def test_encore_performance_dead_without_designation_or_target():
     st = furina_state()
     hand_card(st, "chevreuse_interdiction_fire")
@@ -359,6 +396,31 @@ def test_encore_performance_dead_without_designation_or_target():
     st.player.spotlight = "lynette"                 # spotlight, no target
     effects.resolve_card(st, loader.get_card("encore_performance"))
     assert len(st.player.hand) == 1
+
+
+def test_spotlight_machinery_refunds_setup_energy():
+    for cid in ("limelight", "shared_billing", "guest_list",
+                "encore_performance"):
+        st = furina_state()
+        p = st.player
+        p.energy = 1
+        p.encore = 1
+        p.spotlight = C.SPOTLIGHT_GUEST_CAST
+        hand_card(st, "chevreuse_interdiction_fire")
+        card = hand_card(st, cid)
+        combat.play_card(st, card)
+        assert p.energy == 1, cid
+
+
+def test_top_billing_no_longer_bricks_on_empty_encore():
+    st = furina_state()
+    p = st.player
+    p.energy = 1
+    card = hand_card(st, "top_billing")
+    assert p.encore == 0 and card.encore_cost == 0
+    assert combat.card_playable(st, card)
+    assert loader.get_card("standing_ovation").cost == 1
+    assert loader.get_card("standing_ovation+").cost == 0
 
 
 # --- Spotlight texture powers (ratified design space, kickoff §3.2) ---
@@ -418,9 +480,11 @@ def test_star_of_the_show_flat_rider_on_spotlighted_damage():
     p.spotlight = "chevreuse"
     p.powers["spotlight_flat_damage"] = 3
     hp0 = st.enemies[0].hp
-    effects.resolve_card(st, loader.get_card("chevreuse_interdiction_fire"))
-    # R16 world: 5 printed -> x BASE_MULT -> +3 flat.
-    expect = int(5 * C.SPOTLIGHT_BASE_MULT) + 3
+    card = loader.get_card("chevreuse_interdiction_fire")
+    printed = next(fx["amount"] for fx in card.effects
+                   if fx.get("op") == "damage")
+    effects.resolve_card(st, card)
+    expect = int(printed * C.SPOTLIGHT_BASE_MULT) + 3
     assert st.enemies[0].hp == hp0 - expect
 
 
@@ -477,23 +541,16 @@ def test_upgraded_power_amount_lifts_its_own_stack_cap():
     assert st.player.powers["spotlight_flat_damage"] == 4
 
 
-# --- selector aiming v2 (the depth contest; DECISIONS-bound in report) ---
+# --- selector aiming v5 (explicit two-mode choice) ---
 
-def test_selector_depth_contest_self_beats_shallow_companion():
-    """v3 keeps v1's lesson: a shallow guest must NOT hijack the
-    Spotlight from a deep self-kit (sub-threshold depth -> self
-    fallback). With NO self cards at all, any stage beats none -- the
-    guest gets the beam as the last resort (v2's tie rule, archived,
-    happened to agree here)."""
-    st = furina_state()                       # real starter: 10 furina cards
-    hand_card(st, "lynette_box_trick")        # one shallow companion
+def test_selector_guest_cast_does_not_require_character_depth():
+    st = furina_state()                       # real starter: 10 Furina cards
+    hand_card(st, "lynette_box_trick")        # one ready Companion suffices
     effects.resolve_card(st, loader.get_card("ethereal_spotlight"))
-    assert st.player.spotlight == "furina"    # self depth 10 wins
-    st2 = furina_state()
-    st2.player.draw_pile.clear()
-    hand_card(st2, "lynette_box_trick")       # tie: 1 companion vs 0 self
-    effects.resolve_card(st2, loader.get_card("ethereal_spotlight"))
-    assert st2.player.spotlight == "lynette"  # companion wins the tie
+    assert st.player.spotlight == C.SPOTLIGHT_GUEST_CAST
+    st.player.hand.clear()
+    effects.resolve_card(st, loader.get_card("ethereal_spotlight"))
+    assert st.player.spotlight == "furina"
 
 
 # --- selector-payoff predicates ---
@@ -506,7 +563,7 @@ def test_spotlight_moved_predicates():
     assert not effects._predicate(st, "spotlight_moved_this_turn")
     assert not effects._predicate(st, "spotlight_unmoved_this_combat")
     effects.resolve_card(st, loader.get_card("ethereal_spotlight"))
-    assert p.spotlight == "chevreuse"
+    assert p.spotlight == C.SPOTLIGHT_GUEST_CAST
     assert effects._predicate(st, "spotlight_moved_this_turn")
     assert effects._predicate(st, "spotlight_unmoved_this_combat")
     st.spotlight_moved_this_turn = False            # next turn's reset

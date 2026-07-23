@@ -114,6 +114,12 @@ def _active_effects(state: CombatState, effect_list: list[dict]):
                 ready = state.cards_exhausted_this_turn > 0
             elif name == "hp_lost_this_turn":
                 ready = state.hp_lost_this_turn > 0
+            elif name.startswith("fanfare_at_least_"):
+                ready = (state.player.fanfare
+                         >= int(name.rsplit("_", 1)[1]))
+            elif name.startswith("encore_at_least_"):
+                ready = (state.player.encore
+                         >= int(name.rsplit("_", 1)[1]))
             else:
                 continue
             branch = fx["then"] if ready else fx.get("else", [])
@@ -364,22 +370,20 @@ def _sustain_value(state: CombatState, card: Card) -> float:
 
 
 def _spotlight_value(state: CombatState, card: Card) -> float:
-    """Selector + Spotlight-machinery value (sheet pass 1). Without this
+    """Selector + two-mode Spotlight machinery value. Without this
     her pilots score the selector 0 and never designate -- the exact
     anchor-drafted-nothing failure M5 logged (DECISIONS 53)."""
     p = state.player
     val = 0.0
-    generated_guest_waiting = any(
-        c.generated_by_guest_star and c.character for c in p.hand)
+    companion_waiting = any(c.is_companion and not c.kit_card for c in p.hand)
     generator_waiting = any(
         any(fx.get("op") == "generate_guest_star" for fx in c.effects)
         for c in p.hand)
     for fx in card.effects:
         if fx["op"] == "spotlight_designate":
-            # Aiming an empty stage is the whole archetype; re-aiming is
-            # nearly free but rarely urgent. When a generator is waiting,
-            # invite first so this same selector can aim the temporary guest.
-            if generated_guest_waiting:
+            # When a generator is waiting, invite first so this same selector
+            # can put the resulting Companion into Guest Cast.
+            if companion_waiting:
                 val += 20.0             # sequencing priority: light, then play
             elif generator_waiting:
                 val += 0.1
@@ -394,7 +398,8 @@ def _spotlight_value(state: CombatState, card: Card) -> float:
             # (combat-scoped stacks compound; turn windows want same-turn
             # Spotlighted plays). ovation_spend_boost (R32.1 flip) is a
             # combat-scoped engine like top_billing's mult.
-            if p.spotlight is not None:
+            guest_mode_live = p.spotlight == C.SPOTLIGHT_GUEST_CAST
+            if guest_mode_live or companion_waiting:
                 val += (3.0 if fx["power"] in ("spotlight_mult_bonus",
                                                "ovation_spend_boost")
                         else 1.5)
@@ -404,7 +409,7 @@ def _spotlight_value(state: CombatState, card: Card) -> float:
             val += 2.5 * fx.get("amount", 1)     # a card in hand, roughly
         elif fx["op"] == "copy_spotlighted_in_hand":
             has_target = p.spotlight and any(
-                c.character == p.spotlight and not c.kit_card
+                effects.is_spotlighted(state, c) and not c.kit_card
                 for c in p.hand)
             val += 3.5 if has_target else 0.0    # dead without a target,
     return val                                   # and the pilot knows it

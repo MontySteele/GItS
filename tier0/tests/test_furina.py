@@ -11,6 +11,7 @@ from tier0.engine import combat, effects, powers, resources
 from tier0.engine.state import Card, CombatState
 from tier0.harness import metrics
 from tier0.harness.axes import raw_axes
+from tier0.pilot import policy
 from tier0.pilot.policy import make_pilot
 from tier0.tests.conftest import make_enemy
 
@@ -170,47 +171,91 @@ def test_fanfare_inert_without_the_resource():
     assert not any(ev["event"] == "gain_fanfare" for ev in st.log)
 
 
+def test_fanfare_cost_is_gated_and_paid_after_scaling_resolves():
+    st = furina_state()
+    p = st.player
+    card = loader.get_card("crescendo")
+    p.hand.append(card)
+    p.energy = 3
+    assert not combat.card_playable(st, card)
+    p.fanfare = 30
+    hp0 = st.enemies[0].hp
+    assert combat.card_playable(st, card)
+    combat.play_card(st, card)
+    assert st.enemies[0].hp == hp0 - 23       # 8 + floor(30 / 2)
+    assert p.fanfare == 20                    # then pays its 10-point cost
+    assert any(ev["event"] == "fanfare_spent" and ev["amount"] == 10
+               for ev in st.log)
+
+
+def test_pilot_values_live_fanfare_threshold_branches():
+    st = furina_state()
+    entrance = loader.get_card("dramatic_entrance")
+    ovation = loader.get_card("thunderous_ovation")
+    st.player.fanfare = 4
+    assert policy._expected_damage(st, entrance) == 6
+    assert policy._raw_block(st, ovation) == 7
+    st.player.fanfare = 5
+    assert policy._expected_damage(st, entrance) == 10
+    assert policy._raw_block(st, ovation) == 11
+
+
+def test_dramatic_entrance_is_the_common_fanfare_converter():
+    st = furina_state()
+    p = st.player
+    entrance = loader.get_card("dramatic_entrance")
+    p.hand.append(entrance)
+    p.energy = 1
+    p.fanfare = 4
+    assert not combat.card_playable(st, entrance)
+    p.fanfare = 5
+    hp0 = st.enemies[0].hp
+    combat.play_card(st, entrance)
+    assert st.enemies[0].hp == hp0 - 10
+    assert p.fanfare == 0
+
+
+def test_thunderous_ovation_is_the_defensive_common_converter():
+    st = furina_state()
+    p = st.player
+    ovation = loader.get_card("thunderous_ovation")
+    p.hand.append(ovation)
+    p.energy = 1
+    p.fanfare = 4
+    assert not combat.card_playable(st, ovation)
+    p.fanfare = 5
+    combat.play_card(st, ovation)
+    assert p.block == 11
+    assert p.fanfare == 0
+    assert any(ev["event"] == "fanfare_spent" and ev["amount"] == 5
+               for ev in st.log)
+
+
 # --- Spotlight ---
 
 def _stock_deck(p, *card_ids):
     p.draw_pile.extend(loader.get_card(cid) for cid in card_ids)
 
 
-def test_selector_v4_preserves_v3_drafted_companion_threshold():
-    """Selector v4 preserves v3 for drafted cards: designation needs BOTH
-    a full-kit-depth companion AND a crowd on stage; anything less is the
-    kickoff's self-Spotlight fallback. v2's raw depth contest is archived
-    (R33: its companion branch was unreachable)."""
-    two = [make_enemy(hp=50), make_enemy(hp=50)]
-    st = furina_state(enemies=two)   # starter: 10 furina cards vs kit of 4
+def test_selector_v5_chooses_between_ready_guest_cast_and_center_stage():
+    """Guest Cast is a hand-level tactical choice, not a depth check."""
+    st = furina_state()
     _stock_deck(st.player, "chevreuse_interdiction_fire",
-                "chevreuse_interdiction_fire", "chevreuse_vanguards_valor",
-                "chevreuse_bursting_grenades", "lynette_box_trick")
+                "lynette_box_trick")
     effects.resolve_card(st, loader.get_card("ethereal_spotlight"))
-    assert st.player.spotlight == "chevreuse"    # depth 4 + crowd: outward
-    # Same deck, single enemy: the duel belongs to her own kit (W0:
-    # forced-companion zeroed tank_boss).
-    st2 = furina_state()
-    _stock_deck(st2.player, "chevreuse_interdiction_fire",
-                "chevreuse_interdiction_fire", "chevreuse_vanguards_valor",
-                "chevreuse_bursting_grenades")
-    effects.resolve_card(st2, loader.get_card("ethereal_spotlight"))
-    assert st2.player.spotlight == "furina"
-    # Crowd but sub-threshold kit (W0 depth-3 arm: clean no): self.
-    st3 = furina_state(enemies=[make_enemy(hp=50), make_enemy(hp=50)])
-    _stock_deck(st3.player, "chevreuse_interdiction_fire",
-                "chevreuse_vanguards_valor")
-    effects.resolve_card(st3, loader.get_card("ethereal_spotlight"))
-    assert st3.player.spotlight == "furina"
+    assert st.player.spotlight == "furina"       # no Companion ready now
+    st.player.hand.append(loader.get_card("lynette_box_trick"))
+    effects.resolve_card(st, loader.get_card("ethereal_spotlight"))
+    assert st.player.spotlight == C.SPOTLIGHT_GUEST_CAST
 
 
-def test_selector_v4_designates_a_generated_guest_at_depth_one():
+def test_selector_v5_designates_guest_cast_for_a_generated_guest():
     st = furina_state()                       # one enemy: crowd rule bypassed
     effects.resolve_card(st, loader.get_card("an_invitation"))
     guest = st.player.hand[0]
     assert guest.generated_by_guest_star and guest.character
     effects.resolve_card(st, loader.get_card("ethereal_spotlight"))
-    assert st.player.spotlight == guest.character
+    assert st.player.spotlight == C.SPOTLIGHT_GUEST_CAST
 
 
 def test_spotlight_pilot_invites_then_designates_before_playing_guest():
@@ -226,16 +271,15 @@ def test_spotlight_pilot_invites_then_designates_before_playing_guest():
     assert pilot(st).id == "ethereal_spotlight"
 
 
-def test_spotlight_returns_to_furina_after_generated_guest_performs():
+def test_guest_cast_persists_after_a_generated_guest_performs():
     st = furina_state()
     guest = Card(id="temporary_guest", name="Guest", cost=0, type="skill",
                  character="lynette", generated_by_guest_star=True)
     st.player.hand = [guest]
-    st.player.spotlight = "lynette"
+    st.player.spotlight = C.SPOTLIGHT_GUEST_CAST
     combat.play_card(st, guest)
-    assert st.player.spotlight == "furina"
-    assert not st.spotlight_moved_this_turn
-    assert any(e["event"] == "spotlight_returned" for e in st.log)
+    assert st.player.spotlight == C.SPOTLIGHT_GUEST_CAST
+    assert not any(e["event"] == "spotlight_returned" for e in st.log)
 
 
 def test_ovation_spend_boost_converts_spend_events_into_turn_boost():
@@ -275,11 +319,8 @@ def test_knob_exercise_counter_counts_companion_reads_only():
     assert effects.KNOB_READS == {}
 
 
-def test_spotlight_force_oracle_arms_bypass_heuristic_v2():
-    """R33 window zero: forced-companion designates the deepest companion
-    even against her 10-card starter (unreachable for heuristic v2), and
-    has NO self fallback when no companion exists -- a quietly self-aiming
-    oracle would re-create the circularity the veto struck."""
+def test_spotlight_force_oracle_arms_bypass_selector_v5():
+    """Diagnostic arms force either mode; companion has no self fallback."""
     st = furina_state()          # starter: 10 furina cards in draw pile
     p = st.player
     selector = loader.get_card("ethereal_spotlight")
@@ -289,7 +330,7 @@ def test_spotlight_force_oracle_arms_bypass_heuristic_v2():
         assert p.spotlight is None           # no companion cards: no aim
         _stock_deck(p, "chevreuse_interdiction_fire")
         effects.resolve_card(st, selector)
-        assert p.spotlight == "chevreuse"    # 1-card kit beats 10-card self
+        assert p.spotlight == C.SPOTLIGHT_GUEST_CAST
         effects.SPOTLIGHT_FORCE = "self"
         effects.resolve_card(st, selector)
         assert p.spotlight == "furina"
@@ -337,6 +378,8 @@ def test_unspotlighted_and_untagged_cards_unchanged():
 def test_self_spotlight_has_no_numeric_multiplier():
     st = furina_state()
     st.player.spotlight = "furina"
+    st.player.powers["spotlight_mult_bonus"] = 50
+    st.player.powers["spotlight_flat_damage"] = 3
     effects.resolve_card(st, furina_card(
         effects=[{"op": "damage", "amount": 4, "applies_element": False}]))
     dmg = [ev for ev in st.log if ev["event"] == "damage"][0]
@@ -344,36 +387,38 @@ def test_self_spotlight_has_no_numeric_multiplier():
     assert dmg["base"] == 4
 
 
-def test_ovation_fanfare_on_spotlighted_play():
+def test_only_center_stage_spotlighted_plays_generate_fanfare():
     st = furina_state()
     p = st.player
-    p.spotlight = "lynette"
+    p.spotlight = C.SPOTLIGHT_GUEST_CAST
     card = loader.get_card("lynette_box_trick")
     p.hand.append(card)
     p.energy = 3
     combat.play_card(st, card)
     assert st.spotlighted_cards_this_turn == 1
+    assert p.fanfare == 0
+    p.spotlight = "furina"
+    own = furina_card()
+    p.hand.append(own)
+    combat.play_card(st, own)
     assert p.fanfare == C.FANFARE_PER_SPOTLIGHT_CARD
 
 
 def test_designation_moves_freely_and_duplicates_inert():
     st = furina_state()
-    st.player.draw_pile.clear()      # isolate from the real starter's depth
-    _stock_deck(st.player, "chevreuse_interdiction_fire",
-                "chevreuse_vanguards_valor", "lynette_box_trick")
+    st.player.hand.append(loader.get_card("chevreuse_interdiction_fire"))
     sel = loader.get_card("ethereal_spotlight")
     effects.resolve_card(st, sel)
-    assert st.player.spotlight == "chevreuse"
+    assert st.player.spotlight == C.SPOTLIGHT_GUEST_CAST
     events = sum(1 for ev in st.log if ev["event"] == "spotlight_designated")
     effects.resolve_card(st, sel)            # same aim: inert re-aim
-    assert st.player.spotlight == "chevreuse"
+    assert st.player.spotlight == C.SPOTLIGHT_GUEST_CAST
     assert sum(1 for ev in st.log
                if ev["event"] == "spotlight_designated") == events
-    # Deck composition shifts -> the selector re-aims at the new deepest.
-    _stock_deck(st.player, "lynette_enigmatic_feint",
-                "lynette_astonishing_shift")
+    # Once no Companion is ready, the selector returns to Center Stage.
+    st.player.hand.clear()
     effects.resolve_card(st, sel)
-    assert st.player.spotlight == "lynette"
+    assert st.player.spotlight == "furina"
 
 
 def test_selector_delivered_each_turn_and_vanishes():

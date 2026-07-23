@@ -66,13 +66,16 @@ class Card:
     guest_star: bool = False
     # Combat-local provenance: set on every card created by a Guest Star
     # generator, including ordinary shared companions pulled by that effect.
-    # The selector permits this temporary guest at depth one without weakening
-    # the commitment threshold for drafted companions.
+    # Guest Cast treats this temporary guest like every other Companion.
     generated_by_guest_star: bool = False
     # "Spend N Encore:" cost line (kickoff §4). A playability gate, not an
     # overdraw: cards that may legally overdraw into HP use the
     # spend_encore op instead.
     encore_cost: int = 0
+    # Spendable Fanfare payoff. Like encore_cost this is a playability gate,
+    # but it is paid once after the card resolves so Fanfare scaling on that
+    # card reads the audience level that funded the performance.
+    fanfare_cost: int = 0
     # Base-game parity (Ironclad pool): CanBeGeneratedInCombat. Feed sets it
     # false so a generator cannot conjure the card that permanently raises
     # max HP. MUST be honored by generate_from_pool -- otherwise Stoke
@@ -176,7 +179,9 @@ class Player(Fighter):
     fanfare_cap: int = 0          # 0 = character has no Fanfare resource
     spotlight: Optional[str] = None   # THE per-player registry: one
                                   # designated character at a time; a second
-                                  # designation re-aims, never stacks
+                                  # designation re-aims, never stacks. The
+                                  # guest-cast sentinel means every Companion
+                                  # card rather than one named character.
 
 
 @dataclass
