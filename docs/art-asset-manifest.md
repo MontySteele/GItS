@@ -21,6 +21,42 @@ Every dimension below is scraped from Hexaghost (complete) / Champ (Spine humano
 
 **Slice total: ~55 images, most of them small icons. Full character: ~135.**
 
+## The combat model layer cut — AS SHIPPED (animation sprint 1, Track B, 2026-07-23)
+
+Source artwork: `ImageGen/images/model/character_klee_full_wish.png` (1069x1245,
+the wish splash — same source the static `combat_model.png` was scaled from).
+The plan's nominal cut was body/head/backpack/Dodoco; in THIS pose a head cut
+runs through hair overlaps and buys visible seams for a weak effect, while the
+splash's big free-floating elements separate almost surgically. Shipped cut
+(5 layers, z back-to-front):
+
+| Layer | Master (full res) | Shipped (combat scale) | Motion role |
+|---|---|---|---|
+| smoke | 698x884 | 154x202 | slow x-drift (blast cloud) |
+| floaters | 1058x1124 | 240x256 | ambient bob (bell-bombs, flowers, trails) |
+| dumpty | 407x479 | 98x110 | the held Jumpy Dumpty: bob + micro-rotate |
+| body | 528x847 | 124x195 | Klee herself: sway; hurt-flash target |
+| dodoco | 153x187 | 41x49 | independent bob + wiggle ("she's alive") |
+
+Method (all scripted, no hand editor work): alpha connected components gave
+the floaters for free; the one merged blob (Klee+dumpty+smoke+dodoco) was
+hard-partitioned by hand-digitized fence polylines + flood fill, leftover
+outline pixels assigned by priority dilation (dodoco > dumpty > body > smoke).
+Hard partition means the at-rest recomposition is pixel-exact by construction.
+Lower layers are inpainted (edge-extension onion peel) behind movers: smoke
+32px behind dumpty/body/dodoco, body 20px behind dodoco — sized so worst-case
+relative idle motion (~27 source px) never reveals a hole.
+
+Masters: `ImageGen/images/model/layers/klee_layer_*.png` (+ `layers.json`
+offsets). Shipped: `layers/combat/klee_combat_*.png` (+ `layers_combat.json`),
+pre-scaled to the same 240x280 box the static model used — house rule: ship
+pre-sized art, no runtime minification. Both tiers F in `art/SOURCES.tsv`
+(derived from the already-ledgered wish splash). Layer PNGs are gitignored
+with the rest of ImageGen/images; `tools/cut_klee_combat_layers.py` (the
+committed cut — fences, partition, inpaint, export) regenerates all of them
+from the wish splash, and its printed offsets must match the sprite positions
+in `klee-mod/pck-src/klee/model/combat.tscn`.
+
 ## The combat model: no Spine required (Hexaghost proves it)
 Hexaghost's in-combat "model" is a Godot scene: TextureRect layers (a 512px core + five 256px orb layers) driven by an **AnimationPlayer + AnimationTree**, with GPUParticles2D for smoke/hurt effects. Champ, by contrast, uses a Spine rig (54KB .spskel + one 512×1024 atlas). We take the Hexaghost road:
 1. Pick ONE full-body Klee artwork.

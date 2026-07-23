@@ -88,6 +88,17 @@ foreach ($d in 'ui', 'powers', 'relics', 'model') {
     if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
+# Animation sprint 1 (Track B): pre-scaled combat layer sprites for the
+# animated combat scene. Full-res layer masters live in ImageGen/images/model
+# /layers; only the combat-scale derivatives in layers/combat ship, matching
+# how every other roster surface ships pre-sized art.
+$layerSrc = Join-Path $src 'model\layers\combat'
+if (Test-Path $layerSrc) {
+    $to = Join-Path $work 'klee\model\layers'
+    New-Item -ItemType Directory -Force -Path $to | Out-Null
+    Copy-Item (Join-Path $layerSrc '*.png') -Destination $to
+}
+
 $furinaSrc = Join-Path $src 'furina'
 foreach ($d in 'ui', 'powers', 'relics', 'model') {
     $from = Join-Path $furinaSrc $d
@@ -493,6 +504,11 @@ $contractLines = @(
     "sha256=$hash",
     'resource=res://klee/model/combat_visuals.tscn',
     'resource=res://klee/model/combat.tscn',
+    'resource=res://klee/model/layers/klee_combat_smoke.png',
+    'resource=res://klee/model/layers/klee_combat_floaters.png',
+    'resource=res://klee/model/layers/klee_combat_dumpty.png',
+    'resource=res://klee/model/layers/klee_combat_body.png',
+    'resource=res://klee/model/layers/klee_combat_dodoco.png',
     'resource=res://klee/build_id.tres',
     'resource=res://klee/ui/character_icon.tscn',
     'resource=res://klee/ui/char_select_bg_klee.tscn',
