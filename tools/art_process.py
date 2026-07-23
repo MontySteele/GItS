@@ -373,13 +373,23 @@ def main():
         else:
             gaps.append(f"{r['asset_id']} r{r['rank']} ({r['title']})")
 
-    # derived: locked select portrait
-    sp = ROOT / "ImageGen/images/ui/select_portrait.png"
-    if sp.exists():
+    # derived: locked select portrait -- one per character. The roster put
+    # Furina's portrait at ImageGen/images/furina/ui/; Klee's historical layout
+    # is ImageGen/images/ui/. Derive the locked variant next to EVERY
+    # select_portrait a plan row produced, not just Klee's hardcoded path.
+    sp_outs = {
+        (ROOT / r["out"]) for r in rows
+        if Path(r["out"]).name == "select_portrait.png"
+    }
+    for sp in sorted(sp_outs):
+        if not sp.exists():
+            continue
         img = Image.open(sp).convert("RGBA")
         locked = ImageEnhance.Brightness(ImageEnhance.Color(img).enhance(0.15)).enhance(0.55)
         locked.save(sp.parent / "select_portrait_locked.png")
-        status["select_portrait_locked"] = ("found", "derived: select_portrait desaturated")
+        key = "select_portrait_locked" if sp.parent == ROOT / "ImageGen/images/ui" \
+            else f"{sp.parent.parent.name}_select_portrait_locked"
+        status[key] = ("found", f"derived: {sp.parent.name}/select_portrait desaturated")
 
     update_manifest(status)
     print(f"{done}/{len(rows)} plan rows processed; {len(status)} assets placed")
