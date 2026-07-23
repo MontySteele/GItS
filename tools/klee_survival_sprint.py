@@ -17,7 +17,7 @@ import math
 import subprocess
 
 from tier0 import constants as C
-from tier0.content import loader, upgrades
+from tier0.content import loader, local_reference, upgrades
 from tier0.engine import powers
 from tier0.harness import axes
 from tier0.harness import metrics as fight_metrics
@@ -60,11 +60,39 @@ def _git_world() -> tuple[str, str]:
     return commit, hashlib.sha256(diff).hexdigest()[:12]
 
 
+def _game_ref_digest() -> str:
+    """Digest of the gitignored game_ref/ sheets the loader consumes.
+
+    WHY: on 2026-07-22/23 a measurement world diverged between two machines
+    while their world lines matched, because ``tracked_diff`` hashes only
+    ``git diff --binary`` over TRACKED files -- gitignored game_ref content
+    was invisible to provenance. Hash every ``*.yaml`` in game_ref/, sorted
+    by name, name and content both, so any local-reference difference
+    changes the digest. Absence of the directory (or committed-only mode,
+    where the loader consumes none of it) is labeled distinctly rather
+    than hashed as empty. Keep in sync with
+    tools/real_battery_calibration.py.
+    """
+    if local_reference.mode() == local_reference.COMMITTED_ONLY:
+        return "committed-only"
+    ref_dir = local_reference.game_ref_dir()
+    if not ref_dir.is_dir():
+        return "absent"
+    digest = hashlib.sha256()
+    for path in sorted(ref_dir.glob("*.yaml"), key=lambda p: p.name):
+        digest.update(path.name.encode("utf-8"))
+        digest.update(b"\x00")
+        digest.update(path.read_bytes())
+        digest.update(b"\x00")
+    return digest.hexdigest()[:12]
+
+
 def _print_world() -> None:
     commit, dirty = _git_world()
     print(
         "world: "
         f"git={commit} tracked_diff={dirty} "
+        f"game_ref={_game_ref_digest()} "
         f"CONSTANTS={C.CONSTANTS_VERSION} "
         f"DRAFTER={C.DRAFTER_VERSION} "
         f"RUNTEMPLATE={C.RUNTEMPLATE_VERSION} "
