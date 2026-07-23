@@ -63,11 +63,15 @@ public static class GaugeBridge
     private static readonly GaugeSpec[] Specs =
     {
         // Burst ready: flash when the meter first reaches the cast gate.
+        // Anchored centered overhead: the gauge scene is symmetric about its
+        // root, and Klee's tallest layer (the smoke plume) tops out ~-277 in
+        // creature space -- -300 clears the whole model (C4 feedback: the old
+        // up-left anchor sat on Dodoco).
         new()
         {
             Key = "burst",
             FillColor = new Color(1.0f, 0.45f, 0.15f),
-            AnchorOffset = new Vector2(-100f, -250f),
+            AnchorOffset = new Vector2(0f, -300f),
             VisualSpan = BurstConstants.KleeMax,
             LabelMax = BurstConstants.KleeMax,
             AppliesTo = creature => creature.Player?.Character is Klee,

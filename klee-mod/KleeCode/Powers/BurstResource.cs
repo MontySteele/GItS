@@ -73,16 +73,13 @@ public interface ISkillTagCard
 /// overflow is lost at cast, never at gain (combat.py: playing the Burst
 /// sets burst_energy = 0).
 ///
-/// The badge: BaseLib ships NO ambient on-screen meter (its resource UI is
-/// cost-side card visuals only; BasicResourceVisualsHandler is an empty
-/// marker), so the meter renders through <see cref="BurstMeterPower"/> on
-/// Klee -- the SparkPower display idiom. The resource is canonical; the
-/// badge is display. Two writers, one invariant: Gain() moves both together
-/// (every context-carrying site), GainPreResolution() moves the resource
-/// alone -- BeforeCardPlayed has no PlayerChoiceContext, so the skill-tag
-/// bonus lands resource-first and SyncBadge() restores badge == resource in
-/// AfterCardPlayed. The badge may lag the resource only WITHIN a single card
-/// play, never across plays. Anything that RULES on the meter (the future
+/// Display: the Track C overhead gauge (Vfx.GaugeBridge) is the meter's only
+/// ambient surface. It renders through the <see cref="AmountFor"/> read and
+/// the Refresh calls in the mutation funnels below; SyncGauge() in
+/// AfterCardPlayed catches the one mutation outside them (the kit card's
+/// whole-meter Spend inside the cost machinery). The old status-strip badge
+/// (<see cref="BurstMeterPower"/>) was retired as redundant with the gauge --
+/// C4 playtest feedback 2026-07-23. Anything that RULES on the meter (the
 /// cast gate included) must read the resource.
 /// </summary>
 public sealed class KleeBurstResource : BasicCustomResource
@@ -142,26 +139,29 @@ public sealed class KleeBurstResource : BasicCustomResource
     /// <summary>
     /// The gain path for every context-carrying source (reactions, the
     /// burst_energy op, and future powers) -- mirrors SparkPower.Gain so the
-    /// economy stays easy to instrument. Moves resource and badge together.
+    /// economy stays easy to instrument. The context/cardSource parameters
+    /// stay in the signature even though the badge apply they fed is retired:
+    /// every call site carries them, and a future instrumented gain (VFX,
+    /// telemetry) wants them back.
     /// </summary>
-    public static async Task Gain(
+    public static Task Gain(
         PlayerChoiceContext choiceContext, Creature player, int amount,
         CardModel? cardSource)
     {
-        if (amount <= 0) return;
+        if (amount <= 0) return Task.CompletedTask;
         var resource = Find(player);
-        if (resource == null) return;
+        if (resource == null) return Task.CompletedTask;
 
         resource.ModifyAmount(amount);
         Vfx.GaugeBridge.Refresh(player);
-        await PowerCmd.Apply<BurstMeterPower>(
-            choiceContext, player, amount, applier: player, cardSource: cardSource);
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// The gain path for the skill-tag bonus, which fires in BeforeCardPlayed
-    /// where the game hands hooks no PlayerChoiceContext. Resource only; the
-    /// paired SyncBadge call in AfterCardPlayed catches the display up.
+    /// where the game hands hooks no PlayerChoiceContext. Refreshes the gauge
+    /// immediately; the paired SyncGauge call in AfterCardPlayed exists for
+    /// the cast drain, not for this.
     /// </summary>
     public static void GainPreResolution(Creature player, int amount)
     {
@@ -173,33 +173,26 @@ public sealed class KleeBurstResource : BasicCustomResource
     }
 
     /// <summary>
-    /// Re-establish badge == resource (sync-to-truth, so it also self-heals
-    /// any drift rather than replaying a remembered delta). Also the gauge's
-    /// catch-up site: it runs after EVERY card play, which is what makes the
-    /// cast drain visible -- the kit card's whole-meter Spend happens inside
-    /// the cost machinery, outside our mutation funnels.
+    /// The gauge's catch-up site: runs after EVERY card play, which is what
+    /// makes the cast drain visible -- the kit card's whole-meter Spend
+    /// happens inside the cost machinery, outside our mutation funnels.
+    /// (Successor to the retired SyncBadge; the badge half is gone, the
+    /// after-every-play timing is unchanged.)
     /// </summary>
-    public static async Task SyncBadge(
-        PlayerChoiceContext choiceContext, Creature player, CardModel? cardSource)
+    public static void SyncGauge(Creature player)
     {
-        var resource = Find(player);
-        if (resource == null) return;
+        if (Find(player) == null) return;
         Vfx.GaugeBridge.Refresh(player);
-
-        var badge = player.Powers.OfType<BurstMeterPower>().FirstOrDefault();
-        decimal delta = resource.Amount - (badge?.Amount ?? 0m);
-        if (delta == 0m) return;
-        await PowerCmd.Apply<BurstMeterPower>(
-            choiceContext, player, delta, applier: player, cardSource: cardSource);
     }
 }
 
 /// <summary>
-/// Display badge for the Burst meter (see KleeBurstResource: BaseLib has no
-/// ambient resource UI, so the meter shows the way Sparks do). Amount equals
-/// the resource's Amount between card plays; within a skill-tagged play it
-/// may lag by the tag bonus until SyncBadge runs in AfterCardPlayed. Rules
-/// read the resource, never this.
+/// RETIRED display badge for the Burst meter -- superseded by the Track C
+/// overhead gauge and no longer applied anywhere (C4 playtest feedback
+/// 2026-07-23: redundant with the gauge). The class stays registered for
+/// save compatibility: a run saved mid-combat before the retirement carries
+/// BurstMeterPower stacks, and deleting the model would break that load.
+/// Never apply this again; it renders one stale combat at most.
 /// </summary>
 public sealed class BurstMeterPower : PowerModel, ILocalizationProvider
 {
