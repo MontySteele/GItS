@@ -87,13 +87,13 @@ internal static class KleeSelfCheck
     }
 
     // Distinct rule labels that can actually reach the log:
-    //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8, R9
+    //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8, R9, R10, R11
     // This was 8 while R5/R6a/R6b were documented but unattributable -- the
     // helpers that emit them hardcoded R4 and R6, so those three strings could
     // never appear. Fixing the labels is what makes the count honest. Note
     // R4 and R5 come from a `rule` parameter, so grepping for Fail("R... will
     // not find them; count the call sites, not the literals.
-    private const int RuleCount = 14;
+    private const int RuleCount = 16;
 
     private static void Fail(string rule, string detail) => Findings.Add($"[{rule}] {detail}");
 
@@ -252,6 +252,44 @@ internal static class KleeSelfCheck
                 Fail("R3c", $"CardPool has no {rarity} cards. Not a soft lock -- reward generation "
                           + "falls through to the next rarity -- but the rarity odds collapse onto "
                           + "the remaining tiers, so drafts will not match the sheet.");
+            }
+        }
+
+        // R10. DynamicVarSet's constructor throws on a duplicate var name, and
+        // it is built lazily inside CardFactory.CreateForReward -- so the
+        // reward screen dies on whatever run first ROLLS the card, picked or
+        // not (playtest 2026-07-23: StageLights/CourtroomDrama each declared
+        // "PowerAmount" twice). The generator now fails on collisions at emit
+        // time; evaluating the getter here catches hand-written cards too,
+        // at boot instead of mid-run.
+        foreach (var card in pool.Concat(deck))
+        {
+            try
+            {
+                _ = card.DynamicVars;
+            }
+            catch (ArgumentException e)
+            {
+                Fail("R10", $"{card.GetType().Name}: DynamicVars getter threw \"{e.Message}\" -- "
+                          + "duplicate DynamicVar name; every reward screen that rolls this "
+                          + "card will throw.");
+            }
+        }
+
+        // R11. Base-game content resolves "the character's Strike/Defend" with
+        // an unguarded First() over the pool: LargeCapsule.GetStrikeForCharacter
+        // is `AllCards.First(c => c.Rarity == Basic && c.Tags.Contains(
+        // CardTag.Strike))`, and the throw lands inside the Ancient event's
+        // option handler, hanging the room (playtest 2026-07-23: Furina's
+        // first relic -- her generated basics carried no CanonicalTags).
+        // Mirror that predicate exactly: rarity AND tag together.
+        foreach (var tag in new[] { CardTag.Strike, CardTag.Defend })
+        {
+            if (!pool.Any(c => c.Rarity == CardRarity.Basic && c.Tags.Contains(tag)))
+            {
+                Fail("R11", $"{character.GetType().Name}: no Basic-rarity card tagged "
+                          + $"CardTag.{tag} in the pool; LargeCapsule (and anything else "
+                          + "keyed on the tag) does an unguarded First() and will throw.");
             }
         }
     }

@@ -44,6 +44,8 @@ public sealed class SoloistsSolicitation : CustomCardModel, ICharacterCard
         ("description", "Deal {Damage:diff()} damage."),
     };
 
+    protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {

@@ -996,11 +996,12 @@ def build_vars(card: dict) -> list[str]:
                 f'new DynamicVar("FanfareCap", {int(eff["amount"])}m)')
         elif op == "heal":
             out.append(f'new DynamicVar("Heal", {int(eff["amount"])}m)')
-        elif op in POWER_UPGRADE_OPS and power_upgrade(card):
-            # Same rule again: only an upgradeable amount needs a var. The
-            # sim binds these deltas to the FIRST top-level apply_power or
-            # buff_next_attack, and build_vars only walks top level, so a
-            # conditional rider never claims the var.
+        elif op in POWER_UPGRADE_OPS and eff is power_upgrade_effect(card):
+            # Same rule again: only an upgradeable amount needs a var, and
+            # only the ONE effect the sim's delta binds to may own it -- a
+            # second apply_power on the same card must stay a literal, or the
+            # duplicate "PowerAmount" key throws in the DynamicVarSet
+            # constructor at reward time (2026-07-23 softlock).
             out.append(f'new DynamicVar("PowerAmount", {int(eff["amount"])}m)')
         elif op == "discard_for_sparks" and discard_upgrade(card) != (0, 0):
             # R36: both numbers render, so both become vars together.
@@ -1035,6 +1036,22 @@ def build_vars(card: dict) -> list[str]:
                     out.append(f'new DynamicVar("DrawElse", {int(e["amount"])}m)')
     if added_draw_upgrade(card):
         out.append(f"new CardsVar({added_draw_upgrade(card)})")
+    # DynamicVarSet's constructor throws on a duplicate name, and it runs
+    # inside CardFactory.CreateForReward -- a collision is a reward-screen
+    # softlock on whatever run happens to roll the card. Fail the GENERATOR
+    # instead. Typed vars carry their class-derived name (DamageVar ->
+    # "Damage"), named vars declare theirs.
+    names = [
+        (m.group(1) if (m := re.search(r'DynamicVar\("(\w+)"', decl))
+         else re.match(r"new (\w+?)Var\(", decl).group(1))
+        for decl in out
+    ]
+    dupes = sorted({n for n in names if names.count(n) > 1})
+    if dupes:
+        raise SystemExit(
+            f"gen_klee_cards: {card['id']}: duplicate DynamicVar name(s) "
+            f"{dupes} -- DynamicVarSet throws at reward time "
+            "(2026-07-23 softlock).")
     return out
 
 
@@ -1323,6 +1340,38 @@ def power_upgrade(card: dict) -> int:
             f"gen_klee_cards: {card['id']}: multiple power upgrade keys {keys} "
             "-- one apply_power effect cannot take two amount deltas.")
     return int(deltas[keys[0]]) if keys else 0
+
+
+def power_upgrade_effect(card: dict) -> dict | None:
+    """The ONE top-level effect the ruled power delta binds to, mirroring
+    tier0/content/upgrades.py exactly: `weak`/`vulnerable` bump the first
+    apply_power whose power NAME contains the word; every other key takes the
+    first top-level apply_power/buff_next_attack. Every other power effect on
+    the card renders its printed literal and declares NO var -- two effects
+    sharing the "PowerAmount" name is a DynamicVarSet constructor throw that
+    kills the reward screen (playtest 2026-07-23: stage_lights,
+    courtroom_drama)."""
+    if not power_upgrade(card):
+        return None
+    deltas = upgrade_plan(card)[0]
+    key = next(k for k in POWER_UPGRADE_KEYS if k in deltas)
+    effects = card["effects"]
+    if key in ("weak", "vulnerable"):
+        word = "vuln" if key == "vulnerable" else "weak"
+        hit = next((fx for fx in effects if fx.get("op") == "apply_power"
+                    and word in fx.get("power", "")), None)
+    else:
+        hit = next((fx for fx in effects
+                    if fx.get("op") in POWER_UPGRADE_OPS), None)
+    if hit is None:
+        # upgrade_plan vets "some POWER_UPGRADE_OPS effect exists" but not the
+        # weak/vuln name match; the sim would fail to apply this delta, so a
+        # silent literal here would ship a card whose upgrade does nothing.
+        raise SystemExit(
+            f"gen_klee_cards: {card['id']}: power delta '{key}' matches no "
+            "top-level effect (tier0 upgrades.py binding rule) -- fix the "
+            "sheet or the delta key.")
+    return hit
 
 
 def _target_guard(lines: list[str], ctx: dict) -> None:
@@ -1670,7 +1719,7 @@ def build_body(
             cls = APPLY_POWERS[eff["power"]][0]
             amount = (
                 'DynamicVars["PowerAmount"].IntValue'
-                if power_upgrade(card)
+                if eff is power_upgrade_effect(card)
                 else str(int(eff["amount"]))
             )
             if salon_deployed and eff["power"] != "salon_member":
@@ -1994,7 +2043,8 @@ def build_body(
             # tier0 _op_buff_next_attack -> next_attack_up, consumed by the
             # next attack card (NextAttackUpPower's AfterCardPlayed).
             amount = ('DynamicVars["PowerAmount"].IntValue'
-                      if power_upgrade(card) else str(int(eff["amount"])))
+                      if eff is power_upgrade_effect(card)
+                      else str(int(eff["amount"])))
             lines.append(
                 f"await PowerCmd.Apply<NextAttackUpPower>(choiceContext, "
                 f"Owner.Creature, {amount}, "
@@ -2421,7 +2471,7 @@ def build_description(card: dict) -> str:
 
         elif op == "apply_power":
             template = APPLY_POWERS[eff["power"]][2]
-            x = ("{PowerAmount:diff()}" if power_upgrade(card)
+            x = ("{PowerAmount:diff()}" if eff is power_upgrade_effect(card)
                  else str(int(eff["amount"])))
             to = " to ALL enemies" if eff.get("target") == "all_enemies" else ""
             parts.append(template.replace("{X}", x).replace("{TO}", to))
@@ -2535,7 +2585,7 @@ def build_description(card: dict) -> str:
                          else "[gold]Swirl[/gold] an enemy's aura.")
 
         elif op == "buff_next_attack":
-            n = ("{PowerAmount:diff()}" if power_upgrade(card)
+            n = ("{PowerAmount:diff()}" if eff is power_upgrade_effect(card)
                  else str(int(eff["amount"])))
             parts.append(f"Your next Attack deals {n} more damage.")
 
@@ -2694,7 +2744,12 @@ def build_upgrade(card: dict) -> list[str]:
             lines.append(f'DynamicVars["Chance"].UpgradeValueBy({pts}m);')
             continue
         if op in POWER_UPGRADE_OPS:
-            key = next((k for k in POWER_UPGRADE_KEYS if k in deltas), None)
+            # Only the effect the sim binds the delta to owns the var (see
+            # power_upgrade_effect) -- keying off "first POWER_UPGRADE_OPS
+            # effect" here would bump the wrong effect for a name-matched
+            # weak/vulnerable delta listed after another power.
+            key = (next((k for k in POWER_UPGRADE_KEYS if k in deltas), None)
+                   if eff is power_upgrade_effect(card) else None)
         elif op == "damage" and eff["target"] != "self":
             key = "damage"
         else:
@@ -3014,6 +3069,25 @@ def emit(
             "    // Partially generated character sheets must never auto-register cards."
         )
     )
+    # Base-game content keys on CardTag.Strike/Defend AND CardRarity.Basic
+    # together: LargeCapsule.GetStrikeForCharacter is
+    # `CardPool.AllCards.First(c => c.Rarity == Basic && c.Tags.Contains(
+    # CardTag.Strike))` -- an untagged basic makes that First() throw inside
+    # the Ancient event's option handler and hangs the room (playtest
+    # 2026-07-23). Mirror the hand-written Kaboom/DuckAndCover pair: the
+    # basic attack is the character's Strike, the basic blocker its Defend.
+    tag = None
+    if card["rarity"] == "basic":
+        if card["type"] == "attack" and any(
+                e.get("op") == "damage" and e.get("target") != "self"
+                for e in card["effects"]):
+            tag = "Strike"
+        elif any(e.get("op") == "block" for e in card["effects"]):
+            tag = "Defend"
+    tags_member = (
+        "\n\n    protected override HashSet<CardTag> CanonicalTags => "
+        f"new() {{ CardTag.{tag} }};"
+        if tag else "")
     resource_cost_setup = []
     if int(card.get("encore_cost", 0)) > 0:
         resource_cost_setup.append(
@@ -3066,7 +3140,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{card["name"].replace('"', chr(92) + chr(34))}"),
         ("description", "{desc}"),
-    }};
+    }};{tags_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

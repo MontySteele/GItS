@@ -50,6 +50,8 @@ public sealed class JumpyDumpty : CustomCardModel, IElementalCard, ISkillTagCard
         ("description", "Deal {Damage:diff()} damage to random enemies twice. Place a [gold]Bomb[/gold] on a random enemy dealing {ExtraDamage:diff()} damage."),
     };
 
+    protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {

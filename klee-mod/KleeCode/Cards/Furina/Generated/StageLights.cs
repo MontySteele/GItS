@@ -41,14 +41,13 @@ public sealed class StageLights : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stage Lights"),
-        ("description", "[gold]Spotlighted[/gold] Companion damage gains {PowerAmount:diff()} this turn. Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "[gold]Spotlighted[/gold] Companion damage gains {PowerAmount:diff()} this turn. Apply 1 [gold]Weak[/gold] to ALL enemies. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DynamicVar("PowerAmount", 2m),
-            new DynamicVar("PowerAmount", 1m),
             new CardsVar(1)
         };
 
@@ -64,7 +63,7 @@ public sealed class StageLights : CustomCardModel, ICharacterCard
         await PowerCmd.Apply<SpotlightFlatDamageTurnPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
         foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())
         {
-            await PowerCmd.Apply<WeakPower>(choiceContext, debuffTarget, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+            await PowerCmd.Apply<WeakPower>(choiceContext, debuffTarget, 1, applier: Owner.Creature, cardSource: this);
         }
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }

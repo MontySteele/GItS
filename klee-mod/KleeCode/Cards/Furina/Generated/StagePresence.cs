@@ -44,6 +44,8 @@ public sealed class StagePresence : CustomCardModel, ICharacterCard
         ("description", "Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
+    protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Defend };
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {

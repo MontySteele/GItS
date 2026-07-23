@@ -44,6 +44,8 @@ public sealed class RegalBearing : CustomCardModel, ICharacterCard
         ("description", "Gain {Block:diff()} [gold]Block[/gold]. Apply 1 [gold]Weak[/gold]."),
     };
 
+    protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Defend };
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {

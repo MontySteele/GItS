@@ -41,14 +41,13 @@ public sealed class CourtroomDrama : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Courtroom Drama"),
-        ("description", "Apply {PowerAmount:diff()} [gold]Vulnerable[/gold]. Apply {PowerAmount:diff()} [gold]Weak[/gold]."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Vulnerable[/gold]. Apply 1 [gold]Weak[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 2m),
-            new DynamicVar("PowerAmount", 1m)
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -62,7 +61,7 @@ public sealed class CourtroomDrama : CustomCardModel, ICharacterCard
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
-        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
