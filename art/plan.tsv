@@ -257,3 +257,291 @@ model_source_tcg_alt	ImageGen/images/model/klee_character_card.png	0	0	raw	cente
 # pop's only claim was r1 seniority, so pop yielded and went to rehunt.
 # DECLINED: incumbent fish_flavored_bait keeps Item Fish-Flavored Toast
 # fish_blasting	ImageGen/images/cards/klee/fish_blasting.png	500	380	cover_autocrop	contain	shortlist	1	png	Item Fish-Flavored Toast.png		item
+# ---------- FURINA batch 1 (identity: basics + generic + rares) ----------
+# Sources enumerated from Category:Furina Images via tools/art_hunt.py, not guessed.
+# source_group intentionally BLANK: Furina's own cards stay under strict L1.
+soloists_solicitation	ImageGen/images/cards/furina/soloists_solicitation.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Soloist's Prologue Computer Graphic.png		splash	
+soloists_solicitation	ImageGen/images/cards/furina/soloists_solicitation.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Furina Game (Ousia).png		tcg	
+stage_presence	ImageGen/images/cards/furina/stage_presence.png	500	380	cover	y0.20	shortlist	1	png	Furina Portrait.png		splash	
+stage_presence	ImageGen/images/cards/furina/stage_presence.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Furina Card.png		splash	
+regal_bearing	ImageGen/images/cards/furina/regal_bearing.png	500	380	cover	y0.20	shortlist	1	png	Furina Character Card.png		tcg	
+regal_bearing	ImageGen/images/cards/furina/regal_bearing.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Furina Expression 1.png		sticker	
+regal_bearing	ImageGen/images/cards/furina/regal_bearing.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Furina Introduction Banner.png		splash	
+aria_of_recompense	ImageGen/images/cards/furina/aria_of_recompense.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	La vaguelette.png		splash	
+aria_of_recompense	ImageGen/images/cards/furina/aria_of_recompense.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Chanson of Many Waters.png		splash	
+salon_debut	ImageGen/images/cards/furina/salon_debut.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Salon Members Summon.png		tcg	
+salon_debut	ImageGen/images/cards/furina/salon_debut.png	500	380	cover_autocrop	cover@0.06	shortlist	2	gif	Salon Solitaire Salon Members Preview.gif	50	vfx	
+salon_debut	ImageGen/images/cards/furina/salon_debut.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Opera Epiclese.png		splash	
+graceful_retreat	ImageGen/images/cards/furina/graceful_retreat.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Expression 2.png		sticker	furina_pool
+graceful_retreat	ImageGen/images/cards/furina/graceful_retreat.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Savoring the Breeze Furina.png		splash	furina_pool
+poised_riposte	ImageGen/images/cards/furina/poised_riposte.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	On-Hit Effect Furina.png		vfx	furina_pool
+poised_riposte	ImageGen/images/cards/furina/poised_riposte.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Furina Game (Pneuma).png		tcg	furina_pool
+commanding_gaze	ImageGen/images/cards/furina/commanding_gaze.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Expression 3.png		sticker	furina_pool
+commanding_gaze	ImageGen/images/cards/furina/commanding_gaze.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Furina Expression 1.png		sticker	furina_pool
+commanding_gaze	ImageGen/images/cards/furina/commanding_gaze.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Furina Card 2.png		splash	furina_pool
+witness_stand	ImageGen/images/cards/furina/witness_stand.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Opera Epiclese Courtroom.png		splash	furina_pool
+witness_stand	ImageGen/images/cards/furina/witness_stand.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Opera Epiclese - Furina's Seat.png		splash	furina_pool
+macaron_break	ImageGen/images/cards/furina/macaron_break.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Rainbow Macarons.png		item	furina_pool
+macaron_break	ImageGen/images/cards/furina/macaron_break.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Rainbow Macarons Event Card.png		item	furina_pool
+macaron_break	ImageGen/images/cards/furina/macaron_break.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Furina Banquet.png		item	furina_pool
+swelling_overture	ImageGen/images/cards/furina/swelling_overture.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Chanson of Many Waters 2024-06-25 - Furina Shorts.png		splash	furina_pool
+swelling_overture	ImageGen/images/cards/furina/swelling_overture.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Furina Introduction Card.png		splash	furina_pool
+fortissimo_guard	ImageGen/images/cards/furina/fortissimo_guard.png	500	380	cover	y0.16	shortlist	1	png	Furina Profile.png		splash	furina_pool
+fortissimo_guard	ImageGen/images/cards/furina/fortissimo_guard.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Furina Multi Wish.png		splash	furina_pool
+fortissimo_guard	ImageGen/images/cards/furina/fortissimo_guard.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Furina Wallpaper without Watermark.png		splash	furina_pool
+courtroom_drama	ImageGen/images/cards/furina/courtroom_drama.png	500	380	cover	x0.40,y0.55	shortlist	1	png	Opera Epiclese Courtroom.png		splash	furina_pool
+courtroom_drama	ImageGen/images/cards/furina/courtroom_drama.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Opera Epiclese Courtroom.png		splash	furina_pool
+quick_change	ImageGen/images/cards/furina/quick_change.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Fragrant Fantasy Furina 1.png		splash	furina_pool
+quick_change	ImageGen/images/cards/furina/quick_change.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Fragrant Fantasy Furina 2.png		splash	furina_pool
+quick_change	ImageGen/images/cards/furina/quick_change.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Fragrant Fantasy Furina 3.png		splash	furina_pool
+deep_breath	ImageGen/images/cards/furina/deep_breath.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Profile.png		splash	furina_pool
+deep_breath	ImageGen/images/cards/furina/deep_breath.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Tea Time Furina Preview.png		splash	furina_pool
+deep_breath	ImageGen/images/cards/furina/deep_breath.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	New Year's Advice from Teyvat Furina.png		splash	furina_pool
+let_the_people_rejoice	ImageGen/images/cards/furina/let_the_people_rejoice.png	500	380	cover	y0.29	shortlist	1	png	Furina Multi Wish.png		splash	
+let_the_people_rejoice	ImageGen/images/cards/furina/let_the_people_rejoice.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Furina Full Wish.png		splash	
+let_the_people_rejoice	ImageGen/images/cards/furina/let_the_people_rejoice.png	500	380	cover_autocrop	cover@0.06	shortlist	3	gif	Salon Solitaire Pneuma Preview.gif	50	vfx	
+encore_performance	ImageGen/images/cards/furina/encore_performance.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Wallpaper without Watermark.png		splash	
+encore_performance	ImageGen/images/cards/furina/encore_performance.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Furina Introduction Card 2.png		splash	
+encore_performance	ImageGen/images/cards/furina/encore_performance.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Coronated Prima Donna Pneuma Turnaround.png		splash	
+singer_of_many_waters	ImageGen/images/cards/furina/singer_of_many_waters.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Chanson of Many Waters.png		splash	
+singer_of_many_waters	ImageGen/images/cards/furina/singer_of_many_waters.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Furina Game (Pneuma).png		tcg	
+unheard_confession	ImageGen/images/cards/furina/unheard_confession.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Letter Portrait Furina.png		splash	
+unheard_confession	ImageGen/images/cards/furina/unheard_confession.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	La vaguelette.png		splash	
+endless_waltz	ImageGen/images/cards/furina/endless_waltz.png	500	380	cover_autocrop	cover@0.06	shortlist	1	gif	Salon Solitaire Salon Members Preview.gif	50	vfx	
+endless_waltz	ImageGen/images/cards/furina/endless_waltz.png	500	380	cover_autocrop	cover@0.06	shortlist	2	gif	Salon Solitaire Water Walk Preview.gif	50	vfx	
+grand_gala	ImageGen/images/cards/furina/grand_gala.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Opera Epiclese.png		splash	
+grand_gala	ImageGen/images/cards/furina/grand_gala.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Furina Banquet.png		item	
+the_sea_is_my_stage	ImageGen/images/cards/furina/the_sea_is_my_stage.png	500	380	cover	y0.27	shortlist	1	png	Furina Card.png		splash	
+the_sea_is_my_stage	ImageGen/images/cards/furina/the_sea_is_my_stage.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Furina Wallpaper without Watermark.png		splash	
+universal_revelry	ImageGen/images/cards/furina/universal_revelry.png	500	380	cover	x0.50,y0.42	shortlist	1	png	2024 7 5 amusement park art.png		splash	
+universal_revelry	ImageGen/images/cards/furina/universal_revelry.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Tabletop Troupe Pros Furina.png		splash	
+universal_revelry	ImageGen/images/cards/furina/universal_revelry.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Seville Fair 2024.png		splash	
+star_of_the_show	ImageGen/images/cards/furina/star_of_the_show.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Wish.png		splash	
+star_of_the_show	ImageGen/images/cards/furina/star_of_the_show.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Starlight Reverie Wallpaper Furina.png		splash	
+star_of_the_show	ImageGen/images/cards/furina/star_of_the_show.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Furina Introduction Banner 2.png		splash	
+prima_donna	ImageGen/images/cards/furina/prima_donna.png	500	380	cover	y0.20	shortlist	1	png	Furina Character Card Platinum.png		tcg	
+prima_donna	ImageGen/images/cards/furina/prima_donna.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Coronated Prima Donna Ousia Turnaround.png		splash	
+prima_donna	ImageGen/images/cards/furina/prima_donna.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Starlit Letter Portrait Furina.png		splash	
+high_tide	ImageGen/images/cards/furina/high_tide.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Fragrant Fantasy Furina 2.png		splash	
+high_tide	ImageGen/images/cards/furina/high_tide.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	On-Hit Effect Furina.png		vfx	
+rain_of_roses	ImageGen/images/cards/furina/rain_of_roses.png	500	380	cover	y0.33	shortlist	1	png	Furina Birthday 2024.png		splash	
+rain_of_roses	ImageGen/images/cards/furina/rain_of_roses.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Furina Birthday 2025.png		splash	
+the_final_verdict	ImageGen/images/cards/furina/the_final_verdict.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Opera Epiclese (The Final Feast).png		splash	
+the_final_verdict	ImageGen/images/cards/furina/the_final_verdict.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Opera Epiclese Courtroom.png		splash	
+command_performance	ImageGen/images/cards/furina/command_performance.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Furina Full Wish.png		splash	
+command_performance	ImageGen/images/cards/furina/command_performance.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Furina Special Program Chibi.png		splash	
+reginas_mercy	ImageGen/images/cards/furina/reginas_mercy.png	500	380	cover	y0.36	shortlist	1	png	Furina Card 2.png		splash	
+reginas_mercy	ImageGen/images/cards/furina/reginas_mercy.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Starlit Letter Portrait Furina.png		splash	
+# ---------- FURINA batch 2 (salon + fanfare) ----------
+# Sources enumerated via tools/art_hunt.py; source_group left BLANK so
+# Furina's own cards stay under strict L1 (requirements sec.2).
+gentilhomme_usher	ImageGen/images/cards/furina/gentilhomme_usher.png	500	380	cover_autocrop	cover@0.06	shortlist	1	gif	Salon Solitaire Ousia Preview.gif	50	vfx	furina_pool
+gentilhomme_usher	ImageGen/images/cards/furina/gentilhomme_usher.png	500	380	cover_autocrop	cover@0.06	shortlist	2	gif	Salon Solitaire Plunging Water Preview.gif	50	vfx	furina_pool
+gentilhomme_usher	ImageGen/images/cards/furina/gentilhomme_usher.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Namecard Background Furina Banquet.png		splash	furina_pool
+surintendante_chevalmarin	ImageGen/images/cards/furina/surintendante_chevalmarin.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Film Stand Surintendante Chevalmarin.png		item	furina_pool
+surintendante_chevalmarin	ImageGen/images/cards/furina/surintendante_chevalmarin.png	500	380	cover_autocrop	cover@0.06	shortlist	2	gif	Salon Solitaire Ousia Preview.gif	50	vfx	furina_pool
+surintendante_chevalmarin	ImageGen/images/cards/furina/surintendante_chevalmarin.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Chevalmarin Film Fantasyland.png		splash	furina_pool
+mademoiselle_crabaletta	ImageGen/images/cards/furina/mademoiselle_crabaletta.png	500	380	cover_autocrop	cover@0.06	shortlist	1	gif	Salon Solitaire Plunging Water Preview.gif	50	vfx	furina_pool
+mademoiselle_crabaletta	ImageGen/images/cards/furina/mademoiselle_crabaletta.png	500	380	cover_autocrop	cover@0.06	shortlist	2	gif	Salon Solitaire Pneuma Preview.gif	50	vfx	furina_pool
+dinner_service	ImageGen/images/cards/furina/dinner_service.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Namecard Background Furina Banquet.png		splash	furina_pool
+dinner_service	ImageGen/images/cards/furina/dinner_service.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Furina Banquet.png		item	furina_pool
+dinner_service	ImageGen/images/cards/furina/dinner_service.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Astra Carnival Cat's Tail Gathering 2024 S4 Artwork.png		splash	furina_pool
+usher_the_waves	ImageGen/images/cards/furina/usher_the_waves.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Archon Quest When All Return to the Waters.png		splash	furina_pool
+usher_the_waves	ImageGen/images/cards/furina/usher_the_waves.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Calamitous Tread Graphic 2.png		splash	furina_pool
+usher_the_waves	ImageGen/images/cards/furina/usher_the_waves.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	A Wish For Smooth Sailing Quest Still 1.png		splash	furina_pool
+torrential_turn	ImageGen/images/cards/furina/torrential_turn.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Calamitous Tread Graphic 3.png		splash	furina_pool
+torrential_turn	ImageGen/images/cards/furina/torrential_turn.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Calamitous Tread Graphic 2.png		splash	furina_pool
+torrential_turn	ImageGen/images/cards/furina/torrential_turn.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Apocalypse Still 1.png		splash	furina_pool
+matinee_performance	ImageGen/images/cards/furina/matinee_performance.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Shorts 2023-11-21.png		splash	furina_pool
+matinee_performance	ImageGen/images/cards/furina/matinee_performance.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Chanson of Many Waters 2024-06-25 - Furina Shorts.png		splash	furina_pool
+rising_tide	ImageGen/images/cards/furina/rising_tide.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	A Wish For Smooth Sailing Quest Still 2.png		splash	furina_pool
+rising_tide	ImageGen/images/cards/furina/rising_tide.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Calamitous Tread Graphic 4.png		splash	furina_pool
+rising_tide	ImageGen/images/cards/furina/rising_tide.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Apocalypse Still 1.png		splash	furina_pool
+house_call	ImageGen/images/cards/furina/house_call.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Tea Time Furina Preview.png		splash	furina_pool
+house_call	ImageGen/images/cards/furina/house_call.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Suddenly the Rain Stops 2 2.png		splash	furina_pool
+house_call	ImageGen/images/cards/furina/house_call.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Savoring the Breeze Wallpaper Furina.png		splash	furina_pool
+curtain_up	ImageGen/images/cards/furina/curtain_up.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Opera Epiclese - After The Forgotten Thief.png		splash	furina_pool
+curtain_up	ImageGen/images/cards/furina/curtain_up.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Ride the Waves to a Rendezvous in Fontaine Opera Epiclese Concept Art 1.png		splash	furina_pool
+curtain_up	ImageGen/images/cards/furina/curtain_up.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Opera Epiclese Support Card.png		tcg	furina_pool
+dramatic_entrance	ImageGen/images/cards/furina/dramatic_entrance.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Icon Emoji Paimon's Paintings 28 Furina 1.png		sticker	furina_pool
+dramatic_entrance	ImageGen/images/cards/furina/dramatic_entrance.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Version Luna I HoYoPlay Splashscreen 2.png		splash	furina_pool
+crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Astra Carnival Cat's Tail Gathering 2024 S5 Artwork.png		splash	furina_pool
+crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	2024 7 5 amusement park art.png		splash	furina_pool
+crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Universal Studios Beijing x Genshin Impact Collab.png		splash	furina_pool
+suffering_for_art	ImageGen/images/cards/furina/suffering_for_art.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Expression 1.png		sticker	furina_pool
+suffering_for_art	ImageGen/images/cards/furina/suffering_for_art.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Fragmented Memories Archive 3.png		splash	furina_pool
+suffering_for_art	ImageGen/images/cards/furina/suffering_for_art.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Icon Emoji Paimon's Paintings 28 Furina 2.png		sticker	furina_pool
+thunderous_ovation	ImageGen/images/cards/furina/thunderous_ovation.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	4th Anniversary Wallpaper 1.png		splash	furina_pool
+thunderous_ovation	ImageGen/images/cards/furina/thunderous_ovation.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Paimon's Paintings Set 28.png		splash	furina_pool
+thunderous_ovation	ImageGen/images/cards/furina/thunderous_ovation.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Universal Studios Beijing x Genshin Impact Collab.png		splash	furina_pool
+tempo_change	ImageGen/images/cards/furina/tempo_change.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Icon Emoji Paimon's Paintings 29 Furina 1.png		sticker	furina_pool
+warmup_act	ImageGen/images/cards/furina/warmup_act.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Icon Emoji Paimon's Paintings 28 Furina 2.png		sticker	furina_pool
+warmup_act	ImageGen/images/cards/furina/warmup_act.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Furina Vision.png		item	furina_pool
+audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	A Commemorative Photo Aether 1.png		splash	furina_pool
+audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	A Commemorative Photo Lumine 1.png		splash	furina_pool
+audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Those We Have Kept Quest Still Aether.png		splash	furina_pool
+ebb_and_flow	ImageGen/images/cards/furina/ebb_and_flow.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Calamitous Tread Graphic 5.png		splash	furina_pool
+ebb_and_flow	ImageGen/images/cards/furina/ebb_and_flow.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	This Life, Just Like a Light Trickle of Song Still 1 Aether.png		splash	furina_pool
+ebb_and_flow	ImageGen/images/cards/furina/ebb_and_flow.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Fragmented Memories Puzzle 2.png		splash	furina_pool
+curtain_cue	ImageGen/images/cards/furina/curtain_cue.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Ride the Waves to a Rendezvous in Fontaine Opera Epiclese Concept Art 2.png		splash	furina_pool
+curtain_cue	ImageGen/images/cards/furina/curtain_cue.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Opera Epiclese - Neuvillette's Seat.png		splash	furina_pool
+curtain_cue	ImageGen/images/cards/furina/curtain_cue.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Opera Epiclese Support Card.png		tcg	furina_pool
+full_ensemble	ImageGen/images/cards/furina/full_ensemble.png	500	380	cover_autocrop	cover@0.06	shortlist	1	gif	Salon Solitaire Pneuma Preview.gif	50	vfx	furina_pool
+full_ensemble	ImageGen/images/cards/furina/full_ensemble.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Opera Epiclese Support Card Platinum.png		tcg	furina_pool
+grand_salon	ImageGen/images/cards/furina/grand_salon.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Opera Epiclese Support Card Platinum.png		tcg	furina_pool
+grand_salon	ImageGen/images/cards/furina/grand_salon.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Ride the Waves to a Rendezvous in Fontaine Opera Epiclese Concept Art 1.png		splash	furina_pool
+grand_salon	ImageGen/images/cards/furina/grand_salon.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Fragmented Memories Archive 3.png		splash	furina_pool
+many_waters_melody	ImageGen/images/cards/furina/many_waters_melody.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Chanson of Many Waters 2023-11-08, Immaculate Pulse 2023-11-08 - Furina & Charlotte Shorts.png		splash	furina_pool
+many_waters_melody	ImageGen/images/cards/furina/many_waters_melody.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Chanson of Many Waters 2024-06-25 - Furina Shorts.png		splash	furina_pool
+many_waters_melody	ImageGen/images/cards/furina/many_waters_melody.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	This Life, Just Like a Light Trickle of Song Still 2 Aether.png		splash	furina_pool
+dress_rehearsal	ImageGen/images/cards/furina/dress_rehearsal.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Fragrant Fantasy Furina Wallpaper.png		splash	furina_pool
+dress_rehearsal	ImageGen/images/cards/furina/dress_rehearsal.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Fragrant Fantasy Wallpaper.png		splash	furina_pool
+dress_rehearsal	ImageGen/images/cards/furina/dress_rehearsal.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Starlit Letter Wallpaper Furina.png		splash	furina_pool
+crashing_waves	ImageGen/images/cards/furina/crashing_waves.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Apocalypse Still 4 Aether.png		splash	furina_pool
+crashing_waves	ImageGen/images/cards/furina/crashing_waves.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Apocalypse Still 4 Lumine.png		splash	furina_pool
+crashing_waves	ImageGen/images/cards/furina/crashing_waves.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Calamitous Tread Graphic 4.png		splash	furina_pool
+overflowing_hospitality	ImageGen/images/cards/furina/overflowing_hospitality.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Furina Banquet.png		item	furina_pool
+overflowing_hospitality	ImageGen/images/cards/furina/overflowing_hospitality.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	A Commemorative Photo Aether 2.png		splash	furina_pool
+overflowing_hospitality	ImageGen/images/cards/furina/overflowing_hospitality.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Astra Carnival Cat's Tail Gathering 2024 S4 Artwork.png		splash	furina_pool
+waters_embrace	ImageGen/images/cards/furina/waters_embrace.png	500	380	cover	x0.60,y0.42@1.5	shortlist	1	png	Version 4.2 Wallpaper 2.png		splash	furina_pool
+waters_embrace	ImageGen/images/cards/furina/waters_embrace.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	A Wish For Smooth Sailing Quest Still 1.png		splash	furina_pool
+waters_embrace	ImageGen/images/cards/furina/waters_embrace.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Version 4.2 Wallpaper 2.png		splash	furina_pool
+crescendo	ImageGen/images/cards/furina/crescendo.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Version Luna VIII HoYoPlay Splashscreen.png		splash	furina_pool
+crescendo	ImageGen/images/cards/furina/crescendo.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Calamitous Tread Graphic 5.png		splash	furina_pool
+crescendo	ImageGen/images/cards/furina/crescendo.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Version 4.1 Wallpaper 1.png		splash	furina_pool
+showstopper	ImageGen/images/cards/furina/showstopper.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	VIPAD Furina.png		splash	furina_pool
+showstopper	ImageGen/images/cards/furina/showstopper.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	VIP Ace Detective Wallpaper.png		splash	furina_pool
+showstopper	ImageGen/images/cards/furina/showstopper.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	VIP Ace Detective 1.png		splash	furina_pool
+florid_cadenza	ImageGen/images/cards/furina/florid_cadenza.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	KR Official Radio Artwork 3.png		splash	furina_pool
+florid_cadenza	ImageGen/images/cards/furina/florid_cadenza.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Genshin Impact Commemorative Shikishi Set. 4 - Furina.png		splash	furina_pool
+florid_cadenza	ImageGen/images/cards/furina/florid_cadenza.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Paimon's Paintings Set 26.png		splash	furina_pool
+hearts_swelling	ImageGen/images/cards/furina/hearts_swelling.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	This Life, Just Like a Light Trickle of Song Still 1 Lumine.png		splash	furina_pool
+hearts_swelling	ImageGen/images/cards/furina/hearts_swelling.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Fragmented Memories Archive 3.png		splash	furina_pool
+hearts_swelling	ImageGen/images/cards/furina/hearts_swelling.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Furina Birthday 2024 - Shorts.png		splash	furina_pool
+rapturous_applause	ImageGen/images/cards/furina/rapturous_applause.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	FCFH Applause and Cheer.png		splash	furina_pool
+rapturous_applause	ImageGen/images/cards/furina/rapturous_applause.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Astra Carnival Cat's Tail Gathering 2024 S5 Artwork.png		splash	furina_pool
+rapturous_applause	ImageGen/images/cards/furina/rapturous_applause.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	4th Anniversary Wallpaper 3.jpg		splash	furina_pool
+pit_orchestra	ImageGen/images/cards/furina/pit_orchestra.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Opera Epiclese Support Card Golden.png		tcg	furina_pool
+pit_orchestra	ImageGen/images/cards/furina/pit_orchestra.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Opera Epiclese - Neuvillette's Seat.png		splash	furina_pool
+flood_of_emotion	ImageGen/images/cards/furina/flood_of_emotion.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Apocalypse Still 1.png		splash	furina_pool
+flood_of_emotion	ImageGen/images/cards/furina/flood_of_emotion.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Calamitous Tread Graphic 3.png		splash	furina_pool
+flood_of_emotion	ImageGen/images/cards/furina/flood_of_emotion.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Archon Quest When All Return to the Waters.png		splash	furina_pool
+undercurrent	ImageGen/images/cards/furina/undercurrent.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Special Program Chibi.png		sticker	furina_pool
+undercurrent	ImageGen/images/cards/furina/undercurrent.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Furina Vision.png		item	furina_pool
+undercurrent	ImageGen/images/cards/furina/undercurrent.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	On-Hit Effect Furina.png		vfx	furina_pool
+# ---------- FURINA batch 3 (spotlight + token) ----------
+# sec.10: distinct props/crops, no identical beams. Hybrid source rule.
+an_invitation	ImageGen/images/cards/furina/an_invitation.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Ball Invitation Letter.png		item	furina_pool
+an_invitation	ImageGen/images/cards/furina/an_invitation.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Event Invitation.png		item	furina_pool
+an_invitation	ImageGen/images/cards/furina/an_invitation.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Invitation to an Auction.png		item	furina_pool
+blocking_notes	ImageGen/images/cards/furina/blocking_notes.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Case Record Entrances and Exits to the Opera House.png		item	furina_pool
+blocking_notes	ImageGen/images/cards/furina/blocking_notes.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Opera House Switcheroo Case Record.png		item	furina_pool
+blocking_notes	ImageGen/images/cards/furina/blocking_notes.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Theater Tickets.png		item	furina_pool
+limelight	ImageGen/images/cards/furina/limelight.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Shining Spotlight.png		item	furina_pool
+limelight	ImageGen/images/cards/furina/limelight.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Movable Small Spotlight.png		item	furina_pool
+limelight	ImageGen/images/cards/furina/limelight.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Festival Spotlight.png		item	furina_pool
+shared_billing	ImageGen/images/cards/furina/shared_billing.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Opera Epiclese Support Card.png		tcg	furina_pool
+shared_billing	ImageGen/images/cards/furina/shared_billing.png	500	380	cover	y0.30	shortlist	2	png	Opera Epiclese Support Card Golden.png		tcg	furina_pool
+shared_billing	ImageGen/images/cards/furina/shared_billing.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Theater Tickets.png		item	furina_pool
+stage_lights	ImageGen/images/cards/furina/stage_lights.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Movable Small Spotlight.png		item	furina_pool
+stage_lights	ImageGen/images/cards/furina/stage_lights.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Shining Spotlight.png		item	furina_pool
+stage_lights	ImageGen/images/cards/furina/stage_lights.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Firework - Festival Spotlight.png		vfx	furina_pool
+directors_cut	ImageGen/images/cards/furina/directors_cut.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Opera House Switcheroo Case Record.png		item	furina_pool
+directors_cut	ImageGen/images/cards/furina/directors_cut.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Case Record Entrances and Exits to the Opera House.png		item	furina_pool
+directors_cut	ImageGen/images/cards/furina/directors_cut.png	500	380	cover	y0.30	shortlist	3	png	Opera Epiclese Support Card.png		tcg	furina_pool
+duet	ImageGen/images/cards/furina/duet.png	500	380	cover	y0.30	shortlist	1	png	Chanson of Many Waters 2023-11-08, Immaculate Pulse 2023-11-08 - Furina & Charlotte Shorts.png		splash	furina_pool
+duet	ImageGen/images/cards/furina/duet.png	500	380	cover	y0.30	shortlist	2	png	Opera Epiclese Support Card Golden.png		tcg	furina_pool
+duet	ImageGen/images/cards/furina/duet.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Theater Tickets.png		item	furina_pool
+guest_list	ImageGen/images/cards/furina/guest_list.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Event Invitation.png		item	furina_pool
+guest_list	ImageGen/images/cards/furina/guest_list.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Ball Invitation Letter.png		item	furina_pool
+guest_list	ImageGen/images/cards/furina/guest_list.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Invitation to an Auction.png		item	furina_pool
+leading_role	ImageGen/images/cards/furina/leading_role.png	500	380	cover	y0.16	shortlist	1	png	Character Furina Game (Ousia).png		tcg	furina_pool
+leading_role	ImageGen/images/cards/furina/leading_role.png	500	380	cover	y0.30	shortlist	2	png	Opera Epiclese Support Card.png		tcg	furina_pool
+leading_role	ImageGen/images/cards/furina/leading_role.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Festival Spotlight.png		item	furina_pool
+standing_ovation	ImageGen/images/cards/furina/standing_ovation.png	500	380	cover	y0.30	shortlist	1	png	Astra Carnival Cat's Tail Gathering 2024 S5 Artwork.png		splash	furina_pool
+standing_ovation	ImageGen/images/cards/furina/standing_ovation.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Theater Tickets.png		item	furina_pool
+standing_ovation	ImageGen/images/cards/furina/standing_ovation.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Festival Spotlight.png		item	furina_pool
+supporting_cast	ImageGen/images/cards/furina/supporting_cast.png	500	380	cover	center@1.8	shortlist	1	gif	Salon Solitaire Water Walk Preview.gif	50	vfx	furina_pool
+supporting_cast	ImageGen/images/cards/furina/supporting_cast.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Movable Small Spotlight.png		item	furina_pool
+supporting_cast	ImageGen/images/cards/furina/supporting_cast.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Theater Tickets.png		item	furina_pool
+top_billing	ImageGen/images/cards/furina/top_billing.png	500	380	cover	y0.16	shortlist	1	png	Character Furina Game (Pneuma).png		tcg	furina_pool
+top_billing	ImageGen/images/cards/furina/top_billing.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Shining Spotlight.png		item	furina_pool
+top_billing	ImageGen/images/cards/furina/top_billing.png	500	380	cover	y0.30	shortlist	3	png	Opera Epiclese Support Card Platinum.png		tcg	furina_pool
+ethereal_spotlight	ImageGen/images/cards/furina/ethereal_spotlight.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Firework - Festival Spotlight.png		vfx	
+ethereal_spotlight	ImageGen/images/cards/furina/ethereal_spotlight.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Shining Spotlight.png		item	
+ethereal_spotlight	ImageGen/images/cards/furina/ethereal_spotlight.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Festival Spotlight.png		item	
+# ---------- COMPANIONS batch 4 (24 cards) ----------
+# Mondstadt singles: distinct TCG/Wish per card. Fontaine trios:
+# sibling rule -- one Character Card, source_group=<char>, 3 crops (L7).
+charlotte_freezing_point	ImageGen/images/cards/companions/charlotte_freezing_point.png	500	380	cover	y0.16	shortlist	1	png	Charlotte Character Card.png		tcg	charlotte
+charlotte_freezing_point	ImageGen/images/cards/companions/charlotte_freezing_point.png	500	380	cover	y0.16	shortlist	2	png	Charlotte Character Card Platinum.png		tcg	charlotte
+charlotte_freezing_point	ImageGen/images/cards/companions/charlotte_freezing_point.png	500	380	cover	y0.16	shortlist	3	png	Charlotte Character Card Golden.png		tcg	charlotte
+charlotte_enduring_frosthelm	ImageGen/images/cards/companions/charlotte_enduring_frosthelm.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Charlotte Wish.png		splash	charlotte
+charlotte_enduring_frosthelm	ImageGen/images/cards/companions/charlotte_enduring_frosthelm.png	500	380	cover	y0.16	shortlist	2	png	Charlotte Character Card Platinum.png		tcg	charlotte
+charlotte_enduring_frosthelm	ImageGen/images/cards/companions/charlotte_enduring_frosthelm.png	500	380	cover	y0.16	shortlist	3	png	Charlotte Character Card Golden.png		tcg	charlotte
+charlotte_snappy_silhouette	ImageGen/images/cards/companions/charlotte_snappy_silhouette.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Charlotte Hurlock Variations Full Wish.png		splash	charlotte
+charlotte_snappy_silhouette	ImageGen/images/cards/companions/charlotte_snappy_silhouette.png	500	380	cover	y0.16	shortlist	2	png	Charlotte Character Card Platinum.png		tcg	charlotte
+charlotte_snappy_silhouette	ImageGen/images/cards/companions/charlotte_snappy_silhouette.png	500	380	cover	y0.16	shortlist	3	png	Charlotte Character Card Golden.png		tcg	charlotte
+chevreuse_interdiction_fire	ImageGen/images/cards/companions/chevreuse_interdiction_fire.png	500	380	cover	y0.16	shortlist	1	png	Chevreuse Character Card.png		tcg	chevreuse
+chevreuse_interdiction_fire	ImageGen/images/cards/companions/chevreuse_interdiction_fire.png	500	380	cover	y0.16	shortlist	2	png	Chevreuse Character Card Platinum.png		tcg	chevreuse
+chevreuse_interdiction_fire	ImageGen/images/cards/companions/chevreuse_interdiction_fire.png	500	380	cover	y0.16	shortlist	3	png	Chevreuse Character Card Golden.png		tcg	chevreuse
+chevreuse_vanguards_valor	ImageGen/images/cards/companions/chevreuse_vanguards_valor.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Chevreuse Wish.png		splash	chevreuse
+chevreuse_vanguards_valor	ImageGen/images/cards/companions/chevreuse_vanguards_valor.png	500	380	cover	y0.16	shortlist	2	png	Chevreuse Character Card Platinum.png		tcg	chevreuse
+chevreuse_vanguards_valor	ImageGen/images/cards/companions/chevreuse_vanguards_valor.png	500	380	cover	y0.16	shortlist	3	png	Chevreuse Character Card Golden.png		tcg	chevreuse
+chevreuse_bursting_grenades	ImageGen/images/cards/companions/chevreuse_bursting_grenades.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Chevreuse Full Wish.png		splash	chevreuse
+chevreuse_bursting_grenades	ImageGen/images/cards/companions/chevreuse_bursting_grenades.png	500	380	cover	y0.16	shortlist	2	png	Chevreuse Character Card Platinum.png		tcg	chevreuse
+chevreuse_bursting_grenades	ImageGen/images/cards/companions/chevreuse_bursting_grenades.png	500	380	cover	y0.16	shortlist	3	png	Chevreuse Character Card Golden.png		tcg	chevreuse
+freminet_pers_deploy	ImageGen/images/cards/companions/freminet_pers_deploy.png	500	380	cover	y0.16	shortlist	1	png	Freminet Character Card.png		tcg	freminet
+freminet_pers_deploy	ImageGen/images/cards/companions/freminet_pers_deploy.png	500	380	cover	y0.16	shortlist	2	png	Freminet Character Card Platinum.png		tcg	freminet
+freminet_pers_deploy	ImageGen/images/cards/companions/freminet_pers_deploy.png	500	380	cover	y0.16	shortlist	3	png	Freminet Character Card Golden.png		tcg	freminet
+freminet_pressurized_floe	ImageGen/images/cards/companions/freminet_pressurized_floe.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Freminet Wish.png		splash	freminet
+freminet_pressurized_floe	ImageGen/images/cards/companions/freminet_pressurized_floe.png	500	380	cover	y0.16	shortlist	2	png	Freminet Character Card Platinum.png		tcg	freminet
+freminet_pressurized_floe	ImageGen/images/cards/companions/freminet_pressurized_floe.png	500	380	cover	y0.16	shortlist	3	png	Freminet Character Card Golden.png		tcg	freminet
+freminet_shattering_pressure	ImageGen/images/cards/companions/freminet_shattering_pressure.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Freminet Full Wish.png		splash	freminet
+freminet_shattering_pressure	ImageGen/images/cards/companions/freminet_shattering_pressure.png	500	380	cover	y0.16	shortlist	2	png	Freminet Character Card Platinum.png		tcg	freminet
+freminet_shattering_pressure	ImageGen/images/cards/companions/freminet_shattering_pressure.png	500	380	cover	y0.16	shortlist	3	png	Freminet Character Card Golden.png		tcg	freminet
+guest_neuvillette_tears	ImageGen/images/cards/companions/guest_neuvillette_tears.png	500	380	cover	y0.16	shortlist	1	png	Neuvillette Character Card.png		tcg	neuvillette
+guest_neuvillette_tears	ImageGen/images/cards/companions/guest_neuvillette_tears.png	500	380	cover	y0.16	shortlist	2	png	Neuvillette Character Card Platinum.png		tcg	neuvillette
+guest_neuvillette_tears	ImageGen/images/cards/companions/guest_neuvillette_tears.png	500	380	cover	y0.16	shortlist	3	png	Neuvillette Character Card Golden.png		tcg	neuvillette
+guest_neuvillette_droplets	ImageGen/images/cards/companions/guest_neuvillette_droplets.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Neuvillette Wish.png		splash	neuvillette
+guest_neuvillette_droplets	ImageGen/images/cards/companions/guest_neuvillette_droplets.png	500	380	cover	y0.16	shortlist	2	png	Neuvillette Character Card Platinum.png		tcg	neuvillette
+guest_neuvillette_droplets	ImageGen/images/cards/companions/guest_neuvillette_droplets.png	500	380	cover	y0.16	shortlist	3	png	Neuvillette Character Card Golden.png		tcg	neuvillette
+guest_neuvillette_judgment	ImageGen/images/cards/companions/guest_neuvillette_judgment.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Neuvillette Full Wish.png		splash	neuvillette
+guest_neuvillette_judgment	ImageGen/images/cards/companions/guest_neuvillette_judgment.png	500	380	cover	y0.16	shortlist	2	png	Neuvillette Character Card Platinum.png		tcg	neuvillette
+guest_neuvillette_judgment	ImageGen/images/cards/companions/guest_neuvillette_judgment.png	500	380	cover	y0.16	shortlist	3	png	Neuvillette Character Card Golden.png		tcg	neuvillette
+lynette_enigmatic_feint	ImageGen/images/cards/companions/lynette_enigmatic_feint.png	500	380	cover	y0.16	shortlist	1	png	Lynette Character Card.png		tcg	lynette
+lynette_enigmatic_feint	ImageGen/images/cards/companions/lynette_enigmatic_feint.png	500	380	cover	y0.16	shortlist	2	png	Lynette Character Card Platinum.png		tcg	lynette
+lynette_enigmatic_feint	ImageGen/images/cards/companions/lynette_enigmatic_feint.png	500	380	cover	y0.16	shortlist	3	png	Lynette Character Card Golden.png		tcg	lynette
+lynette_box_trick	ImageGen/images/cards/companions/lynette_box_trick.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Lynette Wish.png		splash	lynette
+lynette_box_trick	ImageGen/images/cards/companions/lynette_box_trick.png	500	380	cover	y0.16	shortlist	2	png	Lynette Character Card Platinum.png		tcg	lynette
+lynette_box_trick	ImageGen/images/cards/companions/lynette_box_trick.png	500	380	cover	y0.16	shortlist	3	png	Lynette Character Card Golden.png		tcg	lynette
+lynette_astonishing_shift	ImageGen/images/cards/companions/lynette_astonishing_shift.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Lynette Full Wish.png		splash	lynette
+lynette_astonishing_shift	ImageGen/images/cards/companions/lynette_astonishing_shift.png	500	380	cover	y0.16	shortlist	2	png	Lynette Character Card Platinum.png		tcg	lynette
+lynette_astonishing_shift	ImageGen/images/cards/companions/lynette_astonishing_shift.png	500	380	cover	y0.16	shortlist	3	png	Lynette Character Card Golden.png		tcg	lynette
+albedo_solar_isotoma	ImageGen/images/cards/companions/albedo_solar_isotoma.png	500	380	cover	y0.16	shortlist	1	png	Albedo Character Card.png		tcg	albedo
+albedo_solar_isotoma	ImageGen/images/cards/companions/albedo_solar_isotoma.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Albedo Introduction Card.png		tcg	albedo
+albedo_solar_isotoma	ImageGen/images/cards/companions/albedo_solar_isotoma.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Albedo Character Card Showcase 1.png		tcg	albedo
+barbara_shining_idol	ImageGen/images/cards/companions/barbara_shining_idol.png	500	380	cover	y0.16	shortlist	1	png	Barbara Character Card.png		tcg	barbara
+barbara_shining_idol	ImageGen/images/cards/companions/barbara_shining_idol.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Barbara Card.png		tcg	barbara
+barbara_shining_idol	ImageGen/images/cards/companions/barbara_shining_idol.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Barbara Introduction Card.png		tcg	barbara
+bennett_fantastic_voyage	ImageGen/images/cards/companions/bennett_fantastic_voyage.png	500	380	cover	y0.16	shortlist	1	png	Bennett Character Card.png		tcg	bennett
+bennett_fantastic_voyage	ImageGen/images/cards/companions/bennett_fantastic_voyage.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Bennett Card.png		tcg	bennett
+bennett_fantastic_voyage	ImageGen/images/cards/companions/bennett_fantastic_voyage.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Bennett Introduction Card.png		tcg	bennett
+diona_icy_paws	ImageGen/images/cards/companions/diona_icy_paws.png	500	380	cover	y0.16	shortlist	1	png	Diona Character Card.png		tcg	diona
+diona_icy_paws	ImageGen/images/cards/companions/diona_icy_paws.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Diona Introduction Card.png		tcg	diona
+diona_icy_paws	ImageGen/images/cards/companions/diona_icy_paws.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Diona Card.png		tcg	diona
+durin_witchs_flame	ImageGen/images/cards/companions/durin_witchs_flame.png	500	380	cover	y0.16	shortlist	1	png	Durin.png		splash	durin
+durin_witchs_flame	ImageGen/images/cards/companions/durin_witchs_flame.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Durin Character Details 1.png		splash	durin
+durin_witchs_flame	ImageGen/images/cards/companions/durin_witchs_flame.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Durin Item.png		splash	durin
+fischl_oz	ImageGen/images/cards/companions/fischl_oz.png	500	380	cover	y0.16	shortlist	1	png	Fischl Character Card.png		tcg	fischl
+fischl_oz	ImageGen/images/cards/companions/fischl_oz.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Fischl Card.png		tcg	fischl
+fischl_oz	ImageGen/images/cards/companions/fischl_oz.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Fischl Introduction Card.png		tcg	fischl
+nicole_celestial_gift	ImageGen/images/cards/companions/nicole_celestial_gift.png	500	380	cover	y0.16	shortlist	1	png	Character Nicole Game.png		splash	nicole
+nicole_celestial_gift	ImageGen/images/cards/companions/nicole_celestial_gift.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Nicole Introduction Card.png		splash	nicole
+nicole_celestial_gift	ImageGen/images/cards/companions/nicole_celestial_gift.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nicole Icon.png		splash	nicole
+sucrose_astable	ImageGen/images/cards/companions/sucrose_astable.png	500	380	cover	y0.16	shortlist	1	png	Sucrose Character Card.png		tcg	sucrose
+sucrose_astable	ImageGen/images/cards/companions/sucrose_astable.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Sucrose Card.png		tcg	sucrose
+sucrose_astable	ImageGen/images/cards/companions/sucrose_astable.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Sucrose Introduction Card.png		tcg	sucrose
+dahlia_favonian_favor	ImageGen/images/cards/companions/dahlia_favonian_favor.png	500	380	cover	y0.16	shortlist	1	png	Dahlia Wish.png		splash	dahlia
+dahlia_favonian_favor	ImageGen/images/cards/companions/dahlia_favonian_favor.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Dahlia Full Wish.png		splash	dahlia
+dahlia_favonian_favor	ImageGen/images/cards/companions/dahlia_favonian_favor.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Dahlia Character Card.png		splash	dahlia

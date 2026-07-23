@@ -19,16 +19,40 @@ The card-sized output bill is:
 |---|---:|
 | Furina personal sheet | 76 |
 | Ethereal Spotlight token | 1 |
-| Neuvillette Guest Stars | 3 |
-| Missing normal Companion cards | 22 |
-| **Total card-sized outputs** | **102** |
+| Missing Companion cards (all kinds) | 24 |
+| **Total card-sized outputs** | **101** |
 
-The 22-Companion count is derived from the live sheets and output directory,
-not the older “21 missing” note in `klee-mod/DECISIONS.md`. Only six of the
-current 28 normal Companion rows have matching files in
-`ImageGen/images/cards/companions/`. The existing
-`xingqiu_raincutter.png` is not in the current Companion sheets and therefore
-does not count as roster coverage.
+The 24 missing Companion cards break down as 18 normal 4-star cards, the 3
+Neuvillette Guest Stars, and the 3 five-star rares. The Companion sheets hold
+31 rows (28 normal + 3 rare); seven normal rows already have files.
+
+**RATIFIED 2026-07-23 — bill corrected from 102 to 101.** The first draft of
+this section was transcribed prose and disagreed with the canonical sheets
+three ways at once:
+
+- `dahlia_sacramental_shower` was billed as missing ("never reached the final
+  output directory"). It had: 500×380 opaque RGBA, from the same
+  2026-07-21 14:04 batch as the six this doc did count, with three candidate
+  rows in `art/SOURCES.tsv`. Re-fetching it would have overwritten
+  eyes-on-approved art. The older “21 missing” note in `klee-mod/DECISIONS.md`
+  was right and should not have been overridden.
+- `albedo_solar_isotoma`, `durin_witchs_flame` and `nicole_celestial_gift` are
+  `rarity: rare` (5-star, one card each) and were listed under *normal*
+  Companion portraits, so they could not reconcile against a 28-normal-row
+  denominator.
+- The three Neuvillette Guest Stars are ordinary rows in
+  `fontaine-companions.yaml`, but were billed as a surface separate from the
+  Companion count — double-counting them against any sheet-driven check.
+
+The last two cancelled numerically (three rares in, three Guest Stars out),
+which is why the arithmetic looked self-consistent while being wrong in both
+directions. **The bill is now a DERIVED number: `tools/art_coverage.py` owns
+it, and this table is a snapshot of that tool's output.** If the two ever
+disagree, the tool is right — that is the whole lesson of this correction.
+
+The existing `xingqiu_raincutter.png` is not in the current Companion sheets
+and therefore does not count as roster coverage; it is carried as a recorded
+`KNOWN_STALE` entry in the coverage tool.
 
 ## 2. Policy and visual language
 
@@ -69,9 +93,29 @@ Additional direction for Furina:
   poised swordwork, judgment, testimony, and Regina-versus-vulnerable Furina.
 - Avoid UI, damage numbers, subtitles, watermarks, or a tiny character lost in
   a gameplay field. No constellation sigils as card portraits.
-- One effective source should not serve two unrelated Furina cards. Reuse is
-  allowed across registers and within a single Companion character's sibling
-  cards when differentiated by crop.
+- Reuse is allowed across registers and within a single Companion character's
+  sibling cards when differentiated by crop.
+
+**Source-uniqueness rule — AMENDED & RATIFIED 2026-07-23.** The original rule
+("one effective source should not serve two unrelated Furina cards") assumed a
+Furina illustration inventory that does not exist. The art hunt established that
+the wiki holds only ~20–25 clean, single-figure, text-free Furina illustrations;
+the rest are version-banner splashscreens (burnt-in text — see L9), UI
+infographics, multi-character scene art where Furina is a small background figure,
+turnaround sheets, and namecards. 76 unique clean sources cannot be sourced. The
+rule is therefore scoped by rarity:
+
+- **Basics + rares (20 cards): STRICT** — one unique effective source each, no
+  reuse by any other card. These are the identity-defining cards and must look
+  distinct. Enforced by a blank `source_group` (strict L1).
+- **Commons + uncommons (56 cards): crop-reuse allowed** — may share a source
+  with another common/uncommon *provided the crop differs*, exactly the
+  Companion sibling pattern. Enforced by `source_group = furina_pool` (L7). A
+  pool card may NOT reuse a strict card's source (group mismatch → L1 fires),
+  which is what protects the 20 unique sources.
+
+This is the same "the gate assumed data the repo can't see" lesson as the bill
+correction: the rule is only as good as the inventory it presumed.
 
 ## 3. Output layout and processing contract
 
@@ -263,13 +307,17 @@ These are temporary Companion cards and belong in the Companion directory.
 Use one strong Neuvillette Wish/splash source with three deliberately different
 crops; same-source sibling reuse is intended here.
 
+They are ordinary rows in `fontaine-companions.yaml`, so they are **counted
+inside** the 24 missing Companion cards in §1 and §7, not added on top of it.
+This section exists to give them their own crop brief, not a second line item.
+
 | ID | Card | Crop/visual brief |
 |---|---|---|
 | `guest_neuvillette_tears` | Neuvillette — O Tears, I Shall Repay | Action crop with cane/hand and a narrow Hydro strike; closest framing of the three. |
 | `guest_neuvillette_droplets` | Neuvillette — Sourcewater Droplets | Support crop emphasizing droplets, Hydro field, and protective space. |
 | `guest_neuvillette_judgment` | Neuvillette — Equitable Judgment | Signature full-body/wide crop with the charged beam spanning the frame; preserve the personal-cost gravity. |
 
-## 7. Missing normal Companion portraits — 22
+## 7. Missing Companion portraits — 24
 
 The source rule from `companion-art-plan-addendum.md` remains the default:
 Wish/splash art, `cover_autocrop`, cover fill, with sibling differentiation by
@@ -277,17 +325,32 @@ crop. Dahlia may use the previously accepted Character Card fallback. If a
 direct TCG talent card is materially stronger and coherent with that
 character's existing portrait, include it as a contact-sheet alternative.
 
-### Mondstadt/shared set — 10
+Run `python tools/art_coverage.py` for the live list; the tables below are a
+snapshot of it. The 24 are 6 Mondstadt normals + 3 five-star rares + 12
+Fontaine normals + the 3 Neuvillette Guest Stars from §6.
+
+`dahlia_sacramental_shower` is **already covered** and is deliberately absent
+from these tables. Do not re-fetch it (see the ratification note in §1).
+
+### Mondstadt/shared normal set — 6
 
 | ID | Card | Visual/crop requirement |
 |---|---|---|
-| `dahlia_sacramental_shower` | Dahlia — Sacramental Shower | Accepted Dahlia Character Card fallback or Wish; attack crop emphasizing Hydro shower. This row existed in the plan but never reached the final output directory. |
-| `dahlia_favonian_favor` | Dahlia — Favonian Favor | Same Dahlia family source, wider support/blessing crop; use contain if cover clips the head/hat. |
+| `dahlia_favonian_favor` | Dahlia — Favonian Favor | Same Dahlia family source as the shipped `dahlia_sacramental_shower`, wider support/blessing crop; use contain if cover clips the head/hat. |
 | `fischl_oz` | Fischl — Oz, at Your Side | Fischl/Oz source with Oz dominant and readable; differentiate from the existing Nightrider attack. |
 | `barbara_shining_idol` | Barbara — Shining Idol | Wider support/idol crop with melody or healing field; not the same framing as `barbara_melody`. |
 | `sucrose_astable` | Sucrose — Astable Anemohypostasis | Alchemical/Anemo experiment crop with apparatus or vortex prominent. |
 | `bennett_fantastic_voyage` | Bennett — Fantastic Voyage | Burst/support field crop, wider and more triumphant than the existing Passion attack. |
 | `diona_icy_paws` | Diona — Icy Paws | Icy shield/paw motif; preserve Diona's figure rather than filling with a generic Cryo icon. |
+
+### Five-star rares — 3
+
+`rarity: rare`, one card each, no siblings to differentiate against. They get
+rare-grade identity art and the generous manual crop review of §4's rares, not
+the 4-star sibling-crop treatment.
+
+| ID | Card | Visual/crop requirement |
+|---|---|---|
 | `albedo_solar_isotoma` | Albedo — Solar Isotoma | Geo flower/platform clearly visible; persistent-power composition. |
 | `durin_witchs_flame` | Durin — Witch's Flame | Dark Pyro/dragon identity, persistent and ominous rather than a generic explosion. |
 | `nicole_celestial_gift` | Nicole — Celestial Gift | Celestial/support image with a clear beneficent gift or blessing read. |
@@ -338,7 +401,30 @@ silently expand this pass.
 | `ui/energy_icon_22.png` | 22×22 | Crisp small derivation; inspect at 1:1 rather than trusting downscale. |
 | `ui/map_marker.png` | 49×64 | High-contrast Furina silhouette or hat/crown motif. |
 | `ui/selection_splash.png` | 1920×1200 | Full selection-screen composition with safe room for UI text/panels. |
+| `ui/select_bg.png` | 1920×1080 | Character-select backdrop behind the splash. **Added 2026-07-23** — `tools/build_pck.ps1` requires it and this table omitted it. Furina's scene tints it `Color(0.33, 0.55, 0.68)` where Klee's is warm red, so a shared neutral backdrop is legitimate; a Furina-specific one is optional polish, not a gap. |
+| `ui/transition_wipe.png` | procedural | Select-transition wipe texture for `materials/furina_transition_mat.tres`. **Added 2026-07-23** — same omission. Generated by `tools/gen_transition_wipe.py`, not hunted; sharing Klee's is fine. |
 | `model/combat_model.png` | 240×280 minimum output | Transparent full-body sprite, feet bottom-anchored; also serves the static rest/merchant fallback. |
+
+**`energy_icon_74` / `energy_icon_22` have no consumer yet.** No C# in the mod
+references them, and `Furina.cs` currently points `CustomEnergyCounterPath` at
+the base game's `ironclad_energy_counter.tscn`. Producing them changes nothing
+in-game until someone authors a Furina energy-counter scene. Keep them in the
+bill — they are real §11 smoke-test items — but treat the scene as the blocking
+work, not the art.
+
+### Klee fallback fill — how §11's "no Klee assets" is actually checked
+
+As of `def4c50`, `build_pck.ps1` copies eight required assets from Klee's
+namespace into Furina's when Furina has no file of her own, so her resource
+*paths* could go character-specific before her art existed. It is a genuinely
+good call — but it means a missing Furina asset now renders as **Klee art**
+rather than as an obvious hole, and the §11 criterion "render without falling
+back to Klee assets" is no longer verifiable by eye.
+
+The signal is the build log: each fill prints `Furina fallback: <path> <- Klee`
+in dark yellow. **A clean Furina art pass ends with zero such lines** (except
+any deliberately shared neutral asset, currently `select_bg` and
+`transition_wipe`). Check the build output, not the screen.
 
 Optional polish after the static model is proven:
 
@@ -381,32 +467,53 @@ the shared roster mod and are not Furina art-pass work.
 
 ## 9. Pipeline changes required before execution
 
-1. Add the character-aware output directories above; do not reuse the global
-   Klee `ui/`, `powers/`, `relics/`, or `model/` targets.
+1. **DONE (2026-07-23)** — no code change needed. `tools/art_process.py`
+   already creates each output's parent directory, so the character-aware
+   paths in §3 come into being when their rows are processed; verified no
+   Klee-specific hardcoding in the processor.
 2. Extend `art/plan.tsv` with rows for every required output.
-3. Add a Companion `source_group`/character-family concept to the dedupe lint,
-   or an equally explicit rule. Same-source/different-crop reuse is legal for
-   Chevreuse's three cards and illegal for unrelated characters.
-4. Make the contact-sheet title and filters roster/character-aware rather than
-   Klee-specific.
-5. Add a coverage check that reads the canonical YAML sheets and token file,
-   compares expected IDs to final PNG stems, and reports stale outputs such as
-   `xingqiu_raincutter.png` separately from missing outputs.
-6. Update PCK preparation to ingest `ImageGen/images/furina/**` under
-   `res://furina/**`.
-7. Preserve `art/SOURCES.tsv` by merge, never rewrite it from a partial fetch.
+3. **DONE (2026-07-23)** — `source_group` column in `art/plan.tsv`, enforced by
+   `tools/art_lint.py` (rule **L7**) and gated by
+   `tier0/tests/test_art_lint_source_group.py`. Same-source/different-crop
+   reuse is legal within a group and illegal across groups; same-source
+   *same-crop* inside a group is L7, since that is one picture on two cards.
+   Blank `source_group` keeps the original strict L1 — Furina's own 76 cards
+   are deliberately ungrouped, because grouping them by character would have
+   legalised exactly the reuse §2 forbids.
+4. **DONE (2026-07-23)** — `tools/art_contact_sheet.py` is roster-aware:
+   `--batch` renders the §10 batches, `--list` prints batch sizes. Routing is
+   by output path first so another character's cards cannot fall into Furina's
+   archetype batches, and anything unclassified lands in `unsorted` rather
+   than being silently dropped.
+5. **DONE (2026-07-23)** — `tools/art_coverage.py`, gated by
+   `tier0/tests/test_art_coverage.py`. Reads the canonical YAML sheets and
+   token file, compares expected IDs to final PNG stems, and reports stale
+   outputs such as `xingqiu_raincutter.png` separately from missing ones.
+   Built first, before any fetching: it is what caught the §1 bill error, and
+   it is now the authority on the count.
+6. **DONE (2026-07-23, commit `def4c50`)** — `tools/build_pck.ps1` stages
+   `ImageGen/images/furina/**` under `res://furina/**`, authors Furina's
+   scenes and transition material, and fills missing Furina assets from Klee
+   so her paths could go character-specific ahead of her art. `Furina.cs` now
+   points at `furina/...` throughout. See the §8 note on how that fallback
+   changes the way §11's "no Klee assets" criterion must be checked.
+7. **Already implemented** — `tools/art_fetch.py` merges `art/SOURCES.tsv` by
+   filename and keeps existing rows verbatim. Added after a real incident
+   (2026-07-20) where a rewrite from a partial fetch truncated the ledger from
+   115 rows to 30. Verified, unchanged by this pass.
 
 ## 10. Review batches
 
-Avoid one 102-card wall. Produce four labeled contact-sheet batches:
+Avoid one 101-card wall. Produce four labeled contact-sheet batches:
 
 1. **Furina identity:** basics, generic/courtroom, and all 15 rares.
 2. **Salon + Fanfare:** verify Member readability and separate applause/music
    cards from generic blue VFX.
 3. **Spotlight:** verify invitations, billing, selector, and shared-cast cards
    do not collapse into identical beams.
-4. **Companions:** Guest Stars plus 22 missing normal cards, grouped by
-   character so sibling crop differentiation is reviewed together.
+4. **Companions:** all 24 missing Companion cards — 18 normals, the 3 Guest
+   Stars, and the 3 five-star rares — grouped by character so sibling crop
+   differentiation is reviewed together.
 
 UI/model/power/relic assets receive their own small native-size sheet.
 
@@ -414,10 +521,13 @@ UI/model/power/relic assets receive their own small native-size sheet.
 
 ### Coverage
 
-- All 102 card-sized output paths exist or have an explicitly approved Tier P
+- All 101 card-sized output paths exist or have an explicitly approved Tier P
   fallback; there are no accidental BaseLib “BETA” portraits.
 - Every ID in the four inventories resolves to the correct filename.
 - Stale files are reported but never counted as coverage.
+- `python tools/art_coverage.py --strict` exits 0. This is the gate that owns
+  the coverage number; the counts written above are a snapshot of it and are
+  expected to be re-derived, never hand-maintained.
 
 ### Mechanical validation
 
@@ -442,7 +552,9 @@ UI/model/power/relic assets receive their own small native-size sheet.
 ### In-game smoke test
 
 - Character select, top panel, map marker, energy icon, starting relic, and
-  combat model render without falling back to Klee assets.
+  combat model render without falling back to Klee assets. **Verify from the
+  `build_pck.ps1` log, not the screen** — the Klee fallback fill makes a
+  missing asset look like working Klee art (see §8).
 - Draw at least one card from each Furina rarity, each archetype, each
   Companion character, and the Neuvillette Guest Star set.
 - Inspect the 22×22 energy icon, 88×88 character icon, and power badges at

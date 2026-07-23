@@ -10,6 +10,7 @@ __pycache__/
 art/raw/
 art/candidates/
 art/contact_sheet.html
+art/contact_sheet_*.html
 art/picks.tsv
 ImageGen/images/
 

@@ -57,6 +57,15 @@ def read_plan():
                 # splash|icon. Declares the pick's art class so art_lint can
                 # check class-appropriateness mechanically.
                 "register": parts[11] if len(parts) > 11 and parts[11] else None,
+                # source_group (furina-art-pass-requirements.md 9.3): the
+                # character family a row belongs to. Companion siblings share
+                # ONE source family and differ by crop, which L1 would
+                # otherwise read as a dedupe violation. Empty = ungrouped, and
+                # ungrouped rows keep the original strict L1: Furina's own 76
+                # cards are all "furina" conceptually but must never share a
+                # source with each other, so they are deliberately left blank
+                # rather than given a group.
+                "source_group": parts[12] if len(parts) > 12 and parts[12] else None,
             })
     return rows
 
