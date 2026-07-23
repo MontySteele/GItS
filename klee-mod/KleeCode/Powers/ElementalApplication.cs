@@ -84,12 +84,12 @@ public sealed class KleeElementalHooks : AbstractModel
     }
 
     /// <summary>
-    /// Display half of the burst economy: sync-to-truth after EVERY card
-    /// play. Unconditional because two writers move the resource without the
-    /// badge -- the skill-tag gain in BeforeCardPlayed (no context there) and
-    /// the full-meter drain when the Burst itself is cast (the cost
-    /// machinery's Spend, outside our call sites entirely). Delta-zero syncs
-    /// are no-ops, so the common case costs nothing.
+    /// Display half of the burst economy: gauge catch-up after EVERY card
+    /// play. Unconditional because one writer moves the resource outside the
+    /// refresh funnels -- the full-meter drain when the Burst itself is cast
+    /// (the cost machinery's Spend, outside our call sites entirely).
+    /// Redundant refreshes redraw the same value, so the common case costs
+    /// nothing.
     ///
     /// Also a kit-grant check site: the sim calls grant_charged_kit at the
     /// end of every play_card (mid-turn gains -- reactions, splash, the
@@ -99,8 +99,7 @@ public sealed class KleeElementalHooks : AbstractModel
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var owner = cardPlay.Card.Owner;
-        await KleeBurstResource.SyncBadge(
-            choiceContext, owner.Creature, cardPlay.Card);
+        KleeBurstResource.SyncGauge(owner.Creature);
         await KitGrant.GrantIfCharged(choiceContext, owner);
     }
 
