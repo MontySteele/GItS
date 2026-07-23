@@ -554,3 +554,25 @@ furina_char_icon	ImageGen/images/furina/ui/char_icon.png	88	88	cover	y0.22@2.3	a
 furina_map_marker	ImageGen/images/furina/ui/map_marker.png	49	64	cover	y0.22@2.3	auto	1	png	Furina Profile.png		splash
 furina_selection_splash	ImageGen/images/furina/ui/selection_splash.png	1920	1200	cover_autocrop	cover@0.06	auto	1	png	Furina Wish.png		splash
 furina_combat_model	ImageGen/images/furina/model/combat_model.png	240	280	sprite	center	auto	1	png	Furina Profile.png		splash
+# ---------- KLEE gap fill: 21 post-rebalance cards (strict L1) ----------
+pop	ImageGen/images/cards/klee/pop.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 11.png		splash
+chain_fuse	ImageGen/images/cards/klee/chain_fuse.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 3.png		splash
+careful_arrangement	ImageGen/images/cards/klee/careful_arrangement.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 4.png		splash
+trip_wire	ImageGen/images/cards/klee/trip_wire.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 5.png		splash
+controlled_demolition	ImageGen/images/cards/klee/controlled_demolition.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 6.png		splash
+chained_reactions	ImageGen/images/cards/klee/chained_reactions.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 7.png		splash
+sparkly_explosion	ImageGen/images/cards/klee/sparkly_explosion.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 1.png		splash
+grand_finale	ImageGen/images/cards/klee/grand_finale.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 8.png		splash
+tail_of_flame	ImageGen/images/cards/klee/tail_of_flame.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 9.png		splash
+sugar_rush	ImageGen/images/cards/klee/sugar_rush.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sparkling Steps 2021-06-09 - Klee Emoji 1.png		sticker
+study_of_explosions	ImageGen/images/cards/klee/study_of_explosions.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Let's Go Dodoco! Illustration 2.png		splash
+friendly_visit	ImageGen/images/cards/klee/friendly_visit.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Let's Go Dodoco! Illustration 3.png		splash
+borrowed_brilliance	ImageGen/images/cards/klee/borrowed_brilliance.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Let's Go Dodoco! Illustration 4.png		splash
+study_buddy	ImageGen/images/cards/klee/study_buddy.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Let's Go Dodoco! Illustration 5.png		splash
+best_friends_forever	ImageGen/images/cards/klee/best_friends_forever.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Let's Go Dodoco! Illustration 1.png		splash
+spooked	ImageGen/images/cards/klee/spooked.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	App Store Event Character Wallpaper Klee Version 3.8.png		splash
+patched_dress	ImageGen/images/cards/klee/patched_dress.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Klee Item.png		item
+dodge_roll	ImageGen/images/cards/klee/dodge_roll.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 4.png		sticker
+bright_idea	ImageGen/images/cards/klee/bright_idea.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Dodoco's Sparks 'n' Splash.png		item
+surprise_visit	ImageGen/images/cards/klee/surprise_visit.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sparkling Steps 2021-06-09 - Klee Emoji 2.png		sticker
+fish_blasting	ImageGen/images/cards/klee/fish_blasting.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Dodoco's Beach Nap.png		item
