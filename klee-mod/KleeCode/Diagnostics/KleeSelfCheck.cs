@@ -299,23 +299,32 @@ internal static class KleeSelfCheck
         // (allowAnyCharacterDialogues: false) -- a character with none
         // softlocks the WIN screen (playtest 2026-07-23: Furina beat Act 3
         // and crashed on PROCEED). The rows ship in the PCK's ancients.json
-        // and BaseLib merges them at PopulateLocKeys time; this reads them
-        // through BaseLib's own lookup so the check cannot drift from the
-        // consumer. At least one must be REPEATING ("r" keys):
-        // GetValidDialogues exact-matches VisitIndex == the character's win
-        // count and only repeating rows survive its fallback, so a
-        // non-repeating-only set works exactly once, then crashes on the
-        // second win.
+        // and BaseLib merges them at PopulateLocKeys time. At least one must
+        // be REPEATING ("r" keys): GetValidDialogues exact-matches
+        // VisitIndex == the character's win count and only repeating rows
+        // survive its fallback, so a non-repeating-only set works exactly
+        // once, then crashes on the second win.
+        //
+        // The repeating probe reads the loc keys directly, mirroring
+        // AncientDialogue.HasRepeatingSuffix: it CANNOT use
+        // GetDialoguesForKey(...).Any(d => d.IsRepeating), because BaseLib's
+        // lookup only constructs the dialogues -- IsRepeating stays false
+        // until the game's own PopulateLines parses the "r" suffix at
+        // dialogue-set build time, so that probe fails unconditionally
+        // (false positive shipped 2026-07-23, one debug cycle).
+        var baseKey = AncientDialogueUtil.BaseLocKey(
+            "THE_ARCHITECT", character.Id.Entry);
         var dialogues = AncientDialogueUtil.GetDialoguesForKey(
-            "ancients",
-            AncientDialogueUtil.BaseLocKey("THE_ARCHITECT", character.Id.Entry));
+            "ancients", baseKey);
         if (dialogues.Count == 0)
         {
             Fail("R12", $"{character.GetType().Name}: no THE_ARCHITECT dialogue rows in the "
                       + "ancients table; WinRun() dereferences a null Dialogue and the "
                       + "win-the-run screen softlocks. Rebuild the PCK (ancients.json).");
         }
-        else if (!dialogues.Any(d => d.IsRepeating))
+        else if (!Enumerable.Range(0, dialogues.Count).Any(i =>
+                     LocString.Exists("ancients", $"{baseKey}{i}-0r.ancient")
+                  || LocString.Exists("ancients", $"{baseKey}{i}-0r.char")))
         {
             Fail("R12", $"{character.GetType().Name}: THE_ARCHITECT dialogues exist but none "
                       + "repeat; GetValidDialogues' visit-index exact match goes empty after "
