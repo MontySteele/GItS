@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using BaseLib.Utils;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -87,13 +88,13 @@ internal static class KleeSelfCheck
     }
 
     // Distinct rule labels that can actually reach the log:
-    //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8, R9, R10, R11
+    //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8, R9, R10, R11, R12
     // This was 8 while R5/R6a/R6b were documented but unattributable -- the
     // helpers that emit them hardcoded R4 and R6, so those three strings could
     // never appear. Fixing the labels is what makes the count honest. Note
     // R4 and R5 come from a `rule` parameter, so grepping for Fail("R... will
     // not find them; count the call sites, not the literals.
-    private const int RuleCount = 16;
+    private const int RuleCount = 17;
 
     private static void Fail(string rule, string detail) => Findings.Add($"[{rule}] {detail}");
 
@@ -291,6 +292,34 @@ internal static class KleeSelfCheck
                           + $"CardTag.{tag} in the pool; LargeCapsule (and anything else "
                           + "keyed on the tag) does an unguarded First() and will throw.");
             }
+        }
+
+        // R12. TheArchitect.WinRun() dereferences Dialogue unconditionally,
+        // and LoadDialogue draws ONLY from per-character rows
+        // (allowAnyCharacterDialogues: false) -- a character with none
+        // softlocks the WIN screen (playtest 2026-07-23: Furina beat Act 3
+        // and crashed on PROCEED). The rows ship in the PCK's ancients.json
+        // and BaseLib merges them at PopulateLocKeys time; this reads them
+        // through BaseLib's own lookup so the check cannot drift from the
+        // consumer. At least one must be REPEATING ("r" keys):
+        // GetValidDialogues exact-matches VisitIndex == the character's win
+        // count and only repeating rows survive its fallback, so a
+        // non-repeating-only set works exactly once, then crashes on the
+        // second win.
+        var dialogues = AncientDialogueUtil.GetDialoguesForKey(
+            "ancients",
+            AncientDialogueUtil.BaseLocKey("THE_ARCHITECT", character.Id.Entry));
+        if (dialogues.Count == 0)
+        {
+            Fail("R12", $"{character.GetType().Name}: no THE_ARCHITECT dialogue rows in the "
+                      + "ancients table; WinRun() dereferences a null Dialogue and the "
+                      + "win-the-run screen softlocks. Rebuild the PCK (ancients.json).");
+        }
+        else if (!dialogues.Any(d => d.IsRepeating))
+        {
+            Fail("R12", $"{character.GetType().Name}: THE_ARCHITECT dialogues exist but none "
+                      + "repeat; GetValidDialogues' visit-index exact match goes empty after "
+                      + "the first win and the second win softlocks.");
         }
     }
 
