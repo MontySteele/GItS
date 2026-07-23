@@ -44,6 +44,12 @@ public static class KleeMod
         // logs proof-of-merge so a stale/missing pack shows up in godot.log.
         KleePck.LogStatus();
 
+        // Convention-scene + build-id telemetry (animation sprint 1, A3 —
+        // permanent). One line per shipped scene: path, found/missing, root
+        // node type. A missing scene falls back quietly at the use site, so
+        // this is where the miss gets loud.
+        Diagnostics.KleeSceneTelemetry.LogStatus();
+
         // Aura application (R23): a standing combat-hook listener, registered
         // through the game's own mod-subscriber API. Elemental card hits apply
         // auras; AuraPower handles everything after that. See ElementalApplication.cs.

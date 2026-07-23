@@ -20,9 +20,17 @@ namespace KleeMod;
 /// <summary>
 /// Klee — Spark Knight of Mondstadt.
 ///
-/// GenerateAnimator is deliberately NOT overridden — it is virtual with a
-/// working base implementation, so C1 needs no spine art (verified against
-/// decompiled CharacterModel, v0.107.1).
+/// GenerateAnimator is STILL deliberately NOT overridden — and as of
+/// animation sprint 1 the reason is sharper than "the base works": NCreature
+/// only builds a CreatureAnimator when Visuals.HasSpineAnimation, and Klee
+/// ships no spine rig, so any override here would be dead code. The animation
+/// regime is instead: combat visuals load from the script-less convention
+/// scene klee/model/combat.tscn (BaseLib's NCreatureVisualsFactory converts
+/// the root to a real NCreatureVisuals), and Vfx.KleeAnimationRouter routes
+/// NCreature.SetAnimationTrigger / StartDeathAnim into the scene's
+/// %AnimationTree when one exists. The Track-A scene is static (no tree), so
+/// the router is inert until Track B ships klee2.tscn. Verified against
+/// decompiled CharacterModel/NCreature v0.107.1 and BaseLib 2026-07-21.
 ///
 /// DERIVES FROM CustomCharacterModel, NOT CharacterModel — see DECISIONS
 /// finding 21. BaseLib gates 29 separate guards on <c>is ICustomModel</c>,
@@ -142,8 +150,15 @@ public sealed class Klee : CustomCharacterModel
     // room starts. CreateCustomVisuals and the texture overrides below affect
     // instantiation, not that preload list, so all four path overrides are
     // mandatory even when the visible art is created another way.
+    //
+    // combat.tscn is the animation-sprint convention scene (Track A). The
+    // combat_visuals.tscn fallback keeps a pre-sprint pck bootable: BaseLib
+    // registers whichever path this returns for NCreatureVisuals conversion,
+    // and KleeSceneTelemetry shouts at boot when the convention scene is
+    // missing.
     public override string? CustomVisualPath =>
-        KleePck.Path("klee/model/combat_visuals.tscn");
+        KleePck.Path("klee/model/combat.tscn")
+        ?? KleePck.Path("klee/model/combat_visuals.tscn");
 
     public override string? CustomIconPath =>
         KleePck.Path("klee/ui/character_icon.tscn");
@@ -192,13 +207,37 @@ public sealed class Klee : CustomCharacterModel
     public override string? CustomMerchantAnimPath =>
         KleePck.Path("klee/model/character_sprite.tscn");
 
-    /// <summary>On-screen combat model. BaseLib's factory builds the whole
-    /// NCreatureVisuals tree (Bounds, CenterPos, IntentPos, ...) from a bare
-    /// Texture2D, sized from the texture with feet at ground level -- which is
-    /// exactly how combat_model.png is authored (alpha-trimmed, bottom
-    /// anchored, 240x280). Null falls through to the base scene lookup.</summary>
+    /// <summary>On-screen combat model, scene-first as of animation sprint 1.
+    ///
+    /// Preferred path: instantiate the convention scene klee/model/combat.tscn
+    /// through BaseLib's factory, which converts the script-less Node2D root
+    /// into a real NCreatureVisuals and fills any missing named nodes
+    /// (%Visuals / Bounds / %CenterPos / IntentPos). The scene's inventory
+    /// mirrors what the texture route generated, so Track A is a pure
+    /// re-plumbing: same art, same geometry, new channel — proven by boot
+    /// telemetry rather than by eyeballing.
+    ///
+    /// Fallback 1 (pck predates the sprint): build from the bare 240x280
+    /// bottom-anchored combat_model.png, exactly the pre-sprint behavior.
+    /// Fallback 2 (no pck at all): null, base scene lookup. Every step logs —
+    /// a silent path miss looks like "nothing happened" (sprint ordering law).
+    /// </summary>
     public override NCreatureVisuals? CreateCustomVisuals()
     {
+        string? scenePath = KleePck.Path("klee/model/combat.tscn");
+        if (scenePath != null)
+        {
+            var visuals = NodeFactory<NCreatureVisuals>.CreateFromScene(scenePath);
+            MegaCrit.Sts2.Core.Logging.Log.Info(
+                $"[{KleeMod.ModId}] combat visuals from convention scene "
+                + $"{scenePath}: {visuals.GetType().Name}");
+            return visuals;
+        }
+
+        MegaCrit.Sts2.Core.Logging.Log.Warn(
+            $"[{KleeMod.ModId}] convention combat scene missing; falling back "
+            + "to static combat_model.png (pck stale? rebuild with "
+            + "tools/build_pck.ps1)");
         string? path = KleePck.Path("klee/model/combat_model.png");
         if (path == null)
         {
