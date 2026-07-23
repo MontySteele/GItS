@@ -252,6 +252,28 @@ if (-not (Test-Path $venvPython)) {
 }
 
 # ---------------------------------------------------------------------------
+# S6d. Every roster character ships at least one Ancient-rarity pool card.
+#
+# Playtest 2026-07-23: the Darv ancient event rolls Dusty Tome ~50% of the
+# time, and vanilla DustyTome.SetupForPlayer draws a random Ancient card from
+# the character's pool -- an empty draw NREs inside the event's option
+# generation and the run softlocks on entering the room. The ledger is
+# KleeCode/RosterAncientCards.cs; the lint also proves each pool actually
+# concats it and that no ledger card is off-pool filtered.
+# ---------------------------------------------------------------------------
+$ancientLint = Join-Path $repoRoot 'tools\lint_ancient_coverage.py'
+if (-not (Test-Path $venvPython)) {
+    Fail 'S6d' "repo venv python not found at $venvPython; cannot run ancient coverage lint."
+} elseif (-not (Test-Path $ancientLint)) {
+    Fail 'S6d' "tools/lint_ancient_coverage.py is missing."
+} else {
+    $ancientOut = & $venvPython $ancientLint
+    if ($LASTEXITCODE -ne 0) {
+        Fail 'S6d' "ancient coverage lint failed:`n    $($ancientOut -join "`n    ")"
+    }
+}
+
+# ---------------------------------------------------------------------------
 # S6c. Every roster character closes the CharacterModel preload surface.
 #
 # CharacterModel.AssetPaths derives combat visuals, icon scene, energy counter

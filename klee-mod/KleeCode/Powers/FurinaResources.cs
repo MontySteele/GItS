@@ -466,6 +466,36 @@ public static class FurinaKitGrant
 }
 
 /// <summary>
+/// The Encore engine behind All the World's a Stage (Furina's Ancient card):
+/// Amount Encore at the start of every player turn, routed through
+/// FurinaResources.GainEncore so the Fanfare mint, gauge refresh and salon
+/// dry-badge all behave exactly like any other gain. The explicit SyncMeters
+/// keeps the status-strip counters current in the same beat -- hook order
+/// between powers and FurinaResourceHooks is not guaranteed.
+/// </summary>
+public sealed class EncorePerTurnPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "All the World's a Stage"),
+        ("description",
+            "At the start of your turn, gain {Amount} [gold]Encore[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (player.Creature != Owner) return;
+        FurinaResources.GainEncore(Owner, (int)Amount);
+        await FurinaResources.SyncMeters(choiceContext, Owner);
+    }
+}
+
+/// <summary>
 /// "Attacks deal +Amount per 10 Fanfare", capped at two stacks by the sheet.
 /// Fanfare is read per hit, so spending or gaining it changes later attacks
 /// immediately.

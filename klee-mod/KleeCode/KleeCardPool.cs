@@ -162,8 +162,14 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<WarmGlow>(),
         };
 
+        // Ancients are VISIBLE members (Dusty Tome draws from
+        // GetUnlockedCards) but never roll: generation filters
+        // CardRarity.Ancient upstream. Ledger + gate: RosterAncientCards.
         // Off-pool cards are pool MEMBERS (so CardModel.Pool resolves) but are
         // filtered out of GetUnlockedCards above, so no generator sees them.
-        return pooled.Concat(KleeOffPoolCards.All).ToArray();
+        return pooled
+            .Concat(RosterAncientCards.Klee)
+            .Concat(KleeOffPoolCards.All)
+            .ToArray();
     }
 }
