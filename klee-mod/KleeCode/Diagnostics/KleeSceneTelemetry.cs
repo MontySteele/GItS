@@ -36,6 +36,8 @@ internal static class KleeSceneTelemetry
         "furina/ui/char_select_bg_furina.tscn",
         "furina/ui/salon.tscn",
         "shared/gauge.tscn",
+        "klee/vfx/bomb_lob.tscn",
+        "klee/vfx/dodoco_pop.tscn",
     };
 
     public static void LogStatus()

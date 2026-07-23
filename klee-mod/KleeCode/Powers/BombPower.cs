@@ -428,6 +428,10 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         var damageUp =
             applier?.Powers.OfType<BombDamageUpPower>().FirstOrDefault()?.Amount ?? 0;
 
+        // One VFX per detonation EVENT, not per bomb stack (sprint plan E2's
+        // spam guard) — this method is the per-event funnel.
+        Vfx.KleeCombatVfx.SpawnBombLob(applier, target);
+
         foreach (var damage in payloads)
         {
             // Sim order: detonations_total increments before the damage
