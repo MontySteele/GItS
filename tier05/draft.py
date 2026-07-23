@@ -42,6 +42,13 @@ STATIC_BOMB_GUARD_VALUE = 1.5
 STATIC_KLEE_CONDITIONAL_SHARE = 0.5
 STATIC_STRENGTH_VALUE = 2.0        # conservative two future Attack hits (v4)
 STATIC_PERSISTENT_PROC_SHARE = 1.0  # one turn of a repeatable Power (v4)
+# DRAFTER_VERSION 6: all_enemies damage counts toward the average swarm, not
+# a single body. The Furina-0% diagnosis (§10.8.2) caught the v5 scorer
+# reading Undercurrent at HALF its table value against the 4-body elite --
+# AoE blindness was structural. 2.0 is deliberately conservative (multi-body
+# fights average 2-4 bodies; single-target fights make AoE overpriced at
+# higher values).
+STATIC_AOE_MULT = 2.0
 
 # These predicates are readable before a card is played. Mid-resolution
 # conditions such as reaction_triggered_by_this and killed_target remain out:
@@ -90,6 +97,13 @@ def _neutral_amount(fx: dict, default: float = 1.0) -> float:
     return default
 
 AMP_PAYOFF_POWERS = C.AMP_PAYOFF_POWERS   # shared with the content loader
+
+
+def _has_tempo(card: Card) -> bool:
+    """Draw / energy anywhere in the printed text -- the velocity class the
+    late-run discipline (DRAFTER_VERSION 5) still takes past the lean cap."""
+    return any(fx.get("op") in ("draw", "energy")
+               for fx in _nested_effects(card.effects))
 
 
 def _has_block(card: Card) -> bool:
@@ -300,7 +314,10 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                     if isinstance(times_formula, dict):
                         times = (times_formula.get("base", 0)
                                  + times_formula.get("per", 1))
-                    total += amt * times
+                    if fx.get("target") == "all_enemies":
+                        total += amt * times * STATIC_AOE_MULT      # v6
+                    else:
+                        total += amt * times
             elif fx.get("op") == "block":
                 times = 2 if fx.get("times") == "exhausted_this_card" else 1
                 total += fx.get("amount", 0) * times
@@ -349,6 +366,26 @@ REACTION_APPLIER_WEIGHT = 3.5     # sweep: 4.5 hurts
 REACTION_AMP_OFFLINE = 1.0        # sweep: 2.5 hurts
 REACTION_LEAN_CAP = 13            # reaction's own bloat line (§3: lean decks)
 REACTION_LEAN_PENALTY = 0.4       # winner at x0.4; x0.8 overshoots (16.6 cards)
+
+# DRAFTER_VERSION 5 late-run discipline (red-pen 2026-07-23, the
+# Ironclad-0.6% diagnosis §10.8.1). The 99%-pick-rate degeneracy: the
+# soft-cap penalty was tuned in a 10-screen world where 22 cards was
+# unreachable, so 30 screens produced 28-35-card decks. The human act-2
+# rule ("stop taking cards; fish for powers and velocity") expressed as a
+# hard gate: past LEAN_CAP only Powers / tempo (draw-energy) / Block make
+# the cut, past LEAN_BLOCK_CAP Powers and tempo only. Measured as the
+# lean15 arm: deck 28.9 -> ~17, act-2-boss deaths 32% -> ~20%.
+# Applied to assigned_policy ONLY -- the measured arm; adaptive keeps its
+# emergent-shape scoring unchanged until separately measured.
+DRAFT_LEAN_CAP = 15
+DRAFT_LEAN_BLOCK_CAP = 20
+# DRAFTER_VERSION 6: the strong-pick escape hatch the measured arm's
+# docstring promised but its code never implemented (§10.8.1 lever-world
+# flag: the v5 gate filtered real_ironclad's rare attack payoffs and his
+# win fell 5.4->3.0). Past the lean cap, a RARE whose score clears this
+# bar is always eligible.
+DRAFT_LEAN_RARE_BAR = 4.0
+
 
 # Fanfare is a native-resource plan, not a four-card assembly puzzle.  One
 # Aria of Recompense supplies five printed points of meter movement before the
@@ -476,6 +513,18 @@ def assigned_policy(rng: random.Random, deck: list[Card],
                  if archetype == "fanfare" else C.DRAFT_SKIP_THRESHOLD)
     if best_score < threshold:
         return None                                  # skip is a real pick
+    n = len(deck)
+    if n >= DRAFT_LEAN_CAP:
+        # v5 late-run discipline + the v6 rare strong-pick hatch (see the
+        # constants blocks above).
+        score = {i: s for s, i, c in scored}
+        ok = [c for i, c in enumerate(offers)
+              if c.type == "power" or _has_tempo(c)
+              or (n < DRAFT_LEAN_BLOCK_CAP and _has_block(c))
+              or (c.rarity == "rare" and score[i] >= DRAFT_LEAN_RARE_BAR)]
+        if not ok:
+            return None
+        return max(ok, key=lambda c: score_offer(c, deck, archetype))
     return best
 
 

@@ -348,10 +348,11 @@ APPLY_POWERS = {
         "Your Attacks deal {X} more damage per 10 [gold]Fanfare[/gold]. "
         "Maximum 2 stacks."),
     "salon_member": ("SalonMemberPower", None,
-        "Add {X} [gold]Salon Member(s)[/gold]. Maximum 3. "
-        "Replacements perform a final bow and empower this card's later effects."),
+        "Add {X} typed [gold]Salon Member(s)[/gold]. Maximum 3; a full "
+        "stage bows its OLDEST member out (its unique payoff) and "
+        "empowers this card's later effects."),
     "salon_damage_up": ("SalonDamageUpPower", 6,
-        "[gold]Salon Members[/gold] deal {X} more damage. Maximum 6."),
+        "[gold]Salon Member[/gold] numbers are {X} higher. Maximum 6."),
     "spotlight_discount": ("SpotlightDiscountPower", 1,
         "The first [gold]Spotlighted[/gold] card each turn costs {X} less."),
     "spotlight_draw": ("SpotlightDrawPower", 1,
@@ -381,6 +382,9 @@ ENEMY_APPLY_POWERS = {"weak", "vulnerable"}
 # generator does not understand -- fail loudly (UNPARSEABLE discipline).
 APPLY_POWER_FIELDS = {"op", "power", "amount", "target", "max_stacks", "note",
                       "splash_procs_per_turn",
+                      # Salon v2: the typed-member rider on salon_member
+                      # deploys (rework plan §1).
+                      "member",
                       # Companion sheet annotations (oz/albedo): the summon's
                       # element and aura consumption live in the POWER's C#
                       # implementation; the fields are documentation.
@@ -1728,9 +1732,16 @@ def build_body(
             # TryModifyPowerAmountReceived (the sim clamps at apply too), so
             # the call site stays a plain Apply.
             if eff["power"] == "salon_member":
+                # Salon v2 (rework plan §1): deploys are member-TYPED. The
+                # C# enum mirrors tier0's C.SALON_MEMBERS keys.
+                member = {"crabaletta": "SalonMember.Crabaletta",
+                          "usher": "SalonMember.Usher",
+                          "chevalmarin": "SalonMember.Chevalmarin"}[
+                    eff.get("member", "crabaletta")]
                 lines.append(
                     "salonReplacements += await SalonMemberPower.Deploy("
-                    f"choiceContext, Owner.Creature, {amount}, this);")
+                    f"choiceContext, Owner.Creature, {amount}, this, "
+                    f"{member});")
                 salon_deployed = True
             elif eff["power"] in ENEMY_APPLY_POWERS:
                 # tier0 _op_apply_power -> _pick_targets: chosen enemy or

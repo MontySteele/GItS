@@ -240,6 +240,6 @@ def test_ab_threads_realistic_run_layers(monkeypatch):
                     grant_relics=True, grant_potions=True)
     assert set(out) == {"assigned", "adaptive"}
     assert calls == [
-        {"grant_relics": True, "grant_potions": True},
-        {"grant_relics": True, "grant_potions": True},
+        {"grant_relics": True, "grant_potions": True, "n_acts": None},
+        {"grant_relics": True, "grant_potions": True, "n_acts": None},
     ]

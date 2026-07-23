@@ -142,22 +142,36 @@ FANFARE_PER_SPOTLIGHT_CARD = 2    # the Ovation merge: per Spotlighted
                               # card played. NO passive per-turn accrual
                               # constant exists; do not add one (§4).
 
-# --- Furina: Salon Members (kickoff §5; sheet pass 1) ---
-# The oz_summon rails with Defect-style fixed slots: each active member is one
-# start-of-turn Hydro tick. Overflowed deployments take an immediate stronger
-# final bow. A tick that can pay Encore deals full damage; a dry tick never
-# overdraws HP and instead deals three-quarter damage.
-SALON_MEMBER_DMG = 4          # per-member tick damage (v0.2: 3->4 -- her
-                              # signature engine may out-tick Oz's 3; the
-                              # upkeep cost is what Oz doesn't pay)
+# --- Furina: Salon Members (kickoff §5; Salon v2 rework 2026-07-23,
+# docs/furina-salon-rework-plan.md -- numbers PROPOSED pending red-pen) ---
+# v2 = the full Defect-orb grammar per user directive: members are TYPED
+# (unique slot passive at start of player turn + unique final bow when
+# displaced), the queue is FIFO (deploying into full slots bows the OLDEST
+# member out), and Fanfare is the Focus analogue: every member NUMERIC
+# amount gains +1 per SALON_FOCUS_PER held Fanfare at resolution (auras and
+# the Encore bow rider do not scale -- numbers-only, §2.2a discipline).
+# v1 (archive: uniform anonymous 4-damage ticks, overflow self-bows at x3)
+# is the world of sheet passes 1-3 and every pre-rework Furina number.
+SALON_MEMBERS = {
+    # member: tick (slot passive) / bow (displaced payoff). "damage" ticks
+    # are hydro to a random enemy; "block" is player Block; "aura" applies
+    # hydro (chevalmarin's tick deals its damage AND applies; her bow
+    # applies to ALL enemies and refunds Encore -- activity-gated, legal).
+    "crabaletta":  {"tick": {"damage": 6},  "bow": {"damage": 14}},
+    "usher":       {"tick": {"block": 3},   "bow": {"block": 9}},
+    "chevalmarin": {"tick": {"damage": 2, "aura": True},
+                    "bow": {"aura_all": True, "encore": 3}},
+}
+SALON_FOCUS_PER = 10          # +1 member numbers per this much held Fanfare
+                              # (cap 30 -> +3; uncapped 45 -> +4)
 SALON_MEMBER_SLOTS = 3        # Defect-orb shape: fixed active company
-SALON_REPLACE_NUMERIC_MULT = 2  # draw/Encore/power/etc. on replacement
-SALON_REPLACE_DAMAGE_MULT = 3   # final-bow damage and Block on replacement
+SALON_REPLACE_NUMERIC_MULT = 2  # deploy card's OTHER numerics on replacement
+SALON_REPLACE_DAMAGE_MULT = 3   # deploy card's damage riders on replacement
 SALON_TICK_ENCORE_COST = 1    # Encore drained per member tick
-SALON_DRY_DAMAGE_MULT = 0.75  # no Encore: 3 vs the paid tick's 4 damage;
-                              # never true-HP loss
-SALON_TICK_BURST = 2          # burst energy per member tick (her particle
-                              # economy leans on Salon application, §1)
+SALON_DRY_DAMAGE_MULT = 0.75  # no Encore: tick numerics at three-quarters;
+                              # never true-HP loss (auras still apply)
+SALON_TICK_BURST = 2          # burst energy per member tick AND bow (her
+                              # particle economy leans on Salon, §1)
 BURST_PER_ENCORE_SPENT = 1    # burst energy per point of Encore spent
                               # (the other half of her particle economy)
 
@@ -216,19 +230,47 @@ WINRATE_BAND_MIN_FIGHTS = 1000    # ratification process fix: winrate band
 # early elite without a chance to heal/smith first. The second R guards the
 # boss. Both elites and the boss are reachable off a rest.
 #
-# v3 DELIBERATELY BREAKS v2's "fight count (11) and screen count (10)
-# UNCHANGED" promise -- the whole point of the rework is 11 fights -> 7 so
-# per-fight effects (Burning Blood, future per-fight relics) read correctly.
-# Draft-economy numbers are therefore NOT comparable across v2/v3.
+# v4 (multi-act extension §10, RATIFIED 2026-07-23): the TEMPLATE STRING is
+# unchanged, but the run is now the template repeated once PER REGISTERED ACT
+# (RUN_ACTS below), with an act-boundary event between acts (forced-Rare
+# companion slot + Ancient full-heal/relic pick) and the act BOSS drawn from
+# a per-act boss POOL (>= 2, §10.0 ruling -- including Act 1). The boss-pool
+# draw consumes a run-rng call, so v4 runs are NOT seed-comparable to v3
+# EVEN at --acts 1. All v3 run-layer numbers are archived; never compare
+# across template versions unlabeled.
+# v5 (Ironclad-0.6% diagnosis, 2026-07-23): the act-boundary CARD offers are
+#      forced Rare -- §10.1's ratified "choice-of-3 Rares" boss drop, which v4
+#      shipped as a forced-Rare COMPANION slot only (a no-companion character
+#      got plain commons at the boundary). Boundary screens skip the rarity
+#      rolls, so v5 runs are not seed-comparable to v4 past the first boss.
+# v4 = template repeated per registered act, boss pools, boundary event with
+#      the forced-Rare companion slot only. §10.8's shipped sanity numbers
+#      are v4; the boss-pool draw already broke v3 comparability at --acts 1.
+# v3 = same "NNNRETN$ERB" string, single act, single fixed boss (Vantom):
+#      the relic/potion-layer + calibration archive world.
 # v2 = "NNNENRNNENRNRB" (11 fights, 3 rests incl. guaranteed pre-boss): the
 #      archive world of the Furina sprint-1 and Klee pass-4 reports.
 # v1 = "NNNENRNNENRNB"  (11 fights, 2 rests): the M5-M8 archive world.
-RUNTEMPLATE_VERSION = 3
+RUNTEMPLATE_VERSION = 5
 RUN_NODE_TEMPLATE = "NNNRETN$ERB"
+
+# The act registry (§10.1): one spec per act -- pool file (tier05/content/)
+# + how many N fights draw the easy pool (Act 1: 3, Acts 2-3: 2, the real
+# StS2 rule). The run model spans ALL registered acts by default; acts 2-3
+# land in §10 Passes 2-3 by appending specs here.
+RUN_ACTS = (
+    {"id": "act1", "pool": "act1_pool.yaml", "easy_fights": 3},
+    {"id": "act2", "pool": "act2_pool.yaml", "easy_fights": 2},  # the Hive
+    {"id": "act3", "pool": "act3_pool.yaml", "easy_fights": 2},  # Glory
+)
 
 # --- Tier 0.5 economy (run-model rework §5; defaults RATIFIED §8) ---
 GOLD_START = 99                  # StS default starting gold
-GOLD_INCOME = {"N": 10, "E": 25, "B": 40}  # per WON fight, by node tier
+# Boss pays 100 (§10.1, RATIFIED 2026-07-23: the real StS2 act-transition
+# drop -- resolves §5's open boss number; was 40). Only ever SPENDABLE on
+# multi-act runs (a final boss ends the run), but it lands in the reported
+# run gold at every act count.
+GOLD_INCOME = {"N": 10, "E": 25, "B": 100}  # per WON fight, by node tier
 TREASURE_GOLD = 40               # T node lump (relic slot is a stub)
 # Shop ($): offers SHOP_CARD_OFFERS cards from the character's OWN draft pool
 # (rewards.character_pool, ownership-required, companion-free) plus one card
@@ -269,6 +311,11 @@ REST_HEAL_THRESHOLD = 0.65        # rest policy: heal below this HP
 # third option was dead by construction -- measured: 0 upgrades in 30
 # demolition runs.
 REST_SMITH_DANGER = 0.40
+# DRAFTER_VERSION 5 (b): when the NEXT node is an Elite/Boss fight, the
+# heal outranks the smith below this line -- the human "top up before the
+# big fight" lookahead. Both template rests sit directly before E/B, so
+# under v4 runs walked into guaranteed elites at ~48/80 HP (§10.8.1).
+REST_PREFIGHT_HEAL_THRESHOLD = 0.90
                                   # fraction, otherwise remove a card
 PUNISHER_LITE_SCALE = 0.70        # normal-pool punisher at 70% statline
 ATTRITION_LITE_HP = 45            # normal-pool attrition: ONE 45 HP unit
@@ -327,8 +374,22 @@ CONSTANTS_VERSION = 2
 # STATIC_STRENGTH_VALUE / witchs_flame persistent-proc terms in
 # tier05/draft.py (bab07b2). Numbers measured Wed 2026-07-22 before 14:01
 # are v3-world. Never compare measurements across drafter versions without
-# labeling them.
-DRAFTER_VERSION = 4
+# labeling them. v5 (2026-07-23, red-pen: the Ironclad-0.6% diagnosis) =
+# the run-layer discipline pass, two changes stamped together because they
+# were measured together as the "discipline" arm (§10.8.1): (a) assigned's
+# late-run lean gate (draft.DRAFT_LEAN_CAP/DRAFT_LEAN_BLOCK_CAP -- past 15
+# cards only Powers/tempo/Block, past 20 Powers+tempo only; adaptive
+# unchanged), and (b) the rest policy's pre-fight lookahead
+# (REST_PREFIGHT_HEAL_THRESHOLD: heal-first below 90% when the next node
+# is an Elite/Boss fight -- both template rests directly precede E/B, and
+# v4 smithed at ~48/80 HP into them). v4-world 3-act numbers (real_IC
+# 5.4%) are archived in §10.8.1. v6 (2026-07-23, Salon-v2 rework batch,
+# ratified direction): (a) all_enemies damage in the static scorer counts
+# STATIC_AOE_MULT bodies (the §10.8.2 AoE-blindness finding), and (b) the
+# lean gate gains the rare strong-pick escape hatch (DRAFT_LEAN_RARE_BAR)
+# the v5 arm promised but never implemented. v5-world numbers (Klee 6.2%,
+# real_IC 3.0%) are archived in §10.8.1's lever-world table.
+DRAFTER_VERSION = 6
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).

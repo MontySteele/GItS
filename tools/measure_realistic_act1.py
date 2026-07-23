@@ -21,7 +21,8 @@ def measure(character, runs=1500, seed=11, grant_relics=False,
     policy = draft.POLICIES["assigned"]
     results = model.run_many(character, archetype, pilot, policy, runs, seed,
                              grant_relics=grant_relics,
-                             grant_potions=grant_potions)
+                             grant_potions=grant_potions,
+                             n_acts=1)   # §10: Act-1 instrument, pinned
     max_hp = loader._character_index()[character]["hp"]
     surv = run_metrics.survival_profile(results, max_hp)
     n = len(results)

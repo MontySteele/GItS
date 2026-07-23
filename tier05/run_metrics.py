@@ -70,7 +70,31 @@ def summarize_runs(results: list[RunResult]) -> dict:
         "median_time_to_online": (sorted(online)[len(online) // 2]
                                   if online else None),
         "online_rate": len(online) / n,
+        "act_funnel": act_funnel(results),      # §10.6 (len 1 at --acts 1)
     }
+
+
+def act_funnel(results: list[RunResult]) -> list[dict]:
+    """§10.6 (multi-act): the per-act funnel -- what share of runs REACHED
+    each act and what share CLEARED its boss. This is the surface the whole
+    extension exists for: a frontloaded build shows a steep cleared-rate
+    fall-off between act 1 and act 3; a scaling build holds.
+
+    Denominator is ALL runs (not reached-conditional) so acts compose:
+    cleared[act] is monotonically non-increasing by construction."""
+    if not results:
+        return []
+    n_acts = results[0].n_acts
+    tpl = len(results[0].node_kinds) // max(1, n_acts)
+    n = len(results)
+    out = []
+    for a in range(n_acts):
+        reached = sum(1 for r in results
+                      if r.death_node is None or r.death_node >= a * tpl)
+        cleared = sum(1 for r in results if r.acts_completed > a)
+        out.append({"act": a + 1, "reached": reached, "cleared": cleared,
+                    "reached_rate": reached / n, "cleared_rate": cleared / n})
+    return out
 
 
 NEAR_DEATH_FRACTION = 0.15      # "one bad turn from dead"
@@ -194,6 +218,11 @@ def print_run_report(character: str, archetype: str, s: dict,
     lo, hi = s["winrate_wilson95"]
     print(f"  run winrate      {s['winrate']:.1%} "
           f"({s['wins']}/{s['runs']}; Wilson 95% {lo:.1%}-{hi:.1%})")
+    funnel = s.get("act_funnel") or []
+    if len(funnel) > 1:                     # §10.6: multi-act runs only
+        print("  act funnel       " + "   ".join(
+            f"act{f['act']} reached {f['reached_rate']:.0%} "
+            f"cleared {f['cleared_rate']:.0%}" for f in funnel))
     if survival:
         print(f"  survival         act median HP "
               f"{survival['act_median_hp_pct']:.0%} of max "

@@ -214,6 +214,7 @@ def measure(
         results = model.run_many(
             "klee", plan, plan, draft.POLICIES["assigned"], runs, seed,
             grant_relics=True, grant_potions=True,
+            n_acts=1,   # §10: Act-1 instrument, pinned
         )
         summary = run_metrics.summarize_runs(results)
         max_hp = loader._character_index()["klee"]["hp"]
@@ -290,6 +291,7 @@ def measure_furina(runs: int, seed: int, overload_stagger: bool = True) -> None:
         results = model.run_many(
             "furina", archetype, pilot, draft.POLICIES["assigned"], runs, seed,
             grant_relics=True, grant_potions=True,
+            n_acts=1,   # §10: Act-1 instrument, pinned
         )
         wins = sum(run.won for run in results)
         lo, hi = _wilson(wins, runs)

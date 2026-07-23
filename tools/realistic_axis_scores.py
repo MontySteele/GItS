@@ -162,7 +162,9 @@ def evaluate(character: str, runs: int, sample: int, fights: int,
     # One realistic run set (everything ON) feeds BOTH surfaces.
     results = model.run_many(character, "generic", "generic",
                              draft.POLICIES["assigned"], runs, seed,
-                             grant_relics=True, grant_potions=True)
+                             grant_relics=True, grant_potions=True,
+                             n_acts=1)   # §10: Act-1 instrument, pinned --
+    #                          the multi-act axis surface is a Pass-4 decision
 
     # --- SURFACE 1: pool every real run fight. -----------------------------
     run_fights = [s for r in results for s in r.fight_stats]

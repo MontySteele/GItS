@@ -163,6 +163,7 @@ def evaluate(config: Config, runs: int, sample: int, fights: int,
         config.character, config.archetype, config.pilot,
         draft.POLICIES["assigned"], runs, seed,
         grant_relics=True, grant_potions=True,
+        n_acts=1,   # §10: Act-1 instrument, pinned
     )
     reached = [result for result in run_results if _reached_boss(result)]
     selected = _sample_evenly(reached, sample)

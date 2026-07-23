@@ -45,8 +45,10 @@ public sealed class LetThePeopleRejoice
             new DamageVar(8m, ValueProp.Move),
         };
 
+    // Energy cost 0 (user ruling 2026-07-23, matching Klee's Sparks 'n'
+    // Splash): the charged Burst meter IS the cost -- it empties on cast.
     public LetThePeopleRejoice()
-        : base(2, CardType.Attack, CardRarity.Rare,
+        : base(0, CardType.Attack, CardRarity.Rare,
             TargetType.AllEnemies, autoAdd: false)
     {
         CustomResources<FurinaBurstResource>.SetCanonicalCost(

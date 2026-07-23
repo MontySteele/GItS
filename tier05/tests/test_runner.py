@@ -55,6 +55,7 @@ def test_realistic_runner_enables_both_run_layers(monkeypatch, capsys):
     assert called["kwargs"] == {
         "grant_relics": True,
         "grant_potions": True,
+        "n_acts": None,                 # §10.1: default spans RUN_ACTS
     }
     assert "realistic (relics + potions)" in capsys.readouterr().out
 
@@ -79,6 +80,7 @@ def test_bare_runner_preserves_historical_defaults(monkeypatch):
     assert called["kwargs"] == {
         "grant_relics": False,
         "grant_potions": False,
+        "n_acts": None,                 # §10.1: default spans RUN_ACTS
     }
 
 

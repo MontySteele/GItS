@@ -175,6 +175,67 @@ neow:
     effects:
       - {hook: grant_random_common}
 
+# --- ANCIENT boons (§10.1, RATIFIED 2026-07-23): the act-boundary pick. -----
+# After each NON-FINAL act boss the Ancient heals 100% of missing HP (that
+# part is structural, in tier05/model.py) and offers a 1-of-3 pick from this
+# pool. Representative sample of the REAL StS2 Act-2/3 Ancient boons (wiki
+# harvest 2026-07-23, docs/act2-act3-roster-research.md), ratified sampling
+# rule: only boons that map 1:1 onto EXISTING hooks. Transform / UI-choice /
+# card-content boons are out of scope (skip-loudly, §10.9). Wiki caveat: the
+# 100%-missing-HP heal number is from the Mobalytics guide; the wiki proper
+# confirms the choice-of-3 but not the heal fraction.
+ancient:
+  sand_castle:
+    name: "Sand Castle"             # Orobas (Act 2): upgrade 6 random cards
+    effects:
+      - {hook: pickup_upgrade, count: 6}
+
+  yummy_cookie:
+    name: "Yummy Cookie"            # Tezcatara (Act 2): upgrade 4 cards
+    effects:
+      - {hook: pickup_upgrade, count: 4}
+
+  very_hot_cocoa:
+    name: "Very Hot Cocoa"          # Tezcatara (Act 2): +4 energy at combat start
+    effects:
+      - {hook: combat_start_energy, amount: 4}
+
+  paels_blood:
+    name: "Pael's Blood"            # Pael (Act 2): +1 draw at each turn start
+    effects:
+      - {hook: every_n_turns_draw, n: 1, amount: 1}
+
+  prismatic_gem:
+    name: "Prismatic Gem"           # +1 energy at each turn start
+    # The real pools carry THREE +1-energy-per-turn boons (Prismatic Gem /
+    # Blessed Antler / Philosopher's Stone) -- the class that replaces STS1's
+    # energy boss-relics. The shipped sample had none, which the Ironclad-0.6%
+    # diagnosis (2026-07-23) measured as the single largest player-power
+    # distortion in the 3-act world. Prismatic Gem is the one whose rider
+    # ("card rewards show other colors") is faithfully a no-op in a
+    # single-character pool, so it maps 1:1 onto the existing hook -- the
+    # ratified sampling rule. Antler (3 Dazed at combat start) and Stone
+    # (enemies +1 Str) need new hooks: §10.9 backlog, never faked.
+    effects:
+      - {hook: every_n_turns_energy, n: 1, amount: 1}
+
+  looming_fruit:
+    name: "Looming Fruit"           # Nonupeipe (Act 3): +31 max HP
+    effects:
+      - {hook: on_pickup_maxhp, amount: 31}
+
+  signet_ring:
+    name: "Signet Ring"             # Nonupeipe (Act 3): +999 gold
+    effects:
+      - {hook: gold_on_pickup, amount: 999}
+
+  diamond_diadem:
+    name: "Diamond Diadem"          # Nonupeipe (Act 3): 20 block at combat start
+    # UNIMPLEMENTED (§10.9): the real Diadem's block survives into the next
+    # turn; modeled as plain start-of-combat block.
+    effects:
+      - {hook: combat_start_block, amount: 20}
+
 # --- SKIP: relics whose mechanic tier0 lacks. NOT faked -- listed here so the
 # loader emits a loud UNIMPLEMENTED warning naming the missing mechanic, and
 # get_relic() refuses to hand back a hollow relic. (House rule: never

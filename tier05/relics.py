@@ -82,11 +82,16 @@ def skipped_ids() -> frozenset[str]:
     return frozenset((_pool().get("skip") or {}).keys())
 
 
+def ancient_pool() -> dict[str, dict]:
+    """id -> boon spec for the act-boundary Ancient pool (§10.1)."""
+    return dict(_pool().get("ancient") or {})
+
+
 def get_relic(rid: str) -> dict:
-    """Fetch a relic spec by id from common or neow. A SKIP relic or an unknown
-    id is a hard error -- never a hollow relic."""
+    """Fetch a relic spec by id from common, neow or ancient. A SKIP relic or
+    an unknown id is a hard error -- never a hollow relic."""
     pool = _pool()
-    for group in ("common", "neow"):
+    for group in ("common", "neow", "ancient"):
         if rid in (pool.get(group) or {}):
             return (pool[group])[rid]
     if rid in (pool.get("skip") or {}):
@@ -144,6 +149,14 @@ def roll_relic_reward(rng: random.Random, held, character: str
 _NEOW_HOOK_WEIGHT = {
     "combat_start_energy": 10,
     "combat_start_draw": 10,
+    "every_n_turns_draw": 8,     # §10.1 ancient pool (Pael's Blood); absent
+    #                              from the Neow pool, so Neow picks unchanged
+    "every_n_turns_energy": 12,  # n=1 in the ancient pool (Prismatic Gem):
+    #                              +1 energy EVERY turn dominates a one-shot
+    #                              combat_start_energy 4 -- ranking it below
+    #                              Cocoa made the pilot spurn the best boon.
+    #                              Only ancient picks read this row (the Neow
+    #                              pool has no every_n_turns hooks).
     "post_rest_energy": 9,
     "elite_combat_start": 9,
     "grant_random_common": 8,
@@ -168,6 +181,39 @@ def _neow_value(rid: str, character: str) -> int:
         return 0
     return sum(_NEOW_HOOK_WEIGHT.get(fx.get("hook"), 0)
                for fx in (spec.get("effects") or []))
+
+
+# ---------------------------------------------------------------------------
+# Act-boundary Ancient pick (§10.1, RATIFIED 2026-07-23). After a non-final
+# act boss the Ancient offers 3 distinct boons from the ancient pool; the
+# pilot takes the best by the same static hook valuation Neow uses. Boons
+# already held are never re-offered (each is a one-time pickup).
+# ---------------------------------------------------------------------------
+
+def unowned_ancient(held_ids, character: str) -> list[str]:
+    """Sorted Ancient-pool ids still offerable: not already held, owner-ok."""
+    owned = set(held_ids)
+    return [rid for rid, spec in sorted(ancient_pool().items())
+            if rid not in owned and _owner_ok(spec, character)]
+
+
+def ancient_offer(rng: random.Random, held, character: str,
+                  k: int = 3) -> list[str]:
+    """Sample `k` DISTINCT unheld boons from the Ancient pool through the run
+    rng (all of them if fewer remain). `held` may be a HeldRelics or ids."""
+    held_ids = held.ids if isinstance(held, HeldRelics) else (held or [])
+    ids = unowned_ancient(held_ids, character)
+    if len(ids) <= k:
+        return ids
+    return rng.sample(ids, k)
+
+
+def ancient_pick(offer: list[str], character: str) -> Optional[str]:
+    """The pilot's Ancient pick: highest static hook valuation (the Neow
+    table), ties broken by lowest id. No rng -- the offer consumed it."""
+    if not offer:
+        return None
+    return max(sorted(offer), key=lambda rid: _neow_value(rid, character))
 
 
 def neow_offer(rng: random.Random, k: int = 3) -> list[str]:

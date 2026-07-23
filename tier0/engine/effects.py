@@ -235,6 +235,11 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     dmg = powers.modify_damage_dealt(state.player, base)  # freeze it applies
     dmg = reactions.resolve_hit(state, enemy, element, dmg)
     dmg = powers.modify_damage_taken(enemy, dmg)
+    # Slow (§10.9 promotion): +N% damage from Attacks per card played this
+    # turn. cards_played_this_turn increments at play, BEFORE resolution, so
+    # the attacking card counts itself -- the base-game trigger order.
+    if enemy.slow and source == "attack":
+        dmg *= 1 + enemy.slow * state.cards_played_this_turn / 100.0
     dmg = int(dmg)
     if base > 0 and dmg > base * C.AMP_STACK_LIMIT:
         state.emit("amp_stack_warning", base=base, final=dmg, target=enemy.name)
@@ -269,6 +274,16 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
             state.fatal_kills_this_card += 1
     if hp_dmg > 0:
         _detonate_bombs_on_hit(state, enemy, source)
+    # Skittish (§10.9 promotion): "The first time it is hit each turn, it
+    # gains N Block." AFTER the whole hit resolves (incl. any detonation
+    # rider), so the triggering attack is never mitigated by it; the latch
+    # resets in combat._player_turn.
+    if (enemy.skittish and not enemy.skittish_fired and source == "attack"
+            and enemy.alive):
+        enemy.skittish_fired = True
+        enemy.block += enemy.skittish
+        state.emit("skittish_block", target=enemy.name,
+                   amount=enemy.skittish)
     return hp_dmg
 
 
@@ -466,33 +481,59 @@ def _op_energy(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("energy", amount=amount)
 
 
-def _deploy_salon_members(state: CombatState, amount: int) -> None:
-    """Fill Furina's three active Salon slots, then give each displaced
-    Member a stronger immediate final bow. Members are anonymous stacks in
-    Tier 0, so this is Defect-style evoke geometry without false identity
-    tracking: the active company stays capped and every overflow still has
-    value. Final bows are Hydro, cost no Encore, and generate Salon particles."""
+def _salon_amount(state: CombatState, base: int) -> int:
+    """A Salon member numeric amount (Salon v2): base + the Fanfare Focus
+    term (+1 per SALON_FOCUS_PER held, read live) + Grand Salon."""
     p = state.player
-    current = p.powers.get("salon_member", 0)
-    room = max(0, C.SALON_MEMBER_SLOTS - current)
-    added = min(amount, room)
-    if added:
-        powers.apply_power(state, p, "salon_member", added,
-                           max_stacks=C.SALON_MEMBER_SLOTS)
-    replacements = max(0, amount - added)
-    state.salon_replacements_this_card += replacements
-    for _ in range(replacements):
-        if not state.living_enemies:
-            break
+    focus = p.fanfare // C.SALON_FOCUS_PER if p.fanfare_cap else 0
+    return base + focus + p.powers.get("salon_damage_up", 0)
+
+
+def _salon_bow(state: CombatState, member: str) -> None:
+    """The displaced member's final bow (Salon v2, rework plan §1): its
+    UNIQUE payoff. No Encore upkeep, Focus/Grand-Salon scaled numerics,
+    feeds the Burst meter like a tick."""
+    p = state.player
+    spec = C.SALON_MEMBERS[member]["bow"]
+    dmg = spec.get("damage", 0)
+    if dmg and state.living_enemies:
         enemy = state.rng.choice(state.living_enemies)
-        bow = (C.SALON_REPLACE_DAMAGE_MULT
-               * (C.SALON_MEMBER_DMG
-                  + p.powers.get("salon_damage_up", 0)))
-        deal_damage_to_enemy(state, enemy, bow,
+        deal_damage_to_enemy(state, enemy, _salon_amount(state, dmg),
                              element="hydro", source="salon_final_bow")
-        if p.burst_max:
-            p.burst_energy += C.SALON_TICK_BURST
-        state.emit("salon_final_bow", target=enemy.name, damage=bow)
+    blk = spec.get("block", 0)
+    if blk:
+        amt = _salon_amount(state, blk)
+        p.block += amt
+        state.emit("block", amount=amt)
+    if spec.get("aura_all"):
+        for enemy in state.living_enemies:
+            reactions.resolve_hit(state, enemy, "hydro", 0)
+    enc = spec.get("encore", 0)
+    if enc:
+        resources.gain_encore(state, enc)
+    if p.burst_max:
+        p.burst_energy += C.SALON_TICK_BURST
+    state.emit("salon_final_bow", member=member)
+
+
+def _deploy_salon_members(state: CombatState, amount: int,
+                          member: str = "crabaletta") -> None:
+    """Salon v2 deploy (rework plan §1): the typed FIFO queue with Defect
+    evoke geometry. Deploying into full slots bows the OLDEST member OUT
+    (its unique bow) and the new member takes the vacated slot — the v1
+    rule (the excess deploy bowed itself and never entered) is the
+    archive. powers['salon_member'] mirrors len(queue) so every count
+    read (has_salon_members, the pilot, instruments) is unchanged."""
+    p = state.player
+    if member not in C.SALON_MEMBERS:
+        raise ValueError(f"unknown salon member {member!r}")
+    for _ in range(amount):
+        if len(p.salon) >= C.SALON_MEMBER_SLOTS:
+            state.salon_replacements_this_card += 1
+            _salon_bow(state, p.salon.pop(0))
+        p.salon.append(member)
+        state.emit("salon_deploy", member=member, company=list(p.salon))
+    p.powers["salon_member"] = len(p.salon)
 
 
 def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
@@ -511,7 +552,8 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
         return
     if fx.get("target", "self") == "self":
         if fx["power"] == "salon_member":
-            _deploy_salon_members(state, amount)
+            _deploy_salon_members(state, amount,
+                                  fx.get("member", "crabaletta"))
             return
         powers.apply_power(state, state.player, fx["power"], amount,
                            max_stacks=cap)
@@ -1395,29 +1437,39 @@ def player_turn_start_triggers(state: CombatState) -> None:
 
 
 def salon_tick(state: CombatState) -> None:
-    """Salon Members (kickoff §5, on the summon rails per the audit): each
-    member is one hydro tick to a random enemy at the START of the player
-    turn (Klee-bomb timing, not Oz timing -- a sheet-pass measurement
-    decision: end-of-turn upkeep drained the buffer BEFORE enemy hits, so
-    the default archetype zeroed her elite A4; start-of-turn ticks let
-    absorption take first bite and the upkeep eats what survived the
-    night). A tick pays Encore for full damage. When Encore is too low,
-    it cannot overdraw HP: it attacks at three-quarter power instead. Members persist
-    for the combat; fixed slots and replacement effects govern the ceiling."""
+    """Salon v2 (rework plan §1): each active member performs its UNIQUE
+    slot passive at the START of the player turn, in queue order
+    (Klee-bomb timing, not Oz timing -- the sheet-pass 1 measurement
+    decision stands: end-of-turn upkeep drained the buffer BEFORE enemy
+    hits and zeroed her elite A4; start-of-turn ticks let absorption take
+    first bite and the upkeep eats what survived the night). Upkeep is
+    unchanged from v1: each member pays 1 Encore for full numerics; a dry
+    member cannot overdraw HP and resolves numerics at three-quarters
+    (hydro application on damage ticks still applies either way). Numeric
+    amounts carry the Fanfare Focus term + Grand Salon (_salon_amount)."""
     p = state.player
-    members = p.powers.get("salon_member", 0)
-    for _ in range(members):
-        if not state.living_enemies or not p.alive:
+    for member in list(p.salon):
+        if not p.alive or not state.living_enemies:
             break
+        spec = C.SALON_MEMBERS[member]["tick"]
         paid = p.encore >= C.SALON_TICK_ENCORE_COST
         if paid:
             resources.spend_encore(state, C.SALON_TICK_ENCORE_COST)
-        enemy = state.rng.choice(state.living_enemies)
-        dmg = C.SALON_MEMBER_DMG + p.powers.get("salon_damage_up", 0)
-        if not paid:
-            dmg = int(dmg * C.SALON_DRY_DAMAGE_MULT)
-        deal_damage_to_enemy(state, enemy, dmg, element="hydro",
-                             source="salon")
+
+        def _num(base: int) -> int:
+            amt = _salon_amount(state, base)
+            return amt if paid else int(amt * C.SALON_DRY_DAMAGE_MULT)
+
+        dmg = spec.get("damage", 0)
+        if dmg:
+            enemy = state.rng.choice(state.living_enemies)
+            deal_damage_to_enemy(state, enemy, _num(dmg), element="hydro",
+                                 source="salon")
+        blk = spec.get("block", 0)
+        if blk:
+            amt = _num(blk)
+            p.block += amt
+            state.emit("block", amount=amt)
         if p.burst_max:
             p.burst_energy += C.SALON_TICK_BURST     # §1 particle economy
 

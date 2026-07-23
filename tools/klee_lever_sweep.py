@@ -52,7 +52,8 @@ effects.OPS["block"] = _block
 def measure(character, runs, seed):
     res = model.run_many(character, "generic", "generic",
                          draft.POLICIES["assigned"], runs, seed,
-                         grant_relics=True, grant_potions=True)
+                         grant_relics=True, grant_potions=True,
+                         n_acts=1)   # §10: Act-1 instrument, pinned
     max_hp = loader._character_index()[character]["hp"]
     won = sum(1 for r in res if r.won)
     # per-fight HP lost (net of in-combat heals; Klee has no Burning Blood so

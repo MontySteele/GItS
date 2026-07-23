@@ -41,7 +41,8 @@ ALIVE = 0.20
 
 def tally(arch):
     res = model.run_many("klee", arch, "generic", draft.POLICIES["assigned"],
-                         RUNS, SEED, grant_relics=True, grant_potions=True)
+                         RUNS, SEED, grant_relics=True, grant_potions=True,
+                         n_acts=1)   # §10: Act-1 instrument, pinned
     off = defaultdict(int)
     pick = defaultdict(int)
     for r in res:

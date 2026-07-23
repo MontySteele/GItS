@@ -140,7 +140,8 @@ def test_combat_max_hp_gain_carries_to_the_next_fight(monkeypatch):
     monkeypatch.setattr(model, "node_template", lambda: ["N", "N"])
     monkeypatch.setattr(model, "run_fight", gain_once)
     model.run_one("klee", "demolition", "demolition",
-                  lambda rng, deck, offers, archetype: None, SEED)
+                  lambda rng, deck, offers, archetype: None, SEED,
+                  n_acts=1)     # §10: exactly two stubbed fights
 
     assert seen == [(62, 62), (65, 65)]
 
@@ -150,21 +151,21 @@ def test_realistic_normals_easy_then_hard():
     battery-derived lites in build_node_encounter. The first three N nodes
     draw distinct easy-pool encounters; the fourth N draws the hard pool.
     HP lands inside each enemy's spawn band, rolled through the run rng."""
-    from tier05 import act1
-    easy_ids = {e["id"] for e in act1.pools()["easy"]}
-    hard_ids = {e["id"] for e in act1.pools()["hard"]}
+    from tier05 import acts
+    easy_ids = {e["id"] for e in acts.pools(0)["easy"]}
+    hard_ids = {e["id"] for e in acts.pools(0)["hard"]}
     rng = random.Random(SEED)
-    draw = act1.ActDraw(rng)
+    draw = acts.ActDraw(rng, 0)
     easy_picks = [draw.encounter_for("N", rng)["id"]
-                  for _ in range(act1.EASY_FIGHTS)]
+                  for _ in range(acts.easy_fights(0))]
     assert set(easy_picks) <= easy_ids
-    assert len(set(easy_picks)) == act1.EASY_FIGHTS   # no repeat within act
+    assert len(set(easy_picks)) == acts.easy_fights(0)  # no repeat within act
     assert draw.encounter_for("N", rng)["id"] in hard_ids   # fight 4 = hard
     # Spawn-time HP range: Nibbit's band is [42, 46]; every roll lands in it.
-    nibbit = next(e for e in act1.pools()["easy"] if e["id"] == "nibbit")
+    nibbit = next(e for e in acts.pools(0)["easy"] if e["id"] == "nibbit")
     lo, hi = nibbit["enemies"][0]["hp"]
     for s in range(40):
-        body = act1.spawn(nibbit, random.Random(s))[0]
+        body = acts.spawn(nibbit, random.Random(s))[0]
         assert lo <= body.hp <= hi and body.max_hp == body.hp
 
 
@@ -366,22 +367,27 @@ def test_draft_regret_deterministic():
 
 # --- triage ruling 3b/4 mechanisms ---
 
-def test_elite_pool_draws_two_distinct_and_boss_is_vantom():
-    """Run-model rework §4.3/§4.4: E nodes draw two DISTINCT enemies from
-    the 3-enemy elite pool; B is Vantom at his real 173 HP. The old
-    compensator (punisher*0.8 elite / 240*0.7 boss) is GONE -- the roster
-    carries real StS2 numbers with no run-context scaling."""
-    from tier05 import act1
-    rng = random.Random(SEED)
-    draw = act1.ActDraw(rng)
-    e1 = draw.encounter_for("E", rng)["id"]
-    e2 = draw.encounter_for("E", rng)["id"]
-    assert e1 != e2                                  # 2 distinct elites
-    assert {e1, e2} <= {e["id"] for e in act1.pools()["elite"]}
-    boss = act1.spawn(draw.encounter_for("B", rng), rng)
-    assert len(boss) == 1
-    assert boss[0].name == "vantom"
-    assert boss[0].hp == 173 and boss[0].is_boss     # real HP, uncompensated
+def test_elite_pool_draws_two_distinct_and_boss_draws_from_pool():
+    """Run-model rework §4.3/§4.4 + §10.5: E nodes draw two DISTINCT enemies
+    from the 3-enemy elite pool; B draws ONE boss from the act's boss pool
+    (Vantom 173 / Lagavulin Matriarch 222 -- real HP, uncompensated), and
+    across seeds BOTH bosses actually occur."""
+    from tier05 import acts
+    real_hp = {"vantom": 173, "lagavulin_matriarch": 222}
+    seen_bosses = set()
+    for s in range(30):
+        rng = random.Random(SEED + s)
+        draw = acts.ActDraw(rng, 0)
+        e1 = draw.encounter_for("E", rng)["id"]
+        e2 = draw.encounter_for("E", rng)["id"]
+        assert e1 != e2                              # 2 distinct elites
+        assert {e1, e2} <= {e["id"] for e in acts.pools(0)["elite"]}
+        boss = acts.spawn(draw.encounter_for("B", rng), rng)
+        assert len(boss) == 1
+        assert boss[0].is_boss
+        assert boss[0].hp == real_hp[boss[0].name]   # real HP, uncompensated
+        seen_bosses.add(boss[0].name)
+    assert seen_bosses == set(real_hp)               # pool actually rotates
 
 
 def test_pity_slot_fires_after_k_companionless_screens():

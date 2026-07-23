@@ -96,6 +96,15 @@ class Card:
     # owner has already played. Keeping the rate on the card lets card_cost()
     # read the live turn counter without mutating the printed/base cost.
     cost_reduction_per_attack_this_turn: int = 0
+    # --- Status cards (multi-act §10.2 injection op; engine/statuses.py).
+    # type == "status" cards are UNPLAYABLE (combat.card_playable) and exist
+    # only inside a combat: enemies inject them into the player's piles; the
+    # run layer rebuilds the player from deck_ids each fight, so they never
+    # leak into the deck. Both fields are 0 on every designed card, so the
+    # frozen battery and all existing content are dead branches. ---
+    status_eot_damage: int = 0    # Burn/Wither: damage at end of player turn
+    #                               while in hand (blockable, StS-real)
+    status_draw_damage: int = 0   # Toxic (§10.3 ratified): HP loss on draw
     # DEPRECATED (ruled R20, 2026-07-20): a parallel M9 session introduced
     # inline `upgrade:` fields on klee-cards.yaml rows; the ruling made
     # *-upgrades.yaml sheets the ONE upgrade convention. Tier 0 IGNORES
@@ -177,6 +186,11 @@ class Player(Fighter):
     encore: int = 0               # unbounded per-combat buffer (v1.6 style)
     fanfare: int = 0              # capped activity stacks; global pool
     fanfare_cap: int = 0          # 0 = character has no Fanfare resource
+    # Salon v2 (rework 2026-07-23): the typed member queue, FIFO, max
+    # SALON_MEMBER_SLOTS, duplicates legal (Defect-orb geometry). SOURCE OF
+    # TRUTH for the Salon; powers["salon_member"] mirrors len(salon) so
+    # every count read (has_salon_members, pilot, instruments) still works.
+    salon: list[str] = field(default_factory=list)
     spotlight: Optional[str] = None   # THE per-player registry: one
                                   # designated character at a time; a second
                                   # designation re-aims, never stacks. The
@@ -208,6 +222,30 @@ class Enemy(Fighter):
     # permanent max HP, which is exactly the invisible upward bias this
     # project exists to catch. Read by effects.deal_damage_to_enemy.
     counts_for_fatal: bool = True
+    # --- Multi-act §10.2 boss ops (all inert-by-default; battery never sets
+    # them, so every branch is dead on the frozen anchor). ---
+    # Kaiser Crab's Crab Rage: {"powers": {name: stacks}, "block": int}
+    # applied ONCE at this enemy's next turn start after any ally has died.
+    ally_death_buff: Optional[dict] = None
+    ally_death_fired: bool = False
+    # HP-threshold phases (Test Subject): remaining phase specs, each
+    # {"hp": int, "intents": [...]}. When hp <= 0 with phases remaining, the
+    # enemy revives into the next phase (combat._settle_phases) instead of
+    # dying; counts_for_fatal must be False until the LAST phase (spawn and
+    # _settle_phases maintain this) so Feed cannot farm phase-downs.
+    phases: list[dict] = field(default_factory=list)
+    # §10.9 promotions (2026-07-23 red-pen): the per-card-played enemy
+    # counterplay class, previously skipped as "flavor". Inert-by-default,
+    # same contract as the §10.2 ops -- the battery never sets either, so
+    # every branch is dead on the frozen anchor.
+    # Slow N (Bygone Effigy): "Whenever you play a card, this enemy receives
+    # N% more damage from Attacks this turn." Resets each player turn (reads
+    # state.cards_played_this_turn, which already resets there).
+    slow: int = 0
+    # Skittish N (Phantasmal Gardener): "The first time it is hit each turn,
+    # it gains N Block. Does not stack." The latch resets each player turn.
+    skittish: int = 0
+    skittish_fired: bool = False
 
     def current_intent(self) -> dict:
         return self.intents[self.intent_index % len(self.intents)]
@@ -309,3 +347,11 @@ class CombatState:
             card = p.draw_pile.pop(0)
             p.hand.append(card)
             self.emit("draw", card=card.id)
+            if card.status_draw_damage:
+                # Toxic (§10.3, ratified semantics): unblockable HP loss the
+                # moment it is drawn. Late import mirrors refpowers above.
+                from tier0.engine import resources
+                p.hp -= card.status_draw_damage
+                resources.note_player_hp_loss(self, card.status_draw_damage)
+                self.emit("status_draw_damage", card=card.id,
+                          amount=card.status_draw_damage)

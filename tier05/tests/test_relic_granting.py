@@ -20,9 +20,18 @@ import random
 
 import pytest
 
+from tier0 import constants as C
 from tier0.engine.state import CombatState
 from tier05 import draft, model
 from tier05 import relics as relic_pool
+
+
+@pytest.fixture(autouse=True)
+def _single_act(monkeypatch):
+    """§10 re-stamp: this suite asserts ACT-1 granting cadence (one Neow,
+    one treasure, 2 elites + 1 boss). Pin the registry so acts 2-3 never
+    silently double the grants under test."""
+    monkeypatch.setattr(C, "RUN_ACTS", C.RUN_ACTS[:1])
 
 CHAR, ARCH, PILOT = "klee", "demolition", "demolition"
 # ref_ironclad is the committed reference character (real_ironclad is a

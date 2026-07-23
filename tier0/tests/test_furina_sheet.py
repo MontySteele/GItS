@@ -51,7 +51,9 @@ def test_pool_composition():
     for c in cards:
         by_rarity.setdefault(c.rarity, []).append(c)
     assert len(by_rarity["basic"]) == 5          # template §3.4 allows 4-5
-    assert len(by_rarity["common"]) == 31
+    # 32 commons since the Salon-v2 rework added standing_room_only (the
+    # common Fanfare-tied AoE, user directive 2026-07-23).
+    assert len(by_rarity["common"]) == 32
     assert len(by_rarity["uncommon"]) == 25
     assert len(by_rarity["rare"]) == 15
     kit = [c for c in by_rarity["rare"] if c.kit_card]
@@ -133,32 +135,58 @@ def test_no_passive_accrual_path_on_the_sheet():
                              or "per_turn" in str(fx.get("power")))), c.id
 
 
-# --- Salon Members (kickoff §5, on the oz_summon rails) ---
+# --- Salon Members (Salon v2 rework 2026-07-23: typed FIFO queue, unique
+# ticks/bows, Fanfare-as-Focus; docs/furina-salon-rework-plan.md §1) ---
 
-def test_salon_tick_damages_applies_hydro_and_drains_encore():
+CRAB_TICK = C.SALON_MEMBERS["crabaletta"]["tick"]["damage"]
+CRAB_BOW = C.SALON_MEMBERS["crabaletta"]["bow"]["damage"]
+USHER_TICK = C.SALON_MEMBERS["usher"]["tick"]["block"]
+USHER_BOW = C.SALON_MEMBERS["usher"]["bow"]["block"]
+CHEV_TICK = C.SALON_MEMBERS["chevalmarin"]["tick"]["damage"]
+CHEV_BOW_ENCORE = C.SALON_MEMBERS["chevalmarin"]["bow"]["encore"]
+
+
+def _company(p, *members):
+    """Seed the typed queue directly (the deploy op is tested separately);
+    the count power mirrors len(queue), same as the engine maintains."""
+    p.salon = list(members)
+    p.powers["salon_member"] = len(p.salon)
+
+
+def test_salon_ticks_are_typed_apply_hydro_and_drain_encore():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = 2
+    _company(p, "crabaletta", "chevalmarin")
     p.encore = 5
     hp0 = st.enemies[0].hp
     effects.salon_tick(st)
-    assert st.enemies[0].hp == hp0 - 2 * C.SALON_MEMBER_DMG
+    assert st.enemies[0].hp == hp0 - CRAB_TICK - CHEV_TICK
     assert st.enemies[0].aura == "hydro"            # the application engine
     assert p.encore == 5 - 2 * C.SALON_TICK_ENCORE_COST
 
 
-def test_dry_salon_ticks_deal_three_quarter_damage_without_overdraw():
+def test_usher_ticks_block_not_damage():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = 2
+    _company(p, "usher")
+    p.encore = 3
+    hp0 = st.enemies[0].hp
+    effects.salon_tick(st)
+    assert st.enemies[0].hp == hp0
+    assert p.block == USHER_TICK
+
+
+def test_dry_salon_ticks_resolve_at_three_quarters_without_overdraw():
+    st = furina_state()
+    p = st.player
+    _company(p, "crabaletta", "crabaletta")
     p.encore = 0
     hp0 = p.hp
     enemy_hp0 = st.enemies[0].hp
     effects.salon_tick(st)
     assert p.hp == hp0
-    assert int(C.SALON_MEMBER_DMG * C.SALON_DRY_DAMAGE_MULT) == 3
     assert st.enemies[0].hp == (
-        enemy_hp0 - 2 * int(C.SALON_MEMBER_DMG * C.SALON_DRY_DAMAGE_MULT))
+        enemy_hp0 - 2 * int(CRAB_TICK * C.SALON_DRY_DAMAGE_MULT))
     assert not any(e["event"] == "encore_overdraw" for e in st.log)
     assert p.fanfare == 0
 
@@ -166,46 +194,70 @@ def test_dry_salon_ticks_deal_three_quarter_damage_without_overdraw():
 def test_salon_ticks_only_throttle_after_encore_runs_out():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = 2
+    _company(p, "crabaletta", "crabaletta")
     p.encore = 1
     enemy_hp0 = st.enemies[0].hp
     effects.salon_tick(st)
     assert p.encore == 0
     assert p.hp == p.max_hp
     assert st.enemies[0].hp == (
-        enemy_hp0 - C.SALON_MEMBER_DMG
-        - int(C.SALON_MEMBER_DMG * C.SALON_DRY_DAMAGE_MULT))
+        enemy_hp0 - CRAB_TICK
+        - int(CRAB_TICK * C.SALON_DRY_DAMAGE_MULT))
 
 
-def test_salon_slots_cap_at_three_and_overflow_takes_a_final_bow():
+def test_fanfare_is_the_focus_term_on_ticks():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = 2
+    _company(p, "crabaletta")
+    p.encore = 3
+    p.fanfare = 2 * C.SALON_FOCUS_PER               # +2 member numbers
+    hp0 = st.enemies[0].hp
+    effects.salon_tick(st)
+    assert st.enemies[0].hp == hp0 - (CRAB_TICK + 2)
+
+
+def test_deploy_into_full_stage_bows_the_oldest_member_out():
+    st = furina_state()
+    p = st.player
+    _company(p, "crabaletta", "usher", "chevalmarin")
     enemy_hp0 = st.enemies[0].hp
     effects.resolve_card(st, loader.get_card("mademoiselle_crabaletta"))
     assert p.powers["salon_member"] == C.SALON_MEMBER_SLOTS == 3
-    bow = C.SALON_REPLACE_DAMAGE_MULT * C.SALON_MEMBER_DMG
-    assert st.enemies[0].hp == enemy_hp0 - bow
+    assert p.salon == ["usher", "chevalmarin", "crabaletta"]   # FIFO
+    assert st.enemies[0].hp == enemy_hp0 - CRAB_BOW  # the OLDEST bowed
     assert st.enemies[0].aura == "hydro"
     assert p.encore == 0                          # final bows have no upkeep
     assert p.burst_energy == C.SALON_TICK_BURST
 
 
-def test_each_overflowed_member_takes_a_final_bow():
+def test_usher_bow_blocks_and_chevalmarin_bow_mass_applies_with_encore():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    _company(p, "usher", "chevalmarin", "crabaletta")
+    effects.resolve_card(st, loader.get_card("mademoiselle_crabaletta"))
+    assert p.block == USHER_BOW                     # oldest = the Usher
+    effects.resolve_card(st, loader.get_card("mademoiselle_crabaletta"))
+    assert st.enemies[0].aura == "hydro"            # Chevalmarin: mass apply
+    # The bow's Encore is engine-side (_salon_bow), not a card rider, so
+    # the replacement numeric multiplier never touches it.
+    assert p.encore == CHEV_BOW_ENCORE
+
+
+def test_full_ensemble_deploys_one_of_each_and_bows_a_full_stage():
+    st = furina_state()
+    p = st.player
+    _company(p, "crabaletta", "crabaletta", "crabaletta")
     enemy_hp0 = st.enemies[0].hp
     effects.resolve_card(st, loader.get_card("full_ensemble"))
     assert p.powers["salon_member"] == C.SALON_MEMBER_SLOTS
-    bow = C.SALON_REPLACE_DAMAGE_MULT * C.SALON_MEMBER_DMG
-    assert st.enemies[0].hp == enemy_hp0 - 3 * bow
+    assert p.salon == ["usher", "chevalmarin", "crabaletta"]
+    assert st.enemies[0].hp == enemy_hp0 - 3 * CRAB_BOW
 
 
 def test_replacing_member_triples_block_rider_once():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    _company(p, "crabaletta", "crabaletta", "crabaletta")
     effects.resolve_card(st, loader.get_card("gentilhomme_usher"))
     assert p.powers["salon_member"] == C.SALON_MEMBER_SLOTS
     assert p.block == 4 * C.SALON_REPLACE_DAMAGE_MULT
@@ -214,7 +266,7 @@ def test_replacing_member_triples_block_rider_once():
 def test_replacing_member_doubles_encore_rider_once():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    _company(p, "crabaletta", "crabaletta", "crabaletta")
     effects.resolve_card(st, loader.get_card("surintendante_chevalmarin"))
     assert p.encore == 3 * C.SALON_REPLACE_NUMERIC_MULT
 
@@ -222,7 +274,7 @@ def test_replacing_member_doubles_encore_rider_once():
 def test_replacement_multiplier_ends_with_the_deploying_card():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    _company(p, "crabaletta", "crabaletta", "crabaletta")
     effects.resolve_card(st, loader.get_card("surintendante_chevalmarin"))
     after_replacement = p.encore
     effects.resolve_card(st, loader.get_card("curtain_up"))
@@ -232,16 +284,17 @@ def test_replacement_multiplier_ends_with_the_deploying_card():
 def test_multiple_replacements_do_not_multiply_rider_more_than_once():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    _company(p, "usher", "usher", "usher")
     effects.resolve_card(st, loader.get_card("grand_gala"))
     assert p.powers["salon_member"] == C.SALON_MEMBER_SLOTS
+    assert p.salon == ["crabaletta", "chevalmarin", "usher"]
     assert p.encore == 4 * C.SALON_REPLACE_NUMERIC_MULT
 
 
 def test_replacing_member_doubles_salon_power_without_clipping():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    _company(p, "usher", "usher", "usher")
     effects.resolve_card(st, loader.get_card("endless_waltz"))
     assert p.powers["salon_damage_up"] == 3 * C.SALON_REPLACE_NUMERIC_MULT
 
@@ -249,7 +302,7 @@ def test_replacing_member_doubles_salon_power_without_clipping():
 def test_replacing_member_doubles_draw_rider():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    _company(p, "usher", "usher", "usher")
     p.encore = 2
     p.draw_pile = [loader.get_card("stage_presence") for _ in range(2)]
     effects.resolve_card(st, loader.get_card("dress_rehearsal"))
@@ -259,18 +312,18 @@ def test_replacing_member_doubles_draw_rider():
 def test_salon_damage_up_scales_ticks():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = 1
+    _company(p, "crabaletta")
     p.powers["salon_damage_up"] = 2
     p.encore = 3
     hp0 = st.enemies[0].hp
     effects.salon_tick(st)
-    assert st.enemies[0].hp == hp0 - (C.SALON_MEMBER_DMG + 2)
+    assert st.enemies[0].hp == hp0 - (CRAB_TICK + 2)
 
 
 def test_salon_ticks_and_encore_spend_feed_the_burst_meter():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = 1
+    _company(p, "crabaletta")
     p.encore = 3
     assert p.burst_max == 70                        # declared this pass
     effects.salon_tick(st)

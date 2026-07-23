@@ -162,7 +162,8 @@ def _nation_weighted_choice(rng: random.Random, cards: list[Card],
 def roll_rewards(rng: random.Random, character_id: str,
                  companion_offers: int = 1,
                  banner: frozenset[str] | None = None,
-                 companion_rarity: str | None = None) -> list[Card]:
+                 companion_rarity: str | None = None,
+                 card_rarity: str | None = None) -> list[Card]:
     """One post-fight reward screen: card offers + the companion slot.
     companion_offers > 1 is the pity/choose-3 slot (triage ruling 4
     pulled the mechanism forward from M7; the run model decides when).
@@ -172,11 +173,19 @@ def roll_rewards(rng: random.Random, character_id: str,
     still want. Off-banner 5-stars are removed before the rarity roll, so a
     banner that empties the rare tier falls through to uncommon exactly as a
     naturally rare-less pool already does. ``companion_rarity="rare"`` is
-    the post-boss rule: only the Companion slot is forced Rare; ordinary card
-    offers remain the native reward system's responsibility.
+    the post-boss rule for the Companion slot; ``card_rarity="rare"`` forces
+    the ordinary card offers, which is §10.1's boundary reward ("choice-of-3
+    Rare cards"). The Ironclad-0.6% diagnosis (2026-07-23) found the shipped
+    boundary forced only the companion slot -- a no-companion character got
+    plain act-1-odds commons at the act transition, and nobody got the
+    ratified Rare cards. A pool with no card in the forced tier falls down
+    the same rare->uncommon->common ladder the natural roll uses (the ref
+    pool has no rares at all; a substituted screen beats an empty one).
     """
-    if companion_rarity is not None and companion_rarity not in C.RARITY_ODDS:
-        raise ValueError(f"unknown companion rarity {companion_rarity!r}")
+    for label, forced in (("companion", companion_rarity),
+                          ("card", card_rarity)):
+        if forced is not None and forced not in C.RARITY_ODDS:
+            raise ValueError(f"unknown {label} rarity {forced!r}")
     pool = character_pool(character_id)
     if not pool:
         # Reachable since ownership became REQUIRED above: a character with
@@ -190,7 +199,7 @@ def roll_rewards(rng: random.Random, character_id: str,
             "Check the id, or that its sheet sets `character`.")
     offers = []
     for _ in range(C.REWARD_CARD_OFFERS):
-        rarity = _roll_rarity(rng)
+        rarity = card_rarity or _roll_rarity(rng)
         while rarity not in pool:            # ref pool may lack a rarity
             rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
         offers.append(loader.get_card(rng.choice(pool[rarity]).id))
