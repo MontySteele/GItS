@@ -1,9 +1,9 @@
-"""Errata verification (furina-predesign-notes.md Part 1 + pass-3
-ratification closeout): Frozen v2, companion healing Exhaust, the
-control_uptime/SUPPORT_CARRY detector, and the ratified winrate bands.
+"""Errata verification: Frozen v2, companion healing law, the
+control_uptime/SUPPORT_CARRY detector, and Klee's current balance locks.
 
-The 1000-fight band tests are the v0.1 regression lock — they ARE slow;
-that's the ratification's process fix (bands only mean anything >=1000).
+The 1000-fight band tests are slow by design: bands only mean anything at
+adequate sample size. The scorecard lock moved to v0.2 after the July 23
+playtest pass deliberately changed defense, companions, reactions, and Burst.
 """
 
 import pytest
@@ -50,8 +50,10 @@ def test_r8_conversions_landed():
     idol = loader.get_card("barbara_shining_idol")
     assert {fx["op"] for fx in idol.effects} == {"block", "apply_aura", "draw"}
     voyage = loader.get_card("bennett_fantastic_voyage")
-    assert not voyage.exhaust
-    assert {fx["op"] for fx in voyage.effects} == {"block", "apply_power"}
+    assert voyage.exhaust
+    assert voyage.effects == [
+        {"op": "apply_power", "power": "strength", "amount": 3,
+         "target": "self"}]
 
 
 # --- control_uptime / SUPPORT_CARRY (§2.2a) ---
@@ -105,22 +107,22 @@ def test_klee_cannot_source_frozen_alone():
     assert e.frozen_by_companion
 
 
-# --- the frozen v0.1 median identity (regression lock) ---
+# --- the frozen v0.2 median identity (regression lock) ---
 
-# Measured post-errata at 300 fights / seed 42. Deterministic at fixed
+# Measured post-playtest pass at 300 fights / seed 42. Deterministic at fixed
 # seed; the tolerance is headroom for benign engine changes, not noise.
-V01_MEDIAN = {"A1_frontload": 4.19, "A2_scaling": 3.95, "A3_block": 2.26,
-              "A4_sustain": 0.50, "A5_velocity": 3.04, "A6_utility": 3.59,
-              "A7_setup_tax": 2.35}
+V02_MEDIAN = {"A1_frontload": 4.77, "A2_scaling": 3.82, "A3_block": 2.09,
+              "A4_sustain": 0.50, "A5_velocity": 3.07, "A6_utility": 4.05,
+              "A7_setup_tax": 2.37}
 
 
-def test_v01_median_scorecard_locked():
+def test_v02_median_scorecard_locked():
     rep = score_character("klee", 300, SEED)
-    for ax, frozen in V01_MEDIAN.items():
+    for ax, frozen in V02_MEDIAN.items():
         assert rep["median_scores"][ax] == pytest.approx(frozen, abs=0.3), ax
 
 
-# --- ratified winrate bands (the v0.1 regression lock) ---
+# --- authored-package floors (realistic Tier 0.5 owns the ceiling) ---
 
 def test_winrate_bands_skipped_below_min_fights():
     rep = score_character("klee", 50, SEED)

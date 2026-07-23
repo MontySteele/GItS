@@ -24,8 +24,8 @@ public static class BurstConstants
     /// <summary>tier0 constants.py BURST_PER_REACTION = 5.</summary>
     public const int PerReaction = 5;
 
-    /// <summary>tier0 klee.yaml burst_max: 60.</summary>
-    public const int KleeMax = 60;
+    /// <summary>tier0 klee.yaml burst_max: 40.</summary>
+    public const int KleeMax = 40;
 }
 
 /// <summary>
@@ -62,12 +62,12 @@ public interface ISkillTagCard
 ///     like the sim's resolve_hit);
 ///   +N from the burst_energy card op (codegen, mid-resolution like the
 ///     sim's effect loop);
-///   accrual is UNCAPPED past 60 (the sim never clamps; the grant check is
+///   accrual is UNCAPPED past 40 (the sim never clamps; the grant check is
 ///     >=, and casting resets to 0 -- overflow is lost at cast, not at gain).
 ///
 /// The kit half (landed with the kit-grant machinery, standing-plan item):
 /// Sparks 'n' Splash carries this resource as a BaseLib CustomResourceCost
-/// (SetCanonicalCost 60 -- CanAfford >= 60 gates playability, the sim's
+/// (SetCanonicalCost 40 -- CanAfford >= 40 gates playability, the sim's
 /// requires: burst_energy_full), KitGrant grants the card to hand at a full
 /// meter, and the Spend override below drains the WHOLE meter at cast --
 /// overflow is lost at cast, never at gain (combat.py: playing the Burst
@@ -94,8 +94,8 @@ public sealed class KleeBurstResource : BasicCustomResource
     /// <summary>
     /// Casting the Burst empties the METER, not just the canonical cost --
     /// sim law (combat.py): `p.burst_energy = 0` on a requires-full play;
-    /// overflow past 60 is lost at cast, never clamped at gain. The cost
-    /// machinery passes amount = 60 (GetAmountToSpend); this resource's only
+    /// overflow past 40 is lost at cast, never clamped at gain. The cost
+    /// machinery passes amount = 40 (GetAmountToSpend); this resource's only
     /// spender is the kit card, so the full drain is the rule, not a special
     /// case.
     ///
@@ -194,7 +194,7 @@ public sealed class BurstMeterPower : PowerModel, ILocalizationProvider
         ("title", "Burst Energy"),
         ("description",
             "Cards with [gold]Elemental Skill[/gold] grant 5 [gold]Burst "
-          + "Energy[/gold]; Elemental Reactions grant 5. At 60, [gold]Sparks "
+          + "Energy[/gold]; Elemental Reactions grant 5. At 40, [gold]Sparks "
           + "'n' Splash[/gold] is added to your hand; casting it spends ALL "
           + "Burst Energy."),
     };

@@ -42,7 +42,6 @@ SUFFIX = "+"
 # now {innate: true}, which IS sim-expressible -- the R24 no-unmeasured-
 # upgrades law is satisfied rather than waived.
 UNAPPLIABLE = frozenset({
-    "durin_witchs_flame",     # WITCHS_FLAME_DMG is a constant
     "nicole_celestial_gift",  # CELESTIAL_GIFT_BLOCK is a constant
 })
 

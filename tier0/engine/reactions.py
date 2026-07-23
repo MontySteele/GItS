@@ -29,11 +29,10 @@ _AMPLIFY = {
 
 def _amp_mult(state: CombatState, name: str) -> float:
     base = C.VAPORIZE_MULT if name == "vaporize" else C.MELT_MULT
-    # amp_reaction_up / witchs_flame stacks are PERCENT boosts to the
-    # amplifier (Vermillion Pact +25, Durin +30). Additive with each
-    # other, multiplicative on the base: 1.75 * (1 + 0.55) = 2.71 < 4x cap.
-    pct = (state.player.powers.get("amp_reaction_up", 0)
-           + state.player.powers.get("witchs_flame", 0))
+    # Vermillion Pact's amp_reaction_up is a PERCENT boost to the base
+    # amplifier. +100 doubles Vaporize/Melt's multiplier; the +125 upgraded
+    # form puts Melt at 3.9375, just below the 4x provenance detector.
+    pct = state.player.powers.get("amp_reaction_up", 0)
     return base * (1 + pct / 100)
 
 

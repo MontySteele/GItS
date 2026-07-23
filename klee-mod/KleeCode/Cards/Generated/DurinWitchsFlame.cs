@@ -48,13 +48,13 @@ public sealed class DurinWitchsFlame : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Durin — Witch's Flame"),
-        ("description", "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify 30% more. At the end of your turn, deal 4 damage and apply [gold]Pyro[/gold] to a random enemy."),
+        ("description", "At the end of your turn, consume [gold]Pyro[/gold] from each enemy. For each aura consumed, deal {PowerAmount:diff()} damage and gain 3 [gold]Burst Energy[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            
+            new DynamicVar("PowerAmount", 6m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -67,11 +67,11 @@ public sealed class DurinWitchsFlame : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<WitchsFlamePower>(choiceContext, Owner.Creature, 30, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<WitchsFlamePower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- delta key 'ping_damage: 2' not expressible by codegen (structural upgrade). Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
     }
 }

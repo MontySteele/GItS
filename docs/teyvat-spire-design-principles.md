@@ -64,7 +64,7 @@ This dial is our main cross-character balance lever for reaction frequency.
 ### 2.4 Burst Energy
 - Per-character meter, per-combat, starts at 0. Gained by: playing Skill-tagged cards (+N) and triggering reactions (+N; the "particle economy").
 - Each character's **Burst** is a signature rare card that is **kit, not loot** (v1.9): it does not occupy the draftable pool or the starting deck. When the meter first fills in a combat, the Burst is granted to hand; playing it empties the meter, and it re-arrives if the meter refills. This is Genshin-faithful (your burst is your kit, charged by play) and solves the discovered acquisition problem: as a 1-of-15 rare, only ~10% of runs ever saw their own signature ability. **Burst cards have Retain** — they stay in hand at end of turn. (v1.4 ruling: without Retain, StS's discard rhythm cycles the Burst away before the meter fills — sim-verified. Retain is also faithful: a charged burst doesn't evaporate.)
-- Relic space may carry partial energy between fights (Favonius-flavored). Meter size is a per-character balance knob (Klee ~60-grade; a nuke burst like a Raiden-analogue ~90-grade).
+- Relic space may carry partial energy between fights (Favonius-flavored). Meter size is a per-character balance knob; Klee's playtest-tuned 40-grade meter is deliberately quicker than a nuke Burst.
 
 ### 2.5 Co-op rules
 - Auras live on shared enemies → cross-player reactions work with zero special-casing.

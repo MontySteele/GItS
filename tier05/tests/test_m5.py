@@ -261,7 +261,7 @@ def test_skip_is_a_real_pick():
 
 def test_drafter_v3_values_klee_visible_utility():
     """Direct mitigation is visible; deck-context engines stay neutral."""
-    assert draft._static_power(loader.get_card("alchemical_curiosity")) == 0
+    assert draft._static_power(loader.get_card("alchemical_curiosity")) == 5
     assert draft._static_power(loader.get_card("trip_wire")) == 5.5
     assert draft._static_power(loader.get_card("skip_and_hop")) == 2
 
@@ -269,7 +269,9 @@ def test_drafter_v3_values_klee_visible_utility():
     assert draft._has_block(dreams)
     # Conditional 8 Block is available at the draft-time 50% share.
     assert draft._static_power(dreams) == 2
-    assert draft._static_power(loader.get_card("patched_dress")) == 6
+    assert draft._static_power(loader.get_card("patched_dress")) == 7.5
+    assert draft._static_power(loader.get_card("bennett_fantastic_voyage")) == 6
+    assert draft._static_power(loader.get_card("durin_witchs_flame")) == 6
 
 
 def test_bomb_guard_proxy_does_not_stack_with_printed_weak():

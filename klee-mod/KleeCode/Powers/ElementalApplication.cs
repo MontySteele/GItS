@@ -123,6 +123,8 @@ public sealed class KleeElementalHooks : AbstractModel
     /// fill the meter) and before the discard filter. This hook maps to
     /// Hook.BeforeTurnEnd -- before the flush -- and mod models run after
     /// power hooks in the same broadcast, so the volley has already fired.
+    /// Durin resolves later in AfterSideTurnEnd to guarantee it consumes the
+    /// volley's Pyro; its Burst Energy is granted at the next turn-start check.
     /// The granted card's Retain then carries it through the flush.
     /// </summary>
     public override async Task BeforeSideTurnEnd(

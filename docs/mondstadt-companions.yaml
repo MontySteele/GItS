@@ -27,8 +27,11 @@
 - {id: bennett_passion, name: "Bennett — Passion Overload", star: 4, rarity: common, role_c: buffer, element: pyro, cost: 0, type: skill,
    effects: [{op: buff_next_attack, amount: 4}, {op: burst_energy, amount: 5}]}
 - {id: bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage", star: 4, rarity: uncommon, role_c: buffer, element: pyro, cost: 1, type: skill,
-   effects: [{op: block, amount: 4}, {op: apply_power, power: attack_up_this_turn, amount: 3, target: self}]}
-   # R8 conversion: the field grants courage instead of HP; value profile unchanged.
+   exhaust: true,
+   effects: [{op: apply_power, power: strength, amount: 3, target: self}]}
+   # A one-shot field: permanent Strength is useful even when Klee cannot spend
+   # more cards this turn, while Exhaust keeps ordinary deck cycling from
+   # turning an uncommon into unlimited scaling.
 - {id: kaeya_frostgnaw, name: "Kaeya — Frostgnaw", star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: attack,
    effects: [{op: damage, amount: 6, target: enemy, applies_element: true}]}
 - {id: diona_icy_paws, name: "Diona — Icy Paws", star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: skill,
@@ -38,7 +41,7 @@
 - {id: albedo_solar_isotoma, name: "Albedo — Solar Isotoma", star: 5, rarity: rare, role_c: trigger, element: geo, cost: 1, type: power,
    effects: [{op: apply_power, power: solar_isotoma, amount: 3, target: self, consumes_aura: true, note: "3 turns: your attacks vs aura'd enemies grant 3 block (Crystallize engine)"}]}
 - {id: durin_witchs_flame, name: "Durin — Witch's Flame", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 1, type: power,
-   effects: [{op: apply_power, power: witchs_flame, amount: 30, target: self, note: "PERCENT: amplifying reactions +30%; end of turn 4 dmg + pyro to random enemy. Support payoff: routes through player's reactions."}]}
+   effects: [{op: apply_power, power: witchs_flame, amount: 6, target: self, consumes_aura: true, note: "At end of turn, consume Pyro from each enemy; per aura, deal 6 damage and gain 3 Burst Energy. Clears Klee's excess Pyro so another element can establish the next reaction."}]}
 - {id: nicole_celestial_gift, name: "Nicole — Celestial Gift", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 2, type: power,
    effects: [{op: apply_power, power: celestial_gift, amount: 2, target: self, note: "your attacks +2 dmg; gain 4 block at start of turn"}]}
 

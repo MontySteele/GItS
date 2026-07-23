@@ -38,6 +38,8 @@ STATIC_DEBUFF_VALUE = 2.0
 STATIC_BOMB_DAMAGE_SHARE = 0.5
 STATIC_BOMB_GUARD_VALUE = 1.5
 STATIC_KLEE_CONDITIONAL_SHARE = 0.5
+STATIC_STRENGTH_VALUE = 2.0        # conservative two future Attack hits
+STATIC_PERSISTENT_PROC_SHARE = 1.0  # one turn of a repeatable Power
 
 # These predicates are readable before a card is played. Mid-resolution
 # conditions such as reaction_triggered_by_this and killed_target remain out:
@@ -207,6 +209,17 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                 total += (fx.get("bomb_damage", 0)
                           * _neutral_amount(fx)
                           * STATIC_BOMB_DAMAGE_SHARE)
+            elif (fx.get("op") == "apply_power"
+                  and fx.get("target", "self") == "self"
+                  and fx.get("power") == "strength"):
+                total += _neutral_amount(fx) * STATIC_STRENGTH_VALUE
+            elif (fx.get("op") == "apply_power"
+                  and fx.get("target", "self") == "self"
+                  and fx.get("power") == "witchs_flame"):
+                # Durin is reliable on Klee's catalyst cadence, but offer
+                # scoring credits only one end-turn aura rather than pricing
+                # an entire permanent engine up front.
+                total += _neutral_amount(fx) * STATIC_PERSISTENT_PROC_SHARE
             elif (fx.get("op") == "apply_power"
                   and fx.get("target") != "self"
                   and fx.get("power") in ("weak", "vulnerable")):

@@ -23,7 +23,7 @@ namespace KleeMod.Powers;
 public static class CompanionConstants
 {
     public const int OzDamage = 3;             // OZ_DMG (applies electro)
-    public const int WitchsFlameDamage = 4;    // WITCHS_FLAME_DMG (applies pyro)
+    public const int WitchsFlameBurst = 3;     // WITCHS_FLAME_BURST per aura
     public const int SolarIsotomaBlock = 3;    // SOLAR_ISOTOMA_BLOCK per hit
     public const int CelestialGiftBlock = 4;   // CELESTIAL_GIFT_BLOCK per turn
 }
@@ -197,11 +197,10 @@ public sealed class OzSummonPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Durin: PERMANENT. Amount is a PERCENT boost to amplifying reactions
-/// (ReactionTable.AmplifierMultiplier reads it, additive with Vermillion
-/// Pact's AmpReactionUpPower -- tier0 reactions._amp_mult), plus one
-/// end-of-turn Pyro hit to a random enemy (no tick-down; the sim's
-/// witchs_flame never decrements).
+/// Durin: PERMANENT. At end of turn, consumes every enemy Pyro aura; each
+/// consumed aura deals Amount unpowered damage and grants 3 Burst Energy.
+/// This turns Klee's Pyro saturation into value while clearing the board for
+/// Hydro/Cryo to establish the next reaction. No tick-down.
 /// </summary>
 public sealed class WitchsFlamePower : PowerModel, ILocalizationProvider
 {
@@ -209,31 +208,35 @@ public sealed class WitchsFlamePower : PowerModel, ILocalizationProvider
     {
         ("title", "Witch's Flame"),
         ("description",
-            "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {Amount}% "
-          + "more. At the end of your turn, deal "
-          + $"{CompanionConstants.WitchsFlameDamage} damage and apply "
-          + "[gold]Pyro[/gold] to a random enemy."),
+            "At the end of your turn, consume [gold]Pyro[/gold] from each "
+          + "enemy. For each aura consumed, deal {Amount} damage and gain "
+          + $"{CompanionConstants.WitchsFlameBurst} [gold]Burst Energy[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override async Task BeforeSideTurnEnd(
+    public override async Task AfterSideTurnEnd(
         PlayerChoiceContext choiceContext, CombatSide side,
         IEnumerable<Creature> participants)
     {
         if (side != CombatSide.Player) return;
         if (Owner.Player == null) return;
 
-        var candidates = CombatState.HittableEnemies.ToList();
-        if (candidates.Count == 0) return;
-        var target = CombatState.RunState.Rng.CombatTargets.NextItem(candidates);
-        if (target == null) return;
+        foreach (var target in CombatState.HittableEnemies.ToList())
+        {
+            var aura = AuraCmd.Find(target);
+            if (aura?.Element != Element.Pyro) continue;
 
-        await ElementalHit.Deal(
-            choiceContext, target, Element.Pyro,
-            CompanionConstants.WitchsFlameDamage, Owner);
+            await PowerCmd.Remove(aura);
+            await CreatureCmd.Damage(
+                choiceContext, target, (int)Amount,
+                ValueProp.Unpowered, dealer: null, cardSource: null);
+            await KleeBurstResource.Gain(
+                choiceContext, Owner, CompanionConstants.WitchsFlameBurst,
+                cardSource: null);
+        }
     }
 }
 

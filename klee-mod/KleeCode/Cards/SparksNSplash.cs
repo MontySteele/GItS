@@ -22,7 +22,7 @@ namespace KleeMod.Cards;
 /// kit cards from every pool).
 ///
 /// Cost model: 0 energy (normal EnergyCost) PLUS a BaseLib custom-resource
-/// cost of the full meter -- SetCanonicalCost(60) wires CanAfford (>= 60)
+/// cost of the full meter -- SetCanonicalCost(40) wires CanAfford (>= 40)
 /// into the game's playability check, matching the sim's
 /// requires: burst_energy_full gate, and the play pipeline calls
 /// KleeBurstResource.Spend, whose override drains the WHOLE meter (sim law:

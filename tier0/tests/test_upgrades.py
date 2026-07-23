@@ -64,10 +64,12 @@ def test_condition_and_keyword_class_upgrades():
     assert hot.retain is True
     assert hot.innate is False
     assert any(fx.get("target") == "self" for fx in hot.effects)
-    pd = loader.get_card("patched_dress+")               # hoisted then-branch
-    assert not any(fx.get("op") == "conditional" for fx in pd.effects)
-    assert sum(fx["amount"] for fx in pd.effects
-               if fx.get("op") == "block") == 7          # 5 + 2 unconditional
+    pd = loader.get_card("patched_dress+")
+    assert any(fx.get("op") == "conditional" for fx in pd.effects)
+    assert pd.effects[0]["amount"] == 9                   # 6->9 base
+    assert pd.effects[1]["then"][0]["amount"] == 3        # 12 while online
+    durin = loader.get_card("durin_witchs_flame+")
+    assert durin.effects[0]["amount"] == 8
     both = loader.get_card("eager_to_help+")             # BOTH branches
     cond = next(fx for fx in both.effects if fx.get("op") == "conditional")
     assert cond["then"][0]["amount"] == 3 and cond["else"][0]["amount"] == 2

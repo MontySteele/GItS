@@ -230,9 +230,9 @@ APPLY_POWERS = {
         "Summon Oz for {X} turns: at the end of your turn, he deals 3 damage "
         "and applies [gold]Electro[/gold] to a random enemy."),
     "witchs_flame": ("WitchsFlamePower", None,
-        "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more. "
-        "At the end of your turn, deal 4 damage and apply [gold]Pyro[/gold] "
-        "to a random enemy."),
+        "At the end of your turn, consume [gold]Pyro[/gold] from each enemy. "
+        "For each aura consumed, deal {X} damage and gain 3 "
+        "[gold]Burst Energy[/gold]."),
     "celestial_gift": ("CelestialGiftPower", None,
         "Your Attacks deal {X} more damage. At the start of your turn, "
         "gain 4 [gold]Block[/gold]."),
@@ -241,6 +241,8 @@ APPLY_POWERS = {
         "aura grant 3 [gold]Block[/gold] per hit."),
     "attack_up_this_turn": ("AttackUpThisTurnPower", None,
         "Your Attacks deal {X} more damage this turn."),
+    "strength": ("StrengthPower", None,
+        "Gain {X} [gold]Strength[/gold]."),
     # Fontaine (2026-07-21 ruling). shatter_bonus is a flat rider the sim adds
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,

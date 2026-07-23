@@ -36,6 +36,7 @@ def test_live_playtest_card_patch_is_loaded():
     assert loader.get_card("chained_reactions").cost == 0
     assert loader.get_card("barbara_shining_idol").cost == 1
     assert loader.get_card("sparks_n_splash").cost == 0
+    assert loader._character_index()["klee"]["burst_max"] == 40
 
     warm = loader.get_card("warm_glow")
     assert warm.effects[0] == {"op": "block", "amount": 6}

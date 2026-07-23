@@ -802,3 +802,45 @@ ticks, so the overshoot is the assembled persistent engine rather than a
 cross-card multiplier leak. Disposition: keep this as the measured pass;
 further work should redistribute power toward early access/frontload rather
 than add more global Salon scaling.
+
+## R47 -- Klee second-playtest card and Burst pass (2026-07-23)
+
+USER FINDING: the starter/Companion uplift made Klee feel materially healthier
+and produced the first Act-1 clear, but several one-Energy commons still did
+too little, Fantastic Voyage was not worth taking, Burst appeared only near the
+Act-1 boss, and Vermillion Pact/Durin overlapped on an amplifying-reaction
+payoff Klee rarely triggers through her Pyro saturation.
+
+SHIPPED CARD DOSE:
+
+- Hide and Seek remains 7 Block and gains Scry 2; upgrade remains 10 Block.
+- Patched Dress is 6 Block plus 3 with Spark; upgrade raises the floor to 9,
+  leaving the online total at 12 rather than removing an almost-free condition.
+- Alchemical Curiosity becomes 5 Block / Draw 2; upgrade is 8 Block / Draw 2.
+- Bennett — Fantastic Voyage becomes gain 3 Strength, Exhaust (4 upgraded).
+- Vermillion Pact moves +25%->+100% amplification (+125% upgraded). This
+  doubles the base Vaporize/Melt multiplier; upgraded Melt is x3.9375, just
+  below the x4 provenance detector.
+- Durin no longer amplifies reactions or applies more Pyro. At end of turn it
+  consumes Pyro from each enemy; each aura deals 6 damage and grants 3 Burst
+  Energy (8 damage upgraded). This monetizes Klee's Pyro saturation, then
+  clears a window for Hydro/Cryo to establish the next reaction.
+
+BURST BRACKET, 500 realistic runs/plan at seed 42:
+
+- meter 30: generic 58.4%, reaction 75.4%; Burst seen 65.8% / 91.2%.
+- meter 35: generic 54.8%, reaction 64.2%; Burst seen 42.4% / 79.4%.
+- meter 40: generic 51.4%, reaction 59.4%; Burst seen 24.4% / 62.8%.
+
+DISPOSITION: 40 wins. The previous post-starter baseline was approximately
+44% generic / 50% reaction, so 40 produces a controlled +7/+9-point Act-1
+uplift and a 17x generic / 8x reaction increase in run-level Burst visibility
+over the 60 meter, without the 30-meter arm's reaction ceiling. The Burst
+payoff remains unchanged at 60 damage over three turns.
+
+The authored 25-card Tier-0 packages are now ceiling-saturated because they
+charge a 40-point kit Burst reliably (1000-fight tank reads: demolition 99.9%,
+spark 95.5%, reaction 100%). Their old upper bands no longer model real drafts;
+Tier 0.5 owns the upper-power comparison, while the authored batteries retain
+only their matchup floors. The v0.2 median scorecard at 300 fights/seed 42 is
+4.77 / 3.82 / 2.09 / 0.50 / 3.07 / 4.05 / 2.37.

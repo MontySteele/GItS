@@ -33,16 +33,16 @@ warm_glow:         {block: +2}                     # 6->8
 snap:              {damage: +3}                    # 6->9; Spark rider untouched (R1: the upgrade must not move the resource curve)
 sizzle:            {conditional_bonus: +3}         # aura bonus 6->9
 combustion_study:  {burst_energy: +5}              # 10->15
-alchemical_curiosity: {draw: +1}                   # 2->3
+alchemical_curiosity: {block: +3}                  # 5->8; draw stays 2
 boom_goes_the_dynamite: {damage: +4}               # 18->22
 study_of_explosions: {burst_energy: +5}            # 5->10
 friendly_visit:    {draw: +1}                      # 1->2
-hide_and_seek:     {block: +3}                     # 7->10
+hide_and_seek:     {block: +3}                     # 7->10; Scry 2 rider stays fixed
 sorry_jean:        {block: +2}                     # 4->6
 spooked:           {weak: +1}                      # 1->2 all
 clockwork_toy:     {block: +2}                     # 5->7
 run_away:          {block: +2}                     # 4->6
-patched_dress:     {condition: unconditional}      # the +2 spark-bonus always applies
+patched_dress:     {block: +3}                     # 6->9; Spark branch remains +3 (12 total)
 
 # ---- UNCOMMONS (bump OR keyword/condition; two cost slots + one 1->0) ----
 jumpy_dumpty_mk2:  {damage: +2}                    # 8->10 x2
@@ -83,7 +83,7 @@ true_spark_knight: {cost: -1}                      # 2->1
 da_da_da:          {damage: +2}                    # 4->6 x3 (Exhaust stays; sparks make removal too loopy)
 grand_finale:      {bonus_per_detonation: +1}      # 2->3
 secret_stash:      {cards: +1}                     # adds 3 demolition commons
-vermillion_pact:   {amp_percent: +5}               # 25->30, NOT 35 — amp-cap watchlist discipline
+vermillion_pact:   {amp_percent: +25}              # +100%->+125%; Melt reaches x3.94, just below the 4x detector
 playtime_forever:  {cost: -1}                      # 3->2
 best_friends_forever: {cost: -1}                   # 1->0
 no_holding_back:   {damage: +4}                    # 14->18; the base HP loss was removed in the live-playtest patch
@@ -98,10 +98,10 @@ barbara_shining_idol:      {block: +2}             # R8 conversion: 5->7 (cantri
 sucrose_gust:              {draw: +1}
 sucrose_astable:           {burst_energy: +4}      # 8->12; base cost is now 1
 bennett_passion:           {buff: +2}              # next attack +4->+6
-bennett_fantastic_voyage:  {buff: +1}              # attack-up 3->4; base cost is now 1
+bennett_fantastic_voyage:  {buff: +1}              # Strength 3->4; Exhaust stays
 kaeya_frostgnaw:           {damage: +2}
 diona_icy_paws:            {block: +2}
 prune_witch_hunt:          {spark: +1}             # 1->2; Swirl/fallback Block stay fixed (personal pool)
 albedo_solar_isotoma:      {duration: +1}          # 3->4 turns
-durin_witchs_flame:        {ping_damage: +2}       # end-of-turn 4->6; amp % stays 30 (watchlist)
+durin_witchs_flame:        {power_amount: +2}       # consumed-Pyro damage 6->8; Burst rider stays 3/aura
 nicole_celestial_gift:     {block_per_turn: +2}    # 4->6; attack bonus stays +2

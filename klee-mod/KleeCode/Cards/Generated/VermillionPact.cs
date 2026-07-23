@@ -43,7 +43,7 @@ public sealed class VermillionPact : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 25m)
+            new DynamicVar("PowerAmount", 100m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -61,6 +61,6 @@ public sealed class VermillionPact : CustomCardModel
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(5m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(25m);
     }
 }

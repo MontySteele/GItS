@@ -71,7 +71,7 @@ DETONATION_SPLASH_PROC_CAP = 3     # max splash procs/turn. ARMED by the
                                    # on blazing_delight (drift-guarded in
                                    # test_errata).
 OZ_DMG = 3                        # Oz end-of-turn hit (applies electro)
-WITCHS_FLAME_DMG = 4              # Durin end-of-turn hit (applies pyro)
+WITCHS_FLAME_BURST = 3            # Durin: Burst Energy per consumed Pyro aura
 SOLAR_ISOTOMA_BLOCK = 3           # block per attack hit vs aura'd enemy
 CELESTIAL_GIFT_BLOCK = 4          # Nicole: block at start of turn
 CATALYTIC_BURST_PER_REACTION = 5  # Catalytic Conversion bonus burst/reaction
@@ -357,4 +357,4 @@ DRAFT_REGRET_SAMPLE = 0.10        # fraction of decisions re-scored post-run
 # Powers that AMPLIFY reactions rather than causing them. Lives here rather
 # than in tier05.draft because the content loader also needs it, and tier0 must
 # not import tier05.
-AMP_PAYOFF_POWERS = {"amp_reaction_up", "witchs_flame"}
+AMP_PAYOFF_POWERS = {"amp_reaction_up"}

@@ -43,18 +43,20 @@ public sealed class BennettFantasticVoyage : CustomCardModel, ICompanionCard
 
     public string? Nation => "mondstadt";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Exhaust };
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("bennett_fantastic_voyage");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bennett — Fantastic Voyage"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Your Attacks deal {PowerAmount:diff()} more damage this turn."),
+        ("description", "Gain {PowerAmount:diff()} [gold]Strength[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(4m, ValueProp.Move),
             new DynamicVar("PowerAmount", 3m)
         };
 
@@ -68,8 +70,7 @@ public sealed class BennettFantasticVoyage : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await PowerCmd.Apply<AttackUpThisTurnPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<StrengthPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

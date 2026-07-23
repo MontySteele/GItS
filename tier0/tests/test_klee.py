@@ -164,6 +164,43 @@ def test_prune_has_a_solo_floor_and_a_distinct_reaction_payoff():
     assert all(enemy.aura == "hydro" for enemy in online.enemies)
 
 
+def test_bennett_voyage_is_one_shot_permanent_strength():
+    from tier0.engine.combat import play_card
+    from tier0.tests.conftest import make_state
+
+    state = make_state()
+    state.player.energy = 1
+    voyage = loader.get_card("bennett_fantastic_voyage")
+    state.player.hand = [voyage]
+
+    play_card(state, voyage)
+
+    assert state.player.powers["strength"] == 3
+    assert voyage in state.player.exhaust_pile
+
+
+def test_durin_consumes_excess_pyro_and_opens_a_reaction_window():
+    from tier0.engine import effects
+    from tier0.tests.conftest import make_enemy, make_state
+
+    state = make_state(enemies=[make_enemy(hp=30, name="pyro"),
+                                make_enemy(hp=30, name="hydro")])
+    state.player.burst_max = 40
+    state.enemies[0].aura = "pyro"
+    state.enemies[0].aura_turns_left = 2
+    state.enemies[1].aura = "hydro"
+    state.enemies[1].aura_turns_left = 2
+
+    effects.resolve_card(state, loader.get_card("durin_witchs_flame"))
+    effects.player_turn_end_triggers(state)
+
+    assert state.enemies[0].hp == 24
+    assert state.enemies[0].aura is None
+    assert state.enemies[1].hp == 30
+    assert state.enemies[1].aura == "hydro"
+    assert state.player.burst_energy == 3
+
+
 def test_pilot_reads_klee_pure_state_conditional_block():
     """Combat scoring sees Block that is live before the card is played."""
     from tier0.pilot import policy
@@ -178,9 +215,9 @@ def test_pilot_reads_klee_pure_state_conditional_block():
     state.enemies[0].aura = "hydro"
     assert policy._raw_block(state, dreams) == 8
 
-    assert policy._raw_block(state, dress) == 5
+    assert policy._raw_block(state, dress) == 6
     state.player.sparks = 1
-    assert policy._raw_block(state, dress) == 7
+    assert policy._raw_block(state, dress) == 9
 
 
 @pytest.mark.parametrize("deck,pilot", DECKS)
@@ -271,7 +308,7 @@ def test_first_pending_bomb_suppresses_one_attack_without_stacking_weak():
 
 
 def test_burst_meter_fills_in_reaction_fights():
-    # skill_tags + reactions must feed the 60 meter to full (or to a
+    # skill_tags + reactions must feed the 40 meter to full (or to a
     # cast, which resets it) in most long fights.
     from tier0.engine.combat import run_fight
     from tier0.pilot.policy import make_pilot
@@ -291,13 +328,13 @@ def test_burst_card_gated_and_empties_meter():
     from tier0.engine.combat import card_playable, play_card
     from tier0.tests.conftest import make_state
     st = make_state()
-    st.player.burst_max = 60
+    st.player.burst_max = 40
     st.player.energy = 3
     sns = loader.get_card("sparks_n_splash")
     st.player.hand.append(sns)
-    st.player.burst_energy = 45
+    st.player.burst_energy = 35
     assert not card_playable(st, sns)       # gated until full
-    st.player.burst_energy = 60
+    st.player.burst_energy = 40
     assert card_playable(st, sns)
     play_card(st, sns)
     assert st.player.burst_energy == 0      # casting empties the meter
@@ -311,19 +348,19 @@ def test_kit_burst_grant_and_regrant():
     from tier0.engine.combat import grant_charged_kit, play_card
     from tier0.tests.conftest import make_state
     st = make_state()
-    st.player.burst_max = 60
+    st.player.burst_max = 40
     st.player.energy = 6
     st.player.kit_cards = [loader.get_card("sparks_n_splash")]
     grant_charged_kit(st)
     assert not st.player.hand               # meter not full: nothing yet
-    st.player.burst_energy = 60
+    st.player.burst_energy = 40
     grant_charged_kit(st)
     assert [c.id for c in st.player.hand] == ["sparks_n_splash"]
     grant_charged_kit(st)
     assert len(st.player.hand) == 1         # no duplicate grant
     play_card(st, st.player.hand[0])
     assert st.player.burst_energy == 0
-    st.player.burst_energy = 60             # refill re-grants
+    st.player.burst_energy = 40             # refill re-grants
     grant_charged_kit(st)
     assert [c.id for c in st.player.hand] == ["sparks_n_splash"]
 
@@ -336,8 +373,8 @@ def test_random_discard_cannot_touch_the_kit_burst():
     from tier0.engine import effects
     from tier0.tests.conftest import make_state
     st = make_state()
-    st.player.burst_max = 60
-    st.player.burst_energy = 60
+    st.player.burst_max = 40
+    st.player.burst_energy = 40
     sns = loader.get_card("sparks_n_splash")
     filler = loader.get_card("kaboom")
     st.player.hand = [sns, filler]
@@ -528,8 +565,21 @@ def test_mono_pyro_deck_cannot_react_alone():
 
 
 def test_amp_cap_holds_on_melt_stack():
-    # Review watchlist #1: Vermillion Pact (+25%) + Durin (+30%) + Melt
-    # (x1.75) = x2.71 must stay under the 4x provenance cap.
+    # Review watchlist #1: upgraded Vermillion Pact (+125%) x Melt (x1.75)
+    # = x3.9375, deliberately just below the 4x provenance cap. Durin no
+    # longer overlaps the amp; it consumes excess Pyro instead.
+    from tier0.engine import effects
+    from tier0.tests.conftest import make_state
+
+    state = make_state()
+    state.player.element = "pyro"
+    state.player.powers["amp_reaction_up"] = 125
+    state.enemies[0].aura = "cryo"
+    dealt = effects.deal_damage_to_enemy(
+        state, state.enemies[0], 10, element="pyro", source="attack")
+    assert dealt == 39
+    assert not any(e["event"] == "amp_stack_warning" for e in state.log)
+
     for enc in ("punisher", "tank_boss"):
         stats = run_battery("klee", "melt_stack", enc, "generic",
                             FIGHTS, SEED)

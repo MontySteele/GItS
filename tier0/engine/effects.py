@@ -1489,10 +1489,21 @@ def player_turn_end_triggers(state: CombatState) -> None:
                                  element="electro", source="companion")
         p.powers["oz_summon"] -= 1
     if p.powers.get("witchs_flame", 0):                 # Durin (permanent)
-        if state.living_enemies:
-            enemy = state.rng.choice(state.living_enemies)
-            deal_damage_to_enemy(state, enemy, C.WITCHS_FLAME_DMG,
-                                 element="pyro", source="companion")
+        # Turn Klee's Pyro saturation into a setup window instead of adding
+        # still more Pyro. Each consumed aura pays damage + Burst Energy, then
+        # leaves the enemy clear for Hydro/Cryo to establish the next reaction.
+        damage = p.powers["witchs_flame"]
+        for enemy in list(state.living_enemies):
+            if enemy.aura != "pyro":
+                continue
+            enemy.aura = None
+            enemy.aura_turns_left = 0
+            deal_damage_to_enemy(state, enemy, damage,
+                                 element=None, source="companion")
+            if p.burst_max:
+                p.burst_energy += C.WITCHS_FLAME_BURST
+            state.emit("witchs_flame_consumed", target=enemy.name,
+                       burst_energy=C.WITCHS_FLAME_BURST)
     if p.powers.get("solar_isotoma", 0):                # Albedo, 3 turns
         p.powers["solar_isotoma"] -= 1
     p.powers.pop("attack_up_this_turn", None)           # Bennett burst

@@ -13,7 +13,7 @@ cadence: skill           # Skill-grade (kickoff §1): only Skill/Burst-tagged
                          # cards apply hydro; engine rule in effects._element_for
 burst_max: 70            # RATIFIED (R17, 2026-07-20): particles from skill
                          # tags (5), reactions (5), Salon ticks (2/member/
-                         # turn), Encore spend (1/point). Klee=60, nuke~90.
+                         # turn), Encore spend (1/point). Klee=40, nuke~90.
 fanfare: true            # Fanfare cap = FANFARE_CAP_FRACTION x maxHP
 kit: [let_the_people_rejoice]   # v1.9: Burst is kit, not loot
 # Ethereal Spotlight (kickoff §3.1): her starting relic adds the selector
