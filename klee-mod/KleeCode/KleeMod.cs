@@ -112,6 +112,9 @@ public static class KleeMod
                     ["KLEEMOD-BOMB.title"] = "Bomb",
                     ["KLEEMOD-BOMB.description"] =
                         "Detonates at the start of your turn or early when its enemy takes unblocked Attack damage. The first attack that enemy makes while Bombed each combat deals 25% less damage.",
+                    ["KLEEMOD-CONFISCATED.title"] = "Confiscated",
+                    ["KLEEMOD-CONFISCATED.description"] =
+                        "A 1-cost Status card that does nothing.",
                     ["KLEEMOD-VAPORIZE_PREVIEW.title"] = "Reaction preview: Vaporize",
                     ["KLEEMOD-VAPORIZE_PREVIEW.description"] =
                         "This card supplies Pyro or Hydro while an enemy has the other aura. The triggering hit deals 1.5x damage and consumes the aura.",
@@ -130,6 +133,9 @@ public static class KleeMod
                     ["KLEEMOD-FROZEN_PREVIEW.title"] = "Reaction preview: Frozen",
                     ["KLEEMOD-FROZEN_PREVIEW.description"] =
                         "This card supplies Hydro or Cryo while an enemy has the other aura. Its next action deals half damage; attacking it Shatters for 6 damage.",
+                    ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Frozen (Boss)",
+                    ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
+                        "Bosses cannot be Frozen. Hydro plus Cryo is consumed and applies 2 Vulnerable instead.",
                     ["KLEEMOD-SWIRL_PREVIEW.title"] = "Reaction preview: Swirl",
                     ["KLEEMOD-SWIRL_PREVIEW.description"] =
                         "This card supplies Anemo to an existing aura. The aura is consumed and copied onto all enemies.",

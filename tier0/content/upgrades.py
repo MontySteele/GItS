@@ -117,6 +117,10 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             if val is not True:
                 raise ValueError(f"innate delta on {base_id!r} must be true")
             card.innate = True
+        elif key == "retain":
+            if val is not True:
+                raise ValueError(f"retain delta on {base_id!r} must be true")
+            card.retain = True
         elif key == "condition" and val == "unconditional":
             # Hoist the conditional's then-branch into the effect list.
             out = []

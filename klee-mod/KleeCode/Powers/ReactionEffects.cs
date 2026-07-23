@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
+using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
@@ -117,16 +118,22 @@ internal static class ReactionEffects
                 break;
 
             case Reaction.Frozen:
-                // TODO(C2.1): bosses must take Vulnerable FROZEN_BOSS_VULN
-                // instead of Frozen (round-3 ruling, stands post-errata). Not
-                // implemented -- I have not yet verified how to identify a boss
-                // from a Creature, and guessing at that predicate is how the
-                // "is_boss" branch silently never fires. Until then every
-                // enemy, boss included, gets the soft-control version, which is
-                // WRONG for bosses and will skew any boss playtest.
-                await PowerCmd.Apply<FrozenPower>(
-                    choiceContext, target, 1,
-                    applier: dealer, cardSource: cardSource);
+                // Boss rooms consume the aura but receive Vulnerable rather
+                // than Frozen. This preserves the intended boss immunity to
+                // action control while retaining a useful reaction payoff.
+                if (target.CombatState?.Encounter?.RoomType == RoomType.Boss)
+                {
+                    await PowerCmd.Apply<VulnerablePower>(
+                        choiceContext, target,
+                        ReactionConstants.FrozenBossVuln,
+                        applier: dealer, cardSource: cardSource);
+                }
+                else
+                {
+                    await PowerCmd.Apply<FrozenPower>(
+                        choiceContext, target, 1,
+                        applier: dealer, cardSource: cardSource);
+                }
                 break;
 
             // Completed with the companions batch (2026-07-21): the roster's

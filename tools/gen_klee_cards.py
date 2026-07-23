@@ -183,20 +183,18 @@ MODIFY_BOMBS_FIELDS = {"op", "scope", "bonus"}
 CHANCE_BOMB_FIELDS = {"op", "chance", "bomb_damage"}
 
 # apply_power (power-card pass): sheet power id -> (C# PowerModel class,
-# stack cap or None, card-text template with {X} for the amount).
-#
-# The cap is DOUBLE-ENTERED deliberately: the C# class enforces it in
-# TryModifyPowerAmountReceived (the sim clamps in powers.py apply_power), and
-# codegen cross-checks the sheet's max_stacks against this table so cap drift
-# between sheet and C# fails the regen loudly instead of shipping.
+# stack cap or None, card-text template with {X} for the amount). Stackable
+# powers normally use None, matching native Slay the Spire power stacking;
+# a numeric cap is reserved for an explicitly designed exception and is
+# cross-checked against the sheet below.
 #
 # sparks_n_splash is deliberately ABSENT: the Burst kit card lands LAST in
 # the power-card pass (standing plan) with its own cost/grant machinery.
 APPLY_POWERS = {
-    "bomb_damage_up": ("BombDamageUpPower", 4,
-        "Your [gold]Bombs[/gold] detonate for {X} more damage. (Max 4.)"),
-    "zero_cost_attacks_up": ("ZeroCostAttacksUpPower", 4,
-        "Your Attacks that cost 0 deal {X} more damage. (Max 4.)"),
+    "bomb_damage_up": ("BombDamageUpPower", None,
+        "Your [gold]Bombs[/gold] detonate for {X} more damage."),
+    "zero_cost_attacks_up": ("ZeroCostAttacksUpPower", None,
+        "Your Attacks that cost 0 deal {X} more damage."),
     "spark_per_turn": ("SparkPerTurnPower", None,
         "At the start of your turn, gain {X} [gold]Spark[/gold]."),
     "reaction_bonus_spark_energy": ("ReactionBonusSparkEnergyPower", None,
@@ -213,7 +211,7 @@ APPLY_POWERS = {
         "You need {X} fewer [gold]Spark[/gold] for your Attacks to cost 0."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
-    "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", 1,
+    "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,
         "At the start of your turn, place a 5-damage [gold]Bomb[/gold] on a "
         "random enemy and gain {X} [gold]Spark[/gold]."),
     # Native debuffs (weak/vulnerable batch, 2026-07-20). Semantics verified
@@ -346,7 +344,7 @@ HAND_WRITTEN |= {"sparks_n_splash"}
 #   bombs       -> X-cost bomb count: X_plus_N -> X_plus_(N+val) in tier0;
 #                  codegen renders "X+{Bombs:diff()}" off a Bombs var
 EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "bomb_damage", "burst_energy", "cost",
-                       "discard", "sparks", "innate", "bonus", "chance",
+                       "discard", "sparks", "innate", "retain", "bonus", "chance",
                        "conditional_bonus", "condition", "bombs",
                        "bonus_per_detonation", "cards", "remove",
                        "copy_cost_override", "add"}
@@ -898,8 +896,9 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # R36: both keys ride the one discard_for_sparks effect.
         "discard": any(e["op"] == "discard_for_sparks" for e in effects),
         "sparks": any(e["op"] == "discard_for_sparks" for e in effects),
-        # R37: card-level, any card can become Innate.
+        # R37: card-level, any card can become Innate or Retain.
         "innate": True,
+        "retain": True,
         # Bomb-op batch: bonus rides a bonus-carrying bomb op; chance is
         # the chance_bomb_per_detonation replacement.
         "bonus": any(e["op"] in BONUS_OPS and "bonus" in e for e in effects),
@@ -2199,6 +2198,11 @@ def build_upgrade(card: dict) -> list[str]:
             raise SystemExit(
                 f"gen_klee_cards: {card['id']}: innate delta must be `true`")
         lines.append("AddKeyword(CardKeyword.Innate);")
+    if "retain" in deltas:
+        if deltas["retain"] is not True:
+            raise SystemExit(
+                f"gen_klee_cards: {card['id']}: retain delta must be `true`")
+        lines.append("AddKeyword(CardKeyword.Retain);")
     return lines
 
 
@@ -2365,14 +2369,21 @@ def emit(card: dict) -> str:
             "        new[] { " + ", ".join(keywords) + " };\n"
         )
 
+    includes_confiscated_rules = any(
+        eff.get("op") == "add_card" and eff.get("card") == "confiscated"
+        for eff in card.get("effects", []))
     tooltip_member = ""
-    if preview_element_cs is not None or includes_bomb_rules:
+    if preview_element_cs is not None or includes_bomb_rules or includes_confiscated_rules:
         trigger_arg = preview_element_cs or "Element.None"
         bomb_arg = "true" if includes_bomb_rules else "false"
+        confiscated_arg = (
+            ", includesConfiscatedRules: true"
+            if includes_confiscated_rules else "")
         tooltip_member = (
             "\n    protected override IEnumerable<IHoverTip> ExtraHoverTips =>\n"
             "        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, "
-            f"{trigger_arg}, includesBombRules: {bomb_arg});\n"
+            f"{trigger_arg}, includesBombRules: {bomb_arg}"
+            f"{confiscated_arg});\n"
         )
     hover_using = (
         "\nusing MegaCrit.Sts2.Core.HoverTips;" if tooltip_member else "")

@@ -17,9 +17,9 @@
 - {id: barbara_melody, name: "Barbara — Soothing Melody", star: 4, rarity: common, role_c: buffer, element: hydro, cost: 1, type: skill,
    effects: [{op: block, amount: 4}, {op: burst_energy, amount: 4}]}
    # Song inspires: modest block + meter. Bennett Passion pricing precedent (rider + burst_energy at 1 cost).
-- {id: barbara_shining_idol, name: "Barbara — Shining Idol", star: 4, rarity: uncommon, role_c: buffer, element: hydro, cost: 2, type: skill,
+- {id: barbara_shining_idol, name: "Barbara — Shining Idol", star: 4, rarity: uncommon, role_c: buffer, element: hydro, cost: 1, type: skill,
    effects: [{op: block, amount: 5}, {op: apply_aura, element: hydro, target: random_enemy}, {op: draw, amount: 1}]}
-   # Distinct from Dahlia Favonian Favor (cost 1, block 5 + aura) by the cantrip at +1 cost.
+   # Playtest 2026-07-22: the cantrip does not justify a full extra energy on an energy-starved character.
 - {id: sucrose_gust, name: "Sucrose — Wind Spirit Creation", star: 4, rarity: common, role_c: trigger, element: anemo, cost: 1, type: skill,
    effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
 - {id: sucrose_astable, name: "Sucrose — Astable Anemohypostasis", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 2, type: skill,

@@ -40,34 +40,16 @@ public static class DemolitionConstants
 /// </summary>
 public sealed class BombDamageUpPower : PowerModel, ILocalizationProvider
 {
-    /// <summary>Sheet cap (explosives_workshop max_stacks: 4), in POWER
-    /// UNITS -- the sim clamps `min(current + amount, max_stacks)` at apply
-    /// (powers.py apply_power).</summary>
-    public const int MaxStacks = 4;
-
     public List<(string, string)>? Localization => new()
     {
         ("title", "Explosives Workshop"),
-        ("description",
-            "Your [gold]Bombs[/gold] detonate for {Amount} more damage. "
-          + "(Max 4.)"),
+        ("description", "Your [gold]Bombs[/gold] detonate for {Amount} more damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override bool TryModifyPowerAmountReceived(
-        PowerModel canonicalPower, Creature target, decimal amount,
-        Creature? applier, out decimal modifiedAmount)
-    {
-        modifiedAmount = amount;
-        if (canonicalPower is not BombDamageUpPower || target != Owner) return false;
-        var clamped = System.Math.Min(Amount + amount, MaxStacks) - Amount;
-        if (clamped == amount) return false;
-        modifiedAmount = clamped;
-        return true;
-    }
 }
 
 /// <summary>
@@ -182,11 +164,6 @@ public sealed class DetonationVulnPower
 /// </summary>
 public sealed class BombAndSparkPerTurnPower : PowerModel, ILocalizationProvider
 {
-    /// <summary>Sheet cap (playtime_forever max_stacks: 1). Single-application
-    /// encoding: cap == amount, so a future power_amount upgrade must bump
-    /// BOTH (upgrades.py pass-2 rule). Today's upgrade is cost-only.</summary>
-    public const int MaxStacks = 1;
-
     public List<(string, string)>? Localization => new()
     {
         ("title", "Playtime Forever"),
@@ -198,18 +175,6 @@ public sealed class BombAndSparkPerTurnPower : PowerModel, ILocalizationProvider
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override bool TryModifyPowerAmountReceived(
-        PowerModel canonicalPower, Creature target, decimal amount,
-        Creature? applier, out decimal modifiedAmount)
-    {
-        modifiedAmount = amount;
-        if (canonicalPower is not BombAndSparkPerTurnPower || target != Owner) return false;
-        var clamped = System.Math.Min(Amount + amount, MaxStacks) - Amount;
-        if (clamped == amount) return false;
-        modifiedAmount = clamped;
-        return true;
-    }
 
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)

@@ -55,6 +55,10 @@ public static class KleeKeywords
     [KeywordProperties(AutoKeywordPosition.None)]
     public static CardKeyword Bomb;
 
+    [CustomEnum("confiscated")]
+    [KeywordProperties(AutoKeywordPosition.None)]
+    public static CardKeyword Confiscated;
+
     [CustomEnum("vaporize_preview")]
     [KeywordProperties(AutoKeywordPosition.None)]
     public static CardKeyword VaporizePreview;
@@ -78,6 +82,10 @@ public static class KleeKeywords
     [CustomEnum("frozen_preview")]
     [KeywordProperties(AutoKeywordPosition.None)]
     public static CardKeyword FrozenPreview;
+
+    [CustomEnum("frozen_boss_preview")]
+    [KeywordProperties(AutoKeywordPosition.None)]
+    public static CardKeyword FrozenBossPreview;
 
     [CustomEnum("swirl_preview")]
     [KeywordProperties(AutoKeywordPosition.None)]

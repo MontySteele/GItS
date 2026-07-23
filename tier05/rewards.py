@@ -161,7 +161,8 @@ def _nation_weighted_choice(rng: random.Random, cards: list[Card],
 
 def roll_rewards(rng: random.Random, character_id: str,
                  companion_offers: int = 1,
-                 banner: frozenset[str] | None = None) -> list[Card]:
+                 banner: frozenset[str] | None = None,
+                 companion_rarity: str | None = None) -> list[Card]:
     """One post-fight reward screen: card offers + the companion slot.
     companion_offers > 1 is the pity/choose-3 slot (triage ruling 4
     pulled the mechanism forward from M7; the run model decides when).
@@ -170,8 +171,12 @@ def roll_rewards(rng: random.Random, character_id: str,
     which is the pre-v1.8 behaviour and what the Tier 0 fight-level tests
     still want. Off-banner 5-stars are removed before the rarity roll, so a
     banner that empties the rare tier falls through to uncommon exactly as a
-    naturally rare-less pool already does.
+    naturally rare-less pool already does. ``companion_rarity="rare"`` is
+    the post-boss rule: only the Companion slot is forced Rare; ordinary card
+    offers remain the native reward system's responsibility.
     """
+    if companion_rarity is not None and companion_rarity not in C.RARITY_ODDS:
+        raise ValueError(f"unknown companion rarity {companion_rarity!r}")
     pool = character_pool(character_id)
     if not pool:
         # Reachable since ownership became REQUIRED above: a character with
@@ -199,9 +204,16 @@ def roll_rewards(rng: random.Random, character_id: str,
                   for r, cs in companion_pool().items()) if cs}
         home = loader.character_nation(character_id)
         for _ in range(companion_offers):
-            rarity = _roll_rarity(rng)
-            while rarity not in comps:
-                rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
+            rarity = companion_rarity or _roll_rarity(rng)
+            if companion_rarity is not None:
+                # Rare-only means rare-only: if a future roster has no card
+                # in the forced tier, omit the slot rather than substituting
+                # a lower-rarity companion.
+                if rarity not in comps:
+                    continue
+            else:
+                while rarity not in comps:
+                    rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
             offers.append(loader.get_card(
                 _nation_weighted_choice(rng, comps[rarity], home).id))
     return offers

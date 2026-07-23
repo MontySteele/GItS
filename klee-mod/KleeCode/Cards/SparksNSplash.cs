@@ -12,7 +12,7 @@ using MegaCrit.Sts2.Core.Models;
 namespace KleeMod.Cards;
 
 /// <summary>
-/// Sparks 'n' Splash -- the kit Burst card (sheet: rare power, cost 3,
+/// Sparks 'n' Splash -- the kit Burst card (sheet: rare power, cost 0,
 /// kit_card, requires burst_energy_full; v1.9: the Burst is kit, not loot).
 ///
 /// Hand-written: its lifecycle is machinery, not ops. NEVER in
@@ -21,7 +21,7 @@ namespace KleeMod.Cards;
 /// unobtainable (not draftable, not transformable; the sim's loader excludes
 /// kit cards from every pool).
 ///
-/// Cost model: 3 energy (normal EnergyCost) PLUS a BaseLib custom-resource
+/// Cost model: 0 energy (normal EnergyCost) PLUS a BaseLib custom-resource
 /// cost of the full meter -- SetCanonicalCost(60) wires CanAfford (>= 60)
 /// into the game's playability check, matching the sim's
 /// requires: burst_energy_full gate, and the play pipeline calls
@@ -61,7 +61,7 @@ public sealed class SparksNSplash : CustomCardModel
     // never draftable). The custom-resource cost is per-instance state;
     // setting it in the ctor covers the canonical and every CreateCard copy.
     public SparksNSplash()
-        : base(3, CardType.Power, CardRarity.Rare, TargetType.Self, autoAdd: false)
+        : base(0, CardType.Power, CardRarity.Rare, TargetType.Self, autoAdd: false)
     {
         CustomResources<KleeBurstResource>.SetCanonicalCost(this, BurstConstants.KleeMax);
     }

@@ -37,7 +37,7 @@ public sealed class SparkKnightStyle : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Spark Knight Style"),
-        ("description", "Your Attacks that cost 0 deal {PowerAmount:diff()} more damage. (Max 4.)"),
+        ("description", "Your Attacks that cost 0 deal {PowerAmount:diff()} more damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

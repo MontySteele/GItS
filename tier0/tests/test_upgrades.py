@@ -58,11 +58,11 @@ def test_number_bumps_follow_the_mined_grammar():
 
 def test_condition_and_keyword_class_upgrades():
     assert loader.get_card("sugar_rush+").exhaust is False
-    # R38: hot_hands+ adopts the R37 Innate disposition. The old
-    # {remove: self_damage} delta is DEAD -- the self-damage stays on the
-    # upgrade (it's the card's cost); Innate is the quality.
+    # Live playtest 2026-07-22: Retain lets the player bank the enabler for
+    # a useful hand without forcing the HP cost into turn 1.
     hot = loader.get_card("hot_hands+")
-    assert hot.innate is True
+    assert hot.retain is True
+    assert hot.innate is False
     assert any(fx.get("target") == "self" for fx in hot.effects)
     pd = loader.get_card("patched_dress+")               # hoisted then-branch
     assert not any(fx.get("op") == "conditional" for fx in pd.effects)

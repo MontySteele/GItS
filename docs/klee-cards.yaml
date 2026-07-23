@@ -61,7 +61,7 @@
 - {id: rapid_fire, name: "Rapid Fire", cost: 2, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: enabler,
    effects: [{op: damage, amount: 4, target: random_enemy, times: 4}]}
 - {id: warm_glow, name: "Warm Glow", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [spark], role: glue,
-   effects: [{op: block, amount: 3}, {op: gain_spark, amount: 1}]}
+   effects: [{op: block, amount: 6}, {op: gain_spark, amount: 1}]}
 - {id: snap, name: "Snap!", cost: 1, type: attack, rarity: common, solve: [frontload, velocity], archetypes: [spark], role: enabler,
    effects: [{op: damage, amount: 6, target: enemy}, {op: gain_spark, amount: 1}]}
 # Reaction (6)
@@ -105,7 +105,7 @@
 - {id: bombs_away, name: "Bombs Away!", cost: 3, type: skill, rarity: uncommon, solve: [frontload], archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 5, target: random_enemies, bomb_damage: 5}]}
 - {id: explosives_workshop, name: "Explosives Workshop", cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [demolition], role: payoff,
-   effects: [{op: apply_power, power: bomb_damage_up, amount: 2, target: self, max_stacks: 4}]}
+   effects: [{op: apply_power, power: bomb_damage_up, amount: 2, target: self}]}
 - {id: cluster_charge, name: "Cluster Charge", cost: 2, type: attack, rarity: uncommon, solve: [frontload], archetypes: [demolition], role: enabler,
    effects: [{op: damage, amount: 10, target: enemy}, {op: place_bomb, amount: 2, target: random_enemies, bomb_damage: 5}]}
 - {id: trip_wire, name: "Trip Wire", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [demolition], role: glue, tags: [skill_tag],
@@ -116,7 +116,7 @@
    effects: [{op: damage, amount: 5, target: random_enemy, times: 3, bonus_vs_bombed: 3}]}
 # Spark (7)
 - {id: spark_knight_style, name: "Spark Knight Style", cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [spark], role: payoff,
-   effects: [{op: apply_power, power: zero_cost_attacks_up, amount: 2, target: self, max_stacks: 4}]}
+   effects: [{op: apply_power, power: zero_cost_attacks_up, amount: 2, target: self}]}
 - {id: endless_fireworks, name: "Endless Fireworks", cost: 1, type: power, rarity: uncommon, solve: [velocity], archetypes: [spark], role: enabler,
    effects: [{op: apply_power, power: spark_per_turn, amount: 1, target: self}]}
 - {id: flame_on_the_wick, name: "Flame on the Wick", cost: 0, type: attack, rarity: uncommon, solve: [frontload], archetypes: [spark], role: glue,
@@ -134,7 +134,7 @@
 # ERRATA LANDED (R25 batch, 2026-07-20): block 4 -> 2. Queued behind the
 # R36 Crackle window per the sequencing rule; the window ran (bands hold,
 # spark tank_boss 56.8% in [45,65]) and the user released the batch. This
-# ends the strict domination over warm_glow (block 2 < 3) -- the
+# ends the strict domination over the old warm_glow (block 2 < 3) -- the
 # lint's KNOWN allowlist entry is retired with this row.
 - {id: cant_catch_me, name: "Can't Catch Me!", cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], archetypes: [spark], role: glue,
    effects: [{op: block, amount: 2}, {op: gain_spark, amount: 1}, {op: draw, amount: 1}]}
@@ -168,17 +168,17 @@
 - {id: dodge_roll, name: "Dodge Roll", cost: 1, type: skill, rarity: uncommon, solve: [block, utility], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 6}, {op: exhaust_from, zone: hand, filter: status, amount: 1}]}
 - {id: bright_idea, name: "Bright Idea", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [generic], role: glue,
-   effects: [{op: draw, amount: 3}, {op: discard, amount: 1}]}
+   effects: [{op: draw, amount: 3}, {op: discard, amount: 1}, {op: energy, amount: 1}]}
 - {id: surprise_visit, name: "Surprise Visit", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [generic], role: glue,
    effects: [{op: apply_power, power: vulnerable, amount: 2, target: enemy}]}
 
 # ---------- RARE (15) ----------
-- {id: sparks_n_splash, name: "Sparks 'n' Splash", cost: 3, type: power, rarity: rare, solve: [scaling], archetypes: [generic], role: payoff, tags: [burst], kit_card: true,  # v0.5: NOT in draftable pool; granted to hand when Burst meter first fills (innate-on-charge)
+- {id: sparks_n_splash, name: "Sparks 'n' Splash", cost: 0, type: power, rarity: rare, solve: [scaling], archetypes: [generic], role: payoff, tags: [burst], kit_card: true,  # v0.5: NOT in draftable pool; granted to hand when Burst meter first fills (innate-on-charge)
    requires: burst_energy_full,
    effects: [{op: apply_power, power: sparks_n_splash, amount: 3, target: self, note: "3 turns: end of turn, 4 sparks x 5 dmg to random enemies, each applies pyro"}]}
 - {id: blazing_delight, name: "Blazing Delight", cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [demolition], role: payoff,
    effects: [{op: apply_power, power: detonation_splash, amount: 3, target: self, splash_procs_per_turn: 3, note: "bomb detonations: 3 dmg ALL enemies + 3 burst energy; splash capped at 3 procs/turn (armed by errata triage — demolition band ceiling knob)"}]}
-- {id: chained_reactions, name: "Chained Reactions", cost: 1, type: skill, rarity: rare, solve: [frontload], archetypes: [demolition], role: payoff,
+- {id: chained_reactions, name: "Chained Reactions", cost: 0, type: skill, rarity: rare, solve: [frontload], archetypes: [demolition], role: payoff,
    effects: [{op: detonate, target: all_enemies}, {op: chance_bomb_per_detonation, chance: 0.5, bomb_damage: 5}]}
 - {id: explosive_frags, name: "Explosive Frags", cost: 1, type: power, rarity: rare, solve: [utility], archetypes: [demolition], role: payoff,
    effects: [{op: apply_power, power: detonation_vuln, amount: 1, target: self}]}
@@ -204,8 +204,8 @@
 - {id: vermillion_pact, name: "Vermillion Pact", cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [reaction], role: payoff,
    effects: [{op: apply_power, power: amp_reaction_up, amount: 25, target: self, note: "PERCENT. Watch the 4x amp-cap detector."}]}
 - {id: playtime_forever, name: "Playtime Forever", cost: 3, type: power, rarity: rare, solve: [scaling, velocity], archetypes: [demolition, spark], role: payoff,
-   effects: [{op: apply_power, power: bomb_and_spark_per_turn, amount: 1, target: self, max_stacks: 1}]}
+   effects: [{op: apply_power, power: bomb_and_spark_per_turn, amount: 1, target: self}]}
 - {id: best_friends_forever, name: "Best Friends Forever", cost: 1, type: skill, rarity: rare, solve: [utility], archetypes: [reaction], role: payoff, exhaust: true,
    effects: [{op: copy_companions_played_this_combat, zone: hand, cost_override: 0}]}
-- {id: no_holding_back, name: "No Holding Back", cost: 2, type: attack, rarity: rare, solve: [frontload], archetypes: [generic], role: payoff,
-   effects: [{op: damage, amount: 14, target: all_enemies}, {op: damage, amount: 4, target: self}]}
+- {id: no_holding_back, name: "No Holding Back", cost: 1, type: attack, rarity: rare, solve: [frontload], archetypes: [generic], role: payoff,
+   effects: [{op: damage, amount: 14, target: all_enemies}]}

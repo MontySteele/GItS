@@ -14,12 +14,38 @@ FIGHTS = 100
 SEED = 11
 
 
-def test_max_stacks_caps_power():
+def test_duplicate_klee_powers_stack_without_arbitrary_caps():
     st = make_state()
-    card = loader.get_card("explosives_workshop")   # v0.2: amount 2, cap 4
+    card = loader.get_card("explosives_workshop")
     for _ in range(5):
         effects.resolve_card(st, card)
-    assert st.player.powers["bomb_damage_up"] == 4
+    assert st.player.powers["bomb_damage_up"] == 10
+
+    spark_style = loader.get_card("spark_knight_style")
+    for _ in range(3):
+        effects.resolve_card(st, spark_style)
+    assert st.player.powers["zero_cost_attacks_up"] == 6
+
+    playtime = loader.get_card("playtime_forever")
+    for _ in range(2):
+        effects.resolve_card(st, playtime)
+    assert st.player.powers["bomb_and_spark_per_turn"] == 2
+
+
+def test_live_playtest_card_patch_is_loaded():
+    assert loader.get_card("chained_reactions").cost == 0
+    assert loader.get_card("barbara_shining_idol").cost == 1
+    assert loader.get_card("sparks_n_splash").cost == 0
+
+    warm = loader.get_card("warm_glow")
+    assert warm.effects[0] == {"op": "block", "amount": 6}
+
+    bright = loader.get_card("bright_idea")
+    assert bright.effects[-1] == {"op": "energy", "amount": 1}
+
+    no_holding = loader.get_card("no_holding_back")
+    assert no_holding.cost == 1
+    assert not any(fx.get("target") == "self" for fx in no_holding.effects)
 
 
 def test_n_per_detonation_formula():

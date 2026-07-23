@@ -37,7 +37,7 @@ public sealed class ExplosivesWorkshop : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Explosives Workshop"),
-        ("description", "Your [gold]Bombs[/gold] detonate for {PowerAmount:diff()} more damage. (Max 4.)"),
+        ("description", "Your [gold]Bombs[/gold] detonate for {PowerAmount:diff()} more damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

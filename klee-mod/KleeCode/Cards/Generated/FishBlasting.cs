@@ -42,7 +42,7 @@ public sealed class FishBlasting : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false, includesConfiscatedRules: true);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("fish_blasting");
 

@@ -3,6 +3,7 @@ using KleeMod.Elements;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Rooms;
 
 namespace KleeMod.Cards;
 
@@ -20,13 +21,19 @@ public static class KleeCardTooltips
         IEnumerable<IHoverTip> inherited,
         CardModel card,
         Element trigger = Element.None,
-        bool includesBombRules = false)
+        bool includesBombRules = false,
+        bool includesConfiscatedRules = false)
     {
         foreach (var tip in inherited) yield return tip;
 
         if (includesBombRules)
         {
             yield return HoverTipFactory.FromKeyword(KleeKeywords.Bomb);
+        }
+
+        if (includesConfiscatedRules)
+        {
+            yield return HoverTipFactory.FromKeyword(KleeKeywords.Confiscated);
         }
 
         if (trigger == Element.None || card.CombatState == null) yield break;
@@ -40,7 +47,10 @@ public static class KleeCardTooltips
             var reaction = ReactionTable.Lookup(aura.Element, trigger);
             if (reaction == Reaction.None || !seen.Add(reaction)) continue;
 
-            var keyword = KleeKeywords.ReactionPreview(reaction);
+            var keyword = reaction == Reaction.Frozen
+                && enemy.CombatState?.Encounter?.RoomType == RoomType.Boss
+                    ? KleeKeywords.FrozenBossPreview
+                    : KleeKeywords.ReactionPreview(reaction);
             if (keyword != MegaCrit.Sts2.Core.Entities.Cards.CardKeyword.None)
             {
                 yield return HoverTipFactory.FromKeyword(keyword);

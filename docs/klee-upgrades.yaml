@@ -29,7 +29,7 @@ tail_of_flame:     {conditional_bonus: +3}         # 4->7 when free
 eager_to_help:     {draw: +1}                      # both branches
 skip_and_hop:      {block: +2}                     # 2->4
 rapid_fire:        {damage: +1}                    # 4->5 per hit (x4)
-warm_glow:         {block: +2}                     # 3->5
+warm_glow:         {block: +2}                     # 6->8
 snap:              {damage: +3}                    # 6->9; Spark rider untouched (R1: the upgrade must not move the resource curve)
 sizzle:            {conditional_bonus: +3}         # aura bonus 6->9
 combustion_study:  {burst_energy: +5}              # 10->15
@@ -48,7 +48,7 @@ patched_dress:     {condition: unconditional}      # the +2 spark-bonus always a
 jumpy_dumpty_mk2:  {damage: +2}                    # 8->10 x2
 remote_detonator:  {bonus: +2}                     # detonation bonus 2->4
 bombs_away:        {cost: -1}                      # 3->2 (uncommon cost slot)
-explosives_workshop: {power_amount: +1}            # +2->+3 per stack, cap 4 unchanged
+explosives_workshop: {power_amount: +1}            # +2->+3 per copy; duplicate Powers stack without a cap
 cluster_charge:    {damage: +3}                    # 10->13
 trip_wire:         {bomb_damage: +3}               # 7->10
 controlled_demolition: {bombs: +1}                 # X+1 -> X+2
@@ -57,7 +57,7 @@ spark_knight_style: {power_amount: +1}             # +2->+3 on free attacks
 endless_fireworks: {cost: -1}                      # 1->0 (engine-power precedent)
 flame_on_the_wick: {damage: +3}                    # 6->9
 gleeful_barrage:   {damage: +1}                    # R39: 3->4 per hit
-hot_hands:         {innate: true}                  # R38 (user 2026-07-20): adopts the R37 disposition. The old {remove: self_damage} delta was codegen-inexpressible (structural) and left the card with no C# upgrade path; self-damage now STAYS on the upgrade (it's the card's cost), Innate is the quality.
+hot_hands:         {retain: true}                  # Playtest 2026-07-22: bank the Spark enabler for the right hand; do not force its HP cost into turn 1.
 cant_catch_me:     {block: +2}                     # 2->4 (base errata'd 4->2, R25 batch)
 sugar_rush:        {remove: exhaust}               # classic quality upgrade (net-0 energy loop is spark-bounded)
 catalytic_conversion: {innate: true}               # R37: classic power disposition -- starts in the opening hand
@@ -86,7 +86,7 @@ secret_stash:      {cards: +1}                     # adds 3 demolition commons
 vermillion_pact:   {amp_percent: +5}               # 25->30, NOT 35 — amp-cap watchlist discipline
 playtime_forever:  {cost: -1}                      # 3->2
 best_friends_forever: {cost: -1}                   # 1->0
-no_holding_back:   {damage: +4}                    # 14->18, self-damage stays (it's the card's story)
+no_holding_back:   {damage: +4}                    # 14->18; the base HP loss was removed in the live-playtest patch
 
 # ---- COMPANIONS (modest; upgraded forms stay enabler-grade; Exhausts never remove) ----
 dahlia_sacramental_shower: {damage: +2}

@@ -37,7 +37,7 @@ public sealed class BrightIdea : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bright Idea"),
-        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. Discard a random card."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. Discard a random card. Gain 1 Energy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -65,6 +65,7 @@ public sealed class BrightIdea : CustomCardModel
             if (victim == null) break;
             await CardCmd.Discard(choiceContext, victim);
         }
+        await PlayerCmd.GainEnergy(1, Owner);
     }
 
     protected override void OnUpgrade()

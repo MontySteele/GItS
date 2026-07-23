@@ -39,7 +39,7 @@ public static class CompanionSlot
     /// <summary>tier0 NATION_WEIGHTS -- every nation 1.0 today.</summary>
     private const double NationWeight = 1.0;
 
-    public static CardModel? Roll(Player player)
+    public static CardModel? Roll(Player player, CardRarity? forcedRarity = null)
     {
         // rarity tier -> canonical companion models. personal_pool cards are
         // only offered to their own character (tier05: "load-bearing the
@@ -60,13 +60,12 @@ public static class CompanionSlot
 
         // Sim _roll_rarity: cumulative walk of RARITY_ODDS in sheet order.
         var rng = player.PlayerRng.Rewards;
-        var roll = rng.NextFloat();
-        var rarity = roll < CommonOdds ? CardRarity.Common
-            : roll < CommonOdds + UncommonOdds ? CardRarity.Uncommon
-            : CardRarity.Rare;
-        // Fall-through when a tier is empty (tier0 roll_rewards).
-        if (!tiers.ContainsKey(rarity)) rarity = CardRarity.Uncommon;
-        if (!tiers.ContainsKey(rarity)) rarity = CardRarity.Common;
+        var rarity = forcedRarity ?? RollRarity(rng);
+        // Ordinary rolls fall through when a tier is empty (tier0
+        // roll_rewards). Forced post-boss rarity is strict: no lower-tier
+        // substitute may occupy the Rare-only slot.
+        if (forcedRarity == null && !tiers.ContainsKey(rarity)) rarity = CardRarity.Uncommon;
+        if (forcedRarity == null && !tiers.ContainsKey(rarity)) rarity = CardRarity.Common;
         if (!tiers.TryGetValue(rarity, out var pool)) return null;
 
         var pick = NationWeightedChoice(rng, pool, HomeNation);
@@ -77,6 +76,14 @@ public static class CompanionSlot
         // No upgrade roll here: the native path rolls one per reward card,
         // and the sim's companion slot does not.
         return ((ICardScope)player.RunState).CreateCard(pick, player);
+    }
+
+    private static CardRarity RollRarity(Rng rng)
+    {
+        var roll = rng.NextFloat();
+        return roll < CommonOdds ? CardRarity.Common
+            : roll < CommonOdds + UncommonOdds ? CardRarity.Uncommon
+            : CardRarity.Rare;
     }
 
     /// <summary>Klee's home nation (tier0 loader.character_nation).</summary>
