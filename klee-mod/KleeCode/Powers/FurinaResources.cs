@@ -176,6 +176,7 @@ public static class FurinaResources
         var resource = EncoreResourceFor(creature);
         if (resource == null) return;
         resource.ModifyAmount(amount);
+        Vfx.GaugeBridge.Refresh(creature);
         GainFanfare(
             creature, amount * FurinaResourceConstants.FanfarePerEncoreGained);
     }
@@ -199,6 +200,7 @@ public static class FurinaResources
         var spent = Math.Min(resource.Amount, amount);
         if (spent <= 0) return 0;
         resource.ModifyAmount(-spent);
+        Vfx.GaugeBridge.Refresh(creature);
         GainFanfare(
             creature, spent * FurinaResourceConstants.FanfarePerEncoreSpent);
         GainBurst(
@@ -234,6 +236,7 @@ public static class FurinaResources
         if (resource == null || resource.Amount <= 0) return amount;
         var absorbed = Math.Min(resource.Amount, (int)Math.Ceiling(amount));
         resource.ModifyAmount(-absorbed);
+        Vfx.GaugeBridge.Refresh(creature);
         return Math.Max(0m, amount - absorbed);
     }
 

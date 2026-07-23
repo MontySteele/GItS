@@ -134,6 +134,12 @@ public sealed class KleeBurstResource : BasicCustomResource
     }
 
     /// <summary>
+    /// Current meter value for display surfaces (the Track C gauge). Reads
+    /// the canonical resource, 0 for non-Klee owners.
+    /// </summary>
+    public static int AmountFor(Creature player) => Find(player)?.Amount ?? 0;
+
+    /// <summary>
     /// The gain path for every context-carrying source (reactions, the
     /// burst_energy op, and future powers) -- mirrors SparkPower.Gain so the
     /// economy stays easy to instrument. Moves resource and badge together.
@@ -147,6 +153,7 @@ public sealed class KleeBurstResource : BasicCustomResource
         if (resource == null) return;
 
         resource.ModifyAmount(amount);
+        Vfx.GaugeBridge.Refresh(player);
         await PowerCmd.Apply<BurstMeterPower>(
             choiceContext, player, amount, applier: player, cardSource: cardSource);
     }
@@ -159,18 +166,25 @@ public sealed class KleeBurstResource : BasicCustomResource
     public static void GainPreResolution(Creature player, int amount)
     {
         if (amount <= 0) return;
-        Find(player)?.ModifyAmount(amount);
+        var resource = Find(player);
+        if (resource == null) return;
+        resource.ModifyAmount(amount);
+        Vfx.GaugeBridge.Refresh(player);
     }
 
     /// <summary>
     /// Re-establish badge == resource (sync-to-truth, so it also self-heals
-    /// any drift rather than replaying a remembered delta).
+    /// any drift rather than replaying a remembered delta). Also the gauge's
+    /// catch-up site: it runs after EVERY card play, which is what makes the
+    /// cast drain visible -- the kit card's whole-meter Spend happens inside
+    /// the cost machinery, outside our mutation funnels.
     /// </summary>
     public static async Task SyncBadge(
         PlayerChoiceContext choiceContext, Creature player, CardModel? cardSource)
     {
         var resource = Find(player);
         if (resource == null) return;
+        Vfx.GaugeBridge.Refresh(player);
 
         var badge = player.Powers.OfType<BurstMeterPower>().FirstOrDefault();
         decimal delta = resource.Amount - (badge?.Amount ?? 0m);

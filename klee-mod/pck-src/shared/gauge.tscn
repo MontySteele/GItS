@@ -1,0 +1,85 @@
+[gd_scene load_steps=4 format=3]
+
+[sub_resource type="Animation" id="Animation_reset"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Flash:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_flash"]
+resource_name = "flash"
+length = 0.6
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Flash:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.08, 0.25, 0.35, 0.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0.85), Color(1, 1, 1, 0), Color(1, 1, 1, 0.55), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_gauge"]
+_data = {
+&"RESET": SubResource("Animation_reset"),
+&"flash": SubResource("Animation_flash")
+}
+
+[node name="Gauge" type="Node2D"]
+
+[node name="BarBack" type="ColorRect" parent="."]
+unique_name_in_owner = true
+offset_left = -32.0
+offset_top = -5.0
+offset_right = 32.0
+offset_bottom = 5.0
+color = Color(0.08, 0.07, 0.1, 0.82)
+
+[node name="BarFill" type="ColorRect" parent="."]
+unique_name_in_owner = true
+offset_left = -30.0
+offset_top = -3.0
+offset_right = 30.0
+offset_bottom = 3.0
+color = Color(1, 1, 1, 1)
+
+[node name="Flash" type="ColorRect" parent="."]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+offset_left = -32.0
+offset_top = -5.0
+offset_right = 32.0
+offset_bottom = 5.0
+color = Color(1, 1, 1, 1)
+
+[node name="ValueLabel" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = -32.0
+offset_top = -26.0
+offset_right = 32.0
+offset_bottom = -6.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+vertical_alignment = 2
+text = ""
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_gauge")
+}
