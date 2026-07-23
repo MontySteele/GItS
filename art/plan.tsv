@@ -545,3 +545,12 @@ sucrose_astable	ImageGen/images/cards/companions/sucrose_astable.png	500	380	cov
 dahlia_favonian_favor	ImageGen/images/cards/companions/dahlia_favonian_favor.png	500	380	cover	y0.16	shortlist	1	png	Dahlia Wish.png		splash	dahlia
 dahlia_favonian_favor	ImageGen/images/cards/companions/dahlia_favonian_favor.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Dahlia Full Wish.png		splash	dahlia
 dahlia_favonian_favor	ImageGen/images/cards/companions/dahlia_favonian_favor.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Dahlia Character Card.png		splash	dahlia
+# ---------- FURINA non-card assets (sec.8): character UI + combat model ----------
+# Mirrors Klee's proven ui/model rows with Furina sources so the build stops
+# falling back to Klee art. select_bg + transition_wipe intentionally stay the
+# shared/procedural fallback (sec.8 sanctions this); locked portrait auto-derives.
+furina_select_portrait	ImageGen/images/furina/ui/select_portrait.png	132	195	cover	y0.20@1.9	auto	1	png	Furina Profile.png		splash
+furina_char_icon	ImageGen/images/furina/ui/char_icon.png	88	88	cover	y0.22@2.3	auto	1	png	Furina Profile.png		splash
+furina_map_marker	ImageGen/images/furina/ui/map_marker.png	49	64	cover	y0.22@2.3	auto	1	png	Furina Profile.png		splash
+furina_selection_splash	ImageGen/images/furina/ui/selection_splash.png	1920	1200	cover_autocrop	cover@0.06	auto	1	png	Furina Wish.png		splash
+furina_combat_model	ImageGen/images/furina/model/combat_model.png	240	280	sprite	center	auto	1	png	Furina Profile.png		splash
