@@ -261,6 +261,9 @@ public static class FurinaResources
             choiceContext, creature, Fanfare(creature), cardSource);
         await SyncMeter<FurinaBurstMeterPower>(
             choiceContext, creature, Burst(creature), cardSource);
+        // Salon display sync (Track D): every meter-sync moment is also a
+        // dry-badge moment, and the salon reads composition + Encore here.
+        Vfx.SalonVisualsBridge.Refresh(creature);
     }
 
     private static async Task SyncMeter<T>(

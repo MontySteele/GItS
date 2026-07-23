@@ -58,6 +58,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         {
             await PowerCmd.Apply<SalonMemberPower>(
                 choiceContext, owner, added, applier: owner, cardSource: cardSource);
+            Vfx.SalonVisualsBridge.Refresh(owner);
         }
 
         var replacements = Math.Max(0, amount - added);
