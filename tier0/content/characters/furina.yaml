@@ -1,0 +1,160 @@
+# Furina — sheet pass 1 (furina-kickoff-v0.1.md governs; statline CLEARED
+# by redpen 2026-07-20). Card pool lives in docs/furina-cards.yaml (loader
+# reads the docs sheet directly; single source of truth).
+# Declared 7-axis targets (kickoff §2): A1 1.0-1.5 (load-bearing weakness),
+# A2 ~3.0, A3 ~2.5, A4 4.3 (elite), A5 3.7, A6 4.2 (elite), A7 ~2.0
+# (declared weakness). Exactly two elite axes: A4 + A6.
+id: furina
+name: "Furina"
+hp: 60                   # RATIFIED (R17, 2026-07-20)
+nation: fontaine         # §4.1 reward weighting: Fontaine is her half
+element: hydro
+cadence: skill           # Skill-grade (kickoff §1): only Skill/Burst-tagged
+                         # cards apply hydro; engine rule in effects._element_for
+burst_max: 70            # RATIFIED (R17, 2026-07-20): particles from skill
+                         # tags (5), reactions (5), Salon ticks (2/member/
+                         # turn), Encore spend (1/point). Klee=40, nuke~90.
+fanfare: true            # Fanfare cap = FANFARE_CAP_FRACTION x maxHP
+kit: [let_the_people_rejoice]   # v1.9: Burst is kit, not loot
+# Ethereal Spotlight (kickoff §3.1): her starting relic adds the selector
+# card to hand each turn.
+relic_hooks: [ethereal_spotlight]
+# Identity constraint (kickoff §2 shape): her sustain must dominate her
+# frontload — hard on starter and the archetype median, warn on packages.
+constraints: ["A4_sustain>A1_frontload"]
+archetype_decks:
+  salon_weighted: salon
+  spotlight_weighted: spotlight
+  fanfare_weighted: fanfare
+# NO winrate_bands yet: bands are ratified artifacts (pass-3 pattern);
+# the report's winrate proposals remain proposals (salon bands proposed,
+# spotlight/fanfare deliberately held until the R16 world lands).
+# A2 deck bands RATIFIED by R19 (2026-07-20) under the lag-not-growth
+# reading (curve exponents 0.07-0.28: the ratio instrument inflates
+# A1-dreadful engines; Klee deck-band precedent). spotlight_weighted
+# BANDED AT PASS 2 per R19's schedule, in the R16 world: measured 4.0
+# at 1000 fights + the 0.3 margin convention. Red-pen may adjust.
+deck_bands:
+  A2_scaling:
+    salon_weighted: 7.6
+    fanfare_weighted: 4.2
+    spotlight_weighted: 4.3
+starting_deck:
+  - soloists_solicitation
+  - soloists_solicitation
+  - soloists_solicitation
+  - stage_presence
+  - stage_presence
+  - stage_presence
+  - regal_bearing
+  - aria_of_recompense
+  - salon_debut
+  - an_invitation
+# Run-start Fontaine ensemble, mirroring Klee's Mondstadt starter rule.
+# One weak basic Attack and one basic defense are replaced on a dedicated,
+# replayable RNG stream. Each of the four shortlisted characters appears in
+# exactly one role: Pyro/Cryo attack choice, two defensive support textures.
+randomized_starter:
+  attack: {replace: soloists_solicitation, choices: [chevreuse_interdiction_fire, freminet_pers_deploy]}
+  support: {replace: stage_presence, choices: [charlotte_enduring_frosthelm, lynette_enigmatic_feint]}
+packages:
+  # Plausible drafts (round-3 principle), not monocultures — each carries
+  # natural cross-archetype draft-ins.
+  salon_weighted:
+    - gentilhomme_usher
+    - surintendante_chevalmarin
+    - mademoiselle_crabaletta
+    - dinner_service
+    - usher_the_waves
+    - matinee_performance
+    - rising_tide
+    - house_call
+    - torrential_turn
+    - grand_salon
+    - waters_embrace
+    - many_waters_melody
+    - endless_waltz
+    - undercurrent
+    - crashing_waves
+    - hearts_swelling
+    # draft-ins a human obviously takes:
+    - graceful_retreat
+    - swelling_overture
+  # Guest Cast package: a mixed Companion ensemble (all share Spotlight v5),
+  # plus the Spotlight machinery. Draft-gated high-ceiling; luck-gated is the
+  # access-plus-machinery assembly, not same-character depth.
+  spotlight_weighted:
+    - chevreuse_interdiction_fire
+    - chevreuse_interdiction_fire
+    - chevreuse_vanguards_valor
+    - chevreuse_bursting_grenades
+    - lynette_box_trick
+    - an_invitation
+    - guest_list
+    - limelight
+    - stage_lights
+    - shared_billing
+    - top_billing
+    - leading_role
+    - standing_ovation
+    - directors_cut
+    - encore_performance
+    - undercurrent
+    # draft-ins (R16 re-author: a human takes the scaling engine first —
+    # top_billing displaced courtroom_drama):
+    - graceful_retreat
+    - commanding_gaze
+  fanfare_weighted:
+    - curtain_up
+    - curtain_up
+    - suffering_for_art
+    - dramatic_entrance
+    - crowd_work
+    - tempo_change
+    - ebb_and_flow
+    - audience_participation
+    - crescendo
+    - showstopper
+    - florid_cadenza
+    - hearts_swelling
+    - rapturous_applause
+    - universal_revelry
+    # draft-ins:
+    - poised_riposte
+    - graceful_retreat
+    - quick_change
+  # §8 acceptance probes (watchlist configs, NOT archetype decks — the
+  # melt_stack pattern):
+  # Criterion 1: self-carry (pump own kit, self-Spotlight) must NOT beat
+  # Salon/Spotlight at median draft quality.
+  self_carry:
+    - poised_riposte
+    - poised_riposte
+    - torrential_turn
+    - crescendo
+    - showstopper
+    - high_tide
+    - universal_revelry
+    - hearts_swelling
+    - curtain_up
+    - suffering_for_art
+    - rapturous_applause
+    - star_of_the_show
+    - fortissimo_guard
+    - quick_change
+    - macaron_break
+    - deep_breath
+  # Criterion 2 delete-test probe: the Spotlight deck's companions WITHOUT
+  # her machinery cards. If this wins like spotlight_weighted does, the
+  # companions are carrying — SUPPORT_CARRY, real failure, no carve-outs.
+  spotlight_companions_only:
+    - chevreuse_interdiction_fire
+    - chevreuse_interdiction_fire
+    - chevreuse_vanguards_valor
+    - chevreuse_bursting_grenades
+    - lynette_box_trick
+    - lynette_enigmatic_feint
+    - charlotte_freezing_point
+    - charlotte_enduring_frosthelm
+    - graceful_retreat
+    - commanding_gaze

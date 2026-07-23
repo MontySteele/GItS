@@ -1,0 +1,94 @@
+# Per-archetype pilot weights (spec §6) so archetype comparisons aren't
+# confounded by pilot behavior. block stays at the frozen 1.2 everywhere
+# (part of battery calibration — see DECISIONS.md #9).
+- id: demolition
+  weights:
+    damage: 1.1
+    block: 1.2
+    scaling: 1.0
+    reaction: 0.6
+    tempo: 0.6
+    cost: 0.1
+
+- id: reaction
+  weights:
+    damage: 0.9
+    block: 1.2
+    scaling: 1.0
+    reaction: 2.0
+    tempo: 0.7
+    cost: 0.1
+
+- id: spark
+  weights:
+    damage: 1.0
+    block: 1.2
+    scaling: 1.0
+    reaction: 0.6
+    tempo: 1.0
+    cost: 0.0
+
+# --- Furina (sheet pass 1). block stays at the frozen 1.2 everywhere.
+# New keys: sustain (Encore economy; policy default 1.0 keeps every
+# older pilot unchanged) and spotlight (selector/generator machinery;
+# default 0.0 -- the generic anchor still ignores the selector, which is
+# the DECISIONS-53 lesson applied in reverse: HER pilots must not).
+- id: salon
+  weights:
+    damage: 1.0
+    block: 1.2
+    scaling: 1.4      # member deploys are the plan
+    reaction: 0.8     # hydro uptime feeds companions in co-op, mild solo
+    tempo: 0.9
+    sustain: 1.3      # the Salon runs on the Encore buffer
+    spotlight: 0.4    # plays a selector if drafted into one, no priority
+    cost: 0.1
+
+- id: spotlight
+  weights:
+    damage: 1.0
+    block: 1.2
+    scaling: 1.0
+    reaction: 0.9     # companion appliers ride along in this deck
+    tempo: 0.8
+    sustain: 1.0
+    spotlight: 1.6    # designate early, feed the star, generate guests
+    cost: 0.1
+
+- id: fanfare
+  weights:
+    damage: 1.1      # crescendo payoffs want the flux converted to hits
+    block: 1.2
+    scaling: 1.0
+    reaction: 0.6
+    tempo: 1.2       # the drain->refill->spend cycle IS the tempo plan
+    sustain: 1.2
+    spotlight: 0.3
+    cost: 0.1
+
+# --- real_ironclad (the real base-game reference pool). block stays at the
+# frozen 1.2 everywhere. sustain/spotlight are OMITTED, not zeroed: the
+# policy defaults make them inert, while writing 0.0 would imply he has an
+# Encore buffer worth devaluing.
+#
+# KNOWN UNDERSTATEMENT -- on the record so a low score is not read as a
+# finding about his pool (see the pass report):
+#   1. _scaling_value caps a self-power at min(amount,6)*3 and decays it by
+#      max(0, 1-turn/12). Demon Form compounds +2 Str EVERY turn and scores
+#      as a one-shot +2 worth nothing by turn 12 -- exactly when it wins.
+#      Raising `scaling` does not fix this; it inflates one-shot buffs too.
+#   2. Vulnerable scores a flat amount*2 with no reference to
+#      C.VULNERABLE_TAKEN_MULT, so Bash -- his STARTER -- is undervalued,
+#      and starter is the config where constraints are hard.
+#   3. Body Slam's live Block formula is now visible, but persistent and
+#      history payoffs are still priced conservatively: Barricade's retained
+#      Block is not valued as future-turn sustain, and Rampage/Tear Asunder
+#      receive only bounded one-redraw / one-event estimates.
+- id: ironclad
+  weights:
+    damage: 1.1      # no elements, no engine: hits are the plan
+    block: 1.2       # FROZEN. do not tune.
+    scaling: 1.4     # the Strength ramp is his identity (Salon's slot)
+    reaction: 0.0    # applies no elements; the term is inert, said out loud
+    tempo: 0.7       # Battle Trance / Offering draw
+    cost: 0.1

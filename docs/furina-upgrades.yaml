@@ -1,0 +1,107 @@
+# Furina + Fontaine upgrade deltas — v0.1 (companion file to furina-cards.yaml / fontaine-companions.yaml)
+# Grammar authority: upgrade-conventions.md (mined base-game grammar). Same semantics as klee-upgrades.yaml.
+# Bursts excluded (kit, v1.9; Talent Training = v2). Guest Stars excluded (generated mid-combat — rest-smithing
+# cannot reach them; their upgrade story is the GENERATOR's upgrade, kickoff §9 grammar).
+# encore-key semantics: bumps ALL gain_encore ops, branches included (the eager_to_help "both branches" precedent).
+# SHEET PASS 1: all deltas PROPOSED pending user red-pen.
+
+# ---- BASICS (generous; signature basic gets the Bash-style dual-nature privilege) ----
+soloists_solicitation: {damage: +3}          # 4->7, Strike-exact
+stage_presence:        {block: +3}           # 6->9
+regal_bearing:         {block: +2}           # 3->5; the glance stays 1 Weak
+aria_of_recompense:    {encore: +3}          # 5->8
+salon_debut:           {add: {op: gain_encore, amount: 2}}   # signature: deploy gains a buffer rider (upkeep pre-paid)
+
+# ---- COMMONS (one number bump each; zero cost reductions) ----
+gentilhomme_usher:     {block: +2}           # 4->6
+surintendante_chevalmarin: {encore: +2}      # 3->5
+mademoiselle_crabaletta: {power_amount: +1}  # 2->3 members
+dinner_service:        {encore: +1}          # 3->4 base and rider (both branches)
+usher_the_waves:       {damage: +2}          # 5->7 (still applies hydro)
+torrential_turn:       {damage: +3}          # 10->13, aura bonus stays 4
+matinee_performance:   {damage: +2}          # 4->6
+rising_tide:           {encore: +2}          # 3->5
+house_call:            {damage: +2}          # 6->8 base; member rider stays 4
+curtain_up:            {encore: +1}          # 2->3
+dramatic_entrance:     {conditional_bonus: +3}   # Spend-5 rider 4->7
+crowd_work:            {draw: +1}            # 2->3; Spend 2 Encore stays (the flux is the card)
+suffering_for_art:     {encore: +1}          # 3->4; the measured 1 self-damage stays
+thunderous_ovation:    {block: +2}           # base 7->9 (13 total); Spend 5 and rider 4 stay
+tempo_change:          {draw: +1}            # 1->2; energy and encore_cost untouched
+warmup_act:            {damage: +2}          # 3->5
+audience_participation: {encore: +1}         # 2->3
+ebb_and_flow:          {encore: +1}          # gain 3->4; the Spend 1 stays (net flux grows)
+an_invitation:         {generate_cost_override: 0}   # kickoff §9 upgrade grammar VERBATIM: the guest costs 0
+limelight:             {draw: +1}            # 1->2; the boost stays 25 (R16: the mult is authored, not upgraded)
+shared_billing:        {cost: -1}            # 1->0 (R32.2 rider swap took the block; mined cost line — the
+                                             # aura and the boost are authored, not upgraded)
+blocking_notes:        {block: +2}           # 7->9 (base lifted by the R32.2/R32.3 A3 rehome)
+stage_lights:          {power_amount: +1}    # flat rider +2->+3 this turn; the Weak rider stays 1 (R32.2)
+curtain_cue:           {encore: +1}          # both branches: 3->4 / 1->2
+graceful_retreat:      {block: +3}           # 6->9
+poised_riposte:        {damage: +3}          # 6->9
+commanding_gaze:       {weak: +1}            # 1->2 all
+witness_stand:         {vulnerable: +1}      # 1->2
+macaron_break:         {encore: +1}          # 2->3
+swelling_overture:     {draw: +1}            # 2->3
+undercurrent:          {damage: +2}          # 7->9 all (still applies; convergence watchlist notes the upgrade too)
+
+# ---- UNCOMMONS (bump OR keyword/condition; two cost slots + one 1->0) ----
+full_ensemble:         {cost: -1}            # 3->2 (uncommon cost slot; bombs_away precedent)
+grand_salon:           {power_amount: +1}    # +3->+4, cap 6 unchanged
+many_waters_melody:    {encore: +1}          # 5->6 base, 3->4 rider
+dress_rehearsal:       {encore_cost: -1}     # Spend 2 -> Spend 1 (condition-soften class)
+crashing_waves:        {damage: +2}          # 8->10 all; aura bonus stays 5
+overflowing_hospitality: {encore: +2}        # 3->5
+waters_embrace:        {block: +3}           # base 9->12; salon rider stays 5
+crescendo:             {damage: +3}          # 8->11; spend 10 and 1_per_2 formula stay
+showstopper:           {conditional_bonus: +3}   # 7->10 when the house roars
+florid_cadenza:        {fanfare_cost: -3}    # Spend 10 -> Spend 7
+hearts_swelling:       {encore: +2}          # 7->9
+rapturous_applause:    {power_amount: +1}    # +1->+2 per 10 Fanfare, cap 2 unchanged
+pit_orchestra:         {block: +2}           # 5->7
+flood_of_emotion:      {damage: +3}          # 20->23; Spend 15 Fanfare stays
+leading_role:          {cost: -1}            # 1->0 (endless_fireworks engine-power precedent)
+supporting_cast:       {power_amount: +1}    # first Spotlighted card draws 1->2
+guest_list:            {generate_cost_override: 0}   # Discovery parity
+directors_cut:         {draw: +1}            # both branches: 2->3 / 1->2
+top_billing:           {cost: -1}            # 1->0 (mined power-cost line); the boost and its two-copy ceiling stay
+duet:                  {draw: +1}            # 1->2
+standing_ovation:      {cost: -1}            # 1->0 after the machinery-efficiency pass. R32.1 flip:
+                                             # upgrading the +10%/spend amount would outgrow the two-copy cap
+                                             # (20 != amount, applier correctly won't bump it) — cost is the lever.
+fortissimo_guard:      {block: +3}           # 11->14
+courtroom_drama:       {vulnerable: +1}      # 2->3; weak stays 1
+quick_change:          {draw: +1}            # 3->4, discard stays 1
+deep_breath:           {remove: exhaust}     # sugar_rush-exact quality upgrade
+
+# ---- RARES (quality over quantity) ----
+# let_the_people_rejoice: NO UPGRADE (kit card, v1.9; Talent Training = v2 design space)
+encore_performance:    {copy_cost_override: 0}   # the copy costs 0 (borrowed_brilliance precedent)
+singer_of_many_waters: {heal: +4}            # 14->18; Exhaust NEVER removes (healing law)
+unheard_confession:    {heal: +3}            # 8->11; Exhaust stays, Encore stays 6
+endless_waltz:         {cost: -1}            # 3->2 (rare cost privilege)
+grand_gala:            {encore: +3}          # 4->7; Exhaust stays
+the_sea_is_my_stage:   {fanfare_cap: +5}     # +15->+20 cap; the blood price stays 6 (raised at red-pen, DECISIONS 75)
+universal_revelry:     {damage: +3}          # 9->12 base; spend 20 and 1_per_2 formula stay
+star_of_the_show:      {power_amount: +1}    # +3->+4 printed on Spotlighted damage
+prima_donna:           {cost: -1}            # 2->1
+high_tide:             {damage: +4}          # 22->26 (big-base row); Spend 15 Fanfare stays
+rain_of_roses:         {encore: +2}          # 5->7; the mass application is the card, it does not grow
+the_final_verdict:     {damage: +4}          # 18->22; reaction rider stays 6
+reginas_mercy:         {encore: +3}          # 10->13
+command_performance:   {generate_cost_override: 0}   # both guests cost 0 (Discovery parity)
+
+# ---- FONTAINE COMPANIONS (modest single bumps; upgraded forms stay enabler-grade — guardrail 3 applies) ----
+chevreuse_interdiction_fire: {damage: +2}    # 7->9
+chevreuse_vanguards_valor:   {buff: +2}      # base next-attack 3->5; reaction rider stays 3
+chevreuse_bursting_grenades: {damage: +2}    # 10->12 all; mass Pyro application keeps the card at 2 cost.
+lynette_enigmatic_feint:     {block: +2}     # 5->7; swirl untouched
+lynette_box_trick:           {draw: +1}      # 2->3
+lynette_astonishing_shift:   {damage: +2}    # AoE rider 4->6; base cost is now 1
+charlotte_freezing_point:    {damage: +2}    # 4->6; her ONE Cryo application does not multiply
+charlotte_enduring_frosthelm: {block: +2}    # now-block 4->6; next-turn Block stays 4
+charlotte_snappy_silhouette: {vulnerable: +1}    # 2->3
+freminet_pers_deploy:        {damage: +2}    # 6->8
+freminet_pressurized_floe:   {damage: +2}    # 10->12; Block stays 6 (still applies_element: false)
+freminet_shattering_pressure: {power_amount: +2} # Shatter bonus +4->+6 (grammar row 2: +2 at base 4-6)

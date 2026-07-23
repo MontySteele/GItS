@@ -1,0 +1,259 @@
+# Art sprint fetch/process plan (docs/art-sprint-spec.md). Tier F — private build only, never ships.
+# Columns: asset_id	out	w	h	mode	focus	pick	rank	source	wiki_title	frame_pct	register
+# mode: cover (crop to fill) | contain (fit + pad: flat card-bg for /cards/, transparent for icons) | raw (copy untouched)
+#       | cover_autocrop (crop to the art's content FIRST, then fit -- for splash/Wish sources that
+#         float the figure in a transparent void; focus carries `cover|contain[@margin]`, default cover@0.06)
+# focus: center | top; optional @ZOOM suffix (e.g. center@1.5) punches the crop into the frame (VFX gifs)
+# pick: auto (rank 1 goes straight to `out`) | shortlist (all ranks render to art/candidates/<asset_id>/ for the contact sheet)
+# source: png | gif (frame_pct = % through the clip) | svg (rendered; falls back to same-name .png)
+# register (docs/art-taste-pass.md): sticker|item|vfx|tcg|splash|icon — the pick's art class; art_lint enforces
+#   class rules on effective picks (no icon on cards, item=>contain, gif=>frame_pct, unique source+frame).
+#
+# ---------- CARDS: direct official matches (auto) ----------
+kaboom	ImageGen/images/cards/klee/kaboom.png	500	380	cover	top	auto	1	png	Klee Character Card.png		tcg
+jumpy_dumpty	ImageGen/images/cards/klee/jumpy_dumpty.png	500	380	contain	center	auto	1	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty.png		item
+sparks_n_splash	ImageGen/images/cards/klee/sparks_n_splash.png	500	380	cover	top	auto	1	png	Character Klee Full Wish.png		splash
+hide_and_seek	ImageGen/images/cards/klee/hide_and_seek.png	500	380	cover	center	auto	1	png	Namecard Background Celebration Peekaboo!.png		splash
+explosives_workshop	ImageGen/images/cards/klee/explosives_workshop.png	500	380	cover	center	auto	1	png	Namecard Background Klee Explosive.png		splash
+# ---------- CARDS: shortlists (contact sheet; rank 1 = effective pick) ----------
+duck_and_cover	ImageGen/images/cards/klee/duck_and_cover.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 2.png		sticker
+duck_and_cover	ImageGen/images/cards/klee/duck_and_cover.png	500	380	cover	top	shortlist	2	png	Klee Birthday 2020 2.png		splash
+duck_and_cover	ImageGen/images/cards/klee/duck_and_cover.png	500	380	contain	center	shortlist	3	png	Item Imaginary Friend Dodoco.png		item
+secret_stash	ImageGen/images/cards/klee/secret_stash.png	500	380	cover_autocrop	contain	shortlist	1	png	Item Kaboom Box.png		item
+# YIELDED 2026-07-21: pop r1 was Item Kaboom Box; the red-pen gave the box to
+# secret_stash ("stash" = box) and pop's claim was r1 seniority only. Left
+# commented rather than deleted, and r2/r3 left at THEIR OWN ranks rather than
+# renumbered -- promoting r2 to the vacancy would be a taste call nobody made.
+# pop therefore has no effective pick and renders no portrait until the rehunt
+# lands; null-safe governs, and the gallery lists it under MISSING ART.
+# pop	ImageGen/images/cards/klee/pop.png	500	380	contain	center	shortlist	1	png	Item Kaboom Box.png		item
+pop	ImageGen/images/cards/klee/pop.png	500	380	cover	center	shortlist	2	gif	Jumpy Dumpty Preview.gif	30	vfx
+pop	ImageGen/images/cards/klee/pop.png	500	380	contain	center	shortlist	3	png	Dodoco's Bomb-Tastic Adventure Mint Jelly Jumpy Dumpty.png		item
+mine_toss	ImageGen/images/cards/klee/mine_toss.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine.png		item
+mine_toss	ImageGen/images/cards/klee/mine_toss.png	500	380	contain	center	shortlist	2	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine AoE.png		item
+fish_flavored_bait	ImageGen/images/cards/klee/fish_flavored_bait.png	500	380	contain	center	shortlist	1	png	Item Fish-Flavored Toast.png		item
+fish_flavored_bait	ImageGen/images/cards/klee/fish_flavored_bait.png	500	380	contain	center	shortlist	2	png	Item Dodoco's Beach Nap.png		item
+quick_fuse	ImageGen/images/cards/klee/quick_fuse.png	500	380	contain	center	shortlist	1	png	Item Special Jumpy Dumpty Dodoco.png		item
+quick_fuse	ImageGen/images/cards/klee/quick_fuse.png	500	380	contain	center	shortlist	2	png	Item Kaboom King.png		item
+ammo_scavenging	ImageGen/images/cards/klee/ammo_scavenging.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Travel Bag.png		item
+ammo_scavenging	ImageGen/images/cards/klee/ammo_scavenging.png	500	380	contain	center	shortlist	2	png	Item Dodoco's Collection Cupboard.png		item
+ammo_scavenging	ImageGen/images/cards/klee/ammo_scavenging.png	500	380	contain	center	shortlist	3	png	Item Kaboom Box.png		item
+bomb_voyage	ImageGen/images/cards/klee/bomb_voyage.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Bomb-Tastic Adventure.png		item
+bomb_voyage	ImageGen/images/cards/klee/bomb_voyage.png	500	380	contain	center	shortlist	2	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty.png		item
+bomb_voyage	ImageGen/images/cards/klee/bomb_voyage.png	500	380	contain	center	shortlist	3	png	Item Let's Go, Dodoco!.png		item
+big_badda_boom	ImageGen/images/cards/klee/big_badda_boom.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Klee Wish.png		splash
+blast_radius	ImageGen/images/cards/klee/blast_radius.png	500	380	cover	top@1.15	auto	1	png	Starlit Sky Firework Card 2.png		splash
+# blast_radius r2 (Plunging gif) retired with the r1 board-diagram pick: worknote 2026-07-20 item 4.1
+sorry_jean	ImageGen/images/cards/klee/sorry_jean.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 2.png		sticker
+sorry_jean	ImageGen/images/cards/klee/sorry_jean.png	500	380	cover	center	shortlist	2	png	Icon Emoji Paimon's Paintings 25 Klee 1.png		sticker
+sorry_jean	ImageGen/images/cards/klee/sorry_jean.png	500	380	cover	top	shortlist	3	png	Klee Birthday 2020.png		splash
+remote_detonator	ImageGen/images/cards/klee/remote_detonator.png	500	380	contain	center	shortlist	1	png	Item Kaboom King.png		item
+remote_detonator	ImageGen/images/cards/klee/remote_detonator.png	500	380	contain	center	shortlist	2	png	Item Dodoco's Marvelous Magic.png		item
+sparkly_treasure	ImageGen/images/cards/klee/sparkly_treasure.png	500	380	contain	center	shortlist	1	png	Item Sparkly Shiny Dodoco!.png		item
+sparkly_treasure	ImageGen/images/cards/klee/sparkly_treasure.png	500	380	cover	center	shortlist	2	png	Icon Emoji Paimon's Paintings 07 Klee 1.png		sticker
+sparkly_treasure	ImageGen/images/cards/klee/sparkly_treasure.png	500	380	cover	top	shortlist	3	png	Klee Birthday 2024.png		splash
+pocket_fireworks	ImageGen/images/cards/klee/pocket_fireworks.png	500	380	contain	center	shortlist	1	png	Item Fizzy Fireworks.png		item
+pocket_fireworks	ImageGen/images/cards/klee/pocket_fireworks.png	500	380	contain	center	shortlist	2	png	Item Glimmering Firework.png		item
+pocket_fireworks	ImageGen/images/cards/klee/pocket_fireworks.png	500	380	contain	center	shortlist	3	png	Item Leisurely Fireworks.png		item
+crackle	ImageGen/images/cards/klee/crackle.png	500	380	contain	center	shortlist	1	png	Pounding Surprise Explosive Spark Effect.png		vfx
+crackle	ImageGen/images/cards/klee/crackle.png	500	380	contain	center	shortlist	2	png	Item Supersized Firework.png		item
+# Bomb-op batch (2026-07-20): chain_fuse, careful_arrangement, and
+# chained_reactions entered the pool with NO art rows -- all three ship
+# portrait-less (null-safe governs) and need hunts at the art pass.
+# Hunt notes: chain_fuse = linked/sequenced charges; careful_arrangement =
+# deliberate bomb placement/tidying (Dodoco arranging?); chained_reactions =
+# cascade/chain-explosion VFX. quick_fuse and remote_detonator already
+# carry shortlists.
+# bright_idea unblocked by the R36 discard op (draw 3, discard 1). REHUNT
+# (vibe-check ruling 2026-07-20): both candidates confirmed weak by eyes (r1
+# generic cheer, r2 reads as crying/panic -- the opposite of the card). Hunt
+# term: a REALIZATION gesture -- exclamation, lightbulb, raised-finger --
+# across the emoji/sticker sets. r1 stays placeholder (ships portrait-less,
+# null-safe governs) until the hunt lands at the art pass. NO rank 1 row on
+# purpose: an effective pick here tripped L1 (r1 is eager_to_help's pick) and
+# L3 (icon register on a card slot) -- the dead placeholder was masquerading
+# as a real pick. The rehunt's winner takes rank 1.
+bright_idea	ImageGen/images/cards/klee/bright_idea.png	500	380	contain	center	shortlist	2	png	Icon Emoji Paimon's Paintings 07 Klee 3.png		icon
+bright_idea	ImageGen/images/cards/klee/bright_idea.png	500	380	contain	center	shortlist	3	png	Sparkling Steps 2021-06-09 - Klee Emoji 1.png		icon
+spark_collection	ImageGen/images/cards/klee/spark_collection.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Marvelous Magic.png		item
+spark_collection	ImageGen/images/cards/klee/spark_collection.png	500	380	contain	center	shortlist	2	png	Item Dodoco's Duet.png		item
+spark_collection	ImageGen/images/cards/klee/spark_collection.png	500	380	cover	center	shortlist	3	png	Icon Emoji Paimon's Paintings 25 Klee 2.png		sticker
+skip_and_hop	ImageGen/images/cards/klee/skip_and_hop.png	500	380	cover	top	shortlist	1	png	Klee Birthday 2020 2.png		splash
+skip_and_hop	ImageGen/images/cards/klee/skip_and_hop.png	500	380	cover	center	shortlist	2	png	Icon Emoji Paimon's Paintings 07 Klee 4.png		sticker
+skip_and_hop	ImageGen/images/cards/klee/skip_and_hop.png	500	380	cover	center	shortlist	3	png	Sparkling Steps 2021-06-09 - Klee Emoji 1.png		sticker
+rapid_fire	ImageGen/images/cards/klee/rapid_fire.png	500	380	cover	center	shortlist	1	png	Sparkling Steps 2021-06-09 - Klee Emoji 3.png		sticker
+eager_to_help	ImageGen/images/cards/klee/eager_to_help.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 3.png		sticker
+eager_to_help	ImageGen/images/cards/klee/eager_to_help.png	500	380	cover	center	shortlist	2	png	Sparkling Steps 2021-06-09 - Klee Emoji 2.png		sticker
+eager_to_help	ImageGen/images/cards/klee/eager_to_help.png	500	380	cover	top	shortlist	3	png	Klee Birthday 2023.png		splash
+cant_catch_me	ImageGen/images/cards/klee/cant_catch_me.png	500	380	cover	top	shortlist	1	png	Klee Birthday 2021.png		splash
+cant_catch_me	ImageGen/images/cards/klee/cant_catch_me.png	500	380	cover	center	shortlist	2	png	Icon Emoji Paimon's Paintings 46 Klee 1.png		sticker
+cant_catch_me	ImageGen/images/cards/klee/cant_catch_me.png	500	380	cover	center	shortlist	3	png	Sparkling Steps 2021-06-09 - Klee Emoji 3.png		sticker
+endless_fireworks	ImageGen/images/cards/klee/endless_fireworks.png	500	380	contain	center	shortlist	1	png	Item Slumbering Fireworks.png		item
+endless_fireworks	ImageGen/images/cards/klee/endless_fireworks.png	500	380	contain	center	shortlist	2	png	Item Fireworks Dance Amidst a Snowy Sky.png		item
+gleeful_barrage	ImageGen/images/cards/klee/gleeful_barrage.png	500	380	cover	center	shortlist	1	png	Klee Birthday 2024.png		splash
+gleeful_barrage	ImageGen/images/cards/klee/gleeful_barrage.png	500	380	contain	center	shortlist	2	png	Item Jumbo Sparks 'n' Splash Statue.png		item
+sizzle	ImageGen/images/cards/klee/sizzle.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Dodo Stove.png		item
+combustion_study	ImageGen/images/cards/klee/combustion_study.png	500	380	contain	center	shortlist	1	png	Item Klee Explosive.png		item
+combustion_study	ImageGen/images/cards/klee/combustion_study.png	500	380	contain	center	shortlist	2	png	Item Naganohara Fireworks Note.png		item
+combustion_study	ImageGen/images/cards/klee/combustion_study.png	500	380	cover	center	shortlist	3	png	Namecard Background Klee Explosive.png		splash
+perfect_timing	ImageGen/images/cards/klee/perfect_timing.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 3.png		sticker
+perfect_timing	ImageGen/images/cards/klee/perfect_timing.png	500	380	cover	center	shortlist	2	png	Sparkling Steps 2021-06-09 - Klee Emoji 1.png		sticker
+boom_goes_the_dynamite	ImageGen/images/cards/klee/boom_goes_the_dynamite.png	500	380	contain	center	shortlist	1	png	Item Supersized Firework.png		item
+boom_goes_the_dynamite	ImageGen/images/cards/klee/boom_goes_the_dynamite.png	500	380	cover	center@1.4	shortlist	2	gif	Kaboom! Plunging Preview.gif	55	vfx
+boom_goes_the_dynamite	ImageGen/images/cards/klee/boom_goes_the_dynamite.png	500	380	contain	center	shortlist	3	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine AoE.png		item
+flame_dance	ImageGen/images/cards/klee/flame_dance.png	500	380	contain	center	shortlist	1	png	Item Fireworks Dance Amidst a Snowy Sky.png		item
+kaboom_beetle_swarm	ImageGen/images/cards/klee/kaboom_beetle_swarm.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty AoE.png		item
+elemental_ecstasy	ImageGen/images/cards/klee/elemental_ecstasy.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Klee Birthday 2025.png		splash
+blazing_delight	ImageGen/images/cards/klee/blazing_delight.png	500	380	cover	top	shortlist	2	png	Klee Multi Wish.png		splash
+spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Summertime.png		item
+spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	cover	center	shortlist	2	png	Icon Emoji Paimon's Paintings 46 Klee 1.png		sticker
+spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	cover	top	shortlist	3	png	Klee Birthday 2020 2.png		splash
+# ---------- CARDS: C2 sheet additions (2026-07-20; taste-pass re-picks applied) ----------
+double_pop	ImageGen/images/cards/klee/double_pop.png	500	380	contain	center	auto	1	png	Dodoco's Bomb-Tastic Adventure Mint Jelly Jumpy Dumpty.png		item
+# Burst spike (2026-07-20): clockwork_toy unblocked by the burst_energy op.
+clockwork_toy	ImageGen/images/cards/klee/clockwork_toy.png	500	380	contain	center	shortlist	1	png	Item Imaginary Friend Dodoco.png		item
+alchemical_curiosity	ImageGen/images/cards/klee/alchemical_curiosity.png	500	380	contain	center	auto	1	png	Item Naganohara Fireworks Note.png		item
+run_away	ImageGen/images/cards/klee/run_away.png	500	380	cover	center	auto	1	png	Icon Emoji Paimon's Paintings 46 Klee 1.png		sticker
+jumpy_dumpty_mk2	ImageGen/images/cards/klee/jumpy_dumpty_mk2.png	500	380	cover	center	auto	1	png	JTP Encounter Jumpy Dumpty.png		splash
+bombs_away	ImageGen/images/cards/klee/bombs_away.png	500	380	cover	center@1.3	auto	1	gif	Kaboom! Plunging Preview.gif	45	vfx
+cluster_charge	ImageGen/images/cards/klee/cluster_charge.png	500	380	cover	top@1.15	auto	1	png	Starlit Sky Firework Card 10.png		splash
+flame_on_the_wick	ImageGen/images/cards/klee/flame_on_the_wick.png	500	380	contain	center	auto	1	png	Item Leisurely Fireworks.png		item
+no_holding_back	ImageGen/images/cards/klee/no_holding_back.png	500	380	cover	top	auto	1	png	Klee Multi Wish.png		splash
+# ---------- CARDS: spark-set additions (taste-pass re-picks applied; da_da_da and
+# hot_hands became shortlists — their sticker candidates need an eyeball) ----------
+snap	ImageGen/images/cards/klee/snap.png	500	380	cover	center	auto	1	png	Icon Emoji Paimon's Paintings 25 Klee 1.png		sticker
+da_da_da	ImageGen/images/cards/klee/da_da_da.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 1.png		sticker
+da_da_da	ImageGen/images/cards/klee/da_da_da.png	500	380	cover	center	shortlist	2	png	Sparkling Steps 2021-06-09 - Klee Emoji 3.png		sticker
+hot_hands	ImageGen/images/cards/klee/hot_hands.png	500	380	cover	center@1.5	shortlist	1	png	Klee Birthday 2020.png		splash
+hot_hands	ImageGen/images/cards/klee/hot_hands.png	500	380	cover	center	shortlist	2	png	Sparkling Steps 2021-06-09 - Klee Emoji 2.png		sticker
+warm_glow	ImageGen/images/cards/klee/warm_glow.png	500	380	cover	center	auto	1	png	Klee Birthday 2023.png		splash
+all_my_treasures	ImageGen/images/cards/klee/all_my_treasures.png	500	380	contain	center	auto	1	png	Item Dodoco's Collection Cupboard.png		item
+# ---------- CARDS: power-card pass (2026-07-20) ----------
+# Six power cards predate no portrait row (the sprint ran while they were
+# blocked). Picks below are thematic reads on free sources; the 2026-07-20
+# art vibe-check ruling PASSED playtime_forever, vermillion_pact, and
+# true_spark_knight as-is, and REPLACED two:
+#   spark_knight_style <- Klee Character Card (regular TCG card; pairs with
+#     true_spark_knight's golden card: regular = the Style, golden = the
+#     True). Glimmering Firework RETIRED (teal Fontaine flora, wrong
+#     everything -- confirmed by eyes).
+#   catalytic_conversion <- Dodoco's Marvelous Magic, promoted from its
+#     power icon (which keeps it; same-referent register-crossing is legal).
+#     The Jumbo statue is now EXCLUSIVELY the Burst meter badge.
+# RED-PEN (both collisions missed by the ruling's premises, parked in
+# art_lint PENDING_RED_PEN -- resolve at the red-pen session):
+#   a. Klee Character Card is ALSO kaboom's auto card pick (not "only a
+#      model source"): kaboom re-picks, or spark_knight_style re-hunts.
+#   b. Marvelous Magic is ALSO spark_collection's effective r1 -- and
+#      spark_collection's r2 (Dodoco's Duet) is vermillion_pact's passed
+#      r1, so it cannot quietly fall through either.
+spark_knight_style	ImageGen/images/cards/klee/spark_knight_style.png	500	380	cover	top	shortlist	1	png	Klee Character Card.png		tcg
+catalytic_conversion	ImageGen/images/cards/klee/catalytic_conversion.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Marvelous Magic.png		item
+explosive_frags	ImageGen/images/cards/klee/explosive_frags.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine AoE.png		item
+true_spark_knight	ImageGen/images/cards/klee/true_spark_knight.png	500	380	cover	top	shortlist	1	png	Klee Character Card Golden.png		tcg
+vermillion_pact	ImageGen/images/cards/klee/vermillion_pact.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Duet.png		item
+playtime_forever	ImageGen/images/cards/klee/playtime_forever.png	500	380	contain	center	shortlist	1	png	Item Let's Go, Dodoco!.png		item
+# ---------- COMPANIONS: TCG talent-card art where it exists (register 4) ----------
+# Dahlia and Prune have no Genius Invokation equipment card; taste pass rules
+# their official character-card/wish splashes in (register 5) over the dark,
+# illegible talent-demo frames the first sprint used.
+# dahlia_*: RESOLVED by the vibe-check ruling (2026-07-20) -- "hunt for an
+# Equipment Card first; if none exists, take r1". The hunt already ran (no
+# equipment card exists, recorded above), so r1 Character Card is ACCEPTED
+# (legible; frame clash accepted) over r2 Wish (floats small at card scale).
+# r2/r3 are dead unless a future red-pen revives them.
+dahlia_sacramental_shower	ImageGen/images/cards/companions/dahlia_sacramental_shower.png	500	380	cover	top	shortlist	1	png	Dahlia Character Card.png		tcg
+dahlia_sacramental_shower	ImageGen/images/cards/companions/dahlia_sacramental_shower.png	500	380	cover	top	shortlist	2	png	Dahlia Wish.png		splash
+dahlia_sacramental_shower	ImageGen/images/cards/companions/dahlia_sacramental_shower.png	500	380	cover	top	shortlist	3	png	Character Dahlia Full Wish.png		splash
+fischl_nightrider	ImageGen/images/cards/companions/fischl_nightrider.png	500	380	cover	center	auto	1	png	Stellar Predator Equipment Card.png		tcg
+kaeya_frostgnaw	ImageGen/images/cards/companions/kaeya_frostgnaw.png	500	380	cover	center	auto	1	png	Cold-Blooded Strike Equipment Card.png		tcg
+sucrose_gust	ImageGen/images/cards/companions/sucrose_gust.png	500	380	cover	center	auto	1	png	Chaotic Entropy Equipment Card.png		tcg
+bennett_passion	ImageGen/images/cards/companions/bennett_passion.png	500	380	cover	center	auto	1	png	Grand Expectation Equipment Card.png		tcg
+barbara_melody	ImageGen/images/cards/companions/barbara_melody.png	500	380	cover	center	auto	1	png	Glorious Season Equipment Card.png		tcg
+prune_witch_hunt	ImageGen/images/cards/companions/prune_witch_hunt.png	500	380	cover	top	shortlist	1	png	Prune Wish.png		splash
+prune_witch_hunt	ImageGen/images/cards/companions/prune_witch_hunt.png	500	380	cover	top	shortlist	2	png	Prune Card.png		tcg
+prune_witch_hunt	ImageGen/images/cards/companions/prune_witch_hunt.png	500	380	cover	top	shortlist	3	png	Character Prune Full Wish.png		splash
+# ---------- ICONS ----------
+power_aura_pyro	ImageGen/images/powers/aura_pyro.png	256	256	contain	center	auto	1	svg	Element Pyro.svg		icon
+power_aura_hydro	ImageGen/images/powers/aura_hydro.png	256	256	contain	center	auto	1	svg	Element Hydro.svg		icon
+power_aura_cryo	ImageGen/images/powers/aura_cryo.png	256	256	contain	center	auto	1	svg	Element Cryo.svg		icon
+power_aura_electro	ImageGen/images/powers/aura_electro.png	256	256	contain	center	auto	1	svg	Element Electro.svg		icon
+power_aura_anemo	ImageGen/images/powers/aura_anemo.png	256	256	contain	center	auto	1	svg	Element Anemo.svg		icon
+power_aura_geo	ImageGen/images/powers/aura_geo.png	256	256	contain	center	auto	1	svg	Element Geo.svg		icon
+power_bomb	ImageGen/images/powers/bomb.png	256	256	contain	center	auto	1	png	Item Special Jumpy Dumpty Dodoco.png		icon
+power_spark	ImageGen/images/powers/spark.png	256	256	contain	center	auto	1	png	Sparks 'n' Splash Buff Icon.png		icon
+# Burst spike (2026-07-20): the meter badge. Jumbo statue = the Burst's own
+# item render (register match: bomb/spark icons are item renders too); only
+# other holder is gleeful_barrage at non-rendered shortlist rank 2.
+power_burst	ImageGen/images/powers/burst.png	256	256	contain	center	auto	1	png	Item Jumbo Sparks 'n' Splash Statue.png		icon
+# Power-card pass (2026-07-20): badge icons for the nine kit powers. Three
+# come off the constellation redirect queue below (native icon-shaped sigils,
+# exactly the slots the queue foresaw); the rest reuse each card's own item
+# render so the badge visually recalls the card that applied it (L1 is
+# cards-only, so card/icon sharing is legal -- power_burst/gleeful_barrage
+# precedent). bomb_damage_up gets Kaboom Box (a workshop's box of charges)
+# and spark_threshold_down gets Sparkly Shiny Dodoco! -- its tcg card
+# portrait is no icon. reaction_bonus_spark_energy keeps Marvelous Magic
+# (the conversion read) rather than its card's statue: the statue is
+# already the burst badge, and two identical badges would defeat badge
+# disambiguation. All flagged for red-pen with the cards.
+power_bomb_damage_up	ImageGen/images/powers/bomb_damage_up.png	256	256	contain	center	auto	1	png	Item Kaboom Box.png		icon
+power_detonation_splash	ImageGen/images/powers/detonation_splash.png	256	256	contain	center	auto	1	png	Constellation Blazing Delight.png		icon
+power_detonation_vuln	ImageGen/images/powers/detonation_vuln.png	256	256	contain	center	auto	1	png	Constellation Explosive Frags.png		icon
+power_bomb_and_spark_per_turn	ImageGen/images/powers/bomb_and_spark_per_turn.png	256	256	contain	center	auto	1	png	Item Let's Go, Dodoco!.png		icon
+power_spark_per_turn	ImageGen/images/powers/spark_per_turn.png	256	256	contain	center	auto	1	png	Item Slumbering Fireworks.png		icon
+power_zero_cost_attacks_up	ImageGen/images/powers/zero_cost_attacks_up.png	256	256	contain	center	auto	1	png	Constellation Nova Burst.png		icon
+power_spark_threshold_down	ImageGen/images/powers/spark_threshold_down.png	256	256	contain	center	auto	1	png	Item Sparkly Shiny Dodoco!.png		icon
+power_reaction_bonus_spark_energy	ImageGen/images/powers/reaction_bonus_spark_energy.png	256	256	contain	center	auto	1	png	Item Dodoco's Marvelous Magic.png		icon
+power_amp_reaction_up	ImageGen/images/powers/amp_reaction_up.png	256	256	contain	center	auto	1	png	Item Dodoco's Duet.png		icon
+# Kit sprint (2026-07-20): the Burst power's badge uses the ability's own
+# in-game talent icon -- native icon-shaped art, the exact register, and
+# unmistakably "the Burst is running" next to the burst meter badge.
+power_sparks_n_splash	ImageGen/images/powers/sparks_n_splash.png	256	256	contain	center	auto	1	png	Talent Sparks 'n' Splash.png		icon
+relic_pounding_surprise	ImageGen/images/relics/pounding_surprise.png	256	256	cover	top	auto	1	png	Pounding Surprise Equipment Card.png		icon
+# Constellation-sigil redirect queue (taste pass: sigils are BANNED from card
+# portraits but are native 128px icon-shaped art — they fill future C3 power
+# and relic/upgrade icon slots as those land; keep the mapping here).
+# 2026-07-20 power-card pass: Nova Burst, Blazing Delight and Explosive Frags
+# came off the queue into the power icon rows above (Explosive Frags was
+# queued as an upgrade icon; the power badge is the slot that actually
+# exists, so it landed there).
+#   chained_reactions relic  <- Constellation Chained Reactions.png
+#   exquisite_compound relic <- Constellation Exquisite Compound.png
+#   sparkly_explosion power  <- Constellation Sparkly Explosion.png
+# ---------- UI ----------
+select_portrait	ImageGen/images/ui/select_portrait.png	132	195	cover	top	auto	1	png	Character Klee Full Wish.png		splash
+char_icon	ImageGen/images/ui/char_icon.png	88	88	cover	top	auto	1	png	Klee Icon.png		icon
+energy_icon_large	ImageGen/images/ui/energy_icon_74.png	74	74	contain	center	auto	1	svg	Element Pyro.svg		icon
+energy_icon_small	ImageGen/images/ui/energy_icon_22.png	22	22	contain	center	auto	1	svg	Element Pyro.svg		icon
+map_marker	ImageGen/images/ui/map_marker.png	49	64	cover	top	auto	1	png	Klee Side Icon.png		icon
+selection_splash	ImageGen/images/ui/selection_splash.png	1920	1200	cover	center	auto	1	png	Klee Wish.png		splash
+select_bg	ImageGen/images/ui/select_bg.png	1920	1080	cover	center	auto	1	png	Namecard Background Klee Explosive.png		splash
+# ---------- COMBAT MODEL SOURCE (raw; hand-cut into layers per manifest recipe) ----------
+combat_model	ImageGen/images/model/combat_model.png	240	280	sprite	center	auto	1	png	Character Klee Full Wish.png		splash
+model_source_full_wish	ImageGen/images/model/character_klee_full_wish.png	0	0	raw	center	auto	1	png	Character Klee Full Wish.png		splash
+model_source_tcg_alt	ImageGen/images/model/klee_character_card.png	0	0	raw	center	auto	1	png	Klee Character Card.png		splash
+
+# --- Art red-pen round 3 (2026-07-21) -- PARKED, NOT ACTIVE ------------
+# Every source round 3 locked is ALREADY the effective pick of a shipped
+# card; the hunt treated the source pool as unclaimed. L1 caught all six.
+# These rows are correct in mode/fit/register and were verified to render;
+# they are commented out ONLY because enabling them would double-book art.
+# Uncomment a row once the red-pen rules which card keeps the source (and
+# re-point or retire the loser). See docs/klee-art-redpen-round3.md.
+# RULED 2026-07-21 (user red-pen). One flip approved, five keeps confirmed.
+# The five DECLINED rows stay dead below as the record of what was asked and
+# refused -- do not re-propose these pairings; the challenger goes to rehunt.
+# DECLINED: incumbent boom_goes_the_dynamite keeps Item Supersized Firework
+# grand_finale	ImageGen/images/cards/klee/grand_finale.png	500	380	cover_autocrop	contain	shortlist	1	png	Item Supersized Firework.png		item
+# DECLINED: incumbent crackle keeps Pounding Surprise Explosive Spark Effect
+# tail_of_flame	ImageGen/images/cards/klee/tail_of_flame.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Pounding Surprise Explosive Spark Effect.png		vfx
+# DECLINED: incumbent warm_glow keeps Klee Birthday 2023 (an AUTO pick, the
+# weakest claim in the table -- the red-pen upheld it anyway, on purpose)
+# patched_dress	ImageGen/images/cards/klee/patched_dress.png	500	380	contain	center	shortlist	1	png	Klee Birthday 2023.png		splash
+# DECLINED: incumbent cant_catch_me keeps Klee Birthday 2021
+# sparkly_explosion	ImageGen/images/cards/klee/sparkly_explosion.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Klee Birthday 2021.png		splash
+# APPROVED -> the live row now sits with the cards, above. "stash" = box;
+# pop's only claim was r1 seniority, so pop yielded and went to rehunt.
+# DECLINED: incumbent fish_flavored_bait keeps Item Fish-Flavored Toast
+# fish_blasting	ImageGen/images/cards/klee/fish_blasting.png	500	380	cover_autocrop	contain	shortlist	1	png	Item Fish-Flavored Toast.png		item

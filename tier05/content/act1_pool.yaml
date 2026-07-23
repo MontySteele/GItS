@@ -1,0 +1,157 @@
+# Realistic-ish Act 1 roster -- run-model rework §4 (RATIFIED 2026-07-21).
+#
+# REAL StS2 numbers (wiki.gg, early-access v0.99.x). HP is a spawn-time
+# RANGE [lo, hi] rolled per spawn via the run rng (tier05.act1.spawn);
+# a bare int is a fixed statline.
+#
+# Intents use ONLY the existing engine kinds -- attack / block / buff /
+# debuff / summon -- plus the `frail` power (block-gain reduction). A real
+# card that BUNDLES two effects ("attack 6 AND gain 5 block", "attack 8 AND
+# +1 Str") is split into separate rotation BEATS, following the frozen
+# battery's grinder precedent (attack / block / debuff on separate turns).
+# Nothing here fakes a combined intent or an unmodeled mechanic; every
+# skipped mechanic is flagged UNIMPLEMENTED on its enemy.
+#
+# LAYER BOUNDARY: this is a NEW tier0.5-only source. The tier0 battery
+# (tier0/content/encounters/) is frozen and untouched. NO progression-gap
+# compensator is applied to this roster -- it uses real numbers directly
+# (§4); the old battery-calibrated compensator does not carry over.
+
+# --- EASY pool: the first three N nodes (fights 1-3). §4.1 --------------
+easy:
+  - id: nibbit
+    name: "NIBBIT"
+    # Fully codeable. Butt 12 · Hesitant Slice 6 (+5 block) · Hiss +2 Str.
+    enemies:
+      - name: nibbit
+        hp: [42, 46]
+        intents:
+          - {kind: attack, amount: 12}                 # Butt
+          - {kind: attack, amount: 6}                  # Hesitant Slice
+          - {kind: block, amount: 5}                   # Slice's +5 block (beat)
+          - {kind: buff, power: strength, amount: 2}   # Hiss
+
+  - id: inklets
+    name: "INKLETS"
+    # Swarm shape: three tiny bodies chipping in parallel.
+    enemies:
+      - name: inklet
+        count: 3
+        hp: [11, 17]
+        intents:
+          - {kind: attack, amount: 4}
+
+  - id: slime_group
+    name: "LEAF / TWIG SLIMES"
+    # Basic attack + a Frail/Weak dab (one of each body).
+    # UNIMPLEMENTED: slime split-on-hit (§4.5 skip -- not faked).
+    enemies:
+      - name: leaf_slime
+        hp: [25, 35]
+        intents:
+          - {kind: attack, amount: 5}
+          - {kind: debuff, power: frail, amount: 1}
+      - name: twig_slime
+        hp: [25, 35]
+        intents:
+          - {kind: attack, amount: 6}
+          - {kind: debuff, power: weak, amount: 1}
+
+# --- HARD pool: later N nodes (fight 4+). §4.2 -------------------------
+hard:
+  - id: mawler
+    name: "MAWLER"
+    # Fully codeable. Claw 4x2 · Rip and Tear 14 · Roar apply 3 Vuln.
+    enemies:
+      - name: mawler
+        hp: 72
+        intents:
+          - {kind: attack, amount: 4, times: 2}         # Claw
+          - {kind: attack, amount: 14}                  # Rip and Tear
+          - {kind: debuff, power: vulnerable, amount: 3}  # Roar
+
+  - id: fogmog
+    name: "FOGMOG"
+    # Summon opener + Thwack 8 (+1 Str) + Headbutt 14. Summon is supported.
+    enemies:
+      - name: fogmog
+        hp: 74
+        intents:
+          - {kind: summon, wave: [{name: fog_wisp, hp: 12,
+                intents: [{kind: attack, amount: 5}]}]}  # opener add
+          - {kind: attack, amount: 8}                   # Thwack
+          - {kind: buff, power: strength, amount: 1}     # Thwack's +1 Str (beat)
+          - {kind: attack, amount: 14}                  # Headbutt
+
+  - id: sewer_clam
+    name: "SEWER CLAM"
+    # Jet 10 · Pressurize +4 Str · gains block (Plating ~8, modeled as block).
+    # UNIMPLEMENTED: Plating damage-CAP semantics (§4.5) -- block only.
+    enemies:
+      - name: sewer_clam
+        hp: 56
+        intents:
+          - {kind: attack, amount: 10}                  # Jet
+          - {kind: buff, power: strength, amount: 4}     # Pressurize
+          - {kind: block, amount: 8}                    # gains block (~Plating)
+
+# --- ELITE pool: 3 enemies, tier05.act1.ActDraw draws 2 per run. §4.3 --
+elite:
+  - id: byrdonis
+    name: "BYRDONIS"
+    # Ramp/clock check. Swoop 17 · Peck 3x3 · Territorial +1 Str/turn.
+    # Existing kinds have NO per-turn ritual hook, so Territorial is modeled
+    # as a Str-buff beat PLUS a ramp on Swoop -- the "kill fast or drown"
+    # escalation still bites without faking a ritual power.
+    enemies:
+      - name: byrdonis
+        hp: [81, 84]
+        intents:
+          - {kind: attack, amount: 17, ramp: 2}         # Swoop (+ Territorial ramp)
+          - {kind: attack, amount: 3, times: 3}         # Peck
+          - {kind: buff, power: strength, amount: 1}     # Territorial tick
+
+  - id: bygone_effigy
+    name: "BYGONE EFFIGY"
+    # Block/burst check. Sleep -> Wake +10 Str -> Slashes 13/turn.
+    # The one-shot +10 Str wake buff is FOLDED into the Slash amount (23 =
+    # 13 + 10): a one-time buff cannot be a looping rotation beat without
+    # re-applying every cycle. UNIMPLEMENTED: Slow (per-card +10% dmg, §4.5).
+    enemies:
+      - name: bygone_effigy
+        hp: 127
+        sleep_turns: 2
+        intents:
+          - {kind: attack, amount: 23}                  # Slashes (13 + baked +10 Str)
+
+  - id: phantasmal_gardener
+    name: "PHANTASMAL GARDENER x4"
+    # AoE check: 4 bodies present from turn 1 on staggered standard cycles.
+    # Bite 5 · Lash 7 · Flail 1x3 · Enlarge +2 Str.
+    # UNIMPLEMENTED: Skittish 6 (§4.5 skip).
+    enemies:
+      - name: phantasmal_gardener
+        count: 4
+        stagger: true                                   # each body starts a beat apart
+        hp: [26, 31]
+        intents:
+          - {kind: attack, amount: 5}                   # Bite
+          - {kind: attack, amount: 7}                   # Lash
+          - {kind: attack, amount: 1, times: 3}         # Flail
+          - {kind: buff, power: strength, amount: 2}     # Enlarge
+
+# --- BOSS: act finale. §4.4 -------------------------------------------
+boss:
+  - id: vantom
+    name: "VANTOM"
+    # Ink Blot 7 · Inky Lance 6x2 · Prepare +2 Str · Dismember 27.
+    # UNIMPLEMENTED: Wound injection, 9 Slippery (§4.5 -- both skipped).
+    enemies:
+      - name: vantom
+        hp: 173
+        is_boss: true
+        intents:
+          - {kind: attack, amount: 7}                   # Ink Blot
+          - {kind: attack, amount: 6, times: 2}         # Inky Lance
+          - {kind: buff, power: strength, amount: 2}     # Prepare
+          - {kind: attack, amount: 27}                  # Dismember

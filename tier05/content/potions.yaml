@@ -1,0 +1,36 @@
+# The potion pool (potion pass). This file is the POOL + TIERS + rarity
+# weights ONLY: every potion's EFFECT lives in the engine, keyed by id
+# (tier0/engine/potions.py), because the payloads reuse already-implemented
+# mechanics (block / heal / draw / energy / apply_power / unpowered_damage).
+# The yaml never encodes an effect -- it names the id, its tier, and a human
+# name, and the tier weights the run layer rolls drops/shop stock against.
+#
+# LAYER BOUNDARY: nothing here touches the frozen tier0 battery. Potions are
+# granted only on grant_potions=True runs (tier05/model.py); a battery player
+# carries none, so every potion code path is a dead branch there.
+#
+# Rarity: common frequent, uncommon middling, rare scarce -- and rare holds
+# ONLY fairy_in_a_bottle, so the low rare weight is what makes the revive the
+# scarce prize the design asks for.
+
+common:
+  block_potion:    {name: "Block Potion"}      # gain 12 Block
+  fire_potion:     {name: "Fire Potion"}       # 20 damage to one enemy
+  blood_potion:    {name: "Blood Potion"}      # heal 20% of max HP
+  strength_potion: {name: "Strength Potion"}   # +2 Strength this combat
+  swift_potion:    {name: "Swift Potion"}      # draw 3
+  weak_potion:     {name: "Weak Potion"}       # 3 Weak to one enemy
+
+uncommon:
+  fear_potion:     {name: "Fear Potion"}       # 3 Vulnerable to one enemy
+  energy_potion:   {name: "Energy Potion"}     # +2 Energy
+
+rare:
+  fairy_in_a_bottle: {name: "Fairy in a Bottle"}  # passive revive at 30% max HP
+
+# Tier roll weights (sum need not be 1; roll_potion normalises). Common-heavy,
+# rare scarce -- mirrors the StS potion-rarity feel and RARITY_ODDS' shape.
+weights:
+  common:   0.65
+  uncommon: 0.30
+  rare:     0.05

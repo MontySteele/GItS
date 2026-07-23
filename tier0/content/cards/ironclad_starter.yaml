@@ -1,0 +1,31 @@
+# REF_IRONCLAD starter cards (spec §7), simplified from public StS1 knowledge.
+- id: strike
+  name: "Strike"
+  cost: 1
+  type: attack
+  rarity: basic
+  solve: [frontload]
+  role: glue
+  effects:
+    - {op: damage, amount: 6, target: enemy}
+
+- id: defend
+  name: "Defend"
+  cost: 1
+  type: skill
+  rarity: basic
+  solve: [block]
+  role: glue
+  effects:
+    - {op: block, amount: 5}
+
+- id: bash
+  name: "Bash"
+  cost: 2
+  type: attack
+  rarity: basic
+  solve: [frontload, utility]
+  role: enabler
+  effects:
+    - {op: damage, amount: 8, target: enemy}
+    - {op: apply_power, power: vulnerable, amount: 2, target: enemy}
