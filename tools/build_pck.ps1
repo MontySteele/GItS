@@ -349,6 +349,31 @@ New-Item -ItemType Directory -Force $locDir | Out-Null
 }
 '@)
 
+# Architect finale dialogue (2026-07-23 softlock). The base game's
+# TheArchitect.WinRun() dereferences Dialogue unconditionally, and
+# LoadDialogue picks ONLY from per-character entries (allowAnyCharacter-
+# Dialogues: false) -- a roster character with no rows here softlocks the
+# win-the-run screen. BaseLib merges "THE_ARCHITECT.talk.<CHAR>.<X>-<Y>"
+# rows from this table into the game's dialogue set (AddAncientDialogues).
+# Key law (from AncientDialogueSet's own doc): X-Y = dialogue-line, suffix
+# .ancient/.char = speaker, "r" on X-Y = repeating, ".next" = button text
+# for every line but the last. The "r" is LOAD-BEARING: GetValidDialogues
+# exact-matches VisitIndex == character wins and only repeating rows
+# survive the fallback, so a non-repeating-only set crashes on the SECOND
+# win. No -attack rows: BaseLib's default EndAttackers=Both is the base
+# game's own finale (character VFX barrage + Architect's counter).
+# PLACEHOLDER dialogue text -- naming/writing pass, user red-pen.
+[IO.File]::WriteAllText((Join-Path $locDir 'ancients.json'), @'
+{
+  "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-0r.ancient": "You have climbed far, little spark. Show me what you carried up my Spire.",
+  "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-0r.next": "Respond",
+  "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-1r.char": "Klee brought the BIGGEST boom! Ready? Da-da-da!",
+  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.ancient": "The curtain falls at last, Regina of All Waters. Was it a performance, or was it real?",
+  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.next": "Respond",
+  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-1r.char": "Both. It was always both. Now — the people rejoice, and their Regina takes her bow."
+}
+'@)
+
 [IO.File]::WriteAllText((Join-Path $work 'klee\materials\klee_transition_mat.tres'), @'
 [gd_resource type="ShaderMaterial" load_steps=3 format=3]
 
