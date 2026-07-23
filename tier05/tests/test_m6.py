@@ -226,3 +226,20 @@ def test_ab_runs_both_policies_over_identical_seeds():
         assert x.seed == y.seed
         assert x.banner == y.banner
         assert x.node_kinds == y.node_kinds
+
+
+def test_ab_threads_realistic_run_layers(monkeypatch):
+    calls = []
+
+    def fake_run_many(*args, **kwargs):
+        calls.append(kwargs)
+        return []
+
+    monkeypatch.setattr(ab.model, "run_many", fake_run_many)
+    out = ab.run_ab("klee", "demolition", "demolition", runs=1, seed=2,
+                    grant_relics=True, grant_potions=True)
+    assert set(out) == {"assigned", "adaptive"}
+    assert calls == [
+        {"grant_relics": True, "grant_potions": True},
+        {"grant_relics": True, "grant_potions": True},
+    ]

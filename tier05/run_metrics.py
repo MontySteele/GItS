@@ -6,6 +6,7 @@ these can.
 
 from __future__ import annotations
 
+import math
 from collections import Counter
 
 from tier05.model import RunResult
@@ -21,10 +22,24 @@ def _percentile(values: list[int], q: float) -> float:
     return s[lo] + (s[hi] - s[lo]) * (idx - lo)
 
 
+def _wilson95(successes: int, trials: int) -> tuple[float, float]:
+    """95% Wilson interval; remains informative for zero-win cells."""
+    if trials <= 0:
+        return 0.0, 0.0
+    z = 1.96
+    p = successes / trials
+    denom = 1 + z * z / trials
+    center = (p + z * z / (2 * trials)) / denom
+    half = (z * math.sqrt(p * (1 - p) / trials
+                          + z * z / (4 * trials * trials)) / denom)
+    return center - half, center + half
+
+
 def summarize_runs(results: list[RunResult]) -> dict:
     n = len(results)
     if n == 0:
         return {}
+    wins = sum(r.won for r in results)
     deaths = Counter(r.death_node for r in results if r.death_node is not None)
     n_nodes = len(results[0].node_kinds)
     # HP trajectory bands: per node position, over runs that REACHED it.
@@ -44,7 +59,9 @@ def summarize_runs(results: list[RunResult]) -> dict:
     online = [r.time_to_online for r in results if r.time_to_online]
     return {
         "runs": n,
-        "winrate": sum(r.won for r in results) / n,
+        "wins": wins,
+        "winrate": wins / n,
+        "winrate_wilson95": _wilson95(wins, n),
         "death_heatmap": dict(sorted(deaths.items())),
         "hp_bands": bands,
         "avg_final_deck": sum(len(r.deck_ids) for r in results) / n,
@@ -174,7 +191,9 @@ def print_run_report(character: str, archetype: str, s: dict,
                      node_kinds: list[str], survival: dict | None = None) -> None:
     print(f"\n=== Tier 0.5 runs: {character}/{archetype} "
           f"({s['runs']} runs) ===")
-    print(f"  run winrate      {s['winrate']:.1%}")
+    lo, hi = s["winrate_wilson95"]
+    print(f"  run winrate      {s['winrate']:.1%} "
+          f"({s['wins']}/{s['runs']}; Wilson 95% {lo:.1%}-{hi:.1%})")
     if survival:
         print(f"  survival         act median HP "
               f"{survival['act_median_hp_pct']:.0%} of max "

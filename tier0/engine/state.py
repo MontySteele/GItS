@@ -44,6 +44,10 @@ class Card:
     # Today only upgrades set this ({innate: true} -- Catalytic Conversion+);
     # sparks_n_splash's "innate-on-charge" is its OWN mechanism, untouched.
     innate: bool = False
+    # Ordinary Retain. Burst cards also retain through their kit tag, but a
+    # card upgrade such as Hot Hands+ can now express the base-game keyword
+    # without pretending to be a Burst.
+    retain: bool = False
     # principles v1.8: standard-banner 5-stars (Jean/Mona/Diluc) are ordinary
     # nation-pool rares that participate in the banner roll like anyone else.
     # The tag exists so that IF banner-variance data shows bad-roll bricking,
@@ -60,6 +64,11 @@ class Card:
     # to a personal pool. Never in shared rewards or the banner roll; the
     # equal-rarity clause on generators is what respects 5-star scarcity.
     guest_star: bool = False
+    # Combat-local provenance: set on every card created by a Guest Star
+    # generator, including ordinary shared companions pulled by that effect.
+    # The selector permits this temporary guest at depth one without weakening
+    # the commitment threshold for drafted companions.
+    generated_by_guest_star: bool = False
     # "Spend N Encore:" cost line (kickoff §4). A playability gate, not an
     # overdraw: cards that may legally overdraw into HP use the
     # spend_encore op instead.
@@ -222,6 +231,7 @@ class CombatState:
     fatal_kills_this_card: int = 0        # killed_target_fatal (Feed)
     exhausted_this_card: int = 0          # generate_from_pool amount_formula
     block_gains_this_card: int = 0        # exact multi-gain block hooks
+    salon_replacements_this_card: int = 0 # overflow count for current card
     cards_exhausted_this_turn: int = 0     # EvilEye / ForgottenRitual
     hp_lost_this_turn: int = 0             # Spite's live history predicate
     player_damage_events: int = 0          # TearAsunder hit-count history

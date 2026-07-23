@@ -200,6 +200,15 @@ def play_card(state: CombatState, card: Card) -> None:
             refpowers.exhaust_card(state, card)
         elif dest == "discard":
             p.discard_pile.append(card)
+    # Selector-v4 Guest Star exception: a generated guest can take the light
+    # at depth one, but it is a one-card cameo rather than a persistent partner.
+    # Return the Spotlight to Furina after that card performs so the designation
+    # cannot strand itself on an absent temporary character. This automatic
+    # stage reset is not a player move and therefore triggers no move payoffs.
+    if (card.generated_by_guest_star and card.character
+            and p.spotlight == card.character and p.character_id):
+        p.spotlight = p.character_id
+        state.emit("spotlight_returned", character=p.character_id)
     grant_charged_kit(state)
     # Self-damage and Encore overdraw resolve inside a card play rather than
     # the enemy-hit funnel. Give Fairy the same lethal checkpoint, then update
@@ -300,11 +309,13 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Burst cards have Retain (principles v1.4): they stay in hand.
     # Ethereal cards (the Spotlight selector) vanish to exhaust instead of
     # discarding -- an unplayed selector must never circulate as loot.
-    retained = [c for c in p.hand if "burst" in c.tags]
+    retained = [c for c in p.hand if "burst" in c.tags or c.retain]
     ethereal = [c for c in p.hand
-                if "ethereal" in c.tags and "burst" not in c.tags]
+                if "ethereal" in c.tags
+                and "burst" not in c.tags and not c.retain]
     p.discard_pile.extend(c for c in p.hand
-                          if "burst" not in c.tags and "ethereal" not in c.tags)
+                          if "burst" not in c.tags and not c.retain
+                          and "ethereal" not in c.tags)
     p.hand = retained
     for c in ethereal:
         # DarkEmbrace counts ethereal exhausts instead of drawing on them; the

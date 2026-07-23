@@ -150,6 +150,17 @@ def test_reward_rarity_odds_and_slot():
     assert counts["rare"] / total == pytest.approx(0.05, abs=0.02)
 
 
+def test_post_boss_companion_slot_is_rare_only():
+    rng = random.Random(SEED)
+    for _ in range(100):
+        offers = rewards.roll_rewards(
+            rng, "klee", companion_rarity="rare")
+        companion = offers[-1]
+        assert companion.is_companion
+        assert companion.rarity == "rare"
+        assert companion.star == 5
+
+
 def test_ref_pool_is_own_kit_no_companions():
     rng = random.Random(SEED)
     package = set(loader.character_packages("ref_ironclad")
@@ -358,6 +369,9 @@ def test_summarize_runs_fragility_shape():
                          draft.assigned_policy, 40, SEED)
     s = summarize_runs(res)
     assert 0.0 <= s["winrate"] <= 1.0
+    assert s["wins"] == sum(r.won for r in res)
+    lo, hi = s["winrate_wilson95"]
+    assert lo <= s["winrate"] <= hi
     assert sum(s["death_heatmap"].values()) == \
         sum(1 for r in res if r.death_node is not None)
     reached = [b["reached"] for b in s["hp_bands"] if b]

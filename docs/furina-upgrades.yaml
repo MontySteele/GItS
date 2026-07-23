@@ -7,21 +7,21 @@
 
 # ---- BASICS (generous; signature basic gets the Bash-style dual-nature privilege) ----
 soloists_solicitation: {damage: +3}          # 4->7, Strike-exact
-stage_presence:        {block: +3}           # 4->7, Defend-exact
+stage_presence:        {block: +3}           # 5->8, Defend-exact
 regal_bearing:         {block: +2}           # 3->5; the glance stays 1 Weak
-aria_of_recompense:    {encore: +2}          # 3->5
+aria_of_recompense:    {encore: +3}          # 5->8
 salon_debut:           {add: {op: gain_encore, amount: 2}}   # signature: deploy gains a buffer rider (upkeep pre-paid)
 
 # ---- COMMONS (one number bump each; zero cost reductions) ----
-gentilhomme_usher:     {block: +2}           # 3->5
-surintendante_chevalmarin: {encore: +2}      # 2->4
+gentilhomme_usher:     {block: +2}           # 4->6
+surintendante_chevalmarin: {encore: +2}      # 3->5
 mademoiselle_crabaletta: {power_amount: +1}  # 2->3 members
-dinner_service:        {encore: +1}          # 2->3 base, 2->3 rider (both branches, sheet law)
-usher_the_waves:       {damage: +2}          # 4->6 (still applies hydro)
-torrential_turn:       {damage: +3}          # 9->12, aura bonus stays 3
-matinee_performance:   {damage: +2}          # 3->5
-rising_tide:           {encore: +2}          # 2->4
-house_call:            {damage: +2}          # 5->7 base; member rider stays 3
+dinner_service:        {encore: +1}          # 3->4 base and rider (both branches)
+usher_the_waves:       {damage: +2}          # 5->7 (still applies hydro)
+torrential_turn:       {damage: +3}          # 10->13, aura bonus stays 4
+matinee_performance:   {damage: +2}          # 4->6
+rising_tide:           {encore: +2}          # 3->5
+house_call:            {damage: +2}          # 6->8 base; member rider stays 4
 curtain_up:            {encore: +1}          # 2->3
 dramatic_entrance:     {conditional_bonus: +3}   # threshold rider 3->6
 crowd_work:            {draw: +1}            # 2->3; Spend 2 Encore stays (the flux is the card)
@@ -44,20 +44,20 @@ commanding_gaze:       {weak: +1}            # 1->2 all
 witness_stand:         {vulnerable: +1}      # 1->2
 macaron_break:         {encore: +1}          # 2->3
 swelling_overture:     {draw: +1}            # 2->3
-undercurrent:          {damage: +2}          # 6->8 all (still applies; convergence watchlist notes the upgrade too)
+undercurrent:          {damage: +2}          # 7->9 all (still applies; convergence watchlist notes the upgrade too)
 
 # ---- UNCOMMONS (bump OR keyword/condition; two cost slots + one 1->0) ----
 full_ensemble:         {cost: -1}            # 3->2 (uncommon cost slot; bombs_away precedent)
-grand_salon:           {power_amount: +1}    # +2->+3 per stack, cap 4 unchanged
-many_waters_melody:    {encore: +1}          # 4->5 base, 2->3 rider
+grand_salon:           {power_amount: +1}    # +3->+4, cap 6 unchanged
+many_waters_melody:    {encore: +1}          # 5->6 base, 3->4 rider
 dress_rehearsal:       {encore_cost: -1}     # Spend 2 -> Spend 1 (condition-soften class)
-crashing_waves:        {damage: +2}          # 7->9 all (flame_dance-exact; aura bonus stays 4)
+crashing_waves:        {damage: +2}          # 8->10 all; aura bonus stays 5
 overflowing_hospitality: {encore: +2}        # 3->5
-waters_embrace:        {block: +3}           # base 8->11; salon rider stays 4
+waters_embrace:        {block: +3}           # base 9->12; salon rider stays 5
 crescendo:             {damage: +3}          # 8->11; formula stays 1_per_4
 showstopper:           {conditional_bonus: +3}   # 7->10 when the house roars
 florid_cadenza:        {encore_cost: -1}     # Spend 4 -> Spend 3
-hearts_swelling:       {encore: +2}          # 6->8
+hearts_swelling:       {encore: +2}          # 7->9
 rapturous_applause:    {power_amount: +1}    # +1->+2 per 10 Fanfare, cap 2 unchanged
 pit_orchestra:         {block: +2}           # 5->7
 flood_of_emotion:      {damage: +3}          # 12->15
@@ -78,16 +78,16 @@ deep_breath:           {remove: exhaust}     # sugar_rush-exact quality upgrade
 # ---- RARES (quality over quantity) ----
 # let_the_people_rejoice: NO UPGRADE (kit card, v1.9; Talent Training = v2 design space)
 encore_performance:    {copy_cost_override: 0}   # the copy costs 0 (borrowed_brilliance precedent)
-singer_of_many_waters: {heal: +4}            # 12->16; Exhaust NEVER removes (healing law)
+singer_of_many_waters: {heal: +4}            # 14->18; Exhaust NEVER removes (healing law)
 unheard_confession:    {heal: +3}            # 8->11; Exhaust stays, Encore stays 6
 endless_waltz:         {cost: -1}            # 3->2 (rare cost privilege)
-grand_gala:            {encore: +3}          # 3->6 (covers more of its own upkeep); Exhaust stays
+grand_gala:            {encore: +3}          # 4->7; Exhaust stays
 the_sea_is_my_stage:   {fanfare_cap: +5}     # +15->+20 cap; the blood price stays 6 (raised at red-pen, DECISIONS 75)
 universal_revelry:     {damage: +3}          # 9->12 base; formula stays 1_per_3
 star_of_the_show:      {power_amount: +1}    # +3->+4 printed on Spotlighted damage
 prima_donna:           {cost: -1}            # 2->1
-high_tide:             {damage: +4}          # 14->18 (big-base row); Spend 3 stays
-rain_of_roses:         {encore: +2}          # 4->6; the mass application is the card, it does not grow
+high_tide:             {damage: +4}          # 16->20 (big-base row); Spend 3 stays
+rain_of_roses:         {encore: +2}          # 5->7; the mass application is the card, it does not grow
 the_final_verdict:     {damage: +4}          # 18->22; reaction rider stays 6
 reginas_mercy:         {encore: +3}          # 10->13
 command_performance:   {generate_cost_override: 0}   # both guests cost 0 (Discovery parity)

@@ -11,6 +11,7 @@ from tier0.engine import combat, effects, powers, resources
 from tier0.engine.state import Card, CombatState
 from tier0.harness import metrics
 from tier0.harness.axes import raw_axes
+from tier0.pilot.policy import make_pilot
 from tier0.tests.conftest import make_enemy
 
 NULL_PILOT = lambda s: None
@@ -75,6 +76,18 @@ def test_encore_absorbs_after_block_before_hp():
     assert hits[0]["blocked"] == 3 and hits[0]["amount"] == 0
     absorbed = [ev for ev in st.log if ev["event"] == "encore_absorb"]
     assert absorbed[0]["amount"] == 5
+
+
+def test_ten_block_then_one_encore_absorbs_an_eleven_damage_hit():
+    st = furina_state()
+    p = st.player
+    p.block, p.encore = 10, 5
+    e = st.enemies[0]
+    e.intents = [{"kind": "attack", "amount": 11}]
+    combat._enemy_turn(st, e)
+    assert p.block == 0
+    assert p.encore == 4
+    assert p.hp == p.max_hp
 
 
 def test_encore_accounting_credits_a4_never_a3():
@@ -163,8 +176,8 @@ def _stock_deck(p, *card_ids):
     p.draw_pile.extend(loader.get_card(cid) for cid in card_ids)
 
 
-def test_selector_v3_designates_companion_at_kit_depth_with_a_crowd():
-    """Selector v3 (pass 3, W0-derived): companion designation needs BOTH
+def test_selector_v4_preserves_v3_drafted_companion_threshold():
+    """Selector v4 preserves v3 for drafted cards: designation needs BOTH
     a full-kit-depth companion AND a crowd on stage; anything less is the
     kickoff's self-Spotlight fallback. v2's raw depth contest is archived
     (R33: its companion branch was unreachable)."""
@@ -189,6 +202,40 @@ def test_selector_v3_designates_companion_at_kit_depth_with_a_crowd():
                 "chevreuse_vanguards_valor")
     effects.resolve_card(st3, loader.get_card("ethereal_spotlight"))
     assert st3.player.spotlight == "furina"
+
+
+def test_selector_v4_designates_a_generated_guest_at_depth_one():
+    st = furina_state()                       # one enemy: crowd rule bypassed
+    effects.resolve_card(st, loader.get_card("an_invitation"))
+    guest = st.player.hand[0]
+    assert guest.generated_by_guest_star and guest.character
+    effects.resolve_card(st, loader.get_card("ethereal_spotlight"))
+    assert st.player.spotlight == guest.character
+
+
+def test_spotlight_pilot_invites_then_designates_before_playing_guest():
+    st = furina_state()
+    st.player.hand = [loader.get_card("an_invitation"),
+                      loader.get_card("ethereal_spotlight")]
+    st.player.energy = 3
+    pilot = make_pilot(loader.pilot_weights("spotlight"))
+    invitation = pilot(st)
+    assert invitation.id == "an_invitation"
+    combat.play_card(st, invitation)
+    assert any(c.generated_by_guest_star for c in st.player.hand)
+    assert pilot(st).id == "ethereal_spotlight"
+
+
+def test_spotlight_returns_to_furina_after_generated_guest_performs():
+    st = furina_state()
+    guest = Card(id="temporary_guest", name="Guest", cost=0, type="skill",
+                 character="lynette", generated_by_guest_star=True)
+    st.player.hand = [guest]
+    st.player.spotlight = "lynette"
+    combat.play_card(st, guest)
+    assert st.player.spotlight == "furina"
+    assert not st.spotlight_moved_this_turn
+    assert any(e["event"] == "spotlight_returned" for e in st.log)
 
 
 def test_ovation_spend_boost_converts_spend_events_into_turn_boost():
@@ -287,13 +334,14 @@ def test_unspotlighted_and_untagged_cards_unchanged():
     assert dmg2["base"] == 6                 # strike prints 6, unscaled
 
 
-def test_self_spotlight_reduced_rate():
+def test_self_spotlight_has_no_numeric_multiplier():
     st = furina_state()
     st.player.spotlight = "furina"
     effects.resolve_card(st, furina_card(
         effects=[{"op": "damage", "amount": 4, "applies_element": False}]))
     dmg = [ev for ev in st.log if ev["event"] == "damage"][0]
-    assert dmg["base"] == int(4 * C.SPOTLIGHT_SELF_MULT)   # 5, not 6
+    assert C.SPOTLIGHT_SELF_MULT == 1.0
+    assert dmg["base"] == 4
 
 
 def test_ovation_fanfare_on_spotlighted_play():

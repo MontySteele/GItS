@@ -86,22 +86,18 @@ SPOTLIGHT_BASE_MULT = 1.5     # PLACEHOLDER (R33 veto, 2026-07-20): the
                               # READ in any cell (exercise-counter law,
                               # DECISIONS 87). E1 re-scoped to a valid
                               # MEDIAN-DEPTH null only; never summarize
-                              # it as "the knob is dead". 1.5 restores
-                              # the pass-1 geometry (companion 1.5 >
-                              # self 1.25 -- the R17 anti-self-buff
-                              # lever un-inverted; 1.0 made degenerate
-                              # self-aim optimal BY CONSTANT).
-                              # Measurement-neutral today for the same
-                              # structural reason the veto exists.
+                              # it as "the knob is dead". 1.5 restored
+                              # the pass-1 companion geometry against the
+                              # then-current self rate of 1.25. R40 later
+                              # moved self aim to 1.0 without changing this
+                              # outward-Spotlight value.
                               # Window-zero forced-arm sweep {1.25,
                               # 1.5} decides (furina-pass3-rulings.md).
-SPOTLIGHT_SELF_MULT = 1.25    # RATIFIED (R17, 2026-07-20) -- a measured
-                              # design constant, no longer a placeholder:
-                              # the sweep proved the reduced rate IS the
-                              # anti-self-buff lever (1.5x companion
-                              # parity borderline-fails criterion 1).
+SPOTLIGHT_SELF_MULT = 1.0     # Furina pays no hidden baseline tax: self aim
+                              # still drives Ovation/Fanfare, while numeric
+                              # empowerment is reserved for companions.
 # Selector heuristic version (instrument stamp, the A6-v2 pattern —
-# never compare selector-v2 and selector-v3 numbers unlabeled):
+# never compare selector versions unlabeled):
 # v1 companions-always (sprint 1; measured harmful — 1-card guest
 #    hijack halved Ovation throughput);
 # v2 raw depth contest (passes 1-2; R33 found the companion branch
@@ -115,7 +111,11 @@ SPOTLIGHT_SELF_MULT = 1.25    # RATIFIED (R17, 2026-07-20) -- a measured
 #    is +12.5pt on attrition and -10pt on tank_boss — outward aim is
 #    encounter-contingent, so the selector reads the fight, not just
 #    the deck.
-SPOTLIGHT_SELECTOR_VERSION = 3
+# v4 keeps v3 for drafted companions, but a card created into hand by a
+#    Guest Star generator is eligible at depth one. This is the promised
+#    bricking exception, scoped by combat-local provenance rather than card id;
+#    after the cameo is played, the light returns to Furina automatically.
+SPOTLIGHT_SELECTOR_VERSION = 4
 SPOTLIGHT_COMPANION_DEPTH_MIN = 4     # W0 bracket: best-companion depth 4
                                       # (full Chevreuse kit) rational,
                                       # depth 2 not; (2, 4] -> full-kit
@@ -147,14 +147,18 @@ FANFARE_PER_SPOTLIGHT_CARD = 2    # the Ovation merge: per Spotlighted
                               # constant exists; do not add one (§4).
 
 # --- Furina: Salon Members (kickoff §5; sheet pass 1) ---
-# The oz_summon rails, stacking: each member is one end-of-turn hydro
-# tick to a random enemy. Every tick drains Encore; when the buffer is
-# dry it drains TRUE HP instead (the overdraw identity -- greed is legal
-# and priced). All PROPOSED numbers pending sheet red-pen.
+# The oz_summon rails with Defect-style fixed slots: each active member is one
+# start-of-turn Hydro tick. Overflowed deployments take an immediate stronger
+# final bow. A tick that can pay Encore deals full damage; a dry tick never
+# overdraws HP and instead deals half damage.
 SALON_MEMBER_DMG = 4          # per-member tick damage (v0.2: 3->4 -- her
                               # signature engine may out-tick Oz's 3; the
                               # upkeep cost is what Oz doesn't pay)
+SALON_MEMBER_SLOTS = 3        # Defect-orb shape: fixed active company
+SALON_REPLACE_NUMERIC_MULT = 2  # draw/Encore/power/etc. on replacement
+SALON_REPLACE_DAMAGE_MULT = 3   # final-bow damage and Block on replacement
 SALON_TICK_ENCORE_COST = 1    # Encore drained per member tick
+SALON_DRY_DAMAGE_MULT = 0.5   # no Encore: half damage, never true-HP loss
 SALON_TICK_BURST = 2          # burst energy per member tick (her particle
                               # economy leans on Salon application, §1)
 BURST_PER_ENCORE_SPENT = 1    # burst energy per point of Encore spent

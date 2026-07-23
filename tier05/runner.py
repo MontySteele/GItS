@@ -4,6 +4,8 @@ optional CSV. Fast iteration loop > elegance.
 Usage:
     python -m tier05.runner --character klee --archetype demolition \
         --runs 500 --seed 42
+    python -m tier05.runner --character furina --archetype salon \
+        --realistic --runs 500 --seed 42
     python -m tier05.runner --character ref_ironclad --runs 500   # anchor
 """
 
@@ -18,15 +20,56 @@ from tier0 import constants as C
 from tier0.content import loader
 from tier05 import ab, draft, model, run_metrics
 
-ARCHETYPE_PILOTS = {"demolition": "demolition", "spark": "spark",
-                    "reaction": "reaction", "generic": "generic"}
+# The run model itself is character-agnostic; this is the CLI's honest list of
+# plans with authored draft tags + combat pilots. Keeping it character-scoped
+# prevents a syntactically valid but meaningless pairing such as
+# ``furina/demolition`` or ``klee/spotlight``.
+CHARACTER_PLANS = {
+    "klee": {
+        "generic": "generic",
+        "demolition": "demolition",
+        "spark": "spark",
+        "reaction": "reaction",
+    },
+    "furina": {
+        "salon": "salon",
+        "spotlight": "spotlight",
+        "fanfare": "fanfare",
+    },
+    "ref_ironclad": {"generic": "generic"},
+    "real_ironclad": {"generic": "generic"},
+}
+
+DEFAULT_PLAN = {
+    "klee": "demolition",
+    "furina": "salon",
+    "ref_ironclad": "generic",
+    "real_ironclad": "generic",
+}
+
+
+def resolve_plan(character: str, archetype: str | None) -> tuple[str, str]:
+    """Return the assigned-plan id and its combat pilot, or fail loudly."""
+    if character not in CHARACTER_PLANS:
+        raise ValueError(
+            f"unsupported character {character!r}; choose one of "
+            f"{', '.join(sorted(CHARACTER_PLANS))}")
+    plan = archetype or DEFAULT_PLAN[character]
+    pilots = CHARACTER_PLANS[character]
+    if plan not in pilots:
+        raise ValueError(
+            f"character {character!r} has no archetype {plan!r}; choose one "
+            f"of {', '.join(pilots)}")
+    return plan, pilots[plan]
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Tier 0.5 draft-level simulator")
-    ap.add_argument("--character", default="klee")
-    ap.add_argument("--archetype", default="demolition",
-                    choices=sorted(ARCHETYPE_PILOTS))
+    ap.add_argument("--character", default="klee",
+                    choices=sorted(CHARACTER_PLANS))
+    ap.add_argument("--archetype", default=None,
+                    help="assigned plan; defaults by character (Klee: "
+                         "demolition, Furina: salon, Ironclads: generic)")
     ap.add_argument("--runs", type=int, default=200)
     ap.add_argument("--seed", type=int, default=C.DEFAULT_SEED)
     ap.add_argument("--csv", default=None)
@@ -34,7 +77,24 @@ def main(argv: list[str] | None = None) -> int:
                     choices=sorted(draft.POLICIES))
     ap.add_argument("--ab", action="store_true",
                     help="M6 A/B: assigned vs adaptive over the same seeds")
+    ap.add_argument(
+        "--realistic", action="store_true",
+        help="enable the realistic Act-1 power budget: relic granting and "
+             "potion drops/shop/use (default preserves the historical bare "
+             "run world)",
+    )
     args = ap.parse_args(argv)
+
+    try:
+        archetype, pilot = resolve_plan(args.character, args.archetype)
+    except ValueError as exc:
+        ap.error(str(exc))
+
+    if args.ab and args.character == "furina":
+        ap.error(
+            "--ab is not valid for Furina: the adaptive classifier currently "
+            "recognizes only Klee's Demolition/Spark/Reaction shapes. Use "
+            "assigned runs (omit --ab).")
 
     # The death-heatmap bar is a block glyph; a cp1252 console (Windows
     # default) raises UnicodeEncodeError the moment ANY node records a
@@ -46,27 +106,30 @@ def main(argv: list[str] | None = None) -> int:
     except (AttributeError, OSError):       # non-reconfigurable stream
         pass
 
-    archetype = args.archetype
-    if args.character == "ref_ironclad":
-        archetype = "generic"           # the anchor drafts power, not plans
-    pilot = ARCHETYPE_PILOTS[archetype]
-
     if args.ab:
         t0 = time.perf_counter()
         result = ab.run_ab(args.character, archetype, pilot,
-                           args.runs, args.seed)
+                           args.runs, args.seed,
+                           grant_relics=args.realistic,
+                           grant_potions=args.realistic)
         ab.print_ab_report(args.character, archetype, result)
+        print(f"  loadout         "
+              f"{'realistic (relics + potions)' if args.realistic else 'bare'}")
         print(f"\n({2 * args.runs} runs in {time.perf_counter() - t0:.1f}s)")
         return 0
 
     t0 = time.perf_counter()
     results = model.run_many(args.character, archetype, pilot,
-                             draft.POLICIES[args.policy], args.runs, args.seed)
+                             draft.POLICIES[args.policy], args.runs, args.seed,
+                             grant_relics=args.realistic,
+                             grant_potions=args.realistic)
     summary = run_metrics.summarize_runs(results)
     max_hp = loader._character_index()[args.character]["hp"]
     survival = run_metrics.survival_profile(results, max_hp)
     run_metrics.print_run_report(args.character, archetype, summary,
                                  results[0].node_kinds, survival)
+    print(f"  loadout         "
+          f"{'realistic (relics + potions)' if args.realistic else 'bare'}")
     print(f"\n({args.runs} runs in {time.perf_counter() - t0:.1f}s)")
 
     if args.csv:

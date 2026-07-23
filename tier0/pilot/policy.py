@@ -364,11 +364,22 @@ def _spotlight_value(state: CombatState, card: Card) -> float:
     anchor-drafted-nothing failure M5 logged (DECISIONS 53)."""
     p = state.player
     val = 0.0
+    generated_guest_waiting = any(
+        c.generated_by_guest_star and c.character for c in p.hand)
+    generator_waiting = any(
+        any(fx.get("op") == "generate_guest_star" for fx in c.effects)
+        for c in p.hand)
     for fx in card.effects:
         if fx["op"] == "spotlight_designate":
             # Aiming an empty stage is the whole archetype; re-aiming is
-            # nearly free but rarely urgent.
-            val += 4.0 if p.spotlight is None else 0.3
+            # nearly free but rarely urgent. When a generator is waiting,
+            # invite first so this same selector can aim the temporary guest.
+            if generated_guest_waiting:
+                val += 20.0             # sequencing priority: light, then play
+            elif generator_waiting:
+                val += 0.1
+            else:
+                val += 4.0 if p.spotlight is None else 0.3
         elif (fx["op"] == "apply_power"
               and fx.get("power") in ("spotlight_mult_bonus",
                                       "spotlight_mult_bonus_turn",

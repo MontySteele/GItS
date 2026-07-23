@@ -48,8 +48,8 @@ starting_deck:
   - stage_presence
   - regal_bearing
   - aria_of_recompense
-  - aria_of_recompense
   - salon_debut
+  - an_invitation
 packages:
   # Plausible drafts (round-3 principle), not monocultures — each carries
   # natural cross-archetype draft-ins.

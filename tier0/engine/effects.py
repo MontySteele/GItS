@@ -346,6 +346,8 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         base = _amount(state, fx["amount"])
     if "bonus_formula" in fx:
         base += _bonus_formula(state, fx["bonus_formula"])
+    if state.salon_replacements_this_card:
+        base *= C.SALON_REPLACE_DAMAGE_MULT
     # Spotlight scales the card's own printed damage -- before external
     # buffs (strength/next_attack_up are not printed numbers) and before
     # per-target riders (v1 boring baseline; riders logged as design room).
@@ -387,6 +389,8 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
 def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     raw = (_calc_amount(state, fx["amount_formula"], card)
            if "amount_formula" in fx else fx["amount"])
+    if state.salon_replacements_this_card:
+        raw *= C.SALON_REPLACE_DAMAGE_MULT
     times = fx.get("times", 1)
     times = (_runtime_count(state, times, card)
              if isinstance(times, str) else times)
@@ -404,14 +408,19 @@ def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
     # start of the player's NEXT turn (after the turn-start block reset).
     # Sustain-over-time identity without true healing (R8-shaped).
     # Spotlight scales it at play time (printed Block is printed Block).
+    amount = fx["amount"]
+    if state.salon_replacements_this_card:
+        amount *= C.SALON_REPLACE_DAMAGE_MULT
     powers.apply_power(state, state.player, "block_next_turn",
-                       _spotlight_scale(state, card, fx["amount"]))
+                       _spotlight_scale(state, card, amount))
 
 
 def _op_draw(state: CombatState, fx: dict, card: Card) -> None:
     n = fx.get("amount")
     if fx.get("amount_formula") == "per_aura":     # Elemental Ecstasy
         n = sum(1 for e in state.living_enemies if e.aura)
+    if state.salon_replacements_this_card:
+        n *= C.SALON_REPLACE_NUMERIC_MULT
     state.draw(n)
     state.emit("extra_draw", amount=n)   # A5 velocity accounting
 
@@ -449,18 +458,53 @@ def _op_energy(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("energy", amount=amount)
 
 
+def _deploy_salon_members(state: CombatState, amount: int) -> None:
+    """Fill Furina's three active Salon slots, then give each displaced
+    Member a stronger immediate final bow. Members are anonymous stacks in
+    Tier 0, so this is Defect-style evoke geometry without false identity
+    tracking: the active company stays capped and every overflow still has
+    value. Final bows are Hydro, cost no Encore, and generate Salon particles."""
+    p = state.player
+    current = p.powers.get("salon_member", 0)
+    room = max(0, C.SALON_MEMBER_SLOTS - current)
+    added = min(amount, room)
+    if added:
+        powers.apply_power(state, p, "salon_member", added,
+                           max_stacks=C.SALON_MEMBER_SLOTS)
+    replacements = max(0, amount - added)
+    state.salon_replacements_this_card += replacements
+    for _ in range(replacements):
+        if not state.living_enemies:
+            break
+        enemy = state.rng.choice(state.living_enemies)
+        bow = (C.SALON_REPLACE_DAMAGE_MULT
+               * (C.SALON_MEMBER_DMG
+                  + p.powers.get("salon_damage_up", 0)))
+        deal_damage_to_enemy(state, enemy, bow,
+                             element="hydro", source="salon_final_bow")
+        if p.burst_max:
+            p.burst_energy += C.SALON_TICK_BURST
+        state.emit("salon_final_bow", target=enemy.name, damage=bow)
+
+
 def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
     cap = fx.get("max_stacks")
     if "amount_formula" in fx:                 # Dominate, MoltenFist
         amount = _power_amount_formula(state, fx["amount_formula"])
     else:
         amount = fx["amount"]
+    if (state.salon_replacements_this_card
+            and fx["power"] != "salon_member"):
+        amount *= C.SALON_REPLACE_NUMERIC_MULT
     # MoltenFist reads the target's current Vulnerable and applies that many
     # MORE -- inert against a target with none, so the guard skips the apply.
     # Dominate needs no guard: it applies 1 first, so its read is always >= 1.
     if fx.get("guard") == "nonzero" and amount <= 0:
         return
     if fx.get("target", "self") == "self":
+        if fx["power"] == "salon_member":
+            _deploy_salon_members(state, amount)
+            return
         powers.apply_power(state, state.player, fx["power"], amount,
                            max_stacks=cap)
     else:
@@ -470,8 +514,11 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_apply_aura(state: CombatState, fx: dict, card: Card) -> None:
-    for enemy in _pick_targets(state, fx.get("target", "enemy")):
-        reactions.resolve_hit(state, enemy, fx["element"], 0)
+    times = (C.SALON_REPLACE_NUMERIC_MULT
+             if state.salon_replacements_this_card else 1)
+    for _ in range(times):
+        for enemy in _pick_targets(state, fx.get("target", "enemy")):
+            reactions.resolve_hit(state, enemy, fx["element"], 0)
 
 
 def _op_place_bomb(state: CombatState, fx: dict, card: Card) -> None:
@@ -551,7 +598,10 @@ def _op_gain_spark(state: CombatState, fx: dict, card: Card) -> None:
 
 def _op_gain_encore(state: CombatState, fx: dict, card: Card) -> None:
     # Her "healing" effects grant Encore (kickoff §4). Unbounded per-combat.
-    resources.gain_encore(state, _amount(state, fx["amount"]))
+    amount = _amount(state, fx["amount"])
+    if state.salon_replacements_this_card:
+        amount *= C.SALON_REPLACE_NUMERIC_MULT
+    resources.gain_encore(state, amount)
 
 
 def _op_spend_encore(state: CombatState, fx: dict, card: Card) -> None:
@@ -567,11 +617,10 @@ def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
     tags to designate; cards with no tag are invalid targets. Movable
     freely; persists until moved; a duplicate designation is inert.
 
-    PILOT HEURISTIC v3 (pass 3, W0-derived; SPOTLIGHT_SELECTOR_VERSION
-    in constants carries the full version history and archive rule):
+    PILOT HEURISTIC v4: a temporary card created by a Guest Star generator
+    and currently in hand is eligible at depth one. Otherwise v3 remains:
     designate the deepest companion iff its per-character depth reaches
-    SPOTLIGHT_COMPANION_DEPTH_MIN and the stage holds a crowd
-    (living enemies >= SPOTLIGHT_COMPANION_MIN_ENEMIES); otherwise
+    SPOTLIGHT_COMPANION_DEPTH_MIN and the stage holds a crowd; otherwise
     self-Spotlight (the kickoff fallback). Value-aware, not
     depth-greedy: the W0 oracle showed outward aim wins crowds/grinds
     (+12.5pt attrition at full-kit depth) and loses duels (-10pt
@@ -591,12 +640,20 @@ def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
         if c.character and not c.kit_card:
             counts[c.character] = counts.get(c.character, 0) + 1
     others = {ch: n for ch, n in counts.items() if ch != p.character_id}
+    generated = sorted({c.character for c in p.hand
+                        if c.generated_by_guest_star and c.character
+                        and c.character != p.character_id})
     self_n = counts.get(p.character_id, 0) if p.character_id else 0
     best = max(sorted(others), key=lambda ch: others[ch]) if others else None
     if SPOTLIGHT_FORCE == "self":
         target = p.character_id if self_n else None
     elif SPOTLIGHT_FORCE == "companion":
         target = best
+    elif generated:
+        # Temporary guests in hand are the archetype's bricking mitigation:
+        # they can take the light at depth one. Permanent drafted companions
+        # still use the full depth-and-crowd commitment below.
+        target = generated[0]
     elif (best is not None
           and others[best] >= C.SPOTLIGHT_COMPANION_DEPTH_MIN
           and len(state.living_enemies) >= C.SPOTLIGHT_COMPANION_MIN_ENEMIES):
@@ -680,6 +737,8 @@ def _generate(state: CombatState, fx: dict, which: str) -> None:
             # with no expressible upgrade simply arrives unupgraded, which
             # is the same visible-skip policy upgrades.UNAPPLIABLE uses.
             pick = loader.get_card(pick.id + upgrades.SUFFIX)
+        if which == "guest_star":
+            pick.generated_by_guest_star = True
         if "cost_override" in fx:                   # upgraded form: 0 this turn
             pick.cost = fx["cost_override"]
         _add_token(state, pick, fx.get("to", "hand"))
@@ -720,7 +779,10 @@ def _op_copy_spotlighted_in_hand(state: CombatState, fx: dict,
 
 def _op_heal(state: CombatState, fx: dict, card: Card) -> None:
     p = state.player
-    healed = min(fx["amount"], p.max_hp - p.hp)
+    amount = fx["amount"]
+    if state.salon_replacements_this_card:
+        amount *= C.SALON_REPLACE_NUMERIC_MULT
+    healed = min(amount, p.max_hp - p.hp)
     p.hp += healed
     state.emit("heal", amount=healed)
 
@@ -1268,6 +1330,7 @@ def resolve_card(state: CombatState, card: Card) -> None:
     state.fatal_kills_this_card = 0
     state.exhausted_this_card = 0
     state.block_gains_this_card = 0
+    state.salon_replacements_this_card = 0
     state.detonations_at_card_start = state.detonations_total
     state.repeat_requested = 0
     # Predicate snapshot: does the default target hold an off-element aura?
@@ -1349,19 +1412,21 @@ def salon_tick(state: CombatState) -> None:
     decision: end-of-turn upkeep drained the buffer BEFORE enemy hits, so
     the default archetype zeroed her elite A4; start-of-turn ticks let
     absorption take first bite and the upkeep eats what survived the
-    night). Every tick FIRST drains Encore -- true HP when the buffer is
-    dry (the overdraw identity; greed is legal and priced). Members
-    persist for the combat; the upkeep is the governor."""
+    night). A tick pays Encore for full damage. When Encore is too low,
+    it cannot overdraw HP: it attacks at half power instead. Members persist
+    for the combat; fixed slots and replacement effects govern the ceiling."""
     p = state.player
     members = p.powers.get("salon_member", 0)
     for _ in range(members):
         if not state.living_enemies or not p.alive:
             break
-        resources.spend_encore_or_hp(state, C.SALON_TICK_ENCORE_COST)
-        if not p.alive:
-            break
+        paid = p.encore >= C.SALON_TICK_ENCORE_COST
+        if paid:
+            resources.spend_encore(state, C.SALON_TICK_ENCORE_COST)
         enemy = state.rng.choice(state.living_enemies)
         dmg = C.SALON_MEMBER_DMG + p.powers.get("salon_damage_up", 0)
+        if not paid:
+            dmg = int(dmg * C.SALON_DRY_DAMAGE_MULT)
         deal_damage_to_enemy(state, enemy, dmg, element="hydro",
                              source="salon")
         if p.burst_max:

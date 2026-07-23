@@ -267,7 +267,9 @@ After implementation, rerun the same-seed comparison that's been the through
 Still deferred (NOT this pass):
 - [ ] Multi-act enemy rosters (Act 2/3) — same machine, new roster, full heal
       between. Land Act 1 first.
-- [ ] Furina tier0.5 pilots (she cannot be run through this yet, §9).
+- [x] Furina Tier 0.5 assigned-pilot runner integration — deferred by this
+      pass, then closed 2026-07-22. Salon/Spotlight/Fanfare are now ordinary
+      character-scoped runner plans; baseline in `furina-tier05-baseline.md`.
 
 ---
 
@@ -276,5 +278,6 @@ Still deferred (NOT this pass):
 - No card balance numbers (Klee/Furina/Ironclad).
 - No tier0 battery, no axis definitions, no 3.0 normalization.
 - No relics modeled (gold economy only).
-- Furina has no tier0.5 pilots at all (`ARCHETYPE_PILOTS` is Klee-scoped) —
-  she cannot be run through this yet. Noted, not fixed here (separate stream).
+- Historical note: this pass shipped while the CLI's `ARCHETYPE_PILOTS` was
+  Klee-scoped. The follow-up closed on 2026-07-22; Furina can now run through
+  the realistic Act-1 layer with her three assigned pilots.

@@ -774,3 +774,31 @@ in AfterCardPlayed, so during OnPlay the bank has not yet been spent,
 which makes the pre-spend read the PLAIN one). SparksAsResolved is kept
 and documented as the correct accessor for any future attack that wants
 the post-spend view; it currently has no reader.
+
+## R40 -- Furina runner rulings and Salon replacement pass (2026-07-22)
+
+USER RULINGS: the starter carries one Aria of Recompense at 5 Encore
+(8 upgraded) and one 0-cost An Invitation; Stage Presence is 5 Block
+(8 upgraded); self-Spotlight has a 1.0 numeric multiplier. Encore absorbs
+enemy damage only after Block. Generated Guest Stars are selector-v4's
+depth-one bricking exception and return the light to Furina after play.
+
+SALON LAW: three active slots. A tick that can pay 1 Encore deals full
+damage; a dry tick deals half damage and never overdraws HP. Every overflowed
+deployment gives the displaced Member an immediate Hydro final bow at three
+times its current tick damage. If the deploying card has a following rider,
+replacement triples printed damage or Block, or doubles numeric utility
+(Encore, draw, application, healing, or non-Member power) exactly once for
+that card, regardless of how many Members it displaced. The replacement flag
+resets at the start of every card resolution.
+
+MEASUREMENT: after the direct Salon-number lift, 1,500 realistic runs/plan at
+seed 11 moved Salon Act clear 0.13% -> 5.2% and first-elite survival 17.1% ->
+40.9%; Spotlight/Fanfare first-elite survival rose only to 24.7%/24.2%, with
+Act clear near zero. Deep Salon overshoots in the opposite direction:
+tank_boss 99.4%, A2 8.9 against the 7.6 ceiling. A 300-fight source audit
+attributes 16.3% of its damage to final bows and 52.3% to ordinary Salon
+ticks, so the overshoot is the assembled persistent engine rather than a
+cross-card multiplier leak. Disposition: keep this as the measured pass;
+further work should redistribute power toward early access/frontload rather
+than add more global Salon scaling.

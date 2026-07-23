@@ -58,6 +58,23 @@ def test_pool_composition():
     assert [c.id for c in kit] == ["let_the_people_rejoice"]   # 14 draftable
 
 
+def test_starter_invitation_and_aria_curve():
+    starter = loader.starting_deck("furina")
+    assert len(starter) == 10
+    assert starter.count("aria_of_recompense") == 1
+    assert starter.count("an_invitation") == 1
+
+    aria = loader.get_card("aria_of_recompense")
+    aria_plus = loader.get_card("aria_of_recompense+")
+    assert aria.effects == [{"op": "gain_encore", "amount": 5}]
+    assert aria_plus.effects == [{"op": "gain_encore", "amount": 8}]
+
+    stage = loader.get_card("stage_presence")
+    stage_plus = loader.get_card("stage_presence+")
+    assert stage.effects == [{"op": "block", "amount": 5}]
+    assert stage_plus.effects == [{"op": "block", "amount": 8}]
+
+
 def test_every_archetype_has_the_template_shape():
     """Each archetype: enablers commons-heavy, rares as payoffs (§3.3)."""
     cards = [c for c in loader._card_index().values()
@@ -105,17 +122,112 @@ def test_salon_tick_damages_applies_hydro_and_drains_encore():
     assert p.encore == 5 - 2 * C.SALON_TICK_ENCORE_COST
 
 
-def test_salon_overdraw_drains_true_hp_when_dry():
+def test_dry_salon_ticks_deal_half_damage_without_overdraw():
     st = furina_state()
     p = st.player
     p.powers["salon_member"] = 2
     p.encore = 0
     hp0 = p.hp
+    enemy_hp0 = st.enemies[0].hp
     effects.salon_tick(st)
-    assert p.hp == hp0 - 2 * C.SALON_TICK_ENCORE_COST
-    assert any(e["event"] == "encore_overdraw" for e in st.log)
-    # true HP loss is Fanfare flux
-    assert p.fanfare > 0
+    assert p.hp == hp0
+    assert st.enemies[0].hp == (
+        enemy_hp0 - 2 * int(C.SALON_MEMBER_DMG * C.SALON_DRY_DAMAGE_MULT))
+    assert not any(e["event"] == "encore_overdraw" for e in st.log)
+    assert p.fanfare == 0
+
+
+def test_salon_ticks_only_throttle_after_encore_runs_out():
+    st = furina_state()
+    p = st.player
+    p.powers["salon_member"] = 2
+    p.encore = 1
+    enemy_hp0 = st.enemies[0].hp
+    effects.salon_tick(st)
+    assert p.encore == 0
+    assert p.hp == p.max_hp
+    assert st.enemies[0].hp == (
+        enemy_hp0 - C.SALON_MEMBER_DMG
+        - int(C.SALON_MEMBER_DMG * C.SALON_DRY_DAMAGE_MULT))
+
+
+def test_salon_slots_cap_at_three_and_overflow_takes_a_final_bow():
+    st = furina_state()
+    p = st.player
+    p.powers["salon_member"] = 2
+    enemy_hp0 = st.enemies[0].hp
+    effects.resolve_card(st, loader.get_card("mademoiselle_crabaletta"))
+    assert p.powers["salon_member"] == C.SALON_MEMBER_SLOTS == 3
+    bow = C.SALON_REPLACE_DAMAGE_MULT * C.SALON_MEMBER_DMG
+    assert st.enemies[0].hp == enemy_hp0 - bow
+    assert st.enemies[0].aura == "hydro"
+    assert p.encore == 0                          # final bows have no upkeep
+    assert p.burst_energy == C.SALON_TICK_BURST
+
+
+def test_each_overflowed_member_takes_a_final_bow():
+    st = furina_state()
+    p = st.player
+    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    enemy_hp0 = st.enemies[0].hp
+    effects.resolve_card(st, loader.get_card("full_ensemble"))
+    assert p.powers["salon_member"] == C.SALON_MEMBER_SLOTS
+    bow = C.SALON_REPLACE_DAMAGE_MULT * C.SALON_MEMBER_DMG
+    assert st.enemies[0].hp == enemy_hp0 - 3 * bow
+
+
+def test_replacing_member_triples_block_rider_once():
+    st = furina_state()
+    p = st.player
+    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    effects.resolve_card(st, loader.get_card("gentilhomme_usher"))
+    assert p.powers["salon_member"] == C.SALON_MEMBER_SLOTS
+    assert p.block == 4 * C.SALON_REPLACE_DAMAGE_MULT
+
+
+def test_replacing_member_doubles_encore_rider_once():
+    st = furina_state()
+    p = st.player
+    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    effects.resolve_card(st, loader.get_card("surintendante_chevalmarin"))
+    assert p.encore == 3 * C.SALON_REPLACE_NUMERIC_MULT
+
+
+def test_replacement_multiplier_ends_with_the_deploying_card():
+    st = furina_state()
+    p = st.player
+    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    effects.resolve_card(st, loader.get_card("surintendante_chevalmarin"))
+    after_replacement = p.encore
+    effects.resolve_card(st, loader.get_card("curtain_up"))
+    assert p.encore == after_replacement + 2
+
+
+def test_multiple_replacements_do_not_multiply_rider_more_than_once():
+    st = furina_state()
+    p = st.player
+    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    effects.resolve_card(st, loader.get_card("grand_gala"))
+    assert p.powers["salon_member"] == C.SALON_MEMBER_SLOTS
+    assert p.encore == 4 * C.SALON_REPLACE_NUMERIC_MULT
+
+
+def test_replacing_member_doubles_salon_power_without_clipping():
+    st = furina_state()
+    p = st.player
+    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    effects.resolve_card(st, loader.get_card("endless_waltz"))
+    assert p.powers["salon_damage_up"] == 3 * C.SALON_REPLACE_NUMERIC_MULT
+
+
+def test_replacing_member_doubles_draw_rider():
+    st = furina_state()
+    p = st.player
+    p.powers["salon_member"] = C.SALON_MEMBER_SLOTS
+    p.encore = 2
+    p.draw_pile = [loader.get_card("stage_presence") for _ in range(2)]
+    effects.resolve_card(st, loader.get_card("dress_rehearsal"))
+    assert len(p.hand) == 2
 
 
 def test_salon_damage_up_scales_ticks():
@@ -210,12 +322,14 @@ def test_generation_pool_guardrails():
 def test_generators_exhaust_and_generate_to_hand():
     st = furina_state()
     gen = loader.get_card("an_invitation")
+    assert gen.cost == 0
     assert gen.exhaust                              # guardrail b
     effects.resolve_card(st, gen)
     assert len(st.player.hand) == 1
     made = st.player.hand[0]
     assert made.rarity == "common"                  # guardrail c
     assert made.is_companion or made.guest_star     # guardrail d
+    assert made.generated_by_guest_star              # selector-v4 provenance
 
 
 def test_upgraded_generator_discounts_the_guest():
