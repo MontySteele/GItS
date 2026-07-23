@@ -304,7 +304,12 @@ def _reaction_value(state: CombatState, card: Card) -> float:
         target = fx.get("target", "enemy")
 
         if target == "enemy":
-            aimed = effects._default_target(state)
+            # Single-target Swirl is deliberately aura-aware in the engine:
+            # it models the player's target choice rather than blindly using
+            # tier0's generic lowest-HP aim.
+            aimed = (min(reactable, key=lambda e: e.hp)
+                     if op == "swirl" and reactable
+                     else effects._default_target(state))
             expected = float(bool(aimed and aimed in reactable))
         elif target == "all_enemies":
             expected = float(len(reactable))

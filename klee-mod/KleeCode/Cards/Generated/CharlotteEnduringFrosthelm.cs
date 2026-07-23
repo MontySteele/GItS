@@ -48,13 +48,13 @@ public sealed class CharlotteEnduringFrosthelm : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Charlotte — Enduring Frosthelm"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. At the start of your next turn, gain 3 [gold]Block[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. At the start of your next turn, gain 4 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(3m, ValueProp.Move)
+            new BlockVar(4m, ValueProp.Move)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -68,7 +68,7 @@ public sealed class CharlotteEnduringFrosthelm : CustomCardModel, ICompanionCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, Owner.Creature, 3, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, Owner.Creature, 4, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

@@ -193,7 +193,10 @@ def run_one(character: str, archetype: str, pilot_id: str,
     # snapshot. Seed-determined either way, which is all the spec asks for.
     banner = rewards.roll_banner(random.Random(seed + 2 * 10 ** 9))
     pilot = make_pilot(loader.pilot_weights(pilot_id))
-    deck_ids = loader.starting_deck(character)
+    # Dedicated stream: randomized starters are seed-replayable but do not
+    # renumber encounters, reward rolls, shops, or any calibrated run result.
+    starter_rng = random.Random(seed + 3 * 10 ** 9)
+    deck_ids = loader.starting_deck(character, starter_rng)
     max_hp = loader._character_index()[character]["hp"]
     hp = max_hp
     gold = C.GOLD_START

@@ -78,7 +78,13 @@ public sealed class Klee : CustomCharacterModel
 
     public override PotionPoolModel PotionPool => ModelDb.PotionPool<SilentPotionPool>();
 
-    /// <remarks>Spec C1.4: 4x Kaboom, 4x Duck and Cover, 1x Jumpy Dumpty, 1x Pop.</remarks>
+    /// <remarks>
+    /// Printed template: 4x Kaboom, 4x Duck and Cover, 1x Jumpy Dumpty,
+    /// 1x Pop. KleeStartingCompanionsPatch replaces one Kaboom with Dahlia or
+    /// Kaeya and one Duck and Cover with Barbara or Prune after the run seed
+    /// exists. Keeping the template here makes character-select/self-check
+    /// reads stable; only actual new-run creation resolves the random pair.
+    /// </remarks>
     public override IEnumerable<CardModel> StartingDeck => new CardModel[]
     {
         ModelDb.Card<Kaboom>(),

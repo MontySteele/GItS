@@ -58,7 +58,7 @@ public sealed class LynetteEnigmaticFeint : CustomCardModel, ICompanionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(3m, ValueProp.Move)
+            new BlockVar(5m, ValueProp.Move)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in

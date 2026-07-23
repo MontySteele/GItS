@@ -64,7 +64,7 @@ public sealed class ChevreuseInterdictionFire : CustomCardModel, IElementalCard,
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move)
+            new DamageVar(7m, ValueProp.Move)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in

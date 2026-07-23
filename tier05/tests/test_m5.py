@@ -51,6 +51,43 @@ def test_run_determinism():
            [d["picked"] for d in b.decisions]
 
 
+def test_klee_randomized_starter_is_mondstadt_locked_and_role_locked():
+    attacks = {"dahlia_sacramental_shower", "kaeya_frostgnaw"}
+    supports = {"barbara_melody", "prune_witch_hunt"}
+    seen_attacks = set()
+    seen_supports = set()
+
+    for seed in range(40):
+        deck = loader.starting_deck("klee", random.Random(seed))
+        rolled_attacks = attacks.intersection(deck)
+        rolled_supports = supports.intersection(deck)
+        assert len(deck) == 10
+        assert len(rolled_attacks) == 1
+        assert len(rolled_supports) == 1
+        assert deck.count("kaboom") == 3
+        assert deck.count("duck_and_cover") == 3
+        assert all(loader.get_card(cid).nation == "mondstadt"
+                   for cid in rolled_attacks | rolled_supports)
+        seen_attacks.update(rolled_attacks)
+        seen_supports.update(rolled_supports)
+
+    assert seen_attacks == attacks
+    assert seen_supports == supports
+
+
+def test_randomized_starter_uses_a_dedicated_replayable_stream():
+    first = model.run_one("klee", "generic", "generic",
+                          draft.assigned_policy, SEED)
+    second = model.run_one("klee", "generic", "generic",
+                           draft.assigned_policy, SEED)
+    companion_ids = {c.id for c in loader._card_index().values()
+                     if c.is_companion}
+    first_pair = companion_ids.intersection(first.deck_ids)
+    second_pair = companion_ids.intersection(second.deck_ids)
+    assert len(first_pair) >= 2  # rewards may add more; starters never vanish
+    assert first_pair == second_pair
+
+
 def test_death_logs_node_index_and_hp_persists():
     results = model.run_many("klee", "demolition", "demolition",
                              draft.assigned_policy, 30, SEED)

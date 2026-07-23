@@ -572,7 +572,15 @@ def _op_burst_energy(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_swirl(state: CombatState, fx: dict, card: Card) -> None:
-    for enemy in _pick_targets(state, fx.get("target", "enemy")):
+    targets = _pick_targets(state, fx.get("target", "enemy"))
+    # A human will aim a single-target Swirl at an aura when one exists.
+    # Tier 0 otherwise hard-aims every AnyEnemy card at lowest HP, which made
+    # Anemo cards blank whenever the aura happened to sit elsewhere.
+    if fx.get("target", "enemy") == "enemy" and targets and not targets[0].aura:
+        aura_targets = [e for e in state.living_enemies if e.aura]
+        if aura_targets:
+            targets = [min(aura_targets, key=lambda e: e.hp)]
+    for enemy in targets:
         reactions.resolve_hit(state, enemy, "anemo", 0)
 
 

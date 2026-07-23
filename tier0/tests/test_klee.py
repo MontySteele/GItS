@@ -139,6 +139,31 @@ def test_survival_sprint_companion_interfaces_have_live_bodies():
     assert loader.get_card("elemental_ecstasy+").cost == 1
 
 
+def test_prune_has_a_solo_floor_and_a_distinct_reaction_payoff():
+    """Prune never blanks, but successful Swirl does not also grant Block."""
+    from tier0.engine import effects
+    from tier0.tests.conftest import make_enemy, make_state
+
+    prune = loader.get_card("prune_witch_hunt")
+
+    offline = make_state()
+    effects.resolve_card(offline, prune)
+    assert offline.player.block == 5
+    assert offline.player.sparks == 1
+    assert offline.reactions_this_card == 0
+
+    # The generic simulator normally aims at the lowest-HP enemy. Swirl is a
+    # targeted setup card, so it should model a human choosing the aura instead.
+    online = make_state(enemies=[make_enemy(hp=20, name="low"),
+                                 make_enemy(hp=30, name="aura")])
+    online.enemies[1].aura = "hydro"
+    effects.resolve_card(online, prune)
+    assert online.player.block == 0
+    assert online.player.sparks == 2
+    assert online.reactions_this_card == 1
+    assert all(enemy.aura == "hydro" for enemy in online.enemies)
+
+
 def test_pilot_reads_klee_pure_state_conditional_block():
     """Combat scoring sees Block that is live before the card is played."""
     from tier0.pilot import policy

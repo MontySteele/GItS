@@ -93,16 +93,15 @@ reginas_mercy:         {encore: +3}          # 10->13
 command_performance:   {generate_cost_override: 0}   # both guests cost 0 (Discovery parity)
 
 # ---- FONTAINE COMPANIONS (modest single bumps; upgraded forms stay enabler-grade — guardrail 3 applies) ----
-chevreuse_interdiction_fire: {damage: +2}    # 5->7
+chevreuse_interdiction_fire: {damage: +2}    # 7->9
 chevreuse_vanguards_valor:   {buff: +2}      # base next-attack 3->5; reaction rider stays 3
-chevreuse_bursting_grenades: {damage: +2}    # 7->9 all. WATCH-ITEM (redpen a2): under 1.5x Spotlight this is 13 all —
-                                             # the named strongest thing the baseline creates; +2 not +3 is deliberate.
-lynette_enigmatic_feint:     {block: +2}     # 3->5; swirl untouched
+chevreuse_bursting_grenades: {damage: +2}    # 10->12 all; mass Pyro application keeps the card at 2 cost.
+lynette_enigmatic_feint:     {block: +2}     # 5->7; swirl untouched
 lynette_box_trick:           {draw: +1}      # 2->3
-lynette_astonishing_shift:   {damage: +2}    # AoE rider 4->6 (still applies_element: false)
-charlotte_freezing_point:    {damage: +2}    # 3->5; her ONE Cryo application does not multiply (budget holds)
-charlotte_enduring_frosthelm: {block: +2}    # now-block 3->5; next-turn block stays 3
+lynette_astonishing_shift:   {damage: +2}    # AoE rider 4->6; base cost is now 1
+charlotte_freezing_point:    {damage: +2}    # 4->6; her ONE Cryo application does not multiply
+charlotte_enduring_frosthelm: {block: +2}    # now-block 4->6; next-turn Block stays 4
 charlotte_snappy_silhouette: {vulnerable: +1}    # 2->3
-freminet_pers_deploy:        {damage: +2}    # 5->7
-freminet_pressurized_floe:   {damage: +2}    # 8->10 (still applies_element: false)
+freminet_pers_deploy:        {damage: +2}    # 6->8
+freminet_pressurized_floe:   {damage: +2}    # 10->12; Block stays 6 (still applies_element: false)
 freminet_shattering_pressure: {power_amount: +2} # Shatter bonus +4->+6 (grammar row 2: +2 at base 4-6)

@@ -5,7 +5,7 @@
 
 # ---------- 4-STAR (common/uncommon) ----------
 - {id: dahlia_sacramental_shower, name: "Dahlia — Sacramental Shower", star: 4, rarity: common, role_c: applier, element: hydro, cost: 1, type: attack,
-   effects: [{op: damage, amount: 4, target: enemy, applies_element: true}]}
+   effects: [{op: damage, amount: 6, target: enemy, applies_element: true}]}
 - {id: dahlia_favonian_favor, name: "Dahlia — Favonian Favor", star: 4, rarity: uncommon, role_c: applier, element: hydro, cost: 1, type: skill,
    effects: [{op: block, amount: 5}, {op: apply_aura, element: hydro, target: random_enemy}]}
 - {id: fischl_nightrider, name: "Fischl — Nightrider", star: 4, rarity: common, role_c: applier, element: electro, cost: 1, type: attack,
@@ -15,33 +15,39 @@
 # R8 healing-law conversions (conjunctive law: true heal = Rare AND Exhausts;
 # 4-stars cap at uncommon, so no 4-star companion may true-heal):
 - {id: barbara_melody, name: "Barbara — Soothing Melody", star: 4, rarity: common, role_c: buffer, element: hydro, cost: 1, type: skill,
-   effects: [{op: block, amount: 4}, {op: burst_energy, amount: 4}]}
-   # Song inspires: modest block + meter. Bennett Passion pricing precedent (rider + burst_energy at 1 cost).
+   effects: [{op: block, amount: 6}, {op: burst_energy, amount: 4}]}
+   # Song inspires: reliable one-energy defense plus a small Burst-meter rider.
 - {id: barbara_shining_idol, name: "Barbara — Shining Idol", star: 4, rarity: uncommon, role_c: buffer, element: hydro, cost: 1, type: skill,
    effects: [{op: block, amount: 5}, {op: apply_aura, element: hydro, target: random_enemy}, {op: draw, amount: 1}]}
    # Playtest 2026-07-22: the cantrip does not justify a full extra energy on an energy-starved character.
-- {id: sucrose_gust, name: "Sucrose — Wind Spirit Creation", star: 4, rarity: common, role_c: trigger, element: anemo, cost: 1, type: skill,
+- {id: sucrose_gust, name: "Sucrose — Wind Spirit Creation", star: 4, rarity: common, role_c: trigger, element: anemo, cost: 0, type: skill,
    effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
-- {id: sucrose_astable, name: "Sucrose — Astable Anemohypostasis", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 2, type: skill,
+- {id: sucrose_astable, name: "Sucrose — Astable Anemohypostasis", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 1, type: skill,
    effects: [{op: swirl, target: enemy}, {op: burst_energy, amount: 8}]}
-- {id: bennett_passion, name: "Bennett — Passion Overload", star: 4, rarity: common, role_c: buffer, element: pyro, cost: 1, type: skill,
+- {id: bennett_passion, name: "Bennett — Passion Overload", star: 4, rarity: common, role_c: buffer, element: pyro, cost: 0, type: skill,
    effects: [{op: buff_next_attack, amount: 4}, {op: burst_energy, amount: 5}]}
-- {id: bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage", star: 4, rarity: uncommon, role_c: buffer, element: pyro, cost: 2, type: skill,
+- {id: bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage", star: 4, rarity: uncommon, role_c: buffer, element: pyro, cost: 1, type: skill,
    effects: [{op: block, amount: 4}, {op: apply_power, power: attack_up_this_turn, amount: 3, target: self}]}
    # R8 conversion: the field grants courage instead of HP; value profile unchanged.
 - {id: kaeya_frostgnaw, name: "Kaeya — Frostgnaw", star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: attack,
-   effects: [{op: damage, amount: 5, target: enemy, applies_element: true}]}
+   effects: [{op: damage, amount: 6, target: enemy, applies_element: true}]}
 - {id: diona_icy_paws, name: "Diona — Icy Paws", star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: skill,
    effects: [{op: block, amount: 5}, {op: apply_aura, element: cryo, target: random_enemy}]}
 
 # ---------- 5-STAR (rare, one card each, max 3 per nation) ----------
 - {id: albedo_solar_isotoma, name: "Albedo — Solar Isotoma", star: 5, rarity: rare, role_c: trigger, element: geo, cost: 1, type: power,
    effects: [{op: apply_power, power: solar_isotoma, amount: 3, target: self, consumes_aura: true, note: "3 turns: your attacks vs aura'd enemies grant 3 block (Crystallize engine)"}]}
-- {id: durin_witchs_flame, name: "Durin — Witch's Flame", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 2, type: power,
+- {id: durin_witchs_flame, name: "Durin — Witch's Flame", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 1, type: power,
    effects: [{op: apply_power, power: witchs_flame, amount: 30, target: self, note: "PERCENT: amplifying reactions +30%; end of turn 4 dmg + pyro to random enemy. Support payoff: routes through player's reactions."}]}
 - {id: nicole_celestial_gift, name: "Nicole — Celestial Gift", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 2, type: power,
    effects: [{op: apply_power, power: celestial_gift, amount: 2, target: self, note: "your attacks +2 dmg; gain 4 block at start of turn"}]}
 
 # ---------- PERSONAL POOL (Klee — designated teammate, not in shared pool) ----------
 - {id: prune_witch_hunt, name: "Prune — Little Witch's Hunt", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 1, type: skill, personal_pool: klee,
-   effects: [{op: swirl, target: all_enemies}, {op: gain_spark, amount: 1}]}
+   effects: [{op: swirl, target: enemy}, {op: conditional, if: reaction_triggered_by_this, then: [{op: gain_spark, amount: 1}], else: [{op: block, amount: 5}]}, {op: gain_spark, amount: 1}]}
+   # Swirl already spreads the consumed aura to every enemy; targeting ALL
+   # cascaded through those freshly spread auras and over-triggered reactions.
+   # The fallback is mutually exclusive with Swirl, so Prune has a Defend-sized
+   # body when drawn alone. A successful Swirl instead pays a second Spark,
+   # making her the reaction starter's energy-cheating support rather than a
+   # flat bundle of stats.

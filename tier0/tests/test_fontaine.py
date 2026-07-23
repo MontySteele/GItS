@@ -150,10 +150,10 @@ def test_reactions_this_turn_resets_at_turn_start():
 def test_frosthelm_blocks_now_and_next_turn():
     st = make_state(enemies=[make_enemy(hp=200)])
     effects.resolve_card(st, loader.get_card("charlotte_enduring_frosthelm"))
-    assert st.player.block == 3
-    assert st.player.powers["block_next_turn"] == 3
+    assert st.player.block == 4
+    assert st.player.powers["block_next_turn"] == 4
     combat._player_turn(st, lambda s: None)   # resets block, then trigger
-    assert st.player.block == 3
+    assert st.player.block == 4
     assert "block_next_turn" not in st.player.powers   # consumed, no carry
 
 
@@ -174,7 +174,7 @@ def test_shatter_bonus_adds_to_shatter_damage():
     shatters = [ev for ev in st.log if ev["event"] == "damage"
                 and ev.get("source") == "shatter"]
     assert shatters and shatters[-1]["base"] == C.SHATTER_DAMAGE + 4
-    assert hp_before - e.hp == 8 + C.SHATTER_DAMAGE + 4
+    assert hp_before - e.hp == 10 + C.SHATTER_DAMAGE + 4
 
 
 def test_backstroke_applies_no_element():

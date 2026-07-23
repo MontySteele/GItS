@@ -50,6 +50,13 @@ starting_deck:
   - duck_and_cover
   - jumpy_dumpty
   - pop
+# Tier 0.5 / the shipped mod replaces one basic Attack and one basic defense
+# at run creation. Both rolls are deliberately Mondstadt-only: Klee starts
+# with one reliable off-element applier, while Barbara and Prune compete for
+# the support slot without precommitting the deck to a single reaction.
+randomized_starter:
+  attack: {replace: kaboom, choices: [dahlia_sacramental_shower, kaeya_frostgnaw]}
+  support: {replace: duck_and_cover, choices: [barbara_melody, prune_witch_hunt]}
 packages:
   # Round-3 principle: archetype packages model PLAUSIBLE DRAFTS, not
   # monocultures — each carries its natural cross-archetype draft-ins.

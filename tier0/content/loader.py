@@ -354,8 +354,30 @@ def build_player_from_ids(character_id: str, card_ids: list[str],
                                if spec.get("fanfare") else 0))
 
 
-def starting_deck(character_id: str) -> list[str]:
-    return list(_character_index()[character_id]["starting_deck"])
+def starting_deck(character_id: str, rng=None) -> list[str]:
+    """Return the printed starter, optionally resolving its run-start rolls.
+
+    Tier 0's frozen starter scorecards call this without an RNG and retain the
+    canonical basic deck. Tier 0.5 passes a dedicated per-run stream so Klee's
+    Mondstadt Companion pair is deterministic without perturbing encounters,
+    rewards, or any previously calibrated run randomness.
+    """
+    spec = _character_index()[character_id]
+    deck = list(spec["starting_deck"])
+    if rng is None:
+        return deck
+    for slot in spec.get("randomized_starter", {}).values():
+        replaced = slot["replace"]
+        if replaced not in deck:
+            raise ValueError(
+                f"{character_id}: randomized starter cannot replace "
+                f"missing card {replaced!r}")
+        choices = list(slot["choices"])
+        if not choices:
+            raise ValueError(
+                f"{character_id}: randomized starter has no choices")
+        deck[deck.index(replaced)] = rng.choice(choices)
+    return deck
 
 
 def character_packages(character_id: str) -> dict[str, list[str]]:

@@ -56,7 +56,7 @@ def test_skill_cadence_applies_element_on_skills_not_attacks():
 def test_skill_cadence_never_touches_companion_cards():
     st = furina_state()
     # Lynette's AoE rider is explicitly applies_element: false; the plain
-    # 8-dmg Backstroke hit must not pick up hydro from her cadence either.
+    # Backstroke's untagged hit must not pick up hydro from her cadence.
     effects.resolve_card(st, loader.get_card("freminet_pressurized_floe"))
     assert st.enemies[0].aura is None
 
@@ -306,15 +306,15 @@ def test_spotlight_empowers_damage_and_block_only():
     st.player.powers["spotlight_mult_bonus"] = 50    # e.g. two top_billing
     e = st.enemies[0]
     mult = C.SPOTLIGHT_BASE_MULT + 0.5
-    # Damage: Freezing Point prints 3 -> int(3 * mult).
+    # Damage: Freezing Point prints 4 -> int(4 * mult).
     _stock_deck(st.player, "charlotte_freezing_point")   # draw target
     effects.resolve_card(st, loader.get_card("charlotte_freezing_point"))
     dmg = [ev for ev in st.log if ev["event"] == "damage"][0]
-    assert dmg["base"] == int(3 * mult)
-    # Block: Frosthelm prints 3 now + 3 next turn -> scaled both.
+    assert dmg["base"] == int(4 * mult)
+    # Block: Frosthelm prints 4 now + 4 next turn -> scaled both.
     effects.resolve_card(st, loader.get_card("charlotte_enduring_frosthelm"))
-    assert st.player.block == int(3 * mult)
-    assert st.player.powers["block_next_turn"] == int(3 * mult)
+    assert st.player.block == int(4 * mult)
+    assert st.player.powers["block_next_turn"] == int(4 * mult)
     # §2.2a extension: numbers only, never turn-economy or power stacks --
     # Snappy Silhouette's Vulnerable 2 and cantrip stay printed.
     effects.resolve_card(st, loader.get_card("charlotte_snappy_silhouette"))
@@ -326,7 +326,7 @@ def test_unspotlighted_and_untagged_cards_unchanged():
     st.player.spotlight = "charlotte"
     effects.resolve_card(st, loader.get_card("chevreuse_interdiction_fire"))
     dmg = [ev for ev in st.log if ev["event"] == "damage"][0]
-    assert dmg["base"] == 5                  # not the designated character
+    assert dmg["base"] == 7                  # not the designated character
     st2 = furina_state()
     st2.player.spotlight = "furina"
     effects.resolve_card(st2, loader.get_card("strike"))   # untagged

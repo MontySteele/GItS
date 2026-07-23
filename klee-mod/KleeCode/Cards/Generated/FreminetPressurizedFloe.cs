@@ -54,8 +54,8 @@ public sealed class FreminetPressurizedFloe : CustomCardModel, ICompanionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(8m, ValueProp.Move),
-            new BlockVar(4m, ValueProp.Move)
+            new DamageVar(10m, ValueProp.Move),
+            new BlockVar(6m, ValueProp.Move)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in

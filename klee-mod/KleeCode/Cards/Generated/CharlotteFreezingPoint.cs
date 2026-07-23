@@ -64,7 +64,7 @@ public sealed class CharlotteFreezingPoint : CustomCardModel, IElementalCard, IC
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(3m, ValueProp.Move),
+            new DamageVar(4m, ValueProp.Move),
             new CardsVar(1)
         };
 
