@@ -183,6 +183,25 @@ if (-not (Test-Path $venvPython)) {
 }
 
 # ---------------------------------------------------------------------------
+# S6a. Generated roster cards and blocker manifests must match their sheets.
+#
+# This is the character-aware entry point: it checks Klee's shipping output
+# and every staged future-character tranche. A blocked card is valid; a stale
+# or silently approximated generated card is not.
+# ---------------------------------------------------------------------------
+$rosterCodegen = Join-Path $repoRoot 'tools\gen_roster_cards.py'
+if (-not (Test-Path $venvPython)) {
+    Fail 'S6a' "repo venv python not found at $venvPython; cannot check roster codegen."
+} elseif (-not (Test-Path $rosterCodegen)) {
+    Fail 'S6a' "tools/gen_roster_cards.py is missing."
+} else {
+    $codegenOut = & $venvPython $rosterCodegen --check
+    if ($LASTEXITCODE -ne 0) {
+        Fail 'S6a' "roster codegen is stale:`n    $($codegenOut -join "`n    ")"
+    }
+}
+
+# ---------------------------------------------------------------------------
 # S6b. Every card class belongs to a card pool.
 #
 # Playtest 2026-07-21: companions, the kit Burst card and the Confiscated token

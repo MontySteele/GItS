@@ -60,12 +60,13 @@ Copy-Item $dll -Destination $stage
 # Card art ships as loose PNGs next to the dll -- no .pck needed, because
 # BaseLib's CustomPortrait accepts a Texture2D object we build at runtime.
 # Source of truth is the art pipeline's output dir, which is gitignored.
-# KleeArt.CardPortrait looks up images/cards/<cardId>.png -- one FLAT dir keyed
+# RosterArt.CardPortrait looks up images/cards/<cardId>.png -- one FLAT dir keyed
 # by sheet id. The pipeline keeps Klee cards and companion cards in separate
 # source dirs, so both are staged into that one flat destination. Ids are unique
 # across the two sheets, so nothing collides.
 $artSrcDirs = @(
     (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\klee'),
+    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\furina'),
     (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\companions')
 )
 $artDst = Join-Path $stage 'images\cards'

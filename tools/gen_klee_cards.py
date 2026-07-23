@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
 """
-Emit C# card classes for Klee from the canonical YAML design sheet.
+Emit C# card classes from canonical character YAML design sheets.
 
-The sheet (docs/klee-cards.yaml) is the single source of truth through
-implementation, per spec C2. This script owns the mechanical subset of it --
-cards whose whole behaviour is damage / block / draw / self-HP-loss -- and
-refuses to guess at anything else.
+The historical filename remains the Klee-compatible entry point. Character
+profiles now own sheet, output, namespace, element cadence, and identity;
+tools/gen_roster_cards.py runs every profile. Each sheet remains the single
+source of truth through implementation, per spec C2. The emitter owns only
+mechanics backed by verified C# APIs and refuses to guess at anything else.
 
 WHAT IT DELIBERATELY WILL NOT DO
 --------------------------------
-Cards with bombs, sparks, burst energy, conditionals, X costs, or formula-driven
-values are NOT emitted. They depend on systems that do not exist yet, and a
-generator that emits a plausible-looking wrong body is worse than one that emits
-nothing: the C# would compile, ship, and silently misplay. Those cards are
-listed in the manifest with the op that blocked them, and are hand-finished.
+Any effect, card-level cost, condition, or lifecycle rule without an implemented
+runtime is NOT emitted. A generator that emits a plausible-looking wrong body
+is worse than one that emits nothing: the C# would compile, ship, and silently
+misplay. Blocked cards are listed in the character manifest with the exact
+semantic reason.
 
 Every emitted file carries a DO-NOT-EDIT header naming this script and the
 sheet, so a hand edit is visibly wrong rather than quietly lost on regen.
 
-Usage:  python tools/gen_klee_cards.py [--check]
+Usage:  python tools/gen_klee_cards.py [--check] [--character klee|furina|all]
+        python tools/gen_roster_cards.py [--check]
         --check exits nonzero if regenerating would change anything (CI guard).
 """
 
@@ -28,6 +30,7 @@ import argparse
 import json
 import re
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
@@ -50,6 +53,84 @@ COMPANION_SHEETS = ((REPO / "docs" / "mondstadt-companions.yaml", "mondstadt"),
                     (REPO / "docs" / "fontaine-companions.yaml", "fontaine"))
 OUT_DIR = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated"
 MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.json"
+FURINA_SHEET = REPO / "docs" / "furina-cards.yaml"
+FURINA_OUT_DIR = (
+    REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina" / "Generated"
+)
+FURINA_MANIFEST = FURINA_OUT_DIR / "manifest.json"
+
+
+@dataclass(frozen=True)
+class CharacterProfile:
+    """Character-specific rules that the shared card emitter must not infer.
+
+    The original generator predates the roster mod and baked Klee's sheet,
+    namespace, Pyro cadence, and art helper directly into emitted classes.
+    Keeping those choices in a profile makes adding a character an explicit
+    data operation while leaving Klee's existing output stable.
+    """
+
+    character_id: str
+    sheet: Path
+    out_dir: Path
+    manifest: Path
+    namespace: str
+    native_element: str
+    cadence: str
+    generator_script: str
+    art_loader: str
+    emit_character_identity: bool = False
+
+    def damage_applies_element(self, card: dict) -> bool:
+        """Whether this character card's damaging effects carry its element."""
+        if self.cadence == "catalyst_attack":
+            return card.get("type") == "attack"
+        if self.cadence == "skill_grade":
+            tags = set(card.get("tags", []))
+            has_damage = any(
+                effect.get("op") == "damage"
+                and effect.get("target") != "self"
+                for effect in card.get("effects", [])
+            )
+            return has_damage and (
+                card.get("type") == "skill"
+                or "skill_tag" in tags
+                or "burst_tag" in tags
+            )
+        raise ValueError(
+            f"{self.character_id}: unknown elemental cadence {self.cadence!r}"
+        )
+
+
+KLEE_PROFILE = CharacterProfile(
+    character_id="klee",
+    sheet=SHEET,
+    out_dir=OUT_DIR,
+    manifest=MANIFEST,
+    namespace="KleeMod.Cards.Generated",
+    native_element="pyro",
+    cadence="catalyst_attack",
+    generator_script="tools/gen_klee_cards.py",
+    art_loader="KleeArt",
+)
+
+FURINA_PROFILE = CharacterProfile(
+    character_id="furina",
+    sheet=FURINA_SHEET,
+    out_dir=FURINA_OUT_DIR,
+    manifest=FURINA_MANIFEST,
+    namespace="KleeMod.Cards.Furina.Generated",
+    native_element="hydro",
+    cadence="skill_grade",
+    generator_script="tools/gen_roster_cards.py",
+    art_loader="RosterArt",
+    emit_character_identity=True,
+)
+
+PROFILES = {
+    KLEE_PROFILE.character_id: KLEE_PROFILE,
+    FURINA_PROFILE.character_id: FURINA_PROFILE,
+}
 
 # Ops this generator can express with verified Cmd APIs. Anything else blocks
 # the card. Keep this set honest -- widening it without a verified call site is
@@ -372,6 +453,36 @@ TARGET_CS = {
     "self": "TargetType.Self",
 }
 
+# A card-level field can alter playability or lifecycle without appearing in
+# effects. Treating unknown fields as harmless metadata is therefore unsafe:
+# that is how an Encore/Fanfare cost could otherwise disappear while the body
+# still compiles. Descriptive/draft metadata is allowlisted beside every
+# currently implemented lifecycle field.
+CARD_FIELDS = {
+    "id", "name", "cost", "type", "rarity", "solve", "archetypes", "role",
+    "effects", "tags", "exhaust", "kit_card", "requires",
+    # Companion identity/reward metadata.
+    "star", "element", "role_c", "personal_pool", "nation", "character",
+    "guest_star",
+    # Furina resource gates. These are known grammar, but remain blockers
+    # until their runtime spend/check hooks land.
+    "encore_cost", "fanfare_cost",
+}
+
+
+def card_level_reason(
+    card: dict, profile: CharacterProfile = KLEE_PROFILE
+) -> str | None:
+    """Return a blocker for card-level semantics the emitter cannot honor."""
+    unknown = set(card) - CARD_FIELDS
+    if unknown:
+        return f"card field(s) {sorted(unknown)} not understood"
+    if card.get("encore_cost") is not None:
+        return "encore_cost (Furina runtime resource gate not implemented)"
+    if card.get("fanfare_cost") is not None:
+        return "fanfare_cost (Furina runtime resource gate not implemented)"
+    return None
+
 
 def pascal(card_id: str) -> str:
     """kaboom -> Kaboom, sorry_jean -> SorryJean, jumpy_dumpty_mk2 -> JumpyDumptyMk2."""
@@ -422,9 +533,15 @@ def _x_expr(val, bombs_var: bool = False) -> str:
     return f"x + {n}"
 
 
-def blocked_reason(card: dict) -> str | None:
+def blocked_reason(
+    card: dict, profile: CharacterProfile = KLEE_PROFILE
+) -> str | None:
     """Return why this card cannot be generated, or None if it can."""
-    if card["id"] in HAND_WRITTEN:
+    card_reason = card_level_reason(card, profile)
+    if card_reason:
+        return card_reason
+
+    if profile is KLEE_PROFILE and card["id"] in HAND_WRITTEN:
         return "hand-written"
 
     if is_companion(card):
@@ -2208,7 +2325,9 @@ def build_upgrade(card: dict) -> list[str]:
     return lines
 
 
-def emit(card: dict) -> str:
+def emit(
+    card: dict, profile: CharacterProfile = KLEE_PROFILE
+) -> str:
     cls = pascal(card["id"])
     is_attack = card["type"] == "attack"
     # Sheet header: "ALL attacks apply pyro; applies_element omitted = true for
@@ -2222,8 +2341,8 @@ def emit(card: dict) -> str:
                         for e in card.get("effects", []))
         element_cs = ELEMENT_CS[card["element"]]
     else:
-        elemental = is_attack
-        element_cs = "Element.Pyro"
+        elemental = profile.damage_applies_element(card)
+        element_cs = ELEMENT_CS[profile.native_element]
 
     # UI affordances derive from the same mechanics as play resolution.
     # A damage-bearing IElementalCard supplies its card element; apply-only
@@ -2246,7 +2365,9 @@ def emit(card: dict) -> str:
     }
     aura_elements = []
     if elemental:
-        source_element = card["element"] if is_companion(card) else "pyro"
+        source_element = (
+            card["element"] if is_companion(card) else profile.native_element
+        )
         if source_element in aura_keyword_by_element:
             aura_elements.append(source_element)
     for e in card.get("effects", []):
@@ -2299,6 +2420,8 @@ def emit(card: dict) -> str:
         interfaces += ", IElementalCard"
     if is_companion(card):
         interfaces += ", ICompanionCard"
+    elif profile.emit_character_identity:
+        interfaces += ", ICharacterCard"
     # Sheet `skill_tag` -> ISkillTagCard: worth BURST_PER_SKILL_TAG burst
     # energy when played (KleeElementalHooks.AfterCardPlayed reads the marker).
     if "skill_tag" in card.get("tags", []):
@@ -2325,9 +2448,22 @@ def emit(card: dict) -> str:
             f"    public Element Element => {element_cs};\n"
         )
     elif elemental:
-        element_member = (
-            "\n    /// <summary>Sheet: all Klee attacks apply Pyro (catalyst-grade cadence).</summary>\n"
-            "    public Element Element => Element.Pyro;\n"
+        if profile is KLEE_PROFILE:
+            element_member = (
+                "\n    /// <summary>Sheet: all Klee attacks apply Pyro (catalyst-grade cadence).</summary>\n"
+                "    public Element Element => Element.Pyro;\n"
+            )
+        else:
+            element_member = (
+                "\n    /// <summary>Sheet cadence: damaging Skills, Burst-tagged cards, "
+                "and skill-tagged cards apply Hydro.</summary>\n"
+                f"    public Element Element => {element_cs};\n"
+            )
+    if profile.emit_character_identity and not is_companion(card):
+        element_member += (
+            "\n    /// <summary>Roster identity used by character-aware mechanics "
+            "such as Spotlight.</summary>\n"
+            f'    public string CharacterId => "{profile.character_id}";\n'
         )
     if is_companion(card):
         personal = card.get("personal_pool")
@@ -2390,13 +2526,43 @@ def emit(card: dict) -> str:
     hover_using = (
         "\nusing MegaCrit.Sts2.Core.HoverTips;" if tooltip_member else "")
 
+    source_header = (
+        "//     Generated by tools/gen_klee_cards.py from docs/klee-cards.yaml.\n"
+        if profile is KLEE_PROFILE
+        else (
+            f"//     Generated by {profile.generator_script} from "
+            f"docs/{profile.sheet.name}.\n"
+        )
+    )
+    upgrade_header = (
+        "//     Upgrade deltas come from docs/klee-upgrades.yaml (R24 2026-07-20: the\n"
+        "//     upgrades sheet is the single source of truth; codegen defaults abolished).\n"
+        if profile is KLEE_PROFILE
+        else (
+            f"//     Upgrade deltas come from docs/{profile.character_id}-upgrades.yaml; "
+            "unexpressible deltas block the upgrade path.\n"
+        )
+    )
+    extra_usings = ""
+    if profile is not KLEE_PROFILE:
+        extra_usings = "\nusing KleeMod;\nusing KleeMod.Cards;"
+    pool_comment = (
+        "    // autoAdd: false -- KleeCardPool declares pool membership itself in\n"
+        "    // GenerateAllCards. BaseLib's auto-registration would need a [Pool]\n"
+        "    // attribute and would register every card a second time."
+        if profile is KLEE_PROFILE
+        else (
+            "    // autoAdd: false -- the character-aware roster pool owns membership.\n"
+            "    // Partially generated character sheets must never auto-register cards."
+        )
+    )
+
     return f'''// <auto-generated>
-//     Generated by tools/gen_klee_cards.py from docs/klee-cards.yaml.
+{source_header.rstrip()}
 //     DO NOT EDIT. Edits are lost on the next regen -- change the sheet instead.
 //
 //     Sheet entry: id={card["id"]} rarity={card["rarity"]} cost={card["cost"]}
-//     Upgrade deltas come from docs/klee-upgrades.yaml (R24 2026-07-20: the
-//     upgrades sheet is the single source of truth; codegen defaults abolished).
+{upgrade_header.rstrip()}
 // </auto-generated>
 
 // Roslyn treats <auto-generated> files as outside the project's nullable
@@ -2410,7 +2576,7 @@ using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using Godot;
 using KleeMod.Elements;
-using KleeMod.Powers;
+using KleeMod.Powers;{extra_usings}
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -2420,11 +2586,11 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
-namespace KleeMod.Cards.Generated;
+namespace {profile.namespace};
 
 public sealed class {cls} : {interfaces}
 {{{element_member}{keywords_member}{tooltip_member}
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("{card["id"]}");
+    public override Texture2D? CustomPortrait => {profile.art_loader}.CardPortrait("{card["id"]}");
 
     public override List<(string, string)>? Localization => new()
     {{
@@ -2438,9 +2604,7 @@ public sealed class {cls} : {interfaces}
             {vars_cs}
         }};
 
-    // autoAdd: false -- KleeCardPool declares pool membership itself in
-    // GenerateAllCards. BaseLib's auto-registration would need a [Pool]
-    // attribute and would register every card a second time.
+{pool_comment}
     public {cls}()
         : base({0 if str(card["cost"]) == "X" else card["cost"]}, {TYPE_CS[card["type"]]}, {RARITY_CS[card["rarity"]]}, {target_type}, autoAdd: false)
     {{
@@ -2459,11 +2623,7 @@ public sealed class {cls} : {interfaces}
 '''
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--check", action="store_true", help="fail if output would change")
-    args = ap.parse_args()
-
+def _run_klee(check: bool) -> int:
     cards = yaml.safe_load(SHEET.read_text(encoding="utf-8"))
 
     generated, blocked, no_upgrade = {}, {}, {}
@@ -2563,7 +2723,7 @@ public static class CompanionRoster
     }
     manifest_src = json.dumps(manifest, indent=2) + "\n"
 
-    if args.check:
+    if check:
         stale = []
         for cid, src in generated.items():
             p = OUT_DIR / f"{pascal(cid)}.cs"
@@ -2607,6 +2767,195 @@ public static class CompanionRoster
     for cid, why in sorted(no_upgrade.items()):
         print(f"  no upgrade path: {cid} -- {why}")
     return 0
+
+
+def _furina_runtime_cluster(card: dict, reason: str) -> str:
+    """Stable workstream labels for Furina's blocked coverage manifest."""
+    effects = card.get("effects", [])
+    ops = {effect.get("op") for effect in effects}
+    powers = {
+        effect.get("power")
+        for effect in effects
+        if effect.get("op") == "apply_power"
+    }
+    predicates = {
+        effect.get("if")
+        for effect in effects
+        if effect.get("op") == "conditional"
+    }
+    if (
+        reason.startswith(("encore_cost", "fanfare_cost"))
+        or ops
+        & {
+            "gain_encore",
+            "spend_encore",
+            "raise_fanfare_cap",
+        }
+        or any("fanfare" in str(power) for power in powers)
+        or any("fanfare" in str(predicate) for predicate in predicates)
+    ):
+        return "encore_fanfare_resources"
+    if (
+        any("salon" in str(power) for power in powers)
+        or any("salon" in str(predicate) for predicate in predicates)
+    ):
+        return "salon"
+    if (
+        "spotlight" in reason
+        or "companion" in reason
+        or any("spotlight" in str(power) for power in powers)
+        or any("spotlight" in str(predicate) for predicate in predicates)
+    ):
+        return "spotlight"
+    if "guest" in reason:
+        return "guest_stars"
+    if reason.startswith("kit card"):
+        return "kit_burst"
+    if "heal" in reason:
+        return "healing"
+    if "raise_fanfare_cap" in reason:
+        return "encore_fanfare_resources"
+    return "shared_emitter_gap"
+
+
+def _run_furina(check: bool) -> int:
+    """Emit the runtime-safe Furina subset and a complete blocker manifest.
+
+    A partial character pool is intentionally inert: generated classes use
+    autoAdd:false and no Furina pool references them until all runtime clusters
+    exist. This lets codegen advance without accidentally shipping a partial
+    reward pool.
+    """
+    cards = yaml.safe_load(FURINA_PROFILE.sheet.read_text(encoding="utf-8"))
+    generated: dict[str, str] = {}
+    blocked: dict[str, str] = {}
+    no_upgrade: dict[str, str] = {}
+
+    for card in cards:
+        reason = blocked_reason(card, FURINA_PROFILE)
+        if reason:
+            blocked[card["id"]] = reason
+            continue
+        generated[card["id"]] = emit(card, FURINA_PROFILE)
+        _, upgrade_reason = upgrade_plan(card)
+        if upgrade_reason:
+            no_upgrade[card["id"]] = upgrade_reason
+
+    clusters: dict[str, list[str]] = {}
+    cards_by_id = {card["id"]: card for card in cards}
+    for card_id, reason in blocked.items():
+        cluster = _furina_runtime_cluster(cards_by_id[card_id], reason)
+        clusters.setdefault(cluster, []).append(card_id)
+
+    manifest = {
+        "_comment": (
+            "Generated by tools/gen_roster_cards.py from docs/furina-cards.yaml. "
+            "Only cards whose complete runtime grammar is implemented are emitted. "
+            "Blocked cards are not auto-registered or added to a partial pool."
+        ),
+        "profile": {
+            "character": FURINA_PROFILE.character_id,
+            "element": FURINA_PROFILE.native_element,
+            "cadence": (
+                "damage on Skill, skill_tag, or burst_tag cards applies Hydro; "
+                "plain Attacks do not"
+            ),
+            "namespace": FURINA_PROFILE.namespace,
+        },
+        "coverage": {
+            "total": len(cards),
+            "generated": len(generated),
+            "blocked": len(blocked),
+        },
+        "generated": sorted(generated),
+        "blocked": dict(sorted(blocked.items())),
+        "runtime_clusters": {
+            key: sorted(value) for key, value in sorted(clusters.items())
+        },
+        "upgrades": {
+            "_comment": (
+                "docs/furina-upgrades.yaml is authoritative. A generated card "
+                "listed below ships without an upgrade until its full delta is "
+                "expressible; partial upgrade application is forbidden."
+            ),
+            "no_upgrade_path": dict(sorted(no_upgrade.items())),
+        },
+    }
+    manifest_src = json.dumps(manifest, indent=2) + "\n"
+
+    if check:
+        stale = []
+        for card_id, source in generated.items():
+            path = FURINA_PROFILE.out_dir / f"{pascal(card_id)}.cs"
+            if not path.exists() or path.read_text(encoding="utf-8") != source:
+                stale.append(card_id)
+        expected_files = {f"{pascal(card_id)}.cs" for card_id in generated}
+        actual_files = {
+            path.name for path in FURINA_PROFILE.out_dir.glob("*.cs")
+        }
+        extra_files = sorted(actual_files - expected_files)
+        manifest_stale = (
+            not FURINA_PROFILE.manifest.exists()
+            or FURINA_PROFILE.manifest.read_text(encoding="utf-8")
+            != manifest_src
+        )
+        if stale or extra_files or manifest_stale:
+            if stale:
+                print(
+                    f"stale Furina generated cards: {', '.join(sorted(stale))}",
+                    file=sys.stderr,
+                )
+            if extra_files:
+                print(
+                    f"stale Furina generated files: {', '.join(extra_files)}",
+                    file=sys.stderr,
+                )
+            if manifest_stale:
+                print("stale Furina generated manifest", file=sys.stderr)
+            return 1
+        print("gen_roster_cards: furina up to date")
+        return 0
+
+    FURINA_PROFILE.out_dir.mkdir(parents=True, exist_ok=True)
+    for old in FURINA_PROFILE.out_dir.glob("*.cs"):
+        old.unlink()
+    for card_id, source in generated.items():
+        path = FURINA_PROFILE.out_dir / f"{pascal(card_id)}.cs"
+        path.write_text(source, encoding="utf-8")
+    FURINA_PROFILE.manifest.write_text(manifest_src, encoding="utf-8")
+
+    print(
+        f"furina: generated {len(generated)} cards, "
+        f"blocked {len(blocked)}"
+    )
+    for cluster, card_ids in sorted(clusters.items()):
+        print(f"  {cluster}: {len(card_ids)}")
+    for card_id, why in sorted(no_upgrade.items()):
+        print(f"  no upgrade path: {card_id} -- {why}")
+    return 0
+
+
+def main(
+    argv: list[str] | None = None, *, default_character: str = "klee"
+) -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(
+        "--check", action="store_true", help="fail if output would change"
+    )
+    ap.add_argument(
+        "--character",
+        choices=(*PROFILES, "all"),
+        default=default_character,
+        help="character profile to generate (legacy script defaults to klee)",
+    )
+    args = ap.parse_args(argv)
+
+    results = []
+    if args.character in ("klee", "all"):
+        results.append(_run_klee(args.check))
+    if args.character in ("furina", "all"):
+        results.append(_run_furina(args.check))
+    return max(results, default=0)
 
 
 if __name__ == "__main__":

@@ -5,13 +5,23 @@
   <Import Project="$(MSBuildThisFileDirectory)local.props"
           Condition="Exists('$(MSBuildThisFileDirectory)local.props')" />
 
-  <Target Name="RequireLocalProps" BeforeTargets="PrepareForBuild"
-          Condition="'$(GameDir)' == ''">
-    <Error Text="GameDir is not set. Copy local.props.example to local.props and point GameDir at your Slay the Spire 2 install root." />
-  </Target>
-
+  <!-- Resolve the platform-specific managed assembly directory from GameDir.
+       Forward slashes are accepted by MSBuild on Windows and avoid baking a
+       Windows-only separator into the shared project. GameDataDir may still
+       be set explicitly in local.props for an unusual install layout. -->
   <PropertyGroup>
-    <GameDataDir>$(GameDir)\data_sts2_windows_x86_64</GameDataDir>
+    <GameDataDir Condition="'$(GameDataDir)' == '' and Exists('$(GameDir)/data_sts2_windows_x86_64/sts2.dll')">$(GameDir)/data_sts2_windows_x86_64</GameDataDir>
+    <GameDataDir Condition="'$(GameDataDir)' == '' and Exists('$(GameDir)/SlayTheSpire2.app/Contents/Resources/data_sts2_macos_arm64/sts2.dll')">$(GameDir)/SlayTheSpire2.app/Contents/Resources/data_sts2_macos_arm64</GameDataDir>
+    <GameDataDir Condition="'$(GameDataDir)' == '' and Exists('$(GameDir)/SlayTheSpire2.app/Contents/Resources/data_sts2_macos_x86_64/sts2.dll')">$(GameDir)/SlayTheSpire2.app/Contents/Resources/data_sts2_macos_x86_64</GameDataDir>
   </PropertyGroup>
+
+  <Target Name="RequireLocalProps" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(GameDir)' == ''"
+           Text="GameDir is not set. Copy local.props.example to local.props and point GameDir at your Slay the Spire 2 install root." />
+    <Error Condition="'$(GameDataDir)' == ''"
+           Text="Could not locate the game's managed assembly directory under GameDir. Set GameDataDir explicitly in local.props." />
+    <Error Condition="'$(BaseLibDll)' == '' or !Exists('$(BaseLibDll)')"
+           Text="BaseLibDll is not set or does not exist. Point it at the installed Workshop BaseLib.dll in local.props." />
+  </Target>
 
 </Project>
