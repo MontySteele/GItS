@@ -135,6 +135,27 @@ public sealed class Klee : CustomCharacterModel
     public override string? CustomIconTexturePath =>
         KleePck.Path("klee/ui/char_icon.png");
 
+    public override string? CustomIconOutlineTexturePath =>
+        KleePck.Path("klee/ui/char_icon.png");
+
+    // CharacterModel.AssetPaths preloads four id-derived scenes before any
+    // room starts. CreateCustomVisuals and the texture overrides below affect
+    // instantiation, not that preload list, so all four path overrides are
+    // mandatory even when the visible art is created another way.
+    public override string? CustomVisualPath =>
+        KleePck.Path("klee/model/combat_visuals.tscn");
+
+    public override string? CustomIconPath =>
+        KleePck.Path("klee/ui/character_icon.tscn");
+
+    // Temporary shared base-game surfaces. They are real N* scenes, so unlike
+    // an id-derived missing path they are safe to preload and instantiate.
+    public override string? CustomEnergyCounterPath =>
+        "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
+
+    public override string? CustomTrailPath =>
+        "res://scenes/vfx/card_trail_ironclad.tscn";
+
     public override string? CustomMapMarkerPath =>
         KleePck.Path("klee/ui/map_marker.png");
 

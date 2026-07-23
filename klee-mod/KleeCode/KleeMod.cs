@@ -47,8 +47,13 @@ public static class KleeMod
         // Aura application (R23): a standing combat-hook listener, registered
         // through the game's own mod-subscriber API. Elemental card hits apply
         // auras; AuraPower handles everything after that. See ElementalApplication.cs.
-        ModHelper.SubscribeForCombatStateHooks(ModId, Powers.KleeElementalHooks.Subscribe);
-        ModHelper.SubscribeForCombatStateHooks(ModId, Powers.FurinaResourceHooks.Subscribe);
+        // ModHelper keys subscriptions by id and silently rejects a duplicate.
+        // Keep the roster behind ONE delegate so every character hook is live.
+        ModHelper.SubscribeForCombatStateHooks(
+            ModId,
+            combatState =>
+                Powers.KleeElementalHooks.Subscribe(combatState)
+                    .Concat(Powers.FurinaResourceHooks.Subscribe(combatState)));
 
         Log.Info($"[{ModId}] Klee and Furina registered.");
     }

@@ -76,14 +76,54 @@ script_export_mode=2
 binary_format/embed_pck=false
 '@)
 
-# Namespaced under res://klee/ so nothing can collide with the game's own
-# resource tree when the pack merges.
+# Klee's historical art layout predates the roster and stays at ImageGen/images
+# /<surface>. Furina and later characters use ImageGen/images/<character>
+# /<surface>. Both land in character namespaces inside the merged pack.
 foreach ($d in 'ui', 'powers', 'relics', 'model') {
     $from = Join-Path $src $d
     if (-not (Test-Path $from)) { Write-Host "WARNING: no $from, skipping" -ForegroundColor Yellow; continue }
     $to = Join-Path $work "klee\$d"
     New-Item -ItemType Directory -Force -Path $to | Out-Null
-    Copy-Item (Join-Path $from '*.png') -Destination $to
+    $files = Get-ChildItem $from -Filter *.png -ErrorAction SilentlyContinue
+    if ($files) { Copy-Item $files.FullName -Destination $to }
+}
+
+$furinaSrc = Join-Path $src 'furina'
+foreach ($d in 'ui', 'powers', 'relics', 'model') {
+    $from = Join-Path $furinaSrc $d
+    if (-not (Test-Path $from)) { continue }
+    $to = Join-Path $work "furina\$d"
+    New-Item -ItemType Directory -Force -Path $to | Out-Null
+    $files = Get-ChildItem $from -Filter *.png -ErrorAction SilentlyContinue
+    if ($files) { Copy-Item $files.FullName -Destination $to }
+}
+
+# Furina can be tested before her art pass lands, but her resource PATHS must
+# still be character-specific. Fill only missing Furina files from Klee; a real
+# Furina file at the canonical path always wins.
+function Copy-FurinaFallback([string]$relative) {
+    $target = Join-Path (Join-Path $work 'furina') $relative
+    if (Test-Path $target) { return }
+
+    $fallback = Join-Path (Join-Path $work 'klee') $relative
+    if (-not (Test-Path $fallback)) {
+        throw "Neither Furina nor Klee provides required PCK asset: $relative"
+    }
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $target) | Out-Null
+    Copy-Item $fallback -Destination $target
+    Write-Host "Furina fallback: $relative <- Klee" -ForegroundColor DarkYellow
+}
+
+foreach ($relative in @(
+        'ui\select_portrait.png',
+        'ui\select_portrait_locked.png',
+        'ui\char_icon.png',
+        'ui\map_marker.png',
+        'ui\selection_splash.png',
+        'ui\select_bg.png',
+        'ui\transition_wipe.png',
+        'model\combat_model.png')) {
+    Copy-FurinaFallback $relative
 }
 
 # Text resources authored here, not in ImageGen: the character-select bg scene
@@ -96,6 +136,7 @@ foreach ($d in 'ui', 'powers', 'relics', 'model') {
 # No scripts anywhere in these scenes: script resources can't ship in a mod
 # pck, and none are needed.
 New-Item -ItemType Directory -Force -Path (Join-Path $work 'klee\materials') | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $work 'furina\materials') | Out-Null
 
 [IO.File]::WriteAllText((Join-Path $work 'klee\ui\char_select_bg_klee.tscn'), @'
 [gd_scene load_steps=3 format=3]
@@ -136,6 +177,91 @@ expand_mode = 1
 stretch_mode = 6
 '@)
 
+[IO.File]::WriteAllText((Join-Path $work 'furina\ui\char_select_bg_furina.tscn'), @'
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://furina/ui/selection_splash.png" id="1_art"]
+[ext_resource type="Texture2D" path="res://furina/ui/select_bg.png" id="2_bg"]
+
+[node name="FurinaBg" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -960.0
+offset_top = -540.0
+offset_right = 960.0
+offset_bottom = 540.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(960, 540)
+
+[node name="Backdrop" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+self_modulate = Color(0.33, 0.55, 0.68, 1)
+
+[node name="Splash" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("1_art")
+expand_mode = 1
+stretch_mode = 6
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'klee\ui\character_icon.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://klee/ui/char_icon.png" id="1_tex"]
+
+[node name="KleeIcon" type="TextureRect"]
+offset_right = 88.0
+offset_bottom = 88.0
+texture = ExtResource("1_tex")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'furina\ui\character_icon.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://furina/ui/char_icon.png" id="1_tex"]
+
+[node name="FurinaIcon" type="TextureRect"]
+offset_right = 88.0
+offset_bottom = 88.0
+texture = ExtResource("1_tex")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'klee\model\combat_visuals.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://klee/model/combat_model.png" id="1_tex"]
+
+[node name="KleeCombatSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'furina\model\combat_visuals.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://furina/model/combat_model.png" id="1_tex"]
+
+[node name="FurinaCombatSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
 [IO.File]::WriteAllText((Join-Path $work 'klee\model\character_sprite.tscn'), @'
 [gd_scene load_steps=2 format=3]
 
@@ -158,6 +284,28 @@ texture = ExtResource("1_tex")
 [ext_resource type="Texture2D" path="res://klee/model/combat_model.png" id="1_tex"]
 
 [node name="KleeSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
+# Furina receives two additional conversion paths. Reusing Klee's paths is
+# harmless while both characters have the same conversion targets, but blocks
+# future character-specific conversion behavior. Sharing Furina's own rest and
+# merchant path would reproduce the original campfire softlock immediately.
+[IO.File]::WriteAllText((Join-Path $work 'furina\model\rest_character.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://furina/model/combat_model.png" id="1_tex"]
+
+[node name="FurinaRestSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'furina\model\merchant_character.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://furina/model/combat_model.png" id="1_tex"]
+
+[node name="FurinaMerchantSprite" type="Sprite2D"]
 texture = ExtResource("1_tex")
 '@)
 
@@ -229,11 +377,39 @@ shader_parameter/threshold = 0.332
 shader_parameter/transitionTex = ExtResource("1_wipe")
 '@)
 
+[IO.File]::WriteAllText((Join-Path $work 'furina\materials\furina_transition_mat.tres'), @'
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://furina/ui/transition_wipe.png" id="1_wipe"]
+
+[sub_resource type="Shader" id="Shader_furina"]
+code = "shader_type canvas_item;
+
+uniform sampler2D transitionTex;
+uniform float threshold : hint_range(0,1);
+
+void fragment() {
+    float falloff = 1.0 - texture(transitionTex, UV).r;
+
+    // helps with falloff artifacts issues towards the transition extremes
+    float remap  = mix(-0.1, 1.1, threshold);
+    falloff = step(falloff, remap);
+    COLOR.a = falloff;
+}
+"
+
+[resource]
+resource_local_to_scene = true
+shader = SubResource("Shader_furina")
+shader_parameter/threshold = 0.332
+shader_parameter/transitionTex = ExtResource("1_wipe")
+'@)
+
 # Some fetched files are WebP with a .png extension (the wiki serves them that
 # way); Godot's PNG importer hard-fails on them. Re-encode in place, in the
 # scratch copy only -- ImageGen sources belong to the art pipeline.
 $webp = @()
-foreach ($f in Get-ChildItem (Join-Path $work 'klee') -Recurse -Filter *.png) {
+foreach ($f in Get-ChildItem $work -Recurse -Filter *.png) {
     $bytes = [IO.File]::ReadAllBytes($f.FullName)
     if ($bytes.Length -ge 4 -and $bytes[0] -eq 0x52 -and $bytes[1] -eq 0x49 -and $bytes[2] -eq 0x46 -and $bytes[3] -eq 0x46) {
         $webp += $f.FullName
@@ -263,4 +439,23 @@ if (-not (Test-Path $pck) -or (Get-Item $pck).Length -lt 1024) { throw "Export p
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $out) | Out-Null
 Copy-Item $pck -Destination $out -Force
 $size = (Get-Item $out).Length
-Write-Host "Built $out ($size bytes)" -ForegroundColor Green
+$hash = (Get-FileHash $out -Algorithm SHA256).Hash
+$contract = "$out.contract.txt"
+$contractLines = @(
+    'contract=roster-pck-v2',
+    "sha256=$hash",
+    'resource=res://klee/model/combat_visuals.tscn',
+    'resource=res://klee/ui/character_icon.tscn',
+    'resource=res://klee/ui/char_select_bg_klee.tscn',
+    'resource=res://klee/materials/klee_transition_mat.tres',
+    'resource=res://klee/model/rest_character.tscn',
+    'resource=res://klee/model/character_sprite.tscn',
+    'resource=res://furina/model/combat_visuals.tscn',
+    'resource=res://furina/ui/character_icon.tscn',
+    'resource=res://furina/model/rest_character.tscn',
+    'resource=res://furina/model/merchant_character.tscn',
+    'resource=res://furina/ui/char_select_bg_furina.tscn',
+    'resource=res://furina/materials/furina_transition_mat.tres'
+)
+[IO.File]::WriteAllLines($contract, $contractLines)
+Write-Host "Built $out ($size bytes; contract roster-pck-v2)" -ForegroundColor Green

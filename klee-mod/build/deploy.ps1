@@ -93,9 +93,15 @@ if ($foundAny) {
 # has_pck, so validate.ps1's S2 rule fails the deploy if it is missing rather
 # than shipping a manifest that lies to ModManager.
 $pck = Join-Path $root 'assets\klee.pck'
+$pckContract = "$pck.contract.txt"
 if (Test-Path $pck) {
     Copy-Item $pck -Destination $stage
     Write-Host "Staged klee.pck ($((Get-Item $pck).Length) bytes)" -ForegroundColor Cyan
+    if (Test-Path $pckContract) {
+        Copy-Item $pckContract -Destination $stage
+    } else {
+        Write-Host "WARNING: no PCK contract at $pckContract; rebuild with tools\build_pck.ps1." -ForegroundColor Yellow
+    }
 } else {
     Write-Host "WARNING: no klee.pck at $pck; run tools\build_pck.ps1 first (validate will fail below)." -ForegroundColor Yellow
 }

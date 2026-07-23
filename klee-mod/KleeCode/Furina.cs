@@ -70,30 +70,41 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
             ModelDb.Relic<Relics.EtherealSpotlightRelic>(),
         };
 
-    // Temporary playtest visuals: borrow the known-good packaged character
-    // surfaces so Furina can enter every room without resolving missing
-    // id-derived resources. The separate Furina art pass replaces these
-    // paths; card portraits already use Furina-specific loose-image slugs.
+    // Temporary playtest visuals live under a Furina namespace even while the
+    // PCK builder fills missing files from Klee. Distinct scene paths are
+    // future-proofing: BaseLib's conversion registry is keyed by path, so a
+    // shared path cannot later carry character-specific conversion behavior.
+    // The separate Furina art pass replaces the fallback PNGs in place.
     public override string? CustomCharacterSelectIconPath =>
-        KleePck.Path("klee/ui/select_portrait.png");
+        KleePck.Path("furina/ui/select_portrait.png");
     public override string? CustomCharacterSelectLockedIconPath =>
-        KleePck.Path("klee/ui/select_portrait_locked.png");
+        KleePck.Path("furina/ui/select_portrait_locked.png");
     public override string? CustomIconTexturePath =>
-        KleePck.Path("klee/ui/char_icon.png");
+        KleePck.Path("furina/ui/char_icon.png");
+    public override string? CustomIconOutlineTexturePath =>
+        KleePck.Path("furina/ui/char_icon.png");
+    public override string? CustomVisualPath =>
+        KleePck.Path("furina/model/combat_visuals.tscn");
+    public override string? CustomIconPath =>
+        KleePck.Path("furina/ui/character_icon.tscn");
+    public override string? CustomEnergyCounterPath =>
+        "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
+    public override string? CustomTrailPath =>
+        "res://scenes/vfx/card_trail_ironclad.tscn";
     public override string? CustomMapMarkerPath =>
-        KleePck.Path("klee/ui/map_marker.png");
+        KleePck.Path("furina/ui/map_marker.png");
     public override string? CustomCharacterSelectBg =>
-        KleePck.Path("klee/ui/char_select_bg_klee.tscn");
+        KleePck.Path("furina/ui/char_select_bg_furina.tscn");
     public override string? CustomCharacterSelectTransitionPath =>
-        KleePck.Path("klee/materials/klee_transition_mat.tres");
+        KleePck.Path("furina/materials/furina_transition_mat.tres");
     public override string? CustomRestSiteAnimPath =>
-        KleePck.Path("klee/model/rest_character.tscn");
+        KleePck.Path("furina/model/rest_character.tscn");
     public override string? CustomMerchantAnimPath =>
-        KleePck.Path("klee/model/character_sprite.tscn");
+        KleePck.Path("furina/model/merchant_character.tscn");
 
     public override NCreatureVisuals? CreateCustomVisuals()
     {
-        var path = KleePck.Path("klee/model/combat_model.png");
+        var path = KleePck.Path("furina/model/combat_model.png");
         return path == null
             ? null
             : NodeFactory<NCreatureVisuals>.CreateFromResource(

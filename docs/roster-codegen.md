@@ -79,6 +79,27 @@ derivable from the game install.
 The Windows deployment script stages Klee, Furina, and Companion card-art
 directories into the roster mod's flat `images/cards` package.
 
+`tools/build_pck.ps1` builds one character-aware resource pack. Klee keeps its
+historical `ImageGen/images/{ui,powers,relics,model}` inputs; Furina reads
+`ImageGen/images/furina/{ui,powers,relics,model}`. Until the Furina art pass
+fills those directories, the builder copies missing required UI/model files
+from Klee into the `res://furina/` namespace. The namespace is still distinct:
+combat visuals, icon, rest, merchant, character-select background, and
+transition material all have Furina-owned scene paths.
+
+Every `CustomCharacterModel` must override the four otherwise id-derived run
+preload paths: `CustomVisualPath`, `CustomIconPath`,
+`CustomEnergyCounterPath`, and `CustomTrailPath`. Rest and merchant conversion
+paths must also remain distinct. Validation gate S6c checks the source
+contract, and runtime self-check R9 verifies that every evaluated character
+asset path resolves after the PCK merges.
+
+The PCK builder emits `klee.pck.contract.txt` with a contract version, resource
+inventory, and SHA-256. Deployment stages it with the pack and rejects a
+missing, stale, or mismatched contract. After pulling a roster-resource change,
+run `tools\build_pck.ps1` before `klee-mod\build\deploy.ps1`; an old Klee-only
+PCK cannot pass validation.
+
 Deployment validation treats `game_ref/` as an optional, atomic local
 reference. When all required Ironclad layers exist, it runs
 `tools.build_ironclad_sheet --verify` and includes those tests. When the

@@ -1628,3 +1628,38 @@ spark-on-detonation is the tell.
   - No Spark       -> real divergence, opens a sim-side correction.
 
 NOT self-closed from the repo: this needs the eyes-on result.
+
+## Furina character-select crash: preload paths and hook id collision (2026-07-23)
+
+Windows playtest reached character select, then crashed in
+`RunManager.GenerateMap`. The background preload had failed exactly four
+Furina paths: combat visuals, character icon scene, energy counter scene, and
+card trail. `CharacterModel.AssetPaths` derives those from `Id.Entry`; texture
+overrides and `CreateCustomVisuals` do not alter the preload list. BaseLib
+exposes a supported redirect for each one, but Furina had not overridden
+`CustomVisualPath`, `CustomIconPath`, `CustomEnergyCounterPath`, or
+`CustomTrailPath`.
+
+Fix: both roster characters now close all four redirects explicitly. Combat
+and icon scenes are character-owned PCK resources; the temporary energy
+counter and trail borrow valid Ironclad scenes. Furina's remaining PCK scenes
+also moved under `res://furina/`. Missing Furina art is copied from Klee at
+PCK-build time, so temporary art can be shared without sharing the paths that
+BaseLib registers for conversion.
+
+The old PCK was itself a deployment hazard because it is gitignored and a pull
+cannot refresh it. `build_pck.ps1` now writes a versioned resource/hash
+contract beside the pack; deploy validation rejects an old, missing, or
+mismatched contract. S6c checks every roster character's source overrides and
+PCK declarations. Runtime self-check R9 evaluates both character asset sets
+after the pack merges and reports every unresolved path.
+
+The same log exposed an independent dead-mechanic bug:
+`SubscribeForCombatStateHooks` is keyed by id, and both Klee and Furina
+registered with `klee`. ModHelper rejected the second subscription, so
+`FurinaResourceHooks` never ran. The roster now registers once with a combined
+delegate; source tests and S6c enforce one call containing both listeners.
+
+Finally, FrozenPower now supplies the title/description localization that R8
+was correctly reporting. The previous four findings were the same two missing
+keys observed once during each character sweep.

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Localization;
@@ -59,6 +60,7 @@ internal static class KleeSelfCheck
                      })
             {
                 CheckCharacterInvariants(character);
+                CheckCharacterAssets(character);
                 CheckLocalization(character);
             }
         }
@@ -85,13 +87,13 @@ internal static class KleeSelfCheck
     }
 
     // Distinct rule labels that can actually reach the log:
-    //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8
+    //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8, R9
     // This was 8 while R5/R6a/R6b were documented but unattributable -- the
     // helpers that emit them hardcoded R4 and R6, so those three strings could
     // never appear. Fixing the labels is what makes the count honest. Note
     // R4 and R5 come from a `rule` parameter, so grepping for Fail("R... will
     // not find them; count the call sites, not the literals.
-    private const int RuleCount = 13;
+    private const int RuleCount = 14;
 
     private static void Fail(string rule, string detail) => Findings.Add($"[{rule}] {detail}");
 
@@ -250,6 +252,34 @@ internal static class KleeSelfCheck
                 Fail("R3c", $"CardPool has no {rarity} cards. Not a soft lock -- reward generation "
                           + "falls through to the next rarity -- but the rarity odds collapse onto "
                           + "the remaining tiers, so drafts will not match the sheet.");
+            }
+        }
+    }
+
+    private static void CheckCharacterAssets(CharacterModel character)
+    {
+        // R9. CharacterModel.AssetPaths contains id-derived scenes for combat
+        // visuals, the top-panel icon, the energy counter and the card trail.
+        // BaseLib can redirect every one, but only when the Custom*Path
+        // override is non-null. Furina shipped with texture/creation overrides
+        // but not these preload overrides: four failed background loads left
+        // AssetCache incomplete and the run crashed while generating the map.
+        //
+        // Include character-select paths too. This check runs after the mod PCK
+        // has merged and never loads/instantiates a resource; Exists is enough
+        // to catch a stale local PCK without risking a validator crash.
+        var paths = character.AssetPaths
+            .Concat(character.AssetPathsCharacterSelect)
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Distinct(StringComparer.Ordinal);
+
+        foreach (var path in paths)
+        {
+            if (!ResourceLoader.Exists(path))
+            {
+                Fail("R9", $"{character.GetType().Name}: required preload asset "
+                         + $"\"{path}\" does not resolve. Rebuild the roster PCK "
+                         + "before starting a run.");
             }
         }
     }

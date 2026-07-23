@@ -32,6 +32,7 @@ game_assets/
 # tools/extract_base_game_pool.py output -- regenerate locally, never commit
 game_ref/
 *.pck
+*.pck.contract.txt
 *.dll
 *.pdb
 

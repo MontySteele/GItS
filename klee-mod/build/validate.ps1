@@ -60,7 +60,30 @@ if (-not (Test-Path $manifestPath)) {
     }
     if ($m.has_pck) {
         $pck = Get-ChildItem $StageDir -Filter *.pck -ErrorAction SilentlyContinue
-        if (-not $pck) { Fail 'S2' 'manifest says has_pck but no .pck is in the package' }
+        if (-not $pck) {
+            Fail 'S2' 'manifest says has_pck but no .pck is in the package'
+        } else {
+            $pck = @($pck)[0]
+            $contractPath = "$($pck.FullName).contract.txt"
+            if (-not (Test-Path $contractPath)) {
+                Fail 'S2' "PCK has no build contract at $contractPath; rebuild it with tools\build_pck.ps1."
+            } else {
+                $contractLines = Get-Content $contractPath
+                if ($contractLines -notcontains 'contract=roster-pck-v2') {
+                    Fail 'S2' 'PCK contract is stale; expected roster-pck-v2. Rebuild with tools\build_pck.ps1.'
+                }
+                $hashLine = @($contractLines | Where-Object { $_ -like 'sha256=*' })
+                if ($hashLine.Count -ne 1) {
+                    Fail 'S2' 'PCK contract must contain exactly one sha256 line.'
+                } else {
+                    $expectedHash = $hashLine[0].Substring('sha256='.Length)
+                    $actualHash = (Get-FileHash $pck.FullName -Algorithm SHA256).Hash
+                    if ($actualHash -ne $expectedHash) {
+                        Fail 'S2' 'PCK does not match its build contract; rebuild rather than deploying a stale pack.'
+                    }
+                }
+            }
+        }
     }
 
     # S3. Declared dependencies must actually be installed, or the game fails
@@ -221,6 +244,117 @@ if (-not (Test-Path $venvPython)) {
     $poolOut = & $venvPython $poolLint
     if ($LASTEXITCODE -ne 0) {
         Fail 'S6b' "pool membership lint failed:`n    $($poolOut -join "`n    ")"
+    }
+}
+
+# ---------------------------------------------------------------------------
+# S6c. Every roster character closes the CharacterModel preload surface.
+#
+# CharacterModel.AssetPaths derives combat visuals, icon scene, energy counter
+# and card trail from the character id. BaseLib redirects each only when the
+# corresponding Custom*Path override is non-null. A missing override does not
+# fail at model registration: the background preloader logs a missing scene,
+# then the run crashes later with an incomplete AssetCache.
+#
+# Scene-converted paths (visuals/rest/merchant) must also be unique. BaseLib's
+# conversion registry is keyed only by path; a later registration overwrites
+# the earlier target type and can turn a rest-site scene into a merchant node.
+# ---------------------------------------------------------------------------
+$requiredCharacterPaths = @(
+    'CustomVisualPath',
+    'CustomIconPath',
+    'CustomEnergyCounterPath',
+    'CustomTrailPath',
+    'CustomRestSiteAnimPath',
+    'CustomMerchantAnimPath'
+)
+$characterSources = @()
+foreach ($f in Get-ChildItem $SourceDir -Recurse -Filter *.cs) {
+    $text = Get-Content $f.FullName -Raw
+    if ($text -match ':\s*CustomCharacterModel\b') {
+        $characterSources += [PSCustomObject]@{
+            File = $f
+            Text = $text
+        }
+    }
+}
+
+if ($characterSources.Count -eq 0) {
+    Fail 'S6c' 'no CustomCharacterModel roster classes found.'
+}
+
+$conversionOwners = @{}
+foreach ($source in $characterSources) {
+    foreach ($property in $requiredCharacterPaths) {
+        if ($source.Text -notmatch "override\s+string\?\s+$property\b") {
+            Fail 'S6c' "$($source.File.Name): missing explicit $property override; CharacterModel will preload an id-derived scene."
+        }
+    }
+
+    foreach ($property in @(
+            'CustomVisualPath',
+            'CustomRestSiteAnimPath',
+            'CustomMerchantAnimPath')) {
+        $pattern = $property + '\s*=>\s*KleePck\.Path\("(?<path>[^"]+)"\)'
+        $match = [regex]::Match($source.Text, $pattern)
+        if (-not $match.Success) {
+            Fail 'S6c' "$($source.File.Name): $property must resolve through a character-specific KleePck.Path."
+            continue
+        }
+        $path = $match.Groups['path'].Value
+        if ($conversionOwners.ContainsKey($path)) {
+            Fail 'S6c' "$($source.File.Name): $property reuses conversion path '$path' already owned by $($conversionOwners[$path]). BaseLib registrations are path-keyed."
+        } else {
+            $conversionOwners[$path] = "$($source.File.Name).$property"
+        }
+    }
+}
+
+$entryPath = Join-Path $SourceDir 'KleeMod.cs'
+if (-not (Test-Path $entryPath)) {
+    Fail 'S6c' "mod entry point missing at $entryPath."
+} else {
+    $entryText = Get-Content $entryPath -Raw
+    $hookCalls = [regex]::Matches(
+        $entryText, '(?m)^\s*ModHelper\.SubscribeForCombatStateHooks\(')
+    if ($hookCalls.Count -ne 1) {
+        Fail 'S6c' "expected one combined combat-hook subscription, found $($hookCalls.Count). ModHelper rejects duplicate ids."
+    }
+    foreach ($listener in @(
+            'KleeElementalHooks.Subscribe',
+            'FurinaResourceHooks.Subscribe')) {
+        if (-not $entryText.Contains($listener)) {
+            Fail 'S6c' "combined combat-hook subscription omits $listener."
+        }
+    }
+}
+
+$pckBuilder = Join-Path $repoRoot 'tools\build_pck.ps1'
+if (-not (Test-Path $pckBuilder)) {
+    Fail 'S6c' "PCK builder missing at $pckBuilder."
+} else {
+    $pckText = Get-Content $pckBuilder -Raw
+    $stagedContract = Get-ChildItem $StageDir -Filter *.pck.contract.txt -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    $contractText = if ($stagedContract) {
+        Get-Content $stagedContract.FullName -Raw
+    } else {
+        ''
+    }
+    foreach ($source in $characterSources) {
+        foreach ($match in [regex]::Matches(
+                $source.Text,
+                'KleePck\.Path\("(?<path>[^"]+\.(?:tscn|tres))"\)')) {
+            $relative = $match.Groups['path'].Value
+            $builderResource = $relative.Replace('/', '\')
+            if (-not $pckText.Contains($builderResource)) {
+                Fail 'S6c' "$($source.File.Name): PCK resource '$builderResource' is not authored by tools\build_pck.ps1."
+            }
+            $contractResource = "resource=res://$relative"
+            if (-not $contractText.Contains($contractResource)) {
+                Fail 'S6c' "$($source.File.Name): staged PCK contract omits '$contractResource'. Rebuild the PCK."
+            }
+        }
     }
 }
 
