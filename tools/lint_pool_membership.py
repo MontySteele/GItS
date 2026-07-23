@@ -41,6 +41,7 @@ CARD_ROOT = REPO / "klee-mod" / "KleeCode" / "Cards"
 MEMBERSHIP_FILES = [
     REPO / "klee-mod" / "KleeCode" / "KleeCardPool.cs",
     REPO / "klee-mod" / "KleeCode" / "KleeOffPoolCards.cs",
+    REPO / "klee-mod" / "KleeCode" / "RosterAncientCards.cs",
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "CompanionRoster.cs",
     REPO / "klee-mod" / "KleeCode" / "FurinaCardPool.cs",
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina" / "Generated"

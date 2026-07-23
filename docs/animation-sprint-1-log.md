@@ -250,3 +250,23 @@ that survive the look passes: captures into this log per track.
 - E timing feel approval (opens with E).
 - Naming/lore audit for any player-visible gauge/Salon labels (opens with
   C/D; scene/node names are internal and exempt).
+
+## C4 first-pass feedback (2026-07-23, Klee playtest)
+
+Two changes applied from the first Klee look pass:
+
+- **Burst gauge anchor**: the up-left anchor (−100, −250) sat on Dodoco.
+  Moved centered overhead — (0, −300) in creature space; the gauge scene is
+  symmetric about its root and Klee's tallest layer (smoke) tops out ≈ −277.
+  Encore's anchor is untouched pending Furina's own pass.
+- **Status-strip Burst badge retired**: redundant with the gauge.
+  `BurstMeterPower` is no longer applied anywhere (Gain badge-apply dropped;
+  `SyncBadge` → `SyncGauge`, which keeps the after-every-play refresh that
+  makes the cast drain visible). The power class stays registered for save
+  compatibility with mid-combat saves from before the retirement. Furina's
+  three meter badges are untouched — only Burst had an ambient gauge asking
+  for it; revisit hers after her look pass.
+
+Same playtest also caught the act-2 Darv softlock (Dusty Tome × empty
+Ancient pool). Out of sprint scope; fixed as content + a deploy gate — see
+DECISIONS.md "Ancient-card ruling (2026-07-23)".

@@ -1713,3 +1713,41 @@ New conventions this sprint:
 - Boot telemetry (permanent, house pattern): one line per convention scene —
   path, found/missing, root node type from SceneState (no instantiation, so
   logging cannot trigger conversion side effects).
+
+
+Ancient-card ruling (2026-07-23, act-2 playtest) -- Darv softlock, Dusty Tome
+and the roster's Ancient tier:
+
+- FINDING: entering the act-2 Darv ancient event softlocked the run. godot.log
+  shows an NRE in DustyTome.SetupForPlayer (via BaseLib's SetupForPlayer_Patch1
+  falling through: "found 0 ITomeCard implementations") called from
+  Darv.GenerateInitialOptions. Root cause: vanilla SetupForPlayer draws a
+  random CardRarity.Ancient card from the character pool's GetUnlockedCards;
+  Klee/Furina pools shipped zero Ancient cards, and NextItem on the empty
+  draw returns null before .Id. Darv rolls the Tome option ~50% of visits.
+- RULING (user, 2026-07-23): fix with real content, not an option-ectomy.
+  One new Ancient-tier card per character, scaled to the rest of the Ancient
+  rewards: Klee gets an upscaled Jumpy Dumpty (Jumpy Dumpty Mk.Omega -- 2
+  cost, 12 dmg x3 random, 12-dmg Bomb on EVERY enemy, +4/+4 on upgrade),
+  Furina gets an Encore engine (All the World's a Stage -- 1-cost Power,
+  +5 Encore at turn start, +2 on upgrade, via EncorePerTurnPower routed
+  through FurinaResources.GainEncore). Dusty Tome grants arrive upgraded
+  (vanilla AfterObtained), so both cards are designed to be read at their
+  upgraded numbers. Titles pending the naming/lore audit; portraits reuse
+  jumpy_dumpty_mk2 / the_sea_is_my_stage crops pending the art pass.
+- Scope note: Ancient cards are game-side-only content. The sim models
+  neither events nor relics, so there is no tier0 counterpart and no sheet
+  entry; the parity lints do not see them by design. Rollability is safe by
+  construction -- decompiled CardFactory/CardCreationOptions exclude
+  CardRarity.Ancient from rewards, transforms and shops, so Dusty Tome is
+  the single acquisition door (same shape as the base game's own ancients).
+- GATE (user-directed): "add a gate to deployment that catches 'character
+  does not have Ancient cards'". KleeCode/RosterAncientCards.cs is the
+  per-character ledger (pools concat it); tools/lint_ancient_coverage.py
+  (validate.ps1 S6d) fails deploy when a ledger list is empty, detached from
+  its pool, names a non-Ancient class, or collides with the off-pool filter.
+  House pattern: structurally invisible defect -> curated ledger + lint.
+- Related, non-crashing gap logged: Archaic Tooth's transcendence table has
+  no entries for our starters (BaseLib extension point ITranscendenceCard).
+  Its SetupForPlayer returns false gracefully, so the relic just never
+  offers itself to the roster. Content follow-up, not a bug.

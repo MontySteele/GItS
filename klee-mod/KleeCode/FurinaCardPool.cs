@@ -35,8 +35,14 @@ public sealed class FurinaCardPool : CardPoolModel
             .Where(card => !FurinaOffPoolCards.Ids.Contains(card.Id));
     }
 
+    // RosterAncientCards.Furina: visible (Dusty Tome draws from
+    // GetUnlockedCards) but never rolled -- generation filters Ancient
+    // rarity upstream. Gate: tools/lint_ancient_coverage.py.
     protected override CardModel[] GenerateAllCards() =>
-        FurinaCardRoster.All.Concat(FurinaOffPoolCards.All).ToArray();
+        FurinaCardRoster.All
+            .Concat(RosterAncientCards.Furina)
+            .Concat(FurinaOffPoolCards.All)
+            .ToArray();
 }
 
 public static class FurinaOffPoolCards
