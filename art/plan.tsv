@@ -576,3 +576,6 @@ dodge_roll	ImageGen/images/cards/klee/dodge_roll.png	500	380	cover_autocrop	cove
 bright_idea	ImageGen/images/cards/klee/bright_idea.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Dodoco's Sparks 'n' Splash.png		item
 surprise_visit	ImageGen/images/cards/klee/surprise_visit.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sparkling Steps 2021-06-09 - Klee Emoji 2.png		sticker
 fish_blasting	ImageGen/images/cards/klee/fish_blasting.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Dodoco's Beach Nap.png		item
+# Furina character-select backdrop -- her own Fontaine namecard so the select
+# screen stops falling back to Klee's red Explosive namecard (2026-07-23).
+furina_select_bg	ImageGen/images/furina/ui/select_bg.png	1920	1080	cover	center	auto	1	png	Namecard Background Furina Banquet.png		splash
