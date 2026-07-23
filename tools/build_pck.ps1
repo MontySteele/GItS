@@ -510,6 +510,7 @@ $contractLines = @(
     'resource=res://klee/model/layers/klee_combat_body.png',
     'resource=res://klee/model/layers/klee_combat_dodoco.png',
     'resource=res://klee/build_id.tres',
+    'resource=res://shared/gauge.tscn',
     'resource=res://klee/ui/character_icon.tscn',
     'resource=res://klee/ui/char_select_bg_klee.tscn',
     'resource=res://klee/materials/klee_transition_mat.tres',

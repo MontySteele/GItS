@@ -34,6 +34,7 @@ internal static class KleeSceneTelemetry
         "furina/model/merchant_character.tscn",
         "furina/ui/character_icon.tscn",
         "furina/ui/char_select_bg_furina.tscn",
+        "shared/gauge.tscn",
     };
 
     public static void LogStatus()

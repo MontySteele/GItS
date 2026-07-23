@@ -114,15 +114,58 @@ Status: **CODE COMPLETE — [USER] motion look pass pending (B4).**
   animation data, 5 layer ctex present), staged validate: OK, full suite
   586 passed.
 
-## Track C–E
+## Track C — Shared tracked gauge (Burst + Encore)
 
-Blocked pending C/D/E work (B4 look pass can run in parallel). Prep notes:
+Status: **CODE COMPLETE — acceptance rides the B4/D playtest passes.**
 
-- C: reference bridge = HexaghostVisualsBridge (dict + IsInstanceValid +
-  CombatVfxContainer + Track/Refresh/DiscardDisplay) — pattern verified
-  present in the clone. C3's call-site enumeration comes from grepping
-  BurstResource/KitBurst (Burst) and FurinaResources (Encore) mutators.
+- C1 ✅ `pck-src/shared/gauge.tscn` (script-less): %BarBack/%BarFill/%Flash
+  ColorRects + %ValueLabel + AnimationPlayer (RESET + "flash" double-pulse).
+  One scene, two instantiations. Deviation (house-forced): the plan's
+  "exposed knobs" can't be scene exports without a script — they live in
+  GaugeBridge.GaugeSpec (fill color, anchor offset, visual span, label max,
+  flash predicate) and the bridge applies them. Energy-orb-slot alternative
+  rejected for v1: both gauges anchor to the creature (decision logged per
+  C1; the orb slot stays open for a later pass).
+- C2 ✅ `Vfx/GaugeBridge.cs` follows HexaghostVisualsBridge line-for-line
+  where it can (Displays dict + IsInstanceValid staleness + lazy re-Setup +
+  CombatVfxContainer + discard-before-setup). One structural deviation:
+  the reference tracks its creature from a scene script's _Process; our
+  scenes are script-less AND the plan bans _Process polling, so tracking
+  is a RemoteTransform2D child of the creature node (engine transform
+  propagation, no per-frame script). Setup entry = Harmony postfix on
+  `NCombatUi.Activate(CombatState)` — the same surface the reference
+  patches (verified present in decompiled v0.107.1).
+- C3 ✅ Refresh call-site enumeration. Both resources already funnel every
+  mutation through canonical methods (house rule predating this sprint),
+  so the enumeration is short and closed:
+  - **Klee Burst** (all in Powers/BurstResource.cs):
+    `Gain` (reactions, burst_energy op, powers), `GainPreResolution`
+    (skill-tag bonus in BeforeCardPlayed), `SyncBadge` (after EVERY card
+    play — this is what makes the kit-cast whole-meter drain visible; the
+    Spend override runs inside BaseLib's cost machinery with no Creature
+    in scope). BaseLib PrepForCombat zeroing is covered by Setup's
+    initial refresh at NCombatUi.Activate.
+  - **Furina Encore** (all in Powers/FurinaResources.cs):
+    `GainEncore` (gain), `SpendEncore` (deliberate spend — also the
+    funnel under SpendEncoreOrHp's overdraw), `AbsorbDamage` (post-Block
+    absorption). Fanfare/Burst side-effects don't touch the Encore gauge.
+  - Future-proofing note: BaseLib's CustomResource exposes AmountChanged;
+    if the funnels ever multiply, switch the bridge to that event instead
+    of chasing call sites (recorded in the GaugeBridge doc comment).
+- C4 ⏳ acceptance in playtest: tracking through position changes
+  (RemoteTransform2D is engine-driven), no orphaned displays across room
+  transitions (staleness dict + discard-before-setup), threshold flashes
+  (Burst reaching 40 = "ready"; Encore draining to 0 = overdraw moment).
+  Gauge label is bare numbers ("12/40") — no lore/naming audit surface.
+
+Gates green: dotnet build 0 errors, pck rebuilt (gauge.scn in pack,
+build id 20260723-173024+102e99a), staged validate OK, suite 586 passed.
+
+## Track D–E prep notes
+
 - D: ghostflames.tscn wheel composition verified; ours is a flank line.
+  SalonVisualsBridge reuses the GaugeBridge skeleton (extract a common
+  base only AFTER both concrete bridges work — plan D2).
 - E: GhostflameModel.SpawnVfx recipe verified (fire-and-forget,
   AddChildSafely, self-free).
 
