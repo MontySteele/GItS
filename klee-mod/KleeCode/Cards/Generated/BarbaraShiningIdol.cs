@@ -55,13 +55,15 @@ public sealed class BarbaraShiningIdol : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara — Shining Idol"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to a random enemy. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to a random enemy. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(5m, ValueProp.Move),
+            new CalculationBaseVar(5m),
+            new CalculationExtraVar(1m),
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
             new CardsVar(1)
         };
 
@@ -75,7 +77,7 @@ public sealed class BarbaraShiningIdol : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue), ValueProp.Move), cardPlay);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
         {
             var auraCandidates = CombatState!.HittableEnemies.ToList();
             if (auraCandidates.Count > 0)
@@ -92,6 +94,6 @@ public sealed class BarbaraShiningIdol : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

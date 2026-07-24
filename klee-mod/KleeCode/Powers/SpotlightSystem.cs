@@ -177,6 +177,17 @@ public static class SpotlightSystem
         return PrintedDamage(card, printed) - printed;
     }
 
+    /// <summary>
+    /// <see cref="PrintedDamageDelta"/>'s block twin, for cards whose block
+    /// renders through the base game's <c>CalculatedBlockVar</c>. Same identity:
+    /// <c>base + 1 * delta == PrintedBlock(base)</c>.
+    /// </summary>
+    public static decimal PrintedBlockDelta(CardModel card)
+    {
+        var printed = card.DynamicVars.CalculationBase.BaseValue;
+        return PrintedBlock(card, printed) - printed;
+    }
+
     public static decimal PrintedBlock(CardModel card, decimal amount) =>
         Math.Truncate(amount * OutwardMultiplier(card));
 

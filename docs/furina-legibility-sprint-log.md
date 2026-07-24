@@ -289,16 +289,29 @@ Crescendo's old inline form).
     `ExtraDamage` var. Furina's own cards deliberately NOT converted (the wrap is
     identity there) — pinned by `test_furina_own_cards_keep_the_identity_spotlight_wrap`.
 - **Follow-ups (queued):**
-  - **L-A4 block half (9 cards)** — genuinely harder, and NOT symmetric with
-    damage. `CreatureCmd.GainBlock` takes a `BlockVar`; there is no
-    `GainBlock(CalculatedVar)` overload the way `DamageCmd.Attack` has one for
-    `CalculatedDamageVar`. Worse, plain `CalculatedVar.UpdateCardPreview` sets
-    `PreviewValue = Calculate(target)` and never calls `Hook.ModifyBlock` — the
-    base game solves this by having `CalculatedDamageVar` override the method to
-    run `Hook.ModifyDamage`, and ships no block counterpart. Proposed fix: a mod
-    `SpotlightBlockVar : CalculatedVar` that overrides `UpdateCardPreview` to run
-    `Hook.ModifyBlock`, with resolution reading `Calculate(null)` through the same
-    var. Needs its own verification pass; not started.
+- **L-A4 block half — DONE (7 cards).**
+  - **Correction to the note written in `6af7a71`:** the game DOES ship a block
+    counterpart — `CalculatedBlockVar`, which overrides `UpdateCardPreview` to run
+    `Hook.ModifyBlock` exactly as `CalculatedDamageVar` does for damage, and reads
+    `CalculationBase` + `CalculationExtra`. No custom `SpotlightBlockVar` was
+    needed. Found it via BaseLib's `CustomCardModel.GainsBlock`, which tests
+    `value is BlockVar || value is CalculatedBlockVar` — worth remembering that
+    BaseLib's overrides name game types we haven't met yet.
+  - Same identity as the damage half: `base + 1 × (PrintedBlock(base) − base)`.
+    Resolution uses the base game's own idiom, lifted from `Mirage`:
+    `GainBlock(creature, DynamicVars.CalculatedBlock.Calculate(target),
+    DynamicVars.CalculatedBlock.Props, cardPlay)` — face and gain read one var.
+    New `SpotlightSystem.PrintedBlockDelta`.
+  - **Excluded, deliberately: `freminet_pressurized_floe`** — the only card doing
+    both damage and block. `CalculatedDamageVar` and `CalculatedBlockVar` BOTH
+    take their base from the single `CalculationBase` var, so converting both
+    would compute its block off the damage base. Damage conversion wins; its block
+    stays inline. Pinned by `test_card_doing_both_damage_and_block_converts_only_its_damage`.
+- **Known remaining gap (new, small): `prune_witch_hunt`.** Its block is a
+  conditional-branch literal (`PrintedBlock(this, 5m)`), not a `Block` var, so the
+  card text prints a hard "5" while the gain scales. There is no var to green;
+  closing it means introducing per-branch vars for conditional effects — a
+  different, larger change than this sprint's conversions. Logged, not attempted.
   - **Salon ×3 replacement multiplier** — still inline, still invisible to the
     face, on both damage and block emissions. Untouched.
   - **L-C** text re-homing — unstarted (ordering).
