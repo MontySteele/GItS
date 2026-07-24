@@ -165,8 +165,15 @@ def q3(fights: int = FIGHTS) -> None:
                 index["aria_of_recompense"] = override
             else:
                 index["aria_of_recompense"] = original
-            loader.get_card.cache_clear() if hasattr(
-                loader.get_card, "cache_clear") else None
+            # MUST be reset_caches(), not a get_card cache clear: since the
+            # tier-0.5 runtime pass, get_card deep-copies from a memoized
+            # `_card_prototype`, and the upgraded form "aria_of_recompense+"
+            # is a memoized pure function of the id. Mutating the upgrade
+            # index without dropping that memo would serve arm 3 the arm-2
+            # prototype and report the two as identical -- a silently
+            # invalid experiment rather than a failing one. reset_caches is
+            # the one door that drops every derived view.
+            loader.reset_caches()
             s = _statline(deck, "fanfare", fights)
             print(f"  {label:<36} {s['A1_frontload']:>6.2f} "
                   f"{s['A3_block']:>6.2f} {s['A4_sustain']:>6.2f} "
