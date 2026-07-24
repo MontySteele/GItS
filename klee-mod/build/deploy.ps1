@@ -20,7 +20,14 @@ param(
     # Passed through to validate.ps1 S7: allow deploying when game_ref/
     # exists but is incomplete (falls back to committed-only with a loud
     # banner instead of failing validation).
-    [switch]$AllowIncompleteGameRef
+    [switch]$AllowIncompleteGameRef,
+    # Also zip the validated stage into dist\klee-v<version>.zip for handoff.
+    # The zip is the EXACT package that deploys locally (same validate gates),
+    # including all card art and the pck -- recipients extract it into the
+    # game's mods\ folder and additionally need BaseLib from the Workshop.
+    # dist\ and *.zip are both gitignored; hand the zip off privately (it
+    # carries Tier F art that must not be publicly distributed).
+    [switch]$Package
 )
 
 $ErrorActionPreference = 'Stop'
@@ -42,8 +49,10 @@ if (-not (Test-Path $gameDir)) { throw "GameDir does not exist: $gameDir" }
 
 # The game holds an open handle on klee.dll while running, so deploying over a
 # live session fails with an opaque "Access to the path is denied". Check first.
+# With -Package the zip build itself is safe while the game runs, so only the
+# local deploy step is skipped (loudly, below) instead of failing fast here.
 $running = Get-Process -Name 'SlayTheSpire2' -ErrorAction SilentlyContinue
-if ($running) {
+if ($running -and -not $Package) {
     $ids = $running.Id -join ', '
     throw "Slay the Spire 2 is running (PID $ids). Close the game before deploying; it holds a lock on klee.dll."
 }
@@ -119,6 +128,37 @@ Write-Host "Validating package..." -ForegroundColor Cyan
     -SourceDir (Join-Path $root 'KleeCode') `
     -GameDir $gameDir `
     -AllowIncompleteGameRef:$AllowIncompleteGameRef
+
+if ($Package) {
+    # Read the version from the STAGED manifest so the zip name can never
+    # disagree with what is inside it. Co-op is lockstep: peers on different
+    # mod builds desync, so every handoff needs a distinct version stamp.
+    $manifest = Get-Content (Join-Path $stage 'manifest.json') -Raw | ConvertFrom-Json
+    if ([string]::IsNullOrWhiteSpace($manifest.version)) {
+        throw "manifest.json has no version; refusing to build an unstamped handoff zip."
+    }
+    $zip = Join-Path $root ("dist\klee-v" + $manifest.version + ".zip")
+    if (Test-Path $zip) { Remove-Item $zip -Force }
+
+    Write-Host "Packaging $zip" -ForegroundColor Cyan
+    # -Path on the stage DIRECTORY keeps klee\ as the archive root, so
+    # extracting into mods\ lands as mods\klee\.
+    Compress-Archive -Path $stage -DestinationPath $zip -CompressionLevel Optimal
+
+    $mb = [math]::Round((Get-Item $zip).Length / 1MB, 1)
+    Write-Host "Packaged $zip ($mb MB)" -ForegroundColor Green
+    $dep = $manifest.dependencies | Where-Object { $_.id -eq 'BaseLib' }
+    Write-Host "Handoff notes: extract into '<game>\mods\' (lands as mods\klee\)." -ForegroundColor Yellow
+    Write-Host ("  Recipients also need BaseLib >= " + $dep.min_version + " (Steam Workshop) and game >= " + $manifest.min_game_version + ".") -ForegroundColor Yellow
+    Write-Host "  Co-op peers must all run THIS zip -- bump manifest version before each handoff." -ForegroundColor Yellow
+}
+
+if ($running) {
+    $ids = $running.Id -join ', '
+    Write-Host "SKIPPED local deploy: Slay the Spire 2 is running (PID $ids) and holds a lock on klee.dll." -ForegroundColor Yellow
+    Write-Host "The zip above is built from the validated stage; re-run without -Package after closing the game to deploy locally." -ForegroundColor Yellow
+    return
+}
 
 $target = Join-Path $gameDir 'mods\klee'
 Write-Host "Deploying to $target" -ForegroundColor Cyan
