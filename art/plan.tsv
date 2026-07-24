@@ -593,9 +593,9 @@ power_celestial_gift	ImageGen/images/powers/celestial_gift.png	256	256	contain	c
 power_celestial_gift	ImageGen/images/powers/celestial_gift.png	256	256	contain	center	shortlist	2	png	Icon Emoji Paimon's Paintings 50 Nicole 1.png		icon
 # ---------- FURINA RELIC ICON (was falling back to the Silent's snake_ring,
 #            which Furina can also hold: two relics, one icon) ----------
-relic_ethereal_spotlight	ImageGen/images/relics/ethereal_spotlight.png	256	256	contain	center	shortlist	1	png	Item Shining Spotlight.png		icon
-relic_ethereal_spotlight	ImageGen/images/relics/ethereal_spotlight.png	256	256	contain	center	shortlist	2	png	Item Festival Spotlight.png		icon
-relic_ethereal_spotlight	ImageGen/images/relics/ethereal_spotlight.png	256	256	contain	center	shortlist	3	png	Item Theater Tickets.png		icon
+relic_ethereal_spotlight	ImageGen/images/furina/relics/ethereal_spotlight.png	256	256	contain	center	shortlist	1	png	Item Shining Spotlight.png		icon
+relic_ethereal_spotlight	ImageGen/images/furina/relics/ethereal_spotlight.png	256	256	contain	center	shortlist	2	png	Item Festival Spotlight.png		icon
+relic_ethereal_spotlight	ImageGen/images/furina/relics/ethereal_spotlight.png	256	256	contain	center	shortlist	3	png	Item Theater Tickets.png		icon
 # ---------- STANDING ROOM ONLY (the one card with no art; Furina common, so
 #            crop-reuse pool per the ratified scarcity rule) ----------
 standing_room_only	ImageGen/images/cards/furina/standing_room_only.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Theater Tickets.png		item	furina_pool
