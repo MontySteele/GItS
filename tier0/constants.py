@@ -292,6 +292,43 @@ RUN_ACTS = (
     {"id": "act3", "pool": "act3_pool.yaml", "easy_fights": 2},  # Glory
 )
 
+# --- Act maps (§11, 2026-07-24): the real StS2 17-floor DAG --------------
+# Research + sources: docs/sts2-map-and-events-research.md §1. These replace
+# RUN_NODE_TEMPLATE, which authored a fixed 11-node spine with 2 forced elites
+# and zero Unknown rooms. WIKI-REAL at Ascension 0 unless marked OPEN.
+# 16 walkable floors, 0-based. The wiki counts 17 because floor 17 is the
+# boss CHEST, which is not on the map and is folded into the boss reward here
+# rather than modeled as a room. So wiki floor N == index N-1 throughout.
+MAP_FLOORS = 16
+MAP_TREASURE_FLOOR = 8        # wiki floor 9: all rooms are Treasure
+MAP_REST_FLOOR = 14           # wiki floor 15: all rooms are Rest Sites
+MAP_BOSS_FLOOR = 15           # wiki floor 16: every route converges here
+# That leaves 12 freely-typed floors (wiki 2-8 and 10-14), which is what the
+# expected-composition arithmetic in the research doc is computed over.
+MAP_MAX_EDGES = 3             # "1-3 paths exiting to the floor above"
+# Room-type odds for every non-fixed room. WIKI-REAL. Elite frequency is NOT
+# a tuning dial: the count a run FIGHTS is a routing outcome (target median
+# ~2.5, range 1-4 -- §1.3), and moving 8% to hit a winrate would be exactly
+# the difficulty-dial mistake this branch already made once.
+MAP_ROOM_ODDS = (("N", 0.53), ("?", 0.22), ("R", 0.12), ("E", 0.08),
+                 ("$", 0.05))
+# The map is built by CARVING MAP_PATHS routes bottom-to-top (maps.generate);
+# floor width and the 1-3 edge fan-out are emergent, not rolled. Six columns
+# is the wiki's "up to six map locations on each floor"; MAP_PATHS is the
+# OPEN NUMBER (§5.3) and it is what gets calibrated against the elite target
+# (median ~2.5 fought, range 1-4 -- research §1.3), because path count sets
+# how CONNECTED the map is and connectivity is what binds. Do not calibrate
+# MAP_ROOM_ODDS against a winrate.
+MAP_MAX_FLOOR_WIDTH = 6
+MAP_PATHS = 6
+# OPEN NUMBER (§5.1): Unknown rooms resolve at ENTRY with a pity table -- the
+# chosen kind resets to baseline, the others increment. The RULE is wiki-real;
+# the baselines and increments are not published anywhere and these are a
+# defensible stand-in, stamped rather than smuggled. Event-dominant matches
+# the play experience (most Unknowns are events); Treasure is the rare one.
+MAP_UNKNOWN_BASE = {"event": 0.55, "N": 0.20, "$": 0.15, "T": 0.10}
+MAP_UNKNOWN_STEP = {"event": 0.10, "N": 0.05, "$": 0.05, "T": 0.05}
+
 # --- Tier 0.5 economy (run-model rework §5; defaults RATIFIED §8) ---
 GOLD_START = 99                  # StS default starting gold
 # Boss pays 100 (§10.1, RATIFIED 2026-07-23: the real StS2 act-transition
