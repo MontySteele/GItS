@@ -41,13 +41,15 @@ public sealed class EndlessWaltz : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Endless Waltz"),
-        ("description", "Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. [gold]Salon Member[/gold] numbers are 3 higher."),
+        ("description", "Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. [gold]Salon Member[/gold] numbers are {PowerAmount:diff()} higher."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new CalculationBaseVar(3m),
+            new CalculationExtraVar(1m),
+            new CalculatedVar("PowerAmount").WithMultiplier(static (card, _) => SalonMemberPower.ReplacementDelta(card, 2, SalonConstants.ReplacementNumericMultiplier))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,9 +62,10 @@ public sealed class EndlessWaltz : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var salonReplacements = 0;
+        var salonScaledPowerAmount = ((CalculatedVar)DynamicVars["PowerAmount"]).Calculate(null);
         salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Crabaletta);
         salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Usher);
-        await PowerCmd.Apply<SalonDamageUpPower>(choiceContext, Owner.Creature, 3 * (salonReplacements > 0 ? 2 : 1), applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<SalonDamageUpPower>(choiceContext, Owner.Creature, (int)salonScaledPowerAmount, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

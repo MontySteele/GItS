@@ -312,7 +312,56 @@ Crescendo's old inline form).
   card text prints a hard "5" while the gain scales. There is no var to green;
   closing it means introducing per-branch vars for conditional effects — a
   different, larger change than this sprint's conversions. Logged, not attempted.
-  - **Salon ×3 replacement multiplier — ANALYSED, needs a [USER] ruling.**
+- **Salon replacement multiplier — DONE (6 cards), [USER]-ratified 2026-07-24.**
+  The ruling asked for was granted ("proceed with both items"), so the shared
+  predicate was written rather than the second expression.
+  - **`SalonMemberPower.StageIsFull(companyCount)` is now the one home of the
+    rule.** `Deploy`'s loop condition became a call to it (byte-identical test,
+    zero behaviour change), and the face reads it through
+    `WillReplace(owner, deploys)` — the closed form, with the proof in the
+    doc-comment: iteration *i* of `Deploy`'s loop sees a company of
+    `min(Count + i, MemberSlots)`, so `StageIsFull` first turns true at
+    `i = MemberSlots − Count` and stays true; testing the LAST iteration
+    therefore answers for all of them. No simulation, no second rule.
+  - **`ReplacementDelta(card, deploys, multiplier)`** returns
+    `base × (multiplier − 1)` when a bow is coming, so the CalculatedVar's
+    `base + 1 × delta` lands exactly on `base × multiplier` — the number these
+    cards already resolved. Base is read live off `CalculationBase`, so it stays
+    upgrade-safe.
+  - **The timing rule, which is the load-bearing part:** `WillReplace` reads
+    PRE-PLAY company size, but a card's own deploys grow the company mid-
+    resolution — a 4-deploy card mutates the count as it goes. So each converted
+    body captures its scaled value in a local at the TOP of `OnPlay`, before the
+    first `Deploy`, which is precisely the state the preview read. Spending the
+    var *after* the deploys would answer a different question than the face did.
+    Pinned by `test_salon_scaled_value_is_captured_before_the_cards_own_deploys`.
+  - **Converted (6):** `gentilhomme_usher` (Block ×3, `CalculatedBlockVar`),
+    `dress_rehearsal` (draw ×2), `grand_gala` + `overflowing_hospitality` +
+    `surintendante_chevalmarin` (Encore ×2), `endless_waltz` (power amount ×2).
+    The ×2 numerics use the base game's plain `CalculatedVar` — it takes a name
+    in its constructor and its `UpdateCardPreview` sets `PreviewValue =
+    Calculate(target)`, so any named var can green; only Damage/Block have typed
+    subclasses (which additionally run their `Hook.Modify*`).
+  - **Two traps found and guarded.** (a) `DynamicVar.IntValue` is `(int)BaseValue`,
+    and a `CalculatedVar`'s `BaseValue` is only its *base term* — so bodies must
+    call `Calculate(...)`, never `IntValue`, or the scaling silently vanishes.
+    (b) The draw var is named **`DrawCards`, not `Cards`**: `DynamicVarSet.Cards`
+    is a typed accessor that casts to `CardsVar`, so a `CalculatedVar` under that
+    name would throw on any read through the property. `Encore`/`PowerAmount`
+    have no typed accessor, so they keep their natural names.
+  - **One conversion per card** (`test_only_one_salon_number_per_card_converts`):
+    every calculated var — typed or plain — takes its base from the single
+    `CalculationBase`, so a second would compute itself off the first one's base.
+  - **Excluded, deliberately:** `mademoiselle_crabaletta` — its deploy count is
+    itself an upgradeable var, so the closed form has no static deploy count to
+    stand on; it stays inline rather than guessing.
+  - **Known remaining gap:** `salon_debut`'s Encore is added by the `add` upgrade
+    delta, not by a sheet effect, and prints inside `{IfUpgraded:show:…|}`.
+    Nesting a `{Encore:diff()}` token inside that swap is not expressible, so its
+    upgraded Encore still prints unscaled. Logged, not attempted.
+  - Suite **646**. `dotnet build` 0 errors; parity lint OK (8 cards).
+  - _Superseded analysis (kept for the record):_
+    **Salon ×3 replacement multiplier — ANALYSED, needs a [USER] ruling.**
     Unlike Spotlight, this one is not a pure function of pre-play state: the
     generator scales by `salonReplacements > 0`, and `SalonPowers.Deploy`
     increments that counter only when the company is already at

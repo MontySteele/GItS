@@ -48,13 +48,15 @@ public sealed class OverflowingHospitality : CustomCardModel, ICharacterCard, IS
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Overflowing Hospitality"),
-        ("description", "Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. Apply [gold]Hydro[/gold] to a random enemy. Gain {IfUpgraded:show:5|3} [gold]Encore[/gold]."),
+        ("description", "Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. Apply [gold]Hydro[/gold] to a random enemy. Gain {Encore:diff()} [gold]Encore[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new CalculationBaseVar(3m),
+            new CalculationExtraVar(1m),
+            new CalculatedVar("Encore").WithMultiplier(static (card, _) => SalonMemberPower.ReplacementDelta(card, 1, SalonConstants.ReplacementNumericMultiplier))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -67,6 +69,7 @@ public sealed class OverflowingHospitality : CustomCardModel, ICharacterCard, IS
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var salonReplacements = 0;
+        var salonScaledEncore = ((CalculatedVar)DynamicVars["Encore"]).Calculate(null);
         salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Chevalmarin);
         for (var salonRepeat = 0; salonRepeat < (salonReplacements > 0 ? 2 : 1); salonRepeat++)
         {
@@ -82,11 +85,11 @@ public sealed class OverflowingHospitality : CustomCardModel, ICharacterCard, IS
                 }
             }
         }
-        FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 5 : 3) * (salonReplacements > 0 ? 2 : 1));
+        FurinaResources.GainEncore(Owner.Creature, (int)salonScaledEncore);
     }
 
     protected override void OnUpgrade()
     {
-        // encore: every gain_encore site reads IsUpgraded at play time (branches included).
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

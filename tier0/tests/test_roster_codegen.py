@@ -353,6 +353,111 @@ def test_furina_own_cards_keep_the_identity_spotlight_wrap():
     assert "PrintedDamage(this" in plain
 
 
+def test_salon_scaled_number_renders_the_replacement_multiplier():
+    # Legibility sprint, salon half. A salon-deploy card whose later effect is
+    # scaled by the bow-out multiplier used to print its unscaled base and
+    # resolve larger. It now renders through a CalculatedVar whose multiplier
+    # asks SalonMemberPower -- the same StageIsFull predicate Deploy's own loop
+    # uses -- so the face and the effect are one expression.
+    by_id = {card["id"]: card for card in _furina_cards()}
+    usher = gen.emit(by_id["gentilhomme_usher"], gen.FURINA_PROFILE)
+
+    assert "new CalculationBaseVar(4m)" in usher
+    assert "new CalculationExtraVar(1m)" in usher
+    assert (
+        "new CalculatedBlockVar(ValueProp.Move).WithMultiplier("
+        "static (card, _) => SalonMemberPower.ReplacementDelta("
+        "card, 1, SalonConstants.ReplacementDamageMultiplier))"
+        in usher
+    )
+    assert "{CalculatedBlock:diff()}" in usher
+    # The inline expression it replaces must be gone: keeping both would apply
+    # the multiplier twice.
+    assert "salonReplacements > 0 ? 3 : 1" not in usher
+    assert "DynamicVars.CalculationBase.UpgradeValueBy(2m);" in usher
+
+
+def test_salon_scaled_value_is_captured_before_the_cards_own_deploys():
+    # The timing rule that makes the closed form correct. WillReplace reads the
+    # PRE-PLAY company size, but a card's own Deploy calls grow that company
+    # mid-resolution -- so the scaled value is captured at the top of OnPlay,
+    # before the first deploy, which is the state the card face read. Spending
+    # the var afterwards instead would answer a different question than the
+    # preview did.
+    by_id = {card["id"]: card for card in _furina_cards()}
+    usher = gen.emit(by_id["gentilhomme_usher"], gen.FURINA_PROFILE)
+
+    snapshot = usher.index("var salonScaledBlock =")
+    deploy = usher.index("SalonMemberPower.Deploy(")
+    gain = usher.index("CreatureCmd.GainBlock(")
+    assert snapshot < deploy < gain
+    assert "GainBlock(Owner.Creature, salonScaledBlock" in usher
+
+
+def test_salon_numeric_multiplier_covers_draw_encore_and_power():
+    # x2 numerics take the same route as the x3 damage/block, through a plain
+    # CalculatedVar (the base game only ships typed Damage/Block subclasses).
+    by_id = {card["id"]: card for card in _furina_cards()}
+    numeric = "SalonConstants.ReplacementNumericMultiplier"
+
+    rehearsal = gen.emit(by_id["dress_rehearsal"], gen.FURINA_PROFILE)
+    # NOT named "Cards": DynamicVarSet.Cards is a typed accessor that casts to
+    # CardsVar, so a CalculatedVar under that name throws on any read.
+    assert f'new CalculatedVar("DrawCards").WithMultiplier(' in rehearsal
+    assert numeric in rehearsal
+    assert "{DrawCards:diff()}" in rehearsal
+    assert "new CardsVar(" not in rehearsal
+
+    gala = gen.emit(by_id["grand_gala"], gen.FURINA_PROFILE)
+    assert 'new CalculatedVar("Encore")' in gala
+    assert "{Encore:diff()}" in gala
+    # The upgrade moves onto the var's base instead of an IsUpgraded text swap,
+    # so the printed number carries both the upgrade and the salon scaling.
+    assert "DynamicVars.CalculationBase.UpgradeValueBy(3m);" in gala
+    assert "IfUpgraded:show:7|4" not in gala
+
+    waltz = gen.emit(by_id["endless_waltz"], gen.FURINA_PROFILE)
+    assert 'new CalculatedVar("PowerAmount")' in waltz
+    assert "{PowerAmount:diff()}" in waltz
+
+
+def test_only_one_salon_number_per_card_converts():
+    # Every calculated var on a card -- typed or plain -- takes its base term
+    # from the single CalculationBase var, so a second conversion would compute
+    # itself off the first one's base. One per card; the rest keep the inline
+    # expression (and are logged as remaining gaps, not silently dropped).
+    for card in _furina_cards():
+        if not gen.salon_deploy_card(card):
+            continue
+        source = gen.emit(card, gen.FURINA_PROFILE)
+        assert source.count("new CalculationBaseVar(") <= 1, card["id"]
+        converted = [
+            eff for eff in card["effects"]
+            if gen.salon_calc_rider(card, eff) is not None
+        ]
+        assert len(converted) <= 1, card["id"]
+
+
+def test_salon_deploy_count_must_be_static_to_convert():
+    # WillReplace is a closed form over (pre-play company size + this card's
+    # own deploys so far). An upgradeable deploy amount makes that count a
+    # runtime value the face cannot know, so the card stays inline rather than
+    # guessing. mademoiselle_crabaletta is the live case.
+    import copy
+
+    by_id = {card["id"]: card for card in _furina_cards()}
+    crabaletta = copy.deepcopy(by_id["mademoiselle_crabaletta"])
+    crabaletta["effects"].append({"op": "draw", "amount": 1})
+    assert gen._salon_calc_target(crabaletta) is None
+
+    # Control: the identical card with a literal deploy count does convert, so
+    # the exclusion above is the static-count rule and not some other guard.
+    static = copy.deepcopy(crabaletta)
+    static["id"] = "synthetic_static_deploy"   # no upgrade deltas -> no var
+    assert gen.power_upgrade_effect(static) is None
+    assert gen._salon_calc_target(static) is not None
+
+
 def test_handwritten_furina_burst_matches_the_sheet_contract():
     row = next(
         card for card in _furina_cards()
