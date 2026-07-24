@@ -312,9 +312,31 @@ Crescendo's old inline form).
   card text prints a hard "5" while the gain scales. There is no var to green;
   closing it means introducing per-branch vars for conditional effects — a
   different, larger change than this sprint's conversions. Logged, not attempted.
-  - **Salon ×3 replacement multiplier** — still inline, still invisible to the
-    face, on both damage and block emissions. Untouched.
-  - **L-C** text re-homing — unstarted (ordering).
+  - **Salon ×3 replacement multiplier — ANALYSED, needs a [USER] ruling.**
+    Unlike Spotlight, this one is not a pure function of pre-play state: the
+    generator scales by `salonReplacements > 0`, and `SalonPowers.Deploy`
+    increments that counter only when the company is already at
+    `SalonConstants.MemberSlots` *at the moment of each deploy within this card's
+    own resolution*. A card deploying four members mutates the count as it goes.
+    **But it is still predictable in closed form:** a replacement occurs iff
+    `Count(owner) + deploysSoFar > MemberSlots`, so a preview needs only the
+    current company size and how many deploys precede the scaled effect on that
+    card — no simulation. The catch is that this introduces a *second*
+    expression of the replacement rule, which is precisely the split-path disease
+    this sprint exists to cure, unless `Deploy` is refactored to consume the same
+    predicate. That refactor touches resolution order on salon cards, so it wants
+    red-pen before it is written, not after.
+  - **L-C text re-homing — SCOPED, costs more than the doc assumes.** Only 4
+    generated cards (+ the hand-written Burst) carry a trailing rider sentence,
+    so the surface is small. The blocker is the tip API: every
+    `HoverTipFactory` entry point is TYPED — `FromKeyword`, `FromPower`,
+    `FromPotion`, `FromOrb`, `FromEnchantment`, `FromAffliction`. There is no
+    free-text constructor, and a shared `Fanfare` keyword tip cannot carry a
+    per-card rate ("1 per 2" vs "1 per 4"). Re-homing therefore needs a custom
+    `IHoverTip` implementation in the mod. Feasible — `KleeCardTooltips.ForCard`
+    already exists as the injection point and several cards already override
+    `ExtraHoverTips` — but it is a new UI type plus a card-text change on 5
+    cards, i.e. design surface. Not attempted unilaterally.
 - **L-C:** text re-homing — unstarted (ordering).
 
 _Note: `tools/lint_strict_domination.py` shows modified in the tree — that is the
