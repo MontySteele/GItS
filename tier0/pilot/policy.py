@@ -516,8 +516,10 @@ def _incoming_damage(state: CombatState) -> float:
             continue
         intent = e.current_intent()
         if intent["kind"] == "attack":
-            amount = intent["amount"] + intent.get("ramp", 0) * max(
-                0, state.turn - intent.get("ramp_after", 0))
+            # Same helper the enemy turn uses -- these two ramp readings were
+            # duplicated formulas, and a pilot that mispredicts incoming
+            # damage blocks against the wrong number.
+            amount = e.ramped_amount(intent, state.turn)
             per_hit = powers.modify_damage_dealt(e, amount)
             if e.frozen:                # v1.5: halved, not skipped — and an
                 per_hit *= C.FROZEN_DAMAGE_MULT   # attack this turn thaws it
