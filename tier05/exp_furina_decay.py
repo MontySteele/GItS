@@ -20,7 +20,7 @@ B. FANFARE AUTOPSY. The fanfare plan sits at 0.0% winrate across F-A and
 R14: diagnostics feeding a ruling. No acceptance targets in this file --
 the registered bars live in docs/furina-fanfare-sprint-log.md.
 
-Usage: python -m tier05.exp_furina_decay [sweep|autopsy] [--runs N]
+Usage: python -m tier05.exp_furina_decay [sweep|prop|frontload|autopsy] [--runs N]
 """
 
 from __future__ import annotations
@@ -29,6 +29,7 @@ import statistics
 import sys
 
 from tier0 import constants as C
+from tier0.content import loader
 from tier05 import draft, fanfare_telemetry, model
 
 SEED = 11            # the sprint's registered seed (plan §5)
@@ -141,6 +142,62 @@ def prop(runs: int = RUNS) -> None:
         C.FANFARE_DECAY_FRACTION, C.FANFARE_DECAY_PER_TURN = frac0, flat0
 
 
+# F-B3. The archetype's act-1 damage sources, which is the whole list: two
+# attack commons and one damaging skill, plus the uncommon frontload payoff
+# the plan names. Everything else the plan calls "act-1 commons" generates
+# Encore or draws -- see the density note in the sprint log.
+FRONTLOAD_CARDS = ("warmup_act", "dramatic_entrance", "standing_room_only",
+                   "showstopper")
+
+
+def frontload(runs: int = RUNS) -> None:
+    """F-B3, registered as its own cell (plan §4): a NUMBERS pass on the
+    fanfare plan's act-1 damage, swept one variable at a time.
+
+    Deliberately not folded into F-B1: "the archetype needed frontload all
+    along" is a finding worth isolating, and mixing the two would make
+    either result uninterpretable.
+
+    The variable is a flat +N to printed damage on FRONTLOAD_CARDS. If the
+    sweep cannot reach gate (1) at any N a numbers pass could justify, that
+    is itself the finding -- it would mean the deficit is structural
+    (attack DENSITY) rather than per-card magnitude, and no amount of
+    bumping two commons reaches it.
+    """
+    print("=" * 78)
+    print(f"F-B3. FRONTLOAD NUMBERS SWEEP — {runs} realistic runs/cell, "
+          f"seed {SEED}")
+    print(f"      +N printed damage on: {', '.join(FRONTLOAD_CARDS)}")
+    print("      Gate (1): run winrate >= 3% AND act-1 clear >= 50%.")
+    print("=" * 78)
+    print(f"\n  {'+dmg':>5} {'act-1':>7} {'win':>7} {'DPT':>6} "
+          f"{'death node':>11} {'mean@read':>10}")
+
+    for bump in (0, 1, 2, 3, 4, 6):
+        # Rebuild from the sheet, THEN mutate the shared index entries. Order
+        # matters: reset_caches() drops _card_prototype, which is derived from
+        # _card_index, so mutating after the reset is what the memoized
+        # upgraded forms are built from. Mutating first would be undone.
+        loader.reset_caches()
+        index = loader._card_index()
+        for cid in FRONTLOAD_CARDS:
+            for fx in index[cid].effects:
+                if fx.get("op") == "damage" and fx.get("target") != "self":
+                    fx["amount"] += bump
+        c = _cell("fanfare", "fanfare", runs)
+        results = c["results"]
+        fights = [fs for r in results for fs in r.fight_stats]
+        dpt = statistics.mean(fs.total_damage_dealt / max(1, fs.turns)
+                              for fs in fights)
+        deaths = [r.death_node for r in results if r.death_node is not None]
+        node = statistics.median(deaths) if deaths else float("nan")
+        gate = "  <-- GATE (1)" if (c["winrate"] >= 0.03
+                                    and c["act1"] >= 0.50) else ""
+        print(f"  {bump:>5} {c['act1']:>6.1%} {c['winrate']:>6.1%} "
+              f"{dpt:>6.1f} {node:>11.0f} {c['mean_at_read']:>10.1f}{gate}")
+    loader.reset_caches()      # leave the index as the sheet has it
+
+
 def autopsy(runs: int = RUNS) -> None:
     """Why is the fanfare plan at 0%? Three candidate causes, separated."""
     print("=" * 78)
@@ -187,6 +244,8 @@ def main(argv: list[str] | None = None) -> int:
         sweep(runs)
     elif block == "prop":
         prop(runs)
+    elif block == "frontload":
+        frontload(runs)
     elif block == "autopsy":
         autopsy(runs)
     else:
