@@ -23,7 +23,10 @@ run granularity, same contract as Tier 0.
 
 from __future__ import annotations
 
+import os
 import random
+import warnings
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
@@ -111,7 +114,7 @@ def rest_action(deck_ids: list[str], hp: int, max_hp: int,
         return "heal", None
     if next_fight and hp < C.REST_PREFIGHT_HEAL_THRESHOLD * max_hp:
         return "heal", None
-    deck = [loader.get_card(cid) for cid in deck_ids]
+    deck = [loader.peek_card(cid) for cid in deck_ids]     # read-only scoring
     upgradable = [c for c in deck if upgrades.has_upgrade(c.id)]
     on_plan = [c for c in upgradable if archetype in c.archetypes]
     if on_plan:
@@ -296,7 +299,7 @@ def run_one(character: str, archetype: str, pilot_id: str,
             shop_plan = archetype
             if getattr(policy, "emergent_plan", False):
                 shop_plan = draft.dominant_archetype(
-                    [loader.get_card(cid) for cid in deck_ids])
+                    [loader.peek_card(cid) for cid in deck_ids])
             outcome = shop.visit_shop(rng, character, deck_ids, gold,
                                       shop_plan, policy, removal_uses)
             deck_ids = outcome.deck_ids
@@ -360,7 +363,7 @@ def run_one(character: str, archetype: str, pilot_id: str,
             rest_plan = archetype
             if getattr(policy, "emergent_plan", False):
                 rest_plan = draft.dominant_archetype(
-                    [loader.get_card(cid) for cid in deck_ids])
+                    [loader.peek_card(cid) for cid in deck_ids])
             action, target = rest_action(
                 deck_ids, hp, max_hp, rest_plan,
                 next_fight=(i + 1 < len(nodes)
@@ -481,7 +484,10 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 rng, character, companion_offers=n_comp, banner=banner,
                 companion_rarity="rare" if kind == "B" else None,
                 card_rarity="rare" if kind == "B" else None)
-            deck_cards = [loader.get_card(cid) for cid in deck_ids]
+            # Read-only: the drafter, the relevance probes and the core
+            # check below only SCORE the deck. Copying it three times per
+            # screen was the run layer's single biggest cost.
+            deck_cards = [loader.peek_card(cid) for cid in deck_ids]
             # Relevance is judged on the deck as it stood WHEN THE SCREEN WAS
             # SHOWN, before the pick lands -- judging after would let the pick
             # itself change the answer.
@@ -511,7 +517,7 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 screens_since_companion += 1
             if (res.time_to_online is None
                     and draft.core_complete(
-                        [loader.get_card(cid) for cid in deck_ids],
+                        [loader.peek_card(cid) for cid in deck_ids],
                         archetype)):
                 res.time_to_online = fights
         if kind == "B" and not final_act:
@@ -537,15 +543,14 @@ def run_one(character: str, archetype: str, pilot_id: str,
     return res
 
 
-def run_many(character: str, archetype: str, pilot_id: str,
-             policy: DraftPolicy, runs: int, seed: int,
-             slot_mode: str = "standard",
-             relics: list[str] | None = None,
-             grant_relics: bool = False,
-             grant_potions: bool = False,
-             n_acts: int | None = None) -> list[RunResult]:
+def _run_range(character: str, archetype: str, pilot_id: str,
+               policy: DraftPolicy, seed: int, lo: int, hi: int,
+               slot_mode: str, relics: list[str] | None,
+               grant_relics: bool, grant_potions: bool,
+               n_acts: int | None) -> list[RunResult]:
+    """Runs [lo, hi) of the batch. Each is a pure function of `seed + i`."""
     out = []
-    for i in range(runs):
+    for i in range(lo, hi):
         r = run_one(character, archetype, pilot_id, policy, seed + i,
                     slot_mode=slot_mode, relics=relics,
                     grant_relics=grant_relics, grant_potions=grant_potions,
@@ -554,6 +559,61 @@ def run_many(character: str, archetype: str, pilot_id: str,
         # a DEDICATED rng stream so sampling can't perturb run decisions.
         r.regret_samples = draft.draft_regret(
             random.Random(seed + i + 10 ** 9), r.decisions,
-            [loader.get_card(cid) for cid in r.deck_ids], archetype)
+            [loader.peek_card(cid) for cid in r.deck_ids], archetype)
         out.append(r)
     return out
+
+
+def _run_chunk(args: tuple) -> list[RunResult]:
+    """Process-pool entry point. Module-level (picklable), and it takes the
+    policy by NAME because a policy callable cannot cross a process boundary."""
+    name, rest = args[0], args[1:]
+    return _run_range(rest[0], rest[1], rest[2], draft.POLICIES[name],
+                      *rest[3:])
+
+
+def _policy_name(policy: DraftPolicy) -> Optional[str]:
+    for name, fn in draft.POLICIES.items():
+        if fn is policy:
+            return name
+    return None
+
+
+def run_many(character: str, archetype: str, pilot_id: str,
+             policy: DraftPolicy, runs: int, seed: int,
+             slot_mode: str = "standard",
+             relics: list[str] | None = None,
+             grant_relics: bool = False,
+             grant_potions: bool = False,
+             n_acts: int | None = None,
+             jobs: int = 1) -> list[RunResult]:
+    """`jobs` > 1 spreads the batch over that many worker PROCESSES;
+    `jobs=0` means one per CPU.
+
+    This is a wall-clock lever ONLY, never a fidelity tradeoff: run i is a
+    pure function of `seed + i` (spec §2 -- one Random per run, no global
+    state), each worker gets a contiguous block, and the blocks concatenate
+    back in index order. An N-job result list is element-for-element
+    identical to the serial one, which `test_runner.py` pins.
+
+    Serial fallback when there is nothing to parallelize, and when `policy`
+    is not one of the named `draft.POLICIES` -- an experiment script may pass
+    its own closure, which cannot be pickled; running that in-process is
+    better than refusing to run it.
+    """
+    common = (character, archetype, pilot_id, seed)
+    tail = (slot_mode, relics, grant_relics, grant_potions, n_acts)
+    workers = min((os.cpu_count() or 1) if jobs == 0 else jobs, runs)
+    name = _policy_name(policy)
+    if workers <= 1 or name is None:
+        if name is None and workers > 1:
+            warnings.warn(
+                "run_many(jobs>1) needs one of draft.POLICIES to send across "
+                "processes; running serially.", stacklevel=2)
+        return _run_range(*common[:3], policy, seed, 0, runs, *tail)
+
+    edges = [runs * k // workers for k in range(workers + 1)]
+    chunks = [(name, *common, lo, hi, *tail)
+              for lo, hi in zip(edges, edges[1:]) if lo < hi]
+    with ProcessPoolExecutor(max_workers=len(chunks)) as pool:
+        return [r for block in pool.map(_run_chunk, chunks) for r in block]

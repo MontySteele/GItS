@@ -118,7 +118,9 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
     is bought once if a known-dead card is present and the rising price is
     affordable."""
     deck_ids = list(deck_ids)
-    deck_cards = [loader.get_card(cid) for cid in deck_ids]
+    # Read-only: the policy only SCORES the held deck (a bought card is
+    # appended by id), so the shared prototypes are safe here.
+    deck_cards = [loader.peek_card(cid) for cid in deck_ids]
     purchases: list[dict] = []
 
     # --- cards: reuse the draft policy's valuation verbatim (§5) ---

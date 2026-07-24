@@ -277,12 +277,41 @@ def cards_in_pool(pool: str) -> list[Card]:
     return cards
 
 
-def get_card(card_id: str) -> Card:
-    """`<id>+` returns the upgraded form (M7) -- deck lists stay strings."""
+@lru_cache(maxsize=None)
+def _card_prototype(card_id: str) -> Card:
+    """The shared, never-handed-out template for a card id, upgrades applied.
+
+    Building the upgraded form used to run on EVERY `get_card("x+")` call;
+    it is a pure function of the id, so it is memoized here and only the
+    cheap per-caller copy remains. Cleared with the card index (`reload`).
+    """
     if card_id.endswith(upgrades.SUFFIX):
         base = copy.deepcopy(_card_index()[card_id[:-len(upgrades.SUFFIX)]])
         return upgrades.apply_upgrade(base)
-    return copy.deepcopy(_card_index()[card_id])
+    return _card_index()[card_id]
+
+
+def get_card(card_id: str) -> Card:
+    """`<id>+` returns the upgraded form (M7) -- deck lists stay strings.
+
+    Always a FRESH copy: combat mutates card instances (Rampage's
+    grow_damage, Armaments' in-place upgrade), so callers must never share
+    one. Read-only callers that only score a deck should use `peek_card`.
+    """
+    return copy.deepcopy(_card_prototype(card_id))
+
+
+def peek_card(card_id: str) -> Card:
+    """The SHARED prototype for a card id -- do not mutate the result.
+
+    The run layer re-derives `[get_card(cid) for cid in deck_ids]` several
+    times per reward screen purely to score the deck (draft policy, core
+    completion, rest/shop plans, regret). Those paths only read fields, and
+    the copies they forced were ~70% of all card copying in a run. This is
+    the read-only door; anything that plays, upgrades or otherwise mutates a
+    card must go through `get_card`.
+    """
+    return _card_prototype(card_id)
 
 
 @lru_cache(maxsize=1)
@@ -439,6 +468,20 @@ def build_encounter(encounter_id: str) -> list[Enemy]:
 @lru_cache(maxsize=1)
 def _pilot_index() -> dict[str, dict]:
     return {d["id"]: d for d in _load_yaml_dir("pilots")}
+
+
+def reset_caches() -> None:
+    """Drop every memoized view of the content tree.
+
+    One door on purpose: `_card_prototype` is DERIVED from `_card_index`, so
+    clearing the index alone would serve prototypes built from a content tree
+    that no longer exists (the game_ref fresh-clone fixture does exactly
+    that). Anything that changes what is on disk, or monkeypatches where the
+    loader looks, must call this rather than picking caches by hand.
+    """
+    for cache in (_card_index, _card_prototype, _character_index,
+                  _encounter_index, _pilot_index):
+        cache.cache_clear()
 
 
 def pilot_weights(pilot_id: str) -> dict:
