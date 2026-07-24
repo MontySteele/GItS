@@ -7,6 +7,7 @@ using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -32,12 +33,19 @@ public sealed class LetThePeopleRejoice
         ("title", "Let the People Rejoice"),
         ("description",
             "Costs your full [gold]Burst Energy[/gold] meter. "
-          + "Deal {CalculatedDamage:diff()} damage to ALL enemies, plus 1 damage per "
-          + "4 [gold]Fanfare[/gold]. Gain 6 [gold]Encore[/gold]."),
+          + "Deal {CalculatedDamage:diff()} damage to ALL enemies. "
+          + "Scales with [gold]Fanfare[/gold]. Gain 6 [gold]Encore[/gold]."),
     };
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Retain, KleeKeywords.AppliesHydro };
+
+    // Track L-C: the rider's arithmetic lives in the hover tip now that the
+    // printed number carries it. Same treatment the generator gives its own
+    // fanfare riders; hand-written card, so it is wired by hand.
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        FurinaRiderTips.ForCard(
+            base.ExtraHoverTips, this, fanfarePer: 1, fanfareStep: 4);
 
     // Fanfare rider rendered through CalculatedDamageVar (Legibility sprint,
     // 2026-07-24) so the face/hover and the resolved hit share one value path:

@@ -484,3 +484,52 @@ def test_handwritten_furina_burst_matches_the_sheet_contract():
     assert "CardKeyword.Retain" in source
     assert "IElementalCard" in source
     assert "Element Element => Element.Hydro" in source
+
+    # Track L-C: the rider's arithmetic moved to the hover tip, so the face
+    # keeps only the marker. Hand-written card, wired by hand -- pin both ends
+    # so it cannot drift from the generated cards' treatment.
+    assert f"fanfarePer: {n}, fanfareStep: {div}" in source
+    assert "Scales with [gold]Fanfare[/gold]." in source
+    assert f"plus {n} damage per" not in source
+
+
+def test_converted_riders_move_their_arithmetic_to_the_hover_tip():
+    # Track L-C. Once the rider renders inside the printed number, restating
+    # "+1 damage per 2 Fanfare" on the face is duplicate bookkeeping -- the
+    # number already shows the answer. The face keeps a marker naming the
+    # mechanism (so a reward-screen read still declares that it scales) and
+    # the rate moves to a tip that can also price it live.
+    by_id = {card["id"]: card for card in _furina_cards()}
+
+    crescendo = gen.emit(by_id["crescendo"], gen.FURINA_PROFILE)
+    assert "Scales with [gold]Fanfare[/gold]." in crescendo
+    assert "+1 damage per 2" not in crescendo
+    assert (
+        "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, "
+        "fanfarePer: 1, fanfareStep: 2)" in crescendo
+    )
+
+    torrential = gen.emit(by_id["torrential_turn"], gen.FURINA_PROFILE)
+    assert "Bonus damage vs. an elemental aura." in torrential
+    assert "+4 damage if the enemy" not in torrential
+    assert "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, auraBonus: 4)" in torrential
+
+
+def test_unconverted_riders_keep_their_sentence_on_the_face():
+    # The other half of the L-C rule, and the one that matters: a rider whose
+    # number is NOT inside the printed value must keep its full sentence,
+    # because the text is the only place the player can read it. Klee's
+    # detonation rider and the AoE aura riders are both on that side of the
+    # line (AoE aura riders stay per-target, see the L-B pass-2 guard).
+    furina_by_id = {card["id"]: card for card in _furina_cards()}
+    waves = gen.emit(furina_by_id["crashing_waves"], gen.FURINA_PROFILE)
+    assert "damage if the enemy has an elemental aura." in waves
+    assert "FurinaRiderTips" not in waves
+
+    klee_by_id = {
+        card["id"]: card
+        for card in yaml.safe_load(gen.SHEET.read_text(encoding="utf-8"))
+    }
+    big_one = gen.emit(klee_by_id["grand_finale"], gen.KLEE_PROFILE)
+    assert "damage per [gold]Bomb[/gold] detonated this combat." in big_one
+    assert "FurinaRiderTips" not in big_one

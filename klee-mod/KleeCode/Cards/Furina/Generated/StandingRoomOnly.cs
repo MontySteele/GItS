@@ -44,14 +44,14 @@ public sealed class StandingRoomOnly : CustomCardModel, IElementalCard, ICharact
         new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
+        FurinaRiderTips.ForCard(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, fanfarePer: 1, fanfareStep: 5);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("standing_room_only");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Standing Room Only"),
-        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. +1 damage per 5 [gold]Fanfare[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. Scales with [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
