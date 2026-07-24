@@ -56,13 +56,15 @@ public sealed class GuestNeuvilletteDroplets : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Neuvillette — Sourcewater Droplets"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to a random enemy."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(4m, ValueProp.Move)
+            new CalculationBaseVar(4m),
+            new CalculationExtraVar(1m),
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -74,7 +76,7 @@ public sealed class GuestNeuvilletteDroplets : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue), ValueProp.Move), cardPlay);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
         {
             var auraCandidates = CombatState!.HittableEnemies.ToList();
             if (auraCandidates.Count > 0)

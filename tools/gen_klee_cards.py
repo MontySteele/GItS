@@ -1051,6 +1051,33 @@ def spotlight_calc_rider(card: dict, eff: dict) -> tuple[int, int] | None:
     return int(eff["amount"]), 1
 
 
+def spotlight_block_rider(card: dict, eff: dict) -> int | None:
+    """Track L-A4, block half: a COMPANION card's block rendered through the
+    base game's `CalculatedBlockVar` so the Spotlight GuestCast scaling shows on
+    the face. Returns the printed base, or None.
+
+    `CalculatedBlockVar` is the exact block twin of `CalculatedDamageVar` --
+    it overrides UpdateCardPreview to run `Hook.ModifyBlock`, so block-modifying
+    powers still reach the preview. It reads `CalculationBase` + `CalculationExtra`.
+
+    Excluded: a card whose DAMAGE already converts. `CalculatedDamageVar` and
+    `CalculatedBlockVar` both take their base from the single `CalculationBase`
+    var, so a card doing both would compute its block off the damage base.
+    freminet_pressurized_floe is the only one, and its damage conversion wins.
+    Also excluded: more than one block effect (same collision), and salon-deploy
+    cards (the x3 replacement multiplier is still inline)."""
+    if not is_companion(card) or eff.get("op") != "block":
+        return None
+    if salon_deploy_card(card):
+        return None
+    effects = card.get("effects", [])
+    if sum(1 for e in effects if e.get("op") == "block") != 1:
+        return None
+    if any(calc_rider(card, e) is not None for e in effects):
+        return None
+    return int(eff["amount"])
+
+
 def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     """Unified view of every damage rider that renders through a
     CalculatedDamageVar: (base, extra, multiplier-lambda source). The four
@@ -1112,7 +1139,19 @@ def build_vars(card: dict) -> list[str]:
                     n = int(eff["bonus_formula"].partition("_per_")[0])
                     out.append(f'new DynamicVar("BonusPer", {n}m)')
         elif op == "block":
-            out.append(f'new BlockVar({eff["amount"]}m, ValueProp.Move)')
+            block_base = spotlight_block_rider(card, eff)
+            if block_base is not None:
+                # Mirage idiom: base + 1 * (PrintedBlock(base) - base), which
+                # is PrintedBlock(base) -- the number the card already gains,
+                # now also the number it prints.
+                out.append(f'new CalculationBaseVar({block_base}m)')
+                out.append('new CalculationExtraVar(1m)')
+                out.append(
+                    'new CalculatedBlockVar(ValueProp.Move).WithMultiplier('
+                    'static (card, _) => '
+                    'SpotlightSystem.PrintedBlockDelta(card))')
+            else:
+                out.append(f'new BlockVar({eff["amount"]}m, ValueProp.Move)')
         elif op == "draw":
             out.append(f'new CardsVar({int(eff["amount"])})')
         elif op == "place_bomb":
@@ -1745,6 +1784,14 @@ def build_body(
         op = eff["op"]
 
         if op == "block":
+            if spotlight_block_rider(card, eff) is not None:
+                # Base game's own idiom (Mirage): resolve through the same var
+                # the face reads, so preview and gain cannot drift.
+                lines.append(
+                    "await CreatureCmd.GainBlock(Owner.Creature, "
+                    "DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), "
+                    "DynamicVars.CalculatedBlock.Props, cardPlay);")
+                continue
             amount = "DynamicVars.Block"
             if salon_deployed:
                 amount = (
@@ -2502,7 +2549,9 @@ def build_description(card: dict) -> str:
         op = eff["op"]
 
         if op == "block":
-            parts.append("Gain {Block:diff()} [gold]Block[/gold].")
+            tok = ("CalculatedBlock"
+                   if spotlight_block_rider(card, eff) is not None else "Block")
+            parts.append(f"Gain {{{tok}:diff()}} [gold]Block[/gold].")
 
         elif op == "block_next_turn":
             # Literal: the `block` delta binds to the plain block op (sheet:
@@ -2918,6 +2967,9 @@ def build_upgrade(card: dict) -> list[str]:
             var = ("DynamicVars.CalculationBase"
                    if calc_rider(card, eff) is not None
                    else "DynamicVars.Damage")
+        elif key == "block" and spotlight_block_rider(card, eff) is not None:
+            # Converted block has no "Block" var -- its base is CalculationBase.
+            var = "DynamicVars.CalculationBase"
         elif key == "bomb_damage":
             var = f"DynamicVars.{bomb_var(card)}"
         else:

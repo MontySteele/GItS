@@ -301,6 +301,43 @@ def test_companion_damage_renders_spotlight_scaling_on_the_face():
     assert "PrintedDamage(this" not in kaeya
 
 
+def test_companion_block_renders_spotlight_scaling_on_the_face():
+    # Block half of L-A4. CalculatedBlockVar is the exact twin of
+    # CalculatedDamageVar -- it overrides UpdateCardPreview to run
+    # Hook.ModifyBlock, so block-modifying powers still reach the preview --
+    # and it reads CalculationBase + CalculationExtra. Resolution goes through
+    # the same var (the base game's own Mirage idiom) so face and gain agree.
+    by_id = {card["id"]: card for card in _companion_rows()}
+    diona = gen.emit(by_id["diona_icy_paws"])
+
+    assert "new CalculationBaseVar(5m)" in diona
+    assert "new CalculationExtraVar(1m)" in diona
+    assert (
+        "new CalculatedBlockVar(ValueProp.Move).WithMultiplier("
+        "static (card, _) => SpotlightSystem.PrintedBlockDelta(card))"
+        in diona
+    )
+    assert "DynamicVars.CalculatedBlock.Calculate(cardPlay.Target)" in diona
+    assert "{CalculatedBlock:diff()}" in diona
+    assert "PrintedBlock(this" not in diona
+    assert "DynamicVars.CalculationBase.UpgradeValueBy(2m);" in diona
+
+
+def test_card_doing_both_damage_and_block_converts_only_its_damage():
+    # CalculatedDamageVar and CalculatedBlockVar BOTH take their base from the
+    # single CalculationBase var, so a card converting both would compute its
+    # block off the damage base. freminet_pressurized_floe is the only card
+    # doing both; its damage conversion wins and its block stays inline.
+    by_id = {card["id"]: card for card in _companion_rows()}
+    freminet = gen.emit(by_id["freminet_pressurized_floe"])
+
+    assert freminet.count("new CalculationBaseVar(") == 1
+    assert "new CalculatedDamageVar(" in freminet
+    assert "new CalculatedBlockVar(" not in freminet
+    assert "new BlockVar(" in freminet
+    assert "PrintedBlock(this" in freminet
+
+
 def test_furina_own_cards_keep_the_identity_spotlight_wrap():
     # PrintedDamage is identity for a non-companion: its bonus path requires
     # Mode == GuestCast, and under GuestCast IsSpotlighted accepts only
