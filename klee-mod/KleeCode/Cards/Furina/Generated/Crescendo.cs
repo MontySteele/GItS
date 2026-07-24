@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,12 +37,15 @@ public sealed class Crescendo : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, fanfarePer: 1, fanfareStep: 2);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("crescendo");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crescendo"),
-        ("description", "Spend 10 [gold]Fanfare[/gold]. Deal {CalculatedDamage:diff()} damage. +1 damage per 2 [gold]Fanfare[/gold]."),
+        ("description", "Spend 10 [gold]Fanfare[/gold]. Deal {CalculatedDamage:diff()} damage. Scales with [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -1115,6 +1115,27 @@ def salon_calc_rider(card: dict, eff: dict) -> tuple[int, int, str, str] | None:
     return int(eff["amount"]), deploys, var, mult
 
 
+def rider_tip_args(card: dict) -> str:
+    """Track L-C: the C# arguments for the re-homed rider tip, or "".
+
+    Only riders that were CONVERTED get a tip, because only those have had
+    their arithmetic removed from the card text. An unconverted rider (the
+    Bomb-detonation formula, an AoE aura rider) keeps its full sentence on the
+    face, so re-homing it would delete the only place the player could read
+    it."""
+    args = []
+    for eff in card.get("effects", []):
+        if calc_rider(card, eff) is None:
+            continue
+        m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", eff.get("bonus_formula", ""))
+        if m:
+            args.append(f"fanfarePer: {int(m.group(1))}")
+            args.append(f"fanfareStep: {int(m.group(2))}")
+        elif "bonus_vs_aura" in eff:
+            args.append(f"auraBonus: {int(eff['bonus_vs_aura'])}")
+    return ", ".join(args)
+
+
 def salon_scaled_snapshot(card: dict) -> str | None:
     """The C# local a converted salon card captures before its first deploy,
     or None. Named per var so the body reads plainly."""
@@ -2803,6 +2824,12 @@ def build_description(card: dict) -> str:
             else:
                 plural = "random enemies" if times > 1 else "a random enemy"
                 parts.append(f"Deal {{{tok}:diff()}} damage to {plural}{suffix}.")
+            # Track L-C: a rider whose arithmetic now lands inside the printed
+            # number keeps only a short marker here; the rate (and what it is
+            # worth right now) moves to the hover tip. A rider that is NOT
+            # converted keeps its full sentence -- its number is not on the
+            # face, so the text is the only place the player can read it.
+            rehomed = calc_rider(card, eff) is not None
             if "bonus_formula" in eff:
                 formula = eff["bonus_formula"]
                 if formula.endswith("_per_detonation_this_combat"):
@@ -2810,15 +2837,20 @@ def build_description(card: dict) -> str:
                            else formula.partition("_per_")[0])
                     parts.append(
                         f"+{per} damage per [gold]Bomb[/gold] detonated this combat.")
+                elif rehomed:
+                    parts.append("Scales with [gold]Fanfare[/gold].")
                 else:
                     n, _, rest = formula.partition("_per_")
                     fanfare_step = rest.partition("_")[0]
                     parts.append(
                         f"+{n} damage per {fanfare_step} [gold]Fanfare[/gold].")
             if "bonus_vs_aura" in eff:
-                parts.append(
-                    f"+{int(eff['bonus_vs_aura'])} damage if the enemy "
-                    "has an elemental aura.")
+                if rehomed:
+                    parts.append("Bonus damage vs. an elemental aura.")
+                else:
+                    parts.append(
+                        f"+{int(eff['bonus_vs_aura'])} damage if the enemy "
+                        "has an elemental aura.")
 
         elif op == "gain_spark":
             if spark_upgrade(card):
@@ -3449,17 +3481,28 @@ def emit(
         eff.get("op") == "add_card" and eff.get("card") == "confiscated"
         for eff in card.get("effects", []))
     tooltip_member = ""
+    tips_expr = ""
     if preview_element_cs is not None or includes_bomb_rules or includes_confiscated_rules:
         trigger_arg = preview_element_cs or "Element.None"
         bomb_arg = "true" if includes_bomb_rules else "false"
         confiscated_arg = (
             ", includesConfiscatedRules: true"
             if includes_confiscated_rules else "")
+        tips_expr = (
+            "KleeCardTooltips.ForCard(base.ExtraHoverTips, this, "
+            f"{trigger_arg}, includesBombRules: {bomb_arg}"
+            f"{confiscated_arg})")
+    # Track L-C: the arithmetic the card text no longer carries. Wraps the
+    # element/bomb tips when both apply, so one override yields both lists.
+    rider_args = rider_tip_args(card)
+    if rider_args:
+        tips_expr = (
+            f"FurinaRiderTips.ForCard({tips_expr or 'base.ExtraHoverTips'}, "
+            f"this, {rider_args})")
+    if tips_expr:
         tooltip_member = (
             "\n    protected override IEnumerable<IHoverTip> ExtraHoverTips =>\n"
-            "        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, "
-            f"{trigger_arg}, includesBombRules: {bomb_arg}"
-            f"{confiscated_arg});\n"
+            f"        {tips_expr};\n"
         )
     hover_using = (
         "\nusing MegaCrit.Sts2.Core.HoverTips;" if tooltip_member else "")

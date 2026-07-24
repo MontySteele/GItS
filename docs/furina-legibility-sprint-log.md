@@ -375,7 +375,39 @@ Crescendo's old inline form).
     this sprint exists to cure, unless `Deploy` is refactored to consume the same
     predicate. That refactor touches resolution order on salon cards, so it wants
     red-pen before it is written, not after.
-  - **L-C text re-homing — SCOPED, costs more than the doc assumes.** Only 4
+- **L-C text re-homing — DONE (5 cards), [USER]-ratified 2026-07-24.**
+  - **The scoping note below was wrong on its key point, and the correction is
+    the whole reason this was cheap:** `HoverTipFactory`'s entry points are
+    indeed all typed, but **`HoverTip` itself has a
+    `(LocString title, string description)` constructor** — free text for the
+    body. No custom `IHoverTip` was needed. Found by reading `FromKeyword`,
+    which is just `new HoverTip(keyword.GetTitle(), keyword.GetDescription())`.
+    Lesson worth keeping: when a factory looks closed, read what the factory
+    itself calls.
+  - **The rule applied:** a rider gets re-homed **iff its arithmetic now lands
+    inside the printed number** (`calc_rider` is not None). Those cards keep a
+    short marker naming the mechanism — "Scales with [gold]Fanfare[/gold]." /
+    "Bonus damage vs. an elemental aura." — so a reward-screen read still
+    declares that the card scales, and the rate moves to the tip, which can
+    also price it live ("+1 damage per 2 Fanfare. You hold 28 Fanfare: +14
+    damage, already counted in the number above.").
+  - **The other half of the rule, and the one that matters:** an UNCONVERTED
+    rider keeps its full sentence, because the text is the only place its
+    number can be read. That covers Klee's `grand_finale` detonation rider and
+    every AoE aura rider (`crashing_waves`, `flame_dance` — which stay
+    per-target by the L-B pass-2 ruling). Pinned by
+    `test_unconverted_riders_keep_their_sentence_on_the_face`.
+  - New `klee-mod/KleeCode/Cards/FurinaRiderTips.cs`; two title rows added to
+    the existing `card_keywords` fallback merge in `KleeMod.InjectLocStrings`
+    (same KLEEMOD- prefix, same guarded merge, so a code-only rebuild never
+    renders a raw key). Generator emits the tip through one composed
+    `ExtraHoverTips` override, wrapping `KleeCardTooltips.ForCard` when a card
+    also carries element/bomb tips.
+  - Converted: `crescendo`, `standing_room_only`, `universal_revelry`,
+    `torrential_turn`, and the hand-written Burst `LetThePeopleRejoice`
+    (wired by hand, both ends pinned by the parity test). Suite **648**.
+  - _Superseded analysis (kept for the record):_
+    **L-C text re-homing — SCOPED, costs more than the doc assumes.** Only 4
     generated cards (+ the hand-written Burst) carry a trailing rider sentence,
     so the surface is small. The blocker is the tip API: every
     `HoverTipFactory` entry point is TYPED — `FromKeyword`, `FromPower`,
@@ -386,7 +418,7 @@ Crescendo's old inline form).
     already exists as the injection point and several cards already override
     `ExtraHoverTips` — but it is a new UI type plus a card-text change on 5
     cards, i.e. design surface. Not attempted unilaterally.
-- **L-C:** text re-homing — unstarted (ordering).
+- **L-C:** text re-homing — DONE (see above).
 
 _Note: `tools/lint_strict_domination.py` shows modified in the tree — that is the
 concurrent Kokomi v0.2 session (Sly riders), NOT this sprint. Keep it out of any

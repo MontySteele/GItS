@@ -154,6 +154,18 @@ public static class KleeMod
                     ["KLEEMOD-CRYSTALLIZE_PREVIEW.title"] = "Reaction preview: Crystallize",
                     ["KLEEMOD-CRYSTALLIZE_PREVIEW.description"] =
                         "This card supplies Geo to an existing aura. The aura is consumed and you gain 4 Block.",
+
+                    // Legibility sprint L-C: titles for the re-homed rider
+                    // tips (FurinaRiderTips). These are NOT card keywords --
+                    // they are hover-tip titles, which need a LocString --
+                    // but they live in the same table so the one merge point
+                    // covers them and a code-only rebuild never shows a raw
+                    // key. The bodies are built per card in C#, because a
+                    // shared row cannot carry a per-card rate.
+                    [Cards.FurinaRiderTips.FanfareKey + ".title"] =
+                        "Fanfare scaling",
+                    [Cards.FurinaRiderTips.AuraKey + ".title"] =
+                        "Elemental aura bonus",
                 };
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))

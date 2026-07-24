@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,12 +37,15 @@ public sealed class TorrentialTurn : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, auraBonus: 4);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("torrential_turn");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Torrential Turn"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. +4 damage if the enemy has an elemental aura."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Bonus damage vs. an elemental aura."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
