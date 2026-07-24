@@ -35,7 +35,10 @@ def test_build_kokomi_skeleton():
     p = loader.build_player("kokomi")
     assert p.character_id == "kokomi" and p.element == "hydro"
     assert p.cadence == "catalyst"
-    assert p.burst_max == 10 and p.charge == 0   # v0.3 fast-cycle meter
+    assert p.burst_max == 20 and p.charge == 0   # v0.4 O4: a real Burst
+                                                 # again (v0.3's fast-cycle
+                                                 # 10 is the floor
+                                                 # comparator, not the arm)
     assert "tamakushi_casket" in p.relic_hooks
     assert [k.id for k in p.kit_cards] == ["ceremonial_garment"]
     assert loader.character_nation("kokomi") == "inazuma"
@@ -311,15 +314,150 @@ def test_nereids_ascension_reads_charge():
     assert hp0 - e.hp == 12 + 10 // 2      # v0.3 base 12
 
 
-def test_riptide_strike_is_the_on_curve_reader():
+def test_all_streams_flow_is_the_on_curve_reader():
     """v0.3 charge-curve pass: the sub-Rare read exists and scales."""
     st = kokomi_state()
     e = st.enemies[0]
     st.player.charge = 10
     hp0 = e.hp
-    effects.resolve_card(st, loader.get_card("riptide_strike"))
+    effects.resolve_card(st, loader.get_card("all_streams_flow"))
     assert hp0 - e.hp == 5 + 10 // 2
     assert st.player.charge == 10          # read, never spent
+
+
+# --- v0.4 O4 salvage: the Kurage summon + Garment riders ---
+
+def test_bake_kurage_fields_a_summon_for_the_constant_duration():
+    st = kokomi_state()
+    effects.resolve_card(st, loader.get_card("bake_kurage"))
+    assert st.player.powers["kurage_summon"] == C.KURAGE_DURATION
+    assert st.player.charge == 1           # the +1 Charge survives the rework
+
+
+def test_kurage_pulse_reads_the_bank_and_grants_block():
+    st = kokomi_state()
+    e = st.enemies[0]
+    st.player.charge = 12
+    st.player.powers["kurage_summon"] = C.KURAGE_DURATION
+    hp0, block0 = e.hp, st.player.block
+    effects.player_turn_end_triggers(st)
+    assert hp0 - e.hp == C.KURAGE_PULSE_BASE + 12 * C.KURAGE_PULSE_PER_CHARGE
+    assert st.player.block - block0 == C.KURAGE_PULSE_BLOCK
+    assert st.player.charge == 12          # read, never spent
+    assert st.player.powers["kurage_summon"] == C.KURAGE_DURATION - 1
+
+
+def test_kurage_summon_expires_and_stops_pulsing():
+    st = kokomi_state()
+    st.player.powers["kurage_summon"] = 1
+    effects.player_turn_end_triggers(st)
+    assert st.player.powers["kurage_summon"] == 0
+    e = st.enemies[0]
+    hp0 = e.hp
+    effects.player_turn_end_triggers(st)
+    assert e.hp == hp0                     # gone means gone
+
+
+def test_resummoning_refreshes_and_never_stacks():
+    """A second jellyfish is not a bigger jellyfish (plan §1.1)."""
+    st = kokomi_state()
+    effects.resolve_card(st, loader.get_card("bake_kurage"))
+    effects.player_turn_end_triggers(st)
+    assert st.player.powers["kurage_summon"] == C.KURAGE_DURATION - 1
+    effects.resolve_card(st, loader.get_card("bake_kurage"))
+    assert st.player.powers["kurage_summon"] == C.KURAGE_DURATION
+
+
+def test_garment_cast_refreshes_a_fielded_kurage(monkeypatch):
+    """The Tamakushi Casket link: her canon E-into-Q loop (plan §1.3).
+
+    NOTE the monkeypatch, and why it is not cheating: at the SHIPPED
+    KURAGE_DURATION of 1 this mechanic is unobservable. A fielded Kurage is
+    always at exactly 1, so "refresh to full" is a no-op, and at 0 the guard
+    correctly declines to conjure one from nothing. The link is real in code
+    and inert in play -- the known consequence recorded on KURAGE_DURATION.
+    This test raises the duration so the behaviour is still PINNED, which is
+    what makes restoring a longer duration safe.
+    """
+    monkeypatch.setattr(C, "KURAGE_DURATION", 3)
+    st = kokomi_state()
+    st.player.powers["kurage_summon"] = 1          # decayed, 2 turns burned
+    effects.resolve_card(st, loader.get_card("ceremonial_garment"))
+    assert st.player.powers["kurage_summon"] == 3
+
+
+def test_garment_cast_does_not_conjure_a_kurage_from_nothing():
+    st = kokomi_state()
+    effects.resolve_card(st, loader.get_card("ceremonial_garment"))
+    assert st.player.powers.get("kurage_summon", 0) == 0
+
+
+def test_garment_attacks_also_grant_block():
+    st = kokomi_state()
+    st.player.powers["ceremonial_garment"] = C.CEREMONIAL_GARMENT_TURNS
+    block0 = st.player.block
+    effects.resolve_card(st, loader.get_card("waters_edge"))
+    assert st.player.block - block0 == C.GARMENT_ATTACK_BLOCK
+
+
+def test_garment_attack_block_does_not_fire_without_the_state():
+    st = kokomi_state()
+    block0 = st.player.block
+    effects.resolve_card(st, loader.get_card("waters_edge"))
+    assert st.player.block == block0
+
+
+def test_kurages_oath_adds_block_to_every_pulse():
+    """v0.4: the mending half of the canon Bake-Kurage, drafted rather than
+    baseline (KURAGE_PULSE_BLOCK is 0)."""
+    st = kokomi_state()
+    e = st.enemies[0]
+    st.player.powers["kurage_summon"] = 1
+    hp0, block0 = e.hp, st.player.block
+    effects.player_turn_end_triggers(st)
+    assert st.player.block == block0        # no ward yet: damage only
+
+    oath = loader.get_card("kurages_oath")
+    (ward,) = [fx for fx in oath.effects if fx.get("power") == "kurage_ward"]
+    st2 = kokomi_state()
+    effects.resolve_card(st2, oath)
+    st2.player.powers["kurage_summon"] = 1
+    b0 = st2.player.block
+    effects.player_turn_end_triggers(st2)
+    # Read the PRINTED number rather than pinning a literal: this one is an
+    # explicitly-flagged rebalance candidate ([USER]: "maybe too strong"), so
+    # the test guards the wiring, not the balance dial.
+    assert st2.player.block - b0 == ward["amount"]
+
+
+def test_kurages_oath_is_inert_without_a_fielded_kurage():
+    st = kokomi_state()
+    effects.resolve_card(st, loader.get_card("kurages_oath"))
+    b0 = st.player.block
+    effects.player_turn_end_triggers(st)
+    assert st.player.block == b0            # the ward mends nothing alone
+
+
+def test_kurage_constants_are_exercised_knobs():
+    """KNOB_READS: every v0.4 constant is named AND read (plan ask 2)."""
+    effects.KNOB_READS.clear()
+    st = kokomi_state()
+    st.player.powers["ceremonial_garment"] = 1
+    effects.resolve_card(st, loader.get_card("bake_kurage"))
+    effects.resolve_card(st, loader.get_card("waters_edge"))
+    effects.player_turn_end_triggers(st)
+    for knob in ("KURAGE_DURATION", "KURAGE_PULSE_PER_CHARGE",
+                 "GARMENT_ATTACK_BLOCK"):
+        assert effects.KNOB_READS.get(knob, 0) > 0, knob
+
+
+def test_pilot_actually_fields_the_kurage():
+    """The DECISIONS-53 selector lesson: a card the pilot cannot price is a
+    card the arm never gets. Bake-Kurage is the whole O4 arm."""
+    p = loader.build_player("kokomi")
+    pilot = make_pilot(loader.pilot_weights("priest"))
+    st = combat.run_fight(p, [make_enemy(hp=200)], pilot, seed=11)
+    assert any(ev["event"] == "summon_kurage" for ev in st.log)
 
 
 # --- integration: batteries run clean ---

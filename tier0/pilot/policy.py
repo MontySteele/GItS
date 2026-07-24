@@ -61,6 +61,13 @@ def make_pilot(weights: dict):
                        if c.type == "attack" and s > 0]
             if attacks:
                 _, best_neg_i, best = max(attacks, key=lambda t: t[:2])
+        # NOT a rule here: "bank Charge before playing a Charge reader." The
+        # v0.4 W1 arm implemented exactly that (same shape as the bomb rule)
+        # and MEASURED WORSE -- priest act-1 33% -> 27% over 500 realistic
+        # runs, commander flat. Demoting a damage play to a setup play costs
+        # tempo in precisely the act-1 fights that kill her, and the bank is
+        # deep enough by the time a reader matters. Binding null result;
+        # documented in docs/kokomi-v0.4-report.md so it is not retried.
         _log_regret(state, best, -best_neg_i, playable, dmg, blk)
         return best
 
@@ -149,6 +156,13 @@ def _active_effects(state: CombatState, effect_list: list[dict]):
 def _expected_damage(state: CombatState, card: Card) -> float:
     total = 0.0
     living = state.living_enemies
+    # v0.4 W1 (priest-pilot audit): the flat per-attack bonus the engine folds
+    # in at resolution — Bennett's next_attack_up, celestial_gift, the Fanfare
+    # term, and Kokomi's Ceremonial Garment Charge read. The pilot used to see
+    # NONE of it, so it priced every attack at its printed number and played
+    # straight through its own buff windows. Same helper the engine calls, so
+    # the estimate cannot drift from what resolves; it is a pure read.
+    flat = effects.flat_attack_bonus(state, card, card_cost(state, card))
     for fx in _active_effects(state, card.effects):
         if fx["op"] == "damage":
             if fx.get("target") == "self":
@@ -180,6 +194,10 @@ def _expected_damage(state: CombatState, card: Card) -> float:
             # Spotlight empowerment is real damage the pilot should see --
             # this is also what makes it PREFER Spotlighted cards.
             per_hit *= effects.spotlight_mult(state, card)
+            # After the Spotlight multiply and before the per-hit tally, which
+            # is where the engine folds it in (_deal_damage: spotlight scales
+            # the PRINTED number, the flat bonus rides on top, per hit).
+            per_hit += flat
             total += per_hit * times * n_targets
         elif fx["op"] == "place_bomb":
             total += fx["bomb_damage"] * _est(state, fx.get("amount", 1), 1)
@@ -188,6 +206,20 @@ def _expected_damage(state: CombatState, card: Card) -> float:
             # The Burst payoff: stacks x 4 hits x 5 dmg over coming turns.
             total += (fx["amount"] * C.SPARKS_N_SPLASH_HITS
                       * C.SPARKS_N_SPLASH_HIT_DMG * 0.8)
+        elif fx["op"] == "summon_kurage":
+            # v0.4: the jellyfish's pulses are real damage arriving over the
+            # coming turns, same futurity discount as the Burst above. Without
+            # this the pilot prices Bake-Kurage at its +1 Charge alone and
+            # never fields the summon the whole O4 arm rests on -- the
+            # DECISIONS-53 selector lesson, which this pool has already paid
+            # for once. The bank read is priced at the CURRENT bank: the
+            # pilot cannot see its own future accrual, so this understates a
+            # late-fight summon and that is the safe direction to be wrong.
+            turns = _est(state, fx.get("amount", C.KURAGE_DURATION),
+                         C.KURAGE_DURATION)
+            per_pulse = (C.KURAGE_PULSE_BASE
+                         + state.player.charge * C.KURAGE_PULSE_PER_CHARGE)
+            total += turns * per_pulse * 0.8
         elif fx["op"] == "detonate":
             # Early detonation realizes bomb damage now but forfeits the
             # next-turn detonation it would get anyway — value it only
@@ -245,11 +277,21 @@ def _block_value(state: CombatState, card: Card,
     # the same number for every card in one decision; None recomputes it.
     val = 0.0
     raw = _raw_block(state, card)
-    if raw:
+    # v0.4: the Kurage's pulse Block arrives at THIS turn's end, i.e. in time
+    # for the swing the pilot is currently pricing, so it counts like printed
+    # Block. Later pulses are not counted here -- their damage is already
+    # valued in _expected_damage and double-counting the defense would make
+    # the summon crowd out real blockers on a lethal turn.
+    pulse = (C.KURAGE_PULSE_BLOCK
+             if any(fx["op"] == "summon_kurage" for fx in card.effects)
+             else 0)
+    if raw or pulse:
+        # Resolved once for BOTH terms: `incoming` is the same number for
+        # every card in one decision, which is why the caller hands it down.
         if incoming is None:
             incoming = _incoming_damage(state)
         prevented = max(0.0, incoming - state.player.block)
-        val += min(raw, prevented)
+        val += min(raw, prevented) + min(pulse, prevented)
     heal = sum(fx["amount"] for fx in card.effects if fx["op"] == "heal")
     if heal:
         val += min(heal, state.player.max_hp - state.player.hp)

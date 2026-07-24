@@ -424,6 +424,13 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
 def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     raw = (_calc_amount(state, fx["amount_formula"], card)
            if "amount_formula" in fx else fx["amount"])
+    # Same rider grammar damage already carries (F-B1): a defensive card may
+    # scale on the meter too. Applied BEFORE the Salon multiplier and before
+    # Spotlight, exactly where damage applies its own -- a rider that landed
+    # after those would be multiplied by them and quietly outscale its
+    # printed twin.
+    if "bonus_formula" in fx:
+        raw += _bonus_formula(state, fx["bonus_formula"])
     if state.salon_replacements_this_card:
         raw *= C.SALON_REPLACE_DAMAGE_MULT
     times = fx.get("times", 1)
@@ -1722,20 +1729,25 @@ def player_turn_end_triggers(state: CombatState) -> None:
         # the party. This is where O4 puts the periodic output that v0.3
         # had loaded onto the Burst -- canon keeps the metronome on the
         # summon, so the instrument stops reading it as frontload.
-        dmg = C.KURAGE_PULSE_BASE + p.charge // C.KURAGE_PULSE_DIVISOR
-        KNOB_READS["KURAGE_PULSE_DIVISOR"] = (
-            KNOB_READS.get("KURAGE_PULSE_DIVISOR", 0) + 1)
+        dmg = C.KURAGE_PULSE_BASE + p.charge * C.KURAGE_PULSE_PER_CHARGE
+        KNOB_READS["KURAGE_PULSE_PER_CHARGE"] = (
+            KNOB_READS.get("KURAGE_PULSE_PER_CHARGE", 0) + 1)
         if state.living_enemies:
             enemy = state.rng.choice(state.living_enemies)
             deal_damage_to_enemy(state, enemy, dmg, element="hydro",
                                  source="companion")
         # Block lands whether or not an enemy was standing: the healer's
-        # mending is Block under the R52 healing law, and it is the whole
-        # reason the summon carries the fight-1 survival math.
-        p.block += C.KURAGE_PULSE_BLOCK
-        state.emit("block", amount=C.KURAGE_PULSE_BLOCK)
-        KNOB_READS["KURAGE_PULSE_BLOCK"] = (
-            KNOB_READS.get("KURAGE_PULSE_BLOCK", 0) + 1)
+        # mending is Block under the R52 healing law. The BASELINE is off
+        # since the v0.4 starter rework (KURAGE_PULSE_BLOCK 0); the mending
+        # is now DRAFTED, via the kurage_ward power (Kurage's Oath). Both
+        # terms ride the same line so restoring the baseline stays a
+        # one-constant change.
+        blk = C.KURAGE_PULSE_BLOCK + p.powers.get("kurage_ward", 0)
+        if blk:
+            p.block += blk
+            state.emit("block", amount=blk)
+            KNOB_READS["KURAGE_PULSE_BLOCK"] = (
+                KNOB_READS.get("KURAGE_PULSE_BLOCK", 0) + 1)
         p.powers["kurage_summon"] -= 1
     if p.powers.get("witchs_flame", 0):                 # Durin (permanent)
         # Turn Klee's Pyro saturation into a setup window instead of adding

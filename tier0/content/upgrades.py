@@ -251,6 +251,13 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "gain_fanfare_floor"),
                              "amount", val)
+        elif key == "block_next_turn":
+            # The Charlotte-precedent second half. `block` deliberately hits
+            # only the first op, so a card whose upgrade moves BOTH halves
+            # (Sayu's daruma) needs this to say so explicitly.
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "block_next_turn"),
+                             "amount", val)
         elif key == "kurage_turns":
             # v0.4: Bake-Kurage+ keeps the jellyfish out longer. Duration is
             # the ONLY thing an upgrade may move here -- the pulse numbers

@@ -1,7 +1,23 @@
 # Kokomi card pool — v0.2 SHEET PASS (Tier 0 simulator schema). docs/kokomi-kickoff-v1.md governs; every kickoff
 # gate is CLOSED (R51 elite axes + debuff texture, R52 batch closure — 2026-07-24). EVERY number remains PROPOSED;
-# EVERY name is a PLACEHOLDER pending the [USER]-only naming/lore audit (verified talent names: Nereid's Ascension,
-# Ceremonial Garment, Bake-Kurage, Tamakushi Casket, The Moon's Beauty; the rest are authored flavor).
+# v0.4 LORE OVERLAY (2026-07-26): the naming audit ran; the names below are [USER]-ruled, not placeholders.
+# WIKI-VERIFIED canon names (re-verified against the Genshin wiki this pass — the wiki is the instrument, not
+#   anyone's memory): Kurage's Oath (Elemental Skill, which summons the Bake-Kurage), Bake-Kurage,
+#   Nereid's Ascension (Elemental Burst), Ceremonial Garment (the state it dons), Tamakushi Casket (1st Ascension
+#   passive: casting Nereid's Ascension REFRESHES a fielded Bake-Kurage — the link this sheet now models),
+#   Song of Pearls (4th Ascension passive), Princess of Watatsumi (innate passive), and the constellations
+#   C1 At Water's Edge / C5 All Streams Flow to the Sea / C6 Sango Isshin.
+# CORRECTION: the previous header listed "The Moon's Beauty" as verified. It is NOT a Kokomi name and did not
+#   corroborate — struck. The real Moon constellations are C3 "The Moon, A Ship O'er the Seas" and C4 "The Moon
+#   Overlooks the Waters". (Beware beta-era sources: they carry "Kaijin Ceremony" for the Burst and "Haworthia
+#   Casket" for the A1 passive. Both are pre-release names; the release names are the ones above.)
+# EVERY number remains PROPOSED. Names not in the verified list are authored flavor, now ruled.
+# VOICE LAW (v0.4 §3): Exhaust in her fiction is ROTATION, never sacrifice. Units rotate off the field rested and
+#   whole; Charge is the strategic position each executed maneuver buys. Her doctrine is minimal casualties — the
+#   sacrifice voice is the one reading that breaks the character. tactical_recall is the exemplar; the old
+#   grand_conscription line ("the army becomes fuel") was the marked counter-example and is fixed below.
+#   Forced service is Shogunate behaviour and the resistance were volunteers, so the display family is
+#   Muster/Enlist/Rally; the internal op name `conscript` stays.
 # Identity (kickoff §1): Kokomi converts card economy into damage. She pays in cards, never in HP.
 #   LAW 1: no self-damage anywhere in this pool (grep-clean: no {target: self} damage op may ever appear here).
 #   LAW 2 (R52, ask 1): NO heals in this pool, period. No amendment taken and NONE PLANNED — Furina holds the mod's
@@ -35,23 +51,32 @@
 - {id: coral_guard, name: "Coral Guard", cost: 1, type: skill, rarity: basic, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 5}]}
    # Standard Defend. Her distinctive durability comes from the ward/Charge economy, not inflated basics.
-- {id: bake_kurage, name: "Bake-Kurage", cost: 1, type: skill, rarity: basic, solve: [utility], archetypes: [generic], role: enabler, tags: [skill_tag],
-   effects: [{op: apply_aura, element: hydro, target: random_enemy}, {op: block, amount: 3}, {op: gain_charge, amount: 1}]}
-   # Signature basic: the jellyfish takes the field — application from card one (the healer summon's mending is
-   # Block under the law). skill_tag = burst particles. The meter is NAMED for this card (kickoff §2.1).
+- {id: bake_kurage, name: "Bake-Kurage", cost: 1, type: skill, rarity: basic, solve: [utility, scaling], archetypes: [generic], role: enabler, tags: [skill_tag],
+   effects: [{op: summon_kurage, amount: 1}, {op: gain_charge, amount: 1}]}
+   # Signature basic: the jellyfish takes the field — and STAYS there. v0.4 O4 salvage (plan §1.1): the one-shot
+   # body is replaced by a persistent summon that holds for KURAGE_DURATION turns and pulses at each turn end
+   # for KURAGE_PULSE_BASE + Charge/KURAGE_PULSE_DIVISOR damage, hydro application, and KURAGE_PULSE_BLOCK
+   # Block. The old body's three lines all survive inside the pulse — application, Block, and the meter — but
+   # now they repeat and they SCALE, which is the point: v0.3 bought its act-1 clear by making the BURST a
+   # metronome (meter 10), and the ratio instrument correctly read that as frontload. Canon keeps the metronome
+   # on the summon, so this is where it goes. Small at Charge 0, real by node 4: an A2 signature carrying the
+   # fight-1 survival math that meter 10 was buying. The `amount: 3` mirrors KURAGE_DURATION (test-pinned).
+   # skill_tag = burst particles. The meter is NAMED for this card (kickoff §2.1).
    # v0.3: +1 Charge — the signature basic TEACHES the meter from fight 1 (the Regent-common lesson: the
-   # scaling currency rides on ordinary plays, it is not a separate purchase).
-- {id: tactical_recall, name: "Tactical Recall", cost: 0, type: skill, rarity: basic, solve: [velocity], archetypes: [generic], role: enabler,
+   # scaling currency rides on ordinary plays, it is not a separate purchase). Kept verbatim.
+- {id: tactical_retreat, name: "Tactical Retreat", cost: 0, type: skill, rarity: basic, solve: [velocity], archetypes: [generic], role: enabler,
    effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: draw, amount: 1}]}
-   # The exhaust-teacher: burn a card, turn the page. Net delta -1 (reduces the deck — LAW 4 poster child).
-   # With the Casket this is the decision loop in one basic: every card burned is Charge.
-- {id: tide_reading, name: "Tide Reading", cost: 1, type: skill, rarity: basic, solve: [block, velocity], archetypes: [generic], role: glue,
+   # The exhaust-teacher: pull a unit off the line, turn the page. Net delta -1 (reduces the deck — LAW 4
+   # poster child). With the relic this is the decision loop in one basic: every card rotated out is Charge.
+   # v0.4 RENAME ([USER]): "Recall" -> "Retreat". A retreat is a maneuver that PRESERVES the unit, which
+   # is the voice law exactly — rotation, never sacrifice. The exemplar card now says so on its face.
+- {id: tide_reading, name: "Stolen Chapter", cost: 1, type: skill, rarity: basic, solve: [block, velocity], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 2}, {op: draw, amount: 1}]}
    # Fifth basic (template allows 4-5): the strategist reads the field. Poise + a look ahead.
 
 # ---------- COMMON (12: +surging_shoal at kickoff review) ----------
 # Commander (2)
-- {id: conscription_notice, name: "Conscription Notice", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [commander], role: enabler,
+- {id: conscription_notice, name: "Call to Arms", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [commander], role: enabler,
    effects: [{op: conscript, amount: 1}, {op: draw, amount: 1}]}
    # THE Commander verb at common: transform a card in hand into a random Inazuma recruit (costs 1 less, gains
    # Exhaust — kickoff §2.3 grammar verbatim). Net delta 0: transform, never create (LAW 4). Replaces itself.
@@ -80,12 +105,12 @@
    # the exhaust-as-benefit convention, and the act diagnosis proved Block is not her binding constraint —
    # the reprice concentrates on output and meter, not walls.)
 # Assist (3)
-- {id: undertow_shuffle, name: "Undertow Shuffle", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [assist], role: glue,
+- {id: undertow_shuffle, name: "Daydream of a Quiet Life", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [assist], role: glue,
    effects: [{op: draw, amount: 3}, {op: discard, amount: 2}]}
    # Assist's churn: see three, lose two at random — more raw velocity than Communion of Tides but wilder, and it
    # rings the Sly bell TWICE. (First-draft draw-2/discard-1 was a strict-domination lint catch vs Communion —
    # the CCM remedy applied: each card is now a real choice, churn-vs-fuel.)
-- {id: moon_signal, name: "Moon Signal", cost: 0, type: skill, rarity: common, solve: [velocity], archetypes: [assist], role: enabler,
+- {id: moon_signal, name: "A Moment Alone", cost: 0, type: skill, rarity: common, solve: [velocity], archetypes: [assist], role: enabler,
    effects: [{op: discard, amount: 1}, {op: draw, amount: 1}]}
    # Free cycle: pays tempo (a random discard), buys a fresh look. Sly's cheapest bell.
 - {id: drifting_lantern, name: "Drifting Lantern", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [assist, generic], role: glue,
@@ -103,7 +128,7 @@
    # kickoff REVIEW after the first battery — deliberately NOT in any measured package, so the v0.1 battery numbers
    # stand unlabeled; packaging it is sheet-pass material. Catalyst cadence makes this mass hydro application —
    # joins the hydro-convergence WATCHLIST alongside undercurrent/standing_room_only. PROPOSED.
-- {id: jade_bulwark, name: "Jade Bulwark", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue,
+- {id: jade_bulwark, name: "Pearl Bulwark", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 6}]}
    # Graceful Retreat parity exactly (6 at common, under Klee's Hide and Seek) — the stability character does NOT
    # get a hidden block subsidy; her edge is the ward and the buffer of future draws. (lint-ok: Furina comp)
@@ -113,18 +138,38 @@
    # Klee's 7") is SUPERSEDED by the charge-curve ruling direction: the scaling currency rides on ordinary
    # damage plays, and the plain swing meets Klee's 7 instead of undercutting it. (lint-ok: Klee comp)
 
-# ---------- UNCOMMON (12: +the R51 texture pair; +riptide_strike, v0.3 charge-curve pass) ----------
+- {id: kurages_oath, name: "Kurage's Oath", cost: 1, type: power, rarity: common, solve: [block, sustain], archetypes: [priest, generic], role: payoff,
+   effects: [{op: apply_power, power: kurage_ward, amount: 12, target: self}]}
+   # v0.4 ([USER]): the jellyfish's canon SECOND job. Bake-Kurage in the game deals Hydro DMG *and heals nearby
+   # characters at set intervals* — the pulse ships the damage half baseline, and this power drafts the mending
+   # half back in as Block (R52 healing law: her HP bar never moves, the incoming does). While it holds, every
+   # Kurage pulse also grants 5 Block. Priced off the Regent precedent [USER] named: a 2-cost power paying 13
+   # Block per 2-cost finisher play. Hers triggers off a 1-cost summon for 5, and the summon only pulses once
+   # per play at KURAGE_DURATION 1 — so the honest read is "N Block per Bake-Kurage", doubled once the summon
+   # is upgraded to two turns.
+   # THE NUMBER IS 12, MEASURED, NOT REASONED. The first draft was 5, priced by ratio off Regent (13 Block off a
+   # 2-cost finisher, so ~5 off a 1-cost summon). That measured as a TRAP PICK — priest run winrate 5.8% with no
+   # card at all vs 3.8% with it, i.e. drafting it made her worse. Bracket at 500 runs/plan --realistic:
+   # ward 5 -> priest 3.8% / commander 5.4%; ward 8 -> 4.8% / 5.8%; ward 12 -> 6.2% / 5.8% (no-card baseline
+   # 5.8% / 6.0%). The ratio had to go UP for the cheaper trigger, not down: Regent's finisher gets played
+   # reliably, while Bake-Kurage is ONE copy in a growing deck that pulses ONCE per play at duration 1. Correct
+   # for frequency and you land back on essentially the Regent number.
+   # [USER] WATCHLIST (2026-07-26): "I feel like that's too strong, but we can rebalance later." Shipped at 12
+   # with that flag ON THE RECORD — first knob back if the priest lane runs hot in a later pass.
+   # NAME: "Kurage's Oath" is her actual Elemental Skill (wiki-verified) and was unused
+   # by this pool; the oath is that she mends. [USER]-only naming audit as ever.
+# ---------- UNCOMMON (12: +the R51 texture pair; +all_streams_flow, v0.3 charge-curve pass) ----------
 # v0.3 (user-directed 2026-07-24): the meter gets an ON-CURVE reader. The v0.2 world rate-limited every Charge
 # read to Rare/kit — the engine made fuel it could not spend, and the act-1 elite checks arrive at node 4, long
 # before the rarity ladder does. The StS curve this pool now follows: big numbers clear act 1, multipliers and
 # velocity clear act 3 (the Silent shiv package is the genre proof: a flat DOUBLING lives at uncommon).
-- {id: riptide_strike, name: "Riptide Strike", cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling], archetypes: [priest, generic], role: payoff,
+- {id: all_streams_flow, name: "All Streams Flow to the Sea", cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling], archetypes: [priest, generic], role: payoff,
    effects: [{op: damage, amount: 5, target: enemy, bonus_formula: 1_per_2_charge}]}
    # The sub-Rare reader: 5 + 1 per 2 Charge, single target, repeatable. At a node-4 bank of ~10 it is a 10-point
    # swing; at a priest-median 24 it is 17 — act-appropriate at both ends. Bounded by fuel (Charge costs cards),
    # single-target (the AoE reads stay Rare/kit), and the Rare nuke keeps its premium by hitting ALL enemies.
 # Commander (3)
-- {id: mass_mobilization, name: "Mass Mobilization", cost: 2, type: skill, rarity: uncommon, solve: [utility, scaling], archetypes: [commander], role: enabler,
+- {id: mass_mobilization, name: "Rally the Isles", cost: 2, type: skill, rarity: uncommon, solve: [utility, scaling], archetypes: [commander], role: enabler,
    effects: [{op: conscript, amount: 2}, {op: gain_charge, amount: 1}]}
    # Two transforms in one order + a premium point. The engine's mid-game shove.
 - {id: field_promotion, name: "Field Promotion", cost: 1, type: skill, rarity: uncommon, solve: [utility, velocity], archetypes: [commander], role: enabler,
@@ -135,7 +180,7 @@
    # THE kickoff §1.4 sample verbatim ("2 energy: Exhaust 1, create 2"): net +1 card — creation is legal at
    # Uncommon and priced so the positive-sum engine needs Rare payoffs + solved velocity to matter (LAW 4 scope).
 # Priest (3)
-- {id: mercy_of_the_deep, name: "Mercy of the Deep", cost: 1, type: power, rarity: uncommon, solve: [block, scaling], archetypes: [priest], role: payoff,
+- {id: mercy_of_the_deep, name: "Mercy of the Currents", cost: 1, type: power, rarity: uncommon, solve: [block, scaling], archetypes: [priest], role: payoff,
    effects: [{op: apply_power, power: feel_no_pain, amount: 3, target: self}]}
    # Block-per-exhaust (the Feel No Pain rail, already engine-proven): every burn is also a guard. With the
    # ward this is the stability loop closing — getting hit exhausts, exhausting blocks.
@@ -201,15 +246,17 @@
    # an Exhaust -> Charge: getting attacked fuels the finisher. Both structural guards ship (LAW 4 breaks the
    # loop at Common; Rare gating + the once-per-turn latch break it here). max_stacks 6: does NOT stack — the
    # magnitude is the knob, not the copy count. Prevention is REPORTED, not yet axis-credited (ask 4).
-- {id: grand_conscription, name: "Grand Conscription", cost: 2, type: skill, rarity: rare, solve: [utility, scaling], archetypes: [commander], role: payoff, exhaust: true,
+- {id: grand_conscription, name: "General Muster of Watatsumi", cost: 2, type: skill, rarity: rare, solve: [utility, scaling], archetypes: [commander], role: payoff, exhaust: true,
    effects: [{op: conscript, amount: 3}, {op: gain_charge, amount: 2}]}
-   # The full muster: three transforms in one decree, then the order itself burns. Commander's rare swing —
-   # the hand becomes an army and the army becomes fuel.
-- {id: depths_judgment, name: "Judgment of the Depths", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [priest], role: payoff,
+   # The full muster: three call-ups in one order, and the order itself is stood down once answered. The
+   # Commander's rare swing — the hand becomes an army, and the army rotates off the field having WON its
+   # position. VOICE LAW (v0.4 §3): rotation, never sacrifice. Watatsumi's doctrine is minimal casualties;
+   # nobody here is fuel. This comment is the marked example the sweep was written against.
+- {id: depths_judgment, name: "Sango Isshin", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [priest], role: payoff,
    effects: [{op: damage, amount_formula: {base: 10, per: 2, count: exhaust_pile}, target: enemy}]}
    # The pile-reader's ceiling: 8 + 2 per exhausted card, single target, REPEATABLE — bounded by the fight's
    # finite fuel rather than the uncapped meter (deliberate §2.1 anti-stall geometry). Watchlist with Nereid's.
-- {id: epiphany_of_the_deep, name: "Epiphany of the Deep", cost: 2, type: power, rarity: rare, solve: [velocity, scaling], archetypes: [priest, assist], role: payoff,
+- {id: epiphany_of_the_deep, name: "Song of Pearls", cost: 2, type: power, rarity: rare, solve: [velocity, scaling], archetypes: [priest, assist], role: payoff,
    effects: [{op: apply_power, power: dark_embrace, amount: 1, target: self}]}
    # Draw-per-exhaust (the Dark Embrace rail): the burned page turns itself. In HER deck every lane rings it —
    # priced at the base game's rare rate for exactly that reason.

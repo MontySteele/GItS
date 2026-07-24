@@ -94,3 +94,55 @@ every kickoff gate; the sheet pass + act-sim readiness work lands now.
 - No changes to Klee/Furina sheets, upgrades, or any ratified band.
 - klee-mod C# parity is deliberately NOT touched (sim leads the mod;
   Kokomi has no mod presence yet).
+
+## v0.4 O4-salvage additions (2026-07-26, Kokomi Code workstream)
+
+Written BEFORE landing, per the standing rule. Trigger: the v0.4 plan's
+§1 makes Bake-Kurage a persistent summon, which needs a new op and a new
+turn-end hook — shared-engine surface, so this note lands first.
+Governing doc: `docs/kokomi-v0.4-plan.md`.
+
+14. **New op `summon_kurage` (tier0/engine/effects.py)** + the
+    `kurage_summon` power. Countdown semantics, NOT stacking-magnitude:
+    the power's stack count is TURNS REMAINING on the field, the same
+    grammar `oz_summon` (Fischl) already uses and the same grammar
+    `ceremonial_garment` uses in `powers.DECAYING`. Re-summoning refreshes
+    to `KURAGE_DURATION` rather than adding — a second jellyfish is not a
+    bigger jellyfish. Dead branch for every non-Kokomi character.
+15. **`player_turn_end_triggers` gains the Kurage pulse**, seated beside
+    the existing `oz_summon` / `sparks_n_splash` / `witchs_flame` blocks
+    and following their conventions exactly (random living enemy, guarded
+    on `state.living_enemies`, decrement after firing). The pulse reads
+    the Charge bank; it does NOT spend it (the read-never-spent law).
+16. **`flat_attack_bonus` (tier0/engine/effects.py) extracted** from
+    `_apply_card` as a PURE read, and called by `tier0/pilot/policy.py`'s
+    `_expected_damage`. This is the v0.4 W1 pilot fix: the pilot could not
+    previously see ANY flat per-attack bonus — not Kokomi's Garment Charge
+    read, not Furina's `fanfare_attack_per10`, not Bennett's
+    `next_attack_up` — so it priced every attack at its printed number and
+    played straight through its own buff windows. The consuming `pop` and
+    the `KNOB_READS` tick stay at the real call site, so engine behaviour
+    is byte-identical (verified: full suite 654 green before and after the
+    extraction alone, and the regret probe returned an identical
+    979/5991).
+    **Cross-character note:** this is a SHARED pilot change, the only one
+    in this batch. Measured effect on the ratified worlds is nil — the
+    full suite's band locks pass unchanged — but it is named here because
+    it is the one item another session could collide with.
+17. **New constants (tier0/constants.py, Kokomi section)**:
+    `KURAGE_DURATION`, `KURAGE_PULSE_BASE`, `KURAGE_PULSE_DIVISOR`,
+    `KURAGE_PULSE_BLOCK`, `GARMENT_ATTACK_BLOCK`. All five are knobs and
+    all five are exercised (KNOB_READS).
+18. **Sheet-side (not loader-shared, listed for completeness)**: the §3
+    rename batch, including the ONE id-level rename
+    `riptide_strike` → `all_streams_flow` (cross-character collision with
+    Tartaglia's signature mechanic; renamed before the W2 arm so the arm
+    is born with the right id). All other renames are display-name and
+    comment only — ids stay stable, so no measured world moves.
+
+## Collision watch (v0.4)
+
+- Item 16 is the only shared-behaviour change; everything else is either
+  Kokomi-gated or display-only.
+- No changes to Klee/Furina sheets, upgrades, or any ratified band.
+- klee-mod C# parity deliberately untouched (Kokomi has no mod presence).
