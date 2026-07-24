@@ -41,7 +41,7 @@ public sealed class GrandSalon : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Salon"),
-        ("description", "[gold]Salon Member[/gold] numbers are {PowerAmount:diff()} higher. Maximum 6."),
+        ("description", "[gold]Salon Member[/gold] numbers are {PowerAmount:diff()} higher."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

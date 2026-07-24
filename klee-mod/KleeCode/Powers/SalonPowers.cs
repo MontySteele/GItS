@@ -246,17 +246,19 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>Grand Salon, v2 semantics: +N to every member NUMERIC tick and
-/// bow amount (Block included), stacking with the Fanfare Focus term.</summary>
+/// bow amount (Block included), stacking with the Fanfare Focus term.
+///
+/// The six-point (two-stack) cap was dropped 2026-07-24 (uncap-all ruling):
+/// +3/copy is a flat additive to member ticks, linear in copies, so uncapping
+/// lets dupes stack like any base-StS Power. See <see cref="SpotlightPower"/>
+/// for the A/B behind the whole uncap.</summary>
 public sealed class SalonDamageUpPower : PowerModel, ILocalizationProvider
 {
-    public const int MaxStacks = 6;
-
     public List<(string, string)>? Localization => new()
     {
         ("title", "Grand Salon"),
         ("description",
-            "[gold]Salon Member[/gold] numbers are {Amount} higher. "
-          + "Maximum 6."),
+            "[gold]Salon Member[/gold] numbers are {Amount} higher."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -265,17 +267,4 @@ public sealed class SalonDamageUpPower : PowerModel, ILocalizationProvider
 
     public static int AmountFor(Creature creature) =>
         creature.Powers.OfType<SalonDamageUpPower>().FirstOrDefault()?.Amount ?? 0;
-
-    public override bool TryModifyPowerAmountReceived(
-        PowerModel canonicalPower, Creature target, decimal amount,
-        Creature? applier, out decimal modifiedAmount)
-    {
-        modifiedAmount = amount;
-        if (canonicalPower is not SalonDamageUpPower || target != Owner)
-        {
-            return false;
-        }
-        modifiedAmount = Math.Max(0m, Math.Min(amount, MaxStacks - Amount));
-        return modifiedAmount != amount;
-    }
 }

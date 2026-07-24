@@ -544,21 +544,22 @@ def test_star_of_the_show_flat_rider_on_spotlighted_damage():
 # --- R16 card-mediated boosting (pass 2) ---
 
 def test_card_mediated_boosts_stack_through_the_pipe():
-    """R16: her cards grant the multiplier. top_billing stacks to +50%
-    and no further; limelight's turn window closes at end of turn."""
+    """R16: her cards grant the multiplier. top_billing stacks per copy with
+    no ceiling (cap dropped 2026-07-24, uncap-all); limelight's turn window
+    still closes at end of turn."""
     from tier0.engine import powers
     st = furina_state()
     p = st.player
     p.spotlight = "chevreuse"
-    for _ in range(3):                       # third copy hits the ceiling
+    for _ in range(3):                       # three copies -> +75%, no ceiling
         effects.resolve_card(st, loader.get_card("top_billing"))
-    assert p.powers["spotlight_mult_bonus"] == 50
+    assert p.powers["spotlight_mult_bonus"] == 75
     card = loader.get_card("chevreuse_interdiction_fire")
-    assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT + 0.5
-    effects.resolve_card(st, loader.get_card("limelight"))
     assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT + 0.75
+    effects.resolve_card(st, loader.get_card("limelight"))
+    assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT + 1.0
     powers.on_turn_end(st, p)                # the window closes
-    assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT + 0.5
+    assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT + 0.75
     assert "spotlight_mult_bonus_turn" not in p.powers
 
 
@@ -609,17 +610,25 @@ def test_uncapped_spotlight_riders_stack():
             f"{st.player.powers[power]}")
 
 
-def test_compounding_spotlight_powers_stay_capped():
-    """The cap ruling was a SPLIT, not a repeal. The percentage multipliers
-    compound per turn and keep their ceilings -- if this test goes red,
-    someone has widened the drop past what was ratified."""
-    for card_id, power, cap in (("top_billing", "spotlight_mult_bonus", 50),
-                                ("standing_ovation", "ovation_spend_boost", 20)):
+def test_compounding_spotlight_powers_now_uncap():
+    """Round two of the cap ruling (user, 2026-07-24, uncap-all).
+
+    Round one split these two percentage multipliers out and KEPT their
+    ceilings; round two dropped them too, after a 2000-run x 2-seed A/B put
+    the whole cap set at <=+0.5pp on run success (favorable, non-binding at
+    present difficulty). These are the genuinely compounding powers, so this
+    test doubles as the record that the drop was deliberate and measured --
+    and that the two multipliers now stack per copy like base-StS Power dupes.
+    They were FLAGGED for a ceiling re-check at difficulty calibration; if a
+    future ceiling is reintroduced, this test is where it gets re-asserted."""
+    for card_id, power, per_copy in (
+            ("top_billing", "spotlight_mult_bonus", 25),
+            ("standing_ovation", "ovation_spend_boost", 10)):
         st = furina_state()
         for _ in range(4):
             effects.resolve_card(st, loader.get_card(card_id))
-        assert st.player.powers[power] == cap, (
-            f"{card_id}: {power} should cap at {cap}, got "
+        assert st.player.powers[power] == 4 * per_copy, (
+            f"{card_id}: {power} should stack uncapped to {4 * per_copy}, got "
             f"{st.player.powers[power]}")
 
 

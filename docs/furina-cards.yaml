@@ -178,8 +178,11 @@
    # Fill the three Salon slots at once, one of each (v2). Cost 3->2 at the rework; on a full stage the oldest
    # members bow out (Defect evoke geometry). PROPOSED pending red-pen.
 - {id: grand_salon, name: "Grand Salon", cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [salon], role: payoff,
-   effects: [{op: apply_power, power: salon_damage_up, amount: 3, target: self, max_stacks: 6}]}
+   effects: [{op: apply_power, power: salon_damage_up, amount: 3, target: self}]}
    # Explosives Workshop parity: members tick harder. The Salon's A2 curve.
+   # CAP DROPPED (user ruling 2026-07-24, uncap-all): +3/copy is a flat additive to member ticks, linear in copies.
+   # A/B at 2000 runs/arm x2 seeds moved salon 0.0pp (all_caps->shipped) and +0.4-0.5pp (shipped->uncapped, p~0.02), (lint-ok: A/B counts)
+   # so the whole cap set is non-binding at present difficulty; uncapped to match base-StS Power-dupe stacking.
 - {id: many_waters_melody, name: "Melody of Many Waters", cost: 1, type: skill, rarity: uncommon, solve: [sustain], archetypes: [salon], role: glue, tags: [skill_tag],
    effects: [{op: gain_encore, amount: 5}, {op: conditional, if: has_salon_members, then: [{op: gain_encore, amount: 3}]}]}
    # The Singer's melody CONVERTED per R8: buffer, not healing. Sub-Rare sustain routes through pools — the law, applied.
@@ -209,8 +212,10 @@
    effects: [{op: gain_encore, amount: 7}]}
    # The big buffer draught. Seven points of deferred HP and seven Fanfare flux.
 - {id: rapturous_applause, name: "Rapturous Applause", cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [fanfare], role: payoff,
-   effects: [{op: apply_power, power: fanfare_attack_per10, amount: 1, target: self, max_stacks: 2, note: "attacks +1 damage per 10 Fanfare"}]}
+   effects: [{op: apply_power, power: fanfare_attack_per10, amount: 1, target: self, note: "attacks +N damage per 10 Fanfare"}]}
    # "Stacks grant flat power bonuses" (kickoff §4), the card. Reads the pool, spends nothing.
+   # CAP DROPPED (user ruling 2026-07-24, uncap-all): +1/copy per 10 Fanfare is additive in copies. Same A/B as
+   # the salon cap; fanfare-plan win-rate is sub-1% today, so the drop is inert now and reversible if that changes.
 - {id: pit_orchestra, name: "Pit Orchestra", cost: 1, type: skill, rarity: uncommon, solve: [block, sustain], archetypes: [fanfare, generic], role: glue,
    effects: [{op: block, amount: 5}, {op: gain_encore, amount: 1}]}
    # Hybrid glue: the band plays through anything. PASS-2 ERRATA (DECISIONS 76/R26 law): Encore rider trimmed —
@@ -235,19 +240,25 @@
    effects: [{op: conditional, if: spotlight_moved_this_turn, then: [{op: energy, amount: 1}, {op: draw, amount: 2}], else: [{op: draw, amount: 1}]}]}
    # Re-aim payoff: the scene changes and the production surges.
 - {id: top_billing, name: "Top Billing", cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [spotlight], role: payoff,
-   effects: [{op: apply_power, power: spotlight_mult_bonus, amount: 25, target: self, max_stacks: 50, note: "Spotlighted numbers +25% for the rest of combat; stacks to +50%"}]}
+   effects: [{op: apply_power, power: spotlight_mult_bonus, amount: 25, target: self, note: "Spotlighted numbers +25% per copy for the rest of combat"}]}
    # R16 re-author (replaces Constant Star): the name above the title — the archetype's core scaling engine.
-   # Combat-duration mult through the SAME pipe (§2.2a numbers-only inherited). Two copies is the ceiling. (lint-ok: pct points)
+   # Combat-duration mult through the SAME pipe (§2.2a numbers-only inherited). (lint-ok: pct points)
    # The old Spend 2 Encore gate was removed: an early scaling engine must be installable before it can repay setup.
+   # CAP DROPPED (user ruling 2026-07-24, uncap-all). THE COMPOUNDING ONE: unlike the linear drops, +25% per copy on
+   # ALL Spotlighted numbers is genuinely multiplicative — this is the tail the shipped split had kept a ceiling on.
+   # Uncapped because spotlight win-rate is 0.7% pre-calibration so the A/B can't see it move; FLAGGED for re-check at
+   # difficulty calibration, when a viable spotlight plan could make an uncapped 3rd/4th copy a real ceiling problem.
 - {id: duet, name: "Duet", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [spotlight], role: payoff,
    effects: [{op: replay_next_companion, times: 1, duration: this_turn}, {op: draw, amount: 1}]}
    # Study Buddy parity: the next companion performs twice. Star-agnostic — works on any guest.
 - {id: standing_ovation, name: "Standing Ovation", cost: 1, type: power, rarity: uncommon, solve: [scaling, sustain], archetypes: [spotlight], role: payoff,
-   effects: [{op: apply_power, power: ovation_spend_boost, amount: 10, target: self, max_stacks: 20, note: "whenever you spend Encore, Spotlighted +10% this turn"},
+   effects: [{op: apply_power, power: ovation_spend_boost, amount: 10, target: self, note: "whenever you spend Encore, Spotlighted +10% per copy this turn"},
              {op: apply_power, power: spotlight_encore_first, amount: 1, target: self, note: "gain N Encore on the first Spotlighted card each turn"}]}
    # R32.1 FLIP, landed: spend-payoff + first-play trickle. Each spend EVENT grants Spotlighted +10% this turn
    # through the same §2.2a pipe; the applause keeps a per-TURN trickle coming (Supporting Cast's first-play
-   # window). DOSE RECORD from the window (see the pass report): per-play rates and the doubled trickle both re-heat
+   # window). CAP DROPPED (user ruling 2026-07-24, uncap-all): ovation_spend_boost was the other compounding ceiling
+   # (per-spend-EVENT x stack within a turn); uncapped with top_billing, same 0.7% pre-calibration caveat and re-check.
+   # DOSE RECORD from the window (see the pass report): per-play rates and the doubled trickle both re-heat
    # sustain past the declaration; the pure sink collapses it to starter level; the trickle at this rate lands
    # sustain ON the declared shape — and long-fight survival must come from the rider-swap windows' debuff
    # texture, not from re-fattening the buffer (absorption compounds with survival; the axis bills it all).
@@ -293,7 +304,7 @@
 - {id: endless_waltz, name: "Endless Waltz", cost: 2, type: power, rarity: rare, solve: [scaling], archetypes: [salon], role: payoff,
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta},
              {op: apply_power, power: salon_member, amount: 1, target: self, member: usher},
-             {op: apply_power, power: salon_damage_up, amount: 3, target: self, max_stacks: 6}]}
+             {op: apply_power, power: salon_damage_up, amount: 3, target: self}]}
    # Named for her passive. The waltzing pair (hammer + shield, v2) and a standing crescendo — the Salon's rare
    # engine piece. Cost 3->2 at the rework reprice. PROPOSED pending red-pen.
 - {id: grand_gala, name: "Grand Gala", cost: 2, type: skill, rarity: rare, solve: [scaling, utility], archetypes: [salon], role: payoff, exhaust: true, tags: [skill_tag],
