@@ -333,10 +333,76 @@ exists for and it has not moved off zero — consistent with the plan's own
 read that F-B1 (the conversions) and F-B3 (frontload) are where its winrate
 lives, not the resource grammar.
 
-### F-B1 / F-B3 / F-B4
+### Decay ruling — [USER] 2026-07-24
 
-F-B3 is now the priority, not F-B1 — see the autopsy below, which fires the
-plan's own §5 branch.
+**`FANFARE_DECAY_FRACTION = 0.20` ships.** The flat knob is retained as the
+disarmed fallback (and as the thing the sweep was measured against), pinned
+by a test. This REVERSES the plan's flat-over-proportional direction on
+measurement; the reasoning is in the proportional sweep section below.
+
+### F-B1 — the seven conversions: DONE
+
+| card | was | now |
+|---|---|---|
+| dramatic_entrance | SPEND 5 + `fanfare_at_least_5` step | 6 dmg, **+1 per 4 Fanfare** — no gate, live turn 1 |
+| thunderous_ovation | SPEND 5 + `fanfare_at_least_5` step | 7 Block, **+1 per 4 Fanfare** |
+| crescendo | SPEND 10 over an existing read | untouched — F-A4 removed the gate that was double-charging it |
+| flood_of_emotion | SPEND 15, 20 flat dmg | 14 dmg, **+1 per 3 Fanfare** |
+| high_tide | SPEND 15, 22 flat dmg | 15 dmg, **+1 per 2 Fanfare** (steepest on the sheet) |
+| florid_cadenza | SPEND 10, draw 3 | draw 1, **+2 at Fanfare ≥ 12** |
+| universal_revelry | SPEND 20 over an existing read | keeps the read, **+6 AoE at Fanfare ≥ 15** |
+
+Printed damage came DOWN on `flood_of_emotion` and `high_tide` because their
+discounted energy costs were priced against a Fanfare toll that no longer
+exists; the rider pays it back at a full meter and leaves them real cards at
+an empty one. All PROPOSED.
+
+**Three engine/tooling gaps this exposed, each fixed at the root:**
+
+- **`block` did not support `bonus_formula`** — only damage did. Added in the
+  same position damage applies its own (before the Salon multiplier and
+  before Spotlight), so a defensive rider cannot be multiplied by them and
+  quietly outscale its printed twin.
+- **The codegen tabled Fanfare thresholds as string literals**, so a new bar
+  was a `KeyError` rather than a card edit. `fanfare_at_least_N` is now
+  parametric (`predicate_cs` / `predicate_text`) — the bar is a balance
+  number that moves at red-pen and had no business being a table key.
+- **The pilot's `_raw_block` did not read the rider.** It would have priced a
+  Fanfare-scaled blocker at its printed number and blocked with the wrong
+  card — the same blindness the Kokomi pilot audit found on the damage side.
+
+**`florid_cadenza`'s upgrade gap is CLOSED**, so the curated set
+`FURINA_UPGRADE_GAP_PENDING_FB1` is now empty (kept, not deleted, so the
+invariant stays asserted positively). Its upgrade **drops the gate**
+(`{condition: unconditional}`) rather than adding cards: upgraded it is
+exactly the pre-sprint card, and the base version is the one that now has to
+earn it.
+
+### F-B1 + 20% decay measured (200 runs/arm, seed 11)
+
+| | fanfare before | fanfare after | salon after | spotlight after |
+|---|---|---|---|---|
+| run winrate | 1.0% | **1.5%** | 13.0% | 1.5% |
+| act-1 clear | 38.0% | **45.5%** | 53.0% | 62.0% |
+| damage/turn | 12.9 | **14.3** | 16.9 | 15.3 |
+| median death node | 8 | **10** | 10 | 15 |
+| mean@read | 12.9 | 14.7 | 19.2 | 15.5 |
+| empty reads | 13.1% | 12.0% | 5.9% | 10.6% |
+
+**F-B1 moved every fanfare number in the right direction and closed most of
+the DPT gap** — the deficit to salon fell from 4.1 to 2.6 damage/turn, act-1
+clear rose 7.5 points, and the median death moved two nodes later. Salon and
+spotlight are unmoved, which is what one-variable-per-cell wants.
+
+**It is still short of gate (1)**: 1.5% vs ≥3% win, 45.5% vs ≥50% act-1. The
+§5 branch therefore still stands — F-B3 (frontload) is the remaining lever,
+and act-1 clear being 4.5 points off its bar is exactly a frontload-shaped
+gap. F-B1 was not wasted on the way there: without it the two biggest hitters
+in the list had no Fanfare relationship at all.
+
+### F-B3 / F-B4
+
+Not started. **F-B3 is next** — it is now the only unspent lever on gate (1).
 
 ---
 
@@ -534,3 +600,53 @@ Status: open. Interlock items to be mirrored into
   only render correctly through that pipeline.
 - The Fanfare keyword tooltip shrinks to roughly two lines (what raises it,
   that it decays, what floors it).
+
+---
+
+## CROSS-SESSION NOTE IN — the animation stream's Funnel Contract (2026-07-24)
+
+Dropped here per the standing shared-surface rule. **This sprint is not being
+asked to do anything; it is being told what a second live stream is bound
+to,** so that a redesign move that would break it is visible before it lands
+rather than after.
+
+Animation sprint 2 (docs/animation-sprint-2-plan.md) rebuilds Furina's whole
+visual layer — combat model, Salon stage, gauges, badge strip — while this
+sprint reworks her kit. To keep the two from colliding, the visual layer is
+frozen against exactly THREE points of Furina's kit, ratified by [USER]
+2026-07-24 and written up in klee-mod/DECISIONS.md ("Animation sprint 2
+opens: the Funnel Contract"):
+
+1. **Salon = exactly three slots**, deploy is BY CARD, and duplicates are
+   legal. The UI is slot-index-keyed and reads per-slot member identity from
+   state.
+2. **Encore absorbs damage before HP**; the gain/spend/absorb funnels in
+   `Powers/FurinaResources.cs` remain the mutation surface.
+3. **Spotlight is a designation event** — one designation funnel.
+
+**Everything else in the kit is explicitly OUT OF CONTRACT** and this sprint
+may change it freely — numbers, cards, gates, the entire Fanfare package —
+without any risk to the visual layer. Visuals bind to funnels, never to
+values, so no number this sprint moves can break a display.
+
+**What would need a note back:** moving any of the three above. Concretely —
+changing the Salon slot count away from three, removing or renaming the
+Encore gain/spend/absorb funnels (renaming is fine if the funnel identity
+survives; what matters is that one chokepoint still exists), or splitting
+Spotlight designation across multiple entry points. If any of those become
+attractive, note it here before landing and the animation stream stops the
+affected track rather than chasing it.
+
+**Two live interactions worth knowing about, neither of them a request:**
+
+- F-A's demotion of Fanfare to a read-only momentum stat is *helpful* to the
+  animation side: it removes a managed gauge rather than adding one. Fanfare
+  has no ambient home in the new stage/gauge layout, so it stays a status
+  badge and gets a Furina-register icon in animation Track E. The F-E framing
+  above (a Focus readout with a floor marker and decay indication, not an
+  Encore pool) is the framing Track E will render against.
+- F-D (live C#) is not started, so `FurinaResources.cs` is currently
+  untouched by this sprint. The animation stream is editing that file's
+  display call sites now. When F-D does open, expect to meet gauge/stage
+  Refresh calls at the Encore funnels — leave them in place; they are
+  display-only and own no state.

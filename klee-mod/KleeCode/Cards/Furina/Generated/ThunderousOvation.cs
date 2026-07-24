@@ -41,7 +41,7 @@ public sealed class ThunderousOvation : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thunderous Ovation"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you have at least 5 [gold]Fanfare[/gold]: gain 4 [gold]Block[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -60,10 +60,6 @@ public sealed class ThunderousOvation : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue), ValueProp.Move), cardPlay);
-        if (FurinaResources.Fanfare(Owner.Creature) >= 5)
-        {
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, 4m), ValueProp.Move), cardPlay);
-        }
     }
 
     protected override void OnUpgrade()

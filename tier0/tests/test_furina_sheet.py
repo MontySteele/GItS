@@ -116,10 +116,9 @@ def test_targeted_fanfare_floor_repairs():
         {"op": "damage", "amount": 1, "target": "self"},
         {"op": "gain_encore", "amount": 3},
     ]
+    # F-B1: the binary gate became a smooth read on the same Block base.
     assert thunder.effects == [
-        {"op": "block", "amount": 7},
-        {"op": "conditional", "if": "fanfare_at_least_5",
-         "then": [{"op": "block", "amount": 4}]},
+        {"op": "block", "amount": 7, "bonus_formula": "1_per_4_fanfare"},
     ]
 
 

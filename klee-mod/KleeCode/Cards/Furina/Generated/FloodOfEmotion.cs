@@ -44,20 +44,22 @@ public sealed class FloodOfEmotion : CustomCardModel, IElementalCard, ICharacter
         new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
+        FurinaRiderTips.ForCard(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, fanfarePer: 1, fanfareStep: 3);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("flood_of_emotion");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Flood of Emotion"),
-        ("description", "Deal {Damage:diff()} damage."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(20m, ValueProp.Move)
+            new CalculationBaseVar(14m),
+            new ExtraDamageVar(1m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.Fanfare(card.Owner.Creature) / 3)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -70,7 +72,7 @@ public sealed class FloodOfEmotion : CustomCardModel, IElementalCard, ICharacter
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
@@ -79,6 +81,6 @@ public sealed class FloodOfEmotion : CustomCardModel, IElementalCard, ICharacter
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

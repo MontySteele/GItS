@@ -45,7 +45,7 @@ public sealed class UniversalRevelry : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Universal Revelry"),
-        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. Scales with [gold]Fanfare[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. Scales with [gold]Fanfare[/gold]. If you have at least 15 [gold]Fanfare[/gold]: deal 6 damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -71,6 +71,15 @@ public sealed class UniversalRevelry : CustomCardModel, ICharacterCard
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
+        if (FurinaResources.Fanfare(Owner.Creature) >= 15)
+        {
+            await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 6m))
+                .FromCard(this)
+                .TargetingAllOpponents(CombatState!)
+                .WithHitFx("vfx/vfx_attack_slash")
+                .SpawningHitVfxOnEachCreature()
+                .Execute(choiceContext);
+        }
     }
 
     protected override void OnUpgrade()

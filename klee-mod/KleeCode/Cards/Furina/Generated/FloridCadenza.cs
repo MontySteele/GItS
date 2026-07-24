@@ -41,13 +41,13 @@ public sealed class FloridCadenza : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Florid Cadenza"),
-        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. {IfUpgraded:show:Draw 2 cards.|If you have at least 12 [gold]Fanfare[/gold]: draw 2 cards.}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(3)
+            new CardsVar(1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,10 +60,14 @@ public sealed class FloridCadenza : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        if (IsUpgraded || FurinaResources.Fanfare(Owner.Creature) >= 12)
+        {
+            await CardPileCmd.Draw(choiceContext, 2m, Owner);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        // condition: unconditional -- expressed at play time as (IsUpgraded || predicate); the text swaps via {IfUpgraded:show:...}.
     }
 }
