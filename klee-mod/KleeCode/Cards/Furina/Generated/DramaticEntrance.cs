@@ -41,7 +41,7 @@ public sealed class DramaticEntrance : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dramatic Entrance"),
-        ("description", "Spend 5 [gold]Fanfare[/gold]. Deal {Damage:diff()} damage. If you have at least 5 [gold]Fanfare[/gold]: deal {ExtraDamage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} damage. If you have at least 5 [gold]Fanfare[/gold]: deal {ExtraDamage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -56,7 +56,6 @@ public sealed class DramaticEntrance : CustomCardModel, ICharacterCard
     public DramaticEntrance()
         : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
-        CustomResources<FanfareResource>.SetCanonicalCost(this, 5);
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)

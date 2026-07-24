@@ -103,8 +103,7 @@ def card_playable(state: CombatState, card: Card) -> bool:
     if card.encore_cost and state.player.encore < card.encore_cost:
         return False        # "Spend N Encore:" cost line -- a gate, never
                             # an overdraw (that is the spend_encore op)
-    if card.fanfare_cost and state.player.fanfare < card.fanfare_cost:
-        return False
+    # No Fanfare playability gate: Fanfare is read, never spent (F-A4).
     return card_cost(state, card) <= state.player.energy
 
 
@@ -228,8 +227,17 @@ def play_card(state: CombatState, card: Card) -> None:
         snap = refpowers.before_card_played(state, card)
         effects.resolve_card(state, card)
         refpowers.after_card_played(state, card, snap)
-    if card.fanfare_cost:
-        resources.spend_fanfare(state, card.fanfare_cost)  # gated playable
+    # Constellation grant (F-A3): playing a POWER permanently raises the
+    # Fanfare floor by rarity. Fires AFTER resolution so a power that also
+    # grants a floor outright does not double-count against its own read,
+    # and once per card rather than once per replay -- a doubled Power is
+    # still one performance the audience remembers.
+    if card.type == "power":
+        resources.gain_fanfare_floor(
+            state,
+            C.FANFARE_FLOOR_PER_POWER_RARE if card.rarity == "rare"
+            else C.FANFARE_FLOOR_PER_POWER,
+            f"power:{card.id}")
     if card.kit_card:
         pass                                  # returns to the kit, no pile
     else:
@@ -261,6 +269,12 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         e.skittish_fired = False     # Skittish latch is per-turn (§10.9)
     state.in_player_turn = True              # StS2 CombatState.CurrentSide
     refpowers.reset_turn_counters(state)
+    # Fanfare decay, HERE at the true top of the turn -- before the block
+    # clear, the draw, Salon upkeep and every other turn-start generator.
+    # Order is a design choice, not an accident: decay eats what was CARRIED
+    # OVER, and then this turn's activity builds on the remainder. Applying
+    # it after turn-start generation would tax income instead of inventory.
+    resources.decay_fanfare(state)
     # StS2 site A (BeforeSideTurnStart) -- BEFORE the block clear and BEFORE
     # the draw. Aggression pulls Attacks out of the discard pile here; running
     # it after the draw would over-fill the hand versus the real game.
@@ -329,7 +343,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # determines whether this turn's generation overflows. Report-only (R14).
     if p.fanfare_cap:
         state.emit("fanfare_turn", total=p.fanfare, cap=p.fanfare_cap,
-                   at_cap=p.fanfare >= p.fanfare_cap)
+                   floor=p.fanfare_floor,
+                   at_cap=p.fanfare >= p.fanfare_cap,
+                   at_floor=p.fanfare <= p.fanfare_floor)
 
     seen_states: set[tuple] = set()
     while not state.over:
@@ -597,6 +613,15 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # Encore). Spotlight designation likewise re-aims fresh each combat.
     player.encore = 0
     player.fanfare = 0
+    # Constellation floors are per-COMBAT, like every other Furina resource:
+    # a Power is replayed each fight and re-earns its grant. The cap must be
+    # rewound with them or it ratchets upward all run -- `player` is one
+    # object reused across every fight, so a leak here would silently inflate
+    # the ceiling fight after fight. Subtracting the accumulated floor is
+    # exact rather than approximate: gain_fanfare_floor raises cap and floor
+    # by the SAME n every time, and it is the only writer of either.
+    player.fanfare_cap -= player.fanfare_floor
+    player.fanfare_floor = 0
     player.charge = 0            # Kokomi: the meter is per-combat (§2.1)
     player.spotlight = None
     state.rng.shuffle(player.draw_pile)

@@ -41,7 +41,7 @@ public sealed class FloridCadenza : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Florid Cadenza"),
-        ("description", "Spend {IfUpgraded:show:7|10} [gold]Fanfare[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -55,7 +55,6 @@ public sealed class FloridCadenza : CustomCardModel, ICharacterCard
     public FloridCadenza()
         : base(0, CardType.Skill, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
     {
-        CustomResources<FanfareResource>.SetCanonicalCost(this, 10);
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
@@ -65,6 +64,6 @@ public sealed class FloridCadenza : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        CustomResources<FanfareResource>.Cost(this)!.UpgradeCostBy(-3);
+        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
     }
 }

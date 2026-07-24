@@ -45,7 +45,7 @@ public sealed class UniversalRevelry : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Universal Revelry"),
-        ("description", "Spend 20 [gold]Fanfare[/gold]. Deal {CalculatedDamage:diff()} damage to ALL enemies. Scales with [gold]Fanfare[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. Scales with [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -61,7 +61,6 @@ public sealed class UniversalRevelry : CustomCardModel, ICharacterCard
     public UniversalRevelry()
         : base(2, CardType.Attack, CardRarity.Rare, TargetType.AllEnemies, autoAdd: false)
     {
-        CustomResources<FanfareResource>.SetCanonicalCost(this, 20);
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)

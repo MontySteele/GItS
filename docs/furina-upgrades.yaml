@@ -57,7 +57,8 @@ overflowing_hospitality: {encore: +2}        # 3->5
 waters_embrace:        {block: +3}           # base 9->12; salon rider stays 5
 crescendo:             {damage: +3}          # 8->11; spend 10 and 1_per_2 formula stay
 showstopper:           {conditional_bonus: +3}   # 7->10 when the house roars
-florid_cadenza:        {fanfare_cost: -3}    # Spend 10 -> Spend 7
+# florid_cadenza's {fanfare_cost: -3} retired with the spend grammar (F-A4).
+# Its upgrade is F-B1's to re-author against the threshold that replaces the gate.
 hearts_swelling:       {encore: +2}          # 7->9
 rapturous_applause:    {power_amount: +1}    # +1->+2 per 10 Fanfare, cap 2 unchanged
 pit_orchestra:         {block: +2}           # 5->7
@@ -83,7 +84,7 @@ singer_of_many_waters: {heal: +4}            # 14->18; Exhaust NEVER removes (he
 unheard_confession:    {heal: +3}            # 8->11; Exhaust stays, Encore stays 6
 endless_waltz:         {cost: -1}            # 2->1 after the rework reprice (rare cost privilege)
 grand_gala:            {encore: +3}          # 4->7; Exhaust stays
-the_sea_is_my_stage:   {fanfare_cap: +5}     # +15->+20 cap; the blood price stays 6 (raised at red-pen, DECISIONS 75)
+the_sea_is_my_stage:   {fanfare_floor: +5}   # +15->+20 FLOOR (was cap; F-A5). Blood price stays 6 until F-B2 drops it
 universal_revelry:     {damage: +3}          # 9->12 base; spend 20 and 1_per_2 formula stay
 star_of_the_show:      {power_amount: +1}    # +3->+4 printed on Spotlighted damage
 prima_donna:           {cost: -1}            # 2->1

@@ -51,7 +51,7 @@ public sealed class FloodOfEmotion : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Flood of Emotion"),
-        ("description", "Spend 15 [gold]Fanfare[/gold]. Deal {Damage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -65,7 +65,6 @@ public sealed class FloodOfEmotion : CustomCardModel, IElementalCard, ICharacter
     public FloodOfEmotion()
         : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
     {
-        CustomResources<FanfareResource>.SetCanonicalCost(this, 15);
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)

@@ -81,7 +81,6 @@ public static class FurinaCardRoster
         ModelDb.Card<SwellingOverture>(),
         ModelDb.Card<TempoChange>(),
         ModelDb.Card<TheFinalVerdict>(),
-        ModelDb.Card<TheSeaIsMyStage>(),
         ModelDb.Card<ThunderousOvation>(),
         ModelDb.Card<TopBilling>(),
         ModelDb.Card<TorrentialTurn>(),

@@ -1,5 +1,16 @@
 """Focused readout for the Center Stage / Guest Cast + Fanfare-spend pass.
 
+ARCHIVE -- measures the SPENDABLE-Fanfare world, which no longer exists.
+"The Tide Turns" (2026-07-24, F-A4) retired `fanfare_cost` and every cell
+below that reprices or sweeps a Fanfare cost is therefore unrunnable, not
+merely stale. Kept for the record: its numbers are cited by the pass-2 and
+pass-3 reports, and deleting the code would orphan those citations. The
+Fanfare cells raise on entry rather than crashing halfway through a sweep
+with an AttributeError that looks like a bug.
+
+The Spotlight-mode cells (`suite`) do not touch the retired grammar and
+still run.
+
 Usage:
     python -m tier05.exp_furina_modes suite
     python -m tier05.exp_furina_modes fanfare
@@ -812,8 +823,25 @@ def nudge_readout() -> None:
         starter["support"]["choices"] = original_supports
 
 
+# Cells that sweep or reprice a Fanfare COST. The grammar they measure was
+# retired by F-A4, so they cannot run -- refuse by name instead of dying
+# partway through with an AttributeError that reads like a defect.
+_RETIRED_WORLD_CELLS = {
+    "fanfare", "fanfare-core", "fanfare-cards", "fanfare-pilot",
+    "fanfare-spend", "fanfare-followup", "fanfare-draftcards",
+    "fanfare-targets", "all",
+}
+
+
 def main() -> None:
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
+    if mode in _RETIRED_WORLD_CELLS:
+        raise SystemExit(
+            f"'{mode}' measures the SPENDABLE-Fanfare world, retired by "
+            f"'The Tide Turns' F-A4 (fanfare_cost is no longer card "
+            f"grammar). Its published numbers are archive; see "
+            f"docs/furina-fanfare-sprint-log.md. The Spotlight-mode cell "
+            f"still runs: python -m tier05.exp_furina_modes suite")
     if mode in ("suite", "all"):
         suite_readout()
     if mode in ("fanfare", "all"):

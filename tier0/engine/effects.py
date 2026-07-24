@@ -44,6 +44,7 @@ def _bonus_formula(state: CombatState, formula: str) -> int:
         return int(n) * state.detonations_total
     m, _, what = rest.partition("_")
     if what == "fanfare" and m.isdigit():
+        resources.note_fanfare_read(state, "bonus_formula")
         return int(n) * (state.player.fanfare // int(m))
     if what == "charge" and m.isdigit():
         # Kokomi finisher reads (kickoff §2.2): Charge is READ, never
@@ -496,7 +497,12 @@ def _salon_amount(state: CombatState, base: int) -> int:
     """A Salon member numeric amount (Salon v2): base + the Fanfare Focus
     term (+1 per SALON_FOCUS_PER held, read live) + Grand Salon."""
     p = state.player
-    focus = p.fanfare // C.SALON_FOCUS_PER if p.fanfare_cap else 0
+    if not p.fanfare_cap:
+        return base + p.powers.get("salon_damage_up", 0)
+    # The Salon-v2 Focus analogue is the read that matters most to this
+    # sprint: it is where "a constant wearing a meter" was measured.
+    resources.note_fanfare_read(state, "salon_focus")
+    focus = p.fanfare // C.SALON_FOCUS_PER
     return base + focus + p.powers.get("salon_damage_up", 0)
 
 
@@ -566,6 +572,14 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
             _deploy_salon_members(state, amount,
                                   fx.get("member", "crabaletta"))
             return
+        # Tamakushi Casket link (v0.4 §1.3, her canon A1 passive): casting
+        # the Garment while the Kurage is fielded refreshes the jellyfish's
+        # duration. The E-into-Q loop, verbatim. Guarded on the summon
+        # already being out -- the Burst does not conjure one from nothing.
+        if (fx["power"] == "ceremonial_garment"
+                and state.player.powers.get("kurage_summon", 0)):
+            state.player.powers["kurage_summon"] = C.KURAGE_DURATION
+            state.emit("kurage_refreshed", turns=C.KURAGE_DURATION)
         powers.apply_power(state, state.player, fx["power"], amount,
                            max_stacks=cap)
     else:
@@ -715,15 +729,19 @@ def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
         state.emit("spotlight_designated", character=target, mode=mode)
 
 
-def _op_raise_fanfare_cap(state: CombatState, fx: dict, card: Card) -> None:
-    """Rare uncapper (kickoff §4): raises the Fanfare cap. The nasty setup
-    cost is authored on the card (self-damage rider), not here. Inert for
-    characters without the resource, like every Fanfare path."""
-    p = state.player
-    if not p.fanfare_cap:
-        return
-    p.fanfare_cap += fx["amount"]
-    state.emit("fanfare_cap_raised", amount=fx["amount"], cap=p.fanfare_cap)
+def _op_gain_fanfare_floor(state: CombatState, fx: dict, card: Card) -> None:
+    """Constellation grant (F-A3): raise the permanent Fanfare baseline.
+
+    Replaces `raise_fanfare_cap`, which retired with the kickoff §4 uncapper
+    clause it served -- the cap stopped being worth anything once the meter
+    decayed (the W2 cap-1000 cells never once read at-cap). This op exists
+    so NON-power cards can grant a floor, which is required rather than
+    optional: a power-only rule structurally excludes the power-light
+    archetype the whole mechanic was designed for.
+
+    Inert for characters without the resource, like every Fanfare path.
+    """
+    resources.gain_fanfare_floor(state, fx["amount"], f"card:{card.id}")
 
 
 def _op_generate_guest_star(state: CombatState, fx: dict, card: Card) -> None:
@@ -1077,6 +1095,7 @@ def _predicate(state: CombatState, name: str) -> bool:
     if name == "spotlighted_card_played_this_turn":
         return state.spotlighted_cards_this_turn > 0
     if name.startswith("fanfare_at_least_"):
+        resources.note_fanfare_read(state, "threshold")
         return state.player.fanfare >= int(name.rsplit("_", 1)[1])
     if name.startswith("encore_at_least_"):
         return state.player.encore >= int(name.rsplit("_", 1)[1])
@@ -1300,6 +1319,24 @@ def _op_gain_charge(state: CombatState, fx: dict, card: Card) -> None:
                           source=card.id)
 
 
+def _op_summon_kurage(state: CombatState, fx: dict, card: Card) -> None:
+    """Bake-Kurage as a persistent summon (v0.4 plan §1).
+
+    The jellyfish holds the field for KURAGE_DURATION turns and pulses at
+    the owner's turn end (player_turn_end_triggers). Stacks ARE turns
+    remaining -- the oz_summon grammar -- so this REFRESHES to the full
+    duration rather than adding to it: a second jellyfish is not a bigger
+    jellyfish, and the Garment's Casket link refreshes through this same
+    path. Duration is the only state; the pulse reads the Charge bank live
+    at fire time, so a summon made at Charge 0 still grows all fight.
+    """
+    turns = _amount(state, fx.get("amount", C.KURAGE_DURATION))
+    p = state.player
+    p.powers["kurage_summon"] = max(p.powers.get("kurage_summon", 0), turns)
+    KNOB_READS["KURAGE_DURATION"] = KNOB_READS.get("KURAGE_DURATION", 0) + 1
+    state.emit("summon_kurage", turns=p.powers["kurage_summon"])
+
+
 def _op_conscript(state: CombatState, fx: dict, card: Card) -> None:
     """Conscript (kickoff §2.3, the Commander verb).
 
@@ -1426,7 +1463,7 @@ OPS = {
     "gain_encore": _op_gain_encore,
     "spend_encore": _op_spend_encore,
     "spotlight_designate": _op_spotlight_designate,
-    "raise_fanfare_cap": _op_raise_fanfare_cap,
+    "gain_fanfare_floor": _op_gain_fanfare_floor,
     "generate_guest_star": _op_generate_guest_star,
     "copy_spotlighted_in_hand": _op_copy_spotlighted_in_hand,
     "heal": _op_heal,
@@ -1445,6 +1482,7 @@ OPS = {
     # --- Kokomi (kickoff v1 §7) ---
     "gain_charge": _op_gain_charge,
     "conscript": _op_conscript,
+    "summon_kurage": _op_summon_kurage,          # v0.4 O4 salvage
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,
@@ -1483,29 +1521,28 @@ def resolve_card(state: CombatState, card: Card) -> None:
     tgt = min(living, key=lambda e: e.hp) if living else None
     state.target_had_offelement_aura = bool(
         tgt and tgt.aura and tgt.aura != state.player.element)
-    # Per-card flat attack bonus (Bennett's next_attack_up consumed here;
-    # Nicole's celestial_gift, Bennett-burst attack_up_this_turn, and
-    # Spark Knight Style's zero-cost rider all add per attack card).
-    bonus = 0
+    # Per-card flat attack bonus. Computed by the shared pure helper so the
+    # pilot's estimate cannot drift from what actually resolves (v0.4 W1);
+    # the two side effects the helper must NOT have live here instead:
+    # Bennett's next_attack_up is CONSUMED by this play, and the Garment
+    # divisor's KNOB_READS tick counts real resolutions, not estimates.
+    bonus = flat_attack_bonus(state, card, state.current_card_cost)
     if card.type == "attack":
         p = state.player
-        bonus = (p.powers.pop("next_attack_up", 0)
-                 + p.powers.get("celestial_gift", 0)
-                 + p.powers.get("attack_up_this_turn", 0))
-        if state.current_card_cost == 0:
-            bonus += p.powers.get("zero_cost_attacks_up", 0)
-        # Rapturous Applause: attacks +N per 10 Fanfare ("stacks grant
-        # flat power bonuses", kickoff §4). Reads the pool, spends nothing.
-        n = p.powers.get("fanfare_attack_per10", 0)
-        if n:
-            bonus += n * (p.fanfare // 10)
-        # Ceremonial Garment (Kokomi kit, kickoff §2.2 Shape B): while the
-        # state is active her attack cards READ Charge, scaled down by the
-        # divisor knob — repeated-but-bounded payoff, never a spend.
+        p.powers.pop("next_attack_up", 0)
         if p.powers.get("ceremonial_garment", 0) and p.charge:
-            bonus += p.charge // C.GARMENT_CHARGE_DIVISOR
             KNOB_READS["GARMENT_CHARGE_DIVISOR"] = (
                 KNOB_READS.get("GARMENT_CHARGE_DIVISOR", 0) + 1)
+        # Garment attack rider (v0.4 §1.3): while the state holds, her
+        # attacks ALSO restore the party -- her burst's actual behaviour,
+        # translated to Block under the R52 healing law via the Charlotte
+        # precedent. Applied on the play, before the damage resolves, so
+        # it is up in time for the same turn's enemy swing.
+        if p.powers.get("ceremonial_garment", 0):
+            p.block += C.GARMENT_ATTACK_BLOCK
+            state.emit("block", amount=C.GARMENT_ATTACK_BLOCK)
+            KNOB_READS["GARMENT_ATTACK_BLOCK"] = (
+                KNOB_READS.get("GARMENT_ATTACK_BLOCK", 0) + 1)
     state.current_attack_bonus = bonus
 
     _resolve_effects(state, card.effects, card)
@@ -1519,6 +1556,43 @@ def resolve_card(state: CombatState, card: Card) -> None:
                           and any(e.get("op") == "repeat_this"
                                   for e in fx.get("then", [])))],
                 card)
+
+
+def flat_attack_bonus(state: CombatState, card: Card, cost: int) -> int:
+    """The per-card flat bonus every attack card carries, as a PURE READ.
+
+    Bennett's next_attack_up, Nicole's celestial_gift, the Bennett-burst
+    attack_up_this_turn window, Spark Knight Style's zero-cost rider,
+    Rapturous Applause's Fanfare term, and Kokomi's Ceremonial Garment
+    Charge read all land here — flat, folded in before strength/vulnerable.
+
+    Consumes nothing and touches no telemetry, so the pilot may call it to
+    price a play it has not made (v0.4 W1: the pilot previously saw NONE of
+    these, so it valued every attack at its printed number and played
+    straight through its own buff windows -- most visibly the Garment, where
+    a priest-median bank is worth more than most cards' printed damage).
+    The consuming pop and the KNOB_READS tick stay at the real call site.
+    """
+    if card.type != "attack":
+        return 0
+    p = state.player
+    bonus = (p.powers.get("next_attack_up", 0)
+             + p.powers.get("celestial_gift", 0)
+             + p.powers.get("attack_up_this_turn", 0))
+    if cost == 0:
+        bonus += p.powers.get("zero_cost_attacks_up", 0)
+    # Rapturous Applause: attacks +N per 10 Fanfare ("stacks grant flat
+    # power bonuses", kickoff §4). Reads the pool, spends nothing.
+    n = p.powers.get("fanfare_attack_per10", 0)
+    if n:
+        resources.note_fanfare_read(state, "attack_power")
+        bonus += n * (p.fanfare // 10)
+    # Ceremonial Garment (Kokomi kit, kickoff §2.2 Shape B): while the state
+    # is active her attack cards READ Charge, scaled down by the divisor
+    # knob — repeated-but-bounded payoff, never a spend.
+    if p.powers.get("ceremonial_garment", 0) and p.charge:
+        bonus += p.charge // C.GARMENT_CHARGE_DIVISOR
+    return bonus
 
 
 # --- player-side power triggers, called from the combat loop ---
@@ -1642,6 +1716,27 @@ def player_turn_end_triggers(state: CombatState) -> None:
             deal_damage_to_enemy(state, enemy, C.OZ_DMG,
                                  element="electro", source="companion")
         p.powers["oz_summon"] -= 1
+    if p.powers.get("kurage_summon", 0):                # Kokomi (v0.4 §1)
+        # The jellyfish's turn-end pulse: a little damage that READS the
+        # Charge bank (never spends it), hydro application, and Block for
+        # the party. This is where O4 puts the periodic output that v0.3
+        # had loaded onto the Burst -- canon keeps the metronome on the
+        # summon, so the instrument stops reading it as frontload.
+        dmg = C.KURAGE_PULSE_BASE + p.charge // C.KURAGE_PULSE_DIVISOR
+        KNOB_READS["KURAGE_PULSE_DIVISOR"] = (
+            KNOB_READS.get("KURAGE_PULSE_DIVISOR", 0) + 1)
+        if state.living_enemies:
+            enemy = state.rng.choice(state.living_enemies)
+            deal_damage_to_enemy(state, enemy, dmg, element="hydro",
+                                 source="companion")
+        # Block lands whether or not an enemy was standing: the healer's
+        # mending is Block under the R52 healing law, and it is the whole
+        # reason the summon carries the fight-1 survival math.
+        p.block += C.KURAGE_PULSE_BLOCK
+        state.emit("block", amount=C.KURAGE_PULSE_BLOCK)
+        KNOB_READS["KURAGE_PULSE_BLOCK"] = (
+            KNOB_READS.get("KURAGE_PULSE_BLOCK", 0) + 1)
+        p.powers["kurage_summon"] -= 1
     if p.powers.get("witchs_flame", 0):                 # Durin (permanent)
         # Turn Klee's Pyro saturation into a setup window instead of adding
         # still more Pyro. Each consumed aura pays damage + Burst Energy, then

@@ -12,6 +12,33 @@ from tools import gen_klee_cards as gen
 
 FURINA_HAND_WRITTEN = {"let_the_people_rejoice"}
 
+# Cards deliberately DEFERRED from C# generation while a sprint is mid-flight,
+# each with the gate that releases it. A curated list rather than a silent
+# skip: an ungenerated card is a card that does nothing in the live game, and
+# that must never be discoverable only by playing it.
+#
+# "The Tide Turns" F-D (the live C# Fanfare package) is HARD-GATED on F-C's
+# tier-0.5 gates. Until those pass, `gain_fanfare_floor` has no C# home, and
+# emitting a call to a method that does not exist would trade a visible
+# deferral for a build break. Released by: F-D.
+FURINA_DEFERRED_TO_FD = {"the_sea_is_my_stage"}
+
+# Cards whose UPGRADE is unauthored because the delta it used to carry died
+# with a retired grammar. Same curation rule as above: an unupgradable card
+# is a dead campfire choice, so the gap is named and gated, never tolerated
+# silently.
+#
+# florid_cadenza's only ratified delta was {fanfare_cost: -3} -- "Spend 10 ->
+# Spend 7". With no spend line there is nothing for it to discount, and every
+# replacement (cheaper threshold? one more card? Retain?) is a BALANCE call
+# that belongs to F-B1 and red-pen, not to a mechanical grammar removal.
+# Released by: F-B1, which re-authors the card as a threshold reader.
+FURINA_UPGRADE_GAP_PENDING_FB1 = {"florid_cadenza"}
+
+
+def by_id_of(cards: list[dict]) -> dict[str, dict]:
+    return {card["id"]: card for card in cards}
+
 
 def _furina_cards() -> list[dict]:
     return yaml.safe_load(
@@ -35,24 +62,21 @@ def test_card_level_resource_costs_emit_explicit_gates_and_cost_upgrades():
     )
     assert "Spend 2 [gold]Encore[/gold]." in crowd
 
+    # ENCORE is the only card-level resource gate. Fanfare's retired with the
+    # spend grammar ("The Tide Turns", F-A4): it is a read-only momentum stat
+    # and no card spends it, so no Fanfare cost line may be emitted anywhere.
+    for card in _furina_cards():
+        emitted = gen.emit(card, gen.FURINA_PROFILE)
+        assert "CustomResources<FanfareResource>.SetCanonicalCost" not in emitted
+        assert "CustomResources<FanfareResource>.Cost(" not in emitted
+
     crescendo = gen.emit(by_id["crescendo"], gen.FURINA_PROFILE)
-    assert (
-        "CustomResources<FanfareResource>.SetCanonicalCost(this, 10);"
-        in crescendo
-    )
-    # Legibility sprint (2026-07-24): the Fanfare rider now renders through a
+    # Legibility sprint (2026-07-24): the Fanfare rider renders through a
     # CalculatedDamageVar (face/preview and hit share one value path) instead
     # of inline PrintedDamage arithmetic. The scaling lives in the multiplier.
+    # Untouched by F-A -- READING the meter is exactly what survives.
     assert "FurinaResources.Fanfare(card.Owner.Creature) / 2" in crescendo
     assert "DamageCmd.Attack(DynamicVars.CalculatedDamage)" in crescendo
-
-    florid = gen.emit(by_id["florid_cadenza"], gen.FURINA_PROFILE)
-    assert (
-        "CustomResources<FanfareResource>.Cost(this)!"
-        ".UpgradeCostBy(-3);"
-        in florid
-    )
-    assert "{IfUpgraded:show:7|10}" in florid
 
 
 def test_unknown_card_level_semantics_block_loudly():
@@ -77,20 +101,31 @@ def test_furina_profile_emits_every_non_kit_card():
         for card in _furina_cards()
         if gen.blocked_reason(card, gen.FURINA_PROFILE) is None
     }
-    assert generated == all_ids - FURINA_HAND_WRITTEN
+    withheld = FURINA_HAND_WRITTEN | FURINA_DEFERRED_TO_FD
+    assert generated == all_ids - withheld
+
+    # The deferral must be for the REASON we think it is. A card that stopped
+    # generating for some unrelated breakage would otherwise hide inside the
+    # curated set and read as intentional.
+    for cid in FURINA_DEFERRED_TO_FD:
+        reason = gen.blocked_reason(by_id_of(_furina_cards())[cid],
+                                    gen.FURINA_PROFILE)
+        assert reason == "op 'gain_fanfare_floor'", reason
 
     manifest = json.loads(
         gen.FURINA_PROFILE.manifest.read_text(encoding="utf-8")
     )
-    # 77 cards since the Salon-v2 rework added standing_room_only.
+    # 77 cards since the Salon-v2 rework added standing_room_only; one more
+    # withheld while F-D is gated (see FURINA_DEFERRED_TO_FD).
     assert manifest["coverage"] == {
         "total": 77,
-        "generated": 76,
-        "blocked": 1,
+        "generated": 75,
+        "blocked": 2,
     }
     assert set(manifest["generated"]) == generated
-    assert set(manifest["blocked"]) == FURINA_HAND_WRITTEN
-    assert not manifest["upgrades"]["no_upgrade_path"]
+    assert set(manifest["blocked"]) == withheld
+    assert (set(manifest["upgrades"]["no_upgrade_path"])
+            == FURINA_UPGRADE_GAP_PENDING_FB1)
 
 
 def test_furina_runtime_clusters_emit_concrete_calls():
