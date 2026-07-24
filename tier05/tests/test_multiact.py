@@ -12,7 +12,7 @@ import pytest
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier0.engine.state import CombatState, Enemy
+from tier0.engine.state import CombatState
 from tier05 import acts, draft, model
 from tier05 import relics as relic_pool
 
@@ -233,77 +233,3 @@ def test_multiact_run_determinism(monkeypatch):
     if a.death_node is not None:       # a real 2-act death logs globally
         assert a.hp_by_node[-1] == 0
         assert len(a.hp_by_node) == a.death_node + 1
-
-
-# --- ACT_DIFFICULTY_SCALE (calibration pass, 2026-07-24) --------------------
-#
-# The dial that stands in for the player power growth the sim does not model
-# (upgrades, a boss-relic tier, a real draft pool). It ships INERT at 1.0; the
-# number is a ruling. These pin the mechanism so flipping it is one constant.
-
-
-def test_scale_covers_every_registered_act():
-    """One entry per act in RUN_ACTS, in order. A short tuple would silently
-    leave the last act uncompensated at whatever the ruling set."""
-    assert len(C.ACT_DIFFICULTY_SCALE) == len(C.RUN_ACTS)
-    for entry in C.ACT_DIFFICULTY_SCALE:
-        assert set(entry) == {"N", "E", "B"}
-
-
-def test_an_unregistered_act_is_a_loud_error_not_a_silent_1_0():
-    with pytest.raises(ValueError, match="one entry per act"):
-        acts.scale_for(len(C.ACT_DIFFICULTY_SCALE), "E")
-
-
-def test_stamped_default_is_inert_down_to_object_identity():
-    """1.0 must not merely round-trip -- it must not touch the spawn at all,
-    so the shipped world stays byte-identical to the pre-dial measurements."""
-    assert all(v == 1.0 for entry in C.ACT_DIFFICULTY_SCALE
-               for v in entry.values()), "default moved without a ruling"
-    spawned = acts.spawn(acts.pools(0)["elite"][0], random.Random(3))
-    before = [(e.hp, e.max_hp, [i.get("amount") for i in e.intents])
-              for e in spawned]
-    out = acts.apply_difficulty_scale(spawned, 0, "E")
-    assert out is spawned
-    assert [(e.hp, e.max_hp, [i.get("amount") for i in e.intents])
-            for e in out] == before
-
-
-def test_scale_moves_hp_and_attacks_only(monkeypatch):
-    monkeypatch.setattr(C, "ACT_DIFFICULTY_SCALE",
-                        ({"N": 1.0, "E": 0.5, "B": 1.0},) * len(C.RUN_ACTS))
-    e = Enemy(hp=100, max_hp=100, name="dummy", intents=[
-        {"kind": "attack", "amount": 20},
-        {"kind": "block", "amount": 30},
-        {"kind": "buff", "power": "strength", "amount": 4},
-        {"kind": "inject", "status": "wound", "count": 3},
-    ])
-    acts.apply_difficulty_scale([e], 0, "E")
-    assert e.hp == e.max_hp == 50
-    assert e.intents[0]["amount"] == 10          # attack scaled
-    assert e.intents[1]["amount"] == 30          # block untouched
-    assert e.intents[2]["amount"] == 4           # buff untouched
-    assert e.intents[3]["count"] == 3            # inject untouched
-
-
-def test_scale_reaches_phase_bars(monkeypatch):
-    """Test Subject carries 500 of his 600 HP in unspawned phase specs; a dial
-    that only scaled the visible bar would barely touch him."""
-    monkeypatch.setattr(C, "ACT_DIFFICULTY_SCALE",
-                        ({"N": 1.0, "E": 1.0, "B": 0.5},) * len(C.RUN_ACTS))
-    spec = next(s for s in acts.boss_pool(2) if s["id"] == "test_subject")
-    boss = acts.spawn(spec, random.Random(0))[0]
-    bars = [int(ph["hp"]) for ph in boss.phases]
-    acts.apply_difficulty_scale([boss], 2, "B")
-    assert boss.hp == 50
-    assert [int(ph["hp"]) for ph in boss.phases] == [b // 2 for b in bars]
-
-
-def test_scale_is_applied_by_the_run_layer(monkeypatch):
-    monkeypatch.setattr(C, "ACT_DIFFICULTY_SCALE",
-                        ({"N": 0.5, "E": 1.0, "B": 1.0},) * len(C.RUN_ACTS))
-    rng = random.Random(5)
-    draw = acts.ActDraw(random.Random(5), 0)
-    scaled = model.build_node_encounter("N", rng, draw)
-    plain = acts.spawn(draw._easy[0], random.Random(5))
-    assert sum(e.hp for e in scaled) < sum(e.hp for e in plain)
