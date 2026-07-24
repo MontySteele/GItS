@@ -400,9 +400,99 @@ and act-1 clear being 4.5 points off its bar is exactly a frontload-shaped
 gap. F-B1 was not wasted on the way there: without it the two biggest hitters
 in the list had no Fanfare relationship at all.
 
-### F-B3 / F-B4
+### F-B3 — frontload numbers pass: RUN, and it is a BINDING NULL
 
-Not started. **F-B3 is next** — it is now the only unspent lever on gate (1).
+Registered as its own cell per plan §4. Variable: flat +N printed damage on
+the fanfare plan's act-1 damage sources (`warmup_act`, `dramatic_entrance`,
+`standing_room_only`, `showstopper`). 150 runs/cell, seed 11.
+
+| +dmg | act-1 clear | run win | DPT | median death node |
+|---|---|---|---|---|
+| 0 | 44.0% | 1.3% | 14.3 | 10 |
+| 1 | 44.0% | 1.3% | 14.3 | 10 |
+| 2 | 42.7% | 0.7% | 14.3 | 10 |
+| 3 | 46.7% | 1.3% | 14.7 | 10 |
+| 4 | 46.0% | 1.3% | 14.8 | 10 |
+| 6 | 50.0% | 1.3% | 15.5 | 10 |
+
+**Run winrate is FLAT at ~1.3% across the entire sweep, including a frankly
+unshippable +6.** Act-1 clear reaches 50% at +6, but the run winrate never
+moves and the median death node never moves. **F-B3 does not reach gate (1),
+and null results are binding.** The plan's §5 branch — "the archetype needs
+frontload, not grammar" — has now been run and is falsified as stated.
+
+**The DPT column is the tell:** +6 damage on four cards moves total damage
+per turn by **1.2**. Those cards cannot be a meaningful share of the deck's
+output. That pointed at composition, which was then measured directly.
+
+### Why the numbers pass could not work — the archetype's cards are not there
+
+Deck composition, 120 runs/arm, seed 11:
+
+| arm | deck size | attacks | attack % | top damage sources |
+|---|---|---|---|---|
+| fanfare | 18.4 | 5.2 | 28% | `soloists_solicitation` 32%, `freminet_pers_deploy` 10%, `chevreuse_interdiction_fire` 9% |
+| salon | 20.6 | 4.9 | 24% | `soloists_solicitation` 32%, … |
+| spotlight | 20.5 | 4.8 | 23% | `soloists_solicitation` 35%, … |
+
+All three archetypes have **near-identical attack density**, and the #1
+damage source in *every* deck is `soloists_solicitation` — the starter's
+deliberately-dreadful 4-damage basic (kickoff §2 made it dreadful on
+purpose). Not one fanfare payoff appears in any arm's top four.
+
+Payoff reach into the final fanfare deck, 200 runs:
+
+| card | % of decks | copies/run |
+|---|---|---|
+| thunderous_ovation | 28% | 0.32 |
+| the_sea_is_my_stage | 21% | 0.23 |
+| rapturous_applause | 20% | 0.20 |
+| standing_room_only | 18% | 0.20 |
+| flood_of_emotion / universal_revelry | 17% | 0.17–0.19 |
+| crescendo / high_tide / lasting_impression | 16–17% | 0.16–0.17 |
+| **dramatic_entrance** (the signature common) | **11%** | 0.12 |
+| showstopper | 5% | 0.06 |
+| **mean payoffs per deck** | — | **1.99 of ~18.4 cards** |
+
+**The average fanfare deck holds two of its own payoff cards.** That is the
+whole explanation: F-B1's conversions and F-B3's bumps both apply to cards
+that are not in the deck. The lever is **draft reach** — pool dilution
+across 78 Furina cards, drafter valuation, or both — not card magnitude.
+
+> **CORRECTION to the autopsy above.** It reported that fanfare *"ASSEMBLES
+> FASTEST of the three — 174/200 online by median fight 3"* and concluded it
+> was "not failing to come online". That reading was wrong, and the fault is
+> in the instrument: `core_complete("fanfare")` tests generation coverage
+> **and floor coverage**, and neither is a payoff. Cheap Encore generation
+> plus any single Power satisfies it. So the definition declares the
+> archetype online while it holds two payoffs in eighteen cards. It
+> assembles its *resource* fastest, not its *deck*. The other two archetypes'
+> core definitions name actual payoff cards, which is why salon reads slower
+> and is in fact further along.
+
+### What this means for the sprint
+
+Gates (2), (3) and (4) pass and the resource rework is sound and finished.
+Gate (1) fails, and **both registered levers for it have now been spent**:
+F-B1 (conversions) moved it a little, F-B3 (numbers) not at all. The
+remaining candidates are all draft-reach shaped and none is in this sprint's
+scope:
+
+1. `core_complete("fanfare")` should require a payoff, not just resource
+   coverage — it is currently unable to report the archetype's real problem.
+2. Pool dilution: 78 Furina cards against ~3-card reward screens.
+3. Drafter valuation of fanfare payoffs (`FANFARE_READER_VALUE` is 1.0).
+
+**[USER] ruling needed** on whether the sprint closes here with the resource
+rework shipped and gate (1) documented as out of reach by grammar or
+numbers, or extends into draft reach. Recommendation: **close the sprint**,
+publish the null, and open draft reach as its own pass — it is a different
+subsystem, it affects all three archetypes, and item (1) is an instrument
+bug that should be fixed before anything is measured against it.
+
+### F-B4
+
+Not started (kickoff §4 amendment text, [USER] ratification required).
 
 ---
 
