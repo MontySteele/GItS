@@ -49,6 +49,19 @@ STATIC_PERSISTENT_PROC_SHARE = 1.0  # one turn of a repeatable Power (v4)
 # fights average 2-4 bodies; single-target fights make AoE overpriced at
 # higher values).
 STATIC_AOE_MULT = 2.0
+# DRAFTER_VERSION 7 (Kokomi v0.2 sheet pass): her three verbs were
+# structurally invisible -- conscript and gain_charge print zero damage or
+# Block, and Sly riders live outside card.effects entirely -- the same
+# defect class as v6's AoE blindness. Conservative structural proxies:
+STATIC_SLY_SHARE = 0.5        # a Sly rider needs a card-effect discard
+                              # outlet to fire; half its printed face
+STATIC_CONSCRIPT_VALUE = 1.5  # one playable recruit ~ one companion's
+                              # conservative static worth per transform
+STATIC_CHARGE_VALUE = 0.5     # per printed Charge point: the kit Garment
+                              # is a universal reader (never-expiring bank,
+                              # +1 damage per 4 Charge while it holds), so
+                              # banked points are never dead -- but one
+                              # Garment window is all this prices in
 
 # These predicates are readable before a card is played. Mid-resolution
 # conditions such as reaction_triggered_by_this and killed_target remain out:
@@ -340,11 +353,20 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                   and fx.get("target") != "self"
                   and fx.get("power") in ("weak", "vulnerable")):
                 total += _neutral_amount(fx) * STATIC_DEBUFF_VALUE
+            elif fx.get("op") == "conscript":                       # v7
+                total += _neutral_amount(fx) * STATIC_CONSCRIPT_VALUE
+            elif fx.get("op") == "gain_charge":                     # v7
+                total += _neutral_amount(fx) * STATIC_CHARGE_VALUE
             elif fx.get("op") == "grow_damage":
                 total += fx.get("amount", 0) * 0.5  # one discounted redraw
         return total
 
     total = effect_power(card.effects)
+    if card.sly:
+        # v7: a Sly rider is the same printed grammar at half face -- it
+        # fires only when a card effect discards this from hand, and the
+        # drafter cannot see outlet density at offer time.
+        total += effect_power(card.sly) * STATIC_SLY_SHARE
     # An armed Bomb suppresses one enemy attack action. Do not also price that
     # protection when the same card applies Weak: the two reductions share one
     # branch at runtime and never multiply.

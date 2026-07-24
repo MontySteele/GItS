@@ -66,6 +66,41 @@
     spotlight: 0.3
     cost: 0.1
 
+# --- Kokomi (kickoff v1 §3). block stays at the frozen 1.2 everywhere.
+# New key: charge (Charge-engine machinery — conscription, deliberate
+# exhausts, the garment state; policy default 0.0 keeps every older pilot
+# unchanged, the sustain/spotlight precedent). Payoff DAMAGE already flows
+# through the damage term; charge weights only the machinery.
+- id: commander
+  weights:
+    damage: 1.0
+    block: 1.2
+    scaling: 1.0
+    reaction: 0.7     # recruits apply elements; mild solo priority
+    tempo: 1.0
+    charge: 1.3       # conscription is the plan
+    cost: 0.1
+
+- id: priest
+  weights:
+    damage: 1.0
+    block: 1.2
+    scaling: 1.2      # exhaust-payoff powers (block/draw per exhaust)
+    reaction: 0.6
+    tempo: 0.8
+    charge: 1.6       # exhaust density feeds the finisher
+    cost: 0.1
+
+- id: assist
+  weights:
+    damage: 1.0
+    block: 1.2
+    scaling: 1.0
+    reaction: 0.7
+    tempo: 1.4        # Sly/discard velocity IS the plan
+    charge: 0.8       # glue lane: feeds the engine, low internal payoff
+    cost: 0.1
+
 # --- real_ironclad (the real base-game reference pool). block stays at the
 # frozen 1.2 everywhere. sustain/spotlight are OMITTED, not zeroed: the
 # policy defaults make them inert, while writing 0.0 would imply he has an

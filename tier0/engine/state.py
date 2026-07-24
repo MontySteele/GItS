@@ -60,6 +60,17 @@ class Card:
     # an explicit field wins. Cards with no character are invalid Spotlight
     # targets -- the selector greys them out rather than erroring.
     character: Optional[str] = None
+    # Kokomi kickoff §2.3: combat-local provenance stamped by the conscript
+    # op (the generated_by_guest_star pattern). PROPOSED reading of ruling
+    # ask §6.7: a conscripted companion is SELF-sourced for SUPPORT_CARRY /
+    # control-provenance purposes — she paid a card of her own deck for it.
+    conscripted: bool = False
+    # Kokomi Assist lane (kickoff §2.3 discard verb): Sly — effects that
+    # fire when this card is discarded BY A CARD EFFECT. The end-of-turn
+    # hand flush is NOT a Sly trigger, and neither are draw-pile discards
+    # (scry); both scopings are enforced (and commented) at the one trigger
+    # site in effects._op_discard. Empty on every non-Kokomi card.
+    sly: list[dict] = field(default_factory=list)
     # Guest Star rows (fontaine-companions.yaml): generated cameos, scoped
     # to a personal pool. Never in shared rewards or the banner roll; the
     # equal-rarity clause on generators is what respects 5-star scarcity.
@@ -183,6 +194,11 @@ class Player(Fighter):
     kit_cards: list[Card] = field(default_factory=list)    # v1.9: the Burst(s)
     # --- Furina (kickoff §3/§4); inert defaults for everyone else ---
     character_id: str = ""        # who this player IS (self-Spotlight rate)
+    # --- Kokomi (kickoff v1 §2.1): the Bake-Kurage meter. Uncapped, never
+    # expended, read (not consumed) by finisher effects; accrues ONLY at
+    # the exhaust funnel + explicit gain_charge lines + converted Strength.
+    # Reset per combat in run_fight. Dead field for everyone else. ---
+    charge: int = 0
     encore: int = 0               # unbounded per-combat buffer (v1.6 style)
     fanfare: int = 0              # capped activity stacks; global pool
     fanfare_cap: int = 0          # 0 = character has no Fanfare resource
@@ -276,6 +292,13 @@ class CombatState:
     block_gains_this_card: int = 0        # exact multi-gain block hooks
     salon_replacements_this_card: int = 0 # overflow count for current card
     cards_exhausted_this_turn: int = 0     # EvilEye / ForgottenRitual
+    # Kokomi §2.4: the prevention ward's per-round latch ("first unblocked
+    # hit per turn"); reset at player turn start with the other windows.
+    prevention_used_this_turn: bool = False
+    # Kokomi §7 engine_closure diagnostic (report-only, R14): cards created
+    # into any pile this player turn (add_card tokens, conscript-create,
+    # generators). Reset at player turn start.
+    cards_created_this_turn: int = 0
     hp_lost_this_turn: int = 0             # Spite's live history predicate
     player_damage_events: int = 0          # TearAsunder hit-count history
     # Free-play machinery (Havoc / Cascade / HowlFromBeyond). The depth

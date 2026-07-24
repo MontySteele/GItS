@@ -13,7 +13,11 @@ from __future__ import annotations
 from tier0 import constants as C
 from tier0.engine.state import CombatState, Fighter
 
-DECAYING = ("weak", "vulnerable", "frail")   # tick down at owner's turn end
+# ceremonial_garment (Kokomi kit, kickoff §2.2 Shape B): stacks = turns
+# remaining in the state; the same tick-down grammar as the debuffs. No
+# other character ever carries it, so the addition is a dead branch there.
+DECAYING = ("weak", "vulnerable", "frail",
+            "ceremonial_garment")            # tick down at owner's turn end
 # This-turn windows: cleared entirely at their owner's turn end (R16
 # card-mediated Spotlight boosts; a _turn power is a window, not a stack).
 EXPIRING = ("spotlight_mult_bonus_turn", "spotlight_flat_damage_turn")
@@ -116,6 +120,19 @@ def on_turn_end(state: CombatState, fighter: Fighter) -> None:
 def apply_power(state: CombatState, target: Fighter, name: str, stacks: int,
                 max_stacks: int | None = None,
                 applier: Fighter | None = None) -> None:
+    # Flawless Strategy (Kokomi kickoff §1 law 3 / §2.5): she CANNOT gain
+    # Strength — any positive Strength she would gain becomes Charge
+    # instead, at this one chokepoint (cards, companions, intents, potions
+    # all land here). Negative strength (Mangle-class) is not a gain and
+    # still applies; enemies and every other character take the normal
+    # path. The conversion is the balance guardrail on an uncapped meter:
+    # no Strength-stacking on a Charge finisher, ever.
+    if (name == "strength" and stacks > 0 and target is state.player
+            and "tamakushi_casket" in state.player.relic_hooks):
+        from tier0.engine import resources      # late import (module graph)
+        resources.gain_charge(state, stacks, "flawless_strategy")
+        state.emit("strength_converted", stacks=stacks)
+        return
     new = target.powers.get(name, 0) + stacks
     if max_stacks is not None:              # sheet v0.2 stack caps
         new = min(new, max_stacks)

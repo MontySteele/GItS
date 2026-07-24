@@ -23,6 +23,17 @@ def test_no_strict_domination_on_docs_sheets():
     assert res.returncode == 0, res.stdout + res.stderr
 
 
+def test_kokomi_decksize_grammar():
+    """Kokomi kickoff §1 law 4 (user-authored, machine-checkable → gate):
+    Commons in HER pool net card delta <= 0. Scope is her personal sheet
+    only — deliberately not the companion pools, not mod-wide."""
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_kokomi_decksize.py"),
+         str(loader.DOCS_DIR / "kokomi-cards.yaml")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
 def test_card_names_are_unique():
     """Display names: unique internally, and clear of docs/reserved-card-names.txt.
 

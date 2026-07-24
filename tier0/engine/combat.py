@@ -274,6 +274,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     state.reactions_this_turn = 0                # Chevreuse predicate window
     state.spotlighted_cards_this_turn = 0        # Ovation / reserve cap
     state.spotlight_moved_this_turn = False      # selector-payoff window
+    state.prevention_used_this_turn = False      # Kokomi ward latch (§2.4)
+    state.cards_created_this_turn = 0            # engine_closure window
 
     for enemy in list(state.living_enemies):     # bombs from last turn go off
         if enemy.bombs:
@@ -336,6 +338,20 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
             break
         seen_states.add(snapshot)
         play_card(state, card)
+
+    # Kokomi §7 engine_closure detector (report-only, R14: diagnostics,
+    # never acceptance targets): a turn that CREATED at least as many cards
+    # as it consumed while playing several cards is a candidate
+    # positive-sum engine cycle. v0 heuristic on purpose — full
+    # energy/draw-closure accounting is a later instrument; this flags
+    # candidates for eyes-on. Dead branch until a creation op runs.
+    if (state.cards_created_this_turn > 0
+            and state.cards_created_this_turn
+            >= max(1, state.cards_exhausted_this_turn)):
+        state.emit("engine_closure",
+                   created=state.cards_created_this_turn,
+                   consumed=state.cards_exhausted_this_turn,
+                   plays=state.cards_played_this_turn)
 
     # StS2 site I (BeforeSideTurnEndEarly). PlatingPower's own source comment:
     # "We do this in early so that it triggers before end-of-turn damage
@@ -443,10 +459,20 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             block_before = state.player.block
             blocked = min(state.player.block, dmg)
             state.player.block -= blocked
+            # Kokomi's prevention ward (kickoff §2.4): after Block, before
+            # anything reaches HP — the first unblocked hit each round is
+            # prevented up to the ward's stacks, priced as one random
+            # draw-pile card through the exhaust funnel (which is itself a
+            # Charge event). Dead branch for every player without the
+            # power. Its event stream is REPORTED SEPARATELY, not folded
+            # into `blocked` and not credited to any axis yet — A4 credit
+            # is a metric ruling ask (Encore precedent), not a default.
+            prevented = effects.prevent_damage_exhaust(state, dmg - blocked)
             # Encore absorbs after Block, before HP (kickoff §4). Its own
             # event stream credits A4 sustain -- NEVER folded into
             # `blocked` (§2 harness note, Tier 0 binding).
-            hp_loss = resources.absorb_into_encore(state, dmg - blocked)
+            hp_loss = resources.absorb_into_encore(
+                state, dmg - blocked - prevented)
             state.player.hp -= hp_loss
             resources.note_player_hp_loss(state, hp_loss)
             # Combat-side relic on_first_hp_loss_draw (dead branch on the
@@ -563,6 +589,7 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # Encore). Spotlight designation likewise re-aims fresh each combat.
     player.encore = 0
     player.fanfare = 0
+    player.charge = 0            # Kokomi: the meter is per-combat (§2.1)
     player.spotlight = None
     state.rng.shuffle(player.draw_pile)
     surface_innate(player.draw_pile)

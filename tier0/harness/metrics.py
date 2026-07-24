@@ -38,6 +38,14 @@ class FightStats:
     reaction_damage: int
     auras_wasted: int
     cards_played: int = 0
+    # --- Kokomi telemetry (kickoff §7). prevented is REPORTED ONLY: not
+    # folded into damage_blocked and not credited to A4 — axis credit for
+    # ward prevention is a metric-redefinition and therefore red-pen (the
+    # Encore-accounting precedent). charge_gained is the meter's flux;
+    # engine_closure_turns counts the report-only R14 diagnostic. ---
+    prevented: int = 0              # damage prevented by the exhaust ward
+    charge_gained: int = 0          # total Charge accrued this fight
+    engine_closure_turns: int = 0   # turns flagged by the v0 detector
     regrets: int = 0                # pilot_regret samples (spec §6)
     enemy_actions: int = 0          # intents taken + sleep skips (§2.2a)
     control_negated: float = 0.0    # action-equivalents negated by
@@ -80,6 +88,9 @@ def merge_stages(stages: list["FightStats"]) -> "FightStats":
         merged.reaction_damage += s.reaction_damage
         merged.auras_wasted += s.auras_wasted
         merged.cards_played += s.cards_played
+        merged.prevented += s.prevented
+        merged.charge_gained += s.charge_gained
+        merged.engine_closure_turns += s.engine_closure_turns
         merged.regrets += s.regrets
         merged.enemy_actions += s.enemy_actions
         merged.control_negated += s.control_negated
@@ -95,6 +106,7 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
     extra_draws = extra_energy = healing = encore_absorbed = debuff_stacks = 0
     debuffed_intents = aura_intents = total_intents = cards_played = 0
     regrets = 0
+    prevented = charge_gained = engine_closure_turns = 0
     reactions = reaction_dmg = auras_wasted = sleeps = 0
     control_negated = 0.0
     flags: list[str] = []
@@ -129,6 +141,12 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
             healing += ev["amount"]
         elif e == "encore_absorb":
             encore_absorbed += ev["amount"]
+        elif e == "prevent_exhaust":
+            prevented += ev["amount"]
+        elif e == "gain_charge":
+            charge_gained += ev["amount"]
+        elif e == "engine_closure":
+            engine_closure_turns += 1
         elif e == "apply_power":
             if ev["power"] in ("weak", "vulnerable") and ev["target"] != "player":
                 debuff_stacks += ev["stacks"]
@@ -184,7 +202,9 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
         total_intents=total_intents,
         reactions=reactions,
         reaction_damage=reaction_dmg, auras_wasted=auras_wasted,
-        cards_played=cards_played, regrets=regrets,
+        cards_played=cards_played, prevented=prevented,
+        charge_gained=charge_gained,
+        engine_closure_turns=engine_closure_turns, regrets=regrets,
         enemy_actions=enemy_actions, control_negated=control_negated,
         flags=sorted(set(flags)))
 

@@ -1,0 +1,220 @@
+# Kokomi card pool — v0.2 SHEET PASS (Tier 0 simulator schema). docs/kokomi-kickoff-v1.md governs; every kickoff
+# gate is CLOSED (R51 elite axes + debuff texture, R52 batch closure — 2026-07-24). EVERY number remains PROPOSED;
+# EVERY name is a PLACEHOLDER pending the [USER]-only naming/lore audit (verified talent names: Nereid's Ascension,
+# Ceremonial Garment, Bake-Kurage, Tamakushi Casket, The Moon's Beauty; the rest are authored flavor).
+# Identity (kickoff §1): Kokomi converts card economy into damage. She pays in cards, never in HP.
+#   LAW 1: no self-damage anywhere in this pool (grep-clean: no {target: self} damage op may ever appear here).
+#   LAW 2 (R52, ask 1): NO heals in this pool, period. No amendment taken and NONE PLANNED — Furina holds the mod's
+#          one healing amendment; Kokomi's rares pay off a different way. The conjunctive mod law (Rare AND
+#          Exhaust) stands, but she takes ZERO slots under it: the healer heals no HP. Her sustain fantasy is
+#          prevention (the ward) + the stability band. sango_prayer's v0.1 heal is GONE (reworked below).
+#   LAW 3 (Flawless Strategy): she cannot gain Strength (engine converts to Charge at the apply_power chokepoint);
+#          this sheet accordingly designs NO strength-granting cards.
+#   LAW 4 (deck-size grammar, user-authored): Commons net card delta <= 0 (reduce or replace, never create).
+#          Machine-checked by tools/lint_kokomi_decksize.py (in-suite). Uncommon+ may create (reinforcements).
+# Element: hydro | Cadence: CATALYST (RULED R52, ask N1): every attack applies hydro — the pool's co-op/reaction
+#   voice, and the structural third of elite A6 (application uptime comes from the cadence, not authored lines).
+# Archetypes (kickoff §3): commander (conscription engine) | priest (Charge/exhaust density) | assist (Sly/discard
+#   glue, LOW INTERNAL PAYOFF BY DESIGN — Box Trick philosophy) | generic.
+# Statline this sheet targets (R51): A1 weak ~1.5-2, A2 ELITE, A6 ELITE (the ruled second axis — Weak/Vulnerable
+#   ONLY as riders on exhaust/Sly engine pieces, never a spammable cheap AoE debuff like Furina's commanding_gaze;
+#   uncommon-gated so no such shape exists at common), A4 LOW BY DESIGN (the stability band owns the healer
+#   fantasy in the act sims), A7 mid (engine assembly tax).
+# Charge grammar: the universal exhaust->Charge accrual lives on the relic (engine funnel), NEVER as card text;
+#   gain_charge lines here are the §2.1 "premium" bonuses on top. Charge is read, never spent — readers are
+#   rate-limited per §2.2 (Rare / Exhaust / cost >= 2 on the nuke; the garment state is the kit).
+
+# ---------- BASIC (5) ----------
+- {id: waters_edge, name: "Water's Edge", cost: 1, type: attack, rarity: basic, solve: [frontload], archetypes: [generic], role: glue,
+   effects: [{op: damage, amount: 6, target: enemy}]}
+   # Her normal attack: a ribbon of water. v0.3 charge-curve pass: 4 -> 6, STRIKE PARITY — and no further.
+   # USER RULING (R53, 2026-07-24): the kaboom-parity 7 arm is REJECTED; her basic attack stays at basic-Strike
+   # parity. The v0.2 diagnosis stands (sub-Strike basics made act-1 bills unpayable at any scaling setting),
+   # but A1-weak lives in the pool's SHAPE and the basics stop at parity. The 7 arm measured ~5 act-1 points
+   # above this world (report §6) — that gap is bought elsewhere or not at all.
+- {id: coral_guard, name: "Coral Guard", cost: 1, type: skill, rarity: basic, solve: [block], archetypes: [generic], role: glue,
+   effects: [{op: block, amount: 5}]}
+   # Standard Defend. Her distinctive durability comes from the ward/Charge economy, not inflated basics.
+- {id: bake_kurage, name: "Bake-Kurage", cost: 1, type: skill, rarity: basic, solve: [utility], archetypes: [generic], role: enabler, tags: [skill_tag],
+   effects: [{op: apply_aura, element: hydro, target: random_enemy}, {op: block, amount: 3}, {op: gain_charge, amount: 1}]}
+   # Signature basic: the jellyfish takes the field — application from card one (the healer summon's mending is
+   # Block under the law). skill_tag = burst particles. The meter is NAMED for this card (kickoff §2.1).
+   # v0.3: +1 Charge — the signature basic TEACHES the meter from fight 1 (the Regent-common lesson: the
+   # scaling currency rides on ordinary plays, it is not a separate purchase).
+- {id: tactical_recall, name: "Tactical Recall", cost: 0, type: skill, rarity: basic, solve: [velocity], archetypes: [generic], role: enabler,
+   effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: draw, amount: 1}]}
+   # The exhaust-teacher: burn a card, turn the page. Net delta -1 (reduces the deck — LAW 4 poster child).
+   # With the Casket this is the decision loop in one basic: every card burned is Charge.
+- {id: tide_reading, name: "Tide Reading", cost: 1, type: skill, rarity: basic, solve: [block, velocity], archetypes: [generic], role: glue,
+   effects: [{op: block, amount: 2}, {op: draw, amount: 1}]}
+   # Fifth basic (template allows 4-5): the strategist reads the field. Poise + a look ahead.
+
+# ---------- COMMON (12: +surging_shoal at kickoff review) ----------
+# Commander (2)
+- {id: conscription_notice, name: "Conscription Notice", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [commander], role: enabler,
+   effects: [{op: conscript, amount: 1}, {op: draw, amount: 1}]}
+   # THE Commander verb at common: transform a card in hand into a random Inazuma recruit (costs 1 less, gains
+   # Exhaust — kickoff §2.3 grammar verbatim). Net delta 0: transform, never create (LAW 4). Replaces itself.
+- {id: to_the_front, name: "To the Front!", cost: 0, type: skill, rarity: common, solve: [utility], archetypes: [commander], role: enabler,
+   effects: [{op: conscript, amount: 1}]}
+   # The free order. Pays only card identity — the archetype's cheapest enable, and its texture: what will
+   # the draft pile give you today?
+# Priest (4)
+- {id: votive_offering, name: "Votive Offering", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [priest], role: glue,
+   effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: block, amount: 5}]}
+   # Burn a card for safety: Defend-grade Block whose rider is fuel with the Casket, pure loss without a payoff —
+   # the priest lane's honest price.
+- {id: ritual_purification, name: "Ritual Purification", cost: 1, type: skill, rarity: common, solve: [utility, scaling], archetypes: [priest], role: enabler,
+   effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: gain_charge, amount: 4}, {op: draw, amount: 1}]}
+   # The premium Charge common (§2.1 explicit-bonus grammar): exhaust 1 -> 5 total Charge (1 funnel + 4 line),
+   # replaces itself. The engine's metronome. v0.3: line 2 -> 4 — the benchmark common Forges 7 while dealing 7;
+   # her dedicated charger paying a card for 3 total was under HALF that on one axis and zero on the other.
+- {id: waterspout, name: "Waterspout", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [priest, generic], role: glue, exhaust: true,
+   effects: [{op: damage, amount: 10, target: enemy}]}
+   # Self-consuming swing: v0.3 7 -> 10 — a card of the deck-as-HP-bar is a real price and must buy a real hit
+   # (the v0.2 world priced the burn at +1 damage over a plain swing). One hit, one Charge, one fewer draw.
+- {id: cleansing_tide, name: "Cleansing Tide", cost: 2, type: skill, rarity: common, solve: [block], archetypes: [priest], role: glue,
+   effects: [{op: exhaust_from, amount: 2, select: chosen}, {op: block, amount: 10}]}
+   # The big burn: two cards for a real wall. Double fuel with the Casket; steep deck cost without it.
+   # (v0.3 considered 12 and REVERTED in the same pass: it strictly dominated shell_of_sanctuary's 11 under
+   # the exhaust-as-benefit convention, and the act diagnosis proved Block is not her binding constraint —
+   # the reprice concentrates on output and meter, not walls.)
+# Assist (3)
+- {id: undertow_shuffle, name: "Undertow Shuffle", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [assist], role: glue,
+   effects: [{op: draw, amount: 3}, {op: discard, amount: 2}]}
+   # Assist's churn: see three, lose two at random — more raw velocity than Communion of Tides but wilder, and it
+   # rings the Sly bell TWICE. (First-draft draw-2/discard-1 was a strict-domination lint catch vs Communion —
+   # the CCM remedy applied: each card is now a real choice, churn-vs-fuel.)
+- {id: moon_signal, name: "Moon Signal", cost: 0, type: skill, rarity: common, solve: [velocity], archetypes: [assist], role: enabler,
+   effects: [{op: discard, amount: 1}, {op: draw, amount: 1}]}
+   # Free cycle: pays tempo (a random discard), buys a fresh look. Sly's cheapest bell.
+- {id: drifting_lantern, name: "Drifting Lantern", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [assist, generic], role: glue,
+   sly: [{op: block, amount: 4}],
+   effects: [{op: block, amount: 4}]}
+   # THE Sly teaching card: 4 Block played, 4 Block when a card effect discards it — the lantern shines either
+   # way. First sly row on any sheet (engine: card-effect discards only; the hand flush pays nothing).
+# Generic (3)
+- {id: surging_shoal, name: "Surging Shoal", cost: 1, type: attack, rarity: common, solve: [frontload, utility], archetypes: [generic, priest], role: glue,
+   effects: [{op: damage, amount: 7, target: all_enemies}]}
+   # v0.3: 4 -> 7 — the act-1 AoE elite's Skittish 6 (first hit per body per turn gains 6 Block) ZEROED the
+   # 4-damage version in exactly the fight it was added for (v0.2 diagnosis §3). 7 clears the threshold.
+   # THE GARDENER-LESSON CARD (Furina 3-act diagnosis §10.8.2: a starter/common pool with no cheap AoE dies to the
+   # act-1 AoE wall regardless of assembled-deck quality; standing_room_only is the ratified precedent). Added at
+   # kickoff REVIEW after the first battery — deliberately NOT in any measured package, so the v0.1 battery numbers
+   # stand unlabeled; packaging it is sheet-pass material. Catalyst cadence makes this mass hydro application —
+   # joins the hydro-convergence WATCHLIST alongside undercurrent/standing_room_only. PROPOSED.
+- {id: jade_bulwark, name: "Jade Bulwark", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue,
+   effects: [{op: block, amount: 6}]}
+   # Graceful Retreat parity exactly (6 at common, under Klee's Hide and Seek) — the stability character does NOT
+   # get a hidden block subsidy; her edge is the ward and the buffer of future draws. (lint-ok: Furina comp)
+- {id: pulsing_current, name: "Pulsing Current", cost: 1, type: attack, rarity: common, solve: [frontload, scaling], archetypes: [generic, priest], role: glue,
+   effects: [{op: damage, amount: 7, target: enemy}, {op: gain_charge, amount: 1}]}
+   # v0.3: her Regent-common analogue — deal 7 AND feed the meter 1. The v0.2 stance ("deliberately UNDER
+   # Klee's 7") is SUPERSEDED by the charge-curve ruling direction: the scaling currency rides on ordinary
+   # damage plays, and the plain swing meets Klee's 7 instead of undercutting it. (lint-ok: Klee comp)
+
+# ---------- UNCOMMON (12: +the R51 texture pair; +riptide_strike, v0.3 charge-curve pass) ----------
+# v0.3 (user-directed 2026-07-24): the meter gets an ON-CURVE reader. The v0.2 world rate-limited every Charge
+# read to Rare/kit — the engine made fuel it could not spend, and the act-1 elite checks arrive at node 4, long
+# before the rarity ladder does. The StS curve this pool now follows: big numbers clear act 1, multipliers and
+# velocity clear act 3 (the Silent shiv package is the genre proof: a flat DOUBLING lives at uncommon).
+- {id: riptide_strike, name: "Riptide Strike", cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling], archetypes: [priest, generic], role: payoff,
+   effects: [{op: damage, amount: 5, target: enemy, bonus_formula: 1_per_2_charge}]}
+   # The sub-Rare reader: 5 + 1 per 2 Charge, single target, repeatable. At a node-4 bank of ~10 it is a 10-point
+   # swing; at a priest-median 24 it is 17 — act-appropriate at both ends. Bounded by fuel (Charge costs cards),
+   # single-target (the AoE reads stay Rare/kit), and the Rare nuke keeps its premium by hitting ALL enemies.
+# Commander (3)
+- {id: mass_mobilization, name: "Mass Mobilization", cost: 2, type: skill, rarity: uncommon, solve: [utility, scaling], archetypes: [commander], role: enabler,
+   effects: [{op: conscript, amount: 2}, {op: gain_charge, amount: 1}]}
+   # Two transforms in one order + a premium point. The engine's mid-game shove.
+- {id: field_promotion, name: "Field Promotion", cost: 1, type: skill, rarity: uncommon, solve: [utility, velocity], archetypes: [commander], role: enabler,
+   effects: [{op: conscript, amount: 1, cost_override: 0}, {op: draw, amount: 1}]}
+   # The recruit serves TODAY: conscript at cost 0 (this copy). Tempo face of the verb.
+- {id: reinforcements, name: "Reinforcements", cost: 2, type: skill, rarity: uncommon, solve: [utility, scaling], archetypes: [commander], role: payoff,
+   effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: conscript, amount: 2, mode: create}]}
+   # THE kickoff §1.4 sample verbatim ("2 energy: Exhaust 1, create 2"): net +1 card — creation is legal at
+   # Uncommon and priced so the positive-sum engine needs Rare payoffs + solved velocity to matter (LAW 4 scope).
+# Priest (3)
+- {id: mercy_of_the_deep, name: "Mercy of the Deep", cost: 1, type: power, rarity: uncommon, solve: [block, scaling], archetypes: [priest], role: payoff,
+   effects: [{op: apply_power, power: feel_no_pain, amount: 3, target: self}]}
+   # Block-per-exhaust (the Feel No Pain rail, already engine-proven): every burn is also a guard. With the
+   # ward this is the stability loop closing — getting hit exhausts, exhausting blocks.
+- {id: pearl_barrage, name: "Pearl Barrage", cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling], archetypes: [priest], role: payoff,
+   effects: [{op: damage, amount_formula: {base: 5, per: 1, count: exhaust_pile}, target: enemy}]}
+   # Ashen-Strike rail: 5 + 1 per exhausted card (v0.3: base 3 -> 5 — the floor must be playable before the
+   # pile exists). Bounded by the fight's real burn (not the uncapped meter) — pile-limited by construction.
+- {id: communion_of_tides, name: "Communion of Tides", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [priest, assist], role: glue,
+   effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: draw, amount: 2}]}
+   # Burn one, see two: the lane-bridge card (priest fuel, assist velocity).
+# Assist (2)
+- {id: rearguard_action, name: "Rearguard Action", cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], archetypes: [assist], role: glue,
+   effects: [{op: discard, amount: 1}, {op: block, amount: 7}]}
+   # Cover the retreat: a real wall whose price rings the Sly bell.
+- {id: swift_currents, name: "Swift Currents", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [assist], role: enabler, exhaust: true,
+   effects: [{op: energy, amount: 2}, {op: discard, amount: 1}]}
+   # Deep Breath parity, discard-flavored: net +1 energy once, a Sly trigger, and its own Exhaust is a Charge.
+# Generic (1)
+- {id: shell_of_sanctuary, name: "Shell of Sanctuary", cost: 2, type: skill, rarity: uncommon, solve: [block], archetypes: [generic], role: glue,
+   effects: [{op: block, amount: 11}]}
+   # Fortissimo Guard parity exactly: the generic big wall, no subsidy. (lint-ok: Furina comp)
+# R51 texture pair (2)
+- {id: exposing_current, name: "Exposing Current", cost: 1, type: attack, rarity: uncommon, solve: [utility, frontload], archetypes: [priest, generic], role: enabler, exhaust: true,
+   effects: [{op: damage, amount: 8, target: enemy}, {op: apply_power, power: vulnerable, amount: 2, target: enemy}]}
+   # The strategist marks the flaw: one self-consuming read of the enemy line (its burn is a Charge), and the
+   # target stands exposed. Vulnerable rides an EXHAUST piece per R51 — one shot per copy, the priest lane's
+   # setup swing. Uncommon-gated: no repeatable cheap applier exists below this line.
+- {id: tidal_lure, name: "Tidal Lure", cost: 1, type: skill, rarity: uncommon, solve: [block, utility], archetypes: [assist, generic], role: glue,
+   sly: [{op: apply_power, power: vulnerable, amount: 1, target: random_enemy}],
+   effects: [{op: block, amount: 4}]}
+   # Drifting Lantern's cousin with teeth: 4 Block played — but DISCARDED by a card effect, it baits an enemy
+   # into the open (Vulnerable 1, random). The Sly bell as debuff: R51's second prescribed home. Assist stays
+   # the glue lane — the payoff goes to whoever swings next, not to this card. (No domination pair: the lantern
+   # is common with a bigger Sly number; this trades Sly magnitude for Sly quality.)
+
+# ---------- RARE (7 draftable + 1 kit) ----------
+- {id: ceremonial_garment, name: "Ceremonial Garment", cost: 0, type: skill, rarity: rare, solve: [scaling], archetypes: [generic], role: payoff, tags: [burst], kit_card: true,
+   requires: burst_energy_full,
+   effects: [{op: apply_power, power: ceremonial_garment, amount: 3, target: self}, {op: damage, amount: 7, target: all_enemies, applies_element: true}]}
+   # HER BURST (kit, v1.9: granted on charge, Retain, never in pool) — SHAPE B, the kickoff recommendation: enter
+   # the state for 3 turns (CEREMONIAL_GARMENT_TURNS; test-pinned to the constant); while it holds, her attack
+   # cards read Charge (+1 damage per GARMENT_CHARGE_DIVISOR=2 Charge, per play — v0.3 charge-curve pass: /4 was
+   # decoration, /2 makes a priest-median bank a Burst-tier window). Entry splash 5 -> 7 (clears Skittish 6).
+   # Cost 0: the charged meter IS the cost (Klee/Furina precedent). Meter 10 (v0.3, PROPOSED — the pass's
+   # decisive lever, grid in sheetpass report §6): a FAST-CYCLING Burst, her Salon-member analogue. Particles:
+   # skill tags (5), reactions (5), exhaust events (KOKOMI_BURST_PER_EXHAUST=2). Two bake plays fill it.
+   # FINISHER SHAPE IS RULING ASK 6: this roster ships the recommended both-with-capstone world (state as kit,
+   # nuke as rate-limited Rare below) so the early sims can inform the ruling, not preempt it.
+- {id: nereids_ascension, name: "Nereid's Ascension", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [priest, generic], role: payoff, exhaust: true,
+   effects: [{op: damage, amount: 12, target: all_enemies, bonus_formula: 1_per_2_charge}]}
+   # SHAPE A as the state's capstone: one great wave reading the meter (+1 per 2 Charge, to ALL). Every §2.2
+   # rate limit ships: Rare, Exhaust (which is itself one more Charge), cost 2. At a banked 20 Charge: 20-to-all,
+   # once. The multiplicative-read risk lives HERE and only here — watchlist cell in the report.
+- {id: sango_prayer, name: "Sango Prayer", cost: 1, type: skill, rarity: rare, solve: [sustain, utility], archetypes: [priest, generic], role: payoff, exhaust: true,
+   effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies}, {op: block, amount: 5}]}
+   # R52 REWORK (ask 1: the v0.1 heal-12 is GONE — no amendment taken, none planned; "make her rares pay off a
+   # different way"). The prayer now stills the spears: Weak 2 to ALL + a moment's calm. R51 texture verbatim —
+   # a debuff earned on an Exhaust piece (Rare, one cast per fight, and its burn is itself a Charge), NOT a
+   # spammable cheap AoE weaken. Same sustain fantasy, zero HP restored: the axis it feeds is the stability band.
+- {id: vigil_of_the_deep, name: "Vigil of the Deep", cost: 2, type: power, rarity: rare, solve: [sustain, block], archetypes: [priest, generic], role: payoff,
+   effects: [{op: apply_power, power: prevent_exhaust_ward, amount: 6, target: self, max_stacks: 6, note: "first unblocked hit each turn: prevent up to 6, Exhaust a random draw-pile card"}]}
+   # THE §2.4 prevention power (user's sample made card): her HP bar doesn't move; her deck does. Every proc is
+   # an Exhaust -> Charge: getting attacked fuels the finisher. Both structural guards ship (LAW 4 breaks the
+   # loop at Common; Rare gating + the once-per-turn latch break it here). max_stacks 6: does NOT stack — the
+   # magnitude is the knob, not the copy count. Prevention is REPORTED, not yet axis-credited (ask 4).
+- {id: grand_conscription, name: "Grand Conscription", cost: 2, type: skill, rarity: rare, solve: [utility, scaling], archetypes: [commander], role: payoff, exhaust: true,
+   effects: [{op: conscript, amount: 3}, {op: gain_charge, amount: 2}]}
+   # The full muster: three transforms in one decree, then the order itself burns. Commander's rare swing —
+   # the hand becomes an army and the army becomes fuel.
+- {id: depths_judgment, name: "Judgment of the Depths", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [priest], role: payoff,
+   effects: [{op: damage, amount_formula: {base: 10, per: 2, count: exhaust_pile}, target: enemy}]}
+   # The pile-reader's ceiling: 8 + 2 per exhausted card, single target, REPEATABLE — bounded by the fight's
+   # finite fuel rather than the uncapped meter (deliberate §2.1 anti-stall geometry). Watchlist with Nereid's.
+- {id: epiphany_of_the_deep, name: "Epiphany of the Deep", cost: 2, type: power, rarity: rare, solve: [velocity, scaling], archetypes: [priest, assist], role: payoff,
+   effects: [{op: apply_power, power: dark_embrace, amount: 1, target: self}]}
+   # Draw-per-exhaust (the Dark Embrace rail): the burned page turns itself. In HER deck every lane rings it —
+   # priced at the base game's rare rate for exactly that reason.
+- {id: prayer_to_the_moon, name: "Prayer to the Moon", cost: 1, type: skill, rarity: rare, solve: [scaling, block], archetypes: [priest, generic], role: payoff, exhaust: true,
+   effects: [{op: gain_charge, amount: 7}, {op: block, amount: 4}]}
+   # The pure offering: one card, eight Charge (7 line + 1 funnel) and a moment's calm. The meter's rare
+   # accelerant. v0.3: 4 -> 7 — the v0.2 audit found this RARE generating less meter than the benchmark
+   # COMMON Forges; a rare accelerant must out-accelerate a common by more than politeness.

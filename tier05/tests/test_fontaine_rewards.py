@@ -34,7 +34,11 @@ def test_furina_offers_concentrate_on_fontaine():
     assert share >= 0.55         # thin bench still gets its half
     assert any(c.nation == "mondstadt" for c in offers)
     # Fontaine has no designed shared 5-stars: every rare-tier offer falls
-    # through to Mondstadt rares -- BY CONSTRUCTION, not a bug (kickoff
-    # §10 registers the same logic for Electro scarcity).
+    # through to the nations that HAVE them -- BY CONSTRUCTION, not a bug
+    # (kickoff §10 registers the same logic for Electro scarcity).
+    # 2026-07-24 (Kokomi kickoff): Inazuma joined that set (Itto is its
+    # first designed 5-star), so the fall-through now spans both; the
+    # assertion pins the construction, not a single-nation snapshot.
     rares = [c for c in offers if c.star == 5]
-    assert all(c.nation == "mondstadt" for c in rares)
+    assert rares and all(c.nation in ("mondstadt", "inazuma")
+                         for c in rares)
