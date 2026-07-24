@@ -103,9 +103,34 @@ no line of play can beat**. Observed at 600 runs: 74 reached act 3, 24
 reached the final boss, 13 won (54%) — right where a coin-flip between an
 unwinnable boss and an 81% boss predicts.
 
-The proper fix is engine-side (make `ramp` count from when the enemy entered
-its current phase, not from combat start), which changes behaviour for every
-phased enemy and therefore moves the measurement world. Flagged, not shipped.
+**SHIPPED 2026-07-24** (user ruling). Two parts:
+
+- Engine: `ramp` now counts from the turn the enemy entered its **current
+  phase** (`Enemy.phase_start_turn`, stamped by `_settle_phases`). Unphased
+  enemies keep `phase_start_turn = 0`, i.e. combat start, so Byrdonis, the
+  frozen PUNISHER and every single-bar roster enemy are bit-identical.
+- Content: Multi-Claw moves from `ramp: 3` to a new `ramp_per_use: 3`. The
+  real move gains a **hit each time it is taken**, which a turn ramp cannot
+  express — under a turn ramp the value depends on how many non-attack beats
+  sit between two uses, so adding a beat silently retunes the enemy. It now
+  delivers the sheet's authored 30 → 39 → 48 exactly.
+
+Both ramp shapes are read through one helper (`Enemy.ramped_amount`) used by
+the enemy turn **and** the pilot's incoming-damage estimate; those were
+duplicated formulas, and a pilot that mispredicts incoming damage blocks
+against the wrong number.
+
+Blast radius, verified by digest: runs at `--acts 1` and `--acts 2` are
+**byte-identical** before and after; only act 3 moves.
+
+**It did not rescue act 3, and that is the finding.** Against the real decks
+of act-3 arrivals, `test_subject` goes 0.0% → **0.7%**; run winrate is flat
+inside noise (2.6% → 2.2% at 600 runs). Those decks chew a median of **47% of
+its 600 HP** before dying, in a 9-turn fight. The ramp was a real bug on top
+of a scale problem, not the scale problem — which is §1.3. For contrast the
+other act-3 boss, `aeonglass`, is 512 HP but spends 3 of its 5 beats on
+block/inject/buff: real decks take it to **100% of its HP pool** over 15
+turns and win 81%. Damage-per-beat density, not HP, is what separates them.
 
 Instruments: `tools/roster_scale_gap.py` (committed; the standing
 battery-vs-roster scale check) and `scratchpad/act3_arrivals.py` (one-shot:
