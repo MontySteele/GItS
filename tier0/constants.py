@@ -359,38 +359,7 @@ NORMAL_POOL_WEIGHTS = {           # weighted normal-encounter pool
 # FROZEN 2026-07-19: anchor completion 47.9% at 1000 runs. Normals kept
 # at 1.0 — only the checks calibrated as full-HP solo gates (punisher,
 # tank_boss) get compensated in run context.
-# DEAD as of the §4 roster swap (2026-07-21): the act pools use real StS2
-# numbers and model.build_node_encounter stopped reading this. Kept as the
-# historical record of the method and the target; ACT_DIFFICULTY_SCALE below
-# is its live successor. Do not wire this one back up.
 PROGRESSION_GAP_COMPENSATOR = {"normal": 1.0, "elite": 0.8, "boss": 0.7}
-
-# --- Act difficulty scale (calibration pass, 2026-07-24) -------------------
-# Per-ACT, per-node-tier multiplier on tier 0.5 roster enemy HP and ATTACK
-# amounts (phase bars included). The tier 0 battery is untouched, as ever.
-#
-# What it is FOR, stated plainly so nobody mistakes it for enemy design: the
-# sim runs a three-act ENEMY difficulty curve against a player whose POWER
-# curve is nearly flat. Real StS gives its act-3 player a mostly-upgraded
-# deck, a boss-relic tier and a 75-card pool; we model a little of the first,
-# none of the second, and the reference character drafts from six cards. This
-# is ONE number per act per tier standing in for that missing growth — NOT a
-# model of it, and NOT a claim about the rosters, which stay verifiable
-# against the wiki precisely because the fudge lives here instead of in the
-# yaml. Same contract PROGRESSION_GAP_COMPENSATOR had; per-act because the
-# gap it covers grows with act index, which the single-act version could not
-# express.
-#
-# 1.0 everywhere = the measured shipped world, i.e. this is currently INERT
-# and every archived number stands. The stamped default does not move without
-# a ruling (NORMAL_ATTRITION_SCALE precedent); the calibration sweep and the
-# decision table live in docs/tier05-perf-and-ironclad-act3-notes.md §1.3.
-# One entry per act in RUN_ACTS, in order (pinned by test_multiact.py).
-ACT_DIFFICULTY_SCALE = (
-    {"N": 1.0, "E": 1.0, "B": 1.0},     # act 1 — Underdocks
-    {"N": 1.0, "E": 1.0, "B": 1.0},     # act 2 — the Hive
-    {"N": 1.0, "E": 1.0, "B": 1.0},     # act 3 — Glory
-)
 
 # --- Tier 0.5 rewards (spec §3 — the thing under test) ---
 REWARD_CARD_OFFERS = 3

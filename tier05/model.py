@@ -81,15 +81,11 @@ def build_node_encounter(node_kind: str, rng: random.Random,
     drawn elites for E, the act's drawn boss for B), then `acts.spawn` rolls
     each body's HP within its band via the run rng.
 
-    Rosters use REAL StS2 numbers (§4), so the old battery-calibrated
-    PROGRESSION_GAP_COMPENSATOR does not apply and is not read. Its live
-    successor, C.ACT_DIFFICULTY_SCALE, is applied here instead: per-act,
-    per-tier, and INERT at its stamped 1.0 default, which keeps the rosters
-    themselves verifiable against the wiki. The tier0 battery stays frozen
-    and is not read at the run layer at all."""
+    NO progression-gap compensator: rosters use REAL StS2 numbers (§4),
+    so the old battery-calibrated PROGRESSION_GAP_COMPENSATOR does not apply.
+    The tier0 battery stays frozen and is no longer read at the run layer."""
     encounter = draw.encounter_for(node_kind, rng)
-    enemies = acts.spawn(encounter, rng)
-    return acts.apply_difficulty_scale(enemies, draw.act, node_kind)
+    return acts.spawn(encounter, rng)
 
 
 def rest_action(deck_ids: list[str], hp: int, max_hp: int,
