@@ -236,8 +236,9 @@ PREDICATES_CS = {
     # window as a snapshot of the same monotonic counter.
     "reaction_triggered_this_turn": "ReactionEffects.ReactionTriggeredThisTurn",
     "killed_target": "enemiesAtStart.Any(e => e.IsDead)",
-    "fanfare_at_least_5": "FurinaResources.Fanfare(Owner.Creature) >= 5",
-    "fanfare_at_least_20": "FurinaResources.Fanfare(Owner.Creature) >= 20",
+    # fanfare_at_least_N is PARAMETRIC (see predicate_cs / predicate_text):
+    # the bar is authored per card and moves at red-pen, so a literal map
+    # turned every new threshold into a codegen KeyError.
     "has_salon_members": "SalonMemberPower.Count(Owner.Creature) > 0",
     "spotlight_moved_this_turn":
         "SpotlightSystem.MovedThisTurn(Owner.Creature)",
@@ -250,12 +251,34 @@ PREDICATE_TEXT = {
     "reaction_triggered_by_this": "If it triggered an [gold]Elemental Reaction[/gold]",
     "reaction_triggered_this_turn": "If an [gold]Elemental Reaction[/gold] triggered this turn",
     "killed_target": "If it kills",
-    "fanfare_at_least_5": "If you have at least 5 [gold]Fanfare[/gold]",
-    "fanfare_at_least_20": "If you have at least 20 [gold]Fanfare[/gold]",
     "has_salon_members": "If you have a [gold]Salon Member[/gold]",
     "spotlight_moved_this_turn":
         "If you moved the [gold]Spotlight[/gold] this turn",
 }
+
+_FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
+
+
+def predicate_cs(name: str) -> str | None:
+    """C# expression for a sheet predicate, or None if unsupported.
+
+    `fanfare_at_least_N` is generated rather than tabled: the bar is a
+    balance number authored per card and moved at red-pen, so tabling it
+    made every new threshold a codegen KeyError instead of a card edit.
+    """
+    hit = _FANFARE_BAR.match(name or "")
+    if hit:
+        return f"FurinaResources.Fanfare(Owner.Creature) >= {hit.group(1)}"
+    return PREDICATES_CS.get(name)
+
+
+def predicate_text(name: str) -> str | None:
+    """The if-clause the predicate renders on the card face."""
+    hit = _FANFARE_BAR.match(name or "")
+    if hit:
+        return f"If you have at least {hit.group(1)} [gold]Fanfare[/gold]"
+    return PREDICATE_TEXT.get(name)
+
 
 CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
 
@@ -896,7 +919,7 @@ def blocked_reason(
             unknown = set(eff) - CONDITIONAL_FIELDS
             if unknown:
                 return f"conditional field(s) {sorted(unknown)} not understood"
-            if eff.get("if") not in PREDICATES_CS:
+            if predicate_cs(eff.get("if")) is None:
                 return f"conditional predicate '{eff.get('if')}' (no verified C# read)"
             then, els = eff.get("then", []), eff.get("else", [])
             if any(e.get("op") == "repeat_this" for e in then + els):
@@ -2587,10 +2610,10 @@ def build_body(
                 # replay itself lands after the list (repeat tail below).
                 times = int(then[0].get("times", 1))
                 lines.append(
-                    f"var repeatTimes = ({PREDICATES_CS[eff['if']]}) ? {times} : 0;"
+                    f"var repeatTimes = ({predicate_cs(eff['if'])}) ? {times} : 0;"
                 )
             else:
-                pred = PREDICATES_CS[eff["if"]]
+                pred = predicate_cs(eff["if"])
                 if condition_upgrade(card):
                     # condition: unconditional (tier0 hoists the then-branch
                     # on upgrade) -- the upgraded card runs it always.
@@ -3055,7 +3078,7 @@ def build_description(card: dict) -> str:
                 parts.append(f"Add {a_card} to {zone_txt}.")
 
         elif op == "conditional":
-            pred_txt = PREDICATE_TEXT[eff["if"]]
+            pred_txt = predicate_text(eff["if"])
             then = eff.get("then", [])
             if any(e.get("op") == "repeat_this" for e in then):
                 parts.append(f"{pred_txt}: play this card again.")

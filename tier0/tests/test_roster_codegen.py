@@ -28,12 +28,12 @@ FURINA_DEFERRED_TO_FD = {"the_sea_is_my_stage", "lasting_impression"}
 # is a dead campfire choice, so the gap is named and gated, never tolerated
 # silently.
 #
-# florid_cadenza's only ratified delta was {fanfare_cost: -3} -- "Spend 10 ->
-# Spend 7". With no spend line there is nothing for it to discount, and every
-# replacement (cheaper threshold? one more card? Retain?) is a BALANCE call
-# that belongs to F-B1 and red-pen, not to a mechanical grammar removal.
-# Released by: F-B1, which re-authors the card as a threshold reader.
-FURINA_UPGRADE_GAP_PENDING_FB1 = {"florid_cadenza"}
+# CLOSED by F-B1 (2026-07-24). florid_cadenza's only ratified delta had been
+# {fanfare_cost: -3}; it is now a threshold reader whose upgrade DROPS the
+# gate ({condition: unconditional}) rather than adding cards. Kept as an
+# empty set rather than deleted, so the invariant "every card has an upgrade
+# path" is asserted positively and the next gap has somewhere to be named.
+FURINA_UPGRADE_GAP_PENDING_FB1: set[str] = set()
 
 
 def by_id_of(cards: list[dict]) -> dict[str, dict]:

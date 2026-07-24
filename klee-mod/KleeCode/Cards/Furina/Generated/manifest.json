@@ -109,8 +109,6 @@
   },
   "upgrades": {
     "_comment": "docs/furina-upgrades.yaml is authoritative. A generated card listed below ships without an upgrade until its full delta is expressible; partial upgrade application is forbidden.",
-    "no_upgrade_path": {
-      "florid_cadenza": "no ratified delta in klee-upgrades.yaml"
-    }
+    "no_upgrade_path": {}
   }
 }

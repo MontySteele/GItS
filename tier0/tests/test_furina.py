@@ -167,7 +167,8 @@ def test_fanfare_caps_and_is_activity_only():
 
 
 def test_fanfare_decays_each_turn_but_never_below_the_floor():
-    """F-A1/F-A2. The meter fades from turn 2 and rests on what was built."""
+    """F-A1/F-A2, on whichever decay shape is armed. The meter fades from
+    turn 2 and rests on what was built."""
     st = furina_state()
     p = st.player
     p.hand, p.draw_pile, p.discard_pile = [], [], []
@@ -177,14 +178,32 @@ def test_fanfare_decays_each_turn_but_never_below_the_floor():
     assert p.fanfare == 20, "decay must not tax the opening turn"
 
     combat._player_turn(st, NULL_PILOT)
-    assert p.fanfare == 20 - C.FANFARE_DECAY_PER_TURN
+    assert p.fanfare < 20, "the meter must fade from turn 2"
 
     p.fanfare_floor = 12
-    for _ in range(10):
+    p.fanfare = 20
+    for _ in range(20):
         combat._player_turn(st, NULL_PILOT)
     assert p.fanfare == 12, "decay must clamp at the floor, not at zero"
     assert any(ev["event"] == "fanfare_decay" and ev["at_floor"]
                for ev in st.log)
+
+
+def test_flat_decay_still_works_when_the_fraction_is_disarmed():
+    """The flat shape is retained, not deleted: it is the fallback and the
+    thing the proportional sweep was measured against."""
+    st = furina_state()
+    p = st.player
+    p.hand, p.draw_pile, p.discard_pile = [], [], []
+    p.fanfare = 20
+    original = C.FANFARE_DECAY_FRACTION
+    try:
+        C.FANFARE_DECAY_FRACTION = 0.0
+        combat._player_turn(st, NULL_PILOT)      # turn 1 exempt
+        combat._player_turn(st, NULL_PILOT)
+        assert p.fanfare == 20 - C.FANFARE_DECAY_PER_TURN
+    finally:
+        C.FANFARE_DECAY_FRACTION = original
 
 
 def test_proportional_decay_takes_its_cut_and_still_clamps_at_the_floor():
@@ -216,9 +235,11 @@ def test_proportional_decay_takes_its_cut_and_still_clamps_at_the_floor():
         C.FANFARE_DECAY_FRACTION = original
 
 
-def test_the_flat_shape_is_what_ships_until_red_pen_says_otherwise():
-    assert C.FANFARE_DECAY_FRACTION == 0.0
-    assert C.FANFARE_DECAY_PER_TURN > 0
+def test_proportional_20_percent_is_the_ruled_shape():
+    """[USER] ruling 2026-07-24, reversing the plan's flat direction on
+    measurement: proportional beats flat at BOTH tails, because a flat
+    subtraction is one number for every meter level."""
+    assert C.FANFARE_DECAY_FRACTION == 0.20
 
 
 def test_a_floor_grant_raises_floor_cap_and_current_together():
@@ -389,16 +410,26 @@ def test_every_read_is_instrumented_at_the_moment_it_reads():
     assert ev["at_floor"] and not ev["at_cap"]
 
 
-def test_pilot_values_live_fanfare_threshold_branches():
+def test_pilot_values_the_smooth_fanfare_reads():
+    """F-B1 turned these two commons from binary gates into smooth reads,
+    so the pilot must now see a value that MOVES with the meter rather than
+    stepping once. A pilot blind to the rider would price the archetype's
+    own payoffs at their printed number and play straight past them."""
     st = furina_state()
-    entrance = loader.get_card("dramatic_entrance")
-    ovation = loader.get_card("thunderous_ovation")
-    st.player.fanfare = 4
+    entrance = loader.get_card("dramatic_entrance")   # 6 + 1 per 4 Fanfare
+    ovation = loader.get_card("thunderous_ovation")   # 7 + 1 per 4 Fanfare
+
+    st.player.fanfare = 0
     assert policy._expected_damage(st, entrance) == 6
     assert policy._raw_block(st, ovation) == 7
-    st.player.fanfare = 5
-    assert policy._expected_damage(st, entrance) == 10
-    assert policy._raw_block(st, ovation) == 11
+
+    st.player.fanfare = 4        # one step
+    assert policy._expected_damage(st, entrance) == 7
+    assert policy._raw_block(st, ovation) == 8
+
+    st.player.fanfare = 20       # five steps -- no threshold cliff anywhere
+    assert policy._expected_damage(st, entrance) == 11
+    assert policy._raw_block(st, ovation) == 12
 
 
 def test_the_common_fanfare_readers_are_live_from_turn_one():

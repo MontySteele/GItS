@@ -261,6 +261,12 @@ def _raw_block(state: CombatState, card: Card) -> float:
             continue
         amount = (effects._calc_amount(state, fx["amount_formula"], card)
                   if "amount_formula" in fx else fx["amount"])
+        # F-B1: Block carries the same scaling rider damage does, so the
+        # pilot has to read it or it prices a Fanfare-scaled blocker at its
+        # printed number and blocks with the wrong card. Same helper the
+        # engine calls, so the estimate cannot drift from what resolves.
+        if "bonus_formula" in fx:
+            amount += effects._bonus_formula(state, fx["bonus_formula"])
         times = fx.get("times", 1)
         if times == "exhausted_this_card":
             times = _estimated_exhausts(state, card)

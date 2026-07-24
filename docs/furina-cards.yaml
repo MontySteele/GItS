@@ -82,8 +82,9 @@
    effects: [{op: gain_encore, amount: 2}]}
    # 0-cost flux starter. Sparkly Treasure parity, buffer-flavored.
 - {id: dramatic_entrance, name: "Dramatic Entrance", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [fanfare], role: payoff,
-   effects: [{op: damage, amount: 6, target: enemy}, {op: conditional, if: fanfare_at_least_5, then: [{op: damage, amount: 4, target: enemy}]}]}
-   # The Common converter: Spend 5 Fanfare after dealing 10. Reopens the meter early instead of asking a Common-only deck to hoard until an Uncommon arrives.
+   effects: [{op: damage, amount: 6, target: enemy, bonus_formula: 1_per_4_fanfare}]}
+   # F-B1: the binary threshold becomes a SMOOTH read. Live from turn one at any meter level, where the gate rendered as
+   # nothing at all below its bar — and a scaling number is the one shape the legibility pipeline can show on the face.
 - {id: crowd_work, name: "Crowd Work", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [fanfare], role: glue, encore_cost: 2,
    effects: [{op: draw, amount: 2}]}
    # "Spend 2 Encore:" the A5 identity card — Encore-spend tempo (redpen ruling a: THIS is what A5 reads, not the selector).
@@ -98,8 +99,9 @@
    # repeatable common from being free permanent scaling — and the Encore rider moves the meter NOW so the card is
    # not a dead turn while the deck is still assembling. Name PROPOSED, pending the lore audit. PROPOSED.
 - {id: thunderous_ovation, name: "Thunderous Ovation", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [fanfare, generic], role: glue,
-   effects: [{op: block, amount: 7}, {op: conditional, if: fanfare_at_least_5, then: [{op: block, amount: 4}]}]}
-   # The defensive Common converter: Spend 5 Fanfare after gaining 11 Block, reopening the meter on the survival axis.
+   effects: [{op: block, amount: 7, bonus_formula: 1_per_4_fanfare}]}
+   # F-B1: the survival-axis twin of dramatic_entrance, on the same smooth rate. Block carries bonus_formula as of this
+   # pass — the rider grammar damage already had, applied in the same position so it cannot outscale its printed twin.
 - {id: tempo_change, name: "Tempo Change", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [fanfare], role: glue, encore_cost: 3,
    effects: [{op: energy, amount: 1}, {op: draw, amount: 1}]}
    # Spend 3 Encore: a beat becomes a downbeat. Encore-spend tempo, energy face.
@@ -210,13 +212,17 @@
 # Fanfare (7)
 - {id: crescendo, name: "Crescendo", cost: 1, type: attack, rarity: uncommon, solve: [scaling, frontload], archetypes: [fanfare], role: payoff,
    effects: [{op: damage, amount: 8, target: enemy, bonus_formula: 1_per_2_fanfare}]}
-   # Spend 10 Fanfare after resolving: +1 damage per 2 pre-spend Fanfare. At 30 it deals 23, then reopens the meter to 20. The Fanfare price replaces one point of ordinary Energy tax. (lint-ok: post-spend total)
+   # +1 damage per 2 Fanfare held. F-B1 has nothing to do here: the gate was double-charging a card that ALREADY scaled,
+   # and F-A4 removed it. The archetype's cleanest read, and the model the two commons above were converted toward.
 - {id: showstopper, name: "Showstopper", cost: 1, type: attack, rarity: uncommon, solve: [frontload], archetypes: [fanfare], role: payoff,
    effects: [{op: damage, amount: 5, target: enemy}, {op: conditional, if: fanfare_at_least_20, then: [{op: damage, amount: 7, target: enemy}]}]}
    # Threshold burst: 5, or 12 when the house is roaring.
 - {id: florid_cadenza, name: "Florid Cadenza", cost: 0, type: skill, rarity: uncommon, solve: [velocity], archetypes: [fanfare], role: payoff,
-   effects: [{op: draw, amount: 3}]}
-   # Spend 10 Fanfare: convert the audience into a fresh hand without consuming the Energy needed to play it. A5's ceiling card.
+   effects: [{op: draw, amount: 1}, {op: conditional, if: fanfare_at_least_12, then: [{op: draw, amount: 2}]}]}
+   # F-B1: kept as a THRESHOLD, deliberately — draw cannot scale smoothly at this cost without becoming a combo engine.
+   # A 0-cost cantrip at an empty meter, the old three-card hand at a full one. Its UPGRADE drops the gate rather than
+   # adding cards, so the upgraded card is exactly the pre-sprint one and the base version is what had to be paid for.
+   # This also closes the upgrade gap F-A4 opened (its only delta had been the spend discount). PROPOSED.
 - {id: hearts_swelling, name: "Hearts Swelling", cost: 2, type: skill, rarity: uncommon, solve: [sustain], archetypes: [fanfare, salon], role: enabler,
    effects: [{op: gain_encore, amount: 7}]}
    # The big buffer draught. Seven points of deferred HP and seven Fanfare flux.
@@ -230,9 +236,9 @@
    # Hybrid glue: the band plays through anything. PASS-2 ERRATA (DECISIONS 76/R26 law): Encore rider trimmed —
    # the old row strictly dominated Macaron Break. Now strictly tankier / strictly less flux: a real choice.
 - {id: flood_of_emotion, name: "Flood of Emotion", cost: 1, type: skill, rarity: uncommon, solve: [frontload], archetypes: [fanfare], role: payoff, tags: [skill_tag],
-   effects: [{op: damage, amount: 20, target: enemy}]}
-   # A 20-point hydro-applying torrent. The Fanfare gate retired with the spend grammar (F-A4), so this is currently un-gated
-   # at its discounted energy cost -- F-B1 owns replacing the gate with a smooth read and repricing what the toll was paying for.
+   effects: [{op: damage, amount: 14, target: enemy, bonus_formula: 1_per_3_fanfare}]}
+   # F-B1: gate -> smooth read. Printed damage comes DOWN because the discounted energy cost was priced against a Fanfare
+   # toll that no longer exists; the rider pays it back at a full meter and leaves it a real card at an empty one. PROPOSED.
 # Spotlight (7)
 - {id: leading_role, name: "Leading Role", cost: 1, type: power, rarity: uncommon, solve: [velocity], archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self, note: "first Spotlighted card each turn costs N less"}]}
@@ -332,9 +338,10 @@
    # true HP on a character with no healing was never worth that. Being a Rare Power it ALSO earns the rarity
    # grant, so it lands as a permanent baseline of 15 plus the standard rare-Power grant on top. PROPOSED.
 - {id: universal_revelry, name: "Universal Revelry", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [fanfare], role: payoff,
-   effects: [{op: damage, amount: 9, target: all_enemies, bonus_formula: 1_per_2_fanfare}]}
-   # The archetype's AoE payoff, already scaling at 1 per 2 Fanfare. Its Fanfare spend gate retired with that grammar (F-A4);
-   # F-B1 re-gates it at a threshold reachable under decay, which is where its 2-Energy price gets re-justified.
+   effects: [{op: damage, amount: 9, target: all_enemies, bonus_formula: 1_per_2_fanfare},
+             {op: conditional, if: fanfare_at_least_15, then: [{op: damage, amount: 6, target: all_enemies}]}]}
+   # F-B1: the archetype's ONE deliberate big-moment gate, and the reason thresholds were not banned outright. Keeps the
+   # smooth read so it is never dead, and adds a burst above a bar that is reachable under decay. PROPOSED.
 - {id: star_of_the_show, name: "Star of the Show", cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: spotlight_flat_damage, amount: 3, target: self, note: "Spotlighted cards' damage ops +3 printed per copy"}]}
    # Numbers-texture on the star (legal under §2.2a: numbers, never economy). Stacks with the baseline mult additively AFTER it.
@@ -347,9 +354,9 @@
    effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self}, {op: apply_power, power: spotlight_draw, amount: 1, target: self}]}
    # Both texture lines in one rare: the production revolves around her star.
 - {id: high_tide, name: "High Tide", cost: 1, type: attack, rarity: rare, solve: [frontload], archetypes: [salon, fanfare], role: payoff, tags: [skill_tag],
-   effects: [{op: damage, amount: 22, target: enemy}]}
-   # Her big single-target hit, hydro-applying through skill_tag. Its Fanfare spend gate retired with that grammar (F-A4);
-   # F-B1 owns the smooth read that replaces it and the energy question the gate was covering for.
+   effects: [{op: damage, amount: 15, target: enemy, bonus_formula: 1_per_2_fanfare}]}
+   # F-B1: gate -> the steepest read on the sheet, which is what makes it the archetype's payoff rather than a fat vanilla
+   # hit. Printed damage comes down for the same reason as flood_of_emotion: the Spend line was paying for part of it.
 - {id: rain_of_roses, name: "Rain of Roses", cost: 2, type: skill, rarity: rare, solve: [utility], archetypes: [salon, spotlight], role: payoff, tags: [skill_tag],
    effects: [{op: apply_aura, element: hydro, target: all_enemies}, {op: gain_encore, amount: 5}]}
    # Mass application + buffer. A6's rare ceiling. WATCHLIST (redpen flag 8): hydro+cryo convergence CELL member,

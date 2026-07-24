@@ -1751,3 +1751,79 @@ and the roster's Ancient tier:
   no entries for our starters (BaseLib extension point ITranscendenceCard).
   Its SetupForPlayer returns false gracefully, so the relic just never
   offers itself to the roster. Content follow-up, not a bug.
+
+---
+
+## Animation sprint 2 opens: the Funnel Contract (2026-07-24)
+
+Sprint doc: docs/animation-sprint-2-plan.md. Execution log:
+docs/animation-sprint-2-log.md. Predecessor sprint CLOSED — see the
+2026-07-24 verdict record at the foot of docs/animation-sprint-1-log.md.
+
+**THE FUNNEL CONTRACT — interface freeze between the visual layer and the
+in-flight Furina kit redesign.** Ratified safe by [USER] 2026-07-24.
+
+Furina's kit is being reworked in a parallel stream (the Fanfare sprint,
+docs/furina-fanfare-sprint-log.md) at the same time as her visual layer is
+being rebuilt. Two streams editing one character is the top risk of this
+sprint, and the mitigation is a narrow, explicit interface rather than
+coordination. The visual layer may bind to EXACTLY these three points:
+
+1. **Salon = exactly three slots.** Deploy is BY CARD and duplicates are
+   legal — three of the same member is a valid stage. The UI is therefore
+   slot-INDEX-keyed, with per-slot member identity read from state. No
+   assumption of in-order deploy; no assumption of distinct members. This
+   RETIRES sprint-1 D1's fixed member->slot portrait assignment, which
+   silently assumed both.
+2. **Encore absorbs damage before HP.** The gain/spend/absorb funnels in
+   Powers/FurinaResources.cs remain the mutation surface.
+3. **Spotlight is a designation event** — a single designation funnel.
+
+Everything else in Furina's kit is OUT OF CONTRACT and may change under the
+redesign without breaking the visual layer. The load-bearing half of this
+rule is the converse: **visuals bind to funnels, never to values.** A number
+the redesign moves must not be able to break a display.
+
+Consequences, binding for the sprint:
+
+- If the redesign stream needs to move any of the three contracted points,
+  that is a SHARED-SURFACE change and takes a cross-session note BEFORE
+  landing, per the standing rule (DECISIONS ~431 / R20 lineage). The note
+  pointer for this contract is dropped in the Furina stream's channel,
+  docs/furina-fanfare-sprint-log.md.
+- A contract breach = STOP-WORK on the affected visual track plus the
+  cross-session note. Visuals never chase an unlanded kit change.
+- Anything out-of-contract that the current UI secretly depends on gets
+  caught by Track E1's badge inventory rather than assumed. That inventory
+  exists precisely because the badge strip is where undocumented kit
+  couplings accumulate.
+
+**Related ruling — the overhead slot is a cross-character convention.**
+From the same look pass: the centered-overhead creature-space anchor is the
+COMMON Burst indicator for every character. Klee keeps it (fixed in sprint
+1's C4 first pass); Furina's Burst joins it; Furina's Encore is EVICTED from
+it and re-homes into the Salon stage as a ribbon. Gauge SKINS are unique per
+character — one scene, per-character skin parameters applied by the bridge,
+with per-character scene variants pre-authorized as the fallback if the
+script-less scene format cannot carry a skin by parameter alone.
+
+**Art provenance (A3a), resolved at intake.** The supplied Furina render is
+the Wikipedia article image, which is 227x440 at BOTH en and zh — fair-use
+reduced, with no full-resolution copy available through that chain. The
+artwork itself is the official HoYoverse character-card render, which the
+repo already holds at full resolution as art/raw/Furina_Card_2.png
+(1080x2160, same pose/expression/costume, background-composited rather than
+cut out). The cut therefore runs at 4.75x the preview's linear resolution
+with no softness compromise, and the transparent 227x440 serves as a
+registration prior for fencing her off the branded plate. The risk branch in
+the sprint plan ("accept softness or choose a different render") does NOT
+fire. Ledger row is F/high as with every prior asset.
+
+**Art sourcing (A3b), resolved at intake.** No individual full-body renders
+exist for the three Salon members — a File:-namespace hunt returns nothing
+per member, and the gameplay preview GIF is 480x270. The only asset in which
+the three read as three different creatures is art/raw/Salon_Members_Summon.png
+(420x720: top-hatted octopus / ruffed seahorse / big crab). [USER] pick
+2026-07-24: cut that into three freestanding silhouettes. This is the whole
+premise of the D redesign — the shipped 500x380 card portraits are tiny
+gameplay screenshots and are exactly what failed D4.
