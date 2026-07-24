@@ -76,36 +76,83 @@ Other structural facts:
 - Act 1 randomly picks **Overgrowth or Underdocks**. Our `act1_pool.yaml` is
   Overgrowth-based, so Overgrowth is the event list that matches it.
 
-### 1.1 The comparison that matters
+### 1.1 Per-ROOM odds are not per-PATH odds
 
-Expected composition of one act, real vs ours:
+**Correction, 2026-07-24 (user ruling).** A first pass at this section
+multiplied the 8% elite rate by 13 free floors, concluded "a real act has ~1.0
+elites versus our 2", and called ours double. **That is wrong**, and the error
+is worth naming because it is easy to repeat: the table in §1 is the chance a
+**room** rolls a type, and floors are **up to six rooms wide**. Multiplying by
+floors silently assumes a one-room-wide map, so it describes a *random walk*,
+not a player.
 
-| | real (17 floors, expected) | ours (`NNNRETN$ERB`) |
+Done properly: 13 freely-typed floors at up to 6 rooms each is roughly 50–78
+rooms, of which ~8% — call it **4–6 elite rooms per act** — exist somewhere on
+the map. The player's path touches one room per floor, subject to edges, so
+how many elites they actually *fight* is a **routing outcome, not a map
+statistic**.
+
+**Player-behaviour ground truth (user, domain authority — this is not a
+published stat):** elites are where relics come from, so a competent player
+hunts them. You take **2 as a matter of course, 3 if the deck can carry it,
+and 1 only on a bad map or by deliberately routing around them. 1–4 is the
+realistic range; the median is ~2.5.**
+
+So our elite *count* is approximately right — 2 forced, against a realistic
+median of 2.5. What we are missing is the **agency**: the real player takes
+the third elite because the deck is strong, or ducks to one because they are
+at 20 HP. We take exactly two at exactly the same two floors, every run,
+regardless.
+
+### 1.2 The comparison that matters, corrected
+
+| | real | ours (`NNNRETN$ERB`) |
 |---|---|---|
-| normal fights | **~7.9** | 4 |
-| **elites** | **~1.0** | **2** |
-| rest sites | ~2.6 | 2 |
-| unknowns (event/shop/treasure/monster) | **~2.9** | **0** |
-| merchants | ~0.7 | 1 |
+| walkable floors | **16** (+ a boss chest) | 11 |
+| normal fights | **~7.4** | **4** |
+| elites **on the map** | ~4–5 | — |
+| elites **fought** | **1–4, median ~2.5** (routing) | **2, forced** |
+| rest sites | ~2.4 | 2 |
+| unknowns (event/shop/treasure/monster) | **~2.6** | **0** |
+| merchants | ~0.6 | 1 |
 | treasure | 1 | 1 |
 | boss | 1 | 1 |
-| **total floors** | **17** | **11** |
 | **player choice** | **yes** | **none** |
 
-Read against §1.3.2's HP ledger, where an elite costs the anchor 34 HP and a
-normal costs 6:
+Read against §1.3.2's HP ledger (an elite costs the anchor 34 HP, a normal 6),
+the gap is **not** elite density — it is everything around the elites:
 
-- We run **twice the elites** of an average real path, and the elite is the
-  single most expensive node in the game for us.
-- We run **half the normal fights**, which are nearly free (6 HP) and are
-  where card rewards and gold come from. So our runs are not merely harsher —
-  they are harsher *and* poorer.
-- We run **zero unknowns**, i.e. none of the healing, gold, relic and
-  card-quality swings that real runs use to recover.
-- And the player never chooses, so none of the above can be steered.
+- We run **half the normal fights**. Those are nearly free at 6 HP and they
+  are where card rewards and gold come from. Our runs are therefore not
+  merely harsher, they are *poorer*: fewer picks, less gold, a thinner deck
+  arriving at the same bosses.
+- We run **zero unknowns** — none of the healing, gold, relic and
+  card-quality swings a real run recovers with.
+- Six fewer floors overall, so what economy we do get is compressed.
+- And **nothing is steerable**. An elite at 38/80 HP is a decision in the real
+  game and a sentence in ours.
 
-This is a straightforward, quantified explanation for §1.3.2 that requires
-weakening no enemy.
+Elite *frequency* is close to right and should be left alone. The fix is the
+missing 6 floors of economy and the agency to spend them.
+
+### 1.3 The acceptance check this hands us
+
+The player-behaviour numbers above are a **falsifiable routing target that
+touches no enemy statline**:
+
+> median elites fought per act ≈ **2.5**, full range **1–4**, and the count
+> must *respond to run state* (a healthy deck takes more, a hurt run takes
+> fewer).
+
+That last clause is the real test. A route policy that always takes 2 hits the
+median and is still wrong. Report the distribution and its correlation with
+arrival HP, not the mean.
+
+Note the trap, given the history in this branch: moving from 2 forced elites
+to a routed 1–4 will move the winrate, and it will *look* like the difficulty
+nerf that was already vetoed. It is not one — but the way to know that is to
+check elites-fought against the 2.5 median and the response-to-state clause,
+**not** to check whether the winrate improved.
 
 ---
 
@@ -215,7 +262,52 @@ Philosophers).
 
 ---
 
-## 4. PROPOSED design (not built — see §6)
+## 3.5 BUILT so far (§11 milestone, 2026-07-24)
+
+`tier05/maps.py` + `tier05/route.py`, with `tier05/tests/test_maps_and_routing.py`.
+**Not yet wired into `model.run_one`** — the run layer still walks the fixed
+template. Events are not built.
+
+**One finding worth keeping.** Two generator/policy designs were tried and
+both failed the §1.3 target before the third worked:
+
+| attempt | elites fought (healthy) | P(0 elites) |
+|---|---|---|
+| per-floor width rolls + centred edge spans, greedy next-room policy | mean 2.02 | 8.8% |
+| **path-carved** map, greedy next-room policy | mean 1.38 | **23.2%** |
+| path-carved map, **whole-map planning** policy | **mean 2.31** | **3.0%** |
+
+The first design was lane-locked, and widening floors did not help — the tell
+that *connectivity*, not room count, was binding. Path-carving fixed the map
+and made things worse, which localised the real bug: **a next-room-only policy
+cannot route toward an elite three columns away.** "Path-hunting" is exactly
+the act of reading the whole map and committing to a lane several floors
+early, so the policy plans the full path by backward induction over the DAG
+and re-plans every floor as state changes. Both route policies got the
+planner; what differs between them is what they *value*, which is what makes
+the A/B about preferences rather than eyesight.
+
+Measured path composition (400 maps, healthy run):
+
+| | target | `hunter` | `cautious` |
+|---|---|---|---|
+| normals | ~7.4 | 5.8 | 6.6 |
+| elites | median ~2.5 | **2.3** | 0.4 |
+| rests | ~2.4 | 1.6 (→ **2.4** when hurt) | 1.4 |
+| unknowns | ~2.6 | 3.3 | 4.9 |
+| shops | ~0.6 | 1.0 | 0.8 |
+
+`hunter` lands on the elite target and **responds to state** — the run that
+gets hurt drops to 1.5 elites and picks up a whole extra rest, which is the
+clause that makes the target meaningful. `cautious` deliberately brackets
+*below* the realistic floor of 1: it is not a model of a cautious player, it
+is the other end of the confounder check.
+
+Honest gaps: `hunter` runs ~1.5 normals light against expectation (it spends
+floors on elites and unknowns instead), and neither policy has `route_regret`
+yet.
+
+## 4. Design (A = RULED; §3.5 has what is built)
 
 ### 4.1 Two fidelity levels, pick one
 
@@ -230,11 +322,13 @@ linear spine, insert 2–3 forks per act ("campfire or elite"), fire an event
 after each. Much smaller change, keeps every existing metric's shape, but the
 composition stays authored — which is the thing §1.3.2 says is wrong.
 
-**Recommendation: (A).** The whole finding is that our *authored* composition
-is off (2 elites where the real game averages 1, no unknowns). (B) fixes the
-agency half and leaves the composition half authored, so we would be tuning
-the fork weights by hand — the same trap as the difficulty dial. (A) costs
-more up front and then stops being a source of authored numbers.
+**RULED: (A)** (user, 2026-07-24). The finding is that our *authored*
+composition is off — half the normals, no unknowns, six missing floors — and
+that nothing is steerable. (B) fixes the agency half and leaves composition
+authored, so we would be hand-tuning fork weights: the same trap as the
+difficulty dial. Under (A) the composition is generated and the elite count
+becomes an outcome of routing, which is exactly what §1.3 gives us a target
+for.
 
 ### 4.2 The route policy is a new confounder — treat it like the drafter
 
@@ -271,12 +365,15 @@ discipline as the v4→v5 boundary.
 2. **Event pool composition.** Do we ship only the 7 fully-codeable events, or
    add `transform` + `curse` first and ship ~20? The second is better content
    but it is two new ops plus a curse-card class.
-3. **Elite frequency.** At A0 the real number is 8%/room ⇒ ~1 per act. Ours is
-   2, hard-coded. Under (A) this stops being a decision and becomes an
-   outcome — worth saying out loud, because it will look like a difficulty
-   nerf in the numbers when it is actually a fidelity fix. Guard against
-   self-deception here: check elites-faced-per-run against ~1.0, not against
-   the winrate.
-4. **Gold and shop stock** are both below the real numbers (§1). Fixing them
+3. **Rooms per floor.** The wiki says only "up to six" and publishes no
+   distribution. It matters: it sets how many elites exist to route toward,
+   and therefore whether the §1.3 target (median 2.5, range 1–4) is even
+   reachable. Pick a width distribution, stamp it OPEN, and tune it against
+   that target — that is calibrating the MAP against player behaviour, not
+   calibrating enemies against a winrate.
+4. **Elite frequency is NOT an open number.** 8%/room stands as generated; the
+   count fought is a routing outcome with a target of median ~2.5 (§1.3). Do
+   not "fix" it by changing the 8%.
+5. **Gold and shop stock** are both below the real numbers (§1). Fixing them
    is in scope for a map pass or explicitly out; either is fine, deciding by
    accident is not.
