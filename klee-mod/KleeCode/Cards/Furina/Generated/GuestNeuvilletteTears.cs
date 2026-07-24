@@ -59,13 +59,15 @@ public sealed class GuestNeuvilletteTears : CustomCardModel, IElementalCard, ICo
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Neuvillette — O Tears, I Shall Repay"),
-        ("description", "Deal {Damage:diff()} damage."),
+        ("description", "Deal {CalculatedDamage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move)
+            new CalculationBaseVar(5m),
+            new ExtraDamageVar(1m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,7 +80,7 @@ public sealed class GuestNeuvilletteTears : CustomCardModel, IElementalCard, ICo
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")

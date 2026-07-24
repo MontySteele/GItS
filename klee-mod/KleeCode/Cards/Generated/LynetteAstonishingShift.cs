@@ -52,13 +52,15 @@ public sealed class LynetteAstonishingShift : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lynette — Magic Trick: Astonishing Shift"),
-        ("description", "[gold]Swirl[/gold] an enemy's aura. Deal {Damage:diff()} damage to ALL enemies."),
+        ("description", "[gold]Swirl[/gold] an enemy's aura. Deal {CalculatedDamage:diff()} damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(4m, ValueProp.Move)
+            new CalculationBaseVar(4m),
+            new ExtraDamageVar(1m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -73,7 +75,7 @@ public sealed class LynetteAstonishingShift : CustomCardModel, ICompanionCard
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Anemo, Owner.Creature);
-        await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
@@ -83,6 +85,6 @@ public sealed class LynetteAstonishingShift : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

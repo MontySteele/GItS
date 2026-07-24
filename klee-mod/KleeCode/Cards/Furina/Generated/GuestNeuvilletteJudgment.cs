@@ -59,14 +59,16 @@ public sealed class GuestNeuvilletteJudgment : CustomCardModel, IElementalCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Neuvillette — Equitable Judgment"),
-        ("description", "Lose {HpLoss} HP. Deal {Damage:diff()} damage to ALL enemies."),
+        ("description", "Lose {HpLoss} HP. Deal {CalculatedDamage:diff()} damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new HpLossVar(3m),
-            new DamageVar(7m, ValueProp.Move)
+            new CalculationBaseVar(7m),
+            new ExtraDamageVar(1m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -79,7 +81,7 @@ public sealed class GuestNeuvilletteJudgment : CustomCardModel, IElementalCard, 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.Damage(choiceContext, Owner.Creature, DynamicVars.HpLoss.BaseValue, ValueProp.Unblockable | ValueProp.Unpowered, this);
-        await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
