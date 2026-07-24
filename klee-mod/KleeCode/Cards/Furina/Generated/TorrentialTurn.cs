@@ -41,13 +41,15 @@ public sealed class TorrentialTurn : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Torrential Turn"),
-        ("description", "Deal {Damage:diff()} damage. +4 damage if the enemy has an elemental aura."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. +4 damage if the enemy has an elemental aura."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(10m, ValueProp.Move)
+            new CalculationBaseVar(10m),
+            new ExtraDamageVar(4m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => target != null && AuraCmd.Find(target) != null ? 1 : 0)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,7 +62,7 @@ public sealed class TorrentialTurn : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue + (AuraCmd.Find(cardPlay.Target!) != null ? 4 : 0)))
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
@@ -69,6 +71,6 @@ public sealed class TorrentialTurn : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

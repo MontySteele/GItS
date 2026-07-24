@@ -238,12 +238,36 @@ Crescendo's old inline form).
   `GetBaseVar().BaseValue`) and should highlight. Crescendo greens on the identical
   token, so the asymmetry is unexplained; next sighting, confirm the colour before
   chasing it. Value correctness is not in question either way.
+- **L-B pass 2 — `bonus_vs_aura` riders: DONE (single-target only).**
+  - `torrential_turn` **converted**: `CalculationBaseVar(10)` + `ExtraDamageVar(4)`
+    + multiplier `static (_, target) => target != null && AuraCmd.Find(target) != null ? 1 : 0`.
+    This is the shape `CalculatedVar` was actually built for — `Calculate(target)`
+    gets the *hovered* creature during preview and the real one at resolution, so
+    the face greens exactly when you hover an aura'd enemy. No Furina gate was
+    needed after all: Klee's only `bonus_vs_aura` card (`flame_dance`) is AoE, so
+    the single-target predicate simply never matches it.
+  - `crashing_waves` + Klee's `flame_dance` **deliberately NOT converted**, and not
+    for cosmetic reasons: `AttackCommand` resolves a `CalculatedDamageVar` **once**
+    with `singleTarget == null`, while these emit a per-target `foreach` that
+    re-tests `AuraCmd.Find` per enemy. Converting would collapse a per-enemy
+    decision into one flat board-wide value — a real gameplay change. Pinned by
+    `test_aoe_aura_riders_stay_per_target`.
+  - Refactor: the four emission sites (vars / OnPlay / description token / upgrade
+    target) now key off one `calc_rider` predicate, so they cannot disagree about
+    which shape a card is. Regen proved it neutral — the three fanfare cards came
+    out **byte-identical**; only `TorrentialTurn.cs` changed.
+- **Zero-gameplay-change argument, now proven rather than assumed:** the conversion
+  drops the `SpotlightSystem.PrintedDamage(this, …)` wrapper the generator puts on
+  every Furina card. That wrapper is *identity* for non-companion cards:
+  `PrintedDamage`'s bonus path requires `Mode == GuestCast`, and under GuestCast
+  `IsSpotlighted` is true only for `ICompanionCard`; under CenterStage
+  `OutwardMultiplier` returns a hard `1m`. Furina's sheet has **zero** `star`
+  (companion) rows — Guest Stars are generated separately — so no converted card
+  can ever have been scaled by it. This retroactively covers `a1bca0d` too.
 - **Follow-ups (queued, not this slice):**
-  - `bonus_vs_aura` riders — `torrential_turn` (single-target, clean but shares
-    Klee codegen → needs a Furina gate) and `crashing_waves` (**AoE / per-target**,
-    genuinely harder to preview). Deferred within the safe half.
   - **L-A4 entangled half** — Spotlight/Salon `1.5×` GuestCast + flat + Block hook
-    migration (companion cards). The bigger, separately-verified step.
+    migration (companion cards). The bigger, separately-verified step, and the one
+    where `PrintedDamage` is genuinely load-bearing rather than identity.
 - **L-C:** text re-homing — unstarted (ordering).
 
 _Note: `tools/lint_strict_domination.py` shows modified in the tree — that is the

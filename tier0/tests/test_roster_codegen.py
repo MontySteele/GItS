@@ -114,6 +114,52 @@ def test_furina_runtime_clusters_emit_concrete_calls():
     assert "AuraCmd.Find(auraTarget)" in aura_payoff
 
 
+def test_single_target_aura_rider_renders_through_a_calculated_var():
+    # Legibility sprint pass 2 (2026-07-24): CalculatedVar.Calculate(target)
+    # receives the hovered creature during preview and the real one at
+    # resolution, so a single-target bonus_vs_aura greens exactly when you
+    # hover an aura'd enemy -- and the hit agrees, because AttackCommand
+    # resolves the same var. The multiplier must be static (CalculatedVar
+    # rejects instance targets) and must null-guard: preview calls
+    # Calculate(null) whenever nothing is hovered.
+    by_id = {card["id"]: card for card in _furina_cards()}
+    torrential = gen.emit(by_id["torrential_turn"], gen.FURINA_PROFILE)
+
+    assert "new CalculationBaseVar(10m)" in torrential
+    assert "new ExtraDamageVar(4m)" in torrential
+    assert (
+        "static (_, target) => "
+        "target != null && AuraCmd.Find(target) != null ? 1 : 0"
+        in torrential
+    )
+    assert "DamageCmd.Attack(DynamicVars.CalculatedDamage)" in torrential
+    assert "{CalculatedDamage:diff()}" in torrential
+    # The base term moved out of Damage, so the upgrade must follow it.
+    assert "DynamicVars.CalculationBase.UpgradeValueBy(3m);" in torrential
+    assert "DynamicVars.Damage" not in torrential
+
+
+def test_aoe_aura_riders_stay_per_target():
+    # NOT a display nicety -- a correctness guard. AttackCommand resolves a
+    # CalculatedDamageVar ONCE with singleTarget == null, so converting an AoE
+    # aura rider would collapse a per-enemy "does this one have an aura?"
+    # decision into a single flat value for the whole board. Both of these
+    # must keep their per-target foreach, Furina's and Klee's alike.
+    furina_by_id = {card["id"]: card for card in _furina_cards()}
+    klee_by_id = {
+        card["id"]: card
+        for card in yaml.safe_load(gen.SHEET.read_text(encoding="utf-8"))
+    }
+
+    for source in (
+        gen.emit(furina_by_id["crashing_waves"], gen.FURINA_PROFILE),
+        gen.emit(klee_by_id["flame_dance"], gen.KLEE_PROFILE),
+    ):
+        assert "foreach (var auraTarget" in source
+        assert "AuraCmd.Find(auraTarget)" in source
+        assert "CalculatedDamageVar" not in source
+
+
 def test_furina_skill_grade_cadence_and_character_identity():
     by_id = {card["id"]: card for card in _furina_cards()}
 

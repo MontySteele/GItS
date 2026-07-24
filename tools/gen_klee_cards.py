@@ -983,19 +983,70 @@ def fanfare_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
         deferred entangled modifier, so those stay on the PrintedDamage path.
     The Spotlight PrintedDamage wrap this bypasses is identity for Furina's own
     cards (Center Stage does not scale her own numbers), so no resolved number
-    changes. bonus_vs_aura riders are a separate, later pass (one is AoE /
-    per-target; one shares Klee codegen)."""
+    changes."""
     if eff.get("op") != "damage" or eff.get("target") == "self":
         return None
     m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", eff.get("bonus_formula", ""))
     if not m:
         return None
-    salon_deploy_present = any(
-        e.get("op") == "apply_power" and e.get("power") == "salon_member"
-        for e in card.get("effects", []))
-    if salon_deploy_present:
+    if salon_deploy_card(card):
         return None
     return int(eff["amount"]), int(m.group(1)), int(m.group(2))
+
+
+def salon_deploy_card(card: dict) -> bool:
+    """The salon x3 replacement multiplier is the deferred entangled modifier,
+    so salon-deploy cards stay on the PrintedDamage path."""
+    return any(
+        e.get("op") == "apply_power" and e.get("power") == "salon_member"
+        for e in card.get("effects", []))
+
+
+def aura_calc_rider(card: dict, eff: dict) -> tuple[int, int] | None:
+    """Furina Legibility sprint, pass 2: a SINGLE-TARGET `bonus_vs_aura` rider
+    rendered through CalculatedDamageVar. Returns (base, bonus) or None.
+
+    This is the shape CalculatedVar was built for: `Calculate(target)` receives
+    the hovered creature during preview and the real one at resolution, so the
+    face greens exactly when you hover an aura'd enemy and the hit agrees.
+
+    AoE (`target: all_enemies`) is deliberately EXCLUDED, and not merely as a
+    display nicety: those cards emit a per-target `foreach` that re-tests
+    `AuraCmd.Find` for each enemy, whereas AttackCommand resolves a
+    CalculatedDamageVar once with `singleTarget == null`. Converting them would
+    collapse a per-enemy decision into one flat value -- a real gameplay change
+    (Furina's crashing_waves, Klee's flame_dance). They stay as they are."""
+    if eff.get("op") != "damage" or eff.get("target") != "enemy":
+        return None
+    if "bonus_vs_aura" not in eff:
+        return None
+    if salon_deploy_card(card):
+        return None
+    return int(eff["amount"]), int(eff["bonus_vs_aura"])
+
+
+def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
+    """Unified view of every damage rider that renders through a
+    CalculatedDamageVar: (base, extra, multiplier-lambda source). The four
+    emission sites -- vars, OnPlay, description token, upgrade target -- all key
+    off this one predicate so they cannot disagree about which shape a card is.
+    The multiplier func must be static (CalculatedVar rejects instance targets).
+    """
+    fanfare = fanfare_calc_rider(card, eff)
+    if fanfare is not None:
+        base, per_n, div = fanfare
+        return base, per_n, (
+            "static (card, _) => "
+            f"FurinaResources.Fanfare(card.Owner.Creature) / {div}")
+    aura = aura_calc_rider(card, eff)
+    if aura is not None:
+        base, bonus = aura
+        # Guard the null: preview calls Calculate(null) whenever nothing is
+        # hovered, and AuraCmd.Find would throw on it.
+        return base, bonus, (
+            "static (_, target) => "
+            "target != null && AuraCmd.Find(target) != null ? 1 : 0")
+    return None
 
 
 def build_vars(card: dict) -> list[str]:
@@ -1010,17 +1061,16 @@ def build_vars(card: dict) -> list[str]:
         if op == "damage" and eff["target"] == "self":
             out.append(f'new HpLossVar({eff["amount"]}m)')
         elif op == "damage":
-            rider = fanfare_calc_rider(card, eff)
+            rider = calc_rider(card, eff)
             if rider is not None:
-                base, per_n, div = rider
-                # PerfectedStrike idiom: base + per_n * (Fanfare / div), so the
+                base, extra, mult = rider
+                # PerfectedStrike idiom: base + extra * multiplier, so the
                 # face/preview (:diff green) and the hit resolve identically.
                 out.append(f'new CalculationBaseVar({base}m)')
-                out.append(f'new ExtraDamageVar({per_n}m)')
+                out.append(f'new ExtraDamageVar({extra}m)')
                 out.append(
-                    'new CalculatedDamageVar(ValueProp.Move).WithMultiplier('
-                    'static (card, _) => '
-                    f'FurinaResources.Fanfare(card.Owner.Creature) / {div})')
+                    'new CalculatedDamageVar(ValueProp.Move)'
+                    f'.WithMultiplier({mult})')
             else:
                 out.append(f'new DamageVar({eff["amount"]}m, ValueProp.Move)')
                 if "bonus_formula" in eff and bonus_per_upgrade(card):
@@ -1699,7 +1749,7 @@ def build_body(
                              f"(int)DynamicVars.{bomb_var(card)}.BaseValue")
 
         elif op == "damage":
-            if fanfare_calc_rider(card, eff) is not None:
+            if calc_rider(card, eff) is not None:
                 # Face/preview and hit both route through the one var.
                 _emit_damage(card, eff, lines, ctx,
                              "DynamicVars.CalculatedDamage")
@@ -2474,7 +2524,7 @@ def build_description(card: dict) -> str:
                     times, f" {times} times"
                 )
             tok = ("CalculatedDamage"
-                   if fanfare_calc_rider(card, eff) is not None else "Damage")
+                   if calc_rider(card, eff) is not None else "Damage")
             if target == "enemy":
                 parts.append(f"Deal {{{tok}:diff()}} damage{suffix}.")
             elif target == "all_enemies":
@@ -2828,10 +2878,10 @@ def build_upgrade(card: dict) -> list[str]:
             continue
         done.add(key)
         if key == "damage":
-            # Converted fanfare riders have no "Damage" var -- their base lives
-            # in CalculationBase (the CalculatedDamageVar's base term).
+            # Converted riders have no "Damage" var -- their base lives in
+            # CalculationBase (the CalculatedDamageVar's base term).
             var = ("DynamicVars.CalculationBase"
-                   if fanfare_calc_rider(card, eff) is not None
+                   if calc_rider(card, eff) is not None
                    else "DynamicVars.Damage")
         elif key == "bomb_damage":
             var = f"DynamicVars.{bomb_var(card)}"
