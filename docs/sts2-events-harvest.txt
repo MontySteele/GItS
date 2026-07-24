@@ -1,0 +1,199 @@
+# StS2 event harvest -- ALL 46 events, options only, 2026-07-24.
+#
+# Machine-extracted from slaythespire.wiki.gg wikitext via the MediaWiki API
+# (action=query&prop=revisions), then template-stripped. This is the raw
+# companion to docs/sts2-map-and-events-research.md, kept verbatim so the
+# curated subset in that doc can always be checked against the source without
+# a second harvest. Template stripping is lossy in places -- where an option
+# reads oddly (a bare "Frame|X" mid-line, a dangling category name), the wiki
+# page is the authority, not this file.
+#
+# [all] = every act.  [act1] here is Overgrowth + all-acts, which is the set
+# matching our Overgrowth-based act1_pool.yaml. Underdocks events were not
+# harvested; they belong to the Act 1 alternate we do not model.
+
+
+### [all] Self-Help Book
+    [Read the Back] Choose an to KW|Enchant|Enchant|2 with KW|Sharp|Sharp|2 2.
+    [Read a Random Passage] Choose a to KW|Enchant|Enchant|2 with KW|Nimble|Nimble|2 2.
+    [Read the Entire Book] Choose a to KW|Enchant|Enchant|2 with KW|Swift|Swift|2 2.
+    [Move On] Nothing happens. * Options are only available if you have a valid card to apply the enchantment to. Move On is only available if you have no valid cards.
+
+### [all] Slippery Bridge
+    [Overcome] [Specific card] is removed from your deck.
+    [Hold On] Lose 3 HP. The card in the above option is randomized.
+
+### [all] The Future of Potions?
+    [Insert Common Potion] Lose a specified Common Potions. Obtain an KW|Upgrade|Upgraded|2 [/] card reward.
+    [Insert Uncommon Potion] Lose a specified Uncommon potion. Obtain an Upgraded [Attack/Skill/] card reward.
+    [Insert Rare Potion] Lose a specified Rare potion. Obtain an Upgraded [Attack/Skill/Power] card reward.
+    [Insert Event Potion] Lose a specified Event potion. Obtain an Upgraded Rare [Attack/Skill/Power] card reward.
+    [Insert Token Potion] Lose a specified Token potion. Obtain an Upgraded Common [Attack/Skill] card reward.
+
+### [all] This or That?
+    [This] Lose 6 HP. Gain 57 Gold.
+    [That] Add Clumsy to your Deck. Obtain a random Relic.
+
+### [act1] Aroma of Chaos  (Overgrowth)
+    [Let Go] Transform a card in your Deck.
+    [Maintain Control] Upgrade a card in your Deck.
+
+### [act1] Brain Leech
+    [Share Knowledge] Choose 1 of 5 random cards to add to your deck.
+    [Rip the Leech Off] Lose 5 HP. Gain a card reward.
+
+### [act1] Byrdonis Nest  (Overgrowth)
+    [Eat the Egg] Gain 7 Max HP.
+    [Take the Egg] Add Byrdonis Egg to deck.
+
+### [act1] Dense Vegetation  (Overgrowth)
+    [Trudge On] 
+    [Rest] Heal HP (rest site amount). Fight 4 Wrigglers.
+
+### [act1] Jungle Maze Adventure  (Overgrowth)
+    [Solo Quest] Gain 135-165 Gold. Lose 18 HP.
+    [Join Forces] Gain 35-65 Gold.
+
+### [act1] Luminous Choir  (Overgrowth)
+    [Reach into the Flesh] Remove 2 cards from Deck. Add Spore Mind (curse) to Deck.
+    [Offer Tribute] Pay 99-149 Gold. Obtain a random Relics.
+
+### [act1] Morphic Grove  (Overgrowth)
+    [Group] Lose ALL of your Gold. Transform 2 cards.
+    [Loner] Gain 5 Max HP.
+
+### [act1] Room Full of Cheese  (Overgrowth)
+    [Gorge] Choose 2 of 8 random cards to add to your Deck. * The 8 cards will not contain any duplicates. Frame|Search Lose 14 HP. Obtain The Chosen Cheese (relic). * The Chosen Cheese: At the end of combat, gain 1 Max HP.
+
+### [act1] Sapphire Seed  (Overgrowth)
+    [Consume] Heal 9 HP. Upgrade a card in your Deck.
+    [Plant and Nourish] Enchant a card with Sown.
+
+### [act1] Tablet of Truth  (Overgrowth)
+    [Smash] Heal 20 HP.
+    [Decipher] Lose 3 Max HP. Upgrade a random card. * If Decipher is chosen, additional stages follow with escalating costs: ** Stage 2: Lose 6 Max HP. Upgrade a random card. ** Stage 3: Lose 12 Max HP. Upgrade a random card. ** Stage 4: Lose 24 Max HP. Upgrade a random card. ** Stage 5: Lose [all but 1] Max HP. Upgrade ALL cards in your deck. * Frame|Give Up can be chosen at any stage to leave.
+
+### [act1] Tea Master  (Overgrowth)
+    [Bone Tea] Pay 50 Gold. At the start of the next combat, Upgrade your starting hand.
+    [Ember Tea] Pay 150 Gold. At the start of the next 5 combats, gain 2 Strength.
+    [Tea of Discourtesy] At the start of the next combat, shuffle 2 Dazed into your Draw Pile.
+
+### [act1] The Legends Were True
+    [Nab the Map] Receive the Spoils Map. Frame|Slowly Find an Exit Lose 8 HP. Procure 1 random Potion.
+
+### [act1] Unrest Site  (Overgrowth)
+    [Rest Anyways] Heal to full HP. Receive Poor Sleep (curse).
+    [Kill the Trees] Lose 8 Max HP. Obtain a random Relics.
+
+### [act1] Wellspring  (Overgrowth)
+    [Bottle] Procure 1 random Potions.
+    [Bathe] Remove 1 card from Deck. Add 1 Guilty (curse) to Deck.
+
+### [act1] Whispering Hollow  (Overgrowth)
+    [Exchange Gold] Lose 50 Gold. Procure 2 random Potions.
+    [Hug the Tree] Lose 9 HP. Choose a card to Transform.
+
+### [act1] Wood Carvings  (Overgrowth)
+    [Bird] Choose 1 starter card to Transform into Peck.
+    [Snake] Enchant 1 card with Slither. (Locked if no cards can be enchanted with Slither)
+    [Torus] Choose 1 starter card to Transform into Toric Toughness.
+
+### [act2] Amalgamator  (Hive)
+    [Combine Strikes] Remove 2 C|Strike (Ironclad)|Strikes|2. Add Ultimate Strike to your Deck.
+    [Combine Defends] Remove 2 C|Defend (Ironclad)|Defends|2. Add Ultimate Defend to your Deck.
+
+### [act2] Bugslayer  (Hive)
+    [Learn Extermination Technique] Add Exterminate to your Deck.
+    [Learn Squash Technique] Add Squash to your Deck.
+
+### [act2] Colorful Philosophers  (Hive)
+    [Red] Obtain 3 Ironclad cards. * Frame|Green Obtain 3 Silent cards. * Frame|Blue Obtain 3 Defect cards. * Frame|Pink Obtain 3 Necrobinder cards. * Frame|Orange Obtain 3 Regent cards.
+
+### [act2] Colossal Flower  (Hive)
+    [Extract Nectar] Gain 35 Gold.
+    [Reach Deeper] Lose 5 HP. Advance to the next level. * Level 2: Frame|Extract Nectar Gain 75 Gold. / Frame|Reach Deeper Lose 6 HP. * Level 3: Frame|Extract Nectar Gain 135 Gold. / Frame|Enter the Center Lose 7 HP. Obtain Pollinous Core.
+
+### [act2] Crystal Sphere  (Hive)
+    [Uncover Future] Pay 51-99 Gold. Divine 3 times.
+    [Payment Plan] Gain a Debt. Divine 6 times.
+
+### [act2] Doll Room  (Hive)
+    [Pick at Random] Obtain a random Doll Relic
+    [Take Some Time] Lose 5 HP. Choose 1 of 2 Doll Relics
+    [Examine Each and Make the Best Choice] Lose 15 HP. Choose 1 of 3 Doll Relics
+
+### [act2] Field of Man-Sized Holes  (Hive)
+    [Enter Your Hole] Enchant a card with Perfect Fit.
+    [Resist] Remove 2 cards from your Deck. Add Normality (curse) to your Deck.
+
+### [act2] Infested Automaton  (Hive)
+    [Study] Obtain a random QueryCards||Power||2.
+    [Touch the Core] Obtain a random 0 cost card.
+
+### [act2] Potion Courier  (Hive)
+    [Grab Potions] Procure 3 P|Foul Potion|Foul Potions|2. Frame|Ransack Procure 1 random .
+
+### [act2] Ranwid the Elder  (Hive)
+    [Give <specific> Potion] Obtain a random Relics. Frame|Give 100 Gold Obtain a random Relics. Frame|Give Obtain 2 random Relics.
+
+### [act2] Relic Trader  (Hive)
+    [Take the Top One] Trade for . Frame|Take the Middle One Trade for . Frame|Take the Bottom One Trade for .
+
+### [act2] Spirit Grafter  (Hive)
+    [Let It In] Heal 25 HP. Add Metamorphosis to Deck.
+    [Rejection] Lose 9 HP. Remove 1 card from your Deck.
+
+### [act2] Stone of All Time  (Hive)
+    [Drink and Lift] Lose a random Potions. Gain 10 max HP. Frame|Push Lose 6 HP. Enchant an attack with Vigorous 8.
+
+### [act2] Symbiote  (Hive)
+    [Approach] Enchant an Attack with Corrupted.
+    [Kill with Fire] Chose a card to Transform.
+
+### [act2] The Lantern Key  (Hive)
+    [Return the Key] Gain 100 Gold.
+    [Keep the Key] Enter combat against a Mysterious Knight for the Lantern Key card.
+
+### [act2] The Lost Wisp  (Hive)
+    [Capture the Wisp] Add Decay (curse) to Deck. Obtain the Lost Wisp (relic).
+    [Search the Nearby Area] Gain 45-75 Gold.
+
+### [act2] Welcome to Wongo's  (Hive)
+    [Wongo's Bargain Bin] Pay 100 Gold. Obtain 1 random Common Relics. * Player also receives 32 Wongo Points.
+    [Wongo's Featured Item] Pay 200 Gold. Obtain [Rare Relic]. * This relic is randomly selected from the rare relics in the standard relic pool, and will be displayed by name in the event option. * Player also receives 8 Wongo Points.
+    [Wongo's Mystery Box] Pay 300 Gold. Obtain 3 random Relics after 5 combats. * Player obtains Wongo's Mystery Ticket. * Player also receives 16 Wongo Points.
+    [Leave] Downgrade a random card.
+
+### [act2] Zen Weaver  (Hive)
+    [Breathing Techniques] Pay 50 Gold. Add 2 Enlightenment to your Deck.
+    [Emotional Awareness] Pay 125 Gold. Remove 1 card from your Deck.
+    [Arachnid Acupuncture] Pay 250 Gold. Remove 2 cards from your Deck. * Emotional Awareness and Arachnid Acupuncture are locked if you don't have enough Gold.
+
+### [act3] Battleworn Dummy
+    [Setting 1] Fight a 75 HP Battle Friend V1.0. Procure 1 random Potions.
+    [Setting 2] Fight a 150 HP Battle Friend V2.0. Upgrade 2 random cards.
+    [Setting 3] Fight a 300 HP Battle Friend V3.0. Obtain a random Relics. * You have 3 turns to defeat the dummy. Failing results in no reward.
+
+### [act3] Grave of the Forgotten
+    [Accept the Forgotten Soul] Obtain Forgotten Soul (relic).
+    [Confront with Truth] Add Decay (curse) to your Deck. Enchant a card that KW|Exhaust|Exhausts|2 with Soul's Power. * Confront is locked if you have no cards with Exhaust that can be KW|Enchant|Enchanted|2.
+
+### [act3] Hungry for Mushrooms
+    [Big Mushroom] Obtain Big Mushroom (relic).
+    [Fragrant Mushroom] Obtain Fragrant Mushroom (relic). * Fragrant Mushroom: Upon pickup, lose 15 HP and Upgrade 3 random cards.
+
+### [act3] Reflections snoitcelfeR
+    [Touch a Mirror] Downgrade 2 random cards. Upgrade 4 random cards.
+    [Shatter] Duplicate your entire Deck. Add Bad Luck (curse) to your Deck.
+
+### [act3] The Round Tea Party
+    [Enjoy Your Tea] Obtain Royal Poison (relic). Heal to full HP.
+    [Pick a Fight] Lose 11 HP. Obtain a random Relics.
+
+### [act3] The Trial
+
+### [act3] Tinker Time
+
+### [act3] War Historian, Repy  (Glory)
+    [Unlock the Cage] Lose C|Lantern Key|Lantern Key|2. Obtain R|History Course|History Course|2.
+    [Unlock the Chest] Lose C|Lantern Key|Lantern Key|2. Procure 2 random Potions. Obtain 2 random Relics. * If you still have a Lantern Key in your deck afterwards (this can happen if the card is duplicated beforehand), the other option must also be chosen.
