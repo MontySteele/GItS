@@ -235,8 +235,15 @@ def test_handwritten_furina_burst_matches_the_sheet_contract():
     )
     damage, encore = row["effects"]
 
-    assert f'new DamageVar({damage["amount"]}m' in source
-    assert "FurinaResources.Fanfare(Owner.Creature) / 4" in source
+    # Legibility sprint (2026-07-24): the Fanfare rider renders through a
+    # CalculatedDamageVar (base + N*(Fanfare/M)) so face/preview and the hit
+    # agree -- same form the generator emits for own-card fanfare riders.
+    n, _, rest = damage["bonus_formula"].partition("_per_")
+    div = rest.partition("_")[0]
+    assert f'new CalculationBaseVar({damage["amount"]}m)' in source
+    assert f'new ExtraDamageVar({n}m)' in source
+    assert f"FurinaResources.Fanfare(card.Owner.Creature) / {div}" in source
+    assert "DamageCmd.Attack(DynamicVars.CalculatedDamage)" in source
     assert f"FurinaResources.GainEncore(Owner.Creature, {encore['amount']});" in source
     assert "CustomResources<FurinaBurstResource>.SetCanonicalCost" in source
     assert "FurinaResourceConstants.BurstMax" in source
