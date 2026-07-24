@@ -335,7 +335,97 @@ lives, not the resource grammar.
 
 ### F-B1 / F-B3 / F-B4
 
-Not started. F-B1 is next in the revised order.
+F-B3 is now the priority, not F-B1 — see the autopsy below, which fires the
+plan's own §5 branch.
+
+---
+
+## Decay sweep — re-derived in-repo (`tier05/exp_furina_decay.py`)
+
+200 realistic runs/cell, seed 11 (the sprint's registered seed). Direction
+(flat over proportional) is RATIFIED and not re-litigated; this re-derives
+the **magnitude**. Cell 0 is the control — the world with the knob off.
+
+| decay | fanfare read@cap | fanfare win | salon read@cap | salon act-1 | salon win |
+|---|---|---|---|---|---|
+| **0 (off)** | **30.9%** ✗ | 1.5% | **48.0%** ✗ | 56.0% | 15.0% |
+| 3 | 4.0% | 1.5% | 10.0% | 54.0% | **13.0%** |
+| 5 *(shipping)* | 0.5% | 1.0% | 1.7% | 51.0% | 12.5% |
+| 8 | 0.0% | 0.5% | 0.3% | 45.0% | 8.5% |
+| 12 | 0.0% | 0.0% | 0.0% | 42.5% | 6.0% |
+
+**The control vindicates the mechanic.** With decay off, read-at-cap is
+30.9% / 48.0% and gate (2) fails outright. Decay is what unpins the meter;
+this is the sprint's central claim and it now has an in-repo basis.
+
+**But decay is monotonically COSTLY, and flat-3 dominates flat-5.** Every
+increment costs winrate and act-1 clear in both arms without exception
+(salon 15.0 → 13.0 → 12.5 → 8.5 → 6.0). Flat-3 already clears gate (2) with
+room — 4.0% / 10.0% against a <15% bar — and buys back +0.5pt fanfare and
++0.5pt salon versus flat-5, with a livelier meter (mean@read 17.3 / 22.2 vs
+12.9 / 18.2). The cheapest decay that unpins the meter is the right one.
+
+**PROPOSED: `FANFARE_DECAY_PER_TURN` 5 → 3.** [USER] red-pen — it is a
+balance dial. The counter-argument, stated so the ruling is informed: flat-3
+leaves salon at 10.0% read-at-cap, only 5 points inside the bar, where
+flat-5 has 13 points of margin. If gate (2)'s bar is tightened at red-pen,
+flat-5 is the safer number. Flat-3 is right if the bar stands as written.
+
+**One plan number did NOT reproduce.** §1 cites "flat-3 leaves salon at
+89.5% at-cap"; measured here, flat-3 gives salon **10.0%** read-at-cap. The
+discrepancy cannot be reconciled because the source document
+(`furina-readonly-fanfare-diagnostic.md`) is not in the repo — the likely
+cause is a different metric (turn-start vs read-time) or a pre-floor world.
+Recorded rather than papered over: the in-repo cell is reproducible and the
+cited one is not.
+
+---
+
+## Fanfare archetype autopsy — the §5 branch fires
+
+200 realistic runs/arm, seed 11. Question: is 0–1% a resource problem the
+sprint can still fix, or a weak archetype?
+
+| | fanfare | salon | spotlight |
+|---|---|---|---|
+| run winrate | **1.0%** | 12.5% | 2.0% |
+| act-1 clear | 38.0% | 51.0% | 61.0% |
+| core online | **174/200, median fight 3** | 122/200, fight 5 | 191/200, fight 3 |
+| damage/turn | **12.9** | 17.0 | 15.3 |
+| fight winrate | 88.0% | 92.2% | 90.7% |
+| died | 198/200, **median node 8** | 175/200, node 10 | 196/200, node 14 |
+| mean@read | 12.9 | 18.2 | 15.5 |
+| floors/run | 32.5 | 50.7 | 72.9 |
+
+**The resource is fixed. The archetype is weak on damage.** Fanfare
+*assembles fastest of the three* — 174/200 online by median fight 3, against
+salon's 122/200 by fight 5 — and its meter is healthy (mean@read 12.9,
+floors 32.5/run, only 13.1% empty reads). It is not short of Fanfare, and it
+is not failing to come online. It has the **lowest damage/turn in the
+roster** and dies **earliest** (median node 8). No amount of further
+resource-grammar work reaches that.
+
+This is precisely the branch the plan pre-registered in §5: *"If (1) fails
+while (2) and (3) pass, the finding is 'the mechanic works and the archetype
+needs frontload, not grammar' → F-B3 becomes the whole next pass."*
+**Gate (1) fails** (1.0% vs ≥3%; act-1 38.0% vs ≥50%). **Gates (2) and (3)
+pass.** The branch fires as written; the finding is binding.
+
+### Gate status after F-A + F-B2 (seed 11, 200 runs — not the 1500-run F-C run)
+
+| gate | bar | measured | verdict |
+|---|---|---|---|
+| (1) fanfare clears the floor | ≥3% win, ≥50% act-1 | 1.0%, 38.0% | **FAIL** |
+| (2) mechanic is live | read at-cap <15% | 0.5 / 1.7 / 0.8% | PASS |
+| (3) floors reach the archetype | ≥25/run | 32.5 / 50.7 / 72.9 | PASS |
+| (4) salon does not collapse | ≥8% | 12.5% | PASS |
+
+**Correction to an earlier alarm in this log.** F-B2 was written up with
+"salon run winrate 11.1% → 3.3% → 6.7%", flagged as a worrying regression.
+At the registered seed and a real sample it is **12.5%**, against a
+pre-sprint 11.1% — salon did not regress at all. Those were 60-run smoke
+arms at a different seed (20260724), and the spread between them was noise,
+not signal. Smoke arms will not be quoted against registered bars again.
 
 ## Track F-C — Pre-registered gates
 
