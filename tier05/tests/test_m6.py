@@ -225,7 +225,11 @@ def test_ab_runs_both_policies_over_identical_seeds():
     for x, y in zip(out["assigned"]["results"], out["adaptive"]["results"]):
         assert x.seed == y.seed
         assert x.banner == y.banner
-        assert x.node_kinds == y.node_kinds
+        # §11: NOT node_kinds. Both policies get the same generated map for
+        # act 1 (same seed, same rng prefix), but a different deck means
+        # different fight outcomes, different HP, and therefore a different
+        # ROUTE through it -- which is the map layer working, not a seed leak.
+        assert x.n_acts == y.n_acts
 
 
 def test_ab_threads_realistic_run_layers(monkeypatch):
@@ -241,7 +245,7 @@ def test_ab_threads_realistic_run_layers(monkeypatch):
     assert set(out) == {"assigned", "adaptive"}
     assert calls == [
         {"grant_relics": True, "grant_potions": True, "n_acts": None,
-         "jobs": 1},
+         "jobs": 1, "route_name": "hunter"},
         {"grant_relics": True, "grant_potions": True, "n_acts": None,
-         "jobs": 1},
+         "jobs": 1, "route_name": "hunter"},
     ]

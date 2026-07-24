@@ -262,7 +262,70 @@ Philosophers).
 
 ---
 
-## 3.5 BUILT so far (§11 milestone, 2026-07-24)
+## 3.4 SHIPPED (§11, 2026-07-24) — the map is live
+
+`RUNTEMPLATE_VERSION 6`. The fixed spine is gone: every act generates a map,
+a route policy walks it, Unknown rooms resolve at entry, and 55% of those are
+events. **Every archived run-layer number is uncomparable across this
+boundary** — total, not partial, unlike v4→v5.
+
+New modules: `maps.py`, `route.py`, `events.py`, `content/events.yaml`,
+`tier0/content/cards/curses.yaml`. New CLI: `--route`, `--route-ab`.
+
+### 3.4.1 What moved, with no enemy touched
+
+400 runs, seed 11, realistic, `hunter`:
+
+| | v5 spine | v6 map |
+|---|---|---|
+| ref_ironclad act-1 clear | 42.8% | **61%** |
+| ref_ironclad act-2 clear | 16.2% | **26%** |
+| ref_ironclad win | 2.8% | **5.0%** |
+| klee win | 5.0% | 6.5% |
+| furina win | 14.0% | 12.2% |
+| kokomi win | 1.8% | 4.5% |
+
+The act-1 wall softened by ~18 points because the run finally has the normals,
+the unknowns and the agency a real act has — not because anything got weaker.
+
+### 3.4.2 Two findings the route A/B produced immediately
+
+`--route-ab`, ref_ironclad, 400 runs each:
+
+| | hunter | cautious |
+|---|---|---|
+| winrate | 5.0% | **6.8%** |
+| elites/act (mean, median) | 1.27, 1 | 0.18, 0 |
+| responds to state | 1.28 healthy → 1.00 hurt | flat (already at the floor) |
+
+**1. Elite relics are underpriced — ducking elites wins more.** `route.py`
+called this in advance: "if [cautious] wins outright that is itself the
+finding". It did. Either elite relics are worth too little or elites cost too
+much HP; that is a real balance question and it is now measurable.
+
+**2. Realised elite count is 1.27, against the 2.5 target — and that gap is
+the HP economy, not the policy.** On a healthy run `hunter` reaches 2.3
+(pinned in `test_maps_and_routing.py`). In a live run it manages 1.27, because
+the run sits around 37% HP and hunter's affordability bar correctly refuses
+the third elite. **Do not "fix" this by lowering the bar.** Forcing the count
+to 2.5 would manufacture the target instead of measuring it; the honest read
+is that our runs cannot afford the elites a real player takes, which is the
+same HP-ledger thread the act-3 diagnosis (§1.3.2) landed on — now with an
+instrument attached.
+
+### 3.5 Deliberate gaps
+
+- **Acts 2-3 event pools are empty.** Act 1 is the pilot for the grammar; the
+  Hive and Glory lists are catalogued in §2 but not authored. An Unknown in
+  acts 2-3 that rolls "event" finds an empty pool and passes.
+- **No `route_regret`.** The A/B ships; the road-not-taken sampler does not.
+- **Events that start a fight** (Dense Vegetation, Battleworn Dummy, The
+  Lantern Key) are deferred — resolving combat inside an event would hand the
+  event layer the pilot, relics and the potion bag, and that coupling wants
+  its own pass.
+- **Enchant / Divine / quest cards / Debt** remain skip-loudly (§3).
+
+## 3.6 Build log (§11 milestone, 2026-07-24)
 
 `tier05/maps.py` + `tier05/route.py`, with `tier05/tests/test_maps_and_routing.py`.
 **Not yet wired into `model.run_one`** — the run layer still walks the fixed

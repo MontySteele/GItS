@@ -23,6 +23,7 @@ from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine.state import CombatState
 from tier05 import draft, model
+from tier05 import maps
 
 
 @pytest.fixture(autouse=True)
@@ -40,6 +41,18 @@ BASE_HP = loader._character_index()[CHAR]["hp"]     # 62
 
 
 # --- combat stub: deterministic win, optional fixed HP hit + fx recorder ----
+
+# §11: these tests are about RELIC/POTION/SHOP hooks firing at particular node
+# kinds, not about map generation -- so they pin the legacy v5 spine and index
+# into it exactly as they always did. Runs elsewhere walk a generated map.
+LEGACY_SPINE = "NNNRETN$ERB"
+
+
+@pytest.fixture(autouse=True)
+def _legacy_spine(monkeypatch):
+    monkeypatch.setattr(model, "build_act_map",
+                        lambda rng, act: maps.linear(LEGACY_SPINE, act))
+
 
 def _win_stub(hit=0, records=None):
     """Every fight is an instant win: kill all enemies, dock a fixed `hit` of
@@ -71,7 +84,7 @@ def _pick_first(rng, deck, offers, archetype):
 
 
 def _fight_kinds():
-    return [k for k in model.node_template() if k in ("N", "E", "B")]
+    return [k for k in list(LEGACY_SPINE) if k in ("N", "E", "B")]
 
 
 def _n_upgraded(deck_ids):
@@ -120,7 +133,7 @@ def test_regal_pillow_extra_heal_at_rest(monkeypatch):
     monkeypatch.setattr(model, "run_fight", _win_stub(8))   # arrive hurt
     base = model.run_one(CHAR, ARCH, PILOT, _skip, SEED)
     relic = model.run_one(CHAR, ARCH, PILOT, _skip, SEED, relics=["regal_pillow"])
-    ri = model.node_template().index("R")                   # first rest = 3
+    ri = list(LEGACY_SPINE).index("R")                   # first rest = 3
     assert base.hp_by_node[ri] < BASE_HP                    # room to heal into
     assert relic.hp_by_node[ri] == min(BASE_HP, base.hp_by_node[ri] + 15)
     assert relic.hp_by_node[ri] > base.hp_by_node[ri]
@@ -132,7 +145,7 @@ def test_meal_ticket_heals_at_shop(monkeypatch):
     monkeypatch.setattr(model, "run_fight", _win_stub(8))
     base = model.run_one(CHAR, ARCH, PILOT, _skip, SEED)
     relic = model.run_one(CHAR, ARCH, PILOT, _skip, SEED, relics=["meal_ticket"])
-    si = model.node_template().index("$")                   # shop node = 7
+    si = list(LEGACY_SPINE).index("$")                   # shop node = 7
     assert base.hp_by_node[si] < BASE_HP
     assert relic.hp_by_node[si] == min(BASE_HP, base.hp_by_node[si] + 15)
     assert relic.hp_by_node[si] > base.hp_by_node[si]
@@ -158,7 +171,7 @@ def test_book_of_five_rings_heals_after_five_cards(monkeypatch):
                           relics=["book_of_five_rings"])
     # The 5th card is added at the reward screen after the node-6 fight; the
     # +20 heal shows going into the shop node (index 7).
-    si = model.node_template().index("$")
+    si = list(LEGACY_SPINE).index("$")
     assert base.hp_by_node[si] < BASE_HP
     assert relic.hp_by_node[si] == min(BASE_HP, base.hp_by_node[si] + 20)
     assert relic.hp_by_node[si] > base.hp_by_node[si]
@@ -207,7 +220,7 @@ def test_venerable_tea_set_energy_first_combat_after_rest(monkeypatch):
     monkeypatch.setattr(model, "run_fight", _win_stub(0, records))
     model.run_one(CHAR, ARCH, PILOT, _skip, SEED, relics=["venerable_tea_set"])
 
-    nodes = model.node_template()
+    nodes = list(LEGACY_SPINE)
     fight_pos = [i for i, k in enumerate(nodes) if k in ("N", "E", "B")]
     after_rest = {i for i in fight_pos if i > 0 and nodes[i - 1] == "R"}
     assert after_rest == {4, 10}          # fight right after each rest (E, B)

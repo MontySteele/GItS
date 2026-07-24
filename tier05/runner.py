@@ -18,7 +18,7 @@ import time
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier05 import ab, draft, model, run_metrics
+from tier05 import ab, draft, model, route, run_metrics
 
 # The run model itself is character-agnostic; this is the CLI's honest list of
 # plans with authored draft tags + combat pilots. Keeping it character-scoped
@@ -87,6 +87,16 @@ def main(argv: list[str] | None = None) -> int:
                     choices=sorted(draft.POLICIES))
     ap.add_argument("--ab", action="store_true",
                     help="M6 A/B: assigned vs adaptive over the same seeds")
+    ap.add_argument("--route", default="hunter",
+                    choices=sorted(route.POLICIES),
+                    help="§11 route policy: 'hunter' seeks elites for their "
+                         "relics (the realistic default), 'cautious' routes "
+                         "around them")
+    ap.add_argument("--route-ab", action="store_true",
+                    help="§11 A/B: hunter vs cautious over the same seeds. "
+                         "Pathing is the second policy confounder -- a "
+                         "finding that flips between these arms is a finding "
+                         "about ROUTING, not about the character")
     ap.add_argument(
         "--realistic", action="store_true",
         help="enable the realistic run power budget: relic granting and "
@@ -126,13 +136,25 @@ def main(argv: list[str] | None = None) -> int:
     except (AttributeError, OSError):       # non-reconfigurable stream
         pass
 
+    if args.route_ab:
+        t0 = time.perf_counter()
+        out = ab.run_route_ab(args.character, archetype, pilot, args.runs,
+                              args.seed, policy_name=args.policy,
+                              grant_relics=args.realistic,
+                              grant_potions=args.realistic,
+                              n_acts=args.acts, jobs=args.jobs)
+        ab.print_route_ab(args.character, out)
+        print(f"\n({2 * args.runs} runs in {time.perf_counter() - t0:.1f}s)")
+        return 0
+
     if args.ab:
         t0 = time.perf_counter()
         result = ab.run_ab(args.character, archetype, pilot,
                            args.runs, args.seed,
                            grant_relics=args.realistic,
                            grant_potions=args.realistic,
-                           n_acts=args.acts, jobs=args.jobs)
+                           n_acts=args.acts, jobs=args.jobs,
+                           route_name=args.route)
         ab.print_ab_report(args.character, archetype, result)
         print(f"  loadout         "
               f"{'realistic (relics + potions)' if args.realistic else 'bare'}")
@@ -144,12 +166,14 @@ def main(argv: list[str] | None = None) -> int:
                              draft.POLICIES[args.policy], args.runs, args.seed,
                              grant_relics=args.realistic,
                              grant_potions=args.realistic,
-                             n_acts=args.acts, jobs=args.jobs)
+                             n_acts=args.acts, jobs=args.jobs,
+                             route_name=args.route)
     summary = run_metrics.summarize_runs(results)
     max_hp = loader._character_index()[args.character]["hp"]
     survival = run_metrics.survival_profile(results, max_hp)
-    run_metrics.print_run_report(args.character, archetype, summary,
-                                 results[0].node_kinds, survival)
+    run_metrics.print_run_report(
+        args.character, archetype, summary,
+        run_metrics.floor_kind_labels(results), survival)
     print(f"  loadout         "
           f"{'realistic (relics + potions)' if args.realistic else 'bare'}")
     print(f"\n({args.runs} runs in {time.perf_counter() - t0:.1f}s)")
