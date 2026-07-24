@@ -32,17 +32,24 @@ public sealed class LetThePeopleRejoice
         ("title", "Let the People Rejoice"),
         ("description",
             "Costs your full [gold]Burst Energy[/gold] meter. "
-          + "Deal {Damage} damage to ALL enemies, plus 1 damage per "
+          + "Deal {CalculatedDamage:diff()} damage to ALL enemies, plus 1 damage per "
           + "4 [gold]Fanfare[/gold]. Gain 6 [gold]Encore[/gold]."),
     };
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Retain, KleeKeywords.AppliesHydro };
 
+    // Fanfare rider rendered through CalculatedDamageVar (Legibility sprint,
+    // 2026-07-24) so the face/hover and the resolved hit share one value path:
+    // base 8 + 1*(Fanfare/4). Mirrors the generator's fanfare_calc_rider output;
+    // hand-written card, so it is converted by hand.
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new DynamicVar[]
         {
-            new DamageVar(8m, ValueProp.Move),
+            new CalculationBaseVar(8m),
+            new ExtraDamageVar(1m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(
+                static (card, _) => FurinaResources.Fanfare(card.Owner.Creature) / 4),
         };
 
     // Energy cost 0 (user ruling 2026-07-23, matching Klee's Sparks 'n'
@@ -58,9 +65,7 @@ public sealed class LetThePeopleRejoice
     protected override async Task OnPlay(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var damage = DynamicVars.Damage.BaseValue
-            + FurinaResources.Fanfare(Owner.Creature) / 4;
-        await DamageCmd.Attack(damage)
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")

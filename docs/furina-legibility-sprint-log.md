@@ -225,10 +225,20 @@ Crescendo's old inline form).
 - **L-A1 / precondition:** contract + custom-card refresh — **DONE, decompile-cited.**
 - **L-A2/L-A3:** **✅ PASSED live** (green scaling confirmed on Crescendo, 2026-07-24).
 - **L-B fanfare slice:** **SHIPPED + live-verified** (3 cards, build + suite green).
+- **Fanfare slice committed:** `a1bca0d` (generator + 3 cards + test + this log).
+- **`LetThePeopleRejoice` (hand-written kit Burst): CONVERTED** — same
+  CalculatedDamageVar form by hand (base 8 + 1·(Fanfare/4)), description token
+  `{Damage}` → `{CalculatedDamage:diff()}`. Build + full suite green (635; updated
+  the `test_handwritten_furina_burst` pin). Deployed and **live-verified**: cast at
+  Fanfare 28–31, the face read **15** and the AoE hit for 15 — i.e. `8 + 28/4`, both
+  paths scaling off one value. (First read was "unmodified": 15 was mistaken for the
+  printed base, which is 8.) One cosmetic item stays open — the 15 was reported as
+  **not green**, though `DynamicVar.ToHighlightedString` compares `PreviewValue` (15)
+  against `EnchantedValue` (8, pinned by `CalculatedVar.UpdateValues` →
+  `GetBaseVar().BaseValue`) and should highlight. Crescendo greens on the identical
+  token, so the asymmetry is unexplained; next sighting, confirm the colour before
+  chasing it. Value correctness is not in question either way.
 - **Follow-ups (queued, not this slice):**
-  - `LetThePeopleRejoice.cs:62` — hand-written kit Burst card, same bug
-    (`Fanfare(Owner.Creature) / 4` at resolution); needs a manual conversion (not
-    generator-owned).
   - `bonus_vs_aura` riders — `torrential_turn` (single-target, clean but shares
     Klee codegen → needs a Furina gate) and `crashing_waves` (**AoE / per-target**,
     genuinely harder to preview). Deferred within the safe half.
