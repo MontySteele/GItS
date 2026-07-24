@@ -381,6 +381,62 @@ cited one is not.
 
 ---
 
+## Proportional decay sweep — [USER] re-open, 2026-07-24
+
+The plan ruled flat over proportional on **tooltip** grounds ("fades by 5
+each turn" vs a paragraph). [USER] asked for the proportional shape to be
+swept anyway. This is a direction re-open, not a magnitude re-derivation, so
+the flat cells are re-run at the same seed and sample and printed alongside:
+the two SHAPES are compared, not merely each internally consistent.
+
+Implemented as `FANFARE_DECAY_FRACTION` (0.0 = use the flat knob, which is
+what still ships). A fraction of the whole meter, clamped at the floor, with
+at least 1 always removed while above the floor. Taking the cut of the whole
+meter rather than of the amount above the floor is deliberate: it keeps the
+rule to one line, which is the entire argument flat won on.
+
+120 runs/cell, seed 11.
+
+| decay | fanfare read@cap | fanfare empty | fanfare act-1 | salon read@cap | salon empty | salon act-1 | salon win |
+|---|---|---|---|---|---|---|---|
+| flat 3 | 4.3% | 10.1% | 39.2% | 9.8% | 5.3% | 52.5% | 15.0% |
+| flat 5 *(ships)* | 0.6% | 12.8% | 36.7% | 1.7% | 8.1% | 48.3% | 14.2% |
+| **10%** | 2.7% | **8.6%** | **42.5%** | 5.6% | **3.9%** | 52.5% | 15.0% |
+| 20% | 0.1% | 8.3% | 40.0% | 0.8% | 3.6% | 50.0% | 15.0% |
+| 30% | 0.0% | 7.9% | 38.3% | 0.2% | 3.5% | 49.2% | 10.0% |
+| 40% | 0.0% | 7.4% | 35.0% | 0.1% | 3.7% | 47.5% | 8.3% |
+| 50% | 0.0% | 8.2% | 32.5% | 0.0% | 3.9% | 41.7% | 7.5% |
+
+**Proportional dominates flat, and the `empty` column is why.** A flat
+subtraction is one number applied to every meter level, so it barely dents a
+full meter while driving a low one to zero — flat-5 leaves 12.8% of fanfare
+reads finding *nothing*. Proportional is self-regulating: it takes a lot
+when the meter is high and a little when it is low, so it is asymptotic and
+never empties the pool. The result is that **it beats flat at both tails at
+once**, which flat structurally cannot do: 20% has both a lower at-cap
+(0.1% vs flat-3's 4.3%) *and* a lower empty (8.3% vs 10.1%), at identical
+winrate.
+
+**PROPOSED: `FANFARE_DECAY_FRACTION` 0.10, retiring the flat knob.**
+[USER] red-pen — it is a balance dial and a reversal of a ratified
+direction. Reasoning: 10% clears gate (2) comfortably (2.7% / 5.6%), has the
+**liveliest meter of any cell** (mean@read 19.5 / 24.0) and the **best act-1
+clear of any cell** (fanfare 42.5%) — and act-1 clear is gate (1)'s second
+clause, the one currently failing at 38%. It costs nothing in winrate.
+Conservative alternative: **20%**, same winrate and act-1 within a point,
+with a much larger gate-(2) margin — take this one if the bar tightens at
+red-pen.
+
+The tooltip objection does not survive contact: *"Fanfare fades by 10% each
+turn"* is the same one-line rule as *"fades by 5 each turn."* The plan's
+concern was a percentage requiring a paragraph, which was a fair prior and
+is simply not what the shape turned out to need.
+
+**Nothing was changed by default.** `FANFARE_DECAY_FRACTION` ships at 0.0
+and the flat knob remains live, pinned by a test, until the ruling lands.
+
+---
+
 ## Fanfare archetype autopsy — the §5 branch fires
 
 200 realistic runs/arm, seed 11. Question: is 0–1% a resource problem the
@@ -410,6 +466,33 @@ while (2) and (3) pass, the finding is 'the mechanic works and the archetype
 needs frontload, not grammar' → F-B3 becomes the whole next pass."*
 **Gate (1) fails** (1.0% vs ≥3%; act-1 38.0% vs ≥50%). **Gates (2) and (3)
 pass.** The branch fires as written; the finding is binding.
+
+### Is it a card-payoff problem? Partly — and F-A4 made it worse before better
+
+Counted off the live sheet (not the plan's citation, which predates F-A):
+**29 fanfare-archetype cards.**
+
+| relationship to Fanfare | count | cards |
+|---|---|---|
+| **READS** the meter | **7** | dramatic_entrance, standing_room_only, thunderous_ovation, crescendo, rapturous_applause, showstopper, universal_revelry |
+| BUILDS the floor | 2 | lasting_impression, the_sea_is_my_stage |
+| GENERATES flux, never reads | 13 | aria_of_recompense, audience_participation, curtain_cue, curtain_up, dinner_service, ebb_and_flow, macaron_break, suffering_for_art, deep_breath, hearts_swelling, pit_orchestra, reginas_mercy, unheard_confession |
+| **INERT** w.r.t. Fanfare | 7 | crowd_work, tempo_change, warmup_act, dress_rehearsal, **florid_cadenza**, **flood_of_emotion**, **high_tide** |
+
+**Three of the seven ex-spend-gate cards are now INERT** — `high_tide` (22
+base, rare), `flood_of_emotion` (20 base, uncommon) and `florid_cadenza`.
+Their entire relationship to Fanfare *was* the gate, so F-A4 removed it and
+left them vanilla. The archetype currently has 13 cards that feed a meter
+only 7 cards can spend attention on, which is the same redundancy diagnosis
+the sprint opened with, pointed the other way.
+
+**This materially revises the "F-B3 displaces F-B1" read.** F-B1 is not
+cosmetic re-texturing: it restores scaling to the two biggest hitters in the
+list. At the measured act-2/3 mean@read (~13–18), `high_tide` at +1 per 2
+Fanfare is roughly +6–9 damage and `flood_of_emotion` at +1 per 3 is +4–6 —
+against an archetype whose whole deficit is 12.9 damage/turn versus salon's
+17.0. F-B1 and F-B3 are now both live candidates for the next track and the
+autopsy alone does not separate them.
 
 ### Gate status after F-A + F-B2 (seed 11, 200 runs — not the 1500-run F-C run)
 

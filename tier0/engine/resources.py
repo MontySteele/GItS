@@ -47,6 +47,29 @@ def gain_fanfare(state: CombatState, n: int, source: str) -> None:
                total=p.fanfare, requested=n, wasted=n - applied)
 
 
+def _decay_amount(p) -> int:
+    """How much the meter fades this turn: flat, or proportional when the
+    fraction knob is armed. One shape at a time -- the fraction takes
+    precedence so a sweep can switch shapes without touching the flat value
+    it is being compared against.
+
+    The proportional form takes its cut of the WHOLE meter and lets the
+    floor clamp protect the baseline, rather than taking a cut of the amount
+    above the floor. That keeps the player-facing rule to one line ("Fanfare
+    fades by N% each turn") which is the entire argument the flat shape won
+    on; a rule that reads "N% of the amount above your baseline" gives back
+    the legibility the flat form was chosen for.
+
+    At least 1 always comes off while above the floor, so a small meter
+    cannot stall at a value that rounds down to nothing.
+    """
+    if C.FANFARE_DECAY_FRACTION > 0:
+        if p.fanfare <= p.fanfare_floor:
+            return 0
+        return max(1, round(p.fanfare * C.FANFARE_DECAY_FRACTION))
+    return C.FANFARE_DECAY_PER_TURN
+
+
 def decay_fanfare(state: CombatState) -> None:
     """F-A1: the meter fades each turn, never below the floor.
 
@@ -63,7 +86,7 @@ def decay_fanfare(state: CombatState) -> None:
     if not p.fanfare_cap or state.turn < 2:
         return
     before = p.fanfare
-    p.fanfare = max(p.fanfare_floor, p.fanfare - C.FANFARE_DECAY_PER_TURN)
+    p.fanfare = max(p.fanfare_floor, p.fanfare - _decay_amount(p))
     # Emitted even when nothing fell: "the meter was already resting on its
     # floor" is a distinct and interesting state from "the meter decayed",
     # and a silent no-op would make the two indistinguishable downstream --

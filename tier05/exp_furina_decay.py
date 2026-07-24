@@ -102,6 +102,45 @@ def sweep(runs: int = RUNS) -> None:
         C.FANFARE_DECAY_PER_TURN = original
 
 
+def prop(runs: int = RUNS) -> None:
+    """A2. PROPORTIONAL decay sweep, 10% increments ([USER] 2026-07-24).
+
+    The plan ruled flat over proportional on tooltip grounds, so this is a
+    direction re-open, not a magnitude re-derivation. Flat cells are printed
+    alongside at the same seed and sample so the two SHAPES are comparable
+    rather than merely each internally consistent.
+    """
+    print("=" * 78)
+    print(f"A2. PROPORTIONAL DECAY SWEEP — {runs} realistic runs/cell, "
+          f"seed {SEED}")
+    print("    Fraction of the whole meter, clamped at the floor; always "
+          "removes >= 1")
+    print("    while above the floor. Gate (2) bar: read at-cap < 15%.")
+    print("=" * 78)
+
+    frac0, flat0 = C.FANFARE_DECAY_FRACTION, C.FANFARE_DECAY_PER_TURN
+    cells = ([("flat 3", 0.0, 3), ("flat 5", 0.0, 5)]
+             + [(f"{int(f * 100)}%", f, 0) for f in
+                (0.1, 0.2, 0.3, 0.4, 0.5)])
+    try:
+        for archetype, pilot_id in ARMS:
+            print(f"\n  assigned {archetype}")
+            print(f"  {'decay':>8} {'read@cap':>9} {'mean@read':>10} "
+                  f"{'empty':>7} {'act-1':>7} {'win':>7}")
+            for label, frac, flat in cells:
+                # Serial only -- see the note in sweep().
+                C.FANFARE_DECAY_FRACTION = frac
+                if flat:
+                    C.FANFARE_DECAY_PER_TURN = flat
+                c = _cell(archetype, pilot_id, runs)
+                bar = "" if c["read_at_cap"] < 0.15 else "  !! GATE(2)"
+                print(f"  {label:>8} {c['read_at_cap']:>8.1%} "
+                      f"{c['mean_at_read']:>10.1f} {c['read_empty']:>6.1%} "
+                      f"{c['act1']:>6.1%} {c['winrate']:>6.1%}{bar}")
+    finally:
+        C.FANFARE_DECAY_FRACTION, C.FANFARE_DECAY_PER_TURN = frac0, flat0
+
+
 def autopsy(runs: int = RUNS) -> None:
     """Why is the fanfare plan at 0%? Three candidate causes, separated."""
     print("=" * 78)
@@ -146,6 +185,8 @@ def main(argv: list[str] | None = None) -> int:
     block = args[0] if args else "sweep"
     if block == "sweep":
         sweep(runs)
+    elif block == "prop":
+        prop(runs)
     elif block == "autopsy":
         autopsy(runs)
     else:
