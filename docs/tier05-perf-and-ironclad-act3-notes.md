@@ -204,15 +204,124 @@ uncommon, **0 rare**. Klee and Furina get 71 each. Consequences:
   game" should be tested against `real_ironclad`, and cannot be tested here
   at all without rebuilding `game_ref/`.
 
-### 1.5 Recommended order of work (all red-pen)
+### 1.5 The calibration fix — mechanism SHIPPED, number OPEN
 
-1. Fix the phase-relative ramp (bug; smallest change, largest correctness
-   gain, and it un-breaks half of all act-3 boss draws).
-2. Decide the roster-vs-cards scale question deliberately: either re-introduce
-   a per-tier compensator for acts 2–3, or rescale the card sheets. The arms
-   above size both.
-3. Re-instrument on `real_ironclad`, not `ref_ironclad`, before reading any
-   "can an average player clear this" claim.
+#### 1.5.1 A fourth instrument defect, found while sizing the fix (FIXED)
+
+`ref_ironclad` had **0/6 draft pool and 0/10 starter** cards upgradable.
+Klee and Furina are 71/71 + 10/10; Kokomi 31/31 + 10/10. So rest-site
+smithing, Sand Castle, Yummy Cookie, War Paint and Whetstone were **all dead
+branches on the one character the world is calibrated against** — measured, 0
+upgraded cards and 0 smiths out of 683 rests in 300 runs, while every
+character it anchors was gaining 1–2 upgrades a run.
+
+Shipped as `docs/ref-ironclad-upgrades.yaml` (real base-game numbers: Strike+
+6→9, Defend+ 5→8, Bash+ 8→10 with 3 Vulnerable, Inflame+ 2→3 Str, Shrug It
+Off+ 8→11, Cleave+ 8→11, Metallicize+ 3→4, Heavy Blade+ +4, Pommel Strike+
+draw 2). The tier 0 battery builds from plain deck ids and never upgrades, so
+the frozen scorecard and the anchor lock are untouched. Effect: anchor act-1
+clear **36.7% → 42.8%**, upgrades/deck 0 → 0.98, winrate flat (the wall is
+acts 2–3).
+
+#### 1.5.2 What can and cannot close the gap
+
+Arms at 300 runs/character, seed 11, realistic, all three acts:
+
+| arm | iron | klee | furi | koko |
+|---|---|---|---|---|
+| baseline | 3.7% | 5.7% | 15.0% | 2.0% |
+| A anchor upgrade sheet | 2.7% | — | — | — |
+| B guaranteed act-boundary energy boon | 4.3% | 7.3% | 19.3% | 3.0% |
+| C unlock the rest smith band | 2.7% | 6.0% | 15.7% | 2.3% |
+| D per-act enemy scale (E/B ×1/0.85/0.75) | 11.7% | 27.7% | 22.7% | 11.0% |
+| E = A+B+C (player side only) | 3.0% | 7.0% | 20.7% | 3.7% |
+| F = E+D | 11.7% | 29.7% | 31.3% | 11.0% |
+
+Three readings:
+
+1. **The player side cannot close this gap with the levers that exist.** Every
+   player-power correction stacked (arm E) moves the anchor 3.7% → 3.0% and
+   Klee 5.7% → 7.0%. The rosters are simply outside the scale the cards were
+   built against, and no amount of upgrades-and-relics plumbing fixes that.
+2. **Arm C is a trap, confirmed.** Dropping `REST_PREFIGHT_HEAL_THRESHOLD`
+   0.90 → 0.55 does buy upgrades (Klee 1.94 → 3.15 cards/deck) but act-1
+   clears fall everywhere (Klee 82% → 68%, anchor 37% → 28%) because **both**
+   template rests sit directly before an elite or boss. This is §10.8.1's own
+   note measured: it is a template question, not a threshold one. Not shipped.
+3. **Resolution, not realism, is the strongest argument.** At today's floor
+   the roster reads 2.0 / 3.7 / 5.7 / 15.0% — the anchor is *third of four*,
+   and three characters sit within 4pp of zero. You cannot detect a character
+   being 20% better than another when the ceiling is 5%. Under D the roster
+   separates to 11 / 11.7 / 22.7 / 27.7%.
+
+#### 1.5.3 The mechanism (SHIPPED, inert)
+
+`C.ACT_DIFFICULTY_SCALE` — per-act, per-node-tier multiplier on roster enemy
+HP and **attack amounts only** (phase bars included; Block, buff, debuff and
+inject beats untouched, because inflating those would be enemy redesign
+wearing a calibration label). Applied in `model.build_node_encounter` via
+`acts.apply_difficulty_scale`.
+
+It is the live successor to `PROGRESSION_GAP_COMPENSATOR`, which the §4 roster
+swap left as dead code; that constant now says so and stays as the historical
+record of the method and the 45%±10 target. Per-act because the gap it covers
+**grows with act index**, which the single-act original could not express.
+
+It ships at **1.0 everywhere — INERT**, so every archived number stands. A
+multiplier of exactly 1.0 returns the spawn untouched down to object identity,
+which `test_multiact.py` pins along with tuple/act coverage, the attacks-only
+rule, phase-bar reach, and a loud error (never a silent 1.0) for an
+unregistered act. Moving the default is a ruling, same contract
+`NORMAL_ATTRITION_SCALE` has.
+
+#### 1.5.4 The open number — decision table
+
+Base world for the sweep = shipped state **plus** a guaranteed Ancient energy
+boon per act boundary (arm B; not shipped, see below). 300 runs/character,
+seed 11, realistic.
+
+| act 1 / 2 / 3 | tiers | iron | klee | furi | koko |
+|---|---|---|---|---|---|
+| 1.00 / 1.00 / 1.00 | — | 7.7% | 7.3% | 19.3% | 3.0% |
+| 1.00 / 0.90 / 0.80 | E,B | 18.0% | 30.7% | 26.3% | 12.0% |
+| 1.00 / 0.85 / 0.75 | E,B | 22.3% | 33.3% | 28.0% | 15.0% |
+| 1.00 / 0.75 / 0.65 | E,B | 24.3% | 47.0% | 29.7% | 17.7% |
+| 1.00 / 0.90 / 0.80 | N,E,B | 26.7% | 49.3% | 36.3% | 19.7% |
+| **1.00 / 0.85 / 0.75** | **N,E,B** | **34.3%** | 63.7% | 39.3% | 24.3% |
+| **1.00 / 0.80 / 0.70** | **N,E,B** | **40.3%** | 75.7% | 46.0% | 28.7% |
+| 1.00 / 0.75 / 0.65 | N,E,B | 40.3% | 79.3% | 50.0% | 30.3% |
+| 0.95 / 0.85 / 0.75 | N,E,B | 51.0% | 71.3% | 43.7% | 38.3% |
+| 0.90 / 0.80 / 0.70 | N,E,B | 82.7% | 90.0% | 59.7% | 63.0% |
+
+Recommendations, for the ruling:
+
+- **Scope: acts 2–3, all tiers.** The gap is a *progression* gap, so it should
+  grow with act index and leave act 1 alone — and act 1 is on a cliff
+  (softening it to 0.95 takes the anchor to 51%, 0.90 to 83%, i.e. it stops
+  filtering anything). Elites-and-bosses-only is the old shape but leaves
+  acts 2–3 *normals* raw, and those are out of scale too (the starter loses to
+  `chomper_pair`, `ovicopter` and `obscura`), which caps the anchor near 24%
+  however hard the dial is pushed.
+- **Number: `1.00 / 0.80 / 0.70`.** Anchor 40.3%, dead centre of the historic
+  45%±10 target that `PROGRESSION_GAP_COMPENSATOR` was grid-searched against.
+  One notch harder (`0.85/0.75`, anchor 34.3%) is defensible given the
+  anchor's six-card handicap and keeps the roster in a tighter 24–64% spread.
+- **Caveat to read before ratifying:** at `0.80/0.70` Klee lands at 75.7% —
+  well above the anchor. That is a character-balance finding in its own right
+  and should not be tuned away with this dial.
+
+#### 1.5.5 Not shipped, deliberately
+
+- **The act-boundary energy boon (arm B).** §10.8.1 already flags "no
+  boss-relic tier at all", and real StS hands out a boss relic after every
+  act. Today the Ancient is a 1-of-3 sample from 8 boons, so the anchor sees
+  Prismatic Gem in ~20% of runs. Forcing one energy boon into every boundary
+  offer is worth +1.5 to +4pp for everyone — but it *is* a design change to
+  the boon pool, not a correction, so it belongs in the same ruling as the
+  dial. The sweep table above already assumes it.
+- **`real_ironclad` re-instrumentation.** Everything in §1.4 stands: the
+  calibration target should ultimately be grid-searched against the 75-card
+  base-game pool, not the six-card anchor. That needs `game_ref/` rebuilt.
 
 ---
 

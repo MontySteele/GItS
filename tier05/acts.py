@@ -128,6 +128,50 @@ def spawn(encounter: dict, rng: random.Random) -> list[Enemy]:
     return out
 
 
+def scale_for(act: int, node_kind: str) -> float:
+    """This act+tier's ACT_DIFFICULTY_SCALE multiplier (1.0 = untouched)."""
+    try:
+        return float(C.ACT_DIFFICULTY_SCALE[act].get(node_kind, 1.0))
+    except IndexError:
+        raise ValueError(
+            f"ACT_DIFFICULTY_SCALE has {len(C.ACT_DIFFICULTY_SCALE)} "
+            f"entries but act {act} was asked for; it needs one entry per "
+            f"act in RUN_ACTS.") from None
+
+
+def apply_difficulty_scale(enemies: list[Enemy], act: int,
+                           node_kind: str) -> list[Enemy]:
+    """Scale a spawned encounter by ACT_DIFFICULTY_SCALE, in place.
+
+    Touches exactly two things: body HP (and each pending phase bar's HP) and
+    ATTACK intent amounts. Block, buff, debuff, heal, summon and inject beats
+    are left alone on purpose -- this dial stands in for the player power
+    growth the sim does not model, and inflating an enemy's Block or the
+    count of Wounds it shuffles in would be enemy REDESIGN wearing a
+    calibration label.
+
+    A multiplier of exactly 1.0 returns the spawn untouched, so the stamped
+    default is not merely equivalent to the pre-dial world -- it is the same
+    objects, unrounded.
+    """
+    mult = scale_for(act, node_kind)
+    if mult == 1.0:
+        return enemies
+    for e in enemies:
+        e.hp = e.max_hp = max(1, round(e.hp * mult))
+        for phase in e.phases:
+            phase["hp"] = max(1, round(int(phase["hp"]) * mult))
+            _scale_attacks(phase["intents"], mult)
+        _scale_attacks(e.intents, mult)
+    return enemies
+
+
+def _scale_attacks(intents: list[dict], mult: float) -> None:
+    for intent in intents:
+        if intent.get("kind") == "attack":
+            intent["amount"] = max(1, round(intent["amount"] * mult))
+
+
 class ActDraw:
     """Per-act encounter draw. Built once at each act's start (consuming the
     run rng) so easy/hard identity, the 2-of-3 elite draw and the boss draw
