@@ -22,18 +22,25 @@ element: hydro
 cadence: catalyst        # RULED R52 (N1): she is a catalyst — every
                          # attack applies hydro. Makes elite-A6
                          # application uptime structural (R51).
-burst_max: 10            # v0.3 charge-curve pass (PROPOSED, the pass's
-                         # decisive lever): 50 -> 10 — a FAST-CYCLING
-                         # Burst. The act-sim grid: meter 50 = 1% act-1
-                         # clear, 15 = 22%, 10 = 33-41%, 8 = 43% (report
-                         # §6; monotone, 10 chosen as the largest number
-                         # that clears the wall — R48 anti-optimization
-                         # discipline). Design reading: the short-cycle
-                         # Garment is her Furina-Salon-member analogue —
-                         # guaranteed periodic output, very jellyfish.
-                         # Two bake plays or five exhaust events fill it.
-                         # Klee=40, Furina=70; hers is a different SHAPE
-                         # of meter, not a discount. [USER] red-pen.
+burst_max: 20            # v0.4 O4 salvage (PROPOSED, plan §1.2): 10 -> 20.
+                         # The meter goes back to being a real Burst now
+                         # that the Kurage carries the periodic output.
+                         # W2 bracket (300 runs/plan, --realistic, priest /
+                         # commander act-1): meter 10 = 72/79%, 15 = 48/63%,
+                         # 20 = 34/48%, 25 = 25/39%. 20 is the arm that hits
+                         # the pre-registered acceptance band (35-50%) and
+                         # gives the healthiest median statline (A2 5.2 vs
+                         # A1 3.6 — the constraint the archetype median has
+                         # to satisfy). 15 overshoots commander past the
+                         # Furina-57 ceiling reference; 25 falls under band
+                         # on both plans.
+                         # PRIOR (v0.3, superseded): 50 -> 10 made the Burst
+                         # a FAST-CYCLING metronome, her Salon-member
+                         # analogue. It cleared the act-1 wall and the ratio
+                         # instrument correctly read it as FRONTLOAD — the
+                         # §6.4 tension. O4's thesis is that canon keeps the
+                         # metronome on the summon, not the Burst.
+                         # Klee=40, Furina=70. [USER] red-pen.
 kit: [ceremonial_garment]   # v1.9: Burst is kit, not loot. Shape B state
                          # (ruling ask 6 — roster ships the recommended
                          # both-with-capstone world).
@@ -57,25 +64,44 @@ archetype_decks:
 # starter answer; 7 clears Skittish) and one tactical_recall ->
 # waterspout (one exhaust TEACHER stays; the second copy becomes the
 # burn that hits). Starter grid in report §6. [USER] red-pen.
+# v0.4 STARTER REWORK ([USER], 2026-07-26; PROPOSED). TWELVE cards, not ten:
+# the Silent shape. Two reasons, both hers. (1) Her opening deck carries
+# exhaust, so a 10-card deck that mills itself risks decking out early; the
+# extra two cards are the buffer. (2) Starters are SUPPOSED to be bad and
+# supposed to leave — two more mediocre cards is a real dilution cost, and
+# tactical_retreat's thinning is how she pays it down. That is the Silent
+# bargain verbatim.
+# Shape: 4 Strike + 4 Defend + 2 companions + 2 mechanic cards (Charge and
+# exhaust). The two Commons that used to sit here are GONE: waterspout and
+# surging_shoal. [USER] ruling: "no one starts the game with AoE; if you need
+# it, you draft it" — so the AoE answer moves to the draft (both cards stay in
+# the pool and surging_shoal is now a package draft-in, since a card in NO
+# package is unreachable, which is the vigil defect).
 starting_deck:
   - waters_edge
   - waters_edge
   - waters_edge
+  - waters_edge
   - coral_guard
   - coral_guard
   - coral_guard
+  - coral_guard
+  - gorou_inuzaka_charge
+  - sayu_daruma_gift
   - bake_kurage
-  - tactical_recall
-  - waterspout
-  - surging_shoal
+  - tactical_retreat
 # Run-start Inazuma ensemble (starter-reserved trio per user ruling,
 # kickoff §4): Gorou / Sayu / Shinobu. The trio is THREE characters across
 # the two-slot convention, so the attack slot is Gorou's alone — RULED R52
 # (N3): the adjutant ALWAYS enlists, for lore reasons. The asymmetry vs
 # Klee/Furina's 2x2 is intended; no fourth shortlist name.
+# v0.4: the companions are now ADDITIONS (the 11th and 12th cards), not
+# replacements for a basic — so Gorou sits in the authored list directly (he
+# was always the only attack-slot choice), and the support slot swaps the
+# authored Sayu for the Sayu-or-Shinobu roll. Same `replace` grammar, no
+# schema change; the deck is 12 either way.
 randomized_starter:
-  attack: {replace: waters_edge, choices: [gorou_inuzaka_charge]}
-  support: {replace: coral_guard, choices: [sayu_daruma_gift, shinobu_grass_ring_bond]}
+  support: {replace: sayu_daruma_gift, choices: [sayu_daruma_gift, shinobu_grass_ring_bond]}
 packages:
   # Plausible drafts (round-3 principle), not monocultures — each carries
   # natural cross-archetype draft-ins.
@@ -94,6 +120,7 @@ packages:
     - votive_offering
     - communion_of_tides
     - drifting_lantern
+    - surging_shoal
   priest_weighted:
     - votive_offering
     - votive_offering
@@ -110,6 +137,7 @@ packages:
     - prayer_to_the_moon
     - nereids_ascension
     - vigil_of_the_deep
+    - kurages_oath
     # (vigil was MISSING from every package in the first battery run — the
     # §2.4 identity card unreachable by any archetype deck, caught by the
     # telemetry probe's prevented=0.0 row. The Klee planned-vs-shipped gap
@@ -124,7 +152,13 @@ packages:
     - exposing_current
     # v0.3 charge-curve pass: the on-curve reader — the vigil lesson says
     # an identity card unreachable by any archetype deck is a defect.
-    - riptide_strike
+    - all_streams_flow
+    # v0.4 starter rework: surging_shoal left the starting deck ([USER]: AoE
+    # is drafted, never started). It was in NO package, so it would have been
+    # unreachable — the vigil defect again. It draft-ins here and in commander
+    # below: the act-1 AoE check still has an answer, it just has to be drawn
+    # for now instead of handed over.
+    - surging_shoal
   assist_weighted:
     - moon_signal
     - moon_signal

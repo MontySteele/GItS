@@ -9,10 +9,18 @@
 # per Kokomi character law 1 (no self-damage in her kit or shared-pool errata). Her cards are authored costless-to-HP.
 # RULED (R52, ask 9): Raiden authored below — playable characters may exist as Rare companion cards and surface in
 # the conscript pool, but ONLY as a Rare payoff; the opposed lore carries the flavor. Natural rare odds (N5).
+# FRAMING (v0.4 lore overlay §3) — THE POOL IS THE PEACE, NOT HER ARMY. This roster spans every Inazuma faction:
+#   resistance (Gorou), Shogunate (Kujou Sara, Raiden), Yashiro (Thoma, and Sayu's Shuumatsuban), Arataki Gang
+#   (Itto, Shinobu). That is not a roster accident and it is not a resistance muster — it is POST-DECREE INAZUMA
+#   ANSWERING WATATSUMI'S CALL. The framing does three jobs at once: it explains why non-resistance names are in
+#   a Kokomi pool at all; it sharpens Sara, who was the OPPOSING field commander and now answers to the strategist
+#   who beat her; and it gives Raiden her best gloss (see her card). Read every companion here as someone who
+#   CHOSE to come. Nobody in this pool was conscripted — the display family is Muster/Enlist/Rally for exactly
+#   this reason, and the exhaust voice is ROTATION, never sacrifice (voice law, kokomi-cards.yaml header).
 # Later scope: Kazuha (Sly/discard flavor), Heizou, Ayaka, Ayato, Yoimiya, Yae Miko 5-stars (banner roll per v1.8).
 
 # ---------- GOROU (Geo | buffer/general | the literal adjutant) ----------
-- {id: gorou_inuzaka_charge, name: "Gorou — Inuzaka Charge", star: 4, rarity: common, role_c: applier, element: geo, cost: 1, type: attack,
+- {id: gorou_inuzaka_charge, name: "Gorou — Inuzaka Charge", star: 4, rarity: common, role_c: applier, element: geo, cost: 0, type: attack, exhaust: true,
    effects: [{op: damage, amount: 6, target: enemy, applies_element: false}]}
    # The vanguard's opening arrow. Geo leaves no aura in the reaction table (Crystallize CONSUMES); applies_element
    # false is explicit so no cadence dial can re-tag it. Starter attack-slot card (randomized_starter).
@@ -24,7 +32,7 @@
    # The standing banner: 2 Block a turn while the fight lasts. Sustain-through-armor, never healing (the law).
 
 # ---------- SAYU (Anemo | healer -> Block per law | the sleepy ninja) ----------
-- {id: sayu_yoohoo_windwheel, name: "Sayu — Yoo-hoo Windwheel", star: 4, rarity: common, role_c: trigger, element: anemo, cost: 1, type: attack,
+- {id: sayu_yoohoo_windwheel, name: "Sayu — Yoohoo Art: Fuuin Dash", star: 4, rarity: common, role_c: trigger, element: anemo, cost: 1, type: attack,
    effects: [{op: damage, amount: 4, target: enemy, applies_element: false}, {op: swirl, target: enemy}]}
    # She rolls through. Swirl spreads whatever aura she hits (Kokomi's hydro, usually).
 - {id: sayu_daruma_gift, name: "Sayu — Muji-Muji Daruma", star: 4, rarity: common, role_c: buffer, element: anemo, cost: 1, type: skill,
@@ -40,8 +48,8 @@
    effects: [{op: damage, amount: 3, target: all_enemies, applies_element: true}, {op: block, amount: 4}]}
    # Her ring, minus the blood price (header errata): mass electro application + a guard. Electro on Kokomi's hydro
    # auras = Electro-Charged — the pool's reaction voice.
-- {id: shinobu_grass_ring_bond, name: "Shinobu — Grass Ring of Sanctification", star: 4, rarity: common, role_c: buffer, element: electro, cost: 1, type: skill,
-   effects: [{op: block, amount: 5}]}
+- {id: shinobu_grass_ring_bond, name: "Shinobu — Grass Ring of Sanctification", star: 4, rarity: common, role_c: buffer, element: electro, cost: 0, type: skill,
+   effects: [{op: block, amount: 4}]}
    # The ring's mending CONVERTED to Block per law. Plain on purpose: the honest wall. Starter support-slot card.
 - {id: shinobu_thundergrust, name: "Shinobu — Thundergrust", star: 4, rarity: uncommon, role_c: applier, element: electro, cost: 1, type: attack,
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true}]}
@@ -81,4 +89,9 @@
    # The single slash of Musou: the pool's biggest one-card hit, and electro on Kokomi's ubiquitous hydro is the
    # Electro-Charged apex. Deliberately SHAPELESS otherwise — no Block, no rider: eternity is one perfect cut.
    # Itto is the bruiser jackpot (14+6); Raiden is the executioner jackpot (no domination pair: 18/0 vs 14/6).
-   # Conscription can fish her at natural rare odds (R52/N5 — revisit only if the sims show her busted).
+   # The call-up can find her at natural rare odds (R52/N5 — revisit only if the sims show her busted).
+   # GLOSS ([USER] ruling, v0.4 §3): the card KEEPS Musou no Hitotachi, and the reading is RECONCILIATION, not
+   # irony. The retired framing called this 'the bitterest irony' — Kokomi fishing for the blade that executed
+   # her people's Visions. That reading breaks the peace the whole roster is built on. The true gloss: this is
+   # the peace's crowning proof. The Shogun's blade defends Watatsumi now, and Watatsumi's strategist is the
+   # one who calls it. Never write the irony version again.

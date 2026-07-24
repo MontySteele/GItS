@@ -1366,3 +1366,180 @@ file). Nothing in the v0.3 numbers is ratified by this commit.
 
 COMMITTED WORLD (waters_edge 6, re-measured before commit): see report
 §6.3 for the final labeled table.
+
+## R54 -- Kokomi v0.4: O4 is the primary arm, O1 rejected, O2 in reserve (2026-07-26)
+
+USER RULING (plan asks 1-3, 5; docs/kokomi-v0.4-plan.md is the governing
+doc, ruling answers in its §7):
+
+- **O1 REJECTED.** Accepting the v0.3 world by redefining the instrument or
+  re-declaring the elite pair post hoc is not available -- that is the R33
+  culture line. The measurement stands; the design moves.
+- **O2 = reserve fallback** (Garment splash 7 / turns 2), unexercised.
+- **O4 = primary arm, EXECUTED.** The periodic output moves off the Burst
+  and onto the summon, where canon keeps it: Bake-Kurage becomes a
+  persistent summon that pulses at turn end reading the Charge bank, the
+  Garment gains its canon riders (attack-Block + the Tamakushi refresh
+  link), and the meter goes back to being a real Burst (10 -> 20).
+- **Sequencing W1 -> W2 -> W3 ratified**; knob defaults ratified as
+  proposed; meter bracket 15/20/25 ratified; prediction (c)'s acceptance
+  band 35-50% confirmed, with Furina 57 / IC 59 as ceiling-side reference
+  and NOT a requirement.
+
+MEASUREMENT CONVENTION ESTABLISHED (W1, binding): the Kokomi act numbers of
+record are `--realistic` runs at 500 runs / default seed. The committed v0.3
+world reproduces its recorded four pairs exactly under that invocation
+(priest 32/2.0, commander 49/1.6, generic 26/0.4, assist 20/0.0). The SAME
+world at bare loadout reads priest 3% / commander 4% act-1 -- the
+relic/potion layer is most of the act-1 clear. Comparing across the two is
+comparing two different worlds.
+
+PREDICTIONS GRADED IN WRITING (plan §2; hits and misses both, report §3):
+(a) starter A1 falls below A2 -- **MISS at every meter step**.
+(b) TOO_STRONG clears at archetype median -- **HIT** (and the median now
+    satisfies A2>A1 outright: 5.2 vs 3.6 at meter 20).
+(c) act-1 lands 35-50% at meter 20-25 -- **PARTIAL** (500-run confirm at
+    meter 20: commander 45% in band, priest 30% under).
+(d) Garment-uptime watchlist retires by construction -- **PARTIAL**
+    (priest 57% -> 23% uptime, retired; commander 76% -> 50%, not retired).
+
+The plan's fallback trigger ("misses on (a)/(b) at EVERY meter step -> fall
+back to O2") did NOT fire, because (b) hit. O4 therefore stands as landed
+and (a) goes back to [USER] as an open ask -- see the report's §4 finding
+that (a) is a STARTER-COMPOSITION property, not a Garment property, which
+contradicts the v0.3 report's §6.4 diagnosis.
+
+## R55 -- Kokomi lore overlay: the rename batch and the voice law (2026-07-26)
+
+USER RULING (plan ask 4; naming audit is [USER]-only). Landed in W3,
+measurement-neutral by construction -- display names and comments only, ids
+stable except the one noted:
+
+- **VOICE LAW (binding for the sheet and every future card face):** Exhaust
+  in Kokomi's fiction is ROTATION, never sacrifice. Units rotate off the
+  field rested and whole; Charge is the strategic position each executed
+  maneuver buys. Her doctrine is minimal casualties, and the sacrifice voice
+  is the one reading that breaks the character. `tactical_recall` is the
+  exemplar; `grand_conscription`'s "the army becomes fuel" was the marked
+  counter-example and is rewritten.
+- **Conscription family renamed** (forced service is Shogunate behaviour;
+  the resistance were volunteers). Op name `conscript` stays internal;
+  display moves to Muster/Enlist/Rally: conscription_notice -> "Call to
+  Arms", mass_mobilization -> "Rally the Isles", grand_conscription ->
+  "General Muster of Watatsumi". to_the_front / field_promotion /
+  reinforcements keep their names.
+- **`riptide_strike` -> `all_streams_flow`, ID-LEVEL** (the one id rename;
+  landed BEFORE W2 so the arm was born with the right name). Riptide is
+  Tartaglia's signature mechanic -- a cross-character collision inside
+  Genshin. "All Streams Flow to the Sea" is her C5 and means exactly what
+  the card does.
+- **Other renames:** jade_bulwark -> "Pearl Bulwark" (jade is Liyue-coded;
+  Watatsumi is coral and pearl); mercy_of_the_deep -> "Mercy of the
+  Currents"; vigil_of_the_deep KEEPS its name (it is the ward's name and it
+  is earned); depths_judgment -> "Sango Isshin" ("Judgment" is
+  Fontaine-coded; Sango Isshin is her C6, wiki-verified);
+  sayu_yoohoo_windwheel -> "Sayu — Yoohoo Art: Fuuin Dash".
+- **Private-characterization renames** (the drained introvert, the secret
+  novel reader, the wish for quiet): tide_reading -> "Stolen Chapter",
+  moon_signal -> "A Moment Alone", and the optional third LANDS --
+  undertow_shuffle -> "Daydream of a Quiet Life". Effects unchanged.
+- **Relic swap:** the starting relic is displayed as **"Pearl of Wisdom"**
+  (NOT the drafted alt "Everlasting Moonglow"). "Tamakushi Casket" moves to
+  the mechanic canon actually names -- the Garment-refreshes-Kurage link.
+  Relic mechanics unchanged; the hook IDENTIFIER stays `tamakushi_casket`
+  (ids are stable across this overlay, and it now sits on the engine
+  powering the link it is named for). CONSEQUENCE: the relic took "Pearl of
+  Wisdom", so epiphany_of_the_deep could not have it -- it takes **"Song of
+  Pearls"**, her wiki-verified 4th Ascension passive.
+- **Raiden KEEPS "Musou no Hitotachi"**; the gloss flips from irony to
+  RECONCILIATION. The retired reading had Kokomi fishing for the blade that
+  executed her people's Visions; the true gloss is the peace's crowning
+  proof -- the Shogun's blade defends Watatsumi now.
+- **"The pool is the peace, not her army"** lands as a companion-sheet
+  framing note: the roster spans every Inazuma faction because it is
+  post-Decree Inazuma answering Watatsumi's call, not a resistance muster.
+
+WIKI RE-VERIFY (the plan's header audit ask; the wiki is the instrument,
+not anyone's memory): **"The Moon's Beauty" is NOT a Kokomi name** and has
+been struck from the sheet's verified list -- the header audit ask was
+correct. Confirmed canon: Kurage's Oath (Elemental Skill, which summons the
+Bake-Kurage), Nereid's Ascension (Burst), Ceremonial Garment, Tamakushi
+Casket (A1 passive: casting Nereid's Ascension refreshes a fielded
+Bake-Kurage -- exactly the link O4 models), Song of Pearls (A4), Princess of
+Watatsumi (innate), C1 At Water's Edge / C5 All Streams Flow to the Sea /
+C6 Sango Isshin. Beta-era sources carry "Kaijin Ceremony" and "Haworthia
+Casket" for the Burst and A1 passive; those are pre-release names and are
+noted as a trap in the sheet header.
+
+## R56 -- Kokomi v0.4b: the 12-card starter, the x4 bank read, Kurage's Oath (2026-07-26)
+
+USER RULING, same day as R54/R55 and SUPERSEDING their statline conclusions.
+R54 chose meter 20 on a 10-card starter with a /4 bank read; this ruling
+rebuilds the starting deck and flips the read to a multiplier. R54's act
+numbers are a superseded world -- never compare them unlabeled.
+
+**The starter is TWELVE cards, the Silent shape**: 4 Water's Edge + 4 Coral
+Guard + 2 companions (Gorou fixed, Sayu-or-Shinobu rolled) + 2 mechanic
+cards (Bake-Kurage for Charge, Tactical Retreat for exhaust). Rationale:
+her opening deck carries exhaust, so a 10-card self-milling deck risks
+decking out; and starters are SUPPOSED to be bad and supposed to leave, so
+two more mediocre cards is a real dilution cost that Tactical Retreat's
+thinning pays down. Companions are now ADDITIONS, not replacements.
+
+**waterspout and surging_shoal are OUT of the starter.** USER RULING: "no
+one starts the game with AoE; if you need it, you draft it." Both stay in
+the pool; surging_shoal was in NO package and would have become unreachable
+(the vigil defect), so it is now a priest + commander draft-in.
+
+**The Kurage pulse read flips from divisor to MULTIPLIER**:
+KURAGE_PULSE_PER_CHARGE = 4 (was: +1 per 4 Charge). Design intent: every
+Exhaust is worth about a Silent shiv toss. KURAGE_DURATION 3 -> 1,
+KURAGE_PULSE_BASE 2 -> 4, KURAGE_PULSE_BLOCK 2 -> 0.
+
+**THE ASSISTANT'S "x4 IS TOO HOT" OBJECTION WAS WRONG AND IS WITHDRAWN.**
+It was argued from the internal §2.2 reader hierarchy and from act-1 clear
+measured against STALE anchors. [USER] countered with the StS2 precedent:
+Necrobinder starts with a 1-cost "Osty gains 5 HP" and a 1-cost "deal 3 +
+Osty's HP" -- unbounded starting-deck scaling is something the actual game
+designers ship. Re-measuring the anchors in the current world settled it:
+act-1 clear is NOT the binding metric (Klee clears 83% of act 1 and wins
+3.4% of runs). On RUN winrate x4 is mid-cast. Standing caveat, [USER]'s
+own: Osty's HP can go DOWN with bad play, Charge only goes up -- so this
+is watched in act 3, where it does not in fact run away (6% vs Furina 13%).
+
+**PREDICTION (a) NOW HITS.** R54 graded "starter A1 falls below A2" as a
+MISS at every meter step. Under the 12-card starter it PASSES: A1 3.2 vs
+A2 4.8. Isolated at x0 (bank read fully OFF) the constraint ALREADY passes
+at A1 2.8 vs A2 3.5 -- so the fix is the COMPOSITION, not the multiplier,
+confirming the R54 report's §4 finding by direct experiment. waterspout
+(10 flat) and surging_shoal (7 AoE) were her frontload. The multiplier
+buys A2 depth and clear rate on top. Median passes too (A1 3.7 / A2 5.1).
+
+**NEW CARD -- Kurage's Oath** (Common power, 1 cost, `kurage_ward`): while
+it holds, every Kurage pulse also grants Block. This drafts back the
+mending half of the canon Bake-Kurage ("deals Hydro DMG and heals nearby
+characters at set intervals") after the baseline pulse Block was zeroed --
+the healer fantasy becomes an opt-in build rather than a freebie. Upgrade
+buys INNATE ONLY; the Block does not move.
+NUMBER IS MEASURED, NOT REASONED: drafted at 5 by ratio off Regent, it was
+a TRAP PICK (priest run 3.8% WITH it vs 5.8% without). Bracket: ward 5 ->
+3.8%/5.4%, ward 8 -> 4.8%/5.8%, ward 12 -> 6.2%/5.8%. The ratio had to go
+UP for the cheaper trigger: Regent's finisher is played reliably, while
+Bake-Kurage is one copy in a growing deck pulsing ONCE per play at
+duration 1. **RULED at 12, with [USER]'s flag on the record: "I feel like
+that's too strong, but we can rebalance later."** First knob back.
+
+**MEASURED WORLD (500 runs/plan, --realistic, DRAFTER v8):**
+priest 6.2% run (act 56/27/6); commander 5.8% (65/37/6); generic 2.0%
+(46/16/2); assist 1.6% (44/14/2). Anchors re-measured same world: Furina
+13.4%, real_ironclad 3.6%, Klee 3.4%, ref_ironclad 0.6%. She lands above
+Klee/Ironclad and below Furina on every stage.
+Meter 20 re-checked in the new world and KEPT (15 -> 9.3/8.7% run,
+20 -> 6.7/7.7%, 25 -> 4.0/6.0%).
+
+**OPEN, logged not acted on:** [USER] -- "maybe the Burst needs to be
+reworked entirely; refreshing something that never expires was also a dud."
+The Tamakushi Casket link is inert at KURAGE_DURATION 1 (a fielded Kurage
+is always at exactly 1, so refresh-to-full is a no-op). The mechanic stays
+in code and stays test-pinned via a raised duration, so restoring a longer
+duration is safe; the Burst rework itself is a future conversation.

@@ -11,8 +11,15 @@
 # ---- BASICS ----
 waters_edge:       {damage: +3}          # 6->9 (R53: base stays at Strike parity; Strike+ slope)
 coral_guard:       {block: +3}           # 5->8, Defend-exact
-bake_kurage:       {block: +3}           # 3->6; the hydro application never moves (resource-curve law)
-tactical_recall:   {draw: +1}            # burn 1, see 2 — the exhaust-teacher graduates
+kurages_oath:      {innate: true}        # [USER]: the upgrade buys INNATE ONLY — the Block does not move.
+                                         # At 12 the printed number is already flagged as maybe-too-strong,
+                                         # so the upgrade sells consistency (online turn 1, not drawn on
+                                         # turn 6) instead of more of it.
+bake_kurage:       {kurage_turns: +1}    # v0.4 starter rework: 1->2 turns on the field, i.e. ONE extra
+                                         # pulse — which at the x4 bank read is the whole upgrade. The pulse numbers are constants and
+                                         # the +1 Charge never moves (resource-curve law) — duration is the
+                                         # only dial an upgrade owns, and one more pulse is the honest reward.
+tactical_retreat:  {draw: +1}            # burn 1, see 2 — the exhaust-teacher graduates
 tide_reading:      {block: +2}           # 2->4; draw stays 1
 
 # ---- COMMONS (one number bump each; zero cost reductions — Klee sheet law) ----
@@ -41,7 +48,7 @@ swift_currents:    {energy: +1}          # 2->3, once; Exhaust STAYS (removal op
                                          # sugar_rush got the removal only because Sparks bound its loop)
 shell_of_sanctuary: {block: +4}          # 11->15, spirited_away-parity
 exposing_current:  {vulnerable: +1}      # 2->3 (surprise_visit-parity; the R51 rider sharpens, the Exhaust stays)
-riptide_strike:    {damage: +3}          # 5->8 base; the 1-per-2-Charge read never moves (resource-curve law)
+all_streams_flow:  {damage: +3}          # 5->8 base; the 1-per-2-Charge read never moves (resource-curve law)
 tidal_lure:        {block: +2}           # played 4->6; Sly Vulnerable stays 1 (header gap note)
 
 # ---- RARES (quality over quantity) ----
@@ -54,14 +61,15 @@ epiphany_of_the_deep: {cost: -1}         # 2->1 (true_spark_knight precedent: th
 prayer_to_the_moon: {block: +4}          # 4->8; the Charge line NEVER moves (resource-curve law)
 
 # ---- COMPANIONS (modest; upgraded forms stay enabler-grade — Klee sheet law) ----
-gorou_inuzaka_charge:    {damage: +2}    # 6->8, the starter arrow
+gorou_inuzaka_charge:    {damage: +3}    # 6->9, the starter arrow (v0.4: 0-cost + Exhaust, so the
+                                         # upgrade buys damage, not reach)
 gorou_war_banner:        {buff: +1}      # next attack +3->+4; Block stays 4
 gorou_heart_of_the_clan: {power_amount: +1}   # metallicize 2->3
 sayu_yoohoo_windwheel:   {damage: +2}    # 4->6; the Swirl is the point and never moves
-sayu_daruma_gift:        {block: +2}     # played face 4->6; next-turn 4 stays (block key hits the first op only)
+sayu_daruma_gift:        {block: +2, block_next_turn: +2}   # 4+4 -> 6+6 (v0.4: the next-turn half moves too)
 sayu_naptime:            {draw: +1}      # 1->2, still free
 shinobu_sanctifying_ring: {damage: +2}   # 3->5 all; Block stays 4
-shinobu_grass_ring_bond: {block: +2}     # 5->7, the honest wall thickens
+shinobu_grass_ring_bond: {block: +2}     # v0.4: 4->6 at 0 cost, the honest wall thickens
 shinobu_thundergrust:    {damage: +2}    # 7->9
 thoma_blazing_barrier:   {block: +2}     # 5->7; the lingering ember stays 2
 thoma_crimson_ooyoroi:   {damage: +2}    # 8->10
