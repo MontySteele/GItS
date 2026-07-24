@@ -29,6 +29,24 @@ namespace KleeMod;
 /// </summary>
 public static class CompanionSlot
 {
+    /// <summary>
+    /// The one sentence every relic hosting this slot appends to its
+    /// description. It lives here, next to the mechanic, because the two
+    /// hosts had already drifted: Furina's relic described the slot and
+    /// Klee's did not, so a Klee player had no in-game text explaining
+    /// where companions come from at all.
+    ///
+    /// Wording is load-bearing. "a fourth choice" -- not "an extra reward"
+    /// -- because TryModifyCardRewardOptions appends to the card reward's
+    /// OWN option list: the companion COMPETES with the three cards, it is
+    /// not taken alongside them (the correction of record in
+    /// PoundingSurprise). "after a fight" is the CardCreationSource.Encounter
+    /// gate, which the enum's own doc defines as the post-fight reward --
+    /// shops and events get no companion.
+    /// </summary>
+    public const string RewardSlotDescription =
+        "Card rewards after a fight offer a fourth [gold]Companion[/gold] choice.";
+
     // tier0 constants.RARITY_ODDS: common 0.60 / uncommon 0.35 / rare 0.05.
     private const float CommonOdds = 0.60f;
     private const float UncommonOdds = 0.35f;

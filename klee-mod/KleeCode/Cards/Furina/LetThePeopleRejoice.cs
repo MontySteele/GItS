@@ -69,6 +69,23 @@ public sealed class LetThePeopleRejoice
         FurinaResources.GainEncore(Owner.Creature, 6);
     }
 
+    /// <summary>
+    /// "Returns to the kit, no pile" -- tier0 combat.py play_card:
+    ///
+    ///     if card.kit_card:
+    ///         pass                  # returns to the kit, no pile
+    ///
+    /// That branch is unconditional on card TYPE, and this card is an Attack,
+    /// so the default result pile is Discard. Left at the default the cast
+    /// copy recirculated: it reshuffled into the draw pile, and because
+    /// FurinaKitGrant only dedups against the HAND it granted a fresh copy at
+    /// the next full meter regardless -- so every cast permanently added a
+    /// Burst to the deck. Klee's kit card never showed this because a played
+    /// Power already leaves combat (PileType.None); Furina's card type is the
+    /// only reason the divergence was reachable.
+    /// </summary>
+    protected override PileType GetResultPileTypeForCardPlay() => PileType.None;
+
     protected override void OnUpgrade()
     {
         // Kit cards are not smithable.

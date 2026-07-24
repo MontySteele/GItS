@@ -36,13 +36,33 @@ internal static class KleePowerIcons
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),
         SparksNSplashPower => KleePck.Path("klee/powers/sparks_n_splash.png"),
+        // Companion summons/auras. These four had NO case at all and fell to
+        // `_ => null`, i.e. the base-game placeholder -- the gap the 2026-07-24
+        // sweep found from Oz and Solar Isotoma. Wiring the paths ahead of the
+        // assets is deliberate: KleePck.Path returns null while a file is
+        // absent, so behaviour is unchanged until the PNG lands, and the miss
+        // is logged ONCE by name instead of failing silently forever.
+        OzSummonPower => KleePck.Path("klee/powers/oz_summon.png"),
+        SolarIsotomaPower => KleePck.Path("klee/powers/solar_isotoma.png"),
+        WitchsFlamePower => KleePck.Path("klee/powers/witchs_flame.png"),
+        CelestialGiftPower => KleePck.Path("klee/powers/celestial_gift.png"),
         FurinaBurstMeterPower => KleePck.Path("klee/powers/burst.png"),
         EncoreMeterPower or EncorePerTurnPower => KleePck.Path("klee/powers/spark.png"),
         FanfareMeterPower or FanfareAttackPer10Power =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        // ART DEBT, recorded not fixed (2026-07-24 sweep). These Furina powers
+        // borrow KLEE's icons: the Salon renders a BOMB and Encore a SPARK.
+        // That is arguably worse than the placeholder the companion powers had
+        // -- a wrong icon reads as intentional -- but swapping them to
+        // dedicated (absent) paths would regress them to placeholders today,
+        // which is a taste call, not a bug fix. Left as-is pending a ruling
+        // with Furina's look pass.
         SalonMemberPower or SalonDamageUpPower =>
             KleePck.Path("klee/powers/bomb.png"),
-        CappedSpotlightPower
+        // SpotlightPower is the shared base of BOTH the capped and uncapped
+        // texture powers (the 2026-07-24 cap ruling split the hierarchy);
+        // matching the base keeps every Spotlight power iconed.
+        SpotlightPower
             or SpotlightMultBonusTurnPower
             or SpotlightFlatDamageTurnPower
             or CenterStagePower
