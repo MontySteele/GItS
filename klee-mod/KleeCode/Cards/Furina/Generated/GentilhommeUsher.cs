@@ -44,13 +44,15 @@ public sealed class GentilhommeUsher : CustomCardModel, ICharacterCard, ISkillTa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gentilhomme Usher"),
-        ("description", "Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. Gain {CalculatedBlock:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(4m, ValueProp.Move)
+            new CalculationBaseVar(4m),
+            new CalculationExtraVar(1m),
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SalonMemberPower.ReplacementDelta(card, 1, SalonConstants.ReplacementDamageMultiplier))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,12 +65,13 @@ public sealed class GentilhommeUsher : CustomCardModel, ICharacterCard, ISkillTa
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var salonReplacements = 0;
+        var salonScaledBlock = DynamicVars.CalculatedBlock.Calculate(null);
         salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Usher);
-        await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue * (salonReplacements > 0 ? 3 : 1)), ValueProp.Move), cardPlay);
+        await CreatureCmd.GainBlock(Owner.Creature, salonScaledBlock, DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

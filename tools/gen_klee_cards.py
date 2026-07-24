@@ -995,11 +995,133 @@ def fanfare_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
 
 
 def salon_deploy_card(card: dict) -> bool:
-    """The salon x3 replacement multiplier is the deferred entangled modifier,
-    so salon-deploy cards stay on the PrintedDamage path."""
+    """Salon-deploy cards render their replacement multiplier through
+    `salon_calc_rider` instead of the other riders' path (their scaled value
+    depends on the company, not on Spotlight/Fanfare), so the Spotlight and
+    Fanfare predicates hand them off here."""
     return any(
         e.get("op") == "apply_power" and e.get("power") == "salon_member"
         for e in card.get("effects", []))
+
+
+# The var each scaled op renders through, and which replacement constant
+# scales it. Damage and block bow x3, every other numeric x2 -- the split the
+# inline `(salonReplacements > 0 ? 3 : 1)` / `? 2 : 1` expressions encoded.
+SALON_SCALED_VARS = {
+    "block": ("CalculatedBlock", "ReplacementDamageMultiplier"),
+    "damage": ("CalculatedDamage", "ReplacementDamageMultiplier"),
+    # NOT "Cards": DynamicVarSet.Cards is a TYPED accessor that casts to
+    # CardsVar, so a CalculatedVar under that name would throw on any read
+    # through the property. "Encore"/"PowerAmount" have no typed accessor.
+    "draw": ("DrawCards", "ReplacementNumericMultiplier"),
+    "gain_encore": ("Encore", "ReplacementNumericMultiplier"),
+    "apply_power": ("PowerAmount", "ReplacementNumericMultiplier"),
+}
+
+
+def _salon_calc_target(card: dict) -> tuple[dict, int, str, str] | None:
+    """The ONE effect on a salon-deploy card whose printed number the
+    replacement rule scales and which can render through a CalculatedVar:
+    (effect, deploys before it, var name, multiplier constant).
+
+    Only one, because `CalculatedDamageVar`, `CalculatedBlockVar` and the
+    plain `CalculatedVar` all take their base term from the single
+    `CalculationBase` var -- a second converted number on the same card would
+    compute itself off the first one's base. First eligible effect wins; any
+    others keep the inline `salonReplacements` expression (and their face
+    keeps under-reporting, which is logged, not silently fixed).
+
+    The deploy count must be STATIC: `WillReplace` is a closed form over the
+    pre-play company size plus the deploys this card runs first, so an
+    upgradeable deploy amount (a "PowerAmount" var on the deploy itself)
+    disqualifies the card rather than guessing.
+    """
+    if not salon_deploy_card(card):
+        return None
+    effects = card.get("effects", [])
+    deploys = 0
+    for eff in effects:
+        op = eff.get("op")
+        if op == "apply_power" and eff.get("power") == "salon_member":
+            if eff is power_upgrade_effect(card):
+                return None              # deploy count is not static
+            amount = eff.get("amount", 1)
+            if not isinstance(amount, int):
+                return None
+            deploys += amount
+            continue
+        if deploys == 0:
+            continue                     # nothing has bowed yet: not scaled
+        if op not in SALON_SCALED_VARS:
+            continue
+        if op == "damage":
+            # self-damage is unscaled; a card carrying its own rider would
+            # need a compound multiplier (none exist -- salon cards are
+            # excluded from the Fanfare/aura/Spotlight riders).
+            if eff.get("target") == "self":
+                continue
+            if "bonus_formula" in eff or "bonus_vs_aura" in eff:
+                continue
+        if op == "apply_power":
+            # PowerAmount is ours to own only if no OTHER effect already
+            # claims it for its upgrade delta (DynamicVarSet throws on a
+            # duplicate name -- the 2026-07-23 reward-screen softlock).
+            upgrade_owner = power_upgrade_effect(card)
+            if upgrade_owner is not None and upgrade_owner is not eff:
+                continue
+        if op == "draw":
+            # A branch draw or an upgrade-added draw emits its own CardsVar;
+            # two "Cards" vars is the same duplicate-name softlock.
+            if added_draw_upgrade(card) or branch_draw_upgrade(card):
+                continue
+        if op == "gain_encore":
+            # The ruled encore delta lands on EVERY gain_encore site, so the
+            # var may only own the amount when there is exactly one site.
+            if len([e for e in _effects_everywhere(card)
+                    if e.get("op") == "gain_encore"]) != 1:
+                continue
+            if added_encore_upgrade(card):
+                continue
+        # One effect per op, so the converted number is unambiguous. The
+        # deploys themselves are apply_power too, and never compete for the
+        # var, so they do not count against a scaled power.
+        if len([e for e in effects if e.get("op") == op
+                and not (op == "apply_power"
+                         and e.get("power") == "salon_member")]) != 1:
+            continue
+        var, mult = SALON_SCALED_VARS[op]
+        return eff, deploys, var, mult
+    return None
+
+
+def salon_calc_rider(card: dict, eff: dict) -> tuple[int, int, str, str] | None:
+    """Furina Legibility sprint, Track L-A4 (salon half): the effect scaled by
+    the Salon replacement rule, rendered through a CalculatedVar so the card
+    face shows the bowed-in value instead of the unscaled print.
+    Returns (printed base, deploys before it, var name, multiplier constant).
+
+    The multiplier calls `SalonMemberPower.ReplacementDelta`, which asks
+    `SalonMemberPower.StageIsFull` -- the same predicate `Deploy`'s loop uses.
+    One expression of the replacement rule, two readers.
+
+    Timing note that the emission relies on: the card's own deploys mutate the
+    company mid-resolution, so the body captures this value at the TOP of
+    OnPlay, against the same pre-play state the preview reads.
+    """
+    target = _salon_calc_target(card)
+    if target is None or eff is not target[0]:
+        return None
+    _, deploys, var, mult = target
+    return int(eff["amount"]), deploys, var, mult
+
+
+def salon_scaled_snapshot(card: dict) -> str | None:
+    """The C# local a converted salon card captures before its first deploy,
+    or None. Named per var so the body reads plainly."""
+    target = _salon_calc_target(card)
+    if target is None:
+        return None
+    return "salonScaled" + target[2].removeprefix("Calculated")
 
 
 def aura_calc_rider(card: dict, eff: dict) -> tuple[int, int] | None:
@@ -1111,11 +1233,38 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     return None
 
 
+def salon_calc_var_decls(card: dict, eff: dict) -> list[str] | None:
+    """The CalculationBase + extra + CalculatedVar trio for a salon-scaled
+    number, or None. Damage reads its extra term from `ExtraDamage` (that is
+    what `CalculatedDamageVar.GetExtraVar` overrides to); everything else
+    reads `CalculationExtra`."""
+    rider = salon_calc_rider(card, eff)
+    if rider is None:
+        return None
+    base, deploys, var, mult = rider
+    calc = (
+        f"new {var}Var(ValueProp.Move)"
+        if var in ("CalculatedDamage", "CalculatedBlock")
+        else f'new CalculatedVar("{var}")')
+    return [
+        f'new CalculationBaseVar({base}m)',
+        ('new ExtraDamageVar(1m)' if var == "CalculatedDamage"
+         else 'new CalculationExtraVar(1m)'),
+        f'{calc}.WithMultiplier(static (card, _) => '
+        f'SalonMemberPower.ReplacementDelta(card, {deploys}, '
+        f'SalonConstants.{mult}))',
+    ]
+
+
 def build_vars(card: dict) -> list[str]:
     """DynamicVar declarations, in the order the effects use them."""
     out = []
     for eff in card["effects"]:
         op = eff["op"]
+        salon_decls = salon_calc_var_decls(card, eff)
+        if salon_decls is not None:
+            out.extend(salon_decls)
+            continue
         # Constructor shapes differ per var and are NOT uniform: DamageVar and
         # BlockVar take (decimal, ValueProp); CardsVar takes a bare int;
         # HpLossVar takes a bare decimal. Verified against the decompiled
@@ -1222,7 +1371,8 @@ def build_vars(card: dict) -> list[str]:
     # instead. Typed vars carry their class-derived name (DamageVar ->
     # "Damage"), named vars declare theirs.
     names = [
-        (m.group(1) if (m := re.search(r'DynamicVar\("(\w+)"', decl))
+        (m.group(1)
+         if (m := re.search(r'(?:DynamicVar|CalculatedVar)\("(\w+)"', decl))
          else re.match(r"new (\w+?)Var\(", decl).group(1))
         for decl in out
     ]
@@ -1768,6 +1918,18 @@ def build_body(
     salon_deployed = False
     if salon_deploy_present:
         lines.append("var salonReplacements = 0;")
+    salon_snapshot = salon_scaled_snapshot(card)
+    if salon_snapshot is not None:
+        # The card's own deploys mutate the company as they run, so the
+        # scaled value is captured HERE -- against the pre-play company the
+        # card face read -- and spent below. Face and effect are then the
+        # same evaluation of the same expression on the same state.
+        target = _salon_calc_target(card)
+        var = target[2]
+        read = (f"DynamicVars.{var}.Calculate(null)"
+                if var in ("CalculatedDamage", "CalculatedBlock")
+                else f'((CalculatedVar)DynamicVars["{var}"]).Calculate(null)')
+        lines.append(f"var {salon_snapshot} = {read};")
     # Predicate snapshots: the sim resets its per-card counters at
     # resolve_card START, so the C# diff bases are captured at the top of
     # OnPlay, before any effect resolves -- not at the conditional's site.
@@ -1784,6 +1946,12 @@ def build_body(
         op = eff["op"]
 
         if op == "block":
+            if salon_calc_rider(card, eff) is not None:
+                lines.append(
+                    "await CreatureCmd.GainBlock(Owner.Creature, "
+                    f"{salon_snapshot}, "
+                    "DynamicVars.CalculatedBlock.Props, cardPlay);")
+                continue
             if spotlight_block_rider(card, eff) is not None:
                 # Base game's own idiom (Mirage): resolve through the same var
                 # the face reads, so preview and gain cannot drift.
@@ -1811,7 +1979,9 @@ def build_body(
 
         elif op == "draw":
             amount = "DynamicVars.Cards.BaseValue"
-            if salon_deployed:
+            if salon_calc_rider(card, eff) is not None:
+                amount = f"(int){salon_snapshot}"
+            elif salon_deployed:
                 amount += " * (salonReplacements > 0 ? 2 : 1)"
             lines.append(
                 f"await CardPileCmd.Draw(choiceContext, {amount}, Owner);"
@@ -1835,6 +2005,12 @@ def build_body(
                 # Face/preview and hit both route through the one var.
                 _emit_damage(card, eff, lines, ctx,
                              "DynamicVars.CalculatedDamage")
+                continue
+            if salon_calc_rider(card, eff) is not None:
+                # Same var, but spent from the pre-deploy snapshot: passing
+                # the var itself would make AttackCommand call Calculate()
+                # after this card's own deploys had already grown the company.
+                _emit_damage(card, eff, lines, ctx, salon_snapshot)
                 continue
             amount_expr = "DynamicVars.Damage.BaseValue"
             if "bonus_vs_aura" in eff:
@@ -1889,6 +2065,11 @@ def build_body(
             lines.append(_stmt_burst_energy(card, eff))
 
         elif op == "gain_encore":
+            if salon_calc_rider(card, eff) is not None:
+                lines.append(
+                    "FurinaResources.GainEncore(Owner.Creature, "
+                    f"(int){salon_snapshot});")
+                continue
             lines.append(
                 _stmt_gain_encore(
                     card, eff, salon_scaled=salon_deployed))
@@ -1915,7 +2096,9 @@ def build_body(
                 if eff is power_upgrade_effect(card)
                 else str(int(eff["amount"]))
             )
-            if salon_deployed and eff["power"] != "salon_member":
+            if salon_calc_rider(card, eff) is not None:
+                amount = f"(int){salon_snapshot}"
+            elif salon_deployed and eff["power"] != "salon_member":
                 amount = f"{amount} * (salonReplacements > 0 ? 2 : 1)"
             # Stack caps are enforced by the power's own
             # TryModifyPowerAmountReceived (the sim clamps at apply too), so
@@ -2550,7 +2733,8 @@ def build_description(card: dict) -> str:
 
         if op == "block":
             tok = ("CalculatedBlock"
-                   if spotlight_block_rider(card, eff) is not None else "Block")
+                   if spotlight_block_rider(card, eff) is not None
+                   or salon_calc_rider(card, eff) is not None else "Block")
             parts.append(f"Gain {{{tok}:diff()}} [gold]Block[/gold].")
 
         elif op == "block_next_turn":
@@ -2565,7 +2749,9 @@ def build_description(card: dict) -> str:
             # card" correctly becomes "Draw 2 cards" after upgrade. This is
             # the token BaseLib's SimpleLoc pipeline generates for "card(s)"
             # in #-prefixed strings; we emit runtime form directly.
-            parts.append("Draw {Cards:diff()} card{Cards:plural:|s}.")
+            v = ("DrawCards" if salon_calc_rider(card, eff) is not None
+                 else "Cards")
+            parts.append(f"Draw {{{v}:diff()}} card{{{v}:plural:|s}}.")
 
         elif op == "place_bomb":
             var = bomb_var(card)
@@ -2608,7 +2794,8 @@ def build_description(card: dict) -> str:
                     times, f" {times} times"
                 )
             tok = ("CalculatedDamage"
-                   if calc_rider(card, eff) is not None else "Damage")
+                   if calc_rider(card, eff) is not None
+                   or salon_calc_rider(card, eff) is not None else "Damage")
             if target == "enemy":
                 parts.append(f"Deal {{{tok}:diff()}} damage{suffix}.")
             elif target == "all_enemies":
@@ -2655,9 +2842,14 @@ def build_description(card: dict) -> str:
         elif op == "gain_encore":
             base = int(eff["amount"])
             delta = encore_upgrade(card)
-            amount = (
-                f"{{IfUpgraded:show:{base + delta}|{base}}}"
-                if delta else str(base))
+            if salon_calc_rider(card, eff) is not None:
+                # The var carries both the upgrade (CalculationBase bumps)
+                # and the salon x2, so it replaces the IfUpgraded swap.
+                amount = "{Encore:diff()}"
+            else:
+                amount = (
+                    f"{{IfUpgraded:show:{base + delta}|{base}}}"
+                    if delta else str(base))
             parts.append(f"Gain {amount} [gold]Encore[/gold].")
 
         elif op == "spend_encore":
@@ -2675,7 +2867,9 @@ def build_description(card: dict) -> str:
 
         elif op == "apply_power":
             template = APPLY_POWERS[eff["power"]][2]
-            x = ("{PowerAmount:diff()}" if eff is power_upgrade_effect(card)
+            x = ("{PowerAmount:diff()}"
+                 if eff is power_upgrade_effect(card)
+                 or salon_calc_rider(card, eff) is not None
                  else str(int(eff["amount"])))
             to = " to ALL enemies" if eff.get("target") == "all_enemies" else ""
             parts.append(template.replace("{X}", x).replace("{TO}", to))
@@ -2961,7 +3155,11 @@ def build_upgrade(card: dict) -> list[str]:
         if key is None or key not in deltas or key in done:
             continue
         done.add(key)
-        if key == "damage":
+        if salon_calc_rider(card, eff) is not None:
+            # Salon-converted numbers (block/draw/power alike) all keep their
+            # printed base in CalculationBase, so that is what upgrades.
+            var = "DynamicVars.CalculationBase"
+        elif key == "damage":
             # Converted riders have no "Damage" var -- their base lives in
             # CalculationBase (the CalculatedDamageVar's base term).
             var = ("DynamicVars.CalculationBase"
@@ -2995,9 +3193,21 @@ def build_upgrade(card: dict) -> list[str]:
         lines.append(
             f'DynamicVars["BonusPer"].UpgradeValueBy({int(deltas["bonus_per_detonation"])}m);')
     if "encore" in deltas:
-        lines.append(
-            "// encore: every gain_encore site reads IsUpgraded at play time "
-            "(branches included).")
+        salon_encore = next(
+            (e for e in card["effects"]
+             if e.get("op") == "gain_encore"
+             and salon_calc_rider(card, e) is not None), None)
+        if salon_encore is not None:
+            # A salon-converted encore prints {Encore:diff()} off the
+            # CalculatedVar, so its base upgrades like any other var instead
+            # of the amount swapping on an IsUpgraded read.
+            lines.append(
+                "DynamicVars.CalculationBase.UpgradeValueBy("
+                f'{int(deltas["encore"])}m);')
+        else:
+            lines.append(
+                "// encore: every gain_encore site reads IsUpgraded at play "
+                "time (branches included).")
     if "fanfare_cap" in deltas:
         lines.append(
             'DynamicVars["FanfareCap"].UpgradeValueBy('

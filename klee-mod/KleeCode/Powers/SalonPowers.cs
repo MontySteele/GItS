@@ -145,6 +145,41 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
             owner, FurinaResourceConstants.BurstPerSalonTick);
     }
 
+    /// <summary>The replacement rule, in ONE place: a deploy that lands on a
+    /// full stage bows the oldest member out. Both the loop in
+    /// <see cref="Deploy"/> and the card face (via <see cref="WillReplace"/>)
+    /// ask the question through here, so they cannot drift apart.</summary>
+    public static bool StageIsFull(int companyCount) =>
+        companyCount >= SalonConstants.MemberSlots;
+
+    /// <summary>Closed form of <see cref="Deploy"/>'s loop, for the card face:
+    /// will any of a card's first <paramref name="deploys"/> deploys displace
+    /// someone? Iteration i of that loop sees a company of
+    /// <c>min(Count + i, MemberSlots)</c> -- each pass either grows the queue
+    /// by one or replaces into a full one -- so <see cref="StageIsFull"/>
+    /// first turns true at <c>i = MemberSlots - Count</c> and stays true.
+    /// Testing the LAST iteration therefore answers for all of them; no
+    /// simulation is needed. Reads pre-play state only, which is exactly the
+    /// state the card's own resolution starts from -- hence card bodies
+    /// capture their scaled value BEFORE the first Deploy runs.</summary>
+    public static bool WillReplace(Creature owner, int deploys) =>
+        deploys > 0 && StageIsFull(Count(owner) + deploys - 1);
+
+    /// <summary>Face/resolution delta for a number the replacement rule
+    /// scales: the CalculatedVar computes <c>base + 1 x delta</c>, and this
+    /// returns <c>base x (multiplier - 1)</c> when a bow is coming, so the
+    /// result is <c>base x multiplier</c> -- the same number these cards
+    /// already resolved, now also the number they print. Reading the base
+    /// live off CalculationBase keeps it upgrade-safe.</summary>
+    public static decimal ReplacementDelta(
+        CardModel card, int deploys, int multiplier)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner == null) return 0m;
+        var printed = card.DynamicVars.CalculationBase.BaseValue;
+        return WillReplace(owner, deploys) ? printed * (multiplier - 1) : 0m;
+    }
+
     /// <summary>Salon v2 deploy: into a full stage, the OLDEST member bows
     /// out and the new member enters. Returns the replacement count (the
     /// generated card bodies scale their later numerics off it).</summary>
@@ -156,7 +191,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         var replacements = 0;
         for (var i = 0; i < amount; i++)
         {
-            if (company.Count >= SalonConstants.MemberSlots)
+            if (StageIsFull(company.Count))
             {
                 var displaced = company[0];
                 company.RemoveAt(0);
