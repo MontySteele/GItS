@@ -26,6 +26,8 @@ curtain_up:            {encore: +1}          # 2->3
 dramatic_entrance:     {conditional_bonus: +3}   # Spend-5 rider 4->7
 crowd_work:            {draw: +1}            # 2->3; Spend 2 Encore stays (the flux is the card)
 suffering_for_art:     {encore: +1}          # 3->4; the measured 1 self-damage stays
+lasting_impression:    {fanfare_floor: +2}   # 3->5 permanent baseline (F-B2). The floor IS the card, so the
+                                             # upgrade buys baseline rather than a bigger immediate rider.
 thunderous_ovation:    {block: +2}           # base 7->9 (13 total); Spend 5 and rider 4 stay
 tempo_change:          {draw: +1}            # 1->2; energy and encore_cost untouched
 warmup_act:            {damage: +2}          # 3->5
@@ -84,7 +86,7 @@ singer_of_many_waters: {heal: +4}            # 14->18; Exhaust NEVER removes (he
 unheard_confession:    {heal: +3}            # 8->11; Exhaust stays, Encore stays 6
 endless_waltz:         {cost: -1}            # 2->1 after the rework reprice (rare cost privilege)
 grand_gala:            {encore: +3}          # 4->7; Exhaust stays
-the_sea_is_my_stage:   {fanfare_floor: +5}   # +15->+20 FLOOR (was cap; F-A5). Blood price stays 6 until F-B2 drops it
+the_sea_is_my_stage:   {fanfare_floor: +5}   # +15->+20 FLOOR (was cap; F-A5). Blood rider DROPPED by F-B2
 universal_revelry:     {damage: +3}          # 9->12 base; spend 20 and 1_per_2 formula stay
 star_of_the_show:      {power_amount: +1}    # +3->+4 printed on Spotlighted damage
 prima_donna:           {cost: -1}            # 2->1

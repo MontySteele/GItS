@@ -79,10 +79,18 @@ def q1b(runs: int = RUNS) -> None:
             runs, SEED, grant_relics=True, grant_potions=True)
         wr = sum(r.won for r in results) / len(results)
         every = [tr for r in results for _, tr in r.fanfare_traces]
+        agg = fanfare_telemetry.aggregate(every)
+        pr = fanfare_telemetry.per_run(agg, len(results))
         print(f"\n  assigned {archetype} (pilot {pilot_id}) "
               f"— run winrate {wr:.1%}")
-        print(fanfare_telemetry.format_row("all acts",
-                                           fanfare_telemetry.aggregate(every)))
+        # Gate (3) is written PER RUN, and every rate in `agg` is per combat.
+        # Printed on its own line in its own unit so the two cannot be read
+        # across each other.
+        print(f"  {'GATE (3) floors':<20} "
+              f"{pr['floor_granted_per_run']:5.1f} points/run "
+              f"({pr['floor_grants_per_run']:.1f} grants/run over "
+              f"{pr['combats_per_run']:.1f} combats/run)   bar: >= 25/run")
+        print(fanfare_telemetry.format_row("all acts", agg))
         for act_i, traces in sorted(_by_act(results).items()):
             print(fanfare_telemetry.format_row(
                 f"act {act_i + 1}", fanfare_telemetry.aggregate(traces)))
