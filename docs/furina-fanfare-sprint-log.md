@@ -113,7 +113,7 @@ against the OLD card list, which is precisely the configuration the plan
 called net-negative. Recorded because two of the three gates can already be
 read, and one of them answers.
 
-| arm | read at-cap | pinned | empty | mean@read a1→a2→a3 | floors/run | run wr |
+| arm | read at-cap | pinned | empty | mean@read a1→a2→a3 | floors/combat | run wr |
 |---|---|---|---|---|---|---|
 | fanfare | 1.2% | 12.2% | 13.6% | 8.3 → 17.5 → 25.9 | 3.6 | 0.0% |
 | salon | 2.5% | 4.7% | 8.0% | 9.4 → 22.4 → 29.8 | 4.8 | 3.3% |
@@ -126,13 +126,25 @@ every arm. The diagnosis in §1 was correct and the engine fix does what it
 was designed to do. (Caveat: monotonic across ACTS is what is measured here;
 the plan words the gate across turn buckets. F-C will report both.)
 
-**Gate (3) — floors reach the archetype: FAILS, hard and as predicted.**
-The fanfare plan gets **3.6 floor points/run** against a bar of ≥25. Even in
-act 3 it is 13.9. F-A3's power-rarity rule alone cannot fix this — the
-archetype has 2 powers in 28 cards, which is the exact finding that made
-`gain_fanfare_floor` a required op rather than an optional one. **This is
-F-B2's to close** (the constellation card + the new common Exhaust-for-floor
-source), and it is now measured rather than asserted.
+**Gate (3) — floors reach the archetype: PASSES. (Corrected — see below.)**
+The fanfare plan gets **~30.6 floor points/run** at F-A, against a bar of
+≥25. Derived from the recorded rate: 3.6 points/combat × 510 combats ÷ 60
+runs.
+
+> **CORRECTION, recorded rather than quietly fixed.** This was first written
+> up as a *hard failure at 3.6/run*, and reported that way. It was a units
+> error in my own instrument, not a finding: `aggregate()` divides by
+> `len(live)`, and `live` is one trace per **combat**, so the rate it
+> produces can only ever be per-combat — but the key was named `_per_run`.
+> Gate (3) is written per RUN, and a run is ~9–12 combats, so the mislabel
+> understated the figure by an order of magnitude and inverted the verdict.
+> Fixed by renaming the rates `_per_combat` and adding an explicit
+> `per_run(agg, runs)` that the caller must supply a run count to — guessing
+> that count is precisely how the mislabel happened. Pinned by a test.
+>
+> Standing lesson for this sprint's remaining cells: **every rate carries its
+> denominator in its name**, and any figure compared against a registered bar
+> gets printed in the bar's own unit on its own line.
 
 **Run winrates: salon 11.1% → 3.3%.** Expected in direction — the plan's
 own honest statement is that the package is net-negative until F-B lands —
@@ -276,7 +288,54 @@ Result to be recorded in this log.
 
 ## Track F-B — Sheet: the fanfare card redesign
 
-Status: not started (blocked by ordering law on F-A).
+**Order changed by [USER] 2026-07-24: F-B2 runs BEFORE F-B1.** Rationale
+accepted: the seven gate→read conversions are hard to read while the
+archetype has no baseline for them to read. Floors first, then the cards
+that read them.
+
+### F-B2 — floor sources: DONE
+
+| edit | what |
+|---|---|
+| `the_sea_is_my_stage` | the constellation card. Blood rider **dropped**: the uncapper clause priced a ceiling raise, and a ceiling raise measured at +0.2pt to this very archetype — true HP on a character with no healing was never worth that. Now a flat +15 floor, plus the rare-Power rarity grant on top. Upgrade buys +5 more baseline (was cap). |
+| `rapturous_applause` | no edit needed — picks up the uncommon Power grant from F-A3's engine rule, exactly as the plan said. |
+| `lasting_impression` | **NEW common**, cost 1, Exhaust, `gain_fanfare_floor 3` + `gain_encore 4`. Upgrade `{fanfare_floor: +2}` → 5. |
+
+`lasting_impression` design notes: Exhaust is the anti-degeneracy line — it
+is what keeps a repeatable common from being free permanent scaling. The
+Encore rider moves the meter *now* so the card is not a dead turn while the
+deck is still assembling, and because Encore gain is itself Fanfare flux it
+pays into the same stat it raises the floor of. Name **PROPOSED** pending
+the lore audit (v1.7 checklist); it passes `lint_unique_names` against all
+six sheets and the reserved list.
+
+Pool is now 78 cards / 33 commons. Both floor cards defer from C# generation
+until F-D (`FURINA_DEFERRED_TO_FD`), same gate as before.
+
+### F-B2 measured (60 runs/arm, seed 20260724) — gate (3), in its own unit
+
+| arm | floors/run | grants/run | combats/run | bar | verdict |
+|---|---|---|---|---|---|
+| fanfare | **39.8** | 6.8 | 9.7 | ≥25 | PASS |
+| salon | 52.7 | 8.3 | 11.5 | ≥25 | PASS |
+| spotlight | 68.8 | 11.5 | 11.7 | ≥25 | PASS |
+
+Read-time saturation held while floors roughly doubled — fanfare read at-cap
+1.0%, salon 2.6%, spotlight 0.8%, all still far inside gate (2)'s <15%. That
+is the Risk-4 tripwire staying quiet with the added floor sources in the
+pool, which is the specific thing worth checking here and the reason the
+at-floor metric was added before any of this ran. `pinned` moved very little
+(fanfare 12.2% → 10.5%, salon 4.7% → 3.8%; spotlight rose 12.1% → 12.6%).
+
+Run winrates moved up but stay smoke-thin: salon 3.3% → 6.7%, spotlight
+0.0% → 3.3%, **fanfare still 0.0%**. The fanfare plan is the one the sprint
+exists for and it has not moved off zero — consistent with the plan's own
+read that F-B1 (the conversions) and F-B3 (frontload) are where its winrate
+lives, not the resource grammar.
+
+### F-B1 / F-B3 / F-B4
+
+Not started. F-B1 is next in the revised order.
 
 ## Track F-C — Pre-registered gates
 

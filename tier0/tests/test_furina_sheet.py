@@ -51,9 +51,11 @@ def test_pool_composition():
     for c in cards:
         by_rarity.setdefault(c.rarity, []).append(c)
     assert len(by_rarity["basic"]) == 5          # template §3.4 allows 4-5
-    # 32 commons since the Salon-v2 rework added standing_room_only (the
-    # common Fanfare-tied AoE, user directive 2026-07-23).
-    assert len(by_rarity["common"]) == 32
+    # 33 commons: Salon-v2 added standing_room_only (the common Fanfare-tied
+    # AoE, user directive 2026-07-23), and "The Tide Turns" F-B2 added
+    # lasting_impression -- a floor source at COMMON, which is what lets a
+    # power-light deck build a baseline without becoming a power deck.
+    assert len(by_rarity["common"]) == 33
     assert len(by_rarity["uncommon"]) == 25
     assert len(by_rarity["rare"]) == 15
     kit = [c for c in by_rarity["rare"] if c.kit_card]

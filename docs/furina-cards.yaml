@@ -8,8 +8,8 @@
 # (+ first-play trickle), limelight/top_billing gained spend lines, shared_billing/stage_lights riders swapped to
 # application/debuff, usher_the_waves gained Weak, blocking_notes rehomed block. ALL RE-AUTHORED NUMBERS PROPOSED
 # pending red-pen (furina-sheet-pass-3-report.md; pass-2 numbers are the selector-v2 archive).
-# Numbers tuned through 4 measured rounds against the declared statline (see furina-sheet-pass-1-report.md §2); 77 cards
-# since the Salon-v2 rework added standing_room_only (docs/furina-salon-rework-plan.md — salon typed members, reprice).
+# Numbers tuned through 4 measured rounds against the declared statline (see furina-sheet-pass-1-report.md §2); 78 cards
+# since "The Tide Turns" F-B2 added lasting_impression, the common floor source (the Salon-v2 rework had brought it to 77).
 # Element: hydro | Cadence: SKILL-grade (kickoff §1): damage on type:skill / burst-tag / skill_tag cards applies hydro; plain attacks never do.
 # Archetypes: salon (default plan / solo floor) | spotlight (draft-gated high-ceiling) | fanfare (tempo/velocity flux) | generic
 # Statline this sheet must produce (kickoff §2, CLEARED): A1 1.0-1.5 dreadful, A4 4.3 + A6 4.2 elite, A5 3.7, A7 ~2.0 weak.
@@ -43,7 +43,7 @@
    # Signature basic (SALON v2, rework plan): Chevalmarin takes the stage — the applier, 2 hydro a turn seeding
    # reactions from card one. Members are TYPED now; Fanfare is the Focus analogue on all member numbers.
 
-# ---------- COMMON (32: +standing_room_only at the Salon-v2 rework) ----------
+# ---------- COMMON (33: +standing_room_only at Salon-v2, +lasting_impression at F-B2) ----------
 # Salon (9)
 - {id: gentilhomme_usher, name: "Gentilhomme Usher", cost: 1, type: skill, rarity: common, solve: [block, utility], archetypes: [salon], role: enabler, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: usher}, {op: block, amount: 4}]}
@@ -90,6 +90,13 @@
 - {id: suffering_for_art, name: "Suffering for Art", cost: 0, type: skill, rarity: common, solve: [sustain, velocity], archetypes: [fanfare], role: enabler,
    effects: [{op: damage, amount: 1, target: self}, {op: gain_encore, amount: 3}]}
    # The tragedienne: pay 1 HP, gain 3 buffer. Both movements generate Fanfare; the measured one-point wound keeps the risk/reward without making an overpicked Common a run liability.
+- {id: lasting_impression, name: "Lasting Impression", cost: 1, type: skill, rarity: common, solve: [scaling], archetypes: [fanfare], role: enabler, exhaust: true,
+   effects: [{op: gain_fanfare_floor, amount: 3}, {op: gain_encore, amount: 4}]}
+   # F-B2's floor source at COMMON, and the reason the mechanic reaches the archetype it was built for: powers alone
+   # cannot, because this plan holds 2 of them in 28 cards (measured 3.6 floor pts/run against a bar of 25). A  lint-ok: F-A smoke measurements, not card numbers
+   # performance the audience permanently remembers. Exhaust is the anti-degeneracy line — it is what keeps a
+   # repeatable common from being free permanent scaling — and the Encore rider moves the meter NOW so the card is
+   # not a dead turn while the deck is still assembling. Name PROPOSED, pending the lore audit. PROPOSED.
 - {id: thunderous_ovation, name: "Thunderous Ovation", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [fanfare, generic], role: glue,
    effects: [{op: block, amount: 7}, {op: conditional, if: fanfare_at_least_5, then: [{op: block, amount: 4}]}]}
    # The defensive Common converter: Spend 5 Fanfare after gaining 11 Block, reopening the meter on the survival axis.
@@ -319,9 +326,11 @@
    # All My Treasures parity: four deployments — on any live stage the elders bow out (v2 evoke geometry), and its
    # replacement-doubled Encore rider funds the opening turns. Cost 3->2 at the rework reprice. PROPOSED.
 - {id: the_sea_is_my_stage, name: "The Sea Is My Stage", cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [fanfare], role: payoff,
-   effects: [{op: gain_fanfare_floor, amount: 15}, {op: damage, amount: 6, target: self}]}
-   # THE UNCAPPER (kickoff §4: "Rare uncappers at nasty setup cost"). +15 cap; blood raised at red-pen flag 3 —
-   # self-damage that is itself flux self-subsidizes, so the law demands the deeper cut: 10% of maxHP.
+   effects: [{op: gain_fanfare_floor, amount: 15}]}
+   # THE CONSTELLATION CARD (F-B2). Was the uncapper; the blood rider is DROPPED with the law that demanded it.
+   # The uncapper clause priced a ceiling raise, and a ceiling raise measured at +0.2pt to this very archetype —
+   # true HP on a character with no healing was never worth that. Being a Rare Power it ALSO earns the rarity
+   # grant, so it lands as a permanent baseline of 15 plus the standard rare-Power grant on top. PROPOSED.
 - {id: universal_revelry, name: "Universal Revelry", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [fanfare], role: payoff,
    effects: [{op: damage, amount: 9, target: all_enemies, bonus_formula: 1_per_2_fanfare}]}
    # The archetype's AoE payoff, already scaling at 1 per 2 Fanfare. Its Fanfare spend gate retired with that grammar (F-A4);

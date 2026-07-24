@@ -174,8 +174,16 @@ def aggregate(traces: list[FanfareTrace]) -> dict:
                        if reads else 0.0),
         "mean_at_read": (sum(read_vals) / len(read_vals)
                          if read_vals else 0.0),
-        "floor_grants_per_run": sum(t.floor_grants for t in live) / len(live),
-        "floor_granted_per_run": sum(t.floor_granted for t in live) / len(live),
+        # PER COMBAT. `live` is one trace per FIGHT, so dividing by it can
+        # only ever yield a per-combat rate -- these were briefly named
+        # `_per_run` and that mislabel inverted a gate verdict: gate (3) is
+        # written per RUN, and a run is ~9 combats, so the per-combat figure
+        # reads as a ~9x failure of a bar it actually clears. Callers that
+        # know their run count derive the per-run number themselves; see
+        # `per_run` below.
+        "combats_counted": len(live),
+        "floor_grants_per_combat": sum(t.floor_grants for t in live) / len(live),
+        "floor_granted_per_combat": sum(t.floor_granted for t in live) / len(live),
         "decayed_per_combat": sum(t.decayed for t in live) / len(live),
         "time_at_cap": sum(t.turns_at_cap for t in live) / turns,
         "time_at_floor": sum(t.turns_at_floor for t in live) / turns,
@@ -187,6 +195,23 @@ def aggregate(traces: list[FanfareTrace]) -> dict:
         "spent_per_combat": sum(t.spent for t in live) / len(live),
         "mean_held_fraction": sum(t.held_fraction for t in live) / len(live),
         "peak_fraction": sum(t.peak / t.cap for t in live if t.cap) / len(live),
+    }
+
+
+def per_run(agg: dict, runs: int) -> dict:
+    """Rescale the per-combat rates to PER RUN, which is the unit gate (3)
+    ("floors granted >= 25/run") is written in. Kept as an explicit call
+    rather than folded into aggregate() because only the caller knows how
+    many runs produced the traces -- and guessing that is exactly how the
+    per-combat figure got mislabelled per-run in the first place."""
+    if not agg or not runs:
+        return {}
+    combats = agg["combats_counted"]
+    return {
+        "combats_per_run": combats / runs,
+        "floor_grants_per_run": agg["floor_grants_per_combat"] * combats / runs,
+        "floor_granted_per_run": (agg["floor_granted_per_combat"]
+                                  * combats / runs),
     }
 
 
@@ -202,7 +227,7 @@ def format_row(label: str, agg: dict) -> str:
             f"mean {agg['mean_at_read']:5.1f} (n={agg['reads']})   "
             f"| turn at-cap {agg['time_at_cap']:6.1%}   "
             f"overflow {agg['overflow']:6.1%}   "
-            f"floors {agg['floor_granted_per_run']:5.1f}/run "
-            f"({agg['floor_grants_per_run']:.1f} grants)   "
+            f"floors {agg['floor_granted_per_combat']:5.1f}/combat "
+            f"({agg['floor_grants_per_combat']:.1f} grants)   "
             f"decay {agg['decayed_per_combat']:5.1f}/combat   "
             f"n={agg['combats']} combats / {agg['turns']} turns")

@@ -135,6 +135,24 @@ def test_a_floor_pinned_meter_is_visible_even_though_it_never_reads_at_cap():
     assert (tr.floor_grants, tr.floor_granted) == (1, 15)
 
 
+def test_floor_rates_are_per_combat_and_per_run_is_derived_explicitly():
+    """Gate (3) is written per RUN; every rate in aggregate() is per COMBAT,
+    because `live` is one trace per fight. Conflating them understates the
+    per-run figure by the combats-per-run factor (~9x) and reads as a gate
+    failure where there is none -- which is exactly what happened once."""
+    traces = [ft.FanfareTrace(turns=3, cap=30, held=[5, 5, 5],
+                              floor_grants=1, floor_granted=8)
+              for _ in range(18)]           # 18 combats from 2 runs
+    agg = ft.aggregate(traces)
+    assert agg["floor_granted_per_combat"] == 8
+    assert agg["combats_counted"] == 18
+
+    pr = ft.per_run(agg, runs=2)
+    assert pr["combats_per_run"] == 9
+    assert pr["floor_granted_per_run"] == 72     # NOT 8
+    assert pr["floor_grants_per_run"] == 9
+
+
 def test_an_empty_meter_is_not_reported_as_a_built_floor():
     """Before any grant the floor is 0, so `at_floor` fires on an EMPTY
     meter too -- opposite diagnosis, same flag. Act 1 is dominated by this

@@ -7,9 +7,9 @@
     "namespace": "KleeMod.Cards.Furina.Generated"
   },
   "coverage": {
-    "total": 77,
+    "total": 78,
     "generated": 75,
-    "blocked": 2
+    "blocked": 3
   },
   "generated": [
     "an_invitation",
@@ -94,11 +94,13 @@
     "guest_neuvillette_tears"
   ],
   "blocked": {
+    "lasting_impression": "op 'gain_fanfare_floor'",
     "let_the_people_rejoice": "kit card (hand-write it against the KitBurst machinery)",
     "the_sea_is_my_stage": "op 'gain_fanfare_floor'"
   },
   "runtime_clusters": {
     "encore_fanfare_resources": [
+      "lasting_impression",
       "let_the_people_rejoice"
     ],
     "shared_emitter_gap": [

@@ -21,7 +21,7 @@ FURINA_HAND_WRITTEN = {"let_the_people_rejoice"}
 # tier-0.5 gates. Until those pass, `gain_fanfare_floor` has no C# home, and
 # emitting a call to a method that does not exist would trade a visible
 # deferral for a build break. Released by: F-D.
-FURINA_DEFERRED_TO_FD = {"the_sea_is_my_stage"}
+FURINA_DEFERRED_TO_FD = {"the_sea_is_my_stage", "lasting_impression"}
 
 # Cards whose UPGRADE is unauthored because the delta it used to carry died
 # with a retired grammar. Same curation rule as above: an unupgradable card
@@ -115,12 +115,13 @@ def test_furina_profile_emits_every_non_kit_card():
     manifest = json.loads(
         gen.FURINA_PROFILE.manifest.read_text(encoding="utf-8")
     )
-    # 77 cards since the Salon-v2 rework added standing_room_only; one more
-    # withheld while F-D is gated (see FURINA_DEFERRED_TO_FD).
+    # 78 cards since F-B2 added lasting_impression, the common floor source.
+    # Two withheld while F-D is gated (see FURINA_DEFERRED_TO_FD) -- both are
+    # gain_fanfare_floor cards, which is the whole of the deferral.
     assert manifest["coverage"] == {
-        "total": 77,
+        "total": 78,
         "generated": 75,
-        "blocked": 2,
+        "blocked": 3,
     }
     assert set(manifest["generated"]) == generated
     assert set(manifest["blocked"]) == withheld
