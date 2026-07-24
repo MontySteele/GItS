@@ -179,3 +179,22 @@ def resolve_unknown(rng: random.Random, weights: dict[str, float]) -> str:
 def fresh_unknown_weights() -> dict[str, float]:
     """A run's Unknown pity table, reset per act (the real rule)."""
     return dict(C.MAP_UNKNOWN_BASE)
+
+
+def linear(kinds, act: int = 0) -> ActMap:
+    """A one-room-per-floor map with exactly these kinds, in order.
+
+    The TEST SEAM. A generated map is the right default and the wrong way to
+    ask "does the treasure node grant a relic" -- that question wants one
+    node, not a distribution. Tests build the node sequence they mean and
+    inject it through `model.build_act_map` (the same shape as the long-
+    standing `model.build_node_encounter` seam).
+
+    No fixed-floor rules are applied: `linear("T")` is a one-floor act whose
+    single room is the treasure, which is exactly what a unit test wants.
+    """
+    kinds = list(kinds)
+    floors = [[Room(floor=f, index=0, kind=k, out=[0] if f + 1 < len(kinds)
+                    else [])]
+              for f, k in enumerate(kinds)]
+    return ActMap(act=act, floors=floors)

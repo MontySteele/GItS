@@ -35,7 +35,8 @@ def test_realistic_runner_enables_both_run_layers(monkeypatch, capsys):
     def fake_run_many(*args, **kwargs):
         called["args"] = args
         called["kwargs"] = kwargs
-        return [SimpleNamespace(node_kinds=[], hp_by_node=[])]
+        return [SimpleNamespace(node_kinds=[], hp_by_node=[], n_acts=1,
+                                events=[], deck_ids=[])]
 
     monkeypatch.setattr(runner.model, "run_many", fake_run_many)
     monkeypatch.setattr(runner.run_metrics, "summarize_runs", lambda _: {})
@@ -57,6 +58,7 @@ def test_realistic_runner_enables_both_run_layers(monkeypatch, capsys):
         "grant_potions": True,
         "n_acts": None,                 # §10.1: default spans RUN_ACTS
         "jobs": 1,                      # serial unless --jobs asks
+        "route_name": "hunter",         # §11: elite-seeking is the default
     }
     assert "realistic (relics + potions)" in capsys.readouterr().out
 
@@ -67,7 +69,8 @@ def test_bare_runner_preserves_historical_defaults(monkeypatch):
     def fake_run_many(*args, **kwargs):
         called["args"] = args
         called["kwargs"] = kwargs
-        return [SimpleNamespace(node_kinds=[], hp_by_node=[])]
+        return [SimpleNamespace(node_kinds=[], hp_by_node=[], n_acts=1,
+                                events=[], deck_ids=[])]
 
     monkeypatch.setattr(runner.model, "run_many", fake_run_many)
     monkeypatch.setattr(runner.run_metrics, "summarize_runs", lambda _: {})
@@ -83,6 +86,7 @@ def test_bare_runner_preserves_historical_defaults(monkeypatch):
         "grant_potions": False,
         "n_acts": None,                 # §10.1: default spans RUN_ACTS
         "jobs": 1,                      # serial unless --jobs asks
+        "route_name": "hunter",         # §11: elite-seeking is the default
     }
 
 

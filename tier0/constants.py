@@ -279,7 +279,15 @@ WINRATE_BAND_MIN_FIGHTS = 1000    # ratification process fix: winrate band
 # v2 = "NNNENRNNENRNRB" (11 fights, 3 rests incl. guaranteed pre-boss): the
 #      archive world of the Furina sprint-1 and Klee pass-4 reports.
 # v1 = "NNNENRNNENRNB"  (11 fights, 2 rests): the M5-M8 archive world.
-RUNTEMPLATE_VERSION = 5
+# v6 (§11, 2026-07-24): THE TEMPLATE IS GONE. Each act generates a real
+#      16-floor StS2 map (tier05/maps.py) and a route policy walks it, so node
+#      composition is emergent and the run has agency. Unknown rooms resolve at
+#      entry, 55% of them into events (tier05/events.py). Every archived
+#      run-layer number is uncomparable across this boundary -- the same
+#      discipline as v4->v5, but total rather than partial.
+RUNTEMPLATE_VERSION = 6
+# DEAD as of v6; kept as the name of the world every pre-§11 measurement was
+# taken in, and still used by tests that pin a node sequence deliberately.
 RUN_NODE_TEMPLATE = "NNNRETN$ERB"
 
 # The act registry (§10.1): one spec per act -- pool file (tier05/content/)

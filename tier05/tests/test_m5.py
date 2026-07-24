@@ -10,6 +10,7 @@ from tier0 import constants as C
 from tier0.content import loader, upgrades
 from tier0.engine.state import CombatState
 from tier05 import draft, model, rewards
+from tier05 import maps
 from tier05.run_metrics import summarize_runs, survival_profile
 
 SEED = 42
@@ -137,7 +138,8 @@ def test_combat_max_hp_gain_carries_to_the_next_fight(monkeypatch):
         return CombatState(player=player, enemies=enemies,
                            rng=random.Random(seed))
 
-    monkeypatch.setattr(model, "node_template", lambda: ["N", "N"])
+    monkeypatch.setattr(model, "build_act_map",
+                        lambda rng, act: maps.linear("NN", act))
     monkeypatch.setattr(model, "run_fight", gain_once)
     model.run_one("klee", "demolition", "demolition",
                   lambda rng, deck, offers, archetype: None, SEED,
@@ -500,7 +502,15 @@ def test_summarize_runs_fragility_shape():
     # Relaxed to majority-clustering; flagged for red-pen in the sprint 1
     # report. The ratified 1000-fight winrate bands are untouched and
     # remain the real lock.
-    eb_deaths = sum(s["death_heatmap"].get(i, 0)
-                    for i, k in enumerate(model.node_template())
-                    if k in ("E", "B"))
-    assert eb_deaths >= sum(s["death_heatmap"].values()) * 0.5
+    # §11: node kinds vary per run, so E/B deaths must be counted from each
+    # run's OWN walked path, not from a shared template. The threshold also
+    # drops: the old 50% was a property of a spine with 2 elites in 7 fights,
+    # whereas a real map is ~8 normals to ~2.3 elites, so normals carry more
+    # of the total by construction. What must still hold is that the
+    # dangerous nodes are over-represented RELATIVE to how often they appear.
+    eb_deaths = sum(1 for r in res if r.death_node is not None
+                    and r.node_kinds[r.death_node] in ("E", "B"))
+    deaths = sum(1 for r in res if r.death_node is not None)
+    eb_share = sum(1 for r in res for k in r.node_kinds if k in ("E", "B")) \
+        / max(1, sum(len(r.node_kinds) for r in res))
+    assert eb_deaths / max(1, deaths) > eb_share

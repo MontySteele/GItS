@@ -43,8 +43,10 @@ from tier0.engine.state import Enemy
 
 _CONTENT_DIR = Path(__file__).parent / "content"
 
-# StS-real elite draw (§4.3): every act's elite NODES draw two DISTINCT
-# enemies from that act's 3-enemy elite pool.
+# DEAD as of §11: the old "two distinct elites per act" rule existed because
+# the authored template had exactly two elite NODES. Under a real map the
+# count is a routing outcome, so elites are drawn per node instead (ActDraw).
+# Kept as a name so archived tools referencing it still import.
 ELITES_PER_ACT = 2
 
 
@@ -133,12 +135,14 @@ class ActDraw:
     run rng) so easy/hard identity, the 2-of-3 elite draw and the boss draw
     are fixed for the act and replay identically under the same seed.
 
-    No encounter repeats within an act: the easy pool is shuffled and
-    consumed in order for the act's `easy_fights` easy fights; the elite
-    pool (3 entries) is shuffled and the first two taken for the 2 elite
-    nodes; later N draw from the hard pool; the boss is ONE draw from the
-    act's boss pool (§10.5 -- a 1-entry pool still consumes the draw, so
-    growing a pool never silently renumbers the other streams)."""
+    The easy pool is shuffled and consumed in order for the act's
+    `easy_fights` easy fights; later N draw from the hard pool. ELITES draw
+    per node from the act's shuffled pool, never the same one twice in a row
+    (§11: the run fights however many the route finds, so a pre-drawn pair
+    would cap it at two -- which is exactly the authored constant the map
+    layer exists to remove). The boss is ONE draw from the act's boss pool
+    (§10.5 -- a 1-entry pool still consumes the draw, so growing a pool never
+    silently renumbers the other streams)."""
 
     def __init__(self, rng: random.Random, act: int = 0):
         p = pools(act)
@@ -147,9 +151,9 @@ class ActDraw:
         self._easy = list(p["easy"])
         rng.shuffle(self._easy)
         self._hard = list(p["hard"])
-        elite = list(p["elite"])
-        rng.shuffle(elite)
-        self._elites = elite[:ELITES_PER_ACT]
+        self._elite_pool = list(p["elite"])
+        rng.shuffle(self._elite_pool)
+        self._last_elite = None
         bosses = boss_pool(act)
         self._boss = bosses[rng.randrange(len(bosses))]
         self._n_seen = 0
@@ -159,11 +163,18 @@ class ActDraw:
         if kind == "N":
             i = self._n_seen
             self._n_seen += 1
-            if i < self._easy_fights:         # first easy_fights N -> easy
-                return self._easy[i]
+            if i < min(self._easy_fights, len(self._easy)):
+                return self._easy[i]          # first easy_fights N -> easy
             return rng.choice(self._hard)     # later N -> hard pool
         if kind == "E":
-            spec = self._elites[self._e_seen]   # 2 distinct per act
+            # §11: how many elites a run fights is a ROUTING outcome (0-5),
+            # not a fixed 2, so the draw can no longer pre-pick a pair. The
+            # real rule: the same elite may appear more than once in an act
+            # but never twice in a row (Map Locations).
+            choices = [e for e in self._elite_pool
+                       if e["id"] != self._last_elite] or self._elite_pool
+            spec = choices[rng.randrange(len(choices))]
+            self._last_elite = spec["id"]
             self._e_seen += 1
             return spec
         if kind == "B":
