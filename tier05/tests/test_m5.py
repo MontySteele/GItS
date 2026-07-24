@@ -293,15 +293,18 @@ def test_fanfare_core_is_native_generation_plus_output_converter():
         >= draft.FANFARE_GENERATION_COVERAGE
     assert not draft.core_complete(starter, "fanfare")
 
-    # The common attack cashes Fanfare into immediate output and completes
-    # the plan.  A pure draw-spender is useful machinery, but not the piece
-    # that makes a survival/damage plan functional.
-    converter = loader.get_card("dramatic_entrance")
-    utility_spender = loader.get_card("florid_cadenza")
-    assert draft._is_fanfare_converter(converter)
-    assert not draft._is_fanfare_converter(utility_spender)
-    assert draft.core_complete(starter + [converter], "fanfare")
-    assert not draft.core_complete(starter + [utility_spender], "fanfare")
+    # DRAFTER_VERSION 9: the plan's second half is a permanent BASELINE, not
+    # a converter -- the spend grammar that defined "converter" is retired.
+    # Powers grant a floor by engine RULE without printing an op, so the
+    # drafter must see them; an ordinary reader must not read as a grant.
+    floor_source = loader.get_card("rapturous_applause")
+    pure_reader = loader.get_card("crescendo")
+    assert draft._grants_fanfare_floor(floor_source)
+    assert draft._grants_fanfare_floor(loader.get_card("the_sea_is_my_stage"))
+    assert not draft._grants_fanfare_floor(pure_reader)
+
+    assert draft.core_complete(starter + [floor_source], "fanfare")
+    assert not draft.core_complete(starter + [pure_reader], "fanfare")
 
 
 def test_fanfare_drafter_prioritizes_conversion_over_surplus_generation():

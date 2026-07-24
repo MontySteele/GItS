@@ -41,7 +41,7 @@ public sealed class ThunderousOvation : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thunderous Ovation"),
-        ("description", "Spend 5 [gold]Fanfare[/gold]. Gain {Block:diff()} [gold]Block[/gold]. If you have at least 5 [gold]Fanfare[/gold]: gain 4 [gold]Block[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you have at least 5 [gold]Fanfare[/gold]: gain 4 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -55,7 +55,6 @@ public sealed class ThunderousOvation : CustomCardModel, ICharacterCard
     public ThunderousOvation()
         : base(1, CardType.Skill, CardRarity.Common, TargetType.Self, autoAdd: false)
     {
-        CustomResources<FanfareResource>.SetCanonicalCost(this, 5);
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)

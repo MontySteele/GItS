@@ -51,7 +51,7 @@ public sealed class HighTide : CustomCardModel, IElementalCard, ICharacterCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "High Tide"),
-        ("description", "Spend 15 [gold]Fanfare[/gold]. Deal {Damage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -65,7 +65,6 @@ public sealed class HighTide : CustomCardModel, IElementalCard, ICharacterCard, 
     public HighTide()
         : base(1, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy, autoAdd: false)
     {
-        CustomResources<FanfareResource>.SetCanonicalCost(this, 15);
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)

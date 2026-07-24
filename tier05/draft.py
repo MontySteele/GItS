@@ -57,6 +57,11 @@ STATIC_SLY_SHARE = 0.5        # a Sly rider needs a card-effect discard
                               # outlet to fire; half its printed face
 STATIC_CONSCRIPT_VALUE = 1.5  # one playable recruit ~ one companion's
                               # conservative static worth per transform
+STATIC_FANFARE_FLOOR_VALUE = 0.2  # per printed floor point (v9). A floor is
+                              # worth less per point than Charge: Charge is
+                              # read by a kit state the player controls,
+                              # where a floor only pays through whatever
+                              # readers the deck happens to hold. PROPOSED.
 STATIC_CHARGE_VALUE = 0.5     # per printed Charge point: the kit Garment
                               # is a universal reader (never-expiring bank,
                               # +1 damage per 4 Charge while it holds), so
@@ -185,6 +190,10 @@ def _fanfare_generation_total(deck: list[Card]) -> float:
     return sum(_fanfare_generation(card) for card in deck)
 
 
+def _fanfare_floor_total(deck: list[Card]) -> float:
+    return sum(_grants_fanfare_floor(card) for card in deck)
+
+
 def _self_damage(card: Card) -> float:
     return sum(
         max(0, _neutral_amount(fx, 0))
@@ -202,9 +211,27 @@ def _has_direct_output(card: Card) -> bool:
     )
 
 
-def _is_fanfare_converter(card: Card) -> bool:
-    """A real output converter, not merely a threshold reader or cantrip."""
-    return card.fanfare_cost > 0 and _has_direct_output(card)
+def _grants_fanfare_floor(card: Card) -> float:
+    """Printed permanent baseline this card builds (DRAFTER_VERSION 9).
+
+    Replaces `_is_fanfare_converter`, which keyed off `fanfare_cost` and died
+    with the spend grammar. Floors are what the read-only plan actually
+    assembles, and a drafter blind to them would under-draft the identity
+    outright -- the measured failure this branch exists to prevent is the
+    fanfare plan seeing 6.7 floors/run against salon's ~51.
+
+    Powers grant by rarity without printing an op, so they count here too:
+    the grant is a rule of the engine, not a line on the card, and a drafter
+    that could only see the explicit op would systematically undervalue every
+    Power the archetype drafts.
+    """
+    total = float(sum(fx.get("amount", 0)
+                      for fx in _nested_effects(card.effects)
+                      if fx.get("op") == "gain_fanfare_floor"))
+    if card.type == "power":
+        total += (C.FANFARE_FLOOR_PER_POWER_RARE if card.rarity == "rare"
+                  else C.FANFARE_FLOOR_PER_POWER)
+    return total
 
 
 def _reads_fanfare(card: Card) -> bool:
@@ -213,8 +240,6 @@ def _reads_fanfare(card: Card) -> bool:
         if str(fx.get("if", "")).startswith("fanfare_"):
             return True
         if str(fx.get("power", "")).startswith("fanfare_"):
-            return True
-        if fx.get("op") == "raise_fanfare_cap":
             return True
         if "fanfare" in str(fx.get("bonus_formula", "")):
             return True
@@ -242,7 +267,7 @@ def core_complete(deck: list[Card], archetype: str) -> bool:
         # keep the definition honest for synthetic/modified decks.
         return (
             _fanfare_generation_total(deck) >= FANFARE_GENERATION_COVERAGE
-            and any(_is_fanfare_converter(c) for c in deck)
+            and _fanfare_floor_total(deck) >= FANFARE_FLOOR_COVERAGE
         )
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))
@@ -264,8 +289,8 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
             1.0,
             _fanfare_generation_total(deck) / FANFARE_GENERATION_COVERAGE,
         )
-        conversion = float(any(_is_fanfare_converter(c) for c in deck))
-        return (generation + conversion) / 2
+        baseline = min(1.0, _fanfare_floor_total(deck) / FANFARE_FLOOR_COVERAGE)
+        return (generation + baseline) / 2
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))
     return min(1.0, on_plan / C.DRAFT_CORE_SIZE)
@@ -357,6 +382,21 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                 total += _neutral_amount(fx) * STATIC_CONSCRIPT_VALUE
             elif fx.get("op") == "gain_charge":                     # v7
                 total += _neutral_amount(fx) * STATIC_CHARGE_VALUE
+            elif fx.get("op") == "summon_kurage":                   # v8
+                # A persistent summon, priced like Durin: credit ONE pulse,
+                # not the whole duration. The bank read is invisible at
+                # offer time (the drafter cannot know her Charge curve), so
+                # only the flat pulse + its Block are counted -- deliberately
+                # conservative, same reasoning as the Durin line above.
+                total += (C.KURAGE_PULSE_BASE + C.KURAGE_PULSE_BLOCK
+                          ) * STATIC_PERSISTENT_PROC_SHARE
+            elif fx.get("op") == "gain_fanfare_floor":                # v9
+                # A permanent baseline, priced like Strength: it is not
+                # output now, it is output on every later read. Conservative
+                # on purpose -- the drafter cannot see how many readers the
+                # deck will end up holding, and over-pricing a floor would
+                # bend every Furina plan toward the same few cards.
+                total += _neutral_amount(fx) * STATIC_FANFARE_FLOOR_VALUE
             elif fx.get("op") == "grow_damage":
                 total += fx.get("amount", 0) * 0.5  # one discounted redraw
         return total
@@ -415,8 +455,14 @@ DRAFT_LEAN_RARE_BAR = 4.0
 # support but has sharply diminishing draft value; the priority is securing a
 # card that converts held Fanfare into immediate output.
 FANFARE_GENERATION_COVERAGE = 5
-FANFARE_FIRST_CONVERTER = 2.0
-FANFARE_LATER_CONVERTER = 1.5
+# DRAFTER_VERSION 9: the plan's second half is no longer "own a converter"
+# (that grammar is retired) but "own a baseline the meter rests on". One
+# uncommon Power's grant is the unit; the bar is deliberately a low
+# single-card threshold, matching the converter predicate it replaces --
+# core_complete asks whether the plan is ONLINE, not whether it is finished.
+FANFARE_FLOOR_COVERAGE = 5.0
+FANFARE_FIRST_FLOOR = 2.0     # was FANFARE_FIRST_CONVERTER
+FANFARE_LATER_FLOOR = 1.5     # was FANFARE_LATER_CONVERTER
 FANFARE_READER_VALUE = 1.0
 FANFARE_SURPLUS_GENERATION_CAP = 1.0
 FANFARE_SELF_DAMAGE_COST = 0.5
@@ -426,9 +472,8 @@ FANFARE_SKIP_THRESHOLD = 1.5
 def _fanfare_plan_score(card: Card, deck: list[Card],
                         online: bool) -> float:
     """Contextual plan value after universal printed power is counted."""
-    if _is_fanfare_converter(card):
-        return (FANFARE_LATER_CONVERTER if online
-                else FANFARE_FIRST_CONVERTER)
+    if _grants_fanfare_floor(card):
+        return FANFARE_LATER_FLOOR if online else FANFARE_FIRST_FLOOR
 
     score = FANFARE_READER_VALUE if _reads_fanfare(card) else 0.0
     generation = _fanfare_generation(card)

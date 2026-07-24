@@ -5,10 +5,12 @@ these lock the SYSTEMS, statline work comes with the sheet pass).
 
 import random
 
+import pytest
+
 from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import combat, effects, powers, resources
-from tier0.engine.state import Card, CombatState
+from tier0.engine.state import Card, CombatState, Enemy
 from tier0.harness import metrics
 from tier0.harness.axes import raw_axes
 from tier0.pilot import policy
@@ -154,12 +156,100 @@ def test_fanfare_caps_and_is_activity_only():
     e.intents = [{"kind": "attack", "amount": 45}]
     combat._enemy_turn(st, e)                # 45 true HP lost
     assert p.fanfare == p.fanfare_cap        # capped at %maxHP (30)
-    # No passive accrual: empty turns generate nothing.
+    # No passive ACCRUAL: empty turns never ADD. They now subtract, which is
+    # the whole point of the rework -- so this asserts the direction of
+    # travel, not stasis.
     p.hand, p.draw_pile, p.discard_pile = [], [], []
     before = p.fanfare
     combat._player_turn(st, NULL_PILOT)
     combat._player_turn(st, NULL_PILOT)
-    assert p.fanfare == before
+    assert p.fanfare < before
+
+
+def test_fanfare_decays_each_turn_but_never_below_the_floor():
+    """F-A1/F-A2. The meter fades from turn 2 and rests on what was built."""
+    st = furina_state()
+    p = st.player
+    p.hand, p.draw_pile, p.discard_pile = [], [], []
+    p.fanfare = 20
+
+    combat._player_turn(st, NULL_PILOT)      # turn 1: no decay
+    assert p.fanfare == 20, "decay must not tax the opening turn"
+
+    combat._player_turn(st, NULL_PILOT)
+    assert p.fanfare == 20 - C.FANFARE_DECAY_PER_TURN
+
+    p.fanfare_floor = 12
+    for _ in range(10):
+        combat._player_turn(st, NULL_PILOT)
+    assert p.fanfare == 12, "decay must clamp at the floor, not at zero"
+    assert any(ev["event"] == "fanfare_decay" and ev["at_floor"]
+               for ev in st.log)
+
+
+def test_a_floor_grant_raises_floor_cap_and_current_together():
+    """F-A2/F-A3. Raising the cap alongside the floor is load-bearing: a
+    grant that pushed current toward an unmoved ceiling would re-pin the
+    meter, which is the failure the gradient depends on avoiding."""
+    st = furina_state()
+    p = st.player
+    cap0, cur0 = p.fanfare_cap, p.fanfare
+    resources.gain_fanfare_floor(st, 15, "test")
+
+    assert p.fanfare_floor == 15
+    assert p.fanfare_cap == cap0 + 15
+    assert p.fanfare == cur0 + 15
+    assert p.fanfare < p.fanfare_cap, "a grant must not seat the meter at cap"
+
+
+def test_floors_are_static_value_not_accrual():
+    """The no-passive-accrual law (kickoff §4) is intact, not amended: a
+    floor does not grow with time, so stalling still earns nothing."""
+    st = furina_state()
+    p = st.player
+    p.hand, p.draw_pile, p.discard_pile = [], [], []
+    resources.gain_fanfare_floor(st, 10, "test")
+    floor0, cap0 = p.fanfare_floor, p.fanfare_cap
+    for _ in range(8):
+        combat._player_turn(st, NULL_PILOT)
+    assert (p.fanfare_floor, p.fanfare_cap) == (floor0, cap0)
+
+
+def test_playing_a_power_grants_a_constellation_floor_by_rarity():
+    """F-A3. The grant is a rule of the engine, not a line on the card."""
+    st = furina_state()
+    p = st.player
+    p.energy = 3
+    power = loader.get_card("rapturous_applause")      # uncommon
+    assert power.type == "power" and power.rarity == "uncommon"
+    p.hand.append(power)
+    combat.play_card(st, power)
+    assert p.fanfare_floor == C.FANFARE_FLOOR_PER_POWER
+
+    rare = loader.get_card("the_sea_is_my_stage")      # rare
+    assert rare.type == "power" and rare.rarity == "rare"
+    p.hand.append(rare)
+    p.energy = 3
+    combat.play_card(st, rare)
+    # Its own printed grant (15) AND the rare Power rule (8) both land.
+    assert p.fanfare_floor == (C.FANFARE_FLOOR_PER_POWER
+                               + C.FANFARE_FLOOR_PER_POWER_RARE + 15)
+
+
+def test_floors_and_cap_do_not_leak_across_fights_in_a_run():
+    """`player` is ONE object reused every fight; a leak here would inflate
+    the ceiling all run long and quietly invalidate every act-3 number."""
+    st = furina_state()
+    p = st.player
+    base_cap = p.fanfare_cap
+    resources.gain_fanfare_floor(st, 12, "test")
+    assert p.fanfare_cap == base_cap + 12
+
+    combat.run_fight(p, [Enemy(hp=1, max_hp=1, name="dummy",
+                               intents=[{"kind": "attack", "amount": 0}])],
+                     NULL_PILOT, seed=1)
+    assert p.fanfare_floor == 0
+    assert p.fanfare_cap == base_cap
 
 
 def test_fanfare_inert_without_the_resource():
@@ -171,21 +261,98 @@ def test_fanfare_inert_without_the_resource():
     assert not any(ev["event"] == "gain_fanfare" for ev in st.log)
 
 
-def test_fanfare_cost_is_gated_and_paid_after_scaling_resolves():
+def test_no_card_spends_fanfare():
+    """F-A4, the sprint's defining law. Reading the meter must never move it.
+
+    Asserted on the reader that used to be the archetype's flagship spender,
+    so a re-introduced spend line fails here rather than in a winrate cell
+    three passes later."""
     st = furina_state()
     p = st.player
     card = loader.get_card("crescendo")
     p.hand.append(card)
     p.energy = 3
-    assert not combat.card_playable(st, card)
     p.fanfare = 30
+
+    assert combat.card_playable(st, card), "no Fanfare playability gate"
     hp0 = st.enemies[0].hp
-    assert combat.card_playable(st, card)
     combat.play_card(st, card)
-    assert st.enemies[0].hp == hp0 - 23       # 8 + floor(30 / 2)
-    assert p.fanfare == 20                    # then pays its 10-point cost
-    assert any(ev["event"] == "fanfare_spent" and ev["amount"] == 10
-               for ev in st.log)
+
+    assert st.enemies[0].hp == hp0 - 23        # 8 + floor(30 / 2), unchanged
+    assert p.fanfare == 30, "the read must not consume the pool"
+    assert not [ev for ev in st.log if ev["event"] == "fanfare_spent"]
+
+
+def test_the_spend_grammar_is_rejected_by_name_not_silently_ignored():
+    """F-A4's loud loader. A dead field on a live card is a card whose
+    author believes it still does something."""
+    with pytest.raises(ValueError) as err:
+        Card.from_dict({"id": "ghost", "name": "Ghost", "cost": 1,
+                        "type": "attack", "fanfare_cost": 5})
+    msg = str(err.value)
+    assert "fanfare_cost" in msg and "RETIRED" in msg
+    assert "gain_fanfare_floor" in msg, "the error must name the way forward"
+
+
+def test_reads_behave_under_floors_and_decay():
+    """F-A6. Neither read grammar needed changing -- this VERIFIES that,
+    which is the whole of the item. Both must see the live pool: a floor
+    keeps a read online through a lull, and decay walks it back down.
+    """
+    st = furina_state()
+    p = st.player
+    crescendo = loader.get_card("crescendo")          # 8 + 1_per_2_fanfare
+    entrance = loader.get_card("dramatic_entrance")   # if fanfare_at_least_5
+
+    p.fanfare = 0
+    assert effects._bonus_formula(st, "1_per_2_fanfare") == 0
+    assert not effects._predicate(st, "fanfare_at_least_5")
+
+    # A floor holds both reads online with no activity at all...
+    resources.gain_fanfare_floor(st, 12, "test")
+    assert effects._bonus_formula(st, "1_per_2_fanfare") == 6
+    assert effects._predicate(st, "fanfare_at_least_5")
+
+    # ...and decay cannot take them below it.
+    p.hand, p.draw_pile, p.discard_pile = [], [], []
+    for _ in range(6):
+        combat._player_turn(st, NULL_PILOT)
+    assert p.fanfare == 12
+    assert effects._bonus_formula(st, "1_per_2_fanfare") == 6
+
+    # Above the floor, decay is visible in the read itself.
+    p.fanfare = 30
+    assert effects._bonus_formula(st, "1_per_2_fanfare") == 15
+    combat._player_turn(st, NULL_PILOT)
+    assert effects._bonus_formula(st, "1_per_2_fanfare") == \
+        (30 - C.FANFARE_DECAY_PER_TURN) // 2
+    assert crescendo and entrance                      # ids exist on the sheet
+
+
+def test_every_read_is_instrumented_at_the_moment_it_reads():
+    """The gate-(2) instrument. Sampled at READ time, not turn start: the
+    pool refills mid-turn and spills, so a turn-start sample can look
+    healthy while every read still lands on a pinned meter."""
+    st = furina_state()
+    p = st.player
+    p.fanfare = p.fanfare_cap
+    st.log.clear()
+
+    effects._bonus_formula(st, "1_per_2_fanfare")
+    effects._predicate(st, "fanfare_at_least_5")
+    reads = [ev for ev in st.log if ev["event"] == "fanfare_read"]
+    assert {ev["kind"] for ev in reads} == {"bonus_formula", "threshold"}
+    assert all(ev["at_cap"] for ev in reads)
+
+    # At-cap alone cannot see the floor-stacking failure: a grant raises the
+    # cap alongside the floor, so a meter pinned on its FLOOR never reads
+    # at-cap. Both pins are recorded for exactly this reason.
+    st2 = furina_state()
+    resources.gain_fanfare_floor(st2, 10, "test")
+    st2.log.clear()
+    effects._bonus_formula(st2, "1_per_2_fanfare")
+    ev = next(e for e in st2.log if e["event"] == "fanfare_read")
+    assert ev["at_floor"] and not ev["at_cap"]
 
 
 def test_pilot_values_live_fanfare_threshold_branches():
@@ -200,35 +367,31 @@ def test_pilot_values_live_fanfare_threshold_branches():
     assert policy._raw_block(st, ovation) == 11
 
 
-def test_dramatic_entrance_is_the_common_fanfare_converter():
-    st = furina_state()
-    p = st.player
-    entrance = loader.get_card("dramatic_entrance")
-    p.hand.append(entrance)
-    p.energy = 1
-    p.fanfare = 4
-    assert not combat.card_playable(st, entrance)
-    p.fanfare = 5
-    hp0 = st.enemies[0].hp
-    combat.play_card(st, entrance)
-    assert st.enemies[0].hp == hp0 - 10
-    assert p.fanfare == 0
+def test_the_common_fanfare_readers_are_live_from_turn_one():
+    """F-A4 on the two commons that used to be the archetype's gates.
 
+    They are now un-gated readers: playable at 0 Fanfare, better at 5, and
+    the meter is untouched either way. (F-B1 replaces the binary threshold
+    with a smooth per-N read; that is card DESIGN and lands there, not
+    here -- this pins only that the gate and the payment are gone.)
+    """
+    for cid, get, low, high in (
+            ("dramatic_entrance",
+             lambda st: st.enemies[0].hp, None, None),
+            ("thunderous_ovation",
+             lambda st: st.player.block, None, None)):
+        st = furina_state()
+        p = st.player
+        card = loader.get_card(cid)
+        p.hand.append(card)
+        p.energy = 1
+        p.fanfare = 0
+        assert combat.card_playable(st, card), f"{cid} must not be gated"
 
-def test_thunderous_ovation_is_the_defensive_common_converter():
-    st = furina_state()
-    p = st.player
-    ovation = loader.get_card("thunderous_ovation")
-    p.hand.append(ovation)
-    p.energy = 1
-    p.fanfare = 4
-    assert not combat.card_playable(st, ovation)
-    p.fanfare = 5
-    combat.play_card(st, ovation)
-    assert p.block == 11
-    assert p.fanfare == 0
-    assert any(ev["event"] == "fanfare_spent" and ev["amount"] == 5
-               for ev in st.log)
+        p.fanfare = 5
+        combat.play_card(st, card)
+        assert p.fanfare == 5, f"{cid} must not spend the meter"
+        assert not [ev for ev in st.log if ev["event"] == "fanfare_spent"]
 
 
 # --- Spotlight ---

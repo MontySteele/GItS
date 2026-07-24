@@ -38,6 +38,19 @@ def _copy_plain(val):
 _MUTABLE_FIELDS = ("effects", "solve", "archetypes", "tags", "companion",
                    "sly", "upgrade")
 
+# Card fields that a sheet row may NEVER declare again, with the reason the
+# author needs. House pattern: a caught mistake becomes a lint, so the next
+# person meets the rule instead of the symptom.
+RETIRED_CARD_FIELDS = {
+    "fanfare_cost": (
+        "Fanfare is a read-only momentum stat ('The Tide Turns', F-A4) -- "
+        "no card spends it, and Encore is Furina's only managed resource. "
+        "A card that wants to reward a full meter READS it "
+        "(bonus_formula: N_per_M_fanfare) or gates on it "
+        "(if: fanfare_at_least_N); a card that wants to raise the player's "
+        "permanent baseline grants a floor (op: gain_fanfare_floor)."),
+}
+
 
 @dataclass
 class Card:
@@ -107,10 +120,8 @@ class Card:
     # overdraw: cards that may legally overdraw into HP use the
     # spend_encore op instead.
     encore_cost: int = 0
-    # Spendable Fanfare payoff. Like encore_cost this is a playability gate,
-    # but it is paid once after the card resolves so Fanfare scaling on that
-    # card reads the audience level that funded the performance.
-    fanfare_cost: int = 0
+    # NOTE: `fanfare_cost` was RETIRED by "The Tide Turns" (F-A4). Fanfare is
+    # a read-only momentum stat; no card spends it. See RETIRED_CARD_FIELDS.
     # Base-game parity (Ironclad pool): CanBeGeneratedInCombat. Feed sets it
     # false so a generator cannot conjure the card that permanently raises
     # max HP. MUST be honored by generate_from_pool -- otherwise Stoke
@@ -157,6 +168,17 @@ class Card:
     @classmethod
     def from_dict(cls, d: dict) -> "Card":
         known = {f for f in cls.__dataclass_fields__}
+        # Retired grammar fails LOUDLY and by name, never silently ignored:
+        # a sheet row that still declares a dead field is a card whose author
+        # believes it does something. The generic "unknown fields" message
+        # below would technically catch these, but it reads as a typo rather
+        # than as a retirement, and the fix is different in each case.
+        retired = sorted(set(d) & set(RETIRED_CARD_FIELDS))
+        if retired:
+            why = "; ".join(f"{f}: {RETIRED_CARD_FIELDS[f]}" for f in retired)
+            raise ValueError(
+                f"card {d.get('id')!r} declares RETIRED field(s) "
+                f"{retired} -- {why}")
         unknown = set(d) - known
         if unknown:
             raise ValueError(f"card {d.get('id')!r}: unknown fields {sorted(unknown)}")
@@ -247,8 +269,16 @@ class Player(Fighter):
     # Reset per combat in run_fight. Dead field for everyone else. ---
     charge: int = 0
     encore: int = 0               # unbounded per-combat buffer (v1.6 style)
-    fanfare: int = 0              # capped activity stacks; global pool
-    fanfare_cap: int = 0          # 0 = character has no Fanfare resource
+    fanfare: int = 0              # read-only momentum stat; global pool
+    fanfare_cap: int = 0          # 0 = character has no Fanfare resource.
+                                  # Since "The Tide Turns" this is a high
+                                  # SAFETY RAIL, not a design dial -- under
+                                  # decay the ceiling does not bind.
+    # The permanent baseline built from constellation grants. Decay clamps
+    # here, never below. A grant raises floor, cap AND current together
+    # (resources.gain_fanfare_floor) -- raising the cap alongside the floor
+    # is what keeps the gradient alive instead of re-pinning the meter.
+    fanfare_floor: int = 0
     # Salon v2 (rework 2026-07-23): the typed member queue, FIFO, max
     # SALON_MEMBER_SLOTS, duplicates legal (Defect-orb geometry). SOURCE OF
     # TRUTH for the Salon; powers["salon_member"] mirrors len(salon) so

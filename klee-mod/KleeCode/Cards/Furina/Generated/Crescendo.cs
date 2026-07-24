@@ -45,7 +45,7 @@ public sealed class Crescendo : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crescendo"),
-        ("description", "Spend 10 [gold]Fanfare[/gold]. Deal {CalculatedDamage:diff()} damage. Scales with [gold]Fanfare[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -61,7 +61,6 @@ public sealed class Crescendo : CustomCardModel, ICharacterCard
     public Crescendo()
         : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
     {
-        CustomResources<FanfareResource>.SetCanonicalCost(this, 10);
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)

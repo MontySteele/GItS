@@ -93,6 +93,74 @@ def test_pre_pass4_logs_are_unmeasured_not_healthy():
     assert ft.aggregate([tr])["requested"] == 0
 
 
+def test_read_time_saturation_is_measured_separately_from_turn_start():
+    """"The Tide Turns" gate (2). Pass 4 measured both and they disagreed by
+    25 points: the turn-start snapshot can look healthy while every read
+    still lands on a pinned meter, because the pool refills mid-turn."""
+    log = [
+        {"event": "fanfare_turn", "total": 10, "cap": 30, "floor": 0,
+         "at_cap": False, "at_floor": False},
+        {"event": "gain_fanfare", "amount": 20, "total": 30,
+         "requested": 20, "wasted": 0, "source": "x"},
+        {"event": "fanfare_read", "kind": "bonus_formula", "total": 30,
+         "cap": 30, "floor": 0, "at_cap": True, "at_floor": False},
+        {"event": "fanfare_read", "kind": "threshold", "total": 30,
+         "cap": 30, "floor": 0, "at_cap": True, "at_floor": False},
+    ]
+    tr = ft.trace(log)
+
+    assert tr.time_at_cap == 0.0      # the turn-start sample says "healthy"
+    assert tr.read_at_cap == 1.0      # every actual read says "pinned"
+    assert tr.mean_at_read == 30
+
+
+def test_a_floor_pinned_meter_is_visible_even_though_it_never_reads_at_cap():
+    """The blind spot the added metric exists to close: a grant raises the
+    cap ALONGSIDE the floor, so floor < cap always -- a meter resting on its
+    floor is fully saturated in play and reads at-cap exactly never."""
+    log = [
+        {"event": "fanfare_floor_granted", "amount": 15, "source": "p",
+         "floor": 15, "cap": 45, "total": 15},
+        {"event": "fanfare_turn", "total": 15, "cap": 45, "floor": 15,
+         "at_cap": False, "at_floor": True},
+        {"event": "fanfare_read", "kind": "salon_focus", "total": 15,
+         "cap": 45, "floor": 15, "at_cap": False, "at_floor": True},
+    ]
+    tr = ft.trace(log)
+
+    assert tr.read_at_cap == 0.0, "at-cap is blind to this failure by design"
+    assert tr.read_at_floor == 1.0
+    assert tr.read_empty == 0.0
+    assert tr.time_at_floor == 1.0
+    assert (tr.floor_grants, tr.floor_granted) == (1, 15)
+
+
+def test_an_empty_meter_is_not_reported_as_a_built_floor():
+    """Before any grant the floor is 0, so `at_floor` fires on an EMPTY
+    meter too -- opposite diagnosis, same flag. Act 1 is dominated by this
+    case, so conflating them would read a dead stat as successful
+    floor-building."""
+    log = [
+        {"event": "fanfare_turn", "total": 0, "cap": 30, "floor": 0,
+         "at_cap": False, "at_floor": True},
+        {"event": "fanfare_read", "kind": "bonus_formula", "total": 0,
+         "cap": 30, "floor": 0, "at_cap": False, "at_floor": True},
+    ]
+    tr = ft.trace(log)
+
+    assert tr.read_empty == 1.0
+    assert tr.read_at_floor == 0.0, "an empty meter is not a floor pin"
+    assert ft.aggregate([tr])["read_at_floor"] == 0.0
+
+
+def test_a_deck_that_never_reads_is_not_reported_as_healthy():
+    log = [{"event": "fanfare_turn", "total": 3, "cap": 30, "floor": 0,
+            "at_cap": False, "at_floor": False}]
+    agg = ft.aggregate([ft.trace(log)])
+    assert agg["reads"] == 0
+    assert agg["read_at_cap"] == 0.0    # 0/0 -- read alongside `reads`
+
+
 def test_aggregate_pools_ratios_instead_of_averaging_them():
     # A 1-turn combat must not weigh as much as a 9-turn one.
     short = ft.FanfareTrace(turns=1, turns_at_cap=1, cap=20, held=[20])

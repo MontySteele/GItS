@@ -77,14 +77,34 @@ def test_starter_invitation_and_aria_curve():
     assert stage_plus.effects == [{"op": "block", "amount": 9}]
 
 
-def test_fanfare_spenders_pay_less_energy_than_ordinary_finishers():
-    assert loader.get_card("dramatic_entrance").fanfare_cost == 5
-    assert loader.get_card("thunderous_ovation").fanfare_cost == 5
+def test_no_furina_card_declares_the_retired_spend_grammar():
+    """F-A4 at the sheet level: the seven gates are gone from every row.
+
+    The energy costs are asserted unchanged deliberately -- they were priced
+    as DISCOUNTED against ordinary finishers because the card also paid a
+    Fanfare toll. That toll is now gone and the discount is not, which is a
+    real repricing question and it belongs to F-B1, not here. Pinning the
+    current numbers makes that pass a visible edit rather than a silent one.
+    """
+    for cid in ("dramatic_entrance", "thunderous_ovation", "crescendo",
+                "florid_cadenza", "flood_of_emotion", "universal_revelry",
+                "high_tide"):
+        assert not hasattr(loader.get_card(cid), "fanfare_cost")
+
     assert loader.get_card("crescendo").cost == 1
     assert loader.get_card("florid_cadenza").cost == 0
     assert loader.get_card("flood_of_emotion").cost == 1
     assert loader.get_card("universal_revelry").cost == 2
     assert loader.get_card("high_tide").cost == 1
+
+
+def test_the_constellation_card_grants_a_floor_not_a_cap():
+    """F-A5: the uncapper retires with the grammar it policed. The blood
+    rider survives F-A on purpose -- dropping it is F-B2's edit."""
+    stage = loader.get_card("the_sea_is_my_stage")
+    assert {"op": "gain_fanfare_floor", "amount": 15} in stage.effects
+    assert not any(fx["op"] == "raise_fanfare_cap" for fx in stage.effects)
+    assert loader.get_card("the_sea_is_my_stage+").effects[0]["amount"] == 20
 
 
 def test_targeted_fanfare_floor_repairs():
@@ -99,7 +119,6 @@ def test_targeted_fanfare_floor_repairs():
         {"op": "conditional", "if": "fanfare_at_least_5",
          "then": [{"op": "block", "amount": 4}]},
     ]
-    assert thunder.fanfare_cost == 5
 
 
 def test_every_archetype_has_the_template_shape():

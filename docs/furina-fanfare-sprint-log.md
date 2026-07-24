@@ -104,7 +104,54 @@ that being an afternoon and being a negotiation.
 
 ## Track F-A — Engine: the read-only Fanfare package
 
-Status: **IN PROGRESS.**
+Status: **DONE.** Suite 689 passed / 0 failed. All seven items landed.
+
+### F-A smoke read (60 runs/arm, seed 20260724, NOT the F-C binding run)
+
+Diagnostic only — F-B has not landed, so this measures the engine package
+against the OLD card list, which is precisely the configuration the plan
+called net-negative. Recorded because two of the three gates can already be
+read, and one of them answers.
+
+| arm | read at-cap | pinned | empty | mean@read a1→a2→a3 | floors/run | run wr |
+|---|---|---|---|---|---|---|
+| fanfare | 1.2% | 12.2% | 13.6% | 8.3 → 17.5 → 25.9 | 3.6 | 0.0% |
+| salon | 2.5% | 4.7% | 8.0% | 9.4 → 22.4 → 29.8 | 4.8 | 3.3% |
+| spotlight | 0.2% | 12.1% | 17.9% | 6.2 → 19.3 → 29.1 | 6.1 | 0.0% |
+
+**Gate (2) — the mechanic is live, not a constant: PASSES, decisively.**
+Read-time at-cap falls from the §1 baseline of **100%** (salon) to **2.5%**,
+and every arm is far inside the <15% bar. mean@read rises monotonically in
+every arm. The diagnosis in §1 was correct and the engine fix does what it
+was designed to do. (Caveat: monotonic across ACTS is what is measured here;
+the plan words the gate across turn buckets. F-C will report both.)
+
+**Gate (3) — floors reach the archetype: FAILS, hard and as predicted.**
+The fanfare plan gets **3.6 floor points/run** against a bar of ≥25. Even in
+act 3 it is 13.9. F-A3's power-rarity rule alone cannot fix this — the
+archetype has 2 powers in 28 cards, which is the exact finding that made
+`gain_fanfare_floor` a required op rather than an optional one. **This is
+F-B2's to close** (the constellation card + the new common Exhaust-for-floor
+source), and it is now measured rather than asserted.
+
+**Run winrates: salon 11.1% → 3.3%.** Expected in direction — the plan's
+own honest statement is that the package is net-negative until F-B lands —
+but the size is worth flagging now rather than at F-C. Note the arm is 60
+runs and act-3 fanfare rests on 14 combats; these are smoke numbers.
+
+### Metric correction found by running it (recorded, not buried)
+
+The first pass of the at-floor metric was **wrong in a way that flattered
+the result**. `at_floor` is true whenever `total == floor`, and before any
+grant the floor is 0 — so an EMPTY meter and a meter resting on a built
+baseline were the same event, while being opposite diagnoses ("the stat is
+dead" vs "the stat is pinned"). Act 1 is dominated by the empty case, so the
+first run reported 29.9/17.5/40.0% "at-floor" and would have read as
+successful floor-building. Split into `pinned` (at a built floor) and
+`empty` (found nothing); the table above is post-correction, and the split
+is pinned by a test.
+
+### F-A item status
 
 ### Amendment to the plan's gate (2) — found before running, not after
 
@@ -137,13 +184,59 @@ per plan §F-B2 — the uncapper law retires with the grammar it policed.
 
 | item | what | status |
 |---|---|---|
-| F-A1 | `FANFARE_DECAY_PER_TURN` (PROPOSED 5, flat), applied at start of player turn from turn 2, never below floor | pending |
-| F-A2 | `Player.fanfare_floor`; a grant raises floor + cap + current together; decay clamps at floor | pending |
-| F-A3 | Constellation grants on POWER play by rarity (PROPOSED +5 common/uncommon, +8 rare) + new `gain_fanfare_floor` op | pending |
-| F-A4 | Retire `fanfare_cost` from the grammar; loader **fails loudly** on any card still declaring it | pending |
-| F-A5 | Retire `raise_fanfare_cap` (effects.py) + the drafter's valuation branch; `FANFARE_CAP_FRACTION` → high safety rail | pending |
-| F-A6 | Verify `fanfare_at_least_N` and the `N_per_M_fanfare` read behave under floors + decay | pending |
-| F-A7 | Bump `CONSTANTS_VERSION` 2→3, `DRAFTER_VERSION` 8→9 (incl. real floor-grant valuation work) | pending |
+| F-A1 | `FANFARE_DECAY_PER_TURN` (PROPOSED 5, flat), applied at start of player turn from turn 2, never below floor | **DONE** |
+| F-A2 | `Player.fanfare_floor`; a grant raises floor + cap + current together; decay clamps at floor | **DONE** |
+| F-A3 | Constellation grants on POWER play by rarity (PROPOSED +5 common/uncommon, +8 rare) + new `gain_fanfare_floor` op | **DONE** |
+| F-A4 | Retire `fanfare_cost` from the grammar; loader **fails loudly** on any card still declaring it | **DONE** |
+| F-A5 | Retire `raise_fanfare_cap` (effects.py) + the drafter's valuation branch; `FANFARE_CAP_FRACTION` → high safety rail | **DONE** |
+| F-A6 | Verify `fanfare_at_least_N` and the `N_per_M_fanfare` read behave under floors + decay | **DONE** |
+| F-A7 | Bump `CONSTANTS_VERSION` 2→3, `DRAFTER_VERSION` 8→9 (incl. real floor-grant valuation work) | **DONE** |
+
+### Decisions taken inside F-A (executor's calls, all reversible, all logged)
+
+- **Decay lands at the TRUE top of the player turn**, before the block clear,
+  the draw and Salon upkeep. Decay therefore eats what was *carried over* and
+  this turn's activity builds on the remainder. Applying it after turn-start
+  generation would tax income instead of inventory.
+- **Turn 1 is exempt.** The opening hand plays against what the player built,
+  not against an immediate tax.
+- **Floors are per-COMBAT**, like every other Furina resource — a Power is
+  replayed each fight and re-earns its grant. This forced a real fix: `player`
+  is ONE object reused across every fight in a run, so the cap must be rewound
+  alongside the floor or the ceiling ratchets upward all run and quietly
+  invalidates every act-3 number. `run_fight` now subtracts the accumulated
+  floor; exact, because `gain_fanfare_floor` moves cap and floor by the same
+  `n` and is the only writer of either. Pinned by a test.
+- **The power grant fires after resolution, once per card, not per replay.**
+  A doubled Power is still one performance the audience remembers.
+- **`raise_fanfare_cap` was deleted, not aliased.** Exactly one card used it,
+  so an alias would have been permanent debt for one migration.
+- **`FANFARE_CAP_FRACTION` kept as a safety rail** rather than retired, so a
+  degenerate floor-stack still has a stop. Its R17 sweep numbers are archive.
+- **Retired grammar fails by NAME.** `Card.from_dict` already rejected unknown
+  fields, but that message reads as a typo rather than a retirement, and the
+  fix differs per field. `RETIRED_CARD_FIELDS` names the replacement grammar
+  in the error text.
+
+### Two gaps this created, both curated rather than tolerated
+
+House pattern (structurally-invisible defects): a gap the repo cannot see is
+a gap that ships. Both are named, gated, and asserted in
+`tier0/tests/test_roster_codegen.py`, so closing them is forced rather than
+remembered.
+
+- **`the_sea_is_my_stage` no longer generates C#** (`FURINA_DEFERRED_TO_FD`).
+  `gain_fanfare_floor` has no C# home until F-D, which is hard-gated on F-C.
+  Emitting a call to a method that does not exist would trade a visible
+  deferral for a build break. The test asserts the deferral is for *that*
+  reason, so an unrelated breakage cannot hide inside the curated set.
+- **`florid_cadenza` has no upgrade path** (`FURINA_UPGRADE_GAP_PENDING_FB1`).
+  Its only ratified delta was `{fanfare_cost: -3}`. Every replacement is a
+  BALANCE call belonging to F-B1 and red-pen, not to a grammar removal.
+
+`tier05/exp_furina_modes.py` is marked ARCHIVE and its Fanfare cells now
+refuse by name: they sweep a cost that no longer exists. Kept rather than
+deleted because the pass-2/pass-3 reports cite their numbers.
 
 ### F-A4 sequencing hazard (resolved by commit boundary, not by ignoring it)
 

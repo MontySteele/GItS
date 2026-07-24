@@ -8,8 +8,8 @@
   },
   "coverage": {
     "total": 77,
-    "generated": 76,
-    "blocked": 1
+    "generated": 75,
+    "blocked": 2
   },
   "generated": [
     "an_invitation",
@@ -77,7 +77,6 @@
     "swelling_overture",
     "tempo_change",
     "the_final_verdict",
-    "the_sea_is_my_stage",
     "thunderous_ovation",
     "top_billing",
     "torrential_turn",
@@ -95,15 +94,21 @@
     "guest_neuvillette_tears"
   ],
   "blocked": {
-    "let_the_people_rejoice": "kit card (hand-write it against the KitBurst machinery)"
+    "let_the_people_rejoice": "kit card (hand-write it against the KitBurst machinery)",
+    "the_sea_is_my_stage": "op 'gain_fanfare_floor'"
   },
   "runtime_clusters": {
     "encore_fanfare_resources": [
       "let_the_people_rejoice"
+    ],
+    "shared_emitter_gap": [
+      "the_sea_is_my_stage"
     ]
   },
   "upgrades": {
     "_comment": "docs/furina-upgrades.yaml is authoritative. A generated card listed below ships without an upgrade until its full delta is expressible; partial upgrade application is forbidden.",
-    "no_upgrade_path": {}
+    "no_upgrade_path": {
+      "florid_cadenza": "no ratified delta in klee-upgrades.yaml"
+    }
   }
 }

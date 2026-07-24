@@ -16,7 +16,9 @@
 # character: furina derives from the filename (loader). skill_tag marks Genshin-Skill-flavored cards (burst particles + application).
 # NAMING NOTE: talent/summon names verified (Salon Solitaire cast, Soloist's Solicitation, Let the People Rejoice); other names are
 # authored theatrical flavor — lore/constellation audit per v1.7 checklist before ship, as with Klee.
-# Resource grammar: encore_cost and fanfare_cost are playability gates (never overdraw). Fanfare spenders resolve from
+# Resource grammar: encore_cost is a playability gate (never overdraw). Fanfare is READ-ONLY -- no card spends it
+# ("The Tide Turns", F-A4); cards read it (bonus_formula: N_per_M_fanfare), gate on it (if: fanfare_at_least_N), or
+# raise its permanent baseline (op: gain_fanfare_floor). The old spend line resolved from
 # the pre-spend audience level, then pay once, reopening room beneath the cap; spend_encore remains the priced-overdraw path.
 # NO passive accrual anywhere on this sheet — no per-turn Encore or Fanfare trickle exists, and none may be added (a per-turn Encore
 # power would launder passive Fanfare through the gain hook; deliberately not designed — see sheet-pass plan §5).
@@ -79,7 +81,7 @@
 - {id: curtain_up, name: "Curtain Up", cost: 0, type: skill, rarity: common, solve: [sustain, velocity], archetypes: [fanfare], role: enabler,
    effects: [{op: gain_encore, amount: 2}]}
    # 0-cost flux starter. Sparkly Treasure parity, buffer-flavored.
-- {id: dramatic_entrance, name: "Dramatic Entrance", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [fanfare], role: payoff, fanfare_cost: 5,
+- {id: dramatic_entrance, name: "Dramatic Entrance", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [fanfare], role: payoff,
    effects: [{op: damage, amount: 6, target: enemy}, {op: conditional, if: fanfare_at_least_5, then: [{op: damage, amount: 4, target: enemy}]}]}
    # The Common converter: Spend 5 Fanfare after dealing 10. Reopens the meter early instead of asking a Common-only deck to hoard until an Uncommon arrives.
 - {id: crowd_work, name: "Crowd Work", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [fanfare], role: glue, encore_cost: 2,
@@ -88,7 +90,7 @@
 - {id: suffering_for_art, name: "Suffering for Art", cost: 0, type: skill, rarity: common, solve: [sustain, velocity], archetypes: [fanfare], role: enabler,
    effects: [{op: damage, amount: 1, target: self}, {op: gain_encore, amount: 3}]}
    # The tragedienne: pay 1 HP, gain 3 buffer. Both movements generate Fanfare; the measured one-point wound keeps the risk/reward without making an overpicked Common a run liability.
-- {id: thunderous_ovation, name: "Thunderous Ovation", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [fanfare, generic], role: glue, fanfare_cost: 5,
+- {id: thunderous_ovation, name: "Thunderous Ovation", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [fanfare, generic], role: glue,
    effects: [{op: block, amount: 7}, {op: conditional, if: fanfare_at_least_5, then: [{op: block, amount: 4}]}]}
    # The defensive Common converter: Spend 5 Fanfare after gaining 11 Block, reopening the meter on the survival axis.
 - {id: tempo_change, name: "Tempo Change", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [fanfare], role: glue, encore_cost: 3,
@@ -199,13 +201,13 @@
    effects: [{op: block, amount: 9}, {op: conditional, if: has_salon_members, then: [{op: block, amount: 5}]}]}
    # The household closes ranks. Her biggest sub-Rare wall, and only with the stage set.
 # Fanfare (7)
-- {id: crescendo, name: "Crescendo", cost: 1, type: attack, rarity: uncommon, solve: [scaling, frontload], archetypes: [fanfare], role: payoff, fanfare_cost: 10,
+- {id: crescendo, name: "Crescendo", cost: 1, type: attack, rarity: uncommon, solve: [scaling, frontload], archetypes: [fanfare], role: payoff,
    effects: [{op: damage, amount: 8, target: enemy, bonus_formula: 1_per_2_fanfare}]}
    # Spend 10 Fanfare after resolving: +1 damage per 2 pre-spend Fanfare. At 30 it deals 23, then reopens the meter to 20. The Fanfare price replaces one point of ordinary Energy tax. (lint-ok: post-spend total)
 - {id: showstopper, name: "Showstopper", cost: 1, type: attack, rarity: uncommon, solve: [frontload], archetypes: [fanfare], role: payoff,
    effects: [{op: damage, amount: 5, target: enemy}, {op: conditional, if: fanfare_at_least_20, then: [{op: damage, amount: 7, target: enemy}]}]}
    # Threshold burst: 5, or 12 when the house is roaring.
-- {id: florid_cadenza, name: "Florid Cadenza", cost: 0, type: skill, rarity: uncommon, solve: [velocity], archetypes: [fanfare], role: payoff, fanfare_cost: 10,
+- {id: florid_cadenza, name: "Florid Cadenza", cost: 0, type: skill, rarity: uncommon, solve: [velocity], archetypes: [fanfare], role: payoff,
    effects: [{op: draw, amount: 3}]}
    # Spend 10 Fanfare: convert the audience into a fresh hand without consuming the Energy needed to play it. A5's ceiling card.
 - {id: hearts_swelling, name: "Hearts Swelling", cost: 2, type: skill, rarity: uncommon, solve: [sustain], archetypes: [fanfare, salon], role: enabler,
@@ -220,9 +222,10 @@
    effects: [{op: block, amount: 5}, {op: gain_encore, amount: 1}]}
    # Hybrid glue: the band plays through anything. PASS-2 ERRATA (DECISIONS 76/R26 law): Encore rider trimmed —
    # the old row strictly dominated Macaron Break. Now strictly tankier / strictly less flux: a real choice.
-- {id: flood_of_emotion, name: "Flood of Emotion", cost: 1, type: skill, rarity: uncommon, solve: [frontload], archetypes: [fanfare], role: payoff, fanfare_cost: 15, tags: [skill_tag],
+- {id: flood_of_emotion, name: "Flood of Emotion", cost: 1, type: skill, rarity: uncommon, solve: [frontload], archetypes: [fanfare], role: payoff, tags: [skill_tag],
    effects: [{op: damage, amount: 20, target: enemy}]}
-   # Spend 15 Fanfare after resolving: a 20-point hydro-applying torrent. The flux cycle's direct damage conversion; the Fanfare gate carries half its price.
+   # A 20-point hydro-applying torrent. The Fanfare gate retired with the spend grammar (F-A4), so this is currently un-gated
+   # at its discounted energy cost -- F-B1 owns replacing the gate with a smooth read and repricing what the toll was paying for.
 # Spotlight (7)
 - {id: leading_role, name: "Leading Role", cost: 1, type: power, rarity: uncommon, solve: [velocity], archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self, note: "first Spotlighted card each turn costs N less"}]}
@@ -316,12 +319,13 @@
    # All My Treasures parity: four deployments — on any live stage the elders bow out (v2 evoke geometry), and its
    # replacement-doubled Encore rider funds the opening turns. Cost 3->2 at the rework reprice. PROPOSED.
 - {id: the_sea_is_my_stage, name: "The Sea Is My Stage", cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [fanfare], role: payoff,
-   effects: [{op: raise_fanfare_cap, amount: 15}, {op: damage, amount: 6, target: self}]}
+   effects: [{op: gain_fanfare_floor, amount: 15}, {op: damage, amount: 6, target: self}]}
    # THE UNCAPPER (kickoff §4: "Rare uncappers at nasty setup cost"). +15 cap; blood raised at red-pen flag 3 —
    # self-damage that is itself flux self-subsidizes, so the law demands the deeper cut: 10% of maxHP.
-- {id: universal_revelry, name: "Universal Revelry", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [fanfare], role: payoff, fanfare_cost: 20,
+- {id: universal_revelry, name: "Universal Revelry", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [fanfare], role: payoff,
    effects: [{op: damage, amount: 9, target: all_enemies, bonus_formula: 1_per_2_fanfare}]}
-   # Spend 20 Fanfare after resolving: at the 30-point cap it deals 24 to all, then leaves room for the next ovation. Its audience price replaces the third Energy.
+   # The archetype's AoE payoff, already scaling at 1 per 2 Fanfare. Its Fanfare spend gate retired with that grammar (F-A4);
+   # F-B1 re-gates it at a threshold reachable under decay, which is where its 2-Energy price gets re-justified.
 - {id: star_of_the_show, name: "Star of the Show", cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: spotlight_flat_damage, amount: 3, target: self, note: "Spotlighted cards' damage ops +3 printed per copy"}]}
    # Numbers-texture on the star (legal under §2.2a: numbers, never economy). Stacks with the baseline mult additively AFTER it.
@@ -333,9 +337,10 @@
 - {id: prima_donna, name: "Prima Donna", cost: 2, type: power, rarity: rare, solve: [velocity], archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self}, {op: apply_power, power: spotlight_draw, amount: 1, target: self}]}
    # Both texture lines in one rare: the production revolves around her star.
-- {id: high_tide, name: "High Tide", cost: 1, type: attack, rarity: rare, solve: [frontload], archetypes: [salon, fanfare], role: payoff, fanfare_cost: 15, tags: [skill_tag],
+- {id: high_tide, name: "High Tide", cost: 1, type: attack, rarity: rare, solve: [frontload], archetypes: [salon, fanfare], role: payoff, tags: [skill_tag],
    effects: [{op: damage, amount: 22, target: enemy}]}
-   # Spend 15 Fanfare after resolving: her big single-target conversion, hydro-applying through skill_tag. The resource gate carries the missing Energy.
+   # Her big single-target hit, hydro-applying through skill_tag. Its Fanfare spend gate retired with that grammar (F-A4);
+   # F-B1 owns the smooth read that replaces it and the energy question the gate was covering for.
 - {id: rain_of_roses, name: "Rain of Roses", cost: 2, type: skill, rarity: rare, solve: [utility], archetypes: [salon, spotlight], role: payoff, tags: [skill_tag],
    effects: [{op: apply_aura, element: hydro, target: all_enemies}, {op: gain_encore, amount: 5}]}
    # Mass application + buffer. A6's rare ceiling. WATCHLIST (redpen flag 8): hydro+cryo convergence CELL member,

@@ -244,12 +244,20 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "encore_cost":
             ok = card.encore_cost > 0
             card.encore_cost = max(0, card.encore_cost + val)
-        elif key == "fanfare_cost":
-            ok = card.fanfare_cost > 0
-            card.fanfare_cost = max(0, card.fanfare_cost + val)
-        elif key == "fanfare_cap":
+        elif key == "fanfare_floor":
+            # Was `fanfare_cap` against raise_fanfare_cap; both retired with
+            # the spend/cap grammar ("The Tide Turns", F-A4/F-A5). An upgrade
+            # that used to buy ceiling now buys baseline.
             ok = _bump_first((fx for fx in top
-                              if fx.get("op") == "raise_fanfare_cap"),
+                              if fx.get("op") == "gain_fanfare_floor"),
+                             "amount", val)
+        elif key == "kurage_turns":
+            # v0.4: Bake-Kurage+ keeps the jellyfish out longer. Duration is
+            # the ONLY thing an upgrade may move here -- the pulse numbers
+            # are constants, and the +1 Charge is untouchable under the
+            # resource-curve law (upgrades never move Charge/conscript).
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "summon_kurage"),
                              "amount", val)
         elif key == "generate_cost_override":
             # Discovery-parity upgrade: the generated card costs 0 this
