@@ -1,0 +1,146 @@
+# Kokomi — KICKOFF ROSTER v0.1 (docs/kokomi-kickoff-v1.md governs; NOTHING
+# here is ratified — statline, constants, and composition are all PROPOSED
+# and [USER]-gated per kickoff §6.8. Card pool: docs/kokomi-cards.yaml;
+# companions: docs/inazuma-companions.yaml).
+# Declared 7-axis targets (PROPOSED): A1 1.5-2.0 (load-bearing weakness —
+# she pays in cards, never in HP, and never in cheap damage), A2 ~4.5
+# ELITE (Charge is the scaling identity), A3 ~3.0 (Block is her defense
+# medium), A4 stays LOW by design (heals are Rare+Exhaust; the healer
+# fantasy is measured by the stability band in the act sims, not by A4 —
+# R51), A5 ~3.5 (assist velocity), A6 ELITE target (R51: her second
+# elite axis; Weak/Vulnerable arrive as riders on exhaust/Sly engine
+# pieces — engine payoffs, never a spammable cheap AoE debuff like
+# Furina's commanding_gaze), A7 ~2.5 (engine assembly tax is real).
+# Exactly-two-elite-axes heuristic: A2 + A6, RULED 2026-07-24 (R51).
+id: kokomi
+name: "Sangonomiya Kokomi"
+hp: 70                   # RULED R52 (ask 8): pinned starting point —
+                         # her lore HP pool; stability wants headroom.
+                         # Still a knob for sim-driven tuning.
+nation: inazuma          # §4.1 reward weighting: Inazuma is her half
+element: hydro
+cadence: catalyst        # RULED R52 (N1): she is a catalyst — every
+                         # attack applies hydro. Makes elite-A6
+                         # application uptime structural (R51).
+burst_max: 10            # v0.3 charge-curve pass (PROPOSED, the pass's
+                         # decisive lever): 50 -> 10 — a FAST-CYCLING
+                         # Burst. The act-sim grid: meter 50 = 1% act-1
+                         # clear, 15 = 22%, 10 = 33-41%, 8 = 43% (report
+                         # §6; monotone, 10 chosen as the largest number
+                         # that clears the wall — R48 anti-optimization
+                         # discipline). Design reading: the short-cycle
+                         # Garment is her Furina-Salon-member analogue —
+                         # guaranteed periodic output, very jellyfish.
+                         # Two bake plays or five exhaust events fill it.
+                         # Klee=40, Furina=70; hers is a different SHAPE
+                         # of meter, not a discount. [USER] red-pen.
+kit: [ceremonial_garment]   # v1.9: Burst is kit, not loot. Shape B state
+                         # (ruling ask 6 — roster ships the recommended
+                         # both-with-capstone world).
+# Tamakushi Casket (kickoff §2.5): the two conversion laws live on the
+# relic hook — exhaust->Charge (universal funnel) and Strength->Charge
+# (Flawless Strategy). NO payoff magnitude here (R16).
+relic_hooks: [tamakushi_casket]
+# Identity constraint (kickoff §3): she is a declared scaler with a
+# load-bearing frontload weakness — the inverse of Klee's law. RULED R52
+# (ask 3): the Klee law was Klee-scoped all along; there is no mod-wide
+# A1>A2 invariant. This per-identity constraint stands on its own.
+constraints: ["A2_scaling>A1_frontload"]
+archetype_decks:
+  commander_weighted: commander
+  priest_weighted: priest
+  assist_weighted: assist
+# NO deck_bands and NO winrate_bands: bands are ratified artifacts
+# (pass-3 pattern) and this character has had zero red-pen passes.
+# v0.3 charge-curve pass (ask 8: composition is a knob; PROPOSED): the
+# S3 arms — tide_reading -> surging_shoal (the act-1 AoE check demands a
+# starter answer; 7 clears Skittish) and one tactical_recall ->
+# waterspout (one exhaust TEACHER stays; the second copy becomes the
+# burn that hits). Starter grid in report §6. [USER] red-pen.
+starting_deck:
+  - waters_edge
+  - waters_edge
+  - waters_edge
+  - coral_guard
+  - coral_guard
+  - coral_guard
+  - bake_kurage
+  - tactical_recall
+  - waterspout
+  - surging_shoal
+# Run-start Inazuma ensemble (starter-reserved trio per user ruling,
+# kickoff §4): Gorou / Sayu / Shinobu. The trio is THREE characters across
+# the two-slot convention, so the attack slot is Gorou's alone — RULED R52
+# (N3): the adjutant ALWAYS enlists, for lore reasons. The asymmetry vs
+# Klee/Furina's 2x2 is intended; no fourth shortlist name.
+randomized_starter:
+  attack: {replace: waters_edge, choices: [gorou_inuzaka_charge]}
+  support: {replace: coral_guard, choices: [sayu_daruma_gift, shinobu_grass_ring_bond]}
+packages:
+  # Plausible drafts (round-3 principle), not monocultures — each carries
+  # natural cross-archetype draft-ins.
+  commander_weighted:
+    - conscription_notice
+    - conscription_notice
+    - to_the_front
+    - mass_mobilization
+    - field_promotion
+    - reinforcements
+    - grand_conscription
+    - moon_signal
+    - pulsing_current
+    - jade_bulwark
+    # draft-ins a human obviously takes:
+    - votive_offering
+    - communion_of_tides
+    - drifting_lantern
+  priest_weighted:
+    - votive_offering
+    - votive_offering
+    - ritual_purification
+    - ritual_purification
+    - waterspout
+    - waterspout
+    - cleansing_tide
+    - mercy_of_the_deep
+    - pearl_barrage
+    - communion_of_tides
+    - depths_judgment
+    - epiphany_of_the_deep
+    - prayer_to_the_moon
+    - nereids_ascension
+    - vigil_of_the_deep
+    # (vigil was MISSING from every package in the first battery run — the
+    # §2.4 identity card unreachable by any archetype deck, caught by the
+    # telemetry probe's prevented=0.0 row. The Klee planned-vs-shipped gap
+    # class, caught in-session. Pre-vigil numbers are labeled in the
+    # report; never compare unlabeled.)
+    # draft-ins:
+    - jade_bulwark
+    - sango_prayer
+    # v0.2 sheet pass (R51 texture): the priest lane's Vulnerable setup
+    # swing joins the plausible draft — a NEW measured world; never
+    # compare v0.2 battery numbers against v0.1's unlabeled.
+    - exposing_current
+    # v0.3 charge-curve pass: the on-curve reader — the vigil lesson says
+    # an identity card unreachable by any archetype deck is a defect.
+    - riptide_strike
+  assist_weighted:
+    - moon_signal
+    - moon_signal
+    - undertow_shuffle
+    - undertow_shuffle
+    - drifting_lantern
+    - drifting_lantern
+    - rearguard_action
+    - swift_currents
+    - shell_of_sanctuary
+    - jade_bulwark
+    - pulsing_current
+    # cross-lane draft-ins (assist feeds both other lanes by design):
+    - conscription_notice
+    - ritual_purification
+    - pearl_barrage
+    # v0.2 sheet pass (R51 texture): the Sly-Vulnerable bell (new world,
+    # same labeling rule as above).
+    - tidal_lure

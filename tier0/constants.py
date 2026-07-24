@@ -175,6 +175,34 @@ SALON_TICK_BURST = 2          # burst energy per member tick AND bow (her
 BURST_PER_ENCORE_SPENT = 1    # burst energy per point of Encore spent
                               # (the other half of her particle economy)
 
+# --- Kokomi: Charge & the Tamakushi Casket (kickoff v1 §2; ALL numbers
+# PROPOSED — kickoff constants are [USER]-gated at battery freeze, none
+# ratified). The relic hook `tamakushi_casket` carries only the two
+# conversion laws (R16: bookkeeping in the relic, payoff magnitude in
+# cards): exhaust→Charge and Strength→Charge. Charge is uncapped, never
+# expended, card-event-driven only — no per-turn passive accrual constant
+# exists here and none may be added (the Furina Fanfare precedent). ---
+CHARGE_PER_EXHAUST = 1        # kickoff §2.1 base accrual (universal rule:
+                              # every card through the exhaust funnel)
+KOKOMI_BURST_PER_EXHAUST = 2  # her particle economy: burst energy per
+                              # exhaust event (skill_tag 5 + reactions 5
+                              # are the shared sources; this is her Salon-
+                              # tick analogue). PROPOSED.
+CEREMONIAL_GARMENT_TURNS = 3  # Shape B state duration (stacks = turns,
+                              # decays at player turn end). PROPOSED.
+# v0.3 charge-curve pass (user-directed 2026-07-24, PROPOSED): 4 -> 2.
+# The audit vs the Regent-common benchmark ("deal 7, Forge 7, 1 cost")
+# found her meter read ~4x under the comparison power level; at /4 a
+# node-4 bank of 8 Charge paid +2 per attack -- decoration, not a
+# scaling identity. At /2 a priest-median 24-Charge Garment window is
+# +12 per attack for 3 turns: Burst-tier, which is what a Burst is.
+GARMENT_CHARGE_DIVISOR = 2    # while the state is active, attack cards
+                              # gain +1 damage per this much Charge (the
+                              # "scaled down per hit" read, §2.2 Shape B).
+                              # KNOB_READS-instrumented. PROPOSED.
+CONSCRIPT_COST_DELTA = -1     # kickoff §2.3: a conscripted card costs 1
+                              # less (floor 0) and gains Exhaust.
+
 # --- Reference relics ---
 BURNING_BLOOD_HEAL = 6        # REF_IRONCLAD: heal after each won fight
                               # (ruling 1: gives A4 a nonzero anchor)
@@ -344,7 +372,7 @@ RARITY_ODDS = {"common": 0.60, "uncommon": 0.35, "rare": 0.05}
 # archived pre-Fontaine number is unchanged by the mechanism itself; what
 # changed the world is the Fontaine sheet loading (12 new 4-star cards).
 SAME_NATION_REWARD_SHARE = 0.5
-NATION_WEIGHTS = {"mondstadt": 1.0, "fontaine": 1.0}
+NATION_WEIGHTS = {"mondstadt": 1.0, "fontaine": 1.0, "inazuma": 1.0}
 
 # principles v1.8 / draft-sim addendum: the Featured Banner. Each run rolls
 # this many limited 5-stars per nation from the full designed roster, and only
@@ -389,7 +417,15 @@ CONSTANTS_VERSION = 2
 # lean gate gains the rare strong-pick escape hatch (DRAFT_LEAN_RARE_BAR)
 # the v5 arm promised but never implemented. v5-world numbers (Klee 6.2%,
 # real_IC 3.0%) are archived in §10.8.1's lever-world table.
-DRAFTER_VERSION = 6
+# v7 (2026-07-24, Kokomi v0.2 sheet pass): conservative static proxies for
+# her three verbs -- conscript, gain_charge, and Sly riders -- which the v6
+# scorer read as literal zero (the §10.8.2 AoE-blindness class: a plan
+# whose core verb scores 0.0 drafts like the Furina 0% diagnosis). Structural
+# constants in tier05.draft (STATIC_SLY_SHARE / STATIC_CONSCRIPT_VALUE /
+# STATIC_CHARGE_VALUE), deliberately unswept: any v6-world act number is
+# incomparable with v7 output for Kokomi; Klee/Furina/Ironclad decks carry
+# none of these ops, so their numbers do not move.
+DRAFTER_VERSION = 7
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).

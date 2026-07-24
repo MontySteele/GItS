@@ -8,6 +8,8 @@ cost_mod, conditional, repeat_this, formula amounts, companion ops.
 
 from __future__ import annotations
 
+import copy
+
 from typing import Optional
 
 from tier0 import constants as C
@@ -43,6 +45,11 @@ def _bonus_formula(state: CombatState, formula: str) -> int:
     m, _, what = rest.partition("_")
     if what == "fanfare" and m.isdigit():
         return int(n) * (state.player.fanfare // int(m))
+    if what == "charge" and m.isdigit():
+        # Kokomi finisher reads (kickoff §2.2): Charge is READ, never
+        # consumed. Rate limits (Rare / Exhaust / cost >= 2) live on the
+        # card rows, not here — this is only the arithmetic.
+        return int(n) * (state.player.charge // int(m))
     raise ValueError(f"unknown bonus_formula {formula!r}")
 
 
@@ -334,6 +341,10 @@ def _add_token(state: CombatState, card: Card, zone: str) -> None:
         state.player.hand.append(card)
     else:
         state.player.discard_pile.append(card)
+    # Kokomi §7 engine_closure diagnostic: every created card funnels
+    # through here (add_card tokens, generators, conscript-create), so the
+    # per-turn creation count is structural. Report-only (R14).
+    state.cards_created_this_turn += 1
     state.emit("add_card", card=card.id, to=zone)
 
 
@@ -861,6 +872,16 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
         state.player.hand.remove(victim)
         state.player.discard_pile.append(victim)
         state.emit("discard", card=victim.id)
+        # Sly (Kokomi Assist lane, kickoff §2.3): fires ONLY on card-effect
+        # discards from hand — this op is the one trigger site. The
+        # end-of-turn hand flush is NOT Sly (a silent turn pays nothing —
+        # the activity-gating law), and draw-pile discards (scry_discard)
+        # are not either; discard_for_sparks is Klee's own verb and no
+        # Klee card carries a sly list. Resolved with the discarded card
+        # as context, AFTER it reaches the discard pile (StS2 order).
+        if victim.sly:
+            state.emit("sly", card=victim.id)
+            _resolve_effects(state, victim.sly, victim)
 
 
 def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
@@ -1271,6 +1292,91 @@ def _free_play(state: CombatState, card: Card,
         state.free_play_depth -= 1
 
 
+def _op_gain_charge(state: CombatState, fx: dict, card: Card) -> None:
+    """Kokomi: explicit bonus-Charge effect line (kickoff §2.1 — premium
+    cards may grant bonus Charge beyond the universal accrual). The base
+    per-exhaust accrual lives at the funnel (refpowers), never here."""
+    resources.gain_charge(state, _amount(state, fx.get("amount", 1)),
+                          source=card.id)
+
+
+def _op_conscript(state: CombatState, fx: dict, card: Card) -> None:
+    """Conscript (kickoff §2.3, the Commander verb).
+
+    transform mode (default): transform a card in hand into a random
+    same-nation Companion card; it costs CONSCRIPT_COST_DELTA less
+    (floor 0) and gains Exhaust. Pays card identity, feeds Charge when the
+    conscript is consumed (played -> exhausted -> funnel). Net deck delta
+    is ZERO, which is what makes the verb legal at Common under the
+    Kokomi deck-size law.
+
+    create mode ({mode: create}): the SAME conscription grammar but the
+    recruit is created into hand instead of replacing a card — net
+    POSITIVE delta, therefore Uncommon+ only (lint-enforced on her sheet).
+
+    The transformed pick is the _worst_card in hand (the player conscripts
+    chaff, not payoffs), excluding kit cards (v1.9 invariant) and cards
+    that are already companions (re-conscripting a recruit is rules-legal
+    but pilot-daft; excluding it here is pilot judgement, not law).
+    Replacement happens AT the original index (CardCmd.Transform parity,
+    same argument as transform_in_hand)."""
+    from tier0.content import loader                # late import (cycle)
+    pool = loader.companion_pool(fx.get("nation", "inazuma"))
+    for _ in range(_amount(state, fx.get("amount", 1))):
+        recruit = copy.deepcopy(state.rng.choice(pool))
+        if "cost_override" in fx:
+            recruit.cost = fx["cost_override"]
+        elif isinstance(recruit.cost, int):
+            recruit.cost = max(0, recruit.cost + C.CONSCRIPT_COST_DELTA)
+        recruit.exhaust = True
+        recruit.conscripted = True
+        if fx.get("mode") == "create":
+            _add_token(state, recruit, "hand")
+            continue
+        hand = state.player.hand
+        candidates = [c for c in hand
+                      if not c.kit_card and not c.is_companion]
+        if not candidates:
+            state.emit("conscript_whiffed")
+            return
+        victim = _worst_card(candidates)
+        hand[hand.index(victim)] = recruit
+        state.emit("conscript", was=victim.id, into=recruit.id)
+
+
+def prevent_damage_exhaust(state: CombatState, incoming: int) -> int:
+    """Kokomi's prevention ward (kickoff §2.4): the first time each turn an
+    attack would deal unblocked damage, prevent up to the ward's stacks and
+    Exhaust a random card from the draw pile — prevention priced in future
+    draws. Returns the damage actually prevented.
+
+    The exhaust routes through refpowers.exhaust_card, i.e. THE funnel, so
+    the proc itself feeds Charge (getting attacked fuels the finisher —
+    the stability identity as mechanic). An empty draw pile reshuffles
+    first (ShuffleIfNecessary parity with every other draw-pile read); if
+    draw AND discard are both empty the ward cannot pay and does not
+    proc — the deck really is her second HP bar, and it can run out.
+
+    Rate limit: once per player-turn-round (prevention_used_this_turn,
+    reset with the other per-turn windows). Rare-gating and magnitude live
+    on the card row (R16: power in the cards)."""
+    p = state.player
+    stacks = p.powers.get("prevent_exhaust_ward", 0)
+    if (stacks <= 0 or incoming <= 0 or state.prevention_used_this_turn):
+        return 0
+    if not p.draw_pile:
+        state.shuffle_discard_into_draw()
+    if not p.draw_pile:
+        return 0                       # fuel exhausted: defenseless
+    from tier0.engine import refpowers              # late import (cycle)
+    state.prevention_used_this_turn = True
+    victim = p.draw_pile.pop(state.rng.randrange(len(p.draw_pile)))
+    refpowers.exhaust_card(state, victim)
+    prevented = min(incoming, stacks)
+    state.emit("prevent_exhaust", amount=prevented, card=victim.id)
+    return prevented
+
+
 def _op_autoplay_from_draw(state: CombatState, fx: dict, card: Card) -> None:
     """Havoc (1, forceExhaust) and Cascade (X, no forceExhaust).
 
@@ -1336,6 +1442,9 @@ OPS = {
     "copy_companion_in_hand": _op_copy_companion_in_hand,
     "replay_next_companion": _op_replay_next_companion,
     "copy_companions_played_this_combat": _op_copy_companions_played,
+    # --- Kokomi (kickoff v1 §7) ---
+    "gain_charge": _op_gain_charge,
+    "conscript": _op_conscript,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,
@@ -1355,7 +1464,12 @@ def _resolve_effects(state: CombatState, effects: list[dict],
 
 
 def resolve_card(state: CombatState, card: Card) -> None:
-    state.current_card_companion = card.is_companion    # control provenance
+    # Control provenance (§2.2a) — with the kickoff ask §6.7 attribution
+    # (PROPOSED): a CONSCRIPTED companion is self-sourced (Kokomi paid a
+    # card of her own deck for it), so its control does not count toward
+    # SUPPORT_CARRY; drafted companions count normally.
+    state.current_card_companion = (card.is_companion
+                                    and not card.conscripted)
     state.reactions_this_card = 0
     state.kills_this_card = 0
     state.fatal_kills_this_card = 0
@@ -1385,6 +1499,13 @@ def resolve_card(state: CombatState, card: Card) -> None:
         n = p.powers.get("fanfare_attack_per10", 0)
         if n:
             bonus += n * (p.fanfare // 10)
+        # Ceremonial Garment (Kokomi kit, kickoff §2.2 Shape B): while the
+        # state is active her attack cards READ Charge, scaled down by the
+        # divisor knob — repeated-but-bounded payoff, never a spend.
+        if p.powers.get("ceremonial_garment", 0) and p.charge:
+            bonus += p.charge // C.GARMENT_CHARGE_DIVISOR
+            KNOB_READS["GARMENT_CHARGE_DIVISOR"] = (
+                KNOB_READS.get("GARMENT_CHARGE_DIVISOR", 0) + 1)
     state.current_attack_bonus = bonus
 
     _resolve_effects(state, card.effects, card)

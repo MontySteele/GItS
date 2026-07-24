@@ -1,0 +1,71 @@
+# Kokomi + Inazuma upgrade deltas — v0.2 sheet pass (companion file to kokomi-cards.yaml / inazuma-companions.yaml)
+# Grammar authority: upgrade-conventions.md; klee-upgrades.yaml precedents cited inline. ALL deltas PROPOSED.
+# RESOURCE-CURVE LAW (Klee R1 precedent, applied to her engine): upgrades must NOT move the resource curve —
+#   no gain_charge deltas, no conscript-count deltas, no cadence/aura riders. Charge lines and conscript counts
+#   are printed identities; upgrades buy quality (damage/Block/draw/cost), never a faster engine.
+# ceremonial_garment: NO UPGRADE (kit card, v1.9; sparks_n_splash precedent — Talent Training is v2 design space).
+# KNOWN GAP, flagged not fudged: no sly-delta key exists in the applier, so Sly branches never move on upgrade
+#   (drifting_lantern/tidal_lure upgrade their PLAYED faces only). Extending the dispatch is a design decision
+#   about whether upgrades should sharpen the discard game — deferred to a ruling, not smuggled in here.
+
+# ---- BASICS ----
+waters_edge:       {damage: +3}          # 6->9 (R53: base stays at Strike parity; Strike+ slope)
+coral_guard:       {block: +3}           # 5->8, Defend-exact
+bake_kurage:       {block: +3}           # 3->6; the hydro application never moves (resource-curve law)
+tactical_recall:   {draw: +1}            # burn 1, see 2 — the exhaust-teacher graduates
+tide_reading:      {block: +2}           # 2->4; draw stays 1
+
+# ---- COMMONS (one number bump each; zero cost reductions — Klee sheet law) ----
+conscription_notice: {draw: +1}          # the notice replaces itself twice over; conscript count fixed at 1
+to_the_front:      {add: {op: draw, amount: 1}}   # quick_fuse precedent: the 0-cost order now replaces itself
+votive_offering:   {block: +3}           # 5->8
+ritual_purification: {draw: +1}          # 1->2; the Charge line NEVER moves (resource-curve law)
+waterspout:        {damage: +3}          # 7->10, still burns itself
+cleansing_tide:    {block: +4}           # 10->14, still eats two cards
+undertow_shuffle:  {draw: +1}            # 3->4; discard stays 2 (the two Sly bells are the identity)
+moon_signal:       {draw: +1}            # discard 1, see 2
+drifting_lantern:  {block: +2}           # played 4->6; the Sly branch stays 4 (header gap note)
+surging_shoal:     {damage: +2}          # 4->6 all (blast_radius-parity slope)
+jade_bulwark:      {block: +2}           # 6->8, warm_glow-exact
+pulsing_current:   {damage: +3}          # 6->9, snap-exact
+
+# ---- UNCOMMONS (bump OR keyword; two cost slots — Klee sheet law) ----
+mass_mobilization: {cost: -1}            # 2->1 (uncommon cost slot 1)
+field_promotion:   {draw: +1}            # 1->2
+reinforcements:    {cost: -1}            # 2->1 (uncommon cost slot 2)
+mercy_of_the_deep: {power_amount: +1}    # feel_no_pain 3->4
+pearl_barrage:     {formula_per: +1}     # 3 + 2/exhausted card (gleeful_barrage-class scaling bump)
+communion_of_tides: {draw: +1}           # burn 1, see 3
+rearguard_action:  {block: +3}           # 7->10, dodge_roll-parity
+swift_currents:    {energy: +1}          # 2->3, once; Exhaust STAYS (removal opens a net-positive energy loop —
+                                         # sugar_rush got the removal only because Sparks bound its loop)
+shell_of_sanctuary: {block: +4}          # 11->15, spirited_away-parity
+exposing_current:  {vulnerable: +1}      # 2->3 (surprise_visit-parity; the R51 rider sharpens, the Exhaust stays)
+riptide_strike:    {damage: +3}          # 5->8 base; the 1-per-2-Charge read never moves (resource-curve law)
+tidal_lure:        {block: +2}           # played 4->6; Sly Vulnerable stays 1 (header gap note)
+
+# ---- RARES (quality over quantity) ----
+nereids_ascension: {damage: +4}          # 10->14 all; the 1-per-2-Charge read never moves (resource-curve law)
+sango_prayer:      {weak: +1}            # 2->3 all (spooked-parity; Rare + Exhaust rate limits carry the weight)
+vigil_of_the_deep: {power_amount: +2}    # ward 6->8; max_stacks rides along (single-application encoding)
+grand_conscription: {cost: -1}           # 2->1 (all_my_treasures-class rare cost slot; muster count fixed at 3)
+depths_judgment:   {formula_per: +1}     # 8 + 3 per 2 exhausted (the pile-reader's ceiling climbs, base fixed)
+epiphany_of_the_deep: {cost: -1}         # 2->1 (true_spark_knight precedent: the engine power arrives on curve)
+prayer_to_the_moon: {block: +4}          # 4->8; the Charge line NEVER moves (resource-curve law)
+
+# ---- COMPANIONS (modest; upgraded forms stay enabler-grade — Klee sheet law) ----
+gorou_inuzaka_charge:    {damage: +2}    # 6->8, the starter arrow
+gorou_war_banner:        {buff: +1}      # next attack +3->+4; Block stays 4
+gorou_heart_of_the_clan: {power_amount: +1}   # metallicize 2->3
+sayu_yoohoo_windwheel:   {damage: +2}    # 4->6; the Swirl is the point and never moves
+sayu_daruma_gift:        {block: +2}     # played face 4->6; next-turn 4 stays (block key hits the first op only)
+sayu_naptime:            {draw: +1}      # 1->2, still free
+shinobu_sanctifying_ring: {damage: +2}   # 3->5 all; Block stays 4
+shinobu_grass_ring_bond: {block: +2}     # 5->7, the honest wall thickens
+shinobu_thundergrust:    {damage: +2}    # 7->9
+thoma_blazing_barrier:   {block: +2}     # 5->7; the lingering ember stays 2
+thoma_crimson_ooyoroi:   {damage: +2}    # 8->10
+sara_crowfeather_cover:  {buff: +2}      # +4->+6 (bennett_passion-parity)
+sara_tengu_stormcall:    {damage: +2}    # 4->6; the Strength stays 2 (in Kokomi's hands: still exactly 2 Charge)
+itto_superlative_superstrength: {damage: +3}   # 14->17; Block stays 6
+raiden_musou_no_hitotachi: {damage: +4}  # 18->22; still one perfect cut, still nothing else

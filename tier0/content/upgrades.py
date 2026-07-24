@@ -35,7 +35,11 @@ from tier0.content import local_reference
 _DOCS = Path(__file__).parents[2] / "docs"
 _GAME_REF = local_reference.game_ref_dir()
 UPGRADE_SHEETS = (_DOCS / "klee-upgrades.yaml",
-                  _DOCS / "furina-upgrades.yaml")
+                  _DOCS / "furina-upgrades.yaml",
+                  # v0.2 Kokomi sheet pass (2026-07-24): rest-smith needs
+                  # upgrade targets or her tier05 runs are structurally
+                  # behind. Cross-session note: docs/kokomi-session-worknote.md
+                  _DOCS / "kokomi-upgrades.yaml")
 EXTERNAL_UPGRADE_SHEETS = (_GAME_REF / "ironclad-upgrades.yaml",)
 SUFFIX = "+"
 

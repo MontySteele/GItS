@@ -36,6 +36,15 @@ CHARACTER_PLANS = {
         "spotlight": "spotlight",
         "fanfare": "fanfare",
     },
+    "kokomi": {
+        # v0.2 sheet pass (2026-07-24): plans mirror her tier0 archetype
+        # pilots. Requires DRAFTER_VERSION >= 7 -- the v6 scorer read her
+        # conscript/gain_charge/Sly verbs as literal zero.
+        "generic": "generic",
+        "commander": "commander",
+        "priest": "priest",
+        "assist": "assist",
+    },
     "ref_ironclad": {"generic": "generic"},
     "real_ironclad": {"generic": "generic"},
 }
@@ -43,6 +52,7 @@ CHARACTER_PLANS = {
 DEFAULT_PLAN = {
     "klee": "demolition",
     "furina": "salon",
+    "kokomi": "priest",
     "ref_ironclad": "generic",
     "real_ironclad": "generic",
 }

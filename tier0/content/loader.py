@@ -23,7 +23,9 @@ CONTENT_DIR = Path(__file__).parent
 # pools — the sim reads them directly so design and sim never drift.
 DOCS_DIR = CONTENT_DIR.parents[1] / "docs"
 DOCS_CARD_SHEETS = ("klee-cards.yaml", "furina-cards.yaml",
-                    "mondstadt-companions.yaml", "fontaine-companions.yaml")
+                    "kokomi-cards.yaml",
+                    "mondstadt-companions.yaml", "fontaine-companions.yaml",
+                    "inazuma-companions.yaml")
 
 # The real base-game pool (tools/extract_base_game_pool.py ->
 # tools/build_ironclad_sheet.py). game_ref/ is gitignored (.gitignore:28):
@@ -242,6 +244,23 @@ def guest_star_generation_pool(rarity: str) -> list[Card]:
             and c.rarity == rarity and not c.kit_card]
     if not pool:
         raise ValueError(f"empty guest-star pool at rarity {rarity!r}")
+    return sorted(pool, key=lambda c: c.id)
+
+
+def companion_pool(nation: str) -> list[Card]:
+    """The conscript op's generation pool (Kokomi kickoff §2.3): every
+    ordinary shared Companion of the nation, ALL draftable rarities — the
+    5-star Rare jackpot (Itto) is deliberately in the deck of outcomes;
+    conscription pays card identity for a random recruit, and the rare
+    hit is the verb's advertised dream. Guest Stars are excluded (they are
+    a Furina personal-pool mechanism, kickoff §2.3 differentiation) and so
+    are kit cards, as everywhere."""
+    pool = [c for c in _card_index().values()
+            if c.is_companion and c.nation == nation
+            and not c.guest_star and not c.kit_card
+            and c.rarity in C.RARITY_ODDS]
+    if not pool:
+        raise ValueError(f"empty companion pool for nation {nation!r}")
     return sorted(pool, key=lambda c: c.id)
 
 

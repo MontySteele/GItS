@@ -103,6 +103,20 @@ def absorb_into_encore(state: CombatState, dmg: int) -> int:
     return dmg - absorbed
 
 
+def gain_charge(state: CombatState, n: int, source: str) -> None:
+    """Kokomi's Charge (kickoff v1 §2.1): uncapped, never expended,
+    card-event-driven only. Callers gate on the tamakushi_casket relic
+    hook (the accrual laws live ON the relic; a player without it has no
+    Charge engine and this is never reached). No passive per-turn accrual
+    path exists in this module or anywhere else — same law as Fanfare
+    above, same reason (stall payoff), deliberately not designed."""
+    if n <= 0:
+        return
+    p = state.player
+    p.charge += n
+    state.emit("gain_charge", amount=n, source=source, total=p.charge)
+
+
 def note_player_hp_loss(state: CombatState, n: int) -> None:
     """Fanfare hook for TRUE HP loss (enemy hits reaching HP, DoT,
     self-damage, Encore overdraw). Callers deduct HP themselves; this

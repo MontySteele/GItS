@@ -1271,3 +1271,98 @@ Stop simulator tuning here and use real play to judge whether dry Members feel
 appropriately weakened, whether hard-gated Common converters create engaging
 meter decisions or frustrating dead draws, and whether the 27.5% simulated
 Fanfare plan understates a human pilot's ability to wait for charged turns.
+
+## R51 -- Kokomi elite axes: A2+A6, stability band owns the healer fantasy (2026-07-24)
+
+USER RULING (closes kokomi-kickoff-v1 ask 4; routes session ask N2): Kokomi's
+elite pair is A2 Scaling + A6 Utility, replacing the kickoff's "A2 + A4
+Utility" wording — the A4 terminology clash is discharged. The healer fantasy
+moves entirely to the stability band (HP-trajectory flatness) in the act-level
+realistic sims, which the kickoff §3 already pre-registered as her acceptance
+signature. A4's instrument is NOT redefined: ward prevention stays a reported
+telemetry stream (FightStats.prevented) feeding the stability band, never
+axis-credited.
+
+TEXTURE CONSTRAINT (user, verbatim intent): Weak and Vulnerable enter her pool
+as riders on exhaust / Sly engine pieces — "they go in the kit but as engine
+payoffs, not a spammable '1 cost aoe weaken' like Furina gets." The Furina
+commanding_gaze pattern (cheap standalone AoE debuff) is explicitly excluded
+from her pool. Debuffs are earned by running the exhaust/Sly engine, which
+also keeps the hydro-convergence watchlist honest: her A6 texture is
+mechanically distinct from Furina's even where the status names overlap.
+
+SCOPE NOTES: measured A6 median is 2.2 in the v0.1 battery, so elite A6 is a
+statement about the upcoming full sheet pass (authoring work: Weak/Vuln
+riders, application uptime, AoE packaging incl. surging_shoal), not about the
+v0.1 roster. Remaining instrument questions — A4/ward credit (N2), starter
+weakness (30.5% wr), Gardener-card packaging — are routed to the tier05
+act 1-3 realistic sims; tier0 batteries retain unit/anchor/lint duty only.
+Also accepted in the same thread: the test_fontaine_rewards 5-star assertion
+update (pins the mondstadt-or-inazuma construction) and the in-session
+vigil-packaging and domination-lint catches.
+
+## R52 -- Kokomi kickoff asks: batch closure (2026-07-24)
+
+USER RULINGS (closes kickoff asks 1-3, 5-10 and session asks N1, N3, N5;
+ask 4 / N2 were closed in R51):
+
+- N1 cadence: CATALYST. Every attack applies hydro — the application-uptime
+  third of elite A6 becomes structural rather than authored.
+- Ask 8 statline: hp 70 / energy 3 / starter composition (3x waters_edge,
+  3x coral_guard, bake_kurage, 2x tactical_recall, tide_reading) with the
+  reserved companion slots — pinned as the starting point; numbers stay knobs.
+- Ask 2 deck-size grammar: approved as written, Kokomi-pool scope ONLY;
+  lint_kokomi_decksize remains the in-suite gate.
+- Ask 6 finisher: keep both-with-capstone (Ceremonial Garment kit Burst +
+  Nereid's Ascension rate-limited Rare); the act-level sims arbitrate.
+- Ask 1 healing: NO amendment — and none planned, ever. Furina already holds
+  the mod's one healing amendment; Kokomi's rares pay off a different way.
+  CONSEQUENCE: sango_prayer (heal 12, Rare+Exhaust) is cut as authored and
+  reworked to a non-heal payoff in the v0.2 sheet pass. The healer heals no
+  HP: her sustain fantasy is prevention (ward) plus the stability band.
+- Ask 5 Charge accrual: universal exhaust->Charge through the single funnel,
+  as implemented.
+- Ask 7 SUPPORT_CARRY: conscripted companions count as base kit
+  (self-sourced); drafted companion cards count normally. As implemented.
+- N3 starter trio: Gorou always enlists (lore ruling). The three-name /
+  two-slot asymmetry is intended; no fourth shortlist name.
+- N5 conscript rarity: leave natural rarity odds — the Itto 5-star jackpot
+  stays in the pool; reconsider only if sims show him busted.
+- Ask 3 A1>A2 invariant: the Klee law was Klee-scoped; there is no mod-wide
+  invariant. Kokomi's per-identity constraint A2>A1 stands on her own sheet.
+- Ask 9 Raiden: playable characters MAY also exist as Rare companion cards,
+  and may appear in Kokomi's conscript pool — but only as a Rare payoff.
+  Lorewise Kokomi and Raiden are opposed; the flavor must carry that tension.
+  (User notes the playable-as-companion ruling may not have been formally
+  ratified before; it is ratified here for this case.)
+- Ask 10 naming/lore audit: deferred to the full sheet, pre-C-milestone,
+  as designed.
+
+Not explicitly addressed: N4 (burst meter 50, KOKOMI_BURST_PER_EXHAUST 2) —
+treated under ask 8's "pinned starting point" umbrella: knobs, tuned by sims.
+
+DISPOSITION: every kickoff gate is closed. The v0.2 sheet pass proceeds under
+R51's texture constraint (Weak/Vulnerable only as riders on exhaust/Sly
+engine pieces), with sango_prayer reworked, Raiden authored as an
+opposed-lore conscript-pool Rare, a kokomi-upgrades sheet added (rest-smith
+dependency), and the tier05 drafter taught her verbs (DRAFTER_VERSION-
+stamped) before any act 1-3 number is read.
+
+## R53 -- Kokomi basics stay at Strike parity; v0.3 committed for review (2026-07-24)
+
+USER RULING: waters_edge does NOT go to kaboom parity (7) -- her basic
+attack remains at basic-Strike parity (6). The kaboom-parity arm from the
+v0.3 charge-curve grid is rejected; its ~5 act-1 points are not bought
+through the basic.
+
+CONTEXT: the rest of the v0.3 charge-curve world (Regent-shape commons,
+GARMENT_CHARGE_DIVISOR /2, riptide_strike, fast-cycle Burst meter 10,
+starter S3 swaps -- sheetpass report §6) is committed AS PROPOSED for a
+later card-by-card review. The user flags that the world may diverge too
+far from the character's actual identity; the §6.4 tension (ruled A2>A1
+constraint violated by the fast-cycle Garment's frontload signature, median
+TOO_STRONG) is the open question that review will decide (options O1-O3 on
+file). Nothing in the v0.3 numbers is ratified by this commit.
+
+COMMITTED WORLD (waters_edge 6, re-measured before commit): see report
+§6.3 for the final labeled table.

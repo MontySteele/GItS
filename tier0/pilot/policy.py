@@ -417,6 +417,43 @@ def _spotlight_value(state: CombatState, card: Card) -> float:
     return val                                   # and the pilot knows it
 
 
+def _charge_value(state: CombatState, card: Card) -> float:
+    """Kokomi's Charge-engine machinery (kickoff §2). Without this her
+    pilots would score conscription and deliberate exhausts near zero and
+    never run the engine — the DECISIONS-53 selector lesson again. Values
+    only the MACHINERY; the payoff damage (charge bonus_formula, garment
+    state) already flows through _expected_damage and _scaling_value.
+    Default weight 0.0: every non-Kokomi pilot is unchanged."""
+    p = state.player
+    engine_live = "tamakushi_casket" in p.relic_hooks
+    val = 0.0
+    for fx in _active_effects(state, card.effects):
+        op = fx["op"]
+        if op == "gain_charge":
+            val += _est(state, fx.get("amount", 1), 1) * 0.6
+        elif op == "conscript":
+            # A recruit in hand at a discount, plus its Exhaust feeds the
+            # meter later. Create mode nets a card; transform pays one.
+            n = _est(state, fx.get("amount", 1), 1)
+            val += n * (3.0 if fx.get("mode") == "create" else 2.0)
+        elif op == "exhaust_from" and engine_live:
+            # Deliberate exhausts are Charge + deck-thinning when the
+            # casket is on. amount can be "all" (Stoke grammar).
+            n = fx.get("amount", 1)
+            n = 3 if n == "all" else _est(state, n, 1)
+            val += n * 0.8
+    if engine_live and card.exhaust and not card.kit_card:
+        val += 0.5                       # self-mill is fuel, not just loss
+    # The garment state: worth its remaining-turn Charge read. Scored here
+    # (not _scaling_value) because its value RISES with banked Charge.
+    for fx in card.effects:
+        if (fx["op"] == "apply_power"
+                and fx.get("power") == "ceremonial_garment"):
+            turns = fx.get("amount", C.CEREMONIAL_GARMENT_TURNS)
+            val += turns * (p.charge // C.GARMENT_CHARGE_DIVISOR) * 1.2 + 2.0
+    return val
+
+
 def _score(state: CombatState, card: Card, w: dict) -> float:
     cost = card_cost(state, card)
     return (w["damage"] * _expected_damage(state, card)
@@ -426,6 +463,7 @@ def _score(state: CombatState, card: Card, w: dict) -> float:
             + w["tempo"] * _tempo_value(state, card)
             + w.get("sustain", 1.0) * _sustain_value(state, card)
             + w.get("spotlight", 0.0) * _spotlight_value(state, card)
+            + w.get("charge", 0.0) * _charge_value(state, card)
             - w["cost"] * cost)
 
 

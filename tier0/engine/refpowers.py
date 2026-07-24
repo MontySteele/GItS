@@ -242,6 +242,19 @@ def after_card_exhausted(state: CombatState, card: Card,
     """
     p = state.player
     state.cards_exhausted_this_turn += 1
+    # Kokomi (kickoff v1 §2.1/§2.5): the Tamakushi Casket's universal
+    # accrual law, at the ONE exhaust funnel — played-exhausts, mid-card
+    # exhausts (swept per play), ethereal, the autoplay sweep, and the
+    # prevention ward's procs all pass through here, so "whenever one of
+    # your cards is Exhausted" is structural, not per-site discipline.
+    # Statuses/curses count too (accepted quirk, §2.1). The exhaust event
+    # is also her burst-particle economy (KOKOMI_BURST_PER_EXHAUST).
+    # Dead branch for every player without the relic hook.
+    if "tamakushi_casket" in p.relic_hooks:
+        from tier0.engine import resources    # late import (module graph)
+        resources.gain_charge(state, C.CHARGE_PER_EXHAUST, "exhaust")
+        if p.burst_max:
+            p.burst_energy += C.KOKOMI_BURST_PER_EXHAUST
     if card.on_exhaust_energy:
         # DrumOfBattle uses PlayerCmd.GainEnergy, so ExpectAFight's
         # NoEnergyGain hook must deny this payout too. Normal on-play energy
