@@ -323,6 +323,14 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
             # turn-start evaluation and before the first card is chosen.
             relics.reevaluate_conditionals(state)
 
+    # Pass 4 Q1a: Fanfare trajectory snapshot, taken HERE -- after turn-start
+    # triggers, Salon upkeep, energy and draw, before the first card -- because
+    # that is the state the pilot actually decides in, and the state that
+    # determines whether this turn's generation overflows. Report-only (R14).
+    if p.fanfare_cap:
+        state.emit("fanfare_turn", total=p.fanfare, cap=p.fanfare_cap,
+                   at_cap=p.fanfare >= p.fanfare_cap)
+
     seen_states: set[tuple] = set()
     while not state.over:
         if state.cards_played_this_turn >= C.MAX_CARDS_PER_TURN:

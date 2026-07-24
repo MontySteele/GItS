@@ -30,9 +30,13 @@ def gain_fanfare(state: CombatState, n: int, source: str) -> None:
         return
     before = p.fanfare
     p.fanfare = min(p.fanfare_cap, p.fanfare + n)
-    if p.fanfare != before:
-        state.emit("gain_fanfare", amount=p.fanfare - before, source=source,
-                   total=p.fanfare)
+    applied = p.fanfare - before
+    # Pass 4 Q1a: the clamp used to be SILENT -- only `amount` (what landed)
+    # was emitted, so generation thrown away at the cap left no trace and no
+    # sweep could see saturation. `requested`/`wasted` are the overflow read;
+    # a fully-wasted gain emits too, which is exactly the case that matters.
+    state.emit("gain_fanfare", amount=applied, source=source,
+               total=p.fanfare, requested=n, wasted=n - applied)
 
 
 def spend_fanfare(state: CombatState, n: int) -> int:

@@ -33,7 +33,8 @@ from tier0.engine.combat import run_fight
 from tier0.engine.state import Card, Enemy
 from tier0.harness import metrics as t0_metrics
 from tier0.pilot.policy import make_pilot
-from tier05 import acts, draft, potions as potion_pool, rewards, shop
+from tier05 import acts, draft, fanfare_telemetry
+from tier05 import potions as potion_pool, rewards, shop
 from tier05 import relics as relic_pool
 
 # policy(rng, deck_cards, offers, archetype) -> Card | None
@@ -165,6 +166,9 @@ class RunResult:
     #                    is the per-act template repeated n_acts times, so act
     #                    boundaries sit at multiples of len(node_template()).
     acts_completed: int = 0             # §10.1: boss wins (final boss included)
+    fanfare_traces: list = field(default_factory=list)   # pass 4 Q1a:
+    #                    (act_index, FanfareTrace) per fight, in order.
+    #                    Empty traces (turns == 0) for non-Fanfare rosters.
 
 
 def node_template() -> list[str]:
@@ -410,6 +414,12 @@ def run_one(character: str, archetype: str, pilot_id: str,
         state = run_fight(player, enemies, pilot,
                           seed=rng.randrange(2 ** 31))
         res.fight_stats.append(t0_metrics.extract(state, hp_start))
+        # Pass 4 Q1a: Fanfare trajectory per fight, tagged with the act it
+        # happened in -- the saturation question is "by act 3", which a
+        # fight-level or run-level average cannot answer. Empty (turns == 0)
+        # for characters with no Fanfare pool, so this costs other rosters
+        # nothing.
+        res.fanfare_traces.append((act_i, fanfare_telemetry.trace(state.log)))
         fights += 1
         hp = state.player.hp
         # Combat-scoped effects such as Feed can raise max HP permanently.
