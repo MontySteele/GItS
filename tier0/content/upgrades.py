@@ -39,7 +39,16 @@ UPGRADE_SHEETS = (_DOCS / "klee-upgrades.yaml",
                   # v0.2 Kokomi sheet pass (2026-07-24): rest-smith needs
                   # upgrade targets or her tier05 runs are structurally
                   # behind. Cross-session note: docs/kokomi-session-worknote.md
-                  _DOCS / "kokomi-upgrades.yaml")
+                  _DOCS / "kokomi-upgrades.yaml",
+                  # Calibration pass (2026-07-24): the ANCHOR had 0/6 pool and
+                  # 0/10 starter upgradable while every designed character had
+                  # 100%, so rest-smithing, Sand Castle, Yummy Cookie, War
+                  # Paint and Whetstone were all dead branches on the very
+                  # character the world is calibrated against -- measured 0
+                  # upgraded cards and 0 smiths in 300 runs. Real base-game
+                  # numbers; the tier 0 battery never upgrades, so the frozen
+                  # scorecard and the anchor lock are untouched.
+                  _DOCS / "ref-ironclad-upgrades.yaml")
 EXTERNAL_UPGRADE_SHEETS = (_GAME_REF / "ironclad-upgrades.yaml",)
 SUFFIX = "+"
 
