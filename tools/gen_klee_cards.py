@@ -344,31 +344,33 @@ APPLY_POWERS = {
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,
         "Your [gold]Shatters[/gold] deal {X} more damage."),
-    "fanfare_attack_per10": ("FanfareAttackPer10Power", 2,
-        "Your Attacks deal {X} more damage per 10 [gold]Fanfare[/gold]. "
-        "Maximum 2 stacks."),
+    "fanfare_attack_per10": ("FanfareAttackPer10Power", None,
+        "Your Attacks deal {X} more damage per 10 [gold]Fanfare[/gold]."),
     "salon_member": ("SalonMemberPower", None,
         "Add {X} typed [gold]Salon Member(s)[/gold]. Maximum 3; a full "
         "stage bows its OLDEST member out (its unique payoff) and "
         "empowers this card's later effects."),
-    "salon_damage_up": ("SalonDamageUpPower", 6,
-        "[gold]Salon Member[/gold] numbers are {X} higher. Maximum 6."),
-    # CAPS DROPPED on the four non-compounding powers (user ruling 2026-07-24).
-    # The pass-1 cap rationale (pass1-rulings-round2.md) targets PER-TURN
-    # COMPOUNDING powers, which are the A2 exponent source. These four are not
-    # that: three are gated to one proc per turn by their own "first Spotlighted
-    # card each turn" clause, and spotlight_flat_damage is a flat additive whose
-    # cap equalled a single application, making a second copy a dead card.
-    # Base StS lets you spam Power dupes; these now do too. The four genuinely
-    # compounding powers below (salon_damage_up, spotlight_mult_bonus,
-    # ovation_spend_boost, fanfare_attack_per10) keep their caps.
+    "salon_damage_up": ("SalonDamageUpPower", None,
+        "[gold]Salon Member[/gold] numbers are {X} higher."),
+    # ALL max_stacks DROPPED across Furina's sheet (user ruling 2026-07-24).
+    # Two rounds: the first dropped the four non-compounding powers; this one
+    # drops the rest, matching base StS where Power dupes always stack. An A/B
+    # (2000 runs/arm x2 seeds, assigned pilots) put the whole cap set at 0.0pp
+    # for the first four and +0.4-0.5pp (p~0.02, favorable) for the compounders,
+    # i.e. non-binding at present difficulty. Two of these -- spotlight_mult_bonus
+    # and ovation_spend_boost -- ARE genuinely compounding (per-copy % multipliers
+    # that pass1-rulings-round2's exponent argument was about); they read minimal
+    # ONLY because spotlight/fanfare win <1% pre-calibration. FLAGGED to re-check
+    # at difficulty calibration. `salon_member`'s "Maximum 3" is NOT a max_stacks
+    # cap -- it is the roster size (a full stage bows the oldest out), core salon
+    # rules, and stays. NO numeric cap remains in this registry now.
     "spotlight_discount": ("SpotlightDiscountPower", None,
         "The first [gold]Spotlighted[/gold] card each turn costs {X} less."),
     "spotlight_draw": ("SpotlightDrawPower", None,
         "The first [gold]Spotlighted[/gold] card each turn draws {X} card."),
-    "spotlight_mult_bonus": ("SpotlightMultBonusPower", 50,
+    "spotlight_mult_bonus": ("SpotlightMultBonusPower", None,
         "[gold]Spotlighted[/gold] Companion numbers are {X}% stronger "
-        "this combat. Maximum +50%."),
+        "this combat."),
     "spotlight_mult_bonus_turn": ("SpotlightMultBonusTurnPower", None,
         "[gold]Spotlighted[/gold] Companion numbers are {X}% stronger "
         "this turn."),
@@ -376,9 +378,9 @@ APPLY_POWERS = {
         "[gold]Spotlighted[/gold] Companion damage gains {X}."),
     "spotlight_flat_damage_turn": ("SpotlightFlatDamageTurnPower", None,
         "[gold]Spotlighted[/gold] Companion damage gains {X} this turn."),
-    "ovation_spend_boost": ("OvationSpendBoostPower", 20,
+    "ovation_spend_boost": ("OvationSpendBoostPower", None,
         "Whenever you spend Encore, [gold]Spotlighted[/gold] Companion "
-        "numbers are {X}% stronger this turn. Maximum +20%."),
+        "numbers are {X}% stronger this turn."),
     "spotlight_encore_first": ("SpotlightEncoreFirstPower", None,
         "The first [gold]Spotlighted[/gold] card each turn grants {X} Encore."),
 }

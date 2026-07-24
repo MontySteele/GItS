@@ -59,9 +59,9 @@ internal static class KleePowerIcons
         // with Furina's look pass.
         SalonMemberPower or SalonDamageUpPower =>
             KleePck.Path("klee/powers/bomb.png"),
-        // SpotlightPower is the shared base of BOTH the capped and uncapped
-        // texture powers (the 2026-07-24 cap ruling split the hierarchy);
-        // matching the base keeps every Spotlight power iconed.
+        // SpotlightPower is the shared base of EVERY Spotlight texture power
+        // (the 2026-07-24 uncap-all ruling collapsed the capped subclass back
+        // out); matching the base keeps every Spotlight power iconed.
         SpotlightPower
             or SpotlightMultBonusTurnPower
             or SpotlightFlatDamageTurnPower

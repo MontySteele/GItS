@@ -46,15 +46,26 @@ public static class FurinaResourceConstants
 ///
 /// BaseLib owns reset, affordability, cloning, and card-cost visuals. Encore
 /// card costs are exceptional only in their timing: the sim spends them
-/// before card effects. <see cref="FurinaResourceHooks.BeforeCardPlayed"/>
-/// performs that early spend, so BaseLib's normal post-resolution spend is a
-/// deliberate no-op here.
+/// BEFORE card effects (combat.py play_card line 180, above the replay loop).
+/// <see cref="FurinaResourceHooks.BeforeCardPlayed"/> performs that spend, so
+/// BaseLib's own is a deliberate no-op here.
+///
+/// This class's spend was always correct; only its old wording -- "BaseLib's
+/// normal post-resolution spend" -- was wrong, and that same wrong belief is
+/// what let the Fanfare bug sit. BaseLib spends inside CardModel.SpendResources,
+/// which runs BEFORE OnPlayWrapper. See <see cref="FanfareResource"/>.
 /// </summary>
 public sealed class EncoreResource : BasicCustomResource
 {
     public EncoreResource() : base("KLEEMOD_ENCORE")
     {
     }
+
+    /// <summary>A gate the buffer has to satisfy, not energy. See
+    /// <see cref="FanfareResource.ApplySharedModification"/> -- card_playable
+    /// compares against the printed encore_cost, so a "free" effect must not
+    /// waive it.</summary>
+    public override bool ApplySharedModification => false;
 
     public override Task<bool> Spend<T>(
         ICombatState combatState, AbstractModel? spender, int amount, bool optional)
@@ -64,14 +75,55 @@ public sealed class EncoreResource : BasicCustomResource
 }
 
 /// <summary>
-/// Furina's capped, spendable Fanfare. BaseLib's normal custom-cost spend
-/// occurs after OnPlay, which is exactly the sim rule: Fanfare formula cards
-/// resolve from the pre-spend audience level, then pay their cost.
+/// Furina's capped, spendable Fanfare.
+///
+/// TIMING, corrected 2026-07-24. This class used to claim BaseLib's spend
+/// "occurs after OnPlay". It does not. BaseLib's CustomResourcePatches
+/// transpiles SpendAdditionalCosts into <c>CardModel.SpendResources</c> --
+/// the decompiler cannot print that attribute, but the IL blob decodes to
+/// (typeof(CardModel), "SpendResources") -- and PlayCardAction awaits
+/// SpendResources() and only THEN awaits OnPlayWrapper. So the audience was
+/// being charged before the card resolved, and every
+/// <c>bonus_formula: N_per_M_fanfare</c> read the post-spend level.
+///
+/// The sheet's resource grammar and combat.py disagree: play_card resolves
+/// the card (line 229), THEN pays at line 231. Crescendo lost 5 damage and
+/// Universal Revelry lost 10 to all enemies.
+///
+/// So BaseLib's spend is a deliberate no-op here, exactly as it already is
+/// for <see cref="EncoreResource"/>, and
+/// <see cref="FurinaResourceHooks.AfterCardPlayed"/> pays the cost at the
+/// sim's moment. As a side effect this also fixes auto-played Fanfare cards,
+/// which never paid at all: CardCmd.AutoPlay skips SpendResources (the same
+/// hole that produced the infinite Burst).
 /// </summary>
 public sealed class FanfareResource : BasicCustomResource
 {
     public FanfareResource() : base("KLEEMOD_FANFARE")
     {
+    }
+
+    /// <summary>
+    /// A meter the audience fills, not energy: a "this card is free" effect
+    /// must not waive the applause. Blocks BaseLib's SetToFreeThisTurn /
+    /// ThisCombat forwarding, which would otherwise zero both the cost AND
+    /// the playability gate -- card_playable compares against the PRINTED
+    /// fanfare_cost, never a discounted one.
+    ///
+    /// Note this does not close the Hook.ModifyEnergyCostInCombat path,
+    /// which CustomResourceCost.GetWithModifiers applies unconditionally.
+    /// Nothing Furina can hold implements that hook today; the canonical-cost
+    /// CanAfford override the Burst meters carry is the fix if that changes.
+    /// </summary>
+    public override bool ApplySharedModification => false;
+
+    /// <summary>DELIBERATE NO-OP; the spend lives in
+    /// <see cref="FurinaResourceHooks.AfterCardPlayed"/>. See the class
+    /// summary for why the inherited timing is wrong.</summary>
+    public override Task<bool> Spend<T>(
+        ICombatState combatState, AbstractModel? spender, int amount, bool optional)
+    {
+        return Task.FromResult(true);
     }
 }
 
@@ -198,6 +250,23 @@ public static class FurinaResources
         var cap = FanfareCap(creature);
         if (resource == null || cap <= 0) return;
         resource.Amount = Math.Min(cap, resource.Amount + amount);
+    }
+
+    /// <summary>
+    /// resources.spend_fanfare: pay a gated cost and reopen room beneath the
+    /// cap. Clamped like the sim's <c>min(p.fanfare, n)</c> -- the gate should
+    /// have made a shortfall impossible, and a shortfall is never an overdraw
+    /// (that is spend_encore's job alone).
+    /// </summary>
+    public static int SpendFanfare(Creature creature, int amount)
+    {
+        if (amount <= 0) return 0;
+        var resource = FanfareResourceFor(creature);
+        if (resource == null) return 0;
+        var spent = Math.Min(resource.Amount, amount);
+        if (spent <= 0) return 0;
+        resource.Amount -= spent;
+        return spent;
     }
 
     public static void GainEncore(Creature creature, int amount)
@@ -355,6 +424,20 @@ public sealed class FurinaResourceHooks : AbstractModel
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await SpotlightSystem.ResolvePendingDraw(choiceContext, cardPlay);
+        // Sim order (combat.py play_card): the card resolves through the whole
+        // replay loop, and ONLY THEN does line 231 pay the Fanfare cost. So
+        // this runs after resolution and once per SERIES, not per replay --
+        // a Study Buddy'd Fanfare card performs twice and pays once, matching
+        // spend_fanfare's single call outside the loop.
+        if (cardPlay.IsLastInSeries
+            && FurinaResources.IsFurina(cardPlay.Card.Owner.Creature))
+        {
+            var fanfareCost =
+                CustomResources<FanfareResource>.Cost(cardPlay.Card)
+                    ?.GetAmountToSpend() ?? 0;
+            FurinaResources.SpendFanfare(
+                cardPlay.Card.Owner.Creature, fanfareCost);
+        }
         await FurinaResources.SyncMeters(
             choiceContext, cardPlay.Card.Owner.Creature, cardPlay.Card);
         await FurinaKitGrant.GrantIfCharged(
@@ -529,20 +612,20 @@ public sealed class EncorePerTurnPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// "Attacks deal +Amount per 10 Fanfare", capped at two stacks by the sheet.
-/// Fanfare is read per hit, so spending or gaining it changes later attacks
-/// immediately.
+/// "Attacks deal +Amount per 10 Fanfare". Fanfare is read per hit, so
+/// spending or gaining it changes later attacks immediately.
+///
+/// The two-stack cap was dropped 2026-07-24 (uncap-all ruling): +1/copy per
+/// 10 Fanfare is additive in copies, so uncapping just lets dupes stack like
+/// any base-StS Power. See <see cref="SpotlightPower"/> for the A/B.
 /// </summary>
 public sealed class FanfareAttackPer10Power : PowerModel, ILocalizationProvider
 {
-    public const int MaxStacks = 2;
-
     public List<(string, string)>? Localization => new()
     {
         ("title", "Rising Ovation"),
         ("description",
-            "Your Attacks deal {Amount} more damage per 10 [gold]Fanfare[/gold]. "
-          + "Maximum 2 stacks."),
+            "Your Attacks deal {Amount} more damage per 10 [gold]Fanfare[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -557,18 +640,5 @@ public sealed class FanfareAttackPer10Power : PowerModel, ILocalizationProvider
         if (!props.IsPoweredAttack()) return 0m;
         if (cardSource is not { Type: CardType.Attack }) return 0m;
         return Amount * (FurinaResources.Fanfare(Owner) / 10);
-    }
-
-    public override bool TryModifyPowerAmountReceived(
-        PowerModel canonicalPower, Creature target, decimal amount,
-        Creature? applier, out decimal modifiedAmount)
-    {
-        modifiedAmount = amount;
-        if (canonicalPower is not FanfareAttackPer10Power || target != Owner)
-        {
-            return false;
-        }
-        modifiedAmount = Math.Max(0m, Math.Min(amount, MaxStacks - Amount));
-        return modifiedAmount != amount;
     }
 }

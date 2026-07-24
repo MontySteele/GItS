@@ -251,44 +251,28 @@ public sealed class GuestCastPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Shared shape for every Spotlight texture power: a Buff counter.
+/// Shared shape for every Spotlight texture power: a Buff counter with NO
+/// stack ceiling.
 ///
-/// Split out from CappedSpotlightPower by the 2026-07-24 cap ruling. Four of
-/// these powers no longer have a maximum, but they still want the common
-/// Type/StackType, and KleePowerIcons keys its Spotlight icon off this base --
-/// so the uncapped four derive from here and the capped ones from the subclass
-/// below. Matching on this type keeps both halves iconed.
+/// The 2026-07-24 cap ruling landed in two rounds. Round one dropped the four
+/// non-compounding caps and split a CappedSpotlightPower subclass out for the
+/// two percentage multipliers (spotlight_mult_bonus, ovation_spend_boost).
+/// Round two -- after a 2000-run x 2-seed A/B showed the whole cap set moving
+/// run success by at most +0.5pp (favorable, p~0.02) -- uncapped those two as
+/// well, to match base StS where Power dupes always stack. That emptied
+/// CappedSpotlightPower, so it is gone and every Spotlight power lives here.
+///
+/// KleePowerIcons keys its Spotlight icon off this base type, so keeping the
+/// common base (rather than folding straight into PowerModel) keeps the icon
+/// match a single case. The two multipliers are genuinely compounding and were
+/// FLAGGED for a ceiling re-check when difficulty calibration makes the
+/// spotlight plan viable enough to measure them.
 /// </summary>
 public abstract class SpotlightPower : PowerModel
 {
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary>
-/// A Spotlight power with a stack ceiling. After the 2026-07-24 ruling this is
-/// reserved for the genuinely COMPOUNDING powers -- the percentage multipliers
-/// that pass1-rulings-round2's exponent argument was actually written about.
-/// Powers gated to one proc per turn scale linearly in copies and are plain
-/// <see cref="SpotlightPower"/>s now.
-/// </summary>
-public abstract class CappedSpotlightPower : SpotlightPower
-{
-    protected abstract int Maximum { get; }
-
-    public override bool TryModifyPowerAmountReceived(
-        PowerModel canonicalPower, Creature target, decimal amount,
-        Creature? applier, out decimal modifiedAmount)
-    {
-        modifiedAmount = amount;
-        if (canonicalPower.GetType() != GetType() || target != Owner)
-        {
-            return false;
-        }
-        modifiedAmount = Math.Max(0m, Math.Min(amount, Maximum - Amount));
-        return modifiedAmount != amount;
-    }
 }
 
 public sealed class SpotlightDiscountPower
@@ -331,10 +315,8 @@ public sealed class SpotlightDrawPower
 }
 
 public sealed class SpotlightMultBonusPower
-    : CappedSpotlightPower, ILocalizationProvider
+    : SpotlightPower, ILocalizationProvider
 {
-    protected override int Maximum => 50;
-
     public List<(string, string)>? Localization => new()
     {
         ("title", "Top Billing"),
@@ -400,10 +382,8 @@ public sealed class SpotlightFlatDamageTurnPower
 }
 
 public sealed class OvationSpendBoostPower
-    : CappedSpotlightPower, ILocalizationProvider
+    : SpotlightPower, ILocalizationProvider
 {
-    protected override int Maximum => 20;
-
     public List<(string, string)>? Localization => new()
     {
         ("title", "Standing Ovation"),

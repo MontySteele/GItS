@@ -41,7 +41,7 @@ public sealed class TopBilling : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Top Billing"),
-        ("description", "[gold]Spotlighted[/gold] Companion numbers are 25% stronger this combat. Maximum +50%."),
+        ("description", "[gold]Spotlighted[/gold] Companion numbers are 25% stronger this combat."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

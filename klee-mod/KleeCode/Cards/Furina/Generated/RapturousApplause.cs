@@ -41,7 +41,7 @@ public sealed class RapturousApplause : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rapturous Applause"),
-        ("description", "Your Attacks deal {PowerAmount:diff()} more damage per 10 [gold]Fanfare[/gold]. Maximum 2 stacks."),
+        ("description", "Your Attacks deal {PowerAmount:diff()} more damage per 10 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
