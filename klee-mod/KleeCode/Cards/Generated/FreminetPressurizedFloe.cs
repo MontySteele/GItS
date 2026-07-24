@@ -48,13 +48,15 @@ public sealed class FreminetPressurizedFloe : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Freminet — Pressurized Floe: Backstroke"),
-        ("description", "Deal {Damage:diff()} damage. Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(10m, ValueProp.Move),
+            new CalculationBaseVar(10m),
+            new ExtraDamageVar(1m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
             new BlockVar(6m, ValueProp.Move)
         };
 
@@ -69,7 +71,7 @@ public sealed class FreminetPressurizedFloe : CustomCardModel, ICompanionCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
@@ -79,6 +81,6 @@ public sealed class FreminetPressurizedFloe : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

@@ -270,6 +270,52 @@ def test_basics_carry_the_tags_base_game_content_keys_on():
     assert "CanonicalTags => new() { CardTag.Strike };" in jumpy
 
 
+def _companion_rows() -> list[dict]:
+    rows = []
+    for sheet_path, nation in gen.COMPANION_SHEETS:
+        for card in yaml.safe_load(sheet_path.read_text(encoding="utf-8")):
+            # The generator stamps nation from the sheet it came from; emit()
+            # requires it.
+            card.setdefault("nation", nation)
+            rows.append(card)
+    return rows
+
+
+def test_companion_damage_renders_spotlight_scaling_on_the_face():
+    # Legibility sprint pass 3 (Track L-A4): Spotlight's GuestCast scaling
+    # (1.5x + flat) used to reach the number only at resolution, via
+    # PrintedDamage inside OnPlay -- the card printed its base and hit for
+    # more. Routing it through a CalculatedDamageVar puts face, enemy hover
+    # and hit on one value: base + 1 * (PrintedDamage(base) - base), which is
+    # PrintedDamage(base) exactly, so no resolved number moves.
+    by_id = {card["id"]: card for card in _companion_rows()}
+    kaeya = gen.emit(by_id["kaeya_frostgnaw"])
+
+    assert "new CalculationBaseVar(6m)" in kaeya
+    assert "new ExtraDamageVar(1m)" in kaeya
+    assert "static (card, _) => SpotlightSystem.PrintedDamageDelta(card)" in kaeya
+    assert "DamageCmd.Attack(DynamicVars.CalculatedDamage)" in kaeya
+    assert "{CalculatedDamage:diff()}" in kaeya
+    # The scaling now lives in the var, so the OnPlay wrap must be gone --
+    # leaving both would apply Spotlight twice.
+    assert "PrintedDamage(this" not in kaeya
+
+
+def test_furina_own_cards_keep_the_identity_spotlight_wrap():
+    # PrintedDamage is identity for a non-companion: its bonus path requires
+    # Mode == GuestCast, and under GuestCast IsSpotlighted accepts only
+    # ICompanionCard, while CenterStage forces the multiplier to 1m. Furina's
+    # own plain-damage cards therefore gain nothing from conversion, and
+    # converting them would add a var (and an upgrade-target move) for no
+    # visible change. Keep them on the plain DamageVar.
+    by_id = {card["id"]: card for card in _furina_cards()}
+    plain = gen.emit(by_id["soloists_solicitation"], gen.FURINA_PROFILE)
+
+    assert "new DamageVar(" in plain
+    assert "CalculatedDamageVar" not in plain
+    assert "PrintedDamage(this" in plain
+
+
 def test_handwritten_furina_burst_matches_the_sheet_contract():
     row = next(
         card for card in _furina_cards()

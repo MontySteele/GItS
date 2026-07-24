@@ -264,10 +264,44 @@ Crescendo's old inline form).
   `OutwardMultiplier` returns a hard `1m`. Furina's sheet has **zero** `star`
   (companion) rows — Guest Stars are generated separately — so no converted card
   can ever have been scaled by it. This retroactively covers `a1bca0d` too.
-- **Follow-ups (queued, not this slice):**
-  - **L-A4 entangled half** — Spotlight/Salon `1.5×` GuestCast + flat + Block hook
-    migration (companion cards). The bigger, separately-verified step, and the one
-    where `PrintedDamage` is genuinely load-bearing rather than identity.
+- **L-A4 damage half — DONE (11 companion cards).**
+  - **The hook migration the doc called for is the WRONG fix, and the decompile
+    says so.** `Hook.ModifyDamage` applies *every* additive contribution before
+    *every* multiplicative one (`Hook.ModifyDamageInternal`), whereas
+    `PrintedDamage` computes `Truncate(printed × mult) + flat` on the PRINTED
+    number, ahead of Strength/Vulnerable. Registering Spotlight as a
+    `ModifyDamageMultiplicative` participant would fold Strength into the 1.5×
+    and add the flat on the wrong side of the multiply — a real change to
+    resolved damage. Rejected on those grounds.
+  - **What shipped instead:** the mechanism already proven live twice. Companion
+    damage renders through a `CalculatedDamageVar` whose multiplier *calls*
+    Spotlight: `base + 1 × (PrintedDamage(base) − base)` ≡ `PrintedDamage(base)`.
+    The arithmetic is not re-derived, it is the same function, so no resolved
+    number can move. New `SpotlightSystem.PrintedDamageDelta(card)` gives it one
+    home. The `PrintedDamage` wrap is removed from OnPlay in the same change —
+    keeping both would apply Spotlight twice.
+  - Confirmed load-bearing fact: `CreatureCmd.Damage` calls
+    `Hook.ModifyDamage(..., CardPreviewMode.None, ...)`, so preview and hit share
+    that hook — which is exactly why a hook-based Spotlight would have hit both
+    and why removing the wrap was mandatory, not optional.
+  - Scope was uniform and collision-free: all 11 companion damage cards passed
+    exactly `DynamicVars.Damage.BaseValue`, one wrap each, none already using an
+    `ExtraDamage` var. Furina's own cards deliberately NOT converted (the wrap is
+    identity there) — pinned by `test_furina_own_cards_keep_the_identity_spotlight_wrap`.
+- **Follow-ups (queued):**
+  - **L-A4 block half (9 cards)** — genuinely harder, and NOT symmetric with
+    damage. `CreatureCmd.GainBlock` takes a `BlockVar`; there is no
+    `GainBlock(CalculatedVar)` overload the way `DamageCmd.Attack` has one for
+    `CalculatedDamageVar`. Worse, plain `CalculatedVar.UpdateCardPreview` sets
+    `PreviewValue = Calculate(target)` and never calls `Hook.ModifyBlock` — the
+    base game solves this by having `CalculatedDamageVar` override the method to
+    run `Hook.ModifyDamage`, and ships no block counterpart. Proposed fix: a mod
+    `SpotlightBlockVar : CalculatedVar` that overrides `UpdateCardPreview` to run
+    `Hook.ModifyBlock`, with resolution reading `Calculate(null)` through the same
+    var. Needs its own verification pass; not started.
+  - **Salon ×3 replacement multiplier** — still inline, still invisible to the
+    face, on both damage and block emissions. Untouched.
+  - **L-C** text re-homing — unstarted (ordering).
 - **L-C:** text re-homing — unstarted (ordering).
 
 _Note: `tools/lint_strict_domination.py` shows modified in the tree — that is the

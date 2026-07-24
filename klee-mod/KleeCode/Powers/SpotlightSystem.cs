@@ -156,6 +156,27 @@ public static class SpotlightSystem
                + PowerAmount<SpotlightFlatDamageTurnPower>(card.Owner.Creature);
     }
 
+    /// <summary>
+    /// Spotlight's contribution expressed as a DELTA off a card's printed
+    /// damage, for cards that render through a CalculatedDamageVar
+    /// (Legibility sprint, 2026-07-24). Because that var computes
+    /// <c>base + extra * multiplier</c>, an <c>extra</c> of 1 and this delta
+    /// reproduce <see cref="PrintedDamage"/> exactly -- the face, the enemy
+    /// hover and the resolved hit then read one value instead of the card
+    /// printing its base while Spotlight silently scaled the hit.
+    ///
+    /// Deliberately NOT a Hook.ModifyDamage participant: that hook applies
+    /// every additive contribution before every multiplicative one, whereas
+    /// Spotlight multiplies the PRINTED number and adds its flat bonus after,
+    /// ahead of Strength/Vulnerable. Routing it through the hook would fold
+    /// Strength into the GuestCast multiplier and change resolved damage.
+    /// </summary>
+    public static decimal PrintedDamageDelta(CardModel card)
+    {
+        var printed = card.DynamicVars.CalculationBase.BaseValue;
+        return PrintedDamage(card, printed) - printed;
+    }
+
     public static decimal PrintedBlock(CardModel card, decimal amount) =>
         Math.Truncate(amount * OutwardMultiplier(card));
 

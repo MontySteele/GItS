@@ -58,13 +58,15 @@ public sealed class CharlotteFreezingPoint : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Charlotte — Framing: Freezing Point Composition"),
-        ("description", "Deal {Damage:diff()} damage. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(4m, ValueProp.Move),
+            new CalculationBaseVar(4m),
+            new ExtraDamageVar(1m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
             new CardsVar(1)
         };
 
@@ -79,7 +81,7 @@ public sealed class CharlotteFreezingPoint : CustomCardModel, IElementalCard, IC
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
@@ -89,6 +91,6 @@ public sealed class CharlotteFreezingPoint : CustomCardModel, IElementalCard, IC
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

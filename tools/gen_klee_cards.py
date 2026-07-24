@@ -1025,6 +1025,32 @@ def aura_calc_rider(card: dict, eff: dict) -> tuple[int, int] | None:
     return int(eff["amount"]), int(eff["bonus_vs_aura"])
 
 
+def spotlight_calc_rider(card: dict, eff: dict) -> tuple[int, int] | None:
+    """Furina Legibility sprint, pass 3 (Track L-A4): a COMPANION card's plain
+    damage rendered through CalculatedDamageVar so the Spotlight GuestCast
+    scaling (1.5x + flat) shows on the face and the enemy hover instead of only
+    at resolution. Returns (base, 1) or None.
+
+    Companions only. On Furina's own cards the `PrintedDamage` wrap is identity
+    -- its bonus path needs `Mode == GuestCast`, and under GuestCast
+    `IsSpotlighted` accepts only `ICompanionCard` -- so converting them would
+    add a var for no visible change.
+
+    Only the plain shape: a card carrying its own rider (bonus_formula /
+    bonus_vs_aura) already owns the CalculatedDamageVar for that rider, and the
+    two cannot share one var. None exist today; the guard keeps it that way.
+    """
+    if not is_companion(card):
+        return None
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    if "bonus_formula" in eff or "bonus_vs_aura" in eff:
+        return None
+    if salon_deploy_card(card):
+        return None
+    return int(eff["amount"]), 1
+
+
 def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     """Unified view of every damage rider that renders through a
     CalculatedDamageVar: (base, extra, multiplier-lambda source). The four
@@ -1046,6 +1072,15 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
         return base, bonus, (
             "static (_, target) => "
             "target != null && AuraCmd.Find(target) != null ? 1 : 0")
+    spotlight = spotlight_calc_rider(card, eff)
+    if spotlight is not None:
+        base, extra = spotlight
+        # base + 1 * (PrintedDamage(base) - base) == PrintedDamage(base):
+        # the same number the card resolves today, now also the number it
+        # prints. The delta lives in SpotlightSystem so the arithmetic has
+        # exactly one home.
+        return base, extra, (
+            "static (card, _) => SpotlightSystem.PrintedDamageDelta(card)")
     return None
 
 
