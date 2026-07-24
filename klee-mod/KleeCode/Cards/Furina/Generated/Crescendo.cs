@@ -41,13 +41,15 @@ public sealed class Crescendo : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crescendo"),
-        ("description", "Spend 10 [gold]Fanfare[/gold]. Deal {Damage:diff()} damage. +1 damage per 2 [gold]Fanfare[/gold]."),
+        ("description", "Spend 10 [gold]Fanfare[/gold]. Deal {CalculatedDamage:diff()} damage. +1 damage per 2 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(8m, ValueProp.Move)
+            new CalculationBaseVar(8m),
+            new ExtraDamageVar(1m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.Fanfare(card.Owner.Creature) / 2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,7 +63,7 @@ public sealed class Crescendo : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue + 1 * (FurinaResources.Fanfare(Owner.Creature) / 2)))
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
@@ -70,6 +72,6 @@ public sealed class Crescendo : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

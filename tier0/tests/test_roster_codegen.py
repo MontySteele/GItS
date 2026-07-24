@@ -40,7 +40,11 @@ def test_card_level_resource_costs_emit_explicit_gates_and_cost_upgrades():
         "CustomResources<FanfareResource>.SetCanonicalCost(this, 10);"
         in crescendo
     )
-    assert "FurinaResources.Fanfare(Owner.Creature) / 2" in crescendo
+    # Legibility sprint (2026-07-24): the Fanfare rider now renders through a
+    # CalculatedDamageVar (face/preview and hit share one value path) instead
+    # of inline PrintedDamage arithmetic. The scaling lives in the multiplier.
+    assert "FurinaResources.Fanfare(card.Owner.Creature) / 2" in crescendo
+    assert "DamageCmd.Attack(DynamicVars.CalculatedDamage)" in crescendo
 
     florid = gen.emit(by_id["florid_cadenza"], gen.FURINA_PROFILE)
     assert (

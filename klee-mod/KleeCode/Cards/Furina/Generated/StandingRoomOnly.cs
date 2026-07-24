@@ -51,13 +51,15 @@ public sealed class StandingRoomOnly : CustomCardModel, IElementalCard, ICharact
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Standing Room Only"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. +1 damage per 5 [gold]Fanfare[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. +1 damage per 5 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(4m, ValueProp.Move)
+            new CalculationBaseVar(4m),
+            new ExtraDamageVar(1m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.Fanfare(card.Owner.Creature) / 5)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -69,7 +71,7 @@ public sealed class StandingRoomOnly : CustomCardModel, IElementalCard, ICharact
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue + 1 * (FurinaResources.Fanfare(Owner.Creature) / 5)))
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
@@ -79,6 +81,6 @@ public sealed class StandingRoomOnly : CustomCardModel, IElementalCard, ICharact
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

@@ -969,6 +969,35 @@ def bomb_var(card: dict) -> str:
     return "ExtraDamage" if has_attack else "Damage"
 
 
+def fanfare_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
+    """Furina Legibility sprint (2026-07-24): a plain Fanfare damage rider
+    (`N_per_M_fanfare`) rendered through the base game's CalculatedDamageVar so
+    the card face / hover preview and the resolved hit share ONE value path --
+    base + N*(Fanfare/M) -- instead of the display showing only the static base
+    while PrintedDamage silently adds the rider at resolution (the playtest bug).
+
+    Returns (base, per_n, fanfare_div) or None. Scope guards, both card-level so
+    build_vars and build_body agree and no deferred modifier is dropped:
+      * a non-self damage effect carrying an N_per_M_fanfare formula;
+      * NOT a salon-deploy card -- the salon x3 replacement multiplier is the
+        deferred entangled modifier, so those stay on the PrintedDamage path.
+    The Spotlight PrintedDamage wrap this bypasses is identity for Furina's own
+    cards (Center Stage does not scale her own numbers), so no resolved number
+    changes. bonus_vs_aura riders are a separate, later pass (one is AoE /
+    per-target; one shares Klee codegen)."""
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", eff.get("bonus_formula", ""))
+    if not m:
+        return None
+    salon_deploy_present = any(
+        e.get("op") == "apply_power" and e.get("power") == "salon_member"
+        for e in card.get("effects", []))
+    if salon_deploy_present:
+        return None
+    return int(eff["amount"]), int(m.group(1)), int(m.group(2))
+
+
 def build_vars(card: dict) -> list[str]:
     """DynamicVar declarations, in the order the effects use them."""
     out = []
@@ -981,10 +1010,22 @@ def build_vars(card: dict) -> list[str]:
         if op == "damage" and eff["target"] == "self":
             out.append(f'new HpLossVar({eff["amount"]}m)')
         elif op == "damage":
-            out.append(f'new DamageVar({eff["amount"]}m, ValueProp.Move)')
-            if "bonus_formula" in eff and bonus_per_upgrade(card):
-                n = int(eff["bonus_formula"].partition("_per_")[0])
-                out.append(f'new DynamicVar("BonusPer", {n}m)')
+            rider = fanfare_calc_rider(card, eff)
+            if rider is not None:
+                base, per_n, div = rider
+                # PerfectedStrike idiom: base + per_n * (Fanfare / div), so the
+                # face/preview (:diff green) and the hit resolve identically.
+                out.append(f'new CalculationBaseVar({base}m)')
+                out.append(f'new ExtraDamageVar({per_n}m)')
+                out.append(
+                    'new CalculatedDamageVar(ValueProp.Move).WithMultiplier('
+                    'static (card, _) => '
+                    f'FurinaResources.Fanfare(card.Owner.Creature) / {div})')
+            else:
+                out.append(f'new DamageVar({eff["amount"]}m, ValueProp.Move)')
+                if "bonus_formula" in eff and bonus_per_upgrade(card):
+                    n = int(eff["bonus_formula"].partition("_per_")[0])
+                    out.append(f'new DynamicVar("BonusPer", {n}m)')
         elif op == "block":
             out.append(f'new BlockVar({eff["amount"]}m, ValueProp.Move)')
         elif op == "draw":
@@ -1658,6 +1699,11 @@ def build_body(
                              f"(int)DynamicVars.{bomb_var(card)}.BaseValue")
 
         elif op == "damage":
+            if fanfare_calc_rider(card, eff) is not None:
+                # Face/preview and hit both route through the one var.
+                _emit_damage(card, eff, lines, ctx,
+                             "DynamicVars.CalculatedDamage")
+                continue
             amount_expr = "DynamicVars.Damage.BaseValue"
             if "bonus_vs_aura" in eff:
                 aura_target = (
@@ -2427,13 +2473,15 @@ def build_description(card: dict) -> str:
                 suffix = {1: "", 2: " twice", 3: " three times", 4: " four times"}.get(
                     times, f" {times} times"
                 )
+            tok = ("CalculatedDamage"
+                   if fanfare_calc_rider(card, eff) is not None else "Damage")
             if target == "enemy":
-                parts.append(f"Deal {{Damage:diff()}} damage{suffix}.")
+                parts.append(f"Deal {{{tok}:diff()}} damage{suffix}.")
             elif target == "all_enemies":
-                parts.append(f"Deal {{Damage:diff()}} damage to ALL enemies{suffix}.")
+                parts.append(f"Deal {{{tok}:diff()}} damage to ALL enemies{suffix}.")
             else:
                 plural = "random enemies" if times > 1 else "a random enemy"
-                parts.append(f"Deal {{Damage:diff()}} damage to {plural}{suffix}.")
+                parts.append(f"Deal {{{tok}:diff()}} damage to {plural}{suffix}.")
             if "bonus_formula" in eff:
                 formula = eff["bonus_formula"]
                 if formula.endswith("_per_detonation_this_combat"):
@@ -2779,8 +2827,16 @@ def build_upgrade(card: dict) -> list[str]:
         if key is None or key not in deltas or key in done:
             continue
         done.add(key)
-        var = "DynamicVars.Damage" if key == "damage" else (
-            f"DynamicVars.{bomb_var(card)}" if key == "bomb_damage" else var_for[op])
+        if key == "damage":
+            # Converted fanfare riders have no "Damage" var -- their base lives
+            # in CalculationBase (the CalculatedDamageVar's base term).
+            var = ("DynamicVars.CalculationBase"
+                   if fanfare_calc_rider(card, eff) is not None
+                   else "DynamicVars.Damage")
+        elif key == "bomb_damage":
+            var = f"DynamicVars.{bomb_var(card)}"
+        else:
+            var = var_for[op]
         lines.append(f"{var}.UpgradeValueBy({int(deltas[key])}m);")
     if "conditional_bonus" in deltas:
         # tier0: bump the then-branch's first damage (the ExtraDamage var;
