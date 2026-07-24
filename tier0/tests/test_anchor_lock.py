@@ -71,12 +71,10 @@ def no_game_ref(tmp_path, monkeypatch):
     a later test would be a far more confusing failure than any this file
     is trying to catch.
     """
-    for cache in (loader._card_index, loader._character_index):
-        cache.cache_clear()
+    loader.reset_caches()
     monkeypatch.setattr(loader, "GAME_REF_DIR", tmp_path / "does_not_exist")
     yield
-    for cache in (loader._card_index, loader._character_index):
-        cache.cache_clear()
+    loader.reset_caches()
 
 
 def test_missing_game_ref_loads_without_raising(no_game_ref):

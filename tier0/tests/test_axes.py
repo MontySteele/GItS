@@ -3,7 +3,8 @@
 import pytest
 
 from tier0.harness import axes, metrics
-from tier0.harness.runner import run_battery, score_config
+from tier0.harness.runner import (BASELINE, run_battery, run_full_battery,
+                                  score_config)
 
 FIGHTS = 150   # small but stable enough for the wide bounds below
 SEED = 11
@@ -18,6 +19,21 @@ def baseline():
 def package():
     return score_config("ref_ironclad", "archetype_package", "generic",
                         FIGHTS, SEED)
+
+
+def test_shared_anchor_battery_scores_identically(package):
+    """score_character hands ONE baseline battery to every deck it scores
+    instead of re-running it per deck. The anchor is a deterministic
+    function of (fights, seed) and nothing mutates it, so that must be a
+    pure saving -- if it ever is not, every archived scorecard silently
+    depends on how many decks were scored beside it."""
+    shared = run_full_battery(*BASELINE, "generic", FIGHTS, SEED)
+    passed_in = score_config("ref_ironclad", "archetype_package", "generic",
+                             FIGHTS, SEED, shared)
+    assert passed_in["scores"] == package["scores"]
+    assert passed_in["raw"] == package["raw"]
+    assert passed_in["curve_exponent"] == package["curve_exponent"]
+    assert passed_in["pressure_delta"] == package["pressure_delta"]
 
 
 def test_baseline_scores_are_exactly_three(baseline):

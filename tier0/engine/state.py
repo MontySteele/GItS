@@ -15,6 +15,30 @@ from typing import Any, Optional
 from tier0 import constants as C
 
 
+def _copy_plain(val):
+    """Deep-copy yaml-shaped data (dict / list / immutable scalar).
+
+    Card payloads never hold cycles, class instances or shared aliases, so
+    this needs none of ``copy.deepcopy``'s memo bookkeeping -- which is the
+    whole reason it is several times faster. Anything that is not a dict or
+    list is returned as-is, which is correct for the str/int/bool/None leaves
+    that yaml produces.
+    """
+    t = type(val)
+    if t is dict:
+        return {k: _copy_plain(v) for k, v in val.items()}
+    if t is list:
+        return [_copy_plain(v) for v in val]
+    return val
+
+
+# Every container-valued field on Card. Card.__deepcopy__ copies exactly
+# these and shares the rest; test_state.py pins the list against the
+# dataclass definition so a new mutable field cannot be added silently.
+_MUTABLE_FIELDS = ("effects", "solve", "archetypes", "tags", "companion",
+                   "sly", "upgrade")
+
+
 @dataclass
 class Card:
     id: str
@@ -137,6 +161,29 @@ class Card:
         if unknown:
             raise ValueError(f"card {d.get('id')!r}: unknown fields {sorted(unknown)}")
         return cls(**d)
+
+    def __deepcopy__(self, memo):
+        """Hand-rolled deep copy. Cards are copied on every ``get_card`` and
+        every in-combat clone (Dual Wield, conscript, Armaments), which put
+        generic ``copy.deepcopy`` at ~half of a Tier 0.5 run's total runtime:
+        it walks all ~40 fields through the memo machinery even though all but
+        a handful are immutable scalars.
+
+        The copy is byte-identical to the generic one -- ``_MUTABLE_FIELDS``
+        holds every container-valued field, and card payloads are plain
+        yaml-shaped data (dict/list/scalar), so ``_copy_plain`` covers them.
+        ``test_state.py`` pins both claims against ``copy.deepcopy`` for the
+        whole loaded card index.
+        """
+        new = Card.__new__(Card)
+        memo[id(self)] = new
+        d = dict(self.__dict__)
+        for name in _MUTABLE_FIELDS:
+            val = d[name]
+            if val is not None:           # an EMPTY list still gets a fresh
+                d[name] = _copy_plain(val)   # one -- apply_upgrade appends
+        new.__dict__ = d
+        return new
 
 
 @dataclass

@@ -130,12 +130,15 @@ def run_ab(character: str, archetype: str, pilot_id: str,
            runs: int, seed: int,
            grant_relics: bool = False,
            grant_potions: bool = False,
-           n_acts: int | None = None) -> dict:
+           n_acts: int | None = None,
+           jobs: int = 1) -> dict:
     """Assigned vs adaptive over identical seeds.
 
     Adaptive ignores `archetype` by construction, so it is passed through only
     to keep the two calls otherwise identical -- the comparison is meaningless
     if anything but the policy differs.
+
+    `jobs` is forwarded to run_many; it changes wall-clock only (see there).
     """
     out = {}
     for name, policy in draft.POLICIES.items():
@@ -143,7 +146,7 @@ def run_ab(character: str, archetype: str, pilot_id: str,
                                  policy, runs, seed,
                                  grant_relics=grant_relics,
                                  grant_potions=grant_potions,
-                                 n_acts=n_acts)
+                                 n_acts=n_acts, jobs=jobs)
         out[name] = {
             "results": results,
             "winrate": sum(r.won for r in results) / max(1, len(results)),
