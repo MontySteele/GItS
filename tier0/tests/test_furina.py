@@ -187,6 +187,40 @@ def test_fanfare_decays_each_turn_but_never_below_the_floor():
                for ev in st.log)
 
 
+def test_proportional_decay_takes_its_cut_and_still_clamps_at_the_floor():
+    """The alternative decay shape, armed by FANFARE_DECAY_FRACTION."""
+    st = furina_state()
+    p = st.player
+    p.hand, p.draw_pile, p.discard_pile = [], [], []
+    p.fanfare = 40
+    original = C.FANFARE_DECAY_FRACTION
+    try:
+        C.FANFARE_DECAY_FRACTION = 0.25
+        combat._player_turn(st, NULL_PILOT)      # turn 1: exempt
+        assert p.fanfare == 40
+        combat._player_turn(st, NULL_PILOT)
+        assert p.fanfare == 30                   # 25% of 40
+        combat._player_turn(st, NULL_PILOT)
+        assert p.fanfare == 22                   # 25% of 30, rounded
+
+        # Never stalls: a meter too small to round down still moves.
+        p.fanfare, p.fanfare_floor = 2, 0
+        combat._player_turn(st, NULL_PILOT)
+        assert p.fanfare == 1
+
+        # And the floor still wins.
+        p.fanfare, p.fanfare_floor = 12, 12
+        combat._player_turn(st, NULL_PILOT)
+        assert p.fanfare == 12
+    finally:
+        C.FANFARE_DECAY_FRACTION = original
+
+
+def test_the_flat_shape_is_what_ships_until_red_pen_says_otherwise():
+    assert C.FANFARE_DECAY_FRACTION == 0.0
+    assert C.FANFARE_DECAY_PER_TURN > 0
+
+
 def test_a_floor_grant_raises_floor_cap_and_current_together():
     """F-A2/F-A3. Raising the cap alongside the floor is load-bearing: a
     grant that pushed current toward an unmoved ceiling would re-pin the
