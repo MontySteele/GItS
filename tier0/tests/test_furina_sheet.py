@@ -572,21 +572,72 @@ def test_delete_test_passes_by_construction():
     assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT
 
 
-def test_star_of_the_show_errata_grants_printed_three():
-    """Pass-2 errata: max_stacks is in POWER UNITS -- the pass-1 row
-    (max_stacks 1) silently shipped +1. Printed +3 applies once and
-    never re-stacks."""
+def test_star_of_the_show_grants_printed_three_per_copy():
+    """Printed +3 per copy, and copies STACK (cap dropped, user ruling
+    2026-07-24).
+
+    The pass-2 errata this test was written for still holds and is still
+    checked by the first assertion: max_stacks was in POWER UNITS, so the
+    pass-1 row's `max_stacks: 1` silently shipped the card at +1 instead of
+    its printed +3. What changed is the second assertion. The cap was 3 --
+    exactly one application -- which made a second copy do nothing at all:
+    a dead card of the shape lint_strict_domination exists to catch. The
+    cap rationale (pass1-rulings-round2) is about PER-TURN COMPOUNDING
+    powers; a flat additive read once per Spotlighted card is linear in
+    copies, so it now behaves like an ordinary StS Power dupe."""
     st = furina_state()
     effects.resolve_card(st, loader.get_card("star_of_the_show"))
     assert st.player.powers["spotlight_flat_damage"] == 3
     effects.resolve_card(st, loader.get_card("star_of_the_show"))
-    assert st.player.powers["spotlight_flat_damage"] == 3
+    assert st.player.powers["spotlight_flat_damage"] == 6
+
+
+def test_uncapped_spotlight_riders_stack():
+    """The other three cap drops (user ruling 2026-07-24).
+
+    Each is gated to ONE proc per turn by its own "first Spotlighted card
+    each turn" clause, so a second copy buys a bigger single proc, never a
+    second one -- linear, not exponential, and outside the cap rationale."""
+    for card_id, power in (("leading_role", "spotlight_discount"),
+                           ("supporting_cast", "spotlight_draw"),
+                           ("standing_ovation", "spotlight_encore_first")):
+        st = furina_state()
+        effects.resolve_card(st, loader.get_card(card_id))
+        effects.resolve_card(st, loader.get_card(card_id))
+        assert st.player.powers[power] == 2, (
+            f"{card_id}: {power} should stack to 2, got "
+            f"{st.player.powers[power]}")
+
+
+def test_compounding_spotlight_powers_stay_capped():
+    """The cap ruling was a SPLIT, not a repeal. The percentage multipliers
+    compound per turn and keep their ceilings -- if this test goes red,
+    someone has widened the drop past what was ratified."""
+    for card_id, power, cap in (("top_billing", "spotlight_mult_bonus", 50),
+                                ("standing_ovation", "ovation_spend_boost", 20)):
+        st = furina_state()
+        for _ in range(4):
+            effects.resolve_card(st, loader.get_card(card_id))
+        assert st.player.powers[power] == cap, (
+            f"{card_id}: {power} should cap at {cap}, got "
+            f"{st.player.powers[power]}")
 
 
 def test_upgraded_power_amount_lifts_its_own_stack_cap():
-    """The applier bumps max_stacks alongside amount when they are equal
-    (single-application encoding) -- an upgraded Star of the Show must
-    actually grant +4, not silently cap at the old 3."""
+    """An upgraded Star of the Show grants +4.
+
+    HISTORY, because the name no longer describes the mechanism. This test
+    was written for the applier's single-application rule -- when a row
+    encodes max_stacks == amount, the upgrade bumps BOTH, or the upgraded
+    card silently caps at the old value. Star of the Show was the only such
+    row, and the 2026-07-24 cap ruling removed its cap entirely, so the +4
+    now arrives with no ceiling to lift.
+
+    The assertion is kept as-is: it still guards the upgrade delta landing.
+    The applier's max_stacks branch (content/upgrades.py) is now unexercised
+    by live content -- no shipped row has max_stacks == amount -- but it is
+    deliberately retained as the correctness rule for any future
+    single-application capped power."""
     from tier0.content import upgrades
     st = furina_state()
     effects.resolve_card(st, upgrades.apply_upgrade(

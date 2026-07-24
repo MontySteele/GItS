@@ -353,9 +353,18 @@ APPLY_POWERS = {
         "empowers this card's later effects."),
     "salon_damage_up": ("SalonDamageUpPower", 6,
         "[gold]Salon Member[/gold] numbers are {X} higher. Maximum 6."),
-    "spotlight_discount": ("SpotlightDiscountPower", 1,
+    # CAPS DROPPED on the four non-compounding powers (user ruling 2026-07-24).
+    # The pass-1 cap rationale (pass1-rulings-round2.md) targets PER-TURN
+    # COMPOUNDING powers, which are the A2 exponent source. These four are not
+    # that: three are gated to one proc per turn by their own "first Spotlighted
+    # card each turn" clause, and spotlight_flat_damage is a flat additive whose
+    # cap equalled a single application, making a second copy a dead card.
+    # Base StS lets you spam Power dupes; these now do too. The four genuinely
+    # compounding powers below (salon_damage_up, spotlight_mult_bonus,
+    # ovation_spend_boost, fanfare_attack_per10) keep their caps.
+    "spotlight_discount": ("SpotlightDiscountPower", None,
         "The first [gold]Spotlighted[/gold] card each turn costs {X} less."),
-    "spotlight_draw": ("SpotlightDrawPower", 1,
+    "spotlight_draw": ("SpotlightDrawPower", None,
         "The first [gold]Spotlighted[/gold] card each turn draws {X} card."),
     "spotlight_mult_bonus": ("SpotlightMultBonusPower", 50,
         "[gold]Spotlighted[/gold] Companion numbers are {X}% stronger "
@@ -363,14 +372,14 @@ APPLY_POWERS = {
     "spotlight_mult_bonus_turn": ("SpotlightMultBonusTurnPower", None,
         "[gold]Spotlighted[/gold] Companion numbers are {X}% stronger "
         "this turn."),
-    "spotlight_flat_damage": ("SpotlightFlatDamagePower", 3,
-        "[gold]Spotlighted[/gold] Companion damage gains {X}. Maximum +3."),
+    "spotlight_flat_damage": ("SpotlightFlatDamagePower", None,
+        "[gold]Spotlighted[/gold] Companion damage gains {X}."),
     "spotlight_flat_damage_turn": ("SpotlightFlatDamageTurnPower", None,
         "[gold]Spotlighted[/gold] Companion damage gains {X} this turn."),
     "ovation_spend_boost": ("OvationSpendBoostPower", 20,
         "Whenever you spend Encore, [gold]Spotlighted[/gold] Companion "
         "numbers are {X}% stronger this turn. Maximum +20%."),
-    "spotlight_encore_first": ("SpotlightEncoreFirstPower", 1,
+    "spotlight_encore_first": ("SpotlightEncoreFirstPower", None,
         "The first [gold]Spotlighted[/gold] card each turn grants {X} Encore."),
 }
 

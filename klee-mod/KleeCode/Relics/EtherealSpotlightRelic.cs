@@ -31,11 +31,30 @@ public sealed class EtherealSpotlightRelic : CustomRelicModel
         ("title", "Ethereal Spotlight"),
         ("description",
             "At the start of each turn, add an [gold]Ethereal Spotlight[/gold] "
-          + "to your hand. Post-combat card rewards include a Companion option."),
+          + "to your hand. " + CompanionSlot.RewardSlotDescription),
     };
 
-    // Art-pass fallback.
+    /// <summary>
+    /// FALLBACK ICON, and the OUTLINE atlas entry we ship no asset for --
+    /// same arrangement as Klee's Pounding Surprise. Unlike hers there is no
+    /// in-run collision to worry about: snake_ring belongs to the Silent, and
+    /// Furina borrows the Silent relic pool, so this slug CAN co-occur with
+    /// the real relic. That is exactly why the packed paths below matter --
+    /// until they resolve, two different relics draw the same icon.
+    /// </summary>
     protected override string IconBaseName => "snake_ring";
+
+    /// <summary>
+    /// The real icon, mirroring PoundingSurprise: RelicModel's icon-path
+    /// getters are virtual, so the pck texture wires in directly and
+    /// KleePck.Path falls through to the slug above while the asset is
+    /// absent (logging the miss by name once).
+    /// </summary>
+    public override string PackedIconPath =>
+        KleePck.Path("furina/relics/ethereal_spotlight.png") ?? base.PackedIconPath;
+
+    protected override string BigIconPath =>
+        KleePck.Path("furina/relics/ethereal_spotlight.png") ?? base.BigIconPath;
 
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)

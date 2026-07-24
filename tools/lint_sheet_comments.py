@@ -50,7 +50,13 @@ CARD_START = re.compile(r"^- \{id: (\w+)")
 COMMENT = re.compile(r"^\s+#")
 HEADER = re.compile(r"^#")
 # Refs that are never card numbers; stripped before token extraction.
+#
+# ISO dates come FIRST and are matched whole. The generic `\d+[-–]\d+` range
+# alternative below cannot do the job: on "2026-07-24" it consumes only
+# "2026-07" and leaves "-24" behind, which NUM then reads as a cited 24. The
+# docstring has always promised dates are skipped; this makes that true.
 SKIP = re.compile(
+    r"\d{4}-\d{2}-\d{2}|"
     r"§[\d.]+\w?|v[\d.]+|(?<![A-Za-z])[AR]\d+|DECISIONS \d+|"
     r"Guardrail \d+|flag \d+|\d+-star|\d+%|\d+[-–]\d+")
 NUM = re.compile(r"(?<![\w.])(\d+)")

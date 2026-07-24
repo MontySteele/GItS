@@ -73,6 +73,16 @@ public sealed class SparksNSplash : CustomCardModel
             applier: Owner.Creature, cardSource: this);
     }
 
+    /// <summary>
+    /// "Returns to the kit, no pile" (tier0 combat.py play_card's kit_card
+    /// branch). A played Power already resolves to PileType.None, so this
+    /// states the kit rule rather than changing behaviour -- it is here so
+    /// the invariant survives a future type change, and so both kit cards
+    /// declare it in the same place. Furina's Attack-shaped Burst is where
+    /// the default actually diverged.
+    /// </summary>
+    protected override PileType GetResultPileTypeForCardPlay() => PileType.None;
+
     protected override void OnUpgrade()
     {
         // klee-upgrades.yaml: NO UPGRADE (kit card, v1.9; Talent Training =

@@ -97,10 +97,40 @@ public sealed class FurinaBurstResource : BasicCustomResource
     {
     }
 
-    public override async Task<bool> Spend<T>(
+    /// <summary>Meter, not energy: opt out of BaseLib's SetToFree forwarding.
+    /// See <see cref="KleeBurstResource.ApplySharedModification"/>.</summary>
+    public override bool ApplySharedModification => false;
+
+    /// <summary>Gate on the CANONICAL 70, never a discounted number. See
+    /// <see cref="KleeBurstResource.CanAfford"/> for the full reasoning.</summary>
+    public override bool CanAfford(CardModel card, int cost)
+    {
+        var canonical = CustomResources<FurinaBurstResource>.CanonicalCost(card);
+        return canonical < 0 ? base.CanAfford(card, cost) : Amount >= canonical;
+    }
+
+    /// <summary>DELIBERATE NO-OP; the drain lives in <see cref="DrainOnPlay"/>.</summary>
+    public override Task<bool> Spend<T>(
         ICombatState combatState, AbstractModel? spender, int amount, bool optional)
     {
-        return await base.Spend<T>(combatState, spender, Amount, optional);
+        return Task.FromResult(true);
+    }
+
+    /// <summary>
+    /// Sim law (combat.py play_card): a requires-full play zeroes the meter,
+    /// pre-resolution. Called from FurinaResourceHooks.BeforeCardPlayed.
+    /// See <see cref="KleeBurstResource.DrainOnPlay"/> for why this cannot
+    /// ride the cost machinery -- the infinite-Burst bug, 2026-07-24.
+    /// </summary>
+    public static void DrainOnPlay(CardModel card)
+    {
+        if (CustomResources<FurinaBurstResource>.Cost(card) == null) return;
+        var owner = card.Owner;
+        if (owner == null || !FurinaResources.IsFurina(owner.Creature)) return;
+        var combatState = owner.PlayerCombatState;
+        if (combatState == null) return;
+        CustomResources<FurinaBurstResource>.Get(combatState).Amount = 0;
+        Vfx.GaugeBridge.Refresh(owner.Creature);
     }
 }
 
@@ -301,6 +331,9 @@ public sealed class FurinaResourceHooks : AbstractModel
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
         if (!cardPlay.IsFirstInSeries) return Task.CompletedTask;
+        // Sim order (combat.py play_card): the requires-full drain first,
+        // then the skill-tag bonus, then the Encore cost line.
+        FurinaBurstResource.DrainOnPlay(cardPlay.Card);
         if (cardPlay.Card is ISkillTagCard
             && FurinaResources.IsFurina(cardPlay.Card.Owner.Creature))
         {

@@ -69,6 +69,12 @@ public sealed class KleeElementalHooks : AbstractModel
     /// </summary>
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
+        // Sim order (combat.py play_card): the requires-full drain happens
+        // FIRST, then the skill-tag bonus. Once per play, never per replay.
+        if (cardPlay.IsFirstInSeries)
+        {
+            KleeBurstResource.DrainOnPlay(cardPlay.Card);
+        }
         if (cardPlay.Card is ISkillTagCard && cardPlay.IsFirstInSeries)
         {
             KleeBurstResource.GainPreResolution(

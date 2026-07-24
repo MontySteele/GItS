@@ -250,13 +250,32 @@ public sealed class GuestCastPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Single;
 }
 
-public abstract class CappedSpotlightPower : PowerModel
+/// <summary>
+/// Shared shape for every Spotlight texture power: a Buff counter.
+///
+/// Split out from CappedSpotlightPower by the 2026-07-24 cap ruling. Four of
+/// these powers no longer have a maximum, but they still want the common
+/// Type/StackType, and KleePowerIcons keys its Spotlight icon off this base --
+/// so the uncapped four derive from here and the capped ones from the subclass
+/// below. Matching on this type keeps both halves iconed.
+/// </summary>
+public abstract class SpotlightPower : PowerModel
 {
-    protected abstract int Maximum { get; }
-
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary>
+/// A Spotlight power with a stack ceiling. After the 2026-07-24 ruling this is
+/// reserved for the genuinely COMPOUNDING powers -- the percentage multipliers
+/// that pass1-rulings-round2's exponent argument was actually written about.
+/// Powers gated to one proc per turn scale linearly in copies and are plain
+/// <see cref="SpotlightPower"/>s now.
+/// </summary>
+public abstract class CappedSpotlightPower : SpotlightPower
+{
+    protected abstract int Maximum { get; }
 
     public override bool TryModifyPowerAmountReceived(
         PowerModel canonicalPower, Creature target, decimal amount,
@@ -273,10 +292,8 @@ public abstract class CappedSpotlightPower : PowerModel
 }
 
 public sealed class SpotlightDiscountPower
-    : CappedSpotlightPower, ILocalizationProvider
+    : SpotlightPower, ILocalizationProvider
 {
-    protected override int Maximum => 1;
-
     public List<(string, string)>? Localization => new()
     {
         ("title", "Leading Role"),
@@ -302,10 +319,8 @@ public sealed class SpotlightDiscountPower
 }
 
 public sealed class SpotlightDrawPower
-    : CappedSpotlightPower, ILocalizationProvider
+    : SpotlightPower, ILocalizationProvider
 {
-    protected override int Maximum => 1;
-
     public List<(string, string)>? Localization => new()
     {
         ("title", "Supporting Cast"),
@@ -352,10 +367,8 @@ public sealed class SpotlightMultBonusTurnPower
 }
 
 public sealed class SpotlightFlatDamagePower
-    : CappedSpotlightPower, ILocalizationProvider
+    : SpotlightPower, ILocalizationProvider
 {
-    protected override int Maximum => 3;
-
     public List<(string, string)>? Localization => new()
     {
         ("title", "Star of the Show"),
@@ -401,10 +414,8 @@ public sealed class OvationSpendBoostPower
 }
 
 public sealed class SpotlightEncoreFirstPower
-    : CappedSpotlightPower, ILocalizationProvider
+    : SpotlightPower, ILocalizationProvider
 {
-    protected override int Maximum => 1;
-
     public List<(string, string)>? Localization => new()
     {
         ("title", "Ovation Trickle"),

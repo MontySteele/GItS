@@ -159,11 +159,76 @@ def extract_cs(text: str) -> dict:
         "reaction_tips": "KleeCardTooltips.ForCard" in text and "Element.Pyro" in text,
         "bomb_tips": "includesBombRules: true" in text,
         # Kit sprint: sheet `kit_card` + `requires: burst_energy_full` land as
-        # the custom-resource cost (the CanAfford gate AND the meter spend);
-        # sheet tag `burst` lands as Retain (the sim's turn-end filter).
+        # the custom-resource cost, which supplies the full-meter gate (the
+        # DRAIN moved onto the play hook, 2026-07-24 -- see BurstResource
+        # DrainOnPlay); sheet tag `burst` lands as Retain (the sim's turn-end
+        # filter).
         "kit_cost": "SetCanonicalCost" in text,
         "retain": "CardKeyword.Retain" in text,
+        # Kit cards return to the kit, NO PILE (tier0 combat.py play_card:
+        # `if card.kit_card: pass`). See kit_no_pile() for why this is its own
+        # gate rather than one more row here.
+        "kit_pile": ("GetResultPileTypeForCardPlay" in text
+                     and "PileType.None" in text),
     }
+
+
+# --------------------------------------------------------------------------
+# Kit-card invariants, BOTH sheets
+# --------------------------------------------------------------------------
+
+# Where a hand-written card can live. Furina's sit in a per-character
+# subdirectory; Klee's sit directly in Cards/.
+CS_SEARCH_DIRS = (CARDS_DIR, CARDS_DIR / "Furina")
+
+
+def kit_no_pile() -> list[str]:
+    """Every `kit_card` row, in EVERY sheet, must declare PileType.None.
+
+    tier0 combat.py play_card ends the kit branch with
+
+        if card.kit_card:
+            pass                  # returns to the kit, no pile
+
+    -- unconditional on card TYPE. The C# default is type-derived, so a
+    Power-shaped kit card lands on PileType.None by luck while an
+    Attack-shaped one lands in the DISCARD pile and recirculates: it
+    reshuffles into the draw pile, and the kit-grant machinery only dedups
+    against the HAND, so every cast permanently adds a Burst to the deck.
+    That is exactly how Furina's `let_the_people_rejoice` shipped broken
+    while Klee's `sparks_n_splash` looked fine (playtest 2026-07-24).
+
+    THIS RUNS ACROSS BOTH SHEETS ON PURPOSE. The parity lint above only walks
+    gen.HAND_WRITTEN, which is Klee-only, so Furina's three hand-written cards
+    have no parity gate at all -- the gap the bug came through. Closing the
+    whole gap means teaching the parity rules Furina's ops (encore, fanfare,
+    spotlight) and is its own piece of work; this closes the one invariant
+    that has already burned us, for every character, today.
+    """
+    findings: list[str] = []
+    for sheet in (gen.REPO / "docs" / "klee-cards.yaml",
+                  gen.REPO / "docs" / "furina-cards.yaml"):
+        if not sheet.is_file():
+            continue
+        for row in yaml.safe_load(sheet.read_text(encoding="utf-8")) or []:
+            if not row.get("kit_card"):
+                continue
+            name = f"{gen.pascal(row['id'])}.cs"
+            paths = [d / name for d in CS_SEARCH_DIRS if (d / name).is_file()]
+            if not paths:
+                findings.append(
+                    f"{row['id']}: sheet says kit_card but no C# file named "
+                    f"{name} in {[str(d.relative_to(gen.REPO)) for d in CS_SEARCH_DIRS]}")
+                continue
+            text = paths[0].read_text(encoding="utf-8")
+            if not ("GetResultPileTypeForCardPlay" in text
+                    and "PileType.None" in text):
+                findings.append(
+                    f"{row['id']}: sheet kit_card, but "
+                    f"{paths[0].relative_to(gen.REPO)} does not override "
+                    "GetResultPileTypeForCardPlay to PileType.None "
+                    "(the card will enter a pile and recirculate as loot)")
+    return findings
 
 
 # --------------------------------------------------------------------------
@@ -253,6 +318,13 @@ def lint() -> int:
             fail(card_id, f"retain: sheet burst tag {exp_retain}, "
                           f"C# CardKeyword.Retain {got['retain']} "
                           "(the sim's turn-end filter keeps burst cards in hand)")
+        exp_kit_card = bool(row.get("kit_card"))
+        if got["kit_pile"] != exp_kit_card:
+            fail(card_id, f"kit pile: sheet kit_card {exp_kit_card}, "
+                          f"C# PileType.None override {got['kit_pile']} "
+                          "(kit cards return to the kit, no pile)")
+
+    findings.extend(kit_no_pile())
 
     if findings:
         print(f"handwritten-parity: {len(findings)} finding(s)")
