@@ -94,6 +94,11 @@ def main(argv: list[str] | None = None) -> int:
              "run world)",
     )
     ap.add_argument(
+        "--jobs", "-j", type=int, default=1,
+        help="worker PROCESSES to spread the runs over (0 = one per CPU). "
+             "Wall-clock only: run i is a pure function of seed+i, so the "
+             "results are identical at any job count.")
+    ap.add_argument(
         "--acts", type=int, default=None,
         help="acts the run spans (§10.1); default = every act registered in "
              "RUN_ACTS. --acts 1 is the supported single-act instrument.",
@@ -127,7 +132,7 @@ def main(argv: list[str] | None = None) -> int:
                            args.runs, args.seed,
                            grant_relics=args.realistic,
                            grant_potions=args.realistic,
-                           n_acts=args.acts)
+                           n_acts=args.acts, jobs=args.jobs)
         ab.print_ab_report(args.character, archetype, result)
         print(f"  loadout         "
               f"{'realistic (relics + potions)' if args.realistic else 'bare'}")
@@ -139,7 +144,7 @@ def main(argv: list[str] | None = None) -> int:
                              draft.POLICIES[args.policy], args.runs, args.seed,
                              grant_relics=args.realistic,
                              grant_potions=args.realistic,
-                             n_acts=args.acts)
+                             n_acts=args.acts, jobs=args.jobs)
     summary = run_metrics.summarize_runs(results)
     max_hp = loader._character_index()[args.character]["hp"]
     survival = run_metrics.survival_profile(results, max_hp)

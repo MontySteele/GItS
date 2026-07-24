@@ -28,19 +28,29 @@ def make_pilot(weights: dict):
         if not playable:
             return None
 
-        lethal = _lethal_card(state, playable)
+        # State cannot change while this decision is being made, and every
+        # valuation below is a pure reader of it -- so damage, block and the
+        # incoming-damage estimate are computed ONCE per playable card and
+        # reused by the lethal check, the scorer and the regret log. Those
+        # three used to recompute the same numbers independently, which made
+        # _expected_damage the hottest function in the whole simulator.
+        incoming = _incoming_damage(state)
+        dmg = [_expected_damage(state, c) for c in playable]
+        blk = [_block_value(state, c, incoming) for c in playable]
+
+        lethal = _lethal_card(state, playable, dmg)
         if lethal is not None:
             return lethal
 
-        incoming = _incoming_damage(state)
         if (incoming >= C.BLOCK_PANIC_THRESHOLD * max(1, state.player.hp)
                 and state.player.block < incoming):
             blockers = [c for c in playable if _raw_block(state, c) > 0]
             if blockers:
                 return max(blockers, key=lambda c: _raw_block(state, c))
 
-        scored = [(_score(state, c, weights), -i, c) for i, c in enumerate(playable)]
-        best_score, _, best = max(scored, key=lambda t: t[:2])
+        scored = [(_score(state, c, weights, dmg[i], blk[i]), -i, c)
+                  for i, c in enumerate(playable)]
+        best_score, best_neg_i, best = max(scored, key=lambda t: t[:2])
         if best_score <= 0:
             return None
         # Bomb sequencing: attacks resolve BEFORE new placements, so this
@@ -50,8 +60,8 @@ def make_pilot(weights: dict):
             attacks = [(s, i, c) for s, i, c in scored
                        if c.type == "attack" and s > 0]
             if attacks:
-                best = max(attacks, key=lambda t: t[:2])[2]
-        _log_regret(state, best, playable)
+                _, best_neg_i, best = max(attacks, key=lambda t: t[:2])
+        _log_regret(state, best, -best_neg_i, playable, dmg, blk)
         return best
 
     return pilot
@@ -61,18 +71,26 @@ def _immediate_value(state: CombatState, card: Card) -> float:
     return _expected_damage(state, card) + _block_value(state, card)
 
 
-def _log_regret(state: CombatState, chosen: Card, playable: list[Card]) -> None:
+def _log_regret(state: CombatState, chosen: Card, chosen_i: int,
+                playable: list[Card], dmg: list[float],
+                blk: list[float]) -> None:
     """Spec §6 pilot_regret: was a strictly-better single play available?
     'Strictly better' = higher immediate value (damage + effective block)
     at no greater cost. Sanity instrument, not a target — no rng used, so
-    determinism is preserved."""
-    chosen_val = _immediate_value(state, chosen)
+    determinism is preserved.
+
+    `dmg`/`blk` are the caller's per-playable valuations, positionally
+    aligned with `playable` (see pilot()); their sum IS _immediate_value.
+    `chosen_i` is passed rather than looked up because Card is a value-
+    equality dataclass -- `playable.index` would find the first EQUAL card,
+    not this one."""
+    chosen_val = dmg[chosen_i] + blk[chosen_i]
     chosen_cost = card_cost(state, chosen)
-    for other in playable:
+    for i, other in enumerate(playable):
         if other is chosen:
             continue
         if (card_cost(state, other) <= chosen_cost
-                and _immediate_value(state, other) > chosen_val):
+                and dmg[i] + blk[i] > chosen_val):
             state.emit("pilot_regret", chosen=chosen.id, better=other.id)
             return
 
@@ -218,14 +236,19 @@ def _raw_block(state: CombatState, card: Card) -> float:
     return total
 
 
-def _block_value(state: CombatState, card: Card) -> float:
+def _block_value(state: CombatState, card: Card,
+                 incoming: Optional[float] = None) -> float:
     # Block is worth the damage it actually prevents this turn, not its
     # printed number — otherwise the pilot never blocks chip damage.
     # Healing is the same HP economy, capped by missing HP.
+    # `incoming` is the caller's already-computed _incoming_damage, which is
+    # the same number for every card in one decision; None recomputes it.
     val = 0.0
     raw = _raw_block(state, card)
     if raw:
-        prevented = max(0.0, _incoming_damage(state) - state.player.block)
+        if incoming is None:
+            incoming = _incoming_damage(state)
+        prevented = max(0.0, incoming - state.player.block)
         val += min(raw, prevented)
     heal = sum(fx["amount"] for fx in card.effects if fx["op"] == "heal")
     if heal:
@@ -454,17 +477,36 @@ def _charge_value(state: CombatState, card: Card) -> float:
     return val
 
 
-def _score(state: CombatState, card: Card, w: dict) -> float:
+def _score(state: CombatState, card: Card, w: dict,
+           dmg: Optional[float] = None, blk: Optional[float] = None) -> float:
+    # `dmg`/`blk` are this card's already-computed _expected_damage and
+    # _block_value (pilot() shares them with the lethal check and the regret
+    # log); None computes them here.
     cost = card_cost(state, card)
-    return (w["damage"] * _expected_damage(state, card)
-            + w["block"] * _block_value(state, card)
-            + w["scaling"] * _scaling_value(state, card)
-            + w["reaction"] * _reaction_value(state, card)
-            + w["tempo"] * _tempo_value(state, card)
-            + w.get("sustain", 1.0) * _sustain_value(state, card)
-            + w.get("spotlight", 0.0) * _spotlight_value(state, card)
-            + w.get("charge", 0.0) * _charge_value(state, card)
-            - w["cost"] * cost)
+    if dmg is None:
+        dmg = _expected_damage(state, card)
+    if blk is None:
+        blk = _block_value(state, card)
+    total = (w["damage"] * dmg
+             + w["block"] * blk
+             + w["scaling"] * _scaling_value(state, card)
+             + w["reaction"] * _reaction_value(state, card)
+             + w["tempo"] * _tempo_value(state, card)
+             + w.get("sustain", 1.0) * _sustain_value(state, card)
+             - w["cost"] * cost)
+    # Character-machinery terms, skipped when their weight is zero. Both are
+    # pure readers of state, so a zeroed weight makes the whole term
+    # arithmetically dead -- and every pilot but Furina's zeroes spotlight,
+    # every pilot but Kokomi's zeroes charge. Scanning the hand for
+    # Companions and Guest-Star generators on each of those was the single
+    # most-called thing in a non-Furina fight.
+    sw = w.get("spotlight", 0.0)
+    if sw:
+        total += sw * _spotlight_value(state, card)
+    cw = w.get("charge", 0.0)
+    if cw:
+        total += cw * _charge_value(state, card)
+    return total
 
 
 def _incoming_damage(state: CombatState) -> float:
@@ -484,10 +526,16 @@ def _incoming_damage(state: CombatState) -> float:
     return total
 
 
-def _lethal_card(state: CombatState, playable: list[Card]) -> Optional[Card]:
-    """Single-card lethal check only — cheap and good enough (spec: dumb ok)."""
+def _lethal_card(state: CombatState, playable: list[Card],
+                 dmg: Optional[list[float]] = None) -> Optional[Card]:
+    """Single-card lethal check only — cheap and good enough (spec: dumb ok).
+
+    `dmg` is the caller's per-playable _expected_damage, positionally aligned
+    with `playable`; None recomputes it."""
     remaining = sum(e.hp + e.block for e in state.living_enemies)
-    for card in playable:
-        if _expected_damage(state, card) >= remaining:
+    if dmg is None:
+        dmg = [_expected_damage(state, c) for c in playable]
+    for card, d in zip(playable, dmg):
+        if d >= remaining:
             return card
     return None
