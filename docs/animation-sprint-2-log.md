@@ -321,3 +321,91 @@ like a missing game_ref. Deploy from the repo root.
 - **E2** — Furina's icon register for the one surviving badge (Fanfare).
   Needs an art hunt first; she has no power-icon register at all today.
 - **F2** — Klee spark motes, [USER]-optional by origin. Not started.
+
+---
+
+# Track E follow-up — the icon register (2026-07-24, same day)
+
+E2 asked for "Furina's icon for the one surviving badge". Answering it meant
+sweeping the register, and the sweep found the badge strip was the small half
+of the problem. Written up in full at `docs/icon-gap-2026-07-24.md`.
+
+**What the sweep found.** Six powers had NO icon case at all and rendered the
+base-game placeholder — the same gap the earlier companion sweep left behind,
+missed because that sweep framed itself as "summons" and these are not
+summons. Fifteen of Furina's powers wore Klee's textures. The number that
+matters: **ten distinct Spotlight powers all rendered the same icon**, because
+the switch matched the `SpotlightPower` BASE class, so the register only
+*named* four of them and the count was never taken.
+
+Two adjacent surfaces were checked and are clean: both relics resolve, and all
+78 Furina card portraits resolve (the apparent 5-card gap is 2 roster helpers
+and 3 guest cards whose art lives under `cards/companions/`). Klee's own kit
+was already complete.
+
+**Landed.** All 21 icons fetched from Furina's and the companions' own talent
+and constellation sigils, processed, wired and deployed. `KleePowerIcons` now
+names every power individually. The `SpotlightPower` base case is deliberately
+GONE: a future subclass should fall to the placeholder, which reads as "no art
+yet", rather than inherit a sibling's sigil, which reads as intentional.
+`EncoreMeterPower` and `FurinaBurstMeterPower` were dropped from the register
+entirely — E1 retired both as displays, nothing applies them, and they are now
+listed in `KleePowerIcons.IconExempt` with the reason.
+
+**Two structural defects found in passing, both pre-existing, both fixed.**
+
+1. *Two producers claimed one out-path.* B4 moved Furina's six stills onto
+   `gen_furina_stills.py` but left the five old `plan.tsv` rows live. Both
+   halves bit: `art_fetch` rewrote their `SOURCES.tsv` provenance back to
+   `Furina Profile.png` — a ledger that lied about where the shipped bytes
+   came from, and it got COMMITTED that way — and the next `art_process` run
+   would have silently overwritten the re-centred art with the old off-centre
+   crops, undoing B4's own [USER] verdict. Caught by luck: a fetch happened to
+   run. Rows retired, provenance restored, and **art_lint L11** now fails on
+   any plan row whose out-path a generator owns. Verified by negative test
+   that all three of its branches fire (collision, stale entry, missing
+   generator) and that a clean plan stays clean. Proof the stills survived:
+   re-running the generator reproduces all six shipped files byte-identically.
+
+2. *`plan.tsv` was read as cp1252.* `read_plan` opened it with no explicit
+   encoding, so on Windows the em dash in `Constellation Hear Me — Let Us
+   Raise the Chalice of Love!.png` decoded to `â€"`, the mangled title went to
+   the wiki API, and the row came back `MISSING on wiki` — which reads as a
+   bad guess when the title was exactly right. Every non-ASCII wiki title has
+   always failed this way here. Three opens now pass `encoding="utf-8"`.
+
+**And a new boot check.** `KleeSelfCheck` **R13** reflects over every concrete
+`PowerModel` in the assembly and fails if it has no icon mapping or names a
+path absent from the merged pck. Neither half of this gap was visible to any
+existing check, because a wrong or missing icon does not throw — it just
+draws. R13 is what makes deleting the `SpotlightPower` base case safe.
+
+**Gates.** Build 0 errors; pck rebuilt `20260724-202049+41cab5a`, 5.96 MB →
+7.08 MB, all 15 Furina and 6 shared icons verified present inside the pack;
+`validate: OK`; **740 passed**; deployed.
+
+Note for the next run: `deploy.ps1` does NOT build the pck — it stages a
+prebuilt `klee-mod/assets/klee.pck`. Run `tools/build_pck.ps1` first or you
+will deploy yesterday's pack against today's dll, which is exactly what R13
+would then report at boot. Also seen once: `tier05/tests/test_parallel_runs.py`
+failed 3/5 when pytest ran under CPU contention from a concurrent pck build,
+and passed cleanly in isolation and on a quiet re-run. Load-sensitive, not a
+regression — but do not run the suite alongside a build.
+
+## Open [USER] items after this pass
+
+- **B5**, **D5**, **F2** — unchanged, see above.
+- **E2** is now a PICK rather than a hunt. Seven icons are shortlisted on
+  `art/contact_sheet_assets.html` (batch `assets`, native size): Fanfare
+  itself, the four weak marks (Friendly Visit, Study Buddy, Standing Ovation,
+  Ovation Trickle — these four have no good source and are flagged for
+  re-hunt, not presented as good), plus Frozen and Shattering Pressure where
+  there are two real options. Rank 1 is provisionally live for all seven.
+  Export from the sheet, then
+  `python tools/art_process.py --apply-picks art/picks.tsv`.
+- **NEW, open:** should the ten Spotlight powers keep ten distinct icons, or
+  share one family mark plus their own counters? Shipped as distinct on the
+  sprint-1 reading that legibility failures came from indistinctness, but the
+  opposite case is real at badge size, and the family relationship may be what
+  a player needs to read first. Collapsing is a one-line change. Recorded as a
+  choice, not decided.

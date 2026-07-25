@@ -1836,3 +1836,78 @@ the three read as three different creatures is art/raw/Salon_Members_Summon.png
 2026-07-24: cut that into three freestanding silhouettes. This is the whole
 premise of the D redesign — the shipped 500x380 card portraits are tiny
 gameplay screenshots and are exactly what failed D4.
+
+## Finding: an art out-path may have exactly one producer (2026-07-24)
+
+Animation sprint 2's B4 moved Furina's six still surfaces (combat model, both
+select portraits, splash, char icon, map marker) onto tools/gen_furina_stills.py,
+which re-derives them with framing computed from the ALPHA BBOX -- that
+centring fix IS the B4 [USER] verdict. It did not retire the five plan.tsv
+rows that had produced those same paths through art_process.
+
+Two producers then claimed one out-path, and both halves of that bit within a
+day. art_fetch rewrote those files' SOURCES.tsv provenance back to
+`Furina Profile.png`/`Furina Wish.png`, so the ledger asserted an origin the
+shipped bytes never had -- and that lie was committed. And the next
+art_process run would have silently overwritten the re-centred art with the
+old off-centre crops, undoing the verdict that motivated the work. Nothing
+would have thrown; the art would simply have been wrong again.
+
+RULING. An out-path has exactly one producer. Moving a surface to a generator
+means retiring its plan row in the same change, not later. art_lint L11
+enforces it, and L11 self-checks its own curated list -- an entry naming a
+generator that no longer produces that file is itself a failure, because a
+guard that has silently stopped guarding is the defect it was added to stop.
+
+Both directions are verified rather than assumed: negative tests prove all
+three L11 branches fire and that a clean plan stays clean, and re-running
+gen_furina_stills.py reproduces all six shipped files byte-identically, which
+is what actually proves art_process did not touch them.
+
+Method note, worth more than the fix: the catch was LUCK. A fetch happened to
+run for unrelated reasons and the diff was read. Nothing in the repo was
+watching, and neither symptom is visible without diffing a gitignored Tier F
+binary against a ledger nobody reads. This is the structurally-invisible-defect
+pattern again -- the check needs data the repo cannot see, so the human catch
+becomes a curated list plus a lint.
+
+## Finding: text tools must declare their encoding (2026-07-24)
+
+art_fetch.read_plan opened art/plan.tsv with no `encoding=`. On Windows that
+is cp1252, so the em dash in
+`Constellation Hear Me — Let Us Raise the Chalice of Love!.png` decoded to
+`â€"`, the mangled title went to the MediaWiki API, and the row came back
+`MISSING on wiki (gap-list / fix plan.tsv)`.
+
+The failure message is the interesting part: it accuses the PLAN of naming a
+file that does not exist, and the obvious next move is to re-hunt the title --
+which returns the title you already had. The bug is one layer below where the
+error points. Every non-ASCII wiki title had always failed this way on this
+machine; Furina's constellations are full of em dashes, so the sprint-2 icon
+set was the first set large enough to hit it.
+
+RULING. Every open() of a repo text file passes `encoding="utf-8"` explicitly.
+Fixed at all three plan/SOURCES sites in art_fetch. art_lint and
+art_contact_sheet read the plan through read_plan, so they inherit the fix.
+
+## R13: every power resolves to an icon that exists (2026-07-24)
+
+The sprint-2 Track E sweep found six powers with no icon case at all (rendering
+the base-game placeholder) and fifteen of Furina's wearing Klee's textures --
+ten of them the SAME texture, because the switch matched the SpotlightPower
+base class, so the register only named four of them and the count was never
+taken until someone enumerated the subclasses by hand.
+
+Neither is visible to any character-scoped check, and neither throws: a wrong
+or missing icon just quietly draws. Reflection over the assembly's PowerModel
+types is the only way to ask "did we forget one", so KleeSelfCheck now asks it
+at boot, checking both that a mapping exists and that the path it names is in
+the merged pck.
+
+RULING. R13 is what makes deleting the SpotlightPower base case correct rather
+than reckless. A future subclass added without art now FAILS AT BOOT instead of
+silently inheriting a sibling's sigil. That is the preferred failure: a wrong
+icon reads as intentional, a placeholder reads as "no art yet". Powers that
+legitimately need none (the two displays E1 retired, kept only for save
+compatibility) are listed in KleePowerIcons.IconExempt with a reason, so
+"exempt" is a decision on the record rather than an absence.

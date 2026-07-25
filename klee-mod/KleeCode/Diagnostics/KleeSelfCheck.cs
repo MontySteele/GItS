@@ -64,6 +64,11 @@ internal static class KleeSelfCheck
                 CheckCharacterAssets(character);
                 CheckLocalization(character);
             }
+
+            // Not per-character: powers are owned by systems, not rosters, and
+            // the gap this catches was precisely a power nobody's character
+            // sweep looked at.
+            CheckPowerIcons();
         }
         catch (Exception e)
         {
@@ -76,7 +81,8 @@ internal static class KleeSelfCheck
         if (Findings.Count == 0)
         {
             Log.Info($"[{KleeMod.ModId}] {Tag} passed "
-                   + $"({RuleCount} rule families across 2 characters).");
+                   + $"({RuleCount} rule families across 2 characters "
+                   + "and the assembly's powers).");
             return;
         }
 
@@ -88,13 +94,14 @@ internal static class KleeSelfCheck
     }
 
     // Distinct rule labels that can actually reach the log:
-    //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8, R9, R10, R11, R12
+    //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8, R9, R10, R11,
+    //   R12, R13
     // This was 8 while R5/R6a/R6b were documented but unattributable -- the
     // helpers that emit them hardcoded R4 and R6, so those three strings could
     // never appear. Fixing the labels is what makes the count honest. Note
     // R4 and R5 come from a `rule` parameter, so grepping for Fail("R... will
     // not find them; count the call sites, not the literals.
-    private const int RuleCount = 17;
+    private const int RuleCount = 18;
 
     private static void Fail(string rule, string detail) => Findings.Add($"[{rule}] {detail}");
 
@@ -329,6 +336,60 @@ internal static class KleeSelfCheck
             Fail("R12", $"{character.GetType().Name}: THE_ARCHITECT dialogues exist but none "
                       + "repeat; GetValidDialogues' visit-index exact match goes empty after "
                       + "the first win and the second win softlocks.");
+        }
+    }
+
+    /// <summary>
+    /// R13: every concrete PowerModel this assembly defines resolves to an
+    /// icon, and every icon path it names actually exists in the merged PCK.
+    ///
+    /// Both halves failed silently before. The 2026-07-24 companion sweep wired
+    /// four summons and left SIX powers with no case at all, rendering the
+    /// base-game placeholder; separately, fifteen of Furina's powers wore
+    /// KLEE's textures, TEN of them the same one, because the switch matched
+    /// the SpotlightPower base class and the count was never taken. Neither is
+    /// visible from any character-scoped check, and neither throws -- a wrong
+    /// or missing icon just quietly draws. Reflection is the only way to ask
+    /// "did we forget one", so ask it at boot.
+    /// </summary>
+    private static void CheckPowerIcons()
+    {
+        var powers = typeof(KleeMod).Assembly.GetTypes()
+            .Where(t => typeof(PowerModel).IsAssignableFrom(t)
+                     && !t.IsAbstract
+                     && !Powers.KleePowerIcons.IconExempt.ContainsKey(t))
+            .OrderBy(t => t.Name, StringComparer.Ordinal);
+
+        foreach (var type in powers)
+        {
+            PowerModel instance;
+            try
+            {
+                instance = (PowerModel)Activator.CreateInstance(type)!;
+            }
+            catch (Exception)
+            {
+                // No parameterless ctor: it cannot be constructed here, so its
+                // icon cannot be resolved here either. Not a finding -- R13
+                // covers what it can reach, and says so rather than pretending.
+                continue;
+            }
+
+            var path = Powers.KleePowerIcons.PathFor(instance);
+            if (path == null)
+            {
+                Fail("R13", $"{type.Name}: no icon mapping, so it renders the "
+                          + "base-game placeholder. Add a case to "
+                          + "KleePowerIcons.PathFor, or an entry to "
+                          + "KleePowerIcons.IconExempt saying why it needs none.");
+            }
+            else if (!ResourceLoader.Exists(path))
+            {
+                Fail("R13", $"{type.Name}: icon path \"{path}\" is not in the "
+                          + "merged PCK. KleePck.Path returned it, so the file "
+                          + "was present at build time -- check build_pck.ps1 "
+                          + "copies its directory and that the deploy is fresh.");
+            }
         }
     }
 

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
 
@@ -46,31 +48,73 @@ internal static class KleePowerIcons
         SolarIsotomaPower => KleePck.Path("klee/powers/solar_isotoma.png"),
         WitchsFlamePower => KleePck.Path("klee/powers/witchs_flame.png"),
         CelestialGiftPower => KleePck.Path("klee/powers/celestial_gift.png"),
-        FurinaBurstMeterPower => KleePck.Path("klee/powers/burst.png"),
-        EncoreMeterPower or EncorePerTurnPower => KleePck.Path("klee/powers/spark.png"),
-        FanfareMeterPower or FanfareAttackPer10Power =>
-            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
-        // ART DEBT, recorded not fixed (2026-07-24 sweep). These Furina powers
-        // borrow KLEE's icons: the Salon renders a BOMB and Encore a SPARK.
-        // That is arguably worse than the placeholder the companion powers had
-        // -- a wrong icon reads as intentional -- but swapping them to
-        // dedicated (absent) paths would regress them to placeholders today,
-        // which is a taste call, not a bug fix. Left as-is pending a ruling
-        // with Furina's look pass.
-        SalonMemberPower or SalonDamageUpPower =>
-            KleePck.Path("klee/powers/bomb.png"),
-        // SpotlightPower is the shared base of EVERY Spotlight texture power
-        // (the 2026-07-24 uncap-all ruling collapsed the capped subclass back
-        // out); matching the base keeps every Spotlight power iconed.
-        SpotlightPower
-            or SpotlightMultBonusTurnPower
-            or SpotlightFlatDamageTurnPower
-            or CenterStagePower
-            or GuestCastPower =>
-            KleePck.Path("klee/powers/amp_reaction_up.png"),
+
+        // The six powers the 2026-07-24 companion sweep MISSED, because that
+        // sweep framed itself as "summons" and these are not summons. They had
+        // no case at all and rendered the base-game placeholder.
+        CompanionCostThisTurnPower => KleePck.Path("klee/powers/friendly_visit.png"),
+        ReplayNextCompanionPower => KleePck.Path("klee/powers/study_buddy.png"),
+        AttackUpThisTurnPower => KleePck.Path("klee/powers/fantastic_voyage.png"),
+        NextAttackUpPower => KleePck.Path("klee/powers/passion_overload.png"),
+        ShatterBonusPower => KleePck.Path("klee/powers/shattering_pressure.png"),
+        FrozenPower => KleePck.Path("klee/powers/frozen.png"),
+
+        // FURINA. This block used to route all of her powers at KLEE textures
+        // (the Salon rendered a BOMB, Encore a SPARK) and was recorded as art
+        // debt on the grounds that dedicated paths would regress to
+        // placeholders. Sprint 2 Track E closed that by fetching the art
+        // first: every path below has a file, cut from Furina's own talent and
+        // constellation sigils. See docs/icon-gap-2026-07-24.md.
+        FanfareMeterPower => KleePck.Path("furina/powers/fanfare.png"),
+        FanfareAttackPer10Power => KleePck.Path("furina/powers/rising_ovation.png"),
+        SalonMemberPower => KleePck.Path("furina/powers/salon_member.png"),
+        SalonDamageUpPower => KleePck.Path("furina/powers/grand_salon.png"),
+        EncorePerTurnPower => KleePck.Path("furina/powers/all_the_worlds_a_stage.png"),
+
+        // The Spotlight family. The old entry matched the SpotlightPower BASE
+        // and so read as a handful of powers; it was in fact TEN distinct
+        // powers all rendering Dodoco's Duet. Every one is now named, and the
+        // six that derive from SpotlightPower MUST precede any base-class
+        // pattern or C# would match the base first and silently collapse them
+        // all back to one icon.
+        CenterStagePower => KleePck.Path("furina/powers/center_stage.png"),
+        GuestCastPower => KleePck.Path("furina/powers/guest_cast.png"),
+        SpotlightDiscountPower => KleePck.Path("furina/powers/leading_role.png"),
+        SpotlightDrawPower => KleePck.Path("furina/powers/supporting_cast.png"),
+        SpotlightMultBonusPower => KleePck.Path("furina/powers/top_billing.png"),
+        SpotlightMultBonusTurnPower => KleePck.Path("furina/powers/limelight.png"),
+        SpotlightFlatDamagePower => KleePck.Path("furina/powers/star_of_the_show.png"),
+        SpotlightFlatDamageTurnPower => KleePck.Path("furina/powers/stage_lights.png"),
+        OvationSpendBoostPower => KleePck.Path("furina/powers/standing_ovation.png"),
+        SpotlightEncoreFirstPower => KleePck.Path("furina/powers/ovation_trickle.png"),
+
+        // NO SpotlightPower base case, deliberately. A future subclass added
+        // without an icon should fall to `_ => null` and show the base-game
+        // placeholder -- which reads as "no art yet" -- rather than inherit a
+        // sibling's sigil, which reads as intentional and is the exact failure
+        // this whole sweep was cleaning up. R13 turns that into a boot failure
+        // rather than something only a manual sweep would find.
+
         AuraPower aura => KleePck.Path(
             "klee/powers/aura_" + aura.Element.ToString().ToLowerInvariant() + ".png"),
+
+        // EncoreMeterPower and FurinaBurstMeterPower are absent on purpose:
+        // sprint 2 E1 retired both as displays (Encore's ambient home is the
+        // Salon stage ribbon, Burst's is the overhead gauge) and nothing
+        // applies them any more. They stay registered only so a mid-combat
+        // save written before the retirement still loads. R13 exempts them.
         _ => null,
+    };
+
+    /// <summary>
+    /// Powers that are allowed to have no icon, with the reason. R13 fails on
+    /// any other iconless PowerModel in this assembly.
+    /// </summary>
+    internal static readonly Dictionary<Type, string> IconExempt = new()
+    {
+        [typeof(EncoreMeterPower)] = "retired display (sprint 2 E1); save-compat only",
+        [typeof(FurinaBurstMeterPower)] = "retired display (sprint 2 E1); save-compat only",
+        [typeof(SpotlightPower)] = "abstract base; every concrete subclass is named",
     };
 }
 

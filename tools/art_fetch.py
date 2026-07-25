@@ -34,7 +34,13 @@ def priority(out: str) -> str:
 
 def read_plan():
     rows = []
-    with open(PLAN, newline="") as f:
+    # encoding is EXPLICIT, not incidental. plan.tsv is UTF-8 and carries wiki
+    # titles with em dashes ("Constellation Hear Me — Let Us Raise the Chalice
+    # of Love!.png"). On Windows the default is cp1252, which decoded that dash
+    # to "â€”" and sent the mangled title to the API, so the row reported
+    # MISSING on wiki and the gap looked like a bad guess rather than an
+    # encoding bug -- a wrong-looking answer with a right-looking cause.
+    with open(PLAN, newline="", encoding="utf-8") as f:
         for line in f:
             if not line.strip() or line.startswith("#"):
                 continue
@@ -182,7 +188,7 @@ def main():
     # added or updated (keyed by filename, so a re-source replaces its old row).
     existing = []
     if SOURCES.exists():
-        with open(SOURCES, newline="") as f:
+        with open(SOURCES, newline="", encoding="utf-8") as f:
             existing = [row for row in csv.reader(f, delimiter="\t")][1:]
     by_filename = {row[0]: row for row in existing if row}
 
@@ -200,7 +206,7 @@ def main():
         seen.add(key)
         by_filename[fn] = [fn, resolved[r["title"]][0], "F", priority(r["out"])]
 
-    with open(SOURCES, "w", newline="") as f:
+    with open(SOURCES, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f, delimiter="\t")
         w.writerow(["filename", "source_url", "tier", "replace_priority"])
         for row in by_filename.values():

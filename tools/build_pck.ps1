@@ -540,6 +540,12 @@ $contractLines = @(
     'resource=res://furina/salon/member_chevalmarin.png',
     'resource=res://furina/salon/member_crabaletta.png',
     'resource=res://furina/vfx/spotlight_shine.tscn',
+    # Sprint 2 Track E power icons. ONE anchor per directory on purpose: the
+    # contract's job here is proving the copy blocks ran, and KleeSelfCheck R13
+    # already asserts at boot that EVERY power's icon path resolves in the
+    # merged pck. A hand-maintained list of all 21 would duplicate R13 and rot.
+    'resource=res://furina/powers/fanfare.png',
+    'resource=res://klee/powers/frozen.png',
     'resource=res://klee/vfx/bomb_lob.tscn',
     'resource=res://klee/vfx/dodoco_pop.tscn',
     'resource=res://klee/ui/character_icon.tscn',
