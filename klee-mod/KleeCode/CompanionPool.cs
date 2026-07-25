@@ -79,14 +79,18 @@ public static class CompanionPool
     /// The eligible set for one shop slot. <paramref name="nation"/> null means
     /// wildcard (slot 2); a nation string means the home-region filter (slot 1).
     ///
-    /// NO BANNER GATING, mirroring the reward slot's standing ruling rather
-    /// than inventing a second rule: BANNER_FEATURED_SLOTS is 3 and no nation
-    /// designs more than 3 Rare companions (Mondstadt 3, Inazuma 2, Fontaine
-    /// 0), so the Featured Banner currently features every 5-star in every
-    /// nation and is EXACTLY a no-op. Wiring it into the shop alone would make
-    /// the two channels disagree about a rule neither one can currently
-    /// exercise. It goes live in both channels together, when a nation ships a
-    /// 4th Rare.
+    /// BANNER GATING WENT LIVE 2026-07-25 (R64). This used to read "NO BANNER
+    /// GATING", because BANNER_FEATURED_SLOTS is 3 and no nation designed more
+    /// than 3 Rare companions (Mondstadt 3, Inazuma 2, Fontaine 0) -- the
+    /// Featured Banner featured every 5-star in every nation and was EXACTLY a
+    /// no-op. That ruling named its own trigger: "It goes live in both channels
+    /// together, when a nation ships a 4th Rare." Fontaine shipped its fourth,
+    /// so it does, and the reward slot gained the same filter in the same
+    /// change -- wiring the shop alone is precisely what that ruling forbade.
+    ///
+    /// §4.7: if the banner has emptied the nation's Rare tier, slot 1 falls
+    /// through to Uncommon exactly as the reward slot does. That fallthrough is
+    /// the ladder's job, not this method's -- Eligible just returns fewer cards.
     /// </summary>
     public static List<CardModel> Eligible(
         Player player, CardRarity rarity, string? nation)
@@ -94,6 +98,7 @@ public static class CompanionPool
         return All
             .Where(c => c.Rarity == rarity)
             .Where(c => IsOfferable(c, player))
+            .Where(c => CompanionBanner.IsOffered(c, player))
             .Where(c => nation == null || (c as ICompanionCard)?.Nation == nation)
             .ToList();
     }

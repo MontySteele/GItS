@@ -1898,3 +1898,70 @@ drifted in silence. The lint now reads int/float/double/decimal and private as
 well as public: **58 -> 71 mirrored, 3 -> 13 unmirrored, and every newly
 watched value already matched.** No drift had happened; the gate was not
 looking.
+
+## R64 -- The Featured Banner goes live (2026-07-25)
+
+Fontaine's Rare roster goes to four, exceeding `BANNER_FEATURED_SLOTS` (3) for
+the first time anywhere. The banner therefore becomes selective, and is wired
+in the same sprint across all three surfaces at once -- C# reward slot, C# shop
+slot 1, and a sim call-site audit -- so no channel ever disagrees about a now
+real rule.
+
+Rejected: (b) capping the roster at 3, which defers the gap-fix the sprint
+exists for; (c) raising `BANNER_FEATURED_SLOTS`, which preserves the no-op by
+construction and means the banner never earns its keep as seeded run-variance.
+
+**The C# side named its own trigger and it was honoured.** Both channels
+carried a written ruling that the banner was skipped *because* it was exactly a
+no-op, ending "It goes live in both channels together, when a nation ships a
+4th Rare." It did, so it does, and neither channel was wired alone.
+
+**What the call-site audit found, which predates this ruling.**
+`roll_banner`'s `nations` defaulted to the literal `("mondstadt",)` and the run
+model's single call site passed no argument. Every run of every character
+rolled a Mondstadt-only banner, and `_banner_filtered` then dropped every other
+nation's 5-stars from the reward slot AND the shop. Measured before the fix:
+across 400 Kokomi seeds she was offered Albedo, Durin and Nicole and never Itto
+or Raiden -- Inazuma's own Rares, one of them written as "the conscription
+jackpot", unreachable in Inazuma runs since the day Inazuma got a 5-star. The
+nation set is now DERIVED from the sheets (`rewards.designed_nations()`), so it
+cannot go stale by omission again.
+
+**Parity is structural, not numeric.** The sim and the game use different
+generators, so which three of Fontaine's four are featured differs between
+layers for the same nominal seed. What is mirrored is the rule -- per nation,
+feature min(roster, slots) without replacement, fixed for the run, per player
+in co-op, 4-stars never gated -- and `BANNER_FEATURED_SLOTS` is parity-lint
+watched. The C# banner is a pure function of the player's rng seed, so it needs
+no persistence and survives save/load by construction.
+
+`test_v18_banner`'s "roster <= cap" invariant is RETIRED: it was a tripwire for
+exactly this day, and keeping it would assert the sprint had not happened.
+
+## R65 -- Unreleased-nation placement rule (2026-07-25)
+
+Characters whose home nation is not yet a designed nation sheet are placed in
+their nation of residence/operation until their home nation ships:
+**Arlecchino -> Fontaine** (House of the Hearth), and as recorded precedent,
+**Childe/Tartaglia -> Liyue** when he is designed (precedent only -- no Liyue
+work in this sprint).
+
+Extends the standing nation-precedence rule (same action = same nation over
+faction) with a release-state clause. If and when Snezhnaya ships as a sheet,
+migration of its natives is a [USER] call at that time, not an automatic move.
+
+## D2 -- Neuvillette dual identity: resolved by standing ruling (2026-07-25)
+
+No new number. The Fontaine sheet's Guest Star block already rules it: guest
+cameos are Furina-personal-pool only, reached exclusively through her Guest
+Star generators, never in shared rewards -- and "his shared-pool 5-star Rare
+remains banner-governed and is a DIFFERENT card." Mechanically the separation
+is already enforced: `five_star_roster` filters both `guest_star` and
+`personal_pool`, so the new companion card enters the banner roster and the
+cameos never do. The WATCHLIST convergence cell containing
+`guest_neuvillette_judgment` is untouched by this sprint.
+
+The separation is now asserted directly rather than vacuously. The test that
+covered it used to assert Fontaine's 5-star roster was EMPTY, which proved the
+exclusion only because no shared Rares existed; it would have stayed green if a
+guest leaked the moment real Rares landed.

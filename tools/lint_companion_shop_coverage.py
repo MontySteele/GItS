@@ -65,6 +65,30 @@ from tier05 import rewards                  # noqa: E402
 PATCH = (REPO / "klee-mod" / "KleeCode" / "Patches"
          / "MerchantCompanionSlots.cs")
 
+# BOTH channels must gate 5-stars on the banner, and they must do it together.
+# The standing ruling that kept the banner switched off named this exact
+# condition -- "it goes live in both channels together, when a nation ships a
+# 4th Rare" -- because a banner wired into one channel only means the reward
+# slot and the shop disagree about which cards exist in a run, which no player
+# could diagnose and no sim run can see (tier 0.5 models one seat).
+#
+# A source tripwire rather than a test, for the reason recorded throughout this
+# file: there is no C# test project. It is a weak instrument and it is the
+# strongest one available; deleting a filter is a one-line change that nothing
+# else in the repo would notice.
+#
+# MATCHED ON THE CALL, NOT THE WORD. The first version of this check searched
+# for "CompanionBanner" and passed against a file whose filter had been deleted,
+# because both files also NAME the class in a comment. Verified by removing the
+# call and watching the lint stay green -- the same inert-rule failure S9 hit in
+# validate.ps1. A tripwire nobody has seen fire is a tripwire that does not
+# exist.
+BANNER_CALL = re.compile(r"CompanionBanner\.IsOffered\s*\(")
+BANNER_CHANNELS = [
+    ("reward slot", REPO / "klee-mod" / "KleeCode" / "CompanionSlot.cs"),
+    ("shop channel", REPO / "klee-mod" / "KleeCode" / "CompanionPool.cs"),
+]
+
 # Characters that host the companion system. A new roster character means a
 # new row here; the reference characters never see a companion at all.
 CHARACTERS = ["klee", "furina", "kokomi"]
@@ -145,6 +169,16 @@ def main() -> int:
                     f"{character}: {home} designs no {rarity} companion; "
                     "slot 1 widens the nation when it rolls one (known, "
                     "handled by the ladder -- see R59)")
+
+    for label, path in BANNER_CHANNELS:
+        if not path.exists():
+            findings.append(f"missing {label} source: {path.relative_to(REPO)}")
+        elif not BANNER_CALL.search(path.read_text(encoding="utf-8")):
+            findings.append(
+                f"{path.name}: the {label} no longer gates 5-stars on "
+                "CompanionBanner. The banner is only correct if BOTH channels "
+                "apply it -- one channel alone means the reward slot and the "
+                "shop disagree about which cards exist in a run")
 
     if not PATCH.exists():
         findings.append(f"missing merchant patch: {PATCH.relative_to(REPO)}")

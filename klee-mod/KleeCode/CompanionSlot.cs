@@ -12,8 +12,10 @@ namespace KleeMod;
 
 /// <summary>
 /// The companion reward slot -- tier05 rewards.roll_rewards, standard mode
-/// (one offer; pity/choose-3 measured null and ruled OUT; the Featured
-/// Banner is a no-op at current roster size and is skipped by ruling).
+/// (one offer; pity/choose-3 measured null and ruled OUT). The Featured
+/// Banner WAS skipped by ruling while it was a no-op at roster size; it went
+/// live here and in the shop together on 2026-07-25 (R64), when Fontaine
+/// shipped a 4th Rare -- see CompanionBanner.
 ///
 /// Law mirrored exactly: roll a rarity on RARITY_ODDS (5-star companions
 /// ARE the rare tier), fall through rare -> uncommon -> common when a tier
@@ -72,6 +74,12 @@ public static class CompanionSlot
             var characterId = CharacterId(player);
             if (comp.PersonalPool is not null
                 && comp.PersonalPool != characterId) continue;
+            // Featured Banner (R64, 2026-07-25). Applied BEFORE the rarity
+            // tiers are built, exactly as tier05 roll_rewards filters the pool
+            // before its rarity roll -- so a banner that empties the Rare tier
+            // falls through to Uncommon on the existing ladder below instead
+            // of producing an empty pool at the pick.
+            if (!CompanionBanner.IsOffered(canonical, player)) continue;
             if (!tiers.TryGetValue(canonical.Rarity, out var tier))
             {
                 tiers[canonical.Rarity] = tier = new List<CardModel>();

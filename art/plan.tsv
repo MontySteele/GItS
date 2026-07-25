@@ -915,3 +915,35 @@ lasting_impression	ImageGen/images/cards/furina/lasting_impression.png	500	380	c
 sucrose_catalyst_conversion	ImageGen/images/cards/companions/sucrose_catalyst_conversion.png	500	380	cover	y0.30	shortlist	1	png	Sucrose Card.png		tcg	sucrose
 sucrose_catalyst_conversion	ImageGen/images/cards/companions/sucrose_catalyst_conversion.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Sucrose Introduction Card.png		tcg	sucrose
 sucrose_catalyst_conversion	ImageGen/images/cards/companions/sucrose_catalyst_conversion.png	500	380	cover	y0.40	shortlist	3	png	Sucrose Character Card.png		tcg	sucrose
+
+# ---------- FONTAINE 5-STAR RARES (R64, 2026-07-25) ----------
+# Every wiki_title below was verified with tools/art_hunt.py BEFORE being
+# written, per the kickoff -- a plausible wrong guess silently resolves to
+# some other character's art, which is worse than a MISSING row.
+#
+# NEUVILLETTE'S THREE OBVIOUS SOURCES ARE ALREADY TAKEN, and that is D2
+# working rather than a problem: his Guest Star cameos claim Neuvillette
+# Character Card, Neuvillette Wish and Character Neuvillette Full Wish at
+# rank 1. His shared-pool Rare is a DIFFERENT CARD and should not wear the
+# cameo's face, so it takes the promo Card render instead. They share the
+# `neuvillette` source_group, so L1 permits the family; the separation here
+# is a design choice, not a lint requirement.
+#
+# Arlecchino's `Character Details` family is BANNED (art_lint L9, the same
+# burnt-in-text family as Furina's and Kokomi's) and is not offered.
+navia_cannon_fire_support	ImageGen/images/cards/companions/navia_cannon_fire_support.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Navia Wish.png		splash	navia
+navia_cannon_fire_support	ImageGen/images/cards/companions/navia_cannon_fire_support.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Navia Full Wish.png		splash	navia
+navia_cannon_fire_support	ImageGen/images/cards/companions/navia_cannon_fire_support.png	500	380	cover	y0.16	shortlist	3	png	Navia Character Card.png		tcg	navia
+clorinde_impale_the_night	ImageGen/images/cards/companions/clorinde_impale_the_night.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Clorinde Wish.png		splash	clorinde
+clorinde_impale_the_night	ImageGen/images/cards/companions/clorinde_impale_the_night.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Clorinde Full Wish.png		splash	clorinde
+clorinde_impale_the_night	ImageGen/images/cards/companions/clorinde_impale_the_night.png	500	380	cover	y0.16	shortlist	3	png	Clorinde Character Card.png		tcg	clorinde
+# NOT cover_autocrop: the autocrop took a torso band with no face on him. And NOT a
+# higher anchor -- Neuvillette Card carries the GENSHIN IMPACT wordmark top-centre,
+# the same caveat already recorded for Kokomi Card. y0.28 clears the wordmark and
+# frames the Iudex head-and-shoulders over his own crest. Checked by eye.
+neuvillette_ancient_sea_authority	ImageGen/images/cards/companions/neuvillette_ancient_sea_authority.png	500	380	cover	y0.28	shortlist	1	png	Neuvillette Card.png		splash	neuvillette
+neuvillette_ancient_sea_authority	ImageGen/images/cards/companions/neuvillette_ancient_sea_authority.png	500	380	cover	y0.16	shortlist	2	png	Neuvillette Character Card Showcase 1.png		tcg	neuvillette
+neuvillette_ancient_sea_authority	ImageGen/images/cards/companions/neuvillette_ancient_sea_authority.png	500	380	cover	y0.22	shortlist	3	png	Neuvillette Character Card Golden.png		tcg	neuvillette
+arlecchino_masque_red_death	ImageGen/images/cards/companions/arlecchino_masque_red_death.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Arlecchino Full Wish.png		splash	arlecchino
+arlecchino_masque_red_death	ImageGen/images/cards/companions/arlecchino_masque_red_death.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Arlecchino Card.png		splash	arlecchino
+arlecchino_masque_red_death	ImageGen/images/cards/companions/arlecchino_masque_red_death.png	500	380	cover	y0.20	shortlist	3	png	Arlecchino Portrait.png		splash	arlecchino

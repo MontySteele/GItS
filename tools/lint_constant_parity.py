@@ -137,6 +137,7 @@ MIRRORED: dict[str, object] = {
     "CompanionConstants.SolarIsotomaBlock": C.SOLAR_ISOTOMA_BLOCK,
     "CompanionConstants.CelestialGiftBlock": C.CELESTIAL_GIFT_BLOCK,
     "CompanionConstants.MasqueBondBlock": C.MASQUE_BOND_BLOCK,
+    "CompanionBanner.FeaturedSlots": C.BANNER_FEATURED_SLOTS,
 
     # Furina.
     "FurinaResourceConstants.FanfarePerHpLost": C.FANFARE_PER_HP_LOST,
