@@ -22,8 +22,24 @@ decided before G-A lands.**
 ## Sprint-start state (2026-07-25)
 
 Branched from `kokomi/playtest-build-sprint` @ `4ce3b87` ("Track P: pin the
-Oath's hidden coupling, and watch act 3 by construction"), which is one commit
-ahead of `origin/main` @ `7260590`.
+Oath's hidden coupling, and watch act 3 by construction"), one commit ahead of
+`origin/main` @ `7260590`.
+
+> **CORRECTION, at close.** The parallel streams committed *during* this sprint,
+> and this sprint's four commits sit on top of them, not on `4ce3b87`. The real
+> base is **`a879ffe`**, reached via `7c53c31` (animation sprint 2, "Playtest 1:
+> the ribbon number was covered…"), `40b0884` and `a879ffe` ("Track A: the Pearl
+> of Wisdom, and Kokomi's hooks go live"). Verified: **no commit in this sprint
+> touches any animation-stream file** — `git diff --name-only a879ffe HEAD`
+> returns 45 files and none of them are under `Vfx/`, `pck-src/`,
+> `KleeSceneTelemetry.cs`, `animation-sprint-2-log.md` or `build_pck.ps1`. The
+> DECISIONS bookkeeping note about carrying along uncommitted edits to that file
+> is therefore moot: the animation stream committed its own work.
+>
+> One consequence worth naming: **Kokomi's starter relic went live mid-sprint**
+> in `a879ffe`. G-C3(b)'s condition — "Kokomi's rides along only if her starter
+> relic already exists in-tree" — was satisfied more firmly than it looked when
+> the call was made.
 
 **The animation stream is live in the same working tree.** Uncommitted at
 sprint start: `klee-mod/KleeCode/Vfx/SalonVisualsBridge.cs`,
