@@ -34,6 +34,24 @@ def test_kokomi_decksize_grammar():
     assert res.returncode == 0, res.stdout + res.stderr
 
 
+def test_every_draftable_card_can_be_upgraded():
+    """G-C1. A card with no upgrade is a dead campfire choice.
+
+    Two layers, because the 2026-07-25 playtest's actual defect was in the
+    second: a card can have a perfectly good sheet delta that the GENERATOR
+    cannot express, in which case the sim upgrades it and the live game does
+    not. A lint that only checked the sheet would have reported all-clear on
+    exactly the card that was reported broken.
+
+    Wired here rather than left as a tool so that a missing upgrade is red,
+    not a playtest note.
+    """
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_upgrade_coverage.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
 def test_card_names_are_unique():
     """Display names: unique internally, and clear of docs/reserved-card-names.txt.
 
@@ -48,5 +66,26 @@ def test_card_names_are_unique():
     res = subprocess.run(
         [sys.executable, str(REPO / "tools" / "lint_unique_names.py"),
          *sheets],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
+def test_mirrored_constants_match_the_sim():
+    """C# balance constants vs tier0, the source of truth.
+
+    Every balance number lives twice -- once in tier0 where it was MEASURED,
+    once in C# where it is PLAYED -- and the C# copies were kept in step by
+    discipline alone until 2026-07-25. That failure mode is silent in the
+    worst way: a sim-side retune nobody mirrors leaves the build green, the
+    tests green, and the tuning report describing a game nobody is playing.
+
+    It is wired into PYTEST as well as into validate.ps1 (S6e) on purpose.
+    The retune happens HERE, in Python, and the person doing it runs the
+    suite; making them wait for a deploy to learn they left the mod behind
+    is one round trip too late. There is no C# test project to pin this at
+    runtime, so this static comparison is the whole gate.
+    """
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_constant_parity.py")],
         capture_output=True, text=True)
     assert res.returncode == 0, res.stdout + res.stderr

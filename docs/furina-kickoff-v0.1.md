@@ -116,6 +116,19 @@ predates the v1.6 amendment).
   — **each Spotlighted card played grants Fanfare**. No per-turn passive
   accrual, ever (passive accrual = stall payoff; the healing policy exists
   to kill exactly that).
+  > **RETIRED GRAMMAR (G-F1, 2026-07-25) — the parenthetical only.** "Rare
+  > uncappers at nasty setup cost" no longer describes anything: the
+  > uncapper clause died with "The Tide Turns" (F-A5), and no sheet carries
+  > `raise_fanfare_cap`. Cards raise a permanent **floor** instead
+  > (`gain_fanfare_floor`), and the cap was demoted from a first-order dial
+  > to a high safety rail that decay means nothing reaches. `%maxHP` is
+  > still where the rail sits. See the DECISIONS entry "Implementation
+  > sprint: C# parity, co-op ownership, upgrade lint, known-card fixes".
+  >
+  > **This is an annotation, not an amendment.** The no-passive-accrual law
+  > in the sentence above is untouched and remains binding — a floor is
+  > static value that does not grow with time, so stalling still earns
+  > nothing. F-B4's reasoning for not reopening the law also stands.
 - **Fanfare is a global pool on Furina** — it survives Spotlight moves.
   Commitment texture comes from throughput (a deep single-partner kit
   plays more Spotlighted cards per turn), not from reset punishment. The

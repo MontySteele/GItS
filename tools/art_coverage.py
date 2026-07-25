@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Card-art coverage check (docs/furina-art-pass-requirements.md §9.5).
+"""Card-art coverage check, ROSTER-WIDE (docs/furina-art-pass-requirements.md §9.5).
+
+Started as Furina's instrument; it now bills the whole roster, because the
+question "what art do we still owe" stopped being a one-character question
+the moment a second character shipped on borrowed assets.
 
 Reads the CANONICAL sheets -- never a prose bill -- and compares expected card
 IDs to the PNG stems actually present in the output directories. Reports three
@@ -44,7 +48,14 @@ IMAGES = ROOT / "ImageGen" / "images" / "cards"
 
 # Canonical sheet -> (output dir, surface label). Order fixes report order.
 SHEETS = [
+    (ROOT / "docs" / "klee-cards.yaml", IMAGES / "klee", "Klee personal sheet"),
     (ROOT / "docs" / "furina-cards.yaml", IMAGES / "furina", "Furina personal sheet"),
+    # Kokomi joined 2026-07-25, at zero coverage. Listing a surface with no
+    # files yet is the entire point of an instrument like this: her shell
+    # ships on Klee's art via the pck builder's fallback, which means the
+    # game LOOKS finished and the bill is invisible everywhere except here.
+    (ROOT / "docs" / "kokomi-cards.yaml", IMAGES / "kokomi", "Kokomi personal sheet"),
+    (ROOT / "docs" / "inazuma-companions.yaml", IMAGES / "companions", "Companions (Inazuma)"),
     (ROOT / "docs" / "mondstadt-companions.yaml", IMAGES / "companions", "Companions (Mondstadt/shared)"),
     (ROOT / "docs" / "fontaine-companions.yaml", IMAGES / "companions", "Companions (Fontaine)"),
 ]

@@ -58,6 +58,7 @@ internal static class KleeSelfCheck
                      {
                          ModelDb.Character<Klee>(),
                          ModelDb.Character<Furina>(),
+                         ModelDb.Character<Kokomi>(),
                      })
             {
                 CheckCharacterInvariants(character);
@@ -69,6 +70,17 @@ internal static class KleeSelfCheck
             // the gap this catches was precisely a power nobody's character
             // sweep looked at.
             CheckPowerIcons();
+
+            // R19 (G-A5a). Furina's Fanfare arithmetic against vectors derived
+            // from the sim. This is the only place the C# port can be executed
+            // against the design of record at all -- there is no C# test
+            // project, so a boot-time check is the whole of the automated
+            // half. The Python suite guarantees the vectors themselves are the
+            // sim's; this guarantees our code answers them correctly.
+            foreach (var finding in FurinaParityVectors.Check())
+            {
+                Fail("R19", finding);
+            }
         }
         catch (Exception e)
         {
@@ -81,7 +93,7 @@ internal static class KleeSelfCheck
         if (Findings.Count == 0)
         {
             Log.Info($"[{KleeMod.ModId}] {Tag} passed "
-                   + $"({RuleCount} rule families across 2 characters "
+                   + $"({RuleCount} rule families across 3 characters "
                    + "and the assembly's powers).");
             return;
         }
@@ -95,13 +107,13 @@ internal static class KleeSelfCheck
 
     // Distinct rule labels that can actually reach the log:
     //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8, R9, R10, R11,
-    //   R12, R13
+    //   R12, R13, R19
     // This was 8 while R5/R6a/R6b were documented but unattributable -- the
     // helpers that emit them hardcoded R4 and R6, so those three strings could
     // never appear. Fixing the labels is what makes the count honest. Note
     // R4 and R5 come from a `rule` parameter, so grepping for Fail("R... will
     // not find them; count the call sites, not the literals.
-    private const int RuleCount = 18;
+    private const int RuleCount = 19;
 
     private static void Fail(string rule, string detail) => Findings.Add($"[{rule}] {detail}");
 

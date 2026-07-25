@@ -34,6 +34,35 @@ public static class FurinaResourceConstants
     public const int FanfarePerHpLost = 1;
     public const int FanfarePerEncoreGained = 1;
     public const int FanfarePerEncoreSpent = 1;
+
+    // --- "The Tide Turns" (F-A1/F-A3), ported by G-A1 2026-07-25. Mirrors
+    // tier0/constants.py FANFARE_DECAY_FRACTION / FANFARE_FLOOR_PER_POWER*.
+    // Fanfare is a READ-ONLY momentum stat: activity generates it, it fades
+    // each turn, and permanent constellation grants give it a floor. No card
+    // spends it -- that grammar (fanfare_cost) was retired by F-A4 and no
+    // sheet carries it any more.
+
+    /// <summary>
+    /// PROPORTIONAL decay, taken as a fraction of the WHOLE meter and then
+    /// clamped at the floor (not a fraction of the amount above the floor) --
+    /// "Fanfare fades by 20% each turn" has to stay a one-line rule.
+    ///
+    /// double, and rounded with the default MidpointRounding.ToEven, because
+    /// the sim's `round()` is Python's banker's rounding. The two languages
+    /// agree only because both default to half-to-even; that coincidence is
+    /// load-bearing for trace parity, so it is pinned here rather than left
+    /// to a reader to rediscover.
+    /// </summary>
+    public const double FanfareDecayFraction = 0.20;
+
+    /// <summary>Floor granted by playing a common/uncommon Power.</summary>
+    public const int FanfareFloorPerPower = 5;
+
+    /// <summary>Floor granted by playing a RARE Power. Ancient-rarity Powers
+    /// take the common value, matching the sim's `rarity == "rare"` test.
+    /// </summary>
+    public const int FanfareFloorPerPowerRare = 8;
+
     public const int BurstPerSkillTag = 5;
     public const int BurstPerReaction = 5;
     public const int BurstPerEncoreSpent = 1;
@@ -75,27 +104,27 @@ public sealed class EncoreResource : BasicCustomResource
 }
 
 /// <summary>
-/// Furina's capped, spendable Fanfare.
+/// Furina's Fanfare: a READ-ONLY momentum stat since "The Tide Turns"
+/// (F-A1/F-A4, ported to C# by G-A1 2026-07-25).
 ///
-/// TIMING, corrected 2026-07-24. This class used to claim BaseLib's spend
-/// "occurs after OnPlay". It does not. BaseLib's CustomResourcePatches
-/// transpiles SpendAdditionalCosts into <c>CardModel.SpendResources</c> --
-/// the decompiler cannot print that attribute, but the IL blob decodes to
-/// (typeof(CardModel), "SpendResources") -- and PlayCardAction awaits
-/// SpendResources() and only THEN awaits OnPlayWrapper. So the audience was
-/// being charged before the card resolved, and every
-/// <c>bonus_formula: N_per_M_fanfare</c> read the post-spend level.
+/// Generation is activity-based only -- HP lost, Encore gained, Encore spent,
+/// a Center Stage card played. It DECAYS each turn from the player's second
+/// turn (<see cref="FurinaResources.DecayFanfare"/>), and it rests on a
+/// permanent per-combat floor built from constellation grants
+/// (<see cref="FurinaResources.GainFanfareFloor"/>). Cards READ it
+/// (<c>bonus_formula: N_per_M_fanfare</c>) and GATE on it
+/// (<c>if: fanfare_at_least_N</c>).
 ///
-/// The sheet's resource grammar and combat.py disagree: play_card resolves
-/// the card (line 229), THEN pays at line 231. Crescendo lost 5 damage and
-/// Universal Revelry lost 10 to all enemies.
+/// **No card spends it.** The <c>fanfare_cost</c> grammar was retired by
+/// F-A4 because Encore already is Furina's spendable resource and a second
+/// one was a redundant system; no sheet carries a fanfare_cost today. The
+/// whole payment path that used to live here -- BaseLib's transpiled
+/// SpendResources, the deliberate no-op that displaced it, and the
+/// AfterCardPlayed settle that paid at the sim's moment -- is DELETED rather
+/// than left dormant, so a future card cannot quietly re-arm it.
 ///
-/// So BaseLib's spend is a deliberate no-op here, exactly as it already is
-/// for <see cref="EncoreResource"/>, and
-/// <see cref="FurinaResourceHooks.AfterCardPlayed"/> pays the cost at the
-/// sim's moment. As a side effect this also fixes auto-played Fanfare cards,
-/// which never paid at all: CardCmd.AutoPlay skips SpendResources (the same
-/// hole that produced the infinite Burst).
+/// <see cref="Spend{T}"/> survives as a defensive no-op only: if anything
+/// ever attaches a cost to this resource, the meter must not silently drain.
 /// </summary>
 public sealed class FanfareResource : BasicCustomResource
 {
@@ -105,21 +134,16 @@ public sealed class FanfareResource : BasicCustomResource
 
     /// <summary>
     /// A meter the audience fills, not energy: a "this card is free" effect
-    /// must not waive the applause. Blocks BaseLib's SetToFreeThisTurn /
-    /// ThisCombat forwarding, which would otherwise zero both the cost AND
-    /// the playability gate -- card_playable compares against the PRINTED
-    /// fanfare_cost, never a discounted one.
-    ///
-    /// Note this does not close the Hook.ModifyEnergyCostInCombat path,
-    /// which CustomResourceCost.GetWithModifiers applies unconditionally.
-    /// Nothing Furina can hold implements that hook today; the canonical-cost
-    /// CanAfford override the Burst meters carry is the fix if that changes.
+    /// must not waive the applause. Retained after the spend retirement
+    /// because BaseLib's SetToFree forwarding is about the RESOURCE, not
+    /// about any particular card's cost, and a read-only meter that a free
+    /// effect could zero would break every reader on the sheet.
     /// </summary>
     public override bool ApplySharedModification => false;
 
-    /// <summary>DELIBERATE NO-OP; the spend lives in
-    /// <see cref="FurinaResourceHooks.AfterCardPlayed"/>. See the class
-    /// summary for why the inherited timing is wrong.</summary>
+    /// <summary>DEFENSIVE NO-OP. Fanfare is read-only; nothing may spend it.
+    /// Left in place so that attaching a cost to this resource fails
+    /// harmlessly instead of draining the meter behind the design.</summary>
     public override Task<bool> Spend<T>(
         ICombatState combatState, AbstractModel? spender, int amount, bool optional)
     {
@@ -128,13 +152,54 @@ public sealed class FanfareResource : BasicCustomResource
 }
 
 /// <summary>
-/// Per-combat extension to Furina's default Fanfare cap. This is state rather
-/// than a Power because raise_fanfare_cap is permanent for the combat and
-/// should not participate in power-gain modifiers.
+/// The cap half of a constellation grant. <see cref="FanfareFloorResource"/>
+/// is the floor half; <see cref="FurinaResources.GainFanfareFloor"/> raises
+/// both by the same amount, exactly as the sim's `gain_fanfare_floor` raises
+/// `fanfare_cap` and `fanfare_floor` together.
+///
+/// Raising the cap alongside the floor is load-bearing rather than
+/// bookkeeping: a floor that pushed the current value up toward an UNMOVED
+/// ceiling would simply re-pin the meter, and keeping the two apart is what
+/// preserves the gradient every Fanfare reader is built on.
+///
+/// Kept as its own resource rather than folded into the floor because the sim
+/// models cap and floor as two independent fields that merely happen to move
+/// together today. Mirroring that shape means <see cref="FurinaResources.RaiseFanfareCap"/>
+/// (retired grammar, no sheet user) stays expressible without a rewrite.
 /// </summary>
 public sealed class FanfareCapBonusResource : BasicCustomResource
 {
     public FanfareCapBonusResource() : base("KLEEMOD_FANFARE_CAP_BONUS")
+    {
+    }
+}
+
+/// <summary>
+/// Furina's permanent-for-the-combat Fanfare floor (F-A3). Decay never takes
+/// the meter below this value.
+///
+/// LEGAL under the no-passive-accrual law (kickoff §4): a floor is STATIC
+/// value, not accrual -- it does not grow with time, so stalling still earns
+/// nothing. Stated here because a floor superficially resembles the per-turn
+/// accrual §4 bans forever, and the distinction is the whole reason this
+/// mechanic is allowed to exist.
+///
+/// PER-COMBAT, like every other Furina resource: a Power is replayed each
+/// fight and re-earns its grant. This is free here in a way it was not in the
+/// sim -- BaseLib's BasicCustomResource.PrepForCombat() sets Amount = 0 for
+/// every custom resource at combat start, so the floor and the cap bonus both
+/// rewind by construction. The sim needed an explicit `cap -= floor` rewind
+/// because its Player object is reused across every fight; without it the
+/// ceiling ratcheted upward all run. That failure mode is structurally
+/// impossible here -- but it is impossible because of a BaseLib default, not
+/// because of anything this file does, so the citation is recorded rather
+/// than the conclusion assumed: BaseLib.decompiled.cs, BasicCustomResource
+/// (`public override void PrepForCombat() { Amount = 0; }`), reached through
+/// CustomResources&lt;T&gt;.PrepForCombat per PlayerCombatState.
+/// </summary>
+public sealed class FanfareFloorResource : BasicCustomResource
+{
+    public FanfareFloorResource() : base("KLEEMOD_FANFARE_FLOOR")
     {
     }
 }
@@ -220,6 +285,14 @@ public static class FurinaResources
             : CustomResources<FanfareCapBonusResource>.Get(combatState);
     }
 
+    private static FanfareFloorResource? FanfareFloorFor(Creature creature)
+    {
+        var combatState = creature.Player?.PlayerCombatState;
+        return combatState == null
+            ? null
+            : CustomResources<FanfareFloorResource>.Get(combatState);
+    }
+
     private static FurinaBurstResource? BurstResourceFor(Creature creature)
     {
         var combatState = creature.Player?.PlayerCombatState;
@@ -237,6 +310,17 @@ public static class FurinaResources
     public static int Burst(Creature creature) =>
         BurstResourceFor(creature)?.Amount ?? 0;
 
+    /// <summary>The permanent-for-the-combat baseline the meter rests on.
+    /// Decay never takes Fanfare below it.</summary>
+    public static int FanfareFloor(Creature creature) =>
+        IsFurina(creature) ? FanfareFloorFor(creature)?.Amount ?? 0 : 0;
+
+    /// <summary>
+    /// The ceiling. DEMOTED by F-A5 from a first-order design dial to a high
+    /// safety rail: under decay the ceiling does not bind (the cap-1000 sweep
+    /// cells reported 0.0% at-cap). Kept, not deleted, so a degenerate
+    /// floor-stack still has a stop.
+    /// </summary>
     public static int FanfareCap(Creature creature)
     {
         if (!IsFurina(creature)) return 0;
@@ -253,20 +337,66 @@ public static class FurinaResources
     }
 
     /// <summary>
-    /// resources.spend_fanfare: pay a gated cost and reopen room beneath the
-    /// cap. Clamped like the sim's <c>min(p.fanfare, n)</c> -- the gate should
-    /// have made a shortfall impossible, and a shortfall is never an overdraw
-    /// (that is spend_encore's job alone).
+    /// resources.gain_fanfare_floor (F-A3): a permanent constellation grant.
+    ///
+    /// Raises floor, cap AND current together, in that order -- the cap must
+    /// already carry the new headroom before the current value is clamped
+    /// against it, or the grant would be silently truncated at the old
+    /// ceiling. Mirrors the sim exactly:
+    /// <code>
+    ///   p.fanfare_floor += n
+    ///   p.fanfare_cap   += n
+    ///   p.fanfare        = min(p.fanfare_cap, p.fanfare + n)
+    /// </code>
+    ///
+    /// Inert for anyone without the resource, so a generated Furina card that
+    /// somehow reaches another character grants them nothing.
     /// </summary>
-    public static int SpendFanfare(Creature creature, int amount)
+    public static void GainFanfareFloor(Creature creature, int amount)
     {
-        if (amount <= 0) return 0;
+        if (amount <= 0 || !IsFurina(creature)) return;
+        var floor = FanfareFloorFor(creature);
+        var capBonus = FanfareCapBonusFor(creature);
+        var resource = FanfareResourceFor(creature);
+        if (floor == null || capBonus == null || resource == null) return;
+        floor.ModifyAmount(amount);
+        capBonus.ModifyAmount(amount);
+        resource.Amount = Math.Min(FanfareCap(creature), resource.Amount + amount);
+    }
+
+    /// <summary>
+    /// resources.decay_fanfare (F-A1): the meter fades each turn, never below
+    /// the floor. Returns how much fell, for the parity trace.
+    ///
+    /// This is the load-bearing half of the read-only rework: without it the
+    /// pool sits pinned at its ceiling and every card that "scales with
+    /// Fanfare" is a constant wearing a meter. It is also precisely what the
+    /// 2026-07-25 playtest was reporting when it said "fanfare still capped".
+    ///
+    /// PROPORTIONAL, ruled 20% by [USER] 2026-07-24 on measurement, reversing
+    /// the plan's flat-over-proportional direction: a flat subtraction is one
+    /// number for every meter level, so it barely dents a full meter while
+    /// driving a low one to zero. Proportional is asymptotic and never empties
+    /// the pool, so it beats flat at BOTH tails at once.
+    ///
+    /// Always removes at least 1 while above the floor, so a small meter
+    /// cannot stall at a value that rounds down to nothing.
+    /// </summary>
+    public static int DecayFanfare(Creature creature)
+    {
+        if (!IsFurina(creature)) return 0;
         var resource = FanfareResourceFor(creature);
         if (resource == null) return 0;
-        var spent = Math.Min(resource.Amount, amount);
-        if (spent <= 0) return 0;
-        resource.Amount -= spent;
-        return spent;
+        var floor = FanfareFloor(creature);
+        var before = resource.Amount;
+        if (before <= floor) return 0;      // already resting on its baseline
+        var fall = Math.Max(
+            1,
+            (int)Math.Round(
+                before * FurinaResourceConstants.FanfareDecayFraction,
+                MidpointRounding.ToEven));
+        resource.Amount = Math.Max(floor, before - fall);
+        return before - resource.Amount;
     }
 
     public static void GainEncore(Creature creature, int amount)
@@ -348,6 +478,18 @@ public static class FurinaResources
         return Math.Max(0m, amount - absorbed);
     }
 
+    /// <summary>
+    /// RETIRED GRAMMAR. `raise_fanfare_cap` died with the kickoff §4 uncapper
+    /// clause and no card on any sheet carries it -- `gain_fanfare_floor`
+    /// replaced it, because raising a ceiling nobody reaches was measured at
+    /// +0.2pt to the very archetype named after the stat.
+    ///
+    /// Kept rather than deleted because the cap is still a real quantity and
+    /// this is its only writer; deleting it would leave
+    /// <see cref="FanfareCapBonusResource"/> with no way to move except as a
+    /// side effect of a floor grant. Do NOT reintroduce it on a sheet without
+    /// reopening the ruling.
+    /// </summary>
     public static void RaiseFanfareCap(Creature creature, int amount)
     {
         if (amount <= 0 || !IsFurina(creature)) return;
@@ -448,24 +590,77 @@ public sealed class FurinaResourceHooks : AbstractModel
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await SpotlightSystem.ResolvePendingDraw(choiceContext, cardPlay);
-        // Sim order (combat.py play_card): the card resolves through the whole
-        // replay loop, and ONLY THEN does line 231 pay the Fanfare cost. So
-        // this runs after resolution and once per SERIES, not per replay --
-        // a Study Buddy'd Fanfare card performs twice and pays once, matching
-        // spend_fanfare's single call outside the loop.
+        // The Fanfare COST settle used to live here. Deleted by G-A1: Fanfare
+        // is read-only and `fanfare_cost` has no meaning on any sheet.
+        //
+        // Constellation grant (F-A3), sim site combat.py play_card: playing a
+        // POWER permanently raises the Fanfare floor by rarity.
+        //
+        // AFTER resolution, so a Power that ALSO grants a floor outright does
+        // not double-count against its own read. Once per SERIES rather than
+        // once per replay -- a Study Buddy'd Power is still one performance
+        // the audience remembers, which is the same reason the retired spend
+        // sat outside the sim's replay loop.
         if (cardPlay.IsLastInSeries
+            && cardPlay.Card.Type == CardType.Power
             && FurinaResources.IsFurina(cardPlay.Card.Owner.Creature))
         {
-            var fanfareCost =
-                CustomResources<FanfareResource>.Cost(cardPlay.Card)
-                    ?.GetAmountToSpend() ?? 0;
-            FurinaResources.SpendFanfare(
-                cardPlay.Card.Owner.Creature, fanfareCost);
+            FurinaResources.GainFanfareFloor(
+                cardPlay.Card.Owner.Creature,
+                cardPlay.Card.Rarity == CardRarity.Rare
+                    ? FurinaResourceConstants.FanfareFloorPerPowerRare
+                    : FurinaResourceConstants.FanfareFloorPerPower);
         }
         await FurinaResources.SyncMeters(
             choiceContext, cardPlay.Card.Owner.Creature, cardPlay.Card);
         await FurinaKitGrant.GrantIfCharged(
             choiceContext, cardPlay.Card.Owner);
+    }
+
+    /// <summary>
+    /// Fanfare decay, at the TRUE TOP of the player turn (F-A1).
+    ///
+    /// Site chosen to match the sim, which applies decay before the block
+    /// clear, the draw, Salon upkeep and every other turn-start generator.
+    /// Order is a design choice, not an accident: decay eats what was CARRIED
+    /// OVER, and then this turn's activity builds on the remainder. Applying
+    /// it after turn-start generation would tax income instead of inventory.
+    ///
+    /// BeforeSideTurnStart is the earliest hook available and the only
+    /// turn-start hook carrying a PlayerChoiceContext. CombatManager awaits it
+    /// to completion, THEN AfterBlockCleared, THEN AfterSideTurnStart -- so
+    /// this is guaranteed ahead of Salon upkeep (AfterPlayerTurnStart) and the
+    /// aura tick, without any intra-broadcast ordering assumption.
+    ///
+    /// The one residual ordering caveat, recorded rather than hidden: bomb
+    /// detonation also rides BeforeSideTurnStart, and order BETWEEN models in
+    /// a single broadcast is not guaranteed. A bomb that damages Furina mints
+    /// Fanfare from HP loss, so in the rare Klee-bombs-Furina co-op case the
+    /// decay may see that income or not. The sim decays strictly first.
+    ///
+    /// PlayerCombatState.TurnNumber is per-PLAYER and 1-based (its own doc
+    /// comment: "This starts at 1, so it should never be 0"), which is exactly
+    /// the sim's `state.turn` and exactly what co-op wants -- Furina decays on
+    /// HER second turn, not on the table's second turn. The `<= 1` guard is
+    /// the same idiom a dozen vanilla powers use for "not on the first turn".
+    /// </summary>
+    public override async Task BeforeSideTurnStart(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IReadOnlyList<Creature> participants, ICombatState combatState)
+    {
+        if (side != CombatSide.Player) return;
+        foreach (var creature in participants)
+        {
+            if (creature.Player is not { } player
+                || !FurinaResources.IsFurina(creature)
+                || player.PlayerCombatState is not { } playerCombatState
+                || playerCombatState.TurnNumber <= 1)
+            {
+                continue;
+            }
+            FurinaResources.DecayFanfare(creature);
+            await FurinaResources.SyncMeters(choiceContext, creature);
+        }
     }
 
     public override async Task AfterPlayerTurnStart(
@@ -559,9 +754,15 @@ public sealed class FanfareMeterPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Fanfare"),
+        // Player-facing rule, one line per the decay ruling's own legibility
+        // argument. The CAP is deliberately NOT mentioned: F-A5 demoted it to
+        // a safety rail that never binds under decay, and naming a ceiling
+        // nobody reaches is what made the old tooltip misleading.
         ("description",
             "Generated by HP loss, Encore activity, and Center Stage plays. "
-          + "Its default cap is half your maximum HP."),
+          + "Cards read it; nothing spends it. It fades by 20% at the start "
+          + "of each of your turns, never below the baseline your Powers "
+          + "have built."),
     };
 
     public override PowerType Type => PowerType.Buff;

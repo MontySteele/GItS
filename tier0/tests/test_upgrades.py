@@ -79,7 +79,13 @@ def test_cost_formula_and_override_upgrades():
     assert loader.get_card("bombs_away+").cost == 2
     assert loader.get_card("endless_fireworks+").cost == 0
     cd = loader.get_card("controlled_demolition+")
-    assert cd.effects[0]["amount"] == "X_plus_2"
+    # G-D3 (2026-07-25, PROPOSED) moved the BASE from X_plus_1 to X_plus_2,
+    # so the +1 bombs delta now lands on X_plus_3. Read the base off the
+    # sheet rather than restating it: this assertion is about the delta
+    # ARRIVING, not about any particular base.
+    base = int(loader.peek_card("controlled_demolition")
+               .effects[0]["amount"].rsplit("_", 1)[1])
+    assert cd.effects[0]["amount"] == f"X_plus_{base + 1}"
     gf = loader.get_card("grand_finale+")
     assert gf.effects[0]["bonus_formula"] == "3_per_detonation_this_combat"
     bb = loader.get_card("borrowed_brilliance+")

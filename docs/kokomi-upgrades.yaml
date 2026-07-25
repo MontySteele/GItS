@@ -51,6 +51,45 @@ exposing_current:  {vulnerable: +1}      # 2->3 (surprise_visit-parity; the R51 
 all_streams_flow:  {damage: +3}          # 5->8 base; the 1-per-2-Charge read never moves (resource-curve law)
 tidal_lure:        {block: +2}           # played 4->6; Sly Vulnerable stays 1 (header gap note)
 
+# ---- v0.5 PARTIAL-FILL COMMONS (+12) ----
+# Same laws as above: one number each, no cost reductions at common, and the RESOURCE CURVE NEVER MOVES —
+# no conscript-count delta, no gain_charge delta, no threshold moves down. Upgrades buy quality only.
+standing_orders:   {block: +3}           # 4->7; the muster count is a printed identity and stays 1
+signal_arrow:      {damage: +3}          # 5->8; the order it carries never gets louder
+shoulder_to_shoulder: {copy_cost_override: 0}   # the duplicate arrives FREE (Borrowed Brilliance precedent).
+                                         # Not "copy 2" — the copy count is a card-creation number and LAW 4
+                                         # binds this row at exactly net 0.
+vow_of_tides:      {damage: +3}          # 8->11 all, still one wave and still self-consuming
+pearl_diver:       {add: {op: draw, amount: 1}}   # to_the_front/quick_fuse precedent: the free line now
+                                         # replaces itself. The Charge NEVER moves (resource-curve law), so
+                                         # velocity is the only thing left to sell — which is the right sale.
+tideline_watch:    {block_next_turn: +4} # 8->12 next turn; the exhaust stays exactly one card
+whispered_word:    {block: +3}           # played 3->6; the Sly draw stays 1 (header gap note)
+driftwood_charm:   {block: +3}           # played 3->6; the Sly Charge stays 2 (resource-curve law + gap note)
+scattering_spray:  {damage: +2}          # 5->7 all; the churn (discard 1 / draw 1) is the identity and holds
+slack_water:       {block: +3}           # 4+4 -> 7+4: the half you can rely on is the half that grows.
+                                         # (Keyed `slack_water`, not the drafted `ebb_and_flow` — Furina owns
+                                         # that id, and the upgrade index is GLOBAL across sheets, so the
+                                         # collision took the loader down rather than silently shadowing.)
+tideturn:          {damage: +3}          # 5->8; draw stays 1
+steady_the_line:   {block: +3}           # 4->7 at 0 cost; the tempo price stays
+
+# ---- v0.5 PARTIAL-FILL UNCOMMONS (+8) ----
+honor_guard:       {add: {op: draw, amount: 1}}   # the order also finds the next unit. NOT a cost reduction:
+                                         # the uncommon sheet law allows two cost slots and mass_mobilization /
+                                         # reinforcements hold both. NOT a deeper discount either — cost_mod is
+                                         # energy, and energy is the resource curve.
+press_the_advantage: {damage: +3}        # 7->10; the recruit already arrives at cost 0, so damage is the dial
+moonlit_offering:  {draw: +1}            # 2->3; the Charge line and the burn count NEVER move
+read_the_current:  {damage: +3}          # the ALWAYS-LIVE half, 7->10 (so 13->16 over the bar). The threshold
+                                         # bonus stays 6 and THE BAR NEVER MOVES — lowering a threshold is a
+                                         # resource-curve move, which the law forbids. Upgrading the base is
+                                         # also the honest sale: it pays on turn 1, not only after node 4.
+quiet_harbor:      {block: +3}           # played 6->9; the Sly draw stays 2 (header gap note)
+driftglass:        {damage: +3}          # played 8->11; the Sly hit stays 5 (header gap note)
+pearl_current:     {power_amount: +2}    # metallicize 3->5 (mercy_of_the_deep-parity slope)
+the_tide_remembers: {damage: +3}         # the base wave, 4->7 to all (so 9->12 over the bar); pile bar stays 6
+
 # ---- RARES (quality over quantity) ----
 nereids_ascension: {damage: +4}          # 10->14 all; the 1-per-2-Charge read never moves (resource-curve law)
 sango_prayer:      {weak: +1}            # 2->3 all (spooked-parity; Rare + Exhaust rate limits carry the weight)

@@ -70,6 +70,20 @@ def summarize_runs(results: list[RunResult]) -> dict:
         "death_heatmap": dict(sorted(deaths.items())),
         "hp_bands": bands,
         "avg_final_deck": sum(len(r.deck_ids) for r in results) / n,
+        # P5 (playtest sprint): the same average, split by outcome.
+        # SURVIVORSHIP CHECK, observation only -- no rule reads it. The pooled
+        # figure rides at/over DRAFT_DECK_SOFT_CAP, and that is ambiguous by
+        # construction: a run that dies on floor 4 contributes a small deck it
+        # never got to grow, so heavy decks and short runs push the mean in
+        # opposite directions and can cancel. Splitting says which. Winners
+        # bigger than losers means the cap is being ridden by runs that are
+        # WORKING; losers bigger means bloat is a cause of death.
+        "avg_final_deck_won": (
+            sum(len(r.deck_ids) for r in results if r.won) / max(1, wins)
+            if wins else None),
+        "avg_final_deck_lost": (
+            sum(len(r.deck_ids) for r in results if not r.won) / (n - wins)
+            if n - wins else None),
         "pick_rate": picks / max(1, screens),
         "regretted_decisions": sum(r.regret_samples for r in results),
         "median_time_to_online": (sorted(online)[len(online) // 2]
@@ -312,7 +326,12 @@ def print_run_report(character: str, archetype: str, s: dict,
         print("                   median HP% by fight: "
               + " ".join(f"{p:.0%}" for p in
                          survival["median_hp_pct_by_fight"]))
-    print(f"  final deck size  {s['avg_final_deck']:.1f}   "
+    won, lost = s.get("avg_final_deck_won"), s.get("avg_final_deck_lost")
+    # P5: both halves or neither. A single-sided split invites reading the
+    # one number that happens to be present as the whole story.
+    split = (f"   (won {won:.1f} / lost {lost:.1f})"
+             if won is not None and lost is not None else "")
+    print(f"  final deck size  {s['avg_final_deck']:.1f}{split}   "
           f"pick rate {s['pick_rate']:.0%}   "
           f"regrets {s['regretted_decisions']}")
     onl = s["median_time_to_online"]

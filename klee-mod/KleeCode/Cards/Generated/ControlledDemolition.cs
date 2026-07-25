@@ -53,7 +53,7 @@ public sealed class ControlledDemolition : CustomCardModel, ISkillTagCard
         new List<DynamicVar>
         {
             new DamageVar(5m, ValueProp.Move),
-            new DynamicVar("Bombs", 1m)
+            new DynamicVar("Bombs", 2m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in

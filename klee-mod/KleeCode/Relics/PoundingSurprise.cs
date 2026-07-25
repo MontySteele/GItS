@@ -7,6 +7,8 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Relics;
 using MegaCrit.Sts2.Core.Runs;
 
 namespace KleeMod.Relics;
@@ -35,6 +37,16 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
     }
 
     public override RelicRarity Rarity => RelicRarity.Starter;
+
+    /// <summary>
+    /// G-C3. Touch of Orobas asks this; without it BaseLib's
+    /// StarterUpgradePatches prefix falls through to vanilla's hardcoded
+    /// dictionary, which does not know us and returns the no-effect Circlet --
+    /// so the act-2 "upgrade your starter" reward silently DELETED Klee's
+    /// talent relic. See Relics/UpgradedStarterRelics.cs for the full trace.
+    /// </summary>
+    public override RelicModel? GetUpgradeReplacement() =>
+        ModelDb.Relic<ExplosiveFrags>().ToMutable();
 
     public override List<(string, string)>? Localization => new()
     {

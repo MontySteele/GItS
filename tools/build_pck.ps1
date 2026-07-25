@@ -128,6 +128,16 @@ foreach ($d in 'ui', 'powers', 'relics', 'model') {
     if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
+$kokomiSrc = Join-Path $src 'kokomi'
+foreach ($d in 'ui', 'powers', 'relics', 'model') {
+    $from = Join-Path $kokomiSrc $d
+    if (-not (Test-Path $from)) { continue }
+    $to = Join-Path $work "kokomi\$d"
+    New-Item -ItemType Directory -Force -Path $to | Out-Null
+    $files = Get-ChildItem $from -Filter *.png -ErrorAction SilentlyContinue
+    if ($files) { Copy-Item $files.FullName -Destination $to }
+}
+
 # Furina can be tested before her art pass lands, but her resource PATHS must
 # still be character-specific. Fill only missing Furina files from Klee; a real
 # Furina file at the canonical path always wins.
@@ -156,6 +166,39 @@ foreach ($relative in @(
     Copy-FurinaFallback $relative
 }
 
+# Kokomi, same arrangement and the same NON-NEGOTIABLE reason. Her Custom*Path
+# overrides return KleePck.Path(...), which is null when a file is absent --
+# and a null override does NOT fall back to something safe. CharacterModel's
+# AssetPaths then hands the game an id-derived path that does not exist, the
+# background preloads fail, AssetCache is left incomplete, and the run crashes
+# during map generation. That exact sequence is the Furina defect recorded in
+# KleeSelfCheck R9. So "ship her on placeholders" cannot mean "ship her with no
+# files"; it means ship her with Klee's files at HER paths.
+function Copy-KokomiFallback([string]$relative) {
+    $target = Join-Path (Join-Path $work 'kokomi') $relative
+    if (Test-Path $target) { return }
+
+    $fallback = Join-Path (Join-Path $work 'klee') $relative
+    if (-not (Test-Path $fallback)) {
+        throw "Neither Kokomi nor Klee provides required PCK asset: $relative"
+    }
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $target) | Out-Null
+    Copy-Item $fallback -Destination $target
+    Write-Host "Kokomi fallback: $relative <- Klee" -ForegroundColor DarkYellow
+}
+
+foreach ($relative in @(
+        'ui\select_portrait.png',
+        'ui\select_portrait_locked.png',
+        'ui\char_icon.png',
+        'ui\map_marker.png',
+        'ui\selection_splash.png',
+        'ui\select_bg.png',
+        'ui\transition_wipe.png',
+        'model\combat_model.png')) {
+    Copy-KokomiFallback $relative
+}
+
 # Text resources authored here, not in ImageGen: the character-select bg scene
 # (a Control the game instantiates into its AnimatedBg container -- structure
 # mirrors the base game's char_select_bg_ironclad.tscn, minus spine/particles),
@@ -167,6 +210,7 @@ foreach ($relative in @(
 # pck, and none are needed.
 New-Item -ItemType Directory -Force -Path (Join-Path $work 'klee\materials') | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $work 'furina\materials') | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $work 'kokomi\materials') | Out-Null
 
 [IO.File]::WriteAllText((Join-Path $work 'klee\ui\char_select_bg_klee.tscn'), @'
 [gd_scene load_steps=3 format=3]
@@ -246,14 +290,69 @@ expand_mode = 1
 stretch_mode = 6
 '@)
 
+# Kokomi's backdrop tint is the only thing distinguishing her select screen
+# from Klee's while she runs on Klee's fallback splash. Watatsumi pearl-blue,
+# the same hex her CardPool, map marker and name colour use -- so even on
+# borrowed art the screen reads as a different character rather than as a bug.
+[IO.File]::WriteAllText((Join-Path $work 'kokomi\ui\char_select_bg_kokomi.tscn'), @'
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://kokomi/ui/selection_splash.png" id="1_art"]
+[ext_resource type="Texture2D" path="res://kokomi/ui/select_bg.png" id="2_bg"]
+
+[node name="KokomiBg" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -960.0
+offset_top = -540.0
+offset_right = 960.0
+offset_bottom = 540.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(960, 540)
+
+[node name="Backdrop" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+self_modulate = Color(0.44, 0.78, 0.84, 1)
+
+[node name="Splash" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("1_art")
+expand_mode = 1
+stretch_mode = 6
+'@)
+
+# Character.Icon returns a Control that the game parents into its own slot --
+# the box next to HP in the top-left player panel. These were authored at a
+# fixed 88x88 anchored top-left, which only lands correctly if the slot happens
+# to be exactly 88x88 with the same origin; playtest 2026-07-24 reported the
+# icon sitting off its square. Full-rect anchors make the icon adopt whatever
+# box it is given, and KEEP_ASPECT_CENTERED (stretch_mode 5) keeps the art
+# square inside it. custom_minimum_size is the floor: if a slot ever hands us a
+# zero-size parent, the icon stays 88x88 instead of collapsing to invisible.
 [IO.File]::WriteAllText((Join-Path $work 'klee\ui\character_icon.tscn'), @'
 [gd_scene load_steps=2 format=3]
 
 [ext_resource type="Texture2D" path="res://klee/ui/char_icon.png" id="1_tex"]
 
 [node name="KleeIcon" type="TextureRect"]
-offset_right = 88.0
-offset_bottom = 88.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_minimum_size = Vector2(88, 88)
 texture = ExtResource("1_tex")
 expand_mode = 1
 stretch_mode = 5
@@ -266,8 +365,30 @@ mouse_filter = 2
 [ext_resource type="Texture2D" path="res://furina/ui/char_icon.png" id="1_tex"]
 
 [node name="FurinaIcon" type="TextureRect"]
-offset_right = 88.0
-offset_bottom = 88.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_minimum_size = Vector2(88, 88)
+texture = ExtResource("1_tex")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'kokomi\ui\character_icon.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://kokomi/ui/char_icon.png" id="1_tex"]
+
+[node name="KokomiIcon" type="TextureRect"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_minimum_size = Vector2(88, 88)
 texture = ExtResource("1_tex")
 expand_mode = 1
 stretch_mode = 5
@@ -339,6 +460,40 @@ texture = ExtResource("1_tex")
 texture = ExtResource("1_tex")
 '@)
 
+# Kokomi gets the same THREE distinct paths, and the distinctness is the
+# load-bearing part -- BaseLib's conversion registry is keyed by path, so
+# sharing one scene between rest site and merchant makes the second
+# registration overwrite the first and NRestSiteCharacter.Create's cast throws
+# inside NRestSiteRoom._Ready. That was the first-campfire softlock of
+# 2026-07-20, and it is cheaper to write three near-identical scenes than to
+# debug it a third time.
+[IO.File]::WriteAllText((Join-Path $work 'kokomi\model\combat_visuals.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://kokomi/model/combat_model.png" id="1_tex"]
+
+[node name="KokomiCombatSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'kokomi\model\rest_character.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://kokomi/model/combat_model.png" id="1_tex"]
+
+[node name="KokomiRestSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'kokomi\model\merchant_character.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://kokomi/model/combat_model.png" id="1_tex"]
+
+[node name="KokomiMerchantSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
 # Loc rows for the ElementalSkill custom keyword (KleeKeywords.cs). The game
 # merges res://<modid>/localization/<lang>/<table>.json into the base table of
 # the same name; the key prefix KLEEMOD-ELEMENTAL_SKILL comes from BaseLib's
@@ -400,7 +555,10 @@ New-Item -ItemType Directory -Force $locDir | Out-Null
   "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-1r.char": "Klee brought the BIGGEST boom! Ready? Da-da-da!",
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.ancient": "The curtain falls at last, Regina of All Waters. Was it a performance, or was it real?",
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-1r.char": "Both. It was always both. Now — the people rejoice, and their Regina takes her bow."
+  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-1r.char": "Both. It was always both. Now - the people rejoice, and their Regina takes her bow.",
+  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.ancient": "Priestess. You spent no blood on my stairs, only paper and patience. Tell me what that bought you.",
+  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.next": "Respond",
+  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-1r.char": "Every plan I burned on the way up. Read them, and you will find the last one already written."
 }
 '@)
 
@@ -456,6 +614,34 @@ void fragment() {
 [resource]
 resource_local_to_scene = true
 shader = SubResource("Shader_furina")
+shader_parameter/threshold = 0.332
+shader_parameter/transitionTex = ExtResource("1_wipe")
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'kokomi\materials\kokomi_transition_mat.tres'), @'
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://kokomi/ui/transition_wipe.png" id="1_wipe"]
+
+[sub_resource type="Shader" id="Shader_kokomi"]
+code = "shader_type canvas_item;
+
+uniform sampler2D transitionTex;
+uniform float threshold : hint_range(0,1);
+
+void fragment() {
+    float falloff = 1.0 - texture(transitionTex, UV).r;
+
+    // helps with falloff artifacts issues towards the transition extremes
+    float remap  = mix(-0.1, 1.1, threshold);
+    falloff = step(falloff, remap);
+    COLOR.a = falloff;
+}
+"
+
+[resource]
+resource_local_to_scene = true
+shader = SubResource("Shader_kokomi")
 shader_parameter/threshold = 0.332
 shader_parameter/transitionTex = ExtResource("1_wipe")
 '@)
@@ -558,7 +744,13 @@ $contractLines = @(
     'resource=res://furina/model/rest_character.tscn',
     'resource=res://furina/model/merchant_character.tscn',
     'resource=res://furina/ui/char_select_bg_furina.tscn',
-    'resource=res://furina/materials/furina_transition_mat.tres'
+    'resource=res://furina/materials/furina_transition_mat.tres',
+    'resource=res://kokomi/model/combat_visuals.tscn',
+    'resource=res://kokomi/ui/character_icon.tscn',
+    'resource=res://kokomi/model/rest_character.tscn',
+    'resource=res://kokomi/model/merchant_character.tscn',
+    'resource=res://kokomi/ui/char_select_bg_kokomi.tscn',
+    'resource=res://kokomi/materials/kokomi_transition_mat.tres'
 )
 [IO.File]::WriteAllLines($contract, $contractLines)
 Write-Host "Built $out ($size bytes; contract roster-pck-v2)" -ForegroundColor Green

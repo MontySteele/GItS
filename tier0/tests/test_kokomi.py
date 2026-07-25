@@ -7,7 +7,7 @@ waits on the ruling asks; every constant is PROPOSED).
 import random
 
 from tier0 import constants as C
-from tier0.content import loader
+from tier0.content import loader, upgrades
 from tier0.engine import combat, effects, powers, refpowers
 from tier0.engine.state import Card, CombatState
 from tier0.pilot.policy import make_pilot
@@ -612,6 +612,31 @@ def test_kokomi_upgrades_respect_the_resource_curve():
             assert resource_shape(base) == resource_shape(upped), row["id"]
 
 
+def test_oath_ward_is_pinned_to_the_pulse_frequency_it_was_measured_at():
+    """P1 coupling pin (playtest sprint, Track P).
+
+    Kurage's Oath pays its ward ONCE PER PULSE, so what a run actually gets
+    is (ward x pulses per play). The 12 was measured against a summon that
+    pulses ONCE per play -- KURAGE_DURATION 1, doubling to twice once
+    bake_kurage is upgraded (kurage_turns +1). Neither of those numbers is
+    the Oath's own, and neither is guarded by the Oath's own tests, so a
+    duration change silently reprices a card that already carries a
+    [USER] "maybe too strong" flag as the first knob back.
+
+    If this fails, you moved the pulse frequency. That is allowed. It is not
+    allowed SILENTLY: re-measure the Oath at the new frequency, then move
+    this pin and the note beside the sheet row together, in one change.
+    """
+    assert C.KURAGE_DURATION == 1
+    upgraded = upgrades.apply_upgrade(loader.get_card("bake_kurage"))
+    (summon,) = [fx for fx in upgraded.effects
+                 if fx.get("op") == "summon_kurage"]
+    assert summon["amount"] == 2
+    (ward,) = [fx for fx in loader.get_card("kurages_oath").effects
+               if fx.get("power") == "kurage_ward"]
+    assert ward["amount"] == 12
+
+
 def test_vigil_upgrade_moves_the_cap_with_the_amount():
     """Single-application encoding: max_stacks == amount must ride along
     or the upgrade is silently swallowed (pass-2 fix lineage)."""
@@ -619,3 +644,133 @@ def test_vigil_upgrade_moves_the_cap_with_the_amount():
     (fx,) = [f for f in upped.effects
              if f.get("power") == "prevent_exhaust_ward"]
     assert fx["amount"] == 8 and fx["max_stacks"] == 8
+
+
+# --- v0.5 partial fill: threshold reads and the deck-size accounting ---
+
+def test_charge_threshold_predicate_reads_the_bank_and_never_spends_it():
+    """`charge_at_least_N` is the v0.5 fill's one new predicate.
+
+    Two things are asserted, and the second is the one that matters: the
+    bar works, AND crossing it leaves the bank untouched. Charge is
+    read-never-spent everywhere else in her kit (ChargeResource.Spend is a
+    documented no-op on the C# side); a predicate that quietly consumed it
+    would be the one place the rule broke, and every scaling number on the
+    sheet was measured against a bank that only grows.
+    """
+    st = kokomi_state()
+    st.player.charge = 9
+    assert effects._predicate(st, "charge_at_least_10") is False
+    st.player.charge = 10
+    assert effects._predicate(st, "charge_at_least_10") is True
+    assert st.player.charge == 10          # reading is free
+
+
+def test_read_the_current_pays_the_bar_as_a_flat_bonus_not_a_slope():
+    """The threshold shape, pinned against the §2.2 rate-limit grammar.
+
+    all_streams_flow's per-point slope is rate-limited because a slope is
+    what makes a late bank frightening. A BAR is not: it pays a printed
+    amount once and then stops, which is why this one is legal at uncommon.
+    If someone converts this row to a formula, the sub-Rare read ladder has
+    changed shape and needs re-measuring, not just re-pricing.
+    """
+    card = loader.get_card("read_the_current")
+    assert card.rarity == "uncommon"
+    base, cond = card.effects
+    assert base == {"op": "damage", "amount": 7, "target": "enemy"}
+    assert cond["if"] == "charge_at_least_10"
+    assert cond["then"] == [{"op": "damage", "amount": 6, "target": "enemy"}]
+    assert "else" not in cond              # base-plus-bonus, not either/or
+
+    st = kokomi_state()
+    st.player.charge = 0
+    effects.resolve_card(st, card)
+    low = 300 - st.enemies[0].hp
+
+    st = kokomi_state()
+    st.player.charge = 10
+    effects.resolve_card(st, card)
+    high = 300 - st.enemies[0].hp
+    assert (low, high) == (7, 13)
+
+
+def test_threshold_bars_do_not_move_on_upgrade():
+    """Resource-curve law, extended to the new shape.
+
+    Lowering a threshold is exactly as much of a resource-curve move as
+    raising a gain_charge line -- it makes the engine arrive sooner. The
+    upgrades for both threshold cards buy their always-live half instead,
+    and this fails if a later pass sells the bar.
+    """
+    for cid, bar in (("read_the_current", "charge_at_least_10"),
+                     ("the_tide_remembers", "exhaust_pile_at_least_6")):
+        for card in (loader.get_card(cid), loader.get_card(cid + "+")):
+            (cond,) = [fx for fx in card.effects
+                       if fx.get("op") == "conditional"]
+            assert cond["if"] == bar, cid
+            assert cond["then"][0]["amount"] == (
+                6 if cid == "read_the_current" else 5), cid
+
+
+def test_decksize_lint_counts_the_card_copying_ops():
+    """LAW 4's accounting must see every op that MINTS a card.
+
+    `copy_companion_in_hand` was invisible to the lint until
+    shoulder_to_shoulder wanted it at Common -- a Common carrying it would
+    have netted +1 and passed clean, which is the law failing silently
+    rather than loudly. The whole copy family is enumerated now; this test
+    is the guard, because the next such op will be added by someone who
+    never reads this file.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "_decksize_lint",
+        loader.DOCS_DIR.parent / "tools" / "lint_kokomi_decksize.py")
+    lint = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(lint)
+
+    for op in ("copy_companion_in_hand", "copy_spotlighted_in_hand"):
+        assert lint.card_delta(
+            {"rarity": "common", "effects": [{"op": op, "amount": 1}]}) == 1
+    # No `amount` field and unbounded by the row: counted as the whole hand
+    # rather than guessed at 1.
+    assert lint.card_delta({
+        "rarity": "common",
+        "effects": [{"op": "copy_companions_played_this_combat"}],
+    }) == lint.ALL_SENTINEL
+    # The shipped row is the balanced case: burn one, copy one, net zero.
+    row = next(r for r in lint.yaml.safe_load(
+        (loader.DOCS_DIR / "kokomi-cards.yaml").read_text(encoding="utf-8"))
+        if r["id"] == "shoulder_to_shoulder")
+    assert lint.card_delta(row) == 0
+
+
+def test_the_burst_is_a_skill_so_it_never_pays_itself_the_charge_read():
+    """The Garment's entry splash must not read the bank that the Garment
+    turns on.
+
+    `flat_attack_bonus` gates on `card.type == "attack"`, and the C# rider
+    gates on CardType.Attack for the same reason. So the card TYPE is the
+    only thing standing between "a Burst that opens a scaling window" and "a
+    Burst that also cashes the window on the way in" -- at a priest-median
+    bank the splash would roughly triple, and every number measured for this
+    card would be describing a different card.
+
+    Nothing about a damage-dealing Skill looks wrong at a glance, which is
+    exactly why this is pinned rather than trusted: retyping it to `attack`
+    would read as a tidy-up and would silently reprice her whole Burst.
+    """
+    kit = loader.get_card("ceremonial_garment")
+    assert kit.type == "skill"
+
+    st = kokomi_state()
+    st.player.charge = 20                    # a bank worth cashing
+    e = st.enemies[0]
+    hp0 = e.hp
+    effects.resolve_card(st, kit)
+    printed = next(fx["amount"] for fx in kit.effects if fx["op"] == "damage")
+    assert hp0 - e.hp == printed
+    # ...and the window it just opened is live for the NEXT attack.
+    assert st.player.powers["ceremonial_garment"] == C.CEREMONIAL_GARMENT_TURNS

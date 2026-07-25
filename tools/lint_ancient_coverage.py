@@ -50,6 +50,7 @@ CARD_ROOT = CODE / "Cards"
 CHARACTERS = {
     "Klee": (CODE / "KleeCardPool.cs", CODE / "KleeOffPoolCards.cs"),
     "Furina": (CODE / "FurinaCardPool.cs", CODE / "FurinaCardPool.cs"),
+    "Kokomi": (CODE / "KokomiCardPool.cs", CODE / "KokomiCardPool.cs"),
 }
 
 PROPERTY_RE = re.compile(

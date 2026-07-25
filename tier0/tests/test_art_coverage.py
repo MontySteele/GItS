@@ -85,10 +85,20 @@ def test_bill_is_derived_from_canonical_sheets():
     The doc's bill drifted precisely because it was transcribed prose. If this
     tool ever grows its own literal card list it inherits the same failure
     mode, so assert the totals still reconcile against the YAML.
+
+    The SHEET LIST comes from the tool, not from a literal here. It used to be
+    hardcoded -- which was this very failure mode one level up: adding Klee,
+    Kokomi and the Inazuma companions to the tool (2026-07-25) turned a green
+    test red without a single number being wrong. A test that has to be edited
+    whenever the thing it checks grows is a test that will eventually be
+    edited without being read.
     """
+    sys.path.insert(0, str(REPO / "tools"))
+    import art_coverage
+
     expected = 0
-    for name in ("furina-cards.yaml", "mondstadt-companions.yaml", "fontaine-companions.yaml"):
-        rows = yaml.safe_load((REPO / "docs" / name).read_text(encoding="utf-8"))
+    for path, _outdir, _label in art_coverage.SHEETS:
+        rows = yaml.safe_load(path.read_text(encoding="utf-8"))
         expected += sum(1 for r in rows if isinstance(r, dict) and "id" in r)
     tokens = yaml.safe_load(
         (REPO / "tier0" / "content" / "cards" / "tokens.yaml").read_text(encoding="utf-8"))

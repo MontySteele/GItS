@@ -611,6 +611,21 @@ is simply not what the shape turned out to need.
 **Nothing was changed by default.** `FANFARE_DECAY_FRACTION` ships at 0.0
 and the flat knob remains live, pinned by a test, until the ruling lands.
 
+> **BOOKKEEPING (G-F1/G-F2, added 2026-07-25).** The ruling that followed
+> this recommendation took **20%, the conservative alternative** — not the
+> 10% proposed immediately above. That is a deliberate [USER] choice of the
+> tighter gate-(2) margin over the liveliest meter, made *after* reading
+> this cell, and both numbers came from the same sweep.
+>
+> This note exists because the ruling is recorded EARLIER in this file than
+> the evidence that produced it — the constants block and the F-A summary
+> both state 20% above, while the sweep that offered 10-vs-20 is here. A
+> reader working top-to-bottom would meet the decision before the data and
+> could reasonably conclude the number was ruled before it was measured. It
+> was not. Physical order in an append-only log is not causal order, and
+> where the two disagree the log should say so rather than leave a reader to
+> reconstruct it.
+
 ---
 
 ## Fanfare archetype autopsy — the §5 branch fires

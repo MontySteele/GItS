@@ -91,14 +91,29 @@
     "freminet_pers_deploy",
     "freminet_pressurized_floe",
     "freminet_shattering_pressure",
+    "gorou_heart_of_the_clan",
+    "gorou_inuzaka_charge",
+    "gorou_war_banner",
+    "itto_superlative_superstrength",
     "kaeya_frostgnaw",
     "lynette_astonishing_shift",
     "lynette_box_trick",
     "lynette_enigmatic_feint",
     "nicole_celestial_gift",
     "prune_witch_hunt",
+    "raiden_musou_no_hitotachi",
+    "sara_crowfeather_cover",
+    "sara_tengu_stormcall",
+    "sayu_daruma_gift",
+    "sayu_naptime",
+    "sayu_yoohoo_windwheel",
+    "shinobu_grass_ring_bond",
+    "shinobu_sanctifying_ring",
+    "shinobu_thundergrust",
     "sucrose_astable",
-    "sucrose_gust"
+    "sucrose_gust",
+    "thoma_blazing_barrier",
+    "thoma_crimson_ooyoroi"
   ],
   "blocked": {
     "duck_and_cover": "hand-written",
@@ -112,8 +127,6 @@
   },
   "upgrades": {
     "_comment": "R24 (2026-07-20): docs/klee-upgrades.yaml is the single source of truth for upgrade deltas; codegen defaults are ABOLISHED. Generated cards listed below ship with NO upgrade path (UNAPPLIABLE discipline) until their delta is ratified, made numeric, or hand-finished.",
-    "no_upgrade_path": {
-      "nicole_celestial_gift": "delta key 'block_per_turn: 2' not expressible by codegen (structural upgrade)"
-    }
+    "no_upgrade_path": {}
   }
 }

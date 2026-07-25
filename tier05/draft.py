@@ -265,9 +265,15 @@ def core_complete(deck: list[Card], archetype: str) -> bool:
     if archetype == "fanfare":
         # Furina's starter already supplies the first half in practice, but
         # keep the definition honest for synthetic/modified decks.
+        #
+        # THREE limbs since DRAFTER_VERSION 10 (G-E1). Generation and floor
+        # are both inputs; without the reader limb this returned True for a
+        # deck that moved a meter nothing ever cashed.
         return (
             _fanfare_generation_total(deck) >= FANFARE_GENERATION_COVERAGE
             and _fanfare_floor_total(deck) >= FANFARE_FLOOR_COVERAGE
+            and sum(1 for c in deck if _reads_fanfare(c))
+            >= FANFARE_PAYOFF_COVERAGE
         )
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))
@@ -290,7 +296,15 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
             _fanfare_generation_total(deck) / FANFARE_GENERATION_COVERAGE,
         )
         baseline = min(1.0, _fanfare_floor_total(deck) / FANFARE_FLOOR_COVERAGE)
-        return (generation + baseline) / 2
+        # DRAFTER_VERSION 10: the reader limb, weighted equally with the two
+        # input limbs. This is the half of the fix with teeth -- progress
+        # feeds score_offer's +3.0 core-advance bonus, so a fanfare deck now
+        # actually reaches for a payoff instead of only for inputs.
+        payoff = min(
+            1.0,
+            sum(1 for c in deck if _reads_fanfare(c)) / FANFARE_PAYOFF_COVERAGE,
+        )
+        return (generation + baseline + payoff) / 3
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))
     return min(1.0, on_plan / C.DRAFT_CORE_SIZE)
@@ -461,6 +475,20 @@ FANFARE_GENERATION_COVERAGE = 5
 # single-card threshold, matching the converter predicate it replaces --
 # core_complete asks whether the plan is ONLINE, not whether it is finished.
 FANFARE_FLOOR_COVERAGE = 5.0
+# DRAFTER_VERSION 10 (G-E1): the third limb, and the one whose ABSENCE was the
+# instrument bug. Generation and floor are both INPUTS -- they move the meter
+# and they raise its baseline -- and a plan built entirely of inputs reads a
+# stat nothing cashes. Without this limb `core_complete("fanfare")` reported
+# 85.7-86.0% online while the average deck held 1.87 readers in 20 cards, and
+# the fanfare sprint's close-out banned measuring anything against it until it
+# was fixed.
+#
+# ONE, not more. `core_complete` asks whether the plan is ONLINE, not whether
+# it is finished -- the same low single-card bar the other two limbs use. The
+# question of how many readers a fanfare deck SHOULD hold is exactly the
+# draft-reach question, and it belongs to the pool-sweep pass with this
+# instrument in hand, not to the instrument itself.
+FANFARE_PAYOFF_COVERAGE = 1
 FANFARE_FIRST_FLOOR = 2.0     # was FANFARE_FIRST_CONVERTER
 FANFARE_LATER_FLOOR = 1.5     # was FANFARE_LATER_CONVERTER
 FANFARE_READER_VALUE = 1.0
@@ -601,6 +629,54 @@ def assigned_policy(rng: random.Random, deck: list[Card],
 
 ARCHETYPES = ("demolition", "spark", "reaction")
 
+# POLICY_VERSION 2 (G-E3, "Ship What We Know", 2026-07-25). The free-drafting
+# instrument.
+#
+# v1 -- the implicit pre-stamp generation -- is every policy number taken
+# before this date: `assigned_policy` (plan-committed) and `adaptive_policy`
+# (emergent) as they stood, with ARCHETYPES above hardcoded to KLEE's three.
+#
+# That hardcoding is the finding. `adaptive_score` is already exactly what
+# G-E3 describes -- standalone power plus synergy weighted by what the deck
+# has accumulated, with no assigned label anywhere in it -- but its archetype
+# term begins `if a not in ARCHETYPES: continue`, and none of Furina's plans
+# are in ARCHETYPES. So running "free draft" on Furina today would not have
+# measured free drafting. It would have measured a scorer that cannot see
+# salon, spotlight or fanfare AT ALL, and reported the result as evidence
+# about drafting behaviour. Every Furina card would have scored as pure
+# printed power plus the universal block quota.
+#
+# So the archetype set becomes character-aware. KLEE'S NUMBERS DO NOT MOVE --
+# her tuple is unchanged and every other character had no synergy term to lose
+# -- which is why this is a policy bump rather than a drafter bump.
+POLICY_VERSION = 2
+
+ROSTER_ARCHETYPES: dict[str, tuple[str, ...]] = {
+    "klee": ARCHETYPES,
+    "furina": ("salon", "spotlight", "fanfare"),
+    "kokomi": ("garment", "ward", "conscript"),
+}
+
+
+def archetypes_for(deck: list[Card]) -> tuple[str, ...]:
+    """Which archetype family this deck's character plays in.
+
+    Read from the cards rather than passed in, because the whole point of a
+    free-drafting policy is that it never receives a plan label -- and a
+    character label smuggled down the same channel would be the first step
+    back toward one. The character is a property of the deck that exists
+    whether or not anyone has a plan.
+
+    Falls back to Klee's set for decks with no character (synthetic test
+    decks, the reference characters' generic anchor), which is what every
+    caller got before this existed.
+    """
+    for card in deck:
+        family = ROSTER_ARCHETYPES.get(getattr(card, "character", None) or "")
+        if family:
+            return family
+    return ARCHETYPES
+
 
 def archetype_shares(deck: list[Card], *, companions: bool = True) -> dict[str, float]:
     """What fraction of the deck's *drafted, committed* cards belong to each
@@ -645,14 +721,18 @@ def archetype_shares(deck: list[Card], *, companions: bool = True) -> dict[str, 
     card sets -- deliberately, and documented, rather than the accidental
     disagreement that existed when companions carried no tag at all.
     """
+    # POLICY_VERSION 2: the key set follows the deck's character. Klee's is
+    # unchanged, so her shares -- and every number derived from them -- are
+    # identical to v1.
+    family = archetypes_for(deck)
     tagged = [c for c in deck
               if c.rarity != "basic"
               and (companions or not c.is_companion)
-              and any(a in ARCHETYPES for a in c.archetypes)]
+              and any(a in family for a in c.archetypes)]
     if not tagged:
-        return {a: 0.0 for a in ARCHETYPES}
+        return {a: 0.0 for a in family}
     return {a: sum(1 for c in tagged if a in c.archetypes) / len(tagged)
-            for a in ARCHETYPES}
+            for a in family}
 
 
 def dominant_archetype(deck: list[Card],
@@ -686,8 +766,9 @@ def adaptive_score(card: Card, deck: list[Card]) -> float:
     # reaction's share twice and turns the rich-get-richer loop into a runaway:
     # measured, it drove reaction from 13.2% to 85.5% of decks with both
     # divergence alarms firing. The tag fixes the METRIC; it is not new scoring.
+    family = archetypes_for(deck)
     for a in (card.archetypes if not card.is_companion else ()):
-        if a not in ARCHETYPES:
+        if a not in family:
             continue
         share = shares[a]
         if card.role == "payoff":
@@ -703,7 +784,12 @@ def adaptive_score(card: Card, deck: list[Card]) -> float:
     if card.is_companion:
         # Companions are off-plan power: always playable, never scaling.
         s += 1.5 if _is_applier(card) else 1.0
-        s += 2.0 * shares["reaction"]      # they are reaction's enablers
+        # .get, because POLICY_VERSION 2 made the share keys character-aware
+        # and "reaction" is Klee's plan. On a roster that has no reaction
+        # archetype this term is correctly zero rather than a KeyError -- the
+        # claim it encodes ("companions are reaction's enablers") is a claim
+        # about Klee's pool, not a universal one.
+        s += 2.0 * shares.get("reaction", 0.0)
     if _has_block(card) and _block_density(deck) < C.DRAFT_BLOCK_DENSITY_MIN:
         s += 2.5                            # defense quota is universal
     cost = card.cost if isinstance(card.cost, int) else 2

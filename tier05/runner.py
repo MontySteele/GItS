@@ -18,7 +18,7 @@ import time
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier05 import ab, draft, model, route, run_metrics
+from tier05 import ab, draft, kurage_telemetry, model, route, run_metrics
 
 # The run model itself is character-agnostic; this is the CLI's honest list of
 # plans with authored draft tags + combat pilots. Keeping it character-scoped
@@ -176,6 +176,14 @@ def main(argv: list[str] | None = None) -> int:
         run_metrics.floor_kind_labels(results), survival)
     print(f"  loadout         "
           f"{'realistic (relics + potions)' if args.realistic else 'bare'}")
+    # P2 (playtest sprint): report-only. Prints nothing at all unless this
+    # cohort actually fielded a Bake-Kurage, so it is silent for the rest of
+    # the roster rather than a row of zeroes everyone learns to skip.
+    pulses = kurage_telemetry.by_act(
+        [pair for r in results for pair in r.kurage_traces])
+    block = kurage_telemetry.format_block(pulses)
+    if block:
+        print(block)
     print(f"\n({args.runs} runs in {time.perf_counter() - t0:.1f}s)")
 
     if args.csv:

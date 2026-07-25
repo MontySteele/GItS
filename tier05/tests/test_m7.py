@@ -60,9 +60,24 @@ def test_unappliable_upgrades_never_chosen_at_rest():
     then made that upgrade real and stranded the assertion (caught by the
     first full-suite run -- the cross-tier coupling the full-suite gate
     exists for). Whatever UNAPPLIABLE holds today, a rest must never
-    smith it -- and the next disposition ruling can't strand this again."""
-    assert upgrades.UNAPPLIABLE, \
-        "UNAPPLIABLE is empty -- retire this test with a ruling, not a skip"
+    smith it -- and the next disposition ruling can't strand this again.
+
+    RULING 2026-07-25 (G-C2), which this test demanded rather than a skip.
+    UNAPPLIABLE is now EMPTY: nicole_celestial_gift was its last member and
+    its delta moved from {block_per_turn: +2} -- unexpressible, because the
+    block is a constant rather than a card field -- to {buff: +2}, which the
+    grammar already binds. So the non-empty assertion is retired.
+
+    The test is NOT retired with it, for two reasons. The rest-smithing rule
+    it checks is still the rule; it is merely vacuous while the set is empty,
+    and it re-arms the moment anything becomes unappliable again. And the
+    thing the non-empty assertion was really protecting -- "this guard is
+    guarding something" -- is now carried positively and far more broadly by
+    tools/lint_upgrade_coverage.py, which asserts that EVERY draftable card
+    has an applicable upgrade in both the sim and the codegen. That lint is
+    wired into the suite at
+    tier0/tests/test_sheet_lints.py::test_every_draftable_card_can_be_upgraded.
+    """
     for cid in sorted(upgrades.UNAPPLIABLE):
         # Coherence: unappliable ids must be real sheet entries, or the
         # set is guarding against nothing.

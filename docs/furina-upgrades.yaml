@@ -90,7 +90,7 @@ grand_gala:            {encore: +3}          # 4->7; Exhaust stays
 the_sea_is_my_stage:   {fanfare_floor: +5}   # +15->+20 FLOOR (was cap; F-A5). Blood rider DROPPED by F-B2
 universal_revelry:     {damage: +3}          # 9->12 base only (top-level); the 1_per_2 read and the
                                              # fanfare_at_least_15 burst both stay as printed
-star_of_the_show:      {power_amount: +1}    # +3->+4 printed on Spotlighted damage
+star_of_the_show:      {power_amount: +1}    # one more printed on Spotlighted damage (base moved at G-D2)
 prima_donna:           {cost: -1}            # 2->1
 high_tide:             {damage: +4}          # 15->19; the F-B1 read (1 per 2 Fanfare, the steepest) rides on top
 rain_of_roses:         {encore: +2}          # 5->7; the mass application is the card, it does not grow

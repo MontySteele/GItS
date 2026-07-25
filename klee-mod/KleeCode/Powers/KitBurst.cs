@@ -139,7 +139,9 @@ public static class KitGrant
     /// C#-side carries the exemption (R36 Crackle / bright_idea unblock).
     /// </summary>
     public static bool NotKitCard(CardModel card) =>
-        card is not SparksNSplash and not LetThePeopleRejoice;
+        card is not SparksNSplash
+            and not LetThePeopleRejoice
+            and not Cards.Kokomi.CeremonialGarment;
 
     public static async Task GrantIfCharged(PlayerChoiceContext choiceContext, Player? owner)
     {

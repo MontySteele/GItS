@@ -36,10 +36,42 @@ internal static class KleeSceneTelemetry
         "furina/ui/character_icon.tscn",
         "furina/ui/char_select_bg_furina.tscn",
         "furina/ui/salon_stage.tscn",
+        // Kokomi. combat.tscn is EXPECTED MISSING until her art pass lands --
+        // she runs on the combat_visuals.tscn fallback, which the pck builder
+        // fills from Klee. Listed anyway, because "expected missing" and
+        // "silently missing" are the same thing at 2am and only one of them
+        // says so in the log.
+        "kokomi/model/combat.tscn",
+        "kokomi/model/combat_visuals.tscn",
+        "kokomi/model/rest_character.tscn",
+        "kokomi/model/merchant_character.tscn",
+        "kokomi/ui/character_icon.tscn",
+        "kokomi/ui/char_select_bg_kokomi.tscn",
         "shared/gauge.tscn",
         "klee/vfx/bomb_lob.tscn",
         "klee/vfx/dodoco_pop.tscn",
         "furina/vfx/spotlight_shine.tscn",
+    };
+
+    /// <summary>
+    /// Node names a scene MUST carry for a C# bridge to find anything, checked
+    /// from SceneState so this stays side-effect free.
+    ///
+    /// These are the silent failures: every bridge here is written to be inert
+    /// when its node is absent (GetNodeOrNull, no throw), which is the right
+    /// runtime posture and the wrong debugging one — a renamed or dropped node
+    /// turns the feature off and looks exactly like "the feature does nothing".
+    /// %Facing is the live example: without it CreatureFacing no-ops and the
+    /// character simply never turns, with nothing in the log to say why.
+    /// </summary>
+    private static readonly (string Scene, string Node)[] RequiredNodes =
+    {
+        ("klee/model/combat.tscn", "Facing"),
+        ("furina/model/combat.tscn", "Facing"),
+        ("klee/model/combat.tscn", "AnimationTree"),
+        ("furina/model/combat.tscn", "AnimationTree"),
+        ("furina/ui/salon_stage.tscn", "RibbonLabel"),
+        ("shared/gauge.tscn", "ValueLabel"),
     };
 
     public static void LogStatus()
@@ -71,6 +103,33 @@ internal static class KleeSceneTelemetry
                 ? state.GetNodeType(0).ToString()
                 : "unreadable";
             Log.Info($"[{KleeMod.ModId}] convention scene ok: {path} root={root}");
+        }
+
+        foreach (var (relative, node) in RequiredNodes)
+        {
+            var path = "res://" + relative;
+            if (!ResourceLoader.Exists(path))
+            {
+                continue;   // already reported MISSING above; don't say it twice
+            }
+
+            if (ResourceLoader.Load<PackedScene>(path)?.GetState() is not { } state)
+            {
+                continue;
+            }
+
+            var found = false;
+            for (var i = 0; i < state.GetNodeCount() && !found; i++)
+            {
+                found = state.GetNodeName(i) == node;
+            }
+
+            if (!found)
+            {
+                Log.Warn($"[{KleeMod.ModId}] {path} has no node named \"{node}\" — "
+                       + "the bridge that looks for it will silently do nothing. "
+                       + "Rebuild the pck, or the scene lost the node.");
+            }
         }
     }
 }

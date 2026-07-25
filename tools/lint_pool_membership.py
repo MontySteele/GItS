@@ -21,7 +21,7 @@ position; "in no pool at all" is never legitimate.
 THE POOLS THAT COUNT are character-owned pools. ModelDb.AllCardPools is
 AllCharacters.Select(c => c.CardPool) plus a hardcoded array of shared pools,
 so an unattached helper pool is invisible. Membership therefore means
-reachable from KleeCardPool or FurinaCardPool. Their FilterThroughEpochs
+reachable from KleeCardPool, FurinaCardPool or KokomiCardPool. Their FilterThroughEpochs
 overrides keep generated-only kit/token cards out of reward rolls.
 
 Usage: python tools/lint_pool_membership.py
@@ -48,14 +48,21 @@ MEMBERSHIP_FILES = [
     / "FurinaCardRoster.cs",
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina" / "Generated"
     / "GuestStarRoster.cs",
+    REPO / "klee-mod" / "KleeCode" / "KokomiCardPool.cs",
+    REPO / "klee-mod" / "KleeCode" / "Cards" / "Kokomi" / "Generated"
+    / "KokomiCardRoster.cs",
 ]
 
 # `public sealed class Foo : CustomCardModel` / `: CustomCardModel, IElementalCard`
 CLASS_RE = re.compile(
     r"^\s*public\s+sealed\s+class\s+(\w+)\s*:\s*CustomCardModel\b", re.M
 )
-# `ModelDb.Card<Foo>()`
-MEMBER_RE = re.compile(r"ModelDb\.Card<(\w+)>\s*\(")
+# `ModelDb.Card<Foo>()`, or the namespace-qualified `ModelDb.Card<A.B.Foo>()`.
+# The qualified form is legal C# and reads identically to the compiler; a
+# pattern that only matched the bare name reported a correctly-pooled card as
+# unpooled, which is the safe direction to fail but still a false alarm that
+# invites someone to "fix" the pool instead of the lint.
+MEMBER_RE = re.compile(r"ModelDb\.Card<(?:\w+\.)*(\w+)>\s*\(")
 
 
 def main() -> int:

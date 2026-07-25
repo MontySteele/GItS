@@ -49,8 +49,19 @@ public static class SalonVisualsBridge
     /// plus a ribbon), so the span is deliberately kept inside the creature's
     /// own 240-wide bounds box to stay clear of enemy intent positions and
     /// targeting arrows.
+    ///
+    /// Y was -30 until the 2026-07-25 playtest read the Encore ribbon as
+    /// having no number at all. The ribbon's value label hung BELOW the ribbon,
+    /// which put it at creature-relative y -4..+14 — i.e. under the feet, in
+    /// the band NCreatureStateDisplay owns. That band is not ours: the HP bar
+    /// spans the full bounds width, and NHealthBar.UpdateLayoutForCreatureBounds
+    /// pins the block badge to `bounds.GlobalPosition.X - halfWidth`, the LEFT
+    /// edge of the 240-wide box — which is exactly where this stage sits. The
+    /// number was drawn and then covered. The label moved up onto the ribbon
+    /// (see salon_stage.tscn) and the whole stage lifted clear of the band.
+    /// Both are layout, so both are [USER] D5's to judge.
     /// </summary>
-    private static readonly Vector2 AnchorOffset = new(-104f, -30f);
+    private static readonly Vector2 AnchorOffset = new(-104f, -52f);
 
     /// <summary>Sprite art per member identity, pck-relative.</summary>
     private static readonly Dictionary<SalonMember, string> MemberSprites = new()

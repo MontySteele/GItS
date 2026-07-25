@@ -593,9 +593,16 @@ def test_delete_test_passes_by_construction():
     assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT
 
 
-def test_star_of_the_show_grants_printed_three_per_copy():
-    """Printed +3 per copy, and copies STACK (cap dropped, user ruling
-    2026-07-24).
+def test_star_of_the_show_grants_its_printed_amount_per_copy():
+    """Printed amount per copy, and copies STACK (cap dropped, user
+    ruling 2026-07-24).
+
+    G-D2 note: the printed amount moved 3 -> 5 (PROPOSED, 2026-07-25),
+    so this reads it off the SHEET rather than restating it. The test was
+    named for the number and asserted it twice; that made a ratified
+    reprice look like a regression. What it is actually here to protect is
+    the pass-2 errata (max_stacks is in POWER UNITS) and the linearity of
+    a second copy -- neither of which is a claim about the value 3.
 
     The pass-2 errata this test was written for still holds and is still
     checked by the first assertion: max_stacks was in POWER UNITS, so the
@@ -606,11 +613,12 @@ def test_star_of_the_show_grants_printed_three_per_copy():
     cap rationale (pass1-rulings-round2) is about PER-TURN COMPOUNDING
     powers; a flat additive read once per Spotlighted card is linear in
     copies, so it now behaves like an ordinary StS Power dupe."""
+    printed = loader.get_card("star_of_the_show").effects[0]["amount"]
     st = furina_state()
     effects.resolve_card(st, loader.get_card("star_of_the_show"))
-    assert st.player.powers["spotlight_flat_damage"] == 3
+    assert st.player.powers["spotlight_flat_damage"] == printed
     effects.resolve_card(st, loader.get_card("star_of_the_show"))
-    assert st.player.powers["spotlight_flat_damage"] == 6
+    assert st.player.powers["spotlight_flat_damage"] == printed * 2
 
 
 def test_uncapped_spotlight_riders_stack():
@@ -653,7 +661,7 @@ def test_compounding_spotlight_powers_now_uncap():
 
 
 def test_upgraded_power_amount_lifts_its_own_stack_cap():
-    """An upgraded Star of the Show grants +4.
+    """An upgraded Star of the Show grants its printed amount + 1.
 
     HISTORY, because the name no longer describes the mechanism. This test
     was written for the applier's single-application rule -- when a row
@@ -668,10 +676,11 @@ def test_upgraded_power_amount_lifts_its_own_stack_cap():
     deliberately retained as the correctness rule for any future
     single-application capped power."""
     from tier0.content import upgrades
+    printed = loader.get_card("star_of_the_show").effects[0]["amount"]
     st = furina_state()
     effects.resolve_card(st, upgrades.apply_upgrade(
         loader.get_card("star_of_the_show")))
-    assert st.player.powers["spotlight_flat_damage"] == 4
+    assert st.player.powers["spotlight_flat_damage"] == printed + 1
 
 
 # --- selector aiming v5 (explicit two-mode choice) ---

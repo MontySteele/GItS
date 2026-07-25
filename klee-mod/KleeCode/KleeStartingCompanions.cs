@@ -39,6 +39,10 @@ internal static class KleeStartingCompanionsPatch
             {
                 ResolveFurina(player, seed, slot);
             }
+            else if (player.Character is Kokomi)
+            {
+                ResolveKokomi(player, seed, slot);
+            }
         }
     }
 
@@ -85,6 +89,49 @@ internal static class KleeStartingCompanionsPatch
             Log.Error($"[{KleeMod.ModId}] could not resolve Furina's "
                     + "randomized starter Companion slots; keeping any "
                     + "unreplaced basics.");
+        }
+    }
+
+    /// <summary>
+    /// Kokomi's slot is ONE, not two, and it is a different shape from the
+    /// other two characters'.
+    ///
+    /// Klee and Furina each roll two Companions IN PLACE OF two basics. Her
+    /// companions are ADDITIONS -- the 11th and 12th cards of a 12-card deck
+    /// -- so Gorou sits in the authored StartingDeck directly and is not
+    /// rolled at all: the adjutant ALWAYS enlists, for lore reasons (R52 N3).
+    /// Only the support seat rolls, Sayu or Shinobu.
+    ///
+    /// The asymmetry against Klee and Furina's 2x2 is intended, not an
+    /// oversight: the starter-reserved Inazuma trio is THREE characters
+    /// across a two-slot convention, and Gorou is the only attack-slot name
+    /// on the shortlist.
+    ///
+    /// The roll still burns its own Rng instance off the same seed+slot
+    /// derivation, so peers and replays agree and no native stream is
+    /// consumed. It draws ONE bool where the others draw two -- that is
+    /// fine, the stream is hers alone.
+    /// </summary>
+    private static void ResolveKokomi(Player player, string seed, int slot)
+    {
+        var playerSeed = unchecked(
+            (uint)(StringHelper.GetDeterministicHashCode(seed) + slot));
+        var rng = new Rng(playerSeed, "kokomi_starting_companions");
+
+        CardModel support = rng.NextBool()
+            ? ModelDb.Card<SayuDarumaGift>()
+            : ModelDb.Card<ShinobuGrassRingBond>();
+
+        // Sayu is in the authored deck, so the "replacement" is a no-op half
+        // the time -- deliberately still routed through ReplaceFirst so the
+        // deck INDEX is identical on both arms. A conditional skip would put
+        // Shinobu at a different position than Sayu, and card order is
+        // visible in the deck view.
+        if (!ReplaceFirst<SayuDarumaGift>(player, support))
+        {
+            Log.Error($"[{KleeMod.ModId}] could not resolve Kokomi's "
+                    + "randomized starter Companion slot; keeping the "
+                    + "authored Sayu.");
         }
     }
 

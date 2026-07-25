@@ -290,6 +290,17 @@ KURAGE_DURATION = 1           # turns the jellyfish holds the field. Stacks
                               # duration 1 — it only fires if the Burst goes
                               # off the same turn the Kurage was played. The
                               # canon loop survives in code, not in practice.
+                              # COUPLING PIN (playtest sprint P1): this
+                              # constant is also the pulse FREQUENCY, and
+                              # Kurage's Oath pays its ward once per pulse.
+                              # The Oath's 12 was measured here at 1. Raise
+                              # the duration and you have repriced a Common
+                              # power that already carries a [USER] "maybe
+                              # too strong" flag, without editing its row.
+                              # test_oath_ward_is_pinned_to_the_pulse_
+                              # frequency_it_was_measured_at fails on that
+                              # edit by design — re-measure the Oath, then
+                              # move the pin and both notes together.
 KURAGE_PULSE_BASE = 4         # flat damage per turn-end pulse, before the
                               # bank read (v0.4 starter rework: 2 -> 4).
 KURAGE_PULSE_PER_CHARGE = 4   # pulse gains this much damage PER POINT of
@@ -614,7 +625,19 @@ CONSTANTS_VERSION = 3
 # and floor grants are valued in their place. A drafter that cannot see a
 # floor grant would under-draft the new identity outright, so this bump
 # carries real work. Only Furina rows changed; other characters do not move.
-DRAFTER_VERSION = 9
+# DRAFTER_VERSION 10 (G-E1, "Ship What We Know", 2026-07-25): the fanfare
+# limb of `core_complete` now requires at least one card that READS the
+# meter. It previously asked only for generation coverage and floor
+# coverage -- neither of which is a payoff -- so it declared the archetype
+# ONLINE while the deck held, on measurement, 1.87 readers in 20 cards. The
+# fanfare sprint's close-out registered a standing instruction that nothing
+# be measured against that predicate until it was fixed; this is the fix.
+# NOT bookkeeping: `core_complete` and `_core_progress` both feed
+# `score_offer`, so a fanfare deck now advances its core (and takes the
+# +3.0 core-advance bonus) on a reader it previously ignored. Only Furina
+# fanfare rows move; every other archetype takes a different branch. Any
+# v9-world fanfare number is incomparable with v10 output.
+DRAFTER_VERSION = 10
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).

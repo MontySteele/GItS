@@ -15,7 +15,8 @@ namespace KleeMod.Vfx;
 /// <summary>
 /// On-creature tracked gauges (animation sprint 1, Track C): one shared
 /// script-less scene (res://shared/gauge.tscn), instantiated once per
-/// applicable meter — Klee's Burst, Furina's Encore. Bridge skeleton follows
+/// applicable meter — Klee's Burst, Furina's Burst, Kokomi's Burst and her
+/// uncapped Charge counter. Bridge skeleton follows
 /// HexaghostVisualsBridge (dictionary + IsInstanceValid staleness + lazy
 /// re-Setup + instantiate into NCombatRoom.CombatVfxContainer; pattern
 /// mirrored from the Downfall reference, not copied).
@@ -50,6 +51,18 @@ public static class GaugeBridge
     private static readonly Vector2 OverheadBurstAnchor = new(0f, -300f);
 
     /// <summary>
+    /// A SECOND ROW, above the convention slot, for a character-specific
+    /// resource that is not Burst. Kokomi's Charge is the first tenant.
+    ///
+    /// Above rather than below on purpose: the Burst slot is a cross-character
+    /// convention and must not be evicted or shifted by a character who
+    /// happens to carry a second meter, and everything below -300 is inside
+    /// somebody's rig. Measure a new character's rig before assuming this row
+    /// is clear for them too.
+    /// </summary>
+    private static readonly Vector2 SecondRowAnchor = new(0f, -340f);
+
+    /// <summary>
     /// Per-character skin, applied by the bridge at Setup (C2). Skinning is
     /// parameter-driven against ONE scene rather than per-character scene
     /// variants; the variants remain the sanctioned fallback if a future skin
@@ -79,8 +92,15 @@ public static class GaugeBridge
         /// <summary>Anchor offset relative to the creature node's origin.</summary>
         public required Vector2 AnchorOffset { get; init; }
 
-        /// <summary>Bar renders full at this many points (display only).</summary>
-        public required int VisualSpan { get; init; }
+        /// <summary>
+        /// Bar renders full at this many points (display only). NULL means the
+        /// resource has no "full" at all -- the bar is hidden and the gauge
+        /// renders as a bare counter. Kokomi's Charge is the case: it is
+        /// uncapped and never spent, so a bar would sit pinned at maximum for
+        /// most of a run while the true reading is "this only goes up". A
+        /// meter that lies about its own ceiling is worse than no meter.
+        /// </summary>
+        public required int? VisualSpan { get; init; }
 
         /// <summary>Null for an unbounded buffer: label shows the raw count.</summary>
         public int? LabelMax { get; init; }
@@ -137,6 +157,56 @@ public static class GaugeBridge
             ShouldFlash = (previous, current) =>
                 previous < FurinaResourceConstants.BurstMax
                 && current >= FurinaResourceConstants.BurstMax,
+        },
+        // Kokomi's Burst, same overhead slot. Skin: pearl — a pale
+        // moon-on-water fill over a deep-trench track. She and Furina are both
+        // hydro and must not be confusable, so Furina keeps the ribbon plate
+        // (theatre banner) and Kokomi goes plain and cold; the two read as the
+        // same family at a glance and as different characters on a look.
+        new()
+        {
+            Key = "kokomi_burst",
+            Skin = new GaugeSkin
+            {
+                FillColor = new Color(0.72f, 0.90f, 0.94f),
+                TrackColor = new Color(0.05f, 0.16f, 0.21f, 0.85f),
+                CapIconPath = "kokomi/powers/pearl.png",
+            },
+            AnchorOffset = OverheadBurstAnchor,
+            VisualSpan = KokomiConstants.BurstMax,
+            LabelMax = KokomiConstants.BurstMax,
+            AppliesTo = KokomiResources.IsKokomi,
+            ReadValue = KokomiResources.GetBurst,
+            ShouldFlash = (previous, current) =>
+                previous < KokomiConstants.BurstMax
+                && current >= KokomiConstants.BurstMax,
+        },
+        // Kokomi's Charge, the second row. THE ONE GAUGE WITH NO BAR: Charge is
+        // uncapped and never spent (ChargeResource.Spend is a documented
+        // no-op), so there is no ceiling to draw against and no threshold to
+        // cross. It renders as a bare climbing number, which is the honest
+        // reading of the resource and also the neutral one -- a bar would
+        // invent a target, and her whole design question is how long a player
+        // is willing to keep banking with no target in sight.
+        //
+        // It has an ambient display AT ALL because it is the one number her
+        // scaling cards read and none of them can show it on their face: the
+        // Kurage pulse and the Garment rider are both computed at resolve
+        // time from a bank the card never prints.
+        new()
+        {
+            Key = "kokomi_charge",
+            Skin = new GaugeSkin
+            {
+                FillColor = new Color(0.44f, 0.78f, 0.84f),
+                TrackColor = new Color(0.05f, 0.16f, 0.21f, 0.0f),
+            },
+            AnchorOffset = SecondRowAnchor,
+            VisualSpan = null,
+            LabelMax = null,
+            AppliesTo = KokomiResources.IsKokomi,
+            ReadValue = KokomiResources.GetCharge,
+            ShouldFlash = static (_, _) => false,
         },
         // NOTE: Encore has NO spec here. It was evicted from the overhead slot
         // by the C4 verdict (that slot is Burst, cross-character) and re-homes
@@ -293,10 +363,21 @@ public static class GaugeBridge
     {
         int value = spec.ReadValue(creature);
 
+        // A null span is a counter, not a meter: hide the track and the fill
+        // rather than drawing a bar with no honest ceiling (see VisualSpan).
         if (display.GetNodeOrNull<ColorRect>("%BarFill") is { } fill)
         {
-            float pct = Mathf.Clamp(value / (float)spec.VisualSpan, 0f, 1f);
-            fill.Size = new Vector2(BarFullWidth * pct, fill.Size.Y);
+            fill.Visible = spec.VisualSpan is not null;
+            if (spec.VisualSpan is { } span)
+            {
+                float pct = Mathf.Clamp(value / (float)span, 0f, 1f);
+                fill.Size = new Vector2(BarFullWidth * pct, fill.Size.Y);
+            }
+        }
+
+        if (display.GetNodeOrNull<ColorRect>("%BarBack") is { } track)
+        {
+            track.Visible = spec.VisualSpan is not null;
         }
 
         if (display.GetNodeOrNull<Label>("%ValueLabel") is { } label)
