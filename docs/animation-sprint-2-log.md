@@ -568,3 +568,93 @@ corrects the Track E gap list, which recorded card art as clean — that sweep
 checked that every card RESOLVES a portrait path through the register, which is
 a different question from whether the file is on disk. Needs a plan.tsv row and
 a hunt; not started.
+
+---
+
+# Playtest 2 findings — 2026-07-26 (recorded from the Furina Fanfare capture)
+
+Two visual defects reported while confirming the G-A5(b) Fanfare acceptance
+(docs/red-pen-2026-07-26.md). Both are animation-layer, neither is a Fanfare
+issue, and both are **diagnosed below rather than just filed** — the diagnosis
+is the expensive part and it is done.
+
+Not fixed here: this is the kit stream reporting into the visual stream's
+channel, and both files are yours.
+
+## Finding 1 — the character icon is still off-centre for Furina, fixed for Klee
+
+**The playtest-1 fix repaired a different surface from the one that is wrong.**
+
+`character_icon.tscn` got full-rect anchors + `KEEP_ASPECT_CENTERED`, and that
+scene is served by `CharacterModel.CustomIconPath`. But the run's **top-panel**
+box — the "upper-left box" in the report — is served by a *different* property.
+From the decompile:
+
+```
+// base game, placeholder character
+CustomIconPath          => SceneHelper.GetScenePath("ui/character_icons/" + ID + "_icon")
+CustomIconTexturePath   => ImageHelper.GetImagePath("ui/top_panel/character_icon_" + ID + ".png")
+CustomIconOutlineTexturePath => ImageHelper.GetImagePath("ui/top_panel/character_icon_" + ID + "_outline.png")
+```
+
+`ui/top_panel/` is the box in question, and it takes a **raw PNG** through
+`CustomIconTexturePath` — no scene, no anchors, no aspect handling. BaseLib
+patches all three properties separately (`IconPath`, `IconTexturePath`,
+`IconOutlineTexturePath`), so the `.tscn` centring never reaches the top panel
+at all.
+
+Everything else is identical between the two characters and can be ruled out:
+
+- the three `character_icon.tscn` bodies emitted by `build_pck.ps1` are
+  byte-identical apart from the node name and texture path;
+- every `char_icon.png` is exactly **88 × 88**;
+- `Klee.cs` and `Furina.cs` override the same four properties the same way.
+
+So Klee "working" is not the fix working — it is her raw 88×88 happening to sit
+well in whatever the top panel does with an unscaled texture, and Furina's not.
+**The variable left is content placement inside the 88 × 88 canvas.** Look at
+the art, not the scene.
+
+Second, separate defect noticed while tracing this: **both characters point
+`CustomIconOutlineTexturePath` at the same `char_icon.png` as the fill.** The
+base game expects a distinct `_outline` asset there. Whatever the top panel
+draws for the outline layer is currently a second copy of the icon.
+
+## Finding 2 — Salon members are far larger than their slots
+
+**Cause: nothing ever scales the member sprite.**
+
+`SalonVisualsBridge` sets `sprite.Texture` and `sprite.Visible` and never
+touches `sprite.Scale`; the `Sprite2D` nodes in `salon_stage.tscn` carry no
+scale property either, so the art renders 1:1. Measured:
+
+| | size |
+|---|---|
+| member sprites (`member_usher/chevalmarin/crabaletta.png`) | **121 × 144**, 129 × 144, 120 × 144 |
+| `GhostN` (the member silhouette box) | 34 × 36 |
+| `BeamN` (the light shaft) | 40 × 72 |
+| `PoolN` (the water pad) | 52 × 14 |
+| slot pitch (`Slot1/2/3` at x = −62, 0, +62) | **62 px** |
+
+A 121-wide sprite in a 34-wide ghost on a 62-px pitch is ~3.5× over, and the
+neighbours necessarily overlap. That is the whole of the report.
+
+**Suggested fix, which also serves the "smaller but mobile" idea.** Set
+`sprite.Scale` in the bridge, derived from the texture rather than hardcoded,
+so a re-cropped asset cannot silently break it again:
+
+```csharp
+// Fit the member into the beam, preserving aspect. ~0.42 for today's art.
+var tex = sprite.Texture;
+var fit = Mathf.Min(TargetWidth / tex.GetWidth(), TargetHeight / tex.GetHeight());
+sprite.Scale = new Vector2(fit, fit);
+```
+
+At the beam's 40 × 72 that lands ≈ 40 × 48. Against the 62-px pitch there is
+room for a slightly more generous target — roughly **0.42–0.45** gives ≈ 54 × 65,
+which fills the slot without touching its neighbours and leaves headroom for a
+bob/sway.
+
+Note the animation tracks already drive `Slots/SlotN:scale`, so a sprite-level
+scale is the right place for this: it composes with the deploy/bow pulse instead
+of fighting it.

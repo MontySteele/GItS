@@ -41,13 +41,37 @@ def test_no_unrecorded_stale_art():
 
 
 def test_stale_file_is_not_counted_as_coverage():
-    """sec.11: 'Stale files are reported but never counted as coverage.'"""
-    res = run_tool()
-    assert "xingqiu_raincutter" in res.stdout
-    assert "STALE" in res.stdout
-    # It sits in the companions dir, but the covered list must not name it.
-    covered_lines = [ln for ln in res.stdout.splitlines() if ln.strip().startswith("have:")]
-    assert covered_lines, "report printed no covered list"
+    """sec.11: 'Stale files are reported but never counted as coverage.'
+
+    Creates its OWN stale probe instead of asserting on `xingqiu_raincutter`.
+    That file is real legacy art, but it is gitignored Tier F, so the test only
+    ever passed on a machine that happened to still have it -- a fresh clone
+    has no ImageGen/images at all and failed here. (It was destroyed on
+    2026-07-25 by a `git worktree remove` that followed a junction into the
+    real directory, which is how the fragility was found; the KNOWN_STALE entry
+    for it stays, because the reason it records is still true.)
+
+    A test that depends on an artifact nothing can regenerate is a test that
+    reports the machine, not the code.
+    """
+    probe = COMPANION_ART / "zz_stale_probe_not_a_card.png"
+    probe.parent.mkdir(parents=True, exist_ok=True)
+    # 1x1 PNG. Content is irrelevant -- coverage keys on the FILENAME.
+    probe.write_bytes(bytes.fromhex(
+        "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4"
+        "890000000a49444154789c63000100000500010d0a2db40000000049454e44ae"
+        "426082"))
+    try:
+        res = run_tool()
+        assert probe.stem in res.stdout, res.stdout
+        assert "STALE" in res.stdout
+        # It sits in the companions dir, but the covered list must not name it.
+        covered_lines = [ln for ln in res.stdout.splitlines()
+                         if ln.strip().startswith("have:")]
+        assert covered_lines, "report printed no covered list"
+        assert all(probe.stem not in ln for ln in covered_lines)
+    finally:
+        probe.unlink(missing_ok=True)
     assert not any("xingqiu" in ln for ln in covered_lines)
 
 

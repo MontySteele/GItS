@@ -1,0 +1,206 @@
+# Kokomi Art Pass Requirements
+
+**Date:** 2026-07-25
+**Status:** hunt complete, inventory verified, shortlists not yet built
+**Canonical content:** `docs/kokomi-cards.yaml`, `docs/inazuma-companions.yaml`
+**Bill owner:** `tools/art_coverage.py` — if this doc and the tool disagree, the tool is right (the lesson of the Furina bill correction).
+
+## 1. The bill
+
+| Surface | Required portraits |
+|---|---:|
+| Kokomi personal sheet | 58 |
+| Companions (Inazuma) | 15 |
+| **Total card-sized outputs** | **73** |
+
+Zero currently exist. She ships playable on Klee's assets via
+`build_pck.ps1`'s `Copy-KokomiFallback`, so **the game looks finished and this
+bill is invisible everywhere except the coverage tool.** That is the whole
+reason the tool was taught the roster before this pass started.
+
+Policy is unchanged and binding: **Tier F (found/official) is private-playtest
+only**; a public build needs Tier O. See `teyvat-spire-design-principles.md` §9.
+
+## 2. THE SCARCITY RULING WAS MADE ON AN INCOMPLETE INVENTORY
+
+The standing ruling (2026-07-25, [USER]) reads: *"Kokomi has only ~8 usable
+large illos for 38 personal faces (Furina had ~25 for 76). Ruled **widen the
+source pool** — TCG/event splashes/manga/promo on top of the Furina hybrid §2
+split, accepting a mixed visual register and a longer SOURCES ledger."*
+
+**The direction was right. The count was not, in both directions.** A real
+hunt (`tools/art_hunt.py`, 2026-07-25) found more than 8 — and then eyes-on
+inspection disqualified two whole families the raw counts had included.
+
+### What actually exists
+
+| Register | Count | Notes |
+|---|---:|---|
+| `splash` — large figure illustrations | 10 | Portrait 4900×5700, Introduction Card 2250², Profile 2400×1320, Wish 2048×1024, Full Wish 1568², Card 1080×1920, Game 964×1736, Showcase 700×2646, Namecard BG 840×400, Multi Wish 320×1024 |
+| `sticker` | 15 | 11 Paimon's Paintings emoji (300–340², transparent, **no text**), 3 Expressions (420²), Side by Side (263×315) |
+| `tcg` | 3 | Character Card + Platinum + Golden, 420×720 each |
+| `item` | 5 | Sango Pearl Wild 797², Vision 400², Sango Pearl 256², The Deep 256², Item 256² |
+| `vfx` | **0 usable** | see below — every one is a sigil |
+| **Viable distinct sources** | **33** | against **58** personal faces |
+
+### `vfx` IS A DEAD REGISTER FOR HER — the single most important finding
+
+Every piece of her kit art is a sigil or a clip thumbnail:
+
+| Source | Size |
+|---|---|
+| Talent Nereid's Ascension / Kurage's Oath / Princess of Watatsumi | 128×128 |
+| Ceremonial Garment Buff Icon | 100×100 |
+| Nereid's Ascension / Kurage's Oath / Garment Water / Garment Attack previews | 480×270 |
+
+Not one reaches a 500×380 card, and `vfx` is **not** undersize-exempt — only
+`item` and `sticker` are, and rightly: a sigil is not an illustration.
+
+This matters more than the raw count suggests. Her kit art is the obvious
+*content* match for her attack and ability cards — the Garment previews
+literally depict the Ceremonial Garment — and **none of it can be used on any
+card face.** The first draft of the plan leaned on it for twelve rank-1 picks
+and `art_process` rejected all twelve on L8. They now sit at rank 3 in every
+shortlist, so the taste pass can still choose one deliberately; they must
+never be the default.
+
+Bake-Kurage Summon (420×720) is the exception and is *not* a sigil — it is a
+full-size render of the jellyfish, and it is the only kit art that works.
+
+### What was disqualified, and why it matters
+
+Two families were counted as inventory by a title-only read and then rejected
+on sight. Both are now enumerated bans in `tools/art_lint.py`:
+
+- **`Sangonomiya Kokomi Character Details 1–7`** — a direct read-across from
+  the already-banned `Furina Character Details` family, then confirmed by eye.
+  Details 1 is her key illustration under a burnt-in name wordmark, a stat
+  block and three paragraphs of kit text; Details 5 is solid body text with a
+  chibi inset. *The illustration under Details 1 is genuinely good* — its
+  tagline is even "Pearl of Wisdom", which is what [USER] independently named
+  her starter relic. If it is ever wanted it should be a deliberate manual crop
+  with eyes on it, not a shortlist row that slips through on a title match.
+
+- **`Icon Emoji Sangonomiya Kokomi Xiaohongshu 02–16`** (16 files) — 120×120
+  chat emoji with **Chinese caption text burnt across the art**. Two
+  disqualifiers at once: burnt-in text, and a 4× upscale to reach 500×380.
+  This one needed an explicit ban rather than relying on L8, because the
+  `sticker` register is `UNDERSIZE_EXEMPT` — **L8 would have waved all sixteen
+  through.**
+
+Naming them here rather than silently dropping them: a later pass that
+re-runs the hunt will see 27 emoji and 7 Character Details and reasonably
+wonder why the plan ignores them.
+
+### Consequence for the plan: the unit is SLOTS, not sources
+
+33 sources against 58 faces means crop reuse is mandatory, as hybrid §2
+anticipated. But the real currency turned out to be **(source, anchor)
+slots**: a large source backs several distinct faces, a small transparent icon
+backs exactly one.
+
+| Family | Sources | Slots |
+|---|---:|---:|
+| large splash (multi-anchor) | 10 | 38 |
+| tcg (multi-anchor) | 3 | 12 |
+| item (single) | 5 | 5 |
+| sticker (single) | 15 | 15 |
+| **total** | **33** | **70** for 58 faces |
+
+**Anchors are computed, not chosen.** A `cover` focus is a *centre*, and the
+crop is clamped inside the image, so any anchor nearer an edge than half the
+crop renders identical pixels. On Portrait (4900×5700) the valid centre range
+is only [0.33, 0.67]; on Introduction Card (2250²) it is [0.38, 0.62]. The
+generator derives each source's range from its geometry and spreads slots
+inside it.
+
+**`Sangonomiya Kokomi Card.png` caveat:** 1080×1920 and her best art, but it
+carries the GENSHIN IMPACT wordmark top-centre and a miHoYo logo bottom-right.
+A 500×380 `cover` crop takes a horizontal band, so anchors inside [0.24, 0.74]
+exclude both. A top anchor pulls the wordmark straight in.
+
+**Nothing above is a request to revisit the ruling.** Widening the pool is
+still the right call and this pass follows it. The correction is only to the
+arithmetic the ruling was justified with, because that arithmetic decides how
+aggressively crops get reused.
+
+## 2a. The lint could not see the thing that was actually wrong
+
+Worth recording, because it cost two rebuilds and it generalises.
+
+`art_lint` L1 compares `(title, frame)` and L7 compares `(mode, focus)` — both
+compare **what the plan says**. Both crop modes clamp, so two rows that differ
+on paper can render the same picture:
+
+- the first draft used `cover_autocrop` margins as if they were anchors
+  (`cover@0.22` vs `cover@0.58`) → **11 pixel-identical groups across ~28
+  cards, lint fully green**;
+- the second draft switched to real `cover` anchors but picked values outside
+  the valid centre range → **3 more identical pairs, lint still green**.
+
+Both were found by hashing `art/candidates/*/r1.png`, not by any rule. That
+sweep is now **L12** in `art_lint`, and it immediately turned up three
+*pre-existing* identical pairs nobody had noticed:
+
+| Pair | Status |
+|---|---|
+| `blazing_delight` == `true_spark_knight` | shipped Klee art, allowlisted, **wants a re-pick** |
+| `catalytic_conversion` == `spark_collection` | already in `PENDING_RED_PEN` for a related L1 |
+| `crowd_work` == `standing_ovation` | shipped Furina art, allowlisted, **wants a re-pick** |
+
+They are allowlisted as *known defects*, not exemptions — the gate now holds
+the line while they wait for a ruling.
+
+## 3. Companions (Inazuma) — not scarce at all
+
+Fifteen faces across seven characters (Gorou 3, Sayu 3, Shinobu 3, Sara 2,
+Thoma 2, Itto 1, Raiden 1). Every one of the seven has the full standard set:
+Wish, Full Wish, Multi Wish, Portrait, Introduction Card, three Expressions,
+and most have a TCG Character Card.
+
+This is the same abundance the Fontaine companions had, so it takes the same
+treatment: `tcg` cover at `y0.16` where a Character Card exists,
+`cover_autocrop` off the Wish splash otherwise. Low risk, high confidence,
+and it can be shortlisted mechanically.
+
+## 4. Register assignment by lane
+
+Her sheet divides cleanly, which helps a thin splash pool go further:
+
+| Lane | Cards | Natural register |
+|---|---:|---|
+| Commander (orders, banners, mustering) | 10 | `item` (props, standards, notices), `splash` for the rares |
+| Priest (rituals, offerings, prayers) | 15 | `item` (Sango Pearl, offerings, shrine), environment |
+| Assist (tricks, quiet moments, misdirection) | 11 | `sticker` — the 11 Paimon's Paintings emoji land almost entirely here |
+| Generic / attacks | 22 | `splash`, `tcg`, `vfx` (talent previews) |
+
+The assist lane is the happy accident of this pass: *A Moment Alone*,
+*Daydream of a Quiet Life*, *A Whispered Word* and *Quiet Harbor* are exactly
+what a chibi reaction sticker is for, and the sticker pool is the one part of
+the inventory that is not scarce relative to its lane.
+
+## 5. Order of work
+
+1. ~~Hunt the real inventory~~ — **done**, this document.
+2. ~~Ban what fails on sight~~ — **done**, `art_lint.BANNED_SOURCE_FAMILIES`.
+3. Build `art/plan.tsv` shortlists — 3 ranked candidates per face, 73 faces.
+   Companions first (mechanical), then Kokomi by lane.
+4. `python tools/art_fetch.py` → `art/raw/` + `art/SOURCES.tsv`.
+5. `python tools/art_contact_sheet.py` → the artifact the taste pass reads.
+6. **[USER] taste pass** — the picks are not mine to make. Klee's took three
+   red-pen rounds (`docs/klee-art-redpen-round2.md`, `round3.md`) and Furina's
+   rejected 13 of batch 1.
+7. `python tools/art_process.py` → `ImageGen/images/cards/kokomi/`, then
+   `art_lint` and `art_coverage --strict` green.
+
+## 6. Open questions for the taste pass
+
+1. **Crop reuse budget.** 45 cards over ~24 reusable sources is ~2 crops per
+   source. Furina's hybrid §2 capped this implicitly; is there a number you
+   want stated, or is it eyes-on per card?
+2. **Environment art as card faces.** Watatsumi Island / Shrine / Altar are
+   on-theme for the priest lane but contain no character. Furina's pass
+   rejected an empty-corridor screenshot as "a random hallway". Is a *shrine*
+   different from a *hallway*, or is the same ban in force?
+3. **Character Details 1.** Banned as a family, but the illustration under the
+   text is her best key art. Do you want a manual crop of it for a Rare?

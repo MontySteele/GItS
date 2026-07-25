@@ -33,14 +33,19 @@ sys.path.insert(0, str(ROOT / "tools"))
 from art_fetch import read_plan  # noqa: E402
 
 DOCS = ROOT / "docs"
-SHEETS = ("furina-cards.yaml", "klee-cards.yaml",
-          "mondstadt-companions.yaml", "fontaine-companions.yaml")
+SHEETS = ("furina-cards.yaml", "klee-cards.yaml", "kokomi-cards.yaml",
+          "mondstadt-companions.yaml", "fontaine-companions.yaml",
+          "inazuma-companions.yaml")
 
 BATCH_TITLES = {
     "identity": "Furina identity — basics, generic/courtroom, and all 15 rares",
     "salon-fanfare": "Furina Salon + Fanfare — Member readability, applause vs generic blue",
     "spotlight": "Furina Spotlight — invitations, billing, selector, shared cast",
     "companions": "Companions — Guest Stars, normals, and 5-star rares by character",
+    "kokomi-identity": "Kokomi identity — basics, generic-only, and all 8 rares",
+    "kokomi-commander": "Kokomi Commander — orders, standards, mustering (item/prop register)",
+    "kokomi-priest": "Kokomi Priest — rituals, offerings, prayer (item + environment)",
+    "kokomi-assist": "Kokomi Assist — quiet moments and tricks (the sticker pool lives here)",
     "klee": "Klee — the original sprint's card slice",
     "assets": "UI / powers / relics / model — reviewed at native size",
     "unsorted": "Unsorted — no canonical sheet row and no known output path",
@@ -52,7 +57,9 @@ BATCH_TITLES = {
 # keeps another character's cards out of it: Klee rows fell into `unsorted`
 # when archetype was checked first, which reads as a classification failure
 # rather than "these belong to a different character's batch".
-BATCH_ORDER = ["identity", "salon-fanfare", "spotlight", "companions",
+BATCH_ORDER = ["identity", "salon-fanfare", "spotlight",
+               "kokomi-identity", "kokomi-commander", "kokomi-priest",
+               "kokomi-assist", "companions",
                "klee", "assets", "unsorted"]
 
 
@@ -83,6 +90,25 @@ def batch_of(asset_id, out_path, meta):
         return "companions"
     if "/cards/klee/" in out:
         return "klee"
+    # Kokomi's lanes are her review structure, the way salon/fanfare/spotlight
+    # are Furina's. Routed on the output path first for the reason recorded
+    # above: without this her 58 cards fell through to `assets` and would have
+    # been reviewed at NATIVE SIZE alongside UI icons -- the same "reads as a
+    # classification failure" the Klee/unsorted note describes, one character on.
+    if "/cards/kokomi/" in out:
+        m = meta.get(asset_id)
+        if m is None:
+            return "unsorted"
+        arch = m["archetypes"]
+        if m["rarity"] in {"basic", "rare"} or arch == {"generic"}:
+            return "kokomi-identity"
+        if "commander" in arch:
+            return "kokomi-commander"
+        if "priest" in arch:
+            return "kokomi-priest"
+        if "assist" in arch:
+            return "kokomi-assist"
+        return "kokomi-identity"
     if "/cards/furina/" not in out:
         # ui/, powers/, relics/, model/ -- requirements sec.10: "UI/model/power/
         # relic assets receive their own small native-size sheet."

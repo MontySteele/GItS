@@ -50,7 +50,7 @@ public sealed class LastingImpression : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("FanfareFloor", 3m)
+            new DynamicVar("FanfareFloor", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

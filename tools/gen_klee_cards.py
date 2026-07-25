@@ -441,9 +441,11 @@ APPLY_POWERS = {
         "At the end of your turn, consume [gold]Pyro[/gold] from each enemy. "
         "For each aura consumed, deal {X} damage and gain 3 "
         "[gold]Burst Energy[/gold]."),
+    # Redesigned 2026-07-26 (red-pen item 4): a per-turn Strength ratchet plus
+    # the same per-turn Block, replacing a static flat attack bonus.
     "celestial_gift": ("CelestialGiftPower", None,
-        "Your Attacks deal {X} more damage. At the start of your turn, "
-        "gain 4 [gold]Block[/gold]."),
+        "At the start of your turn, gain {X} [gold]Strength[/gold] and 4 "
+        "[gold]Block[/gold]."),
     "solar_isotoma": ("SolarIsotomaPower", None,
         "For {X} turns: your Attacks against enemies holding an elemental "
         "aura grant 3 [gold]Block[/gold] per hit."),

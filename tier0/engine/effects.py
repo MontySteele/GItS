@@ -1591,8 +1591,13 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int) -> int:
     if card.type != "attack":
         return 0
     p = state.player
+    # celestial_gift LEFT this sum at the 2026-07-26 red-pen redesign. It used
+    # to be a static flat +N to attacks; it is now a per-turn STRENGTH ratchet,
+    # and Strength is applied as a real power (powers.deal_damage folds it in
+    # after this read). Leaving it here as well would have paid the buff twice
+    # -- once as flat damage, once as Strength -- which is exactly the
+    # double-count class the AoE-blindness finding warned about.
     bonus = (p.powers.get("next_attack_up", 0)
-             + p.powers.get("celestial_gift", 0)
              + p.powers.get("attack_up_this_turn", 0))
     if cost == 0:
         bonus += p.powers.get("zero_cost_attacks_up", 0)
@@ -1630,7 +1635,19 @@ def player_turn_start_triggers(state: CombatState) -> None:
         p.block += n
         state.emit("block", amount=n)
     salon_tick(state)                                   # Furina (kickoff §5)
-    if p.powers.get("celestial_gift", 0):               # Nicole
+    # Nicole -- REDESIGNED 2026-07-26 (red-pen, item 4). Was "+N flat attack
+    # damage, and 4 Block each turn"; is now "gain N Strength and 4 Block each
+    # turn". The rationale on the record: a 2-cost Power must clear a high bar
+    # (Silent's damage-to-Weak at 1, Ironclad's +4-Strength-per-turn at 3,
+    # Defect's double-first-card at 3), and SCALING Strength is what earns the
+    # slot where a static flat bonus did not.
+    #
+    # The power's amount is Strength PER TURN, not a total -- it ratchets, so
+    # a deck holding it wants the fight to go long. Block stays a constant
+    # because nothing on the card scales it and the upgrade is cost-only.
+    n = p.powers.get("celestial_gift", 0)
+    if n:
+        powers.apply_power(state, p, "strength", n, applier=p)
         p.block += C.CELESTIAL_GIFT_BLOCK
     n = p.powers.get("spark_per_turn", 0)               # Endless Fireworks
     if n:

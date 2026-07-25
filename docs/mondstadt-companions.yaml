@@ -43,7 +43,18 @@
 - {id: durin_witchs_flame, name: "Durin — Witch's Flame", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 1, type: power,
    effects: [{op: apply_power, power: witchs_flame, amount: 6, target: self, consumes_aura: true, note: "At end of turn, consume Pyro from each enemy; per aura, deal 6 damage and gain 3 Burst Energy. Clears Klee's excess Pyro so another element can establish the next reaction."}]}
 - {id: nicole_celestial_gift, name: "Nicole — Celestial Gift", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 2, type: power,
-   effects: [{op: apply_power, power: celestial_gift, amount: 2, target: self, note: "your attacks +2 dmg; gain 4 block at start of turn"}]}
+   effects: [{op: apply_power, power: celestial_gift, amount: 1, target: self, note: "gain 1 Strength and 4 Block at the start of each turn"}]}
+   # REDESIGNED 2026-07-26 [USER] at the red-pen, superseding both worksheet options. Was a static
+   # "+2 flat damage on your attacks, 4 Block each turn"; is now a per-turn STRENGTH ratchet plus the
+   # same Block. Rationale on the record: a 2-cost Power has to clear a high bar -- the anchors cited
+   # were Silent's damage-to-Weak at 1, Ironclad's +4-Strength-per-turn at 3, and Defect's
+   # double-first-card at 3 -- and SCALING is what earns the slot where a flat bonus did not.
+   # The amount is Strength PER TURN, not a total. Block is a constant (CELESTIAL_GIFT_BLOCK) because
+   # nothing on the card scales it and the upgrade is cost-only.
+   # HISTORY worth keeping: this card is why tools/lint_upgrade_coverage.py exists. Its old upgrade was
+   # {block_per_turn: +2}, which neither the sim nor the generator could express because the Block is a
+   # constant rather than a card field -- so the sheet looked fine, the SIM upgraded the card, and the
+   # LIVE card's OnUpgrade() was an empty method. The 2026-07-25 playtest found it by playing it.
 
 # ---------- PERSONAL POOL (Klee — designated teammate, not in shared pool) ----------
 - {id: prune_witch_hunt, name: "Prune — Little Witch's Hunt", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 1, type: skill, personal_pool: klee,

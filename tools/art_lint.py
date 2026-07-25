@@ -48,6 +48,7 @@ it) are blessed: dead ranks don't ship.
 
 Standalone: python tools/art_lint.py    (also run by art_process before work)
 """
+import hashlib
 import sys
 from pathlib import Path
 
@@ -155,6 +156,24 @@ BANNED_SOURCE_FAMILIES = [
      "500x380 card aspect the widest possible right-crop (clamped to width-500) "
      "still includes the 'NA' tail -- the text cannot be cropped out. Verified "
      "2026-07-23: x0.70 anchor still showed it."),
+    # --- Kokomi art pass, 2026-07-25. Both verified by eye before listing. ---
+    ("Sangonomiya Kokomi Character Details ",
+     "read-across from the banned 'Furina Character Details' family, then "
+     "CONFIRMED by eye on Details 1 and 5: identical construction. Details 1 "
+     "is her key illustration under a burnt-in name wordmark, a Weapon/"
+     "Affiliation/Constellation/Vision stat block and three paragraphs of kit "
+     "description; Details 5 is solid body text with a chibi inset. The "
+     "underlying illustration on 1 is genuinely good -- if it is ever wanted, "
+     "it should be a DELIBERATE manual crop with the user's eyes on it, not a "
+     "shortlist row that slips through on a title match."),
+    ("Icon Emoji Sangonomiya Kokomi Xiaohongshu",
+     "120x120 chat emoji with Chinese caption text burnt across the art "
+     "('Xiaohongshu' is the social platform the set was made for). Two "
+     "disqualifiers at once: burnt-in text, and a 4x upscale to reach the "
+     "500x380 card. The sticker register is UNDERSIZE_EXEMPT, which is exactly "
+     "why this needs an explicit ban -- L8 would have waved all 16 through. "
+     "The sibling 'Icon Emoji Paimon's Paintings ... Sangonomiya Kokomi' set "
+     "is NOT banned: 340x340, transparent, no text, and legitimately her."),
 ]
 
 PENDING_RED_PEN = {
@@ -454,10 +473,68 @@ def clip_warnings(effective) -> list[str]:
     return notes
 
 
+# L12: pixel-identical rank-1 crops. Curated allowlist for the three that were
+# already shipped when this check was written -- they are real defects, not
+# exemptions, and each needs a re-pick or a red-pen ruling.
+KNOWN_IDENTICAL = {
+    frozenset({"blazing_delight", "true_spark_knight"}),
+    frozenset({"catalytic_conversion", "spark_collection"}),   # also PENDING_RED_PEN
+    frozenset({"crowd_work", "standing_ovation"}),
+}
+
+
+def identical_crops() -> list[str]:
+    """L12: two cards whose EFFECTIVE crop renders the same pixels.
+
+    THE STRING CHECKS CANNOT SEE THIS. L1 compares (title, frame) and L7
+    compares (mode, focus) -- both compare what the plan SAYS. But both crop
+    modes clamp:
+
+      - `cover`'s focus is a CENTRE, and the crop is clamped inside the image,
+        so every anchor nearer an edge than half the crop lands in the same
+        place. y0.14 and y0.30 on a 4900x5700 source are the same picture.
+      - `cover_autocrop`'s focus is a MARGIN and clamps to the content bbox,
+        so cover@0.22 and cover@0.58 are the same picture too.
+
+    The Kokomi art pass (2026-07-25) shipped ELEVEN identical groups covering
+    ~28 cards with a fully green lint before this existed, and found them only
+    by hashing the output. That is the whole argument for checking the pixels:
+    a plan that differs on paper is not a plan that differs on the card.
+
+    Reads art/candidates/<id>/r1.png, which art_process writes for every
+    shortlist row. Silent no-op when candidates have not been built yet --
+    this is a post-process check, not a plan check.
+    """
+    cand = Path(__file__).resolve().parent.parent / "art" / "candidates"
+    if not cand.is_dir():
+        return []
+    seen: dict[str, list[str]] = {}
+    for d in sorted(cand.iterdir()):
+        f = d / "r1.png"
+        if f.is_file():
+            seen.setdefault(hashlib.sha256(f.read_bytes()).hexdigest(),
+                            []).append(d.name)
+    problems = []
+    for ids in seen.values():
+        if len(ids) < 2:
+            continue
+        if frozenset(ids) in KNOWN_IDENTICAL:
+            print(f"KNOWN IDENTICAL (allowlisted): L12 {' == '.join(ids)}")
+            continue
+        problems.append(
+            f"L12 {' == '.join(ids)}: effective crops are PIXEL-IDENTICAL. "
+            f"Both crop modes clamp, so differing focus strings do not "
+            f"guarantee differing art -- re-anchor within the source's valid "
+            f"range, or give one of them a different source."
+        )
+    return problems
+
+
 def main() -> int:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from art_fetch import read_plan
     problems = lint(read_plan())
+    problems.extend(identical_crops())
     if problems:
         for p in problems:
             print("LINT: " + p, file=sys.stderr)

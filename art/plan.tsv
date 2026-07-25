@@ -638,3 +638,230 @@ power_furina_star_of_the_show	ImageGen/images/furina/powers/star_of_the_show.png
 power_furina_stage_lights	ImageGen/images/furina/powers/stage_lights.png	256	256	contain	center	auto	1	png	Talent Unheard Confession.png		icon
 power_furina_standing_ovation	ImageGen/images/furina/powers/standing_ovation.png	256	256	contain	center	shortlist	1	png	Furina Icon.png		icon
 power_furina_ovation_trickle	ImageGen/images/furina/powers/ovation_trickle.png	256	256	contain	center	shortlist	1	png	Item Furina Banquet.png		icon
+# --- Kokomi art pass, 2026-07-25 (docs/kokomi-art-pass-requirements.md). Tier F, private build only. ---
+# Shortlists, not picks: rank 1 is the effective source until the taste pass rules.
+# Anchors are COMPUTED from each source's geometry, not chosen. A cover anchor is a CENTRE and the crop
+# clamps inside the image, so any anchor nearer an edge than half the crop renders the SAME pixels --
+# and cover_autocrop's focus is a MARGIN that clamps the same way. art_lint L1/L7 compare STRINGS, so
+# both defects pass the lint; the proof is a sha256 sweep of art/candidates/*/r1.png.
+# Her whole `vfx` register is UNUSABLE at card size (talent icons 128x128, preview gifs 480x270,
+# buff icon 100x100). Sigils sit at rank 3 so the taste pass can still choose one on purpose.
+gorou_inuzaka_charge	ImageGen/images/cards/companions/gorou_inuzaka_charge.png	500	380	cover	y0.16	shortlist	1	png	Gorou Character Card.png		tcg	gorou
+gorou_inuzaka_charge	ImageGen/images/cards/companions/gorou_inuzaka_charge.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Gorou Portrait.png		splash	gorou
+gorou_inuzaka_charge	ImageGen/images/cards/companions/gorou_inuzaka_charge.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Gorou Card.png		splash	gorou
+gorou_war_banner	ImageGen/images/cards/companions/gorou_war_banner.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Gorou Wish.png		splash	gorou
+gorou_war_banner	ImageGen/images/cards/companions/gorou_war_banner.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Gorou Portrait.png		splash	gorou
+gorou_war_banner	ImageGen/images/cards/companions/gorou_war_banner.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Gorou Card.png		splash	gorou
+gorou_heart_of_the_clan	ImageGen/images/cards/companions/gorou_heart_of_the_clan.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Gorou Introduction Card.png		splash	gorou
+gorou_heart_of_the_clan	ImageGen/images/cards/companions/gorou_heart_of_the_clan.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Gorou Portrait.png		splash	gorou
+gorou_heart_of_the_clan	ImageGen/images/cards/companions/gorou_heart_of_the_clan.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Gorou Card.png		splash	gorou
+sayu_yoohoo_windwheel	ImageGen/images/cards/companions/sayu_yoohoo_windwheel.png	500	380	cover	y0.16	shortlist	1	png	Sayu Character Card.png		tcg	sayu
+sayu_yoohoo_windwheel	ImageGen/images/cards/companions/sayu_yoohoo_windwheel.png	500	380	cover	y0.16	shortlist	2	png	Sayu Character Card Platinum.png		tcg	sayu
+sayu_yoohoo_windwheel	ImageGen/images/cards/companions/sayu_yoohoo_windwheel.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Sayu Portrait.png		splash	sayu
+sayu_daruma_gift	ImageGen/images/cards/companions/sayu_daruma_gift.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sayu Wish.png		splash	sayu
+sayu_daruma_gift	ImageGen/images/cards/companions/sayu_daruma_gift.png	500	380	cover	y0.16	shortlist	2	png	Sayu Character Card Platinum.png		tcg	sayu
+sayu_daruma_gift	ImageGen/images/cards/companions/sayu_daruma_gift.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Sayu Portrait.png		splash	sayu
+sayu_naptime	ImageGen/images/cards/companions/sayu_naptime.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Sayu Full Wish.png		splash	sayu
+sayu_naptime	ImageGen/images/cards/companions/sayu_naptime.png	500	380	cover	y0.16	shortlist	2	png	Sayu Character Card Platinum.png		tcg	sayu
+sayu_naptime	ImageGen/images/cards/companions/sayu_naptime.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Sayu Portrait.png		splash	sayu
+shinobu_sanctifying_ring	ImageGen/images/cards/companions/shinobu_sanctifying_ring.png	500	380	cover	y0.16	shortlist	1	png	Kuki Shinobu Character Card.png		tcg	shinobu
+shinobu_sanctifying_ring	ImageGen/images/cards/companions/shinobu_sanctifying_ring.png	500	380	cover	y0.16	shortlist	2	png	Kuki Shinobu Character Card Platinum.png		tcg	shinobu
+shinobu_sanctifying_ring	ImageGen/images/cards/companions/shinobu_sanctifying_ring.png	500	380	cover	y0.16	shortlist	3	png	Kuki Shinobu Character Card Golden.png		tcg	shinobu
+shinobu_grass_ring_bond	ImageGen/images/cards/companions/shinobu_grass_ring_bond.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Kuki Shinobu Wish.png		splash	shinobu
+shinobu_grass_ring_bond	ImageGen/images/cards/companions/shinobu_grass_ring_bond.png	500	380	cover	y0.16	shortlist	2	png	Kuki Shinobu Character Card Platinum.png		tcg	shinobu
+shinobu_grass_ring_bond	ImageGen/images/cards/companions/shinobu_grass_ring_bond.png	500	380	cover	y0.16	shortlist	3	png	Kuki Shinobu Character Card Golden.png		tcg	shinobu
+shinobu_thundergrust	ImageGen/images/cards/companions/shinobu_thundergrust.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Kuki Shinobu Full Wish.png		splash	shinobu
+shinobu_thundergrust	ImageGen/images/cards/companions/shinobu_thundergrust.png	500	380	cover	y0.16	shortlist	2	png	Kuki Shinobu Character Card Platinum.png		tcg	shinobu
+shinobu_thundergrust	ImageGen/images/cards/companions/shinobu_thundergrust.png	500	380	cover	y0.16	shortlist	3	png	Kuki Shinobu Character Card Golden.png		tcg	shinobu
+sara_crowfeather_cover	ImageGen/images/cards/companions/sara_crowfeather_cover.png	500	380	cover	y0.16	shortlist	1	png	Kujou Sara Character Card.png		tcg	sara
+sara_crowfeather_cover	ImageGen/images/cards/companions/sara_crowfeather_cover.png	500	380	cover	y0.16	shortlist	2	png	Kujou Sara Character Card Platinum.png		tcg	sara
+sara_crowfeather_cover	ImageGen/images/cards/companions/sara_crowfeather_cover.png	500	380	cover	y0.16	shortlist	3	png	Kujou Sara Character Card Golden.png		tcg	sara
+sara_tengu_stormcall	ImageGen/images/cards/companions/sara_tengu_stormcall.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Kujou Sara Wish.png		splash	sara
+sara_tengu_stormcall	ImageGen/images/cards/companions/sara_tengu_stormcall.png	500	380	cover	y0.16	shortlist	2	png	Kujou Sara Character Card Platinum.png		tcg	sara
+sara_tengu_stormcall	ImageGen/images/cards/companions/sara_tengu_stormcall.png	500	380	cover	y0.16	shortlist	3	png	Kujou Sara Character Card Golden.png		tcg	sara
+thoma_blazing_barrier	ImageGen/images/cards/companions/thoma_blazing_barrier.png	500	380	cover	y0.16	shortlist	1	png	Thoma Character Card.png		tcg	thoma
+thoma_blazing_barrier	ImageGen/images/cards/companions/thoma_blazing_barrier.png	500	380	cover	y0.16	shortlist	2	png	Thoma Character Card Platinum.png		tcg	thoma
+thoma_blazing_barrier	ImageGen/images/cards/companions/thoma_blazing_barrier.png	500	380	cover	y0.16	shortlist	3	png	Thoma Character Card Golden.png		tcg	thoma
+thoma_crimson_ooyoroi	ImageGen/images/cards/companions/thoma_crimson_ooyoroi.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Thoma Wish.png		splash	thoma
+thoma_crimson_ooyoroi	ImageGen/images/cards/companions/thoma_crimson_ooyoroi.png	500	380	cover	y0.16	shortlist	2	png	Thoma Character Card Platinum.png		tcg	thoma
+thoma_crimson_ooyoroi	ImageGen/images/cards/companions/thoma_crimson_ooyoroi.png	500	380	cover	y0.16	shortlist	3	png	Thoma Character Card Golden.png		tcg	thoma
+itto_superlative_superstrength	ImageGen/images/cards/companions/itto_superlative_superstrength.png	500	380	cover	y0.16	shortlist	1	png	Arataki Itto Character Card.png		tcg	itto
+itto_superlative_superstrength	ImageGen/images/cards/companions/itto_superlative_superstrength.png	500	380	cover	y0.16	shortlist	2	png	Arataki Itto Character Card Platinum.png		tcg	itto
+itto_superlative_superstrength	ImageGen/images/cards/companions/itto_superlative_superstrength.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Arataki Itto Wish.png		splash	itto
+raiden_musou_no_hitotachi	ImageGen/images/cards/companions/raiden_musou_no_hitotachi.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Raiden Shogun Full Wish.png		splash	raiden
+raiden_musou_no_hitotachi	ImageGen/images/cards/companions/raiden_musou_no_hitotachi.png	500	380	cover	y0.16	shortlist	2	png	Raiden Shogun Character Card Platinum.png		tcg	raiden
+raiden_musou_no_hitotachi	ImageGen/images/cards/companions/raiden_musou_no_hitotachi.png	500	380	cover	y0.16	shortlist	3	png	Raiden Shogun Character Card Golden.png		tcg	raiden
+waters_edge	ImageGen/images/cards/kokomi/waters_edge.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+waters_edge	ImageGen/images/cards/kokomi/waters_edge.png	500	380	cover	y0.22	shortlist	2	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+waters_edge	ImageGen/images/cards/kokomi/waters_edge.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Nereid's Ascension.png		vfx	kokomi_pool
+coral_guard	ImageGen/images/cards/kokomi/coral_guard.png	500	380	cover	y0.41	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+coral_guard	ImageGen/images/cards/kokomi/coral_guard.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Sangonomiya Kokomi Vision.png		item	kokomi_pool
+coral_guard	ImageGen/images/cards/kokomi/coral_guard.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Kurage's Oath.png		vfx	kokomi_pool
+bake_kurage	ImageGen/images/cards/kokomi/bake_kurage.png	500	380	cover	y0.50	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+bake_kurage	ImageGen/images/cards/kokomi/bake_kurage.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Icon Emoji Paimon's Paintings 09 Sangonomiya Kokomi 3.png		sticker	kokomi_pool
+bake_kurage	ImageGen/images/cards/kokomi/bake_kurage.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Princess of Watatsumi.png		vfx	kokomi_pool
+tactical_retreat	ImageGen/images/cards/kokomi/tactical_retreat.png	500	380	cover	y0.59	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+tactical_retreat	ImageGen/images/cards/kokomi/tactical_retreat.png	500	380	cover	y0.56	shortlist	2	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+tactical_retreat	ImageGen/images/cards/kokomi/tactical_retreat.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Ceremonial Garment Buff Icon.png		vfx	kokomi_pool
+tide_reading	ImageGen/images/cards/kokomi/tide_reading.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+tide_reading	ImageGen/images/cards/kokomi/tide_reading.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Sangonomiya Kokomi Item.png		item	kokomi_pool
+tide_reading	ImageGen/images/cards/kokomi/tide_reading.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Preview.gif		vfx	kokomi_pool
+conscription_notice	ImageGen/images/cards/kokomi/conscription_notice.png	500	380	cover	y0.22	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+conscription_notice	ImageGen/images/cards/kokomi/conscription_notice.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Icon Emoji Paimon's Paintings 13 Sangonomiya Kokomi 2.png		sticker	kokomi_pool
+conscription_notice	ImageGen/images/cards/kokomi/conscription_notice.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Kurage's Oath Preview.gif		vfx	kokomi_pool
+standing_orders	ImageGen/images/cards/kokomi/standing_orders.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+standing_orders	ImageGen/images/cards/kokomi/standing_orders.png	500	380	cover	y0.34	shortlist	2	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+standing_orders	ImageGen/images/cards/kokomi/standing_orders.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Water Preview.gif		vfx	kokomi_pool
+shoulder_to_shoulder	ImageGen/images/cards/kokomi/shoulder_to_shoulder.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+shoulder_to_shoulder	ImageGen/images/cards/kokomi/shoulder_to_shoulder.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Sango Pearl.png		item	kokomi_pool
+shoulder_to_shoulder	ImageGen/images/cards/kokomi/shoulder_to_shoulder.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Attack Preview.gif		vfx	kokomi_pool
+signal_arrow	ImageGen/images/cards/kokomi/signal_arrow.png	500	380	cover	y0.56	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+signal_arrow	ImageGen/images/cards/kokomi/signal_arrow.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Icon Emoji Paimon's Paintings 25 Sangonomiya Kokomi 1.png		sticker	kokomi_pool
+signal_arrow	ImageGen/images/cards/kokomi/signal_arrow.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Nereid's Ascension.png		vfx	kokomi_pool
+to_the_front	ImageGen/images/cards/kokomi/to_the_front.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+to_the_front	ImageGen/images/cards/kokomi/to_the_front.png	500	380	cover	y0.64	shortlist	2	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+to_the_front	ImageGen/images/cards/kokomi/to_the_front.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Kurage's Oath.png		vfx	kokomi_pool
+cleansing_tide	ImageGen/images/cards/kokomi/cleansing_tide.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sango Pearl Wild.png		item	kokomi_pool
+cleansing_tide	ImageGen/images/cards/kokomi/cleansing_tide.png	500	380	cover	y0.67	shortlist	2	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
+cleansing_tide	ImageGen/images/cards/kokomi/cleansing_tide.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Princess of Watatsumi.png		vfx	kokomi_pool
+pearl_diver	ImageGen/images/cards/kokomi/pearl_diver.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Sangonomiya Kokomi Vision.png		item	kokomi_pool
+pearl_diver	ImageGen/images/cards/kokomi/pearl_diver.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Sangonomiya Kokomi Expression 1.png		sticker	kokomi_pool
+pearl_diver	ImageGen/images/cards/kokomi/pearl_diver.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Ceremonial Garment Buff Icon.png		vfx	kokomi_pool
+ritual_purification	ImageGen/images/cards/kokomi/ritual_purification.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sango Pearl.png		item	kokomi_pool
+ritual_purification	ImageGen/images/cards/kokomi/ritual_purification.png	500	380	cover	y0.50	shortlist	2	png	Sangonomiya Kokomi Introduction Card.jpg		splash	kokomi_pool
+ritual_purification	ImageGen/images/cards/kokomi/ritual_purification.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Preview.gif		vfx	kokomi_pool
+tideline_watch	ImageGen/images/cards/kokomi/tideline_watch.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sangonomiya Kokomi The Deep.png		item	kokomi_pool
+tideline_watch	ImageGen/images/cards/kokomi/tideline_watch.png	500	380	cover	y0.33	shortlist	2	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+tideline_watch	ImageGen/images/cards/kokomi/tideline_watch.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Kurage's Oath Preview.gif		vfx	kokomi_pool
+votive_offering	ImageGen/images/cards/kokomi/votive_offering.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Sangonomiya Kokomi Item.png		item	kokomi_pool
+votive_offering	ImageGen/images/cards/kokomi/votive_offering.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Side by Side We Venture Character Kokomi.png		sticker	kokomi_pool
+votive_offering	ImageGen/images/cards/kokomi/votive_offering.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Water Preview.gif		vfx	kokomi_pool
+kurages_oath	ImageGen/images/cards/kokomi/kurages_oath.png	500	380	cover	y0.24	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+kurages_oath	ImageGen/images/cards/kokomi/kurages_oath.png	500	380	cover	y0.56	shortlist	2	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+kurages_oath	ImageGen/images/cards/kokomi/kurages_oath.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Attack Preview.gif		vfx	kokomi_pool
+moon_signal	ImageGen/images/cards/kokomi/moon_signal.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 09 Sangonomiya Kokomi 1.png		sticker	kokomi_pool
+moon_signal	ImageGen/images/cards/kokomi/moon_signal.png	500	380	cover	y0.67	shortlist	2	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+moon_signal	ImageGen/images/cards/kokomi/moon_signal.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Nereid's Ascension.png		vfx	kokomi_pool
+undertow_shuffle	ImageGen/images/cards/kokomi/undertow_shuffle.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 09 Sangonomiya Kokomi 2.png		sticker	kokomi_pool
+undertow_shuffle	ImageGen/images/cards/kokomi/undertow_shuffle.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Sango Pearl.png		item	kokomi_pool
+undertow_shuffle	ImageGen/images/cards/kokomi/undertow_shuffle.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Kurage's Oath.png		vfx	kokomi_pool
+whispered_word	ImageGen/images/cards/kokomi/whispered_word.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 09 Sangonomiya Kokomi 3.png		sticker	kokomi_pool
+whispered_word	ImageGen/images/cards/kokomi/whispered_word.png	500	380	cover	y0.74	shortlist	2	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+whispered_word	ImageGen/images/cards/kokomi/whispered_word.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Princess of Watatsumi.png		vfx	kokomi_pool
+drifting_lantern	ImageGen/images/cards/kokomi/drifting_lantern.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 09 Sangonomiya Kokomi 4.png		sticker	kokomi_pool
+drifting_lantern	ImageGen/images/cards/kokomi/drifting_lantern.png	500	380	cover	y0.33	shortlist	2	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+drifting_lantern	ImageGen/images/cards/kokomi/drifting_lantern.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Ceremonial Garment Buff Icon.png		vfx	kokomi_pool
+driftwood_charm	ImageGen/images/cards/kokomi/driftwood_charm.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 13 Sangonomiya Kokomi 1.png		sticker	kokomi_pool
+driftwood_charm	ImageGen/images/cards/kokomi/driftwood_charm.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Sango Pearl Wild.png		item	kokomi_pool
+driftwood_charm	ImageGen/images/cards/kokomi/driftwood_charm.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Preview.gif		vfx	kokomi_pool
+pulsing_current	ImageGen/images/cards/kokomi/pulsing_current.png	500	380	cover	y0.34	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+pulsing_current	ImageGen/images/cards/kokomi/pulsing_current.png	500	380	cover	y0.56	shortlist	2	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+pulsing_current	ImageGen/images/cards/kokomi/pulsing_current.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Kurage's Oath Preview.gif		vfx	kokomi_pool
+scattering_spray	ImageGen/images/cards/kokomi/scattering_spray.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+scattering_spray	ImageGen/images/cards/kokomi/scattering_spray.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Sango Pearl.png		item	kokomi_pool
+scattering_spray	ImageGen/images/cards/kokomi/scattering_spray.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Water Preview.gif		vfx	kokomi_pool
+slack_water	ImageGen/images/cards/kokomi/slack_water.png	500	380	cover	y0.54	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+slack_water	ImageGen/images/cards/kokomi/slack_water.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Icon Emoji Paimon's Paintings 25 Sangonomiya Kokomi 1.png		sticker	kokomi_pool
+slack_water	ImageGen/images/cards/kokomi/slack_water.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Attack Preview.gif		vfx	kokomi_pool
+steady_the_line	ImageGen/images/cards/kokomi/steady_the_line.png	500	380	cover	y0.64	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+steady_the_line	ImageGen/images/cards/kokomi/steady_the_line.png	500	380	cover	y0.22	shortlist	2	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
+steady_the_line	ImageGen/images/cards/kokomi/steady_the_line.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Nereid's Ascension.png		vfx	kokomi_pool
+surging_shoal	ImageGen/images/cards/kokomi/surging_shoal.png	500	380	cover	y0.74	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+surging_shoal	ImageGen/images/cards/kokomi/surging_shoal.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Sango Pearl Wild.png		item	kokomi_pool
+surging_shoal	ImageGen/images/cards/kokomi/surging_shoal.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Kurage's Oath.png		vfx	kokomi_pool
+tideturn	ImageGen/images/cards/kokomi/tideturn.png	500	380	cover	y0.38	shortlist	1	png	Sangonomiya Kokomi Introduction Card.jpg		splash	kokomi_pool
+tideturn	ImageGen/images/cards/kokomi/tideturn.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Sangonomiya Kokomi Expression 1.png		sticker	kokomi_pool
+tideturn	ImageGen/images/cards/kokomi/tideturn.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Princess of Watatsumi.png		vfx	kokomi_pool
+vow_of_tides	ImageGen/images/cards/kokomi/vow_of_tides.png	500	380	cover	y0.50	shortlist	1	png	Sangonomiya Kokomi Introduction Card.jpg		splash	kokomi_pool
+vow_of_tides	ImageGen/images/cards/kokomi/vow_of_tides.png	500	380	cover	y0.56	shortlist	2	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
+vow_of_tides	ImageGen/images/cards/kokomi/vow_of_tides.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Ceremonial Garment Buff Icon.png		vfx	kokomi_pool
+waterspout	ImageGen/images/cards/kokomi/waterspout.png	500	380	cover	y0.62	shortlist	1	png	Sangonomiya Kokomi Introduction Card.jpg		splash	kokomi_pool
+waterspout	ImageGen/images/cards/kokomi/waterspout.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Sangonomiya Kokomi The Deep.png		item	kokomi_pool
+waterspout	ImageGen/images/cards/kokomi/waterspout.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Preview.gif		vfx	kokomi_pool
+jade_bulwark	ImageGen/images/cards/kokomi/jade_bulwark.png	500	380	cover	y0.10	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+jade_bulwark	ImageGen/images/cards/kokomi/jade_bulwark.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Side by Side We Venture Character Kokomi.png		sticker	kokomi_pool
+jade_bulwark	ImageGen/images/cards/kokomi/jade_bulwark.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Kurage's Oath Preview.gif		vfx	kokomi_pool
+all_streams_flow	ImageGen/images/cards/kokomi/all_streams_flow.png	500	380	cover	y0.26	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+all_streams_flow	ImageGen/images/cards/kokomi/all_streams_flow.png	500	380	cover	y0.22	shortlist	2	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+all_streams_flow	ImageGen/images/cards/kokomi/all_streams_flow.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Water Preview.gif		vfx	kokomi_pool
+communion_of_tides	ImageGen/images/cards/kokomi/communion_of_tides.png	500	380	cover	y0.42	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+communion_of_tides	ImageGen/images/cards/kokomi/communion_of_tides.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Sangonomiya Kokomi Vision.png		item	kokomi_pool
+communion_of_tides	ImageGen/images/cards/kokomi/communion_of_tides.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Attack Preview.gif		vfx	kokomi_pool
+driftglass	ImageGen/images/cards/kokomi/driftglass.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 13 Sangonomiya Kokomi 2.png		sticker	kokomi_pool
+driftglass	ImageGen/images/cards/kokomi/driftglass.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Sango Pearl.png		item	kokomi_pool
+driftglass	ImageGen/images/cards/kokomi/driftglass.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Nereid's Ascension.png		vfx	kokomi_pool
+exposing_current	ImageGen/images/cards/kokomi/exposing_current.png	500	380	cover	y0.58	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+exposing_current	ImageGen/images/cards/kokomi/exposing_current.png	500	380	cover	y0.56	shortlist	2	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+exposing_current	ImageGen/images/cards/kokomi/exposing_current.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Kurage's Oath.png		vfx	kokomi_pool
+field_promotion	ImageGen/images/cards/kokomi/field_promotion.png	500	380	cover	y0.78	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+field_promotion	ImageGen/images/cards/kokomi/field_promotion.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Sangonomiya Kokomi Item.png		item	kokomi_pool
+field_promotion	ImageGen/images/cards/kokomi/field_promotion.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Princess of Watatsumi.png		vfx	kokomi_pool
+honor_guard	ImageGen/images/cards/kokomi/honor_guard.png	500	380	cover	y0.22	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
+honor_guard	ImageGen/images/cards/kokomi/honor_guard.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Icon Emoji Paimon's Paintings 13 Sangonomiya Kokomi 2.png		sticker	kokomi_pool
+honor_guard	ImageGen/images/cards/kokomi/honor_guard.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Ceremonial Garment Buff Icon.png		vfx	kokomi_pool
+mass_mobilization	ImageGen/images/cards/kokomi/mass_mobilization.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
+mass_mobilization	ImageGen/images/cards/kokomi/mass_mobilization.png	500	380	cover	x0.55	shortlist	2	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+mass_mobilization	ImageGen/images/cards/kokomi/mass_mobilization.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Preview.gif		vfx	kokomi_pool
+mercy_of_the_deep	ImageGen/images/cards/kokomi/mercy_of_the_deep.png	500	380	cover	y0.74	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+mercy_of_the_deep	ImageGen/images/cards/kokomi/mercy_of_the_deep.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Sango Pearl.png		item	kokomi_pool
+mercy_of_the_deep	ImageGen/images/cards/kokomi/mercy_of_the_deep.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Kurage's Oath Preview.gif		vfx	kokomi_pool
+moonlit_offering	ImageGen/images/cards/kokomi/moonlit_offering.png	500	380	cover	y0.90	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+moonlit_offering	ImageGen/images/cards/kokomi/moonlit_offering.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Icon Emoji Paimon's Paintings 25 Sangonomiya Kokomi 1.png		sticker	kokomi_pool
+moonlit_offering	ImageGen/images/cards/kokomi/moonlit_offering.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Water Preview.gif		vfx	kokomi_pool
+pearl_barrage	ImageGen/images/cards/kokomi/pearl_barrage.png	500	380	cover	y0.21	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
+pearl_barrage	ImageGen/images/cards/kokomi/pearl_barrage.png	500	380	cover	y0.56	shortlist	2	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+pearl_barrage	ImageGen/images/cards/kokomi/pearl_barrage.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Attack Preview.gif		vfx	kokomi_pool
+pearl_current	ImageGen/images/cards/kokomi/pearl_current.png	500	380	cover	y0.33	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
+pearl_current	ImageGen/images/cards/kokomi/pearl_current.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Sango Pearl Wild.png		item	kokomi_pool
+pearl_current	ImageGen/images/cards/kokomi/pearl_current.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Nereid's Ascension.png		vfx	kokomi_pool
+press_the_advantage	ImageGen/images/cards/kokomi/press_the_advantage.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
+press_the_advantage	ImageGen/images/cards/kokomi/press_the_advantage.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Sangonomiya Kokomi Expression 1.png		sticker	kokomi_pool
+press_the_advantage	ImageGen/images/cards/kokomi/press_the_advantage.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Kurage's Oath.png		vfx	kokomi_pool
+quiet_harbor	ImageGen/images/cards/kokomi/quiet_harbor.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 13 Sangonomiya Kokomi 3.png		sticker	kokomi_pool
+quiet_harbor	ImageGen/images/cards/kokomi/quiet_harbor.png	500	380	cover	y0.73	shortlist	2	png	Sangonomiya Kokomi Multi Wish.png		splash	kokomi_pool
+quiet_harbor	ImageGen/images/cards/kokomi/quiet_harbor.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Princess of Watatsumi.png		vfx	kokomi_pool
+read_the_current	ImageGen/images/cards/kokomi/read_the_current.png	500	380	cover	y0.44	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
+read_the_current	ImageGen/images/cards/kokomi/read_the_current.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Sangonomiya Kokomi The Deep.png		item	kokomi_pool
+read_the_current	ImageGen/images/cards/kokomi/read_the_current.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Ceremonial Garment Buff Icon.png		vfx	kokomi_pool
+rearguard_action	ImageGen/images/cards/kokomi/rearguard_action.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 24 Sangonomiya Kokomi 1.png		sticker	kokomi_pool
+rearguard_action	ImageGen/images/cards/kokomi/rearguard_action.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Sangonomiya Kokomi Item.png		item	kokomi_pool
+rearguard_action	ImageGen/images/cards/kokomi/rearguard_action.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Preview.gif		vfx	kokomi_pool
+reinforcements	ImageGen/images/cards/kokomi/reinforcements.png	500	380	cover	y0.56	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
+reinforcements	ImageGen/images/cards/kokomi/reinforcements.png	500	380	cover	x0.39	shortlist	2	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
+reinforcements	ImageGen/images/cards/kokomi/reinforcements.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Kurage's Oath Preview.gif		vfx	kokomi_pool
+shell_of_sanctuary	ImageGen/images/cards/kokomi/shell_of_sanctuary.png	500	380	cover	y0.56	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
+shell_of_sanctuary	ImageGen/images/cards/kokomi/shell_of_sanctuary.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Sangonomiya Kokomi Vision.png		item	kokomi_pool
+shell_of_sanctuary	ImageGen/images/cards/kokomi/shell_of_sanctuary.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Water Preview.gif		vfx	kokomi_pool
+swift_currents	ImageGen/images/cards/kokomi/swift_currents.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Sangonomiya Kokomi 1.png		sticker	kokomi_pool
+swift_currents	ImageGen/images/cards/kokomi/swift_currents.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Sango Pearl.png		item	kokomi_pool
+swift_currents	ImageGen/images/cards/kokomi/swift_currents.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Attack Preview.gif		vfx	kokomi_pool
+the_tide_remembers	ImageGen/images/cards/kokomi/the_tide_remembers.png	500	380	cover	y0.67	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
+the_tide_remembers	ImageGen/images/cards/kokomi/the_tide_remembers.png	500	380	cover	y0.22	shortlist	2	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+the_tide_remembers	ImageGen/images/cards/kokomi/the_tide_remembers.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Nereid's Ascension.png		vfx	kokomi_pool
+tidal_lure	ImageGen/images/cards/kokomi/tidal_lure.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Sangonomiya Kokomi 2.png		sticker	kokomi_pool
+tidal_lure	ImageGen/images/cards/kokomi/tidal_lure.png	500	380	cover	y0.33	shortlist	2	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+tidal_lure	ImageGen/images/cards/kokomi/tidal_lure.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Kurage's Oath.png		vfx	kokomi_pool
+nereids_ascension	ImageGen/images/cards/kokomi/nereids_ascension.png	500	380	cover	y0.79	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
+nereids_ascension	ImageGen/images/cards/kokomi/nereids_ascension.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Icon Emoji Paimon's Paintings 13 Sangonomiya Kokomi 2.png		sticker	kokomi_pool
+nereids_ascension	ImageGen/images/cards/kokomi/nereids_ascension.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Princess of Watatsumi.png		vfx	kokomi_pool
+ceremonial_garment	ImageGen/images/cards/kokomi/ceremonial_garment.png	500	380	cover	y0.38	shortlist	1	png	Character Sangonomiya Kokomi Full Wish.png		splash	kokomi_pool
+ceremonial_garment	ImageGen/images/cards/kokomi/ceremonial_garment.png	500	380	cover	y0.56	shortlist	2	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+ceremonial_garment	ImageGen/images/cards/kokomi/ceremonial_garment.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Ceremonial Garment Buff Icon.png		vfx	kokomi_pool
+depths_judgment	ImageGen/images/cards/kokomi/depths_judgment.png	500	380	cover	y0.62	shortlist	1	png	Character Sangonomiya Kokomi Full Wish.png		splash	kokomi_pool
+depths_judgment	ImageGen/images/cards/kokomi/depths_judgment.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Sango Pearl.png		item	kokomi_pool
+depths_judgment	ImageGen/images/cards/kokomi/depths_judgment.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Preview.gif		vfx	kokomi_pool
+epiphany_of_the_deep	ImageGen/images/cards/kokomi/epiphany_of_the_deep.png	500	380	cover	x0.33	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+epiphany_of_the_deep	ImageGen/images/cards/kokomi/epiphany_of_the_deep.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Icon Emoji Paimon's Paintings 25 Sangonomiya Kokomi 1.png		sticker	kokomi_pool
+epiphany_of_the_deep	ImageGen/images/cards/kokomi/epiphany_of_the_deep.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Kurage's Oath Preview.gif		vfx	kokomi_pool
+grand_conscription	ImageGen/images/cards/kokomi/grand_conscription.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
+grand_conscription	ImageGen/images/cards/kokomi/grand_conscription.png	500	380	cover	y0.67	shortlist	2	png	Bake-Kurage Summon.png		vfx	kokomi_pool
+grand_conscription	ImageGen/images/cards/kokomi/grand_conscription.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Water Preview.gif		vfx	kokomi_pool
+prayer_to_the_moon	ImageGen/images/cards/kokomi/prayer_to_the_moon.png	500	380	cover	x0.40	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+prayer_to_the_moon	ImageGen/images/cards/kokomi/prayer_to_the_moon.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Sango Pearl Wild.png		item	kokomi_pool
+prayer_to_the_moon	ImageGen/images/cards/kokomi/prayer_to_the_moon.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Attack Preview.gif		vfx	kokomi_pool
+sango_prayer	ImageGen/images/cards/kokomi/sango_prayer.png	500	380	cover	x0.47	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+sango_prayer	ImageGen/images/cards/kokomi/sango_prayer.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Sangonomiya Kokomi Expression 1.png		sticker	kokomi_pool
+sango_prayer	ImageGen/images/cards/kokomi/sango_prayer.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Nereid's Ascension.png		vfx	kokomi_pool
+vigil_of_the_deep	ImageGen/images/cards/kokomi/vigil_of_the_deep.png	500	380	cover	x0.53	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+vigil_of_the_deep	ImageGen/images/cards/kokomi/vigil_of_the_deep.png	500	380	cover	y0.56	shortlist	2	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+vigil_of_the_deep	ImageGen/images/cards/kokomi/vigil_of_the_deep.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Kurage's Oath.png		vfx	kokomi_pool

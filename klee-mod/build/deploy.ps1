@@ -74,12 +74,20 @@ Copy-Item $dll -Destination $stage
 # BaseLib's CustomPortrait accepts a Texture2D object we build at runtime.
 # Source of truth is the art pipeline's output dir, which is gitignored.
 # RosterArt.CardPortrait looks up images/cards/<cardId>.png -- one FLAT dir keyed
-# by sheet id. The pipeline keeps Klee cards and companion cards in separate
-# source dirs, so both are staged into that one flat destination. Ids are unique
-# across the two sheets, so nothing collides.
+# by sheet id. The pipeline keeps each character's cards and the companion cards
+# in separate source dirs, so all of them are staged into that one flat
+# destination. Ids are unique across the sheets (tools/lint_unique_names.py
+# gates that), so nothing collides.
+#
+# EVERY ROSTER CHARACTER MUST BE LISTED HERE. A character missing from this
+# array does not fail anything -- the build is green, validate is green, and
+# the mod loads -- their cards simply render with no portrait. Kokomi shipped
+# that way for one day (2026-07-25): 58 painted faces sat in ImageGen and none
+# of them reached the game.
 $artSrcDirs = @(
     (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\klee'),
     (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\furina'),
+    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\kokomi'),
     (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\companions')
 )
 $artDst = Join-Path $stage 'images\cards'
