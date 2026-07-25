@@ -544,6 +544,43 @@ if (Test-Path $venvPython) {
 }
 
 # ---------------------------------------------------------------------------
+# S9. Every roster character's card art actually reaches the package.
+#
+# deploy.ps1 stages art from a HARDCODED list of source directories into one
+# flat images/cards. A character missing from that array fails nothing: the
+# build is green, every other gate is green, the mod loads, and their cards
+# simply render with no portrait. Kokomi shipped exactly that way on
+# 2026-07-25 -- 58 painted faces sat in ImageGen and not one reached the game.
+#
+# Checked against the STAGE rather than the source list, so it verifies the
+# outcome instead of restating the config. One portrait per character is
+# enough to prove the directory was wired; art_coverage.py owns completeness.
+# ---------------------------------------------------------------------------
+# ImageGen lives at the REPO root, not under klee-mod. Getting this wrong makes
+# Test-Path false and silently skips the whole rule -- which it did on the first
+# attempt, and the negative test caught it. $repoRoot is defined at S6.
+$cardsRoot = Join-Path $repoRoot 'ImageGen\images\cards'
+$stagedArt = Join-Path $StageDir 'images\cards'
+if ((Test-Path $cardsRoot) -and (Test-Path $stagedArt)) {
+    $staged = @{}
+    foreach ($f in Get-ChildItem $stagedArt -Filter *.png -ErrorAction SilentlyContinue) {
+        $staged[$f.Name] = $true
+    }
+    foreach ($charDir in Get-ChildItem $cardsRoot -Directory -ErrorAction SilentlyContinue) {
+        $pngs = @(Get-ChildItem $charDir.FullName -Filter *.png -ErrorAction SilentlyContinue)
+        if ($pngs.Count -eq 0) { continue }   # nothing painted yet is not a defect
+        $hit = $false
+        foreach ($p in $pngs) { if ($staged.ContainsKey($p.Name)) { $hit = $true; break } }
+        if (-not $hit) {
+            Fail 'S9' ("ImageGen\images\cards\$($charDir.Name) holds $($pngs.Count) " +
+                "portrait(s) and NONE of them are in the staged package. That " +
+                "directory is missing from deploy.ps1's `$artSrcDirs -- their " +
+                "cards will render with no art and nothing else will complain.")
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------
 # S8. Build scripts are pure ASCII.
 #
 # Every .ps1 in this repo says so in its own header, and the rule was still
