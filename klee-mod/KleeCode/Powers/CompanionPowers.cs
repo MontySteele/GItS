@@ -488,3 +488,38 @@ public sealed class ShatterBonusPower : PowerModel, ILocalizationProvider
     public static int BonusFor(Creature? dealer) =>
         dealer?.Powers.OfType<ShatterBonusPower>().FirstOrDefault()?.Amount ?? 0;
 }
+
+/// <summary>
+/// Metallicize -- Gorou, Heart of the Clan (Inazuma roster, playtest sprint).
+///
+/// TIMING IS THE SIM'S, NOT THE TABLETOP CONVENTION. Slay the Spire's
+/// Metallicize grants Block at END of turn; tier0's grants it at turn START
+/// (engine/powers.py on_turn_start). Parity with the sim is the contract here,
+/// so this fires at turn start, and the difference is deliberate rather than
+/// an oversight -- start-of-turn Block survives the block-reset and is
+/// therefore strictly better, which is priced into every number her sheet was
+/// measured with. Changing it to end-of-turn is a BALANCE change and needs a
+/// re-measure, not a bugfix.
+///
+/// No native equivalent exists in the game assembly (there is no
+/// MetallicizePower and no PlatedArmor), so this is ours.
+/// </summary>
+public sealed class MetallicizePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Metallicize"),
+        ("description", "At the start of your turn, gain {Amount} Block."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (player.Creature != Owner) return;
+        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null);
+    }
+}

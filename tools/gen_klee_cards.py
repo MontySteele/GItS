@@ -35,11 +35,17 @@ from pathlib import Path
 
 import yaml
 
+# Emitted-source newline. Kept as a name so generated C# templates never
+# carry backslash escapes through this file's own string literals.
+NEWLINE = chr(10)
+NEWLINE_JOIN = NEWLINE
+
 REPO = Path(__file__).resolve().parent.parent
 SHEET = REPO / "docs" / "klee-cards.yaml"
 # Mirrors tier0/content/upgrades.py UPGRADE_SHEETS, in the same order.
 UPGRADE_SHEETS = (REPO / "docs" / "klee-upgrades.yaml",
-                  REPO / "docs" / "furina-upgrades.yaml")
+                  REPO / "docs" / "furina-upgrades.yaml",
+                  REPO / "docs" / "kokomi-upgrades.yaml")
 
 # Companion sheets -> home nation. The nation is what the reward slot's
 # SAME_NATION_REWARD_SHARE weighting keys on, and tier0's loader derives it
@@ -50,7 +56,8 @@ UPGRADE_SHEETS = (REPO / "docs" / "klee-upgrades.yaml",
 # best to have some non-Mondstadt cards in the pool to make sure Klee doesn't
 # inadvertently overperform with a 100% Mondstadt roster."
 COMPANION_SHEETS = ((REPO / "docs" / "mondstadt-companions.yaml", "mondstadt"),
-                    (REPO / "docs" / "fontaine-companions.yaml", "fontaine"))
+                    (REPO / "docs" / "fontaine-companions.yaml", "fontaine"),
+                    (REPO / "docs" / "inazuma-companions.yaml", "inazuma"))
 OUT_DIR = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated"
 MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.json"
 FURINA_SHEET = REPO / "docs" / "furina-cards.yaml"
@@ -58,6 +65,11 @@ FURINA_OUT_DIR = (
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina" / "Generated"
 )
 FURINA_MANIFEST = FURINA_OUT_DIR / "manifest.json"
+KOKOMI_SHEET = REPO / "docs" / "kokomi-cards.yaml"
+KOKOMI_OUT_DIR = (
+    REPO / "klee-mod" / "KleeCode" / "Cards" / "Kokomi" / "Generated"
+)
+KOKOMI_MANIFEST = KOKOMI_OUT_DIR / "manifest.json"
 
 
 @dataclass(frozen=True)
@@ -127,9 +139,27 @@ FURINA_PROFILE = CharacterProfile(
     emit_character_identity=True,
 )
 
+KOKOMI_PROFILE = CharacterProfile(
+    character_id="kokomi",
+    sheet=KOKOMI_SHEET,
+    out_dir=KOKOMI_OUT_DIR,
+    manifest=KOKOMI_MANIFEST,
+    namespace="KleeMod.Cards.Kokomi.Generated",
+    native_element="hydro",
+    # CATALYST, ruled R52 ask N1: every attack of hers applies Hydro. That is
+    # the structural third of her elite A6 -- application uptime comes from
+    # the cadence, not from authored lines -- so it must be the profile's
+    # business and not something each card re-declares.
+    cadence="catalyst_attack",
+    generator_script="tools/gen_roster_cards.py",
+    art_loader="RosterArt",
+    emit_character_identity=True,
+)
+
 PROFILES = {
     KLEE_PROFILE.character_id: KLEE_PROFILE,
     FURINA_PROFILE.character_id: FURINA_PROFILE,
+    KOKOMI_PROFILE.character_id: KOKOMI_PROFILE,
 }
 
 # Ops this generator can express with verified Cmd APIs. Anything else blocks
@@ -179,6 +209,12 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_
                   "energy", "scry_discard", "add_card", "exhaust_from",
                   "apply_aura", "swirl", "buff_next_attack", "block_next_turn",
                   "cost_mod", "copy_companion_in_hand",
+                  # Kokomi (playtest sprint, Track B). gain_charge rides
+                  # KokomiResources.GainCharge; summon_kurage rides
+                  # KurageSummon.Field (refresh-never-stack); conscript rides
+                  # KokomiConscript.Run. All three have verified call sites in
+                  # klee-mod/KleeCode/Powers -- the whitelist stays honest.
+                  "gain_charge", "summon_kurage", "conscript",
                   "replay_next_companion", "copy_companions_played_this_combat"}
 
 # --- companion batch (2026-07-21) --------------------------------------------
@@ -211,7 +247,13 @@ ENERGY_FIELDS = {"op", "amount"}
 SCRY_FIELDS = {"op", "amount"}
 # exhaust_from: dodge_roll's shape only -- a random Status from hand. The
 # filterless form (kit-exempt any-card) blocks until a card needs it.
-EXHAUST_FROM_FIELDS = {"op", "zone", "filter", "amount"}
+EXHAUST_FROM_FIELDS = {"op", "zone", "filter", "amount",
+                       # Kokomi (playtest sprint): `select: chosen` is the
+                       # PLAYER picking the victims, not the rng. Her whole
+                       # engine is "choose what to rotate out", so a random
+                       # pick would not be a smaller version of the card --
+                       # it would be a different card.
+                       "select"}
 
 # --- conditional op (2026-07-20 batch) ---------------------------------------
 # Predicates with a verified C# read, each mirroring tier0 effects.py
@@ -340,6 +382,19 @@ APPLY_POWERS = {
     # x1.5 taken, Counter stacks, tick at enemy side turn end -- exactly
     # tier0's WEAK_DEALT_MULT / VULNERABLE_TAKEN_MULT and DECAYING rule.
     # No cap either side. {TO} renders the target clause (build_description).
+    # Kokomi (playtest sprint, Track B). kurage_ward is ours
+    # (Powers/KuragePowers.cs); the other two are the BASE GAME's own
+    # Ironclad powers, reused rather than reimplemented -- her sheet asked
+    # for exactly their semantics and a private copy would be a second
+    # implementation of a rule the engine already owns.
+    "metallicize": ("MetallicizePower", None,
+        "At the start of your turn, gain {X} Block."),
+    "kurage_ward": ("KurageWardPower", None,
+        "Each [gold]Bake-Kurage[/gold] pulse also grants {X} Block."),
+    "feel_no_pain": ("FeelNoPainPower", None,
+        "Whenever a card is [gold]Exhausted[/gold], gain {X} Block."),
+    "dark_embrace": ("DarkEmbracePower", None,
+        "Whenever a card is [gold]Exhausted[/gold], draw {X} card(s)."),
     "weak": ("WeakPower", None,
         "Apply {X} [gold]Weak[/gold]{TO}."),
     "vulnerable": ("VulnerablePower", None,
@@ -517,6 +572,11 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "encore",
                        "bonus_per_detonation", "cards", "remove",
                        "copy_cost_override", "add"}
                       | {"generate_cost_override"}
+                      # Kokomi (playtest sprint, Track B). Three deltas her
+                      # sheet already rules but codegen could not express, so
+                      # three of her cards -- one of them a STARTER -- were
+                      # shipping with no campfire upgrade at all (G-C1 lint).
+                      | {"kurage_turns", "energy", "block_next_turn"}
                       | POWER_UPGRADE_KEYS)
 
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
@@ -648,6 +708,19 @@ def blocked_reason(
     # either way, never generated as ordinary loot.
     if card.get("kit_card") or card.get("requires"):
         return "kit card (hand-write it against the KitBurst machinery)"
+
+    # `amount_formula` (Kokomi's exhaust-pile scalers, playtest sprint Track B).
+    # A computed amount that reads a PILE SIZE at resolve time. The generator
+    # has no grammar for it, and the failure mode of guessing is the worst
+    # kind: a card that emits, compiles, and quietly deals its `base` forever
+    # while the face promises scaling. Block loudly instead -- UNPARSEABLE
+    # discipline. Teaching this needs a CalculatedVar bound to the exhaust
+    # pile, which is Track C work, not a codegen shortcut.
+    for effect in card.get("effects", []):
+        if "amount_formula" in effect:
+            formula = effect["amount_formula"]
+            return (f"amount_formula (reads {formula.get('count')}) -- needs a "
+                    "CalculatedVar bound to the pile, not a literal")
 
     # R20: inline upgrade fields are deprecated repo-wide -- deltas live in
     # *-upgrades.yaml sheets. Block loudly so a stray inline key can never
@@ -864,10 +937,22 @@ def blocked_reason(
             unknown = set(eff) - EXHAUST_FROM_FIELDS
             if unknown:
                 return f"exhaust_from field(s) {sorted(unknown)} not understood"
-            if eff.get("zone") != "hand":
+            # Hand is the only zone either character exhausts from, and it
+            # is the sim's default for an omitted `zone` (Kokomi's sheet
+            # omits it on every row). Requiring the key explicitly blocked
+            # six of her cards -- including a STARTER -- over a field that
+            # has exactly one legal value.
+            if eff.get("zone", "hand") != "hand":
                 return f"exhaust_from zone '{eff.get('zone')}'"
-            if eff.get("filter") != "status":
+            # An UNFILTERED exhaust_from is legal when the player picks the
+            # victims: the sim's pool is "hand minus kit cards" and the
+            # chosen branch emits exactly that filter. The any-card pool that
+            # was never built is the RANDOM one -- rolling a victim out of the
+            # whole hand -- and that is still blocked below.
+            if eff.get("filter") != "status" and eff.get("select") != "chosen":
                 return "exhaust_from without status filter (any-card pool not built)"
+            if eff.get("filter") not in (None, "status"):
+                return f"exhaust_from filter '{eff.get('filter')}'"
             if eff.get("amount", 1) != 1:
                 return "exhaust_from amount > 1 (re-pool loop not built)"
         if op == "add_card":
@@ -1364,6 +1449,21 @@ def build_vars(card: dict) -> list[str]:
             # render); "Sparks" collides with no base-game var name. Cards
             # without a sheet upgrade keep the literal (see MECHANICAL_OPS).
             out.append(f'new DynamicVar("Sparks", {int(eff["amount"])}m)')
+        elif op == "summon_kurage" and kurage_turns_upgrade(card):
+            # Same rule as Sparks/BurstEnergy: a var ONLY when the upgrade has
+            # to render. Duration is the only thing bake_kurage's upgrade may
+            # move -- the pulse numbers are constants and the +1 Charge is
+            # untouchable under the resource-curve law -- so one var covers it.
+            out.append(
+                f'new DynamicVar("KurageTurns", {int(eff.get("amount", 1))}m)')
+        elif op == "energy" and energy_upgrade(card):
+            out.append(f'new DynamicVar("Energy", {int(eff["amount"])}m)')
+        elif op == "block_next_turn" and block_next_turn_upgrade(card):
+            out.append(
+                f'new DynamicVar("BlockNextTurn", {int(eff["amount"])}m)')
+        elif op == "exhaust_from" and exhaust_upgrade(card):
+            out.append(
+                f'new DynamicVar("Exhausts", {int(eff.get("amount", 1))}m)')
         elif op == "burst_energy" and burst_upgrade(card):
             # Same rule as Sparks: a var only when the upgrade must render.
             out.append(f'new DynamicVar("BurstEnergy", {int(eff["amount"])}m)')
@@ -1553,6 +1653,12 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # shape: append a draw effect. It is emitted as an IsUpgraded-gated
         # draw at the end of OnPlay, matching upgrades.py's list append.
         "add": True,
+        # Kokomi. Each binds to the op that owns the number, so a delta on a
+        # card without that op is still reported unexpressible rather than
+        # silently dropped on the floor.
+        "kurage_turns": any(e["op"] == "summon_kurage" for e in effects),
+        "energy": any(e["op"] == "energy" for e in effects),
+        "block_next_turn": any(e["op"] == "block_next_turn" for e in effects),
     }
     # tier0 binds every POWER_UPGRADE_KEYS delta to the first TOP-LEVEL
     # apply_power OR buff_next_attack (upgrades.py takes `next(fx for fx in
@@ -1881,6 +1987,58 @@ def _encore_amount_expr(card: dict, eff: dict) -> str:
     return f"(IsUpgraded ? {base + delta} : {base})" if delta else str(base)
 
 
+def energy_upgrade(card: dict) -> int:
+    """Ruled energy delta: `energy: +N` in kokomi-upgrades.yaml."""
+    return int(upgrade_plan(card)[0].get("energy", 0))
+
+
+def block_next_turn_upgrade(card: dict) -> int:
+    """Ruled deferred-block delta: `block_next_turn: +N` (Sayu's daruma)."""
+    return int(upgrade_plan(card)[0].get("block_next_turn", 0))
+
+
+def exhaust_upgrade(card: dict) -> int:
+    """Ruled chosen-exhaust delta: `exhaust: +N` in kokomi-upgrades.yaml."""
+    return int(upgrade_plan(card)[0].get("exhaust", 0))
+
+
+def kurage_turns_upgrade(card: dict) -> int:
+    """Ruled Bake-Kurage duration delta: `kurage_turns: +N`. 0 = none."""
+    return int(upgrade_plan(card)[0].get("kurage_turns", 0))
+
+
+def kurage_turns_expr(card: dict, eff: dict) -> str:
+    """Duration of a summoned Bake-Kurage.
+
+    A LITERAL unless kokomi-upgrades.yaml carries a `kurage_turns: +N` delta
+    for this card, in which case it becomes the named DynamicVar the face
+    reads -- the Sparks/BurstEnergy idiom. Duration is the ONLY thing an
+    upgrade may move here: the pulse numbers are constants, and the +1 Charge
+    is untouchable under the resource-curve law.
+    """
+    if kurage_turns_upgrade(card):
+        return 'DynamicVars["KurageTurns"].IntValue'
+    return str(int(eff.get("amount", 1)))
+
+
+def _conscript_phrase(eff: dict) -> str:
+    """Player-facing conscript text.
+
+    R55 VOICE LAW: exhaust is ROTATION, never sacrifice. Forced service is
+    Shogunate behaviour and the resistance were volunteers, so the display
+    family is Muster/Enlist/Rally. The internal op name stays `conscript`;
+    the FACE never says it.
+    """
+    n = int(eff.get("amount", 1))
+    unit = "an Inazuman ally" if n == 1 else f"{n} Inazuman allies"
+    if eff.get("mode") == "create":
+        return f"muster {unit} to your hand"
+    plural = "" if n == 1 else "s"
+    return (f"muster {unit}: transform {n} card{plural} in your hand into "
+            f"a random Inazuma [gold]Companion[/gold] that costs 1 less "
+            f"and [gold]Exhausts[/gold]")
+
+
 def _stmt_gain_encore(
     card: dict, eff: dict, *, salon_scaled: bool = False
 ) -> str:
@@ -2123,6 +2281,28 @@ def build_body(
 
         elif op == "burst_energy":
             lines.append(_stmt_burst_energy(card, eff))
+
+        elif op == "gain_charge":
+            # The PREMIUM accrual (kickoff 2.1). The universal exhaust->Charge
+            # funnel is the relic's, never card text, so these lines are pure
+            # bonus on top and carry no identity gate of their own -- GainCharge
+            # gates internally.
+            lines.append(
+                "KokomiResources.GainCharge(Owner.Creature, "
+                f"{int(eff['amount'])});")
+
+        elif op == "summon_kurage":
+            lines.append(
+                "await KurageSummon.Field(choiceContext, Owner.Creature, "
+                f"{kurage_turns_expr(card, eff)}, this);")
+
+        elif op == "conscript":
+            override = eff.get("cost_override")
+            lines.append(
+                "await KokomiConscript.Run(choiceContext, Owner, this, "
+                f"{int(eff.get('amount', 1))}, "
+                f"createMode: {'true' if eff.get('mode') == 'create' else 'false'}, "
+                f"costOverride: {override if override is not None else 'null'});")
 
         elif op == "gain_encore":
             if salon_calc_rider(card, eff) is not None:
@@ -2540,6 +2720,30 @@ def build_body(
                 "        }"
             )
 
+        elif op == "exhaust_from" and eff.get("select") == "chosen":
+            # Kokomi: the player chooses. Kit cards stay exempt (v1.9 -- the
+            # Burst is never fodder), the same filter the discard ops ride.
+            # Every exhaust pays Charge through the relic funnel, so this op
+            # is her engine's throttle and the CHOICE is the gameplay -- a
+            # random pick would not be a smaller version of this card, it
+            # would be a different card.
+            n = ('DynamicVars["Exhausts"].IntValue'
+                 if exhaust_upgrade(card) else str(int(eff.get("amount", 1))))
+            lines.append(NEWLINE.join([
+                "{",
+                "            var toExhaust = (await CardSelectCmd.FromHand(",
+                "                choiceContext, Owner,",
+                "                new CardSelectorPrefs(",
+                "                    CardSelectorPrefs.ExhaustSelectionPrompt, "
+                f"{n}),",
+                "                KitGrant.NotKitCard, this)).ToList();",
+                "            foreach (var victim in toExhaust)",
+                "            {",
+                "                await CardCmd.Exhaust(choiceContext, victim);",
+                "            }",
+                "        }",
+            ]))
+
         elif op == "exhaust_from":
             # tier0 _op_exhaust_from with filter status: RANDOM victim from
             # the hand's Status cards (not chosen -- the sim rolls rng).
@@ -2744,6 +2948,12 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool) -> str:
                         else f"gain {n} [gold]Sparks[/gold]")
         elif op == "burst_energy":
             bits.append(f'gain {int(e["amount"])} [gold]Burst Energy[/gold]')
+        elif op == "gain_charge":
+            bits.append(f'gain {int(e["amount"])} [gold]Charge[/gold]')
+        elif op == "summon_kurage":
+            bits.append("summon [gold]Bake-Kurage[/gold]")
+        elif op == "conscript":
+            bits.append(_conscript_phrase(e))
         elif op == "gain_encore":
             base = int(e["amount"])
             delta = encore_upgrade(card)
@@ -2918,6 +3128,29 @@ def build_description(card: dict) -> str:
             else:
                 parts.append(f'Gain {int(eff["amount"])} [gold]Burst Energy[/gold].')
 
+        elif op == "gain_charge":
+            parts.append(
+                f'Gain {int(eff["amount"])} [gold]Charge[/gold].')
+
+        elif op == "summon_kurage":
+            # The pulse arithmetic is NOT spelled out here. It is a computed
+            # number (base + per-Charge x bank) and belongs in the rendered
+            # var / hover tip where it updates live -- the Furina legibility
+            # lesson: a face that prints stale arithmetic teaches the wrong
+            # number. The face says what the card DOES; the tip says what it
+            # is worth right now.
+            turns = ("{KurageTurns:diff()}" if kurage_turns_upgrade(card)
+                     else str(int(eff.get("amount", 1))))
+            parts.append(
+                f"Summon [gold]Bake-Kurage[/gold] for {turns} turn"
+                + ("{KurageTurns:plural:|s}" if kurage_turns_upgrade(card)
+                   else ("" if int(eff.get("amount", 1)) == 1 else "s"))
+                + ".")
+
+        elif op == "conscript":
+            phrase = _conscript_phrase(eff)
+            parts.append(phrase[0].upper() + phrase[1:] + ".")
+
         elif op == "gain_encore":
             base = int(eff["amount"])
             delta = encore_upgrade(card)
@@ -3085,6 +3318,16 @@ def build_description(card: dict) -> str:
                 f'Look at the top {int(eff["amount"])} cards of your draw '
                 "pile; discard one.")
 
+        elif op == "exhaust_from" and eff.get("select") == "chosen":
+            n = ("{Exhausts:diff()}" if exhaust_upgrade(card)
+                 else str(int(eff.get("amount", 1))))
+            plural = "" if str(n) == "1" else "s"
+            # VOICE LAW (R55): the card says what happens, and what happens is
+            # a rotation. No "sacrifice", no "destroy" -- the unit leaves the
+            # line intact. Exhaust is the game's keyword and stays.
+            parts.append(
+                f"[gold]Exhaust[/gold] {n} card{plural} from your hand.")
+
         elif op == "exhaust_from":
             parts.append("Exhaust a random Status card from your hand.")
 
@@ -3198,11 +3441,16 @@ def build_upgrade(card: dict) -> list[str]:
         return []
     key_for = {"block": "block", "draw": "draw", "gain_spark": "spark",
                "place_bomb": "bomb_damage", "burst_energy": "burst_energy",
-               "heal": "heal"}
+               "heal": "heal",
+               "summon_kurage": "kurage_turns", "energy": "energy",
+               "block_next_turn": "block_next_turn"}
     var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
                "buff_next_attack": 'DynamicVars["PowerAmount"]',
-               "heal": 'DynamicVars["Heal"]'}
+               "heal": 'DynamicVars["Heal"]',
+               "summon_kurage": 'DynamicVars["KurageTurns"]',
+               "energy": 'DynamicVars["Energy"]',
+               "block_next_turn": 'DynamicVars["BlockNextTurn"]'}
     lines, done = [], set()
     for eff in card["effects"]:
         op = eff["op"]
@@ -4083,6 +4331,174 @@ public static class GuestStarRoster
     return 0
 
 
+def _run_kokomi(check: bool) -> int:
+    """Emit the runtime-safe Kokomi subset and a complete blocker manifest.
+
+    Same discipline as Furina's path: a partial pool is intentionally INERT.
+    Generated classes use autoAdd:false and no Kokomi pool references them, so
+    codegen can advance card by card without ever shipping a half-built reward
+    pool. Blocked cards are named, counted, and clustered rather than silently
+    dropped -- an unlisted card is a bug, an unlisted BLOCKER is a lie.
+    """
+    cards = yaml.safe_load(KOKOMI_PROFILE.sheet.read_text(encoding="utf-8"))
+    generated: dict[str, str] = {}
+    blocked: dict[str, str] = {}
+    no_upgrade: dict[str, str] = {}
+
+    for card in cards:
+        reason = blocked_reason(card, KOKOMI_PROFILE)
+        if reason:
+            blocked[card["id"]] = reason
+            continue
+        generated[card["id"]] = emit(card, KOKOMI_PROFILE)
+        _, upgrade_reason = upgrade_plan(card)
+        if upgrade_reason:
+            no_upgrade[card["id"]] = upgrade_reason
+
+    main_generated_ids = set(generated)
+
+    main_entries = NEWLINE_JOIN.join(
+        f"        ModelDb.Card<{pascal(card_id)}>(),"
+        for card_id in sorted(main_generated_ids))
+    generated["kokomi_card_roster"] = f'''// <auto-generated>
+//     Generated by tools/gen_roster_cards.py from docs/kokomi-cards.yaml.
+//     Every generated personal-pool card; KokomiCardPool owns membership.
+// </auto-generated>
+
+#nullable enable
+
+using System.Collections.Generic;
+using MegaCrit.Sts2.Core.Models;
+
+namespace KleeMod.Cards.Kokomi.Generated;
+
+public static class KokomiCardRoster
+{{
+    private static List<CardModel>? _all;
+
+    public static IReadOnlyList<CardModel> All => _all ??= new List<CardModel>
+    {{
+{main_entries}
+    }};
+}}
+'''
+
+    clusters: dict[str, list[str]] = {}
+    cards_by_id = {card["id"]: card for card in cards}
+    for card_id, reason in blocked.items():
+        clusters.setdefault(
+            _kokomi_runtime_cluster(cards_by_id[card_id], reason),
+            []).append(card_id)
+
+    manifest = {
+        "_comment": (
+            "Generated by tools/gen_roster_cards.py from docs/kokomi-cards.yaml. "
+            "Only cards whose complete runtime grammar is implemented are emitted. "
+            "Blocked cards are not auto-registered or added to a partial pool."
+        ),
+        "profile": {
+            "character": KOKOMI_PROFILE.character_id,
+            "element": KOKOMI_PROFILE.native_element,
+            "cadence": (
+                "CATALYST (R52 ask N1): every Attack applies Hydro. Application "
+                "uptime is structural, not authored per card."
+            ),
+            "namespace": KOKOMI_PROFILE.namespace,
+        },
+        "coverage": {
+            "total": len(cards),
+            "generated": len(main_generated_ids),
+            "blocked": len(blocked),
+        },
+        "generated": sorted(main_generated_ids),
+        "blocked": dict(sorted(blocked.items())),
+        "runtime_clusters": {
+            key: sorted(value) for key, value in sorted(clusters.items())
+        },
+        "upgrades": {
+            "_comment": (
+                "docs/kokomi-upgrades.yaml is authoritative. A generated card "
+                "listed below ships without an upgrade until its full delta is "
+                "expressible; partial upgrade application is forbidden."
+            ),
+            "no_upgrade_path": dict(sorted(no_upgrade.items())),
+        },
+    }
+    manifest_src = json.dumps(manifest, indent=2) + NEWLINE
+
+    if check:
+        stale = []
+        for card_id, source in generated.items():
+            path = KOKOMI_PROFILE.out_dir / f"{pascal(card_id)}.cs"
+            if not path.exists() or path.read_text(encoding="utf-8") != source:
+                stale.append(card_id)
+        expected_files = {f"{pascal(card_id)}.cs" for card_id in generated}
+        actual_files = {
+            path.name for path in KOKOMI_PROFILE.out_dir.glob("*.cs")
+        } if KOKOMI_PROFILE.out_dir.exists() else set()
+        extra_files = sorted(actual_files - expected_files)
+        manifest_stale = (
+            not KOKOMI_PROFILE.manifest.exists()
+            or KOKOMI_PROFILE.manifest.read_text(encoding="utf-8")
+            != manifest_src
+        )
+        if stale or extra_files or manifest_stale:
+            if stale:
+                print(
+                    f"stale Kokomi generated cards: {', '.join(sorted(stale))}",
+                    file=sys.stderr,
+                )
+            if extra_files:
+                print(
+                    f"stale Kokomi generated files: {', '.join(extra_files)}",
+                    file=sys.stderr,
+                )
+            if manifest_stale:
+                print("stale Kokomi generated manifest", file=sys.stderr)
+            return 1
+        print("gen_roster_cards: kokomi up to date")
+        return 0
+
+    KOKOMI_PROFILE.out_dir.mkdir(parents=True, exist_ok=True)
+    for old in KOKOMI_PROFILE.out_dir.glob("*.cs"):
+        old.unlink()
+    for card_id, source in generated.items():
+        path = KOKOMI_PROFILE.out_dir / f"{pascal(card_id)}.cs"
+        path.write_text(source, encoding="utf-8")
+    KOKOMI_PROFILE.manifest.write_text(manifest_src, encoding="utf-8")
+
+    print(
+        f"kokomi: generated {len(main_generated_ids)} cards, "
+        f"blocked {len(blocked)}"
+    )
+    for cluster, card_ids in sorted(clusters.items()):
+        print(f"  {cluster}: {len(card_ids)}")
+    return 0
+
+
+def _kokomi_runtime_cluster(card: dict, reason: str) -> str:
+    """Group blockers by the RUNTIME SYSTEM they wait on, not by card.
+
+    The cluster name is what tells a reader whether the gap is one afternoon
+    of work or a system nobody has built -- "12 cards blocked" says nothing,
+    "12 cards blocked on the ward" says exactly what to do next.
+    """
+    ops = {eff.get("op") for eff in card.get("effects", [])}
+    powers = {eff.get("power") for eff in card.get("effects", [])
+              if eff.get("op") == "apply_power"}
+    if "prevent_exhaust_ward" in powers:
+        return "prevention_ward"
+    if {"conscript"} & ops:
+        return "conscript"
+    if {"gain_charge", "summon_kurage"} & ops:
+        return "charge_engine"
+    if "sly" in str(card.get("tags", [])):
+        return "sly_discard"
+    if reason.startswith("kit card"):
+        return "kit_burst"
+    return "shared_emitter_gap"
+
+
 def main(
     argv: list[str] | None = None, *, default_character: str = "klee"
 ) -> int:
@@ -4103,6 +4519,8 @@ def main(
         results.append(_run_klee(args.check))
     if args.character in ("furina", "all"):
         results.append(_run_furina(args.check))
+    if args.character in ("kokomi", "all"):
+        results.append(_run_kokomi(args.check))
     return max(results, default=0)
 
 
