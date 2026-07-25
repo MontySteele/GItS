@@ -43,7 +43,19 @@ STARTERS: dict[str, str] = {
 # this file is that a missing upgrade must be a decision on the record.
 NO_UPGRADED_FORM: dict[str, str] = {
     "EtherealSpotlightRelic": (
-        "Furina. Ethereal Spotlight adds a one-use Spotlight selector to hand "
+        "RULED 2026-07-26 (red-pen R2) — this entry is now a QUEUED "
+        "IMPLEMENTATION, not an open question. [USER] design: the upgraded "
+        "relic grants the benefits of BOTH Spotlight selector effects at once, "
+        "so conditions keying off 'moved the Spotlight this turn' are ALWAYS "
+        "ON, making her starter upgrade the selector-payoff enabler. This "
+        "deliberately overrides the sprint's 'no new behaviour in a starter "
+        "upgrade' rule BY USER AUTHORITY -- the rule is overridden, not "
+        "reinterpreted. Delete this entry when the class lands. "
+        "See docs/red-pen-2026-07-26.md R2. "
+        "Until then Touch of Orobas still hands Furina a Circlet. "
+        "--- The original reasoning, kept because it is why the ruling had to "
+        "come from the user rather than from an implementer: "
+        "Ethereal Spotlight adds a one-use Spotlight selector to hand "
         "at the start of each turn. There is NO NUMBER in it to scale: the "
         "selector is a Token card with no upgrade, and the effect is binary "
         "(the card is added, or it is not). Every candidate tune-up is "
@@ -52,12 +64,8 @@ NO_UPGRADED_FORM: dict[str, str] = {
         "forbids in a starter upgrade ('an upgraded starter that changes "
         "behavior is pool-sweep material'); and a per-turn Encore or Fanfare "
         "trickle is banned outright by her sheet's no-passive-accrual law "
-        "(kickoff §4). "
-        "CONSEQUENCE, stated plainly: until this is decided, Touch of Orobas "
-        "still hands Furina a Circlet. She is the character the playtest was "
-        "played on. "
-        "Gate: [USER] ruling at the G-D red-pen -- either accept a behaviour "
-        "change here as a deliberate exception, or send it to the pool sweep."
+        "(kickoff §4). The red-pen took the first branch and accepted a "
+        "behaviour change as a deliberate exception."
     ),
 }
 

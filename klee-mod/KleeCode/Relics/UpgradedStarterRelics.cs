@@ -68,6 +68,26 @@ internal static class UpgradedStarterRelics
 }
 
 /// <summary>
+/// !!! CARRIES A REJECTED NUMBER — DO NOT SHIP WITHOUT READING THIS !!!
+///
+/// The doubling below was **REJECTED** at the 2026-07-26 red-pen ("way too
+/// good"). The ratified design is different in kind, not just in magnitude:
+/// **"Gain 3 additional Sparks at the start of combat"** — a one-off windfall,
+/// not a permanent rate increase. See docs/red-pen-2026-07-26.md item 5.
+///
+/// It is left standing rather than half-replaced because the ratified version
+/// needs its sim counterpart (a real `starter_upgraded` hook; the red-pen
+/// harness used a throwaway) and the two must land together or the C# and the
+/// sim disagree about what Klee's upgraded starter does. That is queue item 2.
+///
+/// **Until then this relic is live in any build cut from this tree**, and a
+/// playtester who takes Touch of Orobas gets the rejected design. That is the
+/// same failure this whole track exists to prevent — a build implementing a kit
+/// that is not the design of record — so it is flagged loudly rather than left
+/// to a reader of the git log.
+///
+/// ---
+///
 /// Klee's upgraded starter (Touch of Orobas). Same hook, doubled number:
 /// 2 Sparks per Bomb detonation instead of 1.
 ///

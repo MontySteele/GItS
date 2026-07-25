@@ -92,7 +92,13 @@
    effects: [{op: damage, amount: 1, target: self}, {op: gain_encore, amount: 3}]}
    # The tragedienne: pay 1 HP, gain 3 buffer. Both movements generate Fanfare; the measured one-point wound keeps the risk/reward without making an overpicked Common a run liability.
 - {id: lasting_impression, name: "Lasting Impression", cost: 1, type: skill, rarity: common, solve: [scaling], archetypes: [fanfare], role: enabler, exhaust: true,
-   effects: [{op: gain_fanfare_floor, amount: 3}, {op: gain_encore, amount: 4}]}
+   effects: [{op: gain_fanfare_floor, amount: 5}, {op: gain_encore, amount: 4}]}
+   # Floor RATIFIED here (2026-07-26 [USER]; raised from its F-B2 value, and the upgrade delta chains on
+   # top unchanged). Tested at the red-pen, and the honest reading of that cell is that it sits BELOW THE
+   # RUN INSTRUMENT'S NOISE FLOOR -- both the fanfare and salon arms moved by less than the seed spread.
+   # At the payoff reach this archetype actually holds, the run model cannot rank a single common. What
+   # the cell DOES show is that the raised floor breaks nothing and does not re-pin the meter. The
+   # pool-sweep world, where reach is the subject rather than the confound, delivers the real verdict.
    # F-B2's floor source at COMMON, and the reason the mechanic reaches the archetype it was built for: powers alone
    # cannot, because this plan holds 2 of them in 28 cards (measured 3.6 floor pts/run against a bar of 25). A  lint-ok: F-A smoke measurements, not card numbers
    # performance the audience permanently remembers. Exhaust is the anti-degeneracy line — it is what keeps a

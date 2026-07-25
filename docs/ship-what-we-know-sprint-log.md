@@ -707,6 +707,58 @@ reaches.
 
 ---
 
+# RED-PEN OUTCOME — 2026-07-26
+
+**The sprint's gate has been run.** Full record:
+**docs/red-pen-2026-07-26.md**. This section is the delta against the close-out
+below, which is otherwise left as written.
+
+**Ratified as proposed (2 of 7):** `rain_of_roses` cost 1 — *interim*, with a
+pool-sweep direction recorded (five rares grant Encore; drop the rider and lean
+into the mass-aura identity); `star_of_the_show` +5.
+
+**Ratified as the alternative (1):** `controlled_demolition` took
+`bomb_damage` 5→7 with the count reverted to `X+1` — the option this log
+recorded as the alternative, chosen for exactly the reason recorded (raising the
+count also raises the ceiling and pulls on the splash proc cap).
+
+**Superseded by user redesign (2):** `nicole_celestial_gift` becomes *"Gain 1
+Strength and 4 Block each turn"* at cost 2; Explosive Frags' **doubling was
+rejected** — *"way too good"* — for *"Gain 3 additional Sparks at the start of
+combat"*. Both are implementation-pending.
+
+**Rulings that close open items in this log:**
+
+- **The reaction-counter question (G-B2) is answered: Reactions are TEAM events
+  in co-op, working as intended.** The census listed it as NEEDS RULING; it is
+  now ruled, and needs only a sealing comment.
+- **Furina's starter gap (G-C3) is answered, by overriding this sprint's own
+  rule.** R2 grants both Spotlight selector effects at once — new behaviour in a
+  starter upgrade, accepted as a deliberate exception by user authority. G-C3
+  declined to invent this precisely because it broke the rule; the rule was
+  overridden rather than reinterpreted. Still pending implementation, so **Touch
+  of Orobas continues to hand Furina a Circlet.**
+- **G-A5(b) is clarified as eyes-on, not telemetry** — and remains **OPEN**.
+
+**Two corrections to this log's own claims, on the evidence of the red-pen:**
+
+1. **G-C3(c)'s recorded divergence cost more than it said.** This log noted that
+   Klee's relic number would go to red-pen without sim evidence. It did not:
+   the red-pen built a throwaway `starter_upgraded` hook and measured it —
+   +7.1pt on demolition, +5.0 on reaction, CIs disjoint. Those deltas are what
+   rejected the doubling. The lesson inverts: the divergence was not merely a
+   cost, it was load-bearing, and the harness the session had to improvise is
+   now queue item 2.
+2. **G-D's "numbers land whenever" reading held, but the landing did not.** The
+   record states its patch had already applied `controlled_demolition` and
+   `lasting_impression`; a clean tree at `329c1a7` had neither. Both were applied
+   by hand on 2026-07-26. See the Discrepancy section of the record.
+
+**Sprint status: CLOSED at the red-pen.** What remains is a ratified
+implementation queue, not sprint work — it is listed in the record, in order.
+
+---
+
 # Sprint close-out — 2026-07-25
 
 ## Definition of done, item by item

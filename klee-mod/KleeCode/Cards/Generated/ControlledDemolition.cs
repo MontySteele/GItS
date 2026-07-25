@@ -46,14 +46,13 @@ public sealed class ControlledDemolition : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Controlled Demolition"),
-        ("description", "Place X+{Bombs:diff()} [gold]Bombs[/gold] on random enemies, each dealing {Damage:diff()} damage."),
+        ("description", "Place X+1 [gold]Bombs[/gold] on random enemies, each dealing {Damage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move),
-            new DynamicVar("Bombs", 2m)
+            new DamageVar(7m, ValueProp.Move)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -67,7 +66,7 @@ public sealed class ControlledDemolition : CustomCardModel, ISkillTagCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var x = ResolveEnergyXValue();
-        for (var i = 0; i < x + DynamicVars["Bombs"].IntValue; i++)
+        for (var i = 0; i < x + 1; i++)
         {
             var candidates = CombatState!.HittableEnemies.ToList();
             if (candidates.Count == 0) break;
@@ -79,6 +78,6 @@ public sealed class ControlledDemolition : CustomCardModel, ISkillTagCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Bombs"].UpgradeValueBy(1m);
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }
