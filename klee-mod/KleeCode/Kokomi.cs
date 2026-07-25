@@ -133,9 +133,20 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
         KleePck.Path("kokomi/ui/char_icon.png");
     public override string? CustomIconOutlineTexturePath =>
         KleePck.Path("kokomi/ui/char_icon.png");
+    /// <summary>
+    /// combat_visuals.tscn, NOT the convention combat.tscn Klee and Furina
+    /// use. Hers does not exist -- there is no rig to put in it until the art
+    /// pass lands -- and the `?? ` chain that used to name it anyway was the
+    /// exact shape S6c exists to catch: source that references a PCK resource
+    /// nothing produces, made invisible by a fallback. The gate cannot read
+    /// intent, and neither can the next person.
+    ///
+    /// The aspiration lives in KleeSceneTelemetry's EXPECTED MISSING list,
+    /// which is the honest home for it. When her rig ships, the scene and the
+    /// reference come back together.
+    /// </summary>
     public override string? CustomVisualPath =>
-        KleePck.Path("kokomi/model/combat.tscn")
-        ?? KleePck.Path("kokomi/model/combat_visuals.tscn");
+        KleePck.Path("kokomi/model/combat_visuals.tscn");
     public override string? CustomIconPath =>
         KleePck.Path("kokomi/ui/character_icon.tscn");
     public override string? CustomEnergyCounterPath =>
@@ -154,30 +165,25 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
         KleePck.Path("kokomi/model/merchant_character.tscn");
 
     /// <summary>
-    /// Combat model, scene-first, same three-step chain Klee and Furina ship
-    /// -- and for the same reason: a silent path miss falls back to static
-    /// art and looks like "nothing happened", so every step logs.
+    /// Combat model. Klee and Furina run a scene-first chain against their
+    /// convention combat.tscn; Kokomi has no rig yet, so this is the static
+    /// half of that chain and nothing else.
     ///
-    /// Today every step misses and this returns null, which is the correct
-    /// behaviour: the base scene lookup takes over and she is visible and
-    /// playable while Track D is outstanding.
+    /// Deliberately NOT written as "try the scene, then fall back". A branch
+    /// that probes a path no build step produces is dead on every run, and a
+    /// dead branch reads as a working feature -- the failure mode this file's
+    /// own logging discipline is aimed at. When her rig ships, the scene
+    /// branch comes back with it, together with the scene.
+    ///
+    /// A null return is correct and safe here: the base scene lookup takes
+    /// over, so she is visible and playable while Track D is outstanding.
     /// </summary>
     public override NCreatureVisuals? CreateCustomVisuals()
     {
-        string? scenePath = KleePck.Path("kokomi/model/combat.tscn");
-        if (scenePath != null)
-        {
-            var visuals = NodeFactory<NCreatureVisuals>.CreateFromScene(scenePath);
-            MegaCrit.Sts2.Core.Logging.Log.Info(
-                $"[{KleeMod.ModId}] combat visuals from convention scene "
-                + $"{scenePath}: {visuals.GetType().Name}");
-            return visuals;
-        }
-
-        MegaCrit.Sts2.Core.Logging.Log.Warn(
-            $"[{KleeMod.ModId}] Kokomi convention combat scene missing; "
-            + "falling back to static combat_model.png (expected until the "
-            + "Kokomi art pass lands; rebuild with tools/build_pck.ps1)");
+        MegaCrit.Sts2.Core.Logging.Log.Info(
+            $"[{KleeMod.ModId}] Kokomi has no convention combat scene yet; "
+            + "using static combat_model.png (expected until her art pass "
+            + "lands -- see KleeSceneTelemetry's EXPECTED MISSING list)");
         var path = KleePck.Path("kokomi/model/combat_model.png");
         return path == null
             ? null
