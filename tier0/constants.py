@@ -290,6 +290,17 @@ KURAGE_DURATION = 1           # turns the jellyfish holds the field. Stacks
                               # duration 1 — it only fires if the Burst goes
                               # off the same turn the Kurage was played. The
                               # canon loop survives in code, not in practice.
+                              # COUPLING PIN (playtest sprint P1): this
+                              # constant is also the pulse FREQUENCY, and
+                              # Kurage's Oath pays its ward once per pulse.
+                              # The Oath's 12 was measured here at 1. Raise
+                              # the duration and you have repriced a Common
+                              # power that already carries a [USER] "maybe
+                              # too strong" flag, without editing its row.
+                              # test_oath_ward_is_pinned_to_the_pulse_
+                              # frequency_it_was_measured_at fails on that
+                              # edit by design — re-measure the Oath, then
+                              # move the pin and both notes together.
 KURAGE_PULSE_BASE = 4         # flat damage per turn-end pulse, before the
                               # bank read (v0.4 starter rework: 2 -> 4).
 KURAGE_PULSE_PER_CHARGE = 4   # pulse gains this much damage PER POINT of

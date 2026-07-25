@@ -36,8 +36,8 @@ from tier0.engine.combat import run_fight
 from tier0.engine.state import Card, Enemy
 from tier0.harness import metrics as t0_metrics
 from tier0.pilot.policy import make_pilot
-from tier05 import (acts, draft, events, fanfare_telemetry, maps,
-                    potions as potion_pool, rewards, route, shop)
+from tier05 import (acts, draft, events, fanfare_telemetry, kurage_telemetry,
+                    maps, potions as potion_pool, rewards, route, shop)
 from tier05 import relics as relic_pool
 
 # policy(rng, deck_cards, offers, archetype) -> Card | None
@@ -190,6 +190,10 @@ class RunResult:
     #                    a per-COMBAT rate derived from these must be rescaled
     #                    by the observed fight count, never by a template
     #                    constant (see fanfare_telemetry.per_run).
+    kurage_traces: list = field(default_factory=list)    # P2: (act_index,
+    #                    KurageTrace) per fight, in order. Empty traces
+    #                    (pulses == 0) for every character that never fields
+    #                    a Bake-Kurage, which is all of them but Kokomi.
 
 
 def node_template() -> list[str]:
@@ -508,6 +512,12 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 # costs other rosters nothing.
                 res.fanfare_traces.append(
                     (act_i, fanfare_telemetry.trace(state.log)))
+                # P2 (playtest sprint): same act-tagged shape, same reason --
+                # the runaway question is "by act 3", which no run-level
+                # average can answer. Empty for every character without a
+                # fielded Kurage, so the rest of the roster pays nothing.
+                res.kurage_traces.append(
+                    (act_i, kurage_telemetry.trace(state.log)))
                 fights += 1
                 hp = state.player.hp
                 # Combat-scoped effects such as Feed can raise max HP permanently.

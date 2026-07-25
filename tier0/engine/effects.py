@@ -1732,6 +1732,17 @@ def player_turn_end_triggers(state: CombatState) -> None:
         dmg = C.KURAGE_PULSE_BASE + p.charge * C.KURAGE_PULSE_PER_CHARGE
         KNOB_READS["KURAGE_PULSE_PER_CHARGE"] = (
             KNOB_READS.get("KURAGE_PULSE_PER_CHARGE", 0) + 1)
+        # P2 runaway telemetry (playtest sprint, Track P). Report-only; no
+        # rule reads this event. The x4 bank read is the one term in the kit
+        # that only ever grows, and [USER]'s standing caveat is "watch act 3".
+        # Emitting the pulse SIZE (with the bank that produced it) means the
+        # next sheet to add a Charge source re-arms that question by itself,
+        # instead of it depending on someone remembering to ask. Emitted
+        # before the living-enemies check so a pulse into an empty board is
+        # still a sample of the CURVE -- filtering by what happened to be
+        # standing would bias the tail downward exactly when fights end fast.
+        state.emit("kurage_pulse", amount=dmg, charge=p.charge,
+                   landed=bool(state.living_enemies))
         if state.living_enemies:
             enemy = state.rng.choice(state.living_enemies)
             deal_damage_to_enemy(state, enemy, dmg, element="hydro",

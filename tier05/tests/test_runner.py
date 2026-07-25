@@ -36,7 +36,13 @@ def test_realistic_runner_enables_both_run_layers(monkeypatch, capsys):
         called["args"] = args
         called["kwargs"] = kwargs
         return [SimpleNamespace(node_kinds=[], hp_by_node=[], n_acts=1,
-                                events=[], deck_ids=[])]
+                                events=[], deck_ids=[],
+                                # P2 telemetry: the runner reads this off
+                                # every result, so the stand-in has to carry
+                                # it. Left strict on the runner side on
+                                # purpose -- a getattr default there would
+                                # swallow a real RunResult regression.
+                                kurage_traces=[])]
 
     monkeypatch.setattr(runner.model, "run_many", fake_run_many)
     monkeypatch.setattr(runner.run_metrics, "summarize_runs", lambda _: {})
@@ -70,7 +76,13 @@ def test_bare_runner_preserves_historical_defaults(monkeypatch):
         called["args"] = args
         called["kwargs"] = kwargs
         return [SimpleNamespace(node_kinds=[], hp_by_node=[], n_acts=1,
-                                events=[], deck_ids=[])]
+                                events=[], deck_ids=[],
+                                # P2 telemetry: the runner reads this off
+                                # every result, so the stand-in has to carry
+                                # it. Left strict on the runner side on
+                                # purpose -- a getattr default there would
+                                # swallow a real RunResult regression.
+                                kurage_traces=[])]
 
     monkeypatch.setattr(runner.model, "run_many", fake_run_many)
     monkeypatch.setattr(runner.run_metrics, "summarize_runs", lambda _: {})

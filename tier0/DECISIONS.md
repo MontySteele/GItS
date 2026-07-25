@@ -1543,3 +1543,111 @@ The Tamakushi Casket link is inert at KURAGE_DURATION 1 (a fielded Kurage
 is always at exactly 1, so refresh-to-full is a no-op). The mechanic stays
 in code and stays test-pinned via a raised duration, so restoring a longer
 duration is safe; the Burst rework itself is a future conversation.
+
+## R57 -- Playtest sprint Track P: pins, telemetry, and a world that moved (2026-07-25)
+
+Track P of the Kokomi Playtest Build sprint. Scope as ratified: pins and
+telemetry only, zero balance changes (the sprint's freeze rule -- the
+variable under test is the MEDIUM, not the numbers). Everything below is
+instrumentation or measurement; no dial moved.
+
+**P1 -- the Oath coupling pin (LANDED).** `kurage_ward` 12 pays out once per
+Kurage pulse, so its real value is (ward x pulses per play). It owns only the
+first factor: the second lives in `KURAGE_DURATION` and the bake_kurage
+`kurage_turns: +1` delta, neither of which the Oath's own tests touch. A
+duration change therefore reprices a Common power that already carries a
+[USER] "maybe too strong" flag, silently and from another file.
+`test_oath_ward_is_pinned_to_the_pulse_frequency_it_was_measured_at` now fails
+on that edit, and reciprocal notes sit at BOTH ends (the sheet row and the
+constant) because the person raising the duration reads constants.py, not the
+Oath's row. Pin verified to fire: forcing KURAGE_DURATION to 2 fails it.
+
+**P2 -- runaway telemetry (LANDED).** `kurage_pulse` is emitted at the pulse
+site with its size and the bank that produced it; `tier05/kurage_telemetry.py`
+reports p50/p95/max by act. Report-only, and silent for every character that
+never fields a Kurage. Rationale: the runaway failure mode is INVISIBLE in win
+rate (a kit that one-shots act-3 elites still reports a win, and reports it as
+success), so [USER]'s standing "watch act 3" caveat becomes a column instead of
+a thing someone has to remember. Pulses into an empty board are counted --
+they are samples of the CURVE, and dropping them biases the tail down exactly
+when fights end fast.
+First reading (500 runs, --realistic, current world), act1 / act2 / act3 p95:
+priest 64 / 116 / 152; commander 56* / 128 (act 3 p95); generic 44 / 108;
+assist 44 / 100. Mean bank at pulse time reaches 16.6 in act 3 (priest).
+The curve roughly doubles act 1 -> act 3 and then flattens. NOT a runaway on
+this evidence; the tail is now watched by construction.
+
+**P3 -- commander Garment-uptime criterion (WRITTEN).** The v0.4 watchlist was
+carried forward with no terms, which makes it un-retireable. Terms, registered
+here and not to be redefined mid-sprint:
+  RETIRE  if long-fight uptime holds < 60% through the Burst rework.
+  ESCALATE if it goes past 70% (a permanent multiplier wearing a Burst's
+           clothes -- the v0.3 failure mode, restated).
+  Neither -> stays a watchlist entry, unchanged.
+Current value stands at the v0.4 measurement (50.1% overall / 58.7% in long
+fights), i.e. just under the retire line and not yet retired. The playtest
+supplies the felt half (protocol item 2).
+
+**P4 -- skeleton-test debt: INVESTIGATED, NOT REPRODUCIBLE.** Went further
+than "log it as debt", and the result is a null.
+FIRST, a real defect in the plan's own premise: the `wip-safety-net` tag named
+as the reproduction handle DID NOT EXIST. The stash was empty, and commit
+`deba245` was reachable from no ref and no reflog entry -- a dangling object
+awaiting gc, i.e. the handle the plan proposed to preserve was already gone.
+Re-created as an annotated tag before it could be pruned; it now anchors the
+entire pre-merge Kokomi WIP tree (12 files).
+SECOND, with the handle restored, `test_build_kokomi_skeleton` PASSES at
+deba245 and passes at HEAD. The only tree that ever exhibited the failure was
+the CONFLICTED MERGE working tree, which was never committed by anyone, so
+there is no artifact that reproduces it and there never will be. Logged as
+CLOSED-UNREPRODUCIBLE rather than as standing debt: leaving it open would
+imply an investigation that no preserved state can support. Do not delete the
+tag until someone decides that WIP tree is worthless.
+
+**P5 -- deck-size survivorship split (LANDED, and it answers its question).**
+`avg_final_deck` now reports won/lost alongside the pooled figure. The 21.7-24.2
+soft-cap ride was ambiguous by construction: heavy decks and short deaths push
+the mean in opposite directions. Split, it is unambiguous --
+  priest 25.4 (won 33.5 / lost 24.8); commander 25.0 (31.7 / 24.3);
+  generic 24.5 (33.8 / 23.9); assist 23.1 (31.2 / 22.9).
+WINNERS' DECKS ARE UNIFORMLY THE BIG ONES, by 7-10 cards. The soft-cap ride is
+survivorship, not bloat: runs that live longer draft more. Deck size is not a
+cause of death in any lane. LAW 4 needs no action.
+
+**THE FINDING -- the world moved, and the R56 numbers are stale.**
+Nobody touched Kokomi. RUNTEMPLATE 7 (acts 2-3 event pools) and DRAFTER 9
+landed on main from the Furina workstream, and the whole roster inflated.
+Re-measured, same command, 500 runs, --realistic:
+| lane / anchor | R56 (DRAFTER v8) | now (DRAFTER v9 + RUNTEMPLATE 7) |
+|---|---|---|
+| Kokomi commander | 5.8% | **9.6%** |
+| Kokomi priest    | 6.2% | **7.0%** |
+| Kokomi generic   | 2.0% | **6.8%** |
+| Kokomi assist    | 1.6% | **2.0%** |
+| Furina salon     | 13.4% | 18.2% |
+| Klee demolition  | 3.4% | 9.2% |
+| real_ironclad    | 3.6% | 8.0% |
+| ref_ironclad     | 0.6% | **7.4%** |
+Her ABSOLUTE numbers rose; her RELATIVE position did not improve -- against
+real_ironclad she went from 1.7x to 0.9x (priest) and 1.6x to 1.2x
+(commander), and against Furina from 0.46x to 0.38x. She remains mid-pack:
+at or just above the Ironclad anchors, far below Furina. **The freeze rule is
+therefore SAFE on the evidence** -- she does not need a rebalance to be worth
+playtesting, and the playtest is still the right next instrument.
+SEPARATE CONCERN, flagged for the Furina/roster workstream and NOT acted on
+here: `ref_ironclad` moved 0.6% -> 7.4%, a 12x swing in the FROZEN reference
+battery. A reference anchor that moves that far invalidates cross-world
+comparison against every archived number in this file, including R56's. That
+is a roster-level instrument question, not a Kokomi one.
+
+**ANOMALY, recorded because burying it would be worse.** The first
+instrumented 500-run priest cell read 8.4%; every subsequent run of the same
+command on the same tree -- six of them, including four with varied
+PYTHONHASHSEED -- reads 7.0%. Instrumentation was verified INERT by
+revert-and-compare (removing only the emit reproduces 7.0% exactly), and
+RunResult is keyword-constructed so the added field cannot shift anything.
+Cause NOT established. A concurrent session was writing the repo during that
+window (mod-side files only, per mtimes), which is suggestive but unproven.
+Recorded as an open trust question about single-cell measurement, in the same
+family as the `--realistic` catch that nearly caused a false regression call.
+Treat any single 500-run cell as provisional until repeated.

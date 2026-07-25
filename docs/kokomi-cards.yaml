@@ -143,10 +143,15 @@
    # v0.4 ([USER]): the jellyfish's canon SECOND job. Bake-Kurage in the game deals Hydro DMG *and heals nearby
    # characters at set intervals* — the pulse ships the damage half baseline, and this power drafts the mending
    # half back in as Block (R52 healing law: her HP bar never moves, the incoming does). While it holds, every
-   # Kurage pulse also grants 5 Block. Priced off the Regent precedent [USER] named: a 2-cost power paying 13
-   # Block per 2-cost finisher play. Hers triggers off a 1-cost summon for 5, and the summon only pulses once
-   # per play at KURAGE_DURATION 1 — so the honest read is "N Block per Bake-Kurage", doubled once the summon
+   # Kurage pulse also grants 12 Block. Priced off the Regent precedent [USER] named: a 2-cost power paying 13
+   # Block per 2-cost finisher play. Hers triggers off a 1-cost summon, and the summon only pulses once
+   # per play at KURAGE_DURATION 1 — so the honest read is "12 Block per Bake-Kurage", doubled once the summon
    # is upgraded to two turns.
+   # COUPLING PIN (playtest sprint P1). This card's value is (ward x pulses per play), and it owns only the
+   # first factor. The second lives in KURAGE_DURATION (1) and the bake_kurage `kurage_turns: +1` delta —
+   # both outside this row, neither guarded by this card's own tests. Moving either reprices the Oath without
+   # touching it. `test_oath_ward_is_pinned_to_the_pulse_frequency_it_was_measured_at` fails if that is
+   # attempted silently: re-measure at the new frequency, then move the pin and this note in the same change.
    # THE NUMBER IS 12, MEASURED, NOT REASONED. The first draft was 5, priced by ratio off Regent (13 Block off a
    # 2-cost finisher, so ~5 off a 1-cost summon). That measured as a TRAP PICK — priest run winrate 5.8% with no
    # card at all vs 3.8% with it, i.e. drafting it made her worse. Bracket at 500 runs/plan --realistic:
