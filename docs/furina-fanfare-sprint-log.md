@@ -14,6 +14,13 @@ runs alongside from day one.
 > business is draft reach, which goes back to the design stage as its own
 > pass rather than being chased from inside this sprint. Full account in
 > *Sprint close-out* at the end of this log.
+>
+> **Re-confirmed under RUNTEMPLATE_VERSION 6** (the map rework, merged
+> `94c8e91`, which archives every number measured here). Payoff reach did not
+> move (1.99 → 1.85 cards per deck) and the run winrate did not move (1.3% →
+> 1.3%), while gate (1)'s act-1 limb flipped to a pass on its own and salon
+> rose to 17.8%. The world changed, fanfare did not. See *Post-merge ghost
+> check* — the null was tested, not merely asserted.
 
 ---
 
@@ -910,3 +917,105 @@ arm under RUNTEMPLATE 6 is the first thing that should happen after the
 merge**, precisely to rule out that this sprint spent itself chasing an
 instrumentation ghost. If the payoff-reach figure moves materially under the
 new map, this close-out is what gets reopened.
+
+---
+
+# Post-merge ghost check — RUNTEMPLATE_VERSION 6 (2026-07-24)
+
+The close-out above registered a reopening condition: the map rework
+(`claude/t0.5-sims-performance-huj26w`, merged as `94c8e91`) bumps
+RUNTEMPLATE_VERSION 5 → 6, which archives every number in this log, and it
+was built partly to fix instrumentation errors. **If the payoff-reach figure
+moved materially under the new map, the sprint had been chasing a ghost and
+this close-out reopens.** Re-derived by `tier05/exp_furina_ghostcheck.py`,
+600 runs/arm, seed 11, route `hunter`.
+
+## Result: the null survives. The close-out stands.
+
+| arm | win | act-1 | payoffs/deck | reach | `core_complete` | floors/run | fights/run |
+|---|---|---|---|---|---|---|---|
+| fanfare | **1.3%** | **53.8%** | 1.85 / 19.5 | 9.5% | 85.7% | 56.5 | 10.7 |
+| salon | **17.8%** | 60.7% | 1.14 / 22.6 | 5.0% | 67.2% | 91.7 | 14.0 |
+| spotlight | 2.2% | 63.8% | 0.81 / 22.0 | 3.7% | 90.3% | 104.6 | 12.0 |
+
+Against the RUNTEMPLATE 5 archive (fanfare 1.3% win / 44.0% act-1, payoff
+reach 1.99 per ~18.4-card deck, salon 12.5% win):
+
+- **Payoff reach did not move: 1.99 → 1.85 cards, 9.5% of the deck.** This is
+  the number the null is built on and the one the reopening condition names.
+  It is unchanged.
+- **The run winrate did not move: 1.3% → 1.3%.** At 600 runs this is no
+  longer a small-sample statement — a true 3% rate would put ~18 wins in the
+  sample and there are 8.
+- **Gate (1)'s act-1 limb FLIPPED TO A PASS: 44.0% → 53.8%**, clearing the
+  ≥50% bar without a single card change.
+
+## Why that last line is the strongest confirmation in this log
+
+Gate (1) has two limbs. The new map moved one of them nearly ten points and
+left the other **exactly** where it was. The archetype now clears act 1 and
+then dies anyway.
+
+That is the frontload hypothesis being falsified a second time, by a
+completely independent mechanism. F-B3 tried to buy act-1 clear with printed
+damage and got it (44% → 50% at +6) without moving the run winrate; the map
+rework gave the same act-1 clear away for free and also did not move the run
+winrate. **Act-1 clear and fanfare's run winrate are not connected**, so no
+lever aimed at the early game can reach gate (1). The §5 branch is closed for
+good.
+
+## The world moved; fanfare did not
+
+The map rework is not a null world — it changed the game substantially, and
+the other archetypes noticed:
+
+- **salon 12.5% → 17.8%**, and it passes gate (1) outright.
+- spotlight 0.0% → 2.2%; act-1 clear 63.8%.
+- Every arm's fight count rose, and it is now **variable by arm** (fanfare
+  10.7, salon 14.0): a route decides how many fights a run takes, and a deck
+  that dies early simply gets fewer. Fights/run is no longer a template
+  constant and must never again be treated as one when rescaling a
+  per-combat rate.
+
+So the instrument genuinely changed, two of three archetypes moved, and the
+one under investigation did not. **The archetype-to-archetype gap widened**
+from ~10× (12.5 vs 1.3) to ~14× (17.8 vs 1.3). Whatever the map rework
+fixed, it was not what ails fanfare.
+
+## Two corrections to how the table above should be read
+
+- **The `payoffs` column is "cards that read Fanfare", not "that arm's own
+  payoffs".** `draft._reads_fanfare` is the fanfare predicate, so the salon
+  and spotlight rows report how many fanfare readers those decks incidentally
+  hold — they are a baseline, not a like-for-like comparison. Salon does not
+  win *despite* 1.14 payoffs; salon wins on cards this predicate does not
+  measure. Only the fanfare row is a reach measurement.
+- **`core_complete("fanfare")` reports 85.7% online** while the deck holds
+  1.85 payoffs. The instrument bug identified in the close-out is intact and
+  now quantified: it calls the archetype assembled in six runs out of seven,
+  in a world where it wins one in eighty. It remains the first thing to fix
+  in the draft-reach pass, and nothing should be measured against it until
+  then.
+
+## The sharpest single number this check produced
+
+`warmup_act` — one of the four cards **F-B3's numbers sweep buffed** — is in
+**0.0% of fanfare decks.** Not rare: absent. Of the other three,
+`dramatic_entrance` is in 10.3% and `showstopper` in 6.7%.
+
+The sprint's final lever was a damage buff applied to a card that is never
+drafted. That is the whole finding in one line, and it is now confirmed under
+two different run templates.
+
+## Gate status under RUNTEMPLATE 6
+
+| gate | bar | v6 measurement | verdict |
+|---|---|---|---|
+| (1) fanfare viable | win ≥3% **and** act-1 ≥50% | 1.3% / 53.8% | **FAILS** (act-1 limb now passes) |
+| (2) meter is live | read at-cap <15% | 0.4–2% across arms | PASS |
+| (3) floors reach the archetype | ≥25/run | 56.5/run | PASS |
+| (4) salon does not collapse | ≥8% | **17.8%** | PASS |
+
+Unchanged in substance from the pre-merge reading. The sprint closes as
+ruled, the resource rework ships, and draft reach goes to the design stage
+with one more piece of evidence than it had.
