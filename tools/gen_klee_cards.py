@@ -240,7 +240,9 @@ BLOCK_NEXT_TURN_FIELDS = {"op", "amount"}
 # archetype/rarity data lives only there), and every resolved member must
 # itself be a generated class -- both enforced in blocked_reason.
 ADD_CARD_CLASSES = {"confiscated": "Confiscated"}
-ADD_CARD_FIELDS = {"op", "card", "card_id", "pool", "zone", "to", "amount",
+ADD_CARD_FIELDS = {
+    # Kokomi/Silent Sly: extra effects that fire when the card is DISCARDED.
+    "sly","op", "card", "card_id", "pool", "zone", "to", "amount",
                    "cost_override"}
 GUEST_STAR_FIELDS = {"op", "rarity", "amount", "to", "cost_override"}
 ENERGY_FIELDS = {"op", "amount"}
@@ -389,6 +391,14 @@ APPLY_POWERS = {
     # implementation of a rule the engine already owns.
     "metallicize": ("MetallicizePower", None,
         "At the start of your turn, gain {X} Block."),
+    # Cap 6 mirrors the sheet's `max_stacks: 6` -- a single-application ward,
+    # not a stacking one. Vigil's upgrade moves amount AND cap together
+    # (test_vigil_upgrade_moves_the_cap_with_the_amount pins that), so the
+    # registry cap has to move with them or the upgrade is silently swallowed.
+    "prevent_exhaust_ward": ("PreventExhaustWardPower", 6,
+        "The first time you would take unblocked attack damage each turn, "
+        "prevent up to {X} of it and [gold]Exhaust[/gold] a random card from "
+        "your draw pile."),
     "kurage_ward": ("KurageWardPower", None,
         "Each [gold]Bake-Kurage[/gold] pulse also grants {X} Block."),
     "feel_no_pain": ("FeelNoPainPower", None,
@@ -576,7 +586,12 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "encore",
                       # sheet already rules but codegen could not express, so
                       # three of her cards -- one of them a STARTER -- were
                       # shipping with no campfire upgrade at all (G-C1 lint).
-                      | {"kurage_turns", "energy", "block_next_turn"}
+                      | {"kurage_turns", "energy", "block_next_turn",
+                         # `formula_per: +N` bumps the PER term of an
+                         # amount_formula, which is the ExtraDamage var in the
+                         # CalculatedDamageVar triple -- the same slot the
+                         # conditional_bonus delta moves.
+                         "formula_per"}
                       | POWER_UPGRADE_KEYS)
 
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
@@ -605,6 +620,8 @@ TARGET_CS = {
 # still compiles. Descriptive/draft metadata is allowlisted beside every
 # currently implemented lifecycle field.
 CARD_FIELDS = {
+    # Kokomi/Silent Sly: extra effects that fire when the card is DISCARDED.
+    "sly",
     "id", "name", "cost", "type", "rarity", "solve", "archetypes", "role",
     "effects", "tags", "exhaust", "kit_card", "requires",
     # Companion identity/reward metadata.
@@ -717,10 +734,11 @@ def blocked_reason(
     # discipline. Teaching this needs a CalculatedVar bound to the exhaust
     # pile, which is Track C work, not a codegen shortcut.
     for effect in card.get("effects", []):
-        if "amount_formula" in effect:
+        if "amount_formula" in effect and exhaust_pile_calc_rider(
+                card, effect) is None:
             formula = effect["amount_formula"]
             return (f"amount_formula (reads {formula.get('count')}) -- needs a "
-                    "CalculatedVar bound to the pile, not a literal")
+                    "CalculatedVar bound to that count, not a literal")
 
     # R20: inline upgrade fields are deprecated repo-wide -- deltas live in
     # *-upgrades.yaml sheets. Block loudly so a stray inline key can never
@@ -750,7 +768,11 @@ def blocked_reason(
             if bf is not None and not (
                     bf.endswith("_per_detonation_this_combat")
                     and bf.partition("_per_")[0].isdigit()) and not re.fullmatch(
-                        r"\d+_per_\d+_fanfare", bf):
+                        r"\d+_per_\d+_fanfare", bf) and not re.fullmatch(
+                        # Kokomi's Charge reader. Same CalculatedDamageVar path
+                        # as Fanfare's -- see charge_calc_rider for why an
+                        # honest printed number matters more here than there.
+                        r"\d+_per_\d+_charge", bf):
                 return f"bonus_formula '{bf}'"
             if "bonus_vs_bombed" in eff:
                 return "conditional damage bonus (needs bomb system)"
@@ -1105,6 +1127,48 @@ def fanfare_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
     return int(eff["amount"]), int(m.group(1)), int(m.group(2))
 
 
+def exhaust_pile_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: exhaust_pile}` -- her finishers that
+    read everything she has rotated off the line so far.
+
+    Same CalculatedDamageVar path as the Charge and Fanfare riders, for the
+    same reason: the pile grows all combat, so a face printing only `base`
+    would understate the card by more than it states by the time anyone casts
+    it. Only the exhaust_pile count is expressible; any other count token
+    stays a named blocker rather than a guess.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict) or formula.get("count") != "exhaust_pile":
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            "static (card, _) => "
+            "KokomiResources.ExhaustPileCount(card.Owner.Creature)")
+
+
+def charge_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
+    """Kokomi's Charge damage rider (`N_per_M_charge`), rendered through the
+    base game's CalculatedDamageVar for exactly the reason Furina's Fanfare
+    rider is (Legibility sprint, 2026-07-24): the face, the hover preview and
+    the resolved hit must share ONE value path.
+
+    This matters more for Charge than it did for Fanfare. The bank is uncapped
+    and never spent, so by act 3 the rider is routinely larger than the printed
+    base -- a face showing only the base would be understating the card by more
+    than it states. `all_streams_flow` is her signature reader; if any card in
+    the game has to print an honest number, it is that one.
+
+    Returns (base, per_n, charge_div) or None.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    m = re.fullmatch(r"(\d+)_per_(\d+)_charge", eff.get("bonus_formula", ""))
+    if not m:
+        return None
+    return int(eff["amount"]), int(m.group(1)), int(m.group(2))
+
+
 def salon_deploy_card(card: dict) -> bool:
     """Salon-deploy cards render their replacement multiplier through
     `salon_calc_rider` instead of the other riders' path (their scaled value
@@ -1345,6 +1409,15 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
         return base, per_n, (
             "static (card, _) => "
             f"FurinaResources.Fanfare(card.Owner.Creature) / {div}")
+    pile = exhaust_pile_calc_rider(card, eff)
+    if pile is not None:
+        return pile
+    charge = charge_calc_rider(card, eff)
+    if charge is not None:
+        base, per_n, div = charge
+        return base, per_n, (
+            "static (card, _) => "
+            f"KokomiResources.GetCharge(card.Owner.Creature) / {div}")
     aura = aura_calc_rider(card, eff)
     if aura is not None:
         base, bonus = aura
@@ -1659,6 +1732,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "kurage_turns": any(e["op"] == "summon_kurage" for e in effects),
         "energy": any(e["op"] == "energy" for e in effects),
         "block_next_turn": any(e["op"] == "block_next_turn" for e in effects),
+        "formula_per": any(
+            exhaust_pile_calc_rider(card, e) is not None for e in effects),
     }
     # tier0 binds every POWER_UPGRADE_KEYS delta to the first TOP-LEVEL
     # apply_power OR buff_next_attack (upgrades.py takes `next(fx for fx in
@@ -3087,6 +3162,13 @@ def build_description(card: dict) -> str:
             # converted keeps its full sentence -- its number is not on the
             # face, so the text is the only place the player can read it.
             rehomed = calc_rider(card, eff) is not None
+            if exhaust_pile_calc_rider(card, eff) is not None:
+                # The number is already honest (it renders through the
+                # CalculatedVar); this sentence says WHY it moves. Without it
+                # the card is a damage number that changes for no stated
+                # reason, which is the exact confusion Track C exists to stop.
+                parts.append(
+                    "Scales with the number of cards [gold]Exhausted[/gold].")
             if "bonus_formula" in eff:
                 formula = eff["bonus_formula"]
                 if formula.endswith("_per_detonation_this_combat"):
@@ -3095,12 +3177,19 @@ def build_description(card: dict) -> str:
                     parts.append(
                         f"+{per} damage per [gold]Bomb[/gold] detonated this combat.")
                 elif rehomed:
-                    parts.append("Scales with [gold]Fanfare[/gold].")
+                    # Name the RESOURCE the formula actually reads. This said
+                    # "Fanfare" unconditionally, which put another character's
+                    # mechanic on the face of every Kokomi Charge reader --
+                    # including her signature one -- while the arithmetic
+                    # underneath was correct. A face that names the wrong stat
+                    # is worse than one that says nothing.
+                    stat = formula.rpartition("_")[2]
+                    parts.append(f"Scales with [gold]{stat.title()}[/gold].")
                 else:
                     n, _, rest = formula.partition("_per_")
-                    fanfare_step = rest.partition("_")[0]
+                    step, _, stat = rest.partition("_")
                     parts.append(
-                        f"+{n} damage per {fanfare_step} [gold]Fanfare[/gold].")
+                        f"+{n} damage per {step} [gold]{stat.title()}[/gold].")
             if "bonus_vs_aura" in eff:
                 if rehomed:
                     parts.append("Bonus damage vs. an elemental aura.")
@@ -3510,6 +3599,12 @@ def build_upgrade(card: dict) -> list[str]:
         else:
             var = var_for[op]
         lines.append(f"{var}.UpgradeValueBy({int(deltas[key])}m);")
+    if "formula_per" in deltas:
+        # The PER term of an amount_formula lives in ExtraDamage (the middle
+        # slot of the CalculatedDamageVar triple: base + per * count), so the
+        # upgrade bumps that var and the face re-renders itself.
+        lines.append(
+            f'DynamicVars.ExtraDamage.UpgradeValueBy({int(deltas["formula_per"])}m);')
     if "conditional_bonus" in deltas:
         # tier0: bump the then-branch's first damage (the ExtraDamage var;
         # expressibility gated in upgrade_plan/conditional_bonus_upgrade).
@@ -3719,6 +3814,31 @@ def emit(
         if upgrade
         else f"// R24: NO upgrade path -- {no_upgrade_reason}. Flagged in manifest."
     )
+
+    # Sly (Kokomi, playtest sprint): the card's `sly` list fires when the card
+    # is DISCARDED, not played. tier0 resolves victim.sly at the discard site,
+    # so the mod hangs it on the card's own AfterCardDiscarded hook -- the
+    # effects are the card's, and putting them anywhere else would separate a
+    # card's behaviour from the card.
+    sly_cs = ""
+    if card.get("sly"):
+        sly_body = ind.join(build_body(
+            {**card, "effects": card["sly"], "cost": card.get("cost", 0)},
+            profile))
+        sly_cs = f'''
+    /// <summary>Sly: resolves when THIS card is discarded.</summary>
+    public override async Task AfterCardDiscarded(
+        PlayerChoiceContext choiceContext, CardModel card)
+    {{
+        if (card != this) return;
+        // A discard is not a play, so there is no CardPlay to attribute these
+        // effects to. The shared body emitter threads one through for VFX and
+        // source attribution; null is the honest value here and every API it
+        // reaches takes a nullable CardPlay.
+        CardPlay? cardPlay = null;
+        {sly_body}
+    }}
+'''
 
     element_member = ""
     if elemental and is_companion(card):
@@ -3940,7 +4060,7 @@ public sealed class {cls} : {interfaces}
     {{
         {upgrade_cs}
     }}
-}}
+{sly_cs}}}
 '''
 
 

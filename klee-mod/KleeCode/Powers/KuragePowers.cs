@@ -224,3 +224,90 @@ public sealed class KokomiGarmentHooks : AbstractModel
             cardPlay);
     }
 }
+
+/// <summary>
+/// Vigil of the Deep -- the prevention ward (kickoff §2.4).
+///
+/// The first time each turn an attack would land unblocked damage, prevent up
+/// to Amount of it and Exhaust a random card from the draw pile. Prevention is
+/// priced in FUTURE DRAWS, not HP: R52's healing law says her HP bar never
+/// moves, the incoming does.
+///
+/// The exhaust routes through the ordinary funnel, so being attacked feeds
+/// Charge -- getting hit fuels the finisher, which is the stability identity
+/// expressed as a mechanic rather than as flavour.
+///
+/// IT CAN RUN OUT, and that is the design. If draw and discard are both empty
+/// the ward cannot pay and does not proc: the deck really is her second HP bar.
+/// A version that prevents for free would be a different, much safer card.
+/// </summary>
+public sealed class PreventExhaustWardPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Vigil of the Deep"),
+        ("description",
+            "The first time you would take unblocked attack damage each turn, "
+          + "prevent up to {Amount} of it and [gold]Exhaust[/gold] a random "
+          + "card from your draw pile."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>Reset with the other per-turn windows, matching the sim's
+    /// `prevention_used_this_turn`.</summary>
+    private bool _usedThisTurn;
+
+    public override Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (player.Creature == Owner) _usedThisTurn = false;
+        return Task.CompletedTask;
+    }
+
+    public override decimal ModifyDamageAdditive(
+        Creature target, decimal amount, ValueProp props, Creature dealer,
+        CardModel cardSource)
+    {
+        if (target != Owner || _usedThisTurn || amount <= 0) return 0m;
+        if (Owner.Player == null) return 0m;
+        // Block resolves first in the sim (the ward reads what is left
+        // UNBLOCKED), and the engine applies Block after additive modifiers,
+        // so the reduction is capped at the ward rather than at the raw hit.
+        var drawPile = CardPile.Get(PileType.Draw, Owner.Player);
+        var discard = CardPile.Get(PileType.Discard, Owner.Player);
+        var fuel = (drawPile?.Cards.Count ?? 0) + (discard?.Cards.Count ?? 0);
+        if (fuel == 0) return 0m;        // defenceless: the deck is spent
+
+        _usedThisTurn = true;
+        _pendingExhaust = true;
+        return -System.Math.Min(amount, Amount);
+    }
+
+    private bool _pendingExhaust;
+
+    /// <summary>
+    /// The fuel is paid AFTER the hit resolves. Exhausting inside the damage
+    /// modifier would mutate piles mid-calculation, which is the class of bug
+    /// that produces "the number changed while I was reading it".
+    /// </summary>
+    public override async Task AfterDamageReceived(
+        PlayerChoiceContext choiceContext, Creature target, DamageResult result,
+        ValueProp props, Creature dealer, CardModel cardSource)
+    {
+        if (target != Owner || !_pendingExhaust) return;
+        _pendingExhaust = false;
+        if (Owner.Player == null) return;
+
+        var drawPile = CardPile.Get(PileType.Draw, Owner.Player);
+        if (drawPile == null || drawPile.Cards.Count == 0) return;
+        var victim = Owner.Player.RunState.Rng.CombatTargets
+            .NextItem(drawPile.Cards.ToList());
+        if (victim != null)
+        {
+            await CardCmd.Exhaust(choiceContext, victim);
+        }
+    }
+}
