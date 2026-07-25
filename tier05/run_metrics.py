@@ -9,6 +9,7 @@ from __future__ import annotations
 import math
 from collections import Counter
 
+from tier0 import constants as C
 from tier05.model import RunResult
 
 
@@ -41,7 +42,11 @@ def summarize_runs(results: list[RunResult]) -> dict:
         return {}
     wins = sum(r.won for r in results)
     deaths = Counter(r.death_node for r in results if r.death_node is not None)
-    n_nodes = len(results[0].node_kinds)
+    # §11: node_kinds is the path WALKED, so a run that died is short. Bands
+    # and the heatmap are indexed by FLOOR, and every path visits exactly one
+    # room per floor -- so the axis is MAP_FLOORS * n_acts, never results[0]'s
+    # length (that would size the whole report off one unlucky run).
+    n_nodes = C.MAP_FLOORS * max(1, results[0].n_acts)
     # HP trajectory bands: per node position, over runs that REACHED it.
     bands = []
     for pos in range(n_nodes):
@@ -71,6 +76,58 @@ def summarize_runs(results: list[RunResult]) -> dict:
                                   if online else None),
         "online_rate": len(online) / n,
         "act_funnel": act_funnel(results),      # §10.6 (len 1 at --acts 1)
+        "route": route_profile(results),        # §11
+    }
+
+
+def route_profile(results: list[RunResult]) -> dict:
+    """§11 acceptance instrument. Reports the elite-count DISTRIBUTION and how
+    it moves with arrival HP, because the target (median ~2.5, range 1-4) is
+    only half the claim -- a policy that always takes exactly two hits the
+    median and is still wrong. Also reports the walked composition, so a route
+    policy that quietly stops visiting shops is visible.
+
+    Elites are counted PER ACT, which is the unit the target is stated in."""
+    if not results:
+        return {}
+    per_act, comp = [], Counter()
+    for r in results:
+        for a in range(max(1, r.n_acts)):
+            seg = r.node_kinds[a * C.MAP_FLOORS:(a + 1) * C.MAP_FLOORS]
+            if len(seg) == C.MAP_FLOORS:        # only acts actually completed
+                per_act.append(sum(1 for k in seg if k == "E"))
+        comp.update(r.node_kinds)
+    n_runs = len(results)
+    dist = Counter(per_act)
+    # Does the count respond to run state? Split completed acts by whether the
+    # run was above or below half HP entering them.
+    healthy, hurt = [], []
+    for r in results:
+        for a in range(max(1, r.n_acts)):
+            seg = r.node_kinds[a * C.MAP_FLOORS:(a + 1) * C.MAP_FLOORS]
+            if len(seg) < C.MAP_FLOORS:
+                continue
+            start = a * C.MAP_FLOORS
+            hp_in = r.hp_by_node[start] if len(r.hp_by_node) > start else 0
+            (healthy if hp_in and hp_in > 0.5 * max(r.hp_by_node or [1])
+             else hurt).append(sum(1 for k in seg if k == "E"))
+    return {
+        "acts_measured": len(per_act),
+        "elites_per_act_mean": (sum(per_act) / len(per_act)) if per_act else 0.0,
+        "elites_per_act_median": (sorted(per_act)[len(per_act) // 2]
+                                  if per_act else None),
+        "elites_distribution": dict(sorted(dist.items())),
+        "in_target_band": (sum(v for k, v in dist.items() if 1 <= k <= 4)
+                           / len(per_act)) if per_act else 0.0,
+        "elites_when_healthy": (sum(healthy) / len(healthy)) if healthy else None,
+        "elites_when_hurt": (sum(hurt) / len(hurt)) if hurt else None,
+        "nodes_per_run": {k: round(v / n_runs, 2)
+                          for k, v in sorted(comp.items())},
+        "events_seen_per_run": round(
+            sum(len(r.events) for r in results) / n_runs, 2),
+        "event_options": dict(Counter(
+            f"{e['event']}:{e['option']}" for r in results
+            for e in r.events).most_common(8)),
     }
 
 
@@ -85,7 +142,7 @@ def act_funnel(results: list[RunResult]) -> list[dict]:
     if not results:
         return []
     n_acts = results[0].n_acts
-    tpl = len(results[0].node_kinds) // max(1, n_acts)
+    tpl = C.MAP_FLOORS               # §11: one room per floor, always
     n = len(results)
     out = []
     for a in range(n_acts):
@@ -211,6 +268,29 @@ def _ungated(required: set[str], r: RunResult) -> set[str]:
             if loader.get_card(cid).star != 5}
 
 
+def floor_kind_labels(results: list[RunResult]) -> list[str]:
+    """Per floor, the mix of node kinds the cohort actually walked.
+
+    Under §11 routing there is no single 'kind' for a floor -- one run's
+    floor 4 is an elite and another's is a shop. The label is the two
+    commonest kinds with their shares, so the report shows the distribution
+    instead of pretending it is a template."""
+    if not results:
+        return []
+    n_nodes = C.MAP_FLOORS * max(1, results[0].n_acts)
+    out = []
+    for i in range(n_nodes):
+        seen = Counter(r.node_kinds[i] for r in results
+                       if len(r.node_kinds) > i)
+        if not seen:
+            out.append("-")
+            continue
+        total = sum(seen.values())
+        out.append(" ".join(f"{k}{round(100 * v / total)}"
+                            for k, v in seen.most_common(2)))
+    return out
+
+
 def print_run_report(character: str, archetype: str, s: dict,
                      node_kinds: list[str], survival: dict | None = None) -> None:
     print(f"\n=== Tier 0.5 runs: {character}/{archetype} "
@@ -238,14 +318,17 @@ def print_run_report(character: str, archetype: str, s: dict,
     onl = s["median_time_to_online"]
     print(f"  time-to-online   median {onl} fights, "
           f"online in {s['online_rate']:.0%} of runs")
-    print("  node  kind  reached   p25/p50/p75 HP   deaths")
+    # §11: node kinds vary per run, so the column reports what the COHORT
+    # actually walked at that floor rather than one run's label -- a fixed
+    # label would be a lie the moment routing exists.
+    print("  floor kinds        reached   p25/p50/p75 HP   deaths")
     for i, kind in enumerate(node_kinds):
         b = s["hp_bands"][i]
         d = s["death_heatmap"].get(i, 0)
         bar = "█" * round(40 * d / max(1, s["runs"]))
         if b is None:
-            print(f"  {i:>4}  {kind:<4}  (never reached)")
+            print(f"  {i:>4}  {kind:<11}  (never reached)")
             continue
-        print(f"  {i:>4}  {kind:<4}  {b['reached']:>7}   "
+        print(f"  {i:>4}  {kind:<11}  {b['reached']:>7}   "
               f"{b['p25']:>4.0f}/{b['p50']:>4.0f}/{b['p75']:>4.0f}       "
               f"{d:>4} {bar}")

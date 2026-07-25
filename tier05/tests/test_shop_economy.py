@@ -24,6 +24,7 @@ from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine.state import Card, CombatState
 from tier05 import draft, model, rewards, shop
+from tier05 import maps
 
 
 @pytest.fixture(autouse=True)
@@ -34,6 +35,18 @@ def _single_act(monkeypatch):
     monkeypatch.setattr(C, "RUN_ACTS", C.RUN_ACTS[:1])
 
 HIT = 8
+
+
+# §11: these tests are about RELIC/POTION/SHOP hooks firing at particular node
+# kinds, not about map generation -- so they pin the legacy v5 spine and index
+# into it exactly as they always did. Runs elsewhere walk a generated map.
+LEGACY_SPINE = "NNNRETN$ERB"
+
+
+@pytest.fixture(autouse=True)
+def _legacy_spine(monkeypatch):
+    monkeypatch.setattr(model, "build_act_map",
+                        lambda rng, act: maps.linear(LEGACY_SPINE, act))
 
 
 def _win_fights(player, enemies, pilot, seed):

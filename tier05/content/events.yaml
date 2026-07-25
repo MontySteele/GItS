@@ -1,0 +1,168 @@
+# Event pool (§11). Source + full 46-event catalogue:
+# docs/sts2-map-and-events-research.md §2, docs/sts2-events-harvest.txt.
+#
+# CURATION RULE: an event ships only if every one of its options is expressible
+# with real ops. No option is ever approximated to get an event in -- the
+# skipped list is at the bottom of this file and in the research doc §3, and
+# skipping loudly is the house rule. Numbers are the wiki's, exactly.
+#
+# Effect grammar (tier05/events.py):
+#   heal: N            heal N HP (capped at max)
+#   heal_frac: F       heal F of MISSING hp (1.0 = to full)
+#   hp: -N             lose N HP (can kill; that is the real game's rule)
+#   max_hp: +-N        move max HP (hp follows a loss down)
+#   gold: [lo, hi]     gain (or lose, if negative) gold, rolled in the band
+#   gold_all: true     lose ALL gold
+#   card_reward: N     an ordinary reward screen, N offers, drafter picks
+#   pick_cards: {of: M, take: N}   choose N of M random pool cards
+#   remove: N          remove N cards (worst-first, drafter's valuation)
+#   upgrade: N         upgrade N cards (on-plan first)
+#   upgrade_random: N  upgrade N RANDOM cards (the escalating-ladder shape)
+#   transform: N       remove N cards, add N random of the same rarity
+#   curse: <id>        add a curse to the deck
+#   relic: true        grant a random relic from the run's relic pool
+#   potion: N          grant N random potions (slot-permitting)
+#   spend_potion: true requires a held potion; consumes it
+#   requires_gold: N   option is unavailable below N gold
+#   escalate: <id>     after resolving, offer this event again (the ladder)
+
+act1:
+  - id: jungle_maze_adventure
+    name: "Jungle Maze Adventure"
+    options:
+      - {label: "Solo Quest", gold: [135, 165], hp: -18}
+      - {label: "Join Forces", gold: [35, 65]}
+
+  - id: tablet_of_truth
+    name: "Tablet of Truth"
+    # The escalating ladder, exactly: -3 / -6 / -12 / -24 max HP, each buying
+    # one random upgrade. Stage 5 (all-but-1 max HP for a whole-deck upgrade)
+    # is SKIPPED, flagged: it needs an "all but 1" max-HP op and is a
+    # degenerate branch no sane policy takes.
+    options:
+      - {label: "Smash", heal: 20}
+      - {label: "Decipher", max_hp: -3, upgrade_random: 1,
+         escalate: tablet_of_truth_2}
+
+  - id: tablet_of_truth_2
+    name: "Tablet of Truth (stage 2)"
+    hidden: true                      # reachable only by escalation
+    options:
+      - {label: "Give Up"}
+      - {label: "Decipher", max_hp: -6, upgrade_random: 1,
+         escalate: tablet_of_truth_3}
+
+  - id: tablet_of_truth_3
+    name: "Tablet of Truth (stage 3)"
+    hidden: true
+    options:
+      - {label: "Give Up"}
+      - {label: "Decipher", max_hp: -12, upgrade_random: 1,
+         escalate: tablet_of_truth_4}
+
+  - id: tablet_of_truth_4
+    name: "Tablet of Truth (stage 4)"
+    hidden: true
+    options:
+      - {label: "Give Up"}
+      - {label: "Decipher", max_hp: -24, upgrade_random: 1}
+
+  - id: brain_leech
+    name: "Brain Leech"
+    options:
+      - {label: "Share Knowledge", pick_cards: {of: 5, take: 1}}
+      - {label: "Rip the Leech Off", hp: -5, card_reward: 3}
+
+  - id: room_full_of_cheese
+    name: "Room Full of Cheese"
+    options:
+      - {label: "Gorge", pick_cards: {of: 8, take: 2}}
+      # The Chosen Cheese (+1 max HP at end of combat) is not a relic we
+      # model, so this option grants a plain random relic instead -- the ONE
+      # substitution in this file, and it is flagged rather than silent.
+      - {label: "Search", hp: -14, relic: true}
+
+  - id: wellspring
+    name: "Wellspring"
+    options:
+      - {label: "Bottle", potion: 1}
+      - {label: "Bathe", remove: 1, curse: curse_guilty}
+
+  - id: unrest_site
+    name: "Unrest Site"
+    options:
+      - {label: "Rest Anyways", heal_frac: 1.0, curse: curse_poor_sleep}
+      - {label: "Kill the Trees", max_hp: -8, relic: true}
+
+  - id: whispering_hollow
+    name: "Whispering Hollow"
+    options:
+      - {label: "Exchange Gold", gold: [-50, -50], potion: 2,
+         requires_gold: 50}
+      - {label: "Hug the Tree", hp: -9, transform: 1}
+
+  - id: morphic_grove
+    name: "Morphic Grove"
+    options:
+      - {label: "Group", gold_all: true, transform: 2}
+      - {label: "Loner", max_hp: 5}
+
+  - id: aroma_of_chaos
+    name: "Aroma of Chaos"
+    options:
+      - {label: "Let Go", transform: 1}
+      - {label: "Maintain Control", upgrade: 1}
+
+  - id: byrdonis_nest
+    name: "Byrdonis Nest"
+    # "Take the Egg" gives a quest card, which we do not model -- so only the
+    # Eat option ships and the event is a one-option floor. Flagged in §3.
+    options:
+      - {label: "Eat the Egg", max_hp: 7}
+
+  - id: luminous_choir
+    name: "Luminous Choir"
+    options:
+      - {label: "Reach into the Flesh", remove: 2, curse: curse_spore_mind}
+      - {label: "Offer Tribute", gold: [-149, -99], relic: true,
+         requires_gold: 149}
+
+# --- all acts -------------------------------------------------------------
+all:
+  - id: this_or_that
+    name: "This or That?"
+    options:
+      - {label: "This", hp: -6, gold: [57, 57]}
+      - {label: "That", curse: curse_clumsy, relic: true}
+
+  - id: slippery_bridge
+    name: "Slippery Bridge"
+    # "the card in the above option is randomized" -- i.e. pay 3 HP to re-roll
+    # which card the removal targets. Modeled as: take the offered removal, or
+    # pay 3 HP for the drafter's own worst-card choice.
+    options:
+      - {label: "Overcome", remove_random: 1}
+      - {label: "Hold On", hp: -3, remove: 1}
+
+  - id: the_future_of_potions
+    name: "The Future of Potions?"
+    options:
+      - {label: "Insert Potion", spend_potion: true, card_reward: 3,
+         upgraded: true}
+      - {label: "Leave"}
+
+# --- SKIPPED, and why (research doc §3) ----------------------------------
+# Enchant is not a mechanic we have:  Self-Help Book, Sapphire Seed,
+#     Wood Carvings, Field of Man-Sized Holes, Grave of the Forgotten,
+#     Stone of All Time, Symbiote
+# Quest cards are not modeled:        The Legends Were True, The Lantern Key,
+#     Byrdonis Nest's Take-the-Egg branch (the event ships one-option)
+# Divine / Debt:                      Crystal Sphere
+# Cross-character pools:              Colorful Philosophers
+# Events that START A FIGHT:          Dense Vegetation, Battleworn Dummy,
+#     The Lantern Key. Deliberately deferred: resolving a combat inside an
+#     event would hand the event layer the pilot, the relic set and the potion
+#     bag, and that coupling is worth its own pass. The resolver stays pure
+#     (deck / HP / gold / relics / potions) until then.
+# Acts 2-3 pools are NOT populated yet: the act-1 pool is the pilot for the
+#     grammar. Adding them is content work, not engine work.

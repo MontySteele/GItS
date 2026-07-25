@@ -23,6 +23,7 @@ import pytest
 from tier0 import constants as C
 from tier0.engine.state import CombatState
 from tier05 import draft, model
+from tier05 import maps
 from tier05 import relics as relic_pool
 
 
@@ -65,7 +66,8 @@ def _run(monkeypatch, template, seed=SEED, character=CHAR, arch=ARCH,
          pilot=PILOT):
     """A grant_relics run over a custom node template, combat stubbed to win."""
     monkeypatch.setattr(model, "run_fight", _win_stub)
-    monkeypatch.setattr(model, "node_template", lambda: list(template))
+    monkeypatch.setattr(model, "build_act_map",
+                        lambda rng, act: maps.linear(template, act))
     return model.run_one(character, arch, pilot, _skip, seed,
                          grant_relics=True)
 
