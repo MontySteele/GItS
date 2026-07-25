@@ -865,3 +865,11 @@ sango_prayer	ImageGen/images/cards/kokomi/sango_prayer.png	500	380	cover_autocro
 vigil_of_the_deep	ImageGen/images/cards/kokomi/vigil_of_the_deep.png	500	380	cover	x0.53	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
 vigil_of_the_deep	ImageGen/images/cards/kokomi/vigil_of_the_deep.png	500	380	cover	y0.56	shortlist	2	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
 vigil_of_the_deep	ImageGen/images/cards/kokomi/vigil_of_the_deep.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Kurage's Oath.png		vfx	kokomi_pool
+
+# ---------- KOKOMI character-shell surfaces (2026-07-25) ----------
+# Six of the eight are produced by tools/gen_kokomi_stills.py (alpha-bbox
+# framing, the B4 centring rule) and are therefore GENERATOR_OWNED -- see
+# art_lint L11. A seventh, transition_wipe, is procedural (gen_transition_wipe.py).
+# select_bg is the only one that is a straight wiki fetch, so it is the only
+# one with a plan row -- exactly the arrangement Furina ended the B4 pass in.
+kokomi_select_bg	ImageGen/images/kokomi/ui/select_bg.png	1920	1080	cover	center	auto	1	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash

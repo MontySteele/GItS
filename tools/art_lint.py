@@ -288,6 +288,14 @@ GENERATOR_OWNED = {
     "ImageGen/images/furina/ui/selection_splash.png":       "gen_furina_stills.py",
     "ImageGen/images/furina/ui/char_icon.png":              "gen_furina_stills.py",
     "ImageGen/images/furina/ui/map_marker.png":             "gen_furina_stills.py",
+    "ImageGen/images/kokomi/model/combat_model.png":        "gen_kokomi_stills.py",
+    "ImageGen/images/kokomi/ui/select_portrait.png":        "gen_kokomi_stills.py",
+    "ImageGen/images/kokomi/ui/select_portrait_locked.png": "gen_kokomi_stills.py",
+    "ImageGen/images/kokomi/ui/selection_splash.png":       "gen_kokomi_stills.py",
+    "ImageGen/images/kokomi/ui/char_icon.png":              "gen_kokomi_stills.py",
+    "ImageGen/images/kokomi/ui/map_marker.png":             "gen_kokomi_stills.py",
+    "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
+    "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
 }
 
 

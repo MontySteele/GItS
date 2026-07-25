@@ -17,6 +17,9 @@ CENTRING RULE. Every framing here is computed from the render's ALPHA
 bounding box, never from the image frame -- that is precisely the bug being
 fixed. Horizontal centre is the alpha bbox centre; vertical framing is
 anchored per surface (feet-down for the full body, head-down for portraits).
+The rule now lives in tools/char_stills.py, because Kokomi's pass needs the
+same six surfaces and a centring rule duplicated across two files is a
+centring rule that will drift. This script keeps only HER numbers.
 
 Source: the transparent 227x440 cutout for anything that needs an alpha
 (combat/portrait/icon), and the 1080x2160 full-res twin for the big splash,
@@ -27,52 +30,16 @@ Usage: .venv/Scripts/python tools/gen_furina_stills.py
 from pathlib import Path
 import sys
 
-from PIL import Image, ImageEnhance
-import numpy as np
+from PIL import Image
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from char_stills import fit, head_crop, locked_variant  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 CUTOUT = ROOT / "ImageGen" / "images" / "furina" / "model" / "furina_wikipedia_cutout.png"
 FULLRES = ROOT / "art" / "raw" / "Furina_Card_2.png"
 UI = ROOT / "ImageGen" / "images" / "furina" / "ui"
 MODEL = ROOT / "ImageGen" / "images" / "furina" / "model"
-
-
-def alpha_bbox(im):
-    a = np.asarray(im.convert("RGBA"))[..., 3] > 8
-    ys, xs = np.nonzero(a)
-    return int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1
-
-
-def fit(im, box_w, box_h, pad=0.0, anchor="bottom"):
-    """Scale the subject to fill the box (minus pad) and centre it horizontally."""
-    x0, y0, x1, y1 = alpha_bbox(im)
-    subject = im.crop((x0, y0, x1, y1))
-    avail_w, avail_h = box_w * (1 - pad), box_h * (1 - pad)
-    scale = min(avail_w / subject.width, avail_h / subject.height)
-    subject = subject.resize(
-        (max(1, round(subject.width * scale)), max(1, round(subject.height * scale))),
-        Image.LANCZOS)
-
-    out = Image.new("RGBA", (box_w, box_h), (0, 0, 0, 0))
-    px = (box_w - subject.width) // 2                  # always centred
-    py = {"bottom": box_h - subject.height,
-          "top": 0,
-          "middle": (box_h - subject.height) // 2}[anchor]
-    out.alpha_composite(subject, (px, py))
-    return out
-
-
-def head_crop(im, box_w, box_h, head_frac=0.52):
-    """Portrait framing: top of the alpha bbox down, centred on the head."""
-    x0, y0, x1, y1 = alpha_bbox(im)
-    # The head occupies roughly the top third of a full-body render; frame it
-    # by taking a window whose height is head_frac of the subject height.
-    sub_h = int((y1 - y0) * head_frac)
-    sub_w = int(sub_h * box_w / box_h)
-    cx = (x0 + x1) // 2
-    left = max(0, cx - sub_w // 2)
-    crop = im.crop((left, y0, left + sub_w, y0 + sub_h))
-    return crop.resize((box_w, box_h), Image.LANCZOS)
 
 
 def main():
@@ -94,12 +61,7 @@ def main():
     # identically (they were separate crops before, which is how they drifted).
     portrait = head_crop(cutout, 132, 195)
     portrait.save(UI / "select_portrait.png")
-    locked = ImageEnhance.Color(portrait.convert("RGB")).enhance(0.18)
-    locked = ImageEnhance.Brightness(locked).enhance(0.42)
-    locked.convert("RGBA").putalpha(portrait.getchannel("A"))
-    locked_rgba = locked.convert("RGBA")
-    locked_rgba.putalpha(portrait.getchannel("A"))
-    locked_rgba.save(UI / "select_portrait_locked.png")
+    locked_variant(portrait).save(UI / "select_portrait_locked.png")
     print("  select_portrait.png    132x195 (+ locked, identical framing)")
 
     # Character icon + map marker: tight head crops on transparency.

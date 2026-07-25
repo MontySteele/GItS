@@ -118,24 +118,35 @@ if (Test-Path $salonSrc) {
     if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
-$furinaSrc = Join-Path $src 'furina'
-foreach ($d in 'ui', 'powers', 'relics', 'model') {
-    $from = Join-Path $furinaSrc $d
-    if (-not (Test-Path $from)) { continue }
-    $to = Join-Path $work "furina\$d"
-    New-Item -ItemType Directory -Force -Path $to | Out-Null
-    $files = Get-ChildItem $from -Filter *.png -ErrorAction SilentlyContinue
-    if ($files) { Copy-Item $files.FullName -Destination $to }
-}
+# WORKING FILES MUST NOT SHIP. The still generators (gen_furina_stills.py,
+# gen_kokomi_stills.py) cache their governing render next to the outputs, in
+# model\, because that is where the source of truth for a character's framing
+# belongs. Nothing in the game ever loads them -- the game loads the 240x280
+# combat_model.png that gets CUT FROM them -- but a blanket *.png copy shipped
+# them anyway. Kokomi's cached cutout is 8.6 MB against a whole pck of 8.3 MB,
+# so this silently doubled the download for a file with no consumer. Excluded
+# by suffix rather than by name so the next character's cutout is covered
+# before anyone notices it exists.
+#
+# Filtered with Where-Object, NOT with -Exclude. Get-ChildItem -Filter *.png
+# -Exclude <pattern> against a DIRECTORY path returns nothing at all: -Exclude
+# matches the path item, which is the directory, so the directory is excluded
+# and no files are enumerated. That silently copied zero images and dropped
+# BOTH characters back onto the Klee fallbacks -- a green build that shipped
+# the wrong art, caught only because the fallback lines are printed.
+$pckExclude = '*_cutout.png'
 
-$kokomiSrc = Join-Path $src 'kokomi'
-foreach ($d in 'ui', 'powers', 'relics', 'model') {
-    $from = Join-Path $kokomiSrc $d
-    if (-not (Test-Path $from)) { continue }
-    $to = Join-Path $work "kokomi\$d"
-    New-Item -ItemType Directory -Force -Path $to | Out-Null
-    $files = Get-ChildItem $from -Filter *.png -ErrorAction SilentlyContinue
-    if ($files) { Copy-Item $files.FullName -Destination $to }
+foreach ($character in 'furina', 'kokomi') {
+    $charSrc = Join-Path $src $character
+    foreach ($d in 'ui', 'powers', 'relics', 'model') {
+        $from = Join-Path $charSrc $d
+        if (-not (Test-Path $from)) { continue }
+        $to = Join-Path $work "$character\$d"
+        New-Item -ItemType Directory -Force -Path $to | Out-Null
+        $files = Get-ChildItem $from -Filter *.png -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -notlike $pckExclude }
+        if ($files) { Copy-Item $files.FullName -Destination $to }
+    }
 }
 
 # Furina can be tested before her art pass lands, but her resource PATHS must
@@ -290,10 +301,13 @@ expand_mode = 1
 stretch_mode = 6
 '@)
 
-# Kokomi's backdrop tint is the only thing distinguishing her select screen
-# from Klee's while she runs on Klee's fallback splash. Watatsumi pearl-blue,
-# the same hex her CardPool, map marker and name colour use -- so even on
-# borrowed art the screen reads as a different character rather than as a bug.
+# Kokomi's backdrop tint began as the only thing distinguishing her select
+# screen from Klee's while she ran on Klee's fallback splash. Her own art
+# landed 2026-07-25 (Watatsumi namecard backdrop, cut-out splash), and the
+# tint is KEPT rather than retired: it is the same Watatsumi pearl-blue her
+# CardPool, map marker and name colour use, and multiplying it over her
+# namecard pushes the reef back so the figure separates from it. Furina's
+# scene keeps its tint over her own namecard for the same reason.
 [IO.File]::WriteAllText((Join-Path $work 'kokomi\ui\char_select_bg_kokomi.tscn'), @'
 [gd_scene load_steps=3 format=3]
 

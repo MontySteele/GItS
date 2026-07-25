@@ -1,7 +1,8 @@
 # Kokomi Art Pass Requirements
 
 **Date:** 2026-07-25
-**Status:** hunt complete, inventory verified, shortlists not yet built
+**Status:** card shortlists built and provisionally applied (73 faces, awaiting
+the [USER] taste pass); **character-shell track DONE** — see §5a
 **Canonical content:** `docs/kokomi-cards.yaml`, `docs/inazuma-companions.yaml`
 **Bill owner:** `tools/art_coverage.py` — if this doc and the tool disagree, the tool is right (the lesson of the Furina bill correction).
 
@@ -192,6 +193,76 @@ the inventory that is not scarce relative to its lane.
    rejected 13 of batch 1.
 7. `python tools/art_process.py` → `ImageGen/images/cards/kokomi/`, then
    `art_lint` and `art_coverage --strict` green.
+
+## 5a. Character-shell track — DONE 2026-07-25
+
+The eight non-card surfaces that make her a character rather than a card set.
+She was wearing Klee's for all eight (`Copy-KokomiFallback`), which is
+deliberately invisible: the build is green, the mod loads, and the select
+screen just shows the wrong girl.
+
+| Surface | Size | Producer |
+|---|---|---|
+| `ui/select_portrait.png` | 132×195 | `gen_kokomi_stills.py` |
+| `ui/select_portrait_locked.png` | 132×195 | derived from the portrait |
+| `ui/char_icon.png` | 88×88 | `gen_kokomi_stills.py` |
+| `ui/map_marker.png` | 49×64 | `gen_kokomi_stills.py` |
+| `ui/selection_splash.png` | 1920×1200 | `gen_kokomi_stills.py` |
+| `model/combat_model.png` | 240×280 | `gen_kokomi_stills.py` |
+| `ui/select_bg.png` | 1920×1080 | `art_process` (the only plan row) |
+| `ui/transition_wipe.png` | 960×540 | `gen_transition_wipe.py`, procedural |
+
+All eight are registered in `art_lint.GENERATOR_OWNED` except `select_bg`, so
+no plan row can ever claim a path a generator writes (L11).
+
+**Three things this track had to solve that Furina's did not.**
+
+1. **Her governing render is flattened onto white.** Furina's arrived as a
+   transparent cutout. Kokomi's best full-body art — Portrait, 4900×5700 — is
+   on a white plate, and fed to B4's framing code it yields a full-frame alpha
+   bbox: every rule degrades to frame-centring, which is *the exact bug B4 was
+   called to fix*, reintroduced by the source rather than by the code. So the
+   cut is a precondition. Keying by colour is wrong (she wears white stockings
+   and a white kimono panel and a global white test punches holes through
+   her), so `cutout_from_plate` keys by **connectivity**: only near-white
+   reachable from the border is background.
+
+2. **Her silhouette is not just her.** The Portrait sweeps a large fin to her
+   right and floats a fish beside her raised hand, which drags the alpha bbox
+   midpoint **275 px right of her actual head** — enough to land her face
+   visibly left of frame in a 132×195 portrait. `head_crop` gained
+   `centre_on="head"`, which takes the **median** alpha column of the top
+   band. Median rather than the band's min/max midpoint because median is
+   mass-weighted and ignores a small bright fish: across band sizes of
+   12/18/25/35% the median moves 2165→2221 while the min/max midpoint swings
+   2191→2667→2608→2215.
+
+3. **The splash is 1920×1200 but only 1080 rows are ever seen.**
+   `char_select_bg_kokomi.tscn` draws it in a 1920×1080 `TextureRect` with
+   `stretch_mode = 6` (KEEP_ASPECT_COVERED), so the top and bottom 60 rows are
+   cropped. Framing against the full 1200 put her head under the top cut and
+   took her feet off entirely — **correct in the file, wrong in the game**,
+   which is the only kind of art defect that survives review. The generator now
+   measures against the visible band, and derives the band from the scene's
+   geometry rather than typing it in.
+
+**The framing math moved to `tools/char_stills.py`** rather than being copied.
+B4's centring rule was a [USER] verdict, and a verdict that exists in two files
+drifts on the next edit. Furina's six surfaces are pinned byte-for-byte by
+`tier0/tests/test_char_stills.py`, which re-runs her generator and compares
+hashes — the extraction is proven not to have moved one of her pixels.
+
+**Two defects found along the way, both outside this track:**
+
+- `build_pck.ps1` shipped the generators' cached working renders, because it
+  copied every `*.png` under `model/`. Kokomi's cutout is 8.6 MB against a
+  whole pck of 8.3 MB. Excluded by suffix now, so the next character's cutout
+  is covered before anyone notices it exists.
+- `validate.ps1` failed on a **passing** lint. Under PS 5.1 with
+  `ErrorActionPreference = 'Stop'`, any native stderr raises
+  `NativeCommandError` even at exit 0; `lint_constant_parity` had grown an
+  import of `tier05.relics`, which emits three house-rule `UserWarning`s.
+  Latent on `main` since `e263577` and blocking every deploy.
 
 ## 6. Open questions for the taste pass
 

@@ -205,17 +205,46 @@ foreach ($f in Get-ChildItem $SourceDir -Recurse -Filter *.cs) {
 # ---------------------------------------------------------------------------
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $venvPython = Join-Path $repoRoot '.venv\Scripts\python.exe'
+
+# Native stderr under Windows PowerShell 5.1 is a trap in BOTH directions, and
+# the note that used to sit at S6 only covered one of them.
+#
+#   * Redirecting with 2>&1 while ErrorActionPreference is 'Stop' wraps every
+#     stderr line in an ErrorRecord and throws NativeCommandError. That is why
+#     the original code deliberately did not redirect.
+#   * But NOT redirecting is not safe either: with EAP 'Stop', any native
+#     stderr output raises NativeCommandError EVEN WHEN THE COMMAND EXITS 0.
+#
+# The second half is what broke this file on 2026-07-25. lint_constant_parity
+# grew a reader that imports tier05.relics, which emits three house-rule
+# UserWarnings on stderr at import; the lint PASSED, printed
+# "constant parity: OK", and took the entire deploy down anyway. A gate that
+# fails on a dependency's warning is not measuring what it claims to measure.
+#
+# Lowering EAP to 'Continue' for the duration of the call makes stderr behave
+# like output rather than like an exception, so 2>&1 is then safe -- and we get
+# to keep the diagnostics for the failure message instead of discarding them
+# to $null. $LASTEXITCODE is a global automatic and survives the call, so
+# callers check it exactly as before.
+function Invoke-RepoPython {
+    param([Parameter(Mandatory = $true, ValueFromRemainingArguments = $true)]
+          [string[]]$Arguments)
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $venvPython @Arguments 2>&1
+    } finally {
+        $ErrorActionPreference = $prev
+    }
+}
+
 $parityLint = Join-Path $repoRoot 'tools\lint_handwritten_parity.py'
 if (-not (Test-Path $venvPython)) {
     Fail 'S6' "repo venv python not found at $venvPython; cannot run hand-written parity lint."
 } elseif (-not (Test-Path $parityLint)) {
     Fail 'S6' "tools/lint_handwritten_parity.py is missing."
 } else {
-    # No 2>&1: under ErrorActionPreference Stop, PS 5.1 turns redirected
-    # native stderr into a terminating NativeCommandError. The lint reports
-    # findings on stdout; a crash's traceback shows on the console and the
-    # exit code still lands here.
-    $parityOut = & $venvPython $parityLint
+    $parityOut = Invoke-RepoPython $parityLint
     if ($LASTEXITCODE -ne 0) {
         Fail 'S6' "hand-written parity lint failed:`n    $($parityOut -join "`n    ")"
     }
@@ -234,7 +263,7 @@ if (-not (Test-Path $venvPython)) {
 } elseif (-not (Test-Path $rosterCodegen)) {
     Fail 'S6a' "tools/gen_roster_cards.py is missing."
 } else {
-    $codegenOut = & $venvPython $rosterCodegen --check
+    $codegenOut = Invoke-RepoPython $rosterCodegen --check
     if ($LASTEXITCODE -ne 0) {
         Fail 'S6a' "roster codegen is stale:`n    $($codegenOut -join "`n    ")"
     }
@@ -257,7 +286,7 @@ if (-not (Test-Path $venvPython)) {
 } elseif (-not (Test-Path $poolLint)) {
     Fail 'S6b' "tools/lint_pool_membership.py is missing."
 } else {
-    $poolOut = & $venvPython $poolLint
+    $poolOut = Invoke-RepoPython $poolLint
     if ($LASTEXITCODE -ne 0) {
         Fail 'S6b' "pool membership lint failed:`n    $($poolOut -join "`n    ")"
     }
@@ -279,7 +308,7 @@ if (-not (Test-Path $venvPython)) {
 } elseif (-not (Test-Path $ancientLint)) {
     Fail 'S6d' "tools/lint_ancient_coverage.py is missing."
 } else {
-    $ancientOut = & $venvPython $ancientLint
+    $ancientOut = Invoke-RepoPython $ancientLint
     if ($LASTEXITCODE -ne 0) {
         Fail 'S6d' "ancient coverage lint failed:`n    $($ancientOut -join "`n    ")"
     }
@@ -306,7 +335,7 @@ if (-not (Test-Path $venvPython)) {
 } elseif (-not (Test-Path $constLint)) {
     Fail 'S6e' "tools/lint_constant_parity.py is missing."
 } else {
-    $constOut = & $venvPython $constLint
+    $constOut = Invoke-RepoPython $constLint
     if ($LASTEXITCODE -ne 0) {
         Fail 'S6e' "constant parity lint failed:`n    $($constOut -join "`n    ")"
     }
@@ -494,7 +523,7 @@ if (Test-Path $venvPython) {
     $referenceMode = $null
     if ($referenceComplete) {
         Write-Host 'Verifying complete local game_ref...' -ForegroundColor Cyan
-        $verifyOut = & $venvPython -m tools.build_ironclad_sheet --verify
+        $verifyOut = Invoke-RepoPython -m tools.build_ironclad_sheet --verify
         if ($LASTEXITCODE -ne 0) {
             Fail 'S7a' "complete local game_ref failed verification:`n    $($verifyOut -join "`n    ")"
         }
@@ -526,7 +555,7 @@ if (Test-Path $venvPython) {
         # No 2>&1 (same PS 5.1 NativeCommandError reason as S6). -q keeps the
         # output to the summary line plus failures.
         try {
-            $pytestOut = & $venvPython -m pytest $repoRoot -q
+            $pytestOut = Invoke-RepoPython -m pytest $repoRoot -q
             if ($LASTEXITCODE -ne 0) {
                 $tail = ($pytestOut | Select-Object -Last 25) -join "`n    "
                 Fail 'S7' "portable repo suite not green (pytest exit $LASTEXITCODE):`n    $tail"
