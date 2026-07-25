@@ -13,7 +13,8 @@ starter-guaranteed engine, which is the exact loop the law breaks).
 
 Accounting:
   created  = add_card amounts + conscript(mode=create) amounts +
-             generate_from_pool / generate_guest_star amounts
+             generate_from_pool / generate_guest_star amounts + the
+             copy_* family (see CREATE_OPS)
              (recursed through conditional then/else and sly lists)
   consumed = exhaust_from amounts ("all" counts as the whole hand, 10) +
              1 if the card itself Exhausts
@@ -31,7 +32,18 @@ from pathlib import Path
 
 import yaml
 
-CREATE_OPS = {"add_card", "generate_from_pool", "generate_guest_star"}
+# Every op that MINTS a card into a pile. The first three were the whole
+# list until the v0.5 sheet fill wanted a Commander common that duplicates
+# a mustered unit -- at which point `copy_companion_in_hand` turned out to
+# mint a card the lint could not see, so a Common carrying it would have
+# netted +1 and passed clean. The copy family is enumerated here rather
+# than left to the next author to notice: a law with a hole in its
+# accounting is not a law, it is a habit.
+CREATE_OPS = {
+    "add_card", "generate_from_pool", "generate_guest_star",
+    "copy_companion_in_hand", "copy_spotlighted_in_hand",
+    "copy_companions_played_this_combat",
+}
 CHECKED_RARITIES = {"basic", "common"}
 ALL_SENTINEL = 10                    # MAX_HAND_SIZE: "all" burns the hand
 
@@ -55,7 +67,13 @@ def card_delta(row: dict) -> int:
     for fx in list(_walk(row.get("effects", []))) + list(
             _walk(row.get("sly", []))):
         op = fx.get("op")
-        if op in CREATE_OPS:
+        if op == "copy_companions_played_this_combat":
+            # No `amount` field: it copies EVERY unique companion played so
+            # far, so the count is unbounded by the row. A lint that guesses
+            # low here would clear the very card the law exists to stop --
+            # count it as the whole hand, the same sentinel "all" uses.
+            created += ALL_SENTINEL
+        elif op in CREATE_OPS:
             created += _amount(fx)
         elif op == "conscript" and fx.get("mode") == "create":
             created += _amount(fx)

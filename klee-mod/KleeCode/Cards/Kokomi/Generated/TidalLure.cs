@@ -41,7 +41,7 @@ public sealed class TidalLure : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Lure"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Sly[/gold]: Apply 1 [gold]Vulnerable[/gold] to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -72,14 +72,16 @@ public sealed class TidalLure : CustomCardModel, ICharacterCard
         PlayerChoiceContext choiceContext, CardModel card)
     {
         if (card != this) return;
-        // A discard is not a play, so there is no CardPlay to attribute these
-        // effects to. The shared body emitter threads one through for VFX and
-        // source attribution; null is the honest value here and every API it
-        // reaches takes a nullable CardPlay.
-        CardPlay? cardPlay = null;
-        foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())
         {
-            await PowerCmd.Apply<VulnerablePower>(choiceContext, debuffTarget, 1, applier: Owner.Creature, cardSource: this);
+            var debuffCandidates = CombatState!.HittableEnemies.ToList();
+            if (debuffCandidates.Count > 0)
+            {
+                var debuffTarget = Owner.RunState.Rng.CombatTargets.NextItem(debuffCandidates);
+                if (debuffTarget != null)
+                {
+                    await PowerCmd.Apply<VulnerablePower>(choiceContext, debuffTarget, 1, applier: Owner.Creature, cardSource: this);
+                }
+            }
         }
     }
 }

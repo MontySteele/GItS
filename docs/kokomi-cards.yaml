@@ -39,6 +39,34 @@
 # Charge grammar: the universal exhaust->Charge accrual lives on the relic (engine funnel), NEVER as card text;
 #   gain_charge lines here are the §2.1 "premium" bonuses on top. Charge is read, never spent — readers are
 #   rate-limited per §2.2 (Rare / Exhaust / cost >= 2 on the nuke; the garment state is the kit).
+#
+# ============================ v0.5 PARTIAL FILL (2026-07-25) ============================
+# WHY THIS BLOCK EXISTS. [USER] sanity-checked the pool against the shipped rosters and found it half-sized:
+#   Kokomi 38 personal cards against Klee 76 and Furina 78, short at EVERY rarity (common 13 vs ~32,
+#   uncommon 12 vs 25, rare 8 vs 15). Nothing regressed — the sheet has been 38 rows since the v0.2 pass and
+#   every R56/R57 number was measured against it — but a thin pool is felt by a HUMAN in a way the run sim
+#   does not report: fewer distinct options per draft screen, more forced picks, and a novelty budget that
+#   runs out well before act 3. That would contaminate every other answer the playtest protocol is asking for.
+# RULING ([USER], this sprint): fill PARTWAY with cards that make logical sense, and carry the remaining gap
+#   forward as an explicit design pass AFTER the early playtest results. This block is that partial fill:
+#   +12 common (13 -> 25) and +8 uncommon (12 -> 20). RARES ARE DELIBERATELY UNTOUCHED at 8 — draft variety
+#   is felt hardest where the offers actually come from, and rares are the slot most likely to be redesigned
+#   once play tells us which of her lanes is real.
+# STILL OPEN after this block, for the post-playtest pass: common 25/~32, uncommon 20/25, rare 8/15 — call it
+#   ~20 cards short of roster parity. Recorded in DECISIONS (R58) and in the sprint log, not just here.
+# FREEZE-RULE STATUS: the sprint's freeze rule ("R56 numbers ship untouched; blocker-class fixes only") is NOT
+#   violated and NOT quietly widened. Not one existing row is edited by this block. New rows carry new numbers,
+#   which is unavoidable, so this is logged as an explicit [USER]-directed EXCEPTION rather than folded in.
+# EVERY NUMBER BELOW IS PROPOSED and every NAME below is AUTHORED, NOT AUDITED. The v0.4 lore overlay ruled the
+#   names that existed then; the naming audit is [USER]-only and has not run on this block. Treat these display
+#   names as drafts, especially against external collisions (docs/reserved-card-names.txt is the record of a
+#   class of bug the repo structurally cannot see).
+# GRAMMAR: this block introduces no new verb. Every row is built from ops she already ships — conscript,
+#   exhaust_from, gain_charge, summon-adjacent riders, Sly, block_next_turn, cost_mod, copy_companion_in_hand —
+#   plus two THRESHOLD predicates (charge_at_least_N, exhaust_pile_at_least_N). A threshold is not a §2.2
+#   proportional read: it pays a flat printed bonus once a bar is cleared, so it cannot feed the
+#   multiplicative-read risk the per-point readers are rate-limited for. Charge thresholds are UNCOMMON+ only.
+# =======================================================================================
 
 # ---------- BASIC (5) ----------
 - {id: waters_edge, name: "Water's Edge", cost: 1, type: attack, rarity: basic, solve: [frontload], archetypes: [generic], role: glue,
@@ -163,6 +191,71 @@
    # with that flag ON THE RECORD — first knob back if the priest lane runs hot in a later pass.
    # NAME: "Kurage's Oath" is her actual Elemental Skill (wiki-verified) and was unused
    # by this pool; the oath is that she mends. [USER]-only naming audit as ever.
+
+# ---------- COMMON, v0.5 PARTIAL FILL (+12: 13 -> 25) ----------
+# Balanced 3 per lane so the fill does not quietly re-weight the archetypes; attack-weighted (4 of 12) because
+# the pre-fill commons ran 3 attacks in 13, and act 1 is bought with commons.
+# Commander (3)
+- {id: standing_orders, name: "Standing Orders", cost: 1, type: skill, rarity: common, solve: [utility, block], archetypes: [commander], role: enabler,
+   effects: [{op: conscript, amount: 1}, {op: block, amount: 4}]}
+   # The order goes out and the line holds while it is answered. Net delta 0 (transform, never create — LAW 4).
+   # The third face of the common conscript: notice replaces itself, to_the_front is free, this one is armoured.
+- {id: signal_arrow, name: "Signal Arrow", cost: 1, type: attack, rarity: common, solve: [frontload, utility], archetypes: [commander], role: glue,
+   effects: [{op: damage, amount: 5, target: enemy}, {op: conscript, amount: 1}]}
+   # The shot that calls the muster: a real swing that is also an order. Under pulsing_current's 7 because the
+   # muster is worth more than the premium point it trades away.
+- {id: shoulder_to_shoulder, name: "Shoulder to Shoulder", cost: 1, type: skill, rarity: common, solve: [utility, scaling], archetypes: [commander], role: payoff,
+   effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: copy_companion_in_hand, amount: 1}]}
+   # Rotate one card off the line and the unit beside it steps up twice. The Commander's only common PAYOFF:
+   # it whiffs with no companion in hand, which is exactly the archetype tax — you must have mustered first.
+   # Net delta 0 (burn 1, copy 1). LAW-4 NOTE: the copy op was invisible to tools/lint_kokomi_decksize.py until
+   # this row wanted it; the lint's CREATE_OPS now enumerates the copy family, so the accounting is real.
+# Priest (3)
+- {id: vow_of_tides, name: "Vow of the Tides", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [priest, generic], role: glue, exhaust: true,
+   effects: [{op: damage, amount: 8, target: all_enemies}]}
+   # The self-consuming wave: waterspout's grammar aimed wide. Priced ABOVE surging_shoal's 7 by one point only
+   # — a second act-1 AoE is real power and the freeze rule says be conservative with new numbers. Its burn is
+   # itself a Charge, which is the whole priest bargain in one card.
+- {id: pearl_diver, name: "Pearl Diver", cost: 0, type: skill, rarity: common, solve: [scaling], archetypes: [priest], role: enabler,
+   effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: gain_charge, amount: 2}]}
+   # The free fuel line: burn one, bank 3 total (2 line + 1 funnel). ritual_purification is the 1-cost engine
+   # common that also replaces itself; this is the cheap one that does not. Watatsumi's divers, on the nose.
+- {id: tideline_watch, name: "Tideline Watch", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [priest], role: glue,
+   effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: block_next_turn, amount: 8}]}
+   # The guard posted for TOMORROW: nothing this turn, a real wall the next. Deliberately not votive_offering
+   # with a bonus (that would be a strict domination at the same cost) — it is the same price for a different
+   # shape, and it reads the enemy's telegraph instead of the current hit.
+# Assist (3)
+- {id: whispered_word, name: "A Whispered Word", cost: 0, type: skill, rarity: common, solve: [block, velocity], archetypes: [assist], role: glue,
+   sly: [{op: draw, amount: 1}],
+   effects: [{op: discard, amount: 1}, {op: block, amount: 3}]}
+   # Free, small, and it rings its own bell: the discard can be this card's own trigger later. moon_signal buys
+   # the look immediately; this one buys cover now and the look only if the word gets passed along.
+- {id: driftwood_charm, name: "Driftwood Charm", cost: 1, type: skill, rarity: common, solve: [block, velocity], archetypes: [assist, generic], role: glue,
+   sly: [{op: gain_charge, amount: 2}],
+   effects: [{op: block, amount: 3}, {op: draw, amount: 1}]}
+   # The Sly bell that feeds the meter — a §2.1 premium on the discard lane, which had none. Charge ACCRUAL,
+   # not a read: nothing here scales off the bank, so §2.2's rate limits do not apply.
+- {id: scattering_spray, name: "Scattering Spray", cost: 1, type: attack, rarity: common, solve: [frontload, velocity], archetypes: [assist, generic], role: glue,
+   effects: [{op: damage, amount: 5, target: all_enemies}, {op: discard, amount: 1}, {op: draw, amount: 1}]}
+   # The assist lane's own AoE: less than surging_shoal's 7, and it churns. The draw is not decoration — without
+   # it this is strictly worse than the shoal at the same cost, which the domination lint would (rightly) call.
+# Generic (3)
+- {id: slack_water, name: "Slack Water", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue,
+   effects: [{op: block, amount: 4}, {op: block_next_turn, amount: 4}]}
+   # Half now, half later — Sayu's daruma shape in her own hands. Total 8 beats jade_bulwark's 6, and the split
+   # is the price: it is worse against burst and better against a long grind.
+   # NAME/ID: drafted as "Ebb and Flow" and CHANGED by lint_unique_names — Furina already owns that name and
+   # that id, and a duplicate id would have taken the whole loader down. Slack water is the still moment at the
+   # turn of the tide, which is the card.
+- {id: tideturn, name: "Tideturn", cost: 1, type: attack, rarity: common, solve: [frontload, velocity], archetypes: [generic], role: glue,
+   effects: [{op: damage, amount: 5, target: enemy}, {op: draw, amount: 1}]}
+   # The swing that keeps the hand moving. Two points under pulsing_current, and the two points are the draw.
+- {id: steady_the_line, name: "Steady the Line", cost: 0, type: skill, rarity: common, solve: [block], archetypes: [generic, assist], role: glue,
+   effects: [{op: block, amount: 4}, {op: discard, amount: 1}]}
+   # Free cover paid for in tempo — and the tempo it pays rings the Sly bell, so the assist lane wants it too.
+   # The 0-cost block slot the pool did not have.
+
 # ---------- UNCOMMON (12: +the R51 texture pair; +all_streams_flow, v0.3 charge-curve pass) ----------
 # v0.3 (user-directed 2026-07-24): the meter gets an ON-CURVE reader. The v0.2 world rate-limited every Charge
 # read to Rare/kit — the engine made fuel it could not spend, and the act-1 elite checks arrive at node 4, long
@@ -220,6 +313,60 @@
    # into the open (Vulnerable 1, random). The Sly bell as debuff: R51's second prescribed home. Assist stays
    # the glue lane — the payoff goes to whoever swings next, not to this card. (No domination pair: the lantern
    # is common with a bigger Sly number; this trades Sly magnitude for Sly quality.)
+
+# ---------- UNCOMMON, v0.5 PARTIAL FILL (+8: 12 -> 20) ----------
+# 2 per lane. This is where the two THRESHOLD predicates live (charge_at_least_N is UNCOMMON+ by grammar);
+# all_streams_flow already broke the seal on sub-Rare Charge reads, and a flat bar is milder than its
+# per-point slope, so the ladder stays monotone.
+# Commander (2)
+- {id: honor_guard, name: "Honor Guard", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [commander], role: payoff,
+   effects: [{op: conscript, amount: 1}, {op: cost_mod, scope: companion_cards, delta: -1, duration: this_turn}]}
+   # Muster one, and every unit already standing costs 1 less THIS TURN. The Commander's tempo payoff: the
+   # archetype's failure mode is a hand full of recruits it cannot afford to play, and this is the answer to it.
+- {id: press_the_advantage, name: "Press the Advantage", cost: 1, type: attack, rarity: uncommon, solve: [frontload, utility], archetypes: [commander], role: payoff,
+   effects: [{op: damage, amount: 7, target: enemy}, {op: conscript, amount: 1, cost_override: 0}]}
+   # The hit that makes the opening, and the recruit who walks through it TODAY (cost 0, this copy).
+   # field_promotion is the same reach as a skill that replaces itself; this one is the reach on an attack.
+# Priest (2)
+- {id: moonlit_offering, name: "Moonlit Offering", cost: 1, type: skill, rarity: uncommon, solve: [scaling, velocity], archetypes: [priest], role: enabler, exhaust: true,
+   effects: [{op: exhaust_from, amount: 2, select: chosen}, {op: gain_charge, amount: 3}, {op: draw, amount: 2}]}
+   # Burn deep, see far: 6 total Charge (3 line + 3 funnel, counting its own rotation) and two fresh cards, for
+   # a net deck delta of -3. The priest lane's biggest single act of fuel, and the sheet's clearest statement
+   # that her deck IS her resource bar.
+- {id: read_the_current, name: "Read the Current", cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling], archetypes: [priest, generic], role: payoff,
+   effects: [{op: damage, amount: 7, target: enemy},
+             {op: conditional, if: charge_at_least_10, then: [{op: damage, amount: 6, target: enemy}]}]}
+   # THE THRESHOLD SHAPE, and the reason it exists: all_streams_flow's per-point slope is the only sub-Rare read
+   # she has, and a slope is the shape that makes late Charge frightening. A bar does not — it pays once, it is
+   # printed, and it stops. 10 is roughly her node-4 bank, so this comes online exactly when act 1 turns into
+   # act 2. Off the bar it is a playable 7; on it, 13 — an uncommon-priced spike that never grows further.
+   # Written as base-plus-bonus rather than a two-branch either/or ON PURPOSE: the upgrade then moves the half
+   # that is always live, and the bar itself cannot drift downward as a side effect (resource-curve law).
+# Assist (2)
+- {id: quiet_harbor, name: "Quiet Harbor", cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], archetypes: [assist], role: payoff,
+   sly: [{op: draw, amount: 2}],
+   effects: [{op: block, amount: 5}]}
+   # The Sly lane's velocity payoff: a fair wall when you play it, two cards when the churn throws it away.
+   # drifting_lantern teaches that Sly pays either way; this is the uncommon that makes the discard the BETTER
+   # half, which is the whole reason the assist lane accepts a low internal payoff elsewhere.
+- {id: driftglass, name: "Driftglass", cost: 1, type: attack, rarity: uncommon, solve: [frontload], archetypes: [assist, generic], role: glue,
+   sly: [{op: damage, amount: 5, target: random_enemy}],
+   effects: [{op: damage, amount: 8, target: enemy}]}
+   # The first Sly ATTACK on any sheet: 8 aimed, or 5 at whoever is nearest when it goes over the side. Nothing
+   # else in her pool makes a random discard into damage, and the assist lane needed a reason to be in a fight.
+# Generic (2)
+- {id: pearl_current, name: "Pearl Current", cost: 1, type: power, rarity: uncommon, solve: [block], archetypes: [generic], role: payoff,
+   effects: [{op: apply_power, power: metallicize, amount: 3, target: self}]}
+   # Standing guard: 3 Block at the start of every turn, forever. The generic lane's only power, and the one
+   # card in the pool that pays a player who does nothing — deliberate, because every other engine she has
+   # demands cards, and a deck that runs out of cards should not immediately run out of defence.
+- {id: the_tide_remembers, name: "The Tide Remembers", cost: 2, type: attack, rarity: uncommon, solve: [frontload, scaling], archetypes: [priest, generic], role: payoff,
+   effects: [{op: damage, amount: 4, target: all_enemies},
+             {op: conditional, if: exhaust_pile_at_least_6, then: [{op: damage, amount: 5, target: all_enemies}]}]}
+   # The pile threshold: the exhaust pile is the record of everything she has rotated off the line, and once it
+   # is six deep the wave arrives with all of it behind (4 to all, or 9). pearl_barrage reads the pile per-card
+   # and single-target; this reads it once, as a bar, and pays ALL enemies — the AoE face of the same idea,
+   # bounded by construction. Same base-plus-bonus encoding as read_the_current, for the same two reasons.
 
 # ---------- RARE (7 draftable + 1 kit) ----------
 - {id: ceremonial_garment, name: "Ceremonial Garment", cost: 0, type: skill, rarity: rare, solve: [scaling], archetypes: [generic], role: payoff, tags: [burst], kit_card: true,

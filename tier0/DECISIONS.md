@@ -1651,3 +1651,105 @@ window (mod-side files only, per mtimes), which is suggestive but unproven.
 Recorded as an open trust question about single-cell measurement, in the same
 family as the `--realistic` catch that nearly caused a false regression call.
 Treat any single 500-run cell as provisional until repeated.
+
+## R58 -- Kokomi v0.5 partial fill: the pool was half-sized (2026-07-25)
+
+**[USER] CATCH, and the repo could not have made it.** Mid-sprint, [USER]
+asked how many cards Kokomi was getting: "the other decks were scoped for
+75-80 in total." Her personal pool was **38** against Klee 76 and Furina 78 --
+short at every rarity (common 13 vs 32, uncommon 12 vs 25, rare 8 vs 15).
+Nothing had regressed: the sheet has been 38 rows since the v0.2 pass and
+every R56/R57 number was measured against it. That is exactly why no
+instrument reported it. The run sim measures winrate, and a thin pool does not
+lower winrate -- it lowers VARIETY, which only a human at the table feels.
+Same family as the reserved-card-names catch (see the structurally-invisible
+defects note): a check that needs data the repo does not hold.
+
+**RULING ([USER]): fill partway with cards that make logical sense; carry the
+rest to a design pass AFTER early playtest results.** Executed as +12 common
+(13 -> 25) and +8 uncommon (12 -> 20), 3 per lane at common and 2 per lane at
+uncommon so the fill does not silently re-weight the archetypes. Rares
+deliberately untouched at 8: draft variety is felt where the offers come from,
+and rares are the slot most likely to be redesigned once play says which of
+her lanes is real. Personal pool 38 -> 58.
+
+**STILL OPEN (post-playtest design pass):** common 25/~32, uncommon 20/25,
+rare 8/15 -- roughly 20 cards short of roster parity. Art bill rises with it:
+53 personal faces today, ~91 at parity, against the ~8 clean large
+illustrations that forced the widened-source ruling.
+
+**FREEZE RULE.** Not violated, not quietly widened: no existing row is edited.
+New rows carry new numbers, which is unavoidable, so this is logged as an
+explicit [USER]-directed exception rather than folded in. All new numbers are
+PROPOSED and all new NAMES are AUTHORED-NOT-AUDITED (the naming audit is
+[USER]-only; it ran at v0.4 and has not run on this block).
+
+**NEW GRAMMAR: threshold predicates.** `charge_at_least_N` (new) and
+`exhaust_pile_at_least_N` (existed sim-side, taught to codegen). A threshold
+is NOT a §2.2 proportional read -- it pays a flat printed bonus once a bar is
+cleared and then stops, so it cannot feed the multiplicative-read risk the
+per-point readers are rate-limited for. Charge bars are uncommon+ only. Both
+threshold cards are encoded base-plus-bonus rather than either/or so the
+upgrade moves the always-live half and the BAR CANNOT DRIFT DOWN -- lowering a
+threshold is a resource-curve move, which the Klee R1 law forbids. Pinned by
+`test_threshold_bars_do_not_move_on_upgrade`.
+
+### Four defects the fill surfaced. Three were already shipped.
+
+1. **Sly branches were never checked by `blocked_reason`.** It read `effects`
+   and nothing else. `tidal_lure`'s sheet says Vulnerable 1 to a RANDOM enemy;
+   the apply_power emitter treats anything-but-"enemy" as all-enemies; the
+   guard that would have caught it never looked. The card generated, compiled,
+   and debuffed the whole room. FIXED both ways: the Sly view now runs through
+   `blocked_reason` like any other card, and apply_power learned
+   `random_enemy`. An unchecked branch is not a smaller surface, it is the
+   same surface with the alarm disconnected.
+2. **Sly branches reused the played face's DynamicVars.** `drifting_lantern`
+   (played 4 / Sly 4, upgrade +2) upgraded its Sly Block to 6, which the sim
+   never does; `driftglass` would have dealt 8 on discard instead of 5; and
+   `quiet_harbor`/`whispered_word` referenced a `Cards` var their cards do not
+   declare at all. FIXED: `_sly_view` stamps `_sly_branch` and every amount in
+   a Sly branch renders LITERAL, which is what the sim does (no sly-delta key
+   exists in the applier).
+3. **No Sly card's FACE mentioned Sly.** `drifting_lantern` -- the sheet's
+   self-declared "Sly teaching card" -- printed "Gain 4 Block." and taught
+   nothing. FIXED: the face now carries a `[gold]Sly[/gold]: ...` clause built
+   from the same text emitter. A mechanic a player cannot read does not exist
+   at the table.
+4. **LAW 4's accounting had a hole.** `tools/lint_kokomi_decksize.py` knew
+   three card-minting ops; the copy family was invisible, so a Common carrying
+   `copy_companion_in_hand` would have netted +1 and passed clean. FIXED: the
+   copy family is enumerated, and the unbounded
+   `copy_companions_played_this_combat` counts as the whole hand rather than
+   being guessed at 1. Guarded by `test_decksize_lint_counts_the_card_copying_ops`.
+
+Two pre-existing codegen blockers also cleared, both over-broad guards rather
+than missing machinery: `exhaust_from amount > 1` is expressible on the CHOSEN
+branch (one multi-select prompt IS the sim's pick-worst-repeat; only the
+random re-pool loop was never built), which unblocked `cleansing_tide` -- a
+COMMON that had been shipping with no C# card at all. Kokomi codegen is now
+**57 of 58**, the remainder being the kit Burst.
+
+### Measurement (500 runs/lane, --realistic, post-fill)
+
+| lane | pre-fill (R57) | post-fill | Wilson 95% |
+|------|------|------|------|
+| priest    | 7.0% | 8.4% | 6.3-11.2% |
+| commander | 9.6% | 8.8% | 6.6-11.6% |
+| generic   | 6.8% | 7.0% | 5.1-9.6% |
+| assist    | 2.0% | 1.4% | 0.7-2.9% |
+
+**READ THIS AS A NULL.** Every interval overlaps its pre-fill value; +20 cards
+moved no lane outside noise. That is the expected and desired result -- the
+fill was for a HUMAN-felt property the sim does not measure, and a fill that
+had moved winrates would have meant the new cards were mispriced. The priest
+cell reading 8.4% is noted only because R57's unexplained anomaly produced
+that same number; nothing is inferred from it, and R57's standing rule holds:
+treat any single 500-run cell as provisional until repeated.
+
+**ONE SIGNAL WORTH THE NEXT PASS:** assist stays a distant last (1.4% against
+7-9%, online in 20% of runs, median 11 fights) and did NOT move despite taking
+5 of the 20 new cards. The sheet declares the lane "LOW INTERNAL PAYOFF BY
+DESIGN" (Box Trick philosophy), but a 6x spread is a different claim from a
+low payoff. Flagged for the post-playtest design pass, not acted on inside the
+freeze.
