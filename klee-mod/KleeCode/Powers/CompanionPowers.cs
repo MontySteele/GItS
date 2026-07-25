@@ -27,6 +27,7 @@ public static class CompanionConstants
     public const int WitchsFlameBurst = 3;     // WITCHS_FLAME_BURST per aura
     public const int SolarIsotomaBlock = 3;    // SOLAR_ISOTOMA_BLOCK per hit
     public const int CelestialGiftBlock = 4;   // CELESTIAL_GIFT_BLOCK per turn
+    public const int MasqueBondBlock = 5;      // MASQUE_BOND_BLOCK owed per turn
 }
 
 /// <summary>

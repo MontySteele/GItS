@@ -468,7 +468,9 @@ APPLY_POWERS = {
     "ancient_sea_authority": ("AncientSeaAuthorityPower", None,
         "Elemental auras you apply last {X} extra turn(s)."),
     "masque_red_death": ("MasqueRedDeathPower", None,
-        "Your Attacks deal {X} more damage. You can no longer be healed."),
+        "At the start of each turn, gain {X} [gold]Strength[/gold]. Each turn "
+        "your [gold]Bond of Life[/gold] consumes the first 5 "
+        "[gold]Block[/gold] you gain."),
     "fanfare_attack_per10": ("FanfareAttackPer10Power", None,
         "Your Attacks deal {X} more damage per 10 [gold]Fanfare[/gold]."),
     "salon_member": ("SalonMemberPower", None,
@@ -2488,16 +2490,8 @@ def build_body(
                 "Owner.Creature, DynamicVars[\"FanfareFloor\"].IntValue);")
 
         elif op == "heal":
-            # KleeHeal, not CreatureCmd.Heal directly: Arlecchino's Masque of
-            # the Red Death refuses healing, and the game exposes no heal hook
-            # on PowerModel for a power to intercept it (checked against
-            # sts2.dll -- the only heal-modifying members are rest-site
-            # specific). Routing every generated heal through one helper is the
-            # same argument tier0 makes by blocking inside the single `heal` op
-            # rather than on each card: a heal card written later cannot
-            # silently ignore her.
             lines.append(
-                "await KleeHeal.Apply(Owner.Creature, "
+                "await CreatureCmd.Heal(Owner.Creature, "
                 "DynamicVars[\"Heal\"].BaseValue);")
 
         elif op == "apply_power":

@@ -101,8 +101,17 @@
    # Burst name "As the Sunlit Sky's Singing Salute" RESERVED for a future playable kit-Burst (v1.9).
 
 - {id: clorinde_impale_the_night, name: "Clorinde — Impale the Night", star: 5, rarity: rare, role_c: applier, element: electro, cost: 2, type: attack, character: clorinde,
-   effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
-             {op: apply_power, power: night_vigil, amount: 3, target: self, note: "your Attacks against enemies that have an aura deal +3"}]}
+   effects: [{op: damage, amount: 20, target: enemy, applies_element: true},
+             {op: apply_power, power: night_vigil, amount: 6, target: self, note: "your Attacks against enemies that have an aura deal +6"}]}
+   # RATIFIED 2026-07-25 [USER]: "double that stat line to 20 damage and +6 vs auras", from 10/+3.
+   # RECORDED CONSEQUENCE, because the doubling changes what this card IS relative to the pool:
+   # at 2 cost she now out-hits Raiden's Musou no Hitotachi (18, the sheet's stated "biggest one-card
+   # hit") AND carries a permanent power, where Raiden was deliberately shapeless to pay for her
+   # number. That is a strict-domination shape at equal cost, and lint_strict_domination sees the
+   # sheets. Left as ruled rather than softened, and flagged here so the red-pen session decides
+   # whether Raiden moves, Clorinde's cost moves, or the domination pair is accepted as intended
+   # (a 5-star Rare beating another 5-star Rare is not automatically wrong -- they are one-per-run
+   # banner draws, not competing commons).
    # ROLE: payoff. The Champion Duelist reads the board before she moves: her payoff is conditional on the
    # pool having done its job, so she pays every applier in the set rather than standing alone.
    # NEW POWER: night_vigil.
@@ -132,21 +141,25 @@
    # Burst name "O Tides, I Have Returned" is RESERVED (line 96) and was NOT taken.
 
 - {id: arlecchino_masque_red_death, name: "Arlecchino — Masque of the Red Death", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 1, type: power, character: arlecchino,
-   effects: [{op: apply_power, power: masque_red_death, amount: 4, target: self, note: "your Attacks deal +4 damage; you can no longer be healed"}]}
+   effects: [{op: apply_power, power: masque_red_death, amount: 1, target: self, note: "at the start of each turn gain 1 Strength; your Bond of Life eats the first 5 Block you gain each turn"}]}
    # ROLE: payoff. R65 places her in FONTAINE (House of the Hearth) — Snezhnaya is not a designed sheet.
-   # NEW POWER: masque_red_death, including a heal block in _op_heal.
-   # The drawback is her actual Genshin identity (Bond of Life: healing is converted, never received) and
-   # is the kickoff's suggested distinguishing cost. It is a REAL cost for Furina, whose sheet carries
-   # two heal cards (14 and 8).
-   # *** THE PROBLEM RED-PEN HAS TO RULE ON, and the sheet cannot see it by itself: ***
-   # Kokomi's LAW 2 forbids heals outright. For her the drawback is INERT, so Arlecchino is a strictly
-   # upside card — a flat +4 on every attack for 1 energy with no cost at all. Klee has no heal in her
-   # starter either, so she is only slightly better off than Furina. A drawback that prices itself
-   # differently per character is not automatically wrong (that is what off-element access is), but a
-   # drawback that prices to ZERO for one character is a §4.3 smell, and it is the reason this card is
-   # flagged rather than proposed quietly. Options if red-pen rejects: (a) accept, and let Kokomi have a
-   # nation-crossing prize; (b) add a second clause that bites universally (e.g. it also blocks Block
-   # gained outside your turn); (c) move the drawback to HP cost on play, which every character pays.
+   # NEW POWER: masque_red_death. Amount is STRENGTH PER TURN (a ratchet, like Nicole's celestial_gift);
+   # the Bond is the flat MASQUE_BOND_BLOCK constant, mirrored C#-side and parity-lint watched.
+   #
+   # REDESIGNED 2026-07-25 [USER], replacing "+4 damage on Attacks; you can no longer be healed".
+   # The new shape is Bond of Life proper — a DEBT rather than a denial — and it fixes both problems
+   # the first draft was flagged with:
+   #   1. The old drawback priced to ZERO for Kokomi (LAW 2 forbids her heals at all), making the card
+   #      pure upside for exactly one character. The Bond bites everyone, because everyone gains Block.
+   #   2. The old drawback was not fully buildable: the engine exposes no heal hook on PowerModel, so
+   #      the C# side could only block heals from MOD cards. Nothing here needs a hook that does not
+   #      exist — Strength and Block both have real funnels in both layers.
+   #
+   # THE KOKOMI INTERACTION IS NOW INTERESTING RATHER THAN BROKEN. Her LAW 3 (Flawless Strategy) says
+   # she cannot gain Strength: it converts to Charge at the one apply chokepoint. So Arlecchino pays
+   # her in Charge instead of Strength — a different currency, not a dead line — and she still pays
+   # the Bond in full. Deliberately NOT special-cased: routing through the standard chokepoint is what
+   # makes that fall out on its own.
    # Burst name "Balemoon Rising" RESERVED for a future playable kit-Burst (v1.9).
 
 # ---------- OPEN ITEMS ----------

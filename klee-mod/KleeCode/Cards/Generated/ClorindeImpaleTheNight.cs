@@ -58,13 +58,13 @@ public sealed class ClorindeImpaleTheNight : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Clorinde — Impale the Night"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Your Attacks against enemies holding an elemental aura deal 3 more damage."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Your Attacks against enemies holding an elemental aura deal 6 more damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(10m),
+            new CalculationBaseVar(20m),
             new ExtraDamageVar(1m),
             new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };
@@ -85,7 +85,7 @@ public sealed class ClorindeImpaleTheNight : CustomCardModel, IElementalCard, IC
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        await PowerCmd.Apply<NightVigilPower>(choiceContext, Owner.Creature, 3, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<NightVigilPower>(choiceContext, Owner.Creature, 6, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

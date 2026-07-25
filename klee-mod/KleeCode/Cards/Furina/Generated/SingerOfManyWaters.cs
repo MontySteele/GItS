@@ -62,7 +62,7 @@ public sealed class SingerOfManyWaters : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KleeHeal.Apply(Owner.Creature, DynamicVars["Heal"].BaseValue);
+        await CreatureCmd.Heal(Owner.Creature, DynamicVars["Heal"].BaseValue);
     }
 
     protected override void OnUpgrade()

@@ -48,13 +48,13 @@ public sealed class ArlecchinoMasqueRedDeath : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Arlecchino — Masque of the Red Death"),
-        ("description", "Your Attacks deal {PowerAmount:diff()} more damage. You can no longer be healed."),
+        ("description", "At the start of each turn, gain {PowerAmount:diff()} [gold]Strength[/gold]. Each turn your [gold]Bond of Life[/gold] consumes the first 5 [gold]Block[/gold] you gain."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 4m)
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -72,6 +72,6 @@ public sealed class ArlecchinoMasqueRedDeath : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

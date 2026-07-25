@@ -857,14 +857,6 @@ def _op_copy_spotlighted_in_hand(state: CombatState, fx: dict,
 
 def _op_heal(state: CombatState, fx: dict, card: Card) -> None:
     p = state.player
-    # Arlecchino, Masque of the Red Death: her Bond of Life identity -- healing
-    # is never received. Blocked at the ONE heal op rather than at each card, so
-    # no future heal can be written that quietly ignores her. Emitted (not
-    # silently dropped) so the pilot's heal accounting and any telemetry can see
-    # that a heal was offered and refused.
-    if p.powers.get("masque_red_death", 0):
-        state.emit("heal_blocked", amount=fx["amount"], by="masque_red_death")
-        return
     amount = fx["amount"]
     if state.salon_replacements_this_card:
         amount *= C.SALON_REPLACE_NUMERIC_MULT
@@ -1668,6 +1660,13 @@ def player_turn_start_triggers(state: CombatState) -> None:
     if n:
         powers.apply_power(state, p, "strength", n, applier=p)
         p.block += C.CELESTIAL_GIFT_BLOCK
+    # Arlecchino -- Strength half. Routed through powers.apply_power, NOT
+    # written into p.powers directly, so Kokomi's LAW 3 chokepoint sees it and
+    # converts it to Charge. That interaction is meant to fall out of the
+    # standard path rather than be special-cased anywhere.
+    n = p.powers.get("masque_red_death", 0)
+    if n:
+        powers.apply_power(state, p, "strength", n, applier=p)
     n = p.powers.get("spark_per_turn", 0)               # Endless Fireworks
     if n:
         gain_sparks(state, n)
@@ -1749,6 +1748,30 @@ def _exhaust_autoplay_sweep(state: CombatState) -> None:
 
 def player_turn_end_triggers(state: CombatState) -> None:
     p = state.player
+    # Arlecchino -- Bond of Life half, once per turn, clamped at zero.
+    #
+    # WHY END-OF-TURN AND NOT AT THE MOMENT BLOCK IS GAINED. The card reads
+    # "the first 5 Block you gain each turn does not count", and eating it at
+    # the gain site would need a funnel that does not exist: Block is added at
+    # ~15 places, and modify_block_gained deliberately covers CARD block only
+    # (its docstring: passive/power Block from Metallicize, Crystallize and
+    # Solar Isotoma is intentionally exempt from Frail). Deducting once at turn
+    # end is ARITHMETICALLY IDENTICAL -- eating the first 5 leaves
+    # max(0, gained - 5), and so does subtracting 5 at the end and clamping --
+    # and it is universal, so Navia's or Crystallize's Block cannot dodge the
+    # Bond the way a card-only funnel would let it.
+    #
+    # The one case where the two differ is a card that READS current Block
+    # mid-turn: the `player_block` formula token (Body Slam). That card is
+    # reference-pool only and the refs take no companions
+    # (rewards.NO_COMPANION_CHARACTERS), so the divergence is unreachable
+    # today. Recorded rather than assumed away -- if a roster character ever
+    # gets a Block-reading card, this is the note that says to move the
+    # deduction to a real gain funnel.
+    if p.powers.get("masque_red_death", 0):
+        paid = min(p.block, C.MASQUE_BOND_BLOCK)
+        p.block -= paid
+        state.emit("bond_of_life", amount=paid, owed=C.MASQUE_BOND_BLOCK)
     # Runs FIRST: the game's AutoPostPlay phase lands after the player's
     # plays and before turn end, so the free play resolves ahead of the
     # other end-of-turn triggers and well ahead of the enemy turn.

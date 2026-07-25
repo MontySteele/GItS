@@ -74,6 +74,7 @@ OZ_DMG = 3                        # Oz end-of-turn hit (applies electro)
 WITCHS_FLAME_BURST = 3            # Durin: Burst Energy per consumed Pyro aura
 SOLAR_ISOTOMA_BLOCK = 3           # block per attack hit vs aura'd enemy
 CELESTIAL_GIFT_BLOCK = 4          # Nicole: block at start of turn
+MASQUE_BOND_BLOCK = 5             # Arlecchino: Bond of Life, Block owed per turn
 CATALYTIC_BURST_PER_REACTION = 5  # Catalytic Conversion bonus burst/reaction
 
 # --- Furina: Spotlight (kickoff §3) ---

@@ -268,7 +268,7 @@ def test_night_vigil_pays_only_against_an_aura_and_only_on_attacks():
     assert before - e.hp == 6
     assert e.aura == "cryo"
 
-    # Aura up: the SAME card now pays +3, and the rider is collected even
+    # Aura up: the SAME card now pays the rider, and it is collected even
     # though this hit reacts the aura away.
     before = e.hp
     effects.resolve_card(st, loader.get_card("chevreuse_interdiction_fire"))
@@ -316,26 +316,65 @@ def test_ancient_sea_authority_applies_no_element_of_its_own():
     assert all(e.aura is None for e in st.enemies)
 
 
-def test_masque_of_the_red_death_buffs_attacks_and_blocks_healing():
-    st = make_state(enemies=[make_enemy(hp=300)], hp=40)
-    e = st.enemies[0]
-    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
-    before = e.hp
-    effects.resolve_card(st, loader.get_card("kaeya_frostgnaw"))   # 6 base
-    assert before - e.hp == 6 + 4
-
-    # The Bond of Life half: healing is offered and refused, not silently lost.
-    st.player.hp = 40
-    effects.resolve_card(st, loader.get_card("singer_of_many_waters"))
-    assert st.player.hp == 40
-    blocked = [ev for ev in st.log if ev["event"] == "heal_blocked"]
-    assert blocked and blocked[-1]["by"] == "masque_red_death"
-
-
-def test_masque_does_not_buff_bombs():
+def test_masque_ratchets_strength_every_turn():
     st = make_state(enemies=[make_enemy(hp=300)])
-    e = st.enemies[0]
-    st.player.powers["masque_red_death"] = 4
-    before = e.hp
-    effects.deal_damage_to_enemy(st, e, 10, element=None, source="bomb")
-    assert before - e.hp == 10
+    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+    assert st.player.powers.get("strength", 0) == 0    # nothing on play
+    effects.player_turn_start_triggers(st)
+    assert st.player.powers["strength"] == 1
+    effects.player_turn_start_triggers(st)
+    assert st.player.powers["strength"] == 2           # a ratchet, not a flat
+
+
+def test_masque_bond_of_life_eats_block_every_turn():
+    st = make_state(enemies=[make_enemy(hp=300)])
+    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+
+    st.player.block = 12
+    effects.player_turn_end_triggers(st)
+    assert st.player.block == 12 - C.MASQUE_BOND_BLOCK
+    bond = [ev for ev in st.log if ev["event"] == "bond_of_life"]
+    assert bond and bond[-1]["amount"] == C.MASQUE_BOND_BLOCK
+
+    # Every turn, not once: a second turn pays again.
+    st.player.block = 8
+    effects.player_turn_end_triggers(st)
+    assert st.player.block == 8 - C.MASQUE_BOND_BLOCK
+
+
+def test_masque_bond_clamps_at_zero_and_never_goes_negative():
+    """The debt is paid out of Block, not out of HP -- a turn with less Block
+    than the Bond loses what there is and no more."""
+    st = make_state(enemies=[make_enemy(hp=300)])
+    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+    st.player.block = 2
+    effects.player_turn_end_triggers(st)
+    assert st.player.block == 0
+    bond = [ev for ev in st.log if ev["event"] == "bond_of_life"]
+    assert bond[-1]["amount"] == 2      # paid what existed, owed 5
+
+
+def test_masque_bond_is_universal_and_navia_block_cannot_dodge_it():
+    """The reason the Bond is paid at turn end rather than at a card-block
+    funnel: power-sourced Block would otherwise slip past it."""
+    st = make_state(enemies=[make_enemy(hp=300)])
+    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+    st.player.powers["cannon_fire_support"] = 3
+    _play(st, "lynette_box_trick")        # Navia pays 3 Block, not card block
+    assert st.player.block == 3
+    effects.player_turn_end_triggers(st)
+    assert st.player.block == 0
+
+
+def test_masque_strength_converts_to_charge_for_kokomi():
+    """LAW 3 (Flawless Strategy) says Kokomi cannot gain Strength; it becomes
+    Charge at the one chokepoint. Arlecchino routes through the standard path
+    precisely so this falls out without a special case."""
+    st = make_state(enemies=[make_enemy(hp=300)])
+    st.player.relic_hooks.append("tamakushi_casket")
+    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+    effects.player_turn_start_triggers(st)
+    assert st.player.powers.get("strength", 0) == 0
+    assert st.player.charge == 1
+    converted = [ev for ev in st.log if ev["event"] == "strength_converted"]
+    assert converted and converted[-1]["stacks"] == 1

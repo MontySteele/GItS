@@ -138,24 +138,30 @@ public sealed class AncientSeaAuthorityPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Arlecchino, Masque of the Red Death: your Attacks deal +Amount, and you can
-/// no longer be healed.
+/// Arlecchino, Masque of the Red Death: at the start of each turn gain Amount
+/// Strength, and each turn your Bond of Life eats the first
+/// <see cref="CompanionConstants.MasqueBondBlock"/> Block you gain.
 ///
-/// THE HEAL BLOCK IS NOT A POWER HOOK, BECAUSE THERE IS NO HEAL HOOK. The game
-/// assembly exposes no ModifyHealReceived / BeforeHealReceived on PowerModel --
-/// checked against sts2.dll, where the only heal-modifying members are rest-site
-/// specific (ModifyRestSiteHealAmount, TryModifyRestSiteHealRewards). So the
-/// block lives in <see cref="KleeHeal"/>, the mod's own heal helper, which every
-/// generated heal card now routes through.
+/// Both halves are PER TURN. Amount is Strength per turn -- a ratchet, like
+/// Nicole's celestial_gift -- and the Bond is a flat constant that does not
+/// scale with it.
 ///
-/// RECORDED DIVERGENCE, and the reason it is small: tier0 blocks the `heal` OP,
-/// which only mod cards have, and the power is combat-scoped in both layers. So
-/// mod-card healing matches exactly. What the mod cannot block and the sim never
-/// models is a BASE-GAME in-combat heal -- a potion, or a relic that heals mid
-/// fight. Those remain possible for an Arlecchino player. Blocking them would
-/// mean Harmony-patching the engine's heal path globally, which is a far more
-/// invasive change than this card justifies and would need owner-scoping in
-/// co-op (the G-B1 bug class). Logged, not faked.
+/// THE BOND IS PAID AT TURN END, NOT AT THE GAIN SITE, mirroring tier0
+/// exactly. Eating the first N at the moment Block is gained would need a
+/// funnel neither layer has, and the arithmetic is identical either way:
+/// eating the first N leaves max(0, gained - N), and so does subtracting N at
+/// the end and clamping at zero. Paying at the end is also universal, so Block
+/// from a power (Navia, Crystallize, Metallicize) cannot dodge the Bond the
+/// way a card-only funnel would let it.
+///
+/// The two orders differ only for a card that READS current Block mid-turn
+/// (the sim's `player_block` token -- Body Slam). That is reference-pool only
+/// and the refs take no companions, so the divergence is unreachable; the note
+/// exists so a future Block-reading roster card knows to revisit this.
+///
+/// Strength is granted through the ordinary power path, which is what makes
+/// Kokomi's LAW 3 chokepoint convert it to Charge for her without a
+/// special case anywhere.
 /// </summary>
 public sealed class MasqueRedDeathPower : PowerModel, ILocalizationProvider
 {
@@ -163,39 +169,32 @@ public sealed class MasqueRedDeathPower : PowerModel, ILocalizationProvider
     {
         ("title", "Masque of the Red Death"),
         ("description",
-            "Your Attacks deal {Amount} more damage. You can no longer be "
-          + "healed."),
+            "At the start of each turn, gain {Amount} [gold]Strength[/gold]. "
+          + "Each turn your [gold]Bond of Life[/gold] consumes the first "
+          + $"{CompanionConstants.MasqueBondBlock} [gold]Block[/gold] you "
+          + "gain."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
     {
-        if (dealer != Owner || target == Owner) return 0m;
-        if (!props.IsPoweredAttack()) return 0m;
-        if (cardSource is not { Type: CardType.Attack }) return 0m;
-        return Amount;
+        if (player.Creature != Owner) return;
+        await PowerCmd.Apply<StrengthPower>(
+            choiceContext, Owner, Amount, applier: Owner, cardSource: null);
     }
 
-    /// <summary>True while this creature refuses healing.</summary>
-    public static bool IsRefusingHeals(Creature? creature) =>
-        creature?.Powers.OfType<MasqueRedDeathPower>().Any() ?? false;
-}
-
-/// <summary>
-/// The mod's heal path. One function, so a future heal card cannot be written
-/// that quietly ignores Arlecchino -- the same argument tier0 makes by blocking
-/// inside the single `heal` op rather than on each card.
-/// </summary>
-public static class KleeHeal
-{
-    public static async Task Apply(Creature target, decimal amount)
+    public override async Task BeforeSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
     {
-        if (MasqueRedDeathPower.IsRefusingHeals(target)) return;
-        await CreatureCmd.Heal(target, amount);
+        if (side != CombatSide.Player) return;
+        if (Owner == null || Owner.Block <= 0) return;
+        var paid = System.Math.Min(
+            Owner.Block, CompanionConstants.MasqueBondBlock);
+        await CreatureCmd.LoseBlock(Owner, paid);
     }
 }
