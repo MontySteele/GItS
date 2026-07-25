@@ -644,3 +644,104 @@ def test_vigil_upgrade_moves_the_cap_with_the_amount():
     (fx,) = [f for f in upped.effects
              if f.get("power") == "prevent_exhaust_ward"]
     assert fx["amount"] == 8 and fx["max_stacks"] == 8
+
+
+# --- v0.5 partial fill: threshold reads and the deck-size accounting ---
+
+def test_charge_threshold_predicate_reads_the_bank_and_never_spends_it():
+    """`charge_at_least_N` is the v0.5 fill's one new predicate.
+
+    Two things are asserted, and the second is the one that matters: the
+    bar works, AND crossing it leaves the bank untouched. Charge is
+    read-never-spent everywhere else in her kit (ChargeResource.Spend is a
+    documented no-op on the C# side); a predicate that quietly consumed it
+    would be the one place the rule broke, and every scaling number on the
+    sheet was measured against a bank that only grows.
+    """
+    st = kokomi_state()
+    st.player.charge = 9
+    assert effects._predicate(st, "charge_at_least_10") is False
+    st.player.charge = 10
+    assert effects._predicate(st, "charge_at_least_10") is True
+    assert st.player.charge == 10          # reading is free
+
+
+def test_read_the_current_pays_the_bar_as_a_flat_bonus_not_a_slope():
+    """The threshold shape, pinned against the §2.2 rate-limit grammar.
+
+    all_streams_flow's per-point slope is rate-limited because a slope is
+    what makes a late bank frightening. A BAR is not: it pays a printed
+    amount once and then stops, which is why this one is legal at uncommon.
+    If someone converts this row to a formula, the sub-Rare read ladder has
+    changed shape and needs re-measuring, not just re-pricing.
+    """
+    card = loader.get_card("read_the_current")
+    assert card.rarity == "uncommon"
+    base, cond = card.effects
+    assert base == {"op": "damage", "amount": 7, "target": "enemy"}
+    assert cond["if"] == "charge_at_least_10"
+    assert cond["then"] == [{"op": "damage", "amount": 6, "target": "enemy"}]
+    assert "else" not in cond              # base-plus-bonus, not either/or
+
+    st = kokomi_state()
+    st.player.charge = 0
+    effects.resolve_card(st, card)
+    low = 300 - st.enemies[0].hp
+
+    st = kokomi_state()
+    st.player.charge = 10
+    effects.resolve_card(st, card)
+    high = 300 - st.enemies[0].hp
+    assert (low, high) == (7, 13)
+
+
+def test_threshold_bars_do_not_move_on_upgrade():
+    """Resource-curve law, extended to the new shape.
+
+    Lowering a threshold is exactly as much of a resource-curve move as
+    raising a gain_charge line -- it makes the engine arrive sooner. The
+    upgrades for both threshold cards buy their always-live half instead,
+    and this fails if a later pass sells the bar.
+    """
+    for cid, bar in (("read_the_current", "charge_at_least_10"),
+                     ("the_tide_remembers", "exhaust_pile_at_least_6")):
+        for card in (loader.get_card(cid), loader.get_card(cid + "+")):
+            (cond,) = [fx for fx in card.effects
+                       if fx.get("op") == "conditional"]
+            assert cond["if"] == bar, cid
+            assert cond["then"][0]["amount"] == (
+                6 if cid == "read_the_current" else 5), cid
+
+
+def test_decksize_lint_counts_the_card_copying_ops():
+    """LAW 4's accounting must see every op that MINTS a card.
+
+    `copy_companion_in_hand` was invisible to the lint until
+    shoulder_to_shoulder wanted it at Common -- a Common carrying it would
+    have netted +1 and passed clean, which is the law failing silently
+    rather than loudly. The whole copy family is enumerated now; this test
+    is the guard, because the next such op will be added by someone who
+    never reads this file.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "_decksize_lint",
+        loader.DOCS_DIR.parent / "tools" / "lint_kokomi_decksize.py")
+    lint = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(lint)
+
+    for op in ("copy_companion_in_hand", "copy_spotlighted_in_hand"):
+        assert lint.card_delta(
+            {"rarity": "common", "effects": [{"op": op, "amount": 1}]}) == 1
+    # No `amount` field and unbounded by the row: counted as the whole hand
+    # rather than guessed at 1.
+    assert lint.card_delta({
+        "rarity": "common",
+        "effects": [{"op": "copy_companions_played_this_combat"}],
+    }) == lint.ALL_SENTINEL
+    # The shipped row is the balanced case: burn one, copy one, net zero.
+    row = next(r for r in lint.yaml.safe_load(
+        (loader.DOCS_DIR / "kokomi-cards.yaml").read_text(encoding="utf-8"))
+        if r["id"] == "shoulder_to_shoulder")
+    assert lint.card_delta(row) == 0

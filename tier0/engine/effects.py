@@ -1078,6 +1078,14 @@ def _predicate(state: CombatState, name: str) -> bool:
         # least N cards; otherwise the card resolves as nothing.
         n = int(name.rsplit("_", 1)[1])
         return len(state.player.exhaust_pile) >= n
+    if name.startswith("charge_at_least_"):
+        # Kokomi threshold read (v0.5 sheet fill). A THRESHOLD is not a
+        # proportional read: it pays a flat, printed bonus once the bank
+        # clears a bar, so it cannot participate in the multiplicative-read
+        # risk that §2.2 rate-limits the per-point readers for. Charge is
+        # still never spent here -- crossing the bar changes nothing about
+        # the bank.
+        return state.player.charge >= int(name.rsplit("_", 1)[1])
     if name == "card_exhausted_this_turn":
         return state.cards_exhausted_this_turn > 0
     if name == "hp_lost_this_turn":

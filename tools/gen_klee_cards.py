@@ -302,6 +302,12 @@ PREDICATE_TEXT = {
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
+# Same parametric treatment, same reason (see predicate_cs): these bars are
+# balance numbers authored per card, so they must be a card edit and never a
+# codegen table edit. Kokomi's two banks are the exhaust pile (a count the
+# engine already keeps) and Charge.
+_CHARGE_BAR = re.compile(r"^charge_at_least_(\d+)$")
+_EXHAUST_PILE_BAR = re.compile(r"^exhaust_pile_at_least_(\d+)$")
 
 
 def predicate_cs(name: str) -> str | None:
@@ -311,17 +317,33 @@ def predicate_cs(name: str) -> str | None:
     balance number authored per card and moved at red-pen, so tabling it
     made every new threshold a codegen KeyError instead of a card edit.
     """
-    hit = _FANFARE_BAR.match(name or "")
+    name = name or ""
+    hit = _FANFARE_BAR.match(name)
     if hit:
         return f"FurinaResources.Fanfare(Owner.Creature) >= {hit.group(1)}"
+    hit = _CHARGE_BAR.match(name)
+    if hit:
+        return f"KokomiResources.GetCharge(Owner.Creature) >= {hit.group(1)}"
+    hit = _EXHAUST_PILE_BAR.match(name)
+    if hit:
+        return (f"KokomiResources.ExhaustPileCount(Owner.Creature) "
+                f">= {hit.group(1)}")
     return PREDICATES_CS.get(name)
 
 
 def predicate_text(name: str) -> str | None:
     """The if-clause the predicate renders on the card face."""
-    hit = _FANFARE_BAR.match(name or "")
+    name = name or ""
+    hit = _FANFARE_BAR.match(name)
     if hit:
         return f"If you have at least {hit.group(1)} [gold]Fanfare[/gold]"
+    hit = _CHARGE_BAR.match(name)
+    if hit:
+        return f"If you have at least {hit.group(1)} [gold]Charge[/gold]"
+    hit = _EXHAUST_PILE_BAR.match(name)
+    if hit:
+        return (f"If {hit.group(1)} or more cards are "
+                "[gold]Exhausted[/gold]")
     return PREDICATE_TEXT.get(name)
 
 
@@ -630,6 +652,11 @@ CARD_FIELDS = {
     # Furina resource gates. BaseLib provides affordability and post-effect
     # Fanfare spend; FurinaResourceHooks moves Encore spend pre-effect.
     "encore_cost", "fanfare_cost",
+    # Internal, never authored on a sheet: _sly_view stamps it so the text
+    # and body emitters know they are rendering the discard branch. Listed
+    # here because that view is now run through blocked_reason like any
+    # other card, and the field whitelist is deliberately total.
+    "_sly_branch",
 }
 
 
@@ -699,6 +726,18 @@ def blocked_reason(
     card_reason = card_level_reason(card, profile)
     if card_reason:
         return card_reason
+
+    # The Sly branch is CARD BEHAVIOUR and gets the same scrutiny as the
+    # played face. It did not, and the result was tidal_lure: its sheet says
+    # Vulnerable 1 to a RANDOM enemy, the apply_power emitter treats
+    # anything-but-"enemy" as all-enemies, and the guard that would have
+    # caught that only ever looked at `effects`. The card generated, compiled,
+    # and debuffed the whole room. An unchecked branch is not a smaller
+    # surface; it is the same surface with the alarm disconnected.
+    if card.get("sly"):
+        sly_reason = blocked_reason(_sly_view(card), profile)
+        if sly_reason:
+            return f"sly branch: {sly_reason}"
 
     if profile is KLEE_PROFILE and card["id"] in HAND_WRITTEN:
         return "hand-written"
@@ -841,7 +880,8 @@ def blocked_reason(
             if power in ENEMY_APPLY_POWERS:
                 # Native debuffs aim at enemies (tier0 _op_apply_power ->
                 # _pick_targets). random targeting has no verified idiom yet.
-                if eff.get("target") not in ("enemy", "all_enemies"):
+                if eff.get("target") not in (
+                        "enemy", "all_enemies", "random_enemy"):
                     return (f"apply_power target '{eff.get('target')}' "
                             f"for enemy debuff '{power}'")
             elif eff.get("target") != "self":
@@ -975,8 +1015,18 @@ def blocked_reason(
                 return "exhaust_from without status filter (any-card pool not built)"
             if eff.get("filter") not in (None, "status"):
                 return f"exhaust_from filter '{eff.get('filter')}'"
-            if eff.get("amount", 1) != 1:
-                return "exhaust_from amount > 1 (re-pool loop not built)"
+            # amount > 1 is expressible ONLY on the chosen branch, and the
+            # distinction is not pedantry. The sim's RANDOM branch re-rolls
+            # against a pool that shrinks after each victim; expressing that
+            # faithfully needs a loop that re-reads the hand, which is the
+            # thing that was never built. The CHOSEN branch has no such
+            # problem: CardSelectCmd.FromHand takes a count and returns N
+            # distinct cards in one prompt, which is exactly the sim's
+            # "pick the worst, remove it from the pool, repeat" without the
+            # loop. Blanket-blocking both cost cleansing_tide (a Common) and
+            # moonlit_offering their upgrade paths for no reason.
+            if eff.get("amount", 1) != 1 and eff.get("select") != "chosen":
+                return "exhaust_from amount > 1 (random re-pool loop not built)"
         if op == "add_card":
             unknown = set(eff) - ADD_CARD_FIELDS
             if unknown:
@@ -2253,7 +2303,9 @@ def build_body(
                     "DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), "
                     "DynamicVars.CalculatedBlock.Props, cardPlay);")
                 continue
-            amount = "DynamicVars.Block"
+            amount = ("new BlockVar(" + str(int(eff["amount"]))
+                      + "m, ValueProp.Move)" if _is_sly_branch(card)
+                      else "DynamicVars.Block")
             if salon_deployed:
                 amount = (
                     "new BlockVar(DynamicVars.Block.BaseValue * "
@@ -2271,7 +2323,8 @@ def build_body(
             )
 
         elif op == "draw":
-            amount = "DynamicVars.Cards.BaseValue"
+            amount = (str(int(eff["amount"])) if _is_sly_branch(card)
+                      else "DynamicVars.Cards.BaseValue")
             if salon_calc_rider(card, eff) is not None:
                 amount = f"(int){salon_snapshot}"
             elif salon_deployed:
@@ -2305,7 +2358,9 @@ def build_body(
                 # after this card's own deploys had already grown the company.
                 _emit_damage(card, eff, lines, ctx, salon_snapshot)
                 continue
-            amount_expr = "DynamicVars.Damage.BaseValue"
+            amount_expr = (str(int(eff["amount"])) + "m"
+                           if _is_sly_branch(card)
+                           else "DynamicVars.Damage.BaseValue")
             if "bonus_vs_aura" in eff:
                 aura_target = (
                     "cardPlay.Target!" if eff["target"] == "enemy"
@@ -2444,6 +2499,28 @@ def build_body(
                         f"await PowerCmd.Apply<{cls}>(choiceContext, cardPlay.Target, "
                         f"{amount}, applier: Owner.Creature, cardSource: this);"
                     )
+                elif eff["target"] == "random_enemy":
+                    # tier0 _pick_targets: ONE enemy, rolled. Same shape the
+                    # aura emitter uses. Emitted separately because the
+                    # all-enemies branch below used to swallow this target and
+                    # debuff the whole room off a one-target sheet line.
+                    lines.append(NEWLINE.join([
+                        "{",
+                        "            var debuffCandidates = CombatState!"
+                        ".HittableEnemies.ToList();",
+                        "            if (debuffCandidates.Count > 0)",
+                        "            {",
+                        "                var debuffTarget = Owner.RunState"
+                        ".Rng.CombatTargets.NextItem(debuffCandidates);",
+                        "                if (debuffTarget != null)",
+                        "                {",
+                        f"                    await PowerCmd.Apply<{cls}>("
+                        f"choiceContext, debuffTarget, {amount}, "
+                        "applier: Owner.Creature, cardSource: this);",
+                        "                }",
+                        "            }",
+                        "        }",
+                    ]))
                 else:  # all_enemies (snapshot: an apply cannot kill, but stay
                     # consistent with every other all-enemies loop we emit)
                     lines.append(
@@ -3085,6 +3162,10 @@ def build_description(card: dict) -> str:
         op = eff["op"]
 
         if op == "block":
+            if _is_sly_branch(card):
+                parts.append(
+                    f'Gain {int(eff["amount"])} [gold]Block[/gold].')
+                continue
             tok = ("CalculatedBlock"
                    if spotlight_block_rider(card, eff) is not None
                    or salon_calc_rider(card, eff) is not None else "Block")
@@ -3102,6 +3183,10 @@ def build_description(card: dict) -> str:
             # card" correctly becomes "Draw 2 cards" after upgrade. This is
             # the token BaseLib's SimpleLoc pipeline generates for "card(s)"
             # in #-prefixed strings; we emit runtime form directly.
+            if _is_sly_branch(card):
+                n = int(eff["amount"])
+                parts.append("Draw 1 card." if n == 1 else f"Draw {n} cards.")
+                continue
             v = ("DrawCards" if salon_calc_rider(card, eff) is not None
                  else "Cards")
             parts.append(f"Draw {{{v}:diff()}} card{{{v}:plural:|s}}.")
@@ -3149,6 +3234,15 @@ def build_description(card: dict) -> str:
             tok = ("CalculatedDamage"
                    if calc_rider(card, eff) is not None
                    or salon_calc_rider(card, eff) is not None else "Damage")
+            if _is_sly_branch(card):
+                tok = None                    # literal, see _sly_view
+            if tok is None:
+                amount_txt = str(int(eff["amount"]))
+                where = {"enemy": "",
+                         "all_enemies": " to ALL enemies"}.get(
+                             target, " to a random enemy")
+                parts.append(f"Deal {amount_txt} damage{where}{suffix}.")
+                continue
             if target == "enemy":
                 parts.append(f"Deal {{{tok}:diff()}} damage{suffix}.")
             elif target == "all_enemies":
@@ -3282,7 +3376,9 @@ def build_description(card: dict) -> str:
                  if eff is power_upgrade_effect(card)
                  or salon_calc_rider(card, eff) is not None
                  else str(int(eff["amount"])))
-            to = " to ALL enemies" if eff.get("target") == "all_enemies" else ""
+            to = {"all_enemies": " to ALL enemies",
+                  "random_enemy": " to a random enemy"}.get(
+                      eff.get("target"), "")
             parts.append(template.replace("{X}", x).replace("{TO}", to))
 
         elif op == "detonate":
@@ -3515,7 +3611,54 @@ def build_description(card: dict) -> str:
             "{IfUpgraded:show:Gain "
             f"{n} [gold]Encore[/gold].|}}")
 
+    # Sly. DEFECT FIX (v0.5 fill): the discard hook generated correctly from
+    # the first Sly card onward, but the card FACE never mentioned it -- so
+    # drifting_lantern, the sheet's self-declared "Sly teaching card", printed
+    # "Gain 4 Block." and taught nothing. A mechanic a player cannot read is a
+    # mechanic that does not exist at the table. Rendered off the same text
+    # builder as the played face, through _sly_view so the numbers here are
+    # LITERAL: no upgrade delta reaches a Sly branch (upgrades sheet header,
+    # "no sly-delta key exists in the applier"), and rendering a {Var:diff()}
+    # would print the played face's upgraded number on a line that never moves.
+    if card.get("sly"):
+        sly_text = build_description(_sly_view(card)).strip()
+        if sly_text:
+            parts.append(f"[gold]Sly[/gold]: {sly_text}")
+
     return " ".join(parts)
+
+
+def _is_sly_branch(card: dict) -> bool:
+    """True while emitting a card's Sly branch (see _sly_view).
+
+    Every amount inside a Sly branch is LITERAL. The played face's
+    DynamicVars belong to the played face: a Sly branch that reached for
+    them printed and dealt the upgraded number on a line the sim never
+    upgrades, and -- worse -- reached for vars the card does not declare at
+    all when the branch used an op the played face lacks (Quiet Harbor's
+    Sly draw against a card whose only var is Block).
+    """
+    return bool(card.get("_sly_branch"))
+
+
+def _sly_view(card: dict) -> dict:
+    """The card as its Sly branch sees itself: the sly list as the effects,
+    and an id no upgrade sheet knows.
+
+    The id swap is the load-bearing part. Both the text builder and the body
+    emitter ask `upgrade_plan(card)` whether a delta claims a given op, and
+    they key that on the card id -- so a Sly branch built under the real id
+    inherited the PLAYED face's deltas. Driftglass (hit 8, Sly hit 5) emitted
+    `DynamicVars.Damage` for the Sly hit and so dealt 8 on discard, and
+    drifting_lantern's Sly Block upgraded from 4 to 6 alongside its played
+    face. Both contradict the sim, which never moves a Sly number.
+    """
+    view = {**card, "id": card["id"] + "__sly", "_sly_branch": True,
+            "effects": card["sly"], "cost": card.get("cost", 0)}
+    # A Sly branch has no Sly branch of its own. Leaving the key in place
+    # made build_description recurse into itself forever.
+    view.pop("sly", None)
+    return view
 
 
 def build_upgrade(card: dict) -> list[str]:
@@ -3822,21 +3965,31 @@ def emit(
     # card's behaviour from the card.
     sly_cs = ""
     if card.get("sly"):
-        sly_body = ind.join(build_body(
-            {**card, "effects": card["sly"], "cost": card.get("cost", 0)},
-            profile))
+        # _sly_view, not a plain effects swap: see its docstring. Under the
+        # card's own id the emitter reached for the played face's DynamicVars
+        # and silently printed the wrong number on discard.
+        sly_body = ind.join(build_body(_sly_view(card), profile))
+        # Only declare the placeholder when the body actually threads one
+        # through; an unconditional declaration is a CS0219 on every Sly
+        # branch that happens not to need it.
+        cardplay_decl = ""
+        if "cardPlay" in sly_body:
+            cardplay_decl = (
+                "        // A discard is not a play, so there is no CardPlay "
+                "to attribute\n"
+                "        // these effects to. The shared body emitter threads "
+                "one through for\n"
+                "        // VFX and source attribution; null is the honest "
+                "value here, and\n"
+                "        // every API it reaches takes a nullable CardPlay.\n"
+                "        CardPlay? cardPlay = null;\n")
         sly_cs = f'''
     /// <summary>Sly: resolves when THIS card is discarded.</summary>
     public override async Task AfterCardDiscarded(
         PlayerChoiceContext choiceContext, CardModel card)
     {{
         if (card != this) return;
-        // A discard is not a play, so there is no CardPlay to attribute these
-        // effects to. The shared body emitter threads one through for VFX and
-        // source attribution; null is the honest value here and every API it
-        // reaches takes a nullable CardPlay.
-        CardPlay? cardPlay = null;
-        {sly_body}
+{cardplay_decl}        {sly_body}
     }}
 '''
 
