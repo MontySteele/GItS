@@ -190,6 +190,27 @@ ancient:
     effects:
       - {hook: pickup_upgrade, count: 6}
 
+  touch_of_orobas_klee:
+    name: "Touch of Orobas"         # Orobas (Act 2): upgrade your STARTER relic
+    # MODELLED NARROWLY AND ON PURPOSE ([USER] ruling 2026-07-26, option 1).
+    # Vanilla's Touch of Orobas swaps the starting relic for an upgraded form,
+    # so what it DOES depends entirely on who holds it -- there is no single
+    # effect to model. Rather than build a relic-upgrade table for two known
+    # cases, each character's variant is its own owner-gated entry. Furina's
+    # (R2, always-on Spotlight selector) and Kokomi's are NOT here yet; when
+    # they land they are siblings of this row, and the day there is a third
+    # roster character wanting one, that is the day the table earns itself.
+    #
+    # Klee's upgraded form is Explosive Frags: her per-detonation Spark income
+    # is UNCHANGED (the relic keeps the base behaviour) and she banks a fixed
+    # opening windfall. The doubling that was tried first was rejected at
+    # red-pen -- it compounds with every bomb in the deck, where this dilutes
+    # across a long fight. Measured before ratification, act-2 acquisition,
+    # generous case: spark +2.3pt, demolition +7.1, reaction +5.0.
+    owner: [klee]
+    effects:
+      - {hook: combat_start_spark, amount: 3}
+
   yummy_cookie:
     name: "Yummy Cookie"            # Tezcatara (Act 2): upgrade 4 cards
     effects:

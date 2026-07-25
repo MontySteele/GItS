@@ -64,7 +64,27 @@ def _salon(member: str, phase: str, key: str):
 # record of WHERE each C# number came from -- which is the question that is
 # expensive to answer six months later and free to answer today.
 # --------------------------------------------------------------------------
+def _ancient_hook(relic_id: str, hook: str) -> int:
+    """A number out of tier05's ancient-relic table.
+
+    Relic effects are DATA rather than named constants, so the sim's copy of an
+    Ancient's number lives in tier05/content/relics.yaml. Reading it here is
+    what makes a relic number mirrorable at all -- the alternative was to file
+    every Ancient under UNMIRRORED as "the sim does not model relics", which
+    stopped being true the day the starter-upgrade hook landed.
+    """
+    from tier05 import relics as _relics
+    for fx in _relics.ancient_pool()[relic_id]["effects"]:
+        if fx.get("hook") == hook:
+            return int(fx["amount"])
+    raise KeyError(f"{relic_id} has no {hook} effect")
+
+
 MIRRORED: dict[str, object] = {
+    # Klee's upgraded starter (Touch of Orobas -> Explosive Frags). The sim's
+    # copy is a relic row, not a constant; see _ancient_hook.
+    "ExplosiveFrags.OpeningSparks":
+        _ancient_hook("touch_of_orobas_klee", "combat_start_spark"),
     # Shared elemental table (tier0/constants.py, reaction block).
     "ReactionConstants.AuraDurationTurns": C.AURA_DURATION_TURNS,
     "ReactionConstants.OverloadSplash": C.OVERLOAD_SPLASH,
@@ -144,9 +164,16 @@ MIRRORED: dict[str, object] = {
 # --------------------------------------------------------------------------
 UNMIRRORED: dict[str, str] = {
     "ExplosiveFrags.SparksPerDetonation":
-        "upgraded starter relic (Touch of Orobas). tier0 has no relic-upgrade "
-        "layer, so this number is game-side-only and cannot be measured -- it "
-        "carries a PROPOSED flag and awaits red-pen, like every Ancient.",
+        "the BASE starter's rate, carried forward unchanged by the upgrade -- "
+        "which is the ratified design (the windfall is OpeningSparks; the "
+        "doubling of this rate was rejected at the 2026-07-26 red-pen). Its "
+        "sim counterpart is a literal at the detonation site in effects.py "
+        "(`gain_sparks(state, 1)` under spark_on_detonation), not a named "
+        "constant, so there is nothing to compare against by value. "
+        "NOTE: this entry used to read 'tier0 has no relic-upgrade layer', "
+        "which stopped being true when combat_start_spark and "
+        "touch_of_orobas_klee landed -- OpeningSparks is now MIRRORED against "
+        "that row.",
     "PearlOfInsightRelic.ChargePerExhaust":
         "derived: KokomiConstants.ChargePerExhaust * 2. The compiler enforces "
         "the link, so mirroring the doubling here would just be a second place "

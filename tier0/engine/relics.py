@@ -22,6 +22,7 @@ HOOK VOCABULARY (combat-scoped -- the ONLY hooks acted on here):
     combat_start_draw        {hook, amount}                 TURN 1 only
     combat_start_enemy_power {hook, power, amount}          applied to ALL enemies
     combat_start_aoe         {hook, amount}                 unpowered dmg to all
+    combat_start_spark       {hook, amount}                 Klee only (Spark)
     every_n_turns_energy     {hook, n, amount}              when turn % n == 0
     every_n_turns_draw       {hook, n, amount}              when turn % n == 0
     on_first_hp_loss_draw    {hook, amount}                 once per combat
@@ -42,7 +43,8 @@ from tier0.engine.state import CombatState
 COMBAT_HOOKS = frozenset({
     "combat_start_block", "combat_start_power", "combat_start_heal",
     "combat_start_energy", "combat_start_draw", "combat_start_enemy_power",
-    "combat_start_aoe", "every_n_turns_energy", "every_n_turns_draw",
+    "combat_start_aoe", "combat_start_spark",
+    "every_n_turns_energy", "every_n_turns_draw",
     "on_first_hp_loss_draw", "card_name_damage_bonus", "conditional_power",
 })
 
@@ -132,6 +134,26 @@ def apply_combat_start(state: CombatState) -> None:
             amt = int(fx["amount"])
             for enemy in list(state.living_enemies):
                 refpowers.unpowered_damage(state, enemy, amt)
+        elif hook == "combat_start_spark":
+            # Klee's upgraded starter (Explosive Frags, red-pen item 5).
+            # A WINDFALL, not a rate: the rejected design doubled her
+            # per-detonation income, which compounds with every bomb she
+            # ever plays; this is a fixed opening bank that a long fight
+            # dilutes. That is why it survived red-pen where the doubling
+            # did not, and the shape matters more than the number.
+            #
+            # Inert for anyone without the Spark system, so an Orobas
+            # variant that somehow reached another character grants nothing
+            # rather than silently minting a resource they cannot spend.
+            # Gated on the starter's own hook rather than on a character id:
+            # the upgraded relic ADDS to the base behaviour rather than
+            # replacing it (the C# ExplosiveFrags keeps the detonation
+            # listener), so spark_on_detonation is still present and is the
+            # honest test for "this player runs the Spark economy".
+            amt = int(fx["amount"])
+            if amt > 0 and "spark_on_detonation" in p.relic_hooks:
+                from tier0.engine import effects   # late import (cycle)
+                effects.gain_sparks(state, amt)
     # conditional_power is evaluated at combat start too (Red Skull may already
     # be active if the fight opens below the HP threshold).
     reevaluate_conditionals(state)

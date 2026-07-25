@@ -191,3 +191,49 @@ def test_gorget_grants_plating_at_start():
     st_no = make_state()
     _fire_start(st_no)
     assert st_no.player.powers.get("plating", 0) == 0
+
+
+# --- Touch of Orobas -> Explosive Frags: Klee's opening Spark bank -----------
+
+def test_combat_start_spark_banks_the_windfall():
+    st = make_state()
+    st.player.relic_hooks = ["spark_on_detonation"]
+    st.player.relic_effects = [{"hook": "combat_start_spark", "amount": 3}]
+    _fire_start(st)
+    assert st.player.sparks == 3
+
+    st_no = make_state()
+    st_no.player.relic_hooks = ["spark_on_detonation"]
+    _fire_start(st_no)
+    assert st_no.player.sparks == 0
+
+
+def test_combat_start_spark_is_inert_without_the_spark_economy():
+    """The gate, and why it is on the HOOK rather than on a character id.
+
+    Touch of Orobas is modelled per character (each upgraded starter is its own
+    owner-gated relic row), so a Klee row should never reach anyone else. This
+    asserts the belt as well as the braces: a player with no Spark system gains
+    nothing rather than banking a resource they can never spend.
+    """
+    st = make_state()
+    st.player.relic_hooks = []          # no Spark economy
+    st.player.relic_effects = [{"hook": "combat_start_spark", "amount": 3}]
+    _fire_start(st)
+    assert st.player.sparks == 0
+
+
+def test_combat_start_spark_fires_once_not_per_turn():
+    """A windfall, not a rate -- the whole reason the doubling was rejected.
+
+    apply_combat_start is called only on turn 1 by combat._player_turn, so the
+    guard is really that this hook did not accidentally get added to the
+    per-turn dispatcher as well.
+    """
+    st = make_state()
+    st.player.relic_hooks = ["spark_on_detonation"]
+    st.player.relic_effects = [{"hook": "combat_start_spark", "amount": 3}]
+    _fire_start(st)
+    relics.on_player_turn_start(st, 2)
+    relics.on_player_turn_start(st, 3)
+    assert st.player.sparks == 3

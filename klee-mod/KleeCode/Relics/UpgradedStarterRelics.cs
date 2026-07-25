@@ -68,44 +68,41 @@ internal static class UpgradedStarterRelics
 }
 
 /// <summary>
-/// !!! CARRIES A REJECTED NUMBER — DO NOT SHIP WITHOUT READING THIS !!!
+/// Klee's upgraded starter (Touch of Orobas). RATIFIED 2026-07-26.
 ///
-/// The doubling below was **REJECTED** at the 2026-07-26 red-pen ("way too
-/// good"). The ratified design is different in kind, not just in magnitude:
-/// **"Gain 3 additional Sparks at the start of combat"** — a one-off windfall,
-/// not a permanent rate increase. See docs/red-pen-2026-07-26.md item 5.
+/// Her per-detonation Spark income is UNCHANGED at 1 -- this relic keeps the
+/// base behaviour rather than replacing it -- and she banks a fixed windfall
+/// of <see cref="OpeningSparks"/> at the start of every combat.
 ///
-/// It is left standing rather than half-replaced because the ratified version
-/// needs its sim counterpart (a real `starter_upgraded` hook; the red-pen
-/// harness used a throwaway) and the two must land together or the C# and the
-/// sim disagree about what Klee's upgraded starter does. That is queue item 2.
+/// WHY A WINDFALL AND NOT A RATE. The first attempt doubled the per-detonation
+/// grant, and that was rejected at red-pen as "way too good": a rate multiplies
+/// with every bomb in the deck, so it compounds precisely where Klee is already
+/// strongest, while a fixed opening bank dilutes across a long fight. The shape
+/// mattered more than the number. Measured before ratification (act-2
+/// acquisition, generous case): spark +2.3pt, demolition +7.1, reaction +5.0 --
+/// strong for the slot, and the slot is an act-2 Ancient whose peers upgrade
+/// six cards.
 ///
-/// **Until then this relic is live in any build cut from this tree**, and a
-/// playtester who takes Touch of Orobas gets the rejected design. That is the
-/// same failure this whole track exists to prevent — a build implementing a kit
-/// that is not the design of record — so it is flagged loudly rather than left
-/// to a reader of the git log.
+/// Named for her C2 constellation. The base-game convention is a DISTINCT name
+/// rather than a "+" suffix (Burning Blood -> Black Blood), so this follows it.
 ///
-/// ---
-///
-/// Klee's upgraded starter (Touch of Orobas). Same hook, doubled number:
-/// 2 Sparks per Bomb detonation instead of 1.
-///
-/// Named for her C2 constellation. The base-game convention is a DISTINCT
-/// name rather than a "+" suffix (Burning Blood -> Black Blood), so this
-/// follows it.
-///
-/// PROPOSED, and the most aggressive number in this sprint: Sparks are Klee's
-/// core economy -- three make the next real Attack free -- so doubling
-/// detonation income roughly halves the time to every free attack. It is the
-/// Burning Blood -> Black Blood ratio applied faithfully, which is the
-/// argument FOR it; that the base-game starter it copies is a flat post-combat
-/// heal rather than an engine input is the argument against. Red-pen decides.
+/// Sim parity: tier05/content/relics.yaml `touch_of_orobas_klee`, whose
+/// `combat_start_spark` hook is this class's opening bank. The per-detonation
+/// half needs no sim entry because it is the starter's own hook, which the sim
+/// never removes.
 /// </summary>
 public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
 {
-    /// <summary>Sparks per detonation. Base relic grants 1.</summary>
-    public const int SparksPerDetonation = 2;
+    /// <summary>
+    /// Sparks per detonation. UNCHANGED from the base relic -- the upgrade is
+    /// the opening bank below, not this rate. Kept as a named constant rather
+    /// than a literal 1 so that anyone tempted to raise it meets the ruling
+    /// first.
+    /// </summary>
+    public const int SparksPerDetonation = 1;
+
+    /// <summary>Sparks banked once, at the start of every combat.</summary>
+    public const int OpeningSparks = 3;
 
     public ExplosiveFrags() : base(autoAdd: false)
     {
@@ -124,7 +121,8 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
     {
         ("title", "Explosive Frags"),
         ("description",
-            $"Whenever a [gold]Bomb[/gold] detonates, gain "
+            $"At the start of combat, gain {OpeningSparks} "
+          + "[gold]Spark[/gold]. Whenever a [gold]Bomb[/gold] detonates, gain "
           + $"{SparksPerDetonation} [gold]Spark[/gold]. "
           + CompanionSlot.RewardSlotDescription),
     };
@@ -158,6 +156,30 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         if (offer == null) return false;
         cardRewardOptions.Add(new CardCreationResult(offer));
         return true;
+    }
+
+    /// <summary>
+    /// The opening bank.
+    ///
+    /// SITE CHOSEN FOR SIM PARITY, not convenience. `BeforeCombatStart()` is
+    /// the obvious-sounding hook and is wrong here twice over: it carries no
+    /// PlayerChoiceContext (which granting a power needs), and the sim fires
+    /// its `combat_start_*` relic effects on TURN 1 after the block clear,
+    /// energy reset and draw — not before the combat exists
+    /// (combat.py `_player_turn`, `if state.turn == 1: apply_combat_start`).
+    /// Turn 1 of `AfterPlayerTurnStart` is that same moment.
+    ///
+    /// `TurnNumber == 1` rather than `<= 1` so an extra first turn cannot pay
+    /// the windfall twice, and per-PLAYER so a co-op partner's turn counter
+    /// cannot trigger Klee's bank.
+    /// </summary>
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (player != Owner || player.PlayerCombatState?.TurnNumber != 1) return;
+        Flash();
+        await SparkPower.Gain(
+            choiceContext, Owner.Creature, OpeningSparks, cardSource: null);
     }
 
     public async Task OnBombDetonated(
@@ -208,6 +230,40 @@ public sealed class PearlOfInsightRelic : CustomRelicModel
           + $"{ChargePerExhaust} [gold]Charge[/gold] "
           + $"and {BurstPerExhaust} Burst Energy."),
     };
+
+    /// <summary>
+    /// Kokomi's fourth companion reward option, carried forward from the base
+    /// relic UNCHANGED.
+    ///
+    /// This is not part of the upgrade and must never be treated as optional.
+    /// Companions are off every rollable pool, so the starter relic's reward
+    /// slot is their ONLY door — and her Commander archetype is built entirely
+    /// out of them. An upgraded starter that dropped this hook would not crash
+    /// or warn; it would quietly delete one of her three archetypes the moment
+    /// Touch of Orobas was taken, which is the same class of silent deletion
+    /// the whole upgraded-starter track exists to prevent.
+    ///
+    /// It was in fact missing here for a day: this class was written before
+    /// the base relic gained the hook, and the omission was caught by reading
+    /// the two files side by side rather than by any check.
+    /// </summary>
+    public override bool TryModifyCardRewardOptions(
+        Player player, List<CardCreationResult> cardRewardOptions,
+        CardCreationOptions creationOptions)
+    {
+        if (creationOptions.Source != CardCreationSource.Encounter
+            || player.Character is not Kokomi)
+        {
+            return false;
+        }
+        var rarity = creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
+            ? CardRarity.Rare
+            : (CardRarity?)null;
+        var offer = CompanionSlot.Roll(player, rarity);
+        if (offer == null) return false;
+        cardRewardOptions.Add(new CardCreationResult(offer));
+        return true;
+    }
 
     protected override string IconBaseName => "snake_ring";
 

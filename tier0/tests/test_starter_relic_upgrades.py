@@ -155,3 +155,30 @@ def test_curated_absences_still_apply():
         assert "GetUpgradeReplacement" not in classes[name], (
             f"{name} now overrides GetUpgradeReplacement -- move it from "
             "NO_UPGRADED_FORM into STARTERS, the gap is closed")
+
+
+def test_upgraded_forms_carry_forward_their_base_reward_hook():
+    """An upgraded starter must not silently drop the companion reward slot.
+
+    THE NEAR-MISS THIS ENCODES (2026-07-26). `PearlOfInsightRelic` was written
+    before `PearlOfWisdomRelic` gained its reward hook, so for a day the
+    upgraded form did not carry it. Nothing would have crashed or warned:
+    companions are off every rollable pool, so the starter relic's fourth
+    reward option is their ONLY door, and Kokomi's Commander archetype is built
+    entirely out of them. Taking Touch of Orobas would have quietly deleted one
+    of her three archetypes.
+
+    That is the same silent-deletion class the whole upgraded-starter track
+    exists to prevent, reappearing one level up -- in the FIX rather than in
+    the bug. It was caught by reading two files side by side, which is exactly
+    the kind of catch that does not survive contact with a busy week.
+    """
+    classes = _classes()
+    hook = "TryModifyCardRewardOptions"
+    for starter, upgraded in STARTERS.items():
+        if hook not in classes[starter]:
+            continue        # base has no reward slot; nothing to carry
+        assert hook in classes[upgraded], (
+            f"{starter} hosts the companion reward slot but its upgraded form "
+            f"{upgraded} does not. Taking Touch of Orobas would remove the "
+            "only door companions have into the deck -- silently.")
