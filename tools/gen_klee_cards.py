@@ -555,6 +555,17 @@ HAND_WRITTEN |= {"sizzle", "flame_dance", "kaboom_beetle_swarm", "elemental_ecst
 # Retain keyword, never pool-registered. See Powers/KitBurst.cs.
 HAND_WRITTEN |= {"sparks_n_splash"}
 
+# Non-Klee hand-written cards. A SEPARATE set from HAND_WRITTEN above, which
+# is Klee-scoped both by its guard and by lint_handwritten_parity.py, whose
+# parity rules only know Klee's ops and whose file lookup only knows Cards/.
+#
+# The point of listing them at all is truthfulness in the generator's report.
+# Without this, `ceremonial_garment` came back as "kit card (hand-write it
+# against the KitBurst machinery)" -- an instruction that had already been
+# carried out, which reads to the next person as outstanding work. A blocked
+# reason should say why the generator declined, not hand out a stale TODO.
+HAND_WRITTEN_ROSTER = {"let_the_people_rejoice", "ceremonial_garment"}
+
 # R24 (2026-07-20): codegen upgrade defaults are ABOLISHED, not demoted.
 # docs/klee-upgrades.yaml is the single source of truth for upgrade deltas.
 # A generated card whose sheet entry is missing, or whose ruled delta this
@@ -740,6 +751,9 @@ def blocked_reason(
             return f"sly branch: {sly_reason}"
 
     if profile is KLEE_PROFILE and card["id"] in HAND_WRITTEN:
+        return "hand-written"
+
+    if card["id"] in HAND_WRITTEN_ROSTER:
         return "hand-written"
 
     if is_companion(card):
@@ -4081,6 +4095,20 @@ def emit(
         tips_expr = (
             f"FurinaRiderTips.ForCard({tips_expr or 'base.ExtraHoverTips'}, "
             f"this, {rider_args})")
+    # Kokomi's two hidden reads. Neither can render on a card face -- the
+    # pulse resolves at end of turn from a bank that will have moved, and the
+    # Garment rider lands on OTHER cards -- so the hover tip is the only
+    # surface either number has. See KokomiRiderTips for the argument.
+    if profile is KOKOMI_PROFILE:
+        if any(eff.get("op") == "summon_kurage"
+               for eff in card.get("effects", [])):
+            tips_expr = (
+                "KokomiRiderTips.ForKuragePulse("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        if card.get("type") == "attack":
+            tips_expr = (
+                "KokomiRiderTips.ForGarmentAttack("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
     if tips_expr:
         tooltip_member = (
             "\n    protected override IEnumerable<IHoverTip> ExtraHoverTips =>\n"
@@ -4365,6 +4393,11 @@ public static class CompanionRoster
 
 def _furina_runtime_cluster(card: dict, reason: str) -> str:
     """Stable workstream labels for Furina's blocked coverage manifest."""
+    # Hand-written is not a GAP -- it is a finished decision, and bucketing it
+    # under a workstream turns completed work into a standing item on the
+    # coverage report. Checked first so no ops-based rule can reclaim it.
+    if reason == "hand-written":
+        return "hand_written"
     effects = card.get("effects", [])
     ops = {effect.get("op") for effect in effects}
     powers = {
@@ -4756,6 +4789,12 @@ def _kokomi_runtime_cluster(card: dict, reason: str) -> str:
     of work or a system nobody has built -- "12 cards blocked" says nothing,
     "12 cards blocked on the ward" says exactly what to do next.
     """
+    # Hand-written first, for the same reason as Furina's mapper: it is a
+    # finished decision, not a coverage gap, and every ops-based rule below
+    # would happily reclaim it into a workstream that has nothing left to do.
+    # ceremonial_garment trips `charge_engine` on exactly this path.
+    if reason == "hand-written":
+        return "hand_written"
     ops = {eff.get("op") for eff in card.get("effects", [])}
     powers = {eff.get("power") for eff in card.get("effects", [])
               if eff.get("op") == "apply_power"}

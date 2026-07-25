@@ -71,10 +71,10 @@
     "whispered_word"
   ],
   "blocked": {
-    "ceremonial_garment": "kit card (hand-write it against the KitBurst machinery)"
+    "ceremonial_garment": "hand-written"
   },
   "runtime_clusters": {
-    "kit_burst": [
+    "hand_written": [
       "ceremonial_garment"
     ]
   },

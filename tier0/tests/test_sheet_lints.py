@@ -68,3 +68,24 @@ def test_card_names_are_unique():
          *sheets],
         capture_output=True, text=True)
     assert res.returncode == 0, res.stdout + res.stderr
+
+
+def test_mirrored_constants_match_the_sim():
+    """C# balance constants vs tier0, the source of truth.
+
+    Every balance number lives twice -- once in tier0 where it was MEASURED,
+    once in C# where it is PLAYED -- and the C# copies were kept in step by
+    discipline alone until 2026-07-25. That failure mode is silent in the
+    worst way: a sim-side retune nobody mirrors leaves the build green, the
+    tests green, and the tuning report describing a game nobody is playing.
+
+    It is wired into PYTEST as well as into validate.ps1 (S6e) on purpose.
+    The retune happens HERE, in Python, and the person doing it runs the
+    suite; making them wait for a deploy to learn they left the mod behind
+    is one round trip too late. There is no C# test project to pin this at
+    runtime, so this static comparison is the whole gate.
+    """
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_constant_parity.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr

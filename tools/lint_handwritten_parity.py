@@ -179,7 +179,7 @@ def extract_cs(text: str) -> dict:
 
 # Where a hand-written card can live. Furina's sit in a per-character
 # subdirectory; Klee's sit directly in Cards/.
-CS_SEARCH_DIRS = (CARDS_DIR, CARDS_DIR / "Furina")
+CS_SEARCH_DIRS = (CARDS_DIR, CARDS_DIR / "Furina", CARDS_DIR / "Kokomi")
 
 
 def kit_no_pile() -> list[str]:
@@ -206,8 +206,14 @@ def kit_no_pile() -> list[str]:
     that has already burned us, for every character, today.
     """
     findings: list[str] = []
+    # Kokomi joined 2026-07-25 with ceremonial_garment, which is the third
+    # distinct card TYPE to carry a kit Burst (Power / Attack / Skill). Only
+    # Klee's Power leaves combat by default, so two of the three shipped
+    # roster Bursts needed this override to avoid recirculating -- the odds
+    # that a fourth character gets it right unprompted are not good.
     for sheet in (gen.REPO / "docs" / "klee-cards.yaml",
-                  gen.REPO / "docs" / "furina-cards.yaml"):
+                  gen.REPO / "docs" / "furina-cards.yaml",
+                  gen.REPO / "docs" / "kokomi-cards.yaml"):
         if not sheet.is_file():
             continue
         for row in yaml.safe_load(sheet.read_text(encoding="utf-8")) or []:

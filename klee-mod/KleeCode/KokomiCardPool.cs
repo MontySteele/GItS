@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using KleeMod.Cards.Kokomi;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Unlocks;
 
@@ -63,9 +64,12 @@ public sealed class KokomiCardPool : CardPoolModel
 /// <summary>
 /// In the pool for Pool-lookup legality, filtered out of reward rolls.
 ///
-/// EMPTY TODAY, and deliberately kept rather than deleted: the shape is what
-/// ceremonial_garment needs the moment it is hand-written, and re-deriving
-/// this plumbing later is how the kit card ends up rollable by accident.
+/// Both halves are load-bearing. IN the pool, because CardModel.Pool falls
+/// through to MockCardPool and throws the moment a poolless card is drawn --
+/// and the kit card is drawn, into hand, every time the meter fills. OUT of
+/// rewards, because granted-not-drafted is the v1.9 kit invariant: a Burst
+/// you can take from a card reward is loot, and every number on her sheet was
+/// measured against a Burst you cannot.
 /// </summary>
 public static class KokomiOffPoolCards
 {
@@ -77,5 +81,10 @@ public static class KokomiOffPoolCards
     public static HashSet<ModelId> Ids =>
         _ids ??= All.Select(card => card.Id).ToHashSet();
 
-    private static List<CardModel> BuildAll() => new();
+    private static List<CardModel> BuildAll() => new()
+    {
+        // Kit Burst card: granted to hand by KokomiKitGrant when the meter
+        // fills, never rollable.
+        ModelDb.Card<CeremonialGarment>(),
+    };
 }

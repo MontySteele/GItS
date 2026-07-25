@@ -96,10 +96,10 @@
     "guest_neuvillette_tears"
   ],
   "blocked": {
-    "let_the_people_rejoice": "kit card (hand-write it against the KitBurst machinery)"
+    "let_the_people_rejoice": "hand-written"
   },
   "runtime_clusters": {
-    "encore_fanfare_resources": [
+    "hand_written": [
       "let_the_people_rejoice"
     ]
   },

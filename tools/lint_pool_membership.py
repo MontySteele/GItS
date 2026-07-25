@@ -57,8 +57,12 @@ MEMBERSHIP_FILES = [
 CLASS_RE = re.compile(
     r"^\s*public\s+sealed\s+class\s+(\w+)\s*:\s*CustomCardModel\b", re.M
 )
-# `ModelDb.Card<Foo>()`
-MEMBER_RE = re.compile(r"ModelDb\.Card<(\w+)>\s*\(")
+# `ModelDb.Card<Foo>()`, or the namespace-qualified `ModelDb.Card<A.B.Foo>()`.
+# The qualified form is legal C# and reads identically to the compiler; a
+# pattern that only matched the bare name reported a correctly-pooled card as
+# unpooled, which is the safe direction to fail but still a false alarm that
+# invites someone to "fix" the pool instead of the lint.
+MEMBER_RE = re.compile(r"ModelDb\.Card<(?:\w+\.)*(\w+)>\s*\(")
 
 
 def main() -> int:

@@ -88,6 +88,14 @@ internal static class ReactionEffects
                 choiceContext, dealer, BurstConstants.PerReaction, cardSource);
             FurinaResources.GainBurst(
                 dealer, FurinaResourceConstants.BurstPerReaction);
+            // Kokomi takes the same +5. The sim's gate is `if p.burst_max`
+            // (reactions.py), i.e. UNIVERSAL for anyone who owns a meter --
+            // not a Klee rule that Furina was granted an exception to. She is
+            // a catalyst, so every attack she plays applies Hydro and reaction
+            // income is a large share of her fill rate; leaving her off this
+            // line left the Burst reachable on paper and rare in play.
+            KokomiResources.GainBurst(
+                dealer, KokomiConstants.BurstPerReaction);
 
             // Catalytic Conversion, right after the flat +5 exactly as in the
             // sim (reactions.py _react): +Amount Sparks and +Amount x 5 Burst
