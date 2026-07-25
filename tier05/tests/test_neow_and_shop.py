@@ -28,6 +28,7 @@ from tier0.engine.state import CombatState
 from tier0.harness import metrics, runner
 from tier0.harness.runner import run_battery
 from tier05 import draft, model
+from tier05 import maps
 from tier05 import relics as relic_pool
 
 
@@ -45,6 +46,18 @@ BASE_HP = loader._character_index()[CHAR]["hp"]      # 62
 
 
 # --- combat stub: deterministic win + optional per-fight recorder -----------
+
+# §11: these tests are about RELIC/POTION/SHOP hooks firing at particular node
+# kinds, not about map generation -- so they pin the legacy v5 spine and index
+# into it exactly as they always did. Runs elsewhere walk a generated map.
+LEGACY_SPINE = "NNNRETN$ERB"
+
+
+@pytest.fixture(autouse=True)
+def _legacy_spine(monkeypatch):
+    monkeypatch.setattr(model, "build_act_map",
+                        lambda rng, act: maps.linear(LEGACY_SPINE, act))
+
 
 def _win_stub(hit=0, records=None):
     """Every fight is an instant win. When `records` is given, snapshot the
@@ -70,7 +83,7 @@ def _skip(rng, deck, offers, archetype):
 
 
 def _fight_kinds():
-    return [k for k in model.node_template() if k in ("N", "E", "B")]
+    return [k for k in list(LEGACY_SPINE) if k in ("N", "E", "B")]
 
 
 def _no_grants(monkeypatch):

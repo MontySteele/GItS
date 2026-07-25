@@ -601,3 +601,32 @@ relic_ethereal_spotlight	ImageGen/images/furina/relics/ethereal_spotlight.png	25
 standing_room_only	ImageGen/images/cards/furina/standing_room_only.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Theater Tickets.png		item	furina_pool
 standing_room_only	ImageGen/images/cards/furina/standing_room_only.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	The Opera of Noirceur and Blancheur Ticket.png		item	furina_pool
 standing_room_only	ImageGen/images/cards/furina/standing_room_only.png	500	380	cover	y0.30	shortlist	3	png	Opera Epiclese.png		splash	furina_pool
+# ---------- POWER ICONS: sprint-2 Track E gap (docs/icon-gap-2026-07-24.md) ----------
+# 6 powers had NO icon; 15 Furina powers wore Klee's. Ten distinct
+# Spotlight powers all rendered amp_reaction_up. weak picks (friendly_visit,
+# study_buddy, standing_ovation, ovation_trickle) are flagged for re-hunt.
+power_fantastic_voyage	ImageGen/images/powers/fantastic_voyage.png	256	256	contain	center	auto	1	png	Talent Fantastic Voyage.png		icon
+power_passion_overload	ImageGen/images/powers/passion_overload.png	256	256	contain	center	auto	1	png	Talent Passion Overload.png		icon
+power_shattering_pressure	ImageGen/images/powers/shattering_pressure.png	256	256	contain	center	shortlist	1	png	Talent Pressurized Floe 3.png		icon
+power_shattering_pressure	ImageGen/images/powers/shattering_pressure.png	256	256	contain	center	shortlist	2	png	Talent Pressurized Floe 2.png		icon
+power_frozen	ImageGen/images/powers/frozen.png	256	256	contain	center	shortlist	1	gif	Status Frozen Player.gif	50	icon
+power_frozen	ImageGen/images/powers/frozen.png	256	256	contain	center	shortlist	2	gif	Status Frozen Enemy.gif	50	icon
+power_friendly_visit	ImageGen/images/powers/friendly_visit.png	256	256	contain	center	shortlist	1	png	Constellation Exquisite Compound.png		icon
+power_study_buddy	ImageGen/images/powers/study_buddy.png	256	256	contain	center	shortlist	1	png	Constellation Sparkly Explosion.png		icon
+power_furina_fanfare	ImageGen/images/furina/powers/fanfare.png	256	256	contain	center	shortlist	1	png	Talent Let the People Rejoice.png		icon
+power_furina_fanfare	ImageGen/images/furina/powers/fanfare.png	256	256	contain	center	shortlist	2	png	Animula Choragi.png		icon
+power_furina_fanfare	ImageGen/images/furina/powers/fanfare.png	256	256	contain	center	shortlist	3	png	Furina Item.png		icon
+power_furina_rising_ovation	ImageGen/images/furina/powers/rising_ovation.png	256	256	contain	center	auto	1	png	Constellation A Woman Adapts Like Duckweed in Water.png		icon
+power_furina_salon_member	ImageGen/images/furina/powers/salon_member.png	256	256	contain	center	auto	1	png	Talent Salon Solitaire.png		icon
+power_furina_grand_salon	ImageGen/images/furina/powers/grand_salon.png	256	256	contain	center	auto	1	png	Talent Salon Solitaire 2.png		icon
+power_furina_all_the_worlds_a_stage	ImageGen/images/furina/powers/all_the_worlds_a_stage.png	256	256	contain	center	auto	1	png	Talent Endless Waltz.png		icon
+power_furina_center_stage	ImageGen/images/furina/powers/center_stage.png	256	256	contain	center	auto	1	png	Talent The Sea Is My Stage.png		icon
+power_furina_guest_cast	ImageGen/images/furina/powers/guest_cast.png	256	256	contain	center	auto	1	png	Constellation They Know Not Life, Who Dwelt in the Netherworld Not!.png		icon
+power_furina_leading_role	ImageGen/images/furina/powers/leading_role.png	256	256	contain	center	auto	1	png	Constellation His Name I Now Know, It Is...!.png		icon
+power_furina_supporting_cast	ImageGen/images/furina/powers/supporting_cast.png	256	256	contain	center	auto	1	png	Constellation My Secret Is Hidden Within Me, No One Will Know My Name.png		icon
+power_furina_top_billing	ImageGen/images/furina/powers/top_billing.png	256	256	contain	center	auto	1	png	Constellation Love Is a Rebellious Bird That None Can Tame.png		icon
+power_furina_limelight	ImageGen/images/furina/powers/limelight.png	256	256	contain	center	auto	1	png	Constellation Hear Me — Let Us Raise the Chalice of Love!.png		icon
+power_furina_star_of_the_show	ImageGen/images/furina/powers/star_of_the_show.png	256	256	contain	center	auto	1	png	Animula Choragi Shape.png		icon
+power_furina_stage_lights	ImageGen/images/furina/powers/stage_lights.png	256	256	contain	center	auto	1	png	Talent Unheard Confession.png		icon
+power_furina_standing_ovation	ImageGen/images/furina/powers/standing_ovation.png	256	256	contain	center	shortlist	1	png	Furina Icon.png		icon
+power_furina_ovation_trickle	ImageGen/images/furina/powers/ovation_trickle.png	256	256	contain	center	shortlist	1	png	Item Furina Banquet.png		icon

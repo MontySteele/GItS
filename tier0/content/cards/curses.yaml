@@ -1,0 +1,67 @@
+# Curses (§11 event layer, 2026-07-24) -- permanent deck cards, unlike the
+# combat-scoped clogs in engine/statuses.py.
+#
+# The distinction is the whole point. A status is injected by an enemy and
+# vanishes when the fight ends (the run layer rebuilds the player from
+# deck_ids each fight). A curse is added to deck_ids by an EVENT and rides the
+# rest of the run, which is what makes "heal to full" options cost something.
+# Without them the generous half of every event is free money and the sim
+# would read events as pure upside.
+#
+# rarity: curse keeps them out of every draft pool for free -- rewards.py
+# filters on `rarity in C.RARITY_ODDS`, and curse is not one of them. They are
+# likewise never offered by shops and cannot be upgraded.
+#
+# Semantics are the real cards'. `character: null` on purpose: curses belong
+# to nobody, and the ownership filter never sees them because the rarity check
+# excludes them first.
+
+- id: curse_clumsy
+  name: "Clumsy"
+  cost: 0
+  type: status            # engine: type == "status" is UNPLAYABLE
+  rarity: curse
+  tags: [ethereal]        # exhausts from hand at end of turn (real: Ethereal)
+
+- id: curse_guilty
+  name: "Guilty"
+  cost: 0
+  type: status
+  rarity: curse           # plain unplayable clog; it just circulates
+
+- id: curse_poor_sleep
+  name: "Poor Sleep"
+  cost: 0
+  type: status
+  rarity: curse
+  retain: true            # sticks in hand across turns -- strictly worse than
+                          # a clog, because it never cycles away
+
+- id: curse_spore_mind
+  name: "Spore Mind"
+  cost: 1
+  type: skill             # NOT unplayable: the real card is a 1-cost Exhaust
+  rarity: curse           # curse, so you may burn a whole energy to be rid of
+  exhaust: true           # it. Modeled exactly: playable, does nothing, gone.
+
+- id: curse_bad_luck
+  name: "Bad Luck"
+  cost: 0
+  type: status
+  rarity: curse
+  status_eot_damage: 13   # "at the end of your turn, if this is in your Hand,
+                          # lose 13 HP" -- blockable, same funnel as Burn.
+                          # UNIMPLEMENTED (§10.9): Eternal (cannot be removed).
+                          # Ours CAN be removed, so this curse is modeled
+                          # SOFTER than the real card, not harsher.
+
+- id: curse_decay
+  name: "Decay"
+  cost: 0
+  type: status
+  rarity: curse
+  # UNCERTAIN, flagged rather than guessed: StS1's Decay dealt 2 end-of-turn
+  # damage, and the StS2 wiki page shows only Unplayable with no damage line.
+  # Shipped as a plain clog -- the conservative read. If the real card does
+  # carry the tick, this is SOFTER than real, which is the safe direction for
+  # a curse we hand out.
