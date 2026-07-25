@@ -112,9 +112,36 @@ public static class KurageSummon
             return;
         }
 
-        await PowerCmd.Apply(
-            choiceContext, ModelDb.Power<KurageSummonPower>(), owner, turns,
-            owner, source, false);
+        // SOFTLOCK FIX 2026-07-26. This used to call the NON-generic
+        // PowerCmd.Apply and hand it ModelDb.Power<KurageSummonPower>() --
+        // the CANONICAL prototype, which is immutable. That overload's second
+        // statement is `power.AssertMutable()`, which throws
+        // CanonicalModelException on a canonical model. The generic Apply<T>
+        // is the one that does the missing step:
+        //
+        //     PowerModel powerModel = ModelDb.Power<T>();
+        //     PowerModel power = FindExistingInstanceForStacking(...);
+        //     if (power == null)
+        //     {
+        //         power = powerModel.ToMutable();   // <-- this
+        //         await Apply(choiceContext, power, target, ...);
+        //     }
+        //
+        // The early return above means this line is reached ONLY when no
+        // jellyfish is fielded, so it threw on every FIRST Bake-Kurage of a
+        // combat. An exception inside an awaited action leaves the action
+        // queue unfinished, which surfaces as a SOFTLOCK rather than a crash
+        // -- the game simply stops advancing, with nothing in the log that
+        // names a card.
+        //
+        // Using the generic overload rather than adding .ToMutable() here is
+        // deliberate: it is the idiom every other PowerCmd.Apply call in this
+        // assembly already uses, so the fix removes an oddity instead of
+        // adding a second correct-but-unusual spelling. The stacking branch
+        // inside it is unreachable from here (the early return owns that
+        // case), so refresh-never-stack is unaffected.
+        await PowerCmd.Apply<KurageSummonPower>(
+            choiceContext, owner, turns, owner, source, false);
     }
 }
 
