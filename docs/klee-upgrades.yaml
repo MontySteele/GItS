@@ -97,6 +97,9 @@ barbara_melody:            {block: +2}             # 6->8; burst rider untouched
 barbara_shining_idol:      {block: +2}             # R8 conversion: 5->7 (cantrip + aura untouched)
 sucrose_gust:              {draw: +1}
 sucrose_astable:           {burst_energy: +4}      # 8->12; base cost is now 1
+sucrose_catalyst_conversion: {draw: +1}            # draw 1->2; energy stays 1 (an energy bump would
+                                                   # over-swing a fixer). PROPOSED with the card (v1.11a).
+
 bennett_passion:           {buff: +2}              # next attack +4->+6
 bennett_fantastic_voyage:  {buff: +1}              # Strength 3->4; Exhaust stays
 kaeya_frostgnaw:           {damage: +2}

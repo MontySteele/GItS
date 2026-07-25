@@ -61,6 +61,7 @@ public static class CompanionRoster
         ModelDb.Card<ShinobuSanctifyingRing>(),
         ModelDb.Card<ShinobuThundergrust>(),
         ModelDb.Card<SucroseAstable>(),
+        ModelDb.Card<SucroseCatalystConversion>(),
         ModelDb.Card<SucroseGust>(),
         ModelDb.Card<ThomaBlazingBarrier>(),
         ModelDb.Card<ThomaCrimsonOoyoroi>(),
