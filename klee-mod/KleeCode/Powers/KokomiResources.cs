@@ -153,6 +153,22 @@ public static class KokomiResources
         Vfx.GaugeBridge.Refresh(creature!);
     }
 
+    /// <summary>
+    /// Cards currently in the exhaust pile. The scaling term behind her
+    /// exhaust-pile finishers (pearl_barrage, depths_judgment): the pile IS
+    /// the record of everything she has rotated off the line, so a card that
+    /// reads it is reading her whole game so far.
+    ///
+    /// Static and null-tolerant because CalculatedVar previews call it with
+    /// no target while nothing is hovered.
+    /// </summary>
+    public static int ExhaustPileCount(Creature? creature)
+    {
+        var owner = creature?.Player;
+        if (owner == null) return 0;
+        return CardPile.Get(PileType.Exhaust, owner)?.Cards.Count ?? 0;
+    }
+
     internal static KokomiBurstResource? FindBurst(Creature? creature)
     {
         var owner = creature?.Player;

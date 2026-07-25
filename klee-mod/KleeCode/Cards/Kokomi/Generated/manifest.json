@@ -8,14 +8,17 @@
   },
   "coverage": {
     "total": 38,
-    "generated": 29,
-    "blocked": 9
+    "generated": 36,
+    "blocked": 2
   },
   "generated": [
+    "all_streams_flow",
     "bake_kurage",
     "communion_of_tides",
     "conscription_notice",
     "coral_guard",
+    "depths_judgment",
+    "drifting_lantern",
     "epiphany_of_the_deep",
     "exposing_current",
     "field_promotion",
@@ -25,6 +28,8 @@
     "mass_mobilization",
     "mercy_of_the_deep",
     "moon_signal",
+    "nereids_ascension",
+    "pearl_barrage",
     "prayer_to_the_moon",
     "pulsing_current",
     "rearguard_action",
@@ -35,39 +40,25 @@
     "surging_shoal",
     "swift_currents",
     "tactical_retreat",
+    "tidal_lure",
     "tide_reading",
     "to_the_front",
     "undertow_shuffle",
+    "vigil_of_the_deep",
     "votive_offering",
     "waters_edge",
     "waterspout"
   ],
   "blocked": {
-    "all_streams_flow": "bonus_formula '1_per_2_charge'",
     "ceremonial_garment": "kit card (hand-write it against the KitBurst machinery)",
-    "cleansing_tide": "exhaust_from amount > 1 (re-pool loop not built)",
-    "depths_judgment": "amount_formula (reads exhaust_pile) -- needs a CalculatedVar bound to the pile, not a literal",
-    "drifting_lantern": "card field(s) ['sly'] not understood",
-    "nereids_ascension": "bonus_formula '1_per_2_charge'",
-    "pearl_barrage": "amount_formula (reads exhaust_pile) -- needs a CalculatedVar bound to the pile, not a literal",
-    "tidal_lure": "card field(s) ['sly'] not understood",
-    "vigil_of_the_deep": "apply_power power 'prevent_exhaust_ward' (no PowerModel in the registry)"
+    "cleansing_tide": "exhaust_from amount > 1 (re-pool loop not built)"
   },
   "runtime_clusters": {
     "kit_burst": [
       "ceremonial_garment"
     ],
-    "prevention_ward": [
-      "vigil_of_the_deep"
-    ],
     "shared_emitter_gap": [
-      "all_streams_flow",
-      "cleansing_tide",
-      "depths_judgment",
-      "drifting_lantern",
-      "nereids_ascension",
-      "pearl_barrage",
-      "tidal_lure"
+      "cleansing_tide"
     ]
   },
   "upgrades": {
