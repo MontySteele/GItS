@@ -21,7 +21,7 @@ position; "in no pool at all" is never legitimate.
 THE POOLS THAT COUNT are character-owned pools. ModelDb.AllCardPools is
 AllCharacters.Select(c => c.CardPool) plus a hardcoded array of shared pools,
 so an unattached helper pool is invisible. Membership therefore means
-reachable from KleeCardPool or FurinaCardPool. Their FilterThroughEpochs
+reachable from KleeCardPool, FurinaCardPool or KokomiCardPool. Their FilterThroughEpochs
 overrides keep generated-only kit/token cards out of reward rolls.
 
 Usage: python tools/lint_pool_membership.py
@@ -48,6 +48,9 @@ MEMBERSHIP_FILES = [
     / "FurinaCardRoster.cs",
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina" / "Generated"
     / "GuestStarRoster.cs",
+    REPO / "klee-mod" / "KleeCode" / "KokomiCardPool.cs",
+    REPO / "klee-mod" / "KleeCode" / "Cards" / "Kokomi" / "Generated"
+    / "KokomiCardRoster.cs",
 ]
 
 # `public sealed class Foo : CustomCardModel` / `: CustomCardModel, IElementalCard`

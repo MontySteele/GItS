@@ -58,6 +58,7 @@ internal static class KleeSelfCheck
                      {
                          ModelDb.Character<Klee>(),
                          ModelDb.Character<Furina>(),
+                         ModelDb.Character<Kokomi>(),
                      })
             {
                 CheckCharacterInvariants(character);
@@ -92,7 +93,7 @@ internal static class KleeSelfCheck
         if (Findings.Count == 0)
         {
             Log.Info($"[{KleeMod.ModId}] {Tag} passed "
-                   + $"({RuleCount} rule families across 2 characters "
+                   + $"({RuleCount} rule families across 3 characters "
                    + "and the assembly's powers).");
             return;
         }

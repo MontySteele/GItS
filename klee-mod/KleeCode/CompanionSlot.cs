@@ -61,8 +61,10 @@ public static class CompanionSlot
     {
         // rarity tier -> canonical companion models. personal_pool cards are
         // only offered to their own character (tier05: "load-bearing the
-        // moment a second character exists") -- the call site already gates
-        // on Klee, so "klee" is the only id that can match today.
+        // moment a second character exists"). That moment has arrived twice
+        // over: three characters host this slot now, each from its own
+        // starter relic, so CharacterId below has three live arms and the
+        // filter is doing real work.
         var tiers = new Dictionary<CardRarity, List<CardModel>>();
         foreach (var canonical in CompanionRoster.All)
         {
@@ -111,6 +113,7 @@ public static class CompanionSlot
         {
             Klee => "klee",
             Furina => "furina",
+            Kokomi => "kokomi",
             _ => null,
         };
 
@@ -119,6 +122,7 @@ public static class CompanionSlot
         {
             Klee => "mondstadt",
             Furina => "fontaine",
+            Kokomi => "inazuma",
             _ => null,
         };
 

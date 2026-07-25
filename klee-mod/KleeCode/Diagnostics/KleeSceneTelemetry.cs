@@ -36,6 +36,17 @@ internal static class KleeSceneTelemetry
         "furina/ui/character_icon.tscn",
         "furina/ui/char_select_bg_furina.tscn",
         "furina/ui/salon_stage.tscn",
+        // Kokomi. combat.tscn is EXPECTED MISSING until her art pass lands --
+        // she runs on the combat_visuals.tscn fallback, which the pck builder
+        // fills from Klee. Listed anyway, because "expected missing" and
+        // "silently missing" are the same thing at 2am and only one of them
+        // says so in the log.
+        "kokomi/model/combat.tscn",
+        "kokomi/model/combat_visuals.tscn",
+        "kokomi/model/rest_character.tscn",
+        "kokomi/model/merchant_character.tscn",
+        "kokomi/ui/character_icon.tscn",
+        "kokomi/ui/char_select_bg_kokomi.tscn",
         "shared/gauge.tscn",
         "klee/vfx/bomb_lob.tscn",
         "klee/vfx/dodoco_pop.tscn",
