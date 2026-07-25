@@ -37,11 +37,44 @@ namespace KleeMod.Vfx;
 /// </summary>
 public static class GaugeBridge
 {
+    /// <summary>
+    /// The cross-character overhead Burst slot, in creature space.
+    ///
+    /// Animation sprint 2, C1 ruling: this anchor is a CONVENTION, not a
+    /// per-character choice — the overhead slot means "Burst" for everybody,
+    /// which is exactly why Encore was evicted from it. Both rigs clear it:
+    /// Klee's tallest layer (the smoke plume) tops out ~-277 and Furina's
+    /// combat box tops out at -280, so -300 clears both with room for the
+    /// label. Measure any new character's rig before assuming it still fits.
+    /// </summary>
+    private static readonly Vector2 OverheadBurstAnchor = new(0f, -300f);
+
+    /// <summary>
+    /// Per-character skin, applied by the bridge at Setup (C2). Skinning is
+    /// parameter-driven against ONE scene rather than per-character scene
+    /// variants; the variants remain the sanctioned fallback if a future skin
+    /// outgrows what a script-less scene can carry by parameter alone. What a
+    /// parameter CAN reach is every node property in shared/gauge.tscn:
+    /// colours, sizes, visibility, and textures on %CapIcon.
+    /// </summary>
+    private sealed class GaugeSkin
+    {
+        public required Color FillColor { get; init; }
+
+        public required Color TrackColor { get; init; }
+
+        /// <summary>Ribbon/banner backing plate. Null leaves it hidden.</summary>
+        public Color? RibbonColor { get; init; }
+
+        /// <summary>pck-relative texture for the end cap. Null hides it.</summary>
+        public string? CapIconPath { get; init; }
+    }
+
     private sealed class GaugeSpec
     {
         public required string Key { get; init; }
 
-        public required Color FillColor { get; init; }
+        public required GaugeSkin Skin { get; init; }
 
         /// <summary>Anchor offset relative to the creature node's origin.</summary>
         public required Vector2 AnchorOffset { get; init; }
@@ -49,7 +82,7 @@ public static class GaugeBridge
         /// <summary>Bar renders full at this many points (display only).</summary>
         public required int VisualSpan { get; init; }
 
-        /// <summary>Null for the unbounded Encore buffer: label shows the raw count.</summary>
+        /// <summary>Null for an unbounded buffer: label shows the raw count.</summary>
         public int? LabelMax { get; init; }
 
         public required Func<Creature, bool> AppliesTo { get; init; }
@@ -62,16 +95,19 @@ public static class GaugeBridge
 
     private static readonly GaugeSpec[] Specs =
     {
-        // Burst ready: flash when the meter first reaches the cast gate.
-        // Anchored centered overhead: the gauge scene is symmetric about its
-        // root, and Klee's tallest layer (the smoke plume) tops out ~-277 in
-        // creature space -- -300 clears the whole model (C4 feedback: the old
-        // up-left anchor sat on Dodoco).
+        // Klee's Burst. Skin: fuse-and-bomb — a warm fuse burning along the
+        // track toward the bomb cap, which is lit exactly when the meter is
+        // castable.
         new()
         {
             Key = "burst",
-            FillColor = new Color(1.0f, 0.45f, 0.15f),
-            AnchorOffset = new Vector2(0f, -300f),
+            Skin = new GaugeSkin
+            {
+                FillColor = new Color(1.0f, 0.45f, 0.15f),
+                TrackColor = new Color(0.08f, 0.07f, 0.1f, 0.82f),
+                CapIconPath = "klee/powers/bomb.png",
+            },
+            AnchorOffset = OverheadBurstAnchor,
             VisualSpan = BurstConstants.KleeMax,
             LabelMax = BurstConstants.KleeMax,
             AppliesTo = creature => creature.Player?.Character is Klee,
@@ -80,26 +116,39 @@ public static class GaugeBridge
                 previous < BurstConstants.KleeMax
                 && current >= BurstConstants.KleeMax,
         },
-        // Encore empty: flash when a spend/absorb drains the buffer to zero
-        // (the overdraw moment — further costs start hitting HP).
+        // Furina's Burst, at the SAME overhead slot. Skin: hydro ribbon —
+        // a banner plate with swallow-tail ends, deliberately sharing its
+        // visual language with the Salon stage's Encore ribbon (D3) so the two
+        // hydro meters read as one family and neither reads as Klee's.
         new()
         {
-            Key = "encore",
-            FillColor = new Color(0.35f, 0.75f, 1.0f),
-            AnchorOffset = new Vector2(-100f, -250f),
-            VisualSpan = 20,
-            LabelMax = null,
+            Key = "furina_burst",
+            Skin = new GaugeSkin
+            {
+                FillColor = new Color(0.35f, 0.75f, 1.0f),
+                TrackColor = new Color(0.06f, 0.13f, 0.2f, 0.85f),
+                RibbonColor = new Color(0.11f, 0.24f, 0.36f, 0.9f),
+            },
+            AnchorOffset = OverheadBurstAnchor,
+            VisualSpan = FurinaResourceConstants.BurstMax,
+            LabelMax = FurinaResourceConstants.BurstMax,
             AppliesTo = FurinaResources.IsFurina,
-            ReadValue = FurinaResources.Encore,
-            ShouldFlash = (previous, current) => previous > 0 && current <= 0,
+            ReadValue = FurinaResources.Burst,
+            ShouldFlash = (previous, current) =>
+                previous < FurinaResourceConstants.BurstMax
+                && current >= FurinaResourceConstants.BurstMax,
         },
+        // NOTE: Encore has NO spec here. It was evicted from the overhead slot
+        // by the C4 verdict (that slot is Burst, cross-character) and re-homes
+        // as the ribbon under the Salon stage — see SalonVisualsBridge (D3).
+        // Its refresh funnels are unchanged; only the display moved.
     };
 
     private const float BarFullWidth = 60f;
     private const string PreviousValueMeta = "kleemod_gauge_value";
 
-    private static readonly Dictionary<(Player Player, string Key), Node2D>
-        Displays = new();
+    private static readonly
+        TrackedDisplayBridge.Registry<(Player Player, string Key)> Displays = new();
 
     private static bool _warnedMissingScene;
 
@@ -120,46 +169,19 @@ public static class GaugeBridge
 
             DiscardDisplay(player, spec);
 
-            string? scenePath = KleePck.Path("shared/gauge.tscn");
-            if (scenePath == null)
+            var display = TrackedDisplayBridge.Spawn(
+                combatRoom, "shared/gauge.tscn", ref _warnedMissingScene,
+                "gauges disabled");
+            if (display == null)
             {
-                if (!_warnedMissingScene)
-                {
-                    _warnedMissingScene = true;
-                    MegaCrit.Sts2.Core.Logging.Log.Warn(
-                        $"[{KleeMod.ModId}] shared/gauge.tscn missing from pck; "
-                        + "gauges disabled (falling back to badge powers only)");
-                }
                 return;
             }
 
-            var display = ResourceLoader
-                .Load<PackedScene>(scenePath)
-                .Instantiate<Node2D>();
-            combatRoom.CombatVfxContainer.AddChildSafely(display);
+            ApplySkin(display, spec.Skin);
+            TrackedDisplayBridge.Track(
+                combatRoom, creature, display, spec.AnchorOffset);
 
-            if (display.GetNodeOrNull<ColorRect>("%BarFill") is { } fill)
-            {
-                fill.Color = spec.FillColor;
-            }
-
-            // Script-less tracking: the creature node drives the gauge's
-            // global position through the engine's transform propagation.
-            var creatureNode = combatRoom.GetCreatureNode(creature);
-            if (creatureNode != null)
-            {
-                var anchor = new RemoteTransform2D
-                {
-                    Position = spec.AnchorOffset,
-                    UpdateRotation = false,
-                    UpdateScale = false,
-                    UseGlobalCoordinates = true,
-                };
-                creatureNode.AddChildSafely(anchor);
-                anchor.RemotePath = anchor.GetPathTo(display);
-            }
-
-            Displays[(player, spec.Key)] = display;
+            Displays.Set((player, spec.Key), display);
             RefreshDisplay(display, spec, creature, allowFlash: false);
         }
     }
@@ -215,27 +237,56 @@ public static class GaugeBridge
         }
     }
 
-    private static Node2D? GetDisplay(Player player, GaugeSpec spec)
+    private static Node2D? GetDisplay(Player player, GaugeSpec spec) =>
+        Displays.Get((player, spec.Key));
+
+    private static void DiscardDisplay(Player player, GaugeSpec spec) =>
+        Displays.Discard((player, spec.Key));
+
+    /// <summary>
+    /// C2's parameter-driven skinning. Every node this touches is optional in
+    /// the scene, so an older pck missing the skin nodes still renders a
+    /// working bar rather than throwing — same loud-but-degradable posture as
+    /// the rest of the sprint's visual layer.
+    /// </summary>
+    private static void ApplySkin(Node2D display, GaugeSkin skin)
     {
-        var display = Displays.GetValueOrDefault((player, spec.Key));
-        if (display != null && GodotObject.IsInstanceValid(display))
+        if (display.GetNodeOrNull<ColorRect>("%BarFill") is { } fill)
         {
-            return display;
+            fill.Color = skin.FillColor;
         }
 
-        Displays.Remove((player, spec.Key));
-        return null;
+        if (display.GetNodeOrNull<ColorRect>("%BarBack") is { } back)
+        {
+            back.Color = skin.TrackColor;
+        }
+
+        foreach (var name in RibbonNodes)
+        {
+            if (display.GetNodeOrNull<ColorRect>(name) is not { } ribbon)
+            {
+                continue;
+            }
+            ribbon.Visible = skin.RibbonColor is not null;
+            if (skin.RibbonColor is { } colour)
+            {
+                ribbon.Color = colour;
+            }
+        }
+
+        if (display.GetNodeOrNull<TextureRect>("%CapIcon") is { } cap)
+        {
+            var texture = skin.CapIconPath is { } relative
+                          && KleePck.Path(relative) is { } path
+                ? ResourceLoader.Load<Texture2D>(path)
+                : null;
+            cap.Texture = texture;
+            cap.Visible = texture != null;
+        }
     }
 
-    private static void DiscardDisplay(Player player, GaugeSpec spec)
-    {
-        if (Displays.TryGetValue((player, spec.Key), out var old)
-            && GodotObject.IsInstanceValid(old))
-        {
-            old.QueueFree();
-        }
-        Displays.Remove((player, spec.Key));
-    }
+    private static readonly string[] RibbonNodes =
+        { "%Ribbon", "%RibbonTailL", "%RibbonTailR" };
 
     private static void RefreshDisplay(
         Node2D display, GaugeSpec spec, Creature creature, bool allowFlash)

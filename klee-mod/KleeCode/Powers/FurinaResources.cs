@@ -276,6 +276,9 @@ public static class FurinaResources
         if (resource == null) return;
         resource.ModifyAmount(amount);
         Vfx.GaugeBridge.Refresh(creature);
+        // Encore's display moved to the Salon stage ribbon (animation sprint 2,
+        // D3). Funnels unchanged -- only the surface it draws on.
+        Vfx.SalonVisualsBridge.Refresh(creature);
         GainFanfare(
             creature, amount * FurinaResourceConstants.FanfarePerEncoreGained);
     }
@@ -300,6 +303,9 @@ public static class FurinaResources
         if (spent <= 0) return 0;
         resource.ModifyAmount(-spent);
         Vfx.GaugeBridge.Refresh(creature);
+        // Encore's display moved to the Salon stage ribbon (animation sprint 2,
+        // D3). Funnels unchanged -- only the surface it draws on.
+        Vfx.SalonVisualsBridge.Refresh(creature);
         GainFanfare(
             creature, spent * FurinaResourceConstants.FanfarePerEncoreSpent);
         GainBurst(
@@ -336,6 +342,9 @@ public static class FurinaResources
         var absorbed = Math.Min(resource.Amount, (int)Math.Ceiling(amount));
         resource.ModifyAmount(-absorbed);
         Vfx.GaugeBridge.Refresh(creature);
+        // Encore's display moved to the Salon stage ribbon (animation sprint 2,
+        // D3). Funnels unchanged -- only the surface it draws on.
+        Vfx.SalonVisualsBridge.Refresh(creature);
         return Math.Max(0m, amount - absorbed);
     }
 
@@ -346,23 +355,38 @@ public static class FurinaResources
     }
 
     /// <summary>
-    /// Resource values are canonical. These powers are the ambient in-combat
-    /// display because BaseLib only renders custom resources on card costs.
+    /// Resource values are canonical; these powers are the ambient in-combat
+    /// display, because BaseLib only renders custom resources on card costs.
+    ///
+    /// BADGE DIET (animation sprint 2, Track E1). Her strip failed the
+    /// 2026-07-24 legibility pass: too many badges, all wearing Klee-register
+    /// icons. The rule applied is the Burst-badge precedent from sprint 1 —
+    /// a meter that gains an AMBIENT home loses its badge, because two
+    /// surfaces for one number is what made the strip unreadable:
+    ///
+    ///   Encore  -> RETIRED. Ambient home: the Salon stage ribbon (D3).
+    ///   Burst   -> RETIRED. Ambient home: the overhead gauge (C1).
+    ///   Fanfare -> KEPT. It has no ambient surface, and the parallel kit
+    ///              redesign is turning it into a read-only momentum stat,
+    ///              which makes a badge the RIGHT home for it rather than a
+    ///              consolation prize.
+    ///
+    /// Three badges become one. Both retired classes stay registered below for
+    /// save compatibility with mid-combat saves written before the retirement.
     /// </summary>
     public static async Task SyncMeters(
         PlayerChoiceContext choiceContext, Creature creature,
         CardModel? cardSource = null)
     {
         if (!IsFurina(creature)) return;
-        await SyncMeter<EncoreMeterPower>(
-            choiceContext, creature, Encore(creature), cardSource);
         await SyncMeter<FanfareMeterPower>(
             choiceContext, creature, Fanfare(creature), cardSource);
-        await SyncMeter<FurinaBurstMeterPower>(
-            choiceContext, creature, Burst(creature), cardSource);
-        // Salon display sync (Track D): every meter-sync moment is also a
-        // dry-badge moment, and the salon reads composition + Encore here.
+        // Salon stage sync (Track D): every meter-sync moment is also a
+        // dry-state moment, and the stage reads composition + Encore here.
         Vfx.SalonVisualsBridge.Refresh(creature);
+        // Burst's gauge refresh used to ride the badge apply; now it is
+        // explicit, so the overhead meter still tracks every sync moment.
+        Vfx.GaugeBridge.Refresh(creature);
     }
 
     private static async Task SyncMeter<T>(
@@ -510,6 +534,12 @@ public sealed class FurinaResourceHooks : AbstractModel
     }
 }
 
+/// <summary>
+/// RETIRED as a display 2026-07-24 (animation sprint 2, E1) — Encore's ambient
+/// home is the Salon stage ribbon. Nothing applies this power any more. The
+/// class stays registered so a mid-combat save written before the retirement
+/// still loads; same pattern as Klee's BurstMeterPower.
+/// </summary>
 public sealed class EncoreMeterPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
@@ -538,6 +568,11 @@ public sealed class FanfareMeterPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
+/// <summary>
+/// RETIRED as a display 2026-07-24 (animation sprint 2, E1) — Burst's ambient
+/// home is the standardised overhead gauge. Kept registered for save
+/// compatibility, exactly as <see cref="EncoreMeterPower"/> is.
+/// </summary>
 public sealed class FurinaBurstMeterPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()

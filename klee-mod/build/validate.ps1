@@ -172,10 +172,22 @@ foreach ($f in Get-ChildItem $SourceDir -Recurse -Filter *.cs) {
         if ($line -match '\{\{') {
             Fail 'S5' "$($f.Name):$n uses doubled braces; SmartFormat placeholders are single-braced and {{X}} renders literally."
         }
-        foreach ($mm in [regex]::Matches($line, '\[/?([A-Za-z_][A-Za-z0-9_]*)')) {
-            $tag = $mm.Groups[1].Value
-            if ($knownTags -notcontains $tag.ToLower()) {
-                Fail 'S5' "$($f.Name):$n uses '[$tag]', which is not a known BBCode tag. If it is a variable write {$tag}; an unknown tag throws at render time."
+        # Scan only the STRING LITERALS on the line, never the surrounding C#.
+        # BBCode can only ever appear inside a literal, and scanning the raw
+        # line made a dictionary-initializer KEY look like a tag: the line
+        #     [Cards.FurinaRiderTips.FanfareKey + ".title"] = "Fanfare scaling"
+        # passes the loc-value filter above on its `.title"]`, and then `[Cards`
+        # reads as an unknown BBCode tag. That false positive has blocked every
+        # deploy since 0b33ffd. Narrowing to literals keeps the gate's reach --
+        # a real '[Block]' inside any loc string is still caught -- while
+        # dropping a class of finding that cannot be a render bug.
+        foreach ($lit in [regex]::Matches($line, '"([^"\\]*(?:\\.[^"\\]*)*)"')) {
+            foreach ($mm in [regex]::Matches($lit.Groups[1].Value,
+                                             '\[/?([A-Za-z_][A-Za-z0-9_]*)')) {
+                $tag = $mm.Groups[1].Value
+                if ($knownTags -notcontains $tag.ToLower()) {
+                    Fail 'S5' "$($f.Name):$n uses '[$tag]', which is not a known BBCode tag. If it is a variable write {$tag}; an unknown tag throws at render time."
+                }
             }
         }
     }

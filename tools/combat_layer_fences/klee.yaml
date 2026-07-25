@@ -1,0 +1,86 @@
+# Klee combat-layer fence config -- config #1, animation sprint 1 Track B1
+# (2026-07-23), transcribed verbatim into the generalized cutter in sprint 2
+# Track B1 (2026-07-24). `cut_combat_layers.py klee --check` asserts the
+# transcription is byte-identical to what the old single-purpose tool shipped.
+#
+# Layer rationale (from docs/art-asset-manifest.md "AS SHIPPED"): the plan's
+# nominal body/head/backpack/Dodoco cut was NOT used -- in this pose a head cut
+# runs through hair overlaps (visible seams, weak payoff), while the splash's
+# big elements separate almost surgically.
+#
+# Coordinates are specific to this artwork revision (source URL in
+# art/SOURCES.tsv). If the source image changes, re-digitize.
+
+character: klee
+source: ImageGen/images/model/character_klee_full_wish.png   # 1069x1245
+out_dir: ImageGen/images/model/layers
+file_prefix: klee
+alpha_threshold: 16
+combat_box: [240, 280]     # the same box the static model used
+master_pad: 4
+combat_pad: 2
+
+# z-order back->front is smoke / floaters / dumpty / body / dodoco.
+# dilate_priority is DIFFERENT from z-order on purpose: it decides who keeps
+# the shared outline pixels along a fence, and the object in FRONT wins. The
+# floaters are free-standing islands that never touch a fence, so they sit at
+# the bottom of the priority list.
+layers:
+  - {id: 1, name: smoke,    dilate_priority: 2}
+  - {id: 2, name: body,     dilate_priority: 3}
+  - {id: 3, name: dumpty,   dilate_priority: 4}
+  - {id: 4, name: dodoco,   dilate_priority: 5}
+  - {id: 5, name: floaters, dilate_priority: 1}
+
+fences:
+  width: 3
+  lines:
+    - name: dumpty | smoke
+      points: [[450, 0], [470, 60], [485, 110], [500, 150], [507, 200],
+               [500, 250], [494, 300], [490, 340], [497, 375], [492, 398]]
+    - name: dumpty | body
+      points: [[0, 525], [80, 520], [150, 510], [230, 500], [270, 497],
+               [295, 480], [302, 464], [330, 462], [360, 466], [390, 472],
+               [410, 468], [430, 455], [450, 440], [470, 420], [485, 408],
+               [492, 398]]
+    - name: body | smoke
+      points: [[492, 398], [500, 410], [510, 404], [540, 397], [575, 394],
+               [610, 401], [635, 414], [650, 431], [662, 440], [668, 425],
+               [678, 415], [692, 410], [705, 415], [715, 428], [718, 445],
+               [712, 462], [703, 478], [695, 490], [690, 500], [695, 505],
+               [705, 508], [720, 510], [735, 501], [752, 493], [766, 494],
+               [780, 500], [793, 505], [804, 508], [812, 512], [816, 520],
+               [810, 528], [796, 534], [780, 539], [762, 544], [748, 549],
+               [740, 556], [732, 566], [724, 578], [714, 590], [702, 602],
+               [688, 614], [672, 626], [662, 645], [658, 662], [658, 678],
+               [660, 690]]
+    - name: dodoco (closed loop)
+      points: [[628, 678], [640, 670], [650, 678], [662, 695], [668, 720],
+               [676, 745], [680, 770], [688, 782], [705, 788], [722, 795],
+               [735, 808], [738, 825], [730, 838], [715, 848], [695, 852],
+               [675, 850], [658, 842], [655, 850], [640, 852], [628, 845],
+               [615, 832], [605, 815], [602, 790], [605, 772], [592, 765],
+               [585, 745], [596, 730], [608, 725], [613, 700], [628, 678]]
+
+# smoke gets extra seeds: the under-arm bulge + wisp spikes are cut off from
+# the main cloud by the arm itself, so they cannot flood from the top seed.
+seeds:
+  - {layer: dumpty, at: [300, 250]}
+  - {layer: smoke,  at: [650, 200]}
+  - {layer: smoke,  at: [750, 650]}
+  - {layer: smoke,  at: [700, 730]}
+  - {layer: body,   at: [500, 600]}
+  - {layer: dodoco, at: [640, 780]}
+
+unreached_layer: smoke      # enclaves cut off from every seed are background
+
+satellites:
+  low_saturation_layer: smoke      # gray wisps rejoin the cloud
+  saturation_threshold: 35
+  other_layer: floaters            # bell bombs, flowers, trails, clovers
+
+# Sized for the worst-case relative idle amplitudes in
+# klee-mod/pck-src/klee/model/combat.tscn (~27 source px) plus AA slack.
+fill_behind:
+  - {layer: smoke, radius: 32, covered_by: [body, dumpty, dodoco]}
+  - {layer: body,  radius: 20, covered_by: [dodoco]}

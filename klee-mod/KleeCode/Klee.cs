@@ -26,7 +26,7 @@ namespace KleeMod;
 /// ships no spine rig, so any override here would be dead code. The animation
 /// regime is instead: combat visuals load from the script-less convention
 /// scene klee/model/combat.tscn (BaseLib's NCreatureVisualsFactory converts
-/// the root to a real NCreatureVisuals), and Vfx.KleeAnimationRouter routes
+/// the root to a real NCreatureVisuals), and Vfx.CreatureAnimationRouter routes
 /// NCreature.SetAnimationTrigger / StartDeathAnim into the scene's
 /// %AnimationTree when one exists. The Track-A scene is static (no tree), so
 /// the router is inert until Track B ships klee2.tscn. Verified against

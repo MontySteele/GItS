@@ -26,6 +26,7 @@ public static class KleeCombatVfx
 {
     private const string BombLobScene = "klee/vfx/bomb_lob.tscn";
     private const string DodocoPopScene = "klee/vfx/dodoco_pop.tscn";
+    private const string SpotlightShineScene = "furina/vfx/spotlight_shine.tscn";
 
     private const float LobDuration = 0.45f;
     private const float LobApexLift = 130f;
@@ -118,6 +119,35 @@ public static class KleeCombatVfx
         vfx.GlobalPosition = ownerNode.GlobalPosition + new Vector2(38f + scatter, -190f);
         LivePops.Add(vfx);
         // The scene autoplays "pop" and frees itself from a method track.
+    }
+
+    /// <summary>
+    /// Beam-from-above on a Spotlight DESIGNATION (animation sprint 2, F1;
+    /// Funnel Contract §3 — designation is a single funnel, so this fires
+    /// exactly once per designation and needs no spam guard of its own).
+    /// The kit's signature moment shipped with zero visual until now.
+    /// </summary>
+    public static void SpawnSpotlightShine(Creature? owner)
+    {
+        if (owner == null || NCombatRoom.Instance is not { } room)
+        {
+            return;
+        }
+
+        var ownerNode = room.GetCreatureNode(owner);
+        if (ownerNode == null)
+        {
+            return;
+        }
+
+        var vfx = Instantiate(SpotlightShineScene, room);
+        if (vfx == null)
+        {
+            return;
+        }
+
+        vfx.GlobalPosition = ownerNode.GlobalPosition;
+        // The scene autoplays "shine" and frees itself from a method track.
     }
 
     private static Node2D? Instantiate(string relativePath, NCombatRoom room)

@@ -34,7 +34,7 @@ $ErrorActionPreference = 'Stop'
 
 $root       = Split-Path -Parent $PSScriptRoot
 $csproj     = Join-Path $root 'KleeCode\KleeCode.csproj'
-$package    = Join-Path $root 'Klee'
+$packageDir = Join-Path $root 'Klee'   # NOT $package: collides with the -Package switch
 $stage      = Join-Path $root 'dist\klee'
 $localProps = Join-Path $root 'local.props'
 
@@ -67,7 +67,7 @@ if (-not (Test-Path $dll)) { throw "Expected output not found: $dll" }
 Write-Host "Staging package..." -ForegroundColor Cyan
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $stage | Out-Null
-Copy-Item (Join-Path $package 'manifest.json') -Destination $stage
+Copy-Item (Join-Path $packageDir 'manifest.json') -Destination $stage
 Copy-Item $dll -Destination $stage
 
 # Card art ships as loose PNGs next to the dll -- no .pck needed, because

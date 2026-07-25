@@ -9,58 +9,81 @@ using MegaCrit.Sts2.Core.Nodes.Rooms;
 namespace KleeMod.Vfx;
 
 /// <summary>
-/// Onscreen Salon members (animation sprint 1, Track D): three slots in a
-/// flank line rising behind Furina's left shoulder, one per
-/// <see cref="SalonMemberPower"/> stack. Same bridge skeleton as
-/// <see cref="GaugeBridge"/> — Displays dict + IsInstanceValid staleness +
-/// lazy re-Setup + CombatVfxContainer + RemoteTransform2D tracking. The
-/// common-base extraction is deliberately deferred until after both concrete
-/// bridges have survived a playtest (plan D2: refactor after the second
-/// instance works, not before).
+/// The Salon stage (animation sprint 2, Track D — the D4 redesign).
 ///
-/// Slot portraits come from the loose card-art register (KleeArt.CardPortrait
-/// — the salon members ARE cards, so their art already ships), not the pck:
-/// per plan D1, portraits are placeholder-grade this sprint and the slots +
-/// states are the deliverable. A missing PNG just leaves the framed slot
-/// empty.
+/// WHAT FAILED, and why this is a re-layout rather than a restyle: sprint 1
+/// put three card-art portraits in framed squares beside Furina. The portraits
+/// are 500x380 gameplay screenshots, and at combat scale the three read as
+/// three identical blue smudges — member identity did not survive. The
+/// [USER] verdict (2026-07-24) failed the styling and kept the concept. So the
+/// members are now freestanding SILHOUETTE mini-sprites standing on a shallow
+/// stage arc: no frame, no square crop, identity carried by outline.
+/// Ghost-outline-for-empty is the one sprint-1 idea that did read, restyled
+/// here to the stage language.
 ///
-/// States (all display-only, re-read from the command layer):
-/// - occupied/empty: SalonMemberPower.Count — empty slots show as dim frames.
-/// - newly occupied: scene-authored "slotN_pop" scale pop (D3's activate).
-/// - dry: Encore below the tick cost — occupied slots desaturate and the
-///   badge greys out (D3's deactivate treatment; members attack at 0.75x).
+/// SLOT-INDEX-KEYED, per Funnel Contract §1. Deploy is by card and duplicates
+/// are legal — three of the same member is a valid stage — so nothing here may
+/// assume a fixed member-to-slot mapping or distinct members. Slot i renders
+/// whatever <see cref="SalonMemberPower.CompanyOf"/> reports at index i, and a
+/// company of three Ushers renders as three Ushers. This retires sprint-1
+/// D1's fixed member-to-slot portrait assignment, which silently assumed both.
+///
+/// The Encore gauge lives here now (D3). It was evicted from the overhead slot
+/// by the C4 verdict — overhead means Burst for every character — and re-homes
+/// as the ribbon beneath the arc, so the members visibly stand ON their fuel
+/// and draining to zero visibly dims the stage they stand on. That causality
+/// is the thing the old layout could not show.
+///
+/// Bridge skeleton is unchanged from sprint 1 (Displays dict + IsInstanceValid
+/// staleness + lazy re-Setup + CombatVfxContainer + RemoteTransform2D tracking
+/// + the NCombatUi.Activate postfix), which is what survived the playtest and
+/// what the G1 extraction covers.
 /// </summary>
 public static class SalonVisualsBridge
 {
-    private const string ScenePathRelative = "furina/ui/salon.tscn";
+    private const string ScenePathRelative = "furina/ui/salon_stage.tscn";
 
-    /// <summary>Anchor relative to Furina's creature node origin.</summary>
-    private static readonly Vector2 AnchorOffset = new(-88f, -70f);
+    /// <summary>
+    /// Anchor relative to Furina's creature node origin. The stage sits low
+    /// and to her left; it is wider than the old flank line (three sprites
+    /// plus a ribbon), so the span is deliberately kept inside the creature's
+    /// own 240-wide bounds box to stay clear of enemy intent positions and
+    /// targeting arrows.
+    /// </summary>
+    private static readonly Vector2 AnchorOffset = new(-104f, -30f);
 
-    private static readonly string[] MemberCardIds =
+    /// <summary>Sprite art per member identity, pck-relative.</summary>
+    private static readonly Dictionary<SalonMember, string> MemberSprites = new()
     {
-        "gentilhomme_usher",
-        "surintendante_chevalmarin",
-        "mademoiselle_crabaletta",
+        [SalonMember.Usher] = "furina/salon/member_usher.png",
+        [SalonMember.Chevalmarin] = "furina/salon/member_chevalmarin.png",
+        [SalonMember.Crabaletta] = "furina/salon/member_crabaletta.png",
     };
 
-    private static readonly Color OccupiedTint = new(1f, 1f, 1f, 1f);
-    private static readonly Color DryTint = new(0.62f, 0.62f, 0.68f, 1f);
-    private static readonly Color EmptyTint = new(1f, 1f, 1f, 0.28f);
-    private static readonly Color BadgePaid = new(0.35f, 0.75f, 1f, 1f);
-    private static readonly Color BadgeDry = new(0.45f, 0.45f, 0.5f, 1f);
+    private static readonly Color ActiveTint = new(1f, 1f, 1f, 1f);
+    private static readonly Color DryTint = new(0.55f, 0.6f, 0.68f, 0.92f);
+    private static readonly Color PoolActive = new(0.62f, 0.85f, 1f, 0.3f);
+    private static readonly Color PoolDry = new(0.5f, 0.55f, 0.62f, 0.14f);
+    private static readonly Color BeamActive = new(0.7f, 0.88f, 1f, 0.12f);
+    private static readonly Color BeamDry = new(0.7f, 0.88f, 1f, 0.03f);
+
+    /// <summary>Ribbon renders full at this many Encore (display only).</summary>
+    private const int RibbonVisualSpan = 20;
+
+    private const float RibbonFullWidth = 180f;
 
     private const string PreviousCountMeta = "kleemod_salon_count";
+    private const string PreviousEncoreMeta = "kleemod_salon_encore";
 
-    private static readonly Dictionary<Player, Node2D> Displays = new();
+    private static readonly TrackedDisplayBridge.Registry<Player> Displays = new();
 
     private static bool _warnedMissingScene;
 
     public static void Setup(NCombatRoom combatRoom, Player player)
     {
         var creature = player.Creature;
-        // Guard mirrors the reference bridge's "player.Character is not
-        // Hexaghost" check (plan D4): non-Furina players never spawn the scene.
+        // Non-Furina players never spawn the stage (mirrors the reference
+        // bridge's is-not-Hexaghost check).
         if (creature == null || player.Character is not IFurinaCharacter)
         {
             return;
@@ -68,57 +91,24 @@ public static class SalonVisualsBridge
 
         DiscardDisplay(player);
 
-        string? scenePath = KleePck.Path(ScenePathRelative);
-        if (scenePath == null)
+        var display = TrackedDisplayBridge.Spawn(
+            combatRoom, ScenePathRelative, ref _warnedMissingScene,
+            "Salon stage disabled");
+        if (display == null)
         {
-            if (!_warnedMissingScene)
-            {
-                _warnedMissingScene = true;
-                MegaCrit.Sts2.Core.Logging.Log.Warn(
-                    $"[{KleeMod.ModId}] {ScenePathRelative} missing from pck; "
-                    + "Salon display disabled");
-            }
             return;
         }
 
-        var display = ResourceLoader
-            .Load<PackedScene>(scenePath)
-            .Instantiate<Node2D>();
-        combatRoom.CombatVfxContainer.AddChildSafely(display);
-
-        for (var i = 0; i < MemberCardIds.Length; i++)
-        {
-            if (display.GetNodeOrNull<TextureRect>($"%Slot{i + 1}Portrait")
-                    is { } portrait
-                && KleeArt.CardPortrait(MemberCardIds[i]) is { } texture)
-            {
-                portrait.Texture = texture;
-            }
-        }
-
-        var creatureNode = combatRoom.GetCreatureNode(creature);
-        if (creatureNode != null)
-        {
-            var anchor = new RemoteTransform2D
-            {
-                Position = AnchorOffset,
-                UpdateRotation = false,
-                UpdateScale = false,
-                UseGlobalCoordinates = true,
-            };
-            creatureNode.AddChildSafely(anchor);
-            anchor.RemotePath = anchor.GetPathTo(display);
-        }
-
-        Displays[player] = display;
-        RefreshDisplay(display, creature, allowPop: false);
+        TrackedDisplayBridge.Track(combatRoom, creature, display, AnchorOffset);
+        Displays.Set(player, display);
+        RefreshDisplay(display, creature, animate: false);
     }
 
     /// <summary>
-    /// Re-read Salon count + dry state and redraw. Call sites: the Deploy
-    /// funnel (same-resolution composition changes) and
-    /// FurinaResources.SyncMeters (every Furina display sync moment, which
-    /// keeps the dry badge honest as Encore moves).
+    /// Re-read company, dry state and Encore, then redraw. Call sites are the
+    /// Funnel Contract's own funnels: SalonMemberPower.Deploy (the single
+    /// composition funnel) and the Encore gain/spend/absorb trio, plus
+    /// FurinaResources.SyncMeters for the every-sync dry check.
     /// </summary>
     public static void Refresh(Creature? creature)
     {
@@ -144,68 +134,72 @@ public static class SalonVisualsBridge
             }
         }
 
-        RefreshDisplay(display, creature, allowPop: true);
+        RefreshDisplay(display, creature, animate: true);
     }
 
-    public static void DiscardDisplay(Player player)
-    {
-        if (Displays.TryGetValue(player, out var old)
-            && GodotObject.IsInstanceValid(old))
-        {
-            old.QueueFree();
-        }
-        Displays.Remove(player);
-    }
+    public static void DiscardDisplay(Player player) => Displays.Discard(player);
 
-    private static Node2D? GetDisplay(Player player)
-    {
-        var display = Displays.GetValueOrDefault(player);
-        if (display != null && GodotObject.IsInstanceValid(display))
-        {
-            return display;
-        }
+    private static Node2D? GetDisplay(Player player) => Displays.Get(player);
 
-        Displays.Remove(player);
-        return null;
-    }
+    private static Texture2D? SpriteFor(SalonMember member) =>
+        MemberSprites.TryGetValue(member, out var relative)
+        && KleePck.Path(relative) is { } path
+            ? ResourceLoader.Load<Texture2D>(path)
+            : null;
 
     private static void RefreshDisplay(
-        Node2D display, Creature creature, bool allowPop)
+        Node2D display, Creature creature, bool animate)
     {
-        int count = SalonMemberPower.Count(creature);
-        bool dry = FurinaResources.Encore(creature)
-                   < SalonConstants.TickEncoreCost;
+        var company = SalonMemberPower.CompanyOf(creature);
+        int encore = FurinaResources.Encore(creature);
+        bool dry = encore < SalonConstants.TickEncoreCost;
 
-        int previous = display.HasMeta(PreviousCountMeta)
+        int previousCount = display.HasMeta(PreviousCountMeta)
             ? (int)display.GetMeta(PreviousCountMeta)
             : 0;
-        display.SetMeta(PreviousCountMeta, count);
+        display.SetMeta(PreviousCountMeta, company.Count);
 
         var anim = display.GetNodeOrNull<AnimationPlayer>("%AnimationPlayer");
         var popped = false;
+
         for (var i = 0; i < SalonConstants.MemberSlots; i++)
         {
-            var slot = display.GetNodeOrNull<Node2D>($"%Slot{i + 1}");
-            if (slot == null)
+            bool occupied = i < company.Count;
+            var sprite = display.GetNodeOrNull<Sprite2D>($"%Sprite{i + 1}");
+            if (sprite != null)
             {
-                continue;
+                // Identity is read per SLOT from state, every refresh —
+                // duplicates render as duplicates, and an out-of-order deploy
+                // cannot desync the stage from the company.
+                sprite.Texture = occupied ? SpriteFor(company[i]) : null;
+                sprite.Visible = occupied && sprite.Texture != null;
+                sprite.Modulate = dry ? DryTint : ActiveTint;
             }
 
-            bool occupied = i < count;
-            slot.Modulate = occupied
-                ? (dry ? DryTint : OccupiedTint)
-                : EmptyTint;
-
-            if (display.GetNodeOrNull<Panel>($"%Slot{i + 1}Badge") is { } badge)
+            // Empty slot = ghost outline on the stage floor (the surviving
+            // sprint-1 idea, restyled to the stage language).
+            if (display.GetNodeOrNull<ColorRect>($"%Ghost{i + 1}") is { } ghost)
             {
-                badge.Visible = occupied;
-                badge.Modulate = dry ? BadgeDry : BadgePaid;
+                ghost.Visible = !occupied;
             }
 
-            if (allowPop && occupied && i >= previous && anim != null)
+            if (display.GetNodeOrNull<ColorRect>($"%Pool{i + 1}") is { } pool)
+            {
+                pool.Visible = occupied;
+                pool.Color = dry ? PoolDry : PoolActive;
+            }
+
+            if (display.GetNodeOrNull<ColorRect>($"%Beam{i + 1}") is { } beam)
+            {
+                beam.Visible = occupied;
+                beam.Color = dry ? BeamDry : BeamActive;
+            }
+
+            if (animate && occupied && i >= previousCount && anim != null)
             {
                 // One AnimationPlayer: a multi-member deploy queues its pops
-                // into a short cascade instead of cutting the first one off.
+                // into a short cascade instead of cutting the first one off
+                // (the sprint-1 behaviour, kept).
                 if (popped)
                 {
                     anim.Queue($"slot{i + 1}_pop");
@@ -216,6 +210,39 @@ public static class SalonVisualsBridge
                     popped = true;
                 }
             }
+        }
+
+        RefreshRibbon(display, encore, anim, animate);
+    }
+
+    /// <summary>
+    /// D3's Encore ribbon: the members stand on their fuel. Draining to zero
+    /// plays the flash and dims the whole stage — the overdraw moment, shown
+    /// as a consequence rather than as a number changing somewhere else.
+    /// </summary>
+    private static void RefreshRibbon(
+        Node2D display, int encore, AnimationPlayer? anim, bool animate)
+    {
+        if (display.GetNodeOrNull<ColorRect>("%RibbonFill") is { } fill)
+        {
+            float pct = Mathf.Clamp(encore / (float)RibbonVisualSpan, 0f, 1f);
+            fill.Size = new Vector2(RibbonFullWidth * pct, fill.Size.Y);
+        }
+
+        if (display.GetNodeOrNull<Label>("%RibbonLabel") is { } label)
+        {
+            label.Text = encore.ToString();
+        }
+
+        int previous = display.HasMeta(PreviousEncoreMeta)
+            ? (int)display.GetMeta(PreviousEncoreMeta)
+            : encore;
+        display.SetMeta(PreviousEncoreMeta, encore);
+
+        if (animate && previous > 0 && encore <= 0 && anim != null)
+        {
+            anim.Stop();
+            anim.Play("overdraw");
         }
     }
 }

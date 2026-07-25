@@ -91,6 +91,12 @@ public static class SpotlightSystem
         var moved = Resource<SpotlightMovedResource>(creature);
         if (moved != null) moved.Amount = 1;
 
+        // Animation sprint 2, F1. Deliberately placed AFTER the early-out
+        // above, so the beam marks an actual designation and not a re-assert
+        // of the mode already in force. This is the single designation funnel
+        // (Funnel Contract §3), so one call here covers every entry point.
+        Vfx.KleeCombatVfx.SpawnSpotlightShine(creature);
+
         foreach (var old in creature.Powers
                      .Where(power => power is CenterStagePower
                                      or GuestCastPower)

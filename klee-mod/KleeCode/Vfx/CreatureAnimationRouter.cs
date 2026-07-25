@@ -7,8 +7,15 @@ namespace KleeMod.Vfx;
 
 /// <summary>
 /// Routes the game's creature animation triggers into an AnimationTree that
-/// lives INSIDE a convention combat scene (animation sprint 1, Track A
-/// plumbing; Track B ships the first tree).
+/// lives INSIDE a convention combat scene.
+///
+/// SCOPE: this serves EVERY modded creature whose visuals carry an
+/// %AnimationTree — it has never been Klee-specific, and it was renamed from
+/// KleeAnimationRouter in animation sprint 2 (G2) once Furina's rig became the
+/// second one it drives with zero code changes. Nothing here knows or cares
+/// which character it is routing for; a third character needs only a scene.
+/// (Introduced as animation sprint 1 Track A plumbing; Track B shipped the
+/// first tree.)
 ///
 /// Why a Harmony postfix pair and not a scene script: the game only animates
 /// through <c>_spineAnimator</c>, which NCreature builds solely when
@@ -25,7 +32,7 @@ namespace KleeMod.Vfx;
 /// handful of times per action, so there is nothing to cache and no
 /// staleness class to manage.
 /// </summary>
-internal static class KleeAnimationRouter
+internal static class CreatureAnimationRouter
 {
     /// <summary>
     /// Game trigger -> AnimationTree state. The scene contract is exactly the
@@ -79,7 +86,7 @@ internal static class NCreature_SetAnimationTrigger_AnimationTreeRoute
 {
     [HarmonyPostfix]
     public static void Postfix(NCreature __instance, string trigger)
-        => KleeAnimationRouter.Route(__instance, trigger);
+        => CreatureAnimationRouter.Route(__instance, trigger);
 }
 
 /// <summary>
@@ -92,5 +99,5 @@ internal static class NCreature_StartDeathAnim_AnimationTreeRoute
 {
     [HarmonyPostfix]
     public static void Postfix(NCreature __instance)
-        => KleeAnimationRouter.Route(__instance, "Dead");
+        => CreatureAnimationRouter.Route(__instance, "Dead");
 }
