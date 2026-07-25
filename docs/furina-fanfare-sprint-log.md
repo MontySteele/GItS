@@ -15,12 +15,14 @@ runs alongside from day one.
 > pass rather than being chased from inside this sprint. Full account in
 > *Sprint close-out* at the end of this log.
 >
-> **Re-confirmed under RUNTEMPLATE_VERSION 6** (the map rework, merged
-> `94c8e91`, which archives every number measured here). Payoff reach did not
-> move (1.99 → 1.85 cards per deck) and the run winrate did not move (1.3% →
-> 1.3%), while gate (1)'s act-1 limb flipped to a pass on its own and salon
-> rose to 17.8%. The world changed, fanfare did not. See *Post-merge ghost
-> check* — the null was tested, not merely asserted.
+> **Re-confirmed twice, under RUNTEMPLATE_VERSION 6 and again under 7** (the
+> map rework, merged `94c8e91` and `5828cd0`; each bump archives every number
+> measured here). Fanfare's run winrate is **1.3% in all three worlds**, and
+> payoff reach has measured 1.99 / 1.85 / 1.87 cards per deck — while gate
+> (1)'s act-1 limb flipped to a pass on its own and salon climbed 12.5% →
+> 18.5%. The world kept moving; fanfare did not. See *Post-merge ghost check*
+> and its v7 re-run — the null was tested twice, not merely asserted, and the
+> registered reopening condition was not met either time.
 
 ---
 
@@ -1019,3 +1021,38 @@ two different run templates.
 Unchanged in substance from the pre-merge reading. The sprint closes as
 ruled, the resource rework ships, and draft reach goes to the design stage
 with one more piece of evidence than it had.
+
+## Re-confirmed again under RUNTEMPLATE_VERSION 7 (2026-07-25)
+
+The map branch landed a second bump before closing — acts 2–3 get event
+pools, plus two valuation fixes its own commit message says "move act-1 runs
+too". That archives the v6 ghost check above, so it was re-run rather than
+left to assert a v6 number inside a v7 world. Same command, same 600 runs,
+same seed 11, route `hunter`.
+
+| arm | win | act-1 | payoffs/deck | reach | v6 comparison |
+|---|---|---|---|---|---|
+| fanfare | **1.3%** | 54.8% | 1.87 / 20.0 | 9.3% | 1.3% / 53.8% / 1.85 |
+| salon | **18.5%** | 62.2% | 1.14 / 23.4 | 4.9% | 17.8% / 60.7% |
+| spotlight | 2.3% | 64.5% | 0.83 / 22.8 | 3.6% | 2.2% / 63.8% |
+
+**Unchanged in every respect that matters.** Fanfare's run winrate is 1.3%
+for the third consecutive run template (v5, v6, v7). Payoff reach is 1.87 of
+a 20.0-card deck — it has now been measured at 1.99, 1.85 and 1.87 across
+three worlds, one of which was built specifically to fix instrumentation
+errors. `warmup_act`, the card F-B3 buffed, moved from 0.0% to 0.2% of decks.
+
+Salon rose again (17.8% → 18.5%) and spotlight held. The pattern from the v6
+check repeats exactly: the world keeps moving, the other two archetypes keep
+noticing, and fanfare does not.
+
+The close-out's reopening condition has now been tested twice and not met
+either time. **It is not reopened.** Nothing further should be spent
+re-measuring this null; the next measurement worth taking is of a *fixed*
+`core_complete("fanfare")`, in the draft-reach pass.
+
+One instrument fix made while here: `exp_furina_ghostcheck.py` printed a
+hard-coded "RUNTEMPLATE_VERSION 6" banner, which was wrong exactly one bump
+after it was written. It now reads `C.RUNTEMPLATE_VERSION`. A script whose
+whole job is catching a world that moved under a measurement must not name
+its own world by hand.
