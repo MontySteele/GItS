@@ -56,9 +56,19 @@ SUFFIX = "+"
 # catalytic_conversion LEFT this set with R37 (2026-07-20): its upgrade is
 # now {innate: true}, which IS sim-expressible -- the R24 no-unmeasured-
 # upgrades law is satisfied rather than waived.
-UNAPPLIABLE = frozenset({
-    "nicole_celestial_gift",  # CELESTIAL_GIFT_BLOCK is a constant
-})
+# nicole_celestial_gift LEFT this set with G-C2 (2026-07-25), the same way
+# catalytic_conversion left it with R37: its delta moved from
+# {block_per_turn: +2} -- unexpressible, because CELESTIAL_GIFT_BLOCK is a
+# constant rather than a card field -- to {buff: +2}, which the `buff` grammar
+# already binds to the first top-level apply_power. The R24 no-unmeasured-
+# upgrades law is satisfied rather than waived.
+#
+# Kept as an empty set rather than deleted, per the standing curated-set
+# discipline: the invariant "every draftable card has an applicable upgrade"
+# is now asserted positively by tools/lint_upgrade_coverage.py, and the next
+# unexpressible delta has somewhere to be named instead of being tolerated
+# silently.
+UNAPPLIABLE: frozenset[str] = frozenset()
 
 
 @lru_cache(maxsize=1)

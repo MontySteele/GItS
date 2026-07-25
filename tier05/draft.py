@@ -265,9 +265,15 @@ def core_complete(deck: list[Card], archetype: str) -> bool:
     if archetype == "fanfare":
         # Furina's starter already supplies the first half in practice, but
         # keep the definition honest for synthetic/modified decks.
+        #
+        # THREE limbs since DRAFTER_VERSION 10 (G-E1). Generation and floor
+        # are both inputs; without the reader limb this returned True for a
+        # deck that moved a meter nothing ever cashed.
         return (
             _fanfare_generation_total(deck) >= FANFARE_GENERATION_COVERAGE
             and _fanfare_floor_total(deck) >= FANFARE_FLOOR_COVERAGE
+            and sum(1 for c in deck if _reads_fanfare(c))
+            >= FANFARE_PAYOFF_COVERAGE
         )
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))
@@ -290,7 +296,15 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
             _fanfare_generation_total(deck) / FANFARE_GENERATION_COVERAGE,
         )
         baseline = min(1.0, _fanfare_floor_total(deck) / FANFARE_FLOOR_COVERAGE)
-        return (generation + baseline) / 2
+        # DRAFTER_VERSION 10: the reader limb, weighted equally with the two
+        # input limbs. This is the half of the fix with teeth -- progress
+        # feeds score_offer's +3.0 core-advance bonus, so a fanfare deck now
+        # actually reaches for a payoff instead of only for inputs.
+        payoff = min(
+            1.0,
+            sum(1 for c in deck if _reads_fanfare(c)) / FANFARE_PAYOFF_COVERAGE,
+        )
+        return (generation + baseline + payoff) / 3
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))
     return min(1.0, on_plan / C.DRAFT_CORE_SIZE)
@@ -461,6 +475,20 @@ FANFARE_GENERATION_COVERAGE = 5
 # single-card threshold, matching the converter predicate it replaces --
 # core_complete asks whether the plan is ONLINE, not whether it is finished.
 FANFARE_FLOOR_COVERAGE = 5.0
+# DRAFTER_VERSION 10 (G-E1): the third limb, and the one whose ABSENCE was the
+# instrument bug. Generation and floor are both INPUTS -- they move the meter
+# and they raise its baseline -- and a plan built entirely of inputs reads a
+# stat nothing cashes. Without this limb `core_complete("fanfare")` reported
+# 85.7-86.0% online while the average deck held 1.87 readers in 20 cards, and
+# the fanfare sprint's close-out banned measuring anything against it until it
+# was fixed.
+#
+# ONE, not more. `core_complete` asks whether the plan is ONLINE, not whether
+# it is finished -- the same low single-card bar the other two limbs use. The
+# question of how many readers a fanfare deck SHOULD hold is exactly the
+# draft-reach question, and it belongs to the pool-sweep pass with this
+# instrument in hand, not to the instrument itself.
+FANFARE_PAYOFF_COVERAGE = 1
 FANFARE_FIRST_FLOOR = 2.0     # was FANFARE_FIRST_CONVERTER
 FANFARE_LATER_FLOOR = 1.5     # was FANFARE_LATER_CONVERTER
 FANFARE_READER_VALUE = 1.0

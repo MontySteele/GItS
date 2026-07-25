@@ -104,4 +104,20 @@ diona_icy_paws:            {block: +2}
 prune_witch_hunt:          {spark: +1}             # 1->2; Swirl/fallback Block stay fixed (personal pool)
 albedo_solar_isotoma:      {duration: +1}          # 3->4 turns
 durin_witchs_flame:        {power_amount: +2}       # consumed-Pyro damage 6->8; Burst rider stays 3/aura
-nicole_celestial_gift:     {block_per_turn: +2}    # 4->6; attack bonus stays +2
+nicole_celestial_gift:     {buff: +2}    # attack bonus 2->4; block stays 4. PROPOSED (G-C2).
+                                         # WAS {block_per_turn: +2} (4->6 block), which was
+                                         # UNEXPRESSIBLE in both layers: CELESTIAL_GIFT_BLOCK is a
+                                         # tier0 constant and CompanionConstants.CelestialGiftBlock is
+                                         # a C# const, so neither the sim nor the codegen could apply
+                                         # it. The card was a dead campfire choice in the live build --
+                                         # named by the 2026-07-25 playtest, and the reason
+                                         # tools/lint_upgrade_coverage.py exists.
+                                         # This moves the delta onto the half of the card that IS a
+                                         # per-card field, which the `buff` grammar already binds to
+                                         # the first top-level apply_power. Same upgrade budget, same
+                                         # card identity (a buffer), zero new plumbing.
+                                         # The higher-fidelity alternative -- make the block a card
+                                         # field and thread it through effects.py, the upgrade
+                                         # grammar, the generator and CelestialGiftPower -- is a real
+                                         # four-layer change and is NOT conventional-delta work; it is
+                                         # listed for [USER] at red-pen rather than taken here.

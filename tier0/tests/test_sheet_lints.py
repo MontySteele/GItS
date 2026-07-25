@@ -34,6 +34,24 @@ def test_kokomi_decksize_grammar():
     assert res.returncode == 0, res.stdout + res.stderr
 
 
+def test_every_draftable_card_can_be_upgraded():
+    """G-C1. A card with no upgrade is a dead campfire choice.
+
+    Two layers, because the 2026-07-25 playtest's actual defect was in the
+    second: a card can have a perfectly good sheet delta that the GENERATOR
+    cannot express, in which case the sim upgrades it and the live game does
+    not. A lint that only checked the sheet would have reported all-clear on
+    exactly the card that was reported broken.
+
+    Wired here rather than left as a tool so that a missing upgrade is red,
+    not a playtest note.
+    """
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_upgrade_coverage.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
 def test_card_names_are_unique():
     """Display names: unique internally, and clear of docs/reserved-card-names.txt.
 
