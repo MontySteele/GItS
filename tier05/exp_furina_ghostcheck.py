@@ -36,6 +36,7 @@ import collections
 import statistics
 import sys
 
+from tier0 import constants as C
 from tier0.content import loader
 from tier05 import draft, fanfare_telemetry, model
 
@@ -94,7 +95,12 @@ def main(argv: list[str] | None = None) -> int:
                 jobs = value
 
     print("=" * 78)
-    print(f"FURINA GHOST CHECK under RUNTEMPLATE_VERSION 6 — {runs} runs/arm, "
+    # Read the stamp, never hard-code it. This script exists to catch a world
+    # changing under a measurement, so a banner that names a version by hand
+    # is the one line guaranteed to be wrong the next time it matters -- and
+    # it was, one bump after it was written.
+    print(f"FURINA GHOST CHECK under RUNTEMPLATE_VERSION "
+          f"{C.RUNTEMPLATE_VERSION} — {runs} runs/arm, "
           f"seed {SEED}, route {route_name}")
     print("  Archive comparison (RUNTEMPLATE 5, seed 11): fanfare 1.3% win / "
           "44.0% act-1,")
