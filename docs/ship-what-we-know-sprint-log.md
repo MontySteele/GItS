@@ -273,4 +273,80 @@ real guard is the Python-side constant comparison.
 
 **No winrate bar, by design.** This track ships behaviour, not balance.
 
-<!-- G-B findings appended below. -->
+## G-B — Co-op correctness
+
+### G-B1 — Best Friends Forever
+
+Root cause was worse than "the result is never filtered by `Owner`".
+`CompanionPlays` stored a bare `List<ModelId>`, so ownership was not merely
+unfiltered — it was **unrecoverable**. No amount of filtering at the call site
+could have fixed it.
+
+Fixed at the tracker: entries are now `(Player Owner, ModelId Id)`,
+`PlayedThisCombat` takes the owner and filters on it, and the generator emits
+`PlayedThisCombat(CombatState!, Owner)`.
+
+Uniqueness is now **per owner**, deliberately. If both players play Oz, both
+should get an Oz back; deduplicating across owners would have fixed the leak by
+creating a subtler one — the second player's copy silently vanishing. Sheet
+text unchanged, because `copy_companions_played_this_combat` always meant the
+owner's.
+
+### G-B2 — the bug class
+
+Every C# consumer of a combat-wide tracker that feeds a card effect.
+
+| Tracker | Consumers | Verdict |
+|---|---|---|
+| `CompanionPlays.PlayedThisCombat` | Best Friends Forever | **was needs-fix → FIXED (G-B1)** |
+| `BombPower.DetonationsThisCombat` | The Big One (`grand_finale`) bonus formula | **NEEDS FIX — blocked, see below** |
+| `ReactionEffects.TotalResolved` (delta pattern) | Boom Goes the Dynamite, Perfect Timing, Prune (Witch Hunt), The Final Verdict | **NEEDS RULING** |
+| `ReactionEffects.ReactionTriggeredThisTurn` | Chevreuse (Vanguard's Valor) | **NEEDS RULING** |
+| `DemolitionPowers._procsThisTurn` | detonation splash cap | correctly scoped — instance field on a Power, and a Power has an owner |
+| `SpotlightSystem.MovedThisTurn` / `PlaysThisTurn` | selector payoffs, Standing Ovation | correctly scoped — keyed per `Creature` |
+| `CompanionCostThisTurnPower` | Friendly Visit | correctly scoped — already tests `card.Owner?.Creature != Owner` |
+
+**Why the detonation counter is not fixed here.** `BombCharge` is
+`record struct BombCharge(int Damage, int RoundPlaced)` — it does not carry who
+placed it, and bombs live on *enemies*, so the detonating `BombPower`'s owner is
+the enemy, not a player. Attributing a detonation to a player needs a schema
+change to the charge plus a placer identity threaded through
+`BombPower.ModifyAll` / `MoveAllTo`. That is a real change with real blast
+radius, and this sprint's mandate is explicitly not to do design work inside a
+census. Flagged, not started. **Impact is Klee-plus-Klee only** — a Furina
+partner places no bombs — so it is narrower than G-B1 was.
+
+**Why the reaction counters need a ruling rather than a fix.** `TotalResolved`
+is a single global monotonic counter, and `MarkTurnStart` fires on a *shared*
+broadcast. So in co-op, your partner's Overload satisfies your Chevreuse, and
+their reaction landing inside your card's resolution window can satisfy your
+Boom Goes the Dynamite. Whether that is a bug depends on a design question this
+sprint may not answer: **is a reaction a team event or a personal one?** There
+is a defensible reading in which Chevreuse's *"if a Reaction triggered this
+turn"* is a co-op payoff working as intended, and a defensible reading in which
+it is the same leak as G-B1. [USER] ruling; then it is a fix or a comment.
+
+### G-B3 — the regression, and what it cannot be
+
+The sprint asked for a co-op-shaped unit test with two owners and interleaved
+plays. **That test cannot be written**, and the reason is the finding the
+sprint asked to be recorded explicitly:
+
+> **Co-op has no sim backstop.** The logic is C#, there is no C# test project,
+> and tier 0.5 models exactly one seat. There is no runtime, on either side of
+> the language boundary, in which two owners can play cards at all. G-B1 was
+> found by two people playing the game, and nothing in this repository could
+> have found it.
+
+So `tier0/tests/test_coop_ownership.py` is a **structural** tripwire, not an
+execution test: it asserts the tracker records an owner, that the query cannot
+be asked without one, that uniqueness is per-owner, and — the one that actually
+earns its keep — that **no call site anywhere asks the combat-wide question**.
+That catches how this bug would come back: a new consumer copying the old
+one-argument shape, or a generator branch nobody updated. It does not catch a
+filter that is present and wrong.
+
+Building a second seat into tier 0.5 is a design-stage question and is named in
+the sprint's non-goals. It is not started.
+
+<!-- G-C findings appended below. -->
