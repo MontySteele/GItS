@@ -29,36 +29,70 @@ public static class CompanionConstants
 }
 
 /// <summary>
-/// Which companions have been played this combat, unique in first-play
-/// order (tier0 companions_played + dict.fromkeys) -- Best Friends Forever
-/// reads it. Keyed to the combat-state instance, the
+/// Which companions have been played this combat, PER OWNER, unique in
+/// first-play order (tier0 companions_played + dict.fromkeys) -- Best Friends
+/// Forever reads it. Keyed to the combat-state instance, the
 /// DetonationsThisCombat pattern: a fresh combat starts empty with no
 /// reset hook. Recorded from KleeElementalHooks.BeforeCardPlayed
 /// (IsFirstInSeries = once per play, the sim's play_card append site).
+///
+/// OWNERSHIP, fixed 2026-07-25 (G-B1). This list used to be combat-wide and
+/// unfiltered, so in co-op Best Friends Forever copied the PARTNER's
+/// companions as well as your own -- reported from the 2026-07-25 A0 playtest
+/// as "pulled the co-op partner's cards". The sheet text never meant that; the
+/// yaml op `copy_companions_played_this_combat` always meant the owner's, and
+/// tier 0.5 models a single seat so no sim run could ever have disagreed.
+///
+/// This is the shape of the whole bug class: a "this combat" tracker is
+/// correct in solo and wrong in co-op, and solo is the only configuration the
+/// instruments can see. See the G-B2 census in
+/// docs/ship-what-we-know-sprint-log.md for the other consumers.
+///
+/// Uniqueness is PER OWNER, not global: if both players play Oz, both should
+/// get an Oz back. Deduplicating across owners would fix the leak by creating
+/// a subtler one.
 /// </summary>
 public static class CompanionPlays
 {
     private static ICombatState? _combat;
-    private static readonly List<ModelId> _played = new();
+    private static readonly List<(Player Owner, ModelId Id)> _played = new();
 
     public static void Record(ICombatState? combatState, CardModel card)
     {
         if (combatState == null) return;
+        // No owner means nothing can ever read this entry back -- every reader
+        // filters by owner -- so dropping it is the honest move rather than
+        // filing it under a null that would match nobody.
+        var owner = card.Owner;
+        if (owner == null) return;
         if (!ReferenceEquals(combatState, _combat))
         {
             _combat = combatState;
             _played.Clear();
         }
-        if (!_played.Contains(card.Id))
+        if (!_played.Any(entry => ReferenceEquals(entry.Owner, owner)
+                                  && entry.Id == card.Id))
         {
-            _played.Add(card.Id);
+            _played.Add((owner, card.Id));
         }
     }
 
-    public static IReadOnlyList<ModelId> PlayedThisCombat(ICombatState combatState)
-        => ReferenceEquals(combatState, _combat)
-            ? _played
-            : (IReadOnlyList<ModelId>)System.Array.Empty<ModelId>();
+    /// <summary>
+    /// The companions <paramref name="owner"/> played this combat, in
+    /// first-play order. Never another player's.
+    /// </summary>
+    public static IReadOnlyList<ModelId> PlayedThisCombat(
+        ICombatState combatState, Player? owner)
+    {
+        if (!ReferenceEquals(combatState, _combat) || owner == null)
+        {
+            return System.Array.Empty<ModelId>();
+        }
+        return _played
+            .Where(entry => ReferenceEquals(entry.Owner, owner))
+            .Select(entry => entry.Id)
+            .ToList();
+    }
 }
 
 /// <summary>

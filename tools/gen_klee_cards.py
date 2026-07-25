@@ -2427,8 +2427,11 @@ def build_body(
                 override_line = (
                     f"            playedToken.EnergyCost.SetThisCombat({int(eff['cost_override'])});\n"
                 )
+            # G-B1: owner-scoped. The tracker is combat-wide storage, so the
+            # query has to name whose plays it wants -- unfiltered, this card
+            # copied the co-op partner's companions.
             lines.append(
-                "foreach (var companionId in CompanionPlays.PlayedThisCombat(CombatState!))\n"
+                "foreach (var companionId in CompanionPlays.PlayedThisCombat(CombatState!, Owner))\n"
                 "        {\n"
                 "            var playedToken = CombatState!.CreateCard(\n"
                 "                ModelDb.GetById<CardModel>(companionId), Owner);\n"
