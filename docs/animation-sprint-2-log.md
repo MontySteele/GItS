@@ -409,3 +409,162 @@ regression — but do not run the suite alongside a build.
   opposite case is real at badge size, and the family relationship may be what
   a player needs to read first. Collapsing is a one-line change. Recorded as a
   choice, not decided.
+
+---
+
+# Playtest 1 (2026-07-25) — three defects from the live co-op run
+
+First [USER] playtest of the deployed sprint-2 build (Furina + Klee co-op, pck
+`20260724-210020+7260590`, confirmed from the run's own godot.log). Verdict on
+the sprint as a whole was "graphical quality is much improved"; three specific
+defects came back. All three are fixed below. None of the three was visible to
+any existing gate, which is the through-line worth keeping.
+
+## 1. "Ovation gauge had no numbers"
+
+The Encore ribbon under the Salon stage. The number was NOT missing — the
+bridge sets `%RibbonLabel` on every refresh and always has. It was being
+DRAWN AND THEN COVERED.
+
+The ribbon's value label hung *below* the ribbon at stage-local y 26..44. With
+the stage anchored at creature-relative (-104, -30) that put the label at
+creature y -4..+14 — under her feet, in the band `NCreatureStateDisplay` owns.
+That band is not ours to draw in. Decompiling the layout confirms the collision
+is structural, not a near miss:
+
+- `NHealthBar.UpdateLayoutForCreatureBounds` spans the HP bar across the full
+  bounds width, and Furina's `%Bounds` is 240 wide.
+- The same method pins the block badge to `bounds.GlobalPosition.X - halfWidth`
+  — the LEFT edge of that box. The Salon stage sits at x -104. They are the
+  same piece of screen.
+
+Fix, both halves in this pass: the label moved up ONTO the ribbon
+(`salon_stage.tscn`, y 8..28, centered, font 12 -> 14, outline 4 -> 5), and the
+whole stage lifted from y -30 to y -52 so no part of it reaches the state
+display's band. Both are layout changes and both feed **D5**, which is still
+open — the capture should now include a shot with Encore > 0 so the number is
+in frame.
+
+Why no gate caught it: every check we have asks whether a thing was *set*.
+`%RibbonLabel` was set. Occlusion is a property of two subtrees that never
+reference each other, and only one of them is ours.
+
+## 2. Character icon shifted off its square
+
+`character_icon.tscn` (both characters) was authored as a bare `TextureRect` at
+a hardcoded 88x88 with default top-left anchors and zero offsets. That only
+lands correctly if the game's slot happens to be exactly 88x88 with the same
+origin. `Character.Icon` returns a `Control` that the game parents into its own
+box, so the box's size is the game's business, not ours.
+
+Fixed to full-rect anchors, so the icon adopts whatever box it is handed;
+`stretch_mode = 5` (KEEP_ASPECT_CENTERED) keeps the art square inside it. A
+`custom_minimum_size` of 88x88 is the floor — if a slot ever hands us a
+zero-size parent, the icon stays 88x88 instead of collapsing to invisible,
+which is the failure mode full-rect anchors introduce if you stop there.
+
+Note the producer: these two scenes are heredocs in `tools/build_pck.ps1`, NOT
+files in `pck-src`. Editing the copies under `dist/pck-work` would have been
+silently reverted on the next build. Same one-producer-per-out-path rule the
+Track E follow-up wrote down, hit from the other direction.
+
+## 3. Characters do not turn to face their target
+
+Reported against the Act 2 Kaiser Crab. That encounter is the one that breaks
+the assumption: `KaiserCrabBoss.FullyCenterPlayers` is `true` and it fills
+slots `crusher` and `rocket` on BOTH sides of the centered party. Attacking the
+left one, the whole party lunged right.
+
+This is a GAP, not a signal we failed to consume. Decompiling v0.107.1,
+**nothing in the base game mirrors a creature**: `NCreature`,
+`NCreatureVisuals`, `CreatureAnimator` and `NCombatRoom.PositionPlayersAndPets`
+carry no facing, flip, or direction concept anywhere. Every base character is a
+Spine skeleton drawn facing right, and with enemies always to the right that
+has been sufficient. So there is no hook to consume — the behaviour has to be
+built, and it is ours to build because the rigs are ours.
+
+Shipped as `KleeCode/Vfx/CreatureFacing.cs`. Three decisions worth keeping:
+
+- **The mirror is on a new `%Facing` node, not on `%Rig`.** The rig is
+  animated, and `Visuals/Facing/Rig:position` carries the attack lunge. A
+  node's own position track is expressed in its PARENT's space, so mirroring
+  the rig would flip the art and leave the lunge travelling right — a moonwalk.
+  The pivot goes above the animated node so the travel mirrors too. Both combat
+  scenes were re-parented and all track paths rewritten (`Visuals/Rig` ->
+  `Visuals/Facing/Rig`; 29 tracks Furina, 25 Klee).
+- **Not `Visuals.Scale`.** NCreature owns that — `ScaleTo`,
+  `SetDefaultScaleTo`, `OstyScaleToSize` all write it and `UpdateBounds` reads
+  it back to place the hitbox and intent. A sign flip there inverts the hitbox.
+- **The hook is a prefix on `AttackCommand.Execute`, not on the damage
+  funnel.** `CreatureCmd.Damage`'s six-argument overload is the single funnel
+  every damage path reaches (all nine overloads delegate to it) and it carries
+  both dealer and targets, so it looks like the obvious choice — but `Execute`
+  awaits `CreatureCmd.TriggerAnim` BEFORE dealing damage. Turning there would
+  flip the sprite at the moment of impact, after the character had already
+  lunged the wrong way. That is worse than not turning at all. The cost of
+  turning at wind-up instead is one reflected private method
+  (`AttackCommand.GetPossibleTargets`), cached, with a one-shot warning and a
+  no-op fallback if a future version removes it.
+
+Facing is the mean of the live targets' x, not `targets[0]`: a centered
+encounter is precisely where an AoE spans both sides, and picking the first
+would make the turn depend on iteration order rather than on where the damage
+goes. A 24px dead zone keeps self-targets and stacked creatures from twitching.
+
+Scoped by construction: `%Facing` exists only in our convention scenes, so
+every base creature and every other mod's is untouched and the lookup returns
+null.
+
+**[USER] ruling, 2026-07-25 — accepted as first pass.** "As long as the art
+flips 180 (so you can tell which enemy you're pointed at), I think that passes
+for a first-pass attempt." A horizontal mirror is what shipped, so the bar is
+met. Two consequences of hooking the attack rather than the targeting cursor,
+both left as-is under this ruling: the turn PERSISTS (she faces the last thing
+she hit; there is no return-to-neutral), and non-damaging plays do not turn her
+at all. Pointing at the hovered target would track intent more tightly at the
+cost of swinging back and forth while the player is still choosing a card —
+not attempted, recorded as the alternative if the crab fight argues for it.
+
+**This one wants a [USER] look**, and it belongs to **B5** rather than being
+its own gate — it changes what the attack animation does. Klee attacking left
+mirrors Dodoco to her other side; whether that reads as "turned around" or as
+"the wrong Klee" is a taste call, and the crab fight is the place to judge it.
+
+## New boot check: a bridge's node contract
+
+All three defects share a shape with the Track E icon gap: a bridge written to
+be inert when its node is missing (`GetNodeOrNull`, no throw) has the right
+runtime posture and the wrong debugging one. A dropped or renamed node turns
+the feature off and looks exactly like "the feature does nothing".
+
+`KleeSceneTelemetry` now carries a `RequiredNodes` list and warns at boot for
+any convention scene missing a node a bridge depends on — `%Facing` and
+`%AnimationTree` in both combat scenes, `%RibbonLabel` in the Salon stage,
+`%ValueLabel` in the shared gauge. Read from `SceneState`, so it stays
+side-effect free and does not instantiate (which would trip BaseLib's
+conversion postfix — the reason that file never instantiates anything).
+
+## Gates
+
+Build 0 errors. `validate` S1-S6 pass. **Not deployed**: the game was running
+during this pass and `deploy.ps1` refuses while it holds the dll. The pck IS
+rebuilt (`20260725-000439+7260590`, 7,083,856 bytes) and carries all three
+scene changes. Run `klee-mod\build\deploy.ps1` from the repo root once the game
+is closed.
+
+`validate` S7 is red on 2 pytest failures in `tier05/tests/test_runner.py`
+(`kurage_traces`). These are NOT from this pass — this pass touched no Python.
+They come from a Kokomi telemetry change that is uncommitted in the working
+tree from a parallel session (`tier05/kurage_telemetry.py` untracked,
+`tier05/runner.py` modified); the failing line is a `+` line in that diff. Left
+alone rather than fixed from here.
+
+## Also found, not fixed: three card arts are missing
+
+The playtest log carries three `No card art at ...` warnings that predate this
+pass: `spotlight_center_stage.png`, `spotlight_guest_cast.png`,
+`confiscated.png`. Those cards are rendering the BETA placeholder. This
+corrects the Track E gap list, which recorded card art as clean — that sweep
+checked that every card RESOLVES a portrait path through the register, which is
+a different question from whether the file is on disk. Needs a plan.tsv row and
+a hunt; not started.

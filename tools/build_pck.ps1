@@ -246,14 +246,26 @@ expand_mode = 1
 stretch_mode = 6
 '@)
 
+# Character.Icon returns a Control that the game parents into its own slot --
+# the box next to HP in the top-left player panel. These were authored at a
+# fixed 88x88 anchored top-left, which only lands correctly if the slot happens
+# to be exactly 88x88 with the same origin; playtest 2026-07-24 reported the
+# icon sitting off its square. Full-rect anchors make the icon adopt whatever
+# box it is given, and KEEP_ASPECT_CENTERED (stretch_mode 5) keeps the art
+# square inside it. custom_minimum_size is the floor: if a slot ever hands us a
+# zero-size parent, the icon stays 88x88 instead of collapsing to invisible.
 [IO.File]::WriteAllText((Join-Path $work 'klee\ui\character_icon.tscn'), @'
 [gd_scene load_steps=2 format=3]
 
 [ext_resource type="Texture2D" path="res://klee/ui/char_icon.png" id="1_tex"]
 
 [node name="KleeIcon" type="TextureRect"]
-offset_right = 88.0
-offset_bottom = 88.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_minimum_size = Vector2(88, 88)
 texture = ExtResource("1_tex")
 expand_mode = 1
 stretch_mode = 5
@@ -266,8 +278,12 @@ mouse_filter = 2
 [ext_resource type="Texture2D" path="res://furina/ui/char_icon.png" id="1_tex"]
 
 [node name="FurinaIcon" type="TextureRect"]
-offset_right = 88.0
-offset_bottom = 88.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_minimum_size = Vector2(88, 88)
 texture = ExtResource("1_tex")
 expand_mode = 1
 stretch_mode = 5

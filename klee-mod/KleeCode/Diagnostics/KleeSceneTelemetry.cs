@@ -42,6 +42,27 @@ internal static class KleeSceneTelemetry
         "furina/vfx/spotlight_shine.tscn",
     };
 
+    /// <summary>
+    /// Node names a scene MUST carry for a C# bridge to find anything, checked
+    /// from SceneState so this stays side-effect free.
+    ///
+    /// These are the silent failures: every bridge here is written to be inert
+    /// when its node is absent (GetNodeOrNull, no throw), which is the right
+    /// runtime posture and the wrong debugging one — a renamed or dropped node
+    /// turns the feature off and looks exactly like "the feature does nothing".
+    /// %Facing is the live example: without it CreatureFacing no-ops and the
+    /// character simply never turns, with nothing in the log to say why.
+    /// </summary>
+    private static readonly (string Scene, string Node)[] RequiredNodes =
+    {
+        ("klee/model/combat.tscn", "Facing"),
+        ("furina/model/combat.tscn", "Facing"),
+        ("klee/model/combat.tscn", "AnimationTree"),
+        ("furina/model/combat.tscn", "AnimationTree"),
+        ("furina/ui/salon_stage.tscn", "RibbonLabel"),
+        ("shared/gauge.tscn", "ValueLabel"),
+    };
+
     public static void LogStatus()
     {
         const string idPath = "res://klee/build_id.tres";
@@ -71,6 +92,33 @@ internal static class KleeSceneTelemetry
                 ? state.GetNodeType(0).ToString()
                 : "unreadable";
             Log.Info($"[{KleeMod.ModId}] convention scene ok: {path} root={root}");
+        }
+
+        foreach (var (relative, node) in RequiredNodes)
+        {
+            var path = "res://" + relative;
+            if (!ResourceLoader.Exists(path))
+            {
+                continue;   // already reported MISSING above; don't say it twice
+            }
+
+            if (ResourceLoader.Load<PackedScene>(path)?.GetState() is not { } state)
+            {
+                continue;
+            }
+
+            var found = false;
+            for (var i = 0; i < state.GetNodeCount() && !found; i++)
+            {
+                found = state.GetNodeName(i) == node;
+            }
+
+            if (!found)
+            {
+                Log.Warn($"[{KleeMod.ModId}] {path} has no node named \"{node}\" — "
+                       + "the bridge that looks for it will silently do nothing. "
+                       + "Rebuild the pck, or the scene lost the node.");
+            }
         }
     }
 }
