@@ -169,6 +169,7 @@ PROFILES = {
 # is the established in-combat pick stream).
 MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_energy",
                   "gain_encore", "spend_encore", "raise_fanfare_cap",
+                  "gain_fanfare_floor",
                   "generate_guest_star",
                   "copy_spotlighted_in_hand",
                   "heal",
@@ -508,7 +509,8 @@ HAND_WRITTEN |= {"sparks_n_splash"}
 #   bombs       -> X-cost bomb count: X_plus_N -> X_plus_(N+val) in tier0;
 #                  codegen renders "X+{Bombs:diff()}" off a Bombs var
 EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "encore",
-                       "encore_cost", "fanfare_cost", "fanfare_cap", "heal",
+                       "encore_cost", "fanfare_cost", "fanfare_cap",
+                       "fanfare_floor", "heal",
                        "bomb_damage", "burst_energy", "cost",
                        "discard", "sparks", "innate", "retain", "bonus", "chance",
                        "conditional_bonus", "condition", "bombs",
@@ -694,7 +696,8 @@ def blocked_reason(
             amt = eff.get("amount")
             if not isinstance(amt, int) and _x_formula_reason(card, amt):
                 return _x_formula_reason(card, amt)
-        if op in {"gain_encore", "spend_encore", "raise_fanfare_cap"}:
+        if op in {"gain_encore", "spend_encore", "raise_fanfare_cap",
+                  "gain_fanfare_floor"}:
             unknown = set(eff) - {"op", "amount"}
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
@@ -1367,6 +1370,12 @@ def build_vars(card: dict) -> list[str]:
         elif op == "raise_fanfare_cap":
             out.append(
                 f'new DynamicVar("FanfareCap", {int(eff["amount"])}m)')
+        elif op == "gain_fanfare_floor":
+            # Always a var, never a literal: BOTH sheet cards carrying this op
+            # have a fanfare_floor upgrade delta, so the new value must render
+            # on the upgraded card. (G-A2.)
+            out.append(
+                f'new DynamicVar("FanfareFloor", {int(eff["amount"])}m)')
         elif op == "heal":
             out.append(f'new DynamicVar("Heal", {int(eff["amount"])}m)')
         elif op in POWER_UPGRADE_OPS and eff is power_upgrade_effect(card):
@@ -1519,6 +1528,13 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "encore_cost": int(card.get("encore_cost", 0)) > 0,
         "fanfare_cost": int(card.get("fanfare_cost", 0)) > 0,
         "fanfare_cap": any(e["op"] == "raise_fanfare_cap" for e in effects),
+        # G-A2. upgrades.py binds this delta to the first TOP-LEVEL
+        # gain_fanfare_floor, so `effects` (not `everywhere`) is the right
+        # scope -- a floor grant nested inside a conditional would not be the
+        # one the sim bumps, and pretending otherwise would silently upgrade
+        # the wrong branch.
+        "fanfare_floor": any(
+            e["op"] == "gain_fanfare_floor" for e in effects),
         "heal": any(e["op"] == "heal" for e in effects),
         "bomb_damage": any(e["op"] == "place_bomb" for e in effects),
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
@@ -2127,6 +2143,11 @@ def build_body(
             lines.append(
                 "FurinaResources.RaiseFanfareCap("
                 "Owner.Creature, DynamicVars[\"FanfareCap\"].IntValue);")
+
+        elif op == "gain_fanfare_floor":
+            lines.append(
+                "FurinaResources.GainFanfareFloor("
+                "Owner.Creature, DynamicVars[\"FanfareFloor\"].IntValue);")
 
         elif op == "heal":
             lines.append(
@@ -2917,6 +2938,16 @@ def build_description(card: dict) -> str:
                 "Increase your [gold]Fanfare[/gold] cap by "
                 "{FanfareCap:diff()} this combat.")
 
+        elif op == "gain_fanfare_floor":
+            # "Baseline", not "floor" or "minimum": the meter's rule text
+            # already says it fades "never below the baseline your Powers have
+            # built", so the card and the meter have to use one word for one
+            # concept. "This combat" is stated because the grant does NOT
+            # persist across fights.
+            parts.append(
+                "Permanently raise your [gold]Fanfare[/gold] baseline by "
+                "{FanfareFloor:diff()} this combat.")
+
         elif op == "heal":
             parts.append("Heal {Heal:diff()} HP.")
 
@@ -3267,6 +3298,10 @@ def build_upgrade(card: dict) -> list[str]:
         lines.append(
             'DynamicVars["FanfareCap"].UpgradeValueBy('
             f'{int(deltas["fanfare_cap"])}m);')
+    if "fanfare_floor" in deltas:
+        lines.append(
+            'DynamicVars["FanfareFloor"].UpgradeValueBy('
+            f'{int(deltas["fanfare_floor"])}m);')
     if "cards" in deltas:
         lines.append(f'DynamicVars["Stash"].UpgradeValueBy({int(deltas["cards"])}m);')
     if deltas.get("remove") == "exhaust":
@@ -3825,6 +3860,7 @@ def _furina_runtime_cluster(card: dict, reason: str) -> str:
             "gain_encore",
             "spend_encore",
             "raise_fanfare_cap",
+            "gain_fanfare_floor",
         }
         or any("fanfare" in str(power) for power in powers)
         or any("fanfare" in str(predicate) for predicate in predicates)

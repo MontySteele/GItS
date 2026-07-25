@@ -17,11 +17,22 @@ FURINA_HAND_WRITTEN = {"let_the_people_rejoice"}
 # skip: an ungenerated card is a card that does nothing in the live game, and
 # that must never be discoverable only by playing it.
 #
-# "The Tide Turns" F-D (the live C# Fanfare package) is HARD-GATED on F-C's
-# tier-0.5 gates. Until those pass, `gain_fanfare_floor` has no C# home, and
-# emitting a call to a method that does not exist would trade a visible
-# deferral for a build break. Released by: F-D.
-FURINA_DEFERRED_TO_FD = {"the_sea_is_my_stage", "lasting_impression"}
+# "The Tide Turns" F-D (the live C# Fanfare package) was HARD-GATED on F-C's
+# tier-0.5 gates. Until it landed, `gain_fanfare_floor` had no C# home, and
+# emitting a call to a method that does not exist would have traded a visible
+# deferral for a build break.
+#
+# RELEASED 2026-07-25 by the "Ship What We Know" sprint, track G-A2. F-C never
+# ran and never will -- the fanfare sprint closed on a null and its gates went
+# with it -- so F-D was resurrected as its own pass with a trace-parity
+# acceptance instead. `FurinaResources.GainFanfareFloor` now exists and both
+# cards generate.
+#
+# Kept as an empty set rather than deleted, exactly as
+# FURINA_UPGRADE_GAP_PENDING_FB1 was: the invariant "every non-kit card is
+# emitted" is then asserted POSITIVELY, and the next deferral has somewhere to
+# be named instead of becoming a silent skip.
+FURINA_DEFERRED_TO_FD: set[str] = set()
 
 # Cards whose UPGRADE is unauthored because the delta it used to carry died
 # with a retired grammar. Same curation rule as above: an unupgradable card
@@ -106,22 +117,31 @@ def test_furina_profile_emits_every_non_kit_card():
 
     # The deferral must be for the REASON we think it is. A card that stopped
     # generating for some unrelated breakage would otherwise hide inside the
-    # curated set and read as intentional.
+    # curated set and read as intentional. Vacuous while the set is empty, and
+    # deliberately kept so: it re-arms the moment anything is deferred again.
     for cid in FURINA_DEFERRED_TO_FD:
         reason = gen.blocked_reason(by_id_of(_furina_cards())[cid],
                                     gen.FURINA_PROFILE)
-        assert reason == "op 'gain_fanfare_floor'", reason
+        assert reason is not None, cid
+
+    # G-A2 released both gain_fanfare_floor cards, so the ONLY withheld card is
+    # the hand-written Burst. Pinned as an explicit assertion rather than left
+    # to the coverage triple: "nothing is deferred" is the state this sprint
+    # bought, and it should fail loudly if a future change re-defers silently.
+    assert not FURINA_DEFERRED_TO_FD
+    assert withheld == FURINA_HAND_WRITTEN
 
     manifest = json.loads(
         gen.FURINA_PROFILE.manifest.read_text(encoding="utf-8")
     )
     # 78 cards since F-B2 added lasting_impression, the common floor source.
-    # Two withheld while F-D is gated (see FURINA_DEFERRED_TO_FD) -- both are
-    # gain_fanfare_floor cards, which is the whole of the deferral.
+    # One withheld: let_the_people_rejoice, the hand-written kit Burst.
+    # the_sea_is_my_stage and lasting_impression joined the generated set at
+    # G-A2 (2026-07-25), which is why generated went 75 -> 77.
     assert manifest["coverage"] == {
         "total": 78,
-        "generated": 75,
-        "blocked": 3,
+        "generated": 77,
+        "blocked": 1,
     }
     assert set(manifest["generated"]) == generated
     assert set(manifest["blocked"]) == withheld
