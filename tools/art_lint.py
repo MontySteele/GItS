@@ -481,11 +481,20 @@ def clip_warnings(effective) -> list[str]:
     return notes
 
 
-# L12: pixel-identical rank-1 crops. Curated allowlist for the three that were
+# L12: pixel-identical rank-1 crops. Curated allowlist for the pairs that were
 # already shipped when this check was written -- they are real defects, not
 # exemptions, and each needs a re-pick or a red-pen ruling.
+#
+# RETIRED 2026-07-25: blazing_delight == true_spark_knight. That pair was never
+# duplicate ART. blazing_delight had no rank-1 plan row at all, so art_process
+# never wrote its out-path; what L12 hashed was a STALE candidate left behind by
+# an older plan. The card read as "shipped with a duplicate crop" when it had in
+# fact shipped with no crop -- art_coverage was billing it MISSING the whole
+# time, and the two gates were describing the same hole in opposite languages.
+# It now has its own rank-1 source and hashes differently. Worth keeping in
+# view: L12 reads the candidates directory, so a stale file can manufacture a
+# duplicate for a card that has no pick.
 KNOWN_IDENTICAL = {
-    frozenset({"blazing_delight", "true_spark_knight"}),
     frozenset({"catalytic_conversion", "spark_collection"}),   # also PENDING_RED_PEN
     frozenset({"crowd_work", "standing_ovation"}),
 }

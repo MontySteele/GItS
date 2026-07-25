@@ -104,7 +104,25 @@ boom_goes_the_dynamite	ImageGen/images/cards/klee/boom_goes_the_dynamite.png	500
 flame_dance	ImageGen/images/cards/klee/flame_dance.png	500	380	contain	center	shortlist	1	png	Item Fireworks Dance Amidst a Snowy Sky.png		item
 kaboom_beetle_swarm	ImageGen/images/cards/klee/kaboom_beetle_swarm.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty AoE.png		item
 elemental_ecstasy	ImageGen/images/cards/klee/elemental_ecstasy.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Klee Birthday 2025.png		splash
+# blazing_delight had NO rank-1 row -- only the rank-2 fallback below -- so
+# art_process never wrote its out-path and art_coverage billed it missing.
+# A stale art/candidates/blazing_delight/r1.png survived from an older plan
+# and is what L12 was hashing, which is why the allowlisted
+# 'blazing_delight == true_spark_knight' pair looked like shipped duplicate
+# ART: it was a duplicate CANDIDATE for a card that had no pick at all.
+#
+# Every Klee illustration is claimed at rank 1 by another card (see
+# docs/art-claimed-sources.tsv), and Klee cards carry no source_group, so
+# strict L1 forbids reuse. Item Glimmering Firework is the only unclaimed
+# card-usable Klee source left -- and it happens to read as a radial burst,
+# which is what this card does (detonations splash every enemy).
+# Constellation Blazing Delight.png is the literal thematic match and is
+# deliberately NOT offered as a rank: it is the `icon` register, which L3
+# bans from cards, and a rank the taste pass could pick would ship a 256px
+# sigil past a lint that only inspects rank 1.
+blazing_delight	ImageGen/images/cards/klee/blazing_delight.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Glimmering Firework.png		item
 blazing_delight	ImageGen/images/cards/klee/blazing_delight.png	500	380	cover	top	shortlist	2	png	Klee Multi Wish.png		splash
+blazing_delight	ImageGen/images/cards/klee/blazing_delight.png	500	380	contain	center	shortlist	3	png	Item Glimmering Firework.png		item
 spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Summertime.png		item
 spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	cover	center	shortlist	2	png	Icon Emoji Paimon's Paintings 46 Klee 1.png		sticker
 spirited_away	ImageGen/images/cards/klee/spirited_away.png	500	380	cover	top	shortlist	3	png	Klee Birthday 2020 2.png		splash
@@ -873,3 +891,27 @@ vigil_of_the_deep	ImageGen/images/cards/kokomi/vigil_of_the_deep.png	500	380	cov
 # select_bg is the only one that is a straight wiki fetch, so it is the only
 # one with a plan row -- exactly the arrangement Furina ended the B4 pass in.
 kokomi_select_bg	ImageGen/images/kokomi/ui/select_bg.png	1920	1080	cover	center	auto	1	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash
+
+# ---------- Coverage gap fill, 2026-07-25 ----------
+# Two cards the sheets declare that no plan row ever covered. Both were
+# invisible except in art_coverage's MISSING bill: the game renders the
+# BETA placeholder and nothing fails.
+#
+# lasting_impression -- Furina's fanfare enabler. Her unclaimed sources are
+# mostly promo art with burnt-in wordmarks (Introduction Banner crops to
+# 'URINA'; the Shikishi set carries a Genshin wordmark and is monochrome;
+# Tabletop Troupe frames her under a printed name caption). Birthday 2025 at
+# y0.46 clears every wordmark in the source and is a CELEBRATION image,
+# which is the right read for a card that raises the Fanfare floor.
+lasting_impression	ImageGen/images/cards/furina/lasting_impression.png	500	380	cover	y0.46	shortlist	1	png	Furina Birthday 2025.png		splash
+lasting_impression	ImageGen/images/cards/furina/lasting_impression.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Fragrant Fantasy Furina 3.png		splash
+lasting_impression	ImageGen/images/cards/furina/lasting_impression.png	500	380	cover	y0.58	shortlist	3	png	Tabletop Troupe Pros Furina.png		splash
+#
+# sucrose_catalyst_conversion -- the shared-pool energy fixer added in
+# v1.11a. Sucrose Character Card is already sucrose_astable's rank 1, so
+# rank 1 here takes the unclaimed Sucrose Card; the siblings share the
+# `sucrose` source_group, which is what lets rank 3 revisit the sibling's
+# source at a different anchor without tripping L1.
+sucrose_catalyst_conversion	ImageGen/images/cards/companions/sucrose_catalyst_conversion.png	500	380	cover	y0.30	shortlist	1	png	Sucrose Card.png		tcg	sucrose
+sucrose_catalyst_conversion	ImageGen/images/cards/companions/sucrose_catalyst_conversion.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Sucrose Introduction Card.png		tcg	sucrose
+sucrose_catalyst_conversion	ImageGen/images/cards/companions/sucrose_catalyst_conversion.png	500	380	cover	y0.40	shortlist	3	png	Sucrose Character Card.png		tcg	sucrose
