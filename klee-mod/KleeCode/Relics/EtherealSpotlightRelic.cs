@@ -26,6 +26,18 @@ public sealed class EtherealSpotlightRelic : CustomRelicModel
 
     public override RelicRarity Rarity => RelicRarity.Starter;
 
+    /// <summary>
+    /// G-C3 / red-pen R2. Without this, BaseLib's StarterUpgradePatches prefix
+    /// falls through to vanilla's hardcoded table and Touch of Orobas replaces
+    /// her talent relic with the no-effect Circlet.
+    ///
+    /// The upgraded form makes BOTH Spotlight modes permanent and stops adding
+    /// the selector card -- see <see cref="CurtainNeverFalls"/>, including the
+    /// Funnel Contract §3 note that landed before it.
+    /// </summary>
+    public override RelicModel? GetUpgradeReplacement() =>
+        ModelDb.Relic<CurtainNeverFalls>().ToMutable();
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ethereal Spotlight"),

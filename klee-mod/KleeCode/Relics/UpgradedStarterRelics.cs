@@ -49,19 +49,20 @@ namespace KleeMod.Relics;
 /// to the Circlet. The fix is to override it -- plugging into the mechanism,
 /// not reinventing it. No Harmony patch of our own is needed or wanted.
 ///
-/// NUMBERS ARE PROPOSED, pending the single red-pen session (G-D). The
-/// magnitude precedent is the base game's own: Burning Blood heals 6 after
-/// combat, Black Blood heals 12 -- an exact doubling of the starter's effect.
-/// These follow that, and the doubling is called out per relic because it is
-/// the most aggressive thing in this sprint.
+/// NUMBERS ARE RATIFIED (red-pen 2026-07-26), not proposed. Worth recording
+/// because the first attempt reasoned from the wrong precedent: Burning Blood
+/// heals 6 and Black Blood heals 12, so the upgraded forms were drafted as
+/// exact doublings of their starters. That works for a flat post-combat heal
+/// and fails for an ENGINE INPUT -- doubling Klee's per-detonation Spark rate
+/// compounds with every bomb in the deck, and it was rejected as "way too
+/// good". The ratified shape is a fixed opening windfall instead. Ratio
+/// precedents do not transfer across effect kinds.
 ///
-/// FURINA IS DELIBERATELY ABSENT. See the G-C3 findings in
-/// docs/ship-what-we-know-sprint-log.md: Ethereal Spotlight has no number to
-/// scale, and every candidate tune-up is either a new mechanic (which this
-/// sprint's own rule forbids in a starter upgrade) or a per-turn Encore
-/// trickle, which her sheet law bans outright. That is a [USER] decision, not
-/// an implementation gap, and it is named in a curated set rather than filled
-/// with an invention.
+/// FURINA'S ARRIVED AT THE RED-PEN. G-C3 declined to invent one because every
+/// candidate broke either the sprint's "no new behaviour in a starter upgrade"
+/// rule or her no-passive-accrual law. R2 (2026-07-26) overrides the FORMER by
+/// user authority — see <see cref="CurtainNeverFalls"/>. The accrual law is
+/// untouched: the upgrade grants no resource per turn, it removes a choice.
 /// </summary>
 internal static class UpgradedStarterRelics
 {
@@ -272,4 +273,104 @@ public sealed class PearlOfInsightRelic : CustomRelicModel
 
     protected override string BigIconPath =>
         KleePck.Path("kokomi/relics/pearl_of_wisdom.png") ?? base.BigIconPath;
+}
+
+/// <summary>
+/// Furina's upgraded starter (Touch of Orobas). RATIFIED 2026-07-26 as red-pen
+/// ruling R2, a [USER] design superseding all three worksheet options.
+///
+/// **Both Spotlight modes at once, permanently.** Her own cards generate
+/// Fanfare (Center Stage's half) AND her Companions are multiplied (Guest
+/// Cast's half), and conditions keying off "moved the Spotlight this turn" are
+/// ALWAYS ON — which is what makes this relic the selector-payoff enabler
+/// rather than merely a convenience.
+///
+/// THE UPGRADE REMOVES THE EXCLUSIVITY, NOT THE TARGETING (reading 1, ruled
+/// during implementation). Each half still applies only to its own card class:
+/// no numeric boost leaks onto Furina's cards, and her Companions still mint no
+/// Fanfare. What she gains is that she never has to choose. Every gate lives in
+/// <see cref="SpotlightSystem"/>, keyed off
+/// <see cref="SpotlightSystem.BothModes"/>, so this class holds no logic of its
+/// own beyond existing — which is the point: a relic that is a FLAG cannot
+/// drift from the system that reads it.
+///
+/// **THE SELECTOR CARD STOPS ARRIVING.** With both modes always on it has
+/// nothing left to choose, so this class deliberately does NOT override
+/// AfterPlayerTurnStart the way <see cref="EtherealSpotlightRelic"/> does. That
+/// touches Funnel Contract §3 (Spotlight is a designation event, one funnel):
+/// the funnel is not removed, moved or renamed and every existing caller still
+/// routes through it — but an upgraded Furina never FIRES it again, so the
+/// Spotlight beam goes quiet for that run. The cross-session note was filed in
+/// BOTH logs before this landed, per the contract's own rule:
+/// docs/animation-sprint-2-log.md and docs/red-pen-2026-07-26.md.
+///
+/// THIS DELIBERATELY BREAKS the "no new behaviour in a starter upgrade" rule,
+/// by user authority. The rule is OVERRIDDEN, not reinterpreted, and the
+/// override is recorded rather than quietly absorbed. Her no-passive-accrual
+/// law (kickoff §4) is NOT touched: this grants no resource per turn.
+///
+/// NAME is authored theatrical flavour like the rest of her sheet and rides the
+/// pending v1.7 lore/constellation audit.
+///
+/// SIM PARITY: NOT MODELLED, recorded rather than silent. tier05 has no
+/// Spotlight-mode model to make always-on, and the narrow relic-upgrade
+/// approach ([USER], option 1) means there is no table to hang it off. So
+/// Furina's Orobas variant has no row in tier05/content/relics.yaml, unlike
+/// touch_of_orobas_klee. Consequence: a tier-0.5 Furina never receives this
+/// upgrade, so no anchor or free-draft cell measures it, and its value is
+/// unpriced. That is a real gap and belongs to the pool-sweep pass, where
+/// Spotlight is already the subject.
+/// </summary>
+public sealed class CurtainNeverFalls : CustomRelicModel
+{
+    public CurtainNeverFalls() : base(autoAdd: false)
+    {
+    }
+
+    // Ancient, never Starter -- see ExplosiveFrags for why that matters.
+    public override RelicRarity Rarity => RelicRarity.Ancient;
+
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "The Curtain Never Falls"),
+        ("description",
+            "[gold]Center Stage[/gold] and [gold]Guest Cast[/gold] are both "
+          + "always active, and you always count as having moved the "
+          + "[gold]Spotlight[/gold] this turn. "
+          + CompanionSlot.RewardSlotDescription),
+    };
+
+    protected override string IconBaseName => "snake_ring";
+
+    public override string PackedIconPath =>
+        KleePck.Path("furina/relics/ethereal_spotlight.png")
+        ?? base.PackedIconPath;
+
+    protected override string BigIconPath =>
+        KleePck.Path("furina/relics/ethereal_spotlight.png")
+        ?? base.BigIconPath;
+
+    /// <summary>
+    /// Furina's companion reward slot, carried forward UNCHANGED from the base
+    /// relic. Not part of the upgrade, and not optional: see
+    /// <see cref="PearlOfInsightRelic.TryModifyCardRewardOptions"/> for the
+    /// near-miss that put an invariant behind this.
+    /// </summary>
+    public override bool TryModifyCardRewardOptions(
+        Player player, List<CardCreationResult> cardRewardOptions,
+        CardCreationOptions creationOptions)
+    {
+        if (creationOptions.Source != CardCreationSource.Encounter
+            || player.Character is not Furina)
+        {
+            return false;
+        }
+        var rarity = creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
+            ? CardRarity.Rare
+            : (CardRarity?)null;
+        var offer = CompanionSlot.Roll(player, rarity);
+        if (offer == null) return false;
+        cardRewardOptions.Add(new CardCreationResult(offer));
+        return true;
+    }
 }

@@ -71,8 +71,42 @@ public static class SpotlightSystem
     public static SpotlightMode Mode(Creature creature) =>
         (SpotlightMode)(Resource<SpotlightModeResource>(creature)?.Amount ?? 0);
 
+    /// <summary>
+    /// Does this Furina hold the upgraded starter (red-pen R2)? If so BOTH
+    /// Spotlight modes are permanently in force.
+    ///
+    /// A relic query rather than a resource, deliberately: the relic is run
+    /// state and survives combats, whereas every Spotlight resource is
+    /// per-combat and would have to be re-seeded at every fight start -- one
+    /// more thing to forget, and its failure mode is silent.
+    /// </summary>
+    public static bool BothModes(Creature creature) =>
+        creature.Player?.Relics
+            .Any(relic => relic is Relics.CurtainNeverFalls) ?? false;
+
+    /// <summary>Is Center Stage's half in force -- her own cards generate
+    /// Fanfare? True under the mode, or unconditionally when upgraded.</summary>
+    private static bool CenterStageActive(Creature creature) =>
+        Mode(creature) == SpotlightMode.CenterStage || BothModes(creature);
+
+    /// <summary>Is Guest Cast's half in force -- Companions are multiplied?
+    /// True under the mode, or unconditionally when upgraded.</summary>
+    private static bool GuestCastActive(Creature creature) =>
+        Mode(creature) == SpotlightMode.GuestCast || BothModes(creature);
+
+    /// <summary>
+    /// R2 makes the upgraded starter the SELECTOR-PAYOFF ENABLER: conditions
+    /// keying off "moved the Spotlight this turn" are always on.
+    ///
+    /// That is the whole point of the ruling rather than a side effect. With
+    /// the selector card gone there is no designation event left to move, so
+    /// without this every selector-payoff card on the sheet would become dead
+    /// text the moment the relic was taken -- the upgrade would silently
+    /// subtract from her pool while appearing to add to it.
+    /// </summary>
     public static bool MovedThisTurn(Creature creature) =>
-        (Resource<SpotlightMovedResource>(creature)?.Amount ?? 0) > 0;
+        BothModes(creature)
+        || (Resource<SpotlightMovedResource>(creature)?.Amount ?? 0) > 0;
 
     public static int PlaysThisTurn(Creature creature) =>
         Resource<SpotlightPlaysResource>(creature)?.Amount ?? 0;
@@ -118,26 +152,38 @@ public static class SpotlightSystem
         }
     }
 
+    /// <summary>
+    /// R2 reading 1 ([USER], 2026-07-26): the upgrade removes the
+    /// EXCLUSIVITY between the two modes, not their TARGETING. Her own cards
+    /// are lit by Center Stage's half and Companions by Guest Cast's half, and
+    /// when upgraded both halves are live at once -- but neither half reaches
+    /// across to the other's card class. So an upgraded Furina still gets no
+    /// numeric boost on her own cards, and her Companions still generate no
+    /// Fanfare; what she gains is that she no longer has to choose.
+    /// </summary>
     public static bool IsSpotlighted(CardModel card)
     {
         var owner = card.Owner?.Creature;
         if (owner == null) return false;
-        return Mode(owner) switch
-        {
-            SpotlightMode.CenterStage =>
-                card is ICharacterCard { CharacterId: "furina" },
-            SpotlightMode.GuestCast => card is ICompanionCard,
-            _ => false,
-        };
+        return (CenterStageActive(owner)
+                && card is ICharacterCard { CharacterId: "furina" })
+            || (GuestCastActive(owner) && card is ICompanionCard);
     }
 
     private static int PowerAmount<T>(Creature owner) where T : PowerModel =>
         owner.Powers.OfType<T>().FirstOrDefault()?.Amount ?? 0;
 
+    /// <summary>
+    /// The Guest Cast multiplier. Gated on the card being a COMPANION as well
+    /// as on the mode -- under R2's upgrade both halves are live, and without
+    /// the card-class test the multiplier would leak onto Furina's own cards,
+    /// which Center Stage explicitly does not do.
+    /// </summary>
     private static decimal OutwardMultiplier(CardModel card)
     {
         if (!IsSpotlighted(card)
-            || Mode(card.Owner.Creature) != SpotlightMode.GuestCast)
+            || card is not ICompanionCard
+            || !GuestCastActive(card.Owner.Creature))
         {
             return 1m;
         }
@@ -152,8 +198,12 @@ public static class SpotlightSystem
     public static decimal PrintedDamage(CardModel card, decimal amount)
     {
         var scaled = Math.Truncate(amount * OutwardMultiplier(card));
+        // Same gate as OutwardMultiplier, for the same reason: the flat
+        // bonuses are Guest Cast's half and must not reach her own cards when
+        // R2's upgrade makes both halves live.
         if (!IsSpotlighted(card)
-            || Mode(card.Owner.Creature) != SpotlightMode.GuestCast)
+            || card is not ICompanionCard
+            || !GuestCastActive(card.Owner.Creature))
         {
             return scaled;
         }
@@ -223,7 +273,12 @@ public static class SpotlightSystem
         var first = plays.Amount == 0;
         plays.ModifyAmount(1);
 
-        if (Mode(owner) == SpotlightMode.CenterStage)
+        // Center Stage's half: her OWN cards mint Fanfare. The card-class test
+        // is what keeps Guest Cast's "their plays generate no Fanfare" clause
+        // true for Companions even when R2's upgrade has both halves live --
+        // the upgrade drops the exclusivity, not the targeting.
+        if (CenterStageActive(owner)
+            && card is ICharacterCard { CharacterId: "furina" })
         {
             FurinaResources.GainFanfare(owner, FanfarePerCenterStagePlay);
         }

@@ -658,3 +658,50 @@ bob/sway.
 Note the animation tracks already drive `Slots/SlotN:scale`, so a sprite-level
 scale is the right place for this: it composes with the deploy/bow pulse instead
 of fighting it.
+
+---
+
+# CROSS-SESSION NOTE — Funnel Contract §3, from the Furina kit stream (2026-07-26)
+
+Filed BEFORE landing, per the contract's own rule: "If the redesign stream
+needs to move any of the three contracted points, that is a SHARED-SURFACE
+change and takes a cross-session note BEFORE landing." The mirror of this note
+is in docs/red-pen-2026-07-26.md.
+
+**What is changing.** Red-pen ruling R2 gives Furina an upgraded starter relic
+(Touch of Orobas) that grants **both** Spotlight modes at once — Center Stage's
+Fanfare generation on her own cards AND Guest Cast's Companion multiplier —
+permanently. [USER] then ruled that the upgraded relic **stops adding the
+Ethereal Spotlight selector card to hand**, because with both modes always on
+the selector has nothing left to choose.
+
+**The contract point it touches.** §3: *"Spotlight is a designation event — a
+single designation funnel."*
+
+**The funnel is NOT removed, moved, or renamed.** `SpotlightSystem.Designate`
+remains the one designation funnel, keeps its signature, and keeps its
+`Vfx.KleeCombatVfx.SpawnSpotlightShine(creature)` call. Every existing entry
+point still routes through it. The visual layer's binding is intact and needs
+no change.
+
+**What DOES change, and it is the reason this note exists.** A Furina who has
+taken Touch of Orobas will never fire that funnel again for the rest of the
+run — there is no selector to play, so there is no designation event. So:
+
+- **the Spotlight beam stops appearing** for that player, from the moment the
+  relic is taken;
+- any visual work that assumes at least one designation per combat, or that
+  uses the beam as a recurring beat in the combat's rhythm, will silently go
+  quiet for upgraded runs rather than break;
+- this is per-run and per-player, so in co-op one Furina may still be firing
+  the funnel while another has stopped.
+
+**No action is required of the visual stream** — nothing breaks, and binding to
+funnels rather than values is exactly what makes that true. This is a heads-up
+that a funnel can legitimately go quiet, so that "the beam stopped happening"
+is diagnosable as a design outcome rather than investigated as a defect.
+
+**If that quiet is unacceptable as design**, the cheap answer is to fire
+`SpawnSpotlightShine` once when the upgraded relic is obtained — a single
+"everything is lit" beat replacing the recurring one. That is a visual-stream
+call and is deliberately not taken here.

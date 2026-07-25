@@ -36,38 +36,26 @@ _RELICS = _ROOT / "klee-mod" / "KleeCode" / "Relics"
 STARTERS: dict[str, str] = {
     "PoundingSurprise": "ExplosiveFrags",          # Klee
     "PearlOfWisdomRelic": "PearlOfInsightRelic",   # Kokomi
+    "EtherealSpotlightRelic": "CurtainNeverFalls", # Furina (red-pen R2)
 }
 
 # Starters KNOWINGLY without an upgraded form, each with the reason and the
 # gate that clears it. A curated absence, never a silent one -- the point of
 # this file is that a missing upgrade must be a decision on the record.
-NO_UPGRADED_FORM: dict[str, str] = {
-    "EtherealSpotlightRelic": (
-        "RULED 2026-07-26 (red-pen R2) — this entry is now a QUEUED "
-        "IMPLEMENTATION, not an open question. [USER] design: the upgraded "
-        "relic grants the benefits of BOTH Spotlight selector effects at once, "
-        "so conditions keying off 'moved the Spotlight this turn' are ALWAYS "
-        "ON, making her starter upgrade the selector-payoff enabler. This "
-        "deliberately overrides the sprint's 'no new behaviour in a starter "
-        "upgrade' rule BY USER AUTHORITY -- the rule is overridden, not "
-        "reinterpreted. Delete this entry when the class lands. "
-        "See docs/red-pen-2026-07-26.md R2. "
-        "Until then Touch of Orobas still hands Furina a Circlet. "
-        "--- The original reasoning, kept because it is why the ruling had to "
-        "come from the user rather than from an implementer: "
-        "Ethereal Spotlight adds a one-use Spotlight selector to hand "
-        "at the start of each turn. There is NO NUMBER in it to scale: the "
-        "selector is a Token card with no upgrade, and the effect is binary "
-        "(the card is added, or it is not). Every candidate tune-up is "
-        "out of bounds for this sprint: adding a second designation or "
-        "changing when the selector arrives is new BEHAVIOUR, which G-C3(b) "
-        "forbids in a starter upgrade ('an upgraded starter that changes "
-        "behavior is pool-sweep material'); and a per-turn Encore or Fanfare "
-        "trickle is banned outright by her sheet's no-passive-accrual law "
-        "(kickoff §4). The red-pen took the first branch and accepted a "
-        "behaviour change as a deliberate exception."
-    ),
-}
+# Starters KNOWINGLY without an upgraded form, each with the reason and the
+# gate that clears it. A curated absence, never a silent one.
+#
+# EMPTY since 2026-07-26. Furina was the sole entry and red-pen R2 closed it:
+# her upgraded starter grants both Spotlight modes at once. G-C3 had declined
+# to invent one because every candidate broke either the sprint's
+# "no new behaviour in a starter upgrade" rule or her no-passive-accrual law,
+# and the ruling OVERRODE the first of those by user authority rather than
+# reinterpreting it. See docs/red-pen-2026-07-26.md R2.
+#
+# Kept as an empty dict rather than deleted, per the standing curated-set
+# discipline: the invariant is then asserted positively and the next gap has
+# somewhere to be named instead of becoming a silent Circlet.
+NO_UPGRADED_FORM: dict[str, str] = {}
 
 
 def _classes() -> dict[str, str]:

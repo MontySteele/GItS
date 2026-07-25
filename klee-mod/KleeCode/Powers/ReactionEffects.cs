@@ -58,6 +58,28 @@ internal static class ReactionEffects
     /// tier0 predicate reaction_triggered_this_turn (Chevreuse, Vanguard's
     /// Valor): `state.reactions_this_turn > 0`. RULED in the sheet as ANY
     /// reaction, not Overload-only.
+    ///
+    /// CO-OP SCOPE, SEALED 2026-07-26 (red-pen R1). This counter and
+    /// <see cref="TotalResolved"/> are deliberately GLOBAL, not per-player:
+    /// in co-op your partner's Overload satisfies your Chevreuse, and a
+    /// reaction landing inside your card's resolution window satisfies your
+    /// Boom Goes the Dynamite. **That is intended, not the G-B1 leak.**
+    ///
+    /// The G-B2 census flagged it as needs-ruling precisely because it LOOKS
+    /// like the Best Friends Forever bug -- a "this combat/turn" tracker that
+    /// is correct solo and divergent in co-op. The distinction is what the
+    /// tracker is a claim ABOUT. BFF's list answered "which cards did YOU
+    /// play", so an unowned entry was simply wrong. This one answers "did a
+    /// Reaction happen", and a Reaction is a fact about the BOARD that both
+    /// players are standing on. Elements are the shared system in this mod;
+    /// making reaction payoffs private would mean two players applying auras
+    /// to the same enemy could not cooperate, which is the opposite of the
+    /// design.
+    ///
+    /// So: do NOT "fix" this by scoping it to an owner. If the intent ever
+    /// changes, it changes at the ruling, not in the code -- see
+    /// docs/red-pen-2026-07-26.md R1 and the co-op section of
+    /// docs/playtest-2026-07-25-coop-a0.md.
     /// </summary>
     public static bool ReactionTriggeredThisTurn => TotalResolved > _turnStartTotal;
 

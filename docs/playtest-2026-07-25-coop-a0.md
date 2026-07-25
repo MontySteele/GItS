@@ -91,6 +91,30 @@ separable from a single session, and they call for opposite fixes. **One more
 playtest before this is a finding.** Recorded so it is not lost, and named in
 the sprint's non-goals so it is not quietly acted on.
 
+## Co-op scope rulings arising from this session
+
+**Reactions are TEAM events (red-pen R1, 2026-07-26 — RATIFIED).** The G-B2
+census flagged `ReactionEffects.TotalResolved` and `ReactionTriggeredThisTurn`
+as needs-ruling because they are global rather than per-player: in co-op your
+partner's Overload satisfies your Chevreuse. **That is intended.**
+
+The distinction from the Best Friends Forever bug (note 2) is what the tracker
+is a claim *about*. BFF's list answered *"which cards did YOU play"*, so an
+unowned entry was simply wrong. The reaction counter answers *"did a Reaction
+happen"* — and a Reaction is a fact about the board both players are standing
+on. Elements are the shared system in this mod; making reaction payoffs private
+would mean two players applying auras to the same enemy could not cooperate,
+which is the opposite of the design.
+
+Sealed in code at `ReactionEffects.ReactionTriggeredThisTurn` so the next
+census does not re-open it, and so nobody "fixes" it into an owner scope.
+
+**Still open in the same class:** `BombPower.DetonationsThisCombat`, read by The
+Big One. Unlike the reaction counter this one cannot currently be scoped even
+if we wanted to — `BombCharge` carries no placer, and bombs live on enemies, so
+a detonation is not attributable to a player without a schema change. Impact is
+Klee-plus-Klee only.
+
 ## The standing gap this session exposed
 
 **Co-op has no sim backstop.** tier 0.5 models exactly one seat, so no run in
