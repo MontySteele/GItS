@@ -1753,3 +1753,68 @@ treat any single 500-run cell as provisional until repeated.
 DESIGN" (Box Trick philosophy), but a 6x spread is a different claim from a
 low payoff. Flagged for the post-playtest design pass, not acted on inside the
 freeze.
+
+## R59 -- Shop slot 2 floor: Uncommon (2026-07-25)
+
+Slot 2 is wildcard-nation, **Uncommon-or-Rare** at renormalized reward odds.
+Preserves the premium-paid-channel thesis: base slot 2 is a guaranteed Rare, so
+a wildcard at full reward odds (~60% Common) would make the mod's shop *worse*
+than base at the exact slot whose whole argument is that it is premium. Matches
+the companion-value study's finding that StS2 colorless has **no common tier**.
+
+The tiebreaker was banner robustness. A guaranteed-Rare slot 2 interacts badly
+with nation-scoped banner gating: runs where the banner thins a nation's Rare
+tier leave a guaranteed-Rare slot drawing from a near-empty eligible set. Base
+StS2 never had this problem because base colorless has no banner. Guaranteed-
+Rare rejected as brittle; as-written (full reward odds) rejected as
+self-contradicting.
+
+**Live instance, not hypothetical: Fontaine ships ZERO Rare companions today**
+(Mondstadt 3, Inazuma 2, Fontaine 0). Furina's home-nation slot 1 already
+cannot roll a Rare regardless of banner state.
+
+## R60 -- Base colorless pool: shop-only override now, removal deferred (2026-07-25)
+
+Phase 1 (this sprint): the merchant's colorless entries draw from the companion
+pool. `ColorlessCardPool` **stays populated** for its six non-shop consumers,
+including all three `GetDistinctForCombat` sites. Emptying it is the exact
+empty-draw softlock class already paid for once (Dusty Tome ->
+`lint_ancient_coverage.py`); full removal demands a seven-consumer audit plus
+per-site invariant tests, which is a sprint of its own. §4.7's rejection of the
+"additive model" argued *reward-economy* fantasy dilution, which does not
+automatically extend to Discovery-style in-combat generation the player never
+drafts.
+
+**Deferred, not rejected:** whether base colorless surfacing via in-combat
+generation is a fantasy leak worth phase 2's blast radius is a taste call.
+[USER] grades it after phase 1 is live at the table. Until graded, phase 2 is
+not scheduled and no prep work rides along.
+
+## R61 -- The sim models the shop channel (2026-07-25)
+
+Companions become shoppable in `tier05/shop.py` (slot 1 nation-filtered +
+Uncommon floor, slot 2 per R59, gold pricing by drawn rarity). §4.7's thesis is
+that *pricing is the balance governor*; an unmeasured governor is a design
+claim with no instrument attached.
+
+Distinguished from R2's relic exemption: that is a static effect, this is an
+economy channel. This also answers the compounding question the plan doc
+raised -- the exemption series stops at two. **Tier 0.5 models economy
+channels.**
+
+## R62 -- `sucrose_astable`: free + Exhaust, restoring the v1.11a numbers (2026-07-25)
+
+The card returns to **cost 0, Exhaust**, superseding main's interim rebalance.
+The 2026-07-26 merge resolved a collision in main's favour on recency, which
+silently dropped the Exhaust; the sheet flagged it as *absent rather than
+rejected* and this is the ruling that closes the flag.
+
+**[USER] grading:** Bursts are not currently priced strongly enough for the
+multi-copy-battery worry to bind -- replaying the card to buy a Burst is not
+worth the energy it costs -- so the guard costs nothing to keep and the
+free-cost reprice stands on its own merits. The guard is **retained as cheap
+insurance against a future Burst reprice, not because it currently binds.**
+
+Mechanical: `docs/mondstadt-companions.yaml` cost 1 -> 0 plus `exhaust: true`;
+`docs/klee-upgrades.yaml` comment corrected; §4.7 changelog gains a v1.11b
+supersession note. Sheet remains sole source of truth; codegen regenerated.

@@ -22,14 +22,16 @@
    # Playtest 2026-07-22: the cantrip does not justify a full extra energy on an energy-starved character.
 - {id: sucrose_gust, name: "Sucrose — Wind Spirit Creation", star: 4, rarity: common, role_c: trigger, element: anemo, cost: 0, type: skill,
    effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
-- {id: sucrose_astable, name: "Sucrose — Astable Anemohypostasis", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 1, type: skill,
+- {id: sucrose_astable, name: "Sucrose — Astable Anemohypostasis", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 0, type: skill, exhaust: true,
    effects: [{op: swirl, target: enemy}, {op: burst_energy, amount: 8}]}
-   # COST 1 IS MAIN'S, and it wins on recency: the v1.11 branch proposed 0-cost + Exhaust, but the later
-   # "Rebalance Klee cards and Burst access" pass took 2->1 without Exhaust. Both fix the same complaint
-   # (the card was dominated by 1-cost sucrose_gust). FLAGGED for red-pen, because the branch's Exhaust
-   # was not only a cost fix -- it was a GUARD, capping burst_energy from becoming a repeatable /
-   # multi-copy Burst battery for Klee and Furina (§2.4 meter tuning, §4.3 enabler-not-carry). The
-   # cost-1 version does not address that, so the guard is currently absent rather than rejected.
+   # R62 (red-pen 2026-07-25): the v1.11a numbers are RESTORED and main's interim rebalance is
+   # SUPERSEDED. The earlier flag asked whether the Exhaust was load-bearing as a guard -- capping
+   # burst_energy from becoming a repeatable / multi-copy Burst battery (§2.4 meter tuning, §4.3
+   # enabler-not-carry). Monty's grading: Bursts are not priced strongly enough today for that worry
+   # to bind (replaying this card to buy a Burst is not worth the energy), so the guard costs nothing
+   # to keep and the free-cost reprice stands on its own. Guard RETAINED as cheap insurance against a
+   # future Burst reprice, not because it currently binds. Both versions fixed the same complaint --
+   # the card was dominated by sucrose_gust, which is free and also swirls.
 - {id: sucrose_catalyst_conversion, name: "Sucrose — Catalyst Conversion", star: 4, rarity: uncommon, role_c: buffer, element: anemo, cost: 0, type: skill, exhaust: true,
    effects: [{op: energy, amount: 1}, {op: draw, amount: 1}]}
    # v1.11a, PROPOSED: the neutral-energy FIXER the shared pool owed every character (§4.7 audit).
