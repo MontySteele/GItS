@@ -87,11 +87,22 @@ def ancient_pool() -> dict[str, dict]:
     return dict(_pool().get("ancient") or {})
 
 
+def event_pool() -> dict[str, dict]:
+    """id -> spec for the closed EVENT pool (§11.2).
+
+    Deliberately NOT reachable from `unowned_common`, `neow_offer` or
+    `unowned_ancient`: an event relic has exactly one source event in the real
+    game, and letting one fall out of a chest would be a quiet buff to every
+    run. `get_relic` still resolves them, so a granted one behaves normally.
+    """
+    return dict(_pool().get("event") or {})
+
+
 def get_relic(rid: str) -> dict:
-    """Fetch a relic spec by id from common, neow or ancient. A SKIP relic or
-    an unknown id is a hard error -- never a hollow relic."""
+    """Fetch a relic spec by id from common, neow, ancient or event. A SKIP
+    relic or an unknown id is a hard error -- never a hollow relic."""
     pool = _pool()
-    for group in ("common", "neow", "ancient"):
+    for group in ("common", "neow", "ancient", "event"):
         if rid in (pool.get(group) or {}):
             return (pool[group])[rid]
     if rid in (pool.get("skip") or {}):

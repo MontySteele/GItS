@@ -14,17 +14,33 @@
 #   gold: [lo, hi]     gain (or lose, if negative) gold, rolled in the band
 #   gold_all: true     lose ALL gold
 #   card_reward: N     an ordinary reward screen, N offers, drafter picks
+#   card_screens: N    N INDEPENDENT reward screens ("gain 2 card rewards")
 #   pick_cards: {of: M, take: N}   choose N of M random pool cards
+#   add_card: <id>     add one NAMED card (an event-only colorless card)
+#   random_card: {type: t, cost: c, n: N}   add N random pool cards matching
+#                      the filter; the option is LOCKED if nothing matches
 #   remove: N          remove N cards (worst-first, drafter's valuation)
 #   upgrade: N         upgrade N cards (on-plan first)
 #   upgrade_random: N  upgrade N RANDOM cards (the escalating-ladder shape)
+#   downgrade_random: N   un-upgrade N random upgraded cards
+#   duplicate_deck: true  append a copy of the whole deck (resolves FIRST)
 #   transform: N       remove N cards, add N random of the same rarity
 #   curse: <id>        add a curse to the deck
-#   relic: true        grant a random relic from the run's relic pool
+#   relic: N           grant N random relics from the run's relic pool
+#                      (`true` means 1)
+#   relic_id: <id>     grant one NAMED relic from the closed event pool
 #   potion: N          grant N random potions (slot-permitting)
 #   spend_potion: true requires a held potion; consumes it
 #   requires_gold: N   option is unavailable below N gold
 #   escalate: <id>     after resolving, offer this event again (the ladder)
+#
+# Event-level keys:
+#   hidden: true       reachable only by `escalate`, never rolled directly
+#   also_acts: [N,..]  ALSO appears in these (1-based) acts. For the real
+#                      events that span acts without being all-acts events.
+#   variants: [{name, options}, ...]   one event that randomly selects one
+#                      sub-scenario per visit (The Trial's three trials).
+#                      Exactly one variant is rolled at the visit.
 
 act1:
   - id: jungle_maze_adventure
@@ -69,12 +85,18 @@ act1:
 
   - id: brain_leech
     name: "Brain Leech"
+    also_acts: [2]                    # Overgrowth + Underdocks + Hive
+    # APPROXIMATION, flagged: "Rip the Leech Off" gives a COLORLESS card
+    # reward on the wiki. We have no colorless loot pool (the two colorless
+    # cards we author are event-only), so it draws from the character pool
+    # like any other screen. Shape right, colour wrong.
     options:
       - {label: "Share Knowledge", pick_cards: {of: 5, take: 1}}
       - {label: "Rip the Leech Off", hp: -5, card_reward: 3}
 
   - id: room_full_of_cheese
     name: "Room Full of Cheese"
+    also_acts: [2]                    # Overgrowth + Underdocks + Hive
     options:
       - {label: "Gorge", pick_cards: {of: 8, take: 2}}
       # The Chosen Cheese (+1 max HP at end of combat) is not a relic we
@@ -127,6 +149,103 @@ act1:
       - {label: "Offer Tribute", gold: [-149, -99], relic: true,
          requires_gold: 149}
 
+# --- act 2: the Hive ------------------------------------------------------
+# Brain Leech and Room Full of Cheese also land here via `also_acts`, so the
+# reachable act-2 pool is 5 own/shared + 3 all-acts.
+#
+# The Hive is the act the admission rule bites hardest: 8 of its 21 events are
+# built on Enchant, Divine, Debt, quest cards or named relics whose effects
+# need hooks we do not have. Every one of them is named in the skip list at the
+# bottom with the SPECIFIC missing mechanic, so the list reads as a backlog
+# rather than an apology.
+act2:
+  - id: colossal_flower
+    name: "Colossal Flower"
+    # The gold ladder. Each rung forfeits the previous rung's nectar, so the
+    # payouts are alternatives, not a running total: 35 / 75 / 135, at 5 / 6 /
+    # 7 HP. The bottom of the ladder is Pollinous Core, which we can express
+    # EXACTLY (every 4 turns, draw 2 -- an existing hook), which is the only
+    # reason this event ships at all.
+    options:
+      - {label: "Extract Nectar", gold: [35, 35]}
+      - {label: "Reach Deeper", hp: -5, escalate: colossal_flower_2}
+
+  - id: colossal_flower_2
+    name: "Colossal Flower (level 2)"
+    hidden: true
+    options:
+      - {label: "Extract Nectar", gold: [75, 75]}
+      - {label: "Reach Deeper", hp: -6, escalate: colossal_flower_3}
+
+  - id: colossal_flower_3
+    name: "Colossal Flower (level 3)"
+    hidden: true
+    options:
+      - {label: "Extract Nectar", gold: [135, 135]}
+      - {label: "Enter the Center", hp: -7, relic_id: pollinous_core}
+
+  - id: infested_automaton
+    name: "Infested Automaton"
+    # Two forced draws from disjoint slices of the character's own pool. Both
+    # options lock themselves if the slice is empty, which is the real rule
+    # and matters here: a character with no Power cards genuinely cannot take
+    # Study.
+    options:
+      - {label: "Study", random_card: {type: power}}
+      - {label: "Touch the Core", random_card: {cost: 0}}
+
+  - id: bugslayer
+    name: "Bugslayer"
+    # Both cards are published with exact numbers and are authored in
+    # tier0/content/cards/colorless_event.yaml. KNOWN LIMITATION: the HP
+    # valuation scores any named card at a flat CARD_HP, so the pick falls to
+    # the drafter's own tiebreak -- and its static-power term saturates for
+    # both of these. The card that lands is therefore near-arbitrary even
+    # though the card itself is exact. Visible, not hidden.
+    options:
+      - {label: "Learn Extermination Technique", add_card: exterminate}
+      - {label: "Learn Squash Technique", add_card: squash}
+
+# --- act 3: Glory ---------------------------------------------------------
+# The THINNEST pool by far -- 2 own + 3 all-acts -- and the reason is a
+# finding, not an oversight: Glory's events are relic-shaped. Five of its
+# eight pay out in a named event relic (Forgotten Soul, Big Mushroom,
+# Fragrant Mushroom, Royal Poison, History Course), and under the no-
+# substitution rule an event whose relic we cannot express exactly does not
+# ship. Four of those five are ONE hook away each; they are itemised in the
+# skip list. Act 3 is where the event layer is most worth extending next.
+act3:
+  - id: the_trial
+    name: "The Trial"
+    # One event, three sub-trials, one rolled per visit (see `variants` in
+    # events.py). Every verdict is a curse-for-payout trade, which is what
+    # makes this the act's best test of whether curses are priced right.
+    variants:
+      - name: "Merchant Trial"
+        options:
+          - {label: "DECIDE: Guilty", curse: curse_regret, relic: 2}
+          - {label: "DECIDE: Innocent", curse: curse_shame, upgrade: 2}
+      - name: "Noble Trial"
+        options:
+          - {label: "DECIDE: Guilty", heal: 10}
+          - {label: "DECIDE: Innocent", curse: curse_regret, gold: [300, 300]}
+      - name: "Nondescript Trial"
+        options:
+          - {label: "DECIDE: Guilty", curse: curse_doubt, card_screens: 2}
+          - {label: "DECIDE: Innocent", curse: curse_doubt, transform: 2}
+
+  - id: reflections
+    name: "Reflections snoitcelfeR"
+    # Downgrade resolves before upgrade, the order the wiki states -- so a
+    # card knocked down by the first half can be picked back up by the second.
+    # Shatter is the single most violent deck op in the game and the reason
+    # `duplicate_deck` values at exactly zero: doubling a deck copies its bad
+    # cards too and dilutes every draw, so the attached curse is what actually
+    # decides the option.
+    options:
+      - {label: "Touch a Mirror", downgrade_random: 2, upgrade_random: 4}
+      - {label: "Shatter", duplicate_deck: true, curse: curse_bad_luck}
+
 # --- all acts -------------------------------------------------------------
 all:
   - id: this_or_that
@@ -152,11 +271,19 @@ all:
       - {label: "Leave"}
 
 # --- SKIPPED, and why (research doc §3) ----------------------------------
+# NO SUBSTITUTIONS RULE (§11.2): where an event pays out a NAMED relic we
+# cannot express, the event is skipped -- it does not fall back to "a random
+# relic". The one pre-existing exception is Room Full of Cheese above, which
+# shipped before this rule and is flagged in place. Every entry below names
+# the specific missing mechanic, so this list is an engine backlog with
+# per-item costs, not a shrug.
+#
 # Enchant is not a mechanic we have:  Self-Help Book, Sapphire Seed,
 #     Wood Carvings, Field of Man-Sized Holes, Grave of the Forgotten,
 #     Stone of All Time, Symbiote
 # Quest cards are not modeled:        The Legends Were True, The Lantern Key,
-#     Byrdonis Nest's Take-the-Egg branch (the event ships one-option)
+#     War Historian Repy, Byrdonis Nest's Take-the-Egg branch (the event
+#     ships one-option)
 # Divine / Debt:                      Crystal Sphere
 # Cross-character pools:              Colorful Philosophers
 # Events that START A FIGHT:          Dense Vegetation, Battleworn Dummy,
@@ -164,5 +291,50 @@ all:
 #     event would hand the event layer the pilot, the relic set and the potion
 #     bag, and that coupling is worth its own pass. The resolver stays pure
 #     (deck / HP / gold / relics / potions) until then.
-# Acts 2-3 pools are NOT populated yet: the act-1 pool is the pilot for the
-#     grammar. Adding them is content work, not engine work.
+#
+# NEEDS ONE RELIC HOOK EACH -- the cheapest remaining unlocks, act 3 first:
+#   Hungry for Mushrooms  Big Mushroom = +20 max HP AND draw 2 fewer each
+#       combat. The max HP is an existing hook; the draw penalty is not --
+#       `combat_start_draw` ignores negative amounts, and a negative draw is
+#       not a discard anyway, it is a smaller OPENING hand. Shipping the
+#       relic without it would be a straight buff, so the event waits.
+#   The Lost Wisp         Lost Wisp = whenever you play a Power, 8 damage to
+#       ALL enemies. Needs an on-card-played combat hook.
+#   Doll Room             Bing Bong (adding a card adds a second copy),
+#       Daughter of the Wind (+1 block per resolved Attack), Mr. Struggles
+#       (turn-start AoE equal to the turn number). Three new hooks, and the
+#       event also wants a "choose 1 of N relics" op -- `ancient_pick` is
+#       already the valuation that op would use.
+#   Room Full of Cheese   The Chosen Cheese = +1 max HP at end of each
+#       combat. `post_fight` returns (gold, hp) and would need max_hp too.
+#       This is the substitution above; the hook retires it.
+# NEEDS A PUBLISHED NUMBER, not a hook:
+#   The Round Tea Party   Royal Poison's effect text is absent from the wiki
+#       (the Interactions section proves it causes HP loss; the magnitude and
+#       trigger are nowhere). Guessing it would be inventing content.
+#   Amalgamator           Ultimate Strike / Ultimate Defend carry their
+#       numbers only in the card infobox, which the API does not render.
+# NEEDS A CARD WE CANNOT EXPRESS:
+#   Spirit Grafter        Metamorphosis creates 3 random Attacks in the draw
+#       pile, free this combat. No card-creation op in tier0.
+#   Zen Weaver            Enlightenment sets every card in hand to cost 1.
+#       No cost-rewrite op.
+#   Potion Courier        Foul Potion. Without it, "3 Foul Potions" would be
+#       strictly better than "1 random potion" and the event would invert.
+# NEEDS A NEXT-COMBAT BUFF CHANNEL:
+#   Tea Master            upgrade next combat's opening hand / +2 Strength for
+#       5 combats / 2 Dazed into the next draw pile. Relics inject into
+#       combat; events have no such channel yet.
+# NEEDS RELIC RARITY + A DELAYED GRANT:
+#   Welcome to Wongo's    common/rare relic tiers, "3 relics after 5 combats",
+#       and a `downgrade` targeting op.
+# NEEDS TO GIVE UP A HELD RELIC:
+#   Ranwid the Elder      third option trades a relic for two. HeldRelics has
+#       no removal (its combat effects are accumulated on add).
+#   Relic Trader          options are generated from held relics; the wiki
+#       page has no static text to harvest.
+#
+# Underdocks (the Act 1 ALTERNATE we do not model) is out of scope entirely:
+#   Abyssal Baths, Doors of Light and Dark, Drowning Beacon, Endless
+#   Conveyor, Punch Off, Spiraling Whirlpool, Sunken Treasury, Trash Heap,
+#   Waterlogged Scriptorium, The Sunken Statue.

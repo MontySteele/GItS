@@ -1,199 +1,439 @@
-# StS2 event harvest -- ALL 46 events, options only, 2026-07-24.
+# StS2 event harvest -- every event page in Category:Events with the
+# `Slay the Spire 2:` namespace prefix. 57 events, 2026-07-25.
 #
 # Machine-extracted from slaythespire.wiki.gg wikitext via the MediaWiki API
-# (action=query&prop=revisions), then template-stripped. This is the raw
-# companion to docs/sts2-map-and-events-research.md, kept verbatim so the
-# curated subset in that doc can always be checked against the source without
-# a second harvest. Template stripping is lossy in places -- where an option
-# reads oddly (a bare "Frame|X" mid-line, a dangling category name), the wiki
-# page is the authority, not this file.
+# (action=query&prop=revisions&rvslots=main), then template-stripped. Kept
+# verbatim so the curated pool in tier05/content/events.yaml can always be
+# checked against the source without a re-harvest.
 #
-# [all] = every act.  [act1] here is Overgrowth + all-acts, which is the set
-# matching our Overgrowth-based act1_pool.yaml. Underdocks events were not
-# harvested; they belong to the Act 1 alternate we do not model.
+# THIS REPLACES the 2026-07-24 harvest, which queried the page titles WITHOUT
+# the namespace prefix and therefore pulled partial pages: The Trial and
+# Tinker Time came back with no options at all, and Ranwid the Elder, Relic
+# Trader, Potion Courier and Stone of All Time came back mangled. Anything in
+# docs/sts2-map-and-events-research.md §2.3/§2.4 that disagrees with this file
+# was written from the bad harvest -- THIS file is the authority.
+#
+# Act tags come from each page's own "found (exclusively) in ..." line, so
+# multi-act events (Brain Leech, Room Full of Cheese, Symbiote, Ranwid) are
+# tagged with every act the wiki lists. `act1-alt` is the Underdocks, the
+# Act 1 alternate we do not model. `?` means the page states no location.
+#
+# Template stripping is lossy in places -- where an option reads oddly, the
+# wiki page is the authority, not this file.
 
 
-### [all] Self-Help Book
-    [Read the Back] Choose an to KW|Enchant|Enchant|2 with KW|Sharp|Sharp|2 2.
-    [Read a Random Passage] Choose a to KW|Enchant|Enchant|2 with KW|Nimble|Nimble|2 2.
-    [Read the Entire Book] Choose a to KW|Enchant|Enchant|2 with KW|Swift|Swift|2 2.
-    [Move On] Nothing happens. * Options are only available if you have a valid card to apply the enchantment to. Move On is only available if you have no valid cards.
+### [act1-alt] Abyssal Baths
+    [Immerse] Gain 2 Max HP. Take 3 damage.
+    * After immersing, additional stages follow with escalating damage:
+    **
+    [Linger] Gain 2 Max HP. Take 3=increasing damage (3=+1 per Linger: 4, 5, 6, 7, 8, 9, 10...).
+    **
+    [Exit Baths] can be chosen at any stage to leave.
+    [Abstain] Heal 10 HP.
 
-### [all] Slippery Bridge
-    [Overcome] [Specific card] is removed from your deck.
-    [Hold On] Lose 3 HP. The card in the above option is randomized.
+### [act2] Amalgamator
+    [Combine Strikes] Remove 2 Strike (Ironclad). Add Ultimate Strike to your Deck.
+    [Combine Defends] Remove 2 Defend (Ironclad). Add Ultimate Defend to your Deck.
 
-### [all] The Future of Potions?
-    [Insert Common Potion] Lose a specified Common Potions. Obtain an KW|Upgrade|Upgraded|2 [/] card reward.
-    [Insert Uncommon Potion] Lose a specified Uncommon potion. Obtain an Upgraded [Attack/Skill/] card reward.
-    [Insert Rare Potion] Lose a specified Rare potion. Obtain an Upgraded [Attack/Skill/Power] card reward.
-    [Insert Event Potion] Lose a specified Event potion. Obtain an Upgraded Rare [Attack/Skill/Power] card reward.
-    [Insert Token Potion] Lose a specified Token potion. Obtain an Upgraded Common [Attack/Skill] card reward.
-
-### [all] This or That?
-    [This] Lose 6 HP. Gain 57 Gold.
-    [That] Add Clumsy to your Deck. Obtain a random Relic.
-
-### [act1] Aroma of Chaos  (Overgrowth)
+### [act1] Aroma of Chaos
     [Let Go] Transform a card in your Deck.
     [Maintain Control] Upgrade a card in your Deck.
 
-### [act1] Brain Leech
+### [act3] Battleworn Dummy
+    [Setting 1] Fight a 75 HP dummy. Procure 1 random Potion.
+    [Setting 2] Fight a 150 HP dummy. Upgrade 2 random cards.
+    [Setting 3] Fight a 300 HP dummy. Obtain a random Relic.
+    * You have 3 turns to defeat the dummy. Failing results in no reward.
+
+### [act1/act1-alt/act2] Brain Leech
     [Share Knowledge] Choose 1 of 5 random cards to add to your deck.
-    [Rip the Leech Off] Lose 5 HP. Gain a card reward.
+    [Rip the Leech Off] Lose 5 HP. Gain a Cards color:Colorless Colorless 2 card reward.
 
-### [act1] Byrdonis Nest  (Overgrowth)
-    [Eat the Egg] Gain 7 Max HP.
-    [Take the Egg] Add Byrdonis Egg to deck.
-
-### [act1] Dense Vegetation  (Overgrowth)
-    [Trudge On] 
-    [Rest] Heal HP (rest site amount). Fight 4 Wrigglers.
-
-### [act1] Jungle Maze Adventure  (Overgrowth)
-    [Solo Quest] Gain 135-165 Gold. Lose 18 HP.
-    [Join Forces] Gain 35-65 Gold.
-
-### [act1] Luminous Choir  (Overgrowth)
-    [Reach into the Flesh] Remove 2 cards from Deck. Add Spore Mind (curse) to Deck.
-    [Offer Tribute] Pay 99-149 Gold. Obtain a random Relics.
-
-### [act1] Morphic Grove  (Overgrowth)
-    [Group] Lose ALL of your Gold. Transform 2 cards.
-    [Loner] Gain 5 Max HP.
-
-### [act1] Room Full of Cheese  (Overgrowth)
-    [Gorge] Choose 2 of 8 random cards to add to your Deck. * The 8 cards will not contain any duplicates. Frame|Search Lose 14 HP. Obtain The Chosen Cheese (relic). * The Chosen Cheese: At the end of combat, gain 1 Max HP.
-
-### [act1] Sapphire Seed  (Overgrowth)
-    [Consume] Heal 9 HP. Upgrade a card in your Deck.
-    [Plant and Nourish] Enchant a card with Sown.
-
-### [act1] Tablet of Truth  (Overgrowth)
-    [Smash] Heal 20 HP.
-    [Decipher] Lose 3 Max HP. Upgrade a random card. * If Decipher is chosen, additional stages follow with escalating costs: ** Stage 2: Lose 6 Max HP. Upgrade a random card. ** Stage 3: Lose 12 Max HP. Upgrade a random card. ** Stage 4: Lose 24 Max HP. Upgrade a random card. ** Stage 5: Lose [all but 1] Max HP. Upgrade ALL cards in your deck. * Frame|Give Up can be chosen at any stage to leave.
-
-### [act1] Tea Master  (Overgrowth)
-    [Bone Tea] Pay 50 Gold. At the start of the next combat, Upgrade your starting hand.
-    [Ember Tea] Pay 150 Gold. At the start of the next 5 combats, gain 2 Strength.
-    [Tea of Discourtesy] At the start of the next combat, shuffle 2 Dazed into your Draw Pile.
-
-### [act1] The Legends Were True
-    [Nab the Map] Receive the Spoils Map. Frame|Slowly Find an Exit Lose 8 HP. Procure 1 random Potion.
-
-### [act1] Unrest Site  (Overgrowth)
-    [Rest Anyways] Heal to full HP. Receive Poor Sleep (curse).
-    [Kill the Trees] Lose 8 Max HP. Obtain a random Relics.
-
-### [act1] Wellspring  (Overgrowth)
-    [Bottle] Procure 1 random Potions.
-    [Bathe] Remove 1 card from Deck. Add 1 Guilty (curse) to Deck.
-
-### [act1] Whispering Hollow  (Overgrowth)
-    [Exchange Gold] Lose 50 Gold. Procure 2 random Potions.
-    [Hug the Tree] Lose 9 HP. Choose a card to Transform.
-
-### [act1] Wood Carvings  (Overgrowth)
-    [Bird] Choose 1 starter card to Transform into Peck.
-    [Snake] Enchant 1 card with Slither. (Locked if no cards can be enchanted with Slither)
-    [Torus] Choose 1 starter card to Transform into Toric Toughness.
-
-### [act2] Amalgamator  (Hive)
-    [Combine Strikes] Remove 2 C|Strike (Ironclad)|Strikes|2. Add Ultimate Strike to your Deck.
-    [Combine Defends] Remove 2 C|Defend (Ironclad)|Defends|2. Add Ultimate Defend to your Deck.
-
-### [act2] Bugslayer  (Hive)
+### [act2] Bugslayer
     [Learn Extermination Technique] Add Exterminate to your Deck.
     [Learn Squash Technique] Add Squash to your Deck.
 
-### [act2] Colorful Philosophers  (Hive)
-    [Red] Obtain 3 Ironclad cards. * Frame|Green Obtain 3 Silent cards. * Frame|Blue Obtain 3 Defect cards. * Frame|Pink Obtain 3 Necrobinder cards. * Frame|Orange Obtain 3 Regent cards.
+### [act1] Byrdonis Nest
+    [Eat the Egg] Gain 7 Max HP.
+    [Take the Egg] Add Byrdonis Egg to deck.
 
-### [act2] Colossal Flower  (Hive)
+### [act2] Colorful Philosophers
+    Up to 3 options are shown, chosen from other characters' card pools (excluding your current character). Each option offers 3 card rewards (1 Common, 1 Uncommon, 1 Rare) from that character's pool:
+    *
+    [Red] Obtain 3 Ironclad cards.
+    *
+    [Green] Obtain 3 Silent cards.
+    *
+    [Blue] Obtain 3 Defect cards.
+    *
+    [Pink] Obtain 3 Necrobinder cards.
+    *
+    [Orange] Obtain 3 Regent cards.
+    ===Interactions===
+    * If the player has Prismatic Gem and/or Dingy Rug:
+    ** If the player has Prismatic Gem, then regardless of the option chosen, the resulting card rewards will include cards from ''all'' the characters, including the current character.
+    ** If the player has Dingy Rug, the resulting card rewards will include Cards color:Colorless Colorless cards in addition to cards of the chosen color.
+    ** If the player has Prismatic Gem ''and'' Dingy Rug, then whichever Relic was picked up ''first'' will impose its respective card rewards modification, and the other will ''not''.
+    *** E.g. if Prismatic Gem was picked up first, then the card rewards will include cards from ''all'' the characters, including the current character, but ''not'' include Cards color:Colorless Colorless cards.
+    * Driftwood allows the card rewards to be rerolled.
+    * Pael's Wing allows the card rewards to be sacrificed for an eventual Relic.
+    * Wing Charm applies Swift 1 to one of the cards in each reward.
+    * Molten Egg, Toxic Egg, and Frozen Egg Upgrade their respective card types as intended.
+
+### [act2] Colossal Flower
     [Extract Nectar] Gain 35 Gold.
-    [Reach Deeper] Lose 5 HP. Advance to the next level. * Level 2: Frame|Extract Nectar Gain 75 Gold. / Frame|Reach Deeper Lose 6 HP. * Level 3: Frame|Extract Nectar Gain 135 Gold. / Frame|Enter the Center Lose 7 HP. Obtain Pollinous Core.
+    [Reach Deeper] Lose 5 HP. Advance to the next level.
+    * Level 2:
+    [Extract Nectar] Gain 75 Gold. /
+    [Reach Deeper] Lose 6 HP.
+    * Level 3:
+    [Extract Nectar] Gain 135 Gold. /
+    [Enter the Center] Lose 7 HP. Obtain Pollinous Core.
 
-### [act2] Crystal Sphere  (Hive)
+### [act2/act3] Crystal Sphere
     [Uncover Future] Pay 51-99 Gold. Divine 3 times.
     [Payment Plan] Gain a Debt. Divine 6 times.
+    === Mechanics ===
+    thumb|The Crystal Sphere minigame with the grid in the middle and the 2 size options for divining on the right
+    The event first presents the player with a choice between two options. Both of them lead to the same minigame in which the player uncovers a crystal sphere for rewards. In the center of the screen is an 11x11 grid with rounded corners. The tiles start of unrevealed and have to be revealed in order to uncover the hidden rewards. Most of the rewards are larger than a single 1x1 tile and have to be uncovered ''completely'' before gaining them.
+    The tiles are uncovered via the process of '''Divination'''. Depending on the option chosen at the beginning, the player can divine 3 or 6 times in total. The 2 options for divining are a '''Small Divination''' which uncovers only a single tile, and a '''Big Divination''' which reveals a 3x3 area. Both options count as 1 "use" for the total number of divinations. At the end of the minigame, the player is presented with a list of all the rewards they managed to find - these can be picked in any order or skipped entirely. The only exception to this is if uncovering the hidden curse Doubt, which is added instantly to the deck.
+    Note that even though the box for the relic is viewed from an angled perspective, it still has the size of a 4x4 square, meaning it is not possible to uncover it completely with only 3 divinations.
+    {| class="wikitable"
+    |+ List of rewards
+    !Icon
+    !Description
+    !Size (Width x Height)
+    |-
+    |60px|middle
+    |1 Relic
+    |4x4
+    |-
+    |30px|center|middle
+    |2 common Potions
+    |1x3
+    |-
+    |60px|middle
+    |1 rare Potion
+    |2x2
+    |-
+    |60px|middle
+    |1 common Card reward
+    |2x2
+    |-
+    |60px|middle
+    |1 uncommon Card reward
+    |2x2
+    |-
+    |60px|middle
+    |1 rare Card reward
+    |2x2
+    |-
+    |60px|middle
+    |1 Doubt
+    |2x2
+    |-
+    |60px|middle
+    |5 small piles of Gold (worth 10 Gold each)
+    |1x1
+    |-
+    |60px|middle
+    |2 big piles of Gold (worth 30 Gold each)
+    |2x1
+    |}
 
-### [act2] Doll Room  (Hive)
+### [act1] Dense Vegetation
+    [Trudge On]
+    One of the following options is randomly offered:
+    * Remove a card from Deck. Lose 11 HP.
+    * or Gain 64 gold Lose 8 HP.
+    [Rest] Heal HP (rest site amount). Fight 4 Wrigglers.
+
+### [act2] Doll Room
     [Pick at Random] Obtain a random Doll Relic
     [Take Some Time] Lose 5 HP. Choose 1 of 2 Doll Relics
     [Examine Each and Make the Best Choice] Lose 15 HP. Choose 1 of 3 Doll Relics
 
-### [act2] Field of Man-Sized Holes  (Hive)
-    [Enter Your Hole] Enchant a card with Perfect Fit.
+### [act1-alt] Doors of Light and Dark
+    [Light Door] Upgrade 2 random cards.
+    [Dark Door] Remove 1 card from Deck.
+
+### [act1-alt] Drowning Beacon
+    [Bottle] Procure 1 Glowwater Potion 2.
+    [Climb] Lose 13 Max HP. Obtain Fresnel Lens (relic).
+
+### [act1-alt] Endless Conveyor
+    [Grab Something Off the Belt] Pay 40 Gold. Receive a random dish (see below).
+    * After each grab, you may continue grabbing or Leave.
+    [Observe the Chef] Upgrade a random card.
+    === Dishes ===
+    Each grab serves a random dish from the belt (40 Gold each, except Golden Fysh which is free):
+    {| class="wikitable" style="width: 650px;"
+    ! Dish !! Effect !! Weight !! Notes
+    |-
+    | Caviar || Gain 4 Max HP. || 6 ||
+    |-
+    | Clam Roll || Heal 10 HP. || 6 || Only if not at full HP.
+    |-
+    | Spicy Snappy || Upgrade a random card. || 3 ||
+    |-
+    | Jelly Liver || Transform a card. || 3 ||
+    |-
+    | Fried Eel || Add a random Colorless card to Deck. || 3 ||
+    |-
+    | Suspicious Condiment || Procure a random Potion. || 3 || Only if potion slots available.
+    |-
+    | Golden Fysh || Gain 75 Gold (free). || 1 || Only appears after 2+ grabs.
+    |-
+    | Seapunk Salad || Add Feeding Frenzy to Deck. || — || Forced every 5th grab.
+    |}
+    * The same dish cannot appear twice in a row.
+    * Requires at least 120 Gold on every player to appear.
+
+### [act2] Field of Man-Sized Holes
+    [Enter Your Hole] Enchant]] a card with Perfect Fit.
     [Resist] Remove 2 cards from your Deck. Add Normality (curse) to your Deck.
-
-### [act2] Infested Automaton  (Hive)
-    [Study] Obtain a random QueryCards||Power||2.
-    [Touch the Core] Obtain a random 0 cost card.
-
-### [act2] Potion Courier  (Hive)
-    [Grab Potions] Procure 3 P|Foul Potion|Foul Potions|2. Frame|Ransack Procure 1 random .
-
-### [act2] Ranwid the Elder  (Hive)
-    [Give <specific> Potion] Obtain a random Relics. Frame|Give 100 Gold Obtain a random Relics. Frame|Give Obtain 2 random Relics.
-
-### [act2] Relic Trader  (Hive)
-    [Take the Top One] Trade for . Frame|Take the Middle One Trade for . Frame|Take the Bottom One Trade for .
-
-### [act2] Spirit Grafter  (Hive)
-    [Let It In] Heal 25 HP. Add Metamorphosis to Deck.
-    [Rejection] Lose 9 HP. Remove 1 card from your Deck.
-
-### [act2] Stone of All Time  (Hive)
-    [Drink and Lift] Lose a random Potions. Gain 10 max HP. Frame|Push Lose 6 HP. Enchant an attack with Vigorous 8.
-
-### [act2] Symbiote  (Hive)
-    [Approach] Enchant an Attack with Corrupted.
-    [Kill with Fire] Chose a card to Transform.
-
-### [act2] The Lantern Key  (Hive)
-    [Return the Key] Gain 100 Gold.
-    [Keep the Key] Enter combat against a Mysterious Knight for the Lantern Key card.
-
-### [act2] The Lost Wisp  (Hive)
-    [Capture the Wisp] Add Decay (curse) to Deck. Obtain the Lost Wisp (relic).
-    [Search the Nearby Area] Gain 45-75 Gold.
-
-### [act2] Welcome to Wongo's  (Hive)
-    [Wongo's Bargain Bin] Pay 100 Gold. Obtain 1 random Common Relics. * Player also receives 32 Wongo Points.
-    [Wongo's Featured Item] Pay 200 Gold. Obtain [Rare Relic]. * This relic is randomly selected from the rare relics in the standard relic pool, and will be displayed by name in the event option. * Player also receives 8 Wongo Points.
-    [Wongo's Mystery Box] Pay 300 Gold. Obtain 3 random Relics after 5 combats. * Player obtains Wongo's Mystery Ticket. * Player also receives 16 Wongo Points.
-    [Leave] Downgrade a random card.
-
-### [act2] Zen Weaver  (Hive)
-    [Breathing Techniques] Pay 50 Gold. Add 2 Enlightenment to your Deck.
-    [Emotional Awareness] Pay 125 Gold. Remove 1 card from your Deck.
-    [Arachnid Acupuncture] Pay 250 Gold. Remove 2 cards from your Deck. * Emotional Awareness and Arachnid Acupuncture are locked if you don't have enough Gold.
-
-### [act3] Battleworn Dummy
-    [Setting 1] Fight a 75 HP Battle Friend V1.0. Procure 1 random Potions.
-    [Setting 2] Fight a 150 HP Battle Friend V2.0. Upgrade 2 random cards.
-    [Setting 3] Fight a 300 HP Battle Friend V3.0. Obtain a random Relics. * You have 3 turns to defeat the dummy. Failing results in no reward.
 
 ### [act3] Grave of the Forgotten
     [Accept the Forgotten Soul] Obtain Forgotten Soul (relic).
-    [Confront with Truth] Add Decay (curse) to your Deck. Enchant a card that KW|Exhaust|Exhausts|2 with Soul's Power. * Confront is locked if you have no cards with Exhaust that can be KW|Enchant|Enchanted|2.
+    [Confront with Truth] Add Decay (curse) to your Deck. Enchant a card that Exhaust with Soul's Power.
+    * Confront is locked if you have no cards with Exhaust that can be Enchant.
 
 ### [act3] Hungry for Mushrooms
     [Big Mushroom] Obtain Big Mushroom (relic).
-    [Fragrant Mushroom] Obtain Fragrant Mushroom (relic). * Fragrant Mushroom: Upon pickup, lose 15 HP and Upgrade 3 random cards.
+    * Big Mushroom: Upon pickup, raise your Max HP by 20. At the start of each combat, draw 2 fewer cards.
+    [Fragrant Mushroom] Obtain Fragrant Mushroom (relic).
+    * Fragrant Mushroom: Upon pickup, lose 15 HP and Upgrade 3 random cards.
+
+### [act2] Infested Automaton
+    [Study] Obtain a random Power 2.
+    [Touch the Core] Obtain a random 0 cost card.
+
+### [act1] Jungle Maze Adventure
+    [Solo Quest] Gain 135-165 Gold. Lose 18 HP.
+    [Join Forces] Gain 35-65 Gold.
+
+### [act1] Luminous Choir
+    [Reach into the Flesh] Remove 2 cards from Deck. Add Spore Mind (curse) to Deck.
+    [Offer Tribute] Pay 99-149 Gold. Obtain a random Relic.
+
+### [act1] Morphic Grove
+    [Group] Lose ALL of your Gold. Transform 2 cards.
+    [Loner] Gain 5 Max HP.
+
+### [act2/act3] Potion Courier
+    [Grab Potions] Procure 3 Foul Potion Foul Potions 2.
+    [Ransack] Procure 1 random Potions rarity:Uncommon Uncommon Potion 2.
+
+### [act1-alt] Punch Off
+    [Nab] Add Injury (curse) to Deck. Obtain a random Relic.
+    [I Can Take Them] Enter combat against 2 Punch Construct Punch Constructs 2 for greater rewards.
+    * Obtain a random Relic, a random Potion, and a standard combat reward.
+    * Each Punch Construct 2 starts off slightly damaged, missing between 2 and 9 HP.
+
+### [act2/act3] Ranwid the Elder
+    [Give Potion] Obtain a random Relic.
+    [Give 100 Gold] Obtain a random Relic.
+    [Give ] Obtain 2 random Relics.
 
 ### [act3] Reflections snoitcelfeR
     [Touch a Mirror] Downgrade 2 random cards. Upgrade 4 random cards.
     [Shatter] Duplicate your entire Deck. Add Bad Luck (curse) to your Deck.
 
+### [act2/act3] Relic Trader
+    [Take the Top One] Trade for .
+    [Take the Middle One] Trade for .
+    [Take the Bottom One] Trade for .
+
+### [act1/act1-alt/act2] Room Full of Cheese
+    [Gorge] Choose 2 of 8 random Cards rarity:Common Common 2 cards to add to your Deck.
+    * The 8 cards will not contain any duplicates.
+    [Search] Lose 14 HP. Obtain The Chosen Cheese (relic).
+    * The Chosen Cheese: At the end of combat, gain 1 Max HP.
+
+### [act1] Sapphire Seed
+    [Consume] Heal 9 HP. Upgrade a card in your Deck.
+    [Plant and Nourish] Enchant a card with Sown.
+
+### [?] Self-Help Book
+    [Read the Back] Choose an Cards type:Attack Attack 2 to Enchant with Sharp 2.
+    [Read a Random Passage] Choose a Cards type:Skill Skill 2 to Enchant with Nimble 2.
+    [Read the Entire Book] Choose a Cards type:Power Power 2 to Enchant with Swift 2.
+    [Move On] Nothing happens.
+    * Options are only available if you have a valid card to apply the enchantment to. Move On is only available if you have no valid cards.
+
+### [all] Slippery Bridge
+    [Overcome] [Specific card] is removed from your deck.
+    [Hold On] Lose 3 HP. The card in the above option is randomized.
+    === Mechanics ===
+    * Choosing Hold On replaces the listed card with another chosen at random, and the event continues to ask you to choose between these options until you choose Overcome.
+    * Each time Hold On is selected, the HP cost increases by 1.
+    * The card is chosen randomly from all your cards without Eternal.
+    * The first card chosen will never be Basic rarity (unless all of your cards are Basic). Basic cards can be chosen during rerolls.
+    * The same card will never be chosen twice (unless it has already offered to remove all other cards in your deck at least once).
+
+### [act1-alt] Spiraling Whirlpool
+    [Observe] Enchant a Basic Strike (Ironclad) or Defend (Ironclad) with Spiral.
+    [Drink] Heal 33% of Max HP.
+
+### [act2] Spirit Grafter
+    [Let It In] Heal 25 HP. Add Metamorphosis to Deck.
+    [Rejection] Lose 9 HP. Remove 1 card from your Deck.
+
+### [act2] Stone of All Time
+    [Drink and Lift] Lose a random potion. Gain 10 max HP.
+    [Push] Lose 6 HP. Enchant an attack with Vigorous 8.
+
+### [act1-alt] Sunken Treasury
+    [First Chest] Gain 52-68 Gold.
+    [Second Chest] Gain 303-363 Gold. Add Greed (curse) to Deck.
+
+### [act2/act3] Symbiote
+    [Approach] Enchant an Attack with Corrupted.
+    [Kill with Fire] Chose a card to Transform.
+
+### [act1] Tablet of Truth
+    [Smash] Heal 20 HP.
+    [Decipher] Lose 3 Max HP. Upgrade a random card.
+    * If Decipher is chosen, additional stages follow with escalating costs:
+    ** Stage 2: Lose 6 Max HP. Upgrade a random card.
+    ** Stage 3: Lose 12 Max HP. Upgrade a random card.
+    ** Stage 4: Lose 24 Max HP. Upgrade a random card.
+    ** Stage 5: Lose [all but 1] Max HP. Upgrade ALL cards in your deck.
+    *
+    [Give Up] can be chosen at any stage to leave.
+
+### [act1/act1-alt/act2] Tea Master
+    [Bone Tea] Pay 50 Gold. At the start of the next combat, Upgrade your starting hand.
+    [Ember Tea] Pay 150 Gold. At the start of the next 5 combats, gain 2 Strength.
+    [Tea of Discourtesy] At the start of the next combat, shuffle 2 Dazed into your Draw Pile.
+
+### [all] The Future of Potions_
+    [Insert Common Potion] Lose a specified Common potion. Obtain an Upgrade Cards rarity:Common Common 2 [Cards type:Attack Attack 2/Cards type:Skill Skill 2] card reward.
+    [Insert Uncommon Potion] Lose a specified Uncommon potion. Obtain an Upgraded Cards rarity:Uncommon Uncommon 2 [Attack/Skill/Cards type:Power Power 2] card reward.
+    [Insert Rare Potion] Lose a specified Rare potion. Obtain an Upgraded Cards rarity:Rare Rare 2 [Attack/Skill/Power] card reward.
+    [Insert Event Potion] Lose a specified Event potion. Obtain an Upgraded Rare [Attack/Skill/Power] card reward.
+    * The only Event potions are Foul Potion 2 and Glowwater Potion 2.
+    [Insert Token Potion] Lose a specified Token potion. Obtain an Upgraded Common [Attack/Skill] card reward.
+    * The only Token potion is Potion-Shaped Rock 2.
+    === Mechanics ===
+    * The first 3 potions in your potion slots are chosen as options to insert, prioritizing the leftmost potions. This can include multiple potions of the same rarity.
+    * The rarity of the card reward depends on the rarity of the potion inserted.
+    * Each option randomly specifies whether it gives an Attack, Skill, or Power card reward.
+
+### [act2] The Lantern Key
+    [Return the Key] Gain 100 Gold.
+    [Keep the Key] Enter combat against a Mysterious Knight for the Lantern Key card.
+
+### [act1/act1-alt] The Legends Were True
+    [Nab the Map] Receive the Spoils Map.
+    [Slowly Find an Exit] Lose 8 HP. Procure 1 random Potion.
+
+### [act2] The Lost Wisp
+    [Capture the Wisp] Add Decay (curse) to Deck. Obtain the Lost Wisp (relic).
+    [Search the Nearby Area] Gain 45-75 Gold.
+
+### [act2/act3] The Merchant___
+    <<NO OPTIONS SECTION ON PAGE>>
+
 ### [act3] The Round Tea Party
     [Enjoy Your Tea] Obtain Royal Poison (relic). Heal to full HP.
-    [Pick a Fight] Lose 11 HP. Obtain a random Relics.
+    [Pick a Fight] Lose 11 HP. Obtain a random Relic.
+
+### [act1/act1-alt] The Sunken Statue
+    [Grab the Sword] Obtain Sword of Stone (relic).
+    [Dive into the Water] Gain 101-121 Gold. Lose 7 HP.
 
 ### [act3] The Trial
+    One of three trials is randomly selected. Every trial presents two verdicts:
+    === Merchant Trial ===
+    [DECIDE: Guilty] Add Regret (curse) to your Deck. Obtain 2 random Relics.
+    [DECIDE: Innocent] Add Shame (curse) to your Deck. Upgrade 2 cards.
+    === Noble Trial ===
+    [DECIDE: Guilty] Heal 10 HP.
+    [DECIDE: Innocent] Add Regret (curse) to your Deck. Gain 300 Gold.
+    === Nondescript Trial ===
+    [DECIDE: Guilty] Add Doubt (curse) to your Deck. Gain 2 card rewards.
+    [DECIDE: Innocent] Add Doubt (curse) to your Deck. Transform 2 cards.
+
+### [?] This or That_
+    [This] Lose 6 HP. Gain 57 Gold.
+    [That] Add Clumsy to your Deck. Obtain a random Relic.
 
 ### [act3] Tinker Time
+    This event lets you create a custom Mad Science card by choosing a card type and a rider effect.
+    === Step 1: Choose Card Type ===
+    *
+    [Weapon] Create an Attack. (Deal 12 damage.)
+    *
+    [Protector] Create a Skill. (Gain 8 Block.)
+    *
+    [Gadget] Create a Power.
+    Two of the three types are offered at random.
+    === Step 2: Choose Rider Effect ===
+    Two rider effects are offered at random from the type's pool:
+    '''Attack Riders:'''
+    * '''Sapping''' — Apply 2 Weak. Apply 2 Vulnerable.
+    * '''Violence''' — Hits 2 additional times.
+    * '''Choking''' — Whenever you play a card this turn, the enemy loses 6 HP.
+    '''Skill Riders:'''
+    * '''Energized''' — Gain 2 energy.
+    * '''Wisdom''' — Draw 3 cards.
+    * '''Chaos''' — Add a random card into your Hand. It's free to play this turn.
+    '''Power Riders:'''
+    * '''Expertise''' — Gain 2 Strength. Gain 2 Dexterity.
+    * '''Curious''' — Powers cost 1 less.
+    * '''Improvement''' — At the end of combat, Upgrade a random card.
 
-### [act3] War Historian, Repy  (Glory)
-    [Unlock the Cage] Lose C|Lantern Key|Lantern Key|2. Obtain R|History Course|History Course|2.
-    [Unlock the Chest] Lose C|Lantern Key|Lantern Key|2. Procure 2 random Potions. Obtain 2 random Relics. * If you still have a Lantern Key in your deck afterwards (this can happen if the card is duplicated beforehand), the other option must also be chosen.
+### [act1-alt] Trash Heap
+    [Dive In] Lose 8 HP. Obtain a random Relic.
+    * The Relic is randomly chosen from among Darkstone Periapt, Dream Catcher, Hand Drill, Maw Bank, and The Boot (with equal probabilities for each).
+    [Grab Random Junk] Gain 100 Gold. Obtain a random card.
+    * The card is randomly chosen from among Caltrops, Distraction, Outmaneuver, Clash, Dual Wield, Entrench, Hello World, Rebound, Stack, and Rip and Tear (with equal probabilities for each).
+
+### [act1] Unrest Site
+    [Rest Anyways] Heal to full HP. Receive Poor Sleep (curse).
+    [Kill the Trees] Lose 8 Max HP. Obtain a random Relic.
+
+### [act2/act3] War Historian, Repy
+    [Unlock the Cage] Lose Lantern Key. Obtain History Course.
+    [Unlock the Chest] Lose Lantern Key. Procure 2 random Potions. Obtain 2 random Relics.
+    * If you still have a Lantern Key in your deck afterwards (this can happen if the card is duplicated beforehand), the other option must also be chosen.
+
+### [act1-alt] Waterlogged Scriptorium
+    [Bloody Ink] Gain 6 Max HP.
+    [Tentacle Quill] Pay 55 Gold. Enchant a card with Steady.
+    [Prickly Sponge] Pay 99 Gold. Enchant 2 cards with Steady.
+    * Tentacle Quill and Prickly Sponge are locked if you don't have enough Gold.
+
+### [act2] Welcome to Wongo's
+    [Wongo's Bargain Bin] Pay 100 Gold. Obtain 1 random Common Relic.
+    * Player also receives 32 Wongo Points.
+    [Wongo's Featured Item] Pay 200 Gold. Obtain [Rare Relic].
+    * This relic is randomly selected from the rare relics in the standard relic pool, and will be displayed by name in the event option.
+    * Player also receives 8 Wongo Points.
+    [Wongo's Mystery Box] Pay 300 Gold. Obtain 3 random Relics after 5 combats.
+    * Player obtains Wongo's Mystery Ticket.
+    * Player also receives 16 Wongo Points.
+    [Leave] Downgrade]] a random card.
+    ===Wongo Points===
+    After any purchase, the player will receive Wongo Points based on which purchase they selected. Wongo Points persist between all of the player's runs on their profile (across all characters), and the event text will display how many total Wongo Points the player has after making a purchase, as well as how many more points are needed to reach 2000 total points.
+    Once the player reaches 2000 total Wongo Points, they will receive the Wongo Customer Appreciation Badge, which does nothing.
+
+### [act1] Wellspring
+    [Bottle] Procure 1 random Potion.
+    [Bathe] Remove 1 card from Deck. Add 1 Guilty (curse) to Deck.
+
+### [act1] Whispering Hollow
+    [Exchange Gold] Lose 50 Gold. Procure 2 random Potions.
+    [Hug the Tree] Lose 9 HP. Choose a card to Transform.
+
+### [act1] Wood Carvings
+    [Bird] Choose 1 starter card to Transform into Peck.
+    [Snake] Enchant 1 card with Slither. (Locked if no cards can be enchanted with Slither)
+    [Torus] Choose 1 starter card to Transform into Toric Toughness.
+
+### [act2] Zen Weaver
+    [Breathing Techniques] Pay 50 Gold. Add 2 Enlightenment to your Deck.
+    [Emotional Awareness] Pay 125 Gold. Remove 1 card from your Deck.
+    [Arachnid Acupuncture] Pay 250 Gold. Remove 2 cards from your Deck.
+    * Emotional Awareness and Arachnid Acupuncture are locked if you don't have enough Gold.
