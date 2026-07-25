@@ -84,6 +84,16 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     public static int Count(Creature creature) =>
         creature.Powers.OfType<SalonMemberPower>().FirstOrDefault()?.Amount ?? 0;
 
+    /// <summary>
+    /// The company in SLOT ORDER, for the visual layer only (animation sprint
+    /// 2, Funnel Contract §1: the stage is slot-index-keyed and duplicates are
+    /// legal, so the UI must read per-slot identity from state rather than
+    /// assume a fixed member-to-slot mapping). Read-only by construction — a
+    /// copy, so a display can never mutate the company.
+    /// </summary>
+    public static IReadOnlyList<SalonMember> CompanyOf(Creature owner) =>
+        CompanyFor(owner).ToList();
+
     private static List<SalonMember> CompanyFor(Creature owner)
     {
         if (!Company.TryGetValue(owner, out var list))

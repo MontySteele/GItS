@@ -52,10 +52,18 @@ offsets). Shipped: `layers/combat/klee_combat_*.png` (+ `layers_combat.json`),
 pre-scaled to the same 240x280 box the static model used — house rule: ship
 pre-sized art, no runtime minification. Both tiers F in `art/SOURCES.tsv`
 (derived from the already-ledgered wish splash). Layer PNGs are gitignored
-with the rest of ImageGen/images; `tools/cut_klee_combat_layers.py` (the
+with the rest of ImageGen/images; `tools/cut_combat_layers.py klee` (the
 committed cut — fences, partition, inpaint, export) regenerates all of them
 from the wish splash, and its printed offsets must match the sprite positions
 in `klee-mod/pck-src/klee/model/combat.tscn`.
+
+> Sprint-2 note (2026-07-24): the cut was originally a single-purpose script,
+> `tools/cut_klee_combat_layers.py`. Furina's rebuild made it the second
+> character through the same method, so it was generalized to
+> `tools/cut_combat_layers.py <character>` reading a per-character fence
+> config from `tools/combat_layer_fences/`. Klee's fences are config #1 and
+> `cut_combat_layers.py klee --check` asserts the move produced byte-identical
+> art (12/12 outputs).
 
 ## The combat model: no Spine required (Hexaghost proves it)
 Hexaghost's in-combat "model" is a Godot scene: TextureRect layers (a 512px core + five 256px orb layers) driven by an **AnimationPlayer + AnimationTree**, with GPUParticles2D for smoke/hurt effects. Champ, by contrast, uses a Spine rig (54KB .spskel + one 512×1024 atlas). We take the Hexaghost road:

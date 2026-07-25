@@ -1813,11 +1813,20 @@ reduced, with no full-resolution copy available through that chain. The
 artwork itself is the official HoYoverse character-card render, which the
 repo already holds at full resolution as art/raw/Furina_Card_2.png
 (1080x2160, same pose/expression/costume, background-composited rather than
-cut out). The cut therefore runs at 4.75x the preview's linear resolution
-with no softness compromise, and the transparent 227x440 serves as a
-registration prior for fencing her off the branded plate. The risk branch in
-the sprint plan ("accept softness or choose a different render") does NOT
-fire. Ledger row is F/high as with every prior asset.
+cut out). The risk branch in the sprint plan ("accept softness or choose a
+different render") does NOT fire. Ledger row is F/high as with every prior
+asset.
+
+CORRECTED at execution (same day), because this entry first recorded the
+wrong method: the cut does NOT run off the full-res twin. That twin has the
+branded plate composited BEHIND the character, so using it requires building a
+matte to strip logo/emblem/border before any fencing can start, and two
+automatic mattes were tried and failed. The Wikipedia file is ALREADY a clean
+alpha cutout -- exactly what the cutter consumes -- and the shipped combat
+layers live in a 240x280 box, so 227x440 -> 280 tall is a DOWNSCALE (0.64x),
+not a compromise. The combat rig is therefore cut from the cutout; the
+full-res twin is used for the B4 stills, which need crops rather than cutouts.
+No quality is lost at any surface, and a matte problem is avoided entirely.
 
 **Art sourcing (A3b), resolved at intake.** No individual full-body renders
 exist for the three Salon members — a File:-namespace hunt returns nothing

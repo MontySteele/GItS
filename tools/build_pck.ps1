@@ -99,6 +99,25 @@ if (Test-Path $layerSrc) {
     Copy-Item (Join-Path $layerSrc '*.png') -Destination $to
 }
 
+# Animation sprint 2 (Track B1): the same treatment for Furina, cut by
+# tools/cut_combat_layers.py furina.
+$furinaLayerSrc = Join-Path $src 'furina\model\layers\combat'
+if (Test-Path $furinaLayerSrc) {
+    $to = Join-Path $work 'furina\model\layers'
+    New-Item -ItemType Directory -Force -Path $to | Out-Null
+    Copy-Item (Join-Path $furinaLayerSrc '*.png') -Destination $to
+}
+
+# Animation sprint 2 (Track D1): Salon member stage sprites, cut by
+# tools/cut_salon_members.py. Silhouette-first mini-sprites for salon_stage.tscn.
+$salonSrc = Join-Path $src 'furina\salon'
+if (Test-Path $salonSrc) {
+    $to = Join-Path $work 'furina\salon'
+    New-Item -ItemType Directory -Force -Path $to | Out-Null
+    $files = Get-ChildItem $salonSrc -Filter *.png -ErrorAction SilentlyContinue
+    if ($files) { Copy-Item $files.FullName -Destination $to }
+}
+
 $furinaSrc = Join-Path $src 'furina'
 foreach ($d in 'ui', 'powers', 'relics', 'model') {
     $from = Join-Path $furinaSrc $d
@@ -511,7 +530,16 @@ $contractLines = @(
     'resource=res://klee/model/layers/klee_combat_dodoco.png',
     'resource=res://klee/build_id.tres',
     'resource=res://shared/gauge.tscn',
-    'resource=res://furina/ui/salon.tscn',
+    'resource=res://furina/ui/salon_stage.tscn',
+    'resource=res://furina/model/combat.tscn',
+    'resource=res://furina/model/layers/furina_combat_coat_back.png',
+    'resource=res://furina/model/layers/furina_combat_sword.png',
+    'resource=res://furina/model/layers/furina_combat_body.png',
+    'resource=res://furina/model/layers/furina_combat_hat.png',
+    'resource=res://furina/salon/member_usher.png',
+    'resource=res://furina/salon/member_chevalmarin.png',
+    'resource=res://furina/salon/member_crabaletta.png',
+    'resource=res://furina/vfx/spotlight_shine.tscn',
     'resource=res://klee/vfx/bomb_lob.tscn',
     'resource=res://klee/vfx/dodoco_pop.tscn',
     'resource=res://klee/ui/character_icon.tscn',

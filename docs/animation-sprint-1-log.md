@@ -72,7 +72,7 @@ passed); staged-package validation: OK end-to-end.
 
 ## Track B — Klee layered-PNG character
 
-Status: **CODE COMPLETE — [USER] motion look pass pending (B4).**
+Status: **COMPLETE — B4 APPROVED by [USER] 2026-07-24.**
 
 - B1 ✅ Layer cut from the wish splash (1069x1245) — but NOT the plan's
   nominal body/head/backpack/Dodoco: in this pose a head cut runs through
@@ -105,7 +105,12 @@ Status: **CODE COMPLETE — [USER] motion look pass pending (B4).**
   pair). AttackAnimDelay/CastAnimDelay already ship at 0.15f/0.25f
   (Klee.cs:250-252). Trigger map: Attack/Cast/PowerUp→attack, Hit→hurt,
   Dead→death (StartDeathAnim postfix), Idle/Revive→idle, unknown ignored.
-- B4 ⏳ **[USER] look pass.** Deploy (game closed), boot, fight as Klee:
+- B4 ✅ **[USER] look pass APPROVED 2026-07-24.** Klee's motion layer is
+  accepted and FROZEN — sprint 2 touches it only for the optional spark-motes
+  stretch (sprint-2 Track F2). No capture was taken; approved live, and per
+  the standing rule this is not backfilled. Original instructions retained
+  below for the record.
+  Deploy (game closed), boot, fight as Klee:
   idle should visibly breathe (dodoco bob is the tell), attack lunge
   syncs with damage numbers, getting hit flinches + flashes, death fades
   once. Non-combat rooms: rest/merchant/select scenes untouched (they
@@ -116,7 +121,9 @@ Status: **CODE COMPLETE — [USER] motion look pass pending (B4).**
 
 ## Track C — Shared tracked gauge (Burst + Encore)
 
-Status: **CODE COMPLETE — acceptance rides the B4/D playtest passes.**
+Status: **SUPERSEDED — Klee's Burst gauge accepted; Encore's PLACEMENT FAILED
+2026-07-24. Re-laid out in sprint-2 Track C/D (see the 2026-07-24 verdict
+record at the foot of this log).**
 
 - C1 ✅ `pck-src/shared/gauge.tscn` (script-less): %BarBack/%BarFill/%Flash
   ColorRects + %ValueLabel + AnimationPlayer (RESET + "flash" double-pulse).
@@ -163,7 +170,9 @@ build id 20260723-173024+102e99a), staged validate OK, suite 586 passed.
 
 ## Track D — Onscreen Salon members
 
-Status: **CODE COMPLETE — [USER] layout/composition look pass pending (D4).**
+Status: **FAILED as styled 2026-07-24 — concept partially validated. Rebuilt
+as a silhouette-first stage in sprint-2 Track D. The plumbing PASSED and is
+the ratified trigger for the bridge-base extraction (sprint-2 Track G1).**
 
 - D1 ✅ `pck-src/furina/ui/salon.tscn`: three square slots (StyleBoxFlat
   frame + TextureRect portrait + badge dot) in a flank line rising behind
@@ -203,7 +212,7 @@ MegaDot's export warning caught it.)
 
 ## Track E — Per-card VFX (bomb lob, Dodoco pop)
 
-Status: **CODE COMPLETE — [USER] timing-feel look pass pending (E4).**
+Status: **COMPLETE — E4 APPROVED by [USER] 2026-07-24.**
 
 - E1 ✅ Recipe per GhostflameModel.SpawnVfx (mirrored): small PackedScenes,
   instantiate → CombatVfxContainer.AddChildSafely → position → self-free.
@@ -225,7 +234,13 @@ Status: **CODE COMPLETE — [USER] timing-feel look pass pending (E4).**
   resolution — the single spend funnel). Autoplay scene, self-freeing.
   Concurrency cap 3 live instances (plan's suggested cap), with slight
   horizontal scatter so simultaneous pops read separately.
-- E4 ⏳ acceptance in playtest: no leaked nodes after a long fight
+- E4 ✅ **[USER] timing-feel look pass APPROVED 2026-07-24.** VFX timing
+  accepted; Klee's VFX layer is FROZEN alongside Track B. One deferred
+  nice-to-have was extracted from this pass and scheduled as sprint-2 Track
+  F2 (Klee spark motes — spark count rendered as literal sparks above her
+  head). No capture taken; approved live, not backfilled. Original
+  acceptance criteria retained below.
+  Acceptance in playtest: no leaked nodes after a long fight
   (method-track free + timer guard; verify with remote scene tree), cap
   holds on a worst-case spark-dump turn, effects never outlive combat
   (children of CombatVfxContainer die with the room). [USER] timing feel.
@@ -242,14 +257,66 @@ in play), D4 (Salon layout), E4 (VFX timing feel) — one deploy + a
 Klee fight and a Furina fight cover all four. Definition-of-done items
 that survive the look passes: captures into this log per track.
 
+> **Resolved 2026-07-24.** All four look passes came back. B4 and E4
+> approved; C4-Encore, D4, and the badge strip failed. See the verdict
+> record below.
+
 ## Open [USER] items
 
 - ~~A4 gate~~ ✅ passed 2026-07-23.
-- B motion look approval — **OPEN** (B4 above: deploy + fight as Klee).
-- D Salon layout/composition approval (opens with D).
-- E timing feel approval (opens with E).
-- Naming/lore audit for any player-visible gauge/Salon labels (opens with
-  C/D; scene/node names are internal and exempt).
+- ~~B motion look approval~~ ✅ **APPROVED 2026-07-24.**
+- ~~E timing feel approval~~ ✅ **APPROVED 2026-07-24.**
+- ~~D Salon layout/composition approval~~ ❌ **FAILED 2026-07-24** — reopened
+  as sprint-2 D5 (capture mandatory this time).
+- ~~C4 Encore gauge placement~~ ❌ **FAILED 2026-07-24** — relocates in
+  sprint-2 Track D.
+- Naming/lore audit for any player-visible gauge/Salon labels — no surface
+  arose in sprint 1 (gauge label is bare numbers, Salon badge is a colour
+  dot). Carries into sprint 2 Track E3, which does create label surfaces.
+
+**Sprint 1 is CLOSED.** Every track is either approved or explicitly
+superseded by a sprint-2 track. Successor: docs/animation-sprint-2-plan.md,
+execution log docs/animation-sprint-2-log.md.
+
+## [USER] look-pass verdicts (2026-07-24) — the sprint-1 close
+
+Recorded here as the ledger of record; these are law for sprint 2, where the
+remedies are scheduled. Full text in docs/animation-sprint-2-plan.md.
+
+| Item | Verdict | Where it goes |
+|---|---|---|
+| B4 — Klee motion | **APPROVED** | Klee's model FROZEN. Sprint-2 F2 only. |
+| E4 — VFX timing | **APPROVED** | Klee's VFX FROZEN. One nice-to-have → sprint-2 F2. |
+| D4 — Salon | **FAILED as styled** | Sprint-2 Track D, rebuilt silhouette-first. |
+| C4 — Encore gauge | **FAILED placement** | Sprint-2 C1 removes it; D3 re-homes it. |
+| Furina badges | **FAILED legibility** | Sprint-2 Track E (diet + own icon register). |
+| Furina character art | **REPLACE** | Sprint-2 Track B, new render. |
+
+Detail on the three failures, because the *reasons* bind sprint 2 more than
+the verdicts do:
+
+- **D4 (Salon).** Card-art portraits in framed squares are too indistinct to
+  carry member identity — the three portraits are tiny gameplay screenshots
+  (500x380) and at combat scale they read as three identical blue smudges.
+  What survived: **ghost-frames-for-empty DID read**, and carries into the
+  redesign restyled to the stage language. The bridge *plumbing* also passed
+  — tracking, staleness, and spawn guards all held — which is the ratified
+  trigger that unlocks the deferred bridge-base extraction (sprint-2 G1).
+- **C4 (Encore placement).** The upper-left overhead anchor collides
+  conceptually with Klee's Burst position. RULING: the overhead slot is the
+  **common Burst indicator across characters**; Encore is not a Burst meter
+  and must not sit there. It relocates into the Salon stage as a ribbon
+  (sprint-2 D3), which also buys the causality the old layout could not
+  show — members visibly standing on their fuel.
+- **Badges.** Furina's status-strip badges borrow Klee-register icons and
+  there are simply too many of them. Sprint-2 Track E diets the strip (any
+  badge that gains an ambient home in C/D retires, on the Burst-badge
+  precedent from this log's C4 first-pass section) and gives the keepers her
+  own hydro/theatre register.
+
+Also ruled at the same pass, forward-looking: gauge skins are **unique per
+character**, not one shared look; and the Furina UI change is a **re-layout**,
+not a restyle.
 
 ## C4 first-pass feedback (2026-07-23, Klee playtest)
 

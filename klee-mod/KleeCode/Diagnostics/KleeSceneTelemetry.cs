@@ -29,15 +29,17 @@ internal static class KleeSceneTelemetry
         "klee/model/character_sprite.tscn",
         "klee/ui/character_icon.tscn",
         "klee/ui/char_select_bg_klee.tscn",
+        "furina/model/combat.tscn",
         "furina/model/combat_visuals.tscn",
         "furina/model/rest_character.tscn",
         "furina/model/merchant_character.tscn",
         "furina/ui/character_icon.tscn",
         "furina/ui/char_select_bg_furina.tscn",
-        "furina/ui/salon.tscn",
+        "furina/ui/salon_stage.tscn",
         "shared/gauge.tscn",
         "klee/vfx/bomb_lob.tscn",
         "klee/vfx/dodoco_pop.tscn",
+        "furina/vfx/spotlight_shine.tscn",
     };
 
     public static void LogStatus()
