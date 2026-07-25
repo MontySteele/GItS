@@ -339,12 +339,51 @@ class Enemy(Fighter):
     # it gains N Block. Does not stack." The latch resets each player turn.
     skittish: int = 0
     skittish_fired: bool = False
+    # The turn this enemy entered its CURRENT phase; `ramp` counts from here,
+    # not from combat start (combat._settle_phases stamps it on each revive).
+    # 0 for every unphased enemy, which is combat start -- so the frozen
+    # battery and every single-bar roster enemy are untouched.
+    phase_start_turn: int = 0
+    # How many times each intent index has been TAKEN this combat, for
+    # `ramp_per_use`. Keyed by index so a rotation is unambiguous.
+    intent_uses: dict[int, int] = field(default_factory=dict)
 
     def current_intent(self) -> dict:
         return self.intents[self.intent_index % len(self.intents)]
 
     def advance_intent(self) -> None:
+        self.intent_uses[self.intent_index % len(self.intents)] = (
+            self.intent_uses.get(self.intent_index % len(self.intents), 0) + 1)
         self.intent_index += 1
+
+    def ramped_amount(self, intent: dict, turn: int) -> int:
+        """This intent's attack amount at `turn`, with both ramp shapes.
+
+        `ramp` is PER TURN, counted from the start of this enemy's current
+        phase (`ramp_after` delays the start further). Phase-relative is the
+        whole point: a ramping intent that first appears in a boss's SECOND
+        phase must not arrive pre-ramped by however long the first bar took
+        to chew through. Unphased enemies have phase_start_turn 0, so
+        Byrdonis and the frozen PUNISHER are bit-identical to before.
+
+        `ramp_per_use` is PER USE of this intent -- the "it grows every time
+        it is taken" shape (Test Subject's Multi-Claw gains a hit each use).
+        Turn-ramping cannot express it: the value would depend on how many
+        non-attack beats sit between two uses, so adding a beat would
+        silently retune the enemy.
+
+        Both default to absent, and an intent may set either or neither.
+        """
+        amount = intent["amount"]
+        ramp = intent.get("ramp", 0)
+        if ramp:
+            elapsed = turn - self.phase_start_turn - intent.get("ramp_after", 0)
+            amount += ramp * max(0, elapsed)
+        per_use = intent.get("ramp_per_use", 0)
+        if per_use:
+            amount += per_use * self.intent_uses.get(
+                self.intent_index % len(self.intents), 0)
+        return amount
 
 
 @dataclass
