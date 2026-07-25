@@ -745,3 +745,32 @@ def test_decksize_lint_counts_the_card_copying_ops():
         (loader.DOCS_DIR / "kokomi-cards.yaml").read_text(encoding="utf-8"))
         if r["id"] == "shoulder_to_shoulder")
     assert lint.card_delta(row) == 0
+
+
+def test_the_burst_is_a_skill_so_it_never_pays_itself_the_charge_read():
+    """The Garment's entry splash must not read the bank that the Garment
+    turns on.
+
+    `flat_attack_bonus` gates on `card.type == "attack"`, and the C# rider
+    gates on CardType.Attack for the same reason. So the card TYPE is the
+    only thing standing between "a Burst that opens a scaling window" and "a
+    Burst that also cashes the window on the way in" -- at a priest-median
+    bank the splash would roughly triple, and every number measured for this
+    card would be describing a different card.
+
+    Nothing about a damage-dealing Skill looks wrong at a glance, which is
+    exactly why this is pinned rather than trusted: retyping it to `attack`
+    would read as a tidy-up and would silently reprice her whole Burst.
+    """
+    kit = loader.get_card("ceremonial_garment")
+    assert kit.type == "skill"
+
+    st = kokomi_state()
+    st.player.charge = 20                    # a bank worth cashing
+    e = st.enemies[0]
+    hp0 = e.hp
+    effects.resolve_card(st, kit)
+    printed = next(fx["amount"] for fx in kit.effects if fx["op"] == "damage")
+    assert hp0 - e.hp == printed
+    # ...and the window it just opened is live for the NEXT attack.
+    assert st.player.powers["ceremonial_garment"] == C.CEREMONIAL_GARMENT_TURNS

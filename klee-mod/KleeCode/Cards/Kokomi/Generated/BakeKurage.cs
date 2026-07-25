@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -38,6 +39,9 @@ public sealed class BakeKurage : CustomCardModel, ICharacterCard, ISkillTagCard
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { KleeKeywords.ElementalSkill };
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KokomiRiderTips.ForKuragePulse(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("bake_kurage");
 

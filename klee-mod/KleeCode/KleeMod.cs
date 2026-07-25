@@ -168,6 +168,15 @@ public static class KleeMod
                         "Fanfare scaling",
                     [Cards.FurinaRiderTips.AuraKey + ".title"] =
                         "Elemental aura bonus",
+
+                    // Kokomi's two hidden reads (KokomiRiderTips). Both
+                    // resolve somewhere no card face can print -- the pulse at
+                    // end of turn, the Garment rider on OTHER cards -- so the
+                    // tip is the only surface either number has.
+                    [Cards.KokomiRiderTips.PulseKey + ".title"] =
+                        "Bake-Kurage pulse",
+                    [Cards.KokomiRiderTips.GarmentKey + ".title"] =
+                        "Ceremonial Garment is active",
                 };
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))

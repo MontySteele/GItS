@@ -152,12 +152,25 @@ public sealed class KurageWardPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// The Ceremonial Garment: Nereid's Ascension's state.
+/// The Ceremonial Garment: her Burst's state (kit card
+/// <see cref="Cards.Kokomi.CeremonialGarment"/>; Nereid's Ascension enters it
+/// too).
 ///
-/// While it holds, her attacks ALSO grant Block (the Charlotte precedent; in
-/// canon the burst's attacks damage AND restore the party). The rider is
-/// applied from the hooks class rather than written onto each attack, because
-/// it must catch every attack she plays including drafted ones.
+/// TWO riders, and the damage one is the whole point of the Burst. While the
+/// state holds:
+///   - her ATTACKS read the Charge bank, +1 damage per
+///     <see cref="KokomiConstants.GarmentChargeDivisor"/> Charge, per hit;
+///   - her attacks ALSO grant Block (the Charlotte precedent; in canon the
+///     burst's attacks damage AND restore the party).
+///
+/// The read is a READ: nothing here decrements the bank, and if it ever
+/// starts to, every scaling number on her sheet was measured against a bank
+/// that only grows and is silently wrong.
+///
+/// Both riders are applied from outside the card faces -- the damage one here
+/// in ModifyDamageAdditive, the Block one in
+/// <see cref="KokomiGarmentHooks"/> -- because they must catch every attack
+/// she plays, drafted and generated alike, and no card face can know that.
 ///
 /// THE CASKET LINK IS INERT AND SHIPS ANYWAY. Casting the Burst refreshes a
 /// fielded Bake-Kurage (Tamakushi Casket, her A1). At KurageDuration 1 a
@@ -173,8 +186,10 @@ public sealed class CeremonialGarmentPower : PowerModel, ILocalizationProvider
     {
         ("title", "Ceremonial Garment"),
         ("description",
-            $"Your Attacks also grant {KokomiConstants.GarmentAttackBlock} "
-          + "Block. Lasts {Amount} more turn{Amount:plural:|s}."),
+            "Your Attacks deal 1 more damage per "
+          + $"{KokomiConstants.GarmentChargeDivisor} [gold]Charge[/gold] and "
+          + $"grant {KokomiConstants.GarmentAttackBlock} Block. "
+          + "Lasts {Amount} more turn{Amount:plural:|s}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -183,6 +198,38 @@ public sealed class CeremonialGarmentPower : PowerModel, ILocalizationProvider
 
     public static bool IsUp(Creature? owner) =>
         owner != null && owner.Powers.Any(p => p is CeremonialGarmentPower);
+
+    /// <summary>
+    /// The bonus her attacks are carrying RIGHT NOW. Public so card faces and
+    /// hover tips read the same arithmetic the hit uses -- the Furina
+    /// legibility lesson: a preview and an effect that compute separately will
+    /// eventually disagree, and the player believes the preview.
+    /// </summary>
+    public static int ChargeBonus(Creature? owner) =>
+        IsUp(owner)
+            ? KokomiResources.GetCharge(owner) / KokomiConstants.GarmentChargeDivisor
+            : 0;
+
+    /// <summary>
+    /// tier0 flat_attack_bonus: `bonus += p.charge // GARMENT_CHARGE_DIVISOR`,
+    /// folded in flat BEFORE Strength and Vulnerable, and applied PER TARGET
+    /// (the sim adds current_attack_bonus inside its per-target damage
+    /// computation, so an AoE attack pays it to each enemy). Additive is
+    /// exactly that phase, which is why this is not a multiplier hook.
+    ///
+    /// Stacking is irrelevant by construction: the power's Amount is TURNS
+    /// REMAINING, not a magnitude, so re-casting the Burst extends the window
+    /// and never doubles the read.
+    /// </summary>
+    public override decimal ModifyDamageAdditive(
+        Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource)
+    {
+        if (dealer != Owner || target == Owner) return 0m;
+        if (!props.IsPoweredAttack()) return 0m;
+        if (cardSource is not { Type: CardType.Attack }) return 0m;
+        return KokomiResources.GetCharge(Owner) / KokomiConstants.GarmentChargeDivisor;
+    }
 
     public override async Task AfterSideTurnEnd(
         PlayerChoiceContext choiceContext, CombatSide side,

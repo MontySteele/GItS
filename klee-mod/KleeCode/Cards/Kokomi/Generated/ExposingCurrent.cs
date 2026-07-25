@@ -44,7 +44,7 @@ public sealed class ExposingCurrent : CustomCardModel, IElementalCard, ICharacte
         new[] { CardKeyword.Exhaust, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
+        KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("exposing_current");
 

@@ -286,6 +286,33 @@ if (-not (Test-Path $venvPython)) {
 }
 
 # ---------------------------------------------------------------------------
+# S6e. Every mirrored balance constant matches tier0.
+#
+# Each balance number lives twice: once in tier0 where it was MEASURED, once
+# in C# where it is PLAYED. The C# copies carry doc comments swearing they
+# mirror the sim, and until 2026-07-25 that promise was kept by discipline
+# alone. A sim-side retune nobody mirrors ships a mod playing to numbers no
+# simulation endorsed, and it does so silently -- green build, green tests,
+# and a tuning report describing a game nobody is playing.
+#
+# There is no C# test project to pin this at runtime, so the lint is the
+# static form: every `public const int` must be classified MIRRORED (compared
+# by value against tier0) or UNMIRRORED (with a written reason). Unclassified
+# is a failure, not a skip.
+# ---------------------------------------------------------------------------
+$constLint = Join-Path $repoRoot 'tools\lint_constant_parity.py'
+if (-not (Test-Path $venvPython)) {
+    Fail 'S6e' "repo venv python not found at $venvPython; cannot run constant parity lint."
+} elseif (-not (Test-Path $constLint)) {
+    Fail 'S6e' "tools/lint_constant_parity.py is missing."
+} else {
+    $constOut = & $venvPython $constLint
+    if ($LASTEXITCODE -ne 0) {
+        Fail 'S6e' "constant parity lint failed:`n    $($constOut -join "`n    ")"
+    }
+}
+
+# ---------------------------------------------------------------------------
 # S6c. Every roster character closes the CharacterModel preload surface.
 #
 # CharacterModel.AssetPaths derives combat visuals, icon scene, energy counter

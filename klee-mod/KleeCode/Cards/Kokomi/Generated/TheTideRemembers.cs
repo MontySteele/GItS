@@ -44,7 +44,7 @@ public sealed class TheTideRemembers : CustomCardModel, IElementalCard, ICharact
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
+        KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("the_tide_remembers");
 

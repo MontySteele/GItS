@@ -26,27 +26,45 @@ public interface IKokomiCharacter
 
 /// <summary>
 /// TRANSCRIPTION SURFACE. Every number here is copied verbatim from the sim;
-/// none is re-derived C#-side. The transcription checklist lives in the PR
-/// body, one row per constant, because a number that exists in two hand-typed
-/// places without a checklist is a number that will drift.
+/// none is re-derived C#-side.
 ///
-/// | C# constant        | sim source                              |
-/// |--------------------|-----------------------------------------|
-/// | ChargePerExhaust   | constants.py CHARGE_PER_EXHAUST = 1      |
-/// | BurstPerExhaust    | constants.py KOKOMI_BURST_PER_EXHAUST=2  |
-/// | KurageDuration     | constants.py KURAGE_DURATION = 1         |
-/// | KuragePulseBase    | constants.py KURAGE_PULSE_BASE = 4       |
-/// | KuragePulsePerChg  | constants.py KURAGE_PULSE_PER_CHARGE = 4 |
-/// | KuragePulseBlock   | constants.py KURAGE_PULSE_BLOCK = 0      |
-/// | GarmentAttackBlock | constants.py GARMENT_ATTACK_BLOCK = 2    |
-/// | GarmentTurns       | constants.py CEREMONIAL_GARMENT_TURNS=3  |
-/// | ConscriptCostDelta | constants.py CONSCRIPT_COST_DELTA = -1   |
-/// | BurstMax           | characters/kokomi.yaml burst_max: 20     |
+/// THE CHECKLIST IS NOW A GATE. This table used to live in the PR body and be
+/// kept by discipline -- which meant a sim-side retune that nobody mirrored
+/// produced a green build playing to numbers no simulation ever endorsed.
+/// tools/lint_constant_parity.py compares every row below against tier0 by
+/// value, and fails on any C# constant that is neither mirrored nor declared
+/// unmirrored with a reason. Adding a constant here without touching that
+/// table is a build failure, on purpose.
+///
+/// | C# constant         | sim source                               |
+/// |---------------------|------------------------------------------|
+/// | ChargePerExhaust    | constants.py CHARGE_PER_EXHAUST = 1       |
+/// | BurstPerExhaust     | constants.py KOKOMI_BURST_PER_EXHAUST=2   |
+/// | BurstPerReaction    | constants.py BURST_PER_REACTION = 5       |
+/// | KurageDuration      | constants.py KURAGE_DURATION = 1          |
+/// | KuragePulseBase     | constants.py KURAGE_PULSE_BASE = 4        |
+/// | KuragePulsePerChg   | constants.py KURAGE_PULSE_PER_CHARGE = 4  |
+/// | KuragePulseBlock    | constants.py KURAGE_PULSE_BLOCK = 0       |
+/// | GarmentAttackBlock  | constants.py GARMENT_ATTACK_BLOCK = 2     |
+/// | GarmentTurns        | constants.py CEREMONIAL_GARMENT_TURNS = 3 |
+/// | GarmentChargeDivisor| constants.py GARMENT_CHARGE_DIVISOR = 2   |
+/// | ConscriptCostDelta  | constants.py CONSCRIPT_COST_DELTA = -1    |
+/// | BurstMax            | characters/kokomi.yaml burst_max: 20      |
 /// </summary>
 public static class KokomiConstants
 {
     public const int ChargePerExhaust = 1;
     public const int BurstPerExhaust = 2;
+
+    /// <summary>
+    /// tier0 BURST_PER_REACTION = 5, and tier0 BURST_PER_SKILL_TAG = 5 is
+    /// <see cref="BurstConstants.PerSkillTag"/>. Both sim gates are
+    /// `if p.burst_max` -- UNIVERSAL to anyone carrying a meter, not
+    /// Klee-scoped -- so she is paid on the same lines Klee and Furina are.
+    /// Aliased here rather than reaching for Klee's constant at her call
+    /// sites, so her economy reads in one place.
+    /// </summary>
+    public const int BurstPerReaction = 5;
     public const int KurageDuration = 1;
     public const int KuragePulseBase = 4;
 
@@ -70,6 +88,16 @@ public static class KokomiConstants
 
     public const int GarmentAttackBlock = 2;
     public const int GarmentTurns = 3;
+
+    /// <summary>
+    /// tier0 GARMENT_CHARGE_DIVISOR = 2. While the Garment holds, her attacks
+    /// gain +1 damage per this much Charge -- the "scaled down per hit" read
+    /// (kickoff §2.2, Shape B). Was 4 until the v0.3 charge-curve pass found
+    /// the meter reading ~4x under the Regent-common benchmark: at /4 a node-4
+    /// bank of 8 paid +2 per attack, which is decoration rather than a scaling
+    /// identity. Do not re-derive it here -- constants.py is LAW.
+    /// </summary>
+    public const int GarmentChargeDivisor = 2;
     public const int ConscriptCostDelta = -1;
     public const int BurstMax = 20;
 }
@@ -177,6 +205,25 @@ public static class KokomiResources
         if (combatState == null) return null;
         return CustomResources<KokomiBurstResource>.Get(combatState);
     }
+
+    /// <summary>Current Burst meter, 0 for non-Kokomi owners.</summary>
+    public static int GetBurst(Creature? creature) => FindBurst(creature)?.Amount ?? 0;
+
+    /// <summary>
+    /// The single Burst gain funnel. Every source lands here -- the exhaust
+    /// funnel, the skill-tag bonus, reactions -- so the gauge cannot go stale
+    /// behind a gain and so the economy stays one place to instrument.
+    /// Accrual is UNCAPPED past the max (the sim never clamps; the grant check
+    /// is `>=` and casting resets to 0 -- overflow is lost at cast, not gain).
+    /// </summary>
+    public static void GainBurst(Creature? creature, int amount)
+    {
+        if (amount <= 0) return;
+        var resource = FindBurst(creature);
+        if (resource == null) return;
+        resource.ModifyAmount(amount);
+        Vfx.GaugeBridge.Refresh(creature!);
+    }
 }
 
 /// <summary>
@@ -219,9 +266,66 @@ public sealed class KokomiResourceHooks : AbstractModel
         if (!KokomiResources.IsKokomi(owner)) return Task.CompletedTask;
 
         KokomiResources.GainCharge(owner, KokomiConstants.ChargePerExhaust);
-        KokomiResources.FindBurst(owner)
-            ?.ModifyAmount(KokomiConstants.BurstPerExhaust);
+        KokomiResources.GainBurst(owner, KokomiConstants.BurstPerExhaust);
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Sim order (combat.py play_card): the requires-full drain FIRST, then
+    /// the skill-tag bonus, both once per play rather than once per replay.
+    /// The game fires card hooks once per replay in a series, so IsFirstInSeries
+    /// is what reproduces "once per play_card call" -- an unguarded hook would
+    /// double-grant where the sim grants once.
+    ///
+    /// The skill-tag half is UNIVERSAL in the sim (`if p.burst_max`, not
+    /// `if klee`), and she has burst_max 20, so her skill-tagged cards pay the
+    /// same 5 Klee's do. Missing this made her meter fill from exhausts alone,
+    /// which is roughly half the sim's rate -- the Burst would have felt
+    /// unreachable in play and correct in the model.
+    /// </summary>
+    public override Task BeforeCardPlayed(CardPlay cardPlay)
+    {
+        if (!cardPlay.IsFirstInSeries) return Task.CompletedTask;
+        KokomiBurstResource.DrainOnPlay(cardPlay.Card);
+        var owner = cardPlay.Card.Owner?.Creature;
+        if (cardPlay.Card is ISkillTagCard && KokomiResources.IsKokomi(owner))
+        {
+            KokomiResources.GainBurst(owner, BurstConstants.PerSkillTag);
+        }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Grant check sites, the sim's three grant_charged_kit calls: after the
+    /// turn-start draw, after every card played, and at turn end before the
+    /// flush. Her income arrives at all three -- exhausts and skill tags land
+    /// inside plays, the Kurage's pulse reactions land in the turn-end
+    /// broadcast, and an Ancient's turn-start drip lands at the top.
+    /// </summary>
+    public override async Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        await KokomiKitGrant.GrantIfCharged(choiceContext, cardPlay.Card.Owner);
+    }
+
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        await KokomiKitGrant.GrantIfCharged(choiceContext, player);
+    }
+
+    public override async Task BeforeSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        foreach (var creature in participants)
+        {
+            if (creature.Player is { } player && KokomiResources.IsKokomi(creature))
+            {
+                await KokomiKitGrant.GrantIfCharged(choiceContext, player);
+            }
+        }
     }
 
     /// <summary>
@@ -291,6 +395,10 @@ public sealed class ChargePerTurnPower : PowerModel, ILocalizationProvider
 /// Kokomi's Burst meter. Separate class from Klee's and Furina's because the
 /// ceiling is hers (kokomi.yaml burst_max: 20) and because BaseLib keys
 /// per-combat instances by resource type.
+///
+/// The three guards below are NOT boilerplate -- each one closes an exposure
+/// the other two meters paid for in a playtest, and a meter that ships
+/// without them is a meter that can be cast off empty or cast twice.
 /// </summary>
 public sealed class KokomiBurstResource : BasicCustomResource
 {
@@ -298,5 +406,100 @@ public sealed class KokomiBurstResource : BasicCustomResource
     {
     }
 
+    /// <summary>
+    /// The meter is not an energy cost and must not be discounted like one.
+    /// BaseLib forwards SetToFreeThisTurn / SetToFreeThisCombat onto every
+    /// custom-resource cost unless the resource opts out here. A "this card is
+    /// free" effect landing on the kit card would zero the meter cost -- see
+    /// <see cref="DrainOnPlay"/> for why that is catastrophic rather than
+    /// merely generous.
+    /// </summary>
     public override bool ApplySharedModification => false;
+
+    /// <summary>
+    /// The cast gate is `requires: burst_energy_full` (tier0 card_playable):
+    /// it reads the CANONICAL 20, never a discounted number. BaseLib's default
+    /// CanAfford compares against the cost AFTER modifiers, and custom costs
+    /// run through Hook.ModifyEnergyCostInCombat -- the hook cost reducers
+    /// use. Without this override any cost reducer in range makes the Burst
+    /// castable on an empty meter.
+    /// </summary>
+    public override bool CanAfford(CardModel card, int cost)
+    {
+        var canonical = CustomResources<KokomiBurstResource>.CanonicalCost(card);
+        return canonical < 0 ? base.CanAfford(card, cost) : Amount >= canonical;
+    }
+
+    /// <summary>
+    /// DELIBERATE NO-OP; the drain lives in <see cref="DrainOnPlay"/>, called
+    /// from <see cref="KokomiResourceHooks.BeforeCardPlayed"/>. Same idiom and
+    /// the same reason as Klee's -- see KleeBurstResource.DrainOnPlay for the
+    /// infinite-Burst bug this shape exists to prevent (CardCmd.AutoPlay skips
+    /// SpendResources entirely, so a drain riding the cost machinery is not
+    /// called on every play path).
+    /// </summary>
+    public override Task<bool> Spend<T>(
+        ICombatState combatState, AbstractModel? spender, int amount, bool optional)
+    {
+        return Task.FromResult(true);
+    }
+
+    /// <summary>
+    /// Sim law, verbatim (combat.py play_card): `p.burst_energy = 0` on a
+    /// requires-full play. Overflow past the max is lost at CAST, never
+    /// clamped at gain, so this zeroes rather than subtracting.
+    ///
+    /// Gated on the card CARRYING a burst cost rather than on the concrete
+    /// card type, which keeps it correct for any future kit card of hers.
+    /// </summary>
+    public static void DrainOnPlay(CardModel card)
+    {
+        if (CustomResources<KokomiBurstResource>.Cost(card) == null) return;
+        var owner = card.Owner;
+        if (owner == null) return;
+        var resource = KokomiResources.FindBurst(owner.Creature);
+        if (resource == null) return;
+        resource.Amount = 0;
+        Vfx.GaugeBridge.Refresh(owner.Creature);
+    }
+}
+
+/// <summary>
+/// Kokomi's kit-grant, port of tier0 grant_charged_kit (combat.py v1.9).
+/// Same four rules Klee's and Furina's carry, and for the same reasons:
+///   - grant only at a FULL meter (`>=`, because accrual is uncapped);
+///   - never a duplicate: a copy already in hand blocks the grant;
+///   - a full hand DEFERS, never drops -- the meter stays full so the next
+///     check re-offers it. The hand-size test has to live HERE, before the
+///     add, because the game's full-hand behaviour for
+///     AddGeneratedCardToCombat is redirect-to-discard, and a kit card in a
+///     pile recirculates the Burst as loot;
+///   - the granted copy is fresh each time (the cast copy leaves combat).
+/// </summary>
+public static class KokomiKitGrant
+{
+    public static async Task GrantIfCharged(
+        PlayerChoiceContext choiceContext, Player? owner)
+    {
+        if (owner?.Character is not IKokomiCharacter) return;
+        var playerCombatState = owner.PlayerCombatState;
+        var combatState = owner.Creature.CombatState;
+        if (playerCombatState == null || combatState == null) return;
+
+        // Rules read the RESOURCE, never a display surface.
+        var resource =
+            CustomResources<KokomiBurstResource>.Get(playerCombatState);
+        if (resource.Amount < KokomiConstants.BurstMax) return;
+
+        var hand = CardPile.Get(PileType.Hand, owner);
+        if (hand == null
+            || hand.Cards.Any(card => card is Cards.Kokomi.CeremonialGarment)
+            || hand.Cards.Count >= CardPile.MaxCardsInHand)
+        {
+            return;
+        }
+
+        var burst = combatState.CreateCard<Cards.Kokomi.CeremonialGarment>(owner);
+        await CardPileCmd.AddGeneratedCardToCombat(burst, PileType.Hand, owner);
+    }
 }
