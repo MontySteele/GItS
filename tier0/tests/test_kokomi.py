@@ -7,7 +7,7 @@ waits on the ruling asks; every constant is PROPOSED).
 import random
 
 from tier0 import constants as C
-from tier0.content import loader
+from tier0.content import loader, upgrades
 from tier0.engine import combat, effects, powers, refpowers
 from tier0.engine.state import Card, CombatState
 from tier0.pilot.policy import make_pilot
@@ -610,6 +610,31 @@ def test_kokomi_upgrades_respect_the_resource_curve():
             base = loader.get_card(row["id"])
             upped = loader.get_card(row["id"] + "+")
             assert resource_shape(base) == resource_shape(upped), row["id"]
+
+
+def test_oath_ward_is_pinned_to_the_pulse_frequency_it_was_measured_at():
+    """P1 coupling pin (playtest sprint, Track P).
+
+    Kurage's Oath pays its ward ONCE PER PULSE, so what a run actually gets
+    is (ward x pulses per play). The 12 was measured against a summon that
+    pulses ONCE per play -- KURAGE_DURATION 1, doubling to twice once
+    bake_kurage is upgraded (kurage_turns +1). Neither of those numbers is
+    the Oath's own, and neither is guarded by the Oath's own tests, so a
+    duration change silently reprices a card that already carries a
+    [USER] "maybe too strong" flag as the first knob back.
+
+    If this fails, you moved the pulse frequency. That is allowed. It is not
+    allowed SILENTLY: re-measure the Oath at the new frequency, then move
+    this pin and the note beside the sheet row together, in one change.
+    """
+    assert C.KURAGE_DURATION == 1
+    upgraded = upgrades.apply_upgrade(loader.get_card("bake_kurage"))
+    (summon,) = [fx for fx in upgraded.effects
+                 if fx.get("op") == "summon_kurage"]
+    assert summon["amount"] == 2
+    (ward,) = [fx for fx in loader.get_card("kurages_oath").effects
+               if fx.get("power") == "kurage_ward"]
+    assert ward["amount"] == 12
 
 
 def test_vigil_upgrade_moves_the_cap_with_the_amount():
