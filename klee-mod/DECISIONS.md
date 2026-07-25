@@ -1980,3 +1980,45 @@ each other and only one of which is ours, so it cannot be derived from our
 side. It is a [USER] capture question, which is why D5 requires a capture at
 all — the gap here was that the capture had not happened yet, not that the
 gate was wrong.
+
+## Implementation sprint: C# parity, co-op ownership, upgrade lint, known-card fixes — no new design (2026-07-25)
+
+Sprint doc: docs/ship-what-we-know-sprint-plan.md. Execution log:
+docs/ship-what-we-know-sprint-log.md. Opened on branch
+`furina/ship-what-we-know` off `4ce3b87`.
+
+Governing intent, verbatim from [USER]: *"Let's take everything we already
+know about and implement it so we don't stack a giant backlog of design ideas
+on top of one another."* **Zero new design.** Every item is a known bug, a
+known gap, a ratified-but-unshipped design, a known-weak number, or an
+instrument the next pass is blocked on.
+
+**The decoder fact.** The 2026-07-25 co-op playtest reported "Furina fanfare
+still capped". That is not a bug: it is an accurate description of a build
+that predates the read-only Fanfare rework. The fanfare sprint shipped
+read-only Fanfare to the sim and the sheet and then hard-gated the C# port
+(F-D) behind an F-C the close-out says will never run. So the live C# layer
+still implements the RETIRED spendable/capped design, and until the port lands
+every playtest generates feedback against a kit that does not exist in the
+design of record.
+
+RULING. F-D is resurrected as track G-A with its own acceptance — turn-by-turn
+trace parity against the sim plus a [USER] live capture — decoupled from the
+dead F-C winrate bars. It ships behaviour, not balance, so it carries no
+winrate gate. It is BLOCKING for every other Furina-touching item in the
+sprint, and the `ebb_and_flow` ruling (G-D4) is hard-gated behind it, because
+a card whose churn feeds a *pinned* meter is a different card from one whose
+churn feeds a *decaying* one.
+
+RULING. Fanfare is explicitly OUT of the Funnel Contract (the contract names
+Salon slots, the Encore absorb funnels, and Spotlight designation — not
+Fanfare), so G-A is free to move it without a cross-session stop-work. The
+animation stream is editing display call sites in the same file; the standing
+rule for this sprint is that gauge/stage `Refresh` calls are display-only, own
+no state, and stay exactly where they are. Nothing in the port requires moving
+an Encore funnel; if that changes, it takes a note in both logs BEFORE landing.
+
+Bookkeeping: this DECISIONS append carries along the animation stream's own
+uncommitted edits to this file (the scene-contract and occlusion findings),
+which were already in the working tree at sprint start. The code they document
+is NOT in this sprint's commits and remains uncommitted for that stream.

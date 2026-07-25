@@ -8,8 +8,8 @@
   },
   "coverage": {
     "total": 78,
-    "generated": 75,
-    "blocked": 3
+    "generated": 77,
+    "blocked": 1
   },
   "generated": [
     "an_invitation",
@@ -45,6 +45,7 @@
     "hearts_swelling",
     "high_tide",
     "house_call",
+    "lasting_impression",
     "leading_role",
     "limelight",
     "macaron_break",
@@ -77,6 +78,7 @@
     "swelling_overture",
     "tempo_change",
     "the_final_verdict",
+    "the_sea_is_my_stage",
     "thunderous_ovation",
     "top_billing",
     "torrential_turn",
@@ -94,17 +96,11 @@
     "guest_neuvillette_tears"
   ],
   "blocked": {
-    "lasting_impression": "op 'gain_fanfare_floor'",
-    "let_the_people_rejoice": "kit card (hand-write it against the KitBurst machinery)",
-    "the_sea_is_my_stage": "op 'gain_fanfare_floor'"
+    "let_the_people_rejoice": "kit card (hand-write it against the KitBurst machinery)"
   },
   "runtime_clusters": {
     "encore_fanfare_resources": [
-      "lasting_impression",
       "let_the_people_rejoice"
-    ],
-    "shared_emitter_gap": [
-      "the_sea_is_my_stage"
     ]
   },
   "upgrades": {
