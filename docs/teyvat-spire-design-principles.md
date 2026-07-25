@@ -118,42 +118,52 @@ Shop-integrated "Wish" draw (pay gold, draw from companion pool, duplicate prote
 
 ### 4.7 Colorless channel — base-pool removal & the shop two-channel split (v1.11)
 
-> **STATUS: RATIFIED DESIGN, UNBUILT. Merged to main 2026-07-26 as specification
-> only.** Nothing in this section is live. Read it as intent, not as a
-> description of the game — and do not measure against it.
+> **STATUS: BUILT 2026-07-25, with three amendments.** The shop carries
+> companions in both slots, in the mod and in tier 0.5. Read this section as
+> live behaviour EXCEPT where the three notes below say otherwise — they are
+> amendments to the design, not implementation notes.
 >
-> What actually ships today: companions reach players through the **free reward
-> slot alone** (the fourth card-reward option hosted on each character's starter
-> relic). The shop carries **no** companions, base colorless is **not** removed,
-> and neither shop slot below exists.
+> **1. Slot 2 has an Uncommon floor (R59), not full card-reward odds.** The
+> text below says "full card-reward rarity odds", which is ~60% Common and
+> would have made the mod's second colorless slot *worse than base's
+> guaranteed Rare* — at the one slot whose entire argument is that it is the
+> premium paid channel. Study §7's finding that StS2 colorless has **no common
+> tier** points the same way. Slot 2 is wildcard-nation, Uncommon-or-Rare at
+> renormalized odds. Not hypothetical: **Fontaine designs zero Rare
+> companions**, so Furina's home-region slot 1 already widens the nation
+> whenever it rolls a Rare — exactly the brittleness that killed the
+> guaranteed-Rare alternative.
 >
-> Three findings from the 2026-07-26 feasibility pass, recorded here because
-> they change what building this costs:
+> **2. The base colorless pool is NOT removed (R60, phase 1).** "Replaces the
+> base-game colorless card pool wholesale" below is the ratified *intent*; what
+> ships is a shop-only override. `ColorlessCardPool` has **seven consumers**,
+> six of them outside the shop, including three `GetDistinctForCombat` sites —
+> asking N distinct cards of an emptied pool is the empty-draw class that
+> softlocked Dusty Tome. Full removal needs a seven-consumer audit and is a
+> sprint of its own; whether base colorless surfacing through in-combat
+> generation is a fantasy leak worth that blast radius is a [USER] taste call,
+> graded after table time. Deferred, not rejected.
 >
-> 1. **Companions are not a card pool.** §4.1 above says they are a
->    `CustomCardPoolModel` with `IsColorless`. They are not: all three character
->    pools declare `IsColorless => false`, there is no companion pool class, and
->    `CompanionSlot.Roll` builds offers ad hoc. The pool this section is written
->    on top of has to be built first, and it is the largest single piece.
-> 2. **The premise checks out.** StS2's shop really does have exactly two
->    colorless slots — `MerchantInventory._colorlessCardRarities` is
->    `[Uncommon, Rare]`, filled from `ModelDb.CardPool<ColorlessCardPool>()`. So
->    "replace base's two colorless slots" names a real surface, and we already
->    Harmony-patch `CardFactory.CreateForMerchant`.
-> 3. **"Remove the base pool wholesale" has seven consumers, not one.** Beyond
->    the shop, `ColorlessCardPool` feeds card-creation options, a concat path,
->    and three `GetDistinctForCombat(..., N, ...)` sites. Asking N distinct cards
->    of an emptied pool is the empty-draw class that softlocked Dusty Tome and
->    that `lint_ancient_coverage.py` exists to prevent.
+> **3. Companions are still not a `CustomCardPoolModel`.** §4.1 above describes
+> them as one. They are queried through `CompanionPool`, a filter surface over
+> the single roster, because `MerchantCardEntry` takes a plain card list and
+> needs no pool object. Registering a real shared pool is now **feasible**
+> (BaseLib grew `ModelDbSharedCardPoolsPatch` after the repo recorded that it
+> could not be done) but would migrate all 47 companions out of the character
+> pools, changing every companion's card frame. A cost decision, open for
+> [USER].
 >
-> **One open design question this section does not settle.** Base slot 2 is a
-> guaranteed **Rare**. Slot 2 below is a wildcard at card-reward odds — ~60%
-> Common — which makes the shop's second colorless slot *worse than base*, in
-> tension with this very section's thesis that the shop is the premium paid
-> channel. Study §7's own finding that StS2 colorless has **no common tier**
-> points the same way. Resolve the slot-2 floor before building.
+> **Pricing carries one silent discount.** `MerchantCardEntry.GetCost` adds
+> **×1.15 only when `card.Pool is ColorlessCardPool`**, which companions are
+> not — so the mod's premium channel is ~15% cheaper than the base channel it
+> replaces. Sim and mod agree on the bands.
 >
-> Scoped for a separate sprint design pass: `docs/shop-companion-channel-plan.md`.
+> **Measured, and it complicates the thesis below.** The channel moved winrate
+> by a null (−0.2pp mean over 500 runs/arm × 3 characters), crowded out relic
+> purchases by ~30%, and left unspent gold unchanged — runs end holding ~220
+> gold. **"Gold price is the balance governor" is not currently true in the
+> sim, because the purse does not bind.** See
+> `docs/shop-companion-channel-sprint-log.md` §4; open for [USER].
 
 
 **Decision:** the companion pool **replaces the base-game colorless card pool wholesale.** The mod ships *no* base StS2 colorless cards; every channel that would have offered a colorless card offers a companion instead. Rationale: the companion pool already *is* this mod's colorless content (`IsColorless`, §4.1). A generic base colorless card sitting next to "Fischl — Oz, at your side" dilutes the Teyvat fantasy and steps on the identity we spent the most engineering on.

@@ -97,6 +97,30 @@ MIRRORED: dict[str, object] = {
     "ReactionConstants.FrozenBossVuln": C.FROZEN_BOSS_VULN,
     "ReactionKitConstants.CatalyticBurstPerReaction":
         C.CATALYTIC_BURST_PER_REACTION,
+    # Non-integer members of the same table. These were invisible until the
+    # lint was widened past `int` during the §4.7 shop sprint -- and they are
+    # the amplifier numbers, i.e. the single most consequential multipliers in
+    # the mod. AMP_STACK_LIMIT is the provenance-log tripwire guardrail (§7.1).
+    "ReactionConstants.VaporizeMult": C.VAPORIZE_MULT,
+    "ReactionConstants.MeltMult": C.MELT_MULT,
+    "ReactionConstants.FrozenDamageMult": C.FROZEN_DAMAGE_MULT,
+    "ReactionConstants.VulnerableTakenMult": C.VULNERABLE_TAKEN_MULT,
+    "ReactionConstants.AmpStackLimit": C.AMP_STACK_LIMIT,
+
+    # Companion reward slot (§4.1) -- the rarity walk and the nation weighting
+    # CompanionSlot ports from tier05 rewards.
+    "CompanionSlot.CommonOdds": C.RARITY_ODDS["common"],
+    "CompanionSlot.UncommonOdds": C.RARITY_ODDS["uncommon"],
+    "CompanionSlot.SameNationShare": C.SAME_NATION_REWARD_SHARE,
+    "CompanionSlot.NationWeight": C.NATION_WEIGHTS["mondstadt"],
+    # §4.7 shop channel, slot 2's renormalized Uncommon share (R59).
+    "MerchantInventory_CompanionColorlessSlots_Patch.SlotTwoUncommonOdds":
+        C.SHOP_COMPANION_RARITY_ODDS["uncommon"],
+
+    # Furina.
+    "FurinaResourceConstants.FanfareDecayFraction": C.FANFARE_DECAY_FRACTION,
+    "SalonConstants.DryDamageMultiplier": C.SALON_DRY_DAMAGE_MULT,
+    "SpotlightSystem.GuestCastBaseMultiplier": C.SPOTLIGHT_BASE_MULT,
 
     # Klee.
     "BurstConstants.PerSkillTag": C.BURST_PER_SKILL_TAG,
@@ -180,16 +204,84 @@ UNMIRRORED: dict[str, str] = {
         "to forget. The x2 itself is the upgrade's design, not a sim number.",
     "PearlOfInsightRelic.BurstPerExhaust":
         "derived: KokomiConstants.BurstPerExhaust * 2, same reasoning.",
+
+    # --- surfaced by widening the lint past `int` (§4.7 shop sprint) ---
+    "FurinaParityVectors.DecayFraction":
+        "derived: it IS FurinaResourceConstants.FanfareDecayFraction, by "
+        "reference rather than by literal. The compiler enforces the link and "
+        "the target is MIRRORED, so comparing here would only add a second "
+        "place to forget.",
+    "KleeSelfCheck.RuleCount":
+        "diagnostic bookkeeping: how many self-check rules exist. It counts "
+        "this file's own contents, not anything the sim models.",
+
+    # Presentation layer. These are pixels, seconds and sprite orientation --
+    # tier0 models no geometry and no time, so there is nothing to mirror. They
+    # are listed rather than pattern-skipped on purpose: a rule that skipped
+    # everything under Vfx/ would also skip a balance number that someone
+    # parked there, which is precisely how numbers go missing.
+    "CreatureFacing.AuthoredFacing":
+        "presentation: which way the source art is drawn. No sim counterpart.",
+    "CreatureFacing.DeadZonePx":
+        "presentation: pixel threshold below which a creature is not re-aimed.",
+    "GaugeBridge.BarFullWidth":
+        "presentation: meter bar width in pixels.",
+    "KleeCombatVfx.LobApexLift":
+        "presentation: bomb-toss arc height in pixels.",
+    "KleeCombatVfx.LobDuration":
+        "presentation: bomb-toss animation length in seconds.",
+    "KleeCombatVfx.MaxConcurrentPops":
+        "presentation: how many pop effects may overlap before they are "
+        "dropped. A frame-rate guard, not a rule -- the sim resolves every "
+        "detonation regardless of what is drawn.",
+    "SalonVisualsBridge.RibbonFullWidth":
+        "presentation: Fanfare ribbon width in pixels.",
+    "SalonVisualsBridge.RibbonVisualSpan":
+        "presentation: how many Fanfare points the ribbon spans end to end. A "
+        "display scale chosen to read well, deliberately NOT the cap -- "
+        "Fanfare is uncapped since F-A, so no sim number corresponds.",
 }
 
 CLASS_RE = re.compile(
     r"^\s*(?:public|internal)\s+(?:static\s+|sealed\s+|abstract\s+|partial\s+)*"
     r"(?:class|record|struct)\s+(\w+)")
-CONST_RE = re.compile(r"^\s*public\s+const\s+int\s+(\w+)\s*=\s*([^;]+);")
+# Non-integer balance numbers count too. The gate shipped int-only, and the
+# docstring's promise ("every balance number in the mod lives twice") quietly
+# did not cover them -- eight constants were escaping when this was widened
+# during the §4.7 shop sprint, and they were not marginal ones: the Vaporize
+# and Melt amplifier multipliers, AMP_STACK_LIMIT, Frozen's damage multiplier,
+# Furina's Fanfare decay fraction, the Salon dry multiplier and the Spotlight
+# Guest Cast multiplier. Every one of those is a headline tuning number, and a
+# sim-side retune of any of them would have drifted silently -- the exact
+# failure this file exists to prevent.
+#
+# `private` is included for the same reason. Visibility is a C# concern; a
+# balance number is a balance number whether or not another class can read it.
+CONST_RE = re.compile(
+    r"^\s*(?:public|internal|private)\s+const\s+"
+    r"(?:int|float|double|decimal)\s+(\w+)\s*=\s*([^;]+);")
+
+# C# numeric literal suffixes (1.5m, 0.875f, 12L) -- stripped before parsing.
+NUM_SUFFIX_RE = re.compile(r"^([-+0-9.eE]+)[mMfFdDlLuU]?$")
+
+# Floating-point mirrors compare within this tolerance rather than exactly:
+# 0.875f round-trips through binary32 and will not equal Python's 0.875.
+FLOAT_TOLERANCE = 1e-6
+
+
+def parse_number(raw: str) -> float | None:
+    """A C# numeric literal as a Python number, or None if it is not one."""
+    m = NUM_SUFFIX_RE.match(raw.strip())
+    if m is None:
+        return None
+    try:
+        return float(m.group(1))
+    except ValueError:
+        return None
 
 
 def collect() -> dict[str, tuple[str, Path]]:
-    """Every `public const int` in the mod, keyed Class.Member.
+    """Every declared numeric `const` in the mod, keyed Class.Member.
 
     The enclosing class is the most recent class declaration above the line.
     That is a lexical approximation rather than a parse, and it is exact for
@@ -222,7 +314,7 @@ def main() -> int:
     found = collect()
 
     if not found:
-        print("FINDING: no `public const int` found -- the lint's pattern or "
+        print("FINDING: no numeric `const` found -- the lint's pattern or "
               "the source layout changed, and a lint that passes because it "
               "read nothing is not a gate.")
         return 1
@@ -237,20 +329,20 @@ def main() -> int:
                 f"MIRRORED with the tier0 value it copies, or to UNMIRRORED "
                 f"with the reason the sim has no counterpart.")
             continue
-        try:
-            got = int(raw)
-        except ValueError:
+        got = parse_number(raw)
+        if got is None:
             findings.append(
-                f"{rel}: {key} = {raw} is in MIRRORED but is not an integer "
+                f"{rel}: {key} = {raw} is in MIRRORED but is not a numeric "
                 f"literal, so its value cannot be compared. Make it a literal "
                 f"or move it to UNMIRRORED as derived.")
             continue
-        want = MIRRORED[key]
-        if got != want:
+        want = float(MIRRORED[key])
+        if abs(got - want) > FLOAT_TOLERANCE:
             findings.append(
-                f"{rel}: {key} = {got}, but tier0 says {want}. The sim is the "
-                f"source of truth: the mod would play to a number no "
-                f"simulation endorsed. Mirror it, or re-measure and move both.")
+                f"{rel}: {key} = {raw}, but tier0 says {MIRRORED[key]}. The "
+                f"sim is the source of truth: the mod would play to a number "
+                f"no simulation endorsed. Mirror it, or re-measure and move "
+                f"both.")
 
     for key in sorted(MIRRORED):
         if key not in found:

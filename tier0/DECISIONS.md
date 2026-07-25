@@ -1818,3 +1818,83 @@ insurance against a future Burst reprice, not because it currently binds.**
 Mechanical: `docs/mondstadt-companions.yaml` cost 1 -> 0 plus `exhaust: true`;
 `docs/klee-upgrades.yaml` comment corrected; §4.7 changelog gains a v1.11b
 supersession note. Sheet remains sole source of truth; codegen regenerated.
+
+## R63 -- §4.7 shop channel executed: three amendments and a purse that never binds (2026-07-25)
+
+Execution record for the R59-R62 sprint. Full log:
+`docs/shop-companion-channel-sprint-log.md`.
+
+**AMENDMENT 1 -- Track A shipped as a query surface, not a `CardPoolModel`.**
+The plan called the pool class the prerequisite. It is not one: a
+`MerchantCardEntry` takes a plain `IEnumerable<CardModel>`, so the shop needs
+no pool object. More importantly the reasoning inverted twice and both halves
+are on file. `KleeOffPoolCards.cs` carried a signed finding that a standalone
+pool "could never work" (no registration hook in `ModelDb.AllSharedCardPools`,
+which is a hardcoded array of 7). **That finding is now STALE and was nearly
+re-asserted:** BaseLib ships `ModelDbSharedCardPoolsPatch`, a postfix that
+appends any `CustomCardPoolModel` declaring `IsShared`. It would work today.
+It was still not built, on COST: `CardModel.Pool` must resolve to exactly one
+pool and supplies the card frame, so registering one migrates 47 companions
+out of three character pools and repaints every companion card -- with an
+init-order dependency no C# test can check, because there is no C# test
+project. Feasible, deferred, [USER]-owned. The stale comment is corrected in
+place.
+
+**AMENDMENT 2 -- no banner gating in the shop.** §4.2 gating was scoped as
+"wiring, not design". Wiring it would have made the two channels disagree
+about a rule neither can exercise: `BANNER_FEATURED_SLOTS` is 3 and no nation
+designs more than 3 Rare companions, so the banner features every 5-star
+everywhere and is exactly a no-op -- which is why the reward slot already
+skips it by standing ruling. It goes live in both channels together, when a
+nation ships a 4th Rare.
+
+**AMENDMENT 3 -- companions do not collect the colorless price surcharge.**
+`MerchantCardEntry.GetCost` is 50/75/150 by rarity (so the plan's "verify
+before reuse" is answered: it DOES price off rarity) and then multiplies by
+1.15 iff `card.Pool is ColorlessCardPool` -- a type check on the concrete
+class, which companions are not. The mod's premium channel is therefore ~15%
+cheaper than the base channel it replaces. Sim mirrors the same bands, so the
+two sides agree with each other and both undercut base.
+
+**THE MEASUREMENT CONTRADICTS §4.7's CENTRAL CLAIM.** 500 runs/arm x 3
+characters, realistic, 3 acts. Winrate delta is a NULL (-0.20pp mean; +1.2 /
+-1.8 / 0.0 with every interval overlapping its control). P1's slot-1 buy rate
+came in at 49.2% against a predicted 10-35%.
+
+The band's own diagnosis for a high buy rate is "under-priced relative to
+card-remove/relic competition". A crowd-out check says that is the wrong
+reading:
+
+| door | off | on | change |
+|---|---|---|---|
+| removals bought | 0 | 0 | -- |
+| relics bought | 1356 | 958 | **-29.4%** |
+| gold unspent at run end | 332277 | 334174 | +0.6% |
+
+Card removal is not a competitor at all in tier 0.5 (zero removals either arm:
+`is_known_dead` only fires on curses and unupgradable basic filler, and all
+three characters ship clean decks). The channel trades a relic for a companion
+at par, ~30% of them, and moves no winrate. And **unspent gold does not
+change** -- runs end holding ~220 gold.
+
+**A price cannot govern a purse that does not bind.** "Gold price is the
+balance governor" is not currently true in the sim; the governor is the shelf.
+NO KNOB WAS TURNED -- the plan's retune order starts at gold bands, and the
+evidence says a gold-band change would be aimed at the wrong mechanism. This
+goes to [USER] as a design question (should the shop's purse ever bind?)
+rather than as a tuning pass. Also recorded: `visit_shop` buys cards before
+removal and `model.py` offers relics later still, so companions get first
+claim on the purse by construction -- the buy rate is partly an ordering
+artifact, which is why the crowd-out table and not P1 is the load-bearing
+evidence.
+
+**RIDE-ALONG: the constant-parity gate was only reading `public const int`.**
+Adding one C# constant surfaced that eight non-integer balance constants were
+escaping a lint whose docstring promises that every balance number lives
+twice -- among them VaporizeMult 1.5, MeltMult 1.75, AmpStackLimit 4.0,
+FanfareDecayFraction 0.20, SalonDryDamageMultiplier 0.75 and
+GuestCastBaseMultiplier 1.5. Headline tuning numbers, any of which could have
+drifted in silence. The lint now reads int/float/double/decimal and private as
+well as public: **58 -> 71 mirrored, 3 -> 13 unmirrored, and every newly
+watched value already matched.** No drift had happened; the gate was not
+looking.

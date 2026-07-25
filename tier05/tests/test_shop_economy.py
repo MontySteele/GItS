@@ -111,8 +111,12 @@ def test_buys_a_card_the_policy_would_draft(monkeypatch):
                         lambda rng, ch, n=C.SHOP_CARD_OFFERS:
                         [loader.get_card("mine_toss")])
     deck = loader.starting_deck("klee")
+    # companions=False isolates the CHARACTER shelf, which is what this test
+    # is about: the flat §5 price and the policy-reuse contract. The companion
+    # channel has its own price bands and its own tests below.
     out = shop.visit_shop(random.Random(0), "klee", deck, 300,
-                          "demolition", draft.assigned_policy)
+                          "demolition", draft.assigned_policy,
+                          companions=False)
     assert out.purchases == [{"buy": "card", "id": "mine_toss",
                               "price": C.SHOP_CARD_PRICE}]
     assert out.gold == 300 - C.SHOP_CARD_PRICE

@@ -89,3 +89,21 @@ def test_mirrored_constants_match_the_sim():
         [sys.executable, str(REPO / "tools" / "lint_constant_parity.py")],
         capture_output=True, text=True)
     assert res.returncode == 0, res.stdout + res.stderr
+
+
+def test_companion_roster_can_fill_both_shop_slots():
+    """§4.7 shop channel: instance TWO of the empty-draw class.
+
+    Wired here rather than left as a tool for the same reason as the upgrade
+    lint above: the failure it prevents is a black-screen softlock on shop
+    entry (finding 24's shape), and the roster corner that causes it moves
+    every time someone edits a companion sheet. A thin nation is survivable --
+    both implementations carry a fallback ladder -- but every rung the ladder
+    takes is a slot that silently stopped honouring §4.7, which is invisible
+    at the table and visible here.
+    """
+    res = subprocess.run(
+        [sys.executable,
+         str(REPO / "tools" / "lint_companion_shop_coverage.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr

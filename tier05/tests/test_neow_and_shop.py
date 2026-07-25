@@ -87,11 +87,22 @@ def _fight_kinds():
 
 
 def _no_grants(monkeypatch):
-    """Silence EVERY roll_relic_reward grant site (treasure / elite / boss /
-    astrolabe) so only the site under test moves the held set. The shop rolls
-    its own shelf via unowned_common, so it is unaffected by this."""
+    """Silence EVERY relic acquisition except the site under test.
+
+    Both doors, deliberately. `roll_relic_reward` covers treasure / elite /
+    boss / astrolabe; `unowned_common` covers the SHOP shelf, which is a
+    separate door the older version of this helper left open with a note
+    saying so. That note made the isolation a promise the helper did not keep:
+    any run whose rng shifted could buy a relic at the shop and smuggle an
+    extra hook into a test that asserts on exact hook lists. The §4.7 shop
+    channel duly renumbered the run and a shop relic started injecting
+    combat_start_energy into every fight of the booming_conch test -- a
+    failure that said nothing about booming_conch.
+    """
     monkeypatch.setattr(relic_pool, "roll_relic_reward",
                         lambda rng, held, character: None)
+    monkeypatch.setattr(relic_pool, "unowned_common",
+                        lambda held_ids, character: [])
 
 
 def _force_neow(monkeypatch, offer):

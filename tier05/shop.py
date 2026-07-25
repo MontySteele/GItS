@@ -96,18 +96,103 @@ def shop_offer(rng: random.Random, character: str,
     return offers
 
 
+def companion_shop_offer(
+        rng: random.Random, character: str,
+        banner: frozenset[str] | None = None) -> list[tuple[Card, int]]:
+    """The §4.7 companion channel: TWO priced slots (R59/R61).
+
+    Slot 1 draws the character's HOME NATION at an Uncommon floor -- the
+    targeted "buy your dream support" slot. Slot 2 is a wildcard at the same
+    floor, rarity rolled on SHOP_COMPANION_RARITY_ODDS. Returns
+    ``(card, price)`` pairs because the two slots are priced by DRAWN RARITY,
+    which is the whole balance story: §4.7 lets the paid channel roll
+    payoff-grade 5-stars precisely because gold, not a stat nerf, is the
+    governor.
+
+    EMPTY-DRAW LADDER (Track D). A slot that cannot be filled must be a
+    decision, never a crash. The ladder widens the NATION before it drops the
+    RARITY, because R59 ratified the floor while §4.7 only ever described the
+    nation as falling through:
+
+        home nation @ rarity -> any nation @ rarity -> any nation @ the other
+        rarity -> the slot is OMITTED.
+
+    THE LAST RUNG DIVERGES FROM THE MOD, deliberately and it is recorded here
+    rather than faked: the C# side falls back to one base colorless card for
+    that slot (R60 keeps ColorlessCardPool populated exactly so that rung
+    exists). tier 0.5 models no base colorless pool at all, so it drops the
+    slot instead. The divergence is unreachable today -- it needs a rarity with
+    no companion at ANY nation -- and inventing a base-colorless surrogate to
+    match would be faking content the sim does not have.
+
+    Live corner worth knowing: Fontaine designs ZERO Rare companions, so
+    Furina's slot 1 can never roll one and takes the nation-widening rung
+    whenever slot 2 has already claimed the last Fontaine uncommon.
+    """
+    home = loader.character_nation(character)
+    pool = rewards.companion_pool()
+
+    def eligible(rarity: str, nation: str | None,
+                 taken: list[Card]) -> list[Card]:
+        taken_ids = {c.id for c in taken}
+        cards = rewards._banner_filtered(pool.get(rarity, []), banner)
+        return [c for c in cards
+                if c.personal_pool in (None, character)
+                and c.id not in taken_ids
+                and (nation is None or c.nation == nation)]
+
+    offers: list[tuple[Card, int]] = []
+    taken: list[Card] = []
+    for slot in range(C.SHOP_COMPANION_SLOTS):
+        # Slot 1 is home-nation; every later slot is wildcard.
+        nation = home if slot == 0 else None
+        rarity = _roll_companion_rarity(rng)
+        cards = eligible(rarity, nation, taken)
+        if not cards and nation is not None:
+            cards = eligible(rarity, None, taken)
+        if not cards:
+            other = "rare" if rarity == "uncommon" else "uncommon"
+            cards = eligible(other, None, taken)
+            if cards:
+                rarity = other
+        if not cards:
+            continue                      # slot omitted -- see the docstring
+        pick = rng.choice(cards)
+        taken.append(pick)
+        offers.append((loader.get_card(pick.id), C.SHOP_COMPANION_PRICE[rarity]))
+    return offers
+
+
+def _roll_companion_rarity(rng: random.Random) -> str:
+    """Uncommon-or-Rare at renormalized reward odds (R59)."""
+    roll = rng.random()
+    acc = 0.0
+    for rarity, odds in C.SHOP_COMPANION_RARITY_ODDS.items():
+        acc += odds
+        if roll < acc:
+            return rarity
+    return "uncommon"
+
+
 @dataclass
 class ShopOutcome:
     deck_ids: list[str]
     gold: int
     removal_uses: int
     purchases: list[dict] = field(default_factory=list)   # buy log
+    # What the companion channel OFFERED this visit: {slot, id, rarity,
+    # price}. The buy log alone cannot grade P1, because a slot that was never
+    # offered and a slot that was offered and declined are the same absence in
+    # it -- and the difference is exactly what a buy RATE means.
+    companion_offers: list[dict] = field(default_factory=list)
 
 
 def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
                gold: int, archetype: str, policy: DraftPolicy,
                removal_uses: int = 0,
-               n_offers: int = C.SHOP_CARD_OFFERS) -> ShopOutcome:
+               n_offers: int = C.SHOP_CARD_OFFERS,
+               companions: bool = True,
+               banner: frozenset[str] | None = None) -> ShopOutcome:
     """Resolve one shop visit. Returns the mutated deck, remaining gold, the
     running removal count and a per-purchase log.
 
@@ -116,7 +201,14 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
     pick from the shelf; we buy its pick when affordable and re-ask on the
     shrunken shelf until it skips or gold can't cover the next card. Removal
     is bought once if a known-dead card is present and the rising price is
-    affordable."""
+    affordable.
+
+    ``companions`` is the §4.7 channel (R61). It is a PARAMETER rather than a
+    constant so P2 can be measured as a paired-seed on/off comparison; note
+    that turning it on also consumes rng, so the two arms diverge downstream
+    rather than being strictly paired. Character-card offers are rolled FIRST
+    so their draw sequence is untouched by the flag, which is what keeps the
+    channel-off arm identical to every archived shop number."""
     deck_ids = list(deck_ids)
     # Read-only: the policy only SCORES the held deck (a bought card is
     # appended by id), so the shared prototypes are safe here.
@@ -124,16 +216,50 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
     purchases: list[dict] = []
 
     # --- cards: reuse the draft policy's valuation verbatim (§5) ---
+    # Character cards first (see the flag note above), then the two companion
+    # slots. Price is per-card because the channels charge differently: the
+    # character shelf is the flat §5 price, companions are priced by drawn
+    # rarity. `id()` keys are safe -- loader.get_card returns a fresh copy per
+    # call, so two copies of one card id are still distinct shelf entries.
     shelf = shop_offer(rng, character, n_offers)
-    while shelf and gold >= C.SHOP_CARD_PRICE:
+    price_of: dict[int, int] = {id(c): C.SHOP_CARD_PRICE for c in shelf}
+    # Which companion slot an entry came from. Needed because P1 and P3 are
+    # SLOT-level predictions -- "did the premium home-region slot get bought"
+    # is a different question from "did a companion get bought", and only the
+    # first one grades the §4.7 thesis. Character-shelf entries stay out of
+    # this map so their purchase records keep their original shape.
+    slot_of: dict[int, int] = {}
+    companion_offers: list[dict] = []
+    if companions:
+        for slot, (card, price) in enumerate(
+                companion_shop_offer(rng, character, banner), start=1):
+            shelf.append(card)
+            price_of[id(card)] = price
+            slot_of[id(card)] = slot
+            companion_offers.append({"slot": slot, "id": card.id,
+                                     "rarity": card.rarity, "price": price})
+
+    while shelf and gold >= min(price_of[id(c)] for c in shelf):
         pick = policy(rng, deck_cards, shelf, archetype)
         if pick is None:                 # policy would skip the shelf -> stop
             break
-        gold -= C.SHOP_CARD_PRICE
+        price = price_of[id(pick)]
+        if price > gold:
+            # The policy wants a card it cannot afford. Drop that ONE entry
+            # and re-ask: with a flat shelf this branch is unreachable (the
+            # loop guard already proved affordability), so every archived
+            # flat-price run is bit-identical. With the companion channel it
+            # is the difference between "too expensive" and "shop over".
+            shelf.remove(pick)
+            continue
+        gold -= price
         deck_ids.append(pick.id)
         deck_cards.append(pick)
-        purchases.append({"buy": "card", "id": pick.id,
-                          "price": C.SHOP_CARD_PRICE})
+        record = {"buy": "card", "id": pick.id, "price": price}
+        if id(pick) in slot_of:
+            record["channel"] = "companion"
+            record["slot"] = slot_of[id(pick)]
+        purchases.append(record)
         shelf.remove(pick)
 
     # --- removal: only a known-dead card, only if affordable (§5) ---
@@ -146,7 +272,8 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
         purchases.append({"buy": "removal", "id": dead.id, "price": price})
 
     return ShopOutcome(deck_ids=deck_ids, gold=gold,
-                       removal_uses=removal_uses, purchases=purchases)
+                       removal_uses=removal_uses, purchases=purchases,
+                       companion_offers=companion_offers)
 
 
 # --- Treasure relic slot: STUB (§1, §5). Relics are NOT modeled this pass.

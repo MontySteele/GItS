@@ -495,6 +495,27 @@ SHOP_REMOVAL_PRICE_STEP = 25     # §5: "rising per use" -- +25 each removal
 #                                  only bites once multi-act adds a 2nd shop.
 SHOP_CARD_OFFERS = 3             # "a few cards" (§5). OPEN NUMBER -- §8 does
 #                                  not fix a count; 3 mirrors REWARD_CARD_OFFERS.
+# --- §4.7 companion channel (R59/R61) -------------------------------------
+# The shop's TWO colorless slots carry companions. Slot 1 draws the run
+# character's home nation; slot 2 is wildcard. Both floor at Uncommon (R59):
+# base StS2's slot 2 is a guaranteed Rare, so a wildcard at full reward odds
+# (~60% common) would make the mod's shop WORSE than base at the one slot
+# whose entire argument is that it is the premium paid channel.
+SHOP_COMPANION_SLOTS = 2
+# RARITY_ODDS renormalized onto {uncommon, rare} -- the Uncommon floor is the
+# ruling, this is just what the surviving odds weigh once commons are cut.
+SHOP_COMPANION_RARITY_ODDS = {"uncommon": 0.875, "rare": 0.125}
+# Priced by DRAWN RARITY (§4.7: gold is the balance governor, not a stat nerf).
+# These are the REAL StS2 shop bands, read off MerchantCardEntry.GetCost, so
+# the sim and the mod charge the same gold for the same companion. They are
+# deliberately NOT the flat SHOP_CARD_PRICE above: a channel whose whole
+# balance story is its price cannot be measured against a flat price.
+#
+# KNOWN DIVERGENCE, recorded not fixed: base GetCost multiplies by 1.15 when
+# `card.Pool is ColorlessCardPool`, and companions do not resolve to that pool
+# (see klee-mod CompanionPool), so neither side charges the colorless
+# surcharge. Both sides agree; both are ~15% under base's premium channel.
+SHOP_COMPANION_PRICE = {"uncommon": 75, "rare": 150}
 # W2 relic granting cadence: shops stock 1-2 Common-pool relics for sale at
 # this price. NEW economy number (relics were a stub before W2); auto-take-all
 # policy buys an offered relic iff gold allows (relics are near-strictly-good).

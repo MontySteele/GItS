@@ -164,6 +164,12 @@ class RunResult:
     banner: frozenset[str] = field(default_factory=frozenset)   # v1.8 featured
     gold: int = 0                       # run-model rework §5: economy state
     shop: list[dict] = field(default_factory=list)   # §5: shop purchase log
+    shop_companion_offers: list[dict] = field(default_factory=list)
+    #                    §4.7 channel (R61): what the two companion slots
+    #                    OFFERED, per visit -- {"slot", "id", "rarity",
+    #                    "price"}. Deliberately NOT folded into `shop`, which
+    #                    is a purchase log that callers sum prices over; an
+    #                    offer is not a purchase. The buy RATE needs both.
     removal_uses: int = 0               # §5: running removal count (rising price)
     relics: list[str] = field(default_factory=list)  # W2: relics GRANTED this
     #                    run (Neow + treasure + elite + boss + shop), in order;
@@ -359,6 +365,7 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 gold = outcome.gold
                 removal_uses = outcome.removal_uses
                 res.shop.extend(outcome.purchases)
+                res.shop_companion_offers.extend(outcome.companion_offers)
                 res.removal_uses = removal_uses
                 res.gold = gold
                 if held is not None:

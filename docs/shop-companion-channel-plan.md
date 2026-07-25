@@ -1,5 +1,18 @@
 # Sprint Design Pass — the Shop Companion Channel (§4.7)
 
+**Status: SUPERSEDED 2026-07-25 — retained as the DECISION RECORD, not a build
+input.** D1/D2/D3 below were answered as R59/R60/R61 (`tier0/DECISIONS.md`);
+the sprint that executed them is `docs/shop-companion-channel-sprint.md` and
+its outcome is `docs/shop-companion-channel-sprint-log.md`.
+
+Two things in this document were **wrong** and the log explains both: §2's
+claim that a companion pool class cannot be registered (BaseLib grew the hook
+since), and §3's D1 framing that slot 2's floor was the only open question
+(the shop's *purse never binds*, so the price floor governs less than either
+document assumed). Read §2's table as the state of the tree on 2026-07-26.
+
+Original header follows.
+
 **Status: DRAFT FOR RED-PEN. Nothing here is ratified and nothing is built.**
 Opened 2026-07-26, out of the feasibility pass on
 `claude/genshin-sts2-design-lqstz1` (merged as specification only).

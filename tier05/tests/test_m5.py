@@ -101,16 +101,29 @@ def test_furina_randomized_starter_is_fontaine_locked_and_role_locked():
 
 
 def test_randomized_starter_uses_a_dedicated_replayable_stream():
+    companion_ids = {c.id for c in loader._card_index().values()
+                     if c.is_companion}
+    # The claim is about the STARTER, so read the starter -- not the deck the
+    # run happens to die holding. The old form asserted >=2 companions in the
+    # final deck on the theory that "starters never vanish", which is simply
+    # not true: events.py removes cards (`remove` and `remove_random`), so any
+    # run that draws a removal event can legitimately eat a starter companion.
+    # That made this a seed-fragile proxy, and the §4.7 shop channel's extra
+    # rng draws duly renumbered the run and took prune_witch_hunt out of the
+    # deck. The mechanism under test never moved.
+    starter = loader.starting_deck("klee",
+                                   random.Random(SEED + 3 * 10 ** 9))
+    assert len(companion_ids.intersection(starter)) >= 2
+
+    # Replayability is the other half, and it IS a whole-run property: same
+    # seed, same run, same surviving companions.
     first = model.run_one("klee", "generic", "generic",
                           draft.assigned_policy, SEED)
     second = model.run_one("klee", "generic", "generic",
                            draft.assigned_policy, SEED)
-    companion_ids = {c.id for c in loader._card_index().values()
-                     if c.is_companion}
-    first_pair = companion_ids.intersection(first.deck_ids)
-    second_pair = companion_ids.intersection(second.deck_ids)
-    assert len(first_pair) >= 2  # rewards may add more; starters never vanish
-    assert first_pair == second_pair
+    assert (companion_ids.intersection(first.deck_ids)
+            == companion_ids.intersection(second.deck_ids))
+    assert first.deck_ids == second.deck_ids
 
 
 def test_death_logs_node_index_and_hp_persists():
@@ -401,12 +414,24 @@ def test_pity_slot_fires_after_k_companionless_screens():
     def no_companions(rng, deck, offers, archetype):
         picks = [c for c in offers if not c.is_companion]
         return picks[0] if picks else None
-    r = model.run_one("klee", "demolition", "demolition", no_companions,
-                      SEED, slot_mode="pity(2)")
-    comp_counts = [sum(1 for c in d["offers"] if c.is_companion)
-                   for d in r.decisions]
-    assert comp_counts[:2] == [1, 1]        # standard until pity builds
-    assert 3 in comp_counts                 # then the choose-3 fires
+
+    # Pity needs THREE screens to show itself (two to build, one to fire), so
+    # the run has to survive three fights. Scan seeds for one that does rather
+    # than pinning SEED: a fixed seed makes this a test of how long Klee lives
+    # as much as of the pity counter, and it duly broke when the §4.7 shop
+    # channel renumbered the run and the SEED=42 run died after two screens.
+    counts = None
+    for s in range(40):
+        r = model.run_one("klee", "demolition", "demolition", no_companions,
+                          SEED + s, slot_mode="pity(2)")
+        c = [sum(1 for card in d["offers"] if card.is_companion)
+             for d in r.decisions]
+        if len(c) >= 3:
+            counts = c
+            break
+    assert counts is not None, "no run survived 3 reward screens in 40 seeds"
+    assert counts[:2] == [1, 1]             # standard until pity builds
+    assert 3 in counts                      # then the choose-3 fires
 
 
 def test_core_advance_never_dead_pick():

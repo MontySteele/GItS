@@ -108,23 +108,15 @@ public static class CompanionSlot
             : CardRarity.Rare;
     }
 
+    // Delegated to CompanionPool (§4.7 shop sprint, Track A) so the reward
+    // slot and the shop channel can never drift about which character is which
+    // or where they are from. Pure switches over Player.Character: no rng, no
+    // ordering, so the offers this slot produces are unchanged by the move.
     private static string? CharacterId(Player player) =>
-        player.Character switch
-        {
-            Klee => "klee",
-            Furina => "furina",
-            Kokomi => "kokomi",
-            _ => null,
-        };
+        CompanionPool.CharacterId(player);
 
     private static string? HomeNation(Player player) =>
-        player.Character switch
-        {
-            Klee => "mondstadt",
-            Furina => "fontaine",
-            Kokomi => "inazuma",
-            _ => null,
-        };
+        CompanionPool.HomeNation(player);
 
     /// <summary>
     /// Port of tier05 rewards._nation_weighted_choice. SAME_NATION_REWARD_SHARE
