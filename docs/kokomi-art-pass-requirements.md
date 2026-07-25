@@ -36,12 +36,36 @@ inspection disqualified two whole families the raw counts had included.
 
 | Register | Count | Notes |
 |---|---:|---|
-| `splash` — large figure illustrations | ~11 | Wish, Full Wish, Multi Wish, Card, Portrait, Profile, Introduction Card, Introduction Banner, Character Card Showcase, in-game Game render, namecard background |
-| `sticker` — Paimon's Paintings emoji | 11 | 340×340, transparent, **no burnt-in text**, unmistakably her |
-| `tcg` | 1 art / 3 files | Character Card + Platinum + Golden (frame variants of one illustration) |
-| `item` / `vfx` — talents, props, Vision | ~10 | Talent Kurage's Oath / Nereid's Ascension / Princess of Watatsumi, Bake-Kurage Summon, Ceremonial Garment Buff Icon, Vision, Item, Item The Deep, Sango Pearl (+Wild), ability preview gifs |
-| environment — Watatsumi | ~4 | Island, Island Concept Art, Sangonomiya Shrine, Watatsumi Altar |
-| **Viable distinct sources** | **~37** | against **58** personal faces |
+| `splash` — large figure illustrations | 10 | Portrait 4900×5700, Introduction Card 2250², Profile 2400×1320, Wish 2048×1024, Full Wish 1568², Card 1080×1920, Game 964×1736, Showcase 700×2646, Namecard BG 840×400, Multi Wish 320×1024 |
+| `sticker` | 15 | 11 Paimon's Paintings emoji (300–340², transparent, **no text**), 3 Expressions (420²), Side by Side (263×315) |
+| `tcg` | 3 | Character Card + Platinum + Golden, 420×720 each |
+| `item` | 5 | Sango Pearl Wild 797², Vision 400², Sango Pearl 256², The Deep 256², Item 256² |
+| `vfx` | **0 usable** | see below — every one is a sigil |
+| **Viable distinct sources** | **33** | against **58** personal faces |
+
+### `vfx` IS A DEAD REGISTER FOR HER — the single most important finding
+
+Every piece of her kit art is a sigil or a clip thumbnail:
+
+| Source | Size |
+|---|---|
+| Talent Nereid's Ascension / Kurage's Oath / Princess of Watatsumi | 128×128 |
+| Ceremonial Garment Buff Icon | 100×100 |
+| Nereid's Ascension / Kurage's Oath / Garment Water / Garment Attack previews | 480×270 |
+
+Not one reaches a 500×380 card, and `vfx` is **not** undersize-exempt — only
+`item` and `sticker` are, and rightly: a sigil is not an illustration.
+
+This matters more than the raw count suggests. Her kit art is the obvious
+*content* match for her attack and ability cards — the Garment previews
+literally depict the Ceremonial Garment — and **none of it can be used on any
+card face.** The first draft of the plan leaned on it for twelve rank-1 picks
+and `art_process` rejected all twelve on L8. They now sit at rank 3 in every
+shortlist, so the taste pass can still choose one deliberately; they must
+never be the default.
+
+Bake-Kurage Summon (420×720) is the exception and is *not* a sigil — it is a
+full-size render of the jellyfish, and it is the only kit art that works.
 
 ### What was disqualified, and why it matters
 
@@ -68,27 +92,64 @@ Naming them here rather than silently dropping them: a later pass that
 re-runs the hunt will see 27 emoji and 7 Character Details and reasonably
 wonder why the plan ignores them.
 
-### Consequence for the plan
+### Consequence for the plan: the unit is SLOTS, not sources
 
-~37 viable sources against 58 faces means **crop reuse is mandatory**, exactly
-as the Furina hybrid §2 split anticipated — but the ratio (1.6 faces per
-source) is far healthier than the ruling's premise implied (4.75). Concretely:
+33 sources against 58 faces means crop reuse is mandatory, as hybrid §2
+anticipated. But the real currency turned out to be **(source, anchor)
+slots**: a large source backs several distinct faces, a small transparent icon
+backs exactly one.
 
-- **Basics and Rares get unique, uncropped-family picks** (13 cards: 5 basic +
-  8 rare). This is the strict half of hybrid §2 and there is enough splash and
-  talent art to honour it.
-- **Commons and Uncommons draw from the crop-reuse pool** (45 cards), where one
-  large source yields several distinct crops.
-- **The `Sangonomiya Kokomi Card.png` caveat:** 1080×1920 and excellent, but it
-  carries the GENSHIN IMPACT wordmark top-centre and a miHoYo logo
-  bottom-right. At the 500×380 card aspect a `cover` crop takes a horizontal
-  band, so a **mid-body focus excludes both** — but `focus: top` would pull the
-  wordmark straight in. Any row using it must not use a top anchor.
+| Family | Sources | Slots |
+|---|---:|---:|
+| large splash (multi-anchor) | 10 | 38 |
+| tcg (multi-anchor) | 3 | 12 |
+| item (single) | 5 | 5 |
+| sticker (single) | 15 | 15 |
+| **total** | **33** | **70** for 58 faces |
+
+**Anchors are computed, not chosen.** A `cover` focus is a *centre*, and the
+crop is clamped inside the image, so any anchor nearer an edge than half the
+crop renders identical pixels. On Portrait (4900×5700) the valid centre range
+is only [0.33, 0.67]; on Introduction Card (2250²) it is [0.38, 0.62]. The
+generator derives each source's range from its geometry and spreads slots
+inside it.
+
+**`Sangonomiya Kokomi Card.png` caveat:** 1080×1920 and her best art, but it
+carries the GENSHIN IMPACT wordmark top-centre and a miHoYo logo bottom-right.
+A 500×380 `cover` crop takes a horizontal band, so anchors inside [0.24, 0.74]
+exclude both. A top anchor pulls the wordmark straight in.
 
 **Nothing above is a request to revisit the ruling.** Widening the pool is
 still the right call and this pass follows it. The correction is only to the
-arithmetic the ruling was justified with, because that arithmetic is about to
-decide how aggressively crops get reused.
+arithmetic the ruling was justified with, because that arithmetic decides how
+aggressively crops get reused.
+
+## 2a. The lint could not see the thing that was actually wrong
+
+Worth recording, because it cost two rebuilds and it generalises.
+
+`art_lint` L1 compares `(title, frame)` and L7 compares `(mode, focus)` — both
+compare **what the plan says**. Both crop modes clamp, so two rows that differ
+on paper can render the same picture:
+
+- the first draft used `cover_autocrop` margins as if they were anchors
+  (`cover@0.22` vs `cover@0.58`) → **11 pixel-identical groups across ~28
+  cards, lint fully green**;
+- the second draft switched to real `cover` anchors but picked values outside
+  the valid centre range → **3 more identical pairs, lint still green**.
+
+Both were found by hashing `art/candidates/*/r1.png`, not by any rule. That
+sweep is now **L12** in `art_lint`, and it immediately turned up three
+*pre-existing* identical pairs nobody had noticed:
+
+| Pair | Status |
+|---|---|
+| `blazing_delight` == `true_spark_knight` | shipped Klee art, allowlisted, **wants a re-pick** |
+| `catalytic_conversion` == `spark_collection` | already in `PENDING_RED_PEN` for a related L1 |
+| `crowd_work` == `standing_ovation` | shipped Furina art, allowlisted, **wants a re-pick** |
+
+They are allowlisted as *known defects*, not exemptions — the gate now holds
+the line while they wait for a ruling.
 
 ## 3. Companions (Inazuma) — not scarce at all
 
