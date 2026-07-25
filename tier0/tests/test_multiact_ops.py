@@ -172,6 +172,112 @@ def test_phased_boss_fight_runs_through_both_bars():
     assert end.player.alive
 
 
+# --- intent ramps (2026-07-24: the Test Subject act-3 diagnosis) ------------
+#
+# `ramp` is per TURN and counts from the start of the enemy's CURRENT phase;
+# `ramp_per_use` is per USE of that intent. Both are read through one helper
+# (Enemy.ramped_amount) so the enemy turn and the pilot's incoming-damage
+# estimate cannot drift apart, which they had.
+
+
+def test_unphased_ramp_still_counts_from_combat_start():
+    """The frozen PUNISHER's shape: atk 9, ramp +2 after turn 3. An unphased
+    enemy has phase_start_turn 0, so this must be bit-identical to the
+    pre-phase-relative behaviour -- the whole battery calibration rests on it.
+    """
+    e = make_enemy(intents=[{"kind": "attack", "amount": 9, "ramp": 2,
+                             "ramp_after": 3}])
+    got = [e.ramped_amount(e.current_intent(), turn) for turn in range(1, 8)]
+    assert got == [9, 9, 9, 11, 13, 15, 17]
+
+
+def test_ramp_inside_a_phase_counts_from_the_phase_change():
+    """THE act-3 bug. A ramping intent that first appears in a boss's second
+    bar must not arrive pre-ramped by however long the first bar took."""
+    e = Enemy(hp=10, max_hp=10, name="phased", is_boss=True,
+              intents=[{"kind": "attack", "amount": 5}],
+              phases=[{"hp": 30,
+                       "intents": [{"kind": "attack", "amount": 10,
+                                    "ramp": 3}]}],
+              counts_for_fatal=False)
+    st = make_state(enemies=[e])
+    st.turn = 9                      # the first bar took nine turns to chew
+    e.hp = 0
+    combat._settle_phases(st)
+    assert e.phase_start_turn == 9
+    # Opens at its printed amount on the turn the bar flips, not 10 + 3*9.
+    assert e.ramped_amount(e.current_intent(), 9) == 10
+    assert e.ramped_amount(e.current_intent(), 11) == 16
+
+
+def test_ramp_per_use_grows_per_use_not_per_turn():
+    """Test Subject's Multi-Claw gains a HIT each time it is taken. A turn
+    ramp cannot express that: the value would depend on how many non-attack
+    beats sit between two uses, so adding a beat would silently retune it."""
+    e = make_enemy(hp=999, intents=[
+        {"kind": "attack", "amount": 10, "times": 3, "ramp_per_use": 3},
+        {"kind": "block", "amount": 1},          # the beat in between
+    ])
+    st = make_state(enemies=[e], hp=500)      # survive the whole sequence:
+    seen = []                                 # a dead player stops advancing
+    for _ in range(6):                           # three uses, three beats
+        if e.current_intent()["kind"] == "attack":
+            seen.append(e.ramped_amount(e.current_intent(), st.turn) * 3)
+        st.turn += 1
+        combat._enemy_turn(st, e)
+    assert seen == [30, 39, 48]                  # the authored act-3 line
+
+
+def test_ramp_per_use_counters_reset_on_a_phase_change():
+    e = Enemy(hp=10, max_hp=10, name="phased",
+              intents=[{"kind": "attack", "amount": 4, "ramp_per_use": 5}],
+              phases=[{"hp": 30, "intents": [{"kind": "attack", "amount": 10,
+                                              "ramp_per_use": 3}]}],
+              counts_for_fatal=False)
+    st = make_state(enemies=[e])
+    combat._enemy_turn(st, e)                    # first bar takes its move
+    combat._enemy_turn(st, e)
+    assert e.intent_uses                         # counted
+    e.hp = 0
+    combat._settle_phases(st)
+    assert e.intent_uses == {}
+    assert e.ramped_amount(e.current_intent(), st.turn) == 10
+
+
+def test_pilot_and_enemy_turn_agree_on_a_ramped_intent():
+    """These were duplicated formulas. A pilot that mispredicts incoming
+    damage blocks against the wrong number."""
+    from tier0.pilot import policy
+    e = make_enemy(hp=999, intents=[{"kind": "attack", "amount": 10,
+                                     "ramp": 4}])
+    st = make_state(enemies=[e])
+    st.turn = 5
+    e.phase_start_turn = 2
+    predicted = policy._incoming_damage(st)
+    hp0 = st.player.hp
+    combat._enemy_turn(st, e)
+    assert predicted == hp0 - st.player.hp == 22      # 10 + 4 * (5 - 2)
+
+
+def test_test_subject_second_bar_opens_at_its_authored_number():
+    """End-to-end on the shipped roster row: the sheet says 30 -> 39 -> 48."""
+    from tier05 import acts
+    spec = next(s for s in acts.boss_pool(2) if s["id"] == "test_subject")
+    boss = acts.spawn(spec, random.Random(0))[0]
+    st = make_state(enemies=[boss], hp=500)   # ditto: read the curve, not the
+    st.turn = 12                              # kill. A realistic first bar.
+    boss.hp = 0
+    combat._settle_phases(st)
+    seen = []
+    for _ in range(6):
+        if boss.current_intent()["kind"] == "attack":
+            seen.append(boss.ramped_amount(boss.current_intent(), st.turn)
+                        * boss.current_intent().get("times", 1))
+        st.turn += 1
+        combat._enemy_turn(st, boss)
+    assert seen == [30, 39, 48]
+
+
 # --- Slow / Skittish (§10.9 promotions, red-pen 2026-07-23) -----------------
 
 

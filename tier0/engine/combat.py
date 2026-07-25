@@ -79,6 +79,12 @@ def _settle_phases(state: CombatState) -> None:
             e.hp = e.max_hp = int(ph["hp"])
             e.intents = ph["intents"]
             e.intent_index = 0
+            # A new bar is a new moveset: its ramps start counting HERE, not
+            # at combat start. Without this, a phase-2 intent arrives already
+            # ramped by however many turns the previous bar took -- Test
+            # Subject's Multi-Claw opened at 84 instead of its authored 30.
+            e.phase_start_turn = state.turn
+            e.intent_uses = {}
             e.block = 0
             e.powers = {}
             e.aura = None
@@ -469,8 +475,7 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
         bomb_suppressed = (
             bool(enemy.bombs) and not enemy.bomb_suppression_spent
         )
-        amount = intent["amount"] + intent.get("ramp", 0) * max(
-            0, state.turn - intent.get("ramp_after", 0))
+        amount = enemy.ramped_amount(intent, state.turn)
         for _ in range(intent.get("times", 1)):
             dmg = powers.modify_damage_dealt(enemy, amount)
             if frozen:

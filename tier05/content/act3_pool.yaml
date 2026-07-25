@@ -216,10 +216,19 @@ boss:
     name: "TEST SUBJECT"
     # THE phase boss (§10.2 op): 100 -> 200 -> 300 HP, revives with a new
     # moveset each bar (600 total). Approximations, all §10.9-logged:
-    # P1 Enrage 2 skipped; P2's grow-a-hit-per-turn Multi-Claw is ramp 3
-    # per hit (30 -> 39 -> 48 vs real 30 -> 40 -> 50) and Painful Stabs'
+    # P1 Enrage 2 skipped; P2's grow-a-hit-per-turn Multi-Claw is +3 per hit
+    # PER USE (30 -> 39 -> 48 vs real 30 -> 40 -> 50) and Painful Stabs'
     # on-unblocked Wounds become an inject beat (every other turn); P3
     # Intangible skipped (the 300 bar carries the weight).
+    #
+    # Multi-Claw was `ramp: 3` until 2026-07-24, which is per TURN counted
+    # from combat start -- so on top of the phase-relative bug (fixed in the
+    # engine, see Enemy.ramped_amount) it also grew on the inject beats it
+    # sits between. Delivered 84 -> 102 -> 120 against a 30 -> 39 -> 48
+    # authored line, i.e. an act-3 boss no measured deck could beat at any
+    # HP. `ramp_per_use` is the shape the real move actually has (it gains a
+    # HIT each time it is taken), and unlike a turn ramp it does not silently
+    # retune if a beat is added to the rotation.
     enemies:
       - name: test_subject
         hp: 100
@@ -231,7 +240,7 @@ boss:
         phases:
           - hp: 200
             intents:
-              - {kind: attack, amount: 10, times: 3, ramp: 3}   # Multi-Claw
+              - {kind: attack, amount: 10, times: 3, ramp_per_use: 3}  # Multi-Claw
               - {kind: inject, status: wound, count: 1}  # Painful Stabs
           - hp: 300
             intents:
