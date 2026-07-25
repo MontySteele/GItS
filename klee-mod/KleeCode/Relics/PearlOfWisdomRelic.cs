@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using BaseLib.Abstracts;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Relics;
 
 namespace KleeMod.Relics;
 
@@ -30,6 +31,14 @@ public sealed class PearlOfWisdomRelic : CustomRelicModel
     }
 
     public override RelicRarity Rarity => RelicRarity.Starter;
+
+    /// <summary>
+    /// G-C3. See PoundingSurprise.GetUpgradeReplacement and
+    /// Relics/UpgradedStarterRelics.cs -- without this, Touch of Orobas
+    /// replaces her starter with the no-effect Circlet.
+    /// </summary>
+    public override RelicModel? GetUpgradeReplacement() =>
+        ModelDb.Relic<PearlOfInsightRelic>().ToMutable();
 
     public override List<(string, string)>? Localization => new()
     {

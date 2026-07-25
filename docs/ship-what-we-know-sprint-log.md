@@ -349,4 +349,178 @@ filter that is present and wrong.
 Building a second seat into tier 0.5 is a design-stage question and is named in
 the sprint's non-goals. It is not started.
 
-<!-- G-C findings appended below. -->
+## G-C — Upgrade coverage
+
+### G-C1 — the lint, and why it has two layers
+
+`tools/lint_upgrade_coverage.py`, wired into the suite at
+`test_sheet_lints.py::test_every_draftable_card_can_be_upgraded`.
+
+The sprint asked for one check: every draftable card has an entry in its
+`*-upgrades.yaml`. **That check would have reported all-clear on the card the
+playtest named.** `nicole_celestial_gift` has `{block_per_turn: +2}` in
+`klee-upgrades.yaml` — a perfectly good entry. The defect was one layer down:
+the delta was not expressible, so `OnUpgrade()` in the generated C# was an
+empty method with a comment in it. The sim upgraded the card; the live game did
+not.
+
+So the lint checks both:
+
+- **L1 (sheet)** — the delta exists and is *applicable* (non-empty, not
+  `_unexpressible`, not in `upgrades.UNAPPLIABLE`).
+- **L2 (codegen)** — the generated card actually emits an upgrade, read from
+  each profile's `manifest.json` rather than re-derived, so it cannot drift
+  from the emitted C#.
+
+The two get separate exemption lists deliberately: "no delta authored yet" and
+"delta exists but the generator cannot say it" are different debts with
+different fixes, and collapsing them hides the second behind the first.
+
+Whole classes are exempted by predicate, not by listing ids — kit cards, guest
+stars, non-generatable tokens/statuses/curses — because a list would need
+editing every time a card is added, which is how a lint becomes stale and
+untrusted. A stale-curation sweep runs over both exemption lists.
+
+**Result: the feared companion gap does not exist.** 232 draftable cards across
+6 sheets, and exactly **one** finding in the entire roster:
+`nicole_celestial_gift`. The playtest's guess that "mondstadt-companions.yaml
+carries no upgrade entries at all" was wrong — the companion upgrades live in
+`klee-upgrades.yaml`, which is why they looked absent. Good news, and it is why
+the lint was worth building before the fills rather than after.
+
+### G-C2 — the one fill
+
+`nicole_celestial_gift`: `{block_per_turn: +2}` → **`{buff: +2}`** (attack
+bonus 2→4; block stays 4). **PROPOSED.**
+
+The old delta was unexpressible in *both* layers for the same root cause:
+`CELESTIAL_GIFT_BLOCK` is a tier0 constant and `CelestialGiftBlock` is a C#
+const, so the block is not a per-card field and neither the sim nor the
+generator could touch it. The new delta moves the upgrade onto the half of the
+card that *is* a per-card field, which the existing `buff` grammar already
+binds to the first top-level `apply_power`. Same upgrade budget, same card
+identity (a buffer), zero new plumbing.
+
+The higher-fidelity alternative — make the block a card field and thread it
+through `effects.py`, the upgrade grammar, the generator and
+`CelestialGiftPower` — is a real four-layer change, is not conventional-delta
+work, and is listed for [USER] at red-pen rather than taken here.
+
+Consequently `upgrades.UNAPPLIABLE` is now **empty**. That tripped
+`test_m7.py::test_unappliable_upgrades_never_chosen_at_rest`, which asserts the
+set is non-empty and says *"retire this test with a ruling, not a skip"* — so
+the ruling is on the record there. The test itself is kept, not retired: its
+rest-smithing rule is merely vacuous while the set is empty and re-arms the
+moment anything becomes unappliable, and the thing the non-empty assertion was
+really protecting is now carried far more broadly by the new lint.
+
+### G-C3 — Touch of Orobas
+
+**(a) Decompile first, and it paid.** Vanilla resolves the swap through
+`TouchOfOrobas.GetUpgradedStarterRelic`, which is a **hardcoded dictionary of
+five base-game pairs** (Burning Blood → Black Blood, Ring of the Snake → Ring
+of the Drake, Divine Right → Divine Destiny, Bound Phylactery → Phylactery
+Unbound, Cracked Core → Infused Core) with a fallback of
+`ModelDb.Relic<Circlet>()` — the no-effect filler. Confirmed exactly as
+reported: a strict downgrade dressed as a reward, silent, no error, no log.
+
+Vanilla is **not** extensible there — the dictionary is a private static
+property. But **BaseLib already patches that exact method**:
+
+```csharp
+[HarmonyPatch(typeof(TouchOfOrobas), "GetUpgradedStarterRelic")]
+private static bool CustomStarterUpgrade(RelicModel starterRelic,
+                                         ref RelicModel? __result)
+{
+    if (starterRelic is CustomRelicModel customRelicModel)
+    {
+        __result = customRelicModel.GetUpgradeReplacement();
+        return __result == null;
+    }
+    return true;
+}
+```
+
+So the registration surface is `CustomRelicModel.GetUpgradeReplacement()`,
+which defaults to `null`. All three of our starters are `CustomRelicModel`s and
+**none of them overrode it** — the bug was a virtual method nobody implemented.
+No Harmony patch of our own was needed or written. This is precisely what the
+decompile-before-asserting norm is for: the naive fix would have been to patch
+a method BaseLib is already patching.
+
+**(b) Registered.** `Relics/UpgradedStarterRelics.cs`:
+
+| Character | Starter | Upgraded form | Delta (PROPOSED) |
+|---|---|---|---|
+| Klee | Pounding Surprise | **Explosive Frags** | 1 → **2** Sparks per detonation |
+| Kokomi | Pearl of Wisdom | **Pearl of Insight** | Charge and Burst per exhaust **doubled** |
+| Furina | Ethereal Spotlight | **none — curated gap** | see below |
+
+Distinct names rather than a `+` suffix, following the base game's own
+convention. Both upgraded forms are **Ancient** rarity, not Starter — that is
+load-bearing, not cosmetic: `GetStarterRelic` finds its target with
+`r.Rarity == RelicRarity.Starter`, so a Starter-rarity replacement could be
+found and "upgraded" again by a second Orobas, and the second pass would fall
+through to the Circlet. The bug would come back through the fix. There is a
+test for it.
+
+Klee's companion reward slot rides along unchanged on the upgraded form.
+Dropping it would have been a second instance of the same bug.
+
+**The magnitude precedent is the base game's own**: Burning Blood heals 6,
+Black Blood heals 12 — an exact doubling. Klee's is nonetheless the most
+aggressive number in this sprint and is flagged as such: Sparks are her core
+economy (three make the next Attack free), so doubling detonation income
+roughly halves the time to every free attack. That the base-game starter it
+copies is a flat post-combat heal rather than an *engine input* is the argument
+against. Red-pen decides.
+
+**Kokomi is included, against the "Kokomi anything" non-goal**, because
+G-C3(b) explicitly says hers rides along if her starter relic exists in-tree —
+and `PearlOfWisdomRelic` does. Specific instruction beats general non-goal, and
+leaving her starter to degrade into a Circlet while fixing exactly that bug for
+Klee would have been knowingly shipping a known defect. Flagged for the user to
+reverse if that reading is wrong; reverting is deleting one class and one
+override.
+
+**Furina has no upgraded form, and that is a finding rather than an omission.**
+Ethereal Spotlight adds a one-use Spotlight selector to hand each turn. **There
+is no number in it to scale**: the selector is a Token card with no upgrade,
+and the effect is binary. Every candidate tune-up is out of bounds *by this
+sprint's own rules* —
+
+- a second designation, or changing when the selector arrives, is new
+  **behaviour**, which G-C3(b) forbids in a starter upgrade ("an upgraded
+  starter that changes behavior is pool-sweep material");
+- a per-turn Encore or Fanfare trickle is banned outright by her sheet's
+  no-passive-accrual law (kickoff §4), which explicitly names "a per-turn
+  Encore power would launder passive Fanfare through the gain hook".
+
+So inventing one here would have broken a ratified law to close a lint. It is
+curated in `NO_UPGRADED_FORM` with its reason and its gate. **Consequence,
+stated plainly: Touch of Orobas still hands Furina a Circlet — and she is the
+character the playtest was played on.** [USER] ruling at red-pen: accept a
+behaviour change as a deliberate exception, or send it to the pool sweep.
+
+**(c) Sim parity — recorded divergence, which G-C3(c) permits.** tier 0.5 models
+act-2 ancients, but **nothing in the sim models a starter-relic upgrade at
+all**: `relics.yaml` has the Orobas *event's* Sand Castle, not Touch of Orobas,
+and starter hooks are bare names (`spark_on_detonation`) with their amounts
+hardcoded at the call site (`gain_sparks(state, 1)` in `effects.py`). Modelling
+it means parameterising the hook and adding a relic that rewrites it — real
+plumbing, and the sprint's own risk section warns against exactly this kind of
+creep inside a census-and-fill track.
+
+**The cost of that choice, so it is not silent: Klee's doubling goes to red-pen
+with no sim evidence behind it.** It is the most aggressive number in the
+sprint and it is the one least measured. If the user wants it measured before
+ratifying, the work is: make the spark amount a constant, add a
+`starter_upgraded` relic hook, and add `touch_of_orobas` to the ancient pool.
+
+**(d) Curated-invariant test.** `tier0/tests/test_starter_relic_upgrades.py`.
+Source-level for the same reason as G-B3. Four checks: every starter is either
+upgraded or curated (the one that catches a *fourth* roster character being
+added), the override exists and names its form, the form exists and is not
+Starter rarity, and curated absences still apply.
+
+<!-- G-D / G-E / G-F findings appended below. -->

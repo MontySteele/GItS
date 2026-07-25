@@ -625,7 +625,19 @@ CONSTANTS_VERSION = 3
 # and floor grants are valued in their place. A drafter that cannot see a
 # floor grant would under-draft the new identity outright, so this bump
 # carries real work. Only Furina rows changed; other characters do not move.
-DRAFTER_VERSION = 9
+# DRAFTER_VERSION 10 (G-E1, "Ship What We Know", 2026-07-25): the fanfare
+# limb of `core_complete` now requires at least one card that READS the
+# meter. It previously asked only for generation coverage and floor
+# coverage -- neither of which is a payoff -- so it declared the archetype
+# ONLINE while the deck held, on measurement, 1.87 readers in 20 cards. The
+# fanfare sprint's close-out registered a standing instruction that nothing
+# be measured against that predicate until it was fixed; this is the fix.
+# NOT bookkeeping: `core_complete` and `_core_progress` both feed
+# `score_offer`, so a fanfare deck now advances its core (and takes the
+# +3.0 core-advance bonus) on a reader it previously ignored. Only Furina
+# fanfare rows move; every other archetype takes a different branch. Any
+# v9-world fanfare number is incomparable with v10 output.
+DRAFTER_VERSION = 10
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).
