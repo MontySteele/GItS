@@ -555,7 +555,10 @@ New-Item -ItemType Directory -Force $locDir | Out-Null
   "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-1r.char": "Klee brought the BIGGEST boom! Ready? Da-da-da!",
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.ancient": "The curtain falls at last, Regina of All Waters. Was it a performance, or was it real?",
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-1r.char": "Both. It was always both. Now — the people rejoice, and their Regina takes her bow."
+  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-1r.char": "Both. It was always both. Now - the people rejoice, and their Regina takes her bow.",
+  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.ancient": "Priestess. You spent no blood on my stairs, only paper and patience. Tell me what that bought you.",
+  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.next": "Respond",
+  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-1r.char": "Every plan I burned on the way up. Read them, and you will find the last one already written."
 }
 '@)
 
