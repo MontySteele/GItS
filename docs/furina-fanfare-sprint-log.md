@@ -8,6 +8,13 @@ Ordering law: **F-A (engine) → F-B (sheet) → F-C (gates) strictly
 sequential**; F-C is a hard gate on F-D (live C#). F-E (legibility interlock)
 runs alongside from day one.
 
+> **STATUS: CLOSED 2026-07-24 by [USER] ruling.** The engine rework shipped
+> and holds; gate (1) is a published null with both of its registered levers
+> spent. F-C's binding run, F-B4, and F-D do **not** open. The unfinished
+> business is draft reach, which goes back to the design stage as its own
+> pass rather than being chased from inside this sprint. Full account in
+> *Sprint close-out* at the end of this log.
+
 ---
 
 ## DECISIONS entry
@@ -490,9 +497,13 @@ publish the null, and open draft reach as its own pass — it is a different
 subsystem, it affects all three archetypes, and item (1) is an instrument
 bug that should be fixed before anything is measured against it.
 
+**RULED 2026-07-24 [USER]: close here.** Recommendation accepted; draft
+reach returns to the design stage. See *Sprint close-out*.
+
 ### F-B4
 
-Not started (kickoff §4 amendment text, [USER] ratification required).
+Not started (kickoff §4 amendment text, [USER] ratification required). It
+does not open — see *Sprint close-out*, "What is deliberately unfinished".
 
 ---
 
@@ -740,3 +751,162 @@ affected track rather than chasing it.
   display call sites now. When F-D does open, expect to meet gauge/stage
   Refresh calls at the Encore funnels — leave them in place; they are
   display-only and own no state.
+
+---
+
+# Sprint close-out — 2026-07-24
+
+Ruled closed by [USER] on the recommendation recorded under *What this means
+for the sprint*. This section is the sprint's published result; everything
+above it is the working record that produced it.
+
+## The one-line result
+
+**The mechanic works. The archetype does not, and the reason is not the
+mechanic.** Fanfare is now a read-only momentum stat that decays, floors,
+and reads correctly, and every gate written about the *mechanic* passes.
+The gate written about the *archetype* fails, and it fails because the
+archetype's cards are not in the deck — which is a drafting problem, not a
+grammar or a numbers problem.
+
+## What shipped and holds
+
+The whole of Track F-A and Track F-B is in the tree, tested, and staying.
+
+- Fanfare is read-only. `fanfare_cost` is gone from the card grammar and the
+  loader **rejects it by name** with the reason attached, so a sheet author
+  who reaches for the retired verb is told what to reach for instead
+  (`RETIRED_CARD_FIELDS`, `tier0/engine/state.py`). `raise_fanfare_cap`
+  retires with it. **Encore is Furina's only managed resource.**
+- Decay is proportional at 20% of the meter, clamped at the floor
+  ([USER] 2026-07-24, reversing the plan's flat direction *on measurement* —
+  see *Proportional decay sweep*). Flat survives as a disarmed code path
+  under `FANFARE_DECAY_FRACTION = 0`, and is pinned by its own test so the
+  reversal stays reviewable rather than becoming folklore.
+- Floors are permanent, static, and granted by playing a Power (+5
+  common/uncommon, +8 rare) or by a printed `gain_fanfare_floor`. A grant
+  raises floor, cap and current together. **Floors do not leak across fights
+  in a run** — the cross-fight cap ratchet was caught in `run_fight` before
+  it could quietly inflate act-3 numbers.
+- The kickoff §4 no-passive-accrual law is intact, not amended: a floor is
+  static value, so stalling still earns nothing.
+- Seven spend-gates became reads (F-B1), and the archetype gained two floor
+  sources (F-B2), one of them the reworked `the_sea_is_my_stage`.
+
+## The null, stated so it cannot be re-run by accident
+
+Gate (1) — fanfare run winrate >= 3% and act-1 clear >= 50% — **fails**, and
+both of the levers the plan registered against it are spent:
+
+| lever | what it moved | verdict |
+|---|---|---|
+| F-B1, gate-to-read conversions | act-1 a little; run winrate ~0 | insufficient |
+| F-B3, frontload numbers | act-1 44% to 50% at +6 damage; run winrate **1.3% at every cell** | **binding null** |
+
+The plan's §5 branch — *"the mechanic works and the archetype needs
+frontload, not grammar"* — was registered, fired, and is **falsified as
+written**. Frontload is not the missing piece.
+
+The evidence that closed it is compositional, not statistical, which is why
+one sweep was enough:
+
+- +6 printed damage across four cards moved total damage/turn by **1.2**.
+- The #1 damage source in *every* archetype's deck is
+  `soloists_solicitation`, the deliberately-dreadful 4-damage starter basic.
+  No fanfare payoff appears in any arm's top four.
+- **The average fanfare deck holds 1.99 of its own payoff cards out of
+  ~18.4.** `dramatic_entrance`, the signature common, is in 11% of decks;
+  `showstopper` in 5%.
+
+Buffing cards that are in 11% of decks cannot move a run winrate. Both
+levers were aimed at card magnitude; the deficit is card *arrival*.
+
+## Correction carried forward (not buried)
+
+An earlier entry in this log claimed the fanfare plan "assembles fastest of
+the three" and concluded it was not failing to come online. **That was
+wrong, and the fault is in the instrument.** `core_complete("fanfare")`
+tests generation coverage and floor coverage — neither of which is a payoff
+— so cheap Encore generation plus any single Power satisfies it. It declares
+the archetype online while the deck holds two payoffs in eighteen cards. It
+measures when the *resource* assembles, not when the *deck* does. Salon's
+core definition names actual payoff cards, which is why it reads slower and
+is nonetheless further along.
+
+This matters beyond the correction: **the instrument that would have caught
+this failure is the instrument that hid it.** Nothing should be measured
+against `core_complete("fanfare")` until it requires a payoff.
+
+## What is deliberately unfinished
+
+Not blocked, not forgotten — out of scope, and left open on purpose:
+
+- **F-B4** (kickoff §4 amendment text) — does not open. The amendment
+  existed to legalise the floor package against the no-accrual law, and the
+  package turned out not to need an amendment: a static floor is not
+  accrual, and the law is unchanged. Writing an amendment for a law that was
+  never violated would put a false precedent in the kickoff document.
+- **F-C** (the 1500-run binding run) — does not open. Running a binding gate
+  set whose bars have never been red-penned, against a gate (1) already
+  known to fail for a reason outside the sprint, buys nothing but an
+  expensive restatement of this log.
+- **F-D** (live C#) — hard-gated on F-C, so it stays shut. Two cards remain
+  deferred from codegen against it (`FURINA_DEFERRED_TO_FD`:
+  `the_sea_is_my_stage`, `lasting_impression`); the deferral test asserts
+  the *reason* is `op 'gain_fanfare_floor'`, so unrelated breakage cannot
+  hide inside the curated set.
+- **F-E** (legibility interlock) — remains open in its own log; the F-E
+  framing above is what Track E renders against and is unaffected by this
+  closure.
+- **[USER] red-pen still outstanding** on every F-B1 conversion number, on
+  the `lasting_impression` card name (pending the v1.7 lore audit), and on
+  the F-C bars themselves. All are PROPOSED and all are still PROPOSED.
+
+## What goes back to the design stage
+
+Draft reach, as its own pass. Three candidates, in the order they should be
+taken:
+
+1. **Fix the instrument first.** `core_complete("fanfare")` must require a
+   payoff. This is a bug, not a design question, and everything else on this
+   list would be measured against it.
+2. **Pool dilution** — 78 Furina cards against ~3-card reward screens. This
+   affects all three archetypes, not just fanfare, which is precisely why it
+   does not belong inside a Fanfare sprint.
+3. **Drafter valuation** of fanfare payoffs (`FANFARE_READER_VALUE` is 1.0).
+
+## Standing lessons registered by this sprint
+
+- **Smoke arms will not be quoted against registered bars.** A 60-run arm at
+  an unregistered seed produced a "salon collapsed 11.1% to 3.3%" alarm that
+  was pure noise; at seed 11 and a real sample salon is 12.5%, *above*
+  pre-sprint.
+- **A rate needs its unit in its name.** Gate (3) was reported as a hard
+  failure at 3.6/run when the true figure was ~30.6/run: `aggregate()`
+  divides by traces, one per *combat*, under a key named `_per_run`. The
+  mislabel understated by ~10x and inverted the verdict. Rates are now
+  `_per_combat` and `per_run()` demands an explicit run count.
+- **A flag that fires on the empty case is not measuring the built case.**
+  `at_floor` fired on `fanfare == 0`, because before any grant the floor
+  *is* 0 — so an archetype that had built nothing read as one that had built
+  a floor. Split into `pinned` and `empty`.
+- **Design a gate so it can see the risk it was written for.** Gate (2) as
+  drafted could not observe Risk 4: a grant raises cap alongside floor, so a
+  floor-pinned meter never reads at-cap. Found before running it, not after.
+
+## Measurement status of this entire log
+
+Every number above was taken under `CONSTANTS_VERSION 3`,
+`DRAFTER_VERSION 9`, `RUNTEMPLATE_VERSION 5`. The map rework on
+`claude/t0.5-sims-performance-huj26w` bumps **RUNTEMPLATE_VERSION to 6** (a
+real 16-floor act DAG, route policies, events), which by house rule makes
+every measurement in this log **archive on merge**.
+
+That is not a problem for the null — it is the test of it. The null is
+compositional (1.99 payoffs per 18.4-card deck; the starter basic out-damages
+every payoff), so it should survive a change to the run template unless the
+old template was itself distorting draft reach. **Re-measuring the fanfare
+arm under RUNTEMPLATE 6 is the first thing that should happen after the
+merge**, precisely to rule out that this sprint spent itself chasing an
+instrumentation ghost. If the payoff-reach figure moves materially under the
+new map, this close-out is what gets reopened.
