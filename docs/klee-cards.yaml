@@ -111,7 +111,16 @@
 - {id: trip_wire, name: "Trip Wire", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [demolition], role: glue, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 1, target: enemy, bomb_damage: 7}, {op: apply_power, power: weak, amount: 1, target: enemy}]}
 - {id: controlled_demolition, name: "Controlled Demolition", cost: X, type: skill, rarity: uncommon, solve: [frontload], archetypes: [demolition], role: enabler, tags: [skill_tag],
-   effects: [{op: place_bomb, amount: X_plus_1, target: random_enemies, bomb_damage: 5}]}
+   effects: [{op: place_bomb, amount: X_plus_2, target: random_enemies, bomb_damage: 5}]}
+   # G-D3 (2026-07-25), PROPOSED: X+1 -> X+2 bombs. "Seems weak" (co-op A0 playtest), which is the
+   # standing X-cost failure mode: the card is PRICED against its best turn and PLAYED on its median one.
+   # At X=0 it placed a single 5-damage bomb, which is not a card; at X=1 it was two bombs for an energy.
+   # The +1 base is the "base rider so X=0..1 isn't dead" fix in the grammar the sheet already speaks,
+   # rather than bolting a second op onto the card (which would be new design, not a number).
+   # RED-PEN CAVEAT, stated because this delta is not purely a low-end fix: raising the BASE also raises
+   # the ceiling, so a 3-energy dump goes 4 bombs -> 5 and interacts with detonation splash. The
+   # alternative that touches only magnitude is bomb_damage 5 -> 7, which scales every X proportionally
+   # and leaves the bomb COUNT (and therefore the splash proc cap) exactly where it is.
 - {id: kaboom_beetle_swarm, name: "Kaboom Beetle Swarm", cost: 2, type: attack, rarity: uncommon, solve: [frontload], archetypes: [demolition], role: payoff,
    effects: [{op: damage, amount: 5, target: random_enemy, times: 3, bonus_vs_bombed: 3}]}
 # Spark (7)

@@ -343,7 +343,14 @@
    # F-B1: the archetype's ONE deliberate big-moment gate, and the reason thresholds were not banned outright. Keeps the
    # smooth read so it is never dead, and adds a burst above a bar that is reachable under decay. PROPOSED.
 - {id: star_of_the_show, name: "Star of the Show", cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [spotlight], role: payoff,
-   effects: [{op: apply_power, power: spotlight_flat_damage, amount: 3, target: self, note: "Spotlighted cards' damage ops +3 printed per copy"}]}
+   effects: [{op: apply_power, power: spotlight_flat_damage, amount: 5, target: self, note: "Spotlighted cards' damage ops +5 printed per copy"}]}
+   # G-D2 (2026-07-25), PROPOSED: printed bonus per copy raised. Named "weak" by the co-op A0 playtest,
+   # and consistent with spotlight's run winrate measured far below salon's in the same world (see the
+   # G-E2 anchors in docs/ship-what-we-know-sprint-log.md).
+   # BOUNDED TO THE MAGNITUDE ON PURPOSE. Spotlight's problem is very likely structural rather than
+   # numeric -- its measured winrate is not something a rare power fixes -- and the structural question
+   # belongs to the pool sweep. Raising this card's number is what CAN be done without pre-empting that
+   # pass; it is explicitly not an attempt to rescue the archetype.
    # Numbers-texture on the star (legal under §2.2a: numbers, never economy). Stacks with the baseline mult additively AFTER it.
    # PASS-2 ERRATA (historical): max_stacks is in POWER UNITS (engine caps the total) — the pass-1 row's max_stacks 1
    # silently shipped this card at +1, not its printed +3. Encoded correctly at the time; pass-1 self_carry carried the bug.
@@ -357,8 +364,17 @@
    effects: [{op: damage, amount: 15, target: enemy, bonus_formula: 1_per_2_fanfare}]}
    # F-B1: gate -> the steepest read on the sheet, which is what makes it the archetype's payoff rather than a fat vanilla
    # hit. Printed damage comes down for the same reason as flood_of_emotion: the Spend line was paying for part of it.
-- {id: rain_of_roses, name: "Rain of Roses", cost: 2, type: skill, rarity: rare, solve: [utility], archetypes: [salon, spotlight], role: payoff, tags: [skill_tag],
+- {id: rain_of_roses, name: "Rain of Roses", cost: 1, type: skill, rarity: rare, solve: [utility], archetypes: [salon, spotlight], role: payoff, tags: [skill_tag],
    effects: [{op: apply_aura, element: hydro, target: all_enemies}, {op: gain_encore, amount: 5}]}
+   # G-D1 (2026-07-25), PROPOSED: repriced one energy cheaper. Named "weak" by the co-op A0 playtest,
+   # and that reading is consistent with the v2 reprice lesson -- rares were overpriced as a TIER, not
+   # one card at a time. The EFFECT is untouched deliberately: this is a repricing, so it cannot drift
+   # the card's identity or its convergence-cell membership. ALTERNATIVE for red-pen, more conservative:
+   # hold the old cost and raise the Encore rider instead. Chosen against because a two-energy skill
+   # that neither damages nor blocks is fighting the energy curve, not the number.
+   # NOTE for red-pen: this card is a WATCHLIST convergence-cell member (with undercurrent and
+   # guest_neuvillette_judgment). A cost cut moves the whole mass-application cell, so that measurement
+   # should be retaken after ratification rather than before.
    # Mass application + buffer. A6's rare ceiling. WATCHLIST (redpen flag 8): hydro+cryo convergence CELL member,
    # with undercurrent and guest_neuvillette_judgment (one measurement covers the full mass-application set).
 - {id: the_final_verdict, name: "The Final Verdict", cost: 2, type: attack, rarity: rare, solve: [frontload], archetypes: [generic], role: payoff,

@@ -523,4 +523,265 @@ upgraded or curated (the one that catches a *fourth* roster character being
 added), the override exists and names its form, the form exists and is not
 Starter rarity, and curated absences still apply.
 
-<!-- G-D / G-E / G-F findings appended below. -->
+## G-D — the named cards
+
+All numbers **PROPOSED**, applied to the sheets per house practice (land, then
+red-pen once over the whole set). Each carries its alternative, so red-pen is a
+choice rather than an approval.
+
+| Card | Change | Rationale |
+|---|---|---|
+| `rain_of_roses` | cost **2 → 1** | The v2 reprice lesson applied: rares were overpriced as a *tier*. Effect untouched, so identity and convergence-cell membership cannot drift. **Alt:** hold cost 2, raise the Encore rider. |
+| `star_of_the_show` | printed **3 → 5** per copy | Bounded to magnitude on purpose. Spotlight's 2.3% is not a number a rare power fixes; the structural question is the pool sweep's. |
+| `controlled_demolition` | `X_plus_1` → **`X_plus_2`** | The "base rider so X=0..1 isn't dead" fix, in the grammar the sheet already speaks. **Alt:** `bomb_damage` 5 → 7, which scales every X proportionally and leaves the bomb *count* (and the splash proc cap) alone. |
+
+`rain_of_roses` is a **WATCHLIST convergence-cell member** (with `undercurrent`
+and `guest_neuvillette_judgment`); a cost cut moves the whole mass-application
+cell, so that measurement should be retaken *after* ratification.
+
+Three tests needed updating, and the way they broke is worth recording: two of
+them asserted `star_of_the_show`'s printed value **twice, in the test name and
+in the assertion**, so a ratified reprice read as a regression. They now read
+the printed amount off the sheet — what they exist to protect is the pass-2
+`max_stacks` errata and the linearity of a second copy, neither of which is a
+claim about the number 3.
+
+### G-D4 — the `ebb_and_flow` ruling
+
+Hard-gated behind G-A by the ordering law. G-A landed, so the gate is open.
+
+**In the build played** the churn fed a pinned meter and did nothing. The
+playtest's *"???"* was correct about the card in front of it. **In the design of
+record** the same play mints **4 Fanfare** (1 for the Encore spent, 3 for the
+Encore gained) into a meter that fades 20% a turn and therefore always has
+room, and nets +2 Encore and a card besides.
+
+**RULING: legibility branch, not redesign.** The card justifies itself; it does
+not *say* so. No pool-sweep slot.
+
+Scope, so the ruling is not mistaken for the fix: the text change is a
+**generator** change (a generation tip on Encore-churn cards) touching every
+card with `encore_cost` or `gain_encore` — more than the "cheap" budgeted for
+one card, so it is named and not done here. G-A already shipped partial
+mitigation: the meter's own tooltip now states the generation rule and the
+decay.
+
+## G-E — instruments, and what they found
+
+### G-E1 — `core_complete("fanfare")` (DRAFTER_VERSION 9 → 10)
+
+The predicate asked for generation coverage and floor coverage. Both are
+**inputs**. Neither is a payoff. So it reported the archetype online while the
+average deck held ~1.87 cards that could read the meter. It now requires at
+least one reader.
+
+**Not bookkeeping**, which is why the version moved: `core_complete` and
+`_core_progress` both feed `score_offer`, so a fanfare deck now advances its
+core — and takes the +3.0 core-advance bonus — on a reader it previously
+ignored.
+
+Re-measured (600 runs, seed 11, route `hunter`, v7):
+
+| arm | win | act-1 | payoffs/deck | reach | online |
+|---|---|---|---|---|---|
+| fanfare | **2.2%** | 55.5% | **2.03** / 20.2 | 10.0% | **75.5%** (was 85.7–86.0%) |
+| salon | 18.5% | 62.2% | 1.14 / 23.4 | 4.9% | 68.2% |
+| spotlight | 2.3% | 64.5% | 0.83 / 22.8 | 3.6% | 90.2% |
+
+**The instrument fix moved the archetype**, which is worth stating plainly:
+fanfare went **1.3% → 2.2%** and payoff reach 1.87 → 2.03. That is the drafter
+reaching for payoffs it used to ignore, not noise. So the close-out's headline —
+*"1.3% in all three worlds"* — is now an archived number, and the fanfare null
+should be restated as **"below the 3% bar in four consecutive worlds"** rather
+than "unmoved". It is still below the bar. It moved.
+
+### G-E2 — roster anchors, same world (600 runs, seed 11, route `hunter`)
+
+Every row from one invocation; nothing quoted across a version bump.
+
+| character | plan | win | act-1 | acts | deck | fights |
+|---|---|---|---|---|---|---|
+| klee | demolition | 4.7% | 83.8% | 1.14 | 24.8 | 15.3 |
+| klee | spark | 5.3% | 77.7% | 1.01 | 23.7 | 14.1 |
+| klee | reaction | 9.2% | 86.8% | 1.25 | 21.8 | 16.2 |
+| ref_ironclad | generic | 7.7% | 62.7% | 1.01 | 22.9 | 13.7 |
+| **furina** | **salon** | **18.5%** | 62.2% | 1.18 | 23.4 | 14.3 |
+| furina | spotlight | 2.3% | 64.5% | 0.83 | 22.8 | 12.3 |
+| furina | fanfare | 2.2% | 55.5% | 0.69 | 20.2 | 11.0 |
+
+**Salon's 18.5% finally has a denominator, and it is damning: salon is double
+the best arm on the roster** (Klee reaction, 9.2%) and more than double the
+reference Ironclad. Meanwhile Furina's *other* two arms sit below every Klee
+arm. She is bimodal — one dominant plan and two dead ones — which is a sharper
+statement of the problem than either half was alone.
+
+The salon ruling itself stays out of scope, as the sprint requires. It now has
+its evidence.
+
+### G-E3 — free drafting (POLICY_VERSION 2), one cell
+
+**The instrument had a hole that had to be fixed before the question could be
+asked.** `adaptive_policy` was already the non-committed scorer G-E3 describes —
+printed power plus synergy weighted by what the deck accumulated, no assigned
+label anywhere. But `adaptive_score`'s archetype term begins `if a not in
+ARCHETYPES: continue`, and `ARCHETYPES` was hardcoded to **Klee's three**.
+Running "free draft" on Furina before the fix would have measured *a scorer
+blind to salon, spotlight and fanfare alike* — every Furina card scored as
+printed power plus the universal block quota — and the number would have looked
+like evidence about drafting behaviour.
+
+POLICY_VERSION 2 makes the archetype set character-aware, read off the deck's
+cards rather than passed in (a character label down the same channel would be
+the first step back toward a plan label). **Klee's numbers do not move** — her
+tuple is unchanged and no other character had a synergy term to lose — which is
+why this is a policy bump and not a drafter bump.
+
+The cell — salon, 600 runs, seed 11, v7:
+
+| policy | win | act-1 | deck | fights | salon share |
+|---|---|---|---|---|---|
+| assigned (plan-committed) | **18.3%** | 62.2% | 23.4 | 14.3 | 28.9% |
+| adaptive (free-drafting) | **4.0%** | 59.0% | 23.2 | 12.0 | 23.5% |
+| **delta** | **−14.3pt** | −3.2pt | — | — | **−5.4pt** |
+
+Free-draft emergent shape: **spotlight 41.3%**, salon 31.7%, fanfare 25.7%,
+goodstuff 1.3%.
+
+**This is the playtest's headline finding, quantified, and it is large.** A
+drafter picking on card quality rather than a plan drifts to **spotlight — the
+worst arm on the roster at 2.3%** — more often than to salon, and loses 14.3
+points of winrate doing it. Note the asymmetry: salon *density* only falls 5.4
+points while winrate falls 14.3. So this is not merely "fewer salon cards"; the
+free drafter is actively picking spotlight cards that do not work.
+
+**Null discipline, as registered in advance:** the result does **not** weaken
+the sim-artifact hypothesis — it strongly supports it. Salon "sims dominant"
+only when the drafter is *told* to build salon. The pool-sweep pass opens
+knowing that.
+
+This track ends at the measurement, as the sprint requires. No design response.
+
+### G-E4 — the calibration note
+
+Added as guardrail 7 in `docs/teyvat-spire-design-principles.md`: absolute
+winrates are pilot-limited floors, the instrument's authority is relative deltas
+and structural findings, and it is on the record so it stops being re-litigated
+per pass. It carries the corollary G-E3 produced the same day — a plan-committed
+drafter is *also* better than a human at staying on plan, so an archetype's
+measured winrate can equally be an **over**-estimate of what a real drafter
+reaches.
+
+## G-F — doc hygiene
+
+- **G-F1.** Kickoff §4's uncapper parenthetical annotated as retired grammar
+  with a pointer to the DECISIONS entry. Explicitly an annotation, not an
+  amendment: the no-passive-accrual law in the same sentence is untouched and
+  F-B4's non-opening reasoning stands.
+- **G-F2.** Bookkeeping note in the fanfare sprint log confirming the decay
+  ruling took **20% — the conservative alternative — deliberately, over the
+  10% proposed in the same cell**. The note exists because the ruling appears
+  *earlier* in that append-only file than the sweep that produced it, so a
+  top-to-bottom reader would meet the decision before the data. Physical order
+  is not causal order, and where they disagree the log should say so.
+- **G-F3.** `docs/playtest-2026-07-25-coop-a0.md` — the notes, the build
+  decoder, a triage table mapping all ten observations to tracks, the
+  `ebb_and_flow` ruling, and the two observations deliberately not acted on.
+  It states honestly that the notes are recorded *as quoted in the sprint doc*
+  and that fuller raw notes, if they exist, should replace that section.
+
+---
+
+# Sprint close-out — 2026-07-25
+
+## Definition of done, item by item
+
+| DoD clause | Status |
+|---|---|
+| Live build implements the design of record: Fanfare decays, floors, cannot be spent | **DONE**, verified by vector parity + boot self-check + trace. Live capture **outstanding ([USER])**. |
+| Verified by trace parity | **DONE** — and reshaped, because there is no C# test project. See G-A5. |
+| BFF copies its owner's companions | **DONE** |
+| The bug class has a census and a tripwire test | **DONE** — census found 2 more; neither fixed, both with stated reasons |
+| No draftable card lacks an upgrade path without a curated reason | **DONE** — lint + suite gate; 232 cards, 0 uncurated gaps |
+| The playtest's named cards have red-penned numbers | **PROPOSED, not red-penned** — red-pen is [USER]'s and is the sprint's own gate |
+| `ebb_and_flow` has its ruling | **DONE** — legibility, not redesign |
+| Truthful `core_complete` | **DONE**, and it moved the arm |
+| v7 anchors | **DONE** — salon is 2× the roster's best |
+| Free-drafting scorer with its first measurement | **DONE** — −14.3pt |
+| Playtest in the repo with its build-decoder | **DONE** |
+| Pool-sweep backlog written down in one place | **DONE** — below |
+
+## What is NOT done, and why
+
+1. **[USER] live capture (G-A5b).** The only acceptance this sprint cannot
+   self-serve.
+2. **The single red-pen session.** Every number here is PROPOSED: G-D's three
+   cards, G-C2's Nicole delta, G-C3(b)'s two relic tune-ups. The sprint's own
+   gate says this happens once, late, over the whole set.
+3. **Furina's starter has no upgraded form.** Touch of Orobas still hands her a
+   Circlet — and she is the character the playtest was played on. Not an
+   implementation gap: every available tune-up breaks either the sprint's
+   no-new-behaviour rule or her sheet's no-passive-accrual law. Needs a ruling,
+   not code.
+4. **Two co-op findings from the G-B2 census.** The Big One's detonation count
+   cannot be attributed to a player without a schema change to `BombCharge`;
+   the reaction counters are a design question (is a Reaction a team event?).
+5. **Orobas is not modelled in the sim.** Permitted by G-C3(c) as a recorded
+   divergence. **Cost: Klee's doubling is the most aggressive number in this
+   sprint and the one with no sim evidence behind it.**
+6. **`ebb_and_flow`'s text.** The ruling is made; the fix is a generator change
+   across every Encore card, which is more than one card's worth of "cheap".
+7. **`lasting_impression` lore audit** — still outstanding from the fanfare
+   sprint, rides along with red-pen.
+
+## Measurement status
+
+**G-E2's anchors and G-E3's cell were taken BEFORE G-D's card changes landed.**
+They are the pre-G-D baseline, which is the right thing to red-pen *against* —
+but after ratification both should be re-run, along with the `rain_of_roses`
+convergence cell. One command each.
+
+Version stamps at close: `RUNTEMPLATE 7`, `CONSTANTS 3`, `DRAFTER 10` (G-E1),
+`POLICY 2` (G-E3). The last two moved in this sprint, so **every pre-2026-07-25
+Furina drafting number is archive.**
+
+## Standing lessons
+
+- **A lint that checks one layer can report all-clear on the exact defect it
+  was built for.** The upgrade lint needed the sheet *and* the codegen; the
+  card the playtest named passed the first cleanly.
+- **Decompile before asserting, still.** The naive Orobas fix was to Harmony
+  patch `GetUpgradedStarterRelic`. BaseLib already patches it, and the real
+  surface was a virtual method nobody had implemented.
+- **An instrument can be blind in a way that looks like data.** The free-draft
+  scorer would have produced a confident number for Furina while unable to see
+  any of her archetypes. Check what a scorer *can* see before quoting what it
+  says.
+- **Fixing an instrument can move what it measures.** `core_complete` feeds
+  `score_offer`, so making the predicate truthful also made the drafter better.
+  A "re-print under the fixed definition" was never going to be just a re-print.
+- **Physical order in an append-only log is not causal order.** Where a ruling
+  lands above its evidence, say so (G-F2).
+- **Co-op has no sim backstop.** Both co-op defects this sprint touched were
+  found by people playing the game, and nothing here could have found either.
+
+## The pool-sweep backlog — one place, as promised
+
+The next pass opens with: G-E1's fixed `core_complete`, G-E2's same-world
+anchors, and G-E3's −14.3pt free-draft measurement. It inherits:
+
+1. **Salon felt weak, sims 2× the roster.** G-E3 says why: it only dominates
+   when the drafter is told to build it.
+2. **Free drafting converges on spotlight (41.3%) — the worst arm (2.3%).**
+   The sharpest single finding here.
+3. **Furina is bimodal**: one dominant plan, two arms below every Klee arm.
+4. **The fanfare reach null** — now "below the bar in four worlds", not
+   "unmoved": 1.3% → 2.2% under DRAFTER 10.
+5. **Spotlight's structural collapse.** G-D2 raised a number and explicitly did
+   not try to rescue the archetype.
+6. **Per-archetype own-payoff reach**, measured for fanfare (2.03/20.2) and
+   nobody else.
+7. **Pool dilution** — 78 Furina cards against ~3-card reward screens.
+8. **Drafter valuation** — `FANFARE_READER_VALUE` is still 1.0.
+9. **Any `ebb_and_flow` follow-on** — the ruling says legibility, so this is a
+   text job, not a redesign slot.
+10. **Co-op sim modelling** — the standing gap behind every co-op finding.

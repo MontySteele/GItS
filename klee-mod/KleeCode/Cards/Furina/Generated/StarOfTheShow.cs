@@ -47,7 +47,7 @@ public sealed class StarOfTheShow : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 3m)
+            new DynamicVar("PowerAmount", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
