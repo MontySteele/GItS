@@ -738,7 +738,13 @@ combat"*. Both are implementation-pending.
   declined to invent this precisely because it broke the rule; the rule was
   overridden rather than reinterpreted. Still pending implementation, so **Touch
   of Orobas continues to hand Furina a Circlet.**
-- **G-A5(b) is clarified as eyes-on, not telemetry** — and remains **OPEN**.
+- **G-A5(b) is clarified as eyes-on, not telemetry**, and was CAPTURED on
+  2026-07-26: no decay on turn 1, ~20% fall each later turn, and nothing
+  spending Fanfare — all three **CONFIRMED**. The fourth shape, a Power
+  play raising the floor and the fall stopping on it, **was not seen** (no
+  Power drawn), and it is the one that exercises `GainFanfareFloor`, the
+  decay clamp and the once-per-series Power grant. **Still OPEN on that
+  line.**
 
 **Two corrections to this log's own claims, on the evidence of the red-pen:**
 
