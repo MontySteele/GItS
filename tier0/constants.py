@@ -404,7 +404,15 @@ WINRATE_BAND_MIN_FIGHTS = 1000    # ratification process fix: winrate band
 #      entry, 55% of them into events (tier05/events.py). Every archived
 #      run-layer number is uncomparable across this boundary -- the same
 #      discipline as v4->v5, but total rather than partial.
-RUNTEMPLATE_VERSION = 6
+# v7 (§11.2, 2026-07-25): acts 2-3 get event pools (they shipped EMPTY in v6 --
+#      an Unknown that rolled `event` in the Hive or Glory found nothing and
+#      passed), and the event option valuation is corrected in two ways that
+#      move act-1 runs too: GOLD_PER_HP was contradicting its own derivation by
+#      ~2x, and escalating ladders are now valued THROUGH the escalation rather
+#      than at face value (a myopic policy never climbed one, so every ladder
+#      past its first rung was unreachable content). v6 event numbers do not
+#      carry across.
+RUNTEMPLATE_VERSION = 7
 # DEAD as of v6; kept as the name of the world every pre-§11 measurement was
 # taken in, and still used by tests that pin a node sequence deliberately.
 RUN_NODE_TEMPLATE = "NNNRETN$ERB"
