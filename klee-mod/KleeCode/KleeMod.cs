@@ -59,9 +59,11 @@ public static class KleeMod
             ModId,
             combatState =>
                 Powers.KleeElementalHooks.Subscribe(combatState)
-                    .Concat(Powers.FurinaResourceHooks.Subscribe(combatState)));
+                    .Concat(Powers.FurinaResourceHooks.Subscribe(combatState))
+                    .Concat(Powers.KokomiResourceHooks.Subscribe(combatState))
+                    .Concat(Powers.KokomiGarmentHooks.Subscribe(combatState)));
 
-        Log.Info($"[{ModId}] Klee and Furina registered.");
+        Log.Info($"[{ModId}] Klee, Furina and Kokomi registered.");
     }
 
     /// <summary>English strings for the character and the four starter stubs.</summary>
