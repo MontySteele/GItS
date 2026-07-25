@@ -12,6 +12,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
@@ -331,28 +332,31 @@ public sealed class CelestialGiftPower : PowerModel, ILocalizationProvider
     {
         ("title", "Celestial Gift"),
         ("description",
-            "Your Attacks deal {Amount} more damage. At the start of your "
-          + $"turn, gain {CompanionConstants.CelestialGiftBlock} [gold]Block[/gold]."),
+            "At the start of your turn, gain {Amount} [gold]Strength[/gold] "
+          + $"and {CompanionConstants.CelestialGiftBlock} [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
-    {
-        if (dealer != Owner || target == Owner) return 0m;
-        if (!props.IsPoweredAttack()) return 0m;
-        if (cardSource is not { Type: CardType.Attack }) return 0m;
-        return Amount;
-    }
+    // ModifyDamageAdditive is GONE, and its absence is the redesign. This power
+    // used to add a static flat bonus to attacks here; it now grants real
+    // Strength below, which the damage pipeline folds in on its own. Keeping
+    // both would pay the buff twice -- once flat, once as Strength -- and the
+    // sim's flat_attack_bonus dropped its celestial_gift term in the same
+    // change for exactly that reason.
 
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
         if (player.Creature != Owner) return;
+        // Sim order (effects.py player turn-start triggers): Strength first,
+        // then Block. Nothing here reads the other, so the order is parity
+        // bookkeeping rather than a dependency -- but a trace diff would show
+        // it, so it matches.
+        await PowerCmd.Apply<StrengthPower>(
+            choiceContext, Owner, Amount, applier: Owner, cardSource: null);
         await CreatureCmd.GainBlock(
             Owner, CompanionConstants.CelestialGiftBlock,
             ValueProp.Unpowered, null, fast: true);

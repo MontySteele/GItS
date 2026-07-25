@@ -48,13 +48,13 @@ public sealed class NicoleCelestialGift : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Nicole — Celestial Gift"),
-        ("description", "Your Attacks deal {PowerAmount:diff()} more damage. At the start of your turn, gain 4 [gold]Block[/gold]."),
+        ("description", "At the start of your turn, gain 1 [gold]Strength[/gold] and 4 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 2m)
+
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -67,11 +67,11 @@ public sealed class NicoleCelestialGift : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<CelestialGiftPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<CelestialGiftPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+        EnergyCost.UpgradeBy(-1);
     }
 }
