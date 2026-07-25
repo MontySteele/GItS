@@ -236,6 +236,25 @@ ancient:
     effects:
       - {hook: combat_start_block, amount: 20}
 
+# --- EVENT relics (§11.2). A closed pool: never rolled as loot, never offered
+# by Neow or an Ancient. The ONLY way to hold one is an event option naming it
+# (`relic_id:` in tier05/content/events.yaml), which is the real game's rule --
+# each of these has exactly one source event.
+#
+# ADMISSION RULE, and it is strict: an event relic ships only if its published
+# effect maps onto a hook the engine ALREADY honors. Nothing here gets a new
+# hook, and no event ever substitutes a generic relic for a named one -- an
+# event whose relic we cannot express is skipped, and events.yaml names the
+# missing hook. That list is currently longer than this one; see §11.2.
+event:
+  pollinous_core:
+    name: "Pollinous Core"          # Colossal Flower (Hive), Enter the Center
+    # "Every 4 turns, it will draw 2 additional cards at the start of the
+    # turn." -> every_n_turns_draw fires on turn % n == 0, i.e. turns 4/8/12.
+    # EXACT: no rider, no approximation.
+    effects:
+      - {hook: every_n_turns_draw, n: 4, amount: 2}
+
 # --- SKIP: relics whose mechanic tier0 lacks. NOT faked -- listed here so the
 # loader emits a loud UNIMPLEMENTED warning naming the missing mechanic, and
 # get_relic() refuses to hand back a hollow relic. (House rule: never
@@ -249,4 +268,10 @@ skip:
     missing: "Dexterity power (block scaling) is absent from tier0"
   juzu_bracelet:
     name: "Juzu Bracelet"
-    missing: "no ?-room / non-combat events exist in the run model"
+    # REASON UPDATED (§11.2). The old text -- "no ?-room / non-combat events
+    # exist in the run model" -- went stale the moment §11 shipped Unknown
+    # rooms and events, and a stale skip reason is the quiet lie this list
+    # exists to prevent. The real remaining gap is narrower: Unknown rooms
+    # resolve in maps.resolve_unknown, which has no channel to the run's held
+    # relics, so nothing a relic says can bias the pity table.
+    missing: "held relics have no channel into maps.resolve_unknown"

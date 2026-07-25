@@ -158,6 +158,15 @@ check elites-fought against the 2.5 median and the response-to-state clause,
 
 ## 2. Events — the full list
 
+> **STALE IN PLACES — see §3.7.** This section was written from the 2026-07-24
+> harvest, which queried the wiki without the `Slay the Spire 2:` namespace
+> prefix and so pulled partial pages. §2.3 and §2.4 are the worst affected:
+> The Trial and Tinker Time appear here with no options because the harvest
+> returned none, and Ranwid, Relic Trader, Potion Courier and Stone of All
+> Time are mangled. The count below (46) is also short: the real category has
+> **57** StS2 events, the extra 11 being Underdocks. `docs/sts2-events-harvest.txt`
+> was re-harvested on 2026-07-25 and is the authority where the two disagree.
+
 46 events. Act 1 = Overgrowth (16) or Underdocks (14); Act 2 Hive (21); Act 3
 Glory (14); 4 appear in all acts. Several appear in more than one act (Brain
 Leech, Room Full of Cheese, Tea Master, Crystal Sphere, Potion Courier, Ranwid
@@ -315,9 +324,7 @@ instrument attached.
 
 ### 3.5 Deliberate gaps
 
-- **Acts 2-3 event pools are empty.** Act 1 is the pilot for the grammar; the
-  Hive and Glory lists are catalogued in §2 but not authored. An Unknown in
-  acts 2-3 that rolls "event" finds an empty pool and passes.
+- ~~**Acts 2-3 event pools are empty.**~~ CLOSED by §11.2 below.
 - **No `route_regret`.** The A/B ships; the road-not-taken sampler does not.
 - **Events that start a fight** (Dense Vegetation, Battleworn Dummy, The
   Lantern Key) are deferred — resolving combat inside an event would hand the
@@ -369,6 +376,185 @@ is the other end of the confounder check.
 Honest gaps: `hunter` runs ~1.5 normals light against expectation (it spends
 floors on elites and unknowns instead), and neither policy has `route_regret`
 yet.
+
+## 3.7 SHIPPED (§11.2, 2026-07-25) — acts 2-3 have event pools
+
+`RUNTEMPLATE_VERSION 7`. The Hive and Glory pools are populated, and two
+valuation bugs found while populating them move act-1 numbers as well, so v6
+event numbers do not carry across.
+
+**The catalogue in §2 was re-harvested first, and it needed to be.** The
+original harvest hit `slaythespire.wiki.gg` without the `Slay the Spire 2:`
+namespace prefix, so it was template-stripped from partial pages: The Trial
+and Tinker Time came back with **no options at all**, and Ranwid, Relic
+Trader, Potion Courier and Stone of All Time came back mangled. §2.3/§2.4 were
+written from that. The re-harvest (58 pages, options + effects for every named
+card and relic) is what made the classification below trustworthy — and it
+turned The Trial, which the old harvest showed as empty, into the best event
+in act 3.
+
+### 3.7.1 What shipped
+
+| act | own events | reachable pool |
+|---|---|---|
+| 1 (Overgrowth) | 11 | 14 |
+| 2 (Hive) | 3 + 2 shared | 8 |
+| 3 (Glory) | 2 | 5 |
+
+New act-2 content: **Colossal Flower** (the gold ladder, bottoming out in
+Pollinous Core), **Infested Automaton** (two filtered forced draws),
+**Bugslayer** (two authored colorless cards). New act-3 content: **The Trial**
+(one event, three randomly-selected sub-trials, six verdicts, three new
+curses) and **Reflections snoitcelfeR** (downgrade-then-upgrade, or double the
+deck and eat Bad Luck).
+
+Brain Leech and Room Full of Cheese now correctly appear in act 2 as well
+(`also_acts`) — the wiki lists both as Overgrowth + Underdocks + Hive.
+
+New grammar: `also_acts`, `variants`, `add_card`, `random_card` (type/cost
+filtered, and the option LOCKS when nothing matches), `downgrade_random`,
+`duplicate_deck`, `card_screens`, `relic: N`, `relic_id`.
+
+### 3.7.2 The no-substitution rule, and what it cost
+
+The §11 pool contains one flagged substitution (Room Full of Cheese grants a
+generic relic where the real event grants The Chosen Cheese). Acts 2-3 would
+have needed **six more** of those, at which point a flagged exception becomes
+an unflagged norm. So the rule is now explicit: **an event that pays out a
+named relic we cannot express exactly does not ship.** An event relic is
+admitted only when its published effect maps onto a hook the engine already
+honors — no new hooks, no approximations.
+
+Exactly one relic clears that bar: **Pollinous Core** ("every 4 turns, draw 2
+additional cards" → `every_n_turns_draw {n: 4, amount: 2}`, exact).
+
+The cost is Glory. Five of act 3's eight events pay out in a named relic, so
+act 3 ships two events rather than six. `content/events.yaml`'s skip list now
+carries the **specific missing mechanic per event** rather than a category, so
+it reads as a backlog with per-item prices. The cheapest four:
+
+| event | what it needs |
+|---|---|
+| Hungry for Mushrooms | a reduced OPENING hand (`combat_start_draw` ignores negatives, and a negative draw is not a discard) |
+| Room Full of Cheese | `post_fight` returning max_hp — this retires the one existing substitution |
+| The Lost Wisp | an on-card-played combat hook (8 AoE per Power played) |
+| Doll Room | three hooks, plus a "choose 1 of N relics" op — `ancient_pick` is already the valuation it would use |
+
+Two more are blocked on **published numbers**, not on engineering: Royal
+Poison's effect text is simply absent from the wiki (its Interactions section
+proves it causes HP loss; the magnitude and trigger appear nowhere), and
+Ultimate Strike / Ultimate Defend carry their numbers only in a card infobox
+the API does not render. Guessing either would be inventing content.
+
+**One stale skip reason was caught and corrected.** `juzu_bracelet` was
+skipped with "no ?-room / non-combat events exist in the run model" — true
+when written, false the moment §11 shipped Unknown rooms. The real gap is
+narrower: held relics have no channel into `maps.resolve_unknown`. A stale
+skip reason is precisely the quiet lie the skip list exists to prevent.
+
+### 3.7.3 Two valuation bugs, both found by act-2 content
+
+**1. Escalating ladders were unreachable content.** `option_value` scored each
+option in isolation, so Colossal Flower's "Reach Deeper" (lose 5 HP, gain
+nothing, open the next rung) scored as a pure −5 and the policy could never
+climb. Levels 2 and 3 were dead. Options are now valued **through** the
+escalation — the immediate effect plus the best reachable value of the next
+stage, which is what a player reading the next screen computes and has no free
+parameter. Tablet of Truth carried the same latent bug in act 1; with
+lookahead it climbs one rung and stops, which is where the max-HP price
+overtakes the upgrade.
+
+**2. `GOLD_PER_HP` contradicted its own derivation by ~2×.** It shipped at
+`4.0` with the comment "a shop card is 60 gold; ~15 HP of value" — a card
+worth 15 HP, four lines above `CARD_HP = 8.0`. The shop is the game's own
+published exchange rate and two of its three prices agree exactly:
+`SHOP_CARD_PRICE 60 / CARD_HP 8 = 7.5` and `SHOP_RELIC_PRICE 150 / RELIC_HP
+20 = 7.5`. (Removal implies 12.5, but 75 is a base that rises 25 per use, so
+it is not a clean read — recorded, not averaged in.) Corrected to **7.5**, the
+derivation, not a target. Every "pay HP for gold" option in the pool was
+mispriced in the same direction; Jungle Maze Adventure now declines 18 HP for
+150 gold, which is the marginal trade it should be.
+
+`test_events_acts23.py::test_gold_rate_matches_the_shops_own_prices` pins the
+derivation so the file cannot silently contradict itself again.
+
+### 3.7.4 Roster under v7
+
+400 runs, seed 11, realistic, `hunter`:
+
+| | v6 | v7 |
+|---|---|---|
+| ref_ironclad | 5.0% | **6.8%** |
+| klee | 6.5% | 5.5% |
+| furina | 12.2% | **16.8%** |
+| kokomi | 4.5% | 5.2% |
+
+Moves in both directions, which is the point: this was not a blanket buff.
+Klee falls because the corrected gold rate makes her HP-for-gold events a
+worse deal, and act-2 events are a net cost as often as a gift.
+
+Event coverage, 600 runs: **2.79 events per run**, every act represented, and
+the whole pool reachable (the rarest, `reflections`, fires 47 times).
+
+### 3.7.5 The finding: relics are underpriced, now from two directions
+
+The §11 route A/B said elite relics are underpriced because ducking elites
+wins more. Under v7 that gap **widened**, and a second, independent instrument
+now says the same thing.
+
+| | hunter | cautious |
+|---|---|---|
+| winrate (v6) | 5.0% | 6.8% |
+| winrate (v7) | 6.8% | **9.5%** |
+| elites/act | 2.38 total, 1.35/act | 0.45 total, 0.19/act |
+
+And in the event layer: the Colossal Flower ladder is climbed to level 3 in
+81 of 82 visits — and then takes the **135 gold over Pollinous Core, 81 times
+out of 81**. The relic is authored, exact, and reachable, and the policy
+declines it every single time.
+
+These are genuinely independent. The route A/B is an *outcome* measurement
+that never consults `RELIC_HP`; the Colossal Flower split is a *valuation*
+measurement that consults nothing else. They agree.
+
+Two readings, and this pass does not distinguish them:
+
+- **The pilot is worse than a real player**, so elites cost more HP than they
+  should, and relics cannot pay that back. This is the user's reading and it
+  fits: the old single-path spine forced ~2 elites per act on every run, which
+  under this hypothesis was making every deck look worse than it is.
+- **Our relics are genuinely weaker than StS2's.** The pool is common-tier
+  only — no boss relics — and the skip list holds real ones.
+
+The discriminating experiment is a *relic-value* A/B rather than a route one:
+hold routing fixed and vary what a relic is worth. `tools/roster_scale_gap.py`
+and `tools/encounter_audit.py` are the instruments for the first reading;
+the second wants the relic pool audited against the wiki the way the events
+just were. **Neither is a licence to raise `RELIC_HP` until the numbers
+look better** — that constant is derived from the shop price and moving it
+would break the derivation the test now pins.
+
+### 3.7.6 Limitations, stated
+
+- **The event policy is one-sided in 17 of 21 events.** Only Unrest Site,
+  Luminous Choir, Whispering Hollow, The Future of Potions and The Trial's
+  variants show a real split; everywhere else the greedy valuation picks the
+  same option every time. Many real events do have a dominant option, so this
+  is not automatically wrong — but it means the event layer contributes less
+  decision variance than its size suggests.
+- **Bugslayer's choice is near-arbitrary.** Both options add a named card
+  valued at a flat `CARD_HP`, and the drafter tiebreak's static-power term
+  saturates for both Exterminate and Squash. The cards are exact; the pick
+  between them is not modelled.
+- **Exterminate and Squash have no upgrade paths**, so no rest site or Tablet
+  of Truth improves them. That is a penalty versus the real game — the safe
+  direction — and it is one upgrade-sheet entry from being exact.
+- **Shame and Doubt ship as plain clogs.** Both list a second keyword (Frail /
+  Weak) in their infobox with no rules text anywhere saying when it applies.
+  Both are therefore SOFTER than real, the same direction as Decay. Regret has
+  no rider and is exact.
+- **Brain Leech's card reward should be colorless.** We have no colorless loot
+  pool, so it draws from the character pool: shape right, colour wrong.
 
 ## 4. Design (A = RULED; §3.5 has what is built)
 
