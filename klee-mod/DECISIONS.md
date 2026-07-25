@@ -1911,3 +1911,72 @@ icon reads as intentional, a placeholder reads as "no art yet". Powers that
 legitimately need none (the two displays E1 retired, kept only for save
 compatibility) are listed in KleePowerIcons.IconExempt with a reason, so
 "exempt" is a decision on the record rather than an absence.
+
+## Finding: the base game has no facing concept, so ours is a build not a hook
+
+Playtest 2026-07-25 reported that characters do not turn during the Act 2
+Kaiser Crab. The instinct was that the game emits a facing signal our
+spine-less rigs fail to consume — the same shape as the animation-trigger gap
+that `CreatureAnimationRouter` exists to close. Decompiling v0.107.1 says
+otherwise. `NCreature`, `NCreatureVisuals`, `CreatureAnimator` and
+`NCombatRoom.PositionPlayersAndPets` contain no facing, flip, mirror or
+direction member of any kind. Every base character is a Spine skeleton drawn
+facing right, and until `KaiserCrabBoss` — the one encounter with
+`FullyCenterPlayers = true`, with monsters in slots on both sides — that has
+always been enough.
+
+RULING. Check whether the signal exists before writing an adapter for it. Here
+it does not, so there is nothing to route and no reference implementation to
+mirror; `CreatureFacing` is a feature we own outright, and it is scoped by the
+`%Facing` node existing only in our own convention scenes rather than by a
+character check. The distinction matters for maintenance: a router breaks when
+the game changes its signal, whereas this breaks only when the game changes
+`AttackCommand`, which is why that one reflected call is guarded and logs once
+instead of throwing.
+
+Two placement rules came out of it and generalize to any future rig:
+
+1. **A mirror belongs above the animated node, never on it.** A Node2D's own
+   position track is expressed in its parent's space, so scaling the animated
+   node by -1 flips the art while the keyframed travel keeps its original
+   direction. `Visuals/Rig:position` carries the attack lunge, so the pivot is
+   `Visuals/Facing` and the rig hangs under it.
+2. **Never write `Visuals.Scale`.** NCreature owns it — `ScaleTo`,
+   `SetDefaultScaleTo` and `OstyScaleToSize` write it and `UpdateBounds` reads
+   it back to place the hitbox, the selection reticle and the intent. A sign
+   flip there inverts the hitbox, which is a gameplay bug wearing a visual
+   bug's clothes.
+
+## Finding: an inert bridge is undebuggable unless boot says the node is gone
+
+Every visual bridge in this mod looks its nodes up with `GetNodeOrNull` and
+does nothing when the lookup fails. That is the right runtime posture — a stale
+pck degrades to base behavior instead of throwing mid-combat — and the wrong
+debugging one, because a renamed or dropped node produces exactly the symptom
+of a feature that was never written. The Track E icon gap, the Encore ribbon
+number and `%Facing` are all this shape.
+
+RULING. A node a bridge depends on is a CONTRACT, and contracts get a boot
+check. `KleeSceneTelemetry.RequiredNodes` names the scene/node pairs and warns
+for any that is absent, read from `SceneState` so the check stays side-effect
+free — that file must never instantiate, because instantiation is what fires
+BaseLib's conversion postfix. This is the same curated-list-plus-check pattern
+as art_lint L11 and SELFCHECK R13, applied to the third place where the repo
+cannot see its own defect.
+
+## Finding: occlusion is invisible to every check that asks "was it set?"
+
+The playtest reported the Encore ribbon as having no number. The bridge had
+been setting `%RibbonLabel` correctly the whole time; the label hung below the
+ribbon at creature-relative y -4..+14, inside the band
+`NCreatureStateDisplay` draws its HP bar and block badge into, and the badge is
+pinned to the LEFT edge of the 240-wide bounds box — the same x the Salon stage
+occupies. The number was drawn and then covered.
+
+RULING. Anything anchored to a creature must stay clear of that band; treat
+y >= -20 in creature space as the state display's, not ours. No automated check
+proposed: occlusion is a relationship between two subtrees that never reference
+each other and only one of which is ours, so it cannot be derived from our
+side. It is a [USER] capture question, which is why D5 requires a capture at
+all — the gap here was that the capture had not happened yet, not that the
+gate was wrong.
