@@ -2022,3 +2022,66 @@ Bookkeeping: this DECISIONS append carries along the animation stream's own
 uncommitted edits to this file (the scene-contract and occlusion findings),
 which were already in the working tree at sprint start. The code they document
 is NOT in this sprint's commits and remains uncommitted for that stream.
+
+## Kokomi character shell (2026-07-25)
+
+57 generated card classes had been sitting inert since Track B: `autoAdd:
+false` and no pool referencing them, which means Kokomi was not selectable
+and nothing downstream of "start a run as her" could be tested. This lands
+the shell. She is now playable end to end on placeholder art.
+
+**Shipped:** `Kokomi.cs` (70 HP, the 12-card starter transcribed from
+characters/kokomi.yaml in sheet order, Pearl of Wisdom, Silent potion pool),
+`KokomiCardPool.cs`, `KokomiRelicPool.cs`, her arm of
+`KleeStartingCompanionsPatch`, `CompanionSlot` character/nation rows, and the
+Kokomi arm of `tools/build_pck.ps1`.
+
+### Four things that were not obvious, recorded because the next character
+### will hit all four
+
+1. **"Ship on placeholders" cannot mean "ship with no files."** Her
+   `Custom*Path` overrides return `KleePck.Path(...)`, which is null on a
+   miss -- and a null override does NOT fall back to something safe.
+   `CharacterModel.AssetPaths` then hands the game an id-derived path that
+   does not exist, the background preloads fail, `AssetCache` is left
+   incomplete, and the run crashes during MAP GENERATION. That is the Furina
+   defect already recorded as KleeSelfCheck R9, and it would have reproduced
+   exactly. Fixed the way Furina's was: `Copy-KokomiFallback` fills every
+   required asset from Klee at KOKOMI'S paths, so the paths are
+   character-specific from day one and the art pass is a pure file drop.
+2. **The starter relic is not decoration -- it hosts the companion reward
+   slot.** Companions are deliberately in no rollable pool; the fourth reward
+   option is their only door, and it hangs off each character's starter relic
+   (Klee: Pounding Surprise, Furina: Ethereal Spotlight). Without
+   `TryModifyCardRewardOptions` on Pearl of Wisdom, Kokomi would have drafted
+   ZERO Companions. That does not crash -- it silently deletes her Commander
+   archetype, which is worse than a crash because a playtest would have
+   reported "commander feels bad" and been right for the wrong reason.
+3. **She needed an Ancient card or act 2 softlocks.** The Darv event rolls
+   Dusty Tome ~50% of the time and draws a random Ancient from the
+   character's pool; an empty draw NREs and the run softlocks on room entry
+   (playtest defect 2026-07-23). `PrincessOfWatatsumi` (Charge per turn, 3,
+   +1 on upgrade) fills the slot, ledgered in `RosterAncientCards.Kokomi` and
+   gated by S6d. Ancients are hand-written, game-side-only content: the sim
+   models neither events nor relics, so this number CANNOT be measured and
+   wants red-pen more than most.
+4. **Her randomized starter is one slot, not two.** Klee and Furina each roll
+   two Companions in place of two basics. Kokomi's companions are ADDITIONS
+   (cards 11 and 12 of a 12-card deck) and Gorou always enlists for lore
+   reasons (R52 N3), so only the support seat rolls -- Sayu or Shinobu. The
+   no-op arm still routes through `ReplaceFirst` so the deck INDEX matches on
+   both arms; a conditional skip would put Shinobu at a different position
+   than Sayu, and card order is visible in the deck view.
+
+Three roster surfaces were also extended rather than left to rot: the two
+lints (`lint_pool_membership`, `lint_ancient_coverage`) both know her,
+`KleeSelfCheck` sweeps three characters, and `KleeSceneTelemetry` lists her
+scenes INCLUDING the ones expected to be missing -- "expected missing" and
+"silently missing" are the same thing at 2am, and only one of them says so.
+
+**KNOWN GAP, not a defect:** her Burst does nothing. `ceremonial_garment` is
+still the one blocked card (kit lifecycle, hand-write), so the meter fills
+and grants no card. `KokomiOffPoolCards` ships empty but present, which is
+the shape that card needs the moment it exists.
+
+Suite 766, mod builds clean, pck rebuilds with 8 Kokomi fallbacks.

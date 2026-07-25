@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using BaseLib.Abstracts;
+using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Relics;
+using MegaCrit.Sts2.Core.Runs;
 
 namespace KleeMod.Relics;
 
@@ -46,8 +49,43 @@ public sealed class PearlOfWisdomRelic : CustomRelicModel
         ("description",
             "Whenever a card is [gold]Exhausted[/gold], gain "
           + $"{Powers.KokomiConstants.ChargePerExhaust} [gold]Charge[/gold] "
-          + $"and {Powers.KokomiConstants.BurstPerExhaust} Burst Energy."),
+          + $"and {Powers.KokomiConstants.BurstPerExhaust} Burst Energy. "
+          + CompanionSlot.RewardSlotDescription),
     };
+
+    /// <summary>
+    /// Kokomi's fourth companion reward option, hosted here for the same
+    /// reason Klee's rides Pounding Surprise and Furina's rides Ethereal
+    /// Spotlight: the starter relic is the one thing guaranteed present for
+    /// the whole run, so it is the only safe home for an always-on reward
+    /// hook.
+    ///
+    /// Without this she would draft no Companions AT ALL -- the reward slot
+    /// is their only door (companions are deliberately off every rollable
+    /// pool), and her Commander archetype is built entirely out of them.
+    /// A silent omission here would not crash; it would just quietly delete
+    /// one of her three archetypes, which is worse.
+    ///
+    /// Boss encounters force Rare, matching the two shipped hosts.
+    /// </summary>
+    public override bool TryModifyCardRewardOptions(
+        Player player, List<CardCreationResult> cardRewardOptions,
+        CardCreationOptions creationOptions)
+    {
+        if (creationOptions.Source != CardCreationSource.Encounter
+            || player.Character is not Kokomi)
+        {
+            return false;
+        }
+        var rarity = creationOptions.RarityOdds
+                     == CardRarityOddsType.BossEncounter
+            ? CardRarity.Rare
+            : (CardRarity?)null;
+        var offer = CompanionSlot.Roll(player, rarity);
+        if (offer == null) return false;
+        cardRewardOptions.Add(new CardCreationResult(offer));
+        return true;
+    }
 
     /// <summary>
     /// FALLBACK ICON while her art pass is outstanding -- the Pounding

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using KleeMod.Cards;
 using KleeMod.Cards.Furina;
+using KleeMod.Cards.Kokomi;
 using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod;
@@ -29,6 +30,7 @@ public static class RosterAncientCards
 {
     private static List<CardModel>? _klee;
     private static List<CardModel>? _furina;
+    private static List<CardModel>? _kokomi;
 
     public static IReadOnlyList<CardModel> Klee => _klee ??= new List<CardModel>
     {
@@ -38,6 +40,11 @@ public static class RosterAncientCards
     public static IReadOnlyList<CardModel> Furina => _furina ??= new List<CardModel>
     {
         ModelDb.Card<AllTheWorldsAStage>(),
+    };
+
+    public static IReadOnlyList<CardModel> Kokomi => _kokomi ??= new List<CardModel>
+    {
+        ModelDb.Card<PrincessOfWatatsumi>(),
     };
 }
 

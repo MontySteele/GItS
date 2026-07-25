@@ -256,6 +256,38 @@ public sealed class KokomiResourceHooks : AbstractModel
 }
 
 /// <summary>
+/// "At the start of your turn, gain Amount Charge." The engine behind her
+/// Ancient card (see Cards/Kokomi/PrincessOfWatatsumi.cs).
+///
+/// This is the ONE place in the mod where Charge accrues without a card
+/// leaving the deck, and that is the point of an Ancient: it is the only
+/// door out of her central bargain. It is also why the number is small --
+/// the pulse reads the bank at KuragePulsePerCharge, so a drip compounds
+/// against a multiplier rather than adding to a total.
+/// </summary>
+public sealed class ChargePerTurnPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Princess of Watatsumi"),
+        ("description",
+            "At the start of your turn, gain {Amount} [gold]Charge[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (player.Creature != Owner) return Task.CompletedTask;
+        KokomiResources.GainCharge(Owner, (int)Amount);
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>
 /// Kokomi's Burst meter. Separate class from Klee's and Furina's because the
 /// ceiling is hers (kokomi.yaml burst_max: 20) and because BaseLib keys
 /// per-combat instances by resource type.
