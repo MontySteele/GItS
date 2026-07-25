@@ -462,11 +462,11 @@ art/candidates/sucrose_astable/r3.png	https://static.wikia.nocookie.net/gensin-i
 art/candidates/dahlia_favonian_favor/r1.png	https://static.wikia.nocookie.net/gensin-impact/images/6/65/Dahlia_Wish.png/revision/latest?cb=20250618025615	F	high
 art/candidates/dahlia_favonian_favor/r2.png	https://static.wikia.nocookie.net/gensin-impact/images/e/eb/Character_Dahlia_Full_Wish.png/revision/latest?cb=20250618072914	F	high
 art/candidates/dahlia_favonian_favor/r3.png	https://static.wikia.nocookie.net/gensin-impact/images/0/05/Dahlia_Character_Card.png/revision/latest?cb=20260408140028	F	high
-ImageGen/images/furina/ui/select_portrait.png	https://static.wikia.nocookie.net/gensin-impact/images/1/18/Furina_Profile.png/revision/latest?cb=20231106041436	F	low
-ImageGen/images/furina/ui/char_icon.png	https://static.wikia.nocookie.net/gensin-impact/images/1/18/Furina_Profile.png/revision/latest?cb=20231106041436	F	low
-ImageGen/images/furina/ui/map_marker.png	https://static.wikia.nocookie.net/gensin-impact/images/1/18/Furina_Profile.png/revision/latest?cb=20231106041436	F	low
-ImageGen/images/furina/ui/selection_splash.png	https://static.wikia.nocookie.net/gensin-impact/images/5/51/Furina_Wish.png/revision/latest?cb=20231108031329	F	high
-ImageGen/images/furina/model/combat_model.png	https://static.wikia.nocookie.net/gensin-impact/images/1/18/Furina_Profile.png/revision/latest?cb=20231106041436	F	high
+ImageGen/images/furina/ui/select_portrait.png	https://upload.wikimedia.org/wikipedia/en/5/56/Furina_%28Genshin_Impact%29.png	F	low
+ImageGen/images/furina/ui/char_icon.png	https://upload.wikimedia.org/wikipedia/en/5/56/Furina_%28Genshin_Impact%29.png	F	low
+ImageGen/images/furina/ui/map_marker.png	https://upload.wikimedia.org/wikipedia/en/5/56/Furina_%28Genshin_Impact%29.png	F	low
+ImageGen/images/furina/ui/selection_splash.png	https://static.wikia.nocookie.net/gensin-impact/images/9/96/Furina_Card_2.png/revision/latest?cb=20231106021937	F	high
+ImageGen/images/furina/model/combat_model.png	https://upload.wikimedia.org/wikipedia/en/5/56/Furina_%28Genshin_Impact%29.png	F	high
 art/candidates/chain_fuse/r1.png	https://static.wikia.nocookie.net/gensin-impact/images/3/30/Starlit_Sky_Firework_Card_3.png/revision/latest?cb=20230205063130	F	high
 art/candidates/careful_arrangement/r1.png	https://static.wikia.nocookie.net/gensin-impact/images/2/2b/Starlit_Sky_Firework_Card_4.png/revision/latest?cb=20230205063128	F	high
 art/candidates/trip_wire/r1.png	https://static.wikia.nocookie.net/gensin-impact/images/a/ab/Starlit_Sky_Firework_Card_5.png/revision/latest?cb=20230205063126	F	high
@@ -550,3 +550,4 @@ ImageGen/images/furina/powers/star_of_the_show.png	https://static.wikia.nocookie
 ImageGen/images/furina/powers/stage_lights.png	https://static.wikia.nocookie.net/gensin-impact/images/c/c0/Talent_Unheard_Confession.png/revision/latest?cb=20231108024425	F	medium
 art/candidates/power_furina_standing_ovation/r1.png	https://static.wikia.nocookie.net/gensin-impact/images/e/e6/Furina_Icon.png/revision/latest?cb=20231108030656	F	medium
 art/candidates/power_furina_ovation_trickle/r1.png	https://static.wikia.nocookie.net/gensin-impact/images/8/80/Item_Furina_Banquet.png/revision/latest?cb=20231108032121	F	medium
+ImageGen/images/furina/powers/limelight.png	https://static.wikia.nocookie.net/gensin-impact/images/6/63/Constellation_Hear_Me_%E2%80%94_Let_Us_Raise_the_Chalice_of_Love%21.png/revision/latest?cb=20231108024409	F	medium

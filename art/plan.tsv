@@ -549,11 +549,19 @@ dahlia_favonian_favor	ImageGen/images/cards/companions/dahlia_favonian_favor.png
 # Mirrors Klee's proven ui/model rows with Furina sources so the build stops
 # falling back to Klee art. select_bg + transition_wipe intentionally stay the
 # shared/procedural fallback (sec.8 sanctions this); locked portrait auto-derives.
-furina_select_portrait	ImageGen/images/furina/ui/select_portrait.png	132	195	cover	y0.20@1.9	auto	1	png	Furina Profile.png		splash
-furina_char_icon	ImageGen/images/furina/ui/char_icon.png	88	88	cover	y0.22@2.3	auto	1	png	Furina Profile.png		splash
-furina_map_marker	ImageGen/images/furina/ui/map_marker.png	49	64	cover	y0.22@2.3	auto	1	png	Furina Profile.png		splash
-furina_selection_splash	ImageGen/images/furina/ui/selection_splash.png	1920	1200	cover_autocrop	cover@0.06	auto	1	png	Furina Wish.png		splash
-furina_combat_model	ImageGen/images/furina/model/combat_model.png	240	280	sprite	center	auto	1	png	Furina Profile.png		splash
+# RETIRED 2026-07-24 (animation sprint 2 B4). These five out-paths are now produced by
+# tools/gen_furina_stills.py, which re-derives them from the Wikipedia cutout with framing
+# computed from the ALPHA BBOX -- that centring fix IS the B4 verdict. Leaving the rows live
+# meant two producers claimed one out-path: art_fetch rewrote their SOURCES.tsv provenance
+# back to Furina Profile/Wish (a ledger that then LIED about where the shipped bytes came
+# from), and the next art_process run would have overwritten the re-centred art with the old
+# off-centre crops. Caught 2026-07-24 when a fetch clobbered the ledger; art_lint L11 now
+# fails on any plan row whose out-path a generator owns.
+# furina_select_portrait	ImageGen/images/furina/ui/select_portrait.png	132	195	cover	y0.20@1.9	auto	1	png	Furina Profile.png		splash
+# furina_char_icon	ImageGen/images/furina/ui/char_icon.png	88	88	cover	y0.22@2.3	auto	1	png	Furina Profile.png		splash
+# furina_map_marker	ImageGen/images/furina/ui/map_marker.png	49	64	cover	y0.22@2.3	auto	1	png	Furina Profile.png		splash
+# furina_selection_splash	ImageGen/images/furina/ui/selection_splash.png	1920	1200	cover_autocrop	cover@0.06	auto	1	png	Furina Wish.png		splash
+# furina_combat_model	ImageGen/images/furina/model/combat_model.png	240	280	sprite	center	auto	1	png	Furina Profile.png		splash
 # ---------- KLEE gap fill: 21 post-rebalance cards (strict L1) ----------
 pop	ImageGen/images/cards/klee/pop.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 11.png		splash
 chain_fuse	ImageGen/images/cards/klee/chain_fuse.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 3.png		splash

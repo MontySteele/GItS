@@ -249,10 +249,67 @@ def lint(rows) -> list[str]:
 
     problems.extend(undersized(effective))
     problems.extend(banned_families(effective))
+    problems.extend(generator_owned(rows))
 
     for note in clip_warnings(effective):
         print(note)
 
+    return problems
+
+
+# L11: out-paths produced by a dedicated generator script rather than by
+# art_process. Curated because nothing in the repo can infer it -- a generator
+# writes wherever its own code says, and plan.tsv has no way to know. Each
+# entry names the generator so the cross-check below can prove the claim is
+# still true; see the "structurally invisible defect" house rule.
+GENERATOR_OWNED = {
+    "ImageGen/images/furina/model/combat_model.png":        "gen_furina_stills.py",
+    "ImageGen/images/furina/ui/select_portrait.png":        "gen_furina_stills.py",
+    "ImageGen/images/furina/ui/select_portrait_locked.png": "gen_furina_stills.py",
+    "ImageGen/images/furina/ui/selection_splash.png":       "gen_furina_stills.py",
+    "ImageGen/images/furina/ui/char_icon.png":              "gen_furina_stills.py",
+    "ImageGen/images/furina/ui/map_marker.png":             "gen_furina_stills.py",
+}
+
+
+def generator_owned(rows) -> list[str]:
+    """L11: no plan row may claim an out-path a generator script owns.
+
+    Shipped as: animation sprint 2 (B4) moved Furina's six still surfaces onto
+    tools/gen_furina_stills.py, which re-derives them with framing computed
+    from the ALPHA BBOX -- that centring fix IS the B4 verdict -- but left the
+    five old plan rows live. Two producers then claimed one out-path, and both
+    halves of that bit the same day: art_fetch rewrote those files' SOURCES.tsv
+    provenance back to `Furina Profile.png`, so the ledger LIED about where the
+    shipped bytes came from, and the next art_process run would have silently
+    overwritten the re-centred art with the old off-centre crops.
+
+    The catch was luck (a fetch happened to run). This makes it structural.
+    """
+    problems = []
+    root = Path(__file__).resolve().parent.parent
+    for r in rows:
+        gen = GENERATOR_OWNED.get(r["out"])
+        if gen:
+            problems.append(
+                f"L11 {r['asset_id']}: out-path '{r['out']}' is produced by "
+                f"tools/{gen}, not by art_process. Two producers for one path "
+                "means whichever runs last wins and the SOURCES row goes stale. "
+                "Retire the plan row (comment it out) or drop it from "
+                "GENERATOR_OWNED if the generator no longer owns it."
+            )
+    # The curated list must not rot: a generator that is renamed, deleted, or
+    # re-pointed leaves entries here silently guarding nothing, which is the
+    # same class of invisible defect the rule exists to stop.
+    for out, gen in sorted(GENERATOR_OWNED.items()):
+        src = root / "tools" / gen
+        if not src.exists():
+            problems.append(
+                f"L11 GENERATOR_OWNED names tools/{gen}, which does not exist")
+        elif Path(out).name not in src.read_text(encoding="utf-8"):
+            problems.append(
+                f"L11 GENERATOR_OWNED claims tools/{gen} produces "
+                f"'{out}', but that filename does not appear in it")
     return problems
 
 
