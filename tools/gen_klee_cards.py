@@ -457,6 +457,18 @@ APPLY_POWERS = {
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,
         "Your [gold]Shatters[/gold] deal {X} more damage."),
+    # Fontaine 5-star Rares (R64, 2026-07-25). Amounts live on the cards, so
+    # none of these adds a constant for the parity lint to drift on.
+    "cannon_fire_support": ("CannonFireSupportPower", None,
+        "Whenever you play a [gold]Companion[/gold] card, gain {X} "
+        "[gold]Block[/gold]."),
+    "night_vigil": ("NightVigilPower", None,
+        "Your Attacks against enemies holding an elemental aura deal {X} "
+        "more damage."),
+    "ancient_sea_authority": ("AncientSeaAuthorityPower", None,
+        "Elemental auras you apply last {X} extra turn(s)."),
+    "masque_red_death": ("MasqueRedDeathPower", None,
+        "Your Attacks deal {X} more damage. You can no longer be healed."),
     "fanfare_attack_per10": ("FanfareAttackPer10Power", None,
         "Your Attacks deal {X} more damage per 10 [gold]Fanfare[/gold]."),
     "salon_member": ("SalonMemberPower", None,
@@ -2476,8 +2488,16 @@ def build_body(
                 "Owner.Creature, DynamicVars[\"FanfareFloor\"].IntValue);")
 
         elif op == "heal":
+            # KleeHeal, not CreatureCmd.Heal directly: Arlecchino's Masque of
+            # the Red Death refuses healing, and the game exposes no heal hook
+            # on PowerModel for a power to intercept it (checked against
+            # sts2.dll -- the only heal-modifying members are rest-site
+            # specific). Routing every generated heal through one helper is the
+            # same argument tier0 makes by blocking inside the single `heal` op
+            # rather than on each card: a heal card written later cannot
+            # silently ignore her.
             lines.append(
-                "await CreatureCmd.Heal(Owner.Creature, "
+                "await KleeHeal.Apply(Owner.Creature, "
                 "DynamicVars[\"Heal\"].BaseValue);")
 
         elif op == "apply_power":

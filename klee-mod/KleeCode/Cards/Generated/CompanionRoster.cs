@@ -22,6 +22,7 @@ public static class CompanionRoster
     public static IReadOnlyList<CardModel> All => _all ??= new List<CardModel>
     {
         ModelDb.Card<AlbedoSolarIsotoma>(),
+        ModelDb.Card<ArlecchinoMasqueRedDeath>(),
         ModelDb.Card<BarbaraMelody>(),
         ModelDb.Card<BarbaraShiningIdol>(),
         ModelDb.Card<BennettFantasticVoyage>(),
@@ -32,6 +33,7 @@ public static class CompanionRoster
         ModelDb.Card<ChevreuseBurstingGrenades>(),
         ModelDb.Card<ChevreuseInterdictionFire>(),
         ModelDb.Card<ChevreuseVanguardsValor>(),
+        ModelDb.Card<ClorindeImpaleTheNight>(),
         ModelDb.Card<DahliaFavonianFavor>(),
         ModelDb.Card<DahliaSacramentalShower>(),
         ModelDb.Card<DionaIcyPaws>(),
@@ -49,6 +51,8 @@ public static class CompanionRoster
         ModelDb.Card<LynetteAstonishingShift>(),
         ModelDb.Card<LynetteBoxTrick>(),
         ModelDb.Card<LynetteEnigmaticFeint>(),
+        ModelDb.Card<NaviaCannonFireSupport>(),
+        ModelDb.Card<NeuvilletteAncientSeaAuthority>(),
         ModelDb.Card<NicoleCelestialGift>(),
         ModelDb.Card<PruneWitchHunt>(),
         ModelDb.Card<RaidenMusouNoHitotachi>(),

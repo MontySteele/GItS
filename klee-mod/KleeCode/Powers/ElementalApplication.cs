@@ -209,6 +209,20 @@ public static class AuraCmd
         creature.Powers.OfType<AuraPower>().FirstOrDefault();
 
     /// <summary>
+    /// How long an aura applied or refreshed by <paramref name="applier"/>
+    /// lasts. Port of tier0 reactions.aura_duration(state).
+    ///
+    /// A function rather than the constant read at each site, for the reason
+    /// the sim gives: application and refresh must never disagree about how
+    /// long an aura lives, which they would the first time someone extended
+    /// only one of them. Neuvillette's Heir to the Ancient Sea's Authority is
+    /// the first thing that extends it.
+    /// </summary>
+    public static int Duration(Creature? applier) =>
+        ReactionConstants.AuraDurationTurns
+        + AncientSeaAuthorityPower.ExtraTurnsFrom(applier);
+
+    /// <summary>
     /// Pure application, the port of tier0 apply_aura(): trigger-only elements
     /// never stick. Amount is the aura's remaining duration in turns.
     /// Callers must have checked Find() == null -- applying a second aura type
@@ -222,22 +236,22 @@ public static class AuraCmd
         {
             case Element.Pyro:
                 await PowerCmd.Apply<PyroAuraPower>(
-                    choiceContext, target, ReactionConstants.AuraDurationTurns,
+                    choiceContext, target, Duration(applier),
                     applier: applier, cardSource: cardSource);
                 break;
             case Element.Hydro:
                 await PowerCmd.Apply<HydroAuraPower>(
-                    choiceContext, target, ReactionConstants.AuraDurationTurns,
+                    choiceContext, target, Duration(applier),
                     applier: applier, cardSource: cardSource);
                 break;
             case Element.Electro:
                 await PowerCmd.Apply<ElectroAuraPower>(
-                    choiceContext, target, ReactionConstants.AuraDurationTurns,
+                    choiceContext, target, Duration(applier),
                     applier: applier, cardSource: cardSource);
                 break;
             case Element.Cryo:
                 await PowerCmd.Apply<CryoAuraPower>(
-                    choiceContext, target, ReactionConstants.AuraDurationTurns,
+                    choiceContext, target, Duration(applier),
                     applier: applier, cardSource: cardSource);
                 break;
             default:
@@ -255,7 +269,7 @@ public static class AuraCmd
     {
         await PowerCmd.ModifyAmount(
             choiceContext, aura,
-            ReactionConstants.AuraDurationTurns - aura.Amount,
+            Duration(applier) - aura.Amount,
             applier: applier, cardSource: cardSource, silent: true);
     }
 }

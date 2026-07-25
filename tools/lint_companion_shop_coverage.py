@@ -33,10 +33,17 @@ CHECKS
      one-line change that reintroduces the softlock and that nothing else in
      the repo would notice.
 
-REPORTED BUT NOT FAILED: a home nation with no RARE companion. Fontaine ships
-zero today, which is exactly the brittleness R59 cites when it rejects a
-guaranteed-Rare slot 2, and the ladder handles it by widening the nation. It
-is a roster fact worth seeing on every run of this lint, not a build break.
+REPORTED BUT NOT FAILED: a home nation with no RARE companion. The ladder
+handles it by widening the nation. It is a roster fact worth seeing on every
+run of this lint, not a build break. (Fontaine shipped zero until R64 gave it
+four on 2026-07-25 -- which is what made check 1 count cards the shop cannot
+actually draw, and why `eligible` now models the banner.)
+
+BANNER STATE IS PART OF THE POOL (R64). Every count below is the WORST CASE
+over banner rolls, not the roster. While the banner was a no-op the two were
+the same number; they no longer are, and the corner this lint exists to catch
+-- a filter emptying a pool that looked full -- is now reachable through the
+banner as well as through the nation filter.
 
 Usage: python tools/lint_companion_shop_coverage.py
 Exit 1 with findings on stdout.
@@ -72,11 +79,35 @@ REQUIRED_RUNGS = [
 
 
 def eligible(character: str, rarity: str, nation: str | None) -> list:
+    """Cards the shop could draw, WORST CASE over banner rolls.
+
+    BANNER-AWARE SINCE R64 (2026-07-25). This used to return the full roster,
+    which was exactly right while the Featured Banner was a no-op -- no nation
+    designed more 5-stars than BANNER_FEATURED_SLOTS, so nothing was ever
+    filtered. Fontaine's fourth Rare ended that: one Fontaine 5-star is now
+    absent from any given run, and a lint that counts all four is counting
+    cards the shop cannot draw.
+
+    The thinning is applied PER NATION and only to 5-stars, mirroring
+    rewards.roll_banner and _banner_filtered exactly: a nation contributes at
+    most BANNER_FEATURED_SLOTS of them, and 4-stars are never gated. WHICH
+    5-stars survive is seed-dependent and irrelevant here -- coverage is a
+    counting question, and the count is the same for every roll.
+    """
     pool = rewards.companion_pool()
-    return [c for c in pool.get(rarity, [])
-            if c.personal_pool in (None, character)
-            and not c.guest_star
-            and (nation is None or c.nation == nation)]
+    cards = [c for c in pool.get(rarity, [])
+             if c.personal_pool in (None, character)
+             and not c.guest_star
+             and (nation is None or c.nation == nation)]
+
+    kept = [c for c in cards if c.star != 5]
+    by_nation: dict[str | None, list] = {}
+    for c in cards:
+        if c.star == 5:
+            by_nation.setdefault(c.nation, []).append(c)
+    for _nation, fives in by_nation.items():
+        kept.extend(sorted(fives, key=lambda c: c.id)[:C.BANNER_FEATURED_SLOTS])
+    return kept
 
 
 def main() -> int:

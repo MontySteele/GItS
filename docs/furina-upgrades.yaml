@@ -111,3 +111,21 @@ charlotte_snappy_silhouette: {vulnerable: +1}    # 2->3
 freminet_pers_deploy:        {damage: +2}    # 6->8
 freminet_pressurized_floe:   {damage: +2}    # 10->12; Block stays 6 (still applies_element: false)
 freminet_shattering_pressure: {power_amount: +2} # Shatter bonus +4->+6 (grammar row 2: +2 at base 4-6)
+
+# Fontaine 5-star Rares (v0.2, 2026-07-25). ALL PROPOSED with the cards.
+navia_cannon_fire_support:   {power_amount: +2}  # 3->5 Block per Companion played
+clorinde_impale_the_night:   {damage: +3}        # 10->13; the night_vigil rider stays +3, so the
+                                                 # upgrade buys the body and never the conditional --
+                                                 # same split as Freminet's Backstroke.
+neuvillette_ancient_sea_authority: {cost: -1}    # 1 -> 0. COST, not magnitude, and deliberately so:
+                                                 # power_amount here would take auras from 3 turns to 4
+                                                 # against a base AURA_DURATION_TURNS of 2, i.e. double
+                                                 # duration, which lifts every applier in the pool and
+                                                 # every aura-keyed payoff (Albedo, Clorinde) at once.
+                                                 # That is a pool-wide multiplier bought on one card.
+                                                 # Buying the same effect a turn earlier is the Nicole
+                                                 # precedent and does not compound.
+arlecchino_masque_red_death: {power_amount: +2}  # +4 -> +6 on your Attacks. The heal block does not
+                                                 # scale and is not removable by upgrade -- the drawback
+                                                 # IS the card, and an upgrade that softened it would be
+                                                 # a different card.

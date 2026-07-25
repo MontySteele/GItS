@@ -97,8 +97,31 @@ def five_star_roster(nation: str) -> list[Card]:
         key=lambda c: c.id)
 
 
+@lru_cache(maxsize=1)
+def designed_nations() -> tuple[str, ...]:
+    """Every nation with at least one banner-eligible 5-star, sorted.
+
+    DERIVED, never listed. The literal default this replaced -- roll_banner's
+    ``nations=("mondstadt",)`` -- was correct on the day it was written and
+    silently wrong from the day Inazuma got its first 5-star: the run model's
+    one call site never passed an argument, so every run of every character
+    rolled a MONDSTADT-ONLY banner, and `_banner_filtered` then dropped every
+    other nation's 5-stars from both the reward slot and the shop. Measured
+    before the fix: across 400 seeds a Kokomi run was offered Albedo, Durin and
+    Nicole and never Itto or Raiden -- Inazuma's own Rares, one of them written
+    as "the conscription jackpot", unreachable in her own runs.
+
+    A hardcoded nation list is a thing someone must remember to update. This is
+    not.
+    """
+    nations = {c.nation for c in loader._card_index().values()
+               if c.is_companion and c.star == 5 and c.nation
+               and c.personal_pool is None and not c.guest_star}
+    return tuple(sorted(nations))
+
+
 def roll_banner(rng: random.Random,
-                nations: tuple[str, ...] = ("mondstadt",)) -> frozenset[str]:
+                nations: tuple[str, ...] | None = None) -> frozenset[str]:
     """The run's Featured Banner: BANNER_FEATURED_SLOTS limited 5-stars per
     nation, drawn once per run and fixed for its duration.
 
@@ -109,7 +132,15 @@ def roll_banner(rng: random.Random,
 
     In co-op each player rolls their own banner -- divergent lineups are the
     point -- so this deliberately takes an rng rather than reading a global.
+
+    ``nations=None`` means EVERY designed nation, which is what §4.2 describes
+    ("3 limited 5-stars per nation") and the only correct setting for a run:
+    the reward slot's uniform half and the shop's wildcard slot both offer
+    off-nation 5-stars, so a banner that omits a nation does not thin that
+    nation -- it DELETES it. See designed_nations().
     """
+    if nations is None:
+        nations = designed_nations()
     featured: set[str] = set()
     for nation in nations:
         roster = five_star_roster(nation)

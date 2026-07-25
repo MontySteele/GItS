@@ -395,6 +395,11 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
                  + state.player.powers.get("spotlight_flat_damage_turn", 0))
     if card.type == "attack":
         base += state.current_attack_bonus
+        # Arlecchino, Masque of the Red Death: flat rider on YOUR Attacks.
+        # Sits with current_attack_bonus rather than in modify_damage_dealt so
+        # it reads only card Attacks -- bombs, Oz and Kurage pulses are not
+        # "your Attacks" and must not collect it.
+        base += state.player.powers.get("masque_red_death", 0)
         # card_name_damage_bonus relic rider (dead branch on the battery:
         # relic_effects is empty). Flat, folded in BEFORE strength/vulnerable,
         # matching current_attack_bonus above.
@@ -412,6 +417,12 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
                 hit += fx["bonus_vs_bombed"]
             if fx.get("bonus_vs_aura") and enemy.aura:
                 hit += fx["bonus_vs_aura"]
+            # Clorinde, Night Vigil: the same per-target aura rider, sourced
+            # from a POWER instead of the card. Read before the hit resolves,
+            # because resolve_hit consumes the aura it is keyed on -- the
+            # identical ordering solar_isotoma needs.
+            if enemy.aura and card.type == "attack":
+                hit += state.player.powers.get("night_vigil", 0)
             # Bully: ExtraDamage x the DEFENDER's own stacks of a named power,
             # evaluated per target -- same shape as the aura/bomb riders above.
             rider = fx.get("bonus_per_target_power")
@@ -669,7 +680,7 @@ def _op_swirl(state: CombatState, fx: dict, card: Card) -> None:
 def _op_refresh_all_auras(state: CombatState, fx: dict, card: Card) -> None:
     for e in state.living_enemies:
         if e.aura:
-            e.aura_turns_left = C.AURA_DURATION_TURNS
+            e.aura_turns_left = reactions.aura_duration(state)
 
 
 def _op_buff_next_attack(state: CombatState, fx: dict, card: Card) -> None:
@@ -846,6 +857,14 @@ def _op_copy_spotlighted_in_hand(state: CombatState, fx: dict,
 
 def _op_heal(state: CombatState, fx: dict, card: Card) -> None:
     p = state.player
+    # Arlecchino, Masque of the Red Death: her Bond of Life identity -- healing
+    # is never received. Blocked at the ONE heal op rather than at each card, so
+    # no future heal can be written that quietly ignores her. Emitted (not
+    # silently dropped) so the pilot's heal accounting and any telemetry can see
+    # that a heal was offered and refused.
+    if p.powers.get("masque_red_death", 0):
+        state.emit("heal_blocked", amount=fx["amount"], by="masque_red_death")
+        return
     amount = fx["amount"]
     if state.salon_replacements_this_card:
         amount *= C.SALON_REPLACE_NUMERIC_MULT

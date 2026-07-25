@@ -61,6 +61,94 @@
    # NEW POWER: shatter_bonus. Convergence note FOR THE RECORD: this makes the freeze package MORE attractive but bends
    # it away from control uptime toward burst damage — every Shatter ENDS a freeze. Growth direction, not a leak.
 
+# ---------- FONTAINE 5-STAR RARES (v0.2, 2026-07-25 — R64/R65; ALL NUMBERS PROPOSED, awaiting red-pen) ----------
+# The roster gap the shop-companion coverage lint found live: Fontaine designed ZERO Rare companions,
+# graded by [USER] as a roster gap rather than a fallback quirk. Four characters, one card each (§4.2).
+#
+# THIS IS THE SET THAT TURNS THE BANNER ON. Four Rares against BANNER_FEATURED_SLOTS = 3 makes the
+# Featured Banner selective for the first time anywhere (R64) — Mondstadt sits at exactly 3 and Inazuma
+# at 2, so the roll has been a no-op everywhere until now. One of these four is excluded per run.
+#
+# Element spread honours §4.1's off-element lean for the home-nation slot: Geo/Electro/Pyro are all off
+# Furina's Hydro; Neuvillette on-element is deliberate and accepted (he is the Hydro Sovereign, and D2
+# rules his shared Rare is a DIFFERENT card from the Guest Star cameos below).
+#
+# §4.3 compliance, stated per card: all four are SUPPORT payoffs — buffs, reaction payoff, aura
+# manipulation. None is an independent damage engine and none self-scales. Only one carries a damage
+# body at all (Clorinde), and hers is below the Itto/Raiden jackpot bar because she also carries a power.
+#
+# Healing law (Rare AND Exhaust, conjunctive) is satisfied VACUOUSLY: no card here heals. Arlecchino
+# interacts with healing in the opposite direction — see her note.
+#
+# NAMES: checked against docs/reserved-card-names.txt and the in-repo sheets BEFORE proposing, per the
+# kickoff. The check earned its keep — "O Tides, I Have Returned" was the natural Neuvillette pick and
+# is RESERVED four lines below for his future playable kit-Burst. Following that precedent, each entry
+# below records the Burst name it is deliberately NOT taking, so the next pass inherits the reservation
+# instead of rediscovering it.
+
+- {id: navia_cannon_fire_support, name: "Navia — Cannon Fire Support", star: 5, rarity: rare, role_c: buffer, element: geo, cost: 1, type: power, character: navia,
+   effects: [{op: apply_power, power: cannon_fire_support, amount: 3, target: self, note: "whenever you play a Companion card, gain 3 Block"}]}
+   # ROLE: glue. The President of the Spina di Rosula pays the POOL rather than the character — the only
+   # card in the game whose trigger is "a companion was played", which is exactly a companion-pool payoff.
+   # NEW POWER: cannon_fire_support.
+   # CRYSTALLIZE, deliberately avoided (kickoff Track A note — Zhongli's slot-4 archetype owns that space):
+   # she applies no Geo, collects no shards, and pays no Crystallize rider. Her trigger is card-type, not
+   # elemental, so nothing here pre-commits how Crystallize scales.
+   # OVERLAP FLAGGED, NOT RESOLVED: Albedo's solar_isotoma is already "Geo defensive engine" (block off
+   # attacks vs aura'd enemies). Navia stacks with it but does not duplicate it — different trigger
+   # (companion play vs aura'd hit), different pool pressure. If red-pen reads two Geo block engines as
+   # one too many, Navia is the one to move, because Albedo predates her and anchors Mondstadt.
+   # Burst name "As the Sunlit Sky's Singing Salute" RESERVED for a future playable kit-Burst (v1.9).
+
+- {id: clorinde_impale_the_night, name: "Clorinde — Impale the Night", star: 5, rarity: rare, role_c: applier, element: electro, cost: 2, type: attack, character: clorinde,
+   effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
+             {op: apply_power, power: night_vigil, amount: 3, target: self, note: "your Attacks against enemies that have an aura deal +3"}]}
+   # ROLE: payoff. The Champion Duelist reads the board before she moves: her payoff is conditional on the
+   # pool having done its job, so she pays every applier in the set rather than standing alone.
+   # NEW POWER: night_vigil.
+   # DELIBERATE SYMMETRY with Albedo: solar_isotoma turns "attack an aura'd enemy" into BLOCK, night_vigil
+   # turns the same trigger into DAMAGE. Same hook in deal_damage_to_enemy, opposite currency. Recorded so
+   # the pairing reads as design rather than as one of them being a copy of the other.
+   # §4.3: a conditional flat buff, not an engine — it never grows, and with no aura on the board it is
+   # worth zero. The 10-damage body is below Itto (14+6) and Raiden (18) BY CONSTRUCTION: those two are
+   # shapeless jackpots that carry nothing else, and she carries a permanent power.
+   # Burst name "Last Lightfall" RESERVED for a future playable kit-Burst (v1.9).
+
+- {id: neuvillette_ancient_sea_authority, name: "Neuvillette — Heir to the Ancient Sea's Authority", star: 5, rarity: rare, role_c: buffer, element: hydro, cost: 1, type: power, character: neuvillette,
+   effects: [{op: apply_power, power: ancient_sea_authority, amount: 1, target: self, note: "auras you apply last 1 extra turn"}]}
+   # ROLE: enabler. Aura manipulation, named in §4.3 as permitted payoff-grade support space, and the one
+   # facet of the Hydro Sovereign no card touches yet: not applying water, but holding authority over it.
+   # NEW POWER: ancient_sea_authority (read in reactions.apply_aura).
+   # D2: this is his SHARED-POOL Rare and is a DIFFERENT card from the three Guest Star cameos below,
+   # per the standing Guest Star ruling. Mechanically the separation is already enforced —
+   # five_star_roster filters both guest_star and personal_pool, so this enters the banner roster and the
+   # cameos never do. The WATCHLIST convergence cell on guest_neuvillette_judgment is untouched.
+   # WHY NOT MASS HYDRO, which was the obvious design: the sheet ALREADY prices that. The watchlist note
+   # on guest_neuvillette_judgment records mass-Hydro + the Cryo pair as mass-Frozen potential, with the
+   # 3 self-damage named as "the intended brake: spamming judgment to fish freezes costs HP". A free
+   # mass-Hydro applier at Rare would delete that brake while leaving the note in place, which is worse
+   # than the freeze risk itself. Extending aura DURATION adds no new application and so cannot initiate
+   # a freeze that was not already going to happen; it lengthens the window the pool already earns.
+   # Burst name "O Tides, I Have Returned" is RESERVED (line 96) and was NOT taken.
+
+- {id: arlecchino_masque_red_death, name: "Arlecchino — Masque of the Red Death", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 1, type: power, character: arlecchino,
+   effects: [{op: apply_power, power: masque_red_death, amount: 4, target: self, note: "your Attacks deal +4 damage; you can no longer be healed"}]}
+   # ROLE: payoff. R65 places her in FONTAINE (House of the Hearth) — Snezhnaya is not a designed sheet.
+   # NEW POWER: masque_red_death, including a heal block in _op_heal.
+   # The drawback is her actual Genshin identity (Bond of Life: healing is converted, never received) and
+   # is the kickoff's suggested distinguishing cost. It is a REAL cost for Furina, whose sheet carries
+   # two heal cards (14 and 8).
+   # *** THE PROBLEM RED-PEN HAS TO RULE ON, and the sheet cannot see it by itself: ***
+   # Kokomi's LAW 2 forbids heals outright. For her the drawback is INERT, so Arlecchino is a strictly
+   # upside card — a flat +4 on every attack for 1 energy with no cost at all. Klee has no heal in her
+   # starter either, so she is only slightly better off than Furina. A drawback that prices itself
+   # differently per character is not automatically wrong (that is what off-element access is), but a
+   # drawback that prices to ZERO for one character is a §4.3 smell, and it is the reason this card is
+   # flagged rather than proposed quietly. Options if red-pen rejects: (a) accept, and let Kokomi have a
+   # nation-crossing prize; (b) add a second clause that bites universally (e.g. it also blocks Block
+   # gained outside your turn); (c) move the drawback to HP cost on play, which every character pays.
+   # Burst name "Balemoon Rising" RESERVED for a future playable kit-Burst (v1.9).
+
 # ---------- OPEN ITEMS ----------
 # 1. Furina personal-pool: RESOLVED (user design, session ruling) — the "Guest Star" generation suite.
 #    Personal-pool cards that generate companion cards, Discovery-class machinery (solved; Klee's
@@ -82,8 +170,10 @@
 #    Registered bet: generation lifts Spotlight's FLOOR, not its ceiling — one-shot cameos can't match
 #    drafted-kit Fanfare throughput. If the sim shows generation beating real drafting, the knob is
 #    generator cost, not the concept.
-# 2. Fontaine 5-star Rares: later scope (Neuvillette, Clorinde, Navia, Sigewinne, Lyney, Wriothesley — banner roll
-#    per v1.8; lore audit per v1.7 before any ship).
+# 2. Fontaine 5-star Rares: FOUR SHIPPED 2026-07-25 (Navia, Clorinde, Neuvillette, Arlecchino) — see the
+#    5-STAR RARES block above. Arlecchino is here by R65 (unreleased-nation placement: residence until
+#    Snezhnaya ships as a sheet). Still later scope: Sigewinne, Lyney, Wriothesley. Lore audit per v1.7
+#    is [USER] and NOT yet done for the four that shipped.
 # 3. WATCHLIST: Kaeya+Freminet cross-nation Cryo-attack redundancy — a Furina drafting both has doubled freeze
 #    initiation. Monitor in the hydro+cryo convergence checks; roster geometry, not a card bug.
 # 4. DSL asks for this set: Chevreuse's reaction_triggered_this_turn predicate, Freminet's shatter_bonus power,

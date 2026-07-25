@@ -255,7 +255,13 @@ def run_one(character: str, archetype: str, pilot_id: str,
     # reason: drawing the banner from `rng` would advance the main stream and
     # silently renumber every existing measurement, including the frozen v0.1
     # snapshot. Seed-determined either way, which is all the spec asks for.
-    banner = rewards.roll_banner(random.Random(seed + 2 * 10 ** 9))
+    # `nations` is passed EXPLICITLY rather than left to the default. This call
+    # site is the entire reason the default was wrong for as long as it was:
+    # it took the argument-free form, so the banner covered Mondstadt alone and
+    # every other nation's 5-stars were filtered out of every offer in the run.
+    # Naming the set here means the audit is visible where the run is built.
+    banner = rewards.roll_banner(random.Random(seed + 2 * 10 ** 9),
+                                 nations=rewards.designed_nations())
     pilot = make_pilot(loader.pilot_weights(pilot_id))
     # Dedicated stream: randomized starters are seed-replayable but do not
     # renumber encounters, reward rolls, shops, or any calibrated run result.

@@ -125,9 +125,14 @@ def companion_shop_offer(
     no companion at ANY nation -- and inventing a base-colorless surrogate to
     match would be faking content the sim does not have.
 
-    Live corner worth knowing: Fontaine designs ZERO Rare companions, so
-    Furina's slot 1 can never roll one and takes the nation-widening rung
-    whenever slot 2 has already claimed the last Fontaine uncommon.
+    Live corner worth knowing (UPDATED 2026-07-25, R64): Fontaine used to
+    design ZERO Rare companions, so Furina's slot 1 could never roll one and
+    took the nation-widening rung as its everyday path. It now designs four, so
+    her slot 1 answers a Rare roll from her own nation. The rung is still
+    reachable and still load-bearing -- it is now the BANNER that can empty her
+    Rare tier (four Fontaine Rares against three featured slots), rather than
+    the roster being empty by construction. That is the first time the rung has
+    had a stochastic trigger instead of a structural one.
     """
     home = loader.character_nation(character)
     pool = rewards.companion_pool()

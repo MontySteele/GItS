@@ -163,7 +163,14 @@ def test_furina_runtime_clusters_emit_concrete_calls():
 
     healing = gen.emit(by_id["singer_of_many_waters"], gen.FURINA_PROFILE)
     assert 'DynamicVars["Heal"].BaseValue' in healing
-    assert "CreatureCmd.Heal" in healing
+    # KleeHeal.Apply, not CreatureCmd.Heal directly (R64, 2026-07-25).
+    # Arlecchino's Masque of the Red Death refuses healing, and the engine
+    # exposes no heal hook on PowerModel for a power to intercept it, so every
+    # generated heal routes through the mod's one heal helper. Asserted on the
+    # HELPER rather than loosened to "some heal call", because the whole point
+    # is that a future heal card cannot bypass her by calling the raw command.
+    assert "KleeHeal.Apply" in healing
+    assert "CreatureCmd.Heal" not in healing
 
     aura_payoff = gen.emit(by_id["crashing_waves"], gen.FURINA_PROFILE)
     assert "foreach (var auraTarget" in aura_payoff

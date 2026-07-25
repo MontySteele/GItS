@@ -89,31 +89,49 @@ def test_slot_one_is_home_nation_when_the_nation_can_supply_it():
 
 # --- the empty-draw corners (the reason this file exists) ------------------
 
-def test_fontaine_has_no_rare_companion_so_furinas_slot_one_widens():
-    """LIVE CORNER, not a hypothetical. Fontaine designs no Rare companion, so
-    Furina's home-nation slot cannot honour a Rare roll and must widen the
-    NATION rather than drop the rarity or crash.
+def test_furinas_slot_one_now_answers_a_rare_roll_from_her_own_nation():
+    """SUCCESSOR to test_fontaine_has_no_rare_companion_so_furinas_slot_one_widens.
 
-    This test is also the tripwire for the day Fontaine gains a Rare: it will
-    start failing, and the fix is to delete it, not to re-widen the ladder."""
+    That test asserted the opposite fact and carried its own retirement
+    instructions: "the tripwire for the day Fontaine gains a Rare -- the fix is
+    to delete it, not to re-widen the ladder." R64 (2026-07-25) shipped four
+    Fontaine Rares, so it was deleted and this took its place.
+
+    What flipped: Furina's home-nation slot can now honour a Rare roll from
+    Fontaine itself, which means the nation-widening rung STOPS being her
+    normal path. It is not gone -- the banner can still thin her Rare tier, and
+    slot 2 can still take the last Fontaine card first -- but it is now a
+    corner rather than the everyday case.
+    """
     pool = rewards.companion_pool()
     fontaine_rares = [c for c in pool.get("rare", []) if c.nation == "fontaine"]
-    assert not fontaine_rares, (
-        "Fontaine now has a Rare companion -- retire this test and the "
-        "nation-widening note in companion_shop_offer's docstring")
+    assert fontaine_rares, "R64's roster is gone; this test's premise with it"
 
-    # Force the Rare roll on slot 1 and confirm it still produces a card.
-    saw_rare_offer = False
+    saw_fontaine_rare = False
     for seed in range(300):
         offers = shop.companion_shop_offer(random.Random(seed), "furina")
         assert len(offers) == C.SHOP_COMPANION_SLOTS
         for card, _ in offers:
-            if card.rarity == "rare":
-                saw_rare_offer = True
-                assert card.nation != "fontaine"
-    assert saw_rare_offer, (
-        "Furina never saw a Rare across 300 seeds -- the widening rung is "
-        "unreachable, so the Rare half of her channel does not exist")
+            if card.rarity == "rare" and card.nation == "fontaine":
+                saw_fontaine_rare = True
+    assert saw_fontaine_rare, (
+        "Furina never saw a Fontaine Rare across 300 seeds -- the roster gap "
+        "this sprint closed is still closed in the sheet but not in the shop")
+
+
+def test_the_widening_rung_still_works_when_the_banner_thins_her_tier():
+    """The rung the test above stopped exercising, exercised deliberately.
+
+    A banner that features NO Fontaine Rare is now a reachable run state (four
+    Rares, three slots, and slot 1 draws home nation). The ladder must widen
+    the nation rather than drop the rarity or crash -- the R59 floor.
+    """
+    empty = frozenset()          # nothing featured at all: the hardest case
+    for seed in range(100):
+        offers = shop.companion_shop_offer(random.Random(seed), "furina", empty)
+        assert len(offers) == C.SHOP_COMPANION_SLOTS
+        for card, _ in offers:
+            assert card.star != 5, "an off-banner 5-star reached the shop"
 
 
 def test_a_nation_with_no_companions_at_all_still_fills_both_slots():

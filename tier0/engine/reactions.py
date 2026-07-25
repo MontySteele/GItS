@@ -36,12 +36,24 @@ def _amp_mult(state: CombatState, name: str) -> float:
     return base * (1 + pct / 100)
 
 
+def aura_duration(state: CombatState) -> int:
+    """Turns a freshly applied or refreshed aura lasts.
+
+    Neuvillette's ancient_sea_authority extends it. Deliberately a function
+    rather than a constant read at three call sites: application and refresh
+    must never disagree about how long an aura lives, which they would the
+    first time someone extended only one of them.
+    """
+    return C.AURA_DURATION_TURNS + state.player.powers.get(
+        "ancient_sea_authority", 0)
+
+
 def apply_aura(state: CombatState, enemy: Enemy, element: str) -> None:
     """Pure application (no damage) — apply_aura op, or post-reaction stick."""
     if element not in AURA_ELEMENTS:
         return
     enemy.aura = element
-    enemy.aura_turns_left = C.AURA_DURATION_TURNS
+    enemy.aura_turns_left = aura_duration(state)
     state.emit("aura_applied", element=element, target=enemy.name)
 
 
@@ -66,7 +78,7 @@ def resolve_hit(state: CombatState, enemy: Enemy, element: Optional[str],
         apply_aura(state, enemy, element)
         return damage
     if aura == element:
-        enemy.aura_turns_left = C.AURA_DURATION_TURNS   # refresh
+        enemy.aura_turns_left = aura_duration(state)    # refresh
         return damage
 
     # Different element on an existing aura: consume + react.

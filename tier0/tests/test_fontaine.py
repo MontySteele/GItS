@@ -26,15 +26,33 @@ def _fontaine_cards():
 
 # --- sheet structure ---
 
+FONTAINE_5STARS = ("navia", "clorinde", "neuvillette", "arlecchino")
+
+
 def test_fontaine_sheet_loads_ratified_roster():
     cards = _fontaine_cards()
     shared = [c for c in cards if not c.guest_star]
+    bench = [c for c in shared if c.star == 4]
+    rares = [c for c in shared if c.star == 5]
     guests = [c for c in cards if c.guest_star]
-    # 4 characters x 3-card kits (kickoff §10) + Guest Star set v0.1.
-    assert len(shared) == 12
-    assert {c.character for c in shared} == set(FONTAINE_4STARS)
+
+    # 4 characters x 3-card kits (kickoff §10).
+    assert len(bench) == 12
+    assert {c.character for c in bench} == set(FONTAINE_4STARS)
     for char in FONTAINE_4STARS:
-        assert sum(1 for c in shared if c.character == char) == 3
+        assert sum(1 for c in bench if c.character == char) == 3
+
+    # 5-star Rares, added 2026-07-25 (R64). §4.2 is EXACTLY ONE CARD each --
+    # asserted per character rather than on the total, because four cards
+    # from three characters would also sum to four.
+    assert {c.character for c in rares} == set(FONTAINE_5STARS)
+    for char in FONTAINE_5STARS:
+        assert sum(1 for c in rares if c.character == char) == 1
+    assert all(c.rarity == "rare" for c in rares)
+    # The roster now EXCEEDS BANNER_FEATURED_SLOTS, which is the whole point of
+    # the sprint that added them: it is what makes the banner selective.
+    assert len(rares) > C.BANNER_FEATURED_SLOTS
+
     assert {c.character for c in guests} == {"neuvillette"}
     assert 2 <= len(guests) <= 3          # kickoff §9: 2-3 Neuvillette cards
 
@@ -81,9 +99,24 @@ def test_guest_star_never_in_shared_rewards():
     from tier05 import rewards
     assert all(not c.guest_star
                for cs in rewards.companion_pool().values() for c in cs)
-    # No banner participation either: Fontaine has no *designed* shared
-    # 5-stars yet, and the guests must not stand in for them.
-    assert rewards.five_star_roster("fontaine") == []
+    # No banner participation either. This used to assert the roster was
+    # EMPTY, which proved the exclusion only because Fontaine had no designed
+    # shared 5-stars -- a vacuous pass that would have gone on reading green if
+    # a guest had leaked in the moment real Rares landed. Now that four exist
+    # (R64), assert the separation directly: the roster is exactly the shared
+    # Rares, and no guest id appears in it.
+    roster = rewards.five_star_roster("fontaine")
+    assert {c.id for c in roster} == {
+        "navia_cannon_fire_support",
+        "clorinde_impale_the_night",
+        "neuvillette_ancient_sea_authority",
+        "arlecchino_masque_red_death",
+    }
+    assert all(not c.guest_star and c.personal_pool is None for c in roster)
+    # D2 in the flesh: Neuvillette is in the banner roster AND has cameos, and
+    # they are different cards.
+    guest_ids = {c.id for c in _fontaine_cards() if c.guest_star}
+    assert guest_ids and not (guest_ids & {c.id for c in roster})
 
 
 def test_personal_pool_not_offered_cross_character():
@@ -185,3 +218,124 @@ def test_backstroke_applies_no_element():
     st.player.element = "pyro"
     effects.resolve_card(st, loader.get_card("freminet_pressurized_floe"))
     assert st.enemies[0].aura is None
+
+
+# --- 5-star Rares (R64, 2026-07-25): the four new powers ---
+
+def _play(st, card_id):
+    """play_card goes through the real hand/energy path -- the companion hook
+    being tested lives there, not in resolve_card."""
+    card = loader.get_card(card_id)
+    st.player.hand.append(card)
+    st.player.energy = 9
+    combat.play_card(st, card)
+    return card
+
+
+def test_cannon_fire_support_pays_on_every_companion_play():
+    """Navia's trigger is the CARD TYPE, not an element -- deliberately, so
+    nothing here pre-commits Crystallize (Zhongli's archetype owns it)."""
+    st = make_state(enemies=[make_enemy(hp=200)])
+    _play(st, "navia_cannon_fire_support")
+    # Her own play does not pay itself: the hook runs before resolution, so the
+    # power is not up yet when her own card play is observed.
+    assert st.player.block == 0
+    assert st.player.powers["cannon_fire_support"] == 3
+
+    _play(st, "lynette_box_trick")
+    assert st.player.block == 3
+    _play(st, "charlotte_snappy_silhouette")
+    assert st.player.block == 6
+
+
+def test_cannon_fire_support_ignores_non_companion_cards():
+    st = make_state(enemies=[make_enemy(hp=200)])
+    st.player.powers["cannon_fire_support"] = 3
+    _play(st, "kaboom")                                  # Klee's own card
+    assert st.player.block == 0
+
+
+def test_night_vigil_pays_only_against_an_aura_and_only_on_attacks():
+    """Clorinde reads the board before she moves. Same hook and same ordering
+    as Albedo's solar_isotoma -- read BEFORE the hit consumes the aura."""
+    st = make_state(enemies=[make_enemy(hp=300)])
+    e = st.enemies[0]
+    st.player.powers["night_vigil"] = 3
+
+    # No aura: the rider is worth nothing.
+    before = e.hp
+    effects.resolve_card(st, loader.get_card("kaeya_frostgnaw"))   # 6, cryo
+    assert before - e.hp == 6
+    assert e.aura == "cryo"
+
+    # Aura up: the SAME card now pays +3, and the rider is collected even
+    # though this hit reacts the aura away.
+    before = e.hp
+    effects.resolve_card(st, loader.get_card("chevreuse_interdiction_fire"))
+    melt = C.MELT_MULT                    # pyro onto cryo
+    assert before - e.hp == int((7 + 3) * melt)
+
+
+def test_night_vigil_does_not_pay_bombs_or_summons():
+    """'Your Attacks' means card Attacks. A bomb tick is not one."""
+    st = make_state(enemies=[make_enemy(hp=300)])
+    e = st.enemies[0]
+    st.player.powers["night_vigil"] = 5
+    e.aura = "hydro"
+    before = e.hp
+    effects.deal_damage_to_enemy(st, e, 10, element=None, source="bomb")
+    assert before - e.hp == 10
+
+
+def test_ancient_sea_authority_extends_applied_and_refreshed_auras():
+    st = make_state(enemies=[make_enemy(hp=200)])
+    e = st.enemies[0]
+    effects.resolve_card(st, loader.get_card("guest_neuvillette_tears"))
+    assert e.aura_turns_left == C.AURA_DURATION_TURNS
+
+    st2 = make_state(enemies=[make_enemy(hp=200)])
+    e2 = st2.enemies[0]
+    effects.resolve_card(
+        st2, loader.get_card("neuvillette_ancient_sea_authority"))
+    effects.resolve_card(st2, loader.get_card("guest_neuvillette_tears"))
+    assert e2.aura_turns_left == C.AURA_DURATION_TURNS + 1
+    # Refresh must agree with application -- the reason aura_duration() is a
+    # function rather than the constant read at three call sites.
+    e2.aura_turns_left = 1
+    effects.resolve_card(st2, loader.get_card("guest_neuvillette_tears"))
+    assert e2.aura_turns_left == C.AURA_DURATION_TURNS + 1
+
+
+def test_ancient_sea_authority_applies_no_element_of_its_own():
+    """It is authority over water, not more water. If it applied Hydro it
+    would re-open the mass-Frozen watchlist the guest card deliberately
+    priced with self-damage."""
+    st = make_state(enemies=[make_enemy(hp=200)])
+    effects.resolve_card(
+        st, loader.get_card("neuvillette_ancient_sea_authority"))
+    assert all(e.aura is None for e in st.enemies)
+
+
+def test_masque_of_the_red_death_buffs_attacks_and_blocks_healing():
+    st = make_state(enemies=[make_enemy(hp=300)], hp=40)
+    e = st.enemies[0]
+    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+    before = e.hp
+    effects.resolve_card(st, loader.get_card("kaeya_frostgnaw"))   # 6 base
+    assert before - e.hp == 6 + 4
+
+    # The Bond of Life half: healing is offered and refused, not silently lost.
+    st.player.hp = 40
+    effects.resolve_card(st, loader.get_card("singer_of_many_waters"))
+    assert st.player.hp == 40
+    blocked = [ev for ev in st.log if ev["event"] == "heal_blocked"]
+    assert blocked and blocked[-1]["by"] == "masque_red_death"
+
+
+def test_masque_does_not_buff_bombs():
+    st = make_state(enemies=[make_enemy(hp=300)])
+    e = st.enemies[0]
+    st.player.powers["masque_red_death"] = 4
+    before = e.hp
+    effects.deal_damage_to_enemy(st, e, 10, element=None, source="bomb")
+    assert before - e.hp == 10
