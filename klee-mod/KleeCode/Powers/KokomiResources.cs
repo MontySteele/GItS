@@ -43,7 +43,7 @@ public interface IKokomiCharacter
 /// | BurstPerReaction    | constants.py BURST_PER_REACTION = 5       |
 /// | KurageDuration      | constants.py KURAGE_DURATION = 1          |
 /// | KuragePulseBase     | constants.py KURAGE_PULSE_BASE = 4        |
-/// | KuragePulsePerChg   | constants.py KURAGE_PULSE_PER_CHARGE = 4  |
+/// | KuragePulsePerChg   | constants.py KURAGE_PULSE_PER_CHARGE = 2  |
 /// | KuragePulseBlock    | constants.py KURAGE_PULSE_BLOCK = 0       |
 /// | GarmentAttackBlock  | constants.py GARMENT_ATTACK_BLOCK = 2     |
 /// | GarmentTurns        | constants.py CEREMONIAL_GARMENT_TURNS = 3 |
@@ -75,8 +75,15 @@ public static class KokomiConstants
     /// actually ship. The standing caveat is that Osty's HP can drop while
     /// Charge only climbs, so act 3 is the cell to watch; sim-side that is
     /// now a report column (tier05/kurage_telemetry.py, R57 P2).
+    ///
+    /// R73 (Neap Tide v2.1, 2026-07-26): 4 -> 2. The act-3 caveat above is
+    /// exactly what came due -- at x4 the pulse out-read the Rare that was
+    /// supposed to cap the hierarchy. Halving the SLOPE and leaving the
+    /// accrual side alone is deliberate (§5 knob order): the bank fills at
+    /// the same rate, it just buys less. "Before Sun and Moon" is the only
+    /// sanctioned way back up, and it is a draft cost.
     /// </summary>
-    public const int KuragePulsePerCharge = 4;
+    public const int KuragePulsePerCharge = 2;
 
     /// <summary>
     /// Zero since the v0.4b starter rework: the pulse is damage now, not
