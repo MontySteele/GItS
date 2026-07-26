@@ -149,10 +149,20 @@ function Test-VersionPolicy {
 
       validate.ps1 calls this and pipes the result into Fail, so this IS the
       gate rather than a description of it -- the tests exercise the shipped
-      code path. It lives here rather than inline in validate.ps1 because
-      validate.ps1 cannot be run quickly: its S7 game_ref verification takes
-      minutes, and a version check nobody can afford to run is the kind of
-      gate this ruling exists to stop shipping.
+      code path. It lives here rather than inline in validate.ps1 so it can be
+      unit-tested, which is worth doing on its own merits.
+
+      C6 CORRECTION, carried here 2026-07-27 (Sweep II). The reason originally
+      given for extracting it -- "validate.ps1 cannot be run quickly: its S7
+      game_ref verification takes minutes" -- was never measured and is false.
+      That verification is 0.17s of an 84.0s gate (0.2%); the cost is the
+      pytest suite S7 exists to run, ~78s, and every other rule together is
+      ~5.5s. Sweep-I C6 deleted this claim from validate.ps1 and replaced it
+      with the measured numbers, but the same sentence survived HERE, in the
+      file the extraction produced -- a corrected claim and its uncorrected
+      twin, one file apart. Found while running the gate during Sweep II and
+      fixed under D4, which requires a quantitative claim used as rationale to
+      carry a measurement or be marked UNMEASURED.
 
       Parameters are already-parsed objects so the caller owns all I/O:
         Manifest    the STAGED manifest (PSCustomObject)

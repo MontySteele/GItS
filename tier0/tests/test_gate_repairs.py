@@ -138,7 +138,7 @@ def test_the_contract_version_moved_with_its_meaning():
 def test_the_false_stall_claim_is_gone():
     """R70's note blamed a 0.17s command for an 84s gate.
 
-    Measured this sprint: `tools.build_ironclad_sheet --verify` is 0.17s; the
+    Measured in Sweep I: `tools.build_ironclad_sheet --verify` is 0.17s; the
     full gate is 84.0s, of which the pytest suite is 78.4s. There was no stall
     to bound or cache -- the cost is the suite, and the suite is the point.
     """
@@ -146,6 +146,47 @@ def test_the_false_stall_claim_is_gone():
         "the unmeasured stall claim is back; it was the stated rationale for "
         "a design decision and it was false")
     assert "C6 CORRECTION" in VALIDATE
+
+
+def test_the_false_stall_claim_is_gone_from_its_SIBLINGS_too():
+    """The rule above was scoped to one file, and the claim lived in three.
+
+    Sweep II found the original sentence intact in `version.ps1` -- the file
+    the extraction C6 was correcting actually PRODUCED -- and again in
+    `test_manifest_version_gate.py`'s docstring. C6 corrected the claim where
+    it was found and pinned it where it was found; the copies it had already
+    spawned were never in scope, so a corrected claim and its uncorrected
+    twins sat one directory apart for a month.
+
+    That is the third-instance rule arriving late. This checks every file that
+    has ever carried the sentence, and any new file is cheap to add -- the
+    point is that the pin follows the CLAIM, not the file where someone first
+    noticed it.
+    """
+    banned = "verification takes minutes"
+    carriers = {
+        "klee-mod/build/validate.ps1": VALIDATE,
+        "klee-mod/build/version.ps1":
+            (ROOT / "klee-mod" / "build" / "version.ps1").read_text(
+                encoding="utf-8"),
+        "tier0/tests/test_manifest_version_gate.py":
+            (ROOT / "tier0" / "tests" / "test_manifest_version_gate.py")
+            .read_text(encoding="utf-8"),
+    }
+
+    offenders = [
+        name for name, text in carriers.items()
+        # The correcting notes QUOTE the false sentence in order to strike it,
+        # so a bare substring test would fail on the correction itself. What
+        # is banned is the claim standing unqualified -- i.e. with no
+        # correction anywhere in the file.
+        if banned in text and "was never measured and is false" not in text
+        and "CORRECTED one" not in text
+    ]
+
+    assert not offenders, (
+        f"the unmeasured stall claim stands uncorrected in: {offenders}. "
+        "It is 0.17s of an 84.0s gate; the cost is the pytest suite.")
 
 
 def test_the_gate_prints_its_own_timing_breakdown():

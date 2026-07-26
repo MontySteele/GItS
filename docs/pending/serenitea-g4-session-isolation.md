@@ -1,7 +1,17 @@
-# G4 — Session isolation policy (PREPARED, awaiting [USER] process ruling)
+# G4 — Session isolation policy (RULED: ADOPTED 2026-07-27)
 
-**Status: DRAFTED, NOT ADOPTED.** This is about [USER]'s machine and workflow,
-so the sprint only drafts it.
+**Status: ADOPTED**, Serenitea Sweep II track B2. All three parts — (a)
+worktree per workstream, (b) PR-to-`main` with the `repo` workflow as a
+required check, (c) the junction rule — were ruled in.
+
+The operating doc is **`docs/worktree-workflow.md`**; that is what to follow.
+This document is retained as the evidence behind it: the live collision that
+made the premise concrete, and the two `game_ref/` losses behind (c). Keep it
+for the incidents, not for the instructions.
+
+One part is not fully executable from this repo: (b) needs branch protection
+set on GitHub, which is a setting rather than a file. Flagged in the operating
+doc as convention-until-clicked.
 
 ---
 
@@ -73,18 +83,13 @@ exactly the things that must happen on the main checkout anyway — `build_pck`,
 
 ---
 
-## What [USER] is being asked to rule
+## What [USER] ruled (2026-07-27)
 
-1. Adopt (a) as a working practice — one worktree per session, branch per
-   session.
-2. Adopt (b), which requires adopting G3 first.
-3. Adopt (c) as a hard rule (it already has two incidents behind it).
+**(a), (b) and (c) all adopted.** See `docs/worktree-workflow.md`.
 
-If only one of these is taken, **(c) is the one with the worst downside**: it
-has already cost non-regenerable files twice, and it costs nothing to follow.
-
-If (a) is not adopted, the practical mitigation for a shared directory is
-narrower and should be recorded as the fallback: **stage explicitly, never
-`git add -A`** — which is what this sprint switched to for every commit after
-the collision, and which is why Tracks D, E, F and G each staged a named file
-list.
+The fallback below was adopted too, and promoted from fallback to standing
+rule 4: **stage explicitly, never `git add -A`**. It was proposed here as the
+mitigation for *not* adopting (a), but (a) does not make it redundant — the
+art-bearing main checkout is genuinely more convenient for some work, so the
+shared tree will keep being used, and rule 4 is what makes that survivable.
+Sweep II staged a named file list for every commit.

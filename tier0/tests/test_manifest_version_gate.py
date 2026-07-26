@@ -2,9 +2,14 @@
 
 These drive `Test-VersionPolicy` -- the function validate.ps1's S3 rule
 calls -- rather than re-implementing its logic, so they exercise the shipped
-code path. They do NOT drive validate.ps1 end to end, because S7's game_ref
-verification takes minutes; a version check nobody can afford to run would
-be the same class of defect this ruling is closing.
+code path. They do NOT drive validate.ps1 end to end, because the gate runs
+the whole pytest suite (~78s of an 84.0s run, measured in C6) and a unit test
+must not.
+
+That reason is the CORRECTED one. This docstring used to say "S7's game_ref
+verification takes minutes" -- the unmeasured claim C6 deleted from
+validate.ps1 and Sweep II deleted from version.ps1. The verification is 0.17s;
+the cost was always the suite.
 
 The defects being pinned, both from the 2026-07-26 audit:
 
