@@ -30,15 +30,12 @@ public static class KleeMod
     {
         Log.Info($"[{ModId}] Initializing Teyvat Spire roster...");
 
-        try
-        {
-            var harmony = new Harmony(ModId);
-            harmony.PatchAll(typeof(KleeMod).Assembly);
-        }
-        catch (Exception e)
-        {
-            Log.Error($"[{ModId}] Harmony patching failed: {e}");
-        }
+        // F2: per-type patching, NOT harmony.PatchAll. PatchAll aborts the
+        // whole walk on the first patch class that throws, so one dead
+        // reflection lookup silently disarms every patch after it -- including
+        // the two shop/reward softlock guards below. KleePatchBootstrap applies
+        // each class in its own try/catch and names any casualty at boot.
+        KleePatchBootstrap.ApplyAll(new Harmony(ModId), typeof(KleeMod).Assembly);
 
         // The game already merged klee.pck (has_pck) before invoking us; this
         // logs proof-of-merge so a stale/missing pack shows up in godot.log.
@@ -388,13 +385,25 @@ internal static class CardFactory_CreateForMerchant_TypeFallback_Patch
 [HarmonyPatch]
 internal static class ProgressSaveManager_EpochCheck_Patch
 {
+    // F2: null-guarded. AccessTools.Method returns null when a name stops
+    // resolving, and yielding that null makes Harmony throw about a null
+    // element rather than about the method that died. Routing through
+    // KleePatchBootstrap records the miss BY NAME and drops the null, so a
+    // rename of one of these two costs the one canary rather than the batch.
+    // If BOTH die the class arms nothing, which the bootstrap reports as a
+    // failure -- the alternative is a canary that silently stopped watching.
     [HarmonyTargetMethods]
     public static IEnumerable<MethodBase> TargetMethods()
     {
-        yield return AccessTools.Method(typeof(ProgressSaveManager),
-            "CheckFifteenElitesDefeatedEpoch");
-        yield return AccessTools.Method(typeof(ProgressSaveManager),
-            "CheckFifteenBossesDefeatedEpoch");
+        var targets = new[]
+        {
+            KleePatchBootstrap.ResolveMethod(typeof(ProgressSaveManager),
+                "CheckFifteenElitesDefeatedEpoch"),
+            KleePatchBootstrap.ResolveMethod(typeof(ProgressSaveManager),
+                "CheckFifteenBossesDefeatedEpoch"),
+        };
+
+        return targets.Where(m => m != null)!;
     }
 
     [HarmonyFinalizer]

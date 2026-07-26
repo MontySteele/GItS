@@ -61,12 +61,19 @@ internal static class KleePlaceholderArt
         "DeathSfx",
     };
 
+    // F2: this loop was already null-tolerant, but silently so -- a renamed
+    // property just stopped being redirected and nothing said which one. It now
+    // resolves through KleePatchBootstrap, which records each miss by name for
+    // the boot report. Skipping the null is still right: 21 redirected paths
+    // and one missing is a DEGRADED patch, not a failed one. Only a fully dead
+    // set arms nothing, and the bootstrap treats that as a failure.
     [HarmonyTargetMethods]
     private static IEnumerable<MethodBase> TargetMethods()
     {
         foreach (var name in PathProperties)
         {
-            var getter = AccessTools.PropertyGetter(typeof(CharacterModel), name);
+            var getter = KleePatchBootstrap.ResolvePropertyGetter(
+                typeof(CharacterModel), name);
             if (getter != null)
             {
                 yield return getter;
