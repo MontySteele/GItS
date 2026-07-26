@@ -165,7 +165,31 @@ all_my_treasures	ImageGen/images/cards/klee/all_my_treasures.png	500	380	contain
 #   b. Marvelous Magic is ALSO spark_collection's effective r1 -- and
 #      spark_collection's r2 (Dodoco's Duet) is vermillion_pact's passed
 #      r1, so it cannot quietly fall through either.
-spark_knight_style	ImageGen/images/cards/klee/spark_knight_style.png	500	380	cover	top	shortlist	1	png	Klee Character Card.png		tcg
+# RULED 2026-07-27 ([USER] red-pen, Serenitea Sweep II D1). Resolves red-pen
+# item (a) above: KABOOM KEEPS "Klee Character Card"; spark_knight_style goes
+# to the REHUNT PILE and needs new art. Commented rather than deleted, same as
+# pop above, so the record shows what the row held and why it lost it --
+# kaboom's claim is an auto pick that predates the power-card pass, and the
+# "regular TCG = the Style, golden = the True" pairing was the newer read.
+#
+# CONSEQUENCES until the rehunt lands, all intended, all checked 2026-07-27:
+#   - spark_knight_style has no effective pick, so art_process no longer writes
+#     its out-path. It does NOT go on the art bill: unlike pop, which never had
+#     a shipped file, spark_knight_style's PNG is already on disk, so
+#     art_coverage still counts it covered (263/267 either way -- the 4 missing
+#     are Kokomi's, unrelated). The card keeps showing the old crop in game.
+#     That is the interim state, not a bug: the debt is visible through L12
+#     below rather than through the coverage bill.
+#   - that shipped PNG stays byte-identical to kaboom.png, so art_lint L12
+#     still sees the duplicate. Its
+#     KNOWN_IDENTICAL entry therefore STAYS, cross-referenced to this block,
+#     and comes out the day new art lands --
+#     `test_every_allowlisted_identical_pair_is_still_identical` fails the
+#     moment the two stop matching, which is what forces the deletion instead
+#     of trusting someone to remember.
+#   - the pair is REMOVED from art_lint PENDING_RED_PEN: the source collision
+#     it recorded no longer exists, because only kaboom claims the card now.
+# spark_knight_style	ImageGen/images/cards/klee/spark_knight_style.png	500	380	cover	top	shortlist	1	png	Klee Character Card.png		tcg
 catalytic_conversion	ImageGen/images/cards/klee/catalytic_conversion.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Marvelous Magic.png		item
 explosive_frags	ImageGen/images/cards/klee/explosive_frags.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine AoE.png		item
 true_spark_knight	ImageGen/images/cards/klee/true_spark_knight.png	500	380	cover	top	shortlist	1	png	Klee Character Card Golden.png		tcg
