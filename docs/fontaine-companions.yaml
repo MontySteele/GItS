@@ -106,11 +106,11 @@
    # RATIFIED 2026-07-25 [USER]: "double that stat line to 20 damage and +6 vs auras", from 10/+3.
    # THE DOMINATION FLAG THIS ENTRY OPENED IS CLOSED — RAIDEN MOVED (2026-07-25 [USER]). Recorded in
    # full because the resolution is the interesting part: the doubling briefly made her out-hit Raiden's
-   # Musou no Hitotachi (then 18, the sheet's stated "biggest one-card hit") at the SAME 2 cost while
+   # Musou no Hitotachi (then 18, the sheet's stated "biggest one-card hit") at the SAME 2 cost while (lint-ok: cross-sheet superseded value)
    # also carrying a permanent power, where Raiden was deliberately shapeless to pay for her number.
    # No lint could have raised it — lint_strict_domination compares within a sheet, and the two live in
    # different nations' files. It was flagged here by hand for exactly that reason, and the red-pen
-   # session took the third option: Raiden went to 3 cost / 40 damage / Vulnerable 2 / Exhaust. The two
+   # session took the third option: Raiden went to 3 cost / 40 damage / Vulnerable 2 / Exhaust. The two (lint-ok: cross-sheet ratified value)
    # cards no longer share a cost or a shape, and neither is strictly better than the other.
    # KEEP THE HAND-FLAG HABIT: cross-sheet comparisons are structurally invisible to the tooling.
    # ROLE: payoff. The Champion Duelist reads the board before she moves: her payoff is conditional on the
@@ -121,7 +121,7 @@
    # the pairing reads as design rather than as one of them being a copy of the other.
    # §4.3: a conditional flat buff, not an engine — it never grows, and with no aura on the board it is
    # worth zero. Her 20-damage body sits ABOVE Itto's (14+6 at the same 2 cost) and far below Raiden's
-   # (40 at 3 cost, once): the Inazuma pair are shapeless jackpots that carry nothing else, and she
+   # (40 at 3 cost, once): the Inazuma pair are shapeless jackpots that carry nothing else, and she (lint-ok: cross-sheet ratified value)
    # carries a permanent power instead of a bigger number.
    # Burst name "Last Lightfall" RESERVED for a future playable kit-Burst (v1.9).
 
@@ -140,7 +140,7 @@
    # mass-Hydro applier at Rare would delete that brake while leaving the note in place, which is worse
    # than the freeze risk itself. Extending aura DURATION adds no new application and so cannot initiate
    # a freeze that was not already going to happen; it lengthens the window the pool already earns.
-   # Burst name "O Tides, I Have Returned" is RESERVED (line 96) and was NOT taken.
+   # Burst name "O Tides, I Have Returned" is RESERVED (line 96) and was NOT taken. (lint-ok: sheet line number, not a game number)
 
 - {id: arlecchino_masque_red_death, name: "Arlecchino — Masque of the Red Death", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 1, type: power, character: arlecchino,
    effects: [{op: apply_power, power: masque_red_death, amount: 1, target: self, note: "at the start of each turn gain 1 Strength; your Bond of Life eats the first 5 Block you gain each turn"}]}

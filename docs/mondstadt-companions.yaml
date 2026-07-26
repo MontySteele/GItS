@@ -1,7 +1,18 @@
 # Mondstadt companion pool — v0.1 (ships with Klee)
 # Shared colorless-style pool. Roles: applier | buffer | trigger (see principles doc §4.3)
 # 4-star = common/uncommon (multi-card kits allowed). 5-star = rare, ONE card each, max 3.
-# Companion cards NEVER scale and route power through the player character.
+# Companion cards route power through the player character.
+# G2 (Serenitea Sweep, 2026-07-26): this line opened "Companion cards NEVER
+# scale and route power..." -- contradicted by USER RULING 1 of 2026-07-21
+# (klee-mod/DECISIONS.md:1524, "the cards should be upgrade-able as per the
+# sheet"). MaxUpgradeLevel 0 is gone; companions emit real upgrade paths from
+# the merged upgrade index, and the mod now reproduces the power curve tier05
+# had already been measuring at rest sites. The only companions that still do
+# not upgrade are the sim's own UNAPPLIABLE set (durin_witchs_flame,
+# nicole_celestial_gift), which is a per-card fact, not a pool law.
+# The half that SURVIVED the ruling is kept above: power routes through the
+# player character. That is the design law; "never scale" was an
+# implementation detail that got overruled.
 
 # ---------- 4-STAR (common/uncommon) ----------
 - {id: dahlia_sacramental_shower, name: "Dahlia — Sacramental Shower", star: 4, rarity: common, role_c: applier, element: hydro, cost: 1, type: attack,

@@ -43,6 +43,28 @@ deck_bands:
     salon_weighted: 7.6
     fanfare_weighted: 4.2
     spotlight_weighted: 4.3
+# B4 (Serenitea Sweep II, 2026-07-27) -- INTERIM ANNOTATION, NOT A BAND MOVE.
+# Sweep-I E2 re-measured all three at `stamp RT7/D10/P3/C3, fights=1000,
+# seed=11, A6 instrument v2`: salon 9.04 vs band 7.6, fanfare 5.69 vs 4.2,
+# spotlight 4.90 vs 4.3. All three low, all three in the same direction --
+# so this is not salon-specific drift, and fanfare's miss (+1.49) is the
+# largest and had never been flagged at all.
+#
+# The numbers above are UNCHANGED and move only at the axis-validity session:
+# under D3 seven-axis numbers are reportable but not load-bearing, so E2
+# establishes that these bands are wrong, NOT what the right ones are.
+#
+# What this key fixes is the flag, not the band. All three read BAND EXCEEDED
+# on every Furina scorecard run, and a gate that always fires is on its way to
+# being ignored. Now it says why it is firing and what closes it. Delete these
+# entries when the bands are re-ratified -- an annotation outliving its reason
+# is the B6 ledger lesson, and `test_stale_band_annotations_point_at_real_bands`
+# fails if one names a band that no longer exists.
+stale_bands:
+  A2_scaling:
+    salon_weighted: "known-stale band; re-ratify at axis-validity session"
+    fanfare_weighted: "known-stale band; re-ratify at axis-validity session"
+    spotlight_weighted: "known-stale band; re-ratify at axis-validity session"
 starting_deck:
   - soloists_solicitation
   - soloists_solicitation

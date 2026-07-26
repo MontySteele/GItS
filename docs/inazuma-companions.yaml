@@ -88,18 +88,18 @@
    exhaust: true,
    effects: [{op: damage, amount: 40, target: enemy, applies_element: true},
              {op: apply_power, power: vulnerable, amount: 2, target: enemy}]}
-   # RATIFIED 2026-07-25 [USER], from 2 cost / 18 damage / no rider / no Exhaust: "3 cost, 40 damage,
+   # RATIFIED 2026-07-25 [USER], from 2 cost / 18 damage / no rider / no Exhaust: "3 cost, 40 damage, (lint-ok: superseded pre-ratification value)
    # vulnerable 2, applies electricity, exhaust — massive payoff for a very high cost. Rares in general
    # tend to be undertuned, so I think this is fine for a front-loaded rare, and has natural Kokomi
    # exhaust synergy." The same session ruled Navia fine as-is and Neuvillette weak-but-deferred.
    # WHAT THE BUFF CHANGES, recorded because it moves the card's class, not just its number:
    #   - It RESOLVES the Clorinde/Raiden domination flag opened one commit earlier (the open item that
    #     no lint could raise, since the two live in different nations' sheets). Clorinde is 2 cost for
-   #     20 + a permanent power; Raiden is 3 cost for 40 + Vulnerable and then she is GONE. Different
+   #     20 + a permanent power; Raiden is 3 cost for 40 + Vulnerable and then she is GONE. Different (lint-ok: sibling card's number)
    #     cost, different shape, and the strictly-better reading is dead in both directions.
    #   - Exhaust converts her from a recurring jackpot into a ONE-SHOT, which is what pays for 40. It is
    #     also the first companion Exhaust that is a PAYOFF rather than a brake, and it lands in the one
-   #     kit that wants it: Kokomi's exhaust voice is ROTATION (sheet header, line 19), so a card that
+   #     kit that wants it: Kokomi's exhaust voice is ROTATION (sheet header, line 19), so a card that (lint-ok: sheet line number, not a game number)
    #     leaves the deck after firing is thinning it on purpose.
    #   - Vulnerable is applied AFTER the damage (StS Bash ordering), so the 40 does NOT amplify itself.
    #   - 3 cost is the FIRST in the shared companion pool (the only other 3-costs anywhere are Klee's

@@ -98,9 +98,9 @@
 - {id: waters_edge, name: "Water's Edge", cost: 1, type: attack, rarity: basic, solve: [frontload], archetypes: [generic], role: glue,
    effects: [{op: damage, amount: 6, target: enemy}]}
    # Her normal attack: a ribbon of water. v0.3 charge-curve pass: 4 -> 6, STRIKE PARITY — and no further.
-   # USER RULING (R53, 2026-07-24): the kaboom-parity 7 arm is REJECTED; her basic attack stays at basic-Strike
+   # USER RULING (R53, 2026-07-24): the kaboom-parity 7 arm is REJECTED; her basic attack stays at basic-Strike (lint-ok: rejected arm's value, on record)
    # parity. The v0.2 diagnosis stands (sub-Strike basics made act-1 bills unpayable at any scaling setting),
-   # but A1-weak lives in the pool's SHAPE and the basics stop at parity. The 7 arm measured ~5 act-1 points
+   # but A1-weak lives in the pool's SHAPE and the basics stop at parity. The 7 arm measured ~5 act-1 points (lint-ok: rejected arm + its measurement)
    # above this world (report §6) — that gap is bought elsewhere or not at all.
 - {id: coral_guard, name: "Coral Guard", cost: 1, type: skill, rarity: basic, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 5}]}
@@ -156,16 +156,16 @@
 - {id: ritual_purification, name: "Ritual Purification", cost: 1, type: skill, rarity: common, solve: [utility, scaling], archetypes: [priest], role: enabler,
    effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: gain_charge, amount: 4}, {op: draw, amount: 1}]}
    # The premium Charge common (§2.1 explicit-bonus grammar): exhaust 1 -> 5 total Charge (1 funnel + 4 line),
-   # replaces itself. The engine's metronome. v0.3: line 2 -> 4 — the benchmark common Forges 7 while dealing 7;
+   # replaces itself. The engine's metronome. v0.3: line 2 -> 4 — the benchmark common Forges 7 while dealing 7; (lint-ok: benchmark common's numbers)
    # her dedicated charger paying a card for 3 total was under HALF that on one axis and zero on the other.
 - {id: waterspout, name: "Waterspout", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [priest, generic], role: glue, exhaust: true,
    effects: [{op: damage, amount: 10, target: enemy}]}
-   # Self-consuming swing: v0.3 7 -> 10 — a card of the deck-as-HP-bar is a real price and must buy a real hit
+   # Self-consuming swing: v0.3 7 -> 10 — a card of the deck-as-HP-bar is a real price and must buy a real hit (lint-ok: v0.3 history)
    # (the v0.2 world priced the burn at +1 damage over a plain swing). One hit, one Charge, one fewer draw.
 - {id: cleansing_tide, name: "Cleansing Tide", cost: 2, type: skill, rarity: common, solve: [block], archetypes: [priest], role: glue,
    effects: [{op: exhaust_from, amount: 2, select: chosen}, {op: block, amount: 10}]}
    # The big burn: two cards for a real wall. Double fuel with the Casket; steep deck cost without it.
-   # (v0.3 considered 12 and REVERTED in the same pass: it strictly dominated shell_of_sanctuary's 11 under
+   # (v0.3 considered 12 and REVERTED in the same pass: it strictly dominated shell_of_sanctuary's 11 under (lint-ok: sibling card's number)
    # the exhaust-as-benefit convention, and the act diagnosis proved Block is not her binding constraint —
    # the reprice concentrates on output and meter, not walls.)
 # Assist (3)
@@ -185,7 +185,7 @@
 # Generic (3)
 - {id: surging_shoal, name: "Surging Shoal", cost: 1, type: attack, rarity: common, solve: [frontload, utility], archetypes: [generic, priest], role: glue,
    effects: [{op: damage, amount: 6, target: all_enemies}]}
-   # R77 (Neap Tide v2.1): 7 -> 6 (upgrade 8), predicated on the B1 Skittish errata below.
+   # R77 (Neap Tide v2.1): 7 -> 6 (upgrade 8), predicated on the B1 Skittish errata below. (lint-ok: supersession record + upgrade value)
    # B1 SKITTISH ERRATA. The v0.3 note this replaces said Skittish 6 "ZEROED the 4-damage version". That is
    # not what the mechanic does. tier0 `deal_damage_to_enemy` adds the Block AFTER the whole hit resolves,
    # with the engine comment "so the triggering attack is never mitigated by it", and act1_pool's own line
@@ -193,8 +193,8 @@
    # Block up against the NEXT hit that turn. The v0.3 repricing was therefore argued from a misread of the
    # rule, even though the direction it chose may still have been right for other reasons.
    # WHAT IT ACTUALLY GATES, and this is a live consideration rather than a settled one: against Gardener x4
-   # the FIRST AoE each turn always lands full, and a SECOND AoE that turn does (dmg - 6) per body. At 7 that
-   # second wave did 1; at 6 it does 0; upgraded to 8 it does 2. So R77 buys a cleaner number at the cost of
+   # the FIRST AoE each turn always lands full, and a SECOND AoE that turn does (dmg - 6) per body. At 7 that (lint-ok: worked arithmetic at the superseded value)
+   # second wave did 1; at 6 it does 0; upgraded to 8 it does 2. So R77 buys a cleaner number at the cost of (lint-ok: upgrade value in worked arithmetic)
    # making the double-AoE turn strictly dead against this one elite. FLAGGED for the E2 read -- it was not
    # part of the errata as ratified, and if the act-1 AoE lane reads weak this line is the first suspect.
    # THE GARDENER-LESSON CARD (Furina 3-act diagnosis §10.8.2: a starter/common pool with no cheap AoE dies to the
@@ -217,7 +217,7 @@
    # v0.4 ([USER]): the jellyfish's canon SECOND job. Bake-Kurage in the game deals Hydro DMG *and heals nearby
    # characters at set intervals* — the pulse ships the damage half baseline, and this power drafts the mending
    # half back in as Block (R52 healing law: her HP bar never moves, the incoming does). While it holds, every
-   # Kurage pulse also grants 12 Block. Priced off the Regent precedent [USER] named: a 2-cost power paying 13
+   # Kurage pulse also grants 12 Block. Priced off the Regent precedent [USER] named: a 2-cost power paying 13 (lint-ok: Regent precedent's number)
    # Block per 2-cost finisher play. Hers triggers off a 1-cost summon, and the summon only pulses once
    # per play at KURAGE_DURATION 1 — so the honest read is "12 Block per Bake-Kurage", doubled once the summon
    # is upgraded to two turns.
@@ -226,11 +226,11 @@
    # both outside this row, neither guarded by this card's own tests. Moving either reprices the Oath without
    # touching it. `test_oath_ward_is_pinned_to_the_pulse_frequency_it_was_measured_at` fails if that is
    # attempted silently: re-measure at the new frequency, then move the pin and this note in the same change.
-   # THE NUMBER IS 12, MEASURED, NOT REASONED. The first draft was 5, priced by ratio off Regent (13 Block off a
-   # 2-cost finisher, so ~5 off a 1-cost summon). That measured as a TRAP PICK — priest run winrate 5.8% with no
-   # card at all vs 3.8% with it, i.e. drafting it made her worse. Bracket at 500 runs/plan --realistic:
-   # ward 5 -> priest 3.8% / commander 5.4%; ward 8 -> 4.8% / 5.8%; ward 12 -> 6.2% / 5.8% (no-card baseline
-   # 5.8% / 6.0%). The ratio had to go UP for the cheaper trigger, not down: Regent's finisher gets played
+   # THE NUMBER IS 12, MEASURED, NOT REASONED. The first draft was 5, priced by ratio off Regent (13 Block off a (lint-ok: ward-bracket measurement)
+   # 2-cost finisher, so ~5 off a 1-cost summon). That measured as a TRAP PICK — priest run winrate 5.8% with no (lint-ok: ward-bracket measurement)
+   # card at all vs 3.8% with it, i.e. drafting it made her worse. Bracket at 500 runs/plan --realistic: (lint-ok: run count + winrates)
+   # ward 5 -> priest 3.8% / commander 5.4%; ward 8 -> 4.8% / 5.8%; ward 12 -> 6.2% / 5.8% (no-card baseline (lint-ok: ward-bracket measurement)
+   # 5.8% / 6.0%). The ratio had to go UP for the cheaper trigger, not down: Regent's finisher gets played (lint-ok: ward-bracket winrates)
    # reliably, while Bake-Kurage is ONE copy in a growing deck that pulses ONCE per play at duration 1. Correct
    # for frequency and you land back on essentially the Regent number.
    # [USER] WATCHLIST (2026-07-26): "I feel like that's too strong, but we can rebalance later." Shipped at 12
@@ -265,7 +265,7 @@
    # The third face of the common conscript: notice replaces itself, to_the_front is free, this one is armoured.
 - {id: signal_arrow, name: "Signal Arrow", cost: 1, type: attack, rarity: common, solve: [frontload, utility], archetypes: [commander], role: glue,
    effects: [{op: damage, amount: 5, target: enemy}, {op: conscript, amount: 1}]}
-   # The shot that calls the muster: a real swing that is also an order. Under pulsing_current's 7 because the
+   # The shot that calls the muster: a real swing that is also an order. Under pulsing_current's 7 because the (lint-ok: sibling card's number)
    # muster is worth more than the premium point it trades away.
 - {id: shoulder_to_shoulder, name: "Shoulder to Shoulder", cost: 1, type: skill, rarity: common, solve: [utility, scaling], archetypes: [commander], role: payoff,
    effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: copy_companion_in_hand, amount: 1}]}
@@ -278,9 +278,9 @@
    effects: [{op: damage, amount: 8, target: all_enemies}]}
    # The self-consuming wave: waterspout's grammar aimed wide. Its burn is itself a Charge, which is the whole
    # priest bargain in one card.
-   # R77 (Neap Tide v2.1) CONFIRMED this card unchanged: 8 (11 upgraded), Exhaust stays. Recorded rather than
+   # R77 (Neap Tide v2.1) CONFIRMED this card unchanged: 8 (11 upgraded), Exhaust stays. Recorded rather than (lint-ok: upgrade value)
    # left silent, because "confirmed" and "nobody looked" are indistinguishable a month later.
-   # The old note priced it "ABOVE surging_shoal's 7 by one point" — that gap is now 2 (shoal is 6 per R77),
+   # The old note priced it "ABOVE surging_shoal's 7 by one point" — that gap is now 2 (shoal is 6 per R77), (lint-ok: quoted superseded note, corrected in the same line)
    # and the pricing sentence is struck rather than re-derived: the ratified numbers are 6 and 8, and inventing
    # a fresh justification for a gap nobody ruled on would be reasoning backwards from the answer.
 - {id: pearl_diver, name: "Pearl Diver", cost: 0, type: skill, rarity: common, solve: [scaling], archetypes: [priest], role: enabler,
@@ -305,7 +305,7 @@
    # not a read: nothing here scales off the bank, so §2.2's rate limits do not apply.
 - {id: scattering_spray, name: "Scattering Spray", cost: 1, type: attack, rarity: common, solve: [frontload, velocity], archetypes: [assist, generic], role: glue,
    effects: [{op: damage, amount: 5, target: all_enemies}, {op: discard, amount: 1}, {op: draw, amount: 1}]}
-   # The assist lane's own AoE: less than surging_shoal's 7, and it churns. The draw is not decoration — without
+   # The assist lane's own AoE: less than surging_shoal's 6, and it churns. The draw is not decoration — without (lint-ok: sibling card's number)
    # it this is strictly worse than the shoal at the same cost, which the domination lint would (rightly) call.
 # Assist, F4 BRIDGE (+2 — the ratified Sly-lane direction, first rows to land)
 # THE GAP F4 CLOSES, stated once for all three bridge rows. Her Charge and Burst meters BOTH pay on the
@@ -328,7 +328,7 @@
    # It is also the only expressible shape — an unfiltered RANDOM exhaust_from has no C# path (the any-card
    # pool was never built; see the codegen guard), so a random version would be sim-only and unshippable.
    # LAW 4: nothing is created (a discard moves a card, an exhaust removes one from combat, neither touches
-   # deck size), so the Common net delta is 0. LAW 5: no economy rider — the exhaust is the payment, not a
+   # deck size), so the Common net delta is 0. LAW 5: no economy rider — the exhaust is the payment, not a (lint-ok: law number, not a value)
    # draw or an energy stapled to one.
 - {id: salt_line, name: "Salt Line", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [assist, generic], role: glue,
    sly: [{op: exhaust_from, amount: 1, select: chosen}],
@@ -365,7 +365,7 @@
 - {id: all_streams_flow, name: "All Streams Flow to the Sea", cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling], archetypes: [priest, generic], role: payoff,
    effects: [{op: damage, amount: 5, target: enemy, bonus_formula: 1_per_2_charge}]}
    # The sub-Rare reader: 5 + 1 per 2 Charge, single target, repeatable. At a node-4 bank of ~10 it is a 10-point
-   # swing; at a priest-median 24 it is 17 — act-appropriate at both ends. Bounded by fuel (Charge costs cards),
+   # swing; at a priest-median 24 it is 17 — act-appropriate at both ends. Bounded by fuel (Charge costs cards), (lint-ok: priest-median worked example)
    # single-target (the AoE reads stay Rare/kit), and the Rare nuke keeps its premium by hitting ALL enemies.
 # Commander (3)
 - {id: mass_mobilization, name: "Rally the Isles", cost: 2, type: skill, rarity: uncommon, solve: [utility, scaling], archetypes: [commander], role: enabler,
@@ -485,13 +485,13 @@
    # F4's third bridge row, and the one that closes the loop: the payoff that READS the pile the lane has been
    # filling. Every other exhaust-pile scaler she owns is priest or generic (cleansing_tide, epiphany_of_the_
    # deep) — the assist lane fed that pile and had nothing that looked at it.
-   # THE SLY RIDER IS ENERGY, and that is a LAW 5 statement rather than a number. R79 hands the card/energy
+   # THE SLY RIDER IS ENERGY, and that is a LAW 5 statement rather than a number. R79 hands the card/energy (lint-ok: law number, not a value)
    # economy to Discard/Sly as a MONOPOLY, and nothing on this sheet had actually exercised the energy half of
    # it: moonlit_offering pays energy as a Rare AND self-Exhaust, i.e. under the law's one narrow exception,
    # not under the rule. This is the rule. Discarded, the card gives the turn back.
-   # PRICING, PROPOSED. base 4 is under driftglass's aimed 8 on purpose — this card is bought for its slope,
+   # PRICING, PROPOSED. base 4 is under driftglass's aimed 8 on purpose — this card is bought for its slope, (lint-ok: sibling card's number)
    # and a card that is also the best turn-one attack in the lane makes the slope free. +1 per exhausted card
-   # matches cleansing_tide's per-term at one rarity lower base (5), which is the intended read: same engine,
+   # matches cleansing_tide's per-term at one rarity lower base (5), which is the intended read: same engine, (lint-ok: sibling card's number)
    # earlier, smaller.
    # NOT A DOMINATION PAIR with driftglass: driftglass is larger on an empty pile and its bell is damage; this
    # is larger on a full one and its bell is tempo. They cross somewhere around four exhausted cards, which is
@@ -518,25 +518,25 @@
    # window her attacks then read Charge through; the splash was a second, unrelated payment stapled to the
    # front of it, and it let the Burst read as a damage button rather than as a state. burst_max UNTOUCHED --
    # the meter still fills at the same rate, so this is a payout change, not an economy one.
-   # The old "entry splash 5 -> 7 (clears Skittish 6)" justification is doubly dead: the card no longer has a
+   # The old "entry splash 5 -> 7 (clears Skittish 6)" justification is doubly dead: the card no longer has a (lint-ok: quoted dead justification)
    # splash, AND the Skittish reading it rested on was wrong (see the B1 errata on surging_shoal).
    # HER BURST (kit, v1.9: granted on charge, Retain, never in pool) — SHAPE B, the kickoff recommendation: enter
    # the state for 3 turns (CEREMONIAL_GARMENT_TURNS; test-pinned to the constant); while it holds, her attack
    # cards read Charge (+1 damage per GARMENT_CHARGE_DIVISOR=2 Charge, per play — v0.3 charge-curve pass: /4 was
-   # decoration, /2 makes a priest-median bank a Burst-tier window). Entry splash 5 -> 7 (clears Skittish 6).
+   # decoration, /2 makes a priest-median bank a Burst-tier window). Entry splash 5 -> 7 (clears Skittish 6). (lint-ok: v0.3 history)
    # Cost 0: the charged meter IS the cost (Klee/Furina precedent). Meter 10 (v0.3, PROPOSED — the pass's
    # decisive lever, grid in sheetpass report §6): a FAST-CYCLING Burst, her Salon-member analogue. Particles:
-   # skill tags (5), reactions (5), exhaust events (KOKOMI_BURST_PER_EXHAUST=2). Two bake plays fill it.
+   # skill tags (5), reactions (5), exhaust events (KOKOMI_BURST_PER_EXHAUST=2). Two bake plays fill it. (lint-ok: engine constants, not this row)
    # FINISHER SHAPE IS RULING ASK 6: this roster ships the recommended both-with-capstone world (state as kit,
    # nuke as rate-limited Rare below) so the early sims can inform the ruling, not preempt it.
 - {id: nereids_ascension, name: "Nereid's Ascension", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [priest, generic], role: payoff, exhaust: true,
    effects: [{op: damage, amount: 12, target: all_enemies, bonus_formula: 1_per_2_charge}]}
    # SHAPE A as the state's capstone: one great wave reading the meter (+1 per 2 Charge, to ALL). Every §2.2
-   # rate limit ships: Rare, Exhaust (which is itself one more Charge), cost 2. At a banked 20 Charge: 20-to-all,
+   # rate limit ships: Rare, Exhaust (which is itself one more Charge), cost 2. At a banked 20 Charge: 20-to-all, (lint-ok: banked-Charge worked example)
    # once. The multiplicative-read risk lives HERE and only here — watchlist cell in the report.
 - {id: sango_prayer, name: "Sango Prayer", cost: 1, type: skill, rarity: rare, solve: [sustain, utility], archetypes: [priest, generic], role: payoff, exhaust: true,
    effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies}, {op: block, amount: 5}]}
-   # R52 REWORK (ask 1: the v0.1 heal-12 is GONE — no amendment taken, none planned; "make her rares pay off a
+   # R52 REWORK (ask 1: the v0.1 heal-12 is GONE — no amendment taken, none planned; "make her rares pay off a (lint-ok: removed v0.1 value, on record)
    # different way"). The prayer now stills the spears: Weak 2 to ALL + a moment's calm. R51 texture verbatim —
    # a debuff earned on an Exhaust piece (Rare, one cast per fight, and its burn is itself a Charge), NOT a
    # spammable cheap AoE weaken. Same sustain fantasy, zero HP restored: the axis it feeds is the stability band.
@@ -554,7 +554,7 @@
    # nobody here is fuel. This comment is the marked example the sweep was written against.
 - {id: depths_judgment, name: "Sango Isshin", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [priest], role: payoff,
    effects: [{op: damage, amount_formula: {base: 10, per: 2, count: exhaust_pile}, target: enemy}]}
-   # The pile-reader's ceiling: 8 + 2 per exhausted card, single target, REPEATABLE — bounded by the fight's
+   # The pile-reader's ceiling: 10 + 2 per exhausted card, single target, REPEATABLE — bounded by the fight's
    # finite fuel rather than the uncapped meter (deliberate §2.1 anti-stall geometry). Watchlist with Nereid's.
 - {id: epiphany_of_the_deep, name: "Song of Pearls", cost: 2, type: power, rarity: rare, solve: [velocity, scaling], archetypes: [priest, assist], role: payoff,
    effects: [{op: apply_power, power: dark_embrace, amount: 1, target: self}]}
@@ -562,6 +562,6 @@
    # priced at the base game's rare rate for exactly that reason.
 - {id: prayer_to_the_moon, name: "Prayer to the Moon", cost: 1, type: skill, rarity: rare, solve: [scaling, block], archetypes: [priest, generic], role: payoff, exhaust: true,
    effects: [{op: gain_charge, amount: 7}, {op: block, amount: 4}]}
-   # The pure offering: one card, eight Charge (7 line + 1 funnel) and a moment's calm. The meter's rare
+   # The pure offering: one card, eight Charge (7 line + 1 funnel) and a moment's calm. The meter's rare (lint-ok: 7 line + 1 funnel arithmetic)
    # accelerant. v0.3: 4 -> 7 — the v0.2 audit found this RARE generating less meter than the benchmark
    # COMMON Forges; a rare accelerant must out-accelerate a common by more than politeness.
