@@ -364,15 +364,45 @@ which is why no test covers the entry point validate gates on);
 
 ## 7. Repo/policy items (need [USER], not code)
 
-1. **Tier F art is in the public repo.** `docs/klee-art-hunt-contactsheet.png`
-   (21 cells of sourced Genshin art, GENSHIN IMPACT/Cognosphere watermarks
-   visible) and `docs/animation-sprint-2-a3-intake.png` (two full HoYoverse
-   Furina renders) are committed under `docs/` — the same content class
-   `.gitignore` blocks by path (`art/candidates/`, contact sheets) with the
-   comment "repo is public." Verified: the GitHub repo is public. Removal
-   requires history rewrite (BFG/filter-repo + force push), not just
-   `git rm`; the third PNG (`animation-sprint-1-a4-gate.png`, an in-game
-   screenshot) is a judgment call.
+1. **Tier F art was in the public repo — REMEDIATED 2026-07-26.**
+   `docs/klee-art-hunt-contactsheet.png` (21 cells of sourced Genshin art,
+   GENSHIN IMPACT/Cognosphere watermarks visible) and
+   `docs/animation-sprint-2-a3-intake.png` (two full HoYoverse Furina
+   renders) were committed under `docs/` — the same content class
+   `.gitignore` blocks by path with the comment "repo is public."
+   **[USER]-ruled removal, executed this session:** both files purged from
+   the entire history via `git filter-repo --invert-paths`; `main` and the
+   working branch force-pushed with the rewritten history. The third PNG
+   (`docs/animation-sprint-1-a4-gate.png`, an in-game screenshot of the mod
+   running) was ruled distinct and retained. Residual caveats, standard for
+   any history rewrite: (a) GitHub may serve the old commits by SHA until
+   its garbage collection runs — a support ticket can force it if urgency
+   warrants; (b) any existing local clone still holds the old objects and
+   should be re-cloned, not pulled; (c) there were no forks or open PRs at
+   rewrite time (verified: forks_count 0).
+
+   **SHA translation.** The rewrite renumbered every commit after the first
+   PNG landed. Docs and DECISIONS cite short SHAs extensively; those
+   citations refer to the pre-rewrite history. Translation for all 41
+   doc-cited commits (old → new; two early ones unchanged):
+
+   | | | | |
+   |---|---|---|---|
+   | `0076b7b`→`cef61e1` | `0b33ffd`→`d0b4c1b` | `102e99a`→`7b02cb2` | `15fc78f`→`d1083cf` |
+   | `1752836`→`7b7c835` | `1afee5d`→`e5c8c31` | `22b6d86`→`1442afc` | `26fe7c9`→`cdd2aff` |
+   | `329c1a7`→`805ca9f` | `364acf0`→`f9dcccf` | `40b0884`→`3ba78d3` | `41cab5a`→`0514242` |
+   | `477b282`→`388d838` | `4ce3b87`→`bb511d0` | `5828cd0`→`e727c25` | `5e631f0`→`88f7ec3` |
+   | `68fb11b`→`e4f8e3b` | `6af7a71`→`55763ee` | `6d75d37`→`3c0cdff` | `6f1b969`→`cf9dcc1` |
+   | `7260590`→`64024aa` | `7480847`→`9528214` | `750a9cc`→`a2ee535` | `7c53c31`→`a10d2e5` |
+   | `81ba9d5`→`2613a44` | `90c9b58`→`1251f42` | `94c8e91`→`16599b4` | `a1bca0d`→`0ef3105` |
+   | `a23d87f`→`9db3805` | `a879ffe`→`a0aa716` | `bc02b76`→`b99b689` | `bc8995f`→`61ff723` |
+   | `db06d8c`→`f49aa66` | `e263577`→`37dacee` | `e307ad2`→`fe59287` | `e3852e7`→`2f3b10d` |
+   | `e80f955`→`5d9477c` | `ebcf1b2`→`72fea95` | `f032cf1`→`5337995` | `587a902`, `915dd0e` unchanged |
+
+   The doc texts themselves were left as written (they are records); read
+   their SHA citations through this table. The deployed-pck stamp
+   `20260725-175515+e263577` in `open-playtest-items.md` likewise refers to
+   pre-rewrite `e263577` = post-rewrite `37dacee`.
 2. **Manifest version policy** (§3.6) — decide the bump discipline (per
    deploy? per handoff?) and whether deploy should enforce it.
 3. **35 stale sheet comments** (§3.8) — a reviewed comment-fix pass over

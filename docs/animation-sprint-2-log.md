@@ -51,7 +51,9 @@ Status: **COMPLETE.**
   **`art/raw/Salon_Members_Summon.png` (420×720)** — top-hatted octopus
   (Usher), ruffed seahorse (Chevalmarin), big crab (Crabaletta).
   - [USER] pick 2026-07-24 (contact sheet
-    `docs/animation-sprint-2-a3-intake.png`): **cut that into three
+    `docs/animation-sprint-2-a3-intake.png` — *file removed from the repo and
+    its history 2026-07-26: Tier F content in a public repo, per §9 policy;
+    the pick itself stands as recorded here*): **cut that into three
     freestanding silhouettes.** No frames, no square crops.
   - Recorded for contrast, because it is the D4 failure in one line: what
     ships today is three 500×380 *gameplay screenshots* — a figure on a sand
