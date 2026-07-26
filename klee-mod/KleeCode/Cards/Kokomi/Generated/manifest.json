@@ -7,8 +7,8 @@
     "namespace": "KleeMod.Cards.Kokomi.Generated"
   },
   "coverage": {
-    "total": 58,
-    "generated": 57,
+    "total": 61,
+    "generated": 60,
     "blocked": 1
   },
   "generated": [
@@ -23,6 +23,7 @@
     "driftglass",
     "drifting_lantern",
     "driftwood_charm",
+    "ebb_tide",
     "epiphany_of_the_deep",
     "exposing_current",
     "field_promotion",
@@ -46,6 +47,7 @@
     "rearguard_action",
     "reinforcements",
     "ritual_purification",
+    "salt_line",
     "sango_prayer",
     "scattering_spray",
     "shell_of_sanctuary",
@@ -62,6 +64,7 @@
     "tideline_watch",
     "tideturn",
     "to_the_front",
+    "undertow",
     "undertow_shuffle",
     "vigil_of_the_deep",
     "votive_offering",

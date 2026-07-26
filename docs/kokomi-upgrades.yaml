@@ -76,6 +76,15 @@ tideline_watch:    {block_next_turn: +4} # 8->12 next turn; the exhaust stays ex
 whispered_word:    {block: +3}           # played 3->6; the Sly draw stays 1 (header gap note)
 driftwood_charm:   {block: +3}           # played 3->6; the Sly Charge stays 2 (resource-curve law + gap note)
 scattering_spray:  {damage: +2}          # 5->7 all; the churn (discard 1 / draw 1) is the identity and holds
+# --- F4 Sly-lane bridge (Neap Tide addendum) ---
+ebb_tide:          {exhaust: +1}         # exhaust 1 -> 2 CHOSEN cards, discard stays 1. The upgrade sells more
+                                         # ENGINE, not more tempo: it is the conversion rate that scales, which
+                                         # is the only thing this card was ever bought for. (Expressible only
+                                         # because the branch is `chosen` -- the random branch has no C# path
+                                         # at amount > 1; see the codegen guard.)
+salt_line:         {block: +3}           # played 5->8; the Sly exhaust stays 1 (header gap note). The BELL is
+                                         # the identity and the wall is the filler, so the filler is what grows
+                                         # -- same call drifting_lantern and quiet_harbor already made.
 slack_water:       {block: +3}           # 4+4 -> 7+4: the half you can rely on is the half that grows.
                                          # (Keyed `slack_water`, not the drafted `ebb_and_flow` — Furina owns
                                          # that id, and the upgrade index is GLOBAL across sheets, so the
@@ -106,6 +115,11 @@ read_the_current:  {damage: +3}          # the ALWAYS-LIVE half, 7->10 (so 13->1
                                          # also the honest sale: it pays on turn 1, not only after node 4.
 quiet_harbor:      {block: +3}           # played 6->9; the Sly draw stays 2 (header gap note)
 driftglass:        {damage: +3}          # played 8->11; the Sly hit stays 5 (header gap note)
+undertow:          {formula_base: +3}    # played base 4->7; the per-exhaust slope stays +1 and the Sly
+                                         # energy stays 1. Upgrading the BASE rather than the slope on purpose:
+                                         # the slope reads a pile that is uncapped and only grows (the same
+                                         # shape R80 makes dangerous on Charge), so moving it is a
+                                         # resource-curve move on an unbounded count. The base pays on turn 1.
 pearl_current:     {power_amount: +2}    # metallicize 3->5 (mercy_of_the_deep-parity slope)
 before_sun_and_moon: {power_amount: +1}  # kurage_amp 1->2. NOT the +2 pearl_current takes, deliberately:
                                          # every other power on this sheet adds a TERM, and this one moves a
