@@ -42,11 +42,20 @@ def divergence(results: list[RunResult]) -> dict:
     """
     if not results:
         return {}
-    shapes = Counter(draft.dominant_archetype(d) for d in _decks(results))
+    decks = _decks(results)
+    shapes = Counter(draft.dominant_archetype(d) for d in decks)
     n = len(results)
     dist = {s: c / n for s, c in shapes.items()}
     dominant = max(dist, key=lambda s: dist[s])
-    starved = {a: dist.get(a, 0.0) for a in draft.ARCHETYPES
+    # R66 (2026-07-26): key the starvation check on THIS COHORT'S archetype
+    # family, not on the module-level ARCHETYPES -- which is Klee's. Read
+    # against Klee's three, a Furina or Kokomi run could never populate any of
+    # them, so every single archetype scored 0.0 and the alarm fired on every
+    # run. That is a spurious alarm for every non-Klee character, not a Kokomi
+    # special case, which is why it is fixed generally rather than by adding
+    # her names to a list.
+    family = draft.archetypes_for([c for d in decks for c in d])
+    starved = {a: dist.get(a, 0.0) for a in family
                if dist.get(a, 0.0) < C.DIVERGENCE_STARVATION_ALARM}
     return {
         "runs": n,

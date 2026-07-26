@@ -3,7 +3,7 @@
   "name": "Teyvat Spire Roster",
   "author": "Monty",
   "description": "Playable Genshin roster for Slay the Spire 2. Includes Klee, Furina, elemental reactions, and Companion cards.",
-  "version": "0.2.0",
+  "version": "0.2",
   "has_dll": true,
   "has_pck": true,
   "min_game_version": "0.107.1",

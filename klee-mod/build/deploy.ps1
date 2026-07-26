@@ -32,7 +32,12 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# R70 manifest version policy (MAJOR-AUTO). Shared with validate.ps1 so the
+# deploy-time stamp and the gate that checks it cannot compute it differently.
+. (Join-Path $PSScriptRoot 'version.ps1')
+
 $root       = Split-Path -Parent $PSScriptRoot
+$repoRoot   = Split-Path -Parent $root
 $csproj     = Join-Path $root 'KleeCode\KleeCode.csproj'
 $packageDir = Join-Path $root 'Klee'   # NOT $package: collides with the -Package switch
 $stage      = Join-Path $root 'dist\klee'
@@ -69,6 +74,37 @@ if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $stage | Out-Null
 Copy-Item (Join-Path $packageDir 'manifest.json') -Destination $stage
 Copy-Item $dll -Destination $stage
+
+# R70: stamp MAJOR-AUTO into the STAGED manifest. MAJOR is the deliberate half
+# and stays exactly as committed; AUTO is the commit count, generated here.
+# The source manifest is never written to -- it is a ratified artifact.
+$version = Get-PackageVersion `
+    -SourceManifest (Join-Path $packageDir 'manifest.json') -RepoRoot $repoRoot
+$stagedManifest = Join-Path $stage 'manifest.json'
+$sm = Get-Content $stagedManifest -Raw | ConvertFrom-Json
+$sm.version = $version.Version
+# -Depth matters: the default of 2 flattens the dependencies array into type
+# names and would ship a manifest whose BaseLib dependency reads as a string.
+($sm | ConvertTo-Json -Depth 10) | Set-Content $stagedManifest -Encoding utf8
+Write-Host "Stamped package version $($version.Version)" -ForegroundColor Cyan
+
+if ($version.IsDirty) {
+    # Loud, and deliberately not fatal: building from a dirty tree is a normal
+    # part of iterating locally. What must never happen is that build reaching
+    # a co-op partner, because the commit count no longer identifies its
+    # contents -- two "+dirty" zips can share a name and differ.
+    Write-Host ""
+    Write-Host "*** DIRTY WORKING TREE ***" -ForegroundColor Red
+    Write-Host ("  $($version.DirtyFiles.Count) uncommitted change(s); version stamped +dirty.") -ForegroundColor Red
+    Write-Host "  DO NOT hand this build to a co-op partner. Commit first, then rebuild." -ForegroundColor Red
+    foreach ($f in ($version.DirtyFiles | Select-Object -First 10)) {
+        Write-Host "    $f" -ForegroundColor DarkYellow
+    }
+    if ($version.DirtyFiles.Count -gt 10) {
+        Write-Host ("    ... and " + ($version.DirtyFiles.Count - 10) + " more") -ForegroundColor DarkYellow
+    }
+    Write-Host ""
+}
 
 # Card art ships as loose PNGs next to the dll -- no .pck needed, because
 # BaseLib's CustomPortrait accepts a Texture2D object we build at runtime.
@@ -146,7 +182,21 @@ if ($Package) {
         throw "manifest.json has no version; refusing to build an unstamped handoff zip."
     }
     $zip = Join-Path $root ("dist\klee-v" + $manifest.version + ".zip")
-    if (Test-Path $zip) { Remove-Item $zip -Force }
+
+    # R70: REFUSE to overwrite. Deploy used to Remove-Item this silently, and
+    # with a version that had not moved in 134 commits that meant every zip
+    # quietly replaced a different build wearing the same name.
+    #
+    # With AUTO in the name this can only fire on a same-commit rebuild --
+    # which is exactly the case where two zips can share a name and differ
+    # (uncommitted changes), so refusing is correct rather than inconvenient.
+    # Commit, or delete the old zip on purpose.
+    if (Test-Path $zip) {
+        throw ("refusing to overwrite an existing handoff zip: $zip`n" +
+               "  Same commit, same name, possibly different contents -- which is the " +
+               "desync this version scheme exists to prevent.`n" +
+               "  Commit your changes (AUTO advances), or delete that zip deliberately.")
+    }
 
     Write-Host "Packaging $zip" -ForegroundColor Cyan
     # -Path on the stage DIRECTORY keeps klee\ as the archive root, so
@@ -158,7 +208,14 @@ if ($Package) {
     $dep = $manifest.dependencies | Where-Object { $_.id -eq 'BaseLib' }
     Write-Host "Handoff notes: extract into '<game>\mods\' (lands as mods\klee\)." -ForegroundColor Yellow
     Write-Host ("  Recipients also need BaseLib >= " + $dep.min_version + " (Steam Workshop) and game >= " + $manifest.min_game_version + ".") -ForegroundColor Yellow
-    Write-Host "  Co-op peers must all run THIS zip -- bump manifest version before each handoff." -ForegroundColor Yellow
+    # R70: "bump the version before each handoff" is no longer a discipline
+    # anyone has to remember -- AUTO advances with every commit. What the
+    # recipient needs is the identity, and whether it is trustworthy.
+    Write-Host ("  Co-op peers must all run THIS build: version " + $manifest.version + ".") -ForegroundColor Yellow
+    Write-Host "  Versions compare: the higher AUTO (the part after '-') is the newer build." -ForegroundColor Yellow
+    if ($version.IsDirty) {
+        Write-Host "  *** +dirty: built from uncommitted changes. NOT for handoff. ***" -ForegroundColor Red
+    }
 }
 
 if ($running) {

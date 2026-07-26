@@ -39,6 +39,15 @@ from __future__ import annotations
 import random
 from collections import Counter
 
+import sys
+from pathlib import Path
+
+# ARCHIVED (R68, 2026-07-26): moved here from tier05/, so the package root is
+# two levels up rather than on the path already. Archived scripts keep their
+# own hand-rolled configuration as a historical record -- R68's canonical Cell
+# governs anything run from today forward, not this.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+
 from tier0 import constants as C
 from tier0.content import loader
 from tier05 import rewards

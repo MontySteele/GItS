@@ -193,7 +193,7 @@ def test_gorget_grants_plating_at_start():
     assert st_no.player.powers.get("plating", 0) == 0
 
 
-# --- Touch of Orobas -> Explosive Frags: Klee's opening Spark bank -----------
+# --- Touch of Orobas -> Dodoco Tales: Klee's opening Spark bank -------------
 
 def test_combat_start_spark_banks_the_windfall():
     st = make_state()

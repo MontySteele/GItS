@@ -147,6 +147,23 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
 
 def _splash(state: CombatState, enemy: Enemy, amount: int) -> None:
     """Reaction splash damage: not element-tagged, ignores block per v1
-    simplicity (applied equally to everyone — spec §1 non-goals)."""
+    simplicity (applied equally to everyone — spec §1 non-goals).
+
+    OVERKILL IS CLAMPED OUT OF THE EMITTED AMOUNT (audit 2026-07-26 §1.7,
+    fixed in EPOCH 1). The canonical path in effects.deal_damage_to_enemy
+    has always clamped -- `effective = min(hp_dmg, max(0, enemy.hp))` -- and
+    this path did not, so 8 splash into a 3 HP swarm add credited 8 to
+    `total_damage_dealt` instead of 3.
+
+    That is not a rounding issue: A6 is a ratified elite axis, it is summed
+    from these emitted amounts, and the over-read scaled with the number of
+    small adds a hit could spill over. So it over-read hardest for exactly
+    the reaction archetypes A6 exists to grade, and the same events feed
+    `reaction_damage_share`.
+
+    HP still takes the full unclamped hit; only the accounting is clamped.
+    """
+    effective = min(amount, max(0, enemy.hp))
     enemy.hp -= amount
-    state.emit("damage", target=enemy.name, amount=amount, source="reaction_splash")
+    state.emit("damage", target=enemy.name, amount=effective,
+               source="reaction_splash")

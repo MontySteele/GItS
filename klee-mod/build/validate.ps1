@@ -28,6 +28,11 @@ $ErrorActionPreference = 'Stop'
 $findings = New-Object System.Collections.Generic.List[string]
 function Fail($rule, $detail) { $findings.Add("[$rule] $detail") | Out-Null }
 
+# R70 manifest version policy (MAJOR-AUTO), shared with deploy.ps1 so the
+# stamp and the gate that checks it cannot compute it differently. Also
+# supplies Read-JsonFile (BOM-tolerant) and ConvertTo-ComparableVersion.
+. (Join-Path $PSScriptRoot 'version.ps1')
+
 # ---------------------------------------------------------------------------
 # S1. No stray *.json in the staged package.
 #
@@ -106,17 +111,30 @@ if (-not (Test-Path $manifestPath)) {
             try {
                 # These files are UTF-8 with BOM; PS 5.1 leaves the BOM in the
                 # string and ConvertFrom-Json chokes on it.
-                $raw = (Get-Content $j.FullName -Raw) -replace "^\xEF\xBB\xBF|^﻿", ''   # ascii-exempt: the pattern matches a literal BOM
-                $id = ($raw | ConvertFrom-Json).id
-                if ($id) { $installed[$id] = $j.FullName }
+                $doc = Read-JsonFile $j.FullName
+                if ($doc.id) { $installed[$doc.id] = $doc }
             } catch { }
         }
     }
 
-    foreach ($dep in @($m.dependencies)) {
-        if (-not $dep) { continue }
-        if (-not $installed.ContainsKey($dep.id)) {
-            Fail 'S3' "declared dependency '$($dep.id)' is not installed; the game will skip this mod entirely. Found: $($installed.Keys -join ', ')"
+    # R70 (audit 3.5 + 3.6). Dependency min_version, min_game_version and the
+    # staged manifest version are all COMPARED here, not merely asserted
+    # present. The comparisons live in version.ps1's Test-VersionPolicy so
+    # they are unit-testable: validate.ps1 as a whole cannot be run quickly
+    # (S7's game_ref verification takes minutes), and a gate nobody can
+    # afford to run is the failure class this ruling is closing.
+    $expected = Get-PackageVersion `
+        -SourceManifest (Join-Path (Split-Path -Parent $PSScriptRoot) 'Klee\manifest.json') `
+        -RepoRoot (Get-RepoRoot)
+    foreach ($finding in (Test-VersionPolicy `
+                -Manifest $m `
+                -Installed $installed `
+                -GameVersion (Get-InstalledGameVersion $GameDir) `
+                -Expected $expected.Version)) {
+        if ($finding -like 'WARN:*') {
+            Write-Host "  [S3] $($finding.Substring(5).Trim())" -ForegroundColor Yellow
+        } else {
+            Fail 'S3' $finding
         }
     }
 }

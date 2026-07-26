@@ -1,9 +1,27 @@
-# Card names taken by content OUTSIDE this repo -- base game and other
-# installed mods. The repo can't see those card lists, so this file is the
-# hand-maintained record of known external collisions. A mod card whose
-# name appears here fails lint_unique_names.py. Format: Name | source
+# Player-facing names that may not be minted (again) in this repo.
 #
-# USER-CONFIRMED collisions:
+# Two kinds of entry live here, and lint_unique_names.py treats them
+# differently.
+#
+# 1. EXTERNAL collisions -- names taken by content outside this repo: the
+#    base game and other installed mods. The repo can't see those card
+#    lists, so this file is the hand-maintained record of known external
+#    collisions. Any object whose name appears here fails the lint.
+#    Format: Name | source
+#
+# 2. SETTLED INTERNAL collisions (R69, 2026-07-26) -- both sides of a
+#    card/relic name clash that has been ruled on, annotated with the kind
+#    that OWNS the name. An entry marked "card-owned" is reserved against
+#    relics but not against the card legitimately holding it, and vice
+#    versa. This is what stops a settled collision from re-forming from the
+#    other direction later: the loser's old name is burned for the winner's
+#    kind, and the winner's name is fenced off from the other kind.
+#
+# USER-CONFIRMED external collisions:
 Grand Finale | base game / Downfall Silent (user-flagged 2026-07-21)
+#
+# Settled card/relic collisions (R69, 2026-07-26):
+Explosive Frags | card-owned (Klee Rare Power, docs/klee-cards.yaml:193) -- R69 renamed the colliding Orobas relic upgrade to Dodoco Tales; this name may not return to a relic
+Dodoco Tales | relic-owned (Klee's Orobas starter upgrade, UpgradedStarterRelics.cs) -- R69; may not be minted as a card
 #
 # Add more as they're found in playtest or cross-mod testing.

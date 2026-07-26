@@ -195,6 +195,12 @@ the game running.
   all); the colorless 1.15× surcharge companions do not collect; Track A's pool
   migration.
 - **Kokomi kickoff §202:** Raiden Shogun's disposition.
+- **Kaboom Beetle Swarm's printed text, after R72** (2026-07-26). The bonus
+  now snapshots bombed-state at cast, so an enemy whose bombs hit 1 detonated
+  keeps paying the +3 on hits 2–3 — but the card still reads "*Bombed enemies
+  take X more per hit*", which a player will read as live state. R72 item 4
+  flags this rather than fixing it: the sheet is ratified, so the rewording
+  needs your countersign. Nothing mechanical rides on it.
 
 ### 6.3 Known gaps, no action requested
 

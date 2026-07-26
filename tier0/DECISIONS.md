@@ -1965,3 +1965,460 @@ The separation is now asserted directly rather than vacuously. The test that
 covered it used to assert Fontaine's 5-star roster was EMPTY, which proved the
 exclusion only because no shared Rares existed; it would have stayed green if a
 guest leaked the moment real Rares landed.
+
+## R66 -- Kokomi archetype vocabulary: the sheet is canonical (2026-07-26)
+
+The canonical archetype vocabulary for Kokomi is the ratified sheet's:
+**priest / commander / assist**, plus `generic` as the non-archetype filler
+tag, matching the Klee and Furina conventions. The `("garment", "ward",
+"conscript")` tuple in `tier05/draft.py` was an orphan: it matched ZERO
+cards, predated the v0.2 sheet pass, and its `conscript` term had already
+been retired independently by the lore pass (muster/rally/enlist).
+
+Two registries in one repo disagreed about her vocabulary. The sheet wins.
+
+**What the mismatch cost, and why it was invisible.** `dominant_archetype()`
+returned `goodstuff` for every Kokomi deck ever built. Adaptive (free-draft)
+Kokomi therefore scored plans as pure static power with no synergy term at
+all, and shop/rest/event plans degraded the same way. None of that crashed,
+failed a test, or looked wrong in a report: it produced numbers that were
+indistinguishable from correct numbers.
+
+This is the SECOND time this exact defect has been fixed. POLICY_VERSION 2
+(G-E3) existed to remove it for Furina, and it left Kokomi's entry naming
+three tags that did not exist -- so she kept the defect the bump was written
+to remove. The general lesson is now a test:
+`test_every_registered_archetype_exists_on_a_real_card` checks every
+character's tuple against the tags actually carried by cards in her pool.
+
+**Scope of the fix.** `draft.py`'s tuple; `dominant_archetype`, adaptive plan
+scoring and shop/rest/event plans all self-correct with no code change once
+the tuple matches real tags. Separately, `ab.py`'s starvation alarm now keys
+on `ROSTER_ARCHETYPES[character]` rather than the module-level `ARCHETYPES`
+(Klee's) -- a latent bug for EVERY non-Klee character, not a Kokomi special
+case, so it is fixed generally.
+
+**Stamp.** POLICY_VERSION 2 -> 3. Klee's and Furina's tuples are untouched
+and their numbers do not move. Every adaptive/free-draft Kokomi number ever
+taken was measured through the broken registry and is ARCHIVED. Assigned-plan
+Kokomi numbers (the R56 battery) STAND -- they route through `runner.py`'s
+plan registry, which was always correct.
+
+**Landed as EPOCH 1**, batched with the other stamped behavior fixes (audit
+s1.7 splash clamping, s2.4 survival_profile, s1.4 Tamakushi): one commit
+group, one archive event, one re-baseline. The `_static_power` repricing
+(audit s2.5, DRAFTER 11) was deferred by [USER] to a design session and
+becomes EPOCH 2 when ruled; it was deliberately NOT waited on.
+
+**Pre-registered predictions, graded 1 of 3.** Full record in
+`docs/epoch-1-log-2026-07-26.md`; the summary is that the ruling was right
+and two of its three predictions were wrong.
+
+- **P1 (spurious starvation alarms -> exactly zero): FAIL as written.** The
+  spurious ones did vanish -- `garment/ward/conscript` were unfalsifiable,
+  since tags no card carries can never reach the 10% floor. What replaced
+  them is a REAL signal at the same threshold: `commander` 2.8%, `assist`
+  8.5%. The instrument went from "always fires, means nothing" to "fires,
+  and means something", and the prediction assumed the alarm's only content
+  was the artifact.
+- **P2 (adaptive winrate moves UP; direction committed): FAIL.** 15.8% ->
+  10.8%, i.e. -5.0pt, the wrong way. Recorded as a null-discipline result.
+  Narrow reading only: both arms score through `_static_power`, which prices
+  21.2% of her draftable pool at exactly 0.0, so this measures a synergy term
+  layered over a partly-blind pricer, not "does synergy help". The confound
+  is EPOCH 2. The fix remains correct regardless of direction -- a registry
+  naming tags no card carries is broken either way, and the pre-R66 15.8%
+  was never a number about drafting Kokomi.
+- **P3 (dominant_archetype returns priest in >=80% of runs): PASS.** 85.8%,
+  against a pre-fix 0.0%. The mechanism self-corrected exactly as ruled.
+
+Two findings fell out that belong to the pool-sweep pass, not here: the
+adaptive drafter converges on priest in 85.8% of runs (also tripping the
+0.55 dominance alarm), and `commander`/`assist` are starved as emergent
+shapes. Both are claims about her card pool.
+
+**Playtest interaction: none.** The Kokomi playtest freeze (R56 numbers ship
+untouched; the variable under test is the medium) is unaffected -- the
+playtest is real players on assigned kits, not the adaptive drafter. The sim
+re-baseline happened at the epoch landing, not before the playtest.
+
+## R67 -- Dead-knob deletion and the sweep-harness KNOB_READS gate (2026-07-26)
+
+All nine dead constants named in audit s6 are DELETED, not DEAD-KNOB-marked:
+`PROGRESSION_GAP_COMPENSATOR`, `SPOTLIGHT_SELF_MULT`,
+`FANFARE_DECAY_PER_TURN`, `SPOTLIGHT_SELECTOR_VERSION`,
+`PILOT_REGRET_SAMPLE_RATE`, `ATTRITION_LITE_HP`, `PUNISHER_LITE_SCALE`,
+`NORMAL_POOL_WEIGHTS`, `NORMAL_ATTRITION_SCALE`.
+
+The DEAD-KNOB comment marking was the correct halfway step for an audit
+session and is the wrong end state: an unreadable knob left in the file
+invites exactly the false-evidence sweeps of audit s2.1. Each deletion keeps
+its record as a tombstone comment where the constant stood -- what it was
+for, what it measured, and what is untested rather than disproved by its
+removal.
+
+Deleting `FANFARE_DECAY_PER_TURN` also removes the unreachable flat-decay
+branch in `resources._decay_amount` and the docstring assertions that argued
+for it. **The ruled world is 20% proportional, full stop.** Note that
+`FANFARE_DECAY_FRACTION` is now a RATE, not a switch: there is no "off", and
+adding an `if fraction <= 0: return 0` guard to give it one would recreate
+precisely the unreachable branch this deletes.
+
+**Sweep disposition.** The two contaminated sweep blocks are deleted with
+their knobs: `exp_furina_sheetpass.py` block C2 (`SPOTLIGHT_SELF_MULT`, three
+guaranteed-identical rows) and `exp_furina_decay.py`'s flat magnitude sweep
+(five guaranteed-identical rows). Any row sourced from either block reads as
+**instrument error, never as a null result**. This is narrower than
+invalidating those scripts' other blocks, which swept live knobs and stand.
+`exp_furina_decay`'s `prop` block loses its flat comparison cells -- the
+shape they compared against no longer exists -- and keeps its proportional
+sweep; the historical flat-vs-proportional table that decided the 20% ruling
+is preserved in the `FANFARE_DECAY_FRACTION` comment as a record.
+
+**Generalization: the third instance, so it becomes a lint (house rule).**
+The read-nothing instrument class has now appeared three times -- R33's
+selector circularity, and the two sweeps here. The KNOB_READS counter
+therefore graduates from opt-in to GATE. `tier05/sweeps.py` is the shared
+harness: it resets `effects.reset_knob_reads()` per cell and refuses loudly
+if a swept knob records zero reads, failing on the FIRST such cell rather
+than collecting a grid nobody can cite. **No sweep may be run outside the
+gated harness**, and every surviving live-knob sweep was moved onto it.
+
+R33's exercise-counter law carries over verbatim: **the gate may not be
+satisfied by adding artificial reads.** The mechanism is built so that it
+cannot be -- `tier0/constants.py` gains a PEP 562 module `__getattr__` that
+serves armed sweep values and counts each access, so what is counted is the
+real attribute read from real engine code on the real read path. A knob
+nothing reads records zero, and no amount of instrumenting the knob changes
+that. (This works because every consumer in this repo reads knobs as module
+attributes; a `from tier0.constants import X` would bind at import time and
+slip the hook. Do not introduce one.)
+
+**Class: SAFE + TESTS. No numbers move.** `tier05/tests/test_sweep_gate.py`
+carries the ruling's negative test (sweep a deliberately dead knob, assert
+refusal) plus the positive control that makes it mean anything, restoration
+on the exception path, and a pin that all nine constants are gone.
+
+## R68 -- Canonical cell object and mandatory run stamps (2026-07-26)
+
+The ratified-cell configuration -- 600 runs, seed 11, hunter, RT7 / DRAFTER
+10 / POLICY 2 / C3 -- was a sentence in a sprint doc and existed in no code
+object. It is now a frozen `Cell` dataclass in `tier05/cells.py`, the single
+source of truth for cell identity.
+
+Version fields are NOT stored: they are read from the live stamps in
+`tier0/constants.py` at call time, so the canonical cell always describes the
+world it is about to run in. R66's epoch landing moved POLICY to 3 and the
+canonical cell followed with nothing edited. A stored stamp goes stale
+silently at the next bump, which is exactly what the ghost check did to
+itself one bump after it was written.
+
+**Requirements, all landed.**
+
+- Experiment scripts construct their configuration from `Cell`, as the base
+  or as explicit `but(...)` deltas. A derived cell RENAMES itself, so its
+  stamp stops claiming to be the cell it came from.
+- The three drifted `_arm()` clones (`exp_roster_anchors`,
+  `exp_furina_ghostcheck`, `exp_free_draft_cell`) consolidate into
+  `Cell.arm()`, and the three byte-identical argument parsers wrapped around
+  them into `cells.parse_overrides`. Byte-identical when copied is how the
+  bodies drifted without anyone noticing they had.
+- Scripts resolve plan -> pilot exclusively through `runner.resolve_plan`;
+  the bypass path is gone. `Cell` validates through it at construction, so a
+  cell naming an archetype its character does not have cannot be built.
+- `print_run_report` emits a mandatory stamp line
+  (`cell=<name> seed=<s> runs=<n> RT<x>/D<y>/P<z>/C<w>`). It is a
+  keyword-only REQUIRED argument, so omitting it is a TypeError at the call
+  site rather than a slightly thinner report that reads fine and cannot be
+  checked. **A report without a stamp is not citable in a sprint doc or a
+  ruling.**
+- `exp_furina_achievability.py` (hardcoded `SCREENS = 10` from RUNTEMPLATE 2
+  -- it runs, prints numbers, and describes no world that exists) moves to
+  `tools/archive/` rather than being ported, together with its self-declared
+  siblings `exp_furina_modes.py` and `exp_furina_pass3.py`.
+
+**Class: SAFE, mechanical, zero numbers move.** Archived scripts keep their
+hand-rolled configs deliberately -- those ARE the historical record. R68
+governs anything run from today forward.
+
+## R69 -- The Orobas relic upgrade is renamed "Dodoco Tales" (2026-07-26)
+
+The Klee upgraded-starter relic that displayed as "Explosive Frags" is
+renamed **Dodoco Tales**. The Rare Power card `explosive_frags`
+(`docs/klee-cards.yaml:193`) keeps its name unchanged: the card was the prior
+arrival and the ratified sheet artifact, so the relic yields.
+
+Lore basis: Dodoco Tales is Klee's signature catalyst, which keeps the relic
+in her personal register alongside Pounding Surprise, and it still satisfies
+the base-game convention of a DISTINCT name for an upgraded starter rather
+than a "+" suffix (Burning Blood -> Black Blood).
+
+**No mechanical change of any kind rides on this ruling.** The C# TYPE is
+deliberately still `ExplosiveFrags`: relic identity is BaseLib's, not this
+repo's, so a renamed type risks moving the runtime relic id -- and in
+deterministic-lockstep co-op that is a desync, not a cosmetic diff. The
+player-facing string is what the ruling renamed and what was renamed.
+
+Red-pen Part 1 item 5's measurement table, quoted in the relic's doc comment,
+grades the same object under the new name, and the doc comment now says so
+explicitly: the +2.3 / +7.1 / +5.0 figures are the RELIC's, measured as the
+Orobas upgrade, and item 5's ratification at 3 opening Sparks is the relic's
+ratification. That closes the ambiguity the audit flagged.
+
+**Gating the class, not the instance.** `lint_unique_names.py` extends to
+relic display names: the namespace it checks is "names the player sees", and
+relics were always in that namespace -- the lint's SCOPE was merely narrower
+than its PURPOSE. Relic names are read out of the emitted C# `("title", ...)`
+entries, which is where they are actually defined; a lint reading a manifest
+instead of the shipped source is the one-layer-lint failure this repo has
+been bitten by before. The reader raises rather than returning an empty list
+if the relic directory is missing, so it cannot pass by scanning nothing.
+
+Both "Dodoco Tales" and "Explosive Frags" enter
+`docs/reserved-card-names.txt`, annotated with the kind that OWNS each, so
+neither can be re-minted on the other side of the card/relic line. The
+annotation is load-bearing: without it, reserving both sides would fail the
+very card and relic that legitimately hold those names, and the obvious fix
+for that (drop the entries) is what lets the collision re-form.
+
+**Class: SAFE (rename + doc comment) + TESTS.** The extended lint carries the
+ruling's negative test -- a deliberate card/relic display-name collision must
+fail -- plus the converse pin that an owner is not failed by its own reserved
+entry, and an assertion that the lint is actually seeing relics at all.
+
+## R70 -- Manifest version policy: MAJOR.AUTO with overwrite refusal (2026-07-26)
+
+`manifest.json`'s version becomes two-part, **MAJOR-AUTO**.
+
+**MAJOR** is bumped deliberately, by [USER], as part of a release sprint's
+close-out. It is a ratified artifact like a sheet and no tooling touches it.
+The current world ships as MAJOR **0.2**, unchanged; the first deliberate
+bump happens at the next release sprint, not retroactively.
+
+**AUTO** is generated at deploy time and exists to prevent duplication and
+build-identity disconnects. The mechanism is the commit count
+(`git rev-list --count HEAD`) -- stateless, monotonic, and comparable. Two
+co-op players comparing versions can see not just THAT they differ but WHO IS
+BEHIND, which is the diagnostic that matters for deterministic-lockstep
+desyncs and the one a timestamp cannot give. *(The auto mechanism is the one
+knob in this ruling [USER] may swap without a new R-number; a timestamp or a
+stored counter would satisfy the policy's intent at the cost of
+comparability or statelessness respectively.)*
+
+**Enforcement -- the load-bearing part.**
+
+- `deploy.ps1` REFUSES to overwrite an existing `dist/klee-v<version>.zip`.
+  With AUTO in the name this can only fire on a same-commit rebuild, which
+  is exactly the case where two zips share a name and can differ, so refusal
+  is correct rather than an inconvenience.
+- Deploys from a dirty working tree append `+dirty` to AUTO and log loudly,
+  listing the offending files. Loud but not fatal: building dirty is normal
+  while iterating; handing that build to a co-op partner is not.
+- **S3 stops being decorative.** `validate.ps1` compares the staged
+  manifest's version against the computed MAJOR-AUTO and fails on mismatch,
+  so the manifest can no longer silently fossilize -- 134 commits at 0.2.0
+  was the presenting symptom. In the same visit, the `min_version 3.3.6` and
+  `min_game_version 0.107.1` pins are wired to actual comparisons (audit
+  s3.5): the same "asserts presence, measures nothing" class. The game's real
+  version is read from `release_info.json`, NOT from `SlayTheSpire2.exe`'s
+  VersionInfo, which reports a placeholder `1.0.0.0`.
+- Version comparison is numeric, not lexical, and an unparseable version
+  reports as unparseable rather than passing. A check that quietly passes on
+  garbage is the original defect wearing a comparison's clothes.
+
+The comparisons live in `klee-mod/build/version.ps1` as `Test-VersionPolicy`,
+which `validate.ps1`'s S3 calls. That placement is deliberate: `validate.ps1`
+as a whole cannot be run quickly -- its S7 game_ref verification takes
+minutes -- and a gate nobody can afford to run is the failure class this
+ruling closes. `deploy.ps1` and `validate.ps1` both dot-source that one file,
+so the stamp and the gate that checks it cannot compute the version
+differently.
+
+The deployed-pck stamp convention (`<timestamp>+<short-sha>`, already in use
+in `open-playtest-items.md`) continues unchanged: it identifies a BUILD,
+while the manifest version identifies a RELEASE LINEAGE. Both appear in the
+deploy log line.
+
+**Class: RULING (this document) + SAFE + TESTS.**
+`tier0/tests/test_manifest_version_gate.py` carries a negative test each for
+version mismatch and min-version violation, positive controls for both, and
+the min-game-version pair.
+
+## R71 -- SPOTLIGHT_BASE_MULT 1.5 and Selector v3 constants ratified (2026-07-26)
+
+`SPOTLIGHT_BASE_MULT = 1.5` is RATIFIED. The `PLACEHOLDER` marking is
+removed from `tier0/constants.py`; the constant now cites this R-number as
+its ratification record.
+
+This ruling makes law of a result already committed to. The W0 forced-arm
+sweep {1.25, 1.5} was the PRE-REGISTERED decision procedure -- the word
+"decides" was written into the constant's own comment before the sweep ran
+-- and it returned dose evidence favouring 1.5 at pass 3
+(`furina-pass3-rulings.md`). What was missing was the record, not the
+evidence: the value has been 1.5 in the tree throughout, so **zero numbers
+move with this ruling** and nothing needs re-measuring.
+
+No R14 conflict. W0's oracle mode (`SPOTLIGHT_FORCE`) remains a diagnostic
+that never ships. What is ratified is the sweep's verdict on the LIVE knob,
+not an oracle cell as an acceptance target -- the distinction R14 exists to
+protect.
+
+**The Selector v3 constants (depth >= 4, crowd >= 2) are ratified in the
+same stroke** -- same ask (pass-3 ask 5), same evidence window, same
+discipline (shipped under full instrument protocol per the pass-3 report).
+
+**Executor's note, and it matters for how this one was landed.** The v3
+constants no longer exist. `SPOTLIGHT_COMPANION_DEPTH_MIN = 4` and
+`SPOTLIGHT_COMPANION_MIN_ENEMIES = 2` were deleted on 2026-07-23 by the
+selector v5 rework (commit b4b4434), which replaced character-depth
+targeting outright with the two-mode Center Stage / Guest Cast design.
+Ratification therefore landed as a RECORD, in the selector history block
+that survived R67: the numbers are written down, attributed, and marked as
+the values to restore v3's geometry with, but no constant was resurrected.
+Reintroducing two constants nothing reads would have manufactured exactly
+the dead-knob class R67 deleted nine of three days earlier, and the
+exercise-counter law would have condemned them on arrival.
+
+The general shape is worth naming, because it will recur: **a ruling can
+arrive after the code has moved past what it rules on.** Three days passed
+between the pass-3 ask and the sitting, and the v5 rework happened inside
+that window. The ruling is still honoured -- ratifying a superseded design's
+numbers costs nothing and preserves the reasoning -- but it is honoured as
+history, and the record says so rather than quietly implying v3 is live.
+
+**Class: SAFE** (comment and marking changes only). Also closes the
+`SPOTLIGHT_BASE_MULT` ratification item in `docs/missed-requirements.md`
+Tier 3.
+
+## R72 -- Kaboom Beetle Swarm: bombed-state snapshots at cast (2026-07-26)
+
+Option (b) of the three put to ruling: the vs-bombed bonus is determined by
+a **bombed-state snapshot taken at cast**, the Sizzle idiom. This restores
+the original design intent. Hit 1's detonation no longer strips the bonus
+from hits 2-3; a target bombed at cast pays the +3 on every hit of the
+series.
+
+The presenting report (playtest, 2026-07-20) was that subsequent hits never
+got the bonus. That was never a port bug -- both engines agreed on [8, 5, 5]
+-- so per house law it was a DESIGN question, and it sat QUEUED until now.
+The mechanism was self-defeating in a specific way worth recording: the
+card's own detonation is the payoff the rider rewards, and reading state the
+card had already consumed made the rider partly unreachable. That is the
+same failure Sizzle's aura predicate was written to avoid, which is why the
+idiom transfers cleanly rather than being invented here.
+
+**What landed, both engines, one commit group:**
+
+1. **tier0.** `_op_damage` builds `bombed_at_cast` before the hit loop and
+   the rider tests membership in it. Taken once per cast, so a replay
+   re-snapshots -- correct, because a replay IS a new cast.
+2. **C#.** `KaboomBeetleSwarm.OnPlay` snapshots into `_bombedAtCast` before
+   the damage series and clears it in a `finally`;
+   `ModifyDamageAdditive` consults the snapshot. Outside a play it falls
+   back to the live read -- damage previews ask what the card would do to
+   the CURRENT board, which is a different question from what a cast in
+   progress is paying, and returning 0 there would have blanked the bonus
+   out of the preview.
+3. **The test was REWRITTEN, not deleted**, as ruled.
+   `test_beetle_swarm_bonus_snapshots_bombed_state_at_cast` pins [8, 8, 8]
+   vs a single bombed enemy and asserts the detonation still happens (a run
+   where the bombs never popped would prove nothing). Two more land with
+   it: the negative -- bombs placed after the damage op buy nothing, without
+   which "snapshot" could be implemented as "read once, whenever" and still
+   pass -- and a two-target discrimination test proving the snapshot is
+   per-enemy rather than a single "someone was bombed" flag. The C# phase
+   half is `test_beetle_swarm_snapshots_bombed_state_at_cast` in
+   `test_roster_runtime_contracts`, a source-text check for the same reason
+   the bomb-suppression latch above it is one: WHEN the state is read is
+   invisible to any simulator run, and a silent revert to the live read
+   compiles, plays, and differs from the sim by exactly the +6 this ruling
+   restored.
+4. **Card text: FLAGGED, not reworded.** "Bombed enemies take X more per
+   hit" reads as live state, and under the snapshot the enemy stops being
+   Bombed after hit 1 while still paying on hits 2-3. The sheet is
+   ratified, so the wording is a red-pen call; queued at
+   `docs/open-playtest-items.md` 6.2 with a pointer comment in the C#.
+
+**Exposure note (not part of the ruling).** `bonus_vs_aura`, the sibling
+rider, still reads live. It has zero exposure to this class today -- all
+three cards carrying it are single-hit per target -- so it was left alone
+rather than changed on speculation. If a multi-hit `bonus_vs_aura` card is
+ever printed, it inherits this bug on day one.
+
+**Stamp.** This moves Klee demolition numbers upward, slightly. It landed
+INSIDE EPOCH 1, which was already archiving Klee-touching A6/DPT numbers;
+no third epoch was created.
+
+**Pre-registered prediction, graded with EPOCH 1's** (see
+`docs/epoch-1-log-2026-07-26.md` for the full grading): "demolition-plan
+winrate delta from this change alone is small (< +1.0pt on the canonical
+Cell) -- if it's larger, that's evidence the card was load-bearing and it
+goes on the balance watch list."
+
+**PASS.** 7.5% -> 7.5% (45/600 both arms) on
+`cell=r72-grading seed=11 runs=600 RT7/D10/P3/C3`, klee/demolition. Not on
+the balance watch list.
+
+The two arms were two WORKING TREES, the BEFORE arm being the same repo at
+the commit before R72, so that "this change alone" is literally true. The
+alternative -- an in-process toggle -- would have meant shipping a knob
+whose only reader is a grading script, one ruling after R67 deleted nine of
+those.
+
+**A 0.0pt delta needs its own proof of exercise, and this one has it.** The
+graded cell drafts the card into 6.3% of decks (38/600) and the ratified
+`demolition_weighted` battery package does not contain it at all, so the
+cell is nearly blind to this card and a null could mean either "small
+effect" or "instrument never saw it" -- the two readings R67 spent a ruling
+separating. A forced-carrier arm (two copies in every deck, 400 gauntlet
+fights, 498 casts) resolves it: turns/fight 4.185 -> 4.160 and HP lost/fight
+17.622 -> 17.410. Real, directionally correct, and small. Note that TOTAL
+DAMAGE DEALT is useless here and was discarded mid-measurement: a won fight
+deals exactly the enemies' HP, so it read 37000 in both arms no matter what
+the card did.
+
+**Class: RULING + behavior (both engines) + TESTS.**
+
+## D3 -- Pass-4 ask A5 deferred pending the axis-validity session (2026-07-26)
+
+No new number; a scope decision with a paper trail.
+
+[USER] declines to encode the scorecard invariants (non-elite <= 4.0 cap,
+declared-elite-pair identity) at this time. The seven-axis bands were
+ratified against a battery since recognized as unrealistic, and the open
+question is whether the instrument is even DIRECTIONALLY correct or whether
+the design loop has been overfitting to it -- designs tuned until axes hit
+bands measured on the same battery the bands were ratified against.
+"Passing by coincidence" may be Goodhart, not luck.
+
+Encoding the invariants now would assert the scorecard is right, and that is
+precisely what is unknown. This is a deferral on grounds of validity, not
+cost.
+
+**Consequences, effective immediately:**
+
+1. The scorecard-invariant items are **pulled from the pin batch** (audit
+   §9 step 2). The mechanical repairs in `axes.py` -- eps guard on
+   zero-baseline axes, loud failure on missing `attrition`/`swarm`
+   encounter ids, the `or 1.0` turn-10 default -- **remain** in the pin
+   batch: they make the instrument honest without asserting it is right.
+2. A dedicated **axis-validity design session** is opened on the horizon
+   list (audit §10), sequenced at both ends. **After EPOCH 1 lands**,
+   because A6 splash and `survival_profile` were known instrument errors
+   and re-litigating the framework on contaminated readings decides the
+   wrong question -- EPOCH 1 landed the same day, so this end is clear.
+   **Before the Zhongli deep dive**, because slot 4 must not declare elite
+   axes against a framework nobody trusts. Candidate agenda, non-binding:
+   directional-validity tests via holdouts the designs were never tuned
+   against -- the tier-0.5 realistic gates, and co-op playtest outcomes,
+   which no design loop has ever seen.
+3. Until that session rules, seven-axis numbers are **reportable but not
+   load-bearing**: no new band may be ratified, and no design may be
+   accepted or rejected on axis evidence alone. This standing is recorded
+   in `axes.py`'s module docstring, where the numbers are produced, and in
+   `calibration-notes.md`, whose three parked "next levers" all assume the
+   framework is sound and are therefore parked harder -- extending an
+   instrument is the wrong move while its validity is the open question.
+
+**Class: RULING** (this record) -- no code beyond the pin-batch scope change
+and the docstring that carries the standing.

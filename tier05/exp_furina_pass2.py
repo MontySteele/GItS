@@ -38,6 +38,7 @@ from tier0.content import loader
 from tier0.engine.combat import run_fight
 from tier0.harness import axes, metrics
 from tier0.pilot.policy import make_pilot
+from tier05 import sweeps
 
 SEED = 20260720
 FIGHTS = 1000
@@ -77,19 +78,26 @@ def e1() -> float:
                ("self_carry", "fanfare"),
                ("salon_weighted", "salon"),
                ("fanfare_weighted", "fanfare")]
-    default = C.SPOTLIGHT_BASE_MULT
     results: dict[float, dict[str, dict[str, float]]] = {}
-    for m in MULTS:
-        C.SPOTLIGHT_BASE_MULT = m
-        results[m] = {}
+
+    def _cell(_m):
+        out = {}
         for deck, pilot in configs:
-            results[m][deck] = _winrates(
-                _battery("furina", deck, pilot, FIGHTS, SEED))
-            row = "  ".join(f"{e}: {results[m][deck][e]:.1%}"
-                            for e in ENCOUNTERS)
+            out[deck] = _winrates(_battery("furina", deck, pilot, FIGHTS,
+                                           SEED))
+        return out
+
+    # R67 gated harness. This block is the reason the gate exists: R33 found
+    # that pass 2's cells were identical because the companion branch was
+    # structurally unreachable, and the record read that as "MEASURED 1.0 --
+    # the knob is dead". Run through the gate, cells that never reach the
+    # multiplier now say so instead of printing a flat table.
+    for m, cell in sweeps.sweep("SPOTLIGHT_BASE_MULT", MULTS, _cell):
+        results[m] = cell
+        for deck, _ in configs:
+            row = "  ".join(f"{e}: {cell[deck][e]:.1%}" for e in ENCOUNTERS)
             print(f"  mult {m:.2f}  {deck:<28} {row}")
         print()
-    C.SPOTLIGHT_BASE_MULT = default
 
     passes = {}
     for m in MULTS:
@@ -136,18 +144,18 @@ def e2(mult: float) -> None:
     print(f"E2. FANFARE_CAP_FRACTION confirmation re-sweep "
           f"(6-blood uncapper; mult {mult:.2f}; 500 fights/cell)")
     print("=" * 72)
-    default_mult = C.SPOTLIGHT_BASE_MULT
     default_cap = C.FANFARE_CAP_FRACTION
-    C.SPOTLIGHT_BASE_MULT = mult
-    for frac in (0.25, 0.5, 0.75):
-        C.FANFARE_CAP_FRACTION = frac
-        wr = _winrates(_battery("furina", "fanfare_weighted", "fanfare",
-                                500, SEED))
-        row = "  ".join(f"{e}: {wr[e]:.1%}" for e in ENCOUNTERS)
-        mark = "  <- ratified" if frac == default_cap else ""
-        print(f"    cap {frac:.2f}x maxHP   {row}{mark}")
-    C.FANFARE_CAP_FRACTION = default_cap
-    C.SPOTLIGHT_BASE_MULT = default_mult
+    # The base mult is HELD at the E1 winner for the whole block (it is the
+    # world the cap is being confirmed in, not a second swept axis), so it
+    # is armed once around the sweep rather than per cell.
+    with sweeps.armed("SPOTLIGHT_BASE_MULT", mult):
+        for frac, wr in sweeps.sweep(
+                "FANFARE_CAP_FRACTION", (0.25, 0.5, 0.75),
+                lambda _: _winrates(_battery("furina", "fanfare_weighted",
+                                             "fanfare", 500, SEED))):
+            row = "  ".join(f"{e}: {wr[e]:.1%}" for e in ENCOUNTERS)
+            mark = "  <- ratified" if frac == default_cap else ""
+            print(f"    cap {frac:.2f}x maxHP   {row}{mark}")
     print("    ratified 0.5 stays unless punisher leaves [10%, 55%] "
           "(registered rule)")
 

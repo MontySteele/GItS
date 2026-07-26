@@ -20,6 +20,13 @@ from tier0 import constants as C
 from tier0.content import loader
 from tier05 import ab, draft, kurage_telemetry, model, route, run_metrics
 
+# `cells` is imported inside main(), not here. R68 put resolve_plan in this
+# module and made it the single source of truth for plan->pilot, so cells.py
+# has to reach back for it -- and cells validates its CANONICAL literal at
+# import time, which would land in a half-built runner if the dependency ran
+# both ways at module scope. The one-way module-level edge is cells -> runner;
+# this is the return trip, deferred to call time.
+
 # The run model itself is character-agnostic; this is the CLI's honest list of
 # plans with authored draft tags + combat pilots. Keeping it character-scoped
 # prevents a syntactically valid but meaningless pairing such as
@@ -74,6 +81,8 @@ def resolve_plan(character: str, archetype: str | None) -> tuple[str, str]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    from tier05 import cells        # see the import note at module top
+
     ap = argparse.ArgumentParser(description="Tier 0.5 draft-level simulator")
     ap.add_argument("--character", default="klee",
                     choices=sorted(CHARACTER_PLANS))
@@ -162,18 +171,22 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     t0 = time.perf_counter()
-    results = model.run_many(args.character, archetype, pilot,
-                             draft.POLICIES[args.policy], args.runs, args.seed,
-                             grant_relics=args.realistic,
-                             grant_potions=args.realistic,
-                             n_acts=args.acts, jobs=args.jobs,
-                             route_name=args.route)
+    # R68: the CLI's own configuration is a Cell too, so the stamp on a
+    # runner report and the stamp on an experiment report are produced by
+    # one piece of code and cannot drift into two formats.
+    cell = cells.Cell(
+        name="cli", character=args.character, archetype=archetype,
+        runs=args.runs, seed=args.seed, route=args.route,
+        policy=args.policy, realistic=args.realistic, n_acts=args.acts,
+        jobs=args.jobs)
+    results = cell.run()
     summary = run_metrics.summarize_runs(results)
     max_hp = loader._character_index()[args.character]["hp"]
     survival = run_metrics.survival_profile(results, max_hp)
     run_metrics.print_run_report(
         args.character, archetype, summary,
-        run_metrics.floor_kind_labels(results), survival)
+        run_metrics.floor_kind_labels(results), survival,
+        stamp=cell.stamp())
     print(f"  loadout         "
           f"{'realistic (relics + potions)' if args.realistic else 'bare'}")
     # P2 (playtest sprint): report-only. Prints nothing at all unless this

@@ -187,19 +187,48 @@ def survival_profile(results: list[RunResult], max_hp: int) -> dict:
     """
     if not results:
         return {}
-    kinds = results[0].node_kinds
+    # PER-RUN fight positions (audit 2026-07-26 s2.4, fixed in EPOCH 1).
+    #
+    # This used to read `kinds = results[0].node_kinds` and treat that ONE
+    # run's room layout as the axis for the whole cohort. Under RUNTEMPLATE
+    # 6+ routing there is no shared layout: one run's floor 4 is an elite and
+    # another's is a shop. So every fragility scalar below was cross-sampling
+    # HP from floors that were different room types run to run -- and worse,
+    # results[0] is just whichever run came first, and dead runs are SHORT,
+    # so an unlucky first run could size the axis down to almost nothing.
+    # This module's own docstring (:47-49) already forbids exactly this for
+    # the HP bands; survival_profile was the one place that still did it.
+    #
+    # The axis is FLOORS, as everywhere else in this module. At each floor a
+    # run is sampled only if THAT RUN fought there.
+    n_nodes = C.MAP_FLOORS * max(1, results[0].n_acts)
     # Fights only: N/E/B. R (rest), T (treasure) and $ (shop) are non-fight
     # nodes -- their HP entries carry the previous value and must not be
     # read as a fight's survival sample (RUNTEMPLATE_VERSION 3).
-    fight_pos = [i for i, k in enumerate(kinds) if k in ("N", "E", "B")]
     pct = []
-    for pos in fight_pos:
+    for pos in range(n_nodes):
         # Keep the original run cohort at every fight. A run that died before
         # this position contributes 0 HP instead of disappearing from the
         # sample; otherwise later medians are conditional on survival and an
         # early death can make the reported act-health curve look healthier.
-        vals = [r.hp_by_node[pos] if len(r.hp_by_node) > pos else 0
-                for r in results]
+        #
+        # A run that REACHED this floor but did not fight on it is excluded
+        # rather than zeroed: its HP entry is a carried-over value from the
+        # previous node, so counting it would be reading a rest stop as a
+        # fight's survival sample -- the defect, in miniature.
+        vals = []
+        fought_here = False
+        for r in results:
+            if len(r.node_kinds) > pos:
+                if r.node_kinds[pos] in ("N", "E", "B"):
+                    fought_here = True
+                    vals.append(r.hp_by_node[pos]
+                                if len(r.hp_by_node) > pos else 0)
+            else:
+                vals.append(0)      # died before reaching this floor
+        # A floor nobody fought on is not a fight position for this cohort.
+        if not fought_here:
+            continue
         pct.append(_percentile(vals, 0.50) / max_hp if vals else 0.0)
     floor = NEAR_DEATH_FRACTION * max_hp
     ever_near = sum(1 for r in results
@@ -306,9 +335,20 @@ def floor_kind_labels(results: list[RunResult]) -> list[str]:
 
 
 def print_run_report(character: str, archetype: str, s: dict,
-                     node_kinds: list[str], survival: dict | None = None) -> None:
+                     node_kinds: list[str], survival: dict | None = None,
+                     *, stamp: str) -> None:
+    """Print the run report. `stamp` is MANDATORY (R68, 2026-07-26).
+
+    A report without a stamp line is not citable in a sprint doc or a
+    ruling, so it is a keyword-only required argument rather than an
+    optional courtesy -- an omitted stamp has to be a TypeError at the call
+    site, not a slightly thinner report that reads fine and cannot be
+    checked. Build it with `tier05.cells.Cell.stamp()`; passing a
+    hand-written string is allowed but is the thing R68 exists to stop.
+    """
     print(f"\n=== Tier 0.5 runs: {character}/{archetype} "
           f"({s['runs']} runs) ===")
+    print(f"  {stamp}")
     lo, hi = s["winrate_wilson95"]
     print(f"  run winrate      {s['winrate']:.1%} "
           f"({s['wins']}/{s['runs']}; Wilson 95% {lo:.1%}-{hi:.1%})")

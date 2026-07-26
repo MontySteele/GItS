@@ -3,13 +3,12 @@
 Two questions, deliberately kept separate because they have different
 answers:
 
-A. DECAY SWEEP. The sprint plan picked FANFARE_DECAY_PER_TURN = 5 on the
-   strength of a sweep whose source document never landed in this repo, so
-   the number has no in-repo basis. User ruling 2026-07-24: re-derive it
-   here before F-C's binding run. Direction (flat over proportional) is
-   RATIFIED and not re-litigated -- what is re-derived is the MAGNITUDE.
-   Cell 0 is the control: it is what the world looks like with the decay
-   knob switched off, i.e. what decay actually bought.
+A2. DECAY SWEEP (proportional). Re-derives the decay MAGNITUDE against the
+   one shape the engine has. The original block A -- a flat-magnitude sweep
+   over FANFARE_DECAY_PER_TURN, written when the plan had ruled flat over
+   proportional -- was deleted by R67 (2026-07-26) along with its knob: the
+   20% proportional ruling had made the flat branch unreachable, so every
+   cell of it ran the same world. Its rows are struck.
 
 B. FANFARE AUTOPSY. The fanfare plan sits at 0.0% winrate across F-A and
    F-B2 alike. This asks whether that is a resource problem the sprint can
@@ -20,7 +19,7 @@ B. FANFARE AUTOPSY. The fanfare plan sits at 0.0% winrate across F-A and
 R14: diagnostics feeding a ruling. No acceptance targets in this file --
 the registered bars live in docs/archive/furina-fanfare-sprint-log.md.
 
-Usage: python -m tier05.exp_furina_decay [sweep|prop|frontload|autopsy] [--runs N]
+Usage: python -m tier05.exp_furina_decay [prop|frontload|autopsy] [--runs N]
 """
 
 from __future__ import annotations
@@ -28,13 +27,11 @@ from __future__ import annotations
 import statistics
 import sys
 
-from tier0 import constants as C
 from tier0.content import loader
-from tier05 import draft, fanfare_telemetry, model
+from tier05 import draft, fanfare_telemetry, model, sweeps
 
 SEED = 11            # the sprint's registered seed (plan §5)
 RUNS = 200
-DECAY_CELLS = (0, 3, 5, 8, 12)
 ARMS = (("fanfare", "fanfare"), ("salon", "salon"))
 
 
@@ -66,50 +63,29 @@ def _cell(archetype: str, pilot_id: str, runs: int) -> dict:
     }
 
 
-def sweep(runs: int = RUNS) -> None:
-    print("=" * 78)
-    print(f"A. FANFARE DECAY SWEEP — {runs} realistic runs/cell, seed {SEED}")
-    print(f"   shipping value: FANFARE_DECAY_PER_TURN = "
-          f"{C.FANFARE_DECAY_PER_TURN} (flat). Cell 0 = knob OFF (control).")
-    print("   Direction (flat over proportional) is RATIFIED; this re-derives")
-    print("   the MAGNITUDE only. Gate (2) bar: read at-cap < 15%.")
-    print("=" * 78)
-
-    original = C.FANFARE_DECAY_PER_TURN
-    try:
-        for archetype, pilot_id in ARMS:
-            print(f"\n  assigned {archetype}")
-            print(f"  {'decay':>6} {'read@cap':>9} {'mean@read':>10} "
-                  f"{'empty':>7} {'act-1':>7} {'win':>7}")
-            for decay in DECAY_CELLS:
-                # One variable per cell: the module attribute IS the knob
-                # every read goes through (engine/ never hard-codes it).
-                #
-                # DO NOT add jobs>1 to the run_many call below. Worker
-                # processes are SPAWNED on Windows, so they re-import
-                # tier0.constants fresh and would silently run every cell at
-                # the shipping default -- a sweep that reports five identical
-                # rows and looks like a null result instead of a broken one.
-                # A constants override and process parallelism do not mix
-                # without shipping the override to the workers.
-                C.FANFARE_DECAY_PER_TURN = decay
-                c = _cell(archetype, pilot_id, runs)
-                flag = "  <-- shipping" if decay == original else ""
-                bar = "" if c["read_at_cap"] < 0.15 else "  !! GATE(2)"
-                print(f"  {decay:>6} {c['read_at_cap']:>8.1%} "
-                      f"{c['mean_at_read']:>10.1f} {c['read_empty']:>6.1%} "
-                      f"{c['act1']:>6.1%} {c['winrate']:>6.1%}{flag}{bar}")
-    finally:
-        C.FANFARE_DECAY_PER_TURN = original
+# Block A (the flat FANFARE_DECAY_PER_TURN magnitude sweep over
+# DECAY_CELLS) was DELETED by R67, 2026-07-26, together with the knob it
+# swept. The flat branch was reachable only when FANFARE_DECAY_FRACTION was
+# 0, which the 20% proportional ruling made permanently false, so all five
+# cells ran the identical world and the block's rows are STRUCK as
+# instrument error -- NOT as a null result about decay magnitude. The block
+# below (A2) swept a live knob and stands.
 
 
 def prop(runs: int = RUNS) -> None:
     """A2. PROPORTIONAL decay sweep, 10% increments ([USER] 2026-07-24).
 
-    The plan ruled flat over proportional on tooltip grounds, so this is a
-    direction re-open, not a magnitude re-derivation. Flat cells are printed
-    alongside at the same seed and sample so the two SHAPES are comparable
-    rather than merely each internally consistent.
+    Originally a direction re-open: it printed flat cells alongside the
+    proportional ones, at the same seed and sample, so the two SHAPES were
+    comparable rather than merely each internally consistent. That
+    comparison is what carried the 20% ruling, and it is now a closed
+    record -- R67 deleted the flat shape from the engine, so the flat cells
+    are gone from here and the block is a pure magnitude sweep over the one
+    surviving shape. The historical flat-vs-proportional table lives in the
+    FANFARE_DECAY_FRACTION comment in tier0/constants.py.
+
+    Runs through the R67 gated harness: a cell in which nothing ever reads
+    the fraction fails loudly rather than printing a row.
     """
     print("=" * 78)
     print(f"A2. PROPORTIONAL DECAY SWEEP — {runs} realistic runs/cell, "
@@ -119,27 +95,27 @@ def prop(runs: int = RUNS) -> None:
     print("    while above the floor. Gate (2) bar: read at-cap < 15%.")
     print("=" * 78)
 
-    frac0, flat0 = C.FANFARE_DECAY_FRACTION, C.FANFARE_DECAY_PER_TURN
-    cells = ([("flat 3", 0.0, 3), ("flat 5", 0.0, 5)]
-             + [(f"{int(f * 100)}%", f, 0) for f in
-                (0.1, 0.2, 0.3, 0.4, 0.5)])
-    try:
-        for archetype, pilot_id in ARMS:
-            print(f"\n  assigned {archetype}")
-            print(f"  {'decay':>8} {'read@cap':>9} {'mean@read':>10} "
-                  f"{'empty':>7} {'act-1':>7} {'win':>7}")
-            for label, frac, flat in cells:
-                # Serial only -- see the note in sweep().
-                C.FANFARE_DECAY_FRACTION = frac
-                if flat:
-                    C.FANFARE_DECAY_PER_TURN = flat
-                c = _cell(archetype, pilot_id, runs)
-                bar = "" if c["read_at_cap"] < 0.15 else "  !! GATE(2)"
-                print(f"  {label:>8} {c['read_at_cap']:>8.1%} "
-                      f"{c['mean_at_read']:>10.1f} {c['read_empty']:>6.1%} "
-                      f"{c['act1']:>6.1%} {c['winrate']:>6.1%}{bar}")
-    finally:
-        C.FANFARE_DECAY_FRACTION, C.FANFARE_DECAY_PER_TURN = frac0, flat0
+    for archetype, pilot_id in ARMS:
+        print(f"\n  assigned {archetype}")
+        print(f"  {'decay':>8} {'read@cap':>9} {'mean@read':>10} "
+              f"{'empty':>7} {'act-1':>7} {'win':>7}")
+        # Serial only. DO NOT add jobs>1 to the run_many call inside _cell.
+        # Worker processes are SPAWNED on Windows, so they re-import
+        # tier0.constants fresh and would silently run every cell at the
+        # stamped default -- a sweep that reports identical rows and looks
+        # like a null result instead of a broken one. (The R67 gate does
+        # not save you here: the parent process still reads the armed knob,
+        # so the reads land while the WORK happens elsewhere at the
+        # default.) A constants override and process parallelism do not mix
+        # without shipping the override to the workers.
+        for frac, c in sweeps.sweep(
+                "FANFARE_DECAY_FRACTION", (0.1, 0.2, 0.3, 0.4, 0.5),
+                lambda _: _cell(archetype, pilot_id, runs)):
+            label = f"{int(frac * 100)}%"
+            bar = "" if c["read_at_cap"] < 0.15 else "  !! GATE(2)"
+            print(f"  {label:>8} {c['read_at_cap']:>8.1%} "
+                  f"{c['mean_at_read']:>10.1f} {c['read_empty']:>6.1%} "
+                  f"{c['act1']:>6.1%} {c['winrate']:>6.1%}{bar}")
 
 
 # F-B3. The archetype's act-1 damage sources, which is the whole list: two
@@ -239,9 +215,15 @@ def main(argv: list[str] | None = None) -> int:
         i = args.index("--runs")
         runs = int(args[i + 1])
         del args[i:i + 2]
-    block = args[0] if args else "sweep"
+    block = args[0] if args else "prop"
     if block == "sweep":
-        sweep(runs)
+        # R67 deleted this block with FANFARE_DECAY_PER_TURN. Named
+        # explicitly rather than falling through to "unknown block" so the
+        # sprint docs that say `exp_furina_decay sweep` get an answer.
+        print("block 'sweep' was DELETED by R67 (2026-07-26) with the dead "
+              "FANFARE_DECAY_PER_TURN knob it swept; its rows are struck as "
+              "instrument error. Use 'prop' for the live decay sweep.")
+        return 2
     elif block == "prop":
         prop(runs)
     elif block == "frontload":

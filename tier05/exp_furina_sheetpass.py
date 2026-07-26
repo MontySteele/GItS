@@ -15,9 +15,12 @@ B. EP + GS COMBAT-COUPLED (DECISIONS 64, ONE experiment): drafted decks
    ceiling, and (ii) the Guest Star draw-variance floor that offer
    geometry cannot see.
 
-C. PLACEHOLDER SWEEPS (redpen ruling c): FANFARE_CAP_FRACTION and
-   SPOTLIGHT_SELF_MULT swept for the user's pick. The stamped defaults do
-   not move; the sweep monkeypatches per cell and restores.
+C. PLACEHOLDER SWEEPS (redpen ruling c): FANFARE_CAP_FRACTION swept for the
+   user's pick, through the R67 gated harness (tier05.sweeps) so a cell that
+   never reads the knob fails loudly instead of printing a flat table. The
+   stamped default does not move; the harness arms per cell and restores.
+   The block's second sweep (SPOTLIGHT_SELF_MULT) was deleted by R67 with
+   its knob -- see the note at the foot of block_c().
 
 Usage: python -m tier05.exp_furina_sheetpass
 Seed 20260720 throughout; deterministic.
@@ -34,6 +37,7 @@ from tier0.content import loader
 from tier0.engine.combat import run_fight
 from tier0.harness import metrics
 from tier0.pilot.policy import make_pilot
+from tier05 import sweeps
 from tier05.rewards import _nation_weighted_choice, _roll_rarity, companion_pool
 
 SEED = 20260720
@@ -200,26 +204,21 @@ def block_c() -> None:
     print("\n  C1. FANFARE_CAP_FRACTION (fanfare_weighted, the deck the cap "
           "binds):")
     default_cap = C.FANFARE_CAP_FRACTION
-    for frac in (0.25, 0.5, 0.75):
-        C.FANFARE_CAP_FRACTION = frac
-        wr = _battery("fanfare_weighted", "fanfare", strip_relic=False,
-                      fights=500, seed=SEED)
+    for frac, wr in sweeps.sweep(
+            "FANFARE_CAP_FRACTION", (0.25, 0.5, 0.75),
+            lambda _: _battery("fanfare_weighted", "fanfare",
+                               strip_relic=False, fights=500, seed=SEED)):
         row = "  ".join(f"{e}: {wr[e]:.1%}" for e in ENCOUNTERS)
         mark = "  <- stamped default" if frac == default_cap else ""
         print(f"    cap {frac:.2f}x maxHP   {row}{mark}")
-    C.FANFARE_CAP_FRACTION = default_cap
 
-    print("\n  C2. SPOTLIGHT_SELF_MULT (self_carry, the deck the self-rate "
-          "governs):")
-    default_self = C.SPOTLIGHT_SELF_MULT
-    for mult in (1.0, 1.25, 1.5):
-        C.SPOTLIGHT_SELF_MULT = mult
-        wr = _battery("self_carry", "fanfare", strip_relic=False,
-                      fights=500, seed=SEED)
-        row = "  ".join(f"{e}: {wr[e]:.1%}" for e in ENCOUNTERS)
-        mark = "  <- stamped default" if mult == default_self else ""
-        print(f"    self-rate {mult:.2f}x   {row}{mark}")
-    C.SPOTLIGHT_SELF_MULT = default_self
+    # C2 (SPOTLIGHT_SELF_MULT swept over {1.0, 1.25, 1.5}) was DELETED by
+    # R67, 2026-07-26, together with the constant it swept. The knob had
+    # zero readers -- effects.spotlight_mult() hard-codes its self-aim
+    # early return and never consulted it -- so all three cells were the
+    # same world. Its three rows are STRUCK: they read as "the self rate
+    # doesn't matter" while measuring nothing at all. Blocks A, B and C1
+    # swept live knobs and stand.
 
 
 if __name__ == "__main__":

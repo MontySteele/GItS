@@ -25,14 +25,16 @@ Usage: python -m tier05.exp_roster_anchors [--runs N] [--route NAME] [--jobs N]
 
 from __future__ import annotations
 
-import statistics
 import sys
 
-from tier0 import constants as C
-from tier05 import draft, model
+from tier05 import cells
 
-SEED = 11            # the sprint's registered seed, as the ghost check uses
-RUNS = 600
+# R68: seed, runs, route and loadout come from the ratified cell rather than
+# from local literals. They used to be `SEED = 11` / `RUNS = 600` here, which
+# happened to agree with the ratified cell and with nothing else in the
+# directory -- five different hand-rolled seeds were in play across twelve
+# scripts, all of them looking equally authoritative at the call site.
+BASE = cells.CANONICAL.but(name="roster-anchors")
 
 # (character, archetype). Klee's three plans plus the reference Ironclad's
 # single generic plan, plus Furina's three, so every row in the printed table
@@ -48,57 +50,27 @@ ARMS: tuple[tuple[str, str], ...] = (
 )
 
 
-def _arm(character: str, archetype: str, runs: int, route_name: str,
-         jobs: int) -> dict:
-    results = model.run_many(character, archetype, archetype,
-                             draft.assigned_policy, runs, SEED,
-                             grant_relics=True, grant_potions=True,
-                             jobs=jobs, route_name=route_name)
-    decks = [[c for c in r.deck_ids] for r in results]
-    return {
-        "win": sum(r.won for r in results) / len(results),
-        # acts_completed counts boss wins, so >= 1 IS the act-1 clear.
-        "act1": sum(r.acts_completed >= 1 for r in results) / len(results),
-        "acts": statistics.mean(r.acts_completed for r in results),
-        "decksize": statistics.mean(len(d) for d in decks),
-        # Variable under RUNTEMPLATE 6+: a route decides how many fights a run
-        # takes, and a deck that dies early simply gets fewer. Printed so any
-        # per-combat rate quoted off this sweep can be rescaled honestly
-        # rather than against a template constant that no longer exists.
-        "fights": statistics.mean(len(r.fight_stats) for r in results),
-    }
-
-
 def main(argv: list[str] | None = None) -> int:
-    args = list(sys.argv[1:] if argv is None else argv)
-    runs, route_name, jobs = RUNS, "hunter", 0
-    for flag, cast in (("--runs", int), ("--route", str), ("--jobs", int)):
-        if flag in args:
-            i = args.index(flag)
-            value = cast(args[i + 1])
-            del args[i:i + 2]
-            if flag == "--runs":
-                runs = value
-            elif flag == "--route":
-                route_name = value
-            else:
-                jobs = value
+    base, _ = cells.parse_overrides(
+        list(sys.argv[1:] if argv is None else argv), BASE)
 
-    print("=" * 78)
-    # Read the stamps, never hard-code them -- the ghost check mislabelled its
-    # own world exactly one bump after it was written.
-    print(f"ROSTER ANCHORS — RUNTEMPLATE {C.RUNTEMPLATE_VERSION}, "
-          f"DRAFTER {C.DRAFTER_VERSION}, CONSTANTS {C.CONSTANTS_VERSION}")
-    print(f"  {runs} runs/arm, seed {SEED}, route {route_name}, "
-          f"relics + potions granted")
+    # The stamp is read from the live world, never hard-coded -- the ghost
+    # check mislabelled its own world exactly one bump after it was written,
+    # which is the defect R68's mandatory stamp line exists to make
+    # structurally impossible.
+    cells.print_header(base, "ROSTER ANCHORS",
+                       f"{len(ARMS)} arms across the roster")
     print("  Every row below comes from THIS run. Nothing is quoted across a "
           "version bump.")
-    print("=" * 78)
     print(f"\n  {'character':>13} {'plan':>12} {'win':>7} {'act-1':>7} "
           f"{'acts':>6} {'deck':>6} {'fights':>7}")
 
     for character, archetype in ARMS:
-        a = _arm(character, archetype, runs, route_name, jobs)
+        # One Cell per arm: same seed, same runs, same route, same loadout,
+        # differing only in the two fields the table's first two columns
+        # name. `arm()` is the consolidated reducer (R68) -- this script,
+        # the ghost check and the free-draft cell each had their own copy.
+        a = base.but(character=character, archetype=archetype).arm()
         print(f"  {character:>13} {archetype:>12} {a['win']:>6.1%} "
               f"{a['act1']:>6.1%} {a['acts']:>6.2f} {a['decksize']:>6.1f} "
               f"{a['fights']:>7.1f}")

@@ -106,6 +106,19 @@ Also `axes.py:63,84`: missing `attrition`/`swarm` encounter ids silently
 fall back to whole-pool averages (vs `runner.py:93` failing loudly), and
 `a2 = _avg(ratios) or 1.0` maps "no fight reached turn 10" to exactly 3.0.
 
+**RULED — D3 (2026-07-26), and it SPLITS this item.** The invariant half
+(non-elite ≤ 4.0 cap, declared-elite-pair identity) is **pulled from the pin
+batch**: encoding "the scorecard must be obeyed" is not something to assert
+while it is unknown whether the scorecard is directionally correct. The
+bands were ratified against a battery since recognized as unrealistic, and
+designs were tuned until the axes hit them — "passing by coincidence" may be
+Goodhart, not luck. The mechanical half (eps guard, loud failure on missing
+encounter ids, the `or 1.0` default) **stays in the pin batch**: it makes
+the instrument honest without asserting it is right. Standing until the
+axis-validity session rules: seven-axis numbers are reportable but **not
+load-bearing** — no new band ratified, no design accepted or rejected on
+axis evidence alone.
+
 ### 2.3 A4 Sustain is anchored on a phantom heal — MED / RULING
 Burning Blood emits `heal` without mutating HP (`combat.py:657-663`,
 deliberate). Consequence not recorded anywhere: the A4 denominator is
@@ -441,7 +454,15 @@ which is why no test covers the entry point validate gates on);
 2. **Pin batch** (tests only, no behavior): reaction phase parity ×3,
    NextAttackUp series, CreatureFacing placement, Invoke-RepoPython
    enforcement, outline≠fill icon assertion, salon scale arithmetic,
-   Crackle+ text, op/predicate-vs-OPS lint, events/act-pool key allowlists.
+   Crackle+ text, op/predicate-vs-OPS lint, events/act-pool key allowlists,
+   plus the §2.2 mechanical repairs (eps guard, loud missing-encounter
+   failure, the `or 1.0` turn-10 default).
+   **PULLED by D3 (2026-07-26): the §2.2 scorecard INVARIANTS** (non-elite
+   ≤ 4.0 cap, declared-elite-pair identity). They are not deferred for cost;
+   they are deferred because pinning "the scorecard must be obeyed" asserts
+   the scorecard is right, and that is the open question. Reinstate only if
+   the axis-validity session (below) finds the instrument directionally
+   sound.
 3. **Gate repairs** (small diffs, big honesty): S8 target dir, S9 inversion,
    L12 → shipped files + wire art_lint as S10, contract from staged files,
    S3 version compare, build_pck stderr helper.
@@ -451,3 +472,28 @@ which is why no test covers the entry point validate gates on);
 5. **Then** the structural refactors (roster registry, codegen driver
    unification, engine chokepoint extraction) — each is mechanical once the
    gates from (2)–(3) are watching.
+
+## 10. The horizon list (design sessions, not code)
+
+### Axis-validity session — OPEN, opened by D3 (2026-07-26)
+
+**Question.** Is the seven-axis scorecard directionally correct, or has the
+design loop been overfitting to it? The bands were ratified against a
+battery since recognized as unrealistic, and designs were then tuned until
+the axes hit those bands — the same battery on both sides of the loop. A
+design that "passes" may be passing by construction.
+
+**Sequencing is part of the ruling**, both ends:
+
+- **After EPOCH 1 lands.** A6 splash and `survival_profile` were known
+  instrument errors; re-litigating the framework on contaminated readings
+  would decide the wrong question. (EPOCH 1 landed 2026-07-26 — this end of
+  the gate is now clear; see `docs/epoch-1-log-2026-07-26.md`.)
+- **Before the Zhongli deep dive.** Slot 4 must not declare elite axes
+  against a framework nobody trusts.
+
+**Candidate agenda (non-binding).** Directional-validity tests against
+holdouts the designs were never tuned on: the tier-0.5 realistic gates, and
+co-op playtest outcomes, which no design loop has ever seen.
+
+**Until it rules:** seven-axis numbers are reportable but not load-bearing.

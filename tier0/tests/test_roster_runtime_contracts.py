@@ -140,3 +140,26 @@ def test_bomb_suppression_latch_is_per_creature_and_snapshotted():
         r"_suppressionAttack != null\s*\?\s*_suppressionArmedForAttack",
         bomb,
     )
+
+
+def test_beetle_swarm_snapshots_bombed_state_at_cast():
+    """R72 (2026-07-26), C# side. The sim pin lives in test_klee.py; this is
+    the parity half, and it is a source-text check for the same reason the
+    suppression latch above is -- the divergence is a phase question (WHEN the
+    bomb state is read), and no simulator run can observe the port's phase.
+
+    The failure it guards is a silent revert to the live per-hit read: that
+    version compiles, plays, and differs from the sim by exactly the +6 the
+    ruling restored."""
+    card = (SOURCE / "Cards" / "KaboomBeetleSwarm.cs").read_text()
+    # The snapshot is taken in OnPlay, before the damage series is executed.
+    play = card.split("protected override async Task OnPlay", 1)[1]
+    snapshot_at = play.index("_bombedAtCast =")
+    assert snapshot_at < play.index("DamageCmd.Attack"), (
+        "the bombed-state snapshot must be taken before the first hit")
+    # ...and the per-hit modifier consults the snapshot, not live Powers.
+    assert re.search(
+        r"_bombedAtCast is \{ \} snap\s*\?\s*snap\.Any\(", card)
+    # Cleared on the way out, so no play can inherit another's snapshot.
+    assert re.search(r"finally\s*\{[^}]*_bombedAtCast = null;", card,
+                     re.DOTALL)
