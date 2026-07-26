@@ -19,7 +19,8 @@ import time
 from tier0 import constants as C
 from tier0 import roster
 from tier0.content import loader
-from tier05 import ab, draft, kurage_telemetry, model, route, run_metrics
+from tier05 import (ab, draft, kurage_telemetry, model, overlap_telemetry,
+                    route, run_metrics)
 
 # `cells` is imported inside main(), not here. R68 put resolve_plan in this
 # module and made it the single source of truth for plan->pilot, so cells.py
@@ -186,6 +187,16 @@ def main(argv: list[str] | None = None) -> int:
     pulses = kurage_telemetry.by_act(
         [pair for r in results for pair in r.kurage_traces])
     block = kurage_telemetry.format_block(pulses)
+    if block:
+        print(block)
+    # C4 (Neap Tide addendum): the carry-card overlap watch. Same silence rule
+    # -- prints nothing unless one of the watched cards was actually drafted.
+    # It is on the DEFAULT report rather than behind a flag on purpose: the
+    # pair that carried playtest two was invisible because nothing put it in
+    # front of anyone, and an instrument you have to remember to ask for has
+    # the same failure mode as no instrument.
+    block = overlap_telemetry.format_block(
+        overlap_telemetry.aggregate(results))
     if block:
         print(block)
     print(f"\n({args.runs} runs in {time.perf_counter() - t0:.1f}s)")
