@@ -59,7 +59,13 @@ from tier05 import cells, kurage_telemetry
 PLANS = ("priest", "commander", "assist", "generic")
 
 # (label, multiplier). Baseline first so the report reads old -> new.
-ARMS = (("x4 (pre-R73)", 4), ("x2 (R73)", 2))
+#
+# x3 is here because the sprint PRE-COMMITTED it as the single weak-side
+# response, and a pre-committed fallback that only gets measured after the
+# result is in is not pre-committed in any useful sense. Measuring all three
+# in one invocation means the fallback is chosen against numbers from the
+# same run as the numbers that triggered it.
+ARMS = (("x4 (pre-R73)", 4), ("x3 (fallback)", 3), ("x2 (R73)", 2))
 
 
 def _run_arm(cell: cells.Cell, multiplier: int) -> dict:
@@ -109,9 +115,14 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{plan:11} {label:14} {a['win']*100:6.1f} "
                   f"{a['act1']*100:6.1f} {a['acts']:5.2f} "
                   f"{a['decksize']:5.1f} {a['fights']:6.2f}")
+        # Every non-baseline arm gets its own delta line. With three arms a
+        # single "delta" row would silently mean whichever pair the loop
+        # happened to hold, which is how a fallback gets graded against the
+        # wrong reference.
         base_win = table[plan][ARMS[0][0]]["win"]
-        new_win = table[plan][ARMS[1][0]]["win"]
-        print(f"{'':11} {'delta':14} {(new_win - base_win)*100:+6.1f}pp")
+        for label, _ in ARMS[1:]:
+            d = (table[plan][label]["win"] - base_win) * 100
+            print(f"{'':11} {'d vs x4: ' + label:14} {d:+6.1f}pp")
         print()
 
     # The tail is the thing R73 was aimed at, so it is reported next to the

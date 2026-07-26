@@ -328,7 +328,7 @@ KURAGE_DURATION = 1           # turns the jellyfish holds the field. Stacks
                               # move the pin and both notes together.
 KURAGE_PULSE_BASE = 4         # flat damage per turn-end pulse, before the
                               # bank read (v0.4 starter rework: 2 -> 4).
-KURAGE_PULSE_PER_CHARGE = 2   # pulse gains this much damage PER POINT of
+KURAGE_PULSE_PER_CHARGE = 3   # pulse gains this much damage PER POINT of
                               # Charge. v0.4 starter rework ([USER]): the
                               # read flips from a DIVISOR (+1 per 4 Charge)
                               # to a MULTIPLIER (+N per Charge) — the design
@@ -336,7 +336,12 @@ KURAGE_PULSE_PER_CHARGE = 2   # pulse gains this much damage PER POINT of
                               # Silent shiv toss", i.e. one banked point
                               # buys roughly one shiv of damage.
                               #
-                              # R73 (Neap Tide v2.1, 2026-07-26): x4 -> x2.
+                              # R73 (Neap Tide v2.1, 2026-07-26): x4 -> x2,
+                              # then x2 -> x3 when E1 graded P6 and the
+                              # pre-committed weak-side fallback FIRED. The
+                              # landed value is x3; x2 is measured, rejected,
+                              # and kept on the record below because the
+                              # rejection is the reason x3 is here.
                               # The x4 WATCH note this replaces was right and
                               # is kept as the reason: Charge is uncapped and
                               # never spent (R80), so this term only ever
@@ -348,12 +353,27 @@ KURAGE_PULSE_PER_CHARGE = 2   # pulse gains this much damage PER POINT of
                               # touching the ACCRUAL side, which is the whole
                               # point of the knob-order commitment: the bank
                               # fills at the same rate, it just buys less.
-                              # The x1/x2/x4 bracket was pre-measured in the
-                              # v0.4 report, so this is a move to an already
-                              # instrumented point, not a new guess.
-                              # x3 is the pre-committed single fallback if
-                              # E1/E2 read weak-everywhere. Nothing else on
-                              # the accrual side moves with it.
+                              # E1 GRADING OF P6 (600 runs, seed 11, C4,
+                              # against same-world roster anchors). Act-1
+                              # clear across the rest of the roster spans
+                              # 57.5% (furina/fanfare) to 85.8% (klee/
+                              # reaction), with ref_ironclad at 62.2%.
+                              #   x2: her BEST plan cleared act 1 57.2% --
+                              #       below the roster floor -- and three of
+                              #       four plans sat far under it, with her
+                              #       best full-run win 5.2% vs the reference
+                              #       Ironclad's 6.3%. That is weak
+                              #       EVERYWHERE, not "mortal in acts 2-3",
+                              #       so P6's single pre-committed response
+                              #       fired.
+                              #   x3: priest 60.3 / commander 66.0 /
+                              #       generic 55.7 act-1, i.e. inside the
+                              #       band around ref_ironclad, and priest
+                              #       8.7% / commander 6.7% win.
+                              # assist stays weak at every value (2.0% win
+                              # even at x4). That is a PLAN problem and must
+                              # not be answered with this knob.
+                              # Nothing else on the accrual side moves.
 KURAGE_PULSE_BLOCK = 0        # Block granted by each pulse. v0.4 starter
                               # rework ([USER]) turned this OFF (was 2): the
                               # pulse is damage now, not mending. NOTE this
