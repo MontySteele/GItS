@@ -306,9 +306,20 @@ def floor_kind_labels(results: list[RunResult]) -> list[str]:
 
 
 def print_run_report(character: str, archetype: str, s: dict,
-                     node_kinds: list[str], survival: dict | None = None) -> None:
+                     node_kinds: list[str], survival: dict | None = None,
+                     *, stamp: str) -> None:
+    """Print the run report. `stamp` is MANDATORY (R68, 2026-07-26).
+
+    A report without a stamp line is not citable in a sprint doc or a
+    ruling, so it is a keyword-only required argument rather than an
+    optional courtesy -- an omitted stamp has to be a TypeError at the call
+    site, not a slightly thinner report that reads fine and cannot be
+    checked. Build it with `tier05.cells.Cell.stamp()`; passing a
+    hand-written string is allowed but is the thing R68 exists to stop.
+    """
     print(f"\n=== Tier 0.5 runs: {character}/{archetype} "
           f"({s['runs']} runs) ===")
+    print(f"  {stamp}")
     lo, hi = s["winrate_wilson95"]
     print(f"  run winrate      {s['winrate']:.1%} "
           f"({s['wins']}/{s['runs']}; Wilson 95% {lo:.1%}-{hi:.1%})")

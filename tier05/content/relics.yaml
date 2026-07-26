@@ -201,7 +201,8 @@ ancient:
     # they land they are siblings of this row, and the day there is a third
     # roster character wanting one, that is the day the table earns itself.
     #
-    # Klee's upgraded form is Explosive Frags: her per-detonation Spark income
+    # Klee's upgraded form is Dodoco Tales (displayed as "Explosive Frags"
+    # until R69 renamed it off the card): her per-detonation Spark income
     # is UNCHANGED (the relic keeps the base behaviour) and she banks a fixed
     # opening windfall. The doubling that was tried first was rejected at
     # red-pen -- it compounds with every bomb in the deck, where this dilutes

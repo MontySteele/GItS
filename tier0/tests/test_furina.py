@@ -189,21 +189,33 @@ def test_fanfare_decays_each_turn_but_never_below_the_floor():
                for ev in st.log)
 
 
-def test_flat_decay_still_works_when_the_fraction_is_disarmed():
-    """The flat shape is retained, not deleted: it is the fallback and the
-    thing the proportional sweep was measured against."""
+def test_the_flat_decay_shape_no_longer_exists():
+    """R67 (2026-07-26): proportional is the ONLY decay shape.
+
+    This test used to be `test_flat_decay_still_works_when_the_fraction_is
+    _disarmed`, and it passed by disarming the fraction to reach a branch
+    the ruled world could never reach. So the suite pinned a code path
+    production could not execute, while exp_furina_decay swept that same
+    path and reported five identical rows as a null result. The pin is now
+    the inverse: the knob is gone, and the shipped shape is measured.
+
+    Note what this test deliberately does NOT do: disarm the fraction and
+    check the result. FANFARE_DECAY_FRACTION is a RATE, not a switch --
+    there is no "off" any more, and adding an `if fraction <= 0: return 0`
+    guard to give it one would recreate exactly the unreachable branch R67
+    just deleted, since the ruled world holds the fraction at 0.20 forever.
+    So the test measures the world that exists.
+    """
+    assert not hasattr(C, "FANFARE_DECAY_PER_TURN")
+
     st = furina_state()
     p = st.player
     p.hand, p.draw_pile, p.discard_pile = [], [], []
     p.fanfare = 20
-    original = C.FANFARE_DECAY_FRACTION
-    try:
-        C.FANFARE_DECAY_FRACTION = 0.0
-        combat._player_turn(st, NULL_PILOT)      # turn 1 exempt
-        combat._player_turn(st, NULL_PILOT)
-        assert p.fanfare == 20 - C.FANFARE_DECAY_PER_TURN
-    finally:
-        C.FANFARE_DECAY_FRACTION = original
+    combat._player_turn(st, NULL_PILOT)      # turn 1 exempt
+    assert p.fanfare == 20
+    combat._player_turn(st, NULL_PILOT)
+    assert p.fanfare == 20 - round(20 * C.FANFARE_DECAY_FRACTION)
 
 
 def test_proportional_decay_takes_its_cut_and_still_clamps_at_the_floor():
@@ -375,12 +387,16 @@ def test_reads_behave_under_floors_and_decay():
     assert p.fanfare == 12
     assert effects._bonus_formula(st, "1_per_2_fanfare") == 6
 
-    # Above the floor, decay is visible in the read itself.
+    # Above the floor, decay is visible in the read itself. Expressed
+    # against the proportional shape, which R67 made the only one -- the
+    # old form subtracted the flat FANFARE_DECAY_PER_TURN (5) and agreed
+    # with the real answer only by the accident that 25//2 and 24//2 are
+    # both 12.
     p.fanfare = 30
     assert effects._bonus_formula(st, "1_per_2_fanfare") == 15
     combat._player_turn(st, NULL_PILOT)
     assert effects._bonus_formula(st, "1_per_2_fanfare") == \
-        (30 - C.FANFARE_DECAY_PER_TURN) // 2
+        (30 - round(30 * C.FANFARE_DECAY_FRACTION)) // 2
     assert crescendo and entrance                      # ids exist on the sheet
 
 
@@ -604,6 +620,16 @@ def test_unspotlighted_and_untagged_cards_unchanged():
 
 
 def test_self_spotlight_has_no_numeric_multiplier():
+    """Self aim is 1.0x, and it is 1.0x in CODE.
+
+    The `assert C.SPOTLIGHT_SELF_MULT == 1.0` that used to open this test
+    was struck by R67 with the constant: it read like a second check and
+    was worth nothing, because spotlight_mult() hard-codes its self-aim
+    early return and never consulted the constant. Had someone edited that
+    knob to 1.5 the assert would have failed while behavior was unmoved --
+    the test would have reported a change that could not happen. The
+    behavioral assert below is the one that was ever load-bearing.
+    """
     st = furina_state()
     st.player.spotlight = "furina"
     st.player.powers["spotlight_mult_bonus"] = 50
@@ -611,7 +637,6 @@ def test_self_spotlight_has_no_numeric_multiplier():
     effects.resolve_card(st, furina_card(
         effects=[{"op": "damage", "amount": 4, "applies_element": False}]))
     dmg = [ev for ev in st.log if ev["event"] == "damage"][0]
-    assert C.SPOTLIGHT_SELF_MULT == 1.0
     assert dmg["base"] == 4
 
 

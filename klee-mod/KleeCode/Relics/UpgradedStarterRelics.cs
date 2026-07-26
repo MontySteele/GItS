@@ -69,7 +69,8 @@ internal static class UpgradedStarterRelics
 }
 
 /// <summary>
-/// Klee's upgraded starter (Touch of Orobas). RATIFIED 2026-07-26.
+/// Klee's upgraded starter (Touch of Orobas), displayed as "Dodoco Tales".
+/// RATIFIED 2026-07-26.
 ///
 /// Her per-detonation Spark income is UNCHANGED at 1 -- this relic keeps the
 /// base behaviour rather than replacing it -- and she banks a fixed windfall
@@ -84,8 +85,30 @@ internal static class UpgradedStarterRelics
 /// strong for the slot, and the slot is an act-2 Ancient whose peers upgrade
 /// six cards.
 ///
-/// Named for her C2 constellation. The base-game convention is a DISTINCT name
-/// rather than a "+" suffix (Burning Blood -> Black Blood), so this follows it.
+/// THE MEASUREMENT TABLE ABOVE GRADES THIS RELIC, NOT THE CARD. Red-pen Part 1
+/// item 5 is titled "Explosive Frags", and until R69 that name belonged to two
+/// different game objects reachable in the same run: this relic and the Rare
+/// Power card `explosive_frags` (docs/klee-cards.yaml:193), which have
+/// unrelated effects. The audit flagged the citation as ambiguous. It is
+/// resolved here explicitly: the +2.3 / +7.1 / +5.0 figures are THIS object's,
+/// measured as the Orobas upgrade, and item 5's ratification at 3 opening
+/// Sparks is this object's ratification.
+///
+/// R69 (2026-07-26) settled the collision by renaming this side. The card was
+/// the prior arrival and the ratified sheet artifact, so it keeps its name and
+/// the relic yields. "Dodoco Tales" is Klee's signature catalyst, which keeps
+/// the relic in her personal register alongside Pounding Surprise -- and it
+/// still satisfies the base-game convention of a DISTINCT name for an upgraded
+/// starter rather than a "+" suffix (Burning Blood -> Black Blood).
+///
+/// The C# TYPE is deliberately still `ExplosiveFrags`. R69 ruled that "no
+/// mechanical change of any kind rides on this ruling", and a type rename is
+/// not reliably cosmetic here: relic identity is BaseLib's, not this repo's,
+/// so a renamed type risks moving the runtime relic id -- which in
+/// deterministic-lockstep co-op is a desync, not a cosmetic diff. The
+/// player-facing string is the thing the ruling renamed, and it is the thing
+/// renamed below. Both names are reserved in docs/reserved-card-names.txt so
+/// neither can be re-minted on the other side of the card/relic line.
 ///
 /// Sim parity: tier05/content/relics.yaml `touch_of_orobas_klee`, whose
 /// `combat_start_spark` hook is this class's opening bank. The per-detonation
@@ -120,7 +143,9 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Explosive Frags"),
+        // R69 (2026-07-26): was "Explosive Frags", which collided with the
+        // Rare Power card of that name. See the class summary.
+        ("title", "Dodoco Tales"),
         ("description",
             $"At the start of combat, gain {OpeningSparks} "
           + "[gold]Spark[/gold]. Whenever a [gold]Bomb[/gold] detonates, gain "

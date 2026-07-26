@@ -81,8 +81,10 @@ def _ancient_hook(relic_id: str, hook: str) -> int:
 
 
 MIRRORED: dict[str, object] = {
-    # Klee's upgraded starter (Touch of Orobas -> Explosive Frags). The sim's
-    # copy is a relic row, not a constant; see _ancient_hook.
+    # Klee's upgraded starter (Touch of Orobas -> Dodoco Tales). The sim's
+    # copy is a relic row, not a constant; see _ancient_hook. The key below
+    # is the C# TYPE name, which R69 deliberately left as ExplosiveFrags:
+    # only the player-facing string was renamed, so relic ids stay put.
     "ExplosiveFrags.OpeningSparks":
         _ancient_hook("touch_of_orobas_klee", "combat_start_spark"),
     # Shared elemental table (tier0/constants.py, reaction block).

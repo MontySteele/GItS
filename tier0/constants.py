@@ -94,19 +94,21 @@ SPOTLIGHT_BASE_MULT = 1.5     # PLACEHOLDER (R33 veto, 2026-07-20): the
                               # outward-Spotlight value.
                               # Window-zero forced-arm sweep {1.25,
                               # 1.5} decides (furina-pass3-rulings.md).
-SPOTLIGHT_SELF_MULT = 1.0     # DEAD KNOB (audit 2026-07-26 §2.1): zero
-                              # readers -- effects.spotlight_mult() hard-
-                              # codes the 1.0 self-aim early return and
-                              # never consults this. Sweeping it produces
-                              # identical rows (exp_furina_sheetpass C2 did
-                              # exactly that). Wire it or delete it before
-                              # any sweep cites it. Original intent:
-                              # Furina pays no hidden baseline tax: self aim
-                              # still drives Ovation/Fanfare, while numeric
-                              # empowerment is reserved for companions.
+# SPOTLIGHT_SELF_MULT: DELETED by R67 (2026-07-26). It had zero readers --
+# effects.spotlight_mult() hard-codes the 1.0 self-aim early return and never
+# consulted the constant -- so exp_furina_sheetpass block C2 swept three
+# guaranteed-identical cells. Those rows are STRUCK as instrument error, not
+# read as "the self rate doesn't matter". The rule it encoded still holds and
+# is now expressed only in code: Furina pays no hidden baseline tax, self aim
+# drives Ovation/Fanfare, and numeric empowerment is reserved for companions.
 SPOTLIGHT_GUEST_CAST = "__guest_cast__"  # all Companion cards share the light
-# Selector heuristic version (instrument stamp, the A6-v2 pattern —
-# never compare selector versions unlabeled):
+# Selector heuristic history. The SPOTLIGHT_SELECTOR_VERSION stamp that used
+# to sit at the end of this block was DELETED by R67 (2026-07-26): it was read
+# by nothing, so it stamped no report and could not have stopped anyone from
+# comparing selector versions unlabeled — the one job an instrument stamp has.
+# The history it guarded is real and stays here as documentation; the shipped
+# selector is v5, and "never compare selector versions unlabeled" survives as a
+# house rule rather than as a constant that pretended to enforce it.
 # v1 companions-always (sprint 1; measured harmful — 1-card guest
 #    hijack halved Ovation throughput);
 # v2 raw depth contest (passes 1-2; R33 found the companion branch
@@ -127,7 +129,6 @@ SPOTLIGHT_GUEST_CAST = "__guest_cast__"  # all Companion cards share the light
 #    multiplier; Guest Cast Spotlights every Companion card at the outward
 #    multiplier and generates no Fanfare from those plays. The selector picks
 #    Guest Cast when a Companion is ready in hand, otherwise Center Stage.
-SPOTLIGHT_SELECTOR_VERSION = 5
 SPOTLIGHT_CARDS_PER_TURN_CAP = None   # schematized but OFF (kickoff §3.2):
                               # turns on only if Tier 0 shows the rate
                               # asymmetry alone fails the §6 criterion.
@@ -163,8 +164,10 @@ FANFARE_PER_SPOTLIGHT_CARD = 2    # the Ovation merge: per Spotlighted
 # flux (above), DECAYS each turn, and is FLOORED by permanent constellation
 # grants. Encore is Furina's only managed resource. ---
 FANFARE_DECAY_FRACTION = 0.20 # PROPORTIONAL decay, as a fraction of the
-                              # meter, applied INSTEAD of the flat amount
-                              # when > 0. 0.0 = use FANFARE_DECAY_PER_TURN.
+                              # meter. This is the ONLY decay shape: R67
+                              # (2026-07-26) deleted the flat fallback knob
+                              # and its branch, so there is no longer an
+                              # "instead of" to read this against.
                               # RULED 20% by [USER] 2026-07-24, REVERSING
                               # the plan's flat-over-proportional direction
                               # on measurement: a flat subtraction is one
@@ -187,16 +190,15 @@ FANFARE_DECAY_FRACTION = 0.20 # PROPORTIONAL decay, as a fraction of the
                               # Always removes at least 1 while above the
                               # floor, so the meter cannot stall out at a
                               # value too small to round down.
-FANFARE_DECAY_PER_TURN = 5    # DEAD BRANCH (audit 2026-07-26 §2.1): the
-                              # flat fallback, reachable only when
-                              # FANFARE_DECAY_FRACTION == 0 -- which it is
-                              # not, and the 20% proportional ruling above
-                              # REVERSED the flat direction this comment
-                              # used to argue for. Sweeping this constant
-                              # while the fraction is live produces
-                              # identical rows (exp_furina_decay did
-                              # exactly that). Kept until [USER] rules on
-                              # deleting the flat branch outright.
+# FANFARE_DECAY_PER_TURN: DELETED by R67 (2026-07-26), together with the flat
+# branch in resources._decay_amount and the resources.py assert that guarded
+# it. It was reachable only when FANFARE_DECAY_FRACTION == 0, which the 20%
+# ruling above made permanently false, so exp_furina_decay's magnitude sweep
+# produced five identical rows that read as a null result about decay strength
+# and were nothing of the kind. Those rows are STRUCK as instrument error.
+# The historical flat-vs-proportional comparison that DECIDED the shape is
+# preserved in the FANFARE_DECAY_FRACTION comment above; it is a record, and
+# it is no longer reproducible in-tree because the flat shape no longer exists.
 # A constellation grant is STATIC value, not accrual: it does not grow with
 # time, so stalling still earns nothing and the no-passive-accrual law
 # (kickoff §4) is intact, not amended. Powers grant by rarity; the
@@ -368,11 +370,11 @@ POTION_BIG_HIT_FRACTION = 0.35    # a telegraphed enemy attack this large a
 
 # --- Pilot policy (spec §6) ---
 BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP
-PILOT_REGRET_SAMPLE_RATE = 0.01  # DEAD KNOB (audit 2026-07-26): zero
-                                 # readers -- pilot/policy._log_regret fires
-                                 # on EVERY play, so the reported regret
-                                 # rate is a full census, not a 1% sample.
-                                 # Do not scale by this when reading it.
+# PILOT_REGRET_SAMPLE_RATE: DELETED by R67 (2026-07-26). Zero readers, and
+# actively misleading while it existed -- pilot/policy._log_regret fires on
+# EVERY play, so every regret rate this repo has ever reported is a full
+# census. Anyone who found the constant and rescaled a regret number by 0.01
+# to "correct for sampling" would have been wrong by two orders of magnitude.
 
 # --- Degeneracy detectors (spec §8) ---
 RUNAWAY_SCALING_RATIO = 8.0   # DPT turn 10 > 8x DPT turn 3 -> SUPERLINEAR
@@ -539,13 +541,12 @@ SHOP_RELIC_PRICE = 150
 POTION_DROP_CHANCE = 0.40        # chance of a potion drop after a won N/E fight
 POTION_PRICE = 50                # shop price per potion ($ node auto-buy)
 
-# R7 directive 2: the second knob of the 2D rest-economy sweep. Scales
-# enemy ATTACK amounts in plain normal-pool fights only (not E/B/BC --
-# those are calibrated checks) to probe whether the 95%-of-rest-arrivals-
-# under-danger finding is a template attrition artifact. 1.0 = measured
-# reality of the battery statlines; the sweep varies it, the stamped
-# default does not move without a ruling.
-NORMAL_ATTRITION_SCALE = 1.0
+# NORMAL_ATTRITION_SCALE: DELETED by R67 (2026-07-26). It was written as the
+# second knob of the R7 2D rest-economy sweep -- scale enemy ATTACK in plain
+# normal-pool fights to test whether "95% of rest arrivals are under danger"
+# was a template artifact -- but nothing ever applied it, so the second axis
+# of that sweep was flat by construction. The finding it was meant to probe
+# is untested, not disproved; re-opening it means wiring a scalar first.
 REST_HEAL_FRACTION = 0.30         # rest option A: heal 30% of max HP
 REST_HEAL_THRESHOLD = 0.65        # rest policy: heal below this HP
 # M7: below DANGER always heal; between DANGER and HEAL_THRESHOLD an
@@ -560,22 +561,24 @@ REST_SMITH_DANGER = 0.40
 # under v4 runs walked into guaranteed elites at ~48/80 HP (§10.8.1).
 REST_PREFIGHT_HEAL_THRESHOLD = 0.90
                                   # fraction, otherwise remove a card
-PUNISHER_LITE_SCALE = 0.70        # normal-pool punisher at 70% statline
-ATTRITION_LITE_HP = 45            # normal-pool attrition: ONE 45 HP unit
-NORMAL_POOL_WEIGHTS = {           # weighted normal-encounter pool
-    "swarm": 1.0, "attrition_lite": 1.0, "punisher_lite": 1.0}
+# PUNISHER_LITE_SCALE / ATTRITION_LITE_HP / NORMAL_POOL_WEIGHTS: DELETED by
+# R67 (2026-07-26). They described a weighted "lite" normal-encounter pool
+# (a 70%-statline punisher and a single 45 HP attrition unit alongside swarm)
+# that no code ever built -- tier05 draws its normal fights from the real
+# battery statlines. The three read as a live encounter-pool spec while
+# specifying nothing; rebuilding a lite pool means designing it again, not
+# uncommenting these.
 
-# DEAD (audit 2026-07-26 §6): applied by NOTHING since the real-statline
-# roster swap -- tier05/model.py deliberately does not read it, and its
-# only remaining reference was the superseded tools/archive/
-# roster_scale_gap.py. Kept as a tombstone until [USER] rules on deletion
-# (it is nominally FROZEN per DECISIONS §triage). Historical record:
-# Triage ruling 3b: ONE number per node-tier standing in for the missing
-# upgrades+relics power growth — NOT a model of them. Grid-searched on the
-# REF_IRONCLAD anchor only, until anchor run completion hit 45%+-10, then
-# frozen (same behavioral-calibration method as the M2 battery).
-# FROZEN 2026-07-19: anchor completion 47.9% at 1000 runs.
-PROGRESSION_GAP_COMPENSATOR = {"normal": 1.0, "elite": 0.8, "boss": 0.7}
+# PROGRESSION_GAP_COMPENSATOR: DELETED by R67 (2026-07-26). Applied by NOTHING
+# since the real-statline roster swap -- tier05/model.py deliberately does not
+# read it (see its note at :86), and its last reference died with
+# tools/archive/roster_scale_gap.py. Historical record, since the constant was
+# nominally FROZEN and is cited in DECISIONS §57 / triage ruling 3b: it was ONE
+# number per node-tier standing in for the missing upgrades+relics power growth
+# -- NOT a model of them -- grid-searched on the REF_IRONCLAD anchor only until
+# anchor run completion hit 45%+-10, then frozen at {normal 1.0, elite 0.8,
+# boss 0.7} on 2026-07-19 with anchor completion 47.9% at 1000 runs. The
+# FROZEN status is preserved as a record; the object it froze is gone.
 
 # --- Tier 0.5 rewards (spec §3 — the thing under test) ---
 REWARD_CARD_OFFERS = 3
@@ -702,3 +705,68 @@ DRAFT_REGRET_SAMPLE = 0.10        # fraction of decisions re-scored post-run
 # than in tier05.draft because the content loader also needs it, and tier0 must
 # not import tier05.
 AMP_PAYOFF_POWERS = {"amp_reaction_up"}
+
+
+# =========================================================================
+# Sweep instrumentation (R67, 2026-07-26). NOT a balance knob -- machinery.
+#
+# The audit found two live sweeps tuning constants the engine never reads
+# (SPOTLIGHT_SELF_MULT, FANFARE_DECAY_PER_TURN), each printing a set of
+# guaranteed-identical rows that read as a null result about the knob. R33
+# had already found the same class once (selector circularity), so R67
+# graduated the KNOB_READS counter from an opt-in courtesy to a gate.
+#
+# The mechanism has to survive the R33 exercise-counter law: "the gate may
+# not be satisfied by adding artificial reads." So it does not count reads
+# the engine was asked to self-report. When the sweep harness arms a knob it
+# REMOVES the name from this module's namespace and parks the value in
+# _SWEPT, which routes every subsequent `C.<KNOB>` through the hook below.
+# What gets counted is therefore the real attribute access from real engine
+# code on the real read path -- a knob nothing reads records zero, and no
+# amount of instrumenting the knob can change that.
+#
+# Every consumer in this repo reads knobs as module attributes
+# (`from tier0 import constants as C`), which is what makes this total; a
+# `from tier0.constants import X` would bind at import time and slip the
+# hook. Do not introduce one.
+#
+# Arm and disarm only through tier05.sweeps -- never poke _SWEPT directly.
+# =========================================================================
+_SWEPT: dict = {}
+
+
+def __getattr__(name: str):
+    """Serve armed sweep values, counting each read (PEP 562).
+
+    Python only calls this when normal lookup fails, so it costs nothing
+    outside a sweep: unarmed knobs are ordinary module globals.
+    """
+    if name in _SWEPT:
+        from tier0.engine import effects
+        effects.KNOB_READS[name] = effects.KNOB_READS.get(name, 0) + 1
+        return _SWEPT[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def _arm_knob(name: str, value):
+    """Park `value` for `name` behind the read hook. Returns the original.
+
+    Raises if the knob does not exist -- a typo'd knob name would otherwise
+    sweep nothing at all and report a clean null, which is the exact defect
+    this machinery exists to catch.
+    """
+    if name in _SWEPT:
+        raise RuntimeError(f"{name} is already armed; nested sweeps of one "
+                           f"knob cannot be unwound in order")
+    g = globals()
+    if name not in g:
+        raise AttributeError(f"no such constant: {name!r}")
+    original = g.pop(name)
+    _SWEPT[name] = value
+    return original
+
+
+def _disarm_knob(name: str, original) -> None:
+    """Restore `name` to a plain module global holding `original`."""
+    _SWEPT.pop(name, None)
+    globals()[name] = original

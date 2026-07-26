@@ -48,10 +48,15 @@ def gain_fanfare(state: CombatState, n: int, source: str) -> None:
 
 
 def _decay_amount(p) -> int:
-    """How much the meter fades this turn: flat, or proportional when the
-    fraction knob is armed. One shape at a time -- the fraction takes
-    precedence so a sweep can switch shapes without touching the flat value
-    it is being compared against.
+    """How much the meter fades this turn: PROPORTIONAL, always.
+
+    R67 (2026-07-26) deleted the flat shape outright. There used to be a
+    second branch here returning FANFARE_DECAY_PER_TURN whenever the
+    fraction was 0, described as "one shape at a time so a sweep can switch
+    shapes" -- but the 20% ruling made the fraction permanently nonzero, so
+    the flat branch was unreachable and the sweep that switched shapes
+    reported five identical rows. The ruled world is 20% proportional, full
+    stop, and it is now the only world this function can express.
 
     The proportional form takes its cut of the WHOLE meter and lets the
     floor clamp protect the baseline, rather than taking a cut of the amount
@@ -63,11 +68,9 @@ def _decay_amount(p) -> int:
     At least 1 always comes off while above the floor, so a small meter
     cannot stall at a value that rounds down to nothing.
     """
-    if C.FANFARE_DECAY_FRACTION > 0:
-        if p.fanfare <= p.fanfare_floor:
-            return 0
-        return max(1, round(p.fanfare * C.FANFARE_DECAY_FRACTION))
-    return C.FANFARE_DECAY_PER_TURN
+    if p.fanfare <= p.fanfare_floor:
+        return 0
+    return max(1, round(p.fanfare * C.FANFARE_DECAY_FRACTION))
 
 
 def decay_fanfare(state: CombatState) -> None:
@@ -77,9 +80,9 @@ def decay_fanfare(state: CombatState) -> None:
     opening hand plays against what the player actually built rather than
     against an immediate tax. PROPORTIONAL (20% of current, min 1) by
     [USER] ruling 2026-07-24 -- see FANFARE_DECAY_FRACTION, which REVERSED
-    the plan's flat-over-proportional direction; the flat
-    FANFARE_DECAY_PER_TURN branch below is unreachable while the fraction
-    is nonzero (audit 2026-07-26 §2.1).
+    the plan's flat-over-proportional direction. The flat alternative it
+    reversed no longer exists in the tree at all: R67 deleted the knob and
+    its unreachable branch (audit 2026-07-26 §2.1).
 
     This is the load-bearing half of the read-only rework: without it the
     pool sits pinned at its ceiling and every card that "scales with

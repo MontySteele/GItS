@@ -36,12 +36,14 @@ import collections
 import statistics
 import sys
 
-from tier0 import constants as C
 from tier0.content import loader
-from tier05 import draft, fanfare_telemetry, model
+from tier05 import cells, draft, fanfare_telemetry
 
-SEED = 11            # the sprint's registered seed
-RUNS = 200
+# R68: derived from the ratified cell rather than hand-rolled. The runs
+# count is a DECLARED delta -- the ghost check runs 200/arm across three
+# arms where the canonical cell is 600 on one -- and `but()` renames the
+# cell so the stamp says so instead of claiming to be the canonical run.
+BASE = cells.CANONICAL.but(name="furina-ghostcheck", runs=200)
 ARMS = ("fanfare", "salon", "spotlight")
 
 
@@ -49,71 +51,56 @@ def _decks(results: list) -> list[list]:
     return [[loader.peek_card(cid) for cid in r.deck_ids] for r in results]
 
 
-def _arm(archetype: str, runs: int, route_name: str, jobs: int) -> dict:
-    results = model.run_many("furina", archetype, archetype,
-                             draft.assigned_policy, runs, SEED,
-                             grant_relics=True, grant_potions=True,
-                             jobs=jobs, route_name=route_name)
+def _arm(cell) -> dict:
+    """The shared reducer plus this script's Fanfare-specific columns.
+
+    R68 consolidated the common half into `Cell.arm()` -- win / act-1 /
+    acts / decksize / fights, which three scripts each computed their own
+    slightly different way. What stays here is what is genuinely local: the
+    Fanfare telemetry and the payoff-reach count, which no other experiment
+    prints.
+    """
+    a = cell.arm()
+    results = a["results"]
     decks = _decks(results)
     traces = [tr for r in results for _, tr in r.fanfare_traces]
     agg = fanfare_telemetry.aggregate(traces)
     payoffs = [sum(1 for c in d if draft._reads_fanfare(c)) for d in decks]
-    return {
-        "results": results,
-        "decks": decks,
-        "win": sum(r.won for r in results) / len(results),
-        # acts_completed counts boss wins, so >= 1 IS the act-1 clear.
-        "act1": sum(r.acts_completed >= 1 for r in results) / len(results),
+    a.update({
+        "decks": decks,             # card objects here, not ids
         "payoffs": statistics.mean(payoffs),
-        "decksize": statistics.mean(len(d) for d in decks),
-        "online": sum(draft.core_complete(d, archetype) for d in decks)
+        "online": sum(draft.core_complete(d, cell.archetype) for d in decks)
                   / len(decks),
         "mean_at_read": agg.get("mean_at_read", 0.0),
         "read_at_cap": agg.get("read_at_cap", 0.0),
         "floors": fanfare_telemetry.per_run(
             agg, len(results)).get("floor_granted_per_run", 0.0),
-        # Fights per run is a CONSTANT no longer: a route decides how many
-        # fights a run takes. Printed so any per-combat figure quoted off this
-        # sweep can be rescaled honestly instead of against a template.
-        "fights": statistics.mean(len(r.fight_stats) for r in results),
-    }
+    })
+    return a
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = list(sys.argv[1:] if argv is None else argv)
-    runs, route_name, jobs = RUNS, "hunter", 0
-    for flag, cast in (("--runs", int), ("--route", str), ("--jobs", int)):
-        if flag in args:
-            i = args.index(flag)
-            value = cast(args[i + 1])
-            del args[i:i + 2]
-            if flag == "--runs":
-                runs = value
-            elif flag == "--route":
-                route_name = value
-            else:
-                jobs = value
+    base, _ = cells.parse_overrides(
+        list(sys.argv[1:] if argv is None else argv), BASE)
 
-    print("=" * 78)
     # Read the stamp, never hard-code it. This script exists to catch a world
     # changing under a measurement, so a banner that names a version by hand
     # is the one line guaranteed to be wrong the next time it matters -- and
-    # it was, one bump after it was written.
-    print(f"FURINA GHOST CHECK under RUNTEMPLATE_VERSION "
-          f"{C.RUNTEMPLATE_VERSION} — {runs} runs/arm, "
-          f"seed {SEED}, route {route_name}")
+    # it was, one bump after it was written. R68's stamp line is that lesson
+    # made mandatory for every report in the repo.
+    cells.print_header(base, "FURINA GHOST CHECK",
+                       f"furina, {len(ARMS)} assigned arms")
     print("  Archive comparison (RUNTEMPLATE 5, seed 11): fanfare 1.3% win / "
           "44.0% act-1,")
     print("  payoff reach 1.99 per ~18.4-card deck. Gate (1): win >= 3% AND "
           "act-1 >= 50%.")
-    print("=" * 78)
     print(f"\n  {'arm':>10} {'win':>7} {'act-1':>7} {'payoffs':>8} "
           f"{'deck':>6} {'reach':>7} {'online':>7} {'mean@read':>10} "
           f"{'floors/run':>11} {'fights':>7}")
 
     arms = {}
     for archetype in ARMS:
-        a = _arm(archetype, runs, route_name, jobs)
+        a = _arm(base.but(archetype=archetype))
         arms[archetype] = a
         gate = "  <-- GATE (1)" if (a["win"] >= 0.03
                                     and a["act1"] >= 0.50) else ""

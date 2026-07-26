@@ -135,7 +135,9 @@ def apply_combat_start(state: CombatState) -> None:
             for enemy in list(state.living_enemies):
                 refpowers.unpowered_damage(state, enemy, amt)
         elif hook == "combat_start_spark":
-            # Klee's upgraded starter (Explosive Frags, red-pen item 5).
+            # Klee's upgraded starter (Dodoco Tales, red-pen item 5 -- the
+            # relic displayed as "Explosive Frags" until R69 renamed it off
+            # the Rare Power card of that name).
             # A WINDFALL, not a rate: the rejected design doubled her
             # per-detonation income, which compounds with every bomb she
             # ever plays; this is a fixed opening bank that a long fight

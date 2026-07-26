@@ -68,6 +68,66 @@ def test_card_names_are_unique():
          *sheets],
         capture_output=True, text=True)
     assert res.returncode == 0, res.stdout + res.stderr
+    # R69: relics are in the namespace too, and the lint must be SEEING them
+    # -- a gate that scans zero relic files reports the same clean line as one
+    # that scans them all (the §3.1/§3.7 dead-gate class).
+    assert "relic names unique" in res.stdout
+    assert " 0 relic " not in res.stdout
+
+
+def test_a_card_relic_name_collision_fails_the_lint(tmp_path):
+    """R69's negative test.
+
+    Until R69 this exact collision existed and the lint was green: the Klee
+    Rare Power card `explosive_frags` and Klee's Orobas relic upgrade both
+    displayed "Explosive Frags", with unrelated effects, both reachable in
+    one run. The lint read card sheets only, so relics were outside its
+    scope while being squarely inside its purpose.
+
+    Built as a synthetic sheet against the REAL relic sources, so it fails
+    if the relic reader stops finding relics -- which is the way a gate like
+    this dies.
+    """
+    lint = str(REPO / "tools" / "lint_unique_names.py")
+    sheet = tmp_path / "collide.yaml"
+    # "Dodoco Tales" is a real, live relic name. Minting a card with it is
+    # precisely the mistake the extended lint exists to refuse.
+    sheet.write_text(
+        'cards:\n'
+        '- {id: fake_collider, name: "Dodoco Tales", cost: 1, type: skill,\n'
+        '   rarity: common}\n', encoding="utf-8")
+
+    res = subprocess.run([sys.executable, lint, str(sheet)],
+                         capture_output=True, text=True)
+    assert res.returncode == 1, (
+        "a card taking a live relic's display name must fail the lint\n"
+        + res.stdout + res.stderr)
+    assert "Dodoco Tales" in res.stdout
+    assert ("CROSS-KIND NAME COLLISION" in res.stdout
+            or "RESERVED NAME" in res.stdout), res.stdout
+
+
+def test_the_reserved_list_does_not_fail_the_names_it_protects(tmp_path):
+    """The other half of R69's reserved-both-sides rule.
+
+    "Explosive Frags" and "Dodoco Tales" are BOTH reserved, so a naive
+    reserved check would fail the card and the relic that legitimately hold
+    them -- and the usual fix for that (drop the entries) is exactly what
+    lets the collision re-form from the other side. The kind annotation is
+    what makes reserving both sides survivable, so it needs its own pin.
+    """
+    lint = str(REPO / "tools" / "lint_unique_names.py")
+    sheet = tmp_path / "owner.yaml"
+    sheet.write_text(
+        'cards:\n'
+        '- {id: explosive_frags, name: "Explosive Frags", cost: 1,\n'
+        '   type: power, rarity: rare}\n', encoding="utf-8")
+
+    res = subprocess.run([sys.executable, lint, str(sheet)],
+                         capture_output=True, text=True)
+    assert res.returncode == 0, (
+        "the card that OWNS a card-owned reserved name must pass\n"
+        + res.stdout + res.stderr)
 
 
 def test_mirrored_constants_match_the_sim():
