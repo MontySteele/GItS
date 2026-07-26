@@ -191,6 +191,23 @@
    # with that flag ON THE RECORD — first knob back if the priest lane runs hot in a later pass.
    # NAME: "Kurage's Oath" is her actual Elemental Skill (wiki-verified) and was unused
    # by this pool; the oath is that she mends. [USER]-only naming audit as ever.
+- {id: before_sun_and_moon, name: "Before Sun and Moon", cost: 1, type: power, rarity: uncommon, solve: [scaling],
+   archetypes: [priest, generic], role: payoff,
+   effects: [{op: apply_power, power: kurage_amp, amount: 1, target: self}]}
+   # R73 (Neap Tide v2.1). SOLE EFFECT: +1 to the Kurage pulse MULTIPLIER. The one sanctioned way back up
+   # from R73's cut of KURAGE_PULSE_PER_CHARGE (4 -> 3), and deliberately a DRAFT cost rather than a free
+   # baseline: the cut lowered what everyone gets, this sells the slope back to decks that commit a card slot.
+   # STACKING, [USER]-ratified at G2 over a ban on the effect class. Two copies read the bank at +2, and the
+   # objection ("multiple copies compound on an uncapped bank") was heard and overruled: draft dilution
+   # self-corrects at full roster. It is a C4 telemetry WATCH -- stack counts are reported, with no threshold
+   # (R14) -- not a rule. The pair is the thing to look at first if the priest lane runs hot.
+   # WHY THIS IS THE STEEPEST CARD ON THE SHEET, said plainly so nobody re-prices it casually: it multiplies a
+   # bank that is uncapped and never spent (R80), so its value is unbounded in run length. Every other scaling
+   # card here adds a term; this one moves a coefficient.
+   # NAME: Enkanomiya, the sunless realm the Watatsumi people fled — its history is the forbidden knowledge she
+   # is heir to, and "before sun and moon" is when it was written. A1O reserved the name via lint_unique_names.
+   # COST 1 IS PROPOSED, matching the other Uncommon powers on this sheet (mercy_of_the_currents, pearl_current).
+   # R73 ratified the EFFECT and the rarity; the cost is this pass's proposal and is a first knob if E2 reads hot.
 
 # ---------- COMMON, v0.5 PARTIAL FILL (+12: 13 -> 25) ----------
 # Balanced 3 per lane so the fill does not quietly re-weight the archetypes; attack-weighted (4 of 12) because

@@ -16,7 +16,7 @@ kurages_oath:      {innate: true}        # [USER]: the upgrade buys INNATE ONLY 
                                          # so the upgrade sells consistency (online turn 1, not drawn on
                                          # turn 6) instead of more of it.
 bake_kurage:       {kurage_turns: +1}    # v0.4 starter rework: 1->2 turns on the field, i.e. ONE extra
-                                         # pulse — which at the x4 bank read is the whole upgrade. The pulse numbers are constants and
+                                         # pulse — which at the bank read (x3 since R73, was x4) is the whole upgrade. The pulse numbers are constants and
                                          # the +1 Charge never moves (resource-curve law) — duration is the
                                          # only dial an upgrade owns, and one more pulse is the honest reward.
 tactical_retreat:  {draw: +1}            # burn 1, see 2 — the exhaust-teacher graduates
@@ -88,6 +88,15 @@ read_the_current:  {damage: +3}          # the ALWAYS-LIVE half, 7->10 (so 13->1
 quiet_harbor:      {block: +3}           # played 6->9; the Sly draw stays 2 (header gap note)
 driftglass:        {damage: +3}          # played 8->11; the Sly hit stays 5 (header gap note)
 pearl_current:     {power_amount: +2}    # metallicize 3->5 (mercy_of_the_deep-parity slope)
+before_sun_and_moon: {power_amount: +1}  # kurage_amp 1->2. NOT the +2 pearl_current takes, deliberately:
+                                         # every other power on this sheet adds a TERM, and this one moves a
+                                         # COEFFICIENT on a bank that is uncapped and never spent (R80), so
+                                         # the same printed delta is not the same power. +1 here already
+                                         # doubles the card. It is also legal under the resource-curve law by
+                                         # the narrow reading -- Charge ACCRUAL does not move, only what a
+                                         # point of it buys -- and that reading is worth stating, because a
+                                         # coefficient on the engine's output is the closest this sheet comes
+                                         # to selling a faster engine without technically being one.
 the_tide_remembers: {damage: +3}         # the base wave, 4->7 to all (so 9->12 over the bar); pile bar stays 6
 
 # ---- RARES (quality over quantity) ----

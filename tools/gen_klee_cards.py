@@ -423,6 +423,11 @@ APPLY_POWERS = {
         "your draw pile."),
     "kurage_ward": ("KurageWardPower", None,
         "Each [gold]Bake-Kurage[/gold] pulse also grants {X} Block."),
+    # R73/G2. No cap: the stacking is the ruling, not an oversight, and a cap
+    # here would implement the ban [USER] considered and rejected.
+    "kurage_amp": ("KurageAmpPower", None,
+        "Each [gold]Bake-Kurage[/gold] pulse reads your [gold]Charge[/gold] "
+        "for {X} more damage per point."),
     "feel_no_pain": ("FeelNoPainPower", None,
         "Whenever a card is [gold]Exhausted[/gold], gain {X} Block."),
     "dark_embrace": ("DarkEmbracePower", None,

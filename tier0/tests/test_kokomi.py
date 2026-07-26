@@ -347,6 +347,47 @@ def test_kurage_pulse_reads_the_bank_and_grants_block():
     assert st.player.powers["kurage_summon"] == C.KURAGE_DURATION - 1
 
 
+def test_before_sun_and_moon_raises_the_multiplier_and_stacks():
+    """R73/G2. The stacking is the RATIFIED part, so it is the pinned part.
+
+    [USER] closed G2 by allowing multiple copies to compound, explicitly over
+    a ban on the effect class -- so a later pass that "fixes" this into a
+    single-application power would be reversing a ruling, not tidying an
+    oversight. The card multiplies an uncapped, never-spent bank (R80), which
+    is exactly why the compounding was contentious and exactly why it must
+    fail loudly if someone caps it.
+    """
+    for copies in (1, 2, 3):
+        st = kokomi_state()
+        e = st.enemies[0]
+        st.player.charge = 10
+        st.player.powers["kurage_summon"] = C.KURAGE_DURATION
+        st.player.powers["kurage_amp"] = copies
+        hp0 = e.hp
+        effects.player_turn_end_triggers(st)
+        expected = C.KURAGE_PULSE_BASE + 10 * (C.KURAGE_PULSE_PER_CHARGE + copies)
+        assert hp0 - e.hp == expected, (
+            f"{copies} copies of Before Sun and Moon must read the bank at "
+            f"+{copies}; G2 ratified stacking over a ban")
+
+
+def test_the_pulse_event_carries_the_amp_for_the_overlap_watch():
+    """C4 reports stack counts, and it reads them off the event.
+
+    Separating "the bank got bigger" from "the multiplier got bought" is the
+    whole point of the overlap watch; re-deriving the amp from the deck list
+    later would miss copies gained mid-run.
+    """
+    st = kokomi_state()
+    st.player.charge = 4
+    st.player.powers["kurage_summon"] = C.KURAGE_DURATION
+    st.player.powers["kurage_amp"] = 2
+    effects.player_turn_end_triggers(st)
+    (ev,) = [e for e in st.log if e["event"] == "kurage_pulse"]
+    assert ev["amp"] == 2
+    assert ev["charge"] == 4
+
+
 def test_kurage_summon_expires_and_stops_pulsing():
     st = kokomi_state()
     st.player.powers["kurage_summon"] = 1

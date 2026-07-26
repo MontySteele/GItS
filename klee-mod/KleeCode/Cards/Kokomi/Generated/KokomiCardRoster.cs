@@ -18,6 +18,7 @@ public static class KokomiCardRoster
     {
         ModelDb.Card<AllStreamsFlow>(),
         ModelDb.Card<BakeKurage>(),
+        ModelDb.Card<BeforeSunAndMoon>(),
         ModelDb.Card<CleansingTide>(),
         ModelDb.Card<CommunionOfTides>(),
         ModelDb.Card<ConscriptionNotice>(),

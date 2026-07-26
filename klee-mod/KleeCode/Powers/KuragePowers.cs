@@ -51,7 +51,23 @@ public sealed class KurageSummonPower : PowerModel, ILocalizationProvider
     /// </summary>
     public static int PulseDamage(Creature? owner) =>
         KokomiConstants.KuragePulseBase
-        + KokomiConstants.KuragePulsePerCharge * KokomiResources.GetCharge(owner);
+        + PulseMultiplier(owner) * KokomiResources.GetCharge(owner);
+
+    /// <summary>
+    /// The bank read, INCLUDING every copy of Before Sun and Moon (R73/G2).
+    ///
+    /// Mirrors tier0 `player_turn_end_triggers`:
+    ///     multiplier = KURAGE_PULSE_PER_CHARGE + powers["kurage_amp"]
+    ///
+    /// Stacking is [USER]-ratified (G2) over a ban on the effect class, so
+    /// the sum here is the ruling and not an accident of PowerStackType.
+    /// It sits behind PulseDamage rather than at the call site so the card
+    /// face, the hover tip and the hit cannot disagree -- the Furina
+    /// legibility lesson, which is why PulseDamage was made public at all.
+    /// </summary>
+    public static int PulseMultiplier(Creature? owner) =>
+        KokomiConstants.KuragePulsePerCharge
+        + (owner?.Powers.OfType<KurageAmpPower>().FirstOrDefault()?.Amount ?? 0);
 
     public override async Task BeforeSideTurnEnd(
         PlayerChoiceContext choiceContext, CombatSide side,
@@ -176,6 +192,52 @@ public sealed class KurageWardPower : PowerModel, ILocalizationProvider
         var power = owner.Powers.FirstOrDefault(p => p is KurageWardPower);
         return power == null ? 0 : (int)power.Amount;
     }
+}
+
+/// <summary>
+/// "Before Sun and Moon" (R73, Neap Tide v2.1). +1 to the Bake-Kurage pulse
+/// MULTIPLIER, and it stacks.
+///
+/// SHARED SCHEMA NOTE (sprint exit criterion). The sim models this as an
+/// ordinary integer power, `powers["kurage_amp"]`, summed straight into the
+/// multiplier; here it is a Counter PowerModel whose Amount is summed the
+/// same way by <see cref="KurageSummonPower.PulseMultiplier"/>. The two
+/// representations differ -- a dict entry against a power instance -- but the
+/// ARITHMETIC is identical and neither side caps. That matters because
+/// PowerStackType is the kind of thing a later reader "fixes": switching this
+/// to Single would silently implement the stacking BAN that [USER] considered
+/// and rejected at G2, and it would do so without touching a number anyone
+/// would think to re-measure. tier0's
+/// test_before_sun_and_moon_raises_the_multiplier_and_stacks is the sim-side
+/// pin; this comment is the C#-side one, because there is no C# test project.
+///
+/// It multiplies an uncapped, never-spent bank (R80), so it is the steepest
+/// term on her sheet: every other scaling card adds a term, this moves a
+/// coefficient. C4 reports stack counts with no threshold (R14).
+///
+/// KNOWN LEGIBILITY GAP, flagged not hidden: KurageSummonPower's own
+/// description prints the BASE multiplier, because Localization is resolved
+/// on the canonical model and has no owner to read an amp off. So a player
+/// holding two copies sees the Bake-Kurage text quote the unamped number
+/// while the hit uses the amped one. The hit and the tip are still in sync
+/// (both route through PulseDamage); it is the static face text that lags.
+/// Closing it needs the DynamicVar treatment the Furina legibility sprint
+/// gave her riders, which is a bigger change than this ruling authorises.
+/// </summary>
+public sealed class KurageAmpPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Before Sun and Moon"),
+        ("description",
+            "Each [gold]Bake-Kurage[/gold] pulse reads your "
+          + "[gold]Charge[/gold] for {Amount} more damage per point."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    // Counter, NOT Single. See the stacking note above -- this is a ruling.
+    public override PowerStackType StackType => PowerStackType.Counter;
 }
 
 /// <summary>
