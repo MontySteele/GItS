@@ -1,11 +1,12 @@
-"""Act maps: the real StS2 17-floor DAG, generated per act (§11).
+"""Act maps: the real StS2 map DAG (16 modelled floors), generated per act (§11).
 
 Replaces the fixed `RUN_NODE_TEMPLATE` spine. Research and the numbers behind
 every constant: `docs/sts2-map-and-events-research.md` §1.
 
 Shape (wiki-real, A0):
-  - 17 floors, up to MAX_FLOOR_WIDTH rooms each, 1-3 edges per room to the
-    floor above.
+  - MAP_FLOORS = 16 modelled floors (the wiki's floor 17, the boss chest, is
+    folded into the boss reward -- see below), up to MAX_FLOOR_WIDTH rooms
+    each, 1-3 edges per room to the floor above.
   - Fixed floors: 1 = easy-pool monsters, 9 = Treasure, 15 = Rest, 16 = Boss.
     Floor 17 (the boss chest) is folded into the boss reward, not a room.
   - Every other room rolls its own type from ROOM_ODDS.

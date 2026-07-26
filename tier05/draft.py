@@ -5,8 +5,10 @@ Assigned mode: the run is seeded with a target archetype. Scoring terms:
   is GATED on the core being online (else you draft win-more blanks)
 - Fanfare exception: native meter movement + one direct-output spender is
   the core; surplus generation diminishes instead of filling four fake slots
-- printed power and conservative mitigation proxies (DRAFTER_VERSION 3;
-  v2 counted only direct damage/Block and made Bombs/debuffs invisible)
+- printed power and conservative mitigation proxies (added at drafter v3;
+  v2 counted only direct damage/Block and made Bombs/debuffs invisible.
+  The LIVE stamp is DRAFTER_VERSION in tier0/constants.py -- this module
+  deliberately does not define one, so do not read a version off this file)
 - universal: defense quota (the real-draft principle codified), curve
   awareness, deck-size penalty (steeper for reaction — ruling R2.2)
 (The old Burst-priority term left with v1.9: the Burst is kit, never

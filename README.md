@@ -29,7 +29,7 @@ Prerequisites (one-time):
    publicly). The art pipeline's output is expected under
    `ImageGen/images/cards/`; without it, cards fall back to placeholders.
 6. The character-select `.pck` is also built locally:
-   `klee-mod/tools/build_pck.ps1`.
+   `tools/build_pck.ps1`.
 
 Build, validate, and deploy into the game's `mods/` folder (game must be
 closed — it holds a lock on the dll):

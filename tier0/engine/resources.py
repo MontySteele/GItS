@@ -75,8 +75,11 @@ def decay_fanfare(state: CombatState) -> None:
 
     Applied at the START of the player turn and only from turn 2, so the
     opening hand plays against what the player actually built rather than
-    against an immediate tax. Flat rather than proportional by ratified
-    design -- see FANFARE_DECAY_PER_TURN for why the tooltip argument won.
+    against an immediate tax. PROPORTIONAL (20% of current, min 1) by
+    [USER] ruling 2026-07-24 -- see FANFARE_DECAY_FRACTION, which REVERSED
+    the plan's flat-over-proportional direction; the flat
+    FANFARE_DECAY_PER_TURN branch below is unreachable while the fraction
+    is nonzero (audit 2026-07-26 §2.1).
 
     This is the load-bearing half of the read-only rework: without it the
     pool sits pinned at its ceiling and every card that "scales with

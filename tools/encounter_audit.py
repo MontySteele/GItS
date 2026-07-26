@@ -7,7 +7,7 @@ beat this fight if they arrived healthy? Full HP removes attrition, and using
 the REAL decks of runs that reached that act removes progression. What is left
 is the encounter itself.
 
-USE THIS, not tools/roster_scale_gap.py, to ask whether a roster is
+USE THIS, not tools/archive/roster_scale_gap.py (superseded, archived), to ask whether a roster is
 over-tuned. roster_scale_gap runs ONE fixed deck against everything, which
 conflates "this fight is out of scale" with "this is an act-1 deck fighting
 act-3 content" -- an error this project made on 2026-07-24 and corrected the

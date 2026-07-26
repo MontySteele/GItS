@@ -154,8 +154,16 @@ def lint_sheet(path: Path) -> tuple[list[str], list[str]]:
 
 
 def main(argv: list[str]) -> int:
-    paths = [Path(a) for a in argv] or [REPO / "docs" / "klee-cards.yaml",
-                                        REPO / "docs" / "furina-cards.yaml"]
+    # Default = every canonical sheet (the pytest gate fans over the same
+    # set); the old two-sheet default silently skipped Kokomi + companions
+    # for anyone running the tool by hand.
+    paths = [Path(a) for a in argv] or [
+        REPO / "docs" / "klee-cards.yaml",
+        REPO / "docs" / "furina-cards.yaml",
+        REPO / "docs" / "kokomi-cards.yaml",
+        REPO / "docs" / "mondstadt-companions.yaml",
+        REPO / "docs" / "fontaine-companions.yaml",
+        REPO / "docs" / "inazuma-companions.yaml"]
     findings: list[str] = []
     for p in paths:
         found, notes = lint_sheet(p)

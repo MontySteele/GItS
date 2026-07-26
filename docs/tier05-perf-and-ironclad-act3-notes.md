@@ -138,7 +138,7 @@ block/inject/buff: real decks take it to **100% of its HP pool** over 15
 turns and win 81%. Damage-per-beat density, not HP, is what separates them.
 
 Instrument: `tools/encounter_audit.py` — every encounter replayed at full HP
-against the real decks that reach that act. (`tools/roster_scale_gap.py` is
+against the real decks that reach that act. (`tools/archive/roster_scale_gap.py` is
 the fixed-deck variant; it compares a roster against the frozen tier 0
 battery, and must NOT be used to ask whether a roster is over-tuned — see
 §1.3.1.)

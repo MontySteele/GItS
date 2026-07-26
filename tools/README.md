@@ -1,0 +1,45 @@
+# tools/ index
+
+Added 2026-07-26 (tech-debt audit §6 — orphan status was undiscoverable).
+Every script, mapped to what actually runs it. "validate" = invoked by
+`klee-mod/build/validate.ps1` at deploy; "pytest" = exercised by the suite;
+"manual" = a live instrument run by hand; details and known gaps per tool:
+`docs/tech-debt-audit-2026-07-26.md`.
+
+## Deploy gates (validate.ps1)
+| script | gate |
+|---|---|
+| `lint_handwritten_parity.py` | S6 |
+| `gen_roster_cards.py` (`--check`) | S6a — thin CLI over `gen_klee_cards.py`; path-invoked only (not importable as a module) |
+| `lint_pool_membership.py` | S6b |
+| `lint_ancient_coverage.py` | S6d |
+| `lint_constant_parity.py` | S6e + pytest (`test_sheet_lints.py`) — the dual-wired model the others should follow |
+| `build_pck.ps1` | S6c reads its contract output |
+
+## Suite-gated (pytest only — no deploy gate)
+`lint_strict_domination.py`, `lint_unique_names.py`, `lint_upgrade_coverage.py`,
+`lint_kokomi_decksize.py`, `lint_companion_shop_coverage.py`,
+`lint_sheet_comments.py` (currently gated on furina-cards.yaml ONLY — 35 open
+findings on the other five sheets, see audit §3.8), `art_coverage.py`
+(invariants, deliberately not completeness), `art_lint.py` (unit-level only;
+its L12 pixel gate is dead on clean checkouts — audit §3.7),
+`extract_base_game_pool.py`, `build_ironclad_sheet.py`,
+`realistic_axis_scores.py`, `burst_defense.py`, `char_stills.py` (library,
+byte-pinned), `gen_furina_stills.py` (byte-pinned, skip-guarded),
+`real_battery_calibration.py` + `klee_survival_sprint.py` (digest only).
+
+## Manual live instruments
+`gen_klee_cards.py` (the roster codegen itself), `art_fetch.py`,
+`art_process.py`, `art_hunt.py`, `art_contact_sheet.py`,
+`gen_kokomi_stills.py` (NO byte-pin twin, unlike Furina's),
+`gen_transition_wipe.py`, `cut_combat_layers.py`, `cut_salon_members.py`,
+`encounter_audit.py`, `pilot_error_audit.py`, `measure_realistic_act1.py`,
+`dump_claimed_sources.py` (owns the committed
+`docs/art-claimed-sources.tsv`; regenerate after any plan.tsv change —
+nothing enforces freshness yet).
+
+## archive/
+One-shot experiments whose results were ratified, and superseded tools.
+Kept for reproducibility of the records that cite them; nothing imports
+them. `roster_scale_gap.py` is additionally the only reader of the dead
+`PROGRESSION_GAP_COMPENSATOR` constant — delete the two together when ruled.

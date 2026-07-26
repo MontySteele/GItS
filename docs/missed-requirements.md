@@ -97,7 +97,7 @@ ruling; disposition (build / waive / re-file) is [USER]'s.
   it a live gate: bodyless draw/resource engines may not be buffed without it.
 - **Evidence:** zero matches for `played_when_drawn` / `dead_in_hand` /
   `force_first_copy` across `tier0/`, `tier05/`, `tools/`;
-  `tools/klee_dead_cards.py` measures offered/picked only.
+  `tools/archive/klee_dead_cards.py` measures offered/picked only.
 
 ### 2.3 The mod's per-fight telemetry (C2) was never built
 - **Source:** `archive/csharp-build-spec.md` §C2: JSON-lines per fight

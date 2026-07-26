@@ -172,8 +172,9 @@ class RunResult:
     #                    offer is not a purchase. The buy RATE needs both.
     removal_uses: int = 0               # §5: running removal count (rising price)
     relics: list[str] = field(default_factory=list)  # W2: relics GRANTED this
-    #                    run (Neow + treasure + elite + boss + shop), in order;
-    #                    excludes any relics= SEED. Empty when grant_relics=False.
+    #                    run (Neow + treasure + elite + boss + shop + events,
+    #                    the last since §11.2), in order; excludes any relics=
+    #                    SEED. Empty when grant_relics=False.
     potions_used: list[str] = field(default_factory=list)   # potion pass: ids
     #                    consumed in combat across the run, in order. Empty when
     #                    grant_potions=False (no potions ever held).
@@ -482,6 +483,12 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 if hp <= 0:                 # an event CAN kill (real rule)
                     res.death_node = i
                     res.deck_ids = deck_ids
+                    # Same full-held-set overwrite as the fight-death and
+                    # run-end exits -- without it an event death reported ONLY
+                    # its event-granted relics (audit 2026-07-26 §1.5), mixing
+                    # two populations in every relic-frequency read.
+                    if held is not None:
+                        res.relics = [r for r in held.ids if r not in seed_ids]
                     if bag is not None:
                         res.potions_end = list(bag.potions)
                     res.hp_by_node.append(0)

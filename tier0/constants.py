@@ -94,7 +94,14 @@ SPOTLIGHT_BASE_MULT = 1.5     # PLACEHOLDER (R33 veto, 2026-07-20): the
                               # outward-Spotlight value.
                               # Window-zero forced-arm sweep {1.25,
                               # 1.5} decides (furina-pass3-rulings.md).
-SPOTLIGHT_SELF_MULT = 1.0     # Furina pays no hidden baseline tax: self aim
+SPOTLIGHT_SELF_MULT = 1.0     # DEAD KNOB (audit 2026-07-26 §2.1): zero
+                              # readers -- effects.spotlight_mult() hard-
+                              # codes the 1.0 self-aim early return and
+                              # never consults this. Sweeping it produces
+                              # identical rows (exp_furina_sheetpass C2 did
+                              # exactly that). Wire it or delete it before
+                              # any sweep cites it. Original intent:
+                              # Furina pays no hidden baseline tax: self aim
                               # still drives Ovation/Fanfare, while numeric
                               # empowerment is reserved for companions.
 SPOTLIGHT_GUEST_CAST = "__guest_cast__"  # all Companion cards share the light
@@ -174,23 +181,22 @@ FANFARE_DECAY_FRACTION = 0.20 # PROPORTIONAL decay, as a fraction of the
                               # each turn" is the same one-line rule.
                               # Semantics: a fraction of the WHOLE meter,
                               # clamped at the floor (not a fraction of the
-                              # amount above it) -- "Fanfare fades by 25%
+                              # amount above it) -- "Fanfare fades by 20%
                               # each turn" is the one-line rule, and the
                               # floor clamp already protects the baseline.
                               # Always removes at least 1 while above the
                               # floor, so the meter cannot stall out at a
                               # value too small to round down.
-FANFARE_DECAY_PER_TURN = 5    # flat, applied at the start of the player
-                              # turn from turn 2, never below the floor.
-                              # FLAT over proportional is deliberate: the
-                              # sweep found flat-5 ~= prop-25% numerically
-                              # (flat-3 leaves salon at 89.5% at-cap;
-                              # flat-8 / prop-50% gut the meter at -57 to
-                              # -90pt), and "fades by 5 each turn" is a
-                              # two-word tooltip where a percentage is a
-                              # paragraph. That sweep is being RE-DERIVED
-                              # in-repo (its source doc never landed here)
-                              # before F-C's binding run.
+FANFARE_DECAY_PER_TURN = 5    # DEAD BRANCH (audit 2026-07-26 §2.1): the
+                              # flat fallback, reachable only when
+                              # FANFARE_DECAY_FRACTION == 0 -- which it is
+                              # not, and the 20% proportional ruling above
+                              # REVERSED the flat direction this comment
+                              # used to argue for. Sweeping this constant
+                              # while the fraction is live produces
+                              # identical rows (exp_furina_decay did
+                              # exactly that). Kept until [USER] rules on
+                              # deleting the flat branch outright.
 # A constellation grant is STATIC value, not accrual: it does not grow with
 # time, so stalling still earns nothing and the no-passive-accrual law
 # (kickoff §4) is intact, not amended. Powers grant by rarity; the
@@ -362,7 +368,11 @@ POTION_BIG_HIT_FRACTION = 0.35    # a telegraphed enemy attack this large a
 
 # --- Pilot policy (spec §6) ---
 BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP
-PILOT_REGRET_SAMPLE_RATE = 0.01
+PILOT_REGRET_SAMPLE_RATE = 0.01  # DEAD KNOB (audit 2026-07-26): zero
+                                 # readers -- pilot/policy._log_regret fires
+                                 # on EVERY play, so the reported regret
+                                 # rate is a full census, not a 1% sample.
+                                 # Do not scale by this when reading it.
 
 # --- Degeneracy detectors (spec §8) ---
 RUNAWAY_SCALING_RATIO = 8.0   # DPT turn 10 > 8x DPT turn 3 -> SUPERLINEAR
@@ -555,15 +565,16 @@ ATTRITION_LITE_HP = 45            # normal-pool attrition: ONE 45 HP unit
 NORMAL_POOL_WEIGHTS = {           # weighted normal-encounter pool
     "swarm": 1.0, "attrition_lite": 1.0, "punisher_lite": 1.0}
 
+# DEAD (audit 2026-07-26 §6): applied by NOTHING since the real-statline
+# roster swap -- tier05/model.py deliberately does not read it, and its
+# only remaining reference was the superseded tools/archive/
+# roster_scale_gap.py. Kept as a tombstone until [USER] rules on deletion
+# (it is nominally FROZEN per DECISIONS §triage). Historical record:
 # Triage ruling 3b: ONE number per node-tier standing in for the missing
 # upgrades+relics power growth — NOT a model of them. Grid-searched on the
 # REF_IRONCLAD anchor only, until anchor run completion hit 45%+-10, then
-# frozen (same behavioral-calibration method as the M2 battery). Applied
-# to enemy hp + attack damage in tier05 node encounters ONLY; the Tier 0
-# battery is untouched.
-# FROZEN 2026-07-19: anchor completion 47.9% at 1000 runs. Normals kept
-# at 1.0 — only the checks calibrated as full-HP solo gates (punisher,
-# tank_boss) get compensated in run context.
+# frozen (same behavioral-calibration method as the M2 battery).
+# FROZEN 2026-07-19: anchor completion 47.9% at 1000 runs.
 PROGRESSION_GAP_COMPENSATOR = {"normal": 1.0, "elite": 0.8, "boss": 0.7}
 
 # --- Tier 0.5 rewards (spec §3 — the thing under test) ---

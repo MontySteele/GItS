@@ -527,7 +527,7 @@ Two readings, and this pass does not distinguish them:
   only — no boss relics — and the skip list holds real ones.
 
 The discriminating experiment is a *relic-value* A/B rather than a route one:
-hold routing fixed and vary what a relic is worth. `tools/roster_scale_gap.py`
+hold routing fixed and vary what a relic is worth. `tools/archive/roster_scale_gap.py`
 and `tools/encounter_audit.py` are the instruments for the first reading;
 the second wants the relic pool audited against the wiki the way the events
 just were. **Neither is a licence to raise `RELIC_HP` until the numbers
