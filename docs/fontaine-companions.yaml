@@ -75,7 +75,7 @@
 #
 # §4.3 compliance, stated per card: all four are SUPPORT payoffs — buffs, reaction payoff, aura
 # manipulation. None is an independent damage engine and none self-scales. Only one carries a damage
-# body at all (Clorinde), and hers is below the Itto/Raiden jackpot bar because she also carries a power.
+# body at all (Clorinde), and it is a fixed number on a card that also carries a power — not an engine.
 #
 # Healing law (Rare AND Exhaust, conjunctive) is satisfied VACUOUSLY: no card here heals. Arlecchino
 # interacts with healing in the opposite direction — see her note.
@@ -104,14 +104,15 @@
    effects: [{op: damage, amount: 20, target: enemy, applies_element: true},
              {op: apply_power, power: night_vigil, amount: 6, target: self, note: "your Attacks against enemies that have an aura deal +6"}]}
    # RATIFIED 2026-07-25 [USER]: "double that stat line to 20 damage and +6 vs auras", from 10/+3.
-   # RECORDED CONSEQUENCE, because the doubling changes what this card IS relative to the pool:
-   # at 2 cost she now out-hits Raiden's Musou no Hitotachi (18, the sheet's stated "biggest one-card
-   # hit") AND carries a permanent power, where Raiden was deliberately shapeless to pay for her
-   # number. That is a strict-domination shape at equal cost, and lint_strict_domination sees the
-   # sheets. Left as ruled rather than softened, and flagged here so the red-pen session decides
-   # whether Raiden moves, Clorinde's cost moves, or the domination pair is accepted as intended
-   # (a 5-star Rare beating another 5-star Rare is not automatically wrong -- they are one-per-run
-   # banner draws, not competing commons).
+   # THE DOMINATION FLAG THIS ENTRY OPENED IS CLOSED — RAIDEN MOVED (2026-07-25 [USER]). Recorded in
+   # full because the resolution is the interesting part: the doubling briefly made her out-hit Raiden's
+   # Musou no Hitotachi (then 18, the sheet's stated "biggest one-card hit") at the SAME 2 cost while
+   # also carrying a permanent power, where Raiden was deliberately shapeless to pay for her number.
+   # No lint could have raised it — lint_strict_domination compares within a sheet, and the two live in
+   # different nations' files. It was flagged here by hand for exactly that reason, and the red-pen
+   # session took the third option: Raiden went to 3 cost / 40 damage / Vulnerable 2 / Exhaust. The two
+   # cards no longer share a cost or a shape, and neither is strictly better than the other.
+   # KEEP THE HAND-FLAG HABIT: cross-sheet comparisons are structurally invisible to the tooling.
    # ROLE: payoff. The Champion Duelist reads the board before she moves: her payoff is conditional on the
    # pool having done its job, so she pays every applier in the set rather than standing alone.
    # NEW POWER: night_vigil.
@@ -119,8 +120,9 @@
    # turns the same trigger into DAMAGE. Same hook in deal_damage_to_enemy, opposite currency. Recorded so
    # the pairing reads as design rather than as one of them being a copy of the other.
    # §4.3: a conditional flat buff, not an engine — it never grows, and with no aura on the board it is
-   # worth zero. The 10-damage body is below Itto (14+6) and Raiden (18) BY CONSTRUCTION: those two are
-   # shapeless jackpots that carry nothing else, and she carries a permanent power.
+   # worth zero. Her 20-damage body sits ABOVE Itto's (14+6 at the same 2 cost) and far below Raiden's
+   # (40 at 3 cost, once): the Inazuma pair are shapeless jackpots that carry nothing else, and she
+   # carries a permanent power instead of a bigger number.
    # Burst name "Last Lightfall" RESERVED for a future playable kit-Burst (v1.9).
 
 - {id: neuvillette_ancient_sea_authority, name: "Neuvillette — Heir to the Ancient Sea's Authority", star: 5, rarity: rare, role_c: buffer, element: hydro, cost: 1, type: power, character: neuvillette,

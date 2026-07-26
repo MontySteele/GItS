@@ -62,7 +62,7 @@ healing law is satisfied vacuously: no card here heals.
   for her number. **`lint_strict_domination` does not see this**: it compares
   within a sheet, and the two live in different nations' files. Flagged in the
   sheet for the red-pen session. Her upgrade was NOT re-scaled — the ruling
-  named the base only.
+  named the base only. **Closed by the Raiden buff below.**
 - **Arlecchino: heal-denial → Bond of Life.** The first draft was "+4 on
   Attacks, you can no longer be healed", and it had two defects the redesign
   dissolves:
@@ -165,17 +165,76 @@ torso band with no face, and higher anchors pull in the GENSHIN IMPACT wordmark
 
 ---
 
+## Red-pen pass 2 — 2026-07-25, and it reached outside the sprint
+
+The remaining numbers went to [USER] as a set. The verdicts:
+
+- **Navia — ACCEPTED as designed.** "Very powerful combo pieces within a
+  niche." No change.
+- **Neuvillette — WEAK, DEFERRED.** "Aura extension doesn't seem like much of
+  a payoff." Explicitly *revisit later* rather than retune now, so the card
+  ships at 1 cost / +1 turn and the weakness is on the record instead of in
+  someone's head. **This is the live design question the set leaves open:**
+  duration is the one Hydro-Sovereign facet nothing else touches, and if it
+  cannot be made to pay, his Rare needs a different facet — not a bigger
+  number on this one.
+- **Raiden — BUFFED, and this is the interesting one.** `2 cost / 18 damage`
+  → **`3 cost / 40 damage / Vulnerable 2 / applies Electro / Exhaust`**.
+  [USER]: "massive payoff for a very high cost. Rares in general tend to be
+  undertuned, so I think this is fine for a front-loaded rare, and has natural
+  Kokomi exhaust synergy."
+
+**The Raiden buff closes open item 2 by taking its third option.** The
+Clorinde/Raiden pair was flagged BY HAND because no lint could see it, and the
+resolution was not "accept the domination" or "move Clorinde" but *move the
+other card*. They no longer share a cost or a shape: 2 cost for 20 + a
+permanent power, versus 3 cost for 40 + Vulnerable and then she is gone.
+
+Three consequences worth having on the record:
+
+1. **Exhaust changes her class, not just her cost.** She goes from a
+   repeatable jackpot to a one-shot, which is what pays for 40. It is also the
+   first companion Exhaust that is a *payoff* rather than a brake — every
+   other one in the pool (Bennett, Gorou, Sucrose) exists to stop the card
+   from recurring. Kokomi's declared exhaust voice is ROTATION, and her deck
+   already runs nine Exhaust cards, so a card that leaves after firing is
+   thinning on purpose.
+2. **3 cost is precedented but new here.** The only other 3-costs in the mod
+   are Klee's `bombs_away`, `all_my_treasures`, `playtime_forever`. Raiden is
+   the first in the shared companion pool, and 3 is a full turn's energy for
+   every character who can draw her.
+3. **Her upgrade was NOT re-scaled, deliberately**, following the Clorinde
+   precedent from the same day: the ruling named the base only. `+4` was ~22%
+   of the old body and is ~10% of the new one, and Exhaust means it is worth
+   its damage exactly once per combat where every other companion upgrade
+   compounds on redraw. **Flagged in `kokomi-upgrades.yaml` for the next
+   red-pen** rather than silently inferred.
+
+Gates re-run after the buff: suite **828 passed**, mod builds **0 errors**,
+strict domination clean across all six sheets, companion shop coverage OK,
+upgrade coverage OK.
+
 ## Open, and owned by [USER]
 
-1. **Red-pen on all four cards' numbers**, one session, whole set. Two are
-   already ruled; Navia's 3 Block and Neuvillette's +1 turn are untouched.
-2. **The Clorinde/Raiden domination pair** — accept, move Raiden, or move
-   Clorinde's cost. No lint will raise it.
+1. ~~Red-pen on all four cards' numbers.~~ **DONE** across two passes — see
+   above. Carried forward, not closed: **Neuvillette is graded weak and
+   deferred**, and **Raiden's upgrade delta is unratified**.
+2. ~~The Clorinde/Raiden domination pair.~~ **CLOSED** — Raiden moved.
 3. **Lore/naming eyes-on audit** (v1.7, non-delegable, not yet done).
 4. **Art picks** from the contact sheet.
 5. **C2 expectation grading countersign** — the cell is graded WITHIN band
    above; the countersign is that the grading itself is accepted.
 6. **Close-out ratification.**
+
+### A note on where the domination flag actually lived
+
+`lint_strict_domination` sweeps **all six sheets** in the pytest gate
+(`test_no_strict_domination_on_docs_sheets` passes `loader.DOCS_CARD_SHEETS`),
+so within-sheet coverage was never the gap — the gap was and remains
+**cross-sheet**, and nothing checks it. Note also that running the tool BY HAND
+with no arguments defaults to `klee-cards.yaml` + `furina-cards.yaml` only and
+prints a confident `CLEAN` for two sheets out of six. The gate is the honest
+instrument; the bare command line is not.
 
 ## Cross-session note
 

@@ -115,4 +115,10 @@ thoma_crimson_ooyoroi:   {damage: +2}    # 8->10
 sara_crowfeather_cover:  {buff: +2}      # +4->+6 (bennett_passion-parity)
 sara_tengu_stormcall:    {damage: +2}    # 4->6; the Strength stays 2 (in Kokomi's hands: still exactly 2 Charge)
 itto_superlative_superstrength: {damage: +3}   # 14->17; Block stays 6
-raiden_musou_no_hitotachi: {damage: +4}  # 18->22; still one perfect cut, still nothing else
+raiden_musou_no_hitotachi: {damage: +4}  # 40->44. NOT RE-SCALED when the base went 18->40 on 2026-07-25:
+                                         # the [USER] ruling named the BASE only, and the Clorinde precedent
+                                         # from the same day is to leave the upgrade where the ruling left it
+                                         # rather than infer one. FLAGGED for red-pen, because +4 was ~22% of
+                                         # the old body and is ~10% of the new one -- thin against every other
+                                         # line on this sheet. The Exhaust also means the upgrade is worth its
+                                         # damage exactly ONCE per combat, where the others compound on redraw.
