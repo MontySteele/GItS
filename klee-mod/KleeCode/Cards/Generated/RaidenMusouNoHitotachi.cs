@@ -90,6 +90,6 @@ public sealed class RaidenMusouNoHitotachi : CustomCardModel, IElementalCard, IC
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(4m);
+        DynamicVars.CalculationBase.UpgradeValueBy(10m);
     }
 }

@@ -203,22 +203,26 @@ Three consequences worth having on the record:
    are Klee's `bombs_away`, `all_my_treasures`, `playtime_forever`. Raiden is
    the first in the shared companion pool, and 3 is a full turn's energy for
    every character who can draw her.
-3. **Her upgrade was NOT re-scaled, deliberately**, following the Clorinde
-   precedent from the same day: the ruling named the base only. `+4` was ~22%
-   of the old body and is ~10% of the new one, and Exhaust means it is worth
-   its damage exactly once per combat where every other companion upgrade
-   compounds on redraw. **Flagged in `kokomi-upgrades.yaml` for the next
-   red-pen** rather than silently inferred.
+3. **Her upgrade delta was carried forward unchanged, then answered.** The buff
+   ruling named the base only, so `+4` was left standing and *flagged* in
+   `kokomi-upgrades.yaml` rather than silently inferred — it was ~22% of the
+   old body and ~10% of the new one, thin against every other line on that
+   sheet, and Exhaust means it pays exactly once per combat where every other
+   companion upgrade compounds on redraw. [USER] answered the flag the same
+   session: **`+4` → `+10`** (40→50, a 25% delta, back in line with the
+   sheet). Recorded because the two-step is the point — the delta was never
+   guessed at, it was flagged and then ruled.
 
-Gates re-run after the buff: suite **828 passed**, mod builds **0 errors**,
-strict domination clean across all six sheets, companion shop coverage OK,
-upgrade coverage OK.
+Gates re-run after the buff and again after the upgrade delta: suite **828
+passed**, mod builds **0 errors**, strict domination clean across all six
+sheets, companion shop coverage OK, upgrade coverage OK.
 
 ## Open, and owned by [USER]
 
 1. ~~Red-pen on all four cards' numbers.~~ **DONE** across two passes — see
    above. Carried forward, not closed: **Neuvillette is graded weak and
-   deferred**, and **Raiden's upgrade delta is unratified**.
+   deferred.** Raiden's upgrade delta was the other carry-forward and is now
+   ratified at `+10`.
 2. ~~The Clorinde/Raiden domination pair.~~ **CLOSED** — Raiden moved.
 3. **Lore/naming eyes-on audit** (v1.7, non-delegable, not yet done).
 4. **Art picks** from the contact sheet.
