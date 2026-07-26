@@ -247,6 +247,107 @@ def survival_profile(results: list[RunResult], max_hp: int) -> dict:
     }
 
 
+def stability_profile(results: list[RunResult], max_hp: int) -> dict:
+    """Kokomi's stability band -- HP-trajectory FLATNESS. (E1, missed-req 1.3.)
+
+    R51 moved her healer fantasy *entirely* here: "the healer fantasy moves
+    entirely to the stability band (HP-trajectory flatness) in the act-level
+    realistic sims". The kickoff s3 pre-registered it as her acceptance
+    signature -- "her acceptance signature is HP-trajectory flatness, not
+    winrate margin" -- and proposed the shape as "max HP-loss variance across
+    battery".
+
+    Until now no such metric existed anywhere. `survival_profile` reports how
+    LOW her HP gets; that is fragility, and it is generic and pre-Kokomi.
+    Flatness is a different question: not "how close to death" but "how
+    JAGGED". A character who ends every fight at 60% and one who alternates
+    95% and 25% can share a median and share nothing else, and the second is
+    the one whose fantasy is broken.
+
+    THIS INSTRUMENT LANDS DARK, ON PURPOSE. Every value below is REPORTED and
+    none is asserted, and `band` is explicitly None. The acceptance band is a
+    [USER] ruling that must be recorded BEFORE any playtest HP data is
+    reviewed -- declaring a band after seeing the data is choosing the target
+    to fit the shot, which is exactly the Goodhart failure the axis-validity
+    session (D3) was opened to investigate one instrument over. Same house
+    rule `survival_profile` states for itself: "bands are user-ratified. This
+    reports; a ruling decides what is acceptable."
+
+    Everything is a FRACTION of max HP, so a band declared for Kokomi can be
+    read against Klee (62) and REF_IRONCLAD (80) without rescaling.
+
+    `prevented` is the ruled feed and rides here (R51: "ward prevention stays
+    a reported telemetry stream (FightStats.prevented) feeding the stability
+    band, never axis-credited"). It has been extracted by `metrics.py` since
+    the kickoff and read by NOTHING -- audit s6 lists it among the metrics no
+    report prints. This is the report.
+    """
+    if not results or max_hp <= 0:
+        return {}
+
+    # Per-FIGHT HP loss, as a fraction of max, pooled across every run.
+    # Read off FightStats rather than differencing hp_by_node: node HP carries
+    # forward across rests and shops, so a difference there measures the rest
+    # economy as much as the fight (the survival_profile lesson, one door
+    # over). hp_start/hp_end bracket the fight itself.
+    losses: list[float] = []
+    per_run_worst: list[float] = []
+    prevented_total = 0
+    fights_total = 0
+    for run in results:
+        run_losses = []
+        for fight in run.fight_stats:
+            lost = max(0, fight.hp_start - fight.hp_end)
+            run_losses.append(lost / max_hp)
+            prevented_total += getattr(fight, "prevented", 0)
+            fights_total += 1
+        if run_losses:
+            losses.extend(run_losses)
+            per_run_worst.append(max(run_losses))
+
+    if not losses:
+        return {"band": None, "fights": 0}
+
+    mean_loss = sum(losses) / len(losses)
+    # Population SD: this is the whole cohort of fights, not a sample of one.
+    variance = sum((x - mean_loss) ** 2 for x in losses) / len(losses)
+    sd = math.sqrt(variance)
+    ordered = sorted(losses)
+    p90 = ordered[min(len(ordered) - 1, int(0.90 * len(ordered)))]
+    total_lost_hp = sum(losses) * max_hp
+
+    return {
+        # THE headline flatness number: spread of per-fight HP loss.
+        "hp_loss_sd_pct": sd,
+        # Scale-free companion. A character who loses little AND evenly has a
+        # small SD for an uninteresting reason; the coefficient of variation
+        # separates "flat because nothing hits her" from "flat because she
+        # absorbs evenly", which is the distinction her fantasy turns on.
+        "hp_loss_cv": sd / mean_loss if mean_loss > 0 else 0.0,
+        "hp_loss_mean_pct": mean_loss,
+        # The kickoff's literal phrasing -- "max HP-loss" -- as the mean over
+        # runs of each run's WORST single fight. One catastrophic fight is
+        # exactly the spike the fantasy forbids.
+        "worst_fight_loss_pct": (sum(per_run_worst) / len(per_run_worst)
+                                 if per_run_worst else 0.0),
+        # p90 alongside the worst, because a max over ~14 fights x 600 runs is
+        # an extreme-value statistic and moves on noise.
+        "hp_loss_p90_pct": p90,
+        # R51's ruled feed. Reported only, never axis-credited.
+        "prevented_per_fight": prevented_total / fights_total,
+        # What share of the incoming the ward actually ate. The denominator is
+        # damage that WOULD have landed, so prevention and real loss are
+        # commensurable.
+        "prevented_share": (prevented_total / (prevented_total + total_lost_hp)
+                            if (prevented_total + total_lost_hp) > 0 else 0.0),
+        "fights": fights_total,
+        "max_hp": max_hp,
+        # DARK until [USER] rules. Not a placeholder for whoever runs this
+        # next to fill in -- the None is the point.
+        "band": None,
+    }
+
+
 def banner_variance(results: list[RunResult]) -> dict:
     """v1.8 addendum: the bad-roll-bricking detector.
 

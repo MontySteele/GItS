@@ -662,3 +662,122 @@ being labelled, not about whether the number happened to move.
 
 Klee untouched this epoch, as scheduled. Suite: 995 → 1000. All six repo lints
 green; the C# mod builds clean.
+
+---
+
+## Track E — Instruments — LANDED (both [USER] gates respected)
+
+No behaviour. Suite: 1000 → 1018.
+
+### E1 — Kokomi HP stability band — BUILT, AND IT LANDS DARK
+
+`run_metrics.stability_profile()`. R51 moved her healer fantasy *entirely*
+here — "the healer fantasy moves entirely to the stability band (HP-trajectory
+flatness) in the act-level realistic sims" — and until now no such metric
+existed anywhere in the repo. `survival_profile` answers how LOW her HP gets;
+that is fragility, it is generic, and it predates her. Flatness is a different
+question: not "how close to death" but "how jagged".
+
+Reported (all fractions of max HP, so a band declared for Kokomi reads against
+Klee's 62 and the anchor's 80 without rescaling):
+
+| key | what it answers |
+|---|---|
+| `hp_loss_sd_pct` | the headline: spread of per-fight HP loss |
+| `hp_loss_cv` | scale-free companion — separates "flat because nothing hits her" from "flat because she absorbs evenly" |
+| `hp_loss_mean_pct` | the level the spread is measured against |
+| `worst_fight_loss_pct` | the kickoff's literal "max HP-loss", taken per RUN then averaged |
+| `hp_loss_p90_pct` | because a max over ~14 fights × 600 runs moves on noise |
+| `prevented_per_fight`, `prevented_share` | R51's ruled feed |
+
+**`band` is `None`, and that is pinned as the first test in the file.** The
+[USER] GATE is respected exactly as written: the acceptance band must be
+recorded BEFORE any playtest HP data is reviewed, and **no playtest HP data was
+opened during this sprint.** A second test asserts the returned dict contains
+no `ok` / `pass` / `verdict` / `acceptable` key, so the day someone makes this
+instrument rule instead of report, the suite says so.
+
+`prevented` is the ruled feed (R51: "a reported telemetry stream feeding the
+stability band, never axis-credited"). It has been extracted by `metrics.py`
+since the kickoff and read by **nothing** — audit §6 lists it among the metrics
+no report prints. This is the report.
+
+**Functional check only, on SIM data** — offered as evidence the instrument
+discriminates, explicitly **not** as a band proposal:
+
+```
+kokomi/priest     sd 20.33%  cv 1.14  worst 67.19%  prev/fight 1.13  prev share 8.3%
+kokomi/commander  sd 21.05%  cv 1.19  worst 69.86%  prev/fight 1.14  prev share 8.5%
+kokomi/assist     sd 21.97%  cv 1.12  worst 68.69%  prev/fight 1.04  prev share 7.1%
+furina/salon      sd 22.35%  cv 1.41  worst 73.12%  prev/fight 0.00
+klee/demolition   sd 21.06%  cv 1.10  worst 67.73%  prev/fight 0.00
+```
+
+It does discriminate, and in the direction her identity predicts: Kokomi's
+coefficient of variation (1.12–1.19) sits below Furina's (1.41), which is the
+volatility/stability axis the kickoff declared as a standing contrast. Her raw
+SD is not distinguishable from Klee's, which is a more interesting reading and
+one the band ruling should look at.
+
+**These numbers must not be used to pick the band.** Choosing a threshold from
+the output you already have is the target drawn around the shot — the same
+Goodhart failure the axis-validity session (D3) was opened to investigate one
+instrument over, and there is no reason to build a second instance of it while
+the first is open. The band should come from design intent.
+
+### E2 — Salon A2 re-measured — the band is stale in the same direction across ALL THREE decks
+
+`stamp RT7/D10/P3/C3, fights=1000, seed=11, A6 instrument v2`
+
+| deck | band (`furina.yaml`) | measured | delta |
+|---|---|---|---|
+| `salon_weighted` | 7.6 | **9.04** | **+1.44** |
+| `fanfare_weighted` | 4.2 | **5.69** | **+1.49** |
+| `spotlight_weighted` | 4.3 | **4.90** | **+0.60** |
+
+The sprint asked only for salon; the other two came nearly free and change the
+shape of the finding. `missed-requirements` §3.6 records the sheet comment
+"STALE SINCE THE SALON-V2 REWORK" and calls the salon band "knowingly ~1.3
+wrong". It is ~1.4 wrong — and **fanfare's is worse (+1.49) and was never
+flagged at all.** This is not a salon-specific drift; all three A2 bands were
+measured in the v1 anonymous-tick world and all three are low.
+
+Salon's 9.04 is consistent with the 8.9 measured at R40, across three version
+bumps.
+
+**Nothing was changed.** The [USER] GATE is "band moves only by ruling — this
+track produces the number, not the law", and `furina.yaml` is untouched. Two
+things the ruling should weigh:
+
+- Under **D3** the seven-axis numbers are *reportable but not load-bearing*
+  until the axis-validity session rules. So these three numbers cannot by
+  themselves justify moving a band — they establish that the current bands are
+  wrong, not what the right ones are.
+- All three currently read `BAND EXCEEDED` in `score_config`'s flags, which is
+  a gate firing on every Furina scorecard run. A gate that always fires is on
+  its way to being ignored.
+
+### E3 — `tier1/analyze.py` sees the roster
+
+`CHARACTER.KLEE` was a module constant and the accessor was named
+`klee_player`. A soak box running the shipped mod produces runs for three
+characters; this tool dropped two thirds at the door and reported the rest as
+"the soak" — a filter that looked like a measurement.
+
+- `ROSTER` maps game id → repo name, curated because the two vocabularies are
+  genuinely different and an unmapped character is the failure being fixed.
+- `roster_player()` replaces `klee_player()`; `roster_seats()` is new, because
+  a Klee/Kokomi lobby is ONE run and TWO seats and counting it as one player
+  under-reports whoever sat second.
+- `--character` defaults to **all**, not Klee. The old default was Klee by
+  construction rather than by choice.
+- Every run now prints `roster seats: klee 11, ...` — a soak that turns out to
+  be 90% one character is a finding about the soak, and the old tool could not
+  have told you.
+- `CARD_PREFIX` deliberately stays one mod-wide constant: `CARD.KLEEMOD-` is
+  BaseLib's *mod* id prefix and every card carries it whoever owns it, so
+  splitting it per character would invent a distinction the game does not have.
+
+Verified against the real local history (11 Klee runs, all abandoned — an old
+soak): roster-wide, per-character, `--crashes`, and the empty-cohort message
+all behave.
