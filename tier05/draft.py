@@ -651,12 +651,35 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # So the archetype set becomes character-aware. KLEE'S NUMBERS DO NOT MOVE --
 # her tuple is unchanged and every other character had no synergy term to lose
 # -- which is why this is a policy bump rather than a drafter bump.
-POLICY_VERSION = 2
+#
+# POLICY_VERSION 3 (R66, 2026-07-26). v2 made the registry character-aware,
+# and Kokomi's entry in it named three tags that existed on ZERO cards -- so
+# she kept the exact defect v2 was written to remove: a scorer structurally
+# blind to her archetypes, reporting its output as evidence about drafting.
+#
+# EVERY adaptive/free-draft Kokomi number ever taken was measured through the
+# broken registry and is ARCHIVED as of this ruling. Klee's and Furina's
+# tuples are untouched and their numbers do not move. Assigned-plan Kokomi
+# numbers (the R56 battery) STAND: they route through runner.py's plan
+# registry, which was always correct.
+POLICY_VERSION = 3
 
 ROSTER_ARCHETYPES: dict[str, tuple[str, ...]] = {
     "klee": ARCHETYPES,
     "furina": ("salon", "spotlight", "fanfare"),
-    "kokomi": ("garment", "ward", "conscript"),
+    # R66: was ("garment", "ward", "conscript"), which matched nothing. The
+    # tuple predates the v0.2 sheet pass that tagged her cards
+    # priest/commander/assist/generic, and its "conscript" term had
+    # independently been retired by the lore pass (muster/rally/enlist). Two
+    # registries in one repo disagreed about her vocabulary; the ratified
+    # sheet is canonical, so the sheet's names win.
+    #
+    # What the mismatch cost: dominant_archetype() returned "goodstuff" for
+    # every Kokomi deck, adaptive Kokomi scored plans as pure static power
+    # with no synergy term at all, shop/rest/event plans degraded the same
+    # way, and --ab fired a spurious starvation alarm on every Kokomi run.
+    # All of it self-corrects from this one line plus the ab.py keying fix.
+    "kokomi": ("priest", "commander", "assist"),
 }
 
 

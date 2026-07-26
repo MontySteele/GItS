@@ -272,7 +272,12 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
         state.emit("damage", target=enemy.name, amount=sh, blocked=0,
                    base=shatter, source="shatter")
         state.emit("shatter", target=enemy.name)
-        hp_dmg += shatter
+        # `sh`, not `shatter` (audit 2026-07-26 s1.7, fixed in EPOCH 1). The
+        # emitted amount was already overkill-clamped and the RETURNED total
+        # was not, so this one function reported two different answers for
+        # the same hit depending on which you read. The docstring promises
+        # "damage actually dealt to HP", which is the clamped one.
+        hp_dmg += sh
     if was_alive and not enemy.alive:
         state.kills_this_card += 1
         # The base game's Fatal gate: cardPlay.Target.Powers.All(p =>
@@ -322,8 +327,17 @@ def detonate_bombs(state: CombatState, enemy: Enemy, bonus: int = 0) -> None:
                 state.splash_procs_this_turn = procs + 1
         if splash:
             for other in state.living_enemies:
+                # Overkill clamped out of the ACCOUNTING, not out of the hit
+                # (audit 2026-07-26 s1.7, fixed in EPOCH 1). See the same fix
+                # and the same reasoning in reactions._splash: the canonical
+                # deal_damage_to_enemy path has always clamped, these two
+                # splash paths did not, and total_damage_dealt sums exactly
+                # these emitted amounts. Detonation splash hits EVERY living
+                # enemy at once, so it over-read hardest against wide boards
+                # of small adds -- the demolition archetype's whole premise.
+                effective = min(splash, max(0, other.hp))
                 other.hp -= splash
-                state.emit("damage", target=other.name, amount=splash,
+                state.emit("damage", target=other.name, amount=effective,
                            source="detonation_splash")
             if p.burst_max:
                 p.burst_energy += C.DETONATION_SPLASH_BURST
@@ -596,8 +610,18 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
         # already being out -- the Burst does not conjure one from nothing.
         if (fx["power"] == "ceremonial_garment"
                 and state.player.powers.get("kurage_summon", 0)):
-            state.player.powers["kurage_summon"] = C.KURAGE_DURATION
-            state.emit("kurage_refreshed", turns=C.KURAGE_DURATION)
+            # max(), not a hard set (audit 2026-07-26 s1.4; fixed in EPOCH 1).
+            # This assigned KURAGE_DURATION outright, so playing the Garment
+            # after an UPGRADED summon (kurage_turns +1, i.e. 2 turns) pulled
+            # the jellyfish back down to 1 and DELETED the turn the upgrade
+            # had paid for. R56/R57's "restoring a longer duration is safe"
+            # was true of the design and false of the wiring. Now matches
+            # _op_summon_kurage, which has always used max(): a refresh tops
+            # the timer up and never shortens it.
+            turns = max(state.player.powers["kurage_summon"],
+                        C.KURAGE_DURATION)
+            state.player.powers["kurage_summon"] = turns
+            state.emit("kurage_refreshed", turns=turns)
         powers.apply_power(state, state.player, fx["power"], amount,
                            max_stacks=cap)
     else:
