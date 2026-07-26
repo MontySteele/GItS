@@ -117,7 +117,28 @@ public static class KokomiConscript
         var pick = owner.PlayerRng.Rewards.NextItem<CardModel>(pool);
         if (pick == null) return null;
 
-        var recruit = ((ICardScope)owner.RunState).CreateCard(pick, owner);
+        // COMBAT scope, not run scope. A recruit is a combat-local instance:
+        // the sim's `_op_conscript` deepcopies into `state.player.hand` and
+        // never touches the deck, the discount is AddThisCombat, and the
+        // Exhaust is per-instance -- all three are combat-lifetime.
+        //
+        // This read `((ICardScope)owner.RunState).CreateCard(pick, owner)`,
+        // copied from CompanionSlot, where run scope IS right because that
+        // recruit is a REWARD and goes into the deck. Here it produced a card
+        // the CombatState had never seen, and the base game rejects those at
+        // both doors: `AddGeneratedCardToCombat` throws "must be added to a
+        // CombatState before adding it to this pile" (create mode, dies on
+        // play of the conscript card), and `AddDuringManualCardPlay` throws
+        // "...before playing it" (transform mode -- the transform LOOKS fine
+        // and the recruit sits in hand, then playing it throws inside
+        // PlayCardAction, which leaves the action queue stuck: a soft lock,
+        // not a crash). Playtest 2026-07-26: Honor Guard -> Gorou, General's
+        // War Banner. CombatState.CreateCard is the pattern every other
+        // generated card in the mod already uses.
+        var combatState = owner.Creature?.CombatState;
+        if (combatState == null) return null;    // out of combat: whiff
+
+        var recruit = combatState.CreateCard(pick, owner);
         if (recruit == null) return null;
 
         // Cost is a MODIFIER on the instance, applied for the rest of the
