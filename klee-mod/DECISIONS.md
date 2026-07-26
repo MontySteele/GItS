@@ -2233,3 +2233,57 @@ Rev 2.1 defers to rev 2 for A3-A8, C1-C3, D1-D4 and P1-P5, and rev 2 exists in
 no file in this repo. Those items are NOT done and are not silently folded into
 the tracks above. R76 (animation sprint 2) and B3 (grading correction) are
 likewise untouched.
+
+### E2 + E2b: the F batch cost more than R73 did, and it was one card
+
+E2 measured the landed world (R73 x3 + Before Sun and Moon + the F batch)
+against E1's x3 arm, which is the multiplier-only world at the same cell,
+seed and constants. 600 runs, seed 11, C4.
+
+    plan        win% (d vs E1x3)   act-1% (d vs E1x3)   act-1 charge
+    priest       2.7   (-6.0)       44.0   (-16.3)       6.4 -> 5.2
+    commander    3.3   (-3.4)       53.3   (-12.7)       5.3 -> 4.6
+    assist       0.7   (-0.5)       37.2   (-13.0)       4.7 -> 3.9
+    generic      1.8   (-4.2)       36.3   (-19.4)       4.8 -> 3.8
+
+The F batch is a LARGER nerf than R73 was. Against the same-world roster
+anchors (floor: furina/fanfare 57.5% act-1 / 2.8% win; ref_ironclad 62.2% /
+6.3%), her best plan now clears act 1 at 53.3% -- below the floor again, which
+is the exact condition that made x2 unacceptable and fired the x3 fallback.
+
+**P9: CONFIRMED, and its named suspect was right.** E2 read odd, so E2b fired
+as pre-authorised. It reverts the ACCRUAL cuts and leaves the payout cuts
+(R74/R77/R75) in every arm, so whatever is not recovered is the payout half.
+400 runs, seed 11:
+
+    plan        landed   +G6 accrual   +G8 accrual   +both
+    priest      45.5     58.5          45.8          59.8
+    commander   53.5     64.0          53.5          64.0
+    assist      38.2     52.2          39.2          54.0
+    generic     38.2     49.8          38.0          49.8
+                                                 (act-1 clear %)
+
+G6 recovers 10.5-14.3 points on its own. G8 recovers 0.0-1.0. `+both` is
+`+G6` to within noise, and `+both` lands back at E1x3's numbers -- so the
+payout cuts (Garment splash, Shoal 7->6, Honor Guard's conscript) cost
+approximately NOTHING, and essentially the entire F-batch loss is G6.
+
+**A CORRECTION on the record.** During the F batch this pass flagged G8 as a
+second, larger accrual exception than G6 -- it removes `exhaust_from 2` AND
+`gain_charge 3`, against G6's single exhaust outlet, so it looked like the
+bigger cut. That was wrong, and E2b says so: G8's accrual removal is very
+nearly free. The reason is frequency, not size. `moonlit_offering` is one
+Uncommon that a run may never draft; `tactical_retreat` is a STARTER, in every
+deck, from turn 1 of every fight. A starter's accrual is worth 10-16 points of
+act-1 clear here and an uncommon's is worth about zero.
+
+That is the transferable finding, and it is why §5's instinct to name the
+STARTER migration as the one dangerous accrual change was correct while this
+pass's instinct to widen the suspicion was not.
+
+**Standing question for [USER], not resolved here.** The landed world is below
+the roster floor. Three levers are visible and none is this pass's to pull:
+revert or soften G6 (which R79/G6 ratified for grammar reasons, not power
+reasons); give the accrual back somewhere else; or accept a lower band for
+her and re-anchor. The multiplier is explicitly NOT the lever -- P9 said to
+suspect the accrual first, and it was right.
