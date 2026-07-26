@@ -892,3 +892,127 @@ at F1, which was the required item. Rolling forward, in the doc's order:
   clamp character gate, `SpotlightSystem.PendingDraws` lifecycle,
   `KleePlaceholderArt` reconciliation (header says delete; 8 asset paths say it
   is load-bearing for Furina and Kokomi).
+
+---
+
+## Track G — PREPARED, NOT LANDED
+
+Everything is in `docs/pending/`, with a README explaining what each artifact
+needs. The tree is green **without** any of it: 1030 passed, all lints, and
+`validate.ps1`.
+
+### G1 + G2 — the sheet-comment pass, and a finding about it
+
+`docs/pending/serenitea-g1-sheet-comments.patch`. Applied, verified green,
+reverted; the patch is that exact state and re-applies cleanly.
+
+**The audit's framing needs correcting before anyone countersigns.** §3.8 calls
+the 35 findings *"real drift the gate's scope hid"*. Reading all 35:
+
+| count | class | examples |
+|---|---|---|
+| 15 | cites a **sibling or cross-sheet card's** number | "Under pulsing_current's 7", "priced ABOVE surging_shoal's 7", Raiden's 40 quoted in Clorinde's entry |
+| 8 | **measurement record** | the whole `kurages_oath` ward bracket (5/8/12 arms at 500 runs, with winrates), "measured 4.7% at 600 runs" |
+| 5 | **superseded value, deliberately on record** | "the kaboom-parity 7 arm is REJECTED", "the v0.1 heal-12 is GONE", "from 2 cost / 18 damage" |
+| 4 | **worked arithmetic** | "at X=3 is 28 (40 upgraded)", "eight Charge (7 line + 1 funnel)", "at a priest-median 24 it is 17" |
+| 2 | **engine constants** | "skill tags (5), reactions (5)" |
+| **2** | **a sheet LINE NUMBER** | "sheet header, line 19"; "RESERVED (line 96)" |
+| **1** | **REAL DRIFT** | `depths_judgment`: comment says "8 + 2 per exhausted card", row says `base: 10` |
+
+So it is **34 legitimately-external citations and one genuine stale number** —
+not 35 stale comments. The patch is 29 per-line `(lint-ok: <reason>)` markers
+plus one number correction.
+
+Why that matters for the countersign: **Furina's sheet is the one already
+clean, because it already carries those markers.** The other five had never
+been through the pass. Fanning the lint out without them would make it fire 34
+false positives forever, and a gate that always fires is ignored within a week
+— the failure mode C6 found in a different costume.
+
+Per-line reasons rather than a blanket exemption, deliberately: a sheet-wide
+suppression switches off the drift class the lint exists for, and the reasons
+are what let a reviewer tell "cites a sibling card" from "cites a number this
+row no longer has".
+
+**G2** is in the same patch: `mondstadt-companions.yaml:4` opened *"Companion
+cards NEVER scale…"*, contradicted by USER RULING 1 of 2026-07-21
+(`klee-mod/DECISIONS.md:1524`). Rewritten to keep the half that survived the
+ruling — power routes through the player character — and to record that "never
+scale" was overruled, with the UNAPPLIABLE pair named as the per-card exception
+they are.
+
+The fan-out also lands a **negative test**: a synthetic sheet whose comment
+cites 8 against a row of 10 must fail. A gate fanned to five new sheets and
+never seen failing is a gate whose new scope nobody has tested.
+
+### G3 — CI proposal, three jobs, drafted not enabled
+
+`serenitea-g3-ci-proposal.md` + `serenitea-g3-ci.yml`, the latter deliberately
+**not** in `.github/workflows/` because putting it there is what adopting it
+means.
+
+The framing is the sprint doc's and it rules most CI ideas out: the consumer is
+the **next session**, and a GitHub runner IS the fresh clone a session starts
+from — no art, no `game_ref/`, no `.venv`.
+
+**All three jobs were verified green against a real bare clone**, not asserted:
+
+```
+lint_handwritten_parity  OK      lint_ancient_coverage   OK
+lint_constant_parity     OK      lint_roster_registry    OK
+lint_pool_membership     OK      art_coverage            OK
+gen_roster_cards --check OK      ledger (duplicate R/D)  OK
+```
+
+Two honesty notes carried into the proposal itself:
+
+- **Job (c) finds nothing today.** Measured: 36 numbered rulings in
+  `tier0/DECISIONS.md`, 1 in `klee-mod/DECISIONS.md`, **0 duplicates** in
+  either. It is proposed as a standing guard on a hand-maintained sequence, and
+  the proposal says to drop it freely if [USER] would rather not pay for a job
+  that has never fired.
+- **`art_coverage` runs without `--strict`** and asserts nothing about art,
+  because `ImageGen/` is absent on a runner. Asserting coverage on a tree with
+  no art is the vacuum Track A spent itself on.
+
+The NOT-doing list is recorded as policy, not omission — most importantly the
+**Windows-runner refusal**: Actions PowerShell is not the deploy machine's PS
+5.1, and the native-stderr trap that took the deploy down twice is a 5.1
+behaviour. Green there would be false confidence. MegaDot path externalization
+is folded in and **parked**.
+
+### G4 — session isolation, with live evidence from this sprint
+
+`serenitea-g4-session-isolation.md`.
+
+The proposal's premise stopped being hypothetical mid-sprint. Between the Track
+B and Track C commits, **another workstream wrote into this same working
+directory** (`test_card_scope.py` and a `KokomiConscript.cs` edit — a Kokomi
+soft-lock fix from a 2026-07-26 playtest) and a routine `git add -A` swept both
+into the Track C commit. The commit was split and both files returned untouched.
+
+What is worth recording is what did *not* catch it:
+
+- **the suite did not** — the other session's work was correct and green, which
+  is exactly why it was invisible;
+- **CI would not have** — by the time anything reaches a runner the files are
+  already in someone else's commit. That is G4's own "wreckage, not causes"
+  argument, demonstrated against G3;
+- **a human reading `--stat` did** — one unexpected filename.
+
+Also live during the sprint: two sessions mutating shared derived state. This
+one rebuilt `klee.pck`, ran the codegen, and reverted a sheet mid-measurement
+for D3's paired test. Any of those would have corrupted a concurrent session's
+measurement with no error on either side.
+
+The sequencing dependency the sprint asked to be recorded is now **discharged**:
+(a) worktree-per-session was only viable after Track A, because before it a
+worktree without art meant a red suite. Track A has landed and a bare tree is
+green, so an art-less worktree is a working environment rather than a broken
+one — which also makes (c), the junction rule, cheap to follow. (c) has already
+cost non-regenerable `game_ref/` files twice and is flagged as the one to take
+if only one is taken.
+
+A fallback is recorded for the case where (a) is declined: **stage explicitly,
+never `git add -A`** — which is what every commit after the collision did, and
+why Tracks D, E, F and G each staged a named file list.
