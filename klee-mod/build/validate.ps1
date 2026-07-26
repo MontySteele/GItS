@@ -790,6 +790,35 @@ if (-not (Test-Path $venvPython)) {
 }
 
 # ---------------------------------------------------------------------------
+# S11. Every roster site knows every registered character.
+#
+# F1 (audit sec.5). Adding character #4 touches roughly 26 scattered edit sites,
+# 4 gated and 22 SILENT. Silent is the defect: the mod builds, the suite is
+# green, every other lint passes, and the character is simply absent from
+# whichever list was missed. It has happened twice already -- Kokomi's
+# archetype registry named three tags that existed on zero cards (R66, and
+# every adaptive number ever taken for her went through it), and her card art
+# was never staged because deploy.ps1's array did not list her.
+#
+# tier0/roster.py declares the roster once; this sweeps every site for every
+# registered character. It is the S6c pattern -- a closed list a lint holds
+# shut -- extended from one rule to the whole roster surface, and it is the
+# PRE-ZHONGLI GATE: slot 4 does not open until a character can be declared in
+# one place and have every consumer either read it or fail loudly.
+# ---------------------------------------------------------------------------
+$rosterLint = Join-Path $repoRoot 'tools\lint_roster_registry.py'
+if (-not (Test-Path $venvPython)) {
+    Fail 'S11' "repo venv python not found at $venvPython; cannot run the roster registry lint."
+} elseif (-not (Test-Path $rosterLint)) {
+    Fail 'S11' "tools/lint_roster_registry.py is missing."
+} else {
+    $rosterOut = Invoke-RepoPython $rosterLint
+    if ($LASTEXITCODE -ne 0) {
+        Fail 'S11' "roster registry lint failed:`n    $($rosterOut -join "`n    ")"
+    }
+}
+
+# ---------------------------------------------------------------------------
 # Report
 # ---------------------------------------------------------------------------
 $swTotal.Stop()

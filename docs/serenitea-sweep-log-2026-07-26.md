@@ -781,3 +781,114 @@ characters; this tool dropped two thirds at the door and reported the rest as
 Verified against the real local history (11 Klee runs, all abandoned — an old
 soak): roster-wide, per-character, `--crashes`, and the empty-cohort message
 all behave.
+
+---
+
+## Track F — F1 LANDED (required); F2–F5 rolled forward
+
+Suite: 1018 → 1030.
+
+### F1 — the roster registry, and the gate that holds it shut
+
+`tier0/roster.py` declares each character once: id, display name, C# class,
+nation, plans, archetypes, and every file path that belongs to them.
+
+**The point is not tidiness.** Adding character #4 touches ~26 sites, 4 gated
+and **22 silent** — and silent is the whole defect. Two of those silences have
+already cost real numbers:
+
+- **R66**: her archetype registry named three tags (`garment`, `ward`,
+  `conscript`) that existed on zero cards. `dominant_archetype()` returned
+  `goodstuff` for every Kokomi deck and **every adaptive number ever taken for
+  her was measured through it.**
+- Her card art was never staged, because `deploy.ps1`'s directory array did
+  not list her. 58 painted faces sat in `ImageGen` and none reached the game.
+
+Neither failed anything.
+
+**What consumes it now** (`ROSTER_ARCHETYPES` and `CHARACTER_PLANS` /
+`DEFAULT_PLAN` are derived, not copied) and **what is enforced instead**
+(C# and PowerShell cannot import Python, and the codegen ladders are structure
+rather than data) — `tools/lint_roster_registry.py` sweeps 11 closed lists ×
+every registered character.
+
+The reference anchors (`ref_ironclad`, `real_ironclad`, `ref_silent`) keep
+their literals in `runner.py` and are named in the registry as explicitly NOT
+roster members: they have no art, no pool, no C# class, and folding them in
+would make every sweep either wrong or full of exceptions.
+
+**The gate, exercised.** Registering a slot-4 Zhongli with nothing else wired
+produces **18 findings**, each naming a specific file to edit:
+
+```
+C# character class / card pool / relic pool     Zhongli.cs, ZhongliCardPool.cs, ZhongliRelicPool.cs
+tier0 character sheet, card sheet, upgrade sheet
+KleeSelfCheck roster array                      ModelDb.Character<Zhongli>()
+KleeMod character registration
+deploy.ps1 art source dirs                      images\cards\zhongli
+build_pck.ps1 character loop
+art_coverage sheet list
+companion shop coverage lint
+pool membership lint                            "ZhongliCardPool.cs"
+ancient coverage lint
+roster ancient ledger
+codegen character profiles                      character_id="zhongli"
+codegen per-character driver                    def _run_zhongli(
+archetype registry                              declares 'geo', which no card carries
+```
+
+**22 silent gaps become 18 loud ones.** That is the pre-Zhongli gate.
+
+**R66 is now impossible in both directions.** The archetype vocabulary stays
+DECLARED rather than derived from card tags — deriving would let a typo'd tag
+on one card silently invent an archetype — and is then cross-checked against
+the tags her cards actually carry:
+
+- a registry naming a tag no card carries FAILS (this is R66 exactly);
+- a card tag no registry declares FAILS too (the direction a derived version
+  would have absorbed in silence).
+
+A test replays R66's literal value `("garment", "ward", "conscript")` against
+the gate and asserts both directions fire.
+
+**The lint's first finding was against itself**, which is the correct thing for
+it to have caught: the "codegen roster driver" row pointed at
+`gen_roster_cards.py`, a four-line wrapper around `gen_klee_cards.main` that
+carries no roster list at all. Repointed at the real per-character drivers
+(`_run_klee` / `_run_furina` / `_run_kokomi` — 590 lines of triplicated driver
+with three divergent manifest schemas, which is F3's target and still open).
+
+Dual-wired: `validate.ps1` **S11** and `tier0/tests/test_roster_registry.py`,
+for the reason `test_sheet_lints.py` gives about its own family — the deploy
+gate runs on one Windows machine, and whoever adds character #4 may never touch
+it.
+
+*Validate run note:* the full gate reports one finding, `[S3] staged manifest
+version is '0.2-143+dirty' but this checkout computes '0.2-147+dirty'`. That is
+S3 working — the staged package predates this sprint's commits. Not fixed here
+because deploying is [USER]'s call, not a sweep's.
+
+### F2–F5 — NOT TAKEN, rolled forward
+
+Per the sprint doc: *"take in order, stop when sprint budget ends; anything
+untaken rolls to the next sprint doc, not into ad-hoc commits."* Budget ended
+at F1, which was the required item. Rolling forward, in the doc's order:
+
+- **F2 Harmony bootstrap.** `KleeMod.cs:33-41` wraps `PatchAll` in one catch,
+  so one dead string-keyed reflection lookup silently disarms **every later
+  patch, including the shop-softlock guards**, with one log line.
+  `MerchantCompanionSlots.cs:61` has the same fragility at static-ctor time.
+  `CreatureFacing.cs:65-66` is the correct pattern and is now pinned as such by
+  B3, so the target shape is already under test.
+  **Highest-severity item left in the sprint** — it is a silent
+  disarm-everything failure, and it should lead the next one.
+- **F3 Codegen driver unification.** `_run_klee/_furina/_kokomi`, 590 lines,
+  three divergent manifest schemas; `_pool_members()` hardcodes Klee's sheet
+  for all profiles. F1's lint now names all three drivers, so the triplication
+  is at least visible to a gate.
+- **F4 Engine chokepoint extraction.** Kokomi's law out of `apply_power`, Klee
+  bomb suppression de-duck-typed, Charge accrual out of `refpowers.py`.
+- **F5 Small sharp items.** `ReplaceFirst<TBasic>` exact-match, reward-draw
+  clamp character gate, `SpotlightSystem.PendingDraws` lifecycle,
+  `KleePlaceholderArt` reconciliation (header says delete; 8 asset paths say it
+  is load-bearing for Furina and Kokomi).
