@@ -266,12 +266,21 @@ def stability_profile(results: list[RunResult], max_hp: int) -> dict:
 
     THIS INSTRUMENT LANDS DARK, ON PURPOSE. Every value below is REPORTED and
     none is asserted, and `band` is explicitly None. The acceptance band is a
-    [USER] ruling that must be recorded BEFORE any playtest HP data is
-    reviewed -- declaring a band after seeing the data is choosing the target
-    to fit the shot, which is exactly the Goodhart failure the axis-validity
-    session (D3) was opened to investigate one instrument over. Same house
-    rule `survival_profile` states for itself: "bands are user-ratified. This
-    reports; a ruling decides what is acceptable."
+    [USER] ruling. Same house rule `survival_profile` states for itself:
+    "bands are user-ratified. This reports; a ruling decides what is
+    acceptable."
+
+    The original gate was BLIND declaration -- the band on record before any
+    playtest HP data was reviewed. **D5 (2026-07-27) amends that**, because
+    HP-trajectory data was reviewed during the Kokomi playtest sprint and a
+    blind declaration stopped being possible. Under D5: that playtest is
+    EXPLORATORY and grades nothing; the band is declared from DESIGN INTENT,
+    informed by those observations and recorded as such; declaration comes
+    BEFORE the post-rework confirmatory playtest, which grades it; and the
+    band MAY NOT be revised against the playtest that grades it. That last
+    clause is what still keeps the target from being drawn around the shot --
+    the Goodhart failure the axis-validity session (D3) was opened to
+    investigate one instrument over.
 
     Everything is a FRACTION of max HP, so a band declared for Kokomi can be
     read against Klee (62) and REF_IRONCLAD (80) without rescaling.

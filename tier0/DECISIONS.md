@@ -2490,3 +2490,62 @@ nobody prints is a number somebody will guess.
    condition; leaving an unmarked unmeasured claim in a ruling is.
 
 **Class: RULING** (this record) -- discipline, no behavior change.
+
+## D5 -- Kokomi stability band: provenance and schedule (2026-07-27)
+
+An amendment to the E1 gate, forced by events. It does not declare the band;
+it rules where the band may come from and when it may be graded.
+
+**Background.** R51 moved Kokomi's healer fantasy *entirely* to the stability
+band, and Serenitea Sweep I's E1 built the instrument
+(`run_metrics.stability_profile`) with `band = None` and every value reported
+rather than asserted. The gate attached to it was blind declaration: the
+acceptance band must be recorded BEFORE any playtest HP data is reviewed,
+because a threshold chosen from output you already have is the target drawn
+around the shot.
+
+**What changed.** HP-trajectory data was subsequently reviewed during the
+Kokomi playtest sprint on the feature branch. The blind gate is therefore no
+longer satisfiable as written -- not by anybody's fault, and not recoverable
+by pretending the data was not seen.
+
+**The ruling:**
+
+1. The observed playtest is designated **EXPLORATORY**. It is a source of
+   understanding, not a grade. Nothing may be graded against it.
+2. The band **will be declared** -- from **design intent**, informed by the
+   exploratory observations, and **recorded as such**. The provenance is part
+   of the record, not a footnote: a reader must be able to tell that this band
+   was declared with some data already seen, and which data.
+3. Declaration happens **BEFORE the post-rework confirmatory playtest**, which
+   grades it.
+4. **The band may not be revised against the playtest that grades it.** A
+   grading instrument that moves to fit its result is not an instrument. If
+   the confirmatory playtest says the band is wrong, that is a finding, and it
+   is ruled on separately and afterwards -- not folded back into the threshold
+   before the grade is written down.
+
+**Why this and not a re-blind.** The alternative -- declare blind by ignoring
+what was already seen -- is unenforceable and would put a false claim on the
+record. Declaring from design intent with the contamination stated is weaker
+evidence than a blind declaration would have been, and it says so out loud,
+which is the honest form. Clause 4 is what preserves the part of the gate that
+still can be preserved: the grading playtest is unseen at declaration time,
+so the band is blind with respect to *the measurement that grades it*, which
+was always the load-bearing half.
+
+**Relation to D4.** The exploratory designation is a D4 instrument statement:
+the confirmatory playtest is the named instrument for the band, and the
+exploratory one is explicitly named as *not* it. Any number carried out of the
+exploratory playtest into the declaration rationale is a quantitative claim
+used as rationale, and wears its measurement or the `UNMEASURED` marker
+accordingly.
+
+**Carriers.** The blind wording is stated at both places it is read --
+`tier05/run_metrics.py`'s `stability_profile` docstring and
+`tier0/tests/test_stability_band.py` -- and both are amended to point here.
+`band is None` stays pinned: the instrument still does not judge, and it stays
+dark until the declaration lands. The Sweep-I log's account is left as
+written; it was true on its date.
+
+**Class: RULING** (this record) -- provenance and schedule, no behavior change.

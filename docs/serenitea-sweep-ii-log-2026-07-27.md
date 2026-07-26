@@ -360,3 +360,33 @@ One thing noticed in passing, not acted on: `art_coverage` bills **4 missing**
 card portraits, all Kokomi's, all arriving with the merge — `ebb_tide`,
 `salt_line`, `before_sun_and_moon`, `undertow`. That is the Track D art debt
 the Neap Tide sprint already recorded, not a new finding.
+
+---
+
+## Addendum — D5, added at merge (2026-07-27)
+
+Recorded after the sprint body was written, on [USER] amendment, and merged to
+`main` with it: **D5 — Kokomi stability band: provenance and schedule.**
+
+E1 (Sweep I) built `stability_profile` dark, under a blind-declaration gate:
+the acceptance band on record *before* any playtest HP data was reviewed. HP
+data was reviewed during the Kokomi playtest sprint on the feature branch, so
+that gate is no longer satisfiable. D5 rules the recovery rather than pretending
+otherwise — the observed playtest is **EXPLORATORY** and grades nothing; the
+band is declared from **design intent**, informed by those observations and
+recorded as such; declaration comes **before** the post-rework confirmatory
+playtest, which grades it; and **the band may not be revised against the
+playtest that grades it.**
+
+That last clause is the part of the original gate that survives intact: the
+band stays blind with respect to the measurement that judges it. It is also a
+D4 instrument statement — the confirmatory playtest is the named instrument,
+and the exploratory one is named as explicitly not it.
+
+Amended in the two places the blind wording is read (`tier05/run_metrics.py`,
+`tier0/tests/test_stability_band.py`); the Sweep-I log's account is left as
+written, because it was true on its date. `band is None` stays pinned.
+
+**This adds a seventh owed item:** the band declaration itself, which is a
+[USER] design ruling and is now on the critical path for the Kokomi
+confirmatory playtest — nothing can grade until it exists.
