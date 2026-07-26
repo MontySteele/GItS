@@ -269,6 +269,10 @@ def lint(rows) -> list[str]:
     problems.extend(undersized(effective))
     problems.extend(banned_families(effective))
     problems.extend(generator_owned(rows))
+    # C3: L12 belongs HERE, not only in main(). It used to be reachable solely
+    # by running this file as a script, so art_process -- the thing that WRITES
+    # the crops -- imported lint() and never pixel-checked its own output.
+    problems.extend(identical_crops())
 
     for note in clip_warnings(effective):
         print(note)
@@ -497,6 +501,25 @@ def clip_warnings(effective) -> list[str]:
 KNOWN_IDENTICAL = {
     frozenset({"catalytic_conversion", "spark_collection"}),   # also PENDING_RED_PEN
     frozenset({"crowd_work", "standing_ovation"}),
+    # ADDED by C3 (Serenitea Sweep), and it is the finding, not the fix.
+    # Turning L12 on against the SHIPPED files surfaced this immediately:
+    # klee/kaboom.png and klee/spark_knight_style.png are byte-identical
+    # (sha256 5649882009...). Both are auto-picks off "Klee Character Card",
+    # so the old candidates-only hash could never have seen them -- auto-picks
+    # get no candidates directory at all.
+    #
+    # It was already half-recorded: the pair sits in PENDING_RED_PEN above as
+    # a SOURCE collision ("ruled onto spark_knight_style, but it is ALSO
+    # kaboom's auto pick -- not 'only a model source' as the ruling assumed").
+    # Its two siblings there were also entered here; this one never was, which
+    # is the gap missed-requirements sec.4.6 names -- "unlike its two siblings,
+    # [it] is in no ledger". Now it is in both.
+    #
+    # OPEN, and deliberately not resolved by this sprint: re-cropping is an
+    # art pass, and the ruling it needs ("which card keeps the Character
+    # Card") is [USER]'s. Listed so the gate can run green while the debt
+    # stays visible, exactly as the two entries above do.
+    frozenset({"kaboom", "spark_knight_style"}),
 }
 
 
@@ -518,19 +541,41 @@ def identical_crops() -> list[str]:
     by hashing the output. That is the whole argument for checking the pixels:
     a plan that differs on paper is not a plan that differs on the card.
 
-    Reads art/candidates/<id>/r1.png, which art_process writes for every
-    shortlist row. Silent no-op when candidates have not been built yet --
-    this is a post-process check, not a plan check.
+    C3 (audit sec.3.7) -- THIS CHECK WAS OFF. Three separate reasons, all fixed
+    here:
+
+      1. It hashed `art/candidates/**`, which is gitignored and absent on every
+         clean checkout: `is_dir()` was False and it returned [] in silence.
+         The one gate that caught the 28-card identical-crop defect had been
+         dark on any machine that had not just run an art pass.
+      2. It hashed the SHORTLIST rather than the shipped output, so auto-picks
+         -- which never get a candidates directory -- were never hashed at all.
+         A duplicate between two auto-picked cards was structurally invisible.
+      3. It was called only from `main()`, so `art_process`'s import path (and
+         every other caller of `lint()`) never pixel-checked.
+
+    Now it hashes `ImageGen/images/cards/**`, which is what actually ships, and
+    `lint()` calls it. Two consequences of the move, both deliberate:
+
+      - Ids are the file STEM, taken from the package rather than from a plan
+        directory name. That closes the stale-candidate trap noted under
+        KNOWN_IDENTICAL: a leftover candidate for a card with no pick can no
+        longer manufacture a duplicate, because a card with no pick has no
+        shipped file to hash.
+      - Absence is still a silent no-op, which is correct here rather than lax:
+        `ImageGen/images` is gitignored Tier F, so a bare clone genuinely has
+        nothing to compare. "Did the art ship" is S9's question and
+        art_coverage.py's; this rule only answers "do two shipped cards render
+        the same pixels".
     """
-    cand = Path(__file__).resolve().parent.parent / "art" / "candidates"
-    if not cand.is_dir():
+    shipped = (Path(__file__).resolve().parent.parent
+               / "ImageGen" / "images" / "cards")
+    if not shipped.is_dir():
         return []
     seen: dict[str, list[str]] = {}
-    for d in sorted(cand.iterdir()):
-        f = d / "r1.png"
-        if f.is_file():
-            seen.setdefault(hashlib.sha256(f.read_bytes()).hexdigest(),
-                            []).append(d.name)
+    for f in sorted(shipped.rglob("*.png")):
+        seen.setdefault(hashlib.sha256(f.read_bytes()).hexdigest(),
+                        []).append(f.stem)
     problems = []
     for ids in seen.values():
         if len(ids) < 2:
@@ -550,8 +595,7 @@ def identical_crops() -> list[str]:
 def main() -> int:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from art_fetch import read_plan
-    problems = lint(read_plan())
-    problems.extend(identical_crops())
+    problems = lint(read_plan())        # includes L12 since C3
     if problems:
         for p in problems:
             print("LINT: " + p, file=sys.stderr)

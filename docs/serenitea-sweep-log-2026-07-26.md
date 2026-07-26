@@ -306,3 +306,180 @@ nonzero `x`, the real battery has both named pools, and every baseline axis is
 nonzero — confirmed end to end: `klee/starter/generic, 40 fights, seed 11`
 scores A1 4.74 / A2 3.34 / A3 2.35 / A4 0.50 / A5 3.00 / A6 3.44 / A7 3.09
 with `A2_samples = 33` and no guard firing.
+
+---
+
+## Track C — Gate repairs — LANDED
+
+Verified END TO END, not just by pin: the pck was rebuilt with MegaDot and the
+full `validate.ps1` was run against the real staged package and the real game
+directory. **`validate: OK`, 84.0s.** C5 landed with Track B.
+
+Suite: 973 → 995. Bare clone: 971 passed, 24 skipped.
+
+> **Working-directory collision, recorded.** Between the Track B and Track C
+> commits, another workstream wrote `tier0/tests/test_card_scope.py` and edited
+> `KleeCode/Powers/KokomiConscript.cs` into this same working directory (a
+> Kokomi conscript soft-lock fix from a 2026-07-26 playtest). A `git add -A`
+> swept both into the Track C commit; the commit was split and both were
+> returned to the working tree untouched, exactly as found. Nothing was lost
+> and nothing of theirs is in this sprint's history. This is precisely the
+> pre-commit collision class **G4** exists to address, and it happened *during
+> the sprint that drafts G4* — noted there as evidence rather than hypothesis.
+
+Every rule repaired here had the same shape: it ran, it reported nothing, and
+reporting nothing read as passing.
+
+### C1 — S8 scanned a directory with no `.ps1` files in it
+
+It walked `$SourceDir` (= `KleeCode`). All three PowerShell files live in
+`klee-mod\build\` and `tools\`. The loop found nothing every run since the day
+it was written, so the mojibake class it exists for — `build_pck.ps1`'s heredoc
+strings, the only place this repo writes game-visible text from PowerShell —
+was never checked at all.
+
+Now scans from the repo root, because a *list* of directories is the same
+defect one level up. `.venv` and build trees are excluded — `Activate.ps1` is
+not this repo's to keep ASCII. And **an empty sweep is now itself a failure**,
+which is the direct lesson: a rule that iterates zero files reports exactly
+what a rule that iterates a clean set reports.
+
+### C2 — S9's precondition was the defect it existed to catch
+
+Two repairs.
+
+The guard was `Test-Path $stagedArt`, and `deploy.ps1` creates that directory
+only when it finds sources — so "art missing entirely", the one case the rule
+was written for, made the missing-art gate silent. Now that case is the
+finding.
+
+And the `break` is gone. Probing one portrait per character proved a directory
+was wired and nothing else; no gate anywhere asserted per-card completeness,
+because `art_coverage.py` bills against the *sheets* rather than against the
+*package*. A partial copy, a name collision in the flat stage, or a per-file
+filter all ship blank cards and all looked identical to the old check.
+
+Dry-run against the real stage before landing: **264 of 264 portraits present**
+across companions/furina/klee/kokomi, so the stricter rule costs nothing today
+and now actually gates completeness.
+
+### C3 — the pixel-dedupe gate was dark, and turning it on found something
+
+L12 was off for three independent reasons, all fixed: it hashed
+`art/candidates/**` (gitignored, absent on any clean checkout → `[]` in
+silence); that directory is the *shortlist*, so auto-picks — which never get a
+candidates directory — were never hashed at all; and it was called only from
+`main()`, so `art_process`, the tool that WRITES the crops, imported `lint()`
+and never pixel-checked its own output.
+
+Now it hashes `ImageGen/images/cards/**`, and `lint()` calls it.
+
+**It immediately found a real duplicate: `klee/kaboom.png` and
+`klee/spark_knight_style.png` are byte-identical** (sha256 `5649882009…`). Both
+are auto-picks off "Klee Character Card", which is exactly why the old
+candidates-only hash could never have seen them.
+
+It was already half-recorded — the pair sits in `PENDING_RED_PEN` as a *source*
+collision — but unlike its two siblings it was in no pixel ledger, which is the
+gap `missed-requirements.md` §4.6 names by hand. Added to `KNOWN_IDENTICAL`
+with its reason. **Not resolved**: re-cropping is an art pass and the ruling it
+needs ("which card keeps the Character Card") is [USER]'s. Listed so the gate
+runs green while the debt stays visible.
+
+Wired as **validate rule S10** and as a full-set pytest — closing the L11
+"verified by negative test" claim, which referred to a test that did not exist.
+The new test file carries both directions, with the negative half synthetic so
+it runs on a bare clone too.
+
+### C4 — the pck contract now measures instead of asserting
+
+It was a hand-written list of ~45 `resource=` lines appended after the export,
+asserting that set regardless of which copy blocks ran. Every copy block skips
+on a missing source, so the contract named `res://furina/salon/member_usher.png`
+whether or not that file existed. S2 checked the contract *belonged to* the pck
+(sha256) and S6c checked C# references against the contract *text*, so nothing
+in the loop ever touched the actual pack contents.
+
+Now derived by enumerating the work directory — which is exactly what the
+exporter packs (`export_filter="all_resources"`). **`roster-pck-v3`**, and S2
+requires it: a v2 contract is a hand-written one, so reading it as current
+would be reading an assertion as a measurement. An empty derived contract
+throws, since a zero-length measurement is the failure mode a derived list
+introduces.
+
+Copy-block skips are now announced individually and summarised at the end.
+
+**Rebuilt and verified: 114 derived resources, and 2 real gaps surfaced
+immediately** — `kokomi\powers` and `kokomi\relics` have no source art at all.
+Five C# sites reference them (`kokomi/relics/pearl_of_wisdom.png` ×4,
+`kokomi/powers/pearl.png` ×1). Not a crash: `KleePck.Path` checks
+`ResourceLoader.Exists` and returns null, so `?? base.PackedIconPath` falls
+back to a base-game icon with a `Log.Warn`. So it is a missing-art bill that
+was previously visible only in `godot.log`, and is now printed by the build.
+**Recorded, not fixed** — it is an art pass, and Kokomi's art is a tracked
+open item.
+
+Two existing pins in `test_roster_runtime_contracts.py` went red, correctly:
+they asserted against the static list in the builder's *source* — an assertion
+checking an assertion. They now check the mechanism (derived, throws when
+empty, no resource literal may reappear) plus the built **artifact**, skipped
+where the pck has not been built since `*.pck.contract.txt` is gitignored.
+That artifact check is the half that can actually fail when a copy block skips.
+
+### C6 — there is no S7 stall; the premise was never measured
+
+The diagnosis is the deliverable. `validate.ps1` carried, as the stated
+rationale for an R70 design decision, the claim that *"validate.ps1 as a whole
+cannot be run quickly (S7's game_ref verification takes minutes)"*.
+
+Measured:
+
+| | |
+|---|---|
+| `tools.build_ironclad_sheet --verify` | **0.17s** |
+| pytest collection from the repo root | 0.40s, 984 tests |
+| the pytest suite S7 runs | **78.4s** |
+| every other rule in `validate.ps1`, together | **5.5s** |
+| full `validate.ps1` | **84.0s** |
+
+The game_ref verification is 0.2% of the gate. There is no stall to bound or
+cache: the cost is the suite, and the suite is the point — caching a "suite
+green" verdict would trade 80 seconds for a class of false green far worse than
+the wait.
+
+So, three things instead:
+
+1. **The false claim is deleted**, with the measured numbers in its place. The
+   unit-testable `Test-VersionPolicy` design stands on its own merits; only its
+   stated rationale was wrong.
+2. **The gate prints its own timing breakdown every run**
+   (`timing: total 84.0s (S7 suite 78.4s, all other rules 5.5s)`). This cost
+   was attributed to the wrong rule for the file's whole life because nobody
+   printed it — a number nobody prints is a number somebody will guess.
+3. **`-StaticOnly`** runs every rule except the suite invocation: **5.5s**,
+   measured. It announces itself with a banner where the suite would have run
+   AND in the verdict line (`validate: OK (STATIC ONLY -- the suite did not
+   run)`), and `deploy.ps1` never passes it — pinned. A fast mode that could be
+   mistaken for a full pass is R70's failure class wearing the opposite coat.
+
+### Two defects the bare-clone gate caught in this sprint's own work
+
+Track A exists so later tracks are verified against it, and it earned that
+twice in one run:
+
+- `test_content_boundaries` (Track B) asserted `len(index) > 300`. The card
+  index is 367 with `game_ref/` and **291** on a bare clone, because
+  real_ironclad's pool is a gitignored local artifact. A magic total was a test
+  reporting the machine — the exact class Track A closed. Re-anchored on the
+  committed roster (each of the three shipped characters ≥ 50 cards) plus a
+  non-vacuity check that a conditional actually exercised the predicate branch.
+- `test_art_lint_full_set`'s skipif used `SHIPPED.is_dir()`, and an **empty**
+  `ImageGen/images/cards/companions/` is a real state on a bare clone — left
+  behind by Track A's own probe test, which created directories and removed
+  only the files it wrote. So the skipif read "art is present" on a clone with
+  no art. Fixed on both sides: the skipif requires an actual PNG, and the probe
+  test now removes the directories it created (deepest first, via `rmdir`,
+  which refuses a non-empty directory — so a machine that really holds art is
+  safe by construction rather than by a check).
+
+Verified after: bare clone leaves no `ImageGen` behind at all.

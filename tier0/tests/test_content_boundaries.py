@@ -65,11 +65,31 @@ def test_predicate_registry_matches_the_if_chain_exactly():
 
 
 def test_every_shipped_card_passes_the_vocabulary_check():
-    """The positive control: 367 cards of real content, all valid."""
+    """The positive control: every card of real content, all valid.
+
+    Anchored on the COMMITTED roster, not on a total. The index is 367 cards
+    on a machine holding `game_ref/` and 291 on a bare clone, because
+    real_ironclad's pool is a gitignored local artifact -- so a magic
+    "> 300" here would have been a test reporting the machine, which is the
+    exact class Track A closed. (It was written that way first, and the
+    bare-clone gate caught it.)
+    """
     index = loader._card_index()
-    assert len(index) > 300, "suspiciously small card index"
     for cid, card in index.items():
         loader._validate_effect_vocabulary(cid, card.effects)
+
+    # Non-vacuity: the three shipped characters are committed content and are
+    # present everywhere, so their counts are a real floor.
+    by_character: dict[str, int] = {}
+    for card in index.values():
+        by_character[card.character] = by_character.get(card.character, 0) + 1
+    for character in ("klee", "furina", "kokomi"):
+        assert by_character.get(character, 0) >= 50, by_character
+    # And at least one conditional actually went through the predicate branch,
+    # so the recursion above is exercised rather than merely reachable.
+    assert any(fx.get("op") == "conditional"
+               for card in index.values() for fx in card.effects), \
+        "no card carries a conditional; the predicate check is untested here"
 
 
 def test_a_misspelled_op_is_rejected_at_load_not_at_play():

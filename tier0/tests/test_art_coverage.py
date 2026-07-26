@@ -94,6 +94,14 @@ def test_stale_file_is_not_counted_as_coverage():
     """
     stale = COMPANION_ART / "zz_stale_probe_not_a_card.png"
     covered = COMPANION_ART / f"{first_companion_id()}.png"
+    # Track the directories this test creates so they can be removed again.
+    # Leaving an empty ImageGen/images/cards/companions/ behind is not inert:
+    # it turns "this clone has no art" into "this clone has an empty art
+    # tree", and a sibling check that reasonably tests `is_dir()` then reads
+    # art as present and fails. That is precisely what happened to
+    # test_art_lint_full_set's skipif, found by the bare-clone gate.
+    created = [p for p in (COMPANION_ART, *COMPANION_ART.parents)
+               if not p.exists()]
     COMPANION_ART.mkdir(parents=True, exist_ok=True)
     stale.write_bytes(PROBE_PNG)
     seeded_covered = not covered.exists()
@@ -120,6 +128,14 @@ def test_stale_file_is_not_counted_as_coverage():
         stale.unlink(missing_ok=True)
         if seeded_covered:
             covered.unlink(missing_ok=True)
+        # Deepest first, and only directories this test made. rmdir refuses a
+        # non-empty directory, so a machine that really holds art is safe by
+        # construction rather than by a check.
+        for path in sorted(created, key=lambda p: len(p.parts), reverse=True):
+            try:
+                path.rmdir()
+            except OSError:
+                break
 
 
 @pytest.mark.skipif(not (COMPANION_ART / "dahlia_sacramental_shower.png").exists(),

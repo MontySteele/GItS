@@ -21,12 +21,23 @@ param(
     # S7 escape hatch: a game_ref/ directory that EXISTS but is INCOMPLETE
     # fails validation by default (see S7 comment). Pass this switch to
     # acknowledge the stale local reference and test committed content only.
-    [switch]$AllowIncompleteGameRef
+    [switch]$AllowIncompleteGameRef,
+    # C6. Run every rule EXCEPT S7's suite invocation, for the inner loop.
+    # Prints a loud banner and is never what deploy.ps1 uses -- a fast mode
+    # that could be mistaken for a full pass would be the R70 failure class
+    # wearing the opposite coat.
+    [switch]$StaticOnly
 )
 
 $ErrorActionPreference = 'Stop'
 $findings = New-Object System.Collections.Generic.List[string]
 function Fail($rule, $detail) { $findings.Add("[$rule] $detail") | Out-Null }
+
+# C6 timing. The cost of this gate was attributed to the wrong rule for its
+# whole life -- see the note at S3 and the S7 header -- so it is now MEASURED
+# and printed rather than believed.
+$swTotal = [Diagnostics.Stopwatch]::StartNew()
+$suiteSeconds = 0.0
 
 # R70 manifest version policy (MAJOR-AUTO), shared with deploy.ps1 so the
 # stamp and the gate that checks it cannot compute it differently. Also
@@ -78,8 +89,14 @@ if (-not (Test-Path $manifestPath)) {
                 Fail 'S2' "PCK has no build contract at $contractPath; rebuild it with tools\build_pck.ps1."
             } else {
                 $contractLines = Get-Content $contractPath
-                if ($contractLines -notcontains 'contract=roster-pck-v2') {
-                    Fail 'S2' 'PCK contract is stale; expected roster-pck-v2. Rebuild with tools\build_pck.ps1.'
+                # v2 -> v3 is C4 (audit sec.3.2). A v2 contract is a HAND-WRITTEN
+                # list appended after the export, asserting a set of resources
+                # regardless of which copy blocks actually ran; v3 is derived
+                # from the files that landed in the work directory. Reading a
+                # v2 contract as current would be reading an assertion as a
+                # measurement, so it is stale by definition.
+                if ($contractLines -notcontains 'contract=roster-pck-v3') {
+                    Fail 'S2' 'PCK contract is stale; expected roster-pck-v3 (C4: derived, not hand-written). Rebuild with tools\build_pck.ps1.'
                 }
                 $hashLine = @($contractLines | Where-Object { $_ -like 'sha256=*' })
                 if ($hashLine.Count -ne 1) {
@@ -120,9 +137,19 @@ if (-not (Test-Path $manifestPath)) {
     # R70 (audit 3.5 + 3.6). Dependency min_version, min_game_version and the
     # staged manifest version are all COMPARED here, not merely asserted
     # present. The comparisons live in version.ps1's Test-VersionPolicy so
-    # they are unit-testable: validate.ps1 as a whole cannot be run quickly
-    # (S7's game_ref verification takes minutes), and a gate nobody can
-    # afford to run is the failure class this ruling is closing.
+    # they are unit-testable, which is worth doing on its own merits.
+    #
+    # C6 CORRECTION (Serenitea Sweep): the reason originally given for that --
+    # "validate.ps1 as a whole cannot be run quickly (S7's game_ref
+    # verification takes minutes)" -- was never measured and is false.
+    # `tools.build_ironclad_sheet --verify` runs in 0.17s. The gate costs ~85s
+    # end to end and ~80s of that is the pytest suite S7 exists to run; every
+    # other rule together is ~5s. There was no stall to bound or cache: the
+    # cost is the suite, and the suite is the point. What was missing was
+    # attribution, so the run now prints its own timing breakdown, and
+    # -StaticOnly gives the inner loop a ~5s pass that says out loud what it
+    # skipped. The unit-testable design stands; only its stated rationale was
+    # wrong.
     $expected = Get-PackageVersion `
         -SourceManifest (Join-Path (Split-Path -Parent $PSScriptRoot) 'Klee\manifest.json') `
         -RepoRoot (Get-RepoRoot)
@@ -565,7 +592,17 @@ if (Test-Path $venvPython) {
             "    or re-run with -AllowIncompleteGameRef to test committed content only.")
     }
 
+    if ($StaticOnly) {
+        Write-Host '===============================================================' -ForegroundColor Yellow
+        Write-Host ' -StaticOnly: S7 DID NOT RUN THE SUITE.' -ForegroundColor Yellow
+        Write-Host ' Every other rule ran. This is an inner-loop pass and says' -ForegroundColor Yellow
+        Write-Host ' NOTHING about whether the repo tests are green.' -ForegroundColor Yellow
+        Write-Host ' deploy.ps1 never passes this switch.' -ForegroundColor Yellow
+        Write-Host '===============================================================' -ForegroundColor Yellow
+        $referenceMode = $null
+    }
     if ($null -ne $referenceMode) {
+        $swSuite = [Diagnostics.Stopwatch]::StartNew()
         $oldReferenceMode = [Environment]::GetEnvironmentVariable(
             'GITS_REFERENCE_MODE', 'Process')
         $env:GITS_REFERENCE_MODE = $referenceMode
@@ -588,9 +625,11 @@ if (Test-Path $venvPython) {
             } else {
                 $env:GITS_REFERENCE_MODE = $oldReferenceMode
             }
+            $swSuite.Stop()
+            $suiteSeconds = $swSuite.Elapsed.TotalSeconds
         }
     }
-} else {
+} elseif (-not $StaticOnly) {
     Fail 'S7' "repo venv python not found at $venvPython; cannot run the full suite."
 }
 
@@ -604,29 +643,61 @@ if (Test-Path $venvPython) {
 # 2026-07-25 -- 58 painted faces sat in ImageGen and not one reached the game.
 #
 # Checked against the STAGE rather than the source list, so it verifies the
-# outcome instead of restating the config. One portrait per character is
-# enough to prove the directory was wired; art_coverage.py owns completeness.
+# outcome instead of restating the config.
+#
+# C2 (audit sec.3.3), two repairs:
+#
+#  * The guard was `Test-Path $stagedArt`, and deploy.ps1 only CREATES that
+#    directory when it finds sources -- so the one case this rule exists for,
+#    art missing entirely from the package, made the missing-art gate silent.
+#    A gate whose precondition is the defect is not a gate. Now: if art exists
+#    upstream and the stage has none, that is the finding.
+#  * It probed ONE portrait per character and broke on the first hit, which
+#    proves a directory was wired and nothing else. No gate anywhere asserted
+#    per-card completeness -- art_coverage.py's test deliberately does not,
+#    because it bills against the sheets rather than against the package. So
+#    the break is gone and every painted portrait must reach the stage. The
+#    failure names counts and examples, not just the first miss.
 # ---------------------------------------------------------------------------
 # ImageGen lives at the REPO root, not under klee-mod. Getting this wrong makes
 # Test-Path false and silently skips the whole rule -- which it did on the first
 # attempt, and the negative test caught it. $repoRoot is defined at S6.
 $cardsRoot = Join-Path $repoRoot 'ImageGen\images\cards'
 $stagedArt = Join-Path $StageDir 'images\cards'
-if ((Test-Path $cardsRoot) -and (Test-Path $stagedArt)) {
-    $staged = @{}
-    foreach ($f in Get-ChildItem $stagedArt -Filter *.png -ErrorAction SilentlyContinue) {
-        $staged[$f.Name] = $true
-    }
-    foreach ($charDir in Get-ChildItem $cardsRoot -Directory -ErrorAction SilentlyContinue) {
-        $pngs = @(Get-ChildItem $charDir.FullName -Filter *.png -ErrorAction SilentlyContinue)
-        if ($pngs.Count -eq 0) { continue }   # nothing painted yet is not a defect
-        $hit = $false
-        foreach ($p in $pngs) { if ($staged.ContainsKey($p.Name)) { $hit = $true; break } }
-        if (-not $hit) {
-            Fail 'S9' ("ImageGen\images\cards\$($charDir.Name) holds $($pngs.Count) " +
-                "portrait(s) and NONE of them are in the staged package. That " +
-                "directory is missing from deploy.ps1's `$artSrcDirs -- their " +
-                "cards will render with no art and nothing else will complain.")
+if (Test-Path $cardsRoot) {
+    $sourcePngs = @(Get-ChildItem $cardsRoot -Recurse -Filter *.png -ErrorAction SilentlyContinue)
+    if ($sourcePngs.Count -gt 0 -and -not (Test-Path $stagedArt)) {
+        # The inversion. deploy.ps1 creates images\cards only when it finds
+        # sources, so "no staged art directory at all" used to skip this rule
+        # entirely -- silence in exactly the case it was written for.
+        Fail 'S9' ("ImageGen\images\cards holds $($sourcePngs.Count) portrait(s) " +
+            "and the staged package has no images\cards directory at all. " +
+            "Every card in the game will render with no art.")
+    } elseif ($sourcePngs.Count -gt 0) {
+        $staged = @{}
+        foreach ($f in Get-ChildItem $stagedArt -Filter *.png -ErrorAction SilentlyContinue) {
+            $staged[$f.Name] = $true
+        }
+        foreach ($charDir in Get-ChildItem $cardsRoot -Directory -ErrorAction SilentlyContinue) {
+            $pngs = @(Get-ChildItem $charDir.FullName -Filter *.png -ErrorAction SilentlyContinue)
+            if ($pngs.Count -eq 0) { continue }   # nothing painted yet is not a defect
+            $missing = @($pngs | Where-Object { -not $staged.ContainsKey($_.Name) })
+            if ($missing.Count -eq $pngs.Count) {
+                Fail 'S9' ("ImageGen\images\cards\$($charDir.Name) holds $($pngs.Count) " +
+                    "portrait(s) and NONE of them are in the staged package. That " +
+                    "directory is missing from deploy.ps1's `$artSrcDirs -- their " +
+                    "cards will render with no art and nothing else will complain.")
+            } elseif ($missing.Count -gt 0) {
+                # The half no gate covered: the directory IS wired, and some of
+                # its portraits still did not land. A per-file copy filter, a
+                # name collision in the flat stage, or a partial copy all look
+                # like this, and all of them ship blank cards.
+                $sample = ($missing | Select-Object -First 5 |
+                    ForEach-Object { $_.Name }) -join ', '
+                Fail 'S9' ("ImageGen\images\cards\$($charDir.Name): " +
+                    "$($missing.Count) of $($pngs.Count) portrait(s) did not reach " +
+                    "the staged package (e.g. $sample). Those cards render blank.")
+            }
         }
     }
 }
@@ -650,8 +721,27 @@ if ((Test-Path $cardsRoot) -and (Test-Path $stagedArt)) {
 # POINT (validate.ps1's own literal-BOM regex is the one case today).
 # ---------------------------------------------------------------------------
 $asciiExempt = '# ascii-exempt:'
-foreach ($script in Get-ChildItem $SourceDir -Recurse -Filter *.ps1 -ErrorAction SilentlyContinue) {
-    if ($script.FullName -like '*\dist\*' -or $script.FullName -like '*\obj\*') { continue }
+# C1 (audit sec.3.1): this walked $SourceDir (= KleeCode), which contains ZERO
+# .ps1 files -- all three live in klee-mod\build\ and tools\. The loop found
+# nothing and the rule passed, every run, since the day it was written. The
+# mojibake class it exists for (build_pck.ps1's heredoc strings, which are the
+# ONLY place this repo writes game-visible text from PowerShell) was never
+# checked at all.
+#
+# Scanned from the repo root instead of from a list of directories, because a
+# list is the same defect one level up: a .ps1 added somewhere new would be
+# unchecked and nothing would say so. Excludes are for trees that are not ours
+# -- .venv ships Activate.ps1, which is not this repo's to keep ASCII.
+$asciiSkip = @('*\.venv\*', '*\dist\*', '*\obj\*', '*\bin\*',
+               '*\pck-work\*', '*\node_modules\*')
+$ps1Files = @(Get-ChildItem $repoRoot -Recurse -Filter *.ps1 -ErrorAction SilentlyContinue |
+    Where-Object { $p = $_.FullName; -not ($asciiSkip | Where-Object { $p -like $_ }) })
+if ($ps1Files.Count -eq 0) {
+    Fail 'S8' ("found no .ps1 files under $repoRoot to check. This rule scanned " +
+        "a directory with none in it for its entire life; an empty sweep is " +
+        "the failure mode, not a pass.")
+}
+foreach ($script in $ps1Files) {
     $lineNo = 0
     foreach ($line in [IO.File]::ReadAllLines($script.FullName)) {
         $lineNo++
@@ -668,10 +758,54 @@ foreach ($script in Get-ChildItem $SourceDir -Recurse -Filter *.ps1 -ErrorAction
 }
 
 # ---------------------------------------------------------------------------
+# S10. The art lint runs.
+#
+# C3 (audit sec.3.7). `tools/art_lint.py` is the largest lint in the repo -- 12
+# rules over the whole card-art plan -- and it was wired into no validate rule
+# and no test. It ran when somebody typed its name, which meant it ran during
+# art passes and never afterwards. The sprint log's L11 "verified by negative
+# test" claim referred to a test that did not exist.
+#
+# Dual-wired, the same argument test_sheet_lints.py makes for its own family:
+# pytest covers it for anyone on any platform (tier0/tests/test_art_lint_full_set.py),
+# and this rule covers the deploy, because the deploy is the moment the art
+# actually ships and pytest is not what gates it.
+#
+# Its inputs (art/plan.tsv, ImageGen/images) are gitignored Tier F, so on a
+# machine without them the tool lints an empty plan and exits 0. That is the
+# correct behaviour here and not a silent skip: this rule asks "is the art
+# plan self-consistent", while "did the art ship" is S9's question, and S9
+# now fails loudly on exactly that case.
+# ---------------------------------------------------------------------------
+$artLint = Join-Path $repoRoot 'tools\art_lint.py'
+if (-not (Test-Path $venvPython)) {
+    Fail 'S10' "repo venv python not found at $venvPython; cannot run the art lint."
+} elseif (-not (Test-Path $artLint)) {
+    Fail 'S10' "tools/art_lint.py is missing."
+} else {
+    $artOut = Invoke-RepoPython $artLint
+    if ($LASTEXITCODE -ne 0) {
+        Fail 'S10' "art lint failed:`n    $($artOut -join "`n    ")"
+    }
+}
+
+# ---------------------------------------------------------------------------
 # Report
 # ---------------------------------------------------------------------------
+$swTotal.Stop()
+# C6: attribution, printed every run. The comment at S3 spent its life blaming
+# the game_ref verification (0.17s) for a cost that is ~95% the pytest suite.
+# A number nobody prints is a number somebody will guess.
+$totalS = $swTotal.Elapsed.TotalSeconds
+Write-Host ("timing: total {0:N1}s  (S7 suite {1:N1}s, all other rules {2:N1}s)" -f `
+    $totalS, $suiteSeconds, ($totalS - $suiteSeconds)) -ForegroundColor DarkGray
+
 if ($findings.Count -eq 0) {
-    Write-Host "validate: OK" -ForegroundColor Green
+    if ($StaticOnly) {
+        Write-Host "validate: OK (STATIC ONLY -- the suite did not run)" -ForegroundColor Yellow
+    } else {
+        Write-Host "validate: OK" -ForegroundColor Green
+    }
     exit 0
 }
 
