@@ -30,9 +30,12 @@ import mimetypes
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+# Same archiving breakage as banner_variance_cells.py: this file moved into
+# tools/archive/, so repo root is parents[2], and `art_fetch` lives one level
+# up in tools/ rather than beside this script.
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(ROOT / "tools"))
 
 from tier0.content import loader          # noqa: E402
 from art_fetch import read_plan           # noqa: E402

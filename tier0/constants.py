@@ -576,7 +576,6 @@ REST_SMITH_DANGER = 0.40
 # big fight" lookahead. Both template rests sit directly before E/B, so
 # under v4 runs walked into guaranteed elites at ~48/80 HP (§10.8.1).
 REST_PREFIGHT_HEAL_THRESHOLD = 0.90
-                                  # fraction, otherwise remove a card
 # PUNISHER_LITE_SCALE / ATTRITION_LITE_HP / NORMAL_POOL_WEIGHTS: DELETED by
 # R67 (2026-07-26). They described a weighted "lite" normal-encounter pool
 # (a 70%-statline punisher and a single 45 HP attrition unit alongside swarm)

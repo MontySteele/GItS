@@ -29,6 +29,34 @@ def run_tool(*args):
                           capture_output=True, text=True)
 
 
+# 1x1 transparent PNG. Content is irrelevant everywhere below -- coverage keys
+# on the FILENAME, never on pixels (that is art_lint's job, not this tool's).
+PROBE_PNG = bytes.fromhex(
+    "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4"
+    "890000000a49444154789c63000100000500010d0a2db40000000049454e44ae"
+    "426082")
+
+
+def first_companion_id():
+    """A real expected id from a canonical companion sheet, read not hardcoded.
+
+    Used to seed a COVERED probe. Which row it is does not matter; that it
+    comes from the sheet rather than a literal does -- a literal here would be
+    the `test_bill_is_derived_from_canonical_sheets` failure mode one level up.
+    """
+    sys.path.insert(0, str(REPO / "tools"))
+    import art_coverage
+
+    for path, outdir, _label in art_coverage.SHEETS:
+        if outdir != COMPANION_ART:
+            continue
+        rows = yaml.safe_load(path.read_text(encoding="utf-8"))
+        for r in rows:
+            if isinstance(r, dict) and "id" in r:
+                return r["id"]
+    raise AssertionError("no companion sheet row found to seed a covered probe")
+
+
 def test_no_unrecorded_stale_art():
     """Exit 0 means every file on disk maps to a sheet row or a KNOWN_STALE reason.
 
@@ -53,26 +81,45 @@ def test_stale_file_is_not_counted_as_coverage():
 
     A test that depends on an artifact nothing can regenerate is a test that
     reports the machine, not the code.
+
+    It seeds BOTH probes. The stale one is the subject; the covered one exists
+    so the `have:` list is non-empty *by construction* rather than because the
+    machine happens to hold art. Asserting "the covered list is non-empty and
+    does not name the stale probe" against a list that is empty on a bare clone
+    is a vacuous assertion wearing a real one's clothes -- which is exactly how
+    this test failed on a fresh clone before (audit sec.A1). The covered probe
+    is written only if that path is currently unoccupied, and removed only if
+    this test wrote it: on a machine that HAS the real portrait we must not
+    overwrite an eyes-on-approved file, and we do not need to.
     """
-    probe = COMPANION_ART / "zz_stale_probe_not_a_card.png"
-    probe.parent.mkdir(parents=True, exist_ok=True)
-    # 1x1 PNG. Content is irrelevant -- coverage keys on the FILENAME.
-    probe.write_bytes(bytes.fromhex(
-        "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4"
-        "890000000a49444154789c63000100000500010d0a2db40000000049454e44ae"
-        "426082"))
+    stale = COMPANION_ART / "zz_stale_probe_not_a_card.png"
+    covered = COMPANION_ART / f"{first_companion_id()}.png"
+    COMPANION_ART.mkdir(parents=True, exist_ok=True)
+    stale.write_bytes(PROBE_PNG)
+    seeded_covered = not covered.exists()
+    if seeded_covered:
+        covered.write_bytes(PROBE_PNG)
     try:
         res = run_tool()
-        assert probe.stem in res.stdout, res.stdout
+        assert stale.stem in res.stdout, res.stdout
         assert "STALE" in res.stdout
-        # It sits in the companions dir, but the covered list must not name it.
         covered_lines = [ln for ln in res.stdout.splitlines()
                          if ln.strip().startswith("have:")]
+        # The positive control: coverage is being reported at all, so the
+        # negative assertions below have something to be negative about.
         assert covered_lines, "report printed no covered list"
-        assert all(probe.stem not in ln for ln in covered_lines)
+        assert any(covered.stem in ln for ln in covered_lines), \
+            f"seeded {covered.stem} did not read as coverage:\n{res.stdout}"
+        # Both probes sit in the same directory. Only one of them is coverage.
+        assert all(stale.stem not in ln for ln in covered_lines)
+        # The KNOWN_STALE legacy file, where a machine still has it, is a NOTE
+        # and must not be counted either. Vacuous on a clone that lacks it --
+        # deliberately so: it is a guard on the KNOWN_STALE path, not evidence.
+        assert not any("xingqiu" in ln for ln in covered_lines)
     finally:
-        probe.unlink(missing_ok=True)
-    assert not any("xingqiu" in ln for ln in covered_lines)
+        stale.unlink(missing_ok=True)
+        if seeded_covered:
+            covered.unlink(missing_ok=True)
 
 
 @pytest.mark.skipif(not (COMPANION_ART / "dahlia_sacramental_shower.png").exists(),
