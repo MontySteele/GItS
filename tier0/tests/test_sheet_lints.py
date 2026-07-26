@@ -23,6 +23,35 @@ def test_no_strict_domination_on_docs_sheets():
     assert res.returncode == 0, res.stdout + res.stderr
 
 
+def test_kokomi_decksize_grammar():
+    """Kokomi kickoff §1 law 4 (user-authored, machine-checkable → gate):
+    Commons in HER pool net card delta <= 0. Scope is her personal sheet
+    only — deliberately not the companion pools, not mod-wide."""
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_kokomi_decksize.py"),
+         str(loader.DOCS_DIR / "kokomi-cards.yaml")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
+def test_every_draftable_card_can_be_upgraded():
+    """G-C1. A card with no upgrade is a dead campfire choice.
+
+    Two layers, because the 2026-07-25 playtest's actual defect was in the
+    second: a card can have a perfectly good sheet delta that the GENERATOR
+    cannot express, in which case the sim upgrades it and the live game does
+    not. A lint that only checked the sheet would have reported all-clear on
+    exactly the card that was reported broken.
+
+    Wired here rather than left as a tool so that a missing upgrade is red,
+    not a playtest note.
+    """
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_upgrade_coverage.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
 def test_card_names_are_unique():
     """Display names: unique internally, and clear of docs/reserved-card-names.txt.
 
@@ -37,5 +66,44 @@ def test_card_names_are_unique():
     res = subprocess.run(
         [sys.executable, str(REPO / "tools" / "lint_unique_names.py"),
          *sheets],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
+def test_mirrored_constants_match_the_sim():
+    """C# balance constants vs tier0, the source of truth.
+
+    Every balance number lives twice -- once in tier0 where it was MEASURED,
+    once in C# where it is PLAYED -- and the C# copies were kept in step by
+    discipline alone until 2026-07-25. That failure mode is silent in the
+    worst way: a sim-side retune nobody mirrors leaves the build green, the
+    tests green, and the tuning report describing a game nobody is playing.
+
+    It is wired into PYTEST as well as into validate.ps1 (S6e) on purpose.
+    The retune happens HERE, in Python, and the person doing it runs the
+    suite; making them wait for a deploy to learn they left the mod behind
+    is one round trip too late. There is no C# test project to pin this at
+    runtime, so this static comparison is the whole gate.
+    """
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_constant_parity.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
+def test_companion_roster_can_fill_both_shop_slots():
+    """§4.7 shop channel: instance TWO of the empty-draw class.
+
+    Wired here rather than left as a tool for the same reason as the upgrade
+    lint above: the failure it prevents is a black-screen softlock on shop
+    entry (finding 24's shape), and the roster corner that causes it moves
+    every time someone edits a companion sheet. A thin nation is survivable --
+    both implementations carry a fallback ladder -- but every rung the ladder
+    takes is a slot that silently stopped honouring §4.7, which is invisible
+    at the table and visible here.
+    """
+    res = subprocess.run(
+        [sys.executable,
+         str(REPO / "tools" / "lint_companion_shop_coverage.py")],
         capture_output=True, text=True)
     assert res.returncode == 0, res.stdout + res.stderr

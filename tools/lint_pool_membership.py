@@ -18,16 +18,11 @@ Both cases were cards deliberately kept OUT of KleeCardPool -- companions
 statuses (created at play time). "Not rollable" is a legitimate design
 position; "in no pool at all" is never legitimate.
 
-THE POOL THAT COUNTS IS KleeCardPool. First fix attempt put those cards in a
-second CardPoolModel, and this lint went green while the crash continued
-unchanged in game: ModelDb.AllCardPools is AllCharacters.Select(c => c.CardPool)
-plus a HARDCODED array of 7 shared pools, so a mod pool that is not a
-character's CardPool is invisible to the Pool lookup. Membership therefore
-means "reachable from KleeCardPool.GenerateAllCards" and nothing else --
-KleeOffPoolCards is spliced in there, and KleeCardPool.FilterThroughEpochs is
-what keeps those cards out of generation. A lint that checks source text can
-confirm membership; it CANNOT confirm the engine sees the pool. That gap is why
-the first fix shipped.
+THE POOLS THAT COUNT are character-owned pools. ModelDb.AllCardPools is
+AllCharacters.Select(c => c.CardPool) plus a hardcoded array of shared pools,
+so an unattached helper pool is invisible. Membership therefore means
+reachable from KleeCardPool, FurinaCardPool or KokomiCardPool. Their FilterThroughEpochs
+overrides keep generated-only kit/token cards out of reward rolls.
 
 Usage: python tools/lint_pool_membership.py
 Exit 1 with findings on stdout if any card class is unpooled.
@@ -40,35 +35,44 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-CARD_DIRS = [
-    REPO / "klee-mod" / "KleeCode" / "Cards",
-    REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated",
-]
-# Files reachable from KleeCardPool.GenerateAllCards. KleeOffPoolCards is
-# spliced into it; CompanionRoster.All is spliced into KleeOffPoolCards.
+CARD_ROOT = REPO / "klee-mod" / "KleeCode" / "Cards"
+# Files reachable from a visible character's GenerateAllCards. The generated
+# roster classes are the sheet-owned membership ledgers.
 MEMBERSHIP_FILES = [
     REPO / "klee-mod" / "KleeCode" / "KleeCardPool.cs",
     REPO / "klee-mod" / "KleeCode" / "KleeOffPoolCards.cs",
+    REPO / "klee-mod" / "KleeCode" / "RosterAncientCards.cs",
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "CompanionRoster.cs",
+    REPO / "klee-mod" / "KleeCode" / "FurinaCardPool.cs",
+    REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina" / "Generated"
+    / "FurinaCardRoster.cs",
+    REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina" / "Generated"
+    / "GuestStarRoster.cs",
+    REPO / "klee-mod" / "KleeCode" / "KokomiCardPool.cs",
+    REPO / "klee-mod" / "KleeCode" / "Cards" / "Kokomi" / "Generated"
+    / "KokomiCardRoster.cs",
 ]
 
 # `public sealed class Foo : CustomCardModel` / `: CustomCardModel, IElementalCard`
 CLASS_RE = re.compile(
     r"^\s*public\s+sealed\s+class\s+(\w+)\s*:\s*CustomCardModel\b", re.M
 )
-# `ModelDb.Card<Foo>()`
-MEMBER_RE = re.compile(r"ModelDb\.Card<(\w+)>\s*\(")
+# `ModelDb.Card<Foo>()`, or the namespace-qualified `ModelDb.Card<A.B.Foo>()`.
+# The qualified form is legal C# and reads identically to the compiler; a
+# pattern that only matched the bare name reported a correctly-pooled card as
+# unpooled, which is the safe direction to fail but still a false alarm that
+# invites someone to "fix" the pool instead of the lint.
+MEMBER_RE = re.compile(r"ModelDb\.Card<(?:\w+\.)*(\w+)>\s*\(")
 
 
 def main() -> int:
     findings: list[str] = []
 
     declared: dict[str, Path] = {}
-    for directory in CARD_DIRS:
-        if not directory.is_dir():
-            findings.append(f"card directory missing: {directory}")
-            continue
-        for path in sorted(directory.glob("*.cs")):
+    if not CARD_ROOT.is_dir():
+        findings.append(f"card directory missing: {CARD_ROOT}")
+    else:
+        for path in sorted(CARD_ROOT.rglob("*.cs")):
             for name in CLASS_RE.findall(path.read_text(encoding="utf-8")):
                 declared[name] = path
 
@@ -91,8 +95,8 @@ def main() -> int:
             findings.append(
                 f"{rel}: {name} is in no card pool. CardModel.Pool falls "
                 f"through to MockCardPool and throws 'You monster!' the first "
-                f"time the card is drawn or previewed. Add it to KleeCardPool "
-                f"(rollable) or KleeExtraCardPool (never rollable)."
+                f"time the card is drawn or previewed. Add it to a visible "
+                f"character pool (rollable or filtered as off-pool)."
             )
 
     for finding in findings:

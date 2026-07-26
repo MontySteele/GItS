@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
+using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
@@ -57,6 +58,28 @@ internal static class ReactionEffects
     /// tier0 predicate reaction_triggered_this_turn (Chevreuse, Vanguard's
     /// Valor): `state.reactions_this_turn > 0`. RULED in the sheet as ANY
     /// reaction, not Overload-only.
+    ///
+    /// CO-OP SCOPE, SEALED 2026-07-26 (red-pen R1). This counter and
+    /// <see cref="TotalResolved"/> are deliberately GLOBAL, not per-player:
+    /// in co-op your partner's Overload satisfies your Chevreuse, and a
+    /// reaction landing inside your card's resolution window satisfies your
+    /// Boom Goes the Dynamite. **That is intended, not the G-B1 leak.**
+    ///
+    /// The G-B2 census flagged it as needs-ruling precisely because it LOOKS
+    /// like the Best Friends Forever bug -- a "this combat/turn" tracker that
+    /// is correct solo and divergent in co-op. The distinction is what the
+    /// tracker is a claim ABOUT. BFF's list answered "which cards did YOU
+    /// play", so an unowned entry was simply wrong. This one answers "did a
+    /// Reaction happen", and a Reaction is a fact about the BOARD that both
+    /// players are standing on. Elements are the shared system in this mod;
+    /// making reaction payoffs private would mean two players applying auras
+    /// to the same enemy could not cooperate, which is the opposite of the
+    /// design.
+    ///
+    /// So: do NOT "fix" this by scoping it to an owner. If the intent ever
+    /// changes, it changes at the ruling, not in the code -- see
+    /// docs/red-pen-2026-07-26.md R1 and the co-op section of
+    /// docs/archive/playtest-2026-07-25-coop-a0.md.
     /// </summary>
     public static bool ReactionTriggeredThisTurn => TotalResolved > _turnStartTotal;
 
@@ -85,6 +108,16 @@ internal static class ReactionEffects
         {
             await KleeBurstResource.Gain(
                 choiceContext, dealer, BurstConstants.PerReaction, cardSource);
+            FurinaResources.GainBurst(
+                dealer, FurinaResourceConstants.BurstPerReaction);
+            // Kokomi takes the same +5. The sim's gate is `if p.burst_max`
+            // (reactions.py), i.e. UNIVERSAL for anyone who owns a meter --
+            // not a Klee rule that Furina was granted an exception to. She is
+            // a catalyst, so every attack she plays applies Hydro and reaction
+            // income is a large share of her fill rate; leaving her off this
+            // line left the Burst reachable on paper and rare in play.
+            KokomiResources.GainBurst(
+                dealer, KokomiConstants.BurstPerReaction);
 
             // Catalytic Conversion, right after the flat +5 exactly as in the
             // sim (reactions.py _react): +Amount Sparks and +Amount x 5 Burst
@@ -117,16 +150,22 @@ internal static class ReactionEffects
                 break;
 
             case Reaction.Frozen:
-                // TODO(C2.1): bosses must take Vulnerable FROZEN_BOSS_VULN
-                // instead of Frozen (round-3 ruling, stands post-errata). Not
-                // implemented -- I have not yet verified how to identify a boss
-                // from a Creature, and guessing at that predicate is how the
-                // "is_boss" branch silently never fires. Until then every
-                // enemy, boss included, gets the soft-control version, which is
-                // WRONG for bosses and will skew any boss playtest.
-                await PowerCmd.Apply<FrozenPower>(
-                    choiceContext, target, 1,
-                    applier: dealer, cardSource: cardSource);
+                // Boss rooms consume the aura but receive Vulnerable rather
+                // than Frozen. This preserves the intended boss immunity to
+                // action control while retaining a useful reaction payoff.
+                if (target.CombatState?.Encounter?.RoomType == RoomType.Boss)
+                {
+                    await PowerCmd.Apply<VulnerablePower>(
+                        choiceContext, target,
+                        ReactionConstants.FrozenBossVuln,
+                        applier: dealer, cardSource: cardSource);
+                }
+                else
+                {
+                    await PowerCmd.Apply<FrozenPower>(
+                        choiceContext, target, 1,
+                        applier: dealer, cardSource: cardSource);
+                }
                 break;
 
             // Completed with the companions batch (2026-07-21): the roster's
@@ -151,6 +190,12 @@ internal static class ReactionEffects
                             dealer: null, cardSource: null);
                     }
                 }
+                // Survival sprint: the explosion staggers the reacted target.
+                // Ordinary Weak composes naturally with Bomb suppression: the
+                // Bomb hook detects a real stack and does not multiply 0.75 twice.
+                await PowerCmd.Apply<WeakPower>(
+                    choiceContext, target, ReactionConstants.OverloadWeak,
+                    applier: dealer, cardSource: cardSource);
                 break;
 
             case Reaction.ElectroCharged:

@@ -4,16 +4,21 @@ from tier0.content import loader, upgrades
 from tier05 import draft, model
 
 
-def test_runs_actually_upgrade_and_stay_deterministic():
+def test_runs_rest_coherently_and_stay_deterministic():
+    """DRAFTER_VERSION 5 revision: both template rests directly precede an
+    E/B fight, so the pre-fight lookahead heals every bruised (<90%)
+    arrival and smithing fires only on near-full ones. The M7 'healthy
+    rests smith' contract lives on in test_upgrade_prefers_on_plan_payoffs
+    (unit) -- here we assert rests act, smithed ids resolve, and runs
+    replay deterministically."""
     rs = model.run_many("klee", "demolition", "demolition",
                         draft.assigned_policy, runs=30, seed=11)
-    upgraded = [r for r in rs
-                if any(cid.endswith("+") for cid in r.deck_ids)]
-    assert upgraded, "healthy rests must smith on-plan cards"
-    smiths = [t for r in rs for t in r.rests if t[1] == "upgrade"]
-    assert smiths
-    # Every smithed id must resolve through the loader.
-    for _, _, cid in smiths:
+    actions = [t for r in rs for t in r.rests]
+    assert actions
+    assert [t for t in actions if t[1] == "heal"], \
+        "v5 world: bruised pre-E/B rests must heal"
+    # Every smithed id (if any run arrived near-full) must resolve.
+    for _, _, cid in (t for t in actions if t[1] == "upgrade"):
         loader.get_card(cid + upgrades.SUFFIX)
     again = model.run_many("klee", "demolition", "demolition",
                            draft.assigned_policy, runs=30, seed=11)
@@ -55,9 +60,24 @@ def test_unappliable_upgrades_never_chosen_at_rest():
     then made that upgrade real and stranded the assertion (caught by the
     first full-suite run -- the cross-tier coupling the full-suite gate
     exists for). Whatever UNAPPLIABLE holds today, a rest must never
-    smith it -- and the next disposition ruling can't strand this again."""
-    assert upgrades.UNAPPLIABLE, \
-        "UNAPPLIABLE is empty -- retire this test with a ruling, not a skip"
+    smith it -- and the next disposition ruling can't strand this again.
+
+    RULING 2026-07-25 (G-C2), which this test demanded rather than a skip.
+    UNAPPLIABLE is now EMPTY: nicole_celestial_gift was its last member and
+    its delta moved from {block_per_turn: +2} -- unexpressible, because the
+    block is a constant rather than a card field -- to {buff: +2}, which the
+    grammar already binds. So the non-empty assertion is retired.
+
+    The test is NOT retired with it, for two reasons. The rest-smithing rule
+    it checks is still the rule; it is merely vacuous while the set is empty,
+    and it re-arms the moment anything becomes unappliable again. And the
+    thing the non-empty assertion was really protecting -- "this guard is
+    guarding something" -- is now carried positively and far more broadly by
+    tools/lint_upgrade_coverage.py, which asserts that EVERY draftable card
+    has an applicable upgrade in both the sim and the codegen. That lint is
+    wired into the suite at
+    tier0/tests/test_sheet_lints.py::test_every_draftable_card_can_be_upgraded.
+    """
     for cid in sorted(upgrades.UNAPPLIABLE):
         # Coherence: unappliable ids must be real sheet entries, or the
         # set is guarding against nothing.

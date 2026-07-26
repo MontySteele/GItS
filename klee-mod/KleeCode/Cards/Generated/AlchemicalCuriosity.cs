@@ -37,12 +37,13 @@ public sealed class AlchemicalCuriosity : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Alchemical Curiosity"),
-        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new BlockVar(5m, ValueProp.Move),
             new CardsVar(2)
         };
 
@@ -56,11 +57,12 @@ public sealed class AlchemicalCuriosity : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Cards.UpgradeValueBy(1m);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

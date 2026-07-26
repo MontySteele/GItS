@@ -64,7 +64,7 @@ This dial is our main cross-character balance lever for reaction frequency.
 ### 2.4 Burst Energy
 - Per-character meter, per-combat, starts at 0. Gained by: playing Skill-tagged cards (+N) and triggering reactions (+N; the "particle economy").
 - Each character's **Burst** is a signature rare card that is **kit, not loot** (v1.9): it does not occupy the draftable pool or the starting deck. When the meter first fills in a combat, the Burst is granted to hand; playing it empties the meter, and it re-arrives if the meter refills. This is Genshin-faithful (your burst is your kit, charged by play) and solves the discovered acquisition problem: as a 1-of-15 rare, only ~10% of runs ever saw their own signature ability. **Burst cards have Retain** — they stay in hand at end of turn. (v1.4 ruling: without Retain, StS's discard rhythm cycles the Burst away before the meter fills — sim-verified. Retain is also faithful: a charged burst doesn't evaporate.)
-- Relic space may carry partial energy between fights (Favonius-flavored). Meter size is a per-character balance knob (Klee ~60-grade; a nuke burst like a Raiden-analogue ~90-grade).
+- Relic space may carry partial energy between fights (Favonius-flavored). Meter size is a per-character balance knob; Klee's playtest-tuned 40-grade meter is deliberately quicker than a nuke Burst.
 
 ### 2.5 Co-op rules
 - Auras live on shared enemies → cross-player reactions work with zero special-casing.
@@ -86,7 +86,7 @@ Every playable character ships with:
 
 ### 4.1 Structure & acquisition
 - A shared, colorless-style pool (`CustomCardPoolModel.IsColorless` — first-class in the StS2 API). Each companion card = one 4-star character's iconic action ("Xingqiu — Raincutter", "Fischl — Oz, at your side").
-- **Acquisition:** every card reward gains a 4th, visually distinct **Companion slot**. Weighting: ~50% same-nation as your character, remainder uniform. Shop carries one rotating "visiting companion."
+- **Acquisition:** every card reward gains a 4th, visually distinct **Companion slot**. Weighting: ~50% same-nation as your character, remainder uniform. **This is the free, stochastic channel — enabler-grade (§4.3).** The shop is a separate, *paid* channel with its own tiering (§4.7, which supersedes the earlier "one rotating visiting companion").
 - Nation-weighting rationale (load-bearing): same-nation ≠ same-element, so a Mondstadt character is preferentially offered *off-element* Mondstadters — exactly the reaction fuel a mono-element character needs. Element-weighting would offer useless same-element appliers. `Rejected:` element-complement weighting — mechanically optimal but kills the nations-as-factions flavor and makes every character's offers identical in structure.
 - **Signature companions:** 1–2 lore-linked companions live in a character's *personal* pool instead (Klee → Prune, her fellow Little Hexenzirkel member). Chosen for story resonance AND for patching the character's statline weakness.
 
@@ -116,6 +116,83 @@ Every card carries an optional `character:` field (shared schema — all sheets;
 ### 4.6 v2 candidate — the Wish banner
 Shop-integrated "Wish" draw (pay gold, draw from companion pool, duplicate protection as pity). Pengo's Tarot pack proves shop-draw UI is fully moddable. Deferred: v1 validates the pool via reward slot first. (Also: keep it gold-only and generous. We are not building a real gacha as a joke. The joke stops being funny immediately.)
 
+### 4.7 Colorless channel — base-pool removal & the shop two-channel split (v1.11)
+
+> **STATUS: BUILT 2026-07-25, with three amendments.** The shop carries
+> companions in both slots, in the mod and in tier 0.5. Read this section as
+> live behaviour EXCEPT where the three notes below say otherwise — they are
+> amendments to the design, not implementation notes.
+>
+> **1. Slot 2 has an Uncommon floor (R59), not full card-reward odds.** The
+> text below says "full card-reward rarity odds", which is ~60% Common and
+> would have made the mod's second colorless slot *worse than base's
+> guaranteed Rare* — at the one slot whose entire argument is that it is the
+> premium paid channel. Study §7's finding that StS2 colorless has **no common
+> tier** points the same way. Slot 2 is wildcard-nation, Uncommon-or-Rare at
+> renormalized odds. Not hypothetical: **Fontaine designs zero Rare
+> companions**, so Furina's home-region slot 1 already widens the nation
+> whenever it rolls a Rare — exactly the brittleness that killed the
+> guaranteed-Rare alternative.
+>
+> **2. The base colorless pool is NOT removed (R60, phase 1).** "Replaces the
+> base-game colorless card pool wholesale" below is the ratified *intent*; what
+> ships is a shop-only override. `ColorlessCardPool` has **seven consumers**,
+> six of them outside the shop, including three `GetDistinctForCombat` sites —
+> asking N distinct cards of an emptied pool is the empty-draw class that
+> softlocked Dusty Tome. Full removal needs a seven-consumer audit and is a
+> sprint of its own; whether base colorless surfacing through in-combat
+> generation is a fantasy leak worth that blast radius is a [USER] taste call,
+> graded after table time. Deferred, not rejected.
+>
+> **3. Companions are still not a `CustomCardPoolModel`.** §4.1 above describes
+> them as one. They are queried through `CompanionPool`, a filter surface over
+> the single roster, because `MerchantCardEntry` takes a plain card list and
+> needs no pool object. Registering a real shared pool is now **feasible**
+> (BaseLib grew `ModelDbSharedCardPoolsPatch` after the repo recorded that it
+> could not be done) but would migrate all 47 companions out of the character
+> pools, changing every companion's card frame. A cost decision, open for
+> [USER].
+>
+> **Pricing carries one silent discount.** `MerchantCardEntry.GetCost` adds
+> **×1.15 only when `card.Pool is ColorlessCardPool`**, which companions are
+> not — so the mod's premium channel is ~15% cheaper than the base channel it
+> replaces. Sim and mod agree on the bands.
+>
+> **Measured, and it complicates the thesis below.** The channel moved winrate
+> by a null (−0.2pp mean over 500 runs/arm × 3 characters), crowded out relic
+> purchases by ~30%, and left unspent gold unchanged — runs end holding ~220
+> gold. **"Gold price is the balance governor" is not currently true in the
+> sim, because the purse does not bind.** See
+> `docs/archive/shop-companion-channel-sprint-log.md` §4; open for [USER].
+
+
+**Decision:** the companion pool **replaces the base-game colorless card pool wholesale.** The mod ships *no* base StS2 colorless cards; every channel that would have offered a colorless card offers a companion instead. Rationale: the companion pool already *is* this mod's colorless content (`IsColorless`, §4.1). A generic base colorless card sitting next to "Fischl — Oz, at your side" dilutes the Teyvat fantasy and steps on the identity we spent the most engineering on.
+
+**The value-inversion problem this must solve:** base colorless is conventionally costed *above* rate on value-per-energy — it's the premium "splash." Companion cards are costed *below* rate as enabler fuel (§4.3). So companions cannot fill the colorless slot 1:1. The resolution is that the two acquisition channels are **different economies rolling different tiers** — not a stat buff:
+
+- **Free channel (reward slot, §4.1):** unchanged. Stochastic, nation-weighted (~50%), enabler-grade. Its value proposition is **capability** — the only *free* source of off-element access (Pillar 2) — not per-energy stat efficiency. A whiff is "fuel I didn't need," never a dead pick, because no character is required to react to clear (Pillars 1 & 4).
+- **Paid channel (shop):** the premium/targeted channel, where StS colorless is conventionally strongest *because you paid gold for it*. **Two colorless slots**, replacing base StS2's two shop colorless slots:
+  - **Slot 1 — Home-region draw:** always rolls from the player character's own **nation**, guaranteed **Uncommon or higher**. The reliable, targeted slot — "buy your dream support." Leans off-element *by construction*: same-nation ≠ same-element (§4.1 rationale), so the guaranteed slot-1 companion is preferentially reaction fuel. 5-star Rares here are banner-gated (§4.2); if the banner has emptied the nation's Rare tier, slot 1 falls through to Uncommon exactly as the reward slot does.
+  - **Slot 2 — Wildcard draw:** a complete free-for-all — any nation, full card-reward rarity odds (mostly Common/Uncommon, Rare rarely), banner-gated 5-stars. The "you never know what's on offer" slot; where an out-of-nation 5-star can surface.
+  - **Pricing is the balance governor.** Both slots price by the drawn card's rarity at base shop-card gold bands; slot 1's Uncommon floor makes it the pricier, premium buy. Gold cost — not a stat nerf — is what keeps a payoff-grade 5-star support fair, exactly as base StS prices its shop rares. This is why the shop can safely roll the strong end of the pool while the free reward slot stays enabler-grade.
+
+**Guardrail note:** routing 5-star Rares and burst-grade 4-stars through the *paid* channel does **not** violate §4.3 — that principle caps power *per rarity grade*, and §4.3 already permits 5-star Rares to be payoff-grade support payoffs. The shop changes *where* premium companions appear, not *how strong* they're allowed to be.
+
+**Utility-coverage checklist (must clear before deleting the base pool):** base colorless also carried **neutral fixing/velocity** that isn't reaction-flavored — raw card draw, energy, in-combat card removal/thinning, block splash. Removing the pool removes those functional roles unless they're covered elsewhere. Before ship, confirm each is reachable via (a) companion cards that happen to provide it, or (b) each character's velocity/tempo archetype (the §3 archetype-3 slot). If neither covers "thin / draw / fix," the removal has quietly opened a deckbuilding hole base StS never had — patch by seeding a few neutral-utility companions (a Sucrose-draw, a Katheryne-style thin), **not** by re-admitting base colorless. (Card-removal as a shop *service* is separate from colorless *cards* and is unaffected.)
+
+**Audit result (v1.11 — checklist cleared, one ruling).** Ran against the live pool (Klee + Furina + both companion sheets):
+- **Card draw** ✅ covered — character pools carry it heavily (Klee 8 / Furina 15 draw effects) plus companions (Lynette *Box Trick* draw 2, Charlotte, Sucrose).
+- **Block splash** ✅ covered — companions (Charlotte, Dahlia, Barbara, Bennett) + every character's own defense.
+- **Permanent thinning / removal** ✅ unaffected — the shop card-removal *service* is not a colorless card.
+- **In-combat exhaust/thin** ✅ present but character-scoped (Klee's status-exhaust cards); no neutral Purity-analog, an acceptable minor loss.
+- **Energy generation** ❌ **genuine pool gap.** No companion sources real (StS action-) energy — companions grant only `burst_energy` (the meter). Current characters happen to self-provide (Klee ×1 `sugar_rush`, Furina ×3), but **that is the wrong test** (see corrected framing below). Base colorless let *any* character draft a fixer (Production: +2 energy, Exhaust) to patch a kit gap; the pool inherited that mandate and currently fails it for energy. **Fix: add a neutral-energy companion** (Production-analog — Exhaust, uncommon; a Mondstadt support such as Sucrose is the natural home), not a per-character patch. **FILLED (v1.11a):** `sucrose_catalyst_conversion` — *Sucrose — Catalyst Conversion*, Uncommon, `0-cost, gain 1 energy, draw 1, Exhaust`. Anemo (no aura → clean fixer, not stealth reaction-fuel); reliably shoppable at shop slot-1 (home-region, Uncommon-floor). 239 tests pass.
+
+**Corrected framing (v1.11a) — the pool must cover gaps, not just the current roster.** The audit's first pass asked "does a current character have X"; the right question is "can *any* character, present or future, **draft** X from the shared pool to patch a kit gap" — because that universal gap-filling is precisely what base colorless did, and the companion pool now inherits it. A future playable Mondstadter with a hole in its kit must be able to shop the pool for the fix, exactly as it could shop base colorless. Draw (Lynette *Box Trick*) and block (Charlotte, Dahlia) already satisfy this pool-wide; **energy does not, and is the one concrete hole to fill before more characters ship.** In-combat thinning is a lesser pool gap (no neutral Purity-analog companion; permanent removal remains the shop service).
+
+**Two-part energy ruling (supersedes the earlier "character-kit-only" wording):** (1) neutral **StS action-energy / draw / thin** are *legal* companion utility — enabler-grade one-shot fixers, gated exactly as base colorless gates them (costed, usually Exhaust), which does **not** breach §4.3 because a one-shot fixer is an enabler, not an engine; (2) **Burst-meter (`burst_energy`) generation stays character-kit-scoped** and must never be cheaply repeatable from companions (the Sucrose Exhaust guard is an instance). The two "energies" are different resources: action-economy is universal colorless-role fixing that the pool owes every character; the Burst meter is character-defining and stays home.
+
+`Rejected:` (a) *additive* model — base colorless still appears in its own slot alongside companions; rejected for fantasy dilution and for making the reward economy carry two colorless-shaped things. (b) buffing companion base numbers up to the colorless value bar; rejected — breaks enabler-not-carry (§4.3) directly. The value-per-energy gap is real and is resolved by **channel and pricing**, not by inflating companion cards. Empirical validation of the gap lives in `companion-value-vs-colorless-study.md`.
+
 ## 5. Artifacts → Relic Sets
 - Artifacts are a relic subcategory with **2-piece set bonuses**: each piece has a modest standalone effect; holding both pieces of a set activates a named set bonus (Crimson Witch: pieces give minor Pyro/reaction perks; set bonus: amplifying reactions +25%).
 - Sets per release: 4–6, themed to reaction styles rather than to characters, so they're cross-character content.
@@ -132,6 +209,11 @@ Shop-integrated "Wish" draw (pay gold, draw from companion pool, duplicate prote
 4. Every archetype must pass the aura-starvation / bricking checks in the simulator before implementation.
 5. New keywords per character: ≤2 beyond the shared element system; support-protagonists (§4.4 High-appetite or Appendix A lineage) may carry one additional keyword via logged amendment with compensating cuts. (v1.10 — the amendment sanctions *one* extra, not open season; Columbina will pressure even this budget.)
 6. True in-combat healing is Rare-tier AND Exhausts (conjunctive — R8 law, v1.10); below Rare, sustain routes through Block or character-specific buffer pools; no 4-star companion may true-heal. Exempt: potions (base-game-priced consumables) and relic-scale trickles.
+7. **What the simulator's authority actually is (G-E4, 2026-07-25).** Absolute tier-0.5 winrates are **pilot-limited floors, not predictions about human play**. The pilot plays a fixed policy; it does not read the board the way a person does, does not learn across a run, and does not save a resource for a turn it can see coming. So a 4% arm is not a claim that a human wins 4% of the time — it is a claim about what that deck does *when piloted that way*. The 2026-07-25 co-op playtest confirmed the direction: two A8 regulars full-cleared A0 against sim winrates in the single digits. **"Sims are worse than real players" is settled, and it is written here so it stops being re-litigated once per pass.**
+
+    The instrument's authority is **relative deltas and structural findings**, and there it is strong — the playtest agreed with it directionally on every structural claim it had made (Fanfare saturation, payoff reach, the decoupling of act-1 clear from run winrate, salon-versus-the-rest). Read the sim for *which* of two things is better and *why* a plan fails; do not read it for how often a person will win. A ratification that rests on an absolute winrate is resting on the wrong number.
+
+    Corollary, learned the same day: this cuts *both* ways. A plan-committed drafter is also better than a human at *staying on plan*, so an archetype's measured winrate can be an over-estimate of what a real drafter reaches — see the G-E3 free-draft cell, where salon fell 18.3% → 4.0% once the drafter was no longer told the plan.
 
 ## 8. Content roadmap
 - **v0.1 (vertical slice):** Element system + Klee (full pool) + 12–16 companion cards (Mondstadt-weighted) + 2 artifact sets. Solo + co-op.
@@ -164,3 +246,5 @@ Flagged for v0.2+ planning: characters whose Genshin identity is *support* (Colu
 - v1.8: 3-per-release cap replaced by the seeded **Featured Banner** (3 limited 5-stars per nation rolled per run; per-player in co-op; shown at run start). Rotation moves from authoring-time (which someone must remember) to runtime (which the seed remembers). Standard 5-stars subsumed as ordinary support-shaped nation Rares with a `standard` tag as the off-banner-floor escape hatch. v1.7's rotation-bench concept superseded. Mona's Omen card flagged for the amp-cap watchlist when designed.
 - v1.9: Bursts become kit cards (innate-on-charge) after Tier 0.5 decomposition showed Burst acquisition was the binding constraint on reaction assembly (5.8% = 79% × 71% × 10%, the 10% being 'ever saw the Burst'). Retain (v1.4) is retained for the in-hand behavior. Rare pool: 14 draftable rares.
 - v1.10 (2026-07-20): **Furina kickoff batch ratified** (furina-principles-amendment-batch.md; red-pen record furina-sprint-1-redpen.md). New §4.5 Spotlight system + `character:` schema field; §2.2a extension (Spotlight numbers-only, never turn-economy); Guardrail 5 support-protagonist keyword exception; Guardrail 2 generated-companion-cards ruling; R8 conjunctive healing law codified as Guardrail 6 with potion/relic-trickle exemptions; Fontaine 4-star set v0.1 into Furina's release scope (§8). **Encore & Fanfare final definitions (supersede furina-predesign-notes.md Part 2):** Encore = unbounded per-combat buffer (v1.6 house style), absorbs after Block and before HP; potent cards carry "Spend N Encore:" cost lines; overdraw drains true HP; Tier 0 accounting binding — Encore absorption credits A4, never A3. Fanfare = capped at %maxHP; generation strictly activity-based (HP lost, Encore gained, Encore spent, Spotlighted card played); no passive per-turn accrual, ever; a global pool that survives Spotlight moves. Wish banner renumbered §4.5→§4.6.
+- v1.11 (2026-07-21): **Base colorless pool removed; the companion pool becomes the mod's sole colorless content (new §4.7).** Two-channel model resolves the value-inversion problem (base colorless is costed above-rate, companions below-rate per §4.3): the free reward slot stays enabler-grade/stochastic (value = capability, not per-energy stats); the shop is the paid premium/targeted channel with two slots — **Slot 1** home-region, Uncommon floor ("dream support"); **Slot 2** wildcard at card-reward odds. Gold pricing is the governor that lets the shop roll payoff-grade 5-stars without violating §4.3 (which caps power per grade, not per channel). Supersedes §4.1's "one rotating visiting companion." Added the utility-coverage checklist (neutral draw/energy/thin must remain reachable post-removal, patched via neutral-utility companions, never by re-admitting base colorless). Value-inversion gap referred to `companion-value-vs-colorless-study.md` for empirical validation; resolution is channel + pricing, not stat buffs. Study since completed: real StS2 colorless data (study §7) confirms StS2 colorless has **no common tier** (voids the hypothesis's bottom rung) and clean rare bodies top ~10 v/e (below StS1's 15+) — the companion pool clears the bar comfortably. Utility-coverage audit run (§4.7 audit result): draw + block covered pool-wide, but **energy is a genuine pool gap** — corrected framing (v1.11a): the shared pool must let *any* character (present or future) draft a gap-patch, as base colorless did, so "a current character self-provides" is the wrong test. Two-part energy ruling: neutral action-energy/draw/thin are legal enabler-grade companion utility (one-shot, Exhaust-gated), while Burst-meter generation stays character-kit-scoped. **Action: add a neutral-energy companion** (Production-analog, Exhaust; Mondstadt/Sucrose). `sucrose_astable` rebalanced 2→0 cost + Exhaust — the pool's one genuinely undercosted card.
+- v1.11b (2026-07-25): **R62 — `sucrose_astable` restored to the v1.11a numbers (free, Exhaust), superseding main's interim rebalance.** The two edits collided in the 2026-07-26 merge and main won on recency, which quietly dropped the Exhaust. Red-pen ruled the Exhaust back in: it was never only a cost fix but a *guard* against the card becoming a repeatable multi-copy Burst battery (§2.4, §4.3). The guard does not currently bind — Bursts are not priced strongly enough for replaying the card to be worth the energy — so it is retained as cheap insurance against a future Burst reprice rather than as a live constraint. §4.7's v1.11a changelog text is accurate again as written.

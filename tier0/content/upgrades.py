@@ -1,9 +1,10 @@
-"""Upgrade application (M7): docs/klee-upgrades.yaml -> upgraded Card copies.
+"""Upgrade application: local/docs delta sheets -> upgraded Card copies.
 
-The sheet is the design artifact (grammar: docs/upgrade-conventions.md);
-this module is only the mechanical applier. An upgraded card is requested
-as `<id>+` through loader.get_card, so deck lists stay plain strings and
-every existing consumer keeps working.
+Committed character sheets are design artifacts; the real-Ironclad sheet is a
+gitignored DLL-derived reference (grammar: docs/upgrade-conventions.md). This
+module is only the mechanical applier. An upgraded card is requested as
+`<id>+` through loader.get_card, so deck lists stay plain strings and every
+existing consumer keeps working.
 
 Delta semantics are PER-KEY, not guessed from values: each key in the
 dispatch below names which effect field it moves and how (bump vs
@@ -29,25 +30,51 @@ from pathlib import Path
 
 import yaml
 
+from tier0.content import local_reference
+
 _DOCS = Path(__file__).parents[2] / "docs"
+_GAME_REF = local_reference.game_ref_dir()
 UPGRADE_SHEETS = (_DOCS / "klee-upgrades.yaml",
-                  _DOCS / "furina-upgrades.yaml")
+                  _DOCS / "furina-upgrades.yaml",
+                  # v0.2 Kokomi sheet pass (2026-07-24): rest-smith needs
+                  # upgrade targets or her tier05 runs are structurally
+                  # behind. Cross-session note: docs/archive/kokomi-session-worknote.md
+                  _DOCS / "kokomi-upgrades.yaml",
+                  # Calibration pass (2026-07-24): the ANCHOR had 0/6 pool and
+                  # 0/10 starter upgradable while every designed character had
+                  # 100%, so rest-smithing, Sand Castle, Yummy Cookie, War
+                  # Paint and Whetstone were all dead branches on the very
+                  # character the world is calibrated against -- measured 0
+                  # upgraded cards and 0 smiths in 300 runs. Real base-game
+                  # numbers; the tier 0 battery never upgrades, so the frozen
+                  # scorecard and the anchor lock are untouched.
+                  _DOCS / "ref-ironclad-upgrades.yaml")
+EXTERNAL_UPGRADE_SHEETS = (_GAME_REF / "ironclad-upgrades.yaml",)
 SUFFIX = "+"
 
 # Deltas the engine cannot express per-card yet (constants-encoded).
 # catalytic_conversion LEFT this set with R37 (2026-07-20): its upgrade is
 # now {innate: true}, which IS sim-expressible -- the R24 no-unmeasured-
 # upgrades law is satisfied rather than waived.
-UNAPPLIABLE = frozenset({
-    "durin_witchs_flame",     # WITCHS_FLAME_DMG is a constant
-    "nicole_celestial_gift",  # CELESTIAL_GIFT_BLOCK is a constant
-})
+# nicole_celestial_gift LEFT this set with G-C2 (2026-07-25), the same way
+# catalytic_conversion left it with R37: its delta moved from
+# {block_per_turn: +2} -- unexpressible, because CELESTIAL_GIFT_BLOCK is a
+# constant rather than a card field -- to {buff: +2}, which the `buff` grammar
+# already binds to the first top-level apply_power. The R24 no-unmeasured-
+# upgrades law is satisfied rather than waived.
+#
+# Kept as an empty set rather than deleted, per the standing curated-set
+# discipline: the invariant "every draftable card has an applicable upgrade"
+# is now asserted positively by tools/lint_upgrade_coverage.py, and the next
+# unexpressible delta has somewhere to be named instead of being tolerated
+# silently.
+UNAPPLIABLE: frozenset[str] = frozenset()
 
 
 @lru_cache(maxsize=1)
 def _upgrade_index() -> dict[str, dict]:
     merged: dict[str, dict] = {}
-    for sheet in UPGRADE_SHEETS:
+    for sheet in (*UPGRADE_SHEETS, *EXTERNAL_UPGRADE_SHEETS):
         if not sheet.exists():
             continue
         entries = yaml.safe_load(sheet.read_text()) or {}
@@ -60,7 +87,10 @@ def _upgrade_index() -> dict[str, dict]:
 
 def has_upgrade(card_id: str) -> bool:
     """Can this card be upgraded AND can the sim express the result?"""
-    return (card_id in _upgrade_index()
+    delta = _upgrade_index().get(card_id)
+    return (isinstance(delta, dict)
+            and bool(delta)
+            and "_unexpressible" not in delta
             and card_id not in UNAPPLIABLE
             and not card_id.endswith(SUFFIX))
 
@@ -85,7 +115,8 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
     """Mutate a (deep-copied) base card into its upgraded form."""
     base_id = card.id
     delta = _upgrade_index().get(base_id)
-    if delta is None or base_id in UNAPPLIABLE:
+    if (not isinstance(delta, dict) or not delta
+            or "_unexpressible" in delta or base_id in UNAPPLIABLE):
         raise ValueError(f"no applicable upgrade for {base_id!r}")
     card.id = base_id + SUFFIX
     card.name = card.name + SUFFIX
@@ -110,6 +141,10 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             if val is not True:
                 raise ValueError(f"innate delta on {base_id!r} must be true")
             card.innate = True
+        elif key == "retain":
+            if val is not True:
+                raise ValueError(f"retain delta on {base_id!r} must be true")
+            card.retain = True
         elif key == "condition" and val == "unconditional":
             # Hoist the conditional's then-branch into the effect list.
             out = []
@@ -125,6 +160,13 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "block":
             ok = _bump_first((fx for fx in top if fx.get("op") == "block"),
                              "amount", val)
+        elif key == "conditional_block":
+            hits = [fx for fx in everywhere
+                    if fx.get("op") == "block"
+                    and isinstance(fx.get("amount"), int)]
+            for fx in hits:
+                fx["amount"] += val
+            ok = bool(hits)
         elif key == "heal":
             ok = _bump_first((fx for fx in top if fx.get("op") == "heal"),
                              "amount", val)
@@ -134,6 +176,68 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             for fx in hits:
                 fx["amount"] += val
             ok = bool(hits)
+        elif key == "energy":
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "energy"), "amount", val)
+        elif key == "times":
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "damage"), "times", val)
+        elif key == "conditional_damage":
+            hits = [fx for fx in everywhere
+                    if fx.get("op") == "damage"
+                    and fx.get("target") != "self"
+                    and isinstance(fx.get("amount"), int)]
+            for fx in hits:
+                fx["amount"] += val
+            ok = bool(hits)
+        elif key == "formula_per":
+            hit = next((fx for fx in everywhere
+                        if fx.get("op") == "damage"
+                        and isinstance(fx.get("amount_formula"), dict)
+                        and isinstance(fx["amount_formula"].get("per"), int)),
+                       None)
+            ok = hit is not None
+            if hit:
+                hit["amount_formula"]["per"] += val
+        elif key == "target_power_per":
+            hit = next((fx for fx in everywhere
+                        if fx.get("op") == "damage"
+                        and isinstance(fx.get("bonus_per_target_power"), dict)
+                        and isinstance(
+                            fx["bonus_per_target_power"].get("per"), int)),
+                       None)
+            ok = hit is not None
+            if hit:
+                hit["bonus_per_target_power"]["per"] += val
+        elif key == "damage_growth":
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "grow_damage"),
+                             "amount", val)
+        elif key == "on_exhaust_energy":
+            ok = card.on_exhaust_energy > 0
+            card.on_exhaust_energy += val
+        elif key == "max_hp":
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "gain_max_hp"),
+                             "amount", val)
+        elif key == "upgrade_scope":
+            if val != "all":
+                raise ValueError(
+                    f"upgrade_scope on {base_id!r} must be 'all'")
+            hit = next((fx for fx in everywhere
+                        if fx.get("op") == "upgrade_in_hand"), None)
+            ok = hit is not None
+            if hit:
+                hit["scope"] = val
+        elif key == "exhaust_select":
+            if val != "chosen":
+                raise ValueError(
+                    f"exhaust_select on {base_id!r} must be 'chosen'")
+            hit = next((fx for fx in everywhere
+                        if fx.get("op") == "exhaust_from"), None)
+            ok = hit is not None
+            if hit:
+                hit["select"] = val
         elif key == "spark":
             ok = _bump_first((fx for fx in top if fx.get("op") == "gain_spark"),
                              "amount", val)
@@ -159,9 +263,27 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "encore_cost":
             ok = card.encore_cost > 0
             card.encore_cost = max(0, card.encore_cost + val)
-        elif key == "fanfare_cap":
+        elif key == "fanfare_floor":
+            # Was `fanfare_cap` against raise_fanfare_cap; both retired with
+            # the spend/cap grammar ("The Tide Turns", F-A4/F-A5). An upgrade
+            # that used to buy ceiling now buys baseline.
             ok = _bump_first((fx for fx in top
-                              if fx.get("op") == "raise_fanfare_cap"),
+                              if fx.get("op") == "gain_fanfare_floor"),
+                             "amount", val)
+        elif key == "block_next_turn":
+            # The Charlotte-precedent second half. `block` deliberately hits
+            # only the first op, so a card whose upgrade moves BOTH halves
+            # (Sayu's daruma) needs this to say so explicitly.
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "block_next_turn"),
+                             "amount", val)
+        elif key == "kurage_turns":
+            # v0.4: Bake-Kurage+ keeps the jellyfish out longer. Duration is
+            # the ONLY thing an upgrade may move here -- the pulse numbers
+            # are constants, and the +1 Charge is untouchable under the
+            # resource-curve law (upgrades never move Charge/conscript).
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "summon_kurage"),
                              "amount", val)
         elif key == "generate_cost_override":
             # Discovery-parity upgrade: the generated card costs 0 this

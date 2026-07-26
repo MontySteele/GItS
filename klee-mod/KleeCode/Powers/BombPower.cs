@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using BaseLib.Abstracts;
+using BaseLib.Utils;
 using System.Linq;
 using System.Threading.Tasks;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Commands.Builders;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
@@ -54,14 +56,18 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         ("title", "Bomb"),
         ("description",
             "Detonates at the start of your turn for its damage. "
-          + "Detonates early if this enemy is hit by an [gold]Attack[/gold]."),
+          + "Detonates early if this enemy takes unblocked [gold]Attack[/gold] damage. "
+          + "The first attack this enemy makes while Bombed each combat "
+          + "deals 25% less damage."),
         // The smart (in-combat, mutable-instance) tooltip carries the count;
         // the badge already shows the total. {Damage} is our DynamicVar,
         // {Amount} is the stack count the game adds to every smart tip.
         ("smartDescription",
             "Detonates at the start of your turn for {Damage} total damage "
           + "({Amount} Bomb{Amount:plural:|s}). "
-          + "Detonates early if this enemy is hit by an [gold]Attack[/gold]."),
+          + "Detonates early if this enemy takes unblocked [gold]Attack[/gold] damage. "
+          + "The first attack this enemy makes while Bombed each combat "
+          + "deals 25% less damage."),
     };
 
     public override PowerType Type => PowerType.Debuff;
@@ -88,6 +94,24 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// </summary>
     private List<BombCharge> _damages = new();
 
+    // Survival sprint: one armed-Bomb suppression per enemy per combat. The
+    // spent latch must outlive this power because early detonation removes the
+    // Bomb, and a later Bomb must not incorrectly reset an already-spent proc.
+    // It lives ON the enemy (sim: state.py Enemy.bomb_suppression_spent) via
+    // BaseLib's SpireField, the same attached-per-instance idiom the resource
+    // layer uses: creatures are per-combat objects, so a second live combat
+    // can never read this one's latch, and the weak keying frees each entry
+    // with its creature -- no reset hook, no reference-equality combat check.
+    private static readonly SpireField<Creature, bool> SuppressionSpent =
+        new(() => false);
+
+    // The enemy action in flight, latched at the attack-command boundary.
+    // Compared by reference so a nested AttackCommand fired by a hook
+    // mid-action (a retaliation, a detonation) can neither re-arm nor clear
+    // the snapshot before AfterAttack sees the original command.
+    private AttackCommand? _suppressionAttack;
+    private bool _suppressionArmedForAttack;
+
     /// <summary>
     /// AbstractModel.MutableClone is a shallow MemberwiseClone; the base class
     /// exposes this hook precisely so reference-typed fields get their own copy.
@@ -97,6 +121,62 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     {
         base.DeepCloneFields();
         _damages = new List<BombCharge>(_damages);
+        _suppressionAttack = null;
+        _suppressionArmedForAttack = false;
+    }
+
+    /// <summary>
+    /// Snapshot at the attack-command boundary, not per hit. That keeps every
+    /// hit of a multi-hit enemy intent at the Weak rate, then spends the latch
+    /// only after the whole action -- sim law (combat.py _enemy_turn):
+    /// eligibility is read BEFORE the action resolves, so bombs detonating
+    /// mid-action never strip later hits. A real Weak stack shares the same
+    /// branch below, so the two reductions never multiply.
+    /// </summary>
+    public override Task BeforeAttack(AttackCommand attack)
+    {
+        if (attack.Attacker != Owner || _suppressionAttack != null)
+        {
+            return Task.CompletedTask;
+        }
+        _suppressionAttack = attack;
+        _suppressionArmedForAttack =
+            _damages.Count > 0 && !SuppressionSpent[Owner];
+        return Task.CompletedTask;
+    }
+
+    public override decimal ModifyDamageMultiplicative(
+        Creature? target, decimal amount, ValueProp props,
+        Creature? dealer, CardModel? cardSource)
+    {
+        if (dealer != Owner || !props.IsPoweredAttack())
+        {
+            return 1m;
+        }
+        // Inside an action the BeforeAttack snapshot rules every hit. Outside
+        // one (intent preview -- same idiom as GigantificationPower's null
+        // branch) the live state IS the snapshot the next action will take.
+        var suppressed = _suppressionAttack != null
+            ? _suppressionArmedForAttack
+            : _damages.Count > 0 && !SuppressionSpent[Owner];
+        if (!suppressed) return 1m;
+
+        var hasRealWeak = Owner.Powers.OfType<WeakPower>()
+            .Any(power => power.Amount > 0);
+        return hasRealWeak ? 1m : 0.75m;
+    }
+
+    public override Task AfterAttack(
+        PlayerChoiceContext choiceContext, AttackCommand attack)
+    {
+        if (attack != _suppressionAttack) return Task.CompletedTask;
+        if (_suppressionArmedForAttack)
+        {
+            SuppressionSpent[Owner] = true;
+        }
+        _suppressionAttack = null;
+        _suppressionArmedForAttack = false;
+        return Task.CompletedTask;
     }
 
     /// <summary>Total damage sitting on this enemy, for intent/tooltip display.</summary>
@@ -347,6 +427,10 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         // and only then enters the elemental pipeline (effects.py detonate_bombs).
         var damageUp =
             applier?.Powers.OfType<BombDamageUpPower>().FirstOrDefault()?.Amount ?? 0;
+
+        // One VFX per detonation EVENT, not per bomb stack (sprint plan E2's
+        // spam guard) — this method is the per-event funnel.
+        Vfx.KleeCombatVfx.SpawnBombLob(applier, target);
 
         foreach (var damage in payloads)
         {

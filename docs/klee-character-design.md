@@ -21,7 +21,7 @@ Companion appetite: **Standard**. Balance check: 4–5 on exactly two primary ax
 - **HP 62, energy 3, draw 5.** Starting deck: 4× Kaboom!, 4× Duck and Cover, 1× Jumpy Dumpty, 1× Pop!
 - **Bombs:** charge on an enemy. Detonates at start of Klee's next turn for its damage + Pyro; detonates **early** if the enemy is hit by an Attack card. Multiple bombs stack independently. Detonations fire relic/power hooks.
 - **Sparks:** at **3 Sparks**, next Attack costs 0 (consumes 3). Starting relic **Pounding Surprise** (talent-relic): +1 Spark per Bomb detonation.
-- **Burst Energy:** meter 60. +5 per Skill-tagged card (`tags: [skill_tag]`), +5 per reaction triggered. **Sparks 'n' Splash** requires full meter, empties it.
+- **Burst Energy:** meter 40. +5 per Skill-tagged card (`tags: [skill_tag]`), +5 per reaction triggered. **Sparks 'n' Splash** requires full meter, empties it.
 - Loop: place turns → detonation turns → Sparks smooth the energy curve → any off-element companion ignites the reaction layer.
 
 ## 4. Archetypes (tag matrix validated by `validate.py` output)
@@ -40,7 +40,7 @@ Bridges: Sorry Jean (block↔demolition), Sparkly Explosion (demolition↔spark)
 ## 7. Sim test plan (order matters)
 1. Starter-deck Klee vs battery → confirm A1/A3/A4 shape vs REF_IRONCLAD before any archetype packages.
 2. Demolition-weighted, Spark-weighted, Reaction-weighted (12 companions injected at realistic draft rates) → axis scorecards + degeneracy detectors.
-3. Watchlist: Vermillion Pact + Durin + Melt stacking vs the 4× amp cap; Gleeful Barrage + spark engines for runaway; Playtime Forever + Blazing Delight loop density.
+3. Watchlist: Vermillion Pact+ + Melt reaches ×3.94 against the 4× amp detector; Gleeful Barrage + spark engines for runaway; Playtime Forever + Blazing Delight loop density.
 4. Dream-team config (Prune + Durin + Nicole + Albedo forced into deck) — should be strong, NOT dominant vs a focused Demolition deck. If it dominates, nerf the Rares' numbers, not the structure.
 
 ## 8. Asset punch list (for eventual art pass)

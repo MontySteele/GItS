@@ -7,26 +7,28 @@
 
 # ---- BASICS (generous; signature basic gets the Bash-style dual-nature privilege) ----
 soloists_solicitation: {damage: +3}          # 4->7, Strike-exact
-stage_presence:        {block: +3}           # 4->7, Defend-exact
+stage_presence:        {block: +3}           # 6->9
 regal_bearing:         {block: +2}           # 3->5; the glance stays 1 Weak
-aria_of_recompense:    {encore: +2}          # 3->5
+aria_of_recompense:    {encore: +3}          # 5->8
 salon_debut:           {add: {op: gain_encore, amount: 2}}   # signature: deploy gains a buffer rider (upkeep pre-paid)
 
 # ---- COMMONS (one number bump each; zero cost reductions) ----
-gentilhomme_usher:     {block: +2}           # 3->5
-surintendante_chevalmarin: {encore: +2}      # 2->4
-mademoiselle_crabaletta: {power_amount: +1}  # 2->3 members
-dinner_service:        {encore: +1}          # 2->3 base, 2->3 rider (both branches, sheet law)
-usher_the_waves:       {damage: +2}          # 4->6 (still applies hydro)
-torrential_turn:       {damage: +3}          # 9->12, aura bonus stays 3
-matinee_performance:   {damage: +2}          # 3->5
-rising_tide:           {encore: +2}          # 2->4
-house_call:            {damage: +2}          # 5->7 base; member rider stays 3
+gentilhomme_usher:     {block: +2}           # 4->6
+surintendante_chevalmarin: {encore: +2}      # 3->5
+mademoiselle_crabaletta: {power_amount: +1}  # v2: 1->2 Crabalettas (double hammer)
+dinner_service:        {encore: +1}          # 3->4 base and rider (both branches)
+usher_the_waves:       {damage: +2}          # 5->7 (still applies hydro)
+torrential_turn:       {damage: +3}          # 10->13, aura bonus stays 4
+matinee_performance:   {damage: +2}          # 4->6
+rising_tide:           {encore: +2}          # 3->5
+house_call:            {damage: +2}          # 6->8 base; member rider stays 4
 curtain_up:            {encore: +1}          # 2->3
-dramatic_entrance:     {conditional_bonus: +3}   # threshold rider 3->6
+dramatic_entrance:     {damage: +3}          # base 6->9; the F-B1 read (1 per 4 Fanfare) rides on top
 crowd_work:            {draw: +1}            # 2->3; Spend 2 Encore stays (the flux is the card)
-suffering_for_art:     {encore: +1}          # 3->4; self-damage STAYS — it IS the Fanfare flux (no_holding_back precedent)
-thunderous_ovation:    {block: +2}           # base 3->5
+suffering_for_art:     {encore: +1}          # 3->4; the measured 1 self-damage stays
+lasting_impression:    {fanfare_floor: +2}   # 3->5 permanent baseline (F-B2). The floor IS the card, so the
+                                             # upgrade buys baseline rather than a bigger immediate rider.
+thunderous_ovation:    {block: +2}           # base 7->9; the F-B1 read (1 per 4 Fanfare) rides on top
 tempo_change:          {draw: +1}            # 1->2; energy and encore_cost untouched
 warmup_act:            {damage: +2}          # 3->5
 audience_participation: {encore: +1}         # 2->3
@@ -44,30 +46,33 @@ commanding_gaze:       {weak: +1}            # 1->2 all
 witness_stand:         {vulnerable: +1}      # 1->2
 macaron_break:         {encore: +1}          # 2->3
 swelling_overture:     {draw: +1}            # 2->3
-undercurrent:          {damage: +2}          # 6->8 all (still applies; convergence watchlist notes the upgrade too)
+undercurrent:          {damage: +2}          # 7->9 all (still applies; convergence watchlist notes the upgrade too)
+standing_room_only:    {damage: +2}          # 4->6 all base; the 1_per_5_fanfare formula stays (rework, PROPOSED)
 
 # ---- UNCOMMONS (bump OR keyword/condition; two cost slots + one 1->0) ----
-full_ensemble:         {cost: -1}            # 3->2 (uncommon cost slot; bombs_away precedent)
-grand_salon:           {power_amount: +1}    # +2->+3 per stack, cap 4 unchanged
-many_waters_melody:    {encore: +1}          # 4->5 base, 2->3 rider
+full_ensemble:         {cost: -1}            # 2->1 after the rework reprice (uncommon cost slot; bombs_away precedent)
+grand_salon:           {power_amount: +1}    # +3->+4, cap 6 unchanged
+many_waters_melody:    {encore: +1}          # 5->6 base, 3->4 rider
 dress_rehearsal:       {encore_cost: -1}     # Spend 2 -> Spend 1 (condition-soften class)
-crashing_waves:        {damage: +2}          # 7->9 all (flame_dance-exact; aura bonus stays 4)
+crashing_waves:        {damage: +2}          # 8->10 all; aura bonus stays 5
 overflowing_hospitality: {encore: +2}        # 3->5
-waters_embrace:        {block: +3}           # base 8->11; salon rider stays 4
-crescendo:             {damage: +3}          # 8->11; formula stays 1_per_4
+waters_embrace:        {block: +3}           # base 9->12; salon rider stays 5
+crescendo:             {damage: +3}          # 8->11; spend 10 and 1_per_2 formula stay
 showstopper:           {conditional_bonus: +3}   # 7->10 when the house roars
-florid_cadenza:        {encore_cost: -1}     # Spend 4 -> Spend 3
-hearts_swelling:       {encore: +2}          # 6->8
+florid_cadenza:        {condition: unconditional}  # F-B1: the upgrade DROPS THE GATE rather than adding cards --
+                                             # upgraded it is the pre-sprint card (3 draw, 0 cost), and the base
+                                             # version is the one that now has to earn it.
+hearts_swelling:       {encore: +2}          # 7->9
 rapturous_applause:    {power_amount: +1}    # +1->+2 per 10 Fanfare, cap 2 unchanged
 pit_orchestra:         {block: +2}           # 5->7
-flood_of_emotion:      {damage: +3}          # 12->15
+flood_of_emotion:      {damage: +3}          # 14->17; the F-B1 read (1 per 3 Fanfare) rides on top
 leading_role:          {cost: -1}            # 1->0 (endless_fireworks engine-power precedent)
 supporting_cast:       {power_amount: +1}    # first Spotlighted card draws 1->2
 guest_list:            {generate_cost_override: 0}   # Discovery parity
 directors_cut:         {draw: +1}            # both branches: 2->3 / 1->2
 top_billing:           {cost: -1}            # 1->0 (mined power-cost line); the boost and its two-copy ceiling stay
 duet:                  {draw: +1}            # 1->2
-standing_ovation:      {cost: -1}            # 2->1 (mined power-cost line, the top_billing grammar). R32.1 flip:
+standing_ovation:      {cost: -1}            # 1->0 after the machinery-efficiency pass. R32.1 flip:
                                              # upgrading the +10%/spend amount would outgrow the two-copy cap
                                              # (20 != amount, applier correctly won't bump it) — cost is the lever.
 fortissimo_guard:      {block: +3}           # 11->14
@@ -78,31 +83,58 @@ deep_breath:           {remove: exhaust}     # sugar_rush-exact quality upgrade
 # ---- RARES (quality over quantity) ----
 # let_the_people_rejoice: NO UPGRADE (kit card, v1.9; Talent Training = v2 design space)
 encore_performance:    {copy_cost_override: 0}   # the copy costs 0 (borrowed_brilliance precedent)
-singer_of_many_waters: {heal: +4}            # 12->16; Exhaust NEVER removes (healing law)
+singer_of_many_waters: {heal: +4}            # 14->18; Exhaust NEVER removes (healing law)
 unheard_confession:    {heal: +3}            # 8->11; Exhaust stays, Encore stays 6
-endless_waltz:         {cost: -1}            # 3->2 (rare cost privilege)
-grand_gala:            {encore: +3}          # 3->6 (covers more of its own upkeep); Exhaust stays
-the_sea_is_my_stage:   {fanfare_cap: +5}     # +15->+20 cap; the blood price stays 6 (raised at red-pen, DECISIONS 75)
-universal_revelry:     {damage: +3}          # 9->12 base; formula stays 1_per_3
-star_of_the_show:      {power_amount: +1}    # +3->+4 printed on Spotlighted damage
+endless_waltz:         {cost: -1}            # 2->1 after the rework reprice (rare cost privilege)
+grand_gala:            {encore: +3}          # 4->7; Exhaust stays
+the_sea_is_my_stage:   {fanfare_floor: +5}   # +15->+20 FLOOR (was cap; F-A5). Blood rider DROPPED by F-B2
+universal_revelry:     {damage: +3}          # 9->12 base only (top-level); the 1_per_2 read and the
+                                             # fanfare_at_least_15 burst both stay as printed
+star_of_the_show:      {power_amount: +1}    # one more printed on Spotlighted damage (base moved at G-D2)
 prima_donna:           {cost: -1}            # 2->1
-high_tide:             {damage: +4}          # 14->18 (big-base row); Spend 3 stays
-rain_of_roses:         {encore: +2}          # 4->6; the mass application is the card, it does not grow
+high_tide:             {damage: +4}          # 15->19; the F-B1 read (1 per 2 Fanfare, the steepest) rides on top
+rain_of_roses:         {encore: +2}          # 5->7; the mass application is the card, it does not grow
 the_final_verdict:     {damage: +4}          # 18->22; reaction rider stays 6
 reginas_mercy:         {encore: +3}          # 10->13
 command_performance:   {generate_cost_override: 0}   # both guests cost 0 (Discovery parity)
 
 # ---- FONTAINE COMPANIONS (modest single bumps; upgraded forms stay enabler-grade — guardrail 3 applies) ----
-chevreuse_interdiction_fire: {damage: +2}    # 5->7
+chevreuse_interdiction_fire: {damage: +2}    # 7->9
 chevreuse_vanguards_valor:   {buff: +2}      # base next-attack 3->5; reaction rider stays 3
-chevreuse_bursting_grenades: {damage: +2}    # 7->9 all. WATCH-ITEM (redpen a2): under 1.5x Spotlight this is 13 all —
-                                             # the named strongest thing the baseline creates; +2 not +3 is deliberate.
-lynette_enigmatic_feint:     {block: +2}     # 3->5; swirl untouched
+chevreuse_bursting_grenades: {damage: +2}    # 10->12 all; mass Pyro application keeps the card at 2 cost.
+lynette_enigmatic_feint:     {block: +2}     # 5->7; swirl untouched
 lynette_box_trick:           {draw: +1}      # 2->3
-lynette_astonishing_shift:   {damage: +2}    # AoE rider 4->6 (still applies_element: false)
-charlotte_freezing_point:    {damage: +2}    # 3->5; her ONE Cryo application does not multiply (budget holds)
-charlotte_enduring_frosthelm: {block: +2}    # now-block 3->5; next-turn block stays 3
+lynette_astonishing_shift:   {damage: +2}    # AoE rider 4->6; base cost is now 1
+charlotte_freezing_point:    {damage: +2}    # 4->6; her ONE Cryo application does not multiply
+charlotte_enduring_frosthelm: {block: +2}    # now-block 4->6; next-turn Block stays 4
 charlotte_snappy_silhouette: {vulnerable: +1}    # 2->3
-freminet_pers_deploy:        {damage: +2}    # 5->7
-freminet_pressurized_floe:   {damage: +2}    # 8->10 (still applies_element: false)
+freminet_pers_deploy:        {damage: +2}    # 6->8
+freminet_pressurized_floe:   {damage: +2}    # 10->12; Block stays 6 (still applies_element: false)
 freminet_shattering_pressure: {power_amount: +2} # Shatter bonus +4->+6 (grammar row 2: +2 at base 4-6)
+
+# Fontaine 5-star Rares (v0.2, 2026-07-25). ALL PROPOSED with the cards.
+navia_cannon_fire_support:   {power_amount: +2}  # 3->5 Block per Companion played
+clorinde_impale_the_night:   {damage: +3}        # 20->23; the night_vigil rider stays +6, so the
+                                                 # upgrade buys the body and never the conditional --
+                                                 # same split as Freminet's Backstroke. NOT re-scaled
+                                                 # when the base doubled (2026-07-25 [USER] ruling on
+                                                 # the card, which named the base only): +3 on a 20
+                                                 # body is proportionally a much smaller upgrade than
+                                                 # it was on a 10 body. Flagged for the red-pen rather
+                                                 # than silently doubled to keep the ruling's scope
+                                                 # exactly where it was set.
+neuvillette_ancient_sea_authority: {cost: -1}    # 1 -> 0. COST, not magnitude, and deliberately so:
+                                                 # power_amount here would take auras from 3 turns to 4
+                                                 # against a base AURA_DURATION_TURNS of 2, i.e. double
+                                                 # duration, which lifts every applier in the pool and
+                                                 # every aura-keyed payoff (Albedo, Clorinde) at once.
+                                                 # That is a pool-wide multiplier bought on one card.
+                                                 # Buying the same effect a turn earlier is the Nicole
+                                                 # precedent and does not compound.
+arlecchino_masque_red_death: {power_amount: +1}  # Strength per turn 1 -> 2, the "1 (2)" the ruling
+                                                 # names. The Bond of Life does NOT scale and is not
+                                                 # removable by upgrade: the debt IS the card, and an
+                                                 # upgrade that softened it would be a different card.
+                                                 # +1 rather than +2 because the effect is a RATCHET --
+                                                 # doubling the per-turn rate compounds over the fight,
+                                                 # the same argument that made Nicole's upgrade cost.

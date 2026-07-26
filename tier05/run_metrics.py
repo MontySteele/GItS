@@ -6,8 +6,10 @@ these can.
 
 from __future__ import annotations
 
+import math
 from collections import Counter
 
+from tier0 import constants as C
 from tier05.model import RunResult
 
 
@@ -21,12 +23,30 @@ def _percentile(values: list[int], q: float) -> float:
     return s[lo] + (s[hi] - s[lo]) * (idx - lo)
 
 
+def _wilson95(successes: int, trials: int) -> tuple[float, float]:
+    """95% Wilson interval; remains informative for zero-win cells."""
+    if trials <= 0:
+        return 0.0, 0.0
+    z = 1.96
+    p = successes / trials
+    denom = 1 + z * z / trials
+    center = (p + z * z / (2 * trials)) / denom
+    half = (z * math.sqrt(p * (1 - p) / trials
+                          + z * z / (4 * trials * trials)) / denom)
+    return center - half, center + half
+
+
 def summarize_runs(results: list[RunResult]) -> dict:
     n = len(results)
     if n == 0:
         return {}
+    wins = sum(r.won for r in results)
     deaths = Counter(r.death_node for r in results if r.death_node is not None)
-    n_nodes = len(results[0].node_kinds)
+    # §11: node_kinds is the path WALKED, so a run that died is short. Bands
+    # and the heatmap are indexed by FLOOR, and every path visits exactly one
+    # room per floor -- so the axis is MAP_FLOORS * n_acts, never results[0]'s
+    # length (that would size the whole report off one unlucky run).
+    n_nodes = C.MAP_FLOORS * max(1, results[0].n_acts)
     # HP trajectory bands: per node position, over runs that REACHED it.
     bands = []
     for pos in range(n_nodes):
@@ -44,15 +64,157 @@ def summarize_runs(results: list[RunResult]) -> dict:
     online = [r.time_to_online for r in results if r.time_to_online]
     return {
         "runs": n,
-        "winrate": sum(r.won for r in results) / n,
+        "wins": wins,
+        "winrate": wins / n,
+        "winrate_wilson95": _wilson95(wins, n),
         "death_heatmap": dict(sorted(deaths.items())),
         "hp_bands": bands,
         "avg_final_deck": sum(len(r.deck_ids) for r in results) / n,
+        # P5 (playtest sprint): the same average, split by outcome.
+        # SURVIVORSHIP CHECK, observation only -- no rule reads it. The pooled
+        # figure rides at/over DRAFT_DECK_SOFT_CAP, and that is ambiguous by
+        # construction: a run that dies on floor 4 contributes a small deck it
+        # never got to grow, so heavy decks and short runs push the mean in
+        # opposite directions and can cancel. Splitting says which. Winners
+        # bigger than losers means the cap is being ridden by runs that are
+        # WORKING; losers bigger means bloat is a cause of death.
+        "avg_final_deck_won": (
+            sum(len(r.deck_ids) for r in results if r.won) / max(1, wins)
+            if wins else None),
+        "avg_final_deck_lost": (
+            sum(len(r.deck_ids) for r in results if not r.won) / (n - wins)
+            if n - wins else None),
         "pick_rate": picks / max(1, screens),
         "regretted_decisions": sum(r.regret_samples for r in results),
         "median_time_to_online": (sorted(online)[len(online) // 2]
                                   if online else None),
         "online_rate": len(online) / n,
+        "act_funnel": act_funnel(results),      # §10.6 (len 1 at --acts 1)
+        "route": route_profile(results),        # §11
+    }
+
+
+def route_profile(results: list[RunResult]) -> dict:
+    """§11 acceptance instrument. Reports the elite-count DISTRIBUTION and how
+    it moves with arrival HP, because the target (median ~2.5, range 1-4) is
+    only half the claim -- a policy that always takes exactly two hits the
+    median and is still wrong. Also reports the walked composition, so a route
+    policy that quietly stops visiting shops is visible.
+
+    Elites are counted PER ACT, which is the unit the target is stated in."""
+    if not results:
+        return {}
+    per_act, comp = [], Counter()
+    for r in results:
+        for a in range(max(1, r.n_acts)):
+            seg = r.node_kinds[a * C.MAP_FLOORS:(a + 1) * C.MAP_FLOORS]
+            if len(seg) == C.MAP_FLOORS:        # only acts actually completed
+                per_act.append(sum(1 for k in seg if k == "E"))
+        comp.update(r.node_kinds)
+    n_runs = len(results)
+    dist = Counter(per_act)
+    # Does the count respond to run state? Split completed acts by whether the
+    # run was above or below half HP entering them.
+    healthy, hurt = [], []
+    for r in results:
+        for a in range(max(1, r.n_acts)):
+            seg = r.node_kinds[a * C.MAP_FLOORS:(a + 1) * C.MAP_FLOORS]
+            if len(seg) < C.MAP_FLOORS:
+                continue
+            start = a * C.MAP_FLOORS
+            hp_in = r.hp_by_node[start] if len(r.hp_by_node) > start else 0
+            (healthy if hp_in and hp_in > 0.5 * max(r.hp_by_node or [1])
+             else hurt).append(sum(1 for k in seg if k == "E"))
+    return {
+        "acts_measured": len(per_act),
+        "elites_per_act_mean": (sum(per_act) / len(per_act)) if per_act else 0.0,
+        "elites_per_act_median": (sorted(per_act)[len(per_act) // 2]
+                                  if per_act else None),
+        "elites_distribution": dict(sorted(dist.items())),
+        "in_target_band": (sum(v for k, v in dist.items() if 1 <= k <= 4)
+                           / len(per_act)) if per_act else 0.0,
+        "elites_when_healthy": (sum(healthy) / len(healthy)) if healthy else None,
+        "elites_when_hurt": (sum(hurt) / len(hurt)) if hurt else None,
+        "nodes_per_run": {k: round(v / n_runs, 2)
+                          for k, v in sorted(comp.items())},
+        "events_seen_per_run": round(
+            sum(len(r.events) for r in results) / n_runs, 2),
+        "event_options": dict(Counter(
+            f"{e['event']}:{e['option']}" for r in results
+            for e in r.events).most_common(8)),
+    }
+
+
+def act_funnel(results: list[RunResult]) -> list[dict]:
+    """§10.6 (multi-act): the per-act funnel -- what share of runs REACHED
+    each act and what share CLEARED its boss. This is the surface the whole
+    extension exists for: a frontloaded build shows a steep cleared-rate
+    fall-off between act 1 and act 3; a scaling build holds.
+
+    Denominator is ALL runs (not reached-conditional) so acts compose:
+    cleared[act] is monotonically non-increasing by construction."""
+    if not results:
+        return []
+    n_acts = results[0].n_acts
+    tpl = C.MAP_FLOORS               # §11: one room per floor, always
+    n = len(results)
+    out = []
+    for a in range(n_acts):
+        reached = sum(1 for r in results
+                      if r.death_node is None or r.death_node >= a * tpl)
+        cleared = sum(1 for r in results if r.acts_completed > a)
+        out.append({"act": a + 1, "reached": reached, "cleared": cleared,
+                    "reached_rate": reached / n, "cleared_rate": cleared / n})
+    return out
+
+
+NEAR_DEATH_FRACTION = 0.15      # "one bad turn from dead"
+
+
+def survival_profile(results: list[RunResult], max_hp: int) -> dict:
+    """Fragility as SCALARS, normalized by max HP.
+
+    Pass-4 sim-fidelity finding (2026-07-21): `hp_bands` already carried
+    this signal and was already printed, but the design conversation
+    travelled on the run-winrate scalar alone, which compresses "she
+    spends the whole act one bad turn from dead" into a single percent.
+    Absolute HP is also uninterpretable across characters with different
+    max HP (Klee 62 vs REF_IRONCLAD 80) -- so everything here is a
+    FRACTION of max, which is what makes an anchor comparison possible.
+
+    Not banded, deliberately: bands are user-ratified (house rule). This
+    reports; a ruling decides what is acceptable.
+    """
+    if not results:
+        return {}
+    kinds = results[0].node_kinds
+    # Fights only: N/E/B. R (rest), T (treasure) and $ (shop) are non-fight
+    # nodes -- their HP entries carry the previous value and must not be
+    # read as a fight's survival sample (RUNTEMPLATE_VERSION 3).
+    fight_pos = [i for i, k in enumerate(kinds) if k in ("N", "E", "B")]
+    pct = []
+    for pos in fight_pos:
+        # Keep the original run cohort at every fight. A run that died before
+        # this position contributes 0 HP instead of disappearing from the
+        # sample; otherwise later medians are conditional on survival and an
+        # early death can make the reported act-health curve look healthier.
+        vals = [r.hp_by_node[pos] if len(r.hp_by_node) > pos else 0
+                for r in results]
+        pct.append(_percentile(vals, 0.50) / max_hp if vals else 0.0)
+    floor = NEAR_DEATH_FRACTION * max_hp
+    ever_near = sum(1 for r in results
+                    if any(0 < h <= floor for h in r.hp_by_node))
+    return {
+        "median_hp_pct_by_fight": pct,
+        # Mean of the median HP fraction across the act: one number for
+        # "how much health does this character actually run on".
+        "act_median_hp_pct": sum(pct) / len(pct) if pct else 0.0,
+        # Share of the act the median run spends under 30% HP.
+        "act_share_below_30pct": (sum(1 for p in pct if p < 0.30)
+                                  / len(pct) if pct else 0.0),
+        # Share of runs that ever touch the near-death floor while alive.
+        "near_death_rate": ever_near / len(results),
+        "max_hp": max_hp,
     }
 
 
@@ -120,25 +282,72 @@ def _ungated(required: set[str], r: RunResult) -> set[str]:
             if loader.get_card(cid).star != 5}
 
 
+def floor_kind_labels(results: list[RunResult]) -> list[str]:
+    """Per floor, the mix of node kinds the cohort actually walked.
+
+    Under §11 routing there is no single 'kind' for a floor -- one run's
+    floor 4 is an elite and another's is a shop. The label is the two
+    commonest kinds with their shares, so the report shows the distribution
+    instead of pretending it is a template."""
+    if not results:
+        return []
+    n_nodes = C.MAP_FLOORS * max(1, results[0].n_acts)
+    out = []
+    for i in range(n_nodes):
+        seen = Counter(r.node_kinds[i] for r in results
+                       if len(r.node_kinds) > i)
+        if not seen:
+            out.append("-")
+            continue
+        total = sum(seen.values())
+        out.append(" ".join(f"{k}{round(100 * v / total)}"
+                            for k, v in seen.most_common(2)))
+    return out
+
+
 def print_run_report(character: str, archetype: str, s: dict,
-                     node_kinds: list[str]) -> None:
+                     node_kinds: list[str], survival: dict | None = None) -> None:
     print(f"\n=== Tier 0.5 runs: {character}/{archetype} "
           f"({s['runs']} runs) ===")
-    print(f"  run winrate      {s['winrate']:.1%}")
-    print(f"  final deck size  {s['avg_final_deck']:.1f}   "
+    lo, hi = s["winrate_wilson95"]
+    print(f"  run winrate      {s['winrate']:.1%} "
+          f"({s['wins']}/{s['runs']}; Wilson 95% {lo:.1%}-{hi:.1%})")
+    funnel = s.get("act_funnel") or []
+    if len(funnel) > 1:                     # §10.6: multi-act runs only
+        print("  act funnel       " + "   ".join(
+            f"act{f['act']} reached {f['reached_rate']:.0%} "
+            f"cleared {f['cleared_rate']:.0%}" for f in funnel))
+    if survival:
+        print(f"  survival         act median HP "
+              f"{survival['act_median_hp_pct']:.0%} of max "
+              f"({survival['max_hp']} HP)   "
+              f"{survival['act_share_below_30pct']:.0%} of the act under 30%"
+              f"   near-death {survival['near_death_rate']:.0%} of runs")
+        print("                   median HP% by fight: "
+              + " ".join(f"{p:.0%}" for p in
+                         survival["median_hp_pct_by_fight"]))
+    won, lost = s.get("avg_final_deck_won"), s.get("avg_final_deck_lost")
+    # P5: both halves or neither. A single-sided split invites reading the
+    # one number that happens to be present as the whole story.
+    split = (f"   (won {won:.1f} / lost {lost:.1f})"
+             if won is not None and lost is not None else "")
+    print(f"  final deck size  {s['avg_final_deck']:.1f}{split}   "
           f"pick rate {s['pick_rate']:.0%}   "
           f"regrets {s['regretted_decisions']}")
     onl = s["median_time_to_online"]
     print(f"  time-to-online   median {onl} fights, "
           f"online in {s['online_rate']:.0%} of runs")
-    print("  node  kind  reached   p25/p50/p75 HP   deaths")
+    # §11: node kinds vary per run, so the column reports what the COHORT
+    # actually walked at that floor rather than one run's label -- a fixed
+    # label would be a lie the moment routing exists.
+    print("  floor kinds        reached   p25/p50/p75 HP   deaths")
     for i, kind in enumerate(node_kinds):
         b = s["hp_bands"][i]
         d = s["death_heatmap"].get(i, 0)
         bar = "█" * round(40 * d / max(1, s["runs"]))
         if b is None:
-            print(f"  {i:>4}  {kind:<4}  (never reached)")
+            print(f"  {i:>4}  {kind:<11}  (never reached)")
             continue
-        print(f"  {i:>4}  {kind:<4}  {b['reached']:>7}   "
+        print(f"  {i:>4}  {kind:<11}  {b['reached']:>7}   "
               f"{b['p25']:>4.0f}/{b['p50']:>4.0f}/{b['p75']:>4.0f}       "
               f"{d:>4} {bar}")

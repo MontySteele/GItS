@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -29,6 +30,12 @@ public sealed class FlameDance : CustomCardModel, IElementalCard
     /// <summary>All of Klee's attacks apply Pyro (sheet: catalyst-grade cadence).</summary>
     public Element Element => Element.Pyro;
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesPyro };
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("flame_dance");
 
     public override List<(string, string)>? Localization => new()
@@ -42,7 +49,7 @@ public sealed class FlameDance : CustomCardModel, IElementalCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(7m, ValueProp.Move),
+            new DamageVar(9m, ValueProp.Move),
             new ExtraDamageVar(4m),
         };
 
@@ -71,7 +78,7 @@ public sealed class FlameDance : CustomCardModel, IElementalCard
 
     protected override void OnUpgrade()
     {
-        // klee-upgrades.yaml: damage +2 (7 -> 9 all); the aura bonus stays 4.
+        // klee-upgrades.yaml: damage +2 (9 -> 11 all); the aura bonus stays 4.
         DynamicVars.Damage.UpgradeValueBy(2m);
     }
 }

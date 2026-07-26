@@ -51,6 +51,8 @@ def test_overload_splashes_all_enemies():
     hit(st, a, "pyro", 5)
     assert a.hp == 30 - C.OVERLOAD_SPLASH   # splash; the 5 resolves in effects.py
     assert b.hp == 30 - C.OVERLOAD_SPLASH
+    assert a.powers["weak"] == C.OVERLOAD_WEAK
+    assert "weak" not in b.powers           # stagger belongs to reacted target
 
 
 def test_superconduct_applies_vulnerable(state):

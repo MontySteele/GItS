@@ -29,12 +29,23 @@ _AMPLIFY = {
 
 def _amp_mult(state: CombatState, name: str) -> float:
     base = C.VAPORIZE_MULT if name == "vaporize" else C.MELT_MULT
-    # amp_reaction_up / witchs_flame stacks are PERCENT boosts to the
-    # amplifier (Vermillion Pact +25, Durin +30). Additive with each
-    # other, multiplicative on the base: 1.75 * (1 + 0.55) = 2.71 < 4x cap.
-    pct = (state.player.powers.get("amp_reaction_up", 0)
-           + state.player.powers.get("witchs_flame", 0))
+    # Vermillion Pact's amp_reaction_up is a PERCENT boost to the base
+    # amplifier. +100 doubles Vaporize/Melt's multiplier; the +125 upgraded
+    # form puts Melt at 3.9375, just below the 4x provenance detector.
+    pct = state.player.powers.get("amp_reaction_up", 0)
     return base * (1 + pct / 100)
+
+
+def aura_duration(state: CombatState) -> int:
+    """Turns a freshly applied or refreshed aura lasts.
+
+    Neuvillette's ancient_sea_authority extends it. Deliberately a function
+    rather than a constant read at three call sites: application and refresh
+    must never disagree about how long an aura lives, which they would the
+    first time someone extended only one of them.
+    """
+    return C.AURA_DURATION_TURNS + state.player.powers.get(
+        "ancient_sea_authority", 0)
 
 
 def apply_aura(state: CombatState, enemy: Enemy, element: str) -> None:
@@ -42,7 +53,7 @@ def apply_aura(state: CombatState, enemy: Enemy, element: str) -> None:
     if element not in AURA_ELEMENTS:
         return
     enemy.aura = element
-    enemy.aura_turns_left = C.AURA_DURATION_TURNS
+    enemy.aura_turns_left = aura_duration(state)
     state.emit("aura_applied", element=element, target=enemy.name)
 
 
@@ -67,7 +78,7 @@ def resolve_hit(state: CombatState, enemy: Enemy, element: Optional[str],
         apply_aura(state, enemy, element)
         return damage
     if aura == element:
-        enemy.aura_turns_left = C.AURA_DURATION_TURNS   # refresh
+        enemy.aura_turns_left = aura_duration(state)    # refresh
         return damage
 
     # Different element on an existing aura: consume + react.
@@ -96,6 +107,11 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         name = "overload"
         for other in state.living_enemies:
             _splash(state, other, C.OVERLOAD_SPLASH)
+        # The explosion staggers the reacted target. This is ordinary Weak,
+        # so it uses the shared debuff rules and never multiplies with Klee's
+        # armed-Bomb suppression.
+        if C.OVERLOAD_WEAK:
+            powers.apply_power(state, enemy, "weak", C.OVERLOAD_WEAK)
     elif pair == frozenset(("electro", "cryo")):
         name = "superconduct"
         powers.apply_power(state, enemy, "vulnerable", C.SUPERCONDUCT_VULN)

@@ -23,6 +23,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -46,18 +47,26 @@ public sealed class ChevreuseBurstingGrenades : CustomCardModel, IElementalCard,
 
     public string? Nation => "fontaine";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesPyro };
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("chevreuse_bursting_grenades");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chevreuse — Ring of Bursting Grenades"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(7m, ValueProp.Move)
+            new CalculationBaseVar(10m),
+            new ExtraDamageVar(1m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -70,7 +79,7 @@ public sealed class ChevreuseBurstingGrenades : CustomCardModel, IElementalCard,
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
@@ -80,6 +89,6 @@ public sealed class ChevreuseBurstingGrenades : CustomCardModel, IElementalCard,
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

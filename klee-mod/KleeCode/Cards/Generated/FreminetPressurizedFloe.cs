@@ -48,14 +48,16 @@ public sealed class FreminetPressurizedFloe : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Freminet — Pressurized Floe: Backstroke"),
-        ("description", "Deal {Damage:diff()} damage. Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(8m, ValueProp.Move),
-            new BlockVar(4m, ValueProp.Move)
+            new CalculationBaseVar(10m),
+            new ExtraDamageVar(1m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
+            new BlockVar(6m, ValueProp.Move)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -69,16 +71,16 @@ public sealed class FreminetPressurizedFloe : CustomCardModel, ICompanionCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue), ValueProp.Move), cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

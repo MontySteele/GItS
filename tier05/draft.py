@@ -3,8 +3,12 @@
 Assigned mode: the run is seeded with a target archetype. Scoring terms:
 - archetype fit: enabler value DECAYS as the core completes; payoff value
   is GATED on the core being online (else you draft win-more blanks)
-- raw printed power (DRAFTER_VERSION 2, ruling R2.1 — adopted from the
-  hybrid experiment after it beat both parents everywhere)
+- Fanfare exception: native meter movement + one direct-output spender is
+  the core; surplus generation diminishes instead of filling four fake slots
+- printed power and conservative mitigation proxies (added at drafter v3;
+  v2 counted only direct damage/Block and made Bombs/debuffs invisible.
+  The LIVE stamp is DRAFTER_VERSION in tier0/constants.py -- this module
+  deliberately does not define one, so do not read a version off this file)
 - universal: defense quota (the real-draft principle codified), curve
   awareness, deck-size penalty (steeper for reaction — ruling R2.2)
 (The old Burst-priority term left with v1.9: the Burst is kit, never
@@ -27,11 +31,114 @@ from typing import Optional
 from tier0 import constants as C
 from tier0.engine.state import Card
 
+
+# DRAFTER_VERSION 3: values are expressed in the same rough units as one
+# point of printed damage or Block. They are deliberately conservative: the
+# assigned drafter only needs to distinguish direct mitigation/power from
+# blank cardboard, not solve an engine before choosing a reward. A measured
+# sweep rejected flat draw/energy/Spark/Burst proxies: raising them monotonically
+# reduced Klee's real-run result, because their value is deck/context dependent.
+STATIC_DEBUFF_VALUE = 2.0
+STATIC_BOMB_DAMAGE_SHARE = 0.5
+STATIC_BOMB_GUARD_VALUE = 1.5
+STATIC_KLEE_CONDITIONAL_SHARE = 0.5
+STATIC_STRENGTH_VALUE = 2.0        # conservative two future Attack hits (v4)
+STATIC_PERSISTENT_PROC_SHARE = 1.0  # one turn of a repeatable Power (v4)
+# DRAFTER_VERSION 6: all_enemies damage counts toward the average swarm, not
+# a single body. The Furina-0% diagnosis (§10.8.2) caught the v5 scorer
+# reading Undercurrent at HALF its table value against the 4-body elite --
+# AoE blindness was structural. 2.0 is deliberately conservative (multi-body
+# fights average 2-4 bodies; single-target fights make AoE overpriced at
+# higher values).
+STATIC_AOE_MULT = 2.0
+# DRAFTER_VERSION 7 (Kokomi v0.2 sheet pass): her three verbs were
+# structurally invisible -- conscript and gain_charge print zero damage or
+# Block, and Sly riders live outside card.effects entirely -- the same
+# defect class as v6's AoE blindness. Conservative structural proxies:
+STATIC_SLY_SHARE = 0.5        # a Sly rider needs a card-effect discard
+                              # outlet to fire; half its printed face
+STATIC_CONSCRIPT_VALUE = 1.5  # one playable recruit ~ one companion's
+                              # conservative static worth per transform
+STATIC_FANFARE_FLOOR_VALUE = 0.2  # per printed floor point (v9). A floor is
+                              # worth less per point than Charge: Charge is
+                              # read by a kit state the player controls,
+                              # where a floor only pays through whatever
+                              # readers the deck happens to hold. PROPOSED.
+STATIC_CHARGE_VALUE = 0.5     # per printed Charge point: the kit Garment
+                              # is a universal reader (never-expiring bank,
+                              # +1 damage per 4 Charge while it holds), so
+                              # banked points are never dead -- but one
+                              # Garment window is all this prices in
+
+# These predicates are readable before a card is played. Mid-resolution
+# conditions such as reaction_triggered_by_this and killed_target remain out:
+# valuing their best branch unconditionally would recreate the old power bias.
+STATIC_STATE_CONDITIONS = frozenset({
+    "has_spark",
+    "target_has_nonpyro_aura",
+    "target_has_power_vulnerable",
+    "card_exhausted_this_turn",
+    "hp_lost_this_turn",
+})
+
+
+def _static_condition(name: str) -> bool:
+    return (
+        name in STATIC_STATE_CONDITIONS
+        or name.startswith("target_has_power_")
+        or name.startswith("exhaust_pile_at_least_")
+    )
+
+
+def _static_condition_share(name: str) -> float:
+    if name in ("has_spark", "target_has_nonpyro_aura"):
+        return STATIC_KLEE_CONDITIONAL_SHARE
+    return 1.0
+
+
+def _nested_effects(effect_list: list[dict]):
+    """Walk every printed branch for card classification only."""
+    for fx in effect_list:
+        yield fx
+        if fx.get("op") == "conditional":
+            yield from _nested_effects(fx.get("then", []))
+            yield from _nested_effects(fx.get("else", []))
+
+
+def _neutral_amount(fx: dict, default: float = 1.0) -> float:
+    amount = fx.get("amount")
+    if isinstance(amount, (int, float)):
+        return amount
+    formula = fx.get("amount_formula")
+    if isinstance(formula, dict):
+        return formula.get("base", 0) + formula.get("per", default)
+    if formula == "per_aura":
+        return default
+    return default
+
 AMP_PAYOFF_POWERS = C.AMP_PAYOFF_POWERS   # shared with the content loader
 
 
+def _has_tempo(card: Card) -> bool:
+    """Draw / energy anywhere in the printed text -- the velocity class the
+    late-run discipline (DRAFTER_VERSION 5) still takes past the lean cap."""
+    return any(fx.get("op") in ("draw", "energy")
+               for fx in _nested_effects(card.effects))
+
+
 def _has_block(card: Card) -> bool:
-    return any(fx.get("op") == "block" for fx in card.effects)
+    def contains(effect_list: list[dict]) -> bool:
+        for fx in effect_list:
+            if fx.get("op") == "block":
+                return True
+            if (fx.get("op") == "conditional"
+                    and _static_condition(fx.get("if", ""))
+                    and (contains(fx.get("then", []))
+                         or contains(fx.get("else", [])))):
+                return True
+        return False
+
+    return contains(card.effects)
 
 
 def _block_density(deck: list[Card]) -> float:
@@ -47,6 +154,100 @@ def _is_amp_payoff(card: Card) -> bool:
     return ("reaction" in card.archetypes and card.role == "payoff")
 
 
+def _generates_guest_star(card: Card) -> bool:
+    return any(fx.get("op") == "generate_guest_star"
+               for fx in _nested_effects(card.effects))
+
+
+def _is_spotlight_access(card: Card) -> bool:
+    """A Companion itself or a card that guarantees one in combat."""
+    return card.is_companion or _generates_guest_star(card)
+
+
+def _is_spotlight_machinery(card: Card) -> bool:
+    """A real Spotlight engine piece, distinct from finding the cast."""
+    return ("spotlight" in card.archetypes
+            and card.role in ("enabler", "payoff")
+            and not _is_spotlight_access(card))
+
+
+def _fanfare_generation(card: Card) -> float:
+    """Printed Fanfare access supplied by one card.
+
+    Furina gains Fanfare when Encore moves in either direction and when she
+    loses HP.  This is an intentionally coarse draft-time estimate: it is
+    used to distinguish "the deck has a way to move the meter" from "this
+    card turns the meter into output", not to predict exact combat totals.
+    """
+    total = max(0, card.encore_cost)
+    for fx in _nested_effects(card.effects):
+        if fx.get("op") == "gain_encore":
+            total += max(0, _neutral_amount(fx, 0))
+        elif fx.get("op") == "damage" and fx.get("target") == "self":
+            total += max(0, _neutral_amount(fx, 0))
+    return total
+
+
+def _fanfare_generation_total(deck: list[Card]) -> float:
+    return sum(_fanfare_generation(card) for card in deck)
+
+
+def _fanfare_floor_total(deck: list[Card]) -> float:
+    return sum(_grants_fanfare_floor(card) for card in deck)
+
+
+def _self_damage(card: Card) -> float:
+    return sum(
+        max(0, _neutral_amount(fx, 0))
+        for fx in _nested_effects(card.effects)
+        if fx.get("op") == "damage" and fx.get("target") == "self"
+    )
+
+
+def _has_direct_output(card: Card) -> bool:
+    """Damage/Block that can cash a resource into immediate survival."""
+    return any(
+        fx.get("op") == "block"
+        or (fx.get("op") == "damage" and fx.get("target") != "self")
+        for fx in _nested_effects(card.effects)
+    )
+
+
+def _grants_fanfare_floor(card: Card) -> float:
+    """Printed permanent baseline this card builds (DRAFTER_VERSION 9).
+
+    Replaces `_is_fanfare_converter`, which keyed off `fanfare_cost` and died
+    with the spend grammar. Floors are what the read-only plan actually
+    assembles, and a drafter blind to them would under-draft the identity
+    outright -- the measured failure this branch exists to prevent is the
+    fanfare plan seeing 6.7 floors/run against salon's ~51.
+
+    Powers grant by rarity without printing an op, so they count here too:
+    the grant is a rule of the engine, not a line on the card, and a drafter
+    that could only see the explicit op would systematically undervalue every
+    Power the archetype drafts.
+    """
+    total = float(sum(fx.get("amount", 0)
+                      for fx in _nested_effects(card.effects)
+                      if fx.get("op") == "gain_fanfare_floor"))
+    if card.type == "power":
+        total += (C.FANFARE_FLOOR_PER_POWER_RARE if card.rarity == "rare"
+                  else C.FANFARE_FLOOR_PER_POWER)
+    return total
+
+
+def _reads_fanfare(card: Card) -> bool:
+    """Does the printed output scale with or unlock from held Fanfare?"""
+    for fx in _nested_effects(card.effects):
+        if str(fx.get("if", "")).startswith("fanfare_"):
+            return True
+        if str(fx.get("power", "")).startswith("fanfare_"):
+            return True
+        if "fanfare" in str(fx.get("bonus_formula", "")):
+            return True
+    return False
+
+
 def core_complete(deck: list[Card], archetype: str) -> bool:
     """Is the archetype 'online'? (spec §5 as amended by v1.9: reaction
     core := 2 appliers + 1 amp payoff. The Burst left the assembly
@@ -59,6 +260,23 @@ def core_complete(deck: list[Card], archetype: str) -> bool:
         appliers = sum(1 for c in deck if _is_applier(c))
         amps = sum(1 for c in deck if _is_amp_payoff(c))
         return appliers >= 2 and amps >= 1
+    if archetype == "spotlight":
+        access = sum(1 for c in deck if _is_spotlight_access(c))
+        machinery = sum(1 for c in deck if _is_spotlight_machinery(c))
+        return access >= 2 and machinery >= 1
+    if archetype == "fanfare":
+        # Furina's starter already supplies the first half in practice, but
+        # keep the definition honest for synthetic/modified decks.
+        #
+        # THREE limbs since DRAFTER_VERSION 10 (G-E1). Generation and floor
+        # are both inputs; without the reader limb this returned True for a
+        # deck that moved a meter nothing ever cashed.
+        return (
+            _fanfare_generation_total(deck) >= FANFARE_GENERATION_COVERAGE
+            and _fanfare_floor_total(deck) >= FANFARE_FLOOR_COVERAGE
+            and sum(1 for c in deck if _reads_fanfare(c))
+            >= FANFARE_PAYOFF_COVERAGE
+        )
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))
     return on_plan >= C.DRAFT_CORE_SIZE
@@ -69,24 +287,147 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
         appliers = min(2, sum(1 for c in deck if _is_applier(c)))
         amps = min(1, sum(1 for c in deck if _is_amp_payoff(c)))
         return (appliers + amps) / 3
+    if archetype == "spotlight":
+        access = min(2, sum(1 for c in deck if _is_spotlight_access(c)))
+        machinery = min(1, sum(
+            1 for c in deck if _is_spotlight_machinery(c)))
+        return (access + machinery) / 3
+    if archetype == "fanfare":
+        generation = min(
+            1.0,
+            _fanfare_generation_total(deck) / FANFARE_GENERATION_COVERAGE,
+        )
+        baseline = min(1.0, _fanfare_floor_total(deck) / FANFARE_FLOOR_COVERAGE)
+        # DRAFTER_VERSION 10: the reader limb, weighted equally with the two
+        # input limbs. This is the half of the fix with teeth -- progress
+        # feeds score_offer's +3.0 core-advance bonus, so a fanfare deck now
+        # actually reaches for a payoff instead of only for inputs.
+        payoff = min(
+            1.0,
+            sum(1 for c in deck if _reads_fanfare(c)) / FANFARE_PAYOFF_COVERAGE,
+        )
+        return (generation + baseline + payoff) / 3
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))
     return min(1.0, on_plan / C.DRAFT_CORE_SIZE)
 
 
-def _static_power(card: Card) -> float:
-    """Printed damage+block per energy — a deliberately dumb immediate-
-    value proxy for the generic (anchor) archetype, whose cards carry no
-    archetype tags. The real power/synergy scorer is M6's adaptive policy."""
-    total = 0.0
-    for fx in card.effects:
-        if fx.get("op") == "damage" and fx.get("target") != "self":
-            amt = fx.get("amount", 0)
-            if isinstance(amt, int):
-                total += amt * (fx.get("times", 1)
-                                if isinstance(fx.get("times", 1), int) else 1)
-        elif fx.get("op") == "block":
-            total += fx.get("amount", 0)
+def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
+    """Conservative printed power per energy for reward decisions.
+
+    Damage and Block remain face value. Enemy debuffs and Bombs receive small,
+    explicit proxies so the generic anchor no longer treats direct mitigation
+    and delayed damage as zero. Draw/energy/resource engines remain with the
+    archetype scorer and M6 adaptive policy: a flat proxy sweep made both
+    reference characters draft worse decks.
+    """
+    all_effects = list(_nested_effects(card.effects))
+    has_enemy_weak = any(
+        fx.get("op") == "apply_power"
+        and fx.get("power") == "weak"
+        and fx.get("target") != "self"
+        for fx in all_effects
+    )
+    has_bomb = any(fx.get("op") == "place_bomb" for fx in all_effects)
+
+    def effect_power(effect_list: list[dict]) -> float:
+        total = 0.0
+        for fx in effect_list:
+            if fx.get("op") == "conditional":
+                name = fx.get("if", "")
+                if _static_condition(name):
+                    # Drafting has no combat state. Klee's Spark/aura branches
+                    # receive a neutral availability discount; predicates
+                    # backed by a deck/pile condition retain the established
+                    # reachable-branch convention. Actual play always reads
+                    # the live predicate in tier0.pilot.policy.
+                    then_power = effect_power(fx.get("then", []))
+                    else_power = effect_power(fx.get("else", []))
+                    share = _static_condition_share(name)
+                    total += (else_power
+                              + share * (then_power - else_power))
+            elif fx.get("op") == "damage" and fx.get("target") != "self":
+                amt = fx.get("amount", 0)
+                formula = fx.get("amount_formula")
+                if isinstance(formula, dict):
+                    count = 1
+                    if formula.get("count") == "strike_cards" and deck is not None:
+                        count = (sum("strike" in c.tags for c in deck)
+                                 + int("strike" in card.tags))
+                    # Otherwise one unit of the live count is a conservative
+                    # neutral offer-state estimate (pile, current Block, ...).
+                    amt = (formula.get("base", 0)
+                           + formula.get("per", 1) * count)
+                rider = fx.get("bonus_per_target_power")
+                if isinstance(rider, dict):
+                    amt += rider.get("per", 0)  # one matching stack
+                if isinstance(amt, (int, float)):
+                    times = (fx.get("times", 1)
+                             if isinstance(fx.get("times", 1), int) else 1)
+                    times_formula = fx.get("times_formula")
+                    if isinstance(times_formula, dict):
+                        times = (times_formula.get("base", 0)
+                                 + times_formula.get("per", 1))
+                    if fx.get("target") == "all_enemies":
+                        total += amt * times * STATIC_AOE_MULT      # v6
+                    else:
+                        total += amt * times
+            elif fx.get("op") == "block":
+                times = 2 if fx.get("times") == "exhausted_this_card" else 1
+                total += fx.get("amount", 0) * times
+            elif fx.get("op") == "place_bomb":
+                total += (fx.get("bomb_damage", 0)
+                          * _neutral_amount(fx)
+                          * STATIC_BOMB_DAMAGE_SHARE)
+            elif (fx.get("op") == "apply_power"
+                  and fx.get("target", "self") == "self"
+                  and fx.get("power") == "strength"):
+                total += _neutral_amount(fx) * STATIC_STRENGTH_VALUE
+            elif (fx.get("op") == "apply_power"
+                  and fx.get("target", "self") == "self"
+                  and fx.get("power") == "witchs_flame"):
+                # Durin is reliable on Klee's catalyst cadence, but offer
+                # scoring credits only one end-turn aura rather than pricing
+                # an entire permanent engine up front.
+                total += _neutral_amount(fx) * STATIC_PERSISTENT_PROC_SHARE
+            elif (fx.get("op") == "apply_power"
+                  and fx.get("target") != "self"
+                  and fx.get("power") in ("weak", "vulnerable")):
+                total += _neutral_amount(fx) * STATIC_DEBUFF_VALUE
+            elif fx.get("op") == "conscript":                       # v7
+                total += _neutral_amount(fx) * STATIC_CONSCRIPT_VALUE
+            elif fx.get("op") == "gain_charge":                     # v7
+                total += _neutral_amount(fx) * STATIC_CHARGE_VALUE
+            elif fx.get("op") == "summon_kurage":                   # v8
+                # A persistent summon, priced like Durin: credit ONE pulse,
+                # not the whole duration. The bank read is invisible at
+                # offer time (the drafter cannot know her Charge curve), so
+                # only the flat pulse + its Block are counted -- deliberately
+                # conservative, same reasoning as the Durin line above.
+                total += (C.KURAGE_PULSE_BASE + C.KURAGE_PULSE_BLOCK
+                          ) * STATIC_PERSISTENT_PROC_SHARE
+            elif fx.get("op") == "gain_fanfare_floor":                # v9
+                # A permanent baseline, priced like Strength: it is not
+                # output now, it is output on every later read. Conservative
+                # on purpose -- the drafter cannot see how many readers the
+                # deck will end up holding, and over-pricing a floor would
+                # bend every Furina plan toward the same few cards.
+                total += _neutral_amount(fx) * STATIC_FANFARE_FLOOR_VALUE
+            elif fx.get("op") == "grow_damage":
+                total += fx.get("amount", 0) * 0.5  # one discounted redraw
+        return total
+
+    total = effect_power(card.effects)
+    if card.sly:
+        # v7: a Sly rider is the same printed grammar at half face -- it
+        # fires only when a card effect discards this from hand, and the
+        # drafter cannot see outlet density at offer time.
+        total += effect_power(card.sly) * STATIC_SLY_SHARE
+    # An armed Bomb suppresses one enemy attack action. Do not also price that
+    # protection when the same card applies Weak: the two reductions share one
+    # branch at runtime and never multiply.
+    if has_bomb and not has_enemy_weak:
+        total += STATIC_BOMB_GUARD_VALUE
     cost = card.cost if isinstance(card.cost, int) else 2
     return total / max(1, cost)
 
@@ -104,6 +445,82 @@ REACTION_AMP_OFFLINE = 1.0        # sweep: 2.5 hurts
 REACTION_LEAN_CAP = 13            # reaction's own bloat line (§3: lean decks)
 REACTION_LEAN_PENALTY = 0.4       # winner at x0.4; x0.8 overshoots (16.6 cards)
 
+# DRAFTER_VERSION 5 late-run discipline (red-pen 2026-07-23, the
+# Ironclad-0.6% diagnosis §10.8.1). The 99%-pick-rate degeneracy: the
+# soft-cap penalty was tuned in a 10-screen world where 22 cards was
+# unreachable, so 30 screens produced 28-35-card decks. The human act-2
+# rule ("stop taking cards; fish for powers and velocity") expressed as a
+# hard gate: past LEAN_CAP only Powers / tempo (draw-energy) / Block make
+# the cut, past LEAN_BLOCK_CAP Powers and tempo only. Measured as the
+# lean15 arm: deck 28.9 -> ~17, act-2-boss deaths 32% -> ~20%.
+# Applied to assigned_policy ONLY -- the measured arm; adaptive keeps its
+# emergent-shape scoring unchanged until separately measured.
+DRAFT_LEAN_CAP = 15
+DRAFT_LEAN_BLOCK_CAP = 20
+# DRAFTER_VERSION 6: the strong-pick escape hatch the measured arm's
+# docstring promised but its code never implemented (§10.8.1 lever-world
+# flag: the v5 gate filtered real_ironclad's rare attack payoffs and his
+# win fell 5.4->3.0). Past the lean cap, a RARE whose score clears this
+# bar is always eligible.
+DRAFT_LEAN_RARE_BAR = 4.0
+
+
+# Fanfare is a native-resource plan, not a four-card assembly puzzle.  One
+# Aria of Recompense supplies five printed points of meter movement before the
+# first reward screen.  Once that coverage exists, more generation is useful
+# support but has sharply diminishing draft value; the priority is securing a
+# card that converts held Fanfare into immediate output.
+FANFARE_GENERATION_COVERAGE = 5
+# DRAFTER_VERSION 9: the plan's second half is no longer "own a converter"
+# (that grammar is retired) but "own a baseline the meter rests on". One
+# uncommon Power's grant is the unit; the bar is deliberately a low
+# single-card threshold, matching the converter predicate it replaces --
+# core_complete asks whether the plan is ONLINE, not whether it is finished.
+FANFARE_FLOOR_COVERAGE = 5.0
+# DRAFTER_VERSION 10 (G-E1): the third limb, and the one whose ABSENCE was the
+# instrument bug. Generation and floor are both INPUTS -- they move the meter
+# and they raise its baseline -- and a plan built entirely of inputs reads a
+# stat nothing cashes. Without this limb `core_complete("fanfare")` reported
+# 85.7-86.0% online while the average deck held 1.87 readers in 20 cards, and
+# the fanfare sprint's close-out banned measuring anything against it until it
+# was fixed.
+#
+# ONE, not more. `core_complete` asks whether the plan is ONLINE, not whether
+# it is finished -- the same low single-card bar the other two limbs use. The
+# question of how many readers a fanfare deck SHOULD hold is exactly the
+# draft-reach question, and it belongs to the pool-sweep pass with this
+# instrument in hand, not to the instrument itself.
+FANFARE_PAYOFF_COVERAGE = 1
+FANFARE_FIRST_FLOOR = 2.0     # was FANFARE_FIRST_CONVERTER
+FANFARE_LATER_FLOOR = 1.5     # was FANFARE_LATER_CONVERTER
+FANFARE_READER_VALUE = 1.0
+FANFARE_SURPLUS_GENERATION_CAP = 1.0
+FANFARE_SELF_DAMAGE_COST = 0.5
+FANFARE_SKIP_THRESHOLD = 1.5
+
+
+def _fanfare_plan_score(card: Card, deck: list[Card],
+                        online: bool) -> float:
+    """Contextual plan value after universal printed power is counted."""
+    if _grants_fanfare_floor(card):
+        return FANFARE_LATER_FLOOR if online else FANFARE_FIRST_FLOOR
+
+    score = FANFARE_READER_VALUE if _reads_fanfare(card) else 0.0
+    generation = _fanfare_generation(card)
+    if generation:
+        covered = _fanfare_generation_total(deck)
+        if covered < FANFARE_GENERATION_COVERAGE:
+            missing = FANFARE_GENERATION_COVERAGE - covered
+            score += min(3.0, generation, missing) * 0.6
+        else:
+            score += min(FANFARE_SURPLUS_GENERATION_CAP,
+                         generation / FANFARE_GENERATION_COVERAGE)
+    # HP loss does move the meter, but it is not free generation in a run
+    # where deaths persist.  The ordinary static-power proxy cannot express
+    # printed downsides, so price that risk here rather than teaching the
+    # Fanfare drafter to prefer the six-damage uncapping setup card.
+    return score - _self_damage(card) * FANFARE_SELF_DAMAGE_COST
+
 
 def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     s = 0.0
@@ -114,13 +531,14 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     # were gated on the core being online (measured: 1% amp assembly).
     if _core_progress(deck + [card], archetype) > progress:
         s += 3.0
-    # DRAFTER_VERSION 2 (ruling R2.1): the raw-power term, adopted from
-    # the hybrid experiment after it beat both parents in all three
-    # archetypes. A plan-committed drafter with zero power awareness is
-    # an implausible human, and the acceptance law requires plausible
-    # drafts. Share-synergy stays excluded — assigned already prices fit
-    # off its target, and stacking share-synergy would double-count it.
-    s += min(3.0, _static_power(card) / 3.0)
+    # DRAFTER_VERSION 3: v2's raw-power term now includes conservative
+    # Bomb/debuff/conditional-Block proxies. A plan-committed drafter that
+    # reads those direct effects as literal zero is no more plausible than one
+    # with no power awareness. Flat draw/resource proxies were measured and
+    # rejected; those effects need deck context rather than a face-value bump.
+    # Share-synergy stays excluded -- assigned already prices fit off its
+    # target, and stacking share-synergy would double-count it.
+    s += min(3.0, _static_power(card, deck) / 3.0)
     if (archetype == "generic" and not card.is_companion
             and card.role in ("enabler", "payoff")):
         # The anchor's roles stand in for engine cards. (Its old private
@@ -130,7 +548,11 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     # below. Without this the derived reaction tag silently re-tunes assigned
     # mode too, which would move the frozen M5 numbers for a reason that has
     # nothing to do with the drafting question they were measuring.
-    if archetype in card.archetypes and not card.is_companion:
+    if (archetype == "fanfare"
+            and "fanfare" in card.archetypes
+            and not card.is_companion):
+        s += _fanfare_plan_score(card, deck, online)
+    elif archetype in card.archetypes and not card.is_companion:
         if card.role == "enabler":
             s += 3.0 * max(0.25, 1.0 - progress)     # decays as core fills
         elif card.role == "payoff":
@@ -147,6 +569,10 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
             # Companions ARE reaction's enablers (deliberate asymmetry).
             s += (REACTION_APPLIER_WEIGHT * max(0.25, 1.0 - progress)
                   if _is_applier(card) else 1.5)
+        elif archetype == "spotlight":
+            # Guest Cast buffs every Companion, so a mixed cast is coherent:
+            # no same-character depth requirement and no selector-v3 trap.
+            s += 3.0 * max(0.25, 1.0 - progress)
         else:
             s += 0.5
     if _has_block(card) and _block_density(deck) < C.DRAFT_BLOCK_DENSITY_MIN:
@@ -180,8 +606,22 @@ def assigned_policy(rng: random.Random, deck: list[Card],
     scored = sorted(((score_offer(c, deck, archetype), i, c)
                      for i, c in enumerate(offers)), reverse=True)
     best_score, _, best = scored[0]
-    if best_score < C.DRAFT_SKIP_THRESHOLD:
+    threshold = (FANFARE_SKIP_THRESHOLD
+                 if archetype == "fanfare" else C.DRAFT_SKIP_THRESHOLD)
+    if best_score < threshold:
         return None                                  # skip is a real pick
+    n = len(deck)
+    if n >= DRAFT_LEAN_CAP:
+        # v5 late-run discipline + the v6 rare strong-pick hatch (see the
+        # constants blocks above).
+        score = {i: s for s, i, c in scored}
+        ok = [c for i, c in enumerate(offers)
+              if c.type == "power" or _has_tempo(c)
+              or (n < DRAFT_LEAN_BLOCK_CAP and _has_block(c))
+              or (c.rarity == "rare" and score[i] >= DRAFT_LEAN_RARE_BAR)]
+        if not ok:
+            return None
+        return max(ok, key=lambda c: score_offer(c, deck, archetype))
     return best
 
 
@@ -190,6 +630,54 @@ def assigned_policy(rng: random.Random, deck: list[Card],
 # ---------------------------------------------------------------------------
 
 ARCHETYPES = ("demolition", "spark", "reaction")
+
+# POLICY_VERSION 2 (G-E3, "Ship What We Know", 2026-07-25). The free-drafting
+# instrument.
+#
+# v1 -- the implicit pre-stamp generation -- is every policy number taken
+# before this date: `assigned_policy` (plan-committed) and `adaptive_policy`
+# (emergent) as they stood, with ARCHETYPES above hardcoded to KLEE's three.
+#
+# That hardcoding is the finding. `adaptive_score` is already exactly what
+# G-E3 describes -- standalone power plus synergy weighted by what the deck
+# has accumulated, with no assigned label anywhere in it -- but its archetype
+# term begins `if a not in ARCHETYPES: continue`, and none of Furina's plans
+# are in ARCHETYPES. So running "free draft" on Furina today would not have
+# measured free drafting. It would have measured a scorer that cannot see
+# salon, spotlight or fanfare AT ALL, and reported the result as evidence
+# about drafting behaviour. Every Furina card would have scored as pure
+# printed power plus the universal block quota.
+#
+# So the archetype set becomes character-aware. KLEE'S NUMBERS DO NOT MOVE --
+# her tuple is unchanged and every other character had no synergy term to lose
+# -- which is why this is a policy bump rather than a drafter bump.
+POLICY_VERSION = 2
+
+ROSTER_ARCHETYPES: dict[str, tuple[str, ...]] = {
+    "klee": ARCHETYPES,
+    "furina": ("salon", "spotlight", "fanfare"),
+    "kokomi": ("garment", "ward", "conscript"),
+}
+
+
+def archetypes_for(deck: list[Card]) -> tuple[str, ...]:
+    """Which archetype family this deck's character plays in.
+
+    Read from the cards rather than passed in, because the whole point of a
+    free-drafting policy is that it never receives a plan label -- and a
+    character label smuggled down the same channel would be the first step
+    back toward one. The character is a property of the deck that exists
+    whether or not anyone has a plan.
+
+    Falls back to Klee's set for decks with no character (synthetic test
+    decks, the reference characters' generic anchor), which is what every
+    caller got before this existed.
+    """
+    for card in deck:
+        family = ROSTER_ARCHETYPES.get(getattr(card, "character", None) or "")
+        if family:
+            return family
+    return ARCHETYPES
 
 
 def archetype_shares(deck: list[Card], *, companions: bool = True) -> dict[str, float]:
@@ -235,14 +723,18 @@ def archetype_shares(deck: list[Card], *, companions: bool = True) -> dict[str, 
     card sets -- deliberately, and documented, rather than the accidental
     disagreement that existed when companions carried no tag at all.
     """
+    # POLICY_VERSION 2: the key set follows the deck's character. Klee's is
+    # unchanged, so her shares -- and every number derived from them -- are
+    # identical to v1.
+    family = archetypes_for(deck)
     tagged = [c for c in deck
               if c.rarity != "basic"
               and (companions or not c.is_companion)
-              and any(a in ARCHETYPES for a in c.archetypes)]
+              and any(a in family for a in c.archetypes)]
     if not tagged:
-        return {a: 0.0 for a in ARCHETYPES}
+        return {a: 0.0 for a in family}
     return {a: sum(1 for c in tagged if a in c.archetypes) / len(tagged)
-            for a in ARCHETYPES}
+            for a in family}
 
 
 def dominant_archetype(deck: list[Card],
@@ -267,7 +759,7 @@ def adaptive_score(card: Card, deck: list[Card]) -> float:
     richer term is the whole experiment -- if the pool still converges on one
     shape across many seeds, the convergence is the pool's, not the policy's.
     """
-    s = min(3.0, _static_power(card) / 3.0)
+    s = min(3.0, _static_power(card, deck) / 3.0)
     shares = archetype_shares(deck)
     # Companions are scored by the dedicated block below, NOT here. They now
     # carry a derived `reaction` tag so that archetype_shares can see them --
@@ -276,8 +768,9 @@ def adaptive_score(card: Card, deck: list[Card]) -> float:
     # reaction's share twice and turns the rich-get-richer loop into a runaway:
     # measured, it drove reaction from 13.2% to 85.5% of decks with both
     # divergence alarms firing. The tag fixes the METRIC; it is not new scoring.
+    family = archetypes_for(deck)
     for a in (card.archetypes if not card.is_companion else ()):
-        if a not in ARCHETYPES:
+        if a not in family:
             continue
         share = shares[a]
         if card.role == "payoff":
@@ -293,7 +786,12 @@ def adaptive_score(card: Card, deck: list[Card]) -> float:
     if card.is_companion:
         # Companions are off-plan power: always playable, never scaling.
         s += 1.5 if _is_applier(card) else 1.0
-        s += 2.0 * shares["reaction"]      # they are reaction's enablers
+        # .get, because POLICY_VERSION 2 made the share keys character-aware
+        # and "reaction" is Klee's plan. On a roster that has no reaction
+        # archetype this term is correctly zero rather than a KeyError -- the
+        # claim it encodes ("companions are reaction's enablers") is a claim
+        # about Klee's pool, not a universal one.
+        s += 2.0 * shares.get("reaction", 0.0)
     if _has_block(card) and _block_density(deck) < C.DRAFT_BLOCK_DENSITY_MIN:
         s += 2.5                            # defense quota is universal
     cost = card.cost if isinstance(card.cost, int) else 2

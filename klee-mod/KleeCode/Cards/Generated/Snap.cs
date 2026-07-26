@@ -23,6 +23,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -35,6 +36,12 @@ public sealed class Snap : CustomCardModel, IElementalCard
     /// <summary>Sheet: all Klee attacks apply Pyro (catalyst-grade cadence).</summary>
     public Element Element => Element.Pyro;
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesPyro };
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("snap");
 
     public override List<(string, string)>? Localization => new()
@@ -46,7 +53,7 @@ public sealed class Snap : CustomCardModel, IElementalCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move)
+            new DamageVar(6m, ValueProp.Move)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in

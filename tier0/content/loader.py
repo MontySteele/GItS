@@ -14,6 +14,7 @@ from pathlib import Path
 import yaml
 
 from tier0 import constants as C
+from tier0.content import local_reference
 from tier0.content import upgrades
 from tier0.engine.state import Card, Enemy, Player
 
@@ -22,14 +23,69 @@ CONTENT_DIR = Path(__file__).parent
 # pools — the sim reads them directly so design and sim never drift.
 DOCS_DIR = CONTENT_DIR.parents[1] / "docs"
 DOCS_CARD_SHEETS = ("klee-cards.yaml", "furina-cards.yaml",
-                    "mondstadt-companions.yaml", "fontaine-companions.yaml")
+                    "kokomi-cards.yaml",
+                    "mondstadt-companions.yaml", "fontaine-companions.yaml",
+                    "inazuma-companions.yaml")
+
+# The real base-game pool (tools/extract_base_game_pool.py ->
+# tools/build_ironclad_sheet.py). game_ref/ is gitignored (.gitignore:28):
+# decompiled material is REFERENCE ONLY, so this is a regenerable LOCAL
+# artifact that is simply absent on a fresh clone.
+#
+# Absence is TOTAL and that is the design, not an accident: the cards live
+# here AND so does the character yaml (char_*.yaml below). Committing a
+# character whose starting_deck ids ship in a gitignored file would leave
+# `build_player("real_ironclad")` a KeyError on every fresh clone -- a
+# committed reference to a missing thing. Nothing in the repo names
+# real_ironclad except inert guards (tier05.rewards.NO_COMPANION_CHARACTERS)
+# and a skip-guarded test module.
+GAME_REF_DIR = local_reference.game_ref_dir()
+EXTERNAL_CARD_SHEETS = {"ironclad_pool.yaml": "real_ironclad"}
+EXTERNAL_CARD_LAYERS = {
+    "ironclad_pool.yaml": (
+        "ironclad_pool_pass4.yaml",
+        "ironclad_pool_pass5.yaml",
+        "ironclad_pool_pass6.yaml",
+    ),
+}
+
+# The two hand-approximated reference characters own the cards/ sheets.
+# Same sheet-name convention as DOCS_CARD_SHEETS: ownership is a property
+# of the pool a card ships in, not a field repeated on every row.
+#
+# This tagging is what makes the rewards.character_pool ownership filter
+# work. Before it, these rows had character=None and the filter only
+# dropped cards belonging to SOMEONE ELSE -- so cards belonging to NOBODY
+# were offered to everybody, and ~12% of Klee's reward screens were
+# Ironclad/Silent stand-ins. tokens.yaml stays untagged on purpose:
+# generated tokens are genuinely shared and are excluded from draft pools
+# by rarity, not by ownership.
+REF_CARD_SHEETS = {"ironclad_starter.yaml": "ref_ironclad",
+                   "ironclad_package.yaml": "ref_ironclad",
+                   "silent.yaml": "ref_silent"}
 
 
-def _load_yaml_dir(sub: str) -> list[dict]:
+def _load_yaml_dir(sub: str, owners: dict[str, str] | None = None
+                   ) -> list[dict]:
     docs = []
     for path in sorted((CONTENT_DIR / sub).glob("*.yaml")):
         data = yaml.safe_load(path.read_text())
-        docs.extend(data if isinstance(data, list) else [data])
+        rows = data if isinstance(data, list) else [data]
+        owner = (owners or {}).get(path.name)
+        if owner:
+            for d in rows:
+                # DRAFTABLE RARITIES ONLY. Basics/tokens/statuses stay
+                # deliberately ownerless: rewards.character_pool already
+                # excludes them by rarity, so tagging buys nothing there --
+                # while `character` is ALSO Furina's Spotlight key
+                # (combat.py:92, effects.py:127/459/578). Engine test states
+                # use strike/defend as filler, and tagging those would make
+                # them valid Spotlight targets, changing a shared path for a
+                # draft-layer fix. test_fontaine.test_character_field_
+                # derivation locks that invariant.
+                if d.get("rarity") in C.RARITY_ODDS:
+                    d.setdefault("character", owner)
+        docs.extend(rows)
     return docs
 
 
@@ -70,9 +126,58 @@ def _is_reaction_fuel(card: Card) -> bool:
     return False
 
 
+def _external_cards() -> list[dict]:
+    """Rows from the gitignored game_ref/ reference sheets, if present.
+
+    Deliberately NOT the docs/ path's post-processing: no nation inference
+    (a base-game pool has no Teyvat nation), and `character` is FORCED
+    rather than `setdefault`-ed. That force is load-bearing, not cosmetic:
+    rewards.character_pool drops cards tagged with another character
+    (rewards.py:48), so without it every Klee reward screen could offer a
+    Bash -- and every Ironclad screen a Jumpy Dumpty.
+    """
+    raw: list[dict] = []
+    for sheet, char in EXTERNAL_CARD_SHEETS.items():
+        path = GAME_REF_DIR / sheet
+        if not path.exists():
+            continue          # fresh clone: the reference simply is not here
+        docs = yaml.safe_load(path.read_text()) or []
+        for d in docs:
+            d["character"] = char
+        pool_ids = {d["id"] for d in docs}
+        for layer_name in EXTERNAL_CARD_LAYERS.get(sheet, ()):
+            layer_path = GAME_REF_DIR / layer_name
+            if not layer_path.exists():
+                raise ValueError(
+                    f"{sheet}: missing required local layer {layer_name}; "
+                    "rebuild/restore game_ref before loading real_ironclad")
+            layer = yaml.safe_load(layer_path.read_text()) or []
+            layer_ids = {d["id"] for d in layer}
+            stale = sorted(layer_ids - pool_ids)
+            if stale:
+                raise ValueError(
+                    f"{sheet}: stale merged pool is missing {layer_name} "
+                    f"cards {stale}; run build_ironclad_sheet.py")
+        # A partial external upgrade population biases both combat (Armaments,
+        # Aggression) and run decisions (smithing versus removal). Treat the
+        # external reference as one atomic artifact: either every row resolves
+        # through the shared `<id>+` path, or real_ironclad does not load.
+        missing_upgrades = sorted(
+            d["id"] for d in docs if not upgrades.has_upgrade(d["id"])
+        )
+        if missing_upgrades:
+            raise ValueError(
+                f"{sheet}: incomplete external upgrade coverage for "
+                f"{missing_upgrades}; rebuild game_ref with "
+                "extract_base_game_pool.py --emit-sheet before loading "
+                "real_ironclad")
+        raw.extend(docs)
+    return raw
+
+
 @lru_cache(maxsize=1)
 def _card_index() -> dict[str, Card]:
-    raw = _load_yaml_dir("cards")
+    raw = _load_yaml_dir("cards", REF_CARD_SHEETS)
     for sheet in DOCS_CARD_SHEETS:
         path = DOCS_DIR / sheet
         if path.exists():
@@ -111,6 +216,7 @@ def _card_index() -> dict[str, Card]:
                 for d in docs:
                     d.setdefault("character", char)
             raw.extend(docs)
+    raw.extend(_external_cards())
     cards = [Card.from_dict(d) for d in raw]
     for c in cards:
         if c.role_c and "companion" not in c.tags:   # sheet marks via role_c
@@ -141,6 +247,23 @@ def guest_star_generation_pool(rarity: str) -> list[Card]:
     return sorted(pool, key=lambda c: c.id)
 
 
+def companion_pool(nation: str) -> list[Card]:
+    """The conscript op's generation pool (Kokomi kickoff §2.3): every
+    ordinary shared Companion of the nation, ALL draftable rarities — the
+    5-star Rare jackpot (Itto) is deliberately in the deck of outcomes;
+    conscription pays card identity for a random recruit, and the rare
+    hit is the verb's advertised dream. Guest Stars are excluded (they are
+    a Furina personal-pool mechanism, kickoff §2.3 differentiation) and so
+    are kit cards, as everywhere."""
+    pool = [c for c in _card_index().values()
+            if c.is_companion and c.nation == nation
+            and not c.guest_star and not c.kit_card
+            and c.rarity in C.RARITY_ODDS]
+    if not pool:
+        raise ValueError(f"empty companion pool for nation {nation!r}")
+    return sorted(pool, key=lambda c: c.id)
+
+
 def cards_in_pool(pool: str) -> list[Card]:
     """Named draft pools for add_card (e.g. Secret Stash's
     'demolition_commons')."""
@@ -154,17 +277,54 @@ def cards_in_pool(pool: str) -> list[Card]:
     return cards
 
 
-def get_card(card_id: str) -> Card:
-    """`<id>+` returns the upgraded form (M7) -- deck lists stay strings."""
+@lru_cache(maxsize=None)
+def _card_prototype(card_id: str) -> Card:
+    """The shared, never-handed-out template for a card id, upgrades applied.
+
+    Building the upgraded form used to run on EVERY `get_card("x+")` call;
+    it is a pure function of the id, so it is memoized here and only the
+    cheap per-caller copy remains. Cleared with the card index (`reload`).
+    """
     if card_id.endswith(upgrades.SUFFIX):
         base = copy.deepcopy(_card_index()[card_id[:-len(upgrades.SUFFIX)]])
         return upgrades.apply_upgrade(base)
-    return copy.deepcopy(_card_index()[card_id])
+    return _card_index()[card_id]
+
+
+def get_card(card_id: str) -> Card:
+    """`<id>+` returns the upgraded form (M7) -- deck lists stay strings.
+
+    Always a FRESH copy: combat mutates card instances (Rampage's
+    grow_damage, Armaments' in-place upgrade), so callers must never share
+    one. Read-only callers that only score a deck should use `peek_card`.
+    """
+    return copy.deepcopy(_card_prototype(card_id))
+
+
+def peek_card(card_id: str) -> Card:
+    """The SHARED prototype for a card id -- do not mutate the result.
+
+    The run layer re-derives `[get_card(cid) for cid in deck_ids]` several
+    times per reward screen purely to score the deck (draft policy, core
+    completion, rest/shop plans, regret). Those paths only read fields, and
+    the copies they forced were ~70% of all card copying in a run. This is
+    the read-only door; anything that plays, upgrades or otherwise mutates a
+    card must go through `get_card`.
+    """
+    return _card_prototype(card_id)
 
 
 @lru_cache(maxsize=1)
 def _character_index() -> dict[str, dict]:
-    return {d["id"]: d for d in _load_yaml_dir("characters")}
+    index = {d["id"]: d for d in _load_yaml_dir("characters")}
+    # Reference characters live beside their (gitignored) card sheet -- see
+    # GAME_REF_DIR. glob() on a missing directory yields nothing, so no
+    # exists() guard is needed; the `char_` prefix keeps this from ever
+    # picking up ironclad.json's siblings.
+    for path in sorted(GAME_REF_DIR.glob("char_*.yaml")):
+        d = yaml.safe_load(path.read_text())
+        index[d["id"]] = d
+    return index
 
 
 def _kit_cards(spec: dict) -> list[Card]:
@@ -208,8 +368,24 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
                                if spec.get("fanfare") else 0))
 
 
-def build_player_from_ids(character_id: str, card_ids: list[str]) -> Player:
-    """Tier 0.5: build a player around an arbitrary (drafted) deck list."""
+def build_player_from_ids(character_id: str, card_ids: list[str],
+                          relic_effects: list[dict] | None = None,
+                          potions: list[str] | None = None,
+                          potion_slots: int = C.POTION_SLOTS,
+                          node_kind: str = "") -> Player:
+    """Tier 0.5: build a player around an arbitrary (drafted) deck list.
+
+    ``relic_effects`` is the combat-side relic engine's seam (engine/relics.py):
+    a list of dicts keyed by ``hook``. It defaults to None -> [] so the battery
+    path (build_player, which never passes it) stays byte-identical and every
+    relic code path remains a dead branch there. The run layer (tier05/model)
+    computes the effective per-fight list and passes it in.
+
+    ``potions`` is the combat-side potion engine's seam (engine/potions.py): a
+    list of held potion-id strings, likewise defaulting to None -> [] so the
+    battery stays byte-identical and every potion code path is a dead branch.
+    ``potion_slots`` (Potion Belt raises it) and ``node_kind`` (elite/boss
+    context for the offensive use-policy) are inert on the battery."""
     spec = _character_index()[character_id]
     return Player(hp=spec["hp"], max_hp=spec["hp"],
                   draw_pile=[get_card(cid) for cid in card_ids],
@@ -217,14 +393,40 @@ def build_player_from_ids(character_id: str, card_ids: list[str]) -> Player:
                   cadence=spec.get("cadence", "skill"),
                   burst_max=spec.get("burst_max", 0),
                   relic_hooks=list(spec.get("relic_hooks", [])),
+                  relic_effects=list(relic_effects or []),
+                  potions=list(potions or []),
+                  potion_slots=potion_slots,
+                  node_kind=node_kind,
                   kit_cards=_kit_cards(spec),
                   character_id=spec["id"],
                   fanfare_cap=(int(C.FANFARE_CAP_FRACTION * spec["hp"])
                                if spec.get("fanfare") else 0))
 
 
-def starting_deck(character_id: str) -> list[str]:
-    return list(_character_index()[character_id]["starting_deck"])
+def starting_deck(character_id: str, rng=None) -> list[str]:
+    """Return the printed starter, optionally resolving its run-start rolls.
+
+    Tier 0's frozen starter scorecards call this without an RNG and retain the
+    canonical basic deck. Tier 0.5 passes a dedicated per-run stream so Klee's
+    Mondstadt Companion pair is deterministic without perturbing encounters,
+    rewards, or any previously calibrated run randomness.
+    """
+    spec = _character_index()[character_id]
+    deck = list(spec["starting_deck"])
+    if rng is None:
+        return deck
+    for slot in spec.get("randomized_starter", {}).values():
+        replaced = slot["replace"]
+        if replaced not in deck:
+            raise ValueError(
+                f"{character_id}: randomized starter cannot replace "
+                f"missing card {replaced!r}")
+        choices = list(slot["choices"])
+        if not choices:
+            raise ValueError(
+                f"{character_id}: randomized starter has no choices")
+        deck[deck.index(replaced)] = rng.choice(choices)
+    return deck
 
 
 def character_packages(character_id: str) -> dict[str, list[str]]:
@@ -266,6 +468,20 @@ def build_encounter(encounter_id: str) -> list[Enemy]:
 @lru_cache(maxsize=1)
 def _pilot_index() -> dict[str, dict]:
     return {d["id"]: d for d in _load_yaml_dir("pilots")}
+
+
+def reset_caches() -> None:
+    """Drop every memoized view of the content tree.
+
+    One door on purpose: `_card_prototype` is DERIVED from `_card_index`, so
+    clearing the index alone would serve prototypes built from a content tree
+    that no longer exists (the game_ref fresh-clone fixture does exactly
+    that). Anything that changes what is on disk, or monkeypatches where the
+    loader looks, must call this rather than picking caches by hand.
+    """
+    for cache in (_card_index, _card_prototype, _character_index,
+                  _encounter_index, _pilot_index):
+        cache.cache_clear()
 
 
 def pilot_weights(pilot_id: str) -> dict:

@@ -37,13 +37,13 @@ public sealed class PatchedDress : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Patched Dress"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. {IfUpgraded:show:Gain 2 [gold]Block[/gold].|If you have [gold]Spark[/gold]: gain 2 [gold]Block[/gold].}"),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you have [gold]Spark[/gold]: gain 3 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(5m, ValueProp.Move)
+            new BlockVar(6m, ValueProp.Move)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -57,14 +57,14 @@ public sealed class PatchedDress : CustomCardModel
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        if (IsUpgraded || SparkPower.SparksAsResolved(Owner.Creature) > 0)
+        if (SparkPower.SparksAsResolved(Owner.Creature) > 0)
         {
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(2m, ValueProp.Move), cardPlay);
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(3m, ValueProp.Move), cardPlay);
         }
     }
 
     protected override void OnUpgrade()
     {
-        // condition: unconditional -- expressed at play time as (IsUpgraded || predicate); the text swaps via {IfUpgraded:show:...}.
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

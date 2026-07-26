@@ -17,7 +17,7 @@
   "shatter": "Hitting a Frozen enemy: bonus damage, and the Frozen state is removed.",
   "swirl": "Anemo trigger: copies the target's aura onto all enemies.",
   "crystallize": "Geo trigger: you gain Block.",
-  "bomb": "A charge placed on an enemy: it explodes at the start of YOUR turn, and your Attacks on that enemy can set it off early. Bombs stack, and each keeps its own damage.",
+  "bomb": "A charge placed on an enemy: it explodes at the start of YOUR turn, and unblocked Attack damage can set it off early. The first attack that enemy makes while Bombed each combat deals 25% less damage. Bombs stack, and each keeps its own damage.",
   "spark": "Klee's counter: at 3 Sparks, her next Attack costs 0 and the Sparks are spent.",
   "burst": "Fills from Skill-tagged cards and Reactions; when full, your signature Burst card becomes playable and casting it empties the meter.",
   "retain": "This card stays in your hand at end of turn.",

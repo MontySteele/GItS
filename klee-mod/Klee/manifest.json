@@ -1,9 +1,9 @@
 {
   "id": "klee",
-  "name": "Klee",
+  "name": "Teyvat Spire Roster",
   "author": "Monty",
-  "description": "Klee — Spark Knight of Mondstadt. C1 'boots' milestone: selectable character with a stub starter deck.",
-  "version": "0.1.0",
+  "description": "Playable Genshin roster for Slay the Spire 2. Includes Klee, Furina, elemental reactions, and Companion cards.",
+  "version": "0.2.0",
   "has_dll": true,
   "has_pck": true,
   "min_game_version": "0.107.1",

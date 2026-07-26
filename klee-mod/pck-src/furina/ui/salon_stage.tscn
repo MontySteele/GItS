@@ -1,0 +1,326 @@
+[gd_scene load_steps=9 format=3]
+
+[sub_resource type="Animation" id="Animation_reset"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Slots/Slot1:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Slots/Slot2:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Slots/Slot3:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("StageDim:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_slot1_pop"]
+resource_name = "slot1_pop"
+length = 0.34
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Slots/Slot1:scale")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.22, 0.34),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0.55, 0.55), Vector2(1.18, 1.18), Vector2(0.94, 0.94), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_slot2_pop"]
+resource_name = "slot2_pop"
+length = 0.34
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Slots/Slot2:scale")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.22, 0.34),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0.55, 0.55), Vector2(1.18, 1.18), Vector2(0.94, 0.94), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_slot3_pop"]
+resource_name = "slot3_pop"
+length = 0.34
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Slots/Slot3:scale")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.22, 0.34),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0.55, 0.55), Vector2(1.18, 1.18), Vector2(0.94, 0.94), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_overdraw"]
+resource_name = "overdraw"
+length = 0.9
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("RibbonFlash:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.07, 0.24, 0.34, 0.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0.9), Color(1, 1, 1, 0), Color(1, 1, 1, 0.6), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("StageDim:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.12, 0.55, 0.9),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0.72), Color(1, 1, 1, 0.72), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_stage"]
+_data = {
+&"RESET": SubResource("Animation_reset"),
+&"overdraw": SubResource("Animation_overdraw"),
+&"slot1_pop": SubResource("Animation_slot1_pop"),
+&"slot2_pop": SubResource("Animation_slot2_pop"),
+&"slot3_pop": SubResource("Animation_slot3_pop")
+}
+
+[node name="SalonStage" type="Node2D"]
+
+[node name="StageArc" type="ColorRect" parent="."]
+unique_name_in_owner = true
+offset_left = -96.0
+offset_top = -12.0
+offset_right = 96.0
+offset_bottom = 6.0
+color = Color(0.1, 0.19, 0.3, 0.72)
+
+[node name="StageLip" type="ColorRect" parent="."]
+unique_name_in_owner = true
+offset_left = -96.0
+offset_top = -14.0
+offset_right = 96.0
+offset_bottom = -10.0
+color = Color(0.42, 0.68, 0.86, 0.85)
+
+[node name="Slots" type="Node2D" parent="."]
+
+[node name="Slot1" type="Node2D" parent="Slots"]
+unique_name_in_owner = true
+position = Vector2(-62, -14)
+
+[node name="Pool1" type="ColorRect" parent="Slots/Slot1"]
+unique_name_in_owner = true
+offset_left = -26.0
+offset_top = -7.0
+offset_right = 26.0
+offset_bottom = 7.0
+color = Color(0.62, 0.85, 1, 0.3)
+
+[node name="Beam1" type="ColorRect" parent="Slots/Slot1"]
+unique_name_in_owner = true
+offset_left = -20.0
+offset_top = -74.0
+offset_right = 20.0
+offset_bottom = -2.0
+color = Color(0.7, 0.88, 1, 0.12)
+
+[node name="Ghost1" type="ColorRect" parent="Slots/Slot1"]
+unique_name_in_owner = true
+offset_left = -17.0
+offset_top = -40.0
+offset_right = 17.0
+offset_bottom = -4.0
+color = Color(0.66, 0.84, 1, 0.16)
+
+[node name="Sprite1" type="Sprite2D" parent="Slots/Slot1"]
+unique_name_in_owner = true
+position = Vector2(0, -26)
+
+[node name="Slot2" type="Node2D" parent="Slots"]
+unique_name_in_owner = true
+position = Vector2(0, -20)
+
+[node name="Pool2" type="ColorRect" parent="Slots/Slot2"]
+unique_name_in_owner = true
+offset_left = -26.0
+offset_top = -7.0
+offset_right = 26.0
+offset_bottom = 7.0
+color = Color(0.62, 0.85, 1, 0.3)
+
+[node name="Beam2" type="ColorRect" parent="Slots/Slot2"]
+unique_name_in_owner = true
+offset_left = -20.0
+offset_top = -74.0
+offset_right = 20.0
+offset_bottom = -2.0
+color = Color(0.7, 0.88, 1, 0.12)
+
+[node name="Ghost2" type="ColorRect" parent="Slots/Slot2"]
+unique_name_in_owner = true
+offset_left = -17.0
+offset_top = -40.0
+offset_right = 17.0
+offset_bottom = -4.0
+color = Color(0.66, 0.84, 1, 0.16)
+
+[node name="Sprite2" type="Sprite2D" parent="Slots/Slot2"]
+unique_name_in_owner = true
+position = Vector2(0, -26)
+
+[node name="Slot3" type="Node2D" parent="Slots"]
+unique_name_in_owner = true
+position = Vector2(62, -14)
+
+[node name="Pool3" type="ColorRect" parent="Slots/Slot3"]
+unique_name_in_owner = true
+offset_left = -26.0
+offset_top = -7.0
+offset_right = 26.0
+offset_bottom = 7.0
+color = Color(0.62, 0.85, 1, 0.3)
+
+[node name="Beam3" type="ColorRect" parent="Slots/Slot3"]
+unique_name_in_owner = true
+offset_left = -20.0
+offset_top = -74.0
+offset_right = 20.0
+offset_bottom = -2.0
+color = Color(0.7, 0.88, 1, 0.12)
+
+[node name="Ghost3" type="ColorRect" parent="Slots/Slot3"]
+unique_name_in_owner = true
+offset_left = -17.0
+offset_top = -40.0
+offset_right = 17.0
+offset_bottom = -4.0
+color = Color(0.66, 0.84, 1, 0.16)
+
+[node name="Sprite3" type="Sprite2D" parent="Slots/Slot3"]
+unique_name_in_owner = true
+position = Vector2(0, -26)
+
+[node name="RibbonBack" type="ColorRect" parent="."]
+unique_name_in_owner = true
+offset_left = -92.0
+offset_top = 10.0
+offset_right = 92.0
+offset_bottom = 26.0
+color = Color(0.06, 0.13, 0.2, 0.85)
+
+[node name="RibbonFill" type="ColorRect" parent="."]
+unique_name_in_owner = true
+offset_left = -90.0
+offset_top = 12.0
+offset_right = 90.0
+offset_bottom = 24.0
+color = Color(0.35, 0.75, 1, 1)
+
+[node name="RibbonTailL" type="ColorRect" parent="."]
+unique_name_in_owner = true
+rotation = 0.7854
+offset_left = -100.0
+offset_top = 12.0
+offset_right = -88.0
+offset_bottom = 24.0
+color = Color(0.11, 0.24, 0.36, 0.9)
+
+[node name="RibbonTailR" type="ColorRect" parent="."]
+unique_name_in_owner = true
+rotation = 0.7854
+offset_left = 88.0
+offset_top = 12.0
+offset_right = 100.0
+offset_bottom = 24.0
+color = Color(0.11, 0.24, 0.36, 0.9)
+
+[node name="RibbonFlash" type="ColorRect" parent="."]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+offset_left = -92.0
+offset_top = 10.0
+offset_right = 92.0
+offset_bottom = 26.0
+color = Color(1, 1, 1, 1)
+
+[node name="RibbonLabel" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = -92.0
+offset_top = 8.0
+offset_right = 92.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+vertical_alignment = 1
+text = ""
+
+[node name="StageDim" type="ColorRect" parent="."]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+offset_left = -104.0
+offset_top = -96.0
+offset_right = 104.0
+offset_bottom = 30.0
+color = Color(0.02, 0.04, 0.09, 1)
+mouse_filter = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_stage")
+}

@@ -23,7 +23,7 @@ from collections import Counter
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier05 import draft, model
+from tier05 import draft, model, route, run_metrics
 from tier05.model import RunResult
 
 
@@ -127,17 +127,28 @@ def achievability(results: list[RunResult]) -> dict:
 
 
 def run_ab(character: str, archetype: str, pilot_id: str,
-           runs: int, seed: int) -> dict:
+           runs: int, seed: int,
+           grant_relics: bool = False,
+           grant_potions: bool = False,
+           n_acts: int | None = None,
+           jobs: int = 1,
+           route_name: str = "hunter") -> dict:
     """Assigned vs adaptive over identical seeds.
 
     Adaptive ignores `archetype` by construction, so it is passed through only
     to keep the two calls otherwise identical -- the comparison is meaningless
     if anything but the policy differs.
+
+    `jobs` is forwarded to run_many; it changes wall-clock only (see there).
     """
     out = {}
     for name, policy in draft.POLICIES.items():
         results = model.run_many(character, archetype, pilot_id,
-                                 policy, runs, seed)
+                                 policy, runs, seed,
+                                 grant_relics=grant_relics,
+                                 grant_potions=grant_potions,
+                                 n_acts=n_acts, jobs=jobs,
+                                 route_name=route_name)
         out[name] = {
             "results": results,
             "winrate": sum(r.won for r in results) / max(1, len(results)),
@@ -193,3 +204,52 @@ def print_ab_report(character: str, archetype: str, ab: dict) -> None:
                   f"(< {C.DIVERGENCE_STARVATION_ALARM:.0%})")
         if not (div["dominance_alarm"] or div["starvation_alarm"]):
             print("  no divergence alarms")
+
+
+def run_route_ab(character: str, archetype: str, pilot_id: str,
+                 runs: int, seed: int, policy_name: str = "assigned",
+                 grant_relics: bool = False, grant_potions: bool = False,
+                 n_acts: int | None = None, jobs: int = 1) -> dict:
+    """§11: hunter vs cautious over identical seeds.
+
+    Pathing is the SECOND policy confounder (route.py's header). Draft-policy
+    quality already had to be A/B'd before any card finding was believed; a
+    route policy that is unusually good at ducking elites moves every
+    run-level number the same way, so the same discipline applies. A finding
+    that flips between these two arms is a finding about ROUTING, not about
+    the character, the pool, or the roster.
+    """
+    out = {}
+    for name in route.POLICIES:
+        results = model.run_many(character, archetype, pilot_id,
+                                 draft.POLICIES[policy_name], runs, seed,
+                                 grant_relics=grant_relics,
+                                 grant_potions=grant_potions,
+                                 n_acts=n_acts, jobs=jobs, route_name=name)
+        out[name] = {
+            "results": results,
+            "winrate": sum(r.won for r in results) / max(1, len(results)),
+            "route": run_metrics.route_profile(results),
+            "avg_deck": sum(len(r.deck_ids) for r in results)
+                        / max(1, len(results)),
+        }
+    return out
+
+
+def print_route_ab(character: str, ab: dict) -> None:
+    print(f"\n=== §11 route A/B: {character} ===")
+    for name, d in ab.items():
+        rp = d["route"]
+        print(f"\n-- {name} --")
+        print(f"  winrate            {d['winrate']:.1%}")
+        print(f"  elites/act         mean {rp['elites_per_act_mean']:.2f}  "
+              f"median {rp['elites_per_act_median']}  "
+              f"in 1-4 band {rp['in_target_band']:.0%}")
+        print(f"                     distribution {rp['elites_distribution']}")
+        hh, hu = rp["elites_when_healthy"], rp["elites_when_hurt"]
+        if hh is not None and hu is not None:
+            print(f"  responds to state  healthy {hh:.2f} vs hurt {hu:.2f}"
+                  f"{'  ** FLAT -- not responding **' if hh - hu < 0.2 else ''}")
+        print(f"  nodes/run          {rp['nodes_per_run']}")
+        print(f"  events/run         {rp['events_seen_per_run']}")
+        print(f"  avg deck           {d['avg_deck']:.1f}")

@@ -39,6 +39,7 @@ public static class ReactionConstants
     public const decimal VulnerableTakenMult = 1.5m;
 
     public const int OverloadSplash = 6;         // OVERLOAD_SPLASH, flat, all enemies
+    public const int OverloadWeak = 1;            // OVERLOAD_WEAK
     public const int SuperconductVuln = 2;       // SUPERCONDUCT_VULN
     public const int ElectroChargedDot = 4;      // ELECTROCHARGED_DOT
     public const int ElectroChargedDotTurns = 2; // ELECTROCHARGED_DOT_TURNS
@@ -98,9 +99,8 @@ public static class ReactionTable
     };
 
     /// <summary>
-    /// Dealer-aware amplifier: percent amp boosts on the dealer (Vermillion
-    /// Pact; Durin's witchs_flame joins when companions land) are additive
-    /// with each other and multiplicative on the base -- sim law,
+    /// Dealer-aware amplifier: Vermillion Pact's percent amp boost on the
+    /// dealer is multiplicative on the base -- sim law,
     /// reactions.py _amp_mult: `base * (1 + pct / 100)`.
     ///
     /// This overload also owns the sim's amp-cap detector (AMP_STACK_LIMIT):
@@ -112,11 +112,9 @@ public static class ReactionTable
         var baseMult = AmplifierMultiplier(reaction);
         if (baseMult == 1m || dealer == null) return baseMult;
 
-        // Additive with each other, multiplicative on the base (sim
-        // _amp_mult): Vermillion Pact's +25 and Durin's +30 stack to +55.
+        // Multiplicative on the base (sim _amp_mult): +100 doubles the
+        // Vaporize/Melt amplifier rather than adding one flat damage point.
         var pct = dealer.Powers.OfType<AmpReactionUpPower>().FirstOrDefault()?.Amount ?? 0;
-        pct += dealer.Powers.OfType<WitchsFlamePower>()
-            .FirstOrDefault()?.Amount ?? 0;
         var mult = baseMult * (1m + pct / 100m);
 
         if (mult > ReactionConstants.AmpStackLimit)

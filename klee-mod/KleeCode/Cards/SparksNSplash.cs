@@ -12,7 +12,7 @@ using MegaCrit.Sts2.Core.Models;
 namespace KleeMod.Cards;
 
 /// <summary>
-/// Sparks 'n' Splash -- the kit Burst card (sheet: rare power, cost 3,
+/// Sparks 'n' Splash -- the kit Burst card (sheet: rare power, cost 0,
 /// kit_card, requires burst_energy_full; v1.9: the Burst is kit, not loot).
 ///
 /// Hand-written: its lifecycle is machinery, not ops. NEVER in
@@ -21,8 +21,8 @@ namespace KleeMod.Cards;
 /// unobtainable (not draftable, not transformable; the sim's loader excludes
 /// kit cards from every pool).
 ///
-/// Cost model: 3 energy (normal EnergyCost) PLUS a BaseLib custom-resource
-/// cost of the full meter -- SetCanonicalCost(60) wires CanAfford (>= 60)
+/// Cost model: 0 energy (normal EnergyCost) PLUS a BaseLib custom-resource
+/// cost of the full meter -- SetCanonicalCost(40) wires CanAfford (>= 40)
 /// into the game's playability check, matching the sim's
 /// requires: burst_energy_full gate, and the play pipeline calls
 /// KleeBurstResource.Spend, whose override drains the WHOLE meter (sim law:
@@ -61,7 +61,7 @@ public sealed class SparksNSplash : CustomCardModel
     // never draftable). The custom-resource cost is per-instance state;
     // setting it in the ctor covers the canonical and every CreateCard copy.
     public SparksNSplash()
-        : base(3, CardType.Power, CardRarity.Rare, TargetType.Self, autoAdd: false)
+        : base(0, CardType.Power, CardRarity.Rare, TargetType.Self, autoAdd: false)
     {
         CustomResources<KleeBurstResource>.SetCanonicalCost(this, BurstConstants.KleeMax);
     }
@@ -72,6 +72,16 @@ public sealed class SparksNSplash : CustomCardModel
             choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue,
             applier: Owner.Creature, cardSource: this);
     }
+
+    /// <summary>
+    /// "Returns to the kit, no pile" (tier0 combat.py play_card's kit_card
+    /// branch). A played Power already resolves to PileType.None, so this
+    /// states the kit rule rather than changing behaviour -- it is here so
+    /// the invariant survives a future type change, and so both kit cards
+    /// declare it in the same place. Furina's Attack-shaped Burst is where
+    /// the default actually diverged.
+    /// </summary>
+    protected override PileType GetResultPileTypeForCardPlay() => PileType.None;
 
     protected override void OnUpgrade()
     {

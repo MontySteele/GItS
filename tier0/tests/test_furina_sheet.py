@@ -51,11 +51,75 @@ def test_pool_composition():
     for c in cards:
         by_rarity.setdefault(c.rarity, []).append(c)
     assert len(by_rarity["basic"]) == 5          # template §3.4 allows 4-5
-    assert len(by_rarity["common"]) == 31
+    # 33 commons: Salon-v2 added standing_room_only (the common Fanfare-tied
+    # AoE, user directive 2026-07-23), and "The Tide Turns" F-B2 added
+    # lasting_impression -- a floor source at COMMON, which is what lets a
+    # power-light deck build a baseline without becoming a power deck.
+    assert len(by_rarity["common"]) == 33
     assert len(by_rarity["uncommon"]) == 25
     assert len(by_rarity["rare"]) == 15
     kit = [c for c in by_rarity["rare"] if c.kit_card]
     assert [c.id for c in kit] == ["let_the_people_rejoice"]   # 14 draftable
+
+
+def test_starter_invitation_and_aria_curve():
+    starter = loader.starting_deck("furina")
+    assert len(starter) == 10
+    assert starter.count("aria_of_recompense") == 1
+    assert starter.count("an_invitation") == 1
+
+    aria = loader.get_card("aria_of_recompense")
+    aria_plus = loader.get_card("aria_of_recompense+")
+    assert aria.effects == [{"op": "gain_encore", "amount": 5}]
+    assert aria_plus.effects == [{"op": "gain_encore", "amount": 8}]
+
+    stage = loader.get_card("stage_presence")
+    stage_plus = loader.get_card("stage_presence+")
+    assert stage.effects == [{"op": "block", "amount": 6}]
+    assert stage_plus.effects == [{"op": "block", "amount": 9}]
+
+
+def test_no_furina_card_declares_the_retired_spend_grammar():
+    """F-A4 at the sheet level: the seven gates are gone from every row.
+
+    The energy costs are asserted unchanged deliberately -- they were priced
+    as DISCOUNTED against ordinary finishers because the card also paid a
+    Fanfare toll. That toll is now gone and the discount is not, which is a
+    real repricing question and it belongs to F-B1, not here. Pinning the
+    current numbers makes that pass a visible edit rather than a silent one.
+    """
+    for cid in ("dramatic_entrance", "thunderous_ovation", "crescendo",
+                "florid_cadenza", "flood_of_emotion", "universal_revelry",
+                "high_tide"):
+        assert not hasattr(loader.get_card(cid), "fanfare_cost")
+
+    assert loader.get_card("crescendo").cost == 1
+    assert loader.get_card("florid_cadenza").cost == 0
+    assert loader.get_card("flood_of_emotion").cost == 1
+    assert loader.get_card("universal_revelry").cost == 2
+    assert loader.get_card("high_tide").cost == 1
+
+
+def test_the_constellation_card_grants_a_floor_not_a_cap():
+    """F-A5: the uncapper retires with the grammar it policed. The blood
+    rider survives F-A on purpose -- dropping it is F-B2's edit."""
+    stage = loader.get_card("the_sea_is_my_stage")
+    assert {"op": "gain_fanfare_floor", "amount": 15} in stage.effects
+    assert not any(fx["op"] == "raise_fanfare_cap" for fx in stage.effects)
+    assert loader.get_card("the_sea_is_my_stage+").effects[0]["amount"] == 20
+
+
+def test_targeted_fanfare_floor_repairs():
+    suffering = loader.get_card("suffering_for_art")
+    thunder = loader.get_card("thunderous_ovation")
+    assert suffering.effects == [
+        {"op": "damage", "amount": 1, "target": "self"},
+        {"op": "gain_encore", "amount": 3},
+    ]
+    # F-B1: the binary gate became a smooth read on the same Block base.
+    assert thunder.effects == [
+        {"op": "block", "amount": 7, "bonus_formula": "1_per_4_fanfare"},
+    ]
 
 
 def test_every_archetype_has_the_template_shape():
@@ -91,48 +155,195 @@ def test_no_passive_accrual_path_on_the_sheet():
                              or "per_turn" in str(fx.get("power")))), c.id
 
 
-# --- Salon Members (kickoff §5, on the oz_summon rails) ---
+# --- Salon Members (Salon v2 rework 2026-07-23: typed FIFO queue, unique
+# ticks/bows, Fanfare-as-Focus; docs/archive/furina-salon-rework-plan.md §1) ---
 
-def test_salon_tick_damages_applies_hydro_and_drains_encore():
+CRAB_TICK = C.SALON_MEMBERS["crabaletta"]["tick"]["damage"]
+CRAB_BOW = C.SALON_MEMBERS["crabaletta"]["bow"]["damage"]
+USHER_TICK = C.SALON_MEMBERS["usher"]["tick"]["block"]
+USHER_BOW = C.SALON_MEMBERS["usher"]["bow"]["block"]
+CHEV_TICK = C.SALON_MEMBERS["chevalmarin"]["tick"]["damage"]
+CHEV_BOW_ENCORE = C.SALON_MEMBERS["chevalmarin"]["bow"]["encore"]
+
+
+def _company(p, *members):
+    """Seed the typed queue directly (the deploy op is tested separately);
+    the count power mirrors len(queue), same as the engine maintains."""
+    p.salon = list(members)
+    p.powers["salon_member"] = len(p.salon)
+
+
+def test_salon_ticks_are_typed_apply_hydro_and_drain_encore():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = 2
+    _company(p, "crabaletta", "chevalmarin")
     p.encore = 5
     hp0 = st.enemies[0].hp
     effects.salon_tick(st)
-    assert st.enemies[0].hp == hp0 - 2 * C.SALON_MEMBER_DMG
+    assert st.enemies[0].hp == hp0 - CRAB_TICK - CHEV_TICK
     assert st.enemies[0].aura == "hydro"            # the application engine
     assert p.encore == 5 - 2 * C.SALON_TICK_ENCORE_COST
 
 
-def test_salon_overdraw_drains_true_hp_when_dry():
+def test_usher_ticks_block_not_damage():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = 2
+    _company(p, "usher")
+    p.encore = 3
+    hp0 = st.enemies[0].hp
+    effects.salon_tick(st)
+    assert st.enemies[0].hp == hp0
+    assert p.block == USHER_TICK
+
+
+def test_dry_salon_ticks_resolve_at_three_quarters_without_overdraw():
+    st = furina_state()
+    p = st.player
+    _company(p, "crabaletta", "crabaletta")
     p.encore = 0
     hp0 = p.hp
+    enemy_hp0 = st.enemies[0].hp
     effects.salon_tick(st)
-    assert p.hp == hp0 - 2 * C.SALON_TICK_ENCORE_COST
-    assert any(e["event"] == "encore_overdraw" for e in st.log)
-    # true HP loss is Fanfare flux
-    assert p.fanfare > 0
+    assert p.hp == hp0
+    assert st.enemies[0].hp == (
+        enemy_hp0 - 2 * int(CRAB_TICK * C.SALON_DRY_DAMAGE_MULT))
+    assert not any(e["event"] == "encore_overdraw" for e in st.log)
+    assert p.fanfare == 0
+
+
+def test_salon_ticks_only_throttle_after_encore_runs_out():
+    st = furina_state()
+    p = st.player
+    _company(p, "crabaletta", "crabaletta")
+    p.encore = 1
+    enemy_hp0 = st.enemies[0].hp
+    effects.salon_tick(st)
+    assert p.encore == 0
+    assert p.hp == p.max_hp
+    assert st.enemies[0].hp == (
+        enemy_hp0 - CRAB_TICK
+        - int(CRAB_TICK * C.SALON_DRY_DAMAGE_MULT))
+
+
+def test_fanfare_is_the_focus_term_on_ticks():
+    st = furina_state()
+    p = st.player
+    _company(p, "crabaletta")
+    p.encore = 3
+    p.fanfare = 2 * C.SALON_FOCUS_PER               # +2 member numbers
+    hp0 = st.enemies[0].hp
+    effects.salon_tick(st)
+    assert st.enemies[0].hp == hp0 - (CRAB_TICK + 2)
+
+
+def test_deploy_into_full_stage_bows_the_oldest_member_out():
+    st = furina_state()
+    p = st.player
+    _company(p, "crabaletta", "usher", "chevalmarin")
+    enemy_hp0 = st.enemies[0].hp
+    effects.resolve_card(st, loader.get_card("mademoiselle_crabaletta"))
+    assert p.powers["salon_member"] == C.SALON_MEMBER_SLOTS == 3
+    assert p.salon == ["usher", "chevalmarin", "crabaletta"]   # FIFO
+    assert st.enemies[0].hp == enemy_hp0 - CRAB_BOW  # the OLDEST bowed
+    assert st.enemies[0].aura == "hydro"
+    assert p.encore == 0                          # final bows have no upkeep
+    assert p.burst_energy == C.SALON_TICK_BURST
+
+
+def test_usher_bow_blocks_and_chevalmarin_bow_mass_applies_with_encore():
+    st = furina_state()
+    p = st.player
+    _company(p, "usher", "chevalmarin", "crabaletta")
+    effects.resolve_card(st, loader.get_card("mademoiselle_crabaletta"))
+    assert p.block == USHER_BOW                     # oldest = the Usher
+    effects.resolve_card(st, loader.get_card("mademoiselle_crabaletta"))
+    assert st.enemies[0].aura == "hydro"            # Chevalmarin: mass apply
+    # The bow's Encore is engine-side (_salon_bow), not a card rider, so
+    # the replacement numeric multiplier never touches it.
+    assert p.encore == CHEV_BOW_ENCORE
+
+
+def test_full_ensemble_deploys_one_of_each_and_bows_a_full_stage():
+    st = furina_state()
+    p = st.player
+    _company(p, "crabaletta", "crabaletta", "crabaletta")
+    enemy_hp0 = st.enemies[0].hp
+    effects.resolve_card(st, loader.get_card("full_ensemble"))
+    assert p.powers["salon_member"] == C.SALON_MEMBER_SLOTS
+    assert p.salon == ["usher", "chevalmarin", "crabaletta"]
+    assert st.enemies[0].hp == enemy_hp0 - 3 * CRAB_BOW
+
+
+def test_replacing_member_triples_block_rider_once():
+    st = furina_state()
+    p = st.player
+    _company(p, "crabaletta", "crabaletta", "crabaletta")
+    effects.resolve_card(st, loader.get_card("gentilhomme_usher"))
+    assert p.powers["salon_member"] == C.SALON_MEMBER_SLOTS
+    assert p.block == 4 * C.SALON_REPLACE_DAMAGE_MULT
+
+
+def test_replacing_member_doubles_encore_rider_once():
+    st = furina_state()
+    p = st.player
+    _company(p, "crabaletta", "crabaletta", "crabaletta")
+    effects.resolve_card(st, loader.get_card("surintendante_chevalmarin"))
+    assert p.encore == 3 * C.SALON_REPLACE_NUMERIC_MULT
+
+
+def test_replacement_multiplier_ends_with_the_deploying_card():
+    st = furina_state()
+    p = st.player
+    _company(p, "crabaletta", "crabaletta", "crabaletta")
+    effects.resolve_card(st, loader.get_card("surintendante_chevalmarin"))
+    after_replacement = p.encore
+    effects.resolve_card(st, loader.get_card("curtain_up"))
+    assert p.encore == after_replacement + 2
+
+
+def test_multiple_replacements_do_not_multiply_rider_more_than_once():
+    st = furina_state()
+    p = st.player
+    _company(p, "usher", "usher", "usher")
+    effects.resolve_card(st, loader.get_card("grand_gala"))
+    assert p.powers["salon_member"] == C.SALON_MEMBER_SLOTS
+    assert p.salon == ["crabaletta", "chevalmarin", "usher"]
+    assert p.encore == 4 * C.SALON_REPLACE_NUMERIC_MULT
+
+
+def test_replacing_member_doubles_salon_power_without_clipping():
+    st = furina_state()
+    p = st.player
+    _company(p, "usher", "usher", "usher")
+    effects.resolve_card(st, loader.get_card("endless_waltz"))
+    assert p.powers["salon_damage_up"] == 3 * C.SALON_REPLACE_NUMERIC_MULT
+
+
+def test_replacing_member_doubles_draw_rider():
+    st = furina_state()
+    p = st.player
+    _company(p, "usher", "usher", "usher")
+    p.encore = 2
+    p.draw_pile = [loader.get_card("stage_presence") for _ in range(2)]
+    effects.resolve_card(st, loader.get_card("dress_rehearsal"))
+    assert len(p.hand) == 2
 
 
 def test_salon_damage_up_scales_ticks():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = 1
+    _company(p, "crabaletta")
     p.powers["salon_damage_up"] = 2
     p.encore = 3
     hp0 = st.enemies[0].hp
     effects.salon_tick(st)
-    assert st.enemies[0].hp == hp0 - (C.SALON_MEMBER_DMG + 2)
+    assert st.enemies[0].hp == hp0 - (CRAB_TICK + 2)
 
 
 def test_salon_ticks_and_encore_spend_feed_the_burst_meter():
     st = furina_state()
     p = st.player
-    p.powers["salon_member"] = 1
+    _company(p, "crabaletta")
     p.encore = 3
     assert p.burst_max == 70                        # declared this pass
     effects.salon_tick(st)
@@ -210,12 +421,14 @@ def test_generation_pool_guardrails():
 def test_generators_exhaust_and_generate_to_hand():
     st = furina_state()
     gen = loader.get_card("an_invitation")
+    assert gen.cost == 0
     assert gen.exhaust                              # guardrail b
     effects.resolve_card(st, gen)
     assert len(st.player.hand) == 1
     made = st.player.hand[0]
     assert made.rarity == "common"                  # guardrail c
     assert made.is_companion or made.guest_star     # guardrail d
+    assert made.generated_by_guest_star              # combat-local provenance
 
 
 def test_upgraded_generator_discounts_the_guest():
@@ -237,6 +450,17 @@ def test_encore_performance_copies_only_the_spotlighted_character():
     assert len(copies) == 2 and copies[1].id == chev.id
 
 
+def test_encore_performance_guest_cast_can_copy_any_companion():
+    st = furina_state()
+    p = st.player
+    hand_card(st, "chevreuse_interdiction_fire")
+    hand_card(st, "lynette_box_trick")
+    p.spotlight = C.SPOTLIGHT_GUEST_CAST
+    effects.resolve_card(st, loader.get_card("encore_performance"))
+    assert len(p.hand) == 3
+    assert all(c.is_companion for c in p.hand)
+
+
 def test_encore_performance_dead_without_designation_or_target():
     st = furina_state()
     hand_card(st, "chevreuse_interdiction_fire")
@@ -245,6 +469,31 @@ def test_encore_performance_dead_without_designation_or_target():
     st.player.spotlight = "lynette"                 # spotlight, no target
     effects.resolve_card(st, loader.get_card("encore_performance"))
     assert len(st.player.hand) == 1
+
+
+def test_spotlight_machinery_refunds_setup_energy():
+    for cid in ("limelight", "shared_billing", "guest_list",
+                "encore_performance"):
+        st = furina_state()
+        p = st.player
+        p.energy = 1
+        p.encore = 1
+        p.spotlight = C.SPOTLIGHT_GUEST_CAST
+        hand_card(st, "chevreuse_interdiction_fire")
+        card = hand_card(st, cid)
+        combat.play_card(st, card)
+        assert p.energy == 1, cid
+
+
+def test_top_billing_no_longer_bricks_on_empty_encore():
+    st = furina_state()
+    p = st.player
+    p.energy = 1
+    card = hand_card(st, "top_billing")
+    assert p.encore == 0 and card.encore_cost == 0
+    assert combat.card_playable(st, card)
+    assert loader.get_card("standing_ovation").cost == 1
+    assert loader.get_card("standing_ovation+").cost == 0
 
 
 # --- Spotlight texture powers (ratified design space, kickoff §3.2) ---
@@ -304,30 +553,33 @@ def test_star_of_the_show_flat_rider_on_spotlighted_damage():
     p.spotlight = "chevreuse"
     p.powers["spotlight_flat_damage"] = 3
     hp0 = st.enemies[0].hp
-    effects.resolve_card(st, loader.get_card("chevreuse_interdiction_fire"))
-    # R16 world: 5 printed -> x BASE_MULT -> +3 flat.
-    expect = int(5 * C.SPOTLIGHT_BASE_MULT) + 3
+    card = loader.get_card("chevreuse_interdiction_fire")
+    printed = next(fx["amount"] for fx in card.effects
+                   if fx.get("op") == "damage")
+    effects.resolve_card(st, card)
+    expect = int(printed * C.SPOTLIGHT_BASE_MULT) + 3
     assert st.enemies[0].hp == hp0 - expect
 
 
 # --- R16 card-mediated boosting (pass 2) ---
 
 def test_card_mediated_boosts_stack_through_the_pipe():
-    """R16: her cards grant the multiplier. top_billing stacks to +50%
-    and no further; limelight's turn window closes at end of turn."""
+    """R16: her cards grant the multiplier. top_billing stacks per copy with
+    no ceiling (cap dropped 2026-07-24, uncap-all); limelight's turn window
+    still closes at end of turn."""
     from tier0.engine import powers
     st = furina_state()
     p = st.player
     p.spotlight = "chevreuse"
-    for _ in range(3):                       # third copy hits the ceiling
+    for _ in range(3):                       # three copies -> +75%, no ceiling
         effects.resolve_card(st, loader.get_card("top_billing"))
-    assert p.powers["spotlight_mult_bonus"] == 50
+    assert p.powers["spotlight_mult_bonus"] == 75
     card = loader.get_card("chevreuse_interdiction_fire")
-    assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT + 0.5
-    effects.resolve_card(st, loader.get_card("limelight"))
     assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT + 0.75
+    effects.resolve_card(st, loader.get_card("limelight"))
+    assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT + 1.0
     powers.on_turn_end(st, p)                # the window closes
-    assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT + 0.5
+    assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT + 0.75
     assert "spotlight_mult_bonus_turn" not in p.powers
 
 
@@ -341,45 +593,106 @@ def test_delete_test_passes_by_construction():
     assert effects.spotlight_mult(st, card) == C.SPOTLIGHT_BASE_MULT
 
 
-def test_star_of_the_show_errata_grants_printed_three():
-    """Pass-2 errata: max_stacks is in POWER UNITS -- the pass-1 row
-    (max_stacks 1) silently shipped +1. Printed +3 applies once and
-    never re-stacks."""
+def test_star_of_the_show_grants_its_printed_amount_per_copy():
+    """Printed amount per copy, and copies STACK (cap dropped, user
+    ruling 2026-07-24).
+
+    G-D2 note: the printed amount moved 3 -> 5 (PROPOSED, 2026-07-25),
+    so this reads it off the SHEET rather than restating it. The test was
+    named for the number and asserted it twice; that made a ratified
+    reprice look like a regression. What it is actually here to protect is
+    the pass-2 errata (max_stacks is in POWER UNITS) and the linearity of
+    a second copy -- neither of which is a claim about the value 3.
+
+    The pass-2 errata this test was written for still holds and is still
+    checked by the first assertion: max_stacks was in POWER UNITS, so the
+    pass-1 row's `max_stacks: 1` silently shipped the card at +1 instead of
+    its printed +3. What changed is the second assertion. The cap was 3 --
+    exactly one application -- which made a second copy do nothing at all:
+    a dead card of the shape lint_strict_domination exists to catch. The
+    cap rationale (pass1-rulings-round2) is about PER-TURN COMPOUNDING
+    powers; a flat additive read once per Spotlighted card is linear in
+    copies, so it now behaves like an ordinary StS Power dupe."""
+    printed = loader.get_card("star_of_the_show").effects[0]["amount"]
     st = furina_state()
     effects.resolve_card(st, loader.get_card("star_of_the_show"))
-    assert st.player.powers["spotlight_flat_damage"] == 3
+    assert st.player.powers["spotlight_flat_damage"] == printed
     effects.resolve_card(st, loader.get_card("star_of_the_show"))
-    assert st.player.powers["spotlight_flat_damage"] == 3
+    assert st.player.powers["spotlight_flat_damage"] == printed * 2
+
+
+def test_uncapped_spotlight_riders_stack():
+    """The other three cap drops (user ruling 2026-07-24).
+
+    Each is gated to ONE proc per turn by its own "first Spotlighted card
+    each turn" clause, so a second copy buys a bigger single proc, never a
+    second one -- linear, not exponential, and outside the cap rationale."""
+    for card_id, power in (("leading_role", "spotlight_discount"),
+                           ("supporting_cast", "spotlight_draw"),
+                           ("standing_ovation", "spotlight_encore_first")):
+        st = furina_state()
+        effects.resolve_card(st, loader.get_card(card_id))
+        effects.resolve_card(st, loader.get_card(card_id))
+        assert st.player.powers[power] == 2, (
+            f"{card_id}: {power} should stack to 2, got "
+            f"{st.player.powers[power]}")
+
+
+def test_compounding_spotlight_powers_now_uncap():
+    """Round two of the cap ruling (user, 2026-07-24, uncap-all).
+
+    Round one split these two percentage multipliers out and KEPT their
+    ceilings; round two dropped them too, after a 2000-run x 2-seed A/B put
+    the whole cap set at <=+0.5pp on run success (favorable, non-binding at
+    present difficulty). These are the genuinely compounding powers, so this
+    test doubles as the record that the drop was deliberate and measured --
+    and that the two multipliers now stack per copy like base-StS Power dupes.
+    They were FLAGGED for a ceiling re-check at difficulty calibration; if a
+    future ceiling is reintroduced, this test is where it gets re-asserted."""
+    for card_id, power, per_copy in (
+            ("top_billing", "spotlight_mult_bonus", 25),
+            ("standing_ovation", "ovation_spend_boost", 10)):
+        st = furina_state()
+        for _ in range(4):
+            effects.resolve_card(st, loader.get_card(card_id))
+        assert st.player.powers[power] == 4 * per_copy, (
+            f"{card_id}: {power} should stack uncapped to {4 * per_copy}, got "
+            f"{st.player.powers[power]}")
 
 
 def test_upgraded_power_amount_lifts_its_own_stack_cap():
-    """The applier bumps max_stacks alongside amount when they are equal
-    (single-application encoding) -- an upgraded Star of the Show must
-    actually grant +4, not silently cap at the old 3."""
+    """An upgraded Star of the Show grants its printed amount + 1.
+
+    HISTORY, because the name no longer describes the mechanism. This test
+    was written for the applier's single-application rule -- when a row
+    encodes max_stacks == amount, the upgrade bumps BOTH, or the upgraded
+    card silently caps at the old value. Star of the Show was the only such
+    row, and the 2026-07-24 cap ruling removed its cap entirely, so the +4
+    now arrives with no ceiling to lift.
+
+    The assertion is kept as-is: it still guards the upgrade delta landing.
+    The applier's max_stacks branch (content/upgrades.py) is now unexercised
+    by live content -- no shipped row has max_stacks == amount -- but it is
+    deliberately retained as the correctness rule for any future
+    single-application capped power."""
     from tier0.content import upgrades
+    printed = loader.get_card("star_of_the_show").effects[0]["amount"]
     st = furina_state()
     effects.resolve_card(st, upgrades.apply_upgrade(
         loader.get_card("star_of_the_show")))
-    assert st.player.powers["spotlight_flat_damage"] == 4
+    assert st.player.powers["spotlight_flat_damage"] == printed + 1
 
 
-# --- selector aiming v2 (the depth contest; DECISIONS-bound in report) ---
+# --- selector aiming v5 (explicit two-mode choice) ---
 
-def test_selector_depth_contest_self_beats_shallow_companion():
-    """v3 keeps v1's lesson: a shallow guest must NOT hijack the
-    Spotlight from a deep self-kit (sub-threshold depth -> self
-    fallback). With NO self cards at all, any stage beats none -- the
-    guest gets the beam as the last resort (v2's tie rule, archived,
-    happened to agree here)."""
-    st = furina_state()                       # real starter: 10 furina cards
-    hand_card(st, "lynette_box_trick")        # one shallow companion
+def test_selector_guest_cast_does_not_require_character_depth():
+    st = furina_state()                       # real starter: 10 Furina cards
+    hand_card(st, "lynette_box_trick")        # one ready Companion suffices
     effects.resolve_card(st, loader.get_card("ethereal_spotlight"))
-    assert st.player.spotlight == "furina"    # self depth 10 wins
-    st2 = furina_state()
-    st2.player.draw_pile.clear()
-    hand_card(st2, "lynette_box_trick")       # tie: 1 companion vs 0 self
-    effects.resolve_card(st2, loader.get_card("ethereal_spotlight"))
-    assert st2.player.spotlight == "lynette"  # companion wins the tie
+    assert st.player.spotlight == C.SPOTLIGHT_GUEST_CAST
+    st.player.hand.clear()
+    effects.resolve_card(st, loader.get_card("ethereal_spotlight"))
+    assert st.player.spotlight == "furina"
 
 
 # --- selector-payoff predicates ---
@@ -392,7 +705,7 @@ def test_spotlight_moved_predicates():
     assert not effects._predicate(st, "spotlight_moved_this_turn")
     assert not effects._predicate(st, "spotlight_unmoved_this_combat")
     effects.resolve_card(st, loader.get_card("ethereal_spotlight"))
-    assert p.spotlight == "chevreuse"
+    assert p.spotlight == C.SPOTLIGHT_GUEST_CAST
     assert effects._predicate(st, "spotlight_moved_this_turn")
     assert effects._predicate(st, "spotlight_unmoved_this_combat")
     st.spotlight_moved_this_turn = False            # next turn's reset

@@ -12,7 +12,8 @@ import random
 from typing import Callable
 
 from tier0 import constants as C
-from tier0.engine import effects, powers, reactions, resources
+from tier0.engine import (effects, potions, powers, reactions, refpowers,
+                          relics, resources)
 from tier0.engine.state import Card, CombatState, Enemy, Player
 
 # A pilot is a callable: (state) -> Card | None (None = end turn).
@@ -51,7 +52,55 @@ def grant_charged_kit(state: CombatState) -> None:
         state.emit("kit_burst_granted", card=kit.id)
 
 
+def _revive_player_if_needed(state: CombatState) -> bool:
+    """Resolve a held Fairy at combat checkpoints after player HP can move."""
+    if state.player.alive or not state.player.potions:
+        return False
+    return potions.try_fairy_revive(state)
+
+
+def _settle_phases(state: CombatState) -> None:
+    """HP-threshold boss phases (§10.2, RATIFIED 2026-07-23). An enemy at
+    hp <= 0 with phases remaining REVIVES into its next phase instead of
+    dying: fresh bar, fresh moveset, powers/aura/bombs cleared (a new body).
+    Called at every site that can drop enemy HP -- after each card play,
+    the bomb-detonation sweep, turn-start potion use, the player-turn-end
+    triggers, and each enemy turn (retaliation kills) -- always BEFORE the
+    loop re-reads state.over, so a phased boss never ends the fight early.
+    Dead branch for every enemy without phases (the whole roster today).
+
+    Known approximation: kill-counting predicates (killed_target et al.)
+    observe the hp <= 0 moment before the revive, so a phase-down counts as
+    a kill for those card effects. Fatal (Feed) does NOT: counts_for_fatal
+    stays False until the last phase is entered."""
+    for e in state.enemies:
+        while e.phases and e.hp <= 0:
+            ph = e.phases.pop(0)
+            e.hp = e.max_hp = int(ph["hp"])
+            e.intents = ph["intents"]
+            e.intent_index = 0
+            # A new bar is a new moveset: its ramps start counting HERE, not
+            # at combat start. Without this, a phase-2 intent arrives already
+            # ramped by however many turns the previous bar took -- Test
+            # Subject's Multi-Claw opened at 84 instead of its authored 30.
+            e.phase_start_turn = state.turn
+            e.intent_uses = {}
+            e.block = 0
+            e.powers = {}
+            e.aura = None
+            e.aura_turns_left = 0
+            e.bombs = []
+            e.frozen = False
+            e.sleep_turns = 0
+            if not e.phases:
+                e.counts_for_fatal = True     # the last bar is a real death
+            state.emit("phase_change", enemy=e.name, hp=e.hp,
+                       remaining=len(e.phases))
+
+
 def card_playable(state: CombatState, card: Card) -> bool:
+    if card.type == "status":
+        return False        # §10.2 injected statuses: unplayable clogs
     if card.requires == "burst_energy_full":
         if state.player.burst_energy < state.player.burst_max:
             return False
@@ -60,13 +109,32 @@ def card_playable(state: CombatState, card: Card) -> bool:
     if card.encore_cost and state.player.encore < card.encore_cost:
         return False        # "Spend N Encore:" cost line -- a gate, never
                             # an overdraw (that is the spend_encore op)
+    # No Fanfare playability gate: Fanfare is read, never spent (F-A4).
     return card_cost(state, card) <= state.player.energy
 
 
 def card_cost(state: CombatState, card: Card) -> int:
     if card.cost == "X":
+        # An X card spends the whole bank and NO cost modifier is consulted --
+        # this early return is the game's own shape, not a tier0 shortcut.
+        # CardEnergyCost.GetAmountToSpend() opens with
+        # `if (CostsX) return Owner.PlayerCombatState?.Energy ?? 0;`, returning
+        # before GetWithModifiers; and GetWithModifiers itself opens with
+        # `if (CostsX) return num;` BEFORE its
+        # `Hook.ModifyEnergyCostInCombat(...)` line. So the ...InCombatLate
+        # hook that FreeAttack (Unrelenting) and Corruption implement never
+        # runs on an X card, even though each sets modifiedCost = 0
+        # unconditionally once reached. Whirlwind is therefore never freed by a
+        # FreeAttack stack -- and must not be, since X is the energy actually
+        # spent (EnergyCost.CapturedXValue), so a freed Whirlwind would resolve
+        # at X = 0 and deal nothing. Same conclusion as the R34 spark exemption
+        # below, reached independently. Pinned by
+        # test_refpowers.test_free_attack_does_not_zero_an_x_cost_attack.
         return state.player.energy
     cost = card.cost
+    if card.cost_reduction_per_attack_this_turn:
+        cost = max(0, cost - (card.cost_reduction_per_attack_this_turn
+                              * state.attacks_played_this_turn))
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
     # Leading Role (card-level texture, kickoff §3.2): the FIRST
@@ -74,11 +142,17 @@ def card_cost(state: CombatState, card: Card) -> int:
     # granting economy, not the Spotlight baseline -- §2.2a governs the
     # multiplier, and the multiplier has no path here.
     p = state.player
-    if (p.spotlight and card.character == p.spotlight
+    if (effects.is_spotlighted(state, card)
             and state.spotlighted_cards_this_turn == 0):
         cost = max(0, cost - p.powers.get("spotlight_discount", 0))
     if (card.type == "attack"
             and state.player.sparks >= spark_threshold(state)):
+        return 0
+    # Base-game parity (FreeAttack / Corruption): checked AFTER the spark
+    # branch, so a spark-freed attack spends the bank rather than a stack.
+    # Precedence pinned by
+    # test_refpowers.test_free_attack_and_spark_are_both_consumed.
+    if refpowers.free_cost(state, card):
         return 0
     return cost
 
@@ -112,13 +186,16 @@ def play_card(state: CombatState, card: Card) -> None:
     p.hand.remove(card)
     state.cards_played_this_turn += 1
     state.emit("play", card=card.id, cost=cost, energy_left=p.energy)
-    if p.spotlight and card.character == p.spotlight:
-        # Ovation (kickoff §4): each Spotlighted card played is Fanfare.
+    if effects.is_spotlighted(state, card):
+        # Spotlight texture applies in both modes. Only Center Stage creates
+        # Fanfare; Guest Cast spends the light on Companion empowerment.
         # Counted BEFORE resolution so the reserve per-turn cap (OFF by
         # default) can compare against this play's own ordinal.
         state.spotlighted_cards_this_turn += 1
         state.emit("spotlight_card_played", card=card.id)
-        resources.gain_fanfare(state, C.FANFARE_PER_SPOTLIGHT_CARD, "ovation")
+        if p.spotlight == p.character_id:
+            resources.gain_fanfare(
+                state, C.FANFARE_PER_SPOTLIGHT_CARD, "center_stage")
         # Card-level Spotlight texture (sheet pass 1, ratified design
         # space): Supporting Cast draws on the FIRST Spotlighted card
         # each turn; post-flip Standing Ovation's trickle uses the same
@@ -145,25 +222,81 @@ def play_card(state: CombatState, card: Card) -> None:
     replays = 1
     if card.is_companion:
         state.companions_played.append(card.id)
+        # Navia, Cannon Fire Support: the pool pays the pool. Fires once per
+        # CARD PLAY, here beside companions_played, not once per replay inside
+        # the loop below -- Study Buddy's replay is one card being resolved
+        # twice, and paying it twice would make the two cards a combo rather
+        # than each doing its own job. Sitting before resolve_card also means
+        # Navia's own play does not pay itself: the power is not up yet.
+        navia = p.powers.get("cannon_fire_support", 0)
+        if navia:
+            p.block += navia
+            state.emit("cannon_fire_support", amount=navia, card=card.id)
         if state.replay_next_companion > 0:   # Study Buddy
             replays += state.replay_next_companion
             state.replay_next_companion = 0
+    # OneTwoPunch resolves the play COUNT once, but Before/AfterCardPlayed fire
+    # per play index -- so a doubled attack pays Rage twice, counts twice for
+    # Juggling, and burns two FreeAttack stacks.
+    replays += refpowers.extra_replays(state, card)
     for _ in range(replays):
+        snap = refpowers.before_card_played(state, card)
         effects.resolve_card(state, card)
+        refpowers.after_card_played(state, card, snap)
+    # Constellation grant (F-A3): playing a POWER permanently raises the
+    # Fanfare floor by rarity. Fires AFTER resolution so a power that also
+    # grants a floor outright does not double-count against its own read,
+    # and once per card rather than once per replay -- a doubled Power is
+    # still one performance the audience remembers.
+    if card.type == "power":
+        resources.gain_fanfare_floor(
+            state,
+            C.FANFARE_FLOOR_PER_POWER_RARE if card.rarity == "rare"
+            else C.FANFARE_FLOOR_PER_POWER,
+            f"power:{card.id}")
     if card.kit_card:
         pass                                  # returns to the kit, no pile
-    elif card.exhaust or card.type == "power":
-        p.exhaust_pile.append(card)
     else:
-        p.discard_pile.append(card)
+        # CardModel.GetResultPileTypeForCardPlay: a played Power card is
+        # REMOVED FROM COMBAT (PileType.None), not exhausted. tier0 used to
+        # exhaust it, which would have paid out FeelNoPain and DarkEmbrace on
+        # all 11 of Ironclad's Power cards (recon BUG 1).
+        dest = refpowers.result_pile(state, card)
+        if dest == "exhaust":
+            refpowers.exhaust_card(state, card)
+        elif dest == "discard":
+            p.discard_pile.append(card)
     grant_charged_kit(state)
+    _settle_phases(state)        # a phased boss dropped to 0 revives BEFORE
+    #                              the play loop re-reads state.over
+    # Self-damage and Encore overdraw resolve inside a card play rather than
+    # the enemy-hit funnel. Give Fairy the same lethal checkpoint, then update
+    # HP-threshold relics before the pilot chooses another card.
+    _revive_player_if_needed(state)
+    if p.relic_effects:
+        relics.reevaluate_conditionals(state)
 
 
 def _player_turn(state: CombatState, pilot: Pilot) -> None:
     p = state.player
     state.turn += 1
     state.cards_played_this_turn = 0
-    p.block = 0
+    for e in state.enemies:
+        e.skittish_fired = False     # Skittish latch is per-turn (§10.9)
+    state.in_player_turn = True              # StS2 CombatState.CurrentSide
+    refpowers.reset_turn_counters(state)
+    # Fanfare decay, HERE at the true top of the turn -- before the block
+    # clear, the draw, Salon upkeep and every other turn-start generator.
+    # Order is a design choice, not an accident: decay eats what was CARRIED
+    # OVER, and then this turn's activity builds on the remainder. Applying
+    # it after turn-start generation would tax income instead of inventory.
+    resources.decay_fanfare(state)
+    # StS2 site A (BeforeSideTurnStart) -- BEFORE the block clear and BEFORE
+    # the draw. Aggression pulls Attacks out of the discard pile here; running
+    # it after the draw would over-fill the hand versus the real game.
+    refpowers.side_turn_start_early(state)
+    if refpowers.should_clear_block(p):      # Barricade suppresses the clear
+        p.block = 0
 
     state.companion_cost_delta_this_turn = 0     # Friendly Visit expires
     state.replay_next_companion = 0              # Study Buddy expires
@@ -171,19 +304,64 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     state.reactions_this_turn = 0                # Chevreuse predicate window
     state.spotlighted_cards_this_turn = 0        # Ovation / reserve cap
     state.spotlight_moved_this_turn = False      # selector-payoff window
+    state.prevention_used_this_turn = False      # Kokomi ward latch (§2.4)
+    state.cards_created_this_turn = 0            # engine_closure window
 
     for enemy in list(state.living_enemies):     # bombs from last turn go off
         if enemy.bombs:
             effects.detonate_bombs(state, enemy)
+    _settle_phases(state)
     reactions.tick_auras(state)
     powers.on_turn_start(state, p)
+    _revive_player_if_needed(state)             # player DoT can be lethal
+    if not p.alive or state.over:
+        return
     effects.player_turn_start_triggers(state)
+    _revive_player_if_needed(state)             # Salon upkeep can overdraw HP
     if not p.alive or state.over:
         return
 
-    p.energy = C.BASE_ENERGY_PER_TURN
-    state.draw(C.CARDS_DRAWN_PER_TURN)
+    p.energy = refpowers.energy_for_turn(state)      # site C, + Pyre
+    state.draw(C.CARDS_DRAWN_PER_TURN, from_hand_draw=True)   # site D
+    # StS2 sites E/F (AfterPlayerTurnStart, AfterSideTurnStart) -- AFTER the
+    # draw. tier0's powers.on_turn_start above is a PRE site; anything that
+    # reads the hand or must land post-draw belongs here instead.
+    refpowers.player_turn_start_late(state)
+    _revive_player_if_needed(state)             # Inferno / Mantle self-damage
+    if not p.alive or state.over:
+        return
     grant_charged_kit(state)                 # turn-start gains + full-hand defer
+
+    # Combat-side relics (dead branch on the battery). combat_start_* fires
+    # once, HERE on turn 1 -- AFTER the block clear / energy reset / draw above,
+    # so combat-start block survives the clear and the turn-1-only energy/draw
+    # riders stack on the turn's own refill and draw. Per-turn hooks
+    # (every_n_turns_*, conditional_power re-eval) run every turn.
+    if p.relic_effects:
+        if state.turn == 1:
+            relics.apply_combat_start(state)
+        relics.on_player_turn_start(state, state.turn)
+
+    # Combat-side potions (dead branch on the battery: potions empty). Bounded
+    # greedy use-policy at turn start, AFTER the draw/energy/relic setup so a
+    # defensive block or an offensive strength lands on this turn's real state.
+    if p.potions:
+        potions.try_use_potions(state)
+        _settle_phases(state)    # an offensive potion can drop a phased boss
+        if p.relic_effects:
+            # Blood Potion can cross Red Skull's HP threshold after its normal
+            # turn-start evaluation and before the first card is chosen.
+            relics.reevaluate_conditionals(state)
+
+    # Pass 4 Q1a: Fanfare trajectory snapshot, taken HERE -- after turn-start
+    # triggers, Salon upkeep, energy and draw, before the first card -- because
+    # that is the state the pilot actually decides in, and the state that
+    # determines whether this turn's generation overflows. Report-only (R14).
+    if p.fanfare_cap:
+        state.emit("fanfare_turn", total=p.fanfare, cap=p.fanfare_cap,
+                   floor=p.fanfare_floor,
+                   at_cap=p.fanfare >= p.fanfare_cap,
+                   at_floor=p.fanfare <= p.fanfare_floor)
 
     seen_states: set[tuple] = set()
     while not state.over:
@@ -201,19 +379,61 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         seen_states.add(snapshot)
         play_card(state, card)
 
+    # Kokomi §7 engine_closure detector (report-only, R14: diagnostics,
+    # never acceptance targets): a turn that CREATED at least as many cards
+    # as it consumed while playing several cards is a candidate
+    # positive-sum engine cycle. v0 heuristic on purpose — full
+    # energy/draw-closure accounting is a later instrument; this flags
+    # candidates for eyes-on. Dead branch until a creation op runs.
+    if (state.cards_created_this_turn > 0
+            and state.cards_created_this_turn
+            >= max(1, state.cards_exhausted_this_turn)):
+        state.emit("engine_closure",
+                   created=state.cards_created_this_turn,
+                   consumed=state.cards_exhausted_this_turn,
+                   plays=state.cards_played_this_turn)
+
+    # StS2 site I (BeforeSideTurnEndEarly). PlatingPower's own source comment:
+    # "We do this in early so that it triggers before end-of-turn damage
+    # effects" -- which is precisely what player_turn_end_triggers holds.
+    refpowers.before_side_turn_end_early(state)
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
+    _settle_phases(state)        # turn-end burst (Sparks 'n' Splash) can
+    #                              drop a phased boss
+    # Injected Burn/Wither (§10.2): end-of-turn damage while in hand,
+    # BLOCKABLE (the real cards' shape) -- fires before the hand flush
+    # discards them. Dead branch unless an enemy injected this combat.
+    eot_statuses = [c for c in p.hand if c.status_eot_damage]
+    for c in eot_statuses:
+        dmg = c.status_eot_damage
+        blocked = min(p.block, dmg)
+        p.block -= blocked
+        p.hp -= dmg - blocked
+        resources.note_player_hp_loss(state, dmg - blocked)
+        state.emit("status_eot_damage", card=c.id, amount=dmg - blocked,
+                   blocked=blocked)
+    _revive_player_if_needed(state)
     grant_charged_kit(state)     # Salon-tick particles can fill the meter
                                  # at turn end; the Burst's Retain keeps it
     # Burst cards have Retain (principles v1.4): they stay in hand.
     # Ethereal cards (the Spotlight selector) vanish to exhaust instead of
     # discarding -- an unplayed selector must never circulate as loot.
-    retained = [c for c in p.hand if "burst" in c.tags]
-    p.exhaust_pile.extend(c for c in p.hand
-                          if "ethereal" in c.tags and "burst" not in c.tags)
+    retained = [c for c in p.hand if "burst" in c.tags or c.retain]
+    ethereal = [c for c in p.hand
+                if "ethereal" in c.tags
+                and "burst" not in c.tags and not c.retain]
     p.discard_pile.extend(c for c in p.hand
-                          if "burst" not in c.tags and "ethereal" not in c.tags)
+                          if "burst" not in c.tags and not c.retain
+                          and "ethereal" not in c.tags)
     p.hand = retained
+    for c in ethereal:
+        # DarkEmbrace counts ethereal exhausts instead of drawing on them; the
+        # deferred draw is flushed in powers.on_turn_end below, i.e. AFTER this
+        # hand flush -- which is the stated reason the source defers it.
+        refpowers.exhaust_card(state, c, caused_by_ethereal=True)
+    state.in_player_turn = False
     powers.on_turn_end(state, p)
+    _revive_player_if_needed(state)
 
 
 def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
@@ -227,6 +447,21 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
     powers.on_turn_start(state, enemy)
     if not enemy.alive:
         return
+    # Crab Rage (§10.2, gated on the spec field -- inert everywhere else):
+    # once, at this enemy's first turn start after any ally has died, apply
+    # the buff. Polled here rather than at the death site so one choke point
+    # covers every way an ally can die; the at-most-one-turn lag is accepted
+    # (§10.3). Applied AFTER the block reset so the block survives into the
+    # player's next turn, which is the real power's shape.
+    if (enemy.ally_death_buff is not None and not enemy.ally_death_fired
+            and any(not e.alive for e in state.enemies if e is not enemy)):
+        enemy.ally_death_fired = True
+        for pname, amt in (enemy.ally_death_buff.get("powers") or {}).items():
+            powers.apply_power(state, enemy, pname, int(amt))
+        blk = int(enemy.ally_death_buff.get("block", 0))
+        if blk:
+            enemy.block += blk
+        state.emit("ally_death_trigger", enemy=enemy.name)
     intent = enemy.current_intent()
     kind = intent["kind"]
     # Frozen v2 (v1.5): the enemy still acts, but its action deals -50%
@@ -245,37 +480,111 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
                aura=enemy.aura is not None)
 
     if kind == "attack":
-        amount = intent["amount"] + intent.get("ramp", 0) * max(
-            0, state.turn - intent.get("ramp_after", 0))
+        # Snapshot before resolving the action. The latch is spent only after
+        # the hit loop so a multi-hit intent receives one coherent modifier.
+        bomb_suppressed = (
+            bool(enemy.bombs) and not enemy.bomb_suppression_spent
+        )
+        amount = enemy.ramped_amount(intent, state.turn)
         for _ in range(intent.get("times", 1)):
             dmg = powers.modify_damage_dealt(enemy, amount)
             if frozen:
                 dmg *= C.FROZEN_DAMAGE_MULT
-            dmg = powers.modify_damage_taken(state.player, dmg)
+            # `enemy` is passed as the dealer so Colossus can read ITS
+            # Vulnerable (ColossusPower halves only what a Vulnerable attacker
+            # lands on its owner).
+            dmg = powers.modify_damage_taken(state.player, dmg, enemy)
             dmg = int(dmg)
+            block_before = state.player.block
             blocked = min(state.player.block, dmg)
             state.player.block -= blocked
+            # Kokomi's prevention ward (kickoff §2.4): after Block, before
+            # anything reaches HP — the first unblocked hit each round is
+            # prevented up to the ward's stacks, priced as one random
+            # draw-pile card through the exhaust funnel (which is itself a
+            # Charge event). Dead branch for every player without the
+            # power. Its event stream is REPORTED SEPARATELY, not folded
+            # into `blocked` and not credited to any axis yet — A4 credit
+            # is a metric ruling ask (Encore precedent), not a default.
+            prevented = effects.prevent_damage_exhaust(state, dmg - blocked)
             # Encore absorbs after Block, before HP (kickoff §4). Its own
             # event stream credits A4 sustain -- NEVER folded into
             # `blocked` (§2 harness note, Tier 0 binding).
-            hp_loss = resources.absorb_into_encore(state, dmg - blocked)
+            hp_loss = resources.absorb_into_encore(
+                state, dmg - blocked - prevented)
             state.player.hp -= hp_loss
             resources.note_player_hp_loss(state, hp_loss)
-            state.emit("player_hit", amount=hp_loss, blocked=blocked)
+            # Combat-side relic on_first_hp_loss_draw (dead branch on the
+            # battery). Fires at most once per combat, on real HP loss.
+            if hp_loss > 0 and state.player.relic_effects:
+                relics.note_hp_loss(state)
+            state.emit("player_hit", amount=hp_loss, blocked=blocked,
+                       block_before=block_before)
+            # AfterDamageReceived fires per HIT, not per intent -- FlameBarrier
+            # retaliates against every hit of a multi-hit attack. Inferno and
+            # Rupture are silent here: both require CurrentSide == Owner.Side,
+            # and state.in_player_turn is False.
+            refpowers.on_damage_received(state, state.player,
+                                         unblocked=dmg - blocked, dealer=enemy,
+                                         powered_attack=True)
             if not state.player.alive:
-                return
+                # Fairy in a Bottle (dead branch on the battery: potions
+                # empty). Passive revive at the lethal hit; if it saves the
+                # player the turn continues and a later hit of a multi-hit
+                # intent can still kill (the fairy is spent).
+                if not _revive_player_if_needed(state):
+                    return
+            if not enemy.alive:
+                break               # FlameBarrier can kill the dealer
+        if bomb_suppressed:
+            enemy.bomb_suppression_spent = True
+            state.emit("bomb_suppression_spent", enemy=enemy.name)
     elif kind == "block":
         enemy.block += intent["amount"]
     elif kind == "buff":
         powers.apply_power(state, enemy, intent.get("power", "strength"),
                            intent["amount"])
     elif kind == "debuff":
-        powers.apply_power(state, state.player, intent["power"], intent["amount"])
+        # applier=enemy: Vicious must NOT draw off an enemy-applied Vulnerable.
+        powers.apply_power(state, state.player, intent["power"],
+                           intent["amount"], applier=enemy)
     elif kind == "summon":
         for spawn in intent["wave"]:
             state.enemies.append(Enemy(hp=spawn["hp"], max_hp=spawn["hp"],
                                        name=spawn.get("name", "add"),
-                                       intents=spawn["intents"]))
+                                       intents=spawn["intents"],
+                                       counts_for_fatal=False))
+    elif kind == "inject":
+        # §10.2 (RATIFIED 2026-07-23): shuffle status cards into a player
+        # pile. Default pile is the discard (the common StS shape); "draw"
+        # inserts at a random depth via the combat rng; "hand" respects
+        # MAX_HAND_SIZE with overflow to discard (base-game overflow rule).
+        from tier0.engine import statuses     # late import, engine-internal
+        pile = intent.get("pile", "discard")
+        p = state.player
+        for _ in range(intent.get("count", 1)):
+            card = statuses.make_status(intent["status"])
+            if pile == "draw":
+                p.draw_pile.insert(
+                    state.rng.randrange(len(p.draw_pile) + 1), card)
+            elif pile == "hand":
+                if len(p.hand) < C.MAX_HAND_SIZE:
+                    p.hand.append(card)
+                else:
+                    p.discard_pile.append(card)
+            elif pile == "discard":
+                p.discard_pile.append(card)
+            else:
+                raise ValueError(f"unknown inject pile {pile!r}")
+        state.emit("status_injected", enemy=enemy.name,
+                   status=intent["status"], count=intent.get("count", 1),
+                   pile=pile)
+    elif kind == "heal":
+        # §10.2: enemy self-heal (Knowledge Demon's Ponder), capped at max.
+        amt = min(int(intent["amount"]), enemy.max_hp - enemy.hp)
+        if amt > 0:
+            enemy.hp += amt
+        state.emit("enemy_heal", enemy=enemy.name, amount=max(0, amt))
     else:
         raise ValueError(f"unknown intent kind {kind!r}")
 
@@ -293,6 +602,24 @@ def surface_innate(draw_pile: list) -> None:
         draw_pile[:] = innate + [c for c in draw_pile if not c.innate]
 
 
+def _run_rounds(state: CombatState, pilot: Pilot) -> None:
+    while not state.over and state.turn < C.MAX_TURNS:
+        _player_turn(state, pilot)
+        if state.over:
+            break
+        for enemy in list(state.enemies):
+            _enemy_turn(state, enemy)
+            _settle_phases(state)    # FlameBarrier retaliation can drop a
+            #                          phased boss mid-enemy-round
+            if state.over:
+                break
+        # AfterSideTurnEnd(side == Enemy): the once-per-round enemy tick. This
+        # is where FlameBarrier is removed and Colossus decrements -- doing
+        # either at the PLAYER's turn end instead makes Flame Barrier do
+        # literally nothing.
+        refpowers.after_enemy_side_turn_end(state)
+
+
 def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
               seed: int) -> CombatState:
     state = CombatState(player=player, enemies=enemies,
@@ -301,17 +628,32 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # Encore). Spotlight designation likewise re-aims fresh each combat.
     player.encore = 0
     player.fanfare = 0
+    # Constellation floors are per-COMBAT, like every other Furina resource:
+    # a Power is replayed each fight and re-earns its grant. The cap must be
+    # rewound with them or it ratchets upward all run -- `player` is one
+    # object reused across every fight, so a leak here would silently inflate
+    # the ceiling fight after fight. Subtracting the accumulated floor is
+    # exact rather than approximate: gain_fanfare_floor raises cap and floor
+    # by the SAME n every time, and it is the only writer of either.
+    player.fanfare_cap -= player.fanfare_floor
+    player.fanfare_floor = 0
+    player.charge = 0            # Kokomi: the meter is per-combat (§2.1)
     player.spotlight = None
     state.rng.shuffle(player.draw_pile)
     surface_innate(player.draw_pile)
-    while not state.over and state.turn < C.MAX_TURNS:
-        _player_turn(state, pilot)
-        if state.over:
-            break
-        for enemy in list(state.enemies):
-            _enemy_turn(state, enemy)
-            if state.over:
-                break
+    # Combat-side relics: clear per-combat counters at true fight start. Dead
+    # branch on the battery (relic_effects empty); the combat_start_* effects
+    # themselves fire on the first player turn (see _player_turn).
+    if player.relic_effects:
+        relics.reset_combat(state)
+    # Bound so refpowers can recover the dealer/applier identity that
+    # effects.py cannot pass; try/finally so a raising fight never leaks a
+    # stale state into the next one.
+    outer = refpowers.bind(state)
+    try:
+        _run_rounds(state, pilot)
+    finally:
+        refpowers.bind(outer)
     won = bool(state.player.alive) and not state.living_enemies
     if won and "heal_after_won_fight" in state.player.relic_hooks:
         # Burning Blood (ruling 1): post-fight, can't affect combat —

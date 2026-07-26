@@ -15,6 +15,43 @@ from typing import Any, Optional
 from tier0 import constants as C
 
 
+def _copy_plain(val):
+    """Deep-copy yaml-shaped data (dict / list / immutable scalar).
+
+    Card payloads never hold cycles, class instances or shared aliases, so
+    this needs none of ``copy.deepcopy``'s memo bookkeeping -- which is the
+    whole reason it is several times faster. Anything that is not a dict or
+    list is returned as-is, which is correct for the str/int/bool/None leaves
+    that yaml produces.
+    """
+    t = type(val)
+    if t is dict:
+        return {k: _copy_plain(v) for k, v in val.items()}
+    if t is list:
+        return [_copy_plain(v) for v in val]
+    return val
+
+
+# Every container-valued field on Card. Card.__deepcopy__ copies exactly
+# these and shares the rest; test_state.py pins the list against the
+# dataclass definition so a new mutable field cannot be added silently.
+_MUTABLE_FIELDS = ("effects", "solve", "archetypes", "tags", "companion",
+                   "sly", "upgrade")
+
+# Card fields that a sheet row may NEVER declare again, with the reason the
+# author needs. House pattern: a caught mistake becomes a lint, so the next
+# person meets the rule instead of the symptom.
+RETIRED_CARD_FIELDS = {
+    "fanfare_cost": (
+        "Fanfare is a read-only momentum stat ('The Tide Turns', F-A4) -- "
+        "no card spends it, and Encore is Furina's only managed resource. "
+        "A card that wants to reward a full meter READS it "
+        "(bonus_formula: N_per_M_fanfare) or gates on it "
+        "(if: fanfare_at_least_N); a card that wants to raise the player's "
+        "permanent baseline grants a floor (op: gain_fanfare_floor)."),
+}
+
+
 @dataclass
 class Card:
     id: str
@@ -44,6 +81,10 @@ class Card:
     # Today only upgrades set this ({innate: true} -- Catalytic Conversion+);
     # sparks_n_splash's "innate-on-charge" is its OWN mechanism, untouched.
     innate: bool = False
+    # Ordinary Retain. Burst cards also retain through their kit tag, but a
+    # card upgrade such as Hot Hands+ can now express the base-game keyword
+    # without pretending to be a Burst.
+    retain: bool = False
     # principles v1.8: standard-banner 5-stars (Jean/Mona/Diluc) are ordinary
     # nation-pool rares that participate in the banner roll like anyone else.
     # The tag exists so that IF banner-variance data shows bad-roll bricking,
@@ -56,14 +97,60 @@ class Card:
     # an explicit field wins. Cards with no character are invalid Spotlight
     # targets -- the selector greys them out rather than erroring.
     character: Optional[str] = None
+    # Kokomi kickoff §2.3: combat-local provenance stamped by the conscript
+    # op (the generated_by_guest_star pattern). PROPOSED reading of ruling
+    # ask §6.7: a conscripted companion is SELF-sourced for SUPPORT_CARRY /
+    # control-provenance purposes — she paid a card of her own deck for it.
+    conscripted: bool = False
+    # Kokomi Assist lane (kickoff §2.3 discard verb): Sly — effects that
+    # fire when this card is discarded BY A CARD EFFECT. The end-of-turn
+    # hand flush is NOT a Sly trigger, and neither are draw-pile discards
+    # (scry); both scopings are enforced (and commented) at the one trigger
+    # site in effects._op_discard. Empty on every non-Kokomi card.
+    sly: list[dict] = field(default_factory=list)
     # Guest Star rows (fontaine-companions.yaml): generated cameos, scoped
     # to a personal pool. Never in shared rewards or the banner roll; the
     # equal-rarity clause on generators is what respects 5-star scarcity.
     guest_star: bool = False
+    # Combat-local provenance: set on every card created by a Guest Star
+    # generator, including ordinary shared companions pulled by that effect.
+    # Guest Cast treats this temporary guest like every other Companion.
+    generated_by_guest_star: bool = False
     # "Spend N Encore:" cost line (kickoff §4). A playability gate, not an
     # overdraw: cards that may legally overdraw into HP use the
     # spend_encore op instead.
     encore_cost: int = 0
+    # NOTE: `fanfare_cost` was RETIRED by "The Tide Turns" (F-A4). Fanfare is
+    # a read-only momentum stat; no card spends it. See RETIRED_CARD_FIELDS.
+    # Base-game parity (Ironclad pool): CanBeGeneratedInCombat. Feed sets it
+    # false so a generator cannot conjure the card that permanently raises
+    # max HP. MUST be honored by generate_from_pool -- otherwise Stoke
+    # over-generates and the whole comparison biases upward.
+    generatable: bool = True
+    # Base-game parity: HowlFromBeyond's AfterAutoPostPlayPhaseEntered hook.
+    # When this card is sitting in the EXHAUST pile at the end of the player
+    # turn it plays itself once for free and then goes to discard. A narrow
+    # boolean on purpose -- one card in 87 does not justify a general
+    # `triggers:` framework, and the house rule is implement-or-log, not
+    # generalize. Read by effects.player_turn_end_triggers.
+    on_exhaust_autoplay: bool = False
+    # DrumOfBattle: an explicit AfterCardExhausted payout. This is card
+    # metadata rather than an on-play effect: playing Drum normally sends it
+    # to discard; only another effect exhausting it grants the energy.
+    on_exhaust_energy: int = 0
+    # Stomp: its combat hook applies a this-turn discount for each Attack the
+    # owner has already played. Keeping the rate on the card lets card_cost()
+    # read the live turn counter without mutating the printed/base cost.
+    cost_reduction_per_attack_this_turn: int = 0
+    # --- Status cards (multi-act §10.2 injection op; engine/statuses.py).
+    # type == "status" cards are UNPLAYABLE (combat.card_playable) and exist
+    # only inside a combat: enemies inject them into the player's piles; the
+    # run layer rebuilds the player from deck_ids each fight, so they never
+    # leak into the deck. Both fields are 0 on every designed card, so the
+    # frozen battery and all existing content are dead branches. ---
+    status_eot_damage: int = 0    # Burn/Wither: damage at end of player turn
+    #                               while in hand (blockable, StS-real)
+    status_draw_damage: int = 0   # Toxic (§10.3 ratified): HP loss on draw
     # DEPRECATED (ruled R20, 2026-07-20): a parallel M9 session introduced
     # inline `upgrade:` fields on klee-cards.yaml rows; the ruling made
     # *-upgrades.yaml sheets the ONE upgrade convention. Tier 0 IGNORES
@@ -81,10 +168,44 @@ class Card:
     @classmethod
     def from_dict(cls, d: dict) -> "Card":
         known = {f for f in cls.__dataclass_fields__}
+        # Retired grammar fails LOUDLY and by name, never silently ignored:
+        # a sheet row that still declares a dead field is a card whose author
+        # believes it does something. The generic "unknown fields" message
+        # below would technically catch these, but it reads as a typo rather
+        # than as a retirement, and the fix is different in each case.
+        retired = sorted(set(d) & set(RETIRED_CARD_FIELDS))
+        if retired:
+            why = "; ".join(f"{f}: {RETIRED_CARD_FIELDS[f]}" for f in retired)
+            raise ValueError(
+                f"card {d.get('id')!r} declares RETIRED field(s) "
+                f"{retired} -- {why}")
         unknown = set(d) - known
         if unknown:
             raise ValueError(f"card {d.get('id')!r}: unknown fields {sorted(unknown)}")
         return cls(**d)
+
+    def __deepcopy__(self, memo):
+        """Hand-rolled deep copy. Cards are copied on every ``get_card`` and
+        every in-combat clone (Dual Wield, conscript, Armaments), which put
+        generic ``copy.deepcopy`` at ~half of a Tier 0.5 run's total runtime:
+        it walks all ~40 fields through the memo machinery even though all but
+        a handful are immutable scalars.
+
+        The copy is byte-identical to the generic one -- ``_MUTABLE_FIELDS``
+        holds every container-valued field, and card payloads are plain
+        yaml-shaped data (dict/list/scalar), so ``_copy_plain`` covers them.
+        ``test_state.py`` pins both claims against ``copy.deepcopy`` for the
+        whole loaded card index.
+        """
+        new = Card.__new__(Card)
+        memo[id(self)] = new
+        d = dict(self.__dict__)
+        for name in _MUTABLE_FIELDS:
+            val = d[name]
+            if val is not None:           # an EMPTY list still gets a fresh
+                d[name] = _copy_plain(val)   # one -- apply_upgrade appends
+        new.__dict__ = d
+        return new
 
 
 @dataclass
@@ -120,15 +241,54 @@ class Player(Fighter):
     discard_pile: list[Card] = field(default_factory=list)
     exhaust_pile: list[Card] = field(default_factory=list)
     relic_hooks: list[str] = field(default_factory=list)   # e.g. ["spark_on_detonation"]
+    # --- combat-side relic engine (engine/relics.py); EMPTY on the frozen
+    # battery, so every relic code path is a dead branch there (anchor lock).
+    # Battery players are built by loader.build_player, which never sets this;
+    # only build_player_from_ids(relic_effects=...) in the run layer does. ---
+    relic_effects: list[dict] = field(default_factory=list)  # dicts keyed 'hook'
+    first_hp_loss_fired: bool = False        # on_first_hp_loss_draw, per combat
+    relic_conditional_applied: dict[str, int] = field(default_factory=dict)
+    #                                        # conditional_power (Red Skull):
+    #                                        # key -> delta currently applied,
+    #                                        # so re-eval never drifts/doubles
+    # --- combat-side potions (engine/potions.py); EMPTY on the frozen battery,
+    # so every potion code path is a dead branch there (anchor lock). Battery
+    # players are built by loader.build_player, which never sets these; only
+    # build_player_from_ids in the run layer does. potion_slots is the held
+    # capacity (Potion Belt relic raises it); node_kind gives combat.py the
+    # elite/boss context the offensive branch reads, "" everywhere else. ---
+    potions: list[str] = field(default_factory=list)
+    potion_slots: int = C.POTION_SLOTS
+    node_kind: str = ""           # "", "normal", "elite", or "boss"
     kit_cards: list[Card] = field(default_factory=list)    # v1.9: the Burst(s)
     # --- Furina (kickoff §3/§4); inert defaults for everyone else ---
     character_id: str = ""        # who this player IS (self-Spotlight rate)
+    # --- Kokomi (kickoff v1 §2.1): the Bake-Kurage meter. Uncapped, never
+    # expended, read (not consumed) by finisher effects; accrues ONLY at
+    # the exhaust funnel + explicit gain_charge lines + converted Strength.
+    # Reset per combat in run_fight. Dead field for everyone else. ---
+    charge: int = 0
     encore: int = 0               # unbounded per-combat buffer (v1.6 style)
-    fanfare: int = 0              # capped activity stacks; global pool
-    fanfare_cap: int = 0          # 0 = character has no Fanfare resource
+    fanfare: int = 0              # read-only momentum stat; global pool
+    fanfare_cap: int = 0          # 0 = character has no Fanfare resource.
+                                  # Since "The Tide Turns" this is a high
+                                  # SAFETY RAIL, not a design dial -- under
+                                  # decay the ceiling does not bind.
+    # The permanent baseline built from constellation grants. Decay clamps
+    # here, never below. A grant raises floor, cap AND current together
+    # (resources.gain_fanfare_floor) -- raising the cap alongside the floor
+    # is what keeps the gradient alive instead of re-pinning the meter.
+    fanfare_floor: int = 0
+    # Salon v2 (rework 2026-07-23): the typed member queue, FIFO, max
+    # SALON_MEMBER_SLOTS, duplicates legal (Defect-orb geometry). SOURCE OF
+    # TRUTH for the Salon; powers["salon_member"] mirrors len(salon) so
+    # every count read (has_salon_members, pilot, instruments) still works.
+    salon: list[str] = field(default_factory=list)
     spotlight: Optional[str] = None   # THE per-player registry: one
                                   # designated character at a time; a second
-                                  # designation re-aims, never stacks
+                                  # designation re-aims, never stacks. The
+                                  # guest-cast sentinel means every Companion
+                                  # card rather than one named character.
 
 
 @dataclass
@@ -139,17 +299,91 @@ class Enemy(Fighter):
     aura: Optional[str] = None
     aura_turns_left: int = 0
     bombs: list[Bomb] = field(default_factory=list)
+    # Klee survival sprint: the first attack action this enemy makes while
+    # Bombed is suppressed. This per-enemy combat latch keeps an armed-Bomb
+    # engine from becoming permanent Weak against bosses.
+    bomb_suppression_spent: bool = False
     is_boss: bool = False
     sleep_turns: int = 0        # skips its turn while > 0 (BURST CHECK)
     frozen: bool = False        # v1.5: next action -50% dmg; first attack
                                 # hit Shatters (bonus dmg, removes Frozen)
     frozen_by_companion: bool = False   # control_uptime provenance (§2.2a)
+    # Base-game parity: ShouldOwnerDeathTriggerFatal. The game gates Fatal
+    # effects (Feed) on the target's powers all agreeing the death counts --
+    # summoned adds do not. Defaults True; the summon intent in
+    # combat._enemy_turn must set it False or Feed farms minions for
+    # permanent max HP, which is exactly the invisible upward bias this
+    # project exists to catch. Read by effects.deal_damage_to_enemy.
+    counts_for_fatal: bool = True
+    # --- Multi-act §10.2 boss ops (all inert-by-default; battery never sets
+    # them, so every branch is dead on the frozen anchor). ---
+    # Kaiser Crab's Crab Rage: {"powers": {name: stacks}, "block": int}
+    # applied ONCE at this enemy's next turn start after any ally has died.
+    ally_death_buff: Optional[dict] = None
+    ally_death_fired: bool = False
+    # HP-threshold phases (Test Subject): remaining phase specs, each
+    # {"hp": int, "intents": [...]}. When hp <= 0 with phases remaining, the
+    # enemy revives into the next phase (combat._settle_phases) instead of
+    # dying; counts_for_fatal must be False until the LAST phase (spawn and
+    # _settle_phases maintain this) so Feed cannot farm phase-downs.
+    phases: list[dict] = field(default_factory=list)
+    # §10.9 promotions (2026-07-23 red-pen): the per-card-played enemy
+    # counterplay class, previously skipped as "flavor". Inert-by-default,
+    # same contract as the §10.2 ops -- the battery never sets either, so
+    # every branch is dead on the frozen anchor.
+    # Slow N (Bygone Effigy): "Whenever you play a card, this enemy receives
+    # N% more damage from Attacks this turn." Resets each player turn (reads
+    # state.cards_played_this_turn, which already resets there).
+    slow: int = 0
+    # Skittish N (Phantasmal Gardener): "The first time it is hit each turn,
+    # it gains N Block. Does not stack." The latch resets each player turn.
+    skittish: int = 0
+    skittish_fired: bool = False
+    # The turn this enemy entered its CURRENT phase; `ramp` counts from here,
+    # not from combat start (combat._settle_phases stamps it on each revive).
+    # 0 for every unphased enemy, which is combat start -- so the frozen
+    # battery and every single-bar roster enemy are untouched.
+    phase_start_turn: int = 0
+    # How many times each intent index has been TAKEN this combat, for
+    # `ramp_per_use`. Keyed by index so a rotation is unambiguous.
+    intent_uses: dict[int, int] = field(default_factory=dict)
 
     def current_intent(self) -> dict:
         return self.intents[self.intent_index % len(self.intents)]
 
     def advance_intent(self) -> None:
+        self.intent_uses[self.intent_index % len(self.intents)] = (
+            self.intent_uses.get(self.intent_index % len(self.intents), 0) + 1)
         self.intent_index += 1
+
+    def ramped_amount(self, intent: dict, turn: int) -> int:
+        """This intent's attack amount at `turn`, with both ramp shapes.
+
+        `ramp` is PER TURN, counted from the start of this enemy's current
+        phase (`ramp_after` delays the start further). Phase-relative is the
+        whole point: a ramping intent that first appears in a boss's SECOND
+        phase must not arrive pre-ramped by however long the first bar took
+        to chew through. Unphased enemies have phase_start_turn 0, so
+        Byrdonis and the frozen PUNISHER are bit-identical to before.
+
+        `ramp_per_use` is PER USE of this intent -- the "it grows every time
+        it is taken" shape (Test Subject's Multi-Claw gains a hit each use).
+        Turn-ramping cannot express it: the value would depend on how many
+        non-attack beats sit between two uses, so adding a beat would
+        silently retune the enemy.
+
+        Both default to absent, and an intent may set either or neither.
+        """
+        amount = intent["amount"]
+        ramp = intent.get("ramp", 0)
+        if ramp:
+            elapsed = turn - self.phase_start_turn - intent.get("ramp_after", 0)
+            amount += ramp * max(0, elapsed)
+        per_use = intent.get("ramp_per_use", 0)
+        if per_use:
+            amount += per_use * self.intent_uses.get(
+                self.intent_index % len(self.intents), 0)
+        return amount
 
 
 @dataclass
@@ -166,6 +400,31 @@ class CombatState:
     reactions_this_turn: int = 0          # reaction_triggered_this_turn
                                           # (Chevreuse; reset per turn)
     kills_this_card: int = 0              # killed_target
+    # Kills that the base game's Fatal gate would honor (Enemy
+    # .counts_for_fatal). Separate from kills_this_card so the existing
+    # killed_target predicate keeps its exact meaning for Klee/Furina.
+    fatal_kills_this_card: int = 0        # killed_target_fatal (Feed)
+    exhausted_this_card: int = 0          # generate_from_pool amount_formula
+    block_gains_this_card: int = 0        # exact multi-gain block hooks
+    salon_replacements_this_card: int = 0 # overflow count for current card
+    cards_exhausted_this_turn: int = 0     # EvilEye / ForgottenRitual
+    # Kokomi §2.4: the prevention ward's per-round latch ("first unblocked
+    # hit per turn"); reset at player turn start with the other windows.
+    prevention_used_this_turn: bool = False
+    # Kokomi §7 engine_closure diagnostic (report-only, R14): cards created
+    # into any pile this player turn (add_card tokens, conscript-create,
+    # generators). Reset at player turn start.
+    cards_created_this_turn: int = 0
+    hp_lost_this_turn: int = 0             # Spite's live history predicate
+    player_damage_events: int = 0          # TearAsunder hit-count history
+    # Free-play machinery (Havoc / Cascade / HowlFromBeyond). The depth
+    # counter backstops the seen_states guard in combat._player_turn, which
+    # only samples BETWEEN pilot plays and is structurally blind to a nested
+    # free-play chain. force_random_targeting matches the base game, which
+    # rolls a random enemy for TargetType.AnyEnemy autoplays rather than
+    # using tier0's lowest-HP pilot aim -- variance IS the point of Havoc.
+    free_play_depth: int = 0
+    force_random_targeting: bool = False
     current_card_cost: int = 0            # this_cost_zero
     current_x: int = 0                    # X-cost cards
     sparks_at_play: int = 0               # bank BEFORE this card's own spark
@@ -178,6 +437,17 @@ class CombatState:
                                               # (SPOTLIGHT_CARDS_PER_TURN_CAP)
     spotlight_moved_this_turn: bool = False   # selector-payoff predicates
     spotlight_moves_this_combat: int = 0      # (sheet pass 1)
+    # --- base-game Ironclad parity (engine/refpowers.py); inert otherwise ---
+    in_player_turn: bool = False          # StS2 CombatState.CurrentSide, which
+                                          # Inferno and Rupture both gate on
+    card_play_depth: int = 0              # >0 while a card is mid-play
+                                          # (Rupture's deferral window)
+    rupture_pending: int = 0              # strength owed to the card in play
+    dark_embrace_ethereal_count: int = 0  # deferred to after the hand flush
+    attacks_played_this_turn: int = 0     # Juggling's ==3 trigger
+    block_gain_card_plays_this_turn: int = 0   # Unmovable's per-turn allowance
+    no_energy_gain_ceiling: Optional[int] = None  # NoEnergyGain, seeded when
+                                          # the power lands (not at the refill)
 
     def emit(self, event: str, **data: Any) -> None:
         self.log.append({"turn": self.turn, "event": event, **data})
@@ -197,8 +467,15 @@ class CombatState:
         self.player.draw_pile = self.player.discard_pile + self.player.draw_pile
         self.player.discard_pile = []
 
-    def draw(self, n: int) -> None:
+    def draw(self, n: int, from_hand_draw: bool = False) -> None:
+        # StS2 gates every draw behind Hook.ShouldDraw. Only NoDrawPower
+        # (Battle Trance) uses it, and it lets the turn-start hand draw
+        # through -- hence the flag, which combat._player_turn sets.
+        from tier0.engine import refpowers        # late import avoids cycle
         p = self.player
+        if not refpowers.should_draw(p, from_hand_draw):
+            self.emit("draw_denied", amount=n)
+            return
         for _ in range(n):
             if not p.draw_pile:
                 if not p.discard_pile:
@@ -209,3 +486,11 @@ class CombatState:
             card = p.draw_pile.pop(0)
             p.hand.append(card)
             self.emit("draw", card=card.id)
+            if card.status_draw_damage:
+                # Toxic (§10.3, ratified semantics): unblockable HP loss the
+                # moment it is drawn. Late import mirrors refpowers above.
+                from tier0.engine import resources
+                p.hp -= card.status_draw_damage
+                resources.note_player_hp_loss(self, card.status_draw_damage)
+                self.emit("status_draw_damage", card=card.id,
+                          amount=card.status_draw_damage)

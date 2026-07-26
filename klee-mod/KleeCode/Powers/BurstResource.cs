@@ -24,8 +24,8 @@ public static class BurstConstants
     /// <summary>tier0 constants.py BURST_PER_REACTION = 5.</summary>
     public const int PerReaction = 5;
 
-    /// <summary>tier0 klee.yaml burst_max: 60.</summary>
-    public const int KleeMax = 60;
+    /// <summary>tier0 klee.yaml burst_max: 40.</summary>
+    public const int KleeMax = 40;
 }
 
 /// <summary>
@@ -62,27 +62,25 @@ public interface ISkillTagCard
 ///     like the sim's resolve_hit);
 ///   +N from the burst_energy card op (codegen, mid-resolution like the
 ///     sim's effect loop);
-///   accrual is UNCAPPED past 60 (the sim never clamps; the grant check is
+///   accrual is UNCAPPED past 40 (the sim never clamps; the grant check is
 ///     >=, and casting resets to 0 -- overflow is lost at cast, not at gain).
 ///
 /// The kit half (landed with the kit-grant machinery, standing-plan item):
 /// Sparks 'n' Splash carries this resource as a BaseLib CustomResourceCost
-/// (SetCanonicalCost 60 -- CanAfford >= 60 gates playability, the sim's
-/// requires: burst_energy_full), KitGrant grants the card to hand at a full
-/// meter, and the Spend override below drains the WHOLE meter at cast --
-/// overflow is lost at cast, never at gain (combat.py: playing the Burst
-/// sets burst_energy = 0).
+/// (SetCanonicalCost 40 -- the CanAfford override below gates playability on
+/// the CANONICAL 40, the sim's requires: burst_energy_full), KitGrant grants
+/// the card to hand at a full meter, and DrainOnPlay empties the WHOLE meter
+/// on the play hook -- overflow is lost at cast, never at gain (combat.py:
+/// playing the Burst sets burst_energy = 0). The cost object exists for the
+/// gate and the cost visual only; it no longer performs the spend.
 ///
-/// The badge: BaseLib ships NO ambient on-screen meter (its resource UI is
-/// cost-side card visuals only; BasicResourceVisualsHandler is an empty
-/// marker), so the meter renders through <see cref="BurstMeterPower"/> on
-/// Klee -- the SparkPower display idiom. The resource is canonical; the
-/// badge is display. Two writers, one invariant: Gain() moves both together
-/// (every context-carrying site), GainPreResolution() moves the resource
-/// alone -- BeforeCardPlayed has no PlayerChoiceContext, so the skill-tag
-/// bonus lands resource-first and SyncBadge() restores badge == resource in
-/// AfterCardPlayed. The badge may lag the resource only WITHIN a single card
-/// play, never across plays. Anything that RULES on the meter (the future
+/// Display: the Track C overhead gauge (Vfx.GaugeBridge) is the meter's only
+/// ambient surface. It renders through the <see cref="AmountFor"/> read and
+/// the Refresh calls in the mutation funnels below; SyncGauge() in
+/// AfterCardPlayed catches the one mutation outside them (the kit card's
+/// whole-meter Spend inside the cost machinery). The old status-strip badge
+/// (<see cref="BurstMeterPower"/>) was retired as redundant with the gauge --
+/// C4 playtest feedback 2026-07-23. Anything that RULES on the meter (the
 /// cast gate included) must read the resource.
 /// </summary>
 public sealed class KleeBurstResource : BasicCustomResource
@@ -92,31 +90,84 @@ public sealed class KleeBurstResource : BasicCustomResource
     }
 
     /// <summary>
-    /// Casting the Burst empties the METER, not just the canonical cost --
-    /// sim law (combat.py): `p.burst_energy = 0` on a requires-full play;
-    /// overflow past 60 is lost at cast, never clamped at gain. The cost
-    /// machinery passes amount = 60 (GetAmountToSpend); this resource's only
-    /// spender is the kit card, so the full drain is the rule, not a special
-    /// case.
-    ///
-    /// BASELIB SIGNATURE CHANGE (2026-07-21): the Workshop auto-updated
-    /// BaseLib.dll under us and CustomResource.Spend changed shape --
-    ///   was: Task       Spend&lt;T&gt;(ICombatState, AbstractModel?, int)
-    ///   now: Task&lt;bool&gt; Spend&lt;T&gt;(ICombatState, AbstractModel?, int, bool optional)
-    /// The bool return reports whether the spend happened; `optional` makes
-    /// an unaffordable spend a no-op returning false instead of a clamped
-    /// spend with a warning. We forward `optional` unchanged rather than
-    /// hardcoding it, so the caller's intent survives. The forwarded amount
-    /// stays `Amount` (not `amount`) -- that IS the whole-meter drain, and
-    /// because Amount is never > Amount the new insufficient-funds branch
-    /// cannot fire here, so this always reports a true spend. The sim law
-    /// above is unchanged by any of it.
+    /// The Burst meter is not an energy cost and must not be discounted like
+    /// one. BaseLib forwards the game's SetToFreeThisTurn / SetToFreeThisCombat
+    /// onto every custom-resource cost unless the resource opts out here
+    /// (CustomResources&lt;T&gt;.SetToFreeThis*, gated on this flag). A
+    /// "this card is free" effect landing on the kit card would otherwise
+    /// zero the meter cost -- see <see cref="DrainOnPlay"/> for why that was
+    /// catastrophic rather than merely generous.
     /// </summary>
-    public override async Task<bool> Spend<T>(
+    public override bool ApplySharedModification => false;
+
+    /// <summary>
+    /// The cast gate is `requires: burst_energy_full` (tier0 card_playable):
+    /// it reads the CANONICAL 40, never a discounted number.
+    ///
+    /// BaseLib's default CanAfford compares against the cost AFTER modifiers,
+    /// and CustomResourceCost.GetWithModifiers pipes custom costs through
+    /// Hook.ModifyEnergyCostInCombat -- the very hook SparkPower uses to zero
+    /// attack costs. Any cost reducer in range would otherwise make the Burst
+    /// castable on an empty meter. ApplySharedModification closes the
+    /// SetToFree half of that exposure; this closes the hook half.
+    ///
+    /// Falls through to the base comparison for cards with no canonical burst
+    /// cost (CanonicalCost returns -1), which is every card but the kit one.
+    /// </summary>
+    public override bool CanAfford(CardModel card, int cost)
+    {
+        var canonical = CustomResources<KleeBurstResource>.CanonicalCost(card);
+        return canonical < 0 ? base.CanAfford(card, cost) : Amount >= canonical;
+    }
+
+    /// <summary>
+    /// DELIBERATE NO-OP; the drain lives in <see cref="DrainOnPlay"/>. Same
+    /// early-spend idiom EncoreResource already uses, and for a stronger
+    /// reason -- see that method.
+    /// </summary>
+    public override Task<bool> Spend<T>(
         MegaCrit.Sts2.Core.Combat.ICombatState combatState,
         AbstractModel? spender, int amount, bool optional)
     {
-        return await base.Spend<T>(combatState, spender, Amount, optional);
+        return Task.FromResult(true);
+    }
+
+    /// <summary>
+    /// Sim law, verbatim (combat.py play_card): `p.burst_energy = 0` on a
+    /// requires-full play. Overflow past 40 is lost at CAST, never clamped at
+    /// gain, so this zeroes the meter rather than subtracting the cost.
+    /// Called from KleeElementalHooks.BeforeCardPlayed -- pre-resolution, and
+    /// ahead of the skill-tag bonus, which is exactly where the sim drains
+    /// (before the replay loop, before resolve_card).
+    ///
+    /// WHY IT IS NOT IN THE COST MACHINERY (playtest 2026-07-24, the
+    /// infinite-Burst bug). The drain used to ride BaseLib's Spend, which runs
+    /// inside CardModel.SpendResources(). Two paths skip or defang that:
+    ///   - CardCmd.AutoPlay does NOT call SpendResources. The base game's own
+    ///     Vakuu relic has to call it by hand before auto-playing
+    ///     (sts2 decompile :377742), so an auto-played Burst never paid its
+    ///     meter at all;
+    ///   - a cost zeroed through either exposure above made the card playable
+    ///     on an empty meter, and BaseLib still called Spend with amount 0.
+    /// Either way the meter survived the cast. KitGrant checks after EVERY
+    /// play, so it then saw a full meter and no copy in hand (a played Power
+    /// leaves combat), granted a fresh one, and the loop ran as many times as
+    /// the turn allowed -- the reported "burst infinite times per turn".
+    ///
+    /// The play hook is unconditional by construction: BeforeCardPlayed fires
+    /// inside OnPlayWrapper, which every play path goes through, auto-plays
+    /// included. Gating on the card carrying a burst cost (rather than on the
+    /// concrete card type) keeps this correct for any future kit card.
+    /// </summary>
+    public static void DrainOnPlay(CardModel card)
+    {
+        if (CustomResources<KleeBurstResource>.Cost(card) == null) return;
+        var owner = card.Owner;
+        if (owner == null) return;
+        var resource = Find(owner.Creature);
+        if (resource == null) return;
+        resource.Amount = 0;
+        Vfx.GaugeBridge.Refresh(owner.Creature);
     }
 
     /// <summary>
@@ -134,58 +185,68 @@ public sealed class KleeBurstResource : BasicCustomResource
     }
 
     /// <summary>
+    /// Current meter value for display surfaces (the Track C gauge). Reads
+    /// the canonical resource, 0 for non-Klee owners.
+    /// </summary>
+    public static int AmountFor(Creature player) => Find(player)?.Amount ?? 0;
+
+    /// <summary>
     /// The gain path for every context-carrying source (reactions, the
     /// burst_energy op, and future powers) -- mirrors SparkPower.Gain so the
-    /// economy stays easy to instrument. Moves resource and badge together.
+    /// economy stays easy to instrument. The context/cardSource parameters
+    /// stay in the signature even though the badge apply they fed is retired:
+    /// every call site carries them, and a future instrumented gain (VFX,
+    /// telemetry) wants them back.
     /// </summary>
-    public static async Task Gain(
+    public static Task Gain(
         PlayerChoiceContext choiceContext, Creature player, int amount,
         CardModel? cardSource)
     {
-        if (amount <= 0) return;
+        if (amount <= 0) return Task.CompletedTask;
         var resource = Find(player);
-        if (resource == null) return;
+        if (resource == null) return Task.CompletedTask;
 
         resource.ModifyAmount(amount);
-        await PowerCmd.Apply<BurstMeterPower>(
-            choiceContext, player, amount, applier: player, cardSource: cardSource);
+        Vfx.GaugeBridge.Refresh(player);
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// The gain path for the skill-tag bonus, which fires in BeforeCardPlayed
-    /// where the game hands hooks no PlayerChoiceContext. Resource only; the
-    /// paired SyncBadge call in AfterCardPlayed catches the display up.
+    /// where the game hands hooks no PlayerChoiceContext. Refreshes the gauge
+    /// immediately; the paired SyncGauge call in AfterCardPlayed exists for
+    /// the cast drain, not for this.
     /// </summary>
     public static void GainPreResolution(Creature player, int amount)
     {
         if (amount <= 0) return;
-        Find(player)?.ModifyAmount(amount);
+        var resource = Find(player);
+        if (resource == null) return;
+        resource.ModifyAmount(amount);
+        Vfx.GaugeBridge.Refresh(player);
     }
 
     /// <summary>
-    /// Re-establish badge == resource (sync-to-truth, so it also self-heals
-    /// any drift rather than replaying a remembered delta).
+    /// The gauge's catch-up site: runs after EVERY card play, which is what
+    /// makes the cast drain visible -- the kit card's whole-meter Spend
+    /// happens inside the cost machinery, outside our mutation funnels.
+    /// (Successor to the retired SyncBadge; the badge half is gone, the
+    /// after-every-play timing is unchanged.)
     /// </summary>
-    public static async Task SyncBadge(
-        PlayerChoiceContext choiceContext, Creature player, CardModel? cardSource)
+    public static void SyncGauge(Creature player)
     {
-        var resource = Find(player);
-        if (resource == null) return;
-
-        var badge = player.Powers.OfType<BurstMeterPower>().FirstOrDefault();
-        decimal delta = resource.Amount - (badge?.Amount ?? 0m);
-        if (delta == 0m) return;
-        await PowerCmd.Apply<BurstMeterPower>(
-            choiceContext, player, delta, applier: player, cardSource: cardSource);
+        if (Find(player) == null) return;
+        Vfx.GaugeBridge.Refresh(player);
     }
 }
 
 /// <summary>
-/// Display badge for the Burst meter (see KleeBurstResource: BaseLib has no
-/// ambient resource UI, so the meter shows the way Sparks do). Amount equals
-/// the resource's Amount between card plays; within a skill-tagged play it
-/// may lag by the tag bonus until SyncBadge runs in AfterCardPlayed. Rules
-/// read the resource, never this.
+/// RETIRED display badge for the Burst meter -- superseded by the Track C
+/// overhead gauge and no longer applied anywhere (C4 playtest feedback
+/// 2026-07-23: redundant with the gauge). The class stays registered for
+/// save compatibility: a run saved mid-combat before the retirement carries
+/// BurstMeterPower stacks, and deleting the model would break that load.
+/// Never apply this again; it renders one stale combat at most.
 /// </summary>
 public sealed class BurstMeterPower : PowerModel, ILocalizationProvider
 {
@@ -194,7 +255,7 @@ public sealed class BurstMeterPower : PowerModel, ILocalizationProvider
         ("title", "Burst Energy"),
         ("description",
             "Cards with [gold]Elemental Skill[/gold] grant 5 [gold]Burst "
-          + "Energy[/gold]; Elemental Reactions grant 5. At 60, [gold]Sparks "
+          + "Energy[/gold]; Elemental Reactions grant 5. At 40, [gold]Sparks "
           + "'n' Splash[/gold] is added to your hand; casting it spends ALL "
           + "Burst Energy."),
     };

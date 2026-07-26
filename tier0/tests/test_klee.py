@@ -25,6 +25,201 @@ def test_whole_sheet_parses():
                 if c.id not in ("strike", "defend", "bash")]) >= 90
 
 
+def _klee_pool():
+    return [c for c in loader._card_index().values()
+            if c.character == "klee" and not c.is_companion]
+
+
+# --- pool composition (template §3.4), mirroring test_furina_sheet.py ---
+# v1 review 2026-07-21: Klee had no composition lock while Furina did, which
+# is exactly how the Snap! (M7 R1) drift reached v1 unnoticed -- the sheet
+# grew 75 -> 76 and three counters were never re-derived. This locks the
+# TRUE current shape; the stale "(31)" / "(10)" headers were corrected to
+# match rather than the reverse.
+def test_pool_composition():
+    by_rarity = {}
+    for c in _klee_pool():
+        by_rarity.setdefault(c.rarity, []).append(c)
+    assert len(by_rarity["basic"]) == 4           # template §3.4 allows 4-5
+    assert len(by_rarity["common"]) == 32         # 31 + snap (M7 R1)
+    assert len(by_rarity["uncommon"]) == 25
+    assert len(by_rarity["rare"]) == 15
+    assert sum(len(v) for v in by_rarity.values()) == 76
+    kit = [c for c in by_rarity["rare"] if c.kit_card]
+    assert [c.id for c in kit] == ["sparks_n_splash"]   # 14 draftable rares
+
+
+def test_archetype_tag_counts():
+    """Drift detector for the archetype tag matrix.
+
+    NOTE: deliberately locks the ACTUAL counts rather than asserting the
+    template §3.4 "15-20 tagged cards per archetype" band, which all three
+    archetypes currently sit outside (28 / 22 / 14) with no amendment in
+    the v1->v1.10 log. Reaction's 14 is rationalized in the character doc
+    ("enablers live in the companion pool") but never formally waived.
+    QUEUED FOR USER at the v1 review -- amend the band or accept the
+    deviation on record; until then this test only catches silent drift.
+    """
+    counts = {}
+    for c in _klee_pool():
+        for arch in c.archetypes:
+            counts[arch] = counts.get(arch, 0) + 1
+    assert counts["demolition"] == 28
+    assert counts["spark"] == 22          # 21 + snap (M7 R1)
+    assert counts["reaction"] == 14
+    assert counts["generic"] == 19
+
+
+def test_survival_sprint_frontload_endpoints():
+    """Window B changes immediate bodies, never the scaling engines."""
+
+    def damage(card_id):
+        card = loader.get_card(card_id)
+        return next(fx["amount"] for fx in card.effects
+                    if fx.get("op") == "damage" and fx.get("target") != "self")
+
+    base = {
+        "kaboom": 7,
+        "jumpy_dumpty": 8,
+        "big_badda_boom": 16,
+        "blast_radius": 9,
+        "pocket_fireworks": 5,
+        "rapid_fire": 4,
+        "snap": 6,
+        "sizzle": 8,
+        "boom_goes_the_dynamite": 18,
+        "flame_dance": 9,
+    }
+    upgraded = {
+        "kaboom+": 10,
+        "jumpy_dumpty+": 10,
+        "big_badda_boom+": 20,
+        "blast_radius+": 12,
+        "pocket_fireworks+": 7,
+        "rapid_fire+": 5,
+        "snap+": 9,
+        "sizzle+": 8,
+        "boom_goes_the_dynamite+": 22,
+        "flame_dance+": 11,
+    }
+    assert {card_id: damage(card_id) for card_id in base} == base
+    assert {card_id: damage(card_id) for card_id in upgraded} == upgraded
+
+    sizzle = loader.get_card("sizzle")
+    rider = next(fx for fx in sizzle.effects if fx.get("op") == "conditional")
+    assert rider["then"][0]["amount"] == 6
+    assert loader.get_card("sizzle+").effects[1]["then"][0]["amount"] == 9
+
+    flame = loader.get_card("flame_dance")
+    assert flame.effects[0]["bonus_vs_aura"] == 4  # rider deliberately stable
+
+
+def test_survival_sprint_companion_interfaces_have_live_bodies():
+    """Window D setup cards do something even before the combo resolves."""
+    friendly = loader.get_card("friendly_visit")
+    assert friendly.effects[0] == {"op": "block", "amount": 5}
+    assert loader.get_card("friendly_visit+").effects[-1]["amount"] == 2
+
+    buddy = loader.get_card("study_buddy")
+    assert buddy.effects[0] == {"op": "block", "amount": 6}
+    assert loader.get_card("study_buddy+").effects[-1] == {
+        "op": "draw", "amount": 1,
+    }
+
+    borrowed = loader.get_card("borrowed_brilliance")
+    assert borrowed.effects[0]["cost_override"] == 0
+    assert loader.get_card("borrowed_brilliance+").effects[-1] == {
+        "op": "draw", "amount": 1,
+    }
+
+    dreams = loader.get_card("elemental_ecstasy")
+    mitigation = dreams.effects[-1]
+    assert mitigation["if"] == "target_has_nonpyro_aura"
+    assert mitigation["then"] == [{"op": "block", "amount": 8}]
+    assert loader.get_card("elemental_ecstasy+").cost == 1
+
+
+def test_prune_has_a_solo_floor_and_a_distinct_reaction_payoff():
+    """Prune never blanks, but successful Swirl does not also grant Block."""
+    from tier0.engine import effects
+    from tier0.tests.conftest import make_enemy, make_state
+
+    prune = loader.get_card("prune_witch_hunt")
+
+    offline = make_state()
+    effects.resolve_card(offline, prune)
+    assert offline.player.block == 5
+    assert offline.player.sparks == 1
+    assert offline.reactions_this_card == 0
+
+    # The generic simulator normally aims at the lowest-HP enemy. Swirl is a
+    # targeted setup card, so it should model a human choosing the aura instead.
+    online = make_state(enemies=[make_enemy(hp=20, name="low"),
+                                 make_enemy(hp=30, name="aura")])
+    online.enemies[1].aura = "hydro"
+    effects.resolve_card(online, prune)
+    assert online.player.block == 0
+    assert online.player.sparks == 2
+    assert online.reactions_this_card == 1
+    assert all(enemy.aura == "hydro" for enemy in online.enemies)
+
+
+def test_bennett_voyage_is_one_shot_permanent_strength():
+    from tier0.engine.combat import play_card
+    from tier0.tests.conftest import make_state
+
+    state = make_state()
+    state.player.energy = 1
+    voyage = loader.get_card("bennett_fantastic_voyage")
+    state.player.hand = [voyage]
+
+    play_card(state, voyage)
+
+    assert state.player.powers["strength"] == 3
+    assert voyage in state.player.exhaust_pile
+
+
+def test_durin_consumes_excess_pyro_and_opens_a_reaction_window():
+    from tier0.engine import effects
+    from tier0.tests.conftest import make_enemy, make_state
+
+    state = make_state(enemies=[make_enemy(hp=30, name="pyro"),
+                                make_enemy(hp=30, name="hydro")])
+    state.player.burst_max = 40
+    state.enemies[0].aura = "pyro"
+    state.enemies[0].aura_turns_left = 2
+    state.enemies[1].aura = "hydro"
+    state.enemies[1].aura_turns_left = 2
+
+    effects.resolve_card(state, loader.get_card("durin_witchs_flame"))
+    effects.player_turn_end_triggers(state)
+
+    assert state.enemies[0].hp == 24
+    assert state.enemies[0].aura is None
+    assert state.enemies[1].hp == 30
+    assert state.enemies[1].aura == "hydro"
+    assert state.player.burst_energy == 3
+
+
+def test_pilot_reads_klee_pure_state_conditional_block():
+    """Combat scoring sees Block that is live before the card is played."""
+    from tier0.pilot import policy
+    from tier0.tests.conftest import make_state
+
+    state = make_state()
+    state.player.element = "pyro"
+    dreams = loader.get_card("elemental_ecstasy")
+    dress = loader.get_card("patched_dress")
+
+    assert policy._raw_block(state, dreams) == 0
+    state.enemies[0].aura = "hydro"
+    assert policy._raw_block(state, dreams) == 8
+
+    assert policy._raw_block(state, dress) == 6
+    state.player.sparks = 1
+    assert policy._raw_block(state, dress) == 9
+
+
 @pytest.mark.parametrize("deck,pilot", DECKS)
 @pytest.mark.parametrize("enc", ["swarm", "punisher", "attrition",
                                  "burst_check", "tank_boss", "gauntlet"])
@@ -65,8 +260,55 @@ def test_demolition_deck_detonates_and_sparks():
     assert "gain_spark" in events           # Pounding Surprise fired
 
 
+def test_first_pending_bomb_suppresses_one_attack_without_stacking_weak():
+    """Survival sprint Window A: the first armed Bomb is conditional defense.
+
+    One whole attack action acts as though Weak, but the Bomb is not itself a
+    Weak stack. Multiple Bombs do not deepen or refresh the reduction, and
+    real Weak does not multiply with it. Early detonation leaves the latch
+    available for a later Bomb.
+    """
+    from tier0.engine import combat, effects
+    from tier0.engine.state import Bomb
+    from tier0.tests.conftest import make_enemy, make_state
+
+    def incoming(*, bombs=1, weak=0, detonate=False):
+        enemy = make_enemy(hp=100, intents=[{"kind": "attack", "amount": 12}])
+        enemy.bombs = [Bomb(damage=1) for _ in range(bombs)]
+        enemy.powers["weak"] = weak
+        state = make_state(enemies=[enemy], hp=100)
+        state.turn = 1
+        if detonate:
+            effects.detonate_bombs(state, enemy)
+        combat._enemy_turn(state, enemy)
+        return 100 - state.player.hp
+
+    assert incoming() == 9                 # 12 x Weak's 0.75
+    assert incoming(bombs=3) == 9          # count does not deepen it
+    assert incoming(weak=1) == 9           # no 0.75 x 0.75 double dip
+    assert incoming(detonate=True) == 12   # cashing the Bomb ends safety
+    assert incoming(bombs=0) == 12         # ordinary enemies unchanged
+
+    enemy = make_enemy(hp=100, intents=[{"kind": "attack", "amount": 12}])
+    enemy.bombs = [Bomb(damage=1)]
+    state = make_state(enemies=[enemy], hp=100)
+    combat._enemy_turn(state, enemy)
+    combat._enemy_turn(state, enemy)
+    assert state.player.hp == 79            # 9 once, then the full 12
+
+    multi = make_enemy(
+        hp=100,
+        intents=[{"kind": "attack", "amount": 4, "times": 3}],
+    )
+    multi.bombs = [Bomb(damage=1)]
+    multi_state = make_state(enemies=[multi], hp=100)
+    combat._enemy_turn(multi_state, multi)
+    assert multi_state.player.hp == 91      # all three hits share the action
+    assert multi.bomb_suppression_spent
+
+
 def test_burst_meter_fills_in_reaction_fights():
-    # skill_tags + reactions must feed the 60 meter to full (or to a
+    # skill_tags + reactions must feed the 40 meter to full (or to a
     # cast, which resets it) in most long fights.
     from tier0.engine.combat import run_fight
     from tier0.pilot.policy import make_pilot
@@ -86,13 +328,13 @@ def test_burst_card_gated_and_empties_meter():
     from tier0.engine.combat import card_playable, play_card
     from tier0.tests.conftest import make_state
     st = make_state()
-    st.player.burst_max = 60
+    st.player.burst_max = 40
     st.player.energy = 3
     sns = loader.get_card("sparks_n_splash")
     st.player.hand.append(sns)
-    st.player.burst_energy = 45
+    st.player.burst_energy = 35
     assert not card_playable(st, sns)       # gated until full
-    st.player.burst_energy = 60
+    st.player.burst_energy = 40
     assert card_playable(st, sns)
     play_card(st, sns)
     assert st.player.burst_energy == 0      # casting empties the meter
@@ -106,19 +348,19 @@ def test_kit_burst_grant_and_regrant():
     from tier0.engine.combat import grant_charged_kit, play_card
     from tier0.tests.conftest import make_state
     st = make_state()
-    st.player.burst_max = 60
+    st.player.burst_max = 40
     st.player.energy = 6
     st.player.kit_cards = [loader.get_card("sparks_n_splash")]
     grant_charged_kit(st)
     assert not st.player.hand               # meter not full: nothing yet
-    st.player.burst_energy = 60
+    st.player.burst_energy = 40
     grant_charged_kit(st)
     assert [c.id for c in st.player.hand] == ["sparks_n_splash"]
     grant_charged_kit(st)
     assert len(st.player.hand) == 1         # no duplicate grant
     play_card(st, st.player.hand[0])
     assert st.player.burst_energy == 0
-    st.player.burst_energy = 60             # refill re-grants
+    st.player.burst_energy = 40             # refill re-grants
     grant_charged_kit(st)
     assert [c.id for c in st.player.hand] == ["sparks_n_splash"]
 
@@ -131,8 +373,8 @@ def test_random_discard_cannot_touch_the_kit_burst():
     from tier0.engine import effects
     from tier0.tests.conftest import make_state
     st = make_state()
-    st.player.burst_max = 60
-    st.player.burst_energy = 60
+    st.player.burst_max = 40
+    st.player.burst_energy = 40
     sns = loader.get_card("sparks_n_splash")
     filler = loader.get_card("kaboom")
     st.player.hand = [sns, filler]
@@ -323,8 +565,21 @@ def test_mono_pyro_deck_cannot_react_alone():
 
 
 def test_amp_cap_holds_on_melt_stack():
-    # Review watchlist #1: Vermillion Pact (+25%) + Durin (+30%) + Melt
-    # (x1.75) = x2.71 must stay under the 4x provenance cap.
+    # Review watchlist #1: upgraded Vermillion Pact (+125%) x Melt (x1.75)
+    # = x3.9375, deliberately just below the 4x provenance cap. Durin no
+    # longer overlaps the amp; it consumes excess Pyro instead.
+    from tier0.engine import effects
+    from tier0.tests.conftest import make_state
+
+    state = make_state()
+    state.player.element = "pyro"
+    state.player.powers["amp_reaction_up"] = 125
+    state.enemies[0].aura = "cryo"
+    dealt = effects.deal_damage_to_enemy(
+        state, state.enemies[0], 10, element="pyro", source="attack")
+    assert dealt == 39
+    assert not any(e["event"] == "amp_stack_warning" for e in state.log)
+
     for enc in ("punisher", "tank_boss"):
         stats = run_battery("klee", "melt_stack", enc, "generic",
                             FIGHTS, SEED)

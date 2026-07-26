@@ -1,0 +1,181 @@
+# Docs index
+
+Reorganized 2026-07-26 (project recap). Two kinds of documents live here:
+
+- **`docs/*.md`** — the current set: anything still governing, still open, or
+  still the live reference for a system. Kept deliberately small.
+- **`docs/archive/*.md`** — completed sprint plans/logs/reports and superseded
+  rulings/specs. **Archived docs are records: they are kept verbatim and are
+  not updated.** Where an archived doc contains a claim that is no longer
+  true, the correction lives in the superseding doc named below or in
+  `missed-requirements.md`.
+
+The design-sheet YAMLs (`docs/*.yaml`) are the single source of truth for
+card/relic/companion data and are read directly by the sims and codegen —
+they are not documentation and are not part of this index's scope.
+
+Chat is not a record. Rulings, worksheets, and results enter the repo or they
+don't exist (house rule; see `red-pen-2026-07-26.md` for what happens
+otherwise).
+
+---
+
+## Current docs
+
+### State of the project (start here)
+| doc | what it is |
+|---|---|
+| `open-playtest-items.md` | The live queue of everything needing a human at the game, plus the desk-ruling queue (§6). Dated addendum carries post-compile corrections. |
+| `red-pen-2026-07-26.md` | The most recent ratification record; carries its own errata and the one still-owed Queue 5 cell. |
+| `missed-requirements.md` | Recap audit (2026-07-26): every requirement that was directed, never built, and tracked nowhere — with evidence. |
+| `tier0/DECISIONS.md`, `klee-mod/DECISIONS.md` | The living decision logs (sim-side and mod-side). The project's spine. |
+
+### Law and charters
+| doc | what it is |
+|---|---|
+| `teyvat-spire-design-principles.md` | The design constitution, amended through v1.11b. |
+| `klee-character-design.md` | Klee's identity charter (amended in place through pass 3). |
+| `furina-kickoff-v0.1.md` | Furina's governing declaration doc (amended through 2026-07-25). |
+| `kokomi-kickoff-v1.md` | Kokomi's identity-law charter (Laws 1–4 are live and machine-checked; its *numeric* sections are superseded by R56+ — read numbers from the sheets). |
+
+### Open sprints and live queues
+| doc | what it is |
+|---|---|
+| `animation-sprint-2-plan.md` | Open sprint: gates B5/D5/E2/F2 (and the Funnel Contract §3, still binding). |
+| `animation-sprint-2-log.md` | Open sprint log; doc of record for the two unfixed Playtest-2 defects. |
+| `fontaine-rares-banner-sprint-log.md` | Sprint closed in code, open on four [USER] items (§"Open, and owned by [USER]"). |
+| `kokomi-playtest-protocol.md` | The protocol for Kokomi's first table time (never played). Where it conflicts with `open-playtest-items.md` §2, the latter wins (newer). |
+| `run-model-rework-plan.md` | Implemented (Passes 1–4 shipped); kept current for §10.9, the living skip backlog. |
+| `tier05-perf-and-ironclad-act3-notes.md` | Perf pass record; kept current for §1.5.2's open items (out-of-scale boss audit lives only here). |
+
+### Live references
+| doc | what it is |
+|---|---|
+| `roster-codegen.md` | Codegen + build-path reference (see dated correction note in-file). |
+| `upgrade-conventions.md` | Mined StS2 upgrade grammar (durable) + house rules (see dated correction note in-file). |
+| `calibration-notes.md` | Battery-calibration law ("battery adapts to the roster") + the parked A3/A4 axis questions. |
+| `klee-real-battery-calibration.md` | The real-Ironclad baseline pipeline reference (both reproduce commands live). |
+| `art-sprint-spec.md` | The art pipeline regime: tiers, SOURCES.tsv/plan.tsv discipline, lint gates. |
+| `art-asset-manifest.md` | The per-character asset bill ("AS SHIPPED" maintained in place). |
+| `furina-art-pass-requirements.md` | Furina's art bill/spec (count delegated to `tools/art_coverage.py`). |
+| `kokomi-art-pass-requirements.md` | Kokomi's art bill/spec + §6 open rulings (§1's "zero exist" predates the shell shipping — see header). |
+
+### Research (inputs, still ground truth)
+| doc | what it is |
+|---|---|
+| `sts2-map-and-events-research.md` | Map/events wiki harvest; fidelity ruling and §5 constants stamped. |
+| `act2-act3-roster-research.md` | Act 2/3 enemy roster harvest the curated pools were cut from. |
+| `companion-value-vs-colorless-study.md` | Empirical backing for principles §4.7 and R59. |
+
+---
+
+## Archive map
+
+Grouped by thread; each line says why the doc is closed and where its live
+successor is. "→" = superseded by / continued in.
+
+### Tier 0 / Tier 0.5 simulator thread
+- `tier0-simulator-spec.md` — origin charter (M1–M4). The world outgrew it on
+  purpose: cards live in `docs/*.yaml` not `content/cards/`, Frozen is v2,
+  the non-goals (relics/potions/upgrades/maps) all shipped sanctioned, OPS is
+  46 not 14. Axis definitions (§6) remain the historical source of the
+  scorecard; the living law is `tier0/harness/axes.py` + DECISIONS.
+- `tier05-draft-sim-spec.md` — → `run-model-rework-plan.md` (template v1 is
+  DEAD as of RUNTEMPLATE v6; real maps/acts/events shipped).
+- `tier05-m5-report.md` … `tier05-m8-report.md` — milestone reports, all
+  worlds long superseded (M6/M7 carry their own ARCHIVED banners).
+- `m7-rulings.md`, `m8-rulings.md` — executed ruling records. Durable laws
+  they created (conjunctive healing law; dose-cells-are-diagnostics) live in
+  the principles doc and DECISIONS.
+- `errata-m5-triage.md` — both items landed. Its finding 2 (catalysts
+  structurally suppress Frozen) is preserved in DECISIONS.
+- `csharp-build-spec.md` — C1–C3 delivered (three characters, not one);
+  localization shipped inline rather than as JSON. The never-built C2
+  per-fight telemetry is logged in `missed-requirements.md` §2.3.
+- `c3-codegen-gap-list.md` — every gap closed (68 generated + 8 hand-written,
+  zero system-blocked).
+- `relic-potion-layer-plan.md` — W1/W2/W3 fully implemented
+  (`tier05/relics.py`, `potions.py`, content YAMLs); header's DRAFT status is
+  historical.
+
+### Cross-roster passes and triage
+- `pass1-rulings-round2.md` → `pass2-rulings-round3.md` → `pass3-ratification.md`
+  — each superseded the last; pass-3's frozen-scorecard closeout was itself
+  superseded by `run-model-rework-plan.md` §0 ("the battery itself is broken").
+- `morning-triage-rulings.md`, `triage-execution-report.md` — executed in full.
+
+### Klee thread
+- `klee-pass-1-report.md`, `klee-pass-2-report.md`, `klee-pass-3-report.md` —
+  pass reports; v0.1 baseline replaced by `V02_MEDIAN`.
+- `klee-pass-4-plan.md` — its headline numbers are all false now (the survival
+  sprint fixed A6 via its own option (c)); asks A3/A5 were never ruled — logged
+  in `missed-requirements.md` §2.5, Tier 5.
+- `klee-r23-r25-rulings.md`, `klee-session-worknote.md`, `klee-errata-report.md`
+  — executed ruling/worknote records.
+- `klee-design-review.md` — framing (40% Ironclad target) invalidated by
+  `klee-real-battery-calibration.md`; two of its four dead-card reworks never
+  landed — logged in `missed-requirements.md` §3.4.
+- `klee-survival-sprint-plan.md` → `klee-survival-sprint-report.md` — shipped;
+  bands went floor-only per its recommendation. The telemetry gate it imposed
+  is logged in `missed-requirements.md` §2.2.
+- `klee-art-redpen-round2.md` → `klee-art-redpen-round3.md` — art verdicts
+  re-litigated at true card size, then ruled 2026-07-21 (record in
+  `art/plan.tsv` DECLINE rows).
+
+### Furina thread
+- `furina-predesign-notes.md` — Part 2 → `furina-kickoff-v0.1.md`; Part 1
+  (Frozen v2 errata) is settled principles v1.5.
+- `furina-sprint-1-plan.md` / `-redpen.md` / `-report.md` — sprint 1 delivered
+  and resolved.
+- `furina-pass1-rulings.md`, `furina-pass3-rulings.md` — R16/R17 architecture
+  retired by R40–R43. R29d's owed naming/lore pass is logged in
+  `missed-requirements.md` Tier 5.
+- `furina-sheet-pass-{1,2,3}-plan/-report.md` — sheet passes; every measured
+  world (CONSTANTS/DRAFTER/RUNTEMPLATE) since replaced. Pass-3's unruled asks
+  are logged in `missed-requirements.md` §3.6/§3.7.
+- `furina-sheet-pass-4-plan.md` — Q1 re-ruled, Q2 dissolved by the fanfare
+  sprint; the orphaned Q3 directive is logged in `missed-requirements.md` §1.5.
+- `furina-sheet-redpen.md` — flags executed or ruled; flag 8's convergence
+  cell is the one still owed, tracked in `red-pen-2026-07-26.md`.
+- `furina-principles-amendment-batch.md` — ratified as principles v1.10.
+- `furina-salon-rework-plan.md` — Salon v2 shipped (R40); its §6(c)/(d)
+  residue is logged in `missed-requirements.md` §3.6.
+- `furina-tier05-baseline.md` — diagnostic; superseded by R40–R43; Spotlight
+  redesign inheritance tracked in the pool-sweep backlog.
+- `furina-legibility-sprint-log.md`, `furina-fanfare-sprint-log.md` — closed
+  sprints (fanfare CLOSED by ruling, null confirmed twice).
+
+### Kokomi thread
+- `kokomi-session-worknote.md` — all 18 items landed ("no mod presence" line
+  is historical; she has a full C# tree now).
+- `kokomi-roster-v0.1-report.md` → `kokomi-sheetpass-v0.2-report.md` →
+  `kokomi-v0.4-plan.md` → `kokomi-v0.4-report.md` — the v0.1/meter-50 →
+  v0.4b/R56 arc; each superseded by the next, final numbers by R57/R58.
+  Unbuilt asks (stability band, multiplicative cell, P3/P4) are logged in
+  `missed-requirements.md` §§1.3, 1.4, 3.2.
+
+### Art / animation thread
+- `art-taste-pass.md` — → `klee-art-redpen-round2/3.md`; its four process
+  directives all live in `tools/art_lint.py` + `art/plan.tsv`.
+- `companion-art-plan-addendum.md`, `companion-lore-errata.md`,
+  `sprint-addendum-art.md` — executed in full (cover_autocrop, sibling
+  carve-out, Dahlia renames, dedupe lint).
+- `animation-sprint-1-plan.md` / `-log.md` — sprint 1 CLOSED 2026-07-24; its
+  deferred "polish sprint" scenes are logged in `missed-requirements.md` §4.5.
+- `icon-gap-2026-07-24.md` — sweep landed; **caution:** its "all 78 Furina
+  card portraits resolve" claim checked path resolution, not files — see
+  `missed-requirements.md` §4.1.
+
+### Shop / ship-what-we-know / playtests
+- `shop-companion-channel-plan.md` → `shop-companion-channel-sprint.md`
+  (pre-registration, kept verbatim) → `shop-companion-channel-sprint-log.md`
+  — built and measured; §7 close-out items tracked in
+  `open-playtest-items.md` §6.2 except §7.6/§7.7 (logged in
+  `missed-requirements.md` Tier 5). Its "Fontaine has zero Rares" note is
+  stale since `15fc78f`.
+- `ship-what-we-know-sprint-plan.md` / `-log.md` — sprint CLOSED at the
+  red-pen; the log's "What is NOT done" list is mostly overtaken by
+  `red-pen-2026-07-26.md` (which is the authoritative close-out).
+- `playtest-2026-07-25-coop-a0.md` — playtest record; carries the co-op scope
+  rulings R1's sealing comment points at. Its "Furina still does not
+  [register an upgraded form]" line closed the next day (R2, queue 3).

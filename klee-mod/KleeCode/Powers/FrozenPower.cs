@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using BaseLib.Abstracts;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -25,8 +27,17 @@ namespace KleeMod.Powers;
 /// <c>dealer == Owner</c> (outgoing), Shatter checks <c>target == Owner</c>
 /// (incoming). That symmetry is why this needs no second system.
 /// </summary>
-public sealed class FrozenPower : PowerModel
+public sealed class FrozenPower : PowerModel, ILocalizationProvider
 {
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Frozen"),
+        ("description",
+            "This creature's next action deals 50% less damage. "
+          + "The first Attack that hits it Shatters for unblockable damage "
+          + "and removes Frozen."),
+    };
+
     public override PowerType Type => PowerType.Debuff;
 
     public override PowerStackType StackType => PowerStackType.Counter;

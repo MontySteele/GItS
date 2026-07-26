@@ -16,7 +16,7 @@ power spike, and a rare obsoleting a common's slot is the rarity ladder
 working. Basics are excluded entirely — starters are supposed to be
 outclassed (Strike is strictly dominated by half the base game, by
 design). Cards are only compared inside an identical (cost, type,
-encore_cost, exhaust, tags) group, so a playability gate or Exhaust
+encore_cost, fanfare_cost, exhaust, tags) group, so a resource gate or Exhaust
 rider makes a pair incomparable rather than falsely dominated; formula
 amounts also mark a card incomparable.
 
@@ -73,15 +73,25 @@ def is_cost(eff: dict) -> bool:
 
 
 def effect_maps(card: dict) -> tuple[dict, dict] | None:
-    """(benefits, costs) as signature -> total amount; None if incomparable."""
+    """(benefits, costs) as signature -> total amount; None if incomparable.
+
+    Sly riders (Kokomi v0.2, 2026-07-24) are printed value the first lint
+    build silently dropped -- which made every plain-Block common "dominate"
+    a Sly card of equal face. They count as benefits under a ("sly","true")
+    key so a Sly line is its own dimension, never conflated with the same
+    op in the played face."""
     good: dict = {}
     bad: dict = {}
-    for eff in card.get("effects", []):
-        m = bad if is_cost(eff) else good
+    tagged = ([(eff, False) for eff in card.get("effects", [])]
+              + [(eff, True) for eff in card.get("sly", [])])
+    for eff, from_sly in tagged:
+        m = bad if (is_cost(eff) and not from_sly) else good
         eff = dict(eff)
         amount = eff.pop("amount", 1)
         if not isinstance(amount, int):
             return None  # formula/complex amount
+        if from_sly:
+            eff["sly"] = "true"
         key = tuple(sorted((k, str(v)) for k, v in eff.items()))
         m[key] = m.get(key, 0) + amount
     return good, bad
@@ -104,7 +114,8 @@ def dominates(a: dict, b: dict) -> bool:
 
 def comparison_group(card: dict) -> tuple:
     return (card.get("cost"), card.get("type"), card.get("encore_cost"),
-            card.get("exhaust"), tuple(sorted(card.get("tags", []))))
+            card.get("fanfare_cost"), card.get("exhaust"),
+            tuple(sorted(card.get("tags", []))))
 
 
 def lint_sheet(path: Path) -> tuple[list[str], list[str]]:
@@ -143,8 +154,16 @@ def lint_sheet(path: Path) -> tuple[list[str], list[str]]:
 
 
 def main(argv: list[str]) -> int:
-    paths = [Path(a) for a in argv] or [REPO / "docs" / "klee-cards.yaml",
-                                        REPO / "docs" / "furina-cards.yaml"]
+    # Default = every canonical sheet (the pytest gate fans over the same
+    # set); the old two-sheet default silently skipped Kokomi + companions
+    # for anyone running the tool by hand.
+    paths = [Path(a) for a in argv] or [
+        REPO / "docs" / "klee-cards.yaml",
+        REPO / "docs" / "furina-cards.yaml",
+        REPO / "docs" / "kokomi-cards.yaml",
+        REPO / "docs" / "mondstadt-companions.yaml",
+        REPO / "docs" / "fontaine-companions.yaml",
+        REPO / "docs" / "inazuma-companions.yaml"]
     findings: list[str] = []
     for p in paths:
         found, notes = lint_sheet(p)

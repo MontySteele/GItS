@@ -2,14 +2,22 @@
   Copy to local.props and edit for your machine. local.props is gitignored
   (spec csharp-build-spec.md §0.3 — never commit machine-local paths).
 
-  GameDir    — the Slay the Spire 2 install root, i.e. the folder containing
-               SlayTheSpire2.exe and data_sts2_windows_x86_64/.
+  GameDir    — the Slay the Spire 2 install root. On Windows this contains
+               SlayTheSpire2.exe and data_sts2_windows_x86_64/. On macOS it
+               contains SlayTheSpire2.app.
 
   BaseLibDll — full path to BaseLib.dll. BaseLib is a Steam Workshop mod, so it
                lives under steamapps/workshop/content/2868840/<workshop-id>/, and
                that id differs per machine. We depend on BaseLib for custom card
                portraits (loose-PNG art without a .pck) and for shared card-pool
                registration.
+
+  GameDataDir is auto-detected for Windows x86_64, macOS arm64, and macOS
+              x86_64. Set it explicitly only for an unusual install layout.
+
+  macOS example:
+    <GameDir>/Users/you/Library/Application Support/Steam/steamapps/common/Slay the Spire 2</GameDir>
+    <BaseLibDll>/Users/you/Library/Application Support/Steam/steamapps/workshop/content/2868840/3737335127/BaseLib/BaseLib.dll</BaseLibDll>
 -->
 <Project>
   <PropertyGroup>

@@ -1,0 +1,117 @@
+# Inazuma companion pool — v0.1 KICKOFF DRAFT (ships with Kokomi; docs/kokomi-kickoff-v1.md §4 governs).
+# Shared colorless-style pool, same schema as mondstadt/fontaine sheets. ALL numbers PROPOSED — nothing red-penned yet.
+# Roster v0.1: the starter-reserved trio (Gorou / Sayu / Shinobu, user ruling) + Thoma + Kujou Sara (4-star bench)
+# + Itto as the ONE designed 5-star Rare (eligible per the slot-4 ruling: Zhongli takes slot 4; conscription's jackpot).
+# Conventions: 4-star caps at Uncommon; heals below Rare convert to Block (Charlotte precedent); 5-star Rares are the
+# only true-heal slots (none designed here yet). All applies_element flags EXPLICIT (catalyst-cadence drafters must not
+# auto-apply through companion hits; the Fontaine-sheet discipline).
+# ERRATA NOTE (kickoff §4, on the record so it isn't "rediscovered"): Kuki Shinobu's canonical self-HP cost is DROPPED
+# per Kokomi character law 1 (no self-damage in her kit or shared-pool errata). Her cards are authored costless-to-HP.
+# RULED (R52, ask 9): Raiden authored below — playable characters may exist as Rare companion cards and surface in
+# the conscript pool, but ONLY as a Rare payoff; the opposed lore carries the flavor. Natural rare odds (N5).
+# FRAMING (v0.4 lore overlay §3) — THE POOL IS THE PEACE, NOT HER ARMY. This roster spans every Inazuma faction:
+#   resistance (Gorou), Shogunate (Kujou Sara, Raiden), Yashiro (Thoma, and Sayu's Shuumatsuban), Arataki Gang
+#   (Itto, Shinobu). That is not a roster accident and it is not a resistance muster — it is POST-DECREE INAZUMA
+#   ANSWERING WATATSUMI'S CALL. The framing does three jobs at once: it explains why non-resistance names are in
+#   a Kokomi pool at all; it sharpens Sara, who was the OPPOSING field commander and now answers to the strategist
+#   who beat her; and it gives Raiden her best gloss (see her card). Read every companion here as someone who
+#   CHOSE to come. Nobody in this pool was conscripted — the display family is Muster/Enlist/Rally for exactly
+#   this reason, and the exhaust voice is ROTATION, never sacrifice (voice law, kokomi-cards.yaml header).
+# Later scope: Kazuha (Sly/discard flavor), Heizou, Ayaka, Ayato, Yoimiya, Yae Miko 5-stars (banner roll per v1.8).
+
+# ---------- GOROU (Geo | buffer/general | the literal adjutant) ----------
+- {id: gorou_inuzaka_charge, name: "Gorou — Inuzaka Charge", star: 4, rarity: common, role_c: applier, element: geo, cost: 0, type: attack, exhaust: true,
+   effects: [{op: damage, amount: 6, target: enemy, applies_element: false}]}
+   # The vanguard's opening arrow. Geo leaves no aura in the reaction table (Crystallize CONSUMES); applies_element
+   # false is explicit so no cadence dial can re-tag it. Starter attack-slot card (randomized_starter).
+- {id: gorou_war_banner, name: "Gorou — General's War Banner", star: 4, rarity: common, role_c: buffer, element: geo, cost: 1, type: skill,
+   effects: [{op: block, amount: 4}, {op: buff_next_attack, amount: 3}]}
+   # His DEF-banner identity: hold the line, then hit harder. Def-adjacent buffer per kickoff §4.
+- {id: gorou_heart_of_the_clan, name: "Gorou — Heart of the Clan", star: 4, rarity: uncommon, role_c: buffer, element: geo, cost: 1, type: skill,
+   effects: [{op: block, amount: 3}, {op: apply_power, power: metallicize, amount: 2, target: self}]}
+   # The standing banner: 2 Block a turn while the fight lasts. Sustain-through-armor, never healing (the law).
+
+# ---------- SAYU (Anemo | healer -> Block per law | the sleepy ninja) ----------
+- {id: sayu_yoohoo_windwheel, name: "Sayu — Yoohoo Art: Fuuin Dash", star: 4, rarity: common, role_c: trigger, element: anemo, cost: 1, type: attack,
+   effects: [{op: damage, amount: 4, target: enemy, applies_element: false}, {op: swirl, target: enemy}]}
+   # She rolls through. Swirl spreads whatever aura she hits (Kokomi's hydro, usually).
+- {id: sayu_daruma_gift, name: "Sayu — Muji-Muji Daruma", star: 4, rarity: common, role_c: buffer, element: anemo, cost: 1, type: skill,
+   effects: [{op: block, amount: 4}, {op: block_next_turn, amount: 4}]}
+   # Her healing daruma CONVERTED per the conjunctive law (Charlotte precedent verbatim): sustain-over-time as
+   # pre-emptive Block. Starter support-slot card (randomized_starter).
+- {id: sayu_naptime, name: "Sayu — Naptime", star: 4, rarity: uncommon, role_c: buffer, element: anemo, cost: 0, type: skill,
+   effects: [{op: block, amount: 3}, {op: draw, amount: 1}]}
+   # Free beat: she naps, you plan. Velocity glue at 0 cost.
+
+# ---------- KUKI SHINOBU (Electro | healer -> Block per law | self-HP cost DROPPED, see header errata) ----------
+- {id: shinobu_sanctifying_ring, name: "Shinobu — Sanctifying Ring", star: 4, rarity: common, role_c: applier, element: electro, cost: 2, type: skill,
+   effects: [{op: damage, amount: 3, target: all_enemies, applies_element: true}, {op: block, amount: 4}]}
+   # Her ring, minus the blood price (header errata): mass electro application + a guard. Electro on Kokomi's hydro
+   # auras = Electro-Charged — the pool's reaction voice.
+- {id: shinobu_grass_ring_bond, name: "Shinobu — Grass Ring of Sanctification", star: 4, rarity: common, role_c: buffer, element: electro, cost: 0, type: skill,
+   effects: [{op: block, amount: 4}]}
+   # The ring's mending CONVERTED to Block per law. Plain on purpose: the honest wall. Starter support-slot card.
+- {id: shinobu_thundergrust, name: "Shinobu — Thundergrust", star: 4, rarity: uncommon, role_c: applier, element: electro, cost: 1, type: attack,
+   effects: [{op: damage, amount: 7, target: enemy, applies_element: true}]}
+   # The medic can also hit. Single-target electro applier.
+
+# ---------- THOMA (Pyro | shield specialist — WATCHLIST: overlap with Kokomi's own Block identity, kickoff §4) ----------
+- {id: thoma_blazing_barrier, name: "Thoma — Blazing Barrier", star: 4, rarity: common, role_c: buffer, element: pyro, cost: 1, type: skill,
+   effects: [{op: block, amount: 5}, {op: block_next_turn, amount: 2}]}
+   # The fixer's shield, with an ember that lingers. Pre-emptive Block texture (Charlotte grammar).
+- {id: thoma_crimson_ooyoroi, name: "Thoma — Crimson Ooyoroi", star: 4, rarity: uncommon, role_c: applier, element: pyro, cost: 2, type: attack,
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true}, {op: block, amount: 3}]}
+   # Flaming collapse: pyro on hydro auras = Vaporize (the cross-pool amp voice), armored follow-through.
+
+# ---------- KUJOU SARA (Electro | attack buffer — the Strength card is DELIBERATE: it exercises Flawless Strategy) ----------
+- {id: sara_crowfeather_cover, name: "Kujou Sara — Crowfeather Cover", star: 4, rarity: common, role_c: buffer, element: electro, cost: 0, type: skill,
+   effects: [{op: buff_next_attack, amount: 4}]}
+   # The Tengu marks the target. Free, sharp, spent on the next swing.
+- {id: sara_tengu_stormcall, name: "Kujou Sara — Tengu Stormcall", star: 4, rarity: uncommon, role_c: buffer, element: electro, cost: 1, type: skill,
+   effects: [{op: damage, amount: 4, target: enemy, applies_element: true}, {op: apply_power, power: strength, amount: 2, target: self}]}
+   # Her ATK-buff identity as real Strength. IN KOKOMI'S HANDS the Strength converts to 2 Charge at the apply_power
+   # chokepoint (Flawless Strategy, kickoff §1 law 3) — the conversion is the design, not a leak; any other drafter
+   # keeps the Strength. The one deliberate conversion-exerciser in the v0.1 pool.
+
+# ---------- ARATAKI ITTO (5-star Rare | taunt/bruiser | conscription's favorite meal — slot-4 ruling) ----------
+- {id: itto_superlative_superstrength, name: "Itto — Superlative Superstrength", star: 5, rarity: rare, role_c: trigger, element: geo, cost: 2, type: attack,
+   effects: [{op: damage, amount: 14, target: enemy, applies_element: false}, {op: block, amount: 6}]}
+   # The one and oni: a bruiser body on both sides of the card. No taunt verb exists in the DSL (implement-or-log:
+   # LOGGED as out of v0.1 scope — a taunt/redirect op is a later design conversation, not silently approximated).
+   # Rare = the conscription jackpot; the banner governor covers drafting him normally.
+
+# ---------- RAIDEN SHOGUN (5-star Rare | the opposed apex — R52 ask 9) ----------
+# Lorewise Kokomi and the Shogun are OPPOSED: Watatsumi bled for the Vision Hunt, and the Almighty answers no
+# conscription. The card is therefore the DOCTRINE, not the woman — one borrowed instant of Musou, and the
+# resistance leader's bitterest irony that it works. Rare payoff ONLY, per the ruling.
+- {id: raiden_musou_no_hitotachi, name: "Raiden Shogun — Musou no Hitotachi", star: 5, rarity: rare, role_c: applier, element: electro, cost: 3, type: attack,
+   exhaust: true,
+   effects: [{op: damage, amount: 40, target: enemy, applies_element: true},
+             {op: apply_power, power: vulnerable, amount: 2, target: enemy}]}
+   # RATIFIED 2026-07-25 [USER], from 2 cost / 18 damage / no rider / no Exhaust: "3 cost, 40 damage,
+   # vulnerable 2, applies electricity, exhaust — massive payoff for a very high cost. Rares in general
+   # tend to be undertuned, so I think this is fine for a front-loaded rare, and has natural Kokomi
+   # exhaust synergy." The same session ruled Navia fine as-is and Neuvillette weak-but-deferred.
+   # WHAT THE BUFF CHANGES, recorded because it moves the card's class, not just its number:
+   #   - It RESOLVES the Clorinde/Raiden domination flag opened one commit earlier (the open item that
+   #     no lint could raise, since the two live in different nations' sheets). Clorinde is 2 cost for
+   #     20 + a permanent power; Raiden is 3 cost for 40 + Vulnerable and then she is GONE. Different
+   #     cost, different shape, and the strictly-better reading is dead in both directions.
+   #   - Exhaust converts her from a recurring jackpot into a ONE-SHOT, which is what pays for 40. It is
+   #     also the first companion Exhaust that is a PAYOFF rather than a brake, and it lands in the one
+   #     kit that wants it: Kokomi's exhaust voice is ROTATION (sheet header, line 19), so a card that
+   #     leaves the deck after firing is thinning it on purpose.
+   #   - Vulnerable is applied AFTER the damage (StS Bash ordering), so the 40 does NOT amplify itself.
+   #   - 3 cost is the FIRST in the shared companion pool (the only other 3-costs anywhere are Klee's
+   #     bombs_away/all_my_treasures/playtime_forever) — so it is precedented, but it is a whole turn's
+   #     energy for any character, which is the intended price and not an oversight.
+   # The single slash of Musou: still the pool's biggest one-card hit by a wide margin, and electro on
+   # Kokomi's ubiquitous hydro is the Electro-Charged apex. Deliberately SHAPELESS defensively — no
+   # Block, no draw, no sustain: eternity is one perfect cut, and then the blade is sheathed.
+   # Itto is the bruiser jackpot (14+6, 2 cost, repeatable); Raiden is the executioner jackpot.
+   # The call-up can find her at natural rare odds (R52/N5 — revisit only if the sims show her busted).
+   # GLOSS ([USER] ruling, v0.4 §3): the card KEEPS Musou no Hitotachi, and the reading is RECONCILIATION, not
+   # irony. The retired framing called this 'the bitterest irony' — Kokomi fishing for the blade that executed
+   # her people's Visions. That reading breaks the peace the whole roster is built on. The true gloss: this is
+   # the peace's crowning proof. The Shogun's blade defends Watatsumi now, and Watatsumi's strategist is the
+   # one who calls it. Never write the irony version again.

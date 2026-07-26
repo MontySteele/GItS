@@ -20,7 +20,7 @@ namespace KleeMod;
 /// ImageTexture cannot satisfy even via Harmony. Character art still needs a
 /// real .pck; see DECISIONS.md.
 /// </summary>
-internal static class KleeArt
+internal static class RosterArt
 {
     /// <summary>
     /// Cached because CustomPortrait is a property getter the UI hits
@@ -81,4 +81,14 @@ internal static class KleeArt
         Cache[cardId] = texture;
         return texture;
     }
+}
+
+/// <summary>
+/// Compatibility name for Klee's already-generated and hand-written cards.
+/// New character profiles use <see cref="RosterArt"/> directly.
+/// </summary>
+internal static class KleeArt
+{
+    public static Texture2D? CardPortrait(string cardId) =>
+        RosterArt.CardPortrait(cardId);
 }

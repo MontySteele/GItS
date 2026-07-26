@@ -13,7 +13,7 @@ cadence: skill           # Skill-grade (kickoff §1): only Skill/Burst-tagged
                          # cards apply hydro; engine rule in effects._element_for
 burst_max: 70            # RATIFIED (R17, 2026-07-20): particles from skill
                          # tags (5), reactions (5), Salon ticks (2/member/
-                         # turn), Encore spend (1/point). Klee=60, nuke~90.
+                         # turn), Encore spend (1/point). Klee=40, nuke~90.
 fanfare: true            # Fanfare cap = FANFARE_CAP_FRACTION x maxHP
 kit: [let_the_people_rejoice]   # v1.9: Burst is kit, not loot
 # Ethereal Spotlight (kickoff §3.1): her starting relic adds the selector
@@ -34,6 +34,10 @@ archetype_decks:
 # A1-dreadful engines; Klee deck-band precedent). spotlight_weighted
 # BANDED AT PASS 2 per R19's schedule, in the R16 world: measured 4.0
 # at 1000 fights + the 0.3 margin convention. Red-pen may adjust.
+# STALE SINCE THE SALON-V2 REWORK (2026-07-23, furina-salon-rework-plan.md):
+# these A2 values were measured in the v1 anonymous-tick world and the
+# rework deliberately moved Salon output. NOT silently retuned (ratified-
+# band law) -- re-measure + red-pen at the rework's ratification.
 deck_bands:
   A2_scaling:
     salon_weighted: 7.6
@@ -48,8 +52,15 @@ starting_deck:
   - stage_presence
   - regal_bearing
   - aria_of_recompense
-  - aria_of_recompense
   - salon_debut
+  - an_invitation
+# Run-start Fontaine ensemble, mirroring Klee's Mondstadt starter rule.
+# One weak basic Attack and one basic defense are replaced on a dedicated,
+# replayable RNG stream. Each of the four shortlisted characters appears in
+# exactly one role: Pyro/Cryo attack choice, two defensive support textures.
+randomized_starter:
+  attack: {replace: soloists_solicitation, choices: [chevreuse_interdiction_fire, freminet_pers_deploy]}
+  support: {replace: stage_presence, choices: [charlotte_enduring_frosthelm, lynette_enigmatic_feint]}
 packages:
   # Plausible drafts (round-3 principle), not monocultures — each carries
   # natural cross-archetype draft-ins.
@@ -73,9 +84,9 @@ packages:
     # draft-ins a human obviously takes:
     - graceful_retreat
     - swelling_overture
-  # The companion-depth plan: Chevreuse's full 3-card kit as the star
-  # (the §10 counterweight route — Vaporize off her own hydro), plus the
-  # Spotlight machinery. Draft-gated high-ceiling; luck-gated is the slot.
+  # Guest Cast package: a mixed Companion ensemble (all share Spotlight v5),
+  # plus the Spotlight machinery. Draft-gated high-ceiling; luck-gated is the
+  # access-plus-machinery assembly, not same-character depth.
   spotlight_weighted:
     - chevreuse_interdiction_fire
     - chevreuse_interdiction_fire

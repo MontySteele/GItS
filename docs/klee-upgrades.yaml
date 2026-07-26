@@ -5,9 +5,9 @@
 # Grammar authority: upgrade-conventions.md. Bursts excluded (kit, v1.9; Talent Training = v2).
 
 # ---- BASICS ----
-kaboom:            {damage: +3}                    # 6->9, Strike-exact
+kaboom:            {damage: +3}                    # 7->10, survival-sprint frontload
 duck_and_cover:    {block: +3}                     # 5->8, Defend-exact
-jumpy_dumpty:      {damage: +2, bomb_damage: +2}   # dual bump: signature-basic privilege (Bash precedent)
+jumpy_dumpty:      {damage: +2, bomb_damage: +2}   # hits 8->10; bomb 6->8
 pop:               {bomb_damage: +2}               # 5->7
 
 # ---- COMMONS (one number bump each; zero cost reductions) ----
@@ -16,56 +16,56 @@ fish_flavored_bait: {bomb_damage: +2}
 quick_fuse:        {add: {op: draw, amount: 1}}    # 0-cost utility gains rider
 double_pop:        {bomb_damage: +2}               # 4->6 each
 ammo_scavenging:   {bomb_damage: +2}
-big_badda_boom:    {damage: +4}                    # 12->16, big-base row
-blast_radius:      {damage: +3}                    # 6->9 AoE
+big_badda_boom:    {damage: +4}                    # 16->20, big-base row
+blast_radius:      {damage: +3}                    # 9->12 AoE
 chain_fuse:        {bonus: +2}                     # placed-this-turn bonus 3->5
 careful_arrangement: {bonus: +2}                   # 2->4 per moved bomb
 bomb_voyage:       {bomb_damage: +2}
 sparkly_treasure:  {spark: +1}                     # 1->2
-pocket_fireworks:  {damage: +2}                    # 4->6 x2
+pocket_fireworks:  {damage: +2}                    # 5->7 x2
 crackle:           {discard: +1, sparks: +1}       # R36: discard 2, add 2 Sparks (damage delta dead with the R10 buff)
 spark_collection:  {spark: +1}                     # 2->3
 tail_of_flame:     {conditional_bonus: +3}         # 4->7 when free
 eager_to_help:     {draw: +1}                      # both branches
 skip_and_hop:      {block: +2}                     # 2->4
-rapid_fire:        {damage: +1}                    # 3->4 per hit (x4)
-warm_glow:         {block: +2}                     # 3->5
-snap:              {damage: +3}                    # 5->8, standard common-attack bump; Spark rider untouched (R1: the upgrade must not move the resource curve)
-sizzle:            {conditional_bonus: +3}         # aura bonus 5->8
+rapid_fire:        {damage: +1}                    # 4->5 per hit (x4)
+warm_glow:         {block: +2}                     # 6->8
+snap:              {damage: +3}                    # 6->9; Spark rider untouched (R1: the upgrade must not move the resource curve)
+sizzle:            {conditional_bonus: +3}         # aura bonus 6->9
 combustion_study:  {burst_energy: +5}              # 10->15
-alchemical_curiosity: {draw: +1}                   # 2->3
-boom_goes_the_dynamite: {damage: +4}               # 16->20
+alchemical_curiosity: {block: +3}                  # 5->8; draw stays 2
+boom_goes_the_dynamite: {damage: +4}               # 18->22
 study_of_explosions: {burst_energy: +5}            # 5->10
 friendly_visit:    {draw: +1}                      # 1->2
-hide_and_seek:     {block: +3}                     # 7->10
+hide_and_seek:     {block: +3}                     # 7->10; Scry 2 rider stays fixed
 sorry_jean:        {block: +2}                     # 4->6
 spooked:           {weak: +1}                      # 1->2 all
 clockwork_toy:     {block: +2}                     # 5->7
 run_away:          {block: +2}                     # 4->6
-patched_dress:     {condition: unconditional}      # the +2 spark-bonus always applies
+patched_dress:     {block: +3}                     # 6->9; Spark branch remains +3 (12 total)
 
 # ---- UNCOMMONS (bump OR keyword/condition; two cost slots + one 1->0) ----
 jumpy_dumpty_mk2:  {damage: +2}                    # 8->10 x2
 remote_detonator:  {bonus: +2}                     # detonation bonus 2->4
 bombs_away:        {cost: -1}                      # 3->2 (uncommon cost slot)
-explosives_workshop: {power_amount: +1}            # +2->+3 per stack, cap 4 unchanged
+explosives_workshop: {power_amount: +1}            # +2->+3 per copy; duplicate Powers stack without a cap
 cluster_charge:    {damage: +3}                    # 10->13
 trip_wire:         {bomb_damage: +3}               # 7->10
-controlled_demolition: {bombs: +1}                 # X+1 -> X+2
+controlled_demolition: {bomb_damage: +3}           # 7 -> 10 per bomb (RATIFIED 2026-07-26; was {bombs: +1})
 kaboom_beetle_swarm: {bonus_vs_bombed: +2}         # 3->5
 spark_knight_style: {power_amount: +1}             # +2->+3 on free attacks
 endless_fireworks: {cost: -1}                      # 1->0 (engine-power precedent)
 flame_on_the_wick: {damage: +3}                    # 6->9
 gleeful_barrage:   {damage: +1}                    # R39: 3->4 per hit
-hot_hands:         {innate: true}                  # R38 (user 2026-07-20): adopts the R37 disposition. The old {remove: self_damage} delta was codegen-inexpressible (structural) and left the card with no C# upgrade path; self-damage now STAYS on the upgrade (it's the card's cost), Innate is the quality.
+hot_hands:         {retain: true}                  # Playtest 2026-07-22: bank the Spark enabler for the right hand; do not force its HP cost into turn 1.
 cant_catch_me:     {block: +2}                     # 2->4 (base errata'd 4->2, R25 batch)
 sugar_rush:        {remove: exhaust}               # classic quality upgrade (net-0 energy loop is spark-bounded)
 catalytic_conversion: {innate: true}               # R37: classic power disposition -- starts in the opening hand
 perfect_timing:    {damage: +2}                    # 8->10
 elemental_ecstasy: {cost: -1}                      # 2->1 (uncommon cost slot)
-borrowed_brilliance: {copy_cost_override: 0}       # the copy costs 0
+borrowed_brilliance: {add: {op: draw, amount: 1}}  # base copy already costs 0; + replaces itself
 study_buddy:       {add: {op: draw, amount: 1}}
-flame_dance:       {damage: +2}                    # 7->9 all
+flame_dance:       {damage: +2}                    # 9->11 all
 spirited_away:     {block: +4}                     # 12->16
 dodge_roll:        {block: +3}                     # 6->9 (base errata'd 8->6, R25 batch)
 bright_idea:       {draw: +1}                      # 3->4, discard stays 1
@@ -83,25 +83,50 @@ true_spark_knight: {cost: -1}                      # 2->1
 da_da_da:          {damage: +2}                    # 4->6 x3 (Exhaust stays; sparks make removal too loopy)
 grand_finale:      {bonus_per_detonation: +1}      # 2->3
 secret_stash:      {cards: +1}                     # adds 3 demolition commons
-vermillion_pact:   {amp_percent: +5}               # 25->30, NOT 35 — amp-cap watchlist discipline
+vermillion_pact:   {amp_percent: +25}              # +100%->+125%; Melt reaches x3.94, just below the 4x detector
 playtime_forever:  {cost: -1}                      # 3->2
 best_friends_forever: {cost: -1}                   # 1->0
-no_holding_back:   {damage: +4}                    # 14->18, self-damage stays (it's the card's story)
+no_holding_back:   {damage: +4}                    # 14->18; the base HP loss was removed in the live-playtest patch
 
 # ---- COMPANIONS (modest; upgraded forms stay enabler-grade; Exhausts never remove) ----
 dahlia_sacramental_shower: {damage: +2}
 dahlia_favonian_favor:     {block: +2}
 fischl_nightrider:         {damage: +2}
 fischl_oz:                 {duration: +1}          # 3->4 turns
-barbara_melody:            {block: +2}             # R8 conversion: 4->6 (heal is gone; burst rider untouched)
+barbara_melody:            {block: +2}             # 6->8; burst rider untouched
 barbara_shining_idol:      {block: +2}             # R8 conversion: 5->7 (cantrip + aura untouched)
 sucrose_gust:              {draw: +1}
-sucrose_astable:           {burst_energy: +4}      # 8->12
+sucrose_astable:           {burst_energy: +4}      # 8->12; base card is free and Exhausts (R62)
+sucrose_catalyst_conversion: {draw: +1}            # draw 1->2; energy stays 1 (an energy bump would
+                                                   # over-swing a fixer). PROPOSED with the card (v1.11a).
+
 bennett_passion:           {buff: +2}              # next attack +4->+6
-bennett_fantastic_voyage:  {buff: +1}              # attack-up 3->4 (R8: heal became block 4, base untouched)
+bennett_fantastic_voyage:  {buff: +1}              # Strength 3->4; Exhaust stays
 kaeya_frostgnaw:           {damage: +2}
 diona_icy_paws:            {block: +2}
-prune_witch_hunt:          {spark: +1}             # 1->2 (personal pool)
+prune_witch_hunt:          {spark: +1}             # 1->2; Swirl/fallback Block stay fixed (personal pool)
 albedo_solar_isotoma:      {duration: +1}          # 3->4 turns
-durin_witchs_flame:        {ping_damage: +2}       # end-of-turn 4->6; amp % stays 30 (watchlist)
-nicole_celestial_gift:     {block_per_turn: +2}    # 4->6; attack bonus stays +2
+durin_witchs_flame:        {power_amount: +2}       # consumed-Pyro damage 6->8; Burst rider stays 3/aura
+nicole_celestial_gift:     {cost: -1}   # 2 -> 1. RATIFIED 2026-07-26 with the redesign.
+                                        # The upgrade is COST, not magnitude, because the card's power is
+                                        # already a ratchet: +1 Strength per turn compounds on its own, and
+                                        # buying it a turn earlier is worth more than buying it bigger.
+                                        # SUPERSEDES the interim G-C2 delta {buff: +2}, which existed only
+                                        # to make the card upgradable at all after {block_per_turn: +2}
+                                        # turned out to be unexpressible in both the sim and the codegen.
+                                         # WAS {block_per_turn: +2} (4->6 block), which was
+                                         # UNEXPRESSIBLE in both layers: CELESTIAL_GIFT_BLOCK is a
+                                         # tier0 constant and CompanionConstants.CelestialGiftBlock is
+                                         # a C# const, so neither the sim nor the codegen could apply
+                                         # it. The card was a dead campfire choice in the live build --
+                                         # named by the 2026-07-25 playtest, and the reason
+                                         # tools/lint_upgrade_coverage.py exists.
+                                         # This moves the delta onto the half of the card that IS a
+                                         # per-card field, which the `buff` grammar already binds to
+                                         # the first top-level apply_power. Same upgrade budget, same
+                                         # card identity (a buffer), zero new plumbing.
+                                         # The higher-fidelity alternative -- make the block a card
+                                         # field and thread it through effects.py, the upgrade
+                                         # grammar, the generator and CelestialGiftPower -- is a real
+                                         # four-layer change and is NOT conventional-delta work; it is
+                                         # listed for [USER] at red-pen rather than taken here.

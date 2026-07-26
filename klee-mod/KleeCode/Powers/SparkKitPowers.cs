@@ -54,31 +54,15 @@ public sealed class SparkPerTurnPower : PowerModel, ILocalizationProvider
 /// </summary>
 public sealed class ZeroCostAttacksUpPower : PowerModel, ILocalizationProvider
 {
-    /// <summary>Sheet cap (spark_knight_style max_stacks: 4), power units.</summary>
-    public const int MaxStacks = 4;
-
     public List<(string, string)>? Localization => new()
     {
         ("title", "Spark Knight Style"),
-        ("description",
-            "Your Attacks that cost 0 deal {Amount} more damage. (Max 4.)"),
+        ("description", "Your Attacks that cost 0 deal {Amount} more damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override bool TryModifyPowerAmountReceived(
-        PowerModel canonicalPower, Creature target, decimal amount,
-        Creature? applier, out decimal modifiedAmount)
-    {
-        modifiedAmount = amount;
-        if (canonicalPower is not ZeroCostAttacksUpPower || target != Owner) return false;
-        var clamped = System.Math.Min(Amount + amount, MaxStacks) - Amount;
-        if (clamped == amount) return false;
-        modifiedAmount = clamped;
-        return true;
-    }
 
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,

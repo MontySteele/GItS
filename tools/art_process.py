@@ -2,7 +2,9 @@
 """Process art/raw/ into ImageGen targets per art/plan.tsv (spec §2 step 3).
 
 - cover: scale to fill W×H, crop (focus=top keeps the top of the frame — right
-  for TCG card art and full-body renders; center otherwise)
+  for TCG card art and full-body renders; center otherwise). focus may instead
+  be a fractional anchor `x<f>`, `y<f>` or `x<f>,y<f>` naming where in the
+  SOURCE the crop should centre — see cover() for why top/center is not enough.
 - contain: fit inside W×H, pad to exact size on transparency (icons)
 - cover_autocrop: crop to the art's content first (splash/Wish sources float
   the figure in a large transparent void), then fit — focus carries
@@ -94,7 +96,40 @@ def render_svg(path, size):
     return None
 
 
+def _anchor(focus):
+    """Parse `x<frac>`, `y<frac>` or `x<frac>,y<frac>` into (ax, ay) fractions.
+
+    Returns None for anything else, which keeps the legacy `top` / `center`
+    keywords on their original code path byte-for-byte -- shipped Klee art
+    must not shift because a new spelling was added.
+    """
+    ax = ay = None
+    for part in focus.split(","):
+        part = part.strip()
+        try:
+            if part.startswith("x"):
+                ax = float(part[1:])
+            elif part.startswith("y"):
+                ay = float(part[1:])
+            else:
+                return None
+        except ValueError:
+            return None
+    return None if (ax is None and ay is None) else (ax, ay)
+
+
 def cover(img, w, h, focus):
+    """Scale to fill w*h and crop.
+
+    focus is `top`, `center`, or a fractional anchor `x<f>[,y<f>]` naming the
+    point in the SOURCE the crop centres on. Either may carry `@zoom`.
+
+    The anchor exists because top/center cannot express the common case
+    (2026-07-23 taste pass): official portrait art puts the face ~25-33% down
+    and parks the GENSHIN IMPACT / HOYOVERSE wordmarks on the top and bottom
+    edges. `center` cropped 500x380 out of the middle and returned a headless
+    torso; `top` would have returned the wordmark. `y0.28` returns the face.
+    """
     # focus "center@1.5" punches the crop 1.5x into the frame (taste-pass
     # directive 2: VFX gif frames want the blast, not the whole battlefield).
     zoom = 1.0
@@ -105,8 +140,16 @@ def cover(img, w, h, focus):
     if scale > UPSCALE_FLAG:
         flags.append(f"upscale x{scale:.1f}")
     img = img.resize((round(img.width * scale), round(img.height * scale)), Image.LANCZOS)
-    x = (img.width - w) // 2
-    y = 0 if focus == "top" else (img.height - h) // 2
+    anchor = _anchor(focus)
+    if anchor is None:
+        x = (img.width - w) // 2
+        y = 0 if focus == "top" else (img.height - h) // 2
+    else:
+        ax, ay = anchor
+        x = (img.width - w) // 2 if ax is None else round(ax * img.width - w / 2)
+        y = (img.height - h) // 2 if ay is None else round(ay * img.height - h / 2)
+        x = max(0, min(img.width - w, x))
+        y = max(0, min(img.height - h, y))
     return img.crop((x, y, x + w, y + h))
 
 
@@ -330,13 +373,23 @@ def main():
         else:
             gaps.append(f"{r['asset_id']} r{r['rank']} ({r['title']})")
 
-    # derived: locked select portrait
-    sp = ROOT / "ImageGen/images/ui/select_portrait.png"
-    if sp.exists():
+    # derived: locked select portrait -- one per character. The roster put
+    # Furina's portrait at ImageGen/images/furina/ui/; Klee's historical layout
+    # is ImageGen/images/ui/. Derive the locked variant next to EVERY
+    # select_portrait a plan row produced, not just Klee's hardcoded path.
+    sp_outs = {
+        (ROOT / r["out"]) for r in rows
+        if Path(r["out"]).name == "select_portrait.png"
+    }
+    for sp in sorted(sp_outs):
+        if not sp.exists():
+            continue
         img = Image.open(sp).convert("RGBA")
         locked = ImageEnhance.Brightness(ImageEnhance.Color(img).enhance(0.15)).enhance(0.55)
         locked.save(sp.parent / "select_portrait_locked.png")
-        status["select_portrait_locked"] = ("found", "derived: select_portrait desaturated")
+        key = "select_portrait_locked" if sp.parent == ROOT / "ImageGen/images/ui" \
+            else f"{sp.parent.parent.name}_select_portrait_locked"
+        status[key] = ("found", f"derived: {sp.parent.name}/select_portrait desaturated")
 
     update_manifest(status)
     print(f"{done}/{len(rows)} plan rows processed; {len(status)} assets placed")

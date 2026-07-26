@@ -1628,3 +1628,460 @@ spark-on-detonation is the tell.
   - No Spark       -> real divergence, opens a sim-side correction.
 
 NOT self-closed from the repo: this needs the eyes-on result.
+
+## Furina character-select crash: preload paths and hook id collision (2026-07-23)
+
+Windows playtest reached character select, then crashed in
+`RunManager.GenerateMap`. The background preload had failed exactly four
+Furina paths: combat visuals, character icon scene, energy counter scene, and
+card trail. `CharacterModel.AssetPaths` derives those from `Id.Entry`; texture
+overrides and `CreateCustomVisuals` do not alter the preload list. BaseLib
+exposes a supported redirect for each one, but Furina had not overridden
+`CustomVisualPath`, `CustomIconPath`, `CustomEnergyCounterPath`, or
+`CustomTrailPath`.
+
+Fix: both roster characters now close all four redirects explicitly. Combat
+and icon scenes are character-owned PCK resources; the temporary energy
+counter and trail borrow valid Ironclad scenes. Furina's remaining PCK scenes
+also moved under `res://furina/`. Missing Furina art is copied from Klee at
+PCK-build time, so temporary art can be shared without sharing the paths that
+BaseLib registers for conversion.
+
+The old PCK was itself a deployment hazard because it is gitignored and a pull
+cannot refresh it. `build_pck.ps1` now writes a versioned resource/hash
+contract beside the pack; deploy validation rejects an old, missing, or
+mismatched contract. S6c checks every roster character's source overrides and
+PCK declarations. Runtime self-check R9 evaluates both character asset sets
+after the pack merges and reports every unresolved path.
+
+The same log exposed an independent dead-mechanic bug:
+`SubscribeForCombatStateHooks` is keyed by id, and both Klee and Furina
+registered with `klee`. ModHelper rejected the second subscription, so
+`FurinaResourceHooks` never ran. The roster now registers once with a combined
+delegate; source tests and S6c enforce one call containing both listeners.
+
+Finally, FrozenPower now supplies the title/description localization that R8
+was correctly reporting. The previous four findings were the same two missing
+keys observed once during each character sweep.
+
+## Animation sprint 1 opens: scene binding architecture (2026-07-23)
+
+Sprint doc: docs/archive/animation-sprint-1-plan.md (Tracks A-E; A is a hard gate).
+
+LICENSE NOTE (standing for the whole sprint): Downfall (github.com/lamali292/
+Downfall) is reference-reading ONLY. Patterns, node inventories, and patch
+shapes may be mirrored; scene files, art, and code are never copied verbatim
+into our tree. The clone lives in a session scratchpad, not the repo.
+
+Track A architecture finding — how a mod scene becomes the combat model.
+Verified against decompiled game v0.107.1 (2026-07-21 decompile; game binary
+unchanged since 07-18) and BaseLib.dll 2026-07-21 (re-decompiled this
+session; CustomCharacterModel surface unchanged by the 07-21 update):
+
+- `CharacterModel.VisualsPath` is private/non-virtual, but BaseLib patches it
+  to return `CustomCharacterModel.CustomVisualPath`, and patches
+  `CreateVisuals` to prefer `CreateCustomVisuals()` when non-null.
+- BaseLib postfixes `PackedScene.Instantiate` and auto-converts any
+  registered scene root via `NodeFactory<T>` (`RegisterSceneForConversion`,
+  path-keyed — the campfire-softlock registry). `NCreatureVisualsFactory`
+  declares the named-node inventory `%Visuals, %PhobiaModeVisuals, Bounds,
+  %CenterPos, IntentPos, %OrbPos, %TalkPos` and GENERATES missing Bounds/
+  CenterPos/IntentPos with defaults (Bounds 240x280 at (-120,-280)).
+- Therefore a combat scene needs NO script attached. Downfall attaches C#
+  scripts to scene roots (`[GlobalClass]` + Godot.NET.Sdk source generators
+  give their assembly ScriptPath mapping); our KleeCode builds with plain
+  Microsoft.NET.Sdk and our pck pipeline is deliberately script-less
+  (build_pck.ps1 standing note). We get the same behavior from the outside:
+  script-less `klee/model/combat.tscn` converted by BaseLib's factory, plus
+  a Harmony postfix pair on `NCreature.SetAnimationTrigger` /
+  `NCreature.StartDeathAnim` (Downfall's own patch shape) that routes
+  triggers into an `%AnimationTree` inside the scene when one exists.
+  `SetAnimationTrigger` is `_spineAnimator?.SetTrigger(...)` — a no-op
+  without spine — so the postfix is purely additive and inert for every
+  creature whose visuals carry no AnimationTree.
+- `GenerateAnimator` stays un-overridden: NCreature only builds the base
+  CreatureAnimator when `Visuals.HasSpineAnimation`, and we ship no spine.
+
+New conventions this sprint:
+- `klee-mod/pck-src/` — git-tracked text scene sources copied verbatim into
+  the pck work dir by build_pck.ps1. Scenes too large for heredocs
+  (AnimationPlayer tracks) live here; the historical heredoc scenes stay in
+  the script until they next need editing.
+- build id: build_pck.ps1 stamps `klee/build_id.tres` (resource_name =
+  timestamp + git short sha) into every pack; boot telemetry logs it, so a
+  stale pck is visible in godot.log instead of silently showing old art.
+- Boot telemetry (permanent, house pattern): one line per convention scene —
+  path, found/missing, root node type from SceneState (no instantiation, so
+  logging cannot trigger conversion side effects).
+
+
+Ancient-card ruling (2026-07-23, act-2 playtest) -- Darv softlock, Dusty Tome
+and the roster's Ancient tier:
+
+- FINDING: entering the act-2 Darv ancient event softlocked the run. godot.log
+  shows an NRE in DustyTome.SetupForPlayer (via BaseLib's SetupForPlayer_Patch1
+  falling through: "found 0 ITomeCard implementations") called from
+  Darv.GenerateInitialOptions. Root cause: vanilla SetupForPlayer draws a
+  random CardRarity.Ancient card from the character pool's GetUnlockedCards;
+  Klee/Furina pools shipped zero Ancient cards, and NextItem on the empty
+  draw returns null before .Id. Darv rolls the Tome option ~50% of visits.
+- RULING (user, 2026-07-23): fix with real content, not an option-ectomy.
+  One new Ancient-tier card per character, scaled to the rest of the Ancient
+  rewards: Klee gets an upscaled Jumpy Dumpty (Jumpy Dumpty Mk.Omega -- 2
+  cost, 12 dmg x3 random, 12-dmg Bomb on EVERY enemy, +4/+4 on upgrade),
+  Furina gets an Encore engine (All the World's a Stage -- 1-cost Power,
+  +5 Encore at turn start, +2 on upgrade, via EncorePerTurnPower routed
+  through FurinaResources.GainEncore). Dusty Tome grants arrive upgraded
+  (vanilla AfterObtained), so both cards are designed to be read at their
+  upgraded numbers. Titles pending the naming/lore audit; portraits reuse
+  jumpy_dumpty_mk2 / the_sea_is_my_stage crops pending the art pass.
+- Scope note: Ancient cards are game-side-only content. The sim models
+  neither events nor relics, so there is no tier0 counterpart and no sheet
+  entry; the parity lints do not see them by design. Rollability is safe by
+  construction -- decompiled CardFactory/CardCreationOptions exclude
+  CardRarity.Ancient from rewards, transforms and shops, so Dusty Tome is
+  the single acquisition door (same shape as the base game's own ancients).
+- GATE (user-directed): "add a gate to deployment that catches 'character
+  does not have Ancient cards'". KleeCode/RosterAncientCards.cs is the
+  per-character ledger (pools concat it); tools/lint_ancient_coverage.py
+  (validate.ps1 S6d) fails deploy when a ledger list is empty, detached from
+  its pool, names a non-Ancient class, or collides with the off-pool filter.
+  House pattern: structurally invisible defect -> curated ledger + lint.
+- Related, non-crashing gap logged: Archaic Tooth's transcendence table has
+  no entries for our starters (BaseLib extension point ITranscendenceCard).
+  Its SetupForPlayer returns false gracefully, so the relic just never
+  offers itself to the roster. Content follow-up, not a bug.
+
+---
+
+## Animation sprint 2 opens: the Funnel Contract (2026-07-24)
+
+Sprint doc: docs/animation-sprint-2-plan.md. Execution log:
+docs/animation-sprint-2-log.md. Predecessor sprint CLOSED — see the
+2026-07-24 verdict record at the foot of docs/archive/animation-sprint-1-log.md.
+
+**THE FUNNEL CONTRACT — interface freeze between the visual layer and the
+in-flight Furina kit redesign.** Ratified safe by [USER] 2026-07-24.
+
+Furina's kit is being reworked in a parallel stream (the Fanfare sprint,
+docs/archive/furina-fanfare-sprint-log.md) at the same time as her visual layer is
+being rebuilt. Two streams editing one character is the top risk of this
+sprint, and the mitigation is a narrow, explicit interface rather than
+coordination. The visual layer may bind to EXACTLY these three points:
+
+1. **Salon = exactly three slots.** Deploy is BY CARD and duplicates are
+   legal — three of the same member is a valid stage. The UI is therefore
+   slot-INDEX-keyed, with per-slot member identity read from state. No
+   assumption of in-order deploy; no assumption of distinct members. This
+   RETIRES sprint-1 D1's fixed member->slot portrait assignment, which
+   silently assumed both.
+2. **Encore absorbs damage before HP.** The gain/spend/absorb funnels in
+   Powers/FurinaResources.cs remain the mutation surface.
+3. **Spotlight is a designation event** — a single designation funnel.
+
+Everything else in Furina's kit is OUT OF CONTRACT and may change under the
+redesign without breaking the visual layer. The load-bearing half of this
+rule is the converse: **visuals bind to funnels, never to values.** A number
+the redesign moves must not be able to break a display.
+
+Consequences, binding for the sprint:
+
+- If the redesign stream needs to move any of the three contracted points,
+  that is a SHARED-SURFACE change and takes a cross-session note BEFORE
+  landing, per the standing rule (DECISIONS ~431 / R20 lineage). The note
+  pointer for this contract is dropped in the Furina stream's channel,
+  docs/archive/furina-fanfare-sprint-log.md.
+- A contract breach = STOP-WORK on the affected visual track plus the
+  cross-session note. Visuals never chase an unlanded kit change.
+- Anything out-of-contract that the current UI secretly depends on gets
+  caught by Track E1's badge inventory rather than assumed. That inventory
+  exists precisely because the badge strip is where undocumented kit
+  couplings accumulate.
+
+**Related ruling — the overhead slot is a cross-character convention.**
+From the same look pass: the centered-overhead creature-space anchor is the
+COMMON Burst indicator for every character. Klee keeps it (fixed in sprint
+1's C4 first pass); Furina's Burst joins it; Furina's Encore is EVICTED from
+it and re-homes into the Salon stage as a ribbon. Gauge SKINS are unique per
+character — one scene, per-character skin parameters applied by the bridge,
+with per-character scene variants pre-authorized as the fallback if the
+script-less scene format cannot carry a skin by parameter alone.
+
+**Art provenance (A3a), resolved at intake.** The supplied Furina render is
+the Wikipedia article image, which is 227x440 at BOTH en and zh — fair-use
+reduced, with no full-resolution copy available through that chain. The
+artwork itself is the official HoYoverse character-card render, which the
+repo already holds at full resolution as art/raw/Furina_Card_2.png
+(1080x2160, same pose/expression/costume, background-composited rather than
+cut out). The risk branch in the sprint plan ("accept softness or choose a
+different render") does NOT fire. Ledger row is F/high as with every prior
+asset.
+
+CORRECTED at execution (same day), because this entry first recorded the
+wrong method: the cut does NOT run off the full-res twin. That twin has the
+branded plate composited BEHIND the character, so using it requires building a
+matte to strip logo/emblem/border before any fencing can start, and two
+automatic mattes were tried and failed. The Wikipedia file is ALREADY a clean
+alpha cutout -- exactly what the cutter consumes -- and the shipped combat
+layers live in a 240x280 box, so 227x440 -> 280 tall is a DOWNSCALE (0.64x),
+not a compromise. The combat rig is therefore cut from the cutout; the
+full-res twin is used for the B4 stills, which need crops rather than cutouts.
+No quality is lost at any surface, and a matte problem is avoided entirely.
+
+**Art sourcing (A3b), resolved at intake.** No individual full-body renders
+exist for the three Salon members — a File:-namespace hunt returns nothing
+per member, and the gameplay preview GIF is 480x270. The only asset in which
+the three read as three different creatures is art/raw/Salon_Members_Summon.png
+(420x720: top-hatted octopus / ruffed seahorse / big crab). [USER] pick
+2026-07-24: cut that into three freestanding silhouettes. This is the whole
+premise of the D redesign — the shipped 500x380 card portraits are tiny
+gameplay screenshots and are exactly what failed D4.
+
+## Finding: an art out-path may have exactly one producer (2026-07-24)
+
+Animation sprint 2's B4 moved Furina's six still surfaces (combat model, both
+select portraits, splash, char icon, map marker) onto tools/gen_furina_stills.py,
+which re-derives them with framing computed from the ALPHA BBOX -- that
+centring fix IS the B4 [USER] verdict. It did not retire the five plan.tsv
+rows that had produced those same paths through art_process.
+
+Two producers then claimed one out-path, and both halves of that bit within a
+day. art_fetch rewrote those files' SOURCES.tsv provenance back to
+`Furina Profile.png`/`Furina Wish.png`, so the ledger asserted an origin the
+shipped bytes never had -- and that lie was committed. And the next
+art_process run would have silently overwritten the re-centred art with the
+old off-centre crops, undoing the verdict that motivated the work. Nothing
+would have thrown; the art would simply have been wrong again.
+
+RULING. An out-path has exactly one producer. Moving a surface to a generator
+means retiring its plan row in the same change, not later. art_lint L11
+enforces it, and L11 self-checks its own curated list -- an entry naming a
+generator that no longer produces that file is itself a failure, because a
+guard that has silently stopped guarding is the defect it was added to stop.
+
+Both directions are verified rather than assumed: negative tests prove all
+three L11 branches fire and that a clean plan stays clean, and re-running
+gen_furina_stills.py reproduces all six shipped files byte-identically, which
+is what actually proves art_process did not touch them.
+
+Method note, worth more than the fix: the catch was LUCK. A fetch happened to
+run for unrelated reasons and the diff was read. Nothing in the repo was
+watching, and neither symptom is visible without diffing a gitignored Tier F
+binary against a ledger nobody reads. This is the structurally-invisible-defect
+pattern again -- the check needs data the repo cannot see, so the human catch
+becomes a curated list plus a lint.
+
+## Finding: text tools must declare their encoding (2026-07-24)
+
+art_fetch.read_plan opened art/plan.tsv with no `encoding=`. On Windows that
+is cp1252, so the em dash in
+`Constellation Hear Me — Let Us Raise the Chalice of Love!.png` decoded to
+`â€"`, the mangled title went to the MediaWiki API, and the row came back
+`MISSING on wiki (gap-list / fix plan.tsv)`.
+
+The failure message is the interesting part: it accuses the PLAN of naming a
+file that does not exist, and the obvious next move is to re-hunt the title --
+which returns the title you already had. The bug is one layer below where the
+error points. Every non-ASCII wiki title had always failed this way on this
+machine; Furina's constellations are full of em dashes, so the sprint-2 icon
+set was the first set large enough to hit it.
+
+RULING. Every open() of a repo text file passes `encoding="utf-8"` explicitly.
+Fixed at all three plan/SOURCES sites in art_fetch. art_lint and
+art_contact_sheet read the plan through read_plan, so they inherit the fix.
+
+## R13: every power resolves to an icon that exists (2026-07-24)
+
+The sprint-2 Track E sweep found six powers with no icon case at all (rendering
+the base-game placeholder) and fifteen of Furina's wearing Klee's textures --
+ten of them the SAME texture, because the switch matched the SpotlightPower
+base class, so the register only named four of them and the count was never
+taken until someone enumerated the subclasses by hand.
+
+Neither is visible to any character-scoped check, and neither throws: a wrong
+or missing icon just quietly draws. Reflection over the assembly's PowerModel
+types is the only way to ask "did we forget one", so KleeSelfCheck now asks it
+at boot, checking both that a mapping exists and that the path it names is in
+the merged pck.
+
+RULING. R13 is what makes deleting the SpotlightPower base case correct rather
+than reckless. A future subclass added without art now FAILS AT BOOT instead of
+silently inheriting a sibling's sigil. That is the preferred failure: a wrong
+icon reads as intentional, a placeholder reads as "no art yet". Powers that
+legitimately need none (the two displays E1 retired, kept only for save
+compatibility) are listed in KleePowerIcons.IconExempt with a reason, so
+"exempt" is a decision on the record rather than an absence.
+
+## Finding: the base game has no facing concept, so ours is a build not a hook
+
+Playtest 2026-07-25 reported that characters do not turn during the Act 2
+Kaiser Crab. The instinct was that the game emits a facing signal our
+spine-less rigs fail to consume — the same shape as the animation-trigger gap
+that `CreatureAnimationRouter` exists to close. Decompiling v0.107.1 says
+otherwise. `NCreature`, `NCreatureVisuals`, `CreatureAnimator` and
+`NCombatRoom.PositionPlayersAndPets` contain no facing, flip, mirror or
+direction member of any kind. Every base character is a Spine skeleton drawn
+facing right, and until `KaiserCrabBoss` — the one encounter with
+`FullyCenterPlayers = true`, with monsters in slots on both sides — that has
+always been enough.
+
+RULING. Check whether the signal exists before writing an adapter for it. Here
+it does not, so there is nothing to route and no reference implementation to
+mirror; `CreatureFacing` is a feature we own outright, and it is scoped by the
+`%Facing` node existing only in our own convention scenes rather than by a
+character check. The distinction matters for maintenance: a router breaks when
+the game changes its signal, whereas this breaks only when the game changes
+`AttackCommand`, which is why that one reflected call is guarded and logs once
+instead of throwing.
+
+Two placement rules came out of it and generalize to any future rig:
+
+1. **A mirror belongs above the animated node, never on it.** A Node2D's own
+   position track is expressed in its parent's space, so scaling the animated
+   node by -1 flips the art while the keyframed travel keeps its original
+   direction. `Visuals/Rig:position` carries the attack lunge, so the pivot is
+   `Visuals/Facing` and the rig hangs under it.
+2. **Never write `Visuals.Scale`.** NCreature owns it — `ScaleTo`,
+   `SetDefaultScaleTo` and `OstyScaleToSize` write it and `UpdateBounds` reads
+   it back to place the hitbox, the selection reticle and the intent. A sign
+   flip there inverts the hitbox, which is a gameplay bug wearing a visual
+   bug's clothes.
+
+## Finding: an inert bridge is undebuggable unless boot says the node is gone
+
+Every visual bridge in this mod looks its nodes up with `GetNodeOrNull` and
+does nothing when the lookup fails. That is the right runtime posture — a stale
+pck degrades to base behavior instead of throwing mid-combat — and the wrong
+debugging one, because a renamed or dropped node produces exactly the symptom
+of a feature that was never written. The Track E icon gap, the Encore ribbon
+number and `%Facing` are all this shape.
+
+RULING. A node a bridge depends on is a CONTRACT, and contracts get a boot
+check. `KleeSceneTelemetry.RequiredNodes` names the scene/node pairs and warns
+for any that is absent, read from `SceneState` so the check stays side-effect
+free — that file must never instantiate, because instantiation is what fires
+BaseLib's conversion postfix. This is the same curated-list-plus-check pattern
+as art_lint L11 and SELFCHECK R13, applied to the third place where the repo
+cannot see its own defect.
+
+## Finding: occlusion is invisible to every check that asks "was it set?"
+
+The playtest reported the Encore ribbon as having no number. The bridge had
+been setting `%RibbonLabel` correctly the whole time; the label hung below the
+ribbon at creature-relative y -4..+14, inside the band
+`NCreatureStateDisplay` draws its HP bar and block badge into, and the badge is
+pinned to the LEFT edge of the 240-wide bounds box — the same x the Salon stage
+occupies. The number was drawn and then covered.
+
+RULING. Anything anchored to a creature must stay clear of that band; treat
+y >= -20 in creature space as the state display's, not ours. No automated check
+proposed: occlusion is a relationship between two subtrees that never reference
+each other and only one of which is ours, so it cannot be derived from our
+side. It is a [USER] capture question, which is why D5 requires a capture at
+all — the gap here was that the capture had not happened yet, not that the
+gate was wrong.
+
+## Implementation sprint: C# parity, co-op ownership, upgrade lint, known-card fixes — no new design (2026-07-25)
+
+Sprint doc: docs/archive/ship-what-we-know-sprint-plan.md. Execution log:
+docs/archive/ship-what-we-know-sprint-log.md. Opened on branch
+`furina/ship-what-we-know` off `4ce3b87`.
+
+Governing intent, verbatim from [USER]: *"Let's take everything we already
+know about and implement it so we don't stack a giant backlog of design ideas
+on top of one another."* **Zero new design.** Every item is a known bug, a
+known gap, a ratified-but-unshipped design, a known-weak number, or an
+instrument the next pass is blocked on.
+
+**The decoder fact.** The 2026-07-25 co-op playtest reported "Furina fanfare
+still capped". That is not a bug: it is an accurate description of a build
+that predates the read-only Fanfare rework. The fanfare sprint shipped
+read-only Fanfare to the sim and the sheet and then hard-gated the C# port
+(F-D) behind an F-C the close-out says will never run. So the live C# layer
+still implements the RETIRED spendable/capped design, and until the port lands
+every playtest generates feedback against a kit that does not exist in the
+design of record.
+
+RULING. F-D is resurrected as track G-A with its own acceptance — turn-by-turn
+trace parity against the sim plus a [USER] live capture — decoupled from the
+dead F-C winrate bars. It ships behaviour, not balance, so it carries no
+winrate gate. It is BLOCKING for every other Furina-touching item in the
+sprint, and the `ebb_and_flow` ruling (G-D4) is hard-gated behind it, because
+a card whose churn feeds a *pinned* meter is a different card from one whose
+churn feeds a *decaying* one.
+
+RULING. Fanfare is explicitly OUT of the Funnel Contract (the contract names
+Salon slots, the Encore absorb funnels, and Spotlight designation — not
+Fanfare), so G-A is free to move it without a cross-session stop-work. The
+animation stream is editing display call sites in the same file; the standing
+rule for this sprint is that gauge/stage `Refresh` calls are display-only, own
+no state, and stay exactly where they are. Nothing in the port requires moving
+an Encore funnel; if that changes, it takes a note in both logs BEFORE landing.
+
+Bookkeeping: this DECISIONS append carries along the animation stream's own
+uncommitted edits to this file (the scene-contract and occlusion findings),
+which were already in the working tree at sprint start. The code they document
+is NOT in this sprint's commits and remains uncommitted for that stream.
+
+## Kokomi character shell (2026-07-25)
+
+57 generated card classes had been sitting inert since Track B: `autoAdd:
+false` and no pool referencing them, which means Kokomi was not selectable
+and nothing downstream of "start a run as her" could be tested. This lands
+the shell. She is now playable end to end on placeholder art.
+
+**Shipped:** `Kokomi.cs` (70 HP, the 12-card starter transcribed from
+characters/kokomi.yaml in sheet order, Pearl of Wisdom, Silent potion pool),
+`KokomiCardPool.cs`, `KokomiRelicPool.cs`, her arm of
+`KleeStartingCompanionsPatch`, `CompanionSlot` character/nation rows, and the
+Kokomi arm of `tools/build_pck.ps1`.
+
+### Four things that were not obvious, recorded because the next character
+### will hit all four
+
+1. **"Ship on placeholders" cannot mean "ship with no files."** Her
+   `Custom*Path` overrides return `KleePck.Path(...)`, which is null on a
+   miss -- and a null override does NOT fall back to something safe.
+   `CharacterModel.AssetPaths` then hands the game an id-derived path that
+   does not exist, the background preloads fail, `AssetCache` is left
+   incomplete, and the run crashes during MAP GENERATION. That is the Furina
+   defect already recorded as KleeSelfCheck R9, and it would have reproduced
+   exactly. Fixed the way Furina's was: `Copy-KokomiFallback` fills every
+   required asset from Klee at KOKOMI'S paths, so the paths are
+   character-specific from day one and the art pass is a pure file drop.
+2. **The starter relic is not decoration -- it hosts the companion reward
+   slot.** Companions are deliberately in no rollable pool; the fourth reward
+   option is their only door, and it hangs off each character's starter relic
+   (Klee: Pounding Surprise, Furina: Ethereal Spotlight). Without
+   `TryModifyCardRewardOptions` on Pearl of Wisdom, Kokomi would have drafted
+   ZERO Companions. That does not crash -- it silently deletes her Commander
+   archetype, which is worse than a crash because a playtest would have
+   reported "commander feels bad" and been right for the wrong reason.
+3. **She needed an Ancient card or act 2 softlocks.** The Darv event rolls
+   Dusty Tome ~50% of the time and draws a random Ancient from the
+   character's pool; an empty draw NREs and the run softlocks on room entry
+   (playtest defect 2026-07-23). `PrincessOfWatatsumi` (Charge per turn, 3,
+   +1 on upgrade) fills the slot, ledgered in `RosterAncientCards.Kokomi` and
+   gated by S6d. Ancients are hand-written, game-side-only content: the sim
+   models neither events nor relics, so this number CANNOT be measured and
+   wants red-pen more than most.
+4. **Her randomized starter is one slot, not two.** Klee and Furina each roll
+   two Companions in place of two basics. Kokomi's companions are ADDITIONS
+   (cards 11 and 12 of a 12-card deck) and Gorou always enlists for lore
+   reasons (R52 N3), so only the support seat rolls -- Sayu or Shinobu. The
+   no-op arm still routes through `ReplaceFirst` so the deck INDEX matches on
+   both arms; a conditional skip would put Shinobu at a different position
+   than Sayu, and card order is visible in the deck view.
+
+Three roster surfaces were also extended rather than left to rot: the two
+lints (`lint_pool_membership`, `lint_ancient_coverage`) both know her,
+`KleeSelfCheck` sweeps three characters, and `KleeSceneTelemetry` lists her
+scenes INCLUDING the ones expected to be missing -- "expected missing" and
+"silently missing" are the same thing at 2am, and only one of them says so.
+
+**KNOWN GAP, not a defect:** her Burst does nothing. `ceremonial_garment` is
+still the one blocked card (kit lifecycle, hand-write), so the meter fills
+and grants no card. `KokomiOffPoolCards` ships empty but present, which is
+the shape that card needs the moment it exists.
+
+Suite 766, mod builds clean, pck rebuilds with 8 Kokomi fallbacks.

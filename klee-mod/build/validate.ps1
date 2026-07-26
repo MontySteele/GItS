@@ -17,7 +17,11 @@
 param(
     [Parameter(Mandatory = $true)][string]$StageDir,
     [Parameter(Mandatory = $true)][string]$SourceDir,
-    [Parameter(Mandatory = $true)][string]$GameDir
+    [Parameter(Mandatory = $true)][string]$GameDir,
+    # S7 escape hatch: a game_ref/ directory that EXISTS but is INCOMPLETE
+    # fails validation by default (see S7 comment). Pass this switch to
+    # acknowledge the stale local reference and test committed content only.
+    [switch]$AllowIncompleteGameRef
 )
 
 $ErrorActionPreference = 'Stop'
@@ -60,7 +64,30 @@ if (-not (Test-Path $manifestPath)) {
     }
     if ($m.has_pck) {
         $pck = Get-ChildItem $StageDir -Filter *.pck -ErrorAction SilentlyContinue
-        if (-not $pck) { Fail 'S2' 'manifest says has_pck but no .pck is in the package' }
+        if (-not $pck) {
+            Fail 'S2' 'manifest says has_pck but no .pck is in the package'
+        } else {
+            $pck = @($pck)[0]
+            $contractPath = "$($pck.FullName).contract.txt"
+            if (-not (Test-Path $contractPath)) {
+                Fail 'S2' "PCK has no build contract at $contractPath; rebuild it with tools\build_pck.ps1."
+            } else {
+                $contractLines = Get-Content $contractPath
+                if ($contractLines -notcontains 'contract=roster-pck-v2') {
+                    Fail 'S2' 'PCK contract is stale; expected roster-pck-v2. Rebuild with tools\build_pck.ps1.'
+                }
+                $hashLine = @($contractLines | Where-Object { $_ -like 'sha256=*' })
+                if ($hashLine.Count -ne 1) {
+                    Fail 'S2' 'PCK contract must contain exactly one sha256 line.'
+                } else {
+                    $expectedHash = $hashLine[0].Substring('sha256='.Length)
+                    $actualHash = (Get-FileHash $pck.FullName -Algorithm SHA256).Hash
+                    if ($actualHash -ne $expectedHash) {
+                        Fail 'S2' 'PCK does not match its build contract; rebuild rather than deploying a stale pack.'
+                    }
+                }
+            }
+        }
     }
 
     # S3. Declared dependencies must actually be installed, or the game fails
@@ -79,7 +106,7 @@ if (-not (Test-Path $manifestPath)) {
             try {
                 # These files are UTF-8 with BOM; PS 5.1 leaves the BOM in the
                 # string and ConvertFrom-Json chokes on it.
-                $raw = (Get-Content $j.FullName -Raw) -replace "^\xEF\xBB\xBF|^﻿", ''
+                $raw = (Get-Content $j.FullName -Raw) -replace "^\xEF\xBB\xBF|^﻿", ''   # ascii-exempt: the pattern matches a literal BOM
                 $id = ($raw | ConvertFrom-Json).id
                 if ($id) { $installed[$id] = $j.FullName }
             } catch { }
@@ -145,10 +172,22 @@ foreach ($f in Get-ChildItem $SourceDir -Recurse -Filter *.cs) {
         if ($line -match '\{\{') {
             Fail 'S5' "$($f.Name):$n uses doubled braces; SmartFormat placeholders are single-braced and {{X}} renders literally."
         }
-        foreach ($mm in [regex]::Matches($line, '\[/?([A-Za-z_][A-Za-z0-9_]*)')) {
-            $tag = $mm.Groups[1].Value
-            if ($knownTags -notcontains $tag.ToLower()) {
-                Fail 'S5' "$($f.Name):$n uses '[$tag]', which is not a known BBCode tag. If it is a variable write {$tag}; an unknown tag throws at render time."
+        # Scan only the STRING LITERALS on the line, never the surrounding C#.
+        # BBCode can only ever appear inside a literal, and scanning the raw
+        # line made a dictionary-initializer KEY look like a tag: the line
+        #     [Cards.FurinaRiderTips.FanfareKey + ".title"] = "Fanfare scaling"
+        # passes the loc-value filter above on its `.title"]`, and then `[Cards`
+        # reads as an unknown BBCode tag. That false positive has blocked every
+        # deploy since 0b33ffd. Narrowing to literals keeps the gate's reach --
+        # a real '[Block]' inside any loc string is still caught -- while
+        # dropping a class of finding that cannot be a render bug.
+        foreach ($lit in [regex]::Matches($line, '"([^"\\]*(?:\\.[^"\\]*)*)"')) {
+            foreach ($mm in [regex]::Matches($lit.Groups[1].Value,
+                                             '\[/?([A-Za-z_][A-Za-z0-9_]*)')) {
+                $tag = $mm.Groups[1].Value
+                if ($knownTags -notcontains $tag.ToLower()) {
+                    Fail 'S5' "$($f.Name):$n uses '[$tag]', which is not a known BBCode tag. If it is a variable write {$tag}; an unknown tag throws at render time."
+                }
             }
         }
     }
@@ -166,19 +205,67 @@ foreach ($f in Get-ChildItem $SourceDir -Recurse -Filter *.cs) {
 # ---------------------------------------------------------------------------
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $venvPython = Join-Path $repoRoot '.venv\Scripts\python.exe'
+
+# Native stderr under Windows PowerShell 5.1 is a trap in BOTH directions, and
+# the note that used to sit at S6 only covered one of them.
+#
+#   * Redirecting with 2>&1 while ErrorActionPreference is 'Stop' wraps every
+#     stderr line in an ErrorRecord and throws NativeCommandError. That is why
+#     the original code deliberately did not redirect.
+#   * But NOT redirecting is not safe either: with EAP 'Stop', any native
+#     stderr output raises NativeCommandError EVEN WHEN THE COMMAND EXITS 0.
+#
+# The second half is what broke this file on 2026-07-25. lint_constant_parity
+# grew a reader that imports tier05.relics, which emits three house-rule
+# UserWarnings on stderr at import; the lint PASSED, printed
+# "constant parity: OK", and took the entire deploy down anyway. A gate that
+# fails on a dependency's warning is not measuring what it claims to measure.
+#
+# Lowering EAP to 'Continue' for the duration of the call makes stderr behave
+# like output rather than like an exception, so 2>&1 is then safe -- and we get
+# to keep the diagnostics for the failure message instead of discarding them
+# to $null. $LASTEXITCODE is a global automatic and survives the call, so
+# callers check it exactly as before.
+function Invoke-RepoPython {
+    param([Parameter(Mandatory = $true, ValueFromRemainingArguments = $true)]
+          [string[]]$Arguments)
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $venvPython @Arguments 2>&1
+    } finally {
+        $ErrorActionPreference = $prev
+    }
+}
+
 $parityLint = Join-Path $repoRoot 'tools\lint_handwritten_parity.py'
 if (-not (Test-Path $venvPython)) {
     Fail 'S6' "repo venv python not found at $venvPython; cannot run hand-written parity lint."
 } elseif (-not (Test-Path $parityLint)) {
     Fail 'S6' "tools/lint_handwritten_parity.py is missing."
 } else {
-    # No 2>&1: under ErrorActionPreference Stop, PS 5.1 turns redirected
-    # native stderr into a terminating NativeCommandError. The lint reports
-    # findings on stdout; a crash's traceback shows on the console and the
-    # exit code still lands here.
-    $parityOut = & $venvPython $parityLint
+    $parityOut = Invoke-RepoPython $parityLint
     if ($LASTEXITCODE -ne 0) {
         Fail 'S6' "hand-written parity lint failed:`n    $($parityOut -join "`n    ")"
+    }
+}
+
+# ---------------------------------------------------------------------------
+# S6a. Generated roster cards and blocker manifests must match their sheets.
+#
+# This is the character-aware entry point: it checks Klee's shipping output
+# and every staged future-character tranche. A blocked card is valid; a stale
+# or silently approximated generated card is not.
+# ---------------------------------------------------------------------------
+$rosterCodegen = Join-Path $repoRoot 'tools\gen_roster_cards.py'
+if (-not (Test-Path $venvPython)) {
+    Fail 'S6a' "repo venv python not found at $venvPython; cannot check roster codegen."
+} elseif (-not (Test-Path $rosterCodegen)) {
+    Fail 'S6a' "tools/gen_roster_cards.py is missing."
+} else {
+    $codegenOut = Invoke-RepoPython $rosterCodegen --check
+    if ($LASTEXITCODE -ne 0) {
+        Fail 'S6a' "roster codegen is stale:`n    $($codegenOut -join "`n    ")"
     }
 }
 
@@ -199,33 +286,363 @@ if (-not (Test-Path $venvPython)) {
 } elseif (-not (Test-Path $poolLint)) {
     Fail 'S6b' "tools/lint_pool_membership.py is missing."
 } else {
-    $poolOut = & $venvPython $poolLint
+    $poolOut = Invoke-RepoPython $poolLint
     if ($LASTEXITCODE -ne 0) {
         Fail 'S6b' "pool membership lint failed:`n    $($poolOut -join "`n    ")"
     }
 }
 
 # ---------------------------------------------------------------------------
-# S7. The FULL repo test suite must be green before anything deploys.
+# S6d. Every roster character ships at least one Ancient-rarity pool card.
+#
+# Playtest 2026-07-23: the Darv ancient event rolls Dusty Tome ~50% of the
+# time, and vanilla DustyTome.SetupForPlayer draws a random Ancient card from
+# the character's pool -- an empty draw NREs inside the event's option
+# generation and the run softlocks on entering the room. The ledger is
+# KleeCode/RosterAncientCards.cs; the lint also proves each pool actually
+# concats it and that no ledger card is off-pool filtered.
+# ---------------------------------------------------------------------------
+$ancientLint = Join-Path $repoRoot 'tools\lint_ancient_coverage.py'
+if (-not (Test-Path $venvPython)) {
+    Fail 'S6d' "repo venv python not found at $venvPython; cannot run ancient coverage lint."
+} elseif (-not (Test-Path $ancientLint)) {
+    Fail 'S6d' "tools/lint_ancient_coverage.py is missing."
+} else {
+    $ancientOut = Invoke-RepoPython $ancientLint
+    if ($LASTEXITCODE -ne 0) {
+        Fail 'S6d' "ancient coverage lint failed:`n    $($ancientOut -join "`n    ")"
+    }
+}
+
+# ---------------------------------------------------------------------------
+# S6e. Every mirrored balance constant matches tier0.
+#
+# Each balance number lives twice: once in tier0 where it was MEASURED, once
+# in C# where it is PLAYED. The C# copies carry doc comments swearing they
+# mirror the sim, and until 2026-07-25 that promise was kept by discipline
+# alone. A sim-side retune nobody mirrors ships a mod playing to numbers no
+# simulation endorsed, and it does so silently -- green build, green tests,
+# and a tuning report describing a game nobody is playing.
+#
+# There is no C# test project to pin this at runtime, so the lint is the
+# static form: every `public const int` must be classified MIRRORED (compared
+# by value against tier0) or UNMIRRORED (with a written reason). Unclassified
+# is a failure, not a skip.
+# ---------------------------------------------------------------------------
+$constLint = Join-Path $repoRoot 'tools\lint_constant_parity.py'
+if (-not (Test-Path $venvPython)) {
+    Fail 'S6e' "repo venv python not found at $venvPython; cannot run constant parity lint."
+} elseif (-not (Test-Path $constLint)) {
+    Fail 'S6e' "tools/lint_constant_parity.py is missing."
+} else {
+    $constOut = Invoke-RepoPython $constLint
+    if ($LASTEXITCODE -ne 0) {
+        Fail 'S6e' "constant parity lint failed:`n    $($constOut -join "`n    ")"
+    }
+}
+
+# ---------------------------------------------------------------------------
+# S6c. Every roster character closes the CharacterModel preload surface.
+#
+# CharacterModel.AssetPaths derives combat visuals, icon scene, energy counter
+# and card trail from the character id. BaseLib redirects each only when the
+# corresponding Custom*Path override is non-null. A missing override does not
+# fail at model registration: the background preloader logs a missing scene,
+# then the run crashes later with an incomplete AssetCache.
+#
+# Scene-converted paths (visuals/rest/merchant) must also be unique. BaseLib's
+# conversion registry is keyed only by path; a later registration overwrites
+# the earlier target type and can turn a rest-site scene into a merchant node.
+# ---------------------------------------------------------------------------
+$requiredCharacterPaths = @(
+    'CustomVisualPath',
+    'CustomIconPath',
+    'CustomEnergyCounterPath',
+    'CustomTrailPath',
+    'CustomRestSiteAnimPath',
+    'CustomMerchantAnimPath'
+)
+$characterSources = @()
+foreach ($f in Get-ChildItem $SourceDir -Recurse -Filter *.cs) {
+    $text = Get-Content $f.FullName -Raw
+    if ($text -match ':\s*CustomCharacterModel\b') {
+        $characterSources += [PSCustomObject]@{
+            File = $f
+            Text = $text
+        }
+    }
+}
+
+if ($characterSources.Count -eq 0) {
+    Fail 'S6c' 'no CustomCharacterModel roster classes found.'
+}
+
+$conversionOwners = @{}
+foreach ($source in $characterSources) {
+    foreach ($property in $requiredCharacterPaths) {
+        if ($source.Text -notmatch "override\s+string\?\s+$property\b") {
+            Fail 'S6c' "$($source.File.Name): missing explicit $property override; CharacterModel will preload an id-derived scene."
+        }
+    }
+
+    foreach ($property in @(
+            'CustomVisualPath',
+            'CustomRestSiteAnimPath',
+            'CustomMerchantAnimPath')) {
+        $pattern = $property + '\s*=>\s*KleePck\.Path\("(?<path>[^"]+)"\)'
+        $match = [regex]::Match($source.Text, $pattern)
+        if (-not $match.Success) {
+            Fail 'S6c' "$($source.File.Name): $property must resolve through a character-specific KleePck.Path."
+            continue
+        }
+        $path = $match.Groups['path'].Value
+        if ($conversionOwners.ContainsKey($path)) {
+            Fail 'S6c' "$($source.File.Name): $property reuses conversion path '$path' already owned by $($conversionOwners[$path]). BaseLib registrations are path-keyed."
+        } else {
+            $conversionOwners[$path] = "$($source.File.Name).$property"
+        }
+    }
+}
+
+$entryPath = Join-Path $SourceDir 'KleeMod.cs'
+if (-not (Test-Path $entryPath)) {
+    Fail 'S6c' "mod entry point missing at $entryPath."
+} else {
+    $entryText = Get-Content $entryPath -Raw
+    $hookCalls = [regex]::Matches(
+        $entryText, '(?m)^\s*ModHelper\.SubscribeForCombatStateHooks\(')
+    if ($hookCalls.Count -ne 1) {
+        Fail 'S6c' "expected one combined combat-hook subscription, found $($hookCalls.Count). ModHelper rejects duplicate ids."
+    }
+    foreach ($listener in @(
+            'KleeElementalHooks.Subscribe',
+            'FurinaResourceHooks.Subscribe')) {
+        if (-not $entryText.Contains($listener)) {
+            Fail 'S6c' "combined combat-hook subscription omits $listener."
+        }
+    }
+}
+
+$pckBuilder = Join-Path $repoRoot 'tools\build_pck.ps1'
+if (-not (Test-Path $pckBuilder)) {
+    Fail 'S6c' "PCK builder missing at $pckBuilder."
+} else {
+    $pckText = Get-Content $pckBuilder -Raw
+    $stagedContract = Get-ChildItem $StageDir -Filter *.pck.contract.txt -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    $contractText = if ($stagedContract) {
+        Get-Content $stagedContract.FullName -Raw
+    } else {
+        ''
+    }
+    foreach ($source in $characterSources) {
+        foreach ($match in [regex]::Matches(
+                $source.Text,
+                'KleePck\.Path\("(?<path>[^"]+\.(?:tscn|tres))"\)')) {
+            $relative = $match.Groups['path'].Value
+            $builderResource = $relative.Replace('/', '\')
+            # Two authoring channels: heredoc text inside build_pck.ps1, or a
+            # git-tracked source file under klee-mod\pck-src (animation sprint
+            # 1 convention; the build overlays pck-src into the work dir).
+            $pckSrcFile = Join-Path $repoRoot "klee-mod\pck-src\$builderResource"
+            if (-not $pckText.Contains($builderResource) -and -not (Test-Path $pckSrcFile)) {
+                Fail 'S6c' "$($source.File.Name): PCK resource '$builderResource' is neither authored by tools\build_pck.ps1 nor present in klee-mod\pck-src."
+            }
+            $contractResource = "resource=res://$relative"
+            if (-not $contractText.Contains($contractResource)) {
+                Fail 'S6c' "$($source.File.Name): staged PCK contract omits '$contractResource'. Rebuild the PCK."
+            }
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------
+# S7. The portable repo test suite must be green before anything deploys.
 #
 # Lesson (2026-07-20): a compaction-narrowed "pytest tier0" habit reported
 # "188 tests green" while the full suite was 236 with one failure -- a tier05
 # rest-policy test stranded by the R37 ruling. Cross-tier coupling is exactly
 # what full-suite discipline exists to catch, and it caught one on its first
-# opportunity. This gate runs pytest over the WHOLE repo (tier0 + tier05 +
-# tools tests), 1000-fight band checks included -- deploys are supposed to
-# pay that price. Green claims must name their scope; this one is "the repo".
+# opportunity. This gate collects the WHOLE repo (tier0 + tier05 + tools
+# tests), 1000-fight band checks included.
+#
+# game_ref/ is deliberately gitignored local/decompiled reference data. A
+# complete copy receives its own --verify gate and participates in pytest.
+#
+# The fallback semantics were split on 2026-07-23 after a silent fallback
+# masked a red auto-mode suite for a day (2026-07-22/23 cross-machine
+# divergence). The decision table:
+#
+#   game_ref ABSENT entirely (fresh clone)
+#       -> committed-only mode with a loud warning banner. Local-reference
+#          modules skip exactly as on a fresh clone; every repository-owned
+#          test still runs.
+#   game_ref EXISTS but is INCOMPLETE (stale local reference)
+#       -> FAIL by default, naming the missing pieces and the rebuild
+#          commands. This is the dangerous case: the machine's real
+#          (auto-mode) suite may be red while committed-only is green.
+#          Pass -AllowIncompleteGameRef to fall back to committed-only
+#          anyway, with the same loud banner.
+#   game_ref COMPLETE
+#       -> --verify gate, then the full suite in auto mode.
+#
+# Committed-only is NOT accepting a partial reference. The loader remains
+# fail-closed in normal mode, and tools.build_ironclad_sheet --verify
+# remains the only validity claim for real_ironclad.
 # ---------------------------------------------------------------------------
+function Write-GameRefBanner($reason) {
+    Write-Host '===============================================================' -ForegroundColor Yellow
+    Write-Host ' WARNING: S7 is running in committed-only mode.' -ForegroundColor Yellow
+    Write-Host " $reason" -ForegroundColor Yellow
+    Write-Host ' Local-reference modules (real_ironclad) are NOT being tested.' -ForegroundColor Yellow
+    Write-Host ' A green result here says nothing about the auto-mode suite.' -ForegroundColor Yellow
+    Write-Host '===============================================================' -ForegroundColor Yellow
+}
+
 if (Test-Path $venvPython) {
-    # No 2>&1 (same PS 5.1 NativeCommandError reason as S6). -q keeps the
-    # output to the summary line plus failures.
-    $pytestOut = & $venvPython -m pytest $repoRoot -q
-    if ($LASTEXITCODE -ne 0) {
-        $tail = ($pytestOut | Select-Object -Last 25) -join "`n    "
-        Fail 'S7' "full test suite not green (pytest exit $LASTEXITCODE):`n    $tail"
+    $gameRef = Join-Path $repoRoot 'game_ref'
+    $referenceFiles = @(
+        'ironclad-cards.yaml',
+        'ironclad_pool_pass4.yaml',
+        'ironclad_pool_pass5.yaml',
+        'ironclad_pool_pass6.yaml',
+        'ironclad_pool.yaml',
+        'ironclad-upgrades.yaml',
+        'ironclad_char_facts.yaml',
+        'char_real_ironclad.yaml'
+    )
+    $missingReferenceFiles = @()
+    foreach ($name in $referenceFiles) {
+        if (-not (Test-Path (Join-Path $gameRef $name))) {
+            $missingReferenceFiles += $name
+        }
+    }
+    $referenceComplete = ($missingReferenceFiles.Count -eq 0)
+
+    # $null = do not run the suite at all (the incomplete-game_ref failure).
+    $referenceMode = $null
+    if ($referenceComplete) {
+        Write-Host 'Verifying complete local game_ref...' -ForegroundColor Cyan
+        $verifyOut = Invoke-RepoPython -m tools.build_ironclad_sheet --verify
+        if ($LASTEXITCODE -ne 0) {
+            Fail 'S7a' "complete local game_ref failed verification:`n    $($verifyOut -join "`n    ")"
+        }
+        $referenceMode = 'auto'
+    } elseif (-not (Test-Path $gameRef)) {
+        # Fresh clone: nothing local to be stale about.
+        Write-GameRefBanner 'game_ref/ is absent (fresh clone).'
+        $referenceMode = 'committed-only'
+    } elseif ($AllowIncompleteGameRef) {
+        Write-GameRefBanner "-AllowIncompleteGameRef: game_ref/ exists but is missing $($missingReferenceFiles -join ', ')."
+        $referenceMode = 'committed-only'
+    } else {
+        # The stale-local-reference case that masked a red auto-mode suite
+        # on 2026-07-22/23: a partial game_ref silently downgraded the gate
+        # to committed-only and the full-suite check passed anyway.
+        Fail 'S7' ("game_ref/ exists but is incomplete; missing: $($missingReferenceFiles -join ', ').`n" +
+            "    The machine's real (auto-mode) suite cannot be trusted from a committed-only pass.`n" +
+            "    Rebuild the local reference:`n" +
+            "        python -m tools.extract_base_game_pool Ironclad --emit-sheet`n" +
+            "        python -m tools.build_ironclad_sheet`n" +
+            "    or re-run with -AllowIncompleteGameRef to test committed content only.")
+    }
+
+    if ($null -ne $referenceMode) {
+        $oldReferenceMode = [Environment]::GetEnvironmentVariable(
+            'GITS_REFERENCE_MODE', 'Process')
+        $env:GITS_REFERENCE_MODE = $referenceMode
+
+        # No 2>&1 (same PS 5.1 NativeCommandError reason as S6). -q keeps the
+        # output to the summary line plus failures.
+        try {
+            $pytestOut = Invoke-RepoPython -m pytest $repoRoot -q
+            if ($LASTEXITCODE -ne 0) {
+                $tail = ($pytestOut | Select-Object -Last 25) -join "`n    "
+                Fail 'S7' "portable repo suite not green (pytest exit $LASTEXITCODE):`n    $tail"
+            }
+        } finally {
+            if ($null -eq $oldReferenceMode) {
+                Remove-Item Env:GITS_REFERENCE_MODE -ErrorAction SilentlyContinue
+            } else {
+                $env:GITS_REFERENCE_MODE = $oldReferenceMode
+            }
+        }
     }
 } else {
     Fail 'S7' "repo venv python not found at $venvPython; cannot run the full suite."
+}
+
+# ---------------------------------------------------------------------------
+# S9. Every roster character's card art actually reaches the package.
+#
+# deploy.ps1 stages art from a HARDCODED list of source directories into one
+# flat images/cards. A character missing from that array fails nothing: the
+# build is green, every other gate is green, the mod loads, and their cards
+# simply render with no portrait. Kokomi shipped exactly that way on
+# 2026-07-25 -- 58 painted faces sat in ImageGen and not one reached the game.
+#
+# Checked against the STAGE rather than the source list, so it verifies the
+# outcome instead of restating the config. One portrait per character is
+# enough to prove the directory was wired; art_coverage.py owns completeness.
+# ---------------------------------------------------------------------------
+# ImageGen lives at the REPO root, not under klee-mod. Getting this wrong makes
+# Test-Path false and silently skips the whole rule -- which it did on the first
+# attempt, and the negative test caught it. $repoRoot is defined at S6.
+$cardsRoot = Join-Path $repoRoot 'ImageGen\images\cards'
+$stagedArt = Join-Path $StageDir 'images\cards'
+if ((Test-Path $cardsRoot) -and (Test-Path $stagedArt)) {
+    $staged = @{}
+    foreach ($f in Get-ChildItem $stagedArt -Filter *.png -ErrorAction SilentlyContinue) {
+        $staged[$f.Name] = $true
+    }
+    foreach ($charDir in Get-ChildItem $cardsRoot -Directory -ErrorAction SilentlyContinue) {
+        $pngs = @(Get-ChildItem $charDir.FullName -Filter *.png -ErrorAction SilentlyContinue)
+        if ($pngs.Count -eq 0) { continue }   # nothing painted yet is not a defect
+        $hit = $false
+        foreach ($p in $pngs) { if ($staged.ContainsKey($p.Name)) { $hit = $true; break } }
+        if (-not $hit) {
+            Fail 'S9' ("ImageGen\images\cards\$($charDir.Name) holds $($pngs.Count) " +
+                "portrait(s) and NONE of them are in the staged package. That " +
+                "directory is missing from deploy.ps1's `$artSrcDirs -- their " +
+                "cards will render with no art and nothing else will complain.")
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------
+# S8. Build scripts are pure ASCII.
+#
+# Every .ps1 in this repo says so in its own header, and the rule was still
+# broken -- Furina's Architect finale line carried an em-dash, and because
+# Windows PowerShell 5.1 reads a BOM-less .ps1 as ANSI, the UTF-8 bytes were
+# decoded as cp1252 and re-encoded as UTF-8 on the way into the pck. The line
+# shipped reading "Now a<euro>" the people rejoice" on the WIN SCREEN, which
+# is the last text a player sees after beating Act 3. Caught 2026-07-25 by
+# reading the built json, not by any gate.
+#
+# The failure is silent by construction: the mangling happens at PARSE time,
+# so nothing downstream can tell a mojibake string from an intended one. The
+# only place to catch it is the bytes on disk, here.
+#
+# A line may opt out with the marker below when a non-ASCII byte is the
+# POINT (validate.ps1's own literal-BOM regex is the one case today).
+# ---------------------------------------------------------------------------
+$asciiExempt = '# ascii-exempt:'
+foreach ($script in Get-ChildItem $SourceDir -Recurse -Filter *.ps1 -ErrorAction SilentlyContinue) {
+    if ($script.FullName -like '*\dist\*' -or $script.FullName -like '*\obj\*') { continue }
+    $lineNo = 0
+    foreach ($line in [IO.File]::ReadAllLines($script.FullName)) {
+        $lineNo++
+        if ($line -match $asciiExempt) { continue }
+        $offenders = [char[]]$line | Where-Object { [int]$_ -gt 127 }
+        if ($offenders.Count -gt 0) {
+            $codes = ($offenders | ForEach-Object { 'U+{0:X4}' -f [int]$_ }) -join ', '
+            Fail 'S8' ("$($script.Name):$lineNo has non-ASCII characters ($codes). " +
+                "PowerShell 5.1 reads a BOM-less .ps1 as ANSI, so these are decoded as " +
+                "cp1252 and ship as mojibake wherever the string lands. Use ASCII, or " +
+                "mark the line '$asciiExempt <reason>' if the byte is deliberate.")
+        }
+    }
 }
 
 # ---------------------------------------------------------------------------

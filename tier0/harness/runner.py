@@ -55,11 +55,18 @@ def run_full_battery(character: str, deck: str, pilot_id: str, fights: int,
 
 
 def score_config(character: str, deck: str, pilot_id: str, fights: int,
-                 seed: int) -> dict:
+                 seed: int, base_stats: dict | None = None) -> dict:
     """Full battery for baseline + target config -> 7-axis scorecard.
     The baseline ALWAYS uses the generic pilot — a floating anchor would
-    make scores incomparable across archetype-pilot runs."""
-    base_stats = run_full_battery(*BASELINE, "generic", fights, seed)
+    make scores incomparable across archetype-pilot runs.
+
+    `base_stats` lets a caller scoring SEVERAL configs at one (fights, seed)
+    compute that anchor once and hand it in. It is a deterministic function
+    of (fights, seed) and nothing here mutates it, so sharing it is only a
+    saving -- score_character used to re-run the whole baseline battery once
+    per deck, which was most of its cost. None recomputes it."""
+    if base_stats is None:
+        base_stats = run_full_battery(*BASELINE, "generic", fights, seed)
     base_raw = axes.raw_axes(base_stats)
     target_is_baseline = (character, deck) == BASELINE
     if target_is_baseline:
@@ -105,10 +112,13 @@ def score_character(character: str, fights: int, seed: int) -> dict:
     here; per-deck results carry only their band checks."""
     import statistics
     decks = loader.archetype_decks(character)
+    # One anchor battery for every deck scored here (see score_config).
+    base_stats = run_full_battery(*BASELINE, "generic", fights, seed)
     results = {"starter": score_config(character, "starter", "generic",
-                                       fights, seed)}
+                                       fights, seed, base_stats)}
     for deck, pilot in decks.items():
-        results[deck] = score_config(character, deck, pilot, fights, seed)
+        results[deck] = score_config(character, deck, pilot, fights, seed,
+                                     base_stats)
     median_scores = {
         ax: statistics.median(results[d]["scores"][ax] for d in decks)
         for ax in axes.AXES}
@@ -158,6 +168,16 @@ def main(argv: list[str] | None = None) -> int:
                     help="starter + all archetype decks + the median "
                          "identity evaluation (round-3 canon)")
     args = ap.parse_args(argv)
+
+    # The summary line prints "hpΔ" and the scorecard prints block-glyph
+    # bars; a cp1252 console (Windows default) raises UnicodeEncodeError on
+    # both, killing the run AFTER the battery has been computed. Same
+    # pre-existing bug already fixed in tier05/runner.py -- found here
+    # 2026-07-21 when the real_ironclad comparison could not be printed.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, OSError):       # non-reconfigurable stream
+        pass
 
     if args.report_character:
         t0 = time.perf_counter()

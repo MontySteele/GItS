@@ -10,7 +10,7 @@ namespace KleeMod.Powers;
 /// <summary>
 /// The one element-tagged non-attack hit: tier0 deal_damage_to_enemy for
 /// every source that is not a powered attack card (bombs, the Burst volley,
-/// Oz, Witch's Flame) plus the damage-less element ops (apply_aura, swirl --
+/// Oz) plus the damage-less element ops (apply_aura, swirl --
 /// sim resolve_hit with damage 0).
 ///
 /// Pipeline, in sim order: Strength/Weak on the applier (pre-amp) -> element

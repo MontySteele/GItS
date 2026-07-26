@@ -48,13 +48,13 @@ public sealed class NicoleCelestialGift : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Nicole — Celestial Gift"),
-        ("description", "Your Attacks deal 2 more damage. At the start of your turn, gain 4 [gold]Block[/gold]."),
+        ("description", "At the start of your turn, gain 1 [gold]Strength[/gold] and 4 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            
+
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -67,11 +67,11 @@ public sealed class NicoleCelestialGift : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<CelestialGiftPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<CelestialGiftPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- delta key 'block_per_turn: 2' not expressible by codegen (structural upgrade). Flagged in manifest.
+        EnergyCost.UpgradeBy(-1);
     }
 }

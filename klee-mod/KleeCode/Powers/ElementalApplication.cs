@@ -69,6 +69,12 @@ public sealed class KleeElementalHooks : AbstractModel
     /// </summary>
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
+        // Sim order (combat.py play_card): the requires-full drain happens
+        // FIRST, then the skill-tag bonus. Once per play, never per replay.
+        if (cardPlay.IsFirstInSeries)
+        {
+            KleeBurstResource.DrainOnPlay(cardPlay.Card);
+        }
         if (cardPlay.Card is ISkillTagCard && cardPlay.IsFirstInSeries)
         {
             KleeBurstResource.GainPreResolution(
@@ -84,12 +90,12 @@ public sealed class KleeElementalHooks : AbstractModel
     }
 
     /// <summary>
-    /// Display half of the burst economy: sync-to-truth after EVERY card
-    /// play. Unconditional because two writers move the resource without the
-    /// badge -- the skill-tag gain in BeforeCardPlayed (no context there) and
-    /// the full-meter drain when the Burst itself is cast (the cost
-    /// machinery's Spend, outside our call sites entirely). Delta-zero syncs
-    /// are no-ops, so the common case costs nothing.
+    /// Display half of the burst economy: gauge catch-up after EVERY card
+    /// play. Unconditional because one writer moves the resource outside the
+    /// refresh funnels -- the full-meter drain when the Burst itself is cast
+    /// (the cost machinery's Spend, outside our call sites entirely).
+    /// Redundant refreshes redraw the same value, so the common case costs
+    /// nothing.
     ///
     /// Also a kit-grant check site: the sim calls grant_charged_kit at the
     /// end of every play_card (mid-turn gains -- reactions, splash, the
@@ -99,8 +105,7 @@ public sealed class KleeElementalHooks : AbstractModel
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var owner = cardPlay.Card.Owner;
-        await KleeBurstResource.SyncBadge(
-            choiceContext, owner.Creature, cardPlay.Card);
+        KleeBurstResource.SyncGauge(owner.Creature);
         await KitGrant.GrantIfCharged(choiceContext, owner);
     }
 
@@ -123,6 +128,8 @@ public sealed class KleeElementalHooks : AbstractModel
     /// fill the meter) and before the discard filter. This hook maps to
     /// Hook.BeforeTurnEnd -- before the flush -- and mod models run after
     /// power hooks in the same broadcast, so the volley has already fired.
+    /// Durin resolves later in AfterSideTurnEnd to guarantee it consumes the
+    /// volley's Pyro; its Burst Energy is granted at the next turn-start check.
     /// The granted card's Retain then carries it through the flush.
     /// </summary>
     public override async Task BeforeSideTurnEnd(
@@ -202,6 +209,20 @@ public static class AuraCmd
         creature.Powers.OfType<AuraPower>().FirstOrDefault();
 
     /// <summary>
+    /// How long an aura applied or refreshed by <paramref name="applier"/>
+    /// lasts. Port of tier0 reactions.aura_duration(state).
+    ///
+    /// A function rather than the constant read at each site, for the reason
+    /// the sim gives: application and refresh must never disagree about how
+    /// long an aura lives, which they would the first time someone extended
+    /// only one of them. Neuvillette's Heir to the Ancient Sea's Authority is
+    /// the first thing that extends it.
+    /// </summary>
+    public static int Duration(Creature? applier) =>
+        ReactionConstants.AuraDurationTurns
+        + AncientSeaAuthorityPower.ExtraTurnsFrom(applier);
+
+    /// <summary>
     /// Pure application, the port of tier0 apply_aura(): trigger-only elements
     /// never stick. Amount is the aura's remaining duration in turns.
     /// Callers must have checked Find() == null -- applying a second aura type
@@ -215,22 +236,22 @@ public static class AuraCmd
         {
             case Element.Pyro:
                 await PowerCmd.Apply<PyroAuraPower>(
-                    choiceContext, target, ReactionConstants.AuraDurationTurns,
+                    choiceContext, target, Duration(applier),
                     applier: applier, cardSource: cardSource);
                 break;
             case Element.Hydro:
                 await PowerCmd.Apply<HydroAuraPower>(
-                    choiceContext, target, ReactionConstants.AuraDurationTurns,
+                    choiceContext, target, Duration(applier),
                     applier: applier, cardSource: cardSource);
                 break;
             case Element.Electro:
                 await PowerCmd.Apply<ElectroAuraPower>(
-                    choiceContext, target, ReactionConstants.AuraDurationTurns,
+                    choiceContext, target, Duration(applier),
                     applier: applier, cardSource: cardSource);
                 break;
             case Element.Cryo:
                 await PowerCmd.Apply<CryoAuraPower>(
-                    choiceContext, target, ReactionConstants.AuraDurationTurns,
+                    choiceContext, target, Duration(applier),
                     applier: applier, cardSource: cardSource);
                 break;
             default:
@@ -248,7 +269,7 @@ public static class AuraCmd
     {
         await PowerCmd.ModifyAmount(
             choiceContext, aura,
-            ReactionConstants.AuraDurationTurns - aura.Amount,
+            Duration(applier) - aura.Amount,
             applier: applier, cardSource: cardSource, silent: true);
     }
 }

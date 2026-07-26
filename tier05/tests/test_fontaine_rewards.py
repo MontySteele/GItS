@@ -33,8 +33,13 @@ def test_furina_offers_concentrate_on_fontaine():
     share = sum(c.nation == "fontaine" for c in offers) / len(offers)
     assert share >= 0.55         # thin bench still gets its half
     assert any(c.nation == "mondstadt" for c in offers)
-    # Fontaine has no designed shared 5-stars: every rare-tier offer falls
-    # through to Mondstadt rares -- BY CONSTRUCTION, not a bug (kickoff
-    # §10 registers the same logic for Electro scarcity).
+    # HISTORY, because the assertion below inverts a previous one. Fontaine
+    # used to design no shared 5-stars, so every rare-tier offer fell through
+    # to the nations that HAD them (Mondstadt, then Inazuma from 2026-07-24).
+    # R64 (2026-07-25) gave Fontaine four, so the fall-through is no longer
+    # the construction being pinned -- Furina's own nation now answers a Rare
+    # roll, which is the roster gap the sprint existed to close.
     rares = [c for c in offers if c.star == 5]
-    assert all(c.nation == "mondstadt" for c in rares)
+    assert rares, "no 5-star surfaced at all across the sample"
+    assert any(c.nation == "fontaine" for c in rares), (
+        "Furina's home nation must now be able to answer a Rare roll")

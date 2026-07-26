@@ -9,6 +9,8 @@ shatter_bonus) and the Guest Star reward exclusions.
 
 import random
 
+import pytest
+
 from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import combat, effects
@@ -24,15 +26,33 @@ def _fontaine_cards():
 
 # --- sheet structure ---
 
+FONTAINE_5STARS = ("navia", "clorinde", "neuvillette", "arlecchino")
+
+
 def test_fontaine_sheet_loads_ratified_roster():
     cards = _fontaine_cards()
     shared = [c for c in cards if not c.guest_star]
+    bench = [c for c in shared if c.star == 4]
+    rares = [c for c in shared if c.star == 5]
     guests = [c for c in cards if c.guest_star]
-    # 4 characters x 3-card kits (kickoff §10) + Guest Star set v0.1.
-    assert len(shared) == 12
-    assert {c.character for c in shared} == set(FONTAINE_4STARS)
+
+    # 4 characters x 3-card kits (kickoff §10).
+    assert len(bench) == 12
+    assert {c.character for c in bench} == set(FONTAINE_4STARS)
     for char in FONTAINE_4STARS:
-        assert sum(1 for c in shared if c.character == char) == 3
+        assert sum(1 for c in bench if c.character == char) == 3
+
+    # 5-star Rares, added 2026-07-25 (R64). §4.2 is EXACTLY ONE CARD each --
+    # asserted per character rather than on the total, because four cards
+    # from three characters would also sum to four.
+    assert {c.character for c in rares} == set(FONTAINE_5STARS)
+    for char in FONTAINE_5STARS:
+        assert sum(1 for c in rares if c.character == char) == 1
+    assert all(c.rarity == "rare" for c in rares)
+    # The roster now EXCEEDS BANNER_FEATURED_SLOTS, which is the whole point of
+    # the sprint that added them: it is what makes the banner selective.
+    assert len(rares) > C.BANNER_FEATURED_SLOTS
+
     assert {c.character for c in guests} == {"neuvillette"}
     assert 2 <= len(guests) <= 3          # kickoff §9: 2-3 Neuvillette cards
 
@@ -79,18 +99,57 @@ def test_guest_star_never_in_shared_rewards():
     from tier05 import rewards
     assert all(not c.guest_star
                for cs in rewards.companion_pool().values() for c in cs)
-    # No banner participation either: Fontaine has no *designed* shared
-    # 5-stars yet, and the guests must not stand in for them.
-    assert rewards.five_star_roster("fontaine") == []
+    # No banner participation either. This used to assert the roster was
+    # EMPTY, which proved the exclusion only because Fontaine had no designed
+    # shared 5-stars -- a vacuous pass that would have gone on reading green if
+    # a guest had leaked in the moment real Rares landed. Now that four exist
+    # (R64), assert the separation directly: the roster is exactly the shared
+    # Rares, and no guest id appears in it.
+    roster = rewards.five_star_roster("fontaine")
+    assert {c.id for c in roster} == {
+        "navia_cannon_fire_support",
+        "clorinde_impale_the_night",
+        "neuvillette_ancient_sea_authority",
+        "arlecchino_masque_red_death",
+    }
+    assert all(not c.guest_star and c.personal_pool is None for c in roster)
+    # D2 in the flesh: Neuvillette is in the banner roster AND has cameos, and
+    # they are different cards.
+    guest_ids = {c.id for c in _fontaine_cards() if c.guest_star}
+    assert guest_ids and not (guest_ids & {c.id for c in roster})
 
 
 def test_personal_pool_not_offered_cross_character():
+    """Probed on a REAL character. This used the invented id
+    "furina_probe" until 2026-07-21; once card ownership became required
+    (rewards.character_pool) that id had an empty pool, so the assertions
+    below passed vacuously against zero offers."""
     from tier05 import rewards
     rng = random.Random(7)
     offered = {c.id for _ in range(300)
-               for c in rewards.roll_rewards(rng, "furina_probe")}
+               for c in rewards.roll_rewards(rng, "furina")}
+    assert offered, "empty offer set would make this test vacuous"
     assert "prune_witch_hunt" not in offered
-    assert not any(cid.startswith("guest_") for cid in offered)
+    # Checked on the guest_star FLAG, not an id prefix. The prefix form
+    # ("guest_") silently false-positives on Furina's own uncommon
+    # "The Guest List" (guest_list) -- it only ever passed because the
+    # probe character had no Furina cards to offer in the first place.
+    assert not any(loader.get_card(cid).guest_star for cid in offered)
+    # The leak this file was written to catch, stated directly: a reward
+    # screen only ever offers cards the character owns (companions aside,
+    # which are a shared pool by design).
+    assert all(loader.get_card(cid).character == "furina"
+               for cid in offered
+               if not loader.get_card(cid).is_companion)
+
+
+def test_unowned_character_pool_fails_loudly():
+    """The rare->uncommon->common fallback used to run off the end and
+    raise a bare KeyError from a dict literal. An empty pool is a config
+    error and must say so."""
+    from tier05 import rewards
+    with pytest.raises(ValueError, match="no draftable cards"):
+        rewards.roll_rewards(random.Random(1), "furina_probe")
 
 
 # --- DSL: reaction_triggered_this_turn (Chevreuse) ---
@@ -124,10 +183,10 @@ def test_reactions_this_turn_resets_at_turn_start():
 def test_frosthelm_blocks_now_and_next_turn():
     st = make_state(enemies=[make_enemy(hp=200)])
     effects.resolve_card(st, loader.get_card("charlotte_enduring_frosthelm"))
-    assert st.player.block == 3
-    assert st.player.powers["block_next_turn"] == 3
+    assert st.player.block == 4
+    assert st.player.powers["block_next_turn"] == 4
     combat._player_turn(st, lambda s: None)   # resets block, then trigger
-    assert st.player.block == 3
+    assert st.player.block == 4
     assert "block_next_turn" not in st.player.powers   # consumed, no carry
 
 
@@ -148,7 +207,7 @@ def test_shatter_bonus_adds_to_shatter_damage():
     shatters = [ev for ev in st.log if ev["event"] == "damage"
                 and ev.get("source") == "shatter"]
     assert shatters and shatters[-1]["base"] == C.SHATTER_DAMAGE + 4
-    assert hp_before - e.hp == 8 + C.SHATTER_DAMAGE + 4
+    assert hp_before - e.hp == 10 + C.SHATTER_DAMAGE + 4
 
 
 def test_backstroke_applies_no_element():
@@ -159,3 +218,163 @@ def test_backstroke_applies_no_element():
     st.player.element = "pyro"
     effects.resolve_card(st, loader.get_card("freminet_pressurized_floe"))
     assert st.enemies[0].aura is None
+
+
+# --- 5-star Rares (R64, 2026-07-25): the four new powers ---
+
+def _play(st, card_id):
+    """play_card goes through the real hand/energy path -- the companion hook
+    being tested lives there, not in resolve_card."""
+    card = loader.get_card(card_id)
+    st.player.hand.append(card)
+    st.player.energy = 9
+    combat.play_card(st, card)
+    return card
+
+
+def test_cannon_fire_support_pays_on_every_companion_play():
+    """Navia's trigger is the CARD TYPE, not an element -- deliberately, so
+    nothing here pre-commits Crystallize (Zhongli's archetype owns it)."""
+    st = make_state(enemies=[make_enemy(hp=200)])
+    _play(st, "navia_cannon_fire_support")
+    # Her own play does not pay itself: the hook runs before resolution, so the
+    # power is not up yet when her own card play is observed.
+    assert st.player.block == 0
+    assert st.player.powers["cannon_fire_support"] == 3
+
+    _play(st, "lynette_box_trick")
+    assert st.player.block == 3
+    _play(st, "charlotte_snappy_silhouette")
+    assert st.player.block == 6
+
+
+def test_cannon_fire_support_ignores_non_companion_cards():
+    st = make_state(enemies=[make_enemy(hp=200)])
+    st.player.powers["cannon_fire_support"] = 3
+    _play(st, "kaboom")                                  # Klee's own card
+    assert st.player.block == 0
+
+
+def test_night_vigil_pays_only_against_an_aura_and_only_on_attacks():
+    """Clorinde reads the board before she moves. Same hook and same ordering
+    as Albedo's solar_isotoma -- read BEFORE the hit consumes the aura."""
+    st = make_state(enemies=[make_enemy(hp=300)])
+    e = st.enemies[0]
+    st.player.powers["night_vigil"] = 3
+
+    # No aura: the rider is worth nothing.
+    before = e.hp
+    effects.resolve_card(st, loader.get_card("kaeya_frostgnaw"))   # 6, cryo
+    assert before - e.hp == 6
+    assert e.aura == "cryo"
+
+    # Aura up: the SAME card now pays the rider, and it is collected even
+    # though this hit reacts the aura away.
+    before = e.hp
+    effects.resolve_card(st, loader.get_card("chevreuse_interdiction_fire"))
+    melt = C.MELT_MULT                    # pyro onto cryo
+    assert before - e.hp == int((7 + 3) * melt)
+
+
+def test_night_vigil_does_not_pay_bombs_or_summons():
+    """'Your Attacks' means card Attacks. A bomb tick is not one."""
+    st = make_state(enemies=[make_enemy(hp=300)])
+    e = st.enemies[0]
+    st.player.powers["night_vigil"] = 5
+    e.aura = "hydro"
+    before = e.hp
+    effects.deal_damage_to_enemy(st, e, 10, element=None, source="bomb")
+    assert before - e.hp == 10
+
+
+def test_ancient_sea_authority_extends_applied_and_refreshed_auras():
+    st = make_state(enemies=[make_enemy(hp=200)])
+    e = st.enemies[0]
+    effects.resolve_card(st, loader.get_card("guest_neuvillette_tears"))
+    assert e.aura_turns_left == C.AURA_DURATION_TURNS
+
+    st2 = make_state(enemies=[make_enemy(hp=200)])
+    e2 = st2.enemies[0]
+    effects.resolve_card(
+        st2, loader.get_card("neuvillette_ancient_sea_authority"))
+    effects.resolve_card(st2, loader.get_card("guest_neuvillette_tears"))
+    assert e2.aura_turns_left == C.AURA_DURATION_TURNS + 1
+    # Refresh must agree with application -- the reason aura_duration() is a
+    # function rather than the constant read at three call sites.
+    e2.aura_turns_left = 1
+    effects.resolve_card(st2, loader.get_card("guest_neuvillette_tears"))
+    assert e2.aura_turns_left == C.AURA_DURATION_TURNS + 1
+
+
+def test_ancient_sea_authority_applies_no_element_of_its_own():
+    """It is authority over water, not more water. If it applied Hydro it
+    would re-open the mass-Frozen watchlist the guest card deliberately
+    priced with self-damage."""
+    st = make_state(enemies=[make_enemy(hp=200)])
+    effects.resolve_card(
+        st, loader.get_card("neuvillette_ancient_sea_authority"))
+    assert all(e.aura is None for e in st.enemies)
+
+
+def test_masque_ratchets_strength_every_turn():
+    st = make_state(enemies=[make_enemy(hp=300)])
+    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+    assert st.player.powers.get("strength", 0) == 0    # nothing on play
+    effects.player_turn_start_triggers(st)
+    assert st.player.powers["strength"] == 1
+    effects.player_turn_start_triggers(st)
+    assert st.player.powers["strength"] == 2           # a ratchet, not a flat
+
+
+def test_masque_bond_of_life_eats_block_every_turn():
+    st = make_state(enemies=[make_enemy(hp=300)])
+    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+
+    st.player.block = 12
+    effects.player_turn_end_triggers(st)
+    assert st.player.block == 12 - C.MASQUE_BOND_BLOCK
+    bond = [ev for ev in st.log if ev["event"] == "bond_of_life"]
+    assert bond and bond[-1]["amount"] == C.MASQUE_BOND_BLOCK
+
+    # Every turn, not once: a second turn pays again.
+    st.player.block = 8
+    effects.player_turn_end_triggers(st)
+    assert st.player.block == 8 - C.MASQUE_BOND_BLOCK
+
+
+def test_masque_bond_clamps_at_zero_and_never_goes_negative():
+    """The debt is paid out of Block, not out of HP -- a turn with less Block
+    than the Bond loses what there is and no more."""
+    st = make_state(enemies=[make_enemy(hp=300)])
+    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+    st.player.block = 2
+    effects.player_turn_end_triggers(st)
+    assert st.player.block == 0
+    bond = [ev for ev in st.log if ev["event"] == "bond_of_life"]
+    assert bond[-1]["amount"] == 2      # paid what existed, owed 5
+
+
+def test_masque_bond_is_universal_and_navia_block_cannot_dodge_it():
+    """The reason the Bond is paid at turn end rather than at a card-block
+    funnel: power-sourced Block would otherwise slip past it."""
+    st = make_state(enemies=[make_enemy(hp=300)])
+    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+    st.player.powers["cannon_fire_support"] = 3
+    _play(st, "lynette_box_trick")        # Navia pays 3 Block, not card block
+    assert st.player.block == 3
+    effects.player_turn_end_triggers(st)
+    assert st.player.block == 0
+
+
+def test_masque_strength_converts_to_charge_for_kokomi():
+    """LAW 3 (Flawless Strategy) says Kokomi cannot gain Strength; it becomes
+    Charge at the one chokepoint. Arlecchino routes through the standard path
+    precisely so this falls out without a special case."""
+    st = make_state(enemies=[make_enemy(hp=300)])
+    st.player.relic_hooks.append("tamakushi_casket")
+    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+    effects.player_turn_start_triggers(st)
+    assert st.player.powers.get("strength", 0) == 0
+    assert st.player.charge == 1
+    converted = [ev for ev in st.log if ev["event"] == "strength_converted"]
+    assert converted and converted[-1]["stacks"] == 1

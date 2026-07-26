@@ -18,6 +18,14 @@ from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine.state import Card
 
+# The calibration references draft only from their own pool. For
+# real_ironclad this is the PARITY rule, not a flavour call: companions are
+# Klee/Furina content and would inject elements and reactions into a run
+# whose whole purpose is to be scored in the same relic-less, potion-less,
+# element-less world Klee was. The guard is a bare string, so it stays inert
+# on a clone where game_ref/ (and therefore real_ironclad) does not exist.
+NO_COMPANION_CHARACTERS = frozenset({"ref_ironclad", "real_ironclad"})
+
 
 @lru_cache(maxsize=8)
 def character_pool(character_id: str) -> dict[str, list[Card]]:
@@ -40,12 +48,23 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
         # is what makes the rare tier 14 draftable instead of 15.
         if c.is_companion or c.kit_card or c.rarity not in C.RARITY_ODDS:
             continue
-        # Personal sheets are per-character pools (sheet pass 1): a card
-        # tagged with another character's name must never be offered here.
-        # Same bug class as the Prune catch, one slot over -- with two
-        # personal sheets loaded, Klee's card rewards would have offered
-        # Furina's cards without this line.
-        if c.character and c.character != character_id:
+        # Ownership is REQUIRED, not merely non-conflicting. The old test
+        # was `if c.character and c.character != character_id` -- it dropped
+        # cards belonging to someone ELSE but let cards belonging to NOBODY
+        # through to everybody. The cards/ reference sheets predate the
+        # drafting layer entirely (commit 8b5ac16, when every deck was
+        # passed in explicitly and card ownership was not yet a concept), so
+        # they carried character=None and leaked into every character's
+        # rewards: 11 stand-ins, ~12% of Klee's offers and ~32% of
+        # real_ironclad's, including Silent cards on the Ironclad.
+        #
+        # This one MATTERS to balance, it is not hygiene: shrug_it_off_like
+        # is 8 block + draw for 1 energy, which beat 11 of Klee's own 12
+        # block cards. Her measured survivability was propped up by borrowed
+        # Ironclad block that will never ship in the mod. Ratified
+        # 2026-07-21: "We NEED to make the sim results reflect the real card
+        # pool. If that damages the baseline, so be it."
+        if c.character != character_id:
             continue
         pool.setdefault(c.rarity, []).append(c)
     return {r: sorted(cs, key=lambda c: c.id) for r, cs in pool.items()}
@@ -78,8 +97,31 @@ def five_star_roster(nation: str) -> list[Card]:
         key=lambda c: c.id)
 
 
+@lru_cache(maxsize=1)
+def designed_nations() -> tuple[str, ...]:
+    """Every nation with at least one banner-eligible 5-star, sorted.
+
+    DERIVED, never listed. The literal default this replaced -- roll_banner's
+    ``nations=("mondstadt",)`` -- was correct on the day it was written and
+    silently wrong from the day Inazuma got its first 5-star: the run model's
+    one call site never passed an argument, so every run of every character
+    rolled a MONDSTADT-ONLY banner, and `_banner_filtered` then dropped every
+    other nation's 5-stars from both the reward slot and the shop. Measured
+    before the fix: across 400 seeds a Kokomi run was offered Albedo, Durin and
+    Nicole and never Itto or Raiden -- Inazuma's own Rares, one of them written
+    as "the conscription jackpot", unreachable in her own runs.
+
+    A hardcoded nation list is a thing someone must remember to update. This is
+    not.
+    """
+    nations = {c.nation for c in loader._card_index().values()
+               if c.is_companion and c.star == 5 and c.nation
+               and c.personal_pool is None and not c.guest_star}
+    return tuple(sorted(nations))
+
+
 def roll_banner(rng: random.Random,
-                nations: tuple[str, ...] = ("mondstadt",)) -> frozenset[str]:
+                nations: tuple[str, ...] | None = None) -> frozenset[str]:
     """The run's Featured Banner: BANNER_FEATURED_SLOTS limited 5-stars per
     nation, drawn once per run and fixed for its duration.
 
@@ -90,7 +132,15 @@ def roll_banner(rng: random.Random,
 
     In co-op each player rolls their own banner -- divergent lineups are the
     point -- so this deliberately takes an rng rather than reading a global.
+
+    ``nations=None`` means EVERY designed nation, which is what §4.2 describes
+    ("3 limited 5-stars per nation") and the only correct setting for a run:
+    the reward slot's uniform half and the shop's wildcard slot both offer
+    off-nation 5-stars, so a banner that omits a nation does not thin that
+    nation -- it DELETES it. See designed_nations().
     """
+    if nations is None:
+        nations = designed_nations()
     featured: set[str] = set()
     for nation in nations:
         roster = five_star_roster(nation)
@@ -142,7 +192,9 @@ def _nation_weighted_choice(rng: random.Random, cards: list[Card],
 
 def roll_rewards(rng: random.Random, character_id: str,
                  companion_offers: int = 1,
-                 banner: frozenset[str] | None = None) -> list[Card]:
+                 banner: frozenset[str] | None = None,
+                 companion_rarity: str | None = None,
+                 card_rarity: str | None = None) -> list[Card]:
     """One post-fight reward screen: card offers + the companion slot.
     companion_offers > 1 is the pity/choose-3 slot (triage ruling 4
     pulled the mechanism forward from M7; the run model decides when).
@@ -151,16 +203,38 @@ def roll_rewards(rng: random.Random, character_id: str,
     which is the pre-v1.8 behaviour and what the Tier 0 fight-level tests
     still want. Off-banner 5-stars are removed before the rarity roll, so a
     banner that empties the rare tier falls through to uncommon exactly as a
-    naturally rare-less pool already does.
+    naturally rare-less pool already does. ``companion_rarity="rare"`` is
+    the post-boss rule for the Companion slot; ``card_rarity="rare"`` forces
+    the ordinary card offers, which is §10.1's boundary reward ("choice-of-3
+    Rare cards"). The Ironclad-0.6% diagnosis (2026-07-23) found the shipped
+    boundary forced only the companion slot -- a no-companion character got
+    plain act-1-odds commons at the act transition, and nobody got the
+    ratified Rare cards. A pool with no card in the forced tier falls down
+    the same rare->uncommon->common ladder the natural roll uses (the ref
+    pool has no rares at all; a substituted screen beats an empty one).
     """
+    for label, forced in (("companion", companion_rarity),
+                          ("card", card_rarity)):
+        if forced is not None and forced not in C.RARITY_ODDS:
+            raise ValueError(f"unknown {label} rarity {forced!r}")
     pool = character_pool(character_id)
+    if not pool:
+        # Reachable since ownership became REQUIRED above: a character with
+        # no cards of its own now has a genuinely empty pool where it used
+        # to inherit the ownerless reference cards. The old code walked the
+        # rare->uncommon->common fallback off the end and died on a bare
+        # KeyError deep in a dict literal; say what is actually wrong.
+        raise ValueError(
+            f"no draftable cards for character {character_id!r} -- every "
+            "reward card must be owned by the character being offered it. "
+            "Check the id, or that its sheet sets `character`.")
     offers = []
     for _ in range(C.REWARD_CARD_OFFERS):
-        rarity = _roll_rarity(rng)
+        rarity = card_rarity or _roll_rarity(rng)
         while rarity not in pool:            # ref pool may lack a rarity
             rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
         offers.append(loader.get_card(rng.choice(pool[rarity]).id))
-    if character_id != "ref_ironclad":       # no companions for the anchor
+    if character_id not in NO_COMPANION_CHARACTERS:   # none for the refs
         # personal_pool cards are only offered to their own character --
         # a no-op while Klee is the only character, load-bearing the moment
         # a second one exists (Prune must not show up in Furina's rewards).
@@ -170,9 +244,16 @@ def roll_rewards(rng: random.Random, character_id: str,
                   for r, cs in companion_pool().items()) if cs}
         home = loader.character_nation(character_id)
         for _ in range(companion_offers):
-            rarity = _roll_rarity(rng)
-            while rarity not in comps:
-                rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
+            rarity = companion_rarity or _roll_rarity(rng)
+            if companion_rarity is not None:
+                # Rare-only means rare-only: if a future roster has no card
+                # in the forced tier, omit the slot rather than substituting
+                # a lower-rarity companion.
+                if rarity not in comps:
+                    continue
+            else:
+                while rarity not in comps:
+                    rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
             offers.append(loader.get_card(
                 _nation_weighted_choice(rng, comps[rarity], home).id))
     return offers

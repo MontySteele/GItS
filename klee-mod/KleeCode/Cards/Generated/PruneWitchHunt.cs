@@ -23,6 +23,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -43,12 +44,15 @@ public sealed class PruneWitchHunt : CustomCardModel, ICompanionCard
 
     public string? Nation => "mondstadt";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("prune_witch_hunt");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Prune — Little Witch's Hunt"),
-        ("description", "[gold]Swirl[/gold] ALL enemies' auras. Gain {Sparks:diff()} [gold]Spark{Sparks:plural:|s}[/gold]."),
+        ("description", "[gold]Swirl[/gold] an enemy's aura. If it triggered an [gold]Elemental Reaction[/gold]: gain 1 [gold]Spark[/gold]. Otherwise: gain 5 [gold]Block[/gold]. Gain {Sparks:diff()} [gold]Spark{Sparks:plural:|s}[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -61,15 +65,22 @@ public sealed class PruneWitchHunt : CustomCardModel, ICompanionCard
     // GenerateAllCards. BaseLib's auto-registration would need a [Pool]
     // attribute and would register every card a second time.
     public PruneWitchHunt()
-        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.AllEnemies, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
+        var reactionsAtStart = ReactionEffects.TotalResolved;
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Anemo, Owner.Creature);
+        if (ReactionEffects.TotalResolved > reactionsAtStart)
         {
-            await ElementalHit.ApplyOnly(choiceContext, auraTarget, Element.Anemo, Owner.Creature);
+            await SparkPower.Gain(choiceContext, Owner.Creature, 1, this);
+        }
+        else
+        {
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, 5m), ValueProp.Move), cardPlay);
         }
         await SparkPower.Gain(choiceContext, Owner.Creature, DynamicVars["Sparks"].IntValue, this);
     }

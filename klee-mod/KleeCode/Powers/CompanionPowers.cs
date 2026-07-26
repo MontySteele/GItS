@@ -12,6 +12,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
@@ -23,42 +24,77 @@ namespace KleeMod.Powers;
 public static class CompanionConstants
 {
     public const int OzDamage = 3;             // OZ_DMG (applies electro)
-    public const int WitchsFlameDamage = 4;    // WITCHS_FLAME_DMG (applies pyro)
+    public const int WitchsFlameBurst = 3;     // WITCHS_FLAME_BURST per aura
     public const int SolarIsotomaBlock = 3;    // SOLAR_ISOTOMA_BLOCK per hit
     public const int CelestialGiftBlock = 4;   // CELESTIAL_GIFT_BLOCK per turn
+    public const int MasqueBondBlock = 5;      // MASQUE_BOND_BLOCK owed per turn
 }
 
 /// <summary>
-/// Which companions have been played this combat, unique in first-play
-/// order (tier0 companions_played + dict.fromkeys) -- Best Friends Forever
-/// reads it. Keyed to the combat-state instance, the
+/// Which companions have been played this combat, PER OWNER, unique in
+/// first-play order (tier0 companions_played + dict.fromkeys) -- Best Friends
+/// Forever reads it. Keyed to the combat-state instance, the
 /// DetonationsThisCombat pattern: a fresh combat starts empty with no
 /// reset hook. Recorded from KleeElementalHooks.BeforeCardPlayed
 /// (IsFirstInSeries = once per play, the sim's play_card append site).
+///
+/// OWNERSHIP, fixed 2026-07-25 (G-B1). This list used to be combat-wide and
+/// unfiltered, so in co-op Best Friends Forever copied the PARTNER's
+/// companions as well as your own -- reported from the 2026-07-25 A0 playtest
+/// as "pulled the co-op partner's cards". The sheet text never meant that; the
+/// yaml op `copy_companions_played_this_combat` always meant the owner's, and
+/// tier 0.5 models a single seat so no sim run could ever have disagreed.
+///
+/// This is the shape of the whole bug class: a "this combat" tracker is
+/// correct in solo and wrong in co-op, and solo is the only configuration the
+/// instruments can see. See the G-B2 census in
+/// docs/archive/ship-what-we-know-sprint-log.md for the other consumers.
+///
+/// Uniqueness is PER OWNER, not global: if both players play Oz, both should
+/// get an Oz back. Deduplicating across owners would fix the leak by creating
+/// a subtler one.
 /// </summary>
 public static class CompanionPlays
 {
     private static ICombatState? _combat;
-    private static readonly List<ModelId> _played = new();
+    private static readonly List<(Player Owner, ModelId Id)> _played = new();
 
     public static void Record(ICombatState? combatState, CardModel card)
     {
         if (combatState == null) return;
+        // No owner means nothing can ever read this entry back -- every reader
+        // filters by owner -- so dropping it is the honest move rather than
+        // filing it under a null that would match nobody.
+        var owner = card.Owner;
+        if (owner == null) return;
         if (!ReferenceEquals(combatState, _combat))
         {
             _combat = combatState;
             _played.Clear();
         }
-        if (!_played.Contains(card.Id))
+        if (!_played.Any(entry => ReferenceEquals(entry.Owner, owner)
+                                  && entry.Id == card.Id))
         {
-            _played.Add(card.Id);
+            _played.Add((owner, card.Id));
         }
     }
 
-    public static IReadOnlyList<ModelId> PlayedThisCombat(ICombatState combatState)
-        => ReferenceEquals(combatState, _combat)
-            ? _played
-            : (IReadOnlyList<ModelId>)System.Array.Empty<ModelId>();
+    /// <summary>
+    /// The companions <paramref name="owner"/> played this combat, in
+    /// first-play order. Never another player's.
+    /// </summary>
+    public static IReadOnlyList<ModelId> PlayedThisCombat(
+        ICombatState combatState, Player? owner)
+    {
+        if (!ReferenceEquals(combatState, _combat) || owner == null)
+        {
+            return System.Array.Empty<ModelId>();
+        }
+        return _played
+            .Where(entry => ReferenceEquals(entry.Owner, owner))
+            .Select(entry => entry.Id)
+            .ToList();
+    }
 }
 
 /// <summary>
@@ -197,11 +233,10 @@ public sealed class OzSummonPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Durin: PERMANENT. Amount is a PERCENT boost to amplifying reactions
-/// (ReactionTable.AmplifierMultiplier reads it, additive with Vermillion
-/// Pact's AmpReactionUpPower -- tier0 reactions._amp_mult), plus one
-/// end-of-turn Pyro hit to a random enemy (no tick-down; the sim's
-/// witchs_flame never decrements).
+/// Durin: PERMANENT. At end of turn, consumes every enemy Pyro aura; each
+/// consumed aura deals Amount unpowered damage and grants 3 Burst Energy.
+/// This turns Klee's Pyro saturation into value while clearing the board for
+/// Hydro/Cryo to establish the next reaction. No tick-down.
 /// </summary>
 public sealed class WitchsFlamePower : PowerModel, ILocalizationProvider
 {
@@ -209,31 +244,35 @@ public sealed class WitchsFlamePower : PowerModel, ILocalizationProvider
     {
         ("title", "Witch's Flame"),
         ("description",
-            "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {Amount}% "
-          + "more. At the end of your turn, deal "
-          + $"{CompanionConstants.WitchsFlameDamage} damage and apply "
-          + "[gold]Pyro[/gold] to a random enemy."),
+            "At the end of your turn, consume [gold]Pyro[/gold] from each "
+          + "enemy. For each aura consumed, deal {Amount} damage and gain "
+          + $"{CompanionConstants.WitchsFlameBurst} [gold]Burst Energy[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override async Task BeforeSideTurnEnd(
+    public override async Task AfterSideTurnEnd(
         PlayerChoiceContext choiceContext, CombatSide side,
         IEnumerable<Creature> participants)
     {
         if (side != CombatSide.Player) return;
         if (Owner.Player == null) return;
 
-        var candidates = CombatState.HittableEnemies.ToList();
-        if (candidates.Count == 0) return;
-        var target = CombatState.RunState.Rng.CombatTargets.NextItem(candidates);
-        if (target == null) return;
+        foreach (var target in CombatState.HittableEnemies.ToList())
+        {
+            var aura = AuraCmd.Find(target);
+            if (aura?.Element != Element.Pyro) continue;
 
-        await ElementalHit.Deal(
-            choiceContext, target, Element.Pyro,
-            CompanionConstants.WitchsFlameDamage, Owner);
+            await PowerCmd.Remove(aura);
+            await CreatureCmd.Damage(
+                choiceContext, target, (int)Amount,
+                ValueProp.Unpowered, dealer: null, cardSource: null);
+            await KleeBurstResource.Gain(
+                choiceContext, Owner, CompanionConstants.WitchsFlameBurst,
+                cardSource: null);
+        }
     }
 }
 
@@ -294,28 +333,31 @@ public sealed class CelestialGiftPower : PowerModel, ILocalizationProvider
     {
         ("title", "Celestial Gift"),
         ("description",
-            "Your Attacks deal {Amount} more damage. At the start of your "
-          + $"turn, gain {CompanionConstants.CelestialGiftBlock} [gold]Block[/gold]."),
+            "At the start of your turn, gain {Amount} [gold]Strength[/gold] "
+          + $"and {CompanionConstants.CelestialGiftBlock} [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
-    {
-        if (dealer != Owner || target == Owner) return 0m;
-        if (!props.IsPoweredAttack()) return 0m;
-        if (cardSource is not { Type: CardType.Attack }) return 0m;
-        return Amount;
-    }
+    // ModifyDamageAdditive is GONE, and its absence is the redesign. This power
+    // used to add a static flat bonus to attacks here; it now grants real
+    // Strength below, which the damage pipeline folds in on its own. Keeping
+    // both would pay the buff twice -- once flat, once as Strength -- and the
+    // sim's flat_attack_bonus dropped its celestial_gift term in the same
+    // change for exactly that reason.
 
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
         if (player.Creature != Owner) return;
+        // Sim order (effects.py player turn-start triggers): Strength first,
+        // then Block. Nothing here reads the other, so the order is parity
+        // bookkeeping rather than a dependency -- but a trace diff would show
+        // it, so it matches.
+        await PowerCmd.Apply<StrengthPower>(
+            choiceContext, Owner, Amount, applier: Owner, cardSource: null);
         await CreatureCmd.GainBlock(
             Owner, CompanionConstants.CelestialGiftBlock,
             ValueProp.Unpowered, null, fast: true);
@@ -450,4 +492,39 @@ public sealed class ShatterBonusPower : PowerModel, ILocalizationProvider
     /// <summary>Total bonus on a Shatter dealt by this creature, 0 if none.</summary>
     public static int BonusFor(Creature? dealer) =>
         dealer?.Powers.OfType<ShatterBonusPower>().FirstOrDefault()?.Amount ?? 0;
+}
+
+/// <summary>
+/// Metallicize -- Gorou, Heart of the Clan (Inazuma roster, playtest sprint).
+///
+/// TIMING IS THE SIM'S, NOT THE TABLETOP CONVENTION. Slay the Spire's
+/// Metallicize grants Block at END of turn; tier0's grants it at turn START
+/// (engine/powers.py on_turn_start). Parity with the sim is the contract here,
+/// so this fires at turn start, and the difference is deliberate rather than
+/// an oversight -- start-of-turn Block survives the block-reset and is
+/// therefore strictly better, which is priced into every number her sheet was
+/// measured with. Changing it to end-of-turn is a BALANCE change and needs a
+/// re-measure, not a bugfix.
+///
+/// No native equivalent exists in the game assembly (there is no
+/// MetallicizePower and no PlatedArmor), so this is ours.
+/// </summary>
+public sealed class MetallicizePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Metallicize"),
+        ("description", "At the start of your turn, gain {Amount} Block."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (player.Creature != Owner) return;
+        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null);
+    }
 }

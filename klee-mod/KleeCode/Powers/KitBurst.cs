@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Cards;
+using KleeMod.Cards.Furina;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -104,7 +105,7 @@ public sealed class SparksNSplashPower : PowerModel, ILocalizationProvider
 /// empties the meter, so a refill re-grants it.
 ///
 /// Rules, verbatim from the sim:
-///   - grant only at a full meter (resource >= 60; accrual is uncapped, the
+///   - grant only at a full meter (resource >= 40; accrual is uncapped, the
 ///     check is >=);
 ///   - never a duplicate: a copy already in hand blocks the grant;
 ///   - a full hand DEFERS the grant to the next check, never drops it -- the
@@ -119,11 +120,12 @@ public sealed class SparksNSplashPower : PowerModel, ILocalizationProvider
 /// Check sites (KleeElementalHooks): after the turn-start draw, after every
 /// card played, and at turn end before the flush -- the sim's three
 /// grant_charged_kit call sites. The sim's own argument for exhaustiveness
-/// holds here too: every Klee-reachable gain fires inside those windows
-/// (turn-start detonations land in BeforeSideTurnStart, card-driven gains
-/// inside plays, the volley's reactions in BeforeSideTurnEnd), and mod-model
-/// hooks run AFTER power hooks in the same broadcast, so a same-phase gain
-/// is always visible to the check that follows it.
+/// holds for every immediate grant source (turn-start detonations land in
+/// BeforeSideTurnStart, card-driven gains inside plays, and the volley's
+/// reactions in BeforeSideTurnEnd). Durin deliberately consumes Pyro in
+/// AfterSideTurnEnd so it always follows the Burst volley; Burst Energy gained
+/// there is picked up by the next turn-start check rather than racing power
+/// hook order.
 /// </summary>
 public static class KitGrant
 {
@@ -136,7 +138,10 @@ public static class KitGrant
     /// DECISIONS when the kit sprint landed: the FIRST discard op to ship
     /// C#-side carries the exemption (R36 Crackle / bright_idea unblock).
     /// </summary>
-    public static bool NotKitCard(CardModel card) => card is not SparksNSplash;
+    public static bool NotKitCard(CardModel card) =>
+        card is not SparksNSplash
+            and not LetThePeopleRejoice
+            and not Cards.Kokomi.CeremonialGarment;
 
     public static async Task GrantIfCharged(PlayerChoiceContext choiceContext, Player? owner)
     {

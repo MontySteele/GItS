@@ -1,0 +1,371 @@
+#!/usr/bin/env python3
+"""Parity lint: C# mirrored constants vs tier0, the single source of truth.
+
+WHY THIS EXISTS. Every balance number in the mod lives twice -- once in
+tier0 (constants.py, the character yamls) where it was MEASURED, and once in
+C# where it is PLAYED. The C# copies carry doc comments swearing they mirror
+the sim and must never be re-derived, and until now that promise was kept by
+discipline alone. Discipline is not a gate: a sim-side retune that nobody
+mirrors produces a mod that plays to numbers no simulation ever endorsed, and
+it does so SILENTLY -- the build is green, the tests pass, the tuning report
+describes a game nobody is playing.
+
+There is no C# test project (and no cheap way to add one against a Godot game
+assembly), so a running fixture is not available. This is the static form of
+the same guarantee, and it is strictly the more valuable half: a fixture pins
+behaviour at the numbers it was written with, while this pins the numbers
+themselves against the model that chose them.
+
+DISCIPLINE (tier0's UNAPPLIABLE, applied to linting). Every `public const int`
+in the mod must be classified: either MIRRORED (with the tier0 expression it
+copies, compared by value) or UNMIRRORED (with a written reason it has no sim
+counterpart). A constant in neither map is a FINDING, not a skip. That is what
+makes the lint survive contact with future work -- adding a C# balance number
+forces a decision about where it came from, at the moment the author still
+knows the answer.
+
+Run: python tools/lint_constant_parity.py
+Exit 1 with findings on stdout when a mirror has drifted or is unclassified.
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+
+import yaml  # noqa: E402
+
+from tier0 import constants as C  # noqa: E402
+
+CS_ROOT = REPO / "klee-mod" / "KleeCode"
+
+
+def _char(name: str, key: str):
+    """A value from a tier0 character sheet (burst_max and friends live there,
+    not in constants.py, because they are per-character statline)."""
+    path = REPO / "tier0" / "content" / "characters" / f"{name}.yaml"
+    return yaml.safe_load(path.read_text(encoding="utf-8"))[key]
+
+
+def _salon(member: str, phase: str, key: str):
+    """A number out of the SALON_MEMBERS table. Furina's members are typed, so
+    their tick/bow numbers are table entries rather than named constants."""
+    return C.SALON_MEMBERS[member][phase][key]
+
+
+# --------------------------------------------------------------------------
+# MIRRORED: C# constant -> the tier0 value it copies.
+#
+# The right-hand side is evaluated here, so this table doubles as the written
+# record of WHERE each C# number came from -- which is the question that is
+# expensive to answer six months later and free to answer today.
+# --------------------------------------------------------------------------
+def _ancient_hook(relic_id: str, hook: str) -> int:
+    """A number out of tier05's ancient-relic table.
+
+    Relic effects are DATA rather than named constants, so the sim's copy of an
+    Ancient's number lives in tier05/content/relics.yaml. Reading it here is
+    what makes a relic number mirrorable at all -- the alternative was to file
+    every Ancient under UNMIRRORED as "the sim does not model relics", which
+    stopped being true the day the starter-upgrade hook landed.
+    """
+    from tier05 import relics as _relics
+    for fx in _relics.ancient_pool()[relic_id]["effects"]:
+        if fx.get("hook") == hook:
+            return int(fx["amount"])
+    raise KeyError(f"{relic_id} has no {hook} effect")
+
+
+MIRRORED: dict[str, object] = {
+    # Klee's upgraded starter (Touch of Orobas -> Explosive Frags). The sim's
+    # copy is a relic row, not a constant; see _ancient_hook.
+    "ExplosiveFrags.OpeningSparks":
+        _ancient_hook("touch_of_orobas_klee", "combat_start_spark"),
+    # Shared elemental table (tier0/constants.py, reaction block).
+    "ReactionConstants.AuraDurationTurns": C.AURA_DURATION_TURNS,
+    "ReactionConstants.OverloadSplash": C.OVERLOAD_SPLASH,
+    "ReactionConstants.OverloadWeak": C.OVERLOAD_WEAK,
+    "ReactionConstants.SuperconductVuln": C.SUPERCONDUCT_VULN,
+    "ReactionConstants.ElectroChargedDot": C.ELECTROCHARGED_DOT,
+    "ReactionConstants.ElectroChargedDotTurns": C.ELECTROCHARGED_DOT_TURNS,
+    "ReactionConstants.CrystallizeBlock": C.CRYSTALLIZE_BLOCK,
+    "ReactionConstants.ShatterDamage": C.SHATTER_DAMAGE,
+    "ReactionConstants.FrozenBossVuln": C.FROZEN_BOSS_VULN,
+    "ReactionKitConstants.CatalyticBurstPerReaction":
+        C.CATALYTIC_BURST_PER_REACTION,
+    # Non-integer members of the same table. These were invisible until the
+    # lint was widened past `int` during the §4.7 shop sprint -- and they are
+    # the amplifier numbers, i.e. the single most consequential multipliers in
+    # the mod. AMP_STACK_LIMIT is the provenance-log tripwire guardrail (§7.1).
+    "ReactionConstants.VaporizeMult": C.VAPORIZE_MULT,
+    "ReactionConstants.MeltMult": C.MELT_MULT,
+    "ReactionConstants.FrozenDamageMult": C.FROZEN_DAMAGE_MULT,
+    "ReactionConstants.VulnerableTakenMult": C.VULNERABLE_TAKEN_MULT,
+    "ReactionConstants.AmpStackLimit": C.AMP_STACK_LIMIT,
+
+    # Companion reward slot (§4.1) -- the rarity walk and the nation weighting
+    # CompanionSlot ports from tier05 rewards.
+    "CompanionSlot.CommonOdds": C.RARITY_ODDS["common"],
+    "CompanionSlot.UncommonOdds": C.RARITY_ODDS["uncommon"],
+    "CompanionSlot.SameNationShare": C.SAME_NATION_REWARD_SHARE,
+    "CompanionSlot.NationWeight": C.NATION_WEIGHTS["mondstadt"],
+    # §4.7 shop channel, slot 2's renormalized Uncommon share (R59).
+    "MerchantInventory_CompanionColorlessSlots_Patch.SlotTwoUncommonOdds":
+        C.SHOP_COMPANION_RARITY_ODDS["uncommon"],
+
+    # Furina.
+    "FurinaResourceConstants.FanfareDecayFraction": C.FANFARE_DECAY_FRACTION,
+    "SalonConstants.DryDamageMultiplier": C.SALON_DRY_DAMAGE_MULT,
+    "SpotlightSystem.GuestCastBaseMultiplier": C.SPOTLIGHT_BASE_MULT,
+
+    # Klee.
+    "BurstConstants.PerSkillTag": C.BURST_PER_SKILL_TAG,
+    "BurstConstants.PerReaction": C.BURST_PER_REACTION,
+    "BurstConstants.KleeMax": _char("klee", "burst_max"),
+    "KitBurstConstants.VolleyHits": C.SPARKS_N_SPLASH_HITS,
+    "KitBurstConstants.VolleyHitDamage": C.SPARKS_N_SPLASH_HIT_DMG,
+    "SparkPower.Threshold": C.SPARKS_FOR_FREE_ATTACK,
+    "DemolitionConstants.SplashBurst": C.DETONATION_SPLASH_BURST,
+    "DemolitionConstants.SplashProcCapPerTurn": C.DETONATION_SPLASH_PROC_CAP,
+    "DemolitionConstants.PlaytimeBombDamage": C.PLAYTIME_BOMB_DAMAGE,
+    "CompanionConstants.OzDamage": C.OZ_DMG,
+    "CompanionConstants.WitchsFlameBurst": C.WITCHS_FLAME_BURST,
+    "CompanionConstants.SolarIsotomaBlock": C.SOLAR_ISOTOMA_BLOCK,
+    "CompanionConstants.CelestialGiftBlock": C.CELESTIAL_GIFT_BLOCK,
+    "CompanionConstants.MasqueBondBlock": C.MASQUE_BOND_BLOCK,
+    "CompanionBanner.FeaturedSlots": C.BANNER_FEATURED_SLOTS,
+
+    # Furina.
+    "FurinaResourceConstants.FanfarePerHpLost": C.FANFARE_PER_HP_LOST,
+    "FurinaResourceConstants.FanfarePerEncoreGained":
+        C.FANFARE_PER_ENCORE_GAINED,
+    "FurinaResourceConstants.FanfarePerEncoreSpent":
+        C.FANFARE_PER_ENCORE_SPENT,
+    "FurinaResourceConstants.FanfareFloorPerPower": C.FANFARE_FLOOR_PER_POWER,
+    "FurinaResourceConstants.FanfareFloorPerPowerRare":
+        C.FANFARE_FLOOR_PER_POWER_RARE,
+    "FurinaResourceConstants.BurstPerSkillTag": C.BURST_PER_SKILL_TAG,
+    "FurinaResourceConstants.BurstPerReaction": C.BURST_PER_REACTION,
+    "FurinaResourceConstants.BurstPerEncoreSpent": C.BURST_PER_ENCORE_SPENT,
+    "FurinaResourceConstants.BurstPerSalonTick": C.SALON_TICK_BURST,
+    "FurinaResourceConstants.BurstMax": _char("furina", "burst_max"),
+    "SpotlightSystem.FanfarePerCenterStagePlay": C.FANFARE_PER_SPOTLIGHT_CARD,
+    "SalonConstants.MemberSlots": C.SALON_MEMBER_SLOTS,
+    "SalonConstants.FocusPerFanfare": C.SALON_FOCUS_PER,
+    "SalonConstants.ReplacementNumericMultiplier": C.SALON_REPLACE_NUMERIC_MULT,
+    "SalonConstants.ReplacementDamageMultiplier": C.SALON_REPLACE_DAMAGE_MULT,
+    "SalonConstants.TickEncoreCost": C.SALON_TICK_ENCORE_COST,
+    "SalonConstants.CrabalettaTick": _salon("crabaletta", "tick", "damage"),
+    "SalonConstants.CrabalettaBow": _salon("crabaletta", "bow", "damage"),
+    "SalonConstants.UsherTick": _salon("usher", "tick", "block"),
+    "SalonConstants.UsherBow": _salon("usher", "bow", "block"),
+    "SalonConstants.ChevalmarinTick": _salon("chevalmarin", "tick", "damage"),
+    "SalonConstants.ChevalmarinBowEncore": _salon("chevalmarin", "bow", "encore"),
+
+    # Kokomi.
+    "KokomiConstants.ChargePerExhaust": C.CHARGE_PER_EXHAUST,
+    "KokomiConstants.BurstPerExhaust": C.KOKOMI_BURST_PER_EXHAUST,
+    "KokomiConstants.BurstPerReaction": C.BURST_PER_REACTION,
+    "KokomiConstants.KurageDuration": C.KURAGE_DURATION,
+    "KokomiConstants.KuragePulseBase": C.KURAGE_PULSE_BASE,
+    "KokomiConstants.KuragePulsePerCharge": C.KURAGE_PULSE_PER_CHARGE,
+    "KokomiConstants.KuragePulseBlock": C.KURAGE_PULSE_BLOCK,
+    "KokomiConstants.GarmentAttackBlock": C.GARMENT_ATTACK_BLOCK,
+    "KokomiConstants.GarmentTurns": C.CEREMONIAL_GARMENT_TURNS,
+    "KokomiConstants.GarmentChargeDivisor": C.GARMENT_CHARGE_DIVISOR,
+    "KokomiConstants.ConscriptCostDelta": C.CONSCRIPT_COST_DELTA,
+    "KokomiConstants.BurstMax": _char("kokomi", "burst_max"),
+}
+
+# --------------------------------------------------------------------------
+# UNMIRRORED: C# constants with no tier0 counterpart, each with its reason.
+#
+# "The sim does not model this" is a legitimate answer and always has been --
+# relics, Ancients and the run layer are game-side content. What is not
+# legitimate is leaving the question unanswered.
+# --------------------------------------------------------------------------
+UNMIRRORED: dict[str, str] = {
+    "ExplosiveFrags.SparksPerDetonation":
+        "the BASE starter's rate, carried forward unchanged by the upgrade -- "
+        "which is the ratified design (the windfall is OpeningSparks; the "
+        "doubling of this rate was rejected at the 2026-07-26 red-pen). Its "
+        "sim counterpart is a literal at the detonation site in effects.py "
+        "(`gain_sparks(state, 1)` under spark_on_detonation), not a named "
+        "constant, so there is nothing to compare against by value. "
+        "NOTE: this entry used to read 'tier0 has no relic-upgrade layer', "
+        "which stopped being true when combat_start_spark and "
+        "touch_of_orobas_klee landed -- OpeningSparks is now MIRRORED against "
+        "that row.",
+    "PearlOfInsightRelic.ChargePerExhaust":
+        "derived: KokomiConstants.ChargePerExhaust * 2. The compiler enforces "
+        "the link, so mirroring the doubling here would just be a second place "
+        "to forget. The x2 itself is the upgrade's design, not a sim number.",
+    "PearlOfInsightRelic.BurstPerExhaust":
+        "derived: KokomiConstants.BurstPerExhaust * 2, same reasoning.",
+
+    # --- surfaced by widening the lint past `int` (§4.7 shop sprint) ---
+    "FurinaParityVectors.DecayFraction":
+        "derived: it IS FurinaResourceConstants.FanfareDecayFraction, by "
+        "reference rather than by literal. The compiler enforces the link and "
+        "the target is MIRRORED, so comparing here would only add a second "
+        "place to forget.",
+    "KleeSelfCheck.RuleCount":
+        "diagnostic bookkeeping: how many self-check rules exist. It counts "
+        "this file's own contents, not anything the sim models.",
+
+    # Presentation layer. These are pixels, seconds and sprite orientation --
+    # tier0 models no geometry and no time, so there is nothing to mirror. They
+    # are listed rather than pattern-skipped on purpose: a rule that skipped
+    # everything under Vfx/ would also skip a balance number that someone
+    # parked there, which is precisely how numbers go missing.
+    "CreatureFacing.AuthoredFacing":
+        "presentation: which way the source art is drawn. No sim counterpart.",
+    "CreatureFacing.DeadZonePx":
+        "presentation: pixel threshold below which a creature is not re-aimed.",
+    "GaugeBridge.BarFullWidth":
+        "presentation: meter bar width in pixels.",
+    "KleeCombatVfx.LobApexLift":
+        "presentation: bomb-toss arc height in pixels.",
+    "KleeCombatVfx.LobDuration":
+        "presentation: bomb-toss animation length in seconds.",
+    "KleeCombatVfx.MaxConcurrentPops":
+        "presentation: how many pop effects may overlap before they are "
+        "dropped. A frame-rate guard, not a rule -- the sim resolves every "
+        "detonation regardless of what is drawn.",
+    "SalonVisualsBridge.RibbonFullWidth":
+        "presentation: Fanfare ribbon width in pixels.",
+    "SalonVisualsBridge.RibbonVisualSpan":
+        "presentation: how many Fanfare points the ribbon spans end to end. A "
+        "display scale chosen to read well, deliberately NOT the cap -- "
+        "Fanfare is uncapped since F-A, so no sim number corresponds.",
+}
+
+CLASS_RE = re.compile(
+    r"^\s*(?:public|internal)\s+(?:static\s+|sealed\s+|abstract\s+|partial\s+)*"
+    r"(?:class|record|struct)\s+(\w+)")
+# Non-integer balance numbers count too. The gate shipped int-only, and the
+# docstring's promise ("every balance number in the mod lives twice") quietly
+# did not cover them -- eight constants were escaping when this was widened
+# during the §4.7 shop sprint, and they were not marginal ones: the Vaporize
+# and Melt amplifier multipliers, AMP_STACK_LIMIT, Frozen's damage multiplier,
+# Furina's Fanfare decay fraction, the Salon dry multiplier and the Spotlight
+# Guest Cast multiplier. Every one of those is a headline tuning number, and a
+# sim-side retune of any of them would have drifted silently -- the exact
+# failure this file exists to prevent.
+#
+# `private` is included for the same reason. Visibility is a C# concern; a
+# balance number is a balance number whether or not another class can read it.
+CONST_RE = re.compile(
+    r"^\s*(?:public|internal|private)\s+const\s+"
+    r"(?:int|float|double|decimal)\s+(\w+)\s*=\s*([^;]+);")
+
+# C# numeric literal suffixes (1.5m, 0.875f, 12L) -- stripped before parsing.
+NUM_SUFFIX_RE = re.compile(r"^([-+0-9.eE]+)[mMfFdDlLuU]?$")
+
+# Floating-point mirrors compare within this tolerance rather than exactly:
+# 0.875f round-trips through binary32 and will not equal Python's 0.875.
+FLOAT_TOLERANCE = 1e-6
+
+
+def parse_number(raw: str) -> float | None:
+    """A C# numeric literal as a Python number, or None if it is not one."""
+    m = NUM_SUFFIX_RE.match(raw.strip())
+    if m is None:
+        return None
+    try:
+        return float(m.group(1))
+    except ValueError:
+        return None
+
+
+def collect() -> dict[str, tuple[str, Path]]:
+    """Every declared numeric `const` in the mod, keyed Class.Member.
+
+    The enclosing class is the most recent class declaration above the line.
+    That is a lexical approximation rather than a parse, and it is exact for
+    this codebase because constant blocks are always declared at the top of
+    their own class; a nested-class constant would need a real parse, and the
+    duplicate-key guard below is what would catch the confusion.
+    """
+    found: dict[str, tuple[str, Path]] = {}
+    for path in sorted(CS_ROOT.rglob("*.cs")):
+        cls = None
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if (m := CLASS_RE.match(line)) is not None:
+                cls = m.group(1)
+                continue
+            if (m := CONST_RE.match(line)) is None:
+                continue
+            key = f"{cls}.{m.group(1)}"
+            if key in found:
+                raise SystemExit(
+                    f"FINDING: duplicate constant key {key} "
+                    f"({found[key][1]} and {path}); the lint's class "
+                    "attribution is ambiguous and must be fixed before it can "
+                    "be trusted.")
+            found[key] = (m.group(2).strip(), path)
+    return found
+
+
+def main() -> int:
+    findings: list[str] = []
+    found = collect()
+
+    if not found:
+        print("FINDING: no numeric `const` found -- the lint's pattern or "
+              "the source layout changed, and a lint that passes because it "
+              "read nothing is not a gate.")
+        return 1
+
+    for key, (raw, path) in sorted(found.items()):
+        rel = path.relative_to(REPO)
+        if key in UNMIRRORED:
+            continue
+        if key not in MIRRORED:
+            findings.append(
+                f"{rel}: {key} = {raw} is classified nowhere. Add it to "
+                f"MIRRORED with the tier0 value it copies, or to UNMIRRORED "
+                f"with the reason the sim has no counterpart.")
+            continue
+        got = parse_number(raw)
+        if got is None:
+            findings.append(
+                f"{rel}: {key} = {raw} is in MIRRORED but is not a numeric "
+                f"literal, so its value cannot be compared. Make it a literal "
+                f"or move it to UNMIRRORED as derived.")
+            continue
+        want = float(MIRRORED[key])
+        if abs(got - want) > FLOAT_TOLERANCE:
+            findings.append(
+                f"{rel}: {key} = {raw}, but tier0 says {MIRRORED[key]}. The "
+                f"sim is the source of truth: the mod would play to a number "
+                f"no simulation endorsed. Mirror it, or re-measure and move "
+                f"both.")
+
+    for key in sorted(MIRRORED):
+        if key not in found:
+            findings.append(
+                f"MIRRORED lists {key}, but no such constant exists in the "
+                f"mod. It was renamed or deleted -- update the table so the "
+                f"gate keeps covering what it claims to cover.")
+    for key in sorted(UNMIRRORED):
+        if key not in found:
+            findings.append(
+                f"UNMIRRORED lists {key}, but no such constant exists in the "
+                f"mod. Drop the entry.")
+
+    for finding in findings:
+        print(f"FINDING: {finding}")
+    if findings:
+        return 1
+    print(f"constant parity: OK ({len(MIRRORED)} mirrored, "
+          f"{len(UNMIRRORED)} declared unmirrored)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

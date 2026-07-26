@@ -1,0 +1,116 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Texture2D" path="res://klee/powers/bomb.png" id="1_bomb"]
+[ext_resource type="Texture2D" path="res://klee/powers/spark.png" id="2_spark"]
+
+[sub_resource type="ParticleProcessMaterial" id="Material_boom"]
+particle_flag_disable_z = true
+spread = 180.0
+initial_velocity_min = 110.0
+initial_velocity_max = 260.0
+angle_min = 0.0
+angle_max = 360.0
+gravity = Vector3(0, 340, 0)
+scale_min = 0.06
+scale_max = 0.14
+color = Color(1, 0.62, 0.25, 1)
+
+[sub_resource type="Animation" id="Animation_reset"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Bomb:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Boom:emitting")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_explode"]
+resource_name = "explode"
+length = 0.9
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Bomb:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Boom:emitting")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+tracks/2/type = "method"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0.88),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"queue_free"
+}]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_lob"]
+_data = {
+&"RESET": SubResource("Animation_reset"),
+&"explode": SubResource("Animation_explode")
+}
+
+[node name="BombLob" type="Node2D"]
+
+[node name="Bomb" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("1_bomb")
+
+[node name="Boom" type="GPUParticles2D" parent="."]
+unique_name_in_owner = true
+emitting = false
+amount = 24
+texture = ExtResource("2_spark")
+lifetime = 0.55
+one_shot = true
+explosiveness = 1.0
+fixed_fps = 60
+local_coords = true
+process_material = SubResource("Material_boom")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_lob")
+}

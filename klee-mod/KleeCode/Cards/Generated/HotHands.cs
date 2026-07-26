@@ -62,6 +62,6 @@ public sealed class HotHands : CustomCardModel
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        AddKeyword(CardKeyword.Retain);
     }
 }

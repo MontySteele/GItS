@@ -46,9 +46,8 @@ public sealed class ReactionBonusSparkEnergyPower : PowerModel, ILocalizationPro
 
 /// <summary>
 /// Vermillion Pact: Amount is a PERCENT boost to amplifier multipliers
-/// (Vaporize/Melt). Sim law (reactions.py _amp_mult): additive with other
-/// amp boosts (Durin's witchs_flame, when companions land), multiplicative
-/// on the base -- `base * (1 + pct / 100)`. Read in
+/// (Vaporize/Melt). Sim law (reactions.py _amp_mult): multiplicative on the
+/// base -- `base * (1 + pct / 100)`. Read in
 /// <see cref="KleeMod.Elements.ReactionTable"/>'s dealer-aware multiplier,
 /// which also owns the 4x amp-cap detector the sheet note warns about.
 /// </summary>

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using BaseLib.Utils;
+using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Localization;
@@ -52,10 +54,33 @@ internal static class KleeSelfCheck
 
         try
         {
-            var klee = ModelDb.Character<Klee>();
+            foreach (var character in new CharacterModel[]
+                     {
+                         ModelDb.Character<Klee>(),
+                         ModelDb.Character<Furina>(),
+                         ModelDb.Character<Kokomi>(),
+                     })
+            {
+                CheckCharacterInvariants(character);
+                CheckCharacterAssets(character);
+                CheckLocalization(character);
+            }
 
-            CheckCharacterInvariants(klee);
-            CheckLocalization(klee);
+            // Not per-character: powers are owned by systems, not rosters, and
+            // the gap this catches was precisely a power nobody's character
+            // sweep looked at.
+            CheckPowerIcons();
+
+            // R19 (G-A5a). Furina's Fanfare arithmetic against vectors derived
+            // from the sim. This is the only place the C# port can be executed
+            // against the design of record at all -- there is no C# test
+            // project, so a boot-time check is the whole of the automated
+            // half. The Python suite guarantees the vectors themselves are the
+            // sim's; this guarantees our code answers them correctly.
+            foreach (var finding in FurinaParityVectors.Check())
+            {
+                Fail("R19", finding);
+            }
         }
         catch (Exception e)
         {
@@ -67,7 +92,9 @@ internal static class KleeSelfCheck
 
         if (Findings.Count == 0)
         {
-            Log.Info($"[{KleeMod.ModId}] {Tag} passed ({RuleCount} rules).");
+            Log.Info($"[{KleeMod.ModId}] {Tag} passed "
+                   + $"({RuleCount} rule families across 3 characters "
+                   + "and the assembly's powers).");
             return;
         }
 
@@ -79,13 +106,14 @@ internal static class KleeSelfCheck
     }
 
     // Distinct rule labels that can actually reach the log:
-    //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8
+    //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8, R9, R10, R11,
+    //   R12, R13, R19
     // This was 8 while R5/R6a/R6b were documented but unattributable -- the
     // helpers that emit them hardcoded R4 and R6, so those three strings could
     // never appear. Fixing the labels is what makes the count honest. Note
     // R4 and R5 come from a `rule` parameter, so grepping for Fail("R... will
     // not find them; count the call sites, not the literals.
-    private const int RuleCount = 13;
+    private const int RuleCount = 19;
 
     private static void Fail(string rule, string detail) => Findings.Add($"[{rule}] {detail}");
 
@@ -93,14 +121,14 @@ internal static class KleeSelfCheck
     //  Character invariants
     // -----------------------------------------------------------------------
 
-    private static void CheckCharacterInvariants(Klee klee)
+    private static void CheckCharacterInvariants(CharacterModel character)
     {
         // R1. CharacterSelectScreen.SelectCharacter does an unconditional
         // StartingRelics[0]. An empty array does not degrade -- it throws
         // mid-method, leaving the screen in a state where Klee looks selectable
         // but silently starts the run as whoever was highlighted before.
         // This shipped once (finding 11) and cost a full debug cycle.
-        var relics = klee.StartingRelics?.ToList() ?? new();
+        var relics = character.StartingRelics?.ToList() ?? new();
         if (relics.Count == 0)
         {
             Fail("R1", "StartingRelics is empty; SelectCharacter indexes [0] unconditionally "
@@ -131,7 +159,7 @@ internal static class KleeSelfCheck
 
         // R2. An empty starting deck means no draw pile and an immediate soft
         // lock on the first combat turn.
-        var deck = klee.StartingDeck?.ToList() ?? new();
+        var deck = character.StartingDeck?.ToList() ?? new();
         if (deck.Count == 0)
         {
             Fail("R2", "StartingDeck is empty; first combat will have nothing to draw.");
@@ -148,7 +176,7 @@ internal static class KleeSelfCheck
         // handed the set of rarities present in the *post-blacklist* pool and
         // GetNextAllowedRarity walks to the next one with wrapping, so a single
         // dry rarity degrades gracefully. Three narrower things do throw.
-        var pool = klee.CardPool?.AllCards?.ToList() ?? new();
+        var pool = character.CardPool?.AllCards?.ToList() ?? new();
         if (pool.Count == 0)
         {
             Fail("R3", "CardPool.AllCards is empty; card rewards and transforms will soft lock.");
@@ -246,13 +274,170 @@ internal static class KleeSelfCheck
                           + "the remaining tiers, so drafts will not match the sheet.");
             }
         }
+
+        // R10. DynamicVarSet's constructor throws on a duplicate var name, and
+        // it is built lazily inside CardFactory.CreateForReward -- so the
+        // reward screen dies on whatever run first ROLLS the card, picked or
+        // not (playtest 2026-07-23: StageLights/CourtroomDrama each declared
+        // "PowerAmount" twice). The generator now fails on collisions at emit
+        // time; evaluating the getter here catches hand-written cards too,
+        // at boot instead of mid-run.
+        foreach (var card in pool.Concat(deck))
+        {
+            try
+            {
+                _ = card.DynamicVars;
+            }
+            catch (ArgumentException e)
+            {
+                Fail("R10", $"{card.GetType().Name}: DynamicVars getter threw \"{e.Message}\" -- "
+                          + "duplicate DynamicVar name; every reward screen that rolls this "
+                          + "card will throw.");
+            }
+        }
+
+        // R11. Base-game content resolves "the character's Strike/Defend" with
+        // an unguarded First() over the pool: LargeCapsule.GetStrikeForCharacter
+        // is `AllCards.First(c => c.Rarity == Basic && c.Tags.Contains(
+        // CardTag.Strike))`, and the throw lands inside the Ancient event's
+        // option handler, hanging the room (playtest 2026-07-23: Furina's
+        // first relic -- her generated basics carried no CanonicalTags).
+        // Mirror that predicate exactly: rarity AND tag together.
+        foreach (var tag in new[] { CardTag.Strike, CardTag.Defend })
+        {
+            if (!pool.Any(c => c.Rarity == CardRarity.Basic && c.Tags.Contains(tag)))
+            {
+                Fail("R11", $"{character.GetType().Name}: no Basic-rarity card tagged "
+                          + $"CardTag.{tag} in the pool; LargeCapsule (and anything else "
+                          + "keyed on the tag) does an unguarded First() and will throw.");
+            }
+        }
+
+        // R12. TheArchitect.WinRun() dereferences Dialogue unconditionally,
+        // and LoadDialogue draws ONLY from per-character rows
+        // (allowAnyCharacterDialogues: false) -- a character with none
+        // softlocks the WIN screen (playtest 2026-07-23: Furina beat Act 3
+        // and crashed on PROCEED). The rows ship in the PCK's ancients.json
+        // and BaseLib merges them at PopulateLocKeys time. At least one must
+        // be REPEATING ("r" keys): GetValidDialogues exact-matches
+        // VisitIndex == the character's win count and only repeating rows
+        // survive its fallback, so a non-repeating-only set works exactly
+        // once, then crashes on the second win.
+        //
+        // The repeating probe reads the loc keys directly, mirroring
+        // AncientDialogue.HasRepeatingSuffix: it CANNOT use
+        // GetDialoguesForKey(...).Any(d => d.IsRepeating), because BaseLib's
+        // lookup only constructs the dialogues -- IsRepeating stays false
+        // until the game's own PopulateLines parses the "r" suffix at
+        // dialogue-set build time, so that probe fails unconditionally
+        // (false positive shipped 2026-07-23, one debug cycle).
+        var baseKey = AncientDialogueUtil.BaseLocKey(
+            "THE_ARCHITECT", character.Id.Entry);
+        var dialogues = AncientDialogueUtil.GetDialoguesForKey(
+            "ancients", baseKey);
+        if (dialogues.Count == 0)
+        {
+            Fail("R12", $"{character.GetType().Name}: no THE_ARCHITECT dialogue rows in the "
+                      + "ancients table; WinRun() dereferences a null Dialogue and the "
+                      + "win-the-run screen softlocks. Rebuild the PCK (ancients.json).");
+        }
+        else if (!Enumerable.Range(0, dialogues.Count).Any(i =>
+                     LocString.Exists("ancients", $"{baseKey}{i}-0r.ancient")
+                  || LocString.Exists("ancients", $"{baseKey}{i}-0r.char")))
+        {
+            Fail("R12", $"{character.GetType().Name}: THE_ARCHITECT dialogues exist but none "
+                      + "repeat; GetValidDialogues' visit-index exact match goes empty after "
+                      + "the first win and the second win softlocks.");
+        }
+    }
+
+    /// <summary>
+    /// R13: every concrete PowerModel this assembly defines resolves to an
+    /// icon, and every icon path it names actually exists in the merged PCK.
+    ///
+    /// Both halves failed silently before. The 2026-07-24 companion sweep wired
+    /// four summons and left SIX powers with no case at all, rendering the
+    /// base-game placeholder; separately, fifteen of Furina's powers wore
+    /// KLEE's textures, TEN of them the same one, because the switch matched
+    /// the SpotlightPower base class and the count was never taken. Neither is
+    /// visible from any character-scoped check, and neither throws -- a wrong
+    /// or missing icon just quietly draws. Reflection is the only way to ask
+    /// "did we forget one", so ask it at boot.
+    /// </summary>
+    private static void CheckPowerIcons()
+    {
+        var powers = typeof(KleeMod).Assembly.GetTypes()
+            .Where(t => typeof(PowerModel).IsAssignableFrom(t)
+                     && !t.IsAbstract
+                     && !Powers.KleePowerIcons.IconExempt.ContainsKey(t))
+            .OrderBy(t => t.Name, StringComparer.Ordinal);
+
+        foreach (var type in powers)
+        {
+            PowerModel instance;
+            try
+            {
+                instance = (PowerModel)Activator.CreateInstance(type)!;
+            }
+            catch (Exception)
+            {
+                // No parameterless ctor: it cannot be constructed here, so its
+                // icon cannot be resolved here either. Not a finding -- R13
+                // covers what it can reach, and says so rather than pretending.
+                continue;
+            }
+
+            var path = Powers.KleePowerIcons.PathFor(instance);
+            if (path == null)
+            {
+                Fail("R13", $"{type.Name}: no icon mapping, so it renders the "
+                          + "base-game placeholder. Add a case to "
+                          + "KleePowerIcons.PathFor, or an entry to "
+                          + "KleePowerIcons.IconExempt saying why it needs none.");
+            }
+            else if (!ResourceLoader.Exists(path))
+            {
+                Fail("R13", $"{type.Name}: icon path \"{path}\" is not in the "
+                          + "merged PCK. KleePck.Path returned it, so the file "
+                          + "was present at build time -- check build_pck.ps1 "
+                          + "copies its directory and that the deploy is fresh.");
+            }
+        }
+    }
+
+    private static void CheckCharacterAssets(CharacterModel character)
+    {
+        // R9. CharacterModel.AssetPaths contains id-derived scenes for combat
+        // visuals, the top-panel icon, the energy counter and the card trail.
+        // BaseLib can redirect every one, but only when the Custom*Path
+        // override is non-null. Furina shipped with texture/creation overrides
+        // but not these preload overrides: four failed background loads left
+        // AssetCache incomplete and the run crashed while generating the map.
+        //
+        // Include character-select paths too. This check runs after the mod PCK
+        // has merged and never loads/instantiates a resource; Exists is enough
+        // to catch a stale local PCK without risking a validator crash.
+        var paths = character.AssetPaths
+            .Concat(character.AssetPathsCharacterSelect)
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Distinct(StringComparer.Ordinal);
+
+        foreach (var path in paths)
+        {
+            if (!ResourceLoader.Exists(path))
+            {
+                Fail("R9", $"{character.GetType().Name}: required preload asset "
+                         + $"\"{path}\" does not resolve. Rebuild the roster PCK "
+                         + "before starting a run.");
+            }
+        }
     }
 
     // -----------------------------------------------------------------------
     //  Localization
     // -----------------------------------------------------------------------
 
-    private static void CheckLocalization(Klee klee)
+    private static void CheckLocalization(CharacterModel character)
     {
         var cards = LocManager.Instance.GetTable("cards");
         var characters = LocManager.Instance.GetTable("characters");
@@ -260,8 +445,10 @@ internal static class KleeSelfCheck
         // Union of pool and starting deck: a starter stub can legitimately sit
         // outside the pool, and both surfaces render text.
         var allCards = new List<CardModel>();
-        allCards.AddRange(klee.CardPool?.AllCards ?? Enumerable.Empty<CardModel>());
-        allCards.AddRange(klee.StartingDeck ?? Enumerable.Empty<CardModel>());
+        allCards.AddRange(character.CardPool?.AllCards
+                          ?? Enumerable.Empty<CardModel>());
+        allCards.AddRange(character.StartingDeck
+                          ?? Enumerable.Empty<CardModel>());
 
         var seen = new HashSet<string>(StringComparer.Ordinal);
 
@@ -280,7 +467,9 @@ internal static class KleeSelfCheck
         }
 
         // R5. Same check for the character surface.
-        CheckLocEntry(characters, "characters", klee.Id.Entry, nameof(Klee), "R5");
+        CheckLocEntry(
+            characters, "characters", character.Id.Entry,
+            character.GetType().Name, "R5");
 
         // R8. Every power this mod ships must have loc. R4 only walks the card
         // pool, so powers were unswept -- and the four AuraPowers shipped

@@ -23,6 +23,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -43,18 +44,26 @@ public sealed class DionaIcyPaws : CustomCardModel, ICompanionCard
 
     public string? Nation => "mondstadt";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesCryo };
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("diona_icy_paws");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Diona — Icy Paws"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] to a random enemy."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(5m, ValueProp.Move)
+            new CalculationBaseVar(5m),
+            new CalculationExtraVar(1m),
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -67,7 +76,7 @@ public sealed class DionaIcyPaws : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
         {
             var auraCandidates = CombatState!.HittableEnemies.ToList();
             if (auraCandidates.Count > 0)
@@ -83,6 +92,6 @@ public sealed class DionaIcyPaws : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

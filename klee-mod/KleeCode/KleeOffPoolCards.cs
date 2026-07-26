@@ -23,13 +23,30 @@ namespace KleeMod;
 /// bug." placeholder -- Reload throws at the Pool read BEFORE it populates the
 /// description label, so the scene's default text survives.
 ///
-/// ATTEMPT 1 (wrong): a second CardPoolModel to hold them. It could never
-/// work. ModelDb.AllCardPools is
+/// ATTEMPT 1 (wrong AT THE TIME, see the correction below): a second
+/// CardPoolModel to hold them. ModelDb.AllCardPools is
 /// <c>AllCharacters.Select(c =&gt; c.CardPool)</c> concatenated with a HARDCODED
-/// array of 7 shared pools. There is no registration hook: a mod pool that is
-/// not some character's CardPool is invisible to the very lookup it was
+/// array of 7 shared pools. There was no registration hook: a mod pool that is
+/// not some character's CardPool was invisible to the very lookup it was
 /// created to satisfy. The lint added alongside it passed, because the lint
 /// checked source membership -- not that the engine could see the pool.
+///
+/// CORRECTION (2026-07-25, §4.7 shop sprint): "it could never work" is NO
+/// LONGER TRUE and this paragraph was nearly acted on as though it were.
+/// BaseLib now ships <c>ModelDbSharedCardPoolsPatch</c> -- a postfix on the
+/// shared-pools getter that appends any <c>CustomCardPoolModel</c> declaring
+/// <c>IsShared</c>, registered from its own constructor. The hardcoded array
+/// is still hardcoded; BaseLib grew the hook around it. So a companion pool
+/// would resolve today.
+///
+/// It is still not built, for a different and much smaller reason: doing it
+/// means migrating all 47 companion models OUT of the three character pools
+/// (CardModel.Pool must resolve to exactly one pool, and Pool supplies the
+/// card frame and energy icon), which is a visual change to every companion
+/// plus an init-order dependency that no C# test can check. See
+/// CompanionPool.cs. The distinction matters: this is now a COST decision,
+/// not an impossibility, and anyone re-reading the paragraph above should not
+/// conclude otherwise.
 ///
 /// ATTEMPT 2 (this): the cards go into KleeCardPool, which IS visible (Klee is
 /// a character, so her pool is in AllCharacterCardPools), and KleeCardPool

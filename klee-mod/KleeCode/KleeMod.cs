@@ -28,7 +28,7 @@ public static class KleeMod
 
     public static void Initialize()
     {
-        Log.Info($"[{ModId}] Initializing Klee (C1 boots)...");
+        Log.Info($"[{ModId}] Initializing Teyvat Spire roster...");
 
         try
         {
@@ -44,12 +44,26 @@ public static class KleeMod
         // logs proof-of-merge so a stale/missing pack shows up in godot.log.
         KleePck.LogStatus();
 
+        // Convention-scene + build-id telemetry (animation sprint 1, A3 —
+        // permanent). One line per shipped scene: path, found/missing, root
+        // node type. A missing scene falls back quietly at the use site, so
+        // this is where the miss gets loud.
+        Diagnostics.KleeSceneTelemetry.LogStatus();
+
         // Aura application (R23): a standing combat-hook listener, registered
         // through the game's own mod-subscriber API. Elemental card hits apply
         // auras; AuraPower handles everything after that. See ElementalApplication.cs.
-        ModHelper.SubscribeForCombatStateHooks(ModId, Powers.KleeElementalHooks.Subscribe);
+        // ModHelper keys subscriptions by id and silently rejects a duplicate.
+        // Keep the roster behind ONE delegate so every character hook is live.
+        ModHelper.SubscribeForCombatStateHooks(
+            ModId,
+            combatState =>
+                Powers.KleeElementalHooks.Subscribe(combatState)
+                    .Concat(Powers.FurinaResourceHooks.Subscribe(combatState))
+                    .Concat(Powers.KokomiResourceHooks.Subscribe(combatState))
+                    .Concat(Powers.KokomiGarmentHooks.Subscribe(combatState)));
 
-        Log.Info($"[{ModId}] Klee registered.");
+        Log.Info($"[{ModId}] Klee, Furina and Kokomi registered.");
     }
 
     /// <summary>English strings for the character and the four starter stubs.</summary>
@@ -72,10 +86,9 @@ public static class KleeMod
                 // 2. Square brackets are BBCode, NOT keyword markup. The game
                 //    wraps descriptions in [center]...[/center], so a stray
                 //    "[Block]" parses as an unclosed tag and throws
-                //    "Found end tag center, expected Block". Keyword tooltips
-                //    are declared per-mod via a card_keywords.json (the Downfall
-                //    pattern, see docs/card_keywords.json); we ship none yet, so
-                //    C1 uses plain text and keywords land with the C2 text pass.
+                //    "Found end tag center, expected Block". Custom keyword
+                //    ids are allocated by BaseLib from KleeKeywords; their
+                //    strings ship in the pck's card_keywords loc table.
                 // ONLY plain CardModel stubs belong here. Cards that derive from
                 // BaseLib's CustomCardModel get a prefixed id (KLEEMOD-KABOOM),
                 // so they declare loc via an ILocalizationProvider.Localization
@@ -86,6 +99,88 @@ public static class KleeMod
 
                 // Pop is now a CustomCardModel and declares its own loc.
             });
+
+            // Runtime copy of the custom-keyword loc. The pck carries the
+            // same table for normal packaged builds, but keeping these rows in
+            // the DLL makes a code-only playtest rebuild safe: newly generated
+            // aura badges and combat-aware reaction tips never render raw keys
+            // merely because the local art pack predates this code pass.
+            var keywordTable = LocManager.Instance.GetTable("card_keywords");
+            var keywordFallback = new Dictionary<string, string>
+                {
+                    ["KLEEMOD-ELEMENTAL_SKILL.title"] = "Elemental Skill",
+                    ["KLEEMOD-ELEMENTAL_SKILL.description"] =
+                        "Playing this card grants 5 Burst Energy.",
+                    ["KLEEMOD-APPLIES_PYRO.title"] = "Applies Pyro",
+                    ["KLEEMOD-APPLIES_PYRO.description"] =
+                        "If the target has no aura, this applies Pyro for 2 turns. A different aura is consumed to trigger a Reaction instead.",
+                    ["KLEEMOD-APPLIES_HYDRO.title"] = "Applies Hydro",
+                    ["KLEEMOD-APPLIES_HYDRO.description"] =
+                        "If the target has no aura, this applies Hydro for 2 turns. A different aura is consumed to trigger a Reaction instead.",
+                    ["KLEEMOD-APPLIES_ELECTRO.title"] = "Applies Electro",
+                    ["KLEEMOD-APPLIES_ELECTRO.description"] =
+                        "If the target has no aura, this applies Electro for 2 turns. A different aura is consumed to trigger a Reaction instead.",
+                    ["KLEEMOD-APPLIES_CRYO.title"] = "Applies Cryo",
+                    ["KLEEMOD-APPLIES_CRYO.description"] =
+                        "If the target has no aura, this applies Cryo for 2 turns. A different aura is consumed to trigger a Reaction instead.",
+                    ["KLEEMOD-BOMB.title"] = "Bomb",
+                    ["KLEEMOD-BOMB.description"] =
+                        "Detonates at the start of your turn or early when its enemy takes unblocked Attack damage. The first attack that enemy makes while Bombed each combat deals 25% less damage.",
+                    ["KLEEMOD-CONFISCATED.title"] = "Confiscated",
+                    ["KLEEMOD-CONFISCATED.description"] =
+                        "A 1-cost Status card that does nothing.",
+                    ["KLEEMOD-VAPORIZE_PREVIEW.title"] = "Reaction preview: Vaporize",
+                    ["KLEEMOD-VAPORIZE_PREVIEW.description"] =
+                        "This card supplies Pyro or Hydro while an enemy has the other aura. The triggering hit deals 1.5x damage and consumes the aura.",
+                    ["KLEEMOD-MELT_PREVIEW.title"] = "Reaction preview: Melt",
+                    ["KLEEMOD-MELT_PREVIEW.description"] =
+                        "This card supplies Pyro or Cryo while an enemy has the other aura. The triggering hit deals 1.75x damage and consumes the aura.",
+                    ["KLEEMOD-OVERLOAD_PREVIEW.title"] = "Reaction preview: Overload",
+                    ["KLEEMOD-OVERLOAD_PREVIEW.description"] =
+                        "This card supplies Pyro or Electro while an enemy has the other aura. It deals 6 splash damage to all enemies and applies 1 Weak to the reacted enemy.",
+                    ["KLEEMOD-SUPERCONDUCT_PREVIEW.title"] = "Reaction preview: Superconduct",
+                    ["KLEEMOD-SUPERCONDUCT_PREVIEW.description"] =
+                        "This card supplies Electro or Cryo while an enemy has the other aura. The reacted enemy gains 2 Vulnerable.",
+                    ["KLEEMOD-ELECTRO_CHARGED_PREVIEW.title"] = "Reaction preview: Electro-Charged",
+                    ["KLEEMOD-ELECTRO_CHARGED_PREVIEW.description"] =
+                        "This card supplies Hydro or Electro while an enemy has the other aura. The reacted enemy gains a 4-damage decaying damage-over-time effect.",
+                    ["KLEEMOD-FROZEN_PREVIEW.title"] = "Reaction preview: Frozen",
+                    ["KLEEMOD-FROZEN_PREVIEW.description"] =
+                        "This card supplies Hydro or Cryo while an enemy has the other aura. Its next action deals half damage; attacking it Shatters for 6 damage.",
+                    ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Frozen (Boss)",
+                    ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
+                        "Bosses cannot be Frozen. Hydro plus Cryo is consumed and applies 2 Vulnerable instead.",
+                    ["KLEEMOD-SWIRL_PREVIEW.title"] = "Reaction preview: Swirl",
+                    ["KLEEMOD-SWIRL_PREVIEW.description"] =
+                        "This card supplies Anemo to an existing aura. The aura is consumed and copied onto all enemies.",
+                    ["KLEEMOD-CRYSTALLIZE_PREVIEW.title"] = "Reaction preview: Crystallize",
+                    ["KLEEMOD-CRYSTALLIZE_PREVIEW.description"] =
+                        "This card supplies Geo to an existing aura. The aura is consumed and you gain 4 Block.",
+
+                    // Legibility sprint L-C: titles for the re-homed rider
+                    // tips (FurinaRiderTips). These are NOT card keywords --
+                    // they are hover-tip titles, which need a LocString --
+                    // but they live in the same table so the one merge point
+                    // covers them and a code-only rebuild never shows a raw
+                    // key. The bodies are built per card in C#, because a
+                    // shared row cannot carry a per-card rate.
+                    [Cards.FurinaRiderTips.FanfareKey + ".title"] =
+                        "Fanfare scaling",
+                    [Cards.FurinaRiderTips.AuraKey + ".title"] =
+                        "Elemental aura bonus",
+
+                    // Kokomi's two hidden reads (KokomiRiderTips). Both
+                    // resolve somewhere no card face can print -- the pulse at
+                    // end of turn, the Garment rider on OTHER cards -- so the
+                    // tip is the only surface either number has.
+                    [Cards.KokomiRiderTips.PulseKey + ".title"] =
+                        "Bake-Kurage pulse",
+                    [Cards.KokomiRiderTips.GarmentKey + ".title"] =
+                        "Ceremonial Garment is active",
+                };
+            keywordTable.MergeWith(keywordFallback
+                .Where(pair => !keywordTable.HasEntry(pair.Key))
+                .ToDictionary(pair => pair.Key, pair => pair.Value));
 
             // Klee's character strings moved onto the model itself
             // (Klee.Localization) when she became a CustomCharacterModel:

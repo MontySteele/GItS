@@ -48,26 +48,28 @@ def test_every_sheet_entry_applies_or_is_declared_unappliable():
 
 
 def test_number_bumps_follow_the_mined_grammar():
-    assert loader.get_card("kaboom+").effects[0]["amount"] == 9      # 6->9
+    assert loader.get_card("kaboom+").effects[0]["amount"] == 10     # 7->10
     assert loader.get_card("duck_and_cover+").effects[0]["amount"] == 8
     jd = loader.get_card("jumpy_dumpty+")                # dual bump privilege
-    assert jd.effects[0]["amount"] == 9                  # 7->9
+    assert jd.effects[0]["amount"] == 10                 # 8->10
     assert jd.effects[1]["bomb_damage"] == 8             # 6->8
-    assert loader.get_card("big_badda_boom+").effects[0]["amount"] == 16
+    assert loader.get_card("big_badda_boom+").effects[0]["amount"] == 20
 
 
 def test_condition_and_keyword_class_upgrades():
     assert loader.get_card("sugar_rush+").exhaust is False
-    # R38: hot_hands+ adopts the R37 Innate disposition. The old
-    # {remove: self_damage} delta is DEAD -- the self-damage stays on the
-    # upgrade (it's the card's cost); Innate is the quality.
+    # Live playtest 2026-07-22: Retain lets the player bank the enabler for
+    # a useful hand without forcing the HP cost into turn 1.
     hot = loader.get_card("hot_hands+")
-    assert hot.innate is True
+    assert hot.retain is True
+    assert hot.innate is False
     assert any(fx.get("target") == "self" for fx in hot.effects)
-    pd = loader.get_card("patched_dress+")               # hoisted then-branch
-    assert not any(fx.get("op") == "conditional" for fx in pd.effects)
-    assert sum(fx["amount"] for fx in pd.effects
-               if fx.get("op") == "block") == 7          # 5 + 2 unconditional
+    pd = loader.get_card("patched_dress+")
+    assert any(fx.get("op") == "conditional" for fx in pd.effects)
+    assert pd.effects[0]["amount"] == 9                   # 6->9 base
+    assert pd.effects[1]["then"][0]["amount"] == 3        # 12 while online
+    durin = loader.get_card("durin_witchs_flame+")
+    assert durin.effects[0]["amount"] == 8
     both = loader.get_card("eager_to_help+")             # BOTH branches
     cond = next(fx for fx in both.effects if fx.get("op") == "conditional")
     assert cond["then"][0]["amount"] == 3 and cond["else"][0]["amount"] == 2
@@ -77,11 +79,21 @@ def test_cost_formula_and_override_upgrades():
     assert loader.get_card("bombs_away+").cost == 2
     assert loader.get_card("endless_fireworks+").cost == 0
     cd = loader.get_card("controlled_demolition+")
-    assert cd.effects[0]["amount"] == "X_plus_2"
+    # G-D3 RATIFIED 2026-07-26: the upgrade moved OFF the bomb count and ONTO
+    # bomb damage, so the X-formula is now expected to survive the upgrade
+    # unchanged while the per-bomb damage climbs. Both halves are asserted --
+    # the count NOT moving is exactly what the ratified alternative bought
+    # (the detonation splash proc cap stays where it was), so an upgrade that
+    # silently started adding bombs again must fail here.
+    base = loader.peek_card("controlled_demolition")
+    assert cd.effects[0]["amount"] == base.effects[0]["amount"]
+    assert (cd.effects[0]["bomb_damage"]
+            == base.effects[0]["bomb_damage"] + 3)
     gf = loader.get_card("grand_finale+")
     assert gf.effects[0]["bonus_formula"] == "3_per_detonation_this_combat"
     bb = loader.get_card("borrowed_brilliance+")
     assert bb.effects[0]["cost_override"] == 0
+    assert bb.effects[-1] == {"op": "draw", "amount": 1}
     cr = loader.get_card("chained_reactions+")
     assert cr.effects[1]["chance"] == 0.75               # replace, not bump
 

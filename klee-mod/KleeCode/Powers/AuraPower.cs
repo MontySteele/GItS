@@ -140,7 +140,7 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
             // Same element refreshes duration rather than reacting.
             await PowerCmd.ModifyAmount(
                 choiceContext, this,
-                ReactionConstants.AuraDurationTurns - Amount,
+                AuraCmd.Duration(dealer) - Amount,
                 applier: dealer, cardSource: cardSource, silent: true);
             return;
         }

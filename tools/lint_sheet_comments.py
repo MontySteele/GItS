@@ -50,7 +50,13 @@ CARD_START = re.compile(r"^- \{id: (\w+)")
 COMMENT = re.compile(r"^\s+#")
 HEADER = re.compile(r"^#")
 # Refs that are never card numbers; stripped before token extraction.
+#
+# ISO dates come FIRST and are matched whole. The generic `\d+[-–]\d+` range
+# alternative below cannot do the job: on "2026-07-24" it consumes only
+# "2026-07" and leaves "-24" behind, which NUM then reads as a cited 24. The
+# docstring has always promised dates are skipped; this makes that true.
 SKIP = re.compile(
+    r"\d{4}-\d{2}-\d{2}|"
     r"§[\d.]+\w?|v[\d.]+|(?<![A-Za-z])[AR]\d+|DECISIONS \d+|"
     r"Guardrail \d+|flag \d+|\d+-star|\d+%|\d+[-–]\d+")
 NUM = re.compile(r"(?<![\w.])(\d+)")
@@ -74,8 +80,16 @@ def card_numbers(row_lines: list[str], max_hp: int) -> set[int]:
 def lint_sheet(path: Path) -> list[str]:
     max_hp = 60  # Furina; per-sheet if a third character ever needs it
     globals_ok = {0, 1, 2, max_hp, 70, int(max_hp * C.FANFARE_CAP_FRACTION),
-                  C.SALON_MEMBER_DMG, C.SALON_TICK_ENCORE_COST,
-                  C.SALON_TICK_BURST}
+                  C.SALON_TICK_ENCORE_COST, C.SALON_TICK_BURST,
+                  C.SALON_FOCUS_PER}
+    # Salon v2: every member tick/bow number is quotable in comments, plus
+    # its dry three-quarters form (the v1 SALON_MEMBER_DMG family's heir).
+    for spec in C.SALON_MEMBERS.values():
+        for half in ("tick", "bow"):
+            for v in spec[half].values():
+                if isinstance(v, int):
+                    globals_ok.add(v)
+                    globals_ok.add(int(v * C.SALON_DRY_DAMAGE_MULT))
     findings: list[str] = []
     card_id, row_lines, comments = None, [], []
 

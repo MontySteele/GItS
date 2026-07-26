@@ -142,7 +142,7 @@ Amend here, not in chat history.
     Celestial Gift = +2 attacks / 4 block; Catalytic Conversion = +1
     spark +5 burst per reaction. Amp %: multiplicative on base, additive
     with each other (melt x1.75 x1.55 = 2.71 < 4x cap).
-31. **Pass 1 verdict recorded in docs/klee-pass-1-report.md** — headline:
+31. **Pass 1 verdict recorded in docs/archive/klee-pass-1-report.md** — headline:
     watchlist all clean, dream team strong-not-dominant, A1/A3/A7 near
     declared; A4/A6 metric definitions need chat-side rulings; A2-solo
     and spark-A3 are real sheet findings; Burst cards likely need Retain.
@@ -199,7 +199,7 @@ Amend here, not in chat history.
     are load-bearing vs bosses (dropping them: 56 -> 44). The band was
     derived from a monoculture measurement; ratification asked, deck not
     forced.
-43. **v0.1 scorecard baseline recorded in docs/klee-pass-3-report.md**;
+43. **v0.1 scorecard baseline recorded in docs/archive/klee-pass-3-report.md**;
     freezes on ratification of the two band asks.
 
 ## Errata pass (2026-07-19, pass-3 ratification + furina-predesign Part 1)
@@ -235,7 +235,7 @@ Amend here, not in chat history.
     back." Measured the designated damper preemptively: splash proc-cap
     3 lands it at 96.5% with swarm 100 / gauntlet 99.4 unharmed. NOT
     armed (its round-3 trigger was A2 drag, not winrate); test xfailed
-    pending ruling. Ask filed in docs/klee-errata-report.md.
+    pending ruling. Ask filed in docs/archive/klee-errata-report.md.
 49. **v0.1 median identity regression-locked** (test_errata.V01_MEDIAN,
     300 fights / seed 42, +-0.3): errata moved every median axis by
     <=0.05. Companion-heal Exhaust (Barbara/Bennett, sheet v0.3.1)
@@ -267,7 +267,7 @@ Amend here, not in chat history.
     boss; both -> 3-10% with the boss killing 117/200. Cause: in-run
     decks (12-14 cards, ~60% HP) face battery checks calibrated for
     full-HP 25-card authored decks; the only power growth modeled is
-    ~8 card picks. Recommendation filed (docs/tier05-m5-report.md):
+    ~8 card picks. Recommendation filed (docs/archive/tier05-m5-report.md):
     run winrate is not a v1 acceptance metric; M6 harvests
     boss-reached decks into the Tier 0 battery. No unilateral tuning.
 55. **Reaction achievability pre-alarm:** <1% of reaction runs assemble
@@ -302,7 +302,7 @@ Amend here, not in chat history.
     assembly = 79% appliers x 71% amp x 10% Burst — the companion slot
     was never the bottleneck. Binding constraint: sparks_n_splash is a
     1-of-15 rare at 5% odds (~10% of runs SEE the Burst). Escalated with
-    options (innate Burst recommended) in docs/triage-execution-report.md.
+    options (innate Burst recommended) in docs/archive/triage-execution-report.md.
     Pity mechanism kept in-code for M7.
 60. **A4 instrument replaced (R8 healing-law ruling): barbara_injection →
     sustain_probe.** The conjunctive healing law (true heal = Rare AND
@@ -774,3 +774,1194 @@ in AfterCardPlayed, so during OnPlay the bank has not yet been spent,
 which makes the pre-spend read the PLAIN one). SparksAsResolved is kept
 and documented as the correct accessor for any future attack that wants
 the post-spend view; it currently has no reader.
+
+## R40 -- Furina runner rulings and Salon replacement pass (2026-07-22)
+
+USER RULINGS: the starter carries one Aria of Recompense at 5 Encore
+(8 upgraded) and one 0-cost An Invitation; Stage Presence is 5 Block
+(8 upgraded); self-Spotlight has a 1.0 numeric multiplier. Encore absorbs
+enemy damage only after Block. Generated Guest Stars are selector-v4's
+depth-one bricking exception and return the light to Furina after play.
+
+SALON LAW: three active slots. A tick that can pay 1 Encore deals full
+damage; a dry tick deals half damage and never overdraws HP. Every overflowed
+deployment gives the displaced Member an immediate Hydro final bow at three
+times its current tick damage. If the deploying card has a following rider,
+replacement triples printed damage or Block, or doubles numeric utility
+(Encore, draw, application, healing, or non-Member power) exactly once for
+that card, regardless of how many Members it displaced. The replacement flag
+resets at the start of every card resolution.
+
+MEASUREMENT: after the direct Salon-number lift, 1,500 realistic runs/plan at
+seed 11 moved Salon Act clear 0.13% -> 5.2% and first-elite survival 17.1% ->
+40.9%; Spotlight/Fanfare first-elite survival rose only to 24.7%/24.2%, with
+Act clear near zero. Deep Salon overshoots in the opposite direction:
+tank_boss 99.4%, A2 8.9 against the 7.6 ceiling. A 300-fight source audit
+attributes 16.3% of its damage to final bows and 52.3% to ordinary Salon
+ticks, so the overshoot is the assembled persistent engine rather than a
+cross-card multiplier leak. Disposition: keep this as the measured pass;
+further work should redistribute power toward early access/frontload rather
+than add more global Salon scaling.
+
+## R41 -- Spotlight two-mode rework and spendable Fanfare (2026-07-22)
+
+USER RULING: test the Spotlight/Fanfare rework before adding more Companion
+cards to Furina's starting deck. CENTER STAGE designates Furina: her cards
+generate 2 Fanfare per play and receive no numeric Spotlight bonus, including
+card-granted bonus powers. GUEST CAST designates the Companion category rather
+than one character: every Companion card receives the outward multiplier and
+Spotlight texture, while those plays generate no Fanfare. The selector chooses
+Guest Cast for a ready Companion in hand and Center Stage otherwise.
+
+FANFARE becomes a cyclic spendable pool. Crescendo spends 10 after resolving
+(8 + 1 per 2 pre-spend Fanfare); Florid Cadenza spends 10 (7 upgraded); Flood
+of Emotion spends 15 and deals 20; Universal Revelry spends 20 and uses 1 per
+2; High Tide spends 15 and deals 22. Rapturous Applause costs 1 Energy. The
+resource gate is checked before play and paid once after resolution so the
+payoff reads the audience level that funded it.
+
+DRAFT CORE: Spotlight requires two cast-access pieces (Companions or Guest
+Star generators) and two machinery pieces. Companions receive explicit
+Spotlight draft value; same-character depth is retired.
+
+MEASUREMENT, 1,500 realistic runs/plan seed 11 in the CURRENT WORKTREE
+(including the concurrent companion-card number pass): first-elite survival /
+Act clear = Salon 42.8% / 5.9%, Spotlight 32.3% / 1.1%, Fanfare 28.9% / 0.2%.
+Spotlight drafted at least one Companion before the first elite in 100% of
+runs (one 39.2%, two 44.6%, three 16.2%); 100% gained extra cast access,
+49.8% found any machinery, and 8.3% completed the full core. Therefore the
+starter-Companion injection is HELD: cast access is fixed, machinery density
+and payoff efficiency are the remaining bottlenecks.
+
+## R42 -- Spotlight machinery efficiency and starter-density bracket (2026-07-22)
+
+USER DIRECTION: evaluate balance on full Act-1 clears, not merely reaching or
+passing the first boss/elite; Klee's current Act target is 40-50%. Current
+realistic reference at 1,500 runs, seed 11: Klee Demolition 39.4%, Spark
+33.6%, Reaction 40.4%. Furina Spotlight's R41 1.1% therefore represents an
+order-of-magnitude delivery failure.
+
+MACHINERY PASS: Limelight, Shared Billing, Guest List, and Encore Performance
+refund their setup Energy; Limelight still replaces itself, Stage Lights now
+draws 1, Top Billing loses its Spend-2-Encore gate, and Standing Ovation costs
+1 (0 upgraded). The Spotlight core is two access pieces (the starter Invitation
+plus a Companion/generator) and ONE machinery piece, not two.
+
+RESULT, 1,500 realistic Spotlight runs: Act clear 10.6%, first-elite survival
+50.5%, core online 66% overall. Deep package win rates are 79.4% punisher,
+100% swarm, 100% attrition, 63.2% tank. The assembled package now delivers;
+the realistic run remains diluted by ten starter cards against one-to-three
+early drafted Companions.
+
+STARTER DIAGNOSTIC, 1,000 realistic runs/arm, randomized from Fontaine common
+Companions on a dedicated RNG stream: unchanged 11.4%; replace one Soloist
+with a Companion Attack 26.4%; replace one Stage Presence with a Companion
+Support 9.6%; Attack+Support 30.3%; replace TWO Soloists with two distinct
+Companion Attacks 46.6%; two Attacks+Support 51.9%. This is diagnostic, NOT YET
+A USER RULING. The clean in-band proposal is two randomized common Fontaine
+Companion Attacks replacing two Soloist's Solicitations, while all three Stage
+Presence cards remain.
+
+## R43 -- Post-Klee companion rerun and Fontaine starter pair (2026-07-22)
+
+POST-COMMIT BASELINE: after aa5277f's shared Companion uplift, but before a
+randomized Furina starter, 1,500 realistic runs/plan at seed 11 produced Act
+clears of Salon 8.9%, Spotlight 10.7%, and Fanfare 1.2%. Spotlight was
+effectively unchanged from R42's 10.6%; Salon and Fanfare rose from 5.9% and
+0.2%, respectively, but remained far below the 40-50% Act target. Therefore
+the earlier Spotlight diagnosis had already been made in substantially the
+buffed-Companion world.
+
+USER RULING: mirror Klee's role-locked random starter, but replace ONE weak
+Attack and ONE basic support rather than two Attacks. Furina rolls one of
+Chevreuse -- Interdiction Fire / Freminet -- Pers, Deploy! in place of one
+Soloist's Solicitation, plus one Fontaine support in place of one Stage
+Presence, on the existing dedicated replayable starter RNG stream.
+
+SUPPORT SELECTION: the first pass used Charlotte -- Enduring Frosthelm and
+Lynette -- Box Trick. At 1,000 identical seeds per exact pairing, Charlotte
+arms cleared 37.8% / 35.5%, while Box Trick arms cleared only 22.9% / 21.6%.
+This was structural: Guest Cast amplifies Charlotte's printed Block from 4+4
+to 6+6, while its numbers-only law deliberately does not amplify Box Trick's
+Draw 2; Box Trick also displaced a 5-Block basic. Lynette -- Enigmatic Feint
+was substituted as the defensive support texture. Before any personal-card
+nudge its two arms cleared 30.5% / 30.6%, eliminating the severe low roll.
+
+BASE-KIT BRACKET, 1,000 realistic runs/arm with the Charlotte/Enigmatic slate:
+the prior Soloist 4 / Stage Presence 5 baseline cleared 32.9%; Soloist 5 alone
+fell to 30.4%; Stage Presence 6 alone rose to 39.7%; both changes cleared
+37.6%. The damage lift made a still-mediocre Attack attractive enough for the
+pilot to spend more Energy on it. SHIPPED DOSE: Stage Presence 6 Block (9
+upgraded), with Soloist held at 4.
+
+FINAL SUITE, 1,500 realistic runs/plan at seed 11: Salon 27.3% Act / 76.7%
+first-elite survival; Spotlight 39.7% / 82.0%; Fanfare 9.5% / 61.4%.
+Spotlight now reaches the lower edge of the Klee-derived target; the same
+starter substantially helps the other plans without concealing that Fanfare
+is still the next balance problem.
+
+FINAL PAIR MATRIX, 1,000 identical seeds/arm: Chevreuse+Charlotte 44.1%,
+Freminet+Charlotte 44.3%, Chevreuse+Lynette 36.6%, Freminet+Lynette 36.4%.
+The Attack choice has no measurable value skew (at most 0.2pt); Charlotte is
+a meaningful 7.5-7.9pt high roll over Lynette, but both are viable and the
+random aggregate is 39.7%. Keep that bounded starter texture rather than add a
+second global buff solely to flatten it; revisit after human playtest.
+
+## R44 -- Fanfare conversion diagnosis (2026-07-22)
+
+SCOPE: diagnostic sweep after R43's randomized starter raised the realistic
+Fanfare plan to 9.5% Act clears. No card-balance dose is shipped in this
+record.
+
+RUNNER FIX: the combat pilot's readable-conditional list omitted
+fanfare_at_least_* and encore_at_least_* even though the engine resolved both.
+It therefore valued Dramatic Entrance as 6 rather than 9 damage, Showstopper
+as 5 rather than 12, and Thunderous Ovation as 3 rather than 7 Block while
+their thresholds were live. The predicates are now visible to play selection
+and test-locked. This was a real accuracy bug but not the balance cause:
+1,500-run Fanfare Act clears remained 9.5%.
+
+RESOURCE TRACE, 1,500 realistic runs at seed 11: per reached fight, Furina
+gained 24.6 Fanfare, spent only 3.2, peaked at 22.7, and ended at 21.4.
+Threshold reach was 94.1% at 10, 80.8% at 15, 64.8% at 20, and 40.8% at the
+30 cap. Generation is therefore abundant. True spender play rates were tiny:
+Crescendo 0.05/fight, Flood of Emotion 0.04, Florid Cadenza 0.02, High Tide
+0.01; the meter is full because realistic decks rarely own and play a
+converter, not because the resource rate is low.
+
+DRAFT-CORE NULL: the generic four-piece definition produced 8.8% Act clears
+at 1,000 seeds. Re-defining online as Aria+one piece yielded 9.1%; first
+payoff completes yielded 9.9%; treating the native resource as online from
+run start yielded 9.8%. The old core@E1 scalar (about 9-10%) badly describes
+the live resource, but payoff gating in the assigned drafter is not causing
+the balance failure.
+
+PILOT NULL, 1,000 identical seeds/arm: current 8.8%; tempo 0.6/sustain 1.0
+8.1%; damage weight 1.4 5.4%; a damage-forward converter profile 5.7%; the
+most aggressive profile 4.5%. Furina genuinely needs the current sustain and
+tempo play, so the answer is not instructing the pilot to ignore setup.
+
+ASSEMBLED PACKAGE: Fanfare wins 48.4% Punisher, 100% swarm, 100% attrition,
+and only 24.6% tank boss, versus Salon 98.8/100/100/99.6 and Spotlight
+85.6/100/100/73.6. Its DPT is only 11.0/12.2/9.3/13.4 despite spending
+27-88 Fanfare per fight. The full engine can cycle, but conversion is too
+Energy- and density-inefficient for single-target fights.
+
+SINGLE-CARD SEED SCREEN, 300 identical seeds/arm, one extra card (directional
+because n is deliberately small and the eleventh card pays deck bloat):
+Curtain Up and Warm-up Act were the best sub-Rares (+8.3pt and +7.0pt Act);
+Rapturous Applause was +3.3pt. Most nominal engine pieces were neutral or
+negative, including Crescendo -1.7pt, Showstopper -2.3pt, Ebb and Flow -2.0pt,
+Audience Participation -3.3pt, Suffering for Art -3.7pt, and Florid Cadenza
+-4.7pt. Regina's Mercy led overall at +8.7pt. The shape favors free activity,
+durable scaling, and large actual sustain over more meter generation.
+
+SPENDER-TAX BRACKET, 1,000 identical seeds/arm across Crescendo, Florid
+Cadenza, Flood of Emotion, Universal Revelry, and High Tide: current 8.8%;
+each costs one less Energy 14.3%; each costs five less Fanfare 9.2%; both
+discounts 18.9%. Energy is the binding half of the double cost, while Fanfare
+price alone is not. Even both discounts remain far below target, confirming a
+second density problem: every true spender is Uncommon or Rare, while the
+Common suite is dominated by generation, thresholds, and cycling.
+
+DISPOSITION FOR THE NEXT DESIGN WINDOW: do not increase global Fanfare gain or
+lower the cap. Start with spender Energy efficiency, then re-author at least
+one Common into a small real converter so early decks can cycle the meter;
+separately review the low-output generator/cycler bodies. Rapturous Applause
+is the clearest existing model for a payoff that actually helps. Re-run both
+realistic Act clears and the Punisher/tank assembled-package cells after a
+concrete dose.
+
+## R45 -- Fanfare conversion-efficiency dose and ceiling boundary (2026-07-22)
+
+USER RULING: apply R44's proposed spender-efficiency and Common-converter
+patches, then measure before proceeding.
+
+SHIPPED FIRST DOSE:
+
+- Crescendo 2->1 Energy, still Spend 10 Fanfare.
+- Florid Cadenza 1->0 Energy, still Draw 3 / Spend 10.
+- Flood of Emotion 2->1 Energy, still 20 damage / Spend 15.
+- Universal Revelry 3->2 Energy, still scaling AoE / Spend 20.
+- High Tide 2->1 Energy, still 22 damage / Spend 15.
+- Dramatic Entrance becomes the Common converter: 1 Energy, gated at and
+  spending 5 Fanfare after dealing 6+4=10 damage. Its upgrade raises the rider
+  4->7.
+
+REALISTIC RESULT, 1,500 runs/plan at seed 11: Fanfare Act clear 9.5%->15.7%,
+first-elite survival 61.4%->68.2%, second-elite survival 22.9%->32.3%.
+Spending doubled from 3.2 to 6.4 per reached fight; end-of-fight Fanfare moved
+only 21.4->20.2, so access remains sparse. Cross-plan movement was healthy:
+Salon 27.3%->31.3%, Spotlight 39.7%->42.9%.
+
+ASSEMBLED RESULT, 500 fights/cell: Punisher 48.4%->87.2%, tank boss
+24.6%->72.2%, swarm/attrition remain 100%. This nearly matches Spotlight's
+85.6%/73.6% single-target ceiling. The payoff package now works when assembled;
+the remaining realistic gap must not be repaired by another blanket ceiling
+increase.
+
+POST-DOSE SINGLE-CARD SCREEN, 300 identical seeds/arm with one conservative
+extra card: High Tide +9.7pt Act, Crescendo +7.7pt, Flood +6.7pt, and Dramatic
+Entrance +2.0pt. The spender repairs succeeded. Florid Cadenza remained -5.7pt
+and Showstopper -6.7pt; Suffering for Art -5.0pt and Hearts Swelling -3.7pt.
+Those identify low-floor cards but do not by themselves authorize global
+buffs in an already-healthy assembled package.
+
+REJECTED FOLLOW-UP BRACKET, 1,000 realistic runs/arm:
+
+- "bottom-card repairs" (Florid Spend 5; Showstopper 7+8 at 15; Suffering
+  self-damage 1; Hearts cost 1) lifted 15.1%->22.6%, but overheated the deep
+  package to 98.0% Punisher / 96.0% tank.
+- "common efficiency" (Crowd Work and Ebb Energy refunds; Audience Encore 3;
+  Tempo Spend 1 Encore; Thunderous base Block 4) reached only 17.1%, while
+  deep rose to 94.8% / 90.8%.
+- Combined reached 25.8% realistic but 99.6% Punisher / 100% tank.
+
+DISPOSITION: keep only the first dose. Do not ship the follow-up groups. The
+balance problem has changed shape: the assembled ceiling is healthy, while the
+realistic floor lacks timely conversion access and is offered several cards
+that are poor isolated additions. The next experiment should change access or
+draft density/selection without increasing the completed package's power.
+
+## R46 -- Fanfare offer trace and targeted floor repairs (2026-07-23)
+
+USER DIRECTION: identify Fanfare cards that are skipped or underperforming and
+buff them selectively rather than applying another package-wide increase.
+
+OFFER/PICK TRACE, 1,500 realistic runs at seed 11: the assigned drafter already
+passes most obvious low-output glue. Early pick rates were Dress Rehearsal
+5.3%, Curtain Cue 5.3%, Crowd Work 6.0%, Tempo Change 6.6%, and Audience
+Participation 9.6%. Those cards do not explain the low result by being forced
+into decks; the policy mostly avoids them.
+
+The more important signal was OVERPICKED underperformance. Early take/pass Act
+rates when the same card was offered (directional, not randomized) included:
+Suffering for Art 11.2%/20.4% at an 81.4% pick rate; Ebb and Flow 11.0%/18.4%
+at 84.0%; Hearts Swelling 13.2%/17.9% at 87.1%; Showstopper 9.0%/17.6% at
+90.8%; and The Sea Is My Stage 2.4%/18.8% at 72.4%. Florid Cadenza was picked
+70.5% and remained negative in the controlled extra-card screen. These
+relationships include offer-strength confounding, so the controlled seed and
+individual-dose arms remain the ruling evidence.
+
+SAFE-TARGET NULL: Thunderous Ovation and The Sea Is My Stage are absent from
+the assembled Fanfare package, so they were tested first. Thunderous base
+Block 3->5 moved realistic Act 15.1%->16.1%. Adding 6 Encore to The Sea Is My
+Stage, with or without reducing its Energy cost 2->1, was inert at 15.2-15.3%
+because the Rare appears in too few runs. Thunderous was retained as a safe
+one-point floor repair; the Sea redesign was rejected.
+
+INDIVIDUAL REPAIR MATRIX, 1,000 realistic runs plus 500 Punisher/tank fights
+per arm:
+
+- Current: 15.1% Act; deep 87.2% / 72.2%.
+- Florid Spend 10->5: 14.9%; deep 89.6% / 74.0% -- reject.
+- Showstopper 7+8 at 15: 17.1%; deep 91.4% / 78.6% -- poor ratio.
+- Suffering self-damage 2->1: 17.3%; deep 88.4% / 75.6% -- best ratio.
+- Hearts Swelling 2->1 Energy: 18.1%; deep 93.4% / 87.0% -- overheats tank.
+
+SHIPPED TARGETED DOSE: Suffering for Art now loses 1 HP and gains 3 Encore;
+Thunderous Ovation now Blocks 5 plus 4 at 15 Fanfare. Together they measured
+18.2% Act / 69.5% first-elite / 35.0% second-elite at 1,000 seeds, with the
+assembled package held to 88.4% Punisher / 75.6% tank.
+
+FINAL SUITE, 1,500 runs/plan: Salon 31.2%, Spotlight 43.6%, Fanfare 18.7%.
+This is a controlled +3pt floor improvement over R45 and +9.2pt over the
+pre-converter world, but still far below the 40-50% target. The ceiling is
+healthy and individual card buffs now have sharply diminishing returns. The
+remaining high-impact work is draft selection/access: stop overvaluing harmful
+isolated on-plan pieces or improve the chance that a realistic deck finds one
+of the already-successful converters, without adding more power to the full
+package.
+
+## R47 -- Klee second-playtest card and Burst pass (2026-07-23)
+
+USER FINDING: the starter/Companion uplift made Klee feel materially healthier
+and produced the first Act-1 clear, but several one-Energy commons still did
+too little, Fantastic Voyage was not worth taking, Burst appeared only near the
+Act-1 boss, and Vermillion Pact/Durin overlapped on an amplifying-reaction
+payoff Klee rarely triggers through her Pyro saturation.
+
+SHIPPED CARD DOSE:
+
+- Hide and Seek remains 7 Block and gains Scry 2; upgrade remains 10 Block.
+- Patched Dress is 6 Block plus 3 with Spark; upgrade raises the floor to 9,
+  leaving the online total at 12 rather than removing an almost-free condition.
+- Alchemical Curiosity becomes 5 Block / Draw 2; upgrade is 8 Block / Draw 2.
+- Bennett — Fantastic Voyage becomes gain 3 Strength, Exhaust (4 upgraded).
+- Vermillion Pact moves +25%->+100% amplification (+125% upgraded). This
+  doubles the base Vaporize/Melt multiplier; upgraded Melt is x3.9375, just
+  below the x4 provenance detector.
+- Durin no longer amplifies reactions or applies more Pyro. At end of turn it
+  consumes Pyro from each enemy; each aura deals 6 damage and grants 3 Burst
+  Energy (8 damage upgraded). This monetizes Klee's Pyro saturation, then
+  clears a window for Hydro/Cryo to establish the next reaction.
+
+BURST BRACKET, 500 realistic runs/plan at seed 42:
+
+- meter 30: generic 58.4%, reaction 75.4%; Burst seen 65.8% / 91.2%.
+- meter 35: generic 54.8%, reaction 64.2%; Burst seen 42.4% / 79.4%.
+- meter 40: generic 51.4%, reaction 59.4%; Burst seen 24.4% / 62.8%.
+
+DISPOSITION: 40 wins. The previous post-starter baseline was approximately
+44% generic / 50% reaction, so 40 produces a controlled +7/+9-point Act-1
+uplift and a 17x generic / 8x reaction increase in run-level Burst visibility
+over the 60 meter, without the 30-meter arm's reaction ceiling. The Burst
+payoff remains unchanged at 60 damage over three turns.
+
+The authored 25-card Tier-0 packages are now ceiling-saturated because they
+charge a 40-point kit Burst reliably (1000-fight tank reads: demolition 99.9%,
+spark 95.5%, reaction 100%). Their old upper bands no longer model real drafts;
+Tier 0.5 owns the upper-power comparison, while the authored batteries retain
+only their matchup floors. The v0.2 median scorecard at 300 fights/seed 42 is
+4.77 / 3.82 / 2.09 / 0.50 / 3.07 / 4.05 / 2.37.
+
+## R48 -- Contextual Fanfare drafting before further card buffs (2026-07-23)
+
+USER RULING: update the runner's Fanfare draft logic before buffing more cards,
+then remeasure the realistic plan and preserve the assembled-package ceiling.
+
+RUNNER DIAGNOSIS: the generic assigned scorer defined every non-reaction plan
+as four tagged enabler/payoff cards. Furina already starts with Aria of
+Recompense (five points of printed Encore/Fanfare movement), but each additional
+generator still advanced that false four-card core and received a +3 assembly
+bonus. The global 0.5 skip threshold then made nearly every tagged generator a
+live pick. Conversely, the definition did not distinguish cards that actually
+spent Fanfare for immediate output from cards that merely generated, read, or
+cycled the resource.
+
+SHIPPED RUNNER MODEL:
+
+- Fanfare core progress has two structural halves: five points of printed meter
+  movement and one direct damage/Block card with a positive Fanfare cost.
+- The first output converter receives priority; further converters retain a
+  smaller plan bonus.
+- Additional generation has sharply diminishing value once the native five
+  points are covered. Threshold/scaling readers receive supporting rather than
+  core value, and a pure draw spender does not masquerade as the damage/survival
+  converter.
+- Printed self-damage is charged against the Fanfare-specific score even though
+  it moves the meter. Fanfare uses a 1.5 engagement threshold; the other assigned
+  archetypes retain the global 0.5 threshold and their existing scoring paths.
+- The rule is structural (effects and resource costs), with no card-ID whitelist.
+
+PAIRED A/B, 1,500 identical seeds with relics and potions: the legacy Fanfare
+policy cleared 19.3% of Acts, survived E1 69.2% and E2 35.1%, averaged 16.09
+cards, and skipped 0.0% of screens. The contextual policy cleared 24.4%,
+survived E1 72.7% and E2 40.0%, averaged 15.13 cards, and skipped 8.8%.
+There were 197 legacy-loss/contextual-win flips versus 120 flips in the other
+direction.
+
+The change did not reduce access to successful converters. Per-run acquisition
+rates moved Dramatic Entrance 24.3%->25.0%, Crescendo 17.1%->17.9%, Flood of
+Emotion 21.0%->21.4%, and High Tide 4.9%->5.4%. The cards removed from realistic
+decks were the surplus generators/cyclers: Suffering for Art 19.3%->0%, Ebb and
+Flow 19.0%->0%, Hearts Swelling 16.0%->0%, and Curtain Up 18.3%->0%.
+Showstopper fell 17.5%->13.8%, while the self-damaging Sea uncapper fell
+4.1%->0%.
+
+THRESHOLD SENSITIVITY, 600 identical seeds: raising the Fanfare cutoff from 1.0
+through 3.0 monotonically raised the measured win rate, but the 3.0 arm skipped
+74% of rewards and finished with 11.43-card decks. That is the simulator's
+known lean-deck pressure, not a credible human drafting policy. Retain the
+moderate 1.5 threshold (about 9% skips) rather than optimize the scalar by
+refusing nearly every reward.
+
+REGRESSIONS: the final 1,500-run Furina suite is Salon 31.1%, Spotlight 43.9%,
+and Fanfare 24.4%. The fixed Fanfare package is unchanged at 88.4% Punisher and
+75.6% tank boss, confirming that this is an access/selection improvement rather
+than more ceiling power. Klee does not enter any new Fanfare branch; its current
+1,500-run assigned results are Demolition 53.4%, Spark 47.5%, and Reaction
+61.6%. Reaction's current post-buff result is above the stated 40-50% Act
+target, but that is independent balance evidence rather than a regression from
+this runner patch.
+
+DISPOSITION: keep the runner correction. It recovers 5.1 Act points without a
+card buff and confirms that the old policy was materially understating Furina.
+At 24.4%, however, Fanfare remains well below target while its assembled ceiling
+is already healthy. Any next dose should improve the floor of cards that the
+contextual runner still rationally skips (or broaden converter access), with
+the deep Punisher/tank cells held as hard guards.
+
+## R49 -- Thunderous Ovation defensive converter (2026-07-23)
+
+USER RULING: Furina still needs buffs after the runner correction. Ignore the
+independent Klee work and test Thunderous Ovation as a defensive Common
+converter that broadens early Fanfare access without touching the assembled
+Fanfare package.
+
+SHIPPED CARD: Thunderous Ovation now costs 1 Energy plus 5 Fanfare, gains 7
+Block plus 4 at the live 5-Fanfare threshold (11 total), and spends its Fanfare
+after resolving. Its upgrade raises the base 7->9 for 13 total; the rider and
+Fanfare price stay fixed.
+
+The first 5+4=9 Block version succeeded at access but not survival. In a paired
+1,500-seed A/B it raised Thunder's early pick rate 66.5%->90.4% and Fanfare
+core-online-by-E1 39.1%->49.1%, yet Act clears moved only 24.4%->24.9% and E1
+survival fell 72.7%->72.1%. The loss of its unconditional pre-meter fallback
+roughly canceled the value of the new conversion route.
+
+BLOCK BRACKET, 800 identical seeds with Spend 5 and every other rule fixed:
+9/10/11/12 total Block produced 24.0%/24.4%/25.0%/24.9% Act clears. Eleven is
+the smallest saturated value; twelve adds no measured win rate and was
+rejected.
+
+FINAL PAIRED A/B, 1,500 identical seeds: the pre-change card produced 24.4%
+Act / 72.7% E1 / 40.0% E2. The 11-Block converter produced 25.9% / 72.8% /
+41.3%, with 41 old-loss/new-win flips versus 19 in the other direction.
+Thunder's early pick rate rose 66.5%->93.7%, and core-online-by-E1 rose
+39.1%->49.1%.
+
+FINAL SUITE: Salon 32.4%, Spotlight 44.9%, Fanfare 25.9%. The fixed Fanfare
+package remains exactly 88.4% Punisher / 75.6% tank boss, because Thunderous
+Ovation is absent from that package. The change is therefore a safe +1.5-point
+realistic-floor repair with no measured ceiling movement.
+
+DISPOSITION: retain the 11-Block defensive converter. It is not the whole
+Fanfare answer—E1 is flat and Act clears remain far below target—but it
+successfully adds a second Common conversion axis and improves later survival.
+Continue with targeted floor/card-quality work rather than global Fanfare
+power.
+
+## R50 -- Dry Salon floor valve and playtest-ready aggregate (2026-07-23)
+
+USER DIRECTION: raise Salon and Fanfare without making the already-leading
+Spotlight plan automatically stronger, then move to real-game feel testing if
+the overall Act-1 clear rate approaches 40%.
+
+TESTED FLOOR VALVES:
+
+- Salon: dry Member ticks deal 75% rather than 50% power—3 versus the paid
+  tick's 4 damage. Paid ticks, replacement bows, slot count, Encore upkeep,
+  and all authored card numbers are unchanged.
+- Fanfare: Dramatic Entrance and Thunderous Ovation were tested as fail-soft
+  Commons, playable for their 6-damage/7-Block base below 5 Fanfare and paying
+  nothing unless fully charged.
+
+ISOLATION, 800 identical seeds: the old Salon/Fanfare rates were 32.9%/25.0%.
+Dry ticks alone produced 38.8%/26.0%. Fail-soft Commons alone produced
+32.8%/24.1%; combined produced 38.6%/25.5%. The Fanfare fallback is rejected:
+the pilot spends Energy on the ordinary branch instead of waiting for a charged
+conversion, reducing rather than improving the plan.
+
+A simpler hard-gate price bracket was also rejected. With dry ticks retained,
+Common converter Spend 5/4/3 produced 26.0%/26.4%/26.4% Fanfare at 800 seeds.
+The gain saturates at four tenths of a point and would make Dramatic Entrance
+more efficient inside the already-healthy assembled package.
+
+SHIPPED CHANGE: only `SALON_DRY_DAMAGE_MULT` 0.50->0.75. The Common converters
+retain their hard Spend-5 gate and R49 numbers.
+
+FINAL SUITE, 1,500 realistic runs/plan: Salon 38.6%, Spotlight 46.7%, Fanfare
+27.5%. The equal-plan aggregate is 37.6%, up from R49's 34.4%. Spotlight gains
+only 1.8 points from the universal starter Member while Salon gains 6.2, so its
+lead narrows rather than widens.
+
+ASSEMBLED CHECK, 300 fights/cell, old->new dry multiplier:
+
+- Salon: Punisher 98.7%->99.3%; tank 99.3%->99.7%.
+- Spotlight: Punisher 86.0%->87.0%; tank 78.3%->78.7%.
+- Fanfare: Punisher 88.7%->89.7%; tank 74.3%->75.3%.
+
+The completed Salon package was already ceiling-saturated; the movement is
+small and does not create a new matchup result. The realistic gain is
+concentrated where intended: incomplete Salon decks that run out of upkeep.
+
+DISPOSITION: Furina is playtest-ready at a 37.6% equal-plan Act aggregate.
+Stop simulator tuning here and use real play to judge whether dry Members feel
+appropriately weakened, whether hard-gated Common converters create engaging
+meter decisions or frustrating dead draws, and whether the 27.5% simulated
+Fanfare plan understates a human pilot's ability to wait for charged turns.
+
+## R51 -- Kokomi elite axes: A2+A6, stability band owns the healer fantasy (2026-07-24)
+
+USER RULING (closes kokomi-kickoff-v1 ask 4; routes session ask N2): Kokomi's
+elite pair is A2 Scaling + A6 Utility, replacing the kickoff's "A2 + A4
+Utility" wording — the A4 terminology clash is discharged. The healer fantasy
+moves entirely to the stability band (HP-trajectory flatness) in the act-level
+realistic sims, which the kickoff §3 already pre-registered as her acceptance
+signature. A4's instrument is NOT redefined: ward prevention stays a reported
+telemetry stream (FightStats.prevented) feeding the stability band, never
+axis-credited.
+
+TEXTURE CONSTRAINT (user, verbatim intent): Weak and Vulnerable enter her pool
+as riders on exhaust / Sly engine pieces — "they go in the kit but as engine
+payoffs, not a spammable '1 cost aoe weaken' like Furina gets." The Furina
+commanding_gaze pattern (cheap standalone AoE debuff) is explicitly excluded
+from her pool. Debuffs are earned by running the exhaust/Sly engine, which
+also keeps the hydro-convergence watchlist honest: her A6 texture is
+mechanically distinct from Furina's even where the status names overlap.
+
+SCOPE NOTES: measured A6 median is 2.2 in the v0.1 battery, so elite A6 is a
+statement about the upcoming full sheet pass (authoring work: Weak/Vuln
+riders, application uptime, AoE packaging incl. surging_shoal), not about the
+v0.1 roster. Remaining instrument questions — A4/ward credit (N2), starter
+weakness (30.5% wr), Gardener-card packaging — are routed to the tier05
+act 1-3 realistic sims; tier0 batteries retain unit/anchor/lint duty only.
+Also accepted in the same thread: the test_fontaine_rewards 5-star assertion
+update (pins the mondstadt-or-inazuma construction) and the in-session
+vigil-packaging and domination-lint catches.
+
+## R52 -- Kokomi kickoff asks: batch closure (2026-07-24)
+
+USER RULINGS (closes kickoff asks 1-3, 5-10 and session asks N1, N3, N5;
+ask 4 / N2 were closed in R51):
+
+- N1 cadence: CATALYST. Every attack applies hydro — the application-uptime
+  third of elite A6 becomes structural rather than authored.
+- Ask 8 statline: hp 70 / energy 3 / starter composition (3x waters_edge,
+  3x coral_guard, bake_kurage, 2x tactical_recall, tide_reading) with the
+  reserved companion slots — pinned as the starting point; numbers stay knobs.
+- Ask 2 deck-size grammar: approved as written, Kokomi-pool scope ONLY;
+  lint_kokomi_decksize remains the in-suite gate.
+- Ask 6 finisher: keep both-with-capstone (Ceremonial Garment kit Burst +
+  Nereid's Ascension rate-limited Rare); the act-level sims arbitrate.
+- Ask 1 healing: NO amendment — and none planned, ever. Furina already holds
+  the mod's one healing amendment; Kokomi's rares pay off a different way.
+  CONSEQUENCE: sango_prayer (heal 12, Rare+Exhaust) is cut as authored and
+  reworked to a non-heal payoff in the v0.2 sheet pass. The healer heals no
+  HP: her sustain fantasy is prevention (ward) plus the stability band.
+- Ask 5 Charge accrual: universal exhaust->Charge through the single funnel,
+  as implemented.
+- Ask 7 SUPPORT_CARRY: conscripted companions count as base kit
+  (self-sourced); drafted companion cards count normally. As implemented.
+- N3 starter trio: Gorou always enlists (lore ruling). The three-name /
+  two-slot asymmetry is intended; no fourth shortlist name.
+- N5 conscript rarity: leave natural rarity odds — the Itto 5-star jackpot
+  stays in the pool; reconsider only if sims show him busted.
+- Ask 3 A1>A2 invariant: the Klee law was Klee-scoped; there is no mod-wide
+  invariant. Kokomi's per-identity constraint A2>A1 stands on her own sheet.
+- Ask 9 Raiden: playable characters MAY also exist as Rare companion cards,
+  and may appear in Kokomi's conscript pool — but only as a Rare payoff.
+  Lorewise Kokomi and Raiden are opposed; the flavor must carry that tension.
+  (User notes the playable-as-companion ruling may not have been formally
+  ratified before; it is ratified here for this case.)
+- Ask 10 naming/lore audit: deferred to the full sheet, pre-C-milestone,
+  as designed.
+
+Not explicitly addressed: N4 (burst meter 50, KOKOMI_BURST_PER_EXHAUST 2) —
+treated under ask 8's "pinned starting point" umbrella: knobs, tuned by sims.
+
+DISPOSITION: every kickoff gate is closed. The v0.2 sheet pass proceeds under
+R51's texture constraint (Weak/Vulnerable only as riders on exhaust/Sly
+engine pieces), with sango_prayer reworked, Raiden authored as an
+opposed-lore conscript-pool Rare, a kokomi-upgrades sheet added (rest-smith
+dependency), and the tier05 drafter taught her verbs (DRAFTER_VERSION-
+stamped) before any act 1-3 number is read.
+
+## R53 -- Kokomi basics stay at Strike parity; v0.3 committed for review (2026-07-24)
+
+USER RULING: waters_edge does NOT go to kaboom parity (7) -- her basic
+attack remains at basic-Strike parity (6). The kaboom-parity arm from the
+v0.3 charge-curve grid is rejected; its ~5 act-1 points are not bought
+through the basic.
+
+CONTEXT: the rest of the v0.3 charge-curve world (Regent-shape commons,
+GARMENT_CHARGE_DIVISOR /2, riptide_strike, fast-cycle Burst meter 10,
+starter S3 swaps -- sheetpass report §6) is committed AS PROPOSED for a
+later card-by-card review. The user flags that the world may diverge too
+far from the character's actual identity; the §6.4 tension (ruled A2>A1
+constraint violated by the fast-cycle Garment's frontload signature, median
+TOO_STRONG) is the open question that review will decide (options O1-O3 on
+file). Nothing in the v0.3 numbers is ratified by this commit.
+
+COMMITTED WORLD (waters_edge 6, re-measured before commit): see report
+§6.3 for the final labeled table.
+
+## R54 -- Kokomi v0.4: O4 is the primary arm, O1 rejected, O2 in reserve (2026-07-26)
+
+USER RULING (plan asks 1-3, 5; docs/archive/kokomi-v0.4-plan.md is the governing
+doc, ruling answers in its §7):
+
+- **O1 REJECTED.** Accepting the v0.3 world by redefining the instrument or
+  re-declaring the elite pair post hoc is not available -- that is the R33
+  culture line. The measurement stands; the design moves.
+- **O2 = reserve fallback** (Garment splash 7 / turns 2), unexercised.
+- **O4 = primary arm, EXECUTED.** The periodic output moves off the Burst
+  and onto the summon, where canon keeps it: Bake-Kurage becomes a
+  persistent summon that pulses at turn end reading the Charge bank, the
+  Garment gains its canon riders (attack-Block + the Tamakushi refresh
+  link), and the meter goes back to being a real Burst (10 -> 20).
+- **Sequencing W1 -> W2 -> W3 ratified**; knob defaults ratified as
+  proposed; meter bracket 15/20/25 ratified; prediction (c)'s acceptance
+  band 35-50% confirmed, with Furina 57 / IC 59 as ceiling-side reference
+  and NOT a requirement.
+
+MEASUREMENT CONVENTION ESTABLISHED (W1, binding): the Kokomi act numbers of
+record are `--realistic` runs at 500 runs / default seed. The committed v0.3
+world reproduces its recorded four pairs exactly under that invocation
+(priest 32/2.0, commander 49/1.6, generic 26/0.4, assist 20/0.0). The SAME
+world at bare loadout reads priest 3% / commander 4% act-1 -- the
+relic/potion layer is most of the act-1 clear. Comparing across the two is
+comparing two different worlds.
+
+PREDICTIONS GRADED IN WRITING (plan §2; hits and misses both, report §3):
+(a) starter A1 falls below A2 -- **MISS at every meter step**.
+(b) TOO_STRONG clears at archetype median -- **HIT** (and the median now
+    satisfies A2>A1 outright: 5.2 vs 3.6 at meter 20).
+(c) act-1 lands 35-50% at meter 20-25 -- **PARTIAL** (500-run confirm at
+    meter 20: commander 45% in band, priest 30% under).
+(d) Garment-uptime watchlist retires by construction -- **PARTIAL**
+    (priest 57% -> 23% uptime, retired; commander 76% -> 50%, not retired).
+
+The plan's fallback trigger ("misses on (a)/(b) at EVERY meter step -> fall
+back to O2") did NOT fire, because (b) hit. O4 therefore stands as landed
+and (a) goes back to [USER] as an open ask -- see the report's §4 finding
+that (a) is a STARTER-COMPOSITION property, not a Garment property, which
+contradicts the v0.3 report's §6.4 diagnosis.
+
+## R55 -- Kokomi lore overlay: the rename batch and the voice law (2026-07-26)
+
+USER RULING (plan ask 4; naming audit is [USER]-only). Landed in W3,
+measurement-neutral by construction -- display names and comments only, ids
+stable except the one noted:
+
+- **VOICE LAW (binding for the sheet and every future card face):** Exhaust
+  in Kokomi's fiction is ROTATION, never sacrifice. Units rotate off the
+  field rested and whole; Charge is the strategic position each executed
+  maneuver buys. Her doctrine is minimal casualties, and the sacrifice voice
+  is the one reading that breaks the character. `tactical_recall` is the
+  exemplar; `grand_conscription`'s "the army becomes fuel" was the marked
+  counter-example and is rewritten.
+- **Conscription family renamed** (forced service is Shogunate behaviour;
+  the resistance were volunteers). Op name `conscript` stays internal;
+  display moves to Muster/Enlist/Rally: conscription_notice -> "Call to
+  Arms", mass_mobilization -> "Rally the Isles", grand_conscription ->
+  "General Muster of Watatsumi". to_the_front / field_promotion /
+  reinforcements keep their names.
+- **`riptide_strike` -> `all_streams_flow`, ID-LEVEL** (the one id rename;
+  landed BEFORE W2 so the arm was born with the right name). Riptide is
+  Tartaglia's signature mechanic -- a cross-character collision inside
+  Genshin. "All Streams Flow to the Sea" is her C5 and means exactly what
+  the card does.
+- **Other renames:** jade_bulwark -> "Pearl Bulwark" (jade is Liyue-coded;
+  Watatsumi is coral and pearl); mercy_of_the_deep -> "Mercy of the
+  Currents"; vigil_of_the_deep KEEPS its name (it is the ward's name and it
+  is earned); depths_judgment -> "Sango Isshin" ("Judgment" is
+  Fontaine-coded; Sango Isshin is her C6, wiki-verified);
+  sayu_yoohoo_windwheel -> "Sayu — Yoohoo Art: Fuuin Dash".
+- **Private-characterization renames** (the drained introvert, the secret
+  novel reader, the wish for quiet): tide_reading -> "Stolen Chapter",
+  moon_signal -> "A Moment Alone", and the optional third LANDS --
+  undertow_shuffle -> "Daydream of a Quiet Life". Effects unchanged.
+- **Relic swap:** the starting relic is displayed as **"Pearl of Wisdom"**
+  (NOT the drafted alt "Everlasting Moonglow"). "Tamakushi Casket" moves to
+  the mechanic canon actually names -- the Garment-refreshes-Kurage link.
+  Relic mechanics unchanged; the hook IDENTIFIER stays `tamakushi_casket`
+  (ids are stable across this overlay, and it now sits on the engine
+  powering the link it is named for). CONSEQUENCE: the relic took "Pearl of
+  Wisdom", so epiphany_of_the_deep could not have it -- it takes **"Song of
+  Pearls"**, her wiki-verified 4th Ascension passive.
+- **Raiden KEEPS "Musou no Hitotachi"**; the gloss flips from irony to
+  RECONCILIATION. The retired reading had Kokomi fishing for the blade that
+  executed her people's Visions; the true gloss is the peace's crowning
+  proof -- the Shogun's blade defends Watatsumi now.
+- **"The pool is the peace, not her army"** lands as a companion-sheet
+  framing note: the roster spans every Inazuma faction because it is
+  post-Decree Inazuma answering Watatsumi's call, not a resistance muster.
+
+WIKI RE-VERIFY (the plan's header audit ask; the wiki is the instrument,
+not anyone's memory): **"The Moon's Beauty" is NOT a Kokomi name** and has
+been struck from the sheet's verified list -- the header audit ask was
+correct. Confirmed canon: Kurage's Oath (Elemental Skill, which summons the
+Bake-Kurage), Nereid's Ascension (Burst), Ceremonial Garment, Tamakushi
+Casket (A1 passive: casting Nereid's Ascension refreshes a fielded
+Bake-Kurage -- exactly the link O4 models), Song of Pearls (A4), Princess of
+Watatsumi (innate), C1 At Water's Edge / C5 All Streams Flow to the Sea /
+C6 Sango Isshin. Beta-era sources carry "Kaijin Ceremony" and "Haworthia
+Casket" for the Burst and A1 passive; those are pre-release names and are
+noted as a trap in the sheet header.
+
+## R56 -- Kokomi v0.4b: the 12-card starter, the x4 bank read, Kurage's Oath (2026-07-26)
+
+USER RULING, same day as R54/R55 and SUPERSEDING their statline conclusions.
+R54 chose meter 20 on a 10-card starter with a /4 bank read; this ruling
+rebuilds the starting deck and flips the read to a multiplier. R54's act
+numbers are a superseded world -- never compare them unlabeled.
+
+**The starter is TWELVE cards, the Silent shape**: 4 Water's Edge + 4 Coral
+Guard + 2 companions (Gorou fixed, Sayu-or-Shinobu rolled) + 2 mechanic
+cards (Bake-Kurage for Charge, Tactical Retreat for exhaust). Rationale:
+her opening deck carries exhaust, so a 10-card self-milling deck risks
+decking out; and starters are SUPPOSED to be bad and supposed to leave, so
+two more mediocre cards is a real dilution cost that Tactical Retreat's
+thinning pays down. Companions are now ADDITIONS, not replacements.
+
+**waterspout and surging_shoal are OUT of the starter.** USER RULING: "no
+one starts the game with AoE; if you need it, you draft it." Both stay in
+the pool; surging_shoal was in NO package and would have become unreachable
+(the vigil defect), so it is now a priest + commander draft-in.
+
+**The Kurage pulse read flips from divisor to MULTIPLIER**:
+KURAGE_PULSE_PER_CHARGE = 4 (was: +1 per 4 Charge). Design intent: every
+Exhaust is worth about a Silent shiv toss. KURAGE_DURATION 3 -> 1,
+KURAGE_PULSE_BASE 2 -> 4, KURAGE_PULSE_BLOCK 2 -> 0.
+
+**THE ASSISTANT'S "x4 IS TOO HOT" OBJECTION WAS WRONG AND IS WITHDRAWN.**
+It was argued from the internal §2.2 reader hierarchy and from act-1 clear
+measured against STALE anchors. [USER] countered with the StS2 precedent:
+Necrobinder starts with a 1-cost "Osty gains 5 HP" and a 1-cost "deal 3 +
+Osty's HP" -- unbounded starting-deck scaling is something the actual game
+designers ship. Re-measuring the anchors in the current world settled it:
+act-1 clear is NOT the binding metric (Klee clears 83% of act 1 and wins
+3.4% of runs). On RUN winrate x4 is mid-cast. Standing caveat, [USER]'s
+own: Osty's HP can go DOWN with bad play, Charge only goes up -- so this
+is watched in act 3, where it does not in fact run away (6% vs Furina 13%).
+
+**PREDICTION (a) NOW HITS.** R54 graded "starter A1 falls below A2" as a
+MISS at every meter step. Under the 12-card starter it PASSES: A1 3.2 vs
+A2 4.8. Isolated at x0 (bank read fully OFF) the constraint ALREADY passes
+at A1 2.8 vs A2 3.5 -- so the fix is the COMPOSITION, not the multiplier,
+confirming the R54 report's §4 finding by direct experiment. waterspout
+(10 flat) and surging_shoal (7 AoE) were her frontload. The multiplier
+buys A2 depth and clear rate on top. Median passes too (A1 3.7 / A2 5.1).
+
+**NEW CARD -- Kurage's Oath** (Common power, 1 cost, `kurage_ward`): while
+it holds, every Kurage pulse also grants Block. This drafts back the
+mending half of the canon Bake-Kurage ("deals Hydro DMG and heals nearby
+characters at set intervals") after the baseline pulse Block was zeroed --
+the healer fantasy becomes an opt-in build rather than a freebie. Upgrade
+buys INNATE ONLY; the Block does not move.
+NUMBER IS MEASURED, NOT REASONED: drafted at 5 by ratio off Regent, it was
+a TRAP PICK (priest run 3.8% WITH it vs 5.8% without). Bracket: ward 5 ->
+3.8%/5.4%, ward 8 -> 4.8%/5.8%, ward 12 -> 6.2%/5.8%. The ratio had to go
+UP for the cheaper trigger: Regent's finisher is played reliably, while
+Bake-Kurage is one copy in a growing deck pulsing ONCE per play at
+duration 1. **RULED at 12, with [USER]'s flag on the record: "I feel like
+that's too strong, but we can rebalance later."** First knob back.
+
+**MEASURED WORLD (500 runs/plan, --realistic, DRAFTER v8):**
+priest 6.2% run (act 56/27/6); commander 5.8% (65/37/6); generic 2.0%
+(46/16/2); assist 1.6% (44/14/2). Anchors re-measured same world: Furina
+13.4%, real_ironclad 3.6%, Klee 3.4%, ref_ironclad 0.6%. She lands above
+Klee/Ironclad and below Furina on every stage.
+Meter 20 re-checked in the new world and KEPT (15 -> 9.3/8.7% run,
+20 -> 6.7/7.7%, 25 -> 4.0/6.0%).
+
+**OPEN, logged not acted on:** [USER] -- "maybe the Burst needs to be
+reworked entirely; refreshing something that never expires was also a dud."
+The Tamakushi Casket link is inert at KURAGE_DURATION 1 (a fielded Kurage
+is always at exactly 1, so refresh-to-full is a no-op). The mechanic stays
+in code and stays test-pinned via a raised duration, so restoring a longer
+duration is safe; the Burst rework itself is a future conversation.
+
+## R57 -- Playtest sprint Track P: pins, telemetry, and a world that moved (2026-07-25)
+
+Track P of the Kokomi Playtest Build sprint. Scope as ratified: pins and
+telemetry only, zero balance changes (the sprint's freeze rule -- the
+variable under test is the MEDIUM, not the numbers). Everything below is
+instrumentation or measurement; no dial moved.
+
+**P1 -- the Oath coupling pin (LANDED).** `kurage_ward` 12 pays out once per
+Kurage pulse, so its real value is (ward x pulses per play). It owns only the
+first factor: the second lives in `KURAGE_DURATION` and the bake_kurage
+`kurage_turns: +1` delta, neither of which the Oath's own tests touch. A
+duration change therefore reprices a Common power that already carries a
+[USER] "maybe too strong" flag, silently and from another file.
+`test_oath_ward_is_pinned_to_the_pulse_frequency_it_was_measured_at` now fails
+on that edit, and reciprocal notes sit at BOTH ends (the sheet row and the
+constant) because the person raising the duration reads constants.py, not the
+Oath's row. Pin verified to fire: forcing KURAGE_DURATION to 2 fails it.
+
+**P2 -- runaway telemetry (LANDED).** `kurage_pulse` is emitted at the pulse
+site with its size and the bank that produced it; `tier05/kurage_telemetry.py`
+reports p50/p95/max by act. Report-only, and silent for every character that
+never fields a Kurage. Rationale: the runaway failure mode is INVISIBLE in win
+rate (a kit that one-shots act-3 elites still reports a win, and reports it as
+success), so [USER]'s standing "watch act 3" caveat becomes a column instead of
+a thing someone has to remember. Pulses into an empty board are counted --
+they are samples of the CURVE, and dropping them biases the tail down exactly
+when fights end fast.
+First reading (500 runs, --realistic, current world), act1 / act2 / act3 p95:
+priest 64 / 116 / 152; commander 56* / 128 (act 3 p95); generic 44 / 108;
+assist 44 / 100. Mean bank at pulse time reaches 16.6 in act 3 (priest).
+The curve roughly doubles act 1 -> act 3 and then flattens. NOT a runaway on
+this evidence; the tail is now watched by construction.
+
+**P3 -- commander Garment-uptime criterion (WRITTEN).** The v0.4 watchlist was
+carried forward with no terms, which makes it un-retireable. Terms, registered
+here and not to be redefined mid-sprint:
+  RETIRE  if long-fight uptime holds < 60% through the Burst rework.
+  ESCALATE if it goes past 70% (a permanent multiplier wearing a Burst's
+           clothes -- the v0.3 failure mode, restated).
+  Neither -> stays a watchlist entry, unchanged.
+Current value stands at the v0.4 measurement (50.1% overall / 58.7% in long
+fights), i.e. just under the retire line and not yet retired. The playtest
+supplies the felt half (protocol item 2).
+
+**P4 -- skeleton-test debt: INVESTIGATED, NOT REPRODUCIBLE.** Went further
+than "log it as debt", and the result is a null.
+FIRST, a real defect in the plan's own premise: the `wip-safety-net` tag named
+as the reproduction handle DID NOT EXIST. The stash was empty, and commit
+`deba245` was reachable from no ref and no reflog entry -- a dangling object
+awaiting gc, i.e. the handle the plan proposed to preserve was already gone.
+Re-created as an annotated tag before it could be pruned; it now anchors the
+entire pre-merge Kokomi WIP tree (12 files).
+SECOND, with the handle restored, `test_build_kokomi_skeleton` PASSES at
+deba245 and passes at HEAD. The only tree that ever exhibited the failure was
+the CONFLICTED MERGE working tree, which was never committed by anyone, so
+there is no artifact that reproduces it and there never will be. Logged as
+CLOSED-UNREPRODUCIBLE rather than as standing debt: leaving it open would
+imply an investigation that no preserved state can support. Do not delete the
+tag until someone decides that WIP tree is worthless.
+
+**P5 -- deck-size survivorship split (LANDED, and it answers its question).**
+`avg_final_deck` now reports won/lost alongside the pooled figure. The 21.7-24.2
+soft-cap ride was ambiguous by construction: heavy decks and short deaths push
+the mean in opposite directions. Split, it is unambiguous --
+  priest 25.4 (won 33.5 / lost 24.8); commander 25.0 (31.7 / 24.3);
+  generic 24.5 (33.8 / 23.9); assist 23.1 (31.2 / 22.9).
+WINNERS' DECKS ARE UNIFORMLY THE BIG ONES, by 7-10 cards. The soft-cap ride is
+survivorship, not bloat: runs that live longer draft more. Deck size is not a
+cause of death in any lane. LAW 4 needs no action.
+
+**THE FINDING -- the world moved, and the R56 numbers are stale.**
+Nobody touched Kokomi. RUNTEMPLATE 7 (acts 2-3 event pools) and DRAFTER 9
+landed on main from the Furina workstream, and the whole roster inflated.
+Re-measured, same command, 500 runs, --realistic:
+| lane / anchor | R56 (DRAFTER v8) | now (DRAFTER v9 + RUNTEMPLATE 7) |
+|---|---|---|
+| Kokomi commander | 5.8% | **9.6%** |
+| Kokomi priest    | 6.2% | **7.0%** |
+| Kokomi generic   | 2.0% | **6.8%** |
+| Kokomi assist    | 1.6% | **2.0%** |
+| Furina salon     | 13.4% | 18.2% |
+| Klee demolition  | 3.4% | 9.2% |
+| real_ironclad    | 3.6% | 8.0% |
+| ref_ironclad     | 0.6% | **7.4%** |
+Her ABSOLUTE numbers rose; her RELATIVE position did not improve -- against
+real_ironclad she went from 1.7x to 0.9x (priest) and 1.6x to 1.2x
+(commander), and against Furina from 0.46x to 0.38x. She remains mid-pack:
+at or just above the Ironclad anchors, far below Furina. **The freeze rule is
+therefore SAFE on the evidence** -- she does not need a rebalance to be worth
+playtesting, and the playtest is still the right next instrument.
+SEPARATE CONCERN, flagged for the Furina/roster workstream and NOT acted on
+here: `ref_ironclad` moved 0.6% -> 7.4%, a 12x swing in the FROZEN reference
+battery. A reference anchor that moves that far invalidates cross-world
+comparison against every archived number in this file, including R56's. That
+is a roster-level instrument question, not a Kokomi one.
+
+**ANOMALY, recorded because burying it would be worse.** The first
+instrumented 500-run priest cell read 8.4%; every subsequent run of the same
+command on the same tree -- six of them, including four with varied
+PYTHONHASHSEED -- reads 7.0%. Instrumentation was verified INERT by
+revert-and-compare (removing only the emit reproduces 7.0% exactly), and
+RunResult is keyword-constructed so the added field cannot shift anything.
+Cause NOT established. A concurrent session was writing the repo during that
+window (mod-side files only, per mtimes), which is suggestive but unproven.
+Recorded as an open trust question about single-cell measurement, in the same
+family as the `--realistic` catch that nearly caused a false regression call.
+Treat any single 500-run cell as provisional until repeated.
+
+## R58 -- Kokomi v0.5 partial fill: the pool was half-sized (2026-07-25)
+
+**[USER] CATCH, and the repo could not have made it.** Mid-sprint, [USER]
+asked how many cards Kokomi was getting: "the other decks were scoped for
+75-80 in total." Her personal pool was **38** against Klee 76 and Furina 78 --
+short at every rarity (common 13 vs 32, uncommon 12 vs 25, rare 8 vs 15).
+Nothing had regressed: the sheet has been 38 rows since the v0.2 pass and
+every R56/R57 number was measured against it. That is exactly why no
+instrument reported it. The run sim measures winrate, and a thin pool does not
+lower winrate -- it lowers VARIETY, which only a human at the table feels.
+Same family as the reserved-card-names catch (see the structurally-invisible
+defects note): a check that needs data the repo does not hold.
+
+**RULING ([USER]): fill partway with cards that make logical sense; carry the
+rest to a design pass AFTER early playtest results.** Executed as +12 common
+(13 -> 25) and +8 uncommon (12 -> 20), 3 per lane at common and 2 per lane at
+uncommon so the fill does not silently re-weight the archetypes. Rares
+deliberately untouched at 8: draft variety is felt where the offers come from,
+and rares are the slot most likely to be redesigned once play says which of
+her lanes is real. Personal pool 38 -> 58.
+
+**STILL OPEN (post-playtest design pass):** common 25/~32, uncommon 20/25,
+rare 8/15 -- roughly 20 cards short of roster parity. Art bill rises with it:
+53 personal faces today, ~91 at parity, against the ~8 clean large
+illustrations that forced the widened-source ruling.
+
+**FREEZE RULE.** Not violated, not quietly widened: no existing row is edited.
+New rows carry new numbers, which is unavoidable, so this is logged as an
+explicit [USER]-directed exception rather than folded in. All new numbers are
+PROPOSED and all new NAMES are AUTHORED-NOT-AUDITED (the naming audit is
+[USER]-only; it ran at v0.4 and has not run on this block).
+
+**NEW GRAMMAR: threshold predicates.** `charge_at_least_N` (new) and
+`exhaust_pile_at_least_N` (existed sim-side, taught to codegen). A threshold
+is NOT a §2.2 proportional read -- it pays a flat printed bonus once a bar is
+cleared and then stops, so it cannot feed the multiplicative-read risk the
+per-point readers are rate-limited for. Charge bars are uncommon+ only. Both
+threshold cards are encoded base-plus-bonus rather than either/or so the
+upgrade moves the always-live half and the BAR CANNOT DRIFT DOWN -- lowering a
+threshold is a resource-curve move, which the Klee R1 law forbids. Pinned by
+`test_threshold_bars_do_not_move_on_upgrade`.
+
+### Four defects the fill surfaced. Three were already shipped.
+
+1. **Sly branches were never checked by `blocked_reason`.** It read `effects`
+   and nothing else. `tidal_lure`'s sheet says Vulnerable 1 to a RANDOM enemy;
+   the apply_power emitter treats anything-but-"enemy" as all-enemies; the
+   guard that would have caught it never looked. The card generated, compiled,
+   and debuffed the whole room. FIXED both ways: the Sly view now runs through
+   `blocked_reason` like any other card, and apply_power learned
+   `random_enemy`. An unchecked branch is not a smaller surface, it is the
+   same surface with the alarm disconnected.
+2. **Sly branches reused the played face's DynamicVars.** `drifting_lantern`
+   (played 4 / Sly 4, upgrade +2) upgraded its Sly Block to 6, which the sim
+   never does; `driftglass` would have dealt 8 on discard instead of 5; and
+   `quiet_harbor`/`whispered_word` referenced a `Cards` var their cards do not
+   declare at all. FIXED: `_sly_view` stamps `_sly_branch` and every amount in
+   a Sly branch renders LITERAL, which is what the sim does (no sly-delta key
+   exists in the applier).
+3. **No Sly card's FACE mentioned Sly.** `drifting_lantern` -- the sheet's
+   self-declared "Sly teaching card" -- printed "Gain 4 Block." and taught
+   nothing. FIXED: the face now carries a `[gold]Sly[/gold]: ...` clause built
+   from the same text emitter. A mechanic a player cannot read does not exist
+   at the table.
+4. **LAW 4's accounting had a hole.** `tools/lint_kokomi_decksize.py` knew
+   three card-minting ops; the copy family was invisible, so a Common carrying
+   `copy_companion_in_hand` would have netted +1 and passed clean. FIXED: the
+   copy family is enumerated, and the unbounded
+   `copy_companions_played_this_combat` counts as the whole hand rather than
+   being guessed at 1. Guarded by `test_decksize_lint_counts_the_card_copying_ops`.
+
+Two pre-existing codegen blockers also cleared, both over-broad guards rather
+than missing machinery: `exhaust_from amount > 1` is expressible on the CHOSEN
+branch (one multi-select prompt IS the sim's pick-worst-repeat; only the
+random re-pool loop was never built), which unblocked `cleansing_tide` -- a
+COMMON that had been shipping with no C# card at all. Kokomi codegen is now
+**57 of 58**, the remainder being the kit Burst.
+
+### Measurement (500 runs/lane, --realistic, post-fill)
+
+| lane | pre-fill (R57) | post-fill | Wilson 95% |
+|------|------|------|------|
+| priest    | 7.0% | 8.4% | 6.3-11.2% |
+| commander | 9.6% | 8.8% | 6.6-11.6% |
+| generic   | 6.8% | 7.0% | 5.1-9.6% |
+| assist    | 2.0% | 1.4% | 0.7-2.9% |
+
+**READ THIS AS A NULL.** Every interval overlaps its pre-fill value; +20 cards
+moved no lane outside noise. That is the expected and desired result -- the
+fill was for a HUMAN-felt property the sim does not measure, and a fill that
+had moved winrates would have meant the new cards were mispriced. The priest
+cell reading 8.4% is noted only because R57's unexplained anomaly produced
+that same number; nothing is inferred from it, and R57's standing rule holds:
+treat any single 500-run cell as provisional until repeated.
+
+**ONE SIGNAL WORTH THE NEXT PASS:** assist stays a distant last (1.4% against
+7-9%, online in 20% of runs, median 11 fights) and did NOT move despite taking
+5 of the 20 new cards. The sheet declares the lane "LOW INTERNAL PAYOFF BY
+DESIGN" (Box Trick philosophy), but a 6x spread is a different claim from a
+low payoff. Flagged for the post-playtest design pass, not acted on inside the
+freeze.
+
+## R59 -- Shop slot 2 floor: Uncommon (2026-07-25)
+
+Slot 2 is wildcard-nation, **Uncommon-or-Rare** at renormalized reward odds.
+Preserves the premium-paid-channel thesis: base slot 2 is a guaranteed Rare, so
+a wildcard at full reward odds (~60% Common) would make the mod's shop *worse*
+than base at the exact slot whose whole argument is that it is premium. Matches
+the companion-value study's finding that StS2 colorless has **no common tier**.
+
+The tiebreaker was banner robustness. A guaranteed-Rare slot 2 interacts badly
+with nation-scoped banner gating: runs where the banner thins a nation's Rare
+tier leave a guaranteed-Rare slot drawing from a near-empty eligible set. Base
+StS2 never had this problem because base colorless has no banner. Guaranteed-
+Rare rejected as brittle; as-written (full reward odds) rejected as
+self-contradicting.
+
+**Live instance, not hypothetical: Fontaine ships ZERO Rare companions today**
+(Mondstadt 3, Inazuma 2, Fontaine 0). Furina's home-nation slot 1 already
+cannot roll a Rare regardless of banner state.
+
+## R60 -- Base colorless pool: shop-only override now, removal deferred (2026-07-25)
+
+Phase 1 (this sprint): the merchant's colorless entries draw from the companion
+pool. `ColorlessCardPool` **stays populated** for its six non-shop consumers,
+including all three `GetDistinctForCombat` sites. Emptying it is the exact
+empty-draw softlock class already paid for once (Dusty Tome ->
+`lint_ancient_coverage.py`); full removal demands a seven-consumer audit plus
+per-site invariant tests, which is a sprint of its own. §4.7's rejection of the
+"additive model" argued *reward-economy* fantasy dilution, which does not
+automatically extend to Discovery-style in-combat generation the player never
+drafts.
+
+**Deferred, not rejected:** whether base colorless surfacing via in-combat
+generation is a fantasy leak worth phase 2's blast radius is a taste call.
+[USER] grades it after phase 1 is live at the table. Until graded, phase 2 is
+not scheduled and no prep work rides along.
+
+## R61 -- The sim models the shop channel (2026-07-25)
+
+Companions become shoppable in `tier05/shop.py` (slot 1 nation-filtered +
+Uncommon floor, slot 2 per R59, gold pricing by drawn rarity). §4.7's thesis is
+that *pricing is the balance governor*; an unmeasured governor is a design
+claim with no instrument attached.
+
+Distinguished from R2's relic exemption: that is a static effect, this is an
+economy channel. This also answers the compounding question the plan doc
+raised -- the exemption series stops at two. **Tier 0.5 models economy
+channels.**
+
+## R62 -- `sucrose_astable`: free + Exhaust, restoring the v1.11a numbers (2026-07-25)
+
+The card returns to **cost 0, Exhaust**, superseding main's interim rebalance.
+The 2026-07-26 merge resolved a collision in main's favour on recency, which
+silently dropped the Exhaust; the sheet flagged it as *absent rather than
+rejected* and this is the ruling that closes the flag.
+
+**[USER] grading:** Bursts are not currently priced strongly enough for the
+multi-copy-battery worry to bind -- replaying the card to buy a Burst is not
+worth the energy it costs -- so the guard costs nothing to keep and the
+free-cost reprice stands on its own merits. The guard is **retained as cheap
+insurance against a future Burst reprice, not because it currently binds.**
+
+Mechanical: `docs/mondstadt-companions.yaml` cost 1 -> 0 plus `exhaust: true`;
+`docs/klee-upgrades.yaml` comment corrected; §4.7 changelog gains a v1.11b
+supersession note. Sheet remains sole source of truth; codegen regenerated.
+
+## R63 -- §4.7 shop channel executed: three amendments and a purse that never binds (2026-07-25)
+
+Execution record for the R59-R62 sprint. Full log:
+`docs/archive/shop-companion-channel-sprint-log.md`.
+
+**AMENDMENT 1 -- Track A shipped as a query surface, not a `CardPoolModel`.**
+The plan called the pool class the prerequisite. It is not one: a
+`MerchantCardEntry` takes a plain `IEnumerable<CardModel>`, so the shop needs
+no pool object. More importantly the reasoning inverted twice and both halves
+are on file. `KleeOffPoolCards.cs` carried a signed finding that a standalone
+pool "could never work" (no registration hook in `ModelDb.AllSharedCardPools`,
+which is a hardcoded array of 7). **That finding is now STALE and was nearly
+re-asserted:** BaseLib ships `ModelDbSharedCardPoolsPatch`, a postfix that
+appends any `CustomCardPoolModel` declaring `IsShared`. It would work today.
+It was still not built, on COST: `CardModel.Pool` must resolve to exactly one
+pool and supplies the card frame, so registering one migrates 47 companions
+out of three character pools and repaints every companion card -- with an
+init-order dependency no C# test can check, because there is no C# test
+project. Feasible, deferred, [USER]-owned. The stale comment is corrected in
+place.
+
+**AMENDMENT 2 -- no banner gating in the shop.** §4.2 gating was scoped as
+"wiring, not design". Wiring it would have made the two channels disagree
+about a rule neither can exercise: `BANNER_FEATURED_SLOTS` is 3 and no nation
+designs more than 3 Rare companions, so the banner features every 5-star
+everywhere and is exactly a no-op -- which is why the reward slot already
+skips it by standing ruling. It goes live in both channels together, when a
+nation ships a 4th Rare.
+
+**AMENDMENT 3 -- companions do not collect the colorless price surcharge.**
+`MerchantCardEntry.GetCost` is 50/75/150 by rarity (so the plan's "verify
+before reuse" is answered: it DOES price off rarity) and then multiplies by
+1.15 iff `card.Pool is ColorlessCardPool` -- a type check on the concrete
+class, which companions are not. The mod's premium channel is therefore ~15%
+cheaper than the base channel it replaces. Sim mirrors the same bands, so the
+two sides agree with each other and both undercut base.
+
+**THE MEASUREMENT CONTRADICTS §4.7's CENTRAL CLAIM.** 500 runs/arm x 3
+characters, realistic, 3 acts. Winrate delta is a NULL (-0.20pp mean; +1.2 /
+-1.8 / 0.0 with every interval overlapping its control). P1's slot-1 buy rate
+came in at 49.2% against a predicted 10-35%.
+
+The band's own diagnosis for a high buy rate is "under-priced relative to
+card-remove/relic competition". A crowd-out check says that is the wrong
+reading:
+
+| door | off | on | change |
+|---|---|---|---|
+| removals bought | 0 | 0 | -- |
+| relics bought | 1356 | 958 | **-29.4%** |
+| gold unspent at run end | 332277 | 334174 | +0.6% |
+
+Card removal is not a competitor at all in tier 0.5 (zero removals either arm:
+`is_known_dead` only fires on curses and unupgradable basic filler, and all
+three characters ship clean decks). The channel trades a relic for a companion
+at par, ~30% of them, and moves no winrate. And **unspent gold does not
+change** -- runs end holding ~220 gold.
+
+**A price cannot govern a purse that does not bind.** "Gold price is the
+balance governor" is not currently true in the sim; the governor is the shelf.
+NO KNOB WAS TURNED -- the plan's retune order starts at gold bands, and the
+evidence says a gold-band change would be aimed at the wrong mechanism. This
+goes to [USER] as a design question (should the shop's purse ever bind?)
+rather than as a tuning pass. Also recorded: `visit_shop` buys cards before
+removal and `model.py` offers relics later still, so companions get first
+claim on the purse by construction -- the buy rate is partly an ordering
+artifact, which is why the crowd-out table and not P1 is the load-bearing
+evidence.
+
+**RIDE-ALONG: the constant-parity gate was only reading `public const int`.**
+Adding one C# constant surfaced that eight non-integer balance constants were
+escaping a lint whose docstring promises that every balance number lives
+twice -- among them VaporizeMult 1.5, MeltMult 1.75, AmpStackLimit 4.0,
+FanfareDecayFraction 0.20, SalonDryDamageMultiplier 0.75 and
+GuestCastBaseMultiplier 1.5. Headline tuning numbers, any of which could have
+drifted in silence. The lint now reads int/float/double/decimal and private as
+well as public: **58 -> 71 mirrored, 3 -> 13 unmirrored, and every newly
+watched value already matched.** No drift had happened; the gate was not
+looking.
+
+## R64 -- The Featured Banner goes live (2026-07-25)
+
+Fontaine's Rare roster goes to four, exceeding `BANNER_FEATURED_SLOTS` (3) for
+the first time anywhere. The banner therefore becomes selective, and is wired
+in the same sprint across all three surfaces at once -- C# reward slot, C# shop
+slot 1, and a sim call-site audit -- so no channel ever disagrees about a now
+real rule.
+
+Rejected: (b) capping the roster at 3, which defers the gap-fix the sprint
+exists for; (c) raising `BANNER_FEATURED_SLOTS`, which preserves the no-op by
+construction and means the banner never earns its keep as seeded run-variance.
+
+**The C# side named its own trigger and it was honoured.** Both channels
+carried a written ruling that the banner was skipped *because* it was exactly a
+no-op, ending "It goes live in both channels together, when a nation ships a
+4th Rare." It did, so it does, and neither channel was wired alone.
+
+**What the call-site audit found, which predates this ruling.**
+`roll_banner`'s `nations` defaulted to the literal `("mondstadt",)` and the run
+model's single call site passed no argument. Every run of every character
+rolled a Mondstadt-only banner, and `_banner_filtered` then dropped every other
+nation's 5-stars from the reward slot AND the shop. Measured before the fix:
+across 400 Kokomi seeds she was offered Albedo, Durin and Nicole and never Itto
+or Raiden -- Inazuma's own Rares, one of them written as "the conscription
+jackpot", unreachable in Inazuma runs since the day Inazuma got a 5-star. The
+nation set is now DERIVED from the sheets (`rewards.designed_nations()`), so it
+cannot go stale by omission again.
+
+**Parity is structural, not numeric.** The sim and the game use different
+generators, so which three of Fontaine's four are featured differs between
+layers for the same nominal seed. What is mirrored is the rule -- per nation,
+feature min(roster, slots) without replacement, fixed for the run, per player
+in co-op, 4-stars never gated -- and `BANNER_FEATURED_SLOTS` is parity-lint
+watched. The C# banner is a pure function of the player's rng seed, so it needs
+no persistence and survives save/load by construction.
+
+`test_v18_banner`'s "roster <= cap" invariant is RETIRED: it was a tripwire for
+exactly this day, and keeping it would assert the sprint had not happened.
+
+## R65 -- Unreleased-nation placement rule (2026-07-25)
+
+Characters whose home nation is not yet a designed nation sheet are placed in
+their nation of residence/operation until their home nation ships:
+**Arlecchino -> Fontaine** (House of the Hearth), and as recorded precedent,
+**Childe/Tartaglia -> Liyue** when he is designed (precedent only -- no Liyue
+work in this sprint).
+
+Extends the standing nation-precedence rule (same action = same nation over
+faction) with a release-state clause. If and when Snezhnaya ships as a sheet,
+migration of its natives is a [USER] call at that time, not an automatic move.
+
+## D2 -- Neuvillette dual identity: resolved by standing ruling (2026-07-25)
+
+No new number. The Fontaine sheet's Guest Star block already rules it: guest
+cameos are Furina-personal-pool only, reached exclusively through her Guest
+Star generators, never in shared rewards -- and "his shared-pool 5-star Rare
+remains banner-governed and is a DIFFERENT card." Mechanically the separation
+is already enforced: `five_star_roster` filters both `guest_star` and
+`personal_pool`, so the new companion card enters the banner roster and the
+cameos never do. The WATCHLIST convergence cell containing
+`guest_neuvillette_judgment` is untouched by this sprint.
+
+The separation is now asserted directly rather than vacuously. The test that
+covered it used to assert Fontaine's 5-star roster was EMPTY, which proved the
+exclusion only because no shared Rares existed; it would have stayed green if a
+guest leaked the moment real Rares landed.

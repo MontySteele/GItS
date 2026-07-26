@@ -12,8 +12,10 @@ namespace KleeMod;
 
 /// <summary>
 /// The companion reward slot -- tier05 rewards.roll_rewards, standard mode
-/// (one offer; pity/choose-3 measured null and ruled OUT; the Featured
-/// Banner is a no-op at current roster size and is skipped by ruling).
+/// (one offer; pity/choose-3 measured null and ruled OUT). The Featured
+/// Banner WAS skipped by ruling while it was a no-op at roster size; it went
+/// live here and in the shop together on 2026-07-25 (R64), when Fontaine
+/// shipped a 4th Rare -- see CompanionBanner.
 ///
 /// Law mirrored exactly: roll a rarity on RARITY_ODDS (5-star companions
 /// ARE the rare tier), fall through rare -> uncommon -> common when a tier
@@ -29,6 +31,24 @@ namespace KleeMod;
 /// </summary>
 public static class CompanionSlot
 {
+    /// <summary>
+    /// The one sentence every relic hosting this slot appends to its
+    /// description. It lives here, next to the mechanic, because the two
+    /// hosts had already drifted: Furina's relic described the slot and
+    /// Klee's did not, so a Klee player had no in-game text explaining
+    /// where companions come from at all.
+    ///
+    /// Wording is load-bearing. "a fourth choice" -- not "an extra reward"
+    /// -- because TryModifyCardRewardOptions appends to the card reward's
+    /// OWN option list: the companion COMPETES with the three cards, it is
+    /// not taken alongside them (the correction of record in
+    /// PoundingSurprise). "after a fight" is the CardCreationSource.Encounter
+    /// gate, which the enum's own doc defines as the post-fight reward --
+    /// shops and events get no companion.
+    /// </summary>
+    public const string RewardSlotDescription =
+        "Card rewards after a fight offer a fourth [gold]Companion[/gold] choice.";
+
     // tier0 constants.RARITY_ODDS: common 0.60 / uncommon 0.35 / rare 0.05.
     private const float CommonOdds = 0.60f;
     private const float UncommonOdds = 0.35f;
@@ -39,17 +59,27 @@ public static class CompanionSlot
     /// <summary>tier0 NATION_WEIGHTS -- every nation 1.0 today.</summary>
     private const double NationWeight = 1.0;
 
-    public static CardModel? Roll(Player player)
+    public static CardModel? Roll(Player player, CardRarity? forcedRarity = null)
     {
         // rarity tier -> canonical companion models. personal_pool cards are
         // only offered to their own character (tier05: "load-bearing the
-        // moment a second character exists") -- the call site already gates
-        // on Klee, so "klee" is the only id that can match today.
+        // moment a second character exists"). That moment has arrived twice
+        // over: three characters host this slot now, each from its own
+        // starter relic, so CharacterId below has three live arms and the
+        // filter is doing real work.
         var tiers = new Dictionary<CardRarity, List<CardModel>>();
         foreach (var canonical in CompanionRoster.All)
         {
             if (canonical is not ICompanionCard comp) continue;
-            if (comp.PersonalPool is not null && comp.PersonalPool != "klee") continue;
+            var characterId = CharacterId(player);
+            if (comp.PersonalPool is not null
+                && comp.PersonalPool != characterId) continue;
+            // Featured Banner (R64, 2026-07-25). Applied BEFORE the rarity
+            // tiers are built, exactly as tier05 roll_rewards filters the pool
+            // before its rarity roll -- so a banner that empties the Rare tier
+            // falls through to Uncommon on the existing ladder below instead
+            // of producing an empty pool at the pick.
+            if (!CompanionBanner.IsOffered(canonical, player)) continue;
             if (!tiers.TryGetValue(canonical.Rarity, out var tier))
             {
                 tiers[canonical.Rarity] = tier = new List<CardModel>();
@@ -60,16 +90,15 @@ public static class CompanionSlot
 
         // Sim _roll_rarity: cumulative walk of RARITY_ODDS in sheet order.
         var rng = player.PlayerRng.Rewards;
-        var roll = rng.NextFloat();
-        var rarity = roll < CommonOdds ? CardRarity.Common
-            : roll < CommonOdds + UncommonOdds ? CardRarity.Uncommon
-            : CardRarity.Rare;
-        // Fall-through when a tier is empty (tier0 roll_rewards).
-        if (!tiers.ContainsKey(rarity)) rarity = CardRarity.Uncommon;
-        if (!tiers.ContainsKey(rarity)) rarity = CardRarity.Common;
+        var rarity = forcedRarity ?? RollRarity(rng);
+        // Ordinary rolls fall through when a tier is empty (tier0
+        // roll_rewards). Forced post-boss rarity is strict: no lower-tier
+        // substitute may occupy the Rare-only slot.
+        if (forcedRarity == null && !tiers.ContainsKey(rarity)) rarity = CardRarity.Uncommon;
+        if (forcedRarity == null && !tiers.ContainsKey(rarity)) rarity = CardRarity.Common;
         if (!tiers.TryGetValue(rarity, out var pool)) return null;
 
-        var pick = NationWeightedChoice(rng, pool, HomeNation);
+        var pick = NationWeightedChoice(rng, pool, HomeNation(player));
         if (pick == null) return null;
         // Same instantiation the native reward path uses for its own rolled
         // cards (CardFactory.CreateForReward ends in exactly this call), so
@@ -79,8 +108,23 @@ public static class CompanionSlot
         return ((ICardScope)player.RunState).CreateCard(pick, player);
     }
 
-    /// <summary>Klee's home nation (tier0 loader.character_nation).</summary>
-    private const string HomeNation = "mondstadt";
+    private static CardRarity RollRarity(Rng rng)
+    {
+        var roll = rng.NextFloat();
+        return roll < CommonOdds ? CardRarity.Common
+            : roll < CommonOdds + UncommonOdds ? CardRarity.Uncommon
+            : CardRarity.Rare;
+    }
+
+    // Delegated to CompanionPool (§4.7 shop sprint, Track A) so the reward
+    // slot and the shop channel can never drift about which character is which
+    // or where they are from. Pure switches over Player.Character: no rng, no
+    // ordering, so the offers this slot produces are unchanged by the move.
+    private static string? CharacterId(Player player) =>
+        CompanionPool.CharacterId(player);
+
+    private static string? HomeNation(Player player) =>
+        CompanionPool.HomeNation(player);
 
     /// <summary>
     /// Port of tier05 rewards._nation_weighted_choice. SAME_NATION_REWARD_SHARE

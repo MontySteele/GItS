@@ -37,7 +37,7 @@ public sealed class HideAndSeek : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hide and Seek"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Look at the top 2 cards of your draw pile; discard one."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -57,6 +57,16 @@ public sealed class HideAndSeek : CustomCardModel
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        {
+            var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take(2).ToList();
+            if (top != null && top.Count > 0)
+            {
+                var scryPick = (await CardSelectCmd.FromSimpleGrid(
+                    choiceContext, top, Owner,
+                    new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 1))).ToList();
+                await CardCmd.Discard(choiceContext, scryPick);
+            }
+        }
     }
 
     protected override void OnUpgrade()
