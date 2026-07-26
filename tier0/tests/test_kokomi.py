@@ -806,12 +806,21 @@ def test_the_burst_is_a_skill_so_it_never_pays_itself_the_charge_read():
     kit = loader.get_card("ceremonial_garment")
     assert kit.type == "skill"
 
+    # R74 (Neap Tide v2.1) made the point structural: the entry splash is
+    # GONE, so there is no longer a number for the bank to inflate. The type
+    # assertion above stays anyway -- it is the guard that survives someone
+    # re-adding damage to this card later, which is exactly when the original
+    # trap comes back.
+    assert not any(fx["op"] == "damage" for fx in kit.effects), (
+        "R74: the Ceremonial Garment is pure state-entry. Re-adding damage "
+        "here re-opens the Burst-cashes-its-own-window problem, and at a "
+        "priest-median bank the splash would roughly triple")
+
     st = kokomi_state()
     st.player.charge = 20                    # a bank worth cashing
     e = st.enemies[0]
     hp0 = e.hp
     effects.resolve_card(st, kit)
-    printed = next(fx["amount"] for fx in kit.effects if fx["op"] == "damage")
-    assert hp0 - e.hp == printed
+    assert e.hp == hp0, "state-entry only; the Garment deals no damage"
     # ...and the window it just opened is live for the NEXT attack.
     assert st.player.powers["ceremonial_garment"] == C.CEREMONIAL_GARMENT_TURNS

@@ -7,8 +7,8 @@
     "namespace": "KleeMod.Cards.Kokomi.Generated"
   },
   "coverage": {
-    "total": 59,
-    "generated": 58,
+    "total": 58,
+    "generated": 57,
     "blocked": 1
   },
   "generated": [
@@ -55,7 +55,6 @@
     "standing_orders",
     "steady_the_line",
     "surging_shoal",
-    "swift_currents",
     "tactical_retreat",
     "the_tide_remembers",
     "tidal_lure",

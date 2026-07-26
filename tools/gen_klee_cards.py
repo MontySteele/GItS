@@ -1593,6 +1593,12 @@ def build_vars(card: dict) -> list[str]:
                 out.append(f'new BlockVar({eff["amount"]}m, ValueProp.Move)')
         elif op == "draw":
             out.append(f'new CardsVar({int(eff["amount"])})')
+        elif op == "discard" and plain_discard_upgrade(card):
+            # G6: only an UPGRADEABLE plain discard needs a var, so every
+            # existing card keeps its literal and its generated file does not
+            # churn. "Discards" collides with no base-game var name (CardsVar
+            # is `Cards`, and this card already spends that on its draw).
+            out.append(f'new DynamicVar("Discards", {int(eff["amount"])}m)')
         elif op == "place_bomb":
             if bomb_var(card) == "ExtraDamage":
                 out.append(f'new ExtraDamageVar({eff["bomb_damage"]}m)')
@@ -1798,7 +1804,14 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
         "cost": str(card.get("cost")) != "X",
         # R36: both keys ride the one discard_for_sparks effect.
-        "discard": any(e["op"] == "discard_for_sparks" for e in effects),
+        # G6 (Neap Tide v2.1) also lets `discard` bind the PLAIN discard op,
+        # which Kokomi's Sly lane uses and Klee's Spark lane does not. Mirrors
+        # tier0/content/upgrades.py, which tries discard_for_sparks FIRST and
+        # falls back -- the two appliers must agree on which effect a delta
+        # lands on or the generated card and the simulated card upgrade
+        # differently, which no test would catch by value.
+        "discard": any(e["op"] in ("discard_for_sparks", "discard")
+                       for e in effects),
         "sparks": any(e["op"] == "discard_for_sparks" for e in effects),
         # R37: card-level, any card can become Innate or Retain.
         "innate": True,
@@ -1895,6 +1908,24 @@ def discard_upgrade(card: dict) -> tuple[int, int]:
     (0, 0) = none; either key alone still upgrades both vars' rendering."""
     deltas = upgrade_plan(card)[0]
     return int(deltas.get("discard", 0)), int(deltas.get("sparks", 0))
+
+
+def plain_discard_upgrade(card: dict) -> int:
+    """G6: a `discard` delta landing on the PLAIN discard op, not Crackle's.
+
+    Zero when the card has no such delta, or when it carries
+    discard_for_sparks -- which wins the binding in BOTH appliers (tier0
+    upgrades.py tries it first, and this mirrors that order). Getting the
+    precedence wrong here would not fail a build; it would upgrade a
+    different effect than the simulator does, which is the class of
+    divergence the constant-parity gate exists for and cannot see.
+    """
+    effects = _effects_everywhere(card)
+    if any(e["op"] == "discard_for_sparks" for e in effects):
+        return 0
+    if not any(e["op"] == "discard" for e in effects):
+        return 0
+    return int(upgrade_plan(card)[0].get("discard", 0))
 
 
 def bonus_upgrade(card: dict) -> int:
@@ -2255,8 +2286,15 @@ def _emit_branch_op(
     elif op == "gain_encore":
         lines.append(_stmt_gain_encore(card, eff))
     elif op == "energy":
-        lines.append(
-            f"await PlayerCmd.GainEnergy({int(eff['amount'])}, Owner);")
+        # DEFECT FIXED HERE (found by G8, 2026-07-26). An `energy` delta made
+        # the CanonicalVars entry and the OnUpgrade bump, but the play emitted
+        # the LITERAL -- so an upgraded swift_currents gained 2 energy in the
+        # mod while the sim gave 3, and the card face printed 2 either way.
+        # It shipped that way. Reading the var is what makes the declared
+        # upgrade real; the description half is fixed alongside it.
+        amount = ('DynamicVars["Energy"].IntValue' if energy_upgrade(card)
+                  else int(eff["amount"]))
+        lines.append(f"await PlayerCmd.GainEnergy({amount}, Owner);")
     elif op == "place_bomb":
         _emit_place_bomb(card, eff, lines, ctx, str(int(eff["bomb_damage"])))
     elif op == "buff_next_attack":
@@ -2660,7 +2698,11 @@ def build_body(
             # Random discard, kit-exempt pool (tier0 _op_discard: re-pool per
             # pick, stop when empty). CombatTargets is the established rng
             # stream for in-combat random picks (bomb targeting idiom).
-            n = int(eff.get("amount", 1))
+            # G6: an upgradeable count reads the VAR, so the loop bound and
+            # the printed face cannot disagree after an upgrade -- the same
+            # preview-truth rule the Furina legibility sprint established.
+            n = ('DynamicVars["Discards"].IntValue'
+                 if plain_discard_upgrade(card) else int(eff.get("amount", 1)))
             lines.append(
                 f"for (var i = 0; i < {n}; i++)\n"
                 "        {\n"
@@ -2890,7 +2932,15 @@ def build_body(
         elif op == "energy":
             # tier0 _op_energy: flat gain, no cap (the game clamps nothing
             # either -- PlayerCmd.GainEnergy is the base-game call).
-            lines.append(f'await PlayerCmd.GainEnergy({int(eff["amount"])}, Owner);')
+            # An upgradeable amount reads the var. This is the TOP-LEVEL
+            # emitter; there is a second one for branch bodies, and the fix
+            # had to land on both -- patching only the other one produced a
+            # card whose FACE said "Gain {Energy:diff()}" while its play still
+            # granted the base, which is the same preview-vs-effect drift in a
+            # new place.
+            amount = ('DynamicVars["Energy"].IntValue' if energy_upgrade(card)
+                      else int(eff["amount"]))
+            lines.append(f'await PlayerCmd.GainEnergy({amount}, Owner);')
 
         elif op == "scry_discard":
             # tier0 _op_scry_discard looks at the top N and discards the
@@ -3537,7 +3587,11 @@ def build_description(card: dict) -> str:
 
         elif op == "energy":
             n = int(eff["amount"])
-            parts.append(f"Gain {n} Energy.")
+            # Same defect as the play emitter: an upgradeable amount printed
+            # its BASE forever. The var renders the diff so the face, the
+            # upgrade preview and the energy actually gained all agree.
+            parts.append("Gain {Energy:diff()} Energy."
+                         if energy_upgrade(card) else f"Gain {n} Energy.")
 
         elif op == "scry_discard":
             parts.append(
@@ -3607,10 +3661,15 @@ def build_description(card: dict) -> str:
 
         elif op == "discard":
             n = int(eff.get("amount", 1))
-            parts.append(
-                "Discard a random card." if n == 1
-                else f"Discard {n} random cards."
-            )
+            if plain_discard_upgrade(card):
+                # Upgradeable: the face must show the NEW number, so it
+                # renders through the var like every other upgraded count.
+                parts.append("Discard {Discards:diff()} random card(s).")
+            else:
+                parts.append(
+                    "Discard a random card." if n == 1
+                    else f"Discard {n} random cards."
+                )
 
         elif op == "discard_for_sparks":
             # `sparks` is a CAP on the total, never a rate: tier0
@@ -3716,14 +3775,20 @@ def build_upgrade(card: dict) -> list[str]:
                "place_bomb": "bomb_damage", "burst_energy": "burst_energy",
                "heal": "heal",
                "summon_kurage": "kurage_turns", "energy": "energy",
-               "block_next_turn": "block_next_turn"}
+               "block_next_turn": "block_next_turn",
+               # G6: the PLAIN discard op. Shares the "Discards" var name with
+               # discard_for_sparks deliberately -- no card carries both ops
+               # (plain_discard_upgrade returns 0 if it does), so the name is
+               # unambiguous per card and the two grammars read alike.
+               "discard": "discard"}
     var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
                "buff_next_attack": 'DynamicVars["PowerAmount"]',
                "heal": 'DynamicVars["Heal"]',
                "summon_kurage": 'DynamicVars["KurageTurns"]',
                "energy": 'DynamicVars["Energy"]',
-               "block_next_turn": 'DynamicVars["BlockNextTurn"]'}
+               "block_next_turn": 'DynamicVars["BlockNextTurn"]',
+               "discard": 'DynamicVars["Discards"]'}
     lines, done = [], set()
     for eff in card["effects"]:
         op = eff["op"]

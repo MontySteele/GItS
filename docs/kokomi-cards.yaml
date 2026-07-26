@@ -93,7 +93,17 @@
    # v0.3: +1 Charge — the signature basic TEACHES the meter from fight 1 (the Regent-common lesson: the
    # scaling currency rides on ordinary plays, it is not a separate purchase). Kept verbatim.
 - {id: tactical_retreat, name: "Tactical Retreat", cost: 0, type: skill, rarity: basic, solve: [velocity], archetypes: [generic], role: enabler,
-   effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: draw, amount: 1}]}
+   effects: [{op: draw, amount: 1}, {op: discard, amount: 1}]}
+   # G6 (Neap Tide v2.1): migrates to the SLY-TEACHER basic. Draw 1, discard 1; upgrade draws and discards 2.
+   # [USER] VERBATIM INTENT, recorded because the card will read like an engine piece to anyone who meets it
+   # cold: this is NOT a true cycling effect. It is a STARTER CARD and must never be tuned into a solo engine
+   # piece. If a later pass wants a cycling engine, it authors one; it does not grow this.
+   # Gorou keeps the exhaust-teaching role in the starter, so the starter still teaches both verbs -- this one
+   # stops being the second exhaust outlet and becomes the first discard one.
+   # ACCRUAL SIDE EFFECT, on the record per §5: removing `exhaust_from 1` removes a starter EXHAUST, which is
+   # Charge and Burst income (CHARGE_PER_EXHAUST, KOKOMI_BURST_PER_EXHAUST). §5 holds accrual otherwise fixed
+   # and names this as its one sanctioned exception; P9 predicts it shows up as an act-1 accrual slowdown and
+   # says to suspect THIS before re-touching the multiplier.
    # The exhaust-teacher: pull a unit off the line, turn the page. Net delta -1 (reduces the deck — LAW 4
    # poster child). With the relic this is the decision loop in one basic: every card rotated out is Charge.
    # v0.4 RENAME ([USER]): "Recall" -> "Retreat". A retreat is a maneuver that PRESERVES the unit, which
@@ -148,9 +158,19 @@
    # way. First sly row on any sheet (engine: card-effect discards only; the hand flush pays nothing).
 # Generic (3)
 - {id: surging_shoal, name: "Surging Shoal", cost: 1, type: attack, rarity: common, solve: [frontload, utility], archetypes: [generic, priest], role: glue,
-   effects: [{op: damage, amount: 7, target: all_enemies}]}
-   # v0.3: 4 -> 7 — the act-1 AoE elite's Skittish 6 (first hit per body per turn gains 6 Block) ZEROED the
-   # 4-damage version in exactly the fight it was added for (v0.2 diagnosis §3). 7 clears the threshold.
+   effects: [{op: damage, amount: 6, target: all_enemies}]}
+   # R77 (Neap Tide v2.1): 7 -> 6 (upgrade 8), predicated on the B1 Skittish errata below.
+   # B1 SKITTISH ERRATA. The v0.3 note this replaces said Skittish 6 "ZEROED the 4-damage version". That is
+   # not what the mechanic does. tier0 `deal_damage_to_enemy` adds the Block AFTER the whole hit resolves,
+   # with the engine comment "so the triggering attack is never mitigated by it", and act1_pool's own line
+   # reads "first hit/turn: +6 Block after". A 4-damage hit landed in FULL; what Skittish 6 did was put 6
+   # Block up against the NEXT hit that turn. The v0.3 repricing was therefore argued from a misread of the
+   # rule, even though the direction it chose may still have been right for other reasons.
+   # WHAT IT ACTUALLY GATES, and this is a live consideration rather than a settled one: against Gardener x4
+   # the FIRST AoE each turn always lands full, and a SECOND AoE that turn does (dmg - 6) per body. At 7 that
+   # second wave did 1; at 6 it does 0; upgraded to 8 it does 2. So R77 buys a cleaner number at the cost of
+   # making the double-AoE turn strictly dead against this one elite. FLAGGED for the E2 read -- it was not
+   # part of the errata as ratified, and if the act-1 AoE lane reads weak this line is the first suspect.
    # THE GARDENER-LESSON CARD (Furina 3-act diagnosis §10.8.2: a starter/common pool with no cheap AoE dies to the
    # act-1 AoE wall regardless of assembled-deck quality; standing_room_only is the ratified precedent). Added at
    # kickoff REVIEW after the first battery — deliberately NOT in any measured package, so the v0.1 battery numbers
@@ -230,9 +250,13 @@
 # Priest (3)
 - {id: vow_of_tides, name: "Vow of the Tides", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [priest, generic], role: glue, exhaust: true,
    effects: [{op: damage, amount: 8, target: all_enemies}]}
-   # The self-consuming wave: waterspout's grammar aimed wide. Priced ABOVE surging_shoal's 7 by one point only
-   # — a second act-1 AoE is real power and the freeze rule says be conservative with new numbers. Its burn is
-   # itself a Charge, which is the whole priest bargain in one card.
+   # The self-consuming wave: waterspout's grammar aimed wide. Its burn is itself a Charge, which is the whole
+   # priest bargain in one card.
+   # R77 (Neap Tide v2.1) CONFIRMED this card unchanged: 8 (11 upgraded), Exhaust stays. Recorded rather than
+   # left silent, because "confirmed" and "nobody looked" are indistinguishable a month later.
+   # The old note priced it "ABOVE surging_shoal's 7 by one point" — that gap is now 2 (shoal is 6 per R77),
+   # and the pricing sentence is struck rather than re-derived: the ratified numbers are 6 and 8, and inventing
+   # a fresh justification for a gap nobody ruled on would be reasoning backwards from the answer.
 - {id: pearl_diver, name: "Pearl Diver", cost: 0, type: skill, rarity: common, solve: [scaling], archetypes: [priest], role: enabler,
    effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: gain_charge, amount: 2}]}
    # The free fuel line: burn one, bank 3 total (2 line + 1 funnel). ritual_purification is the 1-cost engine
@@ -310,9 +334,10 @@
 - {id: rearguard_action, name: "Rearguard Action", cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], archetypes: [assist], role: glue,
    effects: [{op: discard, amount: 1}, {op: block, amount: 7}]}
    # Cover the retreat: a real wall whose price rings the Sly bell.
-- {id: swift_currents, name: "Swift Currents", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [assist], role: enabler, exhaust: true,
-   effects: [{op: energy, amount: 2}, {op: discard, amount: 1}]}
-   # Deep Breath parity, discard-flavored: net +1 energy once, a Sly trigger, and its own Exhaust is a Charge.
+# swift_currents: MERGED INTO moonlit_offering (G8, [USER], this pass). It was 1-cost Uncommon, self-Exhaust,
+#   +2 energy, discard 1 -- an economy rider on an exhaust card below R79's Rare bar, and the F1 census found a
+#   SECOND card in exactly that shape (moonlit_offering). Rather than promote two near-duplicates, the two are
+#   one card at the R79 template. See moonlit_offering.
 # Generic (1)
 - {id: shell_of_sanctuary, name: "Shell of Sanctuary", cost: 2, type: skill, rarity: uncommon, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 11}]}
@@ -336,20 +361,43 @@
 # all_streams_flow already broke the seal on sub-Rare Charge reads, and a flat bar is milder than its
 # per-point slope, so the ladder stays monotone.
 # Commander (2)
-- {id: honor_guard, name: "Honor Guard", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [commander], role: payoff,
-   effects: [{op: conscript, amount: 1}, {op: cost_mod, scope: companion_cards, delta: -1, duration: this_turn}]}
-   # Muster one, and every unit already standing costs 1 less THIS TURN. The Commander's tempo payoff: the
-   # archetype's failure mode is a hand full of recruits it cannot afford to play, and this is the answer to it.
+- {id: honor_guard, name: "Honor Guard", cost: 0, type: skill, rarity: rare, solve: [utility], archetypes: [commander], role: payoff, exhaust: true,
+   effects: [{op: cost_mod, scope: companion_cards, delta: -1, duration: this_turn}]}
+   # Every unit already standing costs 1 less THIS TURN, then the order is spent. The Commander's tempo
+   # payoff: the archetype's failure mode is a hand full of recruits it cannot afford to play.
+   # R75 (Neap Tide v2.1): the conscript half is DROPPED and the card gains Exhaust. The playtest carry combo
+   # ran on the old version, and R75 removes its loop half first -- a card that both makes recruits and
+   # discounts them is its own engine.
+   # RARE AND 0-COST ([USER], this pass) -- and the promotion is REQUIRED, not cosmetic. R79 gives Discard/Sly
+   # the monopoly on economy riders and permits one on an exhaust card only as "Rare AND self-Exhaust". A
+   # blanket cost reduction is energy economy through a different door, so R75's own output (cost-reduction +
+   # Exhaust) would have landed at Uncommon in violation of R79 in the same sprint that ratified R79. Rare is
+   # the carve-out this card has to sit in. Recorded because the collision was found by the F1 census, not by
+   # the ruling, and a later reader should not have to rediscover why a tempo skill is Rare.
+   # NOTE THE SHAPE: with the conscript gone this no longer creates cards, so it is not a deck-size event
+   # under LAW 4 either.
 - {id: press_the_advantage, name: "Press the Advantage", cost: 1, type: attack, rarity: uncommon, solve: [frontload, utility], archetypes: [commander], role: payoff,
    effects: [{op: damage, amount: 7, target: enemy}, {op: conscript, amount: 1, cost_override: 0}]}
    # The hit that makes the opening, and the recruit who walks through it TODAY (cost 0, this copy).
    # field_promotion is the same reach as a skill that replaces itself; this one is the reach on an attack.
 # Priest (2)
-- {id: moonlit_offering, name: "Moonlit Offering", cost: 1, type: skill, rarity: uncommon, solve: [scaling, velocity], archetypes: [priest], role: enabler, exhaust: true,
-   effects: [{op: exhaust_from, amount: 2, select: chosen}, {op: gain_charge, amount: 3}, {op: draw, amount: 2}]}
-   # Burn deep, see far: 6 total Charge (3 line + 3 funnel, counting its own rotation) and two fresh cards, for
-   # a net deck delta of -3. The priest lane's biggest single act of fuel, and the sheet's clearest statement
-   # that her deck IS her resource bar.
+- {id: moonlit_offering, name: "Moonlit Offering", cost: 0, type: skill, rarity: rare, solve: [velocity], archetypes: [priest, assist], role: enabler, exhaust: true,
+   effects: [{op: energy, amount: 1}, {op: draw, amount: 1}, {op: discard, amount: 1}]}
+   # G8 ([USER], this pass): THE ONE-TIME VELOCITY PIECE, and the merge target for swift_currents.
+   # R79's carve-out has a template -- "Rare AND self-Exhaust" -- and the F1 census found TWO Uncommon cards
+   # already wearing its shape (swift_currents: +2 energy, discard 1, Exhaust; this card: draw 2, exhaust 2,
+   # Charge 3, Exhaust). Promoting both would have put two near-duplicate velocity Rares in one pool, so
+   # [USER] folded them together: this id and name survive, the shape is the template's.
+   # 0-cost is the [USER] call; the Rare is forced by R79 rather than chosen.
+   # WHAT THIS CARD LOST, said plainly because it is an accrual change and §5 pins accrual:
+   #   - `exhaust_from 2` is gone -> two fewer exhaust events, i.e. less Charge AND less Burst
+   #   - `gain_charge 3` is gone -> the priest lane's single biggest Charge line
+   # That is the SECOND accrual-side reduction riding in this batch (G6's starter migration is the first, and
+   # §5 named only that one as sanctioned). Both are on the record for E2's read; if act-1 Charge over-drops
+   # against P9's expectation, these two are the suspects before the multiplier is touched again.
+   # The old note called this "the sheet's clearest statement that her deck IS her resource bar". That
+   # statement now has no card carrying it -- worth knowing before someone reads the pool and concludes the
+   # priest lane was always this lean.
 - {id: read_the_current, name: "Read the Current", cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling], archetypes: [priest, generic], role: payoff,
    effects: [{op: damage, amount: 7, target: enemy},
              {op: conditional, if: charge_at_least_10, then: [{op: damage, amount: 6, target: enemy}]}]}
@@ -388,7 +436,13 @@
 # ---------- RARE (7 draftable + 1 kit) ----------
 - {id: ceremonial_garment, name: "Ceremonial Garment", cost: 0, type: skill, rarity: rare, solve: [scaling], archetypes: [generic], role: payoff, tags: [burst], kit_card: true,
    requires: burst_energy_full,
-   effects: [{op: apply_power, power: ceremonial_garment, amount: 3, target: self}, {op: damage, amount: 7, target: all_enemies, applies_element: true}]}
+   effects: [{op: apply_power, power: ceremonial_garment, amount: 3, target: self}]}
+   # R74 (Neap Tide v2.1): THE ENTRY SPLASH IS GONE. Pure state-entry now. The Burst's job is to open the
+   # window her attacks then read Charge through; the splash was a second, unrelated payment stapled to the
+   # front of it, and it let the Burst read as a damage button rather than as a state. burst_max UNTOUCHED --
+   # the meter still fills at the same rate, so this is a payout change, not an economy one.
+   # The old "entry splash 5 -> 7 (clears Skittish 6)" justification is doubly dead: the card no longer has a
+   # splash, AND the Skittish reading it rested on was wrong (see the B1 errata on surging_shoal).
    # HER BURST (kit, v1.9: granted on charge, Retain, never in pool) — SHAPE B, the kickoff recommendation: enter
    # the state for 3 turns (CEREMONIAL_GARMENT_TURNS; test-pinned to the constant); while it holds, her attack
    # cards read Charge (+1 damage per GARMENT_CHARGE_DIVISOR=2 Charge, per play — v0.3 charge-curve pass: /4 was

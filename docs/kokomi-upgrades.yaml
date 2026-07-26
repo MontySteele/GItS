@@ -19,7 +19,12 @@ bake_kurage:       {kurage_turns: +1}    # v0.4 starter rework: 1->2 turns on th
                                          # pulse — which at the bank read (x3 since R73, was x4) is the whole upgrade. The pulse numbers are constants and
                                          # the +1 Charge never moves (resource-curve law) — duration is the
                                          # only dial an upgrade owns, and one more pulse is the honest reward.
-tactical_retreat:  {draw: +1}            # burn 1, see 2 — the exhaust-teacher graduates
+tactical_retreat:  {draw: +1, discard: +1}  # G6: draw 1/discard 1 -> draw 2/discard 2. Both halves move
+                                         # together because the card is a TEACHER: a version that drew 2 and
+                                         # discarded 1 would teach that discard is a cost you grow out of,
+                                         # which is the opposite of the Sly lane's bargain. [USER] verbatim:
+                                         # not a true cycling effect, and never to be tuned into a solo
+                                         # engine piece.
 tide_reading:      {block: +2}           # 2->4; draw stays 1
 
 # ---- COMMONS (one number bump each; zero cost reductions — Klee sheet law) ----
@@ -32,7 +37,10 @@ cleansing_tide:    {block: +4}           # 10->14, still eats two cards
 undertow_shuffle:  {draw: +1}            # 3->4; discard stays 2 (the two Sly bells are the identity)
 moon_signal:       {draw: +1}            # discard 1, see 2
 drifting_lantern:  {block: +2}           # played 4->6; the Sly branch stays 4 (header gap note)
-surging_shoal:     {damage: +2}          # 4->6 all (blast_radius-parity slope)
+surging_shoal:     {damage: +2}          # R77: 6->8 all (was 7->9). The delta is unchanged; the base moved.
+                                         # The old comment here read "4->6", which had been stale since the
+                                         # v0.3 repricing to 7 -- two bases out of date, in the file whose
+                                         # whole job is to say what a card becomes.
 jade_bulwark:      {block: +2}           # 6->8, warm_glow-exact
 pulsing_current:   {damage: +3}          # 6->9, snap-exact
 
@@ -44,8 +52,9 @@ mercy_of_the_deep: {power_amount: +1}    # feel_no_pain 3->4
 pearl_barrage:     {formula_per: +1}     # 3 + 2/exhausted card (gleeful_barrage-class scaling bump)
 communion_of_tides: {draw: +1}           # burn 1, see 3
 rearguard_action:  {block: +3}           # 7->10, dodge_roll-parity
-swift_currents:    {energy: +1}          # 2->3, once; Exhaust STAYS (removal opens a net-positive energy loop —
-                                         # sugar_rush got the removal only because Sparks bound its loop)
+# swift_currents: MERGED INTO moonlit_offering (G8). Its old delta was {energy: +1} with the Exhaust
+#   deliberately retained, because removal would have opened a net-positive energy loop. That reasoning is
+#   inherited by the merged card, whose Exhaust is now load-bearing for R79 as well as for the loop.
 shell_of_sanctuary: {block: +4}          # 11->15, spirited_away-parity
 exposing_current:  {vulnerable: +1}      # 2->3 (surprise_visit-parity; the R51 rider sharpens, the Exhaust stays)
 all_streams_flow:  {damage: +3}          # 5->8 base; the 1-per-2-Charge read never moves (resource-curve law)
@@ -75,12 +84,22 @@ tideturn:          {damage: +3}          # 5->8; draw stays 1
 steady_the_line:   {block: +3}           # 4->7 at 0 cost; the tempo price stays
 
 # ---- v0.5 PARTIAL-FILL UNCOMMONS (+8) ----
-honor_guard:       {add: {op: draw, amount: 1}}   # the order also finds the next unit. NOT a cost reduction:
-                                         # the uncommon sheet law allows two cost slots and mass_mobilization /
-                                         # reinforcements hold both. NOT a deeper discount either — cost_mod is
-                                         # energy, and energy is the resource curve.
+# SECTION HEADING IS NOW APPROXIMATE: honor_guard (R75 + G8's R79 collision) and moonlit_offering (G8) were
+# both promoted to Rare in the Neap Tide pass and are left in place rather than moved, so their git history
+# stays readable. Rarity lives on the CARD sheet and is authoritative there; these headings are organisational.
+honor_guard:       {retain: true}        # R75 + [USER] this pass: the upgrade buys RETAIN, nothing else.
+                                         # The old delta added a draw, which is dead grammar now -- R79 gives
+                                         # Discard/Sly the monopoly on draw, and this card is not in that lane.
+                                         # A deeper discount is also out: cost_mod is energy, and energy is
+                                         # the resource curve. Retain is the right sale for a 0-cost tempo
+                                         # enabler -- it stops being a card you must draw ON the turn the
+                                         # recruits are in hand, which is the whole failure mode it answers.
 press_the_advantage: {damage: +3}        # 7->10; the recruit already arrives at cost 0, so damage is the dial
-moonlit_offering:  {draw: +1}            # 2->3; the Charge line and the burn count NEVER move
+moonlit_offering:  {energy: +1, draw: +1}  # G8 merged card: energy 1->2, draw 1->2; the discard stays 1.
+                                         # This is the R79 template's own upgrade shape ("Gain 1 (2) energy,
+                                         # draw 1 (2)"). The Exhaust is NOT removable by upgrade -- it is what
+                                         # makes the card legal under R79 at all, and removing it would also
+                                         # open the net-positive energy loop swift_currents was denied.
 read_the_current:  {damage: +3}          # the ALWAYS-LIVE half, 7->10 (so 13->16 over the bar). The threshold
                                          # bonus stays 6 and THE BAR NEVER MOVES — lowering a threshold is a
                                          # resource-curve move, which the law forbids. Upgrading the base is
