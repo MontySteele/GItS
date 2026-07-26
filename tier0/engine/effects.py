@@ -1088,6 +1088,66 @@ def _op_conditional(state: CombatState, fx: dict, card: Card) -> None:
     _resolve_effects(state, branch, card)
 
 
+# The predicate vocabulary, as data. `_predicate` below stays an if-chain --
+# each branch carries the ruling that put it there, and that prose is worth
+# more than a dispatch table -- but a chain cannot be ENUMERATED, and the
+# loader needs to enumerate it: a misspelled `if:` on a sheet used to load
+# fine and raise the first time the card was played, which for a rare card
+# means in front of a player rather than in a test.
+#
+# Kept honest by test_content_boundaries.py, which parses the chain and
+# asserts these two collections match it exactly in both directions. Adding a
+# predicate without listing it here fails; listing one that does not exist
+# fails too.
+PREDICATE_NAMES = frozenset({
+    "this_cost_zero",
+    "has_spark",
+    "target_has_nonpyro_aura",
+    "reaction_triggered_by_this",
+    "reaction_triggered_this_turn",
+    "killed_target",
+    "killed_target_fatal",
+    "card_exhausted_this_turn",
+    "hp_lost_this_turn",
+    "enemy_intends_attack",
+    "has_salon_members",
+    "spotlight_set",
+    "spotlight_moved_this_turn",
+    "spotlight_unmoved_this_combat",
+    "spotlighted_card_played_this_turn",
+})
+
+# Parameterised predicates: prefix + an argument the branch parses itself.
+# `target_has_power_` takes a power name (unbounded by design -- the next card
+# that reads a power needs no new predicate); the rest take an integer.
+PREDICATE_PREFIXES = frozenset({
+    "target_has_power_",
+    "exhaust_pile_at_least_",
+    "charge_at_least_",
+    "fanfare_at_least_",
+    "encore_at_least_",
+})
+
+
+def is_known_predicate(name: str) -> bool:
+    """Would `_predicate` recognise this name? Pure, state-free, load-safe."""
+    if name in PREDICATE_NAMES:
+        return True
+    for prefix in PREDICATE_PREFIXES:
+        if not name.startswith(prefix):
+            continue
+        arg = name[len(prefix):]
+        if not arg:
+            return False
+        if prefix == "target_has_power_":
+            return True
+        # The integer forms must actually carry an integer. A typo'd
+        # `fanfare_at_least_ten` would otherwise pass a name-only check and
+        # raise from int() mid-combat -- the very failure being moved earlier.
+        return arg.isdigit()
+    return False
+
+
 def _predicate(state: CombatState, name: str) -> bool:
     if name == "this_cost_zero":
         return state.current_card_cost == 0

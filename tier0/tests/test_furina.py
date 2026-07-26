@@ -105,7 +105,11 @@ def test_encore_accounting_credits_a4_never_a3():
     stats = metrics.extract(st, hp_start=p.max_hp)
     assert stats.encore_absorbed == 5
     assert stats.damage_blocked == 3         # encore NOT folded into block
-    raw = raw_axes({"x": [stats]})
+    # battery=False: one synthetic encounter, and only the POOLED axes are
+    # meaningful here. Declared rather than defaulted (B8) -- the whole-pool
+    # fallback for attrition/swarm is a real defect on a real battery, so it
+    # has to be asked for at the call site.
+    raw = raw_axes({"x": [stats]}, battery=False)
     assert raw["A4_sustain"] == 5.0          # healing 0 + encore 5
 
 

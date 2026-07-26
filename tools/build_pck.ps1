@@ -31,6 +31,45 @@ $work = Join-Path $repo 'klee-mod\dist\pck-work'
 $out  = Join-Path $repo 'klee-mod\assets\klee.pck'
 $py   = Join-Path $repo '.venv\Scripts\python.exe'
 
+# --- native stderr under Windows PowerShell 5.1 ----------------------------
+# The trap validate.ps1 closed on 2026-07-25 was alive in this file until the
+# Serenitea Sweep (audit sec.3.4). Both halves bite here, with
+# $ErrorActionPreference set to 'Stop' at the top of this script:
+#
+#   * `2>&1` wraps every stderr line in an ErrorRecord and raises
+#     NativeCommandError -- so ONE Godot deprecation warning on stderr killed
+#     the pck build even though MegaDot exited 0.
+#   * NOT redirecting is not safe either: with EAP 'Stop', native stderr
+#     raises NativeCommandError EVEN WHEN THE COMMAND EXITS 0. That is the
+#     half that took the whole deploy down from a Pillow UserWarning.
+#
+# Lowering EAP to 'Continue' for the duration of the call makes stderr behave
+# like output rather than like an exception, so the redirect is then safe and
+# the diagnostics survive into the failure message instead of going to $null.
+# $LASTEXITCODE is a global automatic and survives the call, so every caller
+# checks it exactly as before.
+#
+# Same shape as validate.ps1's Invoke-RepoPython, deliberately: one convention
+# across both build scripts, enforced by
+# tier0/tests/test_repo_python_convention.py so a new call site cannot quietly
+# reintroduce either half.
+function Invoke-NativeCaptured {
+    param([Parameter(Mandatory = $true)][string]$Exe,
+          [Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $Exe @Arguments 2>&1
+    } finally {
+        $ErrorActionPreference = $prev
+    }
+}
+
+function Invoke-RepoPython {
+    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+    Invoke-NativeCaptured $py @Arguments
+}
+
 if (-not (Test-Path $MegaDot)) { throw "MegaDot editor not found at $MegaDot (pass -MegaDot)." }
 if (-not (Test-Path $src))     { throw "Art source not found at $src." }
 
@@ -696,18 +735,18 @@ if ($webp.Count -gt 0) {
     if (-not (Test-Path $py)) { throw "Found $($webp.Count) WebP-mislabeled png(s) but no venv python at $py to convert them." }
     Write-Host "Re-encoding $($webp.Count) WebP-mislabeled file(s) to PNG..." -ForegroundColor Cyan
     $list = ($webp | ForEach-Object { $_.Replace('\', '/') }) -join "','"
-    & $py -c "from PIL import Image`nfor p in ['$list']:`n    Image.open(p).save(p, 'PNG')"
-    if ($LASTEXITCODE -ne 0) { throw "Pillow re-encode failed." }
+    $reencodeLog = Invoke-RepoPython -c "from PIL import Image`nfor p in ['$list']:`n    Image.open(p).save(p, 'PNG')"
+    if ($LASTEXITCODE -ne 0) { $reencodeLog | Write-Host; throw "Pillow re-encode failed." }
 }
 
 Write-Host "Importing assets (MegaDot headless)..." -ForegroundColor Cyan
-$importLog = & $MegaDot --headless --path $work --import 2>&1
+$importLog = Invoke-NativeCaptured $MegaDot --headless --path $work --import
 if ($LASTEXITCODE -ne 0) { $importLog | Write-Host; throw "MegaDot import failed ($LASTEXITCODE)." }
 $importErrors = $importLog | Select-String 'ERROR'
 if ($importErrors) { $importErrors | Write-Host; throw "MegaDot import reported errors." }
 
 Write-Host "Exporting pack..." -ForegroundColor Cyan
-$exportLog = & $MegaDot --headless --path $work --export-pack 'pck' (Join-Path $work 'klee.pck') 2>&1
+$exportLog = Invoke-NativeCaptured $MegaDot --headless --path $work --export-pack 'pck' (Join-Path $work 'klee.pck')
 if ($LASTEXITCODE -ne 0) { $exportLog | Write-Host; throw "MegaDot export failed ($LASTEXITCODE)." }
 
 $pck = Join-Path $work 'klee.pck'

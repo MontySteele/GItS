@@ -50,11 +50,65 @@ _CONTENT_DIR = Path(__file__).parent / "content"
 ELITES_PER_ACT = 2
 
 
+# --- content-boundary allowlists (audit sec.5) -----------------------------
+# The act pools are the largest content in the repo and read every key through
+# `.get()`, so a typo'd key does not fail -- it silently does nothing. The
+# audit's example is exact: `is_bos: true` makes a non-boss boss with no signal
+# anywhere, and the encounter then fills a boss slot with an ordinary statline.
+# Same guard shape as tier05/potions.py, which validates loudly because it is
+# small enough that somebody bothered.
+POOL_TIERS = frozenset({"easy", "hard", "elite", "boss"})
+
+ENCOUNTER_KEYS = frozenset({"id", "name", "enemies"})
+
+ENEMY_KEYS = frozenset({
+    "name", "hp", "intents", "count",
+    "is_boss",         # boss accounting (and the audit's typo example)
+    "phases",          # multi-phase bosses
+    "on_ally_death",   # reaction to a sibling dying
+    "skittish", "slow", "stagger", "sleep_turns",
+})
+
+INTENT_KEYS = frozenset({
+    "kind", "amount", "times", "count",
+    "power", "status", "pile",     # buff / debuff / status payloads
+    "ramp", "ramp_after",          # escalating intents
+    "wave",                        # summon waves
+})
+
+
+def _validate_pool(pool_file: str, raw: dict) -> dict:
+    def check(where: str, mapping: dict, allowed: frozenset) -> None:
+        unknown = set(mapping) - allowed
+        if unknown:
+            raise ValueError(
+                f"{pool_file}: {where}: unknown key(s) {sorted(unknown)}. "
+                "A key nothing reads is a silent no-op -- add it to the "
+                "allowlist in tier05/acts.py AND to the reader, or fix the "
+                "spelling.")
+
+    unknown_tiers = set(raw or {}) - POOL_TIERS
+    if unknown_tiers:
+        raise ValueError(
+            f"{pool_file}: unknown pool tier(s) {sorted(unknown_tiers)}")
+    for tier, encounters in (raw or {}).items():
+        for enc in encounters or []:
+            eid = enc.get("id", "?")
+            check(f"{tier}/{eid}", enc, ENCOUNTER_KEYS)
+            for enemy in enc.get("enemies") or []:
+                name = enemy.get("name", "?")
+                check(f"{tier}/{eid}/{name}", enemy, ENEMY_KEYS)
+                for intent in enemy.get("intents") or []:
+                    check(f"{tier}/{eid}/{name}/intent", intent, INTENT_KEYS)
+    return raw
+
+
 @lru_cache(maxsize=None)
 def _load(pool_file: str) -> dict:
     """Pool YAML by FILENAME (not act index), so a monkeypatched RUN_ACTS in
     tests can never serve a stale cache entry for a different file."""
-    return yaml.safe_load((_CONTENT_DIR / pool_file).read_text())
+    return _validate_pool(
+        pool_file, yaml.safe_load((_CONTENT_DIR / pool_file).read_text()))
 
 
 def n_acts() -> int:

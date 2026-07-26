@@ -229,7 +229,44 @@ def _card_index() -> dict[str, Card]:
         seen: set[str] = set()
         dupes = {c.id for c in cards if c.id in seen or seen.add(c.id)}
         raise ValueError(f"duplicate card ids: {sorted(dupes)}")
+    for c in cards:
+        _validate_effect_vocabulary(c.id, c.effects)
     return index
+
+
+def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
+    """Every `op:` is in OPS and every `if:` is a real predicate. AT LOAD.
+
+    Audit sec.5 ("content-boundary validation is inverted"): the loader validated
+    FIELDS and never NAMES, so a misspelled op or predicate loaded clean and
+    raised the first time the card resolved. For a rare that is in front of a
+    player, not in a test -- and on the co-op seat there is no sim backstop at
+    all.
+
+    Both raises already existed in `effects._resolve_effects` and
+    `effects._predicate`; this moves them from play time to load time. Content
+    that was valid stays valid and nothing about resolution changes -- the only
+    behaviour that moves is *when* a typo is reported, which is the whole point.
+
+    Recurses through `then`/`else` branches: conditionals nest, and an
+    unreachable-today branch is exactly where a typo survives longest.
+    """
+    from tier0.engine import effects as _effects        # late: cycle
+
+    for fx in effects:
+        op = fx.get("op")
+        if op not in _effects.OPS:
+            raise ValueError(
+                f"card {card_id!r}: unknown op {op!r} "
+                f"(not in effects.OPS)")
+        if op == "conditional":
+            name = fx.get("if")
+            if not _effects.is_known_predicate(name):
+                raise ValueError(
+                    f"card {card_id!r}: unknown predicate {name!r}")
+        for branch in ("then", "else"):
+            if fx.get(branch):
+                _validate_effect_vocabulary(card_id, fx[branch])
 
 
 def guest_star_generation_pool(rarity: str) -> list[Card]:

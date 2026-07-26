@@ -570,8 +570,12 @@ if (Test-Path $venvPython) {
             'GITS_REFERENCE_MODE', 'Process')
         $env:GITS_REFERENCE_MODE = $referenceMode
 
-        # No 2>&1 (same PS 5.1 NativeCommandError reason as S6). -q keeps the
-        # output to the summary line plus failures.
+        # Invoke-RepoPython DOES redirect 2>&1 -- safely, because it drops
+        # ErrorActionPreference to 'Continue' for the duration of the call.
+        # (This comment used to say "No 2>&1", directly above a helper that
+        # does exactly that: it was written for the bare call site the helper
+        # replaced and was never updated. Audit sec.3.4.) -q keeps the output
+        # to the summary line plus failures.
         try {
             $pytestOut = Invoke-RepoPython -m pytest $repoRoot -q
             if ($LASTEXITCODE -ne 0) {
