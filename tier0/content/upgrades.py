@@ -199,6 +199,24 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = hit is not None
             if hit:
                 hit["amount_formula"]["per"] += val
+        elif key == "formula_base":
+            # The BASE term of an amount_formula: `base + per * count`. Added
+            # by F4 (Neap Tide addendum) because only `formula_per` existed,
+            # and the two are not interchangeable design decisions. A count
+            # that is uncapped and only grows -- the exhaust pile, exactly the
+            # shape R80 makes dangerous on Charge -- makes bumping `per` a
+            # resource-curve move on an unbounded quantity, while bumping
+            # `base` pays on turn one and stops. Both are legitimate; which one
+            # a card takes is a ruling, and before this key the tooling made
+            # that ruling by having only one option.
+            hit = next((fx for fx in everywhere
+                        if fx.get("op") == "damage"
+                        and isinstance(fx.get("amount_formula"), dict)
+                        and isinstance(fx["amount_formula"].get("base"), int)),
+                       None)
+            ok = hit is not None
+            if hit:
+                hit["amount_formula"]["base"] += val
         elif key == "target_power_per":
             hit = next((fx for fx in everywhere
                         if fx.get("op") == "damage"
@@ -238,6 +256,32 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = hit is not None
             if hit:
                 hit["select"] = val
+        elif key == "exhaust":
+            # How many cards an `exhaust_from` takes. F4 (Neap Tide addendum)
+            # is the first card to use it, and adding it here closed a gap
+            # rather than opened one: gen_klee_cards.exhaust_upgrade has read
+            # `exhaust: +N` off the upgrade sheets since the Kokomi codegen
+            # landed, and NOTHING on the sim side applied it. The key was live
+            # in C# and dead in Python -- so the first card to take it would
+            # have upgraded in the mod and not in the simulator, silently, and
+            # every measurement of that upgrade would have been of the wrong
+            # card. Same defect class as the `energy` upgrade the F batch
+            # caught, one layer further out.
+            hit = next((fx for fx in everywhere
+                        if fx.get("op") == "exhaust_from"), None)
+            ok = hit is not None
+            if hit:
+                hit["amount"] = hit.get("amount", 1) + val
+                # The random branch cannot express amount > 1 in C# (the
+                # re-pooling loop was never built), so an upgrade that raises
+                # the count on a random exhaust would ship a card the mod
+                # cannot render. Fail here rather than at generation time,
+                # where the card would simply be blocked with a vague reason.
+                if hit.get("amount", 1) > 1 and hit.get("select") != "chosen":
+                    raise ValueError(
+                        f"exhaust delta on {base_id!r} raises a RANDOM "
+                        "exhaust_from above 1; only the chosen branch is "
+                        "expressible in C#")
         elif key == "spark":
             ok = _bump_first((fx for fx in top if fx.get("op") == "gain_spark"),
                              "amount", val)

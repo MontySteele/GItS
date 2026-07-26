@@ -42,7 +42,17 @@ def test_realistic_runner_enables_both_run_layers(monkeypatch, capsys):
                                 # it. Left strict on the runner side on
                                 # purpose -- a getattr default there would
                                 # swallow a real RunResult regression.
-                                kurage_traces=[])]
+                                kurage_traces=[],
+                                # C4 (addendum): same rule -- the
+                                # runner reads this off every result
+                                # strictly, so a stand-in must carry
+                                # it or the aggregate is silently
+                                # empty instead of loudly wrong.
+                                overlap_traces=[], won=False,
+                                # C2 (addendum): the elite columns
+                                # walk these three off every result,
+                                # strictly, for the same reason.
+                                fight_stats=[], relics_by_act=[])]
 
     monkeypatch.setattr(runner.model, "run_many", fake_run_many)
     monkeypatch.setattr(runner.run_metrics, "summarize_runs", lambda _: {})
@@ -82,7 +92,17 @@ def test_bare_runner_preserves_historical_defaults(monkeypatch):
                                 # it. Left strict on the runner side on
                                 # purpose -- a getattr default there would
                                 # swallow a real RunResult regression.
-                                kurage_traces=[])]
+                                kurage_traces=[],
+                                # C4 (addendum): same rule -- the
+                                # runner reads this off every result
+                                # strictly, so a stand-in must carry
+                                # it or the aggregate is silently
+                                # empty instead of loudly wrong.
+                                overlap_traces=[], won=False,
+                                # C2 (addendum): the elite columns
+                                # walk these three off every result,
+                                # strictly, for the same reason.
+                                fight_stats=[], relics_by_act=[])]
 
     monkeypatch.setattr(runner.model, "run_many", fake_run_many)
     monkeypatch.setattr(runner.run_metrics, "summarize_runs", lambda _: {})

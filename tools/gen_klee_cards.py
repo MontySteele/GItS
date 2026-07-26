@@ -641,11 +641,23 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "encore",
                       # three of her cards -- one of them a STARTER -- were
                       # shipping with no campfire upgrade at all (G-C1 lint).
                       | {"kurage_turns", "energy", "block_next_turn",
+                         # `exhaust: +N` moves how many cards an exhaust_from
+                         # takes. The VAR emitter ("Exhausts") already existed;
+                         # the key was simply never declared expressible, so
+                         # the first card to use it reported "structural
+                         # upgrade" and shipped with no campfire path at all.
+                         "exhaust",
                          # `formula_per: +N` bumps the PER term of an
                          # amount_formula, which is the ExtraDamage var in the
                          # CalculatedDamageVar triple -- the same slot the
                          # conditional_bonus delta moves.
-                         "formula_per"}
+                         "formula_per",
+                         # `formula_base: +N` bumps the BASE term (the
+                         # CalculationBase var). Added by F4 because only the
+                         # per-term existed, and on an UNCAPPED count the two
+                         # are different rulings: per is a slope on something
+                         # that only grows, base pays once and stops.
+                         "formula_base"}
                       | POWER_UPGRADE_KEYS)
 
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
@@ -1830,7 +1842,14 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "kurage_turns": any(e["op"] == "summon_kurage" for e in effects),
         "energy": any(e["op"] == "energy" for e in effects),
         "block_next_turn": any(e["op"] == "block_next_turn" for e in effects),
+        # Only the CHOSEN branch: raising a RANDOM exhaust_from above 1 has no
+        # C# path (the re-pooling loop was never built), so such a card must
+        # stay unexpressible and loudly blocked rather than generate wrong.
+        "exhaust": any(e["op"] == "exhaust_from"
+                       and e.get("select") == "chosen" for e in effects),
         "formula_per": any(
+            exhaust_pile_calc_rider(card, e) is not None for e in effects),
+        "formula_base": any(
             exhaust_pile_calc_rider(card, e) is not None for e in effects),
     }
     # tier0 binds every POWER_UPGRADE_KEYS delta to the first TOP-LEVEL
@@ -3797,7 +3816,8 @@ def build_upgrade(card: dict) -> list[str]:
                # discard_for_sparks deliberately -- no card carries both ops
                # (plain_discard_upgrade returns 0 if it does), so the name is
                # unambiguous per card and the two grammars read alike.
-               "discard": "discard"}
+               "discard": "discard",
+               "exhaust_from": "exhaust"}
     var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
                "buff_next_attack": 'DynamicVars["PowerAmount"]',
@@ -3805,7 +3825,8 @@ def build_upgrade(card: dict) -> list[str]:
                "summon_kurage": 'DynamicVars["KurageTurns"]',
                "energy": 'DynamicVars["Energy"]',
                "block_next_turn": 'DynamicVars["BlockNextTurn"]',
-               "discard": 'DynamicVars["Discards"]'}
+               "discard": 'DynamicVars["Discards"]',
+               "exhaust_from": 'DynamicVars["Exhausts"]'}
     lines, done = [], set()
     for eff in card["effects"]:
         op = eff["op"]
@@ -3871,6 +3892,13 @@ def build_upgrade(card: dict) -> list[str]:
         # upgrade bumps that var and the face re-renders itself.
         lines.append(
             f'DynamicVars.ExtraDamage.UpgradeValueBy({int(deltas["formula_per"])}m);')
+    if "formula_base" in deltas:
+        # The BASE term lives in CalculationBase (the first slot of the same
+        # triple). Same var the plain `damage` delta already targets on a
+        # converted rider -- see the calc_rider branch above -- so this is the
+        # existing path, reached by an explicit key instead of by inference.
+        lines.append(
+            f'DynamicVars.CalculationBase.UpgradeValueBy({int(deltas["formula_base"])}m);')
     if "conditional_bonus" in deltas:
         # tier0: bump the then-branch's first damage (the ExtraDamage var;
         # expressibility gated in upgrade_plan/conditional_bonus_upgrade).

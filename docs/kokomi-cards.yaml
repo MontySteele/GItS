@@ -255,7 +255,7 @@
    # COST 1 IS PROPOSED, matching the other Uncommon powers on this sheet (mercy_of_the_currents, pearl_current).
    # R73 ratified the EFFECT and the rarity; the cost is this pass's proposal and is a first knob if E2 reads hot.
 
-# ---------- COMMON, v0.5 PARTIAL FILL (+12: 13 -> 25) ----------
+# ---------- COMMON, v0.5 PARTIAL FILL (+12: 13 -> 25; +2 F4 bridge: 25 -> 27) ----------
 # Balanced 3 per lane so the fill does not quietly re-weight the archetypes; attack-weighted (4 of 12) because
 # the pre-fill commons ran 3 attacks in 13, and act 1 is bought with commons.
 # Commander (3)
@@ -307,6 +307,40 @@
    effects: [{op: damage, amount: 5, target: all_enemies}, {op: discard, amount: 1}, {op: draw, amount: 1}]}
    # The assist lane's own AoE: less than surging_shoal's 7, and it churns. The draw is not decoration — without
    # it this is strictly worse than the shoal at the same cost, which the domination lint would (rightly) call.
+# Assist, F4 BRIDGE (+2 — the ratified Sly-lane direction, first rows to land)
+# THE GAP F4 CLOSES, stated once for all three bridge rows. Her Charge and Burst meters BOTH pay on the
+# EXHAUST verb and only on it (CHARGE_PER_EXHAUST, KOKOMI_BURST_PER_EXHAUST — see the double-wage note in
+# constants.py). The Sly lane makes DISCARDS. A discard is not an exhaust, so the assist lane ran a churn
+# engine wired to nothing: every bell it rang paid a local rider and none of it reached the meters the rest
+# of the character is built on. That is why assist sat at 0.5–2.0% run winrate at EVERY value of the pulse
+# multiplier in E1 — it is P9's finding applied to a whole lane, and no payout knob was ever going to move it.
+# These rows do not buff the lane. They CONNECT it: discard -> exhaust -> meter -> the payoff that reads the
+# pile the churn has been filling. P7 could not grade before they existed; the E1 assist column is its
+# pre-F4 baseline.
+- {id: ebb_tide, name: "Ebb Tide", cost: 0, type: skill, rarity: common, solve: [velocity], archetypes: [assist], role: enabler,
+   effects: [{op: discard, amount: 1}, {op: exhaust_from, amount: 1, select: chosen}]}
+   # THE CONVERTER, in its plainest form: the random discard rings whatever Sly bell is in hand, and the chosen
+   # exhaust turns the churn into Charge and Burst. Two cards leave your hand for zero energy and no immediate
+   # board effect, which is the price — this is a card that buys ENGINE, not tempo, and a deck with no bells
+   # and no exhaust payoff should never take it.
+   # The exhaust is CHOSEN, not random, and that is the ruling that makes the card a decision instead of a
+   # slot machine: you feed the meter the card you least want, which is the whole fantasy of a rotation lane.
+   # It is also the only expressible shape — an unfiltered RANDOM exhaust_from has no C# path (the any-card
+   # pool was never built; see the codegen guard), so a random version would be sim-only and unshippable.
+   # LAW 4: nothing is created (a discard moves a card, an exhaust removes one from combat, neither touches
+   # deck size), so the Common net delta is 0. LAW 5: no economy rider — the exhaust is the payment, not a
+   # draw or an energy stapled to one.
+- {id: salt_line, name: "Salt Line", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [assist, generic], role: glue,
+   sly: [{op: exhaust_from, amount: 1, select: chosen}],
+   effects: [{op: block, amount: 5}]}
+   # THE BELL THAT RINGS INTO THE EXHAUST PILE. drifting_lantern taught that Sly pays either way; this teaches
+   # that the discard lane can pay the METER. Played it is a fair common wall; thrown overboard by someone
+   # else's churn it hands you an exhaust — so the lane's own noise starts feeding Charge and Burst without a
+   # single card being spent on the conversion.
+   # Deliberately NOT a strict upgrade of drifting_lantern: 5 Block played against the lantern's 4, but the
+   # lantern's bell is 4 more Block (immediate, unconditional) where this one is an exhaust (deferred, and
+   # worth nothing in a deck with no meter payoff). Different shapes at the same cost, which is what the
+   # domination lint is for.
 # Generic (3)
 - {id: slack_water, name: "Slack Water", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 4}, {op: block_next_turn, amount: 4}]}
@@ -356,7 +390,7 @@
 - {id: communion_of_tides, name: "Communion of Tides", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [priest, assist], role: glue,
    effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: draw, amount: 2}]}
    # Burn one, see two: the lane-bridge card (priest fuel, assist velocity).
-# Assist (2)
+# Assist (2 + 1 F4 bridge)
 - {id: rearguard_action, name: "Rearguard Action", cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], archetypes: [assist], role: glue,
    effects: [{op: discard, amount: 1}, {op: block, amount: 7}]}
    # Cover the retreat: a real wall whose price rings the Sly bell.
@@ -433,7 +467,7 @@
    # act 2. Off the bar it is a playable 7; on it, 13 — an uncommon-priced spike that never grows further.
    # Written as base-plus-bonus rather than a two-branch either/or ON PURPOSE: the upgrade then moves the half
    # that is always live, and the bar itself cannot drift downward as a side effect (resource-curve law).
-# Assist (2)
+# Assist (2 + 1 F4 bridge)
 - {id: quiet_harbor, name: "Quiet Harbor", cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], archetypes: [assist], role: payoff,
    sly: [{op: draw, amount: 2}],
    effects: [{op: block, amount: 5}]}
@@ -445,6 +479,23 @@
    effects: [{op: damage, amount: 8, target: enemy}]}
    # The first Sly ATTACK on any sheet: 8 aimed, or 5 at whoever is nearest when it goes over the side. Nothing
    # else in her pool makes a random discard into damage, and the assist lane needed a reason to be in a fight.
+- {id: undertow, name: "Undertow", cost: 1, type: attack, rarity: uncommon, solve: [scaling, velocity], archetypes: [assist], role: payoff,
+   sly: [{op: energy, amount: 1}],
+   effects: [{op: damage, amount_formula: {base: 4, per: 1, count: exhaust_pile}, target: enemy}]}
+   # F4's third bridge row, and the one that closes the loop: the payoff that READS the pile the lane has been
+   # filling. Every other exhaust-pile scaler she owns is priest or generic (cleansing_tide, epiphany_of_the_
+   # deep) — the assist lane fed that pile and had nothing that looked at it.
+   # THE SLY RIDER IS ENERGY, and that is a LAW 5 statement rather than a number. R79 hands the card/energy
+   # economy to Discard/Sly as a MONOPOLY, and nothing on this sheet had actually exercised the energy half of
+   # it: moonlit_offering pays energy as a Rare AND self-Exhaust, i.e. under the law's one narrow exception,
+   # not under the rule. This is the rule. Discarded, the card gives the turn back.
+   # PRICING, PROPOSED. base 4 is under driftglass's aimed 8 on purpose — this card is bought for its slope,
+   # and a card that is also the best turn-one attack in the lane makes the slope free. +1 per exhausted card
+   # matches cleansing_tide's per-term at one rarity lower base (5), which is the intended read: same engine,
+   # earlier, smaller.
+   # NOT A DOMINATION PAIR with driftglass: driftglass is larger on an empty pile and its bell is damage; this
+   # is larger on a full one and its bell is tempo. They cross somewhere around four exhausted cards, which is
+   # a real drafting question rather than a strictly-better answer.
 # Generic (2)
 - {id: pearl_current, name: "Pearl Current", cost: 1, type: power, rarity: uncommon, solve: [block], archetypes: [generic], role: payoff,
    effects: [{op: apply_power, power: metallicize, amount: 3, target: self}]}

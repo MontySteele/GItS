@@ -1507,6 +1507,16 @@ act-1 clear is NOT the binding metric (Klee clears 83% of act 1 and wins
 own: Osty's HP can go DOWN with bad play, Charge only goes up -- so this
 is watched in act 3, where it does not in fact run away (6% vs Furina 13%).
 
+> **SUPERSEDED BY R73 (Neap Tide v2.1, 2026-07-26; addendum A7 pointer.)**
+> The multiplier is now **3**: R73 ruled 4 -> 2, and `exp_neap_tide_e1`
+> graded P6 and fired the pre-committed weak-side fallback, so x2 shipped in
+> no build. `CONSTANTS_VERSION 4` -- every Kokomi number in this entry is
+> archive. The withdrawal above still stands on its own terms (x4 was not
+> the runaway the objection claimed), and the cut was made for the reader
+> hierarchy rather than for act 3. Note also what R73 did NOT settle: G2
+> ratified a stacking `kurage_amp` card, so the coefficient this entry
+> treats as fixed is now drafted, and 4-5 is an ordinary in-run read.
+
 **PREDICTION (a) NOW HITS.** R54 graded "starter A1 falls below A2" as a
 MISS at every meter step. Under the 12-card starter it PASSES: A1 3.2 vs
 A2 4.8. Isolated at x0 (bank read fully OFF) the constraint ALREADY passes

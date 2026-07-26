@@ -283,6 +283,31 @@ KOKOMI_BURST_PER_EXHAUST = 2  # her particle economy: burst energy per
                               # exhaust event (skill_tag 5 + reactions 5
                               # are the shared sources; this is her Salon-
                               # tick analogue). PROPOSED.
+                              # THE DOUBLE WAGE, said out loud (addendum A9).
+                              # One exhaust event pays TWICE on this sheet:
+                              # CHARGE_PER_EXHAUST above AND this. That reads
+                              # like a duplicated payout and it is not; it is
+                              # her identity payment, and R79 is what makes it
+                              # legitimate rather than greedy. LAW 5 hands the
+                              # card/energy economy -- draw, energy, cycling,
+                              # selection -- to the Discard/Sly lane as a
+                              # MONOPOLY, so the exhaust verb has no economy
+                              # rider to be paid in. What it has instead is
+                              # these two meters. Strip either one and the
+                              # exhaust lane is a lane that spends cards and
+                              # buys nothing, because the law already gave
+                              # away the thing it would otherwise buy.
+                              # CONSEQUENCE FOR ANYONE TUNING THIS. These two
+                              # constants are one wage in two currencies, so
+                              # they move together or the reason moves with
+                              # them; halving this alone is not "a small burst
+                              # nerf", it is a partial repeal of the payment
+                              # R79 obliges. The exhaust funnel splits its
+                              # source (exhaust vs exhaust_muster) in
+                              # refpowers.py precisely so the wage can be read
+                              # per-source before anyone touches it -- see
+                              # tier05/burst_telemetry.py, which is a trace
+                              # and not an allowlist for the same reason.
 CEREMONIAL_GARMENT_TURNS = 3  # Shape B state duration (stacks = turns,
                               # decays at player turn end). PROPOSED.
 # v0.3 charge-curve pass (user-directed 2026-07-24, PROPOSED): 4 -> 2.
@@ -374,6 +399,36 @@ KURAGE_PULSE_PER_CHARGE = 3   # pulse gains this much damage PER POINT of
                               # even at x4). That is a PLAN problem and must
                               # not be answered with this knob.
                               # Nothing else on the accrual side moves.
+                              #
+                              # WATCH (restored by addendum A1b, and it is
+                              # MORE live at x3 than it was at x4, not less).
+                              # The x4 watch was retired in the first draft of
+                              # this comment on the reasoning that the cut had
+                              # answered it. It had not. G2 ratified STACKING
+                              # "Before Sun and Moon", which adds +1 (+2
+                              # upgraded) to THIS coefficient and does not cap,
+                              # so the cut lowered the FLOOR and left the
+                              # ceiling to the drafter: one upgraded copy is
+                              # x5, a pair is x5-x7, and 4-5 is the ordinary
+                              # in-run read for a committed priest deck. The
+                              # bank underneath is still uncapped and still
+                              # never spent (R80), so this remains the only
+                              # term in her kit that can only grow.
+                              # WORKED EXAMPLE, at the LANDED x3 (update it
+                              # when this number moves, or it becomes a lie
+                              # that reads like a check):
+                              #   bank 10, x3       pulse 4 + 30 =  34
+                              #   bank 10, x5 (BSM) pulse 4 + 50 =  54
+                              #   bank 25, x3       pulse 4 + 75 =  79
+                              #   nereids' (Rare)   17 at bank 10, 24 at 25
+                              # So the §2.2 reader hierarchy is upright at the
+                              # BASELINE and inverts behind one Uncommon draft.
+                              # That is the ratified design (sell the slope
+                              # back for a card slot), and it is exactly why
+                              # C4 reports stack counts. R14: the telemetry
+                              # carries no threshold. The thing to look at
+                              # first if the priest lane runs hot is the PAIR,
+                              # not this constant.
 KURAGE_PULSE_BLOCK = 0        # Block granted by each pulse. v0.4 starter
                               # rework ([USER]) turned this OFF (was 2): the
                               # pulse is damage now, not mending. NOTE this
@@ -661,12 +716,20 @@ BANNER_FEATURED_SLOTS = 3
 # GRAMMAR, so every Furina number measured under v2 is archive: her decks
 # generated a pool they could cash, and no v2 cell is comparable with v3
 # output. Klee / Kokomi / ref_ironclad carry no Fanfare and do not move.
-# CONSTANTS_VERSION 4 (R73, Neap Tide v2.1): KURAGE_PULSE_PER_CHARGE 4 -> 2.
+# CONSTANTS_VERSION 4 (R73, Neap Tide v2.1): KURAGE_PULSE_PER_CHARGE
+# 4 -> 3 (ruled 2; E1 fired the pre-committed x3 fallback).
 # Her pulse is read off an uncapped, never-spent bank (R80), so the multiplier
 # is the whole slope of her damage curve -- every Kokomi number taken at x4 is
 # archive, not a cheaper sample of the same world. Same rule the v2 bump
 # applied to a single threshold: the size of the edit is not what decides,
 # comparability is.
+# WRITE THE LANDED VALUE, NOT THE RULED ONE (addendum A1c, 2026-07-26). This
+# line read "4 -> 2" for the length of the sprint, because it was written when
+# R73 was ruled and never revisited when E1 graded P6 and the fallback fired.
+# x2 shipped in no build and no measurement cell; a version comment naming it
+# files every current Kokomi number in a world that never existed, which is the
+# exact failure the stamp exists to prevent. If a knob has a pre-committed
+# fallback, this comment is not final until the fallback is graded.
 # Klee / Furina / ref_ironclad carry no Charge and do not move.
 CONSTANTS_VERSION = 4
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive

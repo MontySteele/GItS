@@ -34,6 +34,26 @@ def test_kokomi_decksize_grammar():
     assert res.returncode == 0, res.stdout + res.stderr
 
 
+def test_handwritten_cards_match_their_sheets():
+    """Addendum A8: the hand-written cards, against the sheets they came from.
+
+    This lint existed and gated DEPLOY only (validate.ps1 S6), so `pytest` had
+    nothing to say about it. R74 deleted `ceremonial_garment`'s entry splash
+    from the sheet; the hand-written C# kept dealing it for the length of the
+    sprint, across a full green suite and a constant-parity run, because the
+    only check that could see it was on the far side of a deploy the sprint
+    never performed.
+
+    A gate that runs on deploy and nowhere else does not gate development. It
+    reports at the last possible moment, after the measurements it invalidates
+    have already been taken.
+    """
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_handwritten_parity.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
 def test_every_draftable_card_can_be_upgraded():
     """G-C1. A card with no upgrade is a dead campfire choice.
 
