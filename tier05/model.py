@@ -204,6 +204,13 @@ class RunResult:
     #                    KurageTrace) per fight, in order. Empty traces
     #                    (pulses == 0) for every character that never fields
     #                    a Bake-Kurage, which is all of them but Kokomi.
+    relics_by_act: list = field(default_factory=list)    # C2 (addendum): how
+    #                    many GRANTED relics were held as each act's boss
+    #                    resolved, in act order. `relics` above is overwritten
+    #                    wholesale at every exit and so only ever describes the
+    #                    END of the run; power growth is a per-act question.
+    #                    Empty on grant_relics=False runs and on runs that
+    #                    never finished an act.
     overlap_traces: list = field(default_factory=list)   # C4 (addendum):
     #                    (act_index, OverlapTrace) per fight -- plays of the
     #                    watched carry cards. `deck_ids` above already says
@@ -616,6 +623,14 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 final_act = act_i == n - 1
                 if kind == "B":
                     res.acts_completed += 1
+                    # C2 (Neap Tide addendum): relic count AT the act boundary,
+                    # recorded here because res.relics is overwritten wholesale
+                    # at each exit and therefore only ever describes run END.
+                    # An act that was never finished contributes no entry, which
+                    # is the honest shape: there is no boundary to measure.
+                    res.relics_by_act.append(
+                        0 if held is None
+                        else len([r for r in held.ids if r not in seed_ids]))
                 if kind != "B" or not final_act:
                     # Reward screen. A FINAL boss ends the run with no reward; a
                     # non-final boss shows the act-transition screen (§10.1): the
