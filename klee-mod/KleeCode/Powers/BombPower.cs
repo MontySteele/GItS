@@ -9,6 +9,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Commands.Builders;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
@@ -384,27 +385,58 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// the charges must already be spent by then.
     /// </summary>
     /// <summary>
-    /// Per-combat detonation total (sim: state.detonations_total), read by
-    /// The Big One's (grand_finale) bonus_formula. Keyed to the combat-state instance so a
-    /// new combat starts at zero without a reset hook; every detonation path
-    /// funnels through Detonate, so the count cannot miss one. A mid-combat
-    /// reload restarts the combat (and this count with it).
+    /// Per-combat, PER-PLAYER detonation total (sim: state.detonations_total),
+    /// read by The Big One's (grand_finale) bonus_formula. Keyed to the
+    /// combat-state instance so a new combat starts at zero without a reset
+    /// hook; every detonation path funnels through Detonate, so the count
+    /// cannot miss one. A mid-combat reload restarts the combat (and this
+    /// count with it).
+    ///
+    /// EPOCH 2 / D2 (audit sec.5, tracked since 2026-07-25 as "NEEDS FIX --
+    /// blocked"). This was ONE team-wide integer. In co-op that meant a second
+    /// player's detonations inflated your Big One: two Klees each throwing five
+    /// bombs both read ten, and the card's damage roughly doubled for free.
+    /// The sim cannot see it -- tier 0.5 models one seat -- and there is no C#
+    /// test project, so co-op defects are play-derived by construction.
+    ///
+    /// The ownership idiom is ExplosiveFrags.OnBombDetonated two files over
+    /// ("own bombs only: in co-op another player's detonations are theirs"),
+    /// keyed on the APPLIER's player. Same key here.
+    ///
+    /// Solo behaviour is unchanged by construction: with one player the
+    /// per-player count and the team-wide count are the same number.
+    ///
+    /// Not a leak. The dictionary is cleared whenever the combat instance
+    /// changes, so it holds at most the current combat's players -- unlike
+    /// SpotlightSystem.PendingDraws, which retains dead run graphs on abnormal
+    /// exits (audit sec.5, still open).
     /// </summary>
     private static ICombatState? _countCombat;
-    private static int _detonationsThisCombat;
+    private static readonly Dictionary<Player, int> _detonationsByPlayer = new();
 
-    public static int DetonationsThisCombat(ICombatState combatState)
-        => ReferenceEquals(combatState, _countCombat) ? _detonationsThisCombat : 0;
+    public static int DetonationsThisCombat(ICombatState combatState, Player? player)
+    {
+        if (!ReferenceEquals(combatState, _countCombat) || player == null)
+        {
+            return 0;
+        }
+        return _detonationsByPlayer.TryGetValue(player, out var count) ? count : 0;
+    }
 
-    private static void RecordDetonation(ICombatState? combatState)
+    private static void RecordDetonation(ICombatState? combatState, Creature? applier)
     {
         if (combatState == null) return;
         if (!ReferenceEquals(combatState, _countCombat))
         {
             _countCombat = combatState;
-            _detonationsThisCombat = 0;
+            _detonationsByPlayer.Clear();
         }
-        _detonationsThisCombat++;
+        // An applier with no Player is an enemy-sourced or orphaned detonation.
+        // It still happened, but it is nobody's Big One bonus.
+        var player = applier?.Player;
+        if (player == null) return;
+        _detonationsByPlayer[player] =
+            (_detonationsByPlayer.TryGetValue(player, out var n) ? n : 0) + 1;
     }
 
     private async Task<int> Detonate(PlayerChoiceContext choiceContext, int bonus = 0)
@@ -436,7 +468,7 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         {
             // Sim order: detonations_total increments before the damage
             // lands (effects.py detonate_bombs).
-            RecordDetonation(combatState);
+            RecordDetonation(combatState, applier);
 
             // R23: each detonation is a Pyro-tagged hit (tier0 detonate_bombs
             // -> deal_damage_to_enemy(element=bomb.element), default pyro).

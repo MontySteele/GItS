@@ -265,10 +265,44 @@ public sealed class KokomiResourceHooks : AbstractModel
         var owner = card.Owner?.Creature;
         if (!KokomiResources.IsKokomi(owner)) return Task.CompletedTask;
 
-        KokomiResources.GainCharge(owner, KokomiConstants.ChargePerExhaust);
-        KokomiResources.GainBurst(owner, KokomiConstants.BurstPerExhaust);
+        // EPOCH 2 / D1 (audit sec.1.1). This granted the BASE 1/2 unconditionally
+        // and never looked at the relic, while PearlOfInsightRelic declared
+        // ChargePerExhaust = 2 / BurstPerExhaust = 4 -- constants read by
+        // nothing except the relic's own description string. Kokomi's upgraded
+        // starter was a NO-OP WITH A LYING TOOLTIP: it promised doubled
+        // per-exhaust accrual, printed those numbers on the relic panel, and
+        // changed nothing. The red-pen record (Part 1 item 6, "shipped as
+        // doubled per-exhaust") described a game that was never built.
+        //
+        // The relic is the source of truth for its own numbers, so they are
+        // READ off it rather than restated here -- restating them is how the
+        // description and the funnel came to disagree in the first place.
+        KokomiResources.GainCharge(owner, ExhaustCharge(owner));
+        KokomiResources.GainBurst(owner, ExhaustBurst(owner));
         return Task.CompletedTask;
     }
+
+    /// <summary>
+    /// Does this creature's player hold the upgraded starter?
+    ///
+    /// A relic query rather than a power or a per-combat resource, matching
+    /// SpotlightSystem.BothModes: the relic is RUN state and survives combats,
+    /// so a per-combat mirror would need re-seeding at every fight start and
+    /// its failure mode would be silent.
+    /// </summary>
+    private static bool HasPearlOfInsight(Creature? owner) =>
+        owner?.Player?.Relics.Any(relic => relic is Relics.PearlOfInsightRelic)
+        ?? false;
+
+    internal static int ExhaustCharge(Creature? owner) =>
+        HasPearlOfInsight(owner)
+            ? Relics.PearlOfInsightRelic.ChargePerExhaust
+            : KokomiConstants.ChargePerExhaust;
+
+    internal static int ExhaustBurst(Creature? owner) =>
+        HasPearlOfInsight(owner)
+            ? Relics.PearlOfInsightRelic.BurstPerExhaust
+            : KokomiConstants.BurstPerExhaust;
 
     /// <summary>
     /// Sim order (combat.py play_card): the requires-full drain FIRST, then

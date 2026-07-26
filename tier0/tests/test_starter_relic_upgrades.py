@@ -170,3 +170,106 @@ def test_upgraded_forms_carry_forward_their_base_reward_hook():
             f"{starter} hosts the companion reward slot but its upgraded form "
             f"{upgraded} does not. Taking Touch of Orobas would remove the "
             "only door companions have into the deck -- silently.")
+
+
+# --- EPOCH 2 / D1: pool membership, made structural ----------------------
+
+# Character -> the relic pool file that owns its membership. A curated map
+# rather than a derived one: pool files are hand-written C# and the whole
+# point of this check is that nothing in the compiler relates a relic class
+# to the pool it belongs in.
+RELIC_POOLS = {
+    "PoundingSurprise": "KleeRelicPool.cs",
+    "PearlOfWisdomRelic": "KokomiRelicPool.cs",
+    "EtherealSpotlightRelic": "FurinaRelicPool.cs",
+}
+
+_CODE = _ROOT / "klee-mod" / "KleeCode"
+
+
+def _pool_text(filename: str) -> str:
+    return (_CODE / filename).read_text(encoding="utf-8")
+
+
+def test_every_upgraded_starter_is_in_its_characters_relic_pool():
+    """audit sec.1.2. All three shipped in NO pool, and that is a crash.
+
+    `RelicModel.Pool` is a non-virtual `First()` over `AllRelicPools` and
+    throws `InvalidOperationException` for a relic in none. That is finding
+    27's crash class -- Pounding Surprise shipped poolless and made Klee look
+    selected while the run started as somebody else -- reappearing one door
+    over, at the mid-run Touch of Orobas grant instead of at character select.
+    Act 2 rather than the menu: later, and much worse.
+
+    KleeSelfCheck R7 now sweeps the upgrade replacement too, so this is
+    belt-and-braces on purpose: R7 fires at BOOT, on the machine running the
+    game, and reaches a Log line. This fires at commit time, on any machine,
+    and is the reason a fourth character cannot repeat it.
+    """
+    for starter, upgraded in STARTERS.items():
+        pool = _pool_text(RELIC_POOLS[starter])
+        assert f"ModelDb.Relic<Relics.{upgraded}>()" in pool, (
+            f"{upgraded} is in no relic pool. RelicModel.Pool throws for a "
+            f"poolless relic, and Touch of Orobas hands this one over mid-run. "
+            f"Append it in {RELIC_POOLS[starter]}.")
+
+
+def test_the_base_starter_is_still_pooled_too():
+    """Non-vacuity: the assertion above is only meaningful while the pool
+    file is the thing that declares membership at all."""
+    for starter in STARTERS:
+        pool = _pool_text(RELIC_POOLS[starter])
+        assert f"ModelDb.Relic<Relics.{starter}>()" in pool
+
+
+def test_every_pool_file_is_named_by_the_map():
+    """A new character's pool file must be added here, not discovered."""
+    on_disk = {p.name for p in _CODE.glob("*RelicPool.cs")}
+    assert on_disk == set(RELIC_POOLS.values()), (
+        f"relic pool files on disk {sorted(on_disk)} do not match the curated "
+        f"map {sorted(set(RELIC_POOLS.values()))}")
+
+
+def test_r7_sweeps_the_upgraded_form_not_only_the_starter():
+    """The boot-time half of the same invariant.
+
+    R7 read `character.StartingRelics` only, so the grant path -- the one
+    that actually crashes in act 2 -- was outside its sweep entirely.
+    """
+    self_check = (_CODE / "Diagnostics" / "KleeSelfCheck.cs").read_text(
+        encoding="utf-8")
+    assert "CheckRelicResolvesPool" in self_check
+    assert "GetUpgradeReplacement() is { } upgraded" in self_check, (
+        "R7 must reach the upgraded form through GetUpgradeReplacement rather "
+        "than a hardcoded list, so a starter that gains an upgrade later is "
+        "covered the day it does")
+
+
+def test_the_kokomi_exhaust_funnel_reads_the_relic_not_the_base_constant():
+    """audit sec.1.1: the relic was a no-op with a lying tooltip.
+
+    `PearlOfInsightRelic` declared `ChargePerExhaust = base * 2` and
+    `BurstPerExhaust = base * 2`, and those constants were read by NOTHING
+    except the relic's own description string. The funnel granted the base
+    1/2 unconditionally. So the relic panel promised doubled per-exhaust
+    accrual, and the red-pen record ("shipped as doubled per-exhaust")
+    described a game that was never built.
+
+    Pinned on the SHAPE rather than on the numbers: the grant site must go
+    through the relic-aware helpers, and must not hand the base constants
+    straight to the grant. Restating the numbers at the grant site is exactly
+    how the description and the funnel came to disagree.
+    """
+    resources = (_CODE / "Powers" / "KokomiResources.cs").read_text(
+        encoding="utf-8")
+    hook = resources[resources.index("AfterCardExhausted"):]
+    hook = hook[:hook.index("</summary>")] if "</summary>" in hook else hook
+
+    assert "ExhaustCharge(owner)" in hook, hook[:800]
+    assert "ExhaustBurst(owner)" in hook, hook[:800]
+    assert "GainCharge(owner, KokomiConstants.ChargePerExhaust)" not in hook, (
+        "the exhaust funnel is granting the base constant directly again; "
+        "PearlOfInsightRelic's doubled numbers become decorative the moment "
+        "it does")
+    assert "PearlOfInsightRelic.ChargePerExhaust" in resources
+    assert "PearlOfInsightRelic.BurstPerExhaust" in resources

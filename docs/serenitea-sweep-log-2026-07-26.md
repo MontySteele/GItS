@@ -500,3 +500,165 @@ depend on a document that can be edited later.
 
 Epoch stamp for this landing is assigned at landing time. Klee is untouched
 this epoch.
+
+---
+
+## Track D — EPOCH 2 — LANDED, and the grades come first
+
+**Epoch stamp:** `RT7 / DRAFTER 10 / POLICY 3 / C3` — unchanged from EPOCH 1.
+Nothing in this epoch bumps a version: D1 and D2 are C#-only, and D3 is an
+upgrade-sheet delta, none of which is a drafter, policy, template or constants
+change.
+
+Cell for every number below: `cell=canonical seed=11 runs=600 RT7/D10/P3/C3`,
+hunter route, realistic loadout (relics + potions), all registered acts.
+
+### Measured
+
+| arm | pre | post | delta |
+|---|---|---|---|
+| kokomi/priest | 11.5% | 11.5% | **0.0pt** |
+| kokomi/commander | 9.5% | 9.5% | **0.0pt** |
+| kokomi/assist | 2.0% | 2.0% | **0.0pt** |
+| furina/salon | 16.8% | 17.2% | **+0.4pt** |
+| klee/demolition | 7.5% | 7.5% | **0.0pt** |
+
+The pre-fix furina/salon figure reproduces the EPOCH-1 baseline of 16.8%
+exactly, so the cell is reproducing.
+
+### D1 — Pearl of Insight funnel — PREDICTION FAILED, and the failure is the finding
+
+Registered: *kokomi assigned-plan winrate moves UP*. Measured: **0.0pt on all
+three plans.**
+
+The reason is structural, not a tuning surprise. **Pearl of Insight has no sim
+representation at all.** `tier05/content/relics.yaml` contains no Kokomi
+starter relic (the only `pearl` in it is `golden_pearl`, an unrelated gold
+boon), upgraded starters are not modelled anywhere in tier 0.5, and the sim's
+exhaust funnel at `refpowers.py:255` grants `CHARGE_PER_EXHAUST` /
+`KOKOMI_BURST_PER_EXHAUST` unconditionally with no relic check.
+
+So the prediction was premised on the canonical Cell being able to see an
+object it does not model. It could only ever have printed 0.0pt. **The fix is
+real and correct** — the shipped game had a relic that promised doubled
+per-exhaust accrual, printed those numbers on its own panel, and granted the
+base rate; the red-pen record ("shipped as doubled per-exhaust") described a
+game that was never built. But its verification is the C# pins plus play, not
+this instrument.
+
+Landed with it, from the same audit item:
+
+- **Pool membership for all three upgraded starters.** `ExplosiveFrags`,
+  `PearlOfInsightRelic` and `CurtainNeverFalls` were `autoAdd: false` and in no
+  `GenerateAllRelics`. `RelicModel.Pool` is a non-virtual `First()` over
+  `AllRelicPools` and **throws** for a poolless relic — finding 27's crash
+  class (Pounding Surprise shipped poolless and made Klee look selected while
+  the run started as somebody else), one door over: reachable at the mid-run
+  Touch of Orobas grant rather than at character select. Act 2 instead of the
+  menu, which is later and worse. Membership does not make them loot: relic
+  rewards roll Common/Uncommon/Rare/Shop/Boss and these are `Ancient`, the same
+  shape as the Ancient cards already sitting visibly in the card pools.
+- **R7 extended to the upgrade**, sweeping through `GetUpgradeReplacement()`
+  rather than a hardcoded list, so a starter that gains an upgrade later is
+  covered the day it does. Boot-time half.
+- **Structural lint** (`test_starter_relic_upgrades.py`, +6): commit-time half,
+  on any machine, and the reason a fourth character cannot repeat it. It also
+  pins the funnel by SHAPE — the grant site must go through the relic-aware
+  helpers and must not hand the base constants straight to the grant, because
+  restating the numbers at the grant site is exactly how the description and
+  the funnel came to disagree.
+
+### D2 — DetonationsThisCombat per-owner — prediction met, but VACUOUSLY
+
+Registered: *solo canonical-Cell numbers move 0.0pt; any solo movement is a
+finding.* Measured: **0.0pt everywhere**, including klee/demolition, the only
+bomb arm.
+
+Recorded honestly: **this confirmation carries no information.** `BombPower.cs`
+is C#-only, exactly like D1, so the canonical Cell could not have moved
+whatever the fix did. The prediction is satisfied on its face and was never at
+risk on this instrument.
+
+The fix itself is real: the count was ONE team-wide integer, so in co-op a
+partner's detonations inflated your Big One — two Klees each throwing five
+bombs both read ten. Now keyed per `Player`, on the `ExplosiveFrags`
+ownership idiom two files over ("own bombs only: in co-op another player's
+detonations are theirs"). Solo behaviour is unchanged *by construction*: with
+one player the per-player count and the team-wide count are the same number,
+which is the real reason the 0.0pt is expected, and it is an argument rather
+than a measurement.
+
+The generated reader moved with it — `DetonationsThisCombat(CombatState!, Owner)`
+— through `gen_klee_cards.py`, so the regeneration touched exactly one card.
+
+### D3 — Furina Q3 innate Encore — prediction met on direction; the effect is NOT distinguishable from noise
+
+Registered: *furina/salon moves UP from 16.8%; if it moves DOWN, halt.*
+Measured: **16.8% → 17.2%, UP.** No halt.
+
+But +0.4pt at n=600 is inside one standard error (about 1.5pt), so the honest
+read needed the paired comparison the determinism makes available — same seed,
+same 600 runs, one card changed:
+
+    unchanged 592   flipped to WIN 5   flipped to LOSS 3
+    discordant pairs n = 8
+    exact two-sided McNemar p = 0.73
+
+**592 of 600 runs are outcome-identical. The whole delta is net +2 wins out of
+600, and it is a coin flip.** The registered direction is met and the halt
+condition is not triggered, but nobody should carry "+0.4pt" forward as a
+power claim.
+
+This also re-frames the W2 result the sprint cited as the reason to ship.
+Q3b/c/d measured **the same +0.4pt**, in a different world (RT5/D7/C2 at
+registration) on a different cell — an exact replication that is much more
+likely to mean *both measurements found the same nothing* than that a real
++0.4pt effect survived three version bumps unchanged.
+
+**That is not an argument against shipping it.** The directive it answers is a
+play-feel complaint — *"I have no Encore, so half my cards don't work"* — and a
+dead-hand fix that solves the feel while moving power by nothing measurable is
+the ideal outcome, not a disappointing one. A1 flat and no first-fire
+domination were the other two W2 checks, and both still hold. What should not
+happen is the +0.4pt being cited later as evidence the card got stronger.
+
+Shipped as `aria_of_recompense: {encore: +3, innate: true}`. Two decisions
+recorded at the sheet:
+
+- **The card**: Q3b chose this basic over the common-tier alternate
+  (`curtain_up`) because basics are guaranteed in every deck, which makes the
+  fix a campfire decision every run rather than a draft lottery — the shape of
+  the complaint. Exactly one copy sits in the starting deck, so Innate cannot
+  flood an opening hand.
+- **The encore delta is KEPT.** The directive adds Innate; it does not trade
+  for it. The contrast is `kokomi-upgrades: kurages_oath`, where [USER] ruled
+  the upgrade buys INNATE ONLY — and that is annotated *there* as a
+  card-specific ruling, with no equivalent ever made for Furina. **Flagged for
+  [USER]**: if the intent was innate-only here too, the `encore: +3` comes out
+  and the cell should be re-run.
+
+### Two things [USER] should know about this epoch
+
+1. **Two of the three fixes are invisible to the instrument the predictions
+   were registered against.** D1 and D2 are C#-only, so the canonical Cell can
+   only ever report 0.0pt for them — one prediction failed for that reason and
+   one "passed" for that reason. Registering sim-measured predictions for
+   C#-only fixes is the same "the instrument cannot see it" class the audit
+   catalogues, appearing this time in the sprint's own method.
+2. **The sheet-edit discipline was bent, knowingly.** The standing rule is "no
+   sheet edits outside Track G", and D3 is an edit to `furina-upgrades.yaml`.
+   It is taken as scheduled work rather than a drive-by: the sprint puts D3 in
+   Track D by name, and R20 makes the upgrade sheet the one and only place an
+   upgrade delta can live. Flagged rather than quietly read as not applying.
+
+### Archived under the EPOCH 2 stamp
+
+Per the sprint doc: kokomi assigned-plan numbers (D1) and furina/salon numbers
+(D3) taken under the EPOCH 1 re-baseline. In practice the kokomi archive is a
+formality — D1 moved them 0.0pt for the structural reason above — and the
+furina archive covers a +0.4pt shift the paired test says is noise. Both are
+re-baselined above regardless, because the epoch discipline is about the world
+being labelled, not about whether the number happened to move.
+
+Klee untouched this epoch, as scheduled. Suite: 995 → 1000. All six repo lints
+green; the C# mod builds clean.
