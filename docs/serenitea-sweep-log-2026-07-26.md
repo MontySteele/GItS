@@ -483,3 +483,20 @@ twice in one run:
   safe by construction rather than by a check).
 
 Verified after: bare clone leaves no `ImageGen` behind at all.
+
+---
+
+## Track D — EPOCH 2 — predictions REGISTERED (pre-measurement)
+
+Written and committed BEFORE any post-fix number was produced or reviewed, per
+the standing discipline. Transcribed from the sprint doc so the record does not
+depend on a document that can be edited later.
+
+| # | Fix | Registered prediction | Grading rule |
+|---|---|---|---|
+| D1 | Pearl of Insight funnel + relic-pool membership + R7 lint extension | kokomi assigned-plan winrate moves **UP** on the canonical Cell | Direction committed, **magnitude unbounded** |
+| D2 | `BombPower.DetonationsThisCombat` per-owner | solo canonical-Cell numbers move **0.0pt** — the fix is co-op-scoped | **Any** solo movement is a FINDING, not a pass |
+| D3 | Furina Q3 innate Encore ships | furina/salon winrate moves **UP** from the 16.8% EPOCH-1 baseline | If it moves **DOWN**: HALT and report before landing anything else in the epoch |
+
+Epoch stamp for this landing is assigned at landing time. Klee is untouched
+this epoch.
