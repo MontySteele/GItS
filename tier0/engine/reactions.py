@@ -16,7 +16,7 @@ from __future__ import annotations
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine import powers
+from tier0.engine import powers, resources
 from tier0.engine.state import CombatState, Enemy
 
 AURA_ELEMENTS = {"pyro", "hydro", "electro", "cryo"}   # anemo/geo trigger only
@@ -133,12 +133,13 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         state.reactions_this_turn += 1
         p = state.player
         if p.burst_max:
-            p.burst_energy += C.BURST_PER_REACTION
+            resources.gain_burst(state, C.BURST_PER_REACTION, "reaction")
         # Catalytic Conversion: reactions grant bonus sparks + burst energy.
         bonus = p.powers.get("reaction_bonus_spark_energy", 0)
         if bonus:
             p.sparks += bonus
-            p.burst_energy += C.CATALYTIC_BURST_PER_REACTION * bonus
+            resources.gain_burst(
+                state, C.CATALYTIC_BURST_PER_REACTION * bonus, "catalytic")
         state.emit("reaction", reaction=name, trigger=trigger, aura=aura,
                    target=enemy.name,
                    amp_delta=(out - damage) if out != damage else 0)

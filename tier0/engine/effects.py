@@ -340,7 +340,8 @@ def detonate_bombs(state: CombatState, enemy: Enemy, bonus: int = 0) -> None:
                 state.emit("damage", target=other.name, amount=effective,
                            source="detonation_splash")
             if p.burst_max:
-                p.burst_energy += C.DETONATION_SPLASH_BURST
+                resources.gain_burst(
+                    state, C.DETONATION_SPLASH_BURST, "detonation_splash")
         vuln = p.powers.get("detonation_vuln", 0)         # Explosive Frags
         if vuln and enemy.alive:
             powers.apply_power(state, enemy, "vulnerable", vuln)
@@ -573,7 +574,7 @@ def _salon_bow(state: CombatState, member: str) -> None:
     if enc:
         resources.gain_encore(state, enc)
     if p.burst_max:
-        p.burst_energy += C.SALON_TICK_BURST
+        resources.gain_burst(state, C.SALON_TICK_BURST, "salon_final_bow")
     state.emit("salon_final_bow", member=member)
 
 
@@ -695,7 +696,11 @@ def _op_modify_bombs(state: CombatState, fx: dict, card: Card) -> None:
 
 def _op_burst_energy(state: CombatState, fx: dict, card: Card) -> None:
     if state.player.burst_max:
-        state.player.burst_energy += fx["amount"]
+        # The card-text source. Keeps its own `burst_energy` event as well as
+        # the shared `burst_income` one: the old event is what existing
+        # reports and tests read, and C5 is diagnostic -- it does not get to
+        # break a surface that already works.
+        resources.gain_burst(state, fx["amount"], "card")
         state.emit("burst_energy", amount=fx["amount"],
                    total=state.player.burst_energy)
 
@@ -1812,7 +1817,8 @@ def salon_tick(state: CombatState) -> None:
             p.block += amt
             state.emit("block", amount=amt)
         if p.burst_max:
-            p.burst_energy += C.SALON_TICK_BURST     # §1 particle economy
+            # §1 particle economy
+            resources.gain_burst(state, C.SALON_TICK_BURST, "salon_tick")
 
 
 def _exhaust_autoplay_sweep(state: CombatState) -> None:
@@ -1948,7 +1954,8 @@ def player_turn_end_triggers(state: CombatState) -> None:
             deal_damage_to_enemy(state, enemy, damage,
                                  element=None, source="companion")
             if p.burst_max:
-                p.burst_energy += C.WITCHS_FLAME_BURST
+                resources.gain_burst(
+                    state, C.WITCHS_FLAME_BURST, "witchs_flame")
             state.emit("witchs_flame_consumed", target=enemy.name,
                        burst_energy=C.WITCHS_FLAME_BURST)
     if p.powers.get("solar_isotoma", 0):                # Albedo, 3 turns

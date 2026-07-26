@@ -252,9 +252,17 @@ def after_card_exhausted(state: CombatState, card: Card,
     # Dead branch for every player without the relic hook.
     if "tamakushi_casket" in p.relic_hooks:
         from tier0.engine import resources    # late import (module graph)
-        resources.gain_charge(state, C.CHARGE_PER_EXHAUST, "exhaust")
+        # C5: a MUSTERED recruit's rotation is reported separately from every
+        # other exhaust. P8 is a claim specifically about conscript income
+        # ("mustered-companion exhausts, top-two in commander decks"), and a
+        # single "exhaust" bucket cannot answer it -- her whole pool exhausts,
+        # so the bucket would be top-one for every plan and confirm nothing.
+        # `Card.conscripted` is the stamp the conscript op already sets.
+        kind = "exhaust_muster" if getattr(card, "conscripted", False) \
+            else "exhaust"
+        resources.gain_charge(state, C.CHARGE_PER_EXHAUST, kind)
         if p.burst_max:
-            p.burst_energy += C.KOKOMI_BURST_PER_EXHAUST
+            resources.gain_burst(state, C.KOKOMI_BURST_PER_EXHAUST, kind)
     if card.on_exhaust_energy:
         # DrumOfBattle uses PlayerCmd.GainEnergy, so ExpectAFight's
         # NoEnergyGain hook must deny this payout too. Normal on-play energy
