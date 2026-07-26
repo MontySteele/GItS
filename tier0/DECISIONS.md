@@ -2243,3 +2243,182 @@ deploy log line.
 `tier0/tests/test_manifest_version_gate.py` carries a negative test each for
 version mismatch and min-version violation, positive controls for both, and
 the min-game-version pair.
+
+## R71 -- SPOTLIGHT_BASE_MULT 1.5 and Selector v3 constants ratified (2026-07-26)
+
+`SPOTLIGHT_BASE_MULT = 1.5` is RATIFIED. The `PLACEHOLDER` marking is
+removed from `tier0/constants.py`; the constant now cites this R-number as
+its ratification record.
+
+This ruling makes law of a result already committed to. The W0 forced-arm
+sweep {1.25, 1.5} was the PRE-REGISTERED decision procedure -- the word
+"decides" was written into the constant's own comment before the sweep ran
+-- and it returned dose evidence favouring 1.5 at pass 3
+(`furina-pass3-rulings.md`). What was missing was the record, not the
+evidence: the value has been 1.5 in the tree throughout, so **zero numbers
+move with this ruling** and nothing needs re-measuring.
+
+No R14 conflict. W0's oracle mode (`SPOTLIGHT_FORCE`) remains a diagnostic
+that never ships. What is ratified is the sweep's verdict on the LIVE knob,
+not an oracle cell as an acceptance target -- the distinction R14 exists to
+protect.
+
+**The Selector v3 constants (depth >= 4, crowd >= 2) are ratified in the
+same stroke** -- same ask (pass-3 ask 5), same evidence window, same
+discipline (shipped under full instrument protocol per the pass-3 report).
+
+**Executor's note, and it matters for how this one was landed.** The v3
+constants no longer exist. `SPOTLIGHT_COMPANION_DEPTH_MIN = 4` and
+`SPOTLIGHT_COMPANION_MIN_ENEMIES = 2` were deleted on 2026-07-23 by the
+selector v5 rework (commit b4b4434), which replaced character-depth
+targeting outright with the two-mode Center Stage / Guest Cast design.
+Ratification therefore landed as a RECORD, in the selector history block
+that survived R67: the numbers are written down, attributed, and marked as
+the values to restore v3's geometry with, but no constant was resurrected.
+Reintroducing two constants nothing reads would have manufactured exactly
+the dead-knob class R67 deleted nine of three days earlier, and the
+exercise-counter law would have condemned them on arrival.
+
+The general shape is worth naming, because it will recur: **a ruling can
+arrive after the code has moved past what it rules on.** Three days passed
+between the pass-3 ask and the sitting, and the v5 rework happened inside
+that window. The ruling is still honoured -- ratifying a superseded design's
+numbers costs nothing and preserves the reasoning -- but it is honoured as
+history, and the record says so rather than quietly implying v3 is live.
+
+**Class: SAFE** (comment and marking changes only). Also closes the
+`SPOTLIGHT_BASE_MULT` ratification item in `docs/missed-requirements.md`
+Tier 3.
+
+## R72 -- Kaboom Beetle Swarm: bombed-state snapshots at cast (2026-07-26)
+
+Option (b) of the three put to ruling: the vs-bombed bonus is determined by
+a **bombed-state snapshot taken at cast**, the Sizzle idiom. This restores
+the original design intent. Hit 1's detonation no longer strips the bonus
+from hits 2-3; a target bombed at cast pays the +3 on every hit of the
+series.
+
+The presenting report (playtest, 2026-07-20) was that subsequent hits never
+got the bonus. That was never a port bug -- both engines agreed on [8, 5, 5]
+-- so per house law it was a DESIGN question, and it sat QUEUED until now.
+The mechanism was self-defeating in a specific way worth recording: the
+card's own detonation is the payoff the rider rewards, and reading state the
+card had already consumed made the rider partly unreachable. That is the
+same failure Sizzle's aura predicate was written to avoid, which is why the
+idiom transfers cleanly rather than being invented here.
+
+**What landed, both engines, one commit group:**
+
+1. **tier0.** `_op_damage` builds `bombed_at_cast` before the hit loop and
+   the rider tests membership in it. Taken once per cast, so a replay
+   re-snapshots -- correct, because a replay IS a new cast.
+2. **C#.** `KaboomBeetleSwarm.OnPlay` snapshots into `_bombedAtCast` before
+   the damage series and clears it in a `finally`;
+   `ModifyDamageAdditive` consults the snapshot. Outside a play it falls
+   back to the live read -- damage previews ask what the card would do to
+   the CURRENT board, which is a different question from what a cast in
+   progress is paying, and returning 0 there would have blanked the bonus
+   out of the preview.
+3. **The test was REWRITTEN, not deleted**, as ruled.
+   `test_beetle_swarm_bonus_snapshots_bombed_state_at_cast` pins [8, 8, 8]
+   vs a single bombed enemy and asserts the detonation still happens (a run
+   where the bombs never popped would prove nothing). Two more land with
+   it: the negative -- bombs placed after the damage op buy nothing, without
+   which "snapshot" could be implemented as "read once, whenever" and still
+   pass -- and a two-target discrimination test proving the snapshot is
+   per-enemy rather than a single "someone was bombed" flag. The C# phase
+   half is `test_beetle_swarm_snapshots_bombed_state_at_cast` in
+   `test_roster_runtime_contracts`, a source-text check for the same reason
+   the bomb-suppression latch above it is one: WHEN the state is read is
+   invisible to any simulator run, and a silent revert to the live read
+   compiles, plays, and differs from the sim by exactly the +6 this ruling
+   restored.
+4. **Card text: FLAGGED, not reworded.** "Bombed enemies take X more per
+   hit" reads as live state, and under the snapshot the enemy stops being
+   Bombed after hit 1 while still paying on hits 2-3. The sheet is
+   ratified, so the wording is a red-pen call; queued at
+   `docs/open-playtest-items.md` 6.2 with a pointer comment in the C#.
+
+**Exposure note (not part of the ruling).** `bonus_vs_aura`, the sibling
+rider, still reads live. It has zero exposure to this class today -- all
+three cards carrying it are single-hit per target -- so it was left alone
+rather than changed on speculation. If a multi-hit `bonus_vs_aura` card is
+ever printed, it inherits this bug on day one.
+
+**Stamp.** This moves Klee demolition numbers upward, slightly. It landed
+INSIDE EPOCH 1, which was already archiving Klee-touching A6/DPT numbers;
+no third epoch was created.
+
+**Pre-registered prediction, graded with EPOCH 1's** (see
+`docs/epoch-1-log-2026-07-26.md` for the full grading): "demolition-plan
+winrate delta from this change alone is small (< +1.0pt on the canonical
+Cell) -- if it's larger, that's evidence the card was load-bearing and it
+goes on the balance watch list."
+
+**PASS.** 7.5% -> 7.5% (45/600 both arms) on
+`cell=r72-grading seed=11 runs=600 RT7/D10/P3/C3`, klee/demolition. Not on
+the balance watch list.
+
+The two arms were two WORKING TREES, the BEFORE arm being the same repo at
+the commit before R72, so that "this change alone" is literally true. The
+alternative -- an in-process toggle -- would have meant shipping a knob
+whose only reader is a grading script, one ruling after R67 deleted nine of
+those.
+
+**A 0.0pt delta needs its own proof of exercise, and this one has it.** The
+graded cell drafts the card into 6.3% of decks (38/600) and the ratified
+`demolition_weighted` battery package does not contain it at all, so the
+cell is nearly blind to this card and a null could mean either "small
+effect" or "instrument never saw it" -- the two readings R67 spent a ruling
+separating. A forced-carrier arm (two copies in every deck, 400 gauntlet
+fights, 498 casts) resolves it: turns/fight 4.185 -> 4.160 and HP lost/fight
+17.622 -> 17.410. Real, directionally correct, and small. Note that TOTAL
+DAMAGE DEALT is useless here and was discarded mid-measurement: a won fight
+deals exactly the enemies' HP, so it read 37000 in both arms no matter what
+the card did.
+
+**Class: RULING + behavior (both engines) + TESTS.**
+
+## D3 -- Pass-4 ask A5 deferred pending the axis-validity session (2026-07-26)
+
+No new number; a scope decision with a paper trail.
+
+[USER] declines to encode the scorecard invariants (non-elite <= 4.0 cap,
+declared-elite-pair identity) at this time. The seven-axis bands were
+ratified against a battery since recognized as unrealistic, and the open
+question is whether the instrument is even DIRECTIONALLY correct or whether
+the design loop has been overfitting to it -- designs tuned until axes hit
+bands measured on the same battery the bands were ratified against.
+"Passing by coincidence" may be Goodhart, not luck.
+
+Encoding the invariants now would assert the scorecard is right, and that is
+precisely what is unknown. This is a deferral on grounds of validity, not
+cost.
+
+**Consequences, effective immediately:**
+
+1. The scorecard-invariant items are **pulled from the pin batch** (audit
+   §9 step 2). The mechanical repairs in `axes.py` -- eps guard on
+   zero-baseline axes, loud failure on missing `attrition`/`swarm`
+   encounter ids, the `or 1.0` turn-10 default -- **remain** in the pin
+   batch: they make the instrument honest without asserting it is right.
+2. A dedicated **axis-validity design session** is opened on the horizon
+   list (audit §10), sequenced at both ends. **After EPOCH 1 lands**,
+   because A6 splash and `survival_profile` were known instrument errors
+   and re-litigating the framework on contaminated readings decides the
+   wrong question -- EPOCH 1 landed the same day, so this end is clear.
+   **Before the Zhongli deep dive**, because slot 4 must not declare elite
+   axes against a framework nobody trusts. Candidate agenda, non-binding:
+   directional-validity tests via holdouts the designs were never tuned
+   against -- the tier-0.5 realistic gates, and co-op playtest outcomes,
+   which no design loop has ever seen.
+3. Until that session rules, seven-axis numbers are **reportable but not
+   load-bearing**: no new band may be ratified, and no design may be
+   accepted or rejected on axis evidence alone. This standing is recorded
+   in `axes.py`'s module docstring, where the numbers are produced, and in
+   `calibration-notes.md`, whose three parked "next levers" all assume the
+   framework is sound and are therefore parked harder -- extending an
+   instrument is the wrong move while its validity is the open question.
+
+**Class: RULING** (this record) -- no code beyond the pin-batch scope change
+and the docstring that carries the standing.

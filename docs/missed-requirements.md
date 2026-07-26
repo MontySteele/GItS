@@ -191,10 +191,14 @@ Three related items, all flagged in code comments and on no live list:
   band is law until moved, and it is knowingly ~1.3 wrong.
   (`archive/furina-salon-rework-plan.md` §6(c) committed to the re-measure;
   `archive/furina-sheet-pass-3-report.md` ask 3 asked independently.)
-- **`SPOTLIGHT_BASE_MULT` ratification** — `tier0/constants.py:81` is still
-  `PLACEHOLDER` ("Window-zero forced-arm sweep {1.25, 1.5} decides") even
-  though W0 ran at pass 3 and returned dose evidence favouring 1.5
-  (pass-3 ask 5, never ruled).
+- ~~**`SPOTLIGHT_BASE_MULT` ratification**~~ — **CLOSED by R71
+  (2026-07-26).** `tier0/constants.py` carried `PLACEHOLDER` ("Window-zero
+  forced-arm sweep {1.25, 1.5} decides") even though W0 ran at pass 3 and
+  returned dose evidence favouring 1.5 (pass-3 ask 5). Ruled: 1.5 is law,
+  the marking is gone, and the value never moved — a record catching up
+  with a decision, not a change. R71 also ratified the Selector v3
+  constants (depth ≥ 4, crowd ≥ 2) from the same ask, as a RECORD only:
+  v5 had already superseded and deleted them on 2026-07-23.
 - **The drafter's salon-deploy blindness** — `tier05/draft.py:_static_power`
   has no `salon_member` term, so cross-plan the members are invisible
   (§6(d) of the rework plan; the sibling AoE blindness was fixed, this one
@@ -208,12 +212,17 @@ Three related items, all flagged in code comments and on no live list:
   declared elite axes has been measurably short since 2026-07-20 with no
   disposition.
 
-### 3.8 Klee: the Kaboom Beetle Swarm ruling never happened
-- **Source:** `klee-mod/DECISIONS.md:1131` — QUEUED, three named options,
+### 3.8 ~~Klee: the Kaboom Beetle Swarm ruling never happened~~ — CLOSED (R72, 2026-07-26)
+- **Source:** `klee-mod/DECISIONS.md` — QUEUED, three named options,
   *"Sheet unchanged until ruled."*
-- **Evidence:** sheet unchanged; `test_beetle_swarm_bonus_reads_live_bomb_state_per_hit`
-  pins the *current* behaviour, so drift hasn't settled it either. In neither
+- **Evidence at the time:** sheet unchanged; the pinning test held the
+  *current* behaviour, so drift hadn't settled it either. In neither
   ledger's desk queue.
+- **Resolution:** [USER] took option (b) — bombed-state snapshots at cast.
+  Landed in both engines inside EPOCH 1; the pin was rewritten rather than
+  deleted, and the pre-registered winrate prediction passed at 0.0pt. One
+  thread stays open and is [USER]'s: the printed card text still reads as
+  live state (`open-playtest-items.md` §6.2).
 
 ### 3.9 Out-of-scale boss audit (`test_subject`, `knowledge_demon`, `kaiser_crab`)
 - **Source:** `tier05-perf-and-ironclad-act3-notes.md` §1.5.2 item 1 / §1.3.3

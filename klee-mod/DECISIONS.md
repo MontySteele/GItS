@@ -1128,18 +1128,30 @@ pre-resolution, so a card that READS the bank mid-play (formula cards,
 none shipped) would see sim-vs-C# skew -- revisit with evidence when
 formula codegen lands.
 
-**Finding: Kaboom Beetle Swarm's first hit pops the mines (QUEUED for
-ruling -- working as simulated, NOT fixed).** Reported: subsequent hits
-never get the +3 vs-bombed bonus. Verified against tier0: bonus_vs_bombed
-is read per hit at damage time, and hit 1's HP damage detonates that
-enemy's bombs early -- [8, 5, 5] vs a single bombed enemy in BOTH
-engines (new pinning test test_beetle_swarm_bonus_reads_live_bomb_state_
-per_hit). The C# is a faithful mirror, so per house law this is a DESIGN
-question, not a bug: options at ruling time include (a) accept -- "the
+**Finding: Kaboom Beetle Swarm's first hit pops the mines (RULED
+2026-07-26 -- option (b), see tier0/DECISIONS.md R72).** Reported:
+subsequent hits never get the +3 vs-bombed bonus. Verified against tier0:
+bonus_vs_bombed was read per hit at damage time, and hit 1's HP damage
+detonates that enemy's bombs early -- [8, 5, 5] vs a single bombed enemy
+in BOTH engines. The C# was a faithful mirror, so per house law this was a
+DESIGN question, not a bug: options at ruling time were (a) accept -- "the
 swarm sets off the mines" is coherent demolition flavor and the detonation
 damage usually exceeds the forgone +6, (b) snapshot bombed-state at cast
-(the Sizzle idiom), (c) bonus keys off "detonated this play". Sheet
-unchanged until ruled.
+(the Sizzle idiom), (c) bonus keys off "detonated this play".
+
+**[USER] took (b), restoring the original design intent: a target bombed at
+cast pays the +3 on every hit of the series.** Landed in both engines in one
+commit group -- tier0 `_op_damage` snapshots into `bombed_at_cast` before the
+hit loop; `KaboomBeetleSwarm.OnPlay` snapshots into `_bombedAtCast` and
+`ModifyDamageAdditive` consults it, falling back to the live read only
+outside a play (damage previews, which are questions about the current board
+rather than about a cast in progress). The pinning test was REWRITTEN, not
+deleted: `test_beetle_swarm_bonus_snapshots_bombed_state_at_cast` plus a
+negative (bombs placed after cast buy nothing) and a two-target
+discrimination test, with the C# phase half in
+`test_beetle_swarm_snapshots_bombed_state_at_cast`
+(test_roster_runtime_contracts). The card's printed text still reads as
+live state and is flagged for [USER] wording review, not silently reworded.
 
 ## Bomb-manipulation ops -- standing plan item 4 lands (2026-07-20 night)
 

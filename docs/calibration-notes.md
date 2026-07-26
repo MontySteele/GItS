@@ -185,3 +185,18 @@ block ceiling).
    "spike survivability" derived metric) rather than two independent axes,
    since that interaction is where fragile-no-heal identities actually die.
    NOTE: axis-model changes touch the frozen normalization — user red-pen.
+
+### All three of the above now sit under D3 (2026-07-26)
+
+The parked questions above assume the seven-axis framework is sound and ask
+how to extend it. D3 opened the prior question: **is it directionally
+correct at all**, or has the design loop been overfitting to bands measured
+on the same battery they were ratified against? Item 1 above is the same
+suspicion, stated three days earlier and in narrower terms.
+
+Consequence for this doc: nothing here is wrong, but none of it should be
+acted on before the axis-validity session — extending an instrument is the
+wrong move while its validity is the open question. Sequencing and agenda
+live in `tech-debt-audit-2026-07-26.md` §10. Until it rules, seven-axis
+numbers are reportable but **not load-bearing**: no new band ratified, no
+design accepted or rejected on axis evidence alone.

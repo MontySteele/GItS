@@ -531,14 +531,16 @@ def test_x_cost_attack_never_spends_sparks():
     assert st.current_x == 0                # resolved at X = 0
 
 
-def test_beetle_swarm_bonus_reads_live_bomb_state_per_hit():
-    """Playtest finding 2026-07-20 (QUEUED for user ruling -- this is the
-    LAW as simulated, not a bug): bonus_vs_bombed is read per hit at damage
-    time, and the first hit's HP damage detonates that enemy's bombs early,
-    so vs a single bombed enemy only hit 1 is ever buffed. The C# mirrors
-    this exactly (ModifyDamageAdditive reads live state). If the user
-    re-rules (e.g. snapshot bombed-state at cast), this test changes WITH
-    the sheet -- until then it pins what both engines do."""
+def test_beetle_swarm_bonus_snapshots_bombed_state_at_cast():
+    """R72 (2026-07-26): bonus_vs_bombed is a SNAPSHOT taken at cast, so a
+    target bombed when the card is played pays the bonus on every hit of the
+    series -- hit 1's own detonation no longer strips hits 2-3.
+
+    This test replaced test_beetle_swarm_bonus_reads_live_bomb_state_per_hit,
+    which pinned the opposite ([8, 5, 5]) as the playtest finding of
+    2026-07-20 QUEUED for ruling. It was never a bug report against the
+    engine: both engines agreed. The ruling changed the LAW, so the pin
+    changed with it rather than being deleted."""
     from tier0.engine.combat import play_card
     from tier0.engine.state import Bomb
     from tier0.tests.conftest import make_state
@@ -550,8 +552,54 @@ def test_beetle_swarm_bonus_reads_live_bomb_state_per_hit():
     play_card(st, kbs)
     hits = [e["base"] for e in st.log
             if e["event"] == "damage" and e["source"] == "attack"]
-    assert hits == [8, 5, 5]                # +3 on hit 1 only
+    assert hits == [8, 8, 8]                # +3 on all three hits
+    # The detonation still happens on hit 1 -- the bonus outliving it is the
+    # whole point, so a run where the bombs never popped would prove nothing.
     assert any(e["event"] == "bomb_detonation" for e in st.log)
+
+
+def test_beetle_swarm_bonus_is_not_granted_by_bombs_placed_after_cast():
+    """R72's negative half: the snapshot is taken at cast, so bombs arriving
+    later in the same card do not retroactively buy the bonus. Without this,
+    'snapshot' could be implemented as 'read once, whenever' and still pass
+    the positive test."""
+    from tier0.engine import effects
+    from tier0.engine.state import Card
+    from tier0.tests.conftest import make_state
+    st = make_state()
+    c = Card(id="t", name="t", cost=1, type="attack", effects=[
+        {"op": "damage", "amount": 5, "target": "enemy", "times": 3,
+         "bonus_vs_bombed": 3},
+        {"op": "place_bomb", "amount": 1, "target": "enemy",
+         "bomb_damage": 6},
+    ])
+    effects.resolve_card(st, c)
+    hits = [e["base"] for e in st.log
+            if e["event"] == "damage" and e["source"] == "attack"]
+    assert hits == [5, 5, 5]                # unbombed at cast -> no bonus
+    assert len(st.enemies[0].bombs) == 1    # ...and the bomb did land
+
+
+def test_beetle_swarm_snapshot_discriminates_between_targets():
+    """The snapshot is per-enemy, not a single 'anyone was bombed' flag: in
+    one series, the enemy bombed at cast is bonused on every hit and the
+    unbombed one on none. Deterministic because the target is all_enemies."""
+    from tier0.engine import effects
+    from tier0.engine.state import Bomb, Card
+    from tier0.tests.conftest import make_enemy, make_state
+    st = make_state(enemies=[make_enemy(name="bombed"),
+                             make_enemy(name="clean")])
+    st.enemies[0].bombs.append(Bomb(damage=5, turn_placed=0))
+    c = Card(id="t", name="t", cost=1, type="attack", effects=[
+        {"op": "damage", "amount": 5, "target": "all_enemies", "times": 3,
+         "bonus_vs_bombed": 3}])
+    effects.resolve_card(st, c)
+    by_target = {}
+    for e in st.log:
+        if e["event"] == "damage" and e["source"] == "attack":
+            by_target.setdefault(e["target"], []).append(e["base"])
+    assert by_target["bombed"] == [8, 8, 8]
+    assert by_target["clean"] == [5, 5, 5]
 
 
 def test_mono_pyro_deck_cannot_react_alone():

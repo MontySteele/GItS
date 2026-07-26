@@ -424,10 +424,22 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     base += sum(state.player.powers.get(f"tag_damage_{t}", 0)
                 for t in card.tags)
 
+    # R72 (2026-07-26): the vs-bombed bonus is a SNAPSHOT taken at cast, the
+    # Sizzle idiom -- not a live per-hit read. Under the live read, hit 1 of a
+    # multi-hit attack detonated the target's bombs and hits 2-3 then found no
+    # bombs to be bonused against, so Kaboom Beetle Swarm could never pay its
+    # printed bonus more than once (playtest finding 2026-07-20). The card's
+    # own detonation is the payoff the bonus rewards; reading state the card
+    # already consumed made the rider partly unreachable, the same failure
+    # Sizzle's aura predicate avoids. Taken once per cast, so a replay
+    # re-snapshots -- which is correct, a replay IS a new cast.
+    bombed_at_cast = ({id(e) for e in state.enemies if e.bombs}
+                      if fx.get("bonus_vs_bombed") else frozenset())
+
     for _ in range(times):
         for enemy in _pick_targets(state, fx.get("target", "enemy")):
             hit = base
-            if fx.get("bonus_vs_bombed") and enemy.bombs:
+            if fx.get("bonus_vs_bombed") and id(enemy) in bombed_at_cast:
                 hit += fx["bonus_vs_bombed"]
             if fx.get("bonus_vs_aura") and enemy.aura:
                 hit += fx["bonus_vs_aura"]

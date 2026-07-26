@@ -78,22 +78,30 @@ MASQUE_BOND_BLOCK = 5             # Arlecchino: Bond of Life, Block owed per tur
 CATALYTIC_BURST_PER_REACTION = 5  # Catalytic Conversion bonus burst/reaction
 
 # --- Furina: Spotlight (kickoff §3) ---
-SPOTLIGHT_BASE_MULT = 1.5     # PLACEHOLDER (R33 veto, 2026-07-20): the
-                              # pass-2 "MEASURED 1.0" record is STRUCK.
-                              # E1's identical cells were guaranteed by
-                              # selector v2 (companion branch
-                              # unreachable at ~20 self cards vs 3-5
-                              # card kits) -- the constant was never
-                              # READ in any cell (exercise-counter law,
-                              # DECISIONS 87). E1 re-scoped to a valid
-                              # MEDIAN-DEPTH null only; never summarize
-                              # it as "the knob is dead". 1.5 restored
-                              # the pass-1 companion geometry against the
+SPOTLIGHT_BASE_MULT = 1.5     # RATIFIED (R71, 2026-07-26). The W0
+                              # forced-arm sweep {1.25, 1.5} was the
+                              # PRE-REGISTERED decision procedure -- this
+                              # comment said "decides", and it did: pass 3
+                              # returned dose evidence favouring 1.5
+                              # (furina-pass3-rulings.md). R71 makes law of
+                              # a result already committed to; the value
+                              # does not move, so no number in the tree
+                              # changes with this line.
+                              # History, kept because it is why the
+                              # PLACEHOLDER marking existed at all:
+                              # the pass-2 "MEASURED 1.0" record is STRUCK
+                              # (R33 veto, 2026-07-20). E1's identical
+                              # cells were guaranteed by selector v2
+                              # (companion branch unreachable at ~20 self
+                              # cards vs 3-5 card kits) -- the constant was
+                              # never READ in any cell (exercise-counter
+                              # law, DECISIONS 87). E1 re-scoped to a valid
+                              # MEDIAN-DEPTH null only; never summarize it
+                              # as "the knob is dead". 1.5 restored the
+                              # pass-1 companion geometry against the
                               # then-current self rate of 1.25. R40 later
                               # moved self aim to 1.0 without changing this
                               # outward-Spotlight value.
-                              # Window-zero forced-arm sweep {1.25,
-                              # 1.5} decides (furina-pass3-rulings.md).
 # SPOTLIGHT_SELF_MULT: DELETED by R67 (2026-07-26). It had zero readers --
 # effects.spotlight_mult() hard-codes the 1.0 self-aim early return and never
 # consulted the constant -- so exp_furina_sheetpass block C2 swept three
@@ -116,12 +124,20 @@ SPOTLIGHT_GUEST_CAST = "__guest_cast__"  # all Companion cards share the light
 #    number is a self-Spotlight world);
 # v3 value-aware threshold (pass 3, derived from the W0 oracle arms):
 #    designate the deepest companion iff its per-character depth
-#    reaches SPOTLIGHT_COMPANION_DEPTH_MIN AND the stage holds a
-#    crowd (>= SPOTLIGHT_COMPANION_MIN_ENEMIES living enemies);
+#    reaches SPOTLIGHT_COMPANION_DEPTH_MIN (4) AND the stage holds a
+#    crowd (>= SPOTLIGHT_COMPANION_MIN_ENEMIES, 2, living enemies);
 #    otherwise self. W0 evidence: forced-companion at full-kit depth
 #    is +12.5pt on attrition and -10pt on tank_boss — outward aim is
 #    encounter-contingent, so the selector reads the fight, not just
 #    the deck.
+#    RATIFIED (R71, 2026-07-26) — and ratified as a RECORD, not as live
+#    law. v5 replaced character-depth targeting outright on 2026-07-23
+#    (commit b4b4434) and deleted both constants along with the branch
+#    that read them, three days before the ruling landed. The
+#    ratification is honoured by writing down what it ratified; it is NOT
+#    honoured by resurrecting two constants nothing reads, which is the
+#    class R67 had just deleted nine of. If v3's geometry is ever wanted
+#    back, 4 and 2 are the ratified numbers to restore it with.
 # v4 keeps v3 for drafted companions, but a card created into hand by a
 #    Guest Star generator is eligible at depth one.
 # v5 replaces character-depth targeting with the explicit two-mode design:

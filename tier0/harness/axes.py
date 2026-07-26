@@ -5,6 +5,21 @@ baseline-relative ratios (inverted where lower-is-better), capped at 10.
 Where a raw baseline can be ~0 (A5 velocity: starter has no extra draw),
 the raw value includes the base turn economy so ratios stay finite —
 noted per-axis below.
+
+STANDING (D3, 2026-07-26): seven-axis numbers are REPORTABLE BUT NOT
+LOAD-BEARING. Until the axis-validity design session rules, no new band may
+be ratified and no design may be accepted or rejected on axis evidence
+alone. [USER] declined to encode the scorecard invariants (audit §2.2), and
+the reason belongs where the numbers are produced: the bands were ratified
+against a battery since recognized as unrealistic, and designs have been
+tuned until the axes hit those bands — so a design "passing" may be
+Goodhart rather than luck, and the open question is whether the instrument
+is even DIRECTIONALLY correct. That is a question about this file's output,
+not about its arithmetic. The mechanical repairs it still owes (eps guard
+on zero-baseline axes, loud failure on a missing attrition/swarm encounter
+id, the `or 1.0` turn-10 default) stay queued in the pin batch, because
+they make the instrument honest without asserting it is right.
+See tier0/DECISIONS.md D3.
 """
 
 from __future__ import annotations

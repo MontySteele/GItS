@@ -47,6 +47,8 @@ otherwise).
 | `kokomi-playtest-protocol.md` | The protocol for Kokomi's first table time (never played). Where it conflicts with `open-playtest-items.md` §2, the latter wins (newer). |
 | `run-model-rework-plan.md` | Implemented (Passes 1–4 shipped); kept current for §10.9, the living skip backlog. |
 | `tier05-perf-and-ironclad-act3-notes.md` | Perf pass record; kept current for §1.5.2's open items (out-of-scale boss audit lives only here). |
+| `tech-debt-audit-2026-07-26.md` | The architecture audit; kept current for §9 (the big-push sequencing, with D3's pin-batch pull marked in place) and §10, the horizon list of open design sessions. |
+| `epoch-1-log-2026-07-26.md` | EPOCH 1's landing record: what moved, what was archived, and the graded predictions. The current canonical-cell baseline lives here. |
 
 ### Live references
 | doc | what it is |

@@ -21,10 +21,13 @@ namespace KleeMod.Cards;
 /// vs Bombed enemies. Hand-written (R23 batch -- the bonus needs the bomb
 /// system, and ModifyDamageAdditive is the verified per-target idiom).
 ///
-/// The bonus checks the bomb AT HIT TIME: the first hit of this card can pop
-/// the bombs (early detonation), and later hits on that enemy then get no
-/// bonus -- same as the sim, where bonus_vs_bombed is evaluated per hit
-/// against live bomb state.
+/// The bonus is SNAPSHOTTED at cast (R72, 2026-07-26), the Sizzle idiom:
+/// an enemy that is Bombed when the card is played pays the bonus on every
+/// hit of the series. Previously the bonus read live bomb state per hit, so
+/// hit 1's own detonation stripped the bonus from hits 2-3 and the rider
+/// could never be paid more than once vs a single target (playtest finding
+/// 2026-07-20, ruled 2026-07-26). Mirrors tier0 effects.py `_op_damage`,
+/// which snapshots the same way.
 /// </summary>
 public sealed class KaboomBeetleSwarm : CustomCardModel, IElementalCard
 {
@@ -39,6 +42,12 @@ public sealed class KaboomBeetleSwarm : CustomCardModel, IElementalCard
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("kaboom_beetle_swarm");
 
+    // WORDING FLAGGED FOR [USER] (R72 item 4, 2026-07-26), deliberately NOT
+    // changed here: "Bombed enemies take ... more per hit" reads as live
+    // state, and under the snapshot the enemy stops being Bombed after hit 1
+    // while still paying the bonus on hits 2-3. The sheet is ratified, so the
+    // rewording is a red-pen call, not an executor's; queued in
+    // docs/open-playtest-items.md 6.2.
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaboom Beetle Swarm"),
@@ -60,23 +69,61 @@ public sealed class KaboomBeetleSwarm : CustomCardModel, IElementalCard
     {
     }
 
+    /// <summary>
+    /// Who was Bombed when this card was cast. Non-null only between the top
+    /// of <see cref="OnPlay"/> and the end of its damage series -- one card
+    /// resolves at a time, the same scoping SparkPower's pending-spend state
+    /// relies on. Reference identity, not a comparer: Creature does not
+    /// override Equals, and a list of at most a handful of enemies makes the
+    /// lookup cost irrelevant.
+    /// </summary>
+    private List<Creature>? _bombedAtCast;
+
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
     {
         if (cardSource != this || target == null) return 0m;
-        return target.Powers.OfType<BombPower>().Any()
-            ? DynamicVars.ExtraDamage.BaseValue
-            : 0m;
+
+        // Inside our own series, the snapshot is the authority (R72). Outside
+        // it -- damage previews and any other caller that asks what this card
+        // would do right now -- fall back to the live read, which is the right
+        // answer for a question about the CURRENT board rather than about a
+        // cast in progress. Returning 0m here instead would blank the bonus
+        // out of the preview.
+        var bombed = _bombedAtCast is { } snap
+            ? snap.Any(c => ReferenceEquals(c, target))
+            : target.Powers.OfType<BombPower>().Any();
+
+        return bombed ? DynamicVars.ExtraDamage.BaseValue : 0m;
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .WithHitCount(3)
-            .FromCard(this)
-            .TargetingRandomOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
-            .Execute(choiceContext);
+        // Taken before the first hit resolves: the sim's snapshot sits at the
+        // top of the damage op, i.e. after any earlier effect of the same card
+        // has run and before any hit lands. This card has no earlier effect,
+        // so the two coincide exactly.
+        // HittableEnemies is the verified live-enemy accessor (the sim
+        // iterates living_enemies); TargetingRandomOpponents draws from the
+        // same population, so nothing can be hit that the snapshot never saw.
+        _bombedAtCast = CombatState!.HittableEnemies
+            .Where(c => c.Powers.OfType<BombPower>().Any())
+            .ToList<Creature>();
+        try
+        {
+            await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+                .WithHitCount(3)
+                .FromCard(this)
+                .TargetingRandomOpponents(CombatState!)
+                .WithHitFx("vfx/vfx_attack_slash")
+                .Execute(choiceContext);
+        }
+        finally
+        {
+            // Cleared even if the series throws, so a failed play can never
+            // leave a stale snapshot to be consulted by the next one.
+            _bombedAtCast = null;
+        }
     }
 
     protected override void OnUpgrade()
