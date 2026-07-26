@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -39,12 +40,15 @@ public sealed class GrandConscription : CustomCardModel, ICharacterCard
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Exhaust };
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KokomiRiderTips.ForMuster(base.ExtraHoverTips, this);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("grand_conscription");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "General Muster of Watatsumi"),
-        ("description", "Muster 3 Inazuman allies: transform 3 cards in your hand into a random Inazuma [gold]Companion[/gold] that costs 1 less and [gold]Exhausts[/gold]. Gain 2 [gold]Charge[/gold]."),
+        ("description", "[gold]Muster[/gold] 3. Gain 2 [gold]Charge[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

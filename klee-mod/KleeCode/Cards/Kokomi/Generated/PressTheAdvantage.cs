@@ -44,14 +44,14 @@ public sealed class PressTheAdvantage : CustomCardModel, IElementalCard, ICharac
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
+        KokomiRiderTips.ForMuster(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("press_the_advantage");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Press the Advantage"),
-        ("description", "Deal {Damage:diff()} damage. Muster an Inazuman ally: transform 1 card in your hand into a random Inazuma [gold]Companion[/gold] that costs 1 less and [gold]Exhausts[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. [gold]Muster[/gold] 1, at cost 0."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

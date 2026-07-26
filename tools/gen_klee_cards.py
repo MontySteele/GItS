@@ -2219,15 +2219,32 @@ def _conscript_phrase(eff: dict) -> str:
     Shogunate behaviour and the resistance were volunteers, so the display
     family is Muster/Enlist/Rally. The internal op name stays `conscript`;
     the FACE never says it.
+
+    R78 (Neap Tide v2.1): the grammar is a KEYWORD now. Every conscript card
+    used to restate the whole rule -- "transform N cards in your hand into a
+    random Inazuma Companion that costs 1 less and Exhausts" -- on nine cards,
+    which is ~90 characters of identical text per face and the reason several
+    of them were at text budget. "Muster N" says it once; the hover tip
+    (KokomiRiderTips.ForMuster, attached by codegen to every conscript card)
+    carries the definition.
+
+    DEVIATIONS WRITE OUT ONLY THE DEVIATION, which is the half that makes the
+    keyword worth having. `create` mode adds the unit instead of replacing a
+    card, and a cost_override pins the recruit's cost -- each prints its own
+    clause and nothing else, so what a reader sees on the face is exactly what
+    is different about this card.
     """
     n = int(eff.get("amount", 1))
-    unit = "an Inazuman ally" if n == 1 else f"{n} Inazuman allies"
+    phrase = f"[gold]Muster[/gold] {n}"
     if eff.get("mode") == "create":
-        return f"muster {unit} to your hand"
-    plural = "" if n == 1 else "s"
-    return (f"muster {unit}: transform {n} card{plural} in your hand into "
-            f"a random Inazuma [gold]Companion[/gold] that costs 1 less "
-            f"and [gold]Exhausts[/gold]")
+        # The deviation is WHERE the units land, not what they are.
+        phrase += f", adding the unit{'' if n == 1 else 's'} to your hand"
+    if "cost_override" in eff:
+        # The deviation is the price. The keyword's own "costs 1 less" is
+        # replaced, not stacked with -- KokomiConscript.RollRecruit treats
+        # cost_override as reaching the target ABSOLUTELY.
+        phrase += f", at cost {int(eff['cost_override'])}"
+    return phrase
 
 
 def _stmt_gain_encore(
@@ -4200,6 +4217,15 @@ def emit(
         if card.get("type") == "attack":
             tips_expr = (
                 "KokomiRiderTips.ForGarmentAttack("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # R78: every Muster card carries the keyword's definition, because
+        # the faces no longer restate it. Attached from the OP rather than
+        # from a card list, so a new conscript card cannot ship with a
+        # keyword nothing on screen defines.
+        if any(eff.get("op") == "conscript"
+               for eff in _effects_everywhere(card)):
+            tips_expr = (
+                "KokomiRiderTips.ForMuster("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
     if tips_expr:
         tooltip_member = (
