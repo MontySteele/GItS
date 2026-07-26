@@ -65,5 +65,6 @@ public sealed class AriaOfRecompense : CustomCardModel, ICharacterCard
     protected override void OnUpgrade()
     {
         // encore: every gain_encore site reads IsUpgraded at play time (branches included).
+        AddKeyword(CardKeyword.Innate);
     }
 }

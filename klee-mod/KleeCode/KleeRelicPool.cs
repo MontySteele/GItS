@@ -37,6 +37,13 @@ public sealed class KleeRelicPool : RelicPoolModel
     protected override IEnumerable<RelicModel> GenerateAllRelics()
     {
         return ModelDb.RelicPool<SilentRelicPool>().AllRelics
-            .Append(ModelDb.Relic<Relics.PoundingSurprise>());
+            .Append(ModelDb.Relic<Relics.PoundingSurprise>())
+            // EPOCH 2 / D1 (audit sec.1.2): the upgraded starter was poolless,
+            // and RelicModel.Pool throws for a poolless relic -- the crash
+            // Pounding Surprise itself caused (finding 27), reachable here at
+            // the mid-run Touch of Orobas grant instead of at character select.
+            // Ancient rarity keeps it off reward rolls, which take
+            // Common/Uncommon/Rare/Shop/Boss only (see the header above).
+            .Append(ModelDb.Relic<Relics.ExplosiveFrags>());
     }
 }

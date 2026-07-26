@@ -49,8 +49,29 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-CHARACTER = "CHARACTER.KLEE"
+# E3 (audit sec.5): this instrument predates the roster and could not see
+# Furina or Kokomi runs at all -- `CHARACTER.KLEE` was a module constant and
+# `klee_player()` was in its name. A soak box running the shipped mod produces
+# runs for three characters; the analyser silently discarded two thirds of
+# them and reported the remainder as "the soak".
+#
+# The card prefix is MOD-wide, not character-wide: every card this mod ships
+# carries `CARD.KLEEMOD-` whoever owns it, because it is BaseLib's mod-id
+# prefix. It stays a single constant on purpose -- making it per-character
+# would invent a distinction the game does not have.
 CARD_PREFIX = "CARD.KLEEMOD-"
+
+# Character id in the run history -> the name this repo uses everywhere else.
+# A curated map because the two vocabularies are genuinely different (the game
+# upper-cases and namespaces; the sim uses the sheet name), and because a
+# fourth character must be ADDED here rather than silently missing.
+ROSTER = {
+    "CHARACTER.KLEE": "klee",
+    "CHARACTER.FURINA": "furina",
+    "CHARACTER.KOKOMI": "kokomi",
+}
+DEFAULT_CHARACTER = "CHARACTER.KLEE"
+CHARACTER = DEFAULT_CHARACTER      # back-compat for callers that imported it
 
 # The game writes under a `modded/` profile when any mod is loaded; an unmodded
 # run of the same profile writes beside it. We only ever want the modded tree.
@@ -66,7 +87,11 @@ def find_history_dirs(root: Path = DEFAULT_ROOT) -> list[Path]:
     return sorted(root.glob("*/modded/profile*/saves/history"))
 
 
-def load_runs(dirs: list[Path], character: str = CHARACTER) -> list[dict]:
+def load_runs(dirs: list[Path],
+              character: str | None = DEFAULT_CHARACTER) -> list[dict]:
+    """Runs featuring `character`, or -- with `character=None` -- every run
+    featuring ANY roster character. The None case is what makes a mixed soak
+    readable instead of silently Klee-only."""
     runs = []
     for d in dirs:
         for f in sorted(d.glob("*.run"), key=lambda p: p.stat().st_mtime):
@@ -76,7 +101,8 @@ def load_runs(dirs: list[Path], character: str = CHARACTER) -> list[dict]:
                 print(f"  ! unreadable {f.name}: {e}", file=sys.stderr)
                 continue
             players = data.get("players") or []
-            if not any(p.get("character") == character for p in players):
+            wanted = ROSTER if character is None else {character}
+            if not any(p.get("character") in wanted for p in players):
                 continue
             data["_file"] = f
             runs.append(data)
@@ -89,8 +115,21 @@ def card_id(entry: dict) -> str:
     return raw[len(CARD_PREFIX):].lower() if raw.startswith(CARD_PREFIX) else raw
 
 
-def klee_player(run: dict) -> dict:
-    return next(p for p in run["players"] if p.get("character") == CHARACTER)
+def roster_player(run: dict, character: str | None = None) -> dict:
+    """The roster seat in this run.
+
+    With `character` given, that seat specifically. Without, the first seat
+    belonging to ANY roster character -- which is what makes a co-op run
+    readable at all: a Klee/Kokomi lobby has two roster seats and the old
+    Klee-only lookup would raise StopIteration on a Furina/Kokomi one.
+    """
+    wanted = ROSTER if character is None else {character}
+    return next(p for p in run["players"] if p.get("character") in wanted)
+
+
+def roster_seats(run: dict) -> list[dict]:
+    """EVERY roster seat, so a co-op run is not counted as one player."""
+    return [p for p in run["players"] if p.get("character") in ROSTER]
 
 
 def drafted_cards(run: dict) -> list[dict]:
@@ -98,7 +137,7 @@ def drafted_cards(run: dict) -> list[dict]:
 
     Mirrors M6's basics exclusion by a different route -- see module docstring.
     """
-    return [c for c in klee_player(run).get("deck", [])
+    return [c for c in roster_player(run).get("deck", [])
             if c.get("floor_added_to_deck", 1) > 1]
 
 
@@ -111,7 +150,7 @@ def summarize(runs: list[dict]) -> dict:
         return {}
     wins = sum(1 for r in runs if r.get("win"))
     abandoned = sum(1 for r in runs if r.get("was_abandoned"))
-    decks = [len(klee_player(r).get("deck", [])) for r in runs]
+    decks = [len(roster_player(r).get("deck", [])) for r in runs]
     drafted = [len(drafted_cards(r)) for r in runs]
     floors = [floors_reached(r) for r in runs]
     return {
@@ -149,13 +188,13 @@ def suspicious(runs: list[dict]) -> list[tuple[dict, str]]:
     return out
 
 
-def print_report(s: dict, runs: list[dict]) -> None:
+def print_report(s: dict, runs: list[dict], label: str = "roster") -> None:
     if not s:
-        print("No Klee runs found. Is the soak pointed at a modded profile?")
+        print(f"No {label} runs found. Is the soak pointed at a modded profile?")
         return
     # ASCII only in printed output: the Windows console defaults to cp1252 and
     # mangles em dashes, which is noise in a log you will read at 3am.
-    print(f"\n=== Tier 1 soak - {s['runs']} Klee runs ===")
+    print(f"\n=== Tier 1 soak - {s['runs']} {label} runs ===")
     builds = ", ".join(f"{b} x{n}" for b, n in s["builds"].most_common())
     print(f"  build(s)       {builds}")
     print(f"  winrate        {s['winrate']:.1%}  ({s['wins']}/{s['runs']})")
@@ -197,7 +236,16 @@ def main(argv: list[str] | None = None) -> int:
                     help="only list runs that ended abnormally")
     ap.add_argument("--predict", action="store_true",
                     help="compare against Tier 0.5 (read the scope caveat)")
+    # E3. Default is the WHOLE roster, not Klee. The old default was Klee by
+    # construction rather than by choice, and it made "the soak" mean "the
+    # third of the soak this tool happened to look at".
+    ap.add_argument("--character", default="all",
+                    choices=["all", *sorted(ROSTER.values())],
+                    help="restrict to one character (default: all)")
     args = ap.parse_args(argv)
+
+    by_name = {v: k for k, v in ROSTER.items()}
+    character = None if args.character == "all" else by_name[args.character]
 
     dirs = find_history_dirs(args.root)
     if not dirs:
@@ -205,16 +253,27 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     for d in dirs:
         print(f"reading {d}")
-    runs = load_runs(dirs)
+    runs = load_runs(dirs, character)
+    label = "roster" if args.character == "all" else args.character
+
+    # Which characters the soak ACTUALLY contains, printed every run. A soak
+    # that turns out to be 90% one character is a finding about the soak, and
+    # the Klee-only tool could not have told you -- it discarded the rest
+    # silently and reported what was left as "the soak".
+    seats = Counter(p.get("character") for r in runs for p in roster_seats(r))
+    if seats:
+        mix = ", ".join(f"{ROSTER.get(k, k)} {v}"
+                        for k, v in sorted(seats.items()))
+        print(f"roster seats: {mix}")
 
     if args.crashes:
         flagged = suspicious(runs)
-        print(f"\n{len(flagged)} suspicious of {len(runs)} Klee runs")
+        print(f"\n{len(flagged)} suspicious of {len(runs)} {label} runs")
         for r, why in flagged:
             print(f"  seed {r.get('seed')}  {why}  ({r['_file'].name})")
         return 0
 
-    print_report(summarize(runs), runs)
+    print_report(summarize(runs), runs, label)
 
     if args.predict:
         print("\n" + "=" * 68)

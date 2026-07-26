@@ -9,7 +9,21 @@
 soloists_solicitation: {damage: +3}          # 4->7, Strike-exact
 stage_presence:        {block: +3}           # 6->9
 regal_bearing:         {block: +2}           # 3->5; the glance stays 1 Weak
-aria_of_recompense:    {encore: +3}          # 5->8
+# Q3 (USER directive 2026-07-24), SHIPPED by EPOCH 2 (2026-07-26). "One Encore
+# card should upgrade to Innate, to solve 'I have no Encore, so half my cards
+# don't work.'" Q3a proved the pipeline supports it (two shipped precedents now:
+# catalytic_conversion+, kurages_oath+); Q3b chose this card over the common-tier
+# alternate (curtain_up) because a BASIC is guaranteed in every deck, making the
+# fix a campfire decision every run rather than a draft lottery -- the shape of
+# the complaint. Q3b/c/d measured it green: +0.4pt, A1 flat, no first-fire
+# domination. The directive was then orphaned when its host doc went stale
+# (missed-requirements sec.1.5) and never landed. Exactly one copy is in the
+# starting deck, so Innate cannot flood an opening hand.
+# The encore delta is KEPT: the directive ADDS Innate, it does not trade for it.
+# (Contrast kokomi-upgrades `kurages_oath`, where [USER] ruled the upgrade buys
+# INNATE ONLY -- annotated there as a card-specific ruling, with no equivalent
+# ever made here.)
+aria_of_recompense:    {encore: +3, innate: true}   # 5->8, and starts in hand
 salon_debut:           {add: {op: gain_encore, amount: 2}}   # signature: deploy gains a buffer rider (upkeep pre-paid)
 
 # ---- COMMONS (one number bump each; zero cost reductions) ----

@@ -8,6 +8,8 @@ delegates, and therefore are invisible to the simulator.
 from pathlib import Path
 import re
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "klee-mod" / "KleeCode"
@@ -64,11 +66,13 @@ def test_scene_conversion_paths_are_unique_across_the_roster():
             owners[path] = f"{character}.{property_name}"
 
 
+CONTRACT = ROOT / "klee-mod" / "assets" / "klee.pck.contract.txt"
+
+
 def test_pck_builder_authors_every_character_scene_and_material():
     # Two authoring channels (animation sprint 1): heredoc text inside
     # build_pck.ps1, or a git-tracked scene source under klee-mod/pck-src/
-    # that the build overlays into the pck work dir. Either way the contract
-    # list at the bottom of build_pck.ps1 must name the resource.
+    # that the build overlays into the pck work dir.
     pck_src = ROOT / "klee-mod" / "pck-src"
     for character, source in CHARACTERS.items():
         resources = re.findall(
@@ -82,19 +86,75 @@ def test_pck_builder_authors_every_character_scene_and_material():
                 f"{character} references {resource}, but build_pck.ps1 "
                 "does not author it and klee-mod/pck-src does not carry it"
             )
-            assert f"resource=res://{resource}" in PCK_BUILDER
+
+
+def test_the_pck_contract_is_derived_from_the_build_not_written_by_hand():
+    """C4 (audit sec.3.2). The contract must MEASURE the pck, not assert it.
+
+    Until this sprint the builder appended a hand-written list of ~45
+    `resource=` lines after the export, and this file asserted against THAT
+    list -- an assertion checking an assertion, with the actual pack contents
+    untouched by either. Every copy block in the builder skips on a missing
+    source, so the contract named `res://furina/salon/member_usher.png`
+    whether or not that file existed; missing salon art shipped with all
+    gates green.
+
+    Pinned on the mechanism rather than on any resource name, because a
+    derived list has no fixed contents.
+    """
+    assert '$contract = "$out.contract.txt"' in PCK_BUILDER
+    assert "contract=roster-pck-v3" in PCK_BUILDER
+    assert "Get-FileHash" in PCK_BUILDER
+    # Derived: enumerate the work directory, do not restate a literal.
+    assert "Get-ChildItem $work -Recurse -File" in PCK_BUILDER
+    assert "Contract would be empty" in PCK_BUILDER, (
+        "an empty derived contract must throw -- a zero-length measurement is "
+        "the failure mode a derived list introduces, and it has to be loud")
+    # No resource literal may reappear: that is the hand-written list coming
+    # back, and it would silently outrank the derived one. Matched as a quoted
+    # string with a PATH inside it -- the derived line is the bare prefix
+    # `'resource=res://' + $_.FullName...`, which is the one legal occurrence.
+    literals = re.findall(r"'resource=res://[^']+'", PCK_BUILDER)
+    assert not literals, (
+        f"literal resource lines are back in the builder: {literals[:3]}. The "
+        "contract is derived; a literal beside it is the sec.3.2 defect "
+        "returning, and it would assert what the build did not do.")
 
 
 def test_deploy_rejects_an_old_or_mismatched_pck():
     deploy = (ROOT / "klee-mod" / "build" / "deploy.ps1").read_text()
     validate = (ROOT / "klee-mod" / "build" / "validate.ps1").read_text()
 
-    assert '$contract = "$out.contract.txt"' in PCK_BUILDER
-    assert "contract=roster-pck-v2" in PCK_BUILDER
-    assert "Get-FileHash" in PCK_BUILDER
     assert "pck.contract.txt" in deploy
-    assert "contract=roster-pck-v2" in validate
+    # v2 is stale BY DEFINITION, not merely by age: a v2 contract is a
+    # hand-written one, so reading it as current reads an assertion as a
+    # measurement.
+    assert "contract=roster-pck-v3" in validate
+    assert "roster-pck-v2" not in validate
     assert "Get-FileHash" in validate
+
+
+@pytest.mark.skipif(
+    not CONTRACT.exists(),
+    reason="*.pck.contract.txt is a gitignored build artifact; only present "
+           "where the pck has been built")
+def test_the_built_contract_names_every_referenced_scene():
+    """The assertion that moved out of the builder's source and onto its OUTPUT.
+
+    This is the half that can actually fail when a copy block skips: the
+    resource is missing from the work directory, so it is missing from the
+    derived contract, so this fails -- where the old source-text check passed
+    because the literal was still typed in the script.
+    """
+    contract = CONTRACT.read_text(encoding="utf-8")
+    assert "contract=roster-pck-v3" in contract, "rebuild with build_pck.ps1"
+    for character, source in CHARACTERS.items():
+        for resource in re.findall(
+                r'KleePck\.Path\("([^"]+\.(?:tscn|tres))"\)', source):
+            assert f"resource=res://{resource}" in contract, (
+                f"{character} references {resource}, and the built pck "
+                "contract does not list it -- a copy block skipped, or the "
+                "pck is stale. Rebuild with tools/build_pck.ps1.")
 
 
 def test_roster_uses_one_combined_combat_hook_subscription():

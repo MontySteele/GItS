@@ -589,3 +589,46 @@ def test_unconverted_riders_keep_their_sentence_on_the_face():
     big_one = gen.emit(klee_by_id["grand_finale"], gen.KLEE_PROFILE)
     assert "damage per [gold]Bomb[/gold] detonated this combat." in big_one
     assert "FurinaRiderTips" not in big_one
+
+
+def test_crackle_prints_the_sentence_its_semantics_were_pinned_against():
+    """Audit sec.4 item 5: Crackle's semantics are pinned twice, its SENTENCE never.
+
+    `test_crackle_spark_is_priced_by_the_discard` and
+    `test_crackle_upgrade_applies_r36_deltas` both pin what the card DOES.
+    Neither reads what the card SAYS, and the card's text is the only place a
+    player learns that an empty hand pays nothing -- the whole R10 replacement
+    design ("discard is a real cost, not an engine, for Klee").
+
+    The "1" in "gain 1 Spark per card discarded" is a LITERAL, while every
+    other number on the face is a bound `{Var:diff()}` token. That is safe
+    today for exactly one reason: R36 moved `Discards` and `Sparks` by the
+    same delta, so `Math.Min(Sparks, picked.Count)` always equals the number
+    of cards actually discarded. Bump one without the other and the sentence
+    starts lying with the whole lint suite green -- which is why the pin below
+    asserts the sentence AND the invariant that makes it true, not just the
+    sentence.
+    """
+    klee_by_id = {
+        card["id"]: card
+        for card in yaml.safe_load(gen.SHEET.read_text(encoding="utf-8"))
+    }
+    crackle = gen.emit(klee_by_id["crackle"], gen.KLEE_PROFILE)
+
+    assert (
+        '"Deal {Damage:diff()} damage to a random enemy. '
+        'Discard {Discards:diff()} card{Discards:plural:|s}: '
+        'gain 1 [gold]Spark[/gold] per card discarded."' in crackle
+    ), crackle
+
+    # The plural token, not a hardcoded "s": Crackle+ discards 2.
+    assert "{Discards:plural:|s}" in crackle
+
+    # The invariant the literal "1" rests on. Both vars, same delta.
+    assert 'DynamicVars["Discards"].UpgradeValueBy(1m);' in crackle
+    assert 'DynamicVars["Sparks"].UpgradeValueBy(1m);' in crackle
+
+    # "empty hand = no Spark" is the design, and it lives in the Min, not in
+    # the text. The sentence is only honest while this clamp is here.
+    assert ('Math.Min(DynamicVars["Sparks"].IntValue, picked.Count)'
+            in crackle), crackle

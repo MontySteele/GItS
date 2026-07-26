@@ -2406,9 +2406,15 @@ def build_body(
                     per = ('DynamicVars["BonusPer"].IntValue'
                            if bonus_per_upgrade(card)
                            else formula.partition("_per_")[0])
+                    # EPOCH 2 / D2: the count is PER-PLAYER now, so the reader
+                    # has to say whose. `Owner` on a CardModel is the Player
+                    # (the Creature lives at Owner.Creature) -- the same
+                    # distinction that bit KokomiResourceHooks. Passing the
+                    # owner keeps a co-op partner's detonations out of this
+                    # card's bonus.
                     amount_expr += (
                         f" + {per} * "
-                        "BombPower.DetonationsThisCombat(CombatState!)")
+                        "BombPower.DetonationsThisCombat(CombatState!, Owner)")
                 else:
                     n, _, rest = formula.partition("_per_")
                     per_fanfare = rest.partition("_")[0]

@@ -30,7 +30,10 @@ import collections
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
+# parents[2], not parent.parent: this file moved down a level into
+# tools/archive/ (audit sec.6). The old two-hop landed on tools/ and made the
+# module unimportable -- archiving a script must not silently break it.
+REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
 from tier0 import constants as C            # noqa: E402

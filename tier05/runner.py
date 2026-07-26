@@ -17,6 +17,7 @@ import sys
 import time
 
 from tier0 import constants as C
+from tier0 import roster
 from tier0.content import loader
 from tier05 import ab, draft, kurage_telemetry, model, route, run_metrics
 
@@ -31,35 +32,25 @@ from tier05 import ab, draft, kurage_telemetry, model, route, run_metrics
 # plans with authored draft tags + combat pilots. Keeping it character-scoped
 # prevents a syntactically valid but meaningless pairing such as
 # ``furina/demolition`` or ``klee/spotlight``.
-CHARACTER_PLANS = {
-    "klee": {
-        "generic": "generic",
-        "demolition": "demolition",
-        "spark": "spark",
-        "reaction": "reaction",
-    },
-    "furina": {
-        "salon": "salon",
-        "spotlight": "spotlight",
-        "fanfare": "fanfare",
-    },
-    "kokomi": {
-        # v0.2 sheet pass (2026-07-24): plans mirror her tier0 archetype
-        # pilots. Requires DRAFTER_VERSION >= 7 -- the v6 scorer read her
-        # conscript/gain_charge/Sly verbs as literal zero.
-        "generic": "generic",
-        "commander": "commander",
-        "priest": "priest",
-        "assist": "assist",
-    },
+#
+# F1: the ROSTER half is DERIVED from tier0/roster.py rather than repeated
+# here. The reference anchors keep their literals -- they are deliberately not
+# roster members (no art, no pool, no C# class; see roster.REFERENCE_IDS) and
+# folding them in would make every roster sweep either wrong or full of
+# exceptions. A character added to the registry appears here with no edit,
+# which is the whole point: this was one of the ~26 sites where forgetting was
+# silent, and `runner.resolve_plan` is the R68 single source of truth for
+# plan->pilot that everything else asks.
+CHARACTER_PLANS: dict[str, dict[str, str]] = {
+    c.id: dict(c.plans) for c in roster.ROSTER
+}
+CHARACTER_PLANS.update({
     "ref_ironclad": {"generic": "generic"},
     "real_ironclad": {"generic": "generic"},
-}
+})
 
 DEFAULT_PLAN = {
-    "klee": "demolition",
-    "furina": "salon",
-    "kokomi": "priest",
+    **{c.id: c.default_plan for c in roster.ROSTER},
     "ref_ironclad": "generic",
     "real_ironclad": "generic",
 }

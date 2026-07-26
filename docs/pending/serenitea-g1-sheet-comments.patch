@@ -1,0 +1,306 @@
+diff --git a/docs/fontaine-companions.yaml b/docs/fontaine-companions.yaml
+index 58ed3af..5cc49a8 100644
+--- a/docs/fontaine-companions.yaml
++++ b/docs/fontaine-companions.yaml
+@@ -106,11 +106,11 @@
+    # RATIFIED 2026-07-25 [USER]: "double that stat line to 20 damage and +6 vs auras", from 10/+3.
+    # THE DOMINATION FLAG THIS ENTRY OPENED IS CLOSED — RAIDEN MOVED (2026-07-25 [USER]). Recorded in
+    # full because the resolution is the interesting part: the doubling briefly made her out-hit Raiden's
+-   # Musou no Hitotachi (then 18, the sheet's stated "biggest one-card hit") at the SAME 2 cost while
++   # Musou no Hitotachi (then 18, the sheet's stated "biggest one-card hit") at the SAME 2 cost while (lint-ok: cross-sheet superseded value)
+    # also carrying a permanent power, where Raiden was deliberately shapeless to pay for her number.
+    # No lint could have raised it — lint_strict_domination compares within a sheet, and the two live in
+    # different nations' files. It was flagged here by hand for exactly that reason, and the red-pen
+-   # session took the third option: Raiden went to 3 cost / 40 damage / Vulnerable 2 / Exhaust. The two
++   # session took the third option: Raiden went to 3 cost / 40 damage / Vulnerable 2 / Exhaust. The two (lint-ok: cross-sheet ratified value)
+    # cards no longer share a cost or a shape, and neither is strictly better than the other.
+    # KEEP THE HAND-FLAG HABIT: cross-sheet comparisons are structurally invisible to the tooling.
+    # ROLE: payoff. The Champion Duelist reads the board before she moves: her payoff is conditional on the
+@@ -121,7 +121,7 @@
+    # the pairing reads as design rather than as one of them being a copy of the other.
+    # §4.3: a conditional flat buff, not an engine — it never grows, and with no aura on the board it is
+    # worth zero. Her 20-damage body sits ABOVE Itto's (14+6 at the same 2 cost) and far below Raiden's
+-   # (40 at 3 cost, once): the Inazuma pair are shapeless jackpots that carry nothing else, and she
++   # (40 at 3 cost, once): the Inazuma pair are shapeless jackpots that carry nothing else, and she (lint-ok: cross-sheet ratified value)
+    # carries a permanent power instead of a bigger number.
+    # Burst name "Last Lightfall" RESERVED for a future playable kit-Burst (v1.9).
+ 
+@@ -140,7 +140,7 @@
+    # mass-Hydro applier at Rare would delete that brake while leaving the note in place, which is worse
+    # than the freeze risk itself. Extending aura DURATION adds no new application and so cannot initiate
+    # a freeze that was not already going to happen; it lengthens the window the pool already earns.
+-   # Burst name "O Tides, I Have Returned" is RESERVED (line 96) and was NOT taken.
++   # Burst name "O Tides, I Have Returned" is RESERVED (line 96) and was NOT taken. (lint-ok: sheet line number, not a game number)
+ 
+ - {id: arlecchino_masque_red_death, name: "Arlecchino — Masque of the Red Death", star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 1, type: power, character: arlecchino,
+    effects: [{op: apply_power, power: masque_red_death, amount: 1, target: self, note: "at the start of each turn gain 1 Strength; your Bond of Life eats the first 5 Block you gain each turn"}]}
+diff --git a/docs/inazuma-companions.yaml b/docs/inazuma-companions.yaml
+index aaa205a..ae010b1 100644
+--- a/docs/inazuma-companions.yaml
++++ b/docs/inazuma-companions.yaml
+@@ -88,18 +88,18 @@
+    exhaust: true,
+    effects: [{op: damage, amount: 40, target: enemy, applies_element: true},
+              {op: apply_power, power: vulnerable, amount: 2, target: enemy}]}
+-   # RATIFIED 2026-07-25 [USER], from 2 cost / 18 damage / no rider / no Exhaust: "3 cost, 40 damage,
++   # RATIFIED 2026-07-25 [USER], from 2 cost / 18 damage / no rider / no Exhaust: "3 cost, 40 damage, (lint-ok: superseded pre-ratification value)
+    # vulnerable 2, applies electricity, exhaust — massive payoff for a very high cost. Rares in general
+    # tend to be undertuned, so I think this is fine for a front-loaded rare, and has natural Kokomi
+    # exhaust synergy." The same session ruled Navia fine as-is and Neuvillette weak-but-deferred.
+    # WHAT THE BUFF CHANGES, recorded because it moves the card's class, not just its number:
+    #   - It RESOLVES the Clorinde/Raiden domination flag opened one commit earlier (the open item that
+    #     no lint could raise, since the two live in different nations' sheets). Clorinde is 2 cost for
+-   #     20 + a permanent power; Raiden is 3 cost for 40 + Vulnerable and then she is GONE. Different
++   #     20 + a permanent power; Raiden is 3 cost for 40 + Vulnerable and then she is GONE. Different (lint-ok: sibling card's number)
+    #     cost, different shape, and the strictly-better reading is dead in both directions.
+    #   - Exhaust converts her from a recurring jackpot into a ONE-SHOT, which is what pays for 40. It is
+    #     also the first companion Exhaust that is a PAYOFF rather than a brake, and it lands in the one
+-   #     kit that wants it: Kokomi's exhaust voice is ROTATION (sheet header, line 19), so a card that
++   #     kit that wants it: Kokomi's exhaust voice is ROTATION (sheet header, line 19), so a card that (lint-ok: sheet line number, not a game number)
+    #     leaves the deck after firing is thinning it on purpose.
+    #   - Vulnerable is applied AFTER the damage (StS Bash ordering), so the 40 does NOT amplify itself.
+    #   - 3 cost is the FIRST in the shared companion pool (the only other 3-costs anywhere are Klee's
+diff --git a/docs/klee-cards.yaml b/docs/klee-cards.yaml
+index ad99564..1c306c6 100644
+--- a/docs/klee-cards.yaml
++++ b/docs/klee-cards.yaml
+@@ -119,8 +119,8 @@
+    # the detonation splash proc cap; scaling the damage moves every X proportionally and leaves the
+    # count, and therefore the cap, exactly where it was.
+    # ECOSYSTEM ANCHOR on the record ([USER]): StS2's 3-energy "10(14) to a random enemy X times" lands
+-   # around 30-42. This card at X=3 is 28 (40 upgraded) plus the Spark setup the bombs feed.
+-   # Post-edit demolition arm measured 4.7% at 600 runs -- unchanged, which is the expected result for
++   # around 30-42. This card at X=3 is 28 (40 upgraded) plus the Spark setup the bombs feed. (lint-ok: X-formula worked example)
++   # Post-edit demolition arm measured 4.7% at 600 runs -- unchanged, which is the expected result for (lint-ok: run count, not a card number)
+    # one uncommon and is within noise rather than evidence of nothing happening.
+ - {id: kaboom_beetle_swarm, name: "Kaboom Beetle Swarm", cost: 2, type: attack, rarity: uncommon, solve: [frontload], archetypes: [demolition], role: payoff,
+    effects: [{op: damage, amount: 5, target: random_enemy, times: 3, bonus_vs_bombed: 3}]}
+diff --git a/docs/kokomi-cards.yaml b/docs/kokomi-cards.yaml
+index f9267e6..fc6db77 100644
+--- a/docs/kokomi-cards.yaml
++++ b/docs/kokomi-cards.yaml
+@@ -72,9 +72,9 @@
+ - {id: waters_edge, name: "Water's Edge", cost: 1, type: attack, rarity: basic, solve: [frontload], archetypes: [generic], role: glue,
+    effects: [{op: damage, amount: 6, target: enemy}]}
+    # Her normal attack: a ribbon of water. v0.3 charge-curve pass: 4 -> 6, STRIKE PARITY — and no further.
+-   # USER RULING (R53, 2026-07-24): the kaboom-parity 7 arm is REJECTED; her basic attack stays at basic-Strike
++   # USER RULING (R53, 2026-07-24): the kaboom-parity 7 arm is REJECTED; her basic attack stays at basic-Strike (lint-ok: rejected arm's value, on record)
+    # parity. The v0.2 diagnosis stands (sub-Strike basics made act-1 bills unpayable at any scaling setting),
+-   # but A1-weak lives in the pool's SHAPE and the basics stop at parity. The 7 arm measured ~5 act-1 points
++   # but A1-weak lives in the pool's SHAPE and the basics stop at parity. The 7 arm measured ~5 act-1 points (lint-ok: rejected arm + its measurement)
+    # above this world (report §6) — that gap is bought elsewhere or not at all.
+ - {id: coral_guard, name: "Coral Guard", cost: 1, type: skill, rarity: basic, solve: [block], archetypes: [generic], role: glue,
+    effects: [{op: block, amount: 5}]}
+@@ -120,16 +120,16 @@
+ - {id: ritual_purification, name: "Ritual Purification", cost: 1, type: skill, rarity: common, solve: [utility, scaling], archetypes: [priest], role: enabler,
+    effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: gain_charge, amount: 4}, {op: draw, amount: 1}]}
+    # The premium Charge common (§2.1 explicit-bonus grammar): exhaust 1 -> 5 total Charge (1 funnel + 4 line),
+-   # replaces itself. The engine's metronome. v0.3: line 2 -> 4 — the benchmark common Forges 7 while dealing 7;
++   # replaces itself. The engine's metronome. v0.3: line 2 -> 4 — the benchmark common Forges 7 while dealing 7; (lint-ok: benchmark common's numbers)
+    # her dedicated charger paying a card for 3 total was under HALF that on one axis and zero on the other.
+ - {id: waterspout, name: "Waterspout", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [priest, generic], role: glue, exhaust: true,
+    effects: [{op: damage, amount: 10, target: enemy}]}
+-   # Self-consuming swing: v0.3 7 -> 10 — a card of the deck-as-HP-bar is a real price and must buy a real hit
++   # Self-consuming swing: v0.3 7 -> 10 — a card of the deck-as-HP-bar is a real price and must buy a real hit (lint-ok: v0.3 history)
+    # (the v0.2 world priced the burn at +1 damage over a plain swing). One hit, one Charge, one fewer draw.
+ - {id: cleansing_tide, name: "Cleansing Tide", cost: 2, type: skill, rarity: common, solve: [block], archetypes: [priest], role: glue,
+    effects: [{op: exhaust_from, amount: 2, select: chosen}, {op: block, amount: 10}]}
+    # The big burn: two cards for a real wall. Double fuel with the Casket; steep deck cost without it.
+-   # (v0.3 considered 12 and REVERTED in the same pass: it strictly dominated shell_of_sanctuary's 11 under
++   # (v0.3 considered 12 and REVERTED in the same pass: it strictly dominated shell_of_sanctuary's 11 under (lint-ok: sibling card's number)
+    # the exhaust-as-benefit convention, and the act diagnosis proved Block is not her binding constraint —
+    # the reprice concentrates on output and meter, not walls.)
+ # Assist (3)
+@@ -171,7 +171,7 @@
+    # v0.4 ([USER]): the jellyfish's canon SECOND job. Bake-Kurage in the game deals Hydro DMG *and heals nearby
+    # characters at set intervals* — the pulse ships the damage half baseline, and this power drafts the mending
+    # half back in as Block (R52 healing law: her HP bar never moves, the incoming does). While it holds, every
+-   # Kurage pulse also grants 12 Block. Priced off the Regent precedent [USER] named: a 2-cost power paying 13
++   # Kurage pulse also grants 12 Block. Priced off the Regent precedent [USER] named: a 2-cost power paying 13 (lint-ok: Regent precedent's number)
+    # Block per 2-cost finisher play. Hers triggers off a 1-cost summon, and the summon only pulses once
+    # per play at KURAGE_DURATION 1 — so the honest read is "12 Block per Bake-Kurage", doubled once the summon
+    # is upgraded to two turns.
+@@ -180,11 +180,11 @@
+    # both outside this row, neither guarded by this card's own tests. Moving either reprices the Oath without
+    # touching it. `test_oath_ward_is_pinned_to_the_pulse_frequency_it_was_measured_at` fails if that is
+    # attempted silently: re-measure at the new frequency, then move the pin and this note in the same change.
+-   # THE NUMBER IS 12, MEASURED, NOT REASONED. The first draft was 5, priced by ratio off Regent (13 Block off a
+-   # 2-cost finisher, so ~5 off a 1-cost summon). That measured as a TRAP PICK — priest run winrate 5.8% with no
+-   # card at all vs 3.8% with it, i.e. drafting it made her worse. Bracket at 500 runs/plan --realistic:
+-   # ward 5 -> priest 3.8% / commander 5.4%; ward 8 -> 4.8% / 5.8%; ward 12 -> 6.2% / 5.8% (no-card baseline
+-   # 5.8% / 6.0%). The ratio had to go UP for the cheaper trigger, not down: Regent's finisher gets played
++   # THE NUMBER IS 12, MEASURED, NOT REASONED. The first draft was 5, priced by ratio off Regent (13 Block off a (lint-ok: ward-bracket measurement)
++   # 2-cost finisher, so ~5 off a 1-cost summon). That measured as a TRAP PICK — priest run winrate 5.8% with no (lint-ok: ward-bracket measurement)
++   # card at all vs 3.8% with it, i.e. drafting it made her worse. Bracket at 500 runs/plan --realistic: (lint-ok: run count + winrates)
++   # ward 5 -> priest 3.8% / commander 5.4%; ward 8 -> 4.8% / 5.8%; ward 12 -> 6.2% / 5.8% (no-card baseline (lint-ok: ward-bracket measurement)
++   # 5.8% / 6.0%). The ratio had to go UP for the cheaper trigger, not down: Regent's finisher gets played (lint-ok: ward-bracket winrates)
+    # reliably, while Bake-Kurage is ONE copy in a growing deck that pulses ONCE per play at duration 1. Correct
+    # for frequency and you land back on essentially the Regent number.
+    # [USER] WATCHLIST (2026-07-26): "I feel like that's too strong, but we can rebalance later." Shipped at 12
+@@ -202,7 +202,7 @@
+    # The third face of the common conscript: notice replaces itself, to_the_front is free, this one is armoured.
+ - {id: signal_arrow, name: "Signal Arrow", cost: 1, type: attack, rarity: common, solve: [frontload, utility], archetypes: [commander], role: glue,
+    effects: [{op: damage, amount: 5, target: enemy}, {op: conscript, amount: 1}]}
+-   # The shot that calls the muster: a real swing that is also an order. Under pulsing_current's 7 because the
++   # The shot that calls the muster: a real swing that is also an order. Under pulsing_current's 7 because the (lint-ok: sibling card's number)
+    # muster is worth more than the premium point it trades away.
+ - {id: shoulder_to_shoulder, name: "Shoulder to Shoulder", cost: 1, type: skill, rarity: common, solve: [utility, scaling], archetypes: [commander], role: payoff,
+    effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: copy_companion_in_hand, amount: 1}]}
+@@ -213,7 +213,7 @@
+ # Priest (3)
+ - {id: vow_of_tides, name: "Vow of the Tides", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [priest, generic], role: glue, exhaust: true,
+    effects: [{op: damage, amount: 8, target: all_enemies}]}
+-   # The self-consuming wave: waterspout's grammar aimed wide. Priced ABOVE surging_shoal's 7 by one point only
++   # The self-consuming wave: waterspout's grammar aimed wide. Priced ABOVE surging_shoal's 7 by one point only (lint-ok: sibling card's number)
+    # — a second act-1 AoE is real power and the freeze rule says be conservative with new numbers. Its burn is
+    # itself a Charge, which is the whole priest bargain in one card.
+ - {id: pearl_diver, name: "Pearl Diver", cost: 0, type: skill, rarity: common, solve: [scaling], archetypes: [priest], role: enabler,
+@@ -238,7 +238,7 @@
+    # not a read: nothing here scales off the bank, so §2.2's rate limits do not apply.
+ - {id: scattering_spray, name: "Scattering Spray", cost: 1, type: attack, rarity: common, solve: [frontload, velocity], archetypes: [assist, generic], role: glue,
+    effects: [{op: damage, amount: 5, target: all_enemies}, {op: discard, amount: 1}, {op: draw, amount: 1}]}
+-   # The assist lane's own AoE: less than surging_shoal's 7, and it churns. The draw is not decoration — without
++   # The assist lane's own AoE: less than surging_shoal's 7, and it churns. The draw is not decoration — without (lint-ok: sibling card's number)
+    # it this is strictly worse than the shoal at the same cost, which the domination lint would (rightly) call.
+ # Generic (3)
+ - {id: slack_water, name: "Slack Water", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue,
+@@ -264,7 +264,7 @@
+ - {id: all_streams_flow, name: "All Streams Flow to the Sea", cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling], archetypes: [priest, generic], role: payoff,
+    effects: [{op: damage, amount: 5, target: enemy, bonus_formula: 1_per_2_charge}]}
+    # The sub-Rare reader: 5 + 1 per 2 Charge, single target, repeatable. At a node-4 bank of ~10 it is a 10-point
+-   # swing; at a priest-median 24 it is 17 — act-appropriate at both ends. Bounded by fuel (Charge costs cards),
++   # swing; at a priest-median 24 it is 17 — act-appropriate at both ends. Bounded by fuel (Charge costs cards), (lint-ok: priest-median worked example)
+    # single-target (the AoE reads stay Rare/kit), and the Rare nuke keeps its premium by hitting ALL enemies.
+ # Commander (3)
+ - {id: mass_mobilization, name: "Rally the Isles", cost: 2, type: skill, rarity: uncommon, solve: [utility, scaling], archetypes: [commander], role: enabler,
+@@ -375,20 +375,20 @@
+    # HER BURST (kit, v1.9: granted on charge, Retain, never in pool) — SHAPE B, the kickoff recommendation: enter
+    # the state for 3 turns (CEREMONIAL_GARMENT_TURNS; test-pinned to the constant); while it holds, her attack
+    # cards read Charge (+1 damage per GARMENT_CHARGE_DIVISOR=2 Charge, per play — v0.3 charge-curve pass: /4 was
+-   # decoration, /2 makes a priest-median bank a Burst-tier window). Entry splash 5 -> 7 (clears Skittish 6).
++   # decoration, /2 makes a priest-median bank a Burst-tier window). Entry splash 5 -> 7 (clears Skittish 6). (lint-ok: v0.3 history)
+    # Cost 0: the charged meter IS the cost (Klee/Furina precedent). Meter 10 (v0.3, PROPOSED — the pass's
+    # decisive lever, grid in sheetpass report §6): a FAST-CYCLING Burst, her Salon-member analogue. Particles:
+-   # skill tags (5), reactions (5), exhaust events (KOKOMI_BURST_PER_EXHAUST=2). Two bake plays fill it.
++   # skill tags (5), reactions (5), exhaust events (KOKOMI_BURST_PER_EXHAUST=2). Two bake plays fill it. (lint-ok: engine constants, not this row)
+    # FINISHER SHAPE IS RULING ASK 6: this roster ships the recommended both-with-capstone world (state as kit,
+    # nuke as rate-limited Rare below) so the early sims can inform the ruling, not preempt it.
+ - {id: nereids_ascension, name: "Nereid's Ascension", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [priest, generic], role: payoff, exhaust: true,
+    effects: [{op: damage, amount: 12, target: all_enemies, bonus_formula: 1_per_2_charge}]}
+    # SHAPE A as the state's capstone: one great wave reading the meter (+1 per 2 Charge, to ALL). Every §2.2
+-   # rate limit ships: Rare, Exhaust (which is itself one more Charge), cost 2. At a banked 20 Charge: 20-to-all,
++   # rate limit ships: Rare, Exhaust (which is itself one more Charge), cost 2. At a banked 20 Charge: 20-to-all, (lint-ok: banked-Charge worked example)
+    # once. The multiplicative-read risk lives HERE and only here — watchlist cell in the report.
+ - {id: sango_prayer, name: "Sango Prayer", cost: 1, type: skill, rarity: rare, solve: [sustain, utility], archetypes: [priest, generic], role: payoff, exhaust: true,
+    effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies}, {op: block, amount: 5}]}
+-   # R52 REWORK (ask 1: the v0.1 heal-12 is GONE — no amendment taken, none planned; "make her rares pay off a
++   # R52 REWORK (ask 1: the v0.1 heal-12 is GONE — no amendment taken, none planned; "make her rares pay off a (lint-ok: removed v0.1 value, on record)
+    # different way"). The prayer now stills the spears: Weak 2 to ALL + a moment's calm. R51 texture verbatim —
+    # a debuff earned on an Exhaust piece (Rare, one cast per fight, and its burn is itself a Charge), NOT a
+    # spammable cheap AoE weaken. Same sustain fantasy, zero HP restored: the axis it feeds is the stability band.
+@@ -406,7 +406,7 @@
+    # nobody here is fuel. This comment is the marked example the sweep was written against.
+ - {id: depths_judgment, name: "Sango Isshin", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [priest], role: payoff,
+    effects: [{op: damage, amount_formula: {base: 10, per: 2, count: exhaust_pile}, target: enemy}]}
+-   # The pile-reader's ceiling: 8 + 2 per exhausted card, single target, REPEATABLE — bounded by the fight's
++   # The pile-reader's ceiling: 10 + 2 per exhausted card, single target, REPEATABLE — bounded by the fight's
+    # finite fuel rather than the uncapped meter (deliberate §2.1 anti-stall geometry). Watchlist with Nereid's.
+ - {id: epiphany_of_the_deep, name: "Song of Pearls", cost: 2, type: power, rarity: rare, solve: [velocity, scaling], archetypes: [priest, assist], role: payoff,
+    effects: [{op: apply_power, power: dark_embrace, amount: 1, target: self}]}
+@@ -414,6 +414,6 @@
+    # priced at the base game's rare rate for exactly that reason.
+ - {id: prayer_to_the_moon, name: "Prayer to the Moon", cost: 1, type: skill, rarity: rare, solve: [scaling, block], archetypes: [priest, generic], role: payoff, exhaust: true,
+    effects: [{op: gain_charge, amount: 7}, {op: block, amount: 4}]}
+-   # The pure offering: one card, eight Charge (7 line + 1 funnel) and a moment's calm. The meter's rare
++   # The pure offering: one card, eight Charge (7 line + 1 funnel) and a moment's calm. The meter's rare (lint-ok: 7 line + 1 funnel arithmetic)
+    # accelerant. v0.3: 4 -> 7 — the v0.2 audit found this RARE generating less meter than the benchmark
+    # COMMON Forges; a rare accelerant must out-accelerate a common by more than politeness.
+diff --git a/docs/mondstadt-companions.yaml b/docs/mondstadt-companions.yaml
+index 580e4f3..700684c 100644
+--- a/docs/mondstadt-companions.yaml
++++ b/docs/mondstadt-companions.yaml
+@@ -1,7 +1,18 @@
+ # Mondstadt companion pool — v0.1 (ships with Klee)
+ # Shared colorless-style pool. Roles: applier | buffer | trigger (see principles doc §4.3)
+ # 4-star = common/uncommon (multi-card kits allowed). 5-star = rare, ONE card each, max 3.
+-# Companion cards NEVER scale and route power through the player character.
++# Companion cards route power through the player character.
++# G2 (Serenitea Sweep, 2026-07-26): this line opened "Companion cards NEVER
++# scale and route power..." -- contradicted by USER RULING 1 of 2026-07-21
++# (klee-mod/DECISIONS.md:1524, "the cards should be upgrade-able as per the
++# sheet"). MaxUpgradeLevel 0 is gone; companions emit real upgrade paths from
++# the merged upgrade index, and the mod now reproduces the power curve tier05
++# had already been measuring at rest sites. The only companions that still do
++# not upgrade are the sim's own UNAPPLIABLE set (durin_witchs_flame,
++# nicole_celestial_gift), which is a per-card fact, not a pool law.
++# The half that SURVIVED the ruling is kept above: power routes through the
++# player character. That is the design law; "never scale" was an
++# implementation detail that got overruled.
+ 
+ # ---------- 4-STAR (common/uncommon) ----------
+ - {id: dahlia_sacramental_shower, name: "Dahlia — Sacramental Shower", star: 4, rarity: common, role_c: applier, element: hydro, cost: 1, type: attack,
+diff --git a/tier0/tests/test_sheet_lints.py b/tier0/tests/test_sheet_lints.py
+index e9a0c89..072a484 100644
+--- a/tier0/tests/test_sheet_lints.py
++++ b/tier0/tests/test_sheet_lints.py
+@@ -1,8 +1,16 @@
+ """Cross-sheet lint gates (tools/lint_strict_domination.py).
+ 
+-The per-sheet comment/number lint gate lives with its sheet's tests
+-(test_furina_sheet.test_sheet_comments_match_numbers); this module holds
+-the lints that sweep every docs card sheet at once.
++This module holds the lints that sweep every docs card sheet at once.
++
++G1 (Serenitea Sweep, 2026-07-26) moved the comment/number lint here from
++`test_furina_sheet`, where it gated ONE sheet of six. Audit sec.3.8: run
++against the other five it reported 35 findings -- "real drift the gate's
++scope hid". On inspection it is 34 comments legitimately citing numbers
++that are not the row's (sibling cards, superseded values, measurement
++brackets, worked arithmetic, engine constants, and two SHEET LINE NUMBERS)
++plus exactly ONE real drift. Furina's sheet is clean precisely because it
++already carries the `(lint-ok: reason)` markers the convention provides;
++the other five had never been through the pass.
+ """
+ 
+ import subprocess
+@@ -23,6 +31,40 @@ def test_no_strict_domination_on_docs_sheets():
+     assert res.returncode == 0, res.stdout + res.stderr
+ 
+ 
++def test_sheet_comments_match_numbers_on_every_sheet():
++    """G1: fanned from one sheet to all six.
++
++    Per-line `(lint-ok: <reason>)` markers rather than a blanket suppression:
++    a sheet-wide exemption would switch off the drift class this lint exists
++    for, and the reasons are what let a reviewer tell "cites a sibling card"
++    from "cites a number this row no longer has".
++    """
++    sheets = [str(loader.DOCS_DIR / s) for s in loader.DOCS_CARD_SHEETS]
++    assert len(sheets) >= 6, sheets
++    res = subprocess.run(
++        [sys.executable, str(REPO / "tools" / "lint_sheet_comments.py"),
++         *sheets],
++        capture_output=True, text=True)
++    assert res.returncode == 0, res.stdout + res.stderr
++
++
++def test_the_comment_lint_still_catches_real_drift(tmp_path):
++    """The negative half. A gate fanned out and never seen failing is a gate
++    whose new scope nobody has tested."""
++    sheet = tmp_path / "drift.yaml"
++    sheet.write_text(
++        '- {id: probe, name: "Probe", cost: 1, type: attack, rarity: common,\n'
++        '   effects: [{op: damage, amount: 10, target: enemy}]}\n'
++        '   # The ceiling: 8 damage, single target.\n',
++        encoding="utf-8")
++    res = subprocess.run(
++        [sys.executable, str(REPO / "tools" / "lint_sheet_comments.py"),
++         str(sheet)],
++        capture_output=True, text=True)
++    assert res.returncode == 1, res.stdout
++    assert "comment cites 8" in res.stdout
++
++
+ def test_kokomi_decksize_grammar():
+     """Kokomi kickoff §1 law 4 (user-authored, machine-checkable → gate):
+     Commons in HER pool net card delta <= 0. Scope is her personal sheet

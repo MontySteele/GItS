@@ -19,5 +19,10 @@ public sealed class FurinaRelicPool : RelicPoolModel
 
     protected override IEnumerable<RelicModel> GenerateAllRelics() =>
         ModelDb.RelicPool<SilentRelicPool>().AllRelics
-            .Append(ModelDb.Relic<Relics.EtherealSpotlightRelic>());
+            .Append(ModelDb.Relic<Relics.EtherealSpotlightRelic>())
+            // EPOCH 2 / D1 (audit sec.1.2): the upgraded starter was poolless and
+            // RelicModel.Pool throws for a poolless relic, mid-run at the Touch
+            // of Orobas grant. Ancient rarity keeps it off reward rolls, which
+            // take Common/Uncommon/Rare/Shop/Boss only.
+            .Append(ModelDb.Relic<Relics.CurtainNeverFalls>());
 }

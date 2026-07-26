@@ -33,9 +33,67 @@ from tier05 import draft, potions as potion_pool, rewards
 _POOL_PATH = Path(__file__).parent / "content" / "events.yaml"
 
 
+# --- content-boundary allowlists (audit sec.5) -----------------------------
+# This file and the act pools are the two largest content files in the repo and
+# were the two that read every key through `.get()`. The two SMALLEST (potions,
+# relics) validate loudly -- the inversion the audit names. A typo'd key here
+# does not fail: it silently does nothing, so `is_bos: true` makes a non-boss
+# boss and a misspelled `heal_frac` makes a heal option worth zero, both with
+# every gate green.
+#
+# Same shape as tier05/potions.py's engine-vocabulary guard: the allowlist is
+# the grammar this file's own header documents, and anything outside it is a
+# loud error at load rather than a silent no-op at play.
+#
+# The rule for extending these: adding a key to the grammar means adding it
+# BOTH to the reader and to the set below. That is the point -- a key nothing
+# reads is exactly the defect being caught.
+EVENT_KEYS = frozenset({
+    "id", "name", "options",
+    "hidden",        # reachable only via `escalate`, never rolled directly
+    "also_acts",     # ALSO appears in these (1-based) acts
+    "variants",      # one authored event with several rolled bodies
+})
+
+OPTION_KEYS = frozenset({
+    "label",
+    # health / economy
+    "heal", "heal_frac", "hp", "max_hp", "gold", "gold_all",
+    # deck
+    "card_reward", "card_screens", "pick_cards", "add_card", "random_card",
+    "remove", "remove_random", "upgrade", "upgrade_random", "downgrade_random",
+    "duplicate_deck", "transform", "curse", "upgraded",
+    # objects
+    "relic", "relic_id", "potion", "spend_potion",
+    # gating / structure
+    "requires_gold", "escalate",
+})
+
+
+def _validate_pool(raw: dict) -> dict:
+    for act_key, events in (raw or {}).items():
+        for event in events or []:
+            unknown = set(event) - EVENT_KEYS
+            if unknown:
+                raise ValueError(
+                    f"event {event.get('id', '?')!r} in {act_key!r}: unknown "
+                    f"key(s) {sorted(unknown)} -- not in events.EVENT_KEYS. A "
+                    "key nothing reads is a silent no-op, never a tolerance.")
+            bodies = event.get("variants") or [event]
+            for body in bodies:
+                for opt in body.get("options") or []:
+                    unknown = set(opt) - OPTION_KEYS
+                    if unknown:
+                        raise ValueError(
+                            f"event {event.get('id', '?')!r} option "
+                            f"{opt.get('label', '?')!r}: unknown key(s) "
+                            f"{sorted(unknown)} -- not in events.OPTION_KEYS.")
+    return raw
+
+
 @lru_cache(maxsize=1)
 def _pool() -> dict:
-    return yaml.safe_load(_POOL_PATH.read_text()) or {}
+    return _validate_pool(yaml.safe_load(_POOL_PATH.read_text()) or {})
 
 
 def _act_key(act: int) -> str:

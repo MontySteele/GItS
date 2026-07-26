@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using BaseLib.Abstracts;
 using BaseLib.Utils;
 using Godot;
 using HarmonyLib;
@@ -117,6 +118,27 @@ internal static class KleeSelfCheck
 
     private static void Fail(string rule, string detail) => Findings.Add($"[{rule}] {detail}");
 
+    /// <summary>
+    /// R7's check, factored so the STARTER and its UPGRADED FORM answer to one
+    /// rule rather than to one rule and an omission. `RelicModel.Pool` is a
+    /// non-virtual First() over AllRelicPools and throws for a poolless relic.
+    /// </summary>
+    private static void CheckRelicResolvesPool(RelicModel relic, string role)
+    {
+        try
+        {
+            _ = relic.Pool;
+        }
+        catch (InvalidOperationException)
+        {
+            Fail("R7", $"{role} {relic.GetType().Name} is in NO relic pool; "
+                     + "RelicModel.Pool throws wherever it is read -- at "
+                     + "character select for a starter (SelectCharacter aborts "
+                     + "mid-method, so the character looks selected but is not) "
+                     + "and at the Touch of Orobas grant for an upgraded form.");
+        }
+    }
+
     // -----------------------------------------------------------------------
     //  Character invariants
     // -----------------------------------------------------------------------
@@ -143,17 +165,25 @@ internal static class KleeSelfCheck
         // Surprise shipped poolless and Klee looked selected while the run
         // would start as the previously clicked character — finding 11's
         // symptom through a new door).
+        //
+        // EPOCH 2 / D1 (audit sec.1.2) EXTENDS THIS TO THE UPGRADE. R7 swept
+        // StartingRelics only, so the mid-run grant path was unguarded: all
+        // three upgraded starters were `autoAdd: false` and appeared in no
+        // GenerateAllRelics, so Touch of Orobas handed the player a relic whose
+        // Pool getter throws. Same crash, a different door, and one that opens
+        // in act 2 rather than at character select -- much later, much worse.
+        //
+        // Swept through GetUpgradeReplacement() rather than a hardcoded list,
+        // so a starter that gains an upgrade later is covered the day it does.
         foreach (var relic in relics)
         {
-            try
+            CheckRelicResolvesPool(relic, "starting relic");
+
+            if (relic is CustomRelicModel custom
+                && custom.GetUpgradeReplacement() is { } upgraded)
             {
-                _ = relic.Pool;
-            }
-            catch (InvalidOperationException)
-            {
-                Fail("R7", $"starting relic {relic.GetType().Name} is in NO relic pool; "
-                         + "RelicModel.Pool throws and SelectCharacter aborts mid-method, "
-                         + "so the character looks selected but is not.");
+                CheckRelicResolvesPool(
+                    upgraded, $"upgraded form of {relic.GetType().Name}");
             }
         }
 

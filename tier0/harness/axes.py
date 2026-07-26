@@ -53,7 +53,35 @@ def _avg(xs) -> float:
     return sum(xs) / len(xs) if xs else 0.0
 
 
-def raw_axes(stats_by_enc: dict[str, list[FightStats]]) -> dict[str, float]:
+def _named_pool(stats_by_enc: dict[str, list[FightStats]], enc: str,
+                pooled: list[FightStats], battery: bool) -> list[FightStats]:
+    """The stats for a NAMED encounter, or a loud failure.
+
+    B8 / audit sec.2.2. A3 reads the attrition pool and A6's AoE term reads the
+    swarm pool, and both used `.get(enc, pooled)`: a renamed or missing
+    encounter id silently became a whole-battery average. The axis still
+    printed a number, the number was of a different quantity, and nothing
+    anywhere said so -- while `runner.score_config` two files over indexes
+    `stats["attrition"]` directly and raises. Same instrument, two standards.
+
+    `battery=False` is for callers who legitimately hold a single synthetic
+    encounter and read only the pooled axes. It is a declaration, not a
+    fallback: it has to be written at the call site, so it can never be what a
+    real battery does by accident.
+    """
+    if stats_by_enc.get(enc):
+        return stats_by_enc[enc]
+    if not battery:
+        return pooled
+    raise KeyError(
+        f"axes: encounter {enc!r} is missing or empty from the battery "
+        f"(have: {sorted(stats_by_enc)}). It anchors an axis on its own pool; "
+        "falling back to the whole-battery average would print a number for a "
+        "different quantity. Pass battery=False only for synthetic stats.")
+
+
+def raw_axes(stats_by_enc: dict[str, list[FightStats]],
+             *, battery: bool = True) -> dict[str, float]:
     pooled = _pool(stats_by_enc)
 
     # A1: damage dealt turns 1-3 per energy spent turns 1-3.
@@ -71,11 +99,21 @@ def raw_axes(stats_by_enc: dict[str, list[FightStats]]) -> dict[str, float]:
             hi = _avg(s.damage_by_turn.get(t, 0) for t in (8, 9, 10))
             if lo > 0:
                 ratios.append(hi / lo)
-    a2 = _avg(ratios) or 1.0
+    # B8 / audit sec.2.2: this was `_avg(ratios) or 1.0`. A config where NO fight
+    # reached turn 10 has not scaled slowly -- it has not been measured, and
+    # 1.0 normalized against a baseline that also read 1.0 printed exactly
+    # 3.0: "perfectly average scaling", from zero samples.
+    #
+    # The repair is to stop inventing the number and to make n visible. Zero
+    # samples now reads 0.0, and `A2_samples` rides in the raw dict so every
+    # report can see the denominator. If the BASELINE has zero samples the
+    # zero-baseline guard in normalize() raises -- which is correct: scaling
+    # cannot be scored against an anchor that never scaled.
+    a2 = _avg(ratios)
 
     # A3: enemy damage absorbed by block, per energy (ATTRITION pool if
     # present, else all fights). "Damage prevented by kills" deferred.
-    a3_pool = stats_by_enc.get("attrition", pooled) or pooled
+    a3_pool = _named_pool(stats_by_enc, "attrition", pooled, battery)
     a3 = (sum(s.damage_blocked for s in a3_pool)
           / max(1, sum(s.energy_spent for s in a3_pool)))
 
@@ -96,7 +134,7 @@ def raw_axes(stats_by_enc: dict[str, list[FightStats]]) -> dict[str, float]:
     # A6 components (ruling 2): both baseline-anchored in normalize().
     # Self-relative AoE penalized characters who are also fast single-
     # target; absolute swarm DPT vs baseline measures AoE directly.
-    swarm = stats_by_enc.get("swarm", pooled)
+    swarm = _named_pool(stats_by_enc, "swarm", pooled, battery)
     a6_aoe = _avg(s.total_damage_dealt / max(1, s.turns) for s in swarm)
     a6_debuff = _avg(s.debuff_stacks_applied for s in pooled)
     # A6 v2 (R18): application uptime, pooled across the battery. The
@@ -115,7 +153,11 @@ def raw_axes(stats_by_enc: dict[str, list[FightStats]]) -> dict[str, float]:
             "A4_sustain": a4, "A5_velocity": a5,
             "A6_utility": a6_aoe,          # headline raw = swarm DPT
             "A6_aoe": a6_aoe, "A6_debuff": a6_debuff, "A6_app": a6_app,
-            "A7_setup_tax": a7}
+            "A7_setup_tax": a7,
+            # Not an axis: the A2 denominator, carried so a reader can tell
+            # "scaled 1.0x" from "no fight reached turn 10". Never in AXES,
+            # so normalize() and every scorecard consumer ignore it.
+            "A2_samples": float(len(ratios))}
 
 
 def _turns_to_own_peak(s: FightStats) -> int:
@@ -134,27 +176,55 @@ def _turns_to_own_peak(s: FightStats) -> int:
 A4_FLOOR = 0.5     # zero-healing configs score the floor, not zero
 
 
+def _anchor(ax: str, b: float) -> float:
+    """A baseline divisor, or a loud failure. B8 / audit sec.2.2.
+
+    Every ratio axis divided by `max(eps, b)` with eps = 1e-9. That is not a
+    guard -- it is a silent substitution: a baseline of 0 turned any nonzero
+    raw value into ~1e9, which SCORE_CAP then clamped to a clean-looking
+    10.0. A zero-baseline axis therefore reported "best possible" and an
+    unmeasurable one reported the same, indistinguishably. Only A4 ever got a
+    real floor.
+
+    A baseline of zero on a ratio axis is not a small number; it is the
+    absence of an anchor, and there is no honest score to print against it.
+    A6's application term is exempt by construction -- its baseline IS zero
+    (the Ironclad applies no auras), which is exactly why it is anchored
+    additively rather than as a ratio.
+    """
+    if b > 0:
+        return b
+    raise ValueError(
+        f"axes: baseline {ax} is {b!r}; a ratio axis cannot be scored against "
+        "a zero anchor. Dividing by an epsilon here used to clamp to "
+        f"SCORE_CAP ({SCORE_CAP}) and read as a perfect score. Fix the "
+        "baseline battery, or the axis is unmeasurable for this run.")
+
+
 def normalize(raw: dict[str, float], baseline: dict[str, float]) -> dict[str, float]:
     """Score each axis so baseline = 3.0. Higher = better on every axis."""
-    eps = 1e-9
     scores = {}
     for ax in AXES:
         r, b = raw[ax], baseline[ax]
         if ax == "A4_sustain":
-            score = max(A4_FLOOR, 3.0 * r / max(eps, b))
+            score = max(A4_FLOOR, 3.0 * r / _anchor(ax, b))
         elif ax == "A6_utility":
             # v2 composite (R18): AoE and debuff ratio-anchored as
             # before; application uptime anchored ADDITIVELY (the
             # baseline's uptime is 0 -- a ratio would divide by it).
             # At baseline every term is 1 -> exactly 3.0: anchor held.
-            aoe = raw["A6_aoe"] / max(eps, baseline["A6_aoe"])
-            deb = raw["A6_debuff"] / max(eps, baseline["A6_debuff"])
+            aoe = raw["A6_aoe"] / _anchor("A6_aoe", baseline["A6_aoe"])
+            deb = raw["A6_debuff"] / _anchor("A6_debuff", baseline["A6_debuff"])
             app = 1.0 + raw["A6_app"] - baseline["A6_app"]
             score = 3.0 * (0.5 * aoe + 0.3 * deb + 0.2 * app)
         elif ax == "A7_setup_tax":
-            score = 3.0 * b / max(eps, r)      # fewer setup turns = better
+            # A7 inverts: the RAW value is the divisor. A raw of 0 means "came
+            # online before turn 1", which is not a thing -- _turns_to_own_peak
+            # floors at 1 -- so a 0 here is a broken measurement, not a
+            # brilliant deck, and it gets the same loud treatment.
+            score = 3.0 * b / _anchor(ax, r)
         else:
-            score = 3.0 * r / max(eps, b)
+            score = 3.0 * r / _anchor(ax, b)
         scores[ax] = min(SCORE_CAP, score)
     return scores
 

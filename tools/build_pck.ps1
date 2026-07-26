@@ -31,6 +31,45 @@ $work = Join-Path $repo 'klee-mod\dist\pck-work'
 $out  = Join-Path $repo 'klee-mod\assets\klee.pck'
 $py   = Join-Path $repo '.venv\Scripts\python.exe'
 
+# --- native stderr under Windows PowerShell 5.1 ----------------------------
+# The trap validate.ps1 closed on 2026-07-25 was alive in this file until the
+# Serenitea Sweep (audit sec.3.4). Both halves bite here, with
+# $ErrorActionPreference set to 'Stop' at the top of this script:
+#
+#   * `2>&1` wraps every stderr line in an ErrorRecord and raises
+#     NativeCommandError -- so ONE Godot deprecation warning on stderr killed
+#     the pck build even though MegaDot exited 0.
+#   * NOT redirecting is not safe either: with EAP 'Stop', native stderr
+#     raises NativeCommandError EVEN WHEN THE COMMAND EXITS 0. That is the
+#     half that took the whole deploy down from a Pillow UserWarning.
+#
+# Lowering EAP to 'Continue' for the duration of the call makes stderr behave
+# like output rather than like an exception, so the redirect is then safe and
+# the diagnostics survive into the failure message instead of going to $null.
+# $LASTEXITCODE is a global automatic and survives the call, so every caller
+# checks it exactly as before.
+#
+# Same shape as validate.ps1's Invoke-RepoPython, deliberately: one convention
+# across both build scripts, enforced by
+# tier0/tests/test_repo_python_convention.py so a new call site cannot quietly
+# reintroduce either half.
+function Invoke-NativeCaptured {
+    param([Parameter(Mandatory = $true)][string]$Exe,
+          [Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $Exe @Arguments 2>&1
+    } finally {
+        $ErrorActionPreference = $prev
+    }
+}
+
+function Invoke-RepoPython {
+    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+    Invoke-NativeCaptured $py @Arguments
+}
+
 if (-not (Test-Path $MegaDot)) { throw "MegaDot editor not found at $MegaDot (pass -MegaDot)." }
 if (-not (Test-Path $src))     { throw "Art source not found at $src." }
 
@@ -76,12 +115,25 @@ script_export_mode=2
 binary_format/embed_pck=false
 '@)
 
+# C4 (audit sec.3.2): every copy block below skipped SILENTLY on a missing
+# source, and the contract at the bottom of this file was a hand-written list
+# that asserted the result regardless. Missing salon art shipped with all
+# gates green. Skips are now collected and reported as a block at the end --
+# one place to look, rather than a warning buried in 200 lines of build
+# output -- and the contract is DERIVED from what actually landed, so a
+# skipped block is visible downstream instead of being papered over.
+$skipped = @()
+function Note-Skip([string]$what, [string]$path) {
+    $script:skipped += "$what (no source at $path)"
+    Write-Host "SKIPPED: $what -- no source at $path" -ForegroundColor Yellow
+}
+
 # Klee's historical art layout predates the roster and stays at ImageGen/images
 # /<surface>. Furina and later characters use ImageGen/images/<character>
 # /<surface>. Both land in character namespaces inside the merged pack.
 foreach ($d in 'ui', 'powers', 'relics', 'model') {
     $from = Join-Path $src $d
-    if (-not (Test-Path $from)) { Write-Host "WARNING: no $from, skipping" -ForegroundColor Yellow; continue }
+    if (-not (Test-Path $from)) { Note-Skip "klee\$d" $from; continue }
     $to = Join-Path $work "klee\$d"
     New-Item -ItemType Directory -Force -Path $to | Out-Null
     $files = Get-ChildItem $from -Filter *.png -ErrorAction SilentlyContinue
@@ -93,7 +145,7 @@ foreach ($d in 'ui', 'powers', 'relics', 'model') {
 # /layers; only the combat-scale derivatives in layers/combat ship, matching
 # how every other roster surface ships pre-sized art.
 $layerSrc = Join-Path $src 'model\layers\combat'
-if (Test-Path $layerSrc) {
+if (-not (Test-Path $layerSrc)) { Note-Skip 'klee\model\layers' $layerSrc } else {
     $to = Join-Path $work 'klee\model\layers'
     New-Item -ItemType Directory -Force -Path $to | Out-Null
     Copy-Item (Join-Path $layerSrc '*.png') -Destination $to
@@ -102,7 +154,7 @@ if (Test-Path $layerSrc) {
 # Animation sprint 2 (Track B1): the same treatment for Furina, cut by
 # tools/cut_combat_layers.py furina.
 $furinaLayerSrc = Join-Path $src 'furina\model\layers\combat'
-if (Test-Path $furinaLayerSrc) {
+if (-not (Test-Path $furinaLayerSrc)) { Note-Skip 'furina\model\layers' $furinaLayerSrc } else {
     $to = Join-Path $work 'furina\model\layers'
     New-Item -ItemType Directory -Force -Path $to | Out-Null
     Copy-Item (Join-Path $furinaLayerSrc '*.png') -Destination $to
@@ -111,7 +163,7 @@ if (Test-Path $furinaLayerSrc) {
 # Animation sprint 2 (Track D1): Salon member stage sprites, cut by
 # tools/cut_salon_members.py. Silhouette-first mini-sprites for salon_stage.tscn.
 $salonSrc = Join-Path $src 'furina\salon'
-if (Test-Path $salonSrc) {
+if (-not (Test-Path $salonSrc)) { Note-Skip 'furina\salon' $salonSrc } else {
     $to = Join-Path $work 'furina\salon'
     New-Item -ItemType Directory -Force -Path $to | Out-Null
     $files = Get-ChildItem $salonSrc -Filter *.png -ErrorAction SilentlyContinue
@@ -140,7 +192,7 @@ foreach ($character in 'furina', 'kokomi') {
     $charSrc = Join-Path $src $character
     foreach ($d in 'ui', 'powers', 'relics', 'model') {
         $from = Join-Path $charSrc $d
-        if (-not (Test-Path $from)) { continue }
+        if (-not (Test-Path $from)) { Note-Skip "$character\$d" $from; continue }
         $to = Join-Path $work "$character\$d"
         New-Item -ItemType Directory -Force -Path $to | Out-Null
         $files = Get-ChildItem $from -Filter *.png -ErrorAction SilentlyContinue |
@@ -696,18 +748,18 @@ if ($webp.Count -gt 0) {
     if (-not (Test-Path $py)) { throw "Found $($webp.Count) WebP-mislabeled png(s) but no venv python at $py to convert them." }
     Write-Host "Re-encoding $($webp.Count) WebP-mislabeled file(s) to PNG..." -ForegroundColor Cyan
     $list = ($webp | ForEach-Object { $_.Replace('\', '/') }) -join "','"
-    & $py -c "from PIL import Image`nfor p in ['$list']:`n    Image.open(p).save(p, 'PNG')"
-    if ($LASTEXITCODE -ne 0) { throw "Pillow re-encode failed." }
+    $reencodeLog = Invoke-RepoPython -c "from PIL import Image`nfor p in ['$list']:`n    Image.open(p).save(p, 'PNG')"
+    if ($LASTEXITCODE -ne 0) { $reencodeLog | Write-Host; throw "Pillow re-encode failed." }
 }
 
 Write-Host "Importing assets (MegaDot headless)..." -ForegroundColor Cyan
-$importLog = & $MegaDot --headless --path $work --import 2>&1
+$importLog = Invoke-NativeCaptured $MegaDot --headless --path $work --import
 if ($LASTEXITCODE -ne 0) { $importLog | Write-Host; throw "MegaDot import failed ($LASTEXITCODE)." }
 $importErrors = $importLog | Select-String 'ERROR'
 if ($importErrors) { $importErrors | Write-Host; throw "MegaDot import reported errors." }
 
 Write-Host "Exporting pack..." -ForegroundColor Cyan
-$exportLog = & $MegaDot --headless --path $work --export-pack 'pck' (Join-Path $work 'klee.pck') 2>&1
+$exportLog = Invoke-NativeCaptured $MegaDot --headless --path $work --export-pack 'pck' (Join-Path $work 'klee.pck')
 if ($LASTEXITCODE -ne 0) { $exportLog | Write-Host; throw "MegaDot export failed ($LASTEXITCODE)." }
 
 $pck = Join-Path $work 'klee.pck'
@@ -718,53 +770,51 @@ Copy-Item $pck -Destination $out -Force
 $size = (Get-Item $out).Length
 $hash = (Get-FileHash $out -Algorithm SHA256).Hash
 $contract = "$out.contract.txt"
-$contractLines = @(
-    'contract=roster-pck-v2',
-    "sha256=$hash",
-    'resource=res://klee/model/combat_visuals.tscn',
-    'resource=res://klee/model/combat.tscn',
-    'resource=res://klee/model/layers/klee_combat_smoke.png',
-    'resource=res://klee/model/layers/klee_combat_floaters.png',
-    'resource=res://klee/model/layers/klee_combat_dumpty.png',
-    'resource=res://klee/model/layers/klee_combat_body.png',
-    'resource=res://klee/model/layers/klee_combat_dodoco.png',
-    'resource=res://klee/build_id.tres',
-    'resource=res://shared/gauge.tscn',
-    'resource=res://furina/ui/salon_stage.tscn',
-    'resource=res://furina/model/combat.tscn',
-    'resource=res://furina/model/layers/furina_combat_coat_back.png',
-    'resource=res://furina/model/layers/furina_combat_sword.png',
-    'resource=res://furina/model/layers/furina_combat_body.png',
-    'resource=res://furina/model/layers/furina_combat_hat.png',
-    'resource=res://furina/salon/member_usher.png',
-    'resource=res://furina/salon/member_chevalmarin.png',
-    'resource=res://furina/salon/member_crabaletta.png',
-    'resource=res://furina/vfx/spotlight_shine.tscn',
-    # Sprint 2 Track E power icons. ONE anchor per directory on purpose: the
-    # contract's job here is proving the copy blocks ran, and KleeSelfCheck R13
-    # already asserts at boot that EVERY power's icon path resolves in the
-    # merged pck. A hand-maintained list of all 21 would duplicate R13 and rot.
-    'resource=res://furina/powers/fanfare.png',
-    'resource=res://klee/powers/frozen.png',
-    'resource=res://klee/vfx/bomb_lob.tscn',
-    'resource=res://klee/vfx/dodoco_pop.tscn',
-    'resource=res://klee/ui/character_icon.tscn',
-    'resource=res://klee/ui/char_select_bg_klee.tscn',
-    'resource=res://klee/materials/klee_transition_mat.tres',
-    'resource=res://klee/model/rest_character.tscn',
-    'resource=res://klee/model/character_sprite.tscn',
-    'resource=res://furina/model/combat_visuals.tscn',
-    'resource=res://furina/ui/character_icon.tscn',
-    'resource=res://furina/model/rest_character.tscn',
-    'resource=res://furina/model/merchant_character.tscn',
-    'resource=res://furina/ui/char_select_bg_furina.tscn',
-    'resource=res://furina/materials/furina_transition_mat.tres',
-    'resource=res://kokomi/model/combat_visuals.tscn',
-    'resource=res://kokomi/ui/character_icon.tscn',
-    'resource=res://kokomi/model/rest_character.tscn',
-    'resource=res://kokomi/model/merchant_character.tscn',
-    'resource=res://kokomi/ui/char_select_bg_kokomi.tscn',
-    'resource=res://kokomi/materials/kokomi_transition_mat.tres'
-)
+
+# C4 (audit sec.3.2): THE CONTRACT NOW MEASURES.
+#
+# It used to be the static list below -- written after the export, asserting a
+# set of resources regardless of whether any of them had been copied. Every
+# copy block above skips on a missing source, so the contract said
+# "res://furina/salon/member_usher.png" whether or not that file existed.
+# S2 verified the contract BELONGS to the pck (sha256) and S6c checked C#
+# references against the contract TEXT, so the loop never once touched the
+# actual pack contents: missing salon art shipped with all gates green.
+#
+# Derived from the work directory instead -- which is precisely what the
+# exporter packed, since the preset is export_filter="all_resources". A
+# resource missing from this list is now a resource that is missing from the
+# pck, and S6c turns that into a failure for anything C# references.
+#
+# Excludes the project scaffolding and the exported pack itself: none of them
+# are resources the game loads. `.godot` is the import cache.
+#
+# ROSTER-PCK-V3 is a real version bump, and validate.ps1 S2 requires it: a v2
+# contract is a hand-written one, and reading it as current would be reading
+# an assertion as a measurement. Rebuild with this script.
+$contractSkip = @('*\.godot\*', '*\project.godot', '*\export_presets.cfg',
+                  '*\klee.pck')
+$packed = @(Get-ChildItem $work -Recurse -File |
+    Where-Object {
+        $p = $_.FullName
+        -not ($contractSkip | Where-Object { $p -like $_ }) -and
+        $_.Extension -ne '.import'
+    } |
+    ForEach-Object {
+        'resource=res://' + $_.FullName.Substring($work.Length + 1).Replace('\', '/')
+    } | Sort-Object)
+if ($packed.Count -eq 0) { throw "Contract would be empty: nothing landed in $work." }
+$contractLines = @('contract=roster-pck-v3', "sha256=$hash") + $packed
 [IO.File]::WriteAllLines($contract, $contractLines)
-Write-Host "Built $out ($size bytes; contract roster-pck-v2)" -ForegroundColor Green
+Write-Host "Built $out ($size bytes; contract roster-pck-v3, $($packed.Count) resources)" -ForegroundColor Green
+if ($skipped.Count -gt 0) {
+    Write-Host ""
+    Write-Host "$($skipped.Count) copy block(s) SKIPPED -- those resources are NOT in the pck:" -ForegroundColor Yellow
+    foreach ($s in $skipped) { Write-Host "  $s" -ForegroundColor Yellow }
+    Write-Host "validate.ps1 S6c will fail for any of these that C# references." -ForegroundColor Yellow
+}
+
+# The v2 contract this replaced was a hand-written list of ~45 resource lines,
+# appended after the export and asserting that set regardless of what the copy
+# blocks had actually done. It is deleted rather than kept: a record of what an
+# assertion used to claim is not worth carrying, and `git show` has it.

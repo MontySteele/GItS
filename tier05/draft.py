@@ -29,6 +29,7 @@ import random
 from typing import Optional
 
 from tier0 import constants as C
+from tier0 import roster
 from tier0.engine.state import Card
 
 
@@ -664,22 +665,24 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # registry, which was always correct.
 POLICY_VERSION = 3
 
+# F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one
+# place a character's archetype vocabulary is declared -- and where it is
+# cross-checked against the tags her cards actually carry. R66 happened because
+# two registries in one repo disagreed and nothing compared them; the registry
+# is now compared, so neither direction of that can recur:
+#
+#   * a registry naming a tag that exists on zero cards FAILS
+#     (this is R66 exactly: ("garment", "ward", "conscript") matched nothing,
+#     dominant_archetype() returned "goodstuff" for every Kokomi deck, and
+#     every adaptive number ever taken for her was measured through it);
+#   * a card tag no registry knows about FAILS too, which is the direction a
+#     derived-from-cards version would have silently absorbed.
+#
+# What did NOT change: Klee's and Furina's tuples, and the values here. The
+# per-character history moved into the registry rows beside the values it
+# explains.
 ROSTER_ARCHETYPES: dict[str, tuple[str, ...]] = {
-    "klee": ARCHETYPES,
-    "furina": ("salon", "spotlight", "fanfare"),
-    # R66: was ("garment", "ward", "conscript"), which matched nothing. The
-    # tuple predates the v0.2 sheet pass that tagged her cards
-    # priest/commander/assist/generic, and its "conscript" term had
-    # independently been retired by the lore pass (muster/rally/enlist). Two
-    # registries in one repo disagreed about her vocabulary; the ratified
-    # sheet is canonical, so the sheet's names win.
-    #
-    # What the mismatch cost: dominant_archetype() returned "goodstuff" for
-    # every Kokomi deck, adaptive Kokomi scored plans as pure static power
-    # with no synergy term at all, shop/rest/event plans degraded the same
-    # way, and --ab fired a spurious starvation alarm on every Kokomi run.
-    # All of it self-corrects from this one line plus the ab.py keying fix.
-    "kokomi": ("priest", "commander", "assist"),
+    c.id: c.archetypes for c in roster.ROSTER
 }
 
 
