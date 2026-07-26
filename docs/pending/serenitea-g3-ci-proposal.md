@@ -1,9 +1,12 @@
-# G3 — CI proposal (PREPARED, awaiting [USER] ruling)
+# G3 — CI proposal (RULED: ADOPTED 2026-07-27)
 
-**Status: DRAFTED, NOT ENABLED.** The workflow file sits beside this document
-as `serenitea-g3-ci.yml`. It is deliberately **not** in `.github/workflows/`,
-because putting it there would be adopting it. *The drafted workflow is the
-decision artifact, not the decision.*
+**Status: ADOPTED**, Serenitea Sweep II track B1. [USER] ruled all three jobs
+in, (c) included — "cheap insurance", explicitly confirmed. The NOT-doing list
+below was confirmed as written, Windows-runner refusal and all.
+
+The workflow now lives at **`.github/workflows/repo.yml`**. This document is
+retained as the argument behind it: the reasons a job exists, and the reasons
+five other jobs do not. It is no longer a request for a ruling.
 
 ---
 
@@ -82,10 +85,13 @@ and (b).
 
 ---
 
-## What [USER] is being asked to rule
+## What [USER] ruled (2026-07-27)
 
-1. Adopt (a), (b), (c) — or (a) and (b) only, given (c) currently finds nothing.
-2. Confirm the NOT-doing list, especially the Windows-runner refusal, since
-   that is the one a reasonable person would expect a CI proposal to include.
-3. If adopted: move `serenitea-g3-ci.yml` into `.github/workflows/` and set the
-   two jobs as required checks on `main` (which is also G4's dependency).
+1. **Adopt (a), (b) and (c).** (c) stays despite finding nothing today —
+   ruled cheap insurance on a hand-maintained sequence.
+2. **NOT-doing list confirmed as written**, including the Windows-runner
+   refusal.
+3. Executed: `serenitea-g3-ci.yml` → `.github/workflows/repo.yml`. Setting the
+   jobs as **required checks on `main`** is a GitHub branch-protection setting,
+   not a file in this repo — it is [USER]'s to click, and G4 depends on it.
+   See `serenitea-g4-session-isolation.md`.

@@ -2422,3 +2422,61 @@ cost.
 
 **Class: RULING** (this record) -- no code beyond the pin-batch scope change
 and the docstring that carries the standing.
+
+## D4 -- Instrument-visibility law for predictions (2026-07-27)
+
+A standing discipline rule, not a number. It governs how predictions are
+registered and how quantitative claims may be used as rationale.
+
+**The law, in three clauses:**
+
+1. **A pre-registered prediction must name its instrument.** Not "winrate
+   moves up" but "winrate moves up *as measured by <cell / harness / pin /
+   play session>*". A prediction without a named instrument is not
+   registered.
+2. **Registration must confirm the instrument models the changed object.**
+   Naming an instrument is not enough; the registrar must state that the
+   instrument can see the thing being changed. C#-only changes get C#-side
+   verification -- pins, and play -- and **never** sim predictions. The sim
+   is tier-0.5; it does not execute the mod's C#, and it models one seat, so
+   co-op-scoped and mod-side-only changes are invisible to it *by
+   construction*.
+3. **Any quantitative claim used as rationale in a ruling or a sprint doc
+   must carry a measurement or be marked `UNMEASURED`.** A number offered as
+   a reason is a load-bearing number. If it was not measured, the claim may
+   still be made -- but it must wear the label, so a later reader can tell an
+   observation from a guess.
+
+**Origin.** Two independent failures in Serenitea Sweep I, same root:
+
+*Sweep-I Track D.* Three predictions were registered against the canonical
+tier-0.5 cell. **Two of the three were structurally unmeasurable by that
+instrument.** D1 (Pearl of Insight funnel + relic-pool membership) and D2
+(`BombPower.DetonationsThisCombat` per-owner) are both C#-only fixes; the
+canonical cell cannot execute them, and D2 is co-op-scoped besides, which the
+one-seat model cannot represent at all. Both duly measured **0.0pt**, and the
+log had to record D1 as PREDICTION FAILED and D2 as *met, but VACUOUSLY*.
+Neither grade carries information about the fix. The instrument was never
+capable of producing one, and that was knowable at registration time -- which
+is exactly where this law now puts the check.
+
+*Sweep-I C6.* `validate.ps1` carried, as the stated rationale for an R70
+design decision, the claim that the gate "cannot be run quickly (S7's
+`game_ref` verification takes minutes)". When finally measured, that
+verification was **0.17s -- 0.2% of an 84.0s gate**; the cost was the pytest
+suite (78.4s) the whole time. An unmeasured number survived as design
+rationale for the file's entire life because nobody printed it. A number
+nobody prints is a number somebody will guess.
+
+**Consequences, effective immediately:**
+
+1. Prediction tables in sprint docs gain an **instrument column**, and the
+   registration is incomplete without it. The grading rule column stays.
+2. A prediction whose instrument cannot see the change is not registered as
+   a prediction. It is either re-pointed at an instrument that can (a pin, a
+   play session, a C#-side harness) or recorded as **NOT PREDICTED --
+   no instrument**, which is an honest state and costs nothing.
+3. `UNMEASURED` is a first-class marker. Marking a claim is never a failure
+   condition; leaving an unmarked unmeasured claim in a ruling is.
+
+**Class: RULING** (this record) -- discipline, no behavior change.
