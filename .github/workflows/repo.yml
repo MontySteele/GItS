@@ -1,8 +1,9 @@
-# DRAFTED, NOT ENABLED. See serenitea-g3-ci-proposal.md.
-#
-# This file is deliberately NOT in .github/workflows/ -- putting it there is
-# what adopting it means, and that is [USER]'s ruling to make. Move it there
-# unchanged if the proposal is accepted.
+# ADOPTED 2026-07-27 -- Serenitea Sweep II, track B1. All three jobs kept,
+# ledger check included ([USER]-confirmed: cheap insurance on a hand-maintained
+# sequence). The argument, and the recorded NOT-doing list -- no Windows runner,
+# no pck build, no deploy automation, no coverage number, no scheduled runs --
+# live in docs/pending/serenitea-g3-ci-proposal.md. Read that before adding a
+# job here; each refusal is a decision, not an oversight.
 #
 # The consumer is the NEXT SESSION, not a hypothetical contributor: this is a
 # pre-session guarantee that every session inherits a green world on the fresh

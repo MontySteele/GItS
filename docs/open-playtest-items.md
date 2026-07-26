@@ -37,6 +37,9 @@ measured her, so the protocol's questions are live rather than confirmatory:
 - **v0.4b starter rework (R56):** twelve-card Silent-shape starter, and the
   bank read flipped from divisor to multiplier
   (`KURAGE_PULSE_PER_CHARGE = 4`, duration 3 → 1).
+  **Superseded by R73 (Neap Tide v2.1):** the multiplier is now **3** — ruled
+  2, landed 3 when E1 graded P6 and the pre-committed weak-side fallback
+  fired. `CONSTANTS_VERSION 4`, so every Kokomi number taken at ×4 is archive.
 - **The character shell (today):** select portrait, locked portrait, char
   icon, map marker, selection splash, select backdrop, transition wipe and
   combat model are all hers for the first time — she was wearing Klee's.
@@ -50,7 +53,7 @@ Full text and the specific failure modes: `docs/kokomi-playtest-protocol.md`.
 | Q1 | Does the Charge bank read as a scaling identity or a ticking counter? | **Name a turn.** "Turn 5 of the first elite I started routing plays to feed it." |
 | Q2 | How often does the Burst fire, and does the 3-turn window land? | **Count casts** per normal / elite / boss. Target was 35–50% of fights. Judge cadence and window *separately* — "fires often, does nothing" and "enormous, never fires" have opposite fixes. |
 | Q3 | Can you tell the Garment is up? | See §1 item 1. This is the one most likely to have a real bug behind it. |
-| Q4 | Does Bake-Kurage take over the deck? | **Sharper now than when written:** the pulse reads the bank at ×4 and lasts 1 turn. Watch for plays chosen to set up the pulse rather than to win the turn. |
+| Q4 | Does Bake-Kurage take over the deck? | **Sharper now than when written:** the pulse reads the bank at ×3 (R73; ×5+ with "Before Sun and Moon", which stacks) and lasts 1 turn. Watch for plays chosen to set up the pulse rather than to win the turn. |
 | Q5 | Does Exhaust read as rotation, or as sacrifice? | R55 is a binding voice law. The question is whether the fiction survives the mechanic, not whether the words are right. |
 | Q6 | Does the deck stay thin? | **Report deck size at the end of each act.** LAW 4 is machine-checked; the reward screen is where it can be defeated anyway. |
 | Q7 | Do you draft enough Companions to build Commander? | Companions are in no rollable pool — the 4th reward slot hangs off Pearl of Wisdom and is their only door. |

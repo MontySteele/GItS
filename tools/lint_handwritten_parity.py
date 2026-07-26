@@ -134,6 +134,58 @@ def expected_upgrade(delta: dict | None) -> tuple[list[int], int | None]:
 
 VAR_RE = re.compile(r'new\s+[A-Z]\w*Var\(\s*(\d+(?:\.\d+)?)m?\b')
 NAMED_VAR_RE = re.compile(r'new\s+DynamicVar\("\w+",\s*(\d+(?:\.\d+)?)m?\)')
+
+# A var whose value is a NAMED CONSTANT rather than a literal, e.g.
+#   new DynamicVar("PowerAmount", KokomiConstants.GarmentTurns)
+# This is the better C# -- the card reads the constant instead of copying it --
+# but a literal-only regex sees no var at all and reports the card as having
+# fewer values than the sheet, which is indistinguishable from a DELETED
+# effect. So the constant is resolved to its value and compared like any other.
+# Resolution is sound because lint_constant_parity separately pins every
+# mirrored C# constant to its tier0 twin BY VALUE; together the two lints give
+# sheet -> C# constant -> tier0 constant end to end.
+NAMED_VAR_CONST_RE = re.compile(
+    r'new\s+DynamicVar\("\w+",\s*((?:\w+\.)?\w+)\s*\)')
+CONST_DECL_RE = re.compile(
+    r'(?:^|\n)\s*(?:public|internal)\s+(?:static\s+)?class\s+(\w+)'
+    r'|public\s+const\s+int\s+(\w+)\s*=\s*(-?\d+)\s*;')
+
+_const_cache: dict[str, int] | None = None
+
+
+def cs_constants() -> dict[str, int]:
+    """Every `public const int` in the mod, keyed `Class.Member` AND `Member`.
+
+    CLASS-QUALIFIED, not flat, and the reason is on the record: the first
+    version of this resolver used bare member names and immediately tripped its
+    own collision guard -- `BurstMax` is 70 on Furina's constants and 20 on
+    Kokomi's. Two characters' meters under one name is exactly the ambiguity
+    that would make a resolver quietly pick the wrong one.
+
+    Bare names are still registered as a convenience for unqualified
+    references, but ONLY when unambiguous; a colliding bare name is dropped, so
+    an unqualified use of it resolves to nothing and reads as a missing value
+    rather than as a wrong one.
+    """
+    global _const_cache
+    if _const_cache is None:
+        qualified: dict[str, int] = {}
+        bare: dict[str, list[int]] = {}
+        for path in sorted((gen.REPO / "klee-mod" / "KleeCode").rglob("*.cs")):
+            cls = "?"
+            for klass, name, value in CONST_DECL_RE.findall(
+                    path.read_text(encoding="utf-8")):
+                if klass:
+                    cls = klass
+                    continue
+                qualified[f"{cls}.{name}"] = int(value)
+                bare.setdefault(name, []).append(int(value))
+        found = dict(qualified)
+        for name, values in bare.items():
+            if len(set(values)) == 1:
+                found.setdefault(name, values[0])
+        _const_cache = found
+    return _const_cache
 COST_RE = re.compile(r':\s*base\(\s*(\d+)\s*,')
 HIT_RE = re.compile(r'\.WithHitCount\(\s*(\d+)\s*\)')
 UPG_RE = re.compile(r'\.UpgradeValueBy\(\s*(\d+(?:\.\d+)?)m\s*\)')
@@ -141,8 +193,12 @@ COST_UPG_RE = re.compile(r'EnergyCost\.UpgradeBy\(\s*(-?\d+)\s*\)')
 
 
 def extract_cs(text: str) -> dict:
+    consts = cs_constants()
+    const_vars = [consts[name] for name in NAMED_VAR_CONST_RE.findall(text)
+                  if name in consts]
     return {
-        "vars": [int(float(v)) for v in VAR_RE.findall(text) + NAMED_VAR_RE.findall(text)],
+        "vars": [int(float(v)) for v in VAR_RE.findall(text)
+                 + NAMED_VAR_RE.findall(text)] + const_vars,
         "cost": [int(c) for c in COST_RE.findall(text)],
         "hits": [int(h) for h in HIT_RE.findall(text)],
         "upgrade_vars": [int(float(v)) for v in UPG_RE.findall(text)],
@@ -234,6 +290,180 @@ def kit_no_pile() -> list[str]:
                     f"{paths[0].relative_to(gen.REPO)} does not override "
                     "GetResultPileTypeForCardPlay to PileType.None "
                     "(the card will enter a pile and recirculate as loot)")
+    return findings
+
+
+# --------------------------------------------------------------------------
+# The ROSTER hand-written cards (gen.HAND_WRITTEN_ROSTER)
+# --------------------------------------------------------------------------
+#
+# ADDED BY ADDENDUM A8, 2026-07-26, because the gap this file's own docstring
+# described as "its own piece of work" then shipped a defect through it.
+#
+# R74 deleted `ceremonial_garment`'s entry splash from docs/kokomi-cards.yaml
+# (7 damage to all enemies, applies_element). Every other card in that ruling
+# batch followed the sheet for free -- they are generated. The Garment is
+# hand-written, so the generator never looked at it, and the mod kept casting a
+# 7-point hydro AoE that the simulator had already stopped modelling. E2/E2b
+# measured one Burst; the build shipped another. Nothing failed:
+# lint_constant_parity compares CONSTANTS, this lint walked only gen.HAND_WRITTEN
+# (Klee), and there is no C# test project.
+#
+# The Furina argument for deferring was real -- her ops (encore, fanfare,
+# spotlight) genuinely have no parity rule. It was applied too broadly.
+# `ceremonial_garment`'s ops are `apply_power`, which has had a rule since the
+# first version of this file. The card was excluded by CHARACTER when it should
+# have been excluded by PARSEABILITY.
+#
+# So: every card in HAND_WRITTEN_ROSTER is linted, and a card whose ops have no
+# rule must say so HERE, by name, with a reason. Checked in both directions --
+# a deferral whose ops have since become parseable is a stale exemption, and a
+# stale exemption is how the next one of these gets waved through.
+ROSTER_DEFERRED = {
+    "let_the_people_rejoice":
+        "Furina's encore/fanfare/spotlight ops have no parity rule (see "
+        "walk_effects). Teaching them is a Furina pass, not this one. Her kit "
+        "card is still covered by kit_no_pile() below, which is the invariant "
+        "that actually burned us on this card.",
+}
+
+# Categories in extract_cs() that are KLEE-SPECIFIC and must not be asserted
+# against another character's card: the Pyro aura keyword, the Pyro reaction
+# preview, and the Bomb tooltip are all Klee mechanics, and ElementalSkill is
+# Klee's skill-tag display keyword. Kokomi is catalyst-HYDRO with her own
+# rider tips (KokomiRiderTips.cs). Asserting Klee's idioms on her cards would
+# fail every one of them for being correct, which is how a lint gets disabled.
+CHARACTER_NEUTRAL_ONLY = True
+
+
+def _roster_sheets() -> dict:
+    """card id -> row, across every roster sheet."""
+    rows: dict = {}
+    for profile in gen.PROFILES.values():
+        if not profile.sheet.is_file():
+            continue
+        for row in yaml.safe_load(profile.sheet.read_text(encoding="utf-8")) or []:
+            rows[row["id"]] = row
+    return rows
+
+
+def _find_cs(card_id: str) -> Path | None:
+    name = f"{gen.pascal(card_id)}.cs"
+    for directory in CS_SEARCH_DIRS:
+        if (directory / name).is_file():
+            return directory / name
+    return None
+
+
+def roster_handwritten_parity() -> list[str]:
+    rows = _roster_sheets()
+    upgrades = gen.upgrade_deltas()
+    findings: list[str] = []
+
+    for card_id in sorted(gen.HAND_WRITTEN_ROSTER):
+        row = rows.get(card_id)
+        if row is None:
+            findings.append(
+                f"{card_id}: in HAND_WRITTEN_ROSTER but has no row in any sheet")
+            continue
+        path = _find_cs(card_id)
+        if path is None:
+            findings.append(
+                f"{card_id}: hand-written, but no C# file named "
+                f"{gen.pascal(card_id)}.cs in "
+                f"{[str(d.relative_to(gen.REPO)) for d in CS_SEARCH_DIRS]}")
+            continue
+
+        exp_vars: list[int] = []
+        exp_hits: list[int] = []
+        parseable = True
+        reason = ""
+        try:
+            if str(row.get("cost")) == "X":
+                raise Unparseable("X cost has no parity rule")
+            exp_cost = int(row["cost"])
+            walk_effects(row.get("effects", []), exp_vars, exp_hits)
+            exp_upg_vars, exp_upg_cost = expected_upgrade(upgrades.get(card_id))
+        except Unparseable as e:
+            parseable, reason = False, str(e)
+
+        if card_id in ROSTER_DEFERRED:
+            if parseable:
+                findings.append(
+                    f"{card_id}: STALE DEFERRAL -- it is listed in "
+                    "ROSTER_DEFERRED, but its sheet row now parses cleanly. "
+                    "Delete the entry so the card is actually linted.")
+            continue
+        if not parseable:
+            findings.append(
+                f"{card_id}: UNPARSEABLE -- {reason}. Extend walk_effects, or "
+                "add a ROSTER_DEFERRED entry naming the reason. Do not skip "
+                "the card silently -- that is how the R74 splash shipped.")
+            continue
+
+        got = extract_cs(path.read_text(encoding="utf-8"))
+        where = path.relative_to(gen.REPO)
+
+        if got["cost"] != [exp_cost]:
+            findings.append(
+                f"{card_id}: cost: sheet {exp_cost}, {where} base(...) {got['cost']}")
+        if Counter(got["vars"]) != Counter(exp_vars):
+            findings.append(
+                f"{card_id}: base values: sheet {sorted(exp_vars)}, "
+                f"{where} vars {sorted(got['vars'])} -- an EXTRA C# value is a "
+                "deleted sheet effect that is still being played")
+        if Counter(got["hits"]) != Counter(exp_hits):
+            findings.append(
+                f"{card_id}: hit counts: sheet {sorted(exp_hits)}, "
+                f"{where} WithHitCount {sorted(got['hits'])}")
+        if Counter(got["upgrade_vars"]) != Counter(exp_upg_vars):
+            findings.append(
+                f"{card_id}: upgrade deltas: sheet {sorted(exp_upg_vars)}, "
+                f"{where} UpgradeValueBy {sorted(got['upgrade_vars'])}")
+        exp_upg_cost_list = [] if exp_upg_cost is None else [exp_upg_cost]
+        if got["upgrade_cost"] != exp_upg_cost_list:
+            findings.append(
+                f"{card_id}: cost delta: sheet {exp_upg_cost_list}, "
+                f"{where} EnergyCost.UpgradeBy {got['upgrade_cost']}")
+
+        exp_skill_tag = "skill_tag" in row.get("tags", [])
+        if got["skill_tag"] != exp_skill_tag:
+            findings.append(
+                f"{card_id}: skill_tag: sheet {exp_skill_tag}, {where} "
+                f"ISkillTagCard {got['skill_tag']} (a missing marker generates "
+                "no burst energy)")
+        exp_kit = bool(row.get("kit_card")) or bool(row.get("requires"))
+        if got["kit_cost"] != exp_kit:
+            findings.append(
+                f"{card_id}: kit cost: sheet kit_card/requires {exp_kit}, "
+                f"{where} SetCanonicalCost {got['kit_cost']}")
+        exp_retain = "burst" in row.get("tags", [])
+        if got["retain"] != exp_retain:
+            findings.append(
+                f"{card_id}: retain: sheet burst tag {exp_retain}, {where} "
+                f"CardKeyword.Retain {got['retain']}")
+        exp_kit_card = bool(row.get("kit_card"))
+        if got["kit_pile"] != exp_kit_card:
+            findings.append(
+                f"{card_id}: kit pile: sheet kit_card {exp_kit_card}, {where} "
+                f"PileType.None override {got['kit_pile']}")
+
+    # The registry must be COMPLETE, or the next hand-written card is invisible
+    # to this file exactly the way the Garment was. Any .cs sitting in a
+    # character card directory (not Generated/) whose name matches a sheet row
+    # is a hand-written card and must be registered.
+    known = gen.HAND_WRITTEN | gen.HAND_WRITTEN_ROSTER
+    by_class = {gen.pascal(cid): cid for cid in rows}
+    for directory in CS_SEARCH_DIRS:
+        if not directory.is_dir():
+            continue
+        for path in sorted(directory.glob("*.cs")):
+            card_id = by_class.get(path.stem)
+            if card_id is not None and card_id not in known:
+                findings.append(
+                    f"{card_id}: {path.relative_to(gen.REPO)} is a hand-written "
+                    "card with a sheet row, but is in neither HAND_WRITTEN nor "
+                    "HAND_WRITTEN_ROSTER, so nothing compares it to the sheet")
     return findings
 
 
@@ -330,6 +560,7 @@ def lint() -> int:
                           f"C# PileType.None override {got['kit_pile']} "
                           "(kit cards return to the kit, no pile)")
 
+    findings.extend(roster_handwritten_parity())
     findings.extend(kit_no_pile())
 
     if findings:
@@ -338,7 +569,10 @@ def lint() -> int:
             print(f"  {f}")
         return 1
 
-    print(f"handwritten-parity: OK ({len(gen.HAND_WRITTEN)} cards)")
+    linted = len(gen.HAND_WRITTEN) + len(
+        gen.HAND_WRITTEN_ROSTER - set(ROSTER_DEFERRED))
+    print(f"handwritten-parity: OK ({linted} cards linted, "
+          f"{len(ROSTER_DEFERRED)} deferred by name)")
     return 0
 
 

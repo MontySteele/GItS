@@ -2287,3 +2287,110 @@ revert or soften G6 (which R79/G6 ratified for grammar reasons, not power
 reasons); give the accrual back somewhere else; or accept a lower band for
 her and re-anchor. The multiplier is explicitly NOT the lever -- P9 said to
 suspect the accrual first, and it was right.
+
+---
+
+## Neap Tide, deferred-items addendum (2026-07-26)
+
+Rev 2.1 defined several tracks by reference to revs 1-2 ("A1-A8 as rev 2"),
+and only rev 2.1 was ever handed to a Code session -- revs 1-2 were chat-side
+drafts, overwritten at each revision. The executing session logged those items
+as NOT EXECUTED rather than guessing, which was right. [USER] then reconstructed
+them explicitly. **The drafting lesson is on the record: reference-by-
+incorporation to unregistered documents is a known anti-pattern, and sprint
+docs must be self-contained.**
+
+### B3. Grading correction
+
+**v1's grades are STRUCK.** They were premature: they graded predictions
+against an instrument that was still being built and, in the case of P8 and
+P9, against arms that had not been run. Nothing downstream should cite them.
+
+**Both playtests are recorded as BASELINE OBSERVATIONS, not as grades.** A
+playtest is a sample of one hand's experience of one build. It is the only
+instrument that can see what no column can -- whether a pair feels inevitable,
+whether Exhaust reads as rotation or sacrifice, whether a 0-cost is a decision
+-- and it is a terrible instrument for a rate. Recording them as observations
+keeps what they are good for and stops them being quoted as measurements.
+
+The grades that DO stand, because they were made against arms that ran:
+P6 (fired the x3 fallback, E1), P8 (NULL -- mustered exhausts are 4th in
+commander burst income, not top-two), P9 (CONFIRMED, and it named G6 correctly).
+P7 became gradeable for the first time this addendum, when F4 landed; its
+first read is null-to-negative and is written up in the F4 commit.
+
+### The standing question: levers, annotated
+
+The landed world sits below the roster's act-1-clear floor, and E2b showed G6
+(starter accrual) is empirically ~the entire cost: 10.5-14.3 points, against
+G8's 0.0-1.0. Three levers were named. None is Code's to pull, and each now
+carries what this addendum learned about it:
+
+1. **Revert or soften G6.** Carries a LAW CONFLICT. The old
+   `tactical_retreat` -- exhaust plus a draw rider, at Basic -- violates R79 as
+   ratified in this same sprint. Reverting means grandfathering a
+   starter-level violation of a one-day-old law, which is a different and
+   larger decision than "give the points back".
+2. **Give the accrual back elsewhere.** E2b's frequency finding constrains
+   this to HIGH-FREQUENCY slots only: an uncommon's accrual is worth ~nothing,
+   so this means either a pure-verb starter exhaust outlet (no economy rider,
+   R79-legal) or the universal funnel, `CHARGE_PER_EXHAUST` 1 -> 2 -- one
+   constant, its own E-cell, and a real texture change (fewer outlets, chunkier
+   gains). Note A9: that constant and `KOKOMI_BURST_PER_EXHAUST` are one wage
+   in two currencies and should move together or with a stated reason.
+3. **Re-anchor her band.** THE FLOOR ANCHOR IS CONTAMINATED and this pass
+   should have said so earlier: furina/fanfare (57.5 / 2.8) is the roster's
+   diagnosed-broken archetype. Against ref_ironclad (62.2 / 6.3) she is
+   genuinely below on BOTH axes, so "weak side" stands -- but the honest
+   comparator is Ironclad, not Fanfare, and every "below the floor" sentence
+   in the sprint log should be read against 62.2 rather than 57.5.
+
+### PRE-REGISTERED FORK for playtest three (G5, confirmed)
+
+Registered BEFORE the playtest, which is the only time a pre-registration
+means anything. This sprint began from [USER]'s report that she felt "much
+stronger than the sims made her look"; both playtests have beaten the sim's
+read of their own world; and the calibration gap is documented as large for
+this specific kit. So the hand is the tiebreaker, not the sim.
+
+* **C4 lands first, either way.** It has. Playtest three must not be
+  interpreted without the overlap watch, because the pair that carried
+  playtest two was invisible to every column that existed at the time, and
+  reading playtest three without it repeats exactly that blind spot.
+* **If hands CONFIRM weak** -> lever 2, in an isolated cell. One knob, its own
+  arm, measured alone, in the section 5 knob-order discipline that made E1
+  readable.
+* **If hands SAY FINE** -> lever 3, PLUS a logged sim-calibration offset for
+  exhaust-loop kits. The offset is the point: "the sim under-reads this kit"
+  has now been asserted three times and never written down as a number, and an
+  unwritten offset gets re-litigated every sprint.
+* **No lever is pulled before the playtest.** Not softening G6, not touching
+  `CHARGE_PER_EXHAUST`, not re-anchoring. The multiplier remains explicitly
+  NOT the lever.
+
+### What this addendum found while executing (details in the commits)
+
+Five defects, all of the same shape -- a ruling moved one artifact and a
+hand-maintained projection of it did not follow:
+
+1. `ceremonial_garment` was still dealing R74's deleted 7-damage hydro AoE in
+   C#. Hand-written, so codegen never touched it; E2/E2b measured one Burst
+   and the build shipped another. `lint_handwritten_parity` had excluded the
+   roster cards by CHARACTER when it should have excluded them by
+   PARSEABILITY, and it gated deploy only -- so it reported at the last
+   possible moment, after the measurements it invalidates were taken. Now
+   covered, and in pytest.
+2. `assist_weighted` still named `swift_currents`, deleted at G8, so the
+   assist seven-axis scorecard had been unrunnable since the F batch landed.
+3. `exhaust: +N` was read by the codegen and applied by nothing in tier0.
+4. `formula_base` did not exist; the tooling was choosing between "bump the
+   slope" and "bump the base" by offering only one.
+5. Five live sentences still stated the pre-R73 multiplier, including both
+   standing flags playtest three reads and E1's own docstring calling x2 "the
+   shipped value" in the script whose result was that x2 does not ship.
+
+And one measurement finding worth carrying forward, from C1: **a "watch X"
+caveat should name the COMPARATOR, not just the cell.** "Watch act 3" produced
+an instrument that answered its question correctly for weeks while the actual
+blow-up sat unread in the act-1 row of the same table, because the table
+printed the pulse and never printed what the pulse was supposed to sit under.

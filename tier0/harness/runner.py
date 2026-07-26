@@ -85,11 +85,17 @@ def score_config(character: str, deck: str, pilot_id: str, fights: int,
             constraint_flags.append(
                 f"{severity}: {con} "
                 f"({scores[left]:.1f} vs {scores[right]:.1f})")
+    # B4: a band annotated as known-stale still fires -- it is ratified law
+    # until a ruling moves it -- but the flag carries WHY, so a gate that
+    # fires on every run of a character is not mistaken for a live finding.
+    stale = loader.stale_bands(character)
     for axis, per_deck in loader.deck_bands(character).items():
         if deck in per_deck and scores[axis] > per_deck[deck]:
+            reason = stale.get(axis, {}).get(deck)
             constraint_flags.append(
                 f"BAND EXCEEDED: {axis} {scores[axis]:.1f} > "
-                f"{per_deck[deck]} for {deck}")
+                f"{per_deck[deck]} for {deck}"
+                + (f" ({reason})" if reason else ""))
     pressure_delta = (metrics.summarize(stats["punisher"])["winrate"]
                       - metrics.summarize(stats["attrition"])["winrate"])
     return {

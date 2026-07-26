@@ -1,8 +1,16 @@
 """Cross-sheet lint gates (tools/lint_strict_domination.py).
 
-The per-sheet comment/number lint gate lives with its sheet's tests
-(test_furina_sheet.test_sheet_comments_match_numbers); this module holds
-the lints that sweep every docs card sheet at once.
+This module holds the lints that sweep every docs card sheet at once.
+
+G1 (Serenitea Sweep, 2026-07-26) moved the comment/number lint here from
+`test_furina_sheet`, where it gated ONE sheet of six. Audit sec.3.8: run
+against the other five it reported 35 findings -- "real drift the gate's
+scope hid". On inspection it is 34 comments legitimately citing numbers
+that are not the row's (sibling cards, superseded values, measurement
+brackets, worked arithmetic, engine constants, and two SHEET LINE NUMBERS)
+plus exactly ONE real drift. Furina's sheet is clean precisely because it
+already carries the `(lint-ok: reason)` markers the convention provides;
+the other five had never been through the pass.
 """
 
 import subprocess
@@ -23,6 +31,40 @@ def test_no_strict_domination_on_docs_sheets():
     assert res.returncode == 0, res.stdout + res.stderr
 
 
+def test_sheet_comments_match_numbers_on_every_sheet():
+    """G1: fanned from one sheet to all six.
+
+    Per-line `(lint-ok: <reason>)` markers rather than a blanket suppression:
+    a sheet-wide exemption would switch off the drift class this lint exists
+    for, and the reasons are what let a reviewer tell "cites a sibling card"
+    from "cites a number this row no longer has".
+    """
+    sheets = [str(loader.DOCS_DIR / s) for s in loader.DOCS_CARD_SHEETS]
+    assert len(sheets) >= 6, sheets
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_sheet_comments.py"),
+         *sheets],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
+def test_the_comment_lint_still_catches_real_drift(tmp_path):
+    """The negative half. A gate fanned out and never seen failing is a gate
+    whose new scope nobody has tested."""
+    sheet = tmp_path / "drift.yaml"
+    sheet.write_text(
+        '- {id: probe, name: "Probe", cost: 1, type: attack, rarity: common,\n'
+        '   effects: [{op: damage, amount: 10, target: enemy}]}\n'
+        '   # The ceiling: 8 damage, single target.\n',
+        encoding="utf-8")
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_sheet_comments.py"),
+         str(sheet)],
+        capture_output=True, text=True)
+    assert res.returncode == 1, res.stdout
+    assert "comment cites 8" in res.stdout
+
+
 def test_kokomi_decksize_grammar():
     """Kokomi kickoff §1 law 4 (user-authored, machine-checkable → gate):
     Commons in HER pool net card delta <= 0. Scope is her personal sheet
@@ -30,6 +72,26 @@ def test_kokomi_decksize_grammar():
     res = subprocess.run(
         [sys.executable, str(REPO / "tools" / "lint_kokomi_decksize.py"),
          str(loader.DOCS_DIR / "kokomi-cards.yaml")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
+def test_handwritten_cards_match_their_sheets():
+    """Addendum A8: the hand-written cards, against the sheets they came from.
+
+    This lint existed and gated DEPLOY only (validate.ps1 S6), so `pytest` had
+    nothing to say about it. R74 deleted `ceremonial_garment`'s entry splash
+    from the sheet; the hand-written C# kept dealing it for the length of the
+    sprint, across a full green suite and a constant-parity run, because the
+    only check that could see it was on the far side of a deploy the sprint
+    never performed.
+
+    A gate that runs on deploy and nowhere else does not gate development. It
+    reports at the last possible moment, after the measurements it invalidates
+    have already been taken.
+    """
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_handwritten_parity.py")],
         capture_output=True, text=True)
     assert res.returncode == 0, res.stdout + res.stderr
 

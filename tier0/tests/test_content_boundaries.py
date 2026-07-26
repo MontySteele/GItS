@@ -232,3 +232,37 @@ def test_an_unknown_intent_key_is_rejected():
 def test_an_unknown_pool_tier_is_rejected():
     with pytest.raises(ValueError, match="unknown pool tier"):
         acts._validate_pool("probe.yaml", {"medium": []})
+
+
+def test_every_character_package_still_builds():
+    """A named deck package must resolve to real cards.
+
+    Neap Tide addendum, F4. G8 merged `swift_currents` into `moonlit_offering`
+    and deleted the row; `tier0/content/characters/kokomi.yaml` still listed it
+    in `assist_weighted`, which is hand-maintained and does not follow the
+    sheet. So `--deck assist_weighted` raised KeyError('swift_currents') from
+    the moment the F batch landed, and the assist lane's seven-axis scorecard
+    -- the exact instrument for the lane the sprint was trying to fix -- was
+    unrunnable for the rest of the sprint.
+
+    Nothing caught it because nothing loads a package. Every other consumer of
+    the sheet (the drafter, tier 0.5, the codegen) walks the CARD INDEX, and
+    the index was consistent; the packages are a separate hand-written
+    projection of it that only the battery harness reads, and only when
+    someone asks for that deck by name.
+
+    Cheap and exhaustive: build every package of every character. A deleted or
+    renamed card fails here, in the suite, instead of in front of whoever next
+    tries to score that lane.
+    """
+    from tier0.content import loader
+
+    for character in sorted(loader._character_index()):
+        for package in sorted(loader.character_packages(character)):
+            try:
+                loader.build_player(character, package)
+            except KeyError as exc:
+                raise AssertionError(
+                    f"{character}/{package} names a card that no longer "
+                    f"exists: {exc}. The sheet moved and the package list did "
+                    "not.") from exc

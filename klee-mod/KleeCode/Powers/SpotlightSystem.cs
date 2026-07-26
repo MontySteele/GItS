@@ -59,7 +59,56 @@ public static class SpotlightSystem
     public const decimal GuestCastBaseMultiplier = 1.5m;
     public const int FanfarePerCenterStagePlay = 2;
 
-    private static readonly Dictionary<CardPlay, int> PendingDraws = new();
+    /// <summary>
+    /// C3 -- PendingDraws lifecycle.
+    ///
+    /// THE LEAK. This is a static dictionary keyed by CardPlay, and a CardPlay
+    /// holds Card -> Owner -> Creature -> Player, i.e. the whole run graph.
+    /// Entries were removed in exactly two places: ResolvePendingDraw when the
+    /// draw actually resolved, and ResetTurn at end of turn. Neither runs on an
+    /// ABNORMAL exit -- quit to menu, abandon run, a throw between NotePlay and
+    /// the resolve -- so an interrupted play pinned a dead run in memory for
+    /// the life of the process. BombPower's per-owner counter names this file
+    /// as the counterexample to its own bounded design (audit sec.5).
+    ///
+    /// WHY NOT BOMBPOWER'S IDIOM VERBATIM. That one keeps a single
+    /// `_countCombat` token and clears everything when the combat changes.
+    /// The token there is the shared ICombatState; the state reachable from a
+    /// Creature here is `Player.PlayerCombatState`, which is PER PLAYER. A
+    /// single token over a per-player value would mean each co-op partner's
+    /// play cleared the other's pending draw -- trading a leak for a dropped
+    /// card, which is worse because it changes play.
+    ///
+    /// So the generation is recorded PER ENTRY and checked per entry: an entry
+    /// survives only while its own owner is still in the combat it was made
+    /// in. A partner in the same combat is untouched; an entry whose player
+    /// has moved on (or been torn down, giving null) is dropped on the next
+    /// touch of the system. That gives the same bound BombPower advertises --
+    /// at most the current combat's entries -- without the co-op cost.
+    /// </summary>
+    private readonly record struct PendingDraw(int Amount, object? Combat);
+
+    private static readonly Dictionary<CardPlay, PendingDraw> PendingDraws = new();
+
+    /// <summary>The combat generation an entry for this play belongs to.</summary>
+    private static object? CombatOf(CardPlay play) =>
+        play.Card?.Owner?.Creature?.Player?.PlayerCombatState;
+
+    /// <summary>
+    /// Drop entries whose owner is no longer in the combat that made them.
+    /// Called on every read and write, so the dictionary is bounded by the
+    /// live combat rather than by the process.
+    /// </summary>
+    private static void PurgeStaleEntries()
+    {
+        foreach (var (play, pending) in PendingDraws.ToList())
+        {
+            if (!ReferenceEquals(CombatOf(play), pending.Combat))
+            {
+                PendingDraws.Remove(play);
+            }
+        }
+    }
 
     private static T? Resource<T>(Creature creature)
         where T : CustomResource, new()
@@ -255,8 +304,12 @@ public static class SpotlightSystem
         if (moved != null) moved.Amount = 0;
         if (plays != null) plays.Amount = 0;
         if (spendBoost != null) spendBoost.Amount = 0;
+        // C3: null-tolerant. This walked `play.Card.Owner.Creature` unguarded,
+        // which throws on exactly the half-torn-down entry the purge exists to
+        // clear -- and a throw in ResetTurn takes the turn reset with it.
+        PurgeStaleEntries();
         foreach (var play in PendingDraws.Keys
-                     .Where(play => play.Card.Owner.Creature == creature)
+                     .Where(play => play.Card?.Owner?.Creature == creature)
                      .ToList())
         {
             PendingDraws.Remove(play);
@@ -292,17 +345,23 @@ public static class SpotlightSystem
         var draw = PowerAmount<SpotlightDrawPower>(owner);
         if (draw > 0)
         {
-            PendingDraws[cardPlay] = draw;
+            PurgeStaleEntries();
+            PendingDraws[cardPlay] = new PendingDraw(draw, CombatOf(cardPlay));
         }
     }
 
     public static async Task ResolvePendingDraw(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (!PendingDraws.Remove(cardPlay, out var amount) || amount <= 0)
+        // Purge BEFORE the lookup: a pending draw whose combat has changed
+        // must not resolve into the new one.
+        PurgeStaleEntries();
+        if (!PendingDraws.Remove(cardPlay, out var pending) || pending.Amount <= 0)
         {
             return;
         }
+
+        var amount = pending.Amount;
         await CardPileCmd.Draw(
             choiceContext, amount, cardPlay.Card.Owner);
     }

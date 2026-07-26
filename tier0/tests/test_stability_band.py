@@ -7,11 +7,23 @@ did not exist. `survival_profile` answers how LOW her HP gets; flatness is a
 different question, and no metric anywhere answered it.
 
 The DARK part is the load-bearing part and is pinned first. The acceptance band
-is a [USER] ruling that must be on record BEFORE any playtest HP data is
-reviewed. A band chosen after seeing the data is the target drawn around the
-shot — which is the exact failure the axis-validity session (D3) exists to
-investigate one instrument over, and there is no reason to build a second
-instance of it while the first is still open.
+is a [USER] ruling, and it is not on record yet.
+
+The gate was originally BLIND declaration — the band recorded before any
+playtest HP data was reviewed. **D5 (2026-07-27) amends it**: HP-trajectory
+data was reviewed during the Kokomi playtest sprint, so blind declaration is no
+longer possible. That playtest is EXPLORATORY and grades nothing; the band gets
+declared from DESIGN INTENT, informed by those observations and recorded as
+such, BEFORE the post-rework confirmatory playtest that grades it; and it may
+not be revised against that grading playtest. The surviving protection is that
+last clause — the band stays blind with respect to the measurement that judges
+it, which was always the load-bearing half. Drawing the target around the shot
+is the exact failure the axis-validity session (D3) exists to investigate one
+instrument over, and there is no reason to build a second instance of it while
+the first is still open.
+
+`band is None` therefore stays pinned below: the instrument stays dark until
+the D5 declaration lands, and it never judges regardless.
 """
 
 from __future__ import annotations
@@ -46,8 +58,9 @@ def test_the_band_is_none_until_a_ruling_declares_it():
     assert "band" in profile
     assert profile["band"] is None, (
         "a band appeared in the instrument. Bands are user-ratified (house "
-        "rule) and this one must be recorded BEFORE any playtest HP data is "
-        "reviewed -- see R51 and missed-requirements sec.1.3.")
+        "rule) and this one is declared from design intent under D5, BEFORE "
+        "the confirmatory playtest that grades it -- see R51, D5, and "
+        "missed-requirements sec.1.3.")
 
 
 def test_the_instrument_asserts_nothing_about_what_is_acceptable():

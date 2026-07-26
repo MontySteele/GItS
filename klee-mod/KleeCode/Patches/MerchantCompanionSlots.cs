@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -57,9 +58,43 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
     /// </summary>
     private const float SlotTwoUncommonOdds = 0.875f;
 
-    private static readonly AccessTools.FieldRef<MerchantInventory, List<MerchantCardEntry>>
-        ColorlessEntries = AccessTools.FieldRefAccess<MerchantInventory, List<MerchantCardEntry>>(
-            "_colorlessCardEntries");
+    /// <summary>
+    /// F2. This was a bare `AccessTools.FieldRefAccess<...>("_colorlessCardEntries")`
+    /// in a static field initializer, and FieldRefAccess THROWS on a name that
+    /// no longer resolves. A throw in a static initializer becomes a
+    /// TypeInitializationException on first use -- and first use is inside this
+    /// Prefix, which runs when the player walks into a shop. So a renamed
+    /// private field turned into a black-screened shop, hours into a run: the
+    /// exact softlock class this patch's neighbours exist to prevent, produced
+    /// by the guard itself.
+    ///
+    /// Resolved through a method with its own catch so the static ctor cannot
+    /// throw, and left nullable so the Prefix can decide. That is the
+    /// CreatureFacing pattern (a null degrades to no facing, not to an
+    /// exception) applied where the cost of the alternative is a lost run.
+    /// </summary>
+    private static readonly AccessTools.FieldRef<MerchantInventory, List<MerchantCardEntry>>?
+        ColorlessEntries = ResolveColorlessEntries();
+
+    private static AccessTools.FieldRef<MerchantInventory, List<MerchantCardEntry>>?
+        ResolveColorlessEntries()
+    {
+        try
+        {
+            return AccessTools.FieldRefAccess<MerchantInventory, List<MerchantCardEntry>>(
+                "_colorlessCardEntries");
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[{KleeMod.ModId}] MerchantInventory._colorlessCardEntries did not "
+                    + $"resolve ({e.GetType().Name}). The companion shop channel (R60/S4.7) "
+                    + "is OFF this session; shops fall back to the base colourless fill. "
+                    + "Shops still work -- the premium slot is simply absent.");
+            return null;
+        }
+    }
+
+    private static bool _warnedNoColorlessField;
 
     [HarmonyPrefix]
     public static bool Prefix(MerchantInventory __instance)
@@ -68,7 +103,22 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
         // Base-game characters get a completely unmodified shop.
         if (!CompanionPool.HostsCompanions(player)) return true;
 
-        var entries = ColorlessEntries(__instance);
+        if (ColorlessEntries is not { } colorlessEntries)
+        {
+            // Degrade to the base game's colorless fill rather than throwing
+            // into MerchantRoom.EnterInternal's async continuation, which is
+            // the thing that black-screens instead of crashing.
+            if (!_warnedNoColorlessField)
+            {
+                _warnedNoColorlessField = true;
+                Log.Warn($"[{KleeMod.ModId}] companion shop slots skipped: the entries field "
+                       + "never resolved (see the boot error). Base colourless fill runs.");
+            }
+
+            return true;
+        }
+
+        var entries = colorlessEntries(__instance);
 
         // --- Slot 1: home region, Uncommon floor. The targeted "buy your
         // dream support" slot (§4.7). ---

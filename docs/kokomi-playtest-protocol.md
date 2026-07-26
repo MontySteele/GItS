@@ -39,12 +39,24 @@ wrong, the note is evidence, not a complaint.
 
 Two carry specific standing flags:
 
-- **`KuragePulsePerCharge = 4`** was ratified over the assistant's objection
-  (Necrobinder precedent, R56). The objection was that a **basic** card's pulse
-  out-reads both rate-limited Rare readers: at bank 10 it hits for 44 against
-  Nereid's Ascension's 17, and at bank 25 it is 104 against 24. If the starter
+- **`KuragePulsePerCharge = 3`** (was 4; R73 ruled 2, and E1 fired the
+  pre-committed ×3 fallback — see `tier05/exp_neap_tide_e1.py`). It was
+  originally ratified at 4 over the assistant's objection (Necrobinder
+  precedent, R56). The objection was that a **basic** card's pulse out-reads
+  both rate-limited Rare readers: at bank 10 it hit for 44 against Nereid's
+  Ascension's 17, and at bank 25 it was 104 against 24. If the starter
   dominates the pool, that is the prediction landing, and Q4 below is where it
   goes.
+
+  **The flag did not close when the number moved.** At the landed ×3 the
+  hierarchy is upright at baseline (bank 10: 34 vs 17), but G2 ratified a
+  *stacking* "Before Sun and Moon" that adds +1 (+2 upgraded) to this same
+  coefficient with no cap — so one Uncommon draft puts a **basic** card back
+  above the Rare readers (bank 10, ×5: 54 vs 17). What playtest three is
+  looking at is therefore the **pair**, not the constant. C4 telemetry reports
+  co-draft rate and stack counts with no threshold (R14); a hand's read of
+  whether that pair feels like a purchase or an autopilot is the part no
+  column can supply.
 - **`burst_max = 20`** was chosen off a 300-run bracket to hit a pre-registered
   35–50% Burst-uptime band. Q2 is whether that band feels right in a hand.
 
@@ -103,7 +115,8 @@ disagree, that is a defect and outranks every balance note in this document.
 ### Q4 — Does Bake-Kurage take over the deck?
 
 The flagged risk above, stated as a play question: it is a **basic** card, so
-it is in the opening deck, and its pulse reads the bank at ×4.
+it is in the opening deck, and its pulse reads the bank at ×3 — ×5 or more
+once "Before Sun and Moon" is drafted, and that card stacks.
 
 **Watch for:** plays chosen to set up the pulse rather than to win the turn;
 the jellyfish out-damaging your rares by act 2; a hand where Bake-Kurage is

@@ -548,6 +548,18 @@ def deck_bands(character_id: str) -> dict[str, dict[str, float]]:
     return dict(_character_index()[character_id].get("deck_bands", {}))
 
 
+def stale_bands(character_id: str) -> dict[str, dict[str, str]]:
+    """Per-axis, per-deck reason strings for bands known to be wrong.
+
+    B4. A known-stale band still fires BAND EXCEEDED on every run, because a
+    band is ratified law and only a ruling moves it. Without a reason that
+    flag is indistinguishable from a live finding, and a gate that always
+    fires trains its reader to skim past it. The reason rides with the flag;
+    the band itself is untouched.
+    """
+    return dict(_character_index()[character_id].get("stale_bands", {}))
+
+
 def winrate_bands(character_id: str) -> dict[str, dict[str, tuple]]:
     """Ratified per-encounter winrate bands: enc -> deck -> (lo, hi).
     hi may be None (floor only). Checked at >=WINRATE_BAND_MIN_FIGHTS."""

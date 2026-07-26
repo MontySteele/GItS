@@ -177,10 +177,20 @@ BANNED_SOURCE_FAMILIES = [
 ]
 
 PENDING_RED_PEN = {
-    # Klee Character Card: ruled onto spark_knight_style ("regular = the
-    # Style" pairing), but it is ALSO kaboom's auto pick -- not "only a
-    # model source" as the ruling assumed.
-    frozenset({"kaboom", "spark_knight_style"}),
+    # RESOLVED 2026-07-27 (Sweep II D1) and therefore REMOVED rather than kept
+    # with a note: {kaboom, spark_knight_style}. [USER] ruled that kaboom keeps
+    # "Klee Character Card" and spark_knight_style re-hunts, so its plan row is
+    # commented out in art/plan.tsv and the collision this entry recorded no
+    # longer exists -- exactly one card claims that source now. Leaving the
+    # entry would suppress a duplicate-source finding that can no longer occur,
+    # which is an exemption guarding nothing.
+    #
+    # The pair is STILL in KNOWN_IDENTICAL below, and that is not a
+    # contradiction: the two registries record different facts. This one is
+    # about the PLAN (two rows wanting one source -- fixed now). That one is
+    # about the SHIPPED PIXELS (two files still byte-identical -- fixed only
+    # when the rehunt lands new art).
+    #
     # Dodoco's Marvelous Magic: ruled onto catalytic_conversion (promoted
     # from its power icon), but it is ALSO spark_collection's effective r1,
     # and spark_collection's r2 is vermillion_pact's passed pick.
@@ -515,10 +525,24 @@ KNOWN_IDENTICAL = {
     # is the gap missed-requirements sec.4.6 names -- "unlike its two siblings,
     # [it] is in no ledger". Now it is in both.
     #
-    # OPEN, and deliberately not resolved by this sprint: re-cropping is an
-    # art pass, and the ruling it needs ("which card keeps the Character
-    # Card") is [USER]'s. Listed so the gate can run green while the debt
-    # stays visible, exactly as the two entries above do.
+    # RULED 2026-07-27 ([USER], Serenitea Sweep II D1). The ruling this entry
+    # was waiting for: KABOOM KEEPS the Character Card; spark_knight_style
+    # gets new art. Registered in art/plan.tsv -- its plan row is commented out
+    # with the ruling, and it now sits in the REHUNT PILE beside pop.
+    #
+    # THE ENTRY STAYS, and the reason it stays is the point of D1. The ruling
+    # fixed the PLAN; the two SHIPPED files are still byte-identical and stay
+    # that way until someone actually re-crops. So L12 still has a real finding
+    # here, and suppressing it is still correct -- for now.
+    #
+    # REMOVAL IS AUTOMATIC, not remembered: the day new art lands,
+    # `test_every_allowlisted_identical_pair_is_still_identical` fails on this
+    # pair and the entry has to come out. That is deliberate. An exemption
+    # outliving its reason is the B6 ledger lesson, and the fix for it is a
+    # test that breaks, not a note asking someone to check.
+    #
+    # Its PENDING_RED_PEN twin was removed in the same change, because that
+    # collision really is gone. Different registry, different fact.
     frozenset({"kaboom", "spark_knight_style"}),
 }
 

@@ -21,8 +21,22 @@ regal_bearing:         {block: +2}           # 3->5; the glance stays 1 Weak
 # starting deck, so Innate cannot flood an opening hand.
 # The encore delta is KEPT: the directive ADDS Innate, it does not trade for it.
 # (Contrast kokomi-upgrades `kurages_oath`, where [USER] ruled the upgrade buys
-# INNATE ONLY -- annotated there as a card-specific ruling, with no equivalent
-# ever made here.)
+# INNATE ONLY.)
+#
+# [USER] RULING (2026-07-27, Serenitea Sweep II track E) -- option (a), KEEP AS
+# SHIPPED. aria upgrades to 5->8 AND Innate; the encore delta is not traded for
+# the Innate. This closes the "no equivalent ruling ever made here" flag above:
+# the equivalent ruling is this one, and it went the other way from
+# `kurages_oath` on purpose. A basic is guaranteed in every deck, so making it
+# a campfire decision is the fix; the Oath is a draft-lottery rare, where
+# INNATE-ONLY is the conservative read.
+#
+# NOTED, NOT ACTED ON: "Encore in the opening hand is strong." A revisit is
+# REGISTERED BUT NOT SCHEDULED. If play reads it as too much, the recorded
+# candidate shape is the two-card split -- the basic keeps 5->8 with no Innate,
+# and a separate exhaust Encore card carries innate-on-upgrade. Recorded here
+# so the alternative does not have to be re-derived from scratch, and so a
+# future reader can tell "considered and kept" from "never looked at".
 aria_of_recompense:    {encore: +3, innate: true}   # 5->8, and starts in hand
 salon_debut:           {add: {op: gain_encore, amount: 2}}   # signature: deploy gains a buffer rider (upkeep pre-paid)
 

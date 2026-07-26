@@ -1507,6 +1507,16 @@ act-1 clear is NOT the binding metric (Klee clears 83% of act 1 and wins
 own: Osty's HP can go DOWN with bad play, Charge only goes up -- so this
 is watched in act 3, where it does not in fact run away (6% vs Furina 13%).
 
+> **SUPERSEDED BY R73 (Neap Tide v2.1, 2026-07-26; addendum A7 pointer.)**
+> The multiplier is now **3**: R73 ruled 4 -> 2, and `exp_neap_tide_e1`
+> graded P6 and fired the pre-committed weak-side fallback, so x2 shipped in
+> no build. `CONSTANTS_VERSION 4` -- every Kokomi number in this entry is
+> archive. The withdrawal above still stands on its own terms (x4 was not
+> the runaway the objection claimed), and the cut was made for the reader
+> hierarchy rather than for act 3. Note also what R73 did NOT settle: G2
+> ratified a stacking `kurage_amp` card, so the coefficient this entry
+> treats as fixed is now drafted, and 4-5 is an ordinary in-run read.
+
 **PREDICTION (a) NOW HITS.** R54 graded "starter A1 falls below A2" as a
 MISS at every meter step. Under the 12-card starter it PASSES: A1 3.2 vs
 A2 4.8. Isolated at x0 (bank read fully OFF) the constraint ALREADY passes
@@ -2422,3 +2432,120 @@ cost.
 
 **Class: RULING** (this record) -- no code beyond the pin-batch scope change
 and the docstring that carries the standing.
+
+## D4 -- Instrument-visibility law for predictions (2026-07-27)
+
+A standing discipline rule, not a number. It governs how predictions are
+registered and how quantitative claims may be used as rationale.
+
+**The law, in three clauses:**
+
+1. **A pre-registered prediction must name its instrument.** Not "winrate
+   moves up" but "winrate moves up *as measured by <cell / harness / pin /
+   play session>*". A prediction without a named instrument is not
+   registered.
+2. **Registration must confirm the instrument models the changed object.**
+   Naming an instrument is not enough; the registrar must state that the
+   instrument can see the thing being changed. C#-only changes get C#-side
+   verification -- pins, and play -- and **never** sim predictions. The sim
+   is tier-0.5; it does not execute the mod's C#, and it models one seat, so
+   co-op-scoped and mod-side-only changes are invisible to it *by
+   construction*.
+3. **Any quantitative claim used as rationale in a ruling or a sprint doc
+   must carry a measurement or be marked `UNMEASURED`.** A number offered as
+   a reason is a load-bearing number. If it was not measured, the claim may
+   still be made -- but it must wear the label, so a later reader can tell an
+   observation from a guess.
+
+**Origin.** Two independent failures in Serenitea Sweep I, same root:
+
+*Sweep-I Track D.* Three predictions were registered against the canonical
+tier-0.5 cell. **Two of the three were structurally unmeasurable by that
+instrument.** D1 (Pearl of Insight funnel + relic-pool membership) and D2
+(`BombPower.DetonationsThisCombat` per-owner) are both C#-only fixes; the
+canonical cell cannot execute them, and D2 is co-op-scoped besides, which the
+one-seat model cannot represent at all. Both duly measured **0.0pt**, and the
+log had to record D1 as PREDICTION FAILED and D2 as *met, but VACUOUSLY*.
+Neither grade carries information about the fix. The instrument was never
+capable of producing one, and that was knowable at registration time -- which
+is exactly where this law now puts the check.
+
+*Sweep-I C6.* `validate.ps1` carried, as the stated rationale for an R70
+design decision, the claim that the gate "cannot be run quickly (S7's
+`game_ref` verification takes minutes)". When finally measured, that
+verification was **0.17s -- 0.2% of an 84.0s gate**; the cost was the pytest
+suite (78.4s) the whole time. An unmeasured number survived as design
+rationale for the file's entire life because nobody printed it. A number
+nobody prints is a number somebody will guess.
+
+**Consequences, effective immediately:**
+
+1. Prediction tables in sprint docs gain an **instrument column**, and the
+   registration is incomplete without it. The grading rule column stays.
+2. A prediction whose instrument cannot see the change is not registered as
+   a prediction. It is either re-pointed at an instrument that can (a pin, a
+   play session, a C#-side harness) or recorded as **NOT PREDICTED --
+   no instrument**, which is an honest state and costs nothing.
+3. `UNMEASURED` is a first-class marker. Marking a claim is never a failure
+   condition; leaving an unmarked unmeasured claim in a ruling is.
+
+**Class: RULING** (this record) -- discipline, no behavior change.
+
+## D5 -- Kokomi stability band: provenance and schedule (2026-07-27)
+
+An amendment to the E1 gate, forced by events. It does not declare the band;
+it rules where the band may come from and when it may be graded.
+
+**Background.** R51 moved Kokomi's healer fantasy *entirely* to the stability
+band, and Serenitea Sweep I's E1 built the instrument
+(`run_metrics.stability_profile`) with `band = None` and every value reported
+rather than asserted. The gate attached to it was blind declaration: the
+acceptance band must be recorded BEFORE any playtest HP data is reviewed,
+because a threshold chosen from output you already have is the target drawn
+around the shot.
+
+**What changed.** HP-trajectory data was subsequently reviewed during the
+Kokomi playtest sprint on the feature branch. The blind gate is therefore no
+longer satisfiable as written -- not by anybody's fault, and not recoverable
+by pretending the data was not seen.
+
+**The ruling:**
+
+1. The observed playtest is designated **EXPLORATORY**. It is a source of
+   understanding, not a grade. Nothing may be graded against it.
+2. The band **will be declared** -- from **design intent**, informed by the
+   exploratory observations, and **recorded as such**. The provenance is part
+   of the record, not a footnote: a reader must be able to tell that this band
+   was declared with some data already seen, and which data.
+3. Declaration happens **BEFORE the post-rework confirmatory playtest**, which
+   grades it.
+4. **The band may not be revised against the playtest that grades it.** A
+   grading instrument that moves to fit its result is not an instrument. If
+   the confirmatory playtest says the band is wrong, that is a finding, and it
+   is ruled on separately and afterwards -- not folded back into the threshold
+   before the grade is written down.
+
+**Why this and not a re-blind.** The alternative -- declare blind by ignoring
+what was already seen -- is unenforceable and would put a false claim on the
+record. Declaring from design intent with the contamination stated is weaker
+evidence than a blind declaration would have been, and it says so out loud,
+which is the honest form. Clause 4 is what preserves the part of the gate that
+still can be preserved: the grading playtest is unseen at declaration time,
+so the band is blind with respect to *the measurement that grades it*, which
+was always the load-bearing half.
+
+**Relation to D4.** The exploratory designation is a D4 instrument statement:
+the confirmatory playtest is the named instrument for the band, and the
+exploratory one is explicitly named as *not* it. Any number carried out of the
+exploratory playtest into the declaration rationale is a quantitative claim
+used as rationale, and wears its measurement or the `UNMEASURED` marker
+accordingly.
+
+**Carriers.** The blind wording is stated at both places it is read --
+`tier05/run_metrics.py`'s `stability_profile` docstring and
+`tier0/tests/test_stability_band.py` -- and both are amended to point here.
+`band is None` stays pinned: the instrument still does not judge, and it stays
+dark until the declaration lands. The Sweep-I log's account is left as
+written; it was true on its date.
+
+**Class: RULING** (this record) -- provenance and schedule, no behavior change.

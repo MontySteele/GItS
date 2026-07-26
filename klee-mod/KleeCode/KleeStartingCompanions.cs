@@ -135,11 +135,26 @@ internal static class KleeStartingCompanionsPatch
         }
     }
 
+    /// <summary>
+    /// Swap the first authored <typeparamref name="TBasic"/> out of the
+    /// starting deck for <paramref name="canonicalReplacement"/>, in place.
+    ///
+    /// C1: the match is EXACT (`GetType() == typeof(TBasic)`), not `is`.
+    /// `is` matches any subclass, and this method's whole contract is "find the
+    /// authored basic I put in the starting deck". No card derives from these
+    /// five types today, so this changes nothing now -- it is the shape that is
+    /// wrong. The day an upgraded or reskinned variant is modelled as a
+    /// subclass of its basic (the obvious way to model it), `is` would start
+    /// silently eating that variant out of the starting deck instead, and the
+    /// symptom would be a missing card in a run nobody could reproduce.
+    /// Exact-match costs nothing and says what is meant.
+    /// </summary>
     private static bool ReplaceFirst<TBasic>(Player player,
                                               CardModel canonicalReplacement)
         where TBasic : CardModel
     {
-        var old = player.Deck.Cards.FirstOrDefault(card => card is TBasic);
+        var old = player.Deck.Cards
+            .FirstOrDefault(card => card.GetType() == typeof(TBasic));
         if (old == null)
         {
             return false;

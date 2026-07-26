@@ -167,7 +167,19 @@ packages:
     - drifting_lantern
     - drifting_lantern
     - rearguard_action
-    - swift_currents
+    # G8 (Neap Tide v2.1) merged swift_currents INTO moonlit_offering and
+    # deleted the row. This list is hand-maintained and did not follow, so
+    # `--deck assist_weighted` raised KeyError('swift_currents') from the day
+    # the F batch landed: the assist lane's seven-axis scorecard has been
+    # unrunnable ever since, silently, because nothing loads every package.
+    # test_character_packages_all_build (tier0/tests) now does.
+    - moonlit_offering
+    # F4 bridge (Neap Tide addendum). The package is what the axes harness
+    # scores, so a lane fix that is not in the package is a lane fix the
+    # scorecard cannot see. One of each: the converter, the bell, the payoff.
+    - ebb_tide
+    - salt_line
+    - undertow
     - shell_of_sanctuary
     - jade_bulwark
     - pulsing_current

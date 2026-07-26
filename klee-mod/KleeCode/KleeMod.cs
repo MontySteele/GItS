@@ -30,15 +30,12 @@ public static class KleeMod
     {
         Log.Info($"[{ModId}] Initializing Teyvat Spire roster...");
 
-        try
-        {
-            var harmony = new Harmony(ModId);
-            harmony.PatchAll(typeof(KleeMod).Assembly);
-        }
-        catch (Exception e)
-        {
-            Log.Error($"[{ModId}] Harmony patching failed: {e}");
-        }
+        // F2: per-type patching, NOT harmony.PatchAll. PatchAll aborts the
+        // whole walk on the first patch class that throws, so one dead
+        // reflection lookup silently disarms every patch after it -- including
+        // the two shop/reward softlock guards below. KleePatchBootstrap applies
+        // each class in its own try/catch and names any casualty at boot.
+        KleePatchBootstrap.ApplyAll(new Harmony(ModId), typeof(KleeMod).Assembly);
 
         // The game already merged klee.pck (has_pck) before invoking us; this
         // logs proof-of-merge so a stale/missing pack shows up in godot.log.
@@ -270,6 +267,23 @@ internal static class CardFactory_CreateForReward_Clamp_Patch
             return;
         }
 
+        // C2: gate on OUR roster before touching anything.
+        //
+        // The clamp was written to be self-limiting -- base pools exceed every
+        // N in the game, so `cardCount > available` is false for them and the
+        // patch returns having changed nothing. That is true today and it is
+        // an argument, not a guarantee: it rests on a claim about six pools
+        // this mod does not own and cannot test. If it were ever wrong, the
+        // failure would be this mod silently reducing a base character's Neow
+        // reward, which is the one thing a roster mod must never do.
+        //
+        // The gate also stops us counting a base character's whole generatable
+        // pool on every reward draw, which is what the check below costs.
+        if (!CompanionPool.IsRosterCharacter(player))
+        {
+            return;
+        }
+
         var uniform = options.RarityOdds == CardRarityOddsType.Uniform;
         var available = options.GetPossibleCards(player).Count(c => uniform
             ? c.Rarity != CardRarity.Basic && c.Rarity != CardRarity.Ancient
@@ -388,13 +402,25 @@ internal static class CardFactory_CreateForMerchant_TypeFallback_Patch
 [HarmonyPatch]
 internal static class ProgressSaveManager_EpochCheck_Patch
 {
+    // F2: null-guarded. AccessTools.Method returns null when a name stops
+    // resolving, and yielding that null makes Harmony throw about a null
+    // element rather than about the method that died. Routing through
+    // KleePatchBootstrap records the miss BY NAME and drops the null, so a
+    // rename of one of these two costs the one canary rather than the batch.
+    // If BOTH die the class arms nothing, which the bootstrap reports as a
+    // failure -- the alternative is a canary that silently stopped watching.
     [HarmonyTargetMethods]
     public static IEnumerable<MethodBase> TargetMethods()
     {
-        yield return AccessTools.Method(typeof(ProgressSaveManager),
-            "CheckFifteenElitesDefeatedEpoch");
-        yield return AccessTools.Method(typeof(ProgressSaveManager),
-            "CheckFifteenBossesDefeatedEpoch");
+        var targets = new[]
+        {
+            KleePatchBootstrap.ResolveMethod(typeof(ProgressSaveManager),
+                "CheckFifteenElitesDefeatedEpoch"),
+            KleePatchBootstrap.ResolveMethod(typeof(ProgressSaveManager),
+                "CheckFifteenBossesDefeatedEpoch"),
+        };
+
+        return targets.Where(m => m != null)!;
     }
 
     [HarmonyFinalizer]
