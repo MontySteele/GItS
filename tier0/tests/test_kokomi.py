@@ -347,6 +347,47 @@ def test_kurage_pulse_reads_the_bank_and_grants_block():
     assert st.player.powers["kurage_summon"] == C.KURAGE_DURATION - 1
 
 
+def test_before_sun_and_moon_raises_the_multiplier_and_stacks():
+    """R73/G2. The stacking is the RATIFIED part, so it is the pinned part.
+
+    [USER] closed G2 by allowing multiple copies to compound, explicitly over
+    a ban on the effect class -- so a later pass that "fixes" this into a
+    single-application power would be reversing a ruling, not tidying an
+    oversight. The card multiplies an uncapped, never-spent bank (R80), which
+    is exactly why the compounding was contentious and exactly why it must
+    fail loudly if someone caps it.
+    """
+    for copies in (1, 2, 3):
+        st = kokomi_state()
+        e = st.enemies[0]
+        st.player.charge = 10
+        st.player.powers["kurage_summon"] = C.KURAGE_DURATION
+        st.player.powers["kurage_amp"] = copies
+        hp0 = e.hp
+        effects.player_turn_end_triggers(st)
+        expected = C.KURAGE_PULSE_BASE + 10 * (C.KURAGE_PULSE_PER_CHARGE + copies)
+        assert hp0 - e.hp == expected, (
+            f"{copies} copies of Before Sun and Moon must read the bank at "
+            f"+{copies}; G2 ratified stacking over a ban")
+
+
+def test_the_pulse_event_carries_the_amp_for_the_overlap_watch():
+    """C4 reports stack counts, and it reads them off the event.
+
+    Separating "the bank got bigger" from "the multiplier got bought" is the
+    whole point of the overlap watch; re-deriving the amp from the deck list
+    later would miss copies gained mid-run.
+    """
+    st = kokomi_state()
+    st.player.charge = 4
+    st.player.powers["kurage_summon"] = C.KURAGE_DURATION
+    st.player.powers["kurage_amp"] = 2
+    effects.player_turn_end_triggers(st)
+    (ev,) = [e for e in st.log if e["event"] == "kurage_pulse"]
+    assert ev["amp"] == 2
+    assert ev["charge"] == 4
+
+
 def test_kurage_summon_expires_and_stops_pulsing():
     st = kokomi_state()
     st.player.powers["kurage_summon"] = 1
@@ -765,12 +806,21 @@ def test_the_burst_is_a_skill_so_it_never_pays_itself_the_charge_read():
     kit = loader.get_card("ceremonial_garment")
     assert kit.type == "skill"
 
+    # R74 (Neap Tide v2.1) made the point structural: the entry splash is
+    # GONE, so there is no longer a number for the bank to inflate. The type
+    # assertion above stays anyway -- it is the guard that survives someone
+    # re-adding damage to this card later, which is exactly when the original
+    # trap comes back.
+    assert not any(fx["op"] == "damage" for fx in kit.effects), (
+        "R74: the Ceremonial Garment is pure state-entry. Re-adding damage "
+        "here re-opens the Burst-cashes-its-own-window problem, and at a "
+        "priest-median bank the splash would roughly triple")
+
     st = kokomi_state()
     st.player.charge = 20                    # a bank worth cashing
     e = st.enemies[0]
     hp0 = e.hp
     effects.resolve_card(st, kit)
-    printed = next(fx["amount"] for fx in kit.effects if fx["op"] == "damage")
-    assert hp0 - e.hp == printed
+    assert e.hp == hp0, "state-entry only; the Garment deals no damage"
     # ...and the window it just opened is live for the NEXT attack.
     assert st.player.powers["ceremonial_garment"] == C.CEREMONIAL_GARMENT_TURNS

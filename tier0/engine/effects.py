@@ -340,7 +340,8 @@ def detonate_bombs(state: CombatState, enemy: Enemy, bonus: int = 0) -> None:
                 state.emit("damage", target=other.name, amount=effective,
                            source="detonation_splash")
             if p.burst_max:
-                p.burst_energy += C.DETONATION_SPLASH_BURST
+                resources.gain_burst(
+                    state, C.DETONATION_SPLASH_BURST, "detonation_splash")
         vuln = p.powers.get("detonation_vuln", 0)         # Explosive Frags
         if vuln and enemy.alive:
             powers.apply_power(state, enemy, "vulnerable", vuln)
@@ -573,7 +574,7 @@ def _salon_bow(state: CombatState, member: str) -> None:
     if enc:
         resources.gain_encore(state, enc)
     if p.burst_max:
-        p.burst_energy += C.SALON_TICK_BURST
+        resources.gain_burst(state, C.SALON_TICK_BURST, "salon_final_bow")
     state.emit("salon_final_bow", member=member)
 
 
@@ -695,7 +696,11 @@ def _op_modify_bombs(state: CombatState, fx: dict, card: Card) -> None:
 
 def _op_burst_energy(state: CombatState, fx: dict, card: Card) -> None:
     if state.player.burst_max:
-        state.player.burst_energy += fx["amount"]
+        # The card-text source. Keeps its own `burst_energy` event as well as
+        # the shared `burst_income` one: the old event is what existing
+        # reports and tests read, and C5 is diagnostic -- it does not get to
+        # break a surface that already works.
+        resources.gain_burst(state, fx["amount"], "card")
         state.emit("burst_energy", amount=fx["amount"],
                    total=state.player.burst_energy)
 
@@ -1812,7 +1817,8 @@ def salon_tick(state: CombatState) -> None:
             p.block += amt
             state.emit("block", amount=amt)
         if p.burst_max:
-            p.burst_energy += C.SALON_TICK_BURST     # §1 particle economy
+            # §1 particle economy
+            resources.gain_burst(state, C.SALON_TICK_BURST, "salon_tick")
 
 
 def _exhaust_autoplay_sweep(state: CombatState) -> None:
@@ -1892,7 +1898,16 @@ def player_turn_end_triggers(state: CombatState) -> None:
         # the party. This is where O4 puts the periodic output that v0.3
         # had loaded onto the Burst -- canon keeps the metronome on the
         # summon, so the instrument stops reading it as frontload.
-        dmg = C.KURAGE_PULSE_BASE + p.charge * C.KURAGE_PULSE_PER_CHARGE
+        # R73/G2: "Before Sun and Moon" adds +1 to the MULTIPLIER, and
+        # stacks -- two copies read the bank at +2. Stacking was ratified
+        # deliberately over a ban ([USER], G2): draft dilution self-corrects
+        # at full roster, and the compounding pair is a C4 telemetry watch
+        # rather than a rule. Note this multiplies an uncapped, never-spent
+        # bank (R80), so it is the steepest term the sheet can offer and the
+        # only sanctioned way back up from R73's cut.
+        amp = p.powers.get("kurage_amp", 0)
+        multiplier = C.KURAGE_PULSE_PER_CHARGE + amp
+        dmg = C.KURAGE_PULSE_BASE + p.charge * multiplier
         KNOB_READS["KURAGE_PULSE_PER_CHARGE"] = (
             KNOB_READS.get("KURAGE_PULSE_PER_CHARGE", 0) + 1)
         # P2 runaway telemetry (playtest sprint, Track P). Report-only; no
@@ -1904,8 +1919,11 @@ def player_turn_end_triggers(state: CombatState) -> None:
         # before the living-enemies check so a pulse into an empty board is
         # still a sample of the CURVE -- filtering by what happened to be
         # standing would bias the tail downward exactly when fights end fast.
+        # `amp` rides the event so C4's overlap watch can separate the two
+        # ways the tail rises -- a bigger bank, or a bought multiplier --
+        # without re-deriving either from the deck list.
         state.emit("kurage_pulse", amount=dmg, charge=p.charge,
-                   landed=bool(state.living_enemies))
+                   amp=amp, landed=bool(state.living_enemies))
         if state.living_enemies:
             enemy = state.rng.choice(state.living_enemies)
             deal_damage_to_enemy(state, enemy, dmg, element="hydro",
@@ -1936,7 +1954,8 @@ def player_turn_end_triggers(state: CombatState) -> None:
             deal_damage_to_enemy(state, enemy, damage,
                                  element=None, source="companion")
             if p.burst_max:
-                p.burst_energy += C.WITCHS_FLAME_BURST
+                resources.gain_burst(
+                    state, C.WITCHS_FLAME_BURST, "witchs_flame")
             state.emit("witchs_flame_consumed", target=enemy.name,
                        burst_energy=C.WITCHS_FLAME_BURST)
     if p.powers.get("solar_isotoma", 0):                # Albedo, 3 turns

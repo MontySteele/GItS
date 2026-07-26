@@ -164,7 +164,8 @@ def spend_encore(state: CombatState, n: int) -> int:
         state.emit("encore_spent", amount=spent)
         gain_fanfare(state, spent * C.FANFARE_PER_ENCORE_SPENT, "encore_spent")
         if p.burst_max:
-            p.burst_energy += spent * C.BURST_PER_ENCORE_SPENT
+            gain_burst(state, spent * C.BURST_PER_ENCORE_SPENT,
+                       "encore_spent")
         # Standing Ovation, R32.1 FLIP (pass 3): the spend-payoff power.
         # Per spend EVENT (not per point -- points already pay Fanfare and
         # burst above), grant turn-scoped Spotlight percentage points
@@ -216,6 +217,35 @@ def gain_charge(state: CombatState, n: int, source: str) -> None:
     p = state.player
     p.charge += n
     state.emit("gain_charge", amount=n, source=source, total=p.charge)
+
+
+def gain_burst(state: CombatState, n: int, source: str) -> None:
+    """Burst energy, with the SOURCE recorded (C5, Neap Tide v2.1).
+
+    Deliberately shaped like `gain_charge` above: same signature, same emit
+    grammar, so the two meters can be read with one habit.
+
+    WHY IT EXISTS. Burst income arrived at ten scattered `p.burst_energy +=`
+    sites across five modules, none of which said where the energy came from.
+    "How does her meter actually fill?" was therefore unanswerable from the
+    log -- you could see the meter move and not what moved it -- and P8 is a
+    claim about exactly that (mustered-companion exhausts should be top-two
+    income in commander decks). A prediction that cannot be read off the
+    instrument is not gradeable.
+
+    The `burst_max` gate stays at the CALL SITES rather than moving in here.
+    It reads as a natural thing to centralise and it is not: several callers
+    do other work under the same gate, so folding it in would leave those
+    conditionals half-migrated and their intent less obvious, not more.
+
+    R14: diagnostic. Nothing reads these events to make a decision.
+    """
+    if n <= 0:
+        return
+    p = state.player
+    p.burst_energy += n
+    state.emit("burst_income", amount=n, source=source,
+               total=p.burst_energy)
 
 
 def note_player_hp_loss(state: CombatState, n: int) -> None:

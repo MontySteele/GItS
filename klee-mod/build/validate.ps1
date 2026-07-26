@@ -819,6 +819,132 @@ if (-not (Test-Path $venvPython)) {
 }
 
 # ---------------------------------------------------------------------------
+# S12. Every pck resource C# references is actually IN the pack.
+#
+# Kokomi playtest, 2026-07-26. Her starter relic renders the base-game
+# placeholder icon and her Burst gauge has no cap icon, because
+# kokomi/relics/pearl_of_wisdom.png and kokomi/powers/pearl.png do not exist.
+# The game had been logging both misses once per session, all along, and no
+# gate said a word.
+#
+# S6c is the rule that was supposed to be this. It is scoped twice over and
+# neither scope is the interesting one:
+#
+#   * it inspects only classes matching ': CustomCharacterModel' -- so every
+#     relic, power, VFX and gauge reference is invisible to it, and
+#   * it matches only '\.(tscn|tres)' -- so no PNG has ever been checked by
+#     anything, in any rule, since the pck existed.
+#
+# Both scopes were reasonable when S6c was written (it is a CHARACTER preload
+# rule) and neither was ever widened when the pck grew relics, power icons and
+# gauge skins. So the sweep is separate rather than a widening of S6c: that
+# rule answers "does each character preload a real scene", this one answers
+# "does every pck path in the mod resolve", and collapsing them would leave one
+# rule with two jobs and the weaker error message for both.
+#
+# Namespaces are DERIVED from the contract rather than listed, so a new
+# top-level directory in the pack is swept the day it appears.
+#
+# KNOWN LIMIT, stated rather than papered over: paths built by concatenation
+# are not matched -- today that is exactly one, KleePowerIcons' per-element
+# 'klee/powers/aura_<element>.png'. KleeSelfCheck R13 already asserts at boot
+# that every power's icon path resolves in the merged pck, which covers that
+# family and is the reason this rule does not try to evaluate C# expressions.
+# ---------------------------------------------------------------------------
+
+# Referenced on purpose, art deliberately not made yet. An entry here is a
+# PROMISE that the miss is known and degrades safely, not a way to silence the
+# rule. Checked in both directions below.
+$pckDeferred = @{
+    'kokomi/relics/pearl_of_wisdom.png' =
+        'Kokomi art pass scoped her cards + the eight non-card surfaces; the ' +
+        'relic icon was deliberately left for a manual crop with eyes on it ' +
+        '(docs/kokomi-art-pass-requirements.md). Degrades via ?? base.PackedIconPath.'
+    'kokomi/powers/pearl.png' =
+        'Burst gauge cap icon, same pass, same scope decision. GaugeBridge ' +
+        'routes it through KleePck.Path, so a miss renders no cap icon.'
+}
+
+$stagedContractS12 = Get-ChildItem $StageDir -Filter *.pck.contract.txt -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+if (-not $stagedContractS12) {
+    Fail 'S12' "no staged pck contract; cannot verify pck references. Rebuild with tools\build_pck.ps1."
+} else {
+    $packed = @{}
+    $namespaces = @{}
+    foreach ($line in Get-Content $stagedContractS12.FullName) {
+        if ($line -like 'resource=res://*') {
+            $rel = $line.Substring('resource=res://'.Length)
+            $packed[$rel] = $true
+            $head = $rel.Split('/')[0]
+            if ($rel.Contains('/')) { $namespaces[$head] = $true }
+        }
+    }
+    if ($namespaces.Count -eq 0) {
+        Fail 'S12' "staged contract declares no namespaced resources; it is empty or malformed."
+    } else {
+        $nsAlt = ($namespaces.Keys | Sort-Object) -join '|'
+        $refPattern = '"(?<path>(?:' + $nsAlt + ')/[^"]+\.(?:png|tscn|tres|ogg|wav))"'
+
+        # Files whose resource strings are PROBES, not requests. Excluded with
+        # the reason, because reading them as requests inverts what they say.
+        #
+        # KleeSceneTelemetry's ConventionScenes list exists to report which
+        # convention scenes are absent -- it carries "kokomi/model/combat.tscn"
+        # precisely BECAUSE that scene is expected missing, and it logs the
+        # miss at boot. Feeding that list to a must-be-packed rule would turn
+        # a deliberate absence report into a build failure.
+        $s12ProbeFiles = @('KleeSceneTelemetry.cs')
+
+        $refs = @{}
+        foreach ($f in Get-ChildItem $SourceDir -Recurse -Filter *.cs) {
+            if ($s12ProbeFiles -contains $f.Name) { continue }
+            # Comment-only lines are dropped before matching: KleePck's own
+            # doc comment spells the contract with a "klee/ui/foo.png" example,
+            # and an example is not a reference. Dropping WHOLE comment lines
+            # rather than everything after '//' is deliberate -- a real path
+            # literal contains "res://", so a naive strip would eat the
+            # references this rule exists to find.
+            $lines = [IO.File]::ReadAllLines($f.FullName) | Where-Object {
+                $t = $_.TrimStart()
+                -not ($t.StartsWith('//') -or $t.StartsWith('*'))
+            }
+            $text = $lines -join "`n"
+            foreach ($m in [regex]::Matches($text, $refPattern)) {
+                $rel = $m.Groups['path'].Value
+                if (-not $refs.ContainsKey($rel)) { $refs[$rel] = @() }
+                if ($refs[$rel] -notcontains $f.Name) { $refs[$rel] += $f.Name }
+            }
+        }
+        if ($refs.Count -eq 0) {
+            Fail 'S12' ("found no pck resource references in $SourceDir. The mod " +
+                "references dozens; an empty sweep is the failure mode, not a pass.")
+        }
+        foreach ($rel in ($refs.Keys | Sort-Object)) {
+            if ($packed.ContainsKey($rel)) { continue }
+            if ($pckDeferred.ContainsKey($rel)) { continue }
+            $who = ($refs[$rel] | Sort-Object) -join ', '
+            Fail 'S12' ("$who references res://$rel, which is NOT in the staged pck. " +
+                "Either the art is missing (make it, or add it to `$pckDeferred with " +
+                "the reason) or a copy block in tools\build_pck.ps1 did not run -- " +
+                "that script now reports its skips at the end of a build.")
+        }
+        # Both directions. A deferred entry that has landed, or that nothing
+        # references any more, is a stale exemption, and a stale exemption is
+        # how the next missing asset gets waved through.
+        foreach ($rel in ($pckDeferred.Keys | Sort-Object)) {
+            if ($packed.ContainsKey($rel)) {
+                Fail 'S12' ("res://$rel is in `$pckDeferred but IS now in the pck. " +
+                    "The art landed; drop the exemption.")
+            } elseif (-not $refs.ContainsKey($rel)) {
+                Fail 'S12' ("res://$rel is in `$pckDeferred but no C# file references " +
+                    "it any more. Drop the exemption.")
+            }
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------
 # Report
 # ---------------------------------------------------------------------------
 $swTotal.Stop()

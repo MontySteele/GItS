@@ -36,7 +36,8 @@ from tier0.engine.combat import run_fight
 from tier0.engine.state import Card, Enemy
 from tier0.harness import metrics as t0_metrics
 from tier0.pilot.policy import make_pilot
-from tier05 import (acts, draft, events, fanfare_telemetry, kurage_telemetry,
+from tier05 import (acts, burst_telemetry, draft, events, fanfare_telemetry,
+                    kurage_telemetry,
                     maps, potions as potion_pool, rewards, route, shop)
 from tier05 import relics as relic_pool
 
@@ -197,6 +198,8 @@ class RunResult:
     #                    a per-COMBAT rate derived from these must be rescaled
     #                    by the observed fight count, never by a template
     #                    constant (see fanfare_telemetry.per_run).
+    burst_traces: list = field(default_factory=list)     # C5: (act_index,
+    #                    {source: (energy, events)}) per fight.
     kurage_traces: list = field(default_factory=list)    # P2: (act_index,
     #                    KurageTrace) per fight, in order. Empty traces
     #                    (pulses == 0) for every character that never fields
@@ -538,6 +541,12 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 # fielded Kurage, so the rest of the roster pays nothing.
                 res.kurage_traces.append(
                     (act_i, kurage_telemetry.trace(state.log)))
+                # C5 (Neap Tide v2.1): burst income by SOURCE, act-tagged for
+                # the same reason as the two above. Taken here because the
+                # fight log does not survive onto the RunResult -- only the
+                # reduced trace does.
+                res.burst_traces.append(
+                    (act_i, burst_telemetry.trace(state.log)))
                 fights += 1
                 hp = state.player.hp
                 # Combat-scoped effects such as Feed can raise max HP permanently.

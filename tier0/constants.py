@@ -328,20 +328,52 @@ KURAGE_DURATION = 1           # turns the jellyfish holds the field. Stacks
                               # move the pin and both notes together.
 KURAGE_PULSE_BASE = 4         # flat damage per turn-end pulse, before the
                               # bank read (v0.4 starter rework: 2 -> 4).
-KURAGE_PULSE_PER_CHARGE = 4   # pulse gains this much damage PER POINT of
+KURAGE_PULSE_PER_CHARGE = 3   # pulse gains this much damage PER POINT of
                               # Charge. v0.4 starter rework ([USER]): the
                               # read flips from a DIVISOR (+1 per 4 Charge)
-                              # to a MULTIPLIER (+4 per Charge) — the design
+                              # to a MULTIPLIER (+N per Charge) — the design
                               # intent is "every Exhaust is worth about a
                               # Silent shiv toss", i.e. one banked point
                               # buys roughly one shiv of damage.
-                              # WATCH THIS ONE. Charge is uncapped and never
-                              # spent, so this term only ever grows, and at
-                              # x4 a BASIC out-reads both rate-limited
-                              # readers: at bank 10 the pulse is 44 vs
-                              # nereids' (Rare) 17; at bank 25 it is 104 vs
-                              # 24. That inverts the §2.2 reader hierarchy.
-                              # Bracketed x1/x2/x4 in the v0.4 report.
+                              #
+                              # R73 (Neap Tide v2.1, 2026-07-26): x4 -> x2,
+                              # then x2 -> x3 when E1 graded P6 and the
+                              # pre-committed weak-side fallback FIRED. The
+                              # landed value is x3; x2 is measured, rejected,
+                              # and kept on the record below because the
+                              # rejection is the reason x3 is here.
+                              # The x4 WATCH note this replaces was right and
+                              # is kept as the reason: Charge is uncapped and
+                              # never spent (R80), so this term only ever
+                              # grows, and at x4 a BASIC out-read both
+                              # rate-limited readers — at bank 10 the pulse
+                              # was 44 vs nereids' (Rare) 17, at bank 25 it
+                              # was 104 vs 24, inverting the §2.2 reader
+                              # hierarchy. x2 halves the slope without
+                              # touching the ACCRUAL side, which is the whole
+                              # point of the knob-order commitment: the bank
+                              # fills at the same rate, it just buys less.
+                              # E1 GRADING OF P6 (600 runs, seed 11, C4,
+                              # against same-world roster anchors). Act-1
+                              # clear across the rest of the roster spans
+                              # 57.5% (furina/fanfare) to 85.8% (klee/
+                              # reaction), with ref_ironclad at 62.2%.
+                              #   x2: her BEST plan cleared act 1 57.2% --
+                              #       below the roster floor -- and three of
+                              #       four plans sat far under it, with her
+                              #       best full-run win 5.2% vs the reference
+                              #       Ironclad's 6.3%. That is weak
+                              #       EVERYWHERE, not "mortal in acts 2-3",
+                              #       so P6's single pre-committed response
+                              #       fired.
+                              #   x3: priest 60.3 / commander 66.0 /
+                              #       generic 55.7 act-1, i.e. inside the
+                              #       band around ref_ironclad, and priest
+                              #       8.7% / commander 6.7% win.
+                              # assist stays weak at every value (2.0% win
+                              # even at x4). That is a PLAN problem and must
+                              # not be answered with this knob.
+                              # Nothing else on the accrual side moves.
 KURAGE_PULSE_BLOCK = 0        # Block granted by each pulse. v0.4 starter
                               # rework ([USER]) turned this OFF (was 2): the
                               # pulse is damage now, not mending. NOTE this
@@ -629,7 +661,14 @@ BANNER_FEATURED_SLOTS = 3
 # GRAMMAR, so every Furina number measured under v2 is archive: her decks
 # generated a pool they could cash, and no v2 cell is comparable with v3
 # output. Klee / Kokomi / ref_ironclad carry no Fanfare and do not move.
-CONSTANTS_VERSION = 3
+# CONSTANTS_VERSION 4 (R73, Neap Tide v2.1): KURAGE_PULSE_PER_CHARGE 4 -> 2.
+# Her pulse is read off an uncapped, never-spent bank (R80), so the multiplier
+# is the whole slope of her damage curve -- every Kokomi number taken at x4 is
+# archive, not a cheaper sample of the same world. Same rule the v2 bump
+# applied to a single threshold: the size of the edit is not what decides,
+# comparability is.
+# Klee / Furina / ref_ironclad carry no Charge and do not move.
+CONSTANTS_VERSION = 4
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

@@ -243,9 +243,23 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                              "amount", val)
         elif key == "discard":
             # R36 grammar: moves the chosen-discard count on Crackle's op.
+            #
+            # G6 (Neap Tide v2.1) extends it to the PLAIN `discard` op, which
+            # Kokomi's Sly lane uses and Klee's Spark lane does not. Ordered,
+            # not merged: `discard_for_sparks` is tried first so every Klee
+            # card keeps binding exactly where it always did, and the plain op
+            # is the fallback. No card carries both ops today, so the order is
+            # a guarantee rather than a tiebreak -- but it is written as an
+            # order anyway, because a future card carrying both should move
+            # the Spark op (where the discard is priced against Sparks) and
+            # not silently start moving a bare discard count instead.
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "discard_for_sparks"),
                              "amount", val)
+            if not ok:
+                ok = _bump_first((fx for fx in top
+                                  if fx.get("op") == "discard"),
+                                 "amount", val)
         elif key == "sparks":
             # R36 grammar: moves the Spark cap on the SAME op ("discard 2,
             # add 2 Sparks"). Distinct from "spark" (gain_spark) on purpose:

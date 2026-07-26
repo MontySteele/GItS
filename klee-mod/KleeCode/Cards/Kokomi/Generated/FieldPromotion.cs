@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,12 +37,15 @@ public sealed class FieldPromotion : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KokomiRiderTips.ForMuster(base.ExtraHoverTips, this);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("field_promotion");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Field Promotion"),
-        ("description", "Muster an Inazuman ally: transform 1 card in your hand into a random Inazuma [gold]Companion[/gold] that costs 1 less and [gold]Exhausts[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "[gold]Muster[/gold] 1, at cost 0. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

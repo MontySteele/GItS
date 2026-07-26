@@ -76,6 +76,14 @@ KNOWN_STALE = {
         "Requirements sec.1 calls it out explicitly. Harmless on disk, but it "
         "must never be read as coverage."
     ),
+    "swift_currents": (
+        "G8 (Neap Tide v2.1) MERGED this card into moonlit_offering, which "
+        "keeps its own art. Kept rather than deleted because the merge is one "
+        "ruling old and the pool has an open art debt -- if the velocity Rare "
+        "is ever split back out, or another Sly piece wants a current motif, "
+        "this is a painted asset already cleared through SOURCES.tsv. It is "
+        "NOT coverage for anything and must never be counted as such."
+    ),
 }
 
 

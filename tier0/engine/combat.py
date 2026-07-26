@@ -218,7 +218,7 @@ def play_card(state: CombatState, card: Card) -> None:
         p.burst_energy = 0                    # playing the Burst empties it
         state.emit("burst_cast", card=card.id)
     if p.burst_max and "skill_tag" in card.tags:
-        p.burst_energy += C.BURST_PER_SKILL_TAG
+        resources.gain_burst(state, C.BURST_PER_SKILL_TAG, "skill_tag")
     replays = 1
     if card.is_companion:
         state.companions_played.append(card.id)

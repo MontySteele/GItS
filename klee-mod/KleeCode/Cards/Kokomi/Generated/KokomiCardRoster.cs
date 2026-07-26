@@ -18,6 +18,7 @@ public static class KokomiCardRoster
     {
         ModelDb.Card<AllStreamsFlow>(),
         ModelDb.Card<BakeKurage>(),
+        ModelDb.Card<BeforeSunAndMoon>(),
         ModelDb.Card<CleansingTide>(),
         ModelDb.Card<CommunionOfTides>(),
         ModelDb.Card<ConscriptionNotice>(),
@@ -58,7 +59,6 @@ public static class KokomiCardRoster
         ModelDb.Card<StandingOrders>(),
         ModelDb.Card<SteadyTheLine>(),
         ModelDb.Card<SurgingShoal>(),
-        ModelDb.Card<SwiftCurrents>(),
         ModelDb.Card<TacticalRetreat>(),
         ModelDb.Card<TheTideRemembers>(),
         ModelDb.Card<TidalLure>(),

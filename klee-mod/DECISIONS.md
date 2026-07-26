@@ -2097,3 +2097,193 @@ and grants no card. `KokomiOffPoolCards` ships empty but present, which is
 the shape that card needs the moment it exists.
 
 Suite 766, mod builds clean, pck rebuilds with 8 Kokomi fallbacks.
+
+## Neap Tide v2.1: R73-R80, and three predictions that did not survive contact (2026-07-26)
+
+Kokomi v0.5 amendment + pool pass, executed against the pre-registered sprint
+doc revision 2.1. Baseline ref for both playtests: `c3e11b6` (the Honor Guard
+soft-lock fix). The doc cited `750a9cc`; that commit is real but is not an
+ancestor of any branch -- it is the older "Kokomi's Burst fires" commit -- so
+the baseline is recorded here as the ref that actually carries the fix.
+
+**R73. `KURAGE_PULSE_PER_CHARGE` 4 -> 2 -> 3.** The ruling said 2. E1 measured
+it alone on paired seeds against same-world roster anchors and P6's
+pre-committed weak-side response fired, so the LANDED value is 3.
+
+    roster act-1 clear, C4 world:  57.5% (furina/fanfare) .. 85.8% (klee/reaction)
+                                   ref_ironclad 62.2%, win 6.3%
+
+    kokomi act-1 clear / win       x4            x3            x2
+      priest                       67.5 / 11.5   60.3 / 8.7    50.7 / 4.7
+      commander                    70.8 /  9.5   66.0 / 6.7    57.2 / 5.2
+      assist                       57.8 /  2.0   50.2 / 1.2    39.8 / 0.5
+      generic                      64.2 /  9.2   55.7 / 6.0    46.0 / 4.2
+
+At x2 her BEST plan cleared act 1 below the roster's floor and her best win
+rate sat under the reference Ironclad's. That is weak EVERYWHERE, not "mortal
+in acts 2-3". CONSTANTS_VERSION 3 -> 4: every Kokomi number taken at x4 is
+archive. `assist` is weak at every value (2.0% win even at x4) -- a PLAN
+problem, and explicitly not to be answered with this knob.
+
+**R73b / G2. "Before Sun and Moon"**, Uncommon Power, +1 to the pulse
+multiplier, STACKING. The stacking is the ruling, so it is what the tests pin:
+on the C# side a one-token edit (`PowerStackType.Counter` -> `Single`) would
+implement the ban [USER] considered and rejected, and would move no number
+anyone would think to re-measure. It multiplies an uncapped, never-spent bank,
+so it is the steepest card on the sheet -- every other scaling card adds a
+term; this moves a coefficient.
+
+**R74.** Ceremonial Garment loses its entry splash; pure state-entry.
+`burst_max` untouched, so this is a payout change and not an economy one.
+
+**R75 + [USER].** Honor Guard drops the conscript, gains Exhaust, and is
+promoted to 0-cost RARE with Retain on upgrade. The promotion is REQUIRED, not
+cosmetic: a blanket cost reduction is energy economy through another door, so
+R75's own output would have landed at Uncommon in violation of R79 in the same
+sprint that ratified R79. Found by the F1 census, not by the ruling.
+
+**R76.** Charge gauge styling + infield Kurage sprite -> animation sprint 2.
+Not executed here.
+
+**R77.** Surging Shoal 7 -> 6 (upgrade 8). Vow of the Tides CONFIRMED
+unchanged at 8 (11) + Exhaust -- recorded rather than left silent, because
+"confirmed" and "nobody looked" are indistinguishable a month later.
+
+**R78.** Muster is a keyword. Nine cards each restated ~90 characters of
+identical rule text; the faces now say "Muster N" and deviations print only
+the deviation. The definition is attached from the OP, so a new conscript card
+cannot ship with a keyword nothing on screen defines.
+
+**R79 / G7.** Verb-partition law, executed on the narrow (self-Exhaust)
+reading -- which is what R79's own text says. The F1 census found TWO cards in
+the carve-out's shape, not one; G8 merged them.
+
+**R80.** Charge is never spent. Standing law, healing-law register. Already
+structurally true on both sides (`ChargeResource.Spend` is a documented no-op,
+and there is no `spend_charge` in tier0); recorded so it stays that way.
+
+### B1. The Skittish errata, which was load-bearing
+
+The v0.3 note on `surging_shoal` said Skittish 6 "ZEROED the 4-damage
+version". It does not do that. tier0 adds the Block AFTER the hit resolves --
+the engine comment reads "so the triggering attack is never mitigated by it",
+and act1_pool's own line says "+6 Block after". A 4-damage hit landed in FULL.
+The v0.3 repricing to 7 was argued from a misread of the rule.
+
+What Skittish actually gates is the SECOND AoE each turn: at 7 that wave did
+1, at 6 it does 0, upgraded to 8 it does 2. So R77 buys a cleaner number at the
+cost of making the double-AoE turn dead against Gardener x4. That was not part
+of the errata as ratified and is flagged for the E2 read.
+
+### B4. R79's carve-out has the healing law's shape
+
+Stated once, for both laws: a rider that would otherwise be banned is legal
+only CONJUNCTIVELY. The healing law admits a heal at Rare AND Exhaust; R79
+admits an economy rider at Rare AND self-Exhaust. In both cases the pair is
+the point -- either half alone is the shape the law exists to prevent, and a
+future "simplification" that drops one half is not a simplification.
+
+### Predictions
+
+**P8: NULL.** Mustered-companion exhausts were predicted top-two burst income
+in commander decks. They are FOURTH (17.6%), behind skill_tag 28.3%, reaction
+28.0% and plain exhaust 25.4%. Her recruits are not the Commander lane's burst
+engine; the UNIVERSAL skill-tag and reaction lines are. Caveat on the record:
+all exhausts together are 43.0% and rank first, so a reader who does not split
+`exhaust_muster` from `exhaust` would call P8 confirmed. The split is the
+finding, and it is pinned by name in `test_burst_telemetry`.
+
+**P6: graded, fired.** See R73 above.
+
+### Two accrual reductions, not one
+
+Section 5 held the accrual side fixed with G6 as its single sanctioned
+exception. The batch shipped TWO: G6 removes a starter exhaust outlet, and G8
+additionally removes `moonlit_offering`'s `exhaust_from 2` AND `gain_charge 3`
+-- the priest lane's single biggest Charge line. Both are named on the cards.
+If act-1 Charge over-drops against P9, these are the suspects before the
+multiplier is touched again.
+
+### Defects found by doing the work
+
+1. **`jobs=0` is one worker per CPU, not serial.** E1 builds its arms by
+   patching a module attribute; Windows SPAWNS workers, which re-import
+   constants from source, so the patch vanished and both arms measured the
+   same value. The tell was +0.0pp on all four plans with pulse tails matching
+   to the unit.
+2. **A replication seed must be separated by at least `runs`.** `run_many`
+   seeds run i as `seed + i`, so seeds 11 and 23 share 588 of 600 runs. Seed
+   23 reproduced seed 11 to within 0.2pp everywhere: a 98%-overlapping sample
+   wearing the costume of a stable result.
+3. **An `energy` upgrade delta was never wired, and had shipped.** The var was
+   created and `OnUpgrade` bumped it, but both the play and the description
+   used the LITERAL -- so upgraded `swift_currents` granted 2 energy in the mod
+   while the sim gave 3, and printed 2 either way. There are two energy
+   emitters; patching one produced a face reading `{Energy:diff()}` over a play
+   still granting the base. The constant-parity gate compares constants, not
+   whether a declared upgrade is actually connected.
+4. **`discard` as an upgrade key bound only to Klee's `discard_for_sparks`.**
+   G6's delta had nowhere to land. Both appliers now try that op first and
+   fall back to the plain op -- ORDERED, so every Klee card keeps binding
+   exactly where it did.
+
+### Not executed
+
+Rev 2.1 defers to rev 2 for A3-A8, C1-C3, D1-D4 and P1-P5, and rev 2 exists in
+no file in this repo. Those items are NOT done and are not silently folded into
+the tracks above. R76 (animation sprint 2) and B3 (grading correction) are
+likewise untouched.
+
+### E2 + E2b: the F batch cost more than R73 did, and it was one card
+
+E2 measured the landed world (R73 x3 + Before Sun and Moon + the F batch)
+against E1's x3 arm, which is the multiplier-only world at the same cell,
+seed and constants. 600 runs, seed 11, C4.
+
+    plan        win% (d vs E1x3)   act-1% (d vs E1x3)   act-1 charge
+    priest       2.7   (-6.0)       44.0   (-16.3)       6.4 -> 5.2
+    commander    3.3   (-3.4)       53.3   (-12.7)       5.3 -> 4.6
+    assist       0.7   (-0.5)       37.2   (-13.0)       4.7 -> 3.9
+    generic      1.8   (-4.2)       36.3   (-19.4)       4.8 -> 3.8
+
+The F batch is a LARGER nerf than R73 was. Against the same-world roster
+anchors (floor: furina/fanfare 57.5% act-1 / 2.8% win; ref_ironclad 62.2% /
+6.3%), her best plan now clears act 1 at 53.3% -- below the floor again, which
+is the exact condition that made x2 unacceptable and fired the x3 fallback.
+
+**P9: CONFIRMED, and its named suspect was right.** E2 read odd, so E2b fired
+as pre-authorised. It reverts the ACCRUAL cuts and leaves the payout cuts
+(R74/R77/R75) in every arm, so whatever is not recovered is the payout half.
+400 runs, seed 11:
+
+    plan        landed   +G6 accrual   +G8 accrual   +both
+    priest      45.5     58.5          45.8          59.8
+    commander   53.5     64.0          53.5          64.0
+    assist      38.2     52.2          39.2          54.0
+    generic     38.2     49.8          38.0          49.8
+                                                 (act-1 clear %)
+
+G6 recovers 10.5-14.3 points on its own. G8 recovers 0.0-1.0. `+both` is
+`+G6` to within noise, and `+both` lands back at E1x3's numbers -- so the
+payout cuts (Garment splash, Shoal 7->6, Honor Guard's conscript) cost
+approximately NOTHING, and essentially the entire F-batch loss is G6.
+
+**A CORRECTION on the record.** During the F batch this pass flagged G8 as a
+second, larger accrual exception than G6 -- it removes `exhaust_from 2` AND
+`gain_charge 3`, against G6's single exhaust outlet, so it looked like the
+bigger cut. That was wrong, and E2b says so: G8's accrual removal is very
+nearly free. The reason is frequency, not size. `moonlit_offering` is one
+Uncommon that a run may never draft; `tactical_retreat` is a STARTER, in every
+deck, from turn 1 of every fight. A starter's accrual is worth 10-16 points of
+act-1 clear here and an uncommon's is worth about zero.
+
+That is the transferable finding, and it is why §5's instinct to name the
+STARTER migration as the one dangerous accrual change was correct while this
+pass's instinct to widen the suspicion was not.
+
+**Standing question for [USER], not resolved here.** The landed world is below
+the roster floor. Three levers are visible and none is this pass's to pull:
+revert or soften G6 (which R79/G6 ratified for grammar reasons, not power
+reasons); give the accrual back somewhere else; or accept a lower band for
+her and re-anchor. The multiplier is explicitly NOT the lever -- P9 said to
+suspect the accrual first, and it was right.

@@ -41,13 +41,14 @@ public sealed class TacticalRetreat : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tactical Retreat"),
-        ("description", "[gold]Exhaust[/gold] 1 card from your hand. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. Discard {Discards:diff()} random card(s)."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+            new CardsVar(1),
+            new DynamicVar("Discards", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -59,22 +60,20 @@ public sealed class TacticalRetreat : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        {
-            var toExhaust = (await CardSelectCmd.FromHand(
-                choiceContext, Owner,
-                new CardSelectorPrefs(
-                    CardSelectorPrefs.ExhaustSelectionPrompt, 1),
-                KitGrant.NotKitCard, this)).ToList();
-            foreach (var victim in toExhaust)
-            {
-                await CardCmd.Exhaust(choiceContext, victim);
-            }
-        }
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        for (var i = 0; i < DynamicVars["Discards"].IntValue; i++)
+        {
+            var pool = CardPile.Get(PileType.Hand, Owner)?.Cards.Where(KitGrant.NotKitCard).ToList();
+            if (pool == null || pool.Count == 0) break;
+            var victim = Owner.RunState.Rng.CombatTargets.NextItem(pool);
+            if (victim == null) break;
+            await CardCmd.Discard(choiceContext, victim);
+        }
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars.Cards.UpgradeValueBy(1m);
+        DynamicVars["Discards"].UpgradeValueBy(1m);
     }
 }

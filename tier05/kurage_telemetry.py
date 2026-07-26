@@ -54,6 +54,11 @@ class KurageTrace:
     amounts: list[int] = field(default_factory=list)
     charges: list[int] = field(default_factory=list)
     landed: int = 0
+    # C4 (Neap Tide v2.1): the Before Sun and Moon stack behind each pulse.
+    # Recorded per PULSE rather than per combat, because copies can be
+    # acquired mid-run and a per-combat snapshot would attribute a whole
+    # fight to whatever the count happened to be when it was sampled.
+    amps: list[int] = field(default_factory=list)
 
     @property
     def pulses(self) -> int:
@@ -67,6 +72,7 @@ def trace(log: list[dict]) -> KurageTrace:
             continue
         out.amounts.append(ev["amount"])
         out.charges.append(ev["charge"])
+        out.amps.append(ev.get("amp", 0))
         out.landed += 1 if ev.get("landed") else 0
     return out
 
@@ -80,6 +86,15 @@ def aggregate(traces: list[KurageTrace]) -> dict:
     """
     amounts = [a for t in traces for a in t.amounts]
     charges = [c for t in traces for c in t.charges]
+    # A trace with no amps recorded is one pulse per amount at amp 0: that is
+    # every pre-C4 trace, and every hand-built fixture. Padding rather than
+    # branching keeps the amp columns the same length as the damage columns,
+    # so "share of pulses" stays a share of the SAME pulses the tail is
+    # computed over -- two different denominators in one block is how a
+    # report starts quietly comparing unlike things.
+    amps = [a for t in traces
+            for a in (t.amps if len(t.amps) == len(t.amounts)
+                      else [0] * len(t.amounts))]
     if not amounts:
         return {}
     return {
@@ -91,6 +106,18 @@ def aggregate(traces: list[KurageTrace]) -> dict:
         "mean_charge": sum(charges) / len(charges),
         "max_charge": max(charges),
         "landed": sum(t.landed for t in traces) / len(amounts),
+        # C4 OVERLAP WATCH. G2 allowed Before Sun and Moon to stack over a
+        # ban, on the argument that draft dilution self-corrects at full
+        # roster. `amp_pairs` is that argument's instrument: the share of
+        # pulses fired with TWO OR MORE copies live, which is the compounding
+        # case the objection was about. `mean_amp` alone would hide it -- one
+        # deck at +3 and nine at 0 averages to the same 0.3 as ten decks at
+        # a harmless +0.3 that never happens.
+        # R14: no threshold lives here. This reports; it does not judge.
+        "mean_amp": sum(amps) / len(amps),
+        "max_amp": max(amps),
+        "amp_pairs": sum(1 for a in amps if a >= 2) / len(amps),
+        "amp_any": sum(1 for a in amps if a >= 1) / len(amps),
     }
 
 
@@ -120,4 +147,16 @@ def format_block(per_act: dict[int, dict]) -> str:
             f"    act {act + 1}    p50 {a['p50']:6.0f}   p95 {a['p95']:6.0f}"
             f"   max {a['max']:6.0f}   charge mean {a['mean_charge']:5.1f}"
             f" max {a['max_charge']:4.0f}   n={a['pulses']}")
+    # C4 overlap watch, printed only when the card is actually in play. A row
+    # of zeroes on every pre-R73 cohort would train the reader to skip the
+    # block, which is how the P2 rows above stayed unread for a sprint.
+    if any(a.get("amp_any") for a in per_act.values()):
+        lines.append("  Before Sun and Moon overlap (C4, report-only; "
+                     "no threshold -- R14)")
+        for act, a in per_act.items():
+            lines.append(
+                f"    act {act + 1}    amp mean {a['mean_amp']:4.2f}"
+                f"   max {a['max_amp']:2.0f}"
+                f"   pulses with >=1 copy {a['amp_any']:5.1%}"
+                f"   with >=2 {a['amp_pairs']:5.1%}")
     return "\n".join(lines)

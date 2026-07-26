@@ -35,6 +35,40 @@ public static class KokomiRiderTips
 
     public const string PulseKey = "KLEEMOD-KURAGE_PULSE_RIDER";
     public const string GarmentKey = "KLEEMOD-GARMENT_RIDER";
+    public const string MusterKey = "KLEEMOD-MUSTER";
+
+    /// <summary>
+    /// R78: the [gold]Muster[/gold] keyword, defined ONCE.
+    ///
+    /// Nine cards used to restate the full rule on their faces -- "transform
+    /// N cards in your hand into a random Inazuma Companion that costs 1 less
+    /// and Exhausts" -- about ninety characters of identical text apiece, and
+    /// the reason several of them sat at text budget. The faces now say
+    /// "Muster N" and this tip carries the definition.
+    ///
+    /// Unlike the two rider tips in this file, this one is NOT live
+    /// arithmetic: there is no per-card number to compute, so it prints the
+    /// rule and stops. It is here rather than in a keyword table because the
+    /// hover tip is the surface the other two Kokomi explanations already
+    /// use, and a player looking for "what does this word mean" should not
+    /// have to learn which of two mechanisms a given term lives in.
+    ///
+    /// The cost is stated from the constant, so a CONSCRIPT_COST_DELTA retune
+    /// cannot leave nine card faces and this definition disagreeing -- which
+    /// is exactly the failure mode the restatements had.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForMuster(
+        IEnumerable<IHoverTip> inherited, CardModel card)
+    {
+        foreach (var tip in inherited) yield return tip;
+        var cheaper = -KokomiConstants.ConscriptCostDelta;
+        yield return new HoverTip(
+            new LocString(Table, MusterKey + ".title"),
+            $"[gold]Muster N[/gold]: transform N cards in your hand into "
+          + $"random Inazuma [gold]Companion[/gold] cards. Each costs "
+          + $"{cheaper} less and [gold]Exhausts[/gold]. Kit cards and "
+          + "Companions you already hold are never chosen.");
+    }
 
     /// <summary>
     /// Attach to any card that FIELDS the jellyfish. The tip states the rate
@@ -82,10 +116,18 @@ public static class KokomiRiderTips
     /// </summary>
     private static string PulseBody(CardModel card)
     {
-        var rate = $"The pulse deals {KokomiConstants.KuragePulseBase} damage "
-                 + $"plus {KokomiConstants.KuragePulsePerCharge} per "
-                 + "[gold]Charge[/gold] you hold, at the END of your turn.";
+        // R73/A2: in combat the rate is the AMPED one. Before Sun and Moon
+        // raises the multiplier, and a tip that kept quoting the base would
+        // understate the pulse by exactly the card the player just bought --
+        // the drift the legibility sprint exists to prevent. Out of combat
+        // there is no owner to read copies off, so the base rate stands.
         var owner = card.Owner?.Creature;
+        var perCharge = owner == null
+            ? KokomiConstants.KuragePulsePerCharge
+            : KurageSummonPower.PulseMultiplier(owner);
+        var rate = $"The pulse deals {KokomiConstants.KuragePulseBase} damage "
+                 + $"plus {perCharge} per "
+                 + "[gold]Charge[/gold] you hold, at the END of your turn.";
         if (owner == null || card.CombatState == null) return rate;
 
         var charge = KokomiResources.GetCharge(owner);
