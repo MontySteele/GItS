@@ -12,6 +12,13 @@
 #   Overlooks the Waters". (Beware beta-era sources: they carry "Kaijin Ceremony" for the Burst and "Haworthia
 #   Casket" for the A1 passive. Both are pre-release names; the release names are the ones above.)
 # EVERY number remains PROPOSED. Names not in the verified list are authored flavor, now ruled.
+# B2 / G3 (FLAVOR-TEXT CONVENTION, Neap Tide v2.1): flavor text is VISUALLY SEGREGATED from rules text where the
+#   card's text budget allows, and OMITTED entirely when the card is at budget. Rules text never competes with
+#   flavor for the same line — a player reading a card to decide a turn must never have to parse which half is
+#   binding. STATUS: currently vacuous, and said so rather than left to look implemented. No card in this repo
+#   carries flavor text; there is no `flavor` field on the sheet and no renderer for one. This is the rule that
+#   governs the moment one is added, recorded now because R78 just freed a large amount of face budget on nine
+#   cards and "there is room now" is exactly when the convention gets decided by accident.
 # VOICE LAW (v0.4 §3): Exhaust in her fiction is ROTATION, never sacrifice. Units rotate off the field rested and
 #   whole; Charge is the strategic position each executed maneuver buys. Her doctrine is minimal casualties — the
 #   sacrifice voice is the one reading that breaks the character. tactical_recall is the exemplar; the old
@@ -28,6 +35,19 @@
 #          this sheet accordingly designs NO strength-granting cards.
 #   LAW 4 (deck-size grammar, user-authored): Commons net card delta <= 0 (reduce or replace, never create).
 #          Machine-checked by tools/lint_kokomi_decksize.py (in-suite). Uncommon+ may create (reinforcements).
+#   LAW 5 (R79/G7, verb partition — Neap Tide v2.1): Discard/Sly holds the MONOPOLY on card/energy economy
+#          riders (draw, energy, cycling, selection). Exhaust cards may carry riders — Block and other
+#          identity/defense riders are explicitly legal — but an economy rider on an exhaust card is legal
+#          ONLY as a deliberate one-time velocity piece: RARE **AND** self-Exhaust.
+#          Template: "Gain 1 (2) energy, draw 1 (2), exhaust 2. Exhaust."  (moonlit_offering is the sheet's one
+#          instance; swift_currents was merged into it at G8 rather than promoted alongside it.)
+#   B4 — THE CONJUNCTIVE SHAPE, stated once for BOTH laws that use it. LAW 2 admits a heal only at Rare AND
+#          Exhaust; LAW 5 admits an economy rider only at Rare AND self-Exhaust. In both cases the PAIR is the
+#          point: either half alone is exactly the shape the law exists to prevent — a Rare that heals is a
+#          payoff, an Exhaust card that draws is an engine — and it is the conjunction that makes the effect a
+#          one-time purchase instead of a repeatable one. A future pass that "simplifies" either law to a single
+#          condition has not simplified it; it has repealed it. Kokomi takes ZERO slots under LAW 2 (the healer
+#          heals no HP) and exactly one under LAW 5.
 # Element: hydro | Cadence: CATALYST (RULED R52, ask N1): every attack applies hydro — the pool's co-op/reaction
 #   voice, and the structural third of elite A6 (application uptime comes from the cadence, not authored lines).
 # Archetypes (kickoff §3): commander (conscription engine) | priest (Charge/exhaust density) | assist (Sly/discard
@@ -36,6 +56,12 @@
 #   ONLY as riders on exhaust/Sly engine pieces, never a spammable cheap AoE debuff like Furina's commanding_gaze;
 #   uncommon-gated so no such shape exists at common), A4 LOW BY DESIGN (the stability band owns the healer
 #   fantasy in the act sims), A7 mid (engine assembly tax).
+# R80 (STANDING LAW, healing-law register — Neap Tide v2.1): CHARGE IS NEVER SPENT. Read or thresholded, never
+#   expended. Not a current implementation detail to be revisited: it is the structural firewall against
+#   Regent-Stars convergence, and it is what every scaling number on this sheet was measured against. A bank
+#   that can be spent is a different resource wearing the same name, and every per-point read here would be
+#   describing a curve that no longer exists. Already true on both sides by construction — ChargeResource.Spend
+#   is a documented no-op and tier0 has no spend_charge — and recorded so it stays that way.
 # Charge grammar: the universal exhaust->Charge accrual lives on the relic (engine funnel), NEVER as card text;
 #   gain_charge lines here are the §2.1 "premium" bonuses on top. Charge is read, never spent — readers are
 #   rate-limited per §2.2 (Rare / Exhaust / cost >= 2 on the nuke; the garment state is the kit).
