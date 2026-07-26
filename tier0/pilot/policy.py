@@ -67,7 +67,7 @@ def make_pilot(weights: dict):
         # runs, commander flat. Demoting a damage play to a setup play costs
         # tempo in precisely the act-1 fights that kill her, and the bank is
         # deep enough by the time a reader matters. Binding null result;
-        # documented in docs/kokomi-v0.4-report.md so it is not retried.
+        # documented in docs/archive/kokomi-v0.4-report.md so it is not retried.
         _log_regret(state, best, -best_neg_i, playable, dmg, blk)
         return best
 

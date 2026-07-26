@@ -2,7 +2,7 @@
 
 (Received from design chat 2026-07-23; archived verbatim per the
 no-chat-side-only-artifacts rule. The Code-workstream response is
-docs/kokomi-roster-v0.1-report.md.)
+docs/archive/kokomi-roster-v0.1-report.md.)
 
 Status: DRAFT — ruling asks open, constants proposed not ratified
 Owner: design chat → hands off to Kokomi Claude Code workstream on close

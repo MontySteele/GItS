@@ -1,14 +1,19 @@
 # Tier 0 Balance Simulator
 
 Monte Carlo combat sim for validating Teyvat Spire card designs before any
-C# is written. Spec: `docs/tier0-simulator-spec.md`. Decisions made during
+C# is written. Origin spec: `docs/archive/tier0-simulator-spec.md` (archived
+2026-07-26 — the sim has outgrown it by sanctioned scope growth; the living
+law is `DECISIONS.md` and `harness/axes.py`). Decisions made during
 implementation: `DECISIONS.md`.
 
 ## Setup
 
 ```sh
-python3 -m venv .venv && .venv/bin/pip install pyyaml pytest
+python3 -m venv .venv && .venv/bin/pip install pyyaml pytest pillow
 ```
+
+(Pillow is needed by the art/still tests — `tests/test_char_stills.py`,
+`tests/test_art_coverage.py` — and the `tools/` art pipeline.)
 
 ## Usage
 
@@ -26,7 +31,7 @@ PYTHONPATH=. .venv/bin/python -m tier0.harness.runner --score \
 # Per-fight CSV for spreadsheet work
 PYTHONPATH=. .venv/bin/python -m tier0.harness.runner --csv out.csv ...
 
-# Tests (70; includes frozen-battery regression bands)
+# Tests (~590 collected; includes frozen-battery regression bands)
 .venv/bin/python -m pytest tier0/tests -q
 ```
 

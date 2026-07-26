@@ -1,6 +1,9 @@
 # Run-Model Rework: a realistic tier0.5 gauntlet
 
-**Status:** DRAFT for red-pen — 2026-07-21. Nothing here is implemented.
+**Status:** IMPLEMENTED — Passes 1–4 SHIPPED (see §10.8); ratified 2026-07-23.
+§10.9 is the living skip backlog and the reason this doc stays current.
+*(Header corrected 2026-07-26 during the recap; it previously still read
+"DRAFT … Nothing here is implemented", which had been false since §10.8.)*
 **Author:** Claude, from rulings this session.
 **Scope owner:** tier0.5 (the draft/run layer) ONLY. See §6 for the hard
 layer boundary — tier0's battery does not move.

@@ -156,7 +156,7 @@ def test_no_passive_accrual_path_on_the_sheet():
 
 
 # --- Salon Members (Salon v2 rework 2026-07-23: typed FIFO queue, unique
-# ticks/bows, Fanfare-as-Focus; docs/furina-salon-rework-plan.md §1) ---
+# ticks/bows, Fanfare-as-Focus; docs/archive/furina-salon-rework-plan.md §1) ---
 
 CRAB_TICK = C.SALON_MEMBERS["crabaletta"]["tick"]["damage"]
 CRAB_BOW = C.SALON_MEMBERS["crabaletta"]["bow"]["damage"]

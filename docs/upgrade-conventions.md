@@ -11,6 +11,19 @@
 6. **One upgrade axis per card** is the overwhelming norm; dual bumps are reserved for signature basics and rare flavor moments.
 
 ## Our derived rules (applied in klee-upgrades.yaml)
+
+> **Correction (2026-07-26 recap):** the mined grammar above is durable; this
+> section has drifted from the sheet it describes. As shipped in
+> `docs/klee-upgrades.yaml`: `hot_hands` upgrades to **Retain** (playtest
+> 2026-07-22 ruling), not self-damage removal; `patched_dress` is a flat
+> `{block: +3}` — the Spark branch **remains** conditional;
+> `vermillion_pact` is `{amp_percent: +25}` (+100%→+125% — a different value
+> scale than the "25→30" note below); and both Barbaras were converted off
+> healing entirely by m7-rulings R8, making the "Exhaust never removes" note
+> moot. There are now four upgrade sheets (`klee-`, `furina-`, `kokomi-`,
+> `ref-ironclad-upgrades.yaml`), not one. The M7 directive below was executed;
+> its prediction was falsified and corrected at M8/R14 (dose cells are
+> diagnostics, never acceptance targets).
 - Basics: Strike/Defend-exact (+3); Jumpy Dumpty gets the Bash-style dual bump (signature basic privilege).
 - Commons: exactly one number bump per grammar row 1/2. Zero common cost reductions.
 - Uncommons: number bump OR one keyword/condition change; two cost −1 slots (bombs_away, elemental_ecstasy) + one 1→0 (endless_fireworks, StS engine-power precedent).

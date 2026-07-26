@@ -132,7 +132,7 @@ SPOTLIGHT_CARDS_PER_TURN_CAP = None   # schematized but OFF (kickoff §3.2):
 FANFARE_CAP_FRACTION = 0.5    # Fanfare cap = fraction of maxHP.
                               # DEMOTED to a high safety rail by the Tide
                               # Turns sprint (F-A5, executor's call, logged
-                              # in docs/furina-fanfare-sprint-log.md): under
+                              # in docs/archive/furina-fanfare-sprint-log.md): under
                               # decay the ceiling never binds -- the W2
                               # cap-1000 cells reported 0.0% at-cap -- and
                               # uncapping was worth +0.2pt to the archetype
@@ -202,7 +202,7 @@ FANFARE_FLOOR_PER_POWER = 5       # common/uncommon Power played
 FANFARE_FLOOR_PER_POWER_RARE = 8  # rare Power played
 
 # --- Furina: Salon Members (kickoff §5; Salon v2 rework 2026-07-23,
-# docs/furina-salon-rework-plan.md -- numbers PROPOSED pending red-pen) ---
+# docs/archive/furina-salon-rework-plan.md -- numbers PROPOSED pending red-pen) ---
 # v2 = the full Defect-orb grammar per user directive: members are TYPED
 # (unique slot passive at start of player turn + unique final bow when
 # displaced), the queue is FIFO (deploying into full slots bows the OLDEST

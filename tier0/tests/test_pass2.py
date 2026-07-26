@@ -1,4 +1,4 @@
-"""Pass-2 ruling verification (docs/pass1-rulings-round2.md)."""
+"""Pass-2 ruling verification (docs/archive/pass1-rulings-round2.md)."""
 
 import pytest
 

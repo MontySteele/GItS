@@ -3,6 +3,17 @@
 The mod has one character-aware card generator. Klee remains the compatibility
 baseline and Furina is active as the second playable character.
 
+> **Correction (2026-07-26 recap):** three claims below have drifted.
+> (1) Kokomi is now a third registered profile (`KOKOMI_PROFILE` in
+> `tools/gen_klee_cards.py`, a catalyst Hydro cadence; her manifest emits
+> 57/58) — the `--character` examples below omit her. (2) Furina coverage is
+> now 77 of 78 generated (sole blocked row still `let_the_people_rejoice`,
+> hand-written). (3) The pck builder's art fallback now loops both
+> `furina` and `kokomi` (`tools/build_pck.ps1`), and per
+> `open-playtest-items.md` §2 it is Kokomi's surfaces that are newest, not
+> Furina's. The structural claims below (honesty rules, `--check`, S6c gate,
+> contract file — now `roster-pck-v2`) all still verify.
+
 ## Commands
 
 Generate every configured character:

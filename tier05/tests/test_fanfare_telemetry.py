@@ -1,6 +1,6 @@
 """Sheet pass 4 Q1a: the Fanfare saturation metrics.
 
-These pin the REGISTERED definitions (docs/furina-sheet-pass-4-plan.md).
+These pin the REGISTERED definitions (docs/archive/furina-sheet-pass-4-plan.md).
 A metric that quietly changes shape mid-pass would invalidate every cell
 measured before the change, so the definitions are tests, not comments.
 """

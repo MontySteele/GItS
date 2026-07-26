@@ -3,7 +3,7 @@
 This is deliberately a report tool, not a balance implementation.  It runs the
 four assigned Klee plans through the realistic Act-1 layer with relic and
 potion granting enabled, then prints the survival signals used by
-``docs/klee-survival-sprint-plan.md``.
+``docs/archive/klee-survival-sprint-plan.md``.
 
 Usage:
     python -m tools.klee_survival_sprint --runs 1500 --seed 11

@@ -48,7 +48,7 @@ public static class CompanionConstants
 /// This is the shape of the whole bug class: a "this combat" tracker is
 /// correct in solo and wrong in co-op, and solo is the only configuration the
 /// instruments can see. See the G-B2 census in
-/// docs/ship-what-we-know-sprint-log.md for the other consumers.
+/// docs/archive/ship-what-we-know-sprint-log.md for the other consumers.
 ///
 /// Uniqueness is PER OWNER, not global: if both players play Oz, both should
 /// get an Oz back. Deduplicating across owners would fix the leak by creating

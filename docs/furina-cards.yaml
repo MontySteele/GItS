@@ -352,7 +352,7 @@
    effects: [{op: apply_power, power: spotlight_flat_damage, amount: 5, target: self, note: "Spotlighted cards' damage ops +5 printed per copy"}]}
    # G-D2 (2026-07-25), PROPOSED: printed bonus per copy raised. Named "weak" by the co-op A0 playtest,
    # and consistent with spotlight's run winrate measured far below salon's in the same world (see the
-   # G-E2 anchors in docs/ship-what-we-know-sprint-log.md).
+   # G-E2 anchors in docs/archive/ship-what-we-know-sprint-log.md).
    # BOUNDED TO THE MAGNITUDE ON PURPOSE. Spotlight's problem is very likely structural rather than
    # numeric -- its measured winrate is not something a rare power fixes -- and the structural question
    # belongs to the pool sweep. Raising this card's number is what CAN be done without pre-empting that

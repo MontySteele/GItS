@@ -1,6 +1,6 @@
 """Furina sheet pass 4 — pre-registered experiment battery.
 
-Registered in docs/furina-sheet-pass-4-plan.md BEFORE running; null results
+Registered in docs/archive/furina-sheet-pass-4-plan.md BEFORE running; null results
 binding. Seed 20260724 throughout; deterministic.
 
 Q1B. Fanfare saturation BASELINE (current constants, no overrides). Reports

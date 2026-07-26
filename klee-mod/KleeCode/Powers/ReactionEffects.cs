@@ -79,7 +79,7 @@ internal static class ReactionEffects
     /// So: do NOT "fix" this by scoping it to an owner. If the intent ever
     /// changes, it changes at the ruling, not in the code -- see
     /// docs/red-pen-2026-07-26.md R1 and the co-op section of
-    /// docs/playtest-2026-07-25-coop-a0.md.
+    /// docs/archive/playtest-2026-07-25-coop-a0.md.
     /// </summary>
     public static bool ReactionTriggeredThisTurn => TotalResolved > _turnStartTotal;
 

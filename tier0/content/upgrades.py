@@ -38,7 +38,7 @@ UPGRADE_SHEETS = (_DOCS / "klee-upgrades.yaml",
                   _DOCS / "furina-upgrades.yaml",
                   # v0.2 Kokomi sheet pass (2026-07-24): rest-smith needs
                   # upgrade targets or her tier05 runs are structurally
-                  # behind. Cross-session note: docs/kokomi-session-worknote.md
+                  # behind. Cross-session note: docs/archive/kokomi-session-worknote.md
                   _DOCS / "kokomi-upgrades.yaml",
                   # Calibration pass (2026-07-24): the ANCHOR had 0/6 pool and
                   # 0/10 starter upgradable while every designed character had

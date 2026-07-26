@@ -1,7 +1,7 @@
 """§4.7 shop companion channel -- the Track C measurement cell (R61).
 
 Grades the three predictions pre-registered in
-`docs/shop-companion-channel-sprint.md` §3, BEFORE the numbers are read:
+`docs/archive/shop-companion-channel-sprint.md` §3, BEFORE the numbers are read:
 
   P1  slot-1 buy rate lands in 10-35% of visits where slot 1 was offered.
       Below 10% = pricing over-governs (the premium slot goes unbought);

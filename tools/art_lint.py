@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plan lint for art/plan.tsv (docs/art-taste-pass.md process directives 3-4).
+"""Plan lint for art/plan.tsv (docs/archive/art-taste-pass.md process directives 3-4).
 
 Checks EFFECTIVE card picks only (auto rows and shortlist rank 1) -- shortlist
 alternates may share sources freely, since only one of them ever ships.

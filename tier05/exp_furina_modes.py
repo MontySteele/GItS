@@ -840,7 +840,7 @@ def main() -> None:
             f"'{mode}' measures the SPENDABLE-Fanfare world, retired by "
             f"'The Tide Turns' F-A4 (fanfare_cost is no longer card "
             f"grammar). Its published numbers are archive; see "
-            f"docs/furina-fanfare-sprint-log.md. The Spotlight-mode cell "
+            f"docs/archive/furina-fanfare-sprint-log.md. The Spotlight-mode cell "
             f"still runs: python -m tier05.exp_furina_modes suite")
     if mode in ("suite", "all"):
         suite_readout()

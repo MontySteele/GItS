@@ -1666,7 +1666,7 @@ keys observed once during each character sweep.
 
 ## Animation sprint 1 opens: scene binding architecture (2026-07-23)
 
-Sprint doc: docs/animation-sprint-1-plan.md (Tracks A-E; A is a hard gate).
+Sprint doc: docs/archive/animation-sprint-1-plan.md (Tracks A-E; A is a hard gate).
 
 LICENSE NOTE (standing for the whole sprint): Downfall (github.com/lamali292/
 Downfall) is reference-reading ONLY. Patterns, node inventories, and patch
@@ -1758,13 +1758,13 @@ and the roster's Ancient tier:
 
 Sprint doc: docs/animation-sprint-2-plan.md. Execution log:
 docs/animation-sprint-2-log.md. Predecessor sprint CLOSED — see the
-2026-07-24 verdict record at the foot of docs/animation-sprint-1-log.md.
+2026-07-24 verdict record at the foot of docs/archive/animation-sprint-1-log.md.
 
 **THE FUNNEL CONTRACT — interface freeze between the visual layer and the
 in-flight Furina kit redesign.** Ratified safe by [USER] 2026-07-24.
 
 Furina's kit is being reworked in a parallel stream (the Fanfare sprint,
-docs/furina-fanfare-sprint-log.md) at the same time as her visual layer is
+docs/archive/furina-fanfare-sprint-log.md) at the same time as her visual layer is
 being rebuilt. Two streams editing one character is the top risk of this
 sprint, and the mitigation is a narrow, explicit interface rather than
 coordination. The visual layer may bind to EXACTLY these three points:
@@ -1790,7 +1790,7 @@ Consequences, binding for the sprint:
   that is a SHARED-SURFACE change and takes a cross-session note BEFORE
   landing, per the standing rule (DECISIONS ~431 / R20 lineage). The note
   pointer for this contract is dropped in the Furina stream's channel,
-  docs/furina-fanfare-sprint-log.md.
+  docs/archive/furina-fanfare-sprint-log.md.
 - A contract breach = STOP-WORK on the affected visual track plus the
   cross-session note. Visuals never chase an unlanded kit change.
 - Anything out-of-contract that the current UI secretly depends on gets
@@ -1983,8 +1983,8 @@ gate was wrong.
 
 ## Implementation sprint: C# parity, co-op ownership, upgrade lint, known-card fixes — no new design (2026-07-25)
 
-Sprint doc: docs/ship-what-we-know-sprint-plan.md. Execution log:
-docs/ship-what-we-know-sprint-log.md. Opened on branch
+Sprint doc: docs/archive/ship-what-we-know-sprint-plan.md. Execution log:
+docs/archive/ship-what-we-know-sprint-log.md. Opened on branch
 `furina/ship-what-we-know` off `4ce3b87`.
 
 Governing intent, verbatim from [USER]: *"Let's take everything we already

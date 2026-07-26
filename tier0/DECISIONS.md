@@ -142,7 +142,7 @@ Amend here, not in chat history.
     Celestial Gift = +2 attacks / 4 block; Catalytic Conversion = +1
     spark +5 burst per reaction. Amp %: multiplicative on base, additive
     with each other (melt x1.75 x1.55 = 2.71 < 4x cap).
-31. **Pass 1 verdict recorded in docs/klee-pass-1-report.md** — headline:
+31. **Pass 1 verdict recorded in docs/archive/klee-pass-1-report.md** — headline:
     watchlist all clean, dream team strong-not-dominant, A1/A3/A7 near
     declared; A4/A6 metric definitions need chat-side rulings; A2-solo
     and spark-A3 are real sheet findings; Burst cards likely need Retain.
@@ -199,7 +199,7 @@ Amend here, not in chat history.
     are load-bearing vs bosses (dropping them: 56 -> 44). The band was
     derived from a monoculture measurement; ratification asked, deck not
     forced.
-43. **v0.1 scorecard baseline recorded in docs/klee-pass-3-report.md**;
+43. **v0.1 scorecard baseline recorded in docs/archive/klee-pass-3-report.md**;
     freezes on ratification of the two band asks.
 
 ## Errata pass (2026-07-19, pass-3 ratification + furina-predesign Part 1)
@@ -235,7 +235,7 @@ Amend here, not in chat history.
     back." Measured the designated damper preemptively: splash proc-cap
     3 lands it at 96.5% with swarm 100 / gauntlet 99.4 unharmed. NOT
     armed (its round-3 trigger was A2 drag, not winrate); test xfailed
-    pending ruling. Ask filed in docs/klee-errata-report.md.
+    pending ruling. Ask filed in docs/archive/klee-errata-report.md.
 49. **v0.1 median identity regression-locked** (test_errata.V01_MEDIAN,
     300 fights / seed 42, +-0.3): errata moved every median axis by
     <=0.05. Companion-heal Exhaust (Barbara/Bennett, sheet v0.3.1)
@@ -267,7 +267,7 @@ Amend here, not in chat history.
     boss; both -> 3-10% with the boss killing 117/200. Cause: in-run
     decks (12-14 cards, ~60% HP) face battery checks calibrated for
     full-HP 25-card authored decks; the only power growth modeled is
-    ~8 card picks. Recommendation filed (docs/tier05-m5-report.md):
+    ~8 card picks. Recommendation filed (docs/archive/tier05-m5-report.md):
     run winrate is not a v1 acceptance metric; M6 harvests
     boss-reached decks into the Tier 0 battery. No unilateral tuning.
 55. **Reaction achievability pre-alarm:** <1% of reaction runs assemble
@@ -302,7 +302,7 @@ Amend here, not in chat history.
     assembly = 79% appliers x 71% amp x 10% Burst — the companion slot
     was never the bottleneck. Binding constraint: sparks_n_splash is a
     1-of-15 rare at 5% odds (~10% of runs SEE the Burst). Escalated with
-    options (innate Burst recommended) in docs/triage-execution-report.md.
+    options (innate Burst recommended) in docs/archive/triage-execution-report.md.
     Pity mechanism kept in-code for M7.
 60. **A4 instrument replaced (R8 healing-law ruling): barbara_injection →
     sustain_probe.** The conjunctive healing law (true heal = Rare AND
@@ -1369,7 +1369,7 @@ COMMITTED WORLD (waters_edge 6, re-measured before commit): see report
 
 ## R54 -- Kokomi v0.4: O4 is the primary arm, O1 rejected, O2 in reserve (2026-07-26)
 
-USER RULING (plan asks 1-3, 5; docs/kokomi-v0.4-plan.md is the governing
+USER RULING (plan asks 1-3, 5; docs/archive/kokomi-v0.4-plan.md is the governing
 doc, ruling answers in its §7):
 
 - **O1 REJECTED.** Accepting the v0.3 world by redefining the instrument or
@@ -1822,7 +1822,7 @@ supersession note. Sheet remains sole source of truth; codegen regenerated.
 ## R63 -- §4.7 shop channel executed: three amendments and a purse that never binds (2026-07-25)
 
 Execution record for the R59-R62 sprint. Full log:
-`docs/shop-companion-channel-sprint-log.md`.
+`docs/archive/shop-companion-channel-sprint-log.md`.
 
 **AMENDMENT 1 -- Track A shipped as a query surface, not a `CardPoolModel`.**
 The plan called the pool class the prerequisite. It is not one: a

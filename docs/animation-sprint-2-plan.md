@@ -2,8 +2,8 @@
 
 > Verbatim record of the governing sprint doc from the 2026-07-24 planning
 > discussion (house rule: no chat-side-only artifacts). Execution log:
-> docs/animation-sprint-2-log.md. Predecessor: docs/animation-sprint-1-plan.md
-> (architecture now in production) + docs/animation-sprint-1-log.md (CLOSED
+> docs/animation-sprint-2-log.md. Predecessor: docs/archive/animation-sprint-1-plan.md
+> (architecture now in production) + docs/archive/animation-sprint-1-log.md (CLOSED
 > 2026-07-24).
 
 Date: 2026-07-24. Inputs: animation-sprint-1-plan.md + animation-sprint-1-log.md (architecture now in production), the 2026-07-24 [USER] look-pass verdicts (recorded below as CLOSED inputs, not open questions), user-supplied Furina full-body art (design chat, 2026-07-24 — 227×440 preview; see B1 on sourcing the full-res original), Furina kit redesign IN FLIGHT in a parallel stream (see Funnel Contract).

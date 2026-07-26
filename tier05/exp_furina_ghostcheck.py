@@ -4,7 +4,7 @@ The map rework replaces the linear `node_template` spine with a generated
 16-floor DAG plus route policies and an event layer, and it was built partly
 to fix instrumentation errors. The Fanfare sprint closed on a null that was
 measured under RUNTEMPLATE 5, so by house rule every number in
-docs/furina-fanfare-sprint-log.md is now archive. This re-derives the two
+docs/archive/furina-fanfare-sprint-log.md is now archive. This re-derives the two
 that the close-out actually rests on:
 
 1. THE STATLINE — run winrate and act-1 clear per archetype. If gate (1)

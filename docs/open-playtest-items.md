@@ -9,10 +9,10 @@ queues have different costs and the desk queue keeps getting mixed into
 playtest agendas where it silently expands them.
 
 Sources swept: `docs/animation-sprint-{1,2}-log.md`,
-`docs/kokomi-playtest-protocol.md`, `docs/kokomi-v0.4-report.md`,
-`docs/ship-what-we-know-sprint-log.md`,
-`docs/shop-companion-channel-sprint-log.md`,
-`docs/kokomi-art-pass-requirements.md`, `docs/icon-gap-2026-07-24.md`,
+`docs/kokomi-playtest-protocol.md`, `docs/archive/kokomi-v0.4-report.md`,
+`docs/archive/ship-what-we-know-sprint-log.md`,
+`docs/archive/shop-companion-channel-sprint-log.md`,
+`docs/kokomi-art-pass-requirements.md`, `docs/archive/icon-gap-2026-07-24.md`,
 `klee-mod/DECISIONS.md`.
 
 ---
@@ -206,3 +206,42 @@ the game running.
   build. If the Darv event offers it, take it and say what happened.
 - **~20 cards short of roster parity** for Kokomi (common 25/~32, uncommon
   20/25, rare 8/15).
+
+---
+
+## 7. Recap addendum (2026-07-26) — corrections to the compile above
+
+Dated addendum from the 2026-07-26 recap audit; the compiled sections above
+are left verbatim as the 2026-07-25 record. Full audit:
+`docs/missed-requirements.md`.
+
+**Closed since compile:**
+
+- §6.2 "The single red-pen session … every number is PROPOSED" — the session
+  happened 2026-07-26. All seven numbers RATIFIED and APPLIED
+  (`docs/red-pen-2026-07-26.md` Part 1).
+- §6.2 "Furina's starter has no upgraded form" — ruled (R2) and implemented
+  (queue 3, `477b282`). `NO_UPGRADED_FORM` is now an empty dict by design.
+- §6.2 "Kokomi kickoff §202: Raiden Shogun's disposition" — closed by R52;
+  she ships as an Inazuma 5-star rare (`docs/inazuma-companions.yaml`),
+  red-pen passes at `81ba9d5`/`e80f955`.
+- §6.1 item 3, "`blazing_delight` … no rank-1 plan row at all" — closed at
+  `6f1b969`; the row exists and the L12 allowlist entry is gone. The other
+  two duplicate pairs remain open as written.
+- §6.3 "Orobas is not modelled in the sim" — narrowed: Klee's variant now is
+  (`touch_of_orobas_klee`, real `combat_start_spark` hook). Still unmodelled:
+  Furina's R2 upgraded form and Kokomi's variant.
+
+**Newly surfaced, untracked above** (full list with evidence in
+`docs/missed-requirements.md` — the top items):
+
+- Three shipped cards render the BETA placeholder with no plan.tsv row:
+  `spotlight_center_stage`, `spotlight_guest_cast`, `confiscated` (§4.1 there).
+- The salon member sprite-scale fix from Playtest 2 was never applied — it
+  blocks D5's capture from being judgeable (§4.3).
+- The char-icon `_outline` asset was never produced; all three characters
+  ship the fill icon in the outline slot (§4.2).
+- The Fontaine Rares sprint's four [USER] close-out items (companion art
+  picks, lore audit, C2 countersign, ratification) are on no tracker (§4.4).
+- `kurages_oath` = 12 was [USER]-flagged "too strong" and is absent from this
+  file and from the playtest protocol's standing-flags list (§3.3).

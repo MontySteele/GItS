@@ -64,7 +64,7 @@ internal static class KleePowerIcons
         // debt on the grounds that dedicated paths would regress to
         // placeholders. Sprint 2 Track E closed that by fetching the art
         // first: every path below has a file, cut from Furina's own talent and
-        // constellation sigils. See docs/icon-gap-2026-07-24.md.
+        // constellation sigils. See docs/archive/icon-gap-2026-07-24.md.
         FanfareMeterPower => KleePck.Path("furina/powers/fanfare.png"),
         FanfareAttackPer10Power => KleePck.Path("furina/powers/rising_ovation.png"),
         SalonMemberPower => KleePck.Path("furina/powers/salon_member.png"),

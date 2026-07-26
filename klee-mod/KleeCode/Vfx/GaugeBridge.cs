@@ -259,7 +259,7 @@ public static class GaugeBridge
     /// <summary>
     /// Re-read the authoritative value and redraw every gauge this creature
     /// owns. Call sites are the resource mutation funnels — enumerated in
-    /// docs/animation-sprint-1-log.md (Track C). If a future mutator bypasses
+    /// docs/archive/animation-sprint-1-log.md (Track C). If a future mutator bypasses
     /// the funnels, prefer wiring it through them; CustomResource.AmountChanged
     /// exists as an event-driven alternative if the funnels ever multiply.
     /// </summary>

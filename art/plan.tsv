@@ -6,7 +6,7 @@
 # focus: center | top; optional @ZOOM suffix (e.g. center@1.5) punches the crop into the frame (VFX gifs)
 # pick: auto (rank 1 goes straight to `out`) | shortlist (all ranks render to art/candidates/<asset_id>/ for the contact sheet)
 # source: png | gif (frame_pct = % through the clip) | svg (rendered; falls back to same-name .png)
-# register (docs/art-taste-pass.md): sticker|item|vfx|tcg|splash|icon — the pick's art class; art_lint enforces
+# register (docs/archive/art-taste-pass.md): sticker|item|vfx|tcg|splash|icon — the pick's art class; art_lint enforces
 #   class rules on effective picks (no icon on cards, item=>contain, gif=>frame_pct, unique source+frame).
 #
 # ---------- CARDS: direct official matches (auto) ----------
@@ -258,7 +258,7 @@ model_source_tcg_alt	ImageGen/images/model/klee_character_card.png	0	0	raw	cente
 # These rows are correct in mode/fit/register and were verified to render;
 # they are commented out ONLY because enabling them would double-book art.
 # Uncomment a row once the red-pen rules which card keeps the source (and
-# re-point or retire the loser). See docs/klee-art-redpen-round3.md.
+# re-point or retire the loser). See docs/archive/klee-art-redpen-round3.md.
 # RULED 2026-07-21 (user red-pen). One flip approved, five keeps confirmed.
 # The five DECLINED rows stay dead below as the record of what was asked and
 # refused -- do not re-propose these pairings; the challenger goes to rehunt.
@@ -627,7 +627,7 @@ relic_ethereal_spotlight	ImageGen/images/furina/relics/ethereal_spotlight.png	25
 standing_room_only	ImageGen/images/cards/furina/standing_room_only.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Theater Tickets.png		item	furina_pool
 standing_room_only	ImageGen/images/cards/furina/standing_room_only.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	The Opera of Noirceur and Blancheur Ticket.png		item	furina_pool
 standing_room_only	ImageGen/images/cards/furina/standing_room_only.png	500	380	cover	y0.30	shortlist	3	png	Opera Epiclese.png		splash	furina_pool
-# ---------- POWER ICONS: sprint-2 Track E gap (docs/icon-gap-2026-07-24.md) ----------
+# ---------- POWER ICONS: sprint-2 Track E gap (docs/archive/icon-gap-2026-07-24.md) ----------
 # 6 powers had NO icon; 15 Furina powers wore Klee's. Ten distinct
 # Spotlight powers all rendered amp_reaction_up. weak picks (friendly_visit,
 # study_buddy, standing_ovation, ovation_trickle) are flagged for re-hunt.

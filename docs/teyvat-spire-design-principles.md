@@ -163,7 +163,7 @@ Shop-integrated "Wish" draw (pay gold, draw from companion pool, duplicate prote
 > purchases by ~30%, and left unspent gold unchanged — runs end holding ~220
 > gold. **"Gold price is the balance governor" is not currently true in the
 > sim, because the purse does not bind.** See
-> `docs/shop-companion-channel-sprint-log.md` §4; open for [USER].
+> `docs/archive/shop-companion-channel-sprint-log.md` §4; open for [USER].
 
 
 **Decision:** the companion pool **replaces the base-game colorless card pool wholesale.** The mod ships *no* base StS2 colorless cards; every channel that would have offered a colorless card offers a companion instead. Rationale: the companion pool already *is* this mod's colorless content (`IsColorless`, §4.1). A generic base colorless card sitting next to "Fischl — Oz, at your side" dilutes the Teyvat fantasy and steps on the identity we spent the most engineering on.

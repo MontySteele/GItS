@@ -14,6 +14,11 @@ the [USER] taste pass); **character-shell track DONE** — see §5a
 | Companions (Inazuma) | 15 |
 | **Total card-sized outputs** | **73** |
 
+*(Stale since later the same day — recap note 2026-07-26: the shell track
+shipped (§5a, commit `68fb11b`) and all 73 faces carry applied provisional
+rank-1 picks (`6f1b969`); "zero exist" described the pre-pass world. The
+[USER] taste pass is what remains — `open-playtest-items.md` §6.1.)*
+
 Zero currently exist. She ships playable on Klee's assets via
 `build_pck.ps1`'s `Copy-KokomiFallback`, so **the game looks finished and this
 bill is invisible everywhere except the coverage tool.** That is the whole
@@ -189,7 +194,7 @@ the inventory that is not scarce relative to its lane.
 4. `python tools/art_fetch.py` → `art/raw/` + `art/SOURCES.tsv`.
 5. `python tools/art_contact_sheet.py` → the artifact the taste pass reads.
 6. **[USER] taste pass** — the picks are not mine to make. Klee's took three
-   red-pen rounds (`docs/klee-art-redpen-round2.md`, `round3.md`) and Furina's
+   red-pen rounds (`docs/archive/klee-art-redpen-round2.md`, `round3.md`) and Furina's
    rejected 13 of batch 1.
 7. `python tools/art_process.py` → `ImageGen/images/cards/kokomi/`, then
    `art_lint` and `art_coverage --strict` green.

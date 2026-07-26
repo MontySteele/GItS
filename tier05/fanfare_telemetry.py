@@ -1,7 +1,7 @@
 """Fanfare trajectory telemetry (sheet pass 4, Q1a).
 
 Reads the combat event log; changes nothing. The metric definitions are
-REGISTERED in docs/furina-sheet-pass-4-plan.md and are fixed for the whole
+REGISTERED in docs/archive/furina-sheet-pass-4-plan.md and are fixed for the whole
 pass so no later cell can redefine them mid-sweep:
 
 - time-at-cap   fraction of PLAYER TURNS whose start-of-turn snapshot has

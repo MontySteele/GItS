@@ -2,7 +2,7 @@
 
 Governing doc: docs/animation-sprint-2-plan.md. Opened 2026-07-24.
 DECISIONS entry: "Animation sprint 2 opens: the Funnel Contract".
-Predecessor: docs/animation-sprint-1-log.md (CLOSED 2026-07-24).
+Predecessor: docs/archive/animation-sprint-1-log.md (CLOSED 2026-07-24).
 
 ## Track A — Ledger, contract, art intake
 
@@ -18,7 +18,7 @@ Status: **COMPLETE.**
   sprint-1 log; every sprint-1 [USER] item is now struck through.
 - A2 ✅ Funnel Contract written into klee-mod/DECISIONS.md, and the
   cross-session note pointer dropped in the Furina stream's channel
-  (docs/furina-fanfare-sprint-log.md, "CROSS-SESSION NOTE IN"). The note
+  (docs/archive/furina-fanfare-sprint-log.md, "CROSS-SESSION NOTE IN"). The note
   states what the visual layer is bound to, what is explicitly free to
   change, and precisely what would require a note back — rather than asking
   the kit stream to do anything.
@@ -328,7 +328,7 @@ like a missing game_ref. Deploy from the repo root.
 
 E2 asked for "Furina's icon for the one surviving badge". Answering it meant
 sweeping the register, and the sweep found the badge strip was the small half
-of the problem. Written up in full at `docs/icon-gap-2026-07-24.md`.
+of the problem. Written up in full at `docs/archive/icon-gap-2026-07-24.md`.
 
 **What the sweep found.** Six powers had NO icon case at all and rendered the
 base-game placeholder — the same gap the earlier companion sweep left behind,

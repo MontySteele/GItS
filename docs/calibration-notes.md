@@ -1,6 +1,6 @@
 # Difficulty calibration — working notes
 
-Phase after the relic/potion/ancient layer (`docs/relic-potion-layer-plan.md`).
+Phase after the relic/potion/ancient layer (`docs/archive/relic-potion-layer-plan.md`).
 The runs are now "realistic" (full player-side power budget), so per the
 ratified order we calibrate difficulty against a character that carries a real
 loadout, never against the bare 3.0 starter. This doc is the running log of

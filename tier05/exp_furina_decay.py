@@ -18,7 +18,7 @@ B. FANFARE AUTOPSY. The fanfare plan sits at 0.0% winrate across F-A and
    deck kills but dies first".
 
 R14: diagnostics feeding a ruling. No acceptance targets in this file --
-the registered bars live in docs/furina-fanfare-sprint-log.md.
+the registered bars live in docs/archive/furina-fanfare-sprint-log.md.
 
 Usage: python -m tier05.exp_furina_decay [sweep|prop|frontload|autopsy] [--runs N]
 """
