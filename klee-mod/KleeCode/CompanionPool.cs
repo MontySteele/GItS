@@ -58,11 +58,26 @@ public static class CompanionPool
     public static IReadOnlyList<CardModel> All => CompanionRoster.All;
 
     /// <summary>
+    /// Is this one of OUR characters? The mod must not change anything for a
+    /// base StS2 character, so every entry point that alters behaviour gates
+    /// on this first.
+    ///
+    /// C2 named this. The predicate already existed as `HostsCompanions`, and
+    /// the reward-draw clamp needed the same question asked for an unrelated
+    /// reason -- nothing to do with companions. A gate named for one of its two
+    /// callers is how a later reader concludes the other caller is a mistake.
+    /// One predicate, two names, the general one primary.
+    /// </summary>
+    public static bool IsRosterCharacter(Player player) => CharacterId(player) != null;
+
+    /// <summary>
     /// Does this player's character host the companion system at all? Base
     /// StS2 characters must see a completely unmodified shop, so every entry
-    /// point gates on this first.
+    /// point gates on this first. Identical to <see cref="IsRosterCharacter"/>
+    /// by construction: the roster and the companion hosts are the same set,
+    /// and if they ever diverge this is the line that splits.
     /// </summary>
-    public static bool HostsCompanions(Player player) => CharacterId(player) != null;
+    public static bool HostsCompanions(Player player) => IsRosterCharacter(player);
 
     /// <summary>
     /// tier05 rewards: personal_pool cards are only ever offered to their own

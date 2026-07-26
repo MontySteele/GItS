@@ -267,6 +267,23 @@ internal static class CardFactory_CreateForReward_Clamp_Patch
             return;
         }
 
+        // C2: gate on OUR roster before touching anything.
+        //
+        // The clamp was written to be self-limiting -- base pools exceed every
+        // N in the game, so `cardCount > available` is false for them and the
+        // patch returns having changed nothing. That is true today and it is
+        // an argument, not a guarantee: it rests on a claim about six pools
+        // this mod does not own and cannot test. If it were ever wrong, the
+        // failure would be this mod silently reducing a base character's Neow
+        // reward, which is the one thing a roster mod must never do.
+        //
+        // The gate also stops us counting a base character's whole generatable
+        // pool on every reward draw, which is what the check below costs.
+        if (!CompanionPool.IsRosterCharacter(player))
+        {
+            return;
+        }
+
         var uniform = options.RarityOdds == CardRarityOddsType.Uniform;
         var available = options.GetPossibleCards(player).Count(c => uniform
             ? c.Rarity != CardRarity.Basic && c.Rarity != CardRarity.Ancient
