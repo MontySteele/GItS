@@ -4,11 +4,19 @@ R73 halves KURAGE_PULSE_PER_CHARGE, 4 -> 2. Section 5 of the sprint pins the
 knob order -- A1 lands ALONE and is measured before anything else moves -- so
 this script varies exactly one number and nothing else.
 
-WHAT THE TWO ARMS ARE, stated because it is easy to misread:
+WHAT THE THREE ARMS ARE, stated because it is easy to misread:
 
     x4   NOT the archived C3 measurement. It is today's tree, today's drafter,
          today's routes, with the multiplier patched back to its old value.
-    x2   the same, at the shipped value.
+    x3   the pre-committed weak-side fallback. See the ARMS note below for why
+         it is measured in the same invocation rather than after the fact.
+    x2   the same, at R73's ruled value.
+
+THE LANDED VALUE IS x3, NOT x2 (addendum A7). This script ran, graded P6, and
+the fallback fired; the ruled x2 shipped nowhere. The docstring said "x2, the
+shipped value" for the length of the sprint because it was written before its
+own result came in. Anything downstream that reads "shipped" here and means
+"current" is reading a pre-registration, not a record.
 
 That is deliberate. An A/B against a number taken in an older world would
 confound the knob with every other change since, which is the exact failure
@@ -95,7 +103,8 @@ def main(argv: list[str] | None = None) -> int:
     cells.print_header(
         base, "E1 -- R73 pulse multiplier, alone (Neap Tide v2.1)",
         subject="kokomi, all four plans", varying=("archetype",))
-    print("  arms: x4 (pre-R73) vs x2 (R73), SAME seeds, one constant apart.")
+    print("  arms: x4 (pre-R73) / x3 (fallback) / x2 (R73), SAME seeds, "
+          "one constant apart.")
     print("  Both arms are today's world. Neither is comparable to a pre-C4 "
           "report.")
 

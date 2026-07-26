@@ -52,16 +52,28 @@ ruling; disposition (build / waive / re-file) is [USER]'s.
 - **Weight:** with the band unbuilt, the ruled backstop for LAW 2 (no heals)
   is unmeasurable — her core fantasy currently has no instrument.
 
-### 1.4 Kokomi: the multiplicative-read cell was registered twice and never measured
+### 1.4 ~~Kokomi: the multiplicative-read cell was registered twice and never measured~~ — CLOSED (R73/E1, 2026-07-26)
 - **Source:** `archive/kokomi-roster-v0.1-report.md` §5 ("one measurement
   covers the set"), escalated to "now hot" in
   `archive/kokomi-sheetpass-v0.2-report.md` §6.5.
-- **Evidence:** every mention in the repo is a registration; none is a
-  measurement. Risk has *grown* since: `KURAGE_PULSE_PER_CHARGE = 4`
-  (`tier0/constants.py:307`) put a per-point bank reader on a **basic** card
-  alongside `all_streams_flow`, the Garment, and `nereids_ascension`, all
-  reading the same uncapped Charge bank. R56's "watched in act 3" is a winrate
-  check, not this cell.
+- **Evidence (as filed):** every mention in the repo was a registration; none
+  was a measurement. Risk had *grown* since: `KURAGE_PULSE_PER_CHARGE = 4` put
+  a per-point bank reader on a **basic** card alongside `all_streams_flow`,
+  the Garment, and `nereids_ascension`, all reading the same uncapped Charge
+  bank. R56's "watched in act 3" is a winrate check, not this cell.
+- **CLOSED by `tier05/exp_neap_tide_e1.py`** — the cell finally ran: three
+  arms (×4 / ×3 / ×2), paired seeds, one constant apart, all four plans, with
+  the p95-by-act pulse tail reported next to the win rates. It is the
+  measurement this item said did not exist. Outcome: ×2 was weak *everywhere*
+  (best plan below the roster act-1 floor), the pre-committed ×3 fallback
+  fired, and the landed multiplier is **3**.
+- **The registration was right and the number was not the whole story.** The
+  cell measured the constant; G2 then ratified a *stacking* `kurage_amp` card
+  that moves the same coefficient without a cap, so the multiplicative read is
+  now a drafted quantity rather than a fixed one. That successor watch lives
+  in C4 telemetry (stack counts, no threshold — R14) and in the
+  `KURAGE_PULSE_PER_CHARGE` WATCH block in `tier0/constants.py`. Closing this
+  item closes the *unmeasured* complaint, not the topic.
 
 ### 1.5 Furina: Q3 — the innate-on-upgrade Encore card was measured green and never shipped
 - **Source:** verbatim [USER] directive (2026-07-24), carried only by
