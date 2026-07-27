@@ -140,6 +140,7 @@ CHARACTERS: dict[str, CharacterSpec] = {
         "silent_pool_pass3.yaml",         # the Shiv token and its creators
         "silent_pool_pass4.yaml",         # runtime counts + the reward channel
         "silent_pool_pass5.yaml",         # payload powers + self-power reads
+        "silent_pool_pass6.yaml",         # per-instance cost state, gates
     )),
 }
 

@@ -182,6 +182,27 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # total, a drawn one does not.
             ok = _bump_first((fx for fx in everywhere
                               if fx.get("op") == "add_card"), "amount", val)
+        elif key == "created_upgraded":
+            # HiddenDaggers+ / StormOfSteel+: the tokens they create arrive
+            # upgraded. Boolean, and only True is a ruling -- the same shape
+            # `innate` and `retain` use.
+            if val is not True:
+                raise ValueError(
+                    f"created_upgraded delta on {base_id!r} must be true")
+            hits = [fx for fx in everywhere if fx.get("op") == "add_card"]
+            for fx in hits:
+                fx["upgraded"] = True
+            ok = bool(hits)
+        elif key == "autoplay_upgrade_first":
+            # KnifeTrap+: upgrade each card before auto-playing it.
+            if val is not True:
+                raise ValueError(
+                    f"autoplay_upgrade_first delta on {base_id!r} must be true")
+            hits = [fx for fx in everywhere
+                    if fx.get("op") == "autoplay_from_exhaust"]
+            for fx in hits:
+                fx["upgrade_first"] = True
+            ok = bool(hits)
         elif key == "draw":
             # ALL draw ops, branches included ("both branches" is sheet law).
             # draw_to_hand_size counts: Expertise's upgrade raises the hand

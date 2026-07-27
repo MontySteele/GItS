@@ -91,39 +91,56 @@ any single row of it would be a lie by omission:
   OFFICIAL:silent  46/88 (52%)  vocab 28  top 35%  uniq 78%  maxclu 3  pass
   OFFICIAL:silent  56/88 (64%)  vocab 29  top 39%  uniq 73%  maxclu 4  FAIL
   OFFICIAL:silent  59/88 (67%)  vocab 30  top 40%  uniq 72%  maxclu 4  FAIL
-  (the last row's `cards` column reads 60: the Shiv TOKEN is a pool row and
-   is not one of the draftable cards)
+  OFFICIAL:silent  85/86 (99%)  vocab 50  top 31%  uniq 72%  maxclu 5  FAIL
 
-  The /88 in those rows is the denominator AS IT WAS READ AT THE TIME, kept
-  unedited because a re-based history is not a history. It is now 86: the
-  extractor reads CardMultiplayerConstraint and drops the two cards the game
-  itself marks MultiplayerOnly (Flanking, Sneaky), which no DSL work could
-  ever make appear in a single-player run. Ironclad's is 85, not 87, for the
-  same reason (Demonic Shield, Tank). The last row therefore reads 59/86
-  (69%) today, and NONE of the gate columns moved when the denominator did --
-  distinctness is computed over the pool, so this changes the coverage story
-  and nothing about the measurement.
+  THE LAST ROW IS THE ONE THAT MATTERS, because coverage is no longer a
+  confound: her pool is COMPLETE bar one card ([USER] sent Blade Of Ink to an
+  enchantments design pass). `uniq` finished where it started -- 72% at 59
+  cards and 72% at 85 -- having passed through 78% on the way. Twenty-six
+  more cards moved it by nothing, `vocab` by twenty, and `maxclu` UP to 5.
+  A finished real base-game pool fails two of the three thresholds.
+
+  That is now a fact about the THRESHOLDS, not about the coverage. Ask A2
+  deferred ratification until the pool completed; it has completed, and the
+  question it was deferred for is answerable: no pool measured by this tool
+  -- ours or the base game's -- has ever passed uniq 75%, and the one pool
+  that did (at 46 cards) was the least complete reading taken.
+  Every `cards` column above runs one HIGHER than the coverage numerator:
+  the Shiv TOKEN is a pool row and is not one of the draftable cards.
+
+  The /88 in the early rows is the denominator AS IT WAS READ AT THE TIME,
+  kept unedited because a re-based history is not a history. It is now 86:
+  the extractor reads CardMultiplayerConstraint and drops the two cards the
+  game itself marks MultiplayerOnly (Flanking, Sneaky), which no DSL work
+  could ever make appear in a single-player run. Ironclad's is 85, not 87,
+  for the same reason (Demonic Shield, Tank). NONE of the gate columns moved
+  when the denominator did -- distinctness is computed over the pool, so
+  that change touched the coverage story and nothing about the measurement.
 
   * Two conclusions were drawn and then overturned by more coverage. At
     22-27 cards: "our pools post 56-62%, Ironclad posts 86%, so HE is the
     outlier and the gate condemns us for matching the other anchor." At 46:
-    "the anchors agree with each other and disagree with us." By 59 she is
-    three points under the line and neither statement survives.
+    "the anchors agree with each other and disagree with us." Neither
+    statement survived, and the completed pool retired the premise of both.
   * The control that licensed the first conclusion was a good experiment
     with a misleading answer: restricting IRONCLAD to his structurally
     simple subset RAISES his uniq (86 -> 89), which said "thinness does not
     depress uniq". It does not depress HIS. Coverage bias is a property of
     the SLICE -- her thin slices were poison/Sly cards that share signatures
     with each other -- and a control run on the other anchor cannot see it.
-  * What IS stable across all five readings: `maxclu` never exceeded 4 and
-    `neardup` never approached 0.33/card, on either anchor. What is not
-    stable is the exact quantity the gate is calibrated on.
+  * `maxclu` and `neardup` looked stable across the first five readings and
+    then BOTH breached on the completed pool (5, and 31 against a 28 budget).
+    Nothing in this table was safe to calibrate on early -- including the two
+    columns that spent five readings looking like they were.
 
-RATIFICATION IS DEFERRED, BY RULING (ask A2, [USER], 2026-07-27): "gate
-ratification waits til the card pool completes." All three thresholds stay
-PROPOSED. The ruling was made while the anchor was failing, and the data
-since has only strengthened it: a threshold picked at any point in that
-table would have been picked off a moving number.
+THE CONDITION FOR RATIFICATION IS NOW MET, AND THE ANSWER IS NOT "RATIFY"
+(ask A2, [USER], 2026-07-27: "gate ratification waits til the card pool
+completes"). It has completed. All three thresholds remain PROPOSED because
+the completed anchor FAILS two of them, which makes the numbers a statement
+about the thresholds rather than about any pool. The three live options, none
+of which is mine to choose: recalibrate off the completed second anchor,
+keep the thresholds and accept that they describe an aspiration no shipped
+pool meets, or retire `uniq` as a gate column and keep it as a report.
 
 vocab/top% still carry NO GATE, and they moved the same way: at 22 cards her
 vocabulary was NINE ideas against Ironclad's 40 and her top% read 50%, which

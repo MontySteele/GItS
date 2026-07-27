@@ -104,6 +104,13 @@ def card_playable(state: CombatState, card: Card) -> bool:
     if card.requires == "burst_energy_full":
         if state.player.burst_energy < state.player.burst_max:
             return False
+    elif card.requires == "draw_pile_empty":
+        # GrandFinale's `IsPlayable => Draw.GetPile(Owner).Cards.Count == 0`.
+        # A real playability GATE, not a cost: the card sits in hand, dead,
+        # until the deck runs out. pilot/policy.py already filters on this
+        # function, so the pilot inherits the rule without knowing the card.
+        if state.player.draw_pile:
+            return False
     elif card.requires:
         raise ValueError(f"unknown requires {card.requires!r}")
     if card.encore_cost and state.player.encore < card.encore_cost:
@@ -132,9 +139,22 @@ def card_cost(state: CombatState, card: Card) -> int:
         # test_refpowers.test_free_attack_does_not_zero_an_x_cost_attack.
         return state.player.energy
     cost = card.cost
+    # PER-INSTANCE cost state, the base game's EnergyCost.AddThisTurn /
+    # AddThisCombat / SetToFreeThisTurn. It lives on the CARD OBJECT because
+    # that is what the game modifies: two copies of Up My Sleeve in one deck
+    # discount themselves separately, and a card that leaves hand and is
+    # redrawn keeps its combat-scoped discount. Applied before every other
+    # modifier and floored at 0 like they are.
+    if card.free_this_turn:
+        return 0
+    cost = max(0, cost + card.cost_delta_this_turn
+               + card.cost_delta_this_combat)
     if card.cost_reduction_per_attack_this_turn:
         cost = max(0, cost - (card.cost_reduction_per_attack_this_turn
                               * state.attacks_played_this_turn))
+    if card.cost_reduction_per_skill_this_turn:
+        cost = max(0, cost - (card.cost_reduction_per_skill_this_turn
+                              * state.skills_played_this_turn))
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
     # Leading Role (card-level texture, kickoff §3.2): the FIRST

@@ -528,8 +528,19 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     bombed_at_cast = ({id(e) for e in state.enemies if e.bombs}
                       if fx.get("bonus_vs_bombed") else frozenset())
 
+    # A POWER THAT REWRITES THIS ROW'S TargetType. FanOfKnivesPower does
+    # exactly that to the Shiv (`TargetType => HasFanOfKnives ? AllEnemies :
+    # AnyEnemy`), so the token's target is not a property of the token alone.
+    # Declared ON the row, which is the contract refpowers.UNIMPLEMENTED
+    # recorded when the Shiv was translated single-target: the power and this
+    # field had to land in the same pass, and they did.
+    target = fx.get("target", "enemy")
+    widen = fx.get("target_all_if_power")
+    if widen and state.player.powers.get(widen, 0):
+        target = "all_enemies"
+
     for _ in range(times):
-        for enemy in _pick_targets(state, fx.get("target", "enemy")):
+        for enemy in _pick_targets(state, target):
             hit = base
             if fx.get("bonus_vs_bombed") and id(enemy) in bombed_at_cast:
                 hit += fx["bonus_vs_bombed"]
@@ -840,9 +851,49 @@ def _op_buff_next_attack(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_cost_mod(state: CombatState, fx: dict, card: Card) -> None:
-    if fx.get("scope") != "companion_cards":
-        raise ValueError(f"unknown cost_mod scope {fx.get('scope')!r}")
-    state.companion_cost_delta_this_turn += fx["delta"]   # reset at turn start
+    scope = fx.get("scope")
+    if scope == "companion_cards":
+        state.companion_cost_delta_this_turn += fx["delta"]  # reset at turn start
+        return
+    if scope == "hand_free_this_turn":
+        # BulletTime: every card in hand costs 0 for the rest of the turn.
+        # X-COST CARDS ARE EXEMPT (`if (!card.EnergyCost.CostsX)`) and the
+        # exemption is not cosmetic -- an X card resolves at the energy it
+        # spent, so freeing one would make it resolve at X = 0 and do
+        # nothing. Same conclusion combat.card_cost already reached for
+        # FreeAttack, reached again here.
+        for held in state.player.hand:
+            if held.cost != "X":
+                held.free_this_turn = True
+        state.emit("hand_freed", cards=len(state.player.hand))
+        return
+    if scope == "self_this_combat":
+        # UpMySleeve: `EnergyCost.AddThisCombat(-1)` on the playing instance,
+        # so each copy discounts ITSELF and the discount survives the card
+        # cycling through the discard pile.
+        card.cost_delta_this_combat += fx["delta"]
+        state.emit("cost_mod", card=card.id,
+                   total=card.cost_delta_this_combat)
+        return
+    raise ValueError(f"unknown cost_mod scope {scope!r}")
+
+
+def _op_grant_sly_this_turn(state: CombatState, fx: dict, card: Card) -> None:
+    """HandTrick: give one card in hand single-turn Sly.
+
+    The base game filters to Skills that are not ALREADY Sly this turn
+    (`card.Type == Skill && !card.IsSlyThisTurn`), so a second Hand Trick in
+    a turn picks a different card rather than wasting itself. Chosen through
+    the same `_best_card` pilot surface every other selection uses.
+    """
+    want = fx.get("card_type", "skill")
+    pool = [c for c in state.player.hand
+            if c.type == want and not c.sly_this_turn and not c.kit_card]
+    if not pool:
+        return
+    pick = _best_card(pool)
+    pick.sly_this_turn = True
+    state.emit("granted_sly", card=pick.id)
 
 
 def _op_gain_spark(state: CombatState, fx: dict, card: Card) -> None:
@@ -1020,7 +1071,7 @@ def _op_heal(state: CombatState, fx: dict, card: Card) -> None:
 def _op_add_card(state: CombatState, fx: dict, card: Card) -> None:
     from tier0.content import loader                # late import avoids cycle
     zone = fx.get("zone") or fx.get("to", "discard")
-    n = fx.get("amount", 1)
+    n = _amount(state, fx.get("amount", 1))
     if fx.get("card") == "self":                    # Anger: clone THIS card
         # CreateClone() of the playing instance -- so Anger+ clones an
         # UPGRADED copy. A fixed card_id add would reload the base id and
@@ -1040,7 +1091,20 @@ def _op_add_card(state: CombatState, fx: dict, card: Card) -> None:
     else:
         ids = [fx.get("card_id") or fx["card"]] * n
     for cid in ids:
-        token = loader.get_card(cid)
+        # `upgraded` is the IsUpgraded branch on HiddenDaggers and StormOfSteel
+        # -- they upgrade the tokens they just made. Loaded as the upgraded
+        # card rather than created-then-upgraded, which is the same result and
+        # keeps the upgrade grammar in one place.
+        if fx.get("upgraded"):
+            from tier0.content import upgrades
+            try:
+                token = loader.get_card(cid + upgrades.SUFFIX)
+            except Exception:
+                state.emit("UNIMPLEMENTED", op="add_card", card=cid,
+                           reason="no upgrade entry; created unupgraded")
+                token = loader.get_card(cid)
+        else:
+            token = loader.get_card(cid)
         if "cost_override" in fx:
             token.cost = fx["cost_override"]
         _add_token(state, token, zone)
@@ -1096,7 +1160,7 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
         if victim.sly:
             state.emit("sly", card=victim.id)
             _resolve_effects(state, victim.sly, victim)
-        if victim.sly_keyword:
+        if victim.sly_keyword or victim.sly_this_turn:
             sly_batch.append(victim)
     # BASE-GAME Sly (Card.sly_keyword, ask A4). Deliberately AFTER the loop:
     # CardCmd.DiscardAndDraw discards the WHOLE batch first -- each card
@@ -1828,6 +1892,57 @@ def _op_autoplay_from_draw(state: CombatState, fx: dict, card: Card) -> None:
                    force_exhaust=fx.get("force_exhaust", False))
 
 
+def _op_autoplay_from_exhaust(state: CombatState, fx: dict, card: Card) -> None:
+    """KnifeTrap: auto-play EVERY tagged card in the exhaust pile.
+
+    The list is snapshotted before the first play, exactly as the source
+    does (`.ToList()` before the foreach) -- a card this effect exhausts
+    while resolving must not be replayed by the same effect, which is a live
+    hazard because the tokens it plays typically exhaust themselves back
+    into the pile it is iterating.
+
+    `upgrade_first` is the card's IsUpgraded branch: each is upgraded before
+    it is played, not after.
+    """
+    p = state.player
+    tag = fx.get("tag")
+    victims = [c for c in p.exhaust_pile if not tag or tag in c.tags]
+    if not victims:
+        return
+    from tier0.content import loader, upgrades
+    for victim in victims:
+        if state.over or not p.alive:
+            break
+        if victim not in p.exhaust_pile:
+            continue
+        p.exhaust_pile.remove(victim)
+        if fx.get("upgrade_first"):
+            try:
+                victim = loader.get_card(victim.id + upgrades.SUFFIX)
+            except Exception:
+                state.emit("UNIMPLEMENTED", op="autoplay_from_exhaust",
+                           card=victim.id,
+                           reason="no upgrade entry; played unupgraded")
+        state.emit("autoplay_from_exhaust", card=victim.id)
+        _free_play(state, victim, force_exhaust=False)
+
+
+def _op_remember_card(state: CombatState, fx: dict, card: Card) -> None:
+    """Nightmare: choose a card in hand now; the POWER copies it later.
+
+    The chosen card is stored as an ID rather than as the object, matching
+    `SetSelectedCard`, which clones the card and clears its affliction before
+    keeping it -- what is remembered is the CARD, not that instance's
+    accumulated combat state.
+    """
+    pool = [c for c in state.player.hand if not c.kit_card]
+    if not pool:
+        return
+    pick = _best_card(pool)
+    state.player.power_payloads[fx["power"]] = pick.id
+    state.emit("remembered_card", card=pick.id, power=fx["power"])
+
+
 OPS = {
     "damage": _op_damage,
     "block": _op_block,
@@ -1878,6 +1993,9 @@ OPS = {
     "draw_to_hand_size": _op_draw_to_hand_size,
     "strip_block": _op_strip_block,
     "chain_attack": _op_chain_attack,
+    "autoplay_from_exhaust": _op_autoplay_from_exhaust,
+    "remember_card": _op_remember_card,
+    "grant_sly_this_turn": _op_grant_sly_this_turn,
     "transform_in_hand": _op_transform_in_hand,
     "generate_from_pool": _op_generate_from_pool,
     "autoplay_from_draw": _op_autoplay_from_draw,

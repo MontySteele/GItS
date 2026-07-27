@@ -416,6 +416,13 @@ SUPPORTED_POWERS = {"StrengthPower": "strength",
                     "NoDrawPower": "no_draw",
                     "ShadowStepPower": "shadow_step",
                     "TrackingPower": "tracking",
+                    # Coverage pass 6. FanOfKnivesPower left UNIMPLEMENTED
+                    # here: it rewrites the token's TargetType, and the entry
+                    # said it could only be implemented in the same pass that
+                    # changed the already-translated token row. That is this
+                    # pass -- the row carries `target_all_if_power` now.
+                    "FanOfKnivesPower": "fan_of_knives",
+                    "NightmarePower": "nightmare",
                     "WraithFormPower": "wraith_form"}
 
 # A FOURTH exclusion category, and the narrowest: the power IS implemented in
@@ -588,6 +595,8 @@ UPGRADE_POWER_KEY = {"strength": "power_amount",
                      "phantom_blades": "power_amount",
                      "shadow_step": "power_amount",
                      "tracking": "power_amount",
+                     "fan_of_knives": "power_amount",
+                     "nightmare": "power_amount",
                      "wraith_form": "power_amount"}
 
 
@@ -1157,6 +1166,16 @@ def _supplement_upgrade_delta(row: dict, src: str) -> dict:
         if any(fx.get("op") == "exhaust_from" and "select" not in fx
                for fx in effects):
             delta["exhaust_select"] = "chosen"
+        # `CardCmd.Upgrade(item)` behind IsUpgraded upgrades the cards the row
+        # HANDLES -- which ones depends on what the row does with them, so the
+        # DSL op decides the key. Created tokens (HiddenDaggers, StormOfSteel)
+        # arrive upgraded; auto-played ones (KnifeTrap) are upgraded first.
+        if "CardCmd.Upgrade(" in src:
+            if any(fx.get("op") == "add_card" for fx in effects):
+                delta["created_upgraded"] = True
+            elif any(fx.get("op") == "autoplay_from_exhaust"
+                     for fx in effects):
+                delta["autoplay_upgrade_first"] = True
         # An X-cost card whose upgrade increments the resolved X by one
         # (`if (IsUpgraded) { powerAmount++; }`). The `++` IS the value --
         # read from the branch, not authored here -- and the guard is that

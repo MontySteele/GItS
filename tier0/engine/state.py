@@ -154,6 +154,23 @@ class Card:
     # owner has already played. Keeping the rate on the card lets card_cost()
     # read the live turn counter without mutating the printed/base cost.
     cost_reduction_per_attack_this_turn: int = 0
+    # Pinpoint. Declarative and read at cost time, which is exactly
+    # equivalent to the base game's two halves (a retroactive ReduceCostBy
+    # when it enters combat, then -1 per Skill afterwards) without needing
+    # an out-of-play hook: at any moment both say "printed cost minus the
+    # Skills played this turn", and both reset at the turn boundary.
+    cost_reduction_per_skill_this_turn: int = 0
+    # EnergyCost.AddThisTurn / AddThisCombat / SetToFreeThisTurn -- state the
+    # base game keeps on the CARD INSTANCE, not on its owner. Two copies of
+    # the same card discount themselves independently, and the combat-scoped
+    # one survives the card leaving hand and being redrawn. `free_this_turn`
+    # is a SET, not a delta: Bullet Time zeroes the cost outright.
+    cost_delta_this_turn: int = 0
+    cost_delta_this_combat: int = 0
+    free_this_turn: bool = False
+    # Hand Trick grants Sly for one turn only. Kept separate from the printed
+    # `sly_keyword` so the grant expires without editing what the card prints.
+    sly_this_turn: bool = False
     # --- Status cards (multi-act §10.2 injection op; engine/statuses.py).
     # type == "status" cards are UNPLAYABLE (combat.card_playable) and exist
     # only inside a combat: enemies inject them into the player's piles; the
@@ -495,6 +512,7 @@ class CombatState:
     extra_card_screens: int = 0
     dark_embrace_ethereal_count: int = 0  # deferred to after the hand flush
     attacks_played_this_turn: int = 0     # Juggling's ==3 trigger
+    skills_played_this_turn: int = 0      # Pinpoint's self-discount
     # CardPlaysFinished this turn, counted per card TAG. PhantomBlades pays
     # only on the first tagged card played each turn, and "finished" is the
     # word that matters: the card currently resolving is not in here yet.

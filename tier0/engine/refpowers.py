@@ -78,16 +78,6 @@ UNIMPLEMENTED: dict[str, str] = {
         "entirely. Needs auto_play_card() + a detector that extends past the "
         "pilot loop. Card: Stampede."
     ),
-    "fan_of_knives": (
-        "FanOfKnivesPower does not deal or gain anything itself -- it "
-        "rewrites the SHIV's TargetType from AnyEnemy to AllEnemies "
-        "(Shiv.TargetType reads HasFanOfKnives). tier0 card rows carry a "
-        "fixed target per effect, so implementing this power means making "
-        "the Shiv row's target conditional on it. The Shiv is currently "
-        "translated as single-target, which is EXACT only while this power "
-        "cannot exist. Do not put it on the dial without changing the Shiv "
-        "row in the same pass. Card: Fan Of Knives."
-    ),
     "hellraiser": (
         "HellraiserPower autoplays every drawn card tagged Strike from inside "
         "AfterCardDrawnEarly, which makes CombatState.draw REENTRANT: the "
@@ -615,6 +605,12 @@ def after_card_played(state: CombatState, card: Card, snap: dict) -> None:
     # the card doing the asking must not count itself.
     for tag in card.tags:
         state.tag_plays_this_turn[tag] = state.tag_plays_this_turn.get(tag, 0) + 1
+    # The same tally by TYPE. Pinpoint discounts itself by one per Skill
+    # played this turn, and counts them here for the same reason: it is
+    # CardPlaysFinished the card reads, so the Skill doing the asking is not
+    # in the count until it is done.
+    if card.type == "skill":
+        state.skills_played_this_turn += 1
 
     # NoEnergyGain (ExpectAFight): ModifyEnergyGain -> 0.
     # NOT a turn-start denial. The turn refill goes through ResetEnergy(), which
@@ -799,18 +795,35 @@ def before_hand_draw(state: CombatState) -> None:
     decompiled game data and this module is committed.
     """
     p = state.player
-    n = p.powers.get("infinite_blades", 0)
-    if not n:
-        return
-    token = p.power_payloads.get("infinite_blades")
-    if not token:
-        state.emit("UNIMPLEMENTED", power="infinite_blades",
-                   reason="no payload: the row that applied it named no card")
-        return
     from tier0.content import loader                # late import avoids cycle
     from tier0.engine.effects import _add_token
-    for _ in range(n):
-        _add_token(state, loader.get_card(token), "hand")
+
+    n = p.powers.get("infinite_blades", 0)
+    if n:
+        token = p.power_payloads.get("infinite_blades")
+        if not token:
+            state.emit("UNIMPLEMENTED", power="infinite_blades",
+                       reason="no payload: the row that applied it named "
+                              "no card")
+        else:
+            for _ in range(n):
+                _add_token(state, loader.get_card(token), "hand")
+
+    # NightmarePower, the same hook: Amount COPIES of the card chosen when it
+    # was played, then PowerCmd.Remove(this) -- one payout, not a standing
+    # buff. The stacks are the copy count, and the power removes itself
+    # whether or not the copies fit in hand.
+    n = p.powers.get("nightmare", 0)
+    if n:
+        remembered = p.power_payloads.pop("nightmare", None)
+        p.powers.pop("nightmare", None)
+        if not remembered:
+            state.emit("UNIMPLEMENTED", power="nightmare",
+                       reason="no remembered card: nothing was in hand to "
+                              "choose when it resolved")
+        else:
+            for _ in range(n):
+                _add_token(state, loader.get_card(remembered), "hand")
 
 
 def after_card_drawn(state: CombatState, card: Card,
@@ -1294,11 +1307,22 @@ def after_enemy_side_turn_end(state: CombatState) -> None:
 def reset_turn_counters(state: CombatState) -> None:
     """Per-player-turn windows owned by this module."""
     state.attacks_played_this_turn = 0            # Juggling
+    state.skills_played_this_turn = 0             # Pinpoint
     state.block_gain_card_plays_this_turn = 0     # Unmovable's allowance
     state.cards_exhausted_this_turn = 0           # EvilEye / ForgottenRitual
     state.hp_lost_this_turn = 0                   # Spite
     state.discards_this_turn = 0                  # MementoMori
     state.tag_plays_this_turn = {}                # PhantomBlades
+    # Per-instance TURN-scoped card state expires here (BulletTime's free
+    # cost, Pinpoint's discount, HandTrick's granted Sly). Swept across every
+    # pile because a freed card that was discarded and redrawn must not come
+    # back still free; the combat-scoped delta is deliberately untouched.
+    p = state.player
+    for pile in (p.hand, p.draw_pile, p.discard_pile, p.exhaust_pile):
+        for held in pile:
+            held.free_this_turn = False
+            held.cost_delta_this_turn = 0
+            held.sly_this_turn = False
     state.rupture_pending = 0
 
 

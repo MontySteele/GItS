@@ -7,12 +7,12 @@ not exist and there is nothing to assert. The fresh-clone half of the
 contract is pinned unguarded in test_anchor_lock.py.
 
 WHAT THIS ANCHOR IS, stated once so no number read off it is over-claimed:
-the assembled pool is 76 rows: 75 of the character's 86 draftable cards
+the assembled pool is 86 rows: 85 of the character's 86 draftable cards
 plus the SHIV token, which is created in hand and never drafted. Coverage
-went 22 -> 27 -> 46 -> 56 -> 59 -> 69 -> 75 over 2026-07-27 (the Sly
+went 22 -> 27 -> 46 -> 56 -> 59 -> 69 -> 75 -> 85 over 2026-07-27 (the Sly
 keyword, nineteen of her powers, a hand-translated foreach/conditional/formula
-layer, the Shiv and its creators, the runtime-count pass, then eight more
-powers).
+layer, the Shiv and its creators, the runtime-count pass, eight more powers,
+then per-instance card cost state and the playability gate).
 
 THE DENOMINATOR IS 86, NOT THE 88 CARDS IN HER POOL LISTING. Flanking and
 Sneaky carry CardMultiplayerConstraint.MultiplayerOnly, so a single-player
@@ -20,12 +20,11 @@ run never offers them and no DSL work could ever change that; the extractor
 reads that flag and files them under `unavailable:`, outside the
 emitted/excluded split.
 
-The 11 still out are not a random sample -- they are the cards needing
-per-instance card cost state, a power that would invalidate an
-already-translated row, created cards that arrive upgraded, or the
-enchantment subsystem ([USER] sent that one to a design pass). This is still a FLOOR on the
-Silent rather than a portrait of her, and the coverage fraction travels with
-every statline she produces.
+ONE CARD IS STILL OUT: Blade Of Ink, which creates enchanted tokens. [USER]
+ruled 2026-07-27 that enchantments get a design pass rather than a
+translation, because an enchantment is state on a CARD INSTANCE and every
+modifier tier0 has attaches to a creature. It is not a coverage debt that
+more DSL work closes -- see the sprint log s13.
 """
 
 import random
@@ -155,14 +154,14 @@ def test_every_reference_card_has_an_applicable_upgrade(ref_cards):
     # Atomic external-artifact contract: partial coverage would bias smithing
     # and shop removal toward whichever cards happened to receive a `+` form.
     from tier0.content import upgrades
-    # 22 -> 27 -> 46 -> 56 -> 59 -> 70 -> 76 rows across 2026-07-27: ask A4
+    # 22 -> 27 -> 46 -> 56 -> 59 -> 70 -> 76 -> 86 rows across 2026-07-27: A4
     # (CardKeyword.Sly) freed the five Sly cards, nineteen of her powers went
     # on the dial, two hand-translated layers followed, then the Shiv token,
     # and finally the runtime-count pass (hand_size, block gained, the drawn
     # card's type) plus The Hunt's post-combat reward channel. The count is
     # pinned rather than derived because a pool that quietly loads SMALLER is
     # the failure this anchor cannot detect any other way.
-    assert len(ref_cards) == 76
+    assert len(ref_cards) == 86
     pool_ids = {card.id for card in ref_cards}
     for layer_name in loader.EXTERNAL_CARD_LAYERS["silent_pool.yaml"]:
         layer = yaml.safe_load((loader.GAME_REF_DIR / layer_name).read_text())
@@ -240,5 +239,8 @@ def test_the_shiv_creators_make_the_token_they_name(ref_cards):
     creators = [c for c in ref_cards
                 if any(fx.get("op") == "add_card" and fx.get("card") == "si_shiv"
                        for fx in c.effects)]
-    assert len(creators) == 3
+    # 3 at pass 3 (the token's first pass), 7 once passes 5-6 landed the rest
+    # of the shiv engine. Pinned as a COUNT so a layer that silently stops
+    # merging is caught here rather than as a strange win rate.
+    assert len(creators) == 7
     assert all(loader.get_card("si_shiv") for _ in creators)

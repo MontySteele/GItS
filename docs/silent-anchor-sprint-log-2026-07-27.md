@@ -893,3 +893,74 @@ data-model gap, not a missing op.
 **Not in scope for this addendum, deliberately:** what Inky itself is worth.
 That is a number, and numbers come after the model. Answering (1) and (2) may
 make it moot.
+
+---
+
+## 14. The pool is complete (85 of 86), and the gate has its answer
+
+Passes 5 and 6 finished the Silent. Coverage 22 -> 85 of 86 in one day; the
+one card still out is Blade Of Ink, which [USER] sent to the enchantments
+design pass (§13) and which no amount of DSL work closes.
+
+### 14.1 A fourth exclusion category: PAYLOAD POWERS
+
+Infinite Blades creates the owner's TOKEN; Phantom Blades reads the owner's
+card TAG. tier0 implements both powers, but a base-game card id or tag is
+decompiled game data and may not appear in committed engine code. So the row
+carries it as a `payload` and `effects._op_apply_power` hands it to the
+power -- the id stays in the gitignored yaml where it already lived.
+
+The category exists because of what the alternative was. Emitting those cards
+structurally would have applied a real power with nothing to work on: a card
+that reads as a buff and measurably does nothing. That is the identical
+failure the CO-OP ONLY category was created to prevent, arrived at from the
+opposite direction, and the extractor now refuses both the same way.
+
+### 14.2 Two numbers read off the DLL that I would have got backwards
+
+DoubleDamagePower returns a literal `2` and its stacks count TURNS (one
+decrements per owner turn end) -- two stacks is two turns of doubling, not
+quadruple damage. TrackingPower is the exact opposite: `base.Amount` IS the
+multiplier, so its second copy takes 2x to 3x. Assuming either would have
+been a large silent difference, and they sit two lines apart in the same
+hook.
+
+### 14.3 The Shiv row changed, exactly as pass 3 said it would have to
+
+When the token was translated single-target, `refpowers.UNIMPLEMENTED` carried
+an entry that was not a refusal to model a mechanic -- it was a note that
+FanOfKnivesPower rewrites the token's TargetType, that the single-target
+translation was exact only while the power could not exist, and that the two
+had to land in the same pass. Pass 6 is that pass: the row carries
+`target_all_if_power: fan_of_knives`, the power is implemented, and the entry
+is gone. That entry did its whole job -- it made a conditional exactness
+claim, named the condition, and expired when the condition did.
+
+### 14.4 The gate, seventh reading, and A2 is answerable now
+
+    OFFICIAL:silent  85/86 (99%)  vocab 50  top 31%  uniq 72%  maxclu 5  FAIL
+
+**`uniq` finished where it started.** 72% at 59 cards, 72% at 85, having
+passed through 78% in between. Twenty-six more cards moved it by nothing.
+`maxclu` went UP to 5 and `neardup` to 31 against a 28 budget -- the two
+columns that had looked stable across five readings both breached on the
+completed pool.
+
+A2 deferred ratification until the pool completed. It has completed, and the
+answer is not "ratify": a finished, real, shipped base-game character fails
+two of three thresholds. That makes these numbers a statement about the
+THRESHOLDS rather than about any pool. Three options, none of them mine:
+recalibrate off the completed second anchor; keep the thresholds and accept
+that they describe an aspiration no shipped pool meets; or retire `uniq` as a
+gate column and keep it as a report. The tool's docstring carries all seven
+readings and this paragraph.
+
+### 14.5 What is still owed
+
+- **Blade Of Ink**, pending the enchantments design pass (§13).
+- **The pilot review** ([USER], §12.1), whose trigger -- pool completion --
+  has now fired. The act-1 clear regression is the first question and it is
+  still unexplained; nothing in passes 4-6 was aimed at it.
+- **A2/A3 remain unratified.** A2 now has its evidence and needs a ruling;
+  A3 is unblocked for the first time, because the pilot finally has a
+  complete pool to draft from.
