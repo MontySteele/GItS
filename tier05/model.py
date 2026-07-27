@@ -36,8 +36,8 @@ from tier0.engine.combat import run_fight
 from tier0.engine.state import Card, Enemy
 from tier0.harness import metrics as t0_metrics
 from tier0.pilot.policy import make_pilot
-from tier05 import (acts, burst_telemetry, draft, events, fanfare_telemetry,
-                    kurage_telemetry, overlap_telemetry,
+from tier05 import (acts, aura_telemetry, burst_telemetry, draft, events,
+                    fanfare_telemetry, kurage_telemetry, overlap_telemetry,
                     maps, potions as potion_pool, rewards, route, shop)
 from tier05 import relics as relic_pool
 
@@ -218,6 +218,9 @@ class RunResult:
     #                    cast, and the drafted-vs-cast gap is half of what C4
     #                    is for. Empty dict for every character whose pool
     #                    holds none of the watched ids.
+    aura_traces: list = field(default_factory=list)      # Curtain Call R85:
+    #                    (act_index, AuraTrace) per fight -- hydro-application
+    #                    uptime, the Track B retype tripwire (sprint log §4).
 
 
 def node_template() -> list[str]:
@@ -567,6 +570,12 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 # can look at it.
                 res.overlap_traces.append(
                     (act_i, overlap_telemetry.trace(state.log)))
+                # Curtain Call (R85, Track D): hydro-application uptime,
+                # act-tagged like the four above and taken here for the same
+                # reason. Empty (turns == 0 only when the log is empty) but
+                # near-zero-cost for rosters that never apply hydro.
+                res.aura_traces.append(
+                    (act_i, aura_telemetry.trace(state.log)))
                 fights += 1
                 hp = state.player.hp
                 # Combat-scoped effects such as Feed can raise max HP permanently.

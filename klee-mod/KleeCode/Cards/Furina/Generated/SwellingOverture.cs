@@ -40,7 +40,7 @@ public sealed class SwellingOverture : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Swelling Overture"),
+        ("title", "Compose Herself"),
         ("description", "Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 

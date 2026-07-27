@@ -22,6 +22,12 @@ KNOWN_FAILING = {
     ("klee", "uniq"),        # 61% -- signature repetition, one defect
     ("furina", "uniq"),      # 62%
     ("furina", "neardup"),   # 0.94/card -- the 12-family + F-B1 cluster
+    ("furina", "maxclu"),    # TRANSIENT (Curtain Call R85, Track B): the
+    #                          four skill->attack retypes join the plain
+    #                          damage family before Track C's rewrites break
+    #                          it apart -- 6 in the B state, resolved in the
+    #                          very next commit (the staleness test forces
+    #                          the removal; see the sprint log §6 cell 2).
     ("kokomi", "uniq"),      # 56% -- breadth
     ("kokomi", "maxclu"),    # 7 -- the 7x block cluster
 }

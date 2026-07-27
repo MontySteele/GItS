@@ -726,6 +726,14 @@ def after_card_played(state: CombatState, card: Card, snap: dict) -> None:
     # third attack of the turn add Amount clones of THAT card to hand. The
     # source tests `== 3`, not `% 3 == 0`, so the sixth attack does nothing.
     state.attacks_played_this_turn += 1
+    # Quick Change (Curtain Call B, R85): the FIRST Attack each turn draws.
+    # Same first-play-window grammar as spotlight_draw; counted per play
+    # index like Juggling below, so a Study-Buddy-doubled attack is two
+    # plays and only the first of the turn pays.
+    n = p.powers.get("first_attack_draw", 0)
+    if n and state.attacks_played_this_turn == 1:
+        state.draw(n)
+        state.emit("extra_draw", amount=n)
     n = p.powers.get("juggling", 0)
     if n and state.attacks_played_this_turn == C.JUGGLING_ATTACK_TRIGGER:
         import copy as _copy

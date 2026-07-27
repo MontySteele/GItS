@@ -67,6 +67,12 @@ def _bonus_formula(state: CombatState, formula: str) -> int:
         # consumed. Rate limits (Rare / Exhaust / cost >= 2) live on the
         # card rows, not here — this is only the arithmetic.
         return int(n) * (state.player.charge // int(m))
+    if what == "encore" and m.isdigit():
+        # Curtain Call C (R85): damage reading the held buffer -- Body
+        # Slam is the direct StS precedent for an attack priced off a
+        # defensive pool. READ only, never consumed; the private-register
+        # attack (poised_riposte) is the one card on the rate.
+        return int(n) * (state.player.encore // int(m))
     raise ValueError(f"unknown bonus_formula {formula!r}")
 
 
@@ -688,6 +694,16 @@ def _salon_bow(state: CombatState, member: str) -> None:
         resources.gain_encore(state, enc)
     if p.burst_max:
         resources.gain_burst(state, C.SALON_TICK_BURST, "salon_final_bow")
+    # Stagehands (Curtain Call B, R85): the crew strikes the set behind
+    # every bow. Activity-gated on the bow event itself; unscaled printed
+    # numbers, same reasoning as salon_deploy_block above.
+    blk = p.powers.get("salon_bow_block", 0)
+    if blk:
+        p.block += blk
+        state.emit("block", amount=blk)
+    enc2 = p.powers.get("salon_bow_encore", 0)
+    if enc2:
+        resources.gain_encore(state, enc2)
     state.emit("salon_final_bow", member=member)
 
 
@@ -708,6 +724,15 @@ def _deploy_salon_members(state: CombatState, amount: int,
             _salon_bow(state, p.salon.pop(0))
         p.salon.append(member)
         state.emit("salon_deploy", member=member, company=list(p.salon))
+        # Fortissimo Guard (Curtain Call B, R85): block per DEPLOY, per
+        # deployment event rather than per card -- Full Ensemble's three
+        # deploys are three cues. Direct add + emit, the _salon_bow block
+        # pattern; deliberately NOT Focus/Grand-Salon scaled (the power's
+        # printed number is the whole payout, matching its own note field).
+        blk = p.powers.get("salon_deploy_block", 0)
+        if blk:
+            p.block += blk
+            state.emit("block", amount=blk)
     p.powers["salon_member"] = len(p.salon)
 
 

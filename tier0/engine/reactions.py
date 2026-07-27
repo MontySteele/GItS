@@ -132,6 +132,15 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         state.reactions_this_card += 1
         state.reactions_this_turn += 1
         p = state.player
+        # Courtroom Drama (Curtain Call B, R85): the FIRST reaction each
+        # turn puts its target on the stand -- Vulnerable + Weak per stack.
+        # Gated on the existing reactions_this_turn counter (== 1 is the
+        # first), so a silent turn pays nothing and a reaction storm pays
+        # once: activity-triggered, never per-turn, per the sheet header.
+        n = p.powers.get("cross_examination", 0)
+        if n and state.reactions_this_turn == 1:
+            powers.apply_power(state, enemy, "vulnerable", n)
+            powers.apply_power(state, enemy, "weak", n)
         if p.burst_max:
             resources.gain_burst(state, C.BURST_PER_REACTION, "reaction")
         # Catalytic Conversion: reactions grant bonus sparks + burst energy.

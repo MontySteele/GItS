@@ -40,7 +40,7 @@ public sealed class GracefulRetreat : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Graceful Retreat"),
+        ("title", "Slip Backstage"),
         ("description", "Gain {Block:diff()} [gold]Block[/gold]."),
     };
 

@@ -8,8 +8,8 @@
   },
   "coverage": {
     "total": 78,
-    "generated": 77,
-    "blocked": 1
+    "generated": 71,
+    "blocked": 7
   },
   "generated": [
     "an_invitation",
@@ -18,10 +18,8 @@
     "blocking_notes",
     "command_performance",
     "commanding_gaze",
-    "courtroom_drama",
     "crashing_waves",
     "crescendo",
-    "crowd_work",
     "curtain_cue",
     "curtain_up",
     "deep_breath",
@@ -35,7 +33,6 @@
     "endless_waltz",
     "flood_of_emotion",
     "florid_cadenza",
-    "fortissimo_guard",
     "full_ensemble",
     "gentilhomme_usher",
     "graceful_retreat",
@@ -53,10 +50,7 @@
     "many_waters_melody",
     "matinee_performance",
     "overflowing_hospitality",
-    "pit_orchestra",
-    "poised_riposte",
     "prima_donna",
-    "quick_change",
     "rain_of_roses",
     "rapturous_applause",
     "regal_bearing",
@@ -96,11 +90,27 @@
     "guest_neuvillette_tears"
   ],
   "blocked": {
-    "let_the_people_rejoice": "hand-written"
+    "courtroom_drama": "apply_power power 'cross_examination' (no PowerModel in the registry)",
+    "crowd_work": "apply_power power 'encore_spend_draw' (no PowerModel in the registry)",
+    "fortissimo_guard": "apply_power power 'salon_deploy_block' (no PowerModel in the registry)",
+    "let_the_people_rejoice": "hand-written",
+    "pit_orchestra": "apply_power power 'salon_bow_block' (no PowerModel in the registry)",
+    "poised_riposte": "bonus_formula '1_per_3_encore'",
+    "quick_change": "apply_power power 'first_attack_draw' (no PowerModel in the registry)"
   },
   "runtime_clusters": {
     "hand_written": [
       "let_the_people_rejoice"
+    ],
+    "salon": [
+      "fortissimo_guard",
+      "pit_orchestra"
+    ],
+    "shared_emitter_gap": [
+      "courtroom_drama",
+      "crowd_work",
+      "poised_riposte",
+      "quick_change"
     ]
   },
   "upgrades": {

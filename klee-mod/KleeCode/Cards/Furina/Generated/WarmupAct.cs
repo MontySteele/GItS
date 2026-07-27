@@ -40,7 +40,7 @@ public sealed class WarmupAct : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Warm-up Act"),
+        ("title", "Stage Combat"),
         ("description", "Deal {Damage:diff()} damage."),
     };
 

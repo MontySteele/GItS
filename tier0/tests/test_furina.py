@@ -291,7 +291,7 @@ def test_playing_a_power_grants_a_constellation_floor_by_rarity():
     st = furina_state()
     p = st.player
     p.energy = 3
-    power = loader.get_card("rapturous_applause")      # uncommon
+    power = loader.get_card("grand_salon")             # uncommon
     assert power.type == "power" and power.rarity == "uncommon"
     p.hand.append(power)
     combat.play_card(st, power)

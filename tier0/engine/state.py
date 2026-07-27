@@ -465,6 +465,8 @@ class CombatState:
     detonations_total: int = 0            # The Big One formula
     reactions_this_card: int = 0          # reaction_triggered_by_this
     reactions_this_turn: int = 0          # reaction_triggered_this_turn
+    encore_spend_draws_this_turn: int = 0  # encore_spend_draw once-per-turn
+    #                                        latch (Curtain Call, R85)
                                           # (Chevreuse; reset per turn)
     kills_this_card: int = 0              # killed_target
     # Kills that the base game's Fatal gate would honor (Enemy
