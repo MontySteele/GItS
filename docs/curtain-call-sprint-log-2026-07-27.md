@@ -241,5 +241,90 @@ and usher_the_waves stay attacks. Final type shape: **Attack 15 / Skill 48
 §4's own shrink clause. Rarity shape unchanged (22/32/19); gate metrics
 unchanged (76 / 0.15 / 3 / 34).
 
-(§6 cell 3′ — the post-shrink re-run + seed-12 rider — and §8 graded
-predictions are appended when the run completes.)
+### Cell 3′ — the post-shrink re-run (seed 11, 600) + seed-12 rider (1000)
+
+```
+arm         win (c0 -> c3')   act-1          uptime            payoffs/deck
+salon       17.2 -> 15.0      62.8 -> 63.2   59.6 -> 56.5%     1.22 -> 0.60
+spotlight    4.2 ->  2.8      68.5 -> 63.3   40.0 -> 35.4%     0.88 -> 0.43
+fanfare      2.8 ->  1.8      57.5 -> 48.5   39.8 -> 32.9%     2.12 -> 1.22
+
+seed-12 rider (1000 runs): salon 13.4 / spotlight 3.1 / fanfare 1.5;
+uptime 56.3 / 35.1 / 32.6 -- the seed-11 reading holds on the second seed
+(the standing single-seed caveat from the scorer pass is closed for this
+world). House/anchor rows byte-identical to cell 0 in EVERY cell.
+```
+
+The shrink reversion recovered roughly half the fanfare-arm uptime loss
+(29.3 → 32.9 against 39.8) and moved nothing else materially. The residual
+breach is dominated by the RATIFIED listed retype (standing_room_only's
+mass application) and by run shape (smaller decks, 0.63 mean acts), not by
+the remaining authored retype (usher_the_waves, single-target, in ~10% of
+decks) — reverting ratified §7 dispositions is [USER]'s call, not the
+session's, so the shrink iteration stops here and §10 carries the
+decision.
+
+## 8. Predictions, graded (per the §5 rubric, written before results)
+
+1. **Cell 1 byte-identical — PASS.** 10/10 rows, zero diff.
+2. **Gate (uniq ≥70, neardup ≤0.40) — PASS.** 76 / 0.15 per card; maxclu 3.
+   Inside the official band on every gated metric. R81's debt paid.
+3. **vocab ≥32 — PASS.** 34 (26 at cell 0); hapax 10 → 19.
+4. **Fanfare 2.8% → ≥5% with payoffs/deck ≥2× — FAIL, both halves.**
+   1.8% and 0.58× (2.12 → 1.22). The pre-registered supersession branch
+   (reach doubles, win flat) did NOT fire — reach never rose. The
+   compositional diagnosis STANDS (reach fell and win fell with it); what
+   failed is §2's structural remedy: under RARITY_ODDS, promoting payoffs
+   OUT of common cuts their offer frequency, so rarity-shape correction
+   REDUCED reach. Payoff reach must be bought at the drafter/odds layer or
+   by in-rarity composition, not by promotion — named follow-on, and the
+   D12-frozen discipline means nothing in this sprint could touch it.
+5. **Salon → 12–15% from padding removal alone — PASS.** 15.0 (13.4 on
+   seed 12), zero direct salon nerfs. And NOTE: the ≥16% trigger for the
+   standalone trim pre-registration did NOT fire — the trim question may
+   be moot; [USER] decides whether the 13–15% band settles it.
+6. **Spotlight 4.2 ± 2 — PASS.** 2.8 / 3.1 (bottom of band; not targeted).
+7. **Hydro uptime within ±10% of cell 0 — FAIL** (the honest grade even
+   after the contingency executed). Salon −5.2% is within; spotlight
+   −11.5% and fanfare −17.3% are not, post-shrink. The clause fired,
+   reverted the two authored retypes, and recovered half the loss;
+   the residual is attributed above and escalated in §10.
+8. **House/anchor rows unmoved — PASS.** Byte-identical in every cell —
+   also proving the aura-telemetry instrument changed nothing.
+9. **Cell 2 < half of cell 3's fanfare delta — FAIL, informatively.** The
+   model behind it (structure small, rewrites large, same sign) was wrong:
+   structure alone was the DOMINANT mover and negative (−1.3pp), rewrites
+   recovered (+0.3 to +0.5pp). "Structure enables, rewrites deliver" is
+   superseded in writing by: structure (as rarity promotion) TAXES reach
+   under these odds; rewrites partially repay it.
+
+Score: 6 PASS / 3 FAIL, none silently. The two substantive failures (4, 7)
+each carry a named mechanism and a named follow-on, which is what
+pre-registration is for.
+
+## 10. [USER] items and named follow-ons
+
+- **Name audit (house law, before ship):** the nine new display names
+  (§9 table) plus three flags — encore_performance says "Encore" but never
+  touches the resource (pre-existing, now register-salient);
+  standing_room_only's new name "The House Rises" sits one word from
+  standing_ovation's; Pneuma/Ousia legibility rides along: both heals
+  (singer_of_many_waters, unheard_confession) read Pneuma-coded ✓, the
+  overdraw/self-damage lines (suffering_for_art, limelight) are the
+  Ousia-coded candidates — zero mechanics either way.
+- **Uptime residual:** accept the new baseline (salon — the declared
+  primary engine — is in bound), revert the RATIFIED standing_room_only
+  retype too, or schedule application elsewhere. Session had no authority
+  beyond the authored moves.
+- **Payoff-reach follow-on (from prediction 4):** the archetype-scorer /
+  RARITY_ODDS question, explicitly out of scope under D12-frozen; this is
+  the same named follow-on §9 already carried, now with a measured reason.
+- **Salon trim:** the ≥16% trigger did not fire (15.0 / 13.4). Ratify the
+  band or order the trim pass anyway.
+- **Real-anchor rows:** re-run the 12-arm roster once on a machine with
+  game_ref/ before the consolidation sprint quotes this world.
+- **Consolidation sprint:** C# parity for the twelve deferred cards
+  (FURINA_DEFERRED_TO_CONSOLIDATION), per §9.
+
+Sprint status: CLOSED 2026-07-27. Tracks A–E executed; cells 0, 1, 2, 3,
+3′ + seed-12 rider run; predictions graded; R85 recorded in DECISIONS.
