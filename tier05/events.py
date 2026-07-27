@@ -93,7 +93,7 @@ def _validate_pool(raw: dict) -> dict:
 
 @lru_cache(maxsize=1)
 def _pool() -> dict:
-    return _validate_pool(yaml.safe_load(_POOL_PATH.read_text()) or {})
+    return _validate_pool(yaml.safe_load(_POOL_PATH.read_text(encoding="utf-8")) or {})
 
 
 def _act_key(act: int) -> str:

@@ -230,7 +230,7 @@ def main(argv: list[str] | None = None) -> int:
           f"({total_fights / elapsed:.0f} fights/sec)")
 
     if args.csv:
-        with open(args.csv, "w", newline="") as f:
+        with open(args.csv, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=rows[0].keys())
             writer.writeheader()
             writer.writerows(rows)

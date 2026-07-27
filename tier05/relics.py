@@ -57,7 +57,7 @@ RUN_HOOKS = (frozenset(engine_relics.RUN_HOOKS)
 
 @lru_cache(maxsize=1)
 def _pool() -> dict:
-    raw = yaml.safe_load(_POOL_PATH.read_text()) or {}
+    raw = yaml.safe_load(_POOL_PATH.read_text(encoding="utf-8")) or {}
     # SKIP relics: warn once, loudly, naming the missing mechanic. They are
     # NEVER handed back as playable relics (get_relic refuses them).
     for rid, spec in (raw.get("skip") or {}).items():
