@@ -103,12 +103,21 @@ def _log_regret(state: CombatState, chosen: Card, chosen_i: int,
 
 
 def _est(state: CombatState, val, default: int = 0) -> float:
-    """Estimate a possibly-formulaic amount for scoring purposes."""
+    """Estimate a possibly-formulaic amount for scoring purposes.
+
+    Every runtime-computed amount string a pool row can carry must either
+    be estimated here or fall to `default` -- raw arithmetic on the field
+    is how an X-amount card crashed every tier05 run it was drafted into
+    (Malaise, first post-pass-6 measurement)."""
     if isinstance(val, (int, float)):
         return val
     if val in ("X", "X_plus_1"):        # X-cards spend all remaining energy
         return state.player.energy + (1 if val == "X_plus_1" else 0)
-    return default
+    if val == "hand_size":              # known exactly at score time
+        return len(state.player.hand)
+    if val == "discards_this_card":     # both users discard the rest of the
+        return max(len(state.player.hand) - 1, 0)   # hand first (CalcGamble,
+    return default                                  # Storm of Steel)
 
 
 def _active_effects(state: CombatState, effect_list: list[dict]):
@@ -309,7 +318,12 @@ def _scaling_value(state: CombatState, card: Card) -> float:
     target = effects._default_target(state)
     applied_to_target: dict[str, int] = {}
     for fx in _active_effects(state, card.effects):
-        amount = fx.get("amount", 0)
+        # _est, not the raw field: an X-cost debuff (Malaise: weak X) carries
+        # the STRING "X" here, and raw arithmetic on it killed every run the
+        # card was drafted into. "-X" falls to _est's default 0 -- a negative
+        # enemy amount (strength down) is a benefit this term cannot price,
+        # and 0 is the honest refusal (scorer-term question, ask A3/c).
+        amount = _est(state, fx.get("amount", 0))
         formula = fx.get("amount_formula")
         if formula and "target_power" in formula:
             power = formula["target_power"]
@@ -328,7 +342,7 @@ def _scaling_value(state: CombatState, card: Card) -> float:
             # Rampage's increase applies to the circulating card instance;
             # price one future redraw, then let the usual fight-end decay
             # discount late setup.
-            val += fx["amount"]
+            val += _est(state, fx["amount"])
     # Setup is worth less as the fight winds down.
     return val * max(0.0, 1.0 - state.turn / 12.0) if val else 0.0
 
@@ -421,7 +435,7 @@ def _tempo_value(state: CombatState, card: Card) -> float:
                 # default -- moves elemental_ecstasy's committed scoring.
                 val += sum(1 for enemy in state.living_enemies if enemy.aura)
             else:
-                val += fx.get("amount", 1)
+                val += _est(state, fx.get("amount", 1), 1)
         elif fx["op"] == "draw_while":
             # One matching card plus the non-matching stopper in a mixed deck.
             val += 2.0

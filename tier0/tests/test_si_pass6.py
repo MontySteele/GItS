@@ -342,3 +342,43 @@ def test_an_unrelated_power_does_not_widen_it():
     play(state, [{"op": "damage", "amount": 4, "target": "enemy",
                   "target_all_if_power": "fan_of_knives"}], type="attack")
     assert sorted(e.hp for e in state.enemies) == [31, 40]
+
+
+# --- the scorer survives an X-amount debuff (Malaise's shape) ---------------
+
+def test_the_pilot_scores_an_x_amount_enemy_debuff_without_crashing():
+    """An X-cost card can apply an enemy power with the STRING amount "X"
+    ("-X" for the drain half). The scaling term did raw arithmetic on the
+    field and crashed every tier05 run the card was drafted into -- found
+    on the first post-pass-6 measurement, because nobody re-ran tier05
+    after the card landed. Priced via _est: "X" as current energy, "-X"
+    refused at 0 (a negative enemy amount is a BENEFIT this term cannot
+    price; that is the ask-A3/c scorer question, not a crash site)."""
+    from tier0.pilot import policy
+    state = make_state()
+    state.player.energy = 3
+    drain = card("malaise_shape", cost="X", exhaust=True, fx=[
+        {"op": "apply_power", "power": "strength", "amount": "-X",
+         "target": "enemy"},
+        {"op": "apply_power", "power": "weak", "amount": "X",
+         "target": "enemy"},
+    ])
+    val = policy._scaling_value(state, drain)
+    assert val == val * 1.0                    # a float came back, no raise
+    assert val >= 0
+
+
+def test_the_pilot_scores_a_runtime_amount_draw_without_crashing():
+    """Calculated Gamble's shape: discard the hand, draw `discards_this_card`.
+    The tempo term did raw arithmetic on the string. _est prices hand_size
+    exactly and discards_this_card as hand-minus-itself -- both cards that
+    use it discard the whole rest of the hand first."""
+    from tier0.pilot import policy
+    state = make_state()
+    state.player.hand.extend(card(f"h{i}") for i in range(4))
+    gamble = card("gamble_shape", cost=0, fx=[
+        {"op": "discard", "amount": "hand_size"},
+        {"op": "draw", "amount": "discards_this_card"},
+    ])
+    val = policy._tempo_value(state, gamble)
+    assert val == 3.0                  # 4 in hand, minus the card itself
