@@ -153,6 +153,21 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         }
         FurinaResources.GainBurst(
             owner, FurinaResourceConstants.BurstPerSalonTick);
+
+        // Stagehands (R85): the crew strikes the set behind every bow. Placed
+        // after the burst credit to match the sim's _salon_bow ordering, and
+        // unscaled -- the printed number is the whole payout.
+        var bowBlock = SalonBowBlockPower.AmountFor(owner);
+        if (bowBlock > 0)
+        {
+            await CreatureCmd.GainBlock(
+                owner, bowBlock, ValueProp.Unpowered, null, fast: true);
+        }
+        var bowEncore = SalonBowEncorePower.AmountFor(owner);
+        if (bowEncore > 0)
+        {
+            FurinaResources.GainEncore(owner, bowEncore);
+        }
     }
 
     /// <summary>The replacement rule, in ONE place: a deploy that lands on a
@@ -209,6 +224,16 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                 await Bow(choiceContext, owner, displaced);
             }
             company.Add(member);
+
+            // Fortissimo Guard (R85): Block per DEPLOY, inside the loop, so a
+            // three-deploy card pays three cues. Mirrors the sim, which adds
+            // it per iteration after the member enters.
+            var deployBlock = SalonDeployBlockPower.AmountFor(owner);
+            if (deployBlock > 0)
+            {
+                await CreatureCmd.GainBlock(
+                    owner, deployBlock, ValueProp.Unpowered, null, fast: true);
+            }
         }
 
         var delta = company.Count - Count(owner);

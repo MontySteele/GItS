@@ -83,6 +83,15 @@ internal static class ReactionEffects
     /// </summary>
     public static bool ReactionTriggeredThisTurn => TotalResolved > _turnStartTotal;
 
+    /// <summary>
+    /// How many reactions have resolved this player turn. The sim's
+    /// `state.reactions_this_turn`, which Courtroom Drama tests for `== 1`
+    /// (the first). Derived from the same snapshot as
+    /// <see cref="ReactionTriggeredThisTurn"/> rather than kept as a second
+    /// counter, so there is still exactly one increment site.
+    /// </summary>
+    public static int ReactionsThisTurn => TotalResolved - _turnStartTotal;
+
     public static async Task Resolve(
         PlayerChoiceContext choiceContext,
         Reaction reaction,
@@ -94,6 +103,15 @@ internal static class ReactionEffects
         if (reaction != Reaction.None)
         {
             TotalResolved++;
+
+            // Courtroom Drama (R85): the FIRST reaction of the turn puts its
+            // target on the stand. Gated on the counter reading exactly 1
+            // after the increment -- the sim's `reactions_this_turn == 1`.
+            if (ReactionsThisTurn == 1)
+            {
+                await CurtainCallHooks.NoteFirstReaction(
+                    choiceContext, target, dealer, cardSource);
+            }
         }
 
         // Burst economy, reaction half: +5 for EVERY named reaction --

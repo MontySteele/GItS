@@ -441,6 +441,10 @@ public static class FurinaResources
         GainBurst(
             creature, spent * FurinaResourceConstants.BurstPerEncoreSpent);
         SpotlightSystem.OnEncoreSpent(creature);
+        // The Gallery Stirs (R85). Records the first-spend window here and
+        // defers the draw itself: this method is synchronous and holds no
+        // PlayerChoiceContext. See CurtainCallHooks.NoteEncoreSpent.
+        CurtainCallHooks.NoteEncoreSpent(creature);
         return spent;
     }
 
@@ -611,6 +615,12 @@ public sealed class FurinaResourceHooks : AbstractModel
                     ? FurinaResourceConstants.FanfareFloorPerPowerRare
                     : FurinaResourceConstants.FanfareFloorPerPower);
         }
+        // Quick Change (R85) counts this play; the flush resolves any draw an
+        // Encore spend deferred during it (the cost settle runs in
+        // BeforeCardPlayed, which has no context of its own).
+        await CurtainCallHooks.NoteCardPlayed(choiceContext, cardPlay);
+        await CurtainCallHooks.FlushPendingDraws(
+            choiceContext, cardPlay.Card.Owner.Creature);
         await FurinaResources.SyncMeters(
             choiceContext, cardPlay.Card.Owner.Creature, cardPlay.Card);
         await FurinaKitGrant.GrantIfCharged(
@@ -651,6 +661,16 @@ public sealed class FurinaResourceHooks : AbstractModel
         if (side != CombatSide.Player) return;
         foreach (var creature in participants)
         {
+            // Curtain Call's per-turn windows reset BEFORE the decay guard:
+            // the guard skips turn 1, but the windows must be clear on every
+            // turn including the first. This broadcast is strictly earlier
+            // than AfterPlayerTurnStart, where Salon upkeep spends Encore --
+            // so the Gallery Stirs latch is guaranteed clear before anything
+            // can set it. See CurtainCallHooks.ResetTurn.
+            if (FurinaResources.IsFurina(creature))
+            {
+                CurtainCallHooks.ResetTurn(creature);
+            }
             if (creature.Player is not { } player
                 || !FurinaResources.IsFurina(creature)
                 || player.PlayerCombatState is not { } playerCombatState
@@ -669,6 +689,11 @@ public sealed class FurinaResourceHooks : AbstractModel
         if (FurinaResources.IsFurina(player.Creature))
         {
             SpotlightSystem.ResetTurn(player.Creature);
+            // Salon upkeep spends Encore in this same broadcast, so flush
+            // here as well as after card plays -- a turn-start spend must not
+            // wait for the player to play something before it draws.
+            await CurtainCallHooks.FlushPendingDraws(
+                choiceContext, player.Creature);
             await FurinaResources.SyncMeters(
                 choiceContext, player.Creature);
             await FurinaKitGrant.GrantIfCharged(
@@ -688,6 +713,9 @@ public sealed class FurinaResourceHooks : AbstractModel
             {
                 continue;
             }
+            // Last chance in the turn: anything an end-of-turn spend deferred
+            // resolves here rather than stranding into the next turn.
+            await CurtainCallHooks.FlushPendingDraws(choiceContext, creature);
             await FurinaResources.SyncMeters(choiceContext, creature);
             await FurinaKitGrant.GrantIfCharged(choiceContext, player);
         }
@@ -724,6 +752,9 @@ public sealed class FurinaResourceHooks : AbstractModel
             FurinaResources.GainFanfare(
                 creature,
                 (int)(-delta) * FurinaResourceConstants.FanfarePerHpLost);
+            // Slip Backstage's predicate reads off the same funnel, so
+            // "she lost HP" is one fact rather than two trackers.
+            CurtainCallHooks.NoteHpLost(creature, (int)(-delta));
         }
         return Task.CompletedTask;
     }
