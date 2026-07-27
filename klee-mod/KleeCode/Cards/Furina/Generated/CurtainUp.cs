@@ -41,7 +41,7 @@ public sealed class CurtainUp : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "In the Wings"),
-        ("description", "Gain {IfUpgraded:show:3|2} [gold]Encore[/gold]."),
+        ("description", "Gain {IfUpgraded:show:3|2} [gold]Encore[/gold]. Look at the top 1 cards of your draw pile; discard one."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -60,6 +60,16 @@ public sealed class CurtainUp : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 3 : 2));
+        {
+            var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take(1).ToList();
+            if (top != null && top.Count > 0)
+            {
+                var scryPick = (await CardSelectCmd.FromSimpleGrid(
+                    choiceContext, top, Owner,
+                    new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 1))).ToList();
+                await CardCmd.Discard(choiceContext, scryPick);
+            }
+        }
     }
 
     protected override void OnUpgrade()

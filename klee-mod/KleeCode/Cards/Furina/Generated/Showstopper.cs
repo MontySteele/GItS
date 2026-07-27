@@ -41,14 +41,13 @@ public sealed class Showstopper : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Showstopper"),
-        ("description", "Deal {Damage:diff()} damage. If you have at least 20 [gold]Fanfare[/gold]: deal {ExtraDamage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} damage. If it kills: gain 6 [gold]Encore[/gold] and draw 2 cards."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move),
-            new ExtraDamageVar(7m)
+            new DamageVar(12m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,24 +59,22 @@ public sealed class Showstopper : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        var enemiesAtStart = CombatState!.HittableEnemies.ToList();
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        if (FurinaResources.Fanfare(Owner.Creature) >= 20)
+        if (enemiesAtStart.Any(e => e.IsDead))
         {
-            await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.ExtraDamage.BaseValue))
-                .FromCard(this)
-                .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
-                .Execute(choiceContext);
+            FurinaResources.GainEncore(Owner.Creature, 6);
+            await CardPileCmd.Draw(choiceContext, 2m, Owner);
         }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.ExtraDamage.UpgradeValueBy(3m);
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

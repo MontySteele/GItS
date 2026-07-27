@@ -41,7 +41,7 @@ public sealed class TempoChange : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Double Time"),
-        ("description", "Spend 3 [gold]Encore[/gold]. Gain 1 Energy. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. If you have a [gold]Salon Member[/gold]: gain 1 Energy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -55,13 +55,15 @@ public sealed class TempoChange : CustomCardModel, ICharacterCard
     public TempoChange()
         : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
     {
-        CustomResources<EncoreResource>.SetCanonicalCost(this, 3);
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PlayerCmd.GainEnergy(1, Owner);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        if (SalonMemberPower.Count(Owner.Creature) > 0)
+        {
+            await PlayerCmd.GainEnergy(1, Owner);
+        }
     }
 
     protected override void OnUpgrade()

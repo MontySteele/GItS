@@ -138,6 +138,13 @@ def _runtime_count(state: CombatState, token: str,
         return state.cards_drawn_this_combat
     if token == "enemy_poison_total":
         return sum(e.powers.get("poison", 0) for e in state.living_enemies)
+    if token == "salon_members":
+        # Curtain Call C (R85): the live cast count. A power-stack read at
+        # resolution time -- Mirage's enemy_poison_total is the in-repo
+        # precedent for a CalculatedVar over power stacks; the mirror
+        # powers['salon_member'] == len(salon) is maintained at the deploy
+        # site. Matinée Performance's per-member hits are the one user.
+        return p.powers.get("salon_member", 0)
     if token == "X":
         # Skewer: hit count = the energy actually spent, the same number
         # `amount: X` resolves. Spelled with the same token deliberately.

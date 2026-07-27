@@ -148,5 +148,74 @@ Two transients recorded, both by-design and resolved in Track C's commit:
   Track C breaks the family apart. The staleness test forces the entry's
   removal the moment it clears.
 
-(Results appended below when the cell completes; §7 gate re-read, §8 graded
-predictions, §9 consequentials, §10 follow-ons follow.)
+Cell 2 results (roster rows + riders; riders' cell-0 baseline taken
+retroactively in a worktree at the Track A commit — content-identical to
+cell 0 by the cell-1 proof — with the instrument copied in):
+
+```
+arm         win     act-1   uptime  apps/f  payoffs  deck   (cell 0 -> cell 2)
+salon       17.2 -> 15.0    62.8 -> 63.5    59.6% -> 55.5%   3.36 -> 3.39   1.22 -> 0.62   23.8 -> 23.5
+spotlight    4.2 ->  4.3    68.5 -> 63.7    40.0% -> 34.0%   2.43 -> 2.16   0.88 -> 0.46   23.6 -> 22.9
+fanfare      2.8 ->  1.5    57.5 -> 46.2    39.8% -> 28.8%   2.23 -> 1.74   2.12 -> 1.26   21.0 ->  9.9f/19.6d
+```
+
+klee ×3, kokomi ×3 and ref_ironclad rows: BYTE-IDENTICAL to cell 0 (the
+tripwire holds; the aura-telemetry instrument provably changed nothing).
+Structure alone moved salon DOWN 2.2pp (padding removal, prediction 5's
+direction), left spotlight flat, and HURT fanfare (payoff reach fell 2.12
+→ 1.26/deck: rarity promotion cuts offer frequency under RARITY_ODDS
+before the rewrites pay it back). Prediction 9's "structure enables,
+rewrites deliver" now has a signed version: structure alone is negative.
+The five new powers draft at 12–17% deck presence.
+
+## 7. Gate re-read at cell 3 content (the tool, `--pool furina`)
+
+| metric | cell 0 | cell 3 | gate | official band |
+|---|---|---|---|---|
+| uniq% | 62 | **76** | ≥70 PASS | 72–86 — INSIDE |
+| neardup/card | 0.94 | **0.15** | ≤0.40 PASS | 0.24–0.36 — BELOW (better) |
+| maxclu | 5 | **3** | ≤5 PASS | 4–5 — BELOW (better) |
+| vocab | 26 | **34** | report-only | R81 guidance "mid-30s" — MET |
+
+R81's named defect (the 12-card stat-only core + the clone families) is
+paid. The furina KNOWN_FAILING entries are removed; the gate's red test
+now bites Furina regressions at full strength.
+
+## 9. Consequentials
+
+- **furina-upgrades.yaml**: delta rows re-keyed for the five power
+  conversions (power_amount) and re-commented for every rewritten body;
+  showstopper's dead conditional_bonus key replaced ({damage: +3});
+  lint_upgrade_coverage green. No inline upgrade: fields anywhere (R20).
+- **Reserved-names lint**: all nine new display names pass
+  lint_unique_names (266 card + 6 relic names unique, reserved list
+  honored).
+- **Art rehunt list** (renamed cards; verify plan.tsv col-10 wiki_title
+  fit against the NEW name before locking any source — per art-pass law,
+  file slugs stay mechanical so rows key on ids and nothing broke):
+  | id | new name | current pick (col-10) | verdict to confirm |
+  |---|---|---|---|
+  | warmup_act | Stage Combat | Icon Emoji Paimon's Paintings 28 Furina 2.png | REHUNT — playful emoji vs combat choreography |
+  | standing_room_only | The House Rises | Item Theater Tickets.png | plausible keep — full-house iconography |
+  | graceful_retreat | Slip Backstage | Furina Expression 2.png | plausible keep — verify the expression reads "escape" |
+  | curtain_up | In the Wings | Opera Epiclese - After The Forgotten Thief.png | plausible keep — house interior |
+  | crowd_work | The Gallery Stirs | Astra Carnival Cat's Tail Gathering 2024 S5 Artwork.png | REHUNT — carnival ≠ courtroom gallery (archon voice) |
+  | swelling_overture | Compose Herself | Chanson of Many Waters 2024-06-25 - Furina Shorts.png | plausible keep — solitary Furina |
+  | tempo_change | Double Time | Icon Emoji Paimon's Paintings 29 Furina 1.png | REHUNT — emoji vs music direction |
+  | pit_orchestra | Stagehands | Opera Epiclese Support Card Golden.png | plausible keep — house machinery |
+  | audience_participation | The Crowd Answers | A Commemorative Photo Aether 1.png | REHUNT — Aether photo vs nation-audience (archon voice) |
+- **C# / klee-mod**: Furina generated set regenerated twice (B, C);
+  twelve cards in FURINA_DEFERRED_TO_CONSOLIDATION (each refused by name
+  in blocked_reason; manifest 65/13). §9 stands: parity work ships in the
+  consolidation sprint, and the two renderer-fixture tests note their
+  deferred fixtures explicitly.
+- **Schema note (REQUIRED, §10)**: `register: Optional[str]` is on the
+  SHARED Card schema in tier0/engine/state.py. Columbina and all future
+  characters inherit the column. The value vocabulary is per-character;
+  Furina's is {salon, archon, private} enforced by
+  tools/lint_furina_registers.py, and the third-instance rule generalizes
+  the lint when a second character adopts registers. Nothing in the
+  engine or drafter may ever read the field (cell 1 is the pin).
+
+(§6 cell 3 + seed-12 rider and §8 graded predictions are appended when the
+cell completes.)

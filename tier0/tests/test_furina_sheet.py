@@ -123,9 +123,10 @@ def test_targeted_fanfare_floor_repairs():
         {"op": "damage", "amount": 1, "target": "self"},
         {"op": "gain_encore", "amount": 3},
     ]
-    # F-B1: the binary gate became a smooth read on the same Block base.
+    # F-B1 made it a smooth read; Curtain Call C (R85) steepened the rate
+    # and moved the card to its rare payoff slot (base 7->6, 1 per 2).
     assert thunder.effects == [
-        {"op": "block", "amount": 7, "bonus_formula": "1_per_4_fanfare"},
+        {"op": "block", "amount": 6, "bonus_formula": "1_per_2_fanfare"},
     ]
 
 

@@ -45,6 +45,12 @@ FURINA_DEFERRED_TO_CONSOLIDATION: set[str] = {
     "fortissimo_guard", "pit_orchestra", "courtroom_drama", "crowd_work",
     "quick_change",                       # the five §4 power conversions
     "poised_riposte",                     # 1_per_3_encore read
+    "warmup_act",                         # enemy_intends_attack read
+    "graceful_retreat",                   # hp_lost_this_turn read
+    "swelling_overture",                  # encore_at_least_N read
+    "crescendo",                          # grow_damage (Rampage growth)
+    "torrential_turn",                    # refresh_all_auras
+    "matinee_performance",                # times: salon_members CalculatedVar
 }
 
 # Cards whose UPGRADE is unauthored because the delta it used to carry died
@@ -156,11 +162,12 @@ def test_furina_profile_emits_every_non_kit_card():
         gen.FURINA_PROFILE.manifest.read_text(encoding="utf-8")
     )
     # 78 cards, frozen at Curtain Call (§9: no pool-size change). Withheld:
-    # the hand-written kit Burst plus the six R85 grammar deferrals above.
+    # the hand-written kit Burst plus the twelve R85 grammar deferrals above
+    # (Track B's five conversions + Track C's new-read rewrites).
     assert manifest["coverage"] == {
         "total": 78,
-        "generated": 71,
-        "blocked": 7,
+        "generated": 65,
+        "blocked": 13,
     }
     assert set(manifest["generated"]) == generated
     assert set(manifest["blocked"]) == withheld
@@ -197,11 +204,15 @@ def test_single_target_aura_rider_renders_through_a_calculated_var():
     # resolves the same var. The multiplier must be static (CalculatedVar
     # rejects instance targets) and must null-guard: preview calls
     # Calculate(null) whenever nothing is hovered.
+    # torrential_turn is DEFERRED grammar since Curtain Call C (its
+    # refresh_all_auras op has no C# home), but it remains the pool's only
+    # single-target bonus_vs_aura card, and the RIDER RENDERER under test
+    # still runs on direct emit. The consolidation sprint regenerates it.
     by_id = {card["id"]: card for card in _furina_cards()}
     torrential = gen.emit(by_id["torrential_turn"], gen.FURINA_PROFILE)
 
     assert "new CalculationBaseVar(10m)" in torrential
-    assert "new ExtraDamageVar(4m)" in torrential
+    assert "new ExtraDamageVar(3m)" in torrential
     assert (
         "static (_, target) => "
         "target != null && AuraCmd.Find(target) != null ? 1 : 0"
@@ -338,9 +349,10 @@ def test_basics_carry_the_tags_base_game_content_keys_on():
     defend = gen.emit(by_id["stage_presence"], gen.FURINA_PROFILE)
     assert "CanonicalTags => new() { CardTag.Defend };" in defend
 
-    # swelling_overture since Curtain Call B: crowd_work is a deferred-grammar
-    # Power now (R85), and emit() over unregistered grammar crashes by design.
-    non_basic = gen.emit(by_id["swelling_overture"], gen.FURINA_PROFILE)
+    # macaron_break since Curtain Call C: crowd_work became deferred-grammar
+    # at B and swelling_overture at C (R85); emit() over unregistered grammar
+    # crashes by design, so the pin sits on a card the sweep kept.
+    non_basic = gen.emit(by_id["macaron_break"], gen.FURINA_PROFILE)
     assert "CanonicalTags" not in non_basic
 
     klee_by_id = {
@@ -592,8 +604,8 @@ def test_converted_riders_move_their_arithmetic_to_the_hover_tip():
 
     torrential = gen.emit(by_id["torrential_turn"], gen.FURINA_PROFILE)
     assert "Bonus damage vs. an elemental aura." in torrential
-    assert "+4 damage if the enemy" not in torrential
-    assert "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, auraBonus: 4)" in torrential
+    assert "+3 damage if the enemy" not in torrential
+    assert "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, auraBonus: 3)" in torrential
 
 
 def test_unconverted_riders_keep_their_sentence_on_the_face():

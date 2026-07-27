@@ -349,7 +349,9 @@ def test_no_card_spends_fanfare():
     hp0 = st.enemies[0].hp
     combat.play_card(st, card)
 
-    assert st.enemies[0].hp == hp0 - 23        # 8 + floor(30 / 2), unchanged
+    # 6 + floor(30 / 2): Curtain Call C repriced the base 8->6 to pay for
+    # the Rampage growth line (which raises FUTURE plays, not this hit).
+    assert st.enemies[0].hp == hp0 - 21
     assert p.fanfare == 30, "the read must not consume the pool"
     assert not [ev for ev in st.log if ev["event"] == "fanfare_spent"]
 
@@ -437,19 +439,20 @@ def test_pilot_values_the_smooth_fanfare_reads():
     own payoffs at their printed number and play straight past them."""
     st = furina_state()
     entrance = loader.get_card("dramatic_entrance")   # 6 + 1 per 4 Fanfare
-    ovation = loader.get_card("thunderous_ovation")   # 7 + 1 per 4 Fanfare
+    ovation = loader.get_card("thunderous_ovation")   # 6 + 1 per 2 Fanfare
+    #                                       (Curtain Call C's steepened rate)
 
     st.player.fanfare = 0
     assert policy._expected_damage(st, entrance) == 6
-    assert policy._raw_block(st, ovation) == 7
+    assert policy._raw_block(st, ovation) == 6
 
-    st.player.fanfare = 4        # one step
+    st.player.fanfare = 4        # one entrance step, two ovation steps
     assert policy._expected_damage(st, entrance) == 7
     assert policy._raw_block(st, ovation) == 8
 
     st.player.fanfare = 20       # five steps -- no threshold cliff anywhere
     assert policy._expected_damage(st, entrance) == 11
-    assert policy._raw_block(st, ovation) == 12
+    assert policy._raw_block(st, ovation) == 16
 
 
 def test_the_common_fanfare_readers_are_live_from_turn_one():

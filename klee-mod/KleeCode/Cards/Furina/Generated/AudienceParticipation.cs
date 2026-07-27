@@ -41,13 +41,13 @@ public sealed class AudienceParticipation : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Crowd Answers"),
-        ("description", "Gain {IfUpgraded:show:3|2} [gold]Encore[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "If an [gold]Elemental Reaction[/gold] triggered this turn: gain {IfUpgraded:show:5|4} [gold]Encore[/gold] and draw 2 cards. Otherwise: gain {IfUpgraded:show:3|2} [gold]Encore[/gold] and draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -59,8 +59,16 @@ public sealed class AudienceParticipation : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 3 : 2));
-        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        if (ReactionEffects.ReactionTriggeredThisTurn)
+        {
+            FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 5 : 4));
+            await CardPileCmd.Draw(choiceContext, 2m, Owner);
+        }
+        else
+        {
+            FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 3 : 2));
+            await CardPileCmd.Draw(choiceContext, 1m, Owner);
+        }
     }
 
     protected override void OnUpgrade()
