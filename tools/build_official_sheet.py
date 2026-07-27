@@ -137,6 +137,7 @@ CHARACTERS: dict[str, CharacterSpec] = {
     "silent": spec_for("silent", (
         "silent_pool_pass1.yaml",         # discard / poison / dexterity
         "silent_pool_pass2.yaml",         # foreach / conditional / formulas
+        "silent_pool_pass3.yaml",         # the Shiv token and its creators
     )),
 }
 

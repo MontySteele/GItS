@@ -750,13 +750,21 @@ def test_aggression_logs_unimplemented_rather_than_handing_over_unupgraded():
 
 # --- Group C: refused -------------------------------------------------------
 
-def test_stampede_and_hellraiser_are_refused_loudly():
-    assert set(refpowers.UNIMPLEMENTED) == {"stampede", "hellraiser"}
+def test_the_refused_powers_are_refused_loudly():
+    # fan_of_knives joined the list on 2026-07-27 (Silent coverage pass). It
+    # is refused for a different reason from the other two: it is not a
+    # mechanic tier0 cannot run, it is a mechanic that would silently
+    # invalidate an ALREADY TRANSLATED row -- the Shiv's single-target
+    # damage is exact only while this power cannot exist, and its reason
+    # says so by name.
+    assert set(refpowers.UNIMPLEMENTED) == {"stampede", "hellraiser",
+                                            "fan_of_knives"}
+    assert "Shiv" in refpowers.UNIMPLEMENTED["fan_of_knives"]
     state = bound_state()
     for name in refpowers.UNIMPLEMENTED:
         refpowers.refuse(state, name)
     logged = [e for e in state.log if e["event"] == "UNIMPLEMENTED"]
-    assert {e["power"] for e in logged} == {"stampede", "hellraiser"}
+    assert {e["power"] for e in logged} == set(refpowers.UNIMPLEMENTED)
     assert all(e["reason"] for e in logged)
 
 

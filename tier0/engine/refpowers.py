@@ -78,6 +78,16 @@ UNIMPLEMENTED: dict[str, str] = {
         "entirely. Needs auto_play_card() + a detector that extends past the "
         "pilot loop. Card: Stampede."
     ),
+    "fan_of_knives": (
+        "FanOfKnivesPower does not deal or gain anything itself -- it "
+        "rewrites the SHIV's TargetType from AnyEnemy to AllEnemies "
+        "(Shiv.TargetType reads HasFanOfKnives). tier0 card rows carry a "
+        "fixed target per effect, so implementing this power means making "
+        "the Shiv row's target conditional on it. The Shiv is currently "
+        "translated as single-target, which is EXACT only while this power "
+        "cannot exist. Do not put it on the dial without changing the Shiv "
+        "row in the same pass. Card: Fan Of Knives."
+    ),
     "hellraiser": (
         "HellraiserPower autoplays every drawn card tagged Strike from inside "
         "AfterCardDrawnEarly, which makes CombatState.draw REENTRANT: the "

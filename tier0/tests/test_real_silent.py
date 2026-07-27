@@ -7,12 +7,13 @@ not exist and there is nothing to assert. The fresh-clone half of the
 contract is pinned unguarded in test_anchor_lock.py.
 
 WHAT THIS ANCHOR IS, stated once so no number read off it is over-claimed:
-the assembled pool is 56 of the character's 88 cards (22 -> 27 -> 46 -> 56
-over 2026-07-27: the Sly keyword, then nineteen of her powers, then a
-hand-translated layer of foreach/conditional/formula cards). The 32 excluded
-are still not a random sample -- they are systematically the SHIV cards (the
-token is not implemented), plus the cards that need a playability gate, a
-card-selection prompt, or an enchantment.
+the assembled pool is 60 rows: 59 of the character's 88 draftable cards
+plus the SHIV token, which is created in hand and never drafted. Coverage
+went 22 -> 27 -> 46 -> 56 -> 59 over 2026-07-27 (the Sly keyword, nineteen
+of her powers, a hand-translated foreach/conditional/formula layer, then the
+Shiv and its creators). The 29 excluded are still not a random sample --
+they are the cards needing a playability gate, a card-selection prompt, an
+enchantment, or a power that would invalidate an already-translated row.
 This is a FLOOR on the Silent, not a portrait of her, and the coverage
 fraction travels with every statline she produces.
 """
@@ -149,7 +150,7 @@ def test_every_reference_card_has_an_applicable_upgrade(ref_cards):
     # of her powers on the dial. The count is pinned rather than derived
     # because a pool that quietly loads SMALLER is the failure this anchor
     # cannot detect any other way.
-    assert len(ref_cards) == 56
+    assert len(ref_cards) == 60
     pool_ids = {card.id for card in ref_cards}
     for layer_name in loader.EXTERNAL_CARD_LAYERS["silent_pool.yaml"]:
         layer = yaml.safe_load((loader.GAME_REF_DIR / layer_name).read_text())
@@ -207,3 +208,25 @@ def test_ring_of_the_snake_fires_on_turn_one_and_only_turn_one(ref_cards):
     combat.run_fight(player, [make_enemy(hp=200)], pilot, seed=11)
     assert hands[0] == C.CARDS_DRAWN_PER_TURN + 2
     assert hands[1] == C.CARDS_DRAWN_PER_TURN
+
+
+def test_the_shiv_token_is_never_offered_as_a_reward(ref_cards):
+    """The Shiv is content, not loot. It is in the pool file because the pool
+    CREATES it -- twelve of her cards do -- and it must stay out of every
+    reward screen, which `rewards.character_pool` guarantees by rarity
+    rather than by name."""
+    shiv = next(c for c in ref_cards if c.id == "si_shiv")
+    assert shiv.rarity not in C.RARITY_ODDS
+    assert shiv.exhaust and "shiv" in shiv.tags
+    pool = rewards.character_pool("real_silent")
+    assert not [c for cs in pool.values() for c in cs if c.id == "si_shiv"]
+
+
+def test_the_shiv_creators_make_the_token_they_name(ref_cards):
+    """A creator that named a card id nothing serves would fail at runtime,
+    not at load. Pinning the link here means the layer cannot drift."""
+    creators = [c for c in ref_cards
+                if any(fx.get("op") == "add_card" and fx.get("card") == "si_shiv"
+                       for fx in c.effects)]
+    assert len(creators) == 3
+    assert all(loader.get_card("si_shiv") for _ in creators)

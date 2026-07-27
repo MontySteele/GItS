@@ -55,6 +55,7 @@ EXTERNAL_CARD_LAYERS = {
     "silent_pool.yaml": (
         "silent_pool_pass1.yaml",
         "silent_pool_pass2.yaml",
+        "silent_pool_pass3.yaml",
     ),
 }
 

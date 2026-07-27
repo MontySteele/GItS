@@ -656,3 +656,64 @@ cannot pilot. That is a hypothesis, not a finding, and it is exactly the
 measurement A3's deferral leaves open.
 
 Suite at the end of the pass: **1168 passed / 1 skipped** from repo ROOT.
+
+### 10.5 The Shiv, and one more gate reading (59 of 88)
+
+The twelve shiv cards were excluded for a reason that turned out to be about
+the TOOL, not the DSL: `Shiv` is created in hand and is not one of the 88
+draftable cards, so `decompile_character` never loaded its source and no
+supplement could reference it. The extractor now finds token types
+**structurally** -- it scans the pool's own sources for the two create-call
+shapes (`X.CreateInHand(`, `CreateCard<X>`) and loads what it finds, which
+on this pool is exactly `Shiv`. No card-name table entered the committed
+tool.
+
+`silent_pool_pass3.yaml` carries the token plus the three creators whose only
+untranslatable part was that it did not exist (Blade Dance, Cloak And Dagger,
+Leading Strike). The `for` loop those three use is a COUNT, which `add_card`
+already takes as an amount; a new `cards` upgrade key bumps it, kept distinct
+from `draw` because creating a card and drawing one are different resources.
+
+**The Shiv's single-target damage is EXACT only conditionally, and the
+condition is recorded where it will be hit.** The real Shiv targets one enemy
+unless the owner has FanOfKnivesPower, which rewrites its TargetType to
+AllEnemies. That power is now in `refpowers.UNIMPLEMENTED` -- a third kind of
+entry there, since it is not a mechanic tier0 cannot run but a mechanic that
+would silently invalidate an already-translated row -- and its reason names
+the Shiv row explicitly. A test pins that the reason still says "Shiv".
+
+The remaining nine shiv cards stay out on their own merits: Fan Of Knives
+(the power above), Storm Of Steel and Hidden Daggers (a discard whose size is
+the hand, and an upgrade that upgrades created cards), Knife Trap (auto-play
+every shiv in the exhaust pile), Blade Of Ink (enchantments), Up My Sleeve (a
+permanent self-cost reduction), Accuracy / Infinite Blades / Phantom Blades
+(three more powers).
+
+**Fifth gate reading, and it did not settle anything:** 60 pool rows (59 of
+the 88 plus the token), `uniq 72%` -- three points under, `maxclu 4`,
+`neardup 23`. tier 0.5 act-1 clear 35% (300 runs, seed 11,
+`game_ref=4cba51f68f68`), still below the 46% it posted at 27 cards and
+still unattributed.
+
+Suite: **1170 passed / 1 skipped** from repo ROOT.
+
+---
+
+## 11. Where this leaves the morning
+
+Landed overnight, all green, all pushed: the five rulings, nineteen parity
+powers, two hand-translated card layers, the Shiv token, and 29 new
+data-free tests. Coverage 22 -> 59 of 88.
+
+**Two things want [USER] eyes, neither actioned:**
+
+1. **The gate number will not hold still.** Five readings, two published
+   conclusions of mine overturned, and the only stable parts (`maxclu`,
+   `neardup`) are the ones nobody doubted. Ask A2's deferral is holding up
+   well; the question worth asking when the pool completes is whether
+   `uniq` is measuring anything a designer should be gated on.
+2. **tier 0.5 act-1 clear fell as coverage rose** (46% -> 31% -> 39% ->
+   35%) while the starter battery stayed flat. The hypothesis is the
+   A3-placeholder pilot drafting cards it cannot fly, and the scorer having
+   no poison term at all. Testing it is a measurement task, not a ruling --
+   but it is the measurement that would make ask A3 answerable.

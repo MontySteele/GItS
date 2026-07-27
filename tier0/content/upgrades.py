@@ -171,6 +171,13 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "heal":
             ok = _bump_first((fx for fx in top if fx.get("op") == "heal"),
                              "amount", val)
+        elif key == "cards":
+            # The COUNT on an add_card op -- "create N more of the token".
+            # Distinct from `draw` because creating a card and drawing one
+            # are different resources: a created token adds to the deck's
+            # total, a drawn one does not.
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "add_card"), "amount", val)
         elif key == "draw":
             # ALL draw ops, branches included ("both branches" is sheet law).
             hits = [fx for fx in everywhere if fx.get("op") == "draw"]

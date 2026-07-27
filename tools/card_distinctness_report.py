@@ -90,19 +90,22 @@ any single row of it would be a lie by omission:
   OFFICIAL:silent  27/88 (31%)  vocab  9  top 48%  uniq 63%  maxclu 3  FAIL
   OFFICIAL:silent  46/88 (52%)  vocab 28  top 35%  uniq 78%  maxclu 3  pass
   OFFICIAL:silent  56/88 (64%)  vocab 29  top 39%  uniq 73%  maxclu 4  FAIL
+  OFFICIAL:silent  59/88 (67%)  vocab 30  top 40%  uniq 72%  maxclu 4  FAIL
+  (the last row's `cards` column reads 60: the Shiv TOKEN is a pool row and
+   is not one of the 88 draftable cards)
 
   * Two conclusions were drawn and then overturned by more coverage. At
     22-27 cards: "our pools post 56-62%, Ironclad posts 86%, so HE is the
     outlier and the gate condemns us for matching the other anchor." At 46:
-    "the anchors agree with each other and disagree with us." At 56 she is
-    four points under the line and neither statement survives.
+    "the anchors agree with each other and disagree with us." By 59 she is
+    three points under the line and neither statement survives.
   * The control that licensed the first conclusion was a good experiment
     with a misleading answer: restricting IRONCLAD to his structurally
     simple subset RAISES his uniq (86 -> 89), which said "thinness does not
     depress uniq". It does not depress HIS. Coverage bias is a property of
     the SLICE -- her thin slices were poison/Sly cards that share signatures
     with each other -- and a control run on the other anchor cannot see it.
-  * What IS stable across all four readings: `maxclu` never exceeded 4 and
+  * What IS stable across all five readings: `maxclu` never exceeded 4 and
     `neardup` never approached 0.33/card, on either anchor. What is not
     stable is the exact quantity the gate is calibrated on.
 
@@ -114,8 +117,8 @@ table would have been picked off a moving number.
 
 vocab/top% still carry NO GATE, and they moved the same way: at 22 cards her
 vocabulary was NINE ideas against Ironclad's 40 and her top% read 50%, which
-said "the most archetype-concentrated official character". At 56 it is 29
-ideas and 39%. The thin readings were measuring the extractor, not her.
+said "the most archetype-concentrated official character". At 59 it is 30
+ideas and 40%. The thin readings were measuring the extractor, not her.
 
 Applies to pools of 30+ cards (companion sheets exempt by size). That
 exemption swallowed OFFICIAL:silent whole while she was under 30, which is
@@ -191,7 +194,7 @@ GATE_NEARDUP_PER_CARD = 0.33
 # Companion sheets are exempt by SIZE, which is a proxy for "not a character
 # pool" -- and a proxy that misfired: OFFICIAL:silent IS a character pool and
 # spent two days under this floor, invisible to the gate she was added to
-# ratify. She is over it now (56 cards) at nobody's decision but the
+# ratify. She is over it now (60 rows) at nobody's decision but the
 # extractor's, which is the argument for making the exemption by KIND. Until
 # then --gate PRINTS what it skipped, so an exemption cannot read as a pass
 # (2026-07-27, Silent anchor sprint E-2).

@@ -96,6 +96,10 @@ CMD = re.compile(r"\b(\w+Cmd)\.(\w+)\(")
 #   HoverTipFactory.FromPower<XPower>()    -- referenced-but-not-applied
 # so match any `<...Power>` type argument rather than one call shape.
 POWER = re.compile(r"<(\w+Power)>")
+# `Shiv.CreateInHand(...)` / `combatState.CreateCard<Shiv>(...)` -- the two
+# spellings a pool card uses to conjure a TOKEN card that is not itself in
+# the pool. Matched on the shape, never on a name.
+TOKEN_CREATE = re.compile(r"\b(\w+)\.CreateInHand\(|CreateCard<(\w+)>")
 
 
 def game_dll() -> Path:
@@ -204,6 +208,24 @@ def decompile_character(
             name: _read_decompiled_type(root, f"{CARD_NS}{name}")
             for name in names
         }
+        # TOKEN CARDS. A character's content is not only what she can draft:
+        # the Silent's Shiv is created in hand by twelve pool cards and is
+        # not in the pool itself, so its source would be unreachable and
+        # every card that makes one would be permanently unexpressible.
+        # Found STRUCTURALLY, from the create-call shapes in the pool's own
+        # sources -- no card-name table enters this file.
+        tokens = sorted({name for src in sources.values()
+                         for match in TOKEN_CREATE.findall(src)
+                         for name in match if name}
+                        - set(names))
+        for name in tokens:
+            try:
+                sources[name] = _read_decompiled_type(root, f"{CARD_NS}{name}")
+            except SystemExit:
+                continue      # not a CardModel (a Power, a Vfx): not a token
+        if tokens:
+            print(f"  token card types referenced by the pool: "
+                  f"{', '.join(tokens)}", file=sys.stderr)
     elapsed = time.monotonic() - started
     print(f"  decompiled and loaded {len(names)} card types in {elapsed:.1f}s",
           file=sys.stderr)
@@ -974,6 +996,13 @@ def _row_delta_key(row: dict, var: str) -> str | None:
     if var in ("Cards", "Draw") and any(
             fx.get("op") == "draw" for fx in effects):
         return "draw"
+    # ...but on a row that CREATES cards rather than drawing them, the same
+    # var counts tokens. Both spellings appear in the Silent's pool (`Cards`
+    # on Blade Dance, the card-specific `Shivs` on Leading Strike), and the
+    # distinction is structural: which op the row actually carries.
+    if var in ("Cards", "Shivs") and any(
+            fx.get("op") == "add_card" for fx in effects):
+        return "cards"
     if var == "Energy" and any(fx.get("op") == "energy" for fx in effects):
         return "energy"
     if var == "Energy" and isinstance(row.get("on_exhaust_energy"), int):
@@ -1232,6 +1261,14 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
             prefix + _snake(card["name"]): sources[card["name"]]
             for card in cards
         }
+        # Token types (Shiv) are in `sources` but never in `cards`: they are
+        # created in hand, not drafted, so they have no pool entry and no
+        # emitted/excluded row. A supplement may still translate one, and
+        # its OnUpgrade is recovered from the DLL exactly like any other.
+        pool_names = {card["name"] for card in cards}
+        for name, src in sources.items():
+            if name not in pool_names:
+                source_by_id.setdefault(prefix + _snake(_display(name)), src)
         emitted_ids = {row["id"] for row in rows}
         seen: set[str] = set()
         for supplement in supplements:
