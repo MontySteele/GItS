@@ -2549,3 +2549,34 @@ dark until the declaration lands. The Sweep-I log's account is left as
 written; it was true on its date.
 
 **Class: RULING** (this record) -- provenance and schedule, no behavior change.
+
+## R81 -- Distinctness gate ratified on the two-anchor floor (2026-07-27)
+
+Full evidence and derivation: docs/a2-gate-ratification-2026-07-27.md
+(supersedes silent-anchor-sprint-log s6.5). Ask A2 is CLOSED.
+
+**Ruled.** (1) `top%` and `vocab` carry NO GATE, permanently: themed
+concentration is design, and the official idea-count edge is the phenomenon
+`uniq%` already enforces from the other side -- double-gating one phenomenon
+invites gaming the metric. Both remain report columns and pool-sweep
+guidance. (2) Hard thresholds recalibrated to the official FLOOR with
+modding headroom: uniq >= 70 (floor 72), maxclu <= 5 (floor 5), neardup
+<= 0.40/card (floor 0.36). `--gate` prints the official band (uniq 72-86,
+maxclu 4-5, neardup 0.24-0.36/card) as advisory so "passes" is never read
+as "matches Ironclad".
+
+**Standing lesson, recorded.** Partial-pool anchors can only loosen a
+threshold's credibility, never certify it. Both of s6.5's would-be
+certifications (maxclu <= 4, neardup <= 0.33 "cleared by both anchors")
+were overturned when the second anchor completed.
+
+**Enforcement.** The gate is now a red test
+(tier0/tests/test_distinctness_gate.py): breaches outside its curated
+known-failing list fail the suite immediately; the curated list (klee uniq;
+furina uniq+neardup; kokomi uniq+maxclu) is debt for the pool-sweep pass,
+and a staleness test forces entries out as they clear, so the list only
+shrinks. The roster-wide uniq gap (8-16 points under the official floor)
+is the pool-sweep pass's acceptance target.
+
+**Class: RULING** ([USER] 2026-07-27) -- thresholds + enforcement; no
+engine behavior change.

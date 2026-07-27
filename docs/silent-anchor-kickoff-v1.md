@@ -169,6 +169,11 @@ Claude-may-proceed under house rules)
   behaviour in the sim layer. Distinctness is unaffected either way.
 - **A2 — Gate ratification** after the two-anchor table exists (§7). The
   sprint DELIVERS the table and a proposed ruling; it does not self-ratify.
+  > **CLOSED 2026-07-27 (second ruling, complete-pool data):** recalibrated
+  > on the two-anchor floor and RATIFIED — uniq ≥ 70 / maxclu ≤ 5 /
+  > neardup ≤ 0.40/card, top%/vocab permanently gate-free, gate enforced as
+  > a red suite test. R81; full evidence in
+  > `docs/a2-gate-ratification-2026-07-27.md`.
 - **A3 — Pilot heuristics.** The `silent` pilot needs a discard-choice
   rule and shiv/poison play-priorities. Proposal ships in the sprint as
   PLACEHOLDER-flagged weights; red-pen before any anchor number derived
