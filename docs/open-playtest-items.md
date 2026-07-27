@@ -197,6 +197,14 @@ the game running.
   gold — this decides whether "pricing is the balance governor" can be true at
   all); the colorless 1.15× surcharge companions do not collect; Track A's pool
   migration.
+- **Enchantments: a design pass, not a card.** Directed 2026-07-27; brief in
+  `docs/silent-anchor-sprint-log-2026-07-27.md` §13. An enchantment is state
+  on a CARD INSTANCE with its own amount, and every modifier tier0 has
+  attaches to a creature — a data-model gap, not a missing op. The pass
+  decides whether tier0 models them at all, and whether this is a parity
+  feature or one our own characters want. Exactly ONE card in the Silent's
+  remaining 27 needs it (Blade Of Ink), which is the argument against, and
+  the anchor is honest without it either way.
 - **Kokomi kickoff §202:** Raiden Shogun's disposition.
 - **Kaboom Beetle Swarm's printed text, after R72** (2026-07-26). The bonus
   now snapshots bombed-state at cast, so an enemy whose bombs hit 1 detonated

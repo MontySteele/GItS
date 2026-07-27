@@ -25,11 +25,26 @@ def _amount(state: CombatState, val) -> int:
         return state.current_x
     if isinstance(val, str) and val.startswith("X_plus_"):
         return state.current_x + int(val[len("X_plus_"):])
+    if isinstance(val, str) and val.startswith("-"):
+        # Malaise applies StrengthPower with -X and WeakPower with +X, i.e.
+        # one number spent twice with opposite signs. A leading minus negates
+        # whatever formula follows it, so the pair stays visibly the SAME
+        # value on the row and the upgrade cannot move one without the other.
+        return -_amount(state, val[1:])
     if val == "exhausted_this_card":
         # Stoke: "exhaust your hand, generate that many cards". The count is
         # captured by the exhaust op as it runs, matching the dll, which
         # reads exhaustCount off the selection list before exhausting.
         return state.exhausted_this_card
+    if isinstance(val, str):
+        # Any _runtime_count token is a legal amount. The two grammars were
+        # separate only by accident of which op needed a live number first:
+        # `times` on damage/block has always read runtime counts, while
+        # `amount` could not, so Calculated Gamble ("discard your hand, draw
+        # that many") had no spelling despite every piece existing. An
+        # unknown token still raises out of _runtime_count, so this widens
+        # the vocabulary without softening the failure.
+        return _runtime_count(state, val)
     raise ValueError(f"unknown amount formula {val!r}")
 
 
@@ -122,6 +137,27 @@ def _runtime_count(state: CombatState, token: str,
         return state.current_x
     if token == "exhausted_this_card":
         return state.exhausted_this_card
+    # Coverage pass 4 (2026-07-27). Each is a count the base game takes off
+    # a pile or a command result at resolution time:
+    #   hand_size            CalculatedGamble / StormOfSteel, which discard
+    #                        the hand and pay out per card discarded. Read
+    #                        BEFORE the discard op runs, which is the order
+    #                        the source reads it in too (`cards.Count()` is
+    #                        evaluated before DiscardAndDraw).
+    #   discards_this_card   the same number read AFTER the discard, for the
+    #                        second half of those cards. Not `hand_size`
+    #                        again: by then the hand is empty.
+    #   block_gained_this_card  DodgeAndRoll applies BlockNextTurn equal to
+    #                        the block CreatureCmd.GainBlock actually
+    #                        returned -- post-Dexterity, post-Frail, not the
+    #                        printed number. block_gains_this_card is a
+    #                        COUNT of gains and cannot answer this.
+    if token == "hand_size":
+        return len(p.hand)
+    if token == "discards_this_card":
+        return state.discards_this_card
+    if token == "block_gained_this_card":
+        return state.block_gained_this_card
     raise ValueError(f"unknown runtime count {token!r}")
 
 
@@ -522,6 +558,7 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
         amount = powers.modify_block_gained(state.player, amount)
         state.player.block += amount
         state.block_gains_this_card += 1
+        state.block_gained_this_card += amount
         state.emit("block", amount=amount)
 
 
@@ -530,7 +567,7 @@ def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
     # start of the player's NEXT turn (after the turn-start block reset).
     # Sustain-over-time identity without true healing (R8-shaped).
     # Spotlight scales it at play time (printed Block is printed Block).
-    amount = fx["amount"]
+    amount = _amount(state, fx["amount"])
     if state.salon_replacements_this_card:
         amount *= C.SALON_REPLACE_DAMAGE_MULT
     powers.apply_power(state, state.player, "block_next_turn",
@@ -538,7 +575,7 @@ def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_draw(state: CombatState, fx: dict, card: Card) -> None:
-    n = fx.get("amount")
+    n = _amount(state, fx.get("amount"))
     if fx.get("amount_formula") == "per_aura":     # Elemental Ecstasy
         n = sum(1 for e in state.living_enemies if e.aura)
     if state.salon_replacements_this_card:
@@ -645,7 +682,9 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
     if "amount_formula" in fx:                 # Dominate, MoltenFist
         amount = _power_amount_formula(state, fx["amount_formula"])
     else:
-        amount = fx["amount"]
+        # Through _amount, so a power amount can be X, -X or a runtime count
+        # like every other op's. Literal ints pass through untouched.
+        amount = _amount(state, fx["amount"])
     if (state.salon_replacements_this_card
             and fx["power"] != "salon_member"):
         amount *= C.SALON_REPLACE_NUMERIC_MULT
@@ -680,9 +719,18 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
         powers.apply_power(state, state.player, fx["power"], amount,
                            max_stacks=cap)
     else:
-        for enemy in _pick_targets(state, fx["target"]):
-            powers.apply_power(state, enemy, fx["power"], amount,
-                               max_stacks=cap)
+        # `times` re-picks the target EVERY pass. BouncingFlask throws three
+        # separate flasks at three separately-rolled random enemies, so
+        # resolving the target once and applying three stacks would be a
+        # different card: same total poison, none of the spread, and a
+        # completely different answer against three enemies.
+        times = fx.get("times", 1)
+        times = (_runtime_count(state, times, card)
+                 if isinstance(times, str) else times)
+        for _ in range(times):
+            for enemy in _pick_targets(state, fx["target"]):
+                powers.apply_power(state, enemy, fx["power"], amount,
+                                   max_stacks=cap)
 
 
 def _op_apply_aura(state: CombatState, fx: dict, card: Card) -> None:
@@ -993,7 +1041,11 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
     # silent flip would re-price them.
     chosen = fx.get("select", "random") == "chosen"
     sly_batch: list[Card] = []
-    for _ in range(fx.get("amount", 1)):
+    # `amount: hand_size` is how "discard your hand" is spelled -- resolved
+    # ONCE, here, before the first card leaves, so it cannot chase its own
+    # shrinking pool. The loop's own `if not pool: break` already handles a
+    # hand smaller than the number asked for.
+    for _ in range(_amount(state, fx.get("amount", 1))):
         pool = [c for c in state.player.hand if not c.kit_card]
         if not pool:
             break
@@ -1001,6 +1053,7 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
         state.player.hand.remove(victim)
         state.player.discard_pile.append(victim)
         state.discards_this_turn += 1
+        state.discards_this_card += 1
         if chosen:
             state.emit("discard", card=victim.id, chosen=True)
         else:
@@ -1200,6 +1253,7 @@ PREDICATE_NAMES = frozenset({
     "reaction_triggered_this_turn",
     "killed_target",
     "killed_target_fatal",
+    "drew_skill_this_card",
     "card_exhausted_this_turn",
     "hp_lost_this_turn",
     "enemy_intends_attack",
@@ -1258,6 +1312,12 @@ def _predicate(state: CombatState, name: str) -> bool:
         return state.reactions_this_turn > 0
     if name == "killed_target":
         return state.kills_this_card > 0
+    if name == "drew_skill_this_card":
+        # EscapePlan: its own draw produced a Skill. Cleared at card start,
+        # so "drew nothing" (empty piles, full hand) is False rather than
+        # whatever the previous card happened to draw -- which is the
+        # source's `FirstOrDefault() != null && .Type == Skill`.
+        return state.last_drawn_type == "skill"
     if name == "killed_target_fatal":
         # Feed. The base game's Fatal gate ignores deaths whose owner says
         # they should not trigger it (summoned adds) -- see
@@ -1418,6 +1478,90 @@ def _op_gain_max_hp(state: CombatState, fx: dict, card: Card) -> None:
     p.max_hp += n
     p.hp += n
     state.emit("gain_max_hp", amount=n)
+
+
+def _op_draw_to_hand_size(state: CombatState, fx: dict, card: Card) -> None:
+    """Expertise: draw until the hand holds `amount` cards; never discard
+    down to it.
+
+    `Math.Max(0, Cards - Hand.Count)` in the source, which is a subtraction
+    and not a loop -- so a hand ALREADY at or above the number draws nothing,
+    and this cannot be spelled as draw_while (whose exit condition is what
+    was drawn). The hand is counted AFTER the card left it, matching the
+    source: Expertise reads `PlayerCombatState.Hand.Cards.Count` from inside
+    its own OnPlay, by which point the card is on the play stack.
+    """
+    want = _amount(state, fx["amount"])
+    n = max(0, want - len(state.player.hand))
+    if not n:
+        return
+    state.draw(n)
+    state.emit("extra_draw", amount=n)
+
+
+def _op_strip_block(state: CombatState, fx: dict, card: Card) -> None:
+    """Expose: remove ALL of the target's Block (CreatureCmd.LoseBlock with
+    the target's own Block as the amount).
+
+    Not damage: it deletes the block outright, so nothing that reads damage
+    -- Thorns, reactions, on-hit riders -- fires. Enemies rarely carry block
+    in tier0, which makes this look inert; it is not approximated for that
+    reason, because whether enemy block matters is a question about the
+    ENCOUNTER set, and rounding the card off would answer it by fiat.
+    """
+    for enemy in _pick_targets(state, fx.get("target", "enemy")):
+        if enemy.block:
+            state.emit("strip_block", target=enemy.name, amount=enemy.block)
+            enemy.block = 0
+
+
+def _op_chain_attack(state: CombatState, fx: dict, card: Card) -> None:
+    """EchoingSlash: a volley that repeats once more per enemy it KILLED.
+
+        attackCount = 1
+        while attackCount > 0:
+            attackCount--
+            results = Damage(HittableEnemies, ...)
+            attackCount += results.Count(r => r.WasTargetKilled)
+
+    Two kills in one volley therefore buy two more volleys, not one. Every
+    other repeat in the DSL is a fixed count, which is why this is its own op
+    rather than a `times` value: the count is not knowable until the damage
+    has resolved.
+
+    Bounded by the enemy list -- an enemy dies once and nothing respawns, so
+    the kill budget for the whole chain is len(enemies). The guard is a pure
+    backstop against an impossible infinite, the same shape draw_while uses.
+    """
+    inner = {k: v for k, v in fx.items() if k != "op"}
+    inner["op"] = "damage"
+    pending, guard = 1, len(state.enemies) + 1
+    while pending > 0 and guard > 0 and not state.over:
+        pending -= 1
+        guard -= 1
+        before = state.kills_this_card
+        _op_damage(state, inner, card)
+        pending += state.kills_this_card - before
+
+
+def _op_extra_card_screen(state: CombatState, fx: dict, card: Card) -> None:
+    """The Hunt. Record that this fight earned `amount` extra card reward
+    screens; grant nothing.
+
+    THE SEAM IS DELIBERATE ([USER] ruling, 2026-07-27). Strictly the reward
+    is not in-combat: the effect fires during the fight, and the extra offer
+    appears on the rewards screen afterwards. So combat's whole job is to say
+    that it happened. tier05/model.py reads `state.extra_card_screens` after
+    a won fight and rolls the screens; a fight LOST after this fires pays
+    nothing, because a lost fight shows no rewards screen -- which is the
+    base game's behaviour too, and falls out of the run layer's existing
+    control flow rather than needing a rule here.
+
+    Nothing else in tier0 may read this counter. It is not a resource, it
+    does not decay, and no card should ever branch on it.
+    """
+    state.extra_card_screens += _amount(state, fx.get("amount", 1))
+    state.emit("extra_card_screen", total=state.extra_card_screens)
 
 
 def _op_recall_to_draw(state: CombatState, fx: dict, card: Card) -> None:
@@ -1702,6 +1846,10 @@ OPS = {
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,
     "recall_to_draw": _op_recall_to_draw,
+    "extra_card_screen": _op_extra_card_screen,
+    "draw_to_hand_size": _op_draw_to_hand_size,
+    "strip_block": _op_strip_block,
+    "chain_attack": _op_chain_attack,
     "transform_in_hand": _op_transform_in_hand,
     "generate_from_pool": _op_generate_from_pool,
     "autoplay_from_draw": _op_autoplay_from_draw,
@@ -1728,6 +1876,9 @@ def resolve_card(state: CombatState, card: Card) -> None:
     state.fatal_kills_this_card = 0
     state.exhausted_this_card = 0
     state.block_gains_this_card = 0
+    state.block_gained_this_card = 0
+    state.discards_this_card = 0
+    state.last_drawn_type = ""
     state.salon_replacements_this_card = 0
     state.detonations_at_card_start = state.detonations_total
     state.repeat_requested = 0

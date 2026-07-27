@@ -156,7 +156,11 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                     out.append(fx)
             card.effects = out
         elif key == "damage":
-            ok = _bump_first((fx for fx in top if fx.get("op") == "damage"
+            # chain_attack is a damage op whose repeat count is decided by
+            # the kills it scores, so its printed number upgrades like any
+            # other attack's.
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") in ("damage", "chain_attack")
                               and fx.get("target") != "self"), "amount", val)
         elif key == "block":
             ok = _bump_first((fx for fx in top if fx.get("op") == "block"),
@@ -180,16 +184,54 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                               if fx.get("op") == "add_card"), "amount", val)
         elif key == "draw":
             # ALL draw ops, branches included ("both branches" is sheet law).
-            hits = [fx for fx in everywhere if fx.get("op") == "draw"]
+            # draw_to_hand_size counts: Expertise's upgrade raises the hand
+            # size it draws TO, which is the same var on the same op family.
+            hits = [fx for fx in everywhere
+                    if fx.get("op") in ("draw", "draw_to_hand_size")]
             for fx in hits:
                 fx["amount"] += val
+            ok = bool(hits)
+        elif key == "draw_and_discard":
+            # ONE DynamicVar read by two ops (Prepared: draw N, discard N).
+            # Bumping only one of them would upgrade half a card, so this
+            # key exists to make "the same number, in both places" sayable.
+            # Requires BOTH -- a row with only one of the ops is a
+            # mis-derived key, not a partial success.
+            draws = [fx for fx in everywhere if fx.get("op") == "draw"]
+            discards = [fx for fx in everywhere if fx.get("op") == "discard"]
+            for fx in draws + discards:
+                fx["amount"] += val
+            ok = bool(draws) and bool(discards)
+        elif key == "x_plus":
+            # An X-cost card whose upgrade adds to the value X resolves to
+            # (Malaise: `if (IsUpgraded) powerAmount++`). Every X-reading
+            # amount on the row moves together, sign preserved -- the card
+            # spends one number in two places and the upgrade must not be
+            # able to split them.
+            hits = []
+            for fx in everywhere:
+                amt = fx.get("amount")
+                if not isinstance(amt, str):
+                    continue
+                sign, body = ("-", amt[1:]) if amt.startswith("-") else ("", amt)
+                if body == "X":
+                    fx["amount"] = f"{sign}X_plus_{val}"
+                elif body.startswith("X_plus_"):
+                    n = int(body[len("X_plus_"):]) + val
+                    fx["amount"] = f"{sign}X_plus_{n}"
+                else:
+                    continue
+                hits.append(fx)
             ok = bool(hits)
         elif key == "energy":
             ok = _bump_first((fx for fx in everywhere
                               if fx.get("op") == "energy"), "amount", val)
         elif key == "times":
+            # BouncingFlask repeats an apply_power, not a damage op -- the
+            # RepeatVar is the same var class either way.
             ok = _bump_first((fx for fx in everywhere
-                              if fx.get("op") == "damage"), "times", val)
+                              if fx.get("op") in ("damage", "apply_power")),
+                             "times", val)
         elif key == "conditional_damage":
             hits = [fx for fx in everywhere
                     if fx.get("op") == "damage"

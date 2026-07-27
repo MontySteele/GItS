@@ -642,46 +642,66 @@ def run_one(character: str, archetype: str, pilot_id: str,
                     n_comp = 1
                     if pity_k is not None and screens_since_companion >= pity_k:
                         n_comp = 3                  # pity fires: choose-3 slot
-                    offers = rewards.roll_rewards(
-                        rng, character, companion_offers=n_comp, banner=banner,
-                        companion_rarity="rare" if kind == "B" else None,
-                        card_rarity="rare" if kind == "B" else None)
-                    # Read-only: the drafter, the relevance probes and the core
-                    # check below only SCORE the deck. Copying it three times per
-                    # screen was the run layer's single biggest cost.
-                    deck_cards = [loader.peek_card(cid) for cid in deck_ids]
-                    # Relevance is judged on the deck as it stood WHEN THE SCREEN WAS
-                    # SHOWN, before the pick lands -- judging after would let the pick
-                    # itself change the answer.
-                    advanced = draft.offer_advances_plan(offers, deck_cards, archetype)
-                    # Whether there was still a plan to advance. Core progress caps at
-                    # 1.0, so once the core is online NOTHING can advance it and
-                    # `advanced` is structurally False for the rest of the run. Without
-                    # this flag, relevance charges those screens to the pool as misses
-                    # -- and half of demolition's screens fall after its core completes.
-                    plan_live = not draft.core_complete(deck_cards, archetype)
-                    engaging = draft.offer_worth_engaging(offers, deck_cards,
-                                                          archetype)
-                    pick = policy(rng, deck_cards, offers, archetype)
-                    res.decisions.append({
-                        "node": i, "offers": offers,
-                        "picked": pick.id if pick else None,
-                        "advanced_plan": advanced,
-                        "plan_live": plan_live,
-                        "engaging": engaging})
-                    if pick is not None:
-                        deck_ids.append(pick.id)
-                        if held is not None:               # Book of Five Rings tally
-                            hp = held.note_cards_added(1, hp, max_hp)
-                    if pick is not None and pick.is_companion:
-                        screens_since_companion = 0
-                    else:
-                        screens_since_companion += 1
-                    if (res.time_to_online is None
-                            and draft.core_complete(
-                                [loader.peek_card(cid) for cid in deck_ids],
-                                archetype)):
-                        res.time_to_online = fights
+                    # THE FIGHT'S OWN SCREEN, then any screen the fight EARNED.
+                    # The Hunt's extra reward is granted here and only here:
+                    # combat recorded that it happened (state.extra_card_screens)
+                    # and the run layer is what owns rolling and drafting, the
+                    # same division the Burning Blood heal keeps above. An extra
+                    # screen is CARD-ONLY -- no companion slot, no pity credit,
+                    # and never the boss's forced-Rare tier, because it is an
+                    # ordinary CardReward the room hands over after the fight.
+                    # (Lost fights never reach here at all, so a Hunt that fires
+                    # in a fight the player then loses pays nothing, exactly as
+                    # in the base game -- there is no rewards screen to pay on.)
+                    screens = [(n_comp, "rare" if kind == "B" else None)]
+                    screens += [(0, None)] * state.extra_card_screens
+                    for n_comp_i, forced in screens:
+                        offers = rewards.roll_rewards(
+                            rng, character, companion_offers=n_comp_i,
+                            banner=banner, companion_rarity=forced,
+                            card_rarity=forced)
+                        # Read-only: the drafter, the relevance probes and the core
+                        # check below only SCORE the deck. Copying it three times per
+                        # screen was the run layer's single biggest cost.
+                        deck_cards = [loader.peek_card(cid) for cid in deck_ids]
+                        # Relevance is judged on the deck as it stood WHEN THE SCREEN WAS
+                        # SHOWN, before the pick lands -- judging after would let the pick
+                        # itself change the answer.
+                        advanced = draft.offer_advances_plan(offers, deck_cards, archetype)
+                        # Whether there was still a plan to advance. Core progress caps at
+                        # 1.0, so once the core is online NOTHING can advance it and
+                        # `advanced` is structurally False for the rest of the run. Without
+                        # this flag, relevance charges those screens to the pool as misses
+                        # -- and half of demolition's screens fall after its core completes.
+                        plan_live = not draft.core_complete(deck_cards, archetype)
+                        engaging = draft.offer_worth_engaging(offers, deck_cards,
+                                                              archetype)
+                        pick = policy(rng, deck_cards, offers, archetype)
+                        res.decisions.append({
+                            "node": i, "offers": offers,
+                            "picked": pick.id if pick else None,
+                            "advanced_plan": advanced,
+                            "plan_live": plan_live,
+                            "engaging": engaging})
+                        if pick is not None:
+                            deck_ids.append(pick.id)
+                            if held is not None:           # Book of Five Rings tally
+                                hp = held.note_cards_added(1, hp, max_hp)
+                        if n_comp_i == 0:
+                            # A card-only screen cannot produce a companion, so
+                            # counting it toward the pity clock would let The
+                            # Hunt accelerate the companion pity timer -- an
+                            # interaction nobody designed and nothing prints.
+                            pass
+                        elif pick is not None and pick.is_companion:
+                            screens_since_companion = 0
+                        else:
+                            screens_since_companion += 1
+                        if (res.time_to_online is None
+                                and draft.core_complete(
+                                    [loader.peek_card(cid) for cid in deck_ids],
+                                    archetype)):
+                            res.time_to_online = fights
                 if kind == "B" and not final_act:
                     # Act boundary (§10.1): the Ancient heals 100% of missing HP,
                     # and on grant_relics runs offers a 1-of-3 Ancient-relic pick.

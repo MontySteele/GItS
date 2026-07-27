@@ -916,6 +916,9 @@ def _upgrade_delta(src: str, fed: dict) -> dict:
         if "AddKeyword(CardKeyword.Innate)" in stmt:
             delta["innate"] = True
             continue
+        if "AddKeyword(CardKeyword.Retain)" in stmt:
+            delta["retain"] = True
+            continue
         if "RemoveKeyword(CardKeyword.Exhaust)" in stmt:
             delta["remove"] = "exhaust"
             continue
@@ -980,11 +983,16 @@ def _row_delta_key(row: dict, var: str) -> str | None:
     the committed tool.
     """
     effects = list(_walk_row_effects(row["effects"]))
+    # `chain_attack` IS a damage op -- a volley that repeats per kill -- so
+    # every damage-shaped rule below has to see it, or EchoingSlash's row
+    # would report no recoverable upgrade for a card whose OnUpgrade plainly
+    # bumps Damage.
+    hits = ("damage", "chain_attack")
     if var == "Damage" and any(
-            fx.get("op") == "damage" and fx.get("target") != "self"
+            fx.get("op") in hits and fx.get("target") != "self"
             for fx in effects):
         top_damage = [fx for fx in row["effects"]
-                      if fx.get("op") == "damage"
+                      if fx.get("op") in hits
                       and fx.get("target") != "self"]
         return "damage" if top_damage else "conditional_damage"
     if var == "Block" and any(fx.get("op") == "block" for fx in effects):
@@ -993,12 +1001,20 @@ def _row_delta_key(row: dict, var: str) -> str | None:
     if var == "MaxHp" and any(fx.get("op") == "gain_max_hp"
                               for fx in effects):
         return "max_hp"
-    if var == "Repeat" and any(fx.get("op") == "damage"
+    if var == "Repeat" and any(fx.get("op") in ("damage", "apply_power")
                                and isinstance(fx.get("times"), int)
                                for fx in effects):
         return "times"
+    # ONE VAR, TWO OPS. Prepared draws `cardCount` and then discards
+    # `cardCount` -- the same DynamicVar read twice -- so bumping only the
+    # draw would upgrade half the card and quietly make it stronger than it
+    # prints. Checked before the plain `draw` rule so the narrower shape wins.
     if var in ("Cards", "Draw") and any(
-            fx.get("op") == "draw" for fx in effects):
+            fx.get("op") == "draw" for fx in effects) and any(
+            fx.get("op") == "discard" for fx in effects):
+        return "draw_and_discard"
+    if var in ("Cards", "Draw") and any(
+            fx.get("op") in ("draw", "draw_to_hand_size") for fx in effects):
         return "draw"
     # ...but on a row that CREATES cards rather than drawing them, the same
     # var counts tokens. Both spellings appear in the Silent's pool (`Cards`
@@ -1059,6 +1075,9 @@ def _supplement_upgrade_delta(row: dict, src: str) -> dict:
         if "AddKeyword(CardKeyword.Innate)" in stmt:
             delta["innate"] = True
             continue
+        if "AddKeyword(CardKeyword.Retain)" in stmt:
+            delta["retain"] = True
+            continue
         if "RemoveKeyword(CardKeyword.Exhaust)" in stmt:
             delta["remove"] = "exhaust"
             continue
@@ -1090,6 +1109,16 @@ def _supplement_upgrade_delta(row: dict, src: str) -> dict:
         if any(fx.get("op") == "exhaust_from" and "select" not in fx
                for fx in effects):
             delta["exhaust_select"] = "chosen"
+        # An X-cost card whose upgrade increments the resolved X by one
+        # (`if (IsUpgraded) { powerAmount++; }`). The `++` IS the value --
+        # read from the branch, not authored here -- and the guard is that
+        # the row actually spends X, so this cannot fire on a row that does
+        # not read the energy it spent.
+        m = re.search(r"IsUpgraded\)\s*\{\s*(\w+)\+\+;", src)
+        if m and any(isinstance(fx.get("amount"), str)
+                     and fx["amount"].lstrip("-").startswith("X")
+                     for fx in effects):
+            delta["x_plus"] = 1
 
     if unexpressible:
         delta["_unexpressible"] = unexpressible

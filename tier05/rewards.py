@@ -235,7 +235,9 @@ def roll_rewards(rng: random.Random, character_id: str,
         while rarity not in pool:            # ref pool may lack a rarity
             rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
         offers.append(loader.get_card(rng.choice(pool[rarity]).id))
-    if character_id not in NO_COMPANION_CHARACTERS:   # none for the refs
+    # companion_offers=0 is a CARD-ONLY screen (The Hunt's extra reward): the
+    # slot is absent, not empty, so none of the companion machinery runs.
+    if companion_offers and character_id not in NO_COMPANION_CHARACTERS:
         # personal_pool cards are only offered to their own character --
         # a no-op while Klee is the only character, load-bearing the moment
         # a second one exists (Prune must not show up in Furina's rewards).

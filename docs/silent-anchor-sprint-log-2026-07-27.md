@@ -831,3 +831,65 @@ today.
 
 So the honest answer to "what do you need": for 25 of the 27, nothing. For
 The Hunt and Blade Of Ink, one ruling each.
+
+---
+
+## 13. ADDENDUM: enchantments want a design pass ([USER], 2026-07-27)
+
+Ruling: *"we should do a design pass on enchantments."* Blade Of Ink stays out
+of the pool until that pass happens, and this addendum exists so the pass
+starts from the question rather than from the card.
+
+**Why this is not a translation problem.** Blade Of Ink creates Shivs and then
+enchants each of them (`CardCmd.Enchant<Inky>`). An enchantment is state
+attached to a CARD INSTANCE, carrying its own stack amount. Every modifier
+tier0 has -- powers, auras, statuses -- attaches to a CREATURE. The Card
+dataclass has flags (`exhaust`, `innate`, `retain`, `sly_keyword`) but no
+concept of a per-instance modifier with a value, and no concept of two copies
+of the same card differing in what they do. That is the gap, and it is a
+data-model gap, not a missing op.
+
+**What the pass has to decide, in the order the answers constrain each other:**
+
+1. **Does tier0 model enchantments at all?** A legitimate answer is no --
+   and if it is no, that answer belongs in `refpowers.UNIMPLEMENTED`'s spirit:
+   written down once, with its reason, so the question stops being reopened
+   one card at a time. Note the honest price of yes: among the Silent's 27
+   remaining cards exactly ONE needs it. A subsystem for one card is a bad
+   trade unless the answer to (2) is that we want enchantments for OUR
+   characters too.
+
+2. **Is this a base-game parity feature or a Teyvat Spire feature?** These
+   pull in opposite directions. Parity says model it because the anchor pool
+   contains it, and the anchor exists to measure our pools against a real
+   one. Design says our characters have never wanted per-card state, and
+   adding a mechanic to the DSL that only the reference pool uses grows the
+   engine for a measurement rather than for a game. If the answer is
+   parity-only, consider whether the anchor can be honest WITHOUT it -- an
+   `unavailable:`-style category for "expressible only with a subsystem we
+   chose not to build" would say so out loud, the way the MultiplayerOnly
+   cards now do.
+
+3. **If yes: where does the state live, and what copies it?** A card in
+   tier0 moves hand -> discard -> draw and is cloned by several effects
+   (`copy_companion_in_hand`, `copy_spotlighted_in_hand`, Nightmare's clones
+   when it lands). Every one of those sites has to answer whether the
+   enchantment travels. Getting this wrong is invisible in a card sheet and
+   very visible in a sim result.
+
+4. **What does an enchantment DO, mechanically, in a world with no
+   enchantment payoffs?** `Inky` on a Shiv is only worth modelling if
+   something reads it. If nothing in either pool reads it, then implementing
+   it faithfully produces a card that is exactly as inert as Sneaky was --
+   which is the trap the CO-OP ONLY category was created to stop us walking
+   into twice.
+
+5. **Interaction with the two things it touches today.** The Shiv is a TOKEN,
+   created at runtime rather than drafted, so enchanting one means the
+   enchantment attaches to a card that never existed in the deck. And
+   upgrades are recovered MECHANICALLY from `OnUpgrade`; an enchantment that
+   scales on upgrade needs an upgrade key, or it silently does not scale.
+
+**Not in scope for this addendum, deliberately:** what Inky itself is worth.
+That is a number, and numbers come after the model. Answering (1) and (2) may
+make it moot.

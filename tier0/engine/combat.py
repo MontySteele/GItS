@@ -307,7 +307,11 @@ _FREE_PLAY_CONTEXT = (
     "fatal_kills_this_card", "exhausted_this_card", "block_gains_this_card",
     "salon_replacements_this_card", "detonations_at_card_start",
     "repeat_requested", "target_had_offelement_aura", "current_attack_bonus",
-    "sparks_at_play", "current_x", "current_card_cost")
+    "sparks_at_play", "current_x", "current_card_cost",
+    # Coverage pass 4's three per-card reads. Same hazard as the rest: a Sly
+    # auto-play that discards or gains block in the middle of an outer card
+    # would otherwise leave its numbers behind for the outer card to read.
+    "block_gained_this_card", "discards_this_card", "last_drawn_type")
 
 
 def resolve_free_play(state: CombatState, card: Card,

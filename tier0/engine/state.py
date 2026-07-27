@@ -418,6 +418,13 @@ class CombatState:
     fatal_kills_this_card: int = 0        # killed_target_fatal (Feed)
     exhausted_this_card: int = 0          # generate_from_pool amount_formula
     block_gains_this_card: int = 0        # exact multi-gain block hooks
+    # The block those gains actually PRODUCED, which is a different question:
+    # DodgeAndRoll pays BlockNextTurn equal to what GainBlock returned, after
+    # Dexterity and Frail. Kept beside the count rather than replacing it --
+    # refpowers reads the count to divide a per-gain allowance.
+    block_gained_this_card: int = 0
+    discards_this_card: int = 0           # CalculatedGamble's draw-back count
+    last_drawn_type: str = ""             # EscapePlan's drawn-card branch
     salon_replacements_this_card: int = 0 # overflow count for current card
     cards_exhausted_this_turn: int = 0     # EvilEye / ForgottenRitual
     # Kokomi §2.4: the prevention ward's per-round latch ("first unblocked
@@ -467,6 +474,20 @@ class CombatState:
     # NOT reset per turn; Murder scales across the whole fight.
     discards_this_turn: int = 0
     cards_drawn_this_combat: int = 0
+    # THE ONLY THING COMBAT SAYS TO THE RUN LAYER ABOUT REWARDS, and it is a
+    # statement of fact rather than a grant: "this fight earned N extra card
+    # screens". The Hunt is the first source ([USER], 2026-07-27: the reward
+    # is not in-combat -- if the effect fires you get an extra reward on the
+    # REWARDS SCREEN afterwards, which is also what the base game does:
+    # CombatRoom.AddExtraReward queues a CardReward for the room, and the
+    # room hands it over when the fight is already over).
+    #
+    # combat.py must never roll, offer or draft anything: rewards are the run
+    # layer's, exactly as the Burning Blood heal is (tier05/model.py, "combat
+    # stays emit-only"). A tier 0 fight run on its own leaves this counter
+    # sitting on the state, unread and harmless, which is the correct
+    # behaviour for a layer that has no reward screen at all.
+    extra_card_screens: int = 0
     dark_embrace_ethereal_count: int = 0  # deferred to after the hand flush
     attacks_played_this_turn: int = 0     # Juggling's ==3 trigger
     block_gain_card_plays_this_turn: int = 0   # Unmovable's per-turn allowance
@@ -510,6 +531,12 @@ class CombatState:
             card = p.draw_pile.pop(0)
             p.hand.append(card)
             self.cards_drawn_this_combat += 1
+            # EscapePlan reads the TYPE of the card its own draw produced
+            # (`(await Draw(1)).FirstOrDefault()`, then `.Type == Skill`).
+            # Cleared at card start, so a card that drew NOTHING -- empty
+            # piles, full hand -- reads as the source's null and pays out
+            # nothing, rather than seeing whatever the last card drew.
+            self.last_drawn_type = card.type
             self.emit("draw", card=card.id)
             # Hook.AfterCardDrawn, per CARD. CorrosiveWave and Speedster are
             # the only readers today and both are dead branches without a
