@@ -83,3 +83,48 @@ Track per-asset tier in a manifest column; "promote to Tier O" becomes a simple 
 - In-game **skill/element icons** map directly onto power icons (aura icons especially: instantly readable to any Genshin player).
 - Curation beats volume: the slice needs ~40 curated pieces, not a scraped archive — manual saving is both sufficient and avoids automated-scraping ToS issues on art sites.
 - Keep a `SOURCES.txt` (url per asset) even for private use: if the project ever goes public, it's the checklist of what needs replacing, and if any fanartist's work inspired a commissioned piece, it's the courtesy-credit list.
+
+## Curtain Call rehunt — the nine renamed cards (Take a Bow, 2026-07-27)
+
+R85 renamed nine cards, and a card's art was picked for the OLD name. The
+close-out dispositioned each row; this pass acted on those dispositions and
+staged the results for [USER] gate G1. **Nothing is locked.** Every row below
+still carries `pick=shortlist`, so the selection happens in the contact sheet
+(`art_process.py --apply-picks`), which is exactly where a visual judgment
+belongs.
+
+Register voice drove the candidate search: **archon** rows want nation-scale,
+courtroom and mask iconography; **salon** wants stagecraft; **private** wants
+the unguarded Furina.
+
+| id | new name | register | disposition | candidates added |
+|---|---|---|---|---|
+| `warmup_act` | Stage Combat | salon | REHUNT | Tabletop Troupe Pros (r3), Fragrant Fantasy 3 (r4) |
+| `crowd_work` | The Gallery Stirs | archon | REHUNT | Opera Epiclese – Furina's Seat (r4) |
+| `tempo_change` | Double Time | salon | REHUNT | Furina Birthday 2024 Shorts (r2), New Year's Advice (r3) |
+| `audience_participation` | The Crowd Answers | archon | REHUNT | Furina Introduction Banner (r4), Astra Carnival S4 (r5) |
+| `standing_room_only` | The House Rises | archon | **OVERTURNED → G1** | none needed; r3 is the answer |
+| `graceful_retreat` | Slip Backstage | private | verify keep | — |
+| `curtain_up` | In the Wings | private | verify keep | — |
+| `swelling_overture` | Compose Herself | private | verify keep | — |
+| `pit_orchestra` | Stagehands | salon | verify keep | — |
+
+### The one overturn
+
+`standing_room_only` was dispositioned "verify keep (full-house iconography)".
+It does not hold. Rank 1 is `Item Theater Tickets.png` — a flat pink item
+GLYPH of a ticket, no house in it at all — while rank 3 is `Opera Epiclese.png`,
+the opera house itself at nation scale. For "The House Rises" in the **archon**
+register, r3 is the card and r1 is a UI icon that happens to mention theatre.
+Verified by eye on both candidates rather than inferred from the titles.
+
+No new sources were fetched: all seven candidates were already in the local
+`art/raw/` pool (the free block of `docs/art-claimed-sources.tsv`), so no row
+of `art/SOURCES.tsv` needed to move. `art_lint` passes on the edited plan.
+
+**Caveat, recorded rather than hidden:** `audience_participation` is the
+weakest shortlist of the four. The free pool is thin on nation-scale crowd
+imagery, and both additions are compromises — a banner and a carnival
+gathering, the latter being the same objection that got the ORIGINAL
+`crowd_work` pick rejected. If G1 rejects all five, this row needs a genuine
+fetch pass rather than another re-rank of what is already local.

@@ -1,7 +1,7 @@
 # DERIVED FILE -- regenerate with tools/dump_claimed_sources.py.
 # Diff every art candidate against the CLAIMED block before proposing it.
 # See the tool's docstring for what each block means.
-# CLAIMED: 260 effective card picks
+# CLAIMED: 267 effective card picks
 2024 7 5 amusement park art.png	universal_revelry
 4th Anniversary Wallpaper 1.png	thunderous_ovation
 A Commemorative Photo Aether 1.png	audience_participation
@@ -14,6 +14,7 @@ Arataki Itto Character Card.png	itto_superlative_superstrength
 Archon Quest When All Return to the Waters.png	usher_the_waves
 Astra Carnival Cat's Tail Gathering 2024 S5 Artwork.png	crowd_work
 Astra Carnival Cat's Tail Gathering 2024 S5 Artwork.png	standing_ovation
+Bake-Kurage Summon.png	before_sun_and_moon
 Barbara Character Card.png	barbara_shining_idol
 Bennett Character Card.png	bennett_fantastic_voyage
 Calamitous Tread Graphic 3.png	torrential_turn
@@ -24,6 +25,7 @@ Chanson of Many Waters 2023-11-08, Immaculate Pulse 2023-11-08 - Furina & Charlo
 Chanson of Many Waters 2024-06-25 - Furina Shorts.png	swelling_overture
 Chanson of Many Waters.png	singer_of_many_waters
 Chaotic Entropy Equipment Card.png	sucrose_gust
+Character Arlecchino Full Wish.png	arlecchino_masque_red_death
 Character Charlotte Hurlock Variations Full Wish.png	charlotte_snappy_silhouette
 Character Chevreuse Full Wish.png	chevreuse_bursting_grenades
 Character Freminet Full Wish.png	freminet_shattering_pressure
@@ -49,6 +51,7 @@ Charlotte Character Card.png	charlotte_freezing_point
 Charlotte Wish.png	charlotte_enduring_frosthelm
 Chevreuse Character Card.png	chevreuse_interdiction_fire
 Chevreuse Wish.png	chevreuse_vanguards_valor
+Clorinde Wish.png	clorinde_impale_the_night
 Cold-Blooded Strike Equipment Card.png	kaeya_frostgnaw
 Dahlia Character Card.png	dahlia_sacramental_shower
 Dahlia Wish.png	dahlia_favonian_favor
@@ -158,7 +161,6 @@ Klee Birthday 2024.png	gleeful_barrage
 Klee Birthday 2025.png	elemental_ecstasy
 Klee Character Card Golden.png	true_spark_knight
 Klee Character Card.png	kaboom
-Klee Character Card.png	spark_knight_style
 Klee Item.png	patched_dress
 Klee Multi Wish.png	no_holding_back
 Klee Wish.png	big_badda_boom
@@ -177,6 +179,9 @@ Lynette Wish.png	lynette_box_trick
 Namecard Background Celebration Peekaboo!.png	hide_and_seek
 Namecard Background Furina Banquet.png	dinner_service
 Namecard Background Klee Explosive.png	explosives_workshop
+Namecard Background Sangonomiya Kokomi The Deep.png	ebb_tide
+Navia Wish.png	navia_cannon_fire_support
+Neuvillette Card.png	neuvillette_ancient_sea_authority
 Neuvillette Character Card.png	guest_neuvillette_tears
 Neuvillette Wish.png	guest_neuvillette_droplets
 On-Hit Effect Furina.png	poised_riposte
@@ -220,6 +225,7 @@ Sangonomiya Kokomi Character Card.png	shoulder_to_shoulder
 Sangonomiya Kokomi Character Card.png	signal_arrow
 Sangonomiya Kokomi Character Card.png	standing_orders
 Sangonomiya Kokomi Character Card.png	to_the_front
+Sangonomiya Kokomi Expression 2.png	salt_line
 Sangonomiya Kokomi Introduction Card.jpg	tideturn
 Sangonomiya Kokomi Introduction Card.jpg	vow_of_tides
 Sangonomiya Kokomi Introduction Card.jpg	waterspout
@@ -229,6 +235,7 @@ Sangonomiya Kokomi Portrait.png	coral_guard
 Sangonomiya Kokomi Portrait.png	tactical_retreat
 Sangonomiya Kokomi Portrait.png	tide_reading
 Sangonomiya Kokomi Portrait.png	waters_edge
+Sangonomiya Kokomi Profile.png	undertow
 Sangonomiya Kokomi Vision.png	pearl_diver
 Sangonomiya Kokomi Wish.png	epiphany_of_the_deep
 Sangonomiya Kokomi Wish.png	prayer_to_the_moon
@@ -263,7 +270,7 @@ VIPAD Furina.png	showstopper
 Version 4.2 Wallpaper 2.png	waters_embrace
 Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 #
-# FREE: 150 fetched titles no card claims
+# FREE: 155 fetched titles no card claims
 # 4th Anniversary Wallpaper 3.jpg
 # A Commemorative Photo Aether 2.png
 # A Commemorative Photo Lumine 1.png
@@ -275,8 +282,9 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Apocalypse Still 4 Lumine.png
 # Arataki Itto Character Card Platinum.png
 # Arataki Itto Wish.png
+# Arlecchino Card.png
+# Arlecchino Portrait.png
 # Astra Carnival Cat's Tail Gathering 2024 S4 Artwork.png
-# Bake-Kurage Summon.png
 # Barbara Card.png
 # Barbara Introduction Card.png
 # Bennett Card.png
@@ -284,13 +292,16 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Calamitous Tread Graphic 2.png
 # Calamitous Tread Graphic 4.png
 # Ceremonial Garment Buff Icon.png
+# Character Clorinde Full Wish.png
 # Character Dahlia Full Wish.png
+# Character Navia Full Wish.png
 # Character Prune Full Wish.png
 # Charlotte Character Card Golden.png
 # Charlotte Character Card Platinum.png
 # Chevalmarin Film Fantasyland.png
 # Chevreuse Character Card Golden.png
 # Chevreuse Character Card Platinum.png
+# Clorinde Character Card.png
 # Constellation A Woman Adapts Like Duckweed in Water.png	[non-card]
 # Constellation Blazing Delight.png	[non-card]
 # Constellation Evernight Raven.png
@@ -348,12 +359,13 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Kurage's Oath Preview.gif
 # Lynette Character Card Golden.png
 # Lynette Character Card Platinum.png
-# Namecard Background Sangonomiya Kokomi The Deep.png	[non-card]
+# Navia Character Card.png
 # Nereid's Ascension Ceremonial Garment Attack Preview.gif
 # Nereid's Ascension Ceremonial Garment Water Preview.gif
 # Nereid's Ascension Preview.gif
 # Neuvillette Character Card Golden.png
 # Neuvillette Character Card Platinum.png
+# Neuvillette Character Card Showcase 1.png
 # New Year's Advice from Teyvat Furina.png
 # Nicole Icon.png	[non-card]
 # Nicole Introduction Card.png
@@ -370,8 +382,8 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Ride the Waves to a Rendezvous in Fontaine Opera Epiclese Concept Art 1.png
 # Sangonomiya Kokomi Character Card Golden.png
 # Sangonomiya Kokomi Expression 1.png
+# Sangonomiya Kokomi Expression 3.png
 # Sangonomiya Kokomi Multi Wish.png
-# Sangonomiya Kokomi Profile.png
 # Savoring the Breeze Furina.png
 # Savoring the Breeze Wallpaper Furina.png
 # Sayu Character Card Platinum.png
