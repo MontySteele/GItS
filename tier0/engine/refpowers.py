@@ -60,7 +60,8 @@ from __future__ import annotations
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine.state import Card, CombatState, Enemy, Fighter, Player
+from tier0.engine.state import (Card, CombatState, Enemy, Fighter, Player,
+                                remove_instance)
 
 # ---------------------------------------------------------------------------
 # Powers this module refuses to implement, and the cards they gate.
@@ -356,6 +357,10 @@ def damage_player_unblockable(state: CombatState, amount: int,
     if amount <= 0:
         return
     p = state.player
+    # Unblockable is not uncappable: IntangiblePower.ModifyHpLostAfterOsty
+    # clamps ALL HP loss to 1, poison included -- that clamp is most of what
+    # Wraith Form promises, so this path may not skip it.
+    amount = int(_intangible_cap(p, amount))
     p.hp -= amount
     state.emit("self_damage", amount=amount, reason=reason)
     from tier0.engine import resources
@@ -423,8 +428,9 @@ def poison_tick(state: CombatState, fighter: Fighter) -> None:
             # anything. It is reset at every card resolution, so incrementing
             # it here would be harmless today and wrong the moment that
             # ordering changes.
-            effective = min(amount, max(0, fighter.hp))
-            fighter.hp -= amount
+            dealt = int(_intangible_cap(fighter, amount))
+            effective = min(dealt, max(0, fighter.hp))
+            fighter.hp -= dealt
             state.emit("damage", target=fighter.name, amount=effective,
                        blocked=0, base=amount, source="poison")
         state.emit("poison_tick", amount=amount,
@@ -881,11 +887,15 @@ def retain_at_flush(state: CombatState, flushing: list[Card]) -> list[Card]:
     if not n:
         return keep
     from tier0.engine.effects import _best_card
-    pool = [c for c in flushing if c not in keep]
+    # Identity, not equality: equal twins are distinct instances, and a
+    # value-based filter/remove here would either shrink the candidate pool
+    # by every copy of a kept card or hand the same instance out twice.
+    keep_ids = {id(c) for c in keep}
+    pool = [c for c in flushing if id(c) not in keep_ids]
     wlp: list[Card] = []
     while pool and len(wlp) < n:
         pick = _best_card(pool)
-        pool.remove(pick)
+        pool = [c for c in pool if c is not pick]
         wlp.append(pick)
     state.emit("well_laid_plans", kept=[c.id for c in wlp])
     return keep + wlp
@@ -1094,7 +1104,7 @@ def side_turn_start_early(state: CombatState) -> None:
     for card in pool[:n]:
         if len(p.hand) >= C.MAX_HAND_SIZE:
             break
-        p.discard_pile.remove(card)
+        remove_instance(p.discard_pile, card)
         p.hand.append(_upgraded(state, card))
         state.emit("aggression_recall", card=card.id)
 

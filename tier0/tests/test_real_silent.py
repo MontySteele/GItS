@@ -173,19 +173,6 @@ def test_every_reference_card_has_an_applicable_upgrade(ref_cards):
         assert upgraded.name == card.name + upgrades.SUFFIX
 
 
-def test_the_required_layer_lists_agree_between_loader_and_builder():
-    """A reviewed layer listed in one place and not the other is a pool that
-    loads at the wrong size -- silently, because both sides fail closed only
-    against their OWN list."""
-    from tools import build_official_sheet as build
-    for name, spec in build.CHARACTERS.items():
-        sheet = f"{name}_pool.yaml"
-        if sheet not in loader.EXTERNAL_CARD_SHEETS:
-            continue
-        assert tuple(p.name for p in spec.supplements) == \
-            loader.EXTERNAL_CARD_LAYERS.get(sheet, ())
-
-
 def test_no_silent_card_silently_dropped_a_printed_keyword(ref_cards):
     """The defect this anchor's first extraction found: five Sly cards and
     two Innate cards were emitted as vanilla rows. Every printed keyword must

@@ -21,4 +21,10 @@ import sys
 from tools.build_official_sheet import main
 
 if __name__ == "__main__":
+    # argparse keeps the LAST occurrence, so a --character in the passthrough
+    # would silently win over the pin. Refuse it instead of lying.
+    if any(a == "--character" or a.startswith("--character=")
+           for a in sys.argv[1:]):
+        sys.exit("this entry point is pinned to ironclad; use "
+                 "tools.build_official_sheet to pick a character")
     sys.exit(main(["--character", "ironclad", *sys.argv[1:]]))

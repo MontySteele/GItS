@@ -16,6 +16,35 @@ from tools import build_official_sheet as build
 from tools import extract_base_game_pool as extract
 
 
+def test_the_required_layer_lists_agree_between_loader_and_builder():
+    """A reviewed layer listed in one place and not the other is a pool that
+    loads at the wrong size -- silently, because both sides fail closed only
+    against their OWN list.
+
+    Lives HERE, not in test_real_silent.py: it compares two committed Python
+    lists and needs no game_ref, and the environment that most needs it is
+    the fresh clone (CI) where a game_ref skip guard would blind it."""
+    checked = 0
+    for name, spec in build.CHARACTERS.items():
+        sheet = f"{name}_pool.yaml"
+        if sheet not in loader.EXTERNAL_CARD_SHEETS:
+            continue
+        assert tuple(p.name for p in spec.supplements) == \
+            loader.EXTERNAL_CARD_LAYERS.get(sheet, ())
+        checked += 1
+    # The loop must never quietly check nobody.
+    assert checked >= 2
+
+
+def test_id_prefixes_are_pairwise_distinct_across_registered_characters():
+    """id_prefix guards a derived prefix against the PINNED table at
+    derivation time, but two derived prefixes can only collide across runs
+    (Watcher/Warden -> wa_). The registry is the one place every character
+    is known at once, so distinctness is pinned here."""
+    prefixes = {name: extract.id_prefix(name) for name in build.CHARACTERS}
+    assert len(set(prefixes.values())) == len(prefixes), prefixes
+
+
 def _spec(tmp_path: Path, **overrides) -> build.CharacterSpec:
     """An Ironclad-shaped spec pointed at a scratch directory.
 
@@ -157,6 +186,21 @@ def test_declared_keywords_refuses_an_unreadable_declaration():
                        match="unrecognised CanonicalKeywords"):
         extract._declared_keywords(
             "IEnumerable<CardKeyword> CanonicalKeywords { get { yield break }")
+
+
+def test_declared_keywords_refuses_a_token_free_declaration():
+    """A declaration that MATCHES but names no keyword -- e.g. delegating to
+    a cached field -- must exclude, not read as empty. Only an explicit
+    empty collection may say `no keywords` out loud."""
+    with pytest.raises(extract._Untranslatable, match="no CardKeyword token"):
+        extract._declared_keywords(
+            "IEnumerable<CardKeyword> CanonicalKeywords => _keywords;")
+    empty = ("IEnumerable<CardKeyword> CanonicalKeywords => "
+             "new HashSet<CardKeyword>();")
+    assert extract._declared_keywords(empty) == []
+    braces = ("IEnumerable<CardKeyword> CanonicalKeywords => "
+              "new HashSet<CardKeyword> { };")
+    assert extract._declared_keywords(braces) == []
 
 
 def test_a_keyword_with_no_tier0_field_excludes_the_card():
@@ -387,3 +431,43 @@ def test_builder_rejects_partial_upgrade_coverage(tmp_path):
 
     with pytest.raises(SystemExit, match="missing upgrades for.*two"):
         build._validated_upgrades(spec, [{"id": "one"}, {"id": "two"}])
+
+
+def test_the_tag_scoped_dial_commits_only_a_prefix():
+    """The finished `tag_damage_<tag>` name embeds a base-game CardTag, so
+    it may exist only in the gitignored output, never in the committed
+    dial -- the payload rule (sprint log 2026-07-27 s14.1), applied to a
+    power NAME. `decompile_character` completes the entry at run time."""
+    assert extract.TAG_SCOPED_POWERS      # the category must not vanish
+    for power_cls, prefix in extract.TAG_SCOPED_POWERS.items():
+        assert prefix.endswith("_")
+        assert power_cls not in extract.SUPPORTED_POWERS
+    assert all(not name.startswith("tag_damage_")
+               for name in extract.SUPPORTED_POWERS.values())
+    assert all(not key.startswith("tag_damage_")
+               for key in extract.UPGRADE_POWER_KEY)
+
+
+def test_single_card_tag_requires_exactly_one_tag():
+    # One tag, referenced twice, is one tag. (The tag here is fictional:
+    # this test may not carry base-game data either.)
+    src = ("if (!card.HasTag(CardTag.Ember)) return num;\n"
+           "// scoped to CardTag.Ember\n")
+    assert extract._single_card_tag(src, "EmberPower") == "ember"
+    with pytest.raises(SystemExit):
+        extract._single_card_tag("no tag reference at all", "EmberPower")
+    with pytest.raises(SystemExit):
+        extract._single_card_tag("CardTag.Ember CardTag.Ash", "EmberPower")
+
+
+def test_read_decompiled_short_fails_closed(tmp_path):
+    (tmp_path / "a").mkdir()
+    (tmp_path / "b").mkdir()
+    (tmp_path / "a" / "FooPower.cs").write_text("x")
+    assert extract._read_decompiled_short(tmp_path, "FooPower") == "x"
+    with pytest.raises(SystemExit):
+        extract._read_decompiled_short(tmp_path, "MissingPower")
+    # An ambiguous match is a real error, same as _read_decompiled_type.
+    (tmp_path / "b" / "FooPower.cs").write_text("y")
+    with pytest.raises(SystemExit):
+        extract._read_decompiled_short(tmp_path, "FooPower")

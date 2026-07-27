@@ -151,25 +151,28 @@
 #      is ask A3 answerable, because only then does a weight have real draft
 #      decisions to choose between.
 #   b. Explain the act-1 clear regression FIRST. Clear fell 46% -> 31% ->
-#      39% -> 35% as coverage rose 27 -> 59 of 88, while the starter battery
+#      39% -> 35% as coverage rose 27 -> 59 of 86, while the starter battery
 #      stayed flat -- combat is not what changed, the draft is. Tuning these
 #      weights before that is explained would tune them to hide it.
+#      NARROWING FACT (review, 2026-07-27): tier05/runner.py maps real_silent
+#      to plan `generic`, so every act-1 number above was flown by the
+#      GENERIC combat pilot -- the weights below never touched them. The
+#      live suspect is the draft scorer, not this block.
 #   c. Decide whether the scorer needs a poison term at all (see 2 below).
 #      That is a scorer change, not a weight change, and it is the one thing
 #      no value in this block can express.
 #
 # KNOWN UNDERSTATEMENT -- on the record before any low score is read as a
 # finding about her pool:
-#   1. The assembled pool is 59 of 86 cards (69%; 60 rows, the extra being
-#      the Shiv token). The denominator is 86, not the 88 printed in her card
-#      pool: the game marks Flanking and Sneaky MultiplayerOnly, so a
-#      single-player run never offers them and no DSL work could change that.
-#      It was 27 cards when these numbers were first written.
-#      The 29 still out are no longer "systematically the interesting ones"
-#      -- the shiv generators and the poison payoffs landed in passes 1-3 --
-#      but the remaining rares (Wraith Form, Nightmare, Grand Finale, Storm
-#      Of Steel) still skew the missing slice toward the deck's ceiling.
-#      This anchor is a floor on her, not yet a portrait.
+#   1. UPDATED at pool completion (pass 6, 2026-07-27): the assembled pool
+#      is 85 of 86 cards (86 rows with the Shiv token). The denominator is
+#      86, not the 88 printed in her card pool: the game marks Flanking and
+#      Sneaky MultiplayerOnly, so a single-player run never offers them and
+#      no DSL work could change that. The one card still out is Blade Of
+#      Ink, which waits on the enchantments design pass ([USER], sprint log
+#      s13) -- no DSL work closes it either. The pool was 27, then 59,
+#      when earlier readings of these numbers were written; the SCHEDULED
+#      REVIEW trigger above has therefore FIRED.
 #   2. Poison is her scaling and the scorer has no poison term at all, so a
 #      Deadly Poison reads as a one-shot debuff rather than as ramp.
 #   3. RESOLVED 2026-07-27 (ask A1): Ring of the Snake IS wired now, so her

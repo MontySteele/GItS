@@ -196,6 +196,31 @@ def _read_decompiled_type(root: Path, type_name: str) -> str:
     return matches[0][1]
 
 
+def _read_decompiled_short(root: Path, short_name: str) -> str:
+    """Read a type by short name alone (powers live outside CARD_NS, and
+    pinning their namespace here would be one more guess to go stale)."""
+    paths = sorted(root.rglob(f"{short_name}.cs"))
+    if not paths:
+        sys.exit(f"{short_name} not found in the decompiled project")
+    if len(paths) > 1:
+        listing = "\n  ".join(str(p.relative_to(root)) for p in paths)
+        sys.exit(f"multiple decompiled files matched {short_name}:\n"
+                 f"  {listing}")
+    return paths[0].read_text()
+
+
+def _single_card_tag(src: str, power_cls: str) -> str:
+    """The one CardTag a tag-scoped power reads, snake-cased. Fail closed:
+    zero tags means the power's shape changed and the derived name would be
+    a lie; two means the scope is ambiguous. Refuse loudly either way
+    rather than emit a power that silently matches nothing."""
+    tags = sorted(set(re.findall(r"\bCardTag\.(\w+)", src)))
+    if len(tags) != 1:
+        sys.exit(f"{power_cls} must reference exactly one CardTag to be "
+                 f"tag-scoped; found: {', '.join(tags) or 'none'}")
+    return _snake(tags[0])
+
+
 def decompile_character(
         dll: Path, character: str) -> tuple[list[str], dict[str, str]]:
     """Return the pool's card names and sources from one ILSpy invocation."""
@@ -225,11 +250,30 @@ def decompile_character(
         for name in tokens:
             try:
                 sources[name] = _read_decompiled_type(root, f"{CARD_NS}{name}")
-            except SystemExit:
-                continue      # not a CardModel (a Power, a Vfx): not a token
+            except SystemExit as err:
+                # ONLY "not found" may skip (a Power, a Vfx: not a token).
+                # An AMBIGUOUS match is a real error and must not be
+                # swallowed into "no such type".
+                if "multiple decompiled files matched" in str(err.code):
+                    raise
+                continue
         if tokens:
             print(f"  token card types referenced by the pool: "
                   f"{', '.join(tokens)}", file=sys.stderr)
+        # TAG-SCOPED POWERS. Their tier0 name embeds a base-game CardTag,
+        # so the committed dial holds only a prefix; complete it here, the
+        # one moment the power's own decompiled source is readable. The
+        # derived tag matches what _canonical_tags emits on the token rows
+        # by construction: both snake the same enum member.
+        for power_cls, prefix in TAG_SCOPED_POWERS.items():
+            # Only when some card in THIS pool reaches for the power: a
+            # pool that never mentions it gets the same dial it always had.
+            if not any(f"<{power_cls}>" in src for src in sources.values()):
+                continue
+            derived = prefix + _single_card_tag(
+                _read_decompiled_short(root, power_cls), power_cls)
+            SUPPORTED_POWERS[power_cls] = derived
+            UPGRADE_POWER_KEY[derived] = "power_amount"
     elapsed = time.monotonic() - started
     print(f"  decompiled and loaded {len(names)} card types in {elapsed:.1f}s",
           file=sys.stderr)
@@ -336,6 +380,11 @@ def id_prefix(character: str) -> str:
             sys.exit(f"cannot derive an id prefix from character {character!r}; "
                      "add an explicit entry to ID_PREFIXES")
         prefix = key[:2] + "_"
+    # Guards derived-vs-PINNED only: two DERIVED prefixes can also collide
+    # (Watcher/Warden -> wa_), but each extraction run sees one character,
+    # so cross-character distinctness is pinned where every character is
+    # known -- test_extract_base_game_pool, over build_official_sheet's
+    # registry.
     clash = sorted(name for name, pinned in ID_PREFIXES.items()
                    if pinned == prefix and name != key)
     if clash:
@@ -410,8 +459,9 @@ SUPPORTED_POWERS = {"StrengthPower": "strength",
                     # its own PowerModel and pinned in
                     # tier0/tests/test_si_pass5.py). NoDrawPower was already
                     # implemented in should_draw for BattleTrance and only
-                    # ever lacked its dial entry.
-                    "AccuracyPower": "tag_damage_shiv",
+                    # ever lacked its dial entry. AccuracyPower is on this
+                    # dial too, but its entry is completed at decompile time
+                    # (see TAG_SCOPED_POWERS below).
                     "DoubleDamagePower": "double_damage",
                     "NoDrawPower": "no_draw",
                     "ShadowStepPower": "shadow_step",
@@ -424,6 +474,18 @@ SUPPORTED_POWERS = {"StrengthPower": "strength",
                     "FanOfKnivesPower": "fan_of_knives",
                     "NightmarePower": "nightmare",
                     "WraithFormPower": "wraith_form"}
+
+# The dial entries whose tier0 name CONTAINS base-game data. Accuracy scopes
+# a damage bonus to cards carrying one CardTag, and tier0 spells that power
+# `tag_damage_<tag>` -- but the tag is the base game's own, so writing the
+# finished name here would commit a decompiled identifier: the exact rule
+# PAYLOAD_POWERS below exists to enforce (PhantomBlades differs only in
+# plumbing -- its tier0 power takes the tag as a row payload instead of
+# baking it into the power name). Committed code therefore holds only the
+# PREFIX; `decompile_character` completes the entry into SUPPORTED_POWERS
+# and UPGRADE_POWER_KEY by reading the tag off the power's own decompiled
+# source, the same way tokens and CanonicalTags are already recovered.
+TAG_SCOPED_POWERS = {"AccuracyPower": "tag_damage_"}
 
 # A FOURTH exclusion category, and the narrowest: the power IS implemented in
 # tier0, but it operates on a card the CHARACTER owns -- a token to create, a
@@ -587,8 +649,9 @@ UPGRADE_POWER_KEY = {"strength": "power_amount",
                      # Coverage pass 5. Accuracy and PhantomBlades raise a
                      # PowerVar like the rest; the other five upgrade
                      # something that is not their power's amount (a cost, a
-                     # keyword) and never reach this map.
-                     "tag_damage_shiv": "power_amount",
+                     # keyword) and never reach this map. Accuracy's key is
+                     # its derived tag-scoped name, added at decompile time
+                     # next to its SUPPORTED_POWERS entry.
                      "double_damage": "power_amount",
                      "infinite_blades": "power_amount",
                      "no_draw": "power_amount",
@@ -1217,6 +1280,12 @@ CARD_KEYWORDS = {"Exhaust": "exhaust", "Innate": "innate", "Retain": "retain",
 # brace block. Declaration-scoped on purpose: a card that exhausts SOMETHING
 # ELSE mentions Exhaust only in a hover tip and must not be marked.
 KEYWORD_DECL = re.compile(r"CanonicalKeywords\s*=>(.*?);", re.S)
+# The only expression shapes that may legitimately carry ZERO CardKeyword
+# tokens. Anything else token-free (e.g. `=> _keywords;` delegating to a
+# cached field) is unreadable, not empty.
+EMPTY_KEYWORD_DECL = re.compile(
+    r"new\s+HashSet<CardKeyword>\s*(\(\s*\)|\{\s*\})"
+    r"|Array\.Empty<CardKeyword>\s*\(\s*\)")
 
 
 def _declared_keywords(src: str) -> list[str]:
@@ -1228,7 +1297,14 @@ def _declared_keywords(src: str) -> list[str]:
     m = KEYWORD_DECL.search(src)
     if not m:
         raise _Untranslatable("unrecognised CanonicalKeywords declaration")
-    return sorted(set(re.findall(r"CardKeyword\.(\w+)", m.group(1))))
+    found = sorted(set(re.findall(r"CardKeyword\.(\w+)", m.group(1))))
+    if not found and not EMPTY_KEYWORD_DECL.search(m.group(1)):
+        # A declaration that names no keyword and is not an explicit empty
+        # collection is the original defect's shape wearing a new rendering.
+        raise _Untranslatable(
+            "CanonicalKeywords declaration carries no CardKeyword token and "
+            "is not an explicit empty collection")
+    return found
 
 
 def _snake(name: str) -> str:

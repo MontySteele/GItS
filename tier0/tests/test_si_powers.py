@@ -85,6 +85,31 @@ def test_intangible_is_the_last_word_over_vulnerable():
     assert powers.modify_damage_taken(state.player, 20) == C.INTANGIBLE_DAMAGE_CAP
 
 
+def test_intangible_caps_unblockable_damage_and_a_poison_tick():
+    """Unblockable is not uncappable: ModifyHpLostAfterOsty clamps ALL HP
+    loss to 1, and the poison tick routes through the unblockable path --
+    surviving poison at 1/tick is most of what Wraith Form promises."""
+    state = make_state()
+    powers.apply_power(state, state.player, "intangible", 1)
+    hp = state.player.hp
+    refpowers.damage_player_unblockable(state, 9, reason="test")
+    assert state.player.hp == hp - C.INTANGIBLE_DAMAGE_CAP
+    powers.apply_power(state, state.player, "poison", 5)
+    refpowers.poison_tick(state, state.player)
+    assert state.player.hp == hp - 2 * C.INTANGIBLE_DAMAGE_CAP
+    assert state.player.powers["poison"] == 4      # decrement is untouched
+
+
+def test_intangible_caps_an_enemy_poison_tick_too():
+    state = make_state()
+    enemy = make_enemy(hp=40)
+    state.enemies = [enemy]
+    powers.apply_power(state, enemy, "intangible", 1)
+    powers.apply_power(state, enemy, "poison", 6)
+    refpowers.poison_tick(state, enemy)
+    assert enemy.hp == 40 - C.INTANGIBLE_DAMAGE_CAP
+
+
 def test_intangible_ticks_down_on_the_enemy_side_turn_end():
     state = make_state()
     powers.apply_power(state, state.player, "intangible", 2)
@@ -297,6 +322,49 @@ def test_well_laid_plans_retains_cards_that_would_have_flushed():
     combat._player_turn(state, pilot)
     assert keeper in state.player.hand
     assert junk in state.player.discard_pile
+
+
+def test_well_laid_plans_flush_conserves_equal_twin_cards():
+    """Card is a dataclass, so two copies of the same card compare EQUAL
+    while being distinct instances. Retaining one copy must not make its
+    twin vanish from every pile -- the flush filters by identity."""
+    state = make_state()
+    state.enemies = [make_enemy(hp=200)]
+    twins = [card("twin", type="attack", cost=1,
+                  fx=[{"op": "damage", "amount": 9, "target": "enemy"}])
+             for _ in range(2)]
+    junk = card("junk", cost=3)
+    powers.apply_power(state, state.player, "well_laid_plans", 1)
+
+    def pilot(s):
+        if not s.player.hand:
+            s.player.hand.extend(twins + [junk])
+        return None
+
+    combat._player_turn(state, pilot)
+    assert len(state.player.hand) == 1
+    assert len(state.player.discard_pile) == 2
+    survivors = state.player.hand + state.player.discard_pile
+    assert {id(c) for c in survivors} == {id(c) for c in twins + [junk]}
+
+
+def test_well_laid_plans_retains_two_distinct_instances_of_a_twin():
+    """With Amount 2 and a hand of equal twins, BOTH instances stay -- the
+    picker must never hand the same instance out twice."""
+    state = make_state()
+    state.enemies = [make_enemy(hp=200)]
+    twins = [card("twin", cost=1) for _ in range(2)]
+    powers.apply_power(state, state.player, "well_laid_plans", 2)
+
+    def pilot(s):
+        if not s.player.hand:
+            s.player.hand.extend(twins)
+        return None
+
+    combat._player_turn(state, pilot)
+    assert len(state.player.hand) == 2
+    assert state.player.hand[0] is not state.player.hand[1]
+    assert not state.player.discard_pile
 
 
 # --- per-play payouts ------------------------------------------------------
