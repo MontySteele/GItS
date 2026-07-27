@@ -717,3 +717,117 @@ data-free tests. Coverage 22 -> 59 of 88.
    A3-placeholder pilot drafting cards it cannot fly, and the scorer having
    no poison term at all. Testing it is a measurement task, not a ruling --
    but it is the measurement that would make ask A3 answerable.
+
+---
+
+## 12. The pilot review, the denominator, and what the last cards need
+
+### 12.1 Ruling recorded: review the pilot when the pool completes
+
+[USER], 2026-07-27: *"let's make a note to review the pilot after all of the
+cards land."* Written where it will actually be read -- at the top of the
+`silent` entry in `tier0/content/pilots/archetypes.yaml`, beside the
+PLACEHOLDER numbers themselves, not only here. The note names three questions
+in order, because doing them out of order would corrupt the answer:
+
+  a. Re-read the placeholders against the complete pool (ask A3).
+  b. **Explain the act-1 clear regression FIRST.** Tuning weights before that
+     is explained would tune them to hide it.
+  c. Decide whether the SCORER needs a poison term -- a change no value in
+     the weights block can express.
+
+### 12.2 The denominator was wrong, and it was wrong for both anchors
+
+Triaging the gap turned up a fact that is not about the Silent at all. Two of
+her 88 printed pool cards -- Flanking and Sneaky -- carry
+`CardMultiplayerConstraint.MultiplayerOnly`, which is the game declaring that
+a single-player run never offers them. Ironclad has two of his own (Demonic
+Shield, Tank). Every coverage number this sprint has published measured
+against a universe containing four cards that cannot appear in the world we
+simulate.
+
+The extractor now reads that constraint structurally (`MP_ONLY`), and those
+cards go to a new `unavailable:` block in document 2 -- recorded, not dropped,
+so nobody re-derives them from the pool listing and reports the sheet as
+missing cards it deliberately does not want. They are OUT of the denominator:
+
+    Silent    41 emitted / 45 excluded of 86     (was: of 88)
+    Ironclad  35 emitted / 50 excluded of 85     (was: of 87)
+
+Live coverage is therefore **59 of 86 (69%)**, and the remaining debt is
+**27 cards, not 29**. Note what this is not: it is not a coverage improvement.
+Nothing was implemented; a wrong measuring stick was replaced.
+
+Two checks, both clean. No card already emitted or hand-translated into
+EITHER anchor's live pool is multiplayer-only -- the shortfall was in the
+denominator only, never in the pool. And the inverse flag exists
+(`SingleplayerOnly`, on Well Laid Plans) and is deliberately NOT filtered: it
+is in the game we measure.
+
+This also retires the CO-OP ONLY reasons written earlier today, which argued
+from `SneakyPower`/`FlankingPower` guard clauses. The argument was right and
+the evidence was second-hand: the game says it at the card level. Both
+categories now coexist, because a power can be co-op-only on a card that is
+not, and only the card-level flag may touch the denominator.
+
+The gate did not move: `uniq` is computed over the pool, so the sixth reading
+is the fifth reading. That is worth saying out loud after a day in which this
+number moved five times -- **this change moves the coverage story and nothing
+about the measurement.**
+
+### 12.3 Triage of the 27: what each one is actually waiting on
+
+Read from the DLL, not from the exclusion strings, which are the translator's
+generic complaints and understate what is possible now that passes 1-3 have
+landed. Two things surprised me, both in the direction of less work:
+
+**Bucket A -- translation plus at most one new amount token (9).** Prepared
+and Calculated Gamble need no new mechanic at all; the extractor simply does
+not map `CardCmd.Discard` + `CardSelectCmd.FromHandForDiscard`, and the ops
+have existed since Kokomi. Expertise wants a hand-size stop condition on
+`draw_while`, which today stops on card TYPE. Dodge And Roll needs the block
+it ACTUALLY gained (`block_gains_this_card` is already tracked). Escape Plan
+needs a condition on the drawn card's type; Malaise is X-cost arithmetic we
+already do; Bouncing Flask needs a repeat that re-rolls its random target;
+Echoing Slash a repeat-while-it-killed; Expose an enemy block-strip.
+
+  Expose carries one thing that must be stated on the row rather than
+  silently skipped: it also removes ArtifactPower. tier0 models no Artifact,
+  so in this world that clause is VACUOUS, and skipping a clause that could
+  never fire is exact. Skipping it quietly is how a row starts lying.
+
+**Bucket B -- one genuinely new engine concept each, no ruling (16).**
+Accuracy, Infinite Blades, Phantom Blades, Tracking and Wraith Form are five
+more powers of exactly the kind pass 1 did nineteen times. Shadow Step needs a
+damage-doubling power; Bullet Time a free-hand-this-turn plus NoDraw; Up My
+Sleeve and Pinpoint two shapes of self-cost reduction (Pinpoint's is
+retroactive, via `AfterCardEnteredCombat`); Hidden Daggers and Storm Of Steel
+need created tokens that arrive upgraded; Nightmare needs a power that
+remembers a chosen card and clones it next turn; Knife Trap auto-plays every
+Shiv in the exhaust pile -- which `resolve_free_play` made possible only
+today.
+
+  **Grand Finale is in this bucket, not the ruling bucket, and I expected
+  otherwise.** It is unplayable unless the draw pile is empty, and I assumed
+  conditional playability would be a DSL question for [USER]. It is not:
+  `Card.requires` already exists with exactly this shape (`burst_energy_full`)
+  and `pilot/policy.py` already filters on `card_playable`. It needs one more
+  `requires` value and no new concept.
+
+  **Fan Of Knives stays last on purpose.** It makes every Shiv hit all
+  enemies, so it cannot land without changing the already-translated Shiv row
+  in the same pass -- which is precisely what its `UNIMPLEMENTED` entry says.
+
+**Bucket C -- genuinely needs a ruling (2).**
+
+  1. **The Hunt.** On a fatal kill it grants an extra CARD REWARD. That is a
+     combat effect reaching into the run layer, which the tier0/tier0.5 split
+     forbids by design. Either the split gets a documented exception or the
+     card stays out; both are defensible and neither is mine to choose.
+  2. **Blade Of Ink.** It creates Shivs enchanted with `Inky`. Enchantments
+     are a subsystem tier0 does not have in any form. This is a SCOPE
+     question -- does the anchor want an enchantment layer at all? -- not a
+     translation one, and it is much larger than one card.
+
+So the honest answer to "what do you need": for 25 of the 27, nothing. For
+The Hunt and Blade Of Ink, one ruling each.

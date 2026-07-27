@@ -92,7 +92,17 @@ any single row of it would be a lie by omission:
   OFFICIAL:silent  56/88 (64%)  vocab 29  top 39%  uniq 73%  maxclu 4  FAIL
   OFFICIAL:silent  59/88 (67%)  vocab 30  top 40%  uniq 72%  maxclu 4  FAIL
   (the last row's `cards` column reads 60: the Shiv TOKEN is a pool row and
-   is not one of the 88 draftable cards)
+   is not one of the draftable cards)
+
+  The /88 in those rows is the denominator AS IT WAS READ AT THE TIME, kept
+  unedited because a re-based history is not a history. It is now 86: the
+  extractor reads CardMultiplayerConstraint and drops the two cards the game
+  itself marks MultiplayerOnly (Flanking, Sneaky), which no DSL work could
+  ever make appear in a single-player run. Ironclad's is 85, not 87, for the
+  same reason (Demonic Shield, Tank). The last row therefore reads 59/86
+  (69%) today, and NONE of the gate columns moved when the denominator did --
+  distinctness is computed over the pool, so this changes the coverage story
+  and nothing about the measurement.
 
   * Two conclusions were drawn and then overturned by more coverage. At
     22-27 cards: "our pools post 56-62%, Ironclad posts 86%, so HE is the

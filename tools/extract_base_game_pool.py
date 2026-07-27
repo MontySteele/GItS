@@ -96,6 +96,10 @@ CMD = re.compile(r"\b(\w+Cmd)\.(\w+)\(")
 #   HoverTipFactory.FromPower<XPower>()    -- referenced-but-not-applied
 # so match any `<...Power>` type argument rather than one call shape.
 POWER = re.compile(r"<(\w+Power)>")
+# The game's own declaration that a card exists only in co-op. Read at the
+# CARD level, so it holds even for a card whose powers look implementable.
+MP_ONLY = re.compile(
+    r"MultiplayerConstraint\s*=>\s*CardMultiplayerConstraint\.MultiplayerOnly")
 # `Shiv.CreateInHand(...)` / `combatState.CreateCard<Shiv>(...)` -- the two
 # spellings a pool card uses to conjure a TOKEN card that is not itself in
 # the pool. Matched on the shape, never on a name.
@@ -1221,14 +1225,38 @@ SHEET_HEADER = """\
 # the hyphen matches this file and never matches `_pool.yaml`.)
 #
 # emitted {n_ok} / {n_all}   excluded {n_bad} / {n_all}
+#
+# {n_all} is the SINGLE-PLAYER universe: the pool's printed card count minus
+# the {n_mp} the game marks CardMultiplayerConstraint.MultiplayerOnly. Those
+# are listed under `unavailable:` in document 2 and are not a coverage debt --
+# no DSL work can ever make them appear in the runs this sheet feeds.
 """
 
 
 def emit_sheet(cards: list[dict], sources: dict[str, str],
                character: str) -> tuple[int, int]:
     prefix = id_prefix(character)
-    rows, upgrades, excluded = [], {}, {}
+    rows, upgrades, excluded, unavailable = [], {}, {}, {}
     for card in cards:
+        # NOT IN THE GAME WE MEASURE. A card the base game itself marks
+        # MultiplayerOnly is never offered in a single-player run, so counting
+        # it in the denominator understates DSL coverage against a card that
+        # could not appear even if the DSL held it perfectly. This is a
+        # STRUCTURAL read of the game's own constraint, not a judgement about
+        # the card: the previous CO-OP ONLY exclusions were argued from a
+        # power's guard clauses, and this flag says the same thing at the
+        # card level, out loud. (Silent 2026-07-27: Flanking and Sneaky. The
+        # inverse flag exists too -- Well Laid Plans is SingleplayerOnly --
+        # and is deliberately NOT filtered: it is in the game we measure.)
+        if MP_ONLY.search(sources[card["name"]]):
+            unavailable[prefix + _snake(card["name"])] = {
+                "name": _display(card["name"]),
+                "rarity": card["rarity"].lower(),
+                "reason": "CardMultiplayerConstraint.MultiplayerOnly -- the "
+                          "base game never offers this card in a "
+                          "single-player run, so it is outside the universe "
+                          "this sheet measures coverage against"}
+            continue
         try:
             row, delta = _sheet_row(card, sources[card["name"]], prefix)
         except _Untranslatable as exc:
@@ -1297,9 +1325,10 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
 
     OUT_DIR.mkdir(exist_ok=True)
     sheet = OUT_DIR / f"{character.lower()}-cards.yaml"
+    n_sp = len(cards) - len(unavailable)
     out = [SHEET_HEADER.format(char=character, char_lc=character.lower(),
-                               n_ok=len(rows),
-                               n_bad=len(excluded), n_all=len(cards))]
+                               n_ok=len(rows), n_bad=len(excluded),
+                               n_all=n_sp, n_mp=len(unavailable))]
     for row in rows:
         out.append(f"- {_flow(row)}")
     out.append(
@@ -1319,6 +1348,20 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
         "already live.)\nexcluded:")
     for cid, info in sorted(excluded.items()):
         out.append(f"  {cid}: {_flow(info)}")
+    if unavailable:
+        out.append(
+            "\n# NOT A COVERAGE DEBT. These are printed in the character's "
+            "card pool but\n"
+            "# the game marks them MultiplayerOnly, so a single-player run "
+            "never offers\n"
+            "# them. They are OUT of the emitted/excluded denominator above. "
+            "Recorded\n"
+            "# rather than dropped so that nobody re-derives them from the "
+            "pool listing\n"
+            "# and reports the sheet as missing cards it deliberately does "
+            "not want.\nunavailable:")
+        for cid, info in sorted(unavailable.items()):
+            out.append(f"  {cid}: {_flow(info)}")
     sheet.write_text("\n".join(out) + "\n")
 
     # R20: upgrades live in their OWN sheet, never inline on a card row.
@@ -1336,7 +1379,11 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
     ups.write_text("\n".join(lines) + "\n")
 
     print(f"\n=== sheet: {len(rows)} emitted / {len(excluded)} excluded "
-          f"of {len(cards)} ===")
+          f"of {n_sp} ===")
+    if unavailable:
+        print(f"  ({len(unavailable)} of the pool's {len(cards)} printed "
+              "cards are MultiplayerOnly and are not counted: "
+              f"{', '.join(i['name'] for i in unavailable.values())})")
     by_reason = Counter(i["reason"] for i in excluded.values())
     for reason, k in by_reason.most_common():
         print(f"  {k:>3}x  {reason}")
