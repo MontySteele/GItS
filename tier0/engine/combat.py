@@ -444,7 +444,8 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
         state.emit("enemy_sleep", enemy=enemy.name)
         return
     enemy.block = 0
-    powers.on_turn_start(state, enemy)
+    powers.on_turn_start(state, enemy)          # site A: metallicize, dot
+    refpowers.enemy_side_turn_start(state, enemy)    # site F: poison
     if not enemy.alive:
         return
     # Crab Rage (§10.2, gated on the spec field -- inert everywhere else):

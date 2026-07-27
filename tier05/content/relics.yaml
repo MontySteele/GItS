@@ -287,7 +287,18 @@ skip:
     missing: "Thorns power (retaliation damage) is absent from tier0"
   oddly_smooth_stone:
     name: "Oddly Smooth Stone"
-    missing: "Dexterity power (block scaling) is absent from tier0"
+    # REASON UPDATED 2026-07-27 (Silent anchor C-3), on juzu_bracelet's
+    # precedent: the old text -- "Dexterity power (block scaling) is absent
+    # from tier0" -- went stale the moment Dexterity landed in
+    # powers.modify_block_gained, and a stale skip reason is the quiet lie
+    # this list exists to prevent. The MECHANIC gap is closed and the hook it
+    # would need (combat_start_power) already exists. What remains is not a
+    # gap at all: un-skipping arms a knob that changes the tier 0.5
+    # measurement world, and that is a [USER] ruling, not a side effect of
+    # a parity pass. It stays skipped until ruled -- see the Silent anchor
+    # sprint log's open asks.
+    missing: "Dexterity now exists (2026-07-27); un-skipping is a [USER]
+      ruling because it arms a relic and moves the tier 0.5 world"
   juzu_bracelet:
     name: "Juzu Bracelet"
     # REASON UPDATED (§11.2). The old text -- "no ?-room / non-combat events

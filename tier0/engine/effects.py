@@ -941,16 +941,35 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
     # the granted Burst to discard, it circulated as loot on reshuffle,
     # and grant_charged_kit -- which dedups against HAND only -- appended
     # the same object a second time. Review-workflow catch, repro'd.
+    #
+    # `select: chosen` is the base-game "Discard N cards" shape (Silent's
+    # Survivor is in her STARTING DECK, so real_silent cannot be built
+    # without it). Same random/chosen split `_op_exhaust_from` already
+    # makes, through the same `_worst_card` pilot surface, so a chosen
+    # discard is not a second heuristic to keep honest. Random stays the
+    # DEFAULT: every existing card that discards does so at random, and a
+    # silent flip would re-price them.
+    chosen = fx.get("select", "random") == "chosen"
     for _ in range(fx.get("amount", 1)):
         pool = [c for c in state.player.hand if not c.kit_card]
         if not pool:
             return
-        victim = state.rng.choice(pool)
+        victim = _worst_card(pool) if chosen else state.rng.choice(pool)
         state.player.hand.remove(victim)
         state.player.discard_pile.append(victim)
-        state.emit("discard", card=victim.id)
-        # Sly (Kokomi Assist lane, kickoff §2.3): fires ONLY on card-effect
-        # discards from hand — this op is the one trigger site. The
+        if chosen:
+            state.emit("discard", card=victim.id, chosen=True)
+        else:
+            state.emit("discard", card=victim.id)
+        # Sly (KOKOMI'S Sly, Assist lane, kickoff §2.3 — NOT the base-game
+        # Silent keyword `CardKeyword.Sly`, which is "if discarded before
+        # end of turn, play it for free" and is a DIFFERENT mechanic that
+        # tier0 does not have; the extractor EXCLUDES cards carrying it.
+        # Two mechanics, one word, and the collision is now load-bearing
+        # in both directions — see docs/silent-anchor-kickoff §6 and
+        # state.Card.sly): fires ONLY on card-effect discards from hand —
+        # this op is the one trigger site. A CHOSEN discard is still a
+        # card-effect discard, so it triggers too. The
         # end-of-turn hand flush is NOT Sly (a silent turn pays nothing —
         # the activity-gating law), and draw-pile discards (scry_discard)
         # are not either; discard_for_sparks is Klee's own verb and no

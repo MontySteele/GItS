@@ -336,6 +336,78 @@ def damage_player_unblockable(state: CombatState, amount: int,
                        powered_attack=False)
 
 
+def poison_tick(state: CombatState, fighter: Fighter) -> None:
+    """PoisonPower.AfterSideTurnStart, verified against the decompiled power.
+
+    The behaviour, from the source rather than from memory or the wiki:
+
+      * `CreatureCmd.Damage(Owner, Amount, Unblockable | Unpowered)` -- the
+        amount is the CURRENT stack, it bypasses Block entirely, and it is
+        Unpowered, so neither the poisoner's Strength nor the victim's
+        Vulnerable scales it.
+      * then `PowerCmd.Decrement(this)` -- ONE stack, and ONLY `if
+        (base.Owner.IsAlive)`. A poison that kills does not decrement, which
+        matters for nothing today and is free to keep exact.
+      * `TriggerCount = Math.Min(Amount, 1 + sum of opponents' Accelerant)`.
+        Accelerant is not implemented (its card stays excluded), so the loop
+        runs exactly once while Amount >= 1. The min() is transcribed anyway,
+        because the day Accelerant lands this function must already be the
+        thing it modifies, not a thing that has to be rediscovered.
+      * StackType.Counter -- applications add, and `apply_power` already
+        does that.
+
+    WHY THIS IS NOT `dot`. tier0's generic `dot` (reactions.py,
+    Electro-Charged) ticks in `powers.on_turn_start`, which is StS2 site A:
+    BEFORE the energy reset and BEFORE the draw. Real poison fires at site F,
+    AFTER the draw. Retiming `dot` to match would have moved a mechanic Klee
+    and Kokomi are already balanced around -- their numbers are load-bearing
+    and the poison parity work has no claim on them. So the two coexist:
+    same shape, different clocks, and neither pretends to be the other.
+    """
+    amount = fighter.powers.get("poison", 0)
+    if amount <= 0:
+        return
+    accelerant = 0                       # AccelerantPower: not implemented
+    for _ in range(min(amount, 1 + accelerant)):
+        amount = fighter.powers.get("poison", 0)
+        if amount <= 0:
+            return
+        if fighter is state.player:
+            # Unblockable, and the self-damage path already bypasses Encore
+            # ("a priced cost stays paid"); poison is not a priced cost, but
+            # Encore is Furina's and no Furina card applies poison, so the
+            # branch is unreachable rather than decided here.
+            damage_player_unblockable(state, amount, reason="poison")
+        else:
+            # NOT `unpowered_damage`: that one lets Block absorb ("Unpowered
+            # is not Unblockable") and poison is BOTH. `kills_this_card` is
+            # deliberately not touched either -- it feeds the `killed_target`
+            # predicate, and a turn-start tick has no card that killed
+            # anything. It is reset at every card resolution, so incrementing
+            # it here would be harmless today and wrong the moment that
+            # ordering changes.
+            effective = min(amount, max(0, fighter.hp))
+            fighter.hp -= amount
+            state.emit("damage", target=fighter.name, amount=effective,
+                       blocked=0, base=amount, source="poison")
+        state.emit("poison_tick", amount=amount,
+                   target=getattr(fighter, "name", "player"))
+        if fighter.alive:                # PowerCmd.Decrement, alive-gated
+            fighter.powers["poison"] = fighter.powers.get("poison", 0) - 1
+
+
+def enemy_side_turn_start(state: CombatState, enemy: Enemy) -> None:
+    """StS2 site F for the ENEMY side (AfterSideTurnStart).
+
+    The player's site F is `player_turn_start_late`, which is separated from
+    site A by the energy reset and the hand draw. An enemy does neither, so
+    for enemies the two sites are adjacent -- but they are still two sites,
+    and poison must land on the later one for the same reason it does for
+    the player: `dot` owns the early one and is not being retimed.
+    """
+    poison_tick(state, enemy)
+
+
 def on_damage_received(state: CombatState, target: Fighter, unblocked: int,
                        dealer: Optional[Fighter],
                        powered_attack: bool) -> None:
@@ -750,6 +822,9 @@ def player_turn_start_late(state: CombatState) -> None:
     # off-by-one on every stack for the rest of the fight.
     if p.powers.get("plating", 0) and state.turn != 1:
         p.powers["plating"] -= 1
+
+    # Poison, also site F. It can kill; the caller re-checks p.alive.
+    poison_tick(state, p)
 
 
 def before_side_turn_end_early(state: CombatState) -> None:

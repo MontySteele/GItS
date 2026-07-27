@@ -11,6 +11,7 @@ from types import SimpleNamespace
 import pytest
 
 from tier0.content import loader
+from tier0.engine.state import Card
 from tools import build_official_sheet as build
 from tools import extract_base_game_pool as extract
 
@@ -132,6 +133,57 @@ def test_id_prefix_refuses_a_collision_with_a_pinned_prefix(monkeypatch):
 def test_emitted_upgrade_delta_supports_energy_and_hit_count():
     assert extract._delta_key({"op": "energy"}, "amount") == "energy"
     assert extract._delta_key({"op": "damage"}, "times") == "times"
+
+
+def test_declared_keywords_reads_the_single_element_list_shape():
+    """ilspy renders a one-keyword list as a compiler-generated type, NOT a
+    `{ ... }` initialiser. The brace-shaped reader found nothing on exactly
+    the cards that carry one keyword, which is most of them."""
+    single = ("public override IEnumerable<CardKeyword> CanonicalKeywords => "
+              "new global::_003C_003Ez__ReadOnlySingleElementList"
+              "<CardKeyword>(CardKeyword.Sly);")
+    assert extract._declared_keywords(single) == ["Sly"]
+    braces = ("public override IEnumerable<CardKeyword> CanonicalKeywords => "
+              "new HashSet<CardKeyword> { CardKeyword.Exhaust, "
+              "CardKeyword.Innate };")
+    assert extract._declared_keywords(braces) == ["Exhaust", "Innate"]
+    assert extract._declared_keywords("class Plain { }") == []
+
+
+def test_declared_keywords_refuses_an_unreadable_declaration():
+    """An unparsed keyword line looks exactly like an empty one. Guessing
+    empty is how five Sly cards were emitted as vanilla rows."""
+    with pytest.raises(extract._Untranslatable,
+                       match="unrecognised CanonicalKeywords"):
+        extract._declared_keywords(
+            "IEnumerable<CardKeyword> CanonicalKeywords { get { yield break }")
+
+
+def test_a_keyword_with_no_tier0_field_excludes_the_card():
+    """Keywords are RULES ON THE CARD. tier0 has fields for three of them;
+    a fourth must take the card out of the sheet, not ride along invisibly."""
+    assert set(extract.CARD_KEYWORDS) == {"Exhaust", "Innate", "Retain"}
+    assert set(extract.CARD_KEYWORDS.values()) <= {
+        f.name for f in dataclasses.fields(Card)}
+    body = """
+class SyntheticCard
+{
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new global::_003C_003Ez__ReadOnlySingleElementList<CardKeyword>(
+            CardKeyword.%s);
+
+    protected override async Task OnPlay(PlayerChoiceContext c, CardPlay p)
+    {
+        await CreatureCmd.GainBlock(base.Owner.Creature, 5m);
+    }
+}
+"""
+    card = {"name": "SyntheticCard", "cost": 1, "type": "Skill",
+            "rarity": "Common"}
+    row, _ = extract._sheet_row(card, body % "Retain", "xx_")
+    assert row["retain"] is True
+    with pytest.raises(extract._Untranslatable, match="CardKeyword.Sly"):
+        extract._sheet_row(card, body % "Sly", "xx_")
 
 
 def test_canonical_tags_reads_only_the_declared_tag_property():

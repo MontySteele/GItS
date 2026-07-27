@@ -349,7 +349,12 @@ SUPPORTED_POWERS = {"StrengthPower": "strength",
                     "ManglePower": "temp_strength_down",
                     "SetupStrikePower": "temp_strength",
                     "RupturePower": "rupture",
-                    "UnmovablePower": "unmovable"}
+                    "UnmovablePower": "unmovable",
+                    # verified 2026-07-27 (Silent anchor, adversarial pass
+                    # against PoisonPower / DexterityPower; pinned in
+                    # tier0/tests/test_si_effects.py)
+                    "PoisonPower": "poison",
+                    "DexterityPower": "dexterity"}
 
 
 def _power_gap(power: str) -> str:
@@ -426,7 +431,9 @@ UPGRADE_POWER_KEY = {"strength": "power_amount",
                      "temp_strength_down": "power_amount",
                      "temp_strength": "power_amount",
                      "rupture": "power_amount",
-                     "unmovable": "power_amount"}
+                     "unmovable": "power_amount",
+                     "poison": "power_amount",
+                     "dexterity": "power_amount"}
 
 
 def _num(text: str) -> int | float:
@@ -762,10 +769,13 @@ def _sheet_row(card: dict, src: str, prefix: str) -> tuple[dict, dict]:
     tags = _canonical_tags(src)
     if tags:
         row["tags"] = tags
-    # Self-exhaust is a printed keyword; a card that exhausts SOMETHING ELSE
-    # only mentions Exhaust in a hover tip, and must not be marked.
-    if re.search(r"CanonicalKeywords[^;]*CardKeyword\.Exhaust", src, re.S):
-        row["exhaust"] = True
+    for keyword in _declared_keywords(src):
+        field = CARD_KEYWORDS.get(keyword)
+        if field is None:
+            raise _Untranslatable(
+                f"CardKeyword.{keyword} has no tier0 Card field "
+                "(the card's printed rule would be silently dropped)")
+        row[field] = True
     return row, _upgrade_delta(src, fed)
 
 
@@ -956,6 +966,37 @@ def _supplement_upgrade_delta(row: dict, src: str) -> dict:
     if unexpressible:
         delta["_unexpressible"] = unexpressible
     return delta
+
+
+# The printed keyword line. tier0's Card carries a field for three of them
+# (state.py: exhaust, innate, retain); anything else EXCLUDES the card.
+#
+# This table exists because the translator used to look for exactly one
+# keyword -- Exhaust -- and drop the rest without a word (found 2026-07-27,
+# Silent's first extraction: 7 of 15 emitted rows had lost a printed rule,
+# 5 Sly and 2 Innate). Ironclad never exposed it because Exhaust is the only
+# keyword his pool declares, so a whole class of silent approximation sat
+# behind a single-character pool for a month. A keyword is a RULE ON THE
+# CARD; dropping one is exactly the "wrong number wearing the right name"
+# this tool refuses to produce.
+CARD_KEYWORDS = {"Exhaust": "exhaust", "Innate": "innate", "Retain": "retain"}
+# ilspy renders a one-element list as a compiler-generated type rather than a
+# `{ ... }` initialiser, so match the whole declaration statement instead of a
+# brace block. Declaration-scoped on purpose: a card that exhausts SOMETHING
+# ELSE mentions Exhaust only in a hover tip and must not be marked.
+KEYWORD_DECL = re.compile(r"CanonicalKeywords\s*=>(.*?);", re.S)
+
+
+def _declared_keywords(src: str) -> list[str]:
+    """Keywords printed on the card. Raises if the shape is unreadable --
+    an unparsed keyword line is indistinguishable from an empty one, and
+    guessing empty is how the Sly cards got emitted as vanilla rows."""
+    if "CanonicalKeywords" not in src:
+        return []
+    m = KEYWORD_DECL.search(src)
+    if not m:
+        raise _Untranslatable("unrecognised CanonicalKeywords declaration")
+    return sorted(set(re.findall(r"CardKeyword\.(\w+)", m.group(1))))
 
 
 def _snake(name: str) -> str:

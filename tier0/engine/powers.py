@@ -68,15 +68,35 @@ def modify_damage_taken(defender: Fighter, dmg: float,
 
 
 def modify_block_gained(fighter: Fighter, amount: int) -> int:
-    """Frail: the affected creature gains -25% block (StS Frail, floored).
+    """Dexterity (additive), then Frail (-25%, floored).
 
     The single funnel every card-block site routes through so the debuff
     actually bites -- StS applies Frail to card block via
     AbstractCard.applyPowersToBlock, so passive/power block (Metallicize,
     Crystallize, Solar Isotoma) is deliberately NOT reduced here.
+
+    DEXTERITY LIVES HERE, NOT IN refpowers.gain_block, and the sprint plan
+    that said otherwise was wrong on the source. DexterityPower overrides
+    `ModifyBlockAdditive` guarded by `props.IsPoweredCardOrMonsterMoveBlock()`
+    -- the SAME predicate FrailPower's multiplicative hook uses. tier0 splits
+    block along exactly that line already: card block reaches this funnel,
+    while refpowers.gain_block carries the Unpowered power-block that Frail
+    is (correctly) not allowed to touch. Hanging Dexterity off gain_block
+    would have applied it to the block it must NOT scale and missed every
+    block it must.
+
+    ORDER IS THE WHOLE INTERACTION: additive before multiplicative, because
+    the engine runs ModifyBlockAdditive first -- (base + dex) * 0.75, not
+    base * 0.75 + dex. On a 5-block card with 3 Dexterity and Frail that is
+    6 versus 6 (they agree), and on 11 block it is 10 versus 11 (they do
+    not). Dexterity is AllowNegative, so the sum is floored at 0 before
+    Frail rather than letting a negative stack invert the multiplier.
     """
     if amount <= 0:
         return amount
+    dex = fighter.powers.get("dexterity", 0)
+    if dex:
+        amount = max(0, amount + dex)
     if fighter.powers.get("frail", 0) > 0:
         return int(amount * C.FRAIL_BLOCK_MULT)   # StS floors block*0.75
     return amount
