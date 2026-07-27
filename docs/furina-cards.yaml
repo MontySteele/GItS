@@ -318,12 +318,13 @@
    # herself AND watches the stage: buffer 2 plus a scry (look at the top card, shed it if it is wrong for
    # the scene). Breaks the gain_encore clone triplet; the 0-cost slot earns its U promotion with a decide
    # point. Was: gain 2 Encore flat (Sparkly Treasure parity). PROPOSED.
-- {id: matinee_performance, name: "Matinée Performance", register: salon, cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling], archetypes: [salon, generic], role: payoff,
+- {id: matinee_performance, name: "Matinée Performance", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [frontload, scaling], archetypes: [salon, generic], role: payoff, tags: [skill_tag],
    effects: [{op: damage, amount: 5, target: enemy}, {op: damage, amount: 2, target: enemy, times: salon_members}]}
    # CURTAIN CALL C (R85): the salon-count scaler (§7) — the matinée runs as long as the cast list: 5, plus
    # a 2-damage bow per member on stage (times: salon_members, the new power-stack CalculatedVar read).
-   # Multi-hit, so each member hit cashes auras/Weak independently. The draw cantrip retired with the
-   # rewrite (a payoff, not glue). Plain attack since Track B. PROPOSED.
+   # RETYPE REVERTED by the pre-registered shrink clause (Track B / prediction 7): as a damaging SKILL every
+   # member hit APPLIES hydro — the matinée seeds the stage it scales with. The draw cantrip stays retired
+   # (a payoff, not glue). PROPOSED.
 - {id: standing_room_only, name: "The House Rises", register: archon, cost: 1, type: attack, rarity: uncommon, solve: [frontload, utility], archetypes: [fanfare, generic], role: payoff,
    effects: [{op: damage, amount: 5, target: all_enemies, bonus_formula: 1_per_4_fanfare}]}
    # CURTAIN CALL C (R85): the archon-register fanfare AoE payoff (§7; rn). The whole nation on its feet:
@@ -440,12 +441,14 @@
    # applause itself is her wall: 6, +1 per 2 Fanfare, the steepest defensive read in the pool (high_tide's
    # survival-axis mirror, 21 at the 30 cap). No longer dramatic_entrance's twin: the rate is doubled and
    # the slot is a payoff, not glue. F-B1's rider grammar unchanged. PROPOSED.
-- {id: flood_of_emotion, name: "Flood of Emotion", register: archon, cost: 1, type: attack, rarity: rare, solve: [frontload], archetypes: [fanfare], role: payoff,
+- {id: flood_of_emotion, name: "Flood of Emotion", register: archon, cost: 1, type: skill, rarity: rare, solve: [frontload], archetypes: [fanfare], role: payoff, tags: [skill_tag],
    effects: [{op: damage, amount: 14, target: enemy}, {op: conditional, if: fanfare_at_least_20, then: [{op: damage, amount: 14, target: enemy}]}]}
    # CURTAIN CALL C (R85): the fanfare-THRESHOLD payoff rewrite (§7), at rare where thresholds pay for their
    # gate (universal_revelry's grammar). At a roaring house the flood strikes TWICE — 14, or 28 past the bar.
    # The smooth read leaves this card (crescendo/high_tide own that shape); the family loses its third twin.
-   # Retyped to a plain attack at Track B (application deleted). PROPOSED.
+   # RETYPE REVERTED by the pre-registered shrink clause (Track B / the uptime prediction): cell 3
+   # breached the hydro-uptime bound (fanfare arm -26% rel.), so the flood stays a damaging SKILL — both
+   # strikes apply. (lint-ok: telemetry) PROPOSED.
 - {id: showstopper, name: "Showstopper", register: archon, cost: 1, type: attack, rarity: rare, solve: [frontload, sustain], archetypes: [fanfare], role: payoff,
    effects: [{op: damage, amount: 12, target: enemy}, {op: conditional, if: killed_target, then: [{op: gain_encore, amount: 6}, {op: draw, amount: 2}]}]}
    # CURTAIN CALL C (R85): the RATIFIED 4th rare (chat 2026-07-27), differentiated from house_call (§7) by

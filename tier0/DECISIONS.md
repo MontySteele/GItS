@@ -2702,9 +2702,14 @@ quick_change is the 5th power (florid_cadenza keeps its F-B1 threshold
 design); showstopper is the 4th rare.
 
 **Executed** (docs/curtain-call-sprint-log-2026-07-27.md, the log of
-record; three commits, Tracks A / B / C+E). The reconciled move set lands
-EXACTLY on §4: Attack 17 / Skill 46 / Power 15, C 22 / U 32 / R 19 at
-frozen pool 78. Register census: every card tagged, nine renamed (ids
+record; Tracks A / B / C+E plus the shrink amendment). The reconciled move
+set landed EXACTLY on §4 (Attack 17 / Skill 46 / Power 15, C 22 / U 32 /
+R 19 at frozen pool 78) -- and then §4's own pre-registered shrink clause
+fired on the cell-3 hydro-uptime breach, reverting the two authored
+retypes that carried the most application (flood_of_emotion,
+matinee_performance, rewrites and rarity moves intact). FINAL shape:
+Attack 15 / Skill 48 / Power 15, rarities as ratified -- the type
+deviation is logged with the clause as its authority. Register census: every card tagged, nine renamed (ids
 stable), lint (tools/lint_furina_registers) at zero violations with the
 Focalors cap holding at exactly {the_sea_is_my_stage, reginas_mercy}.
 `register` joins the SHARED card schema (state.py) -- Columbina and every

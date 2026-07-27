@@ -217,5 +217,29 @@ now bites Furina regressions at full strength.
   the lint when a second character adopts registers. Nothing in the
   engine or drafter may ever read the field (cell 1 is the pin).
 
-(§6 cell 3 + seed-12 rider and §8 graded predictions are appended when the
-cell completes.)
+### Cell 3 — Tracks A+B+C, first read (seed 11, 600): the shrink clause FIRES
+
+```
+arm         win               act-1            uptime           payoffs/deck
+salon       17.2 -> 14.5      62.8 -> 62.2     59.6 -> 54.9%    1.22 -> 0.60
+spotlight    4.2 ->  2.8      68.5 -> 63.2     40.0 -> 34.0%    0.88 -> 0.43
+fanfare      2.8 ->  2.0      57.5 -> 48.2     39.8 -> 29.3%    2.12 -> 1.23
+```
+
+House/anchor rows byte-identical to cell 0 for the third time. Salon and
+spotlight land inside their predicted bands. Fanfare recovers half of cell
+2's drop (1.5 → 2.0) but stays under baseline — and the hydro-uptime bound
+BREACHES outside salon (fanfare −26% rel., spotlight −15%, salon −7.9%,
+pooled −15%). The pre-registered Track B contingency fires exactly as
+written: **the retype list shrinks.** The two AUTHORED retypes carrying
+the most deleted application revert to damaging skills with their rewrites
+and rarity moves intact — flood_of_emotion (both threshold strikes apply
+again) and matinee_performance (every member-scaled hit applies: the
+matinée seeds the stage it reads). The LISTED retype (standing_room_only)
+and usher_the_waves stay attacks. Final type shape: **Attack 15 / Skill 48
+/ Power 15** — a logged deviation from §4's Attack 17, on the authority of
+§4's own shrink clause. Rarity shape unchanged (22/32/19); gate metrics
+unchanged (76 / 0.15 / 3 / 34).
+
+(§6 cell 3′ — the post-shrink re-run + seed-12 rider — and §8 graded
+predictions are appended when the run completes.)

@@ -64,8 +64,11 @@ def test_pool_composition():
     by_type = {}
     for c in cards:
         by_type.setdefault(c.type, []).append(c)
-    assert len(by_type["attack"]) == 17          # §4: official floor deviation LOGGED (A1-dreadful support)
-    assert len(by_type["skill"]) == 46           # skill-heavy pole+, the cadence reason
+    # Attack landed at 15, not §4's 17: the pre-registered Track B shrink
+    # clause fired on the cell-3 hydro-uptime breach and reverted the
+    # flood_of_emotion + matinee_performance retypes (sprint log §6 cell 3).
+    assert len(by_type["attack"]) == 15
+    assert len(by_type["skill"]) == 48           # skill-heavy pole+, the cadence reason
     assert len(by_type["power"]) == 15           # official quota floor (19-21% roster-wide)
 
 
