@@ -426,6 +426,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     state.spotlighted_cards_this_turn = 0        # Ovation / reserve cap
     state.spotlight_moved_this_turn = False      # selector-payoff window
     state.prevention_used_this_turn = False      # Kokomi ward latch (§2.4)
+    state.encore_spend_draws_this_turn = 0       # Gallery Stirs latch (R85)
     state.cards_created_this_turn = 0            # engine_closure window
 
     for enemy in list(state.living_enemies):     # bombs from last turn go off

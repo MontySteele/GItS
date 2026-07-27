@@ -20,8 +20,9 @@ from tools import card_distinctness_report as cdr
 # removal so this list can only shrink.
 KNOWN_FAILING = {
     ("klee", "uniq"),        # 61% -- signature repetition, one defect
-    ("furina", "uniq"),      # 62%
-    ("furina", "neardup"),   # 0.94/card -- the 12-family + F-B1 cluster
+    # furina uniq/neardup CLEARED by the Curtain Call sweep (R85,
+    # 2026-07-27): 62->76 / 0.94->0.15 per card, inside the official band.
+    # The Track-B maxclu transient (6) resolved in the same sweep (3).
     ("kokomi", "uniq"),      # 56% -- breadth
     ("kokomi", "maxclu"),    # 7 -- the 7x block cluster
 }

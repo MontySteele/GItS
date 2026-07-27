@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -32,19 +31,10 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Furina.Generated;
 
-public sealed class UsherTheWaves : CustomCardModel, IElementalCard, ICharacterCard, ISkillTagCard
+public sealed class UsherTheWaves : CustomCardModel, ICharacterCard
 {
-    /// <summary>Sheet cadence: damaging Skills, Burst-tagged cards, and skill-tagged cards apply Hydro.</summary>
-    public Element Element => Element.Hydro;
-
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
-
-    public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
-
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("usher_the_waves");
 
@@ -63,7 +53,7 @@ public sealed class UsherTheWaves : CustomCardModel, IElementalCard, ICharacterC
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public UsherTheWaves()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
+        : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 

@@ -8,8 +8,8 @@
   },
   "coverage": {
     "total": 78,
-    "generated": 77,
-    "blocked": 1
+    "generated": 65,
+    "blocked": 13
   },
   "generated": [
     "an_invitation",
@@ -18,10 +18,7 @@
     "blocking_notes",
     "command_performance",
     "commanding_gaze",
-    "courtroom_drama",
     "crashing_waves",
-    "crescendo",
-    "crowd_work",
     "curtain_cue",
     "curtain_up",
     "deep_breath",
@@ -35,10 +32,8 @@
     "endless_waltz",
     "flood_of_emotion",
     "florid_cadenza",
-    "fortissimo_guard",
     "full_ensemble",
     "gentilhomme_usher",
-    "graceful_retreat",
     "grand_gala",
     "grand_salon",
     "guest_list",
@@ -51,12 +46,8 @@
     "macaron_break",
     "mademoiselle_crabaletta",
     "many_waters_melody",
-    "matinee_performance",
     "overflowing_hospitality",
-    "pit_orchestra",
-    "poised_riposte",
     "prima_donna",
-    "quick_change",
     "rain_of_roses",
     "rapturous_applause",
     "regal_bearing",
@@ -75,18 +66,15 @@
     "suffering_for_art",
     "supporting_cast",
     "surintendante_chevalmarin",
-    "swelling_overture",
     "tempo_change",
     "the_final_verdict",
     "the_sea_is_my_stage",
     "thunderous_ovation",
     "top_billing",
-    "torrential_turn",
     "undercurrent",
     "unheard_confession",
     "universal_revelry",
     "usher_the_waves",
-    "warmup_act",
     "waters_embrace",
     "witness_stand"
   ],
@@ -96,11 +84,39 @@
     "guest_neuvillette_tears"
   ],
   "blocked": {
-    "let_the_people_rejoice": "hand-written"
+    "courtroom_drama": "apply_power power 'cross_examination' (no PowerModel in the registry)",
+    "crescendo": "op 'grow_damage'",
+    "crowd_work": "apply_power power 'encore_spend_draw' (no PowerModel in the registry)",
+    "fortissimo_guard": "apply_power power 'salon_deploy_block' (no PowerModel in the registry)",
+    "graceful_retreat": "conditional predicate 'hp_lost_this_turn' (no verified C# read)",
+    "let_the_people_rejoice": "hand-written",
+    "matinee_performance": "amount formula 'salon_members' on a non-X-cost card",
+    "pit_orchestra": "apply_power power 'salon_bow_block' (no PowerModel in the registry)",
+    "poised_riposte": "bonus_formula '1_per_3_encore'",
+    "quick_change": "apply_power power 'first_attack_draw' (no PowerModel in the registry)",
+    "swelling_overture": "conditional predicate 'encore_at_least_8' (no verified C# read)",
+    "torrential_turn": "op 'refresh_all_auras'",
+    "warmup_act": "conditional predicate 'enemy_intends_attack' (no verified C# read)"
   },
   "runtime_clusters": {
     "hand_written": [
       "let_the_people_rejoice"
+    ],
+    "salon": [
+      "fortissimo_guard",
+      "pit_orchestra"
+    ],
+    "shared_emitter_gap": [
+      "courtroom_drama",
+      "crescendo",
+      "crowd_work",
+      "graceful_retreat",
+      "matinee_performance",
+      "poised_riposte",
+      "quick_change",
+      "swelling_overture",
+      "torrential_turn",
+      "warmup_act"
     ]
   },
   "upgrades": {

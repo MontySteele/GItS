@@ -78,7 +78,7 @@ def _upgrade_index() -> dict[str, dict]:
     for sheet in (*UPGRADE_SHEETS, *EXTERNAL_UPGRADE_SHEETS):
         if not sheet.exists():
             continue
-        entries = yaml.safe_load(sheet.read_text()) or {}
+        entries = yaml.safe_load(sheet.read_text(encoding="utf-8")) or {}
         dupes = set(entries) & set(merged)
         if dupes:
             raise ValueError(f"{sheet.name}: duplicate upgrade ids {sorted(dupes)}")

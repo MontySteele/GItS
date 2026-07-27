@@ -83,7 +83,7 @@ def _load_yaml_dir(sub: str, owners: dict[str, str] | None = None
                    ) -> list[dict]:
     docs = []
     for path in sorted((CONTENT_DIR / sub).glob("*.yaml")):
-        data = yaml.safe_load(path.read_text())
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
         rows = data if isinstance(data, list) else [data]
         owner = (owners or {}).get(path.name)
         if owner:
@@ -155,7 +155,7 @@ def _external_cards() -> list[dict]:
         path = GAME_REF_DIR / sheet
         if not path.exists():
             continue          # fresh clone: the reference simply is not here
-        docs = yaml.safe_load(path.read_text()) or []
+        docs = yaml.safe_load(path.read_text(encoding="utf-8")) or []
         for d in docs:
             d["character"] = char
         pool_ids = {d["id"] for d in docs}
@@ -165,7 +165,7 @@ def _external_cards() -> list[dict]:
                 raise ValueError(
                     f"{sheet}: missing required local layer {layer_name}; "
                     "rebuild/restore game_ref before loading real_ironclad")
-            layer = yaml.safe_load(layer_path.read_text()) or []
+            layer = yaml.safe_load(layer_path.read_text(encoding="utf-8")) or []
             layer_ids = {d["id"] for d in layer}
             stale = sorted(layer_ids - pool_ids)
             if stale:
@@ -195,7 +195,7 @@ def _card_index() -> dict[str, Card]:
     for sheet in DOCS_CARD_SHEETS:
         path = DOCS_DIR / sheet
         if path.exists():
-            docs = yaml.safe_load(path.read_text())
+            docs = yaml.safe_load(path.read_text(encoding="utf-8"))
             # R20 (2026-07-20): *-upgrades.yaml sheets are the ONE upgrade
             # convention. Inline `upgrade:` fields are IGNORED by Tier 0,
             # and silently ignoring them risks an inline-only upgrade that
@@ -373,7 +373,7 @@ def _character_index() -> dict[str, dict]:
     # exists() guard is needed; the `char_` prefix keeps this from ever
     # picking up ironclad.json's siblings.
     for path in sorted(GAME_REF_DIR.glob("char_*.yaml")):
-        d = yaml.safe_load(path.read_text())
+        d = yaml.safe_load(path.read_text(encoding="utf-8"))
         index[d["id"]] = d
     return index
 

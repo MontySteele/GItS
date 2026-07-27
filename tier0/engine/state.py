@@ -114,6 +114,13 @@ class Card:
     # an explicit field wins. Cards with no character are invalid Spotlight
     # targets -- the selector greys them out rather than erroring.
     character: Optional[str] = None
+    # Curtain Call sweep (R85): the register a card's NAME speaks in. Shared
+    # schema on purpose -- Columbina and future characters inherit the field;
+    # the value vocabulary is per-character (Furina: salon | archon | private,
+    # enforced by tools/lint_furina_registers.py -- the same-action-same-nation
+    # precedent applied to naming). Purely descriptive: NOTHING in the engine
+    # or the drafter may ever read it (cell-1 byte-identity is the pin).
+    register: Optional[str] = None
     # Kokomi kickoff §2.3: combat-local provenance stamped by the conscript
     # op (the generated_by_guest_star pattern). PROPOSED reading of ruling
     # ask §6.7: a conscripted companion is SELF-sourced for SUPPORT_CARRY /
@@ -458,6 +465,8 @@ class CombatState:
     detonations_total: int = 0            # The Big One formula
     reactions_this_card: int = 0          # reaction_triggered_by_this
     reactions_this_turn: int = 0          # reaction_triggered_this_turn
+    encore_spend_draws_this_turn: int = 0  # encore_spend_draw once-per-turn
+    #                                        latch (Curtain Call, R85)
                                           # (Chevreuse; reset per turn)
     kills_this_card: int = 0              # killed_target
     # Kills that the base game's Fatal gate would honor (Enemy

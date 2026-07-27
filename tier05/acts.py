@@ -108,7 +108,7 @@ def _load(pool_file: str) -> dict:
     """Pool YAML by FILENAME (not act index), so a monkeypatched RUN_ACTS in
     tests can never serve a stale cache entry for a different file."""
     return _validate_pool(
-        pool_file, yaml.safe_load((_CONTENT_DIR / pool_file).read_text()))
+        pool_file, yaml.safe_load((_CONTENT_DIR / pool_file).read_text(encoding="utf-8")))
 
 
 def n_acts() -> int:

@@ -696,6 +696,11 @@ CARD_FIELDS = {
     # Furina resource gates. BaseLib provides affordability and post-effect
     # Fanfare spend; FurinaResourceHooks moves Encore spend pre-effect.
     "encore_cost", "fanfare_cost",
+    # Curtain Call (R85): the register a card's NAME speaks in. Purely
+    # descriptive naming metadata (salon | archon | private on Furina's
+    # sheet) -- nothing mechanical to emit, so it is whitelisted as inert
+    # rather than treated as an unexpressed mechanic.
+    "register",
     # Internal, never authored on a sheet: _sly_view stamps it so the text
     # and body emitters know they are rendering the discard branch. Listed
     # here because that view is now run through blocked_reason like any

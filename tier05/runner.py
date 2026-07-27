@@ -210,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"\n({args.runs} runs in {time.perf_counter() - t0:.1f}s)")
 
     if args.csv:
-        with open(args.csv, "w", newline="") as f:
+        with open(args.csv, "w", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
             w.writerow(["seed", "won", "death_node", "deck_size",
                         "time_to_online", "final_hp"])

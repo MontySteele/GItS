@@ -51,15 +51,25 @@ def test_pool_composition():
     for c in cards:
         by_rarity.setdefault(c.rarity, []).append(c)
     assert len(by_rarity["basic"]) == 5          # template §3.4 allows 4-5
-    # 33 commons: Salon-v2 added standing_room_only (the common Fanfare-tied
-    # AoE, user directive 2026-07-23), and "The Tide Turns" F-B2 added
-    # lasting_impression -- a floor source at COMMON, which is what lets a
-    # power-light deck build a baseline without becoming a power deck.
-    assert len(by_rarity["common"]) == 33
-    assert len(by_rarity["uncommon"]) == 25
-    assert len(by_rarity["rare"]) == 15
+    # Curtain Call (R85, 2026-07-27): the ratified §4 shape. The old 33/25/15
+    # was rarity-inverted against the official 23/42/30 band, and payoffs are
+    # legal only at U/R under the deck-size grammar -- 11 promotions moved
+    # the pool to bottom-light. Pool size stays 78 (frozen); the type quota
+    # (17 attack / 46 skill / 15 power) is pinned below.
+    assert len(by_rarity["common"]) == 22
+    assert len(by_rarity["uncommon"]) == 32
+    assert len(by_rarity["rare"]) == 19
     kit = [c for c in by_rarity["rare"] if c.kit_card]
-    assert [c.id for c in kit] == ["let_the_people_rejoice"]   # 14 draftable
+    assert [c.id for c in kit] == ["let_the_people_rejoice"]   # 18 draftable
+    by_type = {}
+    for c in cards:
+        by_type.setdefault(c.type, []).append(c)
+    # Attack landed at 15, not §4's 17: the pre-registered Track B shrink
+    # clause fired on the cell-3 hydro-uptime breach and reverted the
+    # flood_of_emotion + matinee_performance retypes (sprint log §6 cell 3).
+    assert len(by_type["attack"]) == 15
+    assert len(by_type["skill"]) == 48           # skill-heavy pole+, the cadence reason
+    assert len(by_type["power"]) == 15           # official quota floor (19-21% roster-wide)
 
 
 def test_starter_invitation_and_aria_curve():
@@ -116,9 +126,10 @@ def test_targeted_fanfare_floor_repairs():
         {"op": "damage", "amount": 1, "target": "self"},
         {"op": "gain_encore", "amount": 3},
     ]
-    # F-B1: the binary gate became a smooth read on the same Block base.
+    # F-B1 made it a smooth read; Curtain Call C (R85) steepened the rate
+    # and moved the card to its rare payoff slot (base 7->6, 1 per 2).
     assert thunder.effects == [
-        {"op": "block", "amount": 7, "bonus_formula": "1_per_4_fanfare"},
+        {"op": "block", "amount": 6, "bonus_formula": "1_per_2_fanfare"},
     ]
 
 
@@ -721,7 +732,9 @@ def test_burst_charges_grants_empties_and_regrants():
     p = st.player
     p.energy = 99
     p.burst_energy = p.burst_max - 1
-    combat.play_card(st, hand_card(st, "usher_the_waves"))   # skill_tag: +5
+    # rising_tide since Curtain Call B: usher_the_waves lost its skill_tag
+    # with the skill->attack retype (plain attacks feed no burst particles)
+    combat.play_card(st, hand_card(st, "rising_tide"))       # skill_tag: +5
     assert any(c.id == "let_the_people_rejoice" for c in p.hand)
     burst = next(c for c in p.hand if c.kit_card)
     assert combat.card_playable(st, burst)

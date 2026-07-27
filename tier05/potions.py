@@ -42,7 +42,7 @@ from tier0.engine.potions import KNOWN as _ENGINE_KNOWN
 
 @lru_cache(maxsize=1)
 def _pool() -> dict:
-    raw = yaml.safe_load(_POOL_PATH.read_text()) or {}
+    raw = yaml.safe_load(_POOL_PATH.read_text(encoding="utf-8")) or {}
     # Guard the layer contract: every yaml potion id must be one the engine can
     # apply. A typo or an id the engine lacks is a loud error, never a silently
     # unrollable dead id.

@@ -34,6 +34,25 @@ FURINA_HAND_WRITTEN = {"let_the_people_rejoice"}
 # be named instead of becoming a silent skip.
 FURINA_DEFERRED_TO_FD: set[str] = set()
 
+# Curtain Call (R85, 2026-07-27): the sweep's new grammar has no C# home yet
+# -- five activity-triggered Powers (salon_deploy_block, salon_bow_*,
+# encore_spend_draw, first_attack_draw, cross_examination) and the Body-Slam
+# encore read (bonus_formula N_per_M_encore). The sprint's §9 names the gate:
+# C# parity ships in the NEXT CONSOLIDATION SPRINT, not with the sweep.
+# blocked_reason() already refuses each one by name (unregistered power /
+# unregistered formula), so this set is curation, not enforcement.
+FURINA_DEFERRED_TO_CONSOLIDATION: set[str] = {
+    "fortissimo_guard", "pit_orchestra", "courtroom_drama", "crowd_work",
+    "quick_change",                       # the five §4 power conversions
+    "poised_riposte",                     # 1_per_3_encore read
+    "warmup_act",                         # enemy_intends_attack read
+    "graceful_retreat",                   # hp_lost_this_turn read
+    "swelling_overture",                  # encore_at_least_N read
+    "crescendo",                          # grow_damage (Rampage growth)
+    "torrential_turn",                    # refresh_all_auras
+    "matinee_performance",                # times: salon_members CalculatedVar
+}
+
 # Cards whose UPGRADE is unauthored because the delta it used to carry died
 # with a retired grammar. Same curation rule as above: an unupgradable card
 # is a dead campfire choice, so the gap is named and gated, never tolerated
@@ -66,17 +85,26 @@ def test_klee_profile_remains_the_legacy_default():
 
 def test_card_level_resource_costs_emit_explicit_gates_and_cost_upgrades():
     by_id = {card["id"]: card for card in _furina_cards()}
-    crowd = gen.emit(by_id["crowd_work"], gen.FURINA_PROFILE)
+    # dress_rehearsal since Curtain Call B: crowd_work became a Power (its
+    # encore_cost install gate was dropped with the conversion), so the
+    # spend-gate emission pin moves to the surviving Spend-2 card.
+    rehearsal = gen.emit(by_id["dress_rehearsal"], gen.FURINA_PROFILE)
     assert (
         "CustomResources<EncoreResource>.SetCanonicalCost(this, 2);"
-        in crowd
+        in rehearsal
     )
-    assert "Spend 2 [gold]Encore[/gold]." in crowd
+    # Its upgrade softens the gate (Spend 2 -> 1), so the face renders the
+    # templated form rather than a bare literal.
+    assert "Spend {IfUpgraded:show:1|2} [gold]Encore[/gold]." in rehearsal
 
     # ENCORE is the only card-level resource gate. Fanfare's retired with the
     # spend grammar ("The Tide Turns", F-A4): it is a read-only momentum stat
     # and no card spends it, so no Fanfare cost line may be emitted anywhere.
+    # (Blocked cards are skipped: emit() over unregistered grammar is a crash
+    # by design -- UNPARSEABLE discipline -- not a parity statement.)
     for card in _furina_cards():
+        if gen.blocked_reason(card, gen.FURINA_PROFILE):
+            continue
         emitted = gen.emit(card, gen.FURINA_PROFILE)
         assert "CustomResources<FanfareResource>.SetCanonicalCost" not in emitted
         assert "CustomResources<FanfareResource>.Cost(" not in emitted
@@ -112,36 +140,34 @@ def test_furina_profile_emits_every_non_kit_card():
         for card in _furina_cards()
         if gen.blocked_reason(card, gen.FURINA_PROFILE) is None
     }
-    withheld = FURINA_HAND_WRITTEN | FURINA_DEFERRED_TO_FD
+    withheld = (FURINA_HAND_WRITTEN | FURINA_DEFERRED_TO_FD
+                | FURINA_DEFERRED_TO_CONSOLIDATION)
     assert generated == all_ids - withheld
 
     # The deferral must be for the REASON we think it is. A card that stopped
     # generating for some unrelated breakage would otherwise hide inside the
-    # curated set and read as intentional. Vacuous while the set is empty, and
+    # curated set and read as intentional. Vacuous while a set is empty, and
     # deliberately kept so: it re-arms the moment anything is deferred again.
-    for cid in FURINA_DEFERRED_TO_FD:
+    for cid in FURINA_DEFERRED_TO_FD | FURINA_DEFERRED_TO_CONSOLIDATION:
         reason = gen.blocked_reason(by_id_of(_furina_cards())[cid],
                                     gen.FURINA_PROFILE)
         assert reason is not None, cid
 
-    # G-A2 released both gain_fanfare_floor cards, so the ONLY withheld card is
-    # the hand-written Burst. Pinned as an explicit assertion rather than left
-    # to the coverage triple: "nothing is deferred" is the state this sprint
-    # bought, and it should fail loudly if a future change re-defers silently.
+    # G-A2 had released everything (the empty-FD state); Curtain Call (R85)
+    # re-opened a curated set with an explicit gate -- the consolidation
+    # sprint. FD stays empty and stays asserted so.
     assert not FURINA_DEFERRED_TO_FD
-    assert withheld == FURINA_HAND_WRITTEN
 
     manifest = json.loads(
         gen.FURINA_PROFILE.manifest.read_text(encoding="utf-8")
     )
-    # 78 cards since F-B2 added lasting_impression, the common floor source.
-    # One withheld: let_the_people_rejoice, the hand-written kit Burst.
-    # the_sea_is_my_stage and lasting_impression joined the generated set at
-    # G-A2 (2026-07-25), which is why generated went 75 -> 77.
+    # 78 cards, frozen at Curtain Call (§9: no pool-size change). Withheld:
+    # the hand-written kit Burst plus the twelve R85 grammar deferrals above
+    # (Track B's five conversions + Track C's new-read rewrites).
     assert manifest["coverage"] == {
         "total": 78,
-        "generated": 77,
-        "blocked": 1,
+        "generated": 65,
+        "blocked": 13,
     }
     assert set(manifest["generated"]) == generated
     assert set(manifest["blocked"]) == withheld
@@ -178,11 +204,15 @@ def test_single_target_aura_rider_renders_through_a_calculated_var():
     # resolves the same var. The multiplier must be static (CalculatedVar
     # rejects instance targets) and must null-guard: preview calls
     # Calculate(null) whenever nothing is hovered.
+    # torrential_turn is DEFERRED grammar since Curtain Call C (its
+    # refresh_all_auras op has no C# home), but it remains the pool's only
+    # single-target bonus_vs_aura card, and the RIDER RENDERER under test
+    # still runs on direct emit. The consolidation sprint regenerates it.
     by_id = {card["id"]: card for card in _furina_cards()}
     torrential = gen.emit(by_id["torrential_turn"], gen.FURINA_PROFILE)
 
     assert "new CalculationBaseVar(10m)" in torrential
-    assert "new ExtraDamageVar(4m)" in torrential
+    assert "new ExtraDamageVar(3m)" in torrential
     assert (
         "static (_, target) => "
         "target != null && AuraCmd.Find(target) != null ? 1 : 0"
@@ -225,7 +255,10 @@ def test_furina_skill_grade_cadence_and_character_identity():
     assert "IElementalCard" not in normal_attack
     assert 'public string CharacterId => "furina";' in normal_attack
 
-    damaging_skill = gen.emit(by_id["usher_the_waves"], gen.FURINA_PROFILE)
+    # undercurrent since Curtain Call B: usher_the_waves was retyped to a
+    # plain attack (application deleted), so the damaging-skill cadence pin
+    # moves to the AoE applier the sweep deliberately kept.
+    damaging_skill = gen.emit(by_id["undercurrent"], gen.FURINA_PROFILE)
     assert "IElementalCard" in damaging_skill
     assert "public Element Element => Element.Hydro;" in damaging_skill
 
@@ -249,11 +282,12 @@ def test_power_var_binds_only_the_effect_the_sim_upgrades():
     assert "Apply 1 [gold]Weak[/gold] to ALL enemies." in lights
     assert "Apply<WeakPower>(choiceContext, debuffTarget, 1," in lights
 
-    drama = gen.emit(by_id["courtroom_drama"], gen.FURINA_PROFILE)
-    assert drama.count('new DynamicVar("PowerAmount"') == 1
-    assert 'new DynamicVar("PowerAmount", 2m)' in drama
-    assert "Apply 1 [gold]Weak[/gold]." in drama
-    assert "Apply<WeakPower>(choiceContext, cardPlay.Target, 1," in drama
+    # courtroom_drama, the softlock's second witness, became a Power at
+    # Curtain Call B (cross_examination is deferred codegen grammar, R85),
+    # so its half of this pin retired with the shape. The regression stays
+    # covered: stage_lights above is the two-apply_power one-var case, and
+    # test_named_power_delta_follows_the_name pins the name-binding rule
+    # the drama half existed to witness.
 
 
 def test_named_power_delta_follows_the_name_not_effect_order(monkeypatch):
@@ -315,7 +349,10 @@ def test_basics_carry_the_tags_base_game_content_keys_on():
     defend = gen.emit(by_id["stage_presence"], gen.FURINA_PROFILE)
     assert "CanonicalTags => new() { CardTag.Defend };" in defend
 
-    non_basic = gen.emit(by_id["crowd_work"], gen.FURINA_PROFILE)
+    # macaron_break since Curtain Call C: crowd_work became deferred-grammar
+    # at B and swelling_overture at C (R85); emit() over unregistered grammar
+    # crashes by design, so the pin sits on a card the sweep kept.
+    non_basic = gen.emit(by_id["macaron_break"], gen.FURINA_PROFILE)
     assert "CanonicalTags" not in non_basic
 
     klee_by_id = {
@@ -567,8 +604,8 @@ def test_converted_riders_move_their_arithmetic_to_the_hover_tip():
 
     torrential = gen.emit(by_id["torrential_turn"], gen.FURINA_PROFILE)
     assert "Bonus damage vs. an elemental aura." in torrential
-    assert "+4 damage if the enemy" not in torrential
-    assert "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, auraBonus: 4)" in torrential
+    assert "+3 damage if the enemy" not in torrential
+    assert "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, auraBonus: 3)" in torrential
 
 
 def test_unconverted_riders_keep_their_sentence_on_the_face():

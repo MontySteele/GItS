@@ -26,72 +26,56 @@
 # and gives no Spotlight-derived Fanfare. Fanfare payoffs spend the capped pool so generation can keep cycling.
 
 # ---------- BASIC (5) ----------
-- {id: soloists_solicitation, name: "Soloist's Solicitation", cost: 1, type: attack, rarity: basic, solve: [frontload], archetypes: [generic], role: glue,
+- {id: soloists_solicitation, name: "Soloist's Solicitation", register: salon, cost: 1, type: attack, rarity: basic, solve: [frontload], archetypes: [generic], role: glue,
    effects: [{op: damage, amount: 4, target: enemy}]}
    # Her normal attack. 4 damage at 1 cost is DREADFUL on purpose — A1 is the load-bearing weakness (kickoff §2).
-- {id: stage_presence, name: "Stage Presence", cost: 1, type: skill, rarity: basic, solve: [block], archetypes: [generic], role: glue,
+- {id: stage_presence, name: "Stage Presence", register: salon, cost: 1, type: skill, rarity: basic, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 6}]}
    # One above a standard Defend: the measured starter-level stabilization nudge. Her distinctive durability still comes from Encore, not a hidden self-Spotlight subsidy.
-- {id: regal_bearing, name: "Regal Bearing", cost: 1, type: skill, rarity: basic, solve: [block, utility], archetypes: [generic], role: glue,
+- {id: regal_bearing, name: "Regal Bearing", register: archon, cost: 1, type: skill, rarity: basic, solve: [block, utility], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 3}, {op: apply_power, power: weak, amount: 1, target: enemy}]}
    # Fifth basic (template allows 4-5): the Regina looks at you. Starter's A6 debuff texture from card one.
-- {id: aria_of_recompense, name: "Aria of Recompense", cost: 1, type: skill, rarity: basic, solve: [sustain], archetypes: [generic, fanfare], role: enabler,
+- {id: aria_of_recompense, name: "Aria of Recompense", register: private, cost: 1, type: skill, rarity: basic, solve: [sustain], archetypes: [generic, fanfare], role: enabler,
    effects: [{op: gain_encore, amount: 5}]}
    # The starter's A4 seed: "healing" that arrives as buffer. One copy in the starting deck.
-- {id: salon_debut, name: "Salon Début", cost: 1, type: skill, rarity: basic, solve: [utility, scaling], archetypes: [salon], role: enabler, tags: [skill_tag],
+- {id: salon_debut, name: "Salon Début", register: salon, cost: 1, type: skill, rarity: basic, solve: [utility, scaling], archetypes: [salon], role: enabler, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: chevalmarin}]}
    # Signature basic (SALON v2, rework plan): Chevalmarin takes the stage — the applier, 2 hydro a turn seeding
    # reactions from card one. Members are TYPED now; Fanfare is the Focus analogue on all member numbers.
 
-# ---------- COMMON (33: +standing_room_only at Salon-v2, +lasting_impression at F-B2) ----------
-# Salon (9)
-- {id: gentilhomme_usher, name: "Gentilhomme Usher", cost: 1, type: skill, rarity: common, solve: [block, utility], archetypes: [salon], role: enabler, tags: [skill_tag],
+# ---------- COMMON (22: was 33; Curtain Call R85 promoted 10 to U and 1 to R -- payoffs live at U/R) ----------
+# Salon (6)
+- {id: gentilhomme_usher, name: "Gentilhomme Usher", register: salon, cost: 1, type: skill, rarity: common, solve: [block, utility], archetypes: [salon], role: enabler, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: usher}, {op: block, amount: 4}]}
    # The Ball Octopus (v2: THE SHIELD — ticks 3 Block, bows for 9): deploy + a shield-swell now. Commons-heavy enablers per template §3.
-- {id: surintendante_chevalmarin, name: "Surintendante Chevalmarin", cost: 1, type: skill, rarity: common, solve: [sustain, utility], archetypes: [salon], role: enabler, tags: [skill_tag],
+- {id: surintendante_chevalmarin, name: "Surintendante Chevalmarin", register: salon, cost: 1, type: skill, rarity: common, solve: [sustain, utility], archetypes: [salon], role: enabler, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: chevalmarin}, {op: gain_encore, amount: 3}]}
    # The Bubbly Seahorse (v2: THE APPLIER — ticks 2 hydro, bows mass-application + Encore refund): deploy + buffer;
    # the rider pre-pays her first three ticks.
-- {id: mademoiselle_crabaletta, name: "Mademoiselle Crabaletta", cost: 1, type: skill, rarity: common, solve: [utility, scaling], archetypes: [salon], role: enabler, tags: [skill_tag],
+- {id: mademoiselle_crabaletta, name: "Mademoiselle Crabaletta", register: salon, cost: 1, type: skill, rarity: common, solve: [utility, scaling], archetypes: [salon], role: enabler, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta}]}
    # The heavy (v2: THE HAMMER — ticks 6 hydro, bows for 14). Cost 2->1 at the rework: one member, the archetype's
    # core common, priced to be drafted. PROPOSED pending red-pen.
-- {id: dinner_service, name: "Dinner Service", cost: 1, type: skill, rarity: common, solve: [sustain], archetypes: [salon, fanfare], role: glue,
+- {id: dinner_service, name: "Dinner Service", register: private, cost: 1, type: skill, rarity: common, solve: [sustain], archetypes: [salon, fanfare], role: glue,
    effects: [{op: gain_encore, amount: 3}, {op: conditional, if: has_salon_members, then: [{op: gain_encore, amount: 3}]}]}
    # Feeding the household. Upkeep economy: better with a salon to feed.
-- {id: usher_the_waves, name: "Usher the Waves", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [salon], role: enabler, tags: [skill_tag],
+- {id: usher_the_waves, name: "Usher the Waves", register: salon, cost: 1, type: attack, rarity: common, solve: [utility], archetypes: [salon], role: enabler,
    effects: [{op: damage, amount: 5, target: enemy}, {op: apply_power, power: weak, amount: 1, target: enemy}]}
-   # Damaging SKILL = hydro applier under her cadence. Her repeatable hand-cast application at common.
-   # R32.3 UTILITY LIFT: the wave staggers — Weak rides the application (salon's debuff line; the deck's
-   # utility was application-only and the axis said so).
-- {id: torrential_turn, name: "Torrential Turn", cost: 2, type: attack, rarity: common, solve: [frontload], archetypes: [salon, generic], role: payoff,
-   effects: [{op: damage, amount: 10, target: enemy, bonus_vs_aura: 4}]}
-   # Plain attack (no application) that CASHES auras without consuming them — rewards the Salon's uptime.
-- {id: matinee_performance, name: "Matinée Performance", cost: 1, type: skill, rarity: common, solve: [utility, velocity], archetypes: [salon, generic], role: glue, tags: [skill_tag],
-   effects: [{op: damage, amount: 4, target: enemy}, {op: draw, amount: 1}]}
-   # Cantrip applier: light hydro + a card. A6 uptime with A5 texture.
-- {id: rising_tide, name: "Rising Tide", cost: 1, type: skill, rarity: common, solve: [utility, sustain], archetypes: [salon], role: enabler, tags: [skill_tag],
+   # CURTAIN CALL B (R85): skill->attack retype (authored red-pen, ratified) — a PLAIN attack now, no
+   # application (the cadence law: plain attacks never apply hydro). The Weak stays (R32.3's utility lift).
+   # The smallest application loss of the four retypes: single-target, and the members carry the engine.
+- {id: rising_tide, name: "Rising Tide", register: salon, cost: 1, type: skill, rarity: common, solve: [utility, sustain], archetypes: [salon], role: enabler, tags: [skill_tag],
    effects: [{op: apply_aura, element: hydro, target: random_enemy}, {op: gain_encore, amount: 3}]}
    # Pure application + buffer. Seeds Vaporize for Chevreuse, Frozen for the Cryo bench — co-op dream fuel.
-- {id: house_call, name: "House Call", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [salon], role: glue,
+- {id: house_call, name: "House Call", register: salon, cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [salon], role: glue,
    effects: [{op: damage, amount: 6, target: enemy}, {op: conditional, if: has_salon_members, then: [{op: damage, amount: 4, target: enemy}]}]}
    # The members flank. Her attack numbers only reach honest when the stage is set (A7 setup tax by design).
    # Red-pen flag 9 KEPT: the sheet's biggest conditional number, priced by the threshold family it matches.
-# Fanfare (9)
-- {id: curtain_up, name: "Curtain Up", cost: 0, type: skill, rarity: common, solve: [sustain, velocity], archetypes: [fanfare], role: enabler,
-   effects: [{op: gain_encore, amount: 2}]}
-   # 0-cost flux starter. Sparkly Treasure parity, buffer-flavored.
-- {id: dramatic_entrance, name: "Dramatic Entrance", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [fanfare], role: payoff,
-   effects: [{op: damage, amount: 6, target: enemy, bonus_formula: 1_per_4_fanfare}]}
-   # F-B1: the binary threshold becomes a SMOOTH read. Live from turn one at any meter level, where the gate rendered as
-   # nothing at all below its bar — and a scaling number is the one shape the legibility pipeline can show on the face.
-- {id: crowd_work, name: "Crowd Work", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [fanfare], role: glue, encore_cost: 2,
-   effects: [{op: draw, amount: 2}]}
-   # "Spend 2 Encore:" the A5 identity card — Encore-spend tempo (redpen ruling a: THIS is what A5 reads, not the selector).
-- {id: suffering_for_art, name: "Suffering for Art", cost: 0, type: skill, rarity: common, solve: [sustain, velocity], archetypes: [fanfare], role: enabler,
+# Fanfare (7)
+- {id: suffering_for_art, name: "Suffering for Art", register: archon, cost: 0, type: skill, rarity: common, solve: [sustain, velocity], archetypes: [fanfare], role: enabler,
    effects: [{op: damage, amount: 1, target: self}, {op: gain_encore, amount: 3}]}
    # The tragedienne: pay 1 HP, gain 3 buffer. Both movements generate Fanfare; the measured one-point wound keeps the risk/reward without making an overpicked Common a run liability.
-- {id: lasting_impression, name: "Lasting Impression", cost: 1, type: skill, rarity: common, solve: [scaling], archetypes: [fanfare], role: enabler, exhaust: true,
+- {id: lasting_impression, name: "Lasting Impression", register: archon, cost: 1, type: skill, rarity: common, solve: [scaling], archetypes: [fanfare], role: enabler, exhaust: true,
    effects: [{op: gain_fanfare_floor, amount: 5}, {op: gain_encore, amount: 4}]}
    # Floor RATIFIED here (2026-07-26 [USER]; raised from its F-B2 value, and the upgrade delta chains on
    # top unchanged). Tested at the red-pen, and the honest reading of that cell is that it sits BELOW THE
@@ -104,32 +88,19 @@
    # performance the audience permanently remembers. Exhaust is the anti-degeneracy line — it is what keeps a
    # repeatable common from being free permanent scaling — and the Encore rider moves the meter NOW so the card is
    # not a dead turn while the deck is still assembling. Name PROPOSED, pending the lore audit. PROPOSED.
-- {id: thunderous_ovation, name: "Thunderous Ovation", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [fanfare, generic], role: glue,
-   effects: [{op: block, amount: 7, bonus_formula: 1_per_4_fanfare}]}
-   # F-B1: the survival-axis twin of dramatic_entrance, on the same smooth rate. Block carries bonus_formula as of this
-   # pass — the rider grammar damage already had, applied in the same position so it cannot outscale its printed twin.
-- {id: tempo_change, name: "Tempo Change", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [fanfare], role: glue, encore_cost: 3,
-   effects: [{op: energy, amount: 1}, {op: draw, amount: 1}]}
-   # Spend 3 Encore: a beat becomes a downbeat. Encore-spend tempo, energy face.
-- {id: warmup_act, name: "Warm-up Act", cost: 0, type: attack, rarity: common, solve: [frontload], archetypes: [fanfare, generic], role: glue,
-   effects: [{op: damage, amount: 3, target: enemy}]}
-   # Free filler swing (Crackle parity). Keeps her hands moving between numbers.
-- {id: audience_participation, name: "Audience Participation", cost: 1, type: skill, rarity: common, solve: [sustain, velocity], archetypes: [fanfare, generic], role: glue,
-   effects: [{op: gain_encore, amount: 2}, {op: draw, amount: 1}]}
-   # Buffer + card. The honest glue of the flux plan.
-- {id: ebb_and_flow, name: "Ebb and Flow", cost: 1, type: skill, rarity: common, solve: [velocity, sustain], archetypes: [fanfare], role: enabler, encore_cost: 1,
+- {id: warmup_act, name: "Stage Combat", register: salon, cost: 0, type: attack, rarity: common, solve: [frontload, block], archetypes: [fanfare, generic], role: glue,
+   effects: [{op: damage, amount: 3, target: enemy}, {op: conditional, if: enemy_intends_attack, then: [{op: block, amount: 3}]}]}
+   # CURTAIN CALL C (R85): the stat-only filler learns stagecraft — stage combat is CHOREOGRAPHED, so the
+   # swing reads the opponent's next move and takes the fall on her terms. First enemy_intends_attack read
+   # in the pool (vocab). Was: 3 damage flat, Crackle parity, NEARDUP core[stat-only]. PROPOSED.
+- {id: ebb_and_flow, name: "Ebb and Flow", register: private, cost: 1, type: skill, rarity: common, solve: [velocity, sustain], archetypes: [fanfare], role: enabler, encore_cost: 1,
    effects: [{op: gain_encore, amount: 3}, {op: draw, amount: 1}]}
    # Spend 1, gain 3: net buffer growth that rings the flux bell BOTH ways. The Fanfare engine's idle animation.
-- {id: standing_room_only, name: "Standing Room Only", cost: 1, type: skill, rarity: common, solve: [frontload, utility], archetypes: [fanfare, generic], role: glue, tags: [skill_tag],
-   effects: [{op: damage, amount: 4, target: all_enemies, bonus_formula: 1_per_5_fanfare}]}
-   # NEW at the Salon-v2 rework (user directive: a common AoE tied to Fanfare — the Gardener-wall answer, doc
-   # §10.8.2). The house floods in: 4 to ALL, +1 per 5 Fanfare (10-all at the 30 cap). Damaging skill = mass hydro
-   # application under her cadence — joins the hydro convergence WATCHLIST cell (redpen flag 8). PROPOSED.
 # Spotlight (6)
-- {id: an_invitation, name: "An Invitation", cost: 0, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: enabler, exhaust: true,
+- {id: an_invitation, name: "An Invitation", register: salon, cost: 0, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: enabler, exhaust: true,
    effects: [{op: generate_guest_star, rarity: common, amount: 1}]}
    # THE base generator (kickoff §9 grammar verbatim): create a common from the companion pool + Guest Star set. Exhausts. This-combat-only. The invitation is free; the generated card still pays its printed cost.
-- {id: limelight, name: "Limelight", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: enabler,
+- {id: limelight, name: "Limelight", register: salon, cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: enabler,
    effects: [{op: spend_encore, amount: 1}, {op: apply_power, power: spotlight_mult_bonus_turn, amount: 25, target: self}, {op: energy, amount: 1}, {op: draw, amount: 1}]}
    # R16 re-author (replaces Warm Reception): the beam finds the star — Spotlighted numbers +25% this turn.
    # The bread-and-butter boost; delete her cards and the empowerment leaves with them. (lint-ok: pct points)
@@ -137,131 +108,127 @@
    # an encore_cost gate bricked opening hands and bled the punisher floor). Dry overdraw moves no Encore, so it
    # rightly does not ring the Ovation bell.
    # Machinery-efficiency pass: refunds its Energy and replaces itself so the empowered Companion can still perform this turn.
-- {id: shared_billing, name: "Shared Billing", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: glue,
+- {id: shared_billing, name: "Shared Billing", register: salon, cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: glue,
    effects: [{op: apply_aura, element: hydro, target: random_enemy}, {op: apply_power, power: spotlight_mult_bonus_turn, amount: 25, target: self}, {op: energy, amount: 1}]}
    # R32.2 RIDER SWAP: the water shares the stage — hydro application replaces the block rider (the boost cards
    # were defensive texture, R31 secondary root cause; application bills to utility, not sustain). Seeds Vaporize
    # for the deck's own Chevreuse kit. NOT freeze-cell routed (single random target; no cryo in-archetype —
    # the named cell is untouched). Boost stays 25. (lint-ok: pct points)
    # Refunds its Energy so the seeded reaction and empowered Companion share the turn.
-- {id: blocking_notes, name: "Blocking Notes", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [spotlight, generic], role: glue,
+- {id: blocking_notes, name: "Blocking Notes", register: salon, cost: 1, type: skill, rarity: common, solve: [block], archetypes: [spotlight, generic], role: glue,
    effects: [{op: block, amount: 7}, {op: conditional, if: spotlight_moved_this_turn, then: [{op: draw, amount: 1}]}]}
    # Theatre blocking, the pun fully intended. Re-staging pays a card. KEPT at re-author: selector glue, not administration.
    # R32.2/R32.3 A3 REHOME: block carries what the swapped riders dropped (the +1 alone under-covered; the
    # axis dipped and the repair continued here). [USER] FLAG: this TIES Klee's Hide and Seek at common with a
    # conditional rider on top — graceful_retreat's stays-under pin never covered this card, but the cross-sheet
    # courtesy question is red-pen's.
-- {id: stage_lights, name: "Stage Lights", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: glue,
+- {id: stage_lights, name: "Stage Lights", register: salon, cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: glue,
    effects: [{op: apply_power, power: spotlight_flat_damage_turn, amount: 2, target: self}, {op: apply_power, power: weak, amount: 1, target: all_enemies}, {op: draw, amount: 1}]}
    # R16 re-author (replaces Props Department): the follow spot holds — Spotlighted damage +2 this turn.
    # R32.2 RIDER SWAP: the glare blinds the front row — Weak replaces the block rider. Debuff texture bills to
    # utility AND defends by prevention (not absorption — the sustain axis stays honest, the W1 dose record's law).
    # R32.3: the glare goes house-wide (mass Weak at common is ratified grammar — Spooked!/commanding_gaze). Draw 1 keeps the lit Companion in reach.
-- {id: curtain_cue, name: "Curtain Cue", cost: 0, type: skill, rarity: common, solve: [sustain], archetypes: [spotlight, fanfare], role: glue,
+- {id: curtain_cue, name: "Curtain Cue", register: salon, cost: 0, type: skill, rarity: common, solve: [sustain], archetypes: [spotlight, fanfare], role: glue,
    effects: [{op: conditional, if: spotlight_moved_this_turn, then: [{op: gain_encore, amount: 3}, {op: draw, amount: 1}], else: [{op: gain_encore, amount: 1}]}]}
    # Free beat that rewards the re-aim. Selector-payoff texture at common.
-# Generic (7)
-- {id: graceful_retreat, name: "Graceful Retreat", cost: 1, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue,
-   effects: [{op: block, amount: 6}]}
-   # Hide and Seek minus one: her generic block stays under Klee's (A3 ~2.5 declared).
-- {id: poised_riposte, name: "Poised Riposte", cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [generic], role: glue,
-   effects: [{op: damage, amount: 6, target: enemy}]}
-   # Her honest Strike+. Skill-grade cadence buys higher bases WITHIN the low-statline identity — 6, not Klee's 7-with-pyro. (lint-ok: Klee comp)
-- {id: commanding_gaze, name: "Commanding Gaze", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [generic], role: glue,
+# Generic (3)
+- {id: graceful_retreat, name: "Slip Backstage", register: private, cost: 1, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue,
+   effects: [{op: block, amount: 5}, {op: conditional, if: hp_lost_this_turn, then: [{op: block, amount: 4}]}]}
+   # CURTAIN CALL C (R85): the private-register block rewrite (§7; rn) — she slips away AFTER the wound,
+   # where no one can see her tend it. Base 6->5, +4 when she has lost HP this turn (first
+   # hp_lost_this_turn read in the pool). Peak 9 only when hurt keeps the A3 stays-under-Klee discipline
+   # honest on the common case. Was: block 6 flat, a block-clone triplet member. PROPOSED.
+- {id: commanding_gaze, name: "Commanding Gaze", register: archon, cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 2}, {op: apply_power, power: weak, amount: 1, target: all_enemies}]}
    # The Regina's stare. Debuff texture for A6. Parity VERIFIED at red-pen vs Klee's ratified Spooked! —
    # same cost/rarity/mass-Weak, one point less block, so strictly not-stronger. (lint-ok: Klee comp)
-- {id: witness_stand, name: "The Witness Stand", cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [generic], role: glue,
-   effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}, {op: draw, amount: 1}]}
-   # Courtroom texture: one count of Vulnerable and the next page of testimony.
-- {id: macaron_break, name: "Macaron Break", cost: 1, type: skill, rarity: common, solve: [sustain, block], archetypes: [generic, fanfare], role: glue,
+- {id: macaron_break, name: "Macaron Break", register: private, cost: 1, type: skill, rarity: common, solve: [sustain, block], archetypes: [generic, fanfare], role: glue,
    effects: [{op: gain_encore, amount: 2}, {op: block, amount: 2}]}
    # A small mercy between acts. NOT a heal — R8 keeps true healing at Rare+Exhaust; this is buffer + poise.
-- {id: swelling_overture, name: "Swelling Overture", cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [generic], role: glue,
-   effects: [{op: draw, amount: 2}]}
-   # Alchemical Curiosity parity: the pool's honest draw common.
-- {id: undercurrent, name: "Undercurrent", cost: 2, type: skill, rarity: common, solve: [utility], archetypes: [salon, generic], role: enabler, tags: [skill_tag],
+- {id: swelling_overture, name: "Compose Herself", register: private, cost: 1, type: skill, rarity: common, solve: [velocity], archetypes: [generic], role: glue,
+   effects: [{op: draw, amount: 2}, {op: conditional, if: encore_at_least_8, then: [{op: draw, amount: 1}]}]}
+   # CURTAIN CALL C (R85): the private-register rewrite (§7; rn) — with deep reserves she can afford the
+   # long breath: draw 2, +1 while holding 8+ Encore (first encore_at_least read in the pool). The
+   # draw-clone pair with old crowd_work dissolved with that card's power conversion; this rewrite gives
+   # the survivor a reason to exist beyond parity. Was: draw 2 flat. PROPOSED.
+- {id: undercurrent, name: "Undercurrent", register: salon, cost: 2, type: skill, rarity: common, solve: [utility], archetypes: [salon, generic], role: enabler, tags: [skill_tag],
    effects: [{op: damage, amount: 7, target: all_enemies}]}
    # AoE hydro application (damaging skill). A6's swarm face. WATCHLIST (redpen flag 8): member of the hydro+cryo
    # convergence CELL = {undercurrent, rain_of_roses, guest_neuvillette_judgment} — one measurement covers the
    # full mass-application set.
 
-# ---------- UNCOMMON (25) ----------
+# ---------- UNCOMMON (32: was 25; +10 promoted commons -3 promoted to rare at Curtain Call R85) ----------
 # Salon (7)
-- {id: full_ensemble, name: "Full Ensemble", cost: 2, type: skill, rarity: uncommon, solve: [scaling, utility], archetypes: [salon], role: enabler, tags: [skill_tag],
+- {id: full_ensemble, name: "Full Ensemble", register: salon, cost: 2, type: skill, rarity: uncommon, solve: [scaling, utility], archetypes: [salon], role: enabler, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: usher},
              {op: apply_power, power: salon_member, amount: 1, target: self, member: chevalmarin},
              {op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta}]}
    # Fill the three Salon slots at once, one of each (v2). Cost 3->2 at the rework; on a full stage the oldest
    # members bow out (Defect evoke geometry). PROPOSED pending red-pen.
-- {id: grand_salon, name: "Grand Salon", cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [salon], role: payoff,
+- {id: grand_salon, name: "Grand Salon", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [salon], role: payoff,
    effects: [{op: apply_power, power: salon_damage_up, amount: 3, target: self}]}
    # Explosives Workshop parity: members tick harder. The Salon's A2 curve.
    # CAP DROPPED (user ruling 2026-07-24, uncap-all): +3/copy is a flat additive to member ticks, linear in copies.
    # A/B at 2000 runs/arm x2 seeds moved salon 0.0pp (all_caps->shipped) and +0.4-0.5pp (shipped->uncapped, p~0.02), (lint-ok: A/B counts)
    # so the whole cap set is non-binding at present difficulty; uncapped to match base-StS Power-dupe stacking.
-- {id: many_waters_melody, name: "Melody of Many Waters", cost: 1, type: skill, rarity: uncommon, solve: [sustain], archetypes: [salon], role: glue, tags: [skill_tag],
-   effects: [{op: gain_encore, amount: 5}, {op: conditional, if: has_salon_members, then: [{op: gain_encore, amount: 3}]}]}
-   # The Singer's melody CONVERTED per R8: buffer, not healing. Sub-Rare sustain routes through pools — the law, applied.
-- {id: dress_rehearsal, name: "Dress Rehearsal", cost: 1, type: skill, rarity: uncommon, solve: [velocity, utility], archetypes: [salon, fanfare], role: glue, encore_cost: 2, tags: [skill_tag],
+- {id: many_waters_melody, name: "Melody of Many Waters", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [sustain, block], archetypes: [salon], role: glue, tags: [skill_tag],
+   effects: [{op: gain_encore, amount: 4}, {op: conditional, if: has_salon_members, then: [{op: block, amount: 5}]}]}
+   # CURTAIN CALL C (R85): differentiated from dinner_service (§7) — the song SHELTERS the household
+   # instead of feeding it twice: buffer 4, and a 5-block wall while the stage is set. The register flips
+   # private->salon with the body (the Track-A private tag followed the old pure-encore shape; the member
+   # interaction is the salon voice). R8 stands: buffer and block, never healing. PROPOSED.
+- {id: dress_rehearsal, name: "Dress Rehearsal", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [velocity, utility], archetypes: [salon, fanfare], role: glue, encore_cost: 2, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: usher}, {op: draw, amount: 1}]}
    # Spend 2 Encore: the understudy (Usher, v2) and a look at the script. Spend-tempo crossing into the Salon plan.
-- {id: crashing_waves, name: "Crashing Waves", cost: 2, type: attack, rarity: uncommon, solve: [frontload, utility], archetypes: [salon, generic], role: payoff,
+- {id: crashing_waves, name: "Crashing Waves", register: salon, cost: 2, type: attack, rarity: uncommon, solve: [frontload, utility], archetypes: [salon, generic], role: payoff,
    effects: [{op: damage, amount: 8, target: all_enemies, bonus_vs_aura: 5}]}
    # Flame Dance parity: AoE that cashes the auras her Salon spreads. No application (plain attack) — exploit, not fuel.
-- {id: overflowing_hospitality, name: "Overflowing Hospitality", cost: 2, type: skill, rarity: uncommon, solve: [utility, sustain], archetypes: [salon], role: enabler, tags: [skill_tag],
+- {id: overflowing_hospitality, name: "Overflowing Hospitality", register: salon, cost: 2, type: skill, rarity: uncommon, solve: [utility, sustain], archetypes: [salon], role: enabler, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: chevalmarin}, {op: apply_aura, element: hydro, target: random_enemy}, {op: gain_encore, amount: 3}]}
    # Deploy the hostess (Chevalmarin, v2), pour the tea, set the table: the kitchen-sink Salon two-drop.
-- {id: waters_embrace, name: "The Water's Embrace", cost: 2, type: skill, rarity: uncommon, solve: [block], archetypes: [salon, generic], role: glue,
+- {id: waters_embrace, name: "The Water's Embrace", register: salon, cost: 2, type: skill, rarity: uncommon, solve: [block], archetypes: [salon, generic], role: glue,
    effects: [{op: block, amount: 9}, {op: conditional, if: has_salon_members, then: [{op: block, amount: 5}]}]}
    # The household closes ranks. Her biggest sub-Rare wall, and only with the stage set.
 # Fanfare (7)
-- {id: crescendo, name: "Crescendo", cost: 1, type: attack, rarity: uncommon, solve: [scaling, frontload], archetypes: [fanfare], role: payoff,
-   effects: [{op: damage, amount: 8, target: enemy, bonus_formula: 1_per_2_fanfare}]}
-   # +1 damage per 2 Fanfare held. F-B1 has nothing to do here: the gate was double-charging a card that ALREADY scaled,
-   # and F-A4 removed it. The archetype's cleanest read, and the model the two commons above were converted toward.
-- {id: showstopper, name: "Showstopper", cost: 1, type: attack, rarity: uncommon, solve: [frontload], archetypes: [fanfare], role: payoff,
-   effects: [{op: damage, amount: 5, target: enemy}, {op: conditional, if: fanfare_at_least_20, then: [{op: damage, amount: 7, target: enemy}]}]}
-   # Threshold burst: 5, or 12 when the house is roaring.
-- {id: florid_cadenza, name: "Florid Cadenza", cost: 0, type: skill, rarity: uncommon, solve: [velocity], archetypes: [fanfare], role: payoff,
+- {id: crescendo, name: "Crescendo", register: archon, cost: 1, type: attack, rarity: uncommon, solve: [scaling, frontload], archetypes: [fanfare], role: payoff,
+   effects: [{op: damage, amount: 6, target: enemy, bonus_formula: 1_per_2_fanfare}, {op: grow_damage, amount: 2}]}
+   # CURTAIN CALL C (R85): the fanfare-read payoff rewrite (§7; rn keeps the name — it fits the archon
+   # build). Each performance plays LOUDER: Rampage growth (grow_damage, permanent this combat) on top of
+   # the 1-per-2 read, so the card is literally a crescendo. Printed base 8->6 pays for the growth line.
+   # Breaks the damage@one~ clone family: no other card grows. PROPOSED.
+- {id: florid_cadenza, name: "Florid Cadenza", register: archon, cost: 0, type: skill, rarity: uncommon, solve: [velocity], archetypes: [fanfare], role: payoff,
    effects: [{op: draw, amount: 1}, {op: conditional, if: fanfare_at_least_12, then: [{op: draw, amount: 2}]}]}
    # F-B1: kept as a THRESHOLD, deliberately — draw cannot scale smoothly at this cost without becoming a combo engine.
    # A 0-cost cantrip at an empty meter, the old three-card hand at a full one. Its UPGRADE drops the gate rather than
    # adding cards, so the upgraded card is exactly the pre-sprint one and the base version is what had to be paid for.
    # This also closes the upgrade gap F-A4 opened (its only delta had been the spend discount). PROPOSED.
-- {id: hearts_swelling, name: "Hearts Swelling", cost: 2, type: skill, rarity: uncommon, solve: [sustain], archetypes: [fanfare, salon], role: enabler,
+- {id: hearts_swelling, name: "Hearts Swelling", register: private, cost: 2, type: skill, rarity: uncommon, solve: [sustain], archetypes: [fanfare, salon], role: enabler,
    effects: [{op: gain_encore, amount: 7}]}
    # The big buffer draught. Seven points of deferred HP and seven Fanfare flux.
-- {id: rapturous_applause, name: "Rapturous Applause", cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [fanfare], role: payoff,
-   effects: [{op: apply_power, power: fanfare_attack_per10, amount: 1, target: self, note: "attacks +N damage per 10 Fanfare"}]}
-   # "Stacks grant flat power bonuses" (kickoff §4), the card. Reads the pool, spends nothing.
-   # CAP DROPPED (user ruling 2026-07-24, uncap-all): +1/copy per 10 Fanfare is additive in copies. Same A/B as
-   # the salon cap; fanfare-plan win-rate is sub-1% today, so the drop is inert now and reversible if that changes.
-- {id: pit_orchestra, name: "Pit Orchestra", cost: 1, type: skill, rarity: uncommon, solve: [block, sustain], archetypes: [fanfare, generic], role: glue,
-   effects: [{op: block, amount: 5}, {op: gain_encore, amount: 1}]}
-   # Hybrid glue: the band plays through anything. PASS-2 ERRATA (DECISIONS 76/R26 law): Encore rider trimmed —
-   # the old row strictly dominated Macaron Break. Now strictly tankier / strictly less flux: a real choice.
-- {id: flood_of_emotion, name: "Flood of Emotion", cost: 1, type: skill, rarity: uncommon, solve: [frontload], archetypes: [fanfare], role: payoff, tags: [skill_tag],
-   effects: [{op: damage, amount: 14, target: enemy, bonus_formula: 1_per_3_fanfare}]}
-   # F-B1: gate -> smooth read. Printed damage comes DOWN because the discounted energy cost was priced against a Fanfare
-   # toll that no longer exists; the rider pays it back at a full meter and leaves it a real card at an empty one. PROPOSED.
+- {id: pit_orchestra, name: "Stagehands", register: salon, cost: 1, type: power, rarity: uncommon, solve: [block, sustain], archetypes: [salon, generic], role: glue,
+   effects: [{op: apply_power, power: salon_bow_block, amount: 5, target: self, note: "whenever a Salon member takes its final bow, gain N Block"},
+             {op: apply_power, power: salon_bow_encore, amount: 2, target: self, note: "...and N Encore"}]}
+   # CURTAIN CALL B (R85): skill->power + (rn) to salon-craft — the crew strikes the set behind every bow.
+   # Bow-triggered (the OTHER salon verb; fortissimo_guard owns the deploy), so the two engines never twin.
+   # Was: block 5 + encore 1 hybrid glue ("Pit Orchestra"), a NEARDUP core[block] member with macaron_break.
+   # PROPOSED pending red-pen.
 # Spotlight (7)
-- {id: leading_role, name: "Leading Role", cost: 1, type: power, rarity: uncommon, solve: [velocity], archetypes: [spotlight], role: payoff,
+- {id: leading_role, name: "Leading Role", register: salon, cost: 1, type: power, rarity: uncommon, solve: [velocity], archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self, note: "first Spotlighted card each turn costs N less"}]}
    # Ratified texture verbatim (kickoff §3.2). Her card granting economy — the baseline multiplier still can't.
    # CAP DROPPED (user ruling 2026-07-24): the "first Spotlighted card each turn" clause already limits this to ONE
    # proc a turn, so a second copy is linear, not compounding — the pass-1 cap rationale was written for per-turn
    # compounding powers and does not reach this one. Base StS lets you spam Power dupes; this now does too.
-- {id: supporting_cast, name: "Supporting Cast", cost: 1, type: power, rarity: uncommon, solve: [velocity], archetypes: [spotlight], role: payoff,
+- {id: supporting_cast, name: "Supporting Cast", register: salon, cost: 1, type: power, rarity: uncommon, solve: [velocity], archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: spotlight_draw, amount: 1, target: self, note: "first Spotlighted card each turn draws N"}]}
    # The other ratified texture line. Cap dropped with Leading Role's, same ruling and same reasoning.
-- {id: guest_list, name: "The Guest List", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [spotlight], role: enabler, exhaust: true,
+- {id: guest_list, name: "The Guest List", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [spotlight], role: enabler, exhaust: true,
    effects: [{op: generate_guest_star, rarity: uncommon, amount: 1}, {op: energy, amount: 1}]}
    # Uncommon generator: equal-rarity clause means uncommon guests only. Refunds its Energy so the generated guest can perform this turn.
-- {id: directors_cut, name: "Director's Cut", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [spotlight], role: glue,
+- {id: directors_cut, name: "Director's Cut", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [spotlight], role: glue,
    effects: [{op: conditional, if: spotlight_moved_this_turn, then: [{op: energy, amount: 1}, {op: draw, amount: 2}], else: [{op: draw, amount: 1}]}]}
    # Re-aim payoff: the scene changes and the production surges.
-- {id: top_billing, name: "Top Billing", cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [spotlight], role: payoff,
+- {id: top_billing, name: "Top Billing", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: spotlight_mult_bonus, amount: 25, target: self, note: "Spotlighted numbers +25% per copy for the rest of combat"}]}
    # R16 re-author (replaces Constant Star): the name above the title — the archetype's core scaling engine.
    # Combat-duration mult through the SAME pipe (§2.2a numbers-only inherited). (lint-ok: pct points)
@@ -270,10 +237,10 @@
    # ALL Spotlighted numbers is genuinely multiplicative — this is the tail the shipped split had kept a ceiling on.
    # Uncapped because spotlight win-rate is 0.7% pre-calibration so the A/B can't see it move; FLAGGED for re-check at
    # difficulty calibration, when a viable spotlight plan could make an uncapped 3rd/4th copy a real ceiling problem.
-- {id: duet, name: "Duet", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [spotlight], role: payoff,
+- {id: duet, name: "Duet", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [spotlight], role: payoff,
    effects: [{op: replay_next_companion, times: 1, duration: this_turn}, {op: draw, amount: 1}]}
    # Study Buddy parity: the next companion performs twice. Star-agnostic — works on any guest.
-- {id: standing_ovation, name: "Standing Ovation", cost: 1, type: power, rarity: uncommon, solve: [scaling, sustain], archetypes: [spotlight], role: payoff,
+- {id: standing_ovation, name: "Standing Ovation", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling, sustain], archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: ovation_spend_boost, amount: 10, target: self, note: "whenever you spend Encore, Spotlighted +10% per copy this turn"},
              {op: apply_power, power: spotlight_encore_first, amount: 1, target: self, note: "gain N Encore on the first Spotlighted card each turn"}]}
    # R32.1 FLIP, landed: spend-payoff + first-play trickle. Each spend EVENT grants Spotlighted +10% this turn
@@ -290,46 +257,115 @@
    # (first Spotlighted PLAY each turn — a silent turn pays nothing), not passive per-turn accrual.
    # PROPOSED pending red-pen. (lint-ok: pct points)
 # Generic (4)
-- {id: fortissimo_guard, name: "Fortissimo Guard", cost: 2, type: skill, rarity: uncommon, solve: [block], archetypes: [generic], role: glue,
-   effects: [{op: block, amount: 11}]}
-   # Spirited Away minus one (A3 discipline holds at uncommon too).
-- {id: courtroom_drama, name: "Courtroom Drama", cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [generic], role: glue,
-   effects: [{op: apply_power, power: vulnerable, amount: 2, target: enemy}, {op: apply_power, power: weak, amount: 1, target: enemy}]}
-   # The full cross-examination. A6 debuff texture in one card.
-- {id: quick_change, name: "Quick Change", cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [generic], role: glue,
-   effects: [{op: draw, amount: 3}, {op: discard, amount: 1}]}
-   # Bright Idea parity: costume change between scenes.
-- {id: deep_breath, name: "Deep Breath", cost: 1, type: skill, rarity: uncommon, solve: [velocity, sustain], archetypes: [generic, fanfare], role: glue, exhaust: true,
+- {id: fortissimo_guard, name: "Fortissimo Guard", register: salon, cost: 2, type: power, rarity: uncommon, solve: [block], archetypes: [salon, generic], role: glue,
+   effects: [{op: apply_power, power: salon_deploy_block, amount: 5, target: self, note: "whenever you deploy a Salon member, gain N Block"}]}
+   # CURTAIN CALL B (R85): skill->power, the §4 power-quota conversion. Activity-triggered block (the guard
+   # stands when the cast walks on), never per-turn — the sheet header's accrual law. Per deploy EVENT, so
+   # Full Ensemble is three cues. Was: block 11 flat (Spirited Away minus one). (lint-ok: pre-sweep body)
+   # The A3 discipline now lives
+   # on the trigger rate instead of one big number. PROPOSED pending red-pen.
+- {id: courtroom_drama, name: "Courtroom Drama", register: archon, cost: 1, type: power, rarity: uncommon, solve: [utility], archetypes: [generic], role: glue,
+   effects: [{op: apply_power, power: cross_examination, amount: 1, target: self, note: "the first reaction you trigger each turn applies N Vulnerable and N Weak to its target"}]}
+   # CURTAIN CALL B (R85): skill->power on the RATIFIED archon register move — the trial runs all combat.
+   # Reads state Furina owns (her reactions put the defendant on the stand); first-reaction gate keeps a
+   # reaction storm from becoming a lockdown engine. Was: Vulnerable 2 + Weak 1 one-shot. PROPOSED.
+- {id: quick_change, name: "Quick Change", register: private, cost: 1, type: power, rarity: uncommon, solve: [velocity], archetypes: [generic], role: glue,
+   effects: [{op: apply_power, power: first_attack_draw, amount: 1, target: self, note: "the first Attack you play each turn draws N"}]}
+   # CURTAIN CALL B (R85): the RATIFIED 5th power slot (chat 2026-07-27; florid_cadenza keeps its F-B1 threshold  (lint-ok: ruling ordinal)
+   # design). The standing costume-change discipline: the first Attack each turn draws — spotlight_draw's
+   # first-play-window grammar on her attack cadence, activity-gated per the header law. Was: draw 3,
+   # discard 1 (Bright Idea parity — generic padding, exactly what this sweep removes). PROPOSED.
+- {id: deep_breath, name: "Deep Breath", register: private, cost: 1, type: skill, rarity: uncommon, solve: [velocity, sustain], archetypes: [generic, fanfare], role: glue, exhaust: true,
    effects: [{op: energy, amount: 1}, {op: gain_encore, amount: 2}]}
    # Sugar Rush parity, buffer-flavored.
+# Promoted at Curtain Call (R85) -- see each card's own comment
+- {id: torrential_turn, name: "Torrential Turn", register: salon, cost: 2, type: attack, rarity: uncommon, solve: [frontload, utility], archetypes: [salon, generic], role: payoff,
+   effects: [{op: damage, amount: 10, target: enemy, bonus_vs_aura: 3}, {op: refresh_all_auras}]}
+   # CURTAIN CALL C (R85): the aura-conditional rewrite (§7) — the turn CASHES the aura and RE-WINDS every
+   # clock on stage (refresh_all_auras, first use in this pool: durations reset, nothing is consumed).
+   # The cash rider comes down 4->3 because the refresh is real value. Salon's uptime payoff. PROPOSED.
+- {id: dramatic_entrance, name: "Dramatic Entrance", register: archon, cost: 1, type: attack, rarity: uncommon, solve: [frontload], archetypes: [fanfare], role: payoff,
+   effects: [{op: damage, amount: 6, target: enemy, bonus_formula: 1_per_4_fanfare}]}
+   # F-B1: the binary threshold becomes a SMOOTH read. Live from turn one at any meter level, where the gate rendered as
+   # nothing at all below its bar — and a scaling number is the one shape the legibility pipeline can show on the face.
+- {id: witness_stand, name: "The Witness Stand", register: archon, cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [generic], role: glue,
+   effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}, {op: draw, amount: 1}]}
+   # Courtroom texture: one count of Vulnerable and the next page of testimony.
+- {id: audience_participation, name: "The Crowd Answers", register: archon, cost: 1, type: skill, rarity: uncommon, solve: [sustain, velocity], archetypes: [fanfare, generic], role: glue,
+   effects: [{op: conditional, if: reaction_triggered_this_turn,
+              then: [{op: gain_encore, amount: 4}, {op: draw, amount: 2}],
+              else: [{op: gain_encore, amount: 2}, {op: draw, amount: 1}]}]}
+   # CURTAIN CALL C (R85): the co-op/partner-flux read (§7; rn, archon) — reactions are the partner
+   # interface (kickoff §4: ally flux is her Genshin identity), and when the stage answers with a
+   # spectacle, the crowd answers HER: 4 buffer and 2 cards on a reaction turn, the old honest glue
+   # otherwise. Register flips private->archon with the body (the read is the archon voice). PROPOSED.
+- {id: tempo_change, name: "Double Time", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [velocity], archetypes: [fanfare, salon], role: glue,
+   effects: [{op: draw, amount: 1}, {op: conditional, if: has_salon_members, then: [{op: energy, amount: 1}]}]}
+   # CURTAIN CALL C (R85): the salon-register rewrite (§7; rn) — the director calls double time and the
+   # COMPANY carries it: a card, and the energy back while the stage is set. The encore_cost 3 gate is
+   # dropped WITH the register (§3 grammar: spend lines are the private voice; a salon name may not carry
+   # one). Was: Spend 3 Encore for energy+draw, a stat-only NEARDUP core member. PROPOSED.
+- {id: poised_riposte, name: "Poised Riposte", register: private, cost: 1, type: attack, rarity: uncommon, solve: [frontload], archetypes: [generic], role: glue,
+   effects: [{op: damage, amount: 6, target: enemy, bonus_formula: 1_per_3_encore}]}
+   # CURTAIN CALL B+C (R85): the encore-interaction rewrite (§7) — her poise IS her reserves (Body Slam
+   # precedent: damage reads a defensive pool; Encore is READ, never spent). Landed with Track B rather than
+   # C because the C→U promotion made the old flat 6 strictly dominated by house_call at common — the
+   # domination lint forced the body early, and the sprint log's cell-2 attribution note carries it.
+   # Was: damage 6 flat (her honest Strike+, Klee comp). (lint-ok: history)
+- {id: curtain_up, name: "In the Wings", register: private, cost: 0, type: skill, rarity: uncommon, solve: [sustain, velocity], archetypes: [fanfare], role: enabler,
+   effects: [{op: gain_encore, amount: 2}, {op: scry_discard, amount: 1}]}
+   # CURTAIN CALL C (R85): the private-register rewrite (§7; rn) — waiting in the wings, she gathers
+   # herself AND watches the stage: buffer 2 plus a scry (look at the top card, shed it if it is wrong for
+   # the scene). Breaks the gain_encore clone triplet; the 0-cost slot earns its U promotion with a decide
+   # point. Was: gain 2 Encore flat (Sparkly Treasure parity). PROPOSED.
+- {id: matinee_performance, name: "Matinée Performance", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [frontload, scaling], archetypes: [salon, generic], role: payoff, tags: [skill_tag],
+   effects: [{op: damage, amount: 5, target: enemy}, {op: damage, amount: 2, target: enemy, times: salon_members}]}
+   # CURTAIN CALL C (R85): the salon-count scaler (§7) — the matinée runs as long as the cast list: 5, plus
+   # a 2-damage bow per member on stage (times: salon_members, the new power-stack CalculatedVar read).
+   # RETYPE REVERTED by the pre-registered shrink clause (Track B / prediction 7): as a damaging SKILL every
+   # member hit APPLIES hydro — the matinée seeds the stage it scales with. The draw cantrip stays retired
+   # (a payoff, not glue). PROPOSED.
+- {id: standing_room_only, name: "The House Rises", register: archon, cost: 1, type: attack, rarity: uncommon, solve: [frontload, utility], archetypes: [fanfare, generic], role: payoff,
+   effects: [{op: damage, amount: 5, target: all_enemies, bonus_formula: 1_per_4_fanfare}]}
+   # CURTAIN CALL C (R85): the archon-register fanfare AoE payoff (§7; rn). The whole nation on its feet:
+   # 5 to ALL, +1 per 4 Fanfare — the rate tightens (was 1 per 5) and the base rises 4->5 because the U slot
+   # pays for payoff-grade numbers. Plain attack since Track B (mass application deleted; the Gardener-wall
+   # answer is now the payoff's, not the applier's). Left the convergence watchlist with its application.
+   # PROPOSED.
+- {id: crowd_work, name: "The Gallery Stirs", register: archon, cost: 1, type: power, rarity: uncommon, solve: [velocity], archetypes: [fanfare], role: glue,
+   effects: [{op: apply_power, power: encore_spend_draw, amount: 1, target: self, note: "the first time you spend Encore each turn, draw N"}]}
+   # CURTAIN CALL B (R85): skill->power + (rn) to the archon register — the audience leans in whenever she
+   # gives of herself. The A5 spend-tempo identity becomes a standing engine on the SAME verb (spend events),
+   # once per turn so the flux plan cannot loop it. The encore_cost 2 install gate is dropped: a spend-payoff
+   # engine bricked behind a spend was anti-synergy at fight start. Was: "Spend 2 Encore: draw 2". PROPOSED.
 
-# ---------- RARE (15: 1 kit + 14 draftable) ----------
-- {id: let_the_people_rejoice, name: "Let the People Rejoice", cost: 0, type: attack, rarity: rare, solve: [frontload, utility], archetypes: [generic], role: payoff, tags: [burst], kit_card: true,
+# ---------- RARE (19: 1 kit + 18 draftable; was 15 before Curtain Call R85) ----------
+- {id: let_the_people_rejoice, name: "Let the People Rejoice", register: archon, cost: 0, type: attack, rarity: rare, solve: [frontload, utility], archetypes: [generic], role: payoff, tags: [burst], kit_card: true,
    requires: burst_energy_full,
    effects: [{op: damage, amount: 8, target: all_enemies, bonus_formula: 1_per_4_fanfare}, {op: gain_encore, amount: 6}]}
    # HER BURST (kit, v1.9: innate-on-charge, Retain, never in pool). Cost 0 (USER RULING 2026-07, matching Klee's
    # Sparks 'n' Splash: the charged meter IS the cost -- it empties on cast). Was cost 2 at sheet passes 1-3; archived
    # Furina numbers are cost-2-world. Mass hydro (burst-tag cadence) scaling with the crowd's roar,
    # and the revelry refills the buffer. Meter 70 (declared, sheet-pass knob): particles from skill tags, reactions, Salon ticks, Encore spend.
-- {id: encore_performance, name: "Encore Performance", cost: 1, type: skill, rarity: rare, solve: [utility, scaling], archetypes: [spotlight], role: payoff,
+- {id: encore_performance, name: "Encore Performance", register: salon, cost: 1, type: skill, rarity: rare, solve: [utility, scaling], archetypes: [spotlight], role: payoff,
    effects: [{op: energy, amount: 1}, {op: copy_spotlighted_in_hand, amount: 1}]}
    # THE duplication card (kickoff §9; DECISIONS 64's held-open registration). Copies a Spotlighted card in hand — kit-deepener,
    # Columbina's replay grammar on schedule. Refunds its Energy so the copied Companion is playable now; still dead without a target.
    # WATCHLIST: duplicating an amp-booster goes on the amp-cap watchlist (iron rule bounds it; confirm in provenance logs).
-- {id: singer_of_many_waters, name: "Singer of Many Waters", cost: 1, type: skill, rarity: rare, solve: [sustain], archetypes: [generic, salon], role: payoff, exhaust: true,
+- {id: singer_of_many_waters, name: "Singer of Many Waters", register: archon, cost: 1, type: skill, rarity: rare, solve: [sustain], archetypes: [generic, salon], role: payoff, exhaust: true,
    effects: [{op: heal, amount: 14}]}
    # TRUE HEAL: Rare AND Exhausts — the conjunctive law's poster child (Guardrail 6). The Pneuma voice, once per combat.
-- {id: unheard_confession, name: "Unheard Confession", cost: 1, type: skill, rarity: rare, solve: [sustain], archetypes: [fanfare, generic], role: payoff, exhaust: true,
+- {id: unheard_confession, name: "Unheard Confession", register: archon, cost: 1, type: skill, rarity: rare, solve: [sustain], archetypes: [fanfare, generic], role: payoff, exhaust: true,
    effects: [{op: heal, amount: 8}, {op: gain_encore, amount: 6}]}
    # The second legal heal: half mended, half buffered, all Fanfare flux. Rare + Exhaust, per the law.
    # Cost 2->1 at the rework reprice (rare curve 1.93 -> 1.43 avg). PROPOSED.
-- {id: endless_waltz, name: "Endless Waltz", cost: 2, type: power, rarity: rare, solve: [scaling], archetypes: [salon], role: payoff,
+- {id: endless_waltz, name: "Endless Waltz", register: salon, cost: 2, type: power, rarity: rare, solve: [scaling], archetypes: [salon], role: payoff,
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta},
              {op: apply_power, power: salon_member, amount: 1, target: self, member: usher},
              {op: apply_power, power: salon_damage_up, amount: 3, target: self}]}
    # Named for her passive. The waltzing pair (hammer + shield, v2) and a standing crescendo — the Salon's rare
    # engine piece. Cost 3->2 at the rework reprice. PROPOSED pending red-pen.
-- {id: grand_gala, name: "Grand Gala", cost: 2, type: skill, rarity: rare, solve: [scaling, utility], archetypes: [salon], role: payoff, exhaust: true, tags: [skill_tag],
+- {id: grand_gala, name: "Grand Gala", register: salon, cost: 2, type: skill, rarity: rare, solve: [scaling, utility], archetypes: [salon], role: payoff, exhaust: true, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta},
              {op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta},
              {op: apply_power, power: salon_member, amount: 1, target: self, member: chevalmarin},
@@ -337,18 +373,20 @@
              {op: gain_encore, amount: 4}]}
    # All My Treasures parity: four deployments — on any live stage the elders bow out (v2 evoke geometry), and its
    # replacement-doubled Encore rider funds the opening turns. Cost 3->2 at the rework reprice. PROPOSED.
-- {id: the_sea_is_my_stage, name: "The Sea Is My Stage", cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [fanfare], role: payoff,
+- {id: the_sea_is_my_stage, name: "The Sea Is My Stage", register: archon, cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [fanfare], role: payoff, tags: [focalors],
    effects: [{op: gain_fanfare_floor, amount: 15}]}
+   # CURTAIN CALL C (R85): Focalors slot 1 (RATIFIED), flavor pass only — the hydro Archon on her true
+   # stage: the sea SHE is, the divinity the audience mistakes for theatre. Mechanics untouched by ruling.
    # THE CONSTELLATION CARD (F-B2). Was the uncapper; the blood rider is DROPPED with the law that demanded it.
    # The uncapper clause priced a ceiling raise, and a ceiling raise measured at +0.2pt to this very archetype —
    # true HP on a character with no healing was never worth that. Being a Rare Power it ALSO earns the rarity
    # grant, so it lands as a permanent baseline of 15 plus the standard rare-Power grant on top. PROPOSED.
-- {id: universal_revelry, name: "Universal Revelry", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [fanfare], role: payoff,
+- {id: universal_revelry, name: "Universal Revelry", register: archon, cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], archetypes: [fanfare], role: payoff,
    effects: [{op: damage, amount: 9, target: all_enemies, bonus_formula: 1_per_2_fanfare},
              {op: conditional, if: fanfare_at_least_15, then: [{op: damage, amount: 6, target: all_enemies}]}]}
    # F-B1: the archetype's ONE deliberate big-moment gate, and the reason thresholds were not banned outright. Keeps the
    # smooth read so it is never dead, and adds a burst above a bar that is reachable under decay. PROPOSED.
-- {id: star_of_the_show, name: "Star of the Show", cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [spotlight], role: payoff,
+- {id: star_of_the_show, name: "Star of the Show", register: salon, cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: spotlight_flat_damage, amount: 5, target: self, note: "Spotlighted cards' damage ops +5 printed per copy"}]}
    # G-D2 (2026-07-25), PROPOSED: printed bonus per copy raised. Named "weak" by the co-op A0 playtest,
    # and consistent with spotlight's run winrate measured far below salon's in the same world (see the
@@ -363,14 +401,14 @@
    # CAP DROPPED (user ruling 2026-07-24): with amount 3 and max_stacks 3 the cap EQUALLED one application, so a second
    # copy did literally nothing — a dead card of exactly the shape lint_strict_domination exists to catch. Flat +3 per
    # copy is linear and rides the same numbers-only pipe, so uncapping restores the base-StS "spam dupes if you want to".
-- {id: prima_donna, name: "Prima Donna", cost: 2, type: power, rarity: rare, solve: [velocity], archetypes: [spotlight], role: payoff,
+- {id: prima_donna, name: "Prima Donna", register: salon, cost: 2, type: power, rarity: rare, solve: [velocity], archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self}, {op: apply_power, power: spotlight_draw, amount: 1, target: self}]}
    # Both texture lines in one rare: the production revolves around her star.
-- {id: high_tide, name: "High Tide", cost: 1, type: attack, rarity: rare, solve: [frontload], archetypes: [salon, fanfare], role: payoff, tags: [skill_tag],
+- {id: high_tide, name: "High Tide", register: archon, cost: 1, type: attack, rarity: rare, solve: [frontload], archetypes: [salon, fanfare], role: payoff, tags: [skill_tag],
    effects: [{op: damage, amount: 15, target: enemy, bonus_formula: 1_per_2_fanfare}]}
    # F-B1: gate -> the steepest read on the sheet, which is what makes it the archetype's payoff rather than a fat vanilla
    # hit. Printed damage comes down for the same reason as flood_of_emotion: the Spend line was paying for part of it.
-- {id: rain_of_roses, name: "Rain of Roses", cost: 1, type: skill, rarity: rare, solve: [utility], archetypes: [salon, spotlight], role: payoff, tags: [skill_tag],
+- {id: rain_of_roses, name: "Rain of Roses", register: salon, cost: 1, type: skill, rarity: rare, solve: [utility], archetypes: [salon, spotlight], role: payoff, tags: [skill_tag],
    effects: [{op: apply_aura, element: hydro, target: all_enemies}, {op: gain_encore, amount: 5}]}
    # G-D1 (2026-07-25), PROPOSED: repriced one energy cheaper. Named "weak" by the co-op A0 playtest,
    # and that reading is consistent with the v2 reprice lesson -- rares were overpriced as a TIER, not
@@ -383,13 +421,42 @@
    # should be retaken after ratification rather than before.
    # Mass application + buffer. A6's rare ceiling. WATCHLIST (redpen flag 8): hydro+cryo convergence CELL member,
    # with undercurrent and guest_neuvillette_judgment (one measurement covers the full mass-application set).
-- {id: the_final_verdict, name: "The Final Verdict", cost: 2, type: attack, rarity: rare, solve: [frontload], archetypes: [generic], role: payoff,
+- {id: the_final_verdict, name: "The Final Verdict", register: archon, cost: 2, type: attack, rarity: rare, solve: [frontload], archetypes: [generic], role: payoff,
    effects: [{op: damage, amount: 18, target: enemy}, {op: conditional, if: reaction_triggered_by_this, then: [{op: gain_encore, amount: 6}]}]}
    # The gavel falls. Plain attack — but landing it through a companion-seeded aura (triggering the reaction) refills the buffer.
-- {id: command_performance, name: "Command Performance", cost: 1, type: skill, rarity: rare, solve: [utility], archetypes: [spotlight], role: payoff, exhaust: true,
+- {id: command_performance, name: "Command Performance", register: salon, cost: 1, type: skill, rarity: rare, solve: [utility], archetypes: [spotlight], role: payoff, exhaust: true,
    effects: [{op: generate_guest_star, rarity: uncommon, amount: 2}]}
    # The rare generator: two uncommon guests at once (still sub-Rare output — the equal-rarity clause reads the GENERATED
    # rarity, and this card's own grammar keeps it under the banner: it creates uncommons, never 5-star Rares).
-- {id: reginas_mercy, name: "The Regina's Mercy", cost: 1, type: skill, rarity: rare, solve: [sustain], archetypes: [generic, fanfare], role: payoff, exhaust: true,
-   effects: [{op: gain_encore, amount: 10}]}
-   # The buffer nuke: ten points of grace, once. Not a heal — the law stays clean; the Fanfare flux is enormous.
+- {id: reginas_mercy, name: "The Regina's Mercy", register: archon, cost: 1, type: skill, rarity: rare, solve: [sustain, scaling], archetypes: [generic, fanfare], role: payoff, exhaust: true, tags: [focalors],
+   effects: [{op: gain_encore, amount: 12}, {op: gain_fanfare_floor, amount: 5}]}
+   # CURTAIN CALL C (R85): Focalors slot 2 (RATIFIED), rewritten toward "her final mercy" (§7) — she gives
+   # EVERYTHING, once: twelve points of grace, and the nation permanently remembers (+5 floor). Not a heal;
+   # the law stays clean. Exhaust stays: a final mercy happens once. The lasting_impression floor grammar
+   # at its rare ceiling. PROPOSED.
+# Promoted at Curtain Call (R85)
+- {id: thunderous_ovation, name: "Thunderous Ovation", register: archon, cost: 1, type: skill, rarity: rare, solve: [block], archetypes: [fanfare, generic], role: payoff,
+   effects: [{op: block, amount: 6, bonus_formula: 1_per_2_fanfare}]}
+   # CURTAIN CALL C (R85): the fanfare-read block payoff at RARE (§7 + authored C->R, ratified) — the
+   # applause itself is her wall: 6, +1 per 2 Fanfare, the steepest defensive read in the pool (high_tide's
+   # survival-axis mirror, 21 at the 30 cap). No longer dramatic_entrance's twin: the rate is doubled and
+   # the slot is a payoff, not glue. F-B1's rider grammar unchanged. PROPOSED.
+- {id: flood_of_emotion, name: "Flood of Emotion", register: archon, cost: 1, type: skill, rarity: rare, solve: [frontload], archetypes: [fanfare], role: payoff, tags: [skill_tag],
+   effects: [{op: damage, amount: 14, target: enemy}, {op: conditional, if: fanfare_at_least_20, then: [{op: damage, amount: 14, target: enemy}]}]}
+   # CURTAIN CALL C (R85): the fanfare-THRESHOLD payoff rewrite (§7), at rare where thresholds pay for their
+   # gate (universal_revelry's grammar). At a roaring house the flood strikes TWICE — 14, or 28 past the bar.
+   # The smooth read leaves this card (crescendo/high_tide own that shape); the family loses its third twin.
+   # RETYPE REVERTED by the pre-registered shrink clause (Track B / the uptime prediction): cell 3
+   # breached the hydro-uptime bound (fanfare arm -26% rel.), so the flood stays a damaging SKILL — both
+   # strikes apply. (lint-ok: telemetry) PROPOSED.
+- {id: showstopper, name: "Showstopper", register: archon, cost: 1, type: attack, rarity: rare, solve: [frontload, sustain], archetypes: [fanfare], role: payoff,
+   effects: [{op: damage, amount: 12, target: enemy}, {op: conditional, if: killed_target, then: [{op: gain_encore, amount: 6}, {op: draw, amount: 2}]}]}
+   # CURTAIN CALL C (R85): the RATIFIED 4th rare (chat 2026-07-27), differentiated from house_call (§7) by
+   # vacating the conditional-double-damage shape entirely: a showstopper STOPS THE SHOW — if the hit
+   # kills, the house erupts (6 buffer, 2 cards; first killed_target read in the pool). The old fanfare
+   # threshold moved to flood_of_emotion, whose §7 row claims it. PROPOSED.
+- {id: rapturous_applause, name: "Rapturous Applause", register: archon, cost: 1, type: power, rarity: rare, solve: [scaling], archetypes: [fanfare], role: payoff,
+   effects: [{op: apply_power, power: fanfare_attack_per10, amount: 1, target: self, note: "attacks +N damage per 10 Fanfare"}]}
+   # "Stacks grant flat power bonuses" (kickoff §4), the card. Reads the pool, spends nothing.
+   # CAP DROPPED (user ruling 2026-07-24, uncap-all): +1/copy per 10 Fanfare is additive in copies. Same A/B as
+   # the salon cap; fanfare-plan win-rate is sub-1% today, so the drop is inert now and reversible if that changes.

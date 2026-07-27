@@ -45,21 +45,21 @@ gentilhomme_usher:     {block: +2}           # 4->6
 surintendante_chevalmarin: {encore: +2}      # 3->5
 mademoiselle_crabaletta: {power_amount: +1}  # v2: 1->2 Crabalettas (double hammer)
 dinner_service:        {encore: +1}          # 3->4 base and rider (both branches)
-usher_the_waves:       {damage: +2}          # 5->7 (still applies hydro)
-torrential_turn:       {damage: +3}          # 10->13, aura bonus stays 4
-matinee_performance:   {damage: +2}          # 4->6
+usher_the_waves:       {damage: +2}          # 5->7 (plain attack since Curtain Call B: no longer applies)
+torrential_turn:       {damage: +3}          # 10->13; aura-cash 3 and the refresh stay (Curtain Call C)
+matinee_performance:   {damage: +2}          # base 5->7; member bows stay 2 each and apply hydro (shrink clause)
 rising_tide:           {encore: +2}          # 3->5
 house_call:            {damage: +2}          # 6->8 base; member rider stays 4
-curtain_up:            {encore: +1}          # 2->3
+curtain_up:            {encore: +1}          # 2->3; the scry stays 1 (Curtain Call C)
 dramatic_entrance:     {damage: +3}          # base 6->9; the F-B1 read (1 per 4 Fanfare) rides on top
-crowd_work:            {draw: +1}            # 2->3; Spend 2 Encore stays (the flux is the card)
+crowd_work:            {power_amount: +1}    # first-spend draw 1->2 (Curtain Call B: skill->power)
 suffering_for_art:     {encore: +1}          # 3->4; the measured 1 self-damage stays
 lasting_impression:    {fanfare_floor: +2}   # 3->5 permanent baseline (F-B2). The floor IS the card, so the
                                              # upgrade buys baseline rather than a bigger immediate rider.
-thunderous_ovation:    {block: +2}           # base 7->9; the F-B1 read (1 per 4 Fanfare) rides on top
-tempo_change:          {draw: +1}            # 1->2; energy and encore_cost untouched
-warmup_act:            {damage: +2}          # 3->5
-audience_participation: {encore: +1}         # 2->3
+thunderous_ovation:    {block: +2}           # base 6->8; the steep read (1 per 2 Fanfare) rides on top (Curtain Call C)
+tempo_change:          {draw: +1}            # 1->2; the member-conditional energy stays (Curtain Call C)
+warmup_act:            {damage: +2}          # 3->5; the read-the-room block stays 3 (Curtain Call C)
+audience_participation: {encore: +1}         # both branches: 4->5 / 2->3 (Curtain Call C; encore-key law)
 ebb_and_flow:          {encore: +1}          # gain 3->4; the Spend 1 stays (net flux grows)
 an_invitation:         {generate_cost_override: 0}   # kickoff §9 upgrade grammar VERBATIM: the guest costs 0
 limelight:             {draw: +1}            # 1->2; the boost stays 25 (R16: the mult is authored, not upgraded)
@@ -68,32 +68,32 @@ shared_billing:        {cost: -1}            # 1->0 (R32.2 rider swap took the b
 blocking_notes:        {block: +2}           # 7->9 (base lifted by the R32.2/R32.3 A3 rehome)
 stage_lights:          {power_amount: +1}    # flat rider +2->+3 this turn; the Weak rider stays 1 (R32.2)
 curtain_cue:           {encore: +1}          # both branches: 3->4 / 1->2
-graceful_retreat:      {block: +3}           # 6->9
+graceful_retreat:      {block: +3}           # base 5->8; the wounded rider stays 4 (Curtain Call C)
 poised_riposte:        {damage: +3}          # 6->9
 commanding_gaze:       {weak: +1}            # 1->2 all
 witness_stand:         {vulnerable: +1}      # 1->2
 macaron_break:         {encore: +1}          # 2->3
-swelling_overture:     {draw: +1}            # 2->3
+swelling_overture:     {draw: +1}            # all draw ops (draw-key law): 2->3 base, 1->2 at reserves (Curtain Call C)
 undercurrent:          {damage: +2}          # 7->9 all (still applies; convergence watchlist notes the upgrade too)
-standing_room_only:    {damage: +2}          # 4->6 all base; the 1_per_5_fanfare formula stays (rework, PROPOSED)
+standing_room_only:    {damage: +2}          # 5->7 all base; the 1_per_4_fanfare read stays (Curtain Call C)
 
 # ---- UNCOMMONS (bump OR keyword/condition; two cost slots + one 1->0) ----
 full_ensemble:         {cost: -1}            # 2->1 after the rework reprice (uncommon cost slot; bombs_away precedent)
 grand_salon:           {power_amount: +1}    # +3->+4, cap 6 unchanged
-many_waters_melody:    {encore: +1}          # 5->6 base, 3->4 rider
+many_waters_melody:    {encore: +1}          # 4->5 base; the member wall stays 5 (Curtain Call C)
 dress_rehearsal:       {encore_cost: -1}     # Spend 2 -> Spend 1 (condition-soften class)
 crashing_waves:        {damage: +2}          # 8->10 all; aura bonus stays 5
 overflowing_hospitality: {encore: +2}        # 3->5
 waters_embrace:        {block: +3}           # base 9->12; salon rider stays 5
-crescendo:             {damage: +3}          # 8->11; spend 10 and 1_per_2 formula stay
-showstopper:           {conditional_bonus: +3}   # 7->10 when the house roars
+crescendo:             {damage: +3}          # base 6->9; the 1_per_2 read and the +2 growth stay (Curtain Call C)
+showstopper:           {damage: +3}          # 12->15; the kill payout stays 6/2 (Curtain Call C)
 florid_cadenza:        {condition: unconditional}  # F-B1: the upgrade DROPS THE GATE rather than adding cards --
                                              # upgraded it is the pre-sprint card (3 draw, 0 cost), and the base
                                              # version is the one that now has to earn it.
 hearts_swelling:       {encore: +2}          # 7->9
 rapturous_applause:    {power_amount: +1}    # +1->+2 per 10 Fanfare, cap 2 unchanged
-pit_orchestra:         {block: +2}           # 5->7
-flood_of_emotion:      {damage: +3}          # 14->17; the F-B1 read (1 per 3 Fanfare) rides on top
+pit_orchestra:         {power_amount: +2}    # bow-block 5->7; the Encore half stays 2 (first apply_power gets the bump)
+flood_of_emotion:      {damage: +3}          # first strike 14->17; threshold strike stays 14; applies hydro again (shrink clause)
 leading_role:          {cost: -1}            # 1->0 (endless_fireworks engine-power precedent)
 supporting_cast:       {power_amount: +1}    # first Spotlighted card draws 1->2
 guest_list:            {generate_cost_override: 0}   # Discovery parity
@@ -103,9 +103,9 @@ duet:                  {draw: +1}            # 1->2
 standing_ovation:      {cost: -1}            # 1->0 after the machinery-efficiency pass. R32.1 flip:
                                              # upgrading the +10%/spend amount would outgrow the two-copy cap
                                              # (20 != amount, applier correctly won't bump it) — cost is the lever.
-fortissimo_guard:      {block: +3}           # 11->14
-courtroom_drama:       {vulnerable: +1}      # 2->3; weak stays 1
-quick_change:          {draw: +1}            # 3->4, discard stays 1
+fortissimo_guard:      {power_amount: +2}    # deploy-block 5->7 (Curtain Call B: skill->power; block delta retired with the flat body)
+courtroom_drama:       {power_amount: +1}    # cross_examination 1->2 (both counts grow together by design)
+quick_change:          {power_amount: +1}    # first-Attack draw 1->2 (Curtain Call B: skill->power)
 deep_breath:           {remove: exhaust}     # sugar_rush-exact quality upgrade
 
 # ---- RARES (quality over quantity) ----
@@ -123,7 +123,7 @@ prima_donna:           {cost: -1}            # 2->1
 high_tide:             {damage: +4}          # 15->19; the F-B1 read (1 per 2 Fanfare, the steepest) rides on top
 rain_of_roses:         {encore: +2}          # 5->7; the mass application is the card, it does not grow
 the_final_verdict:     {damage: +4}          # 18->22; reaction rider stays 6
-reginas_mercy:         {encore: +3}          # 10->13
+reginas_mercy:         {encore: +3}          # 12->15; the remembered floor stays 5 (Curtain Call C)
 command_performance:   {generate_cost_override: 0}   # both guests cost 0 (Discovery parity)
 
 # ---- FONTAINE COMPANIONS (modest single bumps; upgraded forms stay enabler-grade — guardrail 3 applies) ----

@@ -178,6 +178,16 @@ def spend_encore(state: CombatState, n: int) -> int:
             p.powers["spotlight_mult_bonus_turn"] = (
                 p.powers.get("spotlight_mult_bonus_turn", 0) + boost)
             state.emit("ovation_spend_boost", amount=boost)
+        # The Gallery Stirs (Curtain Call B/C, R85): the FIRST spend event
+        # each turn draws. Activity-gated by construction -- a turn that
+        # spends nothing draws nothing (the sheet header's no-passive-accrual
+        # law) -- and once-per-turn so the flux plan cannot loop it into a
+        # draw engine the way a per-event rate would.
+        n = p.powers.get("encore_spend_draw", 0)
+        if n and state.encore_spend_draws_this_turn == 0:
+            state.encore_spend_draws_this_turn = 1
+            state.draw(n)
+            state.emit("extra_draw", amount=n)
     return spent
 
 

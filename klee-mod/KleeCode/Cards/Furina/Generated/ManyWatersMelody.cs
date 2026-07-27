@@ -44,7 +44,7 @@ public sealed class ManyWatersMelody : CustomCardModel, ICharacterCard, ISkillTa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Melody of Many Waters"),
-        ("description", "Gain {IfUpgraded:show:6|5} [gold]Encore[/gold]. If you have a [gold]Salon Member[/gold]: gain {IfUpgraded:show:4|3} [gold]Encore[/gold]."),
+        ("description", "Gain {IfUpgraded:show:5|4} [gold]Encore[/gold]. If you have a [gold]Salon Member[/gold]: gain 5 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -62,10 +62,10 @@ public sealed class ManyWatersMelody : CustomCardModel, ICharacterCard, ISkillTa
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 6 : 5));
+        FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 5 : 4));
         if (SalonMemberPower.Count(Owner.Creature) > 0)
         {
-            FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 4 : 3));
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, 5m), ValueProp.Move), cardPlay);
         }
     }
 

@@ -2685,3 +2685,61 @@ IS a version bump, in the same edit, or the stamp rule is decoration.
 **Class: RULING** ([USER] 2026-07-27) **+ MEASUREMENT** (the D12
 constants are landed with the sweep as evidence; the fresh 3-act roster
 table lives in the review doc s7 -- the only quotable roster table).
+
+## R85 -- "Curtain Call": the register convention lands and the Furina pool takes the official shape (2026-07-27)
+
+Ruled by [USER] in chat, 2026-07-27, in three parts. (1) The pre-registered
+Curtain Call sweep is ratified to execute ("if there are no open questions,
+please proceed"), with the register convention (§3: salon / archon /
+private), the trial-card register moves and the two-Rare Focalors cap
+already RATIFIED in the morning's rulings. (2) The counting check FAILED as
+written -- warmup_act and dramatic_entrance were already attacks and
+pit_orchestra already uncommon on the sheet of record, so the §7 worklist
+could not reach the §4 targets -- and [USER] ruled the SESSION AUTHORS the
+extra moves to land §4 exactly (against the alternatives of re-deriving §4
+down or holding for per-card red-pen). (3) The two deferred slots:
+quick_change is the 5th power (florid_cadenza keeps its F-B1 threshold
+design); showstopper is the 4th rare.
+
+**Executed** (docs/curtain-call-sprint-log-2026-07-27.md, the log of
+record; Tracks A / B / C+E plus the shrink amendment). The reconciled move
+set landed EXACTLY on §4 (Attack 17 / Skill 46 / Power 15, C 22 / U 32 /
+R 19 at frozen pool 78) -- and then §4's own pre-registered shrink clause
+fired on the cell-3 hydro-uptime breach, reverting the two authored
+retypes that carried the most application (flood_of_emotion,
+matinee_performance, rewrites and rarity moves intact). FINAL shape:
+Attack 15 / Skill 48 / Power 15, rarities as ratified -- the type
+deviation is logged with the clause as its authority. Register census: every card tagged, nine renamed (ids
+stable), lint (tools/lint_furina_registers) at zero violations with the
+Focalors cap holding at exactly {the_sea_is_my_stage, reginas_mercy}.
+`register` joins the SHARED card schema (state.py) -- Columbina and every
+future character inherit the column; the value vocabulary stays
+per-character and the third-instance rule governs generalizing the lint.
+
+**The gate debt is PAID.** R81's named defect -- uniq 62 / neardup 0.94,
+the worst on the roster -- re-reads at cell 3 as **uniq 76 / neardup 0.15
+/ maxclu 3 / vocab 34**: inside the official band on every gated metric
+and past the pool-sweep vocab guidance. The furina KNOWN_FAILING entries
+are removed (the staleness test forced them); klee/kokomi rows remain the
+roster debt.
+
+New engine vocabulary, all precedent-argued and pinned in
+test_curtain_call: five activity-triggered powers (deploy-block, bow
+payout, first-spend draw, first-attack draw, first-reaction
+cross-examination -- never per-turn, per the accrual law), the
+`salon_members` CalculatedVar read (Mirage's power-stack precedent), and
+`N_per_M_encore` on bonus_formula (Body Slam's defensive-pool read).
+C# parity for all of it is DEFERRED to the consolidation sprint by the
+sprint's own §9 (FURINA_DEFERRED_TO_CONSOLIDATION, twelve cards, each
+refused by name in blocked_reason; manifest 65 generated / 13 blocked).
+
+Cell results, predictions graded in writing, the environment caveat on the
+real anchors (game_ref absent on fresh clones -- ten of twelve roster arms
+reproduce byte-identically, the two real-anchor rows need a local re-run
+before the consolidation sprint quotes them), and the named follow-ons
+(salon-trim pre-registration per prediction 5; the archetype-scorer
+question for the new self-powers) live in the sprint log.
+
+**Class: RULING** ([USER] 2026-07-27, three chat ratifications) **+
+MEASUREMENT** (cells 0-3 + seed-12 rider; D12 frozen throughout -- no
+scorer or drafter constant moved).
