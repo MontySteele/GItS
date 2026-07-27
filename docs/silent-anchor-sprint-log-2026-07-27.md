@@ -964,3 +964,79 @@ readings and this paragraph.
 - **A2/A3 remain unratified.** A2 now has its evidence and needs a ruling;
   A3 is unblocked for the first time, because the pilot finally has a
   complete pool to draft from.
+
+---
+
+## 15. Post-sprint review (2026-07-27, four-reviewer pass, fixes applied)
+
+An adversarial review of the whole branch confirmed the log's claims
+essentially everywhere it checked -- and found **one P0, twice
+independently, each time with a live repro**:
+
+**The end-of-turn flush destroyed duplicate cards under Well Laid Plans.**
+`Card` is a dataclass, so `c not in retained` compared by VALUE; retaining
+one Strike made its equal twin fail the discard filter AND miss
+`p.hand = retained` -- the twin left the combat permanently. With a starter
+of 5 Strikes / 5 Defends, every run drafting WLP shed duplicates turn after
+turn, invisibly. The existing test used two distinct cards and could not
+see it. FIXED by identity membership, and the same value-equality idiom was
+then swept out of EVERY card-pile remove (`state.remove_instance`, ten
+sites across combat/effects/refpowers -- per-instance state like
+`cost_delta_this_combat` means equal twins are not interchangeable). Two
+twin-card tests pin the flush.
+
+**Every tier 0.5 Silent number in this log predates that fix** and is
+suspect to the degree WLP entered decks. The act-1 regression question
+(§12.1.b) should be re-measured before it is explained. A narrowing fact
+for that review, also found here: tier05/runner.py flies `real_silent` on
+the GENERIC pilot, so the A3 placeholder weights never touched any act-1
+number -- the live suspect is the draft scorer.
+
+Also fixed on review: Intangible now caps unblockable damage and poison
+ticks (it capped only the block-funnel path; Wraith Form's promise);
+the loader<->builder layer-agreement pin moved out of the game_ref skip
+guard so CI can see it; a token-free `CanonicalKeywords` declaration
+(`=> _keywords;`) now excludes instead of reading as empty; the upgrade
+lookup fallbacks catch only missing-entry shapes instead of every
+exception; derived-vs-derived id-prefix collisions are pinned by test;
+token discovery no longer swallows the ambiguous-match error; the
+stale coverage block in archetypes.yaml was updated to the completed pool;
+the gate banner and docstring were brought current (the 75-card reading is
+now in the table, columns unrecorded at the time marked `--`).
+
+**Deliberately NOT touched:** the committed `tag_damage_shiv` power name
+sits on the wrong side of §14.1's own payload rule (a base-game tag in
+committed code) -- or the rule overstates. Either way it is a [USER]
+ruling, filed here rather than papered over.
+
+### 15.1 The tag ruling, and what re-running Ironclad found (same day)
+
+[USER] ruled: clear the issue. A plain rename cannot -- the committed name
+must equal `tag_damage_` + the snake of the base game's own CardTag or the
+real pool's Accuracy silently buffs nothing -- so the fix is the one §14.1
+already prescribes: the committed dial now holds only the PREFIX
+(`TAG_SCOPED_POWERS = {"AccuracyPower": "tag_damage_"}`), and
+`decompile_character` completes the entry into SUPPORTED_POWERS and
+UPGRADE_POWER_KEY by reading the single CardTag off the power's own
+decompiled source (fail-closed: zero or two tags refuses), the same way
+tokens and CanonicalTags were already recovered. Verified by re-running
+both extractions: every game_ref output byte-identical. The finished name
+now exists only in gitignored output. What REMAINS committed --
+`tag_damage_shiv` in `tier0/content/cards/silent.yaml`, tests, and the
+effects.py comment -- is REF vocabulary: ref_silent's own token tag,
+authored from public StS1 knowledge in the Bomb-era commit 719219a, long
+before any decompilation. §14.1 does not reach it; the coincidence of
+spelling is the linkage working as designed.
+
+The verification run also exposed a LATENT pass-5 break nobody had seen:
+`Ironclad --emit-sheet` had not been re-run since NoDrawPower joined the
+dial (10:54), so its 9:54 sheet predated Battle Trance graduating from the
+pass-4 supplement -- and the next run refused on
+`ic_battle_trance overlaps the emitted sheet`, exactly the tripwire doing
+its job. The supplement row was expired (the Fan Of Knives pattern: the
+hand translation's whole job was to exist until the structural one could).
+Diff of the re-emitted sheet: the row moved from excluded to emitted 36/85
+with byte-identical effects, metadata, and upgrade delta, so no merged
+pool content and no recorded gate reading moved. The "Ironclad
+byte-identical" claim in §15 above is now locally re-verified -- through
+9:54; pass 5 itself had broken the RUN, not the output.
