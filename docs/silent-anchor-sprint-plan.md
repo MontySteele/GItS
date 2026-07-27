@@ -1,6 +1,6 @@
 # Silent Anchor — sprint plan (execution brief)
 
-2026-07-27. Design + rationale: `docs/silent-anchor-kickoff-v0.1.md` (read
+2026-07-27. Design + rationale: `docs/silent-anchor-kickoff-v1.md` (read
 it first; §5's wiring table and §6's gap table are the map). Executor:
 Opus. Ratification asks A1–A5 in the kickoff are [USER]-only — build up to
 them, never through them.

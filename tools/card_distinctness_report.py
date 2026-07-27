@@ -69,19 +69,44 @@ to the official rows.
   python tools/card_distinctness_report.py --gate         # exit 1 on breach
 
 GATE (PROPOSED 2026-07-26, single-anchor: OFFICIAL:ironclad 76 cards ->
-uniq 86% / maxclu 4 / neardup 18. Ratify after a SECOND official anchor;
-thresholds leave modding headroom below the official line):
+uniq 86% / maxclu 4 / neardup 18; thresholds leave modding headroom below
+the official line):
 
   uniq%  >= 75        maxclu <= 4        neardup <= 0.33 per card
 
 rider%/decide% carry NO gate -- measurement showed both are non-divergent
 (official rider% 26 sits inside our 25-37; official decide% 20 equals
-Klee's). vocab/top% carry NO GATE YET: themed characters legitimately
-concentrate, so the concentration threshold waits for the Silent anchor --
-the most archetype-concentrated OFFICIAL character is the test of whether
-concentration itself is the divergence.
+Klee's).
 
-Applies to pools of 30+ cards (companion sheets exempt by size).
+THE SECOND ANCHOR ARRIVED AND DID NOT RATIFY (2026-07-27, Silent anchor
+sprint; full analysis in docs/silent-anchor-sprint-log-2026-07-27.md). This
+docstring used to say "Ratify after a SECOND official anchor", and that
+sentence is now stale in the most misleading direction, so it is replaced by
+what actually happened:
+
+  OFFICIAL:silent   22 cards  vocab 9  top 50%  uniq 59%  maxclu 3  neardup 7
+
+  * uniq >= 75 is FAILED by the second official anchor (59%). Our own pools
+    post 56-62%; Ironclad posts 86%. On two anchors HE is the outlier, and a
+    gate calibrated on him condemns our pools for matching the other one.
+  * The obvious defence -- "her pool is only 25% extracted, and the split
+    biases an anchor toward simple cards" -- was TESTED and did not hold.
+    Restricting Ironclad to his structurally-simple doc-1 subset RAISES his
+    uniq (86 -> 89). At comparable thinness the anchors sit 42 points apart.
+  * maxclu <= 4 and neardup <= 0.33/card are cleared by BOTH anchors and are
+    ready to move from PROPOSED to ratified.
+  * uniq stays PROPOSED and SINGLE-ANCHOR-DERIVED. Do not read it as
+    ratified; do not lower it on 22 cards either. [USER] ask A2 is open.
+
+vocab/top% still carry NO GATE. The Silent anchor was supposed to settle the
+concentration question -- she is the most archetype-concentrated OFFICIAL
+character -- and at 25% coverage she cannot: her vocabulary is NINE ideas
+against Ironclad's 40, and with nine words a high top% is mechanical. Unlike
+uniq%, top% DOES move with coverage in the control (57% -> 66% when Ironclad
+is thinned). The question re-opens when her pool is materially larger.
+
+Applies to pools of 30+ cards (companion sheets exempt by size) -- and that
+exemption silently swallows OFFICIAL:silent, so --gate reports its skips.
 """
 from __future__ import annotations
 
@@ -149,7 +174,12 @@ TARGET_CLASS = {
 GATE_MIN_UNIQ = 75          # official 86
 GATE_MAX_CLUSTER = 4        # official 4
 GATE_NEARDUP_PER_CARD = 0.33
-GATE_MIN_POOL = 30          # companion sheets exempt by size
+# Companion sheets are exempt by SIZE, which is a proxy for "not a character
+# pool" -- and a proxy that misfires: OFFICIAL:silent IS a character pool, at
+# 22 cards, and vanishes through this hole. Until the exemption is by KIND,
+# --gate PRINTS what it skipped, so an exemption cannot read as a pass
+# (2026-07-27, Silent anchor sprint E-2).
+GATE_MIN_POOL = 30
 
 
 def _is_scaled(e: dict) -> bool:
@@ -341,9 +371,11 @@ def main() -> int:
                   "calibrated against one and cannot be checked without it. "
                   "Run tools/extract_base_game_pool.py locally.", file=sys.stderr)
             return 2
-        breaches = []
+        breaches, skipped = [], []
         for r in reports:
             if r["cards"] < GATE_MIN_POOL or "/" in r["pool"]:
+                if "/" not in r["pool"]:
+                    skipped.append(f"{r['pool']} ({r['cards']} cards)")
                 continue
             if r["uniq%"] < GATE_MIN_UNIQ:
                 breaches.append(f"{r['pool']}: uniq {r['uniq%']:.0f}% < "
@@ -355,8 +387,12 @@ def main() -> int:
                 breaches.append(
                     f"{r['pool']}: neardup {r['neardup']} > "
                     f"{GATE_NEARDUP_PER_CARD * r['cards']:.0f}")
+        if skipped:
+            print(f"\nGATE SKIPPED (under {GATE_MIN_POOL} cards -- this is NOT "
+                  f"a pass): {', '.join(skipped)}")
         if breaches:
-            print("\nGATE BREACHES (thresholds PROPOSED, pending 2nd anchor):")
+            print("\nGATE BREACHES (uniq is PROPOSED and SINGLE-ANCHOR-derived "
+                  "-- see the module docstring):")
             for b in breaches:
                 print(f"  FAIL {b}")
             return 1
