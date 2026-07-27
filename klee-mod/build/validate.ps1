@@ -863,6 +863,30 @@ $pckDeferred = @{
     'kokomi/powers/pearl.png' =
         'Burst gauge cap icon, same pass, same scope decision. GaugeBridge ' +
         'routes it through KleePck.Path, so a miss renders no cap icon.'
+
+    # Curtain Call consolidation ("Take a Bow", 2026-07-27). Six new
+    # activity-triggered Powers shipped their MECHANICS; the sprint was
+    # explicitly mechanical and carried no art budget, and its art track was
+    # the rehunt for nine renamed cards, not new power sigils.
+    #
+    # Every one degrades to the base-game placeholder through KleePck.Path,
+    # which is the honest render for "no art yet" -- the alternative that R13
+    # exists to forbid is inheriting a sibling's sigil, which reads as
+    # intentional. Wiring the path now rather than later is what makes each
+    # miss a NAMED, logged one instead of a silent fallthrough.
+    'furina/powers/fortissimo_guard.png' =
+        'Curtain Call power, mechanics-only sprint. Block per Salon deploy.'
+    'furina/powers/stagehands.png' =
+        'Curtain Call power, mechanics-only sprint. Block per Salon bow.'
+    'furina/powers/stagehands_encore.png' =
+        'Curtain Call power, mechanics-only sprint. The Encore half of ' +
+        'Stagehands -- a separate power, so a separate sigil when art lands.'
+    'furina/powers/courtroom_drama.png' =
+        'Curtain Call power, mechanics-only sprint. First reaction each turn.'
+    'furina/powers/the_gallery_stirs.png' =
+        'Curtain Call power, mechanics-only sprint. First Encore spend draws.'
+    'furina/powers/quick_change.png' =
+        'Curtain Call power, mechanics-only sprint. First Attack each turn draws.'
 }
 
 $stagedContractS12 = Get-ChildItem $StageDir -Filter *.pck.contract.txt -ErrorAction SilentlyContinue |
