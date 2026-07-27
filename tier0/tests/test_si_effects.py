@@ -236,3 +236,137 @@ def test_a_block_op_with_no_block_gains_nothing_from_dexterity():
     state = make_state()
     powers.apply_power(state, state.player, "dexterity", 4)
     assert powers.modify_block_gained(state.player, 0) == 0
+
+
+# --- A4: the base-game Sly keyword ----------------------------------------
+#
+# Ruled 2026-07-27: implement it as the game has it. CardCmd.DiscardAndDraw
+# collects the Sly cards while discarding the batch, then CardCmd.AutoPlay
+# plays each one through the SAME CardModel.OnPlayWrapper a manual play uses
+# with ResourceInfo.EnergySpent = 0. So it is a whole card play that happens
+# to be free -- not an effect list that resolves, which is Kokomi's `sly` and
+# a different mechanic sharing the word.
+
+def test_a_sly_card_plays_itself_when_a_card_effect_discards_it():
+    state = make_state()
+    state.enemies = [make_enemy(hp=60)]
+    sly = card("sly", type="attack", cost=2, sly_keyword=True,
+               fx=[{"op": "damage", "amount": 7, "target": "enemy"}])
+    state.player.hand = [sly]
+    hp = state.enemies[0].hp
+    effects.resolve_card(state, card("discarder", fx=[
+        {"op": "discard", "amount": 1, "select": "chosen"}]))
+    assert state.enemies[0].hp == hp - 7
+    assert [c.id for c in state.player.discard_pile] == ["sly"]
+
+
+def test_the_sly_play_is_free_and_does_not_touch_energy():
+    """EnergySpent = 0 whatever the card's printed cost -- an auto-play the
+    player cannot pay for is the entire point of the keyword."""
+    state = make_state()
+    state.player.energy = 1
+    sly = card("sly", cost=3, sly_keyword=True, fx=[{"op": "block",
+                                                     "amount": 6}])
+    state.player.hand = [sly]
+    effects.resolve_card(state, card("discarder", fx=[
+        {"op": "discard", "amount": 1, "select": "chosen"}]))
+    assert state.player.energy == 1
+    assert state.player.block == 6
+
+
+def test_the_sly_play_counts_as_a_card_played():
+    """OnPlayWrapper fires BeforeCardPlayed and History.CardPlayStarted
+    whether or not the play was automatic, so an auto-play is a play for
+    every counter that reads one."""
+    state = make_state()
+    state.cards_played_this_turn = 0
+    sly = card("sly", sly_keyword=True, fx=[{"op": "block", "amount": 3}])
+    state.player.hand = [sly]
+    effects.resolve_card(state, card("discarder", fx=[
+        {"op": "discard", "amount": 1, "select": "chosen"}]))
+    assert state.cards_played_this_turn == 1
+    plays = [e for e in state.log if e["event"] == "play"]
+    assert len(plays) == 1 and plays[0]["free"] is True
+
+
+def test_a_sly_card_with_exhaust_exhausts_after_its_free_play():
+    """Result-pile routing is OnPlayWrapper's, not the discard's: the card
+    goes where its own keywords send it once the free play resolves."""
+    state = make_state()
+    sly = card("sly", sly_keyword=True, exhaust=True,
+               fx=[{"op": "block", "amount": 2}])
+    state.player.hand = [sly]
+    effects.resolve_card(state, card("discarder", fx=[
+        {"op": "discard", "amount": 1, "select": "chosen"}]))
+    assert [c.id for c in state.player.exhaust_pile] == ["sly"]
+    assert state.player.discard_pile == []
+
+
+def test_the_whole_batch_is_discarded_before_any_sly_card_plays():
+    """CardCmd.Discard's own docstring warns that discarding in a loop gets
+    the Sly timing wrong. With two Sly cards the second is already in the
+    pile while the first resolves, so a pile-reading effect sees it."""
+    state = make_state()
+    seen = []
+    a = card("a", sly_keyword=True, fx=[{"op": "block", "amount": 1}])
+    b = card("b", sly_keyword=True, fx=[{"op": "block", "amount": 1}])
+    state.player.hand = [a, b]
+    original = effects.OPS["block"]
+
+    def spy(st, fx, c):
+        seen.append(sorted(x.id for x in st.player.discard_pile))
+        return original(st, fx, c)
+
+    effects.OPS["block"] = spy
+    try:
+        effects.resolve_card(state, card("discarder", fx=[
+            {"op": "discard", "amount": 2, "select": "chosen"}]))
+    finally:
+        effects.OPS["block"] = original
+    # First auto-play already sees BOTH cards in the discard pile (its own
+    # has been lifted out of it for the play, so it sees the other one).
+    assert seen[0] == ["b"] and seen[1] == ["a"]
+
+
+def test_the_end_of_turn_hand_flush_is_not_a_sly_trigger():
+    """CombatManager.FlushPlayerHand adds the hand straight to the discard
+    pile via CardPileCmd.Add; it never goes through CardCmd.Discard. A
+    silent turn therefore pays nothing, matching the activity-gating law."""
+    state = make_state()
+    state.enemies = [make_enemy(hp=60)]
+    sly = card("sly", sly_keyword=True, fx=[{"op": "block", "amount": 5}])
+    state.player.hand = [sly]
+    combat._player_turn(state, lambda s: None)       # play nothing, then flush
+    assert sly in state.player.discard_pile
+    assert state.player.block == 0
+    assert state.cards_played_this_turn == 0
+
+
+def test_kokomis_sly_and_the_base_game_sly_are_separate_fields():
+    """One word, two mechanics, and the extractor maps the keyword onto the
+    base-game one. A card carrying only the Assist-lane list must not play
+    itself, and a card carrying only the keyword must not need a list."""
+    state = make_state()
+    assist = card("assist", sly=[{"op": "block", "amount": 4}],
+                  fx=[{"op": "block", "amount": 99}])
+    state.player.hand = [assist]
+    effects.resolve_card(state, card("discarder", fx=[
+        {"op": "discard", "amount": 1, "select": "chosen"}]))
+    assert state.player.block == 4          # the list, not the card
+    assert state.cards_played_this_turn == 0
+
+
+def test_a_free_play_does_not_clobber_the_outer_cards_context():
+    """The reason effects._free_play refuses to resolve effects inline: a
+    whole card resolves mid-resolution, and the outer card must finish
+    reading its OWN kills and exhausts."""
+    state = make_state()
+    state.enemies = [make_enemy(hp=60)]
+    state.kills_this_card = 3
+    state.current_card_cost = 2
+    sly = card("sly", type="attack", cost=1, sly_keyword=True,
+               fx=[{"op": "damage", "amount": 1, "target": "enemy"}])
+    state.player.hand = [sly]
+    combat.resolve_free_play(state, sly)
+    assert state.kills_this_card == 3
+    assert state.current_card_cost == 2

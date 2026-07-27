@@ -18,10 +18,114 @@
 #    kind, and the winner's name is fenced off from the other kind.
 #
 # USER-CONFIRMED external collisions:
-Grand Finale | base game / Downfall Silent (user-flagged 2026-07-21)
+Grand Finale | base game / Downfall Silent (user-flagged 2026-07-21) -- CONFIRMED 2026-07-27: it is also in the StS2 Silent's own pool, so the hand-flag was right twice over
 #
 # Settled card/relic collisions (R69, 2026-07-26):
 Explosive Frags | card-owned (Klee Rare Power, docs/klee-cards.yaml:193) -- R69 renamed the colliding Orobas relic upgrade to Dodoco Tales; this name may not return to a relic
 Dodoco Tales | relic-owned (Klee's Orobas starter upgrade, UpgradedStarterRelics.cs) -- R69; may not be minted as a card
+#
+
+# The SILENT's full base-game card pool (88 names), added 2026-07-27 on the
+# [USER] ruling for ask A5 of the Silent anchor sprint. These are EXTERNAL
+# collisions of kind 1: names the base game already uses, which this repo
+# therefore may not mint. Card names are public, player-facing text (they
+# are on the wiki), so unlike the decompiled numbers in game_ref/ they are
+# safe to commit -- but this is the ONLY base-game material in the repo, so
+# keep it to names.
+#
+# NOT COVERED HERE: the Ironclad's 87 names. The same exposure exists for
+# him and this pass was scoped to the Silent, so a green lint means "no
+# collision with the SILENT", not "no collision with the base game".
+#
+# Zero of the 88 collided with the mod's 266 names when this landed. The
+# list is a fence for the future, not a record of a fire.
+
+Abrasive | base game / Silent (ask A5, 2026-07-27)
+Accelerant | base game / Silent (ask A5, 2026-07-27)
+Accuracy | base game / Silent (ask A5, 2026-07-27)
+Acrobatics | base game / Silent (ask A5, 2026-07-27)
+Adrenaline | base game / Silent (ask A5, 2026-07-27)
+Afterimage | base game / Silent (ask A5, 2026-07-27)
+Anticipate | base game / Silent (ask A5, 2026-07-27)
+Assassinate | base game / Silent (ask A5, 2026-07-27)
+Backflip | base game / Silent (ask A5, 2026-07-27)
+Backstab | base game / Silent (ask A5, 2026-07-27)
+Blade Dance | base game / Silent (ask A5, 2026-07-27)
+Blade Of Ink | base game / Silent (ask A5, 2026-07-27)
+Blur | base game / Silent (ask A5, 2026-07-27)
+Bouncing Flask | base game / Silent (ask A5, 2026-07-27)
+Bubble Bubble | base game / Silent (ask A5, 2026-07-27)
+Bullet Time | base game / Silent (ask A5, 2026-07-27)
+Burst | base game / Silent (ask A5, 2026-07-27)
+Calculated Gamble | base game / Silent (ask A5, 2026-07-27)
+Cloak And Dagger | base game / Silent (ask A5, 2026-07-27)
+Corrosive Wave | base game / Silent (ask A5, 2026-07-27)
+Dagger Spray | base game / Silent (ask A5, 2026-07-27)
+Dagger Throw | base game / Silent (ask A5, 2026-07-27)
+Dash | base game / Silent (ask A5, 2026-07-27)
+Deadly Poison | base game / Silent (ask A5, 2026-07-27)
+Defend Silent | base game / Silent (ask A5, 2026-07-27)
+Deflect | base game / Silent (ask A5, 2026-07-27)
+Dodge And Roll | base game / Silent (ask A5, 2026-07-27)
+Echoing Slash | base game / Silent (ask A5, 2026-07-27)
+Envenom | base game / Silent (ask A5, 2026-07-27)
+Escape Plan | base game / Silent (ask A5, 2026-07-27)
+Expertise | base game / Silent (ask A5, 2026-07-27)
+Expose | base game / Silent (ask A5, 2026-07-27)
+Fan Of Knives | base game / Silent (ask A5, 2026-07-27)
+Finisher | base game / Silent (ask A5, 2026-07-27)
+Flanking | base game / Silent (ask A5, 2026-07-27)
+Flechettes | base game / Silent (ask A5, 2026-07-27)
+Flick Flack | base game / Silent (ask A5, 2026-07-27)
+Footwork | base game / Silent (ask A5, 2026-07-27)
+Hand Trick | base game / Silent (ask A5, 2026-07-27)
+Haze | base game / Silent (ask A5, 2026-07-27)
+Hidden Daggers | base game / Silent (ask A5, 2026-07-27)
+Infinite Blades | base game / Silent (ask A5, 2026-07-27)
+Knife Trap | base game / Silent (ask A5, 2026-07-27)
+Leading Strike | base game / Silent (ask A5, 2026-07-27)
+Leg Sweep | base game / Silent (ask A5, 2026-07-27)
+Malaise | base game / Silent (ask A5, 2026-07-27)
+Master Planner | base game / Silent (ask A5, 2026-07-27)
+Memento Mori | base game / Silent (ask A5, 2026-07-27)
+Mirage | base game / Silent (ask A5, 2026-07-27)
+Murder | base game / Silent (ask A5, 2026-07-27)
+Neutralize | base game / Silent (ask A5, 2026-07-27)
+Nightmare | base game / Silent (ask A5, 2026-07-27)
+Noxious Fumes | base game / Silent (ask A5, 2026-07-27)
+Outbreak | base game / Silent (ask A5, 2026-07-27)
+Phantom Blades | base game / Silent (ask A5, 2026-07-27)
+Piercing Wail | base game / Silent (ask A5, 2026-07-27)
+Pinpoint | base game / Silent (ask A5, 2026-07-27)
+Poisoned Stab | base game / Silent (ask A5, 2026-07-27)
+Pounce | base game / Silent (ask A5, 2026-07-27)
+Precise Cut | base game / Silent (ask A5, 2026-07-27)
+Predator | base game / Silent (ask A5, 2026-07-27)
+Prepared | base game / Silent (ask A5, 2026-07-27)
+Reflex | base game / Silent (ask A5, 2026-07-27)
+Ricochet | base game / Silent (ask A5, 2026-07-27)
+Scare | base game / Silent (ask A5, 2026-07-27)
+Serpent Form | base game / Silent (ask A5, 2026-07-27)
+Shadow Step | base game / Silent (ask A5, 2026-07-27)
+Shadowmeld | base game / Silent (ask A5, 2026-07-27)
+Skewer | base game / Silent (ask A5, 2026-07-27)
+Slice | base game / Silent (ask A5, 2026-07-27)
+Snakebite | base game / Silent (ask A5, 2026-07-27)
+Sneaky | base game / Silent (ask A5, 2026-07-27)
+Speedster | base game / Silent (ask A5, 2026-07-27)
+Storm Of Steel | base game / Silent (ask A5, 2026-07-27)
+Strangle | base game / Silent (ask A5, 2026-07-27)
+Strike Silent | base game / Silent (ask A5, 2026-07-27)
+Sucker Punch | base game / Silent (ask A5, 2026-07-27)
+Suppress | base game / Silent (ask A5, 2026-07-27)
+Survivor | base game / Silent (ask A5, 2026-07-27)
+Tactician | base game / Silent (ask A5, 2026-07-27)
+The Hunt | base game / Silent (ask A5, 2026-07-27)
+Tools Of The Trade | base game / Silent (ask A5, 2026-07-27)
+Tracking | base game / Silent (ask A5, 2026-07-27)
+Untouchable | base game / Silent (ask A5, 2026-07-27)
+Up My Sleeve | base game / Silent (ask A5, 2026-07-27)
+Well Laid Plans | base game / Silent (ask A5, 2026-07-27)
+Wraith Form | base game / Silent (ask A5, 2026-07-27)
 #
 # Add more as they're found in playtest or cross-mod testing.

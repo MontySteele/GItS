@@ -75,6 +75,13 @@ REPO = Path(__file__).resolve().parent.parent
 GAME_REF = REPO / "game_ref"
 
 CHAR_FIELDS = ("id", "name", "hp", "starting_deck", "relic_hooks")
+# Carried through when the facts declare them, required of nobody. A
+# character's own starting relic goes here when it has an AMOUNT on it and so
+# cannot be a bare `relic_hooks` string -- Ring of the Snake (ask A1) is
+# `combat_start_draw: 2`. Optional rather than required because Ironclad's
+# Burning Blood genuinely needs no such entry, and a required-empty field
+# would make his facts file lie about having been considered.
+CHAR_OPTIONAL_FIELDS = ("starting_relic_effects",)
 
 
 @dataclass(frozen=True)
@@ -311,7 +318,8 @@ def do_split(spec: CharacterSpec) -> None:
               file=sys.stderr)
     if spec.char_out.exists():
         cur = yaml.safe_load(spec.char_out.read_text()) or {}
-        facts = {k: cur[k] for k in CHAR_FIELDS if k in cur}
+        facts = {k: cur[k] for k in CHAR_FIELDS + CHAR_OPTIONAL_FIELDS
+                 if k in cur}
         miss = [k for k in CHAR_FIELDS if k not in facts]
         if miss:
             _fail(f"{spec.char_out.name} missing {miss}; cannot bootstrap facts.")
@@ -335,6 +343,8 @@ def do_build(spec: CharacterSpec) -> None:
         print(f"kept {_rel(spec.char_out)} (hand-authored; not overwritten).")
     else:
         entry = {k: facts[k] for k in CHAR_FIELDS}
+        entry.update({k: facts[k] for k in CHAR_OPTIONAL_FIELDS
+                      if k in facts})
         _dump(entry, CHAR_OUT_HEADER.format(**heads), spec.char_out)
         print(f"wrote {_rel(spec.char_out)}: bootstrapped from char facts.")
 
@@ -373,6 +383,17 @@ def do_verify(spec: CharacterSpec) -> None:
         if miss:
             ok = False
             print(f"  {spec.char_out.name} missing loader fields {miss}.")
+        # char_out is hand-authored and never overwritten, so an optional
+        # field added to the facts can silently fail to reach the loader --
+        # and a character quietly missing her starting relic is exactly the
+        # kind of understatement this anchor exists to avoid.
+        facts = _char_facts(spec)            # fails closed if absent
+        for key in CHAR_OPTIONAL_FIELDS:
+            if facts.get(key) and cur.get(key) != facts[key]:
+                ok = False
+                print(f"  {spec.char_out.name}: {key} does not match "
+                      f"{spec.char_facts.name} ({cur.get(key)!r} vs "
+                      f"{facts[key]!r}).")
     if ok:
         print(f"VERIFY OK: {len(current)} pool cards match the rebuild "
               f"(ordered, dup-checked); {len(deltas)} upgrades applicable; "

@@ -219,6 +219,21 @@ def play_card(state: CombatState, card: Card) -> None:
         state.emit("burst_cast", card=card.id)
     if p.burst_max and "skill_tag" in card.tags:
         resources.gain_burst(state, C.BURST_PER_SKILL_TAG, "skill_tag")
+    _finish_play(state, card)
+
+
+def _finish_play(state: CombatState, card: Card,
+                 force_exhaust: bool = False) -> None:
+    """The half of a card play that does not depend on who paid for it.
+
+    CardModel.OnPlayWrapper is entered identically by a manual play and by
+    CardCmd.AutoPlay -- only the cost bookkeeping ahead of it differs. This
+    is that shared half (the replay loop and its per-play-index hooks, the
+    Power floor grant, result-pile routing, and the post-play settlement),
+    split out so resolve_free_play cannot drift from play_card. Nothing here
+    reads energy or the hand, so both callers are correct by construction.
+    """
+    p = state.player
     replays = 1
     if card.is_companion:
         state.companions_played.append(card.id)
@@ -261,7 +276,8 @@ def play_card(state: CombatState, card: Card) -> None:
         # REMOVED FROM COMBAT (PileType.None), not exhausted. tier0 used to
         # exhaust it, which would have paid out FeelNoPain and DarkEmbrace on
         # all 11 of Ironclad's Power cards (recon BUG 1).
-        dest = refpowers.result_pile(state, card)
+        dest = "exhaust" if force_exhaust else refpowers.result_pile(state,
+                                                                     card)
         if dest == "exhaust":
             refpowers.exhaust_card(state, card)
         elif dest == "discard":
@@ -275,6 +291,79 @@ def play_card(state: CombatState, card: Card) -> None:
     _revive_player_if_needed(state)
     if p.relic_effects:
         relics.reevaluate_conditionals(state)
+
+
+# Every piece of per-card context effects.resolve_card sets. A free play
+# resolves an ENTIRE card in the middle of another card's resolution, so each
+# of these has to be put back afterwards or the outer card finishes reading
+# the inner card's kills, exhausts and repeat request -- a corruption that is
+# invisible in results, which is why effects._free_play refuses to resolve
+# effects inline and routes here instead. (Its contract docstring names
+# twelve; block_gains_this_card and salon_replacements_this_card are
+# resolve_card's too and are saved for the same reason.)
+_ABSENT = object()
+_FREE_PLAY_CONTEXT = (
+    "current_card_companion", "reactions_this_card", "kills_this_card",
+    "fatal_kills_this_card", "exhausted_this_card", "block_gains_this_card",
+    "salon_replacements_this_card", "detonations_at_card_start",
+    "repeat_requested", "target_had_offelement_aura", "current_attack_bonus",
+    "sparks_at_play", "current_x", "current_card_cost")
+
+
+def resolve_free_play(state: CombatState, card: Card,
+                      force_exhaust: bool = False) -> None:
+    """CardCmd.AutoPlay -- play `card` with ResourceInfo.EnergySpent = 0.
+
+    Satisfies the contract effects._free_play documents, and is the ONE way
+    an effect may play a card: the base game runs an auto-play through the
+    same CardModel.OnPlayWrapper as a manual play, so an auto-played card
+    fires BeforeCardPlayed/AfterCardPlayed, is recorded by History as a card
+    play, and routes to its own result pile. Only the cost is skipped.
+
+    The caller owns the source pile. AutoPlay moves the card into the play
+    pile from wherever it is (hand, draw, discard, exhaust), so it must
+    already have been removed by the trigger site; there is deliberately no
+    hand.remove here.
+
+    Landed 2026-07-27 for ask A4 (CardKeyword.Sly). Before it, this function
+    did not exist and _free_play raised UNIMPLEMENTED -- which is why
+    Havoc, Cascade and HowlFromBeyond are excluded from the Ironclad sheet.
+    They stay excluded: the extractor still cannot read their shapes
+    (CardPileCmd.AutoPlayFromDrawPile, a runtime branch, and an out-of-play
+    hook), so that anchor is unchanged by this. What DID move is that
+    Card.on_exhaust_autoplay and the autoplay_from_draw op are live paths
+    now. No committed card sets either, so the roster is unmoved.
+    """
+    p = state.player
+    # Four of these (detonations_at_card_start, repeat_requested,
+    # target_had_offelement_aura, current_attack_bonus) are set by
+    # resolve_card rather than declared on CombatState, so before the first
+    # card of a fight resolves they do not exist yet -- and the exhaust
+    # autoplay sweep fires at TURN END, outside any card. Restoring absence
+    # as absence keeps this function from inventing state that the rest of
+    # the engine would then read as a resolved card's leftovers.
+    saved = [(name, getattr(state, name, _ABSENT))
+             for name in _FREE_PLAY_CONTEXT]
+    try:
+        # The bank as it stands at play time (R39's reading), and cost 0 --
+        # EnergySpent is 0 for an auto-play whatever the card's printed
+        # cost, so this_cost_zero and zero_cost_attacks_up both see a free
+        # card. An X card captures the CURRENT energy without spending it
+        # (CapturedXValue = PlayerCombatState.Energy).
+        state.sparks_at_play = p.sparks
+        state.current_card_cost = 0
+        if card.cost == "X":
+            state.current_x = p.energy
+        state.cards_played_this_turn += 1
+        state.emit("play", card=card.id, cost=0, energy_left=p.energy,
+                   free=True)
+        _finish_play(state, card, force_exhaust=force_exhaust)
+    finally:
+        for name, value in saved:
+            if value is _ABSENT:
+                state.__dict__.pop(name, None)
+            else:
+                setattr(state, name, value)
 
 
 def _player_turn(state: CombatState, pilot: Pilot) -> None:

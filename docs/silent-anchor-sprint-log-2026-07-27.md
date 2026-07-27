@@ -408,3 +408,133 @@ Silent pool and cannot be closed here.
    of a parity pass.
 5. **C-6 resolved to "implement none"** — the histogram says ~30 powers gate one
    card each. That is the histogram doing its job.
+
+---
+
+## 9. The rulings landed (2026-07-27, same day)
+
+[USER] red-pen on all five asks, verbatim: *"A1) yes, please implement. A2)
+gate ratification waits til the card pool completes. A3) Should also wait.
+A4) We should implement the Silent's Sly accurate to the game, and also pass
+a note to the next tech debt sweep to unify that behavior to Kokomi. A5)
+Agreed, let's add them."*
+
+### A1 — Ring of the Snake: WIRED
+
+`starting_relic_effects` is a new character-yaml field, read by the loader on
+**both** paths (`build_player` for the battery, `build_player_from_ids` for
+the run layer), because `relic_hooks` is a list of bare strings and cannot
+carry the `2`. Her entry is one hook: `{combat_start_draw, amount: 2}` —
+tier0's `combat_start_draw` is already TURN-1-ONLY, which is exactly
+`ModifyHandDraw`'s shape, so nothing was approximated to fit.
+
+The battery is no longer categorically relic-free, and that is a deliberate,
+scoped change: only a character whose yaml declares the field gets one, and
+no roster character does. A relic on the roster is a DRAFTED relic and stays
+the run layer's job.
+
+Pinned by a fight, not by the yaml: `test_ring_of_the_snake_fires_on_turn_one_and_only_turn_one`
+runs a real combat and asserts the opening hand is `CARDS_DRAWN_PER_TURN + 2`
+and the next one is not.
+
+### A4 — Sly: IMPLEMENTED AS THE GAME HAS IT
+
+**My pre-ruling recommendation was to refuse, and it was wrong on the
+evidence.** The argument for refusing was that the restricted reading
+("resolve its effects on discard") skips the card-played events the Silent's
+payoffs read. That is true of the RESTRICTED reading and is not an argument
+against the real one — which the ruling asked for and which does fire those
+events. Re-read from the DLL rather than from the earlier note:
+
+- `CardCmd.DiscardAndDraw` collects Sly cards while discarding the batch,
+  moves the whole batch to the discard pile (each firing `AfterCardDiscarded`),
+  and only then calls `CardCmd.AutoPlay(..., AutoPlayType.SlyDiscard)` on each.
+- `AutoPlay` builds a `ResourceInfo` with **`EnergySpent = 0`** and hands the
+  card to `CardModel.OnPlayWrapper` — **the same wrapper a manual play uses**.
+  So `Hook.BeforeCardPlayed`, `History.CardPlayStarted/Finished` and normal
+  result-pile routing all happen. An auto-play is a real card play that
+  nobody paid for.
+- `IsSlyThisTurn` is keyword-or-granted; `GiveSingleTurnSly` (Hand Trick)
+  is the granted half and is not implemented (no card needing it is emitted).
+
+What that required in tier0:
+
+1. **`combat.resolve_free_play(state, card, force_exhaust=False)` now
+   exists.** It did not before: `effects._free_play` raised UNIMPLEMENTED
+   with a six-point contract docstring naming exactly what the function had
+   to do. That contract is now satisfied rather than reinterpreted. The
+   Havoc / Cascade / HowlFromBeyond exclusions on the IRONCLAD anchor are
+   **unchanged** — they are excluded because the extractor cannot read their
+   shapes, not because the primitive was missing — and `--verify` confirms
+   his pool is still 76 cards, byte-identical.
+2. **`play_card`'s tail became `_finish_play`**, shared by the paid and free
+   paths, so the two cannot drift. `OnPlayWrapper` is entered identically by
+   both in the source; this is that fact in our code.
+3. **`Card.sly_keyword`** joins `Card.sly`, and the extractor's
+   `CARD_KEYWORDS` maps `CardKeyword.Sly` onto the new field. Mapping it onto
+   Kokomi's would have printed a keyword that resolved an empty list — the
+   dropped-rule defect in a new costume, and a test now pins against it.
+
+**Verified scoping, not assumed:** `CombatManager.FlushPlayerHand` moves the
+end-of-turn hand with `CardPileCmd.Add`, never through `CardCmd.Discard`. The
+end-of-turn flush is therefore NOT a Sly trigger in the base game either — the
+pre-existing comment claiming so on the activity-gating law turns out to be
+right about the game as well as about us.
+
+**Known ordering divergence, recorded not papered over:** the game draws
+BETWEEN the batch discard and the auto-plays (that is what `DiscardAndDraw`
+is for). tier0 spells "discard N, draw M" as two ops, so a following draw op
+lands after the auto-plays. Fixing it needs a combined op; no emitted Silent
+row needs one yet.
+
+**Result: the pool grew 22 → 27 (25% → 31%).** The five Sly cards left the
+excluded list. Nine new data-free tests in `test_si_effects.py`.
+
+### A4b — the unification note is filed
+
+`docs/tech-debt-audit-2026-07-26.md` §5, with the touchpoints, the failure
+mode (a card that reads as one mechanic and behaves as the other), and the
+one direction the unification must NOT take.
+
+### A5 — reserved names: 87 added
+
+The Silent's 88 card names are in `docs/reserved-card-names.txt` as kind-1
+external collisions. **Zero collided** with the mod's 266 existing names, so
+the list is a fence for the future rather than a record of a fire.
+
+One entry was already there: `Grand Finale`, hand-flagged by [USER] on
+2026-07-21 as "base game / Downfall Silent". It IS in the StS2 Silent's own
+pool — the hand-flag was right twice over, and its line now says so instead
+of being duplicated.
+
+**Ironclad's 87 names are NOT in the file.** The same exposure exists for
+him; this pass was scoped to the Silent. A green lint currently means "no
+collision with the SILENT", and the file's header says exactly that.
+
+### A2 / A3 — deferred, and recorded where they will be seen
+
+Both wait for the pool to complete. The deferral is written into
+`card_distinctness_report.py`'s docstring and its `--gate` output (**all
+three** thresholds stay PROPOSED — ratifying the two both anchors clear
+would freeze the easy half and make the contested half look like the only
+open question) and into the `silent` pilot block in `archetypes.yaml`.
+
+A3's deferral is additionally the *right* call on evidence rather than a
+postponement: the weights are currently unmeasurable, because the `silent`
+and `generic` pilots tie on a twelve-card starter holding four distinct
+cards.
+
+### Re-measurement after the world moved
+
+`git=6bc4609+`, `game_ref=790c7ee0c8ff`. Both rulings landed together, so
+attribution is stated per surface rather than claimed globally:
+
+| surface | before | after | attributable to |
+|---|---|---|---|
+| distinctness | 22 cards, uniq 59%, top 50%, neardup 7 | **27 cards, uniq 63%, top 48%, neardup 12** | A4 only (A1 is not a card) |
+| battery A1/A3/A5/A7 | 2.7 / 4.6 / 3.0 / 3.9 | **2.8 / 4.7 / 3.1 / 4.7** | A1 only — no Sly card is in the starter deck |
+| tier 0.5 act 1 (300 runs, seed 11) | 49% | **46%** | BOTH; and the delta is inside sampling noise (se ≈ 2.9%), so it is reported, not read |
+
+The distinctness verdict did not change, and that is the useful part: +23
+percentage points of coverage moved `uniq` by four points. The gate's
+failure is not a coverage artifact.

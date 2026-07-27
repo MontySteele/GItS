@@ -150,6 +150,15 @@ fraction (emitted+supplemented / total), not alone.
 ## 8. Decision-ready asks ([USER] red-pen; everything else is
 Claude-may-proceed under house rules)
 
+> **ALL FIVE RULED 2026-07-27.** A1 implement · A2 defer until the pool
+> completes · A3 defer likewise · A4 implement true to the game, plus a
+> tech-debt note to unify with Kokomi's `sly` · A5 bulk-add. What each
+> ruling actually changed is in §9 of
+> `docs/silent-anchor-sprint-log-2026-07-27.md`; the recommendations below
+> are left as written so the record shows what was recommended against what
+> was decided. **A4's recommendation was wrong** — it argued for refusing
+> the RESTRICTED reading, which is not an argument against the real one.
+
 - **A1 — Ring of the Snake.** real_ironclad got Burning Blood as
   `heal_after_won_fight` because it is battery-inert. Ring of the Snake
   (combat-start draw) is NOT inert. Options: (a) omit — parity world has

@@ -132,22 +132,29 @@
 # 2026-07-27). block stays at the frozen 1.2 everywhere; sustain/spotlight are
 # OMITTED, not zeroed, for the same reason they are on the ironclad entry.
 #
-# EVERY NUMBER BELOW IS A PLACEHOLDER -- sprint ask A3, awaiting [USER]
-# red-pen. They are a first reading of her kit, not a measurement, and no
-# tier05 number derived from them may be quoted as load-bearing until they are
+# EVERY NUMBER BELOW IS A PLACEHOLDER -- sprint ask A3, DEFERRED by [USER]
+# on 2026-07-27 ("should also wait", i.e. until the card pool completes).
+# They are a first reading of her kit, not a measurement, and no tier05
+# number derived from them may be quoted as load-bearing until they are
 # ruled (D4: the instrument must model the changed object).
+#
+# The deferral is the right call on the evidence: A3 is currently
+# UNMEASURABLE. The `silent` and `generic` pilots produce IDENTICAL statlines
+# on her twelve-card starter, which holds four distinct cards -- there is
+# nothing for a weight to choose between. Weights become measurable when the
+# pool is large enough to draft real decisions.
 #
 # KNOWN UNDERSTATEMENT -- on the record before any low score is read as a
 # finding about her pool:
-#   1. The assembled pool is 22 of 88 cards (25%), and the excluded 66 are
-#      systematically the INTERESTING ones -- every Sly card, every shiv
-#      generator, every poison payoff beyond the three that translate. This
-#      anchor is a floor on her, not a portrait of her.
+#   1. The assembled pool is 27 of 88 cards (31%), and the excluded 61 are
+#      systematically the INTERESTING ones -- every shiv generator, every
+#      poison payoff beyond the three that translate. This anchor is a floor
+#      on her, not a portrait of her.
 #   2. Poison is her scaling and the scorer has no poison term at all, so a
 #      Deadly Poison reads as a one-shot debuff rather than as ramp.
-#   3. Ring of the Snake is not wired (ask A1), so her turn-1 hand is two
-#      cards smaller than the real character's -- which is exactly the
-#      resource the discard/Sly plan spends.
+#   3. RESOLVED 2026-07-27 (ask A1): Ring of the Snake IS wired now, so her
+#      turn-1 hand is the real character's size. The weights below were first
+#      read against a hand two cards smaller.
 - id: silent
   weights:
     damage: 1.0      # PLACEHOLDER. shivs and poison, not big hits

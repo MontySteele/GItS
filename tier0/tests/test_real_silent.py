@@ -7,11 +7,12 @@ not exist and there is nothing to assert. The fresh-clone half of the
 contract is pinned unguarded in test_anchor_lock.py.
 
 WHAT THIS ANCHOR IS, stated once so no number read off it is over-claimed:
-the assembled pool is 22 of the character's 88 cards. The 66 excluded are not
-a random sample -- they are systematically the interesting ones (every Sly
-card, every shiv generator, most poison payoffs). This is a FLOOR on the
-Silent, not a portrait of her, and the coverage fraction travels with every
-statline she produces.
+the assembled pool is 27 of the character's 88 cards (22 before ask A4 put
+the Sly keyword in the engine). The 61 excluded are still not a random
+sample -- they are systematically the interesting ones (every shiv
+generator, most poison payoffs, every card that branches on runtime state).
+This is a FLOOR on the Silent, not a portrait of her, and the coverage
+fraction travels with every statline she produces.
 """
 
 import random
@@ -19,6 +20,7 @@ import random
 import pytest
 import yaml
 
+from tier0 import constants as C
 from tier0.content import loader
 from tier05 import draft, rewards
 
@@ -95,11 +97,14 @@ def test_build_player_matches_the_decompiled_character():
     player = loader.build_player("real_silent")
     assert player.max_hp == 70
     assert len(player.draw_pile) == 12
-    # Ring of the Snake is NOT wired: it acts inside combat (+2 cards on turn
-    # one only), unlike Burning Blood's battery-inert post-fight heal, so it
-    # is a parity RULING (ask A1) rather than a detail. This assertion is the
-    # ruling's tripwire -- when A1 lands, it changes here first.
+    # Ring of the Snake, wired 2026-07-27 (ask A1 ruled: implement). It acts
+    # INSIDE combat -- +2 cards on turn one only -- unlike Burning Blood's
+    # battery-inert post-fight heal, so it rides relic_effects (which carries
+    # the amount) and not relic_hooks (which cannot). The battery gets it too:
+    # scoring her without the relic she starts every fight holding understates
+    # exactly the resource her discard plan spends.
     assert player.relic_hooks == []
+    assert player.relic_effects == [{"hook": "combat_start_draw", "amount": 2}]
 
 
 def test_the_starting_deck_needs_the_chosen_discard(ref_cards):
@@ -137,7 +142,11 @@ def test_every_reference_card_has_an_applicable_upgrade(ref_cards):
     # Atomic external-artifact contract: partial coverage would bias smithing
     # and shop removal toward whichever cards happened to receive a `+` form.
     from tier0.content import upgrades
-    assert len(ref_cards) == 22
+    # 22 -> 27 on 2026-07-27: ask A4 (implement CardKeyword.Sly) let the five
+    # Sly cards out of the excluded list. The count is pinned rather than
+    # derived because a pool that quietly loads SMALLER is the failure this
+    # anchor cannot detect any other way.
+    assert len(ref_cards) == 27
     pool_ids = {card.id for card in ref_cards}
     for layer_name in loader.EXTERNAL_CARD_LAYERS["silent_pool.yaml"]:
         layer = yaml.safe_load((loader.GAME_REF_DIR / layer_name).read_text())
@@ -164,8 +173,34 @@ def test_the_required_layer_lists_agree_between_loader_and_builder():
 
 def test_no_silent_card_silently_dropped_a_printed_keyword(ref_cards):
     """The defect this anchor's first extraction found: five Sly cards and
-    two Innate cards were emitted as vanilla rows. Sly cards must be ABSENT
-    from the pool entirely (tier0 has no such rule), and the Innate ones must
-    carry the flag rather than merely having survived."""
+    two Innate cards were emitted as vanilla rows. Every printed keyword must
+    now arrive on a FIELD rather than merely having survived the trip.
+
+    The Sly five are in the pool as of ask A4 (ruled 2026-07-27: implement
+    the base-game keyword), and they must carry `sly_keyword` -- the
+    base-game auto-play -- and never Kokomi's `sly` effect list, which would
+    read as a printed rule that does nothing."""
+    assert sum(c.sly_keyword for c in ref_cards) == 5
     assert not any(c.sly for c in ref_cards)
     assert any(c.innate for c in ref_cards)
+
+
+def test_ring_of_the_snake_fires_on_turn_one_and_only_turn_one(ref_cards):
+    """Ask A1, ruled 2026-07-27. The relic is a first-turn hand-size bonus
+    (ModifyHandDraw returns count + 2, then bails out for TurnNumber > 1),
+    so it must show up as two extra cards in the OPENING hand and nothing
+    afterwards. Driven through a real fight rather than asserted on the yaml
+    -- the point of the ruling is that she plays with the relic, and the
+    battery path is the one that had none."""
+    from tier0.engine import combat
+    from tier0.tests.conftest import make_enemy
+
+    hands = []
+
+    def pilot(state):
+        hands.append(len(state.player.hand))
+
+    player = loader.build_player("real_silent")
+    combat.run_fight(player, [make_enemy(hp=200)], pilot, seed=11)
+    assert hands[0] == C.CARDS_DRAWN_PER_TURN + 2
+    assert hands[1] == C.CARDS_DRAWN_PER_TURN

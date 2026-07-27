@@ -950,10 +950,11 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
     # DEFAULT: every existing card that discards does so at random, and a
     # silent flip would re-price them.
     chosen = fx.get("select", "random") == "chosen"
+    sly_batch: list[Card] = []
     for _ in range(fx.get("amount", 1)):
         pool = [c for c in state.player.hand if not c.kit_card]
         if not pool:
-            return
+            break
         victim = _worst_card(pool) if chosen else state.rng.choice(pool)
         state.player.hand.remove(victim)
         state.player.discard_pile.append(victim)
@@ -962,12 +963,12 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
         else:
             state.emit("discard", card=victim.id)
         # Sly (KOKOMI'S Sly, Assist lane, kickoff §2.3 — NOT the base-game
-        # Silent keyword `CardKeyword.Sly`, which is "if discarded before
-        # end of turn, play it for free" and is a DIFFERENT mechanic that
-        # tier0 does not have; the extractor EXCLUDES cards carrying it.
-        # Two mechanics, one word, and the collision is now load-bearing
-        # in both directions — see docs/silent-anchor-kickoff §6 and
-        # state.Card.sly): fires ONLY on card-effect discards from hand —
+        # Silent keyword `CardKeyword.Sly`, which auto-plays the card for
+        # free and now lives on `Card.sly_keyword`, handled after this loop.
+        # Two mechanics, one word, BOTH implemented as of 2026-07-27 and
+        # both triggering here; unifying them is filed tech debt. See
+        # docs/silent-anchor-kickoff §6 and state.Card.sly):
+        # fires ONLY on card-effect discards from hand —
         # this op is the one trigger site. A CHOSEN discard is still a
         # card-effect discard, so it triggers too. The
         # end-of-turn hand flush is NOT Sly (a silent turn pays nothing —
@@ -978,6 +979,30 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
         if victim.sly:
             state.emit("sly", card=victim.id)
             _resolve_effects(state, victim.sly, victim)
+        if victim.sly_keyword:
+            sly_batch.append(victim)
+    # BASE-GAME Sly (Card.sly_keyword, ask A4). Deliberately AFTER the loop:
+    # CardCmd.DiscardAndDraw discards the WHOLE batch first -- each card
+    # reaching the pile and firing AfterCardDiscarded, which is the hook
+    # Kokomi's `sly` above is standing in for -- and only then auto-plays the
+    # Sly ones, in discard order. Its own docstring warns that discarding in
+    # a loop gets this timing wrong, so the batch is not cosmetic: with two
+    # Sly cards, the second is already in the discard pile while the first
+    # resolves, and a card counting the pile sees it.
+    #
+    # KNOWN ORDERING DIVERGENCE: the game draws BETWEEN the batch discard and
+    # the auto-plays (that is what DiscardAndDraw exists for). tier0 spells
+    # "discard N, draw M" as two ops, so a following draw op lands AFTER the
+    # auto-plays here. Recorded rather than papered over -- fixing it means a
+    # combined op, and no emitted Silent row needs one yet.
+    for victim in sly_batch:
+        if state.over or not state.player.alive:
+            break
+        if victim not in state.player.discard_pile:
+            continue          # an effect already moved it; do not resurrect
+        state.player.discard_pile.remove(victim)
+        state.emit("sly_autoplay", card=victim.id)
+        _free_play(state, victim, force_exhaust=False)
 
 
 def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:

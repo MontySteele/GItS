@@ -84,23 +84,37 @@ docstring used to say "Ratify after a SECOND official anchor", and that
 sentence is now stale in the most misleading direction, so it is replaced by
 what actually happened:
 
-  OFFICIAL:silent   22 cards  vocab 9  top 50%  uniq 59%  maxclu 3  neardup 7
+  OFFICIAL:silent   27 cards  vocab 9  top 48%  uniq 63%  maxclu 3  neardup 12
 
-  * uniq >= 75 is FAILED by the second official anchor (59%). Our own pools
+  (22 cards / uniq 59% when first measured; ask A4 put the Sly keyword in
+  the engine on 2026-07-27 and five more of her cards became expressible.
+  The gate verdict did not change, which is itself worth knowing: +23%
+  coverage moved uniq by 4 points.)
+
+  * uniq >= 75 is FAILED by the second official anchor (63%). Our own pools
     post 56-62%; Ironclad posts 86%. On two anchors HE is the outlier, and a
     gate calibrated on him condemns our pools for matching the other one.
-  * The obvious defence -- "her pool is only 25% extracted, and the split
+  * The obvious defence -- "her pool is only 31% extracted, and the split
     biases an anchor toward simple cards" -- was TESTED and did not hold.
     Restricting Ironclad to his structurally-simple doc-1 subset RAISES his
     uniq (86 -> 89). At comparable thinness the anchors sit 42 points apart.
-  * maxclu <= 4 and neardup <= 0.33/card are cleared by BOTH anchors and are
-    ready to move from PROPOSED to ratified.
-  * uniq stays PROPOSED and SINGLE-ANCHOR-DERIVED. Do not read it as
-    ratified; do not lower it on 22 cards either. [USER] ask A2 is open.
+  * maxclu <= 4 and neardup <= 0.33/card are cleared by BOTH anchors.
+
+RATIFICATION IS DEFERRED, BY RULING (ask A2, [USER], 2026-07-27): "gate
+ratification waits til the card pool completes." ALL THREE THRESHOLDS STAY
+PROPOSED -- including the two both anchors clear, because ratifying half a
+gate on a pool still growing would freeze the easy half and leave the
+contested half looking like the only open question. Nothing here is a
+standard yet. What the second anchor bought is a REASON to wait rather than
+an assumption that 75 was right: at 27/88 the Silent fails uniq by 12
+points, and the coverage-bias defence for that failure was tested against a
+matched-thinness Ironclad control and did NOT hold (thinning him RAISES his
+uniq, 86 -> 89). Re-open when her pool is materially complete; the question
+to answer then is whether Ironclad is the outlier or we are.
 
 vocab/top% still carry NO GATE. The Silent anchor was supposed to settle the
 concentration question -- she is the most archetype-concentrated OFFICIAL
-character -- and at 25% coverage she cannot: her vocabulary is NINE ideas
+character -- and at 31% coverage she cannot: her vocabulary is NINE ideas
 against Ironclad's 40, and with nine words a high top% is mechanical. Unlike
 uniq%, top% DOES move with coverage in the control (57% -> 66% when Ironclad
 is thinned). The question re-opens when her pool is materially larger.
@@ -176,7 +190,7 @@ GATE_MAX_CLUSTER = 4        # official 4
 GATE_NEARDUP_PER_CARD = 0.33
 # Companion sheets are exempt by SIZE, which is a proxy for "not a character
 # pool" -- and a proxy that misfires: OFFICIAL:silent IS a character pool, at
-# 22 cards, and vanishes through this hole. Until the exemption is by KIND,
+# 27 cards, and vanishes through this hole. Until the exemption is by KIND,
 # --gate PRINTS what it skipped, so an exemption cannot read as a pass
 # (2026-07-27, Silent anchor sprint E-2).
 GATE_MIN_POOL = 30

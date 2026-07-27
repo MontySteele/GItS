@@ -160,11 +160,16 @@ def test_declared_keywords_refuses_an_unreadable_declaration():
 
 
 def test_a_keyword_with_no_tier0_field_excludes_the_card():
-    """Keywords are RULES ON THE CARD. tier0 has fields for three of them;
-    a fourth must take the card out of the sheet, not ride along invisibly."""
-    assert set(extract.CARD_KEYWORDS) == {"Exhaust", "Innate", "Retain"}
+    """Keywords are RULES ON THE CARD. tier0 has fields for four of them;
+    a fifth must take the card out of the sheet, not ride along invisibly."""
+    assert set(extract.CARD_KEYWORDS) == {"Exhaust", "Innate", "Retain", "Sly"}
     assert set(extract.CARD_KEYWORDS.values()) <= {
         f.name for f in dataclasses.fields(Card)}
+    # Sly maps onto the BASE-GAME field, never onto Kokomi's Assist lane.
+    # Pointing it at `sly` would resolve an empty authored effect list and
+    # print a keyword that did nothing -- the dropped-rule defect wearing a
+    # new costume (ask A4, ruled 2026-07-27).
+    assert extract.CARD_KEYWORDS["Sly"] == "sly_keyword"
     body = """
 class SyntheticCard
 {
@@ -182,8 +187,11 @@ class SyntheticCard
             "rarity": "Common"}
     row, _ = extract._sheet_row(card, body % "Retain", "xx_")
     assert row["retain"] is True
-    with pytest.raises(extract._Untranslatable, match="CardKeyword.Sly"):
-        extract._sheet_row(card, body % "Sly", "xx_")
+    row, _ = extract._sheet_row(card, body % "Sly", "xx_")
+    assert row["sly_keyword"] is True
+    assert "sly" not in row              # never Kokomi's field
+    with pytest.raises(extract._Untranslatable, match="CardKeyword.Ethereal"):
+        extract._sheet_row(card, body % "Ethereal", "xx_")
 
 
 def test_an_animation_delay_branch_does_not_exclude_a_card():

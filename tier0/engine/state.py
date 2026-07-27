@@ -108,6 +108,18 @@ class Card:
     # (scry); both scopings are enforced (and commented) at the one trigger
     # site in effects._op_discard. Empty on every non-Kokomi card.
     sly: list[dict] = field(default_factory=list)
+    # BASE-GAME `CardKeyword.Sly` (ask A4, ruled 2026-07-27: implement it
+    # true to the game). A DIFFERENT MECHANIC FROM `sly` ABOVE, wearing the
+    # same word: when this card is discarded from hand by a card effect it
+    # is AUTO-PLAYED for free (CardCmd.DiscardAndDraw -> CardCmd.AutoPlay,
+    # AutoPlayType.SlyDiscard), which is a whole card play -- it fires the
+    # card-played hooks, counts toward cards_played_this_turn, and routes to
+    # its own result pile afterwards. Kokomi's `sly` resolves an authored
+    # effect list instead and plays nothing. The unification of the two is
+    # filed as tech debt (docs/tech-debt-audit-2026-07-26.md); until it
+    # lands, the trigger site in effects._op_discard handles both and the
+    # extractor maps CardKeyword.Sly onto THIS field only.
+    sly_keyword: bool = False
     # Guest Star rows (fontaine-companions.yaml): generated cameos, scoped
     # to a personal pool. Never in shared rewards or the banner roll; the
     # equal-rarity clause on generators is what respects 5-star scarcity.

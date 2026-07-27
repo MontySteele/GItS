@@ -992,8 +992,9 @@ def _supplement_upgrade_delta(row: dict, src: str) -> dict:
     return delta
 
 
-# The printed keyword line. tier0's Card carries a field for three of them
-# (state.py: exhaust, innate, retain); anything else EXCLUDES the card.
+# The printed keyword line. tier0's Card carries a field for four of them
+# (state.py: exhaust, innate, retain, sly_keyword); anything else EXCLUDES
+# the card.
 #
 # This table exists because the translator used to look for exactly one
 # keyword -- Exhaust -- and drop the rest without a word (found 2026-07-27,
@@ -1003,7 +1004,14 @@ def _supplement_upgrade_delta(row: dict, src: str) -> dict:
 # behind a single-character pool for a month. A keyword is a RULE ON THE
 # CARD; dropping one is exactly the "wrong number wearing the right name"
 # this tool refuses to produce.
-CARD_KEYWORDS = {"Exhaust": "exhaust", "Innate": "innate", "Retain": "retain"}
+#
+# `Sly` maps onto `sly_keyword`, NOT onto Kokomi's `sly` -- same word, two
+# mechanics (ask A4, ruled 2026-07-27: implement the base-game one as the
+# game has it). Mapping it onto her field would resolve an empty effect list
+# and print a keyword that did nothing, which is the same defect in a new
+# costume.
+CARD_KEYWORDS = {"Exhaust": "exhaust", "Innate": "innate", "Retain": "retain",
+                 "Sly": "sly_keyword"}
 # ilspy renders a one-element list as a compiler-generated type rather than a
 # `{ ... }` initialiser, so match the whole declaration statement instead of a
 # brace block. Declaration-scoped on purpose: a card that exhausts SOMETHING
