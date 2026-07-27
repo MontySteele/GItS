@@ -538,3 +538,121 @@ attribution is stated per surface rather than claimed globally:
 The distinctness verdict did not change, and that is the useful part: +23
 percentage points of coverage moved `uniq` by four points. The gate's
 failure is not a coverage artifact.
+
+---
+
+## 10. The overnight coverage pass (2026-07-27, same day)
+
+[USER]: *"please proceed with the sprint plan, including implementation of as
+many cards as possible that do not require a ruling from me."* Everything
+below is implementation and measurement; no ask was answered on the user's
+behalf.
+
+**Coverage: 27 -> 46 -> 56 of 88 (31% -> 64%).**
+
+### 10.1 Nineteen powers (46 cards)
+
+Each read off its own decompiled PowerModel and implemented in
+`refpowers`/`powers`: accelerant, afterimage, anticipate, block_next_turn,
+blur, burst, corrosive_wave, draw_cards_next_turn, envenom, free_skill,
+intangible, master_planner, noxious_fumes, outbreak, serpent_form,
+shadowmeld, speedster, strangle, thorns, tools_of_the_trade,
+well_laid_plans. Three new hook sites: `AfterCardDrawn` (inside
+`CombatState.draw`, per CARD), `ModifyHandDraw` (site D), `BeforeFlushLate`.
+
+Three of them are worth naming individually:
+
+- **Accelerant needed no behaviour at all.** `poison_tick` already
+  transcribed `TriggerCount = min(Amount, 1 + Accelerant)` against a
+  hardcoded zero, with a comment saying it was transcribed so that the day
+  the power landed this function would already be the thing it modifies.
+  That day was today and the comment was right: one line changed, no logic.
+- **Shadowmeld had to go in BOTH block funnels.** Its multiplicative hook
+  carries no `IsPoweredCardOrMonsterMoveBlock` guard, so unlike Frail it
+  doubles power block too -- and tier0's two block paths are disjoint
+  (`_op_block` for card block, `refpowers.gain_block` for power block). One
+  site would have been half a power.
+- **The Silent's four per-play powers sit ABOVE `after_card_played`'s
+  attacks-only early return.** Afterimage on a Skill is most of what that
+  card is for; below the return it paid out on nothing.
+
+**Two powers are REFUSED, not implemented, and that is a finding.** Sneaky
+pays out only when an ALLY plays an Attack; Flanking multiplies only for a
+dealer other than the applier. In single-player neither trigger is
+reachable, so they go in `refpowers.MULTIPLAYER_ONLY_POWERS` and the
+extractor now reports a THIRD category -- `CO-OP ONLY` -- beside
+"unimplemented" and "not on the dial". Implementing either would have
+produced a card that reads as a buff and measurably does nothing, which is
+the same class of defect as the dropped keyword, only louder.
+
+`bronze_scales`' skip reason was corrected on the `oddly_smooth_stone`
+precedent (Thorns exists now). The relic stays SKIPPED -- arming it is a
+[USER] ruling.
+
+### 10.2 A hand-translated layer, `silent_pool_pass2.yaml` (56 cards)
+
+Ten cards the strict structural translator refuses to invent but whose
+behaviour tier0 expresses exactly: Haze and Piercing Wail (a `foreach` over
+HittableEnemies is `target: all_enemies`; PiercingWailPower IS the class
+Mangle uses), Bubble Bubble (a real `if`, on the predicate
+`target_has_power_poison` that already existed), and seven
+calculated-damage cards behind six new `_runtime_count` tokens --
+`attacks_played_this_turn`, `skills_in_hand`, `other_cards_in_hand`,
+`discards_this_turn`, `cards_drawn_this_combat`, `enemy_poison_total`, plus
+`X` for Skewer's hit count.
+
+Two supporting fixes, both of which the tooling FOUND rather than my
+noticing: `CalculationBase` and `ExtraDamage` are the two halves of one
+grammar and collided on a single upgrade key (Memento Mori upgrades both),
+and the `power_amount` upgrade key searched only top-level effects, so
+Bubble Bubble's nested apply was invisible to it. The builder refused both
+rows until they were fixed, which is the fail-closed design working.
+
+**What is still excluded, and why it is not laziness:** the SHIV cards (12
+of them) need a token card that is not in the 88-card pool at all, so the
+extractor cannot even find its source; Grand Finale needs a playability
+gate ("only while the draw pile is empty"); Nightmare, Hidden Daggers and
+Well Laid Plans' card-selection prompts need a chooser; Blade of Ink needs
+enchantments. Each stays excluded with its reason.
+
+### 10.3 The gate reading moved four times in one day
+
+```
+  22/88 (25%)  uniq 59%  FAIL        46/88 (52%)  uniq 78%  pass
+  27/88 (31%)  uniq 63%  FAIL        56/88 (64%)  uniq 73%  FAIL
+```
+
+**I published two conclusions off this anchor and coverage overturned both.**
+At 22-27 cards: "Ironclad is the outlier and the gate condemns us for
+matching the other anchor." At 46: "the anchors agree with each other and
+disagree with us." At 56 she is four points under the line and neither
+statement survives. The E-2 control that licensed the first one -- thinning
+Ironclad RAISES his uniq -- was a good experiment with a misleading answer:
+coverage bias is a property of the SLICE, not of thinness, and a control run
+on the other anchor cannot see it.
+
+`maxclu` and `neardup` never breached on either anchor across all four
+readings. That is the only part of the gate the data has held still on, and
+it is still not ratified, because ask A2 deferred all three and the ruling
+looks better every time this number moves.
+
+### 10.4 tier 0.5, and a number that went the wrong way
+
+300 runs, seed 11, `game_ref=b6998b1285f8`:
+
+| pool | act 1 clear | near-death |
+|---|---|---|
+| 27 cards | 46% | 36% |
+| 46 cards | 31% | 30% |
+| 56 cards | 39% | 35% |
+
+**Act-1 clear FELL as coverage rose, and I cannot attribute it yet.** The
+starter battery is unchanged across all three (2.8 / 3.2 / 4.7 / 0.5 / 3.1 /
+2.6 / 4.7), which is consistent with a DRAFT-side cause rather than a combat
+one: nineteen powers' worth of new cards entered her reward pool, the pilot
+weights are ask-A3 placeholders, and the scorer still has no poison term at
+all. The most likely reading is that the anchor is now drafting cards it
+cannot pilot. That is a hypothesis, not a finding, and it is exactly the
+measurement A3's deferral leaves open.
+
+Suite at the end of the pass: **1168 passed / 1 skipped** from repo ROOT.

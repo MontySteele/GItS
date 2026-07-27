@@ -67,6 +67,23 @@ def _runtime_count(state: CombatState, token: str,
                      extracted Strike tag, including the playing card)
       player_damage_events TearAsunder (unblocked player-damage entries this
                      combat, counted per event rather than per HP)
+
+    Silent coverage pass (2026-07-27) -- six more, each named after the
+    CalculatedVar multiplier it serves:
+
+      attacks_played_this_turn  Finisher (hit count = Attacks played this
+                     turn; the counter already existed for Juggling)
+      skills_in_hand Flechettes (hit count = Skills in hand at play time)
+      other_cards_in_hand PreciseCut (damage FALLS with hand size; the card
+                     subtracts itself, hence "other")
+      discards_this_turn MementoMori (CardDiscardedEntry this turn -- the
+                     end-of-turn flush does not go through CardCmd.Discard
+                     and so does not count, verified in CombatManager)
+      cards_drawn_this_combat Murder (CardDrawnEntry for the owner, NOT
+                     reset per turn)
+      enemy_poison_total Mirage (summed Poison across LIVING enemies)
+      X              Skewer (hit count = the energy an X card spent, the
+                     same value `amount: X` reads)
     """
     p = state.player
     if token == "exhaust_pile":
@@ -84,6 +101,25 @@ def _runtime_count(state: CombatState, token: str,
         return sum("strike" in c.tags for c in cards)
     if token == "player_damage_events":
         return state.player_damage_events
+    if token == "attacks_played_this_turn":
+        return state.attacks_played_this_turn
+    if token == "skills_in_hand":
+        return sum(1 for c in p.hand if c.type == "skill")
+    if token == "other_cards_in_hand":
+        # The playing card has already left hand (play_card removes it before
+        # resolution), so "other" is simply the hand as it stands -- which is
+        # what the source computes the long way round by subtracting itself.
+        return len(p.hand)
+    if token == "discards_this_turn":
+        return state.discards_this_turn
+    if token == "cards_drawn_this_combat":
+        return state.cards_drawn_this_combat
+    if token == "enemy_poison_total":
+        return sum(e.powers.get("poison", 0) for e in state.living_enemies)
+    if token == "X":
+        # Skewer: hit count = the energy actually spent, the same number
+        # `amount: X` resolves. Spelled with the same token deliberately.
+        return state.current_x
     if token == "exhausted_this_card":
         return state.exhausted_this_card
     raise ValueError(f"unknown runtime count {token!r}")
@@ -964,6 +1000,7 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
         victim = _worst_card(pool) if chosen else state.rng.choice(pool)
         state.player.hand.remove(victim)
         state.player.discard_pile.append(victim)
+        state.discards_this_turn += 1
         if chosen:
             state.emit("discard", card=victim.id, chosen=True)
         else:
@@ -1119,6 +1156,7 @@ def _op_discard_for_sparks(state: CombatState, fx: dict, card: Card) -> None:
         victim = _worst_card(pool)          # the pilot's chosen discard
         state.player.hand.remove(victim)
         state.player.discard_pile.append(victim)
+        state.discards_this_turn += 1
         state.emit("discard", card=victim.id, chosen=True)
         discarded += 1
     gain = min(fx.get("sparks", discarded), discarded)

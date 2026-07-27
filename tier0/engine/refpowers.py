@@ -1193,6 +1193,7 @@ def reset_turn_counters(state: CombatState) -> None:
     state.block_gain_card_plays_this_turn = 0     # Unmovable's allowance
     state.cards_exhausted_this_turn = 0           # EvilEye / ForgottenRitual
     state.hp_lost_this_turn = 0                   # Spite
+    state.discards_this_turn = 0                  # MementoMori
     state.rupture_pending = 0
 
 

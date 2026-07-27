@@ -982,6 +982,20 @@ def _row_delta_key(row: dict, var: str) -> str | None:
     if power and any(fx.get("op") == "apply_power"
                      and fx.get("power") == power for fx in effects):
         return UPGRADE_POWER_KEY.get(power)
+    # CalculationBaseVar and ExtraDamageVar/CalculationExtraVar are the two
+    # HALVES of the same base-game grammar (`base + extra * count`), and a
+    # card that upgrades both -- MementoMori does -- needs them told apart or
+    # they collide on one key and the row is refused. The names are
+    # structural (they are the var CLASS names, shared across characters),
+    # so mapping them here introduces no per-card table.
+    has_formula = any(
+        isinstance(fx.get("amount_formula"), dict) and "count" in
+        fx["amount_formula"] for fx in effects)
+    if has_formula and var == "CalculationBase":
+        return "formula_base"
+    if has_formula and var in ("ExtraDamage", "CalculationExtra"):
+        return "formula_per"
+
     # A few runtime-formula cards name their scaling DynamicVar something
     # card-specific (for example, ExtraDamage). Only use the structural
     # fallback after all standard variable meanings above have failed, and

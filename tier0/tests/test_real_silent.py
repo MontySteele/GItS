@@ -7,11 +7,12 @@ not exist and there is nothing to assert. The fresh-clone half of the
 contract is pinned unguarded in test_anchor_lock.py.
 
 WHAT THIS ANCHOR IS, stated once so no number read off it is over-claimed:
-the assembled pool is 46 of the character's 88 cards (22 before ask A4 put
-the Sly keyword in the engine, 27 after it, 46 once nineteen more of her
-powers were implemented). The 42 excluded are still not a random sample --
-they are systematically the interesting ones (every shiv generator, and
-every card that branches on runtime state).
+the assembled pool is 56 of the character's 88 cards (22 -> 27 -> 46 -> 56
+over 2026-07-27: the Sly keyword, then nineteen of her powers, then a
+hand-translated layer of foreach/conditional/formula cards). The 32 excluded
+are still not a random sample -- they are systematically the SHIV cards (the
+token is not implemented), plus the cards that need a playability gate, a
+card-selection prompt, or an enchantment.
 This is a FLOOR on the Silent, not a portrait of her, and the coverage
 fraction travels with every statline she produces.
 """
@@ -148,7 +149,7 @@ def test_every_reference_card_has_an_applicable_upgrade(ref_cards):
     # of her powers on the dial. The count is pinned rather than derived
     # because a pool that quietly loads SMALLER is the failure this anchor
     # cannot detect any other way.
-    assert len(ref_cards) == 46
+    assert len(ref_cards) == 56
     pool_ids = {card.id for card in ref_cards}
     for layer_name in loader.EXTERNAL_CARD_LAYERS["silent_pool.yaml"]:
         layer = yaml.safe_load((loader.GAME_REF_DIR / layer_name).read_text())
@@ -182,7 +183,7 @@ def test_no_silent_card_silently_dropped_a_printed_keyword(ref_cards):
     the base-game keyword), and they must carry `sly_keyword` -- the
     base-game auto-play -- and never Kokomi's `sly` effect list, which would
     read as a printed rule that does nothing."""
-    assert sum(c.sly_keyword for c in ref_cards) == 6
+    assert sum(c.sly_keyword for c in ref_cards) == 7
     assert not any(c.sly for c in ref_cards)
     assert any(c.innate for c in ref_cards)
 

@@ -370,3 +370,126 @@ def test_a_free_play_does_not_clobber_the_outer_cards_context():
     combat.resolve_free_play(state, sly)
     assert state.kills_this_card == 3
     assert state.current_card_cost == 2
+
+
+# --- the coverage pass's runtime-count tokens ------------------------------
+#
+# Each is a CalculatedVar multiplier read off the DLL, and each is the whole
+# reason one more of her cards can be scored instead of excluded. Driven the
+# way a card row drives them, so a token that silently returns the wrong
+# quantity fails here rather than in a statline nobody can explain.
+
+def test_hit_count_from_attacks_played_this_turn():
+    state = make_state()
+    state.enemies = [make_enemy(hp=90)]
+    state.attacks_played_this_turn = 3
+    effects.resolve_card(state, card("finisher_like", type="attack", fx=[
+        {"op": "damage", "amount": 6, "target": "enemy",
+         "times_formula": {"base": 0, "per": 1,
+                           "count": "attacks_played_this_turn"}}]))
+    assert state.enemies[0].hp == 90 - 18
+
+
+def test_hit_count_from_skills_in_hand_counts_only_skills():
+    state = make_state()
+    state.enemies = [make_enemy(hp=90)]
+    state.player.hand = [card("s1"), card("s2"),
+                         card("a1", type="attack"), card("p1", type="power")]
+    effects.resolve_card(state, card("flechettes_like", type="attack", fx=[
+        {"op": "damage", "amount": 5, "target": "enemy",
+         "times_formula": {"base": 0, "per": 1,
+                           "count": "skills_in_hand"}}]))
+    assert state.enemies[0].hp == 90 - 10
+
+
+def test_hit_count_from_x_matches_the_energy_the_card_spent():
+    """Skewer's hits and an X card's damage must read the same number, or an
+    X attack can pay for energy it did not convert into hits."""
+    state = make_state()
+    state.enemies = [make_enemy(hp=90)]
+    state.current_x = 3
+    effects.resolve_card(state, card("skewer_like", type="attack", cost="X",
+                                     fx=[{"op": "damage", "amount": 8,
+                                          "target": "enemy", "times": "X"}]))
+    assert state.enemies[0].hp == 90 - 24
+
+
+def test_damage_scales_with_discards_this_turn_and_resets():
+    state = make_state()
+    state.enemies = [make_enemy(hp=90)]
+    state.player.hand = [card("junk1"), card("junk2")]
+    effects.resolve_card(state, card("discarder", fx=[
+        {"op": "discard", "amount": 2, "select": "chosen"}]))
+    assert state.discards_this_turn == 2
+    effects.resolve_card(state, card("memento_like", type="attack", fx=[
+        {"op": "damage", "target": "enemy",
+         "amount_formula": {"base": 9, "per": 4,
+                            "count": "discards_this_turn"}}]))
+    assert state.enemies[0].hp == 90 - 17
+    refpowers.reset_turn_counters(state)
+    assert state.discards_this_turn == 0
+
+
+def test_the_end_of_turn_flush_does_not_count_as_a_discard():
+    """CardDiscardedEntry comes from CardCmd.Discard; the flush reaches the
+    pile through CardPileCmd.Add. Counting it would hand Memento Mori a free
+    scaling term every turn."""
+    state = make_state()
+    state.enemies = [make_enemy(hp=200)]
+    state.player.hand = [card("junk")]
+    combat._player_turn(state, lambda s: None)
+    assert state.discards_this_turn == 0
+
+
+def test_damage_scales_with_cards_drawn_across_the_whole_combat():
+    """Murder's history entry is unfiltered by turn, so this counter is NOT
+    reset with the per-turn ones."""
+    state = make_state()
+    state.enemies = [make_enemy(hp=90)]
+    state.player.draw_pile = [card(f"c{i}") for i in range(4)]
+    state.draw(4)
+    refpowers.reset_turn_counters(state)
+    assert state.cards_drawn_this_combat == 4
+    effects.resolve_card(state, card("murder_like", type="attack", fx=[
+        {"op": "damage", "target": "enemy",
+         "amount_formula": {"base": 1, "per": 1,
+                            "count": "cards_drawn_this_combat"}}]))
+    assert state.enemies[0].hp == 90 - 5
+
+
+def test_block_scales_with_total_poison_on_living_enemies():
+    state = make_state()
+    alive = make_enemy(hp=40, name="alive")
+    dead = make_enemy(hp=40, name="dead")
+    state.enemies = [alive, dead]
+    alive.powers["poison"] = 5
+    dead.powers["poison"] = 100
+    dead.hp = 0                                   # a corpse's poison is gone
+    effects.resolve_card(state, card("mirage_like", fx=[
+        {"op": "block", "amount_formula": {"base": 0, "per": 1,
+                                           "count": "enemy_poison_total"}}]))
+    assert state.player.block == 5
+
+
+def test_damage_falls_with_the_rest_of_the_hand():
+    """Precise Cut counts OTHER cards: the playing card has already left hand
+    by resolution time, so the hand as it stands IS 'other'."""
+    state = make_state()
+    state.enemies = [make_enemy(hp=90)]
+    state.player.hand = [card("h1"), card("h2")]
+    effects.resolve_card(state, card("precise_like", type="attack", fx=[
+        {"op": "damage", "target": "enemy",
+         "amount_formula": {"base": 13, "per": -2,
+                            "count": "other_cards_in_hand"}}]))
+    assert state.enemies[0].hp == 90 - 9
+
+
+def test_a_negative_formula_result_deals_no_damage_rather_than_healing():
+    state = make_state()
+    state.enemies = [make_enemy(hp=90)]
+    state.player.hand = [card(f"h{i}") for i in range(9)]
+    effects.resolve_card(state, card("precise_like", type="attack", fx=[
+        {"op": "damage", "target": "enemy",
+         "amount_formula": {"base": 13, "per": -2,
+                            "count": "other_cards_in_hand"}}]))
+    assert state.enemies[0].hp == 90

@@ -366,8 +366,17 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                               and word in fx.get("power", "")), "amount", val)
         elif key in ("power_amount", "amp_percent", "splash_damage",
                      "duration", "buff"):
+            # `everywhere`, not `top`: a power applied inside a conditional
+            # is still the card's only power application, and the base game
+            # upgrades its DynamicVar the same way either side of the branch.
+            # Added 2026-07-27 for the Silent's Bubble Bubble ("if the target
+            # is Poisoned, apply Poison"), whose whole effect is nested.
+            # Top-level is still preferred so a card with both is unchanged.
             hit = next((fx for fx in top if fx.get("op")
                         in ("apply_power", "buff_next_attack")), None)
+            if hit is None:
+                hit = next((fx for fx in everywhere if fx.get("op")
+                            in ("apply_power", "buff_next_attack")), None)
             ok = hit is not None
             if hit:
                 # Single-application powers encode max_stacks == amount

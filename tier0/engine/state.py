@@ -459,6 +459,14 @@ class CombatState:
     # turn: the source keeps it on the power's Data object for the whole
     # fight and takes it mod 3, so a third poison two turns later still pays.
     outbreak_poisonings: int = 0
+    # CardDiscardedEntry / CardDrawnEntry, the two combat-history counts the
+    # Silent's calculated-damage cards read. `discards_this_turn` counts only
+    # CARD-EFFECT discards from hand -- the end-of-turn flush reaches the
+    # discard pile through CardPileCmd.Add and is not a CardCmd.Discard, so
+    # the base game does not count it either. `cards_drawn_this_combat` is
+    # NOT reset per turn; Murder scales across the whole fight.
+    discards_this_turn: int = 0
+    cards_drawn_this_combat: int = 0
     dark_embrace_ethereal_count: int = 0  # deferred to after the hand flush
     attacks_played_this_turn: int = 0     # Juggling's ==3 trigger
     block_gain_card_plays_this_turn: int = 0   # Unmovable's per-turn allowance
@@ -501,6 +509,7 @@ class CombatState:
                 return
             card = p.draw_pile.pop(0)
             p.hand.append(card)
+            self.cards_drawn_this_combat += 1
             self.emit("draw", card=card.id)
             # Hook.AfterCardDrawn, per CARD. CorrosiveWave and Speedster are
             # the only readers today and both are dead branches without a
