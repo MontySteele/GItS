@@ -610,6 +610,12 @@ def after_card_played(state: CombatState, card: Card, snap: dict) -> None:
     p = state.player
     state.card_play_depth -= 1
 
+    # CardPlaysFinished, tallied per tag. Counted here rather than at play
+    # time because the base game's readers ask what has FINISHED this turn:
+    # the card doing the asking must not count itself.
+    for tag in card.tags:
+        state.tag_plays_this_turn[tag] = state.tag_plays_this_turn.get(tag, 0) + 1
+
     # NoEnergyGain (ExpectAFight): ModifyEnergyGain -> 0.
     # NOT a turn-start denial. The turn refill goes through ResetEnergy(), which
     # never calls PlayerCmd.GainEnergy and so never sees this hook -- the power
@@ -783,6 +789,30 @@ def hand_draw_bonus(player: Player) -> int:
             + player.powers.get("draw_cards_next_turn", 0))
 
 
+def before_hand_draw(state: CombatState) -> None:
+    """Hook.BeforeHandDraw -- runs before the turn-start hand draw, so the
+    cards it makes are in hand BEFORE the draw counts against the hand cap.
+
+    InfiniteBladesPower creates Amount of the owner's token here. The token's
+    id is not in this file: it arrives as a `payload` on the row that applied
+    the power (see effects._op_apply_power), because a base-game card id is
+    decompiled game data and this module is committed.
+    """
+    p = state.player
+    n = p.powers.get("infinite_blades", 0)
+    if not n:
+        return
+    token = p.power_payloads.get("infinite_blades")
+    if not token:
+        state.emit("UNIMPLEMENTED", power="infinite_blades",
+                   reason="no payload: the row that applied it named no card")
+        return
+    from tier0.content import loader                # late import avoids cycle
+    from tier0.engine.effects import _add_token
+    for _ in range(n):
+        _add_token(state, loader.get_card(token), "hand")
+
+
 def after_card_drawn(state: CombatState, card: Card,
                      from_hand_draw: bool) -> None:
     """Hook.AfterCardDrawn -- per CARD, not per draw effect.
@@ -815,17 +845,37 @@ def retain_at_flush(state: CombatState, flushing: list[Card]) -> list[Card]:
     knob to probe if a Well Laid Plans measurement looks heuristic-shaped.
     Returns the subset to keep in hand; the caller flushes the rest.
     """
+    keep: list[Card] = []
+    if not flushing:
+        return keep
+
+    # PhantomBladesPower gives Retain to every tagged card it owns
+    # (AfterApplied over AllCards, then AfterCardEnteredCombat for each new
+    # one). tier0 has no per-instance keyword grant, but Retain IS "survives
+    # the flush", so granting it here is the same observable rule applied at
+    # the only site that reads it. NOT capped by a count: unlike Well Laid
+    # Plans below, this power keeps ALL of them.
+    tag = state.player.power_payloads.get("phantom_blades")
+    if state.player.powers.get("phantom_blades", 0) and tag:
+        keep = [c for c in flushing if tag in c.tags]
+        if keep:
+            state.emit("phantom_blades_retain", kept=[c.id for c in keep])
+
+    # Well Laid Plans keeps up to Amount MORE. Its allowance is its own: the
+    # cards Phantom Blades already retained were never candidates for it,
+    # and counting them would silently shrink a power nobody changed.
     n = state.player.powers.get("well_laid_plans", 0)
-    if not n or not flushing:
-        return []
+    if not n:
+        return keep
     from tier0.engine.effects import _best_card
-    keep, pool = [], list(flushing)
-    while pool and len(keep) < n:
+    pool = [c for c in flushing if c not in keep]
+    wlp: list[Card] = []
+    while pool and len(wlp) < n:
         pick = _best_card(pool)
         pool.remove(pick)
-        keep.append(pick)
-    state.emit("well_laid_plans", kept=[c.id for c in keep])
-    return keep
+        wlp.append(pick)
+    state.emit("well_laid_plans", kept=[c.id for c in wlp])
+    return keep + wlp
 
 
 def envenom_on_hit(state: CombatState, enemy: Enemy, unblocked: float,
@@ -933,7 +983,8 @@ def on_power_applied(state: CombatState, target: Fighter, name: str,
 # ---------------------------------------------------------------------------
 
 def modify_damage_taken(defender: Fighter, dmg: float,
-                        attacker: Optional[Fighter]) -> float:
+                        attacker: Optional[Fighter],
+                        from_card: bool = False) -> float:
     """Colossus and Cruelty. Both key off the DEALER, which is why
     powers.modify_damage_taken grew an `attacker` argument.
 
@@ -968,6 +1019,24 @@ def modify_damage_taken(defender: Fighter, dmg: float,
     if (defender.powers.get("colossus", 0)
             and attacker.powers.get("vulnerable", 0) > 0):
         dmg *= C.COLOSSUS_TAKEN_MULT
+
+    # TrackingPower.ModifyDamageMultiplicative returns base.Amount -- the
+    # stacks ARE the multiplier, not a percentage: 2 stacks is double damage
+    # against a Weak target, and a second application makes it 3. It is
+    # keyed off the DEALER holding the power and the TARGET holding Weak, so
+    # it belongs on this two-sided hook rather than in modify_damage_dealt,
+    # which only ever sees the attacker.
+    tracking = attacker.powers.get("tracking", 0)
+    if tracking and defender.powers.get("weak", 0) > 0:
+        dmg *= tracking
+
+    # DoubleDamagePower returns a FLAT 2, never base.Amount -- the stacks are
+    # a turn counter (one is decremented at each of the owner's turn ends),
+    # not a multiplier. Two stacks is two turns of doubling, not quadruple
+    # damage, and reading it the other way would be a large silent buff.
+    # Requires a card source: a bomb or a poison tick is not doubled.
+    if from_card and attacker.powers.get("double_damage", 0):
+        dmg *= C.DOUBLE_DAMAGE_MULT
 
     return _intangible_cap(defender, dmg)
 
@@ -1106,6 +1175,25 @@ def player_turn_start_late(state: CombatState) -> None:
         for enemy in list(state.living_enemies):
             _powers.apply_power(state, enemy, "poison", n, applier=p)
 
+    # WraithForm's downside, site F: the owner LOSES Amount Dexterity every
+    # turn, forever. It is a Debuff on its own owner and never expires, which
+    # is the whole cost of the card -- Intangible 2 up front, paid for by an
+    # accelerating Dexterity hole. Applied through the normal power path so
+    # the loss stacks and reaches the block funnel like any other Dexterity.
+    n = p.powers.get("wraith_form", 0)
+    if n:
+        from tier0.engine import powers as _powers
+        _powers.apply_power(state, p, "dexterity", -n, applier=p)
+
+    # ShadowStepPower, site F (AfterSideTurnStart): it converts itself into
+    # DoubleDamage and is REMOVED -- a one-turn delayed payload, not a
+    # standing buff. Order matters: this runs at the start of the turn the
+    # doubling applies to, so the card played last turn pays out this turn.
+    n = p.powers.pop("shadow_step", 0)
+    if n:
+        from tier0.engine import powers as _powers
+        _powers.apply_power(state, p, "double_damage", n, applier=p)
+
     # Poison, also site F. It can kill; the caller re-checks p.alive.
     poison_tick(state, p)
 
@@ -1165,6 +1253,12 @@ def on_fighter_turn_end(state: CombatState, fighter: Fighter) -> None:
         fighter.powers.pop(name, None)
     state.no_energy_gain_ceiling = None
 
+    # DoubleDamage DECREMENTS here (PowerCmd.Decrement, not Remove), which is
+    # why its stacks read as turns of doubling remaining -- the multiplier
+    # itself is a flat 2 no matter how many are left.
+    if fighter.powers.get("double_damage", 0) > 0:
+        fighter.powers["double_damage"] -= 1
+
     # DarkEmbrace's deferred ethereal draws. This site is already AFTER the
     # hand flush in combat._player_turn, which is precisely why the source
     # defers them here instead of drawing at exhaust time.
@@ -1204,6 +1298,7 @@ def reset_turn_counters(state: CombatState) -> None:
     state.cards_exhausted_this_turn = 0           # EvilEye / ForgottenRitual
     state.hp_lost_this_turn = 0                   # Spite
     state.discards_this_turn = 0                  # MementoMori
+    state.tag_plays_this_turn = {}                # PhantomBlades
     state.rupture_pending = 0
 
 

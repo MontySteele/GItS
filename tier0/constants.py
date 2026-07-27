@@ -13,6 +13,10 @@ MAX_HAND_SIZE = 10
 # the owner. Named rather than inlined because it is a base-game parity
 # number that no design ruling of ours may tune.
 INTANGIBLE_DAMAGE_CAP = 1
+# DoubleDamagePower.ModifyDamageMultiplicative returns a literal 2, NOT
+# base.Amount -- its stacks count TURNS (one decrements at each of the
+# owner's turn ends), so this is a parity constant and not a stack read.
+DOUBLE_DAMAGE_MULT = 2
 # OutbreakPower.poisonThreshold, a public const on the power itself.
 OUTBREAK_POISON_THRESHOLD = 3
 

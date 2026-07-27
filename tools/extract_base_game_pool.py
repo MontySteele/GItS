@@ -405,7 +405,41 @@ SUPPORTED_POWERS = {"StrengthPower": "strength",
                     "StranglePower": "strangle",
                     "ThornsPower": "thorns",
                     "ToolsOfTheTradePower": "tools_of_the_trade",
-                    "WellLaidPlansPower": "well_laid_plans"}
+                    "WellLaidPlansPower": "well_laid_plans",
+                    # verified 2026-07-27 (coverage pass 5 -- each read off
+                    # its own PowerModel and pinned in
+                    # tier0/tests/test_si_pass5.py). NoDrawPower was already
+                    # implemented in should_draw for BattleTrance and only
+                    # ever lacked its dial entry.
+                    "AccuracyPower": "tag_damage_shiv",
+                    "DoubleDamagePower": "double_damage",
+                    "NoDrawPower": "no_draw",
+                    "ShadowStepPower": "shadow_step",
+                    "TrackingPower": "tracking",
+                    "WraithFormPower": "wraith_form"}
+
+# A FOURTH exclusion category, and the narrowest: the power IS implemented in
+# tier0, but it operates on a card the CHARACTER owns -- a token to create, a
+# tag to look for -- and that card is decompiled game data, so neither the
+# engine nor this tool may name it. The row has to carry it as a `payload`,
+# which only a hand-translated supplement can supply.
+#
+# Emitting these structurally would be the worst available outcome: a row
+# that applies a real power with nothing for it to work on, i.e. a card that
+# reads as a buff and measurably does nothing. That is the same failure the
+# CO-OP ONLY category exists to prevent, arrived at from the other direction.
+PAYLOAD_POWERS = {
+    "InfiniteBladesPower": (
+        "it creates the OWNER's token card every turn (Shiv.CreateInHand in "
+        "BeforeHandDraw). tier0 implements the power, but the token's id is "
+        "game data that may not appear in committed code -- the row must "
+        "supply it as `payload`, so this card comes from a supplement."),
+    "PhantomBladesPower": (
+        "it reads a CardTag the character owns (Retain onto tagged cards, "
+        "and a first-of-turn damage bonus for them). Same reason as "
+        "InfiniteBlades: the tag is game data and rides on the row as "
+        "`payload`."),
+}
 
 
 def _power_gap(power: str) -> str:
@@ -432,6 +466,8 @@ def _power_gap(power: str) -> str:
     # conflating it with "not on the dial" would leave a standing invitation
     # to implement a card that measurably does nothing. See
     # refpowers.MULTIPLAYER_ONLY_POWERS.
+    if power in PAYLOAD_POWERS:
+        return f"{power} NEEDS A ROW PAYLOAD: {PAYLOAD_POWERS[power]}"
     if key in refpowers.MULTIPLAYER_ONLY_POWERS:
         # NOT truncated at the first period the way UNIMPLEMENTED is: these
         # reasons cite the guard clause that makes the power unreachable, and
@@ -540,7 +576,19 @@ UPGRADE_POWER_KEY = {"strength": "power_amount",
                      "strangle": "power_amount",
                      "thorns": "power_amount",
                      "tools_of_the_trade": "power_amount",
-                     "well_laid_plans": "power_amount"}
+                     "well_laid_plans": "power_amount",
+                     # Coverage pass 5. Accuracy and PhantomBlades raise a
+                     # PowerVar like the rest; the other five upgrade
+                     # something that is not their power's amount (a cost, a
+                     # keyword) and never reach this map.
+                     "tag_damage_shiv": "power_amount",
+                     "double_damage": "power_amount",
+                     "infinite_blades": "power_amount",
+                     "no_draw": "power_amount",
+                     "phantom_blades": "power_amount",
+                     "shadow_step": "power_amount",
+                     "tracking": "power_amount",
+                     "wraith_form": "power_amount"}
 
 
 def _num(text: str) -> int | float:

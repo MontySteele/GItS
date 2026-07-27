@@ -314,7 +314,11 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     was_frozen = enemy.frozen       # snapshot: a hit can't shatter the
     dmg = powers.modify_damage_dealt(state.player, base)  # freeze it applies
     dmg = reactions.resolve_hit(state, enemy, element, dmg)
-    dmg = powers.modify_damage_taken(enemy, dmg)
+    # `source` names what dealt it; "card" and "attack" are the two card
+    # sources, everything else (bombs, summon pulses, shatter, splash) is
+    # the base game's `cardSource == null` case.
+    dmg = powers.modify_damage_taken(enemy, dmg,
+                                     from_card=source in ("card", "attack"))
     # Slow (§10.9 promotion): +N% damage from Attacks per card played this
     # turn. cards_played_this_turn increments at play, BEFORE resolution, so
     # the attacking card counts itself -- the base-game trigger order.
@@ -502,6 +506,15 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     # tag_damage_<tag> powers (Accuracy-like -> shiv) add per-hit.
     base += sum(state.player.powers.get(f"tag_damage_{t}", 0)
                 for t in card.tags)
+    # PhantomBladesPower pays only on the FIRST tagged card played each turn
+    # ("num > 0 -> return 0", counting CardPlaysFinished this turn). The
+    # playing card has not finished, so the first one sees a count of zero
+    # and every later one sees at least one.
+    n = state.player.powers.get("phantom_blades", 0)
+    tag = state.player.power_payloads.get("phantom_blades")
+    if n and tag and tag in card.tags:
+        if not state.tag_plays_this_turn.get(tag, 0):
+            base += n
 
     # R72 (2026-07-26): the vs-bombed bonus is a SNAPSHOT taken at cast, the
     # Sizzle idiom -- not a live per-hit read. Under the live read, hit 1 of a
@@ -693,6 +706,14 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
     # Dominate needs no guard: it applies 1 first, so its read is always >= 1.
     if fx.get("guard") == "nonzero" and amount <= 0:
         return
+    # POWERS THAT MAKE CARDS carry the card id as a PAYLOAD from the row that
+    # applied them. InfiniteBladesPower creates the owner's Shiv every turn,
+    # and refpowers.py is committed engine while a base-game card id is
+    # decompiled game data (.gitignore:28) -- so the id may not appear there.
+    # This keeps it where it already lives, in the gitignored card row, and
+    # leaves the engine holding only "whatever this power was told to make".
+    if "payload" in fx:
+        state.player.power_payloads[fx["power"]] = fx["payload"]
     if fx.get("target", "self") == "self":
         if fx["power"] == "salon_member":
             _deploy_salon_members(state, amount,
@@ -1269,6 +1290,7 @@ PREDICATE_NAMES = frozenset({
 # that reads a power needs no new predicate); the rest take an integer.
 PREDICATE_PREFIXES = frozenset({
     "target_has_power_",
+    "self_has_power_",
     "exhaust_pile_at_least_",
     "charge_at_least_",
     "fanfare_at_least_",
@@ -1286,7 +1308,7 @@ def is_known_predicate(name: str) -> bool:
         arg = name[len(prefix):]
         if not arg:
             return False
-        if prefix == "target_has_power_":
+        if prefix in ("target_has_power_", "self_has_power_"):
             return True
         # The integer forms must actually carry an integer. A typo'd
         # `fanfare_at_least_ten` would otherwise pass a name-only check and
@@ -1324,6 +1346,12 @@ def _predicate(state: CombatState, name: str) -> bool:
         # Enemy.counts_for_fatal. Distinct from killed_target so Klee's and
         # Furina's existing kill riders keep their exact meaning.
         return state.fatal_kills_this_card > 0
+    if name.startswith("self_has_power_"):
+        # Tracking applies 1 more if the owner ALREADY has it and 2 if not --
+        # a card that reads its own power before applying it. The mirror of
+        # target_has_power_, and parameterised for the same reason: the next
+        # card that reads one of the player's powers needs no new predicate.
+        return state.player.powers.get(name[len("self_has_power_"):], 0) > 0
     if name.startswith("target_has_power_"):
         # Dismantle: the hit-count branch reads whether the default-aim enemy
         # carries a named power AT PLAY TIME. The conditional resolves the

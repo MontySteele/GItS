@@ -7,11 +7,12 @@ not exist and there is nothing to assert. The fresh-clone half of the
 contract is pinned unguarded in test_anchor_lock.py.
 
 WHAT THIS ANCHOR IS, stated once so no number read off it is over-claimed:
-the assembled pool is 70 rows: 69 of the character's 86 draftable cards
+the assembled pool is 76 rows: 75 of the character's 86 draftable cards
 plus the SHIV token, which is created in hand and never drafted. Coverage
-went 22 -> 27 -> 46 -> 56 -> 59 -> 69 over 2026-07-27 (the Sly keyword,
-nineteen of her powers, a hand-translated foreach/conditional/formula layer,
-the Shiv and its creators, then the runtime-count pass).
+went 22 -> 27 -> 46 -> 56 -> 59 -> 69 -> 75 over 2026-07-27 (the Sly
+keyword, nineteen of her powers, a hand-translated foreach/conditional/formula
+layer, the Shiv and its creators, the runtime-count pass, then eight more
+powers).
 
 THE DENOMINATOR IS 86, NOT THE 88 CARDS IN HER POOL LISTING. Flanking and
 Sneaky carry CardMultiplayerConstraint.MultiplayerOnly, so a single-player
@@ -19,10 +20,10 @@ run never offers them and no DSL work could ever change that; the extractor
 reads that flag and files them under `unavailable:`, outside the
 emitted/excluded split.
 
-The 17 still out are not a random sample -- they are the cards needing a
-power that would invalidate an already-translated row, a self-cost-reduction
-hook, created cards that arrive upgraded, or the enchantment subsystem
-([USER] sent that one to a design pass). This is still a FLOOR on the
+The 11 still out are not a random sample -- they are the cards needing
+per-instance card cost state, a power that would invalidate an
+already-translated row, created cards that arrive upgraded, or the
+enchantment subsystem ([USER] sent that one to a design pass). This is still a FLOOR on the
 Silent rather than a portrait of her, and the coverage fraction travels with
 every statline she produces.
 """
@@ -154,14 +155,14 @@ def test_every_reference_card_has_an_applicable_upgrade(ref_cards):
     # Atomic external-artifact contract: partial coverage would bias smithing
     # and shop removal toward whichever cards happened to receive a `+` form.
     from tier0.content import upgrades
-    # 22 -> 27 -> 46 -> 56 -> 59 -> 70 rows across 2026-07-27: ask A4
+    # 22 -> 27 -> 46 -> 56 -> 59 -> 70 -> 76 rows across 2026-07-27: ask A4
     # (CardKeyword.Sly) freed the five Sly cards, nineteen of her powers went
     # on the dial, two hand-translated layers followed, then the Shiv token,
     # and finally the runtime-count pass (hand_size, block gained, the drawn
     # card's type) plus The Hunt's post-combat reward channel. The count is
     # pinned rather than derived because a pool that quietly loads SMALLER is
     # the failure this anchor cannot detect any other way.
-    assert len(ref_cards) == 70
+    assert len(ref_cards) == 76
     pool_ids = {card.id for card in ref_cards}
     for layer_name in loader.EXTERNAL_CARD_LAYERS["silent_pool.yaml"]:
         layer = yaml.safe_load((loader.GAME_REF_DIR / layer_name).read_text())

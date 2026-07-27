@@ -55,7 +55,8 @@ def modify_damage_dealt(attacker: Fighter, base: float) -> float:
 
 
 def modify_damage_taken(defender: Fighter, dmg: float,
-                        attacker: Fighter | None = None) -> float:
+                        attacker: Fighter | None = None,
+                        from_card: bool = False) -> float:
     if defender.powers.get("vulnerable", 0) > 0:
         dmg *= C.VULNERABLE_TAKEN_MULT
     # `attacker` exists for the base-game parity powers that key off the
@@ -63,8 +64,12 @@ def modify_damage_taken(defender: Fighter, dmg: float,
     # it deals; Colossus halves what its owner takes from a Vulnerable dealer).
     # It defaults to None so every existing two-argument call still reads the
     # same -- Klee and Furina have no dealer-keyed power.
+    # `from_card` is the `cardSource != null` guard several base-game
+    # multipliers carry: DoubleDamage doubles a card's Attack and does NOT
+    # double a bomb, a poison tick or a summon's pulse.
     from tier0.engine import refpowers          # late import avoids cycle
-    return _floor(refpowers.modify_damage_taken(defender, dmg, attacker))
+    return _floor(refpowers.modify_damage_taken(defender, dmg, attacker,
+                                                from_card=from_card))
 
 
 def modify_block_gained(fighter: Fighter, amount: int) -> int:

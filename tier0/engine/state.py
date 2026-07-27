@@ -258,6 +258,11 @@ class Player(Fighter):
     # Battery players are built by loader.build_player, which never sets this;
     # only build_player_from_ids(relic_effects=...) in the run layer does. ---
     relic_effects: list[dict] = field(default_factory=list)  # dicts keyed 'hook'
+    # power name -> the card id that power was told to create. Set by an
+    # apply_power row carrying `payload`; read by the refpowers hook that
+    # makes the card. Keeps decompiled card ids out of committed engine code
+    # while letting a parity power create a character's own token.
+    power_payloads: dict[str, str] = field(default_factory=dict)
     first_hp_loss_fired: bool = False        # on_first_hp_loss_draw, per combat
     relic_conditional_applied: dict[str, int] = field(default_factory=dict)
     #                                        # conditional_power (Red Skull):
@@ -490,6 +495,10 @@ class CombatState:
     extra_card_screens: int = 0
     dark_embrace_ethereal_count: int = 0  # deferred to after the hand flush
     attacks_played_this_turn: int = 0     # Juggling's ==3 trigger
+    # CardPlaysFinished this turn, counted per card TAG. PhantomBlades pays
+    # only on the first tagged card played each turn, and "finished" is the
+    # word that matters: the card currently resolving is not in here yet.
+    tag_plays_this_turn: dict = field(default_factory=dict)
     block_gain_card_plays_this_turn: int = 0   # Unmovable's per-turn allowance
     no_energy_gain_ceiling: Optional[int] = None  # NoEnergyGain, seeded when
                                           # the power lands (not at the refill)
