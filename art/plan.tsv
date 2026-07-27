@@ -971,3 +971,56 @@ neuvillette_ancient_sea_authority	ImageGen/images/cards/companions/neuvillette_a
 arlecchino_masque_red_death	ImageGen/images/cards/companions/arlecchino_masque_red_death.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Arlecchino Full Wish.png		splash	arlecchino
 arlecchino_masque_red_death	ImageGen/images/cards/companions/arlecchino_masque_red_death.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Arlecchino Card.png		splash	arlecchino
 arlecchino_masque_red_death	ImageGen/images/cards/companions/arlecchino_masque_red_death.png	500	380	cover	y0.20	shortlist	3	png	Arlecchino Portrait.png		splash	arlecchino
+
+# ---------- Coverage gap fill, Neap Tide (2026-07-26) ----------
+# Four faces the sheet gained in the Neap Tide amendment that no plan row ever
+# covered: the three F4 Sly-lane bridge rows (ebb_tide, salt_line, undertow)
+# and R73's before_sun_and_moon. Identical invisibility to the 2026-07-25 gap
+# fill above -- the game renders the BETA placeholder and nothing fails, so
+# art_coverage's MISSING bill is the only witness.
+#
+# Every rank 1 below claims a source NO card row held at rank 1. That was only
+# still possible because the scarcity ruling widened her pool past the original
+# ~8, and it is worth writing down that it cost the last of the slack: four new
+# faces took the four remaining unclaimed illustrations of usable size. The
+# next batch on this sheet will be re-cropping, not claiming.
+#
+# before_sun_and_moon -- its SOLE effect is +1 to the Bake-Kurage pulse
+# multiplier, so it wears the Kurage and not the princess. Bake-Kurage Summon
+# carries register `vfx` like the rest of her kit art, but it is NOT one of the
+# sources the "vfx is a dead register for her" finding condemned -- those are
+# 128x128 talent sigils and 480x270 clip thumbnails. At 420x720 this is a real
+# render, the same shape as the TCG cards already shipping at rank 1. It is
+# nonetheless the FIRST vfx rank-1 pick on her sheet, so it is flagged here for
+# the taste pass rather than quietly normalised.
+#
+# ebb_tide -- a receding tide, and Namecard Background The Deep is her only
+# unclaimed pure-WATER plate: 840x400, no figure in it to behead by cropping.
+# It is also kokomi_select_bg's source, which is legal and deliberate -- L1
+# scopes to `/cards/`, and a character-select backdrop is not a card face.
+#
+# salt_line -- a common, and her commons already ship sticker faces at rank 1
+# (moon_signal, drifting_lantern, quiet_harbor). Expression 2 is 420x420,
+# LARGER than the 300x300 Paimon's Paintings emoji those shipped on, and
+# unclaimed at every rank.
+#
+# undertow -- the lane's payoff, so it takes the largest unclaimed
+# illustration: Profile, 2400x1320. cover_autocrop, NOT a plain x-anchored
+# cover: Profile floats the figure in a wide transparent void, so `cover` at
+# any anchor framed her hard right against a half-frame of empty parchment.
+# Checked by eye against cover@0.06 / cover@0.12 / contain@0.08 -- 0.06 is the
+# one that centres her and keeps the fish in frame. This is the same void that
+# the mode was written for, and the reason the anchor columns of the neighbours
+# are no guide here.
+before_sun_and_moon	ImageGen/images/cards/kokomi/before_sun_and_moon.png	500	380	cover	y0.42	shortlist	1	png	Bake-Kurage Summon.png		vfx	kokomi_pool
+before_sun_and_moon	ImageGen/images/cards/kokomi/before_sun_and_moon.png	500	380	cover	x0.60	shortlist	2	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+before_sun_and_moon	ImageGen/images/cards/kokomi/before_sun_and_moon.png	500	380	cover	y0.44	shortlist	3	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+ebb_tide	ImageGen/images/cards/kokomi/ebb_tide.png	500	380	cover	x0.62	shortlist	1	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
+ebb_tide	ImageGen/images/cards/kokomi/ebb_tide.png	500	380	cover	y0.80	shortlist	2	png	Character Sangonomiya Kokomi Full Wish.png		splash	kokomi_pool
+ebb_tide	ImageGen/images/cards/kokomi/ebb_tide.png	500	380	cover_autocrop	contain@0.10	shortlist	3	png	Sangonomiya Kokomi Expression 3.png		sticker	kokomi_pool
+salt_line	ImageGen/images/cards/kokomi/salt_line.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Sangonomiya Kokomi Expression 2.png		sticker	kokomi_pool
+salt_line	ImageGen/images/cards/kokomi/salt_line.png	500	380	cover	y0.34	shortlist	2	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+salt_line	ImageGen/images/cards/kokomi/salt_line.png	500	380	cover	y0.50	shortlist	3	png	Sangonomiya Kokomi Multi Wish.png		splash	kokomi_pool
+undertow	ImageGen/images/cards/kokomi/undertow.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+undertow	ImageGen/images/cards/kokomi/undertow.png	500	380	cover	y0.84	shortlist	2	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+undertow	ImageGen/images/cards/kokomi/undertow.png	500	380	cover	y0.90	shortlist	3	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool

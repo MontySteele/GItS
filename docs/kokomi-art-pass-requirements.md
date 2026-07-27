@@ -1,7 +1,7 @@
 # Kokomi Art Pass Requirements
 
 **Date:** 2026-07-25
-**Status:** card shortlists built and provisionally applied (73 faces, awaiting
+**Status:** card shortlists built and provisionally applied (77 faces, awaiting
 the [USER] taste pass); **character-shell track DONE** — see §5a
 **Canonical content:** `docs/kokomi-cards.yaml`, `docs/inazuma-companions.yaml`
 **Bill owner:** `tools/art_coverage.py` — if this doc and the tool disagree, the tool is right (the lesson of the Furina bill correction).
@@ -10,14 +10,25 @@ the [USER] taste pass); **character-shell track DONE** — see §5a
 
 | Surface | Required portraits |
 |---|---:|
-| Kokomi personal sheet | 58 |
+| Kokomi personal sheet | 62 |
 | Companions (Inazuma) | 15 |
-| **Total card-sized outputs** | **73** |
+| **Total card-sized outputs** | **77** |
 
 *(Stale since later the same day — recap note 2026-07-26: the shell track
 shipped (§5a, commit `68fb11b`) and all 73 faces carry applied provisional
 rank-1 picks (`6f1b969`); "zero exist" described the pre-pass world. The
 [USER] taste pass is what remains — `open-playtest-items.md` §6.1.)*
+
+*(Bill correction 2026-07-26, post-merge sweep: **58 → 62**. The Neap Tide
+amendment added four faces this table did not follow — R73's
+`before_sun_and_moon` and the three F4 Sly-lane bridge rows (`ebb_tide`,
+`salt_line`, `undertow`). All four are now planned, rendered and ledgered, and
+`art_coverage.py` reports 267/267 with an empty MISSING bill. Note what the
+delay cost nothing and what it nearly cost: the game renders the BETA
+placeholder for an unplanned face and NOTHING fails, so a sheet that grows
+between art passes is invisible until someone runs the tool. This is the same
+sheet-moved-projection-did-not shape as the five defects in the Neap Tide
+addendum, with the art bill as the projection.)*
 
 Zero currently exist. She ships playable on Klee's assets via
 `build_pck.ps1`'s `Copy-KokomiFallback`, so **the game looks finished and this
@@ -47,7 +58,7 @@ inspection disqualified two whole families the raw counts had included.
 | `tcg` | 3 | Character Card + Platinum + Golden, 420×720 each |
 | `item` | 5 | Sango Pearl Wild 797², Vision 400², Sango Pearl 256², The Deep 256², Item 256² |
 | `vfx` | **0 usable** | see below — every one is a sigil |
-| **Viable distinct sources** | **33** | against **58** personal faces |
+| **Viable distinct sources** | **33** | against **62** personal faces (58 when this was counted; +4 in the Neap Tide amendment) |
 
 ### `vfx` IS A DEAD REGISTER FOR HER — the single most important finding
 
@@ -100,7 +111,7 @@ wonder why the plan ignores them.
 
 ### Consequence for the plan: the unit is SLOTS, not sources
 
-33 sources against 58 faces means crop reuse is mandatory, as hybrid §2
+33 sources against 62 faces means crop reuse is mandatory, as hybrid §2
 anticipated. But the real currency turned out to be **(source, anchor)
 slots**: a large source backs several distinct faces, a small transparent icon
 backs exactly one.
@@ -111,7 +122,15 @@ backs exactly one.
 | tcg (multi-anchor) | 3 | 12 |
 | item (single) | 5 | 5 |
 | sticker (single) | 15 | 15 |
-| **total** | **33** | **70** for 58 faces |
+| **total** | **33** | **70** for 62 faces |
+
+**Headroom, as of the 2026-07-26 gap fill: 8 slots.** The four Neap Tide faces
+were each given a source that NO card row held at rank 1 — Bake-Kurage Summon,
+Namecard Background The Deep, Expression 2, Profile — which was the last of the
+unclaimed-*source* slack, not of the slot slack. The distinction matters for
+whoever adds the next card: there are still spare anchors on the large splash
+and tcg families, so the next face is a re-crop of an already-used source, and
+it will need an L12 check rather than a hunt.
 
 **Anchors are computed, not chosen.** A `cover` focus is a *centre*, and the
 crop is clamped inside the image, so any anchor nearer an edge than half the

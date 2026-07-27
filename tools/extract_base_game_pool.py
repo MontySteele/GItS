@@ -1011,6 +1011,16 @@ SHEET_HEADER = """\
 # They are NOT approximated -- a wrong number wearing the right name is how
 # sim findings stop being trustworthy.
 #
+# THIS FILE IS A SNAPSHOT, NOT THE LIVE POOL. Both counts below are frozen at
+# the DSL dial in force the moment this ran. The assembled pool the loader
+# actually serves is `{char_lc}_pool.yaml` -- later passes implement entries
+# out of `excluded:` and merge them there, so that file grows while this one
+# does not. IF THE TWO DISAGREE, `{char_lc}_pool.yaml` IS THE POOL and this
+# is history. (2026-07-27: this file said 35/87 while the pool held 76,
+# because passes 4-6 had implemented 41 of the excluded cards. A tool globbing
+# `*-cards.yaml` read the 35 and reported a mechanically trivial anchor --
+# the hyphen matches this file and never matches `_pool.yaml`.)
+#
 # emitted {n_ok} / {n_all}   excluded {n_bad} / {n_all}
 """
 
@@ -1079,7 +1089,8 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
 
     OUT_DIR.mkdir(exist_ok=True)
     sheet = OUT_DIR / f"{character.lower()}-cards.yaml"
-    out = [SHEET_HEADER.format(char=character, n_ok=len(rows),
+    out = [SHEET_HEADER.format(char=character, char_lc=character.lower(),
+                               n_ok=len(rows),
                                n_bad=len(excluded), n_all=len(cards))]
     for row in rows:
         out.append(f"- {_flow(row)}")
