@@ -49,7 +49,8 @@ UPGRADE_SHEETS = (_DOCS / "klee-upgrades.yaml",
                   # numbers; the tier 0 battery never upgrades, so the frozen
                   # scorecard and the anchor lock are untouched.
                   _DOCS / "ref-ironclad-upgrades.yaml")
-EXTERNAL_UPGRADE_SHEETS = (_GAME_REF / "ironclad-upgrades.yaml",)
+EXTERNAL_UPGRADE_SHEETS = (_GAME_REF / "ironclad-upgrades.yaml",
+                           _GAME_REF / "silent-upgrades.yaml")
 SUFFIX = "+"
 
 # Deltas the engine cannot express per-card yet (constants-encoded).
@@ -155,7 +156,11 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                     out.append(fx)
             card.effects = out
         elif key == "damage":
-            ok = _bump_first((fx for fx in top if fx.get("op") == "damage"
+            # chain_attack is a damage op whose repeat count is decided by
+            # the kills it scores, so its printed number upgrades like any
+            # other attack's.
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") in ("damage", "chain_attack")
                               and fx.get("target") != "self"), "amount", val)
         elif key == "block":
             ok = _bump_first((fx for fx in top if fx.get("op") == "block"),
@@ -170,18 +175,84 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "heal":
             ok = _bump_first((fx for fx in top if fx.get("op") == "heal"),
                              "amount", val)
+        elif key == "cards":
+            # The COUNT on an add_card op -- "create N more of the token".
+            # Distinct from `draw` because creating a card and drawing one
+            # are different resources: a created token adds to the deck's
+            # total, a drawn one does not.
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "add_card"), "amount", val)
+        elif key == "created_upgraded":
+            # HiddenDaggers+ / StormOfSteel+: the tokens they create arrive
+            # upgraded. Boolean, and only True is a ruling -- the same shape
+            # `innate` and `retain` use.
+            if val is not True:
+                raise ValueError(
+                    f"created_upgraded delta on {base_id!r} must be true")
+            hits = [fx for fx in everywhere if fx.get("op") == "add_card"]
+            for fx in hits:
+                fx["upgraded"] = True
+            ok = bool(hits)
+        elif key == "autoplay_upgrade_first":
+            # KnifeTrap+: upgrade each card before auto-playing it.
+            if val is not True:
+                raise ValueError(
+                    f"autoplay_upgrade_first delta on {base_id!r} must be true")
+            hits = [fx for fx in everywhere
+                    if fx.get("op") == "autoplay_from_exhaust"]
+            for fx in hits:
+                fx["upgrade_first"] = True
+            ok = bool(hits)
         elif key == "draw":
             # ALL draw ops, branches included ("both branches" is sheet law).
-            hits = [fx for fx in everywhere if fx.get("op") == "draw"]
+            # draw_to_hand_size counts: Expertise's upgrade raises the hand
+            # size it draws TO, which is the same var on the same op family.
+            hits = [fx for fx in everywhere
+                    if fx.get("op") in ("draw", "draw_to_hand_size")]
             for fx in hits:
                 fx["amount"] += val
+            ok = bool(hits)
+        elif key == "draw_and_discard":
+            # ONE DynamicVar read by two ops (Prepared: draw N, discard N).
+            # Bumping only one of them would upgrade half a card, so this
+            # key exists to make "the same number, in both places" sayable.
+            # Requires BOTH -- a row with only one of the ops is a
+            # mis-derived key, not a partial success.
+            draws = [fx for fx in everywhere if fx.get("op") == "draw"]
+            discards = [fx for fx in everywhere if fx.get("op") == "discard"]
+            for fx in draws + discards:
+                fx["amount"] += val
+            ok = bool(draws) and bool(discards)
+        elif key == "x_plus":
+            # An X-cost card whose upgrade adds to the value X resolves to
+            # (Malaise: `if (IsUpgraded) powerAmount++`). Every X-reading
+            # amount on the row moves together, sign preserved -- the card
+            # spends one number in two places and the upgrade must not be
+            # able to split them.
+            hits = []
+            for fx in everywhere:
+                amt = fx.get("amount")
+                if not isinstance(amt, str):
+                    continue
+                sign, body = ("-", amt[1:]) if amt.startswith("-") else ("", amt)
+                if body == "X":
+                    fx["amount"] = f"{sign}X_plus_{val}"
+                elif body.startswith("X_plus_"):
+                    n = int(body[len("X_plus_"):]) + val
+                    fx["amount"] = f"{sign}X_plus_{n}"
+                else:
+                    continue
+                hits.append(fx)
             ok = bool(hits)
         elif key == "energy":
             ok = _bump_first((fx for fx in everywhere
                               if fx.get("op") == "energy"), "amount", val)
         elif key == "times":
+            # BouncingFlask repeats an apply_power, not a damage op -- the
+            # RepeatVar is the same var class either way.
             ok = _bump_first((fx for fx in everywhere
-                              if fx.get("op") == "damage"), "times", val)
+                              if fx.get("op") in ("damage", "apply_power")),
+                             "times", val)
         elif key == "conditional_damage":
             hits = [fx for fx in everywhere
                     if fx.get("op") == "damage"
@@ -365,8 +436,17 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                               and word in fx.get("power", "")), "amount", val)
         elif key in ("power_amount", "amp_percent", "splash_damage",
                      "duration", "buff"):
+            # `everywhere`, not `top`: a power applied inside a conditional
+            # is still the card's only power application, and the base game
+            # upgrades its DynamicVar the same way either side of the branch.
+            # Added 2026-07-27 for the Silent's Bubble Bubble ("if the target
+            # is Poisoned, apply Poison"), whose whole effect is nested.
+            # Top-level is still preferred so a card with both is unchanged.
             hit = next((fx for fx in top if fx.get("op")
                         in ("apply_power", "buff_next_attack")), None)
+            if hit is None:
+                hit = next((fx for fx in everywhere if fx.get("op")
+                            in ("apply_power", "buff_next_attack")), None)
             ok = hit is not None
             if hit:
                 # Single-application powers encode max_stacks == amount

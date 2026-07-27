@@ -750,13 +750,21 @@ def test_aggression_logs_unimplemented_rather_than_handing_over_unupgraded():
 
 # --- Group C: refused -------------------------------------------------------
 
-def test_stampede_and_hellraiser_are_refused_loudly():
+def test_the_refused_powers_are_refused_loudly():
+    # fan_of_knives joined this list on 2026-07-27 and LEFT it the same day,
+    # which is the intended lifecycle rather than churn. Its entry was the
+    # only one of its kind: not a mechanic tier0 could not run, but one that
+    # would silently invalidate an ALREADY TRANSLATED row (the Shiv was
+    # translated single-target, exact only while the power could not exist).
+    # The entry named the condition for its own removal -- implement the
+    # power and change the token row IN THE SAME PASS -- and coverage pass 6
+    # did exactly that. The two survivors are the real refusals.
     assert set(refpowers.UNIMPLEMENTED) == {"stampede", "hellraiser"}
     state = bound_state()
     for name in refpowers.UNIMPLEMENTED:
         refpowers.refuse(state, name)
     logged = [e for e in state.log if e["event"] == "UNIMPLEMENTED"]
-    assert {e["power"] for e in logged} == {"stampede", "hellraiser"}
+    assert {e["power"] for e in logged} == set(refpowers.UNIMPLEMENTED)
     assert all(e["reason"] for e in logged)
 
 

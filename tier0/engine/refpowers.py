@@ -122,6 +122,27 @@ def unpowered_damage(state: CombatState, enemy: Enemy, amount: int) -> int:
     return hp_dmg
 
 
+def unblockable_unpowered_damage(state: CombatState, enemy: Enemy,
+                                 amount: int) -> int:
+    """CreatureCmd.Damage(target, N, Unblockable | Unpowered).
+
+    Strangle's shape: block does not stop it and no dealer stat scales it.
+    Split from unpowered_damage rather than parameterised so the two call
+    sites read as the two different ValueProp combinations they are.
+    """
+    dmg = int(amount)
+    if dmg <= 0:
+        return 0
+    was_alive = enemy.alive
+    effective = min(dmg, max(0, enemy.hp))
+    enemy.hp -= dmg
+    state.emit("damage", target=enemy.name, amount=effective, blocked=0,
+               base=amount, source="power")
+    if was_alive and not enemy.alive:
+        state.kills_this_card += 1
+    return dmg
+
+
 def refuse(state: CombatState, power: str) -> None:
     """Log an UNIMPLEMENTED power loudly. Callers must exclude the card."""
     state.emit("UNIMPLEMENTED", power=power, reason=UNIMPLEMENTED[power])
@@ -165,6 +186,13 @@ def gain_block(state: CombatState, fighter: Fighter, amount: int,
         return 0
     if card_sourced:
         amount = _apply_unmovable(state, fighter, amount)
+    # Shadowmeld doubles EVERY block its owner gains, card or power (no
+    # IsPoweredCardOrMonsterMoveBlock guard on its multiplicative hook). The
+    # card-block half of the same rule lives in powers.modify_block_gained;
+    # the two funnels are disjoint, so this is applied once per gain.
+    meld = fighter.powers.get("shadowmeld", 0)
+    if meld:
+        amount *= 2 ** meld
     fighter.block += amount
     state.emit("block", amount=amount)
     _after_block_gained(state, fighter, amount)
@@ -336,6 +364,87 @@ def damage_player_unblockable(state: CombatState, amount: int,
                        powered_attack=False)
 
 
+def poison_tick(state: CombatState, fighter: Fighter) -> None:
+    """PoisonPower.AfterSideTurnStart, verified against the decompiled power.
+
+    The behaviour, from the source rather than from memory or the wiki:
+
+      * `CreatureCmd.Damage(Owner, Amount, Unblockable | Unpowered)` -- the
+        amount is the CURRENT stack, it bypasses Block entirely, and it is
+        Unpowered, so neither the poisoner's Strength nor the victim's
+        Vulnerable scales it.
+      * then `PowerCmd.Decrement(this)` -- ONE stack, and ONLY `if
+        (base.Owner.IsAlive)`. A poison that kills does not decrement, which
+        matters for nothing today and is free to keep exact.
+      * `TriggerCount = Math.Min(Amount, 1 + sum of opponents' Accelerant)`.
+        Accelerant is not implemented (its card stays excluded), so the loop
+        runs exactly once while Amount >= 1. The min() is transcribed anyway,
+        because the day Accelerant lands this function must already be the
+        thing it modifies, not a thing that has to be rediscovered.
+      * StackType.Counter -- applications add, and `apply_power` already
+        does that.
+
+    WHY THIS IS NOT `dot`. tier0's generic `dot` (reactions.py,
+    Electro-Charged) ticks in `powers.on_turn_start`, which is StS2 site A:
+    BEFORE the energy reset and BEFORE the draw. Real poison fires at site F,
+    AFTER the draw. Retiming `dot` to match would have moved a mechanic Klee
+    and Kokomi are already balanced around -- their numbers are load-bearing
+    and the poison parity work has no claim on them. So the two coexist:
+    same shape, different clocks, and neither pretends to be the other.
+    """
+    amount = fighter.powers.get("poison", 0)
+    if amount <= 0:
+        return
+    # "sum of the OPPONENTS' Accelerant" -- the poisoner's stat, not the
+    # victim's. For a poisoned enemy that is the player; for a poisoned
+    # player it is every living enemy. Implemented 2026-07-27; this function
+    # was already written around it, which is why landing the power changed
+    # one line and no logic.
+    if fighter is state.player:
+        accelerant = sum(e.powers.get("accelerant", 0)
+                         for e in state.living_enemies)
+    else:
+        accelerant = state.player.powers.get("accelerant", 0)
+    for _ in range(min(amount, 1 + accelerant)):
+        amount = fighter.powers.get("poison", 0)
+        if amount <= 0:
+            return
+        if fighter is state.player:
+            # Unblockable, and the self-damage path already bypasses Encore
+            # ("a priced cost stays paid"); poison is not a priced cost, but
+            # Encore is Furina's and no Furina card applies poison, so the
+            # branch is unreachable rather than decided here.
+            damage_player_unblockable(state, amount, reason="poison")
+        else:
+            # NOT `unpowered_damage`: that one lets Block absorb ("Unpowered
+            # is not Unblockable") and poison is BOTH. `kills_this_card` is
+            # deliberately not touched either -- it feeds the `killed_target`
+            # predicate, and a turn-start tick has no card that killed
+            # anything. It is reset at every card resolution, so incrementing
+            # it here would be harmless today and wrong the moment that
+            # ordering changes.
+            effective = min(amount, max(0, fighter.hp))
+            fighter.hp -= amount
+            state.emit("damage", target=fighter.name, amount=effective,
+                       blocked=0, base=amount, source="poison")
+        state.emit("poison_tick", amount=amount,
+                   target=getattr(fighter, "name", "player"))
+        if fighter.alive:                # PowerCmd.Decrement, alive-gated
+            fighter.powers["poison"] = fighter.powers.get("poison", 0) - 1
+
+
+def enemy_side_turn_start(state: CombatState, enemy: Enemy) -> None:
+    """StS2 site F for the ENEMY side (AfterSideTurnStart).
+
+    The player's site F is `player_turn_start_late`, which is separated from
+    site A by the energy reset and the hand draw. An enemy does neither, so
+    for enemies the two sites are adjacent -- but they are still two sites,
+    and poison must land on the later one for the same reason it does for
+    the player: `dot` owns the early one and is not being retimed.
+    """
+    poison_tick(state, enemy)
+
+
 def on_damage_received(state: CombatState, target: Fighter, unblocked: int,
                        dealer: Optional[Fighter],
                        powered_attack: bool) -> None:
@@ -382,6 +491,19 @@ def on_damage_received(state: CombatState, target: Fighter, unblocked: int,
     if (n and powered_attack and isinstance(dealer, Enemy) and dealer.alive):
         unpowered_damage(state, dealer, n)
 
+    # ThornsPower has the same shape as FlameBarrier and a different lifetime:
+    # BeforeDamageReceived, no side check, no `unblocked > 0` requirement (it
+    # never looks at the DamageResult), and it does NOT expire at the enemy
+    # turn end. A fully blocked hit is still thorned.
+    #
+    # tier0 fires it AFTER the hit rather than before. The damage numbers are
+    # identical either way -- the incoming amount is already computed -- and
+    # the only observable difference is the order in which Thorns and
+    # FlameBarrier reach an enemy they both finish off. Recorded, not hidden.
+    n = p.powers.get("thorns", 0)
+    if (n and powered_attack and isinstance(dealer, Enemy) and dealer.alive):
+        unpowered_damage(state, dealer, n)
+
 
 # ---------------------------------------------------------------------------
 # Funnel 4 / 5 -- card plays and power application.
@@ -402,6 +524,11 @@ def free_cost(state: CombatState, card: Card) -> bool:
         return True
     if card.type == "skill" and p.powers.get("corruption", 0):
         return True
+    # FreeSkillPower (Pounce) is Corruption on a counter: the owner's next
+    # Amount Skills cost 0. It decrements in before_card_played, per play
+    # index, exactly like FreeAttack.
+    if card.type == "skill" and p.powers.get("free_skill", 0):
+        return True
     return False
 
 
@@ -418,6 +545,13 @@ def extra_replays(state: CombatState, card: Card) -> int:
     if card.type == "attack" and p.powers.get("one_two_punch", 0):
         p.powers["one_two_punch"] -= 1
         state.emit("one_two_punch", card=card.id)
+        return 1
+    # BurstPower is the same shape for SKILLS, and decrements at the same
+    # site (AfterModifyingCardPlayCount). Stacks are "the next N Skills are
+    # each played twice", not "one Skill N+1 times".
+    if card.type == "skill" and p.powers.get("burst", 0):
+        p.powers["burst"] -= 1
+        state.emit("burst_replay", card=card.id)
         return 1
     return 0
 
@@ -439,9 +573,25 @@ def before_card_played(state: CombatState, card: Card) -> dict:
         # denied (see after_card_played).
         state.no_energy_gain_ceiling = min(state.no_energy_gain_ceiling,
                                            p.energy)
+    # FreeSkillPower decrements per owner Skill played from hand/play,
+    # whether or not its discount actually mattered -- the same
+    # "decrement on the play, not on the saving" rule FreeAttack has.
+    if card.type == "skill" and p.powers.get("free_skill", 0):
+        p.powers["free_skill"] -= 1
+        state.emit("free_skill_spent", card=card.id)
     state.card_play_depth += 1
+    # Afterimage / SerpentForm / Strangle all keep a
+    # Dictionary<CardModel,int> filled at BeforeCardPlayed and drained at
+    # AfterCardPlayed. The indirection is not decoration: it is what stops a
+    # card that GRANTS one of these powers from paying itself on the very
+    # play that granted it. Snapshotting the amounts here reproduces that.
     return {"hp": p.hp, "block": p.block, "exhaust": len(p.exhaust_pile),
-            "energy": p.energy}
+            "energy": p.energy,
+            "afterimage": p.powers.get("afterimage", 0),
+            "serpent_form": p.powers.get("serpent_form", 0),
+            "strangle": [(e, e.powers.get("strangle", 0))
+                         for e in state.living_enemies
+                         if e.powers.get("strangle", 0)]}
 
 
 def after_card_played(state: CombatState, card: Card, snap: dict) -> None:
@@ -449,6 +599,18 @@ def after_card_played(state: CombatState, card: Card, snap: dict) -> None:
     OneTwoPunch-doubled attack; Juggling counts it twice)."""
     p = state.player
     state.card_play_depth -= 1
+
+    # CardPlaysFinished, tallied per tag. Counted here rather than at play
+    # time because the base game's readers ask what has FINISHED this turn:
+    # the card doing the asking must not count itself.
+    for tag in card.tags:
+        state.tag_plays_this_turn[tag] = state.tag_plays_this_turn.get(tag, 0) + 1
+    # The same tally by TYPE. Pinpoint discounts itself by one per Skill
+    # played this turn, and counts them here for the same reason: it is
+    # CardPlaysFinished the card reads, so the Skill doing the asking is not
+    # in the count until it is done.
+    if card.type == "skill":
+        state.skills_played_this_turn += 1
 
     # NoEnergyGain (ExpectAFight): ModifyEnergyGain -> 0.
     # NOT a turn-start denial. The turn refill goes through ResetEnergy(), which
@@ -520,6 +682,32 @@ def after_card_played(state: CombatState, card: Card, snap: dict) -> None:
         from tier0.engine import powers as _powers
         _powers.apply_power(state, p, "strength", n, applier=p)
 
+    # --- the Silent's per-card-play powers, all reading the BeforeCardPlayed
+    # snapshot rather than the live stack (see before_card_played).
+    n = snap.get("afterimage", 0)
+    if n:
+        gain_block(state, p, n)                  # Unpowered: no Unmovable
+    n = snap.get("serpent_form", 0)
+    if n:
+        living = state.living_enemies
+        if living:
+            unpowered_damage(state, state.rng.choice(living), n)
+    for enemy, amount in snap.get("strangle", ()):
+        if enemy.alive:
+            unblockable_unpowered_damage(state, enemy, amount)
+
+    # MasterPlannerPower.AfterCardPlayed(owner's Skill) -> ApplyKeyword(Sly).
+    # It marks THE CARD OBJECT, so the skill keeps Sly for the rest of the
+    # fight and auto-plays every later time an effect discards it. Single
+    # stack type: the power is a switch, not a counter.
+    if card.type == "skill" and p.powers.get("master_planner", 0):
+        if not card.sly_keyword:
+            card.sly_keyword = True
+            state.emit("master_planner", card=card.id)
+
+    # EVERYTHING BELOW IS ATTACK-ONLY (Rage, Juggling). The Silent's four
+    # per-play powers are above this line because they fire on every card
+    # type -- Afterimage on a Skill is most of what the card is for.
     if card.type != "attack":
         return
 
@@ -553,6 +741,172 @@ def after_card_played(state: CombatState, card: Card, snap: dict) -> None:
             state.emit("juggling_clone", card=clone.id, zone=zone)
 
 
+# ---------------------------------------------------------------------------
+# The SILENT's powers (second base-game parity pass, 2026-07-27).
+#
+# Same contract as everything above: read off the decompiled PowerModel, never
+# from memory, and a power that tier0 cannot host stays off the dial with its
+# card excluded. Nothing here is Silent-SPECIFIC machinery -- they are ordinary
+# parity powers that happen to be hers, and every one is a dead branch for the
+# roster because no committed card applies them.
+#
+# TWO OF HER POWERS ARE CO-OP ONLY and are recorded in MULTIPLAYER_ONLY_POWERS
+# rather than implemented, because in a single-player fight they can never
+# fire at all: implementing them would produce a card that reads as a buff and
+# measurably does nothing.
+# ---------------------------------------------------------------------------
+MULTIPLAYER_ONLY_POWERS: dict[str, str] = {
+    "sneaky": (
+        "it pays out only when an ALLY plays an Attack, and single-player "
+        "has no allies (SneakyPower.AfterCardPlayed requires the card's "
+        "owner to be someone other than the power's owner; enemies play no "
+        "cards at all). Card: Sneaky."
+    ),
+    "flanking": (
+        "it multiplies damage only from a dealer OTHER than the applier, "
+        "and in single-player the applier is the only dealer "
+        "(FlankingPower.ModifyDamageMultiplicative returns 1 when dealer == "
+        "Applier). Card: Flanking."
+    ),
+}
+
+
+def hand_draw_bonus(player: Player) -> int:
+    """Hook.ModifyHandDraw, the turn-start hand-size modifiers.
+
+    ToolsOfTheTrade adds Amount unconditionally (and then makes you discard
+    Amount at site E -- the card is a filter, not card advantage).
+    DrawCardsNextTurn adds Amount only when `AmountOnTurnStart != 0`; since it
+    is applied during the play phase, which is AFTER this draw, the guard is
+    satisfied for free by tier0's turn order and the power is removed at
+    site F below.
+    """
+    return (player.powers.get("tools_of_the_trade", 0)
+            + player.powers.get("draw_cards_next_turn", 0))
+
+
+def before_hand_draw(state: CombatState) -> None:
+    """Hook.BeforeHandDraw -- runs before the turn-start hand draw, so the
+    cards it makes are in hand BEFORE the draw counts against the hand cap.
+
+    InfiniteBladesPower creates Amount of the owner's token here. The token's
+    id is not in this file: it arrives as a `payload` on the row that applied
+    the power (see effects._op_apply_power), because a base-game card id is
+    decompiled game data and this module is committed.
+    """
+    p = state.player
+    from tier0.content import loader                # late import avoids cycle
+    from tier0.engine.effects import _add_token
+
+    n = p.powers.get("infinite_blades", 0)
+    if n:
+        token = p.power_payloads.get("infinite_blades")
+        if not token:
+            state.emit("UNIMPLEMENTED", power="infinite_blades",
+                       reason="no payload: the row that applied it named "
+                              "no card")
+        else:
+            for _ in range(n):
+                _add_token(state, loader.get_card(token), "hand")
+
+    # NightmarePower, the same hook: Amount COPIES of the card chosen when it
+    # was played, then PowerCmd.Remove(this) -- one payout, not a standing
+    # buff. The stacks are the copy count, and the power removes itself
+    # whether or not the copies fit in hand.
+    n = p.powers.get("nightmare", 0)
+    if n:
+        remembered = p.power_payloads.pop("nightmare", None)
+        p.powers.pop("nightmare", None)
+        if not remembered:
+            state.emit("UNIMPLEMENTED", power="nightmare",
+                       reason="no remembered card: nothing was in hand to "
+                              "choose when it resolved")
+        else:
+            for _ in range(n):
+                _add_token(state, loader.get_card(remembered), "hand")
+
+
+def after_card_drawn(state: CombatState, card: Card,
+                     from_hand_draw: bool) -> None:
+    """Hook.AfterCardDrawn -- per CARD, not per draw effect.
+
+    CorrosiveWave poisons every enemy on ANY draw (it is removed at the
+    owner's turn end, so it is a one-turn burst). Speedster hits every enemy
+    on any draw that is NOT the turn-start hand draw and only during its
+    owner's turn -- the two conditions are what stop it paying out on the
+    opening hand and on enemy-turn draws.
+    """
+    p = state.player
+    n = p.powers.get("corrosive_wave", 0)
+    if n:
+        from tier0.engine import powers as _powers
+        for enemy in list(state.living_enemies):
+            _powers.apply_power(state, enemy, "poison", n, applier=p)
+    n = p.powers.get("speedster", 0)
+    if n and not from_hand_draw and state.in_player_turn:
+        for enemy in list(state.living_enemies):
+            unpowered_damage(state, enemy, n)
+
+
+def retain_at_flush(state: CombatState, flushing: list[Card]) -> list[Card]:
+    """WellLaidPlansPower.BeforeFlushLate: keep up to Amount cards that would
+    otherwise be discarded, giving each single-turn Retain.
+
+    The base game asks the PLAYER which ones. tier0 asks the same pilot
+    surface `_best_card` already answers with, so this is not a second
+    heuristic to keep honest -- and, like every pilot placeholder, it is the
+    knob to probe if a Well Laid Plans measurement looks heuristic-shaped.
+    Returns the subset to keep in hand; the caller flushes the rest.
+    """
+    keep: list[Card] = []
+    if not flushing:
+        return keep
+
+    # PhantomBladesPower gives Retain to every tagged card it owns
+    # (AfterApplied over AllCards, then AfterCardEnteredCombat for each new
+    # one). tier0 has no per-instance keyword grant, but Retain IS "survives
+    # the flush", so granting it here is the same observable rule applied at
+    # the only site that reads it. NOT capped by a count: unlike Well Laid
+    # Plans below, this power keeps ALL of them.
+    tag = state.player.power_payloads.get("phantom_blades")
+    if state.player.powers.get("phantom_blades", 0) and tag:
+        keep = [c for c in flushing if tag in c.tags]
+        if keep:
+            state.emit("phantom_blades_retain", kept=[c.id for c in keep])
+
+    # Well Laid Plans keeps up to Amount MORE. Its allowance is its own: the
+    # cards Phantom Blades already retained were never candidates for it,
+    # and counting them would silently shrink a power nobody changed.
+    n = state.player.powers.get("well_laid_plans", 0)
+    if not n:
+        return keep
+    from tier0.engine.effects import _best_card
+    pool = [c for c in flushing if c not in keep]
+    wlp: list[Card] = []
+    while pool and len(wlp) < n:
+        pick = _best_card(pool)
+        pool.remove(pick)
+        wlp.append(pick)
+    state.emit("well_laid_plans", kept=[c.id for c in wlp])
+    return keep + wlp
+
+
+def envenom_on_hit(state: CombatState, enemy: Enemy, unblocked: float,
+                   source: str) -> None:
+    """EnvenomPower.AfterDamageGiven(dealer == Owner, IsPoweredAttack,
+    UnblockedDamage > 0) -> apply Amount Poison to the target.
+
+    All three conditions matter and each removes a different free lunch: an
+    Unpowered power tick does not envenom, a fully blocked hit does not, and
+    a non-attack does not.
+    """
+    n = state.player.powers.get("envenom", 0)
+    if not n or source != "attack" or unblocked <= 0 or not enemy.alive:
+        return
+    from tier0.engine import powers as _powers
+    _powers.apply_power(state, enemy, "poison", n, applier=state.player)
+
+
 def _counts_multiple_damage_ops(card: Card) -> bool:
     return sum(1 for fx in card.effects
                if fx.get("op") == "damage" and fx.get("target") == "self") > 1
@@ -581,6 +935,12 @@ def on_power_applied(state: CombatState, target: Fighter, name: str,
     elif name == "temp_strength_down" and stacks:
         target.powers["strength"] = target.powers.get("strength", 0) - stacks
 
+    # TemporaryDexterityPower (Anticipate) applies real Dexterity now and
+    # unapplies the same magnitude at the owner's turn end -- its
+    # InternallyAppliedPower IS DexterityPower.
+    elif name == "temp_dexterity" and stacks:
+        target.powers["dexterity"] = target.powers.get("dexterity", 0) + stacks
+
     # InfernoPower / CrimsonMantlePower.IncrementSelfDamage(). Both cards'
     # OnPlay is `PowerCmd.Apply<XPower>(Amount)?.IncrementSelfDamage()`, so the
     # SelfDamage DynamicVar (base 0) is bumped by ONE PER PLAY -- never by the
@@ -608,6 +968,21 @@ def on_power_applied(state: CombatState, target: Fighter, name: str,
     # ViciousPower.AfterPowerAmountChanged(power is Vulnerable, amount > 0,
     # applier == Owner) -> Draw(Amount). Fires ONCE PER CREATURE the Vulnerable
     # lands on, so a multi-target Vulnerable card draws Amount x targets.
+    # OutbreakPower.AfterPowerAmountChanged(power is Poison, amount > 0,
+    # applier == Owner): count, and on every THIRD application damage every
+    # enemy for Amount (Unpowered), then `timesPoisoned %= 3`. The counter is
+    # per APPLICATION, not per stack -- poisoning three enemies with one card
+    # fires it once, and a single 9-stack Deadly Poison does not fire it at
+    # all. The threshold is the power's own const.
+    if (name == "poison" and stacks > 0 and applier is state.player
+            and state.player.powers.get("outbreak", 0)):
+        state.outbreak_poisonings += 1
+        if state.outbreak_poisonings >= C.OUTBREAK_POISON_THRESHOLD:
+            state.outbreak_poisonings %= C.OUTBREAK_POISON_THRESHOLD
+            n = state.player.powers["outbreak"]
+            for enemy in list(state.living_enemies):
+                unpowered_damage(state, enemy, n)
+
     if (name == "vulnerable" and stacks > 0
             and applier is state.player
             and state.player.powers.get("vicious", 0)):
@@ -621,7 +996,8 @@ def on_power_applied(state: CombatState, target: Fighter, name: str,
 # ---------------------------------------------------------------------------
 
 def modify_damage_taken(defender: Fighter, dmg: float,
-                        attacker: Optional[Fighter]) -> float:
+                        attacker: Optional[Fighter],
+                        from_card: bool = False) -> float:
     """Colossus and Cruelty. Both key off the DEALER, which is why
     powers.modify_damage_taken grew an `attacker` argument.
 
@@ -634,7 +1010,7 @@ def modify_damage_taken(defender: Fighter, dmg: float,
     if attacker is None and state is not None and defender is not state.player:
         attacker = state.player
     if attacker is None:
-        return dmg
+        return _intangible_cap(defender, dmg)
 
     # CrueltyPower is read BY VulnerablePower.ModifyDamageMultiplicative, which
     # returns `amount + Amount/100` -- i.e. Cruelty adds PERCENTAGE POINTS to
@@ -657,6 +1033,39 @@ def modify_damage_taken(defender: Fighter, dmg: float,
             and attacker.powers.get("vulnerable", 0) > 0):
         dmg *= C.COLOSSUS_TAKEN_MULT
 
+    # TrackingPower.ModifyDamageMultiplicative returns base.Amount -- the
+    # stacks ARE the multiplier, not a percentage: 2 stacks is double damage
+    # against a Weak target, and a second application makes it 3. It is
+    # keyed off the DEALER holding the power and the TARGET holding Weak, so
+    # it belongs on this two-sided hook rather than in modify_damage_dealt,
+    # which only ever sees the attacker.
+    tracking = attacker.powers.get("tracking", 0)
+    if tracking and defender.powers.get("weak", 0) > 0:
+        dmg *= tracking
+
+    # DoubleDamagePower returns a FLAT 2, never base.Amount -- the stacks are
+    # a turn counter (one is decremented at each of the owner's turn ends),
+    # not a multiplier. Two stacks is two turns of doubling, not quadruple
+    # damage, and reading it the other way would be a large silent buff.
+    # Requires a card source: a bomb or a poison tick is not doubled.
+    if from_card and attacker.powers.get("double_damage", 0):
+        dmg *= C.DOUBLE_DAMAGE_MULT
+
+    return _intangible_cap(defender, dmg)
+
+
+def _intangible_cap(defender: Fighter, dmg: float) -> float:
+    """IntangiblePower is a CAP, not a multiplier, so it is the last word:
+    ModifyDamageCap returns 1 for the owner and ModifyHpLostAfterOsty clamps
+    HP loss to 1 on top of that. Damage BELOW 1 is left alone (`if (amount <
+    1m) return amount`) -- Intangible does not round a 0 up.
+
+    Its own function because it must apply on BOTH exits of
+    modify_damage_taken. The dealer-keyed powers above bail out when the
+    attacker is unknown; a damage cap has nothing to do with who is dealing.
+    """
+    if defender.powers.get("intangible", 0) and dmg > C.INTANGIBLE_DAMAGE_CAP:
+        return C.INTANGIBLE_DAMAGE_CAP
     return dmg
 
 
@@ -734,6 +1143,16 @@ def player_turn_start_late(state: CombatState) -> None:
         damage_player_unblockable(
             state, p.powers.get("inferno_self_damage", 0), reason="inferno")
 
+    # ToolsOfTheTrade, also site E (AfterPlayerTurnStart): it raised the hand
+    # draw by Amount in hand_draw_bonus and now takes Amount BACK as a chosen
+    # discard. The card is a filter, not card advantage, and splitting it
+    # across the two sites is what makes that true rather than asserted.
+    n = p.powers.get("tools_of_the_trade", 0)
+    if n:
+        from tier0.engine import effects as _effects
+        _effects.OPS["discard"](state, {"op": "discard", "amount": n,
+                                        "select": "chosen"}, None)
+
     if not p.alive or state.over:
         return
 
@@ -750,6 +1169,46 @@ def player_turn_start_late(state: CombatState) -> None:
     # off-by-one on every stack for the rest of the fight.
     if p.powers.get("plating", 0) and state.turn != 1:
         p.powers["plating"] -= 1
+
+    # Blur decrements at the owner's side turn start -- AFTER the block clear
+    # it just suppressed (site B ran before this), so a single stack carries
+    # block across exactly one boundary.
+    if p.powers.get("blur", 0):
+        p.powers["blur"] -= 1
+
+    # DrawCardsNextTurn is REMOVED (not decremented) at the turn start whose
+    # draw it just paid for. hand_draw_bonus added it a few lines of engine
+    # ago at site D; this is the other half of that one-shot.
+    p.powers.pop("draw_cards_next_turn", None)
+
+    # NoxiousFumes: poison every enemy at site F, every turn, forever.
+    n = p.powers.get("noxious_fumes", 0)
+    if n:
+        from tier0.engine import powers as _powers
+        for enemy in list(state.living_enemies):
+            _powers.apply_power(state, enemy, "poison", n, applier=p)
+
+    # WraithForm's downside, site F: the owner LOSES Amount Dexterity every
+    # turn, forever. It is a Debuff on its own owner and never expires, which
+    # is the whole cost of the card -- Intangible 2 up front, paid for by an
+    # accelerating Dexterity hole. Applied through the normal power path so
+    # the loss stacks and reaches the block funnel like any other Dexterity.
+    n = p.powers.get("wraith_form", 0)
+    if n:
+        from tier0.engine import powers as _powers
+        _powers.apply_power(state, p, "dexterity", -n, applier=p)
+
+    # ShadowStepPower, site F (AfterSideTurnStart): it converts itself into
+    # DoubleDamage and is REMOVED -- a one-turn delayed payload, not a
+    # standing buff. Order matters: this runs at the start of the turn the
+    # doubling applies to, so the card played last turn pays out this turn.
+    n = p.powers.pop("shadow_step", 0)
+    if n:
+        from tier0.engine import powers as _powers
+        _powers.apply_power(state, p, "double_damage", n, applier=p)
+
+    # Poison, also site F. It can kill; the caller re-checks p.alive.
+    poison_tick(state, p)
 
 
 def before_side_turn_end_early(state: CombatState) -> None:
@@ -786,14 +1245,32 @@ def on_fighter_turn_end(state: CombatState, fighter: Fighter) -> None:
     n = fighter.powers.pop("temp_strength_down", 0)
     if n:
         fighter.powers["strength"] = fighter.powers.get("strength", 0) + n
+    # TemporaryDexterityPower (Anticipate) reverts the same way: remove the
+    # marker and unapply the magnitude, never decrement by one.
+    n = fighter.powers.pop("temp_dexterity", 0)
+    if n:
+        fighter.powers["dexterity"] = fighter.powers.get("dexterity", 0) - n
 
     if fighter is not state.player:
+        # StranglePower sits on an ENEMY and is removed at the ENEMY side's
+        # turn end (`participants.Contains(Owner)`), so the debuff covers the
+        # player turn it was applied on plus nothing else.
+        fighter.powers.pop("strangle", None)
         return
 
     # Removed WHOLE at the owner's turn end (PowerCmd.Remove, not Decrement).
-    for name in ("rage", "no_draw", "no_energy_gain", "one_two_punch"):
+    # burst / corrosive_wave / shadowmeld are the Silent's three one-turn
+    # powers and share the site exactly.
+    for name in ("rage", "no_draw", "no_energy_gain", "one_two_punch",
+                 "burst", "corrosive_wave", "shadowmeld"):
         fighter.powers.pop(name, None)
     state.no_energy_gain_ceiling = None
+
+    # DoubleDamage DECREMENTS here (PowerCmd.Decrement, not Remove), which is
+    # why its stacks read as turns of doubling remaining -- the multiplier
+    # itself is a flat 2 no matter how many are left.
+    if fighter.powers.get("double_damage", 0) > 0:
+        fighter.powers["double_damage"] -= 1
 
     # DarkEmbrace's deferred ethereal draws. This site is already AFTER the
     # hand flush in combat._player_turn, which is precisely why the source
@@ -821,14 +1298,31 @@ def after_enemy_side_turn_end(state: CombatState) -> None:
     p.powers.pop("flame_barrier", None)
     if p.powers.get("colossus", 0) > 0:
         p.powers["colossus"] -= 1
+    # IntangiblePower decrements on `side == CombatSide.Enemy`, so its stacks
+    # read as "enemy turns survived at 1 damage".
+    if p.powers.get("intangible", 0) > 0:
+        p.powers["intangible"] -= 1
 
 
 def reset_turn_counters(state: CombatState) -> None:
     """Per-player-turn windows owned by this module."""
     state.attacks_played_this_turn = 0            # Juggling
+    state.skills_played_this_turn = 0             # Pinpoint
     state.block_gain_card_plays_this_turn = 0     # Unmovable's allowance
     state.cards_exhausted_this_turn = 0           # EvilEye / ForgottenRitual
     state.hp_lost_this_turn = 0                   # Spite
+    state.discards_this_turn = 0                  # MementoMori
+    state.tag_plays_this_turn = {}                # PhantomBlades
+    # Per-instance TURN-scoped card state expires here (BulletTime's free
+    # cost, Pinpoint's discount, HandTrick's granted Sly). Swept across every
+    # pile because a freed card that was discarded and redrawn must not come
+    # back still free; the combat-scoped delta is deliberately untouched.
+    p = state.player
+    for pile in (p.hand, p.draw_pile, p.discard_pile, p.exhaust_pile):
+        for held in pile:
+            held.free_this_turn = False
+            held.cost_delta_this_turn = 0
+            held.sly_this_turn = False
     state.rupture_pending = 0
 
 
@@ -842,8 +1336,15 @@ def energy_for_turn(state: CombatState) -> int:
 
 
 def should_clear_block(player: Player) -> bool:
-    """BarricadePower.ShouldClearBlock(creature) => Owner != creature."""
-    return not player.powers.get("barricade", 0)
+    """ShouldClearBlock => Owner != creature, for BOTH powers that override it.
+
+    Barricade is permanent; Blur is the same suppression on a counter that
+    ticks down at the owner's turn START (site F, after this runs), so N
+    stacks carry block through N turn boundaries.
+    """
+    if player.powers.get("barricade", 0):
+        return False
+    return not player.powers.get("blur", 0)
 
 
 def should_draw(player: Player, from_hand_draw: bool) -> bool:

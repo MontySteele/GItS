@@ -40,12 +40,25 @@ DOCS_CARD_SHEETS = ("klee-cards.yaml", "furina-cards.yaml",
 # real_ironclad except inert guards (tier05.rewards.NO_COMPANION_CHARACTERS)
 # and a skip-guarded test module.
 GAME_REF_DIR = local_reference.game_ref_dir()
-EXTERNAL_CARD_SHEETS = {"ironclad_pool.yaml": "real_ironclad"}
+EXTERNAL_CARD_SHEETS = {"ironclad_pool.yaml": "real_ironclad",
+                        "silent_pool.yaml": "real_silent"}
+# The REQUIRED reviewed layers behind each merged pool. These must agree
+# with tools/build_official_sheet.CHARACTERS; test_real_ironclad and
+# test_real_silent pin that they do, because a layer listed in one place
+# and not the other is a pool that loads at the wrong size.
 EXTERNAL_CARD_LAYERS = {
     "ironclad_pool.yaml": (
         "ironclad_pool_pass4.yaml",
         "ironclad_pool_pass5.yaml",
         "ironclad_pool_pass6.yaml",
+    ),
+    "silent_pool.yaml": (
+        "silent_pool_pass1.yaml",
+        "silent_pool_pass2.yaml",
+        "silent_pool_pass3.yaml",
+        "silent_pool_pass4.yaml",
+        "silent_pool_pass5.yaml",
+        "silent_pool_pass6.yaml",
     ),
 }
 
@@ -381,6 +394,28 @@ def _kit_cards(spec: dict) -> list[Card]:
     return kit
 
 
+def _starting_relic_effects(spec: dict) -> list[dict]:
+    """The character's OWN starting relic, as engine/relics.py hook dicts.
+
+    `relic_hooks` (a list of bare strings) cannot carry an amount, which is
+    fine for Burning Blood's `heal_after_won_fight` but not for a relic with
+    a number on it. Ring of the Snake -- ask A1, ruled 2026-07-27: wire it --
+    is `combat_start_draw: 2`, verified from the character model
+    (`ModifyHandDraw` returns `count + 2` and then `if (TurnNumber > 1)
+    return count`, i.e. the FIRST TURN ONLY, which is exactly what tier0's
+    `combat_start_draw` already means).
+
+    This is the one place a character's intrinsic relic effects enter, so
+    the battery (build_player) and the run layer (build_player_from_ids)
+    cannot disagree about whether she has her relic. It does mean the
+    battery is no longer categorically relic-free -- but only for a
+    character whose yaml declares the field, and no roster character does:
+    a relic on the roster is a DRAFTED relic and stays the run layer's job.
+    Deep-copied because the engine may rewrite conditional effects in place.
+    """
+    return copy.deepcopy(list(spec.get("starting_relic_effects", [])))
+
+
 def build_player(character_id: str, deck: str = "starter") -> Player:
     """deck: 'starter' or the name of a package list in the character yaml
     (e.g. 'archetype_package') appended to the starter deck."""
@@ -399,6 +434,7 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
                   cadence=spec.get("cadence", "skill"),
                   burst_max=spec.get("burst_max", 0),
                   relic_hooks=hooks,
+                  relic_effects=_starting_relic_effects(spec),
                   kit_cards=_kit_cards(spec),
                   character_id=spec["id"],
                   fanfare_cap=(int(C.FANFARE_CAP_FRACTION * spec["hp"])
@@ -413,10 +449,13 @@ def build_player_from_ids(character_id: str, card_ids: list[str],
     """Tier 0.5: build a player around an arbitrary (drafted) deck list.
 
     ``relic_effects`` is the combat-side relic engine's seam (engine/relics.py):
-    a list of dicts keyed by ``hook``. It defaults to None -> [] so the battery
-    path (build_player, which never passes it) stays byte-identical and every
-    relic code path remains a dead branch there. The run layer (tier05/model)
-    computes the effective per-fight list and passes it in.
+    a list of dicts keyed by ``hook``. It defaults to None -> [], and the run
+    layer (tier05/model) computes the effective per-fight list and passes it
+    in. DRAFTED relics remain run-layer-only, so for every character whose
+    yaml declares no ``starting_relic_effects`` the battery path is still
+    byte-identical and every relic code path is still a dead branch there.
+    A character who declares one (real_silent, ask A1) carries it on BOTH
+    paths -- see _starting_relic_effects.
 
     ``potions`` is the combat-side potion engine's seam (engine/potions.py): a
     list of held potion-id strings, likewise defaulting to None -> [] so the
@@ -430,7 +469,13 @@ def build_player_from_ids(character_id: str, card_ids: list[str],
                   cadence=spec.get("cadence", "skill"),
                   burst_max=spec.get("burst_max", 0),
                   relic_hooks=list(spec.get("relic_hooks", [])),
-                  relic_effects=list(relic_effects or []),
+                  # The character's own starting relic FIRST, then whatever
+                  # the run drafted. Two relics with the same hook both
+                  # apply (Ring of the Snake + Bag of Preparation is +4 on
+                  # turn 1), which is the game's behaviour and the reason
+                  # this concatenates rather than merges.
+                  relic_effects=(_starting_relic_effects(spec)
+                                 + list(relic_effects or [])),
                   potions=list(potions or []),
                   potion_slots=potion_slots,
                   node_kind=node_kind,

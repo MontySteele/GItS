@@ -267,6 +267,29 @@ The gap is behavioral phase parity in C#:
 
 ## 5. Structural debt (works today, taxes every future change)
 
+- **Two mechanics named Sly, both live — MED / RULING then SAFE.**
+  *Filed 2026-07-27 by [USER] with ask A4's ruling: "implement the Silent's
+  Sly accurate to the game, and also pass a note to the next tech debt sweep
+  to unify that behavior to Kokomi."*
+  `Card.sly` is Kokomi's Assist lane: a card-effect discard resolves an
+  authored effect list, and the card itself does nothing further.
+  `Card.sly_keyword` is the base game's: the discarded card is AUTO-PLAYED
+  for free, through `combat.resolve_free_play` and therefore through the
+  full card-play path. Both fire at the same site
+  (`effects._op_discard`), on the same trigger, under the same word.
+  Nothing is broken today — no card sets both fields, and the trigger site
+  handles each explicitly — but the collision is now load-bearing in two
+  directions, and the failure mode is a card that reads as one mechanic and
+  behaves as the other. **The unification to consider:** Kokomi's lane is
+  expressible as the general case (an effect list that the discard resolves)
+  with the keyword as the special case where that list is "play this card",
+  so a single `sly:` grammar could carry both. That is a DESIGN ruling, not
+  a rename: her Assist cards are priced as effect lists, and re-pricing them
+  as free plays would move her sheet. Do not unify by making the base-game
+  keyword resolve an effect list — that reading was considered and refused
+  in the Silent sprint (it skips the card-played events the Silent's own
+  payoffs read). Touchpoints: `state.Card.sly` / `Card.sly_keyword`,
+  `effects._op_discard`, `extract_base_game_pool.CARD_KEYWORDS`.
 - **Harmony bootstrap is all-or-nothing:** `KleeMod.cs:33-41` wraps
   `PatchAll` in one catch — one dead string-keyed reflection lookup
   (e.g. `ProgressSaveManager` rename) silently disarms every later patch,

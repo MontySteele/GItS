@@ -93,6 +93,27 @@ def test_missing_game_ref_means_no_reference_cards(no_game_ref):
     assert not [c for c in loader._card_index() if c.startswith("ic_")]
 
 
+def test_missing_game_ref_means_no_silent_reference_either(no_game_ref):
+    """The second anchor gets the same clause as the first, and it gets its
+    OWN clause rather than riding on the Ironclad one: the two pools are
+    separate files behind separate loader entries, so a change that stranded
+    only Silent would pass every assertion above."""
+    assert "real_silent" not in loader._character_index()
+    with pytest.raises(KeyError):
+        loader.build_player("real_silent")
+    assert not [c for c in loader._card_index() if c.startswith("si_")]
+
+
+def test_missing_game_ref_leaves_the_OTHER_silent_intact(no_game_ref):
+    """`ref_silent` is a COMMITTED six-card scoring construct and has nothing
+    to do with the gitignored pool that now shares its character's name. On a
+    fresh clone one of them exists and the other does not, and the naming
+    collision must not take the committed one down with it."""
+    assert "ref_silent" in loader._character_index()
+    assert [c for c in loader._card_index().values()
+            if c.character == "ref_silent"]
+
+
 def test_missing_game_ref_leaves_the_anchor_intact(no_game_ref):
     player = loader.build_player("ref_ironclad", "starter")
     assert player.max_hp == 80

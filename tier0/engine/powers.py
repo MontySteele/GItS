@@ -55,7 +55,8 @@ def modify_damage_dealt(attacker: Fighter, base: float) -> float:
 
 
 def modify_damage_taken(defender: Fighter, dmg: float,
-                        attacker: Fighter | None = None) -> float:
+                        attacker: Fighter | None = None,
+                        from_card: bool = False) -> float:
     if defender.powers.get("vulnerable", 0) > 0:
         dmg *= C.VULNERABLE_TAKEN_MULT
     # `attacker` exists for the base-game parity powers that key off the
@@ -63,20 +64,52 @@ def modify_damage_taken(defender: Fighter, dmg: float,
     # it deals; Colossus halves what its owner takes from a Vulnerable dealer).
     # It defaults to None so every existing two-argument call still reads the
     # same -- Klee and Furina have no dealer-keyed power.
+    # `from_card` is the `cardSource != null` guard several base-game
+    # multipliers carry: DoubleDamage doubles a card's Attack and does NOT
+    # double a bomb, a poison tick or a summon's pulse.
     from tier0.engine import refpowers          # late import avoids cycle
-    return _floor(refpowers.modify_damage_taken(defender, dmg, attacker))
+    return _floor(refpowers.modify_damage_taken(defender, dmg, attacker,
+                                                from_card=from_card))
 
 
 def modify_block_gained(fighter: Fighter, amount: int) -> int:
-    """Frail: the affected creature gains -25% block (StS Frail, floored).
+    """Dexterity (additive), then Frail (-25%, floored).
 
     The single funnel every card-block site routes through so the debuff
     actually bites -- StS applies Frail to card block via
     AbstractCard.applyPowersToBlock, so passive/power block (Metallicize,
     Crystallize, Solar Isotoma) is deliberately NOT reduced here.
+
+    DEXTERITY LIVES HERE, NOT IN refpowers.gain_block, and the sprint plan
+    that said otherwise was wrong on the source. DexterityPower overrides
+    `ModifyBlockAdditive` guarded by `props.IsPoweredCardOrMonsterMoveBlock()`
+    -- the SAME predicate FrailPower's multiplicative hook uses. tier0 splits
+    block along exactly that line already: card block reaches this funnel,
+    while refpowers.gain_block carries the Unpowered power-block that Frail
+    is (correctly) not allowed to touch. Hanging Dexterity off gain_block
+    would have applied it to the block it must NOT scale and missed every
+    block it must.
+
+    ORDER IS THE WHOLE INTERACTION: additive before multiplicative, because
+    the engine runs ModifyBlockAdditive first -- (base + dex) * 0.75, not
+    base * 0.75 + dex. On a 5-block card with 3 Dexterity and Frail that is
+    6 versus 6 (they agree), and on 11 block it is 10 versus 11 (they do
+    not). Dexterity is AllowNegative, so the sum is floored at 0 before
+    Frail rather than letting a negative stack invert the multiplier.
     """
     if amount <= 0:
         return amount
+    dex = fighter.powers.get("dexterity", 0)
+    if dex:
+        amount = max(0, amount + dex)
+    # ShadowmeldPower.ModifyBlockMultiplicative -> 2^Amount, and unlike Frail
+    # it carries NO IsPoweredCardOrMonsterMoveBlock guard: it doubles every
+    # kind of block its owner gains. tier0's two block paths are disjoint
+    # (card block reaches here, power block reaches refpowers.gain_block), so
+    # the doubling is applied in both and lands exactly once either way.
+    meld = fighter.powers.get("shadowmeld", 0)
+    if meld:
+        amount *= 2 ** meld
     if fighter.powers.get("frail", 0) > 0:
         return int(amount * C.FRAIL_BLOCK_MULT)   # StS floors block*0.75
     return amount

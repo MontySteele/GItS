@@ -48,12 +48,14 @@ CHARACTER_PLANS: dict[str, dict[str, str]] = {
 CHARACTER_PLANS.update({
     "ref_ironclad": {"generic": "generic"},
     "real_ironclad": {"generic": "generic"},
+    "real_silent": {"generic": "generic"},
 })
 
 DEFAULT_PLAN = {
     **{c.id: c.default_plan for c in roster.ROSTER},
     "ref_ironclad": "generic",
     "real_ironclad": "generic",
+    "real_silent": "generic",
 }
 
 

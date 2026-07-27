@@ -96,6 +96,14 @@ CMD = re.compile(r"\b(\w+Cmd)\.(\w+)\(")
 #   HoverTipFactory.FromPower<XPower>()    -- referenced-but-not-applied
 # so match any `<...Power>` type argument rather than one call shape.
 POWER = re.compile(r"<(\w+Power)>")
+# The game's own declaration that a card exists only in co-op. Read at the
+# CARD level, so it holds even for a card whose powers look implementable.
+MP_ONLY = re.compile(
+    r"MultiplayerConstraint\s*=>\s*CardMultiplayerConstraint\.MultiplayerOnly")
+# `Shiv.CreateInHand(...)` / `combatState.CreateCard<Shiv>(...)` -- the two
+# spellings a pool card uses to conjure a TOKEN card that is not itself in
+# the pool. Matched on the shape, never on a name.
+TOKEN_CREATE = re.compile(r"\b(\w+)\.CreateInHand\(|CreateCard<(\w+)>")
 
 
 def game_dll() -> Path:
@@ -204,6 +212,24 @@ def decompile_character(
             name: _read_decompiled_type(root, f"{CARD_NS}{name}")
             for name in names
         }
+        # TOKEN CARDS. A character's content is not only what she can draft:
+        # the Silent's Shiv is created in hand by twelve pool cards and is
+        # not in the pool itself, so its source would be unreachable and
+        # every card that makes one would be permanently unexpressible.
+        # Found STRUCTURALLY, from the create-call shapes in the pool's own
+        # sources -- no card-name table enters this file.
+        tokens = sorted({name for src in sources.values()
+                         for match in TOKEN_CREATE.findall(src)
+                         for name in match if name}
+                        - set(names))
+        for name in tokens:
+            try:
+                sources[name] = _read_decompiled_type(root, f"{CARD_NS}{name}")
+            except SystemExit:
+                continue      # not a CardModel (a Power, a Vfx): not a token
+        if tokens:
+            print(f"  token card types referenced by the pool: "
+                  f"{', '.join(tokens)}", file=sys.stderr)
     elapsed = time.monotonic() - started
     print(f"  decompiled and loaded {len(names)} card types in {elapsed:.1f}s",
           file=sys.stderr)
@@ -287,9 +313,35 @@ def summarize(cards: list[dict], character: str) -> None:
 # here moves a card from `excluded:` to the sheet, and the count moves with
 # it.
 
-ID_PREFIX = "ic_"          # keeps base-game ids out of the Klee/Furina
-                           # namespace; docs/reserved-card-names.txt records
-                           # the reverse direction (our names vs theirs).
+# Ids are prefixed PER CHARACTER: this keeps base-game ids out of the
+# Klee/Furina namespace (docs/reserved-card-names.txt records the reverse
+# direction, our names vs theirs) AND keeps two base-game pools from
+# colliding with each other once more than one is extracted -- Strike and
+# Defend exist in every character's pool, so a shared prefix would have the
+# second character silently overwrite the first in the loader.
+#
+# The rule is the first two letters of the character's name (`si_`). `ic_`
+# predates the rule and is load-bearing in artifacts nothing here can
+# rewrite (game_ref/ironclad_pool*.yaml, the committed Ironclad tests,
+# docs/reserved-card-names.txt), so it is PINNED rather than derived.
+ID_PREFIXES = {"ironclad": "ic_"}
+
+
+def id_prefix(character: str) -> str:
+    """The card-id prefix for one character -- see ID_PREFIXES."""
+    key = character.lower()
+    prefix = ID_PREFIXES.get(key)
+    if prefix is None:
+        if len(key) < 2 or not key.isalpha():
+            sys.exit(f"cannot derive an id prefix from character {character!r}; "
+                     "add an explicit entry to ID_PREFIXES")
+        prefix = key[:2] + "_"
+    clash = sorted(name for name, pinned in ID_PREFIXES.items()
+                   if pinned == prefix and name != key)
+    if clash:
+        sys.exit(f"id prefix {prefix!r} for {character!r} collides with "
+                 f"{clash} -- pin a distinct prefix in ID_PREFIXES")
+    return prefix
 
 # Powers tier0/engine/powers.py actually implements. Everything else
 # (Barricade, DarkEmbrace, Juggernaut, ...) is a real mechanic we do not
@@ -323,7 +375,78 @@ SUPPORTED_POWERS = {"StrengthPower": "strength",
                     "ManglePower": "temp_strength_down",
                     "SetupStrikePower": "temp_strength",
                     "RupturePower": "rupture",
-                    "UnmovablePower": "unmovable"}
+                    "UnmovablePower": "unmovable",
+                    # verified 2026-07-27 (Silent anchor, adversarial pass
+                    # against PoisonPower / DexterityPower; pinned in
+                    # tier0/tests/test_si_effects.py)
+                    "PoisonPower": "poison",
+                    "DexterityPower": "dexterity",
+                    # verified 2026-07-27 (Silent coverage pass -- each read
+                    # off its own PowerModel and implemented in
+                    # tier0/engine/refpowers.py; pinned in
+                    # tier0/tests/test_si_powers.py)
+                    "AccelerantPower": "accelerant",
+                    "AfterimagePower": "afterimage",
+                    "AnticipatePower": "temp_dexterity",
+                    "BlockNextTurnPower": "block_next_turn",
+                    "BlurPower": "blur",
+                    "BurstPower": "burst",
+                    "CorrosiveWavePower": "corrosive_wave",
+                    "DrawCardsNextTurnPower": "draw_cards_next_turn",
+                    "EnvenomPower": "envenom",
+                    "FreeSkillPower": "free_skill",
+                    "IntangiblePower": "intangible",
+                    "MasterPlannerPower": "master_planner",
+                    "NoxiousFumesPower": "noxious_fumes",
+                    "OutbreakPower": "outbreak",
+                    "SerpentFormPower": "serpent_form",
+                    "ShadowmeldPower": "shadowmeld",
+                    "SpeedsterPower": "speedster",
+                    "StranglePower": "strangle",
+                    "ThornsPower": "thorns",
+                    "ToolsOfTheTradePower": "tools_of_the_trade",
+                    "WellLaidPlansPower": "well_laid_plans",
+                    # verified 2026-07-27 (coverage pass 5 -- each read off
+                    # its own PowerModel and pinned in
+                    # tier0/tests/test_si_pass5.py). NoDrawPower was already
+                    # implemented in should_draw for BattleTrance and only
+                    # ever lacked its dial entry.
+                    "AccuracyPower": "tag_damage_shiv",
+                    "DoubleDamagePower": "double_damage",
+                    "NoDrawPower": "no_draw",
+                    "ShadowStepPower": "shadow_step",
+                    "TrackingPower": "tracking",
+                    # Coverage pass 6. FanOfKnivesPower left UNIMPLEMENTED
+                    # here: it rewrites the token's TargetType, and the entry
+                    # said it could only be implemented in the same pass that
+                    # changed the already-translated token row. That is this
+                    # pass -- the row carries `target_all_if_power` now.
+                    "FanOfKnivesPower": "fan_of_knives",
+                    "NightmarePower": "nightmare",
+                    "WraithFormPower": "wraith_form"}
+
+# A FOURTH exclusion category, and the narrowest: the power IS implemented in
+# tier0, but it operates on a card the CHARACTER owns -- a token to create, a
+# tag to look for -- and that card is decompiled game data, so neither the
+# engine nor this tool may name it. The row has to carry it as a `payload`,
+# which only a hand-translated supplement can supply.
+#
+# Emitting these structurally would be the worst available outcome: a row
+# that applies a real power with nothing for it to work on, i.e. a card that
+# reads as a buff and measurably does nothing. That is the same failure the
+# CO-OP ONLY category exists to prevent, arrived at from the other direction.
+PAYLOAD_POWERS = {
+    "InfiniteBladesPower": (
+        "it creates the OWNER's token card every turn (Shiv.CreateInHand in "
+        "BeforeHandDraw). tier0 implements the power, but the token's id is "
+        "game data that may not appear in committed code -- the row must "
+        "supply it as `payload`, so this card comes from a supplement."),
+    "PhantomBladesPower": (
+        "it reads a CardTag the character owns (Retain onto tagged cards, "
+        "and a first-of-turn damage bonus for them). Same reason as "
+        "InfiniteBlades: the tag is game data and rides on the row as "
+        "`payload`."),
+}
 
 
 def _power_gap(power: str) -> str:
@@ -346,6 +469,19 @@ def _power_gap(power: str) -> str:
     if key in refpowers.UNIMPLEMENTED:
         return f"{power} is UNIMPLEMENTED in tier0: " \
                f"{refpowers.UNIMPLEMENTED[key].split('.')[0]}"
+    # A power that CANNOT FIRE in single-player is a third category, and
+    # conflating it with "not on the dial" would leave a standing invitation
+    # to implement a card that measurably does nothing. See
+    # refpowers.MULTIPLAYER_ONLY_POWERS.
+    if power in PAYLOAD_POWERS:
+        return f"{power} NEEDS A ROW PAYLOAD: {PAYLOAD_POWERS[power]}"
+    if key in refpowers.MULTIPLAYER_ONLY_POWERS:
+        # NOT truncated at the first period the way UNIMPLEMENTED is: these
+        # reasons cite the guard clause that makes the power unreachable, and
+        # the whole point of the category is that "co-op only" should not
+        # have to be taken on trust.
+        return f"{power} is CO-OP ONLY: " \
+               f"{refpowers.MULTIPLAYER_ONLY_POWERS[key]}"
     return (f"{power} is not on the SUPPORTED_POWERS dial "
             "(unverified or unimplemented in tier0/engine/refpowers.py)")
 
@@ -365,6 +501,30 @@ COSMETIC_LOCAL = re.compile(
     r"^[\w<>?\[\], ]+ \w+ = .*?(?:N\w+Vfx|new Color\(|SaveManager|Mathf"
     r"|base\.CombatState\.HittableEnemies)")
 CONTROL_FLOW = re.compile(r"^(?:if|for|foreach|while|do|else|switch|try)\b")
+
+# A local holding an ANIMATION DELAY, and the statements that only feed it.
+# Several cards read `Character.AttackAnimDelay` into a local and then branch
+# on the player's Fast Mode PREFERENCE to add 0.2s to it. The branch is real
+# control flow, so the card was excluded as "behaviour branches on runtime
+# state" -- but the runtime state is a settings menu, and the card's actual
+# effects are ordinary. Three cards left the sheet over an animation timer,
+# including one in the STARTING DECK. Cosmetic-ness has to PROPAGATE: the
+# declaration is cosmetic, so a statement whose only job is to mutate it is
+# cosmetic too, and the `if` that contained it is then empty.
+COSMETIC_DELAY_LOCAL = re.compile(r"^[\w<>?\[\], ]+ (\w+) = [^;]*AnimDelay\b")
+
+
+def _drop_cosmetic_locals(stmts: list[str]) -> list[str]:
+    """Drop animation-delay locals and every statement that only feeds one."""
+    names = {m.group(1) for s in stmts
+             if (m := COSMETIC_DELAY_LOCAL.match(s))}
+    if not names:
+        return stmts
+    feeds = re.compile(
+        rf"^(?:{'|'.join(re.escape(n) for n in names)})"
+        r"\s*(?:[-+*/]?=[^;]*|\+\+|--)\s*;$")
+    return [s for s in stmts
+            if not COSMETIC_DELAY_LOCAL.match(s) and not feeds.match(s)]
 
 # `base.DynamicVars.Damage.BaseValue`, `base.DynamicVars["Power"].IntValue`,
 # and the bare `base.DynamicVars.Block` that GainBlock takes.
@@ -400,7 +560,44 @@ UPGRADE_POWER_KEY = {"strength": "power_amount",
                      "temp_strength_down": "power_amount",
                      "temp_strength": "power_amount",
                      "rupture": "power_amount",
-                     "unmovable": "power_amount"}
+                     "unmovable": "power_amount",
+                     "poison": "power_amount",
+                     "dexterity": "power_amount",
+                     "accelerant": "power_amount",
+                     "afterimage": "power_amount",
+                     "temp_dexterity": "power_amount",
+                     "block_next_turn": "power_amount",
+                     "blur": "power_amount",
+                     "burst": "power_amount",
+                     "corrosive_wave": "power_amount",
+                     "draw_cards_next_turn": "power_amount",
+                     "envenom": "power_amount",
+                     "free_skill": "power_amount",
+                     "intangible": "power_amount",
+                     "master_planner": "power_amount",
+                     "noxious_fumes": "power_amount",
+                     "outbreak": "power_amount",
+                     "serpent_form": "power_amount",
+                     "shadowmeld": "power_amount",
+                     "speedster": "power_amount",
+                     "strangle": "power_amount",
+                     "thorns": "power_amount",
+                     "tools_of_the_trade": "power_amount",
+                     "well_laid_plans": "power_amount",
+                     # Coverage pass 5. Accuracy and PhantomBlades raise a
+                     # PowerVar like the rest; the other five upgrade
+                     # something that is not their power's amount (a cost, a
+                     # keyword) and never reach this map.
+                     "tag_damage_shiv": "power_amount",
+                     "double_damage": "power_amount",
+                     "infinite_blades": "power_amount",
+                     "no_draw": "power_amount",
+                     "phantom_blades": "power_amount",
+                     "shadow_step": "power_amount",
+                     "tracking": "power_amount",
+                     "fan_of_knives": "power_amount",
+                     "nightmare": "power_amount",
+                     "wraith_form": "power_amount"}
 
 
 def _num(text: str) -> int | float:
@@ -692,7 +889,7 @@ def _translate_statement(stmt: str, vals: dict, locs: dict, fed: dict,
                           else "unrecognised effect statement")
 
 
-def _sheet_row(card: dict, src: str) -> tuple[dict, dict]:
+def _sheet_row(card: dict, src: str, prefix: str) -> tuple[dict, dict]:
     """(row, upgrade_delta). Raises _Untranslatable with the reason."""
     if VAR_CALC.search(src):
         raise _Untranslatable("damage/block scales off runtime state")
@@ -706,7 +903,7 @@ def _sheet_row(card: dict, src: str) -> tuple[dict, dict]:
     body = _method_body(src, "OnPlay")
     if not body:
         raise _Untranslatable("no OnPlay body found")
-    stmts = _drop_cosmetic_blocks(_statements(body))
+    stmts = _drop_cosmetic_blocks(_drop_cosmetic_locals(_statements(body)))
     for s in stmts:
         if CONTROL_FLOW.match(s):
             raise _Untranslatable("behaviour branches on runtime state")
@@ -723,7 +920,7 @@ def _sheet_row(card: dict, src: str) -> tuple[dict, dict]:
 
     cost = "X" if re.search(r"HasEnergyCostX\s*=>\s*true", src) else card["cost"]
     row = {
-        "id": ID_PREFIX + _snake(card["name"]),
+        "id": prefix + _snake(card["name"]),
         "name": _display(card["name"]),
         "cost": cost,
         "type": card["type"].lower(),
@@ -736,10 +933,13 @@ def _sheet_row(card: dict, src: str) -> tuple[dict, dict]:
     tags = _canonical_tags(src)
     if tags:
         row["tags"] = tags
-    # Self-exhaust is a printed keyword; a card that exhausts SOMETHING ELSE
-    # only mentions Exhaust in a hover tip, and must not be marked.
-    if re.search(r"CanonicalKeywords[^;]*CardKeyword\.Exhaust", src, re.S):
-        row["exhaust"] = True
+    for keyword in _declared_keywords(src):
+        field = CARD_KEYWORDS.get(keyword)
+        if field is None:
+            raise _Untranslatable(
+                f"CardKeyword.{keyword} has no tier0 Card field "
+                "(the card's printed rule would be silently dropped)")
+        row[field] = True
     return row, _upgrade_delta(src, fed)
 
 
@@ -772,6 +972,9 @@ def _upgrade_delta(src: str, fed: dict) -> dict:
     for stmt in _statements(body):
         if "AddKeyword(CardKeyword.Innate)" in stmt:
             delta["innate"] = True
+            continue
+        if "AddKeyword(CardKeyword.Retain)" in stmt:
+            delta["retain"] = True
             continue
         if "RemoveKeyword(CardKeyword.Exhaust)" in stmt:
             delta["remove"] = "exhaust"
@@ -837,11 +1040,16 @@ def _row_delta_key(row: dict, var: str) -> str | None:
     the committed tool.
     """
     effects = list(_walk_row_effects(row["effects"]))
+    # `chain_attack` IS a damage op -- a volley that repeats per kill -- so
+    # every damage-shaped rule below has to see it, or EchoingSlash's row
+    # would report no recoverable upgrade for a card whose OnUpgrade plainly
+    # bumps Damage.
+    hits = ("damage", "chain_attack")
     if var == "Damage" and any(
-            fx.get("op") == "damage" and fx.get("target") != "self"
+            fx.get("op") in hits and fx.get("target") != "self"
             for fx in effects):
         top_damage = [fx for fx in row["effects"]
-                      if fx.get("op") == "damage"
+                      if fx.get("op") in hits
                       and fx.get("target") != "self"]
         return "damage" if top_damage else "conditional_damage"
     if var == "Block" and any(fx.get("op") == "block" for fx in effects):
@@ -850,13 +1058,28 @@ def _row_delta_key(row: dict, var: str) -> str | None:
     if var == "MaxHp" and any(fx.get("op") == "gain_max_hp"
                               for fx in effects):
         return "max_hp"
-    if var == "Repeat" and any(fx.get("op") == "damage"
+    if var == "Repeat" and any(fx.get("op") in ("damage", "apply_power")
                                and isinstance(fx.get("times"), int)
                                for fx in effects):
         return "times"
+    # ONE VAR, TWO OPS. Prepared draws `cardCount` and then discards
+    # `cardCount` -- the same DynamicVar read twice -- so bumping only the
+    # draw would upgrade half the card and quietly make it stronger than it
+    # prints. Checked before the plain `draw` rule so the narrower shape wins.
     if var in ("Cards", "Draw") and any(
-            fx.get("op") == "draw" for fx in effects):
+            fx.get("op") == "draw" for fx in effects) and any(
+            fx.get("op") == "discard" for fx in effects):
+        return "draw_and_discard"
+    if var in ("Cards", "Draw") and any(
+            fx.get("op") in ("draw", "draw_to_hand_size") for fx in effects):
         return "draw"
+    # ...but on a row that CREATES cards rather than drawing them, the same
+    # var counts tokens. Both spellings appear in the Silent's pool (`Cards`
+    # on Blade Dance, the card-specific `Shivs` on Leading Strike), and the
+    # distinction is structural: which op the row actually carries.
+    if var in ("Cards", "Shivs") and any(
+            fx.get("op") == "add_card" for fx in effects):
+        return "cards"
     if var == "Energy" and any(fx.get("op") == "energy" for fx in effects):
         return "energy"
     if var == "Energy" and isinstance(row.get("on_exhaust_energy"), int):
@@ -865,6 +1088,20 @@ def _row_delta_key(row: dict, var: str) -> str | None:
     if power and any(fx.get("op") == "apply_power"
                      and fx.get("power") == power for fx in effects):
         return UPGRADE_POWER_KEY.get(power)
+    # CalculationBaseVar and ExtraDamageVar/CalculationExtraVar are the two
+    # HALVES of the same base-game grammar (`base + extra * count`), and a
+    # card that upgrades both -- MementoMori does -- needs them told apart or
+    # they collide on one key and the row is refused. The names are
+    # structural (they are the var CLASS names, shared across characters),
+    # so mapping them here introduces no per-card table.
+    has_formula = any(
+        isinstance(fx.get("amount_formula"), dict) and "count" in
+        fx["amount_formula"] for fx in effects)
+    if has_formula and var == "CalculationBase":
+        return "formula_base"
+    if has_formula and var in ("ExtraDamage", "CalculationExtra"):
+        return "formula_per"
+
     # A few runtime-formula cards name their scaling DynamicVar something
     # card-specific (for example, ExtraDamage). Only use the structural
     # fallback after all standard variable meanings above have failed, and
@@ -894,6 +1131,9 @@ def _supplement_upgrade_delta(row: dict, src: str) -> dict:
     for stmt in _statements(_method_body(src, "OnUpgrade")):
         if "AddKeyword(CardKeyword.Innate)" in stmt:
             delta["innate"] = True
+            continue
+        if "AddKeyword(CardKeyword.Retain)" in stmt:
+            delta["retain"] = True
             continue
         if "RemoveKeyword(CardKeyword.Exhaust)" in stmt:
             delta["remove"] = "exhaust"
@@ -926,10 +1166,69 @@ def _supplement_upgrade_delta(row: dict, src: str) -> dict:
         if any(fx.get("op") == "exhaust_from" and "select" not in fx
                for fx in effects):
             delta["exhaust_select"] = "chosen"
+        # `CardCmd.Upgrade(item)` behind IsUpgraded upgrades the cards the row
+        # HANDLES -- which ones depends on what the row does with them, so the
+        # DSL op decides the key. Created tokens (HiddenDaggers, StormOfSteel)
+        # arrive upgraded; auto-played ones (KnifeTrap) are upgraded first.
+        if "CardCmd.Upgrade(" in src:
+            if any(fx.get("op") == "add_card" for fx in effects):
+                delta["created_upgraded"] = True
+            elif any(fx.get("op") == "autoplay_from_exhaust"
+                     for fx in effects):
+                delta["autoplay_upgrade_first"] = True
+        # An X-cost card whose upgrade increments the resolved X by one
+        # (`if (IsUpgraded) { powerAmount++; }`). The `++` IS the value --
+        # read from the branch, not authored here -- and the guard is that
+        # the row actually spends X, so this cannot fire on a row that does
+        # not read the energy it spent.
+        m = re.search(r"IsUpgraded\)\s*\{\s*(\w+)\+\+;", src)
+        if m and any(isinstance(fx.get("amount"), str)
+                     and fx["amount"].lstrip("-").startswith("X")
+                     for fx in effects):
+            delta["x_plus"] = 1
 
     if unexpressible:
         delta["_unexpressible"] = unexpressible
     return delta
+
+
+# The printed keyword line. tier0's Card carries a field for four of them
+# (state.py: exhaust, innate, retain, sly_keyword); anything else EXCLUDES
+# the card.
+#
+# This table exists because the translator used to look for exactly one
+# keyword -- Exhaust -- and drop the rest without a word (found 2026-07-27,
+# Silent's first extraction: 7 of 15 emitted rows had lost a printed rule,
+# 5 Sly and 2 Innate). Ironclad never exposed it because Exhaust is the only
+# keyword his pool declares, so a whole class of silent approximation sat
+# behind a single-character pool for a month. A keyword is a RULE ON THE
+# CARD; dropping one is exactly the "wrong number wearing the right name"
+# this tool refuses to produce.
+#
+# `Sly` maps onto `sly_keyword`, NOT onto Kokomi's `sly` -- same word, two
+# mechanics (ask A4, ruled 2026-07-27: implement the base-game one as the
+# game has it). Mapping it onto her field would resolve an empty effect list
+# and print a keyword that did nothing, which is the same defect in a new
+# costume.
+CARD_KEYWORDS = {"Exhaust": "exhaust", "Innate": "innate", "Retain": "retain",
+                 "Sly": "sly_keyword"}
+# ilspy renders a one-element list as a compiler-generated type rather than a
+# `{ ... }` initialiser, so match the whole declaration statement instead of a
+# brace block. Declaration-scoped on purpose: a card that exhausts SOMETHING
+# ELSE mentions Exhaust only in a hover tip and must not be marked.
+KEYWORD_DECL = re.compile(r"CanonicalKeywords\s*=>(.*?);", re.S)
+
+
+def _declared_keywords(src: str) -> list[str]:
+    """Keywords printed on the card. Raises if the shape is unreadable --
+    an unparsed keyword line is indistinguishable from an empty one, and
+    guessing empty is how the Sly cards got emitted as vanilla rows."""
+    if "CanonicalKeywords" not in src:
+        return []
+    m = KEYWORD_DECL.search(src)
+    if not m:
+        raise _Untranslatable("unrecognised CanonicalKeywords declaration")
+    return sorted(set(re.findall(r"CardKeyword\.(\w+)", m.group(1))))
 
 
 def _snake(name: str) -> str:
@@ -1022,17 +1321,42 @@ SHEET_HEADER = """\
 # the hyphen matches this file and never matches `_pool.yaml`.)
 #
 # emitted {n_ok} / {n_all}   excluded {n_bad} / {n_all}
+#
+# {n_all} is the SINGLE-PLAYER universe: the pool's printed card count minus
+# the {n_mp} the game marks CardMultiplayerConstraint.MultiplayerOnly. Those
+# are listed under `unavailable:` in document 2 and are not a coverage debt --
+# no DSL work can ever make them appear in the runs this sheet feeds.
 """
 
 
 def emit_sheet(cards: list[dict], sources: dict[str, str],
                character: str) -> tuple[int, int]:
-    rows, upgrades, excluded = [], {}, {}
+    prefix = id_prefix(character)
+    rows, upgrades, excluded, unavailable = [], {}, {}, {}
     for card in cards:
+        # NOT IN THE GAME WE MEASURE. A card the base game itself marks
+        # MultiplayerOnly is never offered in a single-player run, so counting
+        # it in the denominator understates DSL coverage against a card that
+        # could not appear even if the DSL held it perfectly. This is a
+        # STRUCTURAL read of the game's own constraint, not a judgement about
+        # the card: the previous CO-OP ONLY exclusions were argued from a
+        # power's guard clauses, and this flag says the same thing at the
+        # card level, out loud. (Silent 2026-07-27: Flanking and Sneaky. The
+        # inverse flag exists too -- Well Laid Plans is SingleplayerOnly --
+        # and is deliberately NOT filtered: it is in the game we measure.)
+        if MP_ONLY.search(sources[card["name"]]):
+            unavailable[prefix + _snake(card["name"])] = {
+                "name": _display(card["name"]),
+                "rarity": card["rarity"].lower(),
+                "reason": "CardMultiplayerConstraint.MultiplayerOnly -- the "
+                          "base game never offers this card in a "
+                          "single-player run, so it is outside the universe "
+                          "this sheet measures coverage against"}
+            continue
         try:
-            row, delta = _sheet_row(card, sources[card["name"]])
+            row, delta = _sheet_row(card, sources[card["name"]], prefix)
         except _Untranslatable as exc:
-            excluded[ID_PREFIX + _snake(card["name"])] = {
+            excluded[prefix + _snake(card["name"])] = {
                 "name": _display(card["name"]),
                 "rarity": card["rarity"].lower(),
                 "reason": str(exc)}
@@ -1058,9 +1382,17 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
         except ImportError:
             sys.exit("PyYAML is required to derive supplement upgrades")
         source_by_id = {
-            ID_PREFIX + _snake(card["name"]): sources[card["name"]]
+            prefix + _snake(card["name"]): sources[card["name"]]
             for card in cards
         }
+        # Token types (Shiv) are in `sources` but never in `cards`: they are
+        # created in hand, not drafted, so they have no pool entry and no
+        # emitted/excluded row. A supplement may still translate one, and
+        # its OnUpgrade is recovered from the DLL exactly like any other.
+        pool_names = {card["name"] for card in cards}
+        for name, src in sources.items():
+            if name not in pool_names:
+                source_by_id.setdefault(prefix + _snake(_display(name)), src)
         emitted_ids = {row["id"] for row in rows}
         seen: set[str] = set()
         for supplement in supplements:
@@ -1089,15 +1421,43 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
 
     OUT_DIR.mkdir(exist_ok=True)
     sheet = OUT_DIR / f"{character.lower()}-cards.yaml"
+    n_sp = len(cards) - len(unavailable)
     out = [SHEET_HEADER.format(char=character, char_lc=character.lower(),
-                               n_ok=len(rows),
-                               n_bad=len(excluded), n_all=len(cards))]
+                               n_ok=len(rows), n_bad=len(excluded),
+                               n_all=n_sp, n_mp=len(unavailable))]
     for row in rows:
         out.append(f"- {_flow(row)}")
-    out.append("\n---\n# Cards the Tier 0 DSL cannot express. Each reason is a\n"
-               "# concrete gap: implement it, or the card stays out.\nexcluded:")
+    out.append(
+        "\n---\n# Cards the Tier 0 DSL cannot express. Each reason is a\n"
+        "# concrete gap: implement it, or the card stays out.\n"
+        "#\n"
+        "# STALE AS A CLAIM THE MOMENT A PASS LANDS. Later "
+        f"{character.lower()}_pool_pass*.yaml\n"
+        "# layers implement entries from this list and merge them into\n"
+        f"# {character.lower()}_pool.yaml, which this file is never regenerated "
+        "against.\n"
+        "# Read every row below as \"a gap AS OF THIS SNAPSHOT\", never as "
+        "\"still\n"
+        f"# missing\" -- diff against {character.lower()}_pool.yaml before "
+        "believing one.\n"
+        "# (Ironclad's snapshot listed 52 excluded while 41 of them were "
+        "already live.)\nexcluded:")
     for cid, info in sorted(excluded.items()):
         out.append(f"  {cid}: {_flow(info)}")
+    if unavailable:
+        out.append(
+            "\n# NOT A COVERAGE DEBT. These are printed in the character's "
+            "card pool but\n"
+            "# the game marks them MultiplayerOnly, so a single-player run "
+            "never offers\n"
+            "# them. They are OUT of the emitted/excluded denominator above. "
+            "Recorded\n"
+            "# rather than dropped so that nobody re-derives them from the "
+            "pool listing\n"
+            "# and reports the sheet as missing cards it deliberately does "
+            "not want.\nunavailable:")
+        for cid, info in sorted(unavailable.items()):
+            out.append(f"  {cid}: {_flow(info)}")
     sheet.write_text("\n".join(out) + "\n")
 
     # R20: upgrades live in their OWN sheet, never inline on a card row.
@@ -1115,7 +1475,11 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
     ups.write_text("\n".join(lines) + "\n")
 
     print(f"\n=== sheet: {len(rows)} emitted / {len(excluded)} excluded "
-          f"of {len(cards)} ===")
+          f"of {n_sp} ===")
+    if unavailable:
+        print(f"  ({len(unavailable)} of the pool's {len(cards)} printed "
+              "cards are MultiplayerOnly and are not counted: "
+              f"{', '.join(i['name'] for i in unavailable.values())})")
     by_reason = Counter(i["reason"] for i in excluded.values())
     for reason, k in by_reason.most_common():
         print(f"  {k:>3}x  {reason}")

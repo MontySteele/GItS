@@ -4,14 +4,33 @@ These tests use tiny synthetic source trees. They never read or reproduce
 base-game data, and they do not require ilspycmd or a game installation.
 """
 
+import dataclasses
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 from tier0.content import loader
-from tools import build_ironclad_sheet as build
+from tier0.engine.state import Card
+from tools import build_official_sheet as build
 from tools import extract_base_game_pool as extract
+
+
+def _spec(tmp_path: Path, **overrides) -> build.CharacterSpec:
+    """An Ironclad-shaped spec pointed at a scratch directory.
+
+    Built by REPLACING fields on the real registry entry, so a field added to
+    CharacterSpec cannot be quietly missing from these tests.
+    """
+    return dataclasses.replace(build.CHARACTERS["ironclad"],
+                               **{**{
+                                   "extractor_sheet": tmp_path / "cards.yaml",
+                                   "supplements": (),
+                                   "char_facts": tmp_path / "facts.yaml",
+                                   "pool": tmp_path / "pool.yaml",
+                                   "upgrades": tmp_path / "upgrades.yaml",
+                                   "char_out": tmp_path / "char.yaml",
+                               }, **overrides})
 
 
 def _write_type(root: Path, relative: str, namespace: str, body: str) -> Path:
@@ -92,9 +111,116 @@ def test_decompile_character_reads_pool_and_cards_from_one_project(
     assert "Example.Other" not in sources["Bash"]
 
 
+def test_id_prefix_is_per_character_and_pins_ironclad():
+    """Two base-game pools share card NAMES (Strike, Defend); if they shared
+    an id prefix the second extraction would silently overwrite the first in
+    the loader. `ic_` is pinned because artifacts this tool cannot rewrite
+    already depend on it."""
+    assert extract.id_prefix("Ironclad") == "ic_"
+    assert extract.id_prefix("ironclad") == "ic_"
+    assert extract.id_prefix("Silent") == "si_"
+    assert extract.id_prefix("Defect") == "de_"
+    assert len({extract.id_prefix(name)
+                for name in ("Ironclad", "Silent", "Defect")}) == 3
+
+
+def test_id_prefix_refuses_a_collision_with_a_pinned_prefix(monkeypatch):
+    monkeypatch.setattr(extract, "ID_PREFIXES", {"ironclad": "si_"})
+    with pytest.raises(SystemExit, match="collides with"):
+        extract.id_prefix("Silent")
+
+
 def test_emitted_upgrade_delta_supports_energy_and_hit_count():
     assert extract._delta_key({"op": "energy"}, "amount") == "energy"
     assert extract._delta_key({"op": "damage"}, "times") == "times"
+
+
+def test_declared_keywords_reads_the_single_element_list_shape():
+    """ilspy renders a one-keyword list as a compiler-generated type, NOT a
+    `{ ... }` initialiser. The brace-shaped reader found nothing on exactly
+    the cards that carry one keyword, which is most of them."""
+    single = ("public override IEnumerable<CardKeyword> CanonicalKeywords => "
+              "new global::_003C_003Ez__ReadOnlySingleElementList"
+              "<CardKeyword>(CardKeyword.Sly);")
+    assert extract._declared_keywords(single) == ["Sly"]
+    braces = ("public override IEnumerable<CardKeyword> CanonicalKeywords => "
+              "new HashSet<CardKeyword> { CardKeyword.Exhaust, "
+              "CardKeyword.Innate };")
+    assert extract._declared_keywords(braces) == ["Exhaust", "Innate"]
+    assert extract._declared_keywords("class Plain { }") == []
+
+
+def test_declared_keywords_refuses_an_unreadable_declaration():
+    """An unparsed keyword line looks exactly like an empty one. Guessing
+    empty is how five Sly cards were emitted as vanilla rows."""
+    with pytest.raises(extract._Untranslatable,
+                       match="unrecognised CanonicalKeywords"):
+        extract._declared_keywords(
+            "IEnumerable<CardKeyword> CanonicalKeywords { get { yield break }")
+
+
+def test_a_keyword_with_no_tier0_field_excludes_the_card():
+    """Keywords are RULES ON THE CARD. tier0 has fields for four of them;
+    a fifth must take the card out of the sheet, not ride along invisibly."""
+    assert set(extract.CARD_KEYWORDS) == {"Exhaust", "Innate", "Retain", "Sly"}
+    assert set(extract.CARD_KEYWORDS.values()) <= {
+        f.name for f in dataclasses.fields(Card)}
+    # Sly maps onto the BASE-GAME field, never onto Kokomi's Assist lane.
+    # Pointing it at `sly` would resolve an empty authored effect list and
+    # print a keyword that did nothing -- the dropped-rule defect wearing a
+    # new costume (ask A4, ruled 2026-07-27).
+    assert extract.CARD_KEYWORDS["Sly"] == "sly_keyword"
+    body = """
+class SyntheticCard
+{
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new global::_003C_003Ez__ReadOnlySingleElementList<CardKeyword>(
+            CardKeyword.%s);
+
+    protected override async Task OnPlay(PlayerChoiceContext c, CardPlay p)
+    {
+        await CreatureCmd.GainBlock(base.Owner.Creature, 5m);
+    }
+}
+"""
+    card = {"name": "SyntheticCard", "cost": 1, "type": "Skill",
+            "rarity": "Common"}
+    row, _ = extract._sheet_row(card, body % "Retain", "xx_")
+    assert row["retain"] is True
+    row, _ = extract._sheet_row(card, body % "Sly", "xx_")
+    assert row["sly_keyword"] is True
+    assert "sly" not in row              # never Kokomi's field
+    with pytest.raises(extract._Untranslatable, match="CardKeyword.Ethereal"):
+        extract._sheet_row(card, body % "Ethereal", "xx_")
+
+
+def test_an_animation_delay_branch_does_not_exclude_a_card():
+    """A local holding an anim delay, plus the Fast-Mode PREFERENCE branch
+    that bumps it, is cosmetic in both halves -- and cosmetic-ness has to
+    propagate from the declaration to the statements that feed it, or the
+    `if` survives and the card leaves the sheet over an animation timer."""
+    stmts = [
+        "float num = base.Owner.Character.AttackAnimDelay;",
+        "if (SaveManager.Instance.PrefsSave.FastMode == FastModeType.Normal) {",
+        "num += 0.2f;",
+        "}",
+        "await CardPileCmd.Draw(choiceContext, 1m, base.Owner);",
+    ]
+    kept = extract._drop_cosmetic_blocks(extract._drop_cosmetic_locals(stmts))
+    assert kept == ["await CardPileCmd.Draw(choiceContext, 1m, base.Owner);"]
+
+
+def test_a_real_branch_still_excludes_the_card():
+    """The propagation must not become a general `if`-eraser: an unrelated
+    local keeps its branch, and the card stays out."""
+    stmts = [
+        "float num = base.Owner.Character.AttackAnimDelay;",
+        "if (cardPlay.Target.HasPower<PoisonPower>()) {",
+        "await PowerCmd.Apply<PoisonPower>(choiceContext, cardPlay.Target);",
+        "}",
+    ]
+    kept = extract._drop_cosmetic_blocks(extract._drop_cosmetic_locals(stmts))
+    assert any(extract.CONTROL_FLOW.match(s) for s in kept)
 
 
 def test_canonical_tags_reads_only_the_declared_tag_property():
@@ -193,10 +319,10 @@ def test_builder_merges_required_supplement_layers(tmp_path, monkeypatch):
     second = tmp_path / "pass5.yaml"
     first.write_text("- {id: two}\n")
     second.write_text("- {id: three}\n")
-    monkeypatch.setattr(build, "SUPPLEMENTS", (first, second))
-    monkeypatch.setattr(build, "_doc1_cards", lambda: [{"id": "one"}])
+    spec = _spec(tmp_path, supplements=(first, second))
+    monkeypatch.setattr(build, "_doc1_cards", lambda _spec: [{"id": "one"}])
 
-    assert [row["id"] for row in build._validated_pool_cards()] == [
+    assert [row["id"] for row in build._validated_pool_cards(spec)] == [
         "one", "three", "two",
     ]
 
@@ -206,11 +332,40 @@ def test_builder_rejects_cross_layer_overlap(tmp_path, monkeypatch):
     second = tmp_path / "pass5.yaml"
     first.write_text("- {id: repeated}\n")
     second.write_text("- {id: repeated}\n")
-    monkeypatch.setattr(build, "SUPPLEMENTS", (first, second))
-    monkeypatch.setattr(build, "_doc1_cards", lambda: [{"id": "one"}])
+    spec = _spec(tmp_path, supplements=(first, second))
+    monkeypatch.setattr(build, "_doc1_cards", lambda _spec: [{"id": "one"}])
 
     with pytest.raises(SystemExit, match="overlaps earlier layers"):
-        build._validated_pool_cards()
+        build._validated_pool_cards(spec)
+
+
+def test_builder_fails_closed_on_a_missing_required_layer(tmp_path,
+                                                          monkeypatch):
+    """The guarantee the registry exists to keep: a REQUIRED layer that is
+    absent is an error, never a quietly smaller pool. game_ref/ has been
+    destroyed twice; a glob would have made both losses silent."""
+    present = tmp_path / "pass4.yaml"
+    present.write_text("- {id: two}\n")
+    spec = _spec(tmp_path, supplements=(present, tmp_path / "pass5.yaml"))
+    monkeypatch.setattr(build, "_doc1_cards", lambda _spec: [{"id": "one"}])
+
+    with pytest.raises(SystemExit, match="refusing to write a partial pool"):
+        build._validated_pool_cards(spec)
+
+
+def test_every_registered_character_derives_the_same_path_convention():
+    """The registry's only per-character fact is which layers are required;
+    everything else follows the naming convention the loader and the
+    distinctness report already glob for."""
+    for name, spec in build.CHARACTERS.items():
+        assert spec.character == name
+        assert spec.char_id == f"real_{name}"
+        assert spec.pool.name == f"{name}_pool.yaml"
+        assert spec.upgrades.name == f"{name}-upgrades.yaml"
+        assert spec.extractor_sheet.name == f"{name}-cards.yaml"
+        assert spec.char_out.name == f"char_real_{name}.yaml"
+        assert all(p.name.startswith(f"{name}_pool_pass")
+                   for p in spec.supplements)
 
 
 def test_loader_rejects_a_missing_required_external_layer(
@@ -226,10 +381,9 @@ def test_loader_rejects_a_missing_required_external_layer(
         loader._external_cards()
 
 
-def test_builder_rejects_partial_upgrade_coverage(tmp_path, monkeypatch):
-    upgrades = tmp_path / "upgrades.yaml"
-    upgrades.write_text("one: {damage: 1}\n")
-    monkeypatch.setattr(build, "UPGRADES", upgrades)
+def test_builder_rejects_partial_upgrade_coverage(tmp_path):
+    (tmp_path / "upgrades.yaml").write_text("one: {damage: 1}\n")
+    spec = _spec(tmp_path)
 
     with pytest.raises(SystemExit, match="missing upgrades for.*two"):
-        build._validated_upgrades([{"id": "one"}, {"id": "two"}])
+        build._validated_upgrades(spec, [{"id": "one"}, {"id": "two"}])

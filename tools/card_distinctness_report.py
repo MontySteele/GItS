@@ -69,19 +69,88 @@ to the official rows.
   python tools/card_distinctness_report.py --gate         # exit 1 on breach
 
 GATE (PROPOSED 2026-07-26, single-anchor: OFFICIAL:ironclad 76 cards ->
-uniq 86% / maxclu 4 / neardup 18. Ratify after a SECOND official anchor;
-thresholds leave modding headroom below the official line):
+uniq 86% / maxclu 4 / neardup 18; thresholds leave modding headroom below
+the official line):
 
   uniq%  >= 75        maxclu <= 4        neardup <= 0.33 per card
 
 rider%/decide% carry NO gate -- measurement showed both are non-divergent
 (official rider% 26 sits inside our 25-37; official decide% 20 equals
-Klee's). vocab/top% carry NO GATE YET: themed characters legitimately
-concentrate, so the concentration threshold waits for the Silent anchor --
-the most archetype-concentrated OFFICIAL character is the test of whether
-concentration itself is the divergence.
+Klee's).
 
-Applies to pools of 30+ cards (companion sheets exempt by size).
+THE SECOND ANCHOR, AND WHY NO THRESHOLD READ OFF IT HAS HELD STILL
+(2026-07-27, Silent anchor sprint; full analysis in
+docs/silent-anchor-sprint-log-2026-07-27.md). This docstring used to say
+"Ratify after a SECOND official anchor". The second anchor arrived, and its
+`uniq` has since moved four times in one day as more of her pool became
+expressible. Every reading is kept, because the SEQUENCE is the finding and
+any single row of it would be a lie by omission:
+
+  OFFICIAL:silent  22/88 (25%)  vocab  9  top 50%  uniq 59%  maxclu 3  FAIL
+  OFFICIAL:silent  27/88 (31%)  vocab  9  top 48%  uniq 63%  maxclu 3  FAIL
+  OFFICIAL:silent  46/88 (52%)  vocab 28  top 35%  uniq 78%  maxclu 3  pass
+  OFFICIAL:silent  56/88 (64%)  vocab 29  top 39%  uniq 73%  maxclu 4  FAIL
+  OFFICIAL:silent  59/88 (67%)  vocab 30  top 40%  uniq 72%  maxclu 4  FAIL
+  OFFICIAL:silent  85/86 (99%)  vocab 50  top 31%  uniq 72%  maxclu 5  FAIL
+
+  THE LAST ROW IS THE ONE THAT MATTERS, because coverage is no longer a
+  confound: her pool is COMPLETE bar one card ([USER] sent Blade Of Ink to an
+  enchantments design pass). `uniq` finished where it started -- 72% at 59
+  cards and 72% at 85 -- having passed through 78% on the way. Twenty-six
+  more cards moved it by nothing, `vocab` by twenty, and `maxclu` UP to 5.
+  A finished real base-game pool fails two of the three thresholds.
+
+  That is now a fact about the THRESHOLDS, not about the coverage. Ask A2
+  deferred ratification until the pool completed; it has completed, and the
+  question it was deferred for is answerable: no pool measured by this tool
+  -- ours or the base game's -- has ever passed uniq 75%, and the one pool
+  that did (at 46 cards) was the least complete reading taken.
+  Every `cards` column above runs one HIGHER than the coverage numerator:
+  the Shiv TOKEN is a pool row and is not one of the draftable cards.
+
+  The /88 in the early rows is the denominator AS IT WAS READ AT THE TIME,
+  kept unedited because a re-based history is not a history. It is now 86:
+  the extractor reads CardMultiplayerConstraint and drops the two cards the
+  game itself marks MultiplayerOnly (Flanking, Sneaky), which no DSL work
+  could ever make appear in a single-player run. Ironclad's is 85, not 87,
+  for the same reason (Demonic Shield, Tank). NONE of the gate columns moved
+  when the denominator did -- distinctness is computed over the pool, so
+  that change touched the coverage story and nothing about the measurement.
+
+  * Two conclusions were drawn and then overturned by more coverage. At
+    22-27 cards: "our pools post 56-62%, Ironclad posts 86%, so HE is the
+    outlier and the gate condemns us for matching the other anchor." At 46:
+    "the anchors agree with each other and disagree with us." Neither
+    statement survived, and the completed pool retired the premise of both.
+  * The control that licensed the first conclusion was a good experiment
+    with a misleading answer: restricting IRONCLAD to his structurally
+    simple subset RAISES his uniq (86 -> 89), which said "thinness does not
+    depress uniq". It does not depress HIS. Coverage bias is a property of
+    the SLICE -- her thin slices were poison/Sly cards that share signatures
+    with each other -- and a control run on the other anchor cannot see it.
+  * `maxclu` and `neardup` looked stable across the first five readings and
+    then BOTH breached on the completed pool (5, and 31 against a 28 budget).
+    Nothing in this table was safe to calibrate on early -- including the two
+    columns that spent five readings looking like they were.
+
+THE CONDITION FOR RATIFICATION IS NOW MET, AND THE ANSWER IS NOT "RATIFY"
+(ask A2, [USER], 2026-07-27: "gate ratification waits til the card pool
+completes"). It has completed. All three thresholds remain PROPOSED because
+the completed anchor FAILS two of them, which makes the numbers a statement
+about the thresholds rather than about any pool. The three live options, none
+of which is mine to choose: recalibrate off the completed second anchor,
+keep the thresholds and accept that they describe an aspiration no shipped
+pool meets, or retire `uniq` as a gate column and keep it as a report.
+
+vocab/top% still carry NO GATE, and they moved the same way: at 22 cards her
+vocabulary was NINE ideas against Ironclad's 40 and her top% read 50%, which
+said "the most archetype-concentrated official character". At 59 it is 30
+ideas and 40%. The thin readings were measuring the extractor, not her.
+
+Applies to pools of 30+ cards (companion sheets exempt by size). That
+exemption swallowed OFFICIAL:silent whole while she was under 30, which is
+why --gate now PRINTS what it skipped: for two days the anchor added to
+ratify the gate was never evaluated by it, and nothing said so.
 """
 from __future__ import annotations
 
@@ -149,7 +218,14 @@ TARGET_CLASS = {
 GATE_MIN_UNIQ = 75          # official 86
 GATE_MAX_CLUSTER = 4        # official 4
 GATE_NEARDUP_PER_CARD = 0.33
-GATE_MIN_POOL = 30          # companion sheets exempt by size
+# Companion sheets are exempt by SIZE, which is a proxy for "not a character
+# pool" -- and a proxy that misfired: OFFICIAL:silent IS a character pool and
+# spent two days under this floor, invisible to the gate she was added to
+# ratify. She is over it now (60 rows) at nobody's decision but the
+# extractor's, which is the argument for making the exemption by KIND. Until
+# then --gate PRINTS what it skipped, so an exemption cannot read as a pass
+# (2026-07-27, Silent anchor sprint E-2).
+GATE_MIN_POOL = 30
 
 
 def _is_scaled(e: dict) -> bool:
@@ -341,9 +417,11 @@ def main() -> int:
                   "calibrated against one and cannot be checked without it. "
                   "Run tools/extract_base_game_pool.py locally.", file=sys.stderr)
             return 2
-        breaches = []
+        breaches, skipped = [], []
         for r in reports:
             if r["cards"] < GATE_MIN_POOL or "/" in r["pool"]:
+                if "/" not in r["pool"]:
+                    skipped.append(f"{r['pool']} ({r['cards']} cards)")
                 continue
             if r["uniq%"] < GATE_MIN_UNIQ:
                 breaches.append(f"{r['pool']}: uniq {r['uniq%']:.0f}% < "
@@ -355,12 +433,18 @@ def main() -> int:
                 breaches.append(
                     f"{r['pool']}: neardup {r['neardup']} > "
                     f"{GATE_NEARDUP_PER_CARD * r['cards']:.0f}")
+        if skipped:
+            print(f"\nGATE SKIPPED (under {GATE_MIN_POOL} cards -- this is NOT "
+                  f"a pass): {', '.join(skipped)}")
         if breaches:
-            print("\nGATE BREACHES (thresholds PROPOSED, pending 2nd anchor):")
+            print("\nGATE BREACHES (NOTHING HERE IS RATIFIED -- ask A2 "
+                  "deferred all three thresholds until the second anchor's "
+                  "pool completes; see the module docstring):")
             for b in breaches:
                 print(f"  FAIL {b}")
             return 1
-        print("\nGATE: all pools clear (thresholds PROPOSED).")
+        print("\nGATE: all pools clear (all thresholds PROPOSED; "
+              "ratification deferred by ask A2).")
 
     if args.families:
         for r in reports:

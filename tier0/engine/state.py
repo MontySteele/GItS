@@ -108,6 +108,18 @@ class Card:
     # (scry); both scopings are enforced (and commented) at the one trigger
     # site in effects._op_discard. Empty on every non-Kokomi card.
     sly: list[dict] = field(default_factory=list)
+    # BASE-GAME `CardKeyword.Sly` (ask A4, ruled 2026-07-27: implement it
+    # true to the game). A DIFFERENT MECHANIC FROM `sly` ABOVE, wearing the
+    # same word: when this card is discarded from hand by a card effect it
+    # is AUTO-PLAYED for free (CardCmd.DiscardAndDraw -> CardCmd.AutoPlay,
+    # AutoPlayType.SlyDiscard), which is a whole card play -- it fires the
+    # card-played hooks, counts toward cards_played_this_turn, and routes to
+    # its own result pile afterwards. Kokomi's `sly` resolves an authored
+    # effect list instead and plays nothing. The unification of the two is
+    # filed as tech debt (docs/tech-debt-audit-2026-07-26.md); until it
+    # lands, the trigger site in effects._op_discard handles both and the
+    # extractor maps CardKeyword.Sly onto THIS field only.
+    sly_keyword: bool = False
     # Guest Star rows (fontaine-companions.yaml): generated cameos, scoped
     # to a personal pool. Never in shared rewards or the banner roll; the
     # equal-rarity clause on generators is what respects 5-star scarcity.
@@ -142,6 +154,23 @@ class Card:
     # owner has already played. Keeping the rate on the card lets card_cost()
     # read the live turn counter without mutating the printed/base cost.
     cost_reduction_per_attack_this_turn: int = 0
+    # Pinpoint. Declarative and read at cost time, which is exactly
+    # equivalent to the base game's two halves (a retroactive ReduceCostBy
+    # when it enters combat, then -1 per Skill afterwards) without needing
+    # an out-of-play hook: at any moment both say "printed cost minus the
+    # Skills played this turn", and both reset at the turn boundary.
+    cost_reduction_per_skill_this_turn: int = 0
+    # EnergyCost.AddThisTurn / AddThisCombat / SetToFreeThisTurn -- state the
+    # base game keeps on the CARD INSTANCE, not on its owner. Two copies of
+    # the same card discount themselves independently, and the combat-scoped
+    # one survives the card leaving hand and being redrawn. `free_this_turn`
+    # is a SET, not a delta: Bullet Time zeroes the cost outright.
+    cost_delta_this_turn: int = 0
+    cost_delta_this_combat: int = 0
+    free_this_turn: bool = False
+    # Hand Trick grants Sly for one turn only. Kept separate from the printed
+    # `sly_keyword` so the grant expires without editing what the card prints.
+    sly_this_turn: bool = False
     # --- Status cards (multi-act §10.2 injection op; engine/statuses.py).
     # type == "status" cards are UNPLAYABLE (combat.card_playable) and exist
     # only inside a combat: enemies inject them into the player's piles; the
@@ -246,6 +275,11 @@ class Player(Fighter):
     # Battery players are built by loader.build_player, which never sets this;
     # only build_player_from_ids(relic_effects=...) in the run layer does. ---
     relic_effects: list[dict] = field(default_factory=list)  # dicts keyed 'hook'
+    # power name -> the card id that power was told to create. Set by an
+    # apply_power row carrying `payload`; read by the refpowers hook that
+    # makes the card. Keeps decompiled card ids out of committed engine code
+    # while letting a parity power create a character's own token.
+    power_payloads: dict[str, str] = field(default_factory=dict)
     first_hp_loss_fired: bool = False        # on_first_hp_loss_draw, per combat
     relic_conditional_applied: dict[str, int] = field(default_factory=dict)
     #                                        # conditional_power (Red Skull):
@@ -406,6 +440,13 @@ class CombatState:
     fatal_kills_this_card: int = 0        # killed_target_fatal (Feed)
     exhausted_this_card: int = 0          # generate_from_pool amount_formula
     block_gains_this_card: int = 0        # exact multi-gain block hooks
+    # The block those gains actually PRODUCED, which is a different question:
+    # DodgeAndRoll pays BlockNextTurn equal to what GainBlock returned, after
+    # Dexterity and Frail. Kept beside the count rather than replacing it --
+    # refpowers reads the count to divide a per-gain allowance.
+    block_gained_this_card: int = 0
+    discards_this_card: int = 0           # CalculatedGamble's draw-back count
+    last_drawn_type: str = ""             # EscapePlan's drawn-card branch
     salon_replacements_this_card: int = 0 # overflow count for current card
     cards_exhausted_this_turn: int = 0     # EvilEye / ForgottenRitual
     # Kokomi §2.4: the prevention ward's per-round latch ("first unblocked
@@ -443,8 +484,39 @@ class CombatState:
     card_play_depth: int = 0              # >0 while a card is mid-play
                                           # (Rupture's deferral window)
     rupture_pending: int = 0              # strength owed to the card in play
+    # OutbreakPower's internal `timesPoisoned`. Combat-local and NOT reset per
+    # turn: the source keeps it on the power's Data object for the whole
+    # fight and takes it mod 3, so a third poison two turns later still pays.
+    outbreak_poisonings: int = 0
+    # CardDiscardedEntry / CardDrawnEntry, the two combat-history counts the
+    # Silent's calculated-damage cards read. `discards_this_turn` counts only
+    # CARD-EFFECT discards from hand -- the end-of-turn flush reaches the
+    # discard pile through CardPileCmd.Add and is not a CardCmd.Discard, so
+    # the base game does not count it either. `cards_drawn_this_combat` is
+    # NOT reset per turn; Murder scales across the whole fight.
+    discards_this_turn: int = 0
+    cards_drawn_this_combat: int = 0
+    # THE ONLY THING COMBAT SAYS TO THE RUN LAYER ABOUT REWARDS, and it is a
+    # statement of fact rather than a grant: "this fight earned N extra card
+    # screens". The Hunt is the first source ([USER], 2026-07-27: the reward
+    # is not in-combat -- if the effect fires you get an extra reward on the
+    # REWARDS SCREEN afterwards, which is also what the base game does:
+    # CombatRoom.AddExtraReward queues a CardReward for the room, and the
+    # room hands it over when the fight is already over).
+    #
+    # combat.py must never roll, offer or draft anything: rewards are the run
+    # layer's, exactly as the Burning Blood heal is (tier05/model.py, "combat
+    # stays emit-only"). A tier 0 fight run on its own leaves this counter
+    # sitting on the state, unread and harmless, which is the correct
+    # behaviour for a layer that has no reward screen at all.
+    extra_card_screens: int = 0
     dark_embrace_ethereal_count: int = 0  # deferred to after the hand flush
     attacks_played_this_turn: int = 0     # Juggling's ==3 trigger
+    skills_played_this_turn: int = 0      # Pinpoint's self-discount
+    # CardPlaysFinished this turn, counted per card TAG. PhantomBlades pays
+    # only on the first tagged card played each turn, and "finished" is the
+    # word that matters: the card currently resolving is not in here yet.
+    tag_plays_this_turn: dict = field(default_factory=dict)
     block_gain_card_plays_this_turn: int = 0   # Unmovable's per-turn allowance
     no_energy_gain_ceiling: Optional[int] = None  # NoEnergyGain, seeded when
                                           # the power lands (not at the refill)
@@ -485,7 +557,19 @@ class CombatState:
                 return
             card = p.draw_pile.pop(0)
             p.hand.append(card)
+            self.cards_drawn_this_combat += 1
+            # EscapePlan reads the TYPE of the card its own draw produced
+            # (`(await Draw(1)).FirstOrDefault()`, then `.Type == Skill`).
+            # Cleared at card start, so a card that drew NOTHING -- empty
+            # piles, full hand -- reads as the source's null and pays out
+            # nothing, rather than seeing whatever the last card drew.
+            self.last_drawn_type = card.type
             self.emit("draw", card=card.id)
+            # Hook.AfterCardDrawn, per CARD. CorrosiveWave and Speedster are
+            # the only readers today and both are dead branches without a
+            # Silent power up, but the site has to be inside the loop: they
+            # pay per card drawn, not per draw effect.
+            refpowers.after_card_drawn(self, card, from_hand_draw)
             if card.status_draw_damage:
                 # Toxic (§10.3, ratified semantics): unblockable HP loss the
                 # moment it is drawn. Late import mirrors refpowers above.

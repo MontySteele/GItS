@@ -104,6 +104,13 @@ def card_playable(state: CombatState, card: Card) -> bool:
     if card.requires == "burst_energy_full":
         if state.player.burst_energy < state.player.burst_max:
             return False
+    elif card.requires == "draw_pile_empty":
+        # GrandFinale's `IsPlayable => Draw.GetPile(Owner).Cards.Count == 0`.
+        # A real playability GATE, not a cost: the card sits in hand, dead,
+        # until the deck runs out. pilot/policy.py already filters on this
+        # function, so the pilot inherits the rule without knowing the card.
+        if state.player.draw_pile:
+            return False
     elif card.requires:
         raise ValueError(f"unknown requires {card.requires!r}")
     if card.encore_cost and state.player.encore < card.encore_cost:
@@ -132,9 +139,22 @@ def card_cost(state: CombatState, card: Card) -> int:
         # test_refpowers.test_free_attack_does_not_zero_an_x_cost_attack.
         return state.player.energy
     cost = card.cost
+    # PER-INSTANCE cost state, the base game's EnergyCost.AddThisTurn /
+    # AddThisCombat / SetToFreeThisTurn. It lives on the CARD OBJECT because
+    # that is what the game modifies: two copies of Up My Sleeve in one deck
+    # discount themselves separately, and a card that leaves hand and is
+    # redrawn keeps its combat-scoped discount. Applied before every other
+    # modifier and floored at 0 like they are.
+    if card.free_this_turn:
+        return 0
+    cost = max(0, cost + card.cost_delta_this_turn
+               + card.cost_delta_this_combat)
     if card.cost_reduction_per_attack_this_turn:
         cost = max(0, cost - (card.cost_reduction_per_attack_this_turn
                               * state.attacks_played_this_turn))
+    if card.cost_reduction_per_skill_this_turn:
+        cost = max(0, cost - (card.cost_reduction_per_skill_this_turn
+                              * state.skills_played_this_turn))
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
     # Leading Role (card-level texture, kickoff §3.2): the FIRST
@@ -219,6 +239,21 @@ def play_card(state: CombatState, card: Card) -> None:
         state.emit("burst_cast", card=card.id)
     if p.burst_max and "skill_tag" in card.tags:
         resources.gain_burst(state, C.BURST_PER_SKILL_TAG, "skill_tag")
+    _finish_play(state, card)
+
+
+def _finish_play(state: CombatState, card: Card,
+                 force_exhaust: bool = False) -> None:
+    """The half of a card play that does not depend on who paid for it.
+
+    CardModel.OnPlayWrapper is entered identically by a manual play and by
+    CardCmd.AutoPlay -- only the cost bookkeeping ahead of it differs. This
+    is that shared half (the replay loop and its per-play-index hooks, the
+    Power floor grant, result-pile routing, and the post-play settlement),
+    split out so resolve_free_play cannot drift from play_card. Nothing here
+    reads energy or the hand, so both callers are correct by construction.
+    """
+    p = state.player
     replays = 1
     if card.is_companion:
         state.companions_played.append(card.id)
@@ -261,7 +296,8 @@ def play_card(state: CombatState, card: Card) -> None:
         # REMOVED FROM COMBAT (PileType.None), not exhausted. tier0 used to
         # exhaust it, which would have paid out FeelNoPain and DarkEmbrace on
         # all 11 of Ironclad's Power cards (recon BUG 1).
-        dest = refpowers.result_pile(state, card)
+        dest = "exhaust" if force_exhaust else refpowers.result_pile(state,
+                                                                     card)
         if dest == "exhaust":
             refpowers.exhaust_card(state, card)
         elif dest == "discard":
@@ -275,6 +311,83 @@ def play_card(state: CombatState, card: Card) -> None:
     _revive_player_if_needed(state)
     if p.relic_effects:
         relics.reevaluate_conditionals(state)
+
+
+# Every piece of per-card context effects.resolve_card sets. A free play
+# resolves an ENTIRE card in the middle of another card's resolution, so each
+# of these has to be put back afterwards or the outer card finishes reading
+# the inner card's kills, exhausts and repeat request -- a corruption that is
+# invisible in results, which is why effects._free_play refuses to resolve
+# effects inline and routes here instead. (Its contract docstring names
+# twelve; block_gains_this_card and salon_replacements_this_card are
+# resolve_card's too and are saved for the same reason.)
+_ABSENT = object()
+_FREE_PLAY_CONTEXT = (
+    "current_card_companion", "reactions_this_card", "kills_this_card",
+    "fatal_kills_this_card", "exhausted_this_card", "block_gains_this_card",
+    "salon_replacements_this_card", "detonations_at_card_start",
+    "repeat_requested", "target_had_offelement_aura", "current_attack_bonus",
+    "sparks_at_play", "current_x", "current_card_cost",
+    # Coverage pass 4's three per-card reads. Same hazard as the rest: a Sly
+    # auto-play that discards or gains block in the middle of an outer card
+    # would otherwise leave its numbers behind for the outer card to read.
+    "block_gained_this_card", "discards_this_card", "last_drawn_type")
+
+
+def resolve_free_play(state: CombatState, card: Card,
+                      force_exhaust: bool = False) -> None:
+    """CardCmd.AutoPlay -- play `card` with ResourceInfo.EnergySpent = 0.
+
+    Satisfies the contract effects._free_play documents, and is the ONE way
+    an effect may play a card: the base game runs an auto-play through the
+    same CardModel.OnPlayWrapper as a manual play, so an auto-played card
+    fires BeforeCardPlayed/AfterCardPlayed, is recorded by History as a card
+    play, and routes to its own result pile. Only the cost is skipped.
+
+    The caller owns the source pile. AutoPlay moves the card into the play
+    pile from wherever it is (hand, draw, discard, exhaust), so it must
+    already have been removed by the trigger site; there is deliberately no
+    hand.remove here.
+
+    Landed 2026-07-27 for ask A4 (CardKeyword.Sly). Before it, this function
+    did not exist and _free_play raised UNIMPLEMENTED -- which is why
+    Havoc, Cascade and HowlFromBeyond are excluded from the Ironclad sheet.
+    They stay excluded: the extractor still cannot read their shapes
+    (CardPileCmd.AutoPlayFromDrawPile, a runtime branch, and an out-of-play
+    hook), so that anchor is unchanged by this. What DID move is that
+    Card.on_exhaust_autoplay and the autoplay_from_draw op are live paths
+    now. No committed card sets either, so the roster is unmoved.
+    """
+    p = state.player
+    # Four of these (detonations_at_card_start, repeat_requested,
+    # target_had_offelement_aura, current_attack_bonus) are set by
+    # resolve_card rather than declared on CombatState, so before the first
+    # card of a fight resolves they do not exist yet -- and the exhaust
+    # autoplay sweep fires at TURN END, outside any card. Restoring absence
+    # as absence keeps this function from inventing state that the rest of
+    # the engine would then read as a resolved card's leftovers.
+    saved = [(name, getattr(state, name, _ABSENT))
+             for name in _FREE_PLAY_CONTEXT]
+    try:
+        # The bank as it stands at play time (R39's reading), and cost 0 --
+        # EnergySpent is 0 for an auto-play whatever the card's printed
+        # cost, so this_cost_zero and zero_cost_attacks_up both see a free
+        # card. An X card captures the CURRENT energy without spending it
+        # (CapturedXValue = PlayerCombatState.Energy).
+        state.sparks_at_play = p.sparks
+        state.current_card_cost = 0
+        if card.cost == "X":
+            state.current_x = p.energy
+        state.cards_played_this_turn += 1
+        state.emit("play", card=card.id, cost=0, energy_left=p.energy,
+                   free=True)
+        _finish_play(state, card, force_exhaust=force_exhaust)
+    finally:
+        for name, value in saved:
+            if value is _ABSENT:
+                state.__dict__.pop(name, None)
+            else:
+                setattr(state, name, value)
 
 
 def _player_turn(state: CombatState, pilot: Pilot) -> None:
@@ -322,7 +435,12 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         return
 
     p.energy = refpowers.energy_for_turn(state)      # site C, + Pyre
-    state.draw(C.CARDS_DRAWN_PER_TURN, from_hand_draw=True)   # site D
+    # site D, with Hook.ModifyHandDraw folded in (ToolsOfTheTrade and
+    # DrawCardsNextTurn). Relic-driven opening-hand bonuses are a different
+    # hook and stay where they are.
+    refpowers.before_hand_draw(state)                # Hook.BeforeHandDraw
+    state.draw(C.CARDS_DRAWN_PER_TURN + refpowers.hand_draw_bonus(p),
+               from_hand_draw=True)
     # StS2 sites E/F (AfterPlayerTurnStart, AfterSideTurnStart) -- AFTER the
     # draw. tier0's powers.on_turn_start above is a PRE site; anything that
     # reads the hand or must land post-draw belongs here instead.
@@ -419,12 +537,20 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Ethereal cards (the Spotlight selector) vanish to exhaust instead of
     # discarding -- an unplayed selector must never circulate as loot.
     retained = [c for c in p.hand if "burst" in c.tags or c.retain]
+    # WellLaidPlans (BeforeFlushLate): single-turn Retain on up to N cards
+    # that were about to be flushed. Computed against what WOULD flush, so it
+    # can never "retain" a card that was staying anyway.
+    would_flush = [c for c in p.hand
+                   if "burst" not in c.tags and not c.retain
+                   and "ethereal" not in c.tags]
+    retained += refpowers.retain_at_flush(state, would_flush)
     ethereal = [c for c in p.hand
                 if "ethereal" in c.tags
                 and "burst" not in c.tags and not c.retain]
     p.discard_pile.extend(c for c in p.hand
                           if "burst" not in c.tags and not c.retain
-                          and "ethereal" not in c.tags)
+                          and "ethereal" not in c.tags
+                          and c not in retained)
     p.hand = retained
     for c in ethereal:
         # DarkEmbrace counts ethereal exhausts instead of drawing on them; the
@@ -444,7 +570,8 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
         state.emit("enemy_sleep", enemy=enemy.name)
         return
     enemy.block = 0
-    powers.on_turn_start(state, enemy)
+    powers.on_turn_start(state, enemy)          # site A: metallicize, dot
+    refpowers.enemy_side_turn_start(state, enemy)    # site F: poison
     if not enemy.alive:
         return
     # Crab Rage (§10.2, gated on the spec field -- inert everywhere else):

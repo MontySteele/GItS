@@ -167,4 +167,5 @@ def get(character_id: str) -> Character:
 # them in would make every roster sweep below either wrong or full of
 # exceptions. Named here so the distinction is on record rather than implied
 # by their absence.
-REFERENCE_IDS: tuple[str, ...] = ("ref_ironclad", "real_ironclad", "ref_silent")
+REFERENCE_IDS: tuple[str, ...] = ("ref_ironclad", "real_ironclad",
+                                  "ref_silent", "real_silent")
