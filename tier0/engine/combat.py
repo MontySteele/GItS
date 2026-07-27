@@ -411,7 +411,11 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         return
 
     p.energy = refpowers.energy_for_turn(state)      # site C, + Pyre
-    state.draw(C.CARDS_DRAWN_PER_TURN, from_hand_draw=True)   # site D
+    # site D, with Hook.ModifyHandDraw folded in (ToolsOfTheTrade and
+    # DrawCardsNextTurn). Relic-driven opening-hand bonuses are a different
+    # hook and stay where they are.
+    state.draw(C.CARDS_DRAWN_PER_TURN + refpowers.hand_draw_bonus(p),
+               from_hand_draw=True)
     # StS2 sites E/F (AfterPlayerTurnStart, AfterSideTurnStart) -- AFTER the
     # draw. tier0's powers.on_turn_start above is a PRE site; anything that
     # reads the hand or must land post-draw belongs here instead.
@@ -508,12 +512,20 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Ethereal cards (the Spotlight selector) vanish to exhaust instead of
     # discarding -- an unplayed selector must never circulate as loot.
     retained = [c for c in p.hand if "burst" in c.tags or c.retain]
+    # WellLaidPlans (BeforeFlushLate): single-turn Retain on up to N cards
+    # that were about to be flushed. Computed against what WOULD flush, so it
+    # can never "retain" a card that was staying anyway.
+    would_flush = [c for c in p.hand
+                   if "burst" not in c.tags and not c.retain
+                   and "ethereal" not in c.tags]
+    retained += refpowers.retain_at_flush(state, would_flush)
     ethereal = [c for c in p.hand
                 if "ethereal" in c.tags
                 and "burst" not in c.tags and not c.retain]
     p.discard_pile.extend(c for c in p.hand
                           if "burst" not in c.tags and not c.retain
-                          and "ethereal" not in c.tags)
+                          and "ethereal" not in c.tags
+                          and c not in retained)
     p.hand = retained
     for c in ethereal:
         # DarkEmbrace counts ethereal exhausts instead of drawing on them; the

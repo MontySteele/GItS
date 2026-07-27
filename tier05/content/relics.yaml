@@ -284,7 +284,15 @@ event:
 skip:
   bronze_scales:
     name: "Bronze Scales"
-    missing: "Thorns power (retaliation damage) is absent from tier0"
+    # REASON UPDATED 2026-07-27 (Silent coverage pass), on the same precedent
+    # as oddly_smooth_stone below: "Thorns power (retaliation damage) is
+    # absent from tier0" went stale the moment ThornsPower landed in
+    # refpowers.on_damage_received, and a stale skip reason is the quiet lie
+    # this list exists to prevent. The mechanic gap is closed; what remains
+    # is the same [USER] ruling, because un-skipping arms a relic and moves
+    # the tier 0.5 measurement world.
+    missing: "Thorns now exists (2026-07-27); un-skipping is a [USER]
+      ruling because it arms a relic and moves the tier 0.5 world"
   oddly_smooth_stone:
     name: "Oddly Smooth Stone"
     # REASON UPDATED 2026-07-27 (Silent anchor C-3), on juzu_bracelet's

@@ -7,10 +7,11 @@ not exist and there is nothing to assert. The fresh-clone half of the
 contract is pinned unguarded in test_anchor_lock.py.
 
 WHAT THIS ANCHOR IS, stated once so no number read off it is over-claimed:
-the assembled pool is 27 of the character's 88 cards (22 before ask A4 put
-the Sly keyword in the engine). The 61 excluded are still not a random
-sample -- they are systematically the interesting ones (every shiv
-generator, most poison payoffs, every card that branches on runtime state).
+the assembled pool is 46 of the character's 88 cards (22 before ask A4 put
+the Sly keyword in the engine, 27 after it, 46 once nineteen more of her
+powers were implemented). The 42 excluded are still not a random sample --
+they are systematically the interesting ones (every shiv generator, and
+every card that branches on runtime state).
 This is a FLOOR on the Silent, not a portrait of her, and the coverage
 fraction travels with every statline she produces.
 """
@@ -142,11 +143,12 @@ def test_every_reference_card_has_an_applicable_upgrade(ref_cards):
     # Atomic external-artifact contract: partial coverage would bias smithing
     # and shop removal toward whichever cards happened to receive a `+` form.
     from tier0.content import upgrades
-    # 22 -> 27 on 2026-07-27: ask A4 (implement CardKeyword.Sly) let the five
-    # Sly cards out of the excluded list. The count is pinned rather than
-    # derived because a pool that quietly loads SMALLER is the failure this
-    # anchor cannot detect any other way.
-    assert len(ref_cards) == 27
+    # 22 -> 27 -> 46 across 2026-07-27: ask A4 (CardKeyword.Sly) freed the
+    # five Sly cards, and the coverage pass that followed put nineteen more
+    # of her powers on the dial. The count is pinned rather than derived
+    # because a pool that quietly loads SMALLER is the failure this anchor
+    # cannot detect any other way.
+    assert len(ref_cards) == 46
     pool_ids = {card.id for card in ref_cards}
     for layer_name in loader.EXTERNAL_CARD_LAYERS["silent_pool.yaml"]:
         layer = yaml.safe_load((loader.GAME_REF_DIR / layer_name).read_text())
@@ -180,7 +182,7 @@ def test_no_silent_card_silently_dropped_a_printed_keyword(ref_cards):
     the base-game keyword), and they must carry `sly_keyword` -- the
     base-game auto-play -- and never Kokomi's `sly` effect list, which would
     read as a printed rule that does nothing."""
-    assert sum(c.sly_keyword for c in ref_cards) == 5
+    assert sum(c.sly_keyword for c in ref_cards) == 6
     assert not any(c.sly for c in ref_cards)
     assert any(c.innate for c in ref_cards)
 

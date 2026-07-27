@@ -9,6 +9,12 @@ add it here with a comment. These are starting points, not gospel
 BASE_ENERGY_PER_TURN = 3
 CARDS_DRAWN_PER_TURN = 5
 MAX_HAND_SIZE = 10
+# IntangiblePower.ModifyDamageCap / ModifyHpLostAfterOsty both return 1 for
+# the owner. Named rather than inlined because it is a base-game parity
+# number that no design ruling of ours may tune.
+INTANGIBLE_DAMAGE_CAP = 1
+# OutbreakPower.poisonThreshold, a public const on the power itself.
+OUTBREAK_POISON_THRESHOLD = 3
 
 # --- Fight limits ---
 MAX_TURNS = 30            # hard cap; hitting it counts as a loss (stall)

@@ -97,6 +97,14 @@ def modify_block_gained(fighter: Fighter, amount: int) -> int:
     dex = fighter.powers.get("dexterity", 0)
     if dex:
         amount = max(0, amount + dex)
+    # ShadowmeldPower.ModifyBlockMultiplicative -> 2^Amount, and unlike Frail
+    # it carries NO IsPoweredCardOrMonsterMoveBlock guard: it doubles every
+    # kind of block its owner gains. tier0's two block paths are disjoint
+    # (card block reaches here, power block reaches refpowers.gain_block), so
+    # the doubling is applied in both and lands exactly once either way.
+    meld = fighter.powers.get("shadowmeld", 0)
+    if meld:
+        amount *= 2 ** meld
     if fighter.powers.get("frail", 0) > 0:
         return int(amount * C.FRAIL_BLOCK_MULT)   # StS floors block*0.75
     return amount

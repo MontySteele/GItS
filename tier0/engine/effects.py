@@ -287,6 +287,12 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
             state.fatal_kills_this_card += 1
     if hp_dmg > 0:
         _detonate_bombs_on_hit(state, enemy, source)
+    # Hook.AfterDamageGiven -- Envenom. Placed on the POWERED attack pipeline
+    # only (this function), which is what IsPoweredAttack() means; the
+    # Unpowered path in refpowers.unpowered_damage deliberately does not
+    # envenom.
+    from tier0.engine import refpowers as _refpowers
+    _refpowers.envenom_on_hit(state, enemy, hp_dmg, source)
     # Skittish (§10.9 promotion): "The first time it is hit each turn, it
     # gains N Block." AFTER the whole hit resolves (incl. any detonation
     # rider), so the triggering attack is never mitigated by it; the latch

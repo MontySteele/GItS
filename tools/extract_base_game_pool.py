@@ -354,7 +354,32 @@ SUPPORTED_POWERS = {"StrengthPower": "strength",
                     # against PoisonPower / DexterityPower; pinned in
                     # tier0/tests/test_si_effects.py)
                     "PoisonPower": "poison",
-                    "DexterityPower": "dexterity"}
+                    "DexterityPower": "dexterity",
+                    # verified 2026-07-27 (Silent coverage pass -- each read
+                    # off its own PowerModel and implemented in
+                    # tier0/engine/refpowers.py; pinned in
+                    # tier0/tests/test_si_powers.py)
+                    "AccelerantPower": "accelerant",
+                    "AfterimagePower": "afterimage",
+                    "AnticipatePower": "temp_dexterity",
+                    "BlockNextTurnPower": "block_next_turn",
+                    "BlurPower": "blur",
+                    "BurstPower": "burst",
+                    "CorrosiveWavePower": "corrosive_wave",
+                    "DrawCardsNextTurnPower": "draw_cards_next_turn",
+                    "EnvenomPower": "envenom",
+                    "FreeSkillPower": "free_skill",
+                    "IntangiblePower": "intangible",
+                    "MasterPlannerPower": "master_planner",
+                    "NoxiousFumesPower": "noxious_fumes",
+                    "OutbreakPower": "outbreak",
+                    "SerpentFormPower": "serpent_form",
+                    "ShadowmeldPower": "shadowmeld",
+                    "SpeedsterPower": "speedster",
+                    "StranglePower": "strangle",
+                    "ThornsPower": "thorns",
+                    "ToolsOfTheTradePower": "tools_of_the_trade",
+                    "WellLaidPlansPower": "well_laid_plans"}
 
 
 def _power_gap(power: str) -> str:
@@ -377,6 +402,17 @@ def _power_gap(power: str) -> str:
     if key in refpowers.UNIMPLEMENTED:
         return f"{power} is UNIMPLEMENTED in tier0: " \
                f"{refpowers.UNIMPLEMENTED[key].split('.')[0]}"
+    # A power that CANNOT FIRE in single-player is a third category, and
+    # conflating it with "not on the dial" would leave a standing invitation
+    # to implement a card that measurably does nothing. See
+    # refpowers.MULTIPLAYER_ONLY_POWERS.
+    if key in refpowers.MULTIPLAYER_ONLY_POWERS:
+        # NOT truncated at the first period the way UNIMPLEMENTED is: these
+        # reasons cite the guard clause that makes the power unreachable, and
+        # the whole point of the category is that "co-op only" should not
+        # have to be taken on trust.
+        return f"{power} is CO-OP ONLY: " \
+               f"{refpowers.MULTIPLAYER_ONLY_POWERS[key]}"
     return (f"{power} is not on the SUPPORTED_POWERS dial "
             "(unverified or unimplemented in tier0/engine/refpowers.py)")
 
@@ -457,7 +493,28 @@ UPGRADE_POWER_KEY = {"strength": "power_amount",
                      "rupture": "power_amount",
                      "unmovable": "power_amount",
                      "poison": "power_amount",
-                     "dexterity": "power_amount"}
+                     "dexterity": "power_amount",
+                     "accelerant": "power_amount",
+                     "afterimage": "power_amount",
+                     "temp_dexterity": "power_amount",
+                     "block_next_turn": "power_amount",
+                     "blur": "power_amount",
+                     "burst": "power_amount",
+                     "corrosive_wave": "power_amount",
+                     "draw_cards_next_turn": "power_amount",
+                     "envenom": "power_amount",
+                     "free_skill": "power_amount",
+                     "intangible": "power_amount",
+                     "master_planner": "power_amount",
+                     "noxious_fumes": "power_amount",
+                     "outbreak": "power_amount",
+                     "serpent_form": "power_amount",
+                     "shadowmeld": "power_amount",
+                     "speedster": "power_amount",
+                     "strangle": "power_amount",
+                     "thorns": "power_amount",
+                     "tools_of_the_trade": "power_amount",
+                     "well_laid_plans": "power_amount"}
 
 
 def _num(text: str) -> int | float:

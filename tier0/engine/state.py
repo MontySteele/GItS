@@ -455,6 +455,10 @@ class CombatState:
     card_play_depth: int = 0              # >0 while a card is mid-play
                                           # (Rupture's deferral window)
     rupture_pending: int = 0              # strength owed to the card in play
+    # OutbreakPower's internal `timesPoisoned`. Combat-local and NOT reset per
+    # turn: the source keeps it on the power's Data object for the whole
+    # fight and takes it mod 3, so a third poison two turns later still pays.
+    outbreak_poisonings: int = 0
     dark_embrace_ethereal_count: int = 0  # deferred to after the hand flush
     attacks_played_this_turn: int = 0     # Juggling's ==3 trigger
     block_gain_card_plays_this_turn: int = 0   # Unmovable's per-turn allowance
@@ -498,6 +502,11 @@ class CombatState:
             card = p.draw_pile.pop(0)
             p.hand.append(card)
             self.emit("draw", card=card.id)
+            # Hook.AfterCardDrawn, per CARD. CorrosiveWave and Speedster are
+            # the only readers today and both are dead branches without a
+            # Silent power up, but the site has to be inside the loop: they
+            # pay per card drawn, not per draw effect.
+            refpowers.after_card_drawn(self, card, from_hand_draw)
             if card.status_draw_damage:
                 # Toxic (§10.3, ratified semantics): unblockable HP loss the
                 # moment it is drawn. Late import mirrors refpowers above.

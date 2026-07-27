@@ -78,49 +78,51 @@ rider%/decide% carry NO gate -- measurement showed both are non-divergent
 (official rider% 26 sits inside our 25-37; official decide% 20 equals
 Klee's).
 
-THE SECOND ANCHOR ARRIVED AND DID NOT RATIFY (2026-07-27, Silent anchor
-sprint; full analysis in docs/silent-anchor-sprint-log-2026-07-27.md). This
-docstring used to say "Ratify after a SECOND official anchor", and that
-sentence is now stale in the most misleading direction, so it is replaced by
-what actually happened:
+THE SECOND ANCHOR, AND THE READING THAT COVERAGE OVERTURNED (2026-07-27,
+Silent anchor sprint; full analysis in
+docs/silent-anchor-sprint-log-2026-07-27.md). This docstring used to say
+"Ratify after a SECOND official anchor". The second anchor arrived, failed
+the gate, and then -- once more of her pool could be expressed -- passed it.
+Both readings are kept here because the sequence is the finding:
 
-  OFFICIAL:silent   27 cards  vocab 9  top 48%  uniq 63%  maxclu 3  neardup 12
+  OFFICIAL:silent  22/88 (25%)   vocab 9   top 50%  uniq 59%  maxclu 3
+  OFFICIAL:silent  27/88 (31%)   vocab 9   top 48%  uniq 63%  maxclu 3
+  OFFICIAL:silent  46/88 (52%)   vocab 28  top 35%  uniq 78%  maxclu 3
 
-  (22 cards / uniq 59% when first measured; ask A4 put the Sly keyword in
-  the engine on 2026-07-27 and five more of her cards became expressible.
-  The gate verdict did not change, which is itself worth knowing: +23%
-  coverage moved uniq by 4 points.)
-
-  * uniq >= 75 is FAILED by the second official anchor (63%). Our own pools
-    post 56-62%; Ironclad posts 86%. On two anchors HE is the outlier, and a
-    gate calibrated on him condemns our pools for matching the other one.
-  * The obvious defence -- "her pool is only 31% extracted, and the split
-    biases an anchor toward simple cards" -- was TESTED and did not hold.
-    Restricting Ironclad to his structurally-simple doc-1 subset RAISES his
-    uniq (86 -> 89). At comparable thinness the anchors sit 42 points apart.
-  * maxclu <= 4 and neardup <= 0.33/card are cleared by BOTH anchors.
+  * At 22 and 27 cards she FAILED uniq >= 75 badly, and the conclusion drawn
+    from that was "our pools post 56-62%, Ironclad posts 86%, so on two
+    anchors HE is the outlier and the gate condemns us for matching the
+    other one."
+  * That conclusion was WRONG, and the thing that disproved it was more
+    coverage. At 46 cards she posts uniq 78% and clears the gate. The two
+    anchors now agree with each other and disagree with all three of our
+    pools.
+  * The control that licensed the wrong conclusion is worth remembering
+    precisely because it was a good experiment with a misleading answer:
+    restricting IRONCLAD to his structurally-simple subset RAISES his uniq
+    (86 -> 89), which said "thinness does not depress uniq". It does not
+    depress HIS. It depressed hers, because her thin slice was not a random
+    sample of her pool -- it was the poison/Sly cards that share a signature
+    with each other. Coverage bias is a property of the SLICE, not of
+    thinness in general, and a control on the other anchor cannot see it.
 
 RATIFICATION IS DEFERRED, BY RULING (ask A2, [USER], 2026-07-27): "gate
-ratification waits til the card pool completes." ALL THREE THRESHOLDS STAY
-PROPOSED -- including the two both anchors clear, because ratifying half a
-gate on a pool still growing would freeze the easy half and leave the
-contested half looking like the only open question. Nothing here is a
-standard yet. What the second anchor bought is a REASON to wait rather than
-an assumption that 75 was right: at 27/88 the Silent fails uniq by 12
-points, and the coverage-bias defence for that failure was tested against a
-matched-thinness Ironclad control and did NOT hold (thinning him RAISES his
-uniq, 86 -> 89). Re-open when her pool is materially complete; the question
-to answer then is whether Ironclad is the outlier or we are.
+ratification waits til the card pool completes." All three thresholds stay
+PROPOSED. The ruling was made while the anchor was failing the gate and is
+now, on the numbers, better than the analysis it overrode: uniq moved 19
+points on one coverage pass, so no threshold read off this anchor was stable
+enough to freeze. Re-open when her pool is materially complete.
 
-vocab/top% still carry NO GATE. The Silent anchor was supposed to settle the
-concentration question -- she is the most archetype-concentrated OFFICIAL
-character -- and at 31% coverage she cannot: her vocabulary is NINE ideas
-against Ironclad's 40, and with nine words a high top% is mechanical. Unlike
-uniq%, top% DOES move with coverage in the control (57% -> 66% when Ironclad
-is thinned). The question re-opens when her pool is materially larger.
+vocab/top% still carry NO GATE, and the coverage story is the same one:
+at 22 cards her vocabulary was NINE ideas against Ironclad's 40 and her
+top% read 50%, which said "the most archetype-concentrated official
+character". At 46 it is 28 ideas and 35% -- less concentrated than Klee.
+The 22-card reading was measuring the extractor, not the character.
 
-Applies to pools of 30+ cards (companion sheets exempt by size) -- and that
-exemption silently swallows OFFICIAL:silent, so --gate reports its skips.
+Applies to pools of 30+ cards (companion sheets exempt by size). That
+exemption swallowed OFFICIAL:silent whole while she was under 30, which is
+why --gate now PRINTS what it skipped: for two days the anchor added to
+ratify the gate was never evaluated by it, and nothing said so.
 """
 from __future__ import annotations
 
@@ -189,9 +191,11 @@ GATE_MIN_UNIQ = 75          # official 86
 GATE_MAX_CLUSTER = 4        # official 4
 GATE_NEARDUP_PER_CARD = 0.33
 # Companion sheets are exempt by SIZE, which is a proxy for "not a character
-# pool" -- and a proxy that misfires: OFFICIAL:silent IS a character pool, at
-# 27 cards, and vanishes through this hole. Until the exemption is by KIND,
-# --gate PRINTS what it skipped, so an exemption cannot read as a pass
+# pool" -- and a proxy that misfired: OFFICIAL:silent IS a character pool and
+# spent two days under this floor, invisible to the gate she was added to
+# ratify. She is over it now (46 cards) at nobody's decision but the
+# extractor's, which is the argument for making the exemption by KIND. Until
+# then --gate PRINTS what it skipped, so an exemption cannot read as a pass
 # (2026-07-27, Silent anchor sprint E-2).
 GATE_MIN_POOL = 30
 
@@ -405,12 +409,14 @@ def main() -> int:
             print(f"\nGATE SKIPPED (under {GATE_MIN_POOL} cards -- this is NOT "
                   f"a pass): {', '.join(skipped)}")
         if breaches:
-            print("\nGATE BREACHES (uniq is PROPOSED and SINGLE-ANCHOR-derived "
-                  "-- see the module docstring):")
+            print("\nGATE BREACHES (NOTHING HERE IS RATIFIED -- ask A2 "
+                  "deferred all three thresholds until the second anchor's "
+                  "pool completes; see the module docstring):")
             for b in breaches:
                 print(f"  FAIL {b}")
             return 1
-        print("\nGATE: all pools clear (thresholds PROPOSED).")
+        print("\nGATE: all pools clear (all thresholds PROPOSED; "
+              "ratification deferred by ask A2).")
 
     if args.families:
         for r in reports:
