@@ -4,14 +4,32 @@ These tests use tiny synthetic source trees. They never read or reproduce
 base-game data, and they do not require ilspycmd or a game installation.
 """
 
+import dataclasses
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 from tier0.content import loader
-from tools import build_ironclad_sheet as build
+from tools import build_official_sheet as build
 from tools import extract_base_game_pool as extract
+
+
+def _spec(tmp_path: Path, **overrides) -> build.CharacterSpec:
+    """An Ironclad-shaped spec pointed at a scratch directory.
+
+    Built by REPLACING fields on the real registry entry, so a field added to
+    CharacterSpec cannot be quietly missing from these tests.
+    """
+    return dataclasses.replace(build.CHARACTERS["ironclad"],
+                               **{**{
+                                   "extractor_sheet": tmp_path / "cards.yaml",
+                                   "supplements": (),
+                                   "char_facts": tmp_path / "facts.yaml",
+                                   "pool": tmp_path / "pool.yaml",
+                                   "upgrades": tmp_path / "upgrades.yaml",
+                                   "char_out": tmp_path / "char.yaml",
+                               }, **overrides})
 
 
 def _write_type(root: Path, relative: str, namespace: str, body: str) -> Path:
@@ -90,6 +108,25 @@ def test_decompile_character_reads_pool_and_cards_from_one_project(
     assert names == ["Bash"]
     assert "MegaCrit.Sts2.Core.Models.Cards" in sources["Bash"]
     assert "Example.Other" not in sources["Bash"]
+
+
+def test_id_prefix_is_per_character_and_pins_ironclad():
+    """Two base-game pools share card NAMES (Strike, Defend); if they shared
+    an id prefix the second extraction would silently overwrite the first in
+    the loader. `ic_` is pinned because artifacts this tool cannot rewrite
+    already depend on it."""
+    assert extract.id_prefix("Ironclad") == "ic_"
+    assert extract.id_prefix("ironclad") == "ic_"
+    assert extract.id_prefix("Silent") == "si_"
+    assert extract.id_prefix("Defect") == "de_"
+    assert len({extract.id_prefix(name)
+                for name in ("Ironclad", "Silent", "Defect")}) == 3
+
+
+def test_id_prefix_refuses_a_collision_with_a_pinned_prefix(monkeypatch):
+    monkeypatch.setattr(extract, "ID_PREFIXES", {"ironclad": "si_"})
+    with pytest.raises(SystemExit, match="collides with"):
+        extract.id_prefix("Silent")
 
 
 def test_emitted_upgrade_delta_supports_energy_and_hit_count():
@@ -193,10 +230,10 @@ def test_builder_merges_required_supplement_layers(tmp_path, monkeypatch):
     second = tmp_path / "pass5.yaml"
     first.write_text("- {id: two}\n")
     second.write_text("- {id: three}\n")
-    monkeypatch.setattr(build, "SUPPLEMENTS", (first, second))
-    monkeypatch.setattr(build, "_doc1_cards", lambda: [{"id": "one"}])
+    spec = _spec(tmp_path, supplements=(first, second))
+    monkeypatch.setattr(build, "_doc1_cards", lambda _spec: [{"id": "one"}])
 
-    assert [row["id"] for row in build._validated_pool_cards()] == [
+    assert [row["id"] for row in build._validated_pool_cards(spec)] == [
         "one", "three", "two",
     ]
 
@@ -206,11 +243,40 @@ def test_builder_rejects_cross_layer_overlap(tmp_path, monkeypatch):
     second = tmp_path / "pass5.yaml"
     first.write_text("- {id: repeated}\n")
     second.write_text("- {id: repeated}\n")
-    monkeypatch.setattr(build, "SUPPLEMENTS", (first, second))
-    monkeypatch.setattr(build, "_doc1_cards", lambda: [{"id": "one"}])
+    spec = _spec(tmp_path, supplements=(first, second))
+    monkeypatch.setattr(build, "_doc1_cards", lambda _spec: [{"id": "one"}])
 
     with pytest.raises(SystemExit, match="overlaps earlier layers"):
-        build._validated_pool_cards()
+        build._validated_pool_cards(spec)
+
+
+def test_builder_fails_closed_on_a_missing_required_layer(tmp_path,
+                                                          monkeypatch):
+    """The guarantee the registry exists to keep: a REQUIRED layer that is
+    absent is an error, never a quietly smaller pool. game_ref/ has been
+    destroyed twice; a glob would have made both losses silent."""
+    present = tmp_path / "pass4.yaml"
+    present.write_text("- {id: two}\n")
+    spec = _spec(tmp_path, supplements=(present, tmp_path / "pass5.yaml"))
+    monkeypatch.setattr(build, "_doc1_cards", lambda _spec: [{"id": "one"}])
+
+    with pytest.raises(SystemExit, match="refusing to write a partial pool"):
+        build._validated_pool_cards(spec)
+
+
+def test_every_registered_character_derives_the_same_path_convention():
+    """The registry's only per-character fact is which layers are required;
+    everything else follows the naming convention the loader and the
+    distinctness report already glob for."""
+    for name, spec in build.CHARACTERS.items():
+        assert spec.character == name
+        assert spec.char_id == f"real_{name}"
+        assert spec.pool.name == f"{name}_pool.yaml"
+        assert spec.upgrades.name == f"{name}-upgrades.yaml"
+        assert spec.extractor_sheet.name == f"{name}-cards.yaml"
+        assert spec.char_out.name == f"char_real_{name}.yaml"
+        assert all(p.name.startswith(f"{name}_pool_pass")
+                   for p in spec.supplements)
 
 
 def test_loader_rejects_a_missing_required_external_layer(
@@ -226,10 +292,9 @@ def test_loader_rejects_a_missing_required_external_layer(
         loader._external_cards()
 
 
-def test_builder_rejects_partial_upgrade_coverage(tmp_path, monkeypatch):
-    upgrades = tmp_path / "upgrades.yaml"
-    upgrades.write_text("one: {damage: 1}\n")
-    monkeypatch.setattr(build, "UPGRADES", upgrades)
+def test_builder_rejects_partial_upgrade_coverage(tmp_path):
+    (tmp_path / "upgrades.yaml").write_text("one: {damage: 1}\n")
+    spec = _spec(tmp_path)
 
     with pytest.raises(SystemExit, match="missing upgrades for.*two"):
-        build._validated_upgrades([{"id": "one"}, {"id": "two"}])
+        build._validated_upgrades(spec, [{"id": "one"}, {"id": "two"}])

@@ -287,9 +287,35 @@ def summarize(cards: list[dict], character: str) -> None:
 # here moves a card from `excluded:` to the sheet, and the count moves with
 # it.
 
-ID_PREFIX = "ic_"          # keeps base-game ids out of the Klee/Furina
-                           # namespace; docs/reserved-card-names.txt records
-                           # the reverse direction (our names vs theirs).
+# Ids are prefixed PER CHARACTER: this keeps base-game ids out of the
+# Klee/Furina namespace (docs/reserved-card-names.txt records the reverse
+# direction, our names vs theirs) AND keeps two base-game pools from
+# colliding with each other once more than one is extracted -- Strike and
+# Defend exist in every character's pool, so a shared prefix would have the
+# second character silently overwrite the first in the loader.
+#
+# The rule is the first two letters of the character's name (`si_`). `ic_`
+# predates the rule and is load-bearing in artifacts nothing here can
+# rewrite (game_ref/ironclad_pool*.yaml, the committed Ironclad tests,
+# docs/reserved-card-names.txt), so it is PINNED rather than derived.
+ID_PREFIXES = {"ironclad": "ic_"}
+
+
+def id_prefix(character: str) -> str:
+    """The card-id prefix for one character -- see ID_PREFIXES."""
+    key = character.lower()
+    prefix = ID_PREFIXES.get(key)
+    if prefix is None:
+        if len(key) < 2 or not key.isalpha():
+            sys.exit(f"cannot derive an id prefix from character {character!r}; "
+                     "add an explicit entry to ID_PREFIXES")
+        prefix = key[:2] + "_"
+    clash = sorted(name for name, pinned in ID_PREFIXES.items()
+                   if pinned == prefix and name != key)
+    if clash:
+        sys.exit(f"id prefix {prefix!r} for {character!r} collides with "
+                 f"{clash} -- pin a distinct prefix in ID_PREFIXES")
+    return prefix
 
 # Powers tier0/engine/powers.py actually implements. Everything else
 # (Barricade, DarkEmbrace, Juggernaut, ...) is a real mechanic we do not
@@ -692,7 +718,7 @@ def _translate_statement(stmt: str, vals: dict, locs: dict, fed: dict,
                           else "unrecognised effect statement")
 
 
-def _sheet_row(card: dict, src: str) -> tuple[dict, dict]:
+def _sheet_row(card: dict, src: str, prefix: str) -> tuple[dict, dict]:
     """(row, upgrade_delta). Raises _Untranslatable with the reason."""
     if VAR_CALC.search(src):
         raise _Untranslatable("damage/block scales off runtime state")
@@ -723,7 +749,7 @@ def _sheet_row(card: dict, src: str) -> tuple[dict, dict]:
 
     cost = "X" if re.search(r"HasEnergyCostX\s*=>\s*true", src) else card["cost"]
     row = {
-        "id": ID_PREFIX + _snake(card["name"]),
+        "id": prefix + _snake(card["name"]),
         "name": _display(card["name"]),
         "cost": cost,
         "type": card["type"].lower(),
@@ -1027,12 +1053,13 @@ SHEET_HEADER = """\
 
 def emit_sheet(cards: list[dict], sources: dict[str, str],
                character: str) -> tuple[int, int]:
+    prefix = id_prefix(character)
     rows, upgrades, excluded = [], {}, {}
     for card in cards:
         try:
-            row, delta = _sheet_row(card, sources[card["name"]])
+            row, delta = _sheet_row(card, sources[card["name"]], prefix)
         except _Untranslatable as exc:
-            excluded[ID_PREFIX + _snake(card["name"])] = {
+            excluded[prefix + _snake(card["name"])] = {
                 "name": _display(card["name"]),
                 "rarity": card["rarity"].lower(),
                 "reason": str(exc)}
@@ -1058,7 +1085,7 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
         except ImportError:
             sys.exit("PyYAML is required to derive supplement upgrades")
         source_by_id = {
-            ID_PREFIX + _snake(card["name"]): sources[card["name"]]
+            prefix + _snake(card["name"]): sources[card["name"]]
             for card in cards
         }
         emitted_ids = {row["id"] for row in rows}
@@ -1094,8 +1121,21 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
                                n_bad=len(excluded), n_all=len(cards))]
     for row in rows:
         out.append(f"- {_flow(row)}")
-    out.append("\n---\n# Cards the Tier 0 DSL cannot express. Each reason is a\n"
-               "# concrete gap: implement it, or the card stays out.\nexcluded:")
+    out.append(
+        "\n---\n# Cards the Tier 0 DSL cannot express. Each reason is a\n"
+        "# concrete gap: implement it, or the card stays out.\n"
+        "#\n"
+        "# STALE AS A CLAIM THE MOMENT A PASS LANDS. Later "
+        f"{character.lower()}_pool_pass*.yaml\n"
+        "# layers implement entries from this list and merge them into\n"
+        f"# {character.lower()}_pool.yaml, which this file is never regenerated "
+        "against.\n"
+        "# Read every row below as \"a gap AS OF THIS SNAPSHOT\", never as "
+        "\"still\n"
+        f"# missing\" -- diff against {character.lower()}_pool.yaml before "
+        "believing one.\n"
+        "# (Ironclad's snapshot listed 52 excluded while 41 of them were "
+        "already live.)\nexcluded:")
     for cid, info in sorted(excluded.items()):
         out.append(f"  {cid}: {_flow(info)}")
     sheet.write_text("\n".join(out) + "\n")

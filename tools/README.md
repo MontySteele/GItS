@@ -23,7 +23,9 @@ Every script, mapped to what actually runs it. "validate" = invoked by
 findings on the other five sheets, see audit §3.8), `art_coverage.py`
 (invariants, deliberately not completeness), `art_lint.py` (unit-level only;
 its L12 pixel gate is dead on clean checkouts — audit §3.7),
-`extract_base_game_pool.py`, `build_ironclad_sheet.py`,
+`extract_base_game_pool.py`, `build_official_sheet.py` (+ its thin
+`build_ironclad_sheet.py` entry point, kept because validate.ps1 and the
+generated game_ref headers name it),
 `realistic_axis_scores.py`, `burst_defense.py`, `char_stills.py` (library,
 byte-pinned), `gen_furina_stills.py` (byte-pinned, skip-guarded),
 `real_battery_calibration.py` + `klee_survival_sprint.py` (digest only).
