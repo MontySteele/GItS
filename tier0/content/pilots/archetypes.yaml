@@ -148,12 +148,19 @@
 # cards land." The trigger is pool completion, not a date, and the review is
 # three questions, not one:
 #   >> REVIEW EXECUTED 2026-07-27: docs/silent-pilot-review-2026-07-27.md.
-#      (b) is EXPLAINED (draft-side dilution by flat commons; the 75-card
-#      reading was WLP-bug-inflated -- corrected sequence 46->31->39->~27->22).
+#      (b) is EXPLAINED, as CORRECTED by that doc's s1a: the 75-card reading
+#      was WLP-bug-inflated (corrected sequence 46->31->39->~27->22-23), and
+#      the draft-side story is a DISCRIMINATION failure, not net dilution --
+#      the skip-all control clears 7.9% vs assigned 23.3%, so drafting helps;
+#      the scorer just can't tell leg_sweep (+31.8 lift) from anticipate
+#      (-16.9). The originally-quoted Survivor/Neutralize rows were a
+#      starter-removal artifact (basics are never offered).
 #      (a) measured as a DEAD LEVER (generic 24.2% vs silent weights 24.5%,
 #      1000 runs): proposal is weights stay PLACEHOLDER. (c) evidence says
 #      NO poison term (poison cards post positive lifts blind). Both
-#      proposals await [USER] ruling in that doc.
+#      proposals RATIFIED [USER] 2026-07-27 (R83): weights stay
+#      PLACEHOLDER, no poison term, the draft-scorer skip/redundancy pass
+#      is the authorized next lever.
 #   a. Re-read every PLACEHOLDER below against the complete pool. Only then
 #      is ask A3 answerable, because only then does a weight have real draft
 #      decisions to choose between.

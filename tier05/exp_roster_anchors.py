@@ -36,17 +36,23 @@ from tier05 import cells
 # scripts, all of them looking equally authoritative at the call site.
 BASE = cells.CANONICAL.but(name="roster-anchors")
 
-# (character, archetype). Klee's three plans plus the reference Ironclad's
-# single generic plan, plus Furina's three, so every row in the printed table
-# was produced by this run rather than quoted from an archived one.
+# (character, archetype). R84 (2026-07-27) widened this to the FULL roster:
+# Kokomi's three plans and both real anchors joined when the fresh
+# recalculation was ordered -- the previous table predated DRAFTER 11/12 and
+# nothing recorded before that world may be quoted in a roster comparison.
 ARMS: tuple[tuple[str, str], ...] = (
     ("klee", "demolition"),
     ("klee", "spark"),
     ("klee", "reaction"),
-    ("ref_ironclad", "generic"),
     ("furina", "salon"),
     ("furina", "spotlight"),
     ("furina", "fanfare"),
+    ("kokomi", "priest"),
+    ("kokomi", "commander"),
+    ("kokomi", "assist"),
+    ("ref_ironclad", "generic"),
+    ("real_ironclad", "generic"),
+    ("real_silent", "generic"),
 )
 
 

@@ -44,6 +44,21 @@ def test_block_draw_energy(state):
     assert state.player.energy == 1
 
 
+def test_per_aura_draw_needs_no_flat_amount():
+    # The row prints ONLY the formula. The pass-4 grammar widening ran the
+    # missing `amount` through _amount before the per_aura branch could
+    # fire, so every fight that played the card crashed (found by the R84
+    # roster re-run, not by the suite -- this is the engine-path pin the
+    # scorer-side per_aura test never was).
+    state = make_state(enemies=[make_enemy(), make_enemy()])
+    state.enemies[0].aura = "hydro"
+    state.player.draw_pile = [card(id=f"c{i}") for i in range(3)]
+    c = card(type="skill",
+             effects=[{"op": "draw", "amount_formula": "per_aura"}])
+    effects.resolve_card(state, c)
+    assert len(state.player.hand) == 1
+
+
 def test_strength_and_vulnerable_pipeline(state):
     state.player.powers["strength"] = 2
     state.enemies[0].powers["vulnerable"] = 1

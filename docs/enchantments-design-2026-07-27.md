@@ -39,9 +39,14 @@ pattern (`cost_delta_this_combat`, `free_this_turn`, `sly_this_turn` —
 "state that lives on the CARD OBJECT").
 
 **2. Parity feature or Teyvat Spire feature?** Parity, implemented as the
-minimal rider — NOT a general mechanic offered to house design. If a
-house character later wants per-card enchantment state, that design pass
-starts from its own wants; nothing proposed here would need undoing.
+minimal rider — and, AMENDED AT RATIFICATION ([USER] 2026-07-27): the
+rider IS design space offered to house design. The original proposal
+fenced it off; [USER] reversed that clause, because the house is actively
+trying to EXPAND the design space of existing characters to match the
+official ones, and per-card enchantment state is exactly such an
+expansion. What ships today is still only Inky's two hooks; a house card
+that wants an enchantment rider starts from these fields, not from a
+subsystem.
 
 **3. Where does the state live, and what copies it?** Two fields on the
 Card instance: `enchant_damage: int` (flat damage added to the card's
@@ -82,4 +87,33 @@ key covers it; Inky itself does not scale on upgrade.
    move `uniq`/`neardup`; the gate is ratified now, so the reading is a
    pass/fail event, not a note).
 
-**RULING: ___**
+**RULING: RATIFIED [USER] 2026-07-27, with one amendment** — "fine for
+now to just have Blade of Ink make special shivs with the appropriate
+characteristics, but let's make a note that we have the design space to
+apply enchantments — we're actively trying to expand the design space of
+existing characters to make the official ones." Items 1–4 execute as
+written; question 2's house-design fence is struck (see the amended
+paragraph above). Recorded as R82.
+
+## EXECUTED (same day)
+
+1. `Card.enchant_damage` / `Card.enchant_effects` live in
+   `tier0/engine/state.py` beside the pass-6 per-instance cost fields;
+   the damage half folds in with `current_attack_bonus` in `_op_damage`,
+   the effects half resolves after the card's own effects in
+   `resolve_card`, and `_op_add_card` attaches both from the row's
+   `enchant:` block. `_op_apply_power` learned the same
+   `target_all_if_power` widen the damage op has, because Inky's Weak
+   reads the card's LIVE TargetType — under Fan of Knives it goes wide
+   with the damage. Behavior pins: `tier0/tests/test_si_pass7.py`.
+2. Blade Of Ink is `game_ref/silent_pool_pass7.yaml` (layer registered in
+   loader + builder); the extractor recovered its upgrade mechanically
+   (`cards: +1`, i.e. three Shivs upgraded). **The pool is COMPLETE:
+   86 of 86, 87 rows with the Shiv token.**
+3. The subsystem refusal is recorded in
+   `tools/extract_base_game_pool.py` next to the supplement machinery,
+   as the standing triage category for the next enchanted card.
+4. Gate re-read (ratified thresholds): OFFICIAL:silent at 87 rows reads
+   uniq 72% / maxclu 5 / neardup 0.356 per card — **PASS**, sitting on
+   the official band's edge on uniq and inside it elsewhere. No new
+   breaches; the curated debt list is unchanged.
