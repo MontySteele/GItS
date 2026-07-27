@@ -14,7 +14,8 @@ from typing import Optional
 
 from tier0 import constants as C
 from tier0.engine import powers, reactions, resources
-from tier0.engine.state import Bomb, Card, CombatState, Enemy
+from tier0.engine.state import (Bomb, Card, CombatState, Enemy,
+                                remove_instance)
 
 
 def _amount(state: CombatState, val) -> int:
@@ -1097,9 +1098,13 @@ def _op_add_card(state: CombatState, fx: dict, card: Card) -> None:
         # keeps the upgrade grammar in one place.
         if fx.get("upgraded"):
             from tier0.content import upgrades
+            # ONLY the missing-entry shapes (ValueError from apply_upgrade,
+            # KeyError for an unknown id) may degrade to the base copy: a
+            # loader defect masquerading as a missing upgrade would quietly
+            # play base cards forever.
             try:
                 token = loader.get_card(cid + upgrades.SUFFIX)
-            except Exception:
+            except (KeyError, ValueError):
                 state.emit("UNIMPLEMENTED", op="add_card", card=cid,
                            reason="no upgrade entry; created unupgraded")
                 token = loader.get_card(cid)
@@ -1135,7 +1140,7 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
         if not pool:
             break
         victim = _worst_card(pool) if chosen else state.rng.choice(pool)
-        state.player.hand.remove(victim)
+        remove_instance(state.player.hand, victim)
         state.player.discard_pile.append(victim)
         state.discards_this_turn += 1
         state.discards_this_card += 1
@@ -1179,9 +1184,8 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
     for victim in sly_batch:
         if state.over or not state.player.alive:
             break
-        if victim not in state.player.discard_pile:
+        if not remove_instance(state.player.discard_pile, victim):
             continue          # an effect already moved it; do not resurrect
-        state.player.discard_pile.remove(victim)
         state.emit("sly_autoplay", card=victim.id)
         _free_play(state, victim, force_exhaust=False)
 
@@ -1211,7 +1215,7 @@ def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
             break
         victim = _worst_card(pool) if chosen else state.rng.choice(pool)
         pool = [c for c in pool if c is not victim]
-        hand.remove(victim)
+        remove_instance(hand, victim)
         state.player.exhaust_pile.append(victim)
         state.exhausted_this_card += 1
         if chosen:
@@ -1292,7 +1296,7 @@ def _op_discard_for_sparks(state: CombatState, fx: dict, card: Card) -> None:
         if not pool:
             break
         victim = _worst_card(pool)          # the pilot's chosen discard
-        state.player.hand.remove(victim)
+        remove_instance(state.player.hand, victim)
         state.player.discard_pile.append(victim)
         state.discards_this_turn += 1
         state.emit("discard", card=victim.id, chosen=True)
@@ -1309,7 +1313,7 @@ def _op_scry_discard(state: CombatState, fx: dict, card: Card) -> None:
     if not top:
         return
     worst = _worst_card(top)
-    state.player.draw_pile.remove(worst)
+    remove_instance(state.player.draw_pile, worst)
     state.player.discard_pile.append(worst)
     state.emit("scry_discard", card=worst.id)
 
@@ -1671,7 +1675,7 @@ def _op_recall_to_draw(state: CombatState, fx: dict, card: Card) -> None:
         if not p.discard_pile:
             return
         pick = _best_card(p.discard_pile)
-        p.discard_pile.remove(pick)
+        remove_instance(p.discard_pile, pick)
         p.draw_pile.insert(0, pick)
         state.emit("recall_to_draw", card=pick.id)
 
@@ -1913,13 +1917,13 @@ def _op_autoplay_from_exhaust(state: CombatState, fx: dict, card: Card) -> None:
     for victim in victims:
         if state.over or not p.alive:
             break
-        if victim not in p.exhaust_pile:
+        if not remove_instance(p.exhaust_pile, victim):
             continue
-        p.exhaust_pile.remove(victim)
         if fx.get("upgrade_first"):
+            # Same boundary as _op_add_card: only missing-entry shapes degrade.
             try:
                 victim = loader.get_card(victim.id + upgrades.SUFFIX)
-            except Exception:
+            except (KeyError, ValueError):
                 state.emit("UNIMPLEMENTED", op="autoplay_from_exhaust",
                            card=victim.id,
                            reason="no upgrade entry; played unupgraded")
@@ -2129,6 +2133,10 @@ def player_turn_start_triggers(state: CombatState) -> None:
             state.emit("selector_granted")
     n = p.powers.pop("block_next_turn", 0)              # Charlotte
     if n:
+        # Deliberately raw: this payout predates both block funnels and
+        # neither may touch it (Dexterity must not scale power block; the
+        # power that banked it has expired by now). A future block-gain hook
+        # will not see this gain unless it is rerouted on purpose.
         p.block += n
         state.emit("block", amount=n)
     salon_tick(state)                                   # Furina (kickoff §5)
@@ -2229,7 +2237,7 @@ def _exhaust_autoplay_sweep(state: CombatState) -> None:
     for c in flagged:
         if state.over or not p.alive:
             return
-        p.exhaust_pile.remove(c)
+        remove_instance(p.exhaust_pile, c)
         _free_play(state, c, force_exhaust=False)
 
 

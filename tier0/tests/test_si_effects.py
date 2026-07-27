@@ -364,9 +364,10 @@ def test_a_free_play_does_not_clobber_the_outer_cards_context():
     state.enemies = [make_enemy(hp=60)]
     state.kills_this_card = 3
     state.current_card_cost = 2
+    # NOT placed in hand: resolve_free_play's contract says the trigger site
+    # already removed the card from its source pile.
     sly = card("sly", type="attack", cost=1, sly_keyword=True,
                fx=[{"op": "damage", "amount": 1, "target": "enemy"}])
-    state.player.hand = [sly]
     combat.resolve_free_play(state, sly)
     assert state.kills_this_card == 3
     assert state.current_card_cost == 2

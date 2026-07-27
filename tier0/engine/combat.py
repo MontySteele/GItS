@@ -14,7 +14,8 @@ from typing import Callable
 from tier0 import constants as C
 from tier0.engine import (effects, potions, powers, reactions, refpowers,
                           relics, resources)
-from tier0.engine.state import Card, CombatState, Enemy, Player
+from tier0.engine.state import (Card, CombatState, Enemy, Player,
+                                remove_instance)
 
 # A pilot is a callable: (state) -> Card | None (None = end turn).
 Pilot = Callable[[CombatState], Card | None]
@@ -203,7 +204,7 @@ def play_card(state: CombatState, card: Card) -> None:
     p.energy -= cost
     if card.encore_cost:
         resources.spend_encore(state, card.encore_cost)   # gated playable
-    p.hand.remove(card)
+    remove_instance(p.hand, card)
     state.cards_played_this_turn += 1
     state.emit("play", card=card.id, cost=cost, energy_left=p.energy)
     if effects.is_spotlighted(state, card):
@@ -342,7 +343,14 @@ def resolve_free_play(state: CombatState, card: Card,
     an effect may play a card: the base game runs an auto-play through the
     same CardModel.OnPlayWrapper as a manual play, so an auto-played card
     fires BeforeCardPlayed/AfterCardPlayed, is recorded by History as a card
-    play, and routes to its own result pile. Only the cost is skipped.
+    play, and routes to its own result pile.
+
+    NOT ONLY THE COST IS SKIPPED: this enters at _finish_play, below
+    play_card's whole head -- so spotlight counting, burst-per-skill-tag
+    gain and burst-cast emptying do not run either. Dormant today (no
+    roster card auto-plays, and base-game cards have no burst/spotlight),
+    but the day a roster card auto-plays a skill_tag card, that card gains
+    no burst unless this boundary moves.
 
     The caller owns the source pile. AutoPlay moves the card into the play
     pile from wherever it is (hand, draw, discard, exhaust), so it must
@@ -547,10 +555,14 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     ethereal = [c for c in p.hand
                 if "ethereal" in c.tags
                 and "burst" not in c.tags and not c.retain]
+    # Membership must be by IDENTITY: Card is a dataclass, so two copies of
+    # the same card compare EQUAL, and a value check here would drop the
+    # unretained twin from every pile -- a silent deck-shrink.
+    retained_ids = {id(c) for c in retained}
     p.discard_pile.extend(c for c in p.hand
                           if "burst" not in c.tags and not c.retain
                           and "ethereal" not in c.tags
-                          and c not in retained)
+                          and id(c) not in retained_ids)
     p.hand = retained
     for c in ethereal:
         # DarkEmbrace counts ethereal exhausts instead of drawing on them; the

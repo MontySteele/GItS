@@ -52,6 +52,23 @@ RETIRED_CARD_FIELDS = {
 }
 
 
+def remove_instance(pile: list, card: "Card") -> bool:
+    """Remove exactly THIS instance from the pile; True if it was there.
+
+    Card is a dataclass, so `list.remove` / `in` compare by VALUE and two
+    fresh copies of the same card are equal twins -- a value-based remove can
+    take the twin and leave `card` aliased into two piles. Twins are not
+    interchangeable either: cost_delta_this_combat, free_this_turn and
+    sly_this_turn are per-INSTANCE state. Every remove-from-a-card-pile must
+    go through here.
+    """
+    for i, c in enumerate(pile):
+        if c is card:
+            del pile[i]
+            return True
+    return False
+
+
 @dataclass
 class Card:
     id: str

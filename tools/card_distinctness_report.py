@@ -82,16 +82,21 @@ THE SECOND ANCHOR, AND WHY NO THRESHOLD READ OFF IT HAS HELD STILL
 (2026-07-27, Silent anchor sprint; full analysis in
 docs/silent-anchor-sprint-log-2026-07-27.md). This docstring used to say
 "Ratify after a SECOND official anchor". The second anchor arrived, and its
-`uniq` has since moved four times in one day as more of her pool became
-expressible. Every reading is kept, because the SEQUENCE is the finding and
-any single row of it would be a lie by omission:
+`uniq` moved SIX times across seven readings in one day as more of her pool
+became expressible. Every reading is kept, because the SEQUENCE is the
+finding and any single row of it would be a lie by omission:
 
   OFFICIAL:silent  22/88 (25%)  vocab  9  top 50%  uniq 59%  maxclu 3  FAIL
   OFFICIAL:silent  27/88 (31%)  vocab  9  top 48%  uniq 63%  maxclu 3  FAIL
   OFFICIAL:silent  46/88 (52%)  vocab 28  top 35%  uniq 78%  maxclu 3  pass
   OFFICIAL:silent  56/88 (64%)  vocab 29  top 39%  uniq 73%  maxclu 4  FAIL
   OFFICIAL:silent  59/88 (67%)  vocab 30  top 40%  uniq 72%  maxclu 4  FAIL
+  OFFICIAL:silent  75/86 (87%)  vocab --  top --   uniq 73%  maxclu --  FAIL
   OFFICIAL:silent  85/86 (99%)  vocab 50  top 31%  uniq 72%  maxclu 5  FAIL
+
+  (The 75-card row's other columns were not recorded when that reading was
+  taken and the intermediate pool state is not reconstructible -- game_ref
+  is not versioned. `--` is "unrecorded", not zero.)
 
   THE LAST ROW IS THE ONE THAT MATTERS, because coverage is no longer a
   confound: her pool is COMPLETE bar one card ([USER] sent Blade Of Ink to an
@@ -437,9 +442,10 @@ def main() -> int:
             print(f"\nGATE SKIPPED (under {GATE_MIN_POOL} cards -- this is NOT "
                   f"a pass): {', '.join(skipped)}")
         if breaches:
-            print("\nGATE BREACHES (NOTHING HERE IS RATIFIED -- ask A2 "
-                  "deferred all three thresholds until the second anchor's "
-                  "pool completes; see the module docstring):")
+            print("\nGATE BREACHES (NOTHING HERE IS RATIFIED -- the second "
+                  "anchor's pool has COMPLETED and fails two of three "
+                  "thresholds; ask A2 now needs a [USER] ruling on the "
+                  "options in the module docstring):")
             for b in breaches:
                 print(f"  FAIL {b}")
             return 1
