@@ -36,7 +36,7 @@ def _copy_plain(val):
 # these and shares the rest; test_state.py pins the list against the
 # dataclass definition so a new mutable field cannot be added silently.
 _MUTABLE_FIELDS = ("effects", "solve", "archetypes", "tags", "companion",
-                   "sly", "upgrade")
+                   "sly", "upgrade", "enchant_effects")
 
 # Card fields that a sheet row may NEVER declare again, with the reason the
 # author needs. House pattern: a caught mistake becomes a lint, so the next
@@ -188,6 +188,15 @@ class Card:
     # Hand Trick grants Sly for one turn only. Kept separate from the printed
     # `sly_keyword` so the grant expires without editing what the card prints.
     sly_this_turn: bool = False
+    # Enchantment rider (R82, docs/enchantments-design-2026-07-27.md).
+    # Per-INSTANCE like the cost fields above: two Shivs may differ in
+    # enchantment, and deepcopy clone sites (Anger/Nightmare shapes) carry
+    # the rider with the instance -- the correct base-game answer. The
+    # run-wide enchantment SUBSYSTEM (grant screens, enchanting relics) is
+    # outside the parity world with relics and events; these two fields are
+    # the whole mechanic. Ratified as open house design space.
+    enchant_damage: int = 0       # flat rider on this attack's damage
+    enchant_effects: list[dict] = field(default_factory=list)  # after own fx
     # --- Status cards (multi-act §10.2 injection op; engine/statuses.py).
     # type == "status" cards are UNPLAYABLE (combat.card_playable) and exist
     # only inside a combat: enemies inject them into the player's piles; the

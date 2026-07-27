@@ -843,6 +843,13 @@ The Hunt and Blade Of Ink, one ruling each.
 
 ## 13. ADDENDUM: enchantments want a design pass ([USER], 2026-07-27)
 
+> **CLOSED 2026-07-27 (R82).** The pass ran and was ratified same day:
+> docs/enchantments-design-2026-07-27.md. Blade Of Ink ships as
+> per-instance riders on its tokens (silent_pool_pass7.yaml), the
+> subsystem refusal is recorded in the extractor, the design space is
+> ratified OPEN for house characters, and THE POOL IS COMPLETE at 86 of
+> 86. Gate re-read at 87 rows: PASS.
+
 Ruling: *"we should do a design pass on enchantments."* Blade Of Ink stays out
 of the pool until that pass happens, and this addendum exists so the pass
 starts from the question rather than from the card.
@@ -969,6 +976,13 @@ readings and this paragraph.
 > `docs/a2-gate-ratification-2026-07-27.md`.
 
 ### 14.5 What is still owed
+
+> **ALL THREE PAID, 2026-07-27 (same day).** Blade Of Ink landed via the
+> enchantments pass (§13 closure banner; R82) -- the pool is 86/86. The
+> pilot review ran and its regression question is EXPLAINED as corrected
+> (docs/silent-pilot-review-2026-07-27.md §1a). A2 was ratified as R81;
+> A3 was ruled to stay PLACEHOLDER (R83) after the weights measured as a
+> dead lever.
 
 - **Blade Of Ink**, pending the enchantments design pass (§13).
 - **The pilot review** ([USER], §12.1), whose trigger -- pool completion --

@@ -800,7 +800,26 @@ CONSTANTS_VERSION = 4
 # +3.0 core-advance bonus) on a reader it previously ignored. Only Furina
 # fanfare rows move; every other archetype takes a different branch. Any
 # v9-world fanfare number is incomparable with v10 output.
-DRAFTER_VERSION = 10
+# DRAFTER_VERSION 11 (R83/R84, 2026-07-27): the generic-anchor
+# discrimination pass -- GENERIC_PLAN_BONUS_MULT 0.25 / GENERIC_SKIP_
+# THRESHOLD 1.5 / GENERIC_REDUNDANCY_PENALTY 0.0 (dead dial), all scoped
+# to archetype == "generic". Only the two real anchors move (silent 23.3%
+# -> 28.8%, ironclad 26.9% -> 33.3% act-1 clear); house plans draft under
+# their own archetypes. RATIFIED as R84. NOTE: this stamp line landed one
+# session late -- the scorer changed on 2026-07-27 but the stamp still
+# read 10 until the R84 pass caught it. No experiment script ran in the
+# gap; the review doc's own tables carry their protocol inline.
+# DRAFTER_VERSION 12 (R84, 2026-07-27): the power-aware static term.
+# `_static_power` learns permanent self Dexterity (STATIC_DEXTERITY_VALUE
+# 2.0, the Strength mirror; Footwork taken 21% -> 74% against its +23.6
+# lift, real_silent 28.8% -> 29.1%) and carries a measured DEAD DIAL for
+# flat engine credit (STATIC_POWER_ENGINE_VALUE 0.0 -- hurt at every
+# swept value; a flat credit cannot discriminate engines). Universal term:
+# the only committed cards affected are ref-vocabulary
+# (metallicize_like, accuracy_like); no Klee/Furina/Kokomi card prints an
+# unpriced self-power, so house numbers do not move. Any pre-v12 anchor
+# reading is incomparable with v12 output.
+DRAFTER_VERSION = 12
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).

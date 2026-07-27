@@ -2580,3 +2580,108 @@ is the pool-sweep pass's acceptance target.
 
 **Class: RULING** ([USER] 2026-07-27) -- thresholds + enforcement; no
 engine behavior change.
+
+## R82 -- Enchantments: the rider ships, the subsystem stays out, the space stays open (2026-07-27)
+
+Full evidence and derivation: docs/enchantments-design-2026-07-27.md.
+Ruled by [USER] with one amendment to the proposal.
+
+**Ruled.** (1) Blade Of Ink lands as the MINIMAL RIDER: two per-instance
+fields on the Card object (`enchant_damage`, `enchant_effects`), attached
+by the `enchant:` block of the add_card op that creates its tokens -- the
+pass-6 "state on the CARD OBJECT" pattern, no registry, no enchantment
+vocabulary. (2) The run-wide enchantment SUBSYSTEM (deck-enchant screens,
+rest options, granting relics, the ~20-type model hierarchy) is outside
+the parity world with relics and events; the refusal is recorded once, in
+the extractor, as the standing triage category. (3) AMENDMENT -- the
+proposal's "not offered to house design" fence is STRUCK: the rider IS
+open design space, because the house is actively expanding existing
+characters toward the official ones' breadth. What exists today is still
+only Inky's two hooks.
+
+**Landed.** Engine hooks in _op_damage / resolve_card / _op_add_card
+(plus the target_all_if_power widen on apply_power -- Inky's Weak follows
+the card's LIVE TargetType under Fan of Knives); behavior pins in
+tier0/tests/test_si_pass7.py; silent_pool_pass7.yaml registered in loader
+and builder. THE SILENT POOL IS COMPLETE: 86 of 86 draftable cards, 87
+rows with the Shiv token. Gate re-read at 87 rows: uniq 72 / maxclu 5 /
+neardup 0.356 -- PASS, no new breaches.
+
+**Class: RULING** ([USER] 2026-07-27) -- design ratification + the
+implementing engine change.
+
+## R83 -- Pilot review ruled: weights stay PLACEHOLDER, no poison term, the scorer pass runs (2026-07-27)
+
+Full evidence: docs/silent-pilot-review-2026-07-27.md (including its s1a
+correction and s5 execution record). Ruled by [USER]: "let's continue the
+policy work before worrying about thresholds."
+
+**Ruled.** (1) A3's weights stay PLACEHOLDER and the runner keeps the
+generic mapping -- the A/B measured them as a dead lever (24.2% vs 24.5%,
+1000 runs). (2) No poison term -- poison cards post positive lifts under
+the term-blind scorer. (3) The draft-scorer pass is the authorized policy
+work.
+
+**Correction on the record (s1a).** The review's original lift table
+carried an estimator artifact: si_survivor/si_neutralize are BASIC
+starters the reward roll never offers; their -38.6/-35.3 "lifts" were
+removal-selection confounds. The skip-all control (7.9% vs 23.3%) refutes
+net dilution outright -- the draft HELPS; the defect is discrimination
+between strong and weak commons. Standing lesson: an every-deck
+intersection is not a starter filter; exclude by offerability (rarity in
+RARITY_ODDS).
+
+**Executed (s5), numbers PROPOSED.** DRAFTER_VERSION 11, scoped to
+archetype == "generic" (anchors only): the ratified skip/redundancy
+levers measured weak-to-backwards; the measured lever is
+GENERIC_PLAN_BONUS_MULT -- the anchor sheets' role labels collected +3-4
+points of plan value that does not track generic worth. Winner (mult
+0.25, skip 1.5, redundancy 0.0 dead dial): real_silent 23.3% -> 28.8%,
+real_ironclad 26.9% -> 33.3% act-1 clear at 1000 paired-seed runs, take
+tails aligned to the measured lifts. Residual: _static_power is
+power-blind (Footwork), named as the next lever. Anchor 3-act readings
+predate v11 and must be re-measured before being quoted.
+
+**Class: RULING** ([USER] 2026-07-27, three rulings) **+ MEASUREMENT**
+(the v11 constants are PROPOSED pending number ratification).
+
+## R84 -- DRAFTER v11 ratified; the power-aware static term and a fresh 3-act roster ordered (2026-07-27)
+
+Ruled by [USER]: "the constants in the draft.py look fine at first
+glance, approved. Let's take on _static_power and then redo the 3-act
+roster for a full fresh recalculation."
+
+**Ruled.** (1) The DRAFTER_VERSION 11 constants are RATIFIED as measured
+(GENERIC_PLAN_BONUS_MULT 0.25, GENERIC_SKIP_THRESHOLD 1.5,
+GENERIC_REDUNDANCY_PENALTY 0.0 dead dial). (2) The power-aware
+`_static_power` term -- the Footwork residual R83 named -- is the
+authorized next pass. (3) The 3-act roster gets a FULL FRESH
+RECALCULATION once that term lands; nothing recorded before it may be
+quoted in a roster comparison.
+
+**Executed (docs/silent-pilot-review-2026-07-27.md s6).**
+DRAFTER_VERSION 12: `_static_power` learns permanent self Dexterity at
+the Strength mirror (STATIC_DEXTERITY_VALUE 2.0; `temp_dexterity`
+deliberately excluded -- Anticipate carries a -16.9 lift). Footwork
+taken 21% -> 74% against its +23.6 lift; real_silent 28.8% -> 29.1%,
+real_ironclad 33.3% unmoved by construction (1000 paired seeds). The
+flat engine credit (STATIC_POWER_ENGINE_VALUE) measured a DEAD DIAL --
+hurt at every swept value, kept documented at 0.0: a flat credit cannot
+tell Noxious Fumes (+29.7) from junk engines at the same price. The
+value of the pass is the mechanism, not the point estimate. Universal
+term; only ref-vocabulary cards newly touched, house numbers unmoved.
+
+**Two defects found by the ordered re-run.** (1) The pass-4 amount
+grammar widening (8712bb5) crashed every fight that played Elemental
+Ecstasy: `_op_draw` ran the missing flat `amount` through `_amount()`
+before the `per_aura` branch could fire. Fixed; engine-path pin added
+(the old per_aura test only exercised the SCORER's view). No number
+taken today crossed it. (2) The v11 session changed the scorer without
+bumping DRAFTER_VERSION -- the stamp read 10 while the scorer was v11.
+Both bumps now recorded; no experiment script ran in the gap, so no
+published stamp mislabels its world. Standing lesson: a scorer change
+IS a version bump, in the same edit, or the stamp rule is decoration.
+
+**Class: RULING** ([USER] 2026-07-27) **+ MEASUREMENT** (the D12
+constants are landed with the sweep as evidence; the fresh 3-act roster
+table lives in the review doc s7 -- the only quotable roster table).

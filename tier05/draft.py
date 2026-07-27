@@ -386,6 +386,12 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                 total += _neutral_amount(fx) * STATIC_STRENGTH_VALUE
             elif (fx.get("op") == "apply_power"
                   and fx.get("target", "self") == "self"
+                  and fx.get("power") == "dexterity"):
+                # v12: the mirror of the Strength line. temp_dexterity is
+                # a different power string and deliberately falls through.
+                total += _neutral_amount(fx) * STATIC_DEXTERITY_VALUE
+            elif (fx.get("op") == "apply_power"
+                  and fx.get("target", "self") == "self"
                   and fx.get("power") == "witchs_flame"):
                 # Durin is reliable on Klee's catalyst cadence, but offer
                 # scoring credits only one end-turn aura rather than pricing
@@ -395,6 +401,15 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                   and fx.get("target") != "self"
                   and fx.get("power") in ("weak", "vulnerable")):
                 total += _neutral_amount(fx) * STATIC_DEBUFF_VALUE
+            elif (fx.get("op") == "apply_power"
+                  and fx.get("target", "self") == "self"
+                  and card.type == "power"):
+                # v12: a persistent engine the proxies above cannot name.
+                # One flat conservative credit per printed self-power --
+                # the drafter cannot see an engine's payout curve at offer
+                # time, same reasoning as the Durin/Kurage single-pulse
+                # convention.
+                total += STATIC_POWER_ENGINE_VALUE
             elif fx.get("op") == "conscript":                       # v7
                 total += _neutral_amount(fx) * STATIC_CONSCRIPT_VALUE
             elif fx.get("op") == "gain_charge":                     # v7
@@ -465,6 +480,96 @@ DRAFT_LEAN_BLOCK_CAP = 20
 # bar is always eligible.
 DRAFT_LEAN_RARE_BAR = 4.0
 
+# DRAFTER_VERSION 11 -- the R83 discrimination pass (Silent pilot review
+# s1a, 2026-07-27). The corrected evidence: drafting is strongly net-
+# positive on the generic anchors (skip-all control 7.9% vs assigned 23.3%
+# act-1 clear), but the scorer cannot tell the strong commons from the weak
+# ones (leg_sweep +31.8 lift vs anticipate -16.9 under the same policy).
+# Two levers, BOTH SCOPED TO archetype == "generic" so only the two anchor
+# characters move -- every house plan drafts under its own archetype and
+# keeps its measured numbers:
+#   GENERIC_SKIP_THRESHOLD    the anchors' own skip bar. The global 0.5 was
+#                             tuned for plan-committed house drafting, where
+#                             an off-plan screen is worth little; the
+#                             anchors' +1.0 role / +0.8 pool freebies mean
+#                             0.5 skips nothing at all.
+#   GENERIC_REDUNDANCY_PENALTY  per functional twin ALREADY DRAFTED: an
+#                             offer whose top-level op signature equals a
+#                             non-basic deck card's is "the thing you
+#                             already have, plus some Block" (the same
+#                             phenomenon the distinctness gate's neardup
+#                             measures on pools, showing up as draft
+#                             behavior). Basics are excluded from the twin
+#                             count on purpose: five starter Defends must
+#                             not veto the first real block card (Deflect
+#                             carries +25.3 lift), and the rest policy is
+#                             already removing basics.
+# Values are the round-2 sweep winner (docs/silent-pilot-review-2026-07-27.md
+# s5): at 1000 paired-seed runs the winner reads real_silent 28.8% act-1
+# clear (baseline 23.3%) and real_ironclad 33.3% (baseline 26.9%), with the
+# take-when-offered tails finally aligned to the measured lifts (anticipate
+# 30.6% -> 5.7% taken, deflect 25.6% -> 46.2%). RATIFIED [USER] 2026-07-27
+# (R84); the same ruling ordered the 3-act roster re-measured before any
+# anchor reading is quoted again.
+GENERIC_SKIP_THRESHOLD = 1.5
+# Swept 0.0/0.5/1.0 twice: never helped (its op-signature twin test punishes
+# the measured-GOOD plain block cards hardest). Kept at 0 as a documented
+# dead dial rather than deleted, so the next pass starts from the
+# measurement instead of re-proposing it.
+GENERIC_REDUNDANCY_PENALTY = 0.0
+# The lever with teeth, added when the first two measured WEAK (the round-1
+# skip-3.5 winner cut deflect's take-rate 25.6%->13.8% while anticipate
+# held -- a bare bar cuts backwards, because the plan bonuses are what
+# misprice the offer). Scales the role-label plan bonuses on generic
+# anchors only; 1.0 is the pre-pass behavior, 0.0 measured slightly worse
+# than keeping a quarter-weight prior (27.9%/32.2% vs 28.8%/33.3%).
+# KNOWN RESIDUAL, on the record: _static_power cannot see self-powers, so
+# with the labels quieted Footwork's take rate fell 70% -> 21% against a
+# +23.6 measured lift. A power-aware static term is the named next lever,
+# not smuggled into this one.
+GENERIC_PLAN_BONUS_MULT = 0.25
+
+# DRAFTER_VERSION 12 -- the power-aware static term (R84, the Footwork
+# residual paid). Two structural proxies were built and swept (16-cell
+# grid, 300 runs/cell, seed 11, bare 1-act, serial; winners confirmed at
+# 1000 paired-seed runs -- docs/silent-pilot-review-2026-07-27.md s6):
+#   STATIC_DEXTERITY_VALUE   permanent self Dexterity, the exact mirror of
+#                            STATIC_STRENGTH_VALUE: two future Block gains.
+#                            DELIBERATELY excludes `temp_dexterity` -- a
+#                            one-turn grant is not future scaling, and the
+#                            card that prints it (Anticipate) carries a
+#                            -16.9 measured lift the v11 pass just taught
+#                            the scorer to decline. Measured: helps
+#                            monotonically (Footwork taken 21% -> 74% at
+#                            2.0, against its +23.6 lift); 2.0/3.0/4.0 are
+#                            indistinguishable at n=1000, so the value
+#                            keeps the Strength mirror rather than chasing
+#                            a noise peak. real_silent 28.8% -> 29.1%.
+#   STATIC_POWER_ENGINE_VALUE  flat credit per otherwise-unpriced self-power
+#                            printed by a POWER-type card (Afterimage,
+#                            Noxious Fumes, Demon Form...). FLAT, not
+#                            amount-scaled: printed amounts are
+#                            heterogeneous across engines (Cruelty 25,
+#                            Outbreak 11, Afterimage 1) and say nothing
+#                            comparable about value. Skills' self-powers
+#                            stay unpriced -- they are one-turn riders
+#                            (Blur, Rage, Flame Barrier) and most print
+#                            Block or damage beside them anyway.
+#                            MEASURED A DEAD DIAL, kept at 0.0: it hurt at
+#                            every swept value on every dex level (28.0%
+#                            -> 25.7% by 2.25) -- a flat credit cannot
+#                            tell Noxious Fumes (+29.7 lift) from the junk
+#                            engines it drags in at the same price. A
+#                            discriminating engine term needs per-power
+#                            evidence, not a constant; that is a future
+#                            pass, and it starts from this measurement.
+STATIC_DEXTERITY_VALUE = 2.0
+STATIC_POWER_ENGINE_VALUE = 0.0
+
+
+def _op_signature(card: Card) -> frozenset:
+    return frozenset(fx.get("op") for fx in card.effects)
+
 
 # Fanfare is a native-resource plan, not a four-card assembly puzzle.  One
 # Aria of Recompense supplies five printed points of meter movement before the
@@ -530,8 +635,16 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     # A card that ADVANCES the core is never a dead pick — without this,
     # reaction deadlocks: its core contains an amp payoff, but payoffs
     # were gated on the core being online (measured: 1% amp assembly).
+    # DRAFTER_VERSION 11 (R83): on the GENERIC anchors every plan-shaped
+    # bonus below is scaled by one swept multiplier. The anchor sheets'
+    # role labels "stand in for engine cards", but the measured lifts say
+    # the labels do not track generic value (anticipate, role enabler,
+    # scored 6.25 with 0.00 static power and carries a -16.9 lift; deflect,
+    # role glue, scored 2.83 and carries +25.3) -- so how much plan value
+    # a label is worth on an anchor is a measured dial, not an assumption.
+    plan_mult = GENERIC_PLAN_BONUS_MULT if archetype == "generic" else 1.0
     if _core_progress(deck + [card], archetype) > progress:
-        s += 3.0
+        s += 3.0 * plan_mult
     # DRAFTER_VERSION 3: v2's raw-power term now includes conservative
     # Bomb/debuff/conditional-Block proxies. A plan-committed drafter that
     # reads those direct effects as literal zero is no more plausible than one
@@ -544,7 +657,7 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
             and card.role in ("enabler", "payoff")):
         # The anchor's roles stand in for engine cards. (Its old private
         # power term dissolved into the universal one above.)
-        s += 1.0
+        s += 1.0 * plan_mult
     # Same exclusion as adaptive_score: companions get the dedicated block
     # below. Without this the derived reaction tag silently re-tunes assigned
     # mode too, which would move the frozen M5 numbers for a reason that has
@@ -555,14 +668,14 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
         s += _fanfare_plan_score(card, deck, online)
     elif archetype in card.archetypes and not card.is_companion:
         if card.role == "enabler":
-            s += 3.0 * max(0.25, 1.0 - progress)     # decays as core fills
+            s += 3.0 * max(0.25, 1.0 - progress) * plan_mult
         elif card.role == "payoff":
             if archetype == "reaction" and _is_amp_payoff(card):
                 s += 4.0 if online else REACTION_AMP_OFFLINE
             else:
-                s += 4.0 if online else 1.0          # gated on the core
+                s += (4.0 if online else 1.0) * plan_mult
         else:
-            s += 1.5
+            s += 1.5 * plan_mult
     elif "generic" in card.archetypes:
         s += 0.8
     if card.is_companion:
@@ -578,6 +691,11 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
             s += 0.5
     if _has_block(card) and _block_density(deck) < C.DRAFT_BLOCK_DENSITY_MIN:
         s += 2.5                                     # defense quota
+    if archetype == "generic":
+        # DRAFTER_VERSION 11 (R83): the redundancy discount, anchors only.
+        s -= GENERIC_REDUNDANCY_PENALTY * sum(
+            1 for c in deck if c.rarity in C.RARITY_ODDS
+            and _op_signature(c) == _op_signature(card))
     cost = card.cost if isinstance(card.cost, int) else 2
     avg_cost = (sum(c.cost for c in deck if isinstance(c.cost, int))
                 / max(1, sum(1 for c in deck if isinstance(c.cost, int))))
@@ -607,8 +725,9 @@ def assigned_policy(rng: random.Random, deck: list[Card],
     scored = sorted(((score_offer(c, deck, archetype), i, c)
                      for i, c in enumerate(offers)), reverse=True)
     best_score, _, best = scored[0]
-    threshold = (FANFARE_SKIP_THRESHOLD
-                 if archetype == "fanfare" else C.DRAFT_SKIP_THRESHOLD)
+    threshold = (FANFARE_SKIP_THRESHOLD if archetype == "fanfare"
+                 else GENERIC_SKIP_THRESHOLD if archetype == "generic"
+                 else C.DRAFT_SKIP_THRESHOLD)
     if best_score < threshold:
         return None                                  # skip is a real pick
     n = len(deck)

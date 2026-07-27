@@ -1446,6 +1446,18 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
     # recoverable mechanically: values come from OnUpgrade in the DLL, while
     # the local row supplies the effect provenance needed to choose a delta
     # key. The conventional name keeps this generic for future characters.
+    #
+    # ENCHANTMENTS -- the standing category (R82, 2026-07-27, ruled at
+    # docs/enchantments-design-2026-07-27.md). The base game's run-wide
+    # enchantment SUBSYSTEM (deck-enchant screens, rest options, relics that
+    # grant enchantments run-wide, the EnchantmentModel hierarchy) is OUTSIDE
+    # the parity world, same category as relics and events: this extractor
+    # will never grow an enchantment vocabulary. What IS in reach: a card
+    # that enchants the tokens it creates (CardCmd.Enchant at creation)
+    # rides as a supplement row whose add_card op carries an `enchant:`
+    # block -- per-instance damage/effects riders the engine keeps on the
+    # Card object. Triage the next enchanted card in a future anchor pool
+    # against this split instead of reopening the design question.
     supplements = sorted(
         OUT_DIR.glob(f"{character.lower()}_pool_pass*.yaml"),
         key=lambda path: path.name,

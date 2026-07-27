@@ -493,6 +493,10 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
                  + state.player.powers.get("spotlight_flat_damage_turn", 0))
     if card.type == "attack":
         base += state.current_attack_bonus
+        # Inky enchantment (R82): the rider rides the instance, so an
+        # enchanted Shiv hits harder while an ordinary one in the same hand
+        # does not. Flat, folded in with current_attack_bonus.
+        base += card.enchant_damage
         # Arlecchino, Masque of the Red Death: flat rider on YOUR Attacks.
         # Sits with current_attack_bonus rather than in modify_damage_dealt so
         # it reads only card Attacks -- bombs, Oz and Kurage pulses are not
@@ -600,9 +604,14 @@ def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_draw(state: CombatState, fx: dict, card: Card) -> None:
-    n = _amount(state, fx.get("amount"))
     if fx.get("amount_formula") == "per_aura":     # Elemental Ecstasy
+        # Checked FIRST: the row carries no flat `amount`, and running it
+        # through _amount would raise before this branch could fire -- the
+        # pass-4 grammar widening did exactly that and broke every fight
+        # that played the card (caught by the R84 roster re-run).
         n = sum(1 for e in state.living_enemies if e.aura)
+    else:
+        n = _amount(state, fx.get("amount"))
     if state.salon_replacements_this_card:
         n *= C.SALON_REPLACE_NUMERIC_MULT
     state.draw(n)
@@ -760,8 +769,16 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
         times = fx.get("times", 1)
         times = (_runtime_count(state, times, card)
                  if isinstance(times, str) else times)
+        # Same TargetType-rewrite contract as _op_damage: FanOfKnivesPower
+        # changes the SHIV's target, and Inky's Weak reads the card's LIVE
+        # TargetType -- so the rider row declares the widen and follows the
+        # damage wherever the power sends it (R82).
+        target = fx["target"]
+        widen = fx.get("target_all_if_power")
+        if widen and state.player.powers.get(widen, 0):
+            target = "all_enemies"
         for _ in range(times):
-            for enemy in _pick_targets(state, fx["target"]):
+            for enemy in _pick_targets(state, target):
                 powers.apply_power(state, enemy, fx["power"], amount,
                                    max_stacks=cap)
 
@@ -1112,6 +1129,14 @@ def _op_add_card(state: CombatState, fx: dict, card: Card) -> None:
             token = loader.get_card(cid)
         if "cost_override" in fx:
             token.cost = fx["cost_override"]
+        # Enchant-at-creation (R82, Blade Of Ink): the rider attaches in the
+        # same resolution that creates the token, so "a card that never
+        # existed in the deck" is not a special case.
+        enchant = fx.get("enchant")
+        if enchant:
+            token.enchant_damage += enchant.get("damage", 0)
+            token.enchant_effects = (list(token.enchant_effects)
+                                     + list(enchant.get("effects", [])))
         _add_token(state, token, zone)
 
 
@@ -2072,6 +2097,11 @@ def resolve_card(state: CombatState, card: Card) -> None:
                           and any(e.get("op") == "repeat_this"
                                   for e in fx.get("then", [])))],
                 card)
+    # Enchantment rider (R82): appended AFTER the card's own resolution --
+    # Inky's Weak lands on whoever the play targeted, once per play. The
+    # damage half of the rider is in _op_damage (it must ride each hit).
+    if card.enchant_effects:
+        _resolve_effects(state, card.enchant_effects, card)
 
 
 def flat_attack_bonus(state: CombatState, card: Card, cost: int) -> int:
