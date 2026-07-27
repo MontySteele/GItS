@@ -76,6 +76,20 @@ def test_kokomi_decksize_grammar():
     assert res.returncode == 0, res.stdout + res.stderr
 
 
+def test_furina_register_grammar():
+    """Curtain Call sweep (R85): every Furina card carries a register in
+    {salon, archon, private}; Fanfare touches are archon, salon_member
+    deploys are salon, pure-Encore cards are private, and EXACTLY two rares
+    carry the focalors flavor tag. Scope is her personal sheet only; the
+    third-instance rule generalizes this when a second character adopts
+    registers."""
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_furina_registers.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+    assert "0 register violations" in res.stdout
+
+
 def test_handwritten_cards_match_their_sheets():
     """Addendum A8: the hand-written cards, against the sheets they came from.
 

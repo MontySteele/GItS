@@ -114,6 +114,13 @@ class Card:
     # an explicit field wins. Cards with no character are invalid Spotlight
     # targets -- the selector greys them out rather than erroring.
     character: Optional[str] = None
+    # Curtain Call sweep (R85): the register a card's NAME speaks in. Shared
+    # schema on purpose -- Columbina and future characters inherit the field;
+    # the value vocabulary is per-character (Furina: salon | archon | private,
+    # enforced by tools/lint_furina_registers.py -- the same-action-same-nation
+    # precedent applied to naming). Purely descriptive: NOTHING in the engine
+    # or the drafter may ever read it (cell-1 byte-identity is the pin).
+    register: Optional[str] = None
     # Kokomi kickoff §2.3: combat-local provenance stamped by the conscript
     # op (the generated_by_guest_star pattern). PROPOSED reading of ruling
     # ask §6.7: a conscripted companion is SELF-sourced for SUPPORT_CARRY /
