@@ -147,6 +147,13 @@
 # SCHEDULED REVIEW -- [USER], 2026-07-27: "review the pilot after all of the
 # cards land." The trigger is pool completion, not a date, and the review is
 # three questions, not one:
+#   >> REVIEW EXECUTED 2026-07-27: docs/silent-pilot-review-2026-07-27.md.
+#      (b) is EXPLAINED (draft-side dilution by flat commons; the 75-card
+#      reading was WLP-bug-inflated -- corrected sequence 46->31->39->~27->22).
+#      (a) measured as a DEAD LEVER (generic 24.2% vs silent weights 24.5%,
+#      1000 runs): proposal is weights stay PLACEHOLDER. (c) evidence says
+#      NO poison term (poison cards post positive lifts blind). Both
+#      proposals await [USER] ruling in that doc.
 #   a. Re-read every PLACEHOLDER below against the complete pool. Only then
 #      is ask A3 answerable, because only then does a weight have real draft
 #      decisions to choose between.
