@@ -68,15 +68,28 @@ to the official rows.
   python tools/card_distinctness_report.py --by-rarity    # rarity-scoped rows
   python tools/card_distinctness_report.py --gate         # exit 1 on breach
 
-GATE (PROPOSED 2026-07-26, single-anchor: OFFICIAL:ironclad 76 cards ->
-uniq 86% / maxclu 4 / neardup 18; thresholds leave modding headroom below
-the official line):
+GATE (RATIFIED [USER] 2026-07-27, TWO-ANCHOR: derivation and evidence in
+docs/a2-gate-ratification-2026-07-27.md; supersedes the PROPOSED 2026-07-26
+single-anchor draft of uniq>=75/maxclu<=4/neardup<=0.33). Hard floors sit
+at the official FLOOR (Silent, the themed anchor) with modding headroom:
 
-  uniq%  >= 75        maxclu <= 4        neardup <= 0.33 per card
+  uniq%  >= 70        maxclu <= 5        neardup <= 0.40 per card
 
-rider%/decide% carry NO gate -- measurement showed both are non-divergent
-(official rider% 26 sits inside our 25-37; official decide% 20 equals
-Klee's).
+  advisory band, printed by --gate and never pass/fail:
+  official territory uniq 72-86 | maxclu 4-5 | neardup 0.24-0.36/card
+
+vocab/top% carry NO GATE, permanently (ruled 2026-07-27): themed
+concentration is design, not defect, and the official idea-count edge is
+the same phenomenon uniq% already enforces from the other side --
+double-gating one phenomenon invites gaming the metric. They remain report
+columns and pool-sweep guidance. rider%/decide% carry NO gate --
+measurement showed both are non-divergent (official rider% 26 sits inside
+our 25-37; official decide% 20 equals Klee's).
+
+The gate is also a RED TEST: tier0/tests/test_distinctness_gate.py runs
+gate_breaches over every pool and fails on any breach not in its curated
+known-failing list, so NEW regressions bite immediately while existing
+debt is worked off by the pool-sweep pass.
 
 THE SECOND ANCHOR, AND WHY NO THRESHOLD READ OFF IT HAS HELD STILL
 (2026-07-27, Silent anchor sprint; full analysis in
@@ -138,14 +151,14 @@ finding and any single row of it would be a lie by omission:
     Nothing in this table was safe to calibrate on early -- including the two
     columns that spent five readings looking like they were.
 
-THE CONDITION FOR RATIFICATION IS NOW MET, AND THE ANSWER IS NOT "RATIFY"
-(ask A2, [USER], 2026-07-27: "gate ratification waits til the card pool
-completes"). It has completed. All three thresholds remain PROPOSED because
-the completed anchor FAILS two of them, which makes the numbers a statement
-about the thresholds rather than about any pool. The three live options, none
-of which is mine to choose: recalibrate off the completed second anchor,
-keep the thresholds and accept that they describe an aspiration no shipped
-pool meets, or retire `uniq` as a gate column and keep it as a report.
+ASK A2 IS CLOSED (2026-07-27). The completed anchor failing the old
+PROPOSED thresholds made them a statement about the thresholds, and [USER]
+ruled: recalibrate off the completed second anchor. The ratified numbers
+above are floors against the official BAND, not a portrait of Ironclad.
+Standing lesson from the sequence below, recorded in the ratification doc:
+partial-pool anchors can only loosen a threshold's credibility, never
+certify it -- both of §6.5's would-be certifications (maxclu <= 4,
+neardup <= 0.33) were overturned by the completed pool.
 
 vocab/top% still carry NO GATE, and they moved the same way: at 22 cards her
 vocabulary was NINE ideas against Ironclad's 40 and her top% read 50%, which
@@ -219,10 +232,16 @@ TARGET_CLASS = {
     "random": "rand", "random_enemy": "rand", "random_enemies": "rand",
 }
 
-# Gate thresholds. Set RELATIVE to the official anchor, with headroom.
-GATE_MIN_UNIQ = 75          # official 86
-GATE_MAX_CLUSTER = 4        # official 4
-GATE_NEARDUP_PER_CARD = 0.33
+# Gate thresholds. RATIFIED [USER] 2026-07-27 against the COMPLETE
+# two-anchor band (docs/a2-gate-ratification-2026-07-27.md): hard floors
+# sit at the official FLOOR with modest modding headroom, and the official
+# band is printed as an advisory line so "passes the gate" is never
+# mistaken for "matches Ironclad".
+GATE_MIN_UNIQ = 70          # official floor 72 (silent), -2 headroom
+GATE_MAX_CLUSTER = 5        # official floor is 5 (silent)
+GATE_NEARDUP_PER_CARD = 0.40  # official floor 0.36 (silent), +headroom
+# Advisory only, never pass/fail: where the two official anchors landed.
+OFFICIAL_BAND = "uniq 72-86% | maxclu 4-5 | neardup 0.24-0.36/card"
 # Companion sheets are exempt by SIZE, which is a proxy for "not a character
 # pool" -- and a proxy that misfired: OFFICIAL:silent IS a character pool and
 # spent two days under this floor, invisible to the gate she was added to
@@ -366,17 +385,40 @@ def load_pool(path: str) -> list[dict]:
     return [c for d in docs if isinstance(d, list) for c in d]
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--pool", help="restrict to one pool name substring")
-    ap.add_argument("--families", action="store_true",
-                    help="list near-duplicate families and clone clusters")
-    ap.add_argument("--by-rarity", action="store_true",
-                    help="emit one row per (pool, rarity)")
-    ap.add_argument("--gate", action="store_true",
-                    help="apply the PROPOSED gate; exit 1 on any breach")
-    args = ap.parse_args()
+def gate_breaches(reports: list[dict]) -> tuple[list[tuple], list[str]]:
+    """Apply the RATIFIED gate. Returns (breaches, skipped).
 
+    Each breach is (pool, metric, message) so the suite's red test can key
+    its curated known-failing list on (pool, metric) instead of parsing
+    strings. Shared by --gate and tier0/tests/test_distinctness_gate.py --
+    one gate, two mouths.
+    """
+    breaches, skipped = [], []
+    for r in reports:
+        if r["cards"] < GATE_MIN_POOL or "/" in r["pool"]:
+            if "/" not in r["pool"]:
+                skipped.append(f"{r['pool']} ({r['cards']} cards)")
+            continue
+        if r["uniq%"] < GATE_MIN_UNIQ:
+            breaches.append((r["pool"], "uniq",
+                             f"{r['pool']}: uniq {r['uniq%']:.0f}% < "
+                             f"{GATE_MIN_UNIQ}%"))
+        if r["maxclu"] > GATE_MAX_CLUSTER:
+            breaches.append((r["pool"], "maxclu",
+                             f"{r['pool']}: maxclu {r['maxclu']} > "
+                             f"{GATE_MAX_CLUSTER}"))
+        if r["neardup"] > GATE_NEARDUP_PER_CARD * r["cards"]:
+            breaches.append((r["pool"], "neardup",
+                             f"{r['pool']}: neardup {r['neardup']} > "
+                             f"{GATE_NEARDUP_PER_CARD * r['cards']:.0f}"))
+    return breaches, skipped
+
+
+def build_reports(pool_filter: str | None = None,
+                  by_rarity: bool = False) -> list[dict]:
+    """One analyzed report per readable pool -- the single producer behind
+    both the CLI table and the suite's red gate test, so the two can never
+    disagree about which pools exist or what they are called."""
     reports = []
     for path in SHEETS + GAME_REF:
         if not os.path.exists(path):
@@ -386,7 +428,7 @@ def main() -> int:
                                      .replace(".yaml", "")
         if "game_ref" in path:
             name = f"OFFICIAL:{name}"
-        if args.pool and args.pool not in name:
+        if pool_filter and pool_filter not in name:
             continue
         try:
             rows = load_pool(path)
@@ -395,12 +437,26 @@ def main() -> int:
             continue
         if rows:
             reports.append(analyze(name, rows))
-            if args.by_rarity:
+            if by_rarity:
                 for rar in ("common", "uncommon", "rare"):
                     sub = [c for c in rows if isinstance(c, dict)
                            and c.get("rarity") == rar]
                     if sub:
                         reports.append(analyze(f"{name}/{rar}", sub))
+    return reports
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--pool", help="restrict to one pool name substring")
+    ap.add_argument("--families", action="store_true",
+                    help="list near-duplicate families and clone clusters")
+    ap.add_argument("--by-rarity", action="store_true",
+                    help="emit one row per (pool, rarity)")
+    ap.add_argument("--gate", action="store_true",
+                    help="apply the RATIFIED gate; exit 1 on any breach")
+    args = ap.parse_args()
+    reports = build_reports(args.pool, args.by_rarity)
 
     print(f"{'pool':30} {'cards':>5} {'vocab':>5} {'hapax':>5} {'top%':>5} "
           f"{'uniq%':>6} {'maxclu':>6} {'rider%':>6} {'neardup':>7} "
@@ -422,35 +478,21 @@ def main() -> int:
                   "calibrated against one and cannot be checked without it. "
                   "Run tools/extract_base_game_pool.py locally.", file=sys.stderr)
             return 2
-        breaches, skipped = [], []
-        for r in reports:
-            if r["cards"] < GATE_MIN_POOL or "/" in r["pool"]:
-                if "/" not in r["pool"]:
-                    skipped.append(f"{r['pool']} ({r['cards']} cards)")
-                continue
-            if r["uniq%"] < GATE_MIN_UNIQ:
-                breaches.append(f"{r['pool']}: uniq {r['uniq%']:.0f}% < "
-                                f"{GATE_MIN_UNIQ}%")
-            if r["maxclu"] > GATE_MAX_CLUSTER:
-                breaches.append(f"{r['pool']}: maxclu {r['maxclu']} > "
-                                f"{GATE_MAX_CLUSTER}")
-            if r["neardup"] > GATE_NEARDUP_PER_CARD * r["cards"]:
-                breaches.append(
-                    f"{r['pool']}: neardup {r['neardup']} > "
-                    f"{GATE_NEARDUP_PER_CARD * r['cards']:.0f}")
+        breaches, skipped = gate_breaches(reports)
+        print(f"\nGATE (RATIFIED 2026-07-27) -- official territory, "
+              f"advisory only: {OFFICIAL_BAND}")
         if skipped:
-            print(f"\nGATE SKIPPED (under {GATE_MIN_POOL} cards -- this is NOT "
+            print(f"GATE SKIPPED (under {GATE_MIN_POOL} cards -- this is NOT "
                   f"a pass): {', '.join(skipped)}")
         if breaches:
-            print("\nGATE BREACHES (NOTHING HERE IS RATIFIED -- the second "
-                  "anchor's pool has COMPLETED and fails two of three "
-                  "thresholds; ask A2 now needs a [USER] ruling on the "
-                  "options in the module docstring):")
-            for b in breaches:
+            print("\nGATE BREACHES (thresholds RATIFIED against the "
+                  "two-anchor floor -- docs/a2-gate-ratification-"
+                  "2026-07-27.md; known debt is curated in "
+                  "tier0/tests/test_distinctness_gate.py):")
+            for _, _, b in breaches:
                 print(f"  FAIL {b}")
             return 1
-        print("\nGATE: all pools clear (all thresholds PROPOSED; "
-              "ratification deferred by ask A2).")
+        print("\nGATE: all pools clear.")
 
     if args.families:
         for r in reports:

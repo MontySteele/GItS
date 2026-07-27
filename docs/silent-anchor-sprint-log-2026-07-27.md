@@ -351,6 +351,13 @@ Silent pool and cannot be closed here.
 
 ### 6.5 Draft ruling for ask A2 — PROPOSED, not self-ratified
 
+> **SUPERSEDED 2026-07-27 by `docs/a2-gate-ratification-2026-07-27.md`
+> (R81), written against the COMPLETE pool.** Point 3's certifications did
+> not survive coverage: Silent completed at maxclu 5 and neardup 0.36, so
+> ratifying "cleared by both anchors" from a 22-card partial would have
+> shipped thresholds an official character fails. Points 1, 4, and 5 held.
+> Kept as written — the record shows what a partial anchor licensed.
+
 1. **Do not ratify uniq ≥ 75.** The second anchor fails it, and the coverage
    defence failed its control. Ratifying now would freeze an Ironclad-specific
    number into a project-wide law.
@@ -955,6 +962,12 @@ that they describe an aspiration no shipped pool meets; or retire `uniq` as a
 gate column and keep it as a report. The tool's docstring carries all seven
 readings and this paragraph.
 
+> **A2 CLOSED 2026-07-27:** [USER] took the first option. Recalibrated on
+> the two-anchor floor and RATIFIED (uniq ≥ 70 / maxclu ≤ 5 / neardup
+> ≤ 0.40/card; top%/vocab permanently gate-free), enforced as a red suite
+> test with a curated debt list. R81;
+> `docs/a2-gate-ratification-2026-07-27.md`.
+
 ### 14.5 What is still owed
 
 - **Blade Of Ink**, pending the enchantments design pass (§13).
@@ -964,6 +977,9 @@ readings and this paragraph.
 - **A2/A3 remain unratified.** A2 now has its evidence and needs a ruling;
   A3 is unblocked for the first time, because the pilot finally has a
   complete pool to draft from.
+  > **A2 half CLOSED 2026-07-27** (R81,
+  > `docs/a2-gate-ratification-2026-07-27.md`); A3 still open, owned by
+  > the pilot review.
 
 ---
 
