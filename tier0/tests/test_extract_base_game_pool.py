@@ -186,6 +186,35 @@ class SyntheticCard
         extract._sheet_row(card, body % "Sly", "xx_")
 
 
+def test_an_animation_delay_branch_does_not_exclude_a_card():
+    """A local holding an anim delay, plus the Fast-Mode PREFERENCE branch
+    that bumps it, is cosmetic in both halves -- and cosmetic-ness has to
+    propagate from the declaration to the statements that feed it, or the
+    `if` survives and the card leaves the sheet over an animation timer."""
+    stmts = [
+        "float num = base.Owner.Character.AttackAnimDelay;",
+        "if (SaveManager.Instance.PrefsSave.FastMode == FastModeType.Normal) {",
+        "num += 0.2f;",
+        "}",
+        "await CardPileCmd.Draw(choiceContext, 1m, base.Owner);",
+    ]
+    kept = extract._drop_cosmetic_blocks(extract._drop_cosmetic_locals(stmts))
+    assert kept == ["await CardPileCmd.Draw(choiceContext, 1m, base.Owner);"]
+
+
+def test_a_real_branch_still_excludes_the_card():
+    """The propagation must not become a general `if`-eraser: an unrelated
+    local keeps its branch, and the card stays out."""
+    stmts = [
+        "float num = base.Owner.Character.AttackAnimDelay;",
+        "if (cardPlay.Target.HasPower<PoisonPower>()) {",
+        "await PowerCmd.Apply<PoisonPower>(choiceContext, cardPlay.Target);",
+        "}",
+    ]
+    kept = extract._drop_cosmetic_blocks(extract._drop_cosmetic_locals(stmts))
+    assert any(extract.CONTROL_FLOW.match(s) for s in kept)
+
+
 def test_canonical_tags_reads_only_the_declared_tag_property():
     source = """
     HashSet<CardTag> CanonicalTags => new HashSet<CardTag> {

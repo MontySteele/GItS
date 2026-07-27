@@ -397,6 +397,30 @@ COSMETIC_LOCAL = re.compile(
     r"|base\.CombatState\.HittableEnemies)")
 CONTROL_FLOW = re.compile(r"^(?:if|for|foreach|while|do|else|switch|try)\b")
 
+# A local holding an ANIMATION DELAY, and the statements that only feed it.
+# Several cards read `Character.AttackAnimDelay` into a local and then branch
+# on the player's Fast Mode PREFERENCE to add 0.2s to it. The branch is real
+# control flow, so the card was excluded as "behaviour branches on runtime
+# state" -- but the runtime state is a settings menu, and the card's actual
+# effects are ordinary. Three cards left the sheet over an animation timer,
+# including one in the STARTING DECK. Cosmetic-ness has to PROPAGATE: the
+# declaration is cosmetic, so a statement whose only job is to mutate it is
+# cosmetic too, and the `if` that contained it is then empty.
+COSMETIC_DELAY_LOCAL = re.compile(r"^[\w<>?\[\], ]+ (\w+) = [^;]*AnimDelay\b")
+
+
+def _drop_cosmetic_locals(stmts: list[str]) -> list[str]:
+    """Drop animation-delay locals and every statement that only feeds one."""
+    names = {m.group(1) for s in stmts
+             if (m := COSMETIC_DELAY_LOCAL.match(s))}
+    if not names:
+        return stmts
+    feeds = re.compile(
+        rf"^(?:{'|'.join(re.escape(n) for n in names)})"
+        r"\s*(?:[-+*/]?=[^;]*|\+\+|--)\s*;$")
+    return [s for s in stmts
+            if not COSMETIC_DELAY_LOCAL.match(s) and not feeds.match(s)]
+
 # `base.DynamicVars.Damage.BaseValue`, `base.DynamicVars["Power"].IntValue`,
 # and the bare `base.DynamicVars.Block` that GainBlock takes.
 VARREF = re.compile(r'base\.DynamicVars(?:\.(\w+)|\["(\w+)"\])'
@@ -739,7 +763,7 @@ def _sheet_row(card: dict, src: str, prefix: str) -> tuple[dict, dict]:
     body = _method_body(src, "OnPlay")
     if not body:
         raise _Untranslatable("no OnPlay body found")
-    stmts = _drop_cosmetic_blocks(_statements(body))
+    stmts = _drop_cosmetic_blocks(_drop_cosmetic_locals(_statements(body)))
     for s in stmts:
         if CONTROL_FLOW.match(s):
             raise _Untranslatable("behaviour branches on runtime state")

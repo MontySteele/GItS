@@ -127,3 +127,32 @@
     reaction: 0.0    # applies no elements; the term is inert, said out loud
     tempo: 0.7       # Battle Trance / Offering draw
     cost: 0.1
+
+# --- real_silent (the real base-game reference pool, Silent anchor sprint
+# 2026-07-27). block stays at the frozen 1.2 everywhere; sustain/spotlight are
+# OMITTED, not zeroed, for the same reason they are on the ironclad entry.
+#
+# EVERY NUMBER BELOW IS A PLACEHOLDER -- sprint ask A3, awaiting [USER]
+# red-pen. They are a first reading of her kit, not a measurement, and no
+# tier05 number derived from them may be quoted as load-bearing until they are
+# ruled (D4: the instrument must model the changed object).
+#
+# KNOWN UNDERSTATEMENT -- on the record before any low score is read as a
+# finding about her pool:
+#   1. The assembled pool is 22 of 88 cards (25%), and the excluded 66 are
+#      systematically the INTERESTING ones -- every Sly card, every shiv
+#      generator, every poison payoff beyond the three that translate. This
+#      anchor is a floor on her, not a portrait of her.
+#   2. Poison is her scaling and the scorer has no poison term at all, so a
+#      Deadly Poison reads as a one-shot debuff rather than as ramp.
+#   3. Ring of the Snake is not wired (ask A1), so her turn-1 hand is two
+#      cards smaller than the real character's -- which is exactly the
+#      resource the discard/Sly plan spends.
+- id: silent
+  weights:
+    damage: 1.0      # PLACEHOLDER. shivs and poison, not big hits
+    block: 1.2       # FROZEN. do not tune.
+    scaling: 1.3     # PLACEHOLDER. poison is the ramp, priced blind (see 2)
+    reaction: 0.0    # applies no elements; the term is inert, said out loud
+    tempo: 1.3       # PLACEHOLDER. draw/discard velocity IS the plan
+    cost: 0.1

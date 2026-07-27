@@ -69,6 +69,25 @@ def test_file_set_difference_changes_digest(
 
 
 @DIGESTS
+def test_a_second_anchors_layer_moves_the_digest(
+        game_ref_digest, _isolated_game_ref):
+    """Landing the Silent pool CHANGES the measurement world on this machine.
+    The digest is what makes that visible in a run label instead of being a
+    silent difference between two runs someone later compares."""
+    ref = _isolated_game_ref
+    ref.mkdir()
+    (ref / "ironclad_pool.yaml").write_text("hp: 80\n")
+    ironclad_only = game_ref_digest()
+
+    (ref / "silent_pool.yaml").write_text("hp: 70\n")
+    both = game_ref_digest()
+    assert ironclad_only != both
+
+    (ref / "silent_pool_pass1.yaml").write_text("hp: 70\n")
+    assert game_ref_digest() != both
+
+
+@DIGESTS
 def test_empty_directory_differs_from_absent(
         game_ref_digest, _isolated_game_ref):
     _isolated_game_ref.mkdir()

@@ -24,7 +24,8 @@ from tier0.engine.state import Card
 # whose whole purpose is to be scored in the same relic-less, potion-less,
 # element-less world Klee was. The guard is a bare string, so it stays inert
 # on a clone where game_ref/ (and therefore real_ironclad) does not exist.
-NO_COMPANION_CHARACTERS = frozenset({"ref_ironclad", "real_ironclad"})
+NO_COMPANION_CHARACTERS = frozenset({"ref_ironclad", "real_ironclad",
+                                     "real_silent"})
 
 
 @lru_cache(maxsize=8)

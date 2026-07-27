@@ -49,7 +49,8 @@ UPGRADE_SHEETS = (_DOCS / "klee-upgrades.yaml",
                   # numbers; the tier 0 battery never upgrades, so the frozen
                   # scorecard and the anchor lock are untouched.
                   _DOCS / "ref-ironclad-upgrades.yaml")
-EXTERNAL_UPGRADE_SHEETS = (_GAME_REF / "ironclad-upgrades.yaml",)
+EXTERNAL_UPGRADE_SHEETS = (_GAME_REF / "ironclad-upgrades.yaml",
+                           _GAME_REF / "silent-upgrades.yaml")
 SUFFIX = "+"
 
 # Deltas the engine cannot express per-card yet (constants-encoded).

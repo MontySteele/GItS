@@ -40,12 +40,20 @@ DOCS_CARD_SHEETS = ("klee-cards.yaml", "furina-cards.yaml",
 # real_ironclad except inert guards (tier05.rewards.NO_COMPANION_CHARACTERS)
 # and a skip-guarded test module.
 GAME_REF_DIR = local_reference.game_ref_dir()
-EXTERNAL_CARD_SHEETS = {"ironclad_pool.yaml": "real_ironclad"}
+EXTERNAL_CARD_SHEETS = {"ironclad_pool.yaml": "real_ironclad",
+                        "silent_pool.yaml": "real_silent"}
+# The REQUIRED reviewed layers behind each merged pool. These must agree
+# with tools/build_official_sheet.CHARACTERS; test_real_ironclad and
+# test_real_silent pin that they do, because a layer listed in one place
+# and not the other is a pool that loads at the wrong size.
 EXTERNAL_CARD_LAYERS = {
     "ironclad_pool.yaml": (
         "ironclad_pool_pass4.yaml",
         "ironclad_pool_pass5.yaml",
         "ironclad_pool_pass6.yaml",
+    ),
+    "silent_pool.yaml": (
+        "silent_pool_pass1.yaml",
     ),
 }
 
