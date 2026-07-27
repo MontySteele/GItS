@@ -5,10 +5,25 @@ Executor: Opus. Plan: `docs/silent-anchor-sprint-plan.md`. Design:
 (B + C-1/2/3), `8bf6435` (C-7 + D).
 
 Gate at every landing: `python -m pytest -q` from repo ROOT.
-**1121 passed / 1 skipped** (baseline was 1077/1). Fresh-clone behaviour
-verified by RUNNING it, not by asserting it:
-`GITS_REFERENCE_MODE=committed-only python -m pytest -q` →
-**1088 passed / 34 skipped**, nothing red.
+**1121 passed / 1 skipped** (baseline was 1077/1).
+
+Fresh-clone behaviour was verified by RUNNING it, twice, rather than asserted:
+
+- `GITS_REFERENCE_MODE=committed-only python -m pytest -q` → **1088 passed /
+  34 skipped**;
+- and then for real — a genuine `git clone` of this branch into a scratch
+  directory, with no `game_ref/` present at all, which is exactly the
+  environment the CI runner starts from → **1084 passed / 38 skipped**,
+  nothing red.
+
+The two differ by four tests because committed-only mode redirects the
+game_ref path while a true clone has no directory, and four guards
+distinguish those cases. That is the reason both were run.
+
+CI itself has NOT run on this branch: `.github/workflows` triggers on
+`pull_request` and on pushes to `main` only, and opening the PR is a [USER]
+action (no `gh` on this machine). The clone above is the same check the
+runner would perform.
 
 ---
 
