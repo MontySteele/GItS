@@ -102,10 +102,14 @@ rises to +4.0, and the meter ends on 8.3.
 
 This is the pass-4 divergence clause again, and it fires the same way: the
 divergence IS the finding and goes to [USER] before any D8 remedy is
-trusted. Two candidate explanations, neither testable from here — (a) the
+trusted. Three candidate explanations, none testable from here — (a) the
 sim pilot spends Encore that a human hoards, since the pilot has no reason to
 bank; (b) the playtest deck reached a generation density the drafted sim
-decks do not. **No lever is proposed. Track 3 was measure-only and stays so.**
+decks do not; (c) **the playtest was CO-OP and tier 0.5 models one seat** —
+the standing "co-op has no sim backstop" caveat, which here is not a caveat
+about bugs but about the measurement itself: a second player changes how long
+fights run and how much damage arrives per turn, and both feed the meter.
+**No lever is proposed. Track 3 was measure-only and stays so.**
 
 **An instrument bug caught mid-sprint, because the numbers did not
 reconcile.** The first run reported gained/spent 3.07 against a mean end
@@ -129,8 +133,9 @@ conditional evaluation (card + predicate + fired). Generic on purpose — a
 Denominator is EVALUATIONS, not plays.
 
 **`graceful_retreat` / `hp_lost_this_turn`: 2.9% (18/615) salon, 3.3%
-(22/669) fanfare, 3.3% (14/426) generic.** The suspicion is confirmed at
-1511 evaluations: the rider is dead. Block resolves before the enemy swings,
+(22/669) fanfare, 3.3% (14/426) generic — 58/1758 = 3.3% pooled across all
+three arms with the upgraded copies folded in.** The suspicion is confirmed:
+the rider is dead. Block resolves before the enemy swings,
 so on the turn the card is played the condition describes damage that has
 usually not happened yet. The printed card is a 9-block card that is a
 5-block card ~97% of the time.
@@ -138,10 +143,13 @@ usually not happened yet. The printed card is a 9-block card that is a
 Two more dead riders surfaced that the brief did not ask about, and they are
 worse:
 
+Rates below are pooled across all three arms INCLUDING the upgraded copies,
+which is the honest unit — an upgrade does not change either predicate.
+
 | card | predicate | rate | evaluations |
 |---|---|---|---|
-| `the_final_verdict` | `reaction_triggered_by_this` | **0.0%** | 243 across all three arms |
-| `blocking_notes` | `spotlight_moved_this_turn` | 0.0–2.1% | 2391 across all three arms |
+| `the_final_verdict` | `reaction_triggered_by_this` | **0.0%** | 0/298 |
+| `blocking_notes` | `spotlight_moved_this_turn` | 1.3% | 31/2471 |
 
 `the_final_verdict` has never once fired in this world. **Out of scope to
 fix** (any re-authoring is red-pen), but they belong in the same queue as D4
