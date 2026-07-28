@@ -208,14 +208,39 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     /// <summary>Salon v2 deploy: into a full stage, the OLDEST member bows
     /// out and the new member enters. Returns the replacement count (the
     /// generated card bodies scale their later numerics off it).</summary>
+    /// <summary>A11: one random member, drawn from the SHARED combat stream
+    /// so both seats in a co-op run agree on who walked on.</summary>
+    private static readonly SalonMember[] AllMembers =
+    {
+        SalonMember.Crabaletta, SalonMember.Usher, SalonMember.Chevalmarin,
+    };
+
+    private static SalonMember RollMember(Creature owner)
+    {
+        var rng = owner.Player?.RunState.Rng.CombatTargets;
+        return rng == null ? SalonMember.Crabaletta : rng.NextItem(AllMembers);
+    }
+
+    /// <param name="member">Who takes the stage, or NULL for a random member
+    /// (A11, 2026-07-28: the starter fields whoever turns up, so it no longer
+    /// duplicates the Chevalmarin card). Rolled per deploy rather than once
+    /// per card, so a multi-deploy card can field a mixed stage -- the sim
+    /// rolls per iteration too.</param>
     public static async Task<int> Deploy(
         PlayerChoiceContext choiceContext, Creature owner, int amount,
-        CardModel cardSource, SalonMember member)
+        CardModel cardSource, SalonMember? member)
     {
         var company = CompanyFor(owner);
         var replacements = 0;
         for (var i = 0; i < amount; i++)
         {
+            // Drawn INSIDE the loop and from the shared combat stream, not
+            // from a local Random. Co-op runs lockstep: a draw one seat makes
+            // and the other does not poisons every later draw on that stream,
+            // which is exactly how Vigil of the Deep desynced. If there is no
+            // player to own a stream there is no run to desync either, so the
+            // fallback is fixed rather than randomised.
+            var entering = member ?? RollMember(owner);
             if (StageIsFull(company.Count))
             {
                 var displaced = company[0];
@@ -223,7 +248,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                 replacements++;
                 await Bow(choiceContext, owner, displaced);
             }
-            company.Add(member);
+            company.Add(entering);
 
             // Fortissimo Guard (R85): Block per DEPLOY, inside the loop, so a
             // three-deploy card pays three cues. Mirrors the sim, which adds

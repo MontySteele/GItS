@@ -546,6 +546,44 @@ def test_salon_scaled_number_renders_the_replacement_multiplier():
     assert "DynamicVars.CalculationBase.UpgradeValueBy(2m);" in usher
 
 
+def test_a_random_deploy_emits_a_null_and_says_so_on_the_face():
+    """A11: `member: random` -> null, which Deploy resolves per iteration off
+    the SHARED combat stream.
+
+    The face assertion is not decoration. The shared template says "typed",
+    which was true while every deploy named its member; on a random deploy
+    that word implies a choice the player does not have. A card whose text
+    still claims a type is worse than one that says nothing.
+    """
+    by_id = {card["id"]: card for card in _furina_cards()}
+    debut = gen.emit(by_id["salon_debut"], gen.FURINA_PROFILE)
+    named = gen.emit(by_id["surintendante_chevalmarin"], gen.FURINA_PROFILE)
+
+    assert "SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, null)" in debut
+    assert "RANDOM [gold]Salon Member(s)[/gold]" in debut
+    assert "SalonMember." not in debut
+
+    # The Common it was de-duped FROM keeps naming its member. If this ever
+    # goes null too, the de-dupe has been undone in the other direction.
+    assert "this, SalonMember.Chevalmarin)" in named
+
+
+def test_an_unrecognised_member_is_refused_by_name():
+    """The member value is emitted through a lookup, and a lookup miss is a
+    KeyError -- a stack trace mid-emit, not a decision. Every other
+    unexpressible value on this sheet is refused by name; so is this one."""
+    card = {
+        "id": "not_a_real_card", "name": "Not A Real Card", "cost": 1,
+        "type": "skill", "rarity": "common", "solve": ["utility"],
+        "archetypes": ["salon"], "role": "enabler",
+        "effects": [{"op": "apply_power", "power": "salon_member",
+                     "amount": 1, "target": "self", "member": "neuvillette"}],
+    }
+    reason = gen.blocked_reason(card, gen.FURINA_PROFILE)
+    assert reason is not None
+    assert "neuvillette" in reason, reason
+
+
 def test_the_per_member_slope_renders_through_the_calculated_rail():
     """A13/A14: both halves of the per-member slope, pinned STRUCTURALLY.
 

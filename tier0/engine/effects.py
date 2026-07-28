@@ -738,14 +738,22 @@ def _deploy_salon_members(state: CombatState, amount: int,
     archive. powers['salon_member'] mirrors len(queue) so every count
     read (has_salon_members, the pilot, instruments) is unchanged."""
     p = state.player
-    if member not in C.SALON_MEMBERS:
+    if member != "random" and member not in C.SALON_MEMBERS:
         raise ValueError(f"unknown salon member {member!r}")
     for _ in range(amount):
+        # A11 (2026-07-28): `member: random` de-dupes the starter from the
+        # Chevalmarin card. Rolled PER DEPLOY, not once per card, so a
+        # multi-deploy card can field a mixed stage. Sorted keys because the
+        # roll must not depend on dict insertion order.
+        entering = (state.rng.choice(sorted(C.SALON_MEMBERS))
+                    if member == "random" else member)
         if len(p.salon) >= C.SALON_MEMBER_SLOTS:
             state.salon_replacements_this_card += 1
             _salon_bow(state, p.salon.pop(0))
-        p.salon.append(member)
-        state.emit("salon_deploy", member=member, company=list(p.salon))
+        p.salon.append(entering)
+        # `entering`, not `member`: an observer of this event wants to know
+        # WHO took the stage, and "random" is not a member.
+        state.emit("salon_deploy", member=entering, company=list(p.salon))
         # Fortissimo Guard (Curtain Call B, R85): block per DEPLOY, per
         # deployment event rather than per card -- Full Ensemble's three
         # deploys are three cues. Direct add + emit, the _salon_bow block

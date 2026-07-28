@@ -583,6 +583,17 @@ APPLY_POWER_FIELDS = {"op", "power", "amount", "target", "max_stacks", "note",
                       # implementation; the fields are documentation.
                       "summon_element", "consumes_aura"}
 
+# The C# each `member:` value emits. `random` is a NULL, which
+# SalonMemberPower.Deploy resolves per iteration off the shared combat RNG
+# stream (A11). Keyed rather than inlined so an unrecognised member is a
+# named blocker instead of a KeyError mid-emit.
+SALON_MEMBER_CS = {
+    "crabaletta": "SalonMember.Crabaletta",
+    "usher": "SalonMember.Usher",
+    "chevalmarin": "SalonMember.Chevalmarin",
+    "random": "null",
+}
+
 # Upgrade keys that all mean "bump the applied power amount" at card level
 # (tier0 upgrades.py handles them in one branch too).
 # All of these bump the amount of the card's FIRST apply_power/buff_next_attack
@@ -1079,6 +1090,13 @@ def blocked_reason(
                 # UNPARSEABLE discipline: an unrecognized field encodes a
                 # mechanic; block loudly, never approximate.
                 return f"apply_power field(s) {sorted(unknown)} not understood"
+            # A11: the member value is emitted through a lookup, and a lookup
+            # miss mid-emit is a KeyError -- a stack trace, not a decision.
+            # Refuse the card by name instead, the way every other
+            # unexpressible value on this sheet is refused.
+            if "member" in eff and eff["member"] not in SALON_MEMBER_CS:
+                return (f"salon member '{eff['member']}' is not one of "
+                        f"{sorted(SALON_MEMBER_CS)}")
             cap = APPLY_POWERS[power][1]
             if eff.get("max_stacks") != cap and not (eff.get("max_stacks") is None and cap is None):
                 # Cap drift between the sheet and the C# power class const.
@@ -2971,10 +2989,11 @@ def build_body(
             if eff["power"] == "salon_member":
                 # Salon v2 (rework plan §1): deploys are member-TYPED. The
                 # C# enum mirrors tier0's C.SALON_MEMBERS keys.
-                member = {"crabaletta": "SalonMember.Crabaletta",
-                          "usher": "SalonMember.Usher",
-                          "chevalmarin": "SalonMember.Chevalmarin"}[
-                    eff.get("member", "crabaletta")]
+                # A11: `random` emits a null, which Deploy resolves per
+                # iteration off the shared combat RNG stream. The sim rolls
+                # per iteration too, so a multi-deploy card fields a mixed
+                # stage in both engines.
+                member = SALON_MEMBER_CS[eff.get("member", "crabaletta")]
                 lines.append(
                     "salonReplacements += await SalonMemberPower.Deploy("
                     f"choiceContext, Owner.Creature, {amount}, this, "
@@ -3933,6 +3952,15 @@ def build_description(card: dict) -> str:
 
         elif op == "apply_power":
             template = APPLY_POWERS[eff["power"]][2]
+            if eff.get("member") == "random":
+                # A11: the shared template says "typed", which was true when
+                # every deploy named its member. On a random deploy that word
+                # tells the player nothing and implies a choice they do not
+                # have. B5 will name the specific members; this only has to
+                # stop the random one from lying.
+                template = template.replace(
+                    "{X} typed [gold]Salon Member(s)[/gold]",
+                    "{X} RANDOM [gold]Salon Member(s)[/gold]")
             x = ("{PowerAmount:diff()}"
                  if eff is power_upgrade_effect(card)
                  or salon_calc_rider(card, eff) is not None

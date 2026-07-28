@@ -850,6 +850,55 @@ def test_grand_salon_scales_ushers_block_not_only_damage():
         "regressed to damage-only, the B4 defect")
 
 
+def test_salon_debut_fields_a_random_member_not_always_chevalmarin():
+    """A11 (RULED 2026-07-28): the starter and the Chevalmarin Common were
+    the same card at two rarities -- same cost, same member.
+
+    The discriminator is that all three members must be reachable. A roll
+    that always returned one member would satisfy "it deploys somebody" and
+    leave the duplication exactly where it was.
+    """
+    landed = set()
+    for seed in range(40):
+        st = furina_state(seed=seed)
+        effects.resolve_card(st, loader.get_card("salon_debut"))
+        assert len(st.player.salon) == 1
+        landed.add(st.player.salon[0])
+    assert landed == set(C.SALON_MEMBERS), landed
+
+
+def test_the_random_deploy_is_seeded_not_ambient():
+    """Same seed, same member -- twice over.
+
+    tier 0.5 replays runs off a seed, and a co-op run is lockstep: a draw
+    that is not reproducible from the seed is the shape of defect that
+    desynced Vigil of the Deep. This is the sim's half of that guarantee;
+    the C# half draws from RunState.Rng.CombatTargets, the shared stream.
+    """
+    for seed in (0, 7, 99):
+        picks = []
+        for _ in range(2):
+            st = furina_state(seed=seed)
+            effects.resolve_card(st, loader.get_card("salon_debut"))
+            picks.append(st.player.salon[0])
+        assert picks[0] == picks[1], (seed, picks)
+
+
+def test_a_random_deploy_rolls_per_member_not_once_per_card():
+    """Both engines roll INSIDE the deploy loop, so a multi-deploy card can
+    field a mixed stage. Pinned because rolling once and reusing it is the
+    cheaper implementation and reads identically on a 1-deploy card -- which
+    is every card that currently uses the grammar."""
+    mixed = False
+    for seed in range(40):
+        st = furina_state(seed=seed)
+        effects._deploy_salon_members(st, 3, "random")
+        if len(set(st.player.salon)) > 1:
+            mixed = True
+            break
+    assert mixed, "3 random deploys never produced a mixed stage in 40 seeds"
+
+
 def test_dinner_service_pays_a_slope_not_a_threshold():
     """A13 (RULED 2026-07-28): "Gain 2 Block, plus 2 per Salon member".
 

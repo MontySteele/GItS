@@ -46,9 +46,17 @@
    effects: [{op: gain_encore, amount: 5}]}
    # The starter's A4 seed: "healing" that arrives as buffer. One copy in the starting deck.
 - {id: salon_debut, name: "Salon Début", register: salon, cost: 1, type: skill, rarity: basic, solve: [utility, scaling], archetypes: [salon], role: enabler, tags: [skill_tag],
-   effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: chevalmarin}]}
-   # Signature basic (SALON v2, rework plan): Chevalmarin takes the stage — the applier, 2 hydro a turn seeding
-   # reactions from card one. Members are TYPED now; Fanfare is the Focus analogue on all member numbers.
+   effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: random}]}
+   # Signature basic (SALON v2, rework plan): a member takes the stage — Fanfare is the Focus analogue on all
+   # member numbers, and members are TYPED.
+   # A11 (RULED 2026-07-28, playtest-2 red-pen): member chevalmarin -> RANDOM.
+   # The starter and Surintendante Chevalmarin were the same card with
+   # different rarities: both cost 1, both put Chevalmarin on stage. Now the
+   # starter fields whoever turns up and the Common stays the card you draft
+   # when you want the applier specifically.
+   # The roll is per DEPLOY, not per card, and in C# it draws from the SHARED
+   # combat stream -- an unshared draw is what desynced co-op through Vigil
+   # of the Deep, and this is a starter, so it fires in every single run.
 
 # ---------- COMMON (22: was 33; Curtain Call R85 promoted 10 to U and 1 to R -- payoffs live at U/R) ----------
 # Salon (6)
