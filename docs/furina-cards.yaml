@@ -65,9 +65,9 @@
    # A12 (RULED 2026-07-28, playtest-2 red-pen; ex-D2). Capacitor parity: the
    # Salon's size was a constant from the day it was built, and this is the
    # card that makes it a stat. Pool 77 -> 78 (lint-ok: pool sizes).
-   # NAME IS A PLACEHOLDER -- "Box Seats" is mine, not ruled. [USER] picks the
-   # real one at red-pen; the id, the C# class title and the loc row all carry
-   # it, so changing it is a rename across those three, not a redesign.
+   # NAME RATIFIED 2026-07-28 -- "Box Seats" was mine on proposal and [USER]
+   # confirmed it at red-pen. The id, the C# class title and the loc row all
+   # carry it and now agree with a ruled name.
    # PRE-REGISTERED (from the ruling, recorded BEFORE any playtest): the mild
    # anti-synergy with bow payoffs is INTENDED -- a fuller stage bows less
    # often, so bow-hungry decks want a SMALLER salon. That is Capacitor's
@@ -102,7 +102,8 @@
    # the second and third deploys feel like they bought nothing.
    # Archetype `fanfare` DROPPED (no Encore flux left to feed it) and solve
    # moves sustain -> block: it no longer heals or holds a buffer.
-   # 2 + 2 PROPOSED; the shape is ruled, the numbers want red-pen.
+   # 2 + 2 RATIFIED 2026-07-28 at red-pen, in the same pass that ruled the
+   # shape -- both halves of A13 are ruled numbers now, matching A14's base 6.
 - {id: usher_the_waves, name: "Usher the Waves", register: salon, cost: 1, type: attack, rarity: common, solve: [utility], archetypes: [salon], role: enabler,
    effects: [{op: damage, amount: 5, target: enemy}, {op: apply_power, power: weak, amount: 1, target: enemy}]}
    # CURTAIN CALL B (R85): skill->attack retype (authored red-pen, ratified) — a PLAIN attack now, no

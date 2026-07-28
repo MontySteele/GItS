@@ -94,14 +94,15 @@ public static class SalonMemberTips
     private static string BodyFor(SalonMember member) => member switch
     {
         SalonMember.Crabaletta =>
-            $"Each turn, spends 1 Encore to deal "
+            $"Each turn, spends {SalonConstants.TickEncoreCost} Encore to deal "
           + $"{SalonConstants.CrabalettaTick} Hydro damage. Bows out for "
           + $"{SalonConstants.CrabalettaBow} Hydro damage.",
         SalonMember.Usher =>
-            $"Each turn, spends 1 Encore to gain {SalonConstants.UsherTick} "
+            $"Each turn, spends {SalonConstants.TickEncoreCost} Encore to gain "
+          + $"{SalonConstants.UsherTick} "
           + $"Block. Bows out for {SalonConstants.UsherBow} Block.",
         _ =>
-            $"Each turn, spends 1 Encore to deal "
+            $"Each turn, spends {SalonConstants.TickEncoreCost} Encore to deal "
           + $"{SalonConstants.ChevalmarinTick} Hydro damage. Bows out by "
           + "applying Hydro to ALL enemies and granting "
           + $"{SalonConstants.ChevalmarinBowEncore} Encore.",
