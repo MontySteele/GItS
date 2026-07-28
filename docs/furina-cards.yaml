@@ -27,8 +27,15 @@
 
 # ---------- BASIC (5) ----------
 - {id: soloists_solicitation, name: "Soloist's Solicitation", register: salon, cost: 1, type: attack, rarity: basic, solve: [frontload], archetypes: [generic], role: glue,
-   effects: [{op: damage, amount: 4, target: enemy}]}
-   # Her normal attack. 4 damage at 1 cost is DREADFUL on purpose — A1 is the load-bearing weakness (kickoff §2).
+   effects: [{op: damage, amount: 6, target: enemy}]}
+   # Her normal attack.
+   # A15 (RULED 2026-07-28, playtest-2 red-pen): damage 4 -> 6. The old 4 was
+   # "DREADFUL on purpose — A1 is the load-bearing weakness (kickoff §2)", but
+   # that design space was REVERTED and the number was left behind: a
+   # vestigial weakness nothing downstream still leans on. EXPECT the A1
+   # frontload axis to move at the next scorecard — that movement is THIS
+   # RULING, not drift, and must be labeled as such when the table re-runs.
+   # Upgrade delta unchanged (+3, so 6 -> 9) unless red-penned.
 - {id: stage_presence, name: "Stage Presence", register: salon, cost: 1, type: skill, rarity: basic, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 6}]}
    # One above a standard Defend: the measured starter-level stabilization nudge. Her distinctive durability still comes from Encore, not a hidden self-Spotlight subsidy.
@@ -39,12 +46,38 @@
    effects: [{op: gain_encore, amount: 5}]}
    # The starter's A4 seed: "healing" that arrives as buffer. One copy in the starting deck.
 - {id: salon_debut, name: "Salon Début", register: salon, cost: 1, type: skill, rarity: basic, solve: [utility, scaling], archetypes: [salon], role: enabler, tags: [skill_tag],
-   effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: chevalmarin}]}
-   # Signature basic (SALON v2, rework plan): Chevalmarin takes the stage — the applier, 2 hydro a turn seeding
-   # reactions from card one. Members are TYPED now; Fanfare is the Focus analogue on all member numbers.
+   effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: random}]}
+   # Signature basic (SALON v2, rework plan): a member takes the stage — Fanfare is the Focus analogue on all
+   # member numbers, and members are TYPED.
+   # A11 (RULED 2026-07-28, playtest-2 red-pen): member chevalmarin -> RANDOM.
+   # The starter and Surintendante Chevalmarin were the same card with
+   # different rarities: both cost 1, both put Chevalmarin on stage. Now the
+   # starter fields whoever turns up and the Common stays the card you draft
+   # when you want the applier specifically.
+   # The roll is per DEPLOY, not per card, and in C# it draws from the SHARED
+   # combat stream -- an unshared draw is what desynced co-op through Vigil
+   # of the Deep, and this is a starter, so it fires in every single run.
 
 # ---------- COMMON (22: was 33; Curtain Call R85 promoted 10 to U and 1 to R -- payoffs live at U/R) ----------
-# Salon (6)
+# Salon (7 since A12)
+- {id: box_seats, name: "Box Seats", register: salon, cost: 1, type: power, rarity: common, solve: [scaling], archetypes: [salon], role: enabler,
+   effects: [{op: apply_power, power: salon_cap_up, amount: 1, target: self}]}
+   # A12 (RULED 2026-07-28, playtest-2 red-pen; ex-D2). Capacitor parity: the
+   # Salon's size was a constant from the day it was built, and this is the
+   # card that makes it a stat. Pool 77 -> 78 (lint-ok: pool sizes).
+   # NAME RATIFIED 2026-07-28 -- "Box Seats" was mine on proposal and [USER]
+   # confirmed it at red-pen. The id, the C# class title and the loc row all
+   # carry it and now agree with a ruled name.
+   # PRE-REGISTERED (from the ruling, recorded BEFORE any playtest): the mild
+   # anti-synergy with bow payoffs is INTENDED -- a fuller stage bows less
+   # often, so bow-hungry decks want a SMALLER salon. That is Capacitor's
+   # bargain. If playtests read it as a trap rather than a choice, this note
+   # is the pre-registered reason to revisit, not a post-hoc defence.
+   # KNOWN GAP, owned by D1 (the salon-stage UI sprint, which already
+   # sequences the slot count "alongside A12"): the stage scene ships three
+   # sprite nodes, so a FOURTH member is mechanically live -- it ticks, bows,
+   # and counts for every per-member rider -- but does not render until D1
+   # adds the node.
 - {id: gentilhomme_usher, name: "Gentilhomme Usher", register: salon, cost: 1, type: skill, rarity: common, solve: [block, utility], archetypes: [salon], role: enabler, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: usher}, {op: block, amount: 4}]}
    # The Ball Octopus (v2: THE SHIELD — ticks 3 Block, bows for 9): deploy + a shield-swell now. Commons-heavy enablers per template §3.
@@ -56,21 +89,46 @@
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta}]}
    # The heavy (v2: THE HAMMER — ticks 6 hydro, bows for 14). Cost 2->1 at the rework: one member, the archetype's
    # core common, priced to be drafted. PROPOSED pending red-pen.
-- {id: dinner_service, name: "Dinner Service", register: private, cost: 1, type: skill, rarity: common, solve: [sustain], archetypes: [salon, fanfare], role: glue,
-   effects: [{op: gain_encore, amount: 3}, {op: conditional, if: has_salon_members, then: [{op: gain_encore, amount: 3}]}]}
+- {id: dinner_service, name: "Dinner Service", register: private, cost: 1, type: skill, rarity: common, solve: [block], archetypes: [salon], role: glue,
+   effects: [{op: block, amount: 2, bonus_formula: 2_per_salon_member}]}
    # Feeding the household. Upkeep economy: better with a salon to feed.
+   # A13 REWORK (RULED 2026-07-28, playtest-2 red-pen). Was 3 Encore, +3 more
+   # with a salon on stage (lint-ok: retired numbers). Now BLOCK on a
+   # per-member slope: 2/4/6/8 at 0-3 members (lint-ok: projected totals; A12's cap-raise opens 10).
+   # BLOCK not Encore was the explicit ruling -- the deck is over-supplied on
+   # Encore grants, so another one glued nothing.
+   # The threshold -> slope change is the point of the pair with A14: a
+   # conditional pays the same for a stage of 1 and a stage of 3, which made
+   # the second and third deploys feel like they bought nothing.
+   # Archetype `fanfare` DROPPED (no Encore flux left to feed it) and solve
+   # moves sustain -> block: it no longer heals or holds a buffer.
+   # 2 + 2 RATIFIED 2026-07-28 at red-pen, in the same pass that ruled the
+   # shape -- both halves of A13 are ruled numbers now, matching A14's base 6.
 - {id: usher_the_waves, name: "Usher the Waves", register: salon, cost: 1, type: attack, rarity: common, solve: [utility], archetypes: [salon], role: enabler,
    effects: [{op: damage, amount: 5, target: enemy}, {op: apply_power, power: weak, amount: 1, target: enemy}]}
    # CURTAIN CALL B (R85): skill->attack retype (authored red-pen, ratified) — a PLAIN attack now, no
    # application (the cadence law: plain attacks never apply hydro). The Weak stays (R32.3's utility lift).
    # The smallest application loss of the four retypes: single-target, and the members carry the engine.
-- {id: rising_tide, name: "Rising Tide", register: salon, cost: 1, type: skill, rarity: common, solve: [utility, sustain], archetypes: [salon], role: enabler, tags: [skill_tag],
-   effects: [{op: apply_aura, element: hydro, target: random_enemy}, {op: gain_encore, amount: 3}]}
-   # Pure application + buffer. Seeds Vaporize for Chevreuse, Frozen for the Cryo bench — co-op dream fuel.
+# A4 (RULED 2026-07-28, playtest-2 red-pen): `rising_tide` (Rising Tide) is
+# CUT from the pool. It was pure application + buffer at common — the effect
+# the deploy cards already carry as a rider, with no body of its own. Pool
+# 78 -> 77. Removed here, from furina-upgrades.yaml, and from the salon
+# package in tier0/content/characters/furina.yaml; the C# class is dropped by
+# regen. Its skill_tag hydro application is why test_furina_sheet's cadence
+# case named it, and that case now names `overflowing_hospitality` instead.
 - {id: house_call, name: "House Call", register: salon, cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [salon], role: glue,
-   effects: [{op: damage, amount: 6, target: enemy}, {op: conditional, if: has_salon_members, then: [{op: damage, amount: 4, target: enemy}]}]}
+   effects: [{op: damage, amount: 6, target: enemy, bonus_formula: 2_per_salon_member}]}
    # The members flank. Her attack numbers only reach honest when the stage is set (A7 setup tax by design).
-   # Red-pen flag 9 KEPT: the sheet's biggest conditional number, priced by the threshold family it matches.
+   # A14 REWORK (RULED 2026-07-28, playtest-2 red-pen). Was a flat 6 plus a
+   # conditional 4 with any salon on stage (lint-ok: retired numbers). Now a
+   # per-member slope: 6/8/10/12 at 0-3 members (lint-ok: projected totals; A12's cap-raise opens 14).
+   # Base 6 is RULED, not proposed.
+   # RED-PEN FLAG 9 RETIRED: the flag was raised against the old conditional,
+   # which was the sheet's biggest threshold number. There is no threshold
+   # left to price -- the slope pays per member, so the number it reaches is
+   # a consequence of how many deploys the pilot actually landed.
+   # Pairs with A13 by construction: same slope, one on damage and one on
+   # block, so the stage reads the same way on both halves of the turn.
 # Fanfare (7)
 - {id: suffering_for_art, name: "Suffering for Art", register: archon, cost: 0, type: skill, rarity: common, solve: [sustain, velocity], archetypes: [fanfare], role: enabler,
    effects: [{op: damage, amount: 1, target: self}, {op: gain_encore, amount: 3}]}
@@ -100,8 +158,11 @@
 - {id: an_invitation, name: "An Invitation", register: salon, cost: 0, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: enabler, exhaust: true,
    effects: [{op: generate_guest_star, rarity: common, amount: 1}]}
    # THE base generator (kickoff §9 grammar verbatim): create a common from the companion pool + Guest Star set. Exhausts. This-combat-only. The invitation is free; the generated card still pays its printed cost.
-- {id: limelight, name: "Limelight", register: salon, cost: 1, type: skill, rarity: common, solve: [utility], archetypes: [spotlight], role: enabler,
+- {id: limelight, name: "Limelight", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [utility], archetypes: [spotlight], role: enabler, exhaust: true,
    effects: [{op: spend_encore, amount: 1}, {op: apply_power, power: spotlight_mult_bonus_turn, amount: 25, target: self}, {op: energy, amount: 1}, {op: draw, amount: 1}]}
+   # A2 (RULED 2026-07-28, playtest-2 red-pen): common -> UNCOMMON and gains
+   # EXHAUST. With the Energy refund and the self-replacing draw it was a
+   # free-and-repeatable Velocity piece; Exhaust is what prices the loop.
    # R16 re-author (replaces Warm Reception): the beam finds the star — Spotlighted numbers +25% this turn.
    # The bread-and-butter boost; delete her cards and the empowerment leaves with them. (lint-ok: pct points)
    # R32.1 spend line, third iteration: the beam is priced in buffer-or-blood (overdraw op, the greed grammar —
@@ -128,9 +189,11 @@
    # R32.2 RIDER SWAP: the glare blinds the front row — Weak replaces the block rider. Debuff texture bills to
    # utility AND defends by prevention (not absorption — the sustain axis stays honest, the W1 dose record's law).
    # R32.3: the glare goes house-wide (mass Weak at common is ratified grammar — Spooked!/commanding_gaze). Draw 1 keeps the lit Companion in reach.
-- {id: curtain_cue, name: "Curtain Cue", register: salon, cost: 0, type: skill, rarity: common, solve: [sustain], archetypes: [spotlight, fanfare], role: glue,
+- {id: curtain_cue, name: "Curtain Cue", register: salon, cost: 0, type: skill, rarity: uncommon, solve: [sustain], archetypes: [spotlight, fanfare], role: glue,
    effects: [{op: conditional, if: spotlight_moved_this_turn, then: [{op: gain_encore, amount: 3}, {op: draw, amount: 1}], else: [{op: gain_encore, amount: 1}]}]}
-   # Free beat that rewards the re-aim. Selector-payoff texture at common.
+   # Free beat that rewards the re-aim. Selector-payoff texture.
+   # A1 (RULED 2026-07-28, playtest-2 red-pen): common -> UNCOMMON. The
+   # equivalent Official effects (0-cost conditional draw + buffer) live at U.
 # Generic (3)
 - {id: graceful_retreat, name: "Slip Backstage", register: private, cost: 1, type: skill, rarity: common, solve: [block], archetypes: [generic], role: glue,
    effects: [{op: block, amount: 5}, {op: conditional, if: hp_lost_this_turn, then: [{op: block, amount: 4}]}]}
@@ -151,11 +214,22 @@
    # long breath: draw 2, +1 while holding 8+ Encore (first encore_at_least read in the pool). The
    # draw-clone pair with old crowd_work dissolved with that card's power conversion; this rewrite gives
    # the survivor a reason to exist beyond parity. Was: draw 2 flat. PROPOSED.
-- {id: undercurrent, name: "Undercurrent", register: salon, cost: 2, type: skill, rarity: common, solve: [utility], archetypes: [salon, generic], role: enabler, tags: [skill_tag],
-   effects: [{op: damage, amount: 7, target: all_enemies}]}
-   # AoE hydro application (damaging skill). A6's swarm face. WATCHLIST (redpen flag 8): member of the hydro+cryo
-   # convergence CELL = {undercurrent, rain_of_roses, guest_neuvillette_judgment} — one measurement covers the
-   # full mass-application set.
+- {id: undercurrent, name: "Undercurrent", register: salon, cost: 2, type: attack, rarity: common, solve: [frontload], archetypes: [salon, generic], role: enabler,
+   effects: [{op: damage, amount: 2, target: all_enemies, times: 3}]}
+   # A5 REWORK (RULED 2026-07-28, playtest-2 red-pen): was a 2-cost skill
+   # dealing 7 AoE, upgrading to 5 hits (lint-ok: the retired number and the
+   # upgraded hit count both live outside this row).
+   # Now an ATTACK dealing 2 to ALL enemies 3 times
+   # — Furina is short on multi-hit attacks, and the per-hit shape is what
+   # makes her Salon's spread auras and per-hit riders worth building around.
+   # skill_tag DROPPED with the retype: under the cadence law a plain attack
+   # never applies hydro, so keeping the tag would have been a contradiction.
+   # WATCHLIST CONSEQUENCE (redpen flag 8): this LEAVES the hydro+cryo
+   # mass-application cell. That cell was {undercurrent, rain_of_roses,
+   # guest_neuvillette_judgment} and is now the remaining TWO —
+   # {rain_of_roses, guest_neuvillette_judgment}. Re-scope the measurement
+   # there; do not quote the three-member cell's old rows against it.
+   # solve retagged utility -> frontload: it no longer applies anything.
 
 # ---------- UNCOMMON (32: was 25; +10 promoted commons -3 promoted to rare at Curtain Call R85) ----------
 # Salon (7)
@@ -166,7 +240,10 @@
    # Fill the three Salon slots at once, one of each (v2). Cost 3->2 at the rework; on a full stage the oldest
    # members bow out (Defect evoke geometry). PROPOSED pending red-pen.
 - {id: grand_salon, name: "Grand Salon", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling], archetypes: [salon], role: payoff,
-   effects: [{op: apply_power, power: salon_damage_up, amount: 3, target: self}]}
+   effects: [{op: apply_power, power: salon_damage_up, amount: 1, target: self}]}
+   # A10 (RULED 2026-07-28, playtest-2 red-pen): amount 3 -> 1 (2 upgraded),
+   # Defect parity. Pairs with B4: the power must move ALL member numbers,
+   # not just their damage, so the old +3 was both too large and too narrow.
    # Explosives Workshop parity: members tick harder. The Salon's A2 curve.
    # CAP DROPPED (user ruling 2026-07-24, uncap-all): +3/copy is a flat additive to member ticks, linear in copies.
    # A/B at 2000 runs/arm x2 seeds moved salon 0.0pp (all_caps->shipped) and +0.4-0.5pp (shipped->uncapped, p~0.02), (lint-ok: A/B counts)
@@ -180,9 +257,10 @@
 - {id: dress_rehearsal, name: "Dress Rehearsal", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [velocity, utility], archetypes: [salon, fanfare], role: glue, encore_cost: 2, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: usher}, {op: draw, amount: 1}]}
    # Spend 2 Encore: the understudy (Usher, v2) and a look at the script. Spend-tempo crossing into the Salon plan.
-- {id: crashing_waves, name: "Crashing Waves", register: salon, cost: 2, type: attack, rarity: uncommon, solve: [frontload, utility], archetypes: [salon, generic], role: payoff,
+- {id: crashing_waves, name: "Crashing Waves", register: salon, cost: 1, type: attack, rarity: uncommon, solve: [frontload, utility], archetypes: [salon, generic], role: payoff,
    effects: [{op: damage, amount: 8, target: all_enemies, bonus_vs_aura: 5}]}
    # Flame Dance parity: AoE that cashes the auras her Salon spreads. No application (plain attack) — exploit, not fuel.
+   # A8 (RULED 2026-07-28, playtest-2 red-pen): cost 2 -> 1.
 - {id: overflowing_hospitality, name: "Overflowing Hospitality", register: salon, cost: 2, type: skill, rarity: uncommon, solve: [utility, sustain], archetypes: [salon], role: enabler, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: chevalmarin}, {op: apply_aura, element: hydro, target: random_enemy}, {op: gain_encore, amount: 3}]}
    # Deploy the hostess (Chevalmarin, v2), pour the tea, set the table: the kitchen-sink Salon two-drop.
@@ -202,9 +280,14 @@
    # A 0-cost cantrip at an empty meter, the old three-card hand at a full one. Its UPGRADE drops the gate rather than
    # adding cards, so the upgraded card is exactly the pre-sprint one and the base version is what had to be paid for.
    # This also closes the upgrade gap F-A4 opened (its only delta had been the spend discount). PROPOSED.
-- {id: hearts_swelling, name: "Hearts Swelling", register: private, cost: 2, type: skill, rarity: uncommon, solve: [sustain], archetypes: [fanfare, salon], role: enabler,
+- {id: hearts_swelling, name: "Hearts Swelling", register: private, cost: 2, type: skill, rarity: uncommon, solve: [sustain], archetypes: [fanfare, salon], role: enabler, innate: true,
    effects: [{op: gain_encore, amount: 7}]}
    # The big buffer draught. Seven points of deferred HP and seven Fanfare flux.
+   # A9 (RULED 2026-07-28, playtest-2 red-pen): gains INNATE on the BASE card
+   # (not on upgrade — the table lists it flat, alongside A2's flat Exhaust).
+   # First base-card innate on any sheet: tier0 read it for free (Card.innate
+   # already existed and surface_innate reads it), the C# generator did NOT
+   # and needed the keyword wired on the base path — see gen_klee_cards.
 - {id: pit_orchestra, name: "Stagehands", register: salon, cost: 1, type: power, rarity: uncommon, solve: [block, sustain], archetypes: [salon, generic], role: glue,
    effects: [{op: apply_power, power: salon_bow_block, amount: 5, target: self, note: "whenever a Salon member takes its final bow, gain N Block"},
              {op: apply_power, power: salon_bow_encore, amount: 2, target: self, note: "...and N Encore"}]}
@@ -353,12 +436,27 @@
    # Columbina's replay grammar on schedule. Refunds its Energy so the copied Companion is playable now; still dead without a target.
    # WATCHLIST: duplicating an amp-booster goes on the amp-cap watchlist (iron rule bounds it; confirm in provenance logs).
 - {id: singer_of_many_waters, name: "Singer of Many Waters", register: archon, cost: 1, type: skill, rarity: rare, solve: [sustain], archetypes: [generic, salon], role: payoff, exhaust: true,
-   effects: [{op: heal, amount: 14}]}
+   effects: [{op: heal, amount: 6}]}
    # TRUE HEAL: Rare AND Exhausts — the conjunctive law's poster child (Guardrail 6). The Pneuma voice, once per combat.
-- {id: unheard_confession, name: "Unheard Confession", register: archon, cost: 1, type: skill, rarity: rare, solve: [sustain], archetypes: [fanfare, generic], role: payoff, exhaust: true,
-   effects: [{op: heal, amount: 8}, {op: gain_encore, amount: 6}]}
-   # The second legal heal: half mended, half buffered, all Fanfare flux. Rare + Exhaust, per the law.
-   # Cost 2->1 at the rework reprice (rare curve 1.93 -> 1.43 avg). PROPOSED.
+   # A6 (RULED 2026-07-28, playtest-2 red-pen): heal 14 -> 6; the upgraded
+   # value lives in furina-upgrades.yaml, which this lint cannot see.
+   # Stays Rare + Exhaust; the law is untouched, only the magnitude.
+- {id: unheard_confession, name: "Unheard Confession", register: archon, cost: 2, type: power, rarity: rare, solve: [block], archetypes: [fanfare, generic], role: payoff,
+   effects: [{op: apply_power, power: fanfare_delta_block, amount: 1, target: self}]}
+   # A7 REWORK (RULED 2026-07-28, playtest-2 red-pen). Was a 1-cost Rare
+   # Exhaust skill healing 8, granting 6 Encore (lint-ok: retired numbers).
+   # Now a 2-cost (1 upgraded)
+   # POWER: gain 1 Block whenever Fanfare CHANGES AMOUNT — either direction.
+   # The decay half is the point: her meter fades 20% a turn from turn 2, so
+   # this pays on the way down as well as the way up, which is what makes it
+   # a fanfare-archetype engine rather than a second gain-rider.
+   # EXHAUST DROPPED (RATIFIED 2026-07-28, review red-pen: "Exhaust on a
+   # power is redundant"). It was here solely to satisfy the true-heal law
+   # (Rare AND Exhaust, Guardrail 6), and the heal is gone. A Power leaves
+   # combat on play anyway, so Exhaust on one is inert decoration.
+   # solve retagged sustain -> block: it no longer heals or buffers.
+   # A saturated meter stops paying (a gain fully wasted at the cap is not a
+   # change) — deliberate, and visible in the pass-4 saturation telemetry.
 - {id: endless_waltz, name: "Endless Waltz", register: salon, cost: 2, type: power, rarity: rare, solve: [scaling], archetypes: [salon], role: payoff,
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta},
              {op: apply_power, power: salon_member, amount: 1, target: self, member: usher},

@@ -308,6 +308,9 @@ GENERATOR_OWNED = {
     "ImageGen/images/kokomi/ui/selection_splash.png":       "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/char_icon.png":              "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/map_marker.png":             "gen_kokomi_stills.py",
+    "ImageGen/images/furina/salon/glyph_damage.png":        "gen_salon_glyphs.py",
+    "ImageGen/images/furina/salon/glyph_block.png":         "gen_salon_glyphs.py",
+    "ImageGen/images/furina/salon/glyph_support.png":       "gen_salon_glyphs.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
 }

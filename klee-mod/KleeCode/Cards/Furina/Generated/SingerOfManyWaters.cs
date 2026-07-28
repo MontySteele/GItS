@@ -50,7 +50,7 @@ public sealed class SingerOfManyWaters : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Heal", 14m)
+            new DynamicVar("Heal", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -67,6 +67,6 @@ public sealed class SingerOfManyWaters : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Heal"].UpgradeValueBy(4m);
+        DynamicVars["Heal"].UpgradeValueBy(2m);
     }
 }

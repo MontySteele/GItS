@@ -36,7 +36,8 @@ from tier0.engine.combat import run_fight
 from tier0.engine.state import Card, Enemy
 from tier0.harness import metrics as t0_metrics
 from tier0.pilot.policy import make_pilot
-from tier05 import (acts, aura_telemetry, burst_telemetry, draft, events,
+from tier05 import (acts, aura_telemetry, burst_telemetry, conditional_telemetry,
+                    draft, encore_telemetry, events,
                     fanfare_telemetry, kurage_telemetry, overlap_telemetry,
                     maps, potions as potion_pool, rewards, route, shop)
 from tier05 import relics as relic_pool
@@ -221,6 +222,15 @@ class RunResult:
     aura_traces: list = field(default_factory=list)      # Curtain Call R85:
     #                    (act_index, AuraTrace) per fight -- hydro-application
     #                    uptime, the Track B retype tripwire (sprint log §4).
+    encore_traces: list = field(default_factory=list)    # Salon UI Track 3:
+    #                    (act_index, EncoreTrace) per fight -- D8's saturation
+    #                    prerequisite. Act-tagged like the five above because
+    #                    "the bar fills faster than the stage drains it" is a
+    #                    claim about late acts, where the stage is largest.
+    #                    Empty for every character without Encore.
+    conditional_traces: list = field(default_factory=list)  # Salon UI Track 4:
+    #                    (act_index, ConditionalTrace) per fight -- rider
+    #                    fire-rates, D4's near-dead-condition question.
 
 
 def node_template() -> list[str]:
@@ -576,6 +586,15 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 # near-zero-cost for rosters that never apply hydro.
                 res.aura_traces.append(
                     (act_i, aura_telemetry.trace(state.log)))
+                # Salon UI sprint (2026-07-28), Tracks 3 and 4: Encore
+                # saturation and conditional-rider fire rates. Same act-tagged
+                # shape and taken in the same place as the five above, for the
+                # same reason -- state.log does not survive onto the
+                # RunResult, so anything not reduced here is unrecoverable.
+                res.encore_traces.append(
+                    (act_i, encore_telemetry.trace(state.log)))
+                res.conditional_traces.append(
+                    (act_i, conditional_telemetry.trace(state.log)))
                 fights += 1
                 hp = state.player.hp
                 # Combat-scoped effects such as Feed can raise max HP permanently.

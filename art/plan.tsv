@@ -410,6 +410,7 @@ dramatic_entrance	ImageGen/images/cards/furina/dramatic_entrance.png	500	380	cov
 crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Astra Carnival Cat's Tail Gathering 2024 S5 Artwork.png		splash	furina_pool
 crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	2024 7 5 amusement park art.png		splash	furina_pool
 crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Universal Studios Beijing x Genshin Impact Collab.png		splash	furina_pool
+crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	cover@0.06	shortlist	4	png	Opera Epiclese - Furina's Seat.png		splash	furina_pool
 suffering_for_art	ImageGen/images/cards/furina/suffering_for_art.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Expression 1.png		sticker	furina_pool
 suffering_for_art	ImageGen/images/cards/furina/suffering_for_art.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Fragmented Memories Archive 3.png		splash	furina_pool
 suffering_for_art	ImageGen/images/cards/furina/suffering_for_art.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Icon Emoji Paimon's Paintings 28 Furina 2.png		sticker	furina_pool
@@ -417,11 +418,17 @@ thunderous_ovation	ImageGen/images/cards/furina/thunderous_ovation.png	500	380	c
 thunderous_ovation	ImageGen/images/cards/furina/thunderous_ovation.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Paimon's Paintings Set 28.png		splash	furina_pool
 thunderous_ovation	ImageGen/images/cards/furina/thunderous_ovation.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Universal Studios Beijing x Genshin Impact Collab.png		splash	furina_pool
 tempo_change	ImageGen/images/cards/furina/tempo_change.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Icon Emoji Paimon's Paintings 29 Furina 1.png		sticker	furina_pool
+tempo_change	ImageGen/images/cards/furina/tempo_change.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Furina Birthday 2024 - Shorts.png		splash	furina_pool
+tempo_change	ImageGen/images/cards/furina/tempo_change.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	New Year's Advice from Teyvat Furina.png		splash	furina_pool
 warmup_act	ImageGen/images/cards/furina/warmup_act.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Icon Emoji Paimon's Paintings 28 Furina 2.png		sticker	furina_pool
 warmup_act	ImageGen/images/cards/furina/warmup_act.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Furina Vision.png		item	furina_pool
+warmup_act	ImageGen/images/cards/furina/warmup_act.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Tabletop Troupe Pros Furina.png		splash	furina_pool
+warmup_act	ImageGen/images/cards/furina/warmup_act.png	500	380	cover_autocrop	cover@0.06	shortlist	4	png	Fragrant Fantasy Furina 3.png		splash	furina_pool
 audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	A Commemorative Photo Aether 1.png		splash	furina_pool
 audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	A Commemorative Photo Lumine 1.png		splash	furina_pool
 audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Those We Have Kept Quest Still Aether.png		splash	furina_pool
+audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	4	png	Furina Introduction Banner.png		splash	furina_pool
+audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	5	png	Astra Carnival Cat's Tail Gathering 2024 S4 Artwork.png		splash	furina_pool
 ebb_and_flow	ImageGen/images/cards/furina/ebb_and_flow.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Calamitous Tread Graphic 5.png		splash	furina_pool
 ebb_and_flow	ImageGen/images/cards/furina/ebb_and_flow.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	This Life, Just Like a Light Trickle of Song Still 1 Aether.png		splash	furina_pool
 ebb_and_flow	ImageGen/images/cards/furina/ebb_and_flow.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Fragmented Memories Puzzle 2.png		splash	furina_pool

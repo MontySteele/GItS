@@ -396,6 +396,31 @@ public sealed class PreventExhaustWardPower : PowerModel, ILocalizationProvider
     /// `prevention_used_this_turn`.</summary>
     private bool _usedThisTurn;
 
+    /// <summary>
+    /// Raw incoming damage for the hit currently resolving, captured in
+    /// <see cref="BeforeDamageReceived"/>.
+    ///
+    /// This field exists because <see cref="ModifyDamageAdditive"/> is NOT a
+    /// real-hit hook. The engine also calls it to answer damage PREVIEWS --
+    /// the Beetle Swarm ruling in DECISIONS puts it exactly: previews are
+    /// "questions about the current board rather than about a cast in
+    /// progress". Previews are local UI, so they run a different number of
+    /// times on each co-op peer.
+    ///
+    /// The 2026-07-27 co-op playtest is what that costs. This power used to
+    /// set its per-turn latch AND arm its exhaust from inside the modifier,
+    /// so a preview on one peer burned the latch the other peer still had.
+    /// The peers then disagreed about whether the ward had fired, and -- the
+    /// fatal part -- one of them took a roll off the shared
+    /// Rng.CombatTargets stream that the other did not. That poisons every
+    /// later roll in the run, so the host's checksum tripped at the next
+    /// boundary and it disconnected the client (StateDivergence).
+    ///
+    /// So: the modifier is PURE, and every mutation lives in the
+    /// Before/After hooks, which only ever run on hits that really happened.
+    /// </summary>
+    private decimal _incomingThisHit;
+
     public override Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
@@ -403,42 +428,82 @@ public sealed class PreventExhaustWardPower : PowerModel, ILocalizationProvider
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Fuel is draw + discard, because an empty draw pile reshuffles the
+    /// discard back in before the ward gives up (tier0
+    /// prevent_damage_exhaust). Kept in one place so the modifier's answer
+    /// and the exhaust's decision can never drift apart.
+    /// </summary>
+    private bool HasFuel()
+    {
+        if (Owner.Player == null) return false;
+        var draw = CardPile.Get(PileType.Draw, Owner.Player);
+        var discard = CardPile.Get(PileType.Discard, Owner.Player);
+        return (draw?.Cards.Count ?? 0) + (discard?.Cards.Count ?? 0) > 0;
+    }
+
+    public override Task BeforeDamageReceived(
+        PlayerChoiceContext choiceContext, Creature target, decimal amount,
+        ValueProp props, Creature? dealer, CardModel? cardSource)
+    {
+        // Real hits only. Capturing the amount here rather than in the
+        // modifier is what lets AfterDamageReceived tell a hit apart from a
+        // preview without the modifier having to remember anything.
+        if (target == Owner) _incomingThisHit = amount;
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// PURE -- mutating anything here desyncs co-op (see _incomingThisHit).
+    /// Returning the same reduction for a preview and for the real hit is
+    /// the correct answer to both questions: the preview asks what this hit
+    /// would do, and what it would do is the reduced number.
+    /// </summary>
     public override decimal ModifyDamageAdditive(
         Creature target, decimal amount, ValueProp props, Creature dealer,
         CardModel cardSource)
     {
         if (target != Owner || _usedThisTurn || amount <= 0) return 0m;
-        if (Owner.Player == null) return 0m;
+        if (!HasFuel()) return 0m;       // defenceless: the deck is spent
         // Block resolves first in the sim (the ward reads what is left
         // UNBLOCKED), and the engine applies Block after additive modifiers,
         // so the reduction is capped at the ward rather than at the raw hit.
-        var drawPile = CardPile.Get(PileType.Draw, Owner.Player);
-        var discard = CardPile.Get(PileType.Discard, Owner.Player);
-        var fuel = (drawPile?.Cards.Count ?? 0) + (discard?.Cards.Count ?? 0);
-        if (fuel == 0) return 0m;        // defenceless: the deck is spent
-
-        _usedThisTurn = true;
-        _pendingExhaust = true;
         return -System.Math.Min(amount, Amount);
     }
-
-    private bool _pendingExhaust;
 
     /// <summary>
     /// The fuel is paid AFTER the hit resolves. Exhausting inside the damage
     /// modifier would mutate piles mid-calculation, which is the class of bug
     /// that produces "the number changed while I was reading it".
+    ///
+    /// The per-turn latch is set HERE, not in the modifier, so it can only
+    /// ever be burned by a hit that really landed.
     /// </summary>
     public override async Task AfterDamageReceived(
         PlayerChoiceContext choiceContext, Creature target, DamageResult result,
         ValueProp props, Creature dealer, CardModel cardSource)
     {
-        if (target != Owner || !_pendingExhaust) return;
-        _pendingExhaust = false;
+        var incoming = _incomingThisHit;
+        _incomingThisHit = 0m;
+
+        // The same predicate the modifier just answered with. Because the
+        // modifier mutates nothing, it is still true here on a hit the ward
+        // actually reduced -- and false on every hit it declined.
+        if (target != Owner || _usedThisTurn || incoming <= 0) return;
         if (Owner.Player == null) return;
 
+        // tier0 order: reshuffle FIRST, and only then decide the ward is out
+        // of fuel. ShuffleIfNecessary is the funnel every other draw-pile
+        // read in the game goes through.
         var drawPile = CardPile.Get(PileType.Draw, Owner.Player);
+        if (drawPile == null || drawPile.Cards.Count == 0)
+        {
+            await CardPileCmd.ShuffleIfNecessary(choiceContext, Owner.Player);
+            drawPile = CardPile.Get(PileType.Draw, Owner.Player);
+        }
         if (drawPile == null || drawPile.Cards.Count == 0) return;
+
+        _usedThisTurn = true;
         var victim = Owner.Player.RunState.Rng.CombatTargets
             .NextItem(drawPile.Cards.ToList());
         if (victim != null)

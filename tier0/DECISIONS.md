@@ -2743,3 +2743,80 @@ question for the new self-powers) live in the sprint log.
 **Class: RULING** ([USER] 2026-07-27, three chat ratifications) **+
 MEASUREMENT** (cells 0-3 + seed-12 rider; D12 frozen throughout -- no
 scorer or drafter constant moved).
+
+## R86 -- "Take a Bow": the Curtain Call deferral is paid off and deleted (2026-07-27)
+
+R85 shipped Curtain Call's mechanics in Python and deferred C# parity for
+twelve cards to a named consolidation sprint (§9,
+`FURINA_DEFERRED_TO_CONSOLIDATION`, manifest 65 generated / 13 blocked).
+This is that sprint. **Manifest is now 78 total / 77 generated / 1 blocked**,
+the one blocked card being the hand-written kit Burst -- implemented, just
+not by codegen. The deferral set is DELETED rather than emptied: an empty set
+is an invitation, and the positive "every non-kit card is emitted" assertion
+already carries the invariant it existed to state. The next deferral gets a
+fresh set with its own written gate.
+
+Nothing in tier0 moved. The Python side was the frozen reference this sprint
+copied FROM, and no sim cell was run -- the suite was the gate, because there
+was nothing to measure.
+
+**Six PowerModels** (not five: `pit_orchestra` carries `salon_bow_block` AND
+`salon_bow_encore`, and `blocked_reason` only ever reported the first), each
+wired to the site mirroring its tier0 hook. Two needed judgment, both
+recorded in `Powers/CurtainCallPowers.cs`:
+
+- `encore_spend_draw`'s draw is DEFERRED, because `SpendEncore` is
+  synchronous and holds no `PlayerChoiceContext`; it flushes from every async
+  Furina hook that can follow a spend, the same deferral SpotlightSystem
+  already uses for its first-play draw.
+- The per-turn windows reset in `BeforeSideTurnStart`, not
+  `AfterPlayerTurnStart` -- Salon upkeep SPENDS Encore in that second
+  broadcast, so resetting there would make the Gallery Stirs draw depend on
+  undefined intra-broadcast power ordering.
+
+`cross_examination` reads the DEALER, not a global player. The reaction
+counters are deliberately global (red-pen R1: a reaction is a fact about the
+shared board), but a power is owned by a creature, so "did Courtroom Drama
+fire" can only be asked of whoever caused the reaction. Solo -- the only
+configuration the sim models -- the dealer IS the player, so this is the
+sim's read exactly; co-op inherits the Best Friends Forever lesson for free.
+
+**Two latent generator defects surfaced on real cards**, both of the class
+that only appears when a new card shape arrives:
+
+- Compose Herself draws at top level AND inside a branch, and tier0's draw
+  delta bumps ALL draw ops -- so both numbers are upgradeable and both need a
+  var. `Cards` was taken, so branch draws now get their own name.
+- Matinee Performance is the pool's first card with two top-level damage ops
+  and both declared `"Damage"`. That is a `DynamicVarSet` constructor throw
+  inside `CardFactory.CreateForReward` -- **a reward-screen softlock on
+  whatever run rolls the card**, the same shape as the 2026-07-23 incident.
+  `damage_var_effect` now binds the var to the one effect tier0 actually
+  upgrades, exactly as `power_upgrade_effect` already did for powers.
+
+**The register column is fenced off by a lint** (`lint_register_isolation.py`,
+wired into `test_sheet_lints`): nothing under `tier0/engine` or `tier05` may
+read it, `state.py`'s declaration excepted, and `tools/` is deliberately not
+scanned because guiding art selection is the entire point of having a
+register. Cell 1 PROVED the isolation empirically -- renames plus registers,
+byte-identical -- but a measurement only speaks for the code that existed
+when it ran. The coupling this forbids: with a register-aware engine, moving
+a card from the salon voice to the archon one, an ART decision taken on art
+grounds, would silently move win rate. Codegen is separately proven to ignore
+the field by a byte-identity test against a stripped sheet.
+
+Parity vectors extended with the card-body READS (riders and thresholds),
+derived through the sim's own `_bonus_formula` and `_predicate` so the table
+cannot be fudged into agreement with a bug. Both new gates were verified RED
+before being trusted.
+
+**Class: MECHANICAL** -- zero design decisions, per the sprint's own charter.
+No balance, body, cost, name, type, rarity or register changed; D12 stays
+frozen; no sheet edit. Suite 1280 passed / 1 skipped; Release build clean;
+pck 114 resources; `validate: OK`; deployed 0.2-217.
+
+**OPEN, and NOT closed by this entry:** gate G1 (contact-sheet eyes-on for
+the four REHUNT picks plus the `standing_room_only` overturn) and gate G2
+(in-game screenshot review of the twelve cards and the A0 smoke run). Both
+are [USER] and both are eyes-on by nature. Six power icons are declared art
+debt in `$pckDeferred`.

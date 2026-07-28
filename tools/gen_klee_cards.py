@@ -209,6 +209,12 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_
                   "energy", "scry_discard", "add_card", "exhaust_from",
                   "apply_aura", "swirl", "buff_next_attack", "block_next_turn",
                   "cost_mod", "copy_companion_in_hand",
+                  # Curtain Call consolidation ("Take a Bow"): grow_damage is
+                  # Rampage's permanent per-instance growth (BaseValue raised
+                  # on the card's own var, the SyncDisplay idiom);
+                  # refresh_all_auras reuses AuraPower's same-element refresh
+                  # so the duration it refreshes TO has one definition.
+                  "grow_damage", "refresh_all_auras",
                   # Kokomi (playtest sprint, Track B). gain_charge rides
                   # KokomiResources.GainCharge; summon_kurage rides
                   # KurageSummon.Field (refresh-never-stack); conscript rides
@@ -287,6 +293,17 @@ PREDICATES_CS = {
     "has_salon_members": "SalonMemberPower.Count(Owner.Creature) > 0",
     "spotlight_moved_this_turn":
         "SpotlightSystem.MovedThisTurn(Owner.Creature)",
+    # Curtain Call ("Take a Bow"). Both read through CurtainCallHooks rather
+    # than inline, so the mirror of each sim predicate lives next to its
+    # tracker and the divergence risk is one file, not every card that reads
+    # it. enemy_intends_attack drops the sim's `sleep_turns == 0` clause on
+    # purpose: nothing in the game SETS sleep, and a sleeping enemy
+    # telegraphs SleepIntent rather than AttackIntent, so it fails the intent
+    # test on its own (the helper checks IsStunned too).
+    "enemy_intends_attack":
+        "CurtainCallHooks.EnemyIntendsAttack(Owner.Creature)",
+    "hp_lost_this_turn":
+        "CurtainCallHooks.HpLostThisTurn(Owner.Creature)",
 }
 
 # The if-clause each predicate renders on the card.
@@ -299,6 +316,8 @@ PREDICATE_TEXT = {
     "has_salon_members": "If you have a [gold]Salon Member[/gold]",
     "spotlight_moved_this_turn":
         "If you moved the [gold]Spotlight[/gold] this turn",
+    "enemy_intends_attack": "If an enemy intends to attack",
+    "hp_lost_this_turn": "If you have lost HP this turn",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -308,6 +327,10 @@ _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
 # engine already keeps) and Charge.
 _CHARGE_BAR = re.compile(r"^charge_at_least_(\d+)$")
 _EXHAUST_PILE_BAR = re.compile(r"^exhaust_pile_at_least_(\d+)$")
+# Curtain Call: Encore is a HELD buffer, so a threshold on it is the same
+# shape as Fanfare's and gets the same parametric treatment for the same
+# reason -- moving the bar must be a card edit, never a codegen edit.
+_ENCORE_BAR = re.compile(r"^encore_at_least_(\d+)$")
 
 
 def predicate_cs(name: str) -> str | None:
@@ -328,6 +351,9 @@ def predicate_cs(name: str) -> str | None:
     if hit:
         return (f"KokomiResources.ExhaustPileCount(Owner.Creature) "
                 f">= {hit.group(1)}")
+    hit = _ENCORE_BAR.match(name)
+    if hit:
+        return f"FurinaResources.Encore(Owner.Creature) >= {hit.group(1)}"
     return PREDICATES_CS.get(name)
 
 
@@ -344,6 +370,9 @@ def predicate_text(name: str) -> str | None:
     if hit:
         return (f"If {hit.group(1)} or more cards are "
                 "[gold]Exhausted[/gold]")
+    hit = _ENCORE_BAR.match(name)
+    if hit:
+        return f"If you have at least {hit.group(1)} Encore"
     return PREDICATE_TEXT.get(name)
 
 
@@ -478,12 +507,18 @@ APPLY_POWERS = {
         "[gold]Block[/gold] you gain."),
     "fanfare_attack_per10": ("FanfareAttackPer10Power", None,
         "Your Attacks deal {X} more damage per 10 [gold]Fanfare[/gold]."),
+    # B5 (2026-07-28): the face NAMES the member and says nothing else. The
+    # member's act, its bow, and the cap rules moved to hover tips
+    # (SalonMemberTips) -- eight cards were reprinting one paragraph that
+    # named nobody. {MEMBER} is filled per effect from its `member:` value.
     "salon_member": ("SalonMemberPower", None,
-        "Add {X} typed [gold]Salon Member(s)[/gold]. Maximum 3; a full "
-        "stage bows its OLDEST member out (its unique payoff) and "
-        "empowers this card's later effects."),
+        "Add {X} [gold]{MEMBER}[/gold] to your [gold]Salon[/gold]."),
     "salon_damage_up": ("SalonDamageUpPower", None,
         "[gold]Salon Member[/gold] numbers are {X} higher."),
+    # A12 (2026-07-28): the stage's size stops being a constant.
+    "salon_cap_up": ("SalonCapUpPower", None,
+        "Your [gold]Salon[/gold] has room for {X} more "
+        "[gold]Salon Member(s)[/gold]."),
     # ALL max_stacks DROPPED across Furina's sheet (user ruling 2026-07-24).
     # Two rounds: the first dropped the four non-compounding powers; this one
     # drops the rest, matching base StS where Power dupes always stack. An A/B
@@ -515,6 +550,27 @@ APPLY_POWERS = {
         "numbers are {X}% stronger this turn."),
     "spotlight_encore_first": ("SpotlightEncoreFirstPower", None,
         "The first [gold]Spotlighted[/gold] card each turn grants {X} Encore."),
+    # Curtain Call's activity-triggered set (R85), ported by the "Take a Bow"
+    # consolidation sprint. Every one of them pays on an EVENT the player
+    # caused rather than on a turn tick -- see Powers/CurtainCallPowers.cs for
+    # the trigger sites and their tier0 mirrors. No caps: the activity gate IS
+    # the rate limit, so a stack ceiling would be a second, redundant one.
+    "salon_deploy_block": ("SalonDeployBlockPower", None,
+        "Whenever you deploy a [gold]Salon Member[/gold], gain {X} Block."),
+    "salon_bow_block": ("SalonBowBlockPower", None,
+        "Whenever a [gold]Salon Member[/gold] takes its final bow, gain "
+        "{X} Block."),
+    "salon_bow_encore": ("SalonBowEncorePower", None,
+        "Whenever a [gold]Salon Member[/gold] takes its final bow, gain "
+        "{X} Encore."),
+    "cross_examination": ("CrossExaminationPower", None,
+        "The first [gold]Elemental Reaction[/gold] you trigger each turn "
+        "applies {X} [gold]Vulnerable[/gold] and {X} [gold]Weak[/gold] to "
+        "its target."),
+    "encore_spend_draw": ("EncoreSpendDrawPower", None,
+        "The first time you spend Encore each turn, draw {X} card."),
+    "first_attack_draw": ("FirstAttackDrawPower", None,
+        "The first Attack you play each turn draws {X} card."),
 }
 
 # Powers applied to ENEMIES (native debuffs). Everything else in APPLY_POWERS
@@ -532,6 +588,28 @@ APPLY_POWER_FIELDS = {"op", "power", "amount", "target", "max_stacks", "note",
                       # element and aura consumption live in the POWER's C#
                       # implementation; the fields are documentation.
                       "summon_element", "consumes_aura"}
+
+# The C# each `member:` value emits. `random` is a NULL, which
+# SalonMemberPower.Deploy resolves per iteration off the shared combat RNG
+# stream (A11). Keyed rather than inlined so an unrecognised member is a
+# named blocker instead of a KeyError mid-emit.
+SALON_MEMBER_CS = {
+    "crabaletta": "SalonMember.Crabaletta",
+    "usher": "SalonMember.Usher",
+    "chevalmarin": "SalonMember.Chevalmarin",
+    "random": "null",
+}
+
+# B5: the stage names the faces print. These MUST match
+# SalonMemberTips.DisplayName -- the card says "Add Gentilhomme Usher" and the
+# tooltip that explains him is titled the same thing, or the player cannot
+# tell they are about the same member. Pinned in the codegen tests.
+SALON_MEMBER_NAMES = {
+    "crabaletta": "Mademoiselle Crabaletta",
+    "usher": "Gentilhomme Usher",
+    "chevalmarin": "Surintendante Chevalmarin",
+    "random": "random Salon Member",
+}
 
 # Upgrade keys that all mean "bump the applied power amount" at card level
 # (tier0 upgrades.py handles them in one branch too).
@@ -652,6 +730,15 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "encore",
                          # CalculatedDamageVar triple -- the same slot the
                          # conditional_bonus delta moves.
                          "formula_per",
+                         # `times: +N` moves a multi-hit attack's HIT COUNT
+                         # (A5, 2026-07-28: Undercurrent 3 -> 5 hits). tier0
+                         # has bumped `times` since Klee, but codegen baked
+                         # the count in as a literal `.WithHitCount(3)`, so
+                         # the key was unexpressible and the first card to
+                         # rule it would have shipped with NO campfire path.
+                         # Binds to the same effect tier0 does: the first
+                         # damage op carrying a literal int `times`.
+                         "times",
                          # `formula_base: +N` bumps the BASE term (the
                          # CalculationBase var). Added by F4 because only the
                          # per-term existed, and on an UNCAPPED count the two
@@ -690,6 +777,15 @@ CARD_FIELDS = {
     "sly",
     "id", "name", "cost", "type", "rarity", "solve", "archetypes", "role",
     "effects", "tags", "exhaust", "kit_card", "requires",
+    # A9 (2026-07-28): Innate on the BASE card, not only as an upgrade delta.
+    # tier0 needed nothing -- Card.innate already existed and combat's
+    # surface_innate reads it on any card -- but the generator emitted the
+    # keyword only from OnUpgrade, so the field was unknown here and the
+    # first card to rule it was BLOCKED. That block is the design working:
+    # hearts_swelling reported "card field(s) ['innate'] not understood"
+    # rather than shipping a card that starts in hand in the sim and does
+    # not in the game.
+    "innate",
     # Companion identity/reward metadata.
     "star", "element", "role_c", "personal_pool", "nation", "character",
     "guest_star",
@@ -755,6 +851,28 @@ def _x_formula_reason(card: dict, val) -> str | None:
                       and val[len("X_plus_"):].isdigit()):
         return None
     return f"amount formula '{val}'"
+
+
+# Runtime counts legal as a `times:` hit count. Curtain Call's Matinee
+# Performance is the one user: a per-member hit whose count is the live cast
+# size. Read at resolution off the power stack the deploy site mirrors, which
+# is the same read tier0's _runtime_count does -- and the same precedent
+# Mirage's enemy_poison_total set for counting over power stacks.
+#
+# Deliberately a SMALL allowlist, not "any count token". A times value the
+# generator cannot express must stay a named blocker: guessing it produces a
+# card that compiles and quietly hits once forever while the face promises
+# scaling, which is the worst failure this generator has.
+RUNTIME_TIMES = {
+    "salon_members": "SalonMemberPower.Count(Owner.Creature)",
+}
+
+# The clause each runtime count renders on the face. Separate from the C#
+# expression because the player reads the CAST, not the power stack that
+# happens to mirror it.
+RUNTIME_TIMES_TEXT = {
+    "salon_members": " once per [gold]Salon Member[/gold]",
+}
 
 
 def _x_expr(val, bombs_var: bool = False) -> str:
@@ -848,6 +966,21 @@ def blocked_reason(
         op = eff.get("op")
         if op not in MECHANICAL_OPS:
             return f"op '{op}'"
+        # B1 CLASS FIX (2026-07-28). A `bonus_formula` on a NON-damage op is a
+        # blocker unless a rider actually expresses it.
+        #
+        # Damage is exempt because damage riders always resolve: an
+        # unconverted one still rides the PrintedDamage path at resolution
+        # (it merely fails to show on the face, which is what the Legibility
+        # sprint converted). Every OTHER op had no such path -- the formula
+        # was read by nothing, so the card silently shipped its bare base.
+        # Thunderous Ovation lost `1_per_2_fanfare` that way for two
+        # playtests. Blocking is the honest failure: an UNAPPLIABLE card is
+        # visible in the manifest, a quietly-wrong one is not.
+        if op != "damage" and eff.get("bonus_formula") is not None \
+                and block_calc_rider(card, eff) is None:
+            return (f"bonus_formula '{eff['bonus_formula']}' on op '{op}' is "
+                    "expressed by no rider (it would render as the bare base)")
         if op == "damage":
             tgt = eff.get("target")
             if tgt not in DAMAGE_TARGETS:
@@ -863,7 +996,13 @@ def blocked_reason(
                         # Kokomi's Charge reader. Same CalculatedDamageVar path
                         # as Fanfare's -- see charge_calc_rider for why an
                         # honest printed number matters more here than there.
-                        r"\d+_per_\d+_charge", bf):
+                        r"\d+_per_\d+_charge", bf) and not re.fullmatch(
+                        # Curtain Call: Body Slam's grammar -- an attack priced
+                        # off the held Encore buffer. READ only, never spent.
+                        r"\d+_per_\d+_encore", bf) and not re.fullmatch(
+                        # A14: the per-member slope. No divisor -- the salon is
+                        # a capped count, so every member is a full step.
+                        r"\d+_per_salon_member", bf):
                 return f"bonus_formula '{bf}'"
             if "bonus_vs_bombed" in eff:
                 return "conditional damage bonus (needs bomb system)"
@@ -874,7 +1013,8 @@ def blocked_reason(
                         "bonus_vs_aura requires enemy damage and "
                         "a literal int")
             times = eff.get("times", 1)
-            if not isinstance(times, int) and _x_formula_reason(card, times):
+            if (not isinstance(times, int) and times not in RUNTIME_TIMES
+                    and _x_formula_reason(card, times)):
                 return _x_formula_reason(card, times)
         if op == "place_bomb":
             if eff.get("target") not in BOMB_TARGETS:
@@ -927,6 +1067,30 @@ def blocked_reason(
                 return "chance_bomb_per_detonation without a preceding detonate (no count source)"
         if op == "apply_power":
             power = eff.get("power")
+            # A7 (2026-07-28) DEFERRED C# PORT, recorded by name so the
+            # manifest entry reads as a decision rather than an oversight --
+            # the Curtain Call 12-card deferral pattern (R85/R86).
+            #
+            # The sheet and tier0 both implement it. The C# port is blocked on
+            # a real structural gap, not on effort: the trigger has to fire
+            # from FurinaResources' three Fanfare mutators, and those are
+            # SYNCHRONOUS (`static void GainFanfare`, `static int
+            # DecayFanfare`), while every block grant in this mod goes through
+            # `await CreatureCmd.GainBlock`. The two ways out are both worse
+            # than waiting:
+            #   * thread async through GainFanfare/GainEncore/SpendEncore --
+            #     a co-op-critical refactor touching every generated Encore
+            #     card, far outside this ruling's blast radius;
+            #   * call Creature.GainBlockInternal synchronously -- no
+            #     precedent anywhere in the mod, and no decompile evidence for
+            #     whether it runs the hooks/VFX the command layer runs.
+            # Inventing an unverified idiom on a resource path is exactly what
+            # produced the 2026-07-27 Vigil desync, so it waits for a pass
+            # that can do the async surface properly.
+            if power == "fanfare_delta_block":
+                return ("apply_power power 'fanfare_delta_block' -- A7 C# "
+                        "port DEFERRED: the Fanfare mutators are sync and "
+                        "every block grant here is async (see comment)")
             if power not in APPLY_POWERS:
                 return f"apply_power power '{power}' (no PowerModel in the registry)"
             if power in ENEMY_APPLY_POWERS:
@@ -943,6 +1107,13 @@ def blocked_reason(
                 # UNPARSEABLE discipline: an unrecognized field encodes a
                 # mechanic; block loudly, never approximate.
                 return f"apply_power field(s) {sorted(unknown)} not understood"
+            # A11: the member value is emitted through a lookup, and a lookup
+            # miss mid-emit is a KeyError -- a stack trace, not a decision.
+            # Refuse the card by name instead, the way every other
+            # unexpressible value on this sheet is refused.
+            if "member" in eff and eff["member"] not in SALON_MEMBER_CS:
+                return (f"salon member '{eff['member']}' is not one of "
+                        f"{sorted(SALON_MEMBER_CS)}")
             cap = APPLY_POWERS[power][1]
             if eff.get("max_stacks") != cap and not (eff.get("max_stacks") is None and cap is None):
                 # Cap drift between the sheet and the C# power class const.
@@ -1271,6 +1442,60 @@ def charge_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
     return int(eff["amount"]), int(m.group(1)), int(m.group(2))
 
 
+def encore_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
+    """Curtain Call's Encore damage rider (`N_per_M_encore`), rendered through
+    the same CalculatedDamageVar path as the Fanfare and Charge riders.
+
+    Same argument as those two, and it binds hardest here: Encore is a buffer
+    the player deliberately banks, so at the moment anyone casts Poised
+    Riposte the rider is exactly the part they were planning around. A face
+    printing only the base would understate the card precisely when the play
+    matters. The bank is READ, never spent -- consulting it costs nothing.
+
+    Returns (base, per_n, encore_div) or None.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    m = re.fullmatch(r"(\d+)_per_(\d+)_encore", eff.get("bonus_formula", ""))
+    if not m:
+        return None
+    return int(eff["amount"]), int(m.group(1)), int(m.group(2))
+
+
+def salon_member_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
+    """A13/A14 (2026-07-28): a per-Salon-member slope (`N_per_salon_member`).
+
+    Grammar note: no `_M_` divisor, unlike the Fanfare/Charge/Encore riders.
+    Those divide because they read a large pool where 1:1 would pay absurdly;
+    the salon is a capped count of 3 (4 with A12's cap-raise), so every member
+    is a full step. `_bonus_formula` in tier0/engine/effects.py splits the same
+    two grammars the same way.
+
+    Rendered through the Calculated var path rather than PrintedDamage for the
+    Legibility-sprint reason: the whole POINT of the A13/A14 rework is that the
+    pilot can see the stage paying. A face that printed only the base would
+    hide exactly the number the rework exists to show, and would read
+    identically to the threshold version it replaces.
+
+    Returns (base, per_n, 1) -- the trailing 1 keeps the shape of the other
+    riders' (base, per, divisor) triple; the multiplier lambda is the raw
+    member count.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    m = re.fullmatch(r"(\d+)_per_salon_member", eff.get("bonus_formula", ""))
+    if not m:
+        return None
+    # A deploy card scaling off the stage it is currently setting would read
+    # its own arrival, so those stay on the replacement-multiplier path.
+    if salon_deploy_card(card):
+        return None
+    return int(eff["amount"]), int(m.group(1)), 1
+
+
+SALON_MEMBER_COUNT_CS = "SalonMemberPower.Count(card.Owner.Creature)"
+
+
 def salon_deploy_card(card: dict) -> bool:
     """Salon-deploy cards render their replacement multiplier through
     `salon_calc_rider` instead of the other riders' path (their scaled value
@@ -1402,15 +1627,98 @@ def rider_tip_args(card: dict) -> str:
     it."""
     args = []
     for eff in card.get("effects", []):
-        if calc_rider(card, eff) is None:
+        # B1: a converted BLOCK rider has had its arithmetic removed from the
+        # face exactly as a converted damage rider has, so it earns the same
+        # tip. Without this the fix would trade a silent drop for a silent
+        # number -- "{CalculatedBlock}" with nothing saying where it came from.
+        if calc_rider(card, eff) is None \
+                and block_calc_rider(card, eff) is None:
             continue
         m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", eff.get("bonus_formula", ""))
+        members = re.fullmatch(r"(\d+)_per_salon_member",
+                               eff.get("bonus_formula", ""))
         if m:
             args.append(f"fanfarePer: {int(m.group(1))}")
             args.append(f"fanfareStep: {int(m.group(2))}")
+        elif members:
+            # A13/A14: same re-homing bargain as the Fanfare rider. The face
+            # keeps a short marker, the RATE and what the stage is paying
+            # right now live here.
+            args.append(f"salonPer: {int(members.group(1))}")
+            if eff.get("op") == "block":
+                args.append("salonGrantsBlock: true")
         elif "bonus_vs_aura" in eff:
             args.append(f"auraBonus: {int(eff['bonus_vs_aura'])}")
     return ", ".join(args)
+
+
+def merged_deploy_text(card: dict) -> tuple[dict[int, int], set[int]]:
+    """B5: consecutive deploys of the SAME member render as one sentence.
+
+    Grand Gala deploys Crabaletta twice in a row, which read as "Add 1
+    Mademoiselle Crabaletta. Add 1 Mademoiselle Crabaletta." -- the same
+    boilerplate this ruling is deleting, wearing a name.
+
+    Returns ({index of the surviving effect: merged amount},
+             {indices to skip}), keyed by position in card["effects"].
+
+    TEXT ONLY. The body still emits one Deploy call per effect, because the
+    replacement rule bows a member out per deploy and collapsing the calls
+    would change what the card does. Merging is refused unless BOTH effects
+    carry a literal integer amount and neither is the card's upgrade target
+    or a salon-scaled var -- those render a token, not a number, and two
+    tokens cannot be added at generation time.
+    """
+    effects = card.get("effects", [])
+    upgrade_target = power_upgrade_effect(card)
+    merged: dict[int, int] = {}
+    skip: set[int] = set()
+
+    def plain_deploy(eff):
+        return (eff.get("op") == "apply_power"
+                and eff.get("power") == "salon_member"
+                and isinstance(eff.get("amount"), int)
+                and eff is not upgrade_target
+                and salon_calc_rider(card, eff) is None)
+
+    anchor = None
+    for i, eff in enumerate(effects):
+        if not plain_deploy(eff):
+            anchor = None
+            continue
+        if (anchor is not None
+                and effects[anchor].get("member") == eff.get("member")):
+            merged[anchor] += int(eff["amount"])
+            skip.add(i)
+            continue
+        anchor = i
+        merged[i] = int(eff["amount"])
+    return merged, skip
+
+
+def salon_member_tip_args(card: dict) -> str:
+    """B5: the C# arguments naming which member tips this card carries, or "".
+
+    A random deploy passes `randomMember: true` and the tip helper shows all
+    three -- the player is choosing to roll and needs to know the field.
+    Order follows the card's own effects so a multi-deploy card's tips read in
+    the order it summons them.
+    """
+    members: list[str] = []
+    random_deploy = False
+    for eff in card.get("effects", []):
+        if eff.get("op") != "apply_power" or eff.get("power") != "salon_member":
+            continue
+        member = eff.get("member", "crabaletta")
+        if member == "random":
+            random_deploy = True
+        elif SALON_MEMBER_CS[member] not in members:
+            members.append(SALON_MEMBER_CS[member])
+    if random_deploy:
+        return "randomMember: true"
+    if not members:
+        return ""
+    return "members: new[] { " + ", ".join(members) + " }"
 
 
 def salon_scaled_snapshot(card: dict) -> str | None:
@@ -1498,6 +1806,58 @@ def spotlight_block_rider(card: dict, eff: dict) -> int | None:
     return int(eff["amount"])
 
 
+def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
+    """B1 (playtest-2, 2026-07-28): a scaling rider on a BLOCK op, rendered
+    through `CalculatedBlockVar`. Returns (base, extra, multiplier-lambda) or
+    None -- the block twin of `calc_rider`, and the same one-predicate-four-
+    sites discipline.
+
+    THE DEFECT THIS CLOSES. Every rider predicate in this file gated on
+    `op != "damage"`, because until Curtain Call C every rider in the pool
+    was a damage rider. Thunderous Ovation hung `1_per_2_fanfare` on a
+    *block* op and the generator dropped it without a word: the sheet said
+    "6, +1 per 2 Fanfare", the card gave a flat 6, and the playtest reported
+    exactly that ("just gave 6 block"). The sim had implemented the rider all
+    along, so this was a pure C#-side silent drop.
+
+    The rail already existed -- `spotlight_block_rider` renders companion
+    block this way and `salon_calc_rider` renders usher's -- so this adds a
+    predicate, not a mechanism.
+
+    Guards mirror `spotlight_block_rider`'s, and for the same reason:
+    `CalculationBase` is a SINGLE var, so a card converting two numbers
+    through it would compute one off the other's base.
+    """
+    if eff.get("op") != "block":
+        return None
+    formula = eff.get("bonus_formula", "")
+    m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", formula)
+    # A13 (2026-07-28): the per-member slope rides the same rail on a block op
+    # -- Dinner Service is its first card, and the whole point of the rework is
+    # that the face shows the stage paying.
+    members = re.fullmatch(r"(\d+)_per_salon_member", formula)
+    if not m and not members:
+        return None
+    if salon_deploy_card(card):
+        return None
+    effects = card.get("effects", [])
+    if sum(1 for e in effects if e.get("op") == "block") != 1:
+        return None
+    # Damage conversions and the two other block conversions all claim
+    # CalculationBase; whichever the card already has wins and this stays off.
+    if any(calc_rider(card, e) is not None for e in effects):
+        return None
+    if any(spotlight_block_rider(card, e) is not None
+           or salon_calc_rider(card, e) is not None for e in effects):
+        return None
+    if members:
+        return int(eff["amount"]), int(members.group(1)), (
+            f"static (card, _) => {SALON_MEMBER_COUNT_CS}")
+    return int(eff["amount"]), int(m.group(1)), (
+        "static (card, _) => "
+        f"FurinaResources.Fanfare(card.Owner.Creature) / {int(m.group(2))}")
+
+
 def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     """Unified view of every damage rider that renders through a
     CalculatedDamageVar: (base, extra, multiplier-lambda source). The four
@@ -1520,6 +1880,16 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
         return base, per_n, (
             "static (card, _) => "
             f"KokomiResources.GetCharge(card.Owner.Creature) / {div}")
+    encore = encore_calc_rider(card, eff)
+    if encore is not None:
+        base, per_n, div = encore
+        return base, per_n, (
+            "static (card, _) => "
+            f"FurinaResources.Encore(card.Owner.Creature) / {div}")
+    members = salon_member_calc_rider(card, eff)
+    if members is not None:
+        base, per_n, _ = members
+        return base, per_n, f"static (card, _) => {SALON_MEMBER_COUNT_CS}"
     aura = aura_calc_rider(card, eff)
     if aura is not None:
         base, bonus = aura
@@ -1589,14 +1959,29 @@ def build_vars(card: dict) -> list[str]:
                 out.append(
                     'new CalculatedDamageVar(ValueProp.Move)'
                     f'.WithMultiplier({mult})')
+            elif eff is not damage_var_effect(card):
+                pass          # literal; only the upgraded hit declares a var
             else:
                 out.append(f'new DamageVar({eff["amount"]}m, ValueProp.Move)')
                 if "bonus_formula" in eff and bonus_per_upgrade(card):
                     n = int(eff["bonus_formula"].partition("_per_")[0])
                     out.append(f'new DynamicVar("BonusPer", {n}m)')
+            # An upgradeable HIT COUNT is independent of the damage var: A5's
+            # Undercurrent upgrades times (3 -> 5) and leaves the per-hit 2
+            # alone, so this is not an `elif` on the branches above.
+            if eff is times_var_effect(card):
+                out.append(f'new DynamicVar("Times", {eff["times"]}m)')
         elif op == "block":
+            block_rider = block_calc_rider(card, eff)
             block_base = spotlight_block_rider(card, eff)
-            if block_base is not None:
+            if block_rider is not None:
+                base, extra, mult = block_rider
+                out.append(f'new CalculationBaseVar({base}m)')
+                out.append(f'new CalculationExtraVar({extra}m)')
+                out.append(
+                    'new CalculatedBlockVar(ValueProp.Move)'
+                    f'.WithMultiplier({mult})')
+            elif block_base is not None:
                 # Mirage idiom: base + 1 * (PrintedBlock(base) - base), which
                 # is PrintedBlock(base) -- the number the card already gains,
                 # now also the number it prints.
@@ -1688,15 +2073,21 @@ def build_vars(card: dict) -> list[str]:
                 continue
             cb = conditional_bonus_upgrade(card)
             bd = branch_draw_upgrade(card)
+            then_var, else_var = branch_draw_vars(card)
             for e in eff.get("then", []):
                 if e["op"] == "damage" and cb:
                     out.append(f'new ExtraDamageVar({e["amount"]}m)')
                     cb = 0                       # first damage only
                 elif e["op"] == "draw" and bd:
-                    out.append(f'new CardsVar({int(e["amount"])})')
+                    out.append(
+                        f'new CardsVar({int(e["amount"])})'
+                        if then_var == "Cards"
+                        else f'new DynamicVar("{then_var}", '
+                             f'{int(e["amount"])}m)')
             for e in eff.get("else", []):
                 if e["op"] == "draw" and bd:
-                    out.append(f'new DynamicVar("DrawElse", {int(e["amount"])}m)')
+                    out.append(
+                        f'new DynamicVar("{else_var}", {int(e["amount"])}m)')
     if added_draw_upgrade(card):
         out.append(f"new CardsVar({added_draw_upgrade(card)})")
     # DynamicVarSet's constructor throws on a duplicate name, and it runs
@@ -1852,6 +2243,14 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # stay unexpressible and loudly blocked rather than generate wrong.
         "exhaust": any(e["op"] == "exhaust_from"
                        and e.get("select") == "chosen" for e in effects),
+        # times: tier0 bumps the first damage|apply_power op's `times`.
+        # Codegen expresses the DAMAGE form (the Times var feeds
+        # DamageCmd.Attack().WithHitCount). A repeat on apply_power would
+        # need its own var and has no card yet -- structural until then, and
+        # reported unexpressible rather than silently dropped.
+        "times": any(e["op"] == "damage" and e.get("target") != "self"
+                     and isinstance(e.get("times"), int) and e["times"] > 1
+                     for e in effects),
         "formula_per": any(
             exhaust_pile_calc_rider(card, e) is not None for e in effects),
         "formula_base": any(
@@ -1985,6 +2384,28 @@ def bonus_per_upgrade(card: dict) -> int:
     return int(upgrade_plan(card)[0].get("bonus_per_detonation", 0))
 
 
+def times_var_effect(card: dict) -> dict | None:
+    """The ONE damage effect whose hit count is upgradeable, or None.
+
+    tier0's `times` delta is a _bump_first over damage|apply_power, so only
+    the FIRST literal multi-hit damage op is upgradeable -- the same
+    first-effect-owns-the-var rule as damage_var_effect. Every other
+    multi-hit op keeps rendering its literal count.
+    """
+    if not times_upgrade(card):
+        return None
+    return next((e for e in card.get("effects", [])
+                 if e["op"] == "damage" and e.get("target") != "self"
+                 and isinstance(e.get("times"), int) and e["times"] > 1),
+                None)
+
+
+def times_upgrade(card: dict) -> int:
+    """Ruled `times: +N` (A5 undercurrent): the hit count moves on upgrade,
+    so the count rides a Times var and renders with diff(). 0 = none."""
+    return int(upgrade_plan(card)[0].get("times", 0))
+
+
 def bombs_upgrade(card: dict) -> int:
     """Ruled `bombs: +N` (controlled_demolition): X_plus_1 -> X_plus_2.
     Rides the Bombs var so the +1 renders with diff(). 0 = none."""
@@ -2012,22 +2433,39 @@ def condition_upgrade(card: dict) -> bool:
     return upgrade_plan(card)[0].get("condition") == "unconditional"
 
 
+def branch_draw_vars(card: dict) -> tuple[str, str]:
+    """(then-branch var, else-branch var) for a card's branch draws.
+
+    Normally the then-branch rides `Cards`, because a card whose draws live
+    ONLY in branches has no top-level draw competing for that name
+    (eager_to_help). Compose Herself broke that assumption at Curtain Call:
+    it draws 2 at top level AND 1 more inside its Encore branch, and tier0's
+    draw delta bumps ALL draw ops, so both numbers are upgradeable and both
+    need a var. `Cards` is already spoken for by the top-level draw, so the
+    branch takes `DrawThen`.
+
+    A third NAME rather than a shared var: DynamicVarSet throws on duplicates
+    inside CardFactory.CreateForReward, which is a reward-screen softlock on
+    whatever run happens to roll the card.
+    """
+    top_draws = [e for e in card["effects"] if e.get("op") == "draw"]
+    return ("DrawThen" if top_draws else "Cards"), "DrawElse"
+
+
 def branch_draw_upgrade(card: dict) -> int:
     """Ruled `draw: +N` when the card's draws live inside conditional
-    branches (eager_to_help). tier0 bumps ALL draw ops; the branch draws ride
-    the Cards (then) and DrawElse (else) vars. A card with BOTH a top-level
-    draw and branch draws would need three vars -- loud stop until real."""
+    branches (eager_to_help, and Compose Herself which also draws at top
+    level). tier0 bumps ALL draw ops; the branch draws ride the vars
+    `branch_draw_vars` assigns."""
     delta = int(upgrade_plan(card)[0].get("draw", 0))
     if not delta:
         return 0
     branch_draws = [e for e in _effects_everywhere(card)
                     if e.get("op") == "draw"]
     top_draws = [e for e in card["effects"] if e.get("op") == "draw"]
-    if len(branch_draws) > len(top_draws) and top_draws:
-        raise SystemExit(
-            f"gen_klee_cards: {card['id']}: draw delta with draws both at "
-            "top level and inside branches -- var plan has no third name.")
-    return delta if len(branch_draws) > len(top_draws) else 0
+    # _effects_everywhere is a superset of the top level, so equal counts mean
+    # there are no branch draws at all and the plain top-level path applies.
+    return 0 if len(branch_draws) == len(top_draws) else delta
 
 
 def _effects_everywhere(card: dict) -> list[dict]:
@@ -2051,6 +2489,26 @@ def power_upgrade(card: dict) -> int:
             f"gen_klee_cards: {card['id']}: multiple power upgrade keys {keys} "
             "-- one apply_power effect cannot take two amount deltas.")
     return int(deltas[keys[0]]) if keys else 0
+
+
+def damage_var_effect(card: dict) -> dict | None:
+    """The ONE top-level damage effect that owns the `Damage` var.
+
+    Exactly the power_upgrade_effect rule, one var-name over: tier0's `damage`
+    delta is a _bump_first over top-level non-self damage ops, so only the
+    FIRST such effect is upgradeable and only it may declare a var. Every
+    later damage effect renders its printed literal.
+
+    Curtain Call's Matinee Performance is the first card in the pool with two
+    top-level damage ops (a flat hit, then a per-member hit). Before this rule
+    both declared "Damage" and the generator's own duplicate-name check fired
+    -- which is the check standing in for a DynamicVarSet constructor throw
+    inside CardFactory.CreateForReward, i.e. a reward-screen softlock on
+    whatever run rolled the card.
+    """
+    return next((fx for fx in card.get("effects", [])
+                 if fx.get("op") == "damage"
+                 and fx.get("target") != "self"), None)
 
 
 def power_upgrade_effect(card: dict) -> dict | None:
@@ -2107,6 +2565,12 @@ def _emit_damage(card: dict, eff: dict, lines: list[str], ctx: dict,
 
     call = [f"await DamageCmd.Attack({amount_expr})"]
     x_times = isinstance(times, str)
+    # A runtime hit count is gated on the same ">0 or no hits at all" rule as
+    # X: tier0 loops `range(times)`, so a count of zero deals NOTHING rather
+    # than one default hit. DamageCmd would treat a 0 hit count as one swing.
+    times_guard = ("x" if times == "X" or (isinstance(times, str)
+                                           and times.startswith("X_plus_"))
+                   else RUNTIME_TIMES.get(times) if x_times else None)
     if "times_formula" in eff:
         # 2_plus_sparks (Gleeful Barrage), the sim's only times formula.
         # SparksAtPlay: R39 (2026-07-21 ruling) -- the sim computes times from
@@ -2116,9 +2580,15 @@ def _emit_damage(card: dict, eff: dict, lines: list[str], ctx: dict,
         call.append(
             ".WithHitCount(2 + SparkPower.SparksAtPlay(Owner.Creature))")
     elif x_times:
-        # times: "X" (fish_blasting). tier0 loops range(times): X = 0 means
-        # NO hits, so the whole attack statement is gated below.
-        call.append(f".WithHitCount({_x_expr(times)})")
+        # times: "X" (fish_blasting) or a runtime count (salon_members).
+        # tier0 loops range(times): 0 means NO hits, so the whole attack
+        # statement is gated below.
+        call.append(
+            f".WithHitCount({RUNTIME_TIMES.get(times) or _x_expr(times)})")
+    elif eff is times_var_effect(card):
+        # Ruled `times: +N`: the count lives in a var so OnUpgrade can bump it
+        # and the face renders the diff. Literal counts keep the literal.
+        call.append('.WithHitCount(DynamicVars["Times"].IntValue)')
     elif times > 1:
         call.append(f".WithHitCount({times})")
     call.append(".FromCard(this)")
@@ -2140,8 +2610,8 @@ def _emit_damage(card: dict, eff: dict, lines: list[str], ctx: dict,
     call.append(".Execute(choiceContext);")
 
     stmt = "\n            ".join(call)
-    if x_times:
-        stmt = ("if (x > 0)\n        {\n            "
+    if times_guard:
+        stmt = (f"if ({times_guard} > 0)\n        {{\n            "
                 + stmt.replace("\n", "\n    ")
                 + "\n        }")
     lines.append(stmt)
@@ -2309,8 +2779,10 @@ def _emit_branch_op(
         )
     elif op == "draw":
         if branch_draw_upgrade(card):
-            expr = ("DynamicVars.Cards.BaseValue" if in_then
-                    else 'DynamicVars["DrawElse"].IntValue')
+            then_var, else_var = branch_draw_vars(card)
+            expr = (("DynamicVars.Cards.BaseValue" if then_var == "Cards"
+                     else f'DynamicVars["{then_var}"].IntValue') if in_then
+                    else f'DynamicVars["{else_var}"].IntValue')
         else:
             expr = f'{int(eff["amount"])}m'
         lines.append(f"await CardPileCmd.Draw(choiceContext, {expr}, Owner);")
@@ -2409,7 +2881,8 @@ def build_body(
                     f"{salon_snapshot}, "
                     "DynamicVars.CalculatedBlock.Props, cardPlay);")
                 continue
-            if spotlight_block_rider(card, eff) is not None:
+            if (spotlight_block_rider(card, eff) is not None
+                    or block_calc_rider(card, eff) is not None):
                 # Base game's own idiom (Mirage): resolve through the same var
                 # the face reads, so preview and gain cannot drift.
                 lines.append(
@@ -2474,6 +2947,7 @@ def build_body(
                 continue
             amount_expr = (str(int(eff["amount"])) + "m"
                            if _is_sly_branch(card)
+                           or eff is not damage_var_effect(card)
                            else "DynamicVars.Damage.BaseValue")
             if "bonus_vs_aura" in eff:
                 aura_target = (
@@ -2601,10 +3075,11 @@ def build_body(
             if eff["power"] == "salon_member":
                 # Salon v2 (rework plan §1): deploys are member-TYPED. The
                 # C# enum mirrors tier0's C.SALON_MEMBERS keys.
-                member = {"crabaletta": "SalonMember.Crabaletta",
-                          "usher": "SalonMember.Usher",
-                          "chevalmarin": "SalonMember.Chevalmarin"}[
-                    eff.get("member", "crabaletta")]
+                # A11: `random` emits a null, which Deploy resolves per
+                # iteration off the shared combat RNG stream. The sim rolls
+                # per iteration too, so a multi-deploy card fields a mixed
+                # stage in both engines.
+                member = SALON_MEMBER_CS[eff.get("member", "crabaletta")]
                 lines.append(
                     "salonReplacements += await SalonMemberPower.Deploy("
                     f"choiceContext, Owner.Creature, {amount}, this, "
@@ -2946,6 +3421,37 @@ def build_body(
             else:
                 lines.extend(aura_lines)
 
+        elif op == "refresh_all_auras":
+            # tier0 _op_refresh_all_auras: every living enemy holding an aura
+            # has its remaining duration set back to full. The helper reuses
+            # AuraPower's own same-element refresh path, so the value it
+            # refreshes TO is defined once.
+            lines.append(
+                "await CurtainCallHooks.RefreshAllAuras("
+                "choiceContext, Owner.Creature, this);"
+            )
+
+        elif op == "grow_damage":
+            # tier0 _op_grow_damage (Rampage): permanently raise THIS card
+            # instance's printed damage. Targets whichever var actually holds
+            # the printed number -- CalculationBase on a card carrying a
+            # rider, Damage otherwise -- which is the same var the upgrade
+            # bumps, so growth and upgrade compound instead of one silently
+            # overwriting the other. ResetToBase + the display invalidation
+            # are BombPower.SyncDisplay's idiom: without them the card resolves
+            # overwriting the other.
+            #
+            # A bare `BaseValue +=` is the whole operation: DynamicVar's
+            # BaseValue setter calls ResetToBase() itself, so the enchanted
+            # and preview values follow without a second statement. NOT
+            # UpgradeValueBy -- that sets WasJustUpgraded and would paint the
+            # number as freshly upgraded every time the card grows.
+            grow_var = ('DynamicVars.CalculationBase'
+                        if any(calc_rider(card, e) is not None
+                               for e in card.get("effects", []))
+                        else "DynamicVars.Damage")
+            lines.append(f"{grow_var}.BaseValue += {int(eff['amount'])}m;")
+
         elif op == "buff_next_attack":
             # tier0 _op_buff_next_attack -> next_attack_up, consumed by the
             # next attack card (NextAttackUpPower's AfterCardPlayed).
@@ -3220,7 +3726,8 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool) -> str:
             bits.append(f'gain {int(e["amount"])} [gold]Block[/gold]')
         elif op == "draw":
             if branch_draw_upgrade(card):
-                var = "Cards" if in_then else "DrawElse"
+                then_var, else_var = branch_draw_vars(card)
+                var = then_var if in_then else else_var
                 bits.append(
                     f"draw {{{var}:diff()}} card{{{var}:plural:|s}}")
             else:
@@ -3290,7 +3797,11 @@ def build_description(card: dict) -> str:
             f"{{IfUpgraded:show:{max(0, base_cost + delta)}|{base_cost}}}"
             if delta else str(base_cost))
         parts.append(f"Spend {rendered} [gold]{label}[/gold].")
-    for eff in card["effects"]:
+    salon_named = False          # B5: has a deploy already said "your Salon"?
+    deploy_amounts, deploy_skip = merged_deploy_text(card)
+    for eff_index, eff in enumerate(card["effects"]):
+        if eff_index in deploy_skip:
+            continue
         op = eff["op"]
 
         if op == "block":
@@ -3300,8 +3811,20 @@ def build_description(card: dict) -> str:
                 continue
             tok = ("CalculatedBlock"
                    if spotlight_block_rider(card, eff) is not None
-                   or salon_calc_rider(card, eff) is not None else "Block")
+                   or salon_calc_rider(card, eff) is not None
+                   or block_calc_rider(card, eff) is not None else "Block")
             parts.append(f"Gain {{{tok}:diff()}} [gold]Block[/gold].")
+            # The L-C bargain both ways: a CONVERTED rider's arithmetic moves
+            # to the hover tip, but the face must still declare that the card
+            # scales, or it reads as a flat number on the reward screen -- the
+            # exact misread B1 shipped. The damage path has always emitted
+            # this marker; the block path did not, so B1's fix traded a silent
+            # drop for a silent number. Fixed here (A13).
+            if block_calc_rider(card, eff) is not None:
+                formula = eff.get("bonus_formula", "")
+                stat = ("Salon" if formula.endswith("_per_salon_member")
+                        else formula.rpartition("_")[2].title())
+                parts.append(f"Scales with [gold]{stat}[/gold].")
 
         elif op == "block_next_turn":
             # Literal: the `block` delta binds to the plain block op (sheet:
@@ -3356,8 +3879,17 @@ def build_description(card: dict) -> str:
                     "Deal {Damage:diff()} damage to a random enemy, "
                     "2+[gold]Sparks[/gold] times.")
                 continue
-            if isinstance(times, str):        # times: "X"
+            if times in RUNTIME_TIMES:        # times: a live count
+                suffix = RUNTIME_TIMES_TEXT[times]
+                times = 2                     # phrasing: plural targets
+            elif isinstance(times, str):      # times: "X"
                 suffix = " X times"
+                times = 2                     # phrasing: plural targets
+            elif eff is times_var_effect(card):
+                # Ruled `times: +N`: the count must render from the var so the
+                # upgrade shows green, which also means no "twice"/"three
+                # times" word form -- the diff token needs a numeral.
+                suffix = " {Times:diff()} times"
                 times = 2                     # phrasing: plural targets
             else:
                 suffix = {1: "", 2: " twice", 3: " three times", 4: " four times"}.get(
@@ -3368,6 +3900,8 @@ def build_description(card: dict) -> str:
                    or salon_calc_rider(card, eff) is not None else "Damage")
             if _is_sly_branch(card):
                 tok = None                    # literal, see _sly_view
+            if tok == "Damage" and eff is not damage_var_effect(card):
+                tok = None                    # see damage_var_effect
             if tok is None:
                 amount_txt = str(int(eff["amount"]))
                 where = {"enemy": "",
@@ -3409,8 +3943,12 @@ def build_description(card: dict) -> str:
                     # including her signature one -- while the arithmetic
                     # underneath was correct. A face that names the wrong stat
                     # is worse than one that says nothing.
-                    stat = formula.rpartition("_")[2]
-                    parts.append(f"Scales with [gold]{stat.title()}[/gold].")
+                    # A13/A14: `rpartition("_")` would name this rider
+                    # "Member", which is not what anything in the game or on
+                    # the sheet is called. The stage is the Salon.
+                    stat = ("Salon" if formula.endswith("_per_salon_member")
+                            else formula.rpartition("_")[2].title())
+                    parts.append(f"Scales with [gold]{stat}[/gold].")
                 else:
                     n, _, rest = formula.partition("_per_")
                     step, _, stat = rest.partition("_")
@@ -3504,10 +4042,25 @@ def build_description(card: dict) -> str:
 
         elif op == "apply_power":
             template = APPLY_POWERS[eff["power"]][2]
+            if "member" in eff:
+                # B5: name WHO. A11's random deploy says so instead -- it can
+                # field any of the three, and the tooltip lists all three.
+                #
+                # Only the FIRST deploy on a card says "to your Salon". Full
+                # Ensemble makes three, and three copies of the same
+                # prepositional phrase is the boilerplate this ruling exists
+                # to delete, just reworded.
+                if salon_named:
+                    template = template.replace(
+                        " to your [gold]Salon[/gold]", "")
+                salon_named = True
+                template = template.replace(
+                    "{MEMBER}", SALON_MEMBER_NAMES[eff["member"]])
             x = ("{PowerAmount:diff()}"
                  if eff is power_upgrade_effect(card)
                  or salon_calc_rider(card, eff) is not None
-                 else str(int(eff["amount"])))
+                 else str(deploy_amounts.get(eff_index, 0)
+                          or int(eff["amount"])))
             to = {"all_enemies": " to ALL enemies",
                   "random_enemy": " to a random enemy"}.get(
                       eff.get("target"), "")
@@ -3620,6 +4173,14 @@ def build_description(card: dict) -> str:
             parts.append("[gold]Swirl[/gold] ALL enemies' auras."
                          if tgt == "all_enemies"
                          else "[gold]Swirl[/gold] an enemy's aura.")
+
+        elif op == "refresh_all_auras":
+            parts.append("Refresh ALL elemental auras.")
+
+        elif op == "grow_damage":
+            parts.append(
+                f'Permanently increase this card\'s damage by '
+                f'{int(eff["amount"])} this combat.')
 
         elif op == "buff_next_attack":
             n = ("{PowerAmount:diff()}" if eff is power_upgrade_effect(card)
@@ -3883,7 +4444,8 @@ def build_upgrade(card: dict) -> list[str]:
             var = ("DynamicVars.CalculationBase"
                    if calc_rider(card, eff) is not None
                    else "DynamicVars.Damage")
-        elif key == "block" and spotlight_block_rider(card, eff) is not None:
+        elif key == "block" and (spotlight_block_rider(card, eff) is not None
+                                 or block_calc_rider(card, eff) is not None):
             # Converted block has no "Block" var -- its base is CalculationBase.
             var = "DynamicVars.CalculationBase"
         elif key == "bomb_damage":
@@ -3891,6 +4453,12 @@ def build_upgrade(card: dict) -> list[str]:
         else:
             var = var_for[op]
         lines.append(f"{var}.UpgradeValueBy({int(deltas[key])}m);")
+    if "times" in deltas and times_var_effect(card) is not None:
+        # Post-loop: the loop keys a damage op to "damage", so a card that
+        # upgrades BOTH its per-hit number and its hit count (none today, but
+        # the sheet can rule it) would otherwise drop whichever key lost.
+        lines.append(
+            f'DynamicVars["Times"].UpgradeValueBy({int(deltas["times"])}m);')
     if "formula_per" in deltas:
         # The PER term of an amount_formula lives in ExtraDamage (the middle
         # slot of the CalculatedDamageVar triple: base + per * count), so the
@@ -3910,10 +4478,20 @@ def build_upgrade(card: dict) -> list[str]:
         lines.append(
             f'DynamicVars.ExtraDamage.UpgradeValueBy({int(deltas["conditional_bonus"])}m);')
     if branch_draw_upgrade(card):
-        # tier0 draw deltas bump ALL draw ops, branches included.
+        # tier0 draw deltas bump ALL draw ops, branches included. Only the
+        # BRANCH vars are emitted here: when the card also draws at top level
+        # that draw owns `Cards` and the plain top-level draw path above has
+        # already bumped it, so repeating it here would upgrade one number
+        # twice (caught on Compose Herself, whose OnUpgrade briefly carried
+        # two identical Cards bumps).
         d = int(deltas["draw"])
-        lines.append(f"DynamicVars.Cards.UpgradeValueBy({d}m);")
-        lines.append(f'DynamicVars["DrawElse"].UpgradeValueBy({d}m);')
+        for name in dict.fromkeys(branch_draw_vars(card)):
+            if not any(f'"{name}"' in decl or f"{name}Var(" in decl
+                       for decl in build_vars(card)):
+                continue
+            lines.append(
+                f"DynamicVars.Cards.UpgradeValueBy({d}m);" if name == "Cards"
+                else f'DynamicVars["{name}"].UpgradeValueBy({d}m);')
     if "condition" in deltas:
         lines.append(
             "// condition: unconditional -- expressed at play time as "
@@ -4205,6 +4783,13 @@ def emit(
     keywords = []
     if card.get("exhaust"):
         keywords.append("CardKeyword.Exhaust")
+    # A9: base-card Innate rides the same CanonicalKeywords rail as Exhaust,
+    # so the banner renders through the game's auto-keyword pipeline and the
+    # description string stays free of the word (see the note above).
+    # OnUpgrade's AddKeyword path is unchanged and still serves `innate: true`
+    # deltas -- a card can be born Innate or become it, not both.
+    if card.get("innate"):
+        keywords.append("CardKeyword.Innate")
     if "skill_tag" in card.get("tags", []):
         keywords.append("KleeKeywords.ElementalSkill")
     keywords.extend(aura_keyword_by_element[e] for e in aura_elements)
@@ -4237,6 +4822,15 @@ def emit(
         tips_expr = (
             f"FurinaRiderTips.ForCard({tips_expr or 'base.ExtraHoverTips'}, "
             f"this, {rider_args})")
+    # B5: a deploy card carries the tip for every member it can field, plus
+    # the cap rules its face no longer prints. Attached from the EFFECT, not
+    # from a card list, so a new deploy card cannot ship naming a member that
+    # nothing on screen explains.
+    salon_tip_args = salon_member_tip_args(card)
+    if salon_tip_args:
+        tips_expr = (
+            f"SalonMemberTips.ForCard({tips_expr or 'base.ExtraHoverTips'}, "
+            f"this, {salon_tip_args})")
     # Kokomi's two hidden reads. Neither can render on a card face -- the
     # pulse resolves at end of turn from a bank that will have moved, and the
     # Garment rider lands on OTHER cards -- so the hover tip is the only

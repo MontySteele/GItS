@@ -243,3 +243,26 @@ def test_companion_roster_can_fill_both_shop_slots():
          str(REPO / "tools" / "lint_companion_shop_coverage.py")],
         capture_output=True, text=True)
     assert res.returncode == 0, res.stdout + res.stderr
+
+
+def test_register_stays_out_of_the_engine():
+    """R85's register column is naming and art, never mechanics.
+
+    Cell 1 of the Curtain Call sweep PROVED this empirically -- renames plus
+    register assignments landed together and the run was byte-identical, so
+    nothing read the new field. That is a measurement, and a measurement only
+    speaks for the code that existed when it ran. This converts it into a
+    standing guarantee.
+
+    The failure it prevents is the nastiest kind of coupling: with a
+    register-aware engine, moving a card from the salon voice to the archon
+    one -- an ART decision, taken on art grounds, by whoever is picking
+    illustrations -- would silently move win rate, and the next sim run would
+    blame whatever else changed that day. Balance and lore have to be able to
+    move independently.
+    """
+    res = subprocess.run(
+        [sys.executable,
+         str(REPO / "tools" / "lint_register_isolation.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr

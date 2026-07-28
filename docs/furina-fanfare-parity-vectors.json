@@ -140,5 +140,273 @@
       "after_floor": 25,
       "after_cap": 65
     }
+  ],
+  "rider": [
+    {
+      "meter": "fanfare",
+      "bank": 0,
+      "per": 1,
+      "div": 2,
+      "bonus": 0
+    },
+    {
+      "meter": "encore",
+      "bank": 0,
+      "per": 1,
+      "div": 2,
+      "bonus": 0
+    },
+    {
+      "meter": "fanfare",
+      "bank": 1,
+      "per": 1,
+      "div": 2,
+      "bonus": 0
+    },
+    {
+      "meter": "encore",
+      "bank": 1,
+      "per": 1,
+      "div": 2,
+      "bonus": 0
+    },
+    {
+      "meter": "fanfare",
+      "bank": 2,
+      "per": 1,
+      "div": 2,
+      "bonus": 1
+    },
+    {
+      "meter": "encore",
+      "bank": 2,
+      "per": 1,
+      "div": 2,
+      "bonus": 1
+    },
+    {
+      "meter": "fanfare",
+      "bank": 3,
+      "per": 1,
+      "div": 2,
+      "bonus": 1
+    },
+    {
+      "meter": "encore",
+      "bank": 3,
+      "per": 1,
+      "div": 2,
+      "bonus": 1
+    },
+    {
+      "meter": "fanfare",
+      "bank": 40,
+      "per": 1,
+      "div": 2,
+      "bonus": 20
+    },
+    {
+      "meter": "encore",
+      "bank": 40,
+      "per": 1,
+      "div": 2,
+      "bonus": 20
+    },
+    {
+      "meter": "fanfare",
+      "bank": 41,
+      "per": 1,
+      "div": 2,
+      "bonus": 20
+    },
+    {
+      "meter": "encore",
+      "bank": 41,
+      "per": 1,
+      "div": 2,
+      "bonus": 20
+    },
+    {
+      "meter": "fanfare",
+      "bank": 0,
+      "per": 1,
+      "div": 3,
+      "bonus": 0
+    },
+    {
+      "meter": "encore",
+      "bank": 0,
+      "per": 1,
+      "div": 3,
+      "bonus": 0
+    },
+    {
+      "meter": "fanfare",
+      "bank": 2,
+      "per": 1,
+      "div": 3,
+      "bonus": 0
+    },
+    {
+      "meter": "encore",
+      "bank": 2,
+      "per": 1,
+      "div": 3,
+      "bonus": 0
+    },
+    {
+      "meter": "fanfare",
+      "bank": 3,
+      "per": 1,
+      "div": 3,
+      "bonus": 1
+    },
+    {
+      "meter": "encore",
+      "bank": 3,
+      "per": 1,
+      "div": 3,
+      "bonus": 1
+    },
+    {
+      "meter": "fanfare",
+      "bank": 5,
+      "per": 1,
+      "div": 3,
+      "bonus": 1
+    },
+    {
+      "meter": "encore",
+      "bank": 5,
+      "per": 1,
+      "div": 3,
+      "bonus": 1
+    },
+    {
+      "meter": "fanfare",
+      "bank": 9,
+      "per": 1,
+      "div": 3,
+      "bonus": 3
+    },
+    {
+      "meter": "encore",
+      "bank": 9,
+      "per": 1,
+      "div": 3,
+      "bonus": 3
+    },
+    {
+      "meter": "fanfare",
+      "bank": 22,
+      "per": 1,
+      "div": 3,
+      "bonus": 7
+    },
+    {
+      "meter": "encore",
+      "bank": 22,
+      "per": 1,
+      "div": 3,
+      "bonus": 7
+    }
+  ],
+  "threshold": [
+    {
+      "meter": "fanfare",
+      "bank": 19,
+      "bar": 20,
+      "holds": false
+    },
+    {
+      "meter": "encore",
+      "bank": 19,
+      "bar": 20,
+      "holds": false
+    },
+    {
+      "meter": "fanfare",
+      "bank": 20,
+      "bar": 20,
+      "holds": true
+    },
+    {
+      "meter": "encore",
+      "bank": 20,
+      "bar": 20,
+      "holds": true
+    },
+    {
+      "meter": "fanfare",
+      "bank": 21,
+      "bar": 20,
+      "holds": true
+    },
+    {
+      "meter": "encore",
+      "bank": 21,
+      "bar": 20,
+      "holds": true
+    },
+    {
+      "meter": "fanfare",
+      "bank": 0,
+      "bar": 20,
+      "holds": false
+    },
+    {
+      "meter": "encore",
+      "bank": 0,
+      "bar": 20,
+      "holds": false
+    },
+    {
+      "meter": "fanfare",
+      "bank": 7,
+      "bar": 8,
+      "holds": false
+    },
+    {
+      "meter": "encore",
+      "bank": 7,
+      "bar": 8,
+      "holds": false
+    },
+    {
+      "meter": "fanfare",
+      "bank": 8,
+      "bar": 8,
+      "holds": true
+    },
+    {
+      "meter": "encore",
+      "bank": 8,
+      "bar": 8,
+      "holds": true
+    },
+    {
+      "meter": "fanfare",
+      "bank": 9,
+      "bar": 8,
+      "holds": true
+    },
+    {
+      "meter": "encore",
+      "bank": 9,
+      "bar": 8,
+      "holds": true
+    },
+    {
+      "meter": "fanfare",
+      "bank": 0,
+      "bar": 8,
+      "holds": false
+    },
+    {
+      "meter": "encore",
+      "bank": 0,
+      "bar": 8,
+      "holds": false
+    }
   ]
 }

@@ -88,6 +88,21 @@ internal static class KleePowerIcons
         OvationSpendBoostPower => KleePck.Path("furina/powers/standing_ovation.png"),
         SpotlightEncoreFirstPower => KleePck.Path("furina/powers/ovation_trickle.png"),
 
+        // Curtain Call's activity-triggered set (R85), shipped by the "Take a
+        // Bow" consolidation sprint. Paths are wired AHEAD of the art, which
+        // is this file's established policy (see the companion-summon block
+        // above): KleePck.Path returns null while a file is absent, so each of
+        // these behaves exactly like today's placeholder until its PNG lands,
+        // and the miss is logged ONCE by name instead of being invisible.
+        // Named individually rather than grouped -- the two Stagehands halves
+        // are separate powers and a shared icon would read as intentional.
+        SalonDeployBlockPower => KleePck.Path("furina/powers/fortissimo_guard.png"),
+        SalonBowBlockPower => KleePck.Path("furina/powers/stagehands.png"),
+        SalonBowEncorePower => KleePck.Path("furina/powers/stagehands_encore.png"),
+        CrossExaminationPower => KleePck.Path("furina/powers/courtroom_drama.png"),
+        EncoreSpendDrawPower => KleePck.Path("furina/powers/the_gallery_stirs.png"),
+        FirstAttackDrawPower => KleePck.Path("furina/powers/quick_change.png"),
+
         // NO SpotlightPower base case, deliberately. A future subclass added
         // without an icon should fall to `_ => null` and show the base-game
         // placeholder -- which reads as "no art yet" -- rather than inherit a

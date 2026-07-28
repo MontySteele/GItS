@@ -32,6 +32,34 @@ from tier0 import constants as C
 from tier0.engine.state import CombatState
 
 
+def note_fanfare_change(state: CombatState, before: int) -> None:
+    """A7 (Unheard Confession, 2026-07-28): pay Block whenever the meter MOVES.
+
+    Every fanfare mutation in the sim funnels through this module -- gain,
+    decay, floor-raise -- so calling this at each of those three sites is the
+    whole trigger surface, and a fourth mutation added later without a call
+    here is the only way to break it.
+
+    Fires on a change in EITHER direction. The ruling's wording is "whenever
+    Fanfare changes amount", and the decay half is what makes the power more
+    than a second gain-rider: her meter fades 20% every turn from turn 2, so
+    the card pays on the way down as well as the way up.
+
+    A gain that lands entirely at the cap is NOT a change (applied == 0), so
+    a saturated meter stops paying -- deliberate, and the same saturation the
+    pass-4 telemetry made visible.
+
+    Unscaled printed number, following salon_bow_block: this is a power's
+    activity payout, not a card's printed Block, so Spotlight does not read it.
+    """
+    n = state.player.powers.get("fanfare_delta_block", 0)
+    if not n or state.player.fanfare == before:
+        return
+    state.player.block += n
+    state.emit("block", amount=n)
+    state.emit("fanfare_delta_block", amount=n)
+
+
 def gain_fanfare(state: CombatState, n: int, source: str) -> None:
     p = state.player
     if not p.fanfare_cap or n <= 0:
@@ -39,6 +67,7 @@ def gain_fanfare(state: CombatState, n: int, source: str) -> None:
     before = p.fanfare
     p.fanfare = min(p.fanfare_cap, p.fanfare + n)
     applied = p.fanfare - before
+    note_fanfare_change(state, before)
     # Pass 4 Q1a: the clamp used to be SILENT -- only `amount` (what landed)
     # was emitted, so generation thrown away at the cap left no trace and no
     # sweep could see saturation. `requested`/`wasted` are the overflow read;
@@ -99,6 +128,7 @@ def decay_fanfare(state: CombatState) -> None:
     # the exact mistake the pass-4 clamp made.
     state.emit("fanfare_decay", amount=before - p.fanfare, total=p.fanfare,
                floor=p.fanfare_floor, at_floor=p.fanfare <= p.fanfare_floor)
+    note_fanfare_change(state, before)
 
 
 def gain_fanfare_floor(state: CombatState, n: int, source: str) -> None:
@@ -118,9 +148,11 @@ def gain_fanfare_floor(state: CombatState, n: int, source: str) -> None:
     p = state.player
     if not p.fanfare_cap or n <= 0:
         return                    # inert for everyone without the resource
+    before = p.fanfare
     p.fanfare_floor += n
     p.fanfare_cap += n
     p.fanfare = min(p.fanfare_cap, p.fanfare + n)
+    note_fanfare_change(state, before)
     state.emit("fanfare_floor_granted", amount=n, source=source,
                floor=p.fanfare_floor, cap=p.fanfare_cap, total=p.fanfare)
 

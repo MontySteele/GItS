@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=11 format=3]
 
 [sub_resource type="Animation" id="Animation_reset"]
 length = 0.001
@@ -50,6 +50,30 @@ tracks/3/keys = {
 "update": 0,
 "values": [Color(1, 1, 1, 0)]
 }
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Slots/Slot4:scale")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Slots/Slot5:scale")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
 
 [sub_resource type="Animation" id="Animation_slot1_pop"]
 resource_name = "slot1_pop"
@@ -99,6 +123,38 @@ tracks/0/keys = {
 "values": [Vector2(0.55, 0.55), Vector2(1.18, 1.18), Vector2(0.94, 0.94), Vector2(1, 1)]
 }
 
+[sub_resource type="Animation" id="Animation_slot4_pop"]
+resource_name = "slot4_pop"
+length = 0.34
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Slots/Slot4:scale")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.22, 0.34),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0.55, 0.55), Vector2(1.18, 1.18), Vector2(0.94, 0.94), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_slot5_pop"]
+resource_name = "slot5_pop"
+length = 0.34
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Slots/Slot5:scale")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.22, 0.34),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0.55, 0.55), Vector2(1.18, 1.18), Vector2(0.94, 0.94), Vector2(1, 1)]
+}
+
 [sub_resource type="Animation" id="Animation_overdraw"]
 resource_name = "overdraw"
 length = 0.9
@@ -133,7 +189,9 @@ _data = {
 &"overdraw": SubResource("Animation_overdraw"),
 &"slot1_pop": SubResource("Animation_slot1_pop"),
 &"slot2_pop": SubResource("Animation_slot2_pop"),
-&"slot3_pop": SubResource("Animation_slot3_pop")
+&"slot3_pop": SubResource("Animation_slot3_pop"),
+&"slot4_pop": SubResource("Animation_slot4_pop"),
+&"slot5_pop": SubResource("Animation_slot5_pop")
 }
 
 [node name="SalonStage" type="Node2D"]
@@ -188,6 +246,49 @@ color = Color(0.66, 0.84, 1, 0.16)
 unique_name_in_owner = true
 position = Vector2(0, -26)
 
+[node name="ChipEdge1" type="ColorRect" parent="Slots/Slot1"]
+unique_name_in_owner = true
+offset_left = -17.0
+offset_top = -3.0
+offset_right = 17.0
+offset_bottom = 11.0
+color = Color(0.62, 0.85, 1, 0.55)
+
+[node name="Chip1" type="ColorRect" parent="Slots/Slot1"]
+unique_name_in_owner = true
+offset_left = -16.0
+offset_top = -2.0
+offset_right = 16.0
+offset_bottom = 10.0
+color = Color(0.04, 0.09, 0.16, 0.92)
+
+[node name="ChipGlyph1" type="Sprite2D" parent="Slots/Slot1"]
+unique_name_in_owner = true
+position = Vector2(-9, 4)
+scale = Vector2(0.3, 0.3)
+
+[node name="ChipLabel1" type="Label" parent="Slots/Slot1"]
+unique_name_in_owner = true
+offset_left = -3.0
+offset_top = -3.0
+offset_right = 15.0
+offset_bottom = 11.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+vertical_alignment = 1
+text = ""
+
+[node name="Hover1" type="Control" parent="Slots/Slot1"]
+unique_name_in_owner = true
+offset_left = -20.0
+offset_top = -48.0
+offset_right = 20.0
+offset_bottom = 12.0
+mouse_filter = 2
+
 [node name="Slot2" type="Node2D" parent="Slots"]
 unique_name_in_owner = true
 position = Vector2(0, -20)
@@ -219,6 +320,49 @@ color = Color(0.66, 0.84, 1, 0.16)
 [node name="Sprite2" type="Sprite2D" parent="Slots/Slot2"]
 unique_name_in_owner = true
 position = Vector2(0, -26)
+
+[node name="ChipEdge2" type="ColorRect" parent="Slots/Slot2"]
+unique_name_in_owner = true
+offset_left = -17.0
+offset_top = -3.0
+offset_right = 17.0
+offset_bottom = 11.0
+color = Color(0.62, 0.85, 1, 0.55)
+
+[node name="Chip2" type="ColorRect" parent="Slots/Slot2"]
+unique_name_in_owner = true
+offset_left = -16.0
+offset_top = -2.0
+offset_right = 16.0
+offset_bottom = 10.0
+color = Color(0.04, 0.09, 0.16, 0.92)
+
+[node name="ChipGlyph2" type="Sprite2D" parent="Slots/Slot2"]
+unique_name_in_owner = true
+position = Vector2(-9, 4)
+scale = Vector2(0.3, 0.3)
+
+[node name="ChipLabel2" type="Label" parent="Slots/Slot2"]
+unique_name_in_owner = true
+offset_left = -3.0
+offset_top = -3.0
+offset_right = 15.0
+offset_bottom = 11.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+vertical_alignment = 1
+text = ""
+
+[node name="Hover2" type="Control" parent="Slots/Slot2"]
+unique_name_in_owner = true
+offset_left = -20.0
+offset_top = -48.0
+offset_right = 20.0
+offset_bottom = 12.0
+mouse_filter = 2
 
 [node name="Slot3" type="Node2D" parent="Slots"]
 unique_name_in_owner = true
@@ -252,6 +396,199 @@ color = Color(0.66, 0.84, 1, 0.16)
 unique_name_in_owner = true
 position = Vector2(0, -26)
 
+[node name="ChipEdge3" type="ColorRect" parent="Slots/Slot3"]
+unique_name_in_owner = true
+offset_left = -17.0
+offset_top = -3.0
+offset_right = 17.0
+offset_bottom = 11.0
+color = Color(0.62, 0.85, 1, 0.55)
+
+[node name="Chip3" type="ColorRect" parent="Slots/Slot3"]
+unique_name_in_owner = true
+offset_left = -16.0
+offset_top = -2.0
+offset_right = 16.0
+offset_bottom = 10.0
+color = Color(0.04, 0.09, 0.16, 0.92)
+
+[node name="ChipGlyph3" type="Sprite2D" parent="Slots/Slot3"]
+unique_name_in_owner = true
+position = Vector2(-9, 4)
+scale = Vector2(0.3, 0.3)
+
+[node name="ChipLabel3" type="Label" parent="Slots/Slot3"]
+unique_name_in_owner = true
+offset_left = -3.0
+offset_top = -3.0
+offset_right = 15.0
+offset_bottom = 11.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+vertical_alignment = 1
+text = ""
+
+[node name="Hover3" type="Control" parent="Slots/Slot3"]
+unique_name_in_owner = true
+offset_left = -20.0
+offset_top = -48.0
+offset_right = 20.0
+offset_bottom = 12.0
+mouse_filter = 2
+
+[node name="Slot4" type="Node2D" parent="Slots"]
+unique_name_in_owner = true
+position = Vector2(96, -14)
+
+[node name="Pool4" type="ColorRect" parent="Slots/Slot4"]
+unique_name_in_owner = true
+offset_left = -26.0
+offset_top = -7.0
+offset_right = 26.0
+offset_bottom = 7.0
+color = Color(0.62, 0.85, 1, 0.3)
+
+[node name="Beam4" type="ColorRect" parent="Slots/Slot4"]
+unique_name_in_owner = true
+offset_left = -20.0
+offset_top = -74.0
+offset_right = 20.0
+offset_bottom = -2.0
+color = Color(0.7, 0.88, 1, 0.12)
+
+[node name="Ghost4" type="ColorRect" parent="Slots/Slot4"]
+unique_name_in_owner = true
+offset_left = -17.0
+offset_top = -40.0
+offset_right = 17.0
+offset_bottom = -4.0
+color = Color(0.66, 0.84, 1, 0.16)
+
+[node name="Sprite4" type="Sprite2D" parent="Slots/Slot4"]
+unique_name_in_owner = true
+position = Vector2(0, -26)
+
+[node name="ChipEdge4" type="ColorRect" parent="Slots/Slot4"]
+unique_name_in_owner = true
+offset_left = -17.0
+offset_top = -3.0
+offset_right = 17.0
+offset_bottom = 11.0
+color = Color(0.62, 0.85, 1, 0.55)
+
+[node name="Chip4" type="ColorRect" parent="Slots/Slot4"]
+unique_name_in_owner = true
+offset_left = -16.0
+offset_top = -2.0
+offset_right = 16.0
+offset_bottom = 10.0
+color = Color(0.04, 0.09, 0.16, 0.92)
+
+[node name="ChipGlyph4" type="Sprite2D" parent="Slots/Slot4"]
+unique_name_in_owner = true
+position = Vector2(-9, 4)
+scale = Vector2(0.3, 0.3)
+
+[node name="ChipLabel4" type="Label" parent="Slots/Slot4"]
+unique_name_in_owner = true
+offset_left = -3.0
+offset_top = -3.0
+offset_right = 15.0
+offset_bottom = 11.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+vertical_alignment = 1
+text = ""
+
+[node name="Hover4" type="Control" parent="Slots/Slot4"]
+unique_name_in_owner = true
+offset_left = -20.0
+offset_top = -48.0
+offset_right = 20.0
+offset_bottom = 12.0
+mouse_filter = 2
+
+[node name="Slot5" type="Node2D" parent="Slots"]
+unique_name_in_owner = true
+position = Vector2(130, -14)
+
+[node name="Pool5" type="ColorRect" parent="Slots/Slot5"]
+unique_name_in_owner = true
+offset_left = -26.0
+offset_top = -7.0
+offset_right = 26.0
+offset_bottom = 7.0
+color = Color(0.62, 0.85, 1, 0.3)
+
+[node name="Beam5" type="ColorRect" parent="Slots/Slot5"]
+unique_name_in_owner = true
+offset_left = -20.0
+offset_top = -74.0
+offset_right = 20.0
+offset_bottom = -2.0
+color = Color(0.7, 0.88, 1, 0.12)
+
+[node name="Ghost5" type="ColorRect" parent="Slots/Slot5"]
+unique_name_in_owner = true
+offset_left = -17.0
+offset_top = -40.0
+offset_right = 17.0
+offset_bottom = -4.0
+color = Color(0.66, 0.84, 1, 0.16)
+
+[node name="Sprite5" type="Sprite2D" parent="Slots/Slot5"]
+unique_name_in_owner = true
+position = Vector2(0, -26)
+
+[node name="ChipEdge5" type="ColorRect" parent="Slots/Slot5"]
+unique_name_in_owner = true
+offset_left = -17.0
+offset_top = -3.0
+offset_right = 17.0
+offset_bottom = 11.0
+color = Color(0.62, 0.85, 1, 0.55)
+
+[node name="Chip5" type="ColorRect" parent="Slots/Slot5"]
+unique_name_in_owner = true
+offset_left = -16.0
+offset_top = -2.0
+offset_right = 16.0
+offset_bottom = 10.0
+color = Color(0.04, 0.09, 0.16, 0.92)
+
+[node name="ChipGlyph5" type="Sprite2D" parent="Slots/Slot5"]
+unique_name_in_owner = true
+position = Vector2(-9, 4)
+scale = Vector2(0.3, 0.3)
+
+[node name="ChipLabel5" type="Label" parent="Slots/Slot5"]
+unique_name_in_owner = true
+offset_left = -3.0
+offset_top = -3.0
+offset_right = 15.0
+offset_bottom = 11.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+vertical_alignment = 1
+text = ""
+
+[node name="Hover5" type="Control" parent="Slots/Slot5"]
+unique_name_in_owner = true
+offset_left = -20.0
+offset_top = -48.0
+offset_right = 20.0
+offset_bottom = 12.0
+mouse_filter = 2
+
 [node name="RibbonBack" type="ColorRect" parent="."]
 unique_name_in_owner = true
 offset_left = -92.0
@@ -260,9 +597,49 @@ offset_right = 92.0
 offset_bottom = 26.0
 color = Color(0.06, 0.13, 0.2, 0.85)
 
-[node name="RibbonFill" type="ColorRect" parent="."]
+[node name="RibbonPlain" type="ColorRect" parent="."]
 unique_name_in_owner = true
 offset_left = -90.0
+offset_top = 12.0
+offset_right = 90.0
+offset_bottom = 24.0
+color = Color(0.22, 0.45, 0.62, 0.75)
+
+[node name="Seg1" type="ColorRect" parent="."]
+unique_name_in_owner = true
+offset_left = -90.0
+offset_top = 12.0
+offset_right = -56.4
+offset_bottom = 24.0
+color = Color(0.35, 0.75, 1, 1)
+
+[node name="Seg2" type="ColorRect" parent="."]
+unique_name_in_owner = true
+offset_left = -53.4
+offset_top = 12.0
+offset_right = -19.8
+offset_bottom = 24.0
+color = Color(0.35, 0.75, 1, 1)
+
+[node name="Seg3" type="ColorRect" parent="."]
+unique_name_in_owner = true
+offset_left = -16.8
+offset_top = 12.0
+offset_right = 16.8
+offset_bottom = 24.0
+color = Color(0.35, 0.75, 1, 1)
+
+[node name="Seg4" type="ColorRect" parent="."]
+unique_name_in_owner = true
+offset_left = 19.8
+offset_top = 12.0
+offset_right = 53.4
+offset_bottom = 24.0
+color = Color(0.35, 0.75, 1, 1)
+
+[node name="Seg5" type="ColorRect" parent="."]
+unique_name_in_owner = true
+offset_left = 56.4
 offset_top = 12.0
 offset_right = 90.0
 offset_bottom = 24.0
@@ -308,6 +685,20 @@ theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 vertical_alignment = 1
 text = ""
+
+[node name="RunwayOverflow" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 76.0
+offset_top = 8.0
+offset_right = 100.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(0.78, 0.93, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "5+"
 
 [node name="StageDim" type="ColorRect" parent="."]
 unique_name_in_owner = true

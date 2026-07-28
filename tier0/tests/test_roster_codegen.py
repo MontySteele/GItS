@@ -12,6 +12,24 @@ from tools import gen_klee_cards as gen
 
 FURINA_HAND_WRITTEN = {"let_the_people_rejoice"}
 
+# A7 (playtest-2 red-pen, 2026-07-28). Unheard Confession became a POWER that
+# pays Block "whenever Fanfare changes amount". The sheet and tier0 both
+# implement it; the C# port is deferred on a STRUCTURAL gap, not on effort.
+#
+# The trigger has to fire from FurinaResources' three Fanfare mutators, and
+# those are synchronous (`static void GainFanfare`, `static int DecayFanfare`,
+# `static void GainFanfareFloor`) while every block grant in the mod goes
+# through `await CreatureCmd.GainBlock`. Threading async through them would
+# drag GainEncore/SpendEncore and every generated Encore card with it -- a
+# co-op-critical refactor far outside this ruling's blast radius -- and the
+# only sync alternative (`Creature.GainBlockInternal`) has no precedent in the
+# mod and no decompile evidence about which hooks it skips.
+#
+# GATE THAT RELEASES IT: a pass that makes the Furina resource surface async
+# (or establishes a verified sync block-grant idiom). Until then the card is
+# visibly blocked in the manifest rather than quietly inert in the game.
+FURINA_DEFERRED_ASYNC = {"unheard_confession"}
+
 # Cards deliberately DEFERRED from C# generation while a sprint is mid-flight,
 # each with the gate that releases it. A curated list rather than a silent
 # skip: an ungenerated card is a card that does nothing in the live game, and
@@ -34,24 +52,13 @@ FURINA_HAND_WRITTEN = {"let_the_people_rejoice"}
 # be named instead of becoming a silent skip.
 FURINA_DEFERRED_TO_FD: set[str] = set()
 
-# Curtain Call (R85, 2026-07-27): the sweep's new grammar has no C# home yet
-# -- five activity-triggered Powers (salon_deploy_block, salon_bow_*,
-# encore_spend_draw, first_attack_draw, cross_examination) and the Body-Slam
-# encore read (bonus_formula N_per_M_encore). The sprint's §9 names the gate:
-# C# parity ships in the NEXT CONSOLIDATION SPRINT, not with the sweep.
-# blocked_reason() already refuses each one by name (unregistered power /
-# unregistered formula), so this set is curation, not enforcement.
-FURINA_DEFERRED_TO_CONSOLIDATION: set[str] = {
-    "fortissimo_guard", "pit_orchestra", "courtroom_drama", "crowd_work",
-    "quick_change",                       # the five §4 power conversions
-    "poised_riposte",                     # 1_per_3_encore read
-    "warmup_act",                         # enemy_intends_attack read
-    "graceful_retreat",                   # hp_lost_this_turn read
-    "swelling_overture",                  # encore_at_least_N read
-    "crescendo",                          # grow_damage (Rampage growth)
-    "torrential_turn",                    # refresh_all_auras
-    "matinee_performance",                # times: salon_members CalculatedVar
-}
+# Curtain Call (R85) deferred twelve cards to a consolidation sprint while
+# their grammar had no C# home. "Take a Bow" (2026-07-27) shipped all of it --
+# the six activity-triggered Powers, the Body-Slam encore read, the three new
+# predicates, grow_damage, refresh_all_auras and the salon-member hit count --
+# so FURINA_DEFERRED_TO_CONSOLIDATION is DELETED rather than left empty. The
+# next deferral gets a fresh set with its own gate written down; a dormant
+# escape hatch just makes the next silent skip easy.
 
 # Cards whose UPGRADE is unauthored because the delta it used to carry died
 # with a retired grammar. Same curation rule as above: an unupgradable card
@@ -64,6 +71,22 @@ FURINA_DEFERRED_TO_CONSOLIDATION: set[str] = {
 # empty set rather than deleted, so the invariant "every card has an upgrade
 # path" is asserted positively and the next gap has somewhere to be named.
 FURINA_UPGRADE_GAP_PENDING_FB1: set[str] = set()
+
+
+def _generated_source(class_name: str) -> str:
+    """The SHIPPED C# for a generated card, read off disk.
+
+    Used where a fixture is making a claim about the artifact the game loads
+    rather than about the generator's output for a hypothetical card. The two
+    agree by construction -- `--check` fails the build if they drift -- but
+    only one of them is what actually ships, and a test that has a choice
+    should assert against that one.
+    """
+    path = (gen.FURINA_PROFILE.out_dir / f"{class_name}.cs")
+    assert path.exists(), (
+        f"{class_name} is not generated -- regenerate with "
+        "`python tools/gen_roster_cards.py --character furina`")
+    return path.read_text(encoding="utf-8")
 
 
 def by_id_of(cards: list[dict]) -> dict[str, dict]:
@@ -133,6 +156,35 @@ def test_unknown_card_level_semantics_block_loudly():
     ) == "card field(s) ['future_resource_cost'] not understood"
 
 
+def test_register_never_reaches_the_generated_csharp():
+    """`register` is a SHEET-SIDE voice label. Codegen tolerates it and
+    ignores it: strip the field and every generated file must come out
+    byte-identical.
+
+    Asserted as byte-identity rather than as "the word does not appear",
+    because the failure that matters is not a stray literal -- it is the
+    field silently participating in a decision (a tag, a keyword, a sort
+    order, a rarity nudge). An output diff catches every form of that; a
+    substring search catches only the clumsiest.
+
+    The engine-side half of the same law lives in the register lint
+    (tools/lint_register_isolation.py): nothing under tier0/engine or tier05
+    may READ the field either. Together they say the column is documentation
+    until somebody rules otherwise.
+    """
+    cards = _furina_cards()
+    stripped = [{k: v for k, v in card.items() if k != "register"}
+                for card in cards]
+    assert any("register" in card for card in cards), (
+        "no card carries a register -- this test would be vacuous")
+
+    for card, bare in zip(cards, stripped):
+        if gen.blocked_reason(card, gen.FURINA_PROFILE) is not None:
+            continue
+        assert (gen.emit(card, gen.FURINA_PROFILE)
+                == gen.emit(bare, gen.FURINA_PROFILE)), card["id"]
+
+
 def test_furina_profile_emits_every_non_kit_card():
     all_ids = {card["id"] for card in _furina_cards()}
     generated = {
@@ -140,34 +192,44 @@ def test_furina_profile_emits_every_non_kit_card():
         for card in _furina_cards()
         if gen.blocked_reason(card, gen.FURINA_PROFILE) is None
     }
-    withheld = (FURINA_HAND_WRITTEN | FURINA_DEFERRED_TO_FD
-                | FURINA_DEFERRED_TO_CONSOLIDATION)
+    withheld = FURINA_HAND_WRITTEN | FURINA_DEFERRED_TO_FD | FURINA_DEFERRED_ASYNC
     assert generated == all_ids - withheld
+
+    # Same "for the REASON we think it is" check the FD set gets, applied to
+    # the async-gap deferral. Without it, unheard_confession breaking for some
+    # unrelated reason would sit inside a curated set and read as intentional.
+    for cid in FURINA_DEFERRED_ASYNC:
+        reason = gen.blocked_reason(by_id_of(_furina_cards())[cid],
+                                    gen.FURINA_PROFILE)
+        assert reason is not None and "A7 C# port DEFERRED" in reason, cid
 
     # The deferral must be for the REASON we think it is. A card that stopped
     # generating for some unrelated breakage would otherwise hide inside the
     # curated set and read as intentional. Vacuous while a set is empty, and
     # deliberately kept so: it re-arms the moment anything is deferred again.
-    for cid in FURINA_DEFERRED_TO_FD | FURINA_DEFERRED_TO_CONSOLIDATION:
+    for cid in FURINA_DEFERRED_TO_FD:
         reason = gen.blocked_reason(by_id_of(_furina_cards())[cid],
                                     gen.FURINA_PROFILE)
         assert reason is not None, cid
 
-    # G-A2 had released everything (the empty-FD state); Curtain Call (R85)
-    # re-opened a curated set with an explicit gate -- the consolidation
-    # sprint. FD stays empty and stays asserted so.
+    # Both deferral sets are empty and asserted so. G-A2 emptied FD; the "Take
+    # a Bow" consolidation sprint emptied the Curtain Call set by shipping the
+    # C# parity R85 gated on, and DELETED it rather than leaving an empty
+    # escape hatch behind -- an empty set is an invitation, and the positive
+    # assertion above already covers the invariant it existed to state.
     assert not FURINA_DEFERRED_TO_FD
 
     manifest = json.loads(
         gen.FURINA_PROFILE.manifest.read_text(encoding="utf-8")
     )
-    # 78 cards, frozen at Curtain Call (§9: no pool-size change). Withheld:
-    # the hand-written kit Burst plus the twelve R85 grammar deferrals above
-    # (Track B's five conversions + Track C's new-read rewrites).
+    # 77 cards: A4 (playtest-2 red-pen, 2026-07-28) CUT rising_tide, which is
+    # the first pool-size change since Curtain Call froze it at 78. Two cards
+    # are withheld -- the hand-written kit Burst, and A7's unheard_confession
+    # (see FURINA_DEFERRED_ASYNC).
     assert manifest["coverage"] == {
         "total": 78,
-        "generated": 65,
-        "blocked": 13,
+        "generated": 76,
+        "blocked": 2,
     }
     assert set(manifest["generated"]) == generated
     assert set(manifest["blocked"]) == withheld
@@ -204,12 +266,14 @@ def test_single_target_aura_rider_renders_through_a_calculated_var():
     # resolves the same var. The multiplier must be static (CalculatedVar
     # rejects instance targets) and must null-guard: preview calls
     # Calculate(null) whenever nothing is hovered.
-    # torrential_turn is DEFERRED grammar since Curtain Call C (its
-    # refresh_all_auras op has no C# home), but it remains the pool's only
-    # single-target bonus_vs_aura card, and the RIDER RENDERER under test
-    # still runs on direct emit. The consolidation sprint regenerates it.
-    by_id = {card["id"]: card for card in _furina_cards()}
-    torrential = gen.emit(by_id["torrential_turn"], gen.FURINA_PROFILE)
+    #
+    # UN-DEFERRED by the "Take a Bow" consolidation sprint. torrential_turn is
+    # the pool's only single-target bonus_vs_aura card, and while its
+    # refresh_all_auras op had no C# home this could only run on a direct
+    # emit() -- a fixture describing a card that did not ship. Now it reads
+    # the GENERATED FILE, so the assertion is about the artifact the game
+    # loads rather than about what the generator would produce if asked.
+    torrential = _generated_source("TorrentialTurn")
 
     assert "new CalculationBaseVar(10m)" in torrential
     assert "new ExtraDamageVar(3m)" in torrential
@@ -255,12 +319,21 @@ def test_furina_skill_grade_cadence_and_character_identity():
     assert "IElementalCard" not in normal_attack
     assert 'public string CharacterId => "furina";' in normal_attack
 
-    # undercurrent since Curtain Call B: usher_the_waves was retyped to a
-    # plain attack (application deleted), so the damaging-skill cadence pin
-    # moves to the AoE applier the sweep deliberately kept.
-    damaging_skill = gen.emit(by_id["undercurrent"], gen.FURINA_PROFILE)
+    # The damaging-skill cadence pin has now moved twice for the same reason:
+    # Curtain Call B retyped usher_the_waves to a plain attack, moving the pin
+    # to undercurrent, and A5 (2026-07-28) retyped undercurrent the same way.
+    # flood_of_emotion is a damaging skill that KEEPS its skill_tag.
+    damaging_skill = gen.emit(by_id["flood_of_emotion"], gen.FURINA_PROFILE)
     assert "IElementalCard" in damaging_skill
     assert "public Element Element => Element.Hydro;" in damaging_skill
+
+    # A5's other half, pinned as a POSITIVE statement of the cadence law
+    # rather than left as an absence: undercurrent is now a plain attack, and
+    # a plain attack never applies hydro no matter how much damage it deals.
+    # This is the assertion that fails if someone re-adds its skill_tag.
+    retyped_aoe = gen.emit(by_id["undercurrent"], gen.FURINA_PROFILE)
+    assert "IElementalCard" not in retyped_aoe
+    assert "KleeKeywords.AppliesHydro" not in retyped_aoe
 
     nondamaging_skill = gen.emit(by_id["duet"], gen.FURINA_PROFILE)
     assert "IElementalCard" not in nondamaging_skill
@@ -349,9 +422,12 @@ def test_basics_carry_the_tags_base_game_content_keys_on():
     defend = gen.emit(by_id["stage_presence"], gen.FURINA_PROFILE)
     assert "CanonicalTags => new() { CardTag.Defend };" in defend
 
-    # macaron_break since Curtain Call C: crowd_work became deferred-grammar
-    # at B and swelling_overture at C (R85); emit() over unregistered grammar
-    # crashes by design, so the pin sits on a card the sweep kept.
+    # macaron_break carries the negative pin. It moved here at Curtain Call C
+    # because the cards that held it (crowd_work, then swelling_overture) had
+    # become deferred grammar and emit() crashes by design on grammar it does
+    # not know. "Take a Bow" shipped both, so the constraint is gone -- but
+    # the pin stays on macaron_break, because a non-basic is a non-basic and
+    # moving it back would be churn for its own sake.
     non_basic = gen.emit(by_id["macaron_break"], gen.FURINA_PROFILE)
     assert "CanonicalTags" not in non_basic
 
@@ -468,6 +544,169 @@ def test_salon_scaled_number_renders_the_replacement_multiplier():
     # the multiplier twice.
     assert "salonReplacements > 0 ? 3 : 1" not in usher
     assert "DynamicVars.CalculationBase.UpgradeValueBy(2m);" in usher
+
+
+def test_a_random_deploy_emits_a_null_and_says_so_on_the_face():
+    """A11: `member: random` -> null, which Deploy resolves per iteration off
+    the SHARED combat stream.
+
+    The face assertion is not decoration. The shared template says "typed",
+    which was true while every deploy named its member; on a random deploy
+    that word implies a choice the player does not have. A card whose text
+    still claims a type is worse than one that says nothing.
+    """
+    by_id = {card["id"]: card for card in _furina_cards()}
+    debut = gen.emit(by_id["salon_debut"], gen.FURINA_PROFILE)
+    named = gen.emit(by_id["surintendante_chevalmarin"], gen.FURINA_PROFILE)
+
+    assert "SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, null)" in debut
+    # B5 reworded this from "RANDOM Salon Member(s)" to the named-member
+    # grammar; the requirement is unchanged -- the face must say the member is
+    # not chosen.
+    assert "random Salon Member" in debut
+    assert "SalonMemberTips.ForCard(base.ExtraHoverTips, this, randomMember: true)" in debut
+    assert "members: new[]" not in debut
+
+    # The Common it was de-duped FROM keeps naming its member. If this ever
+    # goes null too, the de-dupe has been undone in the other direction.
+    assert "this, SalonMember.Chevalmarin)" in named
+
+
+def test_every_deploy_card_names_its_member_and_carries_its_tip():
+    """B5 (playtest-2 defect, 2026-07-28), swept across the whole sheet.
+
+    Written as a SWEEP rather than as one case per card on purpose: the
+    defect was that eight cards shared one nameless paragraph, so a fixture
+    that named the cards individually would leave the ninth to be found in
+    play. Any future deploy card is covered the moment it is authored.
+    """
+    seen = 0
+    for card in _furina_cards():
+        deploys = [e for e in card.get("effects", [])
+                   if e.get("op") == "apply_power"
+                   and e.get("power") == "salon_member"]
+        if not deploys or gen.blocked_reason(card, gen.FURINA_PROFILE):
+            continue
+        seen += 1
+        source = gen.emit(card, gen.FURINA_PROFILE)
+
+        # The face names WHO -- every member this card can field.
+        for eff in deploys:
+            name = gen.SALON_MEMBER_NAMES[eff.get("member", "crabaletta")]
+            assert f"[gold]{name}[/gold]" in source, (card["id"], name)
+
+        # The cap paragraph is GONE from the face. It moved to the tip, and
+        # since A12 the number in it is not even a constant any more.
+        assert "Maximum 3" not in source, card["id"]
+        assert "bows its OLDEST member out" not in source, card["id"]
+
+        # ...and the tip that replaced it is attached.
+        assert "SalonMemberTips.ForCard(" in source, card["id"]
+
+    assert seen == 9, f"expected 9 deploy cards, swept {seen}"
+
+
+def test_the_face_and_the_tooltip_call_members_the_same_thing():
+    """The face says "Add Gentilhomme Usher" and the tooltip explaining him is
+    titled "Gentilhomme Usher". Those strings live in two languages -- Python
+    and C# -- so nothing but a test makes them agree, and if they drift the
+    player cannot tell the two are about the same member."""
+    tips = (Path(gen.REPO) / "klee-mod" / "KleeCode" / "Cards"
+            / "SalonMemberTips.cs").read_text(encoding="utf-8")
+    loc = (Path(gen.REPO) / "klee-mod" / "KleeCode"
+           / "KleeMod.cs").read_text(encoding="utf-8")
+    for member, name in gen.SALON_MEMBER_NAMES.items():
+        if member == "random":
+            continue
+        assert f'"{name}"' in tips, (member, name)
+        assert f'"{name}"' in loc, (member, name)
+
+
+def test_an_unrecognised_member_is_refused_by_name():
+    """The member value is emitted through a lookup, and a lookup miss is a
+    KeyError -- a stack trace mid-emit, not a decision. Every other
+    unexpressible value on this sheet is refused by name; so is this one."""
+    card = {
+        "id": "not_a_real_card", "name": "Not A Real Card", "cost": 1,
+        "type": "skill", "rarity": "common", "solve": ["utility"],
+        "archetypes": ["salon"], "role": "enabler",
+        "effects": [{"op": "apply_power", "power": "salon_member",
+                     "amount": 1, "target": "self", "member": "neuvillette"}],
+    }
+    reason = gen.blocked_reason(card, gen.FURINA_PROFILE)
+    assert reason is not None
+    assert "neuvillette" in reason, reason
+
+
+def test_the_per_member_slope_renders_through_the_calculated_rail():
+    """A13/A14: both halves of the per-member slope, pinned STRUCTURALLY.
+
+    Deliberately not a text assertion. Both cards' faces read the same whether
+    the rider is there or not -- "Deal {CalculatedDamage} damage" renders
+    identically over a live multiplier and over a var that never scales -- and
+    that is exactly how B1 and the GrandFinale regression both got past a
+    green suite. So this pins the multiplier expression itself.
+    """
+    by_id = {card["id"]: card for card in _furina_cards()}
+    house = gen.emit(by_id["house_call"], gen.FURINA_PROFILE)
+    dinner = gen.emit(by_id["dinner_service"], gen.FURINA_PROFILE)
+
+    # A14: damage half. Base 6, slope 2, multiplier is the raw member count --
+    # no divisor, because the salon is a capped count where every member is a
+    # full step (the Fanfare/Charge riders divide; this one must not).
+    assert "new CalculationBaseVar(6m)" in house
+    assert "new ExtraDamageVar(2m)" in house
+    assert (
+        "new CalculatedDamageVar(ValueProp.Move).WithMultiplier("
+        "static (card, _) => SalonMemberPower.Count(card.Owner.Creature))"
+        in house
+    )
+    assert "DynamicVars.CalculationBase.UpgradeValueBy(2m);" in house
+
+    # A13: block half. Same slope, same rail, on the op that had no rider
+    # rail at all until B1 built one.
+    assert "new CalculationBaseVar(2m)" in dinner
+    assert "new CalculationExtraVar(2m)" in dinner
+    assert (
+        "new CalculatedBlockVar(ValueProp.Move).WithMultiplier("
+        "static (card, _) => SalonMemberPower.Count(card.Owner.Creature))"
+        in dinner
+    )
+
+    # The threshold shape both cards replace must be GONE. Leaving it would
+    # pay the old conditional on top of the new slope.
+    for source in (house, dinner):
+        assert "SalonMemberPower.Count(Owner.Creature) > 0" not in source
+
+
+def test_a_converted_rider_always_declares_itself_on_the_face():
+    """The L-C bargain, both ops.
+
+    A converted rider's arithmetic moves to the hover tip, so the face MUST
+    keep a short marker naming the mechanism -- otherwise a card read on a
+    reward screen is a flat number with no hint that it scales. The damage
+    path always emitted this; the block path did not, so B1's fix traded a
+    silent drop for a silent number. Thunderous Ovation is the regression
+    case: it is the card B1 was reported against.
+    """
+    by_id = {card["id"]: card for card in _furina_cards()}
+    thunder = gen.emit(by_id["thunderous_ovation"], gen.FURINA_PROFILE)
+    dinner = gen.emit(by_id["dinner_service"], gen.FURINA_PROFILE)
+    house = gen.emit(by_id["house_call"], gen.FURINA_PROFILE)
+
+    assert "Scales with [gold]Fanfare[/gold]." in thunder
+    assert "Scales with [gold]Salon[/gold]." in dinner
+    assert "Scales with [gold]Salon[/gold]." in house
+    # Not "Member": rpartition on the formula would name it that, and nothing
+    # in the game or on the sheet calls the stage that.
+    assert "[gold]Member[/gold]" not in dinner + house
+
+    # And the rate itself reaches the tip, with the block/damage noun set.
+    assert "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, salonPer: 2)" in house
+    assert (
+        "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, salonPer: 2, "
+        "salonGrantsBlock: true)" in dinner
+    )
 
 
 def test_salon_scaled_value_is_captured_before_the_cards_own_deploys():
@@ -592,9 +831,11 @@ def test_converted_riders_move_their_arithmetic_to_the_hover_tip():
     # number already shows the answer. The face keeps a marker naming the
     # mechanism (so a reward-screen read still declares that it scales) and
     # the rate moves to a tip that can also price it live.
-    by_id = {card["id"]: card for card in _furina_cards()}
-
-    crescendo = gen.emit(by_id["crescendo"], gen.FURINA_PROFILE)
+    # Both cards were deferred grammar when this fixture was written and could
+    # only be checked through emit(). "Take a Bow" shipped them, so the
+    # fixture now reads the generated files -- the tips are a DISPLAY claim,
+    # and a display claim should be made against what is displayed.
+    crescendo = _generated_source("Crescendo")
     assert "Scales with [gold]Fanfare[/gold]." in crescendo
     assert "+1 damage per 2" not in crescendo
     assert (
@@ -602,7 +843,7 @@ def test_converted_riders_move_their_arithmetic_to_the_hover_tip():
         "fanfarePer: 1, fanfareStep: 2)" in crescendo
     )
 
-    torrential = gen.emit(by_id["torrential_turn"], gen.FURINA_PROFILE)
+    torrential = _generated_source("TorrentialTurn")
     assert "Bonus damage vs. an elemental aura." in torrential
     assert "+3 damage if the enemy" not in torrential
     assert "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, auraBonus: 3)" in torrential
@@ -626,6 +867,15 @@ def test_unconverted_riders_keep_their_sentence_on_the_face():
     big_one = gen.emit(klee_by_id["grand_finale"], gen.KLEE_PROFILE)
     assert "damage per [gold]Bomb[/gold] detonated this combat." in big_one
     assert "FurinaRiderTips" not in big_one
+    # The VAR, not just the sentence. Caught during the 2026-07-28 sprint:
+    # A5's Times-var insertion captured the BonusPer lines into its own branch
+    # by indentation, so grand_finale silently stopped declaring BonusPer and
+    # lost its campfire upgrade -- with the whole 1305-test suite green,
+    # because every assertion on this card read its TEXT. The bare sentence
+    # renders identically either way; only the var declaration differs.
+    assert 'new DynamicVar("BonusPer", 2m)' in big_one, (
+        "grand_finale lost its BonusPer var: the bonus_per_detonation upgrade "
+        "is silently dead while the card text still reads correctly")
 
 
 def test_crackle_prints_the_sentence_its_semantics_were_pinned_against():

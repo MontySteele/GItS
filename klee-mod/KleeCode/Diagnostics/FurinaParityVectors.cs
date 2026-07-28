@@ -80,6 +80,65 @@ internal static class FurinaParityVectors
         new(20, 10, 50, 15, 35, 25, 65),
     };
 
+    internal readonly record struct RiderVector(
+        int Bank, int Per, int Div, int Bonus);
+
+    internal readonly record struct ThresholdVector(
+        int Bank, int Bar, bool Holds);
+
+    /// <summary>
+    /// Curtain Call's card-body READS: `N_per_M_fanfare` / `N_per_M_encore`
+    /// damage riders. Meter-agnostic on purpose -- the arithmetic is the same
+    /// whichever bank the formula names, so one table covers both and the
+    /// Python side generates the rows for each meter from the same cases.
+    ///
+    /// What these actually pin is integer division at the step boundaries.
+    /// Python's `//` floors; C#'s int `/` truncates. Both banks are
+    /// non-negative by construction so the two agree, but that is a fact
+    /// worth a fixture rather than a comment: it stops being true the moment
+    /// anything can drive a meter below zero.
+    /// </summary>
+    internal static readonly RiderVector[] RiderVectors =
+    {
+        new(0, 1, 2, 0),
+        new(1, 1, 2, 0),
+        new(2, 1, 2, 1),
+        new(3, 1, 2, 1),
+        new(40, 1, 2, 20),
+        new(41, 1, 2, 20),
+        new(0, 1, 3, 0),
+        new(2, 1, 3, 0),
+        new(3, 1, 3, 1),
+        new(5, 1, 3, 1),
+        new(9, 1, 3, 3),
+        new(22, 1, 3, 7),
+    };
+
+    /// <summary>
+    /// `fanfare_at_least_N` / `encore_at_least_N`. A `>` written where the
+    /// sheet says `>=` is a one-character slip that no winrate would surface
+    /// and that mis-prices Flood of Emotion's second 14-damage hit.
+    /// </summary>
+    internal static readonly ThresholdVector[] ThresholdVectors =
+    {
+        new(19, 20, false),
+        new(20, 20, true),
+        new(21, 20, true),
+        new(0, 20, false),
+        new(7, 8, false),
+        new(8, 8, true),
+        new(9, 8, true),
+        new(0, 8, false),
+    };
+
+    /// <summary>Pure form of the generated rider expression
+    /// (<c>CalculatedDamageVar.WithMultiplier(... bank / div)</c> times the
+    /// ExtraDamage term), stated the same way the emitted C# states it.</summary>
+    private static int Rider(int bank, int per, int div) => per * (bank / div);
+
+    /// <summary>Pure form of the generated threshold predicate.</summary>
+    private static bool Threshold(int bank, int bar) => bank >= bar;
+
     /// <summary>
     /// Pure form of <see cref="FurinaResources.DecayFanfare"/>. Kept
     /// character-for-character identical to it; see the class remarks.
@@ -138,6 +197,32 @@ internal static class FurinaParityVectors
                     v.Before, v.Floor, v.Cap, v.Grant,
                     current, floor, cap,
                     v.After, v.AfterFloor, v.AfterCap));
+            }
+        }
+
+        foreach (var v in RiderVectors)
+        {
+            var got = Rider(v.Bank, v.Per, v.Div);
+            if (got != v.Bonus)
+            {
+                findings.Add(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Fanfare/Encore rider parity: {0} per {1} off a bank of "
+                  + "{2} -> {3}, sim says {4}",
+                    v.Per, v.Div, v.Bank, got, v.Bonus));
+            }
+        }
+
+        foreach (var v in ThresholdVectors)
+        {
+            var got = Threshold(v.Bank, v.Bar);
+            if (got != v.Holds)
+            {
+                findings.Add(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Fanfare/Encore threshold parity: bank {0} vs bar {1} -> "
+                  + "{2}, sim says {3}",
+                    v.Bank, v.Bar, got, v.Holds));
             }
         }
 

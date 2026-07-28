@@ -41,14 +41,14 @@ public sealed class OverflowingHospitality : CustomCardModel, ICharacterCard, IS
         new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
+        SalonMemberTips.ForCard(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, members: new[] { SalonMember.Chevalmarin });
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("overflowing_hospitality");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Overflowing Hospitality"),
-        ("description", "Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. Apply [gold]Hydro[/gold] to a random enemy. Gain {Encore:diff()} [gold]Encore[/gold]."),
+        ("description", "Add 1 [gold]Surintendante Chevalmarin[/gold] to your [gold]Salon[/gold]. Apply [gold]Hydro[/gold] to a random enemy. Gain {Encore:diff()} [gold]Encore[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

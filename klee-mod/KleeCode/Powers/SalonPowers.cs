@@ -112,6 +112,31 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         + FurinaResources.Fanfare(owner) / SalonConstants.FocusPerFanfare
         + SalonDamageUpPower.AmountFor(owner);
 
+    /// <summary>The member's PRINTED per-turn tick, before any scaling.</summary>
+    public static int BaseTick(SalonMember member) => member switch
+    {
+        SalonMember.Crabaletta => SalonConstants.CrabalettaTick,
+        SalonMember.Usher => SalonConstants.UsherTick,
+        _ => SalonConstants.ChevalmarinTick,
+    };
+
+    /// <summary>
+    /// What this member's tick is worth RIGHT NOW: the printed number plus
+    /// the Fanfare Focus term and Grand Salon, then the dry reduction if the
+    /// member cannot pay.
+    ///
+    /// D1's role chip renders this, and the upkeep loop resolves through it,
+    /// so the number under a member and the number it deals are the same
+    /// expression rather than two copies that agree until one is edited. A
+    /// chip that computed its own scaling would be a fourth hand-maintained
+    /// projection of the same arithmetic.
+    /// </summary>
+    public static int TickValue(Creature owner, SalonMember member, bool paid)
+    {
+        var amt = Scaled(owner, BaseTick(member));
+        return paid ? amt : (int)(amt * SalonConstants.DryDamageMultiplier);
+    }
+
     private static async Task Bow(
         PlayerChoiceContext choiceContext, Creature owner, SalonMember member)
     {
@@ -153,14 +178,42 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         }
         FurinaResources.GainBurst(
             owner, FurinaResourceConstants.BurstPerSalonTick);
+
+        // Stagehands (R85): the crew strikes the set behind every bow. Placed
+        // after the burst credit to match the sim's _salon_bow ordering, and
+        // unscaled -- the printed number is the whole payout.
+        var bowBlock = SalonBowBlockPower.AmountFor(owner);
+        if (bowBlock > 0)
+        {
+            await CreatureCmd.GainBlock(
+                owner, bowBlock, ValueProp.Unpowered, null, fast: true);
+        }
+        var bowEncore = SalonBowEncorePower.AmountFor(owner);
+        if (bowEncore > 0)
+        {
+            FurinaResources.GainEncore(owner, bowEncore);
+        }
     }
 
     /// <summary>The replacement rule, in ONE place: a deploy that lands on a
     /// full stage bows the oldest member out. Both the loop in
     /// <see cref="Deploy"/> and the card face (via <see cref="WillReplace"/>)
     /// ask the question through here, so they cannot drift apart.</summary>
-    public static bool StageIsFull(int companyCount) =>
-        companyCount >= SalonConstants.MemberSlots;
+    /// <remarks>A12 (2026-07-28) promoted the cap from a constant to a
+    /// per-player stat, so every reader must ask with an OWNER. The old
+    /// count-only overload is deliberately gone rather than kept as a
+    /// convenience: a caller that forgot to pass the owner would silently
+    /// enforce the base cap of 3 on a player who had paid for 4, and that
+    /// reads as "the card did nothing" -- the hardest kind of bug to see.
+    /// SalonConstants.MemberSlots remains the BASE, which is what the
+    /// constant-parity gate compares against tier0.</remarks>
+    public static bool StageIsFull(Creature owner, int companyCount) =>
+        companyCount >= SlotsFor(owner);
+
+    /// <summary>The stage's size for this player: the base cap plus whatever
+    /// cap-raise powers they hold.</summary>
+    public static int SlotsFor(Creature owner) =>
+        SalonConstants.MemberSlots + SalonCapUpPower.AmountFor(owner);
 
     /// <summary>Closed form of <see cref="Deploy"/>'s loop, for the card face:
     /// will any of a card's first <paramref name="deploys"/> deploys displace
@@ -173,7 +226,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     /// state the card's own resolution starts from -- hence card bodies
     /// capture their scaled value BEFORE the first Deploy runs.</summary>
     public static bool WillReplace(Creature owner, int deploys) =>
-        deploys > 0 && StageIsFull(Count(owner) + deploys - 1);
+        deploys > 0 && StageIsFull(owner, Count(owner) + deploys - 1);
 
     /// <summary>Face/resolution delta for a number the replacement rule
     /// scales: the CalculatedVar computes <c>base + 1 x delta</c>, and this
@@ -193,22 +246,57 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     /// <summary>Salon v2 deploy: into a full stage, the OLDEST member bows
     /// out and the new member enters. Returns the replacement count (the
     /// generated card bodies scale their later numerics off it).</summary>
+    /// <summary>A11: one random member, drawn from the SHARED combat stream
+    /// so both seats in a co-op run agree on who walked on.</summary>
+    private static readonly SalonMember[] AllMembers =
+    {
+        SalonMember.Crabaletta, SalonMember.Usher, SalonMember.Chevalmarin,
+    };
+
+    private static SalonMember RollMember(Creature owner)
+    {
+        var rng = owner.Player?.RunState.Rng.CombatTargets;
+        return rng == null ? SalonMember.Crabaletta : rng.NextItem(AllMembers);
+    }
+
+    /// <param name="member">Who takes the stage, or NULL for a random member
+    /// (A11, 2026-07-28: the starter fields whoever turns up, so it no longer
+    /// duplicates the Chevalmarin card). Rolled per deploy rather than once
+    /// per card, so a multi-deploy card can field a mixed stage -- the sim
+    /// rolls per iteration too.</param>
     public static async Task<int> Deploy(
         PlayerChoiceContext choiceContext, Creature owner, int amount,
-        CardModel cardSource, SalonMember member)
+        CardModel cardSource, SalonMember? member)
     {
         var company = CompanyFor(owner);
         var replacements = 0;
         for (var i = 0; i < amount; i++)
         {
-            if (StageIsFull(company.Count))
+            // Drawn INSIDE the loop and from the shared combat stream, not
+            // from a local Random. Co-op runs lockstep: a draw one seat makes
+            // and the other does not poisons every later draw on that stream,
+            // which is exactly how Vigil of the Deep desynced. If there is no
+            // player to own a stream there is no run to desync either, so the
+            // fallback is fixed rather than randomised.
+            var entering = member ?? RollMember(owner);
+            if (StageIsFull(owner, company.Count))
             {
                 var displaced = company[0];
                 company.RemoveAt(0);
                 replacements++;
                 await Bow(choiceContext, owner, displaced);
             }
-            company.Add(member);
+            company.Add(entering);
+
+            // Fortissimo Guard (R85): Block per DEPLOY, inside the loop, so a
+            // three-deploy card pays three cues. Mirrors the sim, which adds
+            // it per iteration after the member enters.
+            var deployBlock = SalonDeployBlockPower.AmountFor(owner);
+            if (deployBlock > 0)
+            {
+                await CreatureCmd.GainBlock(
+                    owner, deployBlock, ValueProp.Unpowered, null, fast: true);
+            }
         }
 
         var delta = company.Count - Count(owner);
@@ -240,34 +328,25 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                     Owner, SalonConstants.TickEncoreCost);
             }
 
-            int Num(int baseAmount)
-            {
-                var amt = Scaled(Owner, baseAmount);
-                return paid
-                    ? amt
-                    : (int)(amt * SalonConstants.DryDamageMultiplier);
-            }
+            // The SAME expression D1's role chip renders -- see TickValue.
+            var amount = TickValue(Owner, member, paid);
 
             switch (member)
             {
                 case SalonMember.Crabaletta:
                 case SalonMember.Chevalmarin:
                 {
-                    var tick = member == SalonMember.Crabaletta
-                        ? SalonConstants.CrabalettaTick
-                        : SalonConstants.ChevalmarinTick;
                     var target = CombatState!.RunState.Rng.CombatTargets
                         .NextItem(targets);
                     if (target == null) break;
                     await ElementalHit.Deal(
                         choiceContext, target, Elements.Element.Hydro,
-                        Num(tick), Owner);
+                        amount, Owner);
                     break;
                 }
                 case SalonMember.Usher:
                     await CreatureCmd.GainBlock(
-                        Owner, Num(SalonConstants.UsherTick),
-                        ValueProp.Unpowered, null, fast: true);
+                        Owner, amount, ValueProp.Unpowered, null, fast: true);
                     break;
             }
             FurinaResources.GainBurst(
@@ -285,7 +364,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
             return false;
         }
         modifiedAmount = Math.Max(
-            0m, Math.Min(amount, SalonConstants.MemberSlots - Amount));
+            0m, Math.Min(amount, SlotsFor(target) - Amount));
         return modifiedAmount != amount;
     }
 }
@@ -312,4 +391,30 @@ public sealed class SalonDamageUpPower : PowerModel, ILocalizationProvider
 
     public static int AmountFor(Creature creature) =>
         creature.Powers.OfType<SalonDamageUpPower>().FirstOrDefault()?.Amount ?? 0;
+}
+
+/// <summary>A12 (ruled 2026-07-28): +N stage slots. The Salon's size was a
+/// constant from the day it was built; this is the card that makes it a stat.
+///
+/// PRE-REGISTERED, from the ruling: the mild anti-synergy with bow payoffs is
+/// INTENDED (a fuller stage bows less often, so cards that want bows want a
+/// SMALLER salon). That is Capacitor's bargain in StS, and if playtesting
+/// reads it as a trap rather than a choice, this note is the pre-registered
+/// reason to revisit rather than a post-hoc rationalisation.</summary>
+public sealed class SalonCapUpPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Box Seats"),
+        ("description",
+            "Your [gold]Salon[/gold] has room for {Amount} more "
+          + "[gold]Salon Member(s)[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public static int AmountFor(Creature creature) =>
+        creature.Powers.OfType<SalonCapUpPower>().FirstOrDefault()?.Amount ?? 0;
 }

@@ -13,6 +13,12 @@ art/contact_sheet.html
 art/contact_sheet_*.html
 art/picks.tsv
 ImageGen/images/
+# Design mockups inline the real member sprites as base64 to preview against
+# the live art (docs/mockups/salon-stage-d1-mockup-2026-07-28.html embeds three
+# Tier F PNGs from ImageGen/images/furina/salon/). An embedded copy distributes
+# exactly what the line above refuses to, so the mockups stay local and the
+# briefs that cite them say so.
+docs/mockups/
 
 # Raw art asset zips are shared out-of-band and dropped in the repo root on
 # purpose. They must never be committed (same §9 reasoning as above).

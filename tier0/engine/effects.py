@@ -50,14 +50,29 @@ def _amount(state: CombatState, val) -> int:
 
 
 def _bonus_formula(state: CombatState, formula: str) -> int:
-    """Scaling damage riders. Grammar: 'N_per_detonation_this_combat'
-    (The Big One) and 'N_per_M_fanfare' (the Fanfare crescendo — stacks
-    grant flat bonuses, kickoff §4 / principles v1.10)."""
+    """Scaling riders on a damage or block amount.
+
+    Two grammars, and the difference is deliberate:
+
+      N_per_<thing>      a full step per unit, for SMALL counts --
+                         'detonation_this_combat', 'salon_member'
+      N_per_M_<resource> a ratio, for LARGE pools -- 'fanfare', 'charge',
+                         'encore' -- where 1:1 would pay far too much
+    """
     n, _, rest = formula.partition("_per_")
     if not n.isdigit():
         raise ValueError(f"unknown bonus_formula {formula!r}")
     if rest == "detonation_this_combat":
         return int(n) * state.detonations_total
+    if rest == "salon_member":
+        # A13/A14 (2026-07-28): a slope on the stage itself. No _M_ divisor
+        # because the salon is a small capped count (3, or 4 with A12's
+        # cap-raise power) -- every member is a full step, unlike Fanfare
+        # where the ratio is what keeps a 40-point meter from paying 40.
+        # Reads powers['salon_member'], the same mirror has_salon_members and
+        # the `salon_members` runtime count read, so a member that left the
+        # stage stops paying immediately.
+        return int(n) * state.player.powers.get("salon_member", 0)
     m, _, what = rest.partition("_")
     if what == "fanfare" and m.isdigit():
         resources.note_fanfare_read(state, "bonus_formula")
@@ -714,6 +729,18 @@ def _salon_bow(state: CombatState, member: str) -> None:
     state.emit("salon_final_bow", member=member)
 
 
+def salon_slots(player) -> int:
+    """How many members this player's stage holds.
+
+    A12 (2026-07-28) promoted the cap from a constant to a per-player stat.
+    C.SALON_MEMBER_SLOTS stays the BASE -- it is what the constant-parity gate
+    compares against SalonConstants.MemberSlots on the C# side -- and the
+    cap-raise power adds to it. Every reader goes through here so a new one
+    cannot accidentally re-hardcode 3.
+    """
+    return C.SALON_MEMBER_SLOTS + player.powers.get("salon_cap_up", 0)
+
+
 def _deploy_salon_members(state: CombatState, amount: int,
                           member: str = "crabaletta") -> None:
     """Salon v2 deploy (rework plan §1): the typed FIFO queue with Defect
@@ -723,14 +750,22 @@ def _deploy_salon_members(state: CombatState, amount: int,
     archive. powers['salon_member'] mirrors len(queue) so every count
     read (has_salon_members, the pilot, instruments) is unchanged."""
     p = state.player
-    if member not in C.SALON_MEMBERS:
+    if member != "random" and member not in C.SALON_MEMBERS:
         raise ValueError(f"unknown salon member {member!r}")
     for _ in range(amount):
-        if len(p.salon) >= C.SALON_MEMBER_SLOTS:
+        # A11 (2026-07-28): `member: random` de-dupes the starter from the
+        # Chevalmarin card. Rolled PER DEPLOY, not once per card, so a
+        # multi-deploy card can field a mixed stage. Sorted keys because the
+        # roll must not depend on dict insertion order.
+        entering = (state.rng.choice(sorted(C.SALON_MEMBERS))
+                    if member == "random" else member)
+        if len(p.salon) >= salon_slots(p):
             state.salon_replacements_this_card += 1
             _salon_bow(state, p.salon.pop(0))
-        p.salon.append(member)
-        state.emit("salon_deploy", member=member, company=list(p.salon))
+        p.salon.append(entering)
+        # `entering`, not `member`: an observer of this event wants to know
+        # WHO took the stage, and "random" is not a member.
+        state.emit("salon_deploy", member=entering, company=list(p.salon))
         # Fortissimo Guard (Curtain Call B, R85): block per DEPLOY, per
         # deployment event rather than per card -- Full Ensemble's three
         # deploys are three cues. Direct add + emit, the _salon_bow block
@@ -1376,7 +1411,15 @@ def _op_scry_discard(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_conditional(state: CombatState, fx: dict, card: Card) -> None:
-    branch = fx["then"] if _predicate(state, fx["if"]) else fx.get("else", [])
+    fired = _predicate(state, fx["if"])
+    # D4 telemetry (salon UI sprint, 2026-07-28). EMIT-ONLY, and deliberately
+    # generic rather than a graceful_retreat special case: "how often does
+    # this rider actually fire" is a question every conditional on the sheet
+    # can be asked, and a card-specific counter would have to be rewritten
+    # for the next suspect. The event carries the predicate NAME so a
+    # fire-rate can be read per card, per predicate, or both.
+    state.emit("conditional", card=card.id, predicate=fx["if"], fired=fired)
+    branch = fx["then"] if fired else fx.get("else", [])
     _resolve_effects(state, branch, card)
 
 
@@ -2249,11 +2292,20 @@ def salon_tick(state: CombatState) -> None:
     (hydro application on damage ticks still applies either way). Numeric
     amounts carry the Fanfare Focus term + Grand Salon (_salon_amount)."""
     p = state.player
+    # D8 telemetry (salon UI sprint, 2026-07-28). EMIT-ONLY: the snapshot is
+    # taken BEFORE the first member spends, because the question the D8 lever
+    # is about is whether the stage arrives at upkeep with enough fuel to run
+    # itself -- read it after the loop and a stage that drained itself to
+    # exactly zero looks identical to one that never had a member at all.
+    if p.salon:
+        state.emit("salon_upkeep", members=len(p.salon), encore=p.encore,
+                   cost=C.SALON_TICK_ENCORE_COST * len(p.salon))
     for member in list(p.salon):
         if not p.alive or not state.living_enemies:
             break
         spec = C.SALON_MEMBERS[member]["tick"]
         paid = p.encore >= C.SALON_TICK_ENCORE_COST
+        state.emit("salon_tick", member=member, paid=paid)
         if paid:
             resources.spend_encore(state, C.SALON_TICK_ENCORE_COST)
 

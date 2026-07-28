@@ -212,3 +212,115 @@ def test_superconduct_multiplier_is_pure():
         assert forbidden not in body, (
             f"{forbidden} in the multiplicative phase: this hook is called "
             "speculatively by preview/tooltip paths and must stay pure")
+
+
+# --- damage-modifier purity, swept repo-wide -------------------------------
+#
+# The test above pins ONE power by naming the commands it must not call. The
+# 2026-07-27 co-op soft-lock got underneath exactly that shape of check:
+# PreventExhaustWardPower's impurity was a plain FIELD ASSIGNMENT
+# (`_usedThisTurn = true; _pendingExhaust = true;`), not a command call, in a
+# file no ledger row named. So this sweep is unkeyed -- it visits every
+# damage-modifier override in the mod and asks the structural question
+# instead of the per-power one.
+
+MODIFIER_HOOKS = ("ModifyDamageAdditive", "ModifyDamageMultiplicative")
+
+# Commands that only LOOK up state. A modifier may call these; anything else
+# with a Cmd receiver mutates the board from a hook the UI calls
+# speculatively. Curated on purpose (the house pattern): adding a name here
+# is a claim that the call is read-only, and it should be checked as one.
+READONLY_CMDS = frozenset({"AuraCmd.Find"})
+
+_FIELD_WRITE = re.compile(r"\b(_\w+)\s*(?:=(?!=)|\+\+|--|\+=|-=)")
+_CMD_CALL = re.compile(r"\b(\w+Cmd\.\w+)")
+
+
+def _modifier_bodies():
+    """(path, hook, body) for every damage-modifier override in the mod.
+
+    Not method_body(): that returns the FIRST match only, and several files
+    declare more than one power class.
+    """
+    for path in sorted(SOURCE.rglob("*.cs")):
+        source = path.read_text(encoding="utf-8")
+        for hook in MODIFIER_HOOKS:
+            pattern = rf"public\s+override\s+decimal\s+{hook}\s*\("
+            for match in re.finditer(pattern, source):
+                start = source.index("{", match.end())
+                depth = 0
+                for i in range(start, len(source)):
+                    if source[i] == "{":
+                        depth += 1
+                    elif source[i] == "}":
+                        depth -= 1
+                        if depth == 0:
+                            yield path.relative_to(SOURCE), hook, source[start:i + 1]
+                            break
+
+
+def test_the_sweep_actually_sees_the_modifiers():
+    """A zero-row sweep is a green test that checks nothing."""
+    rows = list(_modifier_bodies())
+    assert len(rows) >= 8, f"only found {len(rows)} damage modifiers: {rows}"
+
+
+@pytest.mark.parametrize(
+    "rel,hook,body",
+    list(_modifier_bodies()),
+    ids=[f"{r}::{h}" for r, h, _ in _modifier_bodies()])
+def test_damage_modifiers_are_pure(rel, hook, body):
+    """Damage modifiers answer questions; they must not change answers.
+
+    The engine calls these outside a play to build damage PREVIEWS -- the
+    Beetle Swarm ruling's phrasing, "questions about the current board rather
+    than about a cast in progress". Previews are local UI, so they run a
+    different number of times on each co-op peer, and any state a modifier
+    mutates therefore diverges between them.
+
+    RECEIPT (2026-07-27 co-op playtest, godot.log checksums 576 and 49):
+    PreventExhaustWardPower set its once-per-turn latch and armed its exhaust
+    from inside ModifyDamageAdditive. A preview on one peer burned the latch
+    the other still had, so the two disagreed about whether Vigil of the Deep
+    had fired -- and one of them took a roll off the shared
+    Rng.CombatTargets stream that the other did not. That desyncs every later
+    roll in the run, so the host tripped StateDivergence and disconnected the
+    client. Reliable, once per combat, on a rare the deck is built around.
+    """
+    writes = _FIELD_WRITE.findall(body)
+    assert not writes, (
+        f"{rel}::{hook} assigns to {writes}: a damage modifier is called "
+        "speculatively by preview paths, so per-peer state written here "
+        "desyncs co-op. Move the mutation to Before/AfterDamageReceived, "
+        "which only run on hits that really landed.")
+
+    assert "await" not in body, (
+        f"{rel}::{hook} awaits: issuing a command from a preview applies "
+        "effects for a hit that was never thrown.")
+
+    assert not re.search(r"\bRng\.", body), (
+        f"{rel}::{hook} draws from an Rng stream. The streams are shared and "
+        "advanced in lockstep; a preview-driven draw on one peer poisons "
+        "every later roll in the run.")
+
+    bad = [c for c in _CMD_CALL.findall(body) if c not in READONLY_CMDS]
+    assert not bad, (
+        f"{rel}::{hook} calls {bad}, which is not in READONLY_CMDS. If it is "
+        "genuinely a lookup, add it there deliberately; if it mutates, it "
+        "belongs one hook over.")
+
+
+def test_vigil_pays_its_fuel_through_the_reshuffle():
+    """tier0 prevent_damage_exhaust reshuffles BEFORE declaring itself out.
+
+    The C# gate counted draw + discard but the exhaust only ever read the
+    draw pile and bailed when it was empty, so an empty draw over a stocked
+    discard prevented the damage and never paid the card -- free prevention,
+    and a second divergence from the sim on the same rare.
+    """
+    body = method_body(
+        (SOURCE / "Powers" / "KuragePowers.cs").read_text(encoding="utf-8"),
+        r"public\s+override\s+async\s+Task\s+AfterDamageReceived\s*\(")
+    assert "CardPileCmd.ShuffleIfNecessary" in body, body
+    # The latch lives here, with the reshuffle -- not in the modifier.
+    assert "_usedThisTurn = true" in body, body

@@ -1,9 +1,14 @@
+using System;
 using System.Collections.Generic;
 using Godot;
+using KleeMod.Cards;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.HoverTips;
+using MegaCrit.Sts2.Core.Localization;
+using MegaCrit.Sts2.Core.Nodes.HoverTips;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
 
 namespace KleeMod.Vfx;
@@ -71,17 +76,90 @@ public static class SalonVisualsBridge
         [SalonMember.Crabaletta] = "furina/salon/member_crabaletta.png",
     };
 
+    /// <summary>
+    /// D1 §1: accent hue per member, carried by the underglow pool and the
+    /// chip edge -- the SPRITES stay untouched. The sprint-1 failure was
+    /// that three blue silhouettes at combat scale read as three identical
+    /// smudges; colour is the channel that survives peripheral vision, and
+    /// it costs nothing at the sprite level to change.
+    ///
+    /// Values are the mockup's, converted from #f0708c / #e8bb52 / #5fe0d2.
+    /// Duplicates render as duplicate hues, per the Funnel Contract §1
+    /// slot-index rule -- three Ushers are three gold pools.
+    /// </summary>
+    private static readonly Dictionary<SalonMember, Color> MemberAccent = new()
+    {
+        [SalonMember.Crabaletta] = new Color(0.941f, 0.439f, 0.549f),
+        [SalonMember.Usher] = new Color(0.910f, 0.733f, 0.322f),
+        [SalonMember.Chevalmarin] = new Color(0.373f, 0.878f, 0.824f),
+    };
+
+    /// <summary>
+    /// D1 §2: the role glyph. WHITE masters, tinted per member through
+    /// Modulate, so one file per ROLE serves every hue and the dry state
+    /// greys the glyph by the same path that greys the sprite.
+    /// Produced by tools/gen_salon_glyphs.py (art_lint L11 GENERATOR_OWNED).
+    /// </summary>
+    private static readonly Dictionary<SalonMember, string> RoleGlyphs = new()
+    {
+        [SalonMember.Crabaletta] = "furina/salon/glyph_damage.png",
+        [SalonMember.Usher] = "furina/salon/glyph_block.png",
+        [SalonMember.Chevalmarin] = "furina/salon/glyph_support.png",
+    };
+
+    /// <summary>The game's own modified-value colour, for a tick the player
+    /// has BUFFED above its printed number (Grand Salon, or Fanfare Focus).
+    /// The mockup's #b7f79b.</summary>
+    private static readonly Color BuffedNumber = new(0.718f, 0.969f, 0.608f);
+    private static readonly Color PlainNumber = new(1f, 1f, 1f);
+    private static readonly Color DryNumber = new(0.36f, 0.44f, 0.57f);
+    private static readonly Color DryEdge = new(0.12f, 0.18f, 0.28f, 0.85f);
+
+    /// <summary>Runway segments the ribbon can draw before it overflows
+    /// (D7). Five is the scene's node count, and the "5+" cue exists
+    /// because Encore is uncapped and the sixth turn of runway has nowhere
+    /// to go.</summary>
+    private const int RunwaySegments = 5;
+
+    /// <summary>
+    /// Horizontal half-span available to the slot row. The creature bounds
+    /// box is 240 wide and the stage arc spans +-96; a slot is 34 wide, so
+    /// its CENTRE may not exceed 96 - 17.
+    /// </summary>
+    private const float SlotHalfSpan = 79f;
+
+    /// <summary>The shipped three-slot spacing. Kept as the cap on gap
+    /// width so a stage of three looks exactly as it did before A12 made
+    /// the cap growable -- the tightening is something a cap RAISE causes,
+    /// not something every Furina sees.</summary>
+    private const float SlotSpacingMax = 62f;
+
+    /// <summary>Slot nodes the SCENE ships. The live cap can exceed this
+    /// only if a future card raises it past Box Seats upgraded; the loop
+    /// clamps and the excess is logged rather than silently invisible.
+    /// </summary>
+    private const int SceneSlots = 5;
+
+    private const string KeywordTable = "card_keywords";
+
+    private const string HoverTitleMeta = "kleemod_hover_title";
+    private const string HoverBodyMeta = "kleemod_hover_body";
+    private const string HoverRulesMeta = "kleemod_hover_rules";
+    private const string HoverWiredMeta = "kleemod_hover_wired";
+    /// <summary>Whether THIS control currently owns a live tip set. Kept on
+    /// the node rather than in a static set so it dies with the node --
+    /// a static registry of Controls outlives the combat that made them.
+    /// NHoverTipSet.CreateAndShow keys its own registry by owner and ADDS,
+    /// so showing twice without a Remove in between throws.</summary>
+    private const string HoverShownMeta = "kleemod_hover_shown";
+    private const string SegmentWidthMeta = "kleemod_seg_width";
+
     private static readonly Color ActiveTint = new(1f, 1f, 1f, 1f);
     private static readonly Color DryTint = new(0.55f, 0.6f, 0.68f, 0.92f);
     private static readonly Color PoolActive = new(0.62f, 0.85f, 1f, 0.3f);
     private static readonly Color PoolDry = new(0.5f, 0.55f, 0.62f, 0.14f);
     private static readonly Color BeamActive = new(0.7f, 0.88f, 1f, 0.12f);
     private static readonly Color BeamDry = new(0.7f, 0.88f, 1f, 0.03f);
-
-    /// <summary>Ribbon renders full at this many Encore (display only).</summary>
-    private const int RibbonVisualSpan = 20;
-
-    private const float RibbonFullWidth = 180f;
 
     private const string PreviousCountMeta = "kleemod_salon_count";
     private const string PreviousEncoreMeta = "kleemod_salon_encore";
@@ -152,6 +230,12 @@ public static class SalonVisualsBridge
 
     private static Node2D? GetDisplay(Player player) => Displays.Get(player);
 
+    private static Texture2D? GlyphFor(SalonMember member) =>
+        RoleGlyphs.TryGetValue(member, out var relative)
+        && KleePck.Path(relative) is { } path
+            ? ResourceLoader.Load<Texture2D>(path)
+            : null;
+
     private static Texture2D? SpriteFor(SalonMember member) =>
         MemberSprites.TryGetValue(member, out var relative)
         && KleePck.Path(relative) is { } path
@@ -173,7 +257,18 @@ public static class SalonVisualsBridge
         var anim = display.GetNodeOrNull<AnimationPlayer>("%AnimationPlayer");
         var popped = false;
 
-        for (var i = 0; i < SalonConstants.MemberSlots; i++)
+        // A12: the cap is a per-player stat now, so the loop asks the player
+        // rather than the constant. D1 added %Slot4/%Slot5, so a raised cap
+        // now RENDERS -- the sprint-2 gap where a fourth member ticked, bowed
+        // and counted for every rider while being invisible is closed.
+        //
+        // Five is the scene's ceiling. A cap above it would go invisible
+        // again, so the loop is clamped and the excess is a KNOWN GAP rather
+        // than a silent one: today nothing can raise the cap past 3 + Box
+        // Seats upgraded (+2) = 5, which is exactly what the scene ships.
+        var slots = Math.Min(SalonMemberPower.SlotsFor(creature), SceneSlots);
+        LayOutSlots(display, slots);
+        for (var i = 0; i < slots; i++)
         {
             bool occupied = i < company.Count;
             var sprite = display.GetNodeOrNull<Sprite2D>($"%Sprite{i + 1}");
@@ -194,17 +289,28 @@ public static class SalonVisualsBridge
                 ghost.Visible = !occupied;
             }
 
+            // D1 §1: the pool carries the member's accent hue at the pool's
+            // own alpha, so identity survives at combat scale without
+            // touching the sprite. Dry keeps the existing grey -- "these
+            // numbers are not happening" outranks "this is a Crabaletta".
             if (display.GetNodeOrNull<ColorRect>($"%Pool{i + 1}") is { } pool)
             {
                 pool.Visible = occupied;
-                pool.Color = dry ? PoolDry : PoolActive;
+                pool.Color = !occupied || dry
+                    ? PoolDry
+                    : Accent(company[i], PoolActive.A);
             }
 
             if (display.GetNodeOrNull<ColorRect>($"%Beam{i + 1}") is { } beam)
             {
                 beam.Visible = occupied;
-                beam.Color = dry ? BeamDry : BeamActive;
+                beam.Color = !occupied || dry
+                    ? BeamDry
+                    : Accent(company[i], BeamActive.A);
             }
+
+            RefreshChip(display, creature, i, occupied ? company[i] : null, dry);
+            RefreshSlotHover(display, creature, i, occupied ? company[i] : null);
 
             if (animate && occupied && i >= previousCount && anim != null)
             {
@@ -223,21 +329,244 @@ public static class SalonVisualsBridge
             }
         }
 
-        RefreshRibbon(display, encore, anim, animate);
+        RefreshRibbon(display, encore, company.Count, anim, animate);
+    }
+
+    private static Color Accent(SalonMember member, float alpha)
+    {
+        var hue = MemberAccent.TryGetValue(member, out var c)
+            ? c
+            : PoolActive;
+        return new Color(hue.R, hue.G, hue.B, alpha);
     }
 
     /// <summary>
-    /// D3's Encore ribbon: the members stand on their fuel. Draining to zero
-    /// plays the flash and dims the whole stage — the overdraw moment, shown
-    /// as a consequence rather than as a number changing somewhere else.
+    /// D1 §5: the slot row is laid out from the LIVE cap, not from the
+    /// scene's authored positions. A cap raise has to appear as a new ghost
+    /// slot on a row that still fits inside Furina's 240-wide bounds, and
+    /// three fixed positions cannot do both -- so the gap tightens as the
+    /// count grows, capped at the shipped three-slot spacing so a normal
+    /// Furina's stage is pixel-identical to the one that shipped.
+    ///
+    /// The arc height is a shallow curve: the middle of the row stands
+    /// highest. Computed rather than authored for the same reason as X --
+    /// with a variable slot count there is no fixed middle.
+    /// </summary>
+    private static void LayOutSlots(Node2D display, int slots)
+    {
+        var spacing = slots > 1
+            ? Mathf.Min(SlotSpacingMax, 2f * SlotHalfSpan / (slots - 1))
+            : 0f;
+        var centre = (slots - 1) / 2f;
+        for (var i = 0; i < SceneSlots; i++)
+        {
+            if (display.GetNodeOrNull<Node2D>($"%Slot{i + 1}") is not { } slot)
+            {
+                continue;
+            }
+            slot.Visible = i < slots;
+            if (i >= slots)
+            {
+                continue;
+            }
+            var offset = i - centre;
+            var lift = centre > 0f ? Mathf.Abs(offset) / centre : 0f;
+            slot.Position = new Vector2(offset * spacing, -20f + 6f * lift);
+        }
+    }
+
+    /// <summary>
+    /// D1 §2: the role chip. Glyph answers "what does this one do", the
+    /// number answers "how much, right now" -- and the number comes from
+    /// SalonMemberPower.TickValue, the same expression the upkeep resolves
+    /// through, so the chip cannot disagree with the tick. A buffed value
+    /// renders in the game's modified-number colour; that is the whole
+    /// point of showing a live number rather than the printed constant.
+    /// </summary>
+    private static void RefreshChip(
+        Node2D display, Creature creature, int index,
+        SalonMember? member, bool dry)
+    {
+        var i = index + 1;
+        var edge = display.GetNodeOrNull<ColorRect>($"%ChipEdge{i}");
+        var back = display.GetNodeOrNull<ColorRect>($"%Chip{i}");
+        var glyph = display.GetNodeOrNull<Sprite2D>($"%ChipGlyph{i}");
+        var label = display.GetNodeOrNull<Label>($"%ChipLabel{i}");
+
+        var show = member.HasValue;
+        if (edge != null) edge.Visible = show;
+        if (back != null) back.Visible = show;
+        if (glyph != null) glyph.Visible = show;
+        if (label != null) label.Visible = show;
+        if (!show || member is not { } who) return;
+
+        if (edge != null)
+        {
+            edge.Color = dry ? DryEdge : Accent(who, 0.55f);
+        }
+        if (glyph != null)
+        {
+            glyph.Texture = GlyphFor(who);
+            glyph.Visible = glyph.Texture != null;
+            glyph.Modulate = dry ? DryNumber : Accent(who, 1f);
+        }
+        if (label != null)
+        {
+            // paid: !dry is the honest read for a chip drawn between turns.
+            // Mid-upkeep the earlier members have already spent, so a later
+            // member may go dry after this was drawn -- the tick that
+            // follows is the authority, and the dry tint is what tells the
+            // player the stage is short.
+            var value = SalonMemberPower.TickValue(creature, who, !dry);
+            label.Text = value.ToString();
+            var buffed = value > SalonMemberPower.BaseTick(who);
+            label.AddThemeColorOverride(
+                "font_color",
+                dry ? DryNumber : buffed ? BuffedNumber : PlainNumber);
+        }
+    }
+
+    /// <summary>
+    /// D1 §4: per-slot hover tips, sharing B5's copy source VERBATIM --
+    /// SalonMemberTips is the one place the member's tick line, bow line and
+    /// the cap rules are written, and the stage asks it the same questions a
+    /// deploy card does.
+    ///
+    /// The tip content is stashed on the Control as metadata and read at
+    /// hover time rather than captured in the callback, so the signal is
+    /// connected ONCE per node and the copy is never a snapshot of an older
+    /// stage. Connecting per refresh would stack a new handler on every
+    /// deploy and every Encore tick.
+    ///
+    /// UNVERIFIED UNTIL PLAYTEST, and the sprint brief says so: no Godot run
+    /// is available here, so whether this hover target fights targeting
+    /// arrows or enemy intents is an in-game question. The Control sits
+    /// inside the creature's own bounds, which is where the arrows live.
+    /// </summary>
+    private static void RefreshSlotHover(
+        Node2D display, Creature creature, int index, SalonMember? member)
+    {
+        if (display.GetNodeOrNull<Control>($"%Hover{index + 1}")
+            is not { } target)
+        {
+            return;
+        }
+
+        if (member is not { } who)
+        {
+            target.MouseFilter = Control.MouseFilterEnum.Ignore;
+            ClearHover(target);
+            return;
+        }
+
+        target.MouseFilter = Control.MouseFilterEnum.Stop;
+        target.SetMeta(HoverTitleMeta, SalonMemberTips.KeyFor(who) + ".title");
+        target.SetMeta(HoverBodyMeta, SalonMemberTips.BodyFor(who));
+        target.SetMeta(HoverRulesMeta, SalonMemberTips.SalonRulesBody(creature));
+
+        if (target.HasMeta(HoverWiredMeta))
+        {
+            return;
+        }
+        target.SetMeta(HoverWiredMeta, true);
+        target.MouseEntered += () => ShowHover(target);
+        target.MouseExited += () => ClearHover(target);
+    }
+
+    private static void ShowHover(Control target)
+    {
+        if (!target.HasMeta(HoverTitleMeta))
+        {
+            return;
+        }
+        // Remove first: NHoverTipSet keys its live set by owner and ADDS,
+        // so a second show without a teardown throws on the duplicate key.
+        ClearHover(target);
+
+        var tips = new List<IHoverTip>
+        {
+            new HoverTip(
+                new LocString(KeywordTable,
+                              (string)target.GetMeta(HoverTitleMeta)),
+                (string)target.GetMeta(HoverBodyMeta)),
+            new HoverTip(
+                new LocString(KeywordTable,
+                              SalonMemberTips.SalonRulesKey + ".title"),
+                (string)target.GetMeta(HoverRulesMeta)),
+        };
+        NHoverTipSet.CreateAndShow(target, tips);
+        target.SetMeta(HoverShownMeta, true);
+    }
+
+    private static void ClearHover(Control target)
+    {
+        if (!target.HasMeta(HoverShownMeta))
+        {
+            return;
+        }
+        target.RemoveMeta(HoverShownMeta);
+        NHoverTipSet.Remove(target);
+    }
+
+    /// <summary>
+    /// D7: the Encore ribbon is a RUNWAY, not a fill bar. The old
+    /// denominator was a display-only 20 -- a lie twice over, because Encore
+    /// is uncapped and because 20 meant nothing to the player. A segment is
+    /// one TURN of upkeep at the current stage, so the bar answers the
+    /// question the player actually has: how many more turns can the salon
+    /// run itself?
+    ///
+    /// Deploying a member visibly SHORTENS the runway with Encore unchanged.
+    /// That is correct and it is the point: the fifth member costs a turn of
+    /// everyone's fuel.
+    ///
+    /// Draining to zero still plays the flash and dims the whole stage — the
+    /// overdraw moment, shown as a consequence rather than as a number
+    /// changing somewhere else.
     /// </summary>
     private static void RefreshRibbon(
-        Node2D display, int encore, AnimationPlayer? anim, bool animate)
+        Node2D display, int encore, int members,
+        AnimationPlayer? anim, bool animate)
     {
-        if (display.GetNodeOrNull<ColorRect>("%RibbonFill") is { } fill)
+        // Zero members: a runway measures turns of upkeep, and an empty
+        // stage has no upkeep, so segmenting would be dividing by a stage
+        // that is not there. JUDGMENT CALL (the brief asks for the least
+        // weird rendering and a note): the ribbon renders as one plain,
+        // muted, FULL-WIDTH bar carrying the number. Full width because a
+        // partial plain bar would imply a fraction of something, and there
+        // is nothing to be a fraction of; muted because the bar is not
+        // measuring anything right now.
+        var segmentCost = members * SalonConstants.TickEncoreCost;
+        var plain = display.GetNodeOrNull<ColorRect>("%RibbonPlain");
+        if (plain != null)
         {
-            float pct = Mathf.Clamp(encore / (float)RibbonVisualSpan, 0f, 1f);
-            fill.Size = new Vector2(RibbonFullWidth * pct, fill.Size.Y);
+            plain.Visible = segmentCost <= 0;
+        }
+
+        var turns = segmentCost > 0 ? encore / (float)segmentCost : 0f;
+        for (var i = 0; i < RunwaySegments; i++)
+        {
+            if (display.GetNodeOrNull<ColorRect>($"%Seg{i + 1}")
+                is not { } seg)
+            {
+                continue;
+            }
+            // Partial LAST segment: a turn half-paid for is drawn half-wide,
+            // so the bar drains continuously instead of snapping a whole
+            // turn at a time. The scene's authored width is the full one.
+            var fill = Mathf.Clamp(turns - i, 0f, 1f);
+            seg.Visible = segmentCost > 0 && fill > 0f;
+            if (!seg.HasMeta(SegmentWidthMeta))
+            {
+                seg.SetMeta(SegmentWidthMeta, seg.Size.X);
+            }
+            var full = (float)seg.GetMeta(SegmentWidthMeta);
+            seg.Size = new Vector2(full * fill, seg.Size.Y);
+        }
+
+        if (display.GetNodeOrNull<Label>("%RunwayOverflow") is { } overflow)
+        {
+            overflow.Visible = segmentCost > 0 && turns > RunwaySegments;
         }
 
         if (display.GetNodeOrNull<Label>("%RibbonLabel") is { } label)
