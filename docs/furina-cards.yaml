@@ -59,7 +59,25 @@
    # of the Deep, and this is a starter, so it fires in every single run.
 
 # ---------- COMMON (22: was 33; Curtain Call R85 promoted 10 to U and 1 to R -- payoffs live at U/R) ----------
-# Salon (6)
+# Salon (7 since A12)
+- {id: box_seats, name: "Box Seats", register: salon, cost: 1, type: power, rarity: common, solve: [scaling], archetypes: [salon], role: enabler,
+   effects: [{op: apply_power, power: salon_cap_up, amount: 1, target: self}]}
+   # A12 (RULED 2026-07-28, playtest-2 red-pen; ex-D2). Capacitor parity: the
+   # Salon's size was a constant from the day it was built, and this is the
+   # card that makes it a stat. Pool 77 -> 78 (lint-ok: pool sizes).
+   # NAME IS A PLACEHOLDER -- "Box Seats" is mine, not ruled. [USER] picks the
+   # real one at red-pen; the id, the C# class title and the loc row all carry
+   # it, so changing it is a rename across those three, not a redesign.
+   # PRE-REGISTERED (from the ruling, recorded BEFORE any playtest): the mild
+   # anti-synergy with bow payoffs is INTENDED -- a fuller stage bows less
+   # often, so bow-hungry decks want a SMALLER salon. That is Capacitor's
+   # bargain. If playtests read it as a trap rather than a choice, this note
+   # is the pre-registered reason to revisit, not a post-hoc defence.
+   # KNOWN GAP, owned by D1 (the salon-stage UI sprint, which already
+   # sequences the slot count "alongside A12"): the stage scene ships three
+   # sprite nodes, so a FOURTH member is mechanically live -- it ticks, bows,
+   # and counts for every per-member rider -- but does not render until D1
+   # adds the node.
 - {id: gentilhomme_usher, name: "Gentilhomme Usher", register: salon, cost: 1, type: skill, rarity: common, solve: [block, utility], archetypes: [salon], role: enabler, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: usher}, {op: block, amount: 4}]}
    # The Ball Octopus (v2: THE SHIELD — ticks 3 Block, bows for 9): deploy + a shield-swell now. Commons-heavy enablers per template §3.

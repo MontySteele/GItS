@@ -46,6 +46,7 @@ salon_debut:           {add: {op: gain_encore, amount: 2}}   # signature: deploy
 gentilhomme_usher:     {block: +2}           # 4->6
 surintendante_chevalmarin: {encore: +2}      # 3->5
 mademoiselle_crabaletta: {power_amount: +1}  # v2: 1->2 Crabalettas (double hammer)
+box_seats:             {power_amount: +1}    # A12: +1 slot -> +2 upgraded (the ruled statline).
 dinner_service:        {block: +2}          # A13: base 2->4, so 4/6/8/10 at 0-3 members; the per-member slope is untouched. PROPOSED with the card's numbers.
 usher_the_waves:       {damage: +2}          # 5->7 (plain attack since Curtain Call B: no longer applies)
 torrential_turn:       {damage: +3}          # 10->13; aura-cash 3 and the refresh stay (Curtain Call C)

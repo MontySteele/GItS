@@ -7,8 +7,8 @@
     "namespace": "KleeMod.Cards.Furina.Generated"
   },
   "coverage": {
-    "total": 77,
-    "generated": 75,
+    "total": 78,
+    "generated": 76,
     "blocked": 2
   },
   "generated": [
@@ -16,6 +16,7 @@
     "aria_of_recompense",
     "audience_participation",
     "blocking_notes",
+    "box_seats",
     "command_performance",
     "commanding_gaze",
     "courtroom_drama",

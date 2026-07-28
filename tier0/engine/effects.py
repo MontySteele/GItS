@@ -729,6 +729,18 @@ def _salon_bow(state: CombatState, member: str) -> None:
     state.emit("salon_final_bow", member=member)
 
 
+def salon_slots(player) -> int:
+    """How many members this player's stage holds.
+
+    A12 (2026-07-28) promoted the cap from a constant to a per-player stat.
+    C.SALON_MEMBER_SLOTS stays the BASE -- it is what the constant-parity gate
+    compares against SalonConstants.MemberSlots on the C# side -- and the
+    cap-raise power adds to it. Every reader goes through here so a new one
+    cannot accidentally re-hardcode 3.
+    """
+    return C.SALON_MEMBER_SLOTS + player.powers.get("salon_cap_up", 0)
+
+
 def _deploy_salon_members(state: CombatState, amount: int,
                           member: str = "crabaletta") -> None:
     """Salon v2 deploy (rework plan §1): the typed FIFO queue with Defect
@@ -747,7 +759,7 @@ def _deploy_salon_members(state: CombatState, amount: int,
         # roll must not depend on dict insertion order.
         entering = (state.rng.choice(sorted(C.SALON_MEMBERS))
                     if member == "random" else member)
-        if len(p.salon) >= C.SALON_MEMBER_SLOTS:
+        if len(p.salon) >= salon_slots(p):
             state.salon_replacements_this_card += 1
             _salon_bow(state, p.salon.pop(0))
         p.salon.append(entering)

@@ -90,6 +90,12 @@ packages:
     - gentilhomme_usher
     - surintendante_chevalmarin
     - mademoiselle_crabaletta
+    # A12 (2026-07-28): the cap-raise power. Added the same commit the card
+    # was authored, per the sheet-projections rule -- a salon card outside the
+    # salon package is a card the sim is blind to, and this one changes the
+    # archetype's ceiling. It moves this package's measured numbers, so every
+    # salon row wants re-measuring before it is quoted.
+    - box_seats
     - dinner_service
     - usher_the_waves
     - matinee_performance

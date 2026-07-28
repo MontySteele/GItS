@@ -227,8 +227,8 @@ def test_furina_profile_emits_every_non_kit_card():
     # are withheld -- the hand-written kit Burst, and A7's unheard_confession
     # (see FURINA_DEFERRED_ASYNC).
     assert manifest["coverage"] == {
-        "total": 77,
-        "generated": 75,
+        "total": 78,
+        "generated": 76,
         "blocked": 2,
     }
     assert set(manifest["generated"]) == generated

@@ -20,6 +20,7 @@ public static class FurinaCardRoster
         ModelDb.Card<AriaOfRecompense>(),
         ModelDb.Card<AudienceParticipation>(),
         ModelDb.Card<BlockingNotes>(),
+        ModelDb.Card<BoxSeats>(),
         ModelDb.Card<CommandPerformance>(),
         ModelDb.Card<CommandingGaze>(),
         ModelDb.Card<CourtroomDrama>(),

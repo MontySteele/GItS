@@ -173,7 +173,17 @@ public static class SalonVisualsBridge
         var anim = display.GetNodeOrNull<AnimationPlayer>("%AnimationPlayer");
         var popped = false;
 
-        for (var i = 0; i < SalonConstants.MemberSlots; i++)
+        // A12: the cap is a per-player stat now, so the loop asks the player
+        // rather than the constant.
+        //
+        // KNOWN GAP, and it belongs to D1 (the salon-stage UI sprint, which
+        // the triage doc already sequences "alongside A12"): the scene ships
+        // %Sprite1..3, so a FOURTH member has no node to render into and
+        // GetNodeOrNull quietly returns null. The mechanic is live -- a
+        // fourth member ticks, bows and counts for every per-member rider --
+        // but until D1 adds the node it is invisible on the stage. Iterating
+        // the real cap here means D1 only has to add the node.
+        for (var i = 0; i < SalonMemberPower.SlotsFor(creature); i++)
         {
             bool occupied = i < company.Count;
             var sprite = display.GetNodeOrNull<Sprite2D>($"%Sprite{i + 1}");

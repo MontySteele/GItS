@@ -513,6 +513,10 @@ APPLY_POWERS = {
         "empowers this card's later effects."),
     "salon_damage_up": ("SalonDamageUpPower", None,
         "[gold]Salon Member[/gold] numbers are {X} higher."),
+    # A12 (2026-07-28): the stage's size stops being a constant.
+    "salon_cap_up": ("SalonCapUpPower", None,
+        "Your [gold]Salon[/gold] has room for {X} more "
+        "[gold]Salon Member(s)[/gold]."),
     # ALL max_stacks DROPPED across Furina's sheet (user ruling 2026-07-24).
     # Two rounds: the first dropped the four non-compounding powers; this one
     # drops the rest, matching base StS where Power dupes always stack. An A/B

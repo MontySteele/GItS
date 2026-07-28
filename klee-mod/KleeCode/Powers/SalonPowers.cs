@@ -174,8 +174,21 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     /// full stage bows the oldest member out. Both the loop in
     /// <see cref="Deploy"/> and the card face (via <see cref="WillReplace"/>)
     /// ask the question through here, so they cannot drift apart.</summary>
-    public static bool StageIsFull(int companyCount) =>
-        companyCount >= SalonConstants.MemberSlots;
+    /// <remarks>A12 (2026-07-28) promoted the cap from a constant to a
+    /// per-player stat, so every reader must ask with an OWNER. The old
+    /// count-only overload is deliberately gone rather than kept as a
+    /// convenience: a caller that forgot to pass the owner would silently
+    /// enforce the base cap of 3 on a player who had paid for 4, and that
+    /// reads as "the card did nothing" -- the hardest kind of bug to see.
+    /// SalonConstants.MemberSlots remains the BASE, which is what the
+    /// constant-parity gate compares against tier0.</remarks>
+    public static bool StageIsFull(Creature owner, int companyCount) =>
+        companyCount >= SlotsFor(owner);
+
+    /// <summary>The stage's size for this player: the base cap plus whatever
+    /// cap-raise powers they hold.</summary>
+    public static int SlotsFor(Creature owner) =>
+        SalonConstants.MemberSlots + SalonCapUpPower.AmountFor(owner);
 
     /// <summary>Closed form of <see cref="Deploy"/>'s loop, for the card face:
     /// will any of a card's first <paramref name="deploys"/> deploys displace
@@ -188,7 +201,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     /// state the card's own resolution starts from -- hence card bodies
     /// capture their scaled value BEFORE the first Deploy runs.</summary>
     public static bool WillReplace(Creature owner, int deploys) =>
-        deploys > 0 && StageIsFull(Count(owner) + deploys - 1);
+        deploys > 0 && StageIsFull(owner, Count(owner) + deploys - 1);
 
     /// <summary>Face/resolution delta for a number the replacement rule
     /// scales: the CalculatedVar computes <c>base + 1 x delta</c>, and this
@@ -241,7 +254,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
             // player to own a stream there is no run to desync either, so the
             // fallback is fixed rather than randomised.
             var entering = member ?? RollMember(owner);
-            if (StageIsFull(company.Count))
+            if (StageIsFull(owner, company.Count))
             {
                 var displaced = company[0];
                 company.RemoveAt(0);
@@ -335,7 +348,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
             return false;
         }
         modifiedAmount = Math.Max(
-            0m, Math.Min(amount, SalonConstants.MemberSlots - Amount));
+            0m, Math.Min(amount, SlotsFor(target) - Amount));
         return modifiedAmount != amount;
     }
 }
@@ -362,4 +375,30 @@ public sealed class SalonDamageUpPower : PowerModel, ILocalizationProvider
 
     public static int AmountFor(Creature creature) =>
         creature.Powers.OfType<SalonDamageUpPower>().FirstOrDefault()?.Amount ?? 0;
+}
+
+/// <summary>A12 (ruled 2026-07-28): +N stage slots. The Salon's size was a
+/// constant from the day it was built; this is the card that makes it a stat.
+///
+/// PRE-REGISTERED, from the ruling: the mild anti-synergy with bow payoffs is
+/// INTENDED (a fuller stage bows less often, so cards that want bows want a
+/// SMALLER salon). That is Capacitor's bargain in StS, and if playtesting
+/// reads it as a trap rather than a choice, this note is the pre-registered
+/// reason to revisit rather than a post-hoc rationalisation.</summary>
+public sealed class SalonCapUpPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Box Seats"),
+        ("description",
+            "Your [gold]Salon[/gold] has room for {Amount} more "
+          + "[gold]Salon Member(s)[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public static int AmountFor(Creature creature) =>
+        creature.Powers.OfType<SalonCapUpPower>().FirstOrDefault()?.Amount ?? 0;
 }

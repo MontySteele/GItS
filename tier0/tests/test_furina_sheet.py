@@ -63,8 +63,11 @@ def test_pool_composition():
     #     A2 limelight, both promoted for having U-grade Official effects).
     #   uncommon 34 (was 32): +2 those promotions.
     #   rare 19: unchanged. A7 reshaped unheard_confession but did not move it.
-    assert len(cards) == 77
-    assert len(by_rarity["common"]) == 19
+    #   78 again, common 20: A12 ADDED box_seats, the salon cap-raise power.
+    #     The pool leaves this sprint the size it entered, by two opposite
+    #     rulings rather than by nothing having happened.
+    assert len(cards) == 78
+    assert len(by_rarity["common"]) == 20
     assert len(by_rarity["uncommon"]) == 34
     assert len(by_rarity["rare"]) == 19
     kit = [c for c in by_rarity["rare"] if c.kit_card]
@@ -78,10 +81,11 @@ def test_pool_composition():
     # Type quota, also moved by the 2026-07-28 red-pen:
     #   attack 16 (was 15): A5 retyped undercurrent skill -> attack.
     #   skill  45 (was 48): -1 that retype, -1 A4's cut, -1 A7's retype.
-    #   power  16 (was 15): +1 A7 retyped unheard_confession skill -> power.
+    #   power  17 (was 15): +1 A7 retyped unheard_confession skill -> power,
+    #     +1 A12's new power card.
     assert len(by_type["attack"]) == 16
     assert len(by_type["skill"]) == 45           # skill-heavy pole+, the cadence reason
-    assert len(by_type["power"]) == 16           # official quota floor (19-21% roster-wide)
+    assert len(by_type["power"]) == 17           # official quota floor (19-21% roster-wide)
 
 
 def test_starter_invitation_and_aria_curve():
@@ -848,6 +852,59 @@ def test_grand_salon_scales_ushers_block_not_only_damage():
     assert p2.block == baseline + 2, (
         "salon_damage_up did not reach Usher's BLOCK tick -- Grand Salon has "
         "regressed to damage-only, the B4 defect")
+
+
+def test_box_seats_makes_the_stage_bigger_and_delays_the_bow():
+    """A12 (RULED 2026-07-28): the Salon's size stops being a constant.
+
+    Both halves are asserted because they are the same ruling seen from two
+    sides, and a cap that grew without delaying the bow would be the worse
+    bug -- the player would hold four members AND still be losing one per
+    deploy, which reads as the card doing nothing.
+    """
+    st = furina_state()
+    p = st.player
+    effects.resolve_card(st, loader.get_card("box_seats"))
+    assert p.powers["salon_cap_up"] == 1
+    assert effects.salon_slots(p) == C.SALON_MEMBER_SLOTS + 1
+
+    _company(p, "usher", "usher", "usher")
+    hp0 = st.enemies[0].hp
+    p.block = 0
+    effects._deploy_salon_members(st, 1, "crabaletta")
+    assert len(p.salon) == 4, "the 4th member did not fit the enlarged stage"
+    assert st.salon_replacements_this_card == 0, (
+        "someone bowed out of a stage that had room -- the cap grew but the "
+        "replacement rule did not follow it")
+
+    # And the 5th still displaces, so the cap is raised, not removed.
+    effects._deploy_salon_members(st, 1, "crabaletta")
+    assert len(p.salon) == 4
+    assert st.salon_replacements_this_card == 1
+
+
+def test_the_enlarged_stage_pays_every_per_member_reader():
+    """The cap is a stat, so a 4th member must count everywhere a member
+    counts -- not just in the queue. A13's slope is the discriminator: it is
+    the newest per-member reader and the one most likely to have been written
+    against a hard 3."""
+    st = furina_state()
+    p = st.player
+    p.powers["salon_cap_up"] = 1
+    _company(p, "usher", "usher", "usher", "crabaletta")
+    p.block = 0
+    effects.resolve_card(st, loader.get_card("dinner_service"))
+    assert p.block == 2 + 2 * 4
+
+
+def test_the_base_cap_constant_is_still_three():
+    """The constant-parity gate compares C.SALON_MEMBER_SLOTS by VALUE against
+    SalonConstants.MemberSlots. A12 makes the cap a stat on top of that base;
+    if the base itself ever moves, the two engines must move together, so the
+    pin stays on the constant rather than on the computed slot count."""
+    assert C.SALON_MEMBER_SLOTS == 3
+    st = furina_state()
+    assert effects.salon_slots(st.player) == 3
 
 
 def test_salon_debut_fields_a_random_member_not_always_chevalmarin():
