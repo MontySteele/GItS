@@ -403,10 +403,10 @@
    # The decay half is the point: her meter fades 20% a turn from turn 2, so
    # this pays on the way down as well as the way up, which is what makes it
    # a fanfare-archetype engine rather than a second gain-rider.
-   # EXHAUST DROPPED — an assumption, flagged for red-pen: `exhaust: true`
-   # was here solely to satisfy the true-heal law (Rare AND Exhaust,
-   # Guardrail 6), and the heal is gone. A Power leaves combat on play
-   # anyway, so Exhaust on one is inert decoration.
+   # EXHAUST DROPPED (RATIFIED 2026-07-28, review red-pen: "Exhaust on a
+   # power is redundant"). It was here solely to satisfy the true-heal law
+   # (Rare AND Exhaust, Guardrail 6), and the heal is gone. A Power leaves
+   # combat on play anyway, so Exhaust on one is inert decoration.
    # solve retagged sustain -> block: it no longer heals or buffers.
    # A saturated meter stops paying (a gain fully wasted at the cap is not a
    # change) — deliberate, and visible in the pass-4 saturation telemetry.
