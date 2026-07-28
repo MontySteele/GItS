@@ -33,13 +33,16 @@ public static class FurinaRiderTips
 
     public const string FanfareKey = "KLEEMOD-FANFARE_RIDER";
     public const string AuraKey = "KLEEMOD-AURA_RIDER";
+    public const string SalonKey = "KLEEMOD-SALON_RIDER";
 
     public static IEnumerable<IHoverTip> ForCard(
         IEnumerable<IHoverTip> inherited,
         CardModel card,
         int fanfarePer = 0,
         int fanfareStep = 0,
-        int auraBonus = 0)
+        int auraBonus = 0,
+        int salonPer = 0,
+        bool salonGrantsBlock = false)
     {
         foreach (var tip in inherited) yield return tip;
 
@@ -58,6 +61,13 @@ public static class FurinaRiderTips
               + "elemental aura. Hover an enemy to see this card's number "
               + "for that target.");
         }
+
+        if (salonPer > 0)
+        {
+            yield return new HoverTip(
+                new LocString(Table, SalonKey + ".title"),
+                SalonBody(card, salonPer, salonGrantsBlock));
+        }
     }
 
     /// <summary>The rate, plus what it is worth at this moment. Out of combat
@@ -72,5 +82,27 @@ public static class FurinaRiderTips
         var fanfare = FurinaResources.Fanfare(owner);
         return $"{rate} You hold {fanfare} Fanfare: +{fanfare / step * per} "
              + "damage, already counted in the number above.";
+    }
+
+    /// <summary>A13/A14: the per-member slope, plus what the stage is paying
+    /// right now. Says "on stage" rather than naming the meter, because the
+    /// thing being counted is visible -- the members are standing there --
+    /// and the whole point of the rework is that the pilot can watch each
+    /// deploy move this number.</summary>
+    private static string SalonBody(CardModel card, int per, bool grantsBlock)
+    {
+        var noun = grantsBlock ? "Block" : "damage";
+        var rate = $"+{per} {noun} per Salon member on stage.";
+        var owner = card.Owner?.Creature;
+        if (owner == null || card.CombatState == null) return rate;
+
+        var members = SalonMemberPower.Count(owner);
+        if (members == 0)
+        {
+            return $"{rate} Your stage is empty, so this card is paying "
+                 + "nothing extra right now.";
+        }
+        return $"{rate} You have {members} on stage: +{members * per} {noun}, "
+             + "already counted in the number above.";
     }
 }

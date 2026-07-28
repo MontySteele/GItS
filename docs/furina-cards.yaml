@@ -63,9 +63,20 @@
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta}]}
    # The heavy (v2: THE HAMMER — ticks 6 hydro, bows for 14). Cost 2->1 at the rework: one member, the archetype's
    # core common, priced to be drafted. PROPOSED pending red-pen.
-- {id: dinner_service, name: "Dinner Service", register: private, cost: 1, type: skill, rarity: common, solve: [sustain], archetypes: [salon, fanfare], role: glue,
-   effects: [{op: gain_encore, amount: 3}, {op: conditional, if: has_salon_members, then: [{op: gain_encore, amount: 3}]}]}
+- {id: dinner_service, name: "Dinner Service", register: private, cost: 1, type: skill, rarity: common, solve: [block], archetypes: [salon], role: glue,
+   effects: [{op: block, amount: 2, bonus_formula: 2_per_salon_member}]}
    # Feeding the household. Upkeep economy: better with a salon to feed.
+   # A13 REWORK (RULED 2026-07-28, playtest-2 red-pen). Was 3 Encore, +3 more
+   # with a salon on stage (lint-ok: retired numbers). Now BLOCK on a
+   # per-member slope: 2/4/6/8 at 0-3 members (lint-ok: projected totals; A12's cap-raise opens 10).
+   # BLOCK not Encore was the explicit ruling -- the deck is over-supplied on
+   # Encore grants, so another one glued nothing.
+   # The threshold -> slope change is the point of the pair with A14: a
+   # conditional pays the same for a stage of 1 and a stage of 3, which made
+   # the second and third deploys feel like they bought nothing.
+   # Archetype `fanfare` DROPPED (no Encore flux left to feed it) and solve
+   # moves sustain -> block: it no longer heals or holds a buffer.
+   # 2 + 2 PROPOSED; the shape is ruled, the numbers want red-pen.
 - {id: usher_the_waves, name: "Usher the Waves", register: salon, cost: 1, type: attack, rarity: common, solve: [utility], archetypes: [salon], role: enabler,
    effects: [{op: damage, amount: 5, target: enemy}, {op: apply_power, power: weak, amount: 1, target: enemy}]}
    # CURTAIN CALL B (R85): skill->attack retype (authored red-pen, ratified) — a PLAIN attack now, no
@@ -79,9 +90,18 @@
 # regen. Its skill_tag hydro application is why test_furina_sheet's cadence
 # case named it, and that case now names `overflowing_hospitality` instead.
 - {id: house_call, name: "House Call", register: salon, cost: 1, type: attack, rarity: common, solve: [frontload], archetypes: [salon], role: glue,
-   effects: [{op: damage, amount: 6, target: enemy}, {op: conditional, if: has_salon_members, then: [{op: damage, amount: 4, target: enemy}]}]}
+   effects: [{op: damage, amount: 6, target: enemy, bonus_formula: 2_per_salon_member}]}
    # The members flank. Her attack numbers only reach honest when the stage is set (A7 setup tax by design).
-   # Red-pen flag 9 KEPT: the sheet's biggest conditional number, priced by the threshold family it matches.
+   # A14 REWORK (RULED 2026-07-28, playtest-2 red-pen). Was a flat 6 plus a
+   # conditional 4 with any salon on stage (lint-ok: retired numbers). Now a
+   # per-member slope: 6/8/10/12 at 0-3 members (lint-ok: projected totals; A12's cap-raise opens 14).
+   # Base 6 is RULED, not proposed.
+   # RED-PEN FLAG 9 RETIRED: the flag was raised against the old conditional,
+   # which was the sheet's biggest threshold number. There is no threshold
+   # left to price -- the slope pays per member, so the number it reaches is
+   # a consequence of how many deploys the pilot actually landed.
+   # Pairs with A13 by construction: same slope, one on damage and one on
+   # block, so the stage reads the same way on both halves of the turn.
 # Fanfare (7)
 - {id: suffering_for_art, name: "Suffering for Art", register: archon, cost: 0, type: skill, rarity: common, solve: [sustain, velocity], archetypes: [fanfare], role: enabler,
    effects: [{op: damage, amount: 1, target: self}, {op: gain_encore, amount: 3}]}

@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,18 +37,23 @@ public sealed class DinnerService : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, salonPer: 2, salonGrantsBlock: true);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("dinner_service");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dinner Service"),
-        ("description", "Gain {IfUpgraded:show:4|3} [gold]Encore[/gold]. If you have a [gold]Salon Member[/gold]: gain {IfUpgraded:show:4|3} [gold]Encore[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Scales with [gold]Salon[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new CalculationBaseVar(2m),
+            new CalculationExtraVar(2m),
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SalonMemberPower.Count(card.Owner.Creature))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -59,15 +65,11 @@ public sealed class DinnerService : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 4 : 3));
-        if (SalonMemberPower.Count(Owner.Creature) > 0)
-        {
-            FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 4 : 3));
-        }
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        // encore: every gain_encore site reads IsUpgraded at play time (branches included).
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

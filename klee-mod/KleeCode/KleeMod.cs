@@ -165,6 +165,8 @@ public static class KleeMod
                         "Fanfare scaling",
                     [Cards.FurinaRiderTips.AuraKey + ".title"] =
                         "Elemental aura bonus",
+                    [Cards.FurinaRiderTips.SalonKey + ".title"] =
+                        "Salon scaling",
 
                     // Kokomi's two hidden reads (KokomiRiderTips). Both
                     // resolve somewhere no card face can print -- the pulse at

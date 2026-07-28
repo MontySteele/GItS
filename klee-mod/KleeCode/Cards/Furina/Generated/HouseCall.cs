@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,18 +37,23 @@ public sealed class HouseCall : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, salonPer: 2);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("house_call");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "House Call"),
-        ("description", "Deal {Damage:diff()} damage. If you have a [gold]Salon Member[/gold]: deal 4 damage."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with [gold]Salon[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(6m, ValueProp.Move)
+            new CalculationBaseVar(6m),
+            new ExtraDamageVar(2m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SalonMemberPower.Count(card.Owner.Creature))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,23 +66,15 @@ public sealed class HouseCall : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        if (SalonMemberPower.Count(Owner.Creature) > 0)
-        {
-            await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 4m))
-                .FromCard(this)
-                .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
-                .Execute(choiceContext);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

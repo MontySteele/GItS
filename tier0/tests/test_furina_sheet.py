@@ -850,6 +850,67 @@ def test_grand_salon_scales_ushers_block_not_only_damage():
         "regressed to damage-only, the B4 defect")
 
 
+def test_dinner_service_pays_a_slope_not_a_threshold():
+    """A13 (RULED 2026-07-28): "Gain 2 Block, plus 2 per Salon member".
+
+    The threshold it replaces paid the SAME bonus for a stage of one and a
+    stage of three, which is what made the second and third deploy feel like
+    they bought nothing. So the discriminator is not "does an empty stage pay
+    less" -- the old shape passed that too -- it is that every step differs.
+    """
+    seen = []
+    for company in ([], ["usher"], ["usher", "chevalmarin"],
+                    ["usher", "chevalmarin", "crabaletta"]):
+        st = furina_state()
+        p = st.player
+        _company(p, *company)
+        p.block = 0
+        effects.resolve_card(st, loader.get_card("dinner_service"))
+        seen.append(p.block)
+    assert seen == [2, 4, 6, 8], seen
+
+
+def test_house_call_pays_a_slope_not_a_threshold():
+    """A14 (RULED 2026-07-28): "Deal 6 damage, plus 2 per Salon member".
+
+    Same shape as A13 on the damage half, and pinned separately because the
+    two ride different halves of the generator -- A13's rider lands on a block
+    op, which had no rider rail at all until B1 built one.
+    """
+    seen = []
+    for company in ([], ["usher"], ["usher", "chevalmarin"],
+                    ["usher", "chevalmarin", "crabaletta"]):
+        st = furina_state()
+        p = st.player
+        _company(p, *company)
+        hp0 = st.enemies[0].hp
+        effects.resolve_card(st, loader.get_card("house_call"))
+        seen.append(hp0 - st.enemies[0].hp)
+    assert seen == [6, 8, 10, 12], seen
+
+
+def test_the_per_member_slope_bumps_its_base_on_upgrade_not_its_rate():
+    """Both A13/A14 deltas move the BASE; the slope is deliberately untouched.
+
+    Pinned because the upgrade applier is one of the four hand-maintained
+    projections a sheet ruling does NOT update for you, and a delta that
+    silently bound to the wrong term would still produce a bigger number --
+    just the wrong bigger number, and only at full stage.
+    """
+    st = furina_state()
+    p = st.player
+    _company(p, "usher", "chevalmarin", "crabaletta")
+    p.block = 0
+    effects.resolve_card(st, loader.get_card("dinner_service+"))
+    assert p.block == 4 + 2 * 3          # base 2->4, slope still 2
+
+    st2 = furina_state()
+    _company(st2.player, "usher", "chevalmarin", "crabaletta")
+    hp0 = st2.enemies[0].hp
+    effects.resolve_card(st2, loader.get_card("house_call+"))
+    assert hp0 - st2.enemies[0].hp == 8 + 2 * 3   # base 6->8, slope still 2
+
+
 # --- reward-pool separation (the cross-character card-reward guard) ---
 
 def test_personal_card_pools_do_not_cross_characters():

@@ -50,14 +50,29 @@ def _amount(state: CombatState, val) -> int:
 
 
 def _bonus_formula(state: CombatState, formula: str) -> int:
-    """Scaling damage riders. Grammar: 'N_per_detonation_this_combat'
-    (The Big One) and 'N_per_M_fanfare' (the Fanfare crescendo — stacks
-    grant flat bonuses, kickoff §4 / principles v1.10)."""
+    """Scaling riders on a damage or block amount.
+
+    Two grammars, and the difference is deliberate:
+
+      N_per_<thing>      a full step per unit, for SMALL counts --
+                         'detonation_this_combat', 'salon_member'
+      N_per_M_<resource> a ratio, for LARGE pools -- 'fanfare', 'charge',
+                         'encore' -- where 1:1 would pay far too much
+    """
     n, _, rest = formula.partition("_per_")
     if not n.isdigit():
         raise ValueError(f"unknown bonus_formula {formula!r}")
     if rest == "detonation_this_combat":
         return int(n) * state.detonations_total
+    if rest == "salon_member":
+        # A13/A14 (2026-07-28): a slope on the stage itself. No _M_ divisor
+        # because the salon is a small capped count (3, or 4 with A12's
+        # cap-raise power) -- every member is a full step, unlike Fanfare
+        # where the ratio is what keeps a 40-point meter from paying 40.
+        # Reads powers['salon_member'], the same mirror has_salon_members and
+        # the `salon_members` runtime count read, so a member that left the
+        # stage stops paying immediately.
+        return int(n) * state.player.powers.get("salon_member", 0)
     m, _, what = rest.partition("_")
     if what == "fanfare" and m.isdigit():
         resources.note_fanfare_read(state, "bonus_formula")

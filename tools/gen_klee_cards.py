@@ -971,7 +971,10 @@ def blocked_reason(
                         r"\d+_per_\d+_charge", bf) and not re.fullmatch(
                         # Curtain Call: Body Slam's grammar -- an attack priced
                         # off the held Encore buffer. READ only, never spent.
-                        r"\d+_per_\d+_encore", bf):
+                        r"\d+_per_\d+_encore", bf) and not re.fullmatch(
+                        # A14: the per-member slope. No divisor -- the salon is
+                        # a capped count, so every member is a full step.
+                        r"\d+_per_salon_member", bf):
                 return f"bonus_formula '{bf}'"
             if "bonus_vs_bombed" in eff:
                 return "conditional damage bonus (needs bomb system)"
@@ -1424,6 +1427,40 @@ def encore_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
     return int(eff["amount"]), int(m.group(1)), int(m.group(2))
 
 
+def salon_member_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
+    """A13/A14 (2026-07-28): a per-Salon-member slope (`N_per_salon_member`).
+
+    Grammar note: no `_M_` divisor, unlike the Fanfare/Charge/Encore riders.
+    Those divide because they read a large pool where 1:1 would pay absurdly;
+    the salon is a capped count of 3 (4 with A12's cap-raise), so every member
+    is a full step. `_bonus_formula` in tier0/engine/effects.py splits the same
+    two grammars the same way.
+
+    Rendered through the Calculated var path rather than PrintedDamage for the
+    Legibility-sprint reason: the whole POINT of the A13/A14 rework is that the
+    pilot can see the stage paying. A face that printed only the base would
+    hide exactly the number the rework exists to show, and would read
+    identically to the threshold version it replaces.
+
+    Returns (base, per_n, 1) -- the trailing 1 keeps the shape of the other
+    riders' (base, per, divisor) triple; the multiplier lambda is the raw
+    member count.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    m = re.fullmatch(r"(\d+)_per_salon_member", eff.get("bonus_formula", ""))
+    if not m:
+        return None
+    # A deploy card scaling off the stage it is currently setting would read
+    # its own arrival, so those stay on the replacement-multiplier path.
+    if salon_deploy_card(card):
+        return None
+    return int(eff["amount"]), int(m.group(1)), 1
+
+
+SALON_MEMBER_COUNT_CS = "SalonMemberPower.Count(card.Owner.Creature)"
+
+
 def salon_deploy_card(card: dict) -> bool:
     """Salon-deploy cards render their replacement multiplier through
     `salon_calc_rider` instead of the other riders' path (their scaled value
@@ -1563,9 +1600,18 @@ def rider_tip_args(card: dict) -> str:
                 and block_calc_rider(card, eff) is None:
             continue
         m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", eff.get("bonus_formula", ""))
+        members = re.fullmatch(r"(\d+)_per_salon_member",
+                               eff.get("bonus_formula", ""))
         if m:
             args.append(f"fanfarePer: {int(m.group(1))}")
             args.append(f"fanfareStep: {int(m.group(2))}")
+        elif members:
+            # A13/A14: same re-homing bargain as the Fanfare rider. The face
+            # keeps a short marker, the RATE and what the stage is paying
+            # right now live here.
+            args.append(f"salonPer: {int(members.group(1))}")
+            if eff.get("op") == "block":
+                args.append("salonGrantsBlock: true")
         elif "bonus_vs_aura" in eff:
             args.append(f"auraBonus: {int(eff['bonus_vs_aura'])}")
     return ", ".join(args)
@@ -1680,8 +1726,13 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     """
     if eff.get("op") != "block":
         return None
-    m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", eff.get("bonus_formula", ""))
-    if not m:
+    formula = eff.get("bonus_formula", "")
+    m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", formula)
+    # A13 (2026-07-28): the per-member slope rides the same rail on a block op
+    # -- Dinner Service is its first card, and the whole point of the rework is
+    # that the face shows the stage paying.
+    members = re.fullmatch(r"(\d+)_per_salon_member", formula)
+    if not m and not members:
         return None
     if salon_deploy_card(card):
         return None
@@ -1695,6 +1746,9 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     if any(spotlight_block_rider(card, e) is not None
            or salon_calc_rider(card, e) is not None for e in effects):
         return None
+    if members:
+        return int(eff["amount"]), int(members.group(1)), (
+            f"static (card, _) => {SALON_MEMBER_COUNT_CS}")
     return int(eff["amount"]), int(m.group(1)), (
         "static (card, _) => "
         f"FurinaResources.Fanfare(card.Owner.Creature) / {int(m.group(2))}")
@@ -1728,6 +1782,10 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
         return base, per_n, (
             "static (card, _) => "
             f"FurinaResources.Encore(card.Owner.Creature) / {div}")
+    members = salon_member_calc_rider(card, eff)
+    if members is not None:
+        base, per_n, _ = members
+        return base, per_n, f"static (card, _) => {SALON_MEMBER_COUNT_CS}"
     aura = aura_calc_rider(card, eff)
     if aura is not None:
         base, bonus = aura
@@ -3647,6 +3705,17 @@ def build_description(card: dict) -> str:
                    or salon_calc_rider(card, eff) is not None
                    or block_calc_rider(card, eff) is not None else "Block")
             parts.append(f"Gain {{{tok}:diff()}} [gold]Block[/gold].")
+            # The L-C bargain both ways: a CONVERTED rider's arithmetic moves
+            # to the hover tip, but the face must still declare that the card
+            # scales, or it reads as a flat number on the reward screen -- the
+            # exact misread B1 shipped. The damage path has always emitted
+            # this marker; the block path did not, so B1's fix traded a silent
+            # drop for a silent number. Fixed here (A13).
+            if block_calc_rider(card, eff) is not None:
+                formula = eff.get("bonus_formula", "")
+                stat = ("Salon" if formula.endswith("_per_salon_member")
+                        else formula.rpartition("_")[2].title())
+                parts.append(f"Scales with [gold]{stat}[/gold].")
 
         elif op == "block_next_turn":
             # Literal: the `block` delta binds to the plain block op (sheet:
@@ -3765,8 +3834,12 @@ def build_description(card: dict) -> str:
                     # including her signature one -- while the arithmetic
                     # underneath was correct. A face that names the wrong stat
                     # is worse than one that says nothing.
-                    stat = formula.rpartition("_")[2]
-                    parts.append(f"Scales with [gold]{stat.title()}[/gold].")
+                    # A13/A14: `rpartition("_")` would name this rider
+                    # "Member", which is not what anything in the game or on
+                    # the sheet is called. The stage is the Salon.
+                    stat = ("Salon" if formula.endswith("_per_salon_member")
+                            else formula.rpartition("_")[2].title())
+                    parts.append(f"Scales with [gold]{stat}[/gold].")
                 else:
                     n, _, rest = formula.partition("_per_")
                     step, _, stat = rest.partition("_")

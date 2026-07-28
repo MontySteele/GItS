@@ -546,6 +546,77 @@ def test_salon_scaled_number_renders_the_replacement_multiplier():
     assert "DynamicVars.CalculationBase.UpgradeValueBy(2m);" in usher
 
 
+def test_the_per_member_slope_renders_through_the_calculated_rail():
+    """A13/A14: both halves of the per-member slope, pinned STRUCTURALLY.
+
+    Deliberately not a text assertion. Both cards' faces read the same whether
+    the rider is there or not -- "Deal {CalculatedDamage} damage" renders
+    identically over a live multiplier and over a var that never scales -- and
+    that is exactly how B1 and the GrandFinale regression both got past a
+    green suite. So this pins the multiplier expression itself.
+    """
+    by_id = {card["id"]: card for card in _furina_cards()}
+    house = gen.emit(by_id["house_call"], gen.FURINA_PROFILE)
+    dinner = gen.emit(by_id["dinner_service"], gen.FURINA_PROFILE)
+
+    # A14: damage half. Base 6, slope 2, multiplier is the raw member count --
+    # no divisor, because the salon is a capped count where every member is a
+    # full step (the Fanfare/Charge riders divide; this one must not).
+    assert "new CalculationBaseVar(6m)" in house
+    assert "new ExtraDamageVar(2m)" in house
+    assert (
+        "new CalculatedDamageVar(ValueProp.Move).WithMultiplier("
+        "static (card, _) => SalonMemberPower.Count(card.Owner.Creature))"
+        in house
+    )
+    assert "DynamicVars.CalculationBase.UpgradeValueBy(2m);" in house
+
+    # A13: block half. Same slope, same rail, on the op that had no rider
+    # rail at all until B1 built one.
+    assert "new CalculationBaseVar(2m)" in dinner
+    assert "new CalculationExtraVar(2m)" in dinner
+    assert (
+        "new CalculatedBlockVar(ValueProp.Move).WithMultiplier("
+        "static (card, _) => SalonMemberPower.Count(card.Owner.Creature))"
+        in dinner
+    )
+
+    # The threshold shape both cards replace must be GONE. Leaving it would
+    # pay the old conditional on top of the new slope.
+    for source in (house, dinner):
+        assert "SalonMemberPower.Count(Owner.Creature) > 0" not in source
+
+
+def test_a_converted_rider_always_declares_itself_on_the_face():
+    """The L-C bargain, both ops.
+
+    A converted rider's arithmetic moves to the hover tip, so the face MUST
+    keep a short marker naming the mechanism -- otherwise a card read on a
+    reward screen is a flat number with no hint that it scales. The damage
+    path always emitted this; the block path did not, so B1's fix traded a
+    silent drop for a silent number. Thunderous Ovation is the regression
+    case: it is the card B1 was reported against.
+    """
+    by_id = {card["id"]: card for card in _furina_cards()}
+    thunder = gen.emit(by_id["thunderous_ovation"], gen.FURINA_PROFILE)
+    dinner = gen.emit(by_id["dinner_service"], gen.FURINA_PROFILE)
+    house = gen.emit(by_id["house_call"], gen.FURINA_PROFILE)
+
+    assert "Scales with [gold]Fanfare[/gold]." in thunder
+    assert "Scales with [gold]Salon[/gold]." in dinner
+    assert "Scales with [gold]Salon[/gold]." in house
+    # Not "Member": rpartition on the formula would name it that, and nothing
+    # in the game or on the sheet calls the stage that.
+    assert "[gold]Member[/gold]" not in dinner + house
+
+    # And the rate itself reaches the tip, with the block/damage noun set.
+    assert "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, salonPer: 2)" in house
+    assert (
+        "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, salonPer: 2, "
+        "salonGrantsBlock: true)" in dinner
+    )
+
+
 def test_salon_scaled_value_is_captured_before_the_cards_own_deploys():
     # The timing rule that makes the closed form correct. WillReplace reads the
     # PRE-PLAY company size, but a card's own Deploy calls grow that company
