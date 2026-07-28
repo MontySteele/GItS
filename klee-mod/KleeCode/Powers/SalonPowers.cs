@@ -112,6 +112,31 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         + FurinaResources.Fanfare(owner) / SalonConstants.FocusPerFanfare
         + SalonDamageUpPower.AmountFor(owner);
 
+    /// <summary>The member's PRINTED per-turn tick, before any scaling.</summary>
+    public static int BaseTick(SalonMember member) => member switch
+    {
+        SalonMember.Crabaletta => SalonConstants.CrabalettaTick,
+        SalonMember.Usher => SalonConstants.UsherTick,
+        _ => SalonConstants.ChevalmarinTick,
+    };
+
+    /// <summary>
+    /// What this member's tick is worth RIGHT NOW: the printed number plus
+    /// the Fanfare Focus term and Grand Salon, then the dry reduction if the
+    /// member cannot pay.
+    ///
+    /// D1's role chip renders this, and the upkeep loop resolves through it,
+    /// so the number under a member and the number it deals are the same
+    /// expression rather than two copies that agree until one is edited. A
+    /// chip that computed its own scaling would be a fourth hand-maintained
+    /// projection of the same arithmetic.
+    /// </summary>
+    public static int TickValue(Creature owner, SalonMember member, bool paid)
+    {
+        var amt = Scaled(owner, BaseTick(member));
+        return paid ? amt : (int)(amt * SalonConstants.DryDamageMultiplier);
+    }
+
     private static async Task Bow(
         PlayerChoiceContext choiceContext, Creature owner, SalonMember member)
     {
@@ -303,34 +328,25 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                     Owner, SalonConstants.TickEncoreCost);
             }
 
-            int Num(int baseAmount)
-            {
-                var amt = Scaled(Owner, baseAmount);
-                return paid
-                    ? amt
-                    : (int)(amt * SalonConstants.DryDamageMultiplier);
-            }
+            // The SAME expression D1's role chip renders -- see TickValue.
+            var amount = TickValue(Owner, member, paid);
 
             switch (member)
             {
                 case SalonMember.Crabaletta:
                 case SalonMember.Chevalmarin:
                 {
-                    var tick = member == SalonMember.Crabaletta
-                        ? SalonConstants.CrabalettaTick
-                        : SalonConstants.ChevalmarinTick;
                     var target = CombatState!.RunState.Rng.CombatTargets
                         .NextItem(targets);
                     if (target == null) break;
                     await ElementalHit.Deal(
                         choiceContext, target, Elements.Element.Hydro,
-                        Num(tick), Owner);
+                        amount, Owner);
                     break;
                 }
                 case SalonMember.Usher:
                     await CreatureCmd.GainBlock(
-                        Owner, Num(SalonConstants.UsherTick),
-                        ValueProp.Unpowered, null, fast: true);
+                        Owner, amount, ValueProp.Unpowered, null, fast: true);
                     break;
             }
             FurinaResources.GainBurst(

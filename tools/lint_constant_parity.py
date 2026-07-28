@@ -238,12 +238,26 @@ UNMIRRORED: dict[str, str] = {
         "presentation: how many pop effects may overlap before they are "
         "dropped. A frame-rate guard, not a rule -- the sim resolves every "
         "detonation regardless of what is drawn.",
-    "SalonVisualsBridge.RibbonFullWidth":
-        "presentation: Fanfare ribbon width in pixels.",
-    "SalonVisualsBridge.RibbonVisualSpan":
-        "presentation: how many Fanfare points the ribbon spans end to end. A "
-        "display scale chosen to read well, deliberately NOT the cap -- "
-        "Fanfare is uncapped since F-A, so no sim number corresponds.",
+    # RibbonFullWidth and RibbonVisualSpan retired with D7 (salon UI sprint,
+    # 2026-07-28): the ribbon no longer has a display span at all. A segment
+    # is one TURN of upkeep at the current stage, which is a derived quantity
+    # (members x TickEncoreCost), so the only constants left are the count of
+    # segment NODES and the geometry they sit in.
+    "SalonVisualsBridge.RunwaySegments":
+        "presentation: how many runway segments the ribbon can draw before it "
+        "shows the overflow cue. A node count, not a rule -- Encore is "
+        "uncapped, so no sim number corresponds and a sixth turn of runway "
+        "is real whether or not it is drawn.",
+    "SalonVisualsBridge.SceneSlots":
+        "presentation: how many slot nodes salon_stage.tscn ships. The RULE "
+        "is SalonConstants.MemberSlots plus the cap-raise power, which is "
+        "mirrored; this is the ceiling on what the scene can draw.",
+    "SalonVisualsBridge.SlotHalfSpan":
+        "presentation: how far from centre a slot may sit, in pixels, before "
+        "it overhangs the stage arc.",
+    "SalonVisualsBridge.SlotSpacingMax":
+        "presentation: the shipped three-slot pitch in pixels, kept as the "
+        "maximum gap so a cap raise tightens the row instead of widening it.",
 }
 
 CLASS_RE = re.compile(

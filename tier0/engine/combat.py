@@ -809,6 +809,16 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
         # Burning Blood (ruling 1): post-fight, can't affect combat —
         # counts toward the A4 healing metric, not hp_left.
         state.emit("heal", amount=C.BURNING_BLOOD_HEAL, post_fight=True)
+    # D8 telemetry (salon UI sprint, 2026-07-28). EMIT-ONLY. Guarded on
+    # fanfare_cap, the same Furina marker the fanfare_turn snapshot uses --
+    # encore is hers alone in content, and a zero-valued row in every Klee log
+    # would be noise pretending to be data. Separate from fight_end rather
+    # than a key on it: fight_end is every character's event, and a
+    # character-specific field on a shared row is how a metric ends up being
+    # read for a character that never had it.
+    if state.player.fanfare_cap:
+        state.emit("encore_end", encore=state.player.encore,
+                   members=len(state.player.salon), won=won)
     state.emit("fight_end", won=won, turns=state.turn,
                hp_left=max(0, state.player.hp))
     return state

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
@@ -81,7 +82,11 @@ public static class SalonMemberTips
         }
     }
 
-    private static string KeyFor(SalonMember member) => member switch
+    /// <summary>Public because the salon STAGE shares this tooltip source
+    /// verbatim (D1 §4): the per-slot hover on the stage and the keyword tip
+    /// on a deploy card must be the same copy, not two that agree today.
+    /// </summary>
+    public static string KeyFor(SalonMember member) => member switch
     {
         SalonMember.Crabaletta => "KLEEMOD-SALON_CRABALETTA",
         SalonMember.Usher => "KLEEMOD-SALON_USHER",
@@ -91,7 +96,7 @@ public static class SalonMemberTips
     /// <summary>What this member does on stage and on the way out. Numbers
     /// come from SalonConstants, so a repricing cannot leave the tooltip
     /// telling the player a retired number.</summary>
-    private static string BodyFor(SalonMember member) => member switch
+    public static string BodyFor(SalonMember member) => member switch
     {
         SalonMember.Crabaletta =>
             $"Each turn, spends {SalonConstants.TickEncoreCost} Encore to deal "
@@ -113,17 +118,21 @@ public static class SalonMemberTips
     /// is the D1 ruling: with summon order guaranteed, position IS the
     /// signal, so the keyword teaches it instead of a marker on the stage.
     /// </summary>
-    private static string SalonRulesBody(CardModel card)
+    private static string SalonRulesBody(CardModel card) =>
+        SalonRulesBody(card.Owner?.Creature);
+
+    /// <summary>Creature overload: the stage hover (D1 §4) has no card to
+    /// ask, and the copy must not fork.</summary>
+    public static string SalonRulesBody(Creature? owner)
     {
-        var owner = card.Owner?.Creature;
         var slots = owner == null
             ? SalonConstants.MemberSlots
             : SalonMemberPower.SlotsFor(owner);
 
         var body =
             $"Your Salon holds {slots} members. Deploying into a full stage "
-          + "bows the OLDEST member out for its payoff -- the leftmost member "
-          + "is always the next to bow. Member numbers gain +1 per "
+          + "bows the OLDEST member out for its payoff. The leftmost member "
+          + "bows first. Member numbers gain +1 per "
           + $"{SalonConstants.FocusPerFanfare} Fanfare you hold; a member "
           + "with no Encore to spend acts at three-quarters.";
 

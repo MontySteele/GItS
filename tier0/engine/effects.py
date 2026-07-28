@@ -1411,7 +1411,15 @@ def _op_scry_discard(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_conditional(state: CombatState, fx: dict, card: Card) -> None:
-    branch = fx["then"] if _predicate(state, fx["if"]) else fx.get("else", [])
+    fired = _predicate(state, fx["if"])
+    # D4 telemetry (salon UI sprint, 2026-07-28). EMIT-ONLY, and deliberately
+    # generic rather than a graceful_retreat special case: "how often does
+    # this rider actually fire" is a question every conditional on the sheet
+    # can be asked, and a card-specific counter would have to be rewritten
+    # for the next suspect. The event carries the predicate NAME so a
+    # fire-rate can be read per card, per predicate, or both.
+    state.emit("conditional", card=card.id, predicate=fx["if"], fired=fired)
+    branch = fx["then"] if fired else fx.get("else", [])
     _resolve_effects(state, branch, card)
 
 
@@ -2284,11 +2292,20 @@ def salon_tick(state: CombatState) -> None:
     (hydro application on damage ticks still applies either way). Numeric
     amounts carry the Fanfare Focus term + Grand Salon (_salon_amount)."""
     p = state.player
+    # D8 telemetry (salon UI sprint, 2026-07-28). EMIT-ONLY: the snapshot is
+    # taken BEFORE the first member spends, because the question the D8 lever
+    # is about is whether the stage arrives at upkeep with enough fuel to run
+    # itself -- read it after the loop and a stage that drained itself to
+    # exactly zero looks identical to one that never had a member at all.
+    if p.salon:
+        state.emit("salon_upkeep", members=len(p.salon), encore=p.encore,
+                   cost=C.SALON_TICK_ENCORE_COST * len(p.salon))
     for member in list(p.salon):
         if not p.alive or not state.living_enemies:
             break
         spec = C.SALON_MEMBERS[member]["tick"]
         paid = p.encore >= C.SALON_TICK_ENCORE_COST
+        state.emit("salon_tick", member=member, paid=paid)
         if paid:
             resources.spend_encore(state, C.SALON_TICK_ENCORE_COST)
 

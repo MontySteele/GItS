@@ -163,21 +163,90 @@ def _slot_positions() -> list[float]:
         SALON_STAGE, re.S)]
 
 
-def test_the_stage_geometry_is_uniform_across_the_three_slots():
-    """The numbers a scale fix will be written against, pinned first."""
-    ghosts = [_rect(f"Ghost{i}") for i in (1, 2, 3)]
-    pools = [_rect(f"Pool{i}") for i in (1, 2, 3)]
-    beams = [_rect(f"Beam{i}") for i in (1, 2, 3)]
+SCENE_SLOTS = 5
+
+
+def test_the_stage_geometry_is_uniform_across_every_slot():
+    """The numbers a scale fix will be written against, pinned first.
+
+    D1 (salon UI sprint, 2026-07-28) took the slot count from three to five --
+    A12 made the cap a per-player stat, and Box Seats upgraded reaches 5 --
+    so the sweep is over every slot the scene ships, not over a hardcoded
+    three. Uniformity is the actual invariant: a slot that renders a member
+    differently from its neighbours would make identity a function of
+    POSITION, which is precisely what the slot-index Funnel Contract forbids.
+    """
+    slots = range(1, SCENE_SLOTS + 1)
+    ghosts = [_rect(f"Ghost{i}") for i in slots]
+    pools = [_rect(f"Pool{i}") for i in slots]
+    beams = [_rect(f"Beam{i}") for i in slots]
+    chips = [_rect(f"Chip{i}") for i in slots]
     assert len(set(ghosts)) == 1, ghosts
     assert len(set(pools)) == 1, pools
     assert len(set(beams)) == 1, beams
+    assert len(set(chips)) == 1, chips
     # The figures missed-requirements sec.4.3 quotes, so the write-up and the
     # scene cannot drift apart without one of them being wrong out loud.
     assert ghosts[0] == (34.0, 36.0), ghosts[0]
-    xs = sorted(_slot_positions())
-    assert len(xs) == 3, xs
-    pitch = {round(b - a) for a, b in zip(xs, xs[1:])}
-    assert pitch == {62}, f"slot pitch is no longer 62px: {pitch}"
+    assert len(_slot_positions()) == SCENE_SLOTS, _slot_positions()
+
+
+def test_the_role_chip_and_the_tick_share_one_expression():
+    """D1 §2 ruled that the chip reads "the same scaled path SalonPowers
+    ticks with, so the chip can never disagree with the actual tick".
+
+    That is only true while there is ONE expression. A bridge that recomputed
+    the Focus term itself would agree today and drift the first time the
+    scaling changes -- a fifth hand-maintained projection of arithmetic the
+    sheet already has four of. So: the bridge must call TickValue, and it
+    must not know how scaling is computed.
+    """
+    powers = (SOURCE / "Powers" / "SalonPowers.cs").read_text(encoding="utf-8")
+    assert "public static int TickValue(" in powers
+    upkeep = powers[powers.index("AfterPlayerTurnStart"):]
+    upkeep = upkeep[:upkeep.index("TryModifyPowerAmountReceived")]
+    assert "TickValue(" in upkeep, (
+        "the upkeep loop no longer resolves through TickValue, so the chip "
+        "is now reading an expression the tick does not use")
+    assert "Scaled(" not in upkeep, (
+        "the upkeep loop scales a number outside TickValue; whatever it is, "
+        "the chip cannot see it")
+    assert "SalonMemberPower.TickValue(" in SALON_BRIDGE
+    for leak in ("FocusPerFanfare", "DryDamageMultiplier", "SalonDamageUp"):
+        assert leak not in SALON_BRIDGE, (
+            f"the bridge references {leak}: it is computing scaling rather "
+            "than asking for the resolved tick")
+
+
+def test_the_slot_row_is_laid_out_by_the_bridge_not_by_the_scene():
+    """D1 §5: a cap raise must appear as a new ghost slot on a row that still
+    fits inside Furina's 240-wide bounds, so X and Y come from the LIVE cap.
+
+    The authored positions in the scene are therefore inert -- which is worth
+    a test, because the old contract pinned them to a 62px pitch and reading
+    that pin as still-load-bearing is how someone "fixes" a spacing bug in
+    the wrong file. The spacing rule now lives in the bridge, and the cap on
+    it is still 62 so a three-member stage is pixel-identical to the one that
+    shipped.
+    """
+    # Twice: the definition AND a call site. Asserting the name alone passes
+    # on a bridge that defines the layout and never runs it, which is the
+    # defect this pins -- the row would silently fall back to the scene's
+    # authored three positions.
+    assert SALON_BRIDGE.count("LayOutSlots") >= 2, (
+        "LayOutSlots is defined but never called; the slot row is back to "
+        "whatever the scene authored")
+    assert re.search(r"SlotSpacingMax\s*=\s*62f", SALON_BRIDGE), (
+        "the shipped three-slot pitch is no longer the maximum gap; a normal "
+        "Furina's stage would move for a reason that only applies to a "
+        "cap raise")
+    half = float(re.search(r"SlotHalfSpan\s*=\s*(-?[\d.]+)f",
+                           SALON_BRIDGE).group(1))
+    half_slot = _rect("Ghost1")[0] / 2
+    # 96 is the stage arc's half-width (StageArc offset_right).
+    assert half + half_slot <= 96.0, (
+        f"a slot centred at {half} with half-width {half_slot} overhangs the "
+        "stage arc, and the arc is already at the creature bounds edge")
 
 
 def test_shipped_sprite_height_is_exactly_twice_the_stage_slot():
