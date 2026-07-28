@@ -252,6 +252,9 @@ UNMIRRORED: dict[str, str] = {
         "presentation: how many slot nodes salon_stage.tscn ships. The RULE "
         "is SalonConstants.MemberSlots plus the cap-raise power, which is "
         "mirrored; this is the ceiling on what the scene can draw.",
+    "SalonVisualsBridge.SpriteScaleMax":
+        "presentation: the largest scale the member art is drawn at, half the "
+        "144px master. A rendering ratio; the sim has no sprites.",
     "SalonVisualsBridge.SlotHalfSpan":
         "presentation: how far from centre a slot may sit, in pixels, before "
         "it overhangs the stage arc.",

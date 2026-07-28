@@ -265,27 +265,36 @@ def test_shipped_sprite_height_is_exactly_twice_the_stage_slot():
         "ratio IS the intended Sprite2D scale and cannot move silently")
 
 
-def test_the_bridge_applies_no_scale_and_that_is_a_recorded_gap():
-    """missed-requirements sec.4.3, made structural instead of documentary.
+def test_the_member_art_is_scaled_to_its_slot():
+    """missed-requirements sec.4.3, CLOSED by playtest 3 (2026-07-28).
 
-    `SalonVisualsBridge` sets `Texture`, `Visible` and `Modulate` on each slot
-    sprite and nothing else, so 121x144 art renders at 1:1 into a 34x36 ghost
-    on a 62px pitch. The fix was supplied as a code block in
-    animation-sprint-2-log.md Playtest 2 Finding 2 and never applied, which is
-    why the tracked D5 capture cannot be judged: silhouette legibility is D5's
-    acceptance question and the silhouettes are 4x oversized.
+    The gap this replaces asserted the opposite: that the bridge set no
+    Scale, so 121x144 art rendered at 1:1 into a 34x36 ghost on a 62px pitch
+    and every member overlapped its neighbour by about half. The old test
+    said, in as many words, that on the day a Scale is set it must be
+    replaced with the arithmetic check below. This is that test.
 
-    This asserts the gap, and it is the assertion that must FLIP when the fix
-    lands: on the day a `Scale` is set, this test fails, and closing it means
-    replacing it with the arithmetic check above (scale == beam_h / TARGET_H).
+    What forced it: A12 made the pitch a function of a per-player stat, and
+    at cap 4-5 (39.5px) the overlap went from ugly to illegible -- "the salon
+    pictures stacked over each other and became unreadable". So the old house
+    rule of pre-scaled art with no runtime minification is amended, because
+    there is no single size art could be cut at to serve a variable pitch.
+
+    The CAP is still the documented ratio -- beam / TARGET_H -- so the
+    ordinary three-member stage lands on a clean 2x downscale. Only a raised
+    cap goes below it.
     """
-    sprite_writes = set(re.findall(r"\bsprite\.(\w+)\s*=", SALON_BRIDGE))
-    if "Scale" in sprite_writes:
-        pytest.fail(
-            "SalonVisualsBridge now sets sprite.Scale -- missed-requirements "
-            f"sec.4.3 is FIXED. Replace this test with the real check: the "
-            f"scale must equal {_rect('Beam1')[1] / TARGET_H} "
-            f"(beam {_rect('Beam1')[1]}px / TARGET_H {TARGET_H}).")
-    assert sprite_writes == {"Texture", "Visible", "Modulate"}, sprite_writes
-    assert "Scale" not in SALON_STAGE.split('name="Sprite1"')[1][:200], (
-        "the scene now carries a Sprite scale; see the note above")
+    _, beam_h = _rect("Beam1")
+    expected = beam_h / TARGET_H
+    assert re.search(rf"SpriteScaleMax\s*=\s*{expected}f", SALON_BRIDGE), (
+        f"the sprite scale cap is no longer {expected} (beam {beam_h}px / "
+        f"TARGET_H {TARGET_H}); a stage of three members is no longer an "
+        "exact 2x downscale of the master")
+    assert re.search(r"sprite\.Scale\s*=", SALON_BRIDGE), (
+        "the bridge stopped scaling member art; at cap 5 the sprites are "
+        "three times the slot pitch and stack into an unreadable pile")
+    # The cap alone is not enough: 121px of art at 0.5 is 60px wide, which
+    # does not fit a 39.5px pitch. The scale must also answer to the pitch.
+    assert "spacing / width" in SALON_BRIDGE, (
+        "SpriteScale ignores the slot pitch, so a raised cap stacks the "
+        "members again -- which is the defect playtest 3 reported")

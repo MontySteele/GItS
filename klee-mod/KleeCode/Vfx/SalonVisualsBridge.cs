@@ -140,6 +140,10 @@ public static class SalonVisualsBridge
     /// </summary>
     private const int SceneSlots = 5;
 
+    /// <summary>Largest scale the member art is ever drawn at: exactly half
+    /// the 144px master, which is exactly the 72px beam.</summary>
+    private const float SpriteScaleMax = 0.5f;
+
     private const string KeywordTable = "card_keywords";
 
     private const string HoverTitleMeta = "kleemod_hover_title";
@@ -267,6 +271,7 @@ public static class SalonVisualsBridge
         // than a silent one: today nothing can raise the cap past 3 + Box
         // Seats upgraded (+2) = 5, which is exactly what the scene ships.
         var slots = Math.Min(SalonMemberPower.SlotsFor(creature), SceneSlots);
+        var spacing = SlotSpacing(slots);
         LayOutSlots(display, slots);
         for (var i = 0; i < slots; i++)
         {
@@ -280,6 +285,10 @@ public static class SalonVisualsBridge
                 sprite.Texture = occupied ? SpriteFor(company[i]) : null;
                 sprite.Visible = occupied && sprite.Texture != null;
                 sprite.Modulate = dry ? DryTint : ActiveTint;
+                if (sprite.Texture is { } art)
+                {
+                    sprite.Scale = Vector2.One * SpriteScale(art, spacing);
+                }
             }
 
             // Empty slot = ghost outline on the stage floor (the surviving
@@ -287,6 +296,7 @@ public static class SalonVisualsBridge
             if (display.GetNodeOrNull<ColorRect>($"%Ghost{i + 1}") is { } ghost)
             {
                 ghost.Visible = !occupied;
+                FitDecoration(ghost, spacing);
             }
 
             // D1 §1: the pool carries the member's accent hue at the pool's
@@ -299,6 +309,7 @@ public static class SalonVisualsBridge
                 pool.Color = !occupied || dry
                     ? PoolDry
                     : Accent(company[i], PoolActive.A);
+                FitDecoration(pool, spacing);
             }
 
             if (display.GetNodeOrNull<ColorRect>($"%Beam{i + 1}") is { } beam)
@@ -307,6 +318,7 @@ public static class SalonVisualsBridge
                 beam.Color = !occupied || dry
                     ? BeamDry
                     : Accent(company[i], BeamActive.A);
+                FitDecoration(beam, spacing);
             }
 
             RefreshChip(display, creature, i, occupied ? company[i] : null, dry);
@@ -352,11 +364,60 @@ public static class SalonVisualsBridge
     /// highest. Computed rather than authored for the same reason as X --
     /// with a variable slot count there is no fixed middle.
     /// </summary>
+    private static float SlotSpacing(int slots) =>
+        slots > 1
+            ? Mathf.Min(SlotSpacingMax, 2f * SlotHalfSpan / (slots - 1))
+            : SlotSpacingMax;
+
+    /// <summary>
+    /// How far down the member art is scaled to fit its slot.
+    ///
+    /// PLAYTEST 3 DEFECT (2026-07-28): "the salon pictures stacked over each
+    /// other and became unreadable" at cap 4-5. The cause is older than the
+    /// cap: the sprites are cut at 144px tall and ~121-129 wide and were
+    /// drawn at 1:1 on a 62px pitch, so they have ALWAYS overlapped by about
+    /// half. That is missed-requirements sec.4.3, which shipped as a
+    /// recorded gap. A12 turned it from ugly into illegible, because the
+    /// pitch is now as tight as 39.5px.
+    ///
+    /// The house rule was pre-scaled art with NO runtime minification. That
+    /// rule cannot survive A12 and is explicitly amended here: the slot
+    /// pitch is a function of a per-player stat, so there is no single size
+    /// the art could be cut at. It is cut once at 144 and fitted at runtime.
+    ///
+    /// The cap is 0.5 -- exactly half of the 144px master and exactly the
+    /// 72px beam -- so the common three-member stage lands on a clean 2x
+    /// downscale with no resampling artefacts, and only a RAISED cap goes
+    /// below it. Width is measured per texture because the three members
+    /// differ by a few pixels, and the one that overflows is the one that
+    /// stacks.
+    /// </summary>
+    private static float SpriteScale(Texture2D art, float spacing)
+    {
+        var width = art.GetWidth();
+        return width > 0
+            ? Mathf.Min(SpriteScaleMax, spacing / width)
+            : SpriteScaleMax;
+    }
+
+    /// <summary>
+    /// Squash a slot decoration horizontally when the pitch is tighter than
+    /// the decoration is wide. The pool is the accent-hue carrier (D1 §1),
+    /// so overlapping pools blur exactly the identity signal the hue exists
+    /// to provide -- and the pool is authored at 52px against a cap-5 pitch
+    /// of 39.5. Horizontal only: these are glows and outlines, and squashing
+    /// one reads as a narrower stage rather than as a smaller member.
+    /// </summary>
+    private static void FitDecoration(Control? rect, float spacing)
+    {
+        if (rect == null || rect.Size.X <= 0f) return;
+        rect.PivotOffset = rect.Size / 2f;
+        rect.Scale = new Vector2(Mathf.Min(1f, spacing / rect.Size.X), 1f);
+    }
+
     private static void LayOutSlots(Node2D display, int slots)
     {
-        var spacing = slots > 1
-            ? Mathf.Min(SlotSpacingMax, 2f * SlotHalfSpan / (slots - 1))
-            : 0f;
+        var spacing = slots > 1 ? SlotSpacing(slots) : 0f;
         var centre = (slots - 1) / 2f;
         for (var i = 0; i < SceneSlots; i++)
         {
