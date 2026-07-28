@@ -1,5 +1,6 @@
 using BaseLib.Patches.Content;
 using KleeMod.Elements;
+using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Entities.Cards;
 
 namespace KleeMod.Cards;
@@ -94,6 +95,34 @@ public static class KleeKeywords
     [CustomEnum("crystallize_preview")]
     [KeywordProperties(AutoKeywordPosition.None)]
     public static CardKeyword CrystallizePreview;
+
+    // B5 (playtest-2, 2026-07-28): the salon-deploy cards used to render one
+    // boilerplate paragraph that named no member and restated the cap rules on
+    // every copy. The face now names WHO takes the stage; these carry what
+    // that member DOES, and the cap rules, so the paragraph does not have to
+    // be reprinted eight times.
+    //
+    // Auto=None: cards opt in through ExtraHoverTips, and a deploy card asks
+    // for exactly the members it deploys.
+    [CustomEnum("salon_crabaletta")]
+    [KeywordProperties(AutoKeywordPosition.None)]
+    public static CardKeyword SalonCrabaletta;
+
+    [CustomEnum("salon_usher")]
+    [KeywordProperties(AutoKeywordPosition.None)]
+    public static CardKeyword SalonUsher;
+
+    [CustomEnum("salon_chevalmarin")]
+    [KeywordProperties(AutoKeywordPosition.None)]
+    public static CardKeyword SalonChevalmarin;
+
+    public static CardKeyword SalonMemberKeyword(SalonMember member) => member switch
+    {
+        SalonMember.Crabaletta => SalonCrabaletta,
+        SalonMember.Usher => SalonUsher,
+        SalonMember.Chevalmarin => SalonChevalmarin,
+        _ => CardKeyword.None,
+    };
 
     public static CardKeyword AuraApplication(Element element) => element switch
     {

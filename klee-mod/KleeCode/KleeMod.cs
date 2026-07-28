@@ -168,6 +168,18 @@ public static class KleeMod
                     [Cards.FurinaRiderTips.SalonKey + ".title"] =
                         "Salon scaling",
 
+                    // B5: the member tips the deploy faces hand off to. Only
+                    // the TITLES are rows -- the bodies are built live in
+                    // SalonMemberTips, because the numbers live in
+                    // SalonConstants and the cap is a per-player stat.
+                    ["KLEEMOD-SALON_CRABALETTA.title"] =
+                        "Mademoiselle Crabaletta",
+                    ["KLEEMOD-SALON_USHER.title"] = "Gentilhomme Usher",
+                    ["KLEEMOD-SALON_CHEVALMARIN.title"] =
+                        "Surintendante Chevalmarin",
+                    [Cards.SalonMemberTips.SalonRulesKey + ".title"] =
+                        "Salon",
+
                     // Kokomi's two hidden reads (KokomiRiderTips). Both
                     // resolve somewhere no card face can print -- the pulse at
                     // end of turn, the Garment rider on OTHER cards -- so the

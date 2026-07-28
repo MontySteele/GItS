@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,12 +37,15 @@ public sealed class EndlessWaltz : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Crabaletta, SalonMember.Usher });
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("endless_waltz");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Endless Waltz"),
-        ("description", "Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. [gold]Salon Member[/gold] numbers are {PowerAmount:diff()} higher."),
+        ("description", "Add 1 [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold]. Add 1 [gold]Gentilhomme Usher[/gold]. [gold]Salon Member[/gold] numbers are {PowerAmount:diff()} higher."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

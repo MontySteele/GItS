@@ -560,12 +560,66 @@ def test_a_random_deploy_emits_a_null_and_says_so_on_the_face():
     named = gen.emit(by_id["surintendante_chevalmarin"], gen.FURINA_PROFILE)
 
     assert "SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, null)" in debut
-    assert "RANDOM [gold]Salon Member(s)[/gold]" in debut
-    assert "SalonMember." not in debut
+    # B5 reworded this from "RANDOM Salon Member(s)" to the named-member
+    # grammar; the requirement is unchanged -- the face must say the member is
+    # not chosen.
+    assert "random Salon Member" in debut
+    assert "SalonMemberTips.ForCard(base.ExtraHoverTips, this, randomMember: true)" in debut
+    assert "members: new[]" not in debut
 
     # The Common it was de-duped FROM keeps naming its member. If this ever
     # goes null too, the de-dupe has been undone in the other direction.
     assert "this, SalonMember.Chevalmarin)" in named
+
+
+def test_every_deploy_card_names_its_member_and_carries_its_tip():
+    """B5 (playtest-2 defect, 2026-07-28), swept across the whole sheet.
+
+    Written as a SWEEP rather than as one case per card on purpose: the
+    defect was that eight cards shared one nameless paragraph, so a fixture
+    that named the cards individually would leave the ninth to be found in
+    play. Any future deploy card is covered the moment it is authored.
+    """
+    seen = 0
+    for card in _furina_cards():
+        deploys = [e for e in card.get("effects", [])
+                   if e.get("op") == "apply_power"
+                   and e.get("power") == "salon_member"]
+        if not deploys or gen.blocked_reason(card, gen.FURINA_PROFILE):
+            continue
+        seen += 1
+        source = gen.emit(card, gen.FURINA_PROFILE)
+
+        # The face names WHO -- every member this card can field.
+        for eff in deploys:
+            name = gen.SALON_MEMBER_NAMES[eff.get("member", "crabaletta")]
+            assert f"[gold]{name}[/gold]" in source, (card["id"], name)
+
+        # The cap paragraph is GONE from the face. It moved to the tip, and
+        # since A12 the number in it is not even a constant any more.
+        assert "Maximum 3" not in source, card["id"]
+        assert "bows its OLDEST member out" not in source, card["id"]
+
+        # ...and the tip that replaced it is attached.
+        assert "SalonMemberTips.ForCard(" in source, card["id"]
+
+    assert seen == 9, f"expected 9 deploy cards, swept {seen}"
+
+
+def test_the_face_and_the_tooltip_call_members_the_same_thing():
+    """The face says "Add Gentilhomme Usher" and the tooltip explaining him is
+    titled "Gentilhomme Usher". Those strings live in two languages -- Python
+    and C# -- so nothing but a test makes them agree, and if they drift the
+    player cannot tell the two are about the same member."""
+    tips = (Path(gen.REPO) / "klee-mod" / "KleeCode" / "Cards"
+            / "SalonMemberTips.cs").read_text(encoding="utf-8")
+    loc = (Path(gen.REPO) / "klee-mod" / "KleeCode"
+           / "KleeMod.cs").read_text(encoding="utf-8")
+    for member, name in gen.SALON_MEMBER_NAMES.items():
+        if member == "random":
+            continue
+        assert f'"{name}"' in tips, (member, name)
+        assert f'"{name}"' in loc, (member, name)
 
 
 def test_an_unrecognised_member_is_refused_by_name():

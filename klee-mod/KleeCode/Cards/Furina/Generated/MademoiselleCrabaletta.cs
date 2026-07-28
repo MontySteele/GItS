@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -39,12 +40,15 @@ public sealed class MademoiselleCrabaletta : CustomCardModel, ICharacterCard, IS
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { KleeKeywords.ElementalSkill };
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Crabaletta });
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("mademoiselle_crabaletta");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mademoiselle Crabaletta"),
-        ("description", "Add {PowerAmount:diff()} typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects."),
+        ("description", "Add {PowerAmount:diff()} [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

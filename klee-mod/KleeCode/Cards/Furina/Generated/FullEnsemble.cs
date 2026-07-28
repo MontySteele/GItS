@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -39,12 +40,15 @@ public sealed class FullEnsemble : CustomCardModel, ICharacterCard, ISkillTagCar
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { KleeKeywords.ElementalSkill };
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Usher, SalonMember.Chevalmarin, SalonMember.Crabaletta });
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("full_ensemble");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Full Ensemble"),
-        ("description", "Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. Add 1 typed [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects."),
+        ("description", "Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Add 1 [gold]Surintendante Chevalmarin[/gold]. Add 1 [gold]Mademoiselle Crabaletta[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

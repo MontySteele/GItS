@@ -507,10 +507,12 @@ APPLY_POWERS = {
         "[gold]Block[/gold] you gain."),
     "fanfare_attack_per10": ("FanfareAttackPer10Power", None,
         "Your Attacks deal {X} more damage per 10 [gold]Fanfare[/gold]."),
+    # B5 (2026-07-28): the face NAMES the member and says nothing else. The
+    # member's act, its bow, and the cap rules moved to hover tips
+    # (SalonMemberTips) -- eight cards were reprinting one paragraph that
+    # named nobody. {MEMBER} is filled per effect from its `member:` value.
     "salon_member": ("SalonMemberPower", None,
-        "Add {X} typed [gold]Salon Member(s)[/gold]. Maximum 3; a full "
-        "stage bows its OLDEST member out (its unique payoff) and "
-        "empowers this card's later effects."),
+        "Add {X} [gold]{MEMBER}[/gold] to your [gold]Salon[/gold]."),
     "salon_damage_up": ("SalonDamageUpPower", None,
         "[gold]Salon Member[/gold] numbers are {X} higher."),
     # A12 (2026-07-28): the stage's size stops being a constant.
@@ -596,6 +598,17 @@ SALON_MEMBER_CS = {
     "usher": "SalonMember.Usher",
     "chevalmarin": "SalonMember.Chevalmarin",
     "random": "null",
+}
+
+# B5: the stage names the faces print. These MUST match
+# SalonMemberTips.DisplayName -- the card says "Add Gentilhomme Usher" and the
+# tooltip that explains him is titled the same thing, or the player cannot
+# tell they are about the same member. Pinned in the codegen tests.
+SALON_MEMBER_NAMES = {
+    "crabaletta": "Mademoiselle Crabaletta",
+    "usher": "Gentilhomme Usher",
+    "chevalmarin": "Surintendante Chevalmarin",
+    "random": "random Salon Member",
 }
 
 # Upgrade keys that all mean "bump the applied power amount" at card level
@@ -1637,6 +1650,75 @@ def rider_tip_args(card: dict) -> str:
         elif "bonus_vs_aura" in eff:
             args.append(f"auraBonus: {int(eff['bonus_vs_aura'])}")
     return ", ".join(args)
+
+
+def merged_deploy_text(card: dict) -> tuple[dict[int, int], set[int]]:
+    """B5: consecutive deploys of the SAME member render as one sentence.
+
+    Grand Gala deploys Crabaletta twice in a row, which read as "Add 1
+    Mademoiselle Crabaletta. Add 1 Mademoiselle Crabaletta." -- the same
+    boilerplate this ruling is deleting, wearing a name.
+
+    Returns ({index of the surviving effect: merged amount},
+             {indices to skip}), keyed by position in card["effects"].
+
+    TEXT ONLY. The body still emits one Deploy call per effect, because the
+    replacement rule bows a member out per deploy and collapsing the calls
+    would change what the card does. Merging is refused unless BOTH effects
+    carry a literal integer amount and neither is the card's upgrade target
+    or a salon-scaled var -- those render a token, not a number, and two
+    tokens cannot be added at generation time.
+    """
+    effects = card.get("effects", [])
+    upgrade_target = power_upgrade_effect(card)
+    merged: dict[int, int] = {}
+    skip: set[int] = set()
+
+    def plain_deploy(eff):
+        return (eff.get("op") == "apply_power"
+                and eff.get("power") == "salon_member"
+                and isinstance(eff.get("amount"), int)
+                and eff is not upgrade_target
+                and salon_calc_rider(card, eff) is None)
+
+    anchor = None
+    for i, eff in enumerate(effects):
+        if not plain_deploy(eff):
+            anchor = None
+            continue
+        if (anchor is not None
+                and effects[anchor].get("member") == eff.get("member")):
+            merged[anchor] += int(eff["amount"])
+            skip.add(i)
+            continue
+        anchor = i
+        merged[i] = int(eff["amount"])
+    return merged, skip
+
+
+def salon_member_tip_args(card: dict) -> str:
+    """B5: the C# arguments naming which member tips this card carries, or "".
+
+    A random deploy passes `randomMember: true` and the tip helper shows all
+    three -- the player is choosing to roll and needs to know the field.
+    Order follows the card's own effects so a multi-deploy card's tips read in
+    the order it summons them.
+    """
+    members: list[str] = []
+    random_deploy = False
+    for eff in card.get("effects", []):
+        if eff.get("op") != "apply_power" or eff.get("power") != "salon_member":
+            continue
+        member = eff.get("member", "crabaletta")
+        if member == "random":
+            random_deploy = True
+        elif SALON_MEMBER_CS[member] not in members:
+            members.append(SALON_MEMBER_CS[member])
+    if random_deploy:
+        return "randomMember: true"
+    if not members:
+        return ""
+    return "members: new[] { " + ", ".join(members) + " }"
 
 
 def salon_scaled_snapshot(card: dict) -> str | None:
@@ -3715,7 +3797,11 @@ def build_description(card: dict) -> str:
             f"{{IfUpgraded:show:{max(0, base_cost + delta)}|{base_cost}}}"
             if delta else str(base_cost))
         parts.append(f"Spend {rendered} [gold]{label}[/gold].")
-    for eff in card["effects"]:
+    salon_named = False          # B5: has a deploy already said "your Salon"?
+    deploy_amounts, deploy_skip = merged_deploy_text(card)
+    for eff_index, eff in enumerate(card["effects"]):
+        if eff_index in deploy_skip:
+            continue
         op = eff["op"]
 
         if op == "block":
@@ -3956,19 +4042,25 @@ def build_description(card: dict) -> str:
 
         elif op == "apply_power":
             template = APPLY_POWERS[eff["power"]][2]
-            if eff.get("member") == "random":
-                # A11: the shared template says "typed", which was true when
-                # every deploy named its member. On a random deploy that word
-                # tells the player nothing and implies a choice they do not
-                # have. B5 will name the specific members; this only has to
-                # stop the random one from lying.
+            if "member" in eff:
+                # B5: name WHO. A11's random deploy says so instead -- it can
+                # field any of the three, and the tooltip lists all three.
+                #
+                # Only the FIRST deploy on a card says "to your Salon". Full
+                # Ensemble makes three, and three copies of the same
+                # prepositional phrase is the boilerplate this ruling exists
+                # to delete, just reworded.
+                if salon_named:
+                    template = template.replace(
+                        " to your [gold]Salon[/gold]", "")
+                salon_named = True
                 template = template.replace(
-                    "{X} typed [gold]Salon Member(s)[/gold]",
-                    "{X} RANDOM [gold]Salon Member(s)[/gold]")
+                    "{MEMBER}", SALON_MEMBER_NAMES[eff["member"]])
             x = ("{PowerAmount:diff()}"
                  if eff is power_upgrade_effect(card)
                  or salon_calc_rider(card, eff) is not None
-                 else str(int(eff["amount"])))
+                 else str(deploy_amounts.get(eff_index, 0)
+                          or int(eff["amount"])))
             to = {"all_enemies": " to ALL enemies",
                   "random_enemy": " to a random enemy"}.get(
                       eff.get("target"), "")
@@ -4730,6 +4822,15 @@ def emit(
         tips_expr = (
             f"FurinaRiderTips.ForCard({tips_expr or 'base.ExtraHoverTips'}, "
             f"this, {rider_args})")
+    # B5: a deploy card carries the tip for every member it can field, plus
+    # the cap rules its face no longer prints. Attached from the EFFECT, not
+    # from a card list, so a new deploy card cannot ship naming a member that
+    # nothing on screen explains.
+    salon_tip_args = salon_member_tip_args(card)
+    if salon_tip_args:
+        tips_expr = (
+            f"SalonMemberTips.ForCard({tips_expr or 'base.ExtraHoverTips'}, "
+            f"this, {salon_tip_args})")
     # Kokomi's two hidden reads. Neither can render on a card face -- the
     # pulse resolves at end of turn from a bank that will have moved, and the
     # Garment rider lands on OTHER cards -- so the hover tip is the only

@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -39,12 +40,15 @@ public sealed class SalonDebut : CustomCardModel, ICharacterCard, ISkillTagCard
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { KleeKeywords.ElementalSkill };
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        SalonMemberTips.ForCard(base.ExtraHoverTips, this, randomMember: true);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("salon_debut");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Salon Début"),
-        ("description", "Add 1 RANDOM [gold]Salon Member(s)[/gold]. Maximum 3; a full stage bows its OLDEST member out (its unique payoff) and empowers this card's later effects. {IfUpgraded:show:Gain 2 [gold]Encore[/gold].|}"),
+        ("description", "Add 1 [gold]random Salon Member[/gold] to your [gold]Salon[/gold]. {IfUpgraded:show:Gain 2 [gold]Encore[/gold].|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
