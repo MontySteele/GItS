@@ -163,8 +163,10 @@ def card_cost(state: CombatState, card: Card) -> int:
     # granting economy, not the Spotlight baseline -- §2.2a governs the
     # multiplier, and the multiplier has no path here.
     p = state.player
+    # B2: gated on the PAID counter, so a free Spotlighted play (Ethereal
+    # Spotlight's token, chiefly) neither takes the discount nor burns it.
     if (effects.is_spotlighted(state, card)
-            and state.spotlighted_cards_this_turn == 0):
+            and state.spotlighted_paid_cards_this_turn == 0):
         cost = max(0, cost - p.powers.get("spotlight_discount", 0))
     if (card.type == "attack"
             and state.player.sparks >= spark_threshold(state)):
@@ -213,6 +215,13 @@ def play_card(state: CombatState, card: Card) -> None:
         # Counted BEFORE resolution so the reserve per-turn cap (OFF by
         # default) can compare against this play's own ordinal.
         state.spotlighted_cards_this_turn += 1
+        # B2: the discount's own window. PRINTED cost, not the resolved one --
+        # a printed-1 card discounted to 0 must still spend the window, or the
+        # discount would re-arm behind its own effect and apply every turn.
+        # An X-cost card counts as paid (its printed cost is not a number, and
+        # X plays are never the free-token case this guard exists for).
+        if not isinstance(card.cost, int) or card.cost >= 1:
+            state.spotlighted_paid_cards_this_turn += 1
         state.emit("spotlight_card_played", card=card.id)
         if p.spotlight == p.character_id:
             resources.gain_fanfare(
@@ -424,6 +433,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     state.splash_procs_this_turn = 0             # detonation_splash cap
     state.reactions_this_turn = 0                # Chevreuse predicate window
     state.spotlighted_cards_this_turn = 0        # Ovation / reserve cap
+    state.spotlighted_paid_cards_this_turn = 0   # B2: Leading Role's window
     state.spotlight_moved_this_turn = False      # selector-payoff window
     state.prevention_used_this_turn = False      # Kokomi ward latch (§2.4)
     state.encore_spend_draws_this_turn = 0       # Gallery Stirs latch (R85)

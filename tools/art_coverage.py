@@ -84,6 +84,15 @@ KNOWN_STALE = {
         "this is a painted asset already cleared through SOURCES.tsv. It is "
         "NOT coverage for anything and must never be counted as such."
     ),
+    "rising_tide": (
+        "A4 (playtest-2 red-pen, 2026-07-28) CUT Rising Tide from the pool: "
+        "pure application + buffer at common, an effect the deploy cards "
+        "already carry as a rider. Kept rather than deleted because it is a "
+        "painted asset already cleared through SOURCES.tsv and the pool "
+        "carries an open art debt -- if a salon application common is ever "
+        "re-authored, the water-climbing-the-stage motif is on disk. It is "
+        "NOT coverage for anything and must never be counted as such."
+    ),
 }
 
 

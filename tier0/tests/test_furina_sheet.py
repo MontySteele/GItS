@@ -56,8 +56,16 @@ def test_pool_composition():
     # legal only at U/R under the deck-size grammar -- 11 promotions moved
     # the pool to bottom-light. Pool size stays 78 (frozen); the type quota
     # (17 attack / 46 skill / 15 power) is pinned below.
-    assert len(by_rarity["common"]) == 22
-    assert len(by_rarity["uncommon"]) == 32
+    # PLAYTEST-2 RED-PEN (2026-07-28) moved every number on this block; the
+    # pool-size freeze is broken for the first time since Curtain Call.
+    #   77 (was 78): A4 CUT rising_tide.
+    #   common 19 (was 22): -1 the cut, -2 to uncommon (A1 curtain_cue,
+    #     A2 limelight, both promoted for having U-grade Official effects).
+    #   uncommon 34 (was 32): +2 those promotions.
+    #   rare 19: unchanged. A7 reshaped unheard_confession but did not move it.
+    assert len(cards) == 77
+    assert len(by_rarity["common"]) == 19
+    assert len(by_rarity["uncommon"]) == 34
     assert len(by_rarity["rare"]) == 19
     kit = [c for c in by_rarity["rare"] if c.kit_card]
     assert [c.id for c in kit] == ["let_the_people_rejoice"]   # 18 draftable
@@ -67,9 +75,13 @@ def test_pool_composition():
     # Attack landed at 15, not §4's 17: the pre-registered Track B shrink
     # clause fired on the cell-3 hydro-uptime breach and reverted the
     # flood_of_emotion + matinee_performance retypes (sprint log §6 cell 3).
-    assert len(by_type["attack"]) == 15
-    assert len(by_type["skill"]) == 48           # skill-heavy pole+, the cadence reason
-    assert len(by_type["power"]) == 15           # official quota floor (19-21% roster-wide)
+    # Type quota, also moved by the 2026-07-28 red-pen:
+    #   attack 16 (was 15): A5 retyped undercurrent skill -> attack.
+    #   skill  45 (was 48): -1 that retype, -1 A4's cut, -1 A7's retype.
+    #   power  16 (was 15): +1 A7 retyped unheard_confession skill -> power.
+    assert len(by_type["attack"]) == 16
+    assert len(by_type["skill"]) == 45           # skill-heavy pole+, the cadence reason
+    assert len(by_type["power"]) == 16           # official quota floor (19-21% roster-wide)
 
 
 def test_starter_invitation_and_aria_curve():
@@ -516,7 +528,13 @@ def test_leading_role_discounts_first_spotlighted_card_only():
     p.powers["spotlight_discount"] = 1
     card = loader.get_card("chevreuse_interdiction_fire")
     assert combat.card_cost(st, card) == 0          # first: 1 -> 0
+    # B2 (2026-07-28): the window is spent by PAID Spotlighted plays, so this
+    # case advances the paid counter. Advancing only the activity counter --
+    # which is what this test used to do -- no longer closes the window, and
+    # that is the whole fix: see
+    # test_leading_role_is_not_consumed_by_a_free_spotlighted_play.
     st.spotlighted_cards_this_turn = 1
+    st.spotlighted_paid_cards_this_turn = 1
     assert combat.card_cost(st, card) == 1          # later plays full price
 
 
@@ -732,9 +750,11 @@ def test_burst_charges_grants_empties_and_regrants():
     p = st.player
     p.energy = 99
     p.burst_energy = p.burst_max - 1
-    # rising_tide since Curtain Call B: usher_the_waves lost its skill_tag
-    # with the skill->attack retype (plain attacks feed no burst particles)
-    combat.play_card(st, hand_card(st, "rising_tide"))       # skill_tag: +5
+    # A skill_tag card is what feeds burst particles; usher_the_waves lost its
+    # tag at Curtain Call B (skill->attack retype, and plain attacks feed no
+    # particles), and rising_tide -- this case's card until then -- was CUT by
+    # A4 (2026-07-28 red-pen). overflowing_hospitality carries the same tag.
+    combat.play_card(st, hand_card(st, "overflowing_hospitality"))   # skill_tag: +5
     assert any(c.id == "let_the_people_rejoice" for c in p.hand)
     burst = next(c for c in p.hand if c.kit_card)
     assert combat.card_playable(st, burst)
@@ -753,6 +773,81 @@ def test_burst_applies_hydro_and_scales_with_fanfare():
     assert st.enemies[0].hp == hp0 - (8 + 3)        # +1 per 4 fanfare at 12
     assert st.enemies[0].aura == "hydro"            # burst-tag cadence
     assert p.encore == 6
+
+
+# --- B2: Leading Role's window is spent by PAID Spotlighted plays only ---
+
+def test_leading_role_is_not_consumed_by_a_free_spotlighted_play():
+    """B2 (playtest-2, 2026-07-28): "Leading Role never discounts".
+
+    Both reported causes were real. The discount skips cards printed at 0
+    (nothing to reduce), but the shared Spotlight play counter ticked for
+    every Spotlighted play including those -- so a free one spent a window
+    it could not use. Under Center Stage the relic's free token is itself a
+    Spotlighted Furina card arriving every turn, which is why the power read
+    as completely dead rather than merely unreliable.
+    """
+    st = furina_state()
+    p = st.player
+    p.spotlight = p.character_id            # Center Stage: her cards are lit
+    p.powers["spotlight_discount"] = 1
+    p.energy = 99
+
+    free = loader.get_card("curtain_cue")   # printed cost 0
+    assert free.cost == 0
+    combat.play_card(st, hand_card(st, "curtain_cue"))
+    assert st.spotlighted_cards_this_turn == 1     # activity still counted
+    assert st.spotlighted_paid_cards_this_turn == 0, (
+        "a free Spotlighted play spent Leading Role's window -- the B2 defect")
+
+    paid = loader.get_card("stage_presence")       # printed cost 1
+    assert combat.card_cost(st, paid) == 0, (
+        "Leading Role did not discount the first PAID Spotlighted card")
+
+    # ...and it is spent once a paid card actually goes.
+    combat.play_card(st, hand_card(st, "stage_presence"))
+    assert st.spotlighted_paid_cards_this_turn == 1
+    assert combat.card_cost(st, loader.get_card("stage_presence")) == 1
+
+
+# --- B4: Grand Salon scopes to every member NUMBER, not just damage ---
+
+def test_grand_salon_scales_ushers_block_not_only_damage():
+    """B4 (playtest-2, 2026-07-28) reported "only member damage scaled".
+
+    VERIFIED CLEAN in both engines, and pinned here so it stays that way.
+    The salon-rework plan ruled `salon_damage_up` a "+N to member NUMERIC
+    effects" term, and both engines honour it: tier0 routes every member
+    number through `_salon_amount`, and the C# routes them through
+    `SalonPowers.Scaled` (tick via `Num`, bow directly). The power's own name
+    is the only thing that still says "damage" -- its printed text already
+    reads "Salon Member numbers are N higher", which is what it does.
+
+    Usher is the discriminator: it is the one member whose tick is BLOCK, so
+    a damage-only implementation passes every other member's assertions and
+    fails only this one.
+    """
+    st = furina_state()
+    p = st.player
+    p.salon = ["usher"]
+    p.fanfare = 0                     # isolate the Grand Salon term
+    p.encore = 99                     # pay upkeep: no dry-multiplier haircut
+    p.block = 0
+    effects.salon_tick(st)
+    baseline = p.block
+    assert baseline == C.SALON_MEMBERS["usher"]["tick"]["block"]
+
+    st2 = furina_state()
+    p2 = st2.player
+    p2.salon = ["usher"]
+    p2.fanfare = 0
+    p2.encore = 99
+    p2.block = 0
+    p2.powers["salon_damage_up"] = 2
+    effects.salon_tick(st2)
+    assert p2.block == baseline + 2, (
+        "salon_damage_up did not reach Usher's BLOCK tick -- Grand Salon has "
+        "regressed to damage-only, the B4 defect")
 
 
 # --- reward-pool separation (the cross-character card-reward guard) ---

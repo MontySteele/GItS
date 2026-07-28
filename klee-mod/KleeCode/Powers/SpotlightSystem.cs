@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
@@ -326,6 +327,19 @@ public static class SpotlightSystem
         var first = plays.Amount == 0;
         plays.ModifyAmount(1);
 
+        // B2: Leading Role's window spends only on a play it could have
+        // discounted. PRINTED cost (Canonical), not the resolved one -- a
+        // printed-1 card discounted to 0 must still spend the window, or the
+        // discount would re-arm behind its own effect and fire every turn.
+        if (card.EnergyCost.Canonical >= 1)
+        {
+            foreach (var discount in owner.Powers
+                         .OfType<SpotlightDiscountPower>())
+            {
+                discount.NoteQualifyingPlay();
+            }
+        }
+
         // Center Stage's half: her OWN cards mint Fanfare. The card-class test
         // is what keeps Guest Cast's "their plays generate no Fanfare" clause
         // true for Companions even when R2's upgrade has both halves live --
@@ -438,13 +452,46 @@ public sealed class SpotlightDiscountPower
           + "{Amount} less."),
     };
 
+    /// <summary>
+    /// B2 (playtest-2, 2026-07-28): Leading Role's OWN first-play window,
+    /// counting only Spotlighted plays whose PRINTED cost is >= 1.
+    ///
+    /// It cannot reuse <see cref="SpotlightSystem.PlaysThisTurn"/>, which
+    /// counts EVERY Spotlighted play. This power skips `originalCost &lt;= 0`
+    /// -- it has nothing to discount -- but the shared counter had already
+    /// ticked, so a free Spotlighted play consumed a window it could never
+    /// use. Ethereal Spotlight's token is an ICharacterCard with
+    /// CharacterId "furina", so under Center Stage it IS a Spotlighted
+    /// Furina card and it arrives every turn: the discount read as dead.
+    ///
+    /// The shared counter keeps counting everything, because Ovation, the
+    /// reserve cap, spotlight_draw and spotlight_encore_first all want free
+    /// plays counted. Only the discount needed its own window.
+    ///
+    /// Mutated ONLY from <see cref="SpotlightSystem.NotePlay"/>, never from
+    /// the cost query below -- the query is called speculatively to draw
+    /// costs on cards in hand, and per-peer state written from a display
+    /// path is what desynced co-op on 2026-07-27 (see
+    /// PreventExhaustWardPower).
+    /// </summary>
+    private int _qualifyingPlaysThisTurn;
+
+    public override Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (player.Creature == Owner) _qualifyingPlaysThisTurn = 0;
+        return Task.CompletedTask;
+    }
+
+    internal void NoteQualifyingPlay() => _qualifyingPlaysThisTurn++;
+
     public override bool TryModifyEnergyCostInCombat(
         CardModel card, decimal originalCost, out decimal modifiedCost)
     {
         modifiedCost = originalCost;
         if (card.Owner?.Creature != Owner
             || !SpotlightSystem.IsSpotlighted(card)
-            || SpotlightSystem.PlaysThisTurn(Owner) > 0
+            || _qualifyingPlaysThisTurn > 0
             || originalCost <= 0m)
         {
             return false;

@@ -12,6 +12,24 @@ from tools import gen_klee_cards as gen
 
 FURINA_HAND_WRITTEN = {"let_the_people_rejoice"}
 
+# A7 (playtest-2 red-pen, 2026-07-28). Unheard Confession became a POWER that
+# pays Block "whenever Fanfare changes amount". The sheet and tier0 both
+# implement it; the C# port is deferred on a STRUCTURAL gap, not on effort.
+#
+# The trigger has to fire from FurinaResources' three Fanfare mutators, and
+# those are synchronous (`static void GainFanfare`, `static int DecayFanfare`,
+# `static void GainFanfareFloor`) while every block grant in the mod goes
+# through `await CreatureCmd.GainBlock`. Threading async through them would
+# drag GainEncore/SpendEncore and every generated Encore card with it -- a
+# co-op-critical refactor far outside this ruling's blast radius -- and the
+# only sync alternative (`Creature.GainBlockInternal`) has no precedent in the
+# mod and no decompile evidence about which hooks it skips.
+#
+# GATE THAT RELEASES IT: a pass that makes the Furina resource surface async
+# (or establishes a verified sync block-grant idiom). Until then the card is
+# visibly blocked in the manifest rather than quietly inert in the game.
+FURINA_DEFERRED_ASYNC = {"unheard_confession"}
+
 # Cards deliberately DEFERRED from C# generation while a sprint is mid-flight,
 # each with the gate that releases it. A curated list rather than a silent
 # skip: an ungenerated card is a card that does nothing in the live game, and
@@ -174,8 +192,16 @@ def test_furina_profile_emits_every_non_kit_card():
         for card in _furina_cards()
         if gen.blocked_reason(card, gen.FURINA_PROFILE) is None
     }
-    withheld = FURINA_HAND_WRITTEN | FURINA_DEFERRED_TO_FD
+    withheld = FURINA_HAND_WRITTEN | FURINA_DEFERRED_TO_FD | FURINA_DEFERRED_ASYNC
     assert generated == all_ids - withheld
+
+    # Same "for the REASON we think it is" check the FD set gets, applied to
+    # the async-gap deferral. Without it, unheard_confession breaking for some
+    # unrelated reason would sit inside a curated set and read as intentional.
+    for cid in FURINA_DEFERRED_ASYNC:
+        reason = gen.blocked_reason(by_id_of(_furina_cards())[cid],
+                                    gen.FURINA_PROFILE)
+        assert reason is not None and "A7 C# port DEFERRED" in reason, cid
 
     # The deferral must be for the REASON we think it is. A card that stopped
     # generating for some unrelated breakage would otherwise hide inside the
@@ -196,13 +222,14 @@ def test_furina_profile_emits_every_non_kit_card():
     manifest = json.loads(
         gen.FURINA_PROFILE.manifest.read_text(encoding="utf-8")
     )
-    # 78 cards, frozen at Curtain Call (§9: no pool-size change). The ONLY
-    # withheld card is the hand-written kit Burst; every other card in the
-    # pool is generated.
+    # 77 cards: A4 (playtest-2 red-pen, 2026-07-28) CUT rising_tide, which is
+    # the first pool-size change since Curtain Call froze it at 78. Two cards
+    # are withheld -- the hand-written kit Burst, and A7's unheard_confession
+    # (see FURINA_DEFERRED_ASYNC).
     assert manifest["coverage"] == {
-        "total": 78,
-        "generated": 77,
-        "blocked": 1,
+        "total": 77,
+        "generated": 75,
+        "blocked": 2,
     }
     assert set(manifest["generated"]) == generated
     assert set(manifest["blocked"]) == withheld
@@ -292,12 +319,21 @@ def test_furina_skill_grade_cadence_and_character_identity():
     assert "IElementalCard" not in normal_attack
     assert 'public string CharacterId => "furina";' in normal_attack
 
-    # undercurrent since Curtain Call B: usher_the_waves was retyped to a
-    # plain attack (application deleted), so the damaging-skill cadence pin
-    # moves to the AoE applier the sweep deliberately kept.
-    damaging_skill = gen.emit(by_id["undercurrent"], gen.FURINA_PROFILE)
+    # The damaging-skill cadence pin has now moved twice for the same reason:
+    # Curtain Call B retyped usher_the_waves to a plain attack, moving the pin
+    # to undercurrent, and A5 (2026-07-28) retyped undercurrent the same way.
+    # flood_of_emotion is a damaging skill that KEEPS its skill_tag.
+    damaging_skill = gen.emit(by_id["flood_of_emotion"], gen.FURINA_PROFILE)
     assert "IElementalCard" in damaging_skill
     assert "public Element Element => Element.Hydro;" in damaging_skill
+
+    # A5's other half, pinned as a POSITIVE statement of the cadence law
+    # rather than left as an absence: undercurrent is now a plain attack, and
+    # a plain attack never applies hydro no matter how much damage it deals.
+    # This is the assertion that fails if someone re-adds its skill_tag.
+    retyped_aoe = gen.emit(by_id["undercurrent"], gen.FURINA_PROFILE)
+    assert "IElementalCard" not in retyped_aoe
+    assert "KleeKeywords.AppliesHydro" not in retyped_aoe
 
     nondamaging_skill = gen.emit(by_id["duet"], gen.FURINA_PROFILE)
     assert "IElementalCard" not in nondamaging_skill
@@ -668,6 +704,15 @@ def test_unconverted_riders_keep_their_sentence_on_the_face():
     big_one = gen.emit(klee_by_id["grand_finale"], gen.KLEE_PROFILE)
     assert "damage per [gold]Bomb[/gold] detonated this combat." in big_one
     assert "FurinaRiderTips" not in big_one
+    # The VAR, not just the sentence. Caught during the 2026-07-28 sprint:
+    # A5's Times-var insertion captured the BonusPer lines into its own branch
+    # by indentation, so grand_finale silently stopped declaring BonusPer and
+    # lost its campfire upgrade -- with the whole 1305-test suite green,
+    # because every assertion on this card read its TEXT. The bare sentence
+    # renders identically either way; only the var declaration differs.
+    assert 'new DynamicVar("BonusPer", 2m)' in big_one, (
+        "grand_finale lost its BonusPer var: the bonus_per_detonation upgrade "
+        "is silently dead while the card text still reads correctly")
 
 
 def test_crackle_prints_the_sentence_its_semantics_were_pinned_against():

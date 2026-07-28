@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -32,44 +31,37 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Furina.Generated;
 
-public sealed class Undercurrent : CustomCardModel, IElementalCard, ICharacterCard, ISkillTagCard
+public sealed class Undercurrent : CustomCardModel, ICharacterCard
 {
-    /// <summary>Sheet cadence: damaging Skills, Burst-tagged cards, and skill-tagged cards apply Hydro.</summary>
-    public Element Element => Element.Hydro;
-
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
-
-    public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
-
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("undercurrent");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undercurrent"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies {Times:diff()} times."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(7m, ValueProp.Move)
+            new DamageVar(2m, ValueProp.Move),
+            new DynamicVar("Times", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public Undercurrent()
-        : base(2, CardType.Skill, CardRarity.Common, TargetType.AllEnemies, autoAdd: false)
+        : base(2, CardType.Attack, CardRarity.Common, TargetType.AllEnemies, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
+            .WithHitCount(DynamicVars["Times"].IntValue)
             .FromCard(this)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
@@ -79,6 +71,6 @@ public sealed class Undercurrent : CustomCardModel, IElementalCard, ICharacterCa
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars["Times"].UpgradeValueBy(2m);
     }
 }

@@ -510,6 +510,18 @@ class CombatState:
     replay_next_companion: int = 0            # Study Buddy
     current_card_companion: bool = False      # control provenance (§2.2a)
     spotlighted_cards_this_turn: int = 0      # Ovation + the reserve cap
+    # B2 (playtest-2, 2026-07-28): Leading Role's OWN first-play window,
+    # counting only Spotlighted plays whose PRINTED cost is >= 1.
+    #
+    # Separate from the counter above on purpose. That one is the Spotlight
+    # activity count and feeds Ovation, the reserve cap, spotlight_draw and
+    # spotlight_encore_first -- all of which should keep counting every
+    # Spotlighted play, free ones included. Only the DISCOUNT has to ignore
+    # cost-0 plays, because only the discount is unable to pay them: it
+    # skips `originalCost <= 0` and then found its window already spent.
+    # Ethereal Spotlight's free token is Spotlighted under Center Stage and
+    # arrives every turn, so in practice the discount never fired at all.
+    spotlighted_paid_cards_this_turn: int = 0
                                               # (SPOTLIGHT_CARDS_PER_TURN_CAP)
     spotlight_moved_this_turn: bool = False   # selector-payoff predicates
     spotlight_moves_this_combat: int = 0      # (sheet pass 1)

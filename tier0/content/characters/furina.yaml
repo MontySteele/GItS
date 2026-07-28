@@ -93,7 +93,8 @@ packages:
     - dinner_service
     - usher_the_waves
     - matinee_performance
-    - rising_tide
+    # rising_tide CUT by A4 (2026-07-28 red-pen); removed from this package
+    # the same commit, per the sheet-projections rule.
     - house_call
     - torrential_turn
     - grand_salon

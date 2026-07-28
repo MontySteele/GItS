@@ -702,6 +702,15 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "encore",
                          # CalculatedDamageVar triple -- the same slot the
                          # conditional_bonus delta moves.
                          "formula_per",
+                         # `times: +N` moves a multi-hit attack's HIT COUNT
+                         # (A5, 2026-07-28: Undercurrent 3 -> 5 hits). tier0
+                         # has bumped `times` since Klee, but codegen baked
+                         # the count in as a literal `.WithHitCount(3)`, so
+                         # the key was unexpressible and the first card to
+                         # rule it would have shipped with NO campfire path.
+                         # Binds to the same effect tier0 does: the first
+                         # damage op carrying a literal int `times`.
+                         "times",
                          # `formula_base: +N` bumps the BASE term (the
                          # CalculationBase var). Added by F4 because only the
                          # per-term existed, and on an UNCAPPED count the two
@@ -740,6 +749,15 @@ CARD_FIELDS = {
     "sly",
     "id", "name", "cost", "type", "rarity", "solve", "archetypes", "role",
     "effects", "tags", "exhaust", "kit_card", "requires",
+    # A9 (2026-07-28): Innate on the BASE card, not only as an upgrade delta.
+    # tier0 needed nothing -- Card.innate already existed and combat's
+    # surface_innate reads it on any card -- but the generator emitted the
+    # keyword only from OnUpgrade, so the field was unknown here and the
+    # first card to rule it was BLOCKED. That block is the design working:
+    # hearts_swelling reported "card field(s) ['innate'] not understood"
+    # rather than shipping a card that starts in hand in the sim and does
+    # not in the game.
+    "innate",
     # Companion identity/reward metadata.
     "star", "element", "role_c", "personal_pool", "nation", "character",
     "guest_star",
@@ -920,6 +938,21 @@ def blocked_reason(
         op = eff.get("op")
         if op not in MECHANICAL_OPS:
             return f"op '{op}'"
+        # B1 CLASS FIX (2026-07-28). A `bonus_formula` on a NON-damage op is a
+        # blocker unless a rider actually expresses it.
+        #
+        # Damage is exempt because damage riders always resolve: an
+        # unconverted one still rides the PrintedDamage path at resolution
+        # (it merely fails to show on the face, which is what the Legibility
+        # sprint converted). Every OTHER op had no such path -- the formula
+        # was read by nothing, so the card silently shipped its bare base.
+        # Thunderous Ovation lost `1_per_2_fanfare` that way for two
+        # playtests. Blocking is the honest failure: an UNAPPLIABLE card is
+        # visible in the manifest, a quietly-wrong one is not.
+        if op != "damage" and eff.get("bonus_formula") is not None \
+                and block_calc_rider(card, eff) is None:
+            return (f"bonus_formula '{eff['bonus_formula']}' on op '{op}' is "
+                    "expressed by no rider (it would render as the bare base)")
         if op == "damage":
             tgt = eff.get("target")
             if tgt not in DAMAGE_TARGETS:
@@ -1003,6 +1036,30 @@ def blocked_reason(
                 return "chance_bomb_per_detonation without a preceding detonate (no count source)"
         if op == "apply_power":
             power = eff.get("power")
+            # A7 (2026-07-28) DEFERRED C# PORT, recorded by name so the
+            # manifest entry reads as a decision rather than an oversight --
+            # the Curtain Call 12-card deferral pattern (R85/R86).
+            #
+            # The sheet and tier0 both implement it. The C# port is blocked on
+            # a real structural gap, not on effort: the trigger has to fire
+            # from FurinaResources' three Fanfare mutators, and those are
+            # SYNCHRONOUS (`static void GainFanfare`, `static int
+            # DecayFanfare`), while every block grant in this mod goes through
+            # `await CreatureCmd.GainBlock`. The two ways out are both worse
+            # than waiting:
+            #   * thread async through GainFanfare/GainEncore/SpendEncore --
+            #     a co-op-critical refactor touching every generated Encore
+            #     card, far outside this ruling's blast radius;
+            #   * call Creature.GainBlockInternal synchronously -- no
+            #     precedent anywhere in the mod, and no decompile evidence for
+            #     whether it runs the hooks/VFX the command layer runs.
+            # Inventing an unverified idiom on a resource path is exactly what
+            # produced the 2026-07-27 Vigil desync, so it waits for a pass
+            # that can do the async surface properly.
+            if power == "fanfare_delta_block":
+                return ("apply_power power 'fanfare_delta_block' -- A7 C# "
+                        "port DEFERRED: the Fanfare mutators are sync and "
+                        "every block grant here is async (see comment)")
             if power not in APPLY_POWERS:
                 return f"apply_power power '{power}' (no PowerModel in the registry)"
             if power in ENEMY_APPLY_POWERS:
@@ -1498,7 +1555,12 @@ def rider_tip_args(card: dict) -> str:
     it."""
     args = []
     for eff in card.get("effects", []):
-        if calc_rider(card, eff) is None:
+        # B1: a converted BLOCK rider has had its arithmetic removed from the
+        # face exactly as a converted damage rider has, so it earns the same
+        # tip. Without this the fix would trade a silent drop for a silent
+        # number -- "{CalculatedBlock}" with nothing saying where it came from.
+        if calc_rider(card, eff) is None \
+                and block_calc_rider(card, eff) is None:
             continue
         m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", eff.get("bonus_formula", ""))
         if m:
@@ -1592,6 +1654,50 @@ def spotlight_block_rider(card: dict, eff: dict) -> int | None:
     if any(calc_rider(card, e) is not None for e in effects):
         return None
     return int(eff["amount"])
+
+
+def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
+    """B1 (playtest-2, 2026-07-28): a scaling rider on a BLOCK op, rendered
+    through `CalculatedBlockVar`. Returns (base, extra, multiplier-lambda) or
+    None -- the block twin of `calc_rider`, and the same one-predicate-four-
+    sites discipline.
+
+    THE DEFECT THIS CLOSES. Every rider predicate in this file gated on
+    `op != "damage"`, because until Curtain Call C every rider in the pool
+    was a damage rider. Thunderous Ovation hung `1_per_2_fanfare` on a
+    *block* op and the generator dropped it without a word: the sheet said
+    "6, +1 per 2 Fanfare", the card gave a flat 6, and the playtest reported
+    exactly that ("just gave 6 block"). The sim had implemented the rider all
+    along, so this was a pure C#-side silent drop.
+
+    The rail already existed -- `spotlight_block_rider` renders companion
+    block this way and `salon_calc_rider` renders usher's -- so this adds a
+    predicate, not a mechanism.
+
+    Guards mirror `spotlight_block_rider`'s, and for the same reason:
+    `CalculationBase` is a SINGLE var, so a card converting two numbers
+    through it would compute one off the other's base.
+    """
+    if eff.get("op") != "block":
+        return None
+    m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", eff.get("bonus_formula", ""))
+    if not m:
+        return None
+    if salon_deploy_card(card):
+        return None
+    effects = card.get("effects", [])
+    if sum(1 for e in effects if e.get("op") == "block") != 1:
+        return None
+    # Damage conversions and the two other block conversions all claim
+    # CalculationBase; whichever the card already has wins and this stays off.
+    if any(calc_rider(card, e) is not None for e in effects):
+        return None
+    if any(spotlight_block_rider(card, e) is not None
+           or salon_calc_rider(card, e) is not None for e in effects):
+        return None
+    return int(eff["amount"]), int(m.group(1)), (
+        "static (card, _) => "
+        f"FurinaResources.Fanfare(card.Owner.Creature) / {int(m.group(2))}")
 
 
 def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
@@ -1698,9 +1804,22 @@ def build_vars(card: dict) -> list[str]:
                 if "bonus_formula" in eff and bonus_per_upgrade(card):
                     n = int(eff["bonus_formula"].partition("_per_")[0])
                     out.append(f'new DynamicVar("BonusPer", {n}m)')
+            # An upgradeable HIT COUNT is independent of the damage var: A5's
+            # Undercurrent upgrades times (3 -> 5) and leaves the per-hit 2
+            # alone, so this is not an `elif` on the branches above.
+            if eff is times_var_effect(card):
+                out.append(f'new DynamicVar("Times", {eff["times"]}m)')
         elif op == "block":
+            block_rider = block_calc_rider(card, eff)
             block_base = spotlight_block_rider(card, eff)
-            if block_base is not None:
+            if block_rider is not None:
+                base, extra, mult = block_rider
+                out.append(f'new CalculationBaseVar({base}m)')
+                out.append(f'new CalculationExtraVar({extra}m)')
+                out.append(
+                    'new CalculatedBlockVar(ValueProp.Move)'
+                    f'.WithMultiplier({mult})')
+            elif block_base is not None:
                 # Mirage idiom: base + 1 * (PrintedBlock(base) - base), which
                 # is PrintedBlock(base) -- the number the card already gains,
                 # now also the number it prints.
@@ -1962,6 +2081,14 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # stay unexpressible and loudly blocked rather than generate wrong.
         "exhaust": any(e["op"] == "exhaust_from"
                        and e.get("select") == "chosen" for e in effects),
+        # times: tier0 bumps the first damage|apply_power op's `times`.
+        # Codegen expresses the DAMAGE form (the Times var feeds
+        # DamageCmd.Attack().WithHitCount). A repeat on apply_power would
+        # need its own var and has no card yet -- structural until then, and
+        # reported unexpressible rather than silently dropped.
+        "times": any(e["op"] == "damage" and e.get("target") != "self"
+                     and isinstance(e.get("times"), int) and e["times"] > 1
+                     for e in effects),
         "formula_per": any(
             exhaust_pile_calc_rider(card, e) is not None for e in effects),
         "formula_base": any(
@@ -2093,6 +2220,28 @@ def bonus_per_upgrade(card: dict) -> int:
     """Ruled `bonus_per_detonation: +N` (grand_finale): the bonus_formula's
     per-detonation rate, rendered/upgraded via the BonusPer var. 0 = none."""
     return int(upgrade_plan(card)[0].get("bonus_per_detonation", 0))
+
+
+def times_var_effect(card: dict) -> dict | None:
+    """The ONE damage effect whose hit count is upgradeable, or None.
+
+    tier0's `times` delta is a _bump_first over damage|apply_power, so only
+    the FIRST literal multi-hit damage op is upgradeable -- the same
+    first-effect-owns-the-var rule as damage_var_effect. Every other
+    multi-hit op keeps rendering its literal count.
+    """
+    if not times_upgrade(card):
+        return None
+    return next((e for e in card.get("effects", [])
+                 if e["op"] == "damage" and e.get("target") != "self"
+                 and isinstance(e.get("times"), int) and e["times"] > 1),
+                None)
+
+
+def times_upgrade(card: dict) -> int:
+    """Ruled `times: +N` (A5 undercurrent): the hit count moves on upgrade,
+    so the count rides a Times var and renders with diff(). 0 = none."""
+    return int(upgrade_plan(card)[0].get("times", 0))
 
 
 def bombs_upgrade(card: dict) -> int:
@@ -2274,6 +2423,10 @@ def _emit_damage(card: dict, eff: dict, lines: list[str], ctx: dict,
         # statement is gated below.
         call.append(
             f".WithHitCount({RUNTIME_TIMES.get(times) or _x_expr(times)})")
+    elif eff is times_var_effect(card):
+        # Ruled `times: +N`: the count lives in a var so OnUpgrade can bump it
+        # and the face renders the diff. Literal counts keep the literal.
+        call.append('.WithHitCount(DynamicVars["Times"].IntValue)')
     elif times > 1:
         call.append(f".WithHitCount({times})")
     call.append(".FromCard(this)")
@@ -2566,7 +2719,8 @@ def build_body(
                     f"{salon_snapshot}, "
                     "DynamicVars.CalculatedBlock.Props, cardPlay);")
                 continue
-            if spotlight_block_rider(card, eff) is not None:
+            if (spotlight_block_rider(card, eff) is not None
+                    or block_calc_rider(card, eff) is not None):
                 # Base game's own idiom (Mirage): resolve through the same var
                 # the face reads, so preview and gain cannot drift.
                 lines.append(
@@ -3490,7 +3644,8 @@ def build_description(card: dict) -> str:
                 continue
             tok = ("CalculatedBlock"
                    if spotlight_block_rider(card, eff) is not None
-                   or salon_calc_rider(card, eff) is not None else "Block")
+                   or salon_calc_rider(card, eff) is not None
+                   or block_calc_rider(card, eff) is not None else "Block")
             parts.append(f"Gain {{{tok}:diff()}} [gold]Block[/gold].")
 
         elif op == "block_next_turn":
@@ -3551,6 +3706,12 @@ def build_description(card: dict) -> str:
                 times = 2                     # phrasing: plural targets
             elif isinstance(times, str):      # times: "X"
                 suffix = " X times"
+                times = 2                     # phrasing: plural targets
+            elif eff is times_var_effect(card):
+                # Ruled `times: +N`: the count must render from the var so the
+                # upgrade shows green, which also means no "twice"/"three
+                # times" word form -- the diff token needs a numeral.
+                suffix = " {Times:diff()} times"
                 times = 2                     # phrasing: plural targets
             else:
                 suffix = {1: "", 2: " twice", 3: " three times", 4: " four times"}.get(
@@ -4086,7 +4247,8 @@ def build_upgrade(card: dict) -> list[str]:
             var = ("DynamicVars.CalculationBase"
                    if calc_rider(card, eff) is not None
                    else "DynamicVars.Damage")
-        elif key == "block" and spotlight_block_rider(card, eff) is not None:
+        elif key == "block" and (spotlight_block_rider(card, eff) is not None
+                                 or block_calc_rider(card, eff) is not None):
             # Converted block has no "Block" var -- its base is CalculationBase.
             var = "DynamicVars.CalculationBase"
         elif key == "bomb_damage":
@@ -4094,6 +4256,12 @@ def build_upgrade(card: dict) -> list[str]:
         else:
             var = var_for[op]
         lines.append(f"{var}.UpgradeValueBy({int(deltas[key])}m);")
+    if "times" in deltas and times_var_effect(card) is not None:
+        # Post-loop: the loop keys a damage op to "damage", so a card that
+        # upgrades BOTH its per-hit number and its hit count (none today, but
+        # the sheet can rule it) would otherwise drop whichever key lost.
+        lines.append(
+            f'DynamicVars["Times"].UpgradeValueBy({int(deltas["times"])}m);')
     if "formula_per" in deltas:
         # The PER term of an amount_formula lives in ExtraDamage (the middle
         # slot of the CalculatedDamageVar triple: base + per * count), so the
@@ -4418,6 +4586,13 @@ def emit(
     keywords = []
     if card.get("exhaust"):
         keywords.append("CardKeyword.Exhaust")
+    # A9: base-card Innate rides the same CanonicalKeywords rail as Exhaust,
+    # so the banner renders through the game's auto-keyword pipeline and the
+    # description string stays free of the word (see the note above).
+    # OnUpgrade's AddKeyword path is unchanged and still serves `innate: true`
+    # deltas -- a card can be born Innate or become it, not both.
+    if card.get("innate"):
+        keywords.append("CardKeyword.Innate")
     if "skill_tag" in card.get("tags", []):
         keywords.append("KleeKeywords.ElementalSkill")
     keywords.extend(aura_keyword_by_element[e] for e in aura_elements)

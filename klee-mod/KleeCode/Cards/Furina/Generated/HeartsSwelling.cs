@@ -36,6 +36,9 @@ public sealed class HeartsSwelling : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Innate };
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("hearts_swelling");
 
     public override List<(string, string)>? Localization => new()

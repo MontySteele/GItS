@@ -65,6 +65,7 @@ public sealed class MacaronBreak : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
+        DynamicVars.Block.UpgradeValueBy(1m);
         // encore: every gain_encore site reads IsUpgraded at play time (branches included).
     }
 }
