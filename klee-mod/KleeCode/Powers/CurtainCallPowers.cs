@@ -120,13 +120,22 @@ public static class CurtainCallHooks
     }
 
     /// <summary>Drop keys whose combat is gone, so these maps cannot grow
-    /// across a run. Cheap: they hold one entry per player, not per card.</summary>
+    /// across a run. Cheap: they hold one entry per player, not per card.
+    ///
+    /// EVERY map above must be listed here, in both halves. CompanionPlays was
+    /// added to the class (Track C.3) and to <see cref="ResetTurn"/> but not
+    /// to this sweep, and it is the one map a NON-Furina player can key:
+    /// <see cref="NoteCardPlayed"/> records any owner's Companion play, while
+    /// ResetTurn is only ever called for Furina (FurinaResourceHooks'
+    /// BeforeSideTurnStart). A co-op partner's key therefore had no clearing
+    /// path at all. Fixed 2026-07-29.</summary>
     private static void Purge()
     {
         foreach (var stale in AttacksPlayed.Keys
                      .Concat(EncoreSpendDraws.Keys)
                      .Concat(PendingDraws.Keys)
                      .Concat(HpLost.Keys)
+                     .Concat(CompanionPlays.Keys)
                      .Where(creature => creature.CombatState == null)
                      .Distinct()
                      .ToList())
@@ -135,6 +144,7 @@ public static class CurtainCallHooks
             EncoreSpendDraws.Remove(stale);
             PendingDraws.Remove(stale);
             HpLost.Remove(stale);
+            CompanionPlays.Remove(stale);
         }
     }
 

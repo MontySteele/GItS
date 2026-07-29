@@ -717,6 +717,9 @@ public static class FurinaResources
             choiceContext, creature, Fanfare(creature), cardSource);
         // Salon stage sync (Track D): every meter-sync moment is also a
         // dry-state moment, and the stage reads composition + Encore here.
+        // The member tooltip's live cap rides the same moment, which is what
+        // makes a Casting Call raise visible as soon as the card resolves.
+        SalonMemberPower.SyncSlotsDisplay(creature);
         Vfx.SalonVisualsBridge.Refresh(creature);
         // Burst's gauge refresh used to ride the badge apply; now it is
         // explicit, so the overhead meter still tracks every sync moment.
@@ -761,18 +764,25 @@ public sealed class FurinaResourceHooks : AbstractModel
         // Sim order (combat.py play_card): the requires-full drain first,
         // then the skill-tag bonus, then the Encore cost line.
         FurinaBurstResource.DrainOnPlay(cardPlay.Card);
-        if (cardPlay.Card is ISkillTagCard
-            && FurinaResources.IsFurina(cardPlay.Card.Owner.Creature))
+        // An OWNERLESS play is a real state: autoplay and token paths hand a
+        // card to this broadcast with no Player attached. This hook fires for
+        // every card every player plays, and it runs inside CombatManager's
+        // async continuation, where an NRE is not an exception the player ever
+        // sees -- it is a black screen. Same guard DrainOnPlay already takes
+        // one line above.
+        var card = cardPlay.Card;
+        if (card?.Owner?.Creature is not { } owner) return Task.CompletedTask;
+        if (card is ISkillTagCard && FurinaResources.IsFurina(owner))
         {
             FurinaResources.GainBurst(
-                cardPlay.Card.Owner.Creature,
+                owner,
                 FurinaResourceConstants.BurstPerSkillTag);
         }
-        var cost = CustomResources<EncoreResource>.Cost(cardPlay.Card)
+        var cost = CustomResources<EncoreResource>.Cost(card)
             ?.GetAmountToSpend() ?? 0;
         if (cost > 0)
         {
-            FurinaResources.SpendEncore(cardPlay.Card.Owner.Creature, cost);
+            FurinaResources.SpendEncore(owner, cost);
         }
         SpotlightSystem.NotePlay(cardPlay);
         return Task.CompletedTask;
@@ -799,18 +809,21 @@ public sealed class FurinaResourceHooks : AbstractModel
         // Encore spend deferred during it (the cost settle runs in
         // BeforeCardPlayed, which has no context of its own).
         await CurtainCallHooks.NoteCardPlayed(choiceContext, cardPlay);
-        await CurtainCallHooks.FlushPendingDraws(
-            choiceContext, cardPlay.Card.Owner.Creature);
+        // Owner-guarded for the same reason BeforeCardPlayed is: an ownerless
+        // autoplay/token card reaching these four calls throws inside
+        // CombatManager's continuation, and that soft-locks the run.
+        // NoteCardPlayed above takes the same guard itself.
+        var player = cardPlay.Card?.Owner;
+        if (player?.Creature is not { } owner) return;
+        await CurtainCallHooks.FlushPendingDraws(choiceContext, owner);
         // A7: the play's Encore spend, Center Stage credit and floor grant all
         // moved the meter from BeforeCardPlayed, which has no context of its
         // own. Settling here puts the Block on the board before the enemy can
         // swing, which is where the sim puts it.
-        await FurinaResources.FlushFanfareDeltaBlock(
-            choiceContext, cardPlay.Card.Owner.Creature);
+        await FurinaResources.FlushFanfareDeltaBlock(choiceContext, owner);
         await FurinaResources.SyncMeters(
-            choiceContext, cardPlay.Card.Owner.Creature, cardPlay.Card);
-        await FurinaKitGrant.GrantIfCharged(
-            choiceContext, cardPlay.Card.Owner);
+            choiceContext, owner, cardPlay.Card);
+        await FurinaKitGrant.GrantIfCharged(choiceContext, player);
     }
 
     /// <summary>
@@ -845,6 +858,12 @@ public sealed class FurinaResourceHooks : AbstractModel
         IReadOnlyList<Creature> participants, ICombatState combatState)
     {
         if (side != CombatSide.Player) return;
+        // Salon's static company map has no other clearing path: its own
+        // stale-list check empties a list but never drops the key, so a run's
+        // worth of dead combats accumulated (each pinning a whole combat's
+        // Creature). Swept once per player turn -- the same lifecycle site
+        // CurtainCallHooks.Purge rides, one line below.
+        SalonMemberPower.PurgeCompany();
         foreach (var creature in participants)
         {
             // Curtain Call's per-turn windows reset BEFORE the decay guard:
@@ -966,12 +985,19 @@ public sealed class FurinaResourceHooks : AbstractModel
     {
         if (delta < 0m && FurinaResources.IsFurina(creature))
         {
+            // Ceiling, matching AbsorbDamage's sibling cast. The stated rule
+            // is "every point of damage past Block prints exactly 1 Fanfare",
+            // and the two halves of that rule must round the same way -- a
+            // truncating (int) cast made a fractional HP loss print nothing
+            // through this half while the absorption half paid for it. One
+            // local, so the mint and Slip Backstage's predicate can never
+            // disagree about how much she lost.
+            var lost = (int)Math.Ceiling(-delta);
             FurinaResources.GainFanfare(
-                creature,
-                (int)(-delta) * FurinaResourceConstants.FanfarePerHpLost);
+                creature, lost * FurinaResourceConstants.FanfarePerHpLost);
             // Slip Backstage's predicate reads off the same funnel, so
             // "she lost HP" is one fact rather than two trackers.
-            CurtainCallHooks.NoteHpLost(creature, (int)(-delta));
+            CurtainCallHooks.NoteHpLost(creature, lost);
         }
         return Task.CompletedTask;
     }

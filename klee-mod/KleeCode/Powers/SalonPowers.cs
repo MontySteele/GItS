@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 
@@ -75,11 +76,49 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
           + "OLDEST member out: Crabaletta deals 14, the Usher gains 9 "
           + "Block, Chevalmarin applies Hydro to ALL enemies and grants "
           + "3 Encore."),
+        // The in-combat tooltip reads the LIVE cap. A12 (2026-07-28) made the
+        // cap a per-player stat (SlotsFor: base plus Casting Call, which takes
+        // it to 5), and until 2026-07-29 both tooltips said a flat "Maximum 3"
+        // -- so a player who had paid for the bigger stage was told, by the
+        // power itself, that the card they bought did nothing. The plain
+        // description above still prints the BASE, because it renders with no
+        // instance and therefore no owner to ask.
+        ("smartDescription",
+            "At the start of your turn, each [gold]Salon Member[/gold] "
+          + "spends 1 Encore for its act: Crabaletta deals 6 Hydro damage, "
+          + "the Usher gains 3 Block, Chevalmarin deals 2 Hydro damage. "
+          + "Dry members act at three-quarters. Member numbers gain +1 per "
+          + "10 [gold]Fanfare[/gold]. Maximum {Slots}; a full stage bows its "
+          + "OLDEST member out: Crabaletta deals 14, the Usher gains 9 "
+          + "Block, Chevalmarin applies Hydro to ALL enemies and grants "
+          + "3 Encore."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>{Slots} in the smart tooltip. Kept in sync by
+    /// <see cref="SyncSlotsDisplay"/>; the base value is the printed cap so a
+    /// tooltip read before any sync still shows a true number.</summary>
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new[] { new DynamicVar("Slots", SalonConstants.MemberSlots) };
+
+    /// <summary>
+    /// Push this player's live cap into {Slots}. Called from every site that
+    /// already refreshes the salon surface -- <see cref="Deploy"/>,
+    /// <see cref="BowLeftmost"/> and FurinaResources.SyncMeters (which runs
+    /// after every card play, so Casting Call's raise is visible the instant
+    /// it resolves). No-op for anyone without the power.
+    /// </summary>
+    public static void SyncSlotsDisplay(Creature owner)
+    {
+        var power = owner.Powers.OfType<SalonMemberPower>().FirstOrDefault();
+        if (power == null) return;
+        var slots = power.DynamicVars["Slots"];
+        slots.BaseValue = SlotsFor(owner);
+        slots.ResetToBase();
+    }
 
     public static int Count(Creature creature) =>
         creature.Powers.OfType<SalonMemberPower>().FirstOrDefault()?.Amount ?? 0;
@@ -105,6 +144,26 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         // that combat, so a nonempty list with a zero counter is garbage.
         if (Count(owner) == 0 && list.Count > 0) list.Clear();
         return list;
+    }
+
+    /// <summary>
+    /// Drop keys whose combat is gone. The line-106 clear only empties a LIST
+    /// -- the Creature key and its List object both survive, so a long run
+    /// left one dead entry per combat behind forever (and every dead entry
+    /// pins a whole combat's Creature). Same cheap sweep as
+    /// <c>FurinaResources.PurgeDeltaBlock</c> and
+    /// <see cref="CurtainCallHooks.Purge"/>, wired to the same lifecycle site
+    /// those use: the top-of-player-turn reset in
+    /// <c>FurinaResourceHooks.BeforeSideTurnStart</c>. Added 2026-07-29.
+    /// </summary>
+    public static void PurgeCompany()
+    {
+        foreach (var stale in Company.Keys
+                     .Where(creature => creature.CombatState == null)
+                     .ToList())
+        {
+            Company.Remove(stale);
+        }
     }
 
     private static int Scaled(Creature owner, int baseAmount) =>
@@ -306,6 +365,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                 choiceContext, owner, delta, applier: owner,
                 cardSource: cardSource);
         }
+        SyncSlotsDisplay(owner);
         Vfx.SalonVisualsBridge.Refresh(owner);
         return replacements;
     }
@@ -346,6 +406,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                 choiceContext, owner, delta, applier: owner,
                 cardSource: null);
         }
+        SyncSlotsDisplay(owner);
         Vfx.SalonVisualsBridge.Refresh(owner);
     }
 
@@ -393,6 +454,17 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         }
     }
 
+    /// <summary>
+    /// The stage cannot hold more members than it has slots, and cannot hold
+    /// fewer than none. Expressed as a clamp on the RESULTING COUNTER rather
+    /// than on the delta, which is the bug this shape replaced (2026-07-29):
+    /// <c>Math.Max(0m, Math.Min(amount, SlotsFor - Amount))</c> zeroed every
+    /// NEGATIVE delta, so <see cref="BowLeftmost"/>'s (always-negative) mirror
+    /// apply never landed. The company list shrank, the counter did not, and
+    /// the badge, the stage and every per-member payer (Dinner Service, House
+    /// Call) kept counting members who had already bowed out -- for the rest
+    /// of the combat.
+    /// </summary>
     public override bool TryModifyPowerAmountReceived(
         PowerModel canonicalPower, Creature target, decimal amount,
         Creature? applier, out decimal modifiedAmount)
@@ -402,8 +474,8 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         {
             return false;
         }
-        modifiedAmount = Math.Max(
-            0m, Math.Min(amount, SlotsFor(target) - Amount));
+        var clamped = Math.Max(0m, Math.Min(Amount + amount, SlotsFor(target)));
+        modifiedAmount = clamped - Amount;
         return modifiedAmount != amount;
     }
 }

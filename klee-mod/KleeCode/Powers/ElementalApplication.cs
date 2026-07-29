@@ -75,10 +75,15 @@ public sealed class KleeElementalHooks : AbstractModel
         {
             KleeBurstResource.DrainOnPlay(cardPlay.Card);
         }
-        if (cardPlay.Card is ISkillTagCard && cardPlay.IsFirstInSeries)
+        // Owner is null on autoplay/token paths. This hook fires for every
+        // card every player plays, inside CombatManager's async continuation,
+        // so an NRE here reaches the player as a black screen rather than an
+        // error -- guarded for the same reason DrainOnPlay guards internally.
+        if (cardPlay.Card is ISkillTagCard && cardPlay.IsFirstInSeries
+            && cardPlay.Card.Owner?.Creature is { } skillTagOwner)
         {
             KleeBurstResource.GainPreResolution(
-                cardPlay.Card.Owner.Creature, BurstConstants.PerSkillTag);
+                skillTagOwner, BurstConstants.PerSkillTag);
         }
         // Best Friends Forever's ledger (tier0 play_card appends
         // companions_played before resolution; once per play).
@@ -104,8 +109,10 @@ public sealed class KleeElementalHooks : AbstractModel
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var owner = cardPlay.Card.Owner;
-        KleeBurstResource.SyncGauge(owner.Creature);
+        // Same ownerless-play guard as BeforeCardPlayed above.
+        var owner = cardPlay.Card?.Owner;
+        if (owner?.Creature is not { } creature) return;
+        KleeBurstResource.SyncGauge(creature);
         await KitGrant.GrantIfCharged(choiceContext, owner);
     }
 

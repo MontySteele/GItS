@@ -171,7 +171,7 @@ public sealed class ReplayNextCompanionPower : PowerModel, ILocalizationProvider
         // captures the replays); the play count was read at play creation,
         // so removing after the series cannot shorten it.
         if (cardPlay.Card is not ICompanionCard) return;
-        if (cardPlay.Card.Owner.Creature != Owner) return;
+        if (cardPlay.Card?.Owner?.Creature != Owner) return;
         if (!cardPlay.IsLastInSeries) return;
         await PowerCmd.Remove(this);
     }
@@ -450,7 +450,7 @@ public sealed class NextAttackUpPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         if (cardPlay.Card.Type != CardType.Attack) return;
-        if (cardPlay.Card.Owner.Creature != Owner) return;
+        if (cardPlay.Card?.Owner?.Creature != Owner) return;
         if (!cardPlay.IsFirstInSeries) return;
         await PowerCmd.Remove(this);
     }

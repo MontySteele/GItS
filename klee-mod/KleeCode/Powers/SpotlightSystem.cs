@@ -321,7 +321,11 @@ public static class SpotlightSystem
     {
         var card = cardPlay.Card;
         if (!cardPlay.IsFirstInSeries || !IsSpotlighted(card)) return;
-        var owner = card.Owner.Creature;
+        // Ownerless plays (autoplay, tokens) reach the card-played broadcast
+        // with no Player attached; the same C3 tolerance ResetTurn already
+        // takes, for the same reason -- a throw here lands in CombatManager's
+        // continuation and reads as a black screen.
+        if (card.Owner?.Creature is not { } owner) return;
         var plays = Resource<SpotlightPlaysResource>(owner);
         if (plays == null) return;
         var first = plays.Amount == 0;

@@ -216,7 +216,16 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
             var basePool = ModelDb.CardPool<ColorlessCardPool>()
                 .GetUnlockedCards(player.UnlockState, player.RunState.CardMultiplayerConstraint)
                 .ToList();
-            var baseEntry = new MerchantCardEntry(player, inventory, basePool, rarity);
+            // chosenRarity, not rarity. Every other reader of this ladder
+            // prices off chosenRarity -- the slot's ACTUAL rarity -- and this
+            // one rung read the requested rarity instead. Today the two are
+            // provably equal here (chosenRarity only moves on a rung that
+            // found candidates, and reaching this branch means none did), so
+            // this is a correctness repair rather than a behaviour change:
+            // add one more rung above that downgrades and succeeds partially,
+            // and the old line would silently price a downgraded card at the
+            // original rarity. Fixed 2026-07-29.
+            var baseEntry = new MerchantCardEntry(player, inventory, basePool, chosenRarity);
             baseEntry.Populate();
             entries.Add(baseEntry);
             return;

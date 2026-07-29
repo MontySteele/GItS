@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KleeMod.Elements;
@@ -52,7 +53,29 @@ internal static class ReactionEffects
     /// because the first player turn has no preceding enemy turn and the
     /// monotonic counter carries over between combats.
     /// </summary>
-    public static void MarkTurnStart() => _turnStartTotal = TotalResolved;
+    public static void MarkTurnStart()
+    {
+        _turnStartTotal = TotalResolved;
+        // Fully cleared rather than purged: every key is written and read
+        // inside a single player turn, so there is nothing to carry over and
+        // no way for this map to grow across a run.
+        DealerReactionsThisTurn.Clear();
+    }
+
+    /// <summary>
+    /// Reactions this player turn, PER DEALER. The global counters above are
+    /// deliberately shared (red-pen R1: a Reaction is a fact about the board);
+    /// Courtroom Drama is not, because it is a POWER and a power belongs to
+    /// somebody. Split out 2026-07-29: the once-per-turn gate used to read
+    /// the global <see cref="ReactionsThisTurn"/>, so in co-op a partner's
+    /// reaction spent your window -- flatly contradicting the contract written
+    /// on <see cref="CurtainCallHooks.NoteFirstReaction"/> ("your partner's
+    /// reaction does not spend your once-per-turn window"). Solo, where the
+    /// dealer is the only player, this is byte-for-byte the sim's
+    /// <c>state.reactions_this_turn == 1</c>.
+    /// </summary>
+    private static readonly Dictionary<Creature, int> DealerReactionsThisTurn =
+        new();
 
     /// <summary>
     /// tier0 predicate reaction_triggered_this_turn (Chevreuse, Vanguard's
@@ -84,11 +107,15 @@ internal static class ReactionEffects
     public static bool ReactionTriggeredThisTurn => TotalResolved > _turnStartTotal;
 
     /// <summary>
-    /// How many reactions have resolved this player turn. The sim's
-    /// `state.reactions_this_turn`, which Courtroom Drama tests for `== 1`
-    /// (the first). Derived from the same snapshot as
-    /// <see cref="ReactionTriggeredThisTurn"/> rather than kept as a second
+    /// How many reactions have resolved this player turn, on the shared board.
+    /// The sim's `state.reactions_this_turn`. Derived from the same snapshot
+    /// as <see cref="ReactionTriggeredThisTurn"/> rather than kept as a second
     /// counter, so there is still exactly one increment site.
+    ///
+    /// NOT the Courtroom Drama gate. That reads
+    /// <see cref="DealerReactionsThisTurn"/> -- see the note there for why a
+    /// board-wide count is the wrong question to ask about an owned power.
+    /// This stays public as the board-scoped reading the sim mirrors.
     /// </summary>
     public static int ReactionsThisTurn => TotalResolved - _turnStartTotal;
 
@@ -105,12 +132,19 @@ internal static class ReactionEffects
             TotalResolved++;
 
             // Courtroom Drama (R85): the FIRST reaction of the turn puts its
-            // target on the stand. Gated on the counter reading exactly 1
-            // after the increment -- the sim's `reactions_this_turn == 1`.
-            if (ReactionsThisTurn == 1)
+            // target on the stand. Counted PER DEALER -- the sim's
+            // `reactions_this_turn == 1` in the only configuration it models
+            // (solo), and the written co-op contract everywhere else.
+            if (dealer != null)
             {
-                await CurtainCallHooks.NoteFirstReaction(
-                    choiceContext, target, dealer, cardSource);
+                var already = DealerReactionsThisTurn.TryGetValue(
+                    dealer, out var seen) ? seen : 0;
+                DealerReactionsThisTurn[dealer] = already + 1;
+                if (already == 0)
+                {
+                    await CurtainCallHooks.NoteFirstReaction(
+                        choiceContext, target, dealer, cardSource);
+                }
             }
         }
 

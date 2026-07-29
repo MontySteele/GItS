@@ -96,10 +96,25 @@ internal static class TrackedDisplayBridge
         return display;
     }
 
+    /// <summary>Name stamped on every anchor this class creates, so the sweep
+    /// below can tell OUR children of the creature node from the game's. Godot
+    /// uniquifies duplicate sibling names ("@Name@2"), which is why the test
+    /// is a Contains rather than an equality -- and why touching a node we did
+    /// not create is impossible.</summary>
+    private const string AnchorName = "KleeTrackAnchor";
+
     /// <summary>
     /// Pin a display to a creature at a fixed offset in creature space. The
     /// RemoteTransform2D is a child of the CREATURE, so it dies with the
     /// creature's node and cannot outlive what it was tracking.
+    ///
+    /// ANCHORS ARE SWEPT HERE, not in <see cref="Registry{TKey}.Discard"/>,
+    /// because Discard is keyed and knows no creature. Every caller runs
+    /// Discard -> Spawn -> Track, so a Setup/Refresh cycle used to add a fresh
+    /// anchor each pass and free none: the creature node accumulated one dead
+    /// RemoteTransform2D per cycle for the length of the combat (bug found
+    /// 2026-07-29). Sweeping our own dead anchors at the top of Track bounds
+    /// the count to one per live display, whatever order the bridges call in.
     /// </summary>
     public static void Track(
         NCombatRoom combatRoom, Creature creature, Node2D display,
@@ -111,8 +126,31 @@ internal static class TrackedDisplayBridge
             return;
         }
 
+        foreach (var child in creatureNode.GetChildren())
+        {
+            if (child is not RemoteTransform2D old) continue;
+            if (!old.Name.ToString().Contains(AnchorName)) continue;
+
+            // Dead: the display it pointed at is gone or on its way out (the
+            // Discard immediately above this call QueueFrees it, and a queued
+            // node is still IsInstanceValid for the rest of the frame).
+            // Or duplicate: an anchor already tracking THIS display, from an
+            // earlier Track on the same node.
+            var remote = old.RemotePath.IsEmpty
+                ? null
+                : old.GetNodeOrNull(old.RemotePath);
+            if (remote == null
+                || !GodotObject.IsInstanceValid(remote)
+                || remote.IsQueuedForDeletion()
+                || remote == display)
+            {
+                old.QueueFree();
+            }
+        }
+
         var anchor = new RemoteTransform2D
         {
+            Name = AnchorName,
             Position = anchorOffset,
             UpdateRotation = false,
             UpdateScale = false,

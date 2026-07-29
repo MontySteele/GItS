@@ -94,8 +94,12 @@ public sealed class DetonationSplashPower
         if (_procsThisTurn >= DemolitionConstants.SplashProcCapPerTurn) return;
         _procsThisTurn++;
 
-        var enemies = CombatState.HittableEnemies.ToList();
-        if (enemies.Count > 0)
+        // CombatState?. -- the idiom every neighbouring file uses. A power can
+        // outlive its combat by a frame (a detonation resolving as the room
+        // tears down), and this hook is reached from an async continuation
+        // where the NRE lands as a black screen, not an error.
+        var enemies = CombatState?.HittableEnemies.ToList();
+        if (enemies is { Count: > 0 })
         {
             await CreatureCmd.Damage(
                 choiceContext, enemies, Amount,
