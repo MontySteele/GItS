@@ -14,7 +14,7 @@ Battery: `tier05/exp_furina_strength.py`, 150 realistic runs per cell, seed
 
 | theory | verdict |
 |---|---|
-| **T1** Fanfare gives too much | **NOT SUPPORTED** as the main lever. Three independent cuts at the Fanfare channel all come back shallow. |
+| **T1** Fanfare gives too much | **VERDICT REVISED** (see S6/S7). Three cuts at the Fanfare channel came back shallow — but all three were taken in a sim world whose decks run **2.4 powers**, and the real ramp is a per-POWER floor rule. The lever exists; it is `FANFARE_FLOOR_PER_POWER`, not the Focus divisor and not the cap. |
 | **T2** Encore is too easy to build | **SUPPORTED, and it is the load-bearing one** — but not for the reason proposed. Encore is not strong because it makes Fanfare; it is strong because it is what PAYS THE STAGE'S BILL. |
 | **T3** Archetypes collapse into good-stuff piles | **NOT WHAT IS HAPPENING.** Focused drafting beats good-stuff 3:1. The problem is the opposite shape: **monoculture** — one archetype works and two do not. |
 
@@ -53,10 +53,17 @@ generation per turn; 6-7 cards/turn is **1.6x** the sim's 4.2.
 
 **"80-90 Fanfare per turn" is ambiguous and the two readings differ by a
 lot.** Held is what the Focus term reads; generated-per-turn is throughput.
-The C# cap is `MaxHp/2 + grants` and only three cards in the pool raise the
-floor or cap at all, so a HELD 80-90 would need ~160+ max HP — which points
-at the generated reading. **This is the table's number to disambiguate**, and
-it changes which of the two gaps above is the real one.
+
+> **CORRECTION (same day, after [USER] flagged it).** This section originally
+> said only three cards raise the floor or cap, so a HELD 80-90 would need
+> ~160 max HP. **That was wrong**, and wrong in the way a census is wrong
+> when it counts the wrong thing: the dominant floor source is not a card
+> effect at all. **It is a rule — playing any POWER permanently raises the
+> floor** by `FANFARE_FLOOR_PER_POWER` (5, or 8 for a rare), and the grant
+> raises the floor, the cap AND the current value together. The pool holds
+> **17 powers**. A deck that plays ten is +50 to +80 floor and the same
+> again on the ceiling, which is the reported band exactly — so the report
+> is **HELD**, no unusual max HP required. See S6 and S7.
 
 Consequence for everything below: the sim's ABSOLUTE winrates are not
 evidence about the table's game. The deltas are.
@@ -109,6 +116,54 @@ feeding Fanfare at all:
 Cutting the Encore economy out of Fanfare **entirely** removes 31% of her
 Fanfare and costs 1.4 points of winrate. The Fanfare channel is not what
 makes her strong.
+
+---
+
+## S6 / S7 — the ramp is POWERS, and the sim never builds that deck
+
+**Is the cap still in the shipped build?** Yes, and no. `FanfareCap` is live
+at `MaxHp/2 + grants`, but F-A5 **demoted it from a design dial to a safety
+rail** — its own doc-comment says so, and says why it was kept rather than
+deleted: "so a degenerate floor-stack still has a stop". Because every floor
+grant raises the cap in lockstep, it does not bind in practice — 0.0–0.4% of
+reads are at cap. So "we removed the cap" is right about the *effect* and
+wrong about the *letter*, and the letter is the only thing standing between a
+floor-stack and infinity.
+
+**S6, the floor rule's slope.** 150 runs/cell.
+
+| FLOOR_PER_POWER | winrate | mean held | powers/deck |
+|---|---|---|---|
+| 0 | 15.3% | 16.9 | 2.4 |
+| **5 (shipped)** | **16.7%** | **20.4** | 2.4 |
+| 10 | 18.7% | 24.3 | 2.5 |
+| 20 | 18.0% | 33.0 | 2.5 |
+
+**`powers/deck = 2.4`.** That is the S0 gap in one number. The table's deck
+was "heavy on powers"; the drafter builds a quarter of that. **Every Fanfare
+cell above was therefore measured in a world where the ramp barely exists**,
+which is the honest reason they all came back flat — not proof that the
+Fanfare channel is shallow at a real table.
+
+**S7, so hand the deck over instead of drafting it.** Same size, same salon
+core, the only difference is nine powers vs none:
+
+| arm | mean Fanfare at read | floor granted/combat | dmg/fight |
+|---|---|---|---|
+| power-heavy (9 powers) | **36.4** | 30.9 | 143.4 |
+| control (0 powers) | 25.5 | 4.3 | 142.1 |
+
+And on a long boss fight specifically (`tank_boss`, 120 fights, mean 8.9
+turns): **mean peak held 48.9, max 58, and 0 of 120 fights reached 80.**
+
+So the floor rule is confirmed as the mechanism, and it gets Fanfare into the
+right neighbourhood — but the model still lands at roughly half the reported
+band. Closing that last gap needs either more powers than nine, longer fights
+than nine turns, or something the model does not have. **The floor is
+per-combat in both engines** (both rewind it at combat start), so it is
+rebuilt every fight — which makes fight LENGTH a direct multiplier on how
+high the meter climbs, and makes a long act-3 boss the natural place to see
+80-90.
 
 ---
 
@@ -200,12 +255,17 @@ condition the playtest was played in.
 
 None of this is a proposal. In rough order of what the evidence supports:
 
-1. **The Encore economy is the lever** — either fewer grantors (T2's "strip
-   the riders from most cards") or a real sink that competes with the stage.
-   Note that absorption being automatic is what makes surplus free; a
-   player-facing choice would change the shape as much as the count does.
-2. **Fanfare scaling is not the lever**, and the cap is not the lever at all.
-   If Fanfare is to be reined in, it has to be at generation.
+1. **The Encore economy is the lever for the STAGE** — either fewer grantors
+   (T2's "strip the riders from most cards") or a real sink that competes
+   with the stage. Note that absorption being automatic is what makes surplus
+   free; a player-facing choice would change the shape as much as the count
+   does.
+2. **The FLOOR-PER-POWER rule is the lever for FANFARE.** Not the Focus
+   divisor (8x = 5 points), not the cap (8x = nothing). 17 of 78 cards are
+   powers and each one permanently raises floor and ceiling together, so a
+   power-heavy deck ramps its own ceiling — and that is the deck the table
+   played. Note the sim cannot size this lever honestly, because its drafter
+   will not build that deck; S7 is the closest available substitute.
 3. **Two dead archetypes** are their own problem, independent of Furina's
    strength: fanfare 1.3% and spotlight 2.0% against salon's 16.7%.
 4. **The table's 80-90** needs disambiguating (held vs generated per turn)

@@ -448,6 +448,148 @@ def s5(runs: int = RUNS) -> None:
 
 
 # =====================================================================
+# S6 -- the floor, which is where the Fanfare actually comes from
+# =====================================================================
+
+def s6(runs: int = RUNS) -> None:
+    """CORRECTION to this file's own earlier framing (2026-07-28, same day).
+
+    S0 noted that only three cards carry a `gain_fanfare_floor` effect and
+    concluded that a HELD 80-90 would need ~160 max HP. That was wrong, and
+    wrong in the way a census is wrong when it counts the wrong thing: the
+    dominant floor source is not a card effect at all. It is a RULE --
+    playing any POWER permanently raises the floor by
+    FANFARE_FLOOR_PER_POWER (rare: _RARE), and GainFanfareFloor raises the
+    floor, the cap AND the current value together.
+
+    So a power-heavy deck ramps its own ceiling. Ten powers is +50 to +80
+    floor, which is exactly the band the playtest reported holding -- and it
+    means the report was HELD Fanfare after all, with no large max HP
+    required.
+
+    This cell measures the slope of that rule, and how many powers the sim's
+    decks actually run, because that is the S0 gap in one number.
+    """
+    print("=" * 78)
+    print(f"S6. FANFARE_FLOOR_PER_POWER sweep — {runs} runs/cell, "
+          f"seed {SEED}")
+    print(f"    shipped {C.FANFARE_FLOOR_PER_POWER} per power "
+          f"({C.FANFARE_FLOOR_PER_POWER_RARE} rare), PERMANENT, and it "
+          f"raises the cap with it.")
+    print("    This is the ramp. The cap was demoted to a safety rail by "
+          "F-A5; the floor is the dial.")
+    print("=" * 78)
+
+    def cell(value):
+        results = _runs("salon", "salon", runs)
+        traces = [tr for r in results for _, tr in r.fanfare_traces]
+        agg = fanfare_telemetry.aggregate(traces)
+        powers = 0
+        for r in results:
+            powers += sum(1 for cid in r.deck_ids if _is_power(cid))
+        return {
+            "winrate": sum(r.won for r in results) / len(results),
+            "acts": sum(r.acts_completed for r in results) / len(results),
+            "held": agg.get("mean_at_read", 0.0),
+            "floor": agg.get("floor_granted_per_combat", 0.0),
+            "powers": powers / len(results),
+            "damage": sum(s.total_damage_dealt
+                          for r in results for s in r.fight_stats)
+                      / max(1, sum(len(r.fight_stats) for r in results)),
+        }
+
+    print(f"\n  {'PER_POWER':>10} {'winrate':>9} {'acts':>6} {'mean held':>10} "
+          f"{'powers/deck':>12} {'dmg/fight':>10}")
+    for value, res in sweeps.sweep("FANFARE_FLOOR_PER_POWER",
+                                   (0, 5, 10, 20), cell):
+        print(f"  {value:>10} {res['winrate']:>8.1%} {res['acts']:>6.2f} "
+              f"{res['held']:>10.1f} {res['powers']:>12.1f} "
+              f"{res['damage']:>10.1f}")
+    print("\n  powers/deck is the S0 gap in one number: the playtest deck was "
+          "'heavy on powers',\n  and every power is a permanent +5 (+8 rare) "
+          "to the floor AND the ceiling.")
+
+
+_POWER_IDS: set[str] = set()
+
+
+def _is_power(card_id: str) -> bool:
+    if not _POWER_IDS:
+        for row in _sheet_rows():
+            if row.get("type") == "power":
+                _POWER_IDS.add(row["id"])
+    return re.sub(r"\+$", "", card_id) in _POWER_IDS
+
+
+# =====================================================================
+# S7 -- build the table's deck by hand and see what it does
+# =====================================================================
+
+def s7(fights: int = 60) -> None:
+    """The drafter will not build the deck that broke the game -- 2.4 powers
+    against a table that was "heavy on powers" -- so the sim's verdict on
+    every Fanfare lever was taken in a world where the ramp barely exists.
+
+    That is not a reason to trust the sim's flatness. It is a reason to
+    stop asking the drafter and hand the deck over directly. Both arms are
+    the SAME SIZE and share seeds; the only difference is what is in them.
+    """
+    from tier0.content import loader
+    from tier0.engine.combat import run_fight
+    from tier0.harness import metrics
+    from tier0.pilot.policy import make_pilot
+
+    rows = _sheet_rows()
+    by_id = {r["id"]: r for r in rows}
+    salon_core = ["mademoiselle_crabaletta", "gentilhomme_usher",
+                  "surintendante_chevalmarin", "house_call", "dinner_service"]
+    powers = [r["id"] for r in rows
+              if r.get("type") == "power" and "salon" in (r.get("archetypes") or [])
+              or r.get("type") == "power" and "fanfare" in (r.get("archetypes") or [])]
+    powers = powers[:10]
+    starter = loader.starting_deck("furina")
+
+    table_deck = starter + salon_core + powers
+    # The control keeps the deck SIZE and the salon core identical and
+    # swaps only the powers out for non-power cards, so the delta is the
+    # power count and not the card count.
+    fillers = [r["id"] for r in rows
+               if r.get("type") != "power" and r["id"] not in salon_core
+               and r.get("rarity") in ("common", "uncommon")][:len(powers)]
+    control_deck = starter + salon_core + fillers
+
+    print("=" * 78)
+    print(f"S7. The table's deck, handed over rather than drafted — "
+          f"{fights} fights/encounter, seed {SEED}")
+    print(f"    power-heavy: {len(powers)} powers "
+          f"({', '.join(powers[:4])}...)")
+    print(f"    control:     0 powers, same deck size, same salon core")
+    print("=" * 78)
+
+    pilot = make_pilot(loader.pilot_weights("salon"))
+    for label, deck in (("power-heavy", table_deck), ("control", control_deck)):
+        rowsout = []
+        traces = []
+        for enc in ("punisher", "swarm", "attrition", "tank_boss"):
+            for i in range(fights):
+                player = loader.build_player_from_ids("furina", list(deck))
+                state = run_fight(player, loader.build_encounter(enc), pilot,
+                                  seed=SEED + i)
+                rowsout.append(metrics.extract(state, player.max_hp))
+                traces.append(fanfare_telemetry.trace(state.log))
+        agg = fanfare_telemetry.aggregate(traces)
+        wins = sum(1 for s in rowsout if s.won) / len(rowsout)
+        dmg = sum(s.total_damage_dealt for s in rowsout) / len(rowsout)
+        print(f"\n  {label:<12} deck {len(deck):>2} cards   "
+              f"fight winrate {wins:6.1%}   dmg/fight {dmg:6.1f}")
+        print(f"  {'':<12} mean Fanfare at read {agg['mean_at_read']:6.1f}   "
+              f"floor granted {agg['floor_granted_per_combat']:5.1f}/combat")
+    print("\n  (This is the closest the model gets to the table. If the "
+          "power-heavy arm's Fanfare\n   lands near the reported 80-90, the "
+          "report is HELD Fanfare and the floor rule explains it.)")
+
+
+# =====================================================================
 # S4 -- calibration: is 16.7% high?
 # =====================================================================
 
@@ -495,7 +637,7 @@ def main(argv: list[str]) -> None:
     if "--runs" in argv:
         runs = int(argv[argv.index("--runs") + 1])
     for name, fn in (("s0", s0), ("s1", s1), ("s1b", s1b), ("s2", s2),
-                     ("s1c", s1c), ("s3", s3), ("s4", s4), ("s5", s5)):
+                     ("s1c", s1c), ("s3", s3), ("s4", s4), ("s5", s5), ("s6", s6), ("s7", s7)):
         if cell in (name, "all"):
             fn(runs)
 
