@@ -1,0 +1,216 @@
+# Furina strength battery — findings (2026-07-28)
+
+Input: playtest 3 (`docs/playtest3-notes-2026-07-28.md`) — "trivially crushed
+ascension 0", 80-90 Fanfare, 6-7 cards/turn. Three theories were put forward.
+Battery: `tier05/exp_furina_strength.py`, 150 realistic runs per cell, seed
+20260728, DRAFTER world as shipped. Every sweep runs through the gated
+`sweeps` harness, so no row here comes from a knob that was never read.
+
+**Nothing has been changed.** This is R14 diagnostics feeding a ruling.
+
+---
+
+## The short version
+
+| theory | verdict |
+|---|---|
+| **T1** Fanfare gives too much | **NOT SUPPORTED** as the main lever. Three independent cuts at the Fanfare channel all come back shallow. |
+| **T2** Encore is too easy to build | **SUPPORTED, and it is the load-bearing one** — but not for the reason proposed. Encore is not strong because it makes Fanfare; it is strong because it is what PAYS THE STAGE'S BILL. |
+| **T3** Archetypes collapse into good-stuff piles | **NOT WHAT IS HAPPENING.** Focused drafting beats good-stuff 3:1. The problem is the opposite shape: **monoculture** — one archetype works and two do not. |
+
+And the calibration that makes "too strong" a measurable claim rather than an
+impression:
+
+| arm | winrate | vs ref Ironclad |
+|---|---|---|
+| **furina / salon** | **16.7%** | **1.7x** |
+| ref_ironclad | 10.0% | 1.0x |
+| klee | 8.0% | 0.8x |
+| real_ironclad | 6.0% | 0.6x |
+| furina / spotlight | 2.0% | 0.2x |
+| furina / fanfare | 1.3% | 0.1x |
+| kokomi | 1.3% | 0.1x |
+
+The table's read is confirmed in the model: salon Furina is the strongest
+thing on the roster, 1.7x the frozen reference and 2.1x Klee. Her other two
+archetypes are at Kokomi's floor.
+
+---
+
+## S0 — does the sim reach the state that broke?
+
+No, and the gap is large enough to matter.
+
+| arm | act | Fanfare HELD | GENERATED/turn | cards/turn |
+|---|---|---|---|---|
+| salon | 1 | 11.9 | 4.2 | 3.97 |
+| salon | 2 | 21.8 | 6.5 | 4.00 |
+| salon | 3 | 28.3 | 8.8 | 4.16 |
+| fanfare | 3 | 24.2 | 8.4 | 4.35 |
+
+The table's 80-90 is **2.8x** the sim's held Fanfare and **9.1x** its
+generation per turn; 6-7 cards/turn is **1.6x** the sim's 4.2.
+
+**"80-90 Fanfare per turn" is ambiguous and the two readings differ by a
+lot.** Held is what the Focus term reads; generated-per-turn is throughput.
+The C# cap is `MaxHp/2 + grants` and only three cards in the pool raise the
+floor or cap at all, so a HELD 80-90 would need ~160+ max HP — which points
+at the generated reading. **This is the table's number to disambiguate**, and
+it changes which of the two gaps above is the real one.
+
+Consequence for everything below: the sim's ABSOLUTE winrates are not
+evidence about the table's game. The deltas are.
+
+---
+
+## S1 / S1B / S1C — three cuts at Fanfare, all shallow (T1)
+
+**S1, the Focus term itself.** `SALON_FOCUS_PER` is the divisor turning held
+Fanfare into member numbers; lower means more scaling.
+
+| FOCUS_PER | winrate | dmg/fight |
+|---|---|---|
+| 5 (2x scaling) | 18.7% | 118.7 |
+| **10 (shipped)** | **16.7%** | **115.5** |
+| 20 | 15.3% | 114.0 |
+| 40 (¼ scaling) | 13.3% | 111.6 |
+
+An **8x** change in the scaling rate moves winrate 5.4 points and damage 6%.
+Real, but nothing like the lever T1 describes.
+
+**S1B, the ceiling.** The obvious objection to S1 is that the sim never gets
+to high Fanfare, so it understates a term whose value is proportional to
+Fanfare held. So raise the ceiling instead:
+
+| CAP_FRACTION | winrate | mean held | reads at cap |
+|---|---|---|---|
+| **0.5 (shipped)** | **16.7%** | **20.4** | 0.4% |
+| 1.0 | 17.3% | 21.1 | 0.0% |
+| 2.0 | 17.3% | 21.1 | 0.0% |
+| 4.0 | 17.3% | 21.1 | 0.0% |
+
+**An 8x ceiling raise changes nothing.** Held Fanfare goes 20.4 → 21.1 and
+then stops moving. The cap is not what limits her; **generation is**. Any
+"make the ramp harder to build" ruling has to act on generation, and the cap
+is the wrong knob to reach for.
+
+**S1C, where the Fanfare comes from.** Every point of Encore prints Fanfare
+twice — once gained, once spent — and 19 of 78 cards grant Encore. So sweep
+both channels together, ending at the counterfactual where Encore stops
+feeding Fanfare at all:
+
+| per gained | per spent | winrate | mean held |
+|---|---|---|---|
+| **1** | **1 (shipped)** | **16.7%** | **20.4** |
+| 1 | 0 | 16.0% | 18.3 |
+| 0 | 1 | 14.7% | 15.9 |
+| 0 | 0 | 15.3% | 14.1 |
+
+Cutting the Encore economy out of Fanfare **entirely** removes 31% of her
+Fanfare and costs 1.4 points of winrate. The Fanfare channel is not what
+makes her strong.
+
+---
+
+## S2 — the Encore census (T2)
+
+**19 of 78 cards (24% of the pool) grant Encore. Exactly ONE spends it.**
+
+| rarity | count | cards |
+|---|---|---|
+| basic | 1 | `aria_of_recompense` |
+| common | 5 | `ebb_and_flow`, `lasting_impression`, `macaron_break`, `suffering_for_art`, `surintendante_chevalmarin` |
+| uncommon | 7 | `audience_participation`, `curtain_cue`, `curtain_up`, `deep_breath`, `hearts_swelling`, `many_waters_melody`, `overflowing_hospitality` |
+| rare | 6 | `grand_gala`, `let_the_people_rejoice`, `rain_of_roses`, `reginas_mercy`, `showstopper`, `the_final_verdict` |
+| **spends it** | **1** | `limelight` |
+
+Measured on the salon arm: **11.9 gained vs 8.0 drained per combat** (3.9
+spent + 4.0 absorbed), ratio 1.50, ending every combat holding 4.0.
+
+Note what the sinks are. Upkeep is automatic. **Absorption is automatic too**
+— it is not a decision the player makes, so every point above what the stage
+burns is a free damage buffer that costs no card, no energy and no thought.
+Against the Necrobinder comparison (one or two enablers in a deck), a quarter
+of the pool is an order of magnitude more access.
+
+*The Necrobinder side cannot be measured here — `game_ref` holds the
+Ironclad only, so that half is taken as given rather than checked.*
+
+---
+
+## S3 — specialising vs the good-stuff pile (T3)
+
+`adaptive_policy` drafts by card quality and never sees the archetype label:
+the good-stuff pile in policy form.
+
+| arm | winrate | acts | archetype mix of drafted cards |
+|---|---|---|---|
+| assigned salon | **16.7%** | 1.09 | generic 45% · salon 28% · spotlight 14% · fanfare 13% |
+| assigned fanfare | 1.3% | 0.57 | generic 52% · fanfare 20% · salon 14% · spotlight 13% |
+| assigned spotlight | 2.0% | 0.95 | generic 45% · spotlight 30% · fanfare 12% · salon 12% |
+| adaptive (good stuff) | 5.3% | 0.80 | generic 44% · salon 26% · spotlight 16% · fanfare 13% |
+
+**Specialising pays, decisively — for salon.** The focused salon draft wins
+3.1x what undirected drafting wins. And good-stuff drifts INTO salon on its
+own (26% salon, its largest non-generic share) while winning a third as
+often, which says the salon cards are individually strong but only pay off
+when they are the plan.
+
+So T3's collapse is not what the model shows. What it shows is worse in a
+different way: **two of the three archetypes are non-functional** (1.3% and
+2.0% against salon's 16.7%), so there is nothing to collapse INTO — there is
+one plan, and everything else is chaff.
+
+One number does support T3's instinct: **~45% of every deck is
+archetype-neutral "generic" cards regardless of the plan.** Nearly half of
+each build is the same pile whatever you are doing.
+
+---
+
+## S5 — so what IS the engine? The stage.
+
+| SLOTS | winrate | dmg/fight | dry upkeeps |
+|---|---|---|---|
+| 1 | 8.7% | 112.8 | 41.8% |
+| 2 | 12.0% | 114.3 | 47.7% |
+| **3 (shipped)** | **16.7%** | **115.5** | **49.7%** |
+| 4 | 14.7% | 113.7 | 52.6% |
+
+Going from one member to three **nearly doubles her winrate** — a far bigger
+move than anything in the Fanfare cells. The stage is the engine.
+
+And the fourth slot makes her WORSE in the sim (14.7%), because dry upkeeps
+climb to 52.6%: the stage outruns its own fuel.
+
+**That is the synthesis, and it is T2's mechanism rather than T1's.** The
+stage is the engine, and Encore is its THROTTLE. In the sim the throttle
+binds — half of all upkeeps arrive unable to fund a member, so extra members
+starve. At a real table with 19 Encore grantors and one sink, the throttle
+does not bind at all, and every added member converts straight into power.
+That also explains the sim/table divergence without anything being wrong with
+either: they are the same engine at different fuel levels.
+
+It also puts A12 (Box Seats) in a specific light. In the sim it is
+self-limiting. In the table's fuel regime it is not, and that is exactly the
+condition the playtest was played in.
+
+---
+
+## What a ruling would need to decide
+
+None of this is a proposal. In rough order of what the evidence supports:
+
+1. **The Encore economy is the lever** — either fewer grantors (T2's "strip
+   the riders from most cards") or a real sink that competes with the stage.
+   Note that absorption being automatic is what makes surplus free; a
+   player-facing choice would change the shape as much as the count does.
+2. **Fanfare scaling is not the lever**, and the cap is not the lever at all.
+   If Fanfare is to be reined in, it has to be at generation.
+3. **Two dead archetypes** are their own problem, independent of Furina's
+   strength: fanfare 1.3% and spotlight 2.0% against salon's 16.7%.
+4. **The table's 80-90** needs disambiguating (held vs generated per turn)
+   before the S0 gap can be read as anything.
+
+Standing caveat, unchanged: tier 0.5 models one seat, the table was co-op,
+and the D8 Encore divergence from the salon UI sprint is still unruled. The
+sim disagreeing with a table is not the sim winning.
