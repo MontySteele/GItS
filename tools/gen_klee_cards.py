@@ -574,6 +574,13 @@ APPLY_POWERS = {
         "The first time you spend Encore each turn, draw {X} card."),
     "first_attack_draw": ("FirstAttackDrawPower", None,
         "The first Attack you play each turn draws {X} card."),
+    # A7 (2026-07-29): the last sheet card to reach C#. The trigger lives in
+    # FurinaResources.NoteFanfareChanged rather than in the power, because the
+    # four Fanfare mutators are static methods, not broadcasts a PowerModel can
+    # subscribe to.
+    "fanfare_delta_block": ("FanfareDeltaBlockPower", None,
+        "Whenever your [gold]Fanfare[/gold] changes amount, gain {X} "
+        "[gold]Block[/gold]."),
 }
 
 # Powers applied to ENEMIES (native debuffs). Everything else in APPLY_POWERS
@@ -1088,30 +1095,20 @@ def blocked_reason(
                 return "chance_bomb_per_detonation without a preceding detonate (no count source)"
         if op == "apply_power":
             power = eff.get("power")
-            # A7 (2026-07-28) DEFERRED C# PORT, recorded by name so the
-            # manifest entry reads as a decision rather than an oversight --
-            # the Curtain Call 12-card deferral pattern (R85/R86).
+            # A7's deferral is RELEASED (2026-07-29). It stood for two sprints
+            # on a real structural gap -- the Fanfare mutators are synchronous
+            # and every block grant in the mod is `await CreatureCmd.GainBlock`
+            # -- and neither way out it named was ever taken. Threading async
+            # through the resource surface is still a co-op-critical refactor,
+            # and Creature.GainBlockInternal still has no precedent.
             #
-            # The sheet and tier0 both implement it. The C# port is blocked on
-            # a real structural gap, not on effort: the trigger has to fire
-            # from FurinaResources' three Fanfare mutators, and those are
-            # SYNCHRONOUS (`static void GainFanfare`, `static int
-            # DecayFanfare`), while every block grant in this mod goes through
-            # `await CreatureCmd.GainBlock`. The two ways out are both worse
-            # than waiting:
-            #   * thread async through GainFanfare/GainEncore/SpendEncore --
-            #     a co-op-critical refactor touching every generated Encore
-            #     card, far outside this ruling's blast radius;
-            #   * call Creature.GainBlockInternal synchronously -- no
-            #     precedent anywhere in the mod, and no decompile evidence for
-            #     whether it runs the hooks/VFX the command layer runs.
-            # Inventing an unverified idiom on a resource path is exactly what
-            # produced the 2026-07-27 Vigil desync, so it waits for a pass
-            # that can do the async surface properly.
-            if power == "fanfare_delta_block":
-                return ("apply_power power 'fanfare_delta_block' -- A7 C# "
-                        "port DEFERRED: the Fanfare mutators are sync and "
-                        "every block grant here is async (see comment)")
+            # The third way, which the deferral note did not consider, is the
+            # one already shipping next door: NOTE synchronously, SETTLE at the
+            # next awaited hook. CurtainCallHooks.NoteEncoreSpent has done
+            # exactly that on the same funnel since R85. See
+            # FurinaResources.PendingDeltaBlock for the idiom and its four
+            # settle points; the deferral is gone rather than emptied because
+            # the gap it named is closed, not merely postponed.
             if power not in APPLY_POWERS:
                 return f"apply_power power '{power}' (no PowerModel in the registry)"
             if power in ENEMY_APPLY_POWERS:

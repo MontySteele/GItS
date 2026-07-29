@@ -103,6 +103,12 @@ internal static class KleePowerIcons
         EncoreSpendDrawPower => KleePck.Path("furina/powers/the_gallery_stirs.png"),
         FirstAttackDrawPower => KleePck.Path("furina/powers/quick_change.png"),
 
+        // A7 (2026-07-29), the last sheet card to reach C#. Same path-ahead-of-
+        // art policy as the block above: null until the PNG lands, and R13
+        // stops it from being an invisible omission in the meantime.
+        FanfareDeltaBlockPower => KleePck.Path(
+            "furina/powers/unheard_confession.png"),
+
         // NO SpotlightPower base case, deliberately. A future subclass added
         // without an icon should fall to `_ => null` and show the base-game
         // placeholder -- which reads as "no art yet" -- rather than inherit a

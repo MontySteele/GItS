@@ -900,6 +900,15 @@ $pckDeferred = @{
         'Curtain Call power, mechanics-only sprint. First Encore spend draws.'
     'furina/powers/quick_change.png' =
         'Curtain Call power, mechanics-only sprint. First Attack each turn draws.'
+
+    # A7, the last sheet card to reach C# (2026-07-29). Same policy and the
+    # same honest degrade as the six above: the sprint's art budget was the
+    # five missing CARD portraits, which it spent, and a power sigil was never
+    # in it. KleePck.Path returns null until the PNG lands, so this renders
+    # the base-game placeholder rather than borrowing another power's icon.
+    'furina/powers/unheard_confession.png' =
+        'A7 port sprint, card-art budget spent on the five missing portraits. ' +
+        'Block whenever Fanfare changes amount.'
 }
 
 $stagedContractS12 = Get-ChildItem $StageDir -Filter *.pck.contract.txt -ErrorAction SilentlyContinue |

@@ -91,6 +91,7 @@ public static class FurinaCardRoster
         ModelDb.Card<TopBilling>(),
         ModelDb.Card<TorrentialTurn>(),
         ModelDb.Card<Undercurrent>(),
+        ModelDb.Card<UnheardConfession>(),
         ModelDb.Card<UniversalRevelry>(),
         ModelDb.Card<UsherTheWaves>(),
         ModelDb.Card<WarmupAct>(),

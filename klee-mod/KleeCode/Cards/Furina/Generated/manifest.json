@@ -8,8 +8,8 @@
   },
   "coverage": {
     "total": 82,
-    "generated": 80,
-    "blocked": 2
+    "generated": 81,
+    "blocked": 1
   },
   "generated": [
     "an_invitation",
@@ -87,6 +87,7 @@
     "top_billing",
     "torrential_turn",
     "undercurrent",
+    "unheard_confession",
     "universal_revelry",
     "usher_the_waves",
     "warmup_act",
@@ -99,13 +100,9 @@
     "guest_neuvillette_tears"
   ],
   "blocked": {
-    "let_the_people_rejoice": "hand-written",
-    "unheard_confession": "apply_power power 'fanfare_delta_block' -- A7 C# port DEFERRED: the Fanfare mutators are sync and every block grant here is async (see comment)"
+    "let_the_people_rejoice": "hand-written"
   },
   "runtime_clusters": {
-    "encore_fanfare_resources": [
-      "unheard_confession"
-    ],
     "hand_written": [
       "let_the_people_rejoice"
     ]

@@ -357,7 +357,99 @@ public static class FurinaResources
         var resource = FanfareResourceFor(creature);
         var cap = FanfareCap(creature);
         if (resource == null || cap <= 0) return;
+        var before = resource.Amount;
         resource.Amount = Math.Min(cap, resource.Amount + amount);
+        NoteFanfareChanged(creature, before, resource.Amount);
+    }
+
+    // ------------------------------------------------------------------
+    // A7 -- Unheard Confession: Block whenever the meter MOVES
+    // ------------------------------------------------------------------
+
+    /// <summary>
+    /// Block that a Fanfare change has EARNED but not yet been handed over,
+    /// per creature. One entry per player, never per card.
+    ///
+    /// THIS IS THE WHOLE A7 IDIOM, and it is a deferral rather than a direct
+    /// grant because the mutators above are synchronous by design while every
+    /// Block grant in this mod is `await CreatureCmd.GainBlock`. The two
+    /// alternatives were both rejected twice before, and still are: threading
+    /// async through the resource surface drags GainEncore/SpendEncore and
+    /// every generated Encore card into a co-op-critical refactor, and
+    /// Creature.GainBlockInternal has no precedent here and no decompile
+    /// evidence about which hooks it skips.
+    ///
+    /// The precedent this DOES copy is CurtainCallHooks.NoteEncoreSpent: note
+    /// synchronously, settle at the next awaited Furina hook. That idiom has
+    /// shipped since R85 on the same funnel (SpendEncore), so this adds no new
+    /// co-op exposure -- the write happens at exactly the points a vetted one
+    /// already happens, and the settle happens at points both peers reach
+    /// deterministically in the lockstep.
+    /// </summary>
+    private static readonly Dictionary<Creature, int> PendingDeltaBlock = new();
+
+    /// <summary>
+    /// Mirrors resources.note_fanfare_change. Called from all FOUR mutation
+    /// funnels -- gain, floor-raise, decay, crash -- which is the entire
+    /// trigger surface in both engines; a fifth mutator added without a call
+    /// here is the only way to break the parity.
+    ///
+    /// FLAT per change EVENT, either direction, exactly like the sim: the
+    /// amount of Block does not scale with how far the meter moved.
+    ///
+    /// INERT AT SATURATION. A gain that lands entirely at the cap moved
+    /// nothing (before == after), so it is not a change and pays nothing. That
+    /// is the sim's `applied == 0` case and it is deliberate, not an oversight.
+    /// </summary>
+    private static void NoteFanfareChanged(
+        Creature creature, int before, int after)
+    {
+        if (before == after) return;
+        var amount = FanfareDeltaBlockPower.AmountFor(creature);
+        if (amount <= 0) return;
+        PendingDeltaBlock[creature] =
+            (PendingDeltaBlock.TryGetValue(creature, out var held) ? held : 0)
+            + amount;
+    }
+
+    /// <summary>
+    /// Hand over whatever the meter earned. Idempotent: the counter is taken
+    /// and cleared, so extra calls are free and a hook that fires on a turn
+    /// with no Fanfare movement costs nothing.
+    ///
+    /// Unscaled and Unpowered, following SalonBowBlockPower: this is a
+    /// power's activity payout rather than a card's printed Block, so
+    /// Spotlight does not read it -- the same rule the sim states in
+    /// note_fanfare_change.
+    ///
+    /// Several change events inside one hook window settle as ONE GainBlock
+    /// call for their SUM rather than as N calls. With Unpowered that is
+    /// arithmetically identical to the sim's N separate adds; it is recorded
+    /// because it would stop being identical the day this payout gains a
+    /// per-grant modifier.
+    /// </summary>
+    public static async Task FlushFanfareDeltaBlock(
+        PlayerChoiceContext choiceContext, Creature creature)
+    {
+        PurgeDeltaBlock();
+        if (!PendingDeltaBlock.TryGetValue(creature, out var pending)) return;
+        PendingDeltaBlock.Remove(creature);
+        if (pending <= 0) return;
+        await CreatureCmd.GainBlock(
+            creature, pending, ValueProp.Unpowered, null, fast: true);
+    }
+
+    /// <summary>Drop keys whose combat is gone. A creature that died holding a
+    /// pending settle would otherwise leave one entry per combat behind for
+    /// the length of a run; same cheap sweep CurtainCallHooks.Purge does.</summary>
+    private static void PurgeDeltaBlock()
+    {
+        foreach (var stale in PendingDeltaBlock.Keys
+                     .Where(c => c.CombatState == null)
+                     .ToList())
+        {
+            PendingDeltaBlock.Remove(stale);
+        }
     }
 
     /// <summary>
@@ -383,9 +475,11 @@ public static class FurinaResources
         var capBonus = FanfareCapBonusFor(creature);
         var resource = FanfareResourceFor(creature);
         if (floor == null || capBonus == null || resource == null) return;
+        var before = resource.Amount;
         floor.ModifyAmount(amount);
         capBonus.ModifyAmount(amount);
         resource.Amount = Math.Min(FanfareCap(creature), resource.Amount + amount);
+        NoteFanfareChanged(creature, before, resource.Amount);
     }
 
     /// <summary>
@@ -420,6 +514,7 @@ public static class FurinaResources
                 before * FurinaResourceConstants.FanfareDecayFraction,
                 MidpointRounding.ToEven));
         resource.Amount = Math.Max(floor, before - fall);
+        NoteFanfareChanged(creature, before, resource.Amount);
         return before - resource.Amount;
     }
 
@@ -462,6 +557,7 @@ public static class FurinaResources
         var before = resource.Amount;
         floor.ModifyAmount(-floorDrop);
         resource.Amount = Math.Min(before, floor.Amount);
+        NoteFanfareChanged(creature, before, resource.Amount);
         return before - resource.Amount;
     }
 
@@ -705,6 +801,12 @@ public sealed class FurinaResourceHooks : AbstractModel
         await CurtainCallHooks.NoteCardPlayed(choiceContext, cardPlay);
         await CurtainCallHooks.FlushPendingDraws(
             choiceContext, cardPlay.Card.Owner.Creature);
+        // A7: the play's Encore spend, Center Stage credit and floor grant all
+        // moved the meter from BeforeCardPlayed, which has no context of its
+        // own. Settling here puts the Block on the board before the enemy can
+        // swing, which is where the sim puts it.
+        await FurinaResources.FlushFanfareDeltaBlock(
+            choiceContext, cardPlay.Card.Owner.Creature);
         await FurinaResources.SyncMeters(
             choiceContext, cardPlay.Card.Owner.Creature, cardPlay.Card);
         await FurinaKitGrant.GrantIfCharged(
@@ -763,6 +865,20 @@ public sealed class FurinaResourceHooks : AbstractModel
                 continue;
             }
             FurinaResources.DecayFanfare(creature);
+            // A7, and the SITE IS LOAD-BEARING: settle the decay's Block HERE,
+            // inside BeforeSideTurnStart, because the sim grants it here too --
+            // combat._player_turn calls decay_fanfare at line 424 and clears
+            // Block at line 430, six lines later. AfterBlockCleared runs after
+            // this broadcast, so both engines wipe the decay grant on any turn
+            // without Barricade, and they wipe it identically.
+            //
+            // Moving this flush to AfterPlayerTurnStart would look like a fix
+            // and would in fact be a C#-only buff worth ~1 Block/turn that the
+            // sim never pays and no measurement has ever priced. If the decay
+            // half is supposed to survive, that is a RULING about the sim's
+            // ordering first; see the sprint log's A7 finding.
+            await FurinaResources.FlushFanfareDeltaBlock(
+                choiceContext, creature);
             await FurinaResources.SyncMeters(choiceContext, creature);
         }
     }
@@ -777,6 +893,13 @@ public sealed class FurinaResourceHooks : AbstractModel
             // here as well as after card plays -- a turn-start spend must not
             // wait for the player to play something before it draws.
             await CurtainCallHooks.FlushPendingDraws(
+                choiceContext, player.Creature);
+            // Salon upkeep spends Encore in this same broadcast, and a spend
+            // mints Fanfare -- so this settles UPKEEP's movement, not decay's.
+            // Decay already settled (and was already cleared) one broadcast
+            // earlier; the counter is taken and cleared, so this cannot pay it
+            // a second time.
+            await FurinaResources.FlushFanfareDeltaBlock(
                 choiceContext, player.Creature);
             await FurinaResources.SyncMeters(
                 choiceContext, player.Creature);
@@ -800,6 +923,8 @@ public sealed class FurinaResourceHooks : AbstractModel
             // Last chance in the turn: anything an end-of-turn spend deferred
             // resolves here rather than stranding into the next turn.
             await CurtainCallHooks.FlushPendingDraws(choiceContext, creature);
+            await FurinaResources.FlushFanfareDeltaBlock(
+                choiceContext, creature);
             await FurinaResources.SyncMeters(choiceContext, creature);
             await FurinaKitGrant.GrantIfCharged(choiceContext, player);
         }
@@ -811,6 +936,14 @@ public sealed class FurinaResourceHooks : AbstractModel
         CardModel? cardSource)
     {
         if (!FurinaResources.IsFurina(target)) return;
+        // A7's ENEMY-TURN settle, and the one that actually matters for a
+        // defensive power. Absorption and true HP loss both mint Fanfare from
+        // synchronous hooks (ModifyHpLostBeforeOsty, AfterCurrentHpChanged);
+        // this hook fires per damage instance, so the Block is on the board
+        // before the NEXT hit of the same turn -- which is exactly what the
+        // sim does, where the grant lands mid-resolution and the hit that
+        // caused it has already been paid for.
+        await FurinaResources.FlushFanfareDeltaBlock(choiceContext, target);
         await FurinaResources.SyncMeters(
             choiceContext, target, cardSource);
         await FurinaKitGrant.GrantIfCharged(
@@ -1002,4 +1135,42 @@ public sealed class FanfareAttackPer10Power : PowerModel, ILocalizationProvider
         if (cardSource is not { Type: CardType.Attack }) return 0m;
         return Amount * (FurinaResources.ReadableFanfare(Owner) / 10);
     }
+}
+
+/// <summary>
+/// Unheard Confession (A7, RULED 2026-07-28): gain Amount Block whenever
+/// Fanfare CHANGES AMOUNT, in either direction.
+///
+/// Mirrors the sim's `fanfare_delta_block` power, read by
+/// resources.note_fanfare_change. The power itself is deliberately a pure
+/// marker with no hooks of its own: the trigger cannot live here, because the
+/// four things that move the meter are static methods on FurinaResources and
+/// none of them is a broadcast a PowerModel can subscribe to. FurinaResources
+/// asks this class for its Amount instead -- see NoteFanfareChanged.
+///
+/// PAYS ON THE WAY DOWN, WITH ONE MEASURED CAVEAT the sheet does not state:
+/// decay is the only downward mover, it fires at the top of the player turn,
+/// and BOTH engines clear Block immediately afterward. So the downward half
+/// pays into a bucket that is emptied a moment later on every turn without
+/// Barricade. That is the sim's behaviour, faithfully reproduced here rather
+/// than quietly improved; it is written up in the 2026-07-29 sprint log for
+/// red-pen because changing it is a ruling about the sim's turn order.
+/// </summary>
+public sealed class FanfareDeltaBlockPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Unheard Confession"),
+        ("description",
+            "Whenever your [gold]Fanfare[/gold] changes amount, gain "
+          + "{Amount} [gold]Block[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public static int AmountFor(Creature creature) =>
+        creature.Powers.OfType<FanfareDeltaBlockPower>()
+            .FirstOrDefault()?.Amount ?? 0;
 }

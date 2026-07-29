@@ -1031,3 +1031,13 @@ salt_line	ImageGen/images/cards/kokomi/salt_line.png	500	380	cover	y0.50	shortli
 undertow	ImageGen/images/cards/kokomi/undertow.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
 undertow	ImageGen/images/cards/kokomi/undertow.png	500	380	cover	y0.84	shortlist	2	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
 undertow	ImageGen/images/cards/kokomi/undertow.png	500	380	cover	y0.90	shortlist	3	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
+casting_call	ImageGen/images/cards/furina/casting_call.png	500	380	cover	x0.45	shortlist	1	png	Opera Epiclese - Furina's Seat.png		splash	furina_pool
+casting_call	ImageGen/images/cards/furina/casting_call.png	500	380	contain	center	shortlist	2	png	The Opera of Noirceur and Blancheur Ticket.png		item	furina_pool
+take_your_bow	ImageGen/images/cards/furina/take_your_bow.png	500	380	cover	center	shortlist	1	png	Starlight Reverie Wallpaper Furina.png		splash	furina_pool
+take_your_bow	ImageGen/images/cards/furina/take_your_bow.png	500	380	cover	x0.45	shortlist	2	png	Opera Epiclese - Furina's Seat.png		splash	furina_pool
+held_breath	ImageGen/images/cards/furina/held_breath.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Fragrant Fantasy Furina 3.png		splash	furina_pool
+held_breath	ImageGen/images/cards/furina/held_breath.png	500	380	cover	y0.35	shortlist	2	png	Fragrant Fantasy Wallpaper.png		splash	furina_pool
+applause_line	ImageGen/images/cards/furina/applause_line.png	500	380	cover	center	shortlist	1	png	Furina Birthday 2024 - Shorts.png		splash	furina_pool
+applause_line	ImageGen/images/cards/furina/applause_line.png	500	380	cover	y0.40	shortlist	2	png	Starlit Letter Wallpaper Furina.png		splash	furina_pool
+breathless	ImageGen/images/cards/furina/breathless.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Savoring the Breeze Furina.png		sticker	furina_pool
+breathless	ImageGen/images/cards/furina/breathless.png	500	380	cover	y0.50	shortlist	2	png	Savoring the Breeze Wallpaper Furina.png		splash	furina_pool

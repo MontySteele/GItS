@@ -12,23 +12,22 @@ from tools import gen_klee_cards as gen
 
 FURINA_HAND_WRITTEN = {"let_the_people_rejoice"}
 
-# A7 (playtest-2 red-pen, 2026-07-28). Unheard Confession became a POWER that
-# pays Block "whenever Fanfare changes amount". The sheet and tier0 both
-# implement it; the C# port is deferred on a STRUCTURAL gap, not on effort.
+# A7's async deferral is CLOSED (2026-07-29) and the set is DELETED rather
+# than emptied, following the Curtain Call precedent below -- a dormant escape
+# hatch just makes the next silent skip easy, and the positive assertion in
+# test_furina_profile_emits_every_non_kit_card states the invariant directly.
 #
-# The trigger has to fire from FurinaResources' three Fanfare mutators, and
-# those are synchronous (`static void GainFanfare`, `static int DecayFanfare`,
-# `static void GainFanfareFloor`) while every block grant in the mod goes
-# through `await CreatureCmd.GainBlock`. Threading async through them would
-# drag GainEncore/SpendEncore and every generated Encore card with it -- a
-# co-op-critical refactor far outside this ruling's blast radius -- and the
-# only sync alternative (`Creature.GainBlockInternal`) has no precedent in the
-# mod and no decompile evidence about which hooks it skips.
+# It stood for two sprints on a real gap: the trigger fires from Fanfare
+# mutators that are synchronous, while every block grant in the mod is `await
+# CreatureCmd.GainBlock`. The gate it named was "make the resource surface
+# async, or establish a verified sync block-grant idiom", and NEITHER is what
+# released it. The third option was the one already shipping next door --
+# note synchronously, settle at the next awaited hook, exactly as
+# CurtainCallHooks.NoteEncoreSpent has done on the same funnel since R85. The
+# lesson worth keeping: a deferral's stated gate is a hypothesis about the
+# solution, and re-reading the neighbours beat waiting for the refactor.
 #
-# GATE THAT RELEASES IT: a pass that makes the Furina resource surface async
-# (or establishes a verified sync block-grant idiom). Until then the card is
-# visibly blocked in the manifest rather than quietly inert in the game.
-FURINA_DEFERRED_ASYNC = {"unheard_confession"}
+# See FurinaResources.PendingDeltaBlock and tier0/tests/test_a7_port.py.
 
 # Cards deliberately DEFERRED from C# generation while a sprint is mid-flight,
 # each with the gate that releases it. A curated list rather than a silent
@@ -192,16 +191,18 @@ def test_furina_profile_emits_every_non_kit_card():
         for card in _furina_cards()
         if gen.blocked_reason(card, gen.FURINA_PROFILE) is None
     }
-    withheld = FURINA_HAND_WRITTEN | FURINA_DEFERRED_TO_FD | FURINA_DEFERRED_ASYNC
+    withheld = FURINA_HAND_WRITTEN | FURINA_DEFERRED_TO_FD
     assert generated == all_ids - withheld
 
-    # Same "for the REASON we think it is" check the FD set gets, applied to
-    # the async-gap deferral. Without it, unheard_confession breaking for some
-    # unrelated reason would sit inside a curated set and read as intentional.
-    for cid in FURINA_DEFERRED_ASYNC:
-        reason = gen.blocked_reason(by_id_of(_furina_cards())[cid],
-                                    gen.FURINA_PROFILE)
-        assert reason is not None and "A7 C# port DEFERRED" in reason, cid
+    # A7 IS RELEASED (2026-07-29) and this is the positive assertion that
+    # replaces the deferral check. Written as its own line rather than left to
+    # the set arithmetic above, because "unheard_confession generates" is the
+    # single fact two sprints of deferral were about, and it should fail by
+    # name if it ever regresses.
+    assert "unheard_confession" in generated
+    assert gen.blocked_reason(
+        by_id_of(_furina_cards())["unheard_confession"],
+        gen.FURINA_PROFILE) is None
 
     # The deferral must be for the REASON we think it is. A card that stopped
     # generating for some unrelated breakage would otherwise hide inside the
@@ -236,17 +237,23 @@ def test_furina_profile_emits_every_non_kit_card():
     # exactly the divergence the blocker exists to stop.
     #
     # The two still withheld are the hand-written kit Burst and A7's
-    # unheard_confession (see FURINA_DEFERRED_ASYNC), both unchanged.
+    # unheard_confession, both unchanged (as of that sprint).
     # COMPENSATION PASS (2026-07-28): 79 -> 82, three new common readers.
     # `blocked` HELD AT 2 AGAIN, and this time for the quieter reason: the pass
     # introduced no new codegen surface at all. Every card it added or rewrote
     # is built from ops the generator already emits, which is what "reader
     # density" means mechanically -- more cards on the rails the rework built,
     # not more rails.
+    #
+    # A7 (2026-07-29): blocked 2 -> 1. Every card on this sheet now exists in
+    # the actual game except the hand-written kit Burst, which is not a gap.
+    # The count is the whole point of the deferral discipline: it was 2 for two
+    # sprints, visibly, and it moved when the gap closed rather than when
+    # somebody remembered.
     assert manifest["coverage"] == {
         "total": 82,
-        "generated": 80,
-        "blocked": 2,
+        "generated": 81,
+        "blocked": 1,
     }
     assert set(manifest["generated"]) == generated
     assert set(manifest["blocked"]) == withheld

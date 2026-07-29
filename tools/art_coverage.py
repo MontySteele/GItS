@@ -82,7 +82,11 @@ KNOWN_STALE = {
         "ruling old and the pool has an open art debt -- if the velocity Rare "
         "is ever split back out, or another Sly piece wants a current motif, "
         "this is a painted asset already cleared through SOURCES.tsv. It is "
-        "NOT coverage for anything and must never be counted as such."
+        "NOT coverage for anything and must never be counted as such. "
+        "CONSIDERED AND REJECTED 2026-07-29 (Track A): it is a KOKOMI chibi "
+        "sticker on a kokomi/ out-path -- a different character. No crop of "
+        "it can serve a Furina card, so the 'current motif' framing above "
+        "only ever applied to a future KOKOMI row."
     ),
     "rising_tide": (
         "A4 (playtest-2 red-pen, 2026-07-28) CUT Rising Tide from the pool: "
@@ -90,8 +94,17 @@ KNOWN_STALE = {
         "already carry as a rider. Kept rather than deleted because it is a "
         "painted asset already cleared through SOURCES.tsv and the pool "
         "carries an open art debt -- if a salon application common is ever "
-        "re-authored, the water-climbing-the-stage motif is on disk. It is "
-        "NOT coverage for anything and must never be counted as such."
+        "re-authored, the motif is on disk. It is "
+        "NOT coverage for anything and must never be counted as such. "
+        "CONSIDERED AND REJECTED 2026-07-29 (Track A): the brief offered it "
+        "as a re-crop for casting_call or take_your_bow. Opened it. THE "
+        "LEDGER DESCRIPTION WAS WRONG -- 'water climbing the stage' describes "
+        "the plan's INTENT, not the shipped bytes, which are 'A Wish For "
+        "Smooth Sailing Quest Still 2': a chibi resort-map panorama with a "
+        "dozen small figures and no Furina focus. Wrong voice for either "
+        "salon card and a multi-figure scene besides. The note above is "
+        "corrected accordingly; a ledger that describes a file it has not "
+        "looked at is worse than no ledger."
     ),
 }
 

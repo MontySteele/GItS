@@ -174,7 +174,57 @@ BANNED_SOURCE_FAMILIES = [
      "why this needs an explicit ban -- L8 would have waved all 16 through. "
      "The sibling 'Icon Emoji Paimon's Paintings ... Sangonomiya Kokomi' set "
      "is NOT banned: 340x340, transparent, no text, and legitimately her."),
+    # --- Track A, 2026-07-29. All four opened and looked at this session
+    # while hunting the last five card portraits; each was a candidate that
+    # died on inspection, which is precisely the knowledge L9 exists to keep.
+    ("Furina Introduction Card",
+     "the Introduction BANNER's sibling and the same disqualifier: a burnt-in "
+     "'Endless Solo of Solitude' title at the top, a full-width FURINA "
+     "wordmark band across the lower third, and HoYoverse/Genshin logos "
+     "beside it. No 500x380 crop clears both the title and the band -- the "
+     "band sits at 80% height and the title at 10%, so any crop tall enough "
+     "to frame the figure eats one of them. The banner half of this family "
+     "was already banned in 2026-07-23; this closes the other half."),
+    ("New Year's Advice from Teyvat",
+     "quote card: a scroll graphic carrying the GENSHIN IMPACT wordmark, a "
+     "two-line pull quote in 40px type and a signature. The only art on it is "
+     "a chibi inset in the right third, and cropping to the inset still "
+     "includes the quote. Not an illustration."),
+    ("Ride the Waves to a Rendezvous",
+     "framed concept-art PAGE, not the concept art: the painting sits in a "
+     "letterboxed panel with the GENSHIN IMPACT wordmark above it and "
+     "(c)COGNOSPHERE below, inside a decorative border. The painting itself "
+     "-- a lone figure walking onto the opera stage -- is genuinely good and "
+     "would suit a salon card, but reaching it needs a manual crop with the "
+     "user's eyes on it, not a title match."),
+    ("Genshin Impact Commemorative Shikishi Set",
+     "MONOCHROME shikishi board photographed in its sleeve, with 'Copyright "
+     "(c) miHoYo. All Rights Reserved.' burnt across the bottom and a "
+     "signature over the art. Greyscale alone disqualifies it: it would be "
+     "the only colourless portrait in a pool of 82."),
 ]
+
+# L9, AWAITING THE RED-PEN SESSION. Same pattern as PENDING_UNDERSIZE: the
+# finding is REAL and the resolution is a taste call, so it is reported every
+# run and does not fail the gate. Resolve by re-picking, then DELETE the entry
+# so the lint guards the resolution.
+PENDING_BANNED_FAMILY = {
+    # FOUND 2026-07-29 BY THE NEW BAN, ON A CARD THAT HAD ALREADY SHIPPED --
+    # which is the whole argument for writing these families down. curtain_cue
+    # wears 'Ride the Waves ... Concept Art 2', and the shipped portrait was
+    # opened and confirmed: the GENSHIN IMPACT wordmark sits across the top of
+    # the card and the page's beige border runs down both sides.
+    #
+    # It cannot be cropped out. The panel is letterboxed inside a 1920x1080
+    # page, so a 500x380 `cover` uses the FULL source height by construction
+    # and no focus anchor changes that; only a different source or a manual
+    # crop fixes it.
+    #
+    # NOT re-picked here on purpose: curtain_cue is outside this sprint's
+    # five-card Track A, the honest replacements are all claimed, and picking
+    # its portrait is a taste call. Reported instead of silently swapped.
+    "curtain_cue",
+}
 
 PENDING_RED_PEN = {
     # RESOLVED 2026-07-27 (Sweep II D1) and therefore REMOVED rather than kept
@@ -369,9 +419,13 @@ def banned_families(effective) -> list[str]:
         title = r["title"]
         for prefix, why in BANNED_SOURCE_FAMILIES:
             if title.lower().startswith(prefix.lower()):
-                problems.append(
-                    f"L9 {r['asset_id']}: source '{title}' is from the banned "
-                    f"'{prefix.strip()}' family -- {why}")
+                msg = (f"L9 {r['asset_id']}: source '{title}' is from the "
+                       f"banned '{prefix.strip()}' family -- {why}")
+                if r["asset_id"] in PENDING_BANNED_FAMILY:
+                    print(f"PENDING RED-PEN (banned family, allowlisted): "
+                          f"{msg}")
+                else:
+                    problems.append(msg)
                 break
     return problems
 
