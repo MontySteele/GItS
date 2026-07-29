@@ -41,13 +41,13 @@ public sealed class LeadingRole : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Leading Role"),
-        ("description", "The first [gold]Spotlighted[/gold] card each turn costs 1 less."),
+        ("description", "The first [gold]Spotlighted[/gold] card each turn costs 1 less. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("FanfareCap", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,6 +60,7 @@ public sealed class LeadingRole : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<SpotlightDiscountPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        FurinaResources.RaiseFanfareCap(Owner.Creature, DynamicVars["FanfareCap"].IntValue);
     }
 
     protected override void OnUpgrade()

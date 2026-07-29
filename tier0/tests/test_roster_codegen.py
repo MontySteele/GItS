@@ -237,9 +237,15 @@ def test_furina_profile_emits_every_non_kit_card():
     #
     # The two still withheld are the hand-written kit Burst and A7's
     # unheard_confession (see FURINA_DEFERRED_ASYNC), both unchanged.
+    # COMPENSATION PASS (2026-07-28): 79 -> 82, three new common readers.
+    # `blocked` HELD AT 2 AGAIN, and this time for the quieter reason: the pass
+    # introduced no new codegen surface at all. Every card it added or rewrote
+    # is built from ops the generator already emits, which is what "reader
+    # density" means mechanically -- more cards on the rails the rework built,
+    # not more rails.
     assert manifest["coverage"] == {
-        "total": 79,
-        "generated": 77,
+        "total": 82,
+        "generated": 80,
         "blocked": 2,
     }
     assert set(manifest["generated"]) == generated

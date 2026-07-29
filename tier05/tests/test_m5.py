@@ -347,7 +347,13 @@ def test_fanfare_core_is_native_generation_plus_output_converter():
 def test_fanfare_drafter_prioritizes_conversion_over_surplus_generation():
     starter = _cards(*loader.starting_deck("furina"))
     converter = loader.get_card("dramatic_entrance")
-    generator = loader.get_card("suffering_for_art")
+    # `suffering_for_art` USED TO BE THE BLIND GENERATOR IN THIS TEST, and the
+    # compensation pass (2026-07-28, Track 2.2) is exactly the change that
+    # disqualified it: it reads the meter now, so the drafter is right to stop
+    # skipping it. Standing on the assertion would have meant asserting the
+    # sprint had not happened. `ebb_and_flow` is the surviving blind Encore
+    # common and carries the case unchanged.
+    generator = loader.get_card("ebb_and_flow")
 
     assert draft.score_offer(converter, starter, "fanfare") \
         > draft.score_offer(generator, starter, "fanfare")

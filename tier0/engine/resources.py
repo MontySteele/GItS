@@ -238,7 +238,8 @@ def readable(player) -> int:
     return max(0, player.fanfare)
 
 
-def note_fanfare_read(state: CombatState, kind: str) -> None:
+def note_fanfare_read(state: CombatState, kind: str,
+                      card: str | None = None) -> None:
     """Instrument for the gate that asks whether the stat is LIVE.
 
     Sampled where a card actually READS the meter, which is not the same
@@ -254,8 +255,9 @@ def note_fanfare_read(state: CombatState, kind: str) -> None:
     p = state.player
     if not p.fanfare_cap:
         return
-    state.emit("fanfare_read", kind=kind, total=p.fanfare, cap=p.fanfare_cap,
-               floor=p.fanfare_floor, at_cap=p.fanfare >= p.fanfare_cap,
+    state.emit("fanfare_read", kind=kind, card=card, total=p.fanfare,
+               cap=p.fanfare_cap, floor=p.fanfare_floor,
+               at_cap=p.fanfare >= p.fanfare_cap,
                at_floor=p.fanfare <= p.fanfare_floor)
 
 

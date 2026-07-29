@@ -17,9 +17,11 @@ public static class FurinaCardRoster
     public static IReadOnlyList<CardModel> All => _all ??= new List<CardModel>
     {
         ModelDb.Card<AnInvitation>(),
+        ModelDb.Card<ApplauseLine>(),
         ModelDb.Card<AriaOfRecompense>(),
         ModelDb.Card<AudienceParticipation>(),
         ModelDb.Card<BlockingNotes>(),
+        ModelDb.Card<Breathless>(),
         ModelDb.Card<CastingCall>(),
         ModelDb.Card<CommandPerformance>(),
         ModelDb.Card<CommandingGaze>(),
@@ -48,6 +50,7 @@ public static class FurinaCardRoster
         ModelDb.Card<GrandSalon>(),
         ModelDb.Card<GuestList>(),
         ModelDb.Card<HeartsSwelling>(),
+        ModelDb.Card<HeldBreath>(),
         ModelDb.Card<HighTide>(),
         ModelDb.Card<HouseCall>(),
         ModelDb.Card<LastingImpression>(),

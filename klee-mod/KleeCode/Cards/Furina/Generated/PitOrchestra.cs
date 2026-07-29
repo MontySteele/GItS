@@ -41,13 +41,14 @@ public sealed class PitOrchestra : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stagehands"),
-        ("description", "Whenever a [gold]Salon Member[/gold] takes its final bow, gain {PowerAmount:diff()} Block. Whenever a [gold]Salon Member[/gold] takes its final bow, gain 2 Encore."),
+        ("description", "Whenever a [gold]Salon Member[/gold] takes its final bow, gain {PowerAmount:diff()} Block. Whenever a [gold]Salon Member[/gold] takes its final bow, gain 2 Encore. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 5m)
+            new DynamicVar("PowerAmount", 5m),
+            new DynamicVar("FanfareCap", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,6 +62,7 @@ public sealed class PitOrchestra : CustomCardModel, ICharacterCard
     {
         await PowerCmd.Apply<SalonBowBlockPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
         await PowerCmd.Apply<SalonBowEncorePower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
+        FurinaResources.RaiseFanfareCap(Owner.Creature, DynamicVars["FanfareCap"].IntValue);
     }
 
     protected override void OnUpgrade()

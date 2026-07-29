@@ -73,8 +73,14 @@ def test_pool_composition():
     #     Track C rewrote three cards in place (graceful_retreat,
     #     the_final_verdict, blocking_notes) and renamed a fourth, none of
     #     which moves a count. (lint-ok: pool sizes)
-    assert len(cards) == 79
-    assert len(by_rarity["common"]) == 20
+    #   82, common 23: the COMPENSATION PASS (2026-07-28) added THREE common
+    #     readers -- applause_line, held_breath, breathless -- because the
+    #     archetype's readers clustered at rare (8 of 10) and its commons were
+    #     blind Encore batteries. Track 1 put "Fanfare Cap +X" on twelve more
+    #     Powers and Track 2 rewrote three cards in place; neither moves a
+    #     count. (lint-ok: pool sizes)
+    assert len(cards) == 82
+    assert len(by_rarity["common"]) == 23
     assert len(by_rarity["uncommon"]) == 35
     assert len(by_rarity["rare"]) == 19
     kit = [c for c in by_rarity["rare"] if c.kit_card]
@@ -90,9 +96,10 @@ def test_pool_composition():
     #   skill  45 (was 48): -1 that retype, -1 A4's cut, -1 A7's retype.
     #   power  17 (was 15): +1 A7 retyped unheard_confession skill -> power,
     #     +1 A12's new power card.
-    assert len(by_type["attack"]) == 16
-    assert len(by_type["skill"]) == 46           # skill-heavy pole+, the cadence reason
-                                                 # (45 -> 46: the Track D bow probe is a skill)
+    assert len(by_type["attack"]) == 18          # 16 -> 18: applause_line and breathless are
+                                                 # the compensation pass's two new attacks
+    assert len(by_type["skill"]) == 47           # skill-heavy pole+, the cadence reason
+                                                 # (46 -> 47: held_breath)
     assert len(by_type["power"]) == 17           # official quota floor (19-21% roster-wide)
 
 
@@ -104,8 +111,17 @@ def test_starter_invitation_and_aria_curve():
 
     aria = loader.get_card("aria_of_recompense")
     aria_plus = loader.get_card("aria_of_recompense+")
-    assert aria.effects == [{"op": "gain_encore", "amount": 5}]
-    assert aria_plus.effects == [{"op": "gain_encore", "amount": 8}]
+    # COMPENSATION Track 2.4 (2026-07-28): the starter is the act-1 lever, so
+    # it carries a low-slope Fanfare read now. The upgrade still moves ONLY the
+    # Encore number and the Innate flag -- the rate is not an upgrade surface.
+    assert aria.effects == [
+        {"op": "gain_encore", "amount": 5},
+        {"op": "block", "amount": 0, "bonus_formula": "1_per_4_fanfare"},
+    ]
+    assert aria_plus.effects == [
+        {"op": "gain_encore", "amount": 8},
+        {"op": "block", "amount": 0, "bonus_formula": "1_per_4_fanfare"},
+    ]
 
     stage = loader.get_card("stage_presence")
     stage_plus = loader.get_card("stage_presence+")
@@ -146,9 +162,13 @@ def test_the_constellation_card_grants_a_floor_not_a_cap():
 def test_targeted_fanfare_floor_repairs():
     suffering = loader.get_card("suffering_for_art")
     thunder = loader.get_card("thunderous_ovation")
+    # COMPENSATION Track 2.2 (2026-07-28): the flagship conversion. The wound
+    # prints the meter and the third clause reads it, so this is the one card
+    # in the pool that both pays Fanfare and spends it on the same face.
     assert suffering.effects == [
         {"op": "damage", "amount": 1, "target": "self"},
         {"op": "gain_encore", "amount": 3},
+        {"op": "block", "amount": 0, "bonus_formula": "1_per_4_fanfare"},
     ]
     # F-B1 made it a smooth read; Curtain Call C (R85) steepened the rate
     # and moved the card to its rare payoff slot (base 7->6, 1 per 2).

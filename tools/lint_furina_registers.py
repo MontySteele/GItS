@@ -19,16 +19,22 @@ of the convention (does this name read in this voice?) is [USER]'s eyes-on
 name audit, by house law, and no tool pretends to cover it.
 
   R1  every Furina card carries register: salon | archon | private.
-  R2  any card that touches Fanfare (a bonus_formula reading fanfare, a
-      fanfare_at_least_* gate, or either keyword op -- gain_fanfare_floor
-      "Fanfare +X" / raise_fanfare_cap "Fanfare Cap +X") is register: archon.
-      Fanfare IS the mask/audience stat; a stagehand name on a Fanfare read
-      is the register scramble this sweep exists to remove.
-      raise_fanfare_cap joined this rule with the Fanfare rework (Track B,
-      2026-07-28), and it is the rule that DECIDED which cards carry the new
-      keywords: the cap only ever binds for a deck pushing the meter high,
-      which is the fanfare plan, which is the archon voice. The convention
-      and the mechanic point the same way, so no amendment was needed.
+  R2  any card that READS Fanfare (a bonus_formula reading fanfare, a
+      fanfare_at_least_* gate, or the gain_fanfare_floor "Fanfare +X" grant)
+      is register: archon. Fanfare IS the mask/audience stat; a stagehand
+      name on a Fanfare read is the register scramble this sweep exists to
+      remove.
+      raise_fanfare_cap RELEASED FROM THIS RULE by the compensation pass
+      (Track 1, RULED 2026-07-28). It joined R2 one day earlier, at the
+      rework, and there it did real work: the cap keyword went on a SHORT
+      LIST, and R2 was the selector that produced the list. The ruling
+      reversed the list -- every Power prints "Fanfare Cap +X" now -- and a
+      requirement every Power must satisfy carries no register information
+      at all. Left in R2 it would have forced every salon and private Power
+      to rename itself into the archon voice to satisfy a lint that had
+      stopped selecting anything. The rule that replaces it is R7, and it is
+      a rule about card TYPE, which is what the ruling actually made it.
+      The full grant stays in R2 because it stayed rare and chosen.
   R3  any card that APPLIES salon_member (deploys a cast member) is
       register: salon. Reads (has_salon_members and count scalers) are not
       deploys and carry no constraint -- Dinner Service feeding the
@@ -54,6 +60,17 @@ name audit, by house law, and no tool pretends to cover it.
       The cheap half of the pair ("Fanfare Cap +X") is what commons,
       uncommons and Exhaust skills may print. Ruled with the rework; before
       it, every Power got a floor grant by rarity and no card said so.
+  R7  EVERY POWER PRINTS EXACTLY ONE Fanfare keyword -- "Fanfare +X" if it
+      is one of R6's rare-Power payoffs, "Fanfare Cap +X" otherwise. This is
+      the compensation pass's Track 1 ruling turned into a standing gate,
+      and it is the positive form of the rule the rework only had in the
+      negative. Before the rework EVERY Power granted floor and no card said
+      so; after the rework four Powers granted and twelve granted nothing,
+      which was also invisible -- a Power's grant was a fact about a curated
+      list. Now the card type decides and the face says so, and the next
+      Power authored without a keyword fails here instead of shipping a
+      silent hole. Non-Powers MAY print "Fanfare Cap +X" (lasting_impression,
+      reginas_mercy); this rule does not reach them.
 
 Third-instance rule stands: if a second character adopts registers, this
 generalizes into a shared lint with a per-character vocabulary table.
@@ -80,8 +97,11 @@ def _leaf_ops(effects: list[dict]):
                 yield from _leaf_ops(fx[branch])
 
 
-# The two printed keywords (Track B). Both are Fanfare-touching for R2.
+# The two printed keywords (Track B). Only the FULL GRANT is Fanfare-touching
+# for R2 -- see the R2 note: raise_fanfare_cap now goes on every Power by
+# ruling, so it selects nothing and R7 owns it instead.
 KEYWORD_OPS = ("gain_fanfare_floor", "raise_fanfare_cap")
+R2_OPS = ("gain_fanfare_floor",)
 
 # L12. Ops that would hand the player TRANSIENT Fanfare directly. None of
 # these exists today and none may be added; the names are the plausible
@@ -93,7 +113,7 @@ BANNED_TRANSIENT_OPS = ("gain_fanfare", "add_fanfare", "grant_fanfare",
 
 def _touches_fanfare(card: dict) -> bool:
     for fx in _leaf_ops(card.get("effects")):
-        if fx.get("op") in KEYWORD_OPS:
+        if fx.get("op") in R2_OPS:
             return True
         if "fanfare" in str(fx.get("bonus_formula", "")):
             return True
@@ -148,6 +168,16 @@ def main() -> int:
                     "Fanfare directly. Every generation source must stay "
                     "indirect or the printed 'Fanfare +X' keyword becomes "
                     "ambiguous on faces already shipped")
+        if c.get("type") == "power":
+            printed = [fx.get("op") for fx in _leaf_ops(c.get("effects"))
+                       if fx.get("op") in KEYWORD_OPS]
+            if len(printed) != 1:
+                errors.append(
+                    f"R7 {cid}: a Power prints EXACTLY ONE Fanfare keyword "
+                    f"(found {printed or 'none'}). 'Fanfare +X' if it is one "
+                    "of R6's rare-Power payoffs, 'Fanfare Cap +X' otherwise. "
+                    "A Power that grants nothing is the invisible hole the "
+                    "compensation pass closed")
         if _grants_fanfare_floor(c) and not (
                 c.get("type") == "power" and c.get("rarity") == "rare"):
             errors.append(

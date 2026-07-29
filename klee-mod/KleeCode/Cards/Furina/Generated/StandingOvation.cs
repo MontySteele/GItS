@@ -41,13 +41,13 @@ public sealed class StandingOvation : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Standing Ovation"),
-        ("description", "Whenever you spend Encore, [gold]Spotlighted[/gold] Companion numbers are 10% stronger this turn. The first [gold]Spotlighted[/gold] card each turn grants 1 Encore."),
+        ("description", "Whenever you spend Encore, [gold]Spotlighted[/gold] Companion numbers are 10% stronger this turn. The first [gold]Spotlighted[/gold] card each turn grants 1 Encore. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("FanfareCap", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,6 +61,7 @@ public sealed class StandingOvation : CustomCardModel, ICharacterCard
     {
         await PowerCmd.Apply<OvationSpendBoostPower>(choiceContext, Owner.Creature, 10, applier: Owner.Creature, cardSource: this);
         await PowerCmd.Apply<SpotlightEncoreFirstPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        FurinaResources.RaiseFanfareCap(Owner.Creature, DynamicVars["FanfareCap"].IntValue);
     }
 
     protected override void OnUpgrade()

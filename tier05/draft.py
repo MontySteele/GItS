@@ -241,6 +241,26 @@ def _grants_fanfare_floor(card: Card) -> float:
                      if fx.get("op") == "gain_fanfare_floor"))
 
 
+def _drafted_readers(deck: list[Card]) -> int:
+    """Readers the DRAFT put in the deck -- basics excluded.
+
+    The exclusion arrived with the compensation pass (2026-07-28, Track 2.4),
+    which put a low-slope Fanfare read on `aria_of_recompense`. That is the
+    STARTER: one copy is in every Furina deck before a single card is offered.
+    Counted plainly, the reader limb of the fanfare core would be closed at
+    run start, forever, for every deck -- and this limb exists precisely to
+    ask whether the DRAFT assembled a plan that cashes the meter. A limb that
+    is always satisfied answers nothing and, worse, feeds `_core_progress`'s
+    +3.0 core-advance bonus with a constant, which would push the drafter off
+    real payoffs by telling it a third of the plan is free.
+
+    The generation and floor limbs are TOTALS over printed amounts, so the
+    starter's contribution to those is a real quantity that scales -- only the
+    reader limb is a COUNT, and only a count can be gamed by a free card.
+    """
+    return sum(1 for c in deck if c.rarity != "basic" and _reads_fanfare(c))
+
+
 def _reads_fanfare(card: Card) -> bool:
     """Does the printed output scale with or unlock from held Fanfare?"""
     for fx in _nested_effects(card.effects):
@@ -279,8 +299,7 @@ def core_complete(deck: list[Card], archetype: str) -> bool:
         return (
             _fanfare_generation_total(deck) >= FANFARE_GENERATION_COVERAGE
             and _fanfare_floor_total(deck) >= FANFARE_FLOOR_COVERAGE
-            and sum(1 for c in deck if _reads_fanfare(c))
-            >= FANFARE_PAYOFF_COVERAGE
+            and _drafted_readers(deck) >= FANFARE_PAYOFF_COVERAGE
         )
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))
@@ -307,10 +326,7 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
         # input limbs. This is the half of the fix with teeth -- progress
         # feeds score_offer's +3.0 core-advance bonus, so a fanfare deck now
         # actually reaches for a payoff instead of only for inputs.
-        payoff = min(
-            1.0,
-            sum(1 for c in deck if _reads_fanfare(c)) / FANFARE_PAYOFF_COVERAGE,
-        )
+        payoff = min(1.0, _drafted_readers(deck) / FANFARE_PAYOFF_COVERAGE)
         return (generation + baseline + payoff) / 3
     on_plan = sum(1 for c in deck if archetype in c.archetypes
                   and c.role in ("enabler", "payoff"))

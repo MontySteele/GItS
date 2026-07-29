@@ -67,6 +67,15 @@ tempo_change:          {draw: +1}            # 1->2; the member-conditional ener
 warmup_act:            {damage: +2}          # 3->5; the read-the-room block stays 3 (Curtain Call C)
 audience_participation: {encore: +1}         # both branches: 4->5 / 2->3 (Curtain Call C; encore-key law)
 ebb_and_flow:          {encore: +1}          # gain 3->4; the Spend 1 stays (net flux grows)
+# COMPENSATION PASS (2026-07-28), the three new common readers. Every delta
+# bumps the PRINTED BASE and leaves the 1_per_4 read alone, which is the
+# standing grammar for a reader card (dramatic_entrance, thunderous_ovation):
+# the rate is the card's identity and the upgrade is not where a rate moves.
+applause_line:         {damage: +2}          # 3->5; the read (1 per 4 Fanfare) rides on top
+held_breath:           {block: +3}           # 4->7; the read rides on top
+breathless:            {damage: +3}          # 9->12; the Spend 4 stays -- upgrading the spend would
+                                             # upgrade the Fanfare it prints, which is a rate change
+                                             # wearing a number's clothes.
 an_invitation:         {generate_cost_override: 0}   # kickoff §9 upgrade grammar VERBATIM: the guest costs 0
 limelight:             {draw: +1}            # 1->2; the boost stays 25 (R16: the mult is authored, not upgraded)
 shared_billing:        {cost: -1}            # 1->0 (R32.2 rider swap took the block; mined cost line — the

@@ -138,13 +138,29 @@ packages:
     - graceful_retreat
     - commanding_gaze
   fanfare_weighted:
-    - curtain_up
+    # COMPENSATION PASS (2026-07-28): the three new common readers replace
+    # three blind Encore batteries, one for one. THE SWAP IS THE DIAGNOSIS
+    # APPLIED -- this package was the evidence for it, holding six blind
+    # generators and one common reader, and the sprint's whole thesis is that
+    # a deck of batteries with no common-tier readers is what the 0.5% is.
+    # OUT: one curtain_up (the pair was two copies of the same 0-cost blind
+    # battery), ebb_and_flow, tempo_change.
+    # SWAPPED, NOT ADDED, deliberately: this package is the tier-0 seven-axis
+    # deck, so growing it from 17 to 20 cards would move every axis score by
+    # deck size and the new cards would be credited for it. A one-for-one swap
+    # keeps the count and makes the axis movement attributable to the cards.
+    # THIS MOVES THE fanfare_weighted A2 BAND, which is already flagged stale
+    # above and stays stale. It does NOT move the run-level fanfare winrate
+    # arm: that arm DRAFTS from the pool by archetype weight, so the new
+    # commons reach it through their `archetypes: [fanfare, ...]` tags and
+    # would have done so with this package untouched.
+    - applause_line
+    - held_breath
+    - breathless
     - curtain_up
     - suffering_for_art
     - dramatic_entrance
     - crowd_work
-    - tempo_change
-    - ebb_and_flow
     - audience_participation
     - crescendo
     - showstopper

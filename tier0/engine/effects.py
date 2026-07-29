@@ -49,7 +49,8 @@ def _amount(state: CombatState, val) -> int:
     raise ValueError(f"unknown amount formula {val!r}")
 
 
-def _bonus_formula(state: CombatState, formula: str) -> int:
+def _bonus_formula(state: CombatState, formula: str,
+                   card: Optional[Card] = None) -> int:
     """Scaling riders on a damage or block amount.
 
     Two grammars, and the difference is deliberate:
@@ -87,7 +88,8 @@ def _bonus_formula(state: CombatState, formula: str) -> int:
         return int(n) * state.companion_plays_this_turn
     m, _, what = rest.partition("_")
     if what == "fanfare" and m.isdigit():
-        resources.note_fanfare_read(state, "bonus_formula")
+        resources.note_fanfare_read(state, "bonus_formula",
+                                    card=card.id if card else None)
         # `readable`, not the raw field: the meter can sit BELOW ZERO since
         # the Hyperbeam (Track C.2), and a rider reading -12 would pay
         # NEGATIVE damage -- an attack that heals the enemy. Effects shut off
@@ -522,7 +524,7 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     else:
         base = _amount(state, fx["amount"])
     if "bonus_formula" in fx:
-        base += _bonus_formula(state, fx["bonus_formula"])
+        base += _bonus_formula(state, fx["bonus_formula"], card)
     if state.salon_replacements_this_card:
         base *= C.SALON_REPLACE_DAMAGE_MULT
     # Spotlight scales the card's own printed damage -- before external
@@ -619,7 +621,7 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     # after those would be multiplied by them and quietly outscale its
     # printed twin.
     if "bonus_formula" in fx:
-        raw += _bonus_formula(state, fx["bonus_formula"])
+        raw += _bonus_formula(state, fx["bonus_formula"], card)
     if state.salon_replacements_this_card:
         raw *= C.SALON_REPLACE_DAMAGE_MULT
     times = fx.get("times", 1)

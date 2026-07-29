@@ -53,6 +53,18 @@ class FanfareTrace:
     # them would let a dead act-1 meter read as successful floor-building.
     reads_empty: int = 0
     read_values: list[int] = field(default_factory=list)
+    # PER-CARD read samples (compensation pass, 2026-07-28). The sprint brief
+    # asks for a fire-rate on every new or changed reader, and the pooled
+    # `read_values` above cannot answer that: it is one bag for the whole
+    # deck, so a dead reader and a live one average into a healthy-looking
+    # number. Keyed by card id, which the `fanfare_read` event now carries.
+    #
+    # WHAT "FIRES" MEANS FOR A SLOPE, and it is not the conditional-telemetry
+    # definition: a bonus_formula rider always evaluates, so the question is
+    # not whether it ran but whether it PAID -- read // step >= 1. That is a
+    # per-card threshold, so the raw samples are kept here and the rate is
+    # computed where the step is known.
+    reads_by_card: dict[str, list[int]] = field(default_factory=dict)
     floor_grants: int = 0
     floor_granted: int = 0
     decayed: int = 0
@@ -140,6 +152,9 @@ def trace(log: list[dict]) -> FanfareTrace:
             out.reads_at_floor += 1 if ev["at_floor"] else 0
             out.reads_empty += 1 if ev["total"] == 0 else 0
             out.read_values.append(ev["total"])
+            cid = ev.get("card")
+            if cid:
+                out.reads_by_card.setdefault(cid, []).append(ev["total"])
         elif kind == "fanfare_floor_granted":
             out.floor_grants += 1
             out.floor_granted += ev["amount"]

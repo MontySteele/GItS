@@ -7,15 +7,17 @@
     "namespace": "KleeMod.Cards.Furina.Generated"
   },
   "coverage": {
-    "total": 79,
-    "generated": 77,
+    "total": 82,
+    "generated": 80,
     "blocked": 2
   },
   "generated": [
     "an_invitation",
+    "applause_line",
     "aria_of_recompense",
     "audience_participation",
     "blocking_notes",
+    "breathless",
     "casting_call",
     "command_performance",
     "commanding_gaze",
@@ -44,6 +46,7 @@
     "grand_salon",
     "guest_list",
     "hearts_swelling",
+    "held_breath",
     "high_tide",
     "house_call",
     "lasting_impression",
