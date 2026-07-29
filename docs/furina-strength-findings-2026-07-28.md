@@ -167,6 +167,91 @@ high the meter climbs, and makes a long act-3 boss the natural place to see
 
 ---
 
+## S8 — every source of Fanfare
+
+Four generation sources. That is all of them.
+
+| source | amount | fires on |
+|---|---|---|
+| `encore_gained` | 1 | per point of Encore **gained**, by any means |
+| `encore_spent` | 1 | per point of Encore **spent**, including salon upkeep |
+| `hp_lost` | 1 | per point of **true** HP lost (after Block and absorption) |
+| `center_stage` | 2 | per card played **while she holds the Spotlight** |
+
+Plus the floor, which is a different thing — it raises floor, cap and current
+together and persists for the combat:
+
+| source | amount | printed on the card? |
+|---|---|---|
+| **playing any POWER** | 5 (rare 8) | **no — it is a rule** |
+| `gain_fanfare_floor` op | varies | yes, on the 3 cards that have it |
+
+Decay is 20% per turn, clamped at the floor. Cap is `MaxHp/2 + floor grants`
+and does not bind.
+
+**Measured share** (power-heavy deck vs `tank_boss`, 150 fights):
+
+| source | per fight | share of generation |
+|---|---|---|
+| `center_stage` | 33.3 | 39.8% |
+| `encore_gained` | 29.2 | 35.0% |
+| `encore_spent` | 14.1 | 16.8% |
+| `hp_lost` | 7.1 | 8.4% |
+| *floor grants* | *34.3* | *(baseline, not generation)* |
+
+**This is the legibility answer to "I gain it for unclear reasons."** Three of
+the four sources are INDIRECT — they fire off Encore movement, damage taken
+and Spotlight plays rather than off anything the card says. A card that grants
+3 Encore silently prints 3 Fanfare on the way in and 3 more as the stage
+spends it: **6 Fanfare from a card whose text never mentions Fanfare.** And
+the single largest line in the table, the floor rule, is not written on any
+card at all.
+
+---
+
+## S9 — pricing "powers raise the cap, not the floor"
+
+Two things have to be said before this is priced.
+
+**It is not a coding mistake.** The floor-per-power rule is the F-A3
+constellation grant, and `constants.py` carries the reasoning: a grant is
+STATIC value rather than accrual, which keeps the no-passive-accrual law
+(kickoff §4) intact while still rewarding investment. The same comment
+records why the `gain_fanfare_floor` op exists alongside it — a power-only
+rule structurally excludes the power-light fanfare archetype (measured: 6.7
+floors/run against salon's ~51).
+
+**The cap half of the proposal is inert.** F-A5 demoted the cap to a safety
+rail; it does not bind (0.0–0.4% of reads, and an 8x cap sweep moved nothing).
+So "raise the cap, not the floor" is in effect "powers stop granting
+anything", and what is being priced is the removal of the ramp.
+
+Power-heavy deck, 150 fights/encounter:
+
+| FLOOR_PER_POWER | winrate | mean held | peak held | dmg/fight | hp left |
+|---|---|---|---|---|---|
+| **0 — the ruling** | 100.0% | 29.7 | 35.7 | 167.8 | 52.5 |
+| 2 | 100.0% | 33.0 | 40.1 | 167.9 | 52.5 |
+| **5 — shipped** | 100.0% | 37.6 | 45.8 | 167.9 | 52.6 |
+
+Winrate saturates at 100% here, so a second cut on the same decks measured
+**turns to kill**: 9.05 turns shipped vs **9.46 with the rule removed**, with
+HP left identical (53.2 vs 53.1) and peak Fanfare 48.7 → 37.8.
+
+**So the ruling costs about 22% of the visible Fanfare number and about 4% of
+her actual power.** It is not a nerf. That is consistent with everything else
+here: the Focus term converts 10 Fanfare into +1, so even a large swing in the
+meter is a small swing in output.
+
+There is still a good reason to want it, and it is the S8 reason rather than a
+balance one: **the rule is invisible.** Nothing on a power says it grants
+Fanfare, and it is the single largest line in the source table. Removing it
+(or printing it) is a legibility fix that happens to cost ~4% power — which is
+a much easier trade to justify than a balance change that does not balance
+anything.
+
+---
+
 ## S2 — the Encore census (T2)
 
 **19 of 78 cards (24% of the pool) grant Encore. Exactly ONE spends it.**
