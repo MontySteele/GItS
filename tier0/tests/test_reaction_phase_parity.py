@@ -243,6 +243,14 @@ def _modifier_bodies():
     declare more than one power class.
     """
     for path in sorted(SOURCE.rglob("*.cs")):
+        # Build output can hold copies of these files, and this sweep is
+        # parametrized at COLLECTION time -- so without this filter the test
+        # count is a function of the build state, not the source. That
+        # phantom has now shown up twice as "+9 tests" in sprint gate counts
+        # (1305-vs-1296, 1359-vs-1350) and made suite totals unusable as
+        # evidence between machines. Same idiom as test_canonical_model_misuse.
+        if any(part in ("bin", "obj") for part in path.parts):
+            continue
         source = path.read_text(encoding="utf-8")
         for hook in MODIFIER_HOOKS:
             pattern = rf"public\s+override\s+decimal\s+{hook}\s*\("
