@@ -539,6 +539,74 @@ def _charge_value(state: CombatState, card: Card) -> float:
     return val
 
 
+# --- Stoker tuning (pilot-gap sprint, 2026-07-28). Module-level, NOT in
+# tier0/constants.py: constants.py is the surface the C# parity gate compares
+# by value, and a pilot heuristic has no C# counterpart to compare against --
+# the mod ships no bot. These are PILOT JUDGMENT, not balance, and the sprint
+# log records that they were picked by hand and never swept.
+STOKE_DEPLOY_OPEN = 6.0     # a member entering an EMPTY slot: pure addition
+STOKE_DEPLOY_FULL = 1.5     # a member entering a FULL stage: a bow trigger,
+                            # which is a different decision (§Track 1.1)
+STOKE_RUNWAY_TURNS = 2.0    # "fuel it while the runway is under ~2 turns"
+STOKE_FUEL_HUNGRY = 1.2     # per point that CLOSES the runway gap
+STOKE_FUEL_SATED = 0.15     # per point beyond it -- not zero: surplus still
+                            # absorbs, which is the whole D8 argument
+
+
+def _stoke_value(state: CombatState, card: Card) -> float:
+    """Furina's SALON machinery: deploy the stage, then keep it fuelled.
+
+    The sprint hypothesis (docs/sprint-pilot-gap-2026-07-28.md) is that the
+    sim/table divergence is a PILOT gap, not an arithmetic one: a stage that
+    is dry half the time is a stage nobody is stoking. Two things the greedy
+    pilot cannot see:
+
+    1. A deploy is an `apply_power` on self, so its ONLY valuation is
+       `_scaling_value`'s `min(amount, 6) * 3` -- decayed by
+       `max(0, 1 - turn/12)`. That decay is right for a one-shot buff and
+       WRONG for a member: a member fielded on turn 10 ticks every remaining
+       turn of the fight, and by turn 12 the greedy pilot prices it at
+       exactly zero. This term does not decay.
+    2. Encore is valued by `_sustain_value` at a flat 0.8/point, which is a
+       statement about Encore as a damage buffer and says nothing about the
+       upkeep bill. A point of Encore that keeps a three-member stage ticking
+       is worth more than the fourth point on an idle one -- that is the
+       runway the D7 ribbon draws, and it is the quantity this term reads.
+
+    Deliberately NOT lookahead and NOT a general improvement (Track 1.4): no
+    damage or block is revalued here, so a stoker that comes back WORSE than
+    greedy is a real reading of the loop and not a broken pilot.
+
+    Default weight 0.0, the `charge`/`spotlight` precedent: every other pilot
+    is arithmetically unchanged.
+    """
+    p = state.player
+    live = len(p.salon)
+    room = max(0, effects.salon_slots(p) - live)
+    # The bill the CURRENT stage presents each upkeep. Zero with no members,
+    # which makes every Encore gain score at the sated rate -- correct: with
+    # no stage there is nothing to starve, and _sustain_value already prices
+    # the buffer. It also means the stoker deploys BEFORE it fuels, which is
+    # the ordering the brief asks for and falls out rather than being coded.
+    bill = live * C.SALON_TICK_ENCORE_COST
+    shortfall = max(0.0, STOKE_RUNWAY_TURNS * bill - p.encore)
+    val = 0.0
+    for fx in _active_effects(state, card.effects):
+        op = fx["op"]
+        if (op == "apply_power" and fx.get("power") == "salon_member"
+                and fx.get("target", "self") == "self"):
+            n = _est(state, fx.get("amount", 1), 1)
+            opened = min(n, room)
+            val += opened * STOKE_DEPLOY_OPEN
+            val += (n - opened) * STOKE_DEPLOY_FULL
+        elif op == "gain_encore":
+            n = _est(state, fx.get("amount", 0))
+            closes = min(n, shortfall)
+            val += closes * STOKE_FUEL_HUNGRY
+            val += (n - closes) * STOKE_FUEL_SATED
+    return val
+
+
 def _score(state: CombatState, card: Card, w: dict,
            dmg: Optional[float] = None, blk: Optional[float] = None) -> float:
     # `dmg`/`blk` are this card's already-computed _expected_damage and
@@ -556,18 +624,22 @@ def _score(state: CombatState, card: Card, w: dict,
              + w["tempo"] * _tempo_value(state, card)
              + w.get("sustain", 1.0) * _sustain_value(state, card)
              - w["cost"] * cost)
-    # Character-machinery terms, skipped when their weight is zero. Both are
-    # pure readers of state, so a zeroed weight makes the whole term
+    # Character-machinery terms, skipped when their weight is zero. All three
+    # are pure readers of state, so a zeroed weight makes the whole term
     # arithmetically dead -- and every pilot but Furina's zeroes spotlight,
-    # every pilot but Kokomi's zeroes charge. Scanning the hand for
-    # Companions and Guest-Star generators on each of those was the single
-    # most-called thing in a non-Furina fight.
+    # every pilot but Kokomi's zeroes charge, and every pilot but the stoker
+    # zeroes stoke. Scanning the hand for Companions and Guest-Star
+    # generators on each of those was the single most-called thing in a
+    # non-Furina fight.
     sw = w.get("spotlight", 0.0)
     if sw:
         total += sw * _spotlight_value(state, card)
     cw = w.get("charge", 0.0)
     if cw:
         total += cw * _charge_value(state, card)
+    kw = w.get("stoke", 0.0)
+    if kw:
+        total += kw * _stoke_value(state, card)
     return total
 
 

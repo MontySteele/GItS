@@ -79,6 +79,17 @@ class Cell:
     realistic: bool = True
     n_acts: int | None = None
     jobs: int = 0
+    # An explicit COMBAT PILOT, overriding the one the plan resolves to.
+    # None -- the default and the only value any ratified cell uses -- keeps
+    # resolve_plan as the single source of truth (R68).
+    #
+    # Added by the pilot-gap sprint (2026-07-28), which has to fly the SAME
+    # assigned draft under two different pilots and attribute the difference
+    # to the pilot alone. It is a field rather than a call-site argument so
+    # that it lands in `stamp()`: the brief's rule is that no Furina table
+    # may show one pilot without saying which, and a rule enforced by the
+    # mandatory stamp line cannot be forgotten by the next script.
+    pilot_override: str | None = None
 
     def __post_init__(self) -> None:
         # Fails loudly on an archetype the character does not have. This is
@@ -86,6 +97,13 @@ class Cell:
         # pass `archetype` as its own pilot id directly, which worked right
         # up until a plan's pilot differed from its name.
         _resolve_plan(self.character, self.archetype)
+        if self.pilot_override is not None:
+            # Fails loudly on a pilot id no weights file defines, at
+            # CONSTRUCTION -- the same contract _resolve_plan gives the plan.
+            # A typo here would otherwise surface as a KeyError deep inside a
+            # worker process, halfway through a batch.
+            from tier0.content import loader
+            loader.pilot_weights(self.pilot_override)
         if self.policy not in draft.POLICIES:
             raise ValueError(
                 f"unknown policy {self.policy!r}; choose one of "
@@ -95,7 +113,10 @@ class Cell:
 
     @property
     def pilot(self) -> str:
-        """The combat pilot for this cell's plan, via runner.resolve_plan."""
+        """The combat pilot for this cell: the override if one is declared,
+        otherwise the plan's, via runner.resolve_plan."""
+        if self.pilot_override is not None:
+            return self.pilot_override
         return _resolve_plan(self.character, self.archetype)[1]
 
     @property
@@ -117,7 +138,14 @@ class Cell:
         from, and for most of this project's life they did not.
         """
         v = self.versions
-        return (f"cell={self.name} seed={self.seed} runs={self.runs} "
+        # The pilot is named ONLY when it is not the plan's own. Adding it
+        # unconditionally would rewrite every stamp on record and make the
+        # ratified cell's line stop matching the one in the sprint docs that
+        # cite it; naming it only on divergence is exactly the case the
+        # reader has to be warned about.
+        pilot = ("" if self.pilot_override is None
+                 else f" pilot={self.pilot_override}")
+        return (f"cell={self.name} seed={self.seed} runs={self.runs}{pilot} "
                 f"RT{v['RT']}/D{v['D']}/P{v['P']}/C{v['C']}")
 
     def describe(self, subject: str | None = None,

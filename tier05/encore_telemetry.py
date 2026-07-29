@@ -24,6 +24,14 @@ later cell can redefine them mid-sweep:
                 member spends, all-ticked after, so a stage that arrives
                 one short shows as not-full AND not-all-ticked, while a
                 stage that arrives exactly adequate shows as both.
+- runway rate   fraction of stage-active upkeeps arriving with at least
+                RUNWAY_SATURATED_TURNS turns of the whole stage's bill in
+                hand (encore >= turns x members x cost). Added by the
+                pilot-gap sprint (2026-07-28) as the direct sim analogue of
+                what a playtester SEES: nobody reads a meter as "full", they
+                read the runway bar as "I am not going to run out". Full
+                rate answers "can the stage tick THIS turn", which is a much
+                weaker claim and is why the two can disagree.
 - end level     Encore still held when the combat ends -- the most direct
                 statement of "generated and never needed".
 - gained/drained totals over the combat, and the ratio. A ratio above 1
@@ -55,6 +63,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+# How many turns of the WHOLE stage's bill counts as a saturated runway.
+# Registered here with the metric definitions, not passed in per call, so no
+# cell can quietly re-cut the threshold and quote the result as the same
+# column. 5 is the sprint brief's number.
+RUNWAY_SATURATED_TURNS = 5
+
 
 @dataclass
 class EncoreTrace:
@@ -63,6 +77,7 @@ class EncoreTrace:
     upkeeps: int = 0
     upkeeps_dry: int = 0
     upkeeps_full: int = 0
+    upkeeps_saturated: int = 0
     upkeeps_all_ticked: int = 0
     upkeeps_complete: int = 0
     upkeeps_truncated: int = 0
@@ -85,6 +100,11 @@ class EncoreTrace:
     @property
     def full_rate(self) -> float:
         return self.upkeeps_full / self.upkeeps if self.upkeeps else 0.0
+
+    @property
+    def runway_rate(self) -> float:
+        return (self.upkeeps_saturated / self.upkeeps
+                if self.upkeeps else 0.0)
 
     @property
     def all_ticked_rate(self) -> float:
@@ -140,6 +160,8 @@ def trace(log: list[dict]) -> EncoreTrace:
                 out.upkeeps_dry += 1
             if ev["encore"] >= ev["cost"]:
                 out.upkeeps_full += 1
+            if ev["encore"] >= RUNWAY_SATURATED_TURNS * ev["cost"]:
+                out.upkeeps_saturated += 1
         elif kind == "salon_tick":
             out.ticks += 1
             out.ticks_paid += 1 if ev["paid"] else 0
@@ -184,6 +206,8 @@ def aggregate(traces: list[EncoreTrace]) -> dict:
                      if upkeeps else 0.0),
         "full_rate": (sum(t.upkeeps_full for t in live) / upkeeps
                       if upkeeps else 0.0),
+        "runway_rate": (sum(t.upkeeps_saturated for t in live) / upkeeps
+                        if upkeeps else 0.0),
         "all_ticked_rate": (sum(t.upkeeps_all_ticked for t in live) / complete
                             if complete else 0.0),
         "truncated_upkeeps": sum(t.upkeeps_truncated for t in live),
@@ -219,6 +243,7 @@ def format_row(label: str, agg: dict) -> str:
     ratio_text = "NEVER USED" if ratio is None else f"{ratio:4.2f}"
     return (f"  {label:<20} dry {agg['dry_rate']:6.1%} "
             f"full {agg['full_rate']:6.1%} "
+            f"runway{RUNWAY_SATURATED_TURNS}+ {agg['runway_rate']:6.1%} "
             f"all-ticked {agg['all_ticked_rate']:6.1%}   "
             f"surplus {agg['mean_surplus']:+6.1f} "
             f"held {agg['mean_held']:5.1f} "

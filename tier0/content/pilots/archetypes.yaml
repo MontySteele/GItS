@@ -44,6 +44,67 @@
     spotlight: 0.4    # plays a selector if drafted into one, no priority
     cost: 0.1
 
+# --- salon_stoker (pilot-gap sprint, 2026-07-28). NOT an archetype: no
+# character yaml names it, so `resolve_plan` can never reach it. It is a
+# COMBAT PILOT passed to run_many by hand, deliberately, so a stoker arm and a
+# greedy arm can be flown over the SAME assigned draft (`salon`) and the only
+# difference between them is how the cards get played.
+#
+# Every number here is the `salon` entry above, UNCHANGED, except the two
+# lines marked. That is the point: this is not a better pilot, it is the same
+# pilot that also knows how to run the engine (brief Track 1.4). If it were
+# retuned generally, a win would not be attributable to stoking.
+#
+# New key: stoke (deploy-the-stage + fuel-the-runway machinery; policy default
+# 0.0, the sustain/spotlight/charge precedent, so every older pilot is
+# arithmetically unchanged). The payoff DAMAGE from a bigger, fed stage
+# already flows through the damage term -- stoke weights only the machinery.
+- id: salon_stoker
+  weights:
+    damage: 1.0
+    block: 1.2
+    scaling: 1.4
+    reaction: 0.8
+    tempo: 0.9
+    sustain: 1.3
+    spotlight: 1.0    # RE-WEIGHTED from salon's 0.4 (brief Track 1.3:
+                      # re-weight, do not rewrite). center_stage pays 2
+                      # Fanfare per card while she holds the Spotlight, so
+                      # designation is stage fuel and not just a selector.
+    stoke: 1.0        # NEW. the whole experiment
+    cost: 0.1
+
+# The two ABLATION arms. salon_stoker changes two things at once, so on its
+# own it cannot say which one moved the number -- and "the stoker wins" and
+# "Furina's salon pilot was simply under-weighting her Spotlight all along"
+# are different findings with different levers behind them. Each of these
+# holds one of the two changes at the `salon` value.
+- id: salon_stoke_only
+  weights:
+    damage: 1.0
+    block: 1.2
+    scaling: 1.4
+    reaction: 0.8
+    tempo: 0.9
+    sustain: 1.3
+    spotlight: 0.4    # HELD at salon's value
+    stoke: 1.0
+    cost: 0.1
+
+- id: salon_spot_only
+  weights:
+    damage: 1.0
+    block: 1.2
+    scaling: 1.4
+    reaction: 0.8
+    tempo: 0.9
+    sustain: 1.3
+    spotlight: 1.0
+    cost: 0.1         # stoke OMITTED, not zeroed -- the ironclad precedent:
+                      # writing 0.0 would imply the term was considered and
+                      # priced at nothing, when the claim is that this arm
+                      # does not have it at all.
+
 - id: spotlight
   weights:
     damage: 1.0

@@ -56,6 +56,19 @@ class FanfareTrace:
     floor_grants: int = 0
     floor_granted: int = 0
     decayed: int = 0
+    # Per-source generation (pilot-gap sprint, 2026-07-28). The S8 census ran
+    # this arithmetic over a raw fight log, which is only possible for a
+    # hand-built deck driven by run_fight directly -- state.log does not
+    # survive onto a RunResult, so a REALISTIC run could not be asked the same
+    # question at all. Reduced here, next to every other per-combat total, so
+    # that "where does her Fanfare come from" becomes answerable of a drafted
+    # deck and comparable between two pilots.
+    #
+    # REQUESTED, not granted: the same leg the `requested`/`wasted` pair uses.
+    # Crediting a source with only what survived the cap would silently
+    # re-attribute overflow to whichever source happened to be under the
+    # ceiling at the time, which is a fact about ORDER, not about sources.
+    by_source: dict[str, int] = field(default_factory=dict)
 
     @property
     def time_at_cap(self) -> float:
@@ -140,6 +153,8 @@ def trace(log: list[dict]) -> FanfareTrace:
                 continue
             out.requested += ev["requested"]
             out.wasted += ev["wasted"]
+            src = ev.get("source", "unknown")
+            out.by_source[src] = out.by_source.get(src, 0) + ev["requested"]
             out.peak = max(out.peak, ev["total"])
         elif kind == "fanfare_spent":
             out.spend_events += 1
@@ -195,7 +210,17 @@ def aggregate(traces: list[FanfareTrace]) -> dict:
         "spent_per_combat": sum(t.spent for t in live) / len(live),
         "mean_held_fraction": sum(t.held_fraction for t in live) / len(live),
         "peak_fraction": sum(t.peak / t.cap for t in live if t.cap) / len(live),
+        "by_source": _pool_sources(live),
     }
+
+
+def _pool_sources(live: list[FanfareTrace]) -> dict[str, int]:
+    """Totals per source across the pooled combats, descending."""
+    out: dict[str, int] = {}
+    for t in live:
+        for src, amount in t.by_source.items():
+            out[src] = out.get(src, 0) + amount
+    return dict(sorted(out.items(), key=lambda kv: -kv[1]))
 
 
 def per_run(agg: dict, runs: int) -> dict:
