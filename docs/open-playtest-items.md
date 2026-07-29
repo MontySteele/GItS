@@ -1,5 +1,22 @@
 # Open playtest items, all sprints
 
+> ## SUPERSEDED AS THE CROSS-SPRINT REGISTER — see `docs/backlog-2026-07-29.md`
+>
+> This file stopped being the owed-item register on 2026-07-26. The live
+> register is **`docs/backlog-2026-07-29.md`**, which carries the desk queue
+> (§6 here), the ruling queue, the bug list and the art debt, and whose own
+> retirement rule is "strike through with a commit reference, never delete."
+>
+> What is still worth reading here: **§1–§5**, the *table* agenda — the
+> questions that need a human at the game, which the backlog deliberately
+> does not restate at this length. §6 is kept for its reasoning, but its
+> status column is maintained in the backlog now.
+>
+> Corrections that used to live in the §7 addendum have been **folded into
+> the text they correct** (2026-07-29 doc de-drift pass) — every closed item
+> below is struck through where it stands, so no reader has to reach an
+> addendum to learn an item is closed.
+
 **Compiled:** 2026-07-25, against deployed pck `20260725-175515+e263577`,
 mod `klee-v0.2.0`, suite 808 passed / 0 skipped.
 
@@ -169,7 +186,10 @@ the game running.
    *pre-existing shipped* duplicates, allowlisted as known defects pending a
    re-pick: `blazing_delight == true_spark_knight`,
    `crowd_work == standing_ovation`, `catalytic_conversion == spark_collection`.
-   `blazing_delight` additionally has **no rank-1 plan row at all**.
+   ~~`blazing_delight` additionally has **no rank-1 plan row at all**.~~
+   **CLOSED 2026-07-26 (`6f1b969`)** — the plan row exists and the L12
+   allowlist entry is gone. The other two duplicate pairs remain open as
+   written.
 
 ### 6.2 Rulings
 
@@ -180,15 +200,19 @@ the game running.
 - **Kokomi v0.4 §6:** meter-20 ratification on the 500-run confirm;
   `epiphany_of_the_deep` → "Song of Pearls"; whether to keep watching commander
   Garment uptime (still 50%, 58.7% in long fights).
-- **The single red-pen session** (ship-what-we-know §"What is NOT done"):
+- ~~**The single red-pen session** (ship-what-we-know §"What is NOT done"):
   every number in that sprint is PROPOSED — G-D's three cards, G-C2's Nicole
   delta, G-C3(b)'s two relic tune-ups. The sprint's own gate says this happens
-  once, late, over the whole set. *(Note: item 1 of that list, G-A5(b)'s live
-  capture, was captured on 2026-07-25 — the list is stale there.)*
-- **Furina's starter has no upgraded form.** Touch of Orobas still hands her a
+  once, late, over the whole set.~~
+  **CLOSED 2026-07-26** — the session happened; all seven numbers RATIFIED and
+  APPLIED (`docs/red-pen-2026-07-26.md` Part 1). *(Item 1 of that list,
+  G-A5(b)'s live capture, had already been captured on 2026-07-25.)*
+- ~~**Furina's starter has no upgraded form.** Touch of Orobas still hands her a
   Circlet, and she is the character the playtest was played on. Every available
   tune-up breaks either the no-new-behaviour rule or her no-passive-accrual
-  law. **Needs a ruling, not code.**
+  law. **Needs a ruling, not code.**~~
+  **CLOSED 2026-07-26** — ruled (R2) and implemented (queue 3, `477b282`);
+  `NO_UPGRADED_FORM` is now an empty dict by design.
 - **Ten Spotlight powers, ten icons or one family mark?** Shipped as distinct
   on the sprint-1 reading that legibility failures came from indistinctness;
   the opposite case is real at badge size. Collapsing is a one-line change.
@@ -205,7 +229,9 @@ the game running.
   feature or one our own characters want. Exactly ONE card in the Silent's
   remaining 27 needs it (Blade Of Ink), which is the argument against, and
   the anchor is honest without it either way.
-- **Kokomi kickoff §202:** Raiden Shogun's disposition.
+- ~~**Kokomi kickoff §202:** Raiden Shogun's disposition.~~
+  **CLOSED 2026-07-26 (R52)** — she ships as an Inazuma 5-star rare
+  (`docs/inazuma-companions.yaml`); red-pen passes at `81ba9d5` / `e80f955`.
 - **Kaboom Beetle Swarm's printed text, after R72** (2026-07-26). The bonus
   now snapshots bombed-state at cast, so an enemy whose bombs hit 1 detonated
   keeps paying the +3 on hits 2–3 — but the card still reads "*Bombed enemies
@@ -218,6 +244,9 @@ the game running.
 - **Orobas is not modelled in the sim**, a recorded divergence. Cost: Klee's
   doubling is the most aggressive number in the ship-what-we-know sprint and
   the one with no sim evidence behind it.
+  **NARROWED 2026-07-26** — Klee's variant *is* modelled now
+  (`touch_of_orobas_klee`, real `combat_start_spark` hook, queue 2). Still
+  unmodelled: Furina's R2 upgraded form and Kokomi's variant.
 - **The Ancient card's 3 Charge/turn is unmeasurable** — it lives in a layer
   the run sim does not model. The single least-defended value in Kokomi's
   build. If the Darv event offers it, take it and say what happened.
@@ -228,26 +257,19 @@ the game running.
 
 ## 7. Recap addendum (2026-07-26) — corrections to the compile above
 
-Dated addendum from the 2026-07-26 recap audit; the compiled sections above
-are left verbatim as the 2026-07-25 record. Full audit:
+Dated addendum from the 2026-07-26 recap audit. Full audit:
 `docs/missed-requirements.md`.
 
-**Closed since compile:**
+**The "closed since compile" list that used to sit here has been FOLDED INTO
+THE TEXT IT CORRECTS** (2026-07-29 doc de-drift pass). All five items —
+§6.1's `blazing_delight` plan row, §6.2's red-pen session, §6.2's Furina
+starter, §6.2's Raiden disposition, and §6.3's Orobas divergence — are now
+struck through and dated where they stand, because a correction nobody
+scrolls to is not a correction. Nothing was deleted; the closures moved.
 
-- §6.2 "The single red-pen session … every number is PROPOSED" — the session
-  happened 2026-07-26. All seven numbers RATIFIED and APPLIED
-  (`docs/red-pen-2026-07-26.md` Part 1).
-- §6.2 "Furina's starter has no upgraded form" — ruled (R2) and implemented
-  (queue 3, `477b282`). `NO_UPGRADED_FORM` is now an empty dict by design.
-- §6.2 "Kokomi kickoff §202: Raiden Shogun's disposition" — closed by R52;
-  she ships as an Inazuma 5-star rare (`docs/inazuma-companions.yaml`),
-  red-pen passes at `81ba9d5`/`e80f955`.
-- §6.1 item 3, "`blazing_delight` … no rank-1 plan row at all" — closed at
-  `6f1b969`; the row exists and the L12 allowlist entry is gone. The other
-  two duplicate pairs remain open as written.
-- §6.3 "Orobas is not modelled in the sim" — narrowed: Klee's variant now is
-  (`touch_of_orobas_klee`, real `combat_start_spark` hook). Still unmodelled:
-  Furina's R2 upgraded form and Kokomi's variant.
+What remains below is the half of the addendum that is *not* a correction to
+§1–§6: findings the 2026-07-26 audit surfaced that this file never listed at
+all. They are all carried forward in `docs/backlog-2026-07-29.md`.
 
 **Newly surfaced, untracked above** (full list with evidence in
 `docs/missed-requirements.md` — the top items):

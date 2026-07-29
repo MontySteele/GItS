@@ -1,4 +1,15 @@
-# Kokomi playtest protocol — first play, build `750a9cc`
+# Kokomi playtest protocol — first play, artefact `0.2-247` (commit `29f5ce6`)
+
+> **Build pin re-stamped 2026-07-29.** This protocol was written against
+> `750a9cc` and that pin went ~70 commits stale. The current deployed
+> artefact is **0.2-247**, built from commit **`29f5ce6`** on a clean tree
+> (pck build id `20260729-125659+29f5ce6`) — the same build the Furina
+> playtest runs on, and safe to hand to a co-op partner. Anything below
+> describing "the build" describes that one. Two changes since the protocol
+> was written that this file does *not* otherwise account for: her character
+> shell is now her own (see the art note below) and the C# bug-fix pass of
+> 2026-07-29 (`docs/sprint-bugfix-log-2026-07-29.md`) changed player-visible
+> behaviour in five places, none Kokomi-specific.
 
 The Kokomi sprint's own definition of done is *"[USER] has played her — not
 before."* This is the form that play should take, and it is a **protocol, not
@@ -12,7 +23,29 @@ first.
 
 ## Read this before treating anything as a bug
 
-### She is playing on Klee's art, on purpose
+### Art: the shell IS hers now, and it wants judging — the card faces do not
+
+> **CORRECTED 2026-07-29.** The blanket "do not report art" below was written
+> when *every* Kokomi surface was a Klee fallback. That stopped being true on
+> 2026-07-25: her **character shell** — select portrait, locked portrait, char
+> icon, map marker, selection splash, select backdrop, transition wipe and
+> combat model — is hers, shipped, and has had **no eyes on it in-game**.
+> `docs/open-playtest-items.md` §2.2 asks you to judge exactly those, and
+> **§2.2 is the authoritative instruction where the two disagree.** What §2.2
+> asks: does she sit left of centre over the Watatsumi reef with the right
+> third clear for the info panel; are the char icon and map marker centred on
+> her *head* rather than her bounding box; does the 240x280 static combat
+> model read acceptably flat next to Furina (she has **no layered combat
+> rig** — no idle, no lunge, no death animation, and that is expected); does
+> the rising-tide transition wipe read.
+>
+> Still not worth reporting, and this is the part the section below gets
+> right: her **58 card faces and 15 Inazuma companion faces** are provisional
+> rank-1 picks nobody has chosen (Track D taste pass). "The card art is a
+> guess" is already in the ledger. Report card art only if it looks *broken*
+> rather than *unchosen*.
+
+### Her card faces are provisional, on purpose (the original note)
 
 `tools/build_pck.ps1` copies eight required assets from Klee's directories into
 Kokomi's paths (`Copy-KokomiFallback`). This is not laziness — a null
@@ -21,10 +54,13 @@ id-derived path that does not exist, the background preloader fails, and the
 run crashes later with an incomplete `AssetCache`. Shipping the fallback is
 what makes her playable before the art exists.
 
-**So: do not report art.** Her portrait, her combat model, her select
-background and her relic icon are all Klee's, and `tools/art_coverage.py` says
-the bill is **58 personal faces + 15 Inazuma companion faces**. That ledger is
-already accurate; a note saying "she looks like Klee" costs a line and tells us
+~~**So: do not report art.** Her portrait, her combat model, her select
+background and her relic icon are all Klee's~~ — **superseded 2026-07-29:
+the shell is hers (see the corrected note above); the fallback machinery is
+what shipped her before it existed, and is recorded here for why a null
+override is not safe.** What remains true: `tools/art_coverage.py` says the
+bill is **58 personal faces + 15 Inazuma companion faces**, that ledger is
+already accurate, and a note saying "the card art is a guess" tells us
 nothing new.
 
 The one visual thing worth reporting is anything that looks *broken* rather
@@ -188,7 +224,7 @@ exactly like "commander feels bad" from inside the run.
 
 | Gap | Status |
 |-----|--------|
-| All personal art is Klee's | Expected — Track D, 58 + 15 faces owed |
+| ~~All personal art is Klee's~~ | **Corrected 2026-07-29** — the character SHELL is hers and is a *review ask* (`open-playtest-items.md` §2.2). Still owed and not worth reporting: Track D's 58 card faces + 15 companion faces |
 | `kokomi/model/combat.tscn` missing | Expected — no rig until the art pass; logged as EXPECTED MISSING at boot |
 | Ancient card's 3 Charge/turn is unmeasured | Known — no instrument exists for Ancients |
 | Every balance number is PROPOSED | Known — none has had red-pen |

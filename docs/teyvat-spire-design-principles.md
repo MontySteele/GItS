@@ -248,3 +248,91 @@ Flagged for v0.2+ planning: characters whose Genshin identity is *support* (Colu
 - v1.10 (2026-07-20): **Furina kickoff batch ratified** (furina-principles-amendment-batch.md; red-pen record furina-sprint-1-redpen.md). New §4.5 Spotlight system + `character:` schema field; §2.2a extension (Spotlight numbers-only, never turn-economy); Guardrail 5 support-protagonist keyword exception; Guardrail 2 generated-companion-cards ruling; R8 conjunctive healing law codified as Guardrail 6 with potion/relic-trickle exemptions; Fontaine 4-star set v0.1 into Furina's release scope (§8). **Encore & Fanfare final definitions (supersede furina-predesign-notes.md Part 2):** Encore = unbounded per-combat buffer (v1.6 house style), absorbs after Block and before HP; potent cards carry "Spend N Encore:" cost lines; overdraw drains true HP; Tier 0 accounting binding — Encore absorption credits A4, never A3. Fanfare = capped at %maxHP; generation strictly activity-based (HP lost, Encore gained, Encore spent, Spotlighted card played); no passive per-turn accrual, ever; a global pool that survives Spotlight moves. Wish banner renumbered §4.5→§4.6.
 - v1.11 (2026-07-21): **Base colorless pool removed; the companion pool becomes the mod's sole colorless content (new §4.7).** Two-channel model resolves the value-inversion problem (base colorless is costed above-rate, companions below-rate per §4.3): the free reward slot stays enabler-grade/stochastic (value = capability, not per-energy stats); the shop is the paid premium/targeted channel with two slots — **Slot 1** home-region, Uncommon floor ("dream support"); **Slot 2** wildcard at card-reward odds. Gold pricing is the governor that lets the shop roll payoff-grade 5-stars without violating §4.3 (which caps power per grade, not per channel). Supersedes §4.1's "one rotating visiting companion." Added the utility-coverage checklist (neutral draw/energy/thin must remain reachable post-removal, patched via neutral-utility companions, never by re-admitting base colorless). Value-inversion gap referred to `companion-value-vs-colorless-study.md` for empirical validation; resolution is channel + pricing, not stat buffs. Study since completed: real StS2 colorless data (study §7) confirms StS2 colorless has **no common tier** (voids the hypothesis's bottom rung) and clean rare bodies top ~10 v/e (below StS1's 15+) — the companion pool clears the bar comfortably. Utility-coverage audit run (§4.7 audit result): draw + block covered pool-wide, but **energy is a genuine pool gap** — corrected framing (v1.11a): the shared pool must let *any* character (present or future) draft a gap-patch, as base colorless did, so "a current character self-provides" is the wrong test. Two-part energy ruling: neutral action-energy/draw/thin are legal enabler-grade companion utility (one-shot, Exhaust-gated), while Burst-meter generation stays character-kit-scoped. **Action: add a neutral-energy companion** (Production-analog, Exhaust; Mondstadt/Sucrose). `sucrose_astable` rebalanced 2→0 cost + Exhaust — the pool's one genuinely undercosted card.
 - v1.11b (2026-07-25): **R62 — `sucrose_astable` restored to the v1.11a numbers (free, Exhaust), superseding main's interim rebalance.** The two edits collided in the 2026-07-26 merge and main won on recency, which quietly dropped the Exhaust. Red-pen ruled the Exhaust back in: it was never only a cost fix but a *guard* against the card becoming a repeatable multi-copy Burst battery (§2.4, §4.3). The guard does not currently bind — Bursts are not priced strongly enough for replaying the card to be worth the energy — so it is retained as cheap insurance against a future Burst reprice rather than as a live constraint. §4.7's v1.11a changelog text is accurate again as written.
+
+---
+
+### Amendment DRAFTS — proposed, NOT ratified (added 2026-07-29)
+
+> These two entries are **DRAFT (unratified)**. They are written in the
+> amendment-log style so they can be ratified by countersign without being
+> re-drafted, and they are fenced off below the ratified log so no reader
+> mistakes them for law. Nothing above this line was renumbered, reworded or
+> altered. Both record changes that have **already shipped in code** while the
+> principles text still states the superseded rule — which is the situation
+> the fence exists to make visible. Filed by the doc de-drift pass
+> (`docs/backlog-2026-07-29.md` §2).
+
+- **v1.12 — DRAFT (unratified): Fanfare generation is SINGLE-LEG on Encore.**
+  Amends the v1.10 entry's Fanfare definition, which still reads *"generation
+  strictly activity-based (HP lost, Encore gained, Encore spent, Spotlighted
+  card played)"*. **The "Encore gained" leg is dead.** Ruled [USER]
+  2026-07-28 (post-playtest-3) and shipped the same day in both engines —
+  `docs/sprint-fanfare-rework-2026-07-28.md` Track A, executed and measured in
+  `docs/sprint-fanfare-rework-log-2026-07-28.md`.
+
+  Proposed replacement text: *Fanfare prints when Encore goes DOWN, never when
+  it goes up.* All three reduction paths qualify — salon upkeep ticks, explicit
+  card spends, and absorption (`encore_absorbed`, a NEW leg: absorbed Encore is
+  deferred Block that will never block a future hit, so cashing it is a real
+  cost). The live generation set is therefore **HP lost / Encore spent / Encore
+  absorbed / Spotlighted card played**. The design invariant that replaces the
+  old asymmetry, and that is pinned as a test in both engines: **every point of
+  damage that gets past Block prints exactly 1 Fanfare** — through absorption
+  if the buffer eats it, through HP loss if HP does. Before the change,
+  absorbed damage printed 0.
+
+  Measured price at ratification (stoker arm): total generation fell **34%**
+  (44% was predicted; the two surviving reduction legs both grew). Post-change
+  source shares: hp_lost 45.4%, encore_spent 24.1%, encore_absorbed 20.8%,
+  center_stage 9.7%. **Every Fanfare number taken before 2026-07-28 is
+  archive.**
+
+  Rider, same sprint, same ruling session and part of the same amendment if it
+  is taken: the invisible `FANFARE_FLOOR_PER_POWER` rule is **deleted** and
+  replaced by printed keywords — **`Fanfare Cap +X`** (raises the cap only) and
+  **`Fanfare +X`** (the full grant: current, floor and cap; a **rare POWER
+  payoff only**, enforced by lint R6). Spelled "Fanfare Cap", never bare "Cap".
+  Consequence to state plainly because it changes how those cards read: the cap
+  has been a non-binding safety rail since F-A5, so a card printing only
+  `Fanfare Cap +X` is paying close to nothing at current constants.
+
+  **What this amendment does NOT touch:** the no-passive-per-turn-accrual law
+  is untouched and remains binding, and the cap stays at %maxHP.
+
+  **Status: DRAFT.** The direction is [USER]-ruled; the X values remain
+  PROPOSED (`docs/backlog-2026-07-29.md` §3 item 9, the ratification batch),
+  and the fanfare archetype itself is under a pre-registered STOP at 1.8%
+  against its 2.0% floor. Ratifying this text does **not** ratify those
+  numbers.
+
+- **v1.13 — DRAFT (unratified): the pre-scaled-art house rule is amended for
+  per-player-stat pitches.** The standing house rule is *"ship pre-sized art,
+  no runtime minification"* (`docs/art-asset-manifest.md`, enforced in
+  `tools/cut_salon_members.py` and `tier0/tests/test_visual_contract_gaps.py`).
+  It is **already amended in code** and the amendment is recorded nowhere but a
+  playtest note — `docs/playtest3-notes-2026-07-28.md` (answer 2), following
+  **A12**, which promoted the Salon member cap from a constant to a per-player
+  stat.
+
+  Proposed text: *pre-scaled art remains the rule wherever the layout pitch is
+  fixed. Where the pitch is a function of a per-player stat, no single cut size
+  can serve it, and runtime fitting is permitted — bounded, with the bound
+  written down and asserted by a test.* The shipped instance: member art is cut
+  at 144px tall and was drawn 1:1 on a 62px pitch (members had always
+  overlapped by about half); A12 tightened the pitch to 39.5px and turned
+  "ugly" into "unreadable". The fix fits the art to the slot at runtime
+  **capped at 0.5** — exactly half the master and exactly the 72px beam, so a
+  three-member stage is a clean 2x downscale and only a RAISED cap ever goes
+  below it. Pool, beam and ghost decorations squash horizontally on the same
+  rule, because the pool carries the accent hue and overlapping pools blur the
+  identity signal the hue exists to provide.
+
+  Why it belongs in the principles rather than in the art manifest alone: the
+  rule it amends is a *ship* rule that three tools and a suite test enforce,
+  and the amendment's condition ("the pitch is a per-player stat") is a design
+  fact, not an art fact — the next character with a stat-sized board inherits
+  it.
+
+  **Status: DRAFT.** Shipped and deployed (playtest 3 fix); the general rule
+  change has never been ratified, and the gap test it replaced was rewritten as
+  the arithmetic check it always said it should become.

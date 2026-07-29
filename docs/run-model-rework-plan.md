@@ -1,5 +1,20 @@
 # Run-Model Rework: a realistic tier0.5 gauntlet
 
+> # ARCHIVED — DO NOT QUOTE UNLABELLED
+>
+> **This doc describes the RUNTEMPLATE 3→5 / DRAFTER 5 world.** The current
+> world is **RUNTEMPLATE 7 / CONSTANTS 4 / DRAFTER 13** (DRAFTER 13 accepted
+> 2026-07-29, R87). RUNTEMPLATE 6 (generated maps, `docs/sts2-map-and-events-research.md`
+> §3.4) and RUNTEMPLATE 7 (acts 2–3 event pools, §3.7) each declared **every
+> archived run-layer number uncomparable across the boundary** — so every
+> winrate, act-clear rate, deck-size and pick-rate figure below is archive,
+> not a reading of anything that exists today.
+>
+> What is still live here: the layer boundary (§6), the ruling that motivated
+> the rework, and §10.9's skip backlog as a list of *ideas*. What is dead:
+> all numbers, all version stamps, and §10.8's "current" framing.
+> Banner added 2026-07-29 by the doc de-drift pass (`docs/backlog-2026-07-29.md` §2).
+
 **Status:** IMPLEMENTED — Passes 1–4 SHIPPED (see §10.8); ratified 2026-07-23.
 §10.9 is the living skip backlog and the reason this doc stays current.
 *(Header corrected 2026-07-26 during the recap; it previously still read

@@ -1,5 +1,24 @@
 # StS2 map generation + event research (wiki harvest)
 
+> # MIXED WORLD — DO NOT QUOTE UNLABELLED
+>
+> **This doc accreted across three run-layer worlds and its sections do not
+> agree with each other.** Current world: **RUNTEMPLATE 7 / CONSTANTS 4 /
+> DRAFTER 13** (DRAFTER 13 accepted 2026-07-29, R87). Section by section:
+>
+> | section | world | how to read it |
+> |---|---|---|
+> | §1–§2 (map generation, event catalogue) | world-neutral wiki research | Live, with one caveat: the §2 catalogue was **re-harvested** during the §3.7 work (namespace-prefix bug) — trust §2 as re-harvested, and `sts2-events-harvest.txt` as the raw source. |
+> | §3–§3.3 (what we can code today) | pre-build, RUNTEMPLATE 5 era | Historical. Its "needs a new op" triage was largely resolved by §3.4/§3.7. |
+> | §3.4–§3.6 (the map goes live) | **RUNTEMPLATE 6** | Superseded by §3.7. Its numbers were declared uncomparable by the very next bump. |
+> | §3.7 (acts 2–3 event pools) | **RUNTEMPLATE 7** — current | The only section whose stamp matches today's world. Numbers still predate DRAFTER 11/12/13, so run-layer figures need re-measurement before quoting. |
+> | §4–§5 (design, open numbers) | written pre-build | Proposals. §4.3 discusses "RUNTEMPLATE_VERSION goes to 6" as *future*; it has gone to 7. |
+>
+> Both bumps declared **every archived run-layer number uncomparable across
+> the boundary** (§3.4, §3.7), so no winrate or act-clear figure below §3.7
+> describes a world that exists.
+> Banner added 2026-07-29 by the doc de-drift pass (`docs/backlog-2026-07-29.md` §2).
+
 **Status:** RESEARCH NOTES — 2026-07-24. Raw source data for the map/event
 extension. Nothing here is a modeling decision; the curated codeable subset
 and the plan live in §4–§6 and are marked as PROPOSALS.

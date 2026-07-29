@@ -1,5 +1,21 @@
 # Architecture & tech-debt audit — 2026-07-26
 
+> # ARCHIVED SNAPSHOT — DO NOT QUOTE UNLABELLED
+>
+> **This audit reads the tree as it stood on 2026-07-26: the RUNTEMPLATE 6 /
+> DRAFTER 10 world.** The current world is **RUNTEMPLATE 7 / CONSTANTS 4 /
+> DRAFTER 13** (DRAFTER 13 accepted 2026-07-29, R87). Two stamps have moved
+> since — DRAFTER 11 landed 2026-07-27 (R83/R84) and this doc still speaks of
+> "the DRAFTER 11 bump" as *future work*; RUNTEMPLATE 7 landed 2026-07-25 but
+> §-references here assume RUNTEMPLATE 6 paths.
+>
+> Every `file:line` citation is a 2026-07-26 citation. Several findings have
+> since been fixed (the 2026-07-29 C# bug-fix pass, `29f5ce6`, closed ten of
+> them — see `docs/sprint-bugfix-log-2026-07-29.md`), and items marked
+> **[FIXED]** were fixed in *that* session's cleanup, not today's. Read this
+> as a dated snapshot; the live register is `docs/backlog-2026-07-29.md`.
+> Banner added 2026-07-29 by the doc de-drift pass.
+
 Companion to `missed-requirements.md` (same recap session). Six parallel
 audits over the C# mod, the build/deploy pipeline, the tier0 engine, the
 tier05 run layer, `tools/`, and the defect→test ledger. Every finding below

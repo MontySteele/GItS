@@ -351,8 +351,15 @@ Three related items, all flagged in code comments and on no live list:
 
 ## Ledger corrections (tracked items that are already done)
 
-Items `open-playtest-items.md` §6 still lists as open that have since closed —
-recorded here and in that file's dated addendum:
+> **APPLIED AT SOURCE 2026-07-29 (doc de-drift pass).** All five corrections
+> below have been folded into `open-playtest-items.md` itself — each item is
+> struck through and dated where it stands in §6, and that file's §7 addendum
+> now points here rather than restating them. The list is kept as the audit's
+> own record of what it found; it is no longer the only place a reader learns
+> these are closed.
+
+Items `open-playtest-items.md` §6 listed as open on 2026-07-26 that had
+already closed:
 
 1. **"Kokomi kickoff §202: Raiden Shogun's disposition"** — closed by R52;
    `raiden_musou_no_hitotachi` is authored and shipped
@@ -376,7 +383,10 @@ Also noted while auditing (not doc issues, but found by the audit):
   warns about machine-dependent tests; it currently is one.
 - `tier05/route.py:13` documents `route_regret` as existing (see §2.1) — the
   docstring should stop advertising an unbuilt instrument.
-- `kokomi-playtest-protocol.md`'s build pin (`750a9cc`) is 63 commits stale,
+- ~~`kokomi-playtest-protocol.md`'s build pin (`750a9cc`) is 63 commits stale,
   and its "do not report art / all personal art is Klee's" instruction now
   contradicts `open-playtest-items.md` §2.2, which asks the tester to judge
-  the new shell art. Read §2.2 as authoritative.
+  the new shell art. Read §2.2 as authoritative.~~ **FIXED 2026-07-29** — the
+  protocol is re-pinned to artefact **0.2-247** / `29f5ce6` and its art
+  instruction now splits shell art (report it, §2.2's ask) from card faces
+  and companions (still provisional, still not worth reporting).

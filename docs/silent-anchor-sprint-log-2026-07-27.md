@@ -975,25 +975,27 @@ readings and this paragraph.
 > test with a curated debt list. R81;
 > `docs/a2-gate-ratification-2026-07-27.md`.
 
-### 14.5 What is still owed
+### 14.5 What was still owed -- ALL THREE PAID, 2026-07-27 (same day)
 
-> **ALL THREE PAID, 2026-07-27 (same day).** Blade Of Ink landed via the
-> enchantments pass (§13 closure banner; R82) -- the pool is 86/86. The
-> pilot review ran and its regression question is EXPLAINED as corrected
-> (docs/silent-pilot-review-2026-07-27.md §1a). A2 was ratified as R81;
-> A3 was ruled to stay PLACEHOLDER (R83) after the weights measured as a
-> dead lever.
+Nothing in this section is open. Each item carries its closure inline
+(banner folded into the list 2026-07-29 by the doc de-drift pass).
 
-- **Blade Of Ink**, pending the enchantments design pass (§13).
-- **The pilot review** ([USER], §12.1), whose trigger -- pool completion --
+- ~~**Blade Of Ink**, pending the enchantments design pass (§13).~~
+  **PAID** -- it landed via the enchantments pass (§13 closure banner; R82).
+  **The pool is 86 of 86.**
+- ~~**The pilot review** ([USER], §12.1), whose trigger -- pool completion --
   has now fired. The act-1 clear regression is the first question and it is
-  still unexplained; nothing in passes 4-6 was aimed at it.
-- **A2/A3 remain unratified.** A2 now has its evidence and needs a ruling;
+  still unexplained; nothing in passes 4-6 was aimed at it.~~
+  **PAID** -- the review ran, and the regression question is EXPLAINED as an
+  estimator artifact rather than a real regression
+  (`docs/silent-pilot-review-2026-07-27.md` §1a).
+- ~~**A2/A3 remain unratified.** A2 now has its evidence and needs a ruling;
   A3 is unblocked for the first time, because the pilot finally has a
-  complete pool to draft from.
-  > **A2 half CLOSED 2026-07-27** (R81,
-  > `docs/a2-gate-ratification-2026-07-27.md`); A3 still open, owned by
-  > the pilot review.
+  complete pool to draft from.~~
+  **PAID, both halves.** A2 was RATIFIED as **R81** on the recalibrated
+  two-anchor floor (`docs/a2-gate-ratification-2026-07-27.md`); A3 was ruled
+  to stay PLACEHOLDER (**R83**) after the weights measured as a dead lever
+  (24.2% vs 24.5%, 1000 runs).
 
 ---
 

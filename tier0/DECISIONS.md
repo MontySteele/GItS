@@ -471,6 +471,16 @@ Amend here, not in chat history.
     [USER] gate (the v1.7 lesson). User eyes-on naming/lore pass OWED
     BEFORE SHIP; the pass itself is the closure.** (a)-(c) ratified by
     R29; veto window closed.
+
+    > **R29d IS STILL OWED (cross-reference added 2026-07-29).** No
+    > naming/lore eyes-on pass has run. The ride-along instance
+    > (`lasting_impression`) was ratified 2026-07-26; the GENERAL pass
+    > was not, and it is on no live playtest list -- it is desk work,
+    > not table work. Tracked at `docs/missed-requirements.md` Tier 5
+    > and at `docs/backlog-2026-07-29.md` §3 item 9 (the ratification
+    > batch). This note records the debt at its own entry so a reader
+    > of R29 cannot mistake "(a)-(c) ratified" for full closure; it
+    > does NOT close anything.
 76. **Strict-domination lint built** (2026-07-20, assigned via
     klee-session-worknote item 2; this session owns tools/lint_*).
     tools/lint_strict_domination.py + suite gate
@@ -2820,3 +2830,173 @@ the four REHUNT picks plus the `standing_room_only` overturn) and gate G2
 (in-game screenshot review of the twelve cards and the A0 smoke run). Both
 are [USER] and both are eyes-on by nature. Six power icons are declared art
 debt in `$pckDeferred`.
+
+## R87 -- The sweep backlog ruled: three deferrals, a rework, a DRAFTER world, and a design pass (2026-07-29)
+
+Ruled by [USER] in session against `docs/backlog-2026-07-29.md` §3 (the
+consolidated owed-item register produced by the four read-only sweeps of
+2026-07-29). Four rulings, taken together in one sitting, exactly as §3
+asked for. No code, no sheet and no number moved with them.
+
+**(1) Items 1-3 DEFERRED, behind one playtest with a pre-registered
+question.** The Furina strength lever + legibility pair, the
+dead-archetype question (fanfare stopped at 1.8% against its 2.0% floor;
+Spotlight sits at 2.0-2.3% with nothing ever aimed at it) and the salon
+leak lever (10.8% against the ruled 7.8% anchor) all wait on a Furina
+playtest. **The question that playtest must answer first is written down
+before it runs:** is the pilot simply BETTER at Salon than at the other
+archetypes, or does everything feed Salon BY CONSTRUCTION? The three
+items are one question wearing three hats, and answering them separately
+costs three sprints. Standing consequence until it runs: no Furina
+balance value moves, the fanfare STOP holds, and every Furina row on
+record stays a pilot-limited floor (Guardrail 7).
+
+**(2) Item 4 -> full REWORK, and the A7 decay ruling is MOOTED.** On
+re-read of `unheard_confession`: *"on second read, this does way too
+much."* The card goes to a design pass, not to a turn-order fix. The A7
+question as filed -- should the sim's decay/Block-clear order move so the
+card's "pays on the way down" half pays, or should the C# stay faithful
+to the sim (`docs/sprint-art-and-a7-log-2026-07-29.md` §B.3) -- is a
+question about which engine should pay a card that is being rewritten, so
+it is withdrawn rather than answered. It returns, if it returns at all,
+as a consequence of the rework and not as its premise. The same-day C#
+bug-fix pass was fenced off the decay path explicitly and touched nothing
+there (that log, "Still owed" §E). Options for the red pen:
+`docs/brief-unheard-confession-rework.md` -- a brief, with no
+recommendation.
+
+**(3) Item 6 ACCEPTED: the drafter repricing proceeds now, as a DRAFTER
+13 world.** The drafter prices 42 of the engine's 56 ops at exactly zero
+at offer time (`tier05/draft.py`), which biases every run-layer winrate
+we quote. The scheduling question WAS the ruling and the answer is *now*,
+**in parallel with the playtest** -- the playtest question (1) is about
+the sim's pilot and the mod's table and does not read the drafter's price
+list, so the two do not collide. Consequence, and it is the expensive
+half: on the stamp bump every drafter-layer number taken under DRAFTER 12
+becomes archive and must be re-measured before it is quoted again. World
+after the bump: RUNTEMPLATE 7 / CONSTANTS 4 / DRAFTER 13.
+
+**(4) Item 8 -> a design pass, taken TOGETHER with the rework.** The two
+co-op charter items -- Fanfare partner-flux with its mandatory Hot Hands
+anti-farm audit (`furina-kickoff-v0.1.md` §4), and cross-player Spotlight
+selector passing (§3.1 / §11.5) -- were deferred behind conditions that
+have since lapsed: co-op is live and has been played twice. They are
+ruled to be DESIGN, not backlog, and they ride with the
+`unheard_confession` rework because both passes ask the same question
+about how much a single Furina card or hook should be doing. Brief:
+`docs/brief-coop-charter-items.md`.
+
+**Recorded as context, not ruled.** The same-day C# bug-fix pass landed
+and deployed while this sitting ran: `29f5ce6`, artefact **0.2-247**, log
+`docs/sprint-bugfix-log-2026-07-29.md`. It is MECHANICAL by its own
+charter -- ten confirmed defects plus three extra NRE-class sites, no
+balance value, sheet, sim constant or piece of art touched -- and carries
+no ruling of its own. It appears here only because ruling (2) is what
+fenced it away from the decay path, and because the Furina playtest that
+rulings (1) and (3) both refer to runs on that build.
+
+**Class: RULING** ([USER] 2026-07-29, four rulings on one backlog). No
+measurement; nothing in tier0 or tier05 moved with this entry.
+
+## R88 (DRAFT -- reconstructed, needs [USER] countersign) -- Zhongli takes roster slot 4; Itto becomes Inazuma-companion eligible
+
+**Reconstructed 2026-07-29 from the archival record. The RULING is real
+and dated 2026-07-23; only this RECORD is new, and it is unsigned.** The
+kickoff directed "Record in DECISIONS.md" and no entry was ever written
+(`docs/missed-requirements.md` Tier 5, first item). Do not read this as
+ratified text until [USER] countersigns it; read it as the best available
+reconstruction of a ruling whose consequences were built.
+
+**Source of record:** `docs/kokomi-kickoff-v1.md` §0, third bullet
+("Slot-4 ruling (this thread): Zhongli takes slot 4. Supersedes the
+Itto-vs-Zhongli open item in A1. Consequence: Itto is now eligible for
+the Inazuma companion pool (mirror of the Neuvillette-reserved pattern in
+reverse). Record in DECISIONS.md."), corroborated by the comment at
+`docs/inazuma-companions.yaml:4`.
+
+**Ruled (as reconstructed).** (1) **Slot 4 is Zhongli.** This supersedes
+roster amendment A1's open Itto-vs-Zhongli item, which is closed by this
+and by no later doc. (2) **Itto is therefore eligible for the Inazuma
+companion pool**, by the reserved-character pattern read in reverse: a
+character reserved for a playable slot may not appear as a companion, so
+a character who LOSES the slot is released to the companion pool.
+Neuvillette is the forward instance of the same rule.
+
+**Built, unrecorded.** The consequence shipped -- Itto is authored in
+`docs/inazuma-companions.yaml` -- while the record was not, which is the
+exact failure class this reconstruction exists to close. Nothing here
+pre-commits how Zhongli's slot-4 archetype scales
+(`docs/fontaine-rares-banner-sprint-log.md` flags that separately), and
+the pre-Zhongli registry gate (slot 4 must not declare elite axes before
+it) stays exactly where the Serenitea Sweep put it.
+
+**Class: RULING (DRAFT)** -- [USER] 2026-07-23 per the kickoff;
+countersign owed. Tracked at `docs/backlog-2026-07-29.md` §3 item 9.
+
+## R89 (DRAFT -- reconstructed, needs [USER] countersign) -- Furina legibility: the preview-truth fix, and why the doc's own migration was the wrong one
+
+**Reconstructed 2026-07-29 from the archival record. The sprint SHIPPED
+on 2026-07-24 and is deployed; only this RECORD is new, and it is
+unsigned.** The sprint's own open item 3 deferred the entry "until
+commit" and it never landed -- a whole shipped C#/codegen sprint with no
+decision record (`docs/missed-requirements.md` Tier 5, second item).
+Source of record: `docs/archive/furina-legibility-sprint-log.md` plus the
+commit trail it cites (`a1bca0d`, `a22c6dd`, `b8bf790`, `6af7a71`,
+`4f0c3c8`, `16d3273`, `0b33ffd`).
+
+**The premise the sprint was opened on was false, and that is the first
+thing worth recording.** The governing doc's leading hypothesis -- "her
+cards ship static localized strings" -- did not survive the first audit:
+every Furina card already shipped on DynamicVars with `:diff()`. The real
+defect was a **split value path**. A number greens iff something raised
+its `PreviewValue`, and `PreviewValue` is reachable only through
+`Hook.ModifyDamage` (DamageVar) or `Calculate` (CalculatedVar); Furina's
+Spotlight / Fanfare / Salon modifiers reached neither, living in
+`SpotlightSystem.PrintedDamage` and in per-card `OnPlay` arithmetic. The
+face showed the base; the hit resolved larger.
+
+**Ruled at the time ([USER] 2026-07-24), as reconstructed.** (1) Adopt
+the modifier-path migration as the sprint's spine, replacing the doc's
+L-B "static-to-DynamicVar conversion" framing. (2) Ship "the safe half
+globally" first. (3) Both blocked salon items ratified later the same
+day.
+
+**And then the doc's own named fix was ruled WRONG on inspection, which
+is the load-bearing finding.** `Hook.ModifyDamage` runs ALL additive
+before ALL multiplicative, whereas `PrintedDamage` is
+`Truncate(printed x mult) + flat` on the printed number AHEAD of Strength
+and Vulnerable -- so a hook-based Spotlight folds Strength into the 1.5x
+and CHANGES RESOLVED DAMAGE. What shipped instead is a
+`CalculatedDamageVar` whose multiplier CALLS Spotlight
+(`base + 1 x (PrintedDamage(base) - base)` is identically
+`PrintedDamage(base)`), so no number can move. A legibility sprint that
+had taken its own doc's advice would have shipped a silent balance
+change.
+
+**Landed (all deployed).** The fanfare `N_per_M_fanfare` rider trio via
+`tools/gen_klee_cards.py` (3 cards) and by hand for the kit Burst;
+single-target `bonus_vs_aura` to CalculatedDamageVar -- with **AoE aura
+riders deliberately NOT converted**, pinned by
+`test_aoe_aura_riders_stay_per_target`, because AttackCommand resolves a
+CalculatedDamageVar ONCE with `singleTarget == null` and converting would
+collapse a per-enemy decision into one board-wide value; the damage half
+(11 companion cards) and the block half (7 cards, on the game's own
+`CalculatedBlockVar`); the salon multiplier (6 cards) with
+`SalonMemberPower.StageIsFull` as the ONE expression of the replacement
+rule; and the L-C tip re-homing (5 cards, `Cards/FurinaRiderTips.cs`)
+under the shipped rule: re-home a rider's arithmetic IFF it now renders
+inside the printed number, and unconverted riders KEEP their sentence
+because the text is the only place their number can be read. Suite 648 at
+close.
+
+**Standing traps recorded by that sprint** (they have already caught
+readers): `DynamicVar.IntValue` is `(int)BaseValue`, and a CalculatedVar's
+BaseValue is only its base term -- always call `Calculate()`; the draw var
+is `DrawCards`, not `Cards`; CalculatedDamageVar and CalculatedBlockVar
+both take their base from the single `CalculationBase` var, so a card
+doing both can convert only one.
+
+**Class: MECHANICAL + RULING (DRAFT)** -- zero design decisions and zero
+sheet/sim movement by charter; the [USER] rulings are the migration spine
+and the "safe half globally" sequencing. Countersign owed; tracked at
+`docs/backlog-2026-07-29.md` §3 item 9.
