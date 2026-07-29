@@ -132,8 +132,15 @@ def test_p95_over_body_is_the_reader_hierarchy_as_a_number():
     run = FakeRun(node_kinds=_one_act(["E"]), fight_stats=[FakeFight()],
                   kurage_traces=[(0, trace)])
     act = eb.aggregate([run])[0]
-    assert act["p95_pulse"] == 100
-    assert act["p95_over_largest_body"] == 100 / act["pool"]["largest_body"]
+    # RE-HOMED, sim-hygiene sprint 2026-07-29: same correction as
+    # test_kurage_telemetry -- elite_blitz priced its tail nearest-rank under a
+    # docstring claiming it matched run_metrics. The repo now has ONE
+    # percentile (tier05.stats, linear), so p95 of these 20 pulses interpolates
+    # (14.5) instead of snapping to the single 100. The RELATION this test is
+    # about -- p95 divided by the act's largest single body -- is untouched.
+    assert round(act["p95_pulse"], 1) == 14.5
+    assert (act["p95_over_largest_body"]
+            == act["p95_pulse"] / act["pool"]["largest_body"])
 
 
 def test_a_cohort_that_meets_no_elite_prints_nothing():

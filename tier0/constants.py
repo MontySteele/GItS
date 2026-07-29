@@ -520,6 +520,45 @@ POTION_BIG_HIT_FRACTION = 0.35    # a telegraphed enemy attack this large a
 
 # --- Pilot policy (spec §6) ---
 BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP
+# Sim-hygiene sprint 2026-07-29 (task 4): the inline scoring weights that had
+# been living as bare floats inside tier0/pilot/policy.py. MOVED, NOT RETUNED
+# -- every value below is byte-identical to the literal it replaced, and the
+# move was verified behaviour-identical by a seeded 12-arm roster comparison
+# (identical table before/after). They live here because this file is what a
+# version stamp labels: a pilot weight that is only reachable by reading the
+# function body cannot be swept, cannot be diffed against a prior world, and
+# cannot be cited in a ruling. Their CALIBRATION history is unchanged and is
+# still recorded at the call sites.
+#
+# Reaction term (_reaction_value). "Preserve the calibrated strategic scale:
+# seeding=2, one trigger=6" -- the comment that has guarded these two numbers
+# since the reaction pilot was calibrated.
+PILOT_REACTION_TRIGGER_VALUE = 6.0   # per EXPECTED reaction this card causes
+PILOT_REACTION_SEED_VALUE = 2.0      # capable card that triggers nothing yet
+# Tempo term (_tempo_value).
+PILOT_DRAW_WHILE_VALUE = 2.0         # one matching card + the stopper
+PILOT_SPARK_VALUE = 0.7              # sparks -> free attacks
+PILOT_BURST_DIVISOR = 10.0           # burst_energy is priced per burst point
+# Sustain term (_sustain_value): Encore is deferred HP economy, worth most of
+# its face because it keeps until used, discounted for not stopping THIS
+# turn's hits when drawn late.
+PILOT_ENCORE_VALUE = 0.8
+# Spotlight term (_spotlight_value). The designate ladder is a SEQUENCING
+# priority, not a value estimate -- 20.0 exists to make the selector fire
+# BEFORE the companion in hand is played, which is why it dwarfs everything
+# else in the function.
+PILOT_SPOTLIGHT_DESIGNATE_SEQUENCING = 20.0  # companion waiting: light first
+PILOT_SPOTLIGHT_DESIGNATE_GENERATOR = 0.1    # invite first, then designate
+PILOT_SPOTLIGHT_DESIGNATE_OPENING = 4.0      # no designation yet
+PILOT_SPOTLIGHT_DESIGNATE_REDESIGNATE = 0.3  # already lit; not dead, not urgent
+PILOT_SPOTLIGHT_BOOST_COMBAT = 3.0   # combat-scoped mult/ovation boosts
+PILOT_SPOTLIGHT_BOOST_TURN = 1.5     # turn-window boosts
+PILOT_SPOTLIGHT_BOOST_EARLY = 0.3    # no stage yet: not dead, just early
+PILOT_GUEST_STAR_VALUE = 2.5         # a card in hand, roughly
+PILOT_SPOTLIGHT_COPY_VALUE = 3.5     # dead without a target, and it knows it
+# Scaling term (_scaling_value): setup is worth less as the fight winds down.
+# The taper hits zero at this turn number.
+PILOT_SETUP_TAPER_TURNS = 12.0
 # PILOT_REGRET_SAMPLE_RATE: DELETED by R67 (2026-07-26). Zero readers, and
 # actively misleading while it existed -- pilot/policy._log_regret fires on
 # EVERY play, so every regret rate this repo has ever reported is a full
@@ -856,7 +895,26 @@ CONSTANTS_VERSION = 4
 # (metallicize_like, accuracy_like); no Klee/Furina/Kokomi card prints an
 # unpriced self-power, so house numbers do not move. Any pre-v12 anchor
 # reading is incomparable with v12 output.
-DRAFTER_VERSION = 12
+# DRAFTER_VERSION 13 (sim-hygiene sprint, 2026-07-29): the op repricing.
+# `_static_power` hand-enumerated 10 of the engine's 56 registered ops; the
+# other 46 were priced at EXACTLY ZERO at offer time, so a card whose whole
+# printed text was `detonate`, `salon_bow`, `add_card`, `apply_aura`,
+# `block_next_turn` or `copy_companion_in_hand` read as blank cardboard to
+# every drafting arm. This is the SAME defect class as v6 (AoE blindness),
+# v7 (Kokomi's three verbs), v8 (summon_kurage) and v9 (floor grants) --
+# found four times, fixed four times one character's verbs at a time. v13
+# prices the whole registry at once and lands `tools/lint_op_parity.py`, so
+# the next registered op cannot arrive unpriced and silent.
+# NOT bookkeeping, and the bump is not optional: `_static_power` feeds
+# `score_offer` on EVERY arm, so every character's decks move. Every pre-v13
+# roster number in this repo is incomparable with v13 output -- the D12/D13
+# side-by-side table (both stamps labeled) is in
+# docs/sprint-sim-hygiene-log-2026-07-29.md. All v13 values are PROPOSED and
+# await [USER] red pen; the deliberate ZEROS (draw/energy/spark/burst,
+# raise_fanfare_cap, crash_fanfare, strip_block, transform_in_hand,
+# remember_card) each carry their measurement or their reason at the
+# constant, in tier05/draft.py.
+DRAFTER_VERSION = 13
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).

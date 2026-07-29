@@ -26,23 +26,18 @@ from __future__ import annotations
 import sys
 from collections import Counter
 
-from tier05 import draft, model
+from tier05 import draft, model, stats
 
 RUNS = 500
 CHARACTERS = [("klee", "demolition"), ("furina", "salon"), ("kokomi", "priest")]
 SEED = 20260725
 
 
-def wilson(k: int, n: int) -> tuple[float, float]:
-    """95% Wilson interval, the repo's standard read for a winrate cell."""
-    if n == 0:
-        return (0.0, 0.0)
-    z = 1.96
-    p = k / n
-    d = 1 + z * z / n
-    centre = (p + z * z / (2 * n)) / d
-    half = z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5) / d
-    return (max(0.0, centre - half), min(1.0, centre + half))
+# The repo's standard read for a winrate cell. Was a second implementation of
+# run_metrics._wilson95 with the same arithmetic and the same return shape;
+# unified into tier05.stats by the sim-hygiene sprint (2026-07-29). This copy
+# is where the [0, 1] clamp came from and the shared one keeps it.
+wilson = stats.wilson95
 
 
 def arm(character: str, archetype: str, runs: int, companions: bool):

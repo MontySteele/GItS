@@ -368,8 +368,19 @@ def test_fanfare_drafter_prioritizes_conversion_over_surplus_generation():
 
 def test_skip_is_a_real_pick():
     # A hand of off-plan cards below threshold gets skipped.
+    #
+    # RE-HOMED at DRAFTER_VERSION 13 (op repricing, 2026-07-29). The offer
+    # used to be Borrowed Brilliance, which was below the bar only because
+    # `copy_companion_in_hand` was one of the forty-six ops priced at zero --
+    # the card duplicates a Companion in hand for free, and it read as blank
+    # cardboard. Under v13 it scores 1.33 and is CORRECTLY taken, so keeping
+    # it here would have pinned the defect instead of the claim. The claim --
+    # an off-plan screen below the bar is skipped, skip is not dead code -- is
+    # unchanged, and now rides on Casting Call, whose whole printed text is
+    # `raise_fanfare_cap`: priced at a MEASURED zero (read-at-cap under 1%
+    # under every pilot), which is a different thing from an unpriced one.
     starter = _cards(*loader.starting_deck("klee"))
-    offers = _cards("borrowed_brilliance")   # deep reaction machinery
+    offers = _cards("casting_call")          # off-plan, measured inert
     pick = draft.assigned_policy(random.Random(0), starter, offers,
                                  "demolition")
     assert pick is None
@@ -383,8 +394,13 @@ def test_drafter_v3_values_klee_visible_utility():
 
     dreams = loader.get_card("elemental_ecstasy")
     assert draft._has_block(dreams)
-    # Conditional 8 Block is available at the draft-time 50% share.
-    assert draft._static_power(dreams) == 2
+    # Conditional 8 Block is available at the draft-time 50% share: 4 / cost
+    # 2 = 2.0. DRAFTER_VERSION 13 adds the other half of what the card prints
+    # -- `refresh_all_auras`, worth STATIC_AURA_REFRESH_VALUE and previously
+    # invisible -- so the same card now reads (4 + 1) / 2. The v3 claim this
+    # test makes is untouched: direct mitigation is visible and the engine
+    # terms stay neutral. Only the count of PRICED verbs on the card moved.
+    assert draft._static_power(dreams) == 2.5
     assert draft._static_power(loader.get_card("patched_dress")) == 7.5
     assert draft._static_power(loader.get_card("bennett_fantastic_voyage")) == 6
     assert draft._static_power(loader.get_card("durin_witchs_flame")) == 6

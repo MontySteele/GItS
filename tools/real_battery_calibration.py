@@ -31,7 +31,7 @@ from tier0.content import loader, local_reference
 from tier0.engine.combat import run_fight
 from tier0.harness import metrics
 from tier0.pilot.policy import make_pilot
-from tier05 import draft, model
+from tier05 import draft, model, stats
 from tools.realistic_axis_scores import _loadout, _reached_boss
 
 
@@ -93,14 +93,9 @@ def _game_ref_digest() -> str:
     return digest.hexdigest()[:12]
 
 
-def _percentile(values: list[float], q: float) -> float:
-    if not values:
-        return 0.0
-    ordered = sorted(values)
-    pos = q * (len(ordered) - 1)
-    lo = int(pos)
-    hi = min(lo + 1, len(ordered) - 1)
-    return ordered[lo] + (ordered[hi] - ordered[lo]) * (pos - lo)
+# Was a fifth hand-rolled copy of the same linear interpolation; identical
+# output, now shared (sim-hygiene sprint 2026-07-29). No number moves.
+_percentile = stats.percentile
 
 
 def _sample_evenly(results, sample: int):

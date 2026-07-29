@@ -10,30 +10,16 @@ import math
 from collections import Counter
 
 from tier0 import constants as C
+from tier05 import stats
 from tier05.model import RunResult
 
 
-def _percentile(values: list[int], q: float) -> float:
-    if not values:
-        return 0.0
-    s = sorted(values)
-    idx = q * (len(s) - 1)
-    lo = int(idx)
-    hi = min(lo + 1, len(s) - 1)
-    return s[lo] + (s[hi] - s[lo]) * (idx - lo)
-
-
-def _wilson95(successes: int, trials: int) -> tuple[float, float]:
-    """95% Wilson interval; remains informative for zero-win cells."""
-    if trials <= 0:
-        return 0.0, 0.0
-    z = 1.96
-    p = successes / trials
-    denom = 1 + z * z / trials
-    center = (p + z * z / (2 * trials)) / denom
-    half = (z * math.sqrt(p * (1 - p) / trials
-                          + z * z / (4 * trials * trials)) / denom)
-    return center - half, center + half
+# The two shared statistics (sim-hygiene sprint, 2026-07-29). This module
+# defined the CANONICAL copy of both -- its linear-interpolation percentile is
+# the convention tier05.stats standardised on -- so these are re-exported under
+# their old private names rather than chased through every call site.
+_percentile = stats.percentile
+_wilson95 = stats.wilson95
 
 
 def summarize_runs(results: list[RunResult]) -> dict:

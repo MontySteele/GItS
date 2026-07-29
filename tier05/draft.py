@@ -333,6 +333,169 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
     return min(1.0, on_plan / C.DRAFT_CORE_SIZE)
 
 
+# Ops whose price is computed by a dedicated branch of `effect_power` above,
+# because they need the card, the deck, or the recursion. `_op_price` refuses
+# them rather than returning a second, quieter number for the same op.
+_PRICED_INLINE = frozenset({
+    "damage", "chain_attack", "block", "place_bomb", "apply_power",
+    "conditional", "conscript", "gain_charge", "summon_kurage",
+    "gain_fanfare_floor", "grow_damage", "repeat_this",
+})
+
+
+def _added_card_value(fx: dict) -> float:
+    """One `add_card` / `generate_from_pool` token, signed.
+
+    A `status`-rarity add is a printed COST -- the card puts bloat in your
+    own pile -- so it is the same magnitude with the sign flipped. The
+    rarity read goes through `loader.peek_card`, guarded: a token id the
+    loader cannot resolve prices as a neutral generated card rather than
+    taking the drafter down.
+    """
+    cid = fx.get("card_id") or fx.get("card")
+    if cid in (None, "self"):
+        # `card: self` clones the playing instance (Anger). That is a copy of
+        # something already drafted, not a conjured token.
+        return STATIC_CARD_COPY_VALUE if cid == "self" \
+            else STATIC_GENERATED_CARD_VALUE
+    try:
+        from tier0.content import loader
+        rarity = loader.peek_card(cid).rarity
+    except Exception:
+        rarity = ""
+    if rarity == "status":
+        return -STATIC_STATUS_CARD_COST
+    return STATIC_GENERATED_CARD_VALUE
+
+
+def _op_price(fx: dict) -> float:
+    """The DRAFTER_VERSION 13 static price of one effect dict.
+
+    Every rationale is one line in STATIC_OP_PRICING, and
+    `tools/lint_op_parity.py` asserts this function and that table between
+    them cover the engine's whole OPS registry. All values PROPOSED.
+    """
+    op = fx.get("op")
+    if op in _PRICED_INLINE:
+        return 0.0
+    aoe = (STATIC_AOE_MULT if fx.get("target") == "all_enemies" else 1.0)
+
+    # -- damage- and Block-shaped -----------------------------------------
+    if op == "block_next_turn":
+        return _neutral_amount(fx, 0) * STATIC_DELAYED_BLOCK_SHARE
+    if op == "buff_next_attack":
+        return _neutral_amount(fx, 0) * STATIC_NEXT_ATTACK_SHARE
+    if op == "detonate":
+        return (STATIC_DETONATE_VALUE + fx.get("bonus", 0)) * aoe
+    if op == "move_bombs":
+        return (STATIC_BOMB_MOVE_VALUE
+                + fx.get("bonus", 0) * STATIC_BOMB_DAMAGE_SHARE)
+    if op == "modify_bombs":
+        return fx.get("bonus", 0) * STATIC_BOMB_DAMAGE_SHARE   # one bomb
+    if op == "chance_bomb_per_detonation":
+        return (fx.get("chance", 0) * fx.get("bomb_damage", 0)
+                * STATIC_BOMB_DAMAGE_SHARE)                    # one det.
+    if op == "strip_block":
+        return STATIC_STRIP_BLOCK_VALUE
+
+    # -- reaction machinery ------------------------------------------------
+    if op == "apply_aura":
+        return STATIC_AURA_VALUE * aoe
+    if op == "swirl":
+        return STATIC_SWIRL_VALUE * aoe
+    if op == "refresh_all_auras":
+        return STATIC_AURA_REFRESH_VALUE
+
+    # -- Furina's meter ----------------------------------------------------
+    if op == "gain_encore":
+        return _neutral_amount(fx, 0) * STATIC_ENCORE_VALUE
+    if op == "spend_encore":
+        return -_neutral_amount(fx, 0) * STATIC_ENCORE_VALUE
+    if op == "raise_fanfare_cap":
+        return _neutral_amount(fx, 0) * STATIC_FANFARE_CAP_VALUE
+    if op == "crash_fanfare":
+        return -_neutral_amount(fx, 0) * STATIC_CRASH_FANFARE_VALUE
+    if op == "salon_bow":
+        return _neutral_amount(fx) * STATIC_SALON_BOW_VALUE
+    if op == "spotlight_designate":
+        return STATIC_SPOTLIGHT_DESIGNATE_VALUE
+
+    # -- cards from nowhere ------------------------------------------------
+    if op in ("generate_guest_star", "generate_from_pool"):
+        return _neutral_amount(fx) * STATIC_GENERATED_CARD_VALUE
+    if op == "add_card":
+        zone = fx.get("zone") or fx.get("to", "discard")
+        share = 1.0 if zone == "hand" else STATIC_OFFPILE_CARD_SHARE
+        return _neutral_amount(fx) * _added_card_value(fx) * share
+    if op in ("copy_companion_in_hand", "copy_spotlighted_in_hand"):
+        per = STATIC_CARD_COPY_VALUE + (
+            STATIC_FREE_COPY_BONUS if fx.get("cost_override") == 0 else 0.0)
+        return _neutral_amount(fx) * per
+    if op == "copy_companions_played_this_combat":
+        # Unbounded at runtime; ONE unique companion is the same neutral
+        # single-unit estimate the damage formulas use for a live count.
+        return STATIC_CARD_COPY_VALUE + (
+            STATIC_FREE_COPY_BONUS if fx.get("cost_override") == 0 else 0.0)
+    if op == "replay_next_companion":
+        return fx.get("times", 1) * STATIC_CARD_COPY_VALUE
+    if op == "autoplay_from_exhaust":
+        return STATIC_AUTOPLAY_VALUE                      # one neutral card
+    if op == "autoplay_from_draw":
+        return _neutral_amount(fx) * STATIC_AUTOPLAY_VALUE
+    if op == "extra_card_screen":
+        return _neutral_amount(fx) * STATIC_EXTRA_SCREEN_VALUE
+
+    # -- deck manipulation --------------------------------------------------
+    if op == "discard":
+        if fx.get("select", "random") == "chosen":
+            return 0.0
+        return -_neutral_amount(fx) * STATIC_RANDOM_DISCARD_COST
+    if op == "discard_for_sparks":
+        return fx.get("sparks", 0) * STATIC_SPARK_VALUE    # chosen fodder
+    if op == "exhaust_from":
+        per = (STATIC_STATUS_EXHAUST_VALUE
+               if fx.get("filter") == "status" else STATIC_EXHAUST_VALUE)
+        n = fx.get("amount", 1)
+        return (1.0 if n == "all" else _neutral_amount(fx)) * per
+    if op == "scry_discard":
+        return STATIC_SCRY_VALUE
+    if op == "recall_to_draw":
+        return _neutral_amount(fx) * STATIC_RECALL_VALUE
+    if op == "upgrade_in_hand":
+        return STATIC_UPGRADE_VALUE                        # one neutral card
+    if op == "grant_sly_this_turn":
+        return STATIC_GRANT_SLY_VALUE
+    if op == "remember_card":
+        return STATIC_REMEMBER_CARD_VALUE
+    if op == "transform_in_hand":
+        return STATIC_TRANSFORM_VALUE
+
+    # -- HP economy ---------------------------------------------------------
+    if op == "heal":
+        return _neutral_amount(fx, 0) * STATIC_HEAL_SHARE
+    if op == "gain_max_hp":
+        return _neutral_amount(fx, 0) * STATIC_MAX_HP_VALUE
+
+    # -- the measured dead dials (v3 sweep; see the v13 header) -------------
+    if op in ("draw", "draw_to_hand_size"):
+        return _neutral_amount(fx) * STATIC_DRAW_VALUE
+    if op == "draw_while":
+        return 2 * STATIC_DRAW_VALUE       # the match plus its stopper
+    if op == "energy":
+        return _neutral_amount(fx, 0) * STATIC_ENERGY_VALUE
+    if op == "cost_mod":
+        return abs(fx.get("delta", 1)) * STATIC_ENERGY_VALUE
+    if op == "gain_spark":
+        return _neutral_amount(fx) * STATIC_SPARK_VALUE
+    if op == "burst_energy":
+        return _neutral_amount(fx, 0) * STATIC_BURST_VALUE
+
+    # Unreachable while lint_op_parity is green; loud rather than silent if
+    # it ever is not, because a silent 0.0 here is the exact defect this
+    # whole version bump exists to end.
+    raise KeyError(f"no DRAFTER v13 static price for op {op!r}")
+
+
 def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
     """Conservative printed power per energy for reward decisions.
 
@@ -367,7 +530,8 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                     share = _static_condition_share(name)
                     total += (else_power
                               + share * (then_power - else_power))
-            elif fx.get("op") == "damage" and fx.get("target") != "self":
+            elif (fx.get("op") in ("damage", "chain_attack")
+                  and fx.get("target") != "self"):
                 amt = fx.get("amount", 0)
                 formula = fx.get("amount_formula")
                 if isinstance(formula, dict):
@@ -389,6 +553,12 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                     if isinstance(times_formula, dict):
                         times = (times_formula.get("base", 0)
                                  + times_formula.get("per", 1))
+                    # v13: chain_attack is a damage line whose volley
+                    # repeats once per body it kills, so it is priced HERE
+                    # rather than as its own verb -- a chain that kills
+                    # nothing is exactly this damage line.
+                    if fx.get("op") == "chain_attack":
+                        amt *= STATIC_CHAIN_ATTACK_MULT
                     if fx.get("target") == "all_enemies":
                         total += amt * times * STATIC_AOE_MULT      # v6
                     else:
@@ -451,9 +621,25 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                 total += _neutral_amount(fx) * STATIC_FANFARE_FLOOR_VALUE
             elif fx.get("op") == "grow_damage":
                 total += fx.get("amount", 0) * 0.5  # one discounted redraw
+            else:
+                # DRAFTER_VERSION 13: everything else in the registry. One
+                # branch per op, in the order STATIC_OP_PRICING documents
+                # them; the lint above guarantees no op reaches this `else`
+                # without an entry, and _op_price returns 0.0 only for the
+                # ops whose entry says ZERO.
+                total += _op_price(fx)
         return total
 
     total = effect_power(card.effects)
+    # v13: `repeat_this` re-resolves the card's OWN effects, so it is a
+    # MULTIPLIER on what the rest of the card printed rather than a term
+    # beside it -- which is why it is applied here and not in `effect_power`,
+    # where the branch would only ever see its own siblings. At half share:
+    # every printed use of the op sits behind a condition.
+    repeats = sum(fx.get("times", 1) for fx in all_effects
+                  if fx.get("op") == "repeat_this")
+    if repeats:
+        total *= 1.0 + repeats * STATIC_REPEAT_SHARE
     if card.sly:
         # v7: a Sly rider is the same printed grammar at half face -- it
         # fires only when a card effect discards this from hand, and the
@@ -585,6 +771,301 @@ GENERIC_PLAN_BONUS_MULT = 0.25
 #                            pass, and it starts from this measurement.
 STATIC_DEXTERITY_VALUE = 2.0
 STATIC_POWER_ENGINE_VALUE = 0.0
+
+# =========================================================================
+# DRAFTER_VERSION 13 -- the op repricing (sim-hygiene sprint, 2026-07-29,
+# [USER]-accepted as the sprint's headline). ALL VALUES BELOW ARE PROPOSED.
+#
+# THE DEFECT. `_static_power` hand-enumerated 10 of the engine's 56
+# registered ops. The other 46 were priced at EXACTLY ZERO at offer time --
+# not "approximately zero", not "conservatively low", but invisible -- so a
+# card whose whole printed text is `detonate`, `salon_bow`, `add_card`,
+# `apply_aura`, `block_next_turn` or `copy_companion_in_hand` read to every
+# drafting arm as blank cardboard. This is the SAME defect class the repo
+# has now found four times (v6 AoE blindness, v7 Kokomi's three verbs, v8
+# summon_kurage, v9 floor grants): each time it was found by noticing one
+# character drafting badly, and each time the fix was scoped to that
+# character's verbs. This pass stops finding it one op at a time. Task 2 of
+# the same sprint adds `tools/lint_op_parity.py`, which fails the build when
+# a newly registered op has no entry in STATIC_OP_PRICING below -- so the
+# NEXT op cannot arrive unpriced and silent.
+#
+# MAGNITUDES follow the file's established idiom: one unit is one point of
+# printed damage or Block; nothing is priced at the value it would have in a
+# solved deck, only at what an offer screen can defend without combat state.
+#
+# THE DELIBERATE ZEROS ARE NOT OVERSIGHTS. Four groups of ops are priced at
+# zero ON THE RECORD, each with a measurement or a stated reason behind it,
+# and each as a NAMED constant so the next pass starts from a dial instead
+# of from a rediscovery:
+#   * draw / energy / spark / burst (and cost_mod, which is energy in
+#     another costume). The v3 header records the sweep: "a measured sweep
+#     rejected flat draw/energy/Spark/Burst proxies: raising them
+#     monotonically reduced Klee's real-run result." Honouring a measurement
+#     beats honouring a symmetry.
+#   * raise_fanfare_cap. The op's own docstring carries the measurement:
+#     read-at-cap under 1% under every pilot, so headroom is worth ~nothing
+#     at current constants. It becomes live the moment floors stack.
+#   * crash_fanfare. See its constant below -- pricing a cost whose paired
+#     benefit is still invisible would be a bookkeeping asymmetry, not a
+#     valuation.
+#   * strip_block / transform_in_hand / remember_card, each for a reason
+#     stated at its constant.
+#
+# WHAT THIS BUMP DOES NOT DO, named so the next reader does not assume it
+# did: `bonus_formula` (20 printed uses -- `1_per_4_fanfare`,
+# `2_per_salon_member`, `1_per_2_charge` ...) and self `apply_power` for
+# non-engine powers (`salon_member`, 15 uses) are STILL priced at zero.
+# They are the same defect in a different grammar, they are not ops, and
+# folding them in here would have made the D12->D13 delta unattributable to
+# the change the user accepted. They are this sprint's named still-owed.
+# =========================================================================
+# -- damage- and Block-shaped, near face value ----------------------------
+STATIC_DELAYED_BLOCK_SHARE = 0.8   # block_next_turn: real printed Block one
+                                   # turn late. It cannot answer the attack
+                                   # in front of you, which is the discount.
+STATIC_NEXT_ATTACK_SHARE = 0.8     # buff_next_attack: flat damage on the
+                                   # next Attack; nearly always spent, small
+                                   # discount for needing an Attack to spend
+                                   # it on.
+STATIC_CHAIN_ATTACK_MULT = 1.25    # chain_attack: the volley repeats once
+                                   # per body it KILLS. Priced as its own
+                                   # damage line plus a quarter -- a chain
+                                   # that never kills is exactly the base
+                                   # volley, and the drafter cannot see the
+                                   # enemy HP that decides the rest.
+STATIC_DETONATE_VALUE = 3.0        # detonate: the payoff that makes
+                                   # STATIC_BOMB_DAMAGE_SHARE's half-price
+                                   # placement real. Roughly one armed bomb
+                                   # cashed early; `bonus` adds on top, and
+                                   # an all_enemies detonation takes the
+                                   # same STATIC_AOE_MULT the damage line
+                                   # takes.
+STATIC_BOMB_MOVE_VALUE = 1.0       # move_bombs: consolidation onto one
+                                   # body, worth about a point before its
+                                   # printed `bonus`.
+# -- reaction machinery (Klee/Furina/Kokomi's shared elemental layer) ------
+STATIC_AURA_VALUE = 2.0            # apply_aura: the reaction plan's entry
+                                   # token, priced at the Weak/Vulnerable
+                                   # magnitude. An aura is not damage; it is
+                                   # what every amp payoff in three kits
+                                   # reads.
+STATIC_SWIRL_VALUE = 1.5           # swirl: spreads/consumes an aura someone
+                                   # else applied, so it is worth less than
+                                   # applying one and worth nothing alone.
+STATIC_AURA_REFRESH_VALUE = 1.0    # refresh_all_auras: extends what is
+                                   # already on the board; strictly weaker
+                                   # than applying, and dead on a clean one.
+# -- Furina's meter -------------------------------------------------------
+STATIC_ENCORE_VALUE = 0.3          # per printed Encore point, either sign.
+                                   # Between the Fanfare floor (0.2, pays
+                                   # only through drafted readers) and
+                                   # Charge (0.5, read by a kit state):
+                                   # Encore is a real buffer the player
+                                   # holds, but its converters are drafted.
+                                   # spend_encore pays the SAME rate with
+                                   # the sign flipped -- an overdraw is a
+                                   # printed cost and must read as one.
+STATIC_FANFARE_CAP_VALUE = 0.0     # raise_fanfare_cap. MEASURED INERT, not
+                                   # unpriced: the op's docstring records
+                                   # read-at-cap under 1% under every pilot.
+STATIC_CRASH_FANFARE_VALUE = 0.0   # crash_fanfare. The Final Verdict's
+                                   # crash is the PRICE of a damage line the
+                                   # static scorer still cannot see
+                                   # (`bonus_formula: 1_per_1_fanfare`).
+                                   # Pricing the cost while the benefit
+                                   # reads zero would make the sheet's only
+                                   # Hyperbeam undraftable on a bookkeeping
+                                   # asymmetry rather than on a valuation.
+                                   # Held at 0.0 until the formula reader
+                                   # lands, and this line is the reason it
+                                   # must land before this dial moves.
+STATIC_SALON_BOW_VALUE = 2.0       # salon_bow: one member's bow, on demand.
+                                   # Priced at one conservative bow rather
+                                   # than at the stage it implies -- the
+                                   # drafter cannot see stage occupancy, and
+                                   # the plan bonus already pays for the
+                                   # Salon shape.
+STATIC_SPOTLIGHT_DESIGNATE_VALUE = 1.5  # spotlight_designate: prints
+                                   # nothing and is what the whole
+                                   # Spotlight kit reads. Deliberately
+                                   # modest: `_is_spotlight_access` already
+                                   # pays it once through the archetype
+                                   # term, and this is the universal half.
+# -- cards from nowhere ---------------------------------------------------
+STATIC_GENERATED_CARD_VALUE = 2.0  # per token generated into hand
+                                   # (generate_guest_star, generate_from_
+                                   # pool, add_card). A conjured card still
+                                   # costs energy to play, so it is worth
+                                   # well under a drafted one; rarity is NOT
+                                   # differentiated, which is conservative
+                                   # for the uncommon generators.
+STATIC_OFFPILE_CARD_SHARE = 0.5    # the same token added to draw/discard
+                                   # instead of hand: same card, later, and
+                                   # maybe not this fight.
+STATIC_STATUS_CARD_COST = 2.0      # a card added to your OWN piles whose
+                                   # rarity is `status`: the same magnitude
+                                   # with the sign flipped. Self-inflicted
+                                   # bloat is a printed cost.
+STATIC_CARD_COPY_VALUE = 3.0       # copy/replay of a card ALREADY in the
+                                   # deck (copy_companion_in_hand,
+                                   # copy_spotlighted_in_hand,
+                                   # copy_companions_played_this_combat,
+                                   # replay_next_companion). Worth more than
+                                   # a conjured token because it duplicates
+                                   # something the player chose.
+STATIC_FREE_COPY_BONUS = 1.0       # `cost_override: 0` on such a copy.
+STATIC_AUTOPLAY_VALUE = 2.0        # autoplay_from_exhaust /
+                                   # autoplay_from_draw: a card played for
+                                   # free, but not one the player picked.
+                                   # One neutral card, the same
+                                   # one-unit-of-a-live-count convention the
+                                   # damage formulas use.
+STATIC_EXTRA_SCREEN_VALUE = 2.0    # extra_card_screen: an extra reward
+                                   # screen after a WON fight. Real
+                                   # run-layer value, discounted for firing
+                                   # only on a win.
+# -- deck manipulation ----------------------------------------------------
+STATIC_RANDOM_DISCARD_COST = 0.5   # per card discarded AT RANDOM. A
+                                   # `select: chosen` discard is priced at
+                                   # zero instead: the pilot discards
+                                   # `_worst_card`, which makes it card
+                                   # SELECTION, not card loss.
+STATIC_EXHAUST_VALUE = 0.5         # exhaust_from, unfiltered: thinning.
+STATIC_STATUS_EXHAUST_VALUE = 1.5  # exhaust_from `filter: status`: removing
+                                   # a Status/Curse is the real version of
+                                   # the same verb.
+STATIC_SCRY_VALUE = 0.5            # scry_discard: exactly one worst card
+                                   # leaves the top of the pile, whatever
+                                   # the printed look-at count.
+STATIC_RECALL_VALUE = 1.0          # recall_to_draw: a CHOSEN card from the
+                                   # discard onto the top of the draw pile.
+STATIC_UPGRADE_VALUE = 1.5         # upgrade_in_hand, per card upgraded --
+                                   # combat-scoped here, which is why it is
+                                   # under a full card's worth.
+STATIC_GRANT_SLY_VALUE = 0.5       # grant_sly_this_turn: one turn of the
+                                   # rider STATIC_SLY_SHARE already
+                                   # half-prices when printed.
+STATIC_STRIP_BLOCK_VALUE = 0.0     # strip_block. The op's docstring says it
+                                   # plainly: enemies rarely carry Block in
+                                   # tier0, and whether they should is a
+                                   # question about the ENCOUNTER set. A
+                                   # nonzero price here would answer it by
+                                   # fiat.
+STATIC_TRANSFORM_VALUE = 0.0       # transform_in_hand. Its value is
+                                   # ENTIRELY the destination card, which
+                                   # the static scorer would have to load
+                                   # and re-price; no committed card prints
+                                   # the op today, so the honest entry is a
+                                   # zero with this sentence next to it.
+STATIC_REMEMBER_CARD_VALUE = 0.0   # remember_card writes a payload that a
+                                   # POWER later reads. The value is on the
+                                   # power, where the self-power branch
+                                   # already prices it; paying here too
+                                   # would be double-counting.
+# -- HP economy -----------------------------------------------------------
+STATIC_HEAL_SHARE = 0.5            # heal, per point. Under the R52 healing
+                                   # law healing converts to Block, and
+                                   # out-of-combat HP is the run resource
+                                   # the drafter cannot see the level of.
+STATIC_MAX_HP_VALUE = 1.0          # gain_max_hp, per point: permanent HP
+                                   # AND an immediate heal of the same size,
+                                   # priced at one point of Block each.
+# -- structural -----------------------------------------------------------
+STATIC_REPEAT_SHARE = 0.5          # repeat_this multiplies the card's OWN
+                                   # printed effects. Applied at half,
+                                   # because every printed use of the op
+                                   # sits behind a condition.
+# -- the measured dead dials (see the header above) ------------------------
+STATIC_DRAW_VALUE = 0.0            # draw, draw_while, draw_to_hand_size
+STATIC_ENERGY_VALUE = 0.0          # energy, and cost_mod through it
+STATIC_SPARK_VALUE = 0.0           # gain_spark, discard_for_sparks
+STATIC_BURST_VALUE = 0.0           # burst_energy
+
+
+# The op-parity table (Task 2 of the same sprint). EVERY key of
+# tier0.engine.effects.OPS must appear here exactly once, with the one-line
+# rationale for the price it receives in `_static_power.effect_power`.
+# `tools/lint_op_parity.py` fails the build otherwise -- an op registered
+# with no entry here is a FINDING, not a skip, in the same discipline
+# `tools/lint_constant_parity.py` applies to the C# mirrors. Adding an op
+# therefore forces a pricing decision at the moment the author still knows
+# the answer, which is the whole point.
+STATIC_OP_PRICING: dict[str, str] = {
+    # --- priced before v13 -----------------------------------------------
+    "damage": "face value; all_enemies takes STATIC_AOE_MULT bodies (v6)",
+    "block": "face value; doubled on the exhausted_this_card times form",
+    "apply_power": "self Strength/Dexterity/witchs_flame, enemy Weak/Vuln, "
+                   "and a flat engine credit on POWER-type cards (v4/v12)",
+    "place_bomb": "bomb damage at STATIC_BOMB_DAMAGE_SHARE + a guard credit",
+    "conditional": "reachable-branch share; Klee's live predicates at half",
+    "conscript": "STATIC_CONSCRIPT_VALUE per recruit (v7)",
+    "gain_charge": "STATIC_CHARGE_VALUE per printed point (v7)",
+    "summon_kurage": "ONE pulse, not the duration (v8)",
+    "gain_fanfare_floor": "STATIC_FANFARE_FLOOR_VALUE per point (v9)",
+    "grow_damage": "one discounted future redraw",
+    # --- damage/Block-shaped, new in v13 ---------------------------------
+    "block_next_turn": "printed Block at STATIC_DELAYED_BLOCK_SHARE",
+    "buff_next_attack": "flat damage at STATIC_NEXT_ATTACK_SHARE",
+    "chain_attack": "its own damage line x STATIC_CHAIN_ATTACK_MULT",
+    "detonate": "STATIC_DETONATE_VALUE + printed bonus, AoE-scaled",
+    "move_bombs": "STATIC_BOMB_MOVE_VALUE + bonus at bomb-damage share",
+    "modify_bombs": "bonus at STATIC_BOMB_DAMAGE_SHARE, one neutral bomb",
+    "chance_bomb_per_detonation": "chance x bomb damage x bomb-damage share",
+    "strip_block": "ZERO: STATIC_STRIP_BLOCK_VALUE, an encounter-set question",
+    # --- reaction machinery ----------------------------------------------
+    "apply_aura": "STATIC_AURA_VALUE per applied aura, AoE-scaled",
+    "swirl": "STATIC_SWIRL_VALUE; needs an aura it did not apply",
+    "refresh_all_auras": "STATIC_AURA_REFRESH_VALUE, dead on a clean board",
+    # --- Furina's meter ---------------------------------------------------
+    "gain_encore": "STATIC_ENCORE_VALUE per printed point",
+    "spend_encore": "the same rate, NEGATIVE: an overdraw is a printed cost",
+    "raise_fanfare_cap": "ZERO: STATIC_FANFARE_CAP_VALUE, measured inert",
+    "crash_fanfare": "ZERO: STATIC_CRASH_FANFARE_VALUE until the meter-read "
+                     "formula is priced; see the constant",
+    "salon_bow": "STATIC_SALON_BOW_VALUE per bow taken",
+    "spotlight_designate": "STATIC_SPOTLIGHT_DESIGNATE_VALUE, the universal "
+                           "half of what the archetype term already pays",
+    "generate_guest_star": "STATIC_GENERATED_CARD_VALUE per token",
+    "copy_spotlighted_in_hand": "STATIC_CARD_COPY_VALUE per copy",
+    # --- cards from nowhere ----------------------------------------------
+    "add_card": "STATIC_GENERATED_CARD_VALUE per token, off-pile share "
+                "applied, NEGATIVE for a `status`-rarity add",
+    "generate_from_pool": "STATIC_GENERATED_CARD_VALUE per token",
+    "copy_companion_in_hand": "STATIC_CARD_COPY_VALUE (+ free-cost bonus)",
+    "copy_companions_played_this_combat": "one neutral unique companion",
+    "replay_next_companion": "STATIC_CARD_COPY_VALUE per replay",
+    "autoplay_from_exhaust": "STATIC_AUTOPLAY_VALUE, one neutral card",
+    "autoplay_from_draw": "STATIC_AUTOPLAY_VALUE per card taken",
+    "extra_card_screen": "STATIC_EXTRA_SCREEN_VALUE per screen earned",
+    # --- deck manipulation ------------------------------------------------
+    "discard": "NEGATIVE at STATIC_RANDOM_DISCARD_COST when random; a "
+               "`chosen` discard is selection, not loss, and prices at zero",
+    "discard_for_sparks": "chosen discard (no cost) + Sparks at the dead dial",
+    "exhaust_from": "STATIC_STATUS_EXHAUST_VALUE filtered, else "
+                    "STATIC_EXHAUST_VALUE",
+    "scry_discard": "STATIC_SCRY_VALUE; one card leaves however many are seen",
+    "recall_to_draw": "STATIC_RECALL_VALUE per chosen card recalled",
+    "upgrade_in_hand": "STATIC_UPGRADE_VALUE per card upgraded",
+    "grant_sly_this_turn": "STATIC_GRANT_SLY_VALUE, one turn of the rider",
+    "remember_card": "ZERO: STATIC_REMEMBER_CARD_VALUE, paid on the power",
+    "transform_in_hand": "ZERO: STATIC_TRANSFORM_VALUE, value is the "
+                         "destination card",
+    # --- HP economy --------------------------------------------------------
+    "heal": "STATIC_HEAL_SHARE per point",
+    "gain_max_hp": "STATIC_MAX_HP_VALUE per point (permanent HP + a heal)",
+    # --- structural --------------------------------------------------------
+    "repeat_this": "multiplies the card's own effects at STATIC_REPEAT_SHARE",
+    # --- the measured dead dials -------------------------------------------
+    "draw": "ZERO: STATIC_DRAW_VALUE, the v3 flat-proxy sweep",
+    "draw_while": "ZERO: STATIC_DRAW_VALUE on two neutral cards",
+    "draw_to_hand_size": "ZERO: STATIC_DRAW_VALUE on the refill",
+    "energy": "ZERO: STATIC_ENERGY_VALUE, the v3 flat-proxy sweep",
+    "cost_mod": "ZERO: energy in another costume, priced through "
+                "STATIC_ENERGY_VALUE",
+    "gain_spark": "ZERO: STATIC_SPARK_VALUE, the v3 flat-proxy sweep",
+    "burst_energy": "ZERO: STATIC_BURST_VALUE, the v3 flat-proxy sweep",
+}
 
 
 def _op_signature(card: Card) -> frozenset:

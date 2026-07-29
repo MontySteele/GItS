@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import math
 import subprocess
 
 from tier0 import constants as C
@@ -22,7 +21,7 @@ from tier0.engine import powers
 from tier0.harness import axes
 from tier0.harness import metrics as fight_metrics
 from tier0.harness.runner import run_battery
-from tier05 import draft, model, run_metrics
+from tier05 import draft, model, run_metrics, stats
 
 
 PLANS = ("generic", "demolition", "spark", "reaction")
@@ -100,16 +99,9 @@ def _print_world() -> None:
     )
 
 
-def _wilson(wins: int, runs: int, z: float = 1.96) -> tuple[float, float]:
-    if runs == 0:
-        return 0.0, 0.0
-    p = wins / runs
-    denom = 1 + z * z / runs
-    center = (p + z * z / (2 * runs)) / denom
-    half = z * math.sqrt(
-        p * (1 - p) / runs + z * z / (4 * runs * runs)
-    ) / denom
-    return center - half, center + half
+# A third copy of the same interval, unified into tier05.stats by the
+# sim-hygiene sprint (2026-07-29). Same arithmetic, same return shape.
+_wilson = stats.wilson95
 
 
 def _normal_loss(results: list[model.RunResult], max_hp: int) -> tuple[float, float]:

@@ -52,19 +52,17 @@ third decimal.
 from __future__ import annotations
 
 from tier0 import constants as C
-from tier05 import acts, kurage_telemetry
+from tier05 import acts, kurage_telemetry, stats
 
 FIGHT_KINDS = ("N", "E", "B")
 
 
-def _percentile(values: list[int], q: float) -> float:
-    """Nearest-rank, matching kurage_telemetry._percentile and
-    run_metrics._percentile. Two percentile conventions in one report is how a
-    moved tail gets argued about instead of acted on."""
-    if not values:
-        return 0.0
-    ordered = sorted(values)
-    return float(ordered[min(int(q * len(ordered)), len(ordered) - 1)])
+# It used to say "nearest-rank, matching kurage_telemetry._percentile and
+# run_metrics._percentile" -- and run_metrics interpolated, so the sentence was
+# false and this reader was the second convention it warned about. Fixed by the
+# sim-hygiene sprint (2026-07-29): ONE percentile, linear, in tier05.stats.
+# p95_pulse therefore MOVED (reported telemetry, never a ratified band).
+_percentile = stats.percentile
 
 
 def _band_mid(hp) -> float:

@@ -347,7 +347,8 @@ def _scaling_value(state: CombatState, card: Card) -> float:
             # discount late setup.
             val += _est(state, fx["amount"])
     # Setup is worth less as the fight winds down.
-    return val * max(0.0, 1.0 - state.turn / 12.0) if val else 0.0
+    return (val * max(0.0, 1.0 - state.turn / C.PILOT_SETUP_TAPER_TURNS)
+            if val else 0.0)
 
 
 def _card_element(state: CombatState, card: Card) -> Optional[str]:
@@ -423,7 +424,8 @@ def _reaction_value(state: CombatState, card: Card) -> float:
         return 0.0
     # Preserve the calibrated strategic scale: seeding=2, one trigger=6.
     # AoE and random cards now scale by their expected reaction count.
-    return 6.0 * best_expected_triggers if best_expected_triggers else 2.0
+    return (C.PILOT_REACTION_TRIGGER_VALUE * best_expected_triggers
+            if best_expected_triggers else C.PILOT_REACTION_SEED_VALUE)
 
 
 def _tempo_value(state: CombatState, card: Card) -> float:
@@ -441,11 +443,11 @@ def _tempo_value(state: CombatState, card: Card) -> float:
                 val += _est(state, fx.get("amount", 1), 1)
         elif fx["op"] == "draw_while":
             # One matching card plus the non-matching stopper in a mixed deck.
-            val += 2.0
+            val += C.PILOT_DRAW_WHILE_VALUE
         elif fx["op"] == "gain_spark":
-            val += fx.get("amount", 1) * 0.7    # sparks -> free attacks
+            val += fx.get("amount", 1) * C.PILOT_SPARK_VALUE
         elif fx["op"] == "burst_energy":
-            val += fx["amount"] / 10
+            val += fx["amount"] / C.PILOT_BURST_DIVISOR
     return val
 
 
@@ -456,7 +458,7 @@ def _sustain_value(state: CombatState, card: Card) -> float:
     encore = sum(fx.get("amount", 0) for fx in card.effects
                  if fx["op"] == "gain_encore"
                  and isinstance(fx.get("amount"), int))
-    return encore * 0.8
+    return encore * C.PILOT_ENCORE_VALUE
 
 
 def _spotlight_value(state: CombatState, card: Card) -> float:
@@ -474,11 +476,14 @@ def _spotlight_value(state: CombatState, card: Card) -> float:
             # When a generator is waiting, invite first so this same selector
             # can put the resulting Companion into Guest Cast.
             if companion_waiting:
-                val += 20.0             # sequencing priority: light, then play
+                # sequencing priority: light, then play
+                val += C.PILOT_SPOTLIGHT_DESIGNATE_SEQUENCING
             elif generator_waiting:
-                val += 0.1
+                val += C.PILOT_SPOTLIGHT_DESIGNATE_GENERATOR
             else:
-                val += 4.0 if p.spotlight is None else 0.3
+                val += (C.PILOT_SPOTLIGHT_DESIGNATE_OPENING
+                        if p.spotlight is None
+                        else C.PILOT_SPOTLIGHT_DESIGNATE_REDESIGNATE)
         elif (fx["op"] == "apply_power"
               and fx.get("power") in ("spotlight_mult_bonus",
                                       "spotlight_mult_bonus_turn",
@@ -490,19 +495,23 @@ def _spotlight_value(state: CombatState, card: Card) -> float:
             # combat-scoped engine like top_billing's mult.
             guest_mode_live = p.spotlight == C.SPOTLIGHT_GUEST_CAST
             if guest_mode_live or companion_waiting:
-                val += (3.0 if fx["power"] in ("spotlight_mult_bonus",
-                                               "ovation_spend_boost")
-                        else 1.5)
+                val += (C.PILOT_SPOTLIGHT_BOOST_COMBAT
+                        if fx["power"] in ("spotlight_mult_bonus",
+                                           "ovation_spend_boost")
+                        else C.PILOT_SPOTLIGHT_BOOST_TURN)
             else:
-                val += 0.3                       # not dead, just early
+                # not dead, just early
+                val += C.PILOT_SPOTLIGHT_BOOST_EARLY
         elif fx["op"] == "generate_guest_star":
-            val += 2.5 * fx.get("amount", 1)     # a card in hand, roughly
+            # a card in hand, roughly
+            val += C.PILOT_GUEST_STAR_VALUE * fx.get("amount", 1)
         elif fx["op"] == "copy_spotlighted_in_hand":
             has_target = p.spotlight and any(
                 effects.is_spotlighted(state, c) and not c.kit_card
                 for c in p.hand)
-            val += 3.5 if has_target else 0.0    # dead without a target,
-    return val                                   # and the pilot knows it
+            # dead without a target, and the pilot knows it
+            val += C.PILOT_SPOTLIGHT_COPY_VALUE if has_target else 0.0
+    return val
 
 
 def _charge_value(state: CombatState, card: Card) -> float:

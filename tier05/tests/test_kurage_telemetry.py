@@ -63,7 +63,15 @@ def test_aggregate_pools_over_pulses_not_over_combats():
     assert agg["pulses"] == 20
     assert agg["max"] == 500
     assert agg["p50"] == 4          # pooled: the mass is in the small combat
-    assert agg["p95"] == 500
+    # RE-HOMED, sim-hygiene sprint 2026-07-29: this read 500 while
+    # kurage_telemetry carried its own NEAREST-RANK percentile under a
+    # docstring claiming it matched run_metrics (which interpolates). One
+    # percentile now, tier05.stats, linear -- so p95 of these 20 pulses
+    # interpolates between the 19th and 20th sample instead of snapping to the
+    # top one. The CLAIM this test makes is unchanged and still holds: pooling
+    # over pulses, not over combats (a mean of per-combat p95s would be 252).
+    # `max` is what asserts the huge pulse is still visible at all.
+    assert round(agg["p95"], 1) == 28.8
 
 
 def test_by_act_keeps_the_acts_apart():

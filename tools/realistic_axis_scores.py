@@ -48,7 +48,7 @@ from tier0.content import loader
 from tier0.engine.combat import run_fight
 from tier0.harness import axes, metrics, runner
 from tier0.pilot.policy import make_pilot
-from tier05 import draft, model
+from tier05 import draft, model, stats
 from tier05 import relics as relic_pool
 
 BASELINE = ("ref_ironclad", "starter")     # the 3.0 anchor, by construction
@@ -136,17 +136,9 @@ def _loadout(r, character: str, node_kind: str = "E"):
 # Aggregation helpers.
 # ---------------------------------------------------------------------------
 
-def _percentile(xs: list[float], q: float) -> float:
-    if not xs:
-        return 0.0
-    s = sorted(xs)
-    if len(s) == 1:
-        return s[0]
-    pos = q * (len(s) - 1)
-    lo = int(pos)
-    if lo + 1 >= len(s):
-        return s[-1]
-    return s[lo] + (pos - lo) * (s[lo + 1] - s[lo])
+# Was a fourth hand-rolled copy of the same linear interpolation; identical
+# output, now shared (sim-hygiene sprint 2026-07-29). No number moves.
+_percentile = stats.percentile
 
 
 def evaluate(character: str, runs: int, sample: int, fights: int,

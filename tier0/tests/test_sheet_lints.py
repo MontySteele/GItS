@@ -266,3 +266,43 @@ def test_register_stays_out_of_the_engine():
          str(REPO / "tools" / "lint_register_isolation.py")],
         capture_output=True, text=True)
     assert res.returncode == 0, res.stdout + res.stderr
+
+
+def test_every_engine_op_has_a_drafter_price():
+    """Op parity (sim-hygiene sprint, 2026-07-29): tools/lint_op_parity.py.
+
+    Wired into PYTEST as well as into CI for the same reason the constant
+    parity lint is: the moment an op is registered is the moment the author
+    knows what it is worth, and that moment is a pytest run, not a push. An
+    op with no price is worth nothing to the drafter SILENTLY -- the defect
+    class DRAFTER_VERSION 6, 7, 8 and 9 each rediscovered by measuring one
+    character and wondering why its plan drafted badly.
+    """
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_op_parity.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
+def test_the_op_parity_lint_still_catches_a_newly_registered_op():
+    """The red half. A lint nobody has seen fail is a lint nobody can trust.
+
+    Registers a fictional op in the engine registry, in-process, and asserts
+    the lint reports it as a FINDING rather than skipping it. The registry is
+    restored in the `finally` -- this test must not leak a fake verb into the
+    rest of the session.
+    """
+    import importlib
+
+    from tier0.engine import effects as _effects
+    lint = importlib.import_module("tools.lint_op_parity")
+
+    assert lint.findings() == [], "the lint must be green before it is red"
+    _effects.OPS["chorus_of_the_unpriced"] = lambda state, fx, card: None
+    try:
+        bad = lint.findings()
+    finally:
+        del _effects.OPS["chorus_of_the_unpriced"]
+    assert any("chorus_of_the_unpriced" in line and "UNPRICED OP" in line
+               for line in bad), bad
+    assert lint.findings() == [], "and green again once the op is gone"

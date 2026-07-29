@@ -1,17 +1,6 @@
 import argparse
-import math
-from tier05 import draft, model, run_metrics
+from tier05 import draft, model, run_metrics, stats
 from tier0.content import loader
-
-
-def wilson(k, n, z=1.96):
-    if n == 0:
-        return (0.0, 0.0, 0.0)
-    p = k / n
-    denom = 1 + z * z / n
-    center = (p + z * z / (2 * n)) / denom
-    half = (z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n))) / denom
-    return (p, center - half, center + half)
 
 
 def measure(character, runs=1500, seed=11, grant_relics=False,
@@ -27,7 +16,12 @@ def measure(character, runs=1500, seed=11, grant_relics=False,
     surv = run_metrics.survival_profile(results, max_hp)
     n = len(results)
     k = sum(r.won for r in results)
-    p, lo, hi = wilson(k, n)
+    # ONE Wilson (tier05.stats, sim-hygiene sprint 2026-07-29). The local
+    # copy this replaces returned (p, lo, hi); the point estimate is a
+    # division every caller already has, so the shared one returns the
+    # interval only and the third tuple slot stops being a second shape.
+    p = k / n if n else 0.0
+    lo, hi = stats.wilson95(k, n)
     tag = (" +relics" if grant_relics else "") + (" +potions" if grant_potions
                                                   else "")
     print(f"=== {character}{tag} ({n} runs, seed {seed}) ===")

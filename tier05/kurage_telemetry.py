@@ -35,16 +35,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from tier05 import stats
 
-def _percentile(values: list[int], q: float) -> float:
-    """Nearest-rank on sorted samples. Matches run_metrics._percentile rather
-    than inventing a second convention: two percentile definitions in one
-    report is how a moved tail gets argued about instead of acted on."""
-    if not values:
-        return 0.0
-    ordered = sorted(values)
-    idx = min(int(q * len(ordered)), len(ordered) - 1)
-    return float(ordered[idx])
+
+# Same correction as elite_blitz: the docstring here claimed to match
+# run_metrics and did not (run_metrics interpolates). ONE percentile now, in
+# tier05.stats. p50/p95 are reported pulse telemetry, never ratified bands.
+_percentile = stats.percentile
 
 
 @dataclass
