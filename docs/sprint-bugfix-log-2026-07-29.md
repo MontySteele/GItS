@@ -231,7 +231,12 @@ both onto one local is why it moved too.)
 | bite-check | `harmony-bitecheck.exe`: `[klee] harmony: 14 patch class(es) armed.` — baseline and post-fix, silent both times |
 | pins | 3 new assertions across 2 files, all 3 bite-checked by reintroducing their defect |
 | suite | `python -m pytest -q` **from repo root**: **1410 passed, 1 skipped** (1407 before + the 3 new pins) |
-| deploy | `klee-mod/build/deploy.ps1 -Configuration Release`, gated on `validate.ps1`, `.pck` rebuilt first via `tools/build_pck.ps1` |
+| deploy | `tools/build_pck.ps1` then `klee-mod/build/deploy.ps1 -Configuration Release`: `validate: OK` (full local `game_ref`, S7 suite included), deployed to the game's `mods\klee` |
+
+The deployed artefact is **0.2-247**, built from commit `29f5ce6` — a clean
+tree, so no `+dirty` stamp and it is safe to hand to a co-op partner. The pck
+carries build id `20260729-125659+29f5ce6`, the same commit. Only this file
+moved after that build; the playtest binary is not affected by it.
 
 ---
 
