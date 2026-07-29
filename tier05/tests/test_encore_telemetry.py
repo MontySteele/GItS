@@ -139,8 +139,16 @@ def test_the_engine_actually_emits_what_the_instruments_read():
     # The starter deck holds no conditional and no deploy, so the join would
     # be untested on exactly the two events this sprint added. Both are
     # named into the deck instead.
+    #
+    # `many_waters_melody` replaced `graceful_retreat` here (Fanfare rework
+    # Track C.1, 2026-07-28): Slip Backstage was rewritten into a flat
+    # Encore->Block spender and no longer holds a conditional at all, so it
+    # stopped supplying the event this test names it for. Its replacement
+    # gates on `has_salon_members`, which the crabaletta deploys below
+    # actually satisfy -- so the conditional is both EVALUATED and FIRED,
+    # which is a slightly stronger join than the one it replaces.
     deck = (loader.starting_deck("furina")
-            + ["graceful_retreat"] * 6 + ["mademoiselle_crabaletta"] * 3)
+            + ["many_waters_melody"] * 6 + ["mademoiselle_crabaletta"] * 3)
     player = loader.build_player_from_ids("furina", deck)
     pilot = make_pilot(loader.pilot_weights("salon"))
     state = run_fight(player, loader.build_encounter("punisher"), pilot,

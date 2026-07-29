@@ -223,18 +223,22 @@ def _grants_fanfare_floor(card: Card) -> float:
     outright -- the measured failure this branch exists to prevent is the
     fanfare plan seeing 6.7 floors/run against salon's ~51.
 
-    Powers grant by rarity without printing an op, so they count here too:
-    the grant is a rule of the engine, not a line on the card, and a drafter
-    that could only see the explicit op would systematically undervalue every
-    Power the archetype drafts.
+    THE BY-RARITY POWER TERM IS GONE (Fanfare rework 2026-07-28, Track B).
+    It used to add 5 (rares 8) to every Power on the sheet, because the
+    engine granted that silently and "a drafter that could only see the
+    explicit op would systematically undervalue every Power the archetype
+    drafts". The engine no longer grants it, so reading it here would be the
+    mirror-image error -- pricing 17 Powers for value they no longer carry.
+
+    What remains is exactly what the card PRINTS, which is now the whole
+    truth. `raise_fanfare_cap` is deliberately NOT counted: the cap has not
+    been a binding number since F-A5 (read-at-cap under 1% in every arm of
+    the pilot-gap battery), so scoring it as baseline would tell the drafter
+    a Fanfare Cap card builds a floor it does not build.
     """
-    total = float(sum(fx.get("amount", 0)
-                      for fx in _nested_effects(card.effects)
-                      if fx.get("op") == "gain_fanfare_floor"))
-    if card.type == "power":
-        total += (C.FANFARE_FLOOR_PER_POWER_RARE if card.rarity == "rare"
-                  else C.FANFARE_FLOOR_PER_POWER)
-    return total
+    return float(sum(fx.get("amount", 0)
+                     for fx in _nested_effects(card.effects)
+                     if fx.get("op") == "gain_fanfare_floor"))
 
 
 def _reads_fanfare(card: Card) -> bool:
@@ -578,10 +582,18 @@ def _op_signature(card: Card) -> frozenset:
 # card that converts held Fanfare into immediate output.
 FANFARE_GENERATION_COVERAGE = 5
 # DRAFTER_VERSION 9: the plan's second half is no longer "own a converter"
-# (that grammar is retired) but "own a baseline the meter rests on". One
-# uncommon Power's grant is the unit; the bar is deliberately a low
-# single-card threshold, matching the converter predicate it replaces --
-# core_complete asks whether the plan is ONLINE, not whether it is finished.
+# (that grammar is retired) but "own a baseline the meter rests on". The bar
+# is deliberately a low single-card threshold -- core_complete asks whether
+# the plan is ONLINE, not whether it is finished.
+#
+# The UNIT used to be "one uncommon Power's automatic grant", which was 5
+# because the engine handed 5 to every Power played. Track B (2026-07-28)
+# deleted that automatic, so the number no longer derives from anything: it
+# is now simply the smallest PRINTED "Fanfare +X" the sheet carries. Held at
+# 5 deliberately rather than retuned, so this instrument does not move
+# underneath the sprint that is measuring against it -- but it is a bar with
+# no derivation behind it any more, and re-deriving it belongs to whichever
+# pass next rules the keyword's numbers.
 FANFARE_FLOOR_COVERAGE = 5.0
 # DRAFTER_VERSION 10 (G-E1): the third limb, and the one whose ABSENCE was the
 # instrument bug. Generation and floor are both INPUTS -- they move the meter

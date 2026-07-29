@@ -32,8 +32,28 @@ public interface IFurinaCharacter
 public static class FurinaResourceConstants
 {
     public const int FanfarePerHpLost = 1;
-    public const int FanfarePerEncoreGained = 1;
     public const int FanfarePerEncoreSpent = 1;
+
+    /// <summary>
+    /// SINGLE-LEG Fanfare (rework 2026-07-28, Track A, RULED). Mirrors
+    /// tier0/constants.py FANFARE_PER_ENCORE_ABSORBED.
+    ///
+    /// Fanfare prints when Encore goes DOWN and never when it goes up.
+    /// FanfarePerEncoreGained is DELETED, not zeroed: the gain leg made every
+    /// Encore point pay the meter twice, which the pilot-gap battery measured
+    /// at 47% of all generation under the greedy pilot and 61.6% under the
+    /// stoker.
+    ///
+    /// Absorption is the third Encore reduction path and used to be the only
+    /// one worth nothing. It pays now because absorbed Encore is deferred
+    /// Block that will never block a future hit -- cashing it is a real cost.
+    ///
+    /// The three FanfarePer* constants above are NOT independently tunable:
+    /// together they say "every point of damage past Block prints exactly 1
+    /// Fanfare", via absorption if the buffer eats it and via HP loss if HP
+    /// does. Change one and that sentence stops being true.
+    /// </summary>
+    public const int FanfarePerEncoreAbsorbed = 1;
 
     // --- "The Tide Turns" (F-A1/F-A3), ported by G-A1 2026-07-25. Mirrors
     // tier0/constants.py FANFARE_DECAY_FRACTION / FANFARE_FLOOR_PER_POWER*.
@@ -55,13 +75,17 @@ public static class FurinaResourceConstants
     /// </summary>
     public const double FanfareDecayFraction = 0.20;
 
-    /// <summary>Floor granted by playing a common/uncommon Power.</summary>
-    public const int FanfareFloorPerPower = 5;
-
-    /// <summary>Floor granted by playing a RARE Power. Ancient-rarity Powers
-    /// take the common value, matching the sim's `rarity == "rare"` test.
-    /// </summary>
-    public const int FanfareFloorPerPowerRare = 8;
+    // FanfareFloorPerPower / FanfareFloorPerPowerRare: DELETED by the Fanfare
+    // rework (2026-07-28, Track B, RULED), together with the grant block in
+    // FurinaResourceHooks.AfterCardPlayed that read them. Playing a Power no
+    // longer grants anything the card does not print.
+    //
+    // The value moved onto the faces as two printed keywords -- "Fanfare Cap
+    // +X" (FurinaResources.RaiseFanfareCap, un-retired for the job) and
+    // "Fanfare +X" (FurinaResources.GainFanfareFloor, rare Powers only).
+    // Deleted rather than left at 0 so nothing can quietly re-arm the
+    // automatic, and so the constant-parity gate has nothing to compare
+    // against a sim constant that no longer exists either.
 
     public const int BurstPerSkillTag = 5;
     public const int BurstPerReaction = 5;
@@ -399,6 +423,56 @@ public static class FurinaResources
         return before - resource.Amount;
     }
 
+    /// <summary>
+    /// Fill the buffer. Prints NO Fanfare (Track A, RULED 2026-07-28) --
+    /// Fanfare prints when Encore goes DOWN, never when it goes up. Mirrors
+    /// resources.gain_encore, which likewise lost its GainFanfare call.
+    /// </summary>
+    /// <summary>
+    /// The Hyperbeam settle (Fanfare rework Track C.2, 2026-07-28), mirroring
+    /// resources.drop_fanfare_to_floor. Fanfare falls to its floor, then the
+    /// FLOOR falls by <paramref name="floorDrop"/>. Returns what the meter
+    /// fell by, for the parity trace.
+    ///
+    /// THE FLOOR MAY GO NEGATIVE, and that is RULED rather than tolerated: a
+    /// negative floor is a hole the player climbs out of with activity, decay
+    /// still clamps to it, and generation counts against the debt.
+    ///
+    /// READERS CLAMP AT ZERO -- see <see cref="ReadableFanfare"/>, which is
+    /// the single chokepoint every consumer goes through so "effects shut
+    /// off, they do not invert" is one fact in one place. PROPOSED semantics,
+    /// flagged for review; the harsher StS-style inversion is a one-line flip
+    /// there, exactly as it is in the sim.
+    ///
+    /// The cap is deliberately NOT lowered: the floor falling is the price,
+    /// and a falling ceiling would make the card quietly worse the second
+    /// time it is played in a combat, which is a different card.
+    ///
+    /// FanfareFloorResource is a BasicCustomResource whose Amount is a plain
+    /// int, so ModifyAmount by a negative delta is the whole implementation;
+    /// nothing here needs to defend a zero floor that the design does not
+    /// want defended.
+    /// </summary>
+    public static int DropFanfareToFloor(Creature creature, int floorDrop)
+    {
+        if (!IsFurina(creature)) return 0;
+        var floor = FanfareFloorFor(creature);
+        var resource = FanfareResourceFor(creature);
+        if (floor == null || resource == null) return 0;
+        var before = resource.Amount;
+        floor.ModifyAmount(-floorDrop);
+        resource.Amount = Math.Min(before, floor.Amount);
+        return before - resource.Amount;
+    }
+
+    /// <summary>
+    /// What a Fanfare READER sees: the meter, clamped at zero. Mirrors
+    /// resources.readable. Every reader goes through here so the Track C.2
+    /// negative-floor semantics live in one place.
+    /// </summary>
+    public static int ReadableFanfare(Creature creature) =>
+        Math.Max(0, Fanfare(creature));
+
     public static void GainEncore(Creature creature, int amount)
     {
         if (amount <= 0) return;
@@ -409,8 +483,6 @@ public static class FurinaResources
         // Encore's display moved to the Salon stage ribbon (animation sprint 2,
         // D3). Funnels unchanged -- only the surface it draws on.
         Vfx.SalonVisualsBridge.Refresh(creature);
-        GainFanfare(
-            creature, amount * FurinaResourceConstants.FanfarePerEncoreGained);
     }
 
     public static void GainBurst(Creature creature, int amount)
@@ -467,6 +539,16 @@ public static class FurinaResources
     /// <summary>
     /// Damage remaining after Block may consume Encore before HP. True HP
     /// costs carry Unblockable and never enter this path.
+    ///
+    /// PRINTS FANFARE since Track A (RULED 2026-07-28). Absorption is the
+    /// third Encore reduction path and was the only one that paid nothing --
+    /// an asymmetry, not a rule: absorbed Encore is deferred Block that will
+    /// never block a future hit, so cashing it is a real cost.
+    ///
+    /// Together with <see cref="AfterCurrentHpChanged"/> this makes the whole
+    /// rule one line: every point of damage past Block prints exactly 1
+    /// Fanfare, through here if the buffer eats it and through HP loss if HP
+    /// does. Mirrors resources.absorb_into_encore.
     /// </summary>
     public static decimal AbsorbDamage(Creature creature, decimal amount)
     {
@@ -479,20 +561,30 @@ public static class FurinaResources
         // Encore's display moved to the Salon stage ribbon (animation sprint 2,
         // D3). Funnels unchanged -- only the surface it draws on.
         Vfx.SalonVisualsBridge.Refresh(creature);
+        GainFanfare(
+            creature, absorbed * FurinaResourceConstants.FanfarePerEncoreAbsorbed);
         return Math.Max(0m, amount - absorbed);
     }
 
     /// <summary>
-    /// RETIRED GRAMMAR. `raise_fanfare_cap` died with the kickoff §4 uncapper
-    /// clause and no card on any sheet carries it -- `gain_fanfare_floor`
-    /// replaced it, because raising a ceiling nobody reaches was measured at
-    /// +0.2pt to the very archetype named after the stat.
+    /// The **Fanfare Cap +X** keyword: headroom only, nothing granted.
+    /// Mirrors resources.raise_fanfare_cap and the sim's op of the same name.
     ///
-    /// Kept rather than deleted because the cap is still a real quantity and
-    /// this is its only writer; deleting it would leave
-    /// <see cref="FanfareCapBonusResource"/> with no way to move except as a
-    /// side effect of a floor grant. Do NOT reintroduce it on a sheet without
-    /// reopening the ruling.
+    /// UN-RETIRED by the Fanfare rework (2026-07-28, Track B, RULED). It died
+    /// with the kickoff §4 uncapper clause because a ceiling nobody reached
+    /// was worth nothing; it returns for a different job, as the SMALL half
+    /// of the keyword pair -- what a common or uncommon Power prints instead
+    /// of the 5 free floor points it used to receive silently.
+    ///
+    /// The old note said "do NOT reintroduce it on a sheet without reopening
+    /// the ruling." The ruling was reopened, on 2026-07-28, and this is the
+    /// reintroduction.
+    ///
+    /// STATED PLAINLY: the cap has been a non-binding safety rail since F-A5
+    /// and read-at-cap measured under 1% in every arm of the pilot-gap
+    /// battery, so a card printing only "Fanfare Cap +X" is close to inert at
+    /// current constants. Recorded so a flat result off these cards reads as
+    /// the measurement it is, not as a wiring bug.
     /// </summary>
     public static void RaiseFanfareCap(Creature creature, int amount)
     {
@@ -594,27 +686,19 @@ public sealed class FurinaResourceHooks : AbstractModel
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await SpotlightSystem.ResolvePendingDraw(choiceContext, cardPlay);
-        // The Fanfare COST settle used to live here. Deleted by G-A1: Fanfare
-        // is read-only and `fanfare_cost` has no meaning on any sheet.
+        // Two things used to live here and both are gone.
         //
-        // Constellation grant (F-A3), sim site combat.py play_card: playing a
-        // POWER permanently raises the Fanfare floor by rarity.
+        // The Fanfare COST settle: deleted by G-A1: Fanfare is read-only and
+        // `fanfare_cost` has no meaning on any sheet.
         //
-        // AFTER resolution, so a Power that ALSO grants a floor outright does
-        // not double-count against its own read. Once per SERIES rather than
-        // once per replay -- a Study Buddy'd Power is still one performance
-        // the audience remembers, which is the same reason the retired spend
-        // sat outside the sim's replay loop.
-        if (cardPlay.IsLastInSeries
-            && cardPlay.Card.Type == CardType.Power
-            && FurinaResources.IsFurina(cardPlay.Card.Owner.Creature))
-        {
-            FurinaResources.GainFanfareFloor(
-                cardPlay.Card.Owner.Creature,
-                cardPlay.Card.Rarity == CardRarity.Rare
-                    ? FurinaResourceConstants.FanfareFloorPerPowerRare
-                    : FurinaResourceConstants.FanfareFloorPerPower);
-        }
+        // The by-rarity POWER FLOOR GRANT: deleted by the Fanfare rework
+        // (2026-07-28, Track B, RULED), mirroring the deleted block in the
+        // sim's combat._finish_play. Playing a Power silently raised floor,
+        // cap and current by 5 (rares 8) -- a mechanic worth ~4% of her power
+        // that appeared on no card and in no tooltip. Powers now grant
+        // exactly what they print, via the "Fanfare Cap +X" and "Fanfare +X"
+        // keywords, and there is deliberately no card-type branch left in
+        // this method.
         // Quick Change (R85) counts this play; the flush resolves any draw an
         // Encore spend deferred during it (the cost settle runs in
         // BeforeCardPlayed, which has no context of its own).
@@ -773,7 +857,8 @@ public sealed class EncoreMeterPower : PowerModel, ILocalizationProvider
         ("title", "Encore"),
         ("description",
             "After Block, Encore absorbs incoming damage before HP. "
-          + "Gaining or deliberately spending it creates Fanfare."),
+          + "Losing it — spent, absorbed or paid as upkeep — creates Fanfare; "
+          + "gaining it does not."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -789,11 +874,20 @@ public sealed class FanfareMeterPower : PowerModel, ILocalizationProvider
         // argument. The CAP is deliberately NOT mentioned: F-A5 demoted it to
         // a safety rail that never binds under decay, and naming a ceiling
         // nobody reaches is what made the old tooltip misleading.
+        // SINGLE-LEG wording (Track A). "Encore activity" was true of the old
+        // two-leg rule and is now actively misleading -- gaining Encore
+        // prints nothing. The player-facing rule is one clause: Encore going
+        // DOWN pays, by any of the three routes.
+        //
+        // "the baseline your cards have built", not "your Powers": Track B
+        // deleted the by-rarity automatic, so the baseline is whatever the
+        // "Fanfare +X" faces in the deck printed, and a Power that prints
+        // nothing builds nothing.
         ("description",
-            "Generated by HP loss, Encore activity, and Center Stage plays. "
-          + "Cards read it; nothing spends it. It fades by 20% at the start "
-          + "of each of your turns, never below the baseline your Powers "
-          + "have built."),
+            "Generated by losing HP, and by spending, absorbing or paying out "
+          + "[gold]Encore[/gold] — and by Center Stage plays. Cards read it; "
+          + "nothing spends it. It fades by 20% at the start of each of your "
+          + "turns, never below the baseline your cards have built."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -906,6 +1000,6 @@ public sealed class FanfareAttackPer10Power : PowerModel, ILocalizationProvider
         if (dealer != Owner || target == Owner) return 0m;
         if (!props.IsPoweredAttack()) return 0m;
         if (cardSource is not { Type: CardType.Attack }) return 0m;
-        return Amount * (FurinaResources.Fanfare(Owner) / 10);
+        return Amount * (FurinaResources.ReadableFanfare(Owner) / 10);
     }
 }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
+using KleeMod.Cards;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -44,6 +45,9 @@ public static class CurtainCallHooks
     private static readonly Dictionary<Creature, int> EncoreSpendDraws = new();
     private static readonly Dictionary<Creature, int> PendingDraws = new();
     private static readonly Dictionary<Creature, int> HpLost = new();
+    // Fanfare rework Track C.3 (2026-07-28): Blocking Notes' slope.
+    // Mirrors the sim's state.companion_plays_this_turn.
+    private static readonly Dictionary<Creature, int> CompanionPlays = new();
 
     private static int Get(Dictionary<Creature, int> map, Creature creature) =>
         map.TryGetValue(creature, out var value) ? value : 0;
@@ -69,6 +73,7 @@ public static class CurtainCallHooks
         EncoreSpendDraws.Remove(creature);
         PendingDraws.Remove(creature);
         HpLost.Remove(creature);
+        CompanionPlays.Remove(creature);
         Purge();
     }
 
@@ -85,6 +90,12 @@ public static class CurtainCallHooks
     /// damage this turn?</summary>
     public static bool HpLostThisTurn(Creature creature) =>
         Get(HpLost, creature) > 0;
+
+    /// <summary>Blocking Notes' slope (Track C.3, 2026-07-28): how many
+    /// Companion cards have been played this turn, Guest Star tokens
+    /// included. Mirrors the sim's state.companion_plays_this_turn.</summary>
+    public static int CompanionPlaysThisTurn(Creature creature) =>
+        Get(CompanionPlays, creature);
 
     /// <summary>
     /// tier0 predicate `enemy_intends_attack`: is any living enemy telegraphing
@@ -170,7 +181,24 @@ public static class CurtainCallHooks
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var owner = cardPlay.Card?.Owner?.Creature;
-        if (owner == null || cardPlay.Card!.Type != CardType.Attack) return;
+        if (owner == null) return;
+
+        // Blocking Notes' slope (Track C.3, 2026-07-28). Counted here rather
+        // than in a Companion-specific hook so it shares the sim's site: the
+        // sim increments in combat._finish_play, which is the same "a card
+        // resolved" moment this method is. Guest Star TOKEN plays count --
+        // they are Companion cards and this is a payoff, not a discount.
+        //
+        // IsFirstInSeries is NOT tested, deliberately, and this differs from
+        // the floor grant's once-per-series rule: a Study Buddy'd Companion
+        // really is two Companion cards hitting the table, and the tempo
+        // payoff is about how busy the turn was.
+        if (cardPlay.Card is ICompanionCard)
+        {
+            CompanionPlays[owner] = Get(CompanionPlays, owner) + 1;
+        }
+
+        if (cardPlay.Card!.Type != CardType.Attack) return;
 
         var played = Get(AttacksPlayed, owner) + 1;
         AttacksPlayed[owner] = played;

@@ -42,8 +42,18 @@ def test_the_five_conversions_are_powers_on_the_sheet():
                 "crowd_work", "quick_change"):
         c = loader.get_card(cid)
         assert c.type == "power", cid
-        # every one is an apply_power body -- a Power must persist
-        assert all(fx["op"] == "apply_power" for fx in c.effects), cid
+        # Every one has a PERSISTING body -- that is what made the conversion
+        # from skill to Power meaningful. Asserted as "at least one
+        # apply_power" rather than "nothing but apply_power": the Fanfare
+        # rework (Track B, 2026-07-28) added a printed `raise_fanfare_cap`
+        # line to courtroom_drama and crowd_work, replacing the invisible
+        # floor grant every Power used to receive. A one-shot line beside a
+        # persisting one does not make the card stop persisting, and the
+        # stricter form would have blocked exactly the change that makes
+        # these Powers' Fanfare value visible.
+        assert any(fx["op"] == "apply_power" for fx in c.effects), cid
+        assert all(fx["op"] in ("apply_power", "raise_fanfare_cap")
+                   for fx in c.effects), cid
 
 
 def test_salon_deploy_block_pays_per_deploy_event():

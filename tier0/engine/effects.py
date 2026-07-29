@@ -73,10 +73,26 @@ def _bonus_formula(state: CombatState, formula: str) -> int:
         # the `salon_members` runtime count read, so a member that left the
         # stage stops paying immediately.
         return int(n) * state.player.powers.get("salon_member", 0)
+    if rest == "companion_played_this_turn":
+        # Blocking Notes (rework Track C.3, 2026-07-28): Companion TEMPO. No
+        # _M_ divisor for the same reason salon_member has none -- this is a
+        # small count (a big turn is three or four Companions), not a pool,
+        # and every play should be a full step.
+        #
+        # Counts the card CURRENTLY resolving too if it is a Companion,
+        # because combat._finish_play increments before resolve_card. That
+        # only matters for a Companion that also grants Block, of which there
+        # are none today; recorded so the off-by-one is a decision rather
+        # than a discovery.
+        return int(n) * state.companion_plays_this_turn
     m, _, what = rest.partition("_")
     if what == "fanfare" and m.isdigit():
         resources.note_fanfare_read(state, "bonus_formula")
-        return int(n) * (state.player.fanfare // int(m))
+        # `readable`, not the raw field: the meter can sit BELOW ZERO since
+        # the Hyperbeam (Track C.2), and a rider reading -12 would pay
+        # NEGATIVE damage -- an attack that heals the enemy. Effects shut off
+        # rather than invert; see resources.drop_fanfare_to_floor.
+        return int(n) * (resources.readable(state.player) // int(m))
     if what == "charge" and m.isdigit():
         # Kokomi finisher reads (kickoff §2.2): Charge is READ, never
         # consumed. Rate limits (Rare / Exhaust / cost >= 2) live on the
@@ -688,7 +704,10 @@ def _salon_amount(state: CombatState, base: int) -> int:
     # The Salon-v2 Focus analogue is the read that matters most to this
     # sprint: it is where "a constant wearing a meter" was measured.
     resources.note_fanfare_read(state, "salon_focus")
-    focus = p.fanfare // C.SALON_FOCUS_PER
+    # Clamped: a negative meter must not chip the stage. Negative member
+    # ticks are the exact reading that would look like a bug rather than a
+    # cost (Track C.2, PROPOSED semantics, flagged for review).
+    focus = resources.readable(p) // C.SALON_FOCUS_PER
     return base + focus + p.powers.get("salon_damage_up", 0)
 
 
@@ -1036,18 +1055,94 @@ def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_gain_fanfare_floor(state: CombatState, fx: dict, card: Card) -> None:
-    """Constellation grant (F-A3): raise the permanent Fanfare baseline.
+    """The **Fanfare +X** keyword: current, floor and cap raised together.
 
-    Replaces `raise_fanfare_cap`, which retired with the kickoff §4 uncapper
-    clause it served -- the cap stopped being worth anything once the meter
-    decayed (the W2 cap-1000 cells never once read at-cap). This op exists
-    so NON-power cards can grant a floor, which is required rather than
-    optional: a power-only rule structurally excludes the power-light
-    archetype the whole mechanic was designed for.
+    Since the Fanfare rework (2026-07-28, Track B, RULED) this is a PRINTED
+    keyword and a RARE POWER payoff, not an invisible automatic. It used to
+    fire for free on every Power played -- see the deleted block in
+    combat._finish_play -- and the whole track is about moving that value
+    onto faces the player can read.
+
+    Reads as the full grant because all three move: the meter jumps now, and
+    it can never fall back past where the grant put it. That is why the
+    keyword is bare "Fanfare" rather than "Fanfare Floor" -- the floor is the
+    lasting half, but the immediate half is what the player feels first.
 
     Inert for characters without the resource, like every Fanfare path.
     """
     resources.gain_fanfare_floor(state, fx["amount"], f"card:{card.id}")
+
+
+def _op_raise_fanfare_cap(state: CombatState, fx: dict, card: Card) -> None:
+    """The **Fanfare Cap +X** keyword: headroom only, nothing granted.
+
+    UN-RETIRED by the Fanfare rework (2026-07-28, Track B, RULED). This op
+    died with the kickoff §4 uncapper clause because a ceiling nobody reached
+    was worth nothing, and it returns for a different job: it is the SMALL
+    half of the keyword pair, the thing a common or uncommon Power prints
+    instead of the 5 free floor points it used to receive silently.
+
+    Spelled "Fanfare Cap" on every face, never bare "Cap" -- the Salon's
+    member cap is also a per-player stat since A12, and one word cannot mean
+    both.
+
+    STATED PLAINLY, because it changes how these numbers should be read: the
+    cap has been a NON-BINDING safety rail since F-A5, and the sprint's own
+    battery measured read-at-cap at under 1% under every pilot. A card that
+    prints only "Fanfare Cap +X" is therefore close to inert AT CURRENT
+    CONSTANTS. That is a measurement, not an argument against the keyword --
+    the pair exists so the two grants can be priced apart, and the cap half
+    becomes live the moment floors stack or decay softens. It is recorded
+    here so nobody reads a flat result off these cards as a bug.
+    """
+    resources.raise_fanfare_cap(state, fx["amount"], f"card:{card.id}")
+
+
+def _op_crash_fanfare(state: CombatState, fx: dict, card: Card) -> None:
+    """The Hyperbeam settle (Track C.2, 2026-07-28): The Final Verdict.
+
+    Fanfare falls to its floor, and the FLOOR falls by `amount`. The gavel
+    falls once and the house is silent afterwards -- and stays quieter than
+    it started, which is the price that makes "deal damage equal to Fanfare"
+    a card rather than a free hit.
+
+    Deliberately a SEPARATE op from the damage line rather than a rider on
+    it, so the sheet reads in the order the card resolves: the attack reads
+    the meter, THEN the meter crashes. Folding the crash into the damage op
+    would make the ordering an implementation detail of one op instead of a
+    visible line on the card.
+
+    The floor MAY GO NEGATIVE (RULED). See resources.drop_fanfare_to_floor
+    for the semantics and for the PROPOSED reader-clamp that goes with it.
+    """
+    resources.drop_fanfare_to_floor(state, fx["amount"], f"card:{card.id}")
+
+
+def _op_salon_bow(state: CombatState, fx: dict, card: Card) -> None:
+    """The on-demand bow (Track D, the D6 probe, 2026-07-28).
+
+    The LEFTMOST member takes their bow: `salon.pop(0)`, the same end of the
+    FIFO queue a deploy into a full stage displaces. That is the whole point
+    of choosing leftmost over a target -- the player already knows which
+    member is next out, because the deploy rule taught them, so the probe
+    costs no new reading.
+
+    Defect-evoke analogue, and it enters NOW because Track A changed what it
+    is worth: a bow that pays Encore is an Encore SINK's opposite, and under
+    single-leg Fanfare the Encore it grants no longer mints on arrival. It is
+    a bow trigger whose value is the bow, not the buffer -- which is exactly
+    the thing the probe wants to measure.
+
+    Inert on an empty stage, silently: "take a bow" with no company is a
+    no-op, not an error, so the card is never unplayable and never wasted in
+    a way the player cannot see coming from the stage itself.
+    """
+    p = state.player
+    for _ in range(_amount(state, fx.get("amount", 1))):
+        if not p.salon:
+            break
+        _salon_bow(state, p.salon.pop(0))
+    p.powers["salon_member"] = len(p.salon)
 
 
 def _op_generate_guest_star(state: CombatState, fx: dict, card: Card) -> None:
@@ -1567,7 +1662,12 @@ def _predicate(state: CombatState, name: str) -> bool:
         return state.spotlighted_cards_this_turn > 0
     if name.startswith("fanfare_at_least_"):
         resources.note_fanfare_read(state, "threshold")
-        return state.player.fanfare >= int(name.rsplit("_", 1)[1])
+        # Clamped for consistency with every other reader. It cannot change
+        # an answer today -- every printed threshold is positive, so a
+        # negative meter fails either way -- and it is written this way so a
+        # future `fanfare_at_least_0` reads as "she has any" rather than as
+        # "always true, even mid-Hyperbeam-debt".
+        return resources.readable(state.player) >= int(name.rsplit("_", 1)[1])
     if name.startswith("encore_at_least_"):
         return state.player.encore >= int(name.rsplit("_", 1)[1])
     raise ValueError(f"unknown predicate {name!r}")
@@ -2070,6 +2170,9 @@ OPS = {
     "spend_encore": _op_spend_encore,
     "spotlight_designate": _op_spotlight_designate,
     "gain_fanfare_floor": _op_gain_fanfare_floor,
+    "raise_fanfare_cap": _op_raise_fanfare_cap,
+    "crash_fanfare": _op_crash_fanfare,
+    "salon_bow": _op_salon_bow,
     "generate_guest_star": _op_generate_guest_star,
     "copy_spotlighted_in_hand": _op_copy_spotlighted_in_hand,
     "heal": _op_heal,
@@ -2212,7 +2315,7 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int) -> int:
     n = p.powers.get("fanfare_attack_per10", 0)
     if n:
         resources.note_fanfare_read(state, "attack_power")
-        bonus += n * (p.fanfare // 10)
+        bonus += n * (resources.readable(p) // 10)
     # Ceremonial Garment (Kokomi kit, kickoff §2.2 Shape B): while the state
     # is active her attack cards READ Charge, scaled down by the divisor
     # knob — repeated-but-bounded payoff, never a spend.

@@ -44,13 +44,13 @@ public sealed class ReginasMercy : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Regina's Mercy"),
-        ("description", "Gain {IfUpgraded:show:15|12} [gold]Encore[/gold]. Permanently raise your [gold]Fanfare[/gold] baseline by {FanfareFloor:diff()} this combat."),
+        ("description", "Gain {IfUpgraded:show:15|12} [gold]Encore[/gold]. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("FanfareFloor", 5m)
+            new DynamicVar("FanfareCap", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,7 +63,7 @@ public sealed class ReginasMercy : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 15 : 12));
-        FurinaResources.GainFanfareFloor(Owner.Creature, DynamicVars["FanfareFloor"].IntValue);
+        FurinaResources.RaiseFanfareCap(Owner.Creature, DynamicVars["FanfareCap"].IntValue);
     }
 
     protected override void OnUpgrade()

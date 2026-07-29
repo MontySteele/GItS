@@ -10,11 +10,23 @@ to A4 sustain, NEVER A3 block (kickoff §2 harness note, Tier 0 binding --
 without this accounting rule she grows a phantom third elite axis).
 
 Fanfare: a READ-ONLY momentum stat since "The Tide Turns" (2026-07-24).
-Generation is activity-based ONLY (HP lost, Encore gained, Encore spent,
-Center Stage card played); it DECAYS each turn from turn 2; and it rests on
-a permanent floor built from constellation grants. Cards read it and gate on
+Generation is activity-based ONLY; it DECAYS each turn from turn 2; and it
+rests on a floor built from what her cards PRINT. Cards read it and gate on
 it. **No card spends it** -- the spend grammar was retired because Encore
 already is her spendable resource and a second one was a redundant system.
+
+SINGLE-LEG since the Fanfare rework (2026-07-28, Track A, RULED). Fanfare
+prints when Encore goes DOWN and never when it goes up, so the four sources
+are now:
+
+    hp_lost           true HP lost                      (note_player_hp_loss)
+    encore_spent      deliberate spends and upkeep      (spend_encore)
+    encore_absorbed   the buffer eating a hit           (absorb_into_encore)
+    center_stage      a card played while SHE holds it  (spotlight)
+
+`encore_gained` is GONE. All four are INDIRECT -- nothing hands the player
+transient Fanfare outright -- which is the property the "Fanfare +X" keyword
+convention rests on and tools/lint_furina_registers.py L12 enforces.
 
 There is deliberately no per-turn passive ACCRUAL path in this module or
 anywhere else -- passive accrual is stall payoff, and the healing policy
@@ -157,6 +169,75 @@ def gain_fanfare_floor(state: CombatState, n: int, source: str) -> None:
                floor=p.fanfare_floor, cap=p.fanfare_cap, total=p.fanfare)
 
 
+def raise_fanfare_cap(state: CombatState, n: int, source: str) -> None:
+    """The **Fanfare Cap +X** keyword: headroom only (Track B, 2026-07-28).
+
+    The deliberate contrast with gain_fanfare_floor above, which moves all
+    three numbers. Nothing is granted here; the meter is only allowed to go
+    further if activity takes it there.
+
+    See effects._op_raise_fanfare_cap for the standing measurement note --
+    the cap has not been a binding number since F-A5, so this keyword is the
+    cheap half of the pair by construction rather than by tuning.
+    """
+    p = state.player
+    if not p.fanfare_cap or n <= 0:
+        return                    # inert for everyone without the resource
+    p.fanfare_cap += n
+    state.emit("fanfare_cap_raised", amount=n, source=source,
+               cap=p.fanfare_cap, total=p.fanfare)
+
+
+def drop_fanfare_to_floor(state: CombatState, floor_drop: int,
+                          source: str) -> int:
+    """The Hyperbeam settle (Track C.2, 2026-07-28): crash the meter, then
+    dig the floor out from under it. Returns what the meter fell by.
+
+    THE FLOOR MAY GO NEGATIVE, and that is RULED rather than tolerated. A
+    negative floor is a hole the player climbs out of with activity: decay
+    still clamps to it exactly as before, so a meter at -12 sits at -12 and
+    every point of generation counts against the debt.
+
+    READERS CLAMP. Every consumer of the meter -- the Salon Focus term, the
+    bonus_formula riders, the fanfare_at_least predicates -- reads
+    `max(0, fanfare)`, so a negative meter turns effects OFF rather than
+    inverting them. That is a PROPOSED semantic, flagged at review: the
+    harsher StS-style inversion (members ticking for negative numbers) is a
+    one-line flip in `readable`, and negative member ticks chipping the stage
+    would read as a bug rather than as a cost.
+
+    The cap is deliberately NOT lowered. The floor falling is the price; the
+    ceiling falling too would make the card quietly worse the second time it
+    is played in a combat, which is a different card.
+    """
+    p = state.player
+    if not p.fanfare_cap:
+        return 0
+    before = p.fanfare
+    p.fanfare_floor -= floor_drop
+    p.fanfare = max(p.fanfare_floor, min(p.fanfare, p.fanfare_floor))
+    note_fanfare_change(state, before)
+    state.emit("fanfare_crashed", amount=before - p.fanfare, source=source,
+               floor=p.fanfare_floor, total=p.fanfare)
+    return before - p.fanfare
+
+
+def readable(player) -> int:
+    """What a Fanfare READER sees: the meter, clamped at zero.
+
+    The single chokepoint for the Track C.2 negative-floor semantics. Every
+    reader goes through here so "effects shut off, they do not invert" is one
+    fact in one place, and so the [USER] flip to StS-style inversion at
+    review is a one-line change rather than a hunt.
+
+    Deliberately takes a PLAYER rather than a CombatState: several readers
+    (the pilot's valuation terms, the C# mirror's tests) hold a player and no
+    state, and a signature that forced them to fabricate one would have
+    guaranteed the clamp got skipped somewhere.
+    """
+    return max(0, player.fanfare)
+
+
 def note_fanfare_read(state: CombatState, kind: str) -> None:
     """Instrument for the gate that asks whether the stat is LIVE.
 
@@ -179,10 +260,18 @@ def note_fanfare_read(state: CombatState, kind: str) -> None:
 
 
 def gain_encore(state: CombatState, n: int) -> None:
+    """Fill the buffer. Prints NO Fanfare (Track A, RULED 2026-07-28).
+
+    Fanfare prints when Encore goes DOWN, never when it goes up. The
+    `encore_gained` leg used to mint here, which made every Encore point pay
+    the meter twice -- once arriving, once leaving -- and that double-count
+    was 47% of all generation under the greedy pilot and 62% under the
+    stoker. A flywheel whose majority output is itself is not a flywheel with
+    a tuning problem; it is a flywheel with a shape problem.
+    """
     p = state.player
     p.encore += n
     state.emit("gain_encore", amount=n, total=p.encore)
-    gain_fanfare(state, n * C.FANFARE_PER_ENCORE_GAINED, "encore_gained")
 
 
 def spend_encore(state: CombatState, n: int) -> int:
@@ -238,12 +327,27 @@ def spend_encore_or_hp(state: CombatState, n: int) -> None:
 def absorb_into_encore(state: CombatState, dmg: int) -> int:
     """Route incoming player damage through the Encore buffer AFTER block.
     Returns the damage that still reaches HP. The emitted event is what
-    metrics route to A4 -- it must never be folded into `blocked`."""
+    metrics route to A4 -- it must never be folded into `blocked`.
+
+    PRINTS FANFARE since Track A (RULED 2026-07-28). Absorption is the third
+    Encore REDUCTION path and it used to be the only one worth nothing, which
+    was an asymmetry rather than a rule: absorbed Encore is deferred Block
+    that will never block a future hit, so cashing it is a real cost and the
+    audience sees the same wound either way.
+
+    That is what makes the post-Track-A rule sayable in one line: every point
+    of damage past Block prints exactly 1 Fanfare -- through here if the
+    buffer eats it, through note_player_hp_loss if HP does. Before this
+    change absorbed damage printed 0 and the same hit paid differently
+    depending on a buffer the player could not see the far side of.
+    """
     p = state.player
     absorbed = min(p.encore, dmg)
     if absorbed:
         p.encore -= absorbed
         state.emit("encore_absorb", amount=absorbed)
+        gain_fanfare(state, absorbed * C.FANFARE_PER_ENCORE_ABSORBED,
+                     "encore_absorbed")
     return dmg - absorbed
 
 

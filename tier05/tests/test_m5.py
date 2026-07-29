@@ -310,15 +310,37 @@ def test_fanfare_core_is_native_generation_plus_output_converter():
 
     # DRAFTER_VERSION 9: the plan's second half is a permanent BASELINE, not
     # a converter -- the spend grammar that defined "converter" is retired.
-    # Powers grant a floor by engine RULE without printing an op, so the
-    # drafter must see them; an ordinary reader must not read as a grant.
-    floor_source = loader.get_card("rapturous_applause")
+    #
+    # WHAT COUNTS AS A GRANT CHANGED (Fanfare rework, Track B, 2026-07-28).
+    # It used to be "prints the op, OR is a Power at all", because the engine
+    # granted 5 by rarity behind every Power's back. The drafter now reads
+    # exactly what the card PRINTS, and nothing else.
+    floor_source = loader.get_card("the_sea_is_my_stage")   # prints Fanfare 15
     pure_reader = loader.get_card("crescendo")
     assert draft._grants_fanfare_floor(floor_source)
-    assert draft._grants_fanfare_floor(loader.get_card("the_sea_is_my_stage"))
     assert not draft._grants_fanfare_floor(pure_reader)
 
-    assert draft.core_complete(starter + [floor_source], "fanfare")
+    # THE CASE THAT PROVES IT. grand_salon is an uncommon Power that used to
+    # be worth 5 floor purely by being one, and prints no Fanfare line at all
+    # -- so the drafter must now see nothing. Same for a Fanfare CAP card:
+    # headroom is not baseline, and scoring it as one would tell the drafter
+    # a near-inert keyword completes the plan's core.
+    assert not draft._grants_fanfare_floor(loader.get_card("grand_salon"))
+    assert not draft._grants_fanfare_floor(loader.get_card("courtroom_drama"))
+
+    # rapturous_applause still closes both the floor limb and the reader limb
+    # -- but for a reason that is now PRINTED ("Fanfare +8") rather than
+    # inferred from its card type. Same answer, different evidence, which is
+    # the whole track in one assertion.
+    both = loader.get_card("rapturous_applause")
+    assert draft._grants_fanfare_floor(both) and draft._reads_fanfare(both)
+    assert draft.core_complete(starter + [both], "fanfare")
+
+    # And the limbs really are separable: a deck holding only a baseline is
+    # not online, because it reads a meter nothing cashes.
+    assert not draft.core_complete(starter + [floor_source], "fanfare")
+    assert draft.core_complete(starter + [floor_source, pure_reader],
+                               "fanfare")
     assert not draft.core_complete(starter + [pure_reader], "fanfare")
 
 

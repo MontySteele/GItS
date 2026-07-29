@@ -75,7 +75,7 @@ public sealed class FloodOfEmotion : CustomCardModel, IElementalCard, ICharacter
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        if (FurinaResources.Fanfare(Owner.Creature) >= 20)
+        if (FurinaResources.ReadableFanfare(Owner.Creature) >= 20)
         {
             await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 14m))
                 .FromCard(this)

@@ -393,11 +393,28 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = card.encore_cost > 0
             card.encore_cost = max(0, card.encore_cost + val)
         elif key == "fanfare_floor":
-            # Was `fanfare_cap` against raise_fanfare_cap; both retired with
-            # the spend/cap grammar ("The Tide Turns", F-A4/F-A5). An upgrade
-            # that used to buy ceiling now buys baseline.
+            # The "Fanfare +X" keyword's upgrade. Once retired in favour of
+            # `fanfare_cap` and back again: the cap grammar died with F-A4/F-A5
+            # and the floor replaced it, and the Fanfare rework (Track B,
+            # 2026-07-28) brought the cap back as the OTHER keyword, so both
+            # keys are now live and they are NOT interchangeable -- one buys
+            # baseline, one buys headroom, and a card prints exactly one.
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "gain_fanfare_floor"),
+                             "amount", val)
+        elif key == "fanfare_cap":
+            # The "Fanfare Cap +X" keyword's upgrade (Track B, 2026-07-28).
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "raise_fanfare_cap"),
+                             "amount", val)
+        elif key == "floor_drop":
+            # The Hyperbeam's price (Track C.2, 2026-07-28). NEGATIVE deltas
+            # are the normal direction here -- the upgrade makes the hole
+            # SHALLOWER -- which is why it needs its own key rather than
+            # riding a generic amount bump whose sign convention says
+            # "bigger is better".
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "crash_fanfare"),
                              "amount", val)
         elif key == "block_next_turn":
             # The Charlotte-precedent second half. `block` deliberately hits
@@ -485,7 +502,13 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             if hit:                                      # X_plus_1 -> X_plus_2
                 n = int(hit["amount"].rsplit("_", 1)[1])
                 hit["amount"] = f"X_plus_{n + val}"
-        elif key == "bonus_per_detonation":
+        elif key in ("bonus_per_detonation", "bonus_slope"):
+            # One implementation, two names. `bonus_per_detonation` was named
+            # for its only user when it was written and is in fact generic --
+            # it steepens whatever bonus_formula the card carries. Rather than
+            # rename it and churn every Klee upgrade row, `bonus_slope` is the
+            # name new rows use (Fanfare rework Track C.3, 2026-07-28), and
+            # the old name stays valid for the rows already written against it.
             hit = next((fx for fx in top if "bonus_formula" in fx), None)
             ok = hit is not None
             if hit:

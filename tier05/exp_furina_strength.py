@@ -420,7 +420,7 @@ def s5(runs: int = RUNS) -> None:
     """
     print("=" * 78)
     print(f"S5. SALON_MEMBER_SLOTS sweep — {runs} runs/cell, seed {SEED}")
-    print(f"    shipped {C.SALON_MEMBER_SLOTS}. Box Seats adds +1 (+2 "
+    print(f"    shipped {C.SALON_MEMBER_SLOTS}. Casting Call adds +1 (+2 "
           f"upgraded) on top of this.")
     print("=" * 78)
 

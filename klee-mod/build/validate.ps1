@@ -276,10 +276,23 @@ function Invoke-RepoPython {
           [string[]]$Arguments)
     $prev = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
+    # PYTHONPATH pinned to the repo root. `python -m tools.x` resolves the
+    # package off the CURRENT DIRECTORY, and validate.ps1 runs from wherever
+    # deploy.ps1 was invoked -- so S7a's game_ref verification was failing
+    # with "No module named 'tools'" and reporting it as "complete local
+    # game_ref failed verification", which is a different and much more
+    # alarming thing than what had actually happened.
+    #
+    # Set here rather than at each call site so every -m invocation this
+    # function ever carries is covered by construction. PRE-EXISTING; not
+    # introduced by the Fanfare rework.
+    $prevPyPath = $env:PYTHONPATH
+    $env:PYTHONPATH = if ($prevPyPath) { "$repoRoot;$prevPyPath" } else { $repoRoot }
     try {
         & $venvPython @Arguments 2>&1
     } finally {
         $ErrorActionPreference = $prev
+        $env:PYTHONPATH = $prevPyPath
     }
 }
 

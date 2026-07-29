@@ -20,9 +20,15 @@ name audit, by house law, and no tool pretends to cover it.
 
   R1  every Furina card carries register: salon | archon | private.
   R2  any card that touches Fanfare (a bonus_formula reading fanfare, a
-      fanfare_at_least_* gate, or gain_fanfare_floor) is register: archon.
+      fanfare_at_least_* gate, or either keyword op -- gain_fanfare_floor
+      "Fanfare +X" / raise_fanfare_cap "Fanfare Cap +X") is register: archon.
       Fanfare IS the mask/audience stat; a stagehand name on a Fanfare read
       is the register scramble this sweep exists to remove.
+      raise_fanfare_cap joined this rule with the Fanfare rework (Track B,
+      2026-07-28), and it is the rule that DECIDED which cards carry the new
+      keywords: the cap only ever binds for a deck pushing the meter high,
+      which is the fanfare plan, which is the archon voice. The convention
+      and the mechanic point the same way, so no amendment was needed.
   R3  any card that APPLIES salon_member (deploys a cast member) is
       register: salon. Reads (has_salon_members and count scalers) are not
       deploys and carry no constraint -- Dinner Service feeding the
@@ -34,6 +40,20 @@ name audit, by house law, and no tool pretends to cover it.
   R5  the Focalors cap: EXACTLY two cards carry the focalors tag, and both
       are rare (ruling 2026-07-27: the_sea_is_my_stage + reginas_mercy; no
       third Focalors reference anywhere in the pool).
+  L12 NO DIRECT TRANSIENT FANFARE GRANT, on the sheet or in the engine.
+      Required by the Fanfare rework brief (Track B, 2026-07-28) and the
+      reason it is a BLOCKER rather than a warning: the "Fanfare +X" keyword
+      can only mean the permanent grant while every generation source is
+      INDIRECT (hp_lost, encore_spent, encore_absorbed, center_stage --
+      things the player DOES, which then pay). The first card that hands out
+      transient Fanfare outright makes the keyword mean two things, on faces
+      already printed, forever. Checked on BOTH surfaces: a banned op on a
+      sheet row, and a banned op existing in effects.OPS at all -- because a
+      sheet lint alone would pass right up until someone wrote the card.
+  R6  the "Fanfare +X" keyword (gain_fanfare_floor) is a RARE POWER payoff.
+      The cheap half of the pair ("Fanfare Cap +X") is what commons,
+      uncommons and Exhaust skills may print. Ruled with the rework; before
+      it, every Power got a floor grant by rarity and no card said so.
 
 Third-instance rule stands: if a second character adopts registers, this
 generalizes into a shared lint with a per-character vocabulary table.
@@ -60,15 +80,31 @@ def _leaf_ops(effects: list[dict]):
                 yield from _leaf_ops(fx[branch])
 
 
+# The two printed keywords (Track B). Both are Fanfare-touching for R2.
+KEYWORD_OPS = ("gain_fanfare_floor", "raise_fanfare_cap")
+
+# L12. Ops that would hand the player TRANSIENT Fanfare directly. None of
+# these exists today and none may be added; the names are the plausible
+# spellings someone would reach for, so the lint fires on the attempt rather
+# than on the consequence three passes later.
+BANNED_TRANSIENT_OPS = ("gain_fanfare", "add_fanfare", "grant_fanfare",
+                        "fanfare", "give_fanfare")
+
+
 def _touches_fanfare(card: dict) -> bool:
     for fx in _leaf_ops(card.get("effects")):
-        if fx.get("op") == "gain_fanfare_floor":
+        if fx.get("op") in KEYWORD_OPS:
             return True
         if "fanfare" in str(fx.get("bonus_formula", "")):
             return True
         if str(fx.get("if", "")).startswith("fanfare_at_least_"):
             return True
     return False
+
+
+def _grants_fanfare_floor(card: dict) -> bool:
+    return any(fx.get("op") == "gain_fanfare_floor"
+               for fx in _leaf_ops(card.get("effects")))
 
 
 def _applies_member(card: dict) -> bool:
@@ -105,6 +141,47 @@ def main() -> int:
             errors.append(f"R4 {cid}: pure-Encore card but register={reg}")
         if "focalors" in (c.get("tags") or ()):
             focalors.append(c)
+        for fx in _leaf_ops(c.get("effects")):
+            if fx.get("op") in BANNED_TRANSIENT_OPS:
+                errors.append(
+                    f"L12 {cid}: op {fx['op']!r} would grant TRANSIENT "
+                    "Fanfare directly. Every generation source must stay "
+                    "indirect or the printed 'Fanfare +X' keyword becomes "
+                    "ambiguous on faces already shipped")
+        if _grants_fanfare_floor(c) and not (
+                c.get("type") == "power" and c.get("rarity") == "rare"):
+            errors.append(
+                f"R6 {cid}: prints 'Fanfare +X' (gain_fanfare_floor) but is "
+                f"a {c.get('rarity')} {c.get('type')}. The full grant is a "
+                "RARE POWER payoff; commons, uncommons and Exhaust skills "
+                "print 'Fanfare Cap +X' instead")
+
+    # L12, the ENGINE half. The sheet half above can only catch a card that
+    # was written; this catches the op being made available at all, which is
+    # the step that actually opens the door.
+    #
+    # THE REPO ROOT IS PUSHED ONTO sys.path EXPLICITLY. This was first written
+    # as a bare try/except ImportError with a `pass` fallback, "so the lint
+    # keeps working as a standalone yaml checker" -- and the mutation test
+    # caught what that actually did: run as `python tools/lint_...py`, sys.path
+    # starts at tools/, `tier0` is not importable, and the except branch
+    # silently switched off half the gate in the exact way the lint is
+    # normally invoked. A planted `gain_fanfare` op passed clean.
+    #
+    # So: fix the path, and let an ImportError RAISE. A lint that cannot see
+    # the thing it lints must fail loudly, not report zero violations. This is
+    # the same class of defect the L12 rule itself exists to prevent -- a gap
+    # that is invisible precisely because nothing complains.
+    if str(REPO) not in sys.path:
+        sys.path.insert(0, str(REPO))
+    from tier0.engine import effects
+
+    for op in BANNED_TRANSIENT_OPS:
+        if op in effects.OPS:
+            errors.append(
+                f"L12 engine: effects.OPS exposes {op!r}. No op may hand "
+                "out transient Fanfare directly -- generation stays "
+                "indirect so 'Fanfare +X' keeps one meaning")
 
     if len(focalors) != 2:
         errors.append(f"R5 focalors cap: {len(focalors)} tagged, need exactly 2"

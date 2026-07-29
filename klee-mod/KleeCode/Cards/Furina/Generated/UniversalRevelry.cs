@@ -53,7 +53,7 @@ public sealed class UniversalRevelry : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(9m),
             new ExtraDamageVar(1m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.Fanfare(card.Owner.Creature) / 2)
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.ReadableFanfare(card.Owner.Creature) / 2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -71,7 +71,7 @@ public sealed class UniversalRevelry : CustomCardModel, ICharacterCard
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
-        if (FurinaResources.Fanfare(Owner.Creature) >= 15)
+        if (FurinaResources.ReadableFanfare(Owner.Creature) >= 15)
         {
             await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 6m))
                 .FromCard(this)

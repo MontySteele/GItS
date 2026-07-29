@@ -200,6 +200,9 @@ PROFILES = {
 MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_energy",
                   "gain_encore", "spend_encore", "raise_fanfare_cap",
                   "gain_fanfare_floor",
+                  # Fanfare rework (2026-07-28): the Hyperbeam settle
+                  # (Track C.2) and the on-demand bow probe (Track D).
+                  "crash_fanfare", "salon_bow",
                   "generate_guest_star",
                   "copy_spotlighted_in_hand",
                   "heal",
@@ -343,7 +346,7 @@ def predicate_cs(name: str) -> str | None:
     name = name or ""
     hit = _FANFARE_BAR.match(name)
     if hit:
-        return f"FurinaResources.Fanfare(Owner.Creature) >= {hit.group(1)}"
+        return f"FurinaResources.ReadableFanfare(Owner.Creature) >= {hit.group(1)}"
     hit = _CHARGE_BAR.match(name)
     if hit:
         return f"KokomiResources.GetCharge(Owner.Creature) >= {hit.group(1)}"
@@ -711,7 +714,12 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "encore",
                        "bomb_damage", "burst_energy", "cost",
                        "discard", "sparks", "innate", "retain", "bonus", "chance",
                        "conditional_bonus", "condition", "bombs",
-                       "bonus_per_detonation", "cards", "remove",
+                       "bonus_per_detonation", "bonus_slope",
+                       # Fanfare rework Track C.2 (2026-07-28): the
+                       # Hyperbeam's upgrade cuts its PRICE (the floor it
+                       # digs), so the delta is normally negative.
+                       "floor_drop",
+                       "cards", "remove",
                        "copy_cost_override", "add"}
                       | {"generate_cost_override"}
                       # Kokomi (playtest sprint, Track B). Three deltas her
@@ -786,6 +794,15 @@ CARD_FIELDS = {
     # rather than shipping a card that starts in hand in the sim and does
     # not in the game.
     "innate",
+    # Fanfare rework Track C.1 (2026-07-28): Retain on the BASE card, and
+    # EXACTLY the A9 story again one field over. Retain was already emittable
+    # as an upgrade delta (`AddKeyword(CardKeyword.Retain)` in OnUpgrade), so
+    # the keyword rail existed and only the base-card spelling was missing --
+    # which meant Slip Backstage, the first card ruled Retain from print,
+    # BLOCKED with "card field(s) ['retain'] not understood". The block is
+    # the design working twice: a card that retains in the sim and does not
+    # in the game is precisely the divergence this whitelist exists to stop.
+    "retain",
     # Companion identity/reward metadata.
     "star", "element", "role_c", "personal_pool", "nation", "character",
     "guest_star",
@@ -1002,7 +1019,11 @@ def blocked_reason(
                         r"\d+_per_\d+_encore", bf) and not re.fullmatch(
                         # A14: the per-member slope. No divisor -- the salon is
                         # a capped count, so every member is a full step.
-                        r"\d+_per_salon_member", bf):
+                        r"\d+_per_salon_member", bf) and not re.fullmatch(
+                        # Track C.3 (2026-07-28): Blocking Notes' Companion
+                        # tempo. No divisor, same reason as salon_member --
+                        # a big turn is three or four plays, not a pool.
+                        r"\d+_per_companion_played_this_turn", bf):
                 return f"bonus_formula '{bf}'"
             if "bonus_vs_bombed" in eff:
                 return "conditional damage bonus (needs bomb system)"
@@ -1023,7 +1044,7 @@ def blocked_reason(
             if not isinstance(amt, int) and _x_formula_reason(card, amt):
                 return _x_formula_reason(card, amt)
         if op in {"gain_encore", "spend_encore", "raise_fanfare_cap",
-                  "gain_fanfare_floor"}:
+                  "gain_fanfare_floor", "crash_fanfare", "salon_bow"}:
             unknown = set(eff) - {"op", "amount"}
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
@@ -1494,6 +1515,10 @@ def salon_member_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | Non
 
 
 SALON_MEMBER_COUNT_CS = "SalonMemberPower.Count(card.Owner.Creature)"
+# Fanfare rework Track C.3 (2026-07-28): Blocking Notes' slope. Mirrors the
+# sim's `state.companion_plays_this_turn`, counting Guest Star token plays.
+COMPANION_PLAYS_THIS_TURN_CS = (
+    "CurtainCallHooks.CompanionPlaysThisTurn(card.Owner.Creature)")
 
 
 def salon_deploy_card(card: dict) -> bool:
@@ -1637,6 +1662,8 @@ def rider_tip_args(card: dict) -> str:
         m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", eff.get("bonus_formula", ""))
         members = re.fullmatch(r"(\d+)_per_salon_member",
                                eff.get("bonus_formula", ""))
+        companions = re.fullmatch(r"(\d+)_per_companion_played_this_turn",
+                                  eff.get("bonus_formula", ""))
         if m:
             args.append(f"fanfarePer: {int(m.group(1))}")
             args.append(f"fanfareStep: {int(m.group(2))}")
@@ -1647,6 +1674,10 @@ def rider_tip_args(card: dict) -> str:
             args.append(f"salonPer: {int(members.group(1))}")
             if eff.get("op") == "block":
                 args.append("salonGrantsBlock: true")
+        elif companions:
+            # Track C.3: same bargain again. The face says it scales; the tip
+            # carries the rate and the live count.
+            args.append(f"companionPer: {int(companions.group(1))}")
         elif "bonus_vs_aura" in eff:
             args.append(f"auraBonus: {int(eff['bonus_vs_aura'])}")
     return ", ".join(args)
@@ -1836,7 +1867,12 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     # -- Dinner Service is its first card, and the whole point of the rework is
     # that the face shows the stage paying.
     members = re.fullmatch(r"(\d+)_per_salon_member", formula)
-    if not m and not members:
+    # Fanfare rework Track C.3 (2026-07-28): Blocking Notes' Companion-tempo
+    # slope, the third shape on this same rail. Counted per PLAY this turn,
+    # including Guest Star token plays -- see the sheet row for why the B2
+    # printed-cost lesson does not apply to a payoff.
+    companions = re.fullmatch(r"(\d+)_per_companion_played_this_turn", formula)
+    if not m and not members and not companions:
         return None
     if salon_deploy_card(card):
         return None
@@ -1853,9 +1889,12 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     if members:
         return int(eff["amount"]), int(members.group(1)), (
             f"static (card, _) => {SALON_MEMBER_COUNT_CS}")
+    if companions:
+        return int(eff["amount"]), int(companions.group(1)), (
+            f"static (card, _) => {COMPANION_PLAYS_THIS_TURN_CS}")
     return int(eff["amount"]), int(m.group(1)), (
         "static (card, _) => "
-        f"FurinaResources.Fanfare(card.Owner.Creature) / {int(m.group(2))}")
+        f"FurinaResources.ReadableFanfare(card.Owner.Creature) / {int(m.group(2))}")
 
 
 def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
@@ -1870,7 +1909,7 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
         base, per_n, div = fanfare
         return base, per_n, (
             "static (card, _) => "
-            f"FurinaResources.Fanfare(card.Owner.Creature) / {div}")
+            f"FurinaResources.ReadableFanfare(card.Owner.Creature) / {div}")
     pile = exhaust_pile_calc_rider(card, eff)
     if pile is not None:
         return pile
@@ -2036,6 +2075,11 @@ def build_vars(card: dict) -> list[str]:
         elif op == "raise_fanfare_cap":
             out.append(
                 f'new DynamicVar("FanfareCap", {int(eff["amount"])}m)')
+        elif op == "crash_fanfare":
+            # Always a var: the Hyperbeam's upgrade IS this number (the
+            # floor_drop delta), so the upgraded face has to render it.
+            out.append(
+                f'new DynamicVar("FloorDrop", {int(eff["amount"])}m)')
         elif op == "gain_fanfare_floor":
             # Always a var, never a literal: BOTH sheet cards carrying this op
             # have a fanfare_floor upgrade delta, so the new value must render
@@ -2184,6 +2228,12 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                      and isinstance(e.get("amount"), str) for e in effects),
         # bonus_per_detonation: tier0 rewrites the bonus_formula's N.
         "bonus_per_detonation": any("bonus_formula" in e for e in effects),
+        # bonus_slope: the same rewrite under the name new rows use. See
+        # upgrades.py, where one branch serves both keys.
+        "bonus_slope": any("bonus_formula" in e for e in effects),
+        # floor_drop: tier0 bumps the crash_fanfare amount, and the value
+        # renders off the FloorDrop var the op already emits.
+        "floor_drop": any(e["op"] == "crash_fanfare" for e in effects),
         # cards: tier0 bumps the add_card amount.
         "cards": any(e["op"] == "add_card" for e in effects),
         # remove: value-checked in the loop below (only 'exhaust' lands;
@@ -2978,7 +3028,7 @@ def build_body(
                     per_fanfare = rest.partition("_")[0]
                     amount_expr += (
                         f" + {n} * "
-                        f"(FurinaResources.Fanfare(Owner.Creature) / {per_fanfare})")
+                        f"(FurinaResources.ReadableFanfare(Owner.Creature) / {per_fanfare})")
             if salon_deployed:
                 amount_expr = (
                     f"({amount_expr}) * "
@@ -3052,6 +3102,25 @@ def build_body(
             lines.append(
                 "FurinaResources.GainFanfareFloor("
                 "Owner.Creature, DynamicVars[\"FanfareFloor\"].IntValue);")
+
+        elif op == "crash_fanfare":
+            # The Hyperbeam settle (Track C.2, 2026-07-28), mirroring
+            # resources.drop_fanfare_to_floor: Fanfare falls to its floor and
+            # the floor falls by the printed amount. The floor MAY GO
+            # NEGATIVE, which is ruled; FurinaResources.DropFanfareToFloor
+            # owns the clamp so the two engines cannot disagree about it.
+            lines.append(
+                "FurinaResources.DropFanfareToFloor("
+                "Owner.Creature, DynamicVars[\"FloorDrop\"].IntValue);")
+
+        elif op == "salon_bow":
+            # The on-demand bow (Track D, 2026-07-28). The LEFTMOST member --
+            # the same end of the FIFO queue a deploy into a full stage
+            # displaces -- so this reuses the displacement path rather than
+            # introducing a second notion of "which member".
+            lines.append(
+                "await SalonMemberPower.BowLeftmost("
+                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
 
         elif op == "heal":
             lines.append(
@@ -3823,6 +3892,8 @@ def build_description(card: dict) -> str:
             if block_calc_rider(card, eff) is not None:
                 formula = eff.get("bonus_formula", "")
                 stat = ("Salon" if formula.endswith("_per_salon_member")
+                        else "Companions"
+                        if formula.endswith("_per_companion_played_this_turn")
                         else formula.rpartition("_")[2].title())
                 parts.append(f"Scales with [gold]{stat}[/gold].")
 
@@ -3947,6 +4018,8 @@ def build_description(card: dict) -> str:
                     # "Member", which is not what anything in the game or on
                     # the sheet is called. The stage is the Salon.
                     stat = ("Salon" if formula.endswith("_per_salon_member")
+                        else "Companions"
+                        if formula.endswith("_per_companion_played_this_turn")
                             else formula.rpartition("_")[2].title())
                     parts.append(f"Scales with [gold]{stat}[/gold].")
                 else:
@@ -4022,20 +4095,38 @@ def build_description(card: dict) -> str:
                 f"Spend {int(eff['amount'])} [gold]Encore[/gold]; "
                 "lose HP for any shortfall.")
 
+        # THE TWO FANFARE KEYWORDS (rework Track B, 2026-07-28, RULED). These
+        # replaced sentences with a printed keyword each, because the value
+        # they carry used to arrive invisibly -- every Power granted 5 floor
+        # (rares 8) and no card said so.
         elif op == "raise_fanfare_cap":
-            parts.append(
-                "Increase your [gold]Fanfare[/gold] cap by "
-                "{FanfareCap:diff()} this combat.")
+            # "Fanfare Cap", never bare "Cap": the Salon's member cap is also
+            # a per-player stat since A12, and one word cannot mean both.
+            parts.append("[gold]Fanfare Cap[/gold] +{FanfareCap:diff()}.")
 
         elif op == "gain_fanfare_floor":
-            # "Baseline", not "floor" or "minimum": the meter's rule text
-            # already says it fades "never below the baseline your Powers have
-            # built", so the card and the meter have to use one word for one
-            # concept. "This combat" is stated because the grant does NOT
-            # persist across fights.
+            # Bare "Fanfare +X" for the FULL grant -- current, baseline and
+            # cap together. The convention is only unambiguous because no card
+            # grants transient Fanfare directly (all four generation sources
+            # are indirect); register lint L12 is the blocker that keeps it
+            # that way, on the sheet AND on effects.OPS.
+            parts.append("[gold]Fanfare[/gold] +{FanfareFloor:diff()}.")
+
+        elif op == "crash_fanfare":
+            # Two sentences because it is two things happening, and the
+            # SECOND one is the cost -- burying it in a subclause is how a
+            # card that digs a hole reads as a card that just resets.
             parts.append(
-                "Permanently raise your [gold]Fanfare[/gold] baseline by "
-                "{FanfareFloor:diff()} this combat.")
+                "Your [gold]Fanfare[/gold] falls to its baseline, and that "
+                "baseline falls by {FloorDrop:diff()}.")
+
+        elif op == "salon_bow":
+            n = int(eff.get("amount", 1))
+            parts.append(
+                "The leftmost member of your [gold]Salon[/gold] takes their "
+                "bow." if n == 1 else
+                f"The leftmost {n} members of your [gold]Salon[/gold] take "
+                "their bows.")
 
         elif op == "heal":
             parts.append("Heal {Heal:diff()} HP.")
@@ -4790,6 +4881,11 @@ def emit(
     # deltas -- a card can be born Innate or become it, not both.
     if card.get("innate"):
         keywords.append("CardKeyword.Innate")
+    # Same rail, same reasoning (Track C.1, 2026-07-28). OnUpgrade's
+    # AddKeyword path still serves `retain: true` deltas; a card can be born
+    # retaining or become it, not both.
+    if card.get("retain"):
+        keywords.append("CardKeyword.Retain")
     if "skill_tag" in card.get("tags", []):
         keywords.append("KleeKeywords.ElementalSkill")
     keywords.extend(aura_keyword_by_element[e] for e in aura_elements)

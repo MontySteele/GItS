@@ -109,7 +109,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
 
     private static int Scaled(Creature owner, int baseAmount) =>
         baseAmount
-        + FurinaResources.Fanfare(owner) / SalonConstants.FocusPerFanfare
+        + FurinaResources.ReadableFanfare(owner) / SalonConstants.FocusPerFanfare
         + SalonDamageUpPower.AmountFor(owner);
 
     /// <summary>The member's PRINTED per-turn tick, before any scaling.</summary>
@@ -310,6 +310,45 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         return replacements;
     }
 
+    /// <summary>
+    /// The on-demand bow (Fanfare rework Track D, 2026-07-28), mirroring the
+    /// sim's `salon_bow` op. The LEFTMOST members take their bows.
+    ///
+    /// Leftmost is deliberately the same end of the FIFO queue that
+    /// <see cref="Deploy"/> displaces when the stage is full, so the card
+    /// teaches the player no new targeting rule -- it reuses the one the
+    /// deploy rule already taught. The company mutation here is byte-for-byte
+    /// the displacement branch above (RemoveAt(0), then Bow), which is why
+    /// this is a sibling method rather than its own notion of "which member".
+    ///
+    /// Inert on an empty stage, silently: a bow with no company is a no-op
+    /// and not an error, matching the sim's `if not p.salon: break`.
+    /// </summary>
+    public static async Task BowLeftmost(
+        PlayerChoiceContext choiceContext, Creature owner, int amount)
+    {
+        if (!FurinaResources.IsFurina(owner)) return;
+        var company = CompanyFor(owner);
+        for (var i = 0; i < amount && company.Count > 0; i++)
+        {
+            var leaving = company[0];
+            company.RemoveAt(0);
+            await Bow(choiceContext, owner, leaving);
+        }
+
+        // Negative delta: the mirror of Deploy's positive one. The
+        // SalonMemberPower counter is a MIRROR of the company list, so it
+        // follows the list rather than the list following it.
+        var delta = company.Count - Count(owner);
+        if (delta < 0)
+        {
+            await PowerCmd.Apply<SalonMemberPower>(
+                choiceContext, owner, delta, applier: owner,
+                cardSource: null);
+        }
+        Vfx.SalonVisualsBridge.Refresh(owner);
+    }
+
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
@@ -405,7 +444,7 @@ public sealed class SalonCapUpPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Box Seats"),
+        ("title", "Casting Call"),
         ("description",
             "Your [gold]Salon[/gold] has room for {Amount} more "
           + "[gold]Salon Member(s)[/gold]."),

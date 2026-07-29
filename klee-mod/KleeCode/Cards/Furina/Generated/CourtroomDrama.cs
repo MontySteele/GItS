@@ -41,13 +41,14 @@ public sealed class CourtroomDrama : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Courtroom Drama"),
-        ("description", "The first [gold]Elemental Reaction[/gold] you trigger each turn applies {PowerAmount:diff()} [gold]Vulnerable[/gold] and {PowerAmount:diff()} [gold]Weak[/gold] to its target."),
+        ("description", "The first [gold]Elemental Reaction[/gold] you trigger each turn applies {PowerAmount:diff()} [gold]Vulnerable[/gold] and {PowerAmount:diff()} [gold]Weak[/gold] to its target. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 1m)
+            new DynamicVar("PowerAmount", 1m),
+            new DynamicVar("FanfareCap", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,6 +61,7 @@ public sealed class CourtroomDrama : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<CrossExaminationPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        FurinaResources.RaiseFanfareCap(Owner.Creature, DynamicVars["FanfareCap"].IntValue);
     }
 
     protected override void OnUpgrade()

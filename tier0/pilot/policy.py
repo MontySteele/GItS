@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine import effects, powers
+from tier0.engine import effects, powers, resources
 from tier0.engine.combat import card_cost, card_playable
 from tier0.engine.state import Card, CombatState
 
@@ -149,7 +149,10 @@ def _active_effects(state: CombatState, effect_list: list[dict]):
             elif name == "hp_lost_this_turn":
                 ready = state.hp_lost_this_turn > 0
             elif name.startswith("fanfare_at_least_"):
-                ready = (state.player.fanfare
+                # Same clamp the engine's own predicate uses, so the pilot's
+                # forecast of which branch fires cannot disagree with the
+                # branch that actually fires (Track C.2 negative floor).
+                ready = (resources.readable(state.player)
                          >= int(name.rsplit("_", 1)[1]))
             elif name.startswith("encore_at_least_"):
                 ready = (state.player.encore

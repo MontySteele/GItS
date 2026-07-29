@@ -36,18 +36,21 @@ public sealed class GracefulRetreat : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Retain };
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("graceful_retreat");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Slip Backstage"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you have lost HP this turn: gain 4 [gold]Block[/gold]."),
+        ("description", "Spend 5 [gold]Encore[/gold]; lose HP for any shortfall. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(5m, ValueProp.Move)
+            new BlockVar(10m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -59,15 +62,12 @@ public sealed class GracefulRetreat : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await FurinaResources.SpendEncoreOrHp(choiceContext, Owner.Creature, 5, this);
         await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue), ValueProp.Move), cardPlay);
-        if (CurtainCallHooks.HpLostThisTurn(Owner.Creature))
-        {
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, 4m), ValueProp.Move), cardPlay);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(3m);
+        DynamicVars.Block.UpgradeValueBy(4m);
     }
 }

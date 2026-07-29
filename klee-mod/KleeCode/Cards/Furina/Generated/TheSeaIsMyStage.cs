@@ -41,7 +41,7 @@ public sealed class TheSeaIsMyStage : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Sea Is My Stage"),
-        ("description", "Permanently raise your [gold]Fanfare[/gold] baseline by {FanfareFloor:diff()} this combat."),
+        ("description", "[gold]Fanfare[/gold] +{FanfareFloor:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -137,7 +137,7 @@ def test_card_level_resource_costs_emit_explicit_gates_and_cost_upgrades():
     # CalculatedDamageVar (face/preview and hit share one value path) instead
     # of inline PrintedDamage arithmetic. The scaling lives in the multiplier.
     # Untouched by F-A -- READING the meter is exactly what survives.
-    assert "FurinaResources.Fanfare(card.Owner.Creature) / 2" in crescendo
+    assert "FurinaResources.ReadableFanfare(card.Owner.Creature) / 2" in crescendo
     assert "DamageCmd.Attack(DynamicVars.CalculatedDamage)" in crescendo
 
 
@@ -222,13 +222,24 @@ def test_furina_profile_emits_every_non_kit_card():
     manifest = json.loads(
         gen.FURINA_PROFILE.manifest.read_text(encoding="utf-8")
     )
-    # 77 cards: A4 (playtest-2 red-pen, 2026-07-28) CUT rising_tide, which is
-    # the first pool-size change since Curtain Call froze it at 78. Two cards
-    # are withheld -- the hand-written kit Burst, and A7's unheard_confession
-    # (see FURINA_DEFERRED_ASYNC).
+    # 79 cards: A4 (playtest-2 red-pen, 2026-07-28) CUT rising_tide, A12 added
+    # the salon cap-raise power back, and the FANFARE REWORK (2026-07-28)
+    # added ONE more -- take_your_bow, the Track D on-demand-bow probe.
+    #
+    # `blocked` HELD AT 2 THROUGH THE REWORK, which is the number worth
+    # reading here: the sprint introduced four new codegen surfaces (base-card
+    # `retain`, the `crash_fanfare` and `salon_bow` ops, and a Companion-tempo
+    # bonus_formula) and every one of them was IMPLEMENTED rather than
+    # deferred. Each surfaced first as a loud block -- "card field(s)
+    # ['retain'] not understood", "op 'crash_fanfare'" -- which is the design
+    # working: a card that retains in the sim and does not in the game is
+    # exactly the divergence the blocker exists to stop.
+    #
+    # The two still withheld are the hand-written kit Burst and A7's
+    # unheard_confession (see FURINA_DEFERRED_ASYNC), both unchanged.
     assert manifest["coverage"] == {
-        "total": 78,
-        "generated": 76,
+        "total": 79,
+        "generated": 77,
         "blocked": 2,
     }
     assert set(manifest["generated"]) == generated
@@ -795,8 +806,16 @@ def test_handwritten_furina_burst_matches_the_sheet_contract():
         card for card in _furina_cards()
         if card["id"] == "let_the_people_rejoice"
     )
+    # Anchored to THIS FILE, not to the working directory. It was written as
+    # a bare relative `Path(...)` and passed every full-repo pytest run,
+    # because those all start at the repo root -- but validate.ps1's portable
+    # suite runs pytest from the STAGED PACKAGE directory, where the relative
+    # path resolves to nothing and the test died with FileNotFoundError
+    # instead of checking anything. A test that only works from one cwd is a
+    # test that silently stops running when the harness moves.
+    repo = Path(__file__).resolve().parent.parent.parent
     source = (
-        Path("klee-mod/KleeCode/Cards/Furina/LetThePeopleRejoice.cs")
+        (repo / "klee-mod/KleeCode/Cards/Furina/LetThePeopleRejoice.cs")
         .read_text(encoding="utf-8")
     )
     damage, encore = row["effects"]
@@ -808,7 +827,7 @@ def test_handwritten_furina_burst_matches_the_sheet_contract():
     div = rest.partition("_")[0]
     assert f'new CalculationBaseVar({damage["amount"]}m)' in source
     assert f'new ExtraDamageVar({n}m)' in source
-    assert f"FurinaResources.Fanfare(card.Owner.Creature) / {div}" in source
+    assert f"FurinaResources.ReadableFanfare(card.Owner.Creature) / {div}" in source
     assert "DamageCmd.Attack(DynamicVars.CalculatedDamage)" in source
     assert f"FurinaResources.GainEncore(Owner.Creature, {encore['amount']});" in source
     assert "CustomResources<FurinaBurstResource>.SetCanonicalCost" in source

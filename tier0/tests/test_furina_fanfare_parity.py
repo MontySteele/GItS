@@ -188,9 +188,13 @@ def _derive() -> dict:
                      "from the sim. Do not hand-edit; regenerate. The C# "
                      "mirror is klee-mod/KleeCode/Diagnostics/"
                      "FurinaParityVectors.cs and is checked against this."),
+        # floor_per_power / floor_per_power_rare left this fixture with the
+        # constants themselves (Fanfare rework, Track B, 2026-07-28). The
+        # automatic by-rarity grant is deleted in BOTH engines, so there is
+        # nothing left for the two mirrors to agree about; the floor_grant
+        # rows below still pin gain_fanfare_floor, which is now reached only
+        # from a printed "Fanfare +X" keyword.
         "decay_fraction": C.FANFARE_DECAY_FRACTION,
-        "floor_per_power": C.FANFARE_FLOOR_PER_POWER,
-        "floor_per_power_rare": C.FANFARE_FLOOR_PER_POWER_RARE,
         "decay": decay,
         "floor_grant": grant,
         "rider": rider,
@@ -305,13 +309,17 @@ def test_csharp_vectors_match_the_sim():
         f"want={thr_by_meter['fanfare']}")
 
 def test_csharp_constants_match_the_sim():
-    """The three ported constants, read out of the C# source.
+    """The ported constants, read out of the C# source.
 
     This is the drift that would otherwise be invisible: the vectors above
     pin BEHAVIOUR at a given fraction, but a sim-side retune of the fraction
     itself would regenerate them happily on the Python side while the live
     build kept the old number. Balance divergence, silent, in the shipped
     artifact. So the C# literals are asserted directly.
+
+    The two FanfareFloorPerPower* assertions left with the constants (Track
+    B, 2026-07-28). The absence gate below replaces them: a deleted constant
+    needs a test that it STAYS deleted, not one comparing it to nothing.
     """
     source = _RESOURCES.read_text(encoding="utf-8")
 
@@ -321,9 +329,42 @@ def test_csharp_constants_match_the_sim():
         return m.group(1)
 
     assert float(literal("FanfareDecayFraction")) == C.FANFARE_DECAY_FRACTION
-    assert int(literal("FanfareFloorPerPower")) == C.FANFARE_FLOOR_PER_POWER
-    assert (int(literal("FanfareFloorPerPowerRare"))
-            == C.FANFARE_FLOOR_PER_POWER_RARE)
+    assert (int(literal("FanfarePerEncoreAbsorbed"))
+            == C.FANFARE_PER_ENCORE_ABSORBED)
+    assert (int(literal("FanfarePerEncoreSpent"))
+            == C.FANFARE_PER_ENCORE_SPENT)
+    assert int(literal("FanfarePerHpLost")) == C.FANFARE_PER_HP_LOST
+
+
+def test_the_automatic_power_floor_grant_stays_deleted_in_csharp():
+    """Track B, asserted as an ABSENCE for the same reason the spend path is.
+
+    A reintroduced automatic would fail no behavioural test in this repo --
+    there is no C# test project, and every sim-side gate would keep passing
+    because the sim's copy really is gone. It would simply mean the shipped
+    build granted 5 free Fanfare floor per Power while every number in the
+    sprint log was measured without it: a silent balance divergence in the
+    artifact, which is exactly the class this file exists to catch.
+
+    Checks the CONSTANTS and the CALL SITE separately. Either one coming back
+    alone is still the bug: a constant with no reader is dead but invites a
+    reader, and a grant hard-coding 5 is worse than one naming a constant.
+    """
+    source = _RESOURCES.read_text(encoding="utf-8")
+
+    for name in ("FanfareFloorPerPower", "FanfareFloorPerPowerRare"):
+        assert not re.search(rf"const\s+int\s+{name}\s*=", source), (
+            f"{name} is back in {_RESOURCES.name}; the by-rarity automatic "
+            "was deleted by the Fanfare rework (Track B) and the value lives "
+            "on the cards now, as the printed 'Fanfare +X' keyword")
+
+    # The call site. GainFanfareFloor itself is legitimate and still used --
+    # it is what the keyword resolves to -- so this pins the specific shape
+    # that made it automatic: a Power-type branch in the card-played hook.
+    assert "CardType.Power" not in source, (
+        f"a card-TYPE branch is back in {_RESOURCES.name}. Powers grant "
+        "exactly what they print; a rarity or type test in the play hook is "
+        "the invisible rule Track B removed")
 
 
 def test_fanfare_spend_path_stays_deleted():

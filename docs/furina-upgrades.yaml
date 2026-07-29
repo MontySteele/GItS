@@ -46,7 +46,7 @@ salon_debut:           {add: {op: gain_encore, amount: 2}}   # signature: deploy
 gentilhomme_usher:     {block: +2}           # 4->6
 surintendante_chevalmarin: {encore: +2}      # 3->5
 mademoiselle_crabaletta: {power_amount: +1}  # v2: 1->2 Crabalettas (double hammer)
-box_seats:             {power_amount: +1}    # A12: +1 slot -> +2 upgraded (the ruled statline).
+casting_call:          {power_amount: +1}    # A12: +1 slot -> +2 upgraded (the ruled statline).
 dinner_service:        {block: +2}          # A13: base 2->4, so 4/6/8/10 at 0-3 members; the per-member slope is untouched. PROPOSED with the card's numbers.
 usher_the_waves:       {damage: +2}          # 5->7 (plain attack since Curtain Call B: no longer applies)
 torrential_turn:       {damage: +3}          # 10->13; aura-cash 3 and the refresh stay (Curtain Call C)
@@ -57,8 +57,11 @@ curtain_up:            {encore: +1}          # 2->3; the scry stays 1 (Curtain C
 dramatic_entrance:     {damage: +3}          # base 6->9; the F-B1 read (1 per 4 Fanfare) rides on top
 crowd_work:            {power_amount: +1}    # first-spend draw 1->2 (Curtain Call B: skill->power)
 suffering_for_art:     {encore: +1}          # 3->4; the measured 1 self-damage stays
-lasting_impression:    {fanfare_floor: +2}   # 3->5 permanent baseline (F-B2). The floor IS the card, so the
-                                             # upgrade buys baseline rather than a bigger immediate rider.
+lasting_impression:    {fanfare_cap: +2}     # FANFARE REWORK Track B (2026-07-28): the base line converted
+                                             # from "Fanfare +5" to "Fanfare Cap +5" (the full grant is a rare
+                                             # POWER payoff now), so the upgrade key follows it -- 5->7
+                                             # headroom. The two keys are NOT interchangeable and the card
+                                             # prints exactly one; `fanfare_floor` here would silently no-op.
 thunderous_ovation:    {block: +2}           # base 6->8; the steep read (1 per 2 Fanfare) rides on top (Curtain Call C)
 tempo_change:          {draw: +1}            # 1->2; the member-conditional energy stays (Curtain Call C)
 warmup_act:            {damage: +2}          # 3->5; the read-the-room block stays 3 (Curtain Call C)
@@ -68,10 +71,17 @@ an_invitation:         {generate_cost_override: 0}   # kickoff §9 upgrade gramm
 limelight:             {draw: +1}            # 1->2; the boost stays 25 (R16: the mult is authored, not upgraded)
 shared_billing:        {cost: -1}            # 1->0 (R32.2 rider swap took the block; mined cost line — the
                                              # aura and the boost are authored, not upgraded)
-blocking_notes:        {block: +2}           # 7->9 (base lifted by the R32.2/R32.3 A3 rehome)
+blocking_notes:        {bonus_slope: +1}     # FANFARE REWORK Track C.3 (2026-07-28): the upgrade buys the
+                                             # SLOPE, +2 -> +3 Block per Companion played, exactly as the
+                                             # ruling worded it. Base 5 unchanged: a rewrite whose point is
+                                             # the slope should upgrade the slope, or the card's identity and
+                                             # its upgrade pull in different directions.
 stage_lights:          {power_amount: +1}    # flat rider +2->+3 this turn; the Weak rider stays 1 (R32.2)
 curtain_cue:           {encore: +1}          # both branches: 3->4 / 1->2
-graceful_retreat:      {block: +3}           # base 5->8; the wounded rider stays 4 (Curtain Call C)
+graceful_retreat:      {block: +4}           # FANFARE REWORK Track C.1 (2026-07-28): 10 -> 14 Block for the
+                                             # same 5 Encore. The upgrade buys the RATE, not a cheaper spend:
+                                             # dropping the spend to 4 would make the card a worse Fanfare
+                                             # source, and the spend is half of what it does now. PROPOSED.
 poised_riposte:        {damage: +3}          # 6->9
 commanding_gaze:       {weak: +1}            # 1->2 all
 witness_stand:         {vulnerable: +1}      # 1->2
@@ -81,6 +91,13 @@ undercurrent:          {times: +2}           # A5 (2026-07-28): 3 -> 5 hits of 2
 standing_room_only:    {damage: +2}          # 5->7 all base; the 1_per_4_fanfare read stays (Curtain Call C)
 
 # ---- UNCOMMONS (bump OR keyword/condition; two cost slots + one 1->0) ----
+take_your_bow:         {add: {op: gain_encore, amount: 3}}
+                                             # FANFARE REWORK Track D (2026-07-28), PROPOSED. The card is
+                                             # already cost 0, so the upgrade cannot buy tempo; it buys the
+                                             # thing the probe is FOR -- a bow that also refills. Deliberately
+                                             # NOT a second bow: two bows on one card would empty a three-slot
+                                             # stage in two plays and turn the probe into a combo piece before
+                                             # anyone has measured the first one.
 full_ensemble:         {cost: -1}            # 2->1 after the rework reprice (uncommon cost slot; bombs_away precedent)
 grand_salon:           {power_amount: +1}    # A10 (2026-07-28): +1->+2, cap 6 unchanged
 many_waters_melody:    {encore: +1}          # 4->5 base; the member wall stays 5 (Curtain Call C)
@@ -126,8 +143,13 @@ star_of_the_show:      {power_amount: +1}    # one more printed on Spotlighted d
 prima_donna:           {cost: -1}            # 2->1
 high_tide:             {damage: +4}          # 15->19; the F-B1 read (1 per 2 Fanfare, the steepest) rides on top
 rain_of_roses:         {encore: +2}          # 5->7; the mass application is the card, it does not grow
-the_final_verdict:     {damage: +4}          # 18->22; reaction rider stays 6
-reginas_mercy:         {encore: +3}          # 12->15; the remembered floor stays 5 (Curtain Call C)
+the_final_verdict:     {floor_drop: -10}     # FANFARE REWORK Track C.2 (2026-07-28): the Hyperbeam upgrade
+                                             # cuts the PRICE, floor drop 30 -> 20, rather than raising the
+                                             # damage. Damage is already "equal to your Fanfare" and has no
+                                             # printed number to grow; what the card actually costs is the
+                                             # hole it digs, so that is the dial. PROPOSED.
+reginas_mercy:         {encore: +3}          # 12->15; the remembered line stays 5 (Curtain Call C), now
+                                             # printed as "Fanfare Cap +5" (rework Track B: rare, but a SKILL)
 command_performance:   {generate_cost_override: 0}   # both guests cost 0 (Discovery parity)
 
 # ---- FONTAINE COMPANIONS (modest single bumps; upgraded forms stay enabler-grade — guardrail 3 applies) ----

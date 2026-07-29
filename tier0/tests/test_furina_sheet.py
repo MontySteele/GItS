@@ -63,12 +63,19 @@ def test_pool_composition():
     #     A2 limelight, both promoted for having U-grade Official effects).
     #   uncommon 34 (was 32): +2 those promotions.
     #   rare 19: unchanged. A7 reshaped unheard_confession but did not move it.
-    #   78 again, common 20: A12 ADDED box_seats, the salon cap-raise power.
-    #     The pool leaves this sprint the size it entered, by two opposite
+    #   78 again, common 20: A12 ADDED the salon cap-raise power (box_seats,
+    #     RENAMED to casting_call by the Fanfare rework, Track C.4).
+    #     The pool leaves THAT sprint the size it entered, by two opposite
     #     rulings rather than by nothing having happened.
-    assert len(cards) == 78
+    #   79, uncommon 35: the FANFARE REWORK (2026-07-28) added ONE card --
+    #     take_your_bow, the Track D on-demand-bow probe. One card, not a
+    #     family: it is a probe and the next playtest is its measurement.
+    #     Track C rewrote three cards in place (graceful_retreat,
+    #     the_final_verdict, blocking_notes) and renamed a fourth, none of
+    #     which moves a count. (lint-ok: pool sizes)
+    assert len(cards) == 79
     assert len(by_rarity["common"]) == 20
-    assert len(by_rarity["uncommon"]) == 34
+    assert len(by_rarity["uncommon"]) == 35
     assert len(by_rarity["rare"]) == 19
     kit = [c for c in by_rarity["rare"] if c.kit_card]
     assert [c.id for c in kit] == ["let_the_people_rejoice"]   # 18 draftable
@@ -84,7 +91,8 @@ def test_pool_composition():
     #   power  17 (was 15): +1 A7 retyped unheard_confession skill -> power,
     #     +1 A12's new power card.
     assert len(by_type["attack"]) == 16
-    assert len(by_type["skill"]) == 45           # skill-heavy pole+, the cadence reason
+    assert len(by_type["skill"]) == 46           # skill-heavy pole+, the cadence reason
+                                                 # (45 -> 46: the Track D bow probe is a skill)
     assert len(by_type["power"]) == 17           # official quota floor (19-21% roster-wide)
 
 
@@ -854,7 +862,7 @@ def test_grand_salon_scales_ushers_block_not_only_damage():
         "regressed to damage-only, the B4 defect")
 
 
-def test_box_seats_makes_the_stage_bigger_and_delays_the_bow():
+def test_casting_call_makes_the_stage_bigger_and_delays_the_bow():
     """A12 (RULED 2026-07-28): the Salon's size stops being a constant.
 
     Both halves are asserted because they are the same ruling seen from two
@@ -864,7 +872,7 @@ def test_box_seats_makes_the_stage_bigger_and_delays_the_bow():
     """
     st = furina_state()
     p = st.player
-    effects.resolve_card(st, loader.get_card("box_seats"))
+    effects.resolve_card(st, loader.get_card("casting_call"))
     assert p.powers["salon_cap_up"] == 1
     assert effects.salon_slots(p) == C.SALON_MEMBER_SLOTS + 1
 

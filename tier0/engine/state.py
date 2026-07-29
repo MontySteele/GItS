@@ -341,10 +341,29 @@ class Player(Fighter):
                                   # Since "The Tide Turns" this is a high
                                   # SAFETY RAIL, not a design dial -- under
                                   # decay the ceiling does not bind.
-    # The permanent baseline built from constellation grants. Decay clamps
-    # here, never below. A grant raises floor, cap AND current together
+    # The out-of-combat ceiling, used by run_fight to REWIND fanfare_cap
+    # between fights. `player` is one object reused across every combat in a
+    # run, so without a rewind the cap ratchets upward all run.
+    #
+    # WHY A SNAPSHOT RATHER THAN A SUBTRACTION. run_fight used to rewind with
+    # `fanfare_cap -= fanfare_floor`, which was exact only while
+    # gain_fanfare_floor was the ONLY writer of either field and always moved
+    # both by the same n. The Fanfare rework (2026-07-28) broke that
+    # coincidence twice over: `raise_fanfare_cap` (Track B) moves the cap
+    # alone, and `drop_fanfare_to_floor` (Track C.2) moves the floor alone
+    # and DOWNWARD. Under the old arithmetic a Fanfare Cap card leaked its
+    # headroom into every later fight and a Hyperbeam ADDED ceiling on the
+    # way out. A snapshot cannot drift no matter how many writers exist.
+    fanfare_cap_base: int = 0
+    # The baseline the meter rests on. Decay clamps here, never below. The
+    # "Fanfare +X" keyword raises floor, cap AND current together
     # (resources.gain_fanfare_floor) -- raising the cap alongside the floor
     # is what keeps the gradient alive instead of re-pinning the meter.
+    #
+    # MAY BE NEGATIVE since the Hyperbeam (Track C.2, RULED): The Final
+    # Verdict digs the floor out from under the meter, and the player climbs
+    # back out with activity. Readers clamp at zero via resources.readable,
+    # so a negative meter turns effects off rather than inverting them.
     fanfare_floor: int = 0
     # Salon v2 (rework 2026-07-23): the typed member queue, FIFO, max
     # SALON_MEMBER_SLOTS, duplicates legal (Defect-orb geometry). SOURCE OF
@@ -356,6 +375,20 @@ class Player(Fighter):
                                   # designation re-aims, never stacks. The
                                   # guest-cast sentinel means every Companion
                                   # card rather than one named character.
+
+    def __post_init__(self) -> None:
+        # Seed the out-of-combat ceiling from the printed one, so EVERY
+        # construction path is correct without having to know about the
+        # field: the two loader builders, the batteries, and every test that
+        # hand-rolls a Player. Setting it only at the loader would have made
+        # run_fight rewind a hand-built Furina's cap to ZERO on her second
+        # fight -- a silent character-loses-her-resource bug reachable only
+        # from paths the loader does not own.
+        #
+        # `or` rather than a None sentinel: 0 means "no Fanfare resource" for
+        # the cap already, so the two spellings of absent agree.
+        if not self.fanfare_cap_base:
+            self.fanfare_cap_base = self.fanfare_cap
 
 
 @dataclass
@@ -506,6 +539,16 @@ class CombatState:
     sparks_at_play: int = 0               # bank BEFORE this card's own spark
                                           # spend (Gleeful Barrage; R39)
     companions_played: list[str] = field(default_factory=list)
+    # Blocking Notes' slope (rework Track C.3, 2026-07-28). A per-TURN count
+    # where companions_played above is a per-COMBAT list, so the two cannot be
+    # derived from each other and both have to exist.
+    #
+    # Counts the Guest Star TOKEN plays too, deliberately: the B2
+    # printed-cost lesson (a cost-<=0 play neither benefits nor consumes) does
+    # NOT apply here, because this is a PAYOFF and not a discount. A payoff
+    # that ignored generated Companions would punish the deck that generates
+    # them, which is the deck this card is for.
+    companion_plays_this_turn: int = 0
     companion_cost_delta_this_turn: int = 0   # cost_mod op
     replay_next_companion: int = 0            # Study Buddy
     current_card_companion: bool = False      # control provenance (§2.2a)

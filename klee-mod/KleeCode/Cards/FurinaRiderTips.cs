@@ -34,6 +34,7 @@ public static class FurinaRiderTips
     public const string FanfareKey = "KLEEMOD-FANFARE_RIDER";
     public const string AuraKey = "KLEEMOD-AURA_RIDER";
     public const string SalonKey = "KLEEMOD-SALON_RIDER";
+    public const string CompanionKey = "KLEEMOD-COMPANION_RIDER";
 
     public static IEnumerable<IHoverTip> ForCard(
         IEnumerable<IHoverTip> inherited,
@@ -42,7 +43,8 @@ public static class FurinaRiderTips
         int fanfareStep = 0,
         int auraBonus = 0,
         int salonPer = 0,
-        bool salonGrantsBlock = false)
+        bool salonGrantsBlock = false,
+        int companionPer = 0)
     {
         foreach (var tip in inherited) yield return tip;
 
@@ -68,6 +70,13 @@ public static class FurinaRiderTips
                 new LocString(Table, SalonKey + ".title"),
                 SalonBody(card, salonPer, salonGrantsBlock));
         }
+
+        if (companionPer > 0)
+        {
+            yield return new HoverTip(
+                new LocString(Table, CompanionKey + ".title"),
+                CompanionBody(card, companionPer));
+        }
     }
 
     /// <summary>The rate, plus what it is worth at this moment. Out of combat
@@ -79,7 +88,7 @@ public static class FurinaRiderTips
         var owner = card.Owner?.Creature;
         if (owner == null || card.CombatState == null) return rate;
 
-        var fanfare = FurinaResources.Fanfare(owner);
+        var fanfare = FurinaResources.ReadableFanfare(owner);
         return $"{rate} You hold {fanfare} Fanfare: +{fanfare / step * per} "
              + "damage, already counted in the number above.";
     }
@@ -103,6 +112,33 @@ public static class FurinaRiderTips
                  + "nothing extra right now.";
         }
         return $"{rate} You have {members} on stage: +{members * per} {noun}, "
+             + "already counted in the number above.";
+    }
+
+    /// <summary>Fanfare rework Track C.3 (2026-07-28): Blocking Notes'
+    /// Companion tempo. Same shape as SalonBody -- the rate, then what it is
+    /// worth right now -- because the thing being counted is a fact about
+    /// THIS TURN and the player needs to know whether playing the Companion
+    /// first is worth the sequencing.
+    ///
+    /// The count INCLUDES Guest Star token plays. That is the ruling and it
+    /// is worth the tip saying so, because a generated Companion does not
+    /// look like a drafted one and a player who assumed otherwise would
+    /// mis-sequence the whole turn.</summary>
+    private static string CompanionBody(CardModel card, int per)
+    {
+        var rate = $"+{per} Block per Companion card you have played this "
+                 + "turn, including Guest Stars.";
+        var owner = card.Owner?.Creature;
+        if (owner == null || card.CombatState == null) return rate;
+
+        var plays = CurtainCallHooks.CompanionPlaysThisTurn(owner);
+        if (plays == 0)
+        {
+            return $"{rate} You have played none this turn, so this card is "
+                 + "paying nothing extra right now.";
+        }
+        return $"{rate} You have played {plays}: +{plays * per} Block, "
              + "already counted in the number above.";
     }
 }

@@ -267,6 +267,7 @@ def _finish_play(state: CombatState, card: Card,
     replays = 1
     if card.is_companion:
         state.companions_played.append(card.id)
+        state.companion_plays_this_turn += 1
         # Navia, Cannon Fire Support: the pool pays the pool. Fires once per
         # CARD PLAY, here beside companions_played, not once per replay inside
         # the loop below -- Study Buddy's replay is one card being resolved
@@ -288,17 +289,17 @@ def _finish_play(state: CombatState, card: Card,
         snap = refpowers.before_card_played(state, card)
         effects.resolve_card(state, card)
         refpowers.after_card_played(state, card, snap)
-    # Constellation grant (F-A3): playing a POWER permanently raises the
-    # Fanfare floor by rarity. Fires AFTER resolution so a power that also
-    # grants a floor outright does not double-count against its own read,
-    # and once per card rather than once per replay -- a doubled Power is
-    # still one performance the audience remembers.
-    if card.type == "power":
-        resources.gain_fanfare_floor(
-            state,
-            C.FANFARE_FLOOR_PER_POWER_RARE if card.rarity == "rare"
-            else C.FANFARE_FLOOR_PER_POWER,
-            f"power:{card.id}")
+    # THE AUTOMATIC POWER FLOOR GRANT USED TO LIVE HERE. Deleted by the
+    # Fanfare rework (2026-07-28, Track B, RULED): playing any Power silently
+    # raised floor, cap and current by 5 (rares 8), printed on no card and
+    # named in no tooltip. A mechanic worth ~4% of her power that the player
+    # could not read is a mechanic the player cannot play around.
+    #
+    # The value moves ONTO THE CARDS as printed keywords -- "Fanfare Cap +X"
+    # (raise_fanfare_cap) and "Fanfare +X" (gain_fanfare_floor, rare Powers
+    # only). There is deliberately NO card-type branch left in this function:
+    # a Power now grants exactly what it prints, the same as every other card
+    # type, and that uniformity is the point rather than a side effect.
     if card.kit_card:
         pass                                  # returns to the kit, no pile
     else:
@@ -428,6 +429,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     if refpowers.should_clear_block(p):      # Barricade suppresses the clear
         p.block = 0
 
+    state.companion_plays_this_turn = 0          # Blocking Notes' slope
     state.companion_cost_delta_this_turn = 0     # Friendly Visit expires
     state.replay_next_companion = 0              # Study Buddy expires
     state.splash_procs_this_turn = 0             # detonation_splash cap
@@ -778,14 +780,17 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # Encore). Spotlight designation likewise re-aims fresh each combat.
     player.encore = 0
     player.fanfare = 0
-    # Constellation floors are per-COMBAT, like every other Furina resource:
-    # a Power is replayed each fight and re-earns its grant. The cap must be
-    # rewound with them or it ratchets upward all run -- `player` is one
-    # object reused across every fight, so a leak here would silently inflate
-    # the ceiling fight after fight. Subtracting the accumulated floor is
-    # exact rather than approximate: gain_fanfare_floor raises cap and floor
-    # by the SAME n every time, and it is the only writer of either.
-    player.fanfare_cap -= player.fanfare_floor
+    # Fanfare floors and cap grants are per-COMBAT, like every other Furina
+    # resource: a card is replayed each fight and re-earns what it prints.
+    #
+    # RESTORE FROM A SNAPSHOT, not by subtracting the floor. The old rewind
+    # (`fanfare_cap -= fanfare_floor`) was exact only while gain_fanfare_floor
+    # was the sole writer of both fields and always moved them together. The
+    # Fanfare rework broke that on both sides: raise_fanfare_cap moves the cap
+    # alone, and the Hyperbeam's floor drop moves the floor alone and
+    # DOWNWARD -- which under the old line would have ADDED ceiling on the way
+    # out of every fight it was played in. See Player.fanfare_cap_base.
+    player.fanfare_cap = player.fanfare_cap_base
     player.fanfare_floor = 0
     player.charge = 0            # Kokomi: the meter is per-combat (§2.1)
     player.spotlight = None

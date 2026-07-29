@@ -114,19 +114,21 @@ def test_encore_accounting_credits_a4_never_a3():
 
 
 def test_gain_and_overdraw():
+    """SINGLE-LEG since Track A (2026-07-28): filling the buffer prints
+    NOTHING. The old assertion here was `fanfare == 4 * PER_ENCORE_GAINED`
+    immediately after a gain, which is the double-count in one line."""
     st = furina_state()
     p = st.player
     effects.resolve_card(st, furina_card(
         effects=[{"op": "gain_encore", "amount": 4}]))
     assert p.encore == 4
-    assert p.fanfare == 4 * C.FANFARE_PER_ENCORE_GAINED
+    assert p.fanfare == 0
     # Overdraw: greed is legal and priced (true HP, which is Fanfare flux).
     effects.resolve_card(st, furina_card(
         effects=[{"op": "spend_encore", "amount": 10}]))
     assert p.encore == 0
     assert p.hp == p.max_hp - 6
-    assert p.fanfare == (4 * C.FANFARE_PER_ENCORE_GAINED
-                         + 4 * C.FANFARE_PER_ENCORE_SPENT
+    assert p.fanfare == (4 * C.FANFARE_PER_ENCORE_SPENT
                          + 6 * C.FANFARE_PER_HP_LOST)
 
 
@@ -286,25 +288,52 @@ def test_floors_are_static_value_not_accrual():
     assert (p.fanfare_floor, p.fanfare_cap) == (floor0, cap0)
 
 
-def test_playing_a_power_grants_a_constellation_floor_by_rarity():
-    """F-A3. The grant is a rule of the engine, not a line on the card."""
+def test_playing_a_power_grants_only_what_the_card_prints():
+    """Track B (2026-07-28), the INVERSE of the test that used to live here.
+
+    It asserted the old rule: "the grant is a rule of the engine, not a line
+    on the card." That rule is deleted -- an invisible +5 floor on every
+    Power, +8 on rares, printed nowhere. This is its replacement gate, and it
+    fails the moment the automatic comes back: a Power with no Fanfare line
+    must move the floor by exactly zero, and a Power with one must move it by
+    exactly what it prints and no rarity bonus on top.
+    """
     st = furina_state()
     p = st.player
     p.energy = 3
-    power = loader.get_card("grand_salon")             # uncommon
+    power = loader.get_card("grand_salon")             # uncommon, prints none
     assert power.type == "power" and power.rarity == "uncommon"
     p.hand.append(power)
     combat.play_card(st, power)
-    assert p.fanfare_floor == C.FANFARE_FLOOR_PER_POWER
+    assert p.fanfare_floor == 0
 
-    rare = loader.get_card("the_sea_is_my_stage")      # rare
+    rare = loader.get_card("the_sea_is_my_stage")      # rare, prints 15
     assert rare.type == "power" and rare.rarity == "rare"
     p.hand.append(rare)
     p.energy = 3
     combat.play_card(st, rare)
-    # Its own printed grant (15) AND the rare Power rule (8) both land.
-    assert p.fanfare_floor == (C.FANFARE_FLOOR_PER_POWER
-                               + C.FANFARE_FLOOR_PER_POWER_RARE + 15)
+    assert p.fanfare_floor == 15
+
+
+def test_fanfare_cap_keyword_raises_headroom_and_nothing_else():
+    """Track B's OTHER keyword, and the contrast that gives the pair its
+    meaning: "Fanfare Cap +X" must move the ceiling ALONE. If it touched the
+    floor or the meter it would just be a weaker "Fanfare +X" and the two
+    keywords could not be priced apart."""
+    st = furina_state()
+    p = st.player
+    resources.gain_fanfare(st, 7, "test")
+    cap0, floor0, now0 = p.fanfare_cap, p.fanfare_floor, p.fanfare
+
+    resources.raise_fanfare_cap(st, 6, "test")
+    assert p.fanfare_cap == cap0 + 6
+    assert (p.fanfare_floor, p.fanfare) == (floor0, now0)
+
+    # And it is inert for a character without the resource, like every other
+    # Fanfare path -- a generated Furina card reaching Klee grants nothing.
+    st.player.fanfare_cap = 0
+    resources.raise_fanfare_cap(st, 6, "test")
+    assert p.fanfare_cap == 0
 
 
 def test_floors_and_cap_do_not_leak_across_fights_in_a_run():
@@ -321,6 +350,119 @@ def test_floors_and_cap_do_not_leak_across_fights_in_a_run():
                      NULL_PILOT, seed=1)
     assert p.fanfare_floor == 0
     assert p.fanfare_cap == base_cap
+
+
+def _one_fight(player) -> None:
+    combat.run_fight(player, [Enemy(hp=1, max_hp=1, name="dummy",
+                                    intents=[{"kind": "attack", "amount": 0}])],
+                     NULL_PILOT, seed=1)
+
+
+def test_the_two_new_cap_writers_also_rewind_between_fights():
+    """THE STRUCTURALLY INVISIBLE HALF of the leak above, and the reason the
+    rewind changed shape.
+
+    run_fight used to rewind with `fanfare_cap -= fanfare_floor`, which is
+    exact only while gain_fanfare_floor is the ONLY writer of either field and
+    always moves both by the same n. The Fanfare rework broke that twice:
+
+      raise_fanfare_cap    (Track B) moves the CAP alone -- so a Fanfare Cap
+                           card leaked its headroom into every later fight
+      drop_fanfare_to_floor(Track C.2) moves the FLOOR alone and DOWNWARD --
+                           so a Hyperbeam ADDED ceiling on the way out
+
+    Neither was caught by the test above, which only ever exercises the one
+    writer that moves both together: a mutation restoring the old subtractive
+    line passed the whole Furina file. This is that gate. Both directions are
+    asserted in one test because they are one defect -- an arithmetic rewind
+    standing in for a snapshot.
+    """
+    st = furina_state()
+    p = st.player
+    base_cap = p.fanfare_cap
+
+    # Cap alone. Under the old arithmetic the floor is 0, so nothing is
+    # subtracted and the +9 survives into fight two.
+    resources.raise_fanfare_cap(st, 9, "test")
+    assert p.fanfare_cap == base_cap + 9
+    _one_fight(p)
+    assert p.fanfare_cap == base_cap
+
+    # Floor alone, DOWNWARD. Under the old arithmetic subtracting a NEGATIVE
+    # floor adds ceiling -- the rewind ran the wrong way.
+    st = furina_state()
+    p = st.player
+    resources.drop_fanfare_to_floor(st, 20, "test")
+    assert p.fanfare_floor == -20
+    _one_fight(p)
+    assert p.fanfare_cap == base_cap
+    assert p.fanfare_floor == 0
+
+
+def test_every_point_past_block_prints_exactly_one_fanfare():
+    """THE Track A design invariant (brief, 2026-07-28), pinned as a test
+    because it is the one sentence the whole rework has to make sayable:
+
+        every point of damage that gets past Block prints exactly 1 Fanfare
+        -- via absorption if the buffer eats it, via hp_lost if HP does.
+
+    Before the rework absorbed damage printed ZERO, so the same hit paid
+    differently depending on how much buffer happened to be standing. This
+    test walks a hit across the boundary -- part eaten by Block, part eaten by
+    the buffer, part reaching HP -- and asserts the total, which is the only
+    formulation that catches a rule applied to one leg and not the other.
+    """
+    st = furina_state()
+    p = st.player
+    p.block, p.encore = 4, 5
+    st.enemies[0].intents = [{"kind": "attack", "amount": 16}]
+
+    combat._enemy_turn(st, st.enemies[0])
+
+    # 16 incoming: 4 absorbed by Block (prints nothing -- Block is the whole
+    # point of Block), 5 eaten by the buffer, 7 reaching HP.
+    past_block = 16 - 4
+    assert (p.encore, p.hp) == (0, p.max_hp - 7)
+    assert p.fanfare == past_block
+
+    # And the two legs really are both present, not one leg paying twice.
+    minted = {ev["source"]: ev["amount"] for ev in st.log
+              if ev["event"] == "gain_fanfare"}
+    assert minted == {"encore_absorbed": 5, "hp_lost": 7}
+
+
+def test_a_fully_buffered_hit_pays_the_same_as_a_fully_unbuffered_one():
+    """The asymmetry Track A removed, stated as an equality.
+
+    Two identical hits, one landing on a full buffer and one on an empty
+    player, must mint the same Fanfare. Under the pre-rework rule the buffered
+    hit minted 0 and the unbuffered one minted 12 -- the wound the audience
+    saw was the same and the applause was not.
+    """
+    def mint(encore: int) -> int:
+        st = furina_state()
+        st.player.encore = encore
+        st.enemies[0].intents = [{"kind": "attack", "amount": 12}]
+        combat._enemy_turn(st, st.enemies[0])
+        return st.player.fanfare
+
+    assert mint(20) == mint(0) == 12
+
+
+def test_gaining_encore_prints_no_fanfare_by_any_route():
+    """Track A's deletion, pinned at the funnel rather than at one card.
+
+    `resources.gain_encore` is the single site every Encore income path goes
+    through -- cards, member bows, Stagehands, the All the World's a Stage
+    power -- so a leg re-added anywhere upstream shows up here. Asserted on
+    the EVENT LOG as well as the meter, because a gain that minted and then
+    lost it all to the cap would still read as fanfare == 0.
+    """
+    st = furina_state()
+    resources.gain_encore(st, 9)
+    assert st.player.encore == 9
+    assert st.player.fanfare == 0
+    assert not any(ev["event"] == "gain_fanfare" for ev in st.log)
 
 
 def test_fanfare_inert_without_the_resource():

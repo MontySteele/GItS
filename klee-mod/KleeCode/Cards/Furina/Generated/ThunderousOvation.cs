@@ -53,7 +53,7 @@ public sealed class ThunderousOvation : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(6m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.Fanfare(card.Owner.Creature) / 2)
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.ReadableFanfare(card.Owner.Creature) / 2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,18 +37,24 @@ public sealed class TheFinalVerdict : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, fanfarePer: 1, fanfareStep: 1);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("the_final_verdict");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Final Verdict"),
-        ("description", "Deal {Damage:diff()} damage. If it triggered an [gold]Elemental Reaction[/gold]: gain 6 [gold]Encore[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with [gold]Fanfare[/gold]. Your [gold]Fanfare[/gold] falls to its baseline, and that baseline falls by {FloorDrop:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(18m, ValueProp.Move)
+            new CalculationBaseVar(0m),
+            new ExtraDamageVar(1m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.ReadableFanfare(card.Owner.Creature) / 1),
+            new DynamicVar("FloorDrop", 30m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -59,21 +66,17 @@ public sealed class TheFinalVerdict : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var reactionsAtStart = ReactionEffects.TotalResolved;
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        if (ReactionEffects.TotalResolved > reactionsAtStart)
-        {
-            FurinaResources.GainEncore(Owner.Creature, 6);
-        }
+        FurinaResources.DropFanfareToFloor(Owner.Creature, DynamicVars["FloorDrop"].IntValue);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(4m);
+        // R24: NO upgrade path -- None. Flagged in manifest.
     }
 }

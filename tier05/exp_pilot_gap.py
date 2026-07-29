@@ -147,7 +147,7 @@ def p1(base: cells.Cell) -> None:
     print("    Only the PILOT differs between rows. Same seed, same route, "
           "same policy, same loadout.")
     print("=" * 78)
-    print("\n  ROSTER RE-MEASURE: these salon rows are taken AFTER Box Seats "
+    print("\n  ROSTER RE-MEASURE: these salon rows are taken AFTER Casting Call "
           "(A12, the cap-raise\n  power) landed, so they retire the owed "
           "post-box_seats salon re-measurement. Any\n  salon number quoted "
           "from before 2026-07-28 predates a cap that is now a per-player "
@@ -208,7 +208,7 @@ def p2(base: cells.Cell) -> None:
           "a playtester sees --\n    nobody reads a meter as 'full', they "
           "read it as 'I am not going to run out'.")
     print(f"    constants: SALON_TICK_ENCORE_COST {C.SALON_TICK_ENCORE_COST}, "
-          f"SALON_MEMBER_SLOTS {C.SALON_MEMBER_SLOTS} (+ Box Seats), "
+          f"SALON_MEMBER_SLOTS {C.SALON_MEMBER_SLOTS} (+ Casting Call), "
           f"SALON_DRY_DAMAGE_MULT {C.SALON_DRY_DAMAGE_MULT}")
     print("=" * 78)
 
@@ -276,24 +276,43 @@ def p4(base: cells.Cell) -> None:
         src = agg.get("by_source", {})
         total = sum(src.values()) or 1
         legs = {k: src.get(k, 0) for k in DOUBLE_COUNT_LEGS}
-        both = sum(legs.values())
-        smaller = min(legs, key=lambda k: legs[k])
-        single = total - legs[smaller]
         centre = src.get("center_stage", 0)
         print(f"\n  pilot {cell.pilot}  ({label})   {cell.stamp()}")
-        print(f"    Encore double-count      {both / total:6.1%} of all "
-              f"generation "
-              f"({legs['encore_gained']} gained + {legs['encore_spent']} "
-              f"spent)")
-        print(f"    single-count counterfactual   drops '{smaller}' (the "
-              f"smaller leg): total generation")
-        print(f"      {total} -> {single}, i.e. "
-              f"{(single / total) - 1:+.1%} Fanfare generated")
+        if legs["encore_gained"]:
+            both = sum(legs.values())
+            smaller = min(legs, key=lambda k: legs[k])
+            single = total - legs[smaller]
+            print(f"    Encore double-count      {both / total:6.1%} of all "
+                  f"generation "
+                  f"({legs['encore_gained']} gained + {legs['encore_spent']} "
+                  f"spent)")
+            print(f"    single-count counterfactual   drops '{smaller}' (the "
+                  f"smaller leg): total generation")
+            print(f"      {total} -> {single}, i.e. "
+                  f"{(single / total) - 1:+.1%} Fanfare generated")
+        else:
+            # THE NERF SHIPPED. The Fanfare rework (Track A, 2026-07-28)
+            # DELETED the `encore_gained` leg, so this cell's counterfactual
+            # has nothing left to remove and would print a meaningless
+            # "+0.0%". Saying so is the honest output: a price tag for a
+            # change already made is not a price tag, and printing one would
+            # invite someone to quote a no-op as evidence the nerf is cheap.
+            print("    Encore double-count      GONE. Track A deleted the "
+                  "`encore_gained` leg, so Encore\n      now pays the meter "
+                  "ONCE, on the way out. The counterfactual this cell used to"
+                  "\n      price is the shipped world; the pre-nerf numbers "
+                  "(47.2% greedy / 61.6%\n      stoker, -11.7% / -16.3%) are "
+                  "ARCHIVE, in docs/sprint-pilot-gap-log-2026-07-28.md.")
+            print(f"    encore_spent             "
+                  f"{legs['encore_spent'] / total:6.1%} of all generation "
+                  f"(the surviving leg)")
+            print(f"    encore_absorbed          "
+                  f"{src.get('encore_absorbed', 0) / total:6.1%} of all "
+                  f"generation (the leg Track A ADDED)")
         print(f"    center_stage             {centre / total:6.1%} of all "
               f"generation")
-    print("\n  Neither is implemented and neither is recommended here. The "
-          "lever pick is [USER]\n  red-pen; this cell exists so the pick is "
-          "made against a price rather than a guess.")
+    print("\n  The lever pick is [USER] red-pen; this cell exists so the pick "
+          "is made against a\n  price rather than a guess.")
 
 
 # ======================================================================

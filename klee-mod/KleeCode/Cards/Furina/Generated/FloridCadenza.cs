@@ -60,7 +60,7 @@ public sealed class FloridCadenza : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        if (IsUpgraded || FurinaResources.Fanfare(Owner.Creature) >= 12)
+        if (IsUpgraded || FurinaResources.ReadableFanfare(Owner.Creature) >= 12)
         {
             await CardPileCmd.Draw(choiceContext, 2m, Owner);
         }

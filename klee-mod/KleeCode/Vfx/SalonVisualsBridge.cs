@@ -135,7 +135,7 @@ public static class SalonVisualsBridge
     private const float SlotSpacingMax = 62f;
 
     /// <summary>Slot nodes the SCENE ships. The live cap can exceed this
-    /// only if a future card raises it past Box Seats upgraded; the loop
+    /// only if a future card raises it past Casting Call upgraded; the loop
     /// clamps and the excess is logged rather than silently invisible.
     /// </summary>
     private const int SceneSlots = 5;

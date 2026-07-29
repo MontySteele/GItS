@@ -182,6 +182,52 @@ MECHANICS = (
             "though it scales"
         ),
     ),
+    # --- Fanfare rework (2026-07-28). Three rows, required by the brief's
+    # gate clause: "add L3 rows for any new invisible mechanic -- the negative
+    # floor and the keyword grants qualify."
+    Mechanic(
+        name="retain",
+        applies=lambda c: bool(c.get("retain")),
+        markers=("CardKeyword.Retain",),
+        why=(
+            "Track C.1: Retain is what makes Slip Backstage's Encore sink "
+            "schedulable -- she holds it until the buffer is deep enough to "
+            "pay without the wound. A card that lost the keyword plays "
+            "IDENTICALLY the turn it is played; the only symptom is that it "
+            "was discarded on some earlier turn the player meant to bank it. "
+            "The exhaust/innate row above, one field over"
+        ),
+    ),
+    Mechanic(
+        name="fanfare_keywords",
+        applies=lambda c: any(
+            e.get("op") in ("raise_fanfare_cap", "gain_fanfare_floor")
+            for e in _effects(c)),
+        markers=("RaiseFanfareCap", "GainFanfareFloor"),
+        why=(
+            "Track B: these two keywords ARE the value that used to arrive "
+            "invisibly -- every Power silently granted 5 Fanfare floor (rares "
+            "8) and no card said so. The whole track is that grant becoming a "
+            "printed line. A generated card that dropped the call would print "
+            "the keyword and grant nothing, which is strictly worse than the "
+            "invisible rule it replaced: the face would now be LYING rather "
+            "than merely silent"
+        ),
+    ),
+    Mechanic(
+        name="crash_fanfare",
+        applies=lambda c: any(e.get("op") == "crash_fanfare"
+                              for e in _effects(c)),
+        markers=("DropFanfareToFloor",),
+        why=(
+            "Track C.2: the Hyperbeam's PRICE. Drop this call and The Final "
+            "Verdict still deals damage equal to Fanfare and simply never "
+            "pays for it -- a card that reads as a costed finisher and "
+            "behaves as a free one. The damage half is visible on screen and "
+            "the cost half is a number moving in a meter, so nothing about "
+            "playing the card would look wrong"
+        ),
+    ),
 )
 
 

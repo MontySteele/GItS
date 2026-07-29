@@ -178,8 +178,24 @@ FANFARE_CAP_FRACTION = 0.5    # Fanfare cap = fraction of maxHP.
                               # at 63%). Those numbers are ARCHIVE -- they
                               # were taken in the spendable-Fanfare world.
 FANFARE_PER_HP_LOST = 1       # per point of true HP lost
-FANFARE_PER_ENCORE_GAINED = 1 # per point of Encore gained
-FANFARE_PER_ENCORE_SPENT = 1  # per point of Encore spent
+FANFARE_PER_ENCORE_SPENT = 1  # per point of Encore deliberately spent
+FANFARE_PER_ENCORE_ABSORBED = 1   # per point of Encore eaten by a hit
+# FANFARE_PER_ENCORE_GAINED: DELETED by the Fanfare rework (2026-07-28, Track
+# A, RULED). Fanfare now prints when Encore goes DOWN and never when it goes
+# up. Encore used to mint on BOTH legs, so a card granting 3 Encore silently
+# printed 6 Fanfare -- measured at 47% of generation under the greedy pilot
+# and 62% under the stoker (pilot-gap P4), i.e. the better the loop was
+# played, the more of its output came from the loop taxing itself twice.
+#
+# The third reduction path, ABSORPTION, was previously worth nothing and now
+# pays: absorbed Encore is deferred Block that will never block a future hit,
+# so cashing it is a real cost (RULED). That closes an asymmetry rather than
+# opening one -- see resources.absorb_into_encore and the invariant test
+# test_every_point_past_block_prints_exactly_one_fanfare: after this change
+# EVERY point of damage that gets past Block prints exactly 1 Fanfare, via
+# absorption if the buffer eats it and via hp_lost if HP does. Those three
+# constants are therefore not independently tunable any more; the test is
+# what says so out loud.
 FANFARE_PER_SPOTLIGHT_CARD = 2    # the Ovation merge: per Spotlighted
                               # card played. NO passive per-turn accrual
                               # constant exists; do not add one (§4).
@@ -227,13 +243,34 @@ FANFARE_DECAY_FRACTION = 0.20 # PROPORTIONAL decay, as a fraction of the
 # it is no longer reproducible in-tree because the flat shape no longer exists.
 # A constellation grant is STATIC value, not accrual: it does not grow with
 # time, so stalling still earns nothing and the no-passive-accrual law
-# (kickoff §4) is intact, not amended. Powers grant by rarity; the
-# gain_fanfare_floor op exists so non-power cards can grant too, which is
-# REQUIRED rather than optional -- a power-only rule structurally excludes
-# the power-light archetype the mechanic was designed for (measured: the
-# fanfare plan saw 6.7 floors/run against salon's ~51).
-FANFARE_FLOOR_PER_POWER = 5       # common/uncommon Power played
-FANFARE_FLOOR_PER_POWER_RARE = 8  # rare Power played
+# (kickoff §4) is intact, not amended.
+#
+# FANFARE_FLOOR_PER_POWER / _RARE: DELETED by the Fanfare rework (2026-07-28,
+# Track B, RULED). They were the invisible rule -- every Power played raised
+# floor, cap AND current by 5 (rares 8), printed on no card and explained in
+# no tooltip. The value does not vanish; it MOVES ONTO THE CARDS, as two
+# printed keywords:
+#
+#   "Fanfare Cap +X"  raise_fanfare_cap  -- the ceiling only
+#   "Fanfare +X"      gain_fanfare_floor -- current, floor and cap together,
+#                                           a RARE POWER payoff only
+#
+# Spelled "Fanfare Cap", never bare "Cap": bare "Cap" is ambiguous with the
+# Salon's member cap, which is also a per-player stat since A12.
+#
+# The keyword convention is only safe while no card grants TRANSIENT Fanfare
+# directly -- all remaining generation sources are indirect (hp_lost,
+# encore_spent, encore_absorbed, center_stage), so "Fanfare +X" can mean the
+# permanent grant without ambiguity. tools/lint_furina_registers.py L12 is
+# the blocker that keeps it that way; the first direct transient grant would
+# make the keyword ambiguous forever, so it fails the build rather than
+# arriving quietly.
+#
+# WHAT THIS COSTS. The automatic was ~4% of her actual power by the 38d7769
+# measurement (the visible Fanfare number moved ~22%, but most of that sat
+# above what any reader consumed). It is deleted from non-Rares outright and
+# is measured TOGETHER with Track A -- the two are never attributed
+# separately without an ablation arm.
 
 # --- Furina: Salon Members (kickoff §5; Salon v2 rework 2026-07-23,
 # docs/archive/furina-salon-rework-plan.md -- numbers PROPOSED pending red-pen) ---

@@ -57,7 +57,7 @@ public sealed class LetThePeopleRejoice
             new CalculationBaseVar(8m),
             new ExtraDamageVar(1m),
             new CalculatedDamageVar(ValueProp.Move).WithMultiplier(
-                static (card, _) => FurinaResources.Fanfare(card.Owner.Creature) / 4),
+                static (card, _) => FurinaResources.ReadableFanfare(card.Owner.Creature) / 4),
         };
 
     // Energy cost 0 (user ruling 2026-07-23, matching Klee's Sparks 'n'

@@ -41,12 +41,13 @@ public sealed class RapturousApplause : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rapturous Applause"),
-        ("description", "Your Attacks deal {PowerAmount:diff()} more damage per 10 [gold]Fanfare[/gold]."),
+        ("description", "[gold]Fanfare[/gold] +{FanfareFloor:diff()}. Your Attacks deal {PowerAmount:diff()} more damage per 10 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new DynamicVar("FanfareFloor", 8m),
             new DynamicVar("PowerAmount", 1m)
         };
 
@@ -59,6 +60,7 @@ public sealed class RapturousApplause : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        FurinaResources.GainFanfareFloor(Owner.Creature, DynamicVars["FanfareFloor"].IntValue);
         await PowerCmd.Apply<FanfareAttackPer10Power>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 

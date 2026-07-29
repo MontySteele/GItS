@@ -53,7 +53,7 @@ public sealed class StandingRoomOnly : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(5m),
             new ExtraDamageVar(1m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.Fanfare(card.Owner.Creature) / 4)
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.ReadableFanfare(card.Owner.Creature) / 4)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

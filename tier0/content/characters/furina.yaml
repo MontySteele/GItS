@@ -95,7 +95,7 @@ packages:
     # salon package is a card the sim is blind to, and this one changes the
     # archetype's ceiling. It moves this package's measured numbers, so every
     # salon row wants re-measuring before it is quoted.
-    - box_seats
+    - casting_call
     - dinner_service
     - usher_the_waves
     - matinee_performance

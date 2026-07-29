@@ -170,7 +170,7 @@ def test_the_stage_geometry_is_uniform_across_every_slot():
     """The numbers a scale fix will be written against, pinned first.
 
     D1 (salon UI sprint, 2026-07-28) took the slot count from three to five --
-    A12 made the cap a per-player stat, and Box Seats upgraded reaches 5 --
+    A12 made the cap a per-player stat, and Casting Call upgraded reaches 5 --
     so the sweep is over every slot the scene ships, not over a hardcoded
     three. Uniformity is the actual invariant: a slot that renders a member
     differently from its neighbours would make identity a function of

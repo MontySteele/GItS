@@ -77,7 +77,7 @@ def test_a_multi_deploy_splits_across_the_slots_it_actually_fills():
 
 def test_the_live_cap_is_read_not_the_constant():
     """A12 made the cap a per-player stat. A stoker that read
-    C.SALON_MEMBER_SLOTS would stop valuing deploys the moment Box Seats
+    C.SALON_MEMBER_SLOTS would stop valuing deploys the moment Casting Call
     landed -- on the deck most likely to have drafted it."""
     st = _stage(members=C.SALON_MEMBER_SLOTS, cap_up=2)
 

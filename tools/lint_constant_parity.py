@@ -142,14 +142,17 @@ MIRRORED: dict[str, object] = {
     "CompanionBanner.FeaturedSlots": C.BANNER_FEATURED_SLOTS,
 
     # Furina.
+    # RE-CLASSIFIED by the Fanfare rework (2026-07-28). FanfarePerEncoreGained
+    # and both FanfareFloorPerPower* left this map because they left BOTH
+    # engines -- a retired constant must be deleted from the map, never left
+    # pointing at a deleted C.* (which raises) and never quietly stubbed to a
+    # literal (which would assert parity between two things that no longer
+    # exist). FanfarePerEncoreAbsorbed is new on both sides and joins here.
     "FurinaResourceConstants.FanfarePerHpLost": C.FANFARE_PER_HP_LOST,
-    "FurinaResourceConstants.FanfarePerEncoreGained":
-        C.FANFARE_PER_ENCORE_GAINED,
     "FurinaResourceConstants.FanfarePerEncoreSpent":
         C.FANFARE_PER_ENCORE_SPENT,
-    "FurinaResourceConstants.FanfareFloorPerPower": C.FANFARE_FLOOR_PER_POWER,
-    "FurinaResourceConstants.FanfareFloorPerPowerRare":
-        C.FANFARE_FLOOR_PER_POWER_RARE,
+    "FurinaResourceConstants.FanfarePerEncoreAbsorbed":
+        C.FANFARE_PER_ENCORE_ABSORBED,
     "FurinaResourceConstants.BurstPerSkillTag": C.BURST_PER_SKILL_TAG,
     "FurinaResourceConstants.BurstPerReaction": C.BURST_PER_REACTION,
     "FurinaResourceConstants.BurstPerEncoreSpent": C.BURST_PER_ENCORE_SPENT,

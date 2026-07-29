@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,18 +37,23 @@ public sealed class BlockingNotes : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, companionPer: 2);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("blocking_notes");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Blocking Notes"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you moved the [gold]Spotlight[/gold] this turn: draw 1 card."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Scales with [gold]Companions[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(7m, ValueProp.Move)
+            new CalculationBaseVar(5m),
+            new CalculationExtraVar(2m),
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => CurtainCallHooks.CompanionPlaysThisTurn(card.Owner.Creature))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -59,15 +65,11 @@ public sealed class BlockingNotes : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue), ValueProp.Move), cardPlay);
-        if (SpotlightSystem.MovedThisTurn(Owner.Creature))
-        {
-            await CardPileCmd.Draw(choiceContext, 1m, Owner);
-        }
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(2m);
+        // R24: NO upgrade path -- None. Flagged in manifest.
     }
 }
