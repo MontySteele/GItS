@@ -251,8 +251,11 @@
 # The repair is reader density at the BOTTOM of the curve, so: two new COMMON
 # readers, one on each of the two post-B1 rider rails (damage, block), both at
 # the LOW slope. 1_per_4 is the commons' tier and it is a rule, not a taste
-# call -- the rares own 1_per_2 (crescendo, high_tide, thunderous_ovation) and
-# a common that matched them would make the rare's steeper rate worthless.
+# call -- the steep 1_per_2 rate belongs to the payoff slots (high_tide and
+# thunderous_ovation at rare, crescendo at UNCOMMON -- it pre-dates the tier
+# rule and pays for its rate with a lowered printed base), and a common that
+# matched them would make the payoff slots' steeper rate worthless.
+# (Audit fix 2026-07-29: this comment previously called crescendo a rare.)
 - {id: applause_line, name: "Applause Line", register: archon, cost: 0, type: attack, rarity: common, solve: [frontload], archetypes: [fanfare, generic], role: glue,
    effects: [{op: damage, amount: 3, target: enemy, bonus_formula: 1_per_4_fanfare}]}
    # The damage rail at common. A rehearsed beat that lands harder the louder
