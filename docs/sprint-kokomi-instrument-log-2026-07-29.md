@@ -6,12 +6,30 @@ entry was touched. **Every number below is REPORTED. Nothing here is
 ratified, and the stability band is NOT declared** — that is a reserved [USER]
 ruling under R51 and D5.
 
-**Suite:** `python -m pytest -q` from the repo root — **1455 passed, 1 failed**.
-The failure is `tier0/tests/test_encoding_gate.py::test_no_new_undeclared_encodings`
-on `tools/art_lint.py` (3 undeclared `open()` calls, allowance 2). `tools/` is
-the concurrent agent's territory in this sprint and that file is mid-edit in the
-working tree; **nothing in this sprint touches `tools/`**. Everything owned here
-is green, including the 16 new instrument tests.
+**Suite:** `python -m pytest -q` from the repo root — **1466 passed, 1 skipped,
+0 failed**, on the merged tree.
+
+Two notes on the count, because the number is not comparable to this morning's
+1412 without them:
+
+- Mid-sprint the suite read **1455 passed, 1 failed** —
+  `test_encoding_gate.py::test_no_new_undeclared_encodings` on
+  `tools/art_lint.py`. That was the **concurrent tooling pass mid-edit**, not
+  this sprint: nothing here touches `tools/`. It was green by the time the tree
+  settled, and 1466 is the joint total of both passes' new tests (16 of them
+  are this sprint's instrument tests).
+- **Disclosure: commit `4ee6881` swept in the concurrent pass's files.** The
+  brief called for `git add` of owned paths only, and that is what was staged —
+  but the other agent staged its own work into the shared index between the
+  `add` and the `commit`, and a plain `git commit` takes the whole index. The
+  resulting commit therefore contains both passes (24 files). Nothing was lost
+  and the combined state is green and self-consistent; the attribution is
+  simply wrong, and un-picking it by resetting a shared branch under a live
+  concurrent writer was judged the more dangerous of the two options. The
+  files owned here are: `tier0/engine/combat.py`,
+  `tier0/harness/metrics.py`, `tier05/run_metrics.py`,
+  `tier05/exp_roster_anchors.py`, `tier05/exp_kokomi_stability.py`,
+  `tier05/tests/test_stability_trajectory.py`, and the two docs.
 
 ---
 
