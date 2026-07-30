@@ -30,6 +30,16 @@ from tools import lint_text_encoding as lint
 # An entry here is DEBT. Work it off by adding `encoding="utf-8"` and lowering
 # the number; the staleness test below forces that edit, so this list can only
 # shrink.
+#
+# RECOUNTED 2026-07-29. TWENTY of these were never offences at all. The `open`
+# arm keyed on
+# the attribute NAME, so every `Image.open(...)` in the repo -- a binary decoder
+# with no `encoding=` parameter to declare -- counted as an undeclared text
+# read. The tooling-hardening sprint (2026-07-29) exempted image opens, which
+# is why four files leave the list entirely and four more drop their counts.
+# That miscount was not cosmetic: the gate compares a per-file COUNT, so
+# `tools/art_lint.py: 2` was a live allowance for two REAL bare `open()` calls
+# to hide behind, on the file this sprint was editing.
 DEBT: dict[str, int] = {
     "tier0/tests/test_extract_base_game_pool.py": 11,
     "tier0/tests/test_ironclad_upgrades.py": 1,
@@ -38,18 +48,22 @@ DEBT: dict[str, int] = {
     "tier0/tests/test_real_silent.py": 1,
     "tier0/tests/test_roster_runtime_contracts.py": 10,
     "tier0/tests/test_upgrades.py": 1,
-    "tools/archive/autocrop_card_art.py": 1,
-    "tools/art_lint.py": 2,
-    "tools/art_process.py": 8,
+    "tools/art_process.py": 3,           # was 8; 5 were Image.open
     "tools/build_official_sheet.py": 10,
-    "tools/cut_combat_layers.py": 3,
-    "tools/cut_salon_members.py": 2,
+    "tools/cut_combat_layers.py": 2,     # was 3
+    "tools/cut_salon_members.py": 1,     # was 2
     "tools/extract_base_game_pool.py": 7,
-    "tools/gen_furina_stills.py": 2,
-    "tools/gen_kokomi_stills.py": 2,
     "tools/lint_furina_registers.py": 1,
     "tools/lint_kokomi_decksize.py": 1,
-    "tools/lint_unique_names.py": 1,
+    # LEFT THE LIST ENTIRELY, all four because every entry they carried was an
+    # Image.open: tools/archive/autocrop_card_art.py (1), tools/art_lint.py (2),
+    # tools/gen_furina_stills.py (2), tools/gen_kokomi_stills.py (2).
+    #
+    # tools/lint_unique_names.py was here at 1 and is a REAL payoff: sprint
+    # item 6 turned `yaml.safe_load(open(path))` into the standard
+    # `with open(path, encoding="utf-8")`. Removed rather than lowered to 0 --
+    # test_debt_list_is_not_stale forces the deletion, and a zero entry is an
+    # allowance for the next offence in the file.
 }
 
 
@@ -91,3 +105,43 @@ def test_the_content_path_carries_no_debt():
 
     live = [rel for rel in lint.scan() if rel.startswith(protected)]
     assert not live, f"undeclared encoding on the content path: {live}"
+
+
+def test_image_open_is_not_a_text_read(tmp_path):
+    """Tooling-hardening sprint 2026-07-29, red demonstration.
+
+    `Image.open` has no `encoding=` parameter and decodes bytes, so flagging it
+    produced debt that could only be "paid" by deleting the image pipeline --
+    and because the gate compares a per-file COUNT, each phantom entry was a
+    live allowance for a REAL bare `open()` to hide behind in that same file.
+
+    The exemption is deliberately narrow and the second half proves it:
+    `io.open`, `codecs.open` and `gzip.open` all take `encoding=` and stay in
+    scope, so this is not "attribute-form open is exempt".
+    """
+    probe = tmp_path / "probe.py"
+    probe.write_text(
+        "from PIL import Image\n"
+        "import io, codecs\n"
+        "def f(p):\n"
+        "    a = Image.open(p).size\n"          # exempt: binary decoder
+        "    b = io.open(p).read()\n"           # NOT exempt
+        "    c = codecs.open(p).read()\n"       # NOT exempt
+        "    d = open(p).read()\n"              # NOT exempt
+        "    e = open(p, encoding='utf-8')\n"   # declared
+        "    g = open(p, 'rb').read()\n"        # binary mode
+        "    return a, b, c, d, e, g\n",
+        encoding="utf-8")
+    lines = [ln for ln, _ in lint.offences(probe)]
+    assert lines == [5, 6, 7], lint.offences(probe)
+
+
+def test_the_exemption_did_not_swallow_the_real_offences_in_those_files():
+    """The four files that LEFT the debt list must genuinely have nothing left,
+    not merely have gone quiet -- otherwise the recount hid a live defect."""
+    live = lint.scan()
+    for rel in ("tools/art_lint.py", "tools/gen_furina_stills.py",
+                "tools/gen_kokomi_stills.py",
+                "tools/archive/autocrop_card_art.py",
+                "tools/lint_unique_names.py"):
+        assert rel not in live, (live.get(rel), rel)

@@ -307,8 +307,10 @@ def stability_profile(results: list[RunResult], max_hp: int) -> dict:
     # Population SD: this is the whole cohort of fights, not a sample of one.
     variance = sum((x - mean_loss) ** 2 for x in losses) / len(losses)
     sd = math.sqrt(variance)
-    ordered = sorted(losses)
-    p90 = ordered[min(len(ordered) - 1, int(0.90 * len(ordered)))]
+    # The SIXTH hand-rolled percentile, found after the sim-hygiene sprint
+    # unified the other five (2026-07-29): this one was nearest-rank, inside a
+    # module whose own convention is linear. No published number quoted it.
+    p90 = _percentile(losses, 0.90)
     total_lost_hp = sum(losses) * max_hp
 
     return {
@@ -341,6 +343,181 @@ def stability_profile(results: list[RunResult], max_hp: int) -> dict:
         # next to fill in -- the None is the point.
         "band": None,
     }
+
+
+#: HP fractions the trajectory report counts rounds beneath. 0.50 is "half
+#: health", the level at which a player starts routing around fights; 0.30 is
+#: `NEAR_DEATH_FRACTION`'s neighbourhood, kept here as its own literal so the
+#: two instruments cannot silently drift into sharing a threshold that only one
+#: of them has a reason for.
+TRAJECTORY_LOW_FRACTIONS: tuple[float, ...] = (0.50, 0.30)
+
+
+def _drawdown(curve: list[float]) -> float:
+    """The largest fall from a running high. The standard definition."""
+    peak = curve[0]
+    worst = 0.0
+    for h in curve:
+        peak = max(peak, h)
+        worst = max(worst, peak - h)
+    return worst
+
+
+def trajectory_profile(results: list[RunResult], max_hp: int,
+                       low_fractions: tuple[float, ...] = None) -> dict:
+    """WITHIN-fight HP trajectory: jaggedness, drawdown, time spent low.
+
+    The second half of the stability instrument (R51, D5), and the half
+    `stability_profile` structurally could not see. That one reads `hp_start`
+    and `hp_end`, which is one number per fight: a fight entered at 100% and
+    left at 80% reads identically whether it was four even 5% chips or a dive
+    to 25% and a recovery. The dive is the thing Kokomi's fantasy forbids, and
+    it was invisible.
+
+    This reads `FightStats.hp_by_round` -- player HP at the end of every round,
+    sampled in the engine's round loop where `state.player.hp` is authoritative
+    (HP also moves through paths that emit no `player_hit` and no `heal`, so a
+    derived trajectory would be wrong on exactly the cards a stability reading
+    is about).
+
+    Three questions, because "flat" turns out to be three claims:
+
+    1. **Jaggedness** -- `within_fight_sd_pct`: the mean over fights of the SD
+       of end-of-round HP *inside* that fight. Deliberately per-fight and then
+       averaged rather than pooled: pooling would mostly measure the act's
+       downward drift, which is attrition, not jaggedness.
+    2. **Spike depth** -- `max_drawdown_pct`: the classic peak-to-trough, run
+       scale. The largest fall from any running high in the run's whole HP
+       curve, averaged over runs, with `p90_drawdown_pct` beside it because a
+       mean drawdown hides the tail that actually kills.
+       `worst_round_drop_pct` is the same question at round resolution: the
+       single biggest one-round fall, which is the burst a ward is supposed to
+       eat.
+
+       **Run-scale drawdown SATURATES in this cohort and is the weakest column
+       here.** ~90% of tier-0.5 runs end in death, and the round before the
+       lethal one is usually a sliver of HP, so every arm of the first reading
+       came out at 0.95-1.01 whether the character was flat or jagged: a run
+       that dies has by definition fallen almost all the way. Reported anyway,
+       because it is the standard definition and a future world with a higher
+       winrate will make it bite -- but the DISCRIMINATING columns today are
+       `within_fight_sd_pct`, `worst_round_drop_pct` and the below-threshold
+       shares. `survived_drawdown_pct` is the uncensored companion: the same
+       statistic over only the fights the player walked out of, so it is the
+       deepest trough she actually RECOVERED from. It carries a survivorship
+       bias in the opposite direction (a run that dies in fight 2 contributes
+       one fight of curve), which is why both are printed and neither is
+       presented as the answer.
+    3. **Time spent low** -- `round_share_below_XX`: the fraction of all rounds
+       fought whose end-of-round HP is under that fraction of max. A character
+       who spends a third of her rounds under half health is not stable however
+       small her SD is.
+
+    Everything is a FRACTION of max HP, so a Kokomi reading and a Klee reading
+    are directly comparable -- the `survival_profile` / `stability_profile`
+    house rule. Values above 1.0 are possible and are not bugs: `max_hp` is the
+    character's STARTING max, and `gain_max_hp` moves the real ceiling up
+    mid-run.
+
+    **THE LETHAL ROUND IS EXCLUDED FROM EVERY COLUMN**, and this is the one
+    judgement call in the module worth arguing with. Measured with it included,
+    `max_drawdown_pct` came out at 1.03-1.08 for all six arms of the first
+    reading -- because ~90% of tier-0.5 runs end in death, and a death is a fall
+    to zero from wherever you were, so the column was reporting the death rate
+    in a costume. Time-spent-low had the same leak: a round that ends at 0 HP is
+    trivially under every threshold. Dying is what the WINRATE table measures.
+    This instrument is about the shape of a living character's HP curve, so the
+    round she does not survive is dropped and counted in `lethal_rounds`.
+
+    **THIS INSTRUMENT DECLARES NO BAND.** Every value is REPORTED. `band` is
+    None and stays None: declaring an acceptance band is a reserved [USER]
+    ruling (R51 put Kokomi's whole healer fantasy on this instrument, and D5
+    rules where the band may come from and when it may be graded -- from design
+    intent, recorded as such, before the confirmatory playtest, and never
+    revised against the playtest that grades it). Nothing here judges, and the
+    absence of a verdict key is pinned by test.
+    """
+    if not results or max_hp <= 0:
+        return {}
+    fracs = (TRAJECTORY_LOW_FRACTIONS if low_fractions is None
+             else low_fractions)
+
+    per_fight_sd: list[float] = []
+    per_run_drawdown: list[float] = []
+    survived_drawdown: list[float] = []
+    worst_round_drops: list[float] = []
+    rounds_total = 0
+    lethal_rounds = 0
+    rounds_below = {f: 0 for f in fracs}
+
+    for run in results:
+        # The run's HP curve: every fight's rounds, in order, each fight opened
+        # by its own hp_start so a rest-stop heal between fights shows up as
+        # the recovery it is rather than as a phantom mid-fight spike.
+        curve: list[float] = []
+        # The same curve restricted to fights the player walked out of: an
+        # uncensored drawdown, because it never contains the approach to a
+        # death. Survivorship runs the other way (a run that dies in fight 2
+        # contributes one fight), so the pair is reported, not reconciled.
+        lived: list[float] = []
+        for fight in run.fight_stats:
+            rounds = [h / max_hp for h in getattr(fight, "hp_by_round", ())]
+            # The lethal round out, everywhere. See the docstring: with it in,
+            # every column becomes a restatement of the death rate.
+            while rounds and rounds[-1] <= 0.0:
+                rounds.pop()
+                lethal_rounds += 1
+            if not rounds:
+                # A fight recorded before this instrument existed, or one that
+                # ended inside its first player turn. Skipped, not zeroed: a
+                # missing trajectory is not a flat one.
+                continue
+            start = fight.hp_start / max_hp
+            within = [start] + rounds
+            if len(rounds) > 1:
+                mean = sum(within) / len(within)
+                per_fight_sd.append(math.sqrt(
+                    sum((x - mean) ** 2 for x in within) / len(within)))
+            drops = [max(0.0, a - b) for a, b in zip(within, within[1:])]
+            if drops:
+                worst_round_drops.append(max(drops))
+            rounds_total += len(rounds)
+            for f in fracs:
+                rounds_below[f] += sum(1 for h in rounds if h < f)
+            curve.extend(within)
+            if getattr(fight, "hp_end", 0) > 0:
+                lived.extend(within)
+        if curve:
+            per_run_drawdown.append(_drawdown(curve))
+        if lived:
+            survived_drawdown.append(_drawdown(lived))
+
+    if not rounds_total:
+        return {"band": None, "rounds": 0, "lethal_rounds": lethal_rounds}
+
+    def _mean(xs):
+        return sum(xs) / len(xs) if xs else 0.0
+
+    out = {
+        "within_fight_sd_pct": _mean(per_fight_sd),
+        "max_drawdown_pct": _mean(per_run_drawdown),
+        "p90_drawdown_pct": _percentile(per_run_drawdown, 0.90),
+        "survived_drawdown_pct": _mean(survived_drawdown),
+        "survived_drawdown_runs": len(survived_drawdown),
+        "worst_round_drop_pct": _mean(worst_round_drops),
+        "rounds": rounds_total,
+        "rounds_per_run": rounds_total / len(results),
+        # Rounds dropped as lethal. Visible, not silent: the exclusion is a
+        # judgement call and a reader has to be able to see how much of the
+        # cohort it removed.
+        "lethal_rounds": lethal_rounds,
+        "max_hp": max_hp,
+        # DARK until [USER] rules. Not a placeholder to be filled in.
+        "band": None,
+    }
+    for f in fracs:
+        out[f"round_share_below_{int(f * 100)}"] = rounds_below[f] / rounds_total
+    return out
 
 
 def banner_variance(results: list[RunResult]) -> dict:

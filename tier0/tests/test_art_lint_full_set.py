@@ -46,10 +46,34 @@ needs_art = pytest.mark.skipif(
     not (SHIPPED.is_dir() and any(SHIPPED.rglob("*.png"))),
     reason="ImageGen/images is gitignored Tier F; nothing shipped to hash")
 
+RAW = REPO / "art" / "raw"
+
+
+def _has_pillow() -> bool:
+    try:
+        import PIL  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+# L8's staleness check has to actually MEASURE the sources, so it needs both a
+# decoder and the gitignored raw files. Same contract as needs_plan: skip with
+# the reason on record rather than assert on something absent.
+needs_raw_images = pytest.mark.skipif(
+    not (_has_pillow() and RAW.is_dir() and any(RAW.iterdir())),
+    reason="L8 staleness needs Pillow and the gitignored art/raw sources")
+
 
 def _rows():
     from art_fetch import read_plan
     return read_plan()
+
+
+def _effective(rows):
+    return [r for r in rows
+            if "/cards/" in r["out"] and (r["pick"] == "auto"
+                                          or r["rank"] == 1)]
 
 
 # --- the full-set run ----------------------------------------------------
@@ -175,3 +199,172 @@ def test_an_allowlisted_pair_is_reported_but_not_failed(tmp_path, monkeypatch,
     out = capsys.readouterr().out
     assert "KNOWN IDENTICAL (allowlisted)" in out
     assert "kaboom" in out
+
+
+# --- the three PENDING waiver sets, and their rot direction ---------------
+#
+# `KNOWN_IDENTICAL` already had `test_every_allowlisted_identical_pair_is_
+# still_identical` above: an entry whose underlying defect is gone FAILS, so
+# the allowlist can only shrink. `PENDING_UNDERSIZE` (L8), `PENDING_BANNED_
+# FAMILY` (L9) and `PENDING_RED_PEN` (L1) had no such guard -- three
+# hand-maintained sets that only printed and could only grow, each carrying a
+# comment asking a future human to "DELETE the entry once resolved". The
+# request in a comment is the failure mode; a test that breaks is the fix.
+#
+# All three are checked the same way, and it is the only honest way: EMPTY the
+# waiver set and re-run the rule. An entry that no longer produces its finding
+# with the suppression lifted is guarding nothing.
+#
+# Verified 2026-07-29 when these were written: all thirteen entries across the
+# three sets still fire. Nothing was removed as stale.
+
+
+@needs_plan
+@needs_raw_images
+def test_pending_undersize_entries_are_still_undersize(monkeypatch):
+    """L8's waiver set, rot direction.
+
+    Lift the suppression and each entry must still produce its own L8 line.
+    It stops firing when the pick is re-hunted onto a big enough source, when
+    the row leaves the plan, or when it is promoted to KNOWN_UNDERSIZED -- and
+    every one of those is a reason the entry must come OUT, not linger.
+    """
+    entries = set(art_lint.PENDING_UNDERSIZE)      # snapshot before lifting
+    monkeypatch.setattr(art_lint, "PENDING_UNDERSIZE", set())
+    effective = _effective(_rows())
+    problems = art_lint.undersized(effective)
+    hit = {p.split()[1].rstrip(":") for p in problems}
+
+    # A raw source that is absent cannot be measured, so it cannot prove
+    # staleness either. Those entries are reported as UNVERIFIED rather than
+    # silently counted as fine -- and if that is all of them the test has
+    # measured nothing, which is the dead-gate class this file exists to name.
+    from art_fetch import rawname
+    by_id = {r["asset_id"]: r for r in effective}
+    # An entry that is not an effective plan row at all is NOT unverifiable --
+    # it is definitively stale (the row was retired or re-ranked), so it stays
+    # in the checked set and fails below.
+    unverified = {a for a in entries
+                  if a in by_id
+                  and not (RAW / rawname(by_id[a]["title"])).exists()}
+    checkable = entries - unverified
+    assert checkable, (
+        f"no PENDING_UNDERSIZE entry could be measured (unverified: "
+        f"{sorted(unverified)}); this gate would pass by scanning nothing")
+
+    stale = sorted(checkable - hit)
+    assert not stale, (
+        "these PENDING_UNDERSIZE entries no longer produce an L8 finding -- "
+        "the undersize is resolved (re-picked, row retired, or approved into "
+        f"KNOWN_UNDERSIZED), so DELETE them from the set: {stale}"
+        + (f" (unverified, raw source absent: {sorted(unverified)})"
+           if unverified else ""))
+
+
+@needs_plan
+def test_pending_banned_family_entries_still_hit_a_ban(monkeypatch):
+    """L9's waiver set, rot direction. Pure string work, so no decoder or raw
+    file is needed -- this one runs wherever the plan does."""
+    entries = set(art_lint.PENDING_BANNED_FAMILY)   # snapshot before lifting
+    monkeypatch.setattr(art_lint, "PENDING_BANNED_FAMILY", set())
+    problems = art_lint.banned_families(_effective(_rows()))
+    hit = {p.split()[1].rstrip(":") for p in problems}
+    stale = sorted(entries - hit)
+    assert not stale, (
+        "these PENDING_BANNED_FAMILY entries no longer draw from a banned "
+        "family -- the pick was changed or the family was unbanned, so DELETE "
+        f"them from the set: {stale}")
+
+
+@needs_plan
+def test_pending_red_pen_entries_are_still_colliding(monkeypatch):
+    """L1's waiver set, rot direction.
+
+    The precedent is in the set's own comment: {kaboom, spark_knight_style}
+    was removed in Sweep II D1 BY HAND after the ruling retired one plan row,
+    with the note that "leaving the entry would suppress a duplicate-source
+    finding that can no longer occur". That removal was remembered. This makes
+    the next one mandatory.
+    """
+    entries = set(art_lint.PENDING_RED_PEN)         # snapshot before lifting
+    monkeypatch.setattr(art_lint, "PENDING_RED_PEN", set())
+    problems = art_lint.lint(_rows())
+    collisions = [p for p in problems if p.startswith("L1 ")]
+    stale = []
+    for pair in entries:
+        if not any(all(a in msg for a in pair) for msg in collisions):
+            stale.append(sorted(pair))
+    assert not stale, (
+        "these PENDING_RED_PEN pairs no longer share an effective source -- "
+        "the collision they suppress can no longer occur, so DELETE them from "
+        f"the set: {stale}")
+
+
+# --- L10: an unreadable source is a finding, not a skip -------------------
+
+def test_l10_reports_a_source_it_cannot_decode(tmp_path, monkeypatch):
+    """The red demonstration for item 1.
+
+    L8 and the L6 warn both `continue`d on any `Image.open` failure, so a
+    truncated download or a saved HTML error page passed BOTH image checks in
+    silence -- the single source neither rule could measure was the one they
+    reported nothing about.
+    """
+    pytest.importorskip("PIL")
+    raw = tmp_path / "art" / "raw"
+    raw.mkdir(parents=True)
+    (raw / "Bogus_Source.png").write_bytes(b"<html>404 Not Found</html>")
+    monkeypatch.setattr(art_lint, "__file__", str(tmp_path / "tools" / "x.py"))
+
+    row = {"asset_id": "probe_card", "title": "Bogus Source.png",
+           "out": "ImageGen/images/cards/klee/probe_card.png", "pick": "auto",
+           "rank": None, "register": "splash", "mode": "cover", "focus": "c",
+           "source": "png", "frame": None, "w": 500, "h": 380,
+           "source_group": None}
+    problems = art_lint.undecodable([row])
+    assert len(problems) == 1, problems
+    assert problems[0].startswith("L10 probe_card:")
+    assert "cannot be decoded" in problems[0]
+
+    # ...and the finding reaches the gate, not just the helper.
+    assert any(p.startswith("L10 probe_card:") for p in art_lint.lint([row]))
+
+
+def test_l10_stays_silent_on_the_two_documented_skips(tmp_path, monkeypatch):
+    """Absence of a decoder and absence of the raw file are facts about the
+    MACHINE, not about the pick, and the plan must stay lintable under both.
+    Only present-and-unopenable is a defect."""
+    (tmp_path / "art" / "raw").mkdir(parents=True)
+    monkeypatch.setattr(art_lint, "__file__", str(tmp_path / "tools" / "x.py"))
+    row = {"asset_id": "probe_card", "title": "Never Fetched.png",
+           "out": "ImageGen/images/cards/klee/probe_card.png", "pick": "auto",
+           "rank": None, "register": "splash", "mode": "cover", "focus": "c",
+           "source": "png", "frame": None, "w": 500, "h": 380,
+           "source_group": None}
+    assert art_lint.undecodable([row]) == []
+
+
+def test_the_staleness_idiom_detects_an_entry_that_stopped_firing():
+    """The synthetic red half of the three tests above, so the IDIOM is pinned
+    on a bare clone where the plan-driven versions skip.
+
+    Lifting a waiver and diffing "entries" against "ids that fired" is the
+    whole mechanism; this shows it going red on a waiver whose defect is gone,
+    using rows built here rather than the gitignored plan.
+    """
+    row = {"asset_id": "clean_card", "title": "Furina Portrait.png",
+           "out": "ImageGen/images/cards/furina/clean_card.png",
+           "pick": "auto", "rank": None, "register": "splash", "mode": "cover",
+           "focus": "c", "source": "png", "frame": None, "w": 500, "h": 380,
+           "source_group": None}
+    banned = dict(row, asset_id="banned_card",
+                  title="Test Run Fischl Banner.png")
+
+    # L9 fires for the banned row and not for the clean one, so a waiver
+    # naming the clean one is guarding nothing -- which is what the diff says.
+    hit = {p.split()[1].rstrip(":")
+           for p in art_lint.banned_families([row, banned])}
+    assert hit == {"banned_card"}
+    assert {"clean_card"} - hit == {"clean_card"}, (
+        "the staleness diff must report a waived id that no longer fires")
+    assert not {"banned_card"} - hit

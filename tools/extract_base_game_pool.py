@@ -520,13 +520,24 @@ def _power_gap(power: str) -> str:
     the card is held back rather than scored on trust. Reading the refusal list
     from the engine keeps this record from going stale the way the old blanket
     string did.
+
+    THE IMPORT FAILURE IS ITS OWN REASON. This used to answer an unimportable
+    tier0 with "{power} is not on the SUPPORTED_POWERS dial", which is a claim
+    ABOUT THE DIAL made by code that could not read the dial. The blocker
+    manifest then recorded a verdict on the engine's contents when the true
+    fact was that the engine was unreachable -- and the two want opposite
+    fixes (implement the power, versus repair the import). They are separate
+    strings now, and the import failure carries the exception so the manifest
+    says what actually broke.
     """
     try:
         if str(REPO) not in sys.path:      # run as a script from tools/
             sys.path.insert(0, str(REPO))
         from tier0.engine import refpowers
-    except Exception:                      # tools/ must run without tier0
-        return f"{power} is not on the SUPPORTED_POWERS dial"
+    except Exception as exc:               # tools/ must run without tier0
+        return (f"{power}: tier0 could not be imported, so this row's gap "
+                f"reason is UNKNOWN, not adjudicated "
+                f"({type(exc).__name__}: {exc})")
     key = _snake(power[:-len("Power")]) if power.endswith("Power") else None
     if key in refpowers.UNIMPLEMENTED:
         return f"{power} is UNIMPLEMENTED in tier0: " \

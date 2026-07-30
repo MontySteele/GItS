@@ -430,11 +430,21 @@ def build_reports(pool_filter: str | None = None,
             name = f"OFFICIAL:{name}"
         if pool_filter and pool_filter not in name:
             continue
+        # An unreadable pool is a HARD FAILURE, not a stderr note. It used to
+        # `continue`, which silently narrowed the gate's scope -- and because
+        # tier0/tests/test_distinctness_gate.py asserts "no NEW breaches" over
+        # whatever build_reports() returns, a pool that stopped parsing simply
+        # left the comparison and its breaches became a passing test. The one
+        # legitimate absence (a gitignored game_ref pool) is already handled by
+        # the os.path.exists check above; PRESENT-BUT-UNPARSEABLE is a defect.
         try:
             rows = load_pool(path)
         except Exception as exc:
-            print(f"  !! {name}: unreadable ({exc})", file=sys.stderr)
-            continue
+            raise RuntimeError(
+                f"{name}: pool file exists but could not be read ({path}): "
+                f"{type(exc).__name__}: {exc}. Refusing to report on a "
+                f"narrowed pool set -- the gate would pass by not looking."
+            ) from exc
         if rows:
             reports.append(analyze(name, rows))
             if by_rarity:

@@ -22,13 +22,193 @@ from tier0.content import loader
 REPO = Path(loader.__file__).resolve().parents[2]
 
 
+sys.path.insert(0, str(REPO / "tools"))
+import lint_strict_domination as dom     # noqa: E402
+
+
+def _sheet_paths():
+    return [loader.DOCS_DIR / s for s in loader.DOCS_CARD_SHEETS]
+
+
 def test_no_strict_domination_on_docs_sheets():
-    sheets = [str(loader.DOCS_DIR / s) for s in loader.DOCS_CARD_SHEETS]
+    sheets = [str(p) for p in _sheet_paths()]
     res = subprocess.run(
         [sys.executable, str(REPO / "tools" / "lint_strict_domination.py"),
          *sheets],
         capture_output=True, text=True)
     assert res.returncode == 0, res.stdout + res.stderr
+    # The gate must be running the CROSS-SHEET pass, not only the within-sheet
+    # one. Before 2026-07-29 the whole comparison was per-file, so a dominating
+    # pair split across two sheets was structurally invisible -- and the one
+    # that existed (Clorinde/Raiden) was caught by a human reading the set.
+    assert "CROSS-SHEET" in res.stdout, res.stdout
+    assert "NOT RUN" not in res.stdout, res.stdout
+
+
+# --- the reporting defect: CLEAN with no denominator ----------------------
+
+def test_the_summary_states_its_scope_not_just_a_verdict():
+    """`CLEAN: <sheet names>` claimed the sheets were clean when it meant
+    "the rows I compared had no findings" -- and it dropped basics, rows with
+    no `effects`, non-draftable rows and formula amounts before comparing.
+    A verdict without a denominator is the confident half of a partial check.
+    """
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_strict_domination.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+    assert "scope (rows this sweep has NO opinion about" in res.stdout
+    assert "compared card(s) in" in res.stdout
+    # Every sheet must own a scope line with a real denominator.
+    for p in _sheet_paths():
+        line = [ln for ln in res.stdout.splitlines() if p.name in ln
+                and "compared" in ln]
+        assert line, f"{p.name} has no scope line: {res.stdout}"
+        assert "/0 " not in line[0], line[0]
+
+
+def test_a_run_that_compares_nothing_refuses_to_print_clean(tmp_path):
+    """The dead-gate direction. A sheet of nothing but basics used to produce
+    the identical `CLEAN` line as a full sweep."""
+    empty = tmp_path / "basics-only.yaml"
+    empty.write_text(
+        '- {id: probe_strike, name: "Probe Strike", cost: 1, type: attack,\n'
+        '   rarity: basic, effects: [{op: damage, amount: 6, target: enemy}]}\n',
+        encoding="utf-8")
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_strict_domination.py"),
+         str(empty)], capture_output=True, text=True)
+    assert res.returncode == 1, res.stdout
+    assert "VACUOUS" in res.stdout
+    assert "CLEAN" not in res.stdout
+
+
+def test_within_only_says_the_cross_pass_did_not_run():
+    """A narrower run is fine; a narrower run that reads like a full one is
+    not. `--within-only` must name what it left unchecked."""
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_strict_domination.py"),
+         "--within-only"], capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+    assert "NOT RUN (--within-only)" in res.stdout
+    assert "WITHIN-SHEET ONLY" in res.stdout
+
+
+# --- the cross-sheet sweep, both directions -------------------------------
+
+def test_the_cross_sheet_sweep_catches_the_clorinde_raiden_shape(tmp_path):
+    """THE RED DEMONSTRATION, rebuilt from the case that needed a human.
+
+    docs/fontaine-rares-banner-sprint-log.md item 2: a Clorinde (Fontaine) /
+    Raiden (Inazuma) dominating pair "was flagged BY HAND because no lint could
+    see it". Two companion sheets, one shared reward pool, and a per-file lint.
+    The pair was resolved by buffing Raiden, so the live sheets no longer carry
+    it -- which is exactly why the demonstration is synthetic: the fix must be
+    provable without re-introducing the defect into shipped content.
+    """
+    a = tmp_path / "alpha-companions.yaml"
+    b = tmp_path / "beta-companions.yaml"
+    a.write_text(
+        '- {id: probe_big, name: "Probe Big", rarity: uncommon, cost: 2,\n'
+        '   type: attack, effects: [{op: damage, amount: 20, target: enemy}]}\n',
+        encoding="utf-8")
+    b.write_text(
+        '- {id: probe_small, name: "Probe Small", rarity: common, cost: 2,\n'
+        '   type: attack, effects: [{op: damage, amount: 18, target: enemy}]}\n',
+        encoding="utf-8")
+
+    lint = str(REPO / "tools" / "lint_strict_domination.py")
+    # WITHIN-SHEET: each file holds one card, so the old scope sees nothing.
+    within = subprocess.run([sys.executable, lint, "--within-only",
+                             str(a), str(b)], capture_output=True, text=True)
+    assert within.returncode == 0, within.stdout
+    assert "probe_big" not in within.stdout, (
+        "the within-sheet sweep cannot see a cross-sheet pair; if it does, "
+        "this test is no longer demonstrating the gap")
+
+    # CROSS-SHEET: the same two files, one finding.
+    across = subprocess.run([sys.executable, lint, str(a), str(b)],
+                            capture_output=True, text=True)
+    assert across.returncode == 1, across.stdout
+    assert "CROSS-SHEET" in across.stdout
+    assert "probe_big" in across.stdout and "probe_small" in across.stdout
+
+
+def test_two_personal_sheets_are_not_compared_across(tmp_path):
+    """The comparability rule the cross pass adds, in the negative.
+
+    Klee's cards and Kokomi's never appear in one run (`rewards.character_pool`
+    requires `c.character == character_id`), so a domination between them is
+    not a draft decision. Flagging it would be noise, and noise is how a gate
+    gets switched off.
+    """
+    a = tmp_path / "alpha-cards.yaml"
+    b = tmp_path / "beta-cards.yaml"
+    a.write_text(
+        '- {id: probe_big, name: "Probe Big", rarity: uncommon, cost: 2,\n'
+        '   type: attack, effects: [{op: damage, amount: 20, target: enemy}]}\n',
+        encoding="utf-8")
+    b.write_text(
+        '- {id: probe_small, name: "Probe Small", rarity: common, cost: 2,\n'
+        '   type: attack, effects: [{op: damage, amount: 18, target: enemy}]}\n',
+        encoding="utf-8")
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_strict_domination.py"),
+         str(a), str(b)], capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout
+    assert "probe_big" not in res.stdout
+    # ...and the pair-count says so, rather than leaving it to be inferred.
+    assert "0 co-draftable sheet pair(s)" in res.stdout
+
+
+def test_co_draftable_matches_the_pool_assembly():
+    assert dom.co_draftable("fontaine-companions.yaml",
+                            "inazuma-companions.yaml")
+    assert dom.co_draftable("klee-cards.yaml", "mondstadt-companions.yaml")
+    assert dom.co_draftable("mondstadt-companions.yaml", "klee-cards.yaml")
+    assert not dom.co_draftable("klee-cards.yaml", "kokomi-cards.yaml")
+
+
+def test_the_cross_sheet_allowlist_is_not_stale():
+    """CROSS_KNOWN is DEBT, exactly like test_distinctness_gate.KNOWN_FAILING.
+
+    The cross pass surfaced seven pre-existing pairs the day it was switched
+    on. Editing a printed card needs red-pen, so they print as notes and CI
+    stays green -- but an entry that outlives its pair becomes cover for the
+    next real cross-sheet domination on those ids. When one is errata'd, this
+    fails and the entry has to come out.
+    """
+    live = set()
+    for note in _cross_notes():
+        live.add(note)
+    stale = sorted(sorted(pair) for pair in dom.CROSS_KNOWN
+                   if not any(all(i in msg for i in pair) for msg in live))
+    assert not stale, (
+        "these CROSS_KNOWN pairs no longer dominate -- the errata landed, so "
+        f"DELETE them from the set: {stale}")
+
+
+def test_the_cross_sheet_allowlist_is_not_a_blanket():
+    """Each entry names two real card ids, so the set cannot be widened by a
+    wildcard or by an id that no longer exists."""
+    ids = {c["id"] for p in _sheet_paths() for c in dom.sheet_cards(p)[0]}
+    for pair in dom.CROSS_KNOWN:
+        assert len(pair) == 2, pair
+        missing = sorted(i for i in pair if i not in ids)
+        assert not missing, (
+            f"CROSS_KNOWN names {missing}, which is not a comparable card on "
+            "any sheet -- the entry is guarding nothing")
+
+
+def _cross_notes():
+    """Every cross-sheet domination message, with the allowlist LIFTED."""
+    saved = dom.CROSS_KNOWN
+    try:
+        dom.CROSS_KNOWN = set()
+        findings, notes, _ = dom.lint_cross_sheet(_sheet_paths())
+    finally:
+        dom.CROSS_KNOWN = saved
+    return findings + notes
 
 
 def test_sheet_comments_match_numbers_on_every_sheet():
@@ -204,6 +384,37 @@ def test_the_reserved_list_does_not_fail_the_names_it_protects(tmp_path):
     assert res.returncode == 0, (
         "the card that OWNS a card-owned reserved name must pass\n"
         + res.stdout + res.stderr)
+
+
+def test_the_unique_name_lint_declares_its_encoding(tmp_path):
+    """Tooling-hardening sprint item 6.
+
+    `load_cards` was `yaml.safe_load(open(path))` -- no encoding, no context
+    manager. This lint's whole job is comparing display NAMES for uniqueness,
+    and a name decoded through cp1252 is still perfectly unique, so the defect
+    would have landed as a green run rather than as a failure. `Salon Debut`'s
+    accented `e` is the live case.
+
+    Pinned in BOTH directions the way the encoding gate argues for: the
+    structural half (no undeclared read in the file) because the behavioural
+    half only shows the bug on a cp1252 machine, and the behavioural half
+    (a non-ASCII name survives the read) because the structural one cannot
+    prove the value came back right.
+    """
+    from tools import lint_text_encoding
+    assert "tools/lint_unique_names.py" not in lint_text_encoding.scan(), (
+        "lint_unique_names must declare encoding= on its sheet read")
+
+    sys.path.insert(0, str(REPO / "tools"))
+    import lint_unique_names
+    name = "Salon Début Probe"      # the live accented case, escaped
+    sheet = tmp_path / "accented.yaml"
+    sheet.write_text(
+        "cards:\n"
+        f'- {{id: probe_accent, name: "{name}", cost: 1,\n'
+        "   type: skill, rarity: common}\n", encoding="utf-8")
+    cards = lint_unique_names.load_cards(str(sheet))
+    assert [c["name"] for c in cards] == [name]
 
 
 def test_mirrored_constants_match_the_sim():

@@ -58,7 +58,13 @@ _TITLE_RE = re.compile(r'\(\s*"title"\s*,\s*"([^"]+)"\s*\)')
 
 
 def load_cards(path):
-    doc = yaml.safe_load(open(path))
+    # encoding EXPLICIT and a context manager, the repo's standard idiom
+    # (tools/lint_text_encoding.py enforces the first half): the sheets are
+    # UTF-8, the Windows default is cp1252, and `Salon Debut`'s accented `e`
+    # decodes to mojibake in a name this lint compares for UNIQUENESS -- a
+    # mangled name is still unique, so the defect would land as a pass.
+    with open(path, encoding="utf-8") as fh:
+        doc = yaml.safe_load(fh)
     cards = doc["cards"] if isinstance(doc, dict) and "cards" in doc else doc
     return cards or []
 

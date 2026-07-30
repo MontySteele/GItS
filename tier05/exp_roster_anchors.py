@@ -20,14 +20,23 @@ This script MEASURES. It does not rule. The standing salon question -- trim,
 or ratify as intentional -- is explicitly out of scope for this sprint and
 waits on these numbers plus a [USER] ruling.
 
+Every rate column carries a **95% Wilson interval** (`tier05.stats.wilson95`).
+Added by the Kokomi-instrument sprint (2026-07-29) for the reason the D12->D13
+table had to state in prose instead: at n=600 a +1.0pp winrate move sits inside
+overlapping intervals, and a table that prints the point estimate alone invites
+exactly the quotation the sim-hygiene log had to spend a paragraph forbidding.
+The interval is part of the row now, so a reader cannot get the point estimate
+without also getting its width.
+
 Usage: python -m tier05.exp_roster_anchors [--runs N] [--route NAME] [--jobs N]
+                                           [--seed N]
 """
 
 from __future__ import annotations
 
 import sys
 
-from tier05 import cells
+from tier05 import cells, stats
 
 # R68: seed, runs, route and loadout come from the ratified cell rather than
 # from local literals. They used to be `SEED = 11` / `RUNS = 600` here, which
@@ -68,8 +77,12 @@ def main(argv: list[str] | None = None) -> int:
                        f"{len(ARMS)} arms across the roster")
     print("  Every row below comes from THIS run. Nothing is quoted across a "
           "version bump.")
-    print(f"\n  {'character':>13} {'plan':>12} {'win':>7} {'act-1':>7} "
-          f"{'acts':>6} {'deck':>6} {'fights':>7}")
+    print("  Bracketed columns are 95% Wilson intervals. Two rows whose "
+          "intervals overlap")
+    print("  have NOT separated at this n, whatever their point estimates do.")
+    print(f"\n  {'character':>13} {'plan':>12} {'win':>7} {'win 95%':>14} "
+          f"{'act-1':>7} {'act-1 95%':>14} {'acts':>6} {'deck':>6} "
+          f"{'fights':>7}")
 
     for character, archetype in ARMS:
         # One Cell per arm: same seed, same runs, same route, same loadout,
@@ -77,10 +90,23 @@ def main(argv: list[str] | None = None) -> int:
         # name. `arm()` is the consolidated reducer (R68) -- this script,
         # the ghost check and the free-draft cell each had their own copy.
         a = base.but(character=character, archetype=archetype).arm()
+        n = len(a["results"])
         print(f"  {character:>13} {archetype:>12} {a['win']:>6.1%} "
-              f"{a['act1']:>6.1%} {a['acts']:>6.2f} {a['decksize']:>6.1f} "
-              f"{a['fights']:>7.1f}")
+              f"{_ci(a['win'], n):>14} {a['act1']:>6.1%} "
+              f"{_ci(a['act1'], n):>14} {a['acts']:>6.2f} "
+              f"{a['decksize']:>6.1f} {a['fights']:>7.1f}")
     return 0
+
+
+def _ci(rate: float, n: int) -> str:
+    """`[lo, hi]` in percentage points for a rate measured over `n` runs.
+
+    `arm()` reports rates, not counts, so the count is recovered as
+    `round(rate * n)` -- exact, because every rate it reports is a k/n over
+    that same n.
+    """
+    lo, hi = stats.wilson95(round(rate * n), n)
+    return f"[{lo:.1%}, {hi:.1%}]"
 
 
 if __name__ == "__main__":

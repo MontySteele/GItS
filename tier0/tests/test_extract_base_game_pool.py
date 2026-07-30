@@ -471,3 +471,43 @@ def test_read_decompiled_short_fails_closed(tmp_path):
     (tmp_path / "b" / "FooPower.cs").write_text("y")
     with pytest.raises(SystemExit):
         extract._read_decompiled_short(tmp_path, "FooPower")
+
+
+def test_an_unimportable_tier0_is_reported_as_such_not_as_a_dial_verdict(
+        monkeypatch):
+    """Tooling-hardening sprint item 4, red demonstration.
+
+    `_power_gap` wrapped `from tier0.engine import refpowers` in
+    `except Exception` and answered "{power} is not on the SUPPORTED_POWERS
+    dial" -- a claim about the dial's CONTENTS, made by code that had just
+    failed to open the dial. The blocker manifest then recorded an adjudicated
+    verdict where the truth was "unknown, the engine was unreachable", and the
+    two want opposite repairs (implement the power vs fix the import).
+
+    Simulated by making the import raise, which is the only way to reach the
+    branch in a repo where tier0 imports fine.
+    """
+    import builtins
+
+    real_import = builtins.__import__
+
+    def boom(name, *a, **kw):
+        if name.startswith("tier0.engine"):
+            raise ImportError("no module named tier0.engine (simulated)")
+        return real_import(name, *a, **kw)
+
+    monkeypatch.setattr(builtins, "__import__", boom)
+    reason = extract._power_gap("BarricadePower")
+    assert "could not be imported" in reason
+    assert "UNKNOWN" in reason
+    assert "SUPPORTED_POWERS dial" not in reason, (
+        "an unreachable engine must not be reported as a verdict on the dial")
+    assert "ImportError" in reason and "simulated" in reason
+
+
+def test_a_real_dial_gap_still_reads_as_a_dial_gap():
+    """The other half: with tier0 importable, an unsupported power keeps its
+    original message. Separating the two reasons must not lose either one."""
+    reason = extract._power_gap("NoSuchInventedPower")
+    assert "is not on the SUPPORTED_POWERS dial" in reason
+    assert "could not be imported" not in reason

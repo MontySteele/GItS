@@ -21,6 +21,11 @@ Rules, each a defect that actually shipped in the first art sprint:
       BOTH axes. Added after `Talent <Card Name>.png` sigils (128x128, exact
       name matches for five Furina rares) were nearly promoted as portraits;
       L3 missed them because it keys on the declared register.
+  L10 an effective pick's raw source must be DECODABLE if it is present.
+      Added 2026-07-29: L8 and the L6 warn both skipped an unreadable file,
+      so the one source they could not measure was the one they said nothing
+      about. Absent Pillow and absent raw file stay silent skips; present-
+      and-unopenable is a finding.
   L7  source_group siblings must differ by CROP. Added for the Furina pass
       (furina-art-pass-requirements.md 9.3): Companion characters get one
       strong source family and three deliberately different crops, which L1
@@ -326,6 +331,7 @@ def lint(rows) -> list[str]:
         if r["source"] == "gif" and r["frame"] is None:
             problems.append(f"L5 {r['asset_id']}: gif pick without a frame_pct")
 
+    problems.extend(undecodable(effective))
     problems.extend(undersized(effective))
     problems.extend(banned_families(effective))
     problems.extend(generator_owned(rows))
@@ -430,6 +436,49 @@ def banned_families(effective) -> list[str]:
     return problems
 
 
+def undecodable(effective) -> list[str]:
+    """L10: an effective pick whose raw source is PRESENT and un-openable.
+
+    Both image rules used to `continue` on any `Image.open` failure, so the
+    single input neither of them could measure was the one input they reported
+    nothing about: a truncated download, a wiki HTML error page saved under a
+    .png name, or a WEBP with no decoder in this Pillow build all passed L8
+    (undersize) and the L6 aspect warn in silence.
+
+    The DOCUMENTED skips are kept and are different in kind, because both are
+    facts about the machine rather than about the pick:
+
+      - no Pillow -> the plan must stay lintable without an image decoder;
+      - no raw file -> the plan must stay lintable BEFORE a fetch.
+
+    "The file is here and it is not an image" is neither. It is a finding.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return []
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from art_fetch import rawname
+
+    raw_dir = Path(__file__).resolve().parent.parent / "art" / "raw"
+    problems = []
+    for r in effective:
+        src = raw_dir / rawname(r["title"])
+        if not src.exists():
+            continue
+        try:
+            Image.open(src).size
+        except Exception as exc:
+            problems.append(
+                f"L10 {r['asset_id']}: raw source '{src.name}' exists but "
+                f"cannot be decoded ({type(exc).__name__}: {exc}) -- L8 and "
+                f"the L6 warn cannot measure it, so nothing about this pick "
+                f"is checked. Re-fetch it (a truncated or HTML-error download "
+                f"is the usual cause) or drop the row."
+            )
+    return problems
+
+
 def undersized(effective) -> list[str]:
     """L8: an effective card pick whose source is smaller than the card BOTH ways.
 
@@ -481,7 +530,7 @@ def undersized(effective) -> list[str]:
         try:
             w, h = Image.open(src).size
         except Exception:
-            continue
+            continue            # already a FINDING -- see undecodable() (L10)
         if w < r["w"] and h < r["h"]:
             msg = (
                 f"L8 {r['asset_id']}: source '{r['title']}' is {w}x{h}, "
@@ -530,7 +579,7 @@ def clip_warnings(effective) -> list[str]:
             box = (img.getchannel("A").point(lambda v: 255 if v > 10 else 0)
                       .getbbox())
         except Exception:
-            continue
+            continue            # already a FINDING -- see undecodable() (L10)
         if not box:
             continue
         cw, ch = box[2] - box[0], box[3] - box[1]

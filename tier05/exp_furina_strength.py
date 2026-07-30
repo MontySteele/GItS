@@ -762,22 +762,41 @@ def s4(runs: int = RUNS) -> None:
         ("real_ironclad", "real_ironclad", "generic", "generic"),
     )
     print(f"\n  {'arm':<20} {'winrate':>9} {'acts':>6} {'vs ref_IC':>10}")
+    # A failing arm used to print "SKIPPED" ABOVE the table and then vanish
+    # from `rows`, so the comparison a reader quotes was computed over the
+    # survivors with nothing in it saying an arm was gone. On the arm that
+    # matters most that is worse than a crash: lose `ref_ironclad` and every
+    # `vs ref_IC` column silently becomes `--` while the winrates still look
+    # authoritative. A missing arm now holds its ROW in the table.
     rows = []
+    missing: list[tuple[str, str]] = []
     for label, character, archetype, pilot_id in arms:
         try:
             results = model.run_many(
                 character, archetype, pilot_id, draft.assigned_policy,
                 runs, SEED, grant_relics=True, grant_potions=True)
         except Exception as exc:                     # noqa: BLE001
-            print(f"  {label:<20} SKIPPED: {exc}")
+            missing.append((label, f"{type(exc).__name__}: {exc}"))
             continue
         rows.append((label,
                      sum(r.won for r in results) / len(results),
                      sum(r.acts_completed for r in results) / len(results)))
     ref = next((wr for label, wr, _ in rows if label == "ref_ironclad"), None)
-    for label, wr, acts in rows:
+    failed = dict(missing)
+    for label, *_ in arms:
+        if label in failed:
+            print(f"  {label:<20} {'MISSING':>8} {'--':>6} {'--':>10}"
+                  f"   <- ARM FAILED: {failed[label]}")
+            continue
+        wr, acts = next((w, a) for lb, w, a in rows if lb == label)
         ratio = f"{wr / ref:>9.1f}x" if ref else "        --"
         print(f"  {label:<20} {wr:>8.1%} {acts:>6.2f} {ratio}")
+    if missing:
+        print(f"\n  {len(missing)} of {len(arms)} arms MISSING -- the table "
+              f"above is NOT the full comparison and the 'vs ref_IC' column "
+              f"is meaningless if ref_ironclad is one of them:")
+        for label, why in missing:
+            print(f"    {label}: {why}")
 
 
 def main(argv: list[str]) -> None:

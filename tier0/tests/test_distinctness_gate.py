@@ -12,6 +12,8 @@ reason: an official anchor can never be "known failing", it is the floor.
 """
 import os
 
+import pytest
+
 from tools import card_distinctness_report as cdr
 
 # Known debt at ratification time (docs/a2-gate-ratification-2026-07-27.md,
@@ -59,3 +61,37 @@ def test_the_curated_list_names_only_house_pools():
     committed = {os.path.basename(p).replace("-cards.yaml", "")
                  .replace(".yaml", "") for p in cdr.SHEETS}
     assert {pool for pool, _ in KNOWN_FAILING} <= committed
+
+
+def test_an_unreadable_pool_is_a_hard_failure(tmp_path, monkeypatch):
+    """The red demonstration for the tooling-hardening sprint, item 3.
+
+    `build_reports` used to print `!! <pool>: unreadable` to stderr and
+    `continue`. That silently narrowed the gate's scope, and combined with
+    `test_no_new_gate_breaches` above -- which asserts over whatever pools
+    build_reports happens to return -- a pool that stopped parsing turned its
+    own breaches into a PASS. A gate that gets greener the less it can read is
+    the worst shape a gate can have.
+
+    Absence is still fine and is checked below: a gitignored game_ref pool that
+    is simply not on disk is a legitimate no-op. Present-but-unparseable is not.
+    """
+    bad = tmp_path / "broken-cards.yaml"
+    bad.write_text("cards: [ this: is: not: yaml\n", encoding="utf-8")
+    monkeypatch.setattr(cdr, "SHEETS", [str(bad)])
+    monkeypatch.setattr(cdr, "GAME_REF", [])
+
+    with pytest.raises(RuntimeError) as exc:
+        cdr.build_reports()
+    assert "could not be read" in str(exc.value)
+    assert "broken" in str(exc.value)
+
+
+def test_a_pool_file_that_is_absent_is_still_a_no_op(tmp_path, monkeypatch):
+    """The other half, and the reason the check keys on PRESENT-and-unreadable.
+
+    game_ref pools are gitignored, so CI genuinely has none of them; skipping a
+    path that does not exist is the documented contract, not a narrowing."""
+    monkeypatch.setattr(cdr, "SHEETS", [str(tmp_path / "nope-cards.yaml")])
+    monkeypatch.setattr(cdr, "GAME_REF", [])
+    assert cdr.build_reports() == []

@@ -37,6 +37,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from tier0.content import loader          # noqa: E402
+from tier0.content import upgrades        # noqa: E402
 from art_fetch import read_plan           # noqa: E402
 
 RARITY_ORDER = ["basic", "common", "uncommon", "rare"]
@@ -174,6 +175,20 @@ def ingame_html(text: str) -> str:
     return out.replace("\n", "<br>")
 
 
+def _upgrade_error(exc: BaseException) -> str:
+    """The visible marker that replaces a swallowed upgrade-render failure.
+
+    Rendered rather than raised on purpose: one malformed `+` entry must not
+    take the whole gallery down (the page's job is to show the set to a human,
+    and 300 good tiles beat a traceback). But it must not be INVISIBLE either
+    -- a blank where an upgrade line belongs reads as "this card has no
+    upgrade", which is a different and false claim.
+    """
+    return ('<div class="upg-err">&#9888; upgrade render failed: '
+            f'{html.escape(type(exc).__name__)}: {html.escape(str(exc))}'
+            '</div>')
+
+
 def tile(card, row, covered: bool, inline: bool, out_dir: Path,
          shipped: dict, blocked: dict) -> str:
     state = "rehunt" if covered else "unplanned"
@@ -201,19 +216,37 @@ def tile(card, row, covered: bool, inline: bool, out_dir: Path,
 
     cost = "X" if card.cost == "X" else card.cost
     effs = "".join(f"<li>{html.escape(l)}</li>" for l in effect_lines(card))
-    up_html = ""
+    up_html, up = "", None
+    # `except Exception: pass` used to wrap this whole block, which conflated
+    # two facts a REVIEW surface must never conflate: "this card has no
+    # upgrade" (ordinary -- basics, unexpressible deltas, UNAPPLIABLE) and
+    # "rendering its upgrade THREW" (a defect). Both printed the same blank,
+    # so a broken `+` entry under-reported as an unupgradeable one on the page
+    # a human reads to decide what shipped. Absence stays silent; a throw now
+    # prints an explicit marker.
     try:
-        up = loader.get_card(card.id + "+")
-        base_lines = set(effect_lines(card))
-        changed = [l for l in effect_lines(up) if l not in base_lines]
-        if str(up.cost) != str(card.cost):
-            changed.insert(0, f"cost {card.cost} -> {up.cost}")
-        if changed:
-            up_html = ('<div class="upg">&#8679; ' +
-                       " &middot; ".join(html.escape(l) for l in changed) +
-                       "</div>")
-    except Exception:
-        pass
+        up = loader.get_card(card.id + upgrades.SUFFIX)
+    except KeyError:
+        pass                        # no such base card / no upgraded form
+    except ValueError as exc:
+        # apply_upgrade raises ValueError for BOTH "there is no upgrade here"
+        # and "the delta is malformed". Only the first is a non-event.
+        if "no applicable upgrade" not in str(exc):
+            up_html = _upgrade_error(exc)
+    except Exception as exc:        # noqa: BLE001 - report, never swallow
+        up_html = _upgrade_error(exc)
+    if up is not None:
+        try:
+            base_lines = set(effect_lines(card))
+            changed = [l for l in effect_lines(up) if l not in base_lines]
+            if str(up.cost) != str(card.cost):
+                changed.insert(0, f"cost {card.cost} -> {up.cost}")
+            if changed:
+                up_html = ('<div class="upg">&#8679; ' +
+                           " &middot; ".join(html.escape(l) for l in changed) +
+                           "</div>")
+        except Exception as exc:    # noqa: BLE001 - report, never swallow
+            up_html = _upgrade_error(exc)
     ship = shipped.get(card.id)
     if ship and ship["description"]:
         ig_html = (f'<div class="ig-text">{ingame_html(ship["description"])}</div>'
@@ -257,6 +290,7 @@ def tile(card, row, covered: bool, inline: bool, out_dir: Path,
 
 CSS = """
 .chips{margin:6px 0}.chip{background:#23252c;color:#cfd3da;border:1px solid #3a3d46;border-radius:12px;padding:2px 10px;margin:2px;cursor:pointer;font-size:12px}.chip:hover{background:#2f323b}.upg{color:#7fc97f;font-size:12px;margin:2px 8px 6px}
+.upg-err{color:#f0a0a0;background:#3a1f1f;border-left:2px solid #d05a5a;font-size:12px;margin:2px 8px 6px;padding:3px 6px}
 :root{color-scheme:dark}
 body{background:#15161a;color:#e6e6e6;font:13px/1.45 system-ui,sans-serif;margin:0;padding:20px}
 h1{font-size:20px;margin:0 0 4px}

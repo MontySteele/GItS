@@ -51,6 +51,14 @@ class FightStats:
     control_negated: float = 0.0    # action-equivalents negated by
                                     # COMPANION-sourced control (frozen
                                     # attack = 0.5; future full stuns = 1.0)
+    # --- HP trajectory (Kokomi stability instrument, 2026-07-29). Player HP
+    # at the END of each round, in round order; `hp_start` is the value before
+    # round 1, so the full trajectory is [hp_start, *hp_by_round]. A LIST and
+    # not a turn-keyed dict like damage_by_turn: the ordering IS the datum, and
+    # merging staged fights is then concatenation rather than key arithmetic.
+    # Read only by tier05.run_metrics.trajectory_profile -- REPORTED, never
+    # banded (band declaration is a [USER] ruling; R51/D5).
+    hp_by_round: list[int] = field(default_factory=list)
     flags: list[str] = field(default_factory=list)
 
     @property
@@ -70,6 +78,10 @@ def merge_stages(stages: list["FightStats"]) -> "FightStats":
             merged.damage_by_turn[t + offset] = v
         for t, v in s.energy_by_turn.items():
             merged.energy_by_turn[t + offset] = v
+        # Concatenation, not key-offsetting: a staged gauntlet's HP curve runs
+        # continuously across the stage break (stage 2 opens on stage 1's HP),
+        # so the rounds simply follow one another.
+        merged.hp_by_round = list(merged.hp_by_round) + list(s.hp_by_round)
         merged.turns += s.turns
         merged.hp_end = s.hp_end
         merged.total_damage_dealt += s.total_damage_dealt
@@ -110,6 +122,7 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
     reactions = reaction_dmg = auras_wasted = sleeps = 0
     control_negated = 0.0
     flags: list[str] = []
+    hp_by_round: list[int] = []
     won = False
     turns = state.turn
 
@@ -168,6 +181,8 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
             reaction_dmg += int(ev["amp_delta"])
         elif e == "aura_wasted":
             auras_wasted += 1
+        elif e == "round_hp":
+            hp_by_round.append(ev["hp"])
         elif e == "degeneracy":
             flags.append(ev["kind"])
         elif e == "amp_stack_warning":
@@ -206,6 +221,7 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
         charge_gained=charge_gained,
         engine_closure_turns=engine_closure_turns, regrets=regrets,
         enemy_actions=enemy_actions, control_negated=control_negated,
+        hp_by_round=hp_by_round,
         flags=sorted(set(flags)))
 
 

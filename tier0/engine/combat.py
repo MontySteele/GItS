@@ -757,19 +757,32 @@ def surface_innate(draw_pile: list) -> None:
 def _run_rounds(state: CombatState, pilot: Pilot) -> None:
     while not state.over and state.turn < C.MAX_TURNS:
         _player_turn(state, pilot)
-        if state.over:
-            break
-        for enemy in list(state.enemies):
-            _enemy_turn(state, enemy)
-            _settle_phases(state)    # FlameBarrier retaliation can drop a
-            #                          phased boss mid-enemy-round
-            if state.over:
-                break
-        # AfterSideTurnEnd(side == Enemy): the once-per-round enemy tick. This
-        # is where FlameBarrier is removed and Colossus decrements -- doing
-        # either at the PLAYER's turn end instead makes Flame Barrier do
-        # literally nothing.
-        refpowers.after_enemy_side_turn_end(state)
+        if not state.over:
+            for enemy in list(state.enemies):
+                _enemy_turn(state, enemy)
+                _settle_phases(state)    # FlameBarrier retaliation can drop a
+                #                          phased boss mid-enemy-round
+                if state.over:
+                    break
+            # AfterSideTurnEnd(side == Enemy): the once-per-round enemy tick.
+            # This is where FlameBarrier is removed and Colossus decrements --
+            # doing either at the PLAYER's turn end instead makes Flame Barrier
+            # do literally nothing.
+            refpowers.after_enemy_side_turn_end(state)
+        # INSTRUMENT ONLY, log-side, no game state read or written: the
+        # authoritative end-of-round player HP, for the HP-trajectory half of
+        # Kokomi's stability instrument (R51 / D5). It is sampled HERE rather
+        # than derived in metrics.py from `player_hit` + `heal`, because HP also
+        # moves through paths that emit neither -- effects.py's block-ignoring
+        # self-damage, the Encore shortfall in resources.py, and the Fairy
+        # revive -- so a derived trajectory would be quietly wrong on exactly
+        # the cards a stability reading is about. `state.player.hp` is the only
+        # thing that cannot disagree with itself.
+        #
+        # The `if not state.over` restructure above is control-flow-identical to
+        # the `break` it replaced (the loop condition re-tests `state.over`);
+        # it exists so the final, possibly lethal, round is sampled too.
+        state.emit("round_hp", hp=max(0, state.player.hp))
 
 
 def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
