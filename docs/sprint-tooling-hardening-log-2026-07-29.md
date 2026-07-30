@@ -1,5 +1,15 @@
 # Tooling hardening sprint — 2026-07-29
 
+> **Provenance note.** This sprint ran concurrently with the Kokomi instrument
+> sprint in one working tree. Its file contents were swept into commit
+> `4ee6881` ("The fanfare +1.0 was noise") by that sprint's broad `git add`
+> before this one could commit its own; the code is identical either way, and
+> this commit carries the narrative that belongs with it. Files owned by this
+> sprint: `tools/{art_lint,card_distinctness_report,extract_base_game_pool,
+> lint_strict_domination,lint_text_encoding,lint_unique_names,
+> render_card_gallery}.py`, `tier05/exp_furina_strength.py` (S4 reporting
+> only), and their tests.
+
 Eight items from a read-only sweep of `tools/`, all one shape: **a check that
 skipped its own inputs, or narrowed its own scope, and still printed the same
 confident line as a full run.** The house rule this sprint enforces is already
