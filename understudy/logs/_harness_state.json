@@ -1,0 +1,16 @@
+{
+ "seed": "SSRWEGLNRG",
+ "decision_index": 0,
+ "started_ts": 1785887094.044082,
+ "speed_at_start": {
+  "status": "ok",
+  "message": "current",
+  "enabled": true,
+  "fast_mode": "Instant",
+  "time_scale": 3,
+  "original_fast_mode": "Fast",
+  "original_time_scale": 1
+ },
+ "last_state_chars": 290,
+ "last_read_ts": 1785887094.3056064
+}
