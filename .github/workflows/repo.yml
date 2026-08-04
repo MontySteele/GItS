@@ -71,6 +71,13 @@ jobs:
         run: python tools/lint_ancient_coverage.py
       - name: roster registry
         run: python tools/lint_roster_registry.py
+      # Understudy 2026-08-04. vendor/ carries third-party source pinned to an
+      # exact upstream commit; this asserts the tree still is what the
+      # provenance note says it is, in both directions. Cheap, and the one
+      # failure it prevents (running a pre-v0.107 bridge against a v0.107.1
+      # game) is invisible until the game is already booting.
+      - name: vendor pin
+        run: python tools/lint_vendor_pin.py
       # art_coverage runs WITHOUT --strict: ImageGen/ is gitignored Tier F and
       # absent here, so the bill is empty by construction. It is present to
       # prove the tool still runs, not to assert coverage -- asserting coverage
