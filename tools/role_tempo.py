@@ -162,11 +162,14 @@ GENERATES = {
     "raise_fanfare_cap": "fanfare",
     "gain_fanfare_floor": "fanfare",
     "burst_energy": "burst",
-    # Kokomi's exhaust verb is a Charge (and Burst) funnel on the relic, never
-    # printed on a card -- so an exhaust op IS a charge carrier even though no
-    # row says `gain_charge`. Recorded here because it is invisible on the
-    # face and would otherwise read as a pure cost.
-    "exhaust_from": "charge",
+}
+# Tokens that only exist for ONE character, keyed by the sheet they live on.
+# Kokomi's exhaust verb is a Charge (and Burst) funnel on the relic, never
+# printed on a card -- so an exhaust op IS a charge carrier even though no row
+# says `gain_charge`. Klee's dodge_roll also exhausts and it means nothing at
+# all there, which is exactly why this table is scoped and GENERATES is not.
+CHARACTER_GENERATES = {
+    "kokomi": {"exhaust_from": "charge"},
 }
 CONSUMES = {
     "detonate": "bomb",
@@ -406,8 +409,9 @@ def _power_token(power: str) -> str | None:
     return None
 
 
-def scan_row(row: dict) -> dict:
+def scan_row(row: dict, character: str = "") -> dict:
     """Everything the classifiers need, read once off one card row."""
+    extra_generates = CHARACTER_GENERATES.get(character, {})
     effects = list(row.get("effects") or [])
     effects += list(row.get("sly") or [])
     direct: set[str] = set()
@@ -492,6 +496,8 @@ def scan_row(row: dict) -> dict:
 
         if op in GENERATES:
             generates.add(GENERATES[op])
+        if op in extra_generates:
+            generates.add(extra_generates[op])
         if op in CONSUMES:
             # A CONSUME op has no number of its own -- `spend_encore 5` then
             # `block 10` is one bargain across two lines -- so it is credited
@@ -528,6 +534,7 @@ def scan_row(row: dict) -> dict:
         "generates": generates,
         "reads": reads,
         "read_roles": read_roles,
+        "card_level_reads": card_level_reads,
         "aoe": aoe,
         "unconditional_body": unconditional_body,
         "gated_effect": gated_effect,
@@ -642,23 +649,7 @@ def companion_pool_roles() -> dict[str, set]:
     return out
 
 
-def classify_pool(rows: list[dict]) -> tuple[dict[str, dict], dict]:
-    """Full classification for one character's rows, tag-through applied.
-
-    Returns (per-card scans, the token payoff table) -- the second half is a
-    deliverable in its own right: it is the hand-auditable tag-through table
-    the brief asks for, and it is what A-G1 reviews.
-    """
-    scans = {}
-    for row in rows:
-        scan = scan_row(row)
-        scan["fight"] = fight_bands(row, scan)
-        scan["run"] = run_bands(row, scan)
-        scans[row["id"]] = scan
-
-    payoffs = derive_meter_payoffs(scans)
-    payoffs.update(entity_payoffs(companion_pool_roles()))
-
+def _apply_inheritance(scans: dict[str, dict], payoffs: dict) -> None:
     for scan in scans.values():
         inherited = {b: set() for b in FIGHT_BANDS}
         for token in scan["generates"]:
@@ -678,4 +669,44 @@ def classify_pool(rows: list[dict]) -> tuple[dict[str, dict], dict]:
         scan["cells"] = cells
         scan["solve"] = sorted(
             (scan["direct"] | set().union(*inherited.values())) or {"utility"})
+
+
+def classify_pool(rows: list[dict],
+                  character: str = "") -> tuple[dict[str, dict], dict]:
+    """Full classification for one character's rows, tag-through applied.
+
+    Returns (per-card scans, the token payoff table) -- the second half is a
+    deliverable in its own right: it is the hand-auditable tag-through table
+    the brief asks for, and it is what A-G1 reviews.
+
+    TWO PASSES, because tag-through chains. Klee's Burst is spent on a card
+    whose whole body is a Spark engine: pass one sees the Burst card deliver
+    nothing of its own and files Burst as cashing into nothing, which is a
+    false finding of exactly the kind this lint must not manufacture. Pass two
+    re-derives the meters with each card's INHERITED roles folded into what it
+    delivers, so a two-hop chain (burst -> spark -> damage) resolves. Only
+    CARD-LEVEL reads are expanded this way; per-effect attribution is left
+    alone, so a card cannot launder an unrelated line into a meter it happens
+    to read on another one.
+    """
+    scans = {}
+    for row in rows:
+        scan = scan_row(row, character)
+        scan["fight"] = fight_bands(row, scan)
+        scan["run"] = run_bands(row, scan)
+        scans[row["id"]] = scan
+
+    entities = entity_payoffs(companion_pool_roles())
+    payoffs = derive_meter_payoffs(scans)
+    payoffs.update(entities)
+    _apply_inheritance(scans, payoffs)
+
+    for scan in scans.values():
+        gained = set().union(*scan["inherited"].values()) - {"utility"}
+        for token in scan["card_level_reads"]:
+            if gained:
+                scan["read_roles"].setdefault(token, set()).update(gained)
+    payoffs = derive_meter_payoffs(scans)
+    payoffs.update(entities)
+    _apply_inheritance(scans, payoffs)
     return scans, payoffs
