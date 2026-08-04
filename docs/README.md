@@ -37,6 +37,7 @@ otherwise).
 | `klee-character-design.md` | Klee's identity charter (amended in place through pass 3). |
 | `furina-kickoff-v0.1.md` | Furina's governing declaration doc (amended through 2026-07-25). |
 | `kokomi-kickoff-v1.md` | Kokomi's identity-law charter (Laws 1–4 are live and machine-checked; its *numeric* sections are superseded by R56+ — read numbers from the sheets). |
+| `axis-validity-session-charter.md` | The Axis-Validity charter (RATIFIED 2026-08-04, AV-G2 countersigned). Grades R87(1), revises the same-y-pools diagnosis against canon, and opens Tracks A/B/C. A-G1 and B-G1 are still open gates. |
 
 ### Open sprints and live queues
 | doc | what it is |
@@ -49,6 +50,8 @@ otherwise).
 | `tier05-perf-and-ironclad-act3-notes.md` | Perf pass record; kept current for §1.5.2's open items (out-of-scale boss audit lives only here). |
 | `tech-debt-audit-2026-07-26.md` | The architecture audit; kept current for §9 (the big-push sequencing, with D3's pin-batch pull marked in place) and §10, the horizon list of open design sessions. |
 | `epoch-1-log-2026-07-26.md` | EPOCH 1's landing record: what moved, what was archived, and the graded predictions. The current canonical-cell baseline lives here. |
+| `track-a-kickoff-brief.md` | Track A's execution brief (T1–T4). Executed 2026-08-04. |
+| `sprint-axis-validity-track-a-log-2026-08-04.md` | **OPEN, and the doc of record for P1's binding null.** §0 holds the graded predictions; §3 diagnoses why the null fired; §4 is the stop-and-surface list; §6 is what [USER] gate A-G1 most needs to look at. |
 
 ### Live references
 | doc | what it is |
@@ -57,6 +60,11 @@ otherwise).
 | `upgrade-conventions.md` | Mined StS2 upgrade grammar (durable) + house rules (see dated correction note in-file). |
 | `calibration-notes.md` | Battery-calibration law ("battery adapts to the roster") + the parked A3/A4 axis questions. |
 | `klee-real-battery-calibration.md` | The real-Ironclad baseline pipeline reference (both reproduce commands live). |
+| `role-tempo-baseline.md` | The five canon pools' (solve × tempo × rarity) matrix, DLL-derived. Percentages only — no canon card text is ever committed (.gitignore:28). Also holds the wiki-vs-DLL count reconciliation. |
+| `role-tempo-floors.yaml` | The machine-readable coverage floors (min-of-canon over the cells all five pools are non-zero in). Read by `tools/lint_role_tempo_coverage.py`. |
+| `role-tempo-review.tsv` | **PROVISIONAL.** Suggested `solve`/`tempo_band` for all 219 GItS cards, beside the authored tags. Nothing here has landed on a sheet; [USER] gate A-G1 closes first. |
+| `role-tempo-tagthrough.md` | **PROVISIONAL.** Token → roles-cashed-into, per fight band. The artifact A-G1 reviews: a token's payoff set is a design fact. |
+| `role-tempo-debt.tsv` | The 30 pinned coverage gaps the lint's `--gate` measures new findings against. Delete it with P1's null. |
 | `art-sprint-spec.md` | The art pipeline regime: tiers, SOURCES.tsv/plan.tsv discipline, lint gates. |
 | `art-asset-manifest.md` | The per-character asset bill ("AS SHIPPED" maintained in place). |
 | `furina-art-pass-requirements.md` | Furina's art bill/spec (count delegated to `tools/art_coverage.py`). |

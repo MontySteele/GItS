@@ -69,6 +69,16 @@ jobs:
         run: python tools/lint_pool_membership.py
       - name: ancient coverage
         run: python tools/lint_ancient_coverage.py
+      # Axis-Validity Track A, 2026-08-04. Both run on a fresh clone by
+      # construction: the floors are a committed percentages-only file and the
+      # tags are a committed review file, so neither needs game_ref/. The
+      # coverage gate runs in --gate mode against the pinned debt list while
+      # P1's binding null is open -- see
+      # docs/sprint-axis-validity-track-a-log-2026-08-04.md §0 and §5.
+      - name: role/tempo review artifacts current
+        run: python tools/suggest_role_tempo_tags.py --check
+      - name: role/tempo coverage (floors only, against the debt list)
+        run: python tools/lint_role_tempo_coverage.py --gate
       - name: roster registry
         run: python tools/lint_roster_registry.py
       # art_coverage runs WITHOUT --strict: ImageGen/ is gitignored Tier F and

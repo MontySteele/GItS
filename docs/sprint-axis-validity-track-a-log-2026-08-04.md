@@ -1,0 +1,245 @@
+# Track A sprint log — Axis-Validity, 2026-08-04
+
+Charter: `docs/axis-validity-session-charter.md` (RATIFIED, AV-G2 countersigned).
+Brief: `docs/track-a-kickoff-brief.md`. Worktree-per-session (G4).
+
+---
+
+## §0. THE GRADES, RECORDED BEFORE ANYTHING ELSE WAS READ INTO THE RUN
+
+The brief's instruction is explicit — *record grades in the sprint log before
+reading anything else into the results* — so this section was written from the
+first run's raw output and nothing below it was allowed to edit it afterwards.
+
+Instrument: `tools/lint_role_tempo_coverage.py`, first run, against
+`docs/role-tempo-floors.yaml` (min-of-canon, five DLL-extracted pools) and the
+provisional tags in `docs/role-tempo-review.tsv`.
+
+### P1 — **NULL. THE BINDING NULL HAS FIRED. TRACK A STOPS HERE.**
+
+> *P1: first run fails Furina on (fanfare × frontload × fight-early) and
+> (fanfare × scaling × fight-late). **Binding null:** if these cells pass as
+> currently authored, the taxonomy is mis-specified and Track A returns to
+> design.*
+
+Verbatim, from the run:
+
+```
+  furina/fanfare  (31 cards)
+      ok     block|early         64.5%  floor 10.2%
+      ok     block|late          64.5%  floor 10.2%
+      ok     block|mid           64.5%  floor  5.7%
+      ok     frontload|early     80.6%  floor 21.6%
+      ok     frontload|late      87.1%  floor 21.6%
+      ok     frontload|mid       87.1%  floor 15.9%
+      ok     scaling|late        58.1%  floor 21.6%
+      ok     scaling|mid         45.2%  floor  4.5%
+      ok     velocity|early      61.3%  floor  4.6%
+      ok     velocity|late       61.3%  floor  6.8%
+      ok     velocity|mid        61.3%  floor 10.2%
+```
+
+Both named cells **PASS**, and not narrowly: `frontload|early` clears its floor
+by 59 percentage points and `scaling|late` by 36. **Furina fails nothing at
+all** — all four of her declared archetypes clear all eleven mandatory cells.
+
+Per the brief this is a STOP. No floor was adjusted, no cell was re-derived,
+and no attempt was made to reach the predicted result. §3 below is diagnosis of
+the null, not a repair of it.
+
+### P2 — **CONFIRMED.**
+
+> *P2: at least one Klee bomb cell and one Kokomi cell fail.*
+
+Klee's bomb archetype is `demolition`, and it fails **seven** cells:
+
+```
+    klee/demolition block|early          3.6%  <  floor 10.2%
+    klee/demolition block|late           0.0%  <  floor 10.2%
+    klee/demolition block|mid            0.0%  <  floor  5.7%
+    klee/demolition frontload|early      3.6%  <  floor 21.6%
+    klee/demolition scaling|late        14.3%  <  floor 21.6%
+    klee/demolition scaling|mid          0.0%  <  floor  4.5%
+    klee/demolition velocity|mid         7.1%  <  floor 10.2%
+```
+
+Kokomi fails **eight** across all four declared archetypes:
+
+```
+    kokomi/assist     block|late           0.0%  <  floor 10.2%
+    kokomi/assist     block|mid            0.0%  <  floor  5.7%
+    kokomi/assist     scaling|mid          0.0%  <  floor  4.5%
+    kokomi/commander  scaling|mid          0.0%  <  floor  4.5%
+    kokomi/generic    velocity|late        0.0%  <  floor  6.8%
+    kokomi/generic    velocity|mid         0.0%  <  floor 10.2%
+    kokomi/priest     velocity|late        4.0%  <  floor  6.8%
+    kokomi/priest     velocity|mid         4.0%  <  floor 10.2%
+```
+
+Total: **30 (character, archetype, cell) findings across Klee and Kokomi, and
+zero on Furina.**
+
+### P3 — metric reading, not a gate
+
+> *P3: Klee multi-solve rises toward the canon floor in her rework — currently
+> 9% vs canon range 29% (Regent) to 51% (Ironclad).*
+
+The rework has not run, so this is a baseline reading only. Two numbers, and
+they are not the same measurement:
+
+| pool | AUTHORED multi-solve % | multi-solve % under this taxonomy |
+|---|---|---|
+| Klee | 9.2 | 44.7 |
+| Furina | 40.2 | 64.6 |
+| Kokomi | 55.7 | 57.4 |
+| canon: Regent | — | 27.3 |
+| canon: Silent | — | 37.5 |
+| canon: Ironclad | — | 46.0 |
+| canon: Necrobinder | — | 48.9 |
+| canon: Defect | — | 51.1 |
+
+The authored column reproduces the charter's figure exactly (Klee 9.2 ≈ 9%),
+which confirms both routes are counting the same sheets. The right-hand column
+is the one the lint uses, and it applies tag-through to both sides, so it is
+the apples-to-apples comparison.
+
+**On that comparison Klee reads 44.7% and is INSIDE the canon range, above
+Regent (27.3) and Silent (37.5).** P3's premise — Klee sitting below the canon
+floor and needing to rise toward it — does not survive the taxonomy it was
+registered against. It is not graded as failed, because P3 is a metric and not
+a gate, and because the rework it refers to has not happened: it is graded as
+**re-based**, and the number a future rework should be read against is 44.7,
+not 9. The gap the charter saw is a gap between authored tags and what the
+cards actually do — which is itself a finding about the sheets, not about Klee.
+
+---
+
+## §1. What shipped
+
+| item | artifact |
+|---|---|
+| T1 — canon baseline, DLL-verified | `tools/extract_base_game_pool.py --characters`, `tools/canon_role_tempo.py`, `game_ref/role_tempo_canon.json` (local) |
+| T2 — classifier + REVIEW column | `tools/role_tempo.py`, `tools/suggest_role_tempo_tags.py`, `docs/role-tempo-review.tsv`, `docs/role-tempo-tagthrough.md` |
+| T3 — baseline + floors | `docs/role-tempo-baseline.md`, `docs/role-tempo-floors.yaml` |
+| T4 — coverage lint | `tools/lint_role_tempo_coverage.py`, `docs/role-tempo-debt.tsv` |
+
+Non-goals held: no balance value moved, no card authored/reworked/re-rarity'd,
+no new keyword/op/subsystem, no `combat_role` field (`solve` was extended), no
+drafter read, no canon card text committed. `game_ref/` outputs stayed local.
+
+## §2. Wiki-vs-DLL reconciliation (counts only)
+
+Full table in `docs/role-tempo-baseline.md` §0. Headline: DLL prints
+87/88/88/88/88 against the charter's wiki route's 91/92/91/91/91 — **flat 3–4
+high per pool**, exactly as predicted, and flat rather than concentrated, which
+is the signature of "the wiki lists a few extra" and not of "we are reading a
+different pool". Every canon pool ships the identical rarity mix (20 common /
+36 uncommon / 26 rare / 2 ancient), so rarity split is not an identity lever in
+canon at all.
+
+One charter figure does not reconcile with anything: the header's "402 canon
+cards total", against its own per-pool wiki figures summing to 456, a DLL sum
+of 439, and a draftable subtotal of 410. Carried forward flagged rather than
+silently replaced. No percentage in the charter is affected — all of them are
+within-pool.
+
+## §3. Diagnosing the null — WHY Furina passes
+
+Written after §0 was fixed, and it changes nothing in it. Four candidate
+mis-specifications, in the order they should be argued about:
+
+**(a) Tag-through unions across bands, so a carrier is credited everywhere.**
+A card that deploys a Salon member inherits the member's roles at `mid` and
+`late` *and* keeps its own direct roles at `early`. Furina's pool is almost
+entirely carriers, so nearly every card lands in nearly every cell. Her lowest
+passing cell is 34.4%; the highest canon floor is 21.6%. The taxonomy cannot
+fail a pool built the way hers is, whatever the pool's real shape.
+
+**(b) There is no magnitude gate, and the charter's own mechanism is a**
+**magnitude claim.** §1.2 grades Fanfare as "a flat adder — too slow to
+generate early, underwhelming damage late". Both halves are about SIZE. A
+coverage lint counts cards; it cannot see that `applause_line` deals 3 or that
+`1 per 4 Fanfare` pays nothing on turn one. Refusing a magnitude gate was a
+deliberate non-goal (it would be authoring balance numbers), so the instrument
+was built unable to test the hypothesis it was pre-registered against. That is
+a specification error upstream of the code.
+
+**(c) The floors are whole-pool canon percentages applied to an archetype's**
+**sub-pool.** A canon character spreads 88 cards across everything it does; a
+GItS archetype is 11–32 cards all pointed at one plan, so its per-cell density
+is structurally higher. The comparison is generous to us by construction, and
+the baseline doc says so — but the size of the effect (Furina clearing floors
+by 40–60 points) was not anticipated.
+
+**(d) Fanfare's derived cash-out is not actually empty, and that is real.**
+The tag-through table (`docs/role-tempo-tagthrough.md`) has Fanfare cashing
+into `block`, `frontload`, `velocity` at every band and `scaling` at late. The
+charter's §2 diagnosis says a carrier with nothing to inherit is the disease;
+by this derivation Fanfare has plenty to inherit. If (a)–(c) are repaired and
+this survives, the CONSTRUCTION half of §1's verdict needs re-examining, not
+the tagging.
+
+One asymmetry worth holding onto: Klee and Kokomi fail 30 cells on the same
+instrument. The taxonomy is not vacuous — it discriminates. It just does not
+discriminate on the axis P1 aimed it at.
+
+## §4. Stop-and-surface items
+
+1. **P1's binding null (above).** Track A returns to design per the charter.
+2. **The tag-through table is the arguable artifact.** Three claims in
+   `tools/role_tempo.py::TOKEN_PAYOFF_POWERS` decide whether a Power *improves*
+   a resource (carrier — inherits) or *is a payoff of* it (defines the
+   cash-out). Get one wrong and a meter's whole column moves.
+3. **`salon_member` is two tokens wearing one name.** The typed member (what
+   that member does on stage) and the stage COUNTER (what `2_per_salon_member`
+   and `has_salon_members` read) are different payoffs of the same deploy. Both
+   are credited. If [USER] rules that double-crediting wrong, Furina's numbers
+   move materially.
+4. **`support` is structurally invisible on our three sheets — 0% everywhere.**
+   Canon carries 2.3% in all five pools. No GItS row has an ally target, an
+   ally op, or a co-op constraint, so there is nothing for a classifier to
+   find. It is never linted (one-seat sim, D4), so this is a finding for the
+   Kokomi rework rather than a gate.
+5. **`sustain` is nearly absent from canon under a structural reading**
+   (0.0–2.3%), against the charter's wiki-route claim of 1% (Silent) to 15%
+   (Ironclad). The structural rule counts heals, max-HP and prevention; the
+   wiki route evidently counted more. Consequence: every `sustain` cell landed
+   in the identity-only list and none is linted. If sustain floors matter, that
+   definition needs a ruling.
+6. **`tools/extract_base_game_pool.py::_solve` contradicts charter A0.** It
+   tags AoE damage as `utility`; A0 retires `aoe` as a role. NOT CHANGED — it
+   feeds the reference anchors' seven-axis scores and re-tagging them would
+   move measurements this track is a non-goal for. Recorded so the divergence
+   is known rather than discovered.
+7. **Shared schema, cross-session note.** `tempo_band:` does not exist on any
+   sheet and nothing was added to one. When A-G1 closes and the field lands, it
+   touches the sheet schema that `tier0/content/loader.py` and the C# codegen
+   both read. That is a cross-session change and needs its note before it
+   lands, not after.
+
+## §5. The debt list, and why the suite is green
+
+The lint exits 1 on its own. Suite-green at the track boundary is a standing
+rule, and the house pattern for a gate whose findings are real but not yet
+actionable is the one the Silent-anchor sprint set: **pin the known findings as
+a debt list and fail only on NEW ones.** `docs/role-tempo-debt.tsv` holds the
+30 findings above; `--gate` passes while the findings are a subset of it and
+fails the moment a thirty-first appears or a pinned one silently disappears.
+
+This is NOT a floors adjustment and no floor moved. It is the difference
+between "we know about these thirty" and "nobody is watching". The debt list is
+worthless the day P1's null is resolved and should be deleted with it.
+
+## §6. What A-G1 most needs to look at
+
+Ranked, from `docs/role-tempo-review.tsv` (219 rows, 135 diverging from the
+authored `solve`):
+
+1. `ENTITY_PAYOFFS` — the three typed Salon members, the bomb, the Bake-Kurage,
+   the spark, the Spotlight, the aura. Seven design claims, one provenance line
+   each.
+2. `TOKEN_PAYOFF_POWERS` — the improver/payoff split named in §4.2.
+3. The double-credit in §4.3.
+4. Whether a damage card that reads a meter is `frontload`, `scaling`, or both.
+   The sheets currently say all three in different places; the suggester picks
+   one and 135 divergences ride partly on that choice.
