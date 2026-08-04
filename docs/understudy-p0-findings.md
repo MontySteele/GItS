@@ -2,7 +2,26 @@
 
 Sprint: Understudy (bot playtest apparatus). Phase: P0, evaluate only.
 Brief: `docs/understudy-kickoff-brief.md`. Date: 2026-08-04. Worktree G4.
-Status: PROPOSED. Every ruling below is a PROPOSAL; [USER] countersigns.
+Status: **RATIFIED 2026-08-04.** The three ruling proposals below were
+countersigned by [USER] unchanged. The word PROPOSAL is left standing in the
+section headings so the record reads as it was written; the table below is
+the operative version.
+
+## Ratification (2026-08-04)
+
+| # | Artifact | Proposal | [USER] ruling |
+|---|---|---|---|
+| 1 | STS2MCP (Gennadiyev) | ADOPT, pinned vendored fork | **ADOPT** — pin commit `55e0648` ("Fix game API compatibility with STS2 v0.107"), explicitly **NOT** release 0.4.0 |
+| 2 | LocalCoop (STS2CouchCoop) | HOLD for P3 | **HOLD** — do not touch this sprint |
+| 3 | Speed affordances | BUILD (ours, ~10 lines) | **BUILD** — `FastModeType.Instant` is unreachable via the settings UI; use it and/or `Godot.Engine.TimeScale`, Harmony or config as appropriate |
+
+Also ratified, out of the "AutoSlay correction" section: **AutoSlay is
+retained ONLY as a crash/coverage instrument, never a numbers source.** No
+winrate, HP trajectory, damage-by-source or killed-by figure from an
+AutoSlay soak is quotable anywhere.
+
+Rulings 1b and 1c (DECLINE STS2-Agent, DECLINE sts2-modding-mcp for
+Understudy) were not disturbed and stand as written.
 
 Nothing was built. Three community artifacts were evaluated, one of them
 end-to-end against a live GItS build. Two throwaway probes (a source clone
