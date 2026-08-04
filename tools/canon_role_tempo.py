@@ -122,7 +122,7 @@ class Reader:
     def source(self, short_name: str) -> str:
         if short_name not in self._cache:
             paths = sorted(self.root.rglob(f"{short_name}.cs"))
-            self._cache[short_name] = paths[0].read_text() if paths else ""
+            self._cache[short_name] = paths[0].read_text(encoding="utf-8") if paths else ""
         return self._cache[short_name]
 
 
@@ -278,7 +278,7 @@ def build(from_json: bool) -> dict:
     per_char: dict[str, dict] = {}
     cards_by_char: dict[str, list[dict]] = {}
     if from_json:
-        payload = json.loads(OUT_JSON.read_text())
+        payload = json.loads(OUT_JSON.read_text(encoding="utf-8"))
         cards_by_char = payload["cards"]
     else:
         dll = extract.game_dll()
@@ -303,7 +303,7 @@ def build(from_json: bool) -> dict:
 
 def write_local(payload: dict) -> None:
     OUT_JSON.parent.mkdir(exist_ok=True)
-    OUT_JSON.write_text(json.dumps(payload, indent=1))
+    OUT_JSON.write_text(json.dumps(payload, indent=1), encoding="utf-8")
     print(f"  wrote {OUT_JSON.relative_to(REPO)}  "
           "(gitignored -- reference only, do not commit)")
 

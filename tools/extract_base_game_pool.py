@@ -287,7 +287,8 @@ def decompiled_project(dll: Path):
     root.mkdir(parents=True, exist_ok=True)
     print("  decompiling sts2.dll once...", file=sys.stderr, flush=True)
     _run_ilspy_project(dll, root)
-    (root / _TREE_MARKER).write_text("decompiled by tools/extract_base_game_pool.py\n")
+    (root / _TREE_MARKER).write_text(
+        "decompiled by tools/extract_base_game_pool.py\n", encoding="utf-8")
     yield root
 
 
