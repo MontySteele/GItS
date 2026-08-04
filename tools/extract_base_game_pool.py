@@ -29,11 +29,26 @@ USAGE
     python tools/extract_base_game_pool.py Ironclad
     python tools/extract_base_game_pool.py Silent --json game_ref/silent.json
     python tools/extract_base_game_pool.py Ironclad --emit-sheet
+    python tools/extract_base_game_pool.py --characters Ironclad,Silent,Defect
 
 Requires: ilspycmd (`dotnet tool install -g ilspycmd`) and a local install.
 The default dotnet-tool location is accepted even when it is not on PATH; the
 game path is read from klee-mod/local.props so there is exactly one place a
 machine path is configured.
+
+--characters / the shared decompile
+-----------------------------------
+Decompiling sts2.dll is the whole cost of a run, and it is per INVOCATION, not
+per character: five one-character runs pay it five times to read five files out
+of the same tree. `--characters A,B,C` decompiles once and walks the pools in
+order, which is what the Axis-Validity baseline (tools/canon_role_tempo.py)
+needs and what nobody wanted to wait for by hand.
+
+`GITS_ILSPY_TREE=<dir>` is the local-iteration knob on the same fact: when it
+names a directory holding a previous decompile, the tree is REUSED instead of
+rebuilt. It is deliberately opt-in and env-only -- a persistent tree is
+decompiled game source sitting on disk outside game_ref/, so it must never be
+the default and must never be a path this repo chooses for you.
 
 --emit-sheet
 ------------
@@ -66,6 +81,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -73,6 +89,7 @@ import sys
 import tempfile
 import time
 from collections import Counter, defaultdict
+from contextlib import contextmanager
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -104,6 +121,24 @@ MP_ONLY = re.compile(
 # spellings a pool card uses to conjure a TOKEN card that is not itself in
 # the pool. Matched on the shape, never on a name.
 TOKEN_CREATE = re.compile(r"\b(\w+)\.CreateInHand\(|CreateCard<(\w+)>")
+# --- the Axis-Validity taxonomy reads (Track A, 2026-08-04) ------------------
+# None of these change what the extractor EMITS; they widen what the JSON
+# RECORDS, because tools/canon_role_tempo.py classifies a canon card from its
+# structure and the four facts below are the ones `parse_card` was throwing
+# away. Kept as module regexes next to their siblings so there is one place to
+# look when a decompiled shape changes.
+#
+# `TargetType.X`, the ctor's fourth argument -- the delivery shape that makes
+# `aoe` a modifier tag rather than a role (charter A0).
+TARGET = re.compile(r":\s*base\([^)]*TargetType\.(\w+)")
+# Generic Cmd calls. The plain CMD regex needs `(` straight after the method
+# name, so it has never seen `PowerCmd.Apply<StrengthPower>(` -- 218 calls
+# across the five pools, i.e. most of the power layer.
+GENERIC_CMD = re.compile(r"\b(\w+Cmd)\.(\w+)<")
+# `OrbCmd.Channel<LightningOrb>` -- the Defect's whole tag-through layer.
+ORB = re.compile(r"<(\w+Orb)>")
+# `CardKeyword.Exhaust` / `.Retain` / `.Ethereal` -- rules on the card.
+KEYWORD = re.compile(r"CardKeyword\.(\w+)")
 
 
 def game_dll() -> Path:
@@ -221,59 +256,102 @@ def _single_card_tag(src: str, power_cls: str) -> str:
     return _snake(tags[0])
 
 
+ILSPY_TREE_ENV = "GITS_ILSPY_TREE"
+_TREE_MARKER = ".gits-decompiled"
+
+
+@contextmanager
+def decompiled_project(dll: Path):
+    """Yield a decompiled source tree, reusing a local one when asked.
+
+    The default is a TemporaryDirectory, so decompiled game source never
+    becomes a persistent artifact. `GITS_ILSPY_TREE` opts a local machine into
+    keeping one between runs -- the marker file is what tells a populated tree
+    apart from an empty directory, so a half-written tree is rebuilt rather
+    than silently read as complete.
+    """
+    keep = os.environ.get(ILSPY_TREE_ENV)
+    if not keep:
+        with tempfile.TemporaryDirectory(prefix="gits-ilspy-") as temp_dir:
+            root = Path(temp_dir)
+            print("  decompiling sts2.dll once...", file=sys.stderr, flush=True)
+            _run_ilspy_project(dll, root)
+            yield root
+        return
+    root = Path(keep).expanduser()
+    if (root / _TREE_MARKER).exists():
+        print(f"  reusing the decompiled tree at {root} "
+              f"(${ILSPY_TREE_ENV})", file=sys.stderr)
+        yield root
+        return
+    root.mkdir(parents=True, exist_ok=True)
+    print("  decompiling sts2.dll once...", file=sys.stderr, flush=True)
+    _run_ilspy_project(dll, root)
+    (root / _TREE_MARKER).write_text("decompiled by tools/extract_base_game_pool.py\n")
+    yield root
+
+
+def read_pool(root: Path, character: str) -> tuple[list[str], dict[str, str]]:
+    """The pool's card names and sources, out of an ALREADY decompiled tree.
+
+    Split out of `decompile_character` so a multi-character run pays for the
+    decompile once. The single-character entry point below is this plus the
+    tree, unchanged in behaviour.
+    """
+    pool_src = _read_decompiled_type(root, f"{POOL_NS}{character}CardPool")
+    names = re.findall(r"ModelDb\.Card<(\w+)>", pool_src)
+    if not names:
+        sys.exit(f"no cards found in {character}CardPool -- check the name")
+    sources = {
+        name: _read_decompiled_type(root, f"{CARD_NS}{name}")
+        for name in names
+    }
+    # TOKEN CARDS. A character's content is not only what she can draft:
+    # the Silent's Shiv is created in hand by twelve pool cards and is
+    # not in the pool itself, so its source would be unreachable and
+    # every card that makes one would be permanently unexpressible.
+    # Found STRUCTURALLY, from the create-call shapes in the pool's own
+    # sources -- no card-name table enters this file.
+    tokens = sorted({name for src in sources.values()
+                     for match in TOKEN_CREATE.findall(src)
+                     for name in match if name}
+                    - set(names))
+    for name in tokens:
+        try:
+            sources[name] = _read_decompiled_type(root, f"{CARD_NS}{name}")
+        except SystemExit as err:
+            # ONLY "not found" may skip (a Power, a Vfx: not a token).
+            # An AMBIGUOUS match is a real error and must not be
+            # swallowed into "no such type".
+            if "multiple decompiled files matched" in str(err.code):
+                raise
+            continue
+    if tokens:
+        print(f"  token card types referenced by the pool: "
+              f"{', '.join(tokens)}", file=sys.stderr)
+    # TAG-SCOPED POWERS. Their tier0 name embeds a base-game CardTag,
+    # so the committed dial holds only a prefix; complete it here, the
+    # one moment the power's own decompiled source is readable. The
+    # derived tag matches what _canonical_tags emits on the token rows
+    # by construction: both snake the same enum member.
+    for power_cls, prefix in TAG_SCOPED_POWERS.items():
+        # Only when some card in THIS pool reaches for the power: a
+        # pool that never mentions it gets the same dial it always had.
+        if not any(f"<{power_cls}>" in src for src in sources.values()):
+            continue
+        derived = prefix + _single_card_tag(
+            _read_decompiled_short(root, power_cls), power_cls)
+        SUPPORTED_POWERS[power_cls] = derived
+        UPGRADE_POWER_KEY[derived] = "power_amount"
+    return names, sources
+
+
 def decompile_character(
         dll: Path, character: str) -> tuple[list[str], dict[str, str]]:
     """Return the pool's card names and sources from one ILSpy invocation."""
     started = time.monotonic()
-    print("  decompiling sts2.dll once...", file=sys.stderr, flush=True)
-    with tempfile.TemporaryDirectory(prefix="gits-ilspy-") as temp_dir:
-        root = Path(temp_dir)
-        _run_ilspy_project(dll, root)
-        pool_src = _read_decompiled_type(root, f"{POOL_NS}{character}CardPool")
-        names = re.findall(r"ModelDb\.Card<(\w+)>", pool_src)
-        if not names:
-            sys.exit(f"no cards found in {character}CardPool -- check the name")
-        sources = {
-            name: _read_decompiled_type(root, f"{CARD_NS}{name}")
-            for name in names
-        }
-        # TOKEN CARDS. A character's content is not only what she can draft:
-        # the Silent's Shiv is created in hand by twelve pool cards and is
-        # not in the pool itself, so its source would be unreachable and
-        # every card that makes one would be permanently unexpressible.
-        # Found STRUCTURALLY, from the create-call shapes in the pool's own
-        # sources -- no card-name table enters this file.
-        tokens = sorted({name for src in sources.values()
-                         for match in TOKEN_CREATE.findall(src)
-                         for name in match if name}
-                        - set(names))
-        for name in tokens:
-            try:
-                sources[name] = _read_decompiled_type(root, f"{CARD_NS}{name}")
-            except SystemExit as err:
-                # ONLY "not found" may skip (a Power, a Vfx: not a token).
-                # An AMBIGUOUS match is a real error and must not be
-                # swallowed into "no such type".
-                if "multiple decompiled files matched" in str(err.code):
-                    raise
-                continue
-        if tokens:
-            print(f"  token card types referenced by the pool: "
-                  f"{', '.join(tokens)}", file=sys.stderr)
-        # TAG-SCOPED POWERS. Their tier0 name embeds a base-game CardTag,
-        # so the committed dial holds only a prefix; complete it here, the
-        # one moment the power's own decompiled source is readable. The
-        # derived tag matches what _canonical_tags emits on the token rows
-        # by construction: both snake the same enum member.
-        for power_cls, prefix in TAG_SCOPED_POWERS.items():
-            # Only when some card in THIS pool reaches for the power: a
-            # pool that never mentions it gets the same dial it always had.
-            if not any(f"<{power_cls}>" in src for src in sources.values()):
-                continue
-            derived = prefix + _single_card_tag(
-                _read_decompiled_short(root, power_cls), power_cls)
-            SUPPORTED_POWERS[power_cls] = derived
-            UPGRADE_POWER_KEY[derived] = "power_amount"
+    with decompiled_project(dll) as root:
+        names, sources = read_pool(root, character)
     elapsed = time.monotonic() - started
     print(f"  decompiled and loaded {len(names)} card types in {elapsed:.1f}s",
           file=sys.stderr)
@@ -286,6 +364,7 @@ def parse_card(src: str, name: str) -> dict | None:
         return None
     cmds = sorted({f"{a}.{b}" for a, b in CMD.findall(src)})
     powers = sorted(set(POWER.findall(src)))
+    target = TARGET.search(src)
     return {
         "name": name,
         "cost": int(m.group(1)),
@@ -298,6 +377,12 @@ def parse_card(src: str, name: str) -> dict | None:
         "exhaust": "Exhaust" in src,
         "innate": "Innate" in src,
         "body_lines": src.count("\n"),
+        # Taxonomy reads (Track A). Additive: no existing consumer reads them.
+        "target": target.group(1) if target else None,
+        "generic_cmds": sorted({f"{a}.{b}" for a, b in GENERIC_CMD.findall(src)}),
+        "orbs": sorted(set(ORB.findall(src))),
+        "keywords": sorted(set(KEYWORD.findall(src))),
+        "mp_only": bool(MP_ONLY.search(src)),
     }
 
 
@@ -1591,18 +1676,10 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
     return len(rows), len(excluded)
 
 
-def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("character", help="e.g. Ironclad, Silent, Defect")
-    ap.add_argument("--json", default=None,
-                    help="output path (default game_ref/<char>.json)")
-    ap.add_argument("--emit-sheet", action="store_true",
-                    help="also write a Tier 0 card sheet + upgrade sheet to "
-                         "game_ref/ (gitignored)")
-    args = ap.parse_args(argv)
-
-    dll = game_dll()
-    names, sources = decompile_character(dll, args.character)
+def run_one(root: Path, character: str, json_out: Path | None,
+            emit: bool) -> None:
+    """One character, against an already decompiled tree."""
+    names, sources = read_pool(root, character)
     cards, failed = [], []
     for i, name in enumerate(names, 1):
         print(f"\r  {i}/{len(names)} {name:<26}", end="", file=sys.stderr)
@@ -1612,17 +1689,48 @@ def main(argv: list[str] | None = None) -> int:
           f"{f', {len(failed)} FAILED: {failed}' if failed else ''}"
           + " " * 24, file=sys.stderr)
 
-    summarize(cards, args.character)
+    summarize(cards, character)
 
     OUT_DIR.mkdir(exist_ok=True)
-    out = Path(args.json) if args.json else OUT_DIR / f"{args.character.lower()}.json"
+    out = json_out or OUT_DIR / f"{character.lower()}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(cards, indent=1))
     print(f"\n  wrote {out.relative_to(REPO)}  "
           f"(gitignored -- reference only, do not commit)")
 
-    if args.emit_sheet:
-        emit_sheet(cards, sources, args.character)
+    if emit:
+        emit_sheet(cards, sources, character)
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("character", nargs="?", default=None,
+                    help="e.g. Ironclad, Silent, Defect")
+    ap.add_argument("--characters", default=None,
+                    help="comma-separated list; ONE decompile serves them all")
+    ap.add_argument("--json", default=None,
+                    help="output path (default game_ref/<char>.json); "
+                         "single-character runs only")
+    ap.add_argument("--emit-sheet", action="store_true",
+                    help="also write a Tier 0 card sheet + upgrade sheet to "
+                         "game_ref/ (gitignored)")
+    args = ap.parse_args(argv)
+
+    if bool(args.character) == bool(args.characters):
+        ap.error("give exactly one of CHARACTER or --characters")
+    who = ([c.strip() for c in args.characters.split(",") if c.strip()]
+           if args.characters else [args.character])
+    if args.json and len(who) > 1:
+        ap.error("--json names ONE file; it cannot serve --characters")
+
+    dll = game_dll()
+    started = time.monotonic()
+    with decompiled_project(dll) as root:
+        for character in who:
+            run_one(root, character,
+                    Path(args.json) if args.json else None, args.emit_sheet)
+    print(f"\n  {len(who)} character(s) in {time.monotonic() - started:.1f}s "
+          "on ONE decompile", file=sys.stderr)
     return 0
 
 
