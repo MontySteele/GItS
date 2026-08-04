@@ -1,0 +1,10 @@
+# A vendored snapshot is pinned by BYTES, and tools/lint_vendor_pin.py hashes
+# the working tree. Line-ending translation would make that hash a property of
+# the machine that checked out the repo: LF on the ubuntu CI runner, CRLF on a
+# Windows clone with core.autocrlf=true, from the identical commit. The lint
+# would then be green in CI and red on the deploy machine, or the reverse,
+# and the first thing anyone would suspect is drift that never happened.
+#
+# So: no conversion anywhere under vendor/. What upstream published is what we
+# store and what we check out.
+* -text
