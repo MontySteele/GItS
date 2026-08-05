@@ -242,6 +242,33 @@ Borderline, reported, no action:
 
 **None.** Findings only, per the task and per the routing line in the sitting record.
 
+### 2.5 POINTER — the reading question in §2.2 was answered (2026-08-06)
+
+*Appended by Track W. Nothing above is rewritten; §2.2's two counts stand as
+this sweep produced them.*
+
+[USER] ruled the limb-(a) reading on **2026-08-06**, verbatim: ***"infinite
+sparks must not be achievable at Common"*** — some Common spark generation is
+fine. Neither of §2.2's two counts is the answer: the criterion is
+**unboundedness**, not "mints sparks" (broad) and not "loops per play"
+(strict).
+
+The six broad-reading candidates were re-read one by one against that
+criterion, to the S13 evidentiary standard (a committed, replay-verified line
+on a Common-or-lower deck). **3 violations** — `crackle`, `skip_and_hop`,
+`sparkly_treasure`, all the 0-cost ones, all riding one Common cost-floor
+engine — and **3 cleared** — `snap`, `spark_collection`, `warm_glow`, held down
+by the 3-energy turn budget with no Common energy or cost reduction able to
+reach them.
+
+- Verdict table, the engine, and the bound that clears each survivor:
+  `docs/dockets/klee-rework.md` **§2c**.
+- The annotation itself: `tier0/DECISIONS.md`, R109, dated [USER] annotation.
+- Lines and replay results: `review/redteam/exploit-lines-x7a.json`,
+  `review/redteam/replay-results-x7a.json`.
+
+Limb (b) (§2.3) is untouched by the clarification.
+
 ---
 
 ## 3 · T-3 (family X8) — the two uncapped bomb-damage terms

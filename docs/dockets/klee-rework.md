@@ -87,6 +87,88 @@ Borderline, no verdict taken: `crackle` (discard-enabler, not draw) and
 One non-Klee spark card exists index-wide: `prune_witch_hunt` (uncommon
 companion), compliant on both limbs.
 
+### 2c. Limb (a) RE-READ under the clarified criterion — Track W, 2026-08-06
+
+**The reading question in §2b is answered and the six candidates are resolved
+individually.** [USER] annotation of 2026-08-06 on R109 (`tier0/DECISIONS.md`),
+verbatim: ***"infinite sparks must not be achievable at Common"*** — some
+Common spark generation is fine.
+
+So limb (a) is neither the broad reading (6) nor the strict one (0). It is an
+**unboundedness test**: a Common spark card violates when some Common-or-lower
+deck reaches unbounded spark generation with it. Findings only. No card was
+changed and none is proposed here.
+
+**Method — the S13 evidentiary standard, unchanged.** A candidate is a
+VIOLATION only where a **committed, replay-verified line** demonstrates the
+infinite on a deck containing **Common-or-lower cards only** (no relics, no
+potions, no uncommon+ card anywhere in the list). "Infinite" keeps the ledger's
+own definition: tier0's degeneracy detector fires — the 25-play `card_cap` or
+an exact `state_repeat` (`combat.py:505-514`). Lines:
+`review/redteam/exploit-lines-x7a.json`; results (regenerate with
+`PYTHONPATH=. python review/redteam/harness.py review/redteam/exploit-lines-x7a.json
+review/redteam/replay-results-x7a.json`):
+`review/redteam/replay-results-x7a.json`. 4 of 7 lines verify.
+
+**The Common-only engine all three violations ride.** `friendly_visit`
+(**common**, `cost_mod scope: companion_cards, delta: -1, this_turn`) is the
+only Common writer of any `cost_mod` in the six committed card sheets — the
+other writer is Kokomi's `honor_guard`, and it is **rare** — and
+`lynette_box_trick` (**common** Fontaine companion, cost 1, `draw 2`,
+non-exhaust) is a companion. One `friendly_visit` makes Lynette free, and a
+free `draw 2` is hand-positive and energy-free: each play leaves the loop
+strictly better off than it found it, which is why it does not terminate. The
+surplus card is what pays for a 0-cost spark play every iteration. This is
+X1's accumulator (§1) reached with two Commons and no Kokomi card — **it is
+also, on its own, an X2 "infinite cycling engine" sitting at Common**, which
+is a limb the X2 rarity law (R109) may want and which this docket does not
+decide.
+
+| card | rarity | cost | verdict | evidence / the bound |
+|---|---|---|---|---|
+| `skip_and_hop` | common | **0** | **VIOLATION** | `x7a_common_infinite_skip_and_hop` — 25 plays turn 1, zero misses, `card_cap`; **12 sparks banked on turn 1**. Closure shown separately on an **8-card** deck (`x7a_common_infinite_skip_and_hop_min`, `state_repeat`) — recursion, not deck size. |
+| `sparkly_treasure` | common | **0** | **VIOLATION** | `x7a_common_infinite_sparkly_treasure` — 25 plays turn 1, zero misses, `card_cap`; 12 sparks on turn 1. |
+| `crackle` | common | **0** | **VIOLATION** | `x7a_common_infinite_crackle` — 25 plays turn 1, zero misses, `card_cap`; 8 sparks on turn 1. `discard_for_sparks` costs a second card per fire, so the line runs 2 Lynettes per Crackle; the loop is still hand-non-negative and the discarded cards reshuffle back. |
+| `snap` | common | 1 | **CLEARED by criterion** | `x7a_common_attempt_snap` does NOT verify: 2 plays, then `not_playable`. |
+| `spark_collection` | common | 1 | **CLEARED by criterion** | `x7a_common_attempt_spark_collection` does NOT verify: 2 plays, then `not_playable`. |
+| `warm_glow` | common | 1 | **CLEARED by criterion** | `x7a_common_attempt_warm_glow` does NOT verify: 2 plays, then `not_playable`. |
+
+**The bound that stops the three cleared cards, stated once because it is the
+same bound.** They cost **1**, and nothing at Common pays for it.
+
+- `BASE_ENERGY_PER_TURN = 3` (`tier0/constants.py:9`), so a turn buys at most
+  three of them however large the hand grows. The infinite loop above adds
+  cards, not energy.
+- **No `{op: energy}` source below Uncommon is reachable by a Klee deck.**
+  Sweeping the six sheets for `{op: energy}` at any nesting depth returns ten
+  rows: eight **uncommon** (`sugar_rush`, `bright_idea`, `directors_cut`,
+  `deep_breath`, `tempo_change`, `guest_list`, `limelight`,
+  `sucrose_catalyst_conversion`), one **rare** (`moonlit_offering`), and
+  exactly one **common** — `shared_billing`, a **Furina character card**, which
+  no Klee deck can hold and which is energy-neutral anyway (cost 1, `energy`
+  1). No basic row anywhere resolves it. `combustion_study` (common) is not a
+  counterexample — its `burst_energy` fills the **Burst meter**
+  (`effects.py:934-942`), not the energy pool, and buys no play.
+- **No Common cost reduction reaches them.** `friendly_visit`'s `cost_mod` is
+  scoped `companion_cards`; the two scopes that would free an arbitrary card,
+  `hand_free_this_turn` and `self_this_combat` (`effects.py:979-998`), are C#
+  parity ops with **zero** users in any committed card sheet.
+
+So the ceiling on all three is `3 × MAX_TURNS` = **90 sparks per combat**,
+which is a bound and therefore not "infinite sparks at Common". They mint
+sparks at Common, and the annotation says that is fine.
+
+**Two things this re-read deliberately does not do.**
+
+1. It does not touch limb (b) (§2.3 above; `cant_catch_me` is unaffected — the
+   clarification was to limb (a) only), and it does not resolve R109's
+   disjunction. Satisfying limb (b) still discharges the law by itself.
+2. It proposes no remedy for the three violations. The obvious readings —
+   price the 0-cost Commons, or close the `friendly_visit` engine — sit on
+   **FLAG-1, which is HELD** (§1 above): the shared uncapped accumulator has no
+   structural disposition, and nothing may be built against a held flag. The
+   three violations are recorded; the fix is a sitting item.
+
 ---
 
 ## 3. X8 — bomb damage, two uncapped terms (AUDIT, R111)

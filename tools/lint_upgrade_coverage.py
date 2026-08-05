@@ -48,9 +48,37 @@ from tier0.content import loader, upgrades          # noqa: E402
 
 # --- Layer 1 exemptions: cards that legitimately have no sheet delta. --------
 #
-# Each entry is a RULE, not a debt: these cards are not campfire choices at
+# Entries are normally a RULE, not a debt: the card is not a campfire choice at
 # all, so "no upgrade" is correct rather than missing.
-SHEET_EXEMPT: dict[str, str] = {}
+#
+# ONE entry is a curated DEBT rather than a rule, and it says so in its own
+# reason string with the gate that removes it. It is carried here rather than in
+# a fourth list because the L1 check is the check it suppresses; splitting the
+# register would put one card's gate two lists away from the assertion it
+# silences.
+SHEET_EXEMPT: dict[str, str] = {
+    # CURATED EXEMPTION -- [USER] reply of 2026-08-06 to the Second Wind open
+    # one-liner (2) (`docs/surplus-week-manifest-2026-08-05.md`, "Open
+    # one-liners this batch generated for [USER]"): *"curated exemption now;
+    # the replacement delta is deferred behind FLAG-2."*
+    #
+    # DEBT, not a rule. R110's S-1 erratum (X3) made Encore Performance a
+    # 0-cost card, which empties its upgrade: `copy_cost_override: 0` was the
+    # delta's only content and a 0-cost card cannot be discounted to 0. The
+    # card IS a draftable campfire pick and SHOULD gain an upgrade; it does not
+    # have one that means anything, and this entry is the register saying so
+    # out loud rather than the lint quietly passing a hollow delta.
+    #
+    # REMOVAL CONDITION: when FLAG-2 (X3's two adjacent closures) is ruled, a
+    # replacement upgrade delta is authored for `encore_performance` and THIS
+    # ENTRY IS DELETED with it. FLAG-2 is HELD; nothing may be built against it,
+    # which is exactly why the delta is deferred and the exemption is carried.
+    "encore_performance":
+        "DEBT -- upgrade emptied by R110/S-1 (X3): `copy_cost_override: 0` is "
+        "meaningless on a card that now costs 0. Curated exemption per [USER] "
+        "2026-08-06; replacement delta deferred behind FLAG-2. Gate: FLAG-2 "
+        "ruled -> author the delta -> delete this entry.",
+}
 
 # Whole classes are exempted by predicate rather than by listing every id --
 # a list would have to be edited every time a card is added, which is the
@@ -150,6 +178,18 @@ def main() -> int:
             findings.append(
                 f"[STALE] SHEET_EXEMPT lists '{card_id}', which is not on any "
                 "sheet -- remove it")
+    # NOT swept: "SHEET_EXEMPT names a card that has an applicable delta".
+    # That is the natural mirror of CODEGEN_DEBT's sweep below and it was
+    # written, run, and REMOVED on 2026-08-06 -- it fires today, on
+    # `encore_performance`, for a reason that is not staleness. R110's S-1
+    # deleted the card's energy refund but STOPPED short of deleting
+    # `copy_cost_override: 0` from `docs/furina-upgrades.yaml`, because
+    # emptying the entry is what made L1 fail in the first place. So the sheet
+    # still carries a delta that R110 already made meaningless, and the
+    # exemption above is PRE-POSITIONED: it becomes the thing holding L1 green
+    # the moment that deletion lands, and a sweep of this shape would have to
+    # be added with it. Adding the sweep first would only turn a stopped
+    # deletion into a red lint.
     live_gaps = {
         cid
         for path in manifests

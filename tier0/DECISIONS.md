@@ -3862,6 +3862,31 @@ checklist. Findings land in the docket; the bumps are a sitting item.
 **Class: SUBSTANTIVE.** Two standing laws enter the constitution's orbit; no
 card value moves under this entry.
 
+> **[USER] ANNOTATION 2026-08-06 -- X7 limb (a), the reading is fixed.** The
+> audit returned two counts for limb (a) and asked which reading the law meant
+> (broad = 6 Common violations, strict = 0;
+> `docs/track-t-audits-2026-08-06.md` §T-2.2, open one-liner (4) of
+> `docs/surplus-week-manifest-2026-08-05.md`). **Verbatim: "infinite sparks
+> must not be achievable at Common" -- some Common spark generation is fine.**
+>
+> The original text above is unchanged (R101b: annotate, never rewrite). What
+> this annotation settles is the CRITERION, not the count: limb (a) is not a
+> ban on Commons that mint sparks, and it is not the strict loop-only reading
+> either. It is an **unboundedness** test. A Common spark card violates limb
+> (a) when some Common-or-lower deck reaches UNBOUNDED spark generation with
+> it; a Common that mints sparks against a real bound does not violate.
+>
+> **Re-read executed 2026-08-06 (Track W)** against exactly that criterion,
+> by the S13 evidentiary standard: a candidate is a violation only where a
+> committed, replay-verified line demonstrates the infinite on a Common-or-
+> lower deck. Lines: `review/redteam/exploit-lines-x7a.json`, results
+> `review/redteam/replay-results-x7a.json`. Verdicts and the bound that clears
+> each survivor: `docs/dockets/klee-rework.md` §2b. **3 violations**
+> (`crackle`, `skip_and_hop`, `sparkly_treasure` -- the 0-cost Commons),
+> **3 cleared** (`snap`, `spark_collection`, `warm_glow` -- the 1-cost
+> Commons, bounded by the energy budget). Findings only; no card moved, and
+> the audit still may not fix what it finds.
+
 ## R110 -- S13's three ratified changes: Encore Performance, replay_next_companion, and the spotlight fallback (2026-08-06)
 
 Sitting of 2026-08-06, section 3, families X3, X11 and X14. Each is a RATIFIED

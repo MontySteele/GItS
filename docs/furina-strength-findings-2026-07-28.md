@@ -1,5 +1,33 @@
 # Furina strength battery — findings (2026-07-28)
 
+> # ARCHIVE BANNER — the Furina rows here are pre-CONSTANTS-5
+>
+> **Appended 2026-08-06 (Track W). Every Furina tier-0.5 number in this
+> document was measured under `CONSTANTS_VERSION 4` or earlier and is NOT
+> comparable to output taken under 5. Quote these rows only with that label
+> attached.**
+>
+> `CONSTANTS_VERSION` 4 → 5 was **APPROVED by [USER] on 2026-08-06** (reply to
+> the Second Wind open one-liner (3),
+> `docs/surplus-week-manifest-2026-08-05.md`) for **R110's S-1 erratum, family
+> X3**: `encore_performance` lost its `{op: energy}` refund and its printed
+> cost moved 1 → 0. A Furina **rare** that changed cost and stopped returning
+> energy re-prices the turns of every Furina deck that could ever be offered
+> it — her energy curve, not one cell. Under the constant's own comparability
+> criterion (stated at the v2 bump, restated at v4: *the size of the edit is
+> not what decides, comparability is*) and on the **R87(3) precedent** that a
+> stamp bump archives every number the stamp governs, **every Furina row here
+> is archive — not a cheaper sample of the same world.**
+>
+> **Nothing above or below is rewritten** (R101b): the numbers stand exactly as
+> published, with this note on top. **Non-Furina rows are untouched by the
+> bump** — Klee, Kokomi, `ref_ironclad`, `real_ironclad` and `real_silent`
+> draft no Furina card, and neither `DRAFTER_VERSION` nor `RUNTEMPLATE` moves
+> (no offer-time price and no map shape changed). The **Furina re-baseline is
+> a COMPUTE decision for the next measurement sprint**; nothing was
+> re-measured for this banner and none is owed by it. Source of the bump:
+> `tier0/constants.py`, the `CONSTANTS_VERSION 5` note.
+
 Input: playtest 3 (`docs/playtest3-notes-2026-07-28.md`) — "trivially crushed
 ascension 0", 80-90 Fanfare, 6-7 cards/turn. Three theories were put forward.
 Battery: `tier05/exp_furina_strength.py`, 150 realistic runs per cell, seed
