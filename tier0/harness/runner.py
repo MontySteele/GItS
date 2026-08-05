@@ -174,6 +174,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--reaction-share", action="store_true",
                     help="print D1's reactions-share-of-damage aggregate for "
                          "each encounter and for the battery as a whole")
+    ap.add_argument("--aura-payoff", action="store_true",
+                    help="print H1/H2's aura-op frequency and conditional "
+                         "payoff-predicate trigger counts for each encounter "
+                         "and for the battery as a whole")
     ap.add_argument("--score", action="store_true",
                     help="run full battery + baseline and print the "
                          "7-axis scorecard")
@@ -229,6 +233,9 @@ def main(argv: list[str] | None = None) -> int:
         report.print_summary(args.character, args.deck, enc, summary)
         if args.reaction_share:
             report.print_reaction_share(enc, metrics.reaction_share(stats))
+        if args.aura_payoff:
+            report.print_aura_payoff(enc, metrics.aura_profile(stats),
+                                     metrics.payoff_profile(stats))
         for i, s in enumerate(stats):
             rows.append({"encounter": enc, "fight": i, "won": s.won,
                          "turns": s.turns, "hp_delta": s.hp_delta,
@@ -242,6 +249,25 @@ def main(argv: list[str] | None = None) -> int:
                          "damage_reactions": s.damage_from_reactions,
                          "damage_base_ops": s.damage_from_base_ops,
                          "reaction_share": round(s.reaction_share, 4),
+                         # H1/H2, per-fight: the aura verbs that fired, the
+                         # auras they landed, and the payoff riders that
+                         # cashed in. Scalars, not pickled dicts -- the
+                         # per-key cut lives in the aggregate hooks.
+                         "aura_ops": sum(s.aura_ops.values()),
+                         "aura_applications": s.aura_applications,
+                         "auras_wasted": s.auras_wasted,
+                         "reaction_payoff_evaluated": sum(
+                             s.conditional_evaluated.get(p, 0)
+                             for p in metrics.REACTION_PAYOFF_PREDICATES),
+                         "reaction_payoff_fired": sum(
+                             s.conditional_fired.get(p, 0)
+                             for p in metrics.REACTION_PAYOFF_PREDICATES),
+                         "aura_payoff_evaluated": sum(
+                             s.conditional_evaluated.get(p, 0)
+                             for p in metrics.AURA_PAYOFF_PREDICATES),
+                         "aura_payoff_fired": sum(
+                             s.conditional_fired.get(p, 0)
+                             for p in metrics.AURA_PAYOFF_PREDICATES),
                          "flags": "|".join(s.flags)})
             # D2: the per-turn record is a row per TURN, not a cell stuffed
             # into the per-fight row -- a trajectory pickled into CSV text is
@@ -259,6 +285,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.reaction_share and len(encounters) > 1:
         report.print_reaction_share("ALL ENCOUNTERS",
                                     metrics.reaction_share(every_stat))
+    if args.aura_payoff and len(encounters) > 1:
+        report.print_aura_payoff("ALL ENCOUNTERS",
+                                metrics.aura_profile(every_stat),
+                                metrics.payoff_profile(every_stat))
 
     if args.csv:
         with open(args.csv, "w", newline="", encoding="utf-8") as f:

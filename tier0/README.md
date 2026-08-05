@@ -64,6 +64,38 @@ Two instruments hang off it (Last Call track D, 2026-08-05):
 
 Both report and neither grades; see `tests/test_track_d_telemetry.py`.
 
+Two more hang off it (Last Call track H, 2026-08-05), same fence:
+
+- **H1, the aura counters.** `aura_ops` (resolutions of an aura-applying
+  VERB -- `apply_aura` / `swirl` / `refresh_all_auras` -- counted even when
+  the op lands nothing), `aura_applications_by_source` (`hit`,
+  `apply_aura_op`, `swirl_op`, `swirl_spread`) and
+  `aura_applications_by_element`, plus `reactions_by_name`. The engine gains
+  two emit-only things for these: an `aura_op` row, and a `source` key on
+  `aura_applied`. Aggregate hook: `metrics.aura_profile(stats)`.
+- **H2, the payoff counters.** `conditional_evaluated` /
+  `conditional_fired`, keyed by PREDICATE, off the existing `conditional`
+  event. Aggregate hook: `metrics.payoff_profile(stats)`, which slices out
+  `REACTION_PAYOFF_PREDICATES` and `AURA_PAYOFF_PREDICATES` and reports a
+  predicate no card in the cohort carried as ABSENT rather than as zero --
+  "nothing drafted it" and "it drafted and never fired" are different
+  findings. The per-CARD cut lives in `tier05/conditional_telemetry.py`,
+  which reads the log directly.
+
+See `tests/test_track_h_telemetry.py`, and
+`docs/reactions-corpus-2026-08-05.md` for the harvest these fed.
+
+```sh
+# H1 + H2 at battery level, printed
+PYTHONPATH=. .venv/bin/python -m tier0.harness.runner \
+    --character klee --deck reaction_weighted --pilot reaction \
+    --fights 500 --aura-payoff
+
+# the roster-wide harvest (both surfaces, TSV out)
+PYTHONPATH=. .venv/bin/python -m tier05.exp_reactions_corpus \
+    --cohort --runs 3000 --seed 20260805 --jobs 0 --tsv out.tsv
+```
+
 ```sh
 # D1 at battery level, printed
 PYTHONPATH=. .venv/bin/python -m tier0.harness.runner \

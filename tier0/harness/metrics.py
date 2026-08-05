@@ -90,11 +90,51 @@ class FightStats:
     # per-seat axis here; a seat dimension is a co-op instrument and is not
     # invented by a one-seat sim.
     turn_trajectory: list[list[int]] = field(default_factory=list)
+    # --- H1/H2, the aura+payoff counters (Last Call track H, 2026-08-05).
+    # LOG-SIDE ONLY: every one of these is a tally of events the engine
+    # already emitted (plus the `aura_op` row and the `aura_applied` `source`
+    # key track H added, both emit-only). Nothing here is read by combat,
+    # by an axis, or by the C# side -- FightStats is sim-local, and the
+    # Py<->C# parity schema is understudy/soak.py's, not this one.
+    #
+    #   aura_ops                    resolutions of an aura-applying VERB
+    #                               (apply_aura / swirl / refresh_all_auras),
+    #                               keyed by op name. Counts the OP, not its
+    #                               effect: an op that resolves into nothing
+    #                               still counts here and not below.
+    #   aura_applications_by_source what actually PUT an aura up, keyed by
+    #                               provenance: `hit` (an element-tagged
+    #                               attack landing on a clean enemy),
+    #                               `apply_aura_op`, `swirl_op`,
+    #                               `swirl_spread` (Swirl copying an aura
+    #                               onto the other bodies).
+    #   aura_applications_by_element same events keyed by element.
+    #   reactions_by_name           the `reaction` event split by which
+    #                               reaction fired. Sums to `reactions`.
+    #   conditional_evaluated /     the `conditional` op's D4 rows, keyed by
+    #   conditional_fired           PREDICATE (not by card -- the payoff
+    #                               question is about the predicate, and the
+    #                               per-card cut already exists in
+    #                               tier05.conditional_telemetry, which reads
+    #                               the log directly). `evaluated` is the
+    #                               denominator: a card that repeats itself
+    #                               evaluates twice in one play.
+    aura_ops: dict[str, int] = field(default_factory=dict)
+    aura_applications_by_source: dict[str, int] = field(default_factory=dict)
+    aura_applications_by_element: dict[str, int] = field(default_factory=dict)
+    reactions_by_name: dict[str, int] = field(default_factory=dict)
+    conditional_evaluated: dict[str, int] = field(default_factory=dict)
+    conditional_fired: dict[str, int] = field(default_factory=dict)
     flags: list[str] = field(default_factory=list)
 
     @property
     def hp_delta(self) -> int:
         return self.hp_end - self.hp_start
+
+    @property
+    def aura_applications(self) -> int:
+        """Every aura this fight put up, from any source (H1 numerator)."""
+        return sum(self.aura_applications_by_source.values())
 
     @property
     def damage_from_reactions(self) -> int:
@@ -168,6 +208,14 @@ def merge_stages(stages: list["FightStats"]) -> "FightStats":
         merged.regrets += s.regrets
         merged.enemy_actions += s.enemy_actions
         merged.control_negated += s.control_negated
+        # Track H counters are plain tallies, so a gauntlet merges them by
+        # key-wise addition (no turn offset: none of them is turn-keyed).
+        for attr in ("aura_ops", "aura_applications_by_source",
+                     "aura_applications_by_element", "reactions_by_name",
+                     "conditional_evaluated", "conditional_fired"):
+            dst, src = getattr(merged, attr), getattr(s, attr)
+            for k, v in src.items():
+                dst[k] = dst.get(k, 0) + v
         merged.flags = sorted(set(merged.flags) | set(s.flags))
     merged.won = all(s.won for s in stages)
     return merged
@@ -193,6 +241,13 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
     turn_close: dict[int, int] = {}
     hits_in: dict[int, int] = {}
     damage_in: dict[int, int] = {}
+    # Track H: aura + payoff tallies, all log-side.
+    aura_ops: dict[str, int] = {}
+    aura_src: dict[str, int] = {}
+    aura_elem: dict[str, int] = {}
+    reactions_by_name: dict[str, int] = {}
+    cond_eval: dict[str, int] = {}
+    cond_fired: dict[str, int] = {}
     won = False
     turns = state.turn
 
@@ -263,6 +318,21 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
             reactions += 1
             reaction_dmg += int(ev["amp_delta"])
             react_amp += int(ev["amp_delta"])
+            name = ev["reaction"]
+            reactions_by_name[name] = reactions_by_name.get(name, 0) + 1
+        elif e == "aura_op":
+            op = ev["op"]
+            aura_ops[op] = aura_ops.get(op, 0) + 1
+        elif e == "aura_applied":
+            src = ev.get("source", "hit")
+            aura_src[src] = aura_src.get(src, 0) + 1
+            el = ev["element"]
+            aura_elem[el] = aura_elem.get(el, 0) + 1
+        elif e == "conditional":
+            pred = ev["predicate"]
+            cond_eval[pred] = cond_eval.get(pred, 0) + 1
+            if ev["fired"]:
+                cond_fired[pred] = cond_fired.get(pred, 0) + 1
         elif e == "aura_wasted":
             auras_wasted += 1
         elif e == "round_hp":
@@ -317,6 +387,12 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
         reaction_damage_splash=react_splash,
         reaction_damage_dot=react_dot,
         turn_trajectory=turn_trajectory,
+        aura_ops=aura_ops,
+        aura_applications_by_source=aura_src,
+        aura_applications_by_element=aura_elem,
+        reactions_by_name=reactions_by_name,
+        conditional_evaluated=cond_eval,
+        conditional_fired=cond_fired,
         flags=sorted(set(flags)))
 
 
@@ -385,6 +461,105 @@ def reaction_share(all_stats: list[FightStats]) -> dict:
         "dot": sum(s.reaction_damage_dot for s in all_stats),
         "fights_with_any_reaction_damage": sum(
             1 for s in all_stats if s.damage_from_reactions),
+    }
+
+
+# The predicates a card uses to CASH IN a reaction or an aura -- the "reaction
+# payoff ops" the 2026-07-26 audit called unused. Named here so the harvest
+# and the tests read the same list, and so adding a payoff predicate to the
+# DSL without adding it here is a visible omission rather than a silent one.
+# `target_has_nonpyro_aura` is an AURA payoff rather than a reaction payoff
+# (it reads the board state a reaction would consume), and is listed for that
+# reason -- the split is kept in the reporting, not merged away.
+REACTION_PAYOFF_PREDICATES = ("reaction_triggered_by_this",
+                              "reaction_triggered_this_turn")
+AURA_PAYOFF_PREDICATES = ("target_has_nonpyro_aura",)
+
+
+def aura_profile(all_stats: list[FightStats]) -> dict:
+    """H1's aggregate hook: how often aura-applying ops fire, and what puts
+    auras on the board, across a battery.
+
+    POOLED counts plus per-fight rates, on the `reaction_share` pattern.
+    Reports numbers only; whether an application rate is adequate is a design
+    reading and is not made here.
+    """
+    n = len(all_stats)
+    if n == 0:
+        return {}
+
+    def _pool(attr: str) -> dict[str, int]:
+        out: dict[str, int] = {}
+        for s in all_stats:
+            for k, v in getattr(s, attr).items():
+                out[k] = out.get(k, 0) + v
+        return out
+
+    ops = _pool("aura_ops")
+    by_source = _pool("aura_applications_by_source")
+    by_element = _pool("aura_applications_by_element")
+    applications = sum(by_source.values())
+    turns = sum(s.turns for s in all_stats)
+    return {
+        "fights": n,
+        "aura_ops": ops,
+        "aura_ops_total": sum(ops.values()),
+        "aura_ops_per_fight": sum(ops.values()) / n,
+        "applications": applications,
+        "applications_per_fight": applications / n,
+        "applications_per_turn": applications / max(1, turns),
+        "applications_by_source": by_source,
+        "applications_by_element": by_element,
+        "reactions": sum(s.reactions for s in all_stats),
+        "reactions_by_name": _pool("reactions_by_name"),
+        "auras_wasted": sum(s.auras_wasted for s in all_stats),
+        "fights_with_any_aura": sum(1 for s in all_stats
+                                    if s.aura_applications),
+    }
+
+
+def payoff_profile(all_stats: list[FightStats]) -> dict:
+    """H2's aggregate hook: conditional-rider trigger counts, keyed by
+    predicate, pooled over a battery.
+
+    `by_predicate` carries EVERY predicate the cohort evaluated, so the table
+    is readable as a whole; `reaction_payoff` and `aura_payoff` are the two
+    slices the audit's "reaction payoff ops are unused" sentence is about.
+    A predicate that no card in the cohort carries is ABSENT, not zero -- the
+    two are different findings (nothing drafted it vs. it drafted and never
+    fired) and collapsing them is exactly the confusion the harvest exists to
+    settle. `evaluated` is the denominator; see FightStats.
+    """
+    n = len(all_stats)
+    if n == 0:
+        return {}
+    evaluated: dict[str, int] = {}
+    fired: dict[str, int] = {}
+    for s in all_stats:
+        for k, v in s.conditional_evaluated.items():
+            evaluated[k] = evaluated.get(k, 0) + v
+        for k, v in s.conditional_fired.items():
+            fired[k] = fired.get(k, 0) + v
+    by_pred = {
+        k: {"evaluated": v, "fired": fired.get(k, 0),
+            "rate": fired.get(k, 0) / v if v else 0.0,
+            "evaluated_per_fight": v / n}
+        for k, v in sorted(evaluated.items())
+    }
+
+    def _slice(names) -> dict:
+        rows = {k: by_pred[k] for k in names if k in by_pred}
+        ev = sum(r["evaluated"] for r in rows.values())
+        fi = sum(r["fired"] for r in rows.values())
+        return {"predicates": rows, "evaluated": ev, "fired": fi,
+                "rate": fi / ev if ev else 0.0,
+                "absent": [k for k in names if k not in by_pred]}
+
+    return {
+        "fights": n,
+        "by_predicate": by_pred,
+        "reaction_payoff": _slice(REACTION_PAYOFF_PREDICATES),
+        "aura_payoff": _slice(AURA_PAYOFF_PREDICATES),
     }
 
 
