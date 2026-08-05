@@ -20,6 +20,15 @@ ImageGen/images/
 # briefs that cite them say so.
 docs/mockups/
 
+# In-game G2 captures (Track I, I2). Each shot is a card rendered at full size
+# with its Tier F illustration in the frame, so committing them distributes the
+# same material art/candidates/ is ignored for. The page cites them by path and
+# the capture procedure in docs/g12-review-2026-08-05.md §3 reproduces them.
+# _TRACKB2_save_backup/ holds a byte copy of a leftover run save found in the
+# game dir at the start of I2 — a save file, not art, but equally not repo
+# content.
+art/g12_captures/
+
 # Raw art asset zips are shared out-of-band and dropped in the repo root on
 # purpose. They must never be committed (same §9 reasoning as above).
 *.zip
