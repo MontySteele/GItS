@@ -390,6 +390,67 @@ def test_a_reward_screen_does_end_the_fight():
     assert d.fight is None and len(d.fights) == 1
 
 
+# ------------------------------------------------- S7 family A / R101/1b ---
+#
+# `fight.cards_played` used to be written inside the "after-state is still a
+# plain combat screen" arm, so the counter keyed on WHERE THE GAME WENT NEXT
+# rather than on the play. Two whole classes of play fell through it, and the
+# audit measured both: every Ethereal Spotlight (707 of them -- the play opens
+# the Center Stage / Guest Cast overlay) and exactly one play per fight, the
+# one that landed the killing blow (52 Soloist's Solicitation, and a long tail
+# of one-per-fight names behind it).
+
+def test_a_play_that_opens_an_overlay_is_still_counted():
+    d = _driver()
+    fight = _combat(hp=50, hand=("Ethereal Spotlight",))
+    d._observe(fight, fight, {}, {"action": "noop"})
+    d._observe(fight, {"state_type": "card_select", "run": {"act": 1, "floor": 3},
+                       "player": {"hp": 50, "max_hp": 71},
+                       "card_select": {"screen_type": "choose", "cards": []}},
+               {"card_name": "Ethereal Spotlight"},
+               {"action": "play_card", "card_index": 0})
+    assert d.fight.cards_played == [[1, "Ethereal Spotlight"]]
+
+
+def test_the_killing_blow_is_still_counted():
+    """The last play of a fight leaves combat for the reward screen. It was
+    posted, the bridge answered `ok`, and the record used to drop it."""
+    d = _driver()
+    fight = _combat(hp=50)
+    d._observe(fight, fight, {}, {"action": "noop"})
+    d._observe(fight, {"state_type": "rewards", "run": {"act": 1, "floor": 3},
+                       "player": {"hp": 50, "max_hp": 71}},
+               {"card_name": "Soloist's Solicitation"},
+               {"action": "play_card", "card_index": 0})
+    assert d.fight is None, "the reward screen still closes the fight"
+    assert d.fights[0].cards_played == [[1, "Soloist's Solicitation"]]
+    assert d.fights[0].as_record()["n_cards_played"] == 1
+
+
+def test_a_potion_drunk_on_the_way_out_of_a_fight_is_still_counted():
+    d = _driver()
+    fight = _combat(hp=50)
+    d._observe(fight, fight, {}, {"action": "noop"})
+    d._observe(fight, {"state_type": "rewards", "run": {"act": 1, "floor": 3},
+                       "player": {"hp": 50, "max_hp": 71}},
+               {"potion_name": "Fire Potion"},
+               {"action": "use_potion", "slot": 0})
+    assert d.fights[0].potions_used == [[1, "Fire Potion"]]
+
+
+def test_a_play_outside_a_fight_is_not_counted_as_one():
+    """The gate that replaced the after-state gate is the BEFORE state, and it
+    still has to be a fight."""
+    d = _driver()
+    fight = _combat(hp=50)
+    d._observe(fight, fight, {}, {"action": "noop"})
+    d._observe({"state_type": "card_select", "run": {"act": 1, "floor": 3},
+                "player": {"hp": 50, "max_hp": 71}}, fight,
+               {"card_name": "Center Stage"},
+               {"action": "play_card", "card_index": 0})
+    assert d.fight.cards_played == []
+
+
 # ------------------------------------- the crash that skipped the teardown ---
 #
 # A soak died when the game vanished mid-request. `bridge.set_speed(False)`

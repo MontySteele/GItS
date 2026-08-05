@@ -799,10 +799,24 @@ class RunDriver:
             ra = (after.get("battle") or {}).get("round")
             if ra != rb and ra is not None:
                 self._open_turn(after)
+
+        # A PLAY IS RECORDED ON THE STATE IT WAS MADE FROM, never on where the
+        # game went next (S7 family A, R101). This block used to live inside
+        # the `st_a in COMBAT` arm above, which silently keyed the counter on
+        # the AFTER-state: a play that opened a mid-fight overlay or ended the
+        # fight was posted, answered `ok`, and then never written down. It cost
+        # 707 Ethereal Spotlights -- Furina's starter relic grants one every
+        # turn and playing it opens the Center Stage / Guest Cast `card_select`
+        # -- plus exactly one play per fight, whichever card landed the killing
+        # blow. Damage attribution stays inside the arm above on purpose: a
+        # pool drop cannot be read across a screen change, and the enemy pool
+        # is the honest damage curve anyway.
+        if st_b in COMBAT:
+            rnd_b = (before.get("battle") or {}).get("round")
             if action.get("action") == "play_card" and names.get("card_name"):
-                self.fight.cards_played.append([rb, names["card_name"]])
+                self.fight.cards_played.append([rnd_b, names["card_name"]])
             if action.get("action") == "use_potion" and names.get("potion_name"):
-                self.fight.potions_used.append([rb, names["potion_name"]])
+                self.fight.potions_used.append([rnd_b, names["potion_name"]])
 
         if st_b in COMBAT and st_a not in COMBAT and st_a not in MID_FIGHT:
             self._close_fight(after, "survived")
@@ -956,7 +970,10 @@ class RunDriver:
         this path returns "Seeded embark is not supported for standard
         singleplayer from this API", and the Custom screen that WOULD take one
         is unmodelled by the bridge and soft-locks -- which is exactly why the
-        Custom arm is P1.5 and not here.
+        Custom arm is P1.5 and not here. R104 promoted P1.5 to NEXT in the
+        Understudy queue (chosen seeds + wire-visible meters + selector
+        recording, one fork), so "not here" now means "not yet" rather than
+        "not until somebody needs it".
         """
         picks = 0
         for _ in range(30):

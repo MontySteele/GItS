@@ -570,6 +570,13 @@ def render(fights: Sequence[Fight], intent: str | None = None) -> str:
             a("")
 
     # ------------------------------------------------------------------ B2
+    #
+    # R101/1a: `docs/track-b-curves.md` carries a hand-written banner under
+    # this heading recording that every play count taken from a PRE-FIX soak
+    # log undercounts (see `docs/s7-probe-c.md`). This generator does not emit
+    # it, because it is a statement about a data vintage and not about the
+    # curve. REGENERATING FROM PRE-FIX LOGS DROPS IT -- put it back, or say in
+    # its place which soak the rows came from.
     a("## 2. B2 — output curves, over the same turns")
     a("")
     a("`damage` is the enemy pool's own drop between two turn openings — "
