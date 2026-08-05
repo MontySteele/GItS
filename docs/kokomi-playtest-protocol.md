@@ -200,19 +200,31 @@ exactly like "commander feels bad" from inside the run.
 > useful than tidied ones — the `ebb_and_flow` *"???"* from the co-op A0 note
 > was the single most informative line in that document.
 
-**Run 1** — date: ____ · ascension: ____ · result: ____ · final deck size: ____
+> **Playtest 4 (2026-08-01/02) does NOT consume this protocol.** A guest seat
+> played her through three co-op acts on build 0.2-247; the answers below are
+> **second-hand** (recorded from the Furina seat), the run was not graded
+> (band undeclared), and no counts were taken. Kept because partial evidence
+> beats a blank table; the graded solo run is still owed, and per the triage
+> it now also wants the N1 attribution pass first — Q1/Q2/Q4 are unanswerable
+> while the pulse renders nothing.
+> Source: `docs/playtest4-notes-2026-08-04.md`.
+
+**Run 1 (co-op guest seat, second-hand)** — date: 2026-08-01/02 ·
+ascension: not recorded · result: run completed through act 3 ·
+final deck size: not recorded
 
 | Q | Answer |
 |---|--------|
-| Q1 Charge pacing | |
-| Q2 Burst frequency / window | |
-| Q3 Garment legibility | |
-| Q4 Kurage dominance | |
-| Q5 Rotation voice | |
-| Q6 Deck size | |
-| Q7 Companion offers | |
+| Q1 Charge pacing | Not readable from the table: end-of-turn resolution was "a bunch of random stuff" nobody could attribute (notes §1). Legibility failure precedes the pacing question. |
+| Q2 Burst frequency / window | Not counted; her burst went unnoticed from the next seat — itself a datum for N1. |
+| Q3 Garment legibility | **Nobody checked** the tip-vs-hit number. Still the priority-1 item. |
+| Q4 Kurage dominance | Unjudgeable — the jellyfish has no in-game visual; the pulse fires with no entity on screen (asset exists, rendering gap — triage N1). |
+| Q5 Rotation voice | Not asked of the guest pilot. |
+| Q6 Deck size | "Normal sized the whole way" (second-hand, no counts) — **soft flag** vs LAW 4's thin-deck intent; standing flag N3 for the graded run. |
+| Q7 Companion offers | Not counted. |
 
-**Anything that crashed, softlocked, or rendered wrong:**
+**Anything that crashed, softlocked, or rendered wrong:** nothing reported —
+three seats, three acts, no black screen, no desync (notes §5).
 
 **Cards that felt dead (name them — a dead card is worth more than a weak one):**
 
