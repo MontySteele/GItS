@@ -128,8 +128,21 @@ def on_turn_start(state: CombatState, fighter: Fighter) -> None:
         if getattr(fighter, "encore", 0) > 0:
             from tier0.engine import resources
             hp_loss = resources.absorb_into_encore(state, dot)
+        # Overkill clamped OUT of the emitted accounting, per the EPOCH 1
+        # reactions._splash fix: HP still takes the full hit, but a 5-tick into
+        # a 2 HP add is 2 points of damage dealt, not 5. Nothing read dot_tick
+        # before this instrument, so `effective` is the only figure the share
+        # calculation may use.
+        effective = min(hp_loss, max(0, fighter.hp))
         fighter.hp -= hp_loss
-        state.emit("dot_tick", amount=dot, target=getattr(fighter, "name", "player"))
+        # `to_player` is explicit rather than inferred from `target`: an enemy
+        # may legitimately be named "player" in a fixture, and the reaction
+        # share-of-damage instrument routes on this flag (electro-charged is
+        # the only thing in the sim that puts `dot` on an enemy, so an
+        # enemy-side tick is reaction-attributable damage by construction).
+        state.emit("dot_tick", amount=dot, effective=effective,
+                   target=getattr(fighter, "name", "player"),
+                   to_player=fighter is state.player)
         if hp_loss and fighter is state.player:
             from tier0.engine import resources
             resources.note_player_hp_loss(state, hp_loss)

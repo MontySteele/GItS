@@ -411,6 +411,14 @@ def resolve_free_play(state: CombatState, card: Card,
 def _player_turn(state: CombatState, pilot: Pilot) -> None:
     p = state.player
     state.turn += 1
+    # INSTRUMENT ONLY, log-side, no game state read or written (the `round_hp`
+    # precedent below). The turn-OPENING sample for the per-turn record in
+    # metrics.turn_trajectory: HP before anything this turn touches it, and the
+    # block that SURVIVED the enemy -- taken here, above the block clear at the
+    # `should_clear_block` line, because that leftover is a different quantity
+    # from the block the player ENDS the turn holding (`turn_close` below), and
+    # the two wear the same word in every report that conflates them.
+    state.emit("turn_open", hp=max(0, state.player.hp), block=state.player.block)
     state.cards_played_this_turn = 0
     for e in state.enemies:
         e.skittish_fired = False     # Skittish latch is per-turn (§10.9)
@@ -583,6 +591,11 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         # hand flush -- which is the stated reason the source defers it.
         refpowers.exhaust_card(state, c, caused_by_ethereal=True)
     state.in_player_turn = False
+    # INSTRUMENT ONLY (pair of `turn_open`): the block standing when the player
+    # hands the turn over, which is the quantity a demand curve is read against.
+    # A turn that ended by killing the last enemy or by the player dying never
+    # reaches here, and metrics records -1 there rather than inventing a zero.
+    state.emit("turn_close", block=p.block)
     powers.on_turn_end(state, p)
     _revive_player_if_needed(state)
 
@@ -670,8 +683,14 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # battery). Fires at most once per combat, on real HP loss.
             if hp_loss > 0 and state.player.relic_effects:
                 relics.note_hp_loss(state)
+            # `incoming` is the hit as it ARRIVES -- after the dealer's own
+            # Strength/Weak/Frozen and after the player's Vulnerable, before
+            # block, before the Kokomi ward and before Encore. It is the
+            # numerator of the incoming-attacks-per-turn instrument; `amount`
+            # (HP actually lost) is what SURVIVED three mitigation layers and
+            # cannot answer "how hard did this turn hit".
             state.emit("player_hit", amount=hp_loss, blocked=blocked,
-                       block_before=block_before)
+                       block_before=block_before, incoming=dmg)
             # AfterDamageReceived fires per HIT, not per intent -- FlameBarrier
             # retaliates against every hit of a multi-hit attack. Inferno and
             # Rupture are silent here: both require CurrentSide == Owner.Side,

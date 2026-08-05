@@ -20,7 +20,7 @@ from tier0 import constants as C
 from tier0 import roster
 from tier0.content import loader
 from tier05 import (ab, draft, elite_blitz, kurage_telemetry, model,
-                    overlap_telemetry, route, run_metrics)
+                    overlap_telemetry, reaction_telemetry, route, run_metrics)
 
 # `cells` is imported inside main(), not here. R68 put resolve_plan in this
 # module and made it the single source of truth for plan->pilot, so cells.py
@@ -205,6 +205,14 @@ def main(argv: list[str] | None = None) -> int:
     # roster meets elites, and "act-1 clear moved" is an elite question for all
     # of them. Silent only when the cohort never entered one.
     block = elite_blitz.format_block(elite_blitz.aggregate(results))
+    if block:
+        print(block)
+    # D1 (Last Call track D): reactions' share of damage, per act. Same silence
+    # rule -- a character who never lands a reaction prints nothing. On the
+    # DEFAULT report for the C4 reason: the share was unmeasured for as long as
+    # it was, partly because nothing put it in front of anyone.
+    block = reaction_telemetry.format_block(
+        reaction_telemetry.aggregate(results))
     if block:
         print(block)
     print(f"\n({args.runs} runs in {time.perf_counter() - t0:.1f}s)")

@@ -35,6 +35,42 @@ PYTHONPATH=. .venv/bin/python -m tier0.harness.runner --csv out.csv ...
 .venv/bin/python -m pytest tier0/tests -q
 ```
 
+### Telemetry on the per-fight record
+
+`harness.metrics.FightStats` is the per-fight record and is **sim-local**: it
+is read by `tier0/`, `tier05/` and `tools/` and by nothing on the C# side. The
+Py↔C# parity-tested fight schema is the *other* one — `understudy/soak.py`'s,
+documented in `understudy/README.md` — and it is not this. Fields added here
+do not cross that boundary.
+
+Two instruments hang off it (Last Call track D, 2026-08-05):
+
+- **D1, reactions' share of damage.** `reaction_damage_amp` (Vaporize/Melt
+  uplift), `reaction_damage_splash` (Overload), `reaction_damage_dot`
+  (Electro-Charged, which lives *outside* `total_damage_dealt`), plus the
+  derived `damage_from_reactions` / `damage_all_ops` / `damage_from_base_ops`
+  / `reaction_share`. Aggregate hook: `metrics.reaction_share(stats)` for a
+  battery, `tier05.reaction_telemetry.aggregate(results)` for a cohort by act
+  (printed on the default tier 0.5 report, silent when nothing reacted).
+  The older `summarize()["reaction_damage_share"]` is **unchanged** — it feeds
+  the ratified A6 axis, and the difference between the two is exactly the DoT.
+- **D2, the per-turn record.** `turn_trajectory`, one row per player turn:
+  `[turn, hp_at_open, block_at_open, block_at_end, incoming_hits,
+  incoming_damage]`. `incoming_damage` is pre-block/ward/Encore — demand, not
+  what survived mitigation. `block_at_end` is `-1` when the fight ended inside
+  that turn (unsampled, never zero). Aggregate hook:
+  `metrics.turn_profile(stats)`. tier0 models one seat, so there is no seat
+  axis. CSV: `--turns-csv out.csv`.
+
+Both report and neither grades; see `tests/test_track_d_telemetry.py`.
+
+```sh
+# D1 at battery level, printed
+PYTHONPATH=. .venv/bin/python -m tier0.harness.runner \
+    --character klee --deck reaction_weighted --pilot reaction \
+    --fights 200 --reaction-share
+```
+
 Characters/decks live in `content/characters/*.yaml` (a deck is
 `starter` or a package name), cards in `content/cards/*.yaml` (the schema
 doubles as the mod's card sheet), pilots in `content/pilots/*.yaml`.
