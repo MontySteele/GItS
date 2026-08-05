@@ -1,6 +1,6 @@
 # Q2 — Act-Boss Pool Gallery (weekly-boss candidates)
 
-> **DRAFTS ASSEMBLED — FABLE CURATION PENDING.**
+> **CURATED 2026-08-05 — see §Curation below.** Drafts intact; nothing deleted.
 > House Lights batch, Track Q (cloud). 2026-08-05. Drafting: one Opus agent per act slot,
 > 2–3 candidate Genshin weekly-boss mappings per base boss, sourced from the S9
 > weekly-boss dossiers (`review/boss-dossiers/dossiers.md`, `pattern-memo.md`).
@@ -12,6 +12,62 @@
 them. The Fable curation pass (parent session) owns best-first ordering, cuts with
 one-line reasons, and final ⚑ placement. Nothing here has been cut, demoted, or
 rewritten — this is the full drafted set.
+
+---
+
+# §Curation (Fable pass, 2026-08-05)
+
+Selection and ordering only; drafts untouched below. A CUT means "read last, for the
+stated reason" — every draft stays on the page. Governing constraints: the
+oversubscription table (§Assembly notes 2 — ten bodies, six slots, four bodies claimed
+3+ ways), the atlas fork (§Assembly notes 4), and single-spend across BOTH galleries
+(Azhdaha is also claimed by three Q1 Ancients; this pass spends him at Q1 Orobas —
+see the Ancients gallery's §Curation).
+
+**⚑ THE FORK FIRST (outranks every ordering below):** for three slots the S10 atlas's
+normal-enemy candidates beat every weekly-boss draft on the merits — Coral Defenders for
+KAISER CRAB (natively a two-body boss; no weekly boss is), Iniquitous Baptist for TEST
+SUBJECT, Abyss Lector for AEONGLASS. Which gallery owns the act-boss slots is a [USER]
+structural call. The ordering below is the best WEEKLY-BOSS allocation, stated so the
+fork is a clean either/or per slot, not a re-litigation.
+
+**Recommended single-spend allocation (weekly-boss layer):**
+
+| Slot | Spend | One-line reason |
+|---|---|---|
+| Vantom (A1) | **Andrius** | cleanest claim in both galleries; converged top pick |
+| Lagavulin (A1) | **Magatsu Narukami** | drafter's top pick; ⚑ the base row is a ratified [USER] identity — biggest-call warning stands |
+| Knowledge Demon (A2) | **Shouki no Kami** | the literal name match, and the one slot where atlas cover is explicitly soft |
+| Kaiser Crab (A2) | **La Signora** (under protest) | every weekly candidate is dishonest here (sequential→simultaneous); ⚑ the atlas's Coral Defenders wins this slot on merit |
+| Test Subject (A3) | **Guardian of Apep** | the only remaining true sequential-full-bar body with Childe fixed; both drafting passes' top pick |
+| Aeonglass (A3) | **Lord of Eroded Primal Fire** | uncontended, well-sourced; frees Shouki for the literal slot |
+
+Bodies left unspent by this allocation: All-Devouring Narwhal (strong second at
+Lagavulin — the uncontended fallback if Magatsu's identity warning bites), Stormterror
+Dvalin (⚑ redemption/co-op problem flagged at both his variants — read before ever
+spending him), The Knave (strong second at Vantom), Azhdaha (spent at Q1 Orobas;
+first body to reclaim if [USER] rejects that allocation). Alternative from the second
+Act 3 pass (lead with Azhdaha, move Shouki) is recorded at §Assembly notes 8 and
+becomes live only if Azhdaha returns from Q1.
+
+**Per-slot demotions, one-lined:** Vantom #2 Signora — demoted here (spent at Kaiser
+Crab; memory-framing mandatory wherever she lands) · Lagavulin #2 Azhdaha — CUT (spent
+at Q1 Orobas) · Knowledge Demon #2 Apep — demoted (body spent at Test Subject; the act
+would otherwise wear one boss in two costumes, §Assembly notes 2) · Knowledge Demon #3
+Azhdaha — CUT (spent) · Kaiser Crab #1 Apep-as-Wardens — demoted (body spent at Test
+Subject; also promotes adds to co-boss stature) · Kaiser Crab #3 Magatsu — demoted
+(spent at Lagavulin) · Test Subject #2 Azhdaha — CUT (spent) · Test Subject #3 Signora —
+demoted (spent at Kaiser Crab) · Aeonglass #1 Shouki — demoted (spent at Knowledge
+Demon, where the name is the match) · Aeonglass #3 Dvalin — demoted (redemption/co-op
+flag unresolved).
+
+**Carried flags ranked:** the atlas-vs-weekly fork (structural, decides three slots);
+Kaiser Crab honesty (no weekly boss is a pair — if the fork lands atlas-side this
+dissolves); stature ceiling (all 19 candidates are Trounce-tier; an Act 1 spend of
+Andrius/Dvalin uses Teyvat's most recognisable bodies first — accepted knowingly in the
+allocation above by putting Andrius at Vantom); Lagavulin's ratified identity.
+
+---
 
 **Structure carried over, contents drafted.** The rotating-pool shape is the north-star
 v0.2 structure and is not in question here: each act draws 1 boss per run from a pool of

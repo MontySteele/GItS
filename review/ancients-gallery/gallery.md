@@ -1,6 +1,6 @@
 # Q1 — Teyvat Ancients Gallery
 
-> **DRAFTS ASSEMBLED — FABLE CURATION PENDING.**
+> **CURATED 2026-08-05 — see §Curation below.** Drafts intact; nothing deleted.
 > House Lights batch, Track Q (cloud). 2026-08-05. Drafting: one Opus agent per Ancient,
 > 2–3 canon-sourced Genshin identity mappings each. **Mechanics are FROZEN** — every
 > silhouette below is *described*, never altered; no number, boon, hook or structure in
@@ -11,6 +11,64 @@
 them. The Fable curation pass (parent session) owns best-first ordering, cuts with
 one-line reasons, and final ⚑ placement. Nothing here has been cut, demoted, or
 rewritten — this is the full drafted set.
+
+---
+
+# §Curation (Fable pass, 2026-08-05)
+
+Selection and ordering only. Draft text below is untouched; a CUT here means "do not
+read this variant first, for the stated reason" — the draft remains on the page and
+[USER] can overrule any line of this section with a tick. The governing constraint is
+the contention map (§Assembly notes 2): several bodies are claimed in both galleries
+and can be spent once. This section spends each body once and records the alternative.
+
+**Cross-gallery allocation (single-spend):** Azhdaha → **Orobas** (his strongest
+reading — "refines what you already hold" — and the only slot where he is a drafter's
+top pick; all Q2 claims lose to that act's converged top picks). Apep → **Q2 Test
+Subject** (see the boss gallery's §Curation — the only true sequential-full-bar body
+with Childe fixed); Pael's Apep variant stays READABLE as a different silhouette but
+inherits the pronoun flag. Andrius → **Q2 Vantom** (assembly note: the Q2 claim is much
+stronger). Marchosius → **Tezcatara** (the hospitality reading is the silhouette match;
+the Nonupeipe soil-god reading is the same body respent).
+
+**Per-entity order (best-first), cuts one-lined:**
+
+- **Neow:** 1. Orobashi · 2. Egeria · 3. Elynas (demoted: the shape-borrowing register
+  conflict is unresolved — ⚑ at the variant — and the other two need no ruling to read).
+- **Orobas:** 1. **Azhdaha** (allocated here) · 2. King Deshret · 3. Rhinedottir
+  (demoted: her canon title collides with the currency noun; fine if renamed, but the
+  first two carry no such tax).
+- **Pael:** 1. **Durin** (literal, best-sourced, and the Melting-Dragon silhouette is
+  exactly "pays you out of his own body") · 2. Apep (cross-gallery; readable even if Q2
+  spends Apep, but re-verify before quoting) · 3. Azhdaha — CUT: thinnest-sourced draft
+  in the gallery (WebSearch-summary only) AND the body is spent at Orobas.
+- **Tezcatara:** 1. **Marchosius/Guoba** (allocated here; stove-god ↔ hospitality is the
+  cleanest silhouette match in Q1) · 2. Madame Ping · 3. Chanca — demoted: mortal shop
+  NPC as an Ancient is a stature break the other two variants don't ask for (⚑ stands).
+- **Darv:** 1. **Katayoun** (literal: librarian of the House of Daena, and canon
+  nominates the institution itself) · 2. Hirayama · 3. Langqing — demoted: the Wanwen
+  framing reads as a vendor, which the drafter's own note warns against.
+- **Nonupeipe:** 1. Remus · 2. Rukkhadevata (⚑ Deshret-adjacency stands — if the Sumeru
+  desert cluster is spent once, Orobas #2 and this variant compete) · 3. Marchosius —
+  CUT: body spent at Tezcatara, and the playable-companion hazard (Guoba on Xiangling's
+  skill) makes it the riskier of his two readings anyway.
+- **Tanx:** 1. Lawachurl (the only surviving variant, and it is register-MUTED — the
+  hilichurl block forbids his voice without a lawa carve-out, ⚑ stands) · 2. Azhdaha —
+  CUT: spent at Orobas · 3. Andrius — CUT: yielded to Q2 Vantom per assembly note.
+  **⚑ Curation verdict: Tanx has no strong surviving variant. Either grant the lawa
+  carve-out, or this entity needs a redraft round — the Khimera King's all-caps
+  weapon-smith identity is currently homeless.**
+- **Vakuu:** 1. Liloupar (best mechanical match; ⚑ worst literal match to "First
+  Demon" — the trade is stated at the variant) · 2. Osial (best literal match; the
+  pre-contract-Liyue reading is sound but needs the register scoping confirmed) ·
+  3. Nibelung. No cut — the three are genuinely different readings and all well-sourced.
+  ⚑ Reminder from assembly note 3: a faithful Vakuu is a tempter whose gifts hurt;
+  the shipped boon sample contains none of that half (mechanics frozen — flavor fact).
+
+**Carried flags ranked (the ones only [USER] can close):** the lawa carve-out (blocks
+Tanx entirely); shape-borrowing (blocks Neow #3); Apep's pronoun, gallery-wide; the
+recurring-Darv one-name rule; the Statue of the Seven mute-Ancient revival; R-Q1.5 boon
+family naming (already in the sitting pack).
 
 **How this is meant to be read.** OPTIONAL sitting material. One checkbox per Ancient;
 tick the variant you want, or none. A ⚑ marks something only [USER] can decide — a
