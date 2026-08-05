@@ -200,9 +200,192 @@ Every number in this log names its writer for that reason.
 ## The committed-arm soaks
 
 *(Results and grades below were recorded before any interpretation was
-written — D4.)*
+written — D4. Every table names its WRITER, because both wrote every fight.)*
 
-<!--RESULTS-->
+### The runs
+
+**Committed-Fanfare, `--commit fanfare`, log stamp `20260805-003056`:**
+
+| run | seed | outcome | reached | fights | actions | wall |
+|---|---|---|---|---|---|---|
+| 1 | `DT8RR60V03` | died | act 1 | 5 | 229 | 176 s |
+| 2 | `EYN7XPN36M` | died | act 1 | 4 | 153 | 117 s |
+| 3 | `ND9RJAYPBQ` | died | act 1, the boss | 9 | 412 | 313 s |
+
+**Three runs, 18 fights, 794 actions, ZERO defects filed.** Reversibility
+REVERTED on all four ledger entries; `fast_mode` captured as `Fast` at setup.
+All three seeds read-back (R95).
+
+**Committed-Salon, `--commit salon`, log stamp `20260805-004135`:**
+
+| run | seed | outcome | reached | fights | actions | wall |
+|---|---|---|---|---|---|---|
+| 1 | `WNYVF59QS5` | died | act 1 | 4 | 153 | 118 s |
+| 2 | `SKUSPCCTKK` | died | act 1 | 6 | 219 | 168 s |
+| 3 | `43MLG7MG9L` | **defect** | act 1, floor 7 | 2 | 85 | 66 s |
+
+**Three runs, 12 fights, 457 actions, one defect.** Reversibility REVERTED on
+all four entries. Seeds read-back.
+
+**Harness defect 15 — `no_progress`, the map↔rest_site bounce.** Two distinct
+fingerprints across twelve posted actions, cycling
+`map|1|6|hp 59` ↔ `rest_site|1|7|hp 59` — a rest site entered at full HP that
+the run left and re-entered without the floor advancing. **Traversal class**,
+the same family as 1–14, so it is **filed and not fixed** under the routing
+R99/3 established: it goes to the next traversal pass with 13 and 14.
+`no_progress` is deliberately outside the stop-and-surface set — halting on it
+would stop the instrument on exactly what it exists to find — so the soak
+filed it and finished.
+
+### The arm did what it was built to do
+
+Share of recorded plays by archetype, **soak writer, like for like** (the
+baseline figure is the two surviving baseline corpora, 109 fights):
+
+| corpus | fights | salon | fanfare | spotlight | generic |
+|---|---|---|---|---|---|
+| baseline (undeclared) | 109 | 13.9% | **8.7%** | 6.0% | 71.4% |
+| committed-Fanfare | 18 | 6.4% | **24.9%** | 3.8% | 64.9% |
+| committed-Salon | 12 | **12.7%** | 12.7% | 7.0% | 67.7% |
+
+Fanfare's share of plays is **2.9× the baseline's**. That is the precondition
+Track B's null was blocked on: a deck that is meaningfully the declared
+archetype rather than a mixed deck with a few of its cards in it.
+
+**It is still 65% generic, and that number is structural.** A run that dies in
+act 1 drafts a handful of cards on top of a starter deck it did not choose;
+`--commit` moves what is drafted, not what was there at floor 0. A committed
+arm makes the archetype the *largest declared* share of the deck; it does not
+make the deck pure, and no flag can while debt #3 stands.
+
+**And the Salon arm barely moved at all — 12.7% against a 13.9% baseline.**
+That is not a failure of the flag. `policy_v0.ARCHETYPE` is already `"salon"`,
+so the baseline draft has been scoring every offer under the salon plan since
+Phase 0. Committing to salon is close to a no-op against a policy that was
+already committed to salon, and the number says so. It matters for the grades
+below, because one of them is a *comparison* with Salon.
+
+### The tables the grades are read from
+
+Both arms, **mod writer** (the more complete record of what was played: it sees
+auto-played companion cards the bot never posts, and it carries a live meter).
+`required output` is B1's own column for the same fights.
+
+| arm | class | turn | fights | median incoming | median required output/turn | median pool drop | median block at turn end |
+|---|---|---|---|---|---|---|---|
+| Fanfare | monster | 1 | 14 | 7 | 10.6 | **12.0** | 6.0 |
+| Fanfare | monster | 2 | 14 | 8 | 10.6 | **8.0** | 9.0 |
+| Fanfare | monster | 3 | 14 | 6 | 10.6 | **7.5** | 5.5 |
+| Salon | monster | 1 | 11 | 8 | 9.8 | **9.0** | 7.0 |
+| Salon | monster | 2 | 11 | 8 | 9.8 | **6.0** | 9.0 |
+| Salon | monster | 3 | 11 | 14 | 9.8 | **10.0** | 4.0 |
+
+Attributed damage per PLAY of the declared archetype, soak writer,
+attribution-limited in the direction the Track B log already declares
+(a card's total is spread across the turns it was played in):
+
+| arm | archetype | t1 | t2 | t3 |
+|---|---|---|---|---|
+| committed-Fanfare | fanfare | 5.2 (18 plays) | 4.8 (13) | 1.6 (8) |
+| committed-Salon | salon | 0.0 (2) | 4.8 (6) | 12.0 (4) |
+| *(baseline, published)* | fanfare | 3.4 | 2.4 | 2.3 |
+| *(baseline, published)* | salon | 3.2 | 2.5 | 3.6 |
+
+### GRADE (a) — Fanfare early-half, R90/1b
+
+> *In Act 1, Fanfare-archetype output in fight-turns 1–3 falls short of the
+> demand curve where Salon does not.*
+
+**GRADE: PARTIALLY GRADED. The Fanfare half is measured and the prediction is
+NOT SUPPORTED. The comparison to Salon is NOT GRADED, because the Salon arm is
+not a contrast.**
+
+The first half is now gradeable and that is the change this pass bought: the
+committed-Fanfare deck is 24.9% Fanfare by plays against a baseline 8.7%, so
+the objection that killed the grade in the Track B pass — *this is a mixed deck
+and the claim is about an archetype* — no longer applies to it.
+
+Read against demand, **the Fanfare arm does not fall short in the early half in
+the shape the prediction describes.** It is *above* required output on turn 1
+(12.0 vs 10.6), below on turns 2 and 3 (8.0 and 7.5 vs 10.6). Per play, its
+Fanfare cards hit for 5.2 / 4.8 / 1.6 against the baseline's published
+3.4 / 2.4 / 2.3 — higher in exactly the turns the prediction says are weak.
+
+**The second half cannot be graded, and the reason is the instrument again.**
+"Where Salon does not" requires Salon to be a different condition, and it is
+not: the baseline draft already runs the salon plan, so committed-Salon
+reproduces baseline rather than contrasting with it. Its own curve falls short
+on turns 1 and 2 (9.0 and 6.0 vs 9.8) and clears on turn 3 — i.e. **Salon falls
+short in the early half too**, which is the opposite of the differential the
+prediction asserts, measured on an arm that is not entitled to carry the
+comparison.
+
+**Instrument named, per the standing rule that a null names its replacement:**
+a **no-plan arm**. The contrast this prediction needs is Fanfare against a
+drafter with no archetype plan at all, and today there is no such arm —
+`generic` is deliberately not declarable, and `policy_v0.ARCHETYPE` is frozen
+at `"salon"` inside a module that may not be edited. That is a small, clean
+piece of work and it is **not** taken here: adding an arm to fix a grade in the
+same pass that reports the grade is how a measurement acquires the answer it
+wanted.
+
+### GRADE (b) — Salon fill time, R91/2b, re-measured
+
+**REPORTED, and the confound was NOT removed.** Committed-Salon, 12 fights
+carrying a meter sample, mod writer (the live cap, not the printed one):
+
+| measure | committed-Salon | baseline (published) |
+|---|---|---|
+| fights where the Salon reached cap | **1 of 12** | 0 of 56 |
+| median turn first at cap | **6** (the single fight that did) | no such turn |
+| fraction of fight-turns at cap | **1.8%** (1 of 55) | 0.0% |
+| median peak members | **0.5 of 3** | 1.0 of 3 |
+
+**The number is 1.8%, and it does not discharge R91/2b's revisit condition in
+either direction.** The condition asks for bounded-meter readers plateauing on
+an output curve; one fight reaching cap on turn 6 is not a plateau, and a
+median peak of half a member is not a filling meter.
+
+**The reason it does not discharge is now sharper than "the bot doesn't build
+salons".** The committed arm was supposed to remove that confound and it could
+not, because *there was no salon-specific confound to remove*: the baseline was
+already drafting the salon plan. What the two arms together say is that **a
+Furina who drafts salon cards under this pilot still does not staff the stage**
+— across 68 metered fights between them, the Salon reached cap once. That is a
+sharper observation than the Track B pass could make, and it is still **a
+bot-limited floor about a pilot**, not a finding about the Salon.
+
+**No tag is revisited, nothing is proposed, and R91/2b stays open.** The
+revisit is [USER]'s decision; this pass reports the number, as instructed.
+
+---
+
+## Run-verification — items 5 and 6a, from live play
+
+Not asserted from source. A record written by the deployed build during the
+committed-Fanfare soak, keys trimmed to the ones under test:
+
+```json
+{"record":"fight","schema":"1","feed":"bot","source":"mod","intent":"fanfare",
+ "seats":1,"seat_index":0,"character":"Furina","act":1,"kind":"monster",
+ "outcome":"won",
+ "meters_by_turn":[[1,0,0,3,0],[2,5,0,3,5]]}
+```
+
+| item | what the record proves |
+|---|---|
+| **5 — win visibility** | `outcome: "won"`. Across 29 mod-written fights this session: **25 `won`, 4 `died`, zero `interrupted`.** Every one of those `won` rows would have read `interrupted` on 0.2-289. |
+| **6a — Furina's meters** | `meters_by_turn` `[round, fanfare, salon_members, salon_cap, encore]`, with Fanfare 5 and **Encore 5** on turn 2 — the meter the bot feed records as `-1` because the wire does not serialise it. |
+| **4a — declared intent** | `intent: "fanfare"`, stamped by the harness through `GITS_TELEMETRY_INTENT`; the human path is the same reader against `intent.txt`. |
+| **the feed label** | `feed: "bot"` on a mod-written record, from the launcher's explicit child environment rather than from whoever's shell. |
+
+**One limit found by verifying rather than by reading:** the mod writer
+recorded 17 fights where the soak writer recorded 18. The missing one is the
+last fight of a run that was still open when teardown killed the process —
+there is no combat-end hook for a process that does not reach the end of the
+combat. The soak's own writer closes it as `interrupted`, so nothing is lost
+from Track B; it is recorded here because a reader comparing per-writer fight
+counts will otherwise find an unexplained gap of one per killed run.
 
 ---
 
