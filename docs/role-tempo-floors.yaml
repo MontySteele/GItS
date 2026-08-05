@@ -5,7 +5,7 @@
 # PERCENTAGES ONLY. No card name, no card text, no card number: this
 # file is committed and game_ref/ is not (.gitignore:28).
 #
-# R91/1c: the comparison population is a canon PACKAGE (the cards that
+# R90/1c: the comparison population is a canon PACKAGE (the cards that
 # touch one mechanic layer, generate side and read side both), not a
 # whole 88-card canon pool. Packages run 8-41 cards, the same order as
 # a GItS archetype.

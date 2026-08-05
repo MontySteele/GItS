@@ -48,7 +48,7 @@ These are ordered by *cost of not knowing*, not by sprint.
 
 ## 2. Kokomi — never played, and the build just changed under her twice
 
-She has had **no table time at all**. Two changes landed since the sim last
+~~She has had **no table time at all**.~~ **CORRECTED 2026-08-06 (R107; S4 finding F17):** she has been played **exploratory** (2026-07-25/26, designated contaminating-exploratory by D5) and in the **08-01/02 three-seat holdout**. What has *not* run is the **protocol** playtest — `docs/kokomi-playtest-protocol.md`'s "Answers" section is still blank. Frame the next session as that, not as a first exposure. Two changes landed since the sim last
 measured her, so the protocol's questions are live rather than confirmatory:
 
 - **v0.4b starter rework (R56):** twelve-card Silent-shape starter, and the

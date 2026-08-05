@@ -54,6 +54,8 @@ are resource counters (cheap). Salon rides existing summon machinery
 pending the check-if-solved audit (§5). Pneuma/Ousia is **pure flavor,
 zero mechanics** (ratified). Nothing else novel ships in her v1.
 
+> **DRAFT ANNOTATION 2026-08-06 (R107; S4 finding F3) — §3.1–3.2 describe the RETIRED designation model.** Read them as the v1.10 design they were, not as law. Live since R41 (2026-07-22): **CENTER STAGE**, under which Furina's own cards generate Fanfare and *"receive no numeric Spotlight bonus"*, and **GUEST CAST**, which *"designates the Companion category rather than one character"* — confirmed at `docs/red-pen-2026-07-26.md` R2(a). The "reduced rate on Furina herself" asymmetry below is therefore not the shipped anti-self-buff lever. Mirrors the v1.14 DRAFT annotation on `docs/teyvat-spire-design-principles.md` §4.5; ratification rides with it.
+
 ### 3.1 Designation (character-level)
 
 - Every card gains a **`character:` schema field** (shared schema change,
@@ -112,8 +114,15 @@ predates the v1.6 amendment).
   m7-rulings R8).
 - **Fanfare:** **capped at %maxHP** (Rare uncappers at nasty setup cost);
   stacks grant flat power bonuses. **Generation is activity-based, never
-  passive:** HP lost, Encore gained, Encore spent, and — the Ovation merge
-  — **each Spotlighted card played grants Fanfare**. No per-turn passive
+  passive:** HP lost, ~~Encore gained~~, Encore spent, and — the Ovation merge
+  — **each Spotlighted card played grants Fanfare**.
+  > **THE "ENCORE GAINED" LEG IS DEAD — annotated 2026-08-06 (R107; S4 finding
+  > F12).** Ruled [USER] 2026-07-28 (post-playtest-3) and shipped the same day
+  > in both engines. Fanfare prints when Encore goes **DOWN**, never when it
+  > goes up. The live generation set is **HP lost / Encore spent / Encore
+  > absorbed / Spotlighted card played** — `encore_absorbed` is a new leg.
+  > Mirrors the v1.12 DRAFT in `docs/teyvat-spire-design-principles.md`;
+  > ratification rides on that amendment's countersign. No per-turn passive
   accrual, ever (passive accrual = stall payoff; the healing policy exists
   to kill exactly that).
   > **RETIRED GRAMMAR (G-F1, 2026-07-25) — the parenthetical only.** "Rare

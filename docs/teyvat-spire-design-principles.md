@@ -111,6 +111,8 @@ A character's statline declaration includes a **companion appetite**: Low (self-
 ### 4.5 The Spotlight system & `character:` schema field (v1.10)
 Every card carries an optional `character:` field (shared schema — all sheets; companion rows derive it from their id prefix, personal sheets from the filename, explicit field wins). Cards with no character tag are invalid Spotlight targets. One Spotlighted character per Furina-class player at a time (per-player in co-op); designation is movable freely and persists until moved; duplicate selectors are inert. Baseline empowerment: +50% printed numbers (flat rate is the knob; texture lives in cards). Self-Spotlight at a reduced rate is the solo fallback and the primary anti-self-buff lever. A per-turn Spotlighted-card cap exists in schema but ships OFF. Empowerment is numbers-only per §2.2a's extension.
 
+> **v1.14 — DRAFT (unratified), 2026-08-06 (R107; S4 finding F3): the designation model above is the RETIRED one.** The section states a character-level, self-Spotlight-at-a-reduced-rate design that [USER] rulings replaced in July, and it states it as current law. The live design is two modes: **CENTER STAGE** — Furina's own cards generate Fanfare and *"receive no numeric Spotlight bonus"* (R41, 2026-07-22) — and **GUEST CAST**, which *"designates the Companion category rather than one character"* (R41; confirmed live in `docs/red-pen-2026-07-26.md` R2(a), which rules on exactly the two-mode split). Consequence for readers: "self-Spotlight at a reduced rate is the primary anti-self-buff lever" is **not** the shipped lever — Center Stage grants no numeric bonus at all. The `character:` field, the invalid-target rule, movable designation, inert duplicate selectors, the +50% baseline for Guest Cast targets and the OFF per-turn cap are unaffected. DRAFT until countersigned; the rulings it records are already live in both engines.
+
 **Generated companion cards (Guardrail 2 ruling, v1.10):** generated companion cards retain their element application. Stochastic, exhausting, drafted off-element access via a personal pool is consistent with "scarce and drafted" — explicit ruling, not silent precedent. Guest Star guardrails: this-combat-only; generators Exhaust; equal-rarity clause; pulls from shared companion pool + purpose-built Guest Star sets, never from playable characters' pools.
 
 ### 4.6 v2 candidate — the Wish banner
@@ -133,6 +135,11 @@ Shop-integrated "Wish" draw (pay gold, draw from companion pool, duplicate prote
 > companions**, so Furina's home-region slot 1 already widens the nation
 > whenever it rolls a Rare — exactly the brittleness that killed the
 > guaranteed-Rare alternative.
+>
+> *Annotated 2026-08-06 (R107; S4 finding F8): Fontaine Rares are **four**
+> since R64 — same day as R59 — and the banner is therefore selective. The
+> zero-Rares claim above is historical context for why the slot-2 floor was
+> set, not a current fact about the roster.*
 >
 > **2. The base colorless pool is NOT removed (R60, phase 1).** "Replaces the
 > base-game colorless card pool wholesale" below is the ratified *intent*; what

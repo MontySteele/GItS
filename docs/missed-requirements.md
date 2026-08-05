@@ -340,12 +340,18 @@ Three related items, all flagged in code comments and on no live list:
   whoever builds the cell should build it over four. Similarly, catalyst
   Kokomi was never added to the hydro-convergence watchlist after R52 ruled
   her a catalyst.
-- **Two stale sheet comments that lints can't catch:** `warmup_act` still says
+- ~~**Two stale sheet comments that lints can't catch:** `warmup_act` still says
   "(Crackle parity)" though Crackle gained `discard_for_sparks`
   (`docs/furina-cards.yaml:116` — redpen flag 6 directed this update);
   `docs/mondstadt-companions.yaml:4` still asserts "Companion cards NEVER
   scale" though 16 companion upgrade deltas ship (the contradiction was
-  resolved the other way at `klee-mod/DECISIONS.md:1524`).
+  resolved the other way at `klee-mod/DECISIONS.md:1524`).~~
+  **BOTH FIXED AT SOURCE — struck 2026-08-06 (R107; S4 finding F15).**
+  `docs/furina-cards.yaml` now carries the comment in its historical form
+  ("Was: 3 damage flat, Crackle parity…"), and `docs/mondstadt-companions.yaml`
+  carries the G2 correction in the file's own ledger-corrections style. Struck
+  the way the five "Ledger corrections" items below were struck; the entry
+  outlived its fix, not the other way round.
 
 ---
 

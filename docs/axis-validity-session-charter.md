@@ -231,5 +231,5 @@ targets) · **B-G1** (per-axis disposition).
 > schema. **B-G1 remains deferred**, and §3's P1 now lives there: per R90/1b
 > it was *aimed at the wrong instrument; withdrawn and re-registered, not
 > failed.*
-Discharged in session: vocabulary review (validated against 402 canon
+Discharged in session: vocabulary review (validated against ~~402~~ **439** canon
 cards); the Zhongli fork (held, per §6.4, silence = stands).

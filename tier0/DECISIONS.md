@@ -2662,6 +2662,19 @@ predate v11 and must be re-measured before being quoted.
 
 ## R84 -- DRAFTER v11 ratified; the power-aware static term and a fresh 3-act roster ordered (2026-07-27)
 
+> **THE "ONLY QUOTABLE ROSTER TABLE" IS ARCHIVED -- annotated 2026-08-06
+> (R107; S4 finding F4).** This entry designates the fresh 3-act roster table
+> in `docs/silent-pilot-review-2026-07-27.md` as *the only quotable roster
+> table*. That table is a DRAFTER 12 world, and **R87(3) archives every
+> drafter-layer number taken under DRAFTER 12 on the stamp bump**, which
+> landed 2026-07-29 (`3e3c243`). The designation and the archive rule cannot
+> both be followed; the archive rule wins, because it is the later ruling and
+> the general one. **Successor:** the D13 roster-anchor run in
+> `docs/sprint-sim-hygiene-log-2026-07-29.md`, ratified as measurements by
+> R107(a), with the n=3000 re-read (`4ee6881`) as the reading of record for
+> any per-arm delta. The table below is not rewritten -- it is a measurement,
+> and it stays exactly as measured.
+
 Ruled by [USER]: "the constants in the draft.py look fine at first
 glance, approved. Let's take on _static_power and then redo the 3-act
 roster for a full fresh recalculation."
@@ -2849,6 +2862,16 @@ asked for. No code, no sheet and no number moved with them.
 > shipped against, and not redesigned against until it reports. The STOP's
 > practical effect -- no Furina balance value moves -- is unchanged by the
 > escrow, which freezes both directions.
+
+> **GOVERNING CONDITION RE-POINTED 2026-08-06 (R107; S4 finding F1).** Item
+> (1)'s trigger fired -- the Furina playtest ran 2026-08-01/02 and was graded
+> BY CONSTRUCTION (`docs/axis-validity-session-charter.md` §1) -- and the
+> condition it converted into ("waiting on Track A's first lint run... until
+> the fanfare cells have floors to fill toward") can never be met: the lint
+> found no fanfare floors, and R90/1b moved the question out of Track A
+> entirely. **Items 1-3 and the fanfare STOP now govern on Track B / B-G1.**
+> The chain is R87(1) -> charter §1 -> R90/1b. Re-pointed, not released: the
+> STOP holds, against a gate that can actually discharge it.
 
 **(1) Items 1-3 DEFERRED, behind one playtest with a pre-registered
 question.** The Furina strength lever + legibility pair, the
@@ -3327,6 +3350,18 @@ stream sits down.
    time; this is almost certainly one of the 42, observed in the wild rather
    than in a table. The acceptance form the routing note takes: **DRAFTER 13
    is not done while The Gallery Stirs scores 0.0 at offer.**
+
+   > **CORRECTION 2026-08-06 (R107; S4 finding F2). The fixture is RE-HOMED to
+   > the `_static_power` repricing session**, item 2's stream, and is no longer
+   > an acceptance condition on DRAFTER 13. "Almost certainly one of the 42"
+   > was wrong: DRAFTER 13 landed 2026-07-29 (`3e3c243`) and prices all 56 ops,
+   > and `score_offer("crowd_work")` still returns **0.0** under the stamped
+   > D13 tree. The zero comes from `_static_power`'s power-name blindness
+   > (`docs/tech-debt-audit-2026-07-26.md` §2.5), which is the stream this item
+   > now belongs to. The original 42-of-56 register entry is struck at
+   > `docs/backlog-2026-07-29.md` §1. **Nothing measured is rewritten** -- the
+   > 0.0 observation stands exactly as recorded; only its acceptance owner
+   > moves.
 2. **`score_offer` prices Vulnerable as a flat debuff** (`amount * 2` through
    `_static_power`), so it cannot see a multiplier applied to an engine
    already producing damage every turn. -> the **`_static_power` repricing
@@ -3715,3 +3750,278 @@ in a chosen order; S7 stays last, adjacent to the B2 footnote this pass landed.
 
 **Class: MECHANICAL.** Nothing merged, nothing pushed; a plan meets the shape of
 the thing it plans over.
+
+## R107 -- The S4 hygiene report is approved entire, and its two HIGH findings give three dangling items a governing condition again (2026-08-06)
+
+Sitting of 2026-08-06, section 1. Source: `review/ledger-audit/hygiene-report.md`
+(S4 -- seventeen findings F1-F17, 2 HIGH / 8 MEDIUM / 7 LOW, "STRICTLY
+READ-ONLY -- nothing was amended; every resolution below is PROPOSED, NOT
+EXECUTED"). Transcript of the sitting: `docs/sitting-record-predraft-2026-08-06.md`.
+
+**Verbatim: "F1-F17 approved as proposed."** All seventeen repairs are approved
+AS PROPOSED and unlocked for mechanical execution -- the strikes, banners and
+cross-references exactly as each finding's own PROPOSED paragraph words them.
+Nothing wider is authorised by this entry: approving a proposal approves *that*
+proposal, and where a proposal's text does not say what to change, the repair
+does not happen and is reported back rather than guessed.
+
+**F1 -- the Furina deferral chain gets a governing condition back.** R87(1)'s
+trigger (the Furina playtest) fired, and the condition it converted into (the
+Track A lint finding fanfare floors to fill toward) can never be met, because
+the lint found none and R90/1b moved the question out of Track A entirely.
+Backlog items 1-3 -- strength lever + legibility, dead-archetype question,
+salon leak -- and **the fanfare STOP** therefore **re-point to Track B /
+B-G1**, as F1 proposes. This is a re-pointing of a condition, not a release:
+the STOP holds, and it now holds against a gate that can actually discharge it.
+
+**F2 + G8 -- the Gallery Stirs fixture re-homes, and the owed DRAFTER 13 entry
+lands as ratified.** The acceptance fixture ("DRAFTER 13 is not done while The
+Gallery Stirs scores 0.0 at offer", R96 item 1) was bound to a stream whose
+mechanism cannot clear it: the zero comes from `_static_power`'s power-name
+blindness, not from the op enumeration D13 repaired. It **re-homes to the
+`_static_power` repricing session**, where R96 item 2 already sits. **G8 is
+DISCHARGED** by clause (a) below.
+
+**(a) The DRAFTER 13 repricing entry, owed since 2026-07-29, is written here
+rather than as a new D-number** -- the D-series in this file is the difficulty
+series (D2-D5) and "D13" in the sim-hygiene log is a DRAFTER world stamp; two
+numbering systems sharing a token is exactly the hygiene F2 exists to stop.
+RATIFIED as measured: `tier05/draft.py::STATIC_OP_PRICING` classifies **all 56
+engine ops** (`lint_op_parity`: "56 registered ops, 56 priced"), taking cards
+priced at exactly 0.0 by the offer-time scorer from **187 of 461 to 133** --
+**54 cards became visible to the drafter**. World stamp `RT7 / D13 / P3 / C4`,
+landed 2026-07-29, `tier0/constants.py` `DRAFTER_VERSION = 13`. The PROPOSED
+mark is lifted from the repricing and from the paired D12/D13 roster-anchor
+columns **as measurements**. What is NOT ratified, because the repo already
+corrected it: the n=600 table's per-arm deltas. The n=3000 re-read on seed
+20260729 found the fanfare "+1.0" to be **-0.1** and every other arm consistent
+with zero. The honest ratified finding is the one that survived five times the
+sample -- **the repricing made 54 cards visible and bought no measurable run
+winrate anywhere**.
+
+**(b) Historical rows are annotated, never rewritten** (R101b). Every F-repair
+that touches a landed number or a superseded claim lands as strikethrough plus
+a dated banner carrying the correcting reference. No measured value is edited
+into a different value anywhere in this batch.
+
+**Class: SUBSTANTIVE** for F1's re-pointed governing condition and F2(a)'s
+ratification of the DRAFTER 13 repricing. **Class: MECHANICAL** for the other
+fifteen repairs, which move paper and no value.
+
+## R108 -- G1 is COUNTERSIGNED: Zhongli takes roster slot 4, and the deep dive is unblocked (2026-08-06)
+
+Sitting of 2026-08-06, section 2. **Verbatim: "Zhongli for slot 4."**
+
+R88 has stood in DRAFT since 2026-07-29 ("reconstructed, needs [USER]
+countersign") and was the recorded blocker on the Zhongli deep dive -- S4's
+gate G1. It is **countersigned**: Zhongli takes roster slot 4, and R88's
+eligibility record is resolved with it.
+
+**The deep dive is unblocked but NOT scheduled.** Track J's dossier
+(`docs/zhongli-dossier-2026-08-05.md` -- canon kit inventory, StS2/Downfall
+precedent scan, open questions, the Crystallize fence honored) is on main and
+is the session's opening exhibit. Scheduling is [USER]'s, post-week-off.
+Nothing in the kit is decided here: a slot is filled, not a character designed.
+
+**Class: SUBSTANTIVE.** A DRAFT ruling becomes law and a roster slot is
+occupied.
+
+## R109 -- S13 yields two rarity laws, each arriving with a mechanical audit attached (2026-08-06)
+
+Sitting of 2026-08-06, section 3, families X2 and X7. Source:
+`review/redteam/exploit-ledger.md` (71 lines, 71/71 replay-verified, 14
+mechanism families). Pins: `tier0/tests/test_s13_exploit_pins.py`.
+
+**X2 -- self-replacing 0-cost companions. Verbatim: "Not a problem; power in
+line with existing Uncommon Colorless... infinite cycling engines gated to
+Uncommon rarity or higher. If this is Common, it needs a bump."**
+
+NEW LAW, stated as the verdict states it: **an infinite cycling engine is gated
+to Uncommon rarity or higher.** A card that is hand- and energy-neutral and
+replaces itself is a cycling engine whatever else it does. MECHANICAL AUDIT
+attached: rarity check on `sayu_naptime` and on every self-replacing 0-cost
+non-exhaust companion in the committed pools; Common instances are **flagged
+for a rarity bump**, not bumped by the auditor -- the audit reports, the bump
+is priced where bumps get priced.
+
+**X7 -- the Klee spark economy. Verbatim: "Gate repeatable spark generation
+behind Uncommon or make sure no card below Rare is both 'sparks + draw
+enabler'"**
+
+NEW LAW, and the disjunction is load-bearing and is preserved as stated: EITHER
+repeatable spark generation sits at Uncommon or higher, OR no card below Rare
+is simultaneously a spark source and a draw enabler. Two ways to satisfy it;
+the law is not silently collapsed to one. MECHANICAL AUDIT attached: a sweep of
+the Klee pool for cards violating both limbs, findings to the Klee-rework
+docket (`docs/dockets/klee-rework.md`).
+
+**Neither audit is run by this entry, and neither audit may fix what it finds.**
+An audit that repaired its own findings would be a design session wearing a
+checklist. Findings land in the docket; the bumps are a sitting item.
+
+**Class: SUBSTANTIVE.** Two standing laws enter the constitution's orbit; no
+card value moves under this entry.
+
+## R110 -- S13's three ratified changes: Encore Performance, replay_next_companion, and the spotlight fallback (2026-08-06)
+
+Sitting of 2026-08-06, section 3, families X3, X11 and X14. Each is a RATIFIED
+CHANGE: the verdict names the fix, so there is nothing left to decide and
+everything left to implement.
+
+**X3 -- Encore Performance closes over itself. Verbatim: "Remove the energy
+rider and make it free to play instead."**
+
+Card-sheet change: the upgrade **loses `copy_cost_override: 0`**, and the base
+card **becomes 0-cost**. The energy-positive loop dies with the rider; the card
+keeps its identity by being free rather than by paying itself back.
+
+**X11 -- replay_next_companion stacking. Verbatim: "Cap those effects to 'same
+turn only'"**
+
+The counter is **scoped to the turn**. Write-side or spend-side is the
+implementer's call, decided by a parity check against the C# mod, because the
+two engines must agree on where the scope lives and neither reading is a design
+question. The Study Buddy / Duet parity twins are **both** covered -- they
+write one counter, so one scope closes both.
+
+**X14 leg (b) -- ethereal-spotlight starvation. Verbatim: "Add a fallback: if
+the hand is full, one random card is discarded before the spotlight is
+added."**
+
+RATIFIED for **leg (b) only**. The relic that exists to guarantee Furina a play
+stops being the thing a full hand starves.
+
+**HELD -- FLAG-2 (X3's two adjacent closures).** The ruling cleanly kills the
+energy-positive loop; two closures in the same family remain undisposed and are
+recorded here as questions, not as work:
+  (i) a copied `sucrose_catalyst_conversion` regenerates faster than its
+      Exhaust bound removes it -- the sheet's stated bound is deleted by the
+      copy op. Whether the copy op should respect printed bounds is a design
+      call and is HELD.
+  (ii) `cost_override` writes to the card instance with no turn scoping, so
+      "temporary" 0-cost copies are permanently free (S14 cross-ledger: this
+      rides a known parity defect). It reads as a straight bug with an
+      unambiguous fix -- turn-scope the override -- and becomes mechanical the
+      moment it is blessed. It is not blessed yet. HELD.
+
+**HELD -- FLAG-4 (X14's other two legs).** Leg (a): `curse_poor_sleep` is typed
+both `status` (unplayable) and `retain: true` (unflushable), so ten copies are
+a permanent hand jam -- this looks like a data-typo-class bug, a curse that
+retains forever. Leg (c): Powers route to `result_pile: none`, so an all-Power
+deck erases itself into 27 empty turns -- this may be intended StS-like
+behaviour. One-line verdict each is requested; neither is probed, pre-drafted
+or fixed here.
+
+**Class: SUBSTANTIVE.** Three card/engine behaviours are ruled changed. The
+held legs change nothing until they are ruled.
+
+## R111 -- S13's other nine families: what is not changing, and what "watching" obliges (2026-08-06)
+
+Sitting of 2026-08-06, section 3, families X1, X4, X5, X6, X8, X9, X10, X12,
+X13. Verdicts verbatim; routing is this entry's.
+
+**X1 -- the companion cost-delta accumulator. Verbatim: "Let's make a note of
+this for the Klee rework"** -- NOTE, to `docs/dockets/klee-rework.md`. **See
+FLAG-1, HELD, below.**
+
+**X4 -- Guest Cast unfiltered 1.5x. Verbatim: "Seems totally fine as a
+damage-boosting power... may need to limit to 'damage only' if the block
+scaling gets absurd."** -- WATCH ITEM. Revisit trigger, as stated: **the block
+side getting absurd.** The telemetry that would show it is block-side Guest
+Cast readings; the register entry names the reading so the trigger is
+falsifiable rather than a feeling.
+
+**X5 -- fanfare floor stacking. Verbatim: "Likewise seems fine; cycling at
+uncommon does not feel problematic."** -- **HELD FOR CLARIFICATION, FLAG-3.**
+Nothing is executed, probed or pre-drafted on X5 by this batch.
+
+**X6 -- salon displacement double-pay. Verbatim: "As a strategy, totally fine
+(Defect does the exact same thing) -- it's the power level we need to watch."**
+-- WATCH ITEM. The strategy is blessed; the **power level** is the watched
+quantity, and that is the distinction the register entry records.
+
+**X8 -- bomb damage, two uncapped terms. Verbatim: "Not a problem at higher
+rarity -- need to check these cards."** -- MECHANICAL AUDIT: rarity check on
+the carrier cards of both terms; findings to the Klee-rework docket.
+
+**X9 -- the Kokomi charge bank. Verbatim: "Probably too strong as-is and needs
+to be parsed carefully. Review during the next kit workshop."** -- NOTE to the
+Kokomi kit-workshop / pool-rework docket, which is already queued third. Not
+opened early: the verdict names the venue.
+
+**X10 -- the Metallicize treadmill. Verbatim: "10 of the same Companion at
+common seems exceptionally unlikely. May be worth moving to Uncommon and
+adjusting power up."** -- **CANDIDATE, NOT RATIFIED.** "May be worth" is not a
+ratification, and this entry does not upgrade it into one. Filed to the
+companion-pricing docket as a candidate: `gorou_heart_of_the_clan` Uncommon
+promotion plus a power adjustment, **priced at a sitting**, not here.
+
+**X12 -- cross-element reaction splashes. Verbatim: "Seems probably fine; half
+the fun of co-op. Check actual potency in co-op playthroughs."** -- WATCH ITEM,
+with an instrument caveat: the Track H reactions corpus is the instrument, and
+it is not usable for this until its denominator defect (O-1, see R112) is
+repaired and the corpus re-read.
+
+**X13 -- the 14-relic weakness eraser. Verbatim: "Also seems fine; odds of a
+specific relic combo are low."** -- **NO ACTION.** The finding's open
+drop-rate question is recorded as **answered by judgment**: the odds argument
+is the answer, and no drop-rate measurement is owed.
+
+**HELD -- FLAG-1 (X1's second enabler).** The accumulator has two run-plausible
+enablers riding one piece of shared uncapped state
+(`companion_cost_delta_this_turn`): Klee's `friendly_visit` (common) **and**
+Kokomi's `honor_guard` (printed 0-cost). A Klee-rework-only note leaves the
+Kokomi leg live. Questions, held: should the note also ride the Kokomi
+pool-rework docket, and/or should the accumulator itself -- shared machinery,
+uncapped, floored at 0 -- take a structural disposition at a systems session?
+Recorded, not answered.
+
+**HELD -- FLAG-3 (what X5's verdict covers).** The verdict's language ("cycling
+at uncommon") maps onto the family's *cantrip leg* -- upgraded `tempo_change`,
+cost 1, draw 2, +1 refund, infinite. The family's core is different machinery:
+**stacked fanfare floors permanently delete the 20%/turn decay that is the
+meter's only sink** (one-card 240, turn-2 boss kill, unloseable stall, turn-3
+boss kill on commons-only income). Question: does "seems fine" cover the
+decay-proof floor stacking, or only the cantrip leg? Held rather than guessed,
+per the no-supplied-assumptions norm.
+
+**What a WATCH ITEM is, recorded once for reuse.** It is not a deferral and not
+a queue entry. It is a blessing of the mechanism plus a named quantity and a
+named trigger: the item does not come back until the trigger fires, and when it
+fires it comes back with a reading, not with an argument.
+
+**Class: SUBSTANTIVE** for X13's no-action and for the four blessings that
+close their families. **Class: MECHANICAL** for the notes, the routings and the
+register. No number moves anywhere in this entry.
+
+## R112 -- The two swarm findings are docketed, and the [USER]-side queue is restated without growing (2026-08-06)
+
+Sitting of 2026-08-06, sections 5 and 6. **No verdicts were requested on either
+finding**, and none is recorded here; this entry exists so neither is lost.
+
+**O-1 (instrument, HIGH) -- the reactions corpus denominator.** `run_battery`
+merges the gauntlet's two stages into one `FightStats` while rates divide by
+records, so **every published Track H per-fight reaction rate overstates**:
+all-row aura applications per fight **7.70 -> 6.60, an overstatement of
+16.7%**. The defect is unambiguous, so the repair and a corrected corpus
+re-read are **MECHANICAL** and queued as such, pinned per the Track K idiom. It
+is also the blocking dependency on X12's watch item (R111), which is why the
+two are cross-referenced in both directions.
+
+**N-1 (lore, HIGH) -- a live miss inside a verified set.** The `gorget` gallery
+rationale cites Concealed Unguis as Bathysmal Vishap material; it is a Riftwolf
+drop (The Chasm). The retroactive audit found what the original S8 pass
+cleared, which is the interesting half: a verified set is a claim about a pass,
+not about a fact. Routed to [USER]'s N-ledger review with the other four
+TOP-5s. **This batch does not repair N-ledger lore**, by standing instruction.
+
+**Carried on [USER]'s side, restated, not grown:** the R102 escrow countersign
+(pre-draft ready, one strike operation); the S2 event-gallery checkboxes; the
+S14 canonicity rulings (NC-1, shop slot 1, Frozen, `spend_potion`); the G6
+Kokomi stability-band declaration; the four merge-train paperwork one-liners;
+the N/O TOP-5 review; the Ancients and boss-pool galleries whenever inspiration
+strikes. Nothing was added to this list by the sitting, and nothing was
+silently dropped from it.
+
+**Class: MECHANICAL.** Two findings take a docket and a queue is copied
+forward. Nothing is graded, priced or decided.
