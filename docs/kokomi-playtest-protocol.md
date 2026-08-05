@@ -85,7 +85,7 @@ Three carry specific standing flags:
   goes.
 
   **The flag did not close when the number moved.** At the landed ×3 the
-  hierarchy is upright at baseline (bank 10: 34 vs 17), but G2 ratified a
+  hierarchy is upright at baseline (bank 10: 34 vs 17), but G2 (`NT-G2`) ratified a
   *stacking* "Before Sun and Moon" that adds +1 (+2 upgraded) to this same
   coefficient with no cap — so one Uncommon draft puts a **basic** card back
   above the Rare readers (bank 10, ×5: 54 vs 17). What playtest three is

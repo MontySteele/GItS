@@ -68,7 +68,7 @@ ruling; disposition (build / waive / re-file) is [USER]'s.
   (best plan below the roster act-1 floor), the pre-committed ×3 fallback
   fired, and the landed multiplier is **3**.
 - **The registration was right and the number was not the whole story.** The
-  cell measured the constant; G2 then ratified a *stacking* `kurage_amp` card
+  cell measured the constant; G2 (`NT-G2`) then ratified a *stacking* `kurage_amp` card
   that moves the same coefficient without a cap, so the multiplicative read is
   now a drafted quantity rather than a fixed one. That successor watch lives
   in C4 telemetry (stack counts, no threshold — R14) and in the
@@ -349,7 +349,7 @@ Three related items, all flagged in code comments and on no live list:
   **BOTH FIXED AT SOURCE — struck 2026-08-06 (R107; S4 finding F15).**
   `docs/furina-cards.yaml` now carries the comment in its historical form
   ("Was: 3 damage flat, Crackle parity…"), and `docs/mondstadt-companions.yaml`
-  carries the G2 correction in the file's own ledger-corrections style. Struck
+  carries the G2 (`SS-G2`) correction in the file's own ledger-corrections style. Struck
   the way the five "Ledger corrections" items below were struck; the entry
   outlived its fix, not the other way round.
 

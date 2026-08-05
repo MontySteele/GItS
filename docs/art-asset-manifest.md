@@ -88,7 +88,7 @@ Track per-asset tier in a manifest column; "promote to Tier O" becomes a simple 
 
 R85 renamed nine cards, and a card's art was picked for the OLD name. The
 close-out dispositioned each row; this pass acted on those dispositions and
-staged the results for [USER] gate G1. **Nothing is locked.** Every row below
+staged the results for [USER] gate G1 (`CC-G1`, R86). **Nothing is locked.** Every row below
 still carries `pick=shortlist`, so the selection happens in the contact sheet
 (`art_process.py --apply-picks`), which is exactly where a visual judgment
 belongs.
@@ -126,5 +126,5 @@ of `art/SOURCES.tsv` needed to move. `art_lint` passes on the edited plan.
 weakest shortlist of the four. The free pool is thin on nation-scale crowd
 imagery, and both additions are compromises — a banner and a carnival
 gathering, the latter being the same objection that got the ORIGINAL
-`crowd_work` pick rejected. If G1 rejects all five, this row needs a genuine
+`crowd_work` pick rejected. If G1 (`CC-G1`) rejects all five, this row needs a genuine
 fetch pass rather than another re-rank of what is already local.

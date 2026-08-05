@@ -173,6 +173,9 @@ So the playtest is read against the right baseline.
 
 ## 6. NOT playtest items — the desk queue
 
+> **QUEUE POINTER, added 2026-08-06 by the housekeeping sweep (Track X).** The single source of truth for what is open and for whom is now **`docs/registry/user-queue.md`**. This section keeps its full text and stays the place the detail lives; the queue file is the index that says which items are still open, which were discharged and by which ruling. Where the two disagree about a *status*, the queue file is the later reconciliation. Identifier collisions (`G1`, `D5`, `C1`, `P1`, `S4`, `X<n>`) resolve at `docs/registry/identifiers.md`.
+
+
 Listed so they stop being smuggled into playtest agendas. None of these needs
 the game running.
 

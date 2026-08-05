@@ -76,6 +76,13 @@ A (ledger + contract + art intake) → B (model) and C (gauge re-layout) in eith
 
 ## Track G — Sprint-1 debt (now unlocked)
 
+> **IDENTIFIER NOTE, 2026-08-06 (housekeeping sweep, Track X).** This plan's
+> task-ids are the **animation sprint 2** mint: qualified forms `AS2-A1`…`AS2-G2`.
+> `AS2-G1`/`AS2-G2` below are not S4's `S4-G1`/`S4-G2` and not Curtain Call's
+> `CC-G1`/`CC-G2`; `AS2-D5` (the layout pass) is not the DECISIONS D-series
+> `DEC-D5` (Kokomi stability band). Resolver: `docs/registry/identifiers.md`
+> §2.1 and §2.2.
+
 - **G1.** Extract the common bridge base (GaugeBridge + SalonVisualsBridge → one skeleton) — D4's plumbing survived its playtest, which was the ratified trigger; do it AFTER D4's rework lands so the extraction covers the new shape, not the dead one.
 - **G2.** Rename `KleeAnimationRouter` to its true generic scope (`AnimationRouter` or `CreatureAnimationRouter`); comment updated to state it serves every modded creature with an `%AnimationTree`.
 

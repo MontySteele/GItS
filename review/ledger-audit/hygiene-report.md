@@ -135,6 +135,8 @@ Class e ([USER] gates) are in §3 — 20 queue entries, all double-cited.
 
 ## 3. The undischarged [USER] gate queue
 
+> **IDENTIFIER NOTE + STATUS BANNER, added 2026-08-06 by the housekeeping sweep (Track X).** The gates below are minted here and their canonical qualified form is **`S4-G1` … `S4-G20`** — six other namespaces in this repo mint bare `G1`/`G2` (Curtain Call's `CC-G1/G2`, Serenitea Sweep's `SS-G1…G4`, Neap Tide's `NT-G2…G8`, animation sprint 2's `AS2-G1/G2`, Track N's `LF-G1…G5`, Track G's `RA-G1/G2`). Resolver: `docs/registry/identifiers.md` §2.1. **This table is a read-only audit artifact and its State column is NOT amended here** (the report's own "nothing was amended" standing holds). Two rows have since been discharged — **`S4-G1` by R108** and **`S4-G8` by R107(a)** — and `S4-G7` was re-fenced onto `B-G1` by R107/F1. ~~Read the State column below as current.~~ **The live, reconciled queue is `docs/registry/user-queue.md` §2.**
+
 All items explicitly awaiting the user that no later document discharges. Healthy-but-open items are included so the queue is visible in one place.
 
 | # | Gate | Source (cite) | Tracked at | State |

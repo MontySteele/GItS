@@ -2100,6 +2100,16 @@ Suite 766, mod builds clean, pck rebuilds with 8 Kokomi fallbacks.
 
 ## Neap Tide v2.1: R73-R80, and three predictions that did not survive contact (2026-07-26)
 
+> **IDENTIFIER NOTE, 2026-08-06 (housekeeping sweep, Track X).** The `G<n>`
+> labels used throughout this pass and its addendum (G2 stacking, G3 flavor-text
+> convention, G5 the pre-registered fork, G6 `tactical_retreat`, G7 the verb
+> partition, G8 the `swift_currents` merge) are the **Neap Tide** mint:
+> canonical qualified forms **`NT-G2`, `NT-G3`, `NT-G5`, `NT-G6`, `NT-G7`,
+> `NT-G8`**. They are batch item labels, not [USER] gates, and they are not
+> S4's `S4-G<n>` queue. The `P1`-`P9` labels below are Neap Tide predictions
+> (`NT-P<n>`), not Understudy phases. Resolver:
+> `docs/registry/identifiers.md` §2.1 and §2.4.
+
 Kokomi v0.5 amendment + pool pass, executed against the pre-registered sprint
 doc revision 2.1. Baseline ref for both playtests: `c3e11b6` (the Honor Guard
 soft-lock fix). The doc cited `750a9cc`; that commit is real but is not an

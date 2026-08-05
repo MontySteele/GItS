@@ -22,6 +22,13 @@ otherwise).
 
 ## Current docs
 
+### Registry (start here if you are looking something up)
+| doc | what it is |
+|---|---|
+| `registry/identifiers.md` | **The resolver.** What every short code in this repo means — R/D/M/C numbers, world stamps, gates, findings, streams, exploit families, track letters — plus the collision table that assigns qualified forms (`S4-G1` vs `CC-G1` vs `SS-G1`…). Opened 2026-08-06 (housekeeping sweep, Track X). Zero design authority. |
+| `registry/user-queue.md` | **The [USER] queue, single source of truth.** Every open item, what is asked, what it unblocks, and where the full text lives — the four one-word replies, the reconciled S4 gate queue, the four HELD flags, the owed sittings, the Last Call asks, the four paperwork one-liners, table time, art debt. Other documents keep their full text and point here for *status*. |
+| `registry/known-identifiers.tsv` | **GENERATED — do not hand-edit.** The grandfathering snapshot `tools/lint_identifier_registry.py` diffs against. Refresh: `python tools/lint_identifier_registry.py --update-baseline`. |
+
 ### State of the project (start here)
 | doc | what it is |
 |---|---|
@@ -45,7 +52,12 @@ otherwise).
 | `animation-sprint-2-plan.md` | Open sprint: gates B5/D5/E2/F2 (and the Funnel Contract §3, still binding). |
 | `animation-sprint-2-log.md` | Open sprint log; doc of record for the two unfixed Playtest-2 defects. |
 | `fontaine-rares-banner-sprint-log.md` | Sprint closed in code, open on four [USER] items (§"Open, and owned by [USER]"). |
-| `kokomi-playtest-protocol.md` | The protocol for Kokomi's first table time (never played). Where it conflicts with `open-playtest-items.md` §2, the latter wins (newer). |
+| `kokomi-playtest-protocol.md` | The protocol for Kokomi's first table time ~~(never played)~~ — **the *protocol* run has not happened (its "Answers" block is blank), but Kokomi has had table time**: exploratory plays 2026-07-25/26 (`DEC-D5`-designated as contaminating-exploratory) and a seat in the three-seat co-op holdout of 2026-08-01/02. (Row corrected 2026-08-06 by the housekeeping sweep, Track X — same class as S4 finding F17, which R107 executed on `open-playtest-items.md` §2 but which was never swept through this index row.) Where it conflicts with `open-playtest-items.md` §2, the latter wins (newer). |
+| `awaiting-user-slots-2026-08-06.md` | Three prepared landing slots, **AWAITING [USER]**, each with its answer text drafted in advance in every form the reply can take. Nothing in it is executed. Indexed 2026-08-06 (Track X). |
+| `sitting-record-predraft-2026-08-06.md` | [USER]'s verdicts of 2026-08-06, transcribed **verbatim** and committed before anything was executed from them. The authority document behind R107–R112. Indexed 2026-08-06 (Track X). |
+| `sitting-prep-2026-08-05.md` | The Last Call sitting's single entry point. **Still live for §8 (the four paperwork one-liners) and §10 (the batch's own asks)** — status for both is reconciled in `registry/user-queue.md` §5/§6. Indexed 2026-08-06 (Track X). |
+| `surplus-week-manifest-2026-08-05.md` | INDEX for surplus week (`SW-S1…S15`), the Last Call/House Lights addendum, and the Second Wind batch's landings and replies. Indexed 2026-08-06 (Track X). |
+| `pending/` | Adopted-but-retained proposal documents (`SS-G3` the CI argument, `SS-G4` the session-isolation argument), kept as the standing reasoning behind two live policies. Index: `pending/README.md`. **Indexed 2026-08-06 (Track X) — S4 §4 lead 6 recorded that this directory was indexed nowhere.** |
 | `run-model-rework-plan.md` | Implemented (Passes 1–4 shipped); kept current for §10.9, the living skip backlog. |
 | `tier05-perf-and-ironclad-act3-notes.md` | Perf pass record; kept current for §1.5.2's open items (out-of-scale boss audit lives only here). |
 | `tech-debt-audit-2026-07-26.md` | The architecture audit; kept current for §9 (the big-push sequencing, with D3's pin-batch pull marked in place) and §10, the horizon list of open design sessions. |
@@ -87,6 +99,21 @@ otherwise).
 | `companion-value-vs-colorless-study.md` | Empirical backing for principles §4.7 and R59. |
 
 ---
+
+## Archive review — 2026-08-06 (housekeeping sweep, Track X)
+
+A conservative archive pass ran over the current set. **Nothing was moved.**
+The rule applied was the sweep's own: *when in doubt it stays live and gets a
+status header instead.* Recorded so the pass is not re-run blind:
+
+| Candidate | Why it looked archivable | Why it stayed live |
+|---|---|---|
+| `track-a-kickoff-brief.md` | Track A executed 2026-08-04; the track log is the doc of record | Four `tools/` modules cite it by path in their module docstrings (`canon_role_tempo.py`, `suggest_role_tempo_tags.py`, `lint_role_tempo_coverage.py`, `role_tempo.py`). Moving it makes four live citations stale to fix one index row. **Status header added in-file instead.** |
+| `understudy-kickoff-brief.md`, `understudy-phase0-report.md`, `understudy-p0-findings.md` | Phase 0 closed; rulings landed as R93–R97 | The Understudy sprint is open (`UND-P1.5` is next, R104), and `understudy/README.md`, `understudy/soak.py`, `vendor/README.md`, `vendor/STS2_MCP/PROVENANCE.md` and `docs/atlas/vendor-sts2-mcp.md` all cite them as live provenance |
+| `sitting-record-predraft-2026-08-06.md` | Its content landed as R107–R112 | It is the **verbatim** [USER] authority document those six rulings are drawn from; the rulings cite it |
+| `handback-note-2026-08-04.md` | The session it opened has closed | Verbatim [USER] text, cited by R97; verbatim records are not edited or relocated by a paper sweep |
+| `pending/serenitea-g3-ci-proposal.md`, `pending/serenitea-g4-session-isolation.md` | Both ADOPTED | `pending/README.md` explicitly retains them as the standing argument — *"read it before adding a job"* |
+| `brief-*.md` (three) | Briefs, not sprints | All three are cited as the live filing target by R87, R92/3c and the backlog |
 
 ## Archive map
 

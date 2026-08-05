@@ -3,7 +3,18 @@
 For: local Code agent (Opus). From: chat session 2026-08-04.
 Charter: `docs/axis-validity-session-charter.md` (v0.2, PROPOSED — read §3
 before touching anything; this brief is the execution slice of Track A only).
-Worktree-per-session (G4). Suite green at every track boundary.
+Worktree-per-session (G4 = `SS-G4`). Suite green at every track boundary.
+
+> **STATUS HEADER, added 2026-08-06 by the housekeeping sweep (Track X).**
+> **EXECUTED 2026-08-04.** Doc of record for what actually happened is
+> `docs/sprint-axis-validity-track-a-log-2026-08-04.md`; the rulings are R90
+> (the null's direction), R91 (the tag review, discharging `A-G1`) and R92
+> (housekeeping). This brief is **kept live, not archived**, because four
+> `tools/` modules cite it by path in their docstrings as the origin of tasks
+> `TA-T1`–`TA-T4` (`canon_role_tempo.py`, `suggest_role_tempo_tags.py`,
+> `lint_role_tempo_coverage.py`, `role_tempo.py`). Read it as a historical
+> execution slice: where it disagrees with the track log or with R90–R92, they
+> win. Identifier resolver: `docs/registry/identifiers.md`.
 
 ## Standing context you need
 

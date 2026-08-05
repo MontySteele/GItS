@@ -382,6 +382,12 @@ Per-resource register census (independently computed, not read off the lint):
 
 #### Mechanical gaps in the law's own coverage (findings, not violations)
 
+> **IDENTIFIER NOTE, 2026-08-06 (housekeeping sweep, Track X).** The `G1`-`G5`
+> rows below are the **Track N lore-fidelity** mint: canonical qualified forms
+> **`LF-G1`…`LF-G5`**. They are coverage gaps in `lint_furina_registers.py`,
+> not [USER] gates, and they are not S4's `S4-G1…G20`. Resolver:
+> `docs/registry/identifiers.md` §2.1.
+
 | # | Gap | Evidence | Live today? |
 |---|---|---|---|
 | G1 | **R4 selects zero cards** — the Encore→`private` binding has no live instance, so Encore's three-way register split is unadjudicable. | `lint_furina_registers.py:136-140` vs all 82 rows | Yes — 21 Encore cards, 0 constrained |

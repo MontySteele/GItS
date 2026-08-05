@@ -81,6 +81,15 @@ jobs:
         run: python tools/lint_role_tempo_coverage.py --gate
       - name: roster registry
         run: python tools/lint_roster_registry.py
+      # Housekeeping sweep (Track X), 2026-08-06. Guards the identifier registry
+      # at docs/registry/identifiers.md. It checks ADDITIONS ONLY -- everything
+      # in the tree when the registry opened is grandfathered by the committed
+      # snapshot docs/registry/known-identifiers.tsv -- so it can never turn the
+      # existing corpus red. Read the module docstring before widening it: the
+      # under-flagging is deliberate, because a lint that fights every doc commit
+      # gets deleted and takes the registry with it.
+      - name: identifier registry
+        run: python tools/lint_identifier_registry.py
       # Understudy 2026-08-04. vendor/ carries third-party source pinned to an
       # exact upstream commit; this asserts the tree still is what the
       # provenance note says it is, in both directions. Cheap, and the one

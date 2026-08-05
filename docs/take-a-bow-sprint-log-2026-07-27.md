@@ -195,6 +195,12 @@ one playthrough answers and no static check can.
 
 ## 5. Open at close
 
+> **IDENTIFIER NOTE, 2026-08-06 (housekeeping sweep, Track X).** `G1`/`G2` here
+> are the **Curtain Call** mint (R86): canonical qualified forms **`CC-G1`**
+> and **`CC-G2`**, tracked jointly by S4 as `S4-G12`. Not S4's `S4-G1`/`S4-G2`.
+> Resolver: `docs/registry/identifiers.md` §2.1. Live status:
+> `docs/registry/user-queue.md` §2.
+
 - **G1** — contact-sheet eyes-on: four REHUNT rows + the `standing_room_only`
   overturn. Nothing locked until then.
 - **G2** — the checklist above.

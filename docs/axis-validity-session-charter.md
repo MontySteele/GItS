@@ -216,6 +216,13 @@ Track A is measurement and vocabulary on existing fields).
 
 ## §7. [USER] gates (triaged)
 
+> **IDENTIFIER NOTE, 2026-08-06 (housekeeping sweep, Track X).** This charter's
+> gates are **already qualified** (`AV-G2`, `A-G1`, `B-G1`) and stay as written.
+> Recorded here only so the resolver is complete: S4 tracks `B-G1` as its own
+> `S4-G5`, and R107/F1 made `B-G1` the governing condition on backlog items 1-3
+> and the fanfare STOP. Resolver: `docs/registry/identifiers.md` §2.1; live
+> status: `docs/registry/user-queue.md` §2.
+
 Live now: **AV-G2** — countersign the ratification bundle in §6.1 (one
 signature; §1's grade quotes your own report, the principles you've assented
 to in session, the canon evidence is attached).

@@ -903,6 +903,14 @@ needs. The tree is green **without** any of it: 1030 passed, all lints, and
 
 ### G1 + G2 — the sheet-comment pass, and a finding about it
 
+> **IDENTIFIER NOTE, 2026-08-06 (housekeeping sweep, Track X).** This sprint's
+> track-G items are the **Serenitea Sweep** mint: canonical qualified forms
+> **`SS-G1`…`SS-G4`**. `SS-G4` is the worktree-per-session policy cited
+> repo-wide as "Worktree G4"; `SS-G3` is the CI proposal that became
+> `.github/workflows/repo.yml`. They are not S4's `S4-G1…G20` gate queue, not
+> Curtain Call's `CC-G1/G2`, and not animation sprint 2's `AS2-G1/G2`.
+> Resolver: `docs/registry/identifiers.md` §2.1.
+
 `docs/pending/serenitea-g1-sheet-comments.patch`. Applied, verified green,
 reverted; the patch is that exact state and re-applies cleanly.
 

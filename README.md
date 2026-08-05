@@ -13,6 +13,14 @@ Project documentation lives in `docs/` — see `docs/README.md` for the index
 (current docs vs. `docs/archive/`, plus `docs/missed-requirements.md`, the
 2026-07-26 recap audit of requirements that were never built).
 
+Two lookup files sit above the index:
+
+- `docs/registry/identifiers.md` — what any short code in this repo means
+  (`R112`, `D14`, `S4-G6`, `S13-X5`, `NC-1`, `FLAG-3`, …), with the collision
+  table for the tokens that several documents mint.
+- `docs/registry/user-queue.md` — the single source of truth for what is open
+  and who owes it.
+
 ## Building the mod
 
 Prerequisites (one-time):
