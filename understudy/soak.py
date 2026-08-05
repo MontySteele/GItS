@@ -340,6 +340,19 @@ class Session:
         escapes, and a fresh process plus `abandon_run` is the only reliable
         way back to the main menu.
         """
+        # THE SUPERSEDED ENTRIES ARE CLOSED BEFORE NEW ONES OPEN. A restart
+        # reassigns `_launch_entry` and `_speed_entry`, so without this the old
+        # rows sit at APPLIED forever and the ledger over-reports what is still
+        # outstanding in the game directory. A reversibility log that cries
+        # wolf is one nobody reads.
+        self._step(self._launch_entry,
+                   lambda: "process terminated (superseded by a restart)")
+        if self._speed_entry:
+            self.ledger.revert(
+                self._speed_entry,
+                "superseded by a restart; the setting does not survive the "
+                "process and is re-captured below")
+            self._speed_entry = None
         self._kill()
         self._launch()
         self.wait_for_menu()
