@@ -21,7 +21,7 @@ good.
 | 1 CHOSEN SEEDS | `POST /api/v1/gits/seed` on the forked bridge, fired between the character pick and the embark confirm; verified by read-back | `vendor/STS2_MCP/gits/GitsSeed.cs`, `understudy/bridge.py`, `understudy/soak.py` |
 | 2 RESOURCE VISIBILITY | `player.resources` on the wire — a reflection read of BaseLib's own custom-resource registry | `vendor/STS2_MCP/gits/GitsResources.cs`, one line in `McpMod.StateBuilder.cs` |
 | 3 SELECTOR RECORDING | `fight.selectors` — every selector answer with the offers it was chosen from | `understudy/soak.py` |
-| (reader) | `understudy/replay.py` — reconstruction and trace comparison | new file |
+| (reader) | `understudy/trace_replay.py` — reconstruction and trace comparison | new file |
 
 ---
 
@@ -177,12 +177,27 @@ on the next, because `naming.describe` lowercases and the blob fallback did
 not. Two spellings of one screen, in the channel whose entire job is to be
 compared. Pinned by a test.
 
-## The reader — `understudy/replay.py`
+## The reader — `understudy/trace_replay.py`, and a name collision
 
-**It did not exist.** The P1.5 spec's acceptance clause says "`understudy/
-replay.py` can consume the new fields (extend it minimally if needed)"; there
-was no such file at `main`. It was built minimally rather than the ambiguity
-resolved: a reader, not an engine.
+**It did not exist, and then it did, and it was somebody else's.** The P1.5
+spec's acceptance clause says "`understudy/replay.py` can consume the new
+fields (extend it minimally if needed)". There was no such file at the commit
+this branch started from (`7835bcd`). One was built here — and while it was
+being built, **the merge train landed `understudy/replay.py` on `main` from
+the S7 fidelity audit**, a different instrument wearing the same word:
+
+| module | what it reads | what it does |
+|---|---|---|
+| `understudy/replay.py` (S7, landed) | soak logs **and tier0** | drives the sim through the recorded action sequence, diffs the two instruments' numbers |
+| `understudy/trace_replay.py` (P1.5, here) | soak logs only | reports whether two RECORDINGS of one seed agree |
+
+**The landed file keeps the name; this one moved.** That is the mechanical
+resolution, not a judgement about which module the spec meant — and it is a
+real question, because the clause's own words are *"reconstruction only, no
+rules retyped"*, which describes `trace_replay` and not the module that drives
+an engine. **Flagged for the red pen; deliberately not decided here.** Both
+modules exist, neither was altered by the other, and the trial merge with
+current `main` is otherwise clean.
 
 **It simulates nothing and never will.** No damage formula, no meter law, no
 draft score is retyped. It reads two JSONL logs the soak wrote and reports
@@ -217,7 +232,7 @@ and show the recorded selector choices + meter readings are identical.*
 | stamps | `20260805-115449` (A), `20260805-115620` (B) |
 
 ```
-$ python -m understudy.replay 20260805-115449 20260805-115620
+$ python -m understudy.trace_replay 20260805-115449 20260805-115620
 REPLAY COMPARE  A=20260805-115449  B=20260805-115620
 
 run 001: IDENTICAL  seed=P15BR1DGE1 (chosen P15BR1DGE1)
@@ -266,7 +281,7 @@ is a cross-session change that takes its note first.
 
 | key | writer | reader |
 |---|---|---|
-| `selectors` | `understudy/soak.py` (bot feed only) | `understudy/replay.py`; available to `tools/track_b_curves.py` |
+| `selectors` | `understudy/soak.py` (bot feed only) | `understudy/trace_replay.py`; available to `tools/track_b_curves.py` |
 
 `schema` stays `"1"`: additions do not bump it, and a test asserts that
 together with the continued presence of every P1 key.
@@ -326,8 +341,10 @@ hand it describes is a different measurement.
 2. **The `lobby` seed route never fired.** `debug_override` carried all three
    live runs. The lobby arm is retained and reports itself; nobody should read
    "two routes work" out of this pass.
-3. **`understudy/replay.py` did not exist** when the spec's acceptance clause
-   named it. It was built around rather than treated as a spec error.
+3. **`understudy/replay.py` NAME COLLISION.** It did not exist at this
+   branch's base; S7's landed on main mid-flight. Ours moved to
+   `understudy/trace_replay.py`. Which module the acceptance clause meant is
+   a red-pen question -- see the section above.
 4. **The live salon cap is now correct; the salon MEMBER LIST still is not.**
    The wire carries the member count and this pass did not add the roster.
    Nothing needed it; recorded so the next reader does not assume it is there.

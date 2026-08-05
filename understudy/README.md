@@ -21,7 +21,8 @@ This directory drives the **real game** through the vendored STS2MCP bridge
 | `rng.py` | the dedicated policy stream, and the refusal that keeps a game seed out of it |
 | `harness.py` | `begin` / `state` / `act` — the Phase-0 measurement loop |
 | `soak.py` | **P1**: N unattended policy_v1 runs, telemetry, watchdog, reversibility. **P1.5**: chosen seeds, the encore column, the selector channel |
-| `replay.py` | **P1.5**: reconstruct a recorded fight, and compare two recordings of one seed. Reads logs; simulates nothing |
+| `replay.py` | **S7**: drives tier0's combat model through a recorded action sequence and diffs the two instruments' numbers. It reads the SIM |
+| `trace_replay.py` | **P1.5**: reconstruct a recorded fight and compare two recordings of one seed. It reads nothing but JSONL. Named apart from `replay.py` because the two are different instruments, not two halves of one |
 | `report.py` | the morning report — defects, outliers, curves. No LLM |
 | `analyze.py` | the Phase-0 divergence analysis |
 | `logs/` | per-run decision JSONL; `phase0-<seed>.jsonl` (committed), `soak/` (gitignored) |
@@ -112,7 +113,7 @@ with (R97/5b).
 
 ```
 python -m understudy.soak --runs 1 --seed P15BRIDGE1 --max-fights 2
-python -m understudy.replay <stampA> <stampB>       # compare two recordings
+python -m understudy.trace_replay <stampA> <stampB>  # compare two recordings
 ```
 
 R95 accepted read-back seeds for P1 and gated CHOSEN seeds at the first

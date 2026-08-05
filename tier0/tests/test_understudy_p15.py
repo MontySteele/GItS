@@ -12,6 +12,11 @@ here rather than left to be rediscovered:
     item 3  SELECTOR RECORDING `fight.selectors`, and the offered list that
                                makes a recorded answer reconstructible
 
+`understudy/trace_replay.py` is imported as `replay` throughout this file for
+brevity. It is NOT `understudy/replay.py`, which is S7's sim-fidelity replay
+and a different instrument that happened to land on main under the name P1.5's
+spec had asked for; the module docstring records the collision.
+
 WHAT THIS FILE CANNOT TEST, STATED SO NOBODY READS MORE INTO A GREEN BAR
 Whether the GAME honours a chosen seed. That is a live-game measurement, it
 was made, and it is written up in the sprint log with its seed and its
@@ -26,7 +31,8 @@ import json
 
 import pytest
 
-from understudy import bridge, replay, soak
+from understudy import bridge, soak
+from understudy import trace_replay as replay
 
 
 # ------------------------------------------------------- item 2: meters ----

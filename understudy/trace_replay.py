@@ -1,10 +1,29 @@
 """Reconstruct what a recorded fight did, and compare two recordings of it.
 
-    python -m understudy.replay <stamp>                  # every run in a soak
-    python -m understudy.replay <stamp> --run 1          # one run
-    python -m understudy.replay <stampA> <stampB>        # compare two soaks
+    python -m understudy.trace_replay <stamp>            # every run in a soak
+    python -m understudy.trace_replay <stamp> --run 1    # one run
+    python -m understudy.trace_replay <stampA> <stampB>  # compare two soaks
 
-NEW IN P1.5, AND THE REASON THIS FILE EXISTS AT ALL. Item 1 makes two soaks
+NOT `understudy/replay.py`, AND THE NAME IS A COLLISION WORTH READING ABOUT.
+P1.5's spec named `understudy/replay.py`, and no such file existed at the
+commit P1.5 branched from. One landed on `main` from the S7 fidelity audit
+while this work was in flight, and it is a DIFFERENT INSTRUMENT wearing the
+same word:
+
+    understudy/replay.py        S7. Drives tier0's combat model through the
+                                recorded action sequence and diffs the two
+                                instruments' numbers. It reads the sim.
+    understudy/trace_replay.py  P1.5. Reads two soak logs and reports whether
+                                the RECORDINGS agree. It reads nothing but
+                                JSONL.
+
+The landed file keeps the name it landed with; this one moved. **Which module
+P1.5's acceptance clause meant is a question for the red pen, not for a
+session** -- but the clause's own words are "reconstruction only, no rules
+retyped", and that describes this file rather than the one that drives an
+engine. Surfaced in `docs/sprint-understudy-p15-log-2026-08-05.md`.
+
+THE REASON THIS FILE EXISTS AT ALL. P1.5 item 1 makes two soaks
 runnable on the SAME seed; item 3 puts the selector answers in the fight
 record. Together those make a recorded fight comparable to another recording
 of the same fight, which is the whole of "one variable per measurement window"
