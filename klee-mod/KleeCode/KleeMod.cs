@@ -58,7 +58,12 @@ public static class KleeMod
                 Powers.KleeElementalHooks.Subscribe(combatState)
                     .Concat(Powers.FurinaResourceHooks.Subscribe(combatState))
                     .Concat(Powers.KokomiResourceHooks.Subscribe(combatState))
-                    .Concat(Powers.KokomiGarmentHooks.Subscribe(combatState)));
+                    .Concat(Powers.KokomiGarmentHooks.Subscribe(combatState))
+                    // Track B's human feed: per-fight telemetry from normal
+                    // play, in the schema the soak writes. Reads only -- see
+                    // the three rules in PlayTelemetry.cs, the first of which
+                    // is that a measurement must never desync a co-op table.
+                    .Concat(Diagnostics.PlayTelemetryHooks.Subscribe(combatState)));
 
         Log.Info($"[{ModId}] Klee, Furina and Kokomi registered.");
     }

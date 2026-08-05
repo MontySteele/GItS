@@ -110,16 +110,38 @@ with (R97/5b).
 
 # Telemetry schema
 
-**SHARED SURFACE TO BE.** The brief pre-registered this as the same telemetry
-surface Track B wants out of the sim ("share the schema; write the
-cross-session note if Track B has started"). Track B has not started reading
-it, so this section is a heads-up rather than a cross-session note under the
-D4/D5 rule — but **the moment it does, renaming or repurposing a key below is
-a shared-schema change** and takes a cross-session note first, in the house
-pattern (`docs/animation-sprint-2-log.md`). Adding keys is free.
+**SHARED SURFACE — LIVE as of 2026-08-04.** This stopped being a heads-up the
+day Track B started reading it. Three consumers now depend on the key names
+below, so **renaming or repurposing any of them is a cross-session change and
+takes its note first** (house pattern: `docs/animation-sprint-2-log.md`; the
+note for this landing is §"Cross-session note" in
+`docs/sprint-track-b-curves-log-2026-08-04.md`). **Adding a key is still
+free** — that is the whole reason the additions of 2026-08-04 needed no
+renegotiation.
 
-Logs live under `understudy/logs/soak/` and are **gitignored**: they are
-per-machine run output, not evidence anyone else can reproduce.
+| consumer | what it does |
+|---|---|
+| `understudy/soak.py` | WRITES the bot feed (`feed: "bot"`, `source: "soak"`) |
+| `klee-mod/KleeCode/Diagnostics/PlayTelemetry.cs` | WRITES the human feed (`feed: "human"`, `source: "mod"`) from normal play, co-op included |
+| `tools/track_b_curves.py` | READS both and builds Track B's B1/B2 curves |
+
+`tier0/tests/test_track_b_curves.py` compares the two writers' key sets
+directly and names every permitted asymmetry, because nothing else in the repo
+can see across the language boundary.
+
+**Two feeds, one schema, and the labels are load-bearing.** `feed` says who
+produced the row and `source` says which instrument wrote it; Guardrail 7's
+labelling requirement on every Track B curve is enforced from those two keys.
+`seats` and `seat_index` carry co-op: the human feed writes ONE RECORD PER
+SEAT per fight, so a two-seat fight is two rows that share an act, floor and
+enemy list.
+
+Logs live under `understudy/logs/soak/` (bot) and `user://gits_telemetry/`
+— `%APPDATA%/SlayTheSpire2/gits_telemetry/` on Windows — (human). Neither is
+committed: they are per-machine run output, not evidence anyone else can
+reproduce. The human feed writes OUTSIDE the mod directory on purpose;
+`deploy.ps1` deletes and re-copies `mods/klee`, which would destroy the log
+at exactly the moment it holds the newest data.
 
 ## Files
 
@@ -164,6 +186,10 @@ Phase 0 could not do.
 
 | key | meaning |
 |---|---|
+| `schema` | schema version (`"1"`). Bumped only on a BREAKING change |
+| `feed`, `source` | `bot`/`human`; `soak`/`mod`. Both mandatory — Track B labels every curve from them |
+| `seats`, `seat_index` | co-op seat count and this record's seat. The human feed writes one record per seat |
+| `character` | *(human feed only)* the seat's character title |
 | `act`, `floor`, `kind` | `monster` / `elite` / `boss` |
 | `enemies` | `[{name, max_hp}]` as the fight opened |
 | `hp_start`, `hp_end`, `hp_lost`, `max_hp` | the HP ledger |
@@ -171,8 +197,11 @@ Phase 0 could not do.
 | `outcome` | `survived` / `died` / `won` / `interrupted` / `superseded` |
 | `hp_trajectory` | `[[round, hp, block], ...]`, sampled at each turn opening |
 | `incoming_by_turn` | `[[round, telegraphed_damage, n_attacking_enemies], ...]`, read before block |
+| `enemy_pool_by_turn` | `[[round, enemy hp+block total], ...]` at each turn opening. **The honest output curve**: the drop between two openings is everything that landed, whoever landed it — which `damage_by_source` cannot say |
+| `meters_by_turn` | `[[round, fanfare, salon_members, salon_cap, encore], ...]`. The bot feed records the PRINTED cap (the wire does not carry the live one); the human feed reads the live per-player cap |
+| `block_at_turn_end` | `[[round, block]]` as the player ENDED the turn — not the turn-opening block in `hp_trajectory`, which is whatever survived the enemy |
 | `cards_played` | `[[round, card_name], ...]` |
-| `potions_used` | `[[round, potion_name], ...]` |
+| `potions_used` | `[[round, potion_name], ...]` — **bot feed only**; no first-party potion hook exists for the mod side yet |
 | `damage_by_source` | `{card_or_potion_name: total}` |
 | `damage_dealt`, `damage_taken` | totals |
 
