@@ -3833,6 +3833,31 @@ Nothing in the kit is decided here: a slot is filled, not a character designed.
 **Class: SUBSTANTIVE.** A DRAFT ruling becomes law and a roster slot is
 occupied.
 
+> **ADDENDUM CLAUSE, 2026-08-06 -- Itto's disposition is settled, and it is not
+> a slot.** Second sitting of 2026-08-06 (sixth-wave brief, Track Y item Y-5;
+> transcribed verbatim at `docs/sitting-record-predraft-2026-08-06.md` §7).
+>
+> **Verbatim: "Itto enters as a COMPANION CARD, not a character."**
+>
+> R108 above filled slot 4 and, in doing so, left Itto's status inferred rather
+> than stated: R88's record has him losing the Itto-vs-Zhongli item and being
+> "released to the companion pool" by the reserved-character rule read in
+> reverse, which is an inference from a rule that is itself in tension with
+> ratified R52 (`docs/slot5-candidates-2026-08-05.md` §2.2/§2.3, caveat [J1]).
+> This clause replaces the inference with a ruling: **Itto's registration is
+> COMPANION CARD.** He is not a playable character, he holds no roster slot, and
+> he is not a slot-5 candidate.
+>
+> **What this clause does NOT do.** It does not draft a card -- **no card is
+> drafted tonight**, no rarity is assigned, no kit is designed, and nothing is
+> added to `docs/inazuma-companions.yaml` beyond what already ships there. It
+> does not resolve the R88-vs-R52 tension over the reserved-character rule
+> generally; it settles ONE name, by direct ruling, so that the tension can no
+> longer be load-bearing for Itto specifically. And it does not disturb R108's
+> own subject: Zhongli still holds slot 4.
+>
+> Cross-noted, dated, at `docs/slot5-candidates-2026-08-05.md` §2.3 and §2.5.
+
 ## R109 -- S13 yields two rarity laws, each arriving with a mechanical audit attached (2026-08-06)
 
 Sitting of 2026-08-06, section 3, families X2 and X7. Source:

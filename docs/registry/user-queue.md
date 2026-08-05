@@ -58,7 +58,7 @@ with their discharges named. **Qualified as `S4-G<n>`** (see
 
 | Gate | What is asked | Where the full text lives | Status |
 |---|---|---|---|
-| `S4-G1` | R88 countersign — Zhongli slot 4 / Itto eligibility | `tier0/DECISIONS.md` R88 | **DISCHARGED by R108** (2026-08-06). Rider still open: §5 row 10.8. |
+| `S4-G1` | R88 countersign — Zhongli slot 4 / Itto eligibility | `tier0/DECISIONS.md` R88 | **DISCHARGED by R108** (2026-08-06). **Itto half now ruled outright (Track Y / Y-5, 2026-08-06):** *"Itto enters as a COMPANION CARD, not a character."* — R108 gained a dated addendum clause; cross-noted in `docs/slot5-candidates-2026-08-05.md` §2.3/§2.5 and `docs/inazuma-companions.yaml`. No card drafted. Rider still open: §5 row 10.8 (the R88-vs-R52 conflict *in general*; it is no longer load-bearing for Itto). |
 | `S4-G2` | R89 countersign — Furina legibility sprint record | `tier0/DECISIONS.md` R89 (DRAFT) | OPEN |
 | `S4-G3` | Principles **v1.12** ratification (Fanfare single-leg + printed cap/grant X values) | `docs/teyvat-spire-design-principles.md`, "Amendment DRAFTS" | OPEN — shipped in code, law text unratified |
 | `S4-G4` | Principles **v1.13** ratification (bounded runtime art fitting) | same, drafts section | OPEN |

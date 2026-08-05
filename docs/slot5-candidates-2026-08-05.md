@@ -438,6 +438,22 @@ now a companion only.
 **Carry the [J1] caveat:** that reserved-character rule sits in **unsigned draft
 R88** and is **in tension with ratified R52** (§2.2 above). See **[J1] §0**.
 
+> **APPEND 2026-08-06 — RULED, and the inference above is no longer what holds
+> Itto in the companion pool.** [USER], second sitting of 2026-08-06, verbatim:
+> ***"Itto enters as a COMPANION CARD, not a character."*** Landed as a dated
+> addendum clause on **R108** (`tier0/DECISIONS.md`).
+>
+> The paragraph above derived "he is now a companion only" from the
+> reserved-character rule read in reverse — a rule sitting in unsigned R88 and
+> in tension with ratified R52. That derivation is now redundant for this name:
+> Itto's registration is COMPANION CARD **by direct ruling**, and the [J1]
+> caveat, while still live as a general matter, no longer carries any weight
+> for him.
+>
+> **No card was drafted by the ruling or by this note.** Registration only: no
+> rarity, no kit, no sheet row beyond what `docs/inazuma-companions.yaml`
+> already ships.
+
 ### 2.4 Names that are NOT playable-slot candidates
 
 Recorded so a future reader does not mistake a companion sheet for a roster.
@@ -471,7 +487,7 @@ any kind:**
 | **Columbina** | **Design space only** (Appendix A / §4.4 High-appetite) | **none** | Extensive forward inheritance; **no slot number anywhere** |
 | Navia, Clorinde, Arlecchino, Neuvillette | **Burst-name reservation** — "a future playable kit-Burst" | **none** | Soft, name-level, slotless |
 | Raiden Shogun | Playable option offered | — | **Closed against playable** by ratified R52 |
-| Itto | Was a slot-4 candidate | — | **Lost**; released to companion pool |
+| Itto | ~~Was a slot-4 candidate~~ **COMPANION CARD** (ruled 2026-08-06, R108 addendum) | — | ~~**Lost**; released to companion pool~~ **Settled by ruling, not by inference:** *"Itto enters as a COMPANION CARD, not a character."* No slot, no slot-5 candidacy, no card drafted |
 | ~30 others | Companion pools | — | No playable registration |
 
 **Slot 5 appears in no row of this table, because it appears nowhere in the
