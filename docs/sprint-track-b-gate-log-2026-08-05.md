@@ -103,6 +103,14 @@ with the package.
 
 The bridge fork stays P1.5, gated where the package puts it.
 
+> **UPDATE 2026-08-05 (R104) — the gate is lifted and P1.5 is NEXT in the
+> Understudy queue.** Not because this item changed, but because two more
+> demands arrived at the same fork: the S7 C2 probe needs the Center Stage /
+> Guest Cast selector choice recorded (R103(b)), and family B's blind turn-1
+> fanfare channel needs the same thing. With chosen seeds that is three
+> payoffs on one work item. Scope unchanged — still the fork as described
+> here, with nothing riding along.
+
 ---
 
 ## Item 4a — how [USER] declares an intent, in one line
@@ -299,6 +307,15 @@ attribution-limited in the direction the Track B log already declares
 **GRADE: PARTIALLY GRADED. The Fanfare half is measured and the prediction is
 NOT SUPPORTED. The comparison to Salon is NOT GRADED, because the Salon arm is
 not a contrast.**
+
+> **PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05).** This
+> grade is one of the four conclusions escrowed pending the S7 C2 probe (a
+> candidate infidelity in tier0's Fanfare accounting,
+> `docs/s7-classification.md` family C): **not citable as load-bearing, not
+> shipped against, and not redesigned against** until the probe reports. If C2
+> confirms, the grade re-opens formally and is re-graded against the corrected
+> sim; if C2 is written off, this mark is struck and the grade stands exactly
+> as written.
 
 The first half is now gradeable and that is the change this pass bought: the
 committed-Fanfare deck is 24.9% Fanfare by plays against a baseline 8.7%, so

@@ -931,6 +931,11 @@ their thresholds were live. The predicates are now visible to play selection
 and test-locked. This was a real accuracy bug but not the balance cause:
 1,500-run Fanfare Act clears remained 9.5%.
 
+> **PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05).** The
+> threshold-reach table in the paragraph below is one of the four conclusions
+> escrowed pending the C2 probe: not citable as load-bearing, not shipped
+> against, and not redesigned against until it reports.
+
 RESOURCE TRACE, 1,500 realistic runs at seed 11: per reached fight, Furina
 gained 24.6 Fanfare, spent only 3.2, peaked at 22.7, and ended at 21.4.
 Threshold reach was 94.1% at 10, 80.8% at 15, 64.8% at 20, and 40.8% at the
@@ -2838,6 +2843,13 @@ consolidated owed-item register produced by the four read-only sweeps of
 2026-07-29). Four rulings, taken together in one sitting, exactly as §3
 asked for. No code, no sheet and no number moved with them.
 
+> **PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05).** Item
+> (1)'s compensation STOP at 1.8% against the 2.0% floor is one of the four
+> conclusions escrowed pending the C2 probe: not citable as load-bearing, not
+> shipped against, and not redesigned against until it reports. The STOP's
+> practical effect -- no Furina balance value moves -- is unchanged by the
+> escrow, which freezes both directions.
+
 **(1) Items 1-3 DEFERRED, behind one playtest with a pre-registered
 question.** The Furina strength lever + legibility pair, the
 dead-archetype question (fanfare stopped at 1.8% against its 2.0% floor;
@@ -3488,6 +3500,9 @@ becomes gradeable against a deck that actually is one, and Salon fill time gets
 re-measured with the bot-doesn't-build-salons confound removed. Until it
 reports, the 0-of-56 fill result stands recorded as **AMBIGUOUS** -- design
 finding versus policy gap, undecided -- and **R91/2b's revisit stays open**.
+*(**PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05)**: the
+R91/2b revisit posture is one of the four escrowed conclusions. It stays open,
+and it does not move in either direction until the C2 probe reports.)*
 What the committed arm reports is a number for [USER] to rule on; this pass
 reports it and revisits no tag.
 
@@ -3547,3 +3562,156 @@ line and the reversibility ledger note.
 **Class: SUBSTANTIVE** for item 5 (the mod takes a new hook on the combat
 lifecycle, and a published limitation is retracted). **Class: MECHANICAL** for
 6a, 6b and 7.
+
+## R101 -- The S7 counter defect is confirmed and fixed at the writer, and every curve it fed is annotated rather than rewritten (2026-08-05)
+
+Signed package of 2026-08-05, Ruling 1 (items 1a and 1b), executed in this
+pass. Audit: `docs/s7-fidelity-audit.md` and `docs/s7-classification.md`
+(family A). Probe read: `docs/s7-probe-c.md`.
+
+**No probe was needed to confirm the defect, because the log disagrees with
+itself.** `fight.cards_played` under-counts the `play_card` actions **the same
+writer posted in the same file**, on 139 of 139 fights. A record that
+contradicts its own action stream is an instrument fault by construction; no
+comparison against the engine is required to say so, and none was made.
+
+**1a -- the footnote lands NOW, before the curves are read again.**
+`docs/track-b-curves.md` carries a banner under B2 stating the defect, its
+direction (**one-way undercount, never an overcount**) and its reach: every
+bot-feed play-count cell in section 2 and every attribution in section 2b is
+affected, because both read `cards_played`. B1's demand cells are **not**
+affected -- they read telegraphed intents and the enemy HP pool and never touch
+the counter -- and that was verified against `tools/track_b_curves.py` rather
+than assumed. The largest single term is Furina's own most-played card: **707
+Ethereal Spotlights**, granted by her starter relic once a turn, missing in
+their entirety.
+
+**1b -- the fix is one defect at the writer, and history is annotated rather
+than regenerated.** `understudy/soak.py` now records a play on the state it was
+decided against instead of on the state the game happened to land in
+afterwards. Four tests pin it. **No historical row is rewritten**: the numbers
+on record stay exactly as measured and carry the banner instead. Rewriting them
+would replace a measured number with a reconstructed one and lose the fact that
+the corpus behind them no longer exists in one piece.
+
+The C# writer (`klee-mod/KleeCode/Diagnostics/PlayTelemetry.cs`) does **not**
+share the defect -- it counts off the game's own `AfterCardPlayed` hook -- so
+nothing is owed to a build here.
+
+**Class: MECHANICAL.** An instrument is repaired and a published table is
+annotated. No balance value, card, floor, tag or grade moves under this entry.
+
+## R102 -- The four fanfare conclusions go into escrow, in both directions, until the C2 probe reports (2026-08-05)
+
+Signed package of 2026-08-05, Ruling 2. Trigger: family C2 of
+`docs/s7-classification.md` -- a candidate infidelity in tier0's Fanfare
+accounting, direction "tier0 pessimistic", **unconfirmed**.
+
+**The four conclusions the classification names are marked PROVISIONAL --
+instrument under audit (R102, C2 escrow):**
+
+1. the threshold-reach table (94.1% at 10, 80.8% at 15, 64.8% at 20, 40.8% at
+   the cap) -- R44, annotated in place;
+2. the compensation STOP at 1.8% against the 2.0% floor -- R87(1), annotated in
+   place;
+3. the Fanfare early-half grade "prediction NOT SUPPORTED" --
+   `docs/sprint-track-b-gate-log-2026-08-05.md` GRADE (a), annotated in place;
+4. the R91/2b revisit posture -- R99(4), annotated in place.
+
+**PROVISIONAL means: not citable as load-bearing, not shipped against, AND not
+redesigned against.** Nothing moves in either direction until the C2 probe
+reports. If C2 confirms, those items re-open formally, each with its own
+re-grade against the corrected sim. If C2 is written off, the PROVISIONAL marks
+are struck and the grades stand exactly as ratified. Either outcome is one
+clean ledger operation.
+
+**The principle, recorded once for reuse:** a binding null presumes a sound
+instrument; a confirmed instrument defect re-opens what it graded -- a
+suspected one escrows it.
+
+**Class: SUBSTANTIVE.** Four ratified conclusions change status. None changes
+value, and the escrow is symmetric on purpose: an audit that could only ever
+loosen a verdict is not an audit.
+
+## R103 -- The three probes are approved in cost order, and what each one is allowed to touch (2026-08-05)
+
+Signed package of 2026-08-05, Ruling 3. Candidates as filed in
+`docs/s7-classification.md` section 4.
+
+**(c) The granted-cards writer read goes FIRST**, because it settles the
+mechanism of R101's fix and costs a code read. **Done in this pass**:
+`docs/s7-probe-c.md`. It reports one gate, not the hypothesised deck-residency
+key.
+
+**(a) The no-relic scripted block fight goes next**, to discriminate C1 (the +2
+block offset). Its exposure is written down before it runs, so the result
+cannot be read wider than it is: **relative arm comparisons survive C1 either
+way** -- a symmetric over-block moves every arm together -- and **absolute
+floor rulings inherit PROVISIONAL only if C1 confirms**. Nothing is escrowed on
+C1's account today.
+
+**(b) The selector-recorded fanfare trace is GATED on P1.5** (R104). It cannot
+run before the bridge records the Center Stage / Guest Cast choice, because
+that choice is the channel the reconstruction is blind to.
+
+**Class: MECHANICAL.** A work order, in an order, with its exposure declared.
+
+## R104 -- P1.5 is promoted to next in the Understudy queue: three demands converge on one bridge fork (2026-08-05)
+
+Signed package of 2026-08-05, Ruling 4. P1.5 was gated at "the first cross-build
+comparison" (R95, restated by R100/6b). **It is now NEXT in the Understudy
+queue**, because three independent demands land on the same fork:
+
+1. **chosen seeds** -- the same seed on two builds, one variable per
+   measurement window (R95's original gate);
+2. **resource/meter visibility on the wire** -- required before any
+   Furina-meter claim is graded from the BOT feed (R100/6b's condition, still
+   binding);
+3. **selector recording** -- the C2 probe (R103(b)) and family B's blind turn-1
+   fanfare channel both need the Center Stage / Guest Cast choice on the wire.
+
+**One work item, three payoffs. The scope does not grow with the promotion**:
+it stays the fork as previously described, and nothing rides along. Queue sites
+updated: `docs/backlog-2026-07-29.md`,
+`docs/sprint-understudy-p1-log-2026-08-04.md`,
+`docs/sprint-track-b-gate-log-2026-08-05.md`, `understudy/soak.py`.
+
+**Class: MECHANICAL.** A priority moves; no scope and no design moves with it.
+
+## R105 -- The patch sentinel is accepted as shipped, and the cheapest way to shrink "not watched" is queued (2026-08-05)
+
+Signed package of 2026-08-05, Ruling 5. **S12's sentinel
+(`tools/patch_sentinel.py`, `docs/patch-sentinel.md`) is ACCEPTED as shipped**
+-- it is this repo's standing answer to a silent defect class: the baseline
+stops describing the shipped game and nothing fails. It arrives with the merge
+train (R106), not with this entry.
+
+**One queued item, next local session:** `char_facts` baselines for the three
+characters that have a card baseline and no character one -- Defect,
+Necrobinder and Regent. The sentinel's `characters` surface watches only the
+two that have one and reports the rest as "not watched" rather than as clean.
+The item is cheap, it is not a design question, and every fact sheet it adds
+converts a note into a check. Filed in `docs/backlog-2026-07-29.md`.
+
+**Class: MECHANICAL.** An acceptance and a queue entry.
+
+## R106 -- The merge train is acknowledged and HELD, and its stated order is not achievable as an order (2026-08-05)
+
+Signed package of 2026-08-05, Ruling 6 -- acknowledged, **not run by this
+pass**. The train waits on S14 closing remotely.
+
+**The discovered topology, recorded because it changes what "S15 first" can
+mean.** The cloud streams are **not** one branch per stream: S1, S6, S8, S9,
+S10, S11, S13 and S15 are all **sequential commits on a single branch**,
+`claude/surplus-week-dispatch-lg7k0c`, interleaved in the order they were
+written -- S15's four partials sit below S13's tip, with S11's atlas commits
+threaded between S1's. There is no commit range that isolates one stream
+without rewriting history. **Consequence: the whole branch merges as one unit
+once S14 closes**, and "S15 first" is already satisfied by where S15 sits on it
+rather than by a merge order anyone can choose. The local findings branches
+(`review/s7-fidelity-audit`, `review/s12-patch-sentinel`,
+`review/enemy-dossiers`, `review/s5-animation-peek`) are separate and do merge
+in a chosen order; S7 stays last, adjacent to the B2 footnote this pass landed.
+
+**Class: MECHANICAL.** Nothing merged, nothing pushed; a plan meets the shape of
+the thing it plans over.
