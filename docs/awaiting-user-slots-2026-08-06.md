@@ -148,16 +148,26 @@ catch graduate into a lint, so the branch carries the repair **and** a narrow
 CI lint that checks every `R<n>/<clause>` citation in that one file against the
 clause markers actually present in the cited `tier0/DECISIONS.md` entry.
 
-**Branch: `staged/f14-siblings`** — branched from the batch base, **never
-merged, never pushed**, suite green on its own tip. It is not on
-`findings/track-w` and nothing on the main line depends on it.
+**Branch: `staged/f14-siblings`**, one commit `eaa83e5` off the batch base
+`5d53965` — **never merged, never pushed**. Suite green on its own tip
+(1942 passed / 41 skipped / 14 xfailed, committed-only), and the new lint runs
+green there and red on a reverted citation (checked in both directions).
 
 **On approval:** merge the branch as-is. **On rejection:** delete the branch;
 `findings/track-w` is unaffected either way.
 
+**What is on it.** The five `R91/1c` sites in `tools/canon_role_tempo.py`
+(comment, its restatement, the anchor-table comment, the `derive_package_floors`
+docstring, and the generated section heading) become `R90/1c`; the two matching
+strings in the generated `docs/role-tempo-baseline.md` are applied by hand,
+identically, because `game_ref/` is absent and the generator cannot be re-run —
+**no percentage in that file is touched.** Plus `tools/lint_r_citations.py`
+(CI-wired) and `tier0/tests/test_r_citation_lint.py`, which pins the F14 fact
+in the red direction as well as the green.
+
 **Read before approving — what the branch deliberately does NOT touch:** the
-same misattribution also appears in `tools/lint_role_tempo_coverage.py` (three
-occurrences) and in the generated `docs/role-tempo-baseline.md`. The lint is
-scoped to `tools/canon_role_tempo.py` alone, per the one-liner's own scope, so
-those siblings stay live and unlinted. Widening the scope is a second decision
-and is not taken here.
+same misattribution is also live in `tools/lint_role_tempo_coverage.py` (three
+occurrences, lines 16 / 31 / 166). The lint is scoped to
+`tools/canon_role_tempo.py` alone, per the one-liner's own scope, so that
+sibling stays live and unlinted. Widening the scope is a second decision and is
+not taken here — flag it if you want it swept.
