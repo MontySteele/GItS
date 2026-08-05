@@ -51,6 +51,16 @@ def _request(url: str, payload: dict | None = None, timeout: float = 20.0) -> di
             raise BridgeError(f"HTTP {e.code} from {url}: {body[:400]}") from e
     except urllib.error.URLError as e:
         raise BridgeError(f"bridge unreachable at {url}: {e}") from e
+    except OSError as e:
+        # A GAME THAT DIES MID-REQUEST DOES NOT RAISE URLError. It resets the
+        # socket, and `ConnectionResetError` (an OSError, not a URLError)
+        # escaped this function during a soak -- past the driver's watchdog,
+        # which is written to catch BridgeError, and then past the teardown,
+        # which left `steam_appid.txt` and `mods\STS2_MCP` in the game
+        # directory. Every failure to reach the bridge is a BridgeError,
+        # including the ones the stdlib does not spell that way.
+        raise BridgeError(f"bridge connection failed at {url}: "
+                          f"{type(e).__name__}: {e}") from e
 
 
 def health() -> dict:

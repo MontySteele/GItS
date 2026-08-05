@@ -269,35 +269,54 @@ class Session:
 
     # -- teardown ---------------------------------------------------------
     def teardown(self) -> None:
-        if self._speed_entry:
-            try:
-                after = bridge.set_speed(False)
-                self.ledger.revert(self._speed_entry,
-                                   f"restored to {after.get('fast_mode')} / "
-                                   f"{after.get('time_scale')}")
-            except bridge.BridgeError as e:
-                self.ledger.fail(self._speed_entry, f"speed restore failed: {e}")
-        if self._launch_entry:
-            self._kill()
-            self.ledger.revert(self._launch_entry, "process terminated")
-        if self._bridge_entry:
-            r = subprocess.run(
-                ["powershell.exe", "-NoProfile", "-NonInteractive",
-                 "-ExecutionPolicy", "Bypass", "-File", str(DEPLOY_BRIDGE),
-                 "-Remove"],
-                cwd=str(REPO / "klee-mod"), capture_output=True, text=True)
-            if r.returncode == 0:
-                self.ledger.revert(self._bridge_entry, "mods/STS2_MCP removed")
-            else:
-                self.ledger.fail(self._bridge_entry, r.stderr.strip()[:300])
-        if self._appid_entry:
-            p = self.dir / "steam_appid.txt"
-            try:
-                if p.exists():
-                    p.unlink()
-                self.ledger.revert(self._appid_entry, "file removed")
-            except OSError as e:
-                self.ledger.fail(self._appid_entry, str(e))
+        """Walk the ledger in reverse. EVERY step runs, whatever the last did.
+
+        A TEARDOWN THAT ABANDONS ITS OWN LEDGER IS WORSE THAN NO TEARDOWN, and
+        this one did: the game died mid-run, `bridge.set_speed(False)` raised a
+        `ConnectionResetError` (which is not a `BridgeError`), the exception
+        left `teardown` at its first step, and `steam_appid.txt` and
+        `mods/STS2_MCP` stayed in the game directory. The socket bug is fixed
+        in `bridge._request`; this is the belt to its braces. Each step is
+        independently guarded, every failure is recorded rather than raised,
+        and the ledger is the report.
+        """
+        self._step(self._speed_entry, self._restore_speed)
+        self._step(self._launch_entry, self._stop_game)
+        self._step(self._bridge_entry, self._remove_bridge)
+        self._step(self._appid_entry, self._remove_appid)
+
+    def _step(self, entry: dict | None, undo) -> None:
+        if not entry:
+            return
+        try:
+            self.ledger.revert(entry, undo())
+        except Exception as e:                               # noqa: BLE001
+            self.ledger.fail(entry, f"{type(e).__name__}: {e}")
+
+    def _restore_speed(self) -> str:
+        after = bridge.set_speed(False)
+        return (f"restored to {after.get('fast_mode')} / "
+                f"{after.get('time_scale')}")
+
+    def _stop_game(self) -> str:
+        self._kill()
+        return "process terminated"
+
+    def _remove_bridge(self) -> str:
+        r = subprocess.run(
+            ["powershell.exe", "-NoProfile", "-NonInteractive",
+             "-ExecutionPolicy", "Bypass", "-File", str(DEPLOY_BRIDGE),
+             "-Remove"],
+            cwd=str(REPO / "klee-mod"), capture_output=True, text=True)
+        if r.returncode != 0:
+            raise RuntimeError(r.stderr.strip()[:300] or "deploy_bridge -Remove failed")
+        return "mods/STS2_MCP removed"
+
+    def _remove_appid(self) -> str:
+        p = self.dir / "steam_appid.txt"
+        if p.exists():
+            p.unlink()
+        return "file removed"
 
     def _kill(self) -> None:
         if self.proc is not None and self.proc.poll() is None:
@@ -673,9 +692,18 @@ class RunDriver:
             self.file_defect(d.kind, d.detail, d.state)
             outcome, detail = "defect", f"{d.kind}: {d.detail}"
         except bridge.BridgeError as e:
-            self.file_defect("bridge_unreachable", str(e),
-                             self._last_state or {})
-            outcome, detail = "defect", f"bridge_unreachable: {e}"
+            kind = ("process_died" if not self.session.alive()
+                    else "bridge_unreachable")
+            self.file_defect(kind, str(e), self._last_state or {})
+            outcome, detail = "defect", f"{kind}: {e}"
+        except Exception as e:                               # noqa: BLE001
+            # The harness itself fell over. That is a defect record like any
+            # other -- the alternative is an exception that escapes `soak()`
+            # and skips the teardown, which is how a game directory keeps a
+            # mod it was promised it would not keep.
+            self.file_defect("harness_exception",
+                             f"{type(e).__name__}: {e}", self._last_state or {})
+            outcome, detail = "defect", f"harness_exception: {e}"
         finally:
             if self.fight is not None:
                 self._close_fight(self._last_state or {}, "interrupted")

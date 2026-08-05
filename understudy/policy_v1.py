@@ -104,13 +104,17 @@ class Memo:
     potion_rounds: set = field(default_factory=set)
     # `leads_to` kinds of the map node most recently travelled to. Revision #5.
     next_node_kinds: list = field(default_factory=list)
-    # `card_select` screens this run on which a selection has already been
-    # posted. The grid protocol needs it: `select_card` TOGGLES, so the second
-    # visit to a screen must confirm rather than re-toggle, and `preview_showing`
-    # is not a reliable signal -- the Enchant screen
-    # (`NDeckEnchantSelectScreen`) reports `can_confirm: true` with
-    # `preview_showing: false` and bounced a run until the watchdog caught it.
-    selected_screens: set = field(default_factory=set)
+    # `card_select` screen key -> the set of indices already toggled on it.
+    #
+    # The grid protocol needs all of this, and each part was learned from a
+    # bounced run. `select_card` TOGGLES, so a second visit must not re-issue
+    # the same index. `preview_showing` is not a reliable "a selection landed"
+    # signal -- the Enchant screen (`NDeckEnchantSelectScreen`) reports
+    # `can_confirm: true` with `preview_showing: false`. And some screens want
+    # SEVERAL cards ("Choose 2 Common Cards to Add to Your Deck",
+    # `simple_select`, `can_confirm: false` until the quota is met), so the
+    # arm has to pick a DIFFERENT card each visit rather than the same best one.
+    selected_screens: dict = field(default_factory=dict)
     # How many times revision #1 has already offered a given card this turn.
     # A free-card rule that re-offers a card whose play was rejected is the one
     # way revision #1 could spin, so the offer count is bounded by the number
@@ -765,9 +769,9 @@ def _card_select_screen(state: dict[str, Any], memo: Memo) -> Decision:
     """
     blob = state.get("card_select") or {}
     key = _screen_key(state, blob)
-    already = key in memo.selected_screens
-    if blob.get("can_confirm") and (blob.get("preview_showing") or already):
-        memo.selected_screens.discard(key)
+    taken = memo.selected_screens.get(key, set())
+    if blob.get("can_confirm") and (blob.get("preview_showing") or taken):
+        memo.selected_screens.pop(key, None)
         return Decision(
             category="resource",
             action={"action": "confirm_selection"},
@@ -779,6 +783,7 @@ def _card_select_screen(state: dict[str, Any], memo: Memo) -> Decision:
             notes={"basis": "grid_confirm",
                    "registered_by": "preview_showing" if
                    blob.get("preview_showing") else "prior_selection",
+                   "selected_indices": sorted(taken),
                    "screen_type": blob.get("screen_type"),
                    "prompt": blob.get("prompt")})
     kind = _screen_kind(blob)
@@ -808,28 +813,36 @@ def _card_select_screen(state: dict[str, Any], memo: Memo) -> Decision:
         # remove. That is `score_offer`, read in the direction the screen asks
         # -- still the sim's valuation, still no heuristic of ours.
         return _remember_selection(
-            _committed_screen(state, blob, kind, d.rationale), memo, key)
-    return _remember_selection(_choice_overlay(state), memo, key)
+            _committed_screen(state, blob, kind, d.rationale, taken),
+            memo, key)
+    return _remember_selection(_choice_overlay(state, taken), memo, key)
 
 
 def _remember_selection(d: Decision, memo: Memo, key: tuple) -> Decision:
-    """Record that a `select_card` has been posted for this screen.
+    """Record WHICH index a `select_card` was posted for on this screen.
 
-    The grid protocol's second half: a toggle that is not followed by a
-    confirm is a bounce, and `preview_showing` does not reliably say a
-    selection landed.
+    The grid protocol's second half. A toggle that is not followed by a
+    confirm is a bounce; `preview_showing` does not reliably say a
+    selection landed; and a multi-select screen needs a DIFFERENT index
+    each visit, so the index is what gets remembered rather than the mere
+    fact of having selected.
     """
     if d.action and d.action.get("action") == "select_card":
-        memo.selected_screens.add(key)
+        memo.selected_screens.setdefault(key, set()).add(
+            int(d.action.get("index", -1)))
     return d
 
 
 def _committed_screen(state: dict[str, Any], blob: dict[str, Any], kind: str,
-                      why_v0_declined: str) -> Decision:
+                      why_v0_declined: str,
+                      taken: set | None = None) -> Decision:
+    taken = taken or set()
     entries = [e for e in (blob.get("cards") or []) if isinstance(e, dict)]
     deck = adapter.deck_cards(state)
     scored: list[tuple[float, int, Any]] = []
     for i, e in enumerate(entries):
+        if i in taken:
+            continue
         card, approx = adapter.resolve_card(e)
         if approx:
             continue
@@ -860,7 +873,8 @@ def _committed_screen(state: dict[str, Any], blob: dict[str, Any], kind: str,
                "scores": {c.name: round(s, 2) for s, _, c in scored}})
 
 
-def _choice_overlay(state: dict[str, Any]) -> Decision:
+def _choice_overlay(state: dict[str, Any],
+                    taken: set | None = None) -> Decision:
     """R93 #6. Center Stage vs Guest Cast, keyed on deck composition.
 
     policy_v0 declined every `choose` overlay -- "tier05 has no policy for it"
@@ -880,11 +894,17 @@ def _choice_overlay(state: dict[str, Any]) -> Decision:
     which delegates them to `rest_action`'s smith order. Only the CHOOSE
     screens are new here.
     """
+    taken = taken or set()
     blob = state.get("card_select") or {}
     screen = str(blob.get("screen_type") or "").lower()
     entries = [e for e in (blob.get("cards") or []) if isinstance(e, dict)]
     if not entries:
         return _unavailable("resource", "no cards on the wire to choose between")
+    if taken and len(taken) >= len(entries):
+        return _unavailable(
+            "resource",
+            f"every one of the {len(entries)} options on this screen has "
+            f"already been toggled and the wire still will not let it confirm")
 
     names = [str(e.get("name") or "") for e in entries]
     lowered = [n.strip().lower() for n in names]
@@ -918,6 +938,13 @@ def _choice_overlay(state: dict[str, Any]) -> Decision:
     scores: dict[str, float] = {}
     resolved: list[tuple[int, Any]] = []
     for i, e in enumerate(entries):
+        # A MULTI-SELECT SCREEN NEEDS A DIFFERENT CARD EACH VISIT. "Choose 2
+        # Common Cards to Add to Your Deck" keeps `can_confirm` false until the
+        # quota is met, so an arm that re-picks its single best option toggles
+        # the same card on and off forever -- which is exactly what the sixth
+        # validation soak did until the cycle watchdog stopped it.
+        if i in taken:
+            continue
         card, approx = adapter.resolve_card(e)
         if not approx:
             resolved.append((i, card))
@@ -939,13 +966,15 @@ def _choice_overlay(state: dict[str, Any]) -> Decision:
             revision="v1.6",
             notes={"basis": "score_offer", "scores": scores,
                    "screen_type": screen, "options": names})
+    first = next((i for i in range(len(entries)) if i not in taken), 0)
     return Decision(
         category="resource",
-        action={"action": "select_card", "index": 0},
-        label=f"{names[0]} [0] (forced)",
+        action={"action": "select_card", "index": first},
+        label=f"{names[first]} [{first}] (forced)",
         rationale=("R93 #6 last resort: no option resolves to a sim card row "
-                   "and none is a named Spotlight mode, so the first option is "
-                   "taken to keep the run moving. FLAGGED, not silent."),
+                   "and none is a named Spotlight mode, so the first "
+                   "untoggled option is taken to keep the run moving. "
+                   "FLAGGED, not silent."),
         revision="v1.6",
         notes={"basis": "first_option_fallback", "screen_type": screen,
                "options": names, "forced_default": True})

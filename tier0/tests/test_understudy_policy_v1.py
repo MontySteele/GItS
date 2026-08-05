@@ -505,3 +505,49 @@ def test_the_confirm_is_not_offered_before_anything_is_selected():
                   screen_type="NDeckEnchantSelectScreen", can_confirm=True)
     d = policy_v1.decide(state, policy_v1.Memo())
     assert d.action["action"] == "select_card"
+
+
+def test_a_multi_select_screen_picks_a_different_card_each_visit():
+    """"Choose 2 Common Cards to Add to Your Deck" (`simple_select`) keeps
+    `can_confirm` false until the quota is met. An arm that re-picks its single
+    best option toggles the same card on and off forever, which is what the
+    sixth validation soak did until the cycle watchdog stopped it."""
+    state = {"state_type": "card_select", "run": {"act": 1, "floor": 6},
+             "player": {"hp": 49, "max_hp": 71, "hand": [],
+                        "draw_pile": [{"id": "KLEEMOD-STAGE_PRESENCE"}],
+                        "discard_pile": [], "exhaust_pile": []},
+             "card_select": {"screen_type": "simple_select",
+                             "prompt": "Choose 2 Common Cards to Add to Your Deck.",
+                             "can_confirm": False, "preview_showing": False,
+                             "cards": [
+                                 {"id": "KLEEMOD-ARIA_OF_RECOMPENSE",
+                                  "name": "Aria of Recompense", "cost": 1},
+                                 {"id": "KLEEMOD-STAGE_PRESENCE",
+                                  "name": "Stage Presence", "cost": 1},
+                                 {"id": "KLEEMOD-SALON_DEBUT",
+                                  "name": "Salon Debut", "cost": 1}]}}
+    memo = policy_v1.Memo()
+    picks = []
+    for _ in range(3):
+        d = policy_v1.decide(state, memo)
+        assert d.action["action"] == "select_card"
+        picks.append(d.action["index"])
+    assert len(set(picks)) == 3, f"the same index was re-toggled: {picks}"
+
+
+def test_a_screen_whose_options_are_exhausted_stops_rather_than_spinning():
+    """If every option has been toggled and the wire still will not confirm,
+    the arm declines and the driver's forced-default path takes over -- which
+    is counted and reported, unlike a silent loop."""
+    state = {"state_type": "card_select", "run": {"act": 1, "floor": 6},
+             "player": {"hp": 49, "max_hp": 71, "hand": [],
+                        "draw_pile": [{"id": "KLEEMOD-STAGE_PRESENCE"}],
+                        "discard_pile": [], "exhaust_pile": []},
+             "card_select": {"screen_type": "simple_select",
+                             "prompt": "Choose 2 Common Cards.",
+                             "can_confirm": False, "preview_showing": False,
+                             "cards": [{"id": "KLEEMOD-STAGE_PRESENCE",
+                                        "name": "Stage Presence", "cost": 1}]}}
+    memo = policy_v1.Memo()
+    assert policy_v1.decide(state, memo).available is True
+    assert policy_v1.decide(state, memo).available is False

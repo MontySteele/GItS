@@ -387,3 +387,59 @@ def test_a_reward_screen_does_end_the_fight():
                        "player": {"hp": 44, "max_hp": 71}}, {},
                {"action": "end_turn"})
     assert d.fight is None and len(d.fights) == 1
+
+
+# ------------------------------------- the crash that skipped the teardown ---
+#
+# A soak died when the game vanished mid-request. `bridge.set_speed(False)`
+# raised `ConnectionResetError`, which is an OSError and NOT a `BridgeError`,
+# so it escaped the first line of `teardown` and the remaining three steps
+# never ran -- leaving `steam_appid.txt` and `mods/STS2_MCP` in the game
+# directory. Both halves of that get a test.
+
+
+def test_a_socket_failure_is_a_bridge_error(monkeypatch):
+    """Every failure to reach the bridge is a BridgeError, including the ones
+    the stdlib does not spell that way."""
+    from understudy import bridge as b
+
+    def boom(*a, **k):
+        raise ConnectionResetError(10054, "forcibly closed")
+
+    monkeypatch.setattr(b.urllib.request, "urlopen", boom)
+    try:
+        b.get_state()
+    except b.BridgeError as e:
+        assert "ConnectionResetError" in str(e)
+    else:
+        raise AssertionError("a reset socket must surface as BridgeError")
+
+
+def test_every_teardown_step_runs_even_when_an_earlier_one_raises(tmp_path):
+    """A teardown that abandons its own ledger is worse than no teardown."""
+    sess = soak.Session.__new__(soak.Session)
+    sess.ledger = soak.Reversibility(tmp_path / "rev.json")
+    sess.dir = tmp_path
+    appid = tmp_path / "steam_appid.txt"
+    appid.write_text("2868840", encoding="ascii")
+
+    sess._speed_entry = sess.ledger.record("speed", "enabled:false")
+    sess._launch_entry = sess.ledger.record("launch", "terminate")
+    sess._bridge_entry = sess.ledger.record("bridge", "-Remove")
+    sess._appid_entry = sess.ledger.record("appid", "delete")
+
+    def explode():
+        raise ConnectionResetError("the game went away")
+
+    sess._restore_speed = explode
+    sess._stop_game = lambda: "process terminated"
+    sess._remove_bridge = explode
+    sess.teardown()
+
+    states = [e["state"] for e in sess.ledger.entries]
+    assert states[0] == "NOT REVERTED"          # speed, honestly recorded
+    assert states[1] == "REVERTED"              # and the rest still ran
+    assert states[2] == "NOT REVERTED"
+    assert states[3] == "REVERTED"
+    assert not appid.exists(), "the appid file survived a failing teardown"
+    assert "ConnectionResetError" in sess.ledger.table()
