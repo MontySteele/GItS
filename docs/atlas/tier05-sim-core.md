@@ -33,7 +33,6 @@ PYTHONPATH=. python3 -m tier05.runner --character klee --ab --runs 500
 PYTHONPATH=. python3 -m tier05.runner --route-ab --character furina --runs 600
 PYTHONPATH=. python3 -m tier05.runner --acts 1 --csv out.csv   # 1-act instrument
 
-python3 -m pytest tier05/tests -q
 python3 -m pytest tier0/tests tier05/tests -q          # what CI runs
 PYTHONPATH=. python3 tools/lint_op_parity.py           # 56 ops, 56 priced
 ```
@@ -41,7 +40,8 @@ PYTHONPATH=. python3 tools/lint_op_parity.py           # 56 ops, 56 priced
 Flags: `--character --archetype --runs --seed --csv --policy --ab --route
 --route-ab --realistic --jobs/-j --acts` (`runner.py:81-118`).
 
-In-process, and the preferred path for experiment scripts:
+In-process, and the preferred path for experiment scripts — a `Cell` carries
+the stamp a report needs to be citable:
 
 ```python
 from tier05 import cells
@@ -76,18 +76,16 @@ fixture (`tier05/tests/conftest.py:17-38`), which patches `model.build_act_map`.
   (`model.py:613-633`); combat only states facts.
 - **Reward screens: the fight's own, then any the fight EARNED.** An extra
   screen (`state.extra_card_screens`) is card-only — no companion slot, no pity
-  credit, never the boss's forced-Rare tier (`model.py:684-685`,
-  `model.py:718-723`).
-- **A non-final boss forces Rare on BOTH the card offers and the companion
-  slot** (v5; forcing only the companion was the Ironclad-0.6% bug) and the
-  boundary then heals to full (`model.py:662-670`, `model.py:733-744`).
+  credit, never the boss's forced-Rare tier (`model.py:684-685`, `:718-723`). A
+  non-final boss forces Rare on BOTH the card offers and the companion slot
+  (v5; companion-only was the Ironclad-0.6% bug), then heals to full
+  (`model.py:662-670`, `:733-744`).
 - **Pool YAML has a closed key schema.** `_validate_pool` raises on any unknown
   tier/encounter/enemy/intent key, because pools are read through `.get()` and a
-  typo (`is_bos: true`) is otherwise a silent no-op (`acts.py:53-103`).
-- **Pool YAML is cached by FILENAME, not act index**, so a monkeypatched
-  `RUN_ACTS` can never serve a stale entry (`acts.py:106-111`); text is read
-  with an explicit `encoding=` (`acts.py:111`), the repo-wide structural rule
-  (`tier0/tests/test_encoding_gate.py:1-22`).
+  typo (`is_bos: true`) is otherwise a silent no-op (`acts.py:53-103`). It is
+  cached by FILENAME so a monkeypatched `RUN_ACTS` cannot serve a stale entry,
+  and read with an explicit `encoding=` (`acts.py:106-111`), the repo-wide
+  structural rule (`tier0/tests/test_encoding_gate.py:1-22`).
 - **The boss draw always consumes an rng call**, even from a 1-entry pool, so
   growing a pool never silently renumbers the other streams (`acts.py:211-212`).
 - **Routing is a whole-map plan, not a greedy next-room choice**: exact backward
@@ -108,10 +106,10 @@ fixture (`tier05/tests/conftest.py:17-38`), which patches `model.build_act_map`.
   0.4), while applier/amp raises measured worse
   (`docs/archive/tier05-m8-report.md:100-118`; `draft.py:657-668`,
   `draft.py:1494`).
-- **R61** — the sim MODELS the shop as an economy channel (distinguished from
-  the static-effect exemptions), which is why `run_one` has a `$` branch and
-  `RunResult` logs offers separately from purchases
-  (`tier0/DECISIONS.md:1813-1824`; `model.py:392-453`, `model.py:169-174`).
+- **R61** — the sim MODELS the shop as an economy channel, which is why
+  `run_one` has a `$` branch and `RunResult` logs offers separately from
+  purchases (an offer is not a purchase — `tier0/DECISIONS.md:1813-1824`;
+  `model.py:392-453`, `:169-174`).
 - **R64** — the Featured Banner went live and `roll_banner`'s `nations` must be
   passed explicitly from the sheets; the argument-free default had silently
   filtered every non-Mondstadt 5-star out of every run
@@ -164,9 +162,9 @@ fixture (`tier05/tests/conftest.py:17-38`), which patches `model.build_act_map`.
   elite-hunting routes reached zero elites — widening floors did not help,
   because *connectivity* was binding (`maps.py:91-111`). Elite-not-twice-in-a-row
   is enforced at walk time by the draw, not by the generator
-  (`maps.py:12-14`, `acts.py:226-233`).
-- **`resolve_unknown` MUTATES the weights dict it is handed** — that is the
-  real game's pity rule, reset per act (`maps.py:155-182`).
+  (`maps.py:12-14`, `acts.py:226-233`). `resolve_unknown` MUTATES the weights
+  dict it is handed — the real game's pity rule, reset per act
+  (`maps.py:155-182`).
 - **Priced-at-zero drafter constants are measurements, not oversights**
   (draw/energy/spark/burst, `raise_fanfare_cap`, `crash_fanfare`,
   `strip_block`, `GENERIC_REDUNDANCY_PENALTY`, `STATIC_POWER_ENGINE_VALUE`).
@@ -178,19 +176,18 @@ fixture (`tier05/tests/conftest.py:17-38`), which patches `model.build_act_map`.
 - **`_drafted_readers` excludes basics on purpose**: Furina's starter carries a
   Fanfare read, so counting it would close the reader limb at run start forever
   and feed `_core_progress` a constant (`draft.py:244-261`).
-- **`cells` ↔ `runner` is a deliberate one-way module edge.** `cells` imports
+- **`cells` ↔ `runner` is a deliberate one-way module edge**: `cells` imports
   `runner` at *call* time and `runner` imports `cells` inside `main()`; moving
   either to module scope reintroduces the cycle (`runner.py:25-30`,
-  `cells.py:49-58`).
+  `cells.py:49-58`). `--ab` is refused for Furina — the adaptive classifier
+  only knows Klee's shapes (`runner.py:126-131`) — and the CLI reconfigures
+  stdout to UTF-8 because the death-heatmap block glyph killed the report
+  mid-table on a cp1252 console (`runner.py:136-140`).
 - **`understudy/policy_v0.py` is FROZEN and delegates into these files**
   (`draft.assigned_policy`, `draft.score_offer`, `model.rest_action`,
   `tier05.route`) — `understudy/policy_v0.py:9-10,193,315`. It is one arm of a
   published measurement, so a scoring change here retroactively moves a quoted
   number.
-- **`--ab` is refused for Furina**: the adaptive classifier only recognizes
-  Klee's shapes (`runner.py:126-131`).
-- **The CLI reconfigures stdout to UTF-8** because the death-heatmap block glyph
-  killed the report mid-table on a cp1252 console (`runner.py:136-140`).
 
 ## 6. Reading order
 
