@@ -1,0 +1,25 @@
+{
+  "_fixture": "SLICE 9 / Track O. The state the game is parked on at the START of the run that follows a `--max-fights` bounded stop. This is the observed B3-corpus condition: run 1 stopped cleanly after 4 fights, `soak()` did not restart the session because the outcome was `bounded` rather than `defect`, and run 2's first `bridge.get_state()` therefore read a mid-run screen instead of a menu. Feed this to `RunDriver._to_main_menu` / `RunDriver.run`.",
+  "state_type": "rewards",
+  "menu_screen": null,
+  "message": "Combat rewards",
+  "run": {"act": 1, "floor": 4, "seed": "TRACKB3B"},
+  "player": {
+    "hp": 54,
+    "max_hp": 72,
+    "energy": 0,
+    "block": 0,
+    "hand": [],
+    "draw_pile": [],
+    "discard_pile": [],
+    "exhaust_pile": [],
+    "deck": [],
+    "resources": {"KLEEMOD_FANFARE": 12, "KLEEMOD_ENCORE": 3},
+    "potions": []
+  },
+  "options": [
+    {"name": "claim_reward", "enabled": true},
+    {"name": "proceed", "enabled": true}
+  ],
+  "map": {"next_options": [5], "boss": "Sentry Trio"}
+}

@@ -1,0 +1,13 @@
+{
+ "stamp": "S04A",
+ "character": "furina",
+ "policy": "policy_v1",
+ "commit": null,
+ "seeds": ["SEEDONE"],
+ "requested_runs": 1,
+ "runs": [
+  {"run": 1, "seed": "SEEDONE", "outcome": "dead", "final_act": 1, "final_floor": 3, "fights": 1, "actions": 12, "wall_s": 30.0, "defects": 0, "defect_kinds": []}
+ ],
+ "stopped_on": null,
+ "reversibility": []
+}

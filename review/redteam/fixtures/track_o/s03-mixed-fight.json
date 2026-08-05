@@ -1,0 +1,10 @@
+{
+  "_note": "One soak fight record whose Encore column was produced by INTERMITTENT partial degradation: turns 1 and 3 read the full resource map (encore 4, 6); on turns 2 and 4 the Encore handler threw inside GitsResources.cs's per-handler catch, so the map arrived non-empty-without-Encore and soak._meters wrote 0. Rows are [rnd, fanfare, salon, salon_cap, encore].",
+  "fight_id": "s03-mixed",
+  "meters_by_turn": [
+    [1, 5, 1, 3, 4],
+    [2, 7, 1, 3, 0],
+    [3, 9, 2, 3, 6],
+    [4, 11, 2, 3, 0]
+  ]
+}
