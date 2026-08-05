@@ -33,16 +33,12 @@ Windows PowerShell 5.1, run from `klee-mod\` unless noted:
 ..\tools\build_pck.ps1 [-MegaDot <editor.exe>]   # rebuild klee-mod\assets\klee.pck + contract
 ```
 
-Bite-check the Harmony bootstrap by hand (`build/bitecheck/README.md:7-20`);
-expected on an unmodified tree is `[klee] harmony: 14 patch class(es) armed.`
+Manual Harmony bite-check (`build/bitecheck/README.md:7-20`; expected on an
+unmodified tree: `[klee] harmony: 14 patch class(es) armed.`), then the portable
+pins, which need no game install:
 
 ```sh
 cd klee-mod/build/bitecheck && dotnet build && ./bin/Debug/harmony-bitecheck.exe
-```
-
-Portable pins for the gates (run anywhere, no game install needed):
-
-```sh
 PYTHONPATH=. python3 -m pytest tier0/tests/test_manifest_version_gate.py \
   tier0/tests/test_gate_repairs.py tier0/tests/test_pck_reference_gate.py \
   tier0/tests/test_repo_python_convention.py -q
@@ -163,11 +159,11 @@ In-process (dot-source `build/version.ps1`): `Get-PackageVersion`,
   only the local copy is skipped (`deploy.ps1:55-63`, `:221-226`).
 - **`*.pck`, `dist\`, `*.zip` and `ImageGen/` are gitignored Tier F.** Every
   machine builds its own pack; handoff zips are passed privately
-  (`deploy.ps1:24-30`, `tools/build_pck.ps1:14-16`).
-- **`klee/build_id.tres`** (timestamp + short sha) is stamped into every pack so a
-  stale pck announces itself in `godot.log` (`tools/build_pck.ps1:726-735`).
-- **WebP bytes wearing a `.png` name** are re-encoded in the scratch copy only;
-  Godot's PNG importer hard-fails on them (`tools/build_pck.ps1:737-753`).
+  (`deploy.ps1:24-30`, `tools/build_pck.ps1:14-16`). `klee/build_id.tres`
+  (timestamp + short sha) is stamped into every pack so a stale pck announces
+  itself in `godot.log` (`tools/build_pck.ps1:726-735`), and WebP bytes wearing a
+  `.png` name are re-encoded in the scratch copy only, because Godot's PNG
+  importer hard-fails on them (`tools/build_pck.ps1:737-753`).
 
 ## 6. Reading order
 
