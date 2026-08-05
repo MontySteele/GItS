@@ -3369,3 +3369,54 @@ was a fact about the wire rather than about our code.
 
 **Class: MECHANICAL + RULING** -- [USER] acknowledged 2026-08-04. No balance
 value moved.
+
+## R98 -- P1 is VALIDATED: the clean N=3 landed, debt #2 is deleted, and the eleventh harness defect is the same class as the other ten (2026-08-04)
+
+Recorded per the hand-back note of 2026-08-04 (evening),
+`docs/handback-note-2026-08-04.md`, which set the acceptance in advance:
+"clean completion -> mark P1 VALIDATED in the ledger and delete debt #2."
+This entry is that mark. No balance value moved and no policy changed -- the
+soak that earned it ran current main code with read-back seeds and nothing
+else, which was the whole condition.
+
+**The number.** Three runs, 18 fights, 656 posted actions, **zero defects
+filed**; reversibility REVERTED on all four ledger entries; `fast_mode`
+captured as `Fast` at setup, which is the leak check the previous soak's
+NOT-REVERTED speed entry made worth running. Log stamp `20260804-222105`
+(gitignored, per-machine).
+
+**It took two attempts, and the first attempt is why this entry is not just a
+tick.** The first N=3 filed `bridge_unreachable` at act 1 floor 6 -- a
+HARNESS-side kind. It was not the harness's wire: the game died inside a Punch
+Off event, the socket reset under the next request, and `session.alive()`,
+asked in the same millisecond, still read True because the OS had not reaped a
+process that was mid-crash. **The instrument filed a build defect against
+itself**, and two of those halt a soak -- so the failure mode is a night that
+stops on exactly the thing the soak exists to find.
+
+Fixed as `Session.died(grace)`, the slow twin of `alive()`, asked only where a
+failure has already happened; `alive()` stays instantaneous because the
+per-action watchdog calls it on a hot path. Defect records now carry
+`proc_exit_code`. Two red tests, one per direction -- a still-crashing process
+must read as dead, and a live game with a dead socket must still read as the
+wire.
+
+**Class: the traversal/wire layer.** This is the eleventh defect of the family
+R97/5d already named ("any future adapter against this wire meets the same
+five") and P1's stop-and-surface #1 restated ("the wire's screen protocol is
+the expensive half of this apparatus"). It is expected-class and is NOT new
+information; debt #1 stands unchanged.
+
+**What the failed attempt found in the BUILD is filed, not fixed.**
+`godot.log` ends mid-backtrace on `PunchOff.PunchEachOther` ->
+`CreatureCmd.TriggerAnim` -> `NCreature.SetAnimationTrigger` (the GItS
+animation-router patch is on the stack) -> `CreatureAnimator.SetNextState`,
+with `Signal '_internal_spine_objects_invalidated' is already connected`. One
+observation, seed `8B97LMCL2F`. Routed to the animation stream and to [USER]'s
+gate package; nothing in Vfx was touched here, because diagnosing a visual
+subsystem from one crash inside a measurement pass is how a session acquires
+a second, unrelated bug.
+
+**Class: MECHANICAL** -- acceptance recorded against a written, pre-agreed
+condition. Debt #2 struck from `docs/sprint-understudy-p1-log-2026-08-04.md`;
+debts #1 and #3 stand.

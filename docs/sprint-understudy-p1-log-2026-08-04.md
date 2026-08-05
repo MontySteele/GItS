@@ -6,7 +6,8 @@ Brief: `docs/understudy-kickoff-brief.md`. Phase-0 measurement:
 `docs/understudy-countersign-2026-08-04.md`. Rulings: `tier0/DECISIONS.md`
 **R93–R97**.
 
-Status: **policy_v1 SHIPPED, soak harness SHIPPED and validated on live runs.**
+Status: **policy_v1 SHIPPED, soak harness SHIPPED and P1 VALIDATED** — a clean
+N=3 on current code, 2026-08-04 evening (R98; see "P1 VALIDATED" below).
 Every number produced by either is a bot-limited floor and none of it is
 balance evidence — see the Guardrail-7 section at the bottom, which is not a
 formality here.
@@ -254,6 +255,74 @@ is the first that runs without them.
   six entries**, and the captured `fast_mode` read `Fast` on every relaunch —
   proof that no killed session leaked `Instant` into `settings.save`.
 
+## P1 VALIDATED — the clean N=3, 2026-08-04 evening
+
+**Debt #2 is DISCHARGED and struck from the list below.** Recorded as **R98**
+(`tier0/DECISIONS.md`). Log:
+`understudy/logs/soak/soak-20260804-222105-*` (gitignored).
+
+| run | seed | outcome | reached | fights | actions | wall |
+|---|---|---|---|---|---|---|
+| 1 | `8YD62HHZKP` | died | act 1, floor 14 | 7 | 232 | 175 s |
+| 2 | `ERPW0H5LPZ` | died | act 1, floor 8 | 4 | 185 | 139 s |
+| 3 | `WTG4G9B4GB` | died | act 1, floor 14 | 7 | 239 | 180 s |
+
+**Three runs, 18 fights, 656 actions, ZERO defects filed.** The morning report
+prints "None. No crash, no soft-lock, no unhandled overlay, no stalled state
+across every run in this soak." The reversibility ledger reads **REVERTED on
+all four entries**, and `_speed_on` captured `fast_mode: "Fast"` at setup —
+which is the leak check, and it passed: the previous soak's speed entry died
+NOT REVERTED (the bridge was gone), and `Instant` still did not reach
+`settings.save`.
+
+**It took two attempts, and the first one is the finding.** The first N=3 ran
+clean for two runs and then filed `bridge_unreachable` at act 1 floor 6 — a
+HARNESS-side kind, which is the instrument blaming its own wire. It was not
+the wire.
+
+### Defect 11 — a crashing process is not yet an exited process
+
+`run()` already asked `session.alive()` before choosing between `process_died`
+and `bridge_unreachable`. It asked in the same millisecond the socket reset,
+and `Popen.poll()` had not yet reaped a process that was in the middle of
+dying — so a build-side failure was filed under a harness-side kind. Two of
+those halt a soak, which means this defect's real cost is a night that stops
+on the very thing the soak exists to catch.
+
+Fixed in `understudy/soak.py`: `Session.died(grace)` is the slow twin of
+`alive()`, called only where a failure has already happened and the question is
+who to blame; `alive()` stays instantaneous because the per-action watchdog is
+on a hot path. Every defect record now also carries `proc_exit_code`. Two red
+tests in `tier0/tests/test_understudy_soak.py` — one that a still-crashing
+process reads as dead, one that a live game with a dead socket still reads as
+the wire, because a grace period that swallowed the second would be a worse
+bug than the first.
+
+**Class: the traversal/wire layer**, the same family as the other ten and as
+Phase-0's five adapter defects — a wrong assumption about how the wire behaves,
+not a logic slip. It is expected-class, not new information.
+
+### What the first attempt found in the BUILD, and did not fix
+
+`godot.log` (`%APPDATA%/SlayTheSpire2/logs/`) ends mid-backtrace on a **Punch
+Off event**: `PunchOff.PunchEachOther` → `CreatureCmd.TriggerAnim` →
+`NCreature.SetAnimationTrigger` (our animation-router patch is on the stack) →
+`CreatureAnimator.SetNextState`, and the Godot error is `Signal
+'_internal_spine_objects_invalidated' is already connected to given callable`.
+The event builds an `NCombatRoom` in `VisualOnly` mode against Furina's
+convention `combat.tscn`.
+
+**Filed, not diagnosed and not fixed.** It is one observation; the seed
+(`8B97LMCL2F`) reproduces the floor, nothing in this pass's scope touches Vfx,
+and it belongs to the animation stream. It is in the gate package and in the
+backlog. What it is NOT is evidence against the harness — the soak caught a
+game-side death, which is the instrument working.
+
+The human feed (`PlayTelemetry.cs`) declines to open a fight record for any
+room that is not a `CombatRoom`, so a Punch Off animation cannot enter Track
+B's demand curve as a zero-incoming "fight" — that is the same event paying
+for itself twice.
+
 ## Stop-and-surface
 
 1. **The harness needed ten fixes to survive three runs, and all ten were
@@ -263,10 +332,11 @@ is the first that runs without them.
    map. The honest reading is that **the wire's screen protocol is the
    expensive half of this apparatus**, and a P1.5 or Phase-3 estimate that
    assumes the traversal layer is done will be wrong.
-2. **No soak has yet completed a clean N=3 with the current code.** The last
-   two defects were fixed after the final soak ran. The fixes have regression
-   tests and clear diagnoses, but the first genuinely clean multi-run soak has
-   not been observed and should be the next session's first action.
+2. ~~**No soak has yet completed a clean N=3 with the current code.**~~
+   **DISCHARGED 2026-08-04 evening — R98.** Deleted rather than rewritten,
+   per the hand-back note; the evidence is "P1 VALIDATED" above. Kept as a
+   struck line because a debt list that quietly loses rows is a debt list
+   nobody trusts.
 3. **Runs die in Act 1.** Deepest reach across every soak was the Act 1 boss,
    beaten once. This is a **bot-limited floor and says nothing about
    difficulty** — but it does mean the current policy will not produce Act 2

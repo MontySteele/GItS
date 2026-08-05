@@ -467,3 +467,55 @@ def test_every_walkable_screen_has_an_exit_verb():
                "crystal_sphere"):
         assert soak._escape({"state_type": st}) is not None, st
     assert soak._escape({"state_type": "monster"}) is None
+
+
+# --------------------------------------------------------- defect 11: the ---
+# ---------------------------------------------------- crash-vs-wire blame ---
+#
+# The clean-N=3 validation soak (2026-08-04) filed `bridge_unreachable` at act
+# 1 floor 6: the game died inside a Punch Off event, the socket reset under the
+# next request, and `session.alive()` -- asked in the same millisecond -- still
+# read True because the OS had not reaped the process. `bridge_unreachable` is
+# a HARNESS-side kind, so the instrument filed a build defect against its own
+# wire, and two of those halt a soak. Two tests, one per half of the fix.
+
+
+class _ExitingProc:
+    """A process that reports alive for the first N polls, then exited."""
+
+    def __init__(self, alive_polls, code=-1073741819):
+        self._left = alive_polls
+        self._code = code
+
+    def poll(self):
+        if self._left > 0:
+            self._left -= 1
+            return None
+        return self._code
+
+
+def _session_with(proc):
+    sess = soak.Session.__new__(soak.Session)
+    sess.proc = proc
+    return sess
+
+
+def test_a_process_that_is_still_crashing_is_still_a_dead_process():
+    """`alive()` stays instantaneous for the watchdog's hot path; `died()` is
+    the slow twin, asked only where a failure has already happened and the
+    question is who to blame."""
+    sess = _session_with(_ExitingProc(alive_polls=2))
+    assert sess.alive() is True                 # the instantaneous read
+    assert sess.died(grace=5.0) is True         # the one that waits
+    assert sess.exit_code == -1073741819
+
+
+def test_a_live_game_with_a_dead_socket_is_still_the_wire():
+    """The grace period must not turn every wire failure into `process_died`:
+    a bridge that stops answering while the game runs on is a harness-side
+    failure and has to keep saying so."""
+    sess = _session_with(_ExitingProc(alive_polls=10000))
+    assert sess.died(grace=0.6) is False
+    assert sess.exit_code is None
+    # --no-setup attaches to someone else's process; it is not ours to judge.
+    assert _session_with(None).died(grace=5.0) is False

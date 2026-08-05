@@ -93,6 +93,17 @@ RUN_TIMEOUT_S = 3600.0
 # TimeScale for the speed endpoint. Animation pacing only -- GitsSpeed.cs
 # touches no rules code. 3.0 is what Phase 0 ran at without incident.
 TIME_SCALE = 3.0
+# How long a bridge failure waits before deciding the process is NOT the cause.
+# A crashing game resets the socket before the OS reaps it, so "is the process
+# alive" asked in the same millisecond answers the wrong question. See
+# `Session.died`.
+PROCESS_EXIT_GRACE_S = 8.0
+
+# Telemetry schema version, stamped on every fight record and mirrored by the
+# C# human-feed writer (`klee-mod/KleeCode/Diagnostics/PlayTelemetry.cs`). Bump
+# on a BREAKING change only -- adding a key is free, renaming one is a
+# cross-session change (understudy/README.md).
+SCHEMA_VERSION = "1"
 
 
 # ------------------------------------------------------------- ledger ----
@@ -363,6 +374,38 @@ class Session:
             return True                      # --no-setup: not ours to judge
         return self.proc.poll() is None
 
+    def died(self, grace: float = PROCESS_EXIT_GRACE_S) -> bool:
+        """Has the game process exited -- allowing for one that is mid-crash?
+
+        A CRASHING PROCESS IS NOT YET AN EXITED PROCESS, and the validation
+        soak of 2026-08-04 was decided by that distinction. The game died
+        inside a Punch Off event, the socket reset under the very next request,
+        and `alive()` -- asked in the same millisecond -- still read True
+        because the OS had not reaped the process yet. The failure was
+        therefore filed as `bridge_unreachable`, which is a HARNESS-side kind:
+        the instrument blamed its own wire for a build defect it had just
+        caught, which is the one misreading that makes a soak report worse than
+        no soak report.
+
+        `alive()` is deliberately left instantaneous -- the per-action watchdog
+        calls it on a hot path and a sleeping watchdog is a slow soak. This is
+        the slow twin, called only where a failure has ALREADY happened and the
+        question is who to blame.
+        """
+        if self.proc is None:
+            return False                     # --no-setup: not ours to judge
+        deadline = time.time() + max(0.0, grace)
+        while True:
+            if self.proc.poll() is not None:
+                return True
+            if time.time() >= deadline:
+                return False
+            time.sleep(0.25)
+
+    @property
+    def exit_code(self) -> int | None:
+        return None if self.proc is None else self.proc.poll()
+
 
 # ------------------------------------------------------------ telemetry ----
 #
@@ -401,6 +444,12 @@ class FightTelemetry:
     turns: int = 0
     hp_trajectory: list = field(default_factory=list)     # [(round, hp, block)]
     incoming_by_turn: list = field(default_factory=list)  # [(round, dmg, n_atk)]
+    # TRACK B ADDITIONS (2026-08-04). Keys only ADDED -- nothing renamed, which
+    # is what the shared-schema rule in understudy/README.md costs and permits.
+    enemy_pool_by_turn: list = field(default_factory=list)  # [(round, pool)]
+    meters_by_turn: list = field(default_factory=list)  # [(rnd, fanfare, salon,
+    #                                                     salon_cap, encore)]
+    block_at_turn_end: list = field(default_factory=list)   # [(round, block)]
     cards_played: list = field(default_factory=list)      # [(round, name)]
     potions_used: list = field(default_factory=list)
     damage_by_source: dict = field(default_factory=dict)
@@ -410,13 +459,22 @@ class FightTelemetry:
 
     def as_record(self) -> dict:
         return {
-            "record": "fight", "act": self.act, "floor": self.floor,
+            "record": "fight", "schema": SCHEMA_VERSION,
+            # THE FEED LABEL IS PART OF THE RECORD, not part of the filename.
+            # Guardrail 7 says every Track B curve is labelled with its feed;
+            # a label that lives in a path is a label that is lost the first
+            # time somebody concatenates two files.
+            "feed": "bot", "source": "soak", "seats": 1, "seat_index": 0,
+            "act": self.act, "floor": self.floor,
             "kind": self.kind, "enemies": self.enemies,
             "hp_start": self.hp_start, "hp_end": self.hp_end,
             "max_hp": self.max_hp, "hp_lost": self.hp_start - self.hp_end,
             "turns": self.turns, "outcome": self.outcome,
             "hp_trajectory": self.hp_trajectory,
             "incoming_by_turn": self.incoming_by_turn,
+            "enemy_pool_by_turn": self.enemy_pool_by_turn,
+            "meters_by_turn": self.meters_by_turn,
+            "block_at_turn_end": self.block_at_turn_end,
             "cards_played": self.cards_played,
             "n_cards_played": len(self.cards_played),
             "potions_used": self.potions_used,
@@ -452,6 +510,44 @@ def _telegraphed(state: dict[str, Any]) -> tuple[int, int]:
         total += dmg
         attackers += 1
     return total, attackers
+
+
+_METER_IDS = {
+    "FANFARE_METER_POWER": 0,
+    "SALON_MEMBER_POWER": 1,
+    "ENCORE_METER_POWER": 3,
+}
+
+
+def _meters(state: dict[str, Any]) -> list[int]:
+    """[fanfare, salon, salon_cap, encore] off the player's status list.
+
+    Read by ID rather than by title: a display name is loc data and moves with
+    a wording pass, an id is the thing itself. The CAP is not on the wire at
+    all -- the smart tooltip renders it from a per-player stat -- so it is
+    recorded as the printed base and any run that raised it with Casting Call
+    says so in `cards_played` instead. A number this file cannot see is a
+    number it records as unseen, not one it guesses.
+    """
+    out = [0, 0, SALON_PRINTED_CAP, 0]
+    for st in ((state.get("player") or {}).get("status") or []):
+        if not isinstance(st, dict):
+            continue
+        slot = _METER_IDS.get(str(st.get("id") or "").strip().upper())
+        if slot is None:
+            continue
+        amount = st.get("amount")
+        try:
+            out[slot] = int(amount)
+        except (TypeError, ValueError):
+            continue
+    return out
+
+
+# The PRINTED salon cap (SalonConstants.MemberSlots). Not a balance constant
+# here -- it is the label on a telemetry column, and the C# side owns the
+# number. A run that raises the live cap is legible from its card plays.
+SALON_PRINTED_CAP = 3
 
 
 def _enemy_pool(state: dict[str, Any]) -> int:
@@ -524,6 +620,11 @@ class RunDriver:
             "floor": (state.get("run") or {}).get("floor"),
             "state_type": state.get("state_type"),
             "actions_taken": self.actions,
+            # Recorded on EVERY defect, not just the process ones: "was the
+            # game still running when this was filed" is the first question
+            # asked of any row in this table, and reconstructing it afterwards
+            # from a killed process is impossible.
+            "proc_exit_code": self.session.exit_code,
             "state_dump": _trim_state(state),
             "recent": self._fingerprints[-NO_PROGRESS_ACTIONS:],
         }
@@ -640,6 +741,15 @@ class RunDriver:
         if self.fight is None:
             return
 
+        # END-OF-TURN BLOCK, not turn-opening block. The trajectory samples
+        # block at the top of the player's turn, which is whatever SURVIVED the
+        # enemy's -- a different quantity wearing the same word, and the wrong
+        # one for an output curve.
+        if st_b in COMBAT and action.get("action") == "end_turn":
+            self.fight.block_at_turn_end.append(
+                [(before.get("battle") or {}).get("round"),
+                 int((pb or {}).get("block", 0) or 0)])
+
         if st_b in COMBAT and st_a in COMBAT:
             dealt = _enemy_pool(before) - _enemy_pool(after)
             if dealt > 0 and action.get("action") in ("play_card", "use_potion"):
@@ -685,6 +795,12 @@ class RunDriver:
         self.fight.turns = max(self.fight.turns, int(rnd or 0))
         self.fight.hp_trajectory.append([rnd, p.get("hp"), p.get("block", 0)])
         self.fight.incoming_by_turn.append([rnd, dmg, n])
+        # THE POOL IS THE HONEST OUTPUT CURVE. `damage_by_source` credits the
+        # play the harness happened to read next and under-counts everything
+        # that resolves off a play (salon ticks, auras, bombs); the enemy pool's
+        # own drop between two turn openings cannot.
+        self.fight.enemy_pool_by_turn.append([rnd, _enemy_pool(state)])
+        self.fight.meters_by_turn.append([rnd] + _meters(state))
 
     def _close_fight(self, state: dict, outcome: str) -> None:
         if self.fight is None:
@@ -717,10 +833,14 @@ class RunDriver:
             self.file_defect(d.kind, d.detail, d.state)
             outcome, detail = "defect", f"{d.kind}: {d.detail}"
         except bridge.BridgeError as e:
-            kind = ("process_died" if not self.session.alive()
+            # THE GRACE PERIOD IS THE WHOLE POINT (see `Session.died`): asked
+            # instantly, a game that is crashing right now still reads alive,
+            # and the build defect gets filed under a harness-side kind.
+            kind = ("process_died" if self.session.died()
                     else "bridge_unreachable")
-            self.file_defect(kind, str(e), self._last_state or {})
-            outcome, detail = "defect", f"{kind}: {e}"
+            detail_ = f"{e} [exit code {self.session.exit_code}]"
+            self.file_defect(kind, detail_, self._last_state or {})
+            outcome, detail = "defect", f"{kind}: {detail_}"
         except Exception as e:                               # noqa: BLE001
             # The harness itself fell over. That is a defect record like any
             # other -- the alternative is an exception that escapes `soak()`
