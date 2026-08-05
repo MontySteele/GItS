@@ -1324,3 +1324,43 @@ terms):** either strike the four PROVISIONAL marks (threshold-reach table,
 1.8% STOP, early-half grade, R91/2b posture) as instrument-vindicated, or
 formally re-open any of them — one clean ledger operation either way; the
 probe measures, this pack does not lean.
+
+**10.12 (Track P) — Family-A dependency hits in the S13 ledger: none found.**
+Ordered by the pre-draft clause C-c. The S13 corpus
+(`review/redteam/exploit-lines.json`, 71 lines;
+`review/redteam/exploit-ledger.md`) was scanned for metric-threshold verdicts
+quoting `cards_played` or any quantity derived from it. **Zero hits.** The 40
+metric verdicts use seven metric names — `damage_dealt_by_turn` (19),
+`damage_in_turn` (12), `block_gained_total` (3), `hp_left` (3),
+`damage_dealt_total` (1), `won` (1), `energy_spent_in_turn` (1); the harness's
+eighth name, `cards_played_in_turn`, is quoted by **no** line. The remaining 31
+verdicts are `infinite` (18) and `stall` (13), which read the engine's own
+degeneracy detector and `MAX_TURNS`. Structural reason the null is expected,
+stated so it is checkable: Family A is a defect in the **soak writer**
+(`understudy/soak.py`, per `docs/s7-probe-c.md`), and the S13 harness never
+loads it — it drives `tier0.engine.combat.run_fight` directly and counts plays
+off its own `ScriptPilot.plays` list (`review/redteam/harness.py:142-143`).
+**Ask (yes/no):** authorize individual re-verification of the hits — with an
+empty hit list, the ask is whether the null is accepted as closing the C-c
+order, or whether a wider derivation test is wanted. Grep patterns used, for
+audit: `cards_played` over `review/redteam/**` (2 hits, both `harness.py`
+vocabulary, neither a verdict); `cards_played` repo-wide for the derivation
+set; `soak|understudy|track.b|telemetry|bot feed|PlayTelemetry|damage_by_source|damage_taken|potions_used`
+over the redteam artifacts (0 hits — no S13 verdict quotes a bot-feed
+quantity); and an enumeration of every `claim` object in `exploit-lines.json`
+by kind and metric name. No re-verification was performed and no line was
+re-run.
+
+**10.13 (Track P) — probe (d) registration, drafted and unsigned.**
+`docs/probe-d-registration-draft.md`. Registers the one residual probe (a)
+declared and deliberately left unadjudicated: `Aria of Recompense` reads Block
+0 in the reconstruction against engine readings of 0–4, five of 38 plays, all
+NEGATIVE — the mirror image of C1's direction. Pre-registered question,
+verbatim: *"Does `Aria of Recompense`'s Block divergence close when the
+recorded Fanfare meter is loaded into the reconstruction, the way C1's
+divergences closed when the recorded status strip was?"* The draft carries its
+method (a third reconstruction column in `tools/probe_b2_table.py`, the B2
+script unchanged on the same seed), four candidate layers, nine declared
+confounders, a cost class with a stated ceiling and a stop-and-re-register
+tripwire, and an explicit licensing section on both outcomes. **Nothing has
+been run.** **Ask (yes/no):** countersign the draft.
