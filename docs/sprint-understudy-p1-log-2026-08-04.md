@@ -88,7 +88,12 @@ hidden state is inspectable rather than living in module globals.
 - **Seeds: read-back (R95).** The game generates, we record from
   `GET /api/v1/compendium` after embarking. No `seed` parameter is passed
   anywhere on the embark path. The chosen-seed Custom arm is **not built** —
-  it is P1.5, gated at the first cross-build comparison.
+  it is P1.5, gated at the first cross-build comparison. **UPDATE 2026-08-05
+  (R104): P1.5 is no longer gated — it is NEXT in the Understudy queue.** Three
+  independent demands land on the same bridge fork: chosen seeds (cross-build
+  comparison), resource/meter visibility on the wire (R100/6b, before any
+  Furina-meter claim is graded from the bot feed), and selector recording (the
+  S7 C2 probe, R103(b)). One work item, three payoffs; the scope is unchanged.
 - **Readiness: the `options` key on a menu state, never `GET /` (R97/5a).** A
   test asserts `bridge.health(` appears nowhere in the module.
 - **Watchdog:** process liveness, `state_type: "overlay"`, a state FINGERPRINT
