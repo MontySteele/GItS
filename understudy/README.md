@@ -16,6 +16,7 @@ This directory drives the **real game** through the vendored STS2MCP bridge
 | `deckwatch.py` | the deck reconstructed from combat piles; the wire hides it everywhere else |
 | `policy_v0.py` | the counterfactual arm: delegates every decision to the live tier0/tier05 entry points, and returns *nothing* where it cannot delegate faithfully. **Frozen** — it is one arm of a published measurement, and editing it would retroactively move a quoted number |
 | `policy_v1.py` | R93's seven approved revisions. The policy the soak flies |
+| `committed.py` | R99/4b's archetype-committed DRAFT arm — a flagged variant, off by default. Membership comes off the design sheets, so the arm that builds a deck and the reader that grades it agree on what a Fanfare card is |
 | `naming.py` | revision #7: resolved card / target / option NAMES per action |
 | `rng.py` | the dedicated policy stream, and the refusal that keeps a game seed out of it |
 | `harness.py` | `begin` / `state` / `act` — the Phase-0 measurement loop |
@@ -106,6 +107,33 @@ launched yourself and makes no game-dir changes at all.
 Any resumable run found on the profile is abandoned rather than negotiated
 with (R97/5b).
 
+## The committed-draft arm (R99/4b)
+
+```
+python -m understudy.soak --runs 3 --commit fanfare --report
+```
+
+**Off by default, and `--commit` is the only difference from a baseline soak.**
+With it, the card-reward arm takes the best-scoring offer of the declared
+archetype when one is on offer, and falls through to the sim's own
+`assigned_policy` under the declared plan — skip included — when none is. The
+pilot, the map arm, the rest arm and the combat ladder are untouched, and the
+shop is deliberately NOT committed (`policy_v1._committed_draft` says why).
+
+It exists because B2 measures cards and every deck the baseline records is a
+mixed deck, so no archetype claim could be graded against one. The arm makes
+decks that are actually the declared archetype; the run stamps `intent` on
+every fight record, and `tools/track_b_curves.py --intent <archetype>` cuts the
+curves to them.
+
+`tier0/tests/test_understudy_committed.py` pins the claim rather than asserting
+it: every state shape the driver produces is replayed through `commit=None` and
+compared against the un-flagged call, decision for decision, and again with the
+flag set to prove the draft is the only category that moves. **A committed-arm
+number is a bot-limited floor measured under a constraint no person plays
+under** — one notch further from a design finding than a baseline soak number,
+which is already not one.
+
 ---
 
 # Telemetry schema
@@ -128,6 +156,12 @@ renegotiation.
 `tier0/tests/test_track_b_curves.py` compares the two writers' key sets
 directly and names every permitted asymmetry, because nothing else in the repo
 can see across the language boundary.
+
+**Additions of 2026-08-04 (late), both writers, no renames:** `intent`
+(R99/4a). The `outcome` value set gained `ended` and `won` became observable on
+the human feed (R100/5) — a change of MEANING rather than of key, which is why
+it is called out here as loudly as a rename would be: a reader who assumed
+`interrupted` meant "probably won" was right yesterday and is wrong today.
 
 **Two feeds, one schema, and the labels are load-bearing.** `feed` says who
 produced the row and `source` says which instrument wrote it; Guardrail 7's
@@ -188,13 +222,14 @@ Phase 0 could not do.
 |---|---|
 | `schema` | schema version (`"1"`). Bumped only on a BREAKING change |
 | `feed`, `source` | `bot`/`human`; `soak`/`mod`. Both mandatory — Track B labels every curve from them |
+| `intent` | **R99/4a.** The DECLARED archetype for the run this fight belongs to, lowercase, `""` when nobody declared one. Human feed: the first word of `intent.txt` beside the logs (or `GITS_TELEMETRY_INTENT`), read ONCE per session so a run's records cannot disagree with each other. Bot feed: the `--commit` arm. **Always a declaration, never an inference** — nothing reads a deck and guesses. `tools/track_b_curves.py --intent X` cuts every curve by it |
 | `seats`, `seat_index` | co-op seat count and this record's seat. The human feed writes one record per seat |
 | `character` | *(human feed only)* the seat's character title |
 | `act`, `floor`, `kind` | `monster` / `elite` / `boss` |
 | `enemies` | `[{name, max_hp}]` as the fight opened |
 | `hp_start`, `hp_end`, `hp_lost`, `max_hp` | the HP ledger |
 | `turns` | highest round reached |
-| `outcome` | `survived` / `died` / `won` / `interrupted` / `superseded`. **The human feed cannot observe a win**: the game exposes no first-party combat-END hook, so a fight the player wins is closed by the next fight's stale-flush and reads `interrupted`. `died` is exact. `hp_end` is the last reading taken while the fight was live, so the HP ledger stays honest whenever the close is late |
+| `outcome` | `survived` / `died` / `won` / `ended` / `interrupted` / `superseded`. **The human feed CAN observe a win as of R100/5** — the previous entry here said the game exposes no first-party combat-end hook, and that was wrong about the game: `CombatManager.EndCombatInternal` calls `Hook.AfterCombatEnd` and `Hook.AfterCombatVictory`, both of which walk the same `IterateHookListeners` that already delivers `BeforeCombatStart`. `died` is exact and always was. The LOSS path never reaches `EndCombatInternal`, so there is no end hook on a death and none is needed. `interrupted` now means what it says: a fight closed by the next fight's stale-flush, i.e. fled, abandoned or crashed. `hp_end` is the last reading taken while the fight was live, capped by the reading at combat end so a revive cannot credit the fight for HP it never had |
 | `hp_trajectory` | `[[round, hp, block], ...]`, sampled at each turn opening |
 | `incoming_by_turn` | `[[round, telegraphed_damage, n_attacking_enemies], ...]`, read before block |
 | `enemy_pool_by_turn` | `[[round, enemy hp+block total], ...]` at each turn opening. **The honest output curve**: the drop between two openings is everything that landed, whoever landed it — which `damage_by_source` cannot say |

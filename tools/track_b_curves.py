@@ -79,6 +79,7 @@ class Fight:
     """One fight, one seat. The schema is `understudy/README.md`."""
     feed: str
     source: str
+    intent: str
     seats: int
     act: int
     floor: int
@@ -107,6 +108,10 @@ def _fight(rec: dict[str, Any]) -> Fight:
     return Fight(
         feed=str(rec.get("feed") or "bot"),
         source=str(rec.get("source") or "soak"),
+        # A DECLARATION, NEVER AN INFERENCE (R99/4a). Absent key and empty
+        # string are the same reading: nobody said what this deck was trying
+        # to be. Nothing here looks at `cards_played` and guesses.
+        intent=str(rec.get("intent") or "").strip().lower(),
         seats=int(rec.get("seats") or 1),
         act=int(rec.get("act") or 0),
         floor=int(rec.get("floor") or 0),
@@ -139,6 +144,23 @@ def read_jsonl(path: Path) -> list[dict]:
         except json.JSONDecodeError:
             continue                      # a torn last line is a killed game
     return out
+
+
+def cut_by_intent(fights: Sequence[Fight], intent: str | None) -> list[Fight]:
+    """R99/4a — the declared-intent cut.
+
+    B2's Fanfare question could not be graded from mixed decks. The cut is the
+    cheap half of the answer: keep only the fights whose run DECLARED the
+    archetype, and B2 becomes a curve for decks that were trying to be that
+    thing. Both feeds carry the key, so one flag cuts a human session and a
+    committed soak arm the same way.
+
+    `None` keeps everything, which is what every reader before this flag got.
+    """
+    if not intent:
+        return list(fights)
+    want = intent.strip().lower()
+    return [f for f in fights if f.intent == want]
 
 
 def load(dirs: Iterable[Path]) -> list[Fight]:
@@ -396,7 +418,7 @@ BANNER = (
 )
 
 
-def render(fights: Sequence[Fight]) -> str:
+def render(fights: Sequence[Fight], intent: str | None = None) -> str:
     table = card_archetypes()
     L: list[str] = []
     a = L.append
@@ -411,6 +433,15 @@ def render(fights: Sequence[Fight]) -> str:
     a("")
     a(BANNER)
     a("")
+    if intent:
+        a(f"> **CUT BY DECLARED INTENT: `{intent}`.** Every table below is "
+          f"restricted to fights whose run declared this archetype — a human "
+          f"session that wrote it in `intent.txt`, or a bot soak run under "
+          f"`--commit {intent}`. This is a **declaration**, not a "
+          f"classification of the deck: nothing infers an archetype from what "
+          f"was played. Numbers under a cut are not comparable to numbers "
+          f"without one.")
+        a("")
 
     # ------------------------------------------------------------ coverage
     a("## 0. Coverage — which cells have data at all")
@@ -437,6 +468,24 @@ def render(fights: Sequence[Fight]) -> str:
           + ". These stay empty until that feed plays there. The bot feed is "
             "not expected to fill acts 2–3 (Understudy debt #3: policy_v1 dies "
             "in act 1); the human feed is the only instrument that will.")
+        a("")
+
+    # ---------------------------------------------- declared intent (R99/4a)
+    declared: dict[tuple[str, str], int] = {}
+    for f in fights:
+        declared[(f.feed, f.intent or "(none)")] = \
+            declared.get((f.feed, f.intent or "(none)"), 0) + 1
+    if declared:
+        a("**Declared deck intent** — one line per session on the human feed "
+          "(`intent.txt`), the `--commit` arm on the bot feed. `(none)` is a "
+          "run nobody declared anything for, which is most of the record and "
+          "is not a defect. Cut a curve to one of these with "
+          "`--intent <archetype>`.")
+        a("")
+        a("| feed | declared intent | fights |")
+        a("|---|---|---|")
+        for (feed, word), n in sorted(declared.items()):
+            a(f"| {feed} | {word} | {n} |")
         a("")
 
     # ------------------------------------------------------------------ B1
@@ -563,11 +612,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap.add_argument("--bot-dir", type=Path, default=BOT_DIR)
     ap.add_argument("--human-dir", type=Path, default=None)
     ap.add_argument("--out", type=Path, default=None)
+    ap.add_argument("--intent", default=None,
+                    help="R99/4a: cut every curve to fights whose run "
+                         "DECLARED this archetype (human feed: intent.txt; "
+                         "bot feed: soak --commit). Omit for everything.")
     args = ap.parse_args(argv)
 
     human = args.human_dir or default_human_dir()
-    fights = load([args.bot_dir, human])
-    doc = render(fights)
+    fights = cut_by_intent(load([args.bot_dir, human]), args.intent)
+    doc = render(fights, intent=args.intent)
     if args.out:
         args.out.write_text(doc + "\n", encoding="utf-8")
         print(f"wrote {args.out} ({len(fights)} fight records)")

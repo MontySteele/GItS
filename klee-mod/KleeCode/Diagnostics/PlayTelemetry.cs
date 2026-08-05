@@ -69,12 +69,36 @@ internal static class PlayTelemetry
     /// the default is the one that is true when nobody said anything.</summary>
     private const string FeedEnvVar = "GITS_TELEMETRY_FEED";
 
+    /// <summary>R99/4a — THE ONE-LINE-PER-SESSION DECK INTENT.
+    ///
+    /// Track B's Fanfare early-half prediction could not be graded because B2
+    /// measures cards and every recorded deck was a mixed deck: an archetype
+    /// total from a deck that drafted little of that archetype cannot separate
+    /// "this archetype produces too little" from "this deck has little of it".
+    /// The cheapest fix that exists is to ask the person who knows.
+    ///
+    /// HOW IT IS DECLARED: one word in
+    /// `%APPDATA%/SlayTheSpire2/gits_telemetry/intent.txt` — the directory the
+    /// logs already land in, so there is nothing to find and nothing to
+    /// create. `GITS_TELEMETRY_INTENT` overrides it, which is how the soak
+    /// stamps its committed-draft arm without touching a file the human owns.
+    ///
+    /// READ ONCE PER SESSION, deliberately. A declaration is a statement about
+    /// the run you are about to play; re-reading it mid-session would let one
+    /// run's records disagree with each other about what they were. Absent
+    /// file, empty file, unreadable file: the intent is `""`, which is exactly
+    /// what "nobody declared anything" should look like in a column.</summary>
+    private const string IntentEnvVar = "GITS_TELEMETRY_INTENT";
+
+    private const string IntentFile = "intent.txt";
+
     private static readonly Regex IntentLabel =
         new(@"^(\d+)(?:\s*[x×]\s*(\d+))?$", RegexOptions.Compiled);
 
     private static readonly Regex BbCode = new(@"\[/?[^\]]*\]", RegexOptions.Compiled);
 
     private static string? _path;
+    private static string? _intent;
     private static bool _writeFailed;
     private static readonly Dictionary<Player, FightRecord> Open = new();
 
@@ -284,10 +308,71 @@ internal static class PlayTelemetry
 
     // ------------------------------------------------------------- close ---
 
+    /// <summary>
+    /// R100/5 — THE COMBAT-END SEAM, and it is a first-party hook.
+    ///
+    /// The previous record said "the game exposes no first-party combat-END
+    /// hook". That was wrong about the game (the consequence it described —
+    /// won fights reading `interrupted` — was real). Verified against a local
+    /// decompile of the shipped `sts2.dll` rather than assumed:
+    ///
+    ///   CombatManager.EndCombatInternal()
+    ///     -> await Hook.AfterCombatEnd(runState, combatState, room)
+    ///     -> ... -> await Hook.AfterCombatVictory(runState, combatState, room)
+    ///
+    /// and both walk `runState.IterateHookListeners(combatState)` — the same
+    /// iteration that already delivers `BeforeCombatStart` to this listener.
+    /// So the outcome label costs two `AbstractModel` overrides and NO Harmony
+    /// patch: no new patch surface on the combat lifecycle of a deterministic
+    /// lockstep game, which is a trade worth taking for a label.
+    ///
+    /// ONE ASYMMETRY, DECLARED. The LOSS path never reaches
+    /// `EndCombatInternal` at all — `CheckWinCondition` sees the pending loss,
+    /// calls `ProcessPendingLoss` and returns — so there is no combat-end hook
+    /// on a death. `died` was already exact from the player's own death and
+    /// stays the observation that labels it.
+    /// </summary>
+    internal static void CombatEnded(bool victory)
+    {
+        try
+        {
+            if (Open.Count == 0) return;
+            var combat = CombatManager.Instance?.DebugOnlyGetState();
+            foreach (var (player, record) in Open)
+            {
+                var creature = player.Creature;
+                if (creature == null) continue;
+                // THE FINAL READING, CAPPED BY THE LAST IN-FIGHT ONE.
+                // `ReviveBeforeCombatEnd` runs immediately before this hook, so
+                // current HP can be HIGHER than anything this fight ever saw —
+                // and an HP ledger that credits a fight for the revive that
+                // followed it is the same class of lie as one that charges it
+                // for the campfire.
+                var now = (int)creature.CurrentHp;
+                record.HpLastSeen = record.HpLastSeen >= 0
+                    ? Math.Min(record.HpLastSeen, now)
+                    : now;
+            }
+
+            // PRIMARY enemies, mirroring `CombatManager.IsEnding` exactly: a
+            // surviving non-primary minion does not stop a combat from ending,
+            // so counting it here would relabel won fights as `ended` for the
+            // encounters that summon.
+            var primariesLeft = combat?.Enemies
+                .Any(e => e != null && e.IsAlive && e.IsPrimaryEnemy) ?? false;
+            FlushAll(victory || !primariesLeft ? "won" : "ended");
+        }
+        catch (Exception e)
+        {
+            Warn("CombatEnded", e);
+        }
+    }
+
     /// <summary>A fight is over when every enemy is down or every seat is.
-    /// There is no first-party combat-END hook, so this is asked at each turn
-    /// boundary; the stale-flush in <see cref="OpenFight"/> is the backstop for
-    /// every ending this misses (fled, abandoned, crashed).</summary>
+    /// Asked at each turn boundary and on a killing blow, ahead of the
+    /// combat-end hook, so the record closes at the moment the fight did; the
+    /// stale-flush in <see cref="OpenFight"/> remains the backstop for every
+    /// ending neither sees (fled, abandoned, crashed).</summary>
     private static void MaybeClose(ICombatState combat)
     {
         if (Open.Count == 0) return;
@@ -342,15 +427,20 @@ internal static class PlayTelemetry
         }
     }
 
+    private static string Root() =>
+        Path.Combine(ProjectSettings.GlobalizePath("user://"), "gits_telemetry");
+
     private static string? LogPath()
     {
         if (_path != null) return _path;
-        var root = Path.Combine(ProjectSettings.GlobalizePath("user://"),
-                                "gits_telemetry");
+        var root = Root();
         Directory.CreateDirectory(root);
         var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
         _path = Path.Combine(root, $"play-{stamp}.jsonl");
-        Log.Info($"[{KleeMod.ModId}] play telemetry ({Feed()} feed) -> {_path}");
+        var intent = Intent();
+        Log.Info($"[{KleeMod.ModId}] play telemetry ({Feed()} feed"
+               + (intent.Length > 0 ? $", intent '{intent}'" : ", no declared intent")
+               + $") -> {_path}");
         return _path;
     }
 
@@ -358,6 +448,47 @@ internal static class PlayTelemetry
     {
         var declared = System.Environment.GetEnvironmentVariable(FeedEnvVar);
         return string.IsNullOrWhiteSpace(declared) ? "human" : declared!.Trim();
+    }
+
+    /// <summary>The session's declared deck intent, cached after the first
+    /// read. Environment first (the harness), then `intent.txt` (the person).
+    /// Every failure path returns `""`: an intent nobody could read is an
+    /// intent nobody declared, and a telemetry file is not worth one line of
+    /// noise in the log a crash report gets read from.</summary>
+    private static string Intent()
+    {
+        if (_intent != null) return _intent;
+        var declared = System.Environment.GetEnvironmentVariable(IntentEnvVar);
+        if (!string.IsNullOrWhiteSpace(declared))
+        {
+            return _intent = Clean(declared!);
+        }
+
+        try
+        {
+            var file = Path.Combine(Root(), IntentFile);
+            if (!File.Exists(file)) return _intent = string.Empty;
+            // FIRST LINE ONLY, and the rest is free comment space. Somebody
+            // will eventually write down why they declared what they declared,
+            // and the reader that punished them for it would be this one.
+            var first = File.ReadLines(file, new UTF8Encoding(false))
+                            .FirstOrDefault() ?? string.Empty;
+            return _intent = Clean(first);
+        }
+        catch (Exception)
+        {
+            return _intent = string.Empty;
+        }
+    }
+
+    /// <summary>One lowercase word, no punctuation to argue about. `Fanfare`,
+    /// `fanfare `, and `FANFARE` are the same declaration.</summary>
+    private static string Clean(string raw)
+    {
+        var trimmed = raw.Trim().ToLowerInvariant();
+        var cut = trimmed.IndexOfAny(new[] { ' ', '\t', '#' });
+        if (cut >= 0) trimmed = trimmed.Substring(0, cut);
+        return trimmed.Length > 32 ? trimmed.Substring(0, 32) : trimmed;
     }
 
     // ------------------------------------------------------------ readers --
@@ -503,6 +634,10 @@ internal static class PlayTelemetry
             Str(sb, "feed", Feed());
             sb.Append(',');
             Str(sb, "source", "mod");
+            sb.Append(',');
+            // R99/4a. Empty when nobody declared anything -- which is a
+            // reading, not a gap, so the key is always present.
+            Str(sb, "intent", Intent());
             sb.Append(",\"seats\":").Append(Seats);
             sb.Append(",\"seat_index\":").Append(SeatIndex);
             sb.Append(',');
@@ -676,6 +811,27 @@ public sealed class PlayTelemetryHooks : AbstractModel
         CombatSide side, IEnumerable<Creature> participants)
     {
         if (side == CombatSide.Player) PlayTelemetry.CloseTurn();
+        return Task.CompletedTask;
+    }
+
+    /// <summary>The combat-end seam (R100/5). Runs inside
+    /// <c>EndCombatInternal</c>, which the loss path never reaches — so
+    /// anything still open here survived to the end of a combat that ended,
+    /// and <see cref="PlayTelemetry.CombatEnded"/> confirms against the live
+    /// enemy list rather than trusting the name of the hook.</summary>
+    public override Task AfterCombatEnd(CombatRoom room)
+    {
+        PlayTelemetry.CombatEnded(victory: false);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>The unambiguous one, kept as the backstop. It runs later in the
+    /// same method, so in the ordinary case it finds nothing open — which is
+    /// the point: if anything ever DOES reach it still open, that fight was a
+    /// victory and gets labelled as one.</summary>
+    public override Task AfterCombatVictory(CombatRoom room)
+    {
+        PlayTelemetry.CombatEnded(victory: true);
         return Task.CompletedTask;
     }
 

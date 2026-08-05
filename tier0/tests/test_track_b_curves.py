@@ -68,6 +68,38 @@ def test_an_act_with_no_data_stays_empty_and_is_named():
     assert "feed `bot` — act 2" not in doc
 
 
+# ------------------------------------------------------ declared intent ----
+
+def test_an_undeclared_fight_reads_as_undeclared_and_is_never_inferred():
+    """R99/4a. A record with no `intent` key is a run nobody declared anything
+    for. Nothing looks at `cards_played` and guesses -- an inferred intent
+    would make the cut a classification, and the whole point of the cut is
+    that a person said so."""
+    assert _fight().intent == ""
+    assert _fight(intent="Fanfare ").intent == "fanfare"
+
+
+def test_the_cut_keeps_only_what_was_declared():
+    fights = [_fight(intent="fanfare"), _fight(intent="salon"), _fight()]
+    assert len(tb.cut_by_intent(fights, "fanfare")) == 1
+    assert len(tb.cut_by_intent(fights, None)) == 3
+
+
+def test_a_cut_document_says_it_is_cut_and_says_what_a_declaration_is():
+    """A cut curve that reads like an uncut one is a number waiting to be
+    quoted against the wrong denominator."""
+    doc = tb.render([_fight(intent="fanfare")], intent="fanfare")
+    assert "CUT BY DECLARED INTENT" in doc
+    assert "declaration" in doc
+    assert "| bot | fanfare | 1 |" in doc
+
+
+def test_an_uncut_document_still_shows_what_was_declared():
+    doc = tb.render([_fight(intent="fanfare"), _fight()])
+    assert "CUT BY DECLARED INTENT" not in doc
+    assert "| bot | (none) | 1 |" in doc
+
+
 # ------------------------------------------------------------- arithmetic ---
 
 def test_damage_per_turn_is_the_pools_own_drop():
@@ -157,6 +189,34 @@ def test_the_schema_version_is_stamped_by_both_writers():
     assert soak.SCHEMA_VERSION == "1"
     assert f'SchemaVersion = "{soak.SCHEMA_VERSION}"' in \
         CS.read_text(encoding="utf-8")
+
+
+def test_both_writers_carry_the_declared_intent():
+    """R99/4a rides the schema as an ADDITION, which is free -- but only if
+    both writers add it. One writer's key is a column the other feed can never
+    fill, and a cut that silently drops a whole feed is worse than no cut."""
+    assert "intent" in _python_keys()
+    assert "intent" in _csharp_keys()
+
+
+def test_the_human_feeds_intent_is_declared_and_never_inferred():
+    """The C# side reads a file and an environment variable. If it ever grows
+    a deck-shaped heuristic, this is the test that says so."""
+    src = CS.read_text(encoding="utf-8")
+    assert 'IntentFile = "intent.txt"' in src
+    assert 'IntentEnvVar = "GITS_TELEMETRY_INTENT"' in src
+
+
+def test_the_combat_end_seam_is_a_first_party_hook_not_a_harmony_patch():
+    """R100/5. `Hook.AfterCombatEnd` and `Hook.AfterCombatVictory` walk the
+    same `IterateHookListeners` that already delivers `BeforeCombatStart`, so
+    the outcome label costs two overrides. A Harmony patch appearing here
+    later is a new patch surface on the combat lifecycle of a lockstep co-op
+    game, and it should have to argue for itself."""
+    src = CS.read_text(encoding="utf-8")
+    assert "public override Task AfterCombatEnd(CombatRoom room)" in src
+    assert "public override Task AfterCombatVictory(CombatRoom room)" in src
+    assert "HarmonyPatch" not in src
 
 
 def test_the_human_feed_never_writes_into_the_mod_directory():

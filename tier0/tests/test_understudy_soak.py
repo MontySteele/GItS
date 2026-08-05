@@ -269,6 +269,7 @@ def _driver():
     d = soak.RunDriver.__new__(soak.RunDriver)
     d.session = _FakeSession()
     d.character = soak.DEFAULT_CHARACTER
+    d.commit = None                      # baseline arm; R99/4b's flag is off
     d.memo = soak.policy_v1.Memo()
     d.run_index = 1
     d.stamp = "test"

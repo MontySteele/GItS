@@ -59,7 +59,8 @@ from tier05 import draft as t5draft
 from tier05 import model as t5model
 from tier05 import route as t5route
 
-from understudy import adapter, naming, policy_v0
+from understudy import adapter, committed, naming, policy_v0
+from understudy.rng import policy_rng
 
 CHARACTER = policy_v0.CHARACTER
 ARCHETYPE = policy_v0.ARCHETYPE
@@ -710,6 +711,85 @@ def _rest(state: dict[str, Any], memo: Memo) -> Decision:
 
 # ------------------- revision #6: the in-combat choice overlay arm ----------
 
+COMMIT_REVISION = "v1.8-commit"
+
+
+def _committed_draft(state: dict[str, Any], commit: str) -> Decision:
+    """The archetype-committed draft arm (R99/4b). Reached ONLY when a soak
+    declared an archetype; `commit=None` never enters this function.
+
+    Two rungs, and the second one is baseline's:
+
+      1. If any offer is a card of the declared archetype (per the design
+         sheets, `understudy/committed.py`), take the best-scoring one. This is
+         the whole delta: a PRIORITY over the ordering, imposed before the
+         skip threshold and before the late-run lean gate, because a
+         commitment that could be overruled by a lean gate would produce
+         exactly the mixed deck the arm exists to avoid.
+      2. Otherwise `assigned_policy` under the DECLARED plan, unchanged --
+         including its right to skip. A committed arm that took junk rather
+         than skip would be measuring junk.
+
+    DECLARED LIMIT: the SHOP is not committed. `policy_v0._shop` owns
+    affordability and shelf-index remapping, and re-deciding a purchase around
+    a commitment would put a second variable (and a second index bug) in the
+    window. Bot runs die in act 1 and shop rarely; card rewards are where a
+    deck comes from. If a committed soak ever ends up deck-diluted by shop
+    buys, that count is in the run log and this note is where to start.
+    """
+    blob = state.get("card_reward") or {}
+    offers_raw = (blob.get("cards") if isinstance(blob, dict) else None) \
+        or state.get("cards") or state.get("options") or []
+    offers: list = []
+    approx: list[str] = []
+    for e in offers_raw:
+        if not isinstance(e, dict):
+            continue
+        card, is_approx = adapter.resolve_card(e)
+        offers.append(card)
+        if is_approx:
+            approx.append(card.name)
+    if not offers:
+        return _unavailable("draft", "no offers on the wire to score")
+
+    deck = adapter.deck_cards(state)
+
+    def score(card) -> float:
+        return t5draft.score_offer(card, deck, commit)
+
+    scores = {c.name: round(score(c), 2) for c in offers}
+    notes = {"approximate_offers": approx, "deck_size": len(deck),
+             "commit": commit,
+             "committed_offers": [c.name for c in offers
+                                  if committed.is_committed(c, commit)]}
+
+    pick = committed.prefer(offers, commit, score)
+    revision = COMMIT_REVISION
+    if pick is None:
+        # Nothing of the declared archetype on this screen. The sim decides,
+        # under the declared plan rather than policy_v0's hardcoded one.
+        pick = t5draft.assigned_policy(policy_rng("draft"), deck, offers, commit)
+        revision = COMMIT_REVISION + "-fallback"
+
+    if pick is None:
+        return Decision(
+            category="draft", action={"action": "skip_card_reward"},
+            label="skip", revision=revision,
+            rationale=(f"no {commit} card on offer, and every offer scored "
+                       f"below the skip threshold under the {commit} plan"),
+            notes=notes)
+
+    index = next((i for i, c in enumerate(offers) if c is pick), None)
+    return Decision(
+        category="draft",
+        action={"action": "select_card_reward", "card_index": index},
+        label=f"take {pick.name} [{index}]",
+        revision=revision,
+        rationale=(f"committed to {commit}: score_offer under the {commit} "
+                   f"plan: {scores}"),
+        notes=notes)
+
+
 def _is_companion(card) -> bool:
     return card.companion is not None or bool(card.nation)
 
@@ -1019,12 +1099,21 @@ def _choice_overlay(state: dict[str, Any],
 
 # ------------------------------------------------------------- dispatch ----
 
-def decide(state: dict[str, Any], memo: Memo | None = None) -> Decision:
+def decide(state: dict[str, Any], memo: Memo | None = None,
+           commit: str | None = None) -> Decision:
     """policy_v1's answer at `state`, with revision #7's names attached.
 
     A crash in any arm returns an unavailable Decision rather than propagating:
     the run is the expensive half, and a policy that can end one by raising is
     a policy that cannot soak.
+
+    `commit` is R99/4b's archetype-committed draft arm, and it is OFF unless a
+    soak declares it. **It is the only difference between this function and the
+    one R98 validated**: with `commit=None` every branch below is the branch
+    that was already there, which `tier0/tests/test_understudy_committed.py`
+    pins by replaying recorded states through both settings. Baseline soak
+    numbers therefore stay comparable to baseline soak numbers, which is the
+    one property a flagged variant has to buy.
     """
     memo = memo if memo is not None else Memo()
     st = str(state.get("state_type") or "unknown")
@@ -1042,7 +1131,8 @@ def decide(state: dict[str, Any], memo: Memo | None = None) -> Decision:
             if st in ("monster", "elite", "boss"):
                 d = _combat(state, memo)
             elif st == "card_reward":
-                d = _from_v0(policy_v0._card_reward(state))
+                d = (_committed_draft(state, commit) if commit
+                     else _from_v0(policy_v0._card_reward(state)))
             elif st == "map":
                 d = _map(state, memo)
             elif st == "rest_site":

@@ -286,6 +286,21 @@ here: the mod has never patched combat lifecycle, the method is reached through
 an async continuation (finding 21's neighbourhood), and adding a patch there to
 improve a LABEL is not a trade this pass should make unsupervised.
 
+> **RETRACTED 2026-08-04 (late), R100/5 — and the retraction is about the game,
+> not about the consequence.** The consequence was real and is now closed. The
+> claim above it — *"the game exposes no first-party combat-END hook"* — was
+> simply false, and the only reason it stood is that nobody decompiled the
+> method before writing it down. `CombatManager.EndCombatInternal` calls
+> `Hook.AfterCombatEnd(runState, combatState, room)` and then
+> `Hook.AfterCombatVictory(...)`; both walk
+> `runState.IterateHookListeners(combatState)`, the same iteration that had
+> been delivering `BeforeCombatStart` to `PlayTelemetryHooks` all along. So the
+> label cost two `AbstractModel` overrides, **no Harmony patch and no async
+> continuation of our own**, which is a strictly better trade than the one this
+> section declined to make. The instrument named here was more expensive than
+> the one that existed; naming an instrument is not the same as checking
+> whether it is needed.
+
 ## Reversibility ledger — game-directory changes this session
 
 | # | change | undo | state |

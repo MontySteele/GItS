@@ -438,6 +438,11 @@ class FightTelemetry:
     act: int
     floor: int
     kind: str
+    # R99/4a. The DECLARED deck intent for the run this fight belongs to: the
+    # committed archetype on the bot feed, whatever the person wrote in
+    # `intent.txt` on the human feed, `""` when nobody declared anything. It is
+    # a declaration, never an inference -- nothing reads the deck and guesses.
+    intent: str = ""
     enemies: list = field(default_factory=list)
     hp_start: int = 0
     max_hp: int = 0
@@ -464,7 +469,8 @@ class FightTelemetry:
             # Guardrail 7 says every Track B curve is labelled with its feed;
             # a label that lives in a path is a label that is lost the first
             # time somebody concatenates two files.
-            "feed": "bot", "source": "soak", "seats": 1, "seat_index": 0,
+            "feed": "bot", "source": "soak", "intent": self.intent,
+            "seats": 1, "seat_index": 0,
             "act": self.act, "floor": self.floor,
             "kind": self.kind, "enemies": self.enemies,
             "hp_start": self.hp_start, "hp_end": self.hp_end,
@@ -593,10 +599,14 @@ class RunDriver:
     """One run, start to game_over, with a watchdog on every action."""
 
     def __init__(self, session: Session, run_index: int, stamp: str,
-                 character: str = DEFAULT_CHARACTER):
+                 character: str = DEFAULT_CHARACTER,
+                 commit: str | None = None):
         self.session = session
         self.run_index = run_index
         self.character = character
+        # R99/4b. `None` is baseline -- the arm the R98 validation ran, and the
+        # only arm whose numbers are comparable to R98's.
+        self.commit = commit
         self.stamp = stamp
         self.memo = policy_v1.Memo()
         self.seed: str | None = None
@@ -792,7 +802,8 @@ class RunDriver:
             kind=str(state.get("state_type")),
             enemies=[{"name": e.get("name"), "max_hp": e.get("max_hp")}
                      for e in adapter.enemy_blobs(state)],
-            hp_start=int(p.get("hp", 0)), max_hp=int(p.get("max_hp", 1)))
+            hp_start=int(p.get("hp", 0)), max_hp=int(p.get("max_hp", 1)),
+            intent=self.commit or "")
         self._open_turn(state)
 
     def _open_turn(self, state: dict) -> None:
@@ -825,6 +836,9 @@ class RunDriver:
     def run(self) -> dict:
         self.emit({"record": "run_begin", "character": self.character,
                    "policy": policy_v1.POLICY_VERSION,
+                   # The arm, recorded per run for the same reason the dials
+                   # are: a log has to stay self-describing when the flag moves.
+                   "commit": self.commit,
                    "dials": {"BLOCK_MATTERS_FRACTION":
                              policy_v1.BLOCK_MATTERS_FRACTION,
                              "COMPANION_SHARE_FOR_GUEST_CAST":
@@ -1079,7 +1093,7 @@ class RunDriver:
                 state = self.post(state, mech, mechanical=True)
                 continue
 
-            decision = policy_v1.decide(state, self.memo)
+            decision = policy_v1.decide(state, self.memo, commit=self.commit)
             if not decision.available or decision.action is None:
                 fallback = _last_resort(state)
                 if fallback is None:
@@ -1254,7 +1268,10 @@ def _trim_state(state: dict) -> dict:
 
 # ----------------------------------------------------------------- main ----
 
-def soak(runs: int, character: str, do_setup: bool) -> dict:
+def soak(runs: int, character: str, do_setup: bool,
+         commit: str | None = None) -> dict:
+    from understudy import committed as _committed
+    commit = _committed.normalise(commit)          # refuses an unknown word
     stamp = time.strftime("%Y%m%d-%H%M%S")
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     session = Session(stamp, do_setup=do_setup)
@@ -1267,7 +1284,7 @@ def soak(runs: int, character: str, do_setup: bool) -> dict:
         for i in range(1, runs + 1):
             print(f"--- run {i}/{runs} ---", flush=True)
             deckwatch.reset()
-            driver = RunDriver(session, i, stamp, character)
+            driver = RunDriver(session, i, stamp, character, commit=commit)
             s = driver.run()
             s["defect_kinds"] = [d["kind"] for d in driver.defects]
             summaries.append(s)
@@ -1276,7 +1293,7 @@ def soak(runs: int, character: str, do_setup: bool) -> dict:
                   f"defects={s['defects']}", flush=True)
             index.write_text(json.dumps(
                 {"stamp": stamp, "character": character,
-                 "policy": policy_v1.POLICY_VERSION,
+                 "policy": policy_v1.POLICY_VERSION, "commit": commit,
                  "requested_runs": runs, "runs": summaries}, indent=1),
                 encoding="utf-8")
 
@@ -1309,7 +1326,7 @@ def soak(runs: int, character: str, do_setup: bool) -> dict:
         session.teardown()
 
     result = {"stamp": stamp, "character": character,
-              "policy": policy_v1.POLICY_VERSION,
+              "policy": policy_v1.POLICY_VERSION, "commit": commit,
               "requested_runs": runs, "runs": summaries,
               "stopped_on": stopped,
               "reversibility": session.ledger.entries}
@@ -1335,9 +1352,15 @@ def main(argv: list[str] | None = None) -> int:
                          "changes and revert none")
     ap.add_argument("--report", action="store_true",
                     help="print the morning report for this soak when it ends")
+    ap.add_argument("--commit", default=None,
+                    help="R99/4b: declare an archetype and draft with its "
+                         "cards prioritised (fanfare / salon / spotlight). "
+                         "OFF by default -- without it this is the baseline "
+                         "arm R98 validated, unchanged")
     args = ap.parse_args(argv)
 
-    result = soak(args.runs, args.character, do_setup=not args.no_setup)
+    result = soak(args.runs, args.character, do_setup=not args.no_setup,
+                  commit=args.commit)
     if args.report:
         from understudy import report
         print()
