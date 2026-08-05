@@ -572,3 +572,41 @@ def test_a_screens_selection_state_does_not_survive_leaving_the_screen():
     again = policy_v1.decide(overlay, memo)
     assert again.available, "the reopened screen was declined as exhausted"
     assert again.action["action"] == "select_card"
+
+
+def test_a_card_the_game_marks_unplayable_is_never_chosen():
+    """tier0's `card_playable` knows about energy and nothing else. A card the
+    GAME has blocked -- a boss debuff, an unplayable status, a condition the
+    sim does not model -- scored normally, was chosen, was rejected, and was
+    chosen again. That loop ended a run on an Act 1 boss at 379 actions."""
+    blocked = dict(BIG_SWING, name="Blocked Swing", can_play=False)
+    state = _combat_state([blocked, DEFEND],
+                          [_enemy("A", "One", 60, "5")])
+    d = policy_v1.decide(state, policy_v1.Memo())
+    assert d.notes["names"].get("card_name") != "Blocked Swing"
+
+
+def test_a_play_the_bridge_rejected_is_not_offered_again_this_turn():
+    """The backstop for when the wire says `can_play` and the game still says
+    no. The driver records the rejection; the policy must honour it."""
+    state = _combat_state([BIG_SWING, DEFEND],
+                          [_enemy("A", "One", 60, "5")])
+    memo = policy_v1.Memo()
+    first = policy_v1.decide(state, memo)
+    assert first.notes["names"]["card_name"] == "Big Swing"
+    memo.rejected.add((memo.turn_key(state), "BASE-SWING"))
+    second = policy_v1.decide(state, memo)
+    assert second.notes["names"].get("card_name") != "Big Swing"
+
+
+def test_the_rejection_veto_is_scoped_to_the_turn():
+    """A boss debuff that lasts several turns costs one wasted action per turn
+    to rediscover, which is cheap and self-correcting. Carrying the veto
+    forever would silently shrink the deck."""
+    state = _combat_state([BIG_SWING, DEFEND],
+                          [_enemy("A", "One", 60, "5")], rnd=1)
+    later = _combat_state([BIG_SWING, DEFEND],
+                          [_enemy("A", "One", 60, "5")], rnd=2)
+    memo = policy_v1.Memo()
+    memo.rejected.add((memo.turn_key(state), "BASE-SWING"))
+    assert policy_v1.decide(later, memo).notes["names"]["card_name"] == "Big Swing"

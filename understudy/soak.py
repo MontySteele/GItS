@@ -609,6 +609,16 @@ class RunDriver:
         if decision is not None:
             rec["policy"] = decision.as_log()
         self.emit(rec)
+        # A PLAY THE GAME REFUSED IS NOT OFFERED AGAIN THIS TURN. Without this
+        # the policy re-picks its highest-scoring card, the bridge rejects it
+        # for a reason tier0 cannot see, and the run bounces until the
+        # watchdog stops it -- which is how an Act 1 boss ended a run at 379
+        # actions with "Card 'Stage Presence' cannot be played".
+        if (result.get("status") == "error"
+                and action.get("action") == "play_card"
+                and names.get("card_id")):
+            self.memo.rejected.add(
+                (self.memo.turn_key(state), str(names["card_id"])))
         time.sleep(SETTLE_S)
         after = bridge.get_state()
         deckwatch.record(after)

@@ -115,6 +115,11 @@ class Memo:
     # `simple_select`, `can_confirm: false` until the quota is met), so the
     # arm has to pick a DIFFERENT card each visit rather than the same best one.
     selected_screens: dict = field(default_factory=dict)
+    # (turn key, card id) pairs the GAME rejected this turn. The wire's
+    # `can_play` is the primary filter; this is the backstop for the case where
+    # the wire says yes and the play still comes back an error, which a boss
+    # debuff produced on a live run ("Card 'Stage Presence' cannot be played").
+    rejected: set = field(default_factory=set)
     # How many times revision #1 has already offered a given card this turn.
     # A free-card rule that re-offers a card whose play was rejected is the one
     # way revision #1 could spin, so the offer count is bounded by the number
@@ -226,8 +231,11 @@ def _free_expiring(state: dict[str, Any], memo: Memo) -> Decision | None:
     copies: dict[str, int] = {}
     for c in hand:
         copies[str(c.get("id"))] = copies.get(str(c.get("id")), 0) + 1
+    rejected_here = memo.rejected
     for i, c in enumerate(hand):
         if c.get("can_play") is False:
+            continue
+        if (key, str(c.get("id"))) in rejected_here:
             continue
         cost = c.get("cost")
         if cost != 0 and str(cost) != "0":
@@ -391,7 +399,8 @@ def _match_enemy(state: dict[str, Any], enemy) -> str | None:
 
 # ------------------------- revision #2: the gated block-panic ladder --------
 
-def _gated_ladder(state: dict[str, Any], cs, notes: dict[str, Any]) -> Decision:
+def _gated_ladder(state: dict[str, Any], cs, notes: dict[str, Any],
+                  vetoed: set | None = None) -> Decision:
     """R93 #2. The pilot's ladder, with the block-panic rung made to justify itself.
 
     tier0's rung is: if incoming >= BLOCK_PANIC_THRESHOLD x HP and block <
@@ -413,9 +422,15 @@ def _gated_ladder(state: dict[str, Any], cs, notes: dict[str, Any]) -> Decision:
     tier0 aims (lowest HP). The kill line aims at the body it is killing, which
     the wire allows and the sim's single-target model does not express.
     """
+    vetoed = vetoed or set()
     weights = loader.pilot_weights(PILOT_ID)
-    playable = [c for c in cs.player.hand
-                if pilot_policy.card_playable(cs, c)]
+    # THE GAME'S OWN PLAYABILITY VERDICT COMES FIRST. tier0's `card_playable`
+    # knows about energy and nothing else, so a card the GAME has blocked --
+    # a boss debuff, an unplayable status, a condition the sim does not model
+    # -- scored normally, was chosen, was rejected, and was chosen again. That
+    # loop reached the cycle watchdog on an Act 1 boss at 379 actions.
+    playable = [c for i, c in enumerate(cs.player.hand)
+                if i not in vetoed and pilot_policy.card_playable(cs, c)]
     if not playable:
         return Decision(category="sequencing", action={"action": "end_turn"},
                         label="end_turn",
@@ -534,6 +549,28 @@ def _from_card(state: dict[str, Any], cs, card, revision: str,
                            "card_id": card.id})
 
 
+def _vetoed(state: dict[str, Any], memo: Memo) -> set:
+    """Hand indices no arm may choose: the game says no, or it already said no.
+
+    Two sources, and the first is the one that should have been there all
+    along. The wire marks every hand card `can_play` with an
+    `unplayable_reason`, and the adapter does not carry it -- so tier0 decided
+    playability on energy alone. The second is the memo: a play the bridge
+    rejected this turn is not offered again, because re-offering it is a loop
+    and a loop is a lost run.
+    """
+    key = memo.turn_key(state)
+    out = set()
+    for i, c in enumerate((state.get("player") or {}).get("hand") or []):
+        if not isinstance(c, dict):
+            continue
+        if c.get("can_play") is False:
+            out.add(i)
+        elif (key, str(c.get("id"))) in memo.rejected:
+            out.add(i)
+    return out
+
+
 def _combat(state: dict[str, Any], memo: Memo) -> Decision:
     cs, notes = adapter.build_combat_state(state)
     pot = _potion_arm(state, cs, memo)
@@ -547,7 +584,7 @@ def _combat(state: dict[str, Any], memo: Memo) -> Decision:
     free = _free_expiring(state, memo)
     if free is not None:
         return free
-    return _gated_ladder(state, cs, notes)
+    return _gated_ladder(state, cs, notes, _vetoed(state, memo))
 
 
 # ------------------------------ revision #3: the map, one ply deeper --------
