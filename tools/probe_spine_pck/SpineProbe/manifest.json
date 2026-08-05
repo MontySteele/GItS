@@ -1,0 +1,12 @@
+{
+  "id": "spineprobe",
+  "name": "Track M Spine Probe (THROWAWAY)",
+  "author": "Monty",
+  "description": "Findings probe for docs/animation-downfall-investigation-2026-08-05.md M-Q3. Loads three scenes, logs what resolved, adds nothing to a run. Delete with tools/probe_spine_pck/cleanup_probe.ps1.",
+  "version": "0.0.1",
+  "has_dll": true,
+  "has_pck": true,
+  "min_game_version": "0.107.1",
+  "dependencies": [],
+  "affects_gameplay": false
+}
