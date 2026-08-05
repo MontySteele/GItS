@@ -27,6 +27,7 @@ BASE = "http://localhost:15526"
 SINGLEPLAYER = f"{BASE}/api/v1/singleplayer"
 COMPENDIUM = f"{BASE}/api/v1/compendium"
 SPEED = f"{BASE}/api/v1/gits/speed"
+SEED = f"{BASE}/api/v1/gits/seed"
 
 
 class BridgeError(RuntimeError):
@@ -101,6 +102,40 @@ def set_speed(enabled: bool, time_scale: float | None = None) -> dict:
 
 def get_speed() -> dict:
     return _request(SPEED)
+
+
+# --------------------------------------------------------- chosen seeds ----
+#
+# P1.5 item 1. `set_seed` must be called while the CHARACTER SELECT screen is
+# up and before the embark `confirm`, for a reason that is the game's and not
+# ours: `NCharacterSelectScreen.AfterInitialized()` sets
+# `NGame.DebugSeedOverride = null` when the screen opens, so a seed chosen
+# earlier is wiped by the screen it was chosen for. The endpoint reports which
+# of its two routes fired (`lobby` or `debug_override`); callers that care
+# should read `route` rather than assume.
+#
+# THE CHOSEN SEED IS NOT A POLICY INPUT. It is stamped on the log and compared
+# against the read-back, and that is all. `understudy/rng.py` still refuses a
+# stream label of this shape, and this function does not change that.
+
+
+def set_seed(seed: str) -> dict:
+    """Choose the seed of the NEXT run. Returns the endpoint's report."""
+    return _request(SEED, {"seed": seed})
+
+
+def clear_seed() -> dict:
+    """Release both seed channels, so the next run rolls its own again.
+
+    The `debug_override` route is GLOBAL and STICKY; leaving it set would make
+    every subsequent run in the session the same run. Teardown calls this
+    whether or not a seed was ever chosen.
+    """
+    return _request(SEED, {"seed": None})
+
+
+def get_seed() -> dict:
+    return _request(SEED)
 
 
 def settle(prev_type: str | None = None, tries: int = 12, delay: float = 0.6) -> dict:

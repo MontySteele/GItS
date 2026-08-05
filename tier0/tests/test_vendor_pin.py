@@ -57,8 +57,16 @@ def test_our_additions_live_apart_from_upstreams_source():
     assert "\tgits/" not in manifest, "our own files must not be listed as upstream's"
     modified = [ln.split("\t")[2] for ln in manifest.splitlines()
                 if "\tgits-modified\t" in ln]
-    # Today: exactly one, one line long, recorded in PROVENANCE.md. This is not
-    # a cap -- it is a tripwire, so growth is a thing someone decided to do.
-    assert modified == ["McpMod.cs"], (
+    # Today: TWO files, three lines between them, recorded in PROVENANCE.md.
+    # This is not a cap -- it is a tripwire, so growth is a thing someone
+    # decided to do.
+    #
+    # It grew ONCE, deliberately, and this is that decision written down:
+    # P1.5 (2026-08-05, R104) added `state["resources"] = ...` to
+    # BuildPlayerState, because a resources map attached out-of-band by a
+    # Harmony patch would not be ATOMIC with the state read it belongs to, and
+    # a meter read a frame after the hand it describes is a different
+    # measurement. Everything else P1.5 added lives in gits/.
+    assert modified == ["McpMod.cs", "McpMod.StateBuilder.cs"], (
         f"upstream files we have edited changed: {modified}. Update PROVENANCE.md's "
         f"'What we changed' table and this assertion together, deliberately.")

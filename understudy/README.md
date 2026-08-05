@@ -20,7 +20,8 @@ This directory drives the **real game** through the vendored STS2MCP bridge
 | `naming.py` | revision #7: resolved card / target / option NAMES per action |
 | `rng.py` | the dedicated policy stream, and the refusal that keeps a game seed out of it |
 | `harness.py` | `begin` / `state` / `act` — the Phase-0 measurement loop |
-| `soak.py` | **P1**: N unattended policy_v1 runs, telemetry, watchdog, reversibility |
+| `soak.py` | **P1**: N unattended policy_v1 runs, telemetry, watchdog, reversibility. **P1.5**: chosen seeds, the encore column, the selector channel |
+| `replay.py` | **P1.5**: reconstruct a recorded fight, and compare two recordings of one seed. Reads logs; simulates nothing |
 | `report.py` | the morning report — defects, outliers, curves. No LLM |
 | `analyze.py` | the Phase-0 divergence analysis |
 | `logs/` | per-run decision JSONL; `phase0-<seed>.jsonl` (committed), `soak/` (gitignored) |
@@ -107,6 +108,41 @@ launched yourself and makes no game-dir changes at all.
 Any resumable run found on the profile is abandoned rather than negotiated
 with (R97/5b).
 
+## Chosen seeds (P1.5)
+
+```
+python -m understudy.soak --runs 1 --seed P15BRIDGE1 --max-fights 2
+python -m understudy.replay <stampA> <stampB>       # compare two recordings
+```
+
+R95 accepted read-back seeds for P1 and gated CHOSEN seeds at the first
+cross-build comparison; R104 promoted that gate. `--seed` is repeatable (run
+*i* takes seed *i*, cycling) and **off by default — without it this is R95's
+read-back arm, unchanged**, and no seed is passed on the embark verb in either
+arm.
+
+The seed goes on through the forked bridge's own endpoint
+(`POST /api/v1/gits/seed`), between the character pick and the embark confirm,
+because `NCharacterSelectScreen.AfterInitialized()` clears the game's seed
+override as that screen opens and the run is generated inside the confirm.
+Upstream's `menu_select(seed=...)` arm is deliberately NOT used: it refuses
+singleplayer on a guard the decompile contradicts, and rewriting an upstream
+refusal means owning it. Full reasoning: `vendor/STS2_MCP/gits/GitsSeed.cs`
+and `docs/sprint-understudy-p15-log-2026-08-05.md`.
+
+**The read-back is the verification.** A run whose seed reads back different
+from the one chosen files `seed_not_honoured` — a harness-side defect, because
+the game rolling its own seed is the game behaving normally and what failed is
+our claim to have chosen one. Two of them halt the soak.
+
+**The chosen seed is not a policy input.** It is stamped on the log and
+compared against the read-back; `rng.py` still refuses a stream label of that
+shape.
+
+`--max-fights N` stops a run cleanly after N closed fights. It exists for
+comparing two recordings of one seed, not for soaking, and it is off by
+default.
+
 ## The committed-draft arm (R99/4b)
 
 ```
@@ -163,6 +199,26 @@ the human feed (R100/5) — a change of MEANING rather than of key, which is why
 it is called out here as loudly as a rename would be: a reader who assumed
 `interrupted` meant "probably won" was right yesterday and is wrong today.
 
+**Addition of 2026-08-05 (P1.5), BOT FEED ONLY, no renames:** `selectors`.
+The note for this landing is §"Cross-session note" in
+`docs/sprint-understudy-p15-log-2026-08-05.md`. It is a **declared
+asymmetry** (`BOT_ONLY` in `tier0/tests/test_track_b_curves.py`, beside
+`potions_used`): the soak records a selector answer because it POSTED it,
+while the mod sees a card leave a pile rather than an offer being taken from a
+list. **A selector cut is a bot-feed cut** until a mod-side hook into the
+selection screens lands.
+
+**And two changes of MEANING in the same pass, called out as loudly as renames
+would be.** Both live inside `meters_by_turn`; neither key was renamed and
+neither changed type:
+
+- the **encore** column now carries real values. It read `-1` (UNSEEN) on
+  every bot fight before P1.5 because the bridge only serialised
+  `creature.Powers` and Encore lost its badge in animation sprint 2. `-1`
+  still means UNSEEN and is still what a pre-P1.5 log says.
+- the **salon_cap** column now follows Casting Call. It used to record the
+  printed base and ignore the raise.
+
 **Two feeds, one schema, and the labels are load-bearing.** `feed` says who
 produced the row and `source` says which instrument wrote it; Guardrail 7's
 labelling requirement on every Track B curve is enforced from those two keys.
@@ -192,11 +248,26 @@ at exactly the moment it holds the newest data.
 `character`, `policy`, `dials` — the policy dials in force. Recorded per run so
 a log is self-describing when the dials later move.
 
+### `seed_chosen` — P1.5, only on a `--seed` run
+
+`requested` (what the caller asked for), `seed` (the game's canonical form of
+it), `route` (`lobby` or `debug_override`), `status`, `message`. Emitted at
+the moment the seed goes on, which is after the character pick and before the
+embark confirm.
+
 ### `seed_read_back`
 
-`seed` — the game-generated seed, read from `GET /api/v1/compendium` after
-embarking. R95's read-back arm. **Never fed to a policy stream**; `rng.py`
+`seed` — the seed the run actually has, read from `GET /api/v1/compendium`
+after embarking. On R95's read-back arm that is the seed the game generated;
+on P1.5's chosen arm it is the verification, and `chosen` / `honoured` record
+the comparison. A mismatch raises `seed_not_honoured` rather than being logged
+and walked past. **Never fed to a policy stream** on either arm; `rng.py`
 refuses a label of that shape and the refusal is the enforcement.
+
+### `bounded_stop` — P1.5, only on a `--max-fights` run
+
+`fights`, `max_fights`. A clean stop, not a defect: the open fight has already
+closed before the bound is checked.
 
 ### `decision` — one posted action
 
@@ -233,10 +304,11 @@ Phase 0 could not do.
 | `hp_trajectory` | `[[round, hp, block], ...]`, sampled at each turn opening |
 | `incoming_by_turn` | `[[round, telegraphed_damage, n_attacking_enemies], ...]`, read before block |
 | `enemy_pool_by_turn` | `[[round, enemy hp+block total], ...]` at each turn opening. **The honest output curve**: the drop between two openings is everything that landed, whoever landed it — which `damage_by_source` cannot say |
-| `meters_by_turn` | `[[round, fanfare, salon_members, salon_cap, encore], ...]`. The bot feed records the PRINTED cap (the wire does not carry the live one) and **`-1` for encore, which it cannot see at all**: `EncoreMeterPower` was retired as a display (animation sprint 2, E1) and the live value is a CustomResource, which the bridge does not serialise. `-1` is *unseen*, not *empty*. The human feed reads both from the resource and the live per-player cap |
+| `meters_by_turn` | `[[round, fanfare, salon_members, salon_cap, encore], ...]`. **P1.5 opened both blind columns.** Encore comes off `player.resources` (`KLEEMOD_ENCORE`), the reflection read of BaseLib's registry the fork added; Fanfare prefers the resource over its badge, which is only ever a synced copy. The cap is the printed base plus `SalonCapUpPower` from the status strip — which had been on the wire all along. **`-1` still means UNSEEN, not empty**, and it is what a log written against a pre-P1.5 bridge (no `resources` key) still says; a `resources` map that simply has no Encore in it reads 0, because that is a player with no Encore rather than a blind spot |
 | `reactions_by_turn` | `[[round, reactions resolved since this fight opened]]` — **human feed only**; the wire does not narrate reactions. `ReactionEffects.TotalResolved` is GLOBAL, so in co-op both seats' reactions appear in every seat's row. Measurement only: no reaction constant is read or written |
 | `block_at_turn_end` | `[[round, block]]` as the player ENDED the turn — not the turn-opening block in `hp_trajectory`, which is whatever survived the enemy |
 | `cards_played` | `[[round, card_name], ...]` |
+| `selectors` | **P1.5, BOT FEED ONLY.** `[[round, screen_type, index, chosen_name, [offered names]], ...]` — every selector screen resolved inside this fight. The OFFERED LIST is in the row for the same reason `hand` travels with a card play: "Center Stage" means one thing against `[Center Stage, Guest Cast]` and nothing at all against a list that did not contain Guest Cast. `index: -1` is a selector resolved without naming an option (a confirm, a skip). `overlay` screens are excluded — that is the shape a soft-lock takes, and a screen nobody can answer has no choice to record |
 | `potions_used` | `[[round, potion_name], ...]` — **bot feed only**; no first-party potion hook exists for the mod side yet |
 | `damage_by_source` | `{card_or_potion_name: total}` |
 | `damage_dealt`, `damage_taken` | totals |
@@ -262,7 +334,7 @@ under-count rather than invent:**
 `kind` is one of `process_died`, `overlay_softlock`, `no_progress`,
 `action_ceiling`, `run_timeout`, `bridge_unreachable`, `no_action`,
 `menu_loop`, `embark_loop`, `no_embark`, `no_embark_path`,
-`unexpected_start_state`. Plus `seed`, `act`/`floor`, `state_dump` (piles
+`unexpected_start_state`, `seed_not_honoured`. Plus `seed`, `act`/`floor`, `state_dump` (piles
 collapsed to counts) and `recent` — the last dozen state fingerprints, which is
 what a stall looks like from inside.
 

@@ -260,12 +260,16 @@ public static partial class McpMod
                 else
                     SendError(response, 405, "Method not allowed");
             }
-            // GItS LOCAL EDIT (Understudy W2) - the only change to an upstream
-            // file in this vendored snapshot; see vendor/STS2_MCP/PROVENANCE.md.
-            // Handler lives in gits/GitsSpeed.cs and is inert until POSTed to.
+            // GItS LOCAL EDIT (Understudy W2 + P1.5) - see PROVENANCE.md, which
+            // records every change to an upstream file in this snapshot.
+            // Handlers live in gits/; both are inert until POSTed to.
             else if (path == "/api/v1/gits/speed")
             {
                 HandleGitsSpeed(request, response);
+            }
+            else if (path == "/api/v1/gits/seed")
+            {
+                HandleGitsSeed(request, response);
             }
             else
             {

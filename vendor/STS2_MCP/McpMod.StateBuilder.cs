@@ -1108,6 +1108,16 @@ public static partial class McpMod
             state["energy"] = combatState.Energy;
             state["max_energy"] = combatState.MaxEnergy;
 
+            // GItS LOCAL EDIT (Understudy P1.5, spec item 2). This method walks
+            // `creature.Powers` for the status strip, so a meter without a badge
+            // is invisible on the wire -- Furina's Encore is a BaseLib
+            // CustomResource and has been recorded as UNSEEN by every bot fight
+            // since animation sprint 2 retired its badge. One line, one key,
+            // always emitted while a combat is live so that a MISSING key means
+            // "bridge predates P1.5" and an EMPTY map means "nothing registered".
+            // Implementation and its reflection contract: gits/GitsResources.cs.
+            state["resources"] = GitsResourceSnapshot(combatState);
+
             // Stars (The Regent's resource, conditionally shown)
             if (player.Character.ShouldAlwaysShowStarCounter || combatState.Stars > 0)
             {
