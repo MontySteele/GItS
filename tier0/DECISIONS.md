@@ -2975,11 +2975,31 @@ it) stays exactly where the Serenitea Sweep put it.
 **Class: RULING (DRAFT)** -- [USER] 2026-07-23 per the kickoff;
 countersign owed. Tracked at `docs/backlog-2026-07-29.md` §3 item 9.
 
-## R89 (DRAFT -- reconstructed, needs [USER] countersign) -- Furina legibility: the preview-truth fix, and why the doc's own migration was the wrong one
+## R89 ~~(DRAFT -- reconstructed, needs [USER] countersign)~~ **SIGNED 2026-08-06** -- Furina legibility: the preview-truth fix, and why the doc's own migration was the wrong one
+
+> **COUNTERSIGNED 2026-08-06, and the DRAFT banner is dropped -- recorded, not
+> silently.** Second sitting of 2026-08-06 (sixth-wave brief, Track Y item Y-6;
+> transcribed at `docs/sitting-record-predraft-2026-08-06.md` §7): R89 is
+> **SIGNED as an audit-trail reconstruction of the shipped 2026-07-24 sprint**,
+> per [USER]'s own characterization of what it is.
+>
+> **What is being signed, stated precisely, because the class matters here.**
+> This entry did not decide anything on 2026-08-06 and does not decide anything
+> now. The sprint it records SHIPPED on 2026-07-24 and has been deployed since;
+> what was missing was the record, not the work. The countersign therefore
+> ratifies the entry as an accurate RECONSTRUCTION -- the audit trail for a
+> sprint that ran without one -- and with it the two [USER] rulings it
+> reconstructs from the archival record (adopt the modifier-path migration as
+> the sprint's spine; ship the safe half globally first).
+>
+> The heading's DRAFT parenthetical is struck rather than deleted, and this
+> banner is dated, so the entry's own history stays readable: it was drafted
+> 2026-07-29 from the archive, it stood unsigned for eight days, and it was
+> signed on 2026-08-06. `S4-G2` is discharged.
 
 **Reconstructed 2026-07-29 from the archival record. The sprint SHIPPED
 on 2026-07-24 and is deployed; only this RECORD is new, and it is
-unsigned.** The sprint's own open item 3 deferred the entry "until
+~~unsigned~~ SIGNED 2026-08-06 (see the banner above).** The sprint's own open item 3 deferred the entry "until
 commit" and it never landed -- a whole shipped C#/codegen sprint with no
 decision record (`docs/missed-requirements.md` Tier 5, second item).
 Source of record: `docs/archive/furina-legibility-sprint-log.md` plus the
@@ -3038,10 +3058,11 @@ is `DrawCards`, not `Cards`; CalculatedDamageVar and CalculatedBlockVar
 both take their base from the single `CalculationBase` var, so a card
 doing both can convert only one.
 
-**Class: MECHANICAL + RULING (DRAFT)** -- zero design decisions and zero
-sheet/sim movement by charter; the [USER] rulings are the migration spine
-and the "safe half globally" sequencing. Countersign owed; tracked at
-`docs/backlog-2026-07-29.md` §3 item 9.
+**Class: MECHANICAL + RULING ~~(DRAFT)~~ SIGNED 2026-08-06** -- zero design
+decisions and zero sheet/sim movement by charter; the [USER] rulings are the
+migration spine and the "safe half globally" sequencing. ~~Countersign owed;
+tracked at `docs/backlog-2026-07-29.md` §3 item 9.~~ **Countersigned 2026-08-06
+as an audit-trail reconstruction (Track Y / Y-6); `S4-G2` discharged.**
 
 ## R90 -- Track A's P1 null: the lint stays a counting tool, the Fanfare question moves to Track B, the floors are re-derived (2026-08-04)
 
@@ -3832,6 +3853,31 @@ Nothing in the kit is decided here: a slot is filled, not a character designed.
 
 **Class: SUBSTANTIVE.** A DRAFT ruling becomes law and a roster slot is
 occupied.
+
+> **ADDENDUM CLAUSE, 2026-08-06 -- Itto's disposition is settled, and it is not
+> a slot.** Second sitting of 2026-08-06 (sixth-wave brief, Track Y item Y-5;
+> transcribed verbatim at `docs/sitting-record-predraft-2026-08-06.md` §7).
+>
+> **Verbatim: "Itto enters as a COMPANION CARD, not a character."**
+>
+> R108 above filled slot 4 and, in doing so, left Itto's status inferred rather
+> than stated: R88's record has him losing the Itto-vs-Zhongli item and being
+> "released to the companion pool" by the reserved-character rule read in
+> reverse, which is an inference from a rule that is itself in tension with
+> ratified R52 (`docs/slot5-candidates-2026-08-05.md` §2.2/§2.3, caveat [J1]).
+> This clause replaces the inference with a ruling: **Itto's registration is
+> COMPANION CARD.** He is not a playable character, he holds no roster slot, and
+> he is not a slot-5 candidate.
+>
+> **What this clause does NOT do.** It does not draft a card -- **no card is
+> drafted tonight**, no rarity is assigned, no kit is designed, and nothing is
+> added to `docs/inazuma-companions.yaml` beyond what already ships there. It
+> does not resolve the R88-vs-R52 tension over the reserved-character rule
+> generally; it settles ONE name, by direct ruling, so that the tension can no
+> longer be load-bearing for Itto specifically. And it does not disturb R108's
+> own subject: Zhongli still holds slot 4.
+>
+> Cross-noted, dated, at `docs/slot5-candidates-2026-08-05.md` §2.3 and §2.5.
 
 ## R109 -- S13 yields two rarity laws, each arriving with a mechanical audit attached (2026-08-06)
 

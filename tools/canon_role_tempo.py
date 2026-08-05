@@ -272,13 +272,13 @@ def pool_percentages(cards: list[dict]) -> dict:
     }
 
 
-# --- canon PACKAGES (R91/1c) ------------------------------------------------
+# --- canon PACKAGES (R90/1c) ------------------------------------------------
 #
 # THE POPULATION FIX. The first pass compared a GItS archetype (11-32 cards,
 # all pointed at one plan) against a whole canon character (88 cards spread
 # across everything it does). An archetype's per-cell density is structurally
 # higher than a whole pool's, so the bar was generous by construction and
-# Furina cleared some floors by 40-60 points. R91 (Ruling 1c) rules the
+# Furina cleared some floors by 40-60 points. R90 (Ruling 1c) rules the
 # comparison population to be the canon PACKAGE: the subset of a canon pool
 # that touches one mechanic layer. Those run 6-33 cards -- the same order as a
 # GItS archetype -- so the two sides are finally the same kind of object.
@@ -320,7 +320,7 @@ PACKAGES = {
 
 # WHICH CANON PACKAGE EACH GItS ARCHETYPE IS MEASURED AGAINST.
 #
-# R91/1c: "an archetype gets compared to the canon thing that is shaped like
+# R90/1c: "an archetype gets compared to the canon thing that is shaped like
 # it." This table is that comparison, and it is a DESIGN CLAIM in exactly the
 # sense ENTITY_PAYOFFS is -- so it carries the same discipline: one line of
 # provenance each, hand-auditable, and no entry is derived from anything the
@@ -433,7 +433,7 @@ def derive_floors(per_char: dict[str, dict]) -> dict:
 # --- entry points -----------------------------------------------------------
 
 def derive_package_floors(per_pkg: dict[str, dict]) -> dict:
-    """The R91/1c floors: canon PACKAGES as the comparison population.
+    """The R90/1c floors: canon PACKAGES as the comparison population.
 
     Two layers, and the second is the whole point of the ruling:
 
@@ -687,14 +687,14 @@ def write_docs(payload: dict) -> None:
     pkg_keys = sorted({k for s in per_pkg.values() for k in s["fight_cells"]})
     lines += [
         "",
-        "## 5. The canon PACKAGES — the comparison population (R91/1c)",
+        "## 5. The canon PACKAGES — the comparison population (R90/1c)",
         "",
         "**This section is the repair.** §§2–4 above are whole-pool numbers, and",
         "the first lint run applied them to an archetype's sub-pool: an 88-card",
         "canon character spread across everything it does, versus 11–32 GItS",
         "cards all pointed at one plan. An archetype's per-cell density is",
         "structurally higher, the bar was generous by construction, and Furina",
-        "cleared some floors by 40–60 points. R91 rules the comparison",
+        "cleared some floors by 40–60 points. R90 rules the comparison",
         "population to be the canon **package** instead.",
         "",
         "A package is the subset of a canon pool whose card bodies name one",

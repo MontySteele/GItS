@@ -134,14 +134,14 @@ play-graded only (D4 clause, written in at birth).
 | `velocity\|rare` | 6.9 | 5.7 | 6.8 | 8.0 | 10.2 |
 | `velocity\|uncommon` | 11.5 | 9.1 | 14.8 | 13.6 | 10.2 |
 
-## 5. The canon PACKAGES — the comparison population (R91/1c)
+## 5. The canon PACKAGES — the comparison population (R90/1c)
 
 **This section is the repair.** §§2–4 above are whole-pool numbers, and
 the first lint run applied them to an archetype's sub-pool: an 88-card
 canon character spread across everything it does, versus 11–32 GItS
 cards all pointed at one plan. An archetype's per-cell density is
 structurally higher, the bar was generous by construction, and Furina
-cleared some floors by 40–60 points. R91 rules the comparison
+cleared some floors by 40–60 points. R90 rules the comparison
 population to be the canon **package** instead.
 
 A package is the subset of a canon pool whose card bodies name one

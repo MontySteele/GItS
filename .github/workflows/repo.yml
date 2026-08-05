@@ -63,6 +63,20 @@ jobs:
       # see, silently. Also wired into pytest (test_sheet_lints).
       - name: op parity
         run: python tools/lint_op_parity.py
+      # ALREADY THE GATE Y-8 ASKED FOR (verified 2026-08-06, Track Y). The
+      # second sitting's Y-8 asked that `gen_roster_cards.py --check` become
+      # "CI job 4" so that the class "sheet changed, generated C# didn't" fails
+      # loudly. It has run here, in the blocking `lints` job, since the
+      # sim-hygiene sprint -- so the reply's outcome was already in force and
+      # this workflow gained no new job. Deliberately NOT duplicated as a
+      # separate job: two invocations of one check would double the failure
+      # noise and halve the trust, and the recorded NOT-doing list at the head
+      # of this file exists precisely so job additions stay decisions rather
+      # than reflexes.
+      #
+      # Exercised for real the same day: Y-4 deleted an upgrade delta from
+      # docs/furina-upgrades.yaml, this check went red on the stale generated
+      # card and manifest, and stayed red until the generator was re-run.
       - name: codegen staleness
         run: python tools/gen_roster_cards.py --check
       - name: pool membership
@@ -90,6 +104,12 @@ jobs:
       # gets deleted and takes the registry with it.
       - name: identifier registry
         run: python tools/lint_identifier_registry.py
+      # S4 finding F14 and its four siblings, 2026-08-06. One file's R-number
+      # citations, checked against the clauses DECISIONS.md actually declares.
+      # Scoped to `tools/canon_role_tempo.py` alone and meant to stay that way
+      # -- see the module docstring.
+      - name: R-number citations (canon_role_tempo)
+        run: python tools/lint_r_citations.py
       # Understudy 2026-08-04. vendor/ carries third-party source pinned to an
       # exact upstream commit; this asserts the tree still is what the
       # provenance note says it is, in both directions. Cheap, and the one

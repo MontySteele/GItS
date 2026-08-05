@@ -69,7 +69,21 @@ FURINA_DEFERRED_TO_FD: set[str] = set()
 # gate ({condition: unconditional}) rather than adding cards. Kept as an
 # empty set rather than deleted, so the invariant "every card has an upgrade
 # path" is asserted positively and the next gap has somewhere to be named.
-FURINA_UPGRADE_GAP_PENDING_FB1: set[str] = set()
+#
+# THE NEXT GAP ARRIVED 2026-08-06, and this is the set it is named in --
+# which is what the paragraph above was written for. `encore_performance`'s
+# only delta was `copy_cost_override: 0`, and R110/S-1 (S13 family X3) made
+# the base card cost 0, so the delta could not mean anything: a 0-cost card
+# cannot be discounted to 0. [USER] authorised the deletion on 2026-08-06
+# (sixth-wave brief, Track Y item Y-4), the sheet entry went, and the
+# generator correctly emits the card with no upgrade path.
+#
+# GATE, stated because an entry without one never leaves: FLAG-2 (X3's two
+# adjacent closures) is HELD; when it is ruled, a replacement upgrade delta is
+# authored for `encore_performance` and this entry is deleted together with
+# both curated entries in `tools/lint_upgrade_coverage.py` (SHEET_EXEMPT for
+# layer 1, CODEGEN_DEBT for layer 2). Three registers, one debt, one removal.
+FURINA_UPGRADE_GAP_PENDING_FB1: set[str] = {"encore_performance"}
 
 
 def _generated_source(class_name: str) -> str:
