@@ -588,9 +588,26 @@ public sealed class PlayTelemetryHooks : AbstractModel
 
     public static IEnumerable<AbstractModel> Subscribe(CombatState combatState)
     {
-        _instance ??= ModelDb.GetById<PlayTelemetryHooks>(
-            ModelDb.GetId<PlayTelemetryHooks>());
-        yield return _instance;
+        // THE ONE PLACE A MEASUREMENT COULD STILL COST A RUN. This runs inside
+        // the roster's single subscription delegate, so an exception here does
+        // not disable telemetry -- it disables the aura, resource and garment
+        // hooks concatenated beside it. A missing ModelDb registration is a
+        // deployment accident; losing Furina's Encore to one would not be.
+        PlayTelemetryHooks? instance;
+        try
+        {
+            instance = _instance ??= ModelDb.GetById<PlayTelemetryHooks>(
+                ModelDb.GetId<PlayTelemetryHooks>());
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] play telemetry not subscribed "
+                   + $"({e.GetType().Name}: {e.Message}); the rest of the "
+                   + "combat hooks are unaffected");
+            yield break;
+        }
+
+        if (instance != null) yield return instance;
     }
 
     public override Task BeforeCombatStart()
