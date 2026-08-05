@@ -31,8 +31,13 @@
 - {id: barbara_shining_idol, name: "Barbara — Shining Idol", star: 4, rarity: uncommon, role_c: buffer, element: hydro, cost: 1, type: skill,
    effects: [{op: block, amount: 5}, {op: apply_aura, element: hydro, target: random_enemy}, {op: draw, amount: 1}]}
    # Playtest 2026-07-22: the cantrip does not justify a full extra energy on an energy-starved character.
-- {id: sucrose_gust, name: "Sucrose — Wind Spirit Creation", star: 4, rarity: common, role_c: trigger, element: anemo, cost: 0, type: skill,
+- {id: sucrose_gust, name: "Sucrose — Wind Spirit Creation", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 0, type: skill,
    effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
+   # RARITY BUMP common -> uncommon, per sitting 2026-08-06 family X2 ("infinite cycling engines
+   # gated to Uncommon rarity or higher. If this is Common, it needs a bump."). This row is
+   # `sayu_naptime`'s exact shape: 0-cost, non-exhaust, draws its own replacement, so it is
+   # hand- and energy-neutral and cycles without bound. Rarity field ONLY -- no stat touched.
+   # Sweep: docs/track-t-audits-2026-08-06.md sec.1.
 - {id: sucrose_astable, name: "Sucrose — Astable Anemohypostasis", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 0, type: skill, exhaust: true,
    effects: [{op: swirl, target: enemy}, {op: burst_energy, amount: 8}]}
    # R62 (red-pen 2026-07-25): the v1.11a numbers are RESTORED and main's interim rebalance is

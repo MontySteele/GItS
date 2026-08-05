@@ -119,6 +119,13 @@ CROSS_KNOWN: set[frozenset] = {
     # 0-cost skills. sayu_naptime: block 3 + draw 1. moon_signal: discard 1 +
     # draw 1 -- the Common pays a cost the Uncommon does not, and gains less.
     frozenset({"sayu_naptime", "moon_signal"}),
+    # 0-cost skills, and the SAME PAIR SHAPE one row up. sucrose_gust was
+    # bumped common -> uncommon by the 2026-08-06 sitting (family X2: infinite
+    # cycling engines are gated to Uncommon+), which made it sayu_naptime's
+    # twin against moon_signal: swirl + draw 1 vs discard 1 + draw 1. The
+    # finding is inherited from the ratified rarity move, not a new design
+    # choice; it queues for red-pen beside its twin.
+    frozenset({"sucrose_gust", "moon_signal"}),
     # --- THE ELEMENT CLUSTER, four pairs of one shape. shinobu_thundergrust
     # is a 1-cost applier attack for 7; the four Commons are the same card at
     # 5-6. They differ ONLY in `element`, which this lint does not read,
