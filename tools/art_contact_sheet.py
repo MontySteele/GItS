@@ -12,6 +12,14 @@ explicitly forbids. Batches come from that section.
     python tools/art_contact_sheet.py                    # everything (Klee default)
     python tools/art_contact_sheet.py --batch identity   # basics + generic + rares
     python tools/art_contact_sheet.py --list             # batch sizes, review nothing
+    python tools/art_contact_sheet.py --assets a,b,c --out art/contact_sheet_g12.html
+
+`--assets` cuts ACROSS the batches, and exists because a gate is not a batch.
+R86's G1 asks for five specific rows whose archetypes scatter them over three
+sheets; sending a reviewer through three full pages to look at five cards is
+how an eyes-on gate stays open. The filter is applied to the shortlist rows
+after batching, so a named id that is not on shortlist is reported rather than
+silently yielding an empty page -- same reasoning as `unsorted` above.
 
 Batch membership is computed from the canonical sheets, not hand-listed, and
 assignment is FIRST MATCH WINS because `archetypes` is a list -- a third of
@@ -184,7 +192,17 @@ def main():
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--list", action="store_true",
                     help="print batch sizes and exit; review nothing")
+    ap.add_argument("--assets", default=None,
+                    help="comma-separated asset ids; cuts across batches "
+                         "(for gate reviews). Implies --batch all.")
+    ap.add_argument("--title", default=None,
+                    help="override the sheet's heading (use with --assets)")
     args = ap.parse_args()
+
+    want = None
+    if args.assets:
+        want = [a.strip() for a in args.assets.split(",") if a.strip()]
+        args.batch = "all"
 
     meta = card_meta()
     rows = [r for r in read_plan() if r["pick"] == "shortlist"]
@@ -195,8 +213,19 @@ def main():
         b = batch_of(r["asset_id"], r["out"], meta)
         if r["asset_id"] not in assets:
             tally[b] += 1
+        if want is not None and r["asset_id"] not in want:
+            continue
         if args.batch in (b, "all"):
             assets.setdefault(r["asset_id"], []).append(r)
+
+    if want is not None:
+        # Order the sheet as the caller named them, not as plan.tsv happens to
+        # file them: a gate's list has a reading order and the sheet should
+        # keep it.
+        assets = OrderedDict((a, assets[a]) for a in want if a in assets)
+        for missing in [a for a in want if a not in assets]:
+            print(f"NOTE: '{missing}' has no shortlist row in art/plan.tsv "
+                  f"-- not rendered, not silently dropped")
 
     if args.list or not assets:
         for b, n in tally.items():
@@ -210,11 +239,12 @@ def main():
         print(f"NOTE: {tally['unsorted']} shortlist asset(s) unclassified by the "
               f"canonical sheets -- see the 'unsorted' batch, they are not dropped")
 
-    title = f"Teyvat Spire art picks — {BATCH_TITLES[args.batch]}"
+    heading = args.title or BATCH_TITLES[args.batch]
+    title = f"Teyvat Spire art picks — {heading}"
     out = args.out or ROOT / "art" / (
         "contact_sheet.html" if args.batch == "all"
         else f"contact_sheet_{args.batch}.html")
-    out.write_text(render(assets, title, BATCH_TITLES[args.batch]), encoding="utf-8")
+    out.write_text(render(assets, title, heading), encoding="utf-8")
     print(f"wrote {out} ({len(assets)} shortlist assets, batch '{args.batch}')")
     return 0
 
