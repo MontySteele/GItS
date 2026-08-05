@@ -167,6 +167,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--fights", type=int, default=C.DEFAULT_FIGHTS_PER_ENCOUNTER)
     ap.add_argument("--seed", type=int, default=C.DEFAULT_SEED)
     ap.add_argument("--csv", default=None, help="write per-fight rows to CSV")
+    ap.add_argument("--turns-csv", default=None,
+                    help="write the per-TURN record (D2: HP trajectory + "
+                         "incoming attacks per turn) to CSV, one row per "
+                         "player turn per fight")
+    ap.add_argument("--reaction-share", action="store_true",
+                    help="print D1's reactions-share-of-damage aggregate for "
+                         "each encounter and for the battery as a whole")
     ap.add_argument("--score", action="store_true",
                     help="run full battery + baseline and print the "
                          "7-axis scorecard")
@@ -209,14 +216,19 @@ def main(argv: list[str] | None = None) -> int:
                   else [args.encounter])
 
     rows = []
+    turn_rows = []
+    every_stat: list[metrics.FightStats] = []
     t0 = time.perf_counter()
     total_fights = 0
     for enc in encounters:
         stats = run_battery(args.character, args.deck, enc, args.pilot,
                             args.fights, args.seed)
         total_fights += len(stats)
+        every_stat.extend(stats)
         summary = metrics.summarize(stats)
         report.print_summary(args.character, args.deck, enc, summary)
+        if args.reaction_share:
+            report.print_reaction_share(enc, metrics.reaction_share(stats))
         for i, s in enumerate(stats):
             rows.append({"encounter": enc, "fight": i, "won": s.won,
                          "turns": s.turns, "hp_delta": s.hp_delta,
@@ -224,10 +236,29 @@ def main(argv: list[str] | None = None) -> int:
                          "block": s.total_block_gained,
                          "energy": s.energy_spent,
                          "reactions": s.reactions,
+                         # D1, per-fight: absolute and share, on the record
+                         # that already carries every other per-fight figure.
+                         "damage_all_ops": s.damage_all_ops,
+                         "damage_reactions": s.damage_from_reactions,
+                         "damage_base_ops": s.damage_from_base_ops,
+                         "reaction_share": round(s.reaction_share, 4),
                          "flags": "|".join(s.flags)})
+            # D2: the per-turn record is a row per TURN, not a cell stuffed
+            # into the per-fight row -- a trajectory pickled into CSV text is
+            # a number nobody reads twice.
+            for t, hp_o, blk_o, blk_e, hits, dmg_in in s.turn_trajectory:
+                turn_rows.append({"encounter": enc, "fight": i, "turn": t,
+                                  "hp_at_open": hp_o, "block_at_open": blk_o,
+                                  "block_at_end": blk_e,
+                                  "incoming_hits": hits,
+                                  "incoming_damage": dmg_in})
     elapsed = time.perf_counter() - t0
     print(f"\n{total_fights} fights in {elapsed:.2f}s "
           f"({total_fights / elapsed:.0f} fights/sec)")
+
+    if args.reaction_share and len(encounters) > 1:
+        report.print_reaction_share("ALL ENCOUNTERS",
+                                    metrics.reaction_share(every_stat))
 
     if args.csv:
         with open(args.csv, "w", newline="", encoding="utf-8") as f:
@@ -235,6 +266,12 @@ def main(argv: list[str] | None = None) -> int:
             writer.writeheader()
             writer.writerows(rows)
         print(f"wrote {len(rows)} rows to {args.csv}")
+    if args.turns_csv and turn_rows:
+        with open(args.turns_csv, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=turn_rows[0].keys())
+            writer.writeheader()
+            writer.writerows(turn_rows)
+        print(f"wrote {len(turn_rows)} turn rows to {args.turns_csv}")
     return 0
 
 

@@ -57,6 +57,21 @@ def print_median(character: str, rep: dict) -> None:
         print("  ✓ all ratified winrate bands hold")
 
 
+def print_reaction_share(encounter: str, r: dict) -> None:
+    """D1's aggregate, printed. Numbers only -- no verdict, no band, no
+    comparison against the spec §4.4 archetype range: this surface exists to
+    make the share readable, and reading it is a design act that happens
+    somewhere else."""
+    if not r:
+        return
+    print(f"  reactions share [{encounter}] "
+          f"{r['share']:.4f} pooled  ({r['damage_from_reactions']} of "
+          f"{r['damage_all_ops']}; base {r['damage_from_base_ops']})  "
+          f"amp {r['amp']} splash {r['splash']} dot {r['dot']}  "
+          f"per-fight mean {r['share_by_fight_mean']:.4f}  "
+          f"fights with any {r['fights_with_any_reaction_damage']}/{r['fights']}")
+
+
 def print_summary(character: str, deck: str, encounter: str, s: dict) -> None:
     flags = f"  FLAGS: {','.join(s['flags'])} ({s['flagged_fights']} fights)" \
         if s.get("flags") else ""
