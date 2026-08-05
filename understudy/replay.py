@@ -57,11 +57,25 @@ Declared confounders — read these before reading any row
    fixes can carry corrupted READINGS. Rows whose engine side fails an
    internal consistency check are flagged `suspected_reading_corruption`
    rather than silently attributed to the sim.
+7. **The Spotlight designation was confounder 2's largest single term and is
+   no longer one, on a P1.5 log.** Furina's starter relic grants an Ethereal
+   Spotlight every turn; playing it opens a Center Stage / Guest Cast
+   selector, and that answer decides whether every Companion card in the turn
+   is numerically empowered (Guest Cast, x`SPOTLIGHT_BASE_MULT`) or generates
+   Fanfare (Center Stage). Before P1.5 the answer was not on the wire, so the
+   replay fell through to tier0's OWN designation heuristic
+   (`effects._op_spotlight_designate`) — a *policy* standing in for a
+   *recording*. `--use-selectors` reads `fight.selectors` instead. It is
+   RECONSTRUCTION, not rules: the recorded answer is pushed through the
+   diagnostic switch tier0 already carries for controlled Center/Guest
+   comparisons (`effects.SPOTLIGHT_FORCE`), and no rule is retyped.
 
 Usage
 -----
 
     python -m understudy.replay --logs "<glob>" --out docs/s7-divergences.tsv
+    python -m understudy.replay --logs "<glob>" --use-selectors \
+        --ledger docs/probe-b-ledger.tsv
 """
 
 from __future__ import annotations
@@ -242,6 +256,48 @@ def _block_end(fight: dict, rnd: Any):
     return None
 
 
+# --------------------------------------------------------------------------
+# the selector channel (P1.5) — reconstruction, not rules
+# --------------------------------------------------------------------------
+
+# The two answers Ethereal Spotlight's selector offers, as the bridge spells
+# them, mapped onto `effects.SPOTLIGHT_FORCE`'s two arms. Matching is on the
+# OFFER LIST as well as the chosen name: "Center Stage" chosen from a list
+# that did not also contain "Guest Cast" is a different screen wearing a
+# familiar word, and this table declines to read it (P1.5 §"the selector
+# channel").
+SPOTLIGHT_OFFERS = ("center stage", "guest cast")
+SPOTLIGHT_FORCE_BY_CHOICE = {"center stage": "self", "guest cast": "companion"}
+
+
+def _selector_choice(fight: dict, rnd: Any) -> str | None:
+    """The Spotlight answer recorded for this round, as a `SPOTLIGHT_FORCE`
+    arm (`self` / `companion`), or None when the round has no such row.
+
+    The LAST matching row for the round wins: a turn that re-designates has
+    the later answer standing when its Companion cards resolve.
+    """
+    out = None
+    for row in fight.get("selectors") or []:
+        if not row or len(row) < 5 or row[0] != rnd:
+            continue
+        offered = {str(o).strip().lower() for o in (row[4] or [])}
+        if not offered.issuperset(SPOTLIGHT_OFFERS):
+            continue
+        arm = SPOTLIGHT_FORCE_BY_CHOICE.get(str(row[3] or "").strip().lower())
+        if arm:
+            out = arm
+    return out
+
+
+def _spotlight_target(arm: str | None, character_id: str) -> str | None:
+    if arm == "self":
+        return character_id
+    if arm == "companion":
+        return C.SPOTLIGHT_GUEST_CAST
+    return None
+
+
 def _apply_meters(player: Player, meters: dict) -> None:
     """Load a turn-opening meter reading onto a fresh Furina player.
 
@@ -269,8 +325,14 @@ def _apply_meters(player: Player, meters: dict) -> None:
         player.encore = int(enc)
 
 
-def _fresh_player(character_id: str, hp: int, max_hp: int, block: int, meters: dict) -> Player:
+def _fresh_player(character_id: str, hp: int, max_hp: int, block: int, meters: dict,
+                  spotlight: str | None = None) -> Player:
     player = loader.build_player(character_id)
+    # The designation the RECORDING carries, standing before the first card
+    # of the turn resolves. `None` leaves tier0's own default (undesignated),
+    # which is what every pre-P1.5 log can say.
+    if spotlight:
+        player.spotlight = spotlight
     player.max_hp = int(max_hp or player.max_hp)
     player.hp = int(hp if hp is not None else player.hp)
     player.block = int(block or 0)
@@ -296,7 +358,8 @@ def _pool_total(state: CombatState) -> int:
 # --------------------------------------------------------------------------
 
 
-def l1_rows(spec: dict, names: Names, character_id: str, tally: dict) -> list[dict]:
+def l1_rows(spec: dict, names: Names, character_id: str, tally: dict,
+            use_selectors: bool = False) -> list[dict]:
     """One row per card the engine's own readings bracket.
 
     The bracket is `target_hp` at play n minus `target_hp` at play n+1, both
@@ -311,6 +374,8 @@ def l1_rows(spec: dict, names: Names, character_id: str, tally: dict) -> list[di
         rnd = turn["round"]
         meters = _meters_at(fight, rnd)
         traj = _traj_at(fight, rnd)
+        spot = _spotlight_target(
+            _selector_choice(fight, rnd) if use_selectors else None, character_id)
         targeted = [p for p in turn["plays"] if p.get("target_id") and p.get("target_hp") is not None]
         for cur, nxt in zip(targeted, targeted[1:]):
             if cur["target_id"] != nxt["target_id"]:
@@ -323,7 +388,8 @@ def l1_rows(spec: dict, names: Names, character_id: str, tally: dict) -> list[di
                 continue
             tally["l1_compared"] += 1
             player = _fresh_player(
-                character_id, traj.get("hp"), fight.get("max_hp"), traj.get("block"), meters
+                character_id, traj.get("hp"), fight.get("max_hp"), traj.get("block"), meters,
+                spotlight=spot,
             )
             enemy = _enemy(cur.get("target_name") or "enemy", cur["target_hp"])
             state = CombatState(player=player, enemies=[enemy], rng=random.Random(0), turn=int(rnd or 1))
@@ -371,7 +437,8 @@ def l1_rows(spec: dict, names: Names, character_id: str, tally: dict) -> list[di
 # --------------------------------------------------------------------------
 
 
-def l2_rows(spec: dict, names: Names, character_id: str, tally: dict) -> list[dict]:
+def l2_rows(spec: dict, names: Names, character_id: str, tally: dict,
+            use_selectors: bool = False, ledger: list[dict] | None = None) -> list[dict]:
     fight = spec["fight"]
     enemies_spec = fight.get("enemies") or []
     rows: list[dict] = []
@@ -381,10 +448,12 @@ def l2_rows(spec: dict, names: Names, character_id: str, tally: dict) -> list[di
         traj = _traj_at(fight, rnd)
         if not traj:
             continue
+        arm = _selector_choice(fight, rnd) if use_selectors else None
         pool_open = _pool_at(fight, rnd)
         pool_next = _pool_at(fight, (rnd or 0) + 1)
         player = _fresh_player(
-            character_id, traj.get("hp"), fight.get("max_hp"), traj.get("block"), meters
+            character_id, traj.get("hp"), fight.get("max_hp"), traj.get("block"), meters,
+            spotlight=_spotlight_target(arm, character_id),
         )
         hand = []
         skipped = 0
@@ -407,20 +476,32 @@ def l2_rows(spec: dict, names: Names, character_id: str, tally: dict) -> list[di
         )
         before_pool = _pool_total(state)
         played = 0
-        for play in turn["plays"]:
-            card = _find_in_hand(state, play["card"])
-            if card is None:
-                card = names.card(play["card"], played=True)
+        # `SPOTLIGHT_FORCE` is tier0's own diagnostic switch for controlled
+        # Center/Guest comparisons. Held only across this turn's plays, and
+        # restored in `finally` so a raise inside `play_card` cannot leak a
+        # forced designation into the next turn or the next fight.
+        prev_force = effects.SPOTLIGHT_FORCE
+        if arm:
+            effects.SPOTLIGHT_FORCE = arm
+        try:
+            for play in turn["plays"]:
+                card = _find_in_hand(state, play["card"])
                 if card is None:
-                    tally["l2_skipped_unresolved"] += 1
+                    card = names.card(play["card"], played=True)
+                    if card is None:
+                        tally["l2_skipped_unresolved"] += 1
+                        continue
+                    state.player.hand.append(card)
+                try:
+                    combat.play_card(state, card)
+                    played += 1
+                except Exception:
+                    tally["l2_play_errors"] += 1
                     continue
-                state.player.hand.append(card)
-            try:
-                combat.play_card(state, card)
-                played += 1
-            except Exception:
-                tally["l2_play_errors"] += 1
-                continue
+        finally:
+            effects.SPOTLIGHT_FORCE = prev_force
+        if arm:
+            tally["l2_turns_with_selector"] += 1
         ctx = "cards=%d/%d hand_unresolved=%d n_enemies=%d" % (
             played,
             len(turn["plays"]),
@@ -474,6 +555,10 @@ def l2_rows(spec: dict, names: Names, character_id: str, tally: dict) -> list[di
             except Exception:
                 pass
             tally["l2_fanfare_decayed_compared"] += 1
+            if ledger is not None:
+                ledger.append(
+                    _ledger_row(spec, rnd, arm, meters, nxt, state, decayed, ctx,
+                                traj, _traj_at(fight, (rnd or 0) + 1)))
             if abs(decayed.player.fanfare - nxt["fanfare"]) > TOLERANCE:
                 rows.append(
                     _row(
@@ -512,6 +597,81 @@ def l2_rows(spec: dict, names: Names, character_id: str, tally: dict) -> list[di
                     )
                 )
     return rows
+
+
+LEDGER_COLUMNS = [
+    "fight_id", "turn", "selector", "eng_open", "eng_next_open", "eng_delta",
+    "sim_open", "sim_after_turn", "sim_next_open_post_decay", "sim_delta",
+    "sim_income", "sim_income_by_source", "sim_decay", "sim_floor_grant",
+    "hp_drop_to_next_open", "sim_next_open_full",
+    "residual_raw", "residual_post_decay", "residual_full", "context",
+]
+
+
+def _ledger_row(spec: dict, rnd: Any, arm: str | None, meters: dict, nxt: dict,
+                state: CombatState, decayed: CombatState, ctx: str,
+                traj: dict, traj_next: dict) -> dict:
+    """One turn of the Fanfare ledger — probe B3 (R103(b)).
+
+    The engine side is two meter readings; the sim side is the same two
+    positions plus the DECOMPOSITION tier0 can state about itself, read off
+    the events `resources.py` already emits rather than recomputed here.
+    `sim_income` is Fanfare actually applied (a gain landing entirely at the
+    cap is not income), and `sim_decay` is what `decay_fanfare` removed at
+    the seam. Nothing in this row is a conclusion.
+    """
+    income = 0
+    by_source: "collections.Counter[str]" = collections.Counter()
+    floor_grant = 0
+    for ev in state.log:
+        if ev.get("event") == "gain_fanfare":
+            amt = int(ev.get("amount") or 0)
+            income += amt
+            by_source[str(ev.get("source") or "?")] += amt
+        elif ev.get("event") == "fanfare_floor_granted":
+            floor_grant += int(ev.get("amount") or 0)
+    decay = sum(int(ev.get("amount") or 0) for ev in decayed.log
+                if ev.get("event") == "fanfare_decay") - \
+        sum(int(ev.get("amount") or 0) for ev in state.log
+            if ev.get("event") == "fanfare_decay")
+    eng_open = int(meters.get("fanfare") or 0)
+    eng_next = int(nxt.get("fanfare") or 0)
+    # THE SEAM, STATED AS THREE POSITIONS RATHER THAN ARGUED ABOUT. The
+    # engine's `meters_by_turn` sample sits at the turn OPENING, so between
+    # the sim's end-of-turn value and that reading the engine has done two
+    # things the replay's turn contains neither of: the top-of-turn decay,
+    # and the Fanfare the enemy's turn generated by taking HP off Furina
+    # (`FANFARE_PER_HP_LOST`, one per point). `hp_drop_to_next_open` is that
+    # second channel read off `hp_trajectory` -- an ATTRIBUTION, not a
+    # narration: the wire does not say which enemy landed which hit, and any
+    # self-damage inside the player's own turn is folded in with it.
+    hp_now, hp_next = traj.get("hp"), (traj_next or {}).get("hp")
+    hp_drop = (max(0, int(hp_now) - int(hp_next))
+               if hp_now is not None and hp_next is not None else 0)
+    full = decayed.player.fanfare + hp_drop * C.FANFARE_PER_HP_LOST
+    return {
+        "fight_id": spec["fight_id"],
+        "turn": "" if rnd is None else rnd,
+        "selector": arm or "",
+        "eng_open": eng_open,
+        "eng_next_open": eng_next,
+        "eng_delta": eng_next - eng_open,
+        "sim_open": eng_open,          # the sim is LOADED from the engine open
+        "sim_after_turn": state.player.fanfare,
+        "sim_next_open_post_decay": decayed.player.fanfare,
+        "sim_delta": state.player.fanfare - eng_open,
+        "sim_income": income,
+        "sim_income_by_source": ";".join(
+            "%s=%d" % (k, v) for k, v in sorted(by_source.items())) or "-",
+        "sim_decay": decay,
+        "sim_floor_grant": floor_grant,
+        "hp_drop_to_next_open": hp_drop,
+        "sim_next_open_full": full,
+        "residual_raw": state.player.fanfare - eng_next,
+        "residual_post_decay": decayed.player.fanfare - eng_next,
+        "residual_full": full - eng_next,
+        "context": ctx,
+    }
 
 
 def _encore_unseen(fight: dict) -> bool:
@@ -670,13 +830,14 @@ COLUMNS = [
 ]
 
 
-def write_tsv(rows: list[dict], path: str) -> None:
+def write_tsv(rows: list[dict], path: str, columns: list[str] | None = None) -> None:
+    cols = columns or COLUMNS
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write("\t".join(COLUMNS) + "\n")
+        fh.write("\t".join(cols) + "\n")
         for row in rows:
             fh.write(
-                "\t".join(str(row.get(col, "")).replace("\t", " ").replace("\n", " ") for col in COLUMNS)
+                "\t".join(str(row.get(col, "")).replace("\t", " ").replace("\n", " ") for col in cols)
                 + "\n"
             )
 
@@ -693,6 +854,14 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--character", default="furina")
     ap.add_argument("--out", default="docs/s7-divergences.tsv")
     ap.add_argument("--summary", default="", help="write a JSON summary here")
+    ap.add_argument(
+        "--use-selectors", action="store_true",
+        help="reconstruct the Spotlight designation from `fight.selectors` "
+             "(P1.5) instead of letting tier0's own heuristic stand in. OFF "
+             "by default: a pre-P1.5 log carries no selectors and the S7 "
+             "artefact must stay reproducible")
+    ap.add_argument("--ledger", default="",
+                    help="write the per-turn Fanfare ledger (probe B3) here")
     args = ap.parse_args(argv)
 
     paths: list[str] = []
@@ -708,13 +877,16 @@ def main(argv: list[str] | None = None) -> int:
     rows: list[dict] = []
     replayed = 0
     tally: "collections.Counter[str]" = collections.Counter()
+    ledger: list[dict] = []
     for spec in specs:
         if not spec["turns"]:
             continue
         replayed += 1
         tally["plays_posted"] += sum(len(t["plays"]) for t in spec["turns"])
-        rows.extend(l1_rows(spec, names, args.character, tally))
-        rows.extend(l2_rows(spec, names, args.character, tally))
+        tally["selector_rows"] += len(spec["fight"].get("selectors") or [])
+        rows.extend(l1_rows(spec, names, args.character, tally, args.use_selectors))
+        rows.extend(l2_rows(spec, names, args.character, tally, args.use_selectors,
+                            ledger if args.ledger else None))
         rows.extend(cards_played_rows(spec))
 
     mod: list[dict] = []
@@ -724,9 +896,13 @@ def main(argv: list[str] | None = None) -> int:
     rows.extend(cross_feed_rows([(s["fight_id"], s["fight"]) for s in specs], mod))
 
     write_tsv(rows, args.out)
+    if args.ledger:
+        write_tsv(ledger, args.ledger, LEDGER_COLUMNS)
 
     by_field = collections.Counter(r["field"].split("[")[0] for r in rows)
     summary = {
+        "use_selectors": bool(args.use_selectors),
+        "ledger_rows": len(ledger),
         "logs": len(paths),
         "fights_found": len(specs),
         "fights_replayed": replayed,

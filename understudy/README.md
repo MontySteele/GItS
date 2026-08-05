@@ -21,7 +21,8 @@ This directory drives the **real game** through the vendored STS2MCP bridge
 | `rng.py` | the dedicated policy stream, and the refusal that keeps a game seed out of it |
 | `harness.py` | `begin` / `state` / `act` — the Phase-0 measurement loop |
 | `soak.py` | **P1**: N unattended policy_v1 runs, telemetry, watchdog, reversibility. **P1.5**: chosen seeds, the encore column, the selector channel |
-| `replay.py` | **S7**: drives tier0's combat model through a recorded action sequence and diffs the two instruments' numbers. It reads the SIM |
+| `replay.py` | **S7**: drives tier0's combat model through a recorded action sequence and diffs the two instruments' numbers. It reads the SIM. **Track B**: `--use-selectors` reconstructs the Spotlight designation from `fight.selectors` instead of letting tier0's own heuristic stand in, and `--ledger` writes the per-turn Fanfare decomposition |
+| `probe_block.py` | **Track B, probe B2**: a FIXED SCRIPT (no policy) that fixes the Spotlight answer, plays only cards whose wire text prints Block, and reads `player.block` at every decision point |
 | `trace_replay.py` | **P1.5**: reconstruct a recorded fight and compare two recordings of one seed. It reads nothing but JSONL. Named apart from `replay.py` because the two are different instruments, not two halves of one |
 | `report.py` | the morning report — defects, outliers, curves. No LLM |
 | `analyze.py` | the Phase-0 divergence analysis |
@@ -143,6 +144,25 @@ shape.
 `--max-fights N` stops a run cleanly after N closed fights. It exists for
 comparing two recordings of one seed, not for soaking, and it is off by
 default.
+
+## The R103 probes (Track B, 2026-08-05)
+
+```
+python -m understudy.probe_block --spotlight center --seed TRACKB2 --max-fights 1 --turns 8
+python -m tools.probe_b2_table "understudy/logs/soak/probe-b2-*.jsonl"
+python -m understudy.replay --logs "<glob>" --use-selectors --ledger <path>
+```
+
+Answers: `docs/probe-a-block-offset.md` (B2, the +2 block offset — YES, it
+reproduces, and it is **Frail**, absent from the fight record the replay reads)
+and `docs/probe-b-fanfare-residual.md` (B3, the Fanfare residual — localized to
+the unrecorded Spotlight selector plus the turn-open sampling seam; **direction
+flips from "tier0 pessimistic" to neutral**).
+
+**`--use-selectors` is OFF by default and must stay that way**: the committed
+`docs/s7-divergences.tsv` was produced from a pre-P1.5 corpus that carries no
+selectors, and a default that consulted them would make that artefact
+irreproducible on any log that does.
 
 ## The committed-draft arm (R99/4b)
 
