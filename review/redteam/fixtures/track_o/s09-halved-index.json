@@ -1,0 +1,92 @@
+{
+ "_fixture": "SLICE 9 / Track O. `soak --runs 6 --seed S1..S6 --max-fights 4`, exactly as the real soak() loop produces it (verified by driving soak() with a scripted session): every even run opens on the parked screen and dies, the second one trips STOP-AND-SURFACE, and the soak halts at run 4. Two of six declared seeds were ever measured.",
+ "stamp": "20260805-140000",
+ "character": "KLEEMOD-FURINA",
+ "policy": "policy_v1",
+ "commit": null,
+ "seeds": [
+  "S1",
+  "S2",
+  "S3",
+  "S4",
+  "S5",
+  "S6"
+ ],
+ "requested_runs": 6,
+ "runs": [
+  {
+   "record": "run_end",
+   "outcome": "bounded",
+   "detail": "stopped after 4 fight(s)",
+   "seed": "TRACKB3A",
+   "run": 1,
+   "actions": 312,
+   "wall_s": 251.4,
+   "fights": 4,
+   "final_act": 1,
+   "final_floor": 4,
+   "defects": 0,
+   "forced_defaults": 0,
+   "log": "x",
+   "ts": 0,
+   "defect_kinds": []
+  },
+  {
+   "record": "run_end",
+   "outcome": "defect",
+   "detail": "unexpected_start_state: expected a menu at run start, found 'rewards'",
+   "seed": null,
+   "run": 2,
+   "actions": 0,
+   "wall_s": 0.3,
+   "fights": 0,
+   "final_act": null,
+   "final_floor": null,
+   "defects": 1,
+   "forced_defaults": 0,
+   "log": "x",
+   "ts": 0,
+   "defect_kinds": [
+    "unexpected_start_state"
+   ]
+  },
+  {
+   "record": "run_end",
+   "outcome": "bounded",
+   "detail": "stopped after 4 fight(s)",
+   "seed": "TRACKB3C",
+   "run": 3,
+   "actions": 312,
+   "wall_s": 251.4,
+   "fights": 4,
+   "final_act": 1,
+   "final_floor": 4,
+   "defects": 0,
+   "forced_defaults": 0,
+   "log": "x",
+   "ts": 0,
+   "defect_kinds": []
+  },
+  {
+   "record": "run_end",
+   "outcome": "defect",
+   "detail": "unexpected_start_state: expected a menu at run start, found 'rewards'",
+   "seed": null,
+   "run": 4,
+   "actions": 0,
+   "wall_s": 0.3,
+   "fights": 0,
+   "final_act": null,
+   "final_floor": null,
+   "defects": 1,
+   "forced_defaults": 0,
+   "log": "x",
+   "ts": 0,
+   "defect_kinds": [
+    "unexpected_start_state"
+   ]
+  }
+ ],
+ "stopped_on": "unexpected_start_state",
+ "reversibility": []
+}

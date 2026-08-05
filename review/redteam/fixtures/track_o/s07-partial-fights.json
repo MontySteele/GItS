@@ -1,0 +1,115 @@
+{
+  "_README": "SLICE 7 (Track O red-team) synthetic combat logs for the Track D telemetry writers under PARTIAL FIGHTS and DEATH MID-WRITE. Event shapes copied from the real emit sites: aura_applied/aura_wasted tier0/engine/reactions.py:65,:75; reaction :164; salon_upkeep/salon_tick tier0/engine/effects.py:2421,:2428; encore_end tier0/engine/combat.py:857; fanfare_turn combat.py:508; fanfare_read/gain_fanfare tier0/engine/resources.py:258,:87. Every log is one FIGHT, the unit model.py:563-597 reduces.",
+
+  "aura_enemy_dies_mid_aura": {
+    "_what": "Hydro lands on enemy A at turn 2; A dies at turn 2 (the engine emits NO enemy-death event, effects.py:376-384). The fight runs to turn 20 against enemy B with no further hydro. Max real span of an unconsumed aura is AURA_DURATION_TURNS=2 (+ the applying turn) = turns 2-4.",
+    "log": [
+      {"turn": 1, "event": "play", "card": "x"},
+      {"turn": 2, "event": "aura_applied", "element": "hydro", "target": "A", "source": "salon"},
+      {"turn": 2, "event": "damage", "target": "A", "amount": 40, "blocked": 0, "base": 40, "source": "attack"},
+      {"turn": 3, "event": "play", "card": "x"},
+      {"turn": 4, "event": "play", "card": "x"},
+      {"turn": 5, "event": "play", "card": "x"},
+      {"turn": 6, "event": "play", "card": "x"},
+      {"turn": 7, "event": "play", "card": "x"},
+      {"turn": 8, "event": "play", "card": "x"},
+      {"turn": 9, "event": "play", "card": "x"},
+      {"turn": 10, "event": "play", "card": "x"},
+      {"turn": 11, "event": "play", "card": "x"},
+      {"turn": 12, "event": "play", "card": "x"},
+      {"turn": 13, "event": "play", "card": "x"},
+      {"turn": 14, "event": "play", "card": "x"},
+      {"turn": 15, "event": "play", "card": "x"},
+      {"turn": 16, "event": "play", "card": "x"},
+      {"turn": 17, "event": "play", "card": "x"},
+      {"turn": 18, "event": "play", "card": "x"},
+      {"turn": 19, "event": "play", "card": "x"},
+      {"turn": 20, "event": "play", "card": "x"},
+      {"turn": 20, "event": "fight_end", "won": false, "turns": 20, "hp_left": 0}
+    ]
+  },
+
+  "aura_enemy_survives_aura_expires": {
+    "_what": "Control for the above: the same application, but the target lives, so tick_auras emits aura_wasted at turn 4 and the interval closes honestly.",
+    "log": [
+      {"turn": 1, "event": "play", "card": "x"},
+      {"turn": 2, "event": "aura_applied", "element": "hydro", "target": "A", "source": "salon"},
+      {"turn": 3, "event": "play", "card": "x"},
+      {"turn": 4, "event": "aura_wasted", "element": "hydro", "target": "A"},
+      {"turn": 5, "event": "play", "card": "x"},
+      {"turn": 10, "event": "play", "card": "x"},
+      {"turn": 15, "event": "play", "card": "x"},
+      {"turn": 20, "event": "play", "card": "x"},
+      {"turn": 20, "event": "fight_end", "won": true, "turns": 20, "hp_left": 12}
+    ]
+  },
+
+  "aura_complete_fight": {
+    "_what": "A ten-turn fight the player WON, two hydro applications, both consumed by a reaction.",
+    "log": [
+      {"turn": 1, "event": "play", "card": "x"},
+      {"turn": 3, "event": "aura_applied", "element": "hydro", "target": "A", "source": "salon"},
+      {"turn": 4, "event": "reaction", "reaction": "vaporize", "trigger": "pyro", "aura": "hydro", "target": "A", "amp_delta": 6},
+      {"turn": 6, "event": "aura_applied", "element": "hydro", "target": "A", "source": "salon"},
+      {"turn": 7, "event": "reaction", "reaction": "vaporize", "trigger": "pyro", "aura": "hydro", "target": "A", "amp_delta": 6},
+      {"turn": 10, "event": "play", "card": "x"},
+      {"turn": 10, "event": "fight_end", "won": true, "turns": 10, "hp_left": 30}
+    ]
+  },
+
+  "aura_partial_fight_death_turn_1": {
+    "_what": "The fight the run DIED in: one turn, no hydro yet. model.py:587 appends this trace before the `not fight_won` exit at :643, so it lands in the cohort as a whole fight.",
+    "log": [
+      {"turn": 1, "event": "play", "card": "x"},
+      {"turn": 1, "event": "fight_end", "won": false, "turns": 1, "hp_left": 0}
+    ]
+  },
+
+  "encore_death_mid_upkeep": {
+    "_what": "Three-member stage; the player dies after the second member ticks, so effects.py:2423-2425 breaks the loop and the third salon_tick never lands. encore_end IS still emitted on the death path (combat.py:856).",
+    "log": [
+      {"turn": 5, "event": "salon_upkeep", "members": 3, "encore": 9, "cost": 3},
+      {"turn": 5, "event": "salon_tick", "member": "m1", "paid": true},
+      {"turn": 5, "event": "salon_tick", "member": "m2", "paid": true},
+      {"turn": 5, "event": "encore_end", "encore": 7, "members": 3, "won": false}
+    ]
+  },
+
+  "encore_complete_upkeep": {
+    "_what": "Control: the same stage ticking all three members and the fight ending normally.",
+    "log": [
+      {"turn": 5, "event": "salon_upkeep", "members": 3, "encore": 9, "cost": 3},
+      {"turn": 5, "event": "salon_tick", "member": "m1", "paid": true},
+      {"turn": 5, "event": "salon_tick", "member": "m2", "paid": true},
+      {"turn": 5, "event": "salon_tick", "member": "m3", "paid": true},
+      {"turn": 5, "event": "encore_end", "encore": 6, "members": 3, "won": true}
+    ]
+  },
+
+  "encore_gain_without_end": {
+    "_what": "A fight that generated and spent Encore but emitted neither salon_upkeep nor encore_end. aggregate()'s liveness filter drops it whole.",
+    "log": [
+      {"turn": 1, "event": "gain_encore", "amount": 12},
+      {"turn": 2, "event": "encore_spent", "amount": 2}
+    ]
+  },
+
+  "fanfare_reads_without_turn_snapshot": {
+    "_what": "A fight carrying a read, a 60%-overflow gain and a spend, but no fanfare_turn snapshot. aggregate()'s `live` filter (turns > 0) discards the whole trace, and the overflow it carried disappears.",
+    "log": [
+      {"turn": 1, "event": "fanfare_read", "kind": "bonus", "card": "c1", "total": 4, "cap": 10, "floor": 0, "at_cap": false, "at_floor": false},
+      {"turn": 1, "event": "gain_fanfare", "amount": 4, "source": "salon", "total": 10, "requested": 10, "wasted": 6},
+      {"turn": 1, "event": "fanfare_spent", "amount": 3}
+    ]
+  },
+
+  "fanfare_long_fight_pinned": {
+    "_what": "Twenty turns held at the cap. Paired with the next entry to show mean_held_fraction/peak_fraction averaging per-combat ratios instead of pooling.",
+    "turns": 20, "held": 10, "cap": 10
+  },
+
+  "fanfare_one_turn_death": {
+    "_what": "A one-turn fight held at 0 -- the fight a run dies in.",
+    "turns": 1, "held": 0, "cap": 10
+  }
+}
