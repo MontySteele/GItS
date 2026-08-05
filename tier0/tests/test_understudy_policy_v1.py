@@ -388,3 +388,120 @@ def test_policy_v0_is_frozen_by_this_sprint():
     # divergence revision #1 exists to close, and policy_v0 must keep showing
     # it or the measurement it belongs to stops being reproducible.
     assert cf.action["card_index"] != 0
+
+
+# ------------------------------- the card_select screens, learned live ------
+#
+# `card_select` is three screens wearing one name, and the first validation
+# soak stalled on the difference. Both rows below are that stall, made red.
+
+
+def _grid(prompt, screen_type="select", can_confirm=False, preview=False):
+    return {"state_type": "card_select", "run": {"act": 1, "floor": 5},
+            "player": {"hp": 42, "max_hp": 71, "hand": [],
+                       "draw_pile": [{"id": "KLEEMOD-SALON_DEBUT"},
+                                     {"id": "KLEEMOD-STAGE_PRESENCE"}],
+                       "discard_pile": [], "exhaust_pile": []},
+            "card_select": {"screen_type": screen_type, "prompt": prompt,
+                            "can_confirm": can_confirm,
+                            "preview_showing": preview,
+                            "cards": [
+                                {"id": "KLEEMOD-SALON_DEBUT",
+                                 "name": "Salon Debut", "cost": 1, "index": 0},
+                                {"id": "KLEEMOD-STAGE_PRESENCE",
+                                 "name": "Stage Presence", "cost": 1,
+                                 "index": 1}]}}
+
+
+def test_a_registered_selection_is_confirmed_not_toggled_again():
+    """The live stall: `select_card` TOGGLES on a grid screen, so re-issuing it
+    deselects. Twelve of those in a row is what the watchdog saw."""
+    d = policy_v1.decide(_grid("Choose a card to Remove.", can_confirm=True,
+                               preview=True), policy_v1.Memo())
+    assert d.action == {"action": "confirm_selection"}
+    assert d.notes["basis"] == "grid_confirm"
+
+
+def test_the_screen_kind_is_read_off_the_prompt_when_the_type_says_nothing():
+    """The shop's removal service reports `screen_type: "select"` and
+    `prompt: "Choose a card to Remove."`. Keying on the type alone sent it to
+    the generic fallback, which scores with `score_offer` and would therefore
+    have removed the deck's BEST card."""
+    assert policy_v1._screen_kind(
+        {"screen_type": "select", "prompt": "Choose a card to Remove."}) == "remove"
+    assert policy_v1._screen_kind(
+        {"screen_type": "select", "prompt": "Choose a card to Upgrade."}) == "upgrade"
+    assert policy_v1._screen_kind(
+        {"screen_type": "choose", "prompt": "Choose one."}) == ""
+
+
+def test_a_prompt_derived_remove_screen_reaches_the_sims_ladder():
+    d = policy_v1.decide(_grid("Choose a card to Remove."), policy_v1.Memo())
+    assert d.notes.get("screen_kind_from") == "prompt" or \
+        d.notes.get("screen_kind") == "remove"
+
+
+def test_a_committed_remove_screen_is_answered_and_never_cancelled():
+    """The fourth validation soak's loop. `rest_action`'s on-plan-upgrade rung
+    outranks its thin rung, so on a remove screen the sim's ladder routinely
+    wants to upgrade and policy_v0 declines. At a rest site cancelling costs
+    nothing; at a shop's removal service the gold is already spent, and the run
+    bounced shop -> card_select -> shop until the watchdog stopped it."""
+    d = policy_v1.decide(_grid("Choose a card to Remove."), policy_v1.Memo())
+    assert d.available, "a paid-for screen must never be answered with a shrug"
+    assert d.action["action"] == "select_card"
+    if d.notes.get("basis"):
+        assert d.notes["basis"] == "score_offer_inverse"
+        scores = d.notes["scores"]
+        chosen = d.notes["names"]["card_name"]
+        assert scores[chosen] == min(scores.values()), \
+            "a remove screen takes the card the drafter would least want"
+
+
+def test_the_shop_arm_does_not_buy_an_untyped_item():
+    """It bought the card-REMOVAL service, which arrives with no `type`, and
+    then could not follow through. Buying a service the bot cannot complete is
+    not a judgment call it is entitled to make."""
+    state = {"state_type": "shop", "run": {"act": 1, "floor": 3},
+             "player": {"hp": 50, "max_hp": 71, "gold": 400,
+                        "deck": [{"id": "KLEEMOD-STAGE_PRESENCE"}]},
+             "items": [{"name": "Card Removal", "price": 75},
+                       {"name": "Aria of Recompense", "type": "card",
+                        "id": "KLEEMOD-ARIA_OF_RECOMPENSE", "price": 50}]}
+    d = policy_v1.decide(state, policy_v1.Memo())
+    assert d.notes["untyped_items_skipped"] == ["Card Removal"]
+    if d.action.get("action") == "shop_purchase":
+        assert d.notes["names"]["item_name"] != "Card Removal"
+
+
+def test_a_named_spotlight_overlay_is_still_the_spotlight_arm():
+    """The prompt reader must not swallow the screen revision #6 owns."""
+    state = _overlay(["KLEEMOD-STAGE_PRESENCE"])
+    state["card_select"]["prompt"] = "Choose one."
+    d = policy_v1.decide(state, policy_v1.Memo())
+    assert d.revision == "v1.6"
+    assert d.notes["basis"] == "companion_density"
+
+
+def test_an_enchant_screen_confirms_on_the_second_visit():
+    """`NDeckEnchantSelectScreen` reports `can_confirm: true` with
+    `preview_showing: false`, so the preview flag alone is not evidence that a
+    selection landed. Without the memo the driver re-toggled the same card
+    until the cycle watchdog stopped the run."""
+    state = _grid("Choose a card to Enchant.",
+                  screen_type="NDeckEnchantSelectScreen", can_confirm=True)
+    memo = policy_v1.Memo()
+    first = policy_v1.decide(state, memo)
+    assert first.action["action"] == "select_card"
+    second = policy_v1.decide(state, memo)
+    assert second.action == {"action": "confirm_selection"}
+    assert second.notes["registered_by"] == "prior_selection"
+
+
+def test_the_confirm_is_not_offered_before_anything_is_selected():
+    """A screen that reports can_confirm on arrival must not be confirmed
+    blind -- that would pick whatever the game had highlighted."""
+    state = _grid("Choose a card to Enchant.",
+                  screen_type="NDeckEnchantSelectScreen", can_confirm=True)
+    d = policy_v1.decide(state, policy_v1.Memo())
+    assert d.action["action"] == "select_card"

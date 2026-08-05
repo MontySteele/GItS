@@ -104,6 +104,13 @@ class Memo:
     potion_rounds: set = field(default_factory=set)
     # `leads_to` kinds of the map node most recently travelled to. Revision #5.
     next_node_kinds: list = field(default_factory=list)
+    # `card_select` screens this run on which a selection has already been
+    # posted. The grid protocol needs it: `select_card` TOGGLES, so the second
+    # visit to a screen must confirm rather than re-toggle, and `preview_showing`
+    # is not a reliable signal -- the Enchant screen
+    # (`NDeckEnchantSelectScreen`) reports `can_confirm: true` with
+    # `preview_showing: false` and bounced a run until the watchdog caught it.
+    selected_screens: set = field(default_factory=set)
     # How many times revision #1 has already offered a given card this turn.
     # A free-card rule that re-offers a card whose play was rejected is the one
     # way revision #1 could spin, so the offer count is bounded by the number
@@ -666,6 +673,193 @@ def _is_companion(card) -> bool:
     return card.companion is not None or bool(card.nation)
 
 
+def _shop(state: dict[str, Any]) -> Decision:
+    """policy_v0's shop arm, over CARDS only.
+
+    NOT a revision -- a defect fix, found by the fourth validation soak.
+    policy_v0's shelf filter accepts an item whose `type` is `"card"` OR the
+    empty string, and the shop's card-REMOVAL service comes across the wire
+    with no type. So the policy bought a service, the remove screen it opened
+    was declined, the driver cancelled it, and the run bounced
+    shop -> card_select -> shop until the watchdog stopped it.
+
+    Buying a service you cannot follow through on is not a judgment call the
+    bot is entitled to make, so the untyped items are dropped rather than
+    guessed at. They are counted in the notes: if a real card ever arrives
+    untyped, that count is where it will show up.
+    """
+    items = state.get("items") or (state.get("shop") or {}).get("items") or []
+    typed = [it for it in items if isinstance(it, dict)]
+    untyped = [str(it.get("name")) for it in typed
+               if not str(it.get("type") or "").strip()]
+
+    # THE INDEX HAS TO COME BACK. `shop_purchase` takes an index into the
+    # SHELF THE GAME IS SHOWING, and policy_v0 returns an index into whatever
+    # list it was handed. Narrowing the list without remapping would buy a
+    # different item than the one the policy chose -- silently, and more often
+    # the more items were filtered. Caught by its own test rather than by a
+    # soak, which is the only reason it is not a second night's defect.
+    keep = [i for i, it in enumerate(typed)
+            if str(it.get("type", "")).lower() == "card"]
+    narrowed = dict(state)
+    narrowed["items"] = [typed[i] for i in keep]
+    narrowed.pop("shop", None)
+    d = _from_v0(policy_v0._shop(narrowed))
+    if d.action and d.action.get("action") == "shop_purchase":
+        local = int(d.action.get("index", 0))
+        if 0 <= local < len(keep):
+            d.action = {**d.action, "index": keep[local]}
+        else:
+            return _unavailable(
+                "resource",
+                f"the shop arm returned index {local} against a shelf of "
+                f"{len(keep)}; refusing to post an unmapped purchase")
+    d.notes = {**d.notes, "untyped_items_skipped": untyped,
+               "shelf_indices": keep}
+    return d
+
+
+_SCREEN_WORDS = (
+    ("remove", ("remove", "purge", "destroy", "eliminate")),
+    ("upgrade", ("upgrade", "smith")),
+)
+
+
+def _screen_kind(blob: dict[str, Any]) -> str:
+    """upgrade / remove / "", read from the wire's own words.
+
+    LEARNED FROM A LIVE STALL. The shop's card-removal service reports
+    `screen_type: "select"` with `prompt: "Choose a card to Remove."` -- the
+    type field says nothing and the prompt says everything. Keying only on
+    `screen_type` sent that screen to the generic fallback, which scored the
+    options with `score_offer` and would have removed the deck's BEST card.
+    The prompt is read because it is the only place the game states intent.
+    """
+    st = str(blob.get("screen_type") or "").lower()
+    for kind, _ in _SCREEN_WORDS:
+        if st == kind:
+            return kind
+    text = str(blob.get("prompt") or "").lower()
+    for kind, words in _SCREEN_WORDS:
+        if any(w in text for w in words):
+            return kind
+    return ""
+
+
+def _screen_key(state: dict[str, Any], blob: dict[str, Any]) -> tuple:
+    run = state.get("run") or {}
+    return (run.get("act"), run.get("floor"),
+            str(blob.get("screen_type") or ""), str(blob.get("prompt") or ""))
+
+
+def _card_select_screen(state: dict[str, Any], memo: Memo) -> Decision:
+    """Dispatch for `card_select`, which is three screens wearing one name.
+
+    THE GRID PROTOCOL, and it cost a soak run to learn. A grid screen TOGGLES
+    on `select_card` and needs an explicit `confirm_selection`; a
+    choose-a-card screen picks immediately and needs no confirm. The wire says
+    which one you are on: `can_confirm` turns true once a selection is
+    registered and `preview_showing` goes with it. Without this the driver
+    re-toggled the same card twelve times and the watchdog -- correctly -- read
+    it as a stall.
+    """
+    blob = state.get("card_select") or {}
+    key = _screen_key(state, blob)
+    already = key in memo.selected_screens
+    if blob.get("can_confirm") and (blob.get("preview_showing") or already):
+        memo.selected_screens.discard(key)
+        return Decision(
+            category="resource",
+            action={"action": "confirm_selection"},
+            label="confirm selection",
+            rationale=("grid screen: a selection is registered and the wire "
+                       "reports can_confirm, so the outstanding verb is the "
+                       "confirm, not another toggle"),
+            revision="v1.6",
+            notes={"basis": "grid_confirm",
+                   "registered_by": "preview_showing" if
+                   blob.get("preview_showing") else "prior_selection",
+                   "screen_type": blob.get("screen_type"),
+                   "prompt": blob.get("prompt")})
+    kind = _screen_kind(blob)
+    if kind:
+        # policy_v0's arm gates on `screen_type` being literally 'upgrade' or
+        # 'remove'. Handing it the kind we read off the prompt is a
+        # TRANSLATION, not a policy change: the decision it then makes is
+        # still `rest_action`'s smith/thin order, unmodified.
+        translated = dict(state)
+        translated["card_select"] = {**blob, "screen_type": kind}
+        d = _from_v0(policy_v0._card_select(translated))
+        d.notes = {**d.notes, "screen_kind_from": "prompt"
+                   if str(blob.get("screen_type") or "").lower() != kind
+                   else "screen_type"}
+        if d.available:
+            return _remember_selection(d, memo, key)
+        # THE SIM'S LADDER CAN REFUSE A SCREEN WE ARE ALREADY COMMITTED TO.
+        # `rest_action` answers "what would I do at a rest site", and its
+        # on-plan-upgrade rung outranks its thin rung -- so on a remove screen
+        # it routinely wants to upgrade, policy_v0 declines rather than
+        # delegate across, and the driver cancels. At a rest site cancelling
+        # costs nothing. At a shop's removal service the gold is already
+        # spent, and the fourth validation soak bounced there forever.
+        #
+        # So a committed screen gets a delegated answer rather than a shrug:
+        # the card the DRAFT policy would least want to add is the card to
+        # remove. That is `score_offer`, read in the direction the screen asks
+        # -- still the sim's valuation, still no heuristic of ours.
+        return _remember_selection(
+            _committed_screen(state, blob, kind, d.rationale), memo, key)
+    return _remember_selection(_choice_overlay(state), memo, key)
+
+
+def _remember_selection(d: Decision, memo: Memo, key: tuple) -> Decision:
+    """Record that a `select_card` has been posted for this screen.
+
+    The grid protocol's second half: a toggle that is not followed by a
+    confirm is a bounce, and `preview_showing` does not reliably say a
+    selection landed.
+    """
+    if d.action and d.action.get("action") == "select_card":
+        memo.selected_screens.add(key)
+    return d
+
+
+def _committed_screen(state: dict[str, Any], blob: dict[str, Any], kind: str,
+                      why_v0_declined: str) -> Decision:
+    entries = [e for e in (blob.get("cards") or []) if isinstance(e, dict)]
+    deck = adapter.deck_cards(state)
+    scored: list[tuple[float, int, Any]] = []
+    for i, e in enumerate(entries):
+        card, approx = adapter.resolve_card(e)
+        if approx:
+            continue
+        try:
+            scored.append((t5draft.score_offer(card, deck, ARCHETYPE), i, card))
+        except Exception:                                    # noqa: BLE001
+            continue
+    if not scored:
+        return _unavailable(
+            "resource",
+            f"the sim declined this '{kind}' screen ({why_v0_declined}) and no "
+            f"option resolves to a sim card row to break the tie with")
+    # remove -> the least wanted; upgrade -> the most wanted. Ties break on
+    # offered index so a seed replays identically.
+    pick = (min(scored, key=lambda t: (t[0], t[1])) if kind == "remove"
+            else max(scored, key=lambda t: (t[0], -t[1])))
+    return Decision(
+        category="resource",
+        action={"action": "select_card", "index": pick[1]},
+        label=f"{kind} {pick[2].name} [{pick[1]}]",
+        rationale=(f"the sim's rest ladder declined this screen "
+                   f"({why_v0_declined}); the screen is already paid for, so "
+                   f"tier05.draft.score_offer breaks it in the direction the "
+                   f"screen asks -- {pick[2].name} at {pick[0]:.2f}"),
+        revision="v1.6",
+        notes={"basis": f"score_offer_{'inverse' if kind == 'remove' else 'direct'}",
+               "screen_kind": kind,
+               "scores": {c.name: round(s, 2) for s, _, c in scored}})
+
+
 def _choice_overlay(state: dict[str, Any]) -> Decision:
     """R93 #6. Center Stage vs Guest Cast, keyed on deck composition.
 
@@ -781,13 +975,9 @@ def decide(state: dict[str, Any], memo: Memo | None = None) -> Decision:
             elif st == "rest_site":
                 d = _rest(state, memo)
             elif st in ("shop", "fake_merchant"):
-                d = _from_v0(policy_v0._shop(state))
+                d = _shop(state)
             elif st == "card_select":
-                screen = str((state.get("card_select") or {}).get("screen_type")
-                             or "").lower()
-                d = (_from_v0(policy_v0._card_select(state))
-                     if screen in ("upgrade", "remove")
-                     else _choice_overlay(state))
+                d = _card_select_screen(state, memo)
             else:
                 d = _unavailable(
                     st, f"'{st}' is a mechanical screen with no sim decision "

@@ -268,6 +268,8 @@ class _FakeSession:
 def _driver():
     d = soak.RunDriver.__new__(soak.RunDriver)
     d.session = _FakeSession()
+    d.character = soak.DEFAULT_CHARACTER
+    d.memo = soak.policy_v1.Memo()
     d.run_index = 1
     d.stamp = "test"
     d.seed = "TESTSEED"
@@ -282,3 +284,106 @@ def _driver():
     d.log = soak.Path(soak.LOG_DIR) / "unused-in-tests.jsonl"
     d.emit = lambda record: None
     return d
+
+
+# ---------------------------------------------------------------- embark ---
+#
+# The first validation soak filed two `embark_loop` defects and halted itself.
+# The cause: `menu_select KLEEMOD-FURINA` is idempotent -- the character stays
+# in `options` after it is chosen and the bridge answers "Selected Furina. Use
+# 'confirm' to embark." every single time -- so a loop that prefers the
+# character over the confirm re-selects her forever. That is a real bug this
+# harness had, caught by this harness, and it gets a red test.
+
+
+class _FakeBridge:
+    """The character-select screen's actual behaviour, replayed offline."""
+
+    class BridgeError(Exception):
+        pass
+
+    def __init__(self):
+        self.posted = []
+        self.screen = "main"
+        self.picked = False
+
+    def get_state(self):
+        if self.screen == "embarked":
+            return {"state_type": "map", "run": {"act": 1, "floor": 1},
+                    "player": {"hp": 60, "max_hp": 60},
+                    "map": {"next_options": [{"index": 0, "type": "Monster"}]}}
+        opts = {
+            "main": ["singleplayer"],
+            "singleplayer": ["standard", "back"],
+            "character_select": (["KLEEMOD-FURINA", "IRONCLAD"]
+                                 + (["confirm"] if self.picked else [])),
+        }[self.screen]
+        return {"state_type": "menu", "menu_screen": self.screen,
+                "options": opts}
+
+    def post(self, action, **params):
+        self.posted.append((action, params))
+        opt = str(params.get("option", "")).lower()
+        if opt == "singleplayer":
+            self.screen = "singleplayer"
+        elif opt == "standard":
+            self.screen = "character_select"
+        elif opt == "kleemod-furina":
+            self.picked = True          # idempotent, and the screen does NOT move
+        elif opt == "confirm":
+            self.screen = "embarked"
+        return {"status": "ok", "message": "ok"}
+
+    def current_seed(self):
+        return "FAKESEED01"
+
+
+def test_the_embark_path_confirms_instead_of_re_picking_forever(monkeypatch):
+    fake = _FakeBridge()
+    monkeypatch.setattr(soak, "bridge", fake)
+    monkeypatch.setattr(soak, "SETTLE_S", 0)
+    d = _driver()
+    state = d._embark(fake.get_state())
+    assert state["state_type"] == "map", "the driver never left the menu"
+    picks = [p for p in fake.posted
+             if str(p[1].get("option", "")).lower() == "kleemod-furina"]
+    assert len(picks) == 1, f"the character was selected {len(picks)} times"
+    assert any(str(p[1].get("option", "")).lower() == "confirm"
+               for p in fake.posted), "nothing ever confirmed"
+
+
+def test_no_seed_is_ever_passed_on_the_embark_path(monkeypatch):
+    """R95: read-back, not chosen. A `seed` parameter here returns "Seeded
+    embark is not supported for standard singleplayer from this API", and the
+    Custom screen that would take one soft-locks the game."""
+    fake = _FakeBridge()
+    monkeypatch.setattr(soak, "bridge", fake)
+    monkeypatch.setattr(soak, "SETTLE_S", 0)
+    d = _driver()
+    d._embark(fake.get_state())
+    assert not any("seed" in params for _, params in fake.posted)
+
+
+def test_an_in_combat_overlay_does_not_end_the_fight():
+    """Furina's starter relic opens `card_select` every single turn. Treating
+    that as the end of combat split one floor-2 fight into five records in the
+    first validation soak, each with its own turn count and HP ledger."""
+    d = _driver()
+    fight = _combat(hp=50)
+    d._observe(fight, fight, {}, {"action": "noop"})
+    d._observe(fight, {"state_type": "card_select", "run": {"act": 1, "floor": 3},
+                       "player": {"hp": 50, "max_hp": 71},
+                       "card_select": {"screen_type": "choose", "cards": []}},
+               {}, {"action": "play_card", "card_index": 0})
+    assert d.fight is not None, "the fight ended at an overlay"
+    assert d.fights == []
+
+
+def test_a_reward_screen_does_end_the_fight():
+    d = _driver()
+    fight = _combat(hp=50)
+    d._observe(fight, fight, {}, {"action": "noop"})
+    d._observe(fight, {"state_type": "rewards", "run": {"act": 1, "floor": 3},
+                       "player": {"hp": 44, "max_hp": 71}}, {},
+               {"action": "end_turn"})
+    assert d.fight is None and len(d.fights) == 1

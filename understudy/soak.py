@@ -81,6 +81,10 @@ SETTLE_S = 0.7
 # actions, the run is not progressing. Combat legitimately repeats a screen
 # type, which is why the fingerprint is not just `state_type`.
 NO_PROGRESS_ACTIONS = 12
+# ...and at most this many DISTINCT fingerprints inside that window. 1 catches
+# a frozen screen; 2 catches the A-B-A-B bounce between a screen and the
+# overlay it keeps reopening, which is the shape a real soak actually hit.
+NO_PROGRESS_CYCLE = 2
 # Hard ceiling per run. A three-act run is a few thousand actions; ten thousand
 # is a spin.
 MAX_ACTIONS_PER_RUN = 10000
@@ -310,6 +314,18 @@ class Session:
         subprocess.run(["taskkill", "/F", "/IM", GAME_EXE],
                        capture_output=True, text=True)
 
+    def restart(self) -> None:
+        """Kill and relaunch, keeping the ledger honest about the extra launch.
+
+        Used after a defect run: the game may be parked on a screen no verb
+        escapes, and a fresh process plus `abandon_run` is the only reliable
+        way back to the main menu.
+        """
+        self._kill()
+        self._launch()
+        self.wait_for_menu()
+        self._speed_on()
+
     def alive(self) -> bool:
         if self.proc is None:
             return True                      # --no-setup: not ours to judge
@@ -415,6 +431,11 @@ def _enemy_pool(state: dict[str, Any]) -> int:
 # --------------------------------------------------------------- driver ----
 
 COMBAT = ("monster", "elite", "boss")
+# Screens that interrupt a fight WITHOUT ending it. Furina's Ethereal Spotlight
+# opens `card_select` every turn; treating that as the end of the fight split
+# one floor-2 fight into five records in the first validation soak, each with
+# its own turn count and its own HP ledger.
+MID_FIGHT = ("card_select", "hand_select", "bundle_select", "overlay")
 DECISION_SCREENS = {"monster", "elite", "boss", "card_reward", "map",
                     "rest_site", "shop", "fake_merchant", "relic_select",
                     "card_select", "bundle_select", "hand_select",
@@ -511,10 +532,25 @@ class RunDriver:
         fp = self._fingerprint(state)
         self._fingerprints.append(fp)
         recent = self._fingerprints[-NO_PROGRESS_ACTIONS:]
-        if len(recent) == NO_PROGRESS_ACTIONS and len(set(recent)) == 1:
+        # A STALL IS A SMALL CYCLE, NOT ONLY A FROZEN FRAME, and the fourth
+        # validation soak proved it: the shop arm bought a card-removal service,
+        # the remove screen was declined and cancelled, and the run bounced
+        # shop -> card_select -> shop forever. Two distinct fingerprints, so a
+        # `len(set(...)) == 1` test never fired and the run would have spun to
+        # the action ceiling three hours later.
+        #
+        # The bar is "at most NO_PROGRESS_CYCLE distinct states across a full
+        # window". Real play cannot do that: the fingerprint carries floor,
+        # round, HP, hand size and the enemy HP pool, and one of those moves on
+        # essentially every action that accomplishes anything.
+        if (len(recent) == NO_PROGRESS_ACTIONS
+                and len(set(recent)) <= NO_PROGRESS_CYCLE):
+            distinct = sorted(set(recent))
             raise Defect("no_progress",
-                         f"the state fingerprint has been identical across "
-                         f"{NO_PROGRESS_ACTIONS} posted actions: {fp}", state)
+                         f"{len(distinct)} distinct state fingerprint(s) across "
+                         f"{NO_PROGRESS_ACTIONS} posted actions "
+                         f"({'cycle' if len(distinct) > 1 else 'frozen'}): "
+                         + " <-> ".join(distinct), state)
 
     # -- acting -----------------------------------------------------------
     def post(self, state: dict[str, Any], action: dict[str, Any],
@@ -579,7 +615,7 @@ class RunDriver:
             if action.get("action") == "use_potion" and names.get("potion_name"):
                 self.fight.potions_used.append([rb, names["potion_name"]])
 
-        if st_b in COMBAT and st_a not in COMBAT:
+        if st_b in COMBAT and st_a not in COMBAT and st_a not in MID_FIGHT:
             self._close_fight(after, "survived")
 
     def _open_fight(self, state: dict) -> None:
@@ -710,6 +746,7 @@ class RunDriver:
         is unmodelled by the bridge and soft-locks -- which is exactly why the
         Custom arm is P1.5 and not here.
         """
+        picks = 0
         for _ in range(30):
             self._last_state = state
             st = str(state.get("state_type"))
@@ -718,7 +755,21 @@ class RunDriver:
             screen = str(state.get("menu_screen") or "")
             opts = _option_names(state)
             if screen == "character_select":
-                if self.character.lower() in [o.lower() for o in opts]:
+                # ORDER MATTERS AND IT COST A RUN TO LEARN. `KLEEMOD-FURINA`
+                # stays in `options` after it has been chosen -- the verb is
+                # idempotent and the bridge answers "Selected Furina. Use
+                # 'confirm' to embark." every time. A loop that prefers the
+                # character over the confirm therefore re-selects her forever
+                # and never embarks, which is the `embark_loop` defect the
+                # first validation soak filed.
+                #
+                # So: pick the character exactly once, then take `confirm`.
+                # The confirm button only appears in `options` while it is
+                # enabled (`_option_names` drops disabled entries), so it is
+                # absent until a character is chosen and cannot fire early.
+                if picks == 0 and self.character.lower() in [o.lower()
+                                                             for o in opts]:
+                    picks += 1
                     state = self.post(state,
                                       {"action": "menu_select",
                                        "option": self.character},
@@ -726,12 +777,31 @@ class RunDriver:
                     continue
                 pick = _first_of(opts, ("confirm", "embark"))
                 if pick is None:
+                    if picks < 3 and self.character.lower() in [o.lower()
+                                                                for o in opts]:
+                        # The selection did not take. Retry a bounded number of
+                        # times rather than spinning; three is enough to ride
+                        # out a frame the screen was still settling on.
+                        picks += 1
+                        state = self.post(state,
+                                          {"action": "menu_select",
+                                           "option": self.character},
+                                          mechanical=True)
+                        continue
                     raise Defect("no_embark",
-                                 f"character select offers no confirm/embark; "
-                                 f"options were {opts}", state)
-                state = self.post(state,
-                                  {"action": "menu_select", "option": pick},
-                                  mechanical=True)
+                                 f"character select offers no confirm/embark "
+                                 f"after {picks} selection(s); options were "
+                                 f"{opts}", state)
+                self.post(state, {"action": "menu_select", "option": pick},
+                          mechanical=True)
+                # EMBARKING IS NOT INSTANT, AND THE SECOND VALIDATION SOAK
+                # PROVED IT. `confirm` returns "Embarking on run" and the very
+                # next GET still reads `character_select`, because the run is
+                # generated over several frames. A driver that trusts the
+                # post-action read re-selects the character and files
+                # `no_embark` on a run that in fact started. So this is the one
+                # place with a transition wait rather than a settle.
+                state = self._await_leaving_menu()
                 continue
             pick = _first_of(opts, ("standard", "singleplayer", "confirm",
                                     "ignore", "ok"))
@@ -743,8 +813,49 @@ class RunDriver:
                               mechanical=True)
         raise Defect("embark_loop", "could not embark in 30 menu actions", state)
 
+    def _settle_transient(self, state: dict[str, Any],
+                          tries: int = 60,
+                          delay: float = 0.5) -> dict[str, Any]:
+        """Ride out `state_type: "unknown"`, which is a MOMENT, not a screen.
+
+        The bridge documents `unknown` as "unrecognized room or null state",
+        and the moment right after embarking is exactly that: act 1, floor 0,
+        the run generated and no room entered yet. The third validation soak
+        embarked cleanly and then filed `no_action` against it within a second,
+        because the driver treated a transition as a screen it could not drive.
+
+        A genuinely stuck `unknown` is still caught -- it just gets caught by
+        the no-progress watchdog with a fingerprint history behind it, which is
+        a far better defect record than an instant refusal.
+        """
+        if str(state.get("state_type")) != "unknown":
+            return state
+        for _ in range(tries):
+            time.sleep(delay)
+            state = bridge.get_state()
+            if str(state.get("state_type")) != "unknown":
+                return state
+        return state
+
+    def _await_leaving_menu(self, tries: int = 60,
+                            delay: float = 0.5) -> dict[str, Any]:
+        """Poll until the game is off the menu, or give the menu back.
+
+        Deliberately returns the menu state rather than raising when the wait
+        runs out: the caller's loop is the retry, and a wait that raises would
+        turn a slow machine into a filed defect.
+        """
+        state = bridge.get_state()
+        for _ in range(tries):
+            if str(state.get("state_type")) != "menu":
+                return state
+            time.sleep(delay)
+            state = bridge.get_state()
+        return state
+
     def _drive(self, state: dict) -> tuple[str, str]:
         while True:
+            state = self._settle_transient(state)
             self._last_state = state
             self._check(state)
             st = str(state.get("state_type"))
@@ -939,11 +1050,19 @@ def soak(runs: int, character: str, do_setup: bool) -> dict:
                 print(f"    STOP-AND-SURFACE: two harness-side '{stopped}' "
                       f"failures; soak halted", flush=True)
                 break
-            if not session.alive() and do_setup:
-                print("    game process is gone; relaunching", flush=True)
-                session._launch()
-                session.wait_for_menu()
-                session._speed_on()
+            # A DEFECT RUN IS NOT TRUSTED TO LEAVE A CLEAN STATE, and the
+            # first validation soak proved why: a run that stalled inside a
+            # `card_select` left the game sitting in it, and the NEXT run's
+            # first read was `unexpected_start_state` -- one defect
+            # manufacturing another, which is how a soak report fills with
+            # rows that are all the same row. Relaunching is the only recovery
+            # the wire actually offers: there is no verb that escapes an
+            # arbitrary mid-run screen.
+            needs_restart = (s["outcome"] == "defect") or not session.alive()
+            if needs_restart and do_setup and i < runs:
+                print("    restarting the game to clear the run state",
+                      flush=True)
+                session.restart()
     finally:
         session.teardown()
 
