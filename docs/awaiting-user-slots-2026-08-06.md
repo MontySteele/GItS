@@ -113,7 +113,14 @@ a dated annotation (R101b: append, never rewrite the pre-registration).
 
 ## Slot 2 — X2 audit venue: does the companion-pricing docket own X2 rarity work?
 
-**AWAITING [USER]. One word: YES or NO.**
+> **ANSWERED AND LANDED 2026-08-06 (Track Y) — reply: YES.** Verbatim: *"YES —
+> companion-pricing docket owns X2 rarity work"* (sixth-wave brief, Track Y
+> item Y-2; transcribed at `docs/sitting-record-predraft-2026-08-06.md` §7).
+> Form **2-YES** below landed verbatim at its named site,
+> `docs/dockets/companion-pricing.md` §2, and that section's "unrouted" marker
+> is cleared. The 2-NO form is void. Struck, not deleted (R101b).
+
+~~**AWAITING [USER]. One word: YES or NO.**~~
 
 **The question.** R109 gave X2 a law — *"infinite cycling engines gated to
 Uncommon rarity or higher. If this is Common, it needs a bump"* — and a
@@ -129,14 +136,14 @@ one-line venue assignment appended beneath the coordinator note. The X2 audit
 **results table already in §2 stays where it is under either answer**; only the
 ownership of future X2 rarity work moves.
 
-### 2-YES — draft, lands only if the reply is YES
+### 2-YES — ~~draft, lands only if the reply is YES~~ **LANDED VERBATIM 2026-08-06**
 
 > **VENUE ASSIGNED <DATE> ([USER]): this docket owns X2 rarity work going
 > forward** — the cycling-rarity law's audits, the Common instances it flags,
 > and the pricing of any bump — on the same terms as §1: candidates only, no
 > number written here, priced at a sitting.
 
-### 2-NO — draft, lands only if the reply is NO
+### 2-NO — ~~draft, lands only if the reply is NO~~ **VOID 2026-08-06: the reply was YES**
 
 > **VENUE DECLINED <DATE> ([USER]): this docket does NOT own X2 rarity work
 > going forward.** The results table below stays as the record of the audit

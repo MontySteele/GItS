@@ -39,22 +39,47 @@ which stays xfail(strict) because a candidate is not a fix.
 
 ---
 
-## 2. Not in this docket, and it needs a home
+## 2. ~~Not in this docket, and it needs a home~~ X2 rarity work — **THIS DOCKET OWNS IT (2026-08-06)**
 
-**X2's mechanical audit (R109) has no docket assigned by the sitting.** The
+> **VENUE ASSIGNED 2026-08-06 ([USER]): this docket owns X2 rarity work going
+> forward** — the cycling-rarity law's audits, the Common instances it flags,
+> and the pricing of any bump — on the same terms as §1: candidates only, no
+> number written here, priced at a sitting.
+
+> **Landing note, 2026-08-06 (Track Y).** The paragraph above is the 2-YES form
+> pre-drafted at `docs/awaiting-user-slots-2026-08-06.md` slot 2, landed
+> verbatim against [USER]'s reply *"YES — companion-pricing docket owns X2
+> rarity work"* (sixth-wave brief, Track Y item Y-2; transcribed at
+> `docs/sitting-record-predraft-2026-08-06.md` §7). The section's **"Recorded
+> here as unrouted" standing is cleared** — struck below, not deleted (R101b) —
+> and the heading is amended to say what is now true. The X2 audit results
+> table is untouched: it never moved, under either answer.
+>
+> **Carried, because it was never a venue question:** §2's closing parity
+> finding — the C# side reads companion rarity from `Star`, not the sheet's
+> `rarity` field, so whether the cycling-rarity gate is enforceable in C# at
+> all is open — is now *this docket's* open question, since this docket owns
+> the work.
+
+### The routing question as it stood before the reply (struck, kept for the record)
+
+~~**X2's mechanical audit (R109) has no docket assigned by the sitting.**~~ The
 cycling-rarity law — *"infinite cycling engines gated to Uncommon rarity or
 higher. If this is Common, it needs a bump"* — comes with a rarity check owed
 on `sayu_naptime` and on every self-replacing 0-cost non-exhaust companion, and
 Common instances are to be **flagged for a bump**.
 
 That is companion-rarity work and it is plausibly this docket's business, but
-the routing was not given and Track R does not assign it. **Recorded here as
-unrouted**, so it is visible rather than lost, and surfaced to the coordinator.
+the routing was not given and Track R does not assign it. ~~**Recorded here as
+unrouted**, so it is visible rather than lost, and surfaced to the
+coordinator.~~ **MARKER CLEARED 2026-08-06 by the venue assignment above: the
+work is routed, and this docket is where it is routed to.**
 
 **Coordinator note, 2026-08-06:** the audit itself was Track T's brief and it
 ran the same night (`docs/track-t-audits-2026-08-06.md` §T-1); its *results*
 are recorded below so they are not lost, while the *venue* question — whether
-this docket owns X2 rarity work going forward — stays open for [USER].
+this docket owns X2 rarity work going forward — ~~stays open for [USER]~~
+**was answered YES on 2026-08-06; see the banner at the head of this section.**
 
 ### X2 audit results (Track T, 2026-08-06)
 
