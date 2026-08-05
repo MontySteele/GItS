@@ -258,18 +258,66 @@ Flagged for v0.2+ planning: characters whose Genshin identity is *support* (Colu
 
 ---
 
-### Amendment DRAFTS — proposed, NOT ratified (added 2026-07-29)
+### ~~Amendment DRAFTS — proposed, NOT ratified (added 2026-07-29)~~ Amendments v1.12 and v1.13 — **RATIFIED 2026-08-06**
 
-> These two entries are **DRAFT (unratified)**. They are written in the
+> **RATIFIED 2026-08-06, and the fence comes down — recorded, not silently.**
+> Second sitting of 2026-08-06 (sixth-wave brief, Track Y item Y-7;
+> transcribed at `docs/sitting-record-predraft-2026-08-06.md` §7): *"v1.12/v1.13
+> amendments RATIFIED; unratified banners drop; law text now matches shipped
+> code."* Gates `S4-G3` (v1.12) and `S4-G4` (v1.13) are discharged. **Both
+> entries below are LAW.** They keep their position in the file rather than
+> being re-cut into the ratified log above, so that the fence's own history —
+> drafted 2026-07-29 against already-shipped code, ratified eight days later —
+> stays readable; every DRAFT marker in them is struck, never deleted (R101b).
+>
+> **The ratification was conditioned on a code read, and the read was done.**
+> Y-7's instruction was to ratify only if the law text matches what ships, and
+> to stop and surface otherwise. Verified before the banners dropped:
+>
+> - **v1.12.** `tier0/constants.py` carries exactly the four live generation
+>   legs — `FANFARE_PER_HP_LOST`, `FANFARE_PER_ENCORE_SPENT`,
+>   `FANFARE_PER_ENCORE_ABSORBED`, `FANFARE_PER_SPOTLIGHT_CARD` — and
+>   `FANFARE_PER_ENCORE_GAINED` is deleted with its reason in place. The
+>   invariant is pinned in the sim by
+>   `test_every_point_past_block_prints_exactly_one_fanfare`
+>   (`tier0/tests/test_furina.py`), and C#'s two halves round to it deliberately
+>   (`FurinaResources.cs`, the HP-loss mint's ceiling cast, matching
+>   `AbsorbDamage`). `FANFARE_FLOOR_PER_POWER`/`_RARE` are absent from BOTH
+>   engines, and the printed keywords that replaced them are enforced by rule R6
+>   of `tools/lint_furina_registers.py`. What the amendment says it does not
+>   touch is untouched: `FANFARE_CAP_FRACTION` is still a fraction of maxHP, and
+>   there is still no passive per-turn accrual.
+> - **v1.13.** `SalonVisualsBridge.cs` declares `SpriteScaleMax = 0.5f` and
+>   applies `Mathf.Min(SpriteScaleMax, spacing / width)` — the bound is written
+>   down AND answers to the pitch, which is exactly the amendment's condition —
+>   and `tier0/tests/test_visual_contract_gaps.py` asserts all three facts (the
+>   cap equals beam/`TARGET_H`, a scale is set at all, and the pitch is read).
+>
+> **One nuance recorded rather than smoothed over,** because the amendment text
+> says it: v1.12 describes the every-point invariant as *"pinned as a test in
+> both engines"*. It is a test in the sim and a documented, parity-swept
+> construction in C# — there is no C# test project to hold a pin (see the
+> standing note that co-op has no sim backstop). The LAW the amendment states —
+> which legs generate Fanfare — matches shipped code in both engines exactly,
+> so this is a claim about test infrastructure, not a mismatch in the rule, and
+> it was not treated as one.
+>
+> **What ratifying does NOT ratify,** restated from v1.12's own closing
+> paragraph so the discharge cannot be over-read: the X values remain PROPOSED
+> (the `S4-G9` ratification batch), and the fanfare archetype's pre-registered
+> STOP at 1.8% against its 2.0% floor is untouched.
+
+> ~~These two entries are **DRAFT (unratified)**. They are written in the
 > amendment-log style so they can be ratified by countersign without being
 > re-drafted, and they are fenced off below the ratified log so no reader
-> mistakes them for law. Nothing above this line was renumbered, reworded or
+> mistakes them for law.~~ **Both are ratified as of 2026-08-06; the fence is
+> historical.** Nothing above this line was renumbered, reworded or
 > altered. Both record changes that have **already shipped in code** while the
 > principles text still states the superseded rule — which is the situation
-> the fence exists to make visible. Filed by the doc de-drift pass
+> the fence existed to make visible. Filed by the doc de-drift pass
 > (`docs/backlog-2026-07-29.md` §2).
 
-- **v1.12 — DRAFT (unratified): Fanfare generation is SINGLE-LEG on Encore.**
+- **v1.12 — ~~DRAFT (unratified)~~ RATIFIED 2026-08-06: Fanfare generation is SINGLE-LEG on Encore.**
   Amends the v1.10 entry's Fanfare definition, which still reads *"generation
   strictly activity-based (HP lost, Encore gained, Encore spent, Spotlighted
   card played)"*. **The "Encore gained" leg is dead.** Ruled [USER]
@@ -306,13 +354,14 @@ Flagged for v0.2+ planning: characters whose Genshin identity is *support* (Colu
   **What this amendment does NOT touch:** the no-passive-per-turn-accrual law
   is untouched and remains binding, and the cap stays at %maxHP.
 
-  **Status: DRAFT.** The direction is [USER]-ruled; the X values remain
+  **Status: ~~DRAFT~~ RATIFIED 2026-08-06 (Track Y / Y-7); `S4-G3` discharged.**
+  The direction is [USER]-ruled; the X values remain
   PROPOSED (`docs/backlog-2026-07-29.md` §3 item 9, the ratification batch),
   and the fanfare archetype itself is under a pre-registered STOP at 1.8%
   against its 2.0% floor. Ratifying this text does **not** ratify those
   numbers.
 
-- **v1.13 — DRAFT (unratified): the pre-scaled-art house rule is amended for
+- **v1.13 — ~~DRAFT (unratified)~~ RATIFIED 2026-08-06: the pre-scaled-art house rule is amended for
   per-player-stat pitches.** The standing house rule is *"ship pre-sized art,
   no runtime minification"* (`docs/art-asset-manifest.md`, enforced in
   `tools/cut_salon_members.py` and `tier0/tests/test_visual_contract_gaps.py`).
@@ -340,6 +389,8 @@ Flagged for v0.2+ planning: characters whose Genshin identity is *support* (Colu
   fact, not an art fact — the next character with a stat-sized board inherits
   it.
 
-  **Status: DRAFT.** Shipped and deployed (playtest 3 fix); the general rule
-  change has never been ratified, and the gap test it replaced was rewritten as
-  the arithmetic check it always said it should become.
+  **Status: ~~DRAFT~~ RATIFIED 2026-08-06 (Track Y / Y-7); `S4-G4` discharged.**
+  Shipped and deployed (playtest 3 fix); ~~the general rule
+  change has never been ratified~~ **the general rule change is now law**, and
+  the gap test it replaced was rewritten as the arithmetic check it always said
+  it should become.
