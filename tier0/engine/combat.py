@@ -439,7 +439,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
 
     state.companion_plays_this_turn = 0          # Blocking Notes' slope
     state.companion_cost_delta_this_turn = 0     # Friendly Visit expires
-    state.replay_next_companion = 0              # Study Buddy expires
+    # replay_next_companion is NOT cleared here any more -- it expires at the
+    # END of the turn it was written on (see `in_player_turn = False` below).
+    # Sitting 2026-08-06, family X11: "Cap those effects to 'same turn only'".
     state.splash_procs_this_turn = 0             # detonation_splash cap
     state.reactions_this_turn = 0                # Chevreuse predicate window
     state.spotlighted_cards_this_turn = 0        # Ovation / reserve cap
@@ -591,6 +593,16 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         # hand flush -- which is the stated reason the source defers it.
         refpowers.exhaust_card(state, c, caused_by_ethereal=True)
     state.in_player_turn = False
+    # SAME TURN ONLY (sitting 2026-08-06, family X11). Study Buddy / Duet write
+    # one shared `replay_next_companion` counter; an unspent grant now dies with
+    # the turn that made it instead of surviving the enemy side and being
+    # cleared at the next player turn's open. WRITE-SIDE scoping, chosen for
+    # parity: the C# twin is a PowerStackType.Counter whose stacks carry no
+    # per-stack metadata, so neither engine can stamp a grant with its turn and
+    # filter at spend time -- but both can bound the counter's LIFETIME at the
+    # writing turn's end, and ReplayNextCompanionPower.AfterSideTurnEnd already
+    # does exactly this. One mechanism, one boundary, both parity twins covered.
+    state.replay_next_companion = 0
     # INSTRUMENT ONLY (pair of `turn_open`): the block standing when the player
     # hands the turn over, which is the quantity a demand curve is read against.
     # A turn that ended by killing the last enemy or by the player dying never
@@ -807,7 +819,12 @@ def _run_rounds(state: CombatState, pilot: Pilot) -> None:
 def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
               seed: int) -> CombatState:
     state = CombatState(player=player, enemies=enemies,
-                        rng=random.Random(seed))
+                        rng=random.Random(seed),
+                        # Dedicated stream, offset 4e9 (see CombatState and
+                        # understudy/rng.py's offset registry): the X14(b)
+                        # hand-full selector fallback must not advance the
+                        # main combat stream and renumber existing seeds.
+                        selector_rng=random.Random(seed + 4 * 10 ** 9))
     # Per-combat resources (v1.6: the reset IS the safety on unbounded
     # Encore). Spotlight designation likewise re-aims fresh each combat.
     player.encore = 0

@@ -2352,10 +2352,30 @@ def player_turn_start_triggers(state: CombatState) -> None:
         # whether selector cadence counts toward A5 velocity is an open
         # accounting ruling; until ruled it must not inflate the axis.
         from tier0.content import loader                # late import (cycle)
-        if (not any(c.id == "ethereal_spotlight" for c in p.hand)
-                and len(p.hand) < C.MAX_HAND_SIZE):
-            p.hand.append(loader.get_card("ethereal_spotlight"))
-            state.emit("selector_granted")
+        if not any(c.id == "ethereal_spotlight" for c in p.hand):
+            # HAND-FULL FALLBACK (sitting 2026-08-06, family X14 leg (b)):
+            # "if the hand is full, one random card is discarded before the
+            # spotlight is added." Before this the grant was simply skipped,
+            # so the relic that exists to guarantee Furina a play was exactly
+            # what a jammed hand starved.
+            #
+            # The victim pool is _op_discard's pool rule -- kit cards are
+            # never fodder (the v1.9 invariant) -- and the draw comes from the
+            # DEDICATED selector stream, not state.rng.
+            if len(p.hand) >= C.MAX_HAND_SIZE:
+                pool = [c for c in p.hand if not c.kit_card]
+                if pool:
+                    victim = state.selector_rng.choice(pool)
+                    remove_instance(p.hand, victim)
+                    p.discard_pile.append(victim)
+                    state.discards_this_turn += 1
+                    state.emit("discard", card=victim.id)
+                    state.emit("selector_hand_full_discard", card=victim.id)
+            # A hand of nothing but kit cards has no legal victim; the grant is
+            # skipped as before rather than breaking the kit invariant.
+            if len(p.hand) < C.MAX_HAND_SIZE:
+                p.hand.append(loader.get_card("ethereal_spotlight"))
+                state.emit("selector_granted")
     n = p.powers.pop("block_next_turn", 0)              # Charlotte
     if n:
         # Deliberately raw: this payout predates both block funnels and

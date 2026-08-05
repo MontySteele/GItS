@@ -526,7 +526,27 @@ def test_encore_performance_dead_without_designation_or_target():
     assert len(st.player.hand) == 1
 
 
+def test_encore_performance_is_free_and_refunds_nothing():
+    """X3, closed by sitting 2026-08-06: "Remove the energy rider and make it
+    free to play instead."
+
+    The card was cost 1 with an {op: energy, amount: 1} refund. The refund was
+    printed to make the copied Companion playable now, and a self-copy loop
+    compounded it into an energy-POSITIVE engine. Cost 0 buys the same thing
+    and cannot stack above zero. THIS PIN IS THE ONLY THING IN THE SUITE THAT
+    READS THE NEW SHAPE -- the errata moved a rare's cost and nothing else
+    went red.
+    """
+    card = loader.get_card("encore_performance")
+    assert card.cost == 0
+    assert not any(fx.get("op") == "energy" for fx in card.effects)
+    assert [fx["op"] for fx in card.effects] == ["copy_spotlighted_in_hand"]
+
+
 def test_spotlight_machinery_refunds_setup_energy():
+    # encore_performance is in this list for the same OBSERVABLE (playing it
+    # leaves energy where it was) but by a different mechanism since the X3
+    # errata: it is free rather than refunded. See the pin above.
     for cid in ("limelight", "shared_billing", "guest_list",
                 "encore_performance"):
         st = furina_state()

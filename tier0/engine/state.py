@@ -508,6 +508,16 @@ class CombatState:
     player: Player
     enemies: list[Enemy]
     rng: random.Random
+    # DEDICATED STREAM for the hand-full selector fallback (sitting 2026-08-06,
+    # family X14 leg (b)). A new stochastic surface never draws from `rng`:
+    # doing so would advance the main stream on every jammed-hand turn and
+    # silently renumber every measurement taken before the fallback existed --
+    # the same reason tier05 draws the banner from random.Random(seed + 2e9).
+    # Offset 4e9; the registry of taken offsets lives in understudy/rng.py.
+    # The default keeps direct CombatState(...) construction (tests, fixtures)
+    # working; run_fight seeds it from the fight seed.
+    selector_rng: random.Random = field(
+        default_factory=lambda: random.Random(4 * 10 ** 9))
     turn: int = 0
     cards_played_this_turn: int = 0
     log: list[dict] = field(default_factory=list)          # event stream for metrics

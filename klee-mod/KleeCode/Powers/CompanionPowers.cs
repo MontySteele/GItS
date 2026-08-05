@@ -138,9 +138,22 @@ public sealed class CompanionCostThisTurnPower : PowerModel, ILocalizationProvid
 /// <summary>
 /// Study Buddy: the next Companion card played this turn is played Amount
 /// extra times (tier0 replay_next_companion: consumed whole by the next
-/// companion play_card, reset at turn start). ModifyCardPlayCount is the
-/// game's replay surface -- the extra plays are a series on one CardPlay,
-/// which is also what the sim's `for _ in range(replays)` is.
+/// companion play_card, expiring at the END of the turn it was granted on).
+/// ModifyCardPlayCount is the game's replay surface -- the extra plays are a
+/// series on one CardPlay, which is also what the sim's
+/// `for _ in range(replays)` is.
+///
+/// SAME TURN ONLY (sitting 2026-08-06, family X11): "Cap those effects to
+/// 'same turn only'". This side already had the ratified semantics --
+/// AfterSideTurnEnd below bounds the grant's lifetime at the writing turn's
+/// end -- and the sim was the divergent half (it cleared at the NEXT player
+/// turn's open, so an unspent grant survived the enemy side). tier0
+/// combat.py now clears at `in_player_turn = False`, matching this hook.
+/// Write-side scoping was the only mechanism expressible identically in both
+/// engines: a Counter power's stacks carry no per-stack metadata, so neither
+/// side can stamp a grant with its turn number and filter at spend time.
+/// Both parity twins -- Study Buddy (Klee) and Duet (Furina) -- apply THIS
+/// power, so one boundary covers both.
 /// </summary>
 public sealed class ReplayNextCompanionPower : PowerModel, ILocalizationProvider
 {
@@ -180,7 +193,9 @@ public sealed class ReplayNextCompanionPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, CombatSide side,
         IEnumerable<Creature> participants)
     {
-        // Expires with the turn (sim resets at the next turn start).
+        // Expires with the turn it was granted on -- the ratified "same turn
+        // only" boundary (sitting 2026-08-06, family X11). The sim's mirror is
+        // tier0/engine/combat.py, beside `state.in_player_turn = False`.
         if (side != CombatSide.Player) return;
         await PowerCmd.Remove(this);
     }

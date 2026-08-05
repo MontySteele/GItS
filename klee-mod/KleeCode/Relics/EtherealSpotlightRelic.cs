@@ -3,12 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Cards.Furina;
+using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Random;
 using MegaCrit.Sts2.Core.Runs;
 
 namespace KleeMod.Relics;
@@ -68,6 +70,18 @@ public sealed class EtherealSpotlightRelic : CustomRelicModel
     protected override string BigIconPath =>
         KleePck.Path("furina/relics/ethereal_spotlight.png") ?? base.BigIconPath;
 
+    /// <summary>
+    /// Name of the derived rng stream for the hand-full fallback below.
+    /// Rng(seed, name) mixes a deterministic hash of this string into the
+    /// seed, giving the fallback its own stream -- the same reason
+    /// <see cref="CompanionBanner"/> does it, and the same reason the sim
+    /// draws from CombatState.selector_rng (seed + 4e9) rather than the
+    /// fight's main rng. Drawing from Rng.CombatTargets would advance the
+    /// stream every jammed-hand turn and silently renumber every combat roll
+    /// taken after it.
+    /// </summary>
+    private const string HandFullRngStream = "furina_spotlight_hand_full";
+
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
@@ -76,6 +90,29 @@ public sealed class EtherealSpotlightRelic : CustomRelicModel
         if (hand == null || hand.Cards.Any(card => card is EtherealSpotlight))
         {
             return;
+        }
+
+        // HAND-FULL FALLBACK (sitting 2026-08-06, family X14 leg (b)):
+        // "if the hand is full, one random card is discarded before the
+        // spotlight is added." Before this the grant was simply skipped, so
+        // the relic that exists to guarantee Furina a play was exactly what a
+        // jammed hand starved.
+        //
+        // The victim pool is the sim's _op_discard pool rule -- KitGrant
+        // .NotKitCard, because kit cards are never fodder (the v1.9
+        // invariant). The seed is mixed with the 1-based turn number so a
+        // multi-turn jam does not discard the same hand slot every turn, and
+        // stays seed-replayable.
+        if (hand.Cards.Count >= CardPile.MaxCardsInHand)
+        {
+            var pool = hand.Cards.Where(KitGrant.NotKitCard).ToList();
+            if (pool.Count == 0) return;    // kit-only hand: no legal victim
+            var turn = (uint)(player.PlayerCombatState?.TurnNumber ?? 0);
+            var rng = new Rng(
+                unchecked(player.PlayerRng.Seed + turn), HandFullRngStream);
+            var victim = rng.NextItem(pool);
+            if (victim == null) return;
+            await CardCmd.Discard(choiceContext, victim);
         }
         if (hand.Cards.Count >= CardPile.MaxCardsInHand) return;
 

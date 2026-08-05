@@ -666,10 +666,13 @@
    # Sparks 'n' Splash: the charged meter IS the cost -- it empties on cast). Was cost 2 at sheet passes 1-3; archived
    # Furina numbers are cost-2-world. Mass hydro (burst-tag cadence) scaling with the crowd's roar,
    # and the revelry refills the buffer. Meter 70 (declared, sheet-pass knob): particles from skill tags, reactions, Salon ticks, Encore spend.
-- {id: encore_performance, name: "Encore Performance", register: salon, cost: 1, type: skill, rarity: rare, solve: [velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [spotlight], role: payoff,
-   effects: [{op: energy, amount: 1}, {op: copy_spotlighted_in_hand, amount: 1}]}
+- {id: encore_performance, name: "Encore Performance", register: salon, cost: 0, type: skill, rarity: rare, solve: [velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [spotlight], role: payoff,
+   effects: [{op: copy_spotlighted_in_hand, amount: 1}]}
    # THE duplication card (kickoff §9; DECISIONS 64's held-open registration). Copies a Spotlighted card in hand — kit-deepener,
-   # Columbina's replay grammar on schedule. Refunds its Energy so the copied Companion is playable now; still dead without a target.
+   # Columbina's replay grammar on schedule. Costs nothing, so the copied Companion is playable now; still dead without a target.
+   # S13/X3 (sitting 2026-08-06, family X3): "Remove the energy rider and make it free to play instead." Was cost 1 with
+   # {op: energy, amount: 1}; the refund was the term the self-copy loop compounded into an energy-POSITIVE engine. Cost 0
+   # buys the same "playable now" the refund was printed for, and cannot stack above zero.
    # WATCHLIST: duplicating an amp-booster goes on the amp-cap watchlist (iron rule bounds it; confirm in provenance logs).
 - {id: singer_of_many_waters, name: "Singer of Many Waters", register: archon, cost: 1, type: skill, rarity: rare, solve: [sustain], tempo_band: {fight: [early], run: [late]}, archetypes: [generic, salon], role: payoff, exhaust: true,
    effects: [{op: heal, amount: 6}]}
