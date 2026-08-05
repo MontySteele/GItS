@@ -4232,3 +4232,146 @@ and nothing in the brief's C-a...C-d parenthetical is left unlanded.
 **Class: SUBSTANTIVE.** Four ratified conclusions change status, in the
 direction R102 pre-committed to. **No value moves anywhere in this entry**, and
 the one real defect the probes found is filed and queued rather than fixed.
+
+## R114 -- The four held flags are RULED: one intended, two ratified changes, and a curse whose root is still one word away (2026-08-06)
+
+Sitting of 2026-08-06, third and fourth sittings, Track AB. Verdicts verbatim;
+routing is this entry's. FLAG-1...FLAG-4 were opened by R110/R111 and carried
+into `docs/registry/user-queue.md` §3 under the docket house rule that nothing
+may be built against a held flag. **All four are discharged here.** Every fix
+named below is **queued to Errata Batch 2 and executed by no part of this
+entry** -- the paper track implements nothing in engine code.
+
+### FLAG-3 (`S13-X5`) -- RESOLVED, INTENDED. X5 closes fully, both legs.
+
+**Verbatim: *"We deliberately allowed for powers to raise the fanfare floor
+(without decaying) as a sort of strength-style scaling effect. I think this is
+fine."***
+
+FLAG-3 asked whether "seems fine" covered the decay-proof floor stacking or
+only the cantrip leg. **It covers both, and the answer arrives with its
+design intent stated:** the floor is a **strength-style scaling effect**, and
+its immunity to decay is the point of it rather than an oversight in it. The
+question the flag was holding is answered, so **X5 leaves the held register and
+takes a disposition.**
+
+**The disposition is X6's, exactly: the strategy is blessed, the power level is
+watched.** A new watch item (`W4`, `docs/dockets/watch-items.md`) rides the
+register with the magnitudes the S13 replay actually verified as its named
+quantity -- **240 damage from one card** (`furina_fanfare_2`) and a **turn-2
+boss kill** (`furina_fanfare_3`). Those two lines are what a future reading is
+compared against; they are recorded so the trigger is falsifiable rather than a
+feeling, per R111's definition of a watch item.
+
+**Pin transition, and it is the first one in this corpus.** The X5 pin in
+`tier0/tests/test_s13_exploit_pins.py` **converts from `xfail(strict=True)` to a
+documented-behaviour test**: it now asserts that the mechanism **REPRODUCES**,
+with no marker, citing this ruling. The polarity flip is the whole content of
+the change -- the other thirteen pins assert the correct behaviour and are
+xfail because the exploit is live; X5's behaviour **is** the correct behaviour
+now, so the assertion that would have been the alarm becomes the assertion that
+is the record. If X5 ever stops reproducing, that pin goes red, and it should:
+a ruled-intended mechanism disappearing is a regression, not a repair.
+
+### FLAG-1 (`S13-X1`) -- RESOLVED, RATIFIED CHANGE. The accumulator scopes to the writing turn.
+
+**Verbatim: *"Limit the cost discount to the current turn? Yes."***
+
+`state.companion_cost_delta_this_turn` is additive and uncapped, and its
+discount currently outlives the turn that wrote it. **The accumulator scopes to
+the writing turn, in both engines, mirroring the X11 boundary** that R110
+already ratified for `replay_next_companion`. One boundary idiom, now used
+twice.
+
+**Distinct from FLAG-2(ii), and they may not be conflated.** `cost_override`
+(FLAG-2(ii)) is a different mechanism with a different fix; two mechanisms, two
+fixes, one shared boundary idiom. The flag's other half -- whether the note also
+rides the Kokomi pool-rework docket, given `honor_guard` is the second enabler
+-- is answered by the ruling being **engine-wide** rather than kit-local: a
+turn-scoped accumulator closes the Klee leg and the Kokomi leg in one move, so
+there is no live leg left for a second docket to carry.
+
+**What the change does NOT close, stated because the finding invites the
+mistake.** The **within-turn** free-companion loop survives this change **by
+design**. A same-turn bound does not touch a mechanism that accumulates and
+spends inside one turn -- the same shape R110's X11 errata already hit, and the
+same shape the X11 pin still reports. That loop is governed by the **X2 rarity
+law** (R109: infinite cycling engines gate to Uncommon or higher), and its
+engines now sit at Uncommon, which is consistent with the X2 framework rather
+than an exception to it. **Pin behaviour: report, do not force.** The X1 pin
+stays `xfail(strict=True)` and its docstring says why.
+
+**Implementation: Errata Batch 2 item 7.** Both engines.
+
+### FLAG-2 (`S13-X3`) -- RESOLVED, BOTH FIXES RATIFIED.
+
+**Verbatim: *"Yes."*** -- to both halves.
+
+**(i) Copy ops inherit the printed card's bounds.** A copied
+`sucrose_catalyst_conversion` respects its Exhaust limit; the copy op no longer
+deletes the sheet's stated bound. This was the half R110 called a design call,
+and the design call is made: **the printed bound travels with the copy.**
+
+**(ii) `cost_override` aligns to the sheet and C# semantics -- "costs 0 *this
+turn*".** This is **NC-12 / `SYS-3`'s sim-side fix**, and its direction is worth
+recording: **C# is already correct**, so (ii) is a **sim-only parity repair**,
+not a design change. tier0 writes `pick.cost = 0` permanently on the token where
+sheet and mod both scope it to the turn.
+
+**Implementation: Errata Batch 2 item 8.** (ii) sim-only; (i) as the batch
+scopes it.
+
+**STAGED, one word owed -- `AB-s1`.** NC-12's adjacent inversion is **not**
+ruled here: C#'s Encore Performance does **not** exclude kit cards from the
+copy pool, where the sheet and the sim both do, so a copied kit Burst clogs a
+hand slot in game. It is a sheet-vs-mod parity fix and the fix is mod-side --
+staged rather than landed because it is a **mod behaviour change** that has not
+been explicitly blessed. Full draft text: `docs/awaiting-user-slots-2026-08-06.md`
+slot 6.
+
+### FLAG-4 (`S13-X14`) -- leg (a) clarified with its root staged; leg (c) RULED intended.
+
+**Leg (a) -- clarification recorded, root staged.** [USER]'s fallback
+restatement **matches the shipped `S-3` spotlight path**, which is R110's leg
+(b) and is already in the code. **Leg (a)'s root is a different thing and the
+clarification does not reach it:** `curse_poor_sleep` is typed both `status`
+(unplayable) and `retain: true` (never flushed). **The jam is the typing, not
+the spotlight.** No fallback on the spotlight path can unjam a hand held by ten
+cards that are unplayable and unflushable by their own type.
+
+**STAGED, one word owed -- `AB-s2`.** Two options, drafted in full and neither
+landed: **(α)** drop `retain` from the curse -- narrow, one card, a data repair;
+**(β)** rule that status-typed cards always flush at end of turn, engine-wide,
+on the StS precedent -- broad, a law, and it would close every future instance
+of this typing class at once. Full text:
+`docs/awaiting-user-slots-2026-08-06.md` slot 7.
+
+**Leg (c) -- RULED, INTENDED. Verbatim: *"You deck out... don't do that."***
+
+An all-Power deck erases itself into empty turns because Power cards route to
+`result_pile: none` -- removed from combat, not exhausted. **This is intended
+and takes the StS-precedent shrug: no guard is added.** Decking out is a thing
+the player does to themselves, and the engine is not obliged to prevent it.
+Recorded as **documented behaviour** in two places, so the next reader of
+`refpowers.result_pile` does not re-file it: the function's own docstring, and
+the X14 entry in `review/redteam/exploit-ledger.md`. **Leg (c) drops from the
+queue.**
+
+**The X14 pin does NOT convert.** Its representative line is
+`stall_softlock_3` -- leg (a), the curse jam -- which is still governed by the
+staged `AB-s2` and is not ruled. Only the ruled-intended leg would have earned
+a conversion, and it is not the leg the pin runs. The pin stays
+`xfail(strict=True)`.
+
+### Version-stamp questions, surfaced per precedent
+
+FLAG-1 and FLAG-2(ii) are **sim combat-math changes** when they land: a
+turn-scoped accumulator and a turn-scoped `cost_override` both change what a
+tier0 run costs and therefore what it measures. Surfaced here, decided by the
+batch that lands them, per the R101/`CONSTANTS_VERSION` precedent -- the paper
+track does not stamp a version for code it has not written. NC-7 raises the
+same question at greater breadth and is surfaced with it (R115).
+
+**Class: SUBSTANTIVE.** One mechanism is ruled intended and re-registered as a
+watch item; three engine behaviours are ruled changed and queued. **No engine
+code moves under this entry**, and the two staged items move nothing at all.

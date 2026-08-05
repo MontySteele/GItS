@@ -331,6 +331,18 @@ def result_pile(state: CombatState, card: Card) -> str:
     Corruption is folded in here because it is a pile rule
     (ModifyCardPlayResultPileTypeAndPosition -> Exhaust for the owner's Skills),
     not a cost rule.
+
+    DOCUMENTED BEHAVIOUR, RULED 2026-08-06 (R114, FLAG-4 leg (c)).
+    A played Power card is removed from combat, so a deck made ENTIRELY of
+    Power cards erases itself: the draw pile empties, the discard pile never
+    refills it, and the fight runs out its turn limit with an empty hand
+    (S13 line `stall_softlock_5`, `review/redteam/exploit-ledger.md` X14(c)).
+
+    That is INTENDED and there is deliberately NO GUARD. Verbatim: "You deck
+    out... don't do that." -- the StS precedent, where decking yourself out is
+    a thing the player does to themselves and the engine is not obliged to
+    prevent it. Recorded here so the next reader of this function files it as
+    known rather than as a bug; leg (c) is closed and off the queue.
     """
     if card.type == "power":
         return "none"

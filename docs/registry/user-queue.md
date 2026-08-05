@@ -42,6 +42,9 @@ pre-drafted where noted, so the reply is the only cost.
 | Q7 | **Close six of the seven axis scorecards permanently as "numbers are informational only"?** Keep only the Fanfare axis, which the Furina work already depends on. Plainly: six of the seven axes have never decided anything and are already marked non-binding; this makes that permanent and shrinks the gate to the one question people are actually waiting on | YES / NO | **`S4-G5`/`B-G1` narrowed.** YES closes six axes forever (no number retired or deleted — they stay publishable as description and may never be an acceptance target) and re-points the `R107/F1` fence to the narrowed gate, which unfences Furina backlog items 1–3 and the fanfare STOP from six questions they do not depend on. NO leaves all seven open and the Furina work waits on them. **Full landing text drafted in both forms** | `docs/awaiting-user-slots-2026-08-06.md` **slot 4** (Y-9(a)) |
 | Q8 | **Re-anchor Kokomi's stability band and her protocol playtest to the post-rework build?** Plainly: the band was to be declared before a confirmatory playtest and graded by it, but the build has been reworked since, and no protocol run has happened — the protocol's Answers block is still blank | YES / NO | **`S4-G6` + `S4-G14` re-anchored.** YES makes the confirmatory playtest a protocol run against the post-rework build and designates the 08-01/02 co-op session and playtest 4 EXPLORATORY. **`DEC-D5` clauses 2–4 survive intact** — declare from design intent with provenance, declare BEFORE the grading playtest, never revise the band against the playtest that grades it. YES declares no band and grades nothing. **Full landing text drafted in both forms** | `docs/awaiting-user-slots-2026-08-06.md` **slot 5** (Y-9(b)) |
 
+| Q9 | **Should the shipped game stop letting Encore Performance copy a kit card? NEW, opened 2026-08-06 by `AB-s1`.** Plainly: Furina's Encore Performance copies a card. The design sheet says it must never copy a *kit* card — the big signature cards a character starts with — and the simulation obeys that. The shipped mod does not, so in a real game you can end up holding a copied kit Burst that cannot be discarded and occupies a hand slot for the rest of the fight | YES / NO | **Sheet-vs-mod parity, fixed on the mod side.** YES makes the game match the sheet and the sim. NO makes the mod canonical, which means the *sheet and sim* are the defect and get repaired instead. Staged rather than landed because it is a **mod behaviour change**, and those are blessed explicitly, never inferred from a parity table. Blast radius either way: one card's copy pool, no sim number, no test flip. **Full landing text drafted in both forms** | `docs/awaiting-user-slots-2026-08-06.md` **slot 6**; R114 (FLAG-2); NC-12 |
+| Q10 | **How should the never-flushed curse stop jamming the hand? NEW, opened 2026-08-06 by `AB-s2`.** Plainly: `curse_poor_sleep` is marked two ways at once — it is a **status** (so it can never be played) and it is **retained** (so it is never discarded). A card that can neither be played nor discarded sits in your hand forever. Ten copies fill the hand, every draw bounces, and the fight cannot proceed | ALPHA / BETA (or NEITHER) | **The fallback you described is already shipped** (`S-3`, the spotlight path, R110 leg (b)) and does not reach this: **the jam is the typing, not the spotlight.** **ALPHA** = drop `retain` from that one curse — a data repair; any future card typed the same way reproduces the jam. **BETA** = a law: status-typed cards always flush at end of turn, engine-wide, `status` beats `retain` wherever they collide — fixes this curse as a consequence and every future instance in advance. **NEITHER** is also an answer and is drafted, with its cost stated. **Full landing text drafted in all three forms** | `docs/awaiting-user-slots-2026-08-06.md` **slot 7**; R114 (FLAG-4 leg (a)); `S13-X14` |
+
 **Why `Q5` is not a repeat of `Q1`.** `Q1` asked whether the trigger fired;
 `Q5` asks what the hands said. The pre-registration is explicit that **the hand
 is the tiebreaker, not the sim**, so Code cannot answer `Q5` by measuring — it
@@ -88,18 +91,24 @@ with their discharges named. **Qualified as `S4-G<n>`** (see
 
 ---
 
-## 3. Held flags — not to be built against
+## 3. Held flags — ~~not to be built against~~ **ALL FOUR RULED 2026-08-06 (R114)**
 
-Four clarifications carried out of the sitting of 2026-08-06 **unresolved**.
+~~Four clarifications carried out of the sitting of 2026-08-06 **unresolved**.~~
 `docs/dockets/README.md` house rule 3: nothing may be built against a held flag.
 Full questions: `docs/registry/identifiers.md` §6, and R110/R111 verbatim.
 
-| Flag | Family | One-line |
-|---|---|---|
-| FLAG-1 | `S13-X1` | The accumulator's second enabler (Kokomi `honor_guard`) / a structural disposition for the shared uncapped state |
-| FLAG-2 | `S13-X3` | Two adjacent closures: copy-outruns-Exhaust (design call) and unscoped `cost_override` (reads as a straight bug) |
-| FLAG-3 | `S13-X5` | Does "seems fine" cover decay-proof fanfare-floor stacking, or only the cantrip leg? |
-| FLAG-4 | `S13-X14` | Legs (a) `curse_poor_sleep` retain-jam and (c) all-Power deck self-erasure |
+> **DISCHARGED 2026-08-06 (Cold Reading, Track AB / R114).** This section is
+> kept, struck rather than deleted, because the flags are part of the record of
+> how these families were decided. **Nothing here is held any more.** Two
+> *new* questions were raised by the answers and are open — `AB-s1` and
+> `AB-s2`, rows `Q9` and `Q10` of §1 — and they are not these flags.
+
+| Flag | Family | One-line | Ruling |
+|---|---|---|---|
+| ~~FLAG-1~~ | `S13-X1` | ~~The accumulator's second enabler (Kokomi `honor_guard`) / a structural disposition for the shared uncapped state~~ | **RATIFIED CHANGE** — *"Limit the cost discount to the current turn? Yes."* Scoped to the writing turn, both engines; the engine-wide fix closes both enablers at once. Errata Batch 2 item 7 |
+| ~~FLAG-2~~ | `S13-X3` | ~~Two adjacent closures: copy-outruns-Exhaust (design call) and unscoped `cost_override` (reads as a straight bug)~~ | **BOTH FIXES RATIFIED** — *"Yes."* (i) copies inherit printed bounds; (ii) `cost_override` = "this turn" (sim-only; C# is already correct). Errata Batch 2 item 8. Residue staged as `AB-s1` |
+| ~~FLAG-3~~ | `S13-X5` | ~~Does "seems fine" cover decay-proof fanfare-floor stacking, or only the cantrip leg?~~ | **INTENDED, both legs** — the floor is a deliberate strength-style scaling effect. X5 closes; watch item `W4` takes the power level; the X5 pin converted from xfail to a documented-behaviour test |
+| ~~FLAG-4~~ | `S13-X14` | ~~Legs (a) `curse_poor_sleep` retain-jam and (c) all-Power deck self-erasure~~ | **(c) RULED INTENDED** — *"You deck out... don't do that."* No guard; documented in `refpowers.result_pile`. **(a) clarified, root staged as `AB-s2`** — the jam is the typing, not the spotlight |
 
 ---
 

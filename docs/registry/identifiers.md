@@ -30,7 +30,7 @@ for what is open and for whom.
 
 1. **A short code you don't recognise** (`G6`, `D5`, `C1`, `P1.5`, `X5`, `NC-1`, `S-2`) → §1 for the namespace, §2 for the collision table, which names the qualified form and the document that minted it.
 2. **"Is this still open, and whose is it?"** → `docs/registry/user-queue.md`: §1 the four one-word replies, §2 the reconciled S4 gate queue, §3 the four HELD flags, §4 the owed sittings, §5–§8 the rest.
-3. **"What did we actually decide?"** → `tier0/DECISIONS.md` (R39–R112, `DEC-D2`–`DEC-D5`) and `klee-mod/DECISIONS.md` (R73–R80); one shared R-sequence, CI-checked for duplicates. R1–R38 are not mechanically resolvable — see §3.
+3. **"What did we actually decide?"** → `tier0/DECISIONS.md` (R39–R114, `DEC-D2`–`DEC-D5`) and `klee-mod/DECISIONS.md` (R73–R80); one shared R-sequence, CI-checked for duplicates. R1–R38 are not mechanically resolvable — see §3.
 4. **"Which document is current?"** → `docs/README.md`: current set above the archive map, plus the 2026-08-06 archive review that says which near-miss documents were deliberately kept live and why.
 5. **"Can I quote this number?"** → check its world stamp against §4 (`RT7 / D14 / P3 / C5` today). A bump archives the numbers below it; archived numbers are bannered where they are published, never rewritten (R101b).
 
@@ -40,7 +40,7 @@ for what is open and for whom.
 
 | Namespace | Shape | Population | Minting authority | Collides? |
 |---|---|---|---|---|
-| Rulings | `R<n>` | R1–R112 | `tier0/DECISIONS.md` + `klee-mod/DECISIONS.md` (one shared sequence) | R1–R38 unresolvable as citations — see §3 |
+| Rulings | `R<n>` | R1–R114 | `tier0/DECISIONS.md` + `klee-mod/DECISIONS.md` (one shared sequence) | R1–R38 unresolvable as citations — see §3 |
 | D-series rulings | `D<n>` | D2–D5 | `tier0/DECISIONS.md` | **yes** — with DRAFTER stamps and with sprint task-ids |
 | Milestones | `M<n>` | M1–M8 | `tier0/DECISIONS.md`, `klee-mod/DECISIONS.md` | no |
 | C# milestones | `C<n>` | C1–C3 | `klee-mod/DECISIONS.md` | **yes** — with world stamps and S7 candidates |
@@ -197,7 +197,7 @@ sweep are all in §2.1–§2.8, plus:
 
 **One shared sequence across two ledgers.** `tier0/DECISIONS.md` and
 `klee-mod/DECISIONS.md` draw from the *same* R-number space — R73–R80 are
-minted in `klee-mod/DECISIONS.md` (Neap Tide), R39–R112 in
+minted in `klee-mod/DECISIONS.md` (Neap Tide), R39–R114 in
 `tier0/DECISIONS.md`. CI enforces no duplicates across both files
 (`.github/workflows/repo.yml`, job `ledger`).
 
@@ -206,7 +206,7 @@ minted in `klee-mod/DECISIONS.md` (Neap Tide), R39–R112 in
 | R1–R38 | prose entries and archived ruling docs | **Not mechanically resolvable.** S4 §4 lead 3: *"no index maps R-number → dated entry."* Several (R8, R13, R14, R24, R25, R29d, R34–R38) are cited as standing law. Resolving them is an open paper item — see `docs/registry/user-queue.md` §4. |
 | R39–R72 | `tier0/DECISIONS.md`, `## R<n>` headings | dated, resolvable |
 | R73–R80 | `klee-mod/DECISIONS.md`, Neap Tide v2.1 | dated, resolvable |
-| R81–R113 | `tier0/DECISIONS.md` | dated, resolvable. **Current maximum: R113** (2026-08-06). |
+| R81–R114 | `tier0/DECISIONS.md` | dated, resolvable. **Current maximum: R114** (2026-08-06). |
 
 Sub-clause citation shape is `R<n>/<clause>` (e.g. `R90/1c`, `R91/2b`) or
 `R<n>(<letter>)` (e.g. `R107(a)`). Clause letters belong to their own ruling:
@@ -266,10 +266,14 @@ not a "while we're in there" (`docs/dockets/README.md` house rule 3).
 
 | Flag | Family | Question | Recorded at |
 |---|---|---|---|
-| FLAG-1 | `S13-X1` | Does the accumulator note also ride the Kokomi pool-rework docket, and does the shared uncapped state take a structural disposition? | R111; `docs/dockets/klee-rework.md` |
-| FLAG-2 | `S13-X3` | Two adjacent closures undisposed: copied `sucrose_catalyst_conversion` outrunning its Exhaust bound; unscoped `cost_override` | R110 |
-| FLAG-3 | `S13-X5` | Does "seems fine" cover decay-proof fanfare-floor stacking, or only the cantrip leg? | R111 |
-| FLAG-4 | `S13-X14` | Legs (a) `curse_poor_sleep` retain-jam and (c) Powers → `result_pile: none` remain undisposed | R110 |
+| ~~FLAG-1~~ | `S13-X1` | ~~Does the accumulator note also ride the Kokomi pool-rework docket, and does the shared uncapped state take a structural disposition?~~ | **RULED 2026-08-06 by R114** — ratified change, accumulator scopes to the writing turn in both engines |
+| ~~FLAG-2~~ | `S13-X3` | ~~Two adjacent closures undisposed: copied `sucrose_catalyst_conversion` outrunning its Exhaust bound; unscoped `cost_override`~~ | **RULED 2026-08-06 by R114** — both fixes ratified; residue staged as `AB-s1` |
+| ~~FLAG-3~~ | `S13-X5` | ~~Does "seems fine" cover decay-proof fanfare-floor stacking, or only the cantrip leg?~~ | **RULED 2026-08-06 by R114** — INTENDED, both legs; re-registered as watch item `W4` |
+| ~~FLAG-4~~ | `S13-X14` | ~~Legs (a) `curse_poor_sleep` retain-jam and (c) Powers → `result_pile: none` remain undisposed~~ | **RULED 2026-08-06 by R114** — leg (c) intended, no guard; leg (a)'s root staged as `AB-s2` |
+
+> **ALL FOUR FLAGS DISCHARGED 2026-08-06 (R114).** The `FLAG-<n>` namespace is
+> closed unless a future sitting mints new ones. Struck rather than deleted:
+> the flags are part of how these four families were decided.
 
 ---
 

@@ -18,6 +18,7 @@ be changed on the strength of being watched.
 | W1 | X4 — Guest Cast unfiltered ×1.5 | the power, as a damage booster | **block-side** Guest Cast scaling | the block scaling getting absurd | block-side Guest Cast telemetry readings |
 | W2 | X6 — salon displacement double-pay | the strategy | the **power level** | power level out of band | salon power-level telemetry |
 | W3 | X12 — cross-element reaction splashes | the mechanism ("half the fun of co-op") | actual reaction potency in co-op | potency readings from real co-op play | Track H reactions corpus — **blocked, see W3 note** |
+| W4 | X5 — decay-proof fanfare floor stacking | the mechanism, **explicitly by design** (a strength-style scaling effect) | the **power level**, against two verified magnitudes | either magnitude being reproduced in a real run, or exceeded | the S13 replay lines themselves + Furina fanfare telemetry |
 
 ---
 
@@ -70,12 +71,61 @@ someone else's problem.
 Mechanism (X12): a cross-element splash makes every attack a guaranteed
 reaction, and `amp_reaction_up` is a raw uncapped percentage.
 
+## W4 — X5, the fanfare floor is decay-proof on purpose
+
+**Added 2026-08-06 (R114), on W2's pattern.** FLAG-3 asked whether the
+family's verdict covered the decay-proof floor stacking or only the cantrip
+leg. It covers both, and it arrived with its intent stated.
+
+**Verdict, verbatim:** *"We deliberately allowed for powers to raise the
+fanfare floor (without decaying) as a sort of strength-style scaling effect. I
+think this is fine."*
+
+**What is blessed is the mechanism, and unusually it is blessed with a design
+rationale attached** — the floor is meant to behave like Strength: a permanent
+raise rather than a temporary one, and its immunity to the 20%/turn decay is
+the *point* of it rather than a hole in it. That is why this entry blesses more
+confidently than W1 or W2 do, and it is also why the watched quantity has to be
+stated precisely.
+
+**The watched quantity is the power level, and it is anchored to two numbers
+this repo actually verified** rather than to a feeling:
+
+| line | magnitude |
+|---|---|
+| `furina_fanfare_2` | **240 damage from one card** |
+| `furina_fanfare_3` | **turn-2 boss kill** |
+
+Both are replay-verified in `review/redteam/exploit-ledger.md` and both are
+**run-stretch**, not run-plausible — they need multiple copies of
+`the_sea_is_my_stage+`. **The trigger is therefore: either magnitude showing up
+in a real run, or being exceeded.** A reading that says "players like stacking
+the floor" is not a trigger. A reading that says a run reached those numbers
+is.
+
+**No remedy is pre-authorised**, per W1's precedent: the trigger firing
+produces a sitting, not an edit. Recorded because the intent statement makes it
+easy to assume the opposite — "deliberately allowed" blesses the mechanism, and
+says nothing about the magnitude.
+
+Mechanism (`review/redteam/exploit-ledger.md` X5): `gain_fanfare_floor` raises
+floor, cap and current together with no ceiling on repetition, and decay
+returns 0 at or below the floor.
+
 ---
 
 ## Pins
 
-All three families keep their S13 pins in
+W1, W2 and W3 keep their S13 pins in
 `tier0/tests/test_s13_exploit_pins.py`, still `xfail(strict=True)`. A watch item
 is not a fix, so nothing flips. If one of these pins ever goes red without a
 ruling behind it, the mechanism changed by accident — which is exactly the
 event the pins exist to catch.
+
+**W4's pin is the exception, and it is inverted.** Because X5 was ruled
+*intended*, its pin converted from `xfail(strict=True)` to a
+documented-behaviour test that asserts the mechanism **reproduces**
+(`test_x5_fanfare_floor_stacking_is_documented_behaviour`, R114). For W4 the
+sentence above runs backwards: if that pin goes red without a ruling behind it,
+a blessed mechanism stopped working. Same alarm, opposite meaning, and the
+docstring says so at the site.
