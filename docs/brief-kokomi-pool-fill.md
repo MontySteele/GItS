@@ -526,3 +526,40 @@ session:
    every Kokomi number in the repo becomes a pre-fill number. The fill should
    land as one batch with a fresh roster-anchor reading beside it, not
    card-by-card.
+
+---
+
+# REWORK INPUT (NOT LINTED) — the support gap, from Track A (2026-08-04)
+
+**Filed by R92/3c.** Carried here rather than into a gate, and the distinction
+is load-bearing: **this is never linted.** The sim is one-seat (charter A0's
+D4 clause, written in at birth), so a `support` cell can only be graded by a
+play session and no coverage lint may ever fail a pool for it. It arrives as
+input to the fill above, not as a bar it has to clear.
+
+**The finding, in one line.** `support` reads **0% on all three GItS sheets**
+— Klee, Furina and Kokomi — against **2.3% in every one of the five canon
+pools** (`docs/role-tempo-baseline.md` §1).
+
+**It is a structural absence, not a mis-tagging.** The classifier finds
+support in canon three independent ways, all of them the game's own spellings:
+an ally `TargetType` (`AnyAlly` / `AllAllies`), a `MultiplayerOnly` card
+constraint, and a power that walks the owner's teammates (`GetTeammatesOf`).
+**No GItS row has any of the three.** There is nothing for a classifier to
+find, so no amount of re-tagging closes this — a card has to be authored.
+
+**Why it lands in THIS brief.** §5's assist lane is where those cards belong.
+The lane's declared job is helping the other two seats, the co-op playtest is
+the only instrument that can see it, and the fill above is the next batch that
+will author Kokomi cards at all. Canon concentrates its own support in the two
+newest characters, so a support-carrying Assist would be following canon
+practice rather than inventing a category.
+
+**How this interacts with open question 2 above** ("whether assist should be
+rescued at all"). It does not settle it and must not be read as settling it.
+If assist stays a splash lane, the support gap stays open and becomes a
+roster-level question for whoever authors slot 4. If assist is rescued to the
+floor, this is the shape the rescue should take, because a lane whose cards
+only ever help the seat that plays them is not an assist lane.
+
+**Not a gate. Not a floor. Not a number.** Track A carries this and stops.

@@ -5,7 +5,15 @@ Discharges the session opened by **D3** (2026-07-26). Supersedes the v0.1 draft
 of the same day; v0.2 folds in three review passes conducted in-session:
 (i) the GItS sheet audit (219 cards), (ii) the two-anchor canon audit
 (Silent 92 / Ironclad 91, wiki route), (iii) the remaining-roster canon audit
-(Defect 91 / Necrobinder 91 / Regent 91, wiki route). 402 canon cards total.
+(Defect 91 / Necrobinder 91 / Regent 91, wiki route).
+
+**Canon card count — CORRECTED 2026-08-04 (R92/3a).** This line read "402
+canon cards total", which was an arithmetic slip: it is neither the wiki sum
+(456) nor anything else. The DLL prints **439**, of which **410 are
+draftable** (5 × 82 common+uncommon+rare); the wiki route runs 3–4 high per
+pool, flat, exactly as the caveat below predicted. **No percentage in this
+charter moves**, because every percentage in it is within-pool. Full
+reconciliation table: `docs/role-tempo-baseline.md` §0.
 
 Sequencing per D3 §2: after EPOCH 1 (landed 2026-07-26) — clear. Before the
 Zhongli deep dive — R88 sits in DRAFT on this session, so this is the blocker.
@@ -119,6 +127,19 @@ lint detect it without a special case.
    cells are identity statements: sustain runs 1% (Silent) to 15%
    (Ironclad); disrupt 3% (Defect) to 14% (Ironclad). Klee at zero sustain
    is Silent-shaped, not deficient.
+   > **Amended by R91/2d, 2026-08-04.** The "15% (Ironclad)" counted
+   > BETWEEN-FIGHT healing, which a combat taxonomy rightly ignores. Under
+   > the ruled definition — sustain is in-combat healing and prevention of
+   > YOUR OWN HP; enemy-output reduction (Weak, Frail) is disrupt; absorbing
+   > a hit this turn is block — canon carries **0.0–2.3%** sustain.
+   > Consequence: `sustain` is NEVER LINTED, beside `utility` and `support`.
+   > The clause's conclusion outlives its number: zero sustain is a legal
+   > identity.
+   >
+   > **Amended by R90/1c, same day.** "Per-identity" now also means
+   > per-POPULATION: an archetype is measured against the canon PACKAGE
+   > shaped like it, not against a whole 88-card canon pool. See
+   > `docs/role-tempo-baseline.md` §5.
 
 **A1 — Baseline extraction.** The (solve × tempo_band × rarity) matrix for
 all five canon pools, percentages, per-identity. Wiki route now; DLL
@@ -200,5 +221,15 @@ signature; §1's grade quotes your own report, the principles you've assented
 to in session, the canon evidence is attached).
 Deferred until artifacts exist: **A-G1** (tag review, esp. tag-through
 targets) · **B-G1** (per-axis disposition).
+
+> **A-G1 DISCHARGED 2026-08-04.** Countersigned at
+> `docs/axis-validity-countersign-2026-08-04.md`; recorded as R90 (the null's
+> direction), R91 (the tag review), R92 (housekeeping). The seven entity
+> payoffs confirmed as proposed, the salon double-credit kept with a
+> bounded-meter amendment, meter-reading damage ruled, the sustain boundary
+> clarified. Tags are LANDED on all three sheets and `tempo_band` is on the
+> schema. **B-G1 remains deferred**, and §3's P1 now lives there: per R90/1b
+> it was *aimed at the wrong instrument; withdrawn and re-registered, not
+> failed.*
 Discharged in session: vocabulary review (validated against 402 canon
 cards); the Zhongli fork (held, per §6.4, silence = stands).
