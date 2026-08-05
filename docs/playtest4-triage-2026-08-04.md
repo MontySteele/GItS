@@ -99,7 +99,7 @@ Unmoved, restated so the next agenda doesn't re-derive them:
 - **D5 salon capture and B5 deliberate motion judgment** — "not noticed" at
   the table lowers urgency but satisfies neither. Both stay open as look
   items.
-- **Furina G1/G2** contact-sheet eyes-on and the desk queue generally —
+- **Furina G1/G2** (`CC-G1`/`CC-G2`) contact-sheet eyes-on and the desk queue generally —
   untouched, as expected.
 
 ## 5. Recommended shape for next week (updates the register's)

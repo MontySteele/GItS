@@ -118,6 +118,13 @@ Track G report.
 
 ## 2. G1 — the v14 roster anchor table
 
+> **IDENTIFIER NOTE, 2026-08-06 (housekeeping sweep, Track X).** `G1`/`G2` in
+> this document are **section labels of Last Call's Track G**: canonical
+> qualified forms **`RA-G1`** and **`RA-G2`**. They are not gates and not S4's
+> `S4-G1`/`S4-G2`. Resolver: `docs/registry/identifiers.md` §2.1; the
+> designate-or-hold ask on this table is `docs/registry/user-queue.md` §5 row
+> 10.2.
+
 All rows: **DRAFTER_VERSION 14**, `RT7/D14/P3/C4`, `cell=roster-anchors`,
 `seed=11`, `n=1500`, `route=hunter`, realistic loadout.
 

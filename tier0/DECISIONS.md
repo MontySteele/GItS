@@ -2849,6 +2849,13 @@ the four REHUNT picks plus the `standing_room_only` overturn) and gate G2
 are [USER] and both are eyes-on by nature. Six power icons are declared art
 debt in `$pckDeferred`.
 
+> **IDENTIFIER NOTE, 2026-08-06 (housekeeping sweep, Track X).** These two
+> gates are the **Curtain Call** mint: canonical qualified forms **`CC-G1`** and
+> **`CC-G2`**. They are not S4's `S4-G1`/`S4-G2` (R88 and R89 countersigns) and
+> not Serenitea Sweep's `SS-G1`/`SS-G2`. S4 tracks the pair jointly as
+> `S4-G12`; the eyes-on materials are `docs/g12-review-2026-08-05.md`.
+> Resolver: `docs/registry/identifiers.md` §2.1.
+
 ## R87 -- The sweep backlog ruled: three deferrals, a rework, a DRAFTER world, and a design pass (2026-07-29)
 
 Ruled by [USER] in session against `docs/backlog-2026-07-29.md` §3 (the

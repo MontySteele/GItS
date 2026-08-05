@@ -95,6 +95,9 @@ the stream's paperwork, not the train's.
 
 ## 4. Open [USER] items
 
+> **QUEUE POINTER, added 2026-08-06 by the housekeeping sweep (Track X).** The single source of truth for what is open and for whom is now **`docs/registry/user-queue.md`**. This section keeps its full text and stays the place the detail lives; the queue file is the index that says which items are still open, which were discharged and by which ruling. Where the two disagree about a *status*, the queue file is the later reconciliation. Identifier collisions (`G1`, `D5`, `C1`, `P1`, `S4`, `X<n>`) resolve at `docs/registry/identifiers.md`.
+
+
 Nothing in this section is scheduled. Each is a decision waiting on the table.
 
 1. **S2 gallery sitting.** 47 events / 130 kept variants, awaiting a sitting.
