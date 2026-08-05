@@ -81,6 +81,12 @@ jobs:
         run: python tools/lint_role_tempo_coverage.py --gate
       - name: roster registry
         run: python tools/lint_roster_registry.py
+      # S4 finding F14 and its four siblings, 2026-08-06. One file's R-number
+      # citations, checked against the clauses DECISIONS.md actually declares.
+      # Scoped to `tools/canon_role_tempo.py` alone and meant to stay that way
+      # -- see the module docstring.
+      - name: R-number citations (canon_role_tempo)
+        run: python tools/lint_r_citations.py
       # Understudy 2026-08-04. vendor/ carries third-party source pinned to an
       # exact upstream commit; this asserts the tree still is what the
       # provenance note says it is, in both directions. Cheap, and the one
