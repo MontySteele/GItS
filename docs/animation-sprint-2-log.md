@@ -707,3 +707,69 @@ is diagnosable as a design outcome rather than investigated as a defect.
 `SpawnSpotlightShine` once when the upgraded relic is obtained — a single
 "everything is lit" beat replacing the recurring one. That is a visual-stream
 call and is deliberately not taken here.
+
+---
+
+# ROUTED IN — the Punch Off crash, status SUSPECTED-OURS (2026-08-04, R99/2)
+
+**This stream now owns it.** Routed by the signed Track B / validation-gate
+package (`docs/track-b-validation-gate-countersign-2026-08-04.md`, item 2),
+recorded as **R99/2**. It arrives from the Understudy soak apparatus, which is
+where it was observed twice; nothing in `Vfx` has been touched by that stream,
+and nothing was touched by the pass that filed this note.
+
+## What was observed
+
+A run died inside a **Punch Off** event. `godot.log`
+(`%APPDATA%/SlayTheSpire2/logs/`) ends mid-backtrace:
+
+```
+PunchOff.PunchEachOther
+  -> CreatureCmd.TriggerAnim
+    -> NCreature.SetAnimationTrigger        <- this method is Harmony-patched by us
+      -> CreatureAnimator.SetNextState
+Godot error: Signal '_internal_spine_objects_invalidated'
+             is already connected to given callable
+```
+
+The event builds an `NCombatRoom` in `VisualOnly` mode against Furina's
+convention `combat.tscn`. **Two observations, not one**: P1 validation attempt
+#1 died in Punch Off, and so did the run that produced the trace above.
+
+## Status, and why it is SUSPECTED-OURS rather than filed as game-side
+
+[USER]'s ruling, as signed: *"'Signal already connected' with the
+animation-router patch on the stack reads as our patch double-connecting on
+event-screen re-entry."* Recorded as the apparatus's **first suspected mod-side
+catch**, and the P1 validation headline ("zero defects attributable to the GItS
+build") now carries a dated asterisk because of it. **If it proves game-side,
+the routing note flips and nothing is lost** — that is written into the ruling.
+
+## Regression case
+
+Seed **`8B97LMCL2F`** reproduces the floor. It is the fixture this item is
+closed against, not an anecdote: *this stream is not done while `8B97LMCL2F`
+crashes in Punch Off.*
+
+## One measured fact for whoever picks it up, offered as a starting point
+
+`Vfx/CreatureAnimationRouter.cs` **connects no signals at all**. Both patches
+are `[HarmonyPostfix]`; `Route` does a `GetNodeOrNull<AnimationTree>` and a
+`playback.Travel(state)`, and the file contains no `Connect`, no `+=` on a
+Godot signal, and no subscription of any kind. The throwing frame in the trace
+is `CreatureAnimator.SetNextState`, which is the *original* method's spine
+path — our postfix routes to the AnimationTree instead and never enters it.
+
+That is **not** a counter-ruling and it does not flip the status. It is the
+cheapest first check: if re-entry is the mechanism, the double connection is
+being made by something that *does* connect, and the candidates are the
+convention scene's own node set and `NCombatRoom`'s `VisualOnly`
+construction/teardown of it — a scene that gets built twice and freed once
+looks exactly like this from the log. What our patch plausibly contributes is
+**reaching a spine-less convention creature through a path the game only
+exercises when a spine animator exists**, which is a scope question about
+`VisualOnly` rooms rather than about the trigger map.
+
+Deliberately not done here: no fix, no diagnosis beyond the above, no `Vfx`
+edit. A visual subsystem diagnosed from one crash inside a measurement pass is
+how a session acquires a second, unrelated bug.

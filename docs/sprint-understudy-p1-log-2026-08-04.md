@@ -216,8 +216,19 @@ policy-driven play rather than from AutoSlay.
 Every defect this pass found was in **the harness**, not in the GItS build.
 That is worth saying plainly: **three soaks' worth of policy-driven play
 through a live GItS build produced no crash, no NRE and no unhandled overlay
-attributable to the mod.** The instrument is what was broken, repeatedly, and
+attributable to the mod.\*** The instrument is what was broken, repeatedly, and
 each break is now a red test.
+
+> **\* Asterisk added 2026-08-04 (R99/2).** The headline held for the three
+> soaks it describes and does not hold as a general claim. A later soak died
+> inside a **Punch Off** event with `Signal
+> '_internal_spine_objects_invalidated' is already connected` and our
+> animation-router patch on the stack; [USER] ruled it **SUSPECTED-OURS** and
+> routed it to the animation stream, seed `8B97LMCL2F` as the regression case
+> (`docs/animation-sprint-2-log.md` § "ROUTED IN — the Punch Off crash";
+> `docs/backlog-2026-07-29.md` §1). It is the apparatus's **first suspected
+> mod-side catch** — which is the soak working, not the soak failing. The
+> asterisk stays until the item is closed either way.
 
 | # | shape | what it actually was | fixed |
 |---|---|---|---|
@@ -344,6 +355,12 @@ for itself twice.
    Note that the FINAL soak of that session was a second clean N=3 at HEAD, so
    R98's validation holds for the code as landed and not only for the commit
    that earned it.
+   **ROUTING ACCEPTED 2026-08-04 (R99/3): the next traversal pass owns both.**
+   Filed in the consolidated backlog register (`docs/backlog-2026-07-29.md` §1,
+   "Understudy harness — traversal layer") with what reproduction exists — 13
+   has a shape, 14 has one observation and none. They stay open and stay
+   unfixed by design; this line is the accepted routing, not a promise to close
+   them here.
 3. **Runs die in Act 1.** Deepest reach across every soak was the Act 1 boss,
    beaten once. This is a **bot-limited floor and says nothing about
    difficulty** — but it does mean the current policy will not produce Act 2

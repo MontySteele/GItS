@@ -3420,3 +3420,130 @@ a second, unrelated bug.
 **Class: MECHANICAL** -- acceptance recorded against a written, pre-agreed
 condition. Debt #2 struck from `docs/sprint-understudy-p1-log-2026-08-04.md`;
 debts #1 and #3 stand.
+
+## R99 -- The validation gate's first four items: the build ships, Punch Off is SUSPECTED-OURS, 13/14 go to the next traversal pass, and deck-intent gets both instruments (2026-08-04)
+
+Signed package, verbatim:
+`docs/track-b-validation-gate-countersign-2026-08-04.md` (seven items,
+countersigned 2026-08-04 late). Execution record:
+`docs/sprint-track-b-gate-log-2026-08-05.md`. This entry carries items 1-4;
+R100 carries 5-7. No balance value, no card, no floor and no tag moved under
+either entry -- the gate package's own scope note says so, and the pass held
+it.
+
+**1. Build 0.2-289 KEEP, and the zip is a courtesy contract as much as an
+artifact.** The build is content-identical to 0.2-247 plus a read-only
+telemetry hook, so the co-op zip goes out for the next table session. The
+condition attached to it is not a formality: **[USER] tells the table the build
+writes local telemetry to their own machines BEFORE the session.** A
+measurement nobody was told about is the same file either way; the difference
+is whether the people generating it agreed. The zip this pass packages is the
+FINAL build of the pass rather than 0.2-289, because items 5 and 6a land in
+between -- handing the table the older one would hand them a build whose
+records cannot say who won.
+
+**2. The Punch Off crash is SUSPECTED-OURS, and the validation headline takes
+an asterisk.** `Signal '_internal_spine_objects_invalidated' is already
+connected` with `NCreature.SetAnimationTrigger` -- the GItS animation-router
+patch -- on the stack reads as our patch double-connecting on event-screen
+re-entry, and **validation attempt #1 crashed inside Punch Off as well**: two
+observations of the same event, not one. Seed `8B97LMCL2F` is the regression
+case. Routed to the animation stream's queue in the consolidated backlog
+register; nothing in `Vfx` was touched here.
+
+The cost of this ruling is paid where the claim lives:
+`docs/sprint-understudy-p1-log-2026-08-04.md`'s "zero defects attributable to
+the GItS build" now carries a dated asterisk. **This is the apparatus's first
+suspected mod-side catch** -- which is the soak doing the job it was built for,
+and a headline that had quietly become a boast is now a headline with a
+footnote. If it proves game-side, the routing note flips and nothing is lost.
+
+**3. Harness defects 13 and 14 -- routing ACCEPTED, and they stay unfixed on
+purpose.** Both are traversal-class (debt #1's family): 13, the bridge
+answering with no `state_type` mid-transition; 14, the wire timing out while
+the process stayed alive. Filed with what reproduction exists, owned by the
+next traversal pass. A harness every pass re-opens is a harness nobody can
+quote a clean run from, and R98's clean N=3 is exactly what would be spent
+re-earning it.
+
+**4. Deck intent gets BOTH instruments, in cost order, because they answer
+different halves of the same null.** R90/1b's Fanfare early-half prediction was
+NOT GRADED by Track B for an instrument reason, not a volume one: B2 measures
+cards, and every bot deck is a mixed deck (224 of 299 turn-1 plays `generic`).
+
+  * **(a) Declared intent, human feed.** A session may declare an archetype in
+    one line; the hook stamps it on every record and `tools/track_b_curves.py`
+    cuts B2 by it. The mechanism is a one-word file, `intent.txt`, beside the
+    telemetry logs -- zero friction was a requirement of the hook and stays one
+    of the declaration.
+  * **(b) The archetype-committed draft arm, bot feed.** A FLAGGED, seeded
+    policy variant that drafts with declared-archetype priority. **The flag is
+    the only delta from baseline**, and a pinning test proves it by replaying
+    recorded states through both settings. Baseline soak behaviour is
+    untouched, so R98's numbers stay comparable.
+
+The committed arm is a **policy variant behind a flag, not a policy change**.
+It serves two open questions with one instrument: the Fanfare early-half claim
+becomes gradeable against a deck that actually is one, and Salon fill time gets
+re-measured with the bot-doesn't-build-salons confound removed. Until it
+reports, the 0-of-56 fill result stands recorded as **AMBIGUOUS** -- design
+finding versus policy gap, undecided -- and **R91/2b's revisit stays open**.
+What the committed arm reports is a number for [USER] to rule on; this pass
+reports it and revisits no tag.
+
+**Class: MECHANICAL** for items 1 and 3 (a signed disposition recorded as
+signed). **Class: SUBSTANTIVE** for item 2 (a defect changes owner and a
+published headline changes) and item 4 (a new measurement instrument enters the
+apparatus).
+
+## R100 -- Win visibility lands on a first-party hook rather than a Harmony patch, the meters were already there, and R98 stays MECHANICAL (2026-08-04)
+
+Items 5-7 of the signed package
+(`docs/track-b-validation-gate-countersign-2026-08-04.md`). Execution record:
+`docs/sprint-track-b-gate-log-2026-08-05.md`.
+
+**5. Win visibility -- ACCEPTED, and the seam is NOT the one the package
+named.** The package authorised "Harmony-patch EndCombatInternal (or the
+correct combat-end seam -- verify the actual method via local decompile, never
+guess)". Verified, and the guess would have been wrong in the cheap direction:
+**the game has first-party combat-end hooks, and our model already receives
+them.** `CombatManager.EndCombatInternal` calls
+`Hook.AfterCombatEnd(runState, combatState, room)` and then
+`Hook.AfterCombatVictory(...)`, both of which walk
+`runState.IterateHookListeners(combatState)` -- the same iteration that already
+delivers `BeforeCombatStart` to `PlayTelemetryHooks`. So win visibility ships
+as two `AbstractModel` overrides, with **no Harmony patch, no async
+continuation of our own, and no new patch surface in a lockstep co-op game**.
+
+The corollary is a correction to the record: the human feed's declared blind
+spot ("the game exposes no first-party combat-END hook" --
+`docs/sprint-track-b-curves-log-2026-08-04.md` and `understudy/README.md`) was
+**wrong about the game, not about the consequence**. The consequence was real
+-- won fights read `interrupted` -- and it is now closed.
+
+One asymmetry stays, documented rather than papered over: the LOSS path never
+runs `EndCombatInternal` (`CheckWinCondition` processes a pending loss and
+returns first), so there is no combat-end hook on a death. `died` was already
+exact from the player's own death, and it remains the observation that labels
+it.
+
+**6a. Furina's meters on the human feed -- ALREADY SHIPPED; this pass verified
+rather than built.** `PlayTelemetry.OpenTurn` has recorded
+`[round, fanfare, salon_members, salon_cap, encore]` since the Track B landing,
+and `FurinaResources.Encore` reads the CustomResource directly -- which is the
+whole reason the human feed can see a meter the bridge serialises as `-1`. The
+item is recorded as met by run-verification. Building it twice would have been
+the more expensive way of agreeing with the package.
+
+**6b. The bridge fork is NOT authorised and was not built.** It stays P1.5
+work, gated exactly where the package puts it: required before any Furina-meter
+claim is graded from the BOT feed, not before.
+
+**7. R98 stays MECHANICAL.** The pre-agreed condition was met and the debt was
+struck as agreed; a ruling that grades itself upward for having been kept is
+the failure mode the two-tier ledger exists to prevent. No action beyond this
+line and the reversibility ledger note.
+
+**Class: SUBSTANTIVE** for item 5 (the mod takes a new hook on the combat
+lifecycle, and a published limitation is retracted). **Class: MECHANICAL** for
+6a, 6b and 7.

@@ -254,6 +254,13 @@ Item 2's job was the curves, and a harness the pass keeps re-opening is a
 harness nobody can quote a clean run from. Both are in the debt list and the
 gate package.
 
+**Routing ACCEPTED 2026-08-04 (R99/3).** The gate package took the disposition
+as offered: traversal-class per debt #1, filed with reproduction, deliberately
+unfixed, **owned by the next traversal pass**. Registered in
+`docs/backlog-2026-07-29.md` §1 under "Understudy harness — traversal layer",
+which is where this repo's queues actually live. Nothing about them changed in
+the pass that recorded the acceptance.
+
 **The final soak re-validated the harness at HEAD**, not only at the commit
 R98 was earned on: 3 runs, 10 fights, zero defects, ledger fully REVERTED. That
 matters because the telemetry additions and the bundle fix landed after R98's
