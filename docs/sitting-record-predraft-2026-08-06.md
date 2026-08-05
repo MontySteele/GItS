@@ -47,3 +47,47 @@ The Zhongli deep dive is unblocked. Track J's dossier (canon kit inventory, StS2
 ## 6. Still open on [USER]'s side (carried, not grown)
 
 R102 escrow countersign (pre-draft ready — one strike operation); S2 event-gallery checkboxes; S14 canonicity rulings (NC-1, shop slot 1, Frozen, `spend_potion`); G6 Kokomi stability-band declaration; the four merge-train paperwork one-liners; N/O TOP-5 review; Ancients/boss-pool gallery whenever inspiration strikes.
+
+---
+
+## 7. SECOND SITTING REPLIES — 2026-08-06, recorded verbatim (Track Y)
+
+**Recorded before execution, per standing discipline.** This section is the
+authority for every commit on `findings/track-y` of the "Empty the Green Room"
+batch. It is a transcription, not a synthesis: the text below is [USER]'s
+sixth-wave brief, Track Y, reproduced as received. Nothing in this section is
+chat commentary, and nothing in it was reworded to fit the repo's vocabulary.
+
+**Scope note, stated so it is not inferred.** Track Y lands *these* answers and
+nothing adjacent. The R102 escrow, the four HELD flags (FLAG-1…FLAG-4), S14
+canonicity, `S4-G15`, and the two staged G5/G6 dispositions are explicitly
+untouched by this batch and remain open on [USER]'s side.
+
+> **Track Y — Land the answers (mechanical; every item cites its reply)**
+>
+> * Y-1 (Q1 / F6 / NT-G5): YES — the 08-01/02 session is playtest three; the current Kokomi build was played. Land the yes-form slot. Consequence recorded, not resolved: the fork's evaluation is now DUE and joins the queue as its own item — "did Neap Tide read weak at the table?" → weak = lever 2 isolated cell; fine = lever 3 + the calibration offset finally written as a number. AWAITING-[USER]; no lever is pulled by this batch.
+> * Y-2 (Q2): YES — companion-pricing docket owns X2 rarity work. Assignment line lands; "unrouted" marker cleared.
+> * Y-3 (Q3): MERGE — `staged/f14-siblings` (`eaa83e5`) merges: four repairs + the citation lint. Suite green on the merge commit.
+> * Y-4 (Q4): YES — `copy_cost_override: 0` deletes from Encore Performance's upgrade in `docs/furina-upgrades.yaml`; the pre-positioned exemption becomes load-bearing. Expect no pin flip (the X3 pin runs the self-copy leg); say so in the commit.
+> * Y-5 (S4-G1 addendum): new ruling recorded — Itto enters as a COMPANION CARD, not a character (R108 gains the clause, verbatim from [USER]). Fontaine-Rares/roster docs cross-noted; no card is drafted tonight.
+> * Y-6 (S4-G2): R89 countersigned — SIGNED as an audit-trail reconstruction of the shipped 07-24 sprint, per [USER]'s characterization. DRAFT banner drops.
+> * Y-7 (S4-G3/G4): v1.12/v1.13 amendments RATIFIED; unratified banners drop; law text now matches shipped code.
+> * Y-8 (CI hardening, first-instance): `gen_roster_cards.py --check` becomes CI job 4. Pure mechanical gate; the class "sheet changed, generated C# didn't" now fails loudly.
+> * Y-9 (staging slots, AWAITING-[USER]): pre-draft both G5/G6 dispositions from chat's recommendation — (a) B-G1 narrowed to the Fanfare axis, six axes closed as reportable-only-permanently, with the R107/F1 fence re-pointed to the narrowed form; (b) S4-G6 + G14 re-anchored to the post-rework Kokomi build, declare-before-playtest law intact. Staged, never landed without the reply.
+
+### How the four one-word asks map onto the queue
+
+| Reply | Queue row | Landing site |
+|---|---|---|
+| Y-1 | §1 `Q1` | `klee-mod/DECISIONS.md`, the `NT-G5` fork block (slot 1, YES-form) |
+| Y-2 | §1 `Q2` | `docs/dockets/companion-pricing.md` §2 (slot 2, YES-form) |
+| Y-3 | §1 `Q3` | branch `staged/f14-siblings` merges (slot 3) |
+| Y-4 | §1 `Q4` | `docs/furina-upgrades.yaml`, `encore_performance` |
+| Y-5 | §2 `S4-G1` rider | `tier0/DECISIONS.md` R108 addendum |
+| Y-6 | §2 `S4-G2` | `tier0/DECISIONS.md` R89 banner |
+| Y-7 | §2 `S4-G3` / `S4-G4` | `docs/teyvat-spire-design-principles.md` amendment drafts |
+
+**What Y-1 does NOT do, restated because the reply invites the mistake.** The
+trigger firing is not the evaluation. No lever moves on this batch, and the
+fine-branch's sim-calibration offset for exhaust-loop kits stays unwritten —
+it is owed by the evaluation, which becomes its own AWAITING-[USER] queue row.

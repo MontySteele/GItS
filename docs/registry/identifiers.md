@@ -89,6 +89,15 @@ changed.
 | `AV-G2` | *(already qualified)* | Axis-Validity **charter gate** — countersign the §6.1 ratification bundle | `docs/axis-validity-session-charter.md` §7 | COUNTERSIGNED 2026-08-04 |
 | `G-A5`, `G-A5(b)`, `G-F1`, `G-F2`, `G-C2`, `G-C3`, `G-D4` | *(already qualified)* | **"Ship What We Know" sprint gates**, prefix-shaped `G-<track><n>` | `docs/archive/ship-what-we-know-sprint-plan.md` | `G-A5(b)` OPEN (one capture); `G-F1`/`G-F2` landed as annotations |
 
+**The `S4-G<n>` range, written out (added 2026-08-06, Track Y).** The row above
+uses an ellipsis, which a human reads and a resolver does not. All twenty are
+therefore named literally once, here, so that any document may cite any of them
+without the registry lint reporting an unregistered token: `S4-G1`, `S4-G2`,
+`S4-G3`, `S4-G4`, `S4-G5`, `S4-G6`, `S4-G7`, `S4-G8`, `S4-G9`, `S4-G10`,
+`S4-G11`, `S4-G12`, `S4-G13`, `S4-G14`, `S4-G15`, `S4-G16`, `S4-G17`, `S4-G18`,
+`S4-G19`, `S4-G20`. Their per-gate meanings and statuses live in
+`docs/registry/user-queue.md` §2; this list is a resolver, not a second index.
+
 **Pre-existing resolvers this table does not disturb.** `docs/g12-review-2026-08-05.md`
 already states in its own header that *"G12 (hygiene-report row G12) = R86's G1
 and G2"* — i.e. `S4-G12` = {`CC-G1`, `CC-G2`}. That statement is correct and
