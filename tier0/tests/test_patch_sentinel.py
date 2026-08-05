@@ -145,6 +145,54 @@ def test_char_facts_baseline_sums_both_starting_relic_spellings(tmp_path):
         "hp": 70, "starting_deck_size": 3, "starting_relic_count": 1}
 
 
+def test_char_facts_baseline_counts_unmodelled_starting_relics(tmp_path):
+    """R105. The three fact sheets added 2026-08-05 (Defect, Necrobinder,
+    Regent) all start with a relic tier0 has no vocabulary for -- an orb, a
+    summoned pet, a Stars grant. Without this spelling their sheets would say
+    zero relics and the sentinel would manufacture a finding on every run.
+    """
+    path = tmp_path / "y_char_facts.yaml"
+    path.write_text(
+        "id: real_y\nhp: 75\nstarting_deck: [a, b]\n"
+        "relic_hooks: []\n"
+        "unmodelled_starting_relics: [Gizmo]\n", encoding="utf-8")
+    assert ps.baseline_character_facts(path) == {
+        "hp": 75, "starting_deck_size": 2, "starting_relic_count": 1}
+
+
+def test_char_facts_baseline_sums_all_three_starting_relic_spellings(tmp_path):
+    path = tmp_path / "z_char_facts.yaml"
+    path.write_text(
+        "id: real_z\nhp: 80\nstarting_deck: [a]\n"
+        "relic_hooks: [heal_after_won_fight]\n"
+        "starting_relic_effects:\n- {hook: combat_start_draw, amount: 2}\n"
+        "unmodelled_starting_relics: [Gizmo]\n", encoding="utf-8")
+    assert ps.baseline_character_facts(path)["starting_relic_count"] == 3
+
+
+def test_the_five_canon_characters_are_all_watchable(tmp_path, monkeypatch):
+    """The R105 item in one assertion: every name in CHARACTERS resolves to a
+    char_facts path, and a character with a baseline is compared rather than
+    noted as "not watched". Driven off synthetic sheets so this holds on a
+    fresh clone with no game_ref/ at all.
+    """
+    monkeypatch.setattr(ps, "GAME_REF", tmp_path)
+    assert ps.CHARACTERS == ("Ironclad", "Silent", "Defect", "Necrobinder",
+                             "Regent")
+    for character in ps.CHARACTERS:
+        (tmp_path / f"{character.lower()}_char_facts.yaml").write_text(
+            "id: x\nhp: 70\nstarting_deck: [a]\n"
+            "unmodelled_starting_relics: [Gizmo]\n", encoding="utf-8")
+        assert ps.baseline_character_facts(
+            tmp_path / f"{character.lower()}_char_facts.yaml") is not None
+
+    # No sheet -> "not watched", for every character and never silently clean.
+    monkeypatch.setattr(ps, "GAME_REF", tmp_path / "empty")
+    _, notes = ps.check_characters(tmp_path)
+    assert len(notes) == len(ps.CHARACTERS)
+    assert all("not watched" in n for n in notes)
+
+
 def test_no_game_installed_is_a_skip_and_never_a_failure(monkeypatch):
     """The CI / fresh-clone contract. A sentinel that fails where the game is
     absent gets deleted the first week, so absence exits 0 even under

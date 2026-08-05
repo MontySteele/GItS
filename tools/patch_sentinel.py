@@ -314,6 +314,18 @@ def baseline_character_facts(path: Path) -> dict | None:
     inventing a mapping. Counts and HP survive the translation intact, so
     counts and HP are what this watches. `starting_gold` has no baseline field
     at all and is carried on the relic-style snapshot instead.
+
+    THREE spellings of "a starting relic", not two (2026-08-05, R105). The
+    first two are relics tier0 models: a bare hook name, and a hook that
+    needed a number. The third, `unmodelled_starting_relics`, is a relic tier0
+    CANNOT express -- Cracked Core channels an orb, Bound Phylactery summons a
+    pet, Divine Right grants Stars, and this engine has orbs, relic-summons
+    and Stars nowhere. The alternative to naming them was to leave the three
+    new fact sheets at zero relics and let the sentinel report a fabricated
+    finding on every run, or to invent a hook nothing implements. Counting a
+    named-but-unmodelled relic keeps the COUNT honest -- which is the only
+    thing this surface claims -- while the sheet says out loud that the effect
+    is not simulated.
     """
     try:
         import yaml
@@ -324,13 +336,15 @@ def baseline_character_facts(path: Path) -> dict | None:
         return None
     hooks = data.get("relic_hooks") or []
     effects = data.get("starting_relic_effects") or []
+    unmodelled = data.get("unmodelled_starting_relics") or []
     return {
         "hp": data.get("hp"),
         "starting_deck_size": len(data.get("starting_deck") or []),
-        # Both spellings are the same fact -- a starting relic that the loader
-        # could express as a bare hook, and one that needed a number. Summing
-        # them is what makes this comparable with a DLL count of relic types.
-        "starting_relic_count": len(hooks) + len(effects),
+        # All three spellings are the same fact -- a starting relic that the
+        # loader could express as a bare hook, one that needed a number, and
+        # one tier0 cannot express at all. Summing them is what makes this
+        # comparable with a DLL count of relic types.
+        "starting_relic_count": len(hooks) + len(effects) + len(unmodelled),
     }
 
 
