@@ -1364,3 +1364,16 @@ script unchanged on the same seed), four candidate layers, nine declared
 confounders, a cost class with a stated ceiling and a stop-and-re-register
 tripwire, and an explicit licensing section on both outcomes. **Nothing has
 been run.** **Ask (yes/no):** countersign the draft.
+
+**10.14 (Tracks N + O) — two severity-ordered ledgers, read top-5-first.**
+`docs/lore-fidelity-audit-2026-08-05.md` (301 claims: 217 VERIFIED / 21
+CONTRADICTED / 50 UNVERIFIABLE; top-5 at head) and
+`docs/instrument-redteam-2026-08-05.md` (73 SILENT-LIE / 26 DECLARED-LIMIT /
+60 UNTESTED-PATH across 12 slices; top-5 at head; 87 guard pins landed, no
+finding pinned). One standing caveat the red-team makes load-bearing NOW:
+`docs/reactions-corpus-2026-08-05.md`'s gauntlet-surface per-fight rates are
+overstated by a stage-merge accounting defect (its §3.1, red-team finding 1)
+and the amp figure is sampled before its multipliers (finding 4, reaches the
+A6 axis) — the corpus doc is deliberately NOT edited or bannered pending your
+ruling (the R101 banner precedent requires a countersign). Treat corpus
+numbers as PROVISIONAL until ruled.

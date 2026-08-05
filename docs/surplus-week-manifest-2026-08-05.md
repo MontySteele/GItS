@@ -127,3 +127,13 @@ The artifacts merge; the derived work waits.
 - **Optional sitting material (no review obligation):** `review/ancients-gallery/gallery.md`
   and `review/boss-pool-gallery/gallery.md` — curated best-first, checkbox-per-entity.
 - The batch's own asks live in `docs/sitting-prep-2026-08-05.md` §10.
+- **House Lights ledgers:** `docs/lore-fidelity-audit-2026-08-05.md` (Track N),
+  `docs/instrument-redteam-2026-08-05.md` (Track O, +87 pins),
+  `docs/mutation-round-2026-08-05.md` (Track K, +32 pins),
+  `docs/probe-a-block-offset.md` / `docs/probe-b-fanfare-residual.md` (Track B),
+  `docs/probe-d-registration-draft.md` (Track P, DRAFT),
+  `docs/roster-anchor-v14-2026-08-05.md` (Track G, PROPOSED),
+  `docs/reactions-corpus-2026-08-05.md` (Track H — see sitting pack §10.14 caveat),
+  `docs/zhongli-dossier-2026-08-05.md` + `docs/slot5-candidates-2026-08-05.md` (Track J),
+  `docs/animation-downfall-investigation-2026-08-05.md` (Track M),
+  `docs/sitting-prep-2026-08-05.md` (Track L — the sitting's single entry point).
