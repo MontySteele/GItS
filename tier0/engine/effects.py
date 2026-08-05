@@ -875,8 +875,17 @@ def _op_apply_aura(state: CombatState, fx: dict, card: Card) -> None:
     times = (C.SALON_REPLACE_NUMERIC_MULT
              if state.salon_replacements_this_card else 1)
     for _ in range(times):
-        for enemy in _pick_targets(state, fx.get("target", "enemy")):
-            reactions.resolve_hit(state, enemy, fx["element"], 0)
+        targets = _pick_targets(state, fx.get("target", "enemy"))
+        # Track H, LOG-ONLY: one row per resolution of an aura-applying VERB.
+        # Distinct from `aura_applied`, which is the verb's EFFECT and is
+        # silent when the op resolves into nothing (dead target, off-list
+        # element). "How often does the op fire" and "how often does an aura
+        # land" are two questions and the audit's claim is about the first.
+        state.emit("aura_op", op="apply_aura", card=card.id,
+                   element=fx["element"], targets=len(targets))
+        for enemy in targets:
+            reactions.resolve_hit(state, enemy, fx["element"], 0,
+                                  "apply_aura_op")
 
 
 def _op_place_bomb(state: CombatState, fx: dict, card: Card) -> None:
@@ -942,14 +951,20 @@ def _op_swirl(state: CombatState, fx: dict, card: Card) -> None:
         aura_targets = [e for e in state.living_enemies if e.aura]
         if aura_targets:
             targets = [min(aura_targets, key=lambda e: e.hp)]
+    state.emit("aura_op", op="swirl", card=card.id, element="anemo",
+               targets=len(targets))
     for enemy in targets:
-        reactions.resolve_hit(state, enemy, "anemo", 0)
+        reactions.resolve_hit(state, enemy, "anemo", 0, "swirl_op")
 
 
 def _op_refresh_all_auras(state: CombatState, fx: dict, card: Card) -> None:
+    refreshed = 0
     for e in state.living_enemies:
         if e.aura:
             e.aura_turns_left = reactions.aura_duration(state)
+            refreshed += 1
+    state.emit("aura_op", op="refresh_all_auras", card=card.id,
+               element="", targets=refreshed)
 
 
 def _op_buff_next_attack(state: CombatState, fx: dict, card: Card) -> None:

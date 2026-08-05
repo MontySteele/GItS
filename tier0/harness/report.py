@@ -72,6 +72,39 @@ def print_reaction_share(encounter: str, r: dict) -> None:
           f"fights with any {r['fights_with_any_reaction_damage']}/{r['fights']}")
 
 
+def print_aura_payoff(encounter: str, aura: dict, payoff: dict) -> None:
+    """H1+H2's aggregates, printed. Same fence as print_reaction_share: this
+    surface makes the counts readable and reads nothing into them."""
+    if not aura:
+        return
+    ops = ", ".join(f"{k} {v}" for k, v in sorted(aura["aura_ops"].items())) \
+        or "none"
+    src = ", ".join(f"{k} {v}" for k, v
+                    in sorted(aura["applications_by_source"].items())) or "none"
+    el = ", ".join(f"{k} {v}" for k, v
+                   in sorted(aura["applications_by_element"].items())) or "none"
+    rx = ", ".join(f"{k} {v}" for k, v
+                   in sorted(aura["reactions_by_name"].items())) or "none"
+    print(f"  aura ops    [{encounter}] {aura['aura_ops_total']} "
+          f"({aura['aura_ops_per_fight']:.2f}/fight): {ops}")
+    print(f"  aura apps   [{encounter}] {aura['applications']} "
+          f"({aura['applications_per_fight']:.2f}/fight, "
+          f"{aura['applications_per_turn']:.2f}/turn; wasted "
+          f"{aura['auras_wasted']}) by source: {src} | by element: {el}")
+    print(f"  reactions   [{encounter}] {aura['reactions']}: {rx}")
+    if payoff:
+        for label, key in (("reaction payoff", "reaction_payoff"),
+                           ("aura payoff", "aura_payoff")):
+            sl = payoff[key]
+            rows = ", ".join(
+                f"{p} {v['fired']}/{v['evaluated']}"
+                for p, v in sl["predicates"].items()) or "-"
+            absent = (f"  absent: {', '.join(sl['absent'])}"
+                      if sl["absent"] else "")
+            print(f"  {label:<11} [{encounter}] fired {sl['fired']} of "
+                  f"{sl['evaluated']} evaluations: {rows}{absent}")
+
+
 def print_summary(character: str, deck: str, encounter: str, s: dict) -> None:
     flags = f"  FLAGS: {','.join(s['flags'])} ({s['flagged_fights']} fights)" \
         if s.get("flags") else ""

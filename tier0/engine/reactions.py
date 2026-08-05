@@ -48,13 +48,22 @@ def aura_duration(state: CombatState) -> int:
         "ancient_sea_authority", 0)
 
 
-def apply_aura(state: CombatState, enemy: Enemy, element: str) -> None:
-    """Pure application (no damage) — apply_aura op, or post-reaction stick."""
+def apply_aura(state: CombatState, enemy: Enemy, element: str,
+               source: str = "hit") -> None:
+    """Pure application (no damage) — apply_aura op, or post-reaction stick.
+
+    `source` is LOG-ONLY (Last Call track H): it names which verb put the aura
+    up, so "how often do aura-applying ops fire" can be separated from "how
+    often does an element-tagged attack happen to leave one". It changes no
+    behaviour and no existing field -- the `aura_applied` event gains a key and
+    nothing reads it but `metrics.extract`.
+    """
     if element not in AURA_ELEMENTS:
         return
     enemy.aura = element
     enemy.aura_turns_left = aura_duration(state)
-    state.emit("aura_applied", element=element, target=enemy.name)
+    state.emit("aura_applied", element=element, target=enemy.name,
+               source=source)
 
 
 def tick_auras(state: CombatState) -> None:
@@ -68,14 +77,17 @@ def tick_auras(state: CombatState) -> None:
 
 
 def resolve_hit(state: CombatState, enemy: Enemy, element: Optional[str],
-                damage: float) -> float:
-    """Element-tagged damage hits an enemy. Returns damage for THIS hit."""
+                damage: float, source: str = "hit") -> float:
+    """Element-tagged damage hits an enemy. Returns damage for THIS hit.
+
+    `source` is log-only provenance (track H); see `apply_aura`.
+    """
     if not element or element == "none":
         return damage
 
     aura = enemy.aura
     if aura is None:
-        apply_aura(state, enemy, element)
+        apply_aura(state, enemy, element, source)
         return damage
     if aura == element:
         enemy.aura_turns_left = aura_duration(state)    # refresh
@@ -96,7 +108,7 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
     if trigger == "anemo":
         name = "swirl"
         for other in state.living_enemies:
-            apply_aura(state, other, aura)
+            apply_aura(state, other, aura, "swirl_spread")
     elif trigger == "geo":
         name = "crystallize"
         state.player.block += C.CRYSTALLIZE_BLOCK
