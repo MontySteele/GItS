@@ -456,3 +456,14 @@ def test_an_uncancellable_screen_is_answered_not_cancelled():
     skippable = {"state_type": "card_select",
                  "card_select": {"can_cancel": True, "cards": []}}
     assert soak._last_resort(skippable) == {"action": "cancel_selection"}
+
+
+def test_every_walkable_screen_has_an_exit_verb():
+    """A forced action that changes nothing is not mechanical. With a full
+    potion belt `claim_reward` returns ok and does nothing, so the walker
+    re-claimed the same Fire Potion until the cycle watchdog stopped the run.
+    Each of these screens advertises a way out; the walker now knows them."""
+    for st in ("rewards", "treasure", "relic_select", "hand_select",
+               "crystal_sphere"):
+        assert soak._escape({"state_type": st}) is not None, st
+    assert soak._escape({"state_type": "monster"}) is None

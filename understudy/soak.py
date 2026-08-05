@@ -504,6 +504,8 @@ class RunDriver:
         self._fingerprints: list[str] = []
         self._last_state: dict[str, Any] | None = None
         self._forced_defaults = 0
+        self._last_mech: tuple | None = None
+        self._mech_repeats = 0
 
     # -- logging ----------------------------------------------------------
     def emit(self, record: dict) -> None:
@@ -921,6 +923,30 @@ class RunDriver:
 
             mech = _mechanical_action(state)
             if mech is not None:
+                # A MECHANICAL ACTION THAT CHANGES NOTHING IS NOT MECHANICAL.
+                # With a full potion belt, `claim_reward` on a potion returns
+                # ok and does nothing -- the reward stays, the screen stays,
+                # and the walker re-claims it forever. Repeating the same
+                # forced action on an unchanged screen is the tell, and the
+                # escape is the verb every one of these screens advertises.
+                fp = self._fingerprint(state)
+                if (fp, json.dumps(mech, sort_keys=True)) == self._last_mech:
+                    self._mech_repeats += 1
+                else:
+                    self._last_mech = (fp, json.dumps(mech, sort_keys=True))
+                    self._mech_repeats = 0
+                if self._mech_repeats >= 3:
+                    escape = _escape(state)
+                    if escape is not None:
+                        self._forced_defaults += 1
+                        self.emit({"record": "forced_default",
+                                   "state_type": st,
+                                   "why": f"{mech} repeated with no state "
+                                          f"change; taking the screen's exit",
+                                   "action": escape})
+                        self._mech_repeats = 0
+                        state = self.post(state, escape, mechanical=True)
+                        continue
                 state = self.post(state, mech, mechanical=True)
                 continue
 
@@ -1023,6 +1049,21 @@ def _mechanical_action(state: dict) -> dict | None:
         pick = _first_of(opts, ("ignore", "ok", "confirm", "back"))
         return {"action": "menu_select", "option": pick} if pick else None
     return None
+
+
+def _escape(state: dict) -> dict | None:
+    """The verb that leaves a screen a forced action could not finish.
+
+    Every one of these screens advertises a way out; the walker just never had
+    a reason to use it until a full potion belt made `claim_reward` a no-op.
+    """
+    return {
+        "rewards": {"action": "proceed"},
+        "treasure": {"action": "proceed"},
+        "relic_select": {"action": "skip_relic_selection"},
+        "hand_select": {"action": "combat_confirm_selection"},
+        "crystal_sphere": {"action": "crystal_sphere_proceed"},
+    }.get(str(state.get("state_type")))
 
 
 def _last_resort(state: dict) -> dict | None:
