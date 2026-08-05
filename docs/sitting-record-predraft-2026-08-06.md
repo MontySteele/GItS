@@ -87,6 +87,23 @@ untouched by this batch and remain open on [USER]'s side.
 | Y-6 | §2 `S4-G2` | `tier0/DECISIONS.md` R89 banner |
 | Y-7 | §2 `S4-G3` / `S4-G4` | `docs/teyvat-spire-design-principles.md` amendment drafts |
 
+### Execution notes worth carrying (recorded at landing, 2026-08-06)
+
+- **Y-8 was already in force.** `python tools/gen_roster_cards.py --check` has
+  run in this repo's CI since the sim-hygiene sprint, as the "codegen staleness"
+  step of the blocking `lints` job. No new job was added — two invocations of one
+  check double the noise and halve the trust — and the step now carries a dated
+  comment saying so. It was exercised for real the same day: Y-4's deletion
+  turned it red until the generator was re-run.
+- **Y-4 produced one consequence nobody predicted**, and it is queued rather
+  than decided: X6's exploit line drafts an *upgraded* Encore Performance, so
+  with the upgrade deleted the replay harness cannot build the deck and that pin
+  went xfail → SKIP. The X3 pin did not flip, exactly as the reply expected. See
+  queue row `Q6`.
+- **Y-9 landed nothing, by instruction.** Slots 4 and 5 of
+  `docs/awaiting-user-slots-2026-08-06.md` carry both forms of both dispositions
+  in full; queue rows `Q7` and `Q8` are the one-word asks.
+
 **What Y-1 does NOT do, restated because the reply invites the mistake.** The
 trigger firing is not the evaluation. No lever moves on this batch, and the
 fine-branch's sim-calibration offset for exhaust-loop kits stays unwritten —

@@ -5,7 +5,14 @@ Track W of the "Strike the Set" batch against [USER]'s replies of 2026-08-06 to
 the Second Wind open one-liners
 (`docs/surplus-week-manifest-2026-08-05.md`, "Open one-liners this batch
 generated for [USER]"). Three of the six were answered and executed elsewhere.
-**The three below were NOT answered.**
+~~**The three below were NOT answered.**~~
+
+> **STATUS UPDATE 2026-08-06 (Track Y).** All three original slots are
+> **ANSWERED and LANDED** — slot 1 YES, slot 2 YES, slot 3 MERGE — each marked
+> in place with the reply verbatim and its landing site. **Two NEW slots, 4 and
+> 5, were opened by Y-9 and are AWAITING [USER]**; they are the G5/G6
+> dispositions, drafted in full so a one-word reply lands them. Nothing in slots
+> 4–5 is executed and nothing in them is a decision.
 
 The purpose of this file is narrow: each open item has its landing text written
 out *in advance*, in every form its answer can take, so that a **one-word
@@ -212,3 +219,168 @@ occurrences, lines 16 / 31 / 166). The lint is scoped to
 `tools/canon_role_tempo.py` alone, per the one-liner's own scope, so that
 sibling stays live and unlinted. Widening the scope is a second decision and is
 not taken here — flag it if you want it swept.
+
+---
+
+# Slots opened 2026-08-06 by Track Y (Y-9) — **AWAITING [USER], nothing landed**
+
+> **These two are the G5/G6 dispositions.** Y-9's instruction was to pre-draft
+> both so that a one-word reply lands them, and to land neither. Nothing below
+> is executed, and nothing below is a decision: the recommendation is chat's,
+> the authority is [USER]'s, and every landing site is named so the reply costs
+> exactly one word. Same house rule as slots 1–3, with the same R101b amendment
+> Track Y applied there: the unselected form is **struck, not deleted.**
+
+## Slot 4 — `S4-G5` / `B-G1`: narrow the axis gate to the Fanfare axis?
+
+**AWAITING [USER]. One word: YES or NO.**
+
+**The question, in plain language first.** The project built a seven-axis
+scorecard to grade characters. Six of those seven axes have never been used to
+decide anything, and under `DEC-D3` clause 3 their numbers are already
+*"reportable, not load-bearing"* — a temporary status that has now been
+temporary for weeks. The seventh, the **Fanfare axis**, is different: the
+Furina work genuinely depends on it, because `R90/1b` withdrew the Fanfare P1
+prediction from Track A and **re-registered it into Track B**, which is this
+gate. So the proposal is to stop holding all seven open, close six of them
+permanently as informational, and let `B-G1` mean only the one question anybody
+is actually waiting on.
+
+**YES closes six axes forever and shrinks the gate to one.** It does not retire
+the scorecard, does not delete a number, and does not grade anything.
+
+**Why it matters beyond tidiness.** `B-G1` is not just its own gate. `R107/F1`
+made it the **governing condition** on backlog items 1–3 (Furina strength lever
++ legibility, dead archetype, salon leak) and on the fanfare STOP. While it
+stays open in its seven-axis form, all of that is fenced behind six questions
+nobody intends to answer. Narrowing the gate re-points the fence at the
+question that is really blocking.
+
+**Landing sites, all three, appended and dated (R101b — annotate, never
+rewrite):**
+1. `tier0/DECISIONS.md`, R90 — a dated annotation beneath clause 1b, which is
+   where the Fanfare P1 was re-registered.
+2. `docs/axis-validity-session-charter.md` §7, beneath the existing `A-G1`
+   discharge note, where `B-G1` is recorded as deferred.
+3. `docs/registry/user-queue.md` §2, row `S4-G5` — status only.
+
+### 4-YES — draft, lands only if the reply is YES
+
+> **[USER] RULING <DATE> — `B-G1` is NARROWED to the Fanfare axis; the other
+> six axes close permanently.**
+>
+> Six of the seven axis scorecards are **CLOSED as reportable-only,
+> permanently**. `DEC-D3` clause 3's *"reportable, not load-bearing"* stops
+> being a temporary posture awaiting disposition and becomes the **final**
+> disposition for those six: their numbers may be published, cited and read as
+> description, and they may never be used as an acceptance target, a gate, or a
+> justification for moving a value. No number is retired, deleted or restated by
+> this closure — the instrument keeps producing them and readers keep reading
+> them; what ends is the expectation that a future sitting will promote them.
+>
+> **`B-G1` now asks exactly one question:** the disposition of the **Fanfare
+> axis** — the axis carrying the Fanfare P1 that `R90/1b` withdrew from Track A
+> and re-registered here. That question stays OPEN and is unchanged in
+> substance; only its scope shrinks.
+>
+> **The `R107/F1` fence re-points to the narrowed form.** Backlog items 1–3 and
+> the fanfare STOP were fenced behind `B-G1` as a seven-axis gate; they are now
+> fenced behind `B-G1` as the Fanfare-axis gate. Nothing is unfenced by this
+> ruling — the condition is the same condition, stated at the width that
+> actually binds.
+>
+> **What this does NOT do.** It does not grade the Fanfare axis, does not
+> ratify any axis band (the charter's standing non-goal), does not move a
+> balance value, and does not discharge `S4-G5`. It does not touch `A-G1`,
+> already discharged, or `AV-G2`, already countersigned.
+
+### 4-NO — draft, lands only if the reply is NO
+
+> **[USER] RULING <DATE> — `B-G1` stays SEVEN-AXIS; no axis closes.**
+>
+> The per-axis disposition remains what the charter registered: each of the
+> seven axes individually confirmed, retired, or left parked, with blanket
+> restoration off the table. `DEC-D3` clause 3's *"reportable, not
+> load-bearing"* remains the **interim** status of all seven, awaiting that
+> disposition.
+>
+> The `R107/F1` fence is unchanged and continues to point at `B-G1` in its full
+> form, which means backlog items 1–3 and the fanfare STOP stay fenced until the
+> whole scorecard is dispositioned. Recorded plainly because it is the cost of
+> this answer: the Furina work waits on six questions it does not depend on.
+
+---
+
+## Slot 5 — `S4-G6` + `S4-G14`: re-anchor Kokomi's band and protocol to the post-rework build?
+
+**AWAITING [USER]. One word: YES or NO.**
+
+**The question, in plain language first.** Kokomi's stability band was supposed
+to be declared before a confirmatory playtest and then graded by it. The build
+that would have been graded has since been reworked, and the playtest that
+happened (2026-08-01/02) was a co-op session, not a protocol run — its
+`docs/kokomi-playtest-protocol.md` Answers block is still blank, and playtest 4
+closed only one priority check. The proposal is to **re-anchor both the band
+declaration (`S4-G6`) and the protocol playtest (`S4-G14`) to the post-rework
+Kokomi build**, so that the thing declared and the thing graded are the same
+character.
+
+**YES re-anchors. It does not declare the band, and it does not weaken the law
+that makes the band worth anything.**
+
+**The law that must survive the re-anchor, stated so the reply cannot
+accidentally repeal it.** `DEC-D5` clauses 2–4: the band is declared from
+**design intent** with its provenance recorded; declaration happens **BEFORE**
+the confirmatory playtest; and **the band may not be revised against the
+playtest that grades it.** Re-anchoring moves *which* playtest is the
+confirmatory one. It does not move the order of operations, which is the whole
+value of the gate.
+
+**Landing sites, appended and dated:**
+1. `tier0/DECISIONS.md`, `DEC-D5` — a dated annotation beneath clause 4.
+2. `docs/kokomi-playtest-protocol.md`, header — the build the protocol run is
+   anchored to.
+3. `docs/registry/user-queue.md` §2, rows `S4-G6` and `S4-G14`, and §7's table
+   row for the protocol playtest.
+
+### 5-YES — draft, lands only if the reply is YES
+
+> **[USER] RULING <DATE> — `S4-G6` and `S4-G14` re-anchor to the post-rework
+> Kokomi build; `DEC-D5`'s declare-before-playtest law is INTACT.**
+>
+> The confirmatory playtest named by `DEC-D5` clause 3 is **the protocol run
+> against the post-rework Kokomi build**, not any session that preceded it. The
+> co-op playtest of 2026-08-01/02 and playtest 4 are **EXPLORATORY** in exactly
+> the sense clause 1 already defines: sources of understanding, graded against
+> nothing. That designation is not a demotion of what they found — playtest
+> four's closed priority check and its two "unjudgeable" answers stand as
+> findings — it is a statement about what may be graded.
+>
+> **Every clause of `DEC-D5` survives unchanged and is restated here so the
+> re-anchor cannot be read as a softening:** the band is declared from **design
+> intent**, with its provenance (including which exploratory data was already
+> seen) recorded as part of the record; **declaration precedes** the
+> confirmatory playtest; and **the band may not be revised against the playtest
+> that grades it.** If the re-anchored playtest says the band is wrong, that is
+> a finding, ruled on separately and afterwards.
+>
+> **`S4-G14` follows `S4-G6`, unchanged in content.** The protocol's Q1–Q7 and
+> three priority checks are the same questions; only the build they are asked
+> against is fixed. Its existing blockers stand: it remains blocked on `S4-G6`
+> and on the N1 attribution pass.
+>
+> **What this does NOT do.** It does not declare the band — no number is written
+> by this ruling — does not schedule the playtest, does not discharge either
+> gate, and does not grade Kokomi against anything.
+
+### 5-NO — draft, lands only if the reply is NO
+
+> **[USER] RULING <DATE> — no re-anchor; `S4-G6` and `S4-G14` stay as
+> registered.**
+>
+> The gates keep their existing anchor and `DEC-D5` is untouched. Recorded
+> plainly because it is the cost of this answer: the band would then be declared
+> against, and graded by, a build that has been reworked since the gate was
+> written, and the mismatch is a finding somebody will have to rule on later.
+> Nothing is unblocked by this answer; `S4-G14` stays blocked on `S4-G6` and on
+> the N1 attribution pass either way.
