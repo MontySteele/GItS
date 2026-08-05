@@ -59,19 +59,33 @@ disagree in either direction.
 
 ## What we changed
 
-**One line, in one upstream file.**
+**Three lines, across two upstream files.** Everything of substance lives in
+`gits/`, which the pin lint excludes from the upstream hash list entirely.
 
 | File | Status | Change |
 |---|---|---|
-| `McpMod.cs` | `gits-modified` | Added an `else if (path == "/api/v1/gits/speed")` arm to the `HandleRequest` route chain, marked in-file with `GItS LOCAL EDIT`. Nothing else in the file is touched. |
-| `gits/GitsSpeed.cs` | GItS addition | The whole of work item W2 — the speed affordance. Not upstream, never sent upstream in this form. |
+| `McpMod.cs` | `gits-modified` | Two `else if` arms on the `HandleRequest` route chain — `/api/v1/gits/speed` (W2) and `/api/v1/gits/seed` (P1.5) — marked in-file with `GItS LOCAL EDIT`. Nothing else in the file is touched. |
+| `McpMod.StateBuilder.cs` | `gits-modified` | One line in `BuildPlayerState`, inside the live-combat block: `state["resources"] = GitsResourceSnapshot(combatState)`. Marked in-file with `GItS LOCAL EDIT`. P1.5 spec item 2. |
+| `gits/GitsSpeed.cs` | GItS addition | Work item W2 — the speed affordance. |
+| `gits/GitsSeed.cs` | GItS addition | P1.5 item 1 — the chosen-seed endpoint. Documents in-file why upstream's own `charSelect.Lobby == null` refusal does not describe the game. |
+| `gits/GitsResources.cs` | GItS addition | P1.5 item 2 — a reflection-only reader for BaseLib's custom-resource registry. No compile-time BaseLib reference; a missing BaseLib yields an empty map. |
 
 Everything else is byte-identical to `55e0648`.
 
-The route arm is an edit rather than a Harmony patch because upstream's
+The route arms are edits rather than Harmony patches because upstream's
 routing is a plain if/else chain in one method: patching it would mean
 rewriting the same chain from outside, in more code, less legibly, to protect
-a purity we can simply record instead.
+a purity we can simply record instead. The `BuildPlayerState` line is an edit
+for the same reason and one more: a resources map attached out-of-band by a
+patch would not be ATOMIC with the state read it belongs to, and a meter read
+a frame after the hand it describes is a different measurement.
+
+## The P1.5 fork, and what it does NOT change
+
+Neither addition changes a rule. `GitsSeed` selects which run the game's own
+generators produce, through the game's own `StartRunLobby.SetSeed` /
+`NGame.DebugSeedOverride`; `GitsResources` is a serialiser that never writes an
+`Amount`. No constant, generator, reward table or pilot is touched by either.
 
 ## Refreshing the pin
 

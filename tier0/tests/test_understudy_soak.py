@@ -270,6 +270,8 @@ def _driver():
     d.session = _FakeSession()
     d.character = soak.DEFAULT_CHARACTER
     d.commit = None                      # baseline arm; R99/4b's flag is off
+    d.chosen_seed = None                 # read-back arm; P1.5's flag is off
+    d.max_fights = None                  # a full run, not a bounded one
     d.memo = soak.policy_v1.Memo()
     d.run_index = 1
     d.stamp = "test"
@@ -354,9 +356,14 @@ def test_the_embark_path_confirms_instead_of_re_picking_forever(monkeypatch):
 
 
 def test_no_seed_is_ever_passed_on_the_embark_path(monkeypatch):
-    """R95: read-back, not chosen. A `seed` parameter here returns "Seeded
-    embark is not supported for standard singleplayer from this API", and the
-    Custom screen that would take one soft-locks the game."""
+    """R95: the DEFAULT arm is still read-back, and it still passes no seed on
+    the embark verb.
+
+    P1.5 did not change this and deliberately did not try to. Upstream's
+    `menu_select(seed=...)` refuses singleplayer on a `charSelect.Lobby == null`
+    guard that the decompile contradicts, and rather than fight that arm the
+    chosen-seed route is a SEPARATE endpoint fired before the confirm. So this
+    assertion holds for both arms, which is why it is still worth asserting."""
     fake = _FakeBridge()
     monkeypatch.setattr(soak, "bridge", fake)
     monkeypatch.setattr(soak, "SETTLE_S", 0)
@@ -485,6 +492,7 @@ def test_every_teardown_step_runs_even_when_an_earlier_one_raises(tmp_path):
     appid = tmp_path / "steam_appid.txt"
     appid.write_text("2868840", encoding="ascii")
 
+    sess._seed_entry = None              # P1.5: no seed was ever chosen
     sess._speed_entry = sess.ledger.record("speed", "enabled:false")
     sess._launch_entry = sess.ledger.record("launch", "terminate")
     sess._bridge_entry = sess.ledger.record("bridge", "-Remove")

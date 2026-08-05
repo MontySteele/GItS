@@ -185,6 +185,7 @@ class Session:
         self._appid_entry: dict | None = None
         self._bridge_entry: dict | None = None
         self._speed_entry: dict | None = None
+        self._seed_entry: dict | None = None
         self._launch_entry: dict | None = None
         self.speed_before: dict | None = None
 
@@ -294,6 +295,23 @@ class Session:
             '`POST {"enabled": false}` restores the captured originals')
         bridge.set_speed(True, TIME_SCALE)
 
+    def note_seed_channel(self) -> None:
+        """Declare the seed channel in the ledger, BEFORE the first seed lands.
+
+        Recorded lazily rather than in `setup` for a reason `--no-setup` makes
+        concrete: that mode deliberately makes no game-dir changes and runs no
+        setup, but a chosen seed set through it is still a global, sticky
+        property on a game somebody else launched. The undo has to be on the
+        ledger in that mode too, so the trigger is the first CHOICE, not the
+        setup. Idempotent -- N runs share one entry.
+        """
+        if self._seed_entry is not None:
+            return
+        self._seed_entry = self.ledger.record(
+            "May set a chosen run seed via `POST /api/v1/gits/seed` "
+            "(NGame.DebugSeedOverride is global and sticky)",
+            '`POST {"seed": null}` clears both seed channels')
+
     # -- teardown ---------------------------------------------------------
     def teardown(self) -> None:
         """Walk the ledger in reverse. EVERY step runs, whatever the last did.
@@ -307,6 +325,14 @@ class Session:
         independently guarded, every failure is recorded rather than raised,
         and the ledger is the report.
         """
+        # THE SEED RELEASE GOES FIRST, and it runs unconditionally. The
+        # `debug_override` route is a GLOBAL, STICKY property on NGame: left
+        # set, every later run in the session -- including one a person starts
+        # by hand -- is the same run. It is cheap and idempotent when no seed
+        # was ever chosen, which is why it is not conditional on having chosen
+        # one; the one moment a ledger matters is the moment nobody remembers
+        # what was set.
+        self._step(self._seed_entry, self._release_seed)
         self._step(self._speed_entry, self._restore_speed)
         self._step(self._launch_entry, self._stop_game)
         self._step(self._bridge_entry, self._remove_bridge)
@@ -319,6 +345,11 @@ class Session:
             self.ledger.revert(entry, undo())
         except Exception as e:                               # noqa: BLE001
             self.ledger.fail(entry, f"{type(e).__name__}: {e}")
+
+    def _release_seed(self) -> str:
+        after = bridge.clear_seed()
+        return (f"chosen seed released (debug_override="
+                f"{after.get('debug_override')!r})")
 
     def _restore_speed(self) -> str:
         after = bridge.set_speed(False)
@@ -472,6 +503,18 @@ class FightTelemetry:
     #                                                     salon_cap, encore)]
     block_at_turn_end: list = field(default_factory=list)   # [(round, block)]
     cards_played: list = field(default_factory=list)      # [(round, name)]
+    # P1.5 ADDITION (2026-08-05), spec item 3. Every SELECTOR screen resolved
+    # inside this fight: [round, screen_type, index, chosen name, offered names].
+    #
+    # WHY THE OFFERED LIST IS IN THE ROW. A choice is not reconstructible from
+    # what was taken alone -- "Center Stage" means one thing against
+    # [Center Stage, Guest Cast] and nothing at all against a list that did not
+    # contain Guest Cast. This is the same denominator rule `hand` already
+    # applies to a card play, for the same reason.
+    #
+    # `-1` in the index slot is a selector resolved without one (a confirm, a
+    # skip); the verb is legible from `screen_type` plus the empty chosen name.
+    selectors: list = field(default_factory=list)
     potions_used: list = field(default_factory=list)
     damage_by_source: dict = field(default_factory=dict)
     damage_taken: int = 0
@@ -499,6 +542,7 @@ class FightTelemetry:
             "block_at_turn_end": self.block_at_turn_end,
             "cards_played": self.cards_played,
             "n_cards_played": len(self.cards_played),
+            "selectors": self.selectors,
             "potions_used": self.potions_used,
             "damage_by_source": {k: round(v, 1)
                                  for k, v in sorted(self.damage_by_source.items())},
@@ -539,39 +583,78 @@ _METER_IDS = {
     "SALON_MEMBER_POWER": 1,
 }
 
-# ENCORE IS NOT ON THE WIRE AND CANNOT BE, so this column reads -1 (unseen)
-# rather than 0 (empty) on the bot feed. `EncoreMeterPower` was retired as a
-# display in animation sprint 2 (E1) -- Encore's ambient home is the Salon
-# stage ribbon -- and the live value is a CustomResource, which the bridge's
-# state builder does not serialise because it only walks `creature.Powers`.
-# The human feed reads it from `FurinaResources.Encore` directly. A zero here
-# would be a measurement claiming the meter was empty in fights where it
-# demonstrably was not.
-ENCORE_UNSEEN = -1
+# UNSEEN, NOT EMPTY. -1 is what this file records for a meter the wire did not
+# carry on the read it was taken from. A zero would be a measurement claiming
+# the meter was empty in fights where it demonstrably was not.
+#
+# ENCORE WAS UNSEEN ON EVERY BOT FIGHT UNTIL P1.5, and the sentence that used
+# to stand here -- "Encore is not on the wire and cannot be" -- was right about
+# the wire and wrong about "cannot". `EncoreMeterPower` was retired as a
+# display in animation sprint 2 (E1), so Encore left `creature.Powers`, which
+# is the only place the bridge's state builder looked. The P1.5 fork adds
+# `player.resources` (`vendor/STS2_MCP/gits/GitsResources.cs`), a read of
+# BaseLib's own custom-resource registry, and Encore is in it by construction.
+#
+# -1 SURVIVES AS THE ANSWER FOR AN OLD BRIDGE. A run driven against a
+# pre-P1.5 bridge has no `resources` key at all, and its logs must keep saying
+# "unseen" rather than start saying "0".
+METER_UNSEEN = -1
+ENCORE_UNSEEN = METER_UNSEEN   # the P1-era name, kept for readers of old logs
+
+# Wire ids of the custom RESOURCES, which are the canonical values -- the badge
+# powers below are a display of them. Both are read: the resource when the
+# bridge carries it, the badge as the fallback for an older one.
+_ENCORE_RESOURCE_ID = "KLEEMOD_ENCORE"
+_FANFARE_RESOURCE_ID = "KLEEMOD_FANFARE"
+
+# The live cap is the printed base plus Casting Call's raises, and
+# `SalonCapUpPower` is an ordinary PowerModel -- so the raise HAS been on the
+# wire all along, in the status strip, next to the meter whose cap it moves.
+# The P1 note said the cap "is not on the wire at all"; that was true of the
+# CAP and false of its only addend.
+_SALON_CAP_UP_ID = "SALON_CAP_UP_POWER"
 
 
 def _meters(state: dict[str, Any]) -> list[int]:
-    """[fanfare, salon, salon_cap, encore] off the player's status list.
+    """[fanfare, salon, salon_cap, encore] for one turn opening.
 
-    Read by ID rather than by title: a display name is loc data and moves with
-    a wording pass, an id is the thing itself. The CAP is not on the wire at
-    all -- the smart tooltip renders it from a per-player stat -- so it is
-    recorded as the printed base and any run that raised it with Casting Call
-    says so in `cards_played` instead. A number this file cannot see is a
-    number it records as unseen, not one it guesses.
+    Read by ID rather than by title everywhere: a display name is loc data and
+    moves with a wording pass, an id is the thing itself. A number this file
+    cannot see is recorded as unseen, not guessed.
     """
-    out = [0, 0, SALON_PRINTED_CAP, ENCORE_UNSEEN]
-    for st in ((state.get("player") or {}).get("status") or []):
+    player = state.get("player") or {}
+    out = [0, 0, SALON_PRINTED_CAP, METER_UNSEEN]
+
+    for st in (player.get("status") or []):
         if not isinstance(st, dict):
             continue
-        slot = _METER_IDS.get(str(st.get("id") or "").strip().upper())
-        if slot is None:
-            continue
-        amount = st.get("amount")
+        wire_id = str(st.get("id") or "").strip().upper()
         try:
-            out[slot] = int(amount)
+            amount = int(st.get("amount"))
         except (TypeError, ValueError):
             continue
+        slot = _METER_IDS.get(wire_id)
+        if slot is not None:
+            out[slot] = amount
+        elif wire_id == _SALON_CAP_UP_ID:
+            out[2] = SALON_PRINTED_CAP + amount
+
+    # P1.5: the resource map, when the bridge carries one. It is authoritative
+    # over the badge for Fanfare -- the badge is synced from the resource at
+    # known hook sites, and the resource is the value those sites are syncing.
+    resources = player.get("resources")
+    if isinstance(resources, dict):
+        for key, slot in ((_FANFARE_RESOURCE_ID, 0), (_ENCORE_RESOURCE_ID, 3)):
+            if key in resources:
+                try:
+                    out[slot] = int(resources[key])
+                except (TypeError, ValueError):
+                    pass
+        # A live combat with a resources map but no Encore in it is not an
+        # unseen meter -- it is a player who has no Encore. Only the ABSENCE of
+        # the map leaves the column unseen.
+        if out[3] == METER_UNSEEN and _ENCORE_RESOURCE_ID not in resources:
+            out[3] = 0
     return out
 
 
@@ -595,6 +678,10 @@ COMBAT = ("monster", "elite", "boss")
 # one floor-2 fight into five records in the first validation soak, each with
 # its own turn count and its own HP ledger.
 MID_FIGHT = ("card_select", "hand_select", "bundle_select", "overlay")
+# The subset of MID_FIGHT that ASKS SOMETHING. `overlay` is excluded on
+# purpose: it is the shape a soft-lock takes (bridge.py's own docstring says
+# so), and a screen nobody can answer has no choice to record.
+SELECTOR_SCREENS = ("card_select", "hand_select", "bundle_select")
 DECISION_SCREENS = {"monster", "elite", "boss", "card_reward", "map",
                     "rest_site", "shop", "fake_merchant", "relic_select",
                     "card_select", "bundle_select", "hand_select",
@@ -616,10 +703,18 @@ class RunDriver:
 
     def __init__(self, session: Session, run_index: int, stamp: str,
                  character: str = DEFAULT_CHARACTER,
-                 commit: str | None = None):
+                 commit: str | None = None,
+                 chosen_seed: str | None = None,
+                 max_fights: int | None = None):
         self.session = session
         self.run_index = run_index
         self.character = character
+        # P1.5 item 1. `None` is the R95 read-back arm -- the game rolls, we
+        # record. A string is a CHOSEN seed, and the run verifies the choice
+        # took rather than trusting the endpoint's answer.
+        self.chosen_seed = chosen_seed
+        # P1.5: stop cleanly after N closed fights. `None` is a full run.
+        self.max_fights = max_fights
         # R99/4b. `None` is baseline -- the arm the R98 validation ran, and the
         # only arm whose numbers are comparable to R98's.
         self.commit = commit
@@ -818,8 +913,60 @@ class RunDriver:
             if action.get("action") == "use_potion" and names.get("potion_name"):
                 self.fight.potions_used.append([rnd_b, names["potion_name"]])
 
+        # P1.5 item 3: THE SELECTOR CHANNEL, which the fight record was blind
+        # to. Furina's Ethereal Spotlight opens a `card_select` every turn and
+        # the Center Stage / Guest Cast answer is the whole of that turn's
+        # Fanfare posture -- probe B3 (R103(b)) and family B's turn-1 gap both
+        # stall on exactly this. It is recorded on the state it was made from,
+        # for the same reason `cards_played` is (S7 family A, R101): the screen
+        # a selector closes into is not where the choice happened.
+        #
+        # Recorded whether or not the fight is the reason the screen is up --
+        # a selector that opens mid-fight belongs to the fight, and MID_FIGHT
+        # is the set that already says so.
+        if self.fight is not None and st_b in SELECTOR_SCREENS:
+            self.fight.selectors.append(self._selector_row(before, action, names))
+
         if st_b in COMBAT and st_a not in COMBAT and st_a not in MID_FIGHT:
             self._close_fight(after, "survived")
+
+    def _selector_row(self, before: dict, action: dict, names: dict) -> list:
+        """One selector choice, with the list it was chosen from.
+
+        The ROUND comes from the fight's own turn counter rather than from
+        `battle.round`: a selector screen is an overlay, and the state the
+        bridge builds for it carries no `battle` block at all. `self.fight.turns`
+        is the highest round this fight has opened, which is the round the
+        overlay is standing on.
+        """
+        assert self.fight is not None
+        blob = before.get(str(before.get("state_type"))) or {}
+        offered = blob.get("cards")
+        if not isinstance(offered, list):
+            offered = blob.get("bundles") if isinstance(blob, dict) else None
+        offered_names = [
+            (o.get("name") if isinstance(o, dict) else None) or ""
+            for o in (offered or [])
+        ]
+        idx = action.get("index", action.get("card_index"))
+        try:
+            idx = int(idx)
+        except (TypeError, ValueError):
+            idx = -1
+        # LOWERCASED, and it is not cosmetic. `naming.describe` lowercases the
+        # screen type and this fallback reads it raw, so the SAME screen
+        # reached by two verbs was writing `NCombatPileCardSelectScreen` on one
+        # row and `ncombatpilecardselectscreen` on the next -- two spellings of
+        # one screen in a channel whose whole job is to be compared.
+        return [
+            self.fight.turns,
+            str(names.get("screen_type")
+                or (blob.get("screen_type") if isinstance(blob, dict) else "")
+                or before.get("state_type") or "").lower(),
+            idx,
+            names.get("card_name") or "",
+            offered_names,
+        ]
 
     def _open_fight(self, state: dict) -> None:
         from understudy import adapter
@@ -880,7 +1027,22 @@ class RunDriver:
             state = self._embark(state)
             self.seed = bridge.current_seed()
             self.emit({"record": "seed_read_back", "seed": self.seed,
-                       "note": "game-generated; R95 read-back arm"})
+                       "chosen": self.chosen_seed,
+                       "honoured": (None if not self.chosen_seed
+                                    else self.seed == self.chosen_seed),
+                       "note": ("chosen; P1.5 arm" if self.chosen_seed
+                                else "game-generated; R95 read-back arm")})
+            # THE READ-BACK IS THE VERIFICATION, and it is a defect rather than
+            # a warning. A chosen-seed soak whose runs quietly rolled their own
+            # seeds is the exact failure that a build-vs-build comparison
+            # cannot survive and cannot detect afterwards -- both builds would
+            # simply be measured on different runs. Stopping here is cheap;
+            # discovering it in the numbers is not.
+            if self.chosen_seed and self.seed != self.chosen_seed:
+                raise Defect(
+                    "seed_not_honoured",
+                    f"asked for seed {self.chosen_seed!r}, the run reads back "
+                    f"{self.seed!r}", self._last_state or {})
             outcome, detail = self._drive(state)
         except Defect as d:
             self.file_defect(d.kind, d.detail, d.state)
@@ -966,14 +1128,21 @@ class RunDriver:
     def _embark(self, state: dict) -> dict:
         """main -> singleplayer -> standard -> character -> confirm.
 
-        No `seed` parameter anywhere: R95's read-back arm. Passing a seed on
-        this path returns "Seeded embark is not supported for standard
-        singleplayer from this API", and the Custom screen that WOULD take one
-        is unmodelled by the bridge and soft-locks -- which is exactly why the
-        Custom arm is P1.5 and not here. R104 promoted P1.5 to NEXT in the
-        Understudy queue (chosen seeds + wire-visible meters + selector
-        recording, one fork), so "not here" now means "not yet" rather than
-        "not until somebody needs it".
+        NO `seed` PARAMETER IS PASSED ON THIS PATH, AND THAT IS STILL TRUE ON
+        THE CHOSEN-SEED ARM. Upstream's `menu_select(seed=...)` returns "Seeded
+        embark is not supported for standard singleplayer from this API",
+        behind a `charSelect.Lobby == null` guard that the decompile
+        contradicts -- `InitializeSingleplayer` builds a lobby and `SetSeed`
+        accepts singleplayer. P1.5 did not rewrite that arm, because a fork
+        that rewrites an upstream refusal owns the refusal forever. It fires
+        its own endpoint instead, below, between the character pick and the
+        confirm.
+
+        So there are two arms here and one embark verb:
+
+          chosen_seed is None  -- R95's read-back arm, byte-for-byte unchanged
+          chosen_seed is set   -- P1.5: `POST /api/v1/gits/seed` before the
+                                  confirm, verified by the read-back in `run`
         """
         picks = 0
         for _ in range(30):
@@ -1005,6 +1174,36 @@ class RunDriver:
                                       mechanical=True)
                     continue
                 pick = _first_of(opts, ("confirm", "embark"))
+                if pick is not None and self.chosen_seed:
+                    # P1.5 item 1, AND THE MOMENT IS THE WHOLE TRICK. The seed
+                    # goes on HERE -- character select is up, a character is
+                    # chosen, the embark has not fired. Earlier is wasted:
+                    # `NCharacterSelectScreen.AfterInitialized()` clears the
+                    # debug override as this screen opens. Later does not
+                    # exist: the run is generated inside the confirm.
+                    #
+                    # This is a separate endpoint rather than upstream's
+                    # `menu_select(seed=...)` because that arm refuses
+                    # singleplayer on a guard the decompile contradicts; see
+                    # vendor/STS2_MCP/gits/GitsSeed.cs.
+                    self.session.note_seed_channel()
+                    report = bridge.set_seed(self.chosen_seed)
+                    # THE CANONICAL FORM COMES BACK FROM THE GAME, and it is
+                    # taken rather than computed. `SeedHelper.CanonicalizeSeed`
+                    # upper-cases, maps 'O'->'0' and 'I'->'1', and the run
+                    # reads back the CANONICAL string -- so a harness that
+                    # compared the read-back against what a person typed would
+                    # file `seed_not_honoured` against a seed the game honoured
+                    # exactly. Retyping the mapping here would be a second copy
+                    # of somebody else's rule; asking for it is one copy.
+                    requested = self.chosen_seed
+                    self.chosen_seed = report.get("chosen") or self.chosen_seed
+                    self.emit({"record": "seed_chosen",
+                               "requested": requested,
+                               "seed": self.chosen_seed,
+                               "route": report.get("route"),
+                               "status": report.get("status"),
+                               "message": report.get("message")})
                 if pick is None:
                     if picks < 3 and self.character.lower() in [o.lower()
                                                                 for o in opts]:
@@ -1088,6 +1287,22 @@ class RunDriver:
             self._last_state = state
             self._check(state)
             st = str(state.get("state_type"))
+
+            # A BOUNDED RUN, ADDED BY P1.5 FOR ITS OWN ACCEPTANCE. Comparing
+            # two recordings of one seed needs a run that ENDS at a stated
+            # point in both, and "when the bot happened to die" is not one.
+            # This is a clean stop, not a defect: the fight that is open has
+            # already closed by the time the count reaches the bound, so the
+            # records the comparison reads are complete records.
+            #
+            # OFF BY DEFAULT (`None`), so a soak is a soak.
+            if (self.max_fights is not None
+                    and len(self.fights) >= self.max_fights
+                    and self.fight is None):
+                self.emit({"record": "bounded_stop",
+                           "fights": len(self.fights),
+                           "max_fights": self.max_fights})
+                return "bounded", f"stopped after {len(self.fights)} fight(s)"
 
             if st == "game_over":
                 won = _game_over_won(state)
@@ -1302,7 +1517,9 @@ def _trim_state(state: dict) -> dict:
 # ----------------------------------------------------------------- main ----
 
 def soak(runs: int, character: str, do_setup: bool,
-         commit: str | None = None) -> dict:
+         commit: str | None = None,
+         seeds: list[str] | None = None,
+         max_fights: int | None = None) -> dict:
     from understudy import committed as _committed
     commit = _committed.normalise(commit)          # refuses an unknown word
     stamp = time.strftime("%Y%m%d-%H%M%S")
@@ -1317,7 +1534,11 @@ def soak(runs: int, character: str, do_setup: bool,
         for i in range(1, runs + 1):
             print(f"--- run {i}/{runs} ---", flush=True)
             deckwatch.reset()
-            driver = RunDriver(session, i, stamp, character, commit=commit)
+            # P1.5: run i takes seed i, cycling if fewer seeds than runs were
+            # named. `None` throughout is the read-back arm, unchanged.
+            chosen = seeds[(i - 1) % len(seeds)] if seeds else None
+            driver = RunDriver(session, i, stamp, character, commit=commit,
+                               chosen_seed=chosen, max_fights=max_fights)
             s = driver.run()
             s["defect_kinds"] = [d["kind"] for d in driver.defects]
             summaries.append(s)
@@ -1327,6 +1548,7 @@ def soak(runs: int, character: str, do_setup: bool,
             index.write_text(json.dumps(
                 {"stamp": stamp, "character": character,
                  "policy": policy_v1.POLICY_VERSION, "commit": commit,
+                 "seeds": seeds,
                  "requested_runs": runs, "runs": summaries}, indent=1),
                 encoding="utf-8")
 
@@ -1360,6 +1582,7 @@ def soak(runs: int, character: str, do_setup: bool,
 
     result = {"stamp": stamp, "character": character,
               "policy": policy_v1.POLICY_VERSION, "commit": commit,
+              "seeds": seeds,
               "requested_runs": runs, "runs": summaries,
               "stopped_on": stopped,
               "reversibility": session.ledger.entries}
@@ -1372,8 +1595,12 @@ def soak(runs: int, character: str, do_setup: bool,
 
 # Defect kinds that indicate the HARNESS is broken rather than the build.
 # A game crash or a soft-lock is the soak working; these are the soak failing.
+# `seed_not_honoured` is HERE and not on the build's side of the line: the
+# game rolling its own seed is the game behaving normally, and the thing that
+# failed is this harness's claim to have chosen one.
 _HARNESS_SIDE = {"no_embark_path", "no_embark", "embark_loop", "menu_loop",
-                 "unexpected_start_state", "bridge_unreachable", "no_action"}
+                 "unexpected_start_state", "bridge_unreachable", "no_action",
+                 "seed_not_honoured"}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1390,10 +1617,20 @@ def main(argv: list[str] | None = None) -> int:
                          "cards prioritised (fanfare / salon / spotlight). "
                          "OFF by default -- without it this is the baseline "
                          "arm R98 validated, unchanged")
+    ap.add_argument("--max-fights", type=int, default=None, metavar="N",
+                    help="P1.5: stop the run cleanly after N closed fights. "
+                         "Off by default; a bounded run is for COMPARING two "
+                         "recordings of one seed, not for soaking")
+    ap.add_argument("--seed", action="append", default=None, metavar="SEED",
+                    help="P1.5: run on a CHOSEN seed instead of one the game "
+                         "rolls. Repeatable; run i takes seed i, cycling. A "
+                         "run whose read-back disagrees with its choice files "
+                         "a `seed_not_honoured` defect rather than continuing")
     args = ap.parse_args(argv)
 
     result = soak(args.runs, args.character, do_setup=not args.no_setup,
-                  commit=args.commit)
+                  commit=args.commit, seeds=args.seed,
+                  max_fights=args.max_fights)
     if args.report:
         from understudy import report
         print()
