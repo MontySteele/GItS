@@ -246,7 +246,201 @@ authored `solve`):
 
 ---
 
-# CROSS-SESSION NOTE — the card-sheet schema gains `tempo_band` (2026-08-04)
+# §7. THE REPAIR RUN — R90/R91/R92 executed (2026-08-04)
+
+Written after the countersign package landed
+(`docs/axis-validity-countersign-2026-08-04.md`). **§0 above is not edited and
+must never be**: it is the grade the first run earned, and the whole point of
+recording grades before reading anything into them is that a later repair
+cannot go back and improve them.
+
+## §7.1 What the repair changed, in order
+
+| ruling | what moved |
+|---|---|
+| R90/1a | lint stays a counting tool; its banner now says so on every run |
+| R90/1b | P1 leaves Track A for Track B; ledger line quoted below |
+| R90/1c | floors re-derived from canon PACKAGES, not whole pools |
+| R91/2a | seven `ENTITY_PAYOFFS` confirmed as proposed — **no code moved** |
+| R91/2b | double-credit kept; every meter gains bounded/unbounded + cap |
+| R91/2c | meter-reading damage = `scaling`, `frontload` iff it pays at zero |
+| R91/2d | sustain bounded to your own HP ledger; joins the never-linted list |
+| R92/3a | charter's "402 canon cards" corrected to 439 DLL / 410 draftable |
+| R92/3b | cross-session note filed, THEN `tempo_band` landed |
+| R92/3c | support gap filed to `docs/brief-kokomi-pool-fill.md`, not linted |
+
+## §7.2 The new floors' shape
+
+Five canon packages, membership structural off the decompiled body and
+counting **both sides** of a mechanic (the card that applies Poison and the
+card that reads the stack are both poison cards — the first extraction only
+recorded the generate side, which is why the packages had to be rebuilt rather
+than filtered out of the existing JSON):
+
+| package | character | cards |
+|---|---|---|
+| `silent_poison` | Silent | 12 |
+| `defect_orbs` | Defect | 41 |
+| `necro_summons` | Necrobinder | 22 |
+| `ironclad_strength` | Ironclad | 8 |
+| `regent_forge` | Regent | 19 |
+
+8–41 cards against archetypes at 11–32. **That is the repair**: §3(c)'s
+diagnosis of the null named the population mismatch and this is it closed.
+
+Eight archetypes are anchored to the package shaped like them; four are not,
+and the four absences are stated in `ARCHETYPE_ANCHORS` rather than left to be
+discovered, because an unanchored archetype gets the four lax default cells
+and that SILENCES findings. Necrobinder's summon-payoff shape **stays Furina's
+designated anchor**, exactly as charter A1 named it; only the population under
+it narrowed from the whole pool to the package.
+
+The default floor set is four cells — `frontload` at all three bands and
+`scaling|late`. That is a finding, not a weakness: across five canon packages
+the only universally-covered jobs are *deal damage at every band* and *scale
+late*. Everything else is identity.
+
+## §7.3 The lint re-run
+
+**19 findings**, down from 30, across three characters.
+
+| character | findings | archetypes |
+|---|---|---|
+| Furina | 2 | salon 1, spotlight 1 |
+| Klee | 11 | demolition 6, reaction 3, spark 2 |
+| Kokomi | 6 | priest 6 |
+
+### Furina's fanfare cells under package floors — REPORTING, NOT A PREDICTION
+
+Quoted verbatim, and quoted because the first run's fanfare reading is the
+thing this whole repair was ordered against:
+
+```
+  furina/fanfare  (31 cards)  -- anchor silent_poison (n=12)
+      ok     block|late          64.5%  floor  8.3%
+      ok     frontload|early     80.6%  floor  8.3%
+      ok     frontload|late      83.9%  floor 16.7%
+      ok     frontload|mid       83.9%  floor  8.3%
+      ok     scaling|late        80.6%  floor 41.7%
+      ok     scaling|mid         80.6%  floor  8.3%
+```
+
+**The fanfare archetype still fails nothing**, on repaired floors, against the
+canon package whose shape it actually resembles — a counter that accrues off
+other plays and is cashed by readers. `scaling|late` reads 80.6% against a
+41.7% floor: the bar is nearly double what it was (21.6 → 41.7) and the
+coverage went UP too, because R91/2c gave nineteen meter-reading damage cards
+their `scaling` tag.
+
+**This is a REPORT and it re-registers nothing.** Per R90/1b the Fanfare
+size-and-timing question now lives in Track B, and P1's ledger line reads:
+*"aimed at the wrong instrument; withdrawn and re-registered, not failed."*
+The correct reading of the table above is **"the payoff cards exist"** — which
+was never in dispute after the first run, and which is precisely why the
+question moved. A coverage lint cannot see that `applause_line` deals 3, and
+under R90/1a it never will.
+
+Furina's two real findings are elsewhere and both are new:
+
+```
+    furina/salon      frontload|late      67.9%  <  floor 68.2%
+    furina/spotlight  scaling|late        61.1%  <  floor 75.0%
+```
+
+The salon miss is **0.3 points** — one card in twenty-eight — and is reported
+at that precision rather than rounded into comfort or out of existence. The
+spotlight miss is real: 61.1 against an Ironclad-strength package that spends
+75% of itself on late scaling, which is what a pure multiplier package looks
+like.
+
+## §7.4 The debt list: 30 → 19, and NOT ONE GAP WAS FIXED
+
+The single most misreadable diff in this branch. **Seventeen pins dropped and
+six appeared, and no card changed to cause any of it.** The instrument changed
+subject.
+
+**Dropped because the archetype stopped being measured** (unanchored → four
+lax default cells): all seven `klee/generic`, both `kokomi/generic`, all three
+`kokomi/assist`, and two of the five `klee/reaction`.
+
+**Dropped because the floor itself moved down** under the package population:
+`klee/demolition scaling|late` (floor 21.6 → 4.5), `klee/spark scaling|late`
+(21.6 → 10.5), `kokomi/commander scaling|mid` (4.5 → not mandatory for the
+Forge/Stars package, which sits at zero there itself).
+
+**Added because the floor moved UP**, i.e. the archetype is now measured
+against something genuinely shaped like it: `furina/salon frontload|late`,
+`furina/spotlight scaling|late`, and four `kokomi/priest` cells (`block|late`,
+`block|mid`, `frontload|late`, `scaling|late`) — the orb package is 41 cards
+and dense, and the Bake-Kurage archetype is being asked to look like it.
+
+Per R90/1a the pinned gaps are real and stay pinned; the gate fails only on a
+NEW finding or a stale pin. The debt file's own header now carries the
+"30 → 19 was not eleven wins" sentence, and a test pins that sentence, because
+a comment nobody is forced to keep is a comment that gets deleted.
+
+## §7.5 Tag landing
+
+219 rows, all three sheets, both fields, machine-written by
+`suggest_role_tempo_tags.py --land`. **135 divergences resolved to zero** — not
+by argument, by landing: the sheets and the classifier are now the same
+statement, `diverges` reads empty on every row, and `--check` fails on any
+hand edit that forks them again.
+
+**No hand-rulings remain.** Every one of the 135 was settled by a rule:
+
+- **19 by R91/2c directly** — the meter-reading damage question. 15 gained
+  `scaling` beside `frontload`; 4 lost `frontload` outright
+  (`the_final_verdict`, `pearl_barrage`, `undertow`, `depths_judgment`)
+  because they deal nothing on an empty meter.
+- **The rest by tag-through**, which was never a divergence in the first
+  place: no sheet row had ever been tagged with what its token cashes into, so
+  every carrier diverged by construction and that IS A0.1 doing its job.
+
+## §7.6 Answers to §4's stop-and-surface list
+
+1. **P1's null** — discharged by R90. Not repaired, *redirected*.
+2. **The tag-through table** — reviewed and confirmed at A-G1 (R91/2a).
+3. **`salon_member` double-credit** — KEPT (R91/2b), with the
+   bounded/unbounded property as the amendment and a Track B fill-time
+   measurement pre-registered against it.
+4. **`support` 0% everywhere** — R92/3c, filed to the Kokomi brief as
+   not-linted rework input.
+5. **`sustain` nearly absent from canon** — this was the item that asked for a
+   ruling and got one: R91/2d. Never linted; zero sustain is a legal identity.
+6. **`extract_base_game_pool::_solve` disagrees with A0** — STILL OPEN,
+   deliberately. It feeds the reference anchors' seven-axis scores and
+   re-tagging them would move measurements this track is a non-goal for. The
+   two classifiers coexist and the divergence stays recorded.
+7. **Shared schema note** — filed before the field landed (§8 below), mirrored
+   in `docs/roster-codegen.md`.
+
+## §7.7 New this run
+
+**`disrupt` has no `solve` value of its own.** R91/2d names disrupt as where
+enemy-output reduction lives, and in this implementation Weak and Frail are
+the sheets' `utility` voice — protected free space, never linted. The ruling's
+load-bearing half (*they are not sustain*) therefore already holds without a
+sixth role. Minting one would be a new vocabulary value on three ratified
+sheets, outside this repair's scope. Recorded here and beside `NEVER_LINTED`
+rather than silently collapsed; the question a sixth role would have answered
+is Track B's HP trajectory.
+
+## §7.8 Track B pre-registrations from this pass
+
+Not measurements, not predictions — conditions filed where Track B will meet
+them.
+
+1. **Salon fill-time** (R91/2b): the turn the Salon first fills, and the
+   fraction of fight-turns it sits full. Revisit condition: if bounded-meter
+   readers plateau early on the output curves, the `scaling` tag for those
+   readers is re-argued WITH DATA. Not before.
+2. **Fanfare size and timing** (R90/1b): re-registered in the playtest's own
+   words — *too slow to generate early, underwhelming damage late*. Instrument:
+   produced damage and block per turn against demanded per turn.
+---
+
+# §8. CROSS-SESSION NOTE — the card-sheet schema gains `tempo_band` (2026-08-04)
 
 Filed BEFORE landing, per R92/3b and the standing rule that a change to a
 shared loader takes its note first (`tier0/DECISIONS.md`:431, and the house
