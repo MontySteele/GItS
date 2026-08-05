@@ -57,6 +57,11 @@ otherwise).
 | `sprint-track-b-curves-log-2026-08-04.md` | **OPEN.** Track B's two feeds: what shipped, the live-shared-surface cross-session note, the graded pre-registrations, and the reversibility ledger (incl. the standing mod redeploy). |
 | `track-b-curves.md` | **GENERATED — do not hand-edit.** B1 (demand) and B2 (output) curves, per feed. Rebuild: `python tools/track_b_curves.py --out docs/track-b-curves.md`. Empty cells are empty on purpose. |
 
+### Dockets (routed, not decided)
+| doc | what it is |
+|---|---|
+| `dockets/` | Holding places for items that have been **routed** and not decided. Opened 2026-08-06 by the sitting's S13 routings (R109–R111): `klee-rework.md` (X1 note + FLAG-1 held, X7 law + Track T's audit slot, X8 findings slot), `kokomi-workshop.md` (X9), `companion-pricing.md` (X10 as a CANDIDATE, explicitly not ratified), `watch-items.md` (X4/X6/X12 with their triggers). Index and house rules: `dockets/README.md`. |
+
 ### Live references
 | doc | what it is |
 |---|---|
