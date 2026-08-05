@@ -415,4 +415,94 @@ worktree** — is a gate item below, not something this pass decides.
 
 ## Reversibility ledger — game-directory changes this session
 
-<!--LEDGER-->
+| # | change | undo | state |
+|---|---|---|---|
+| 1 | `steam_appid.txt` created at the game root (two soaks) | `Remove-Item steam_appid.txt` | **REVERTED** by each soak's teardown |
+| 2 | `mods\STS2_MCP\` deployed from vendor pin `55e0648` (two soaks) | `.\build\deploy_bridge.ps1 -Remove` | **REVERTED** |
+| 3 | `SlayTheSpire2.exe` launched directly (two soaks) | terminated at teardown | **REVERTED** |
+| 4 | `FastMode=Instant`, `TimeScale=3.0` via the speed endpoint (two soaks) | `POST {"enabled": false}` | **REVERTED** on both; `fast_mode` captured as `Fast` at each setup, so `Instant` never reached `settings.save` |
+| 5 | `mods\klee` replaced: **0.2-289 → 0.2-296** | `git checkout e07fb4c && cd klee-mod && .\build\deploy.ps1` | **STANDING BY DESIGN** — this is the build the gate package says to keep, plus this pass's outcome labels. In the gate items below. |
+| 6 | `%APPDATA%\SlayTheSpire2\gits_telemetry\intent.txt` created | delete the file | **STANDING BY DESIGN** — it is the declaration mechanism, and it declares NOTHING as shipped (first line is a comment). Deleting it costs nothing but the instructions. |
+| 7 | `%APPDATA%\SlayTheSpire2\gits_telemetry\play-*.jsonl` — 6 new files, 29 fight records, all `feed: bot` | delete them | **STANDING BY DESIGN** — soak-driven records, correctly labelled `bot`, in the human feed's directory (one writer, one folder). `--intent` and `--source` separate them from anything a person plays. |
+
+Worktree-local, gitignored, NOT repo changes: `klee-mod/local.props` copied
+from the main checkout; `game_ref/` copied; `ImageGen/images`, `.venv` and
+`art/raw` junctioned so `deploy.ps1`'s own gates could run rather than skip.
+
+## Suite
+
+| mode | result |
+|---|---|
+| default (with `game_ref/`) | **1607 passed** |
+| `GITS_REFERENCE_MODE=committed-only` | **1572 passed, 35 skipped** |
+
+`validate.ps1`: **OK, all rules**, on the staged package. Constant parity: **71
+mirrored, 16 declared unmirrored** — unchanged.
+
+## The final build
+
+**`0.2-296`**, zip at `klee-mod/dist/klee-v0.2-296.zip` (76.9 MB, `klee/` as
+the archive root), built from the validated stage on a clean tree and deployed
+to the game directory.
+
+**This is the build to hand the table, not 0.2-289.** The gate package's item 1
+says keep 0.2-289 and package it; items 5 and 6a landed in between, and a
+record from 0.2-289 cannot say who won a fight — which is the demand curve's
+whole job. The C# source of 0.2-296 is identical to the build every number
+above was verified on (`0.2-293`); the dll differs only as any two Release
+builds of the same source differ, and the version moved because four Python
+commits moved the repo's commit count.
+
+## Gate items — batched for one sitting
+
+1. **Distribute `klee-v0.2-296.zip`, and tell the table about the telemetry
+   BEFORE the session.** That courtesy condition is R99/1 and it is the only
+   part of this pass that a machine cannot execute. What to say is short: the
+   build writes a JSONL file of per-fight numbers to each player's own
+   `%APPDATA%\SlayTheSpire2\gits_telemetry\`, it is read-only with respect to
+   the game, nothing leaves their machine, and it exists so Acts 2 and 3 of the
+   demand curve stop being empty.
+2. **Optionally declare an intent** before a session by writing one word in
+   `%APPDATA%\SlayTheSpire2\gits_telemetry\intent.txt`. The file is there with
+   instructions in it and declares nothing until edited.
+3. **R91/2b — the Salon revisit is still yours, and the number is now 1.8%.**
+   Reported, not acted on. What changed is the reading, not the verdict: the
+   committed arm could not remove the confound because there was no
+   salon-specific confound — the baseline already drafted the salon plan. Two
+   arms, 68 metered fights, the stage staffed once.
+4. **The Fanfare early-half prediction is half-graded and the missing half
+   needs one small arm.** A no-plan drafter is the contrast "where Salon does
+   not" requires. It is a P1.5-shaped item next to the chosen-seed arm; not
+   started here on purpose.
+5. **`docs/track-b-curves.md` cannot be regenerated** — its inputs are
+   gitignored per-worktree logs and the corpus behind the published 87 records
+   no longer exists in one piece. Options, none taken: commit the fight records
+   (small, and they stop being per-machine), write them to a stable path
+   outside any worktree, or accept the document as a dated artifact and say so
+   in it. This is a repo-shape decision.
+6. **Three traversal defects (13, 14, 15) are queued and unfixed**, per the
+   routing you accepted. The next traversal pass owns them.
+7. **Punch Off stays SUSPECTED-OURS with seed `8B97LMCL2F` as its fixture**,
+   and the animation stream's note carries one measured starting point: the
+   router connects no signals at all.
+
+## Stop-and-surface
+
+1. **The soak was filing bot play into the human feed, and had been since the
+   hook shipped.** The label depended on the operator's shell. Nothing was lost
+   — last night's runs happened to be labelled correctly — but the failure mode
+   is silent and lands in the one feed whose value is that a person produced
+   it. Fixed. The general shape is worth keeping: *a default that is right only
+   because of how somebody happened to invoke it is not a default.*
+2. **Both writers record every soak fight, and a reader that groups by feed
+   double-counts.** Named and cuttable now, but every fight count published
+   from a mixed corpus before this is a count of RECORDS.
+3. **The committed-Salon arm was not a new condition.** It cost three runs to
+   discover that `policy_v0.ARCHETYPE` has been `"salon"` since Phase 0 — which
+   is also why the baseline's own Salon share is the highest of the three
+   archetypes. Any future arm that means to contrast with the baseline should
+   check what the baseline's plan already is first.
+4. **Debt #3 bounds what a committed arm can be.** A run that dies in act 1
+   drafts a handful of cards onto a starter deck; the committed arm made
+   Fanfare 24.9% of plays and could not make it the majority. No flag can while
+   the bot dies on floor 14.
