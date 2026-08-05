@@ -833,6 +833,90 @@ def test_selector_delivered_each_turn_and_vanishes():
     assert any(ev["event"] == "selector_granted" for ev in st.log)
 
 
+def test_replay_next_companion_dies_with_the_turn_that_wrote_it():
+    """X11, closed by sitting 2026-08-06: "Cap those effects to 'same turn
+    only'".
+
+    WRITE-SIDE scoping: the counter's lifetime ends at the close of the turn
+    it was granted on, so an unspent grant no longer survives the enemy side
+    to be cleared at the next player turn's open. That boundary is the one
+    the C# twin already used (ReplayNextCompanionPower.AfterSideTurnEnd), and
+    it is the only mechanism expressible identically in both engines -- a
+    Counter power's stacks carry no per-stack metadata, so neither side can
+    stamp a grant with its turn and filter at spend time.
+
+    Both parity twins write this one counter: Duet (Furina) and Study Buddy
+    (Klee).
+    """
+    for card_id in ("duet", "study_buddy"):
+        fx = [f for f in loader.get_card(card_id).effects
+              if f.get("op") == "replay_next_companion"]
+        assert fx and fx[0].get("duration") == "this_turn", card_id
+
+    def grant_then_stop(state):
+        state.replay_next_companion = 4          # granted, never spent
+        return None
+
+    st = furina_state()
+    combat._player_turn(st, grant_then_stop)
+    # THE ASSERTION THAT MOVED. Under the old turn-OPEN reset this read 4:
+    # the grant outlived its turn and was only cleared when the player next
+    # acted. The clear now lives at the turn's close.
+    assert st.replay_next_companion == 0
+
+
+def test_selector_hand_full_discards_one_card_first():
+    """X14 leg (b), closed by sitting 2026-08-06: "if the hand is full, one
+    random card is discarded before the spotlight is added."
+
+    Before the ruling the grant was gated on `len(hand) < MAX_HAND_SIZE` and
+    silently skipped -- the relic that exists to guarantee Furina a play was
+    exactly what a jammed hand starved.
+    """
+    st = furina_state()
+    p = st.player
+    p.hand = [furina_card(id=f"jam_{i}", retain=True)
+              for i in range(C.MAX_HAND_SIZE)]
+    effects.player_turn_start_triggers(st)
+    assert any(c.id == "ethereal_spotlight" for c in p.hand)
+    assert len(p.hand) == C.MAX_HAND_SIZE
+    assert len(p.discard_pile) == 1
+    assert st.discards_this_turn == 1
+    fell = [ev for ev in st.log if ev["event"] == "selector_hand_full_discard"]
+    assert len(fell) == 1 and fell[0]["card"] == p.discard_pile[0].id
+    assert any(ev["event"] == "selector_granted" for ev in st.log)
+
+
+def test_selector_hand_full_discard_uses_the_dedicated_stream():
+    """The fallback is a NEW stochastic surface, so it draws from
+    CombatState.selector_rng (seed + 4e9), never from the main combat stream.
+    Advancing `rng` here would renumber every seed measured before the
+    fallback existed. Sitting 2026-08-06, family X14 leg (b).
+    """
+    st = furina_state()
+    st.selector_rng = random.Random(1234)
+    before = st.rng.getstate()
+    st.player.hand = [furina_card(id=f"jam_{i}", retain=True)
+                      for i in range(C.MAX_HAND_SIZE)]
+    effects.player_turn_start_triggers(st)
+    assert st.player.discard_pile           # the fallback did fire
+    assert st.rng.getstate() == before      # ... without touching the main rng
+
+
+def test_selector_hand_full_of_kit_cards_has_no_legal_victim():
+    """Kit cards are never discard fodder (the v1.9 invariant, _op_discard's
+    pool rule). A hand with no legal victim keeps the pre-ruling behaviour:
+    the grant is skipped rather than the invariant broken.
+    """
+    st = furina_state()
+    p = st.player
+    p.hand = [furina_card(id=f"kit_{i}", kit_card=True, retain=True)
+              for i in range(C.MAX_HAND_SIZE)]
+    effects.player_turn_start_triggers(st)
+    assert not any(c.id == "ethereal_spotlight" for c in p.hand)
+    assert not p.discard_pile
+
+
 def test_per_turn_cap_schematized_but_off():
     assert C.SPOTLIGHT_CARDS_PER_TURN_CAP is None    # kickoff §3.2: OFF;
     # arming it is a ruling, and this lock makes turning it on deliberate.

@@ -21,7 +21,15 @@ from __future__ import annotations
 
 import random
 
-# tier05 uses 1e9 (draft regret), 2e9 (banner), 3e9 (starter deck).
+# THE OFFSET REGISTRY. Every dedicated stream in the repo takes a distinct
+# multiple of 1e9 off the same seed, and is recorded here so the next one can
+# see what is taken:
+#   1e9  draft regret          tier05/draft.py
+#   2e9  featured banner       tier05/model.py
+#   3e9  randomized starter    tier05/model.py
+#   4e9  hand-full selector    tier0/engine/combat.py (CombatState.selector_rng;
+#                              sitting 2026-08-06, family X14 leg (b))
+#   7e9  understudy policy     this module
 # Understudy takes 7e9 and leaves room between.
 UNDERSTUDY_STREAM_OFFSET = 7 * 10**9
 
