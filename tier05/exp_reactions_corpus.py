@@ -23,6 +23,14 @@ and must never be pooled into one row:
            same numbers look like when the deck composition is held fixed.
            Cut by encounter.
 
+DENOMINATORS (O-1, ruled 2026-08-06). `n_fights` counts RECORDS -- one per
+encounter attempt -- and `n_combats` counts the combats inside them. They
+differ only on the tier 0 battery's two-stage `gauntlet`, where one attempt is
+two combats. Every per-fight EVENT rate here divides by `n_combats`; the
+pooled counts and the pooled share are ratios of sums and are the same either
+way. The battery TSV published on 2026-08-05 predates this and divided by
+records throughout -- see the erratum in docs/reactions-corpus-2026-08-05.md.
+
 CONFIDENCE INTERVALS. The pooled share is a ratio of sums, not a mean, so its
 interval is a percentile BOOTSTRAP resampling FIGHTS (the independent unit --
 runs within a cohort share a draft, fights within a run share a deck; the
@@ -170,7 +178,7 @@ def bootstrap_share_ci(fight_stats: list, seed: int,
 
 def mean_share_ci(fight_stats: list) -> tuple:
     """Normal-approximation 95% CI on the PER-FIGHT MEAN share."""
-    xs = [s.reaction_share for s in fight_stats]
+    xs = [s.reaction_share for s in metrics.per_combat(fight_stats)]
     if len(xs) < 2:
         return ("", "")
     m = statistics.fmean(xs)
@@ -182,7 +190,7 @@ def mean_share_ci(fight_stats: list) -> tuple:
 
 FIELDS = [
     "surface", "character", "archetype_or_deck", "pilot", "cut",
-    "n_runs", "n_fights", "seed", "stamp",
+    "n_runs", "n_fights", "n_combats", "seed", "stamp",
     "damage_all_ops", "damage_from_reactions", "damage_from_base_ops",
     "share_pooled", "share_pooled_ci_lo", "share_pooled_ci_hi",
     "share_fight_mean", "share_fight_mean_ci_lo", "share_fight_mean_ci_hi",
@@ -228,7 +236,8 @@ def _row(surface, character, arch, pilot, cut, n_runs, fight_stats, seed,
     row = {
         "surface": surface, "character": character,
         "archetype_or_deck": arch, "pilot": pilot, "cut": cut,
-        "n_runs": n_runs, "n_fights": share["fights"], "seed": seed,
+        "n_runs": n_runs, "n_fights": share["fights"],
+        "n_combats": share["combats"], "seed": seed,
         "stamp": stamp,
         "damage_all_ops": share["damage_all_ops"],
         "damage_from_reactions": share["damage_from_reactions"],
@@ -242,7 +251,7 @@ def _row(surface, character, arch, pilot, cut, n_runs, fight_stats, seed,
         "amp": share["amp"], "splash": share["splash"], "dot": share["dot"],
         "reactions": aura["reactions"],
         "reactions_per_fight": round(aura["reactions"]
-                                     / max(1, share["fights"]), 4),
+                                     / max(1, share["combats"]), 4),
         "fights_with_any_reaction_damage":
             share["fights_with_any_reaction_damage"],
         "aura_ops_total": aura["aura_ops_total"],

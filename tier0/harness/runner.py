@@ -43,6 +43,11 @@ def run_battery(character: str, deck: str, encounter_id: str, pilot_id: str,
             carry_hp = state.player.hp
             if not state.player.alive:
                 break
+        # One record per encounter ATTEMPT (HP carries across the stage
+        # break, so the attempt is the unit the axes score). O-1: the merged
+        # record now carries its stage records, so an aggregate that counts
+        # events PER FIGHT can denominate over combats instead of records --
+        # a gauntlet is two combats and used to be counted as one.
         stats.append(metrics.merge_stages(stage_stats))
     return stats
 
