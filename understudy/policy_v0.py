@@ -127,7 +127,16 @@ def _combat(state: dict[str, Any]) -> Counterfactual:
             "adapter bug, not a policy result")
 
     action: dict[str, Any] = {"action": "play_card", "card_index": index}
-    target = _pilot_target(state, cs)
+    # Only aim what needs aiming. The wire marks each hand card's target type;
+    # sending a target with a Self card is an error the bridge rejects, and a
+    # counterfactual that cannot be executed is not a counterfactual.
+    hand_entry = (state.get("player") or {}).get("hand") or []
+    # The field is `target_type`, not `target` -- reading the wrong key made
+    # every card look self-targeting and every attack post without an aim.
+    wire_target = (str(hand_entry[index].get("target_type", "")).lower()
+                   if index < len(hand_entry) else "")
+    target = (_pilot_target(state, cs)
+              if wire_target not in ("", "self", "none") else None)
     if target:
         action["target"] = target
     return Counterfactual(
@@ -145,13 +154,13 @@ def _pilot_target(state: dict[str, Any], cs) -> str | None:
     this is the engine's rule restated at the only place the wire can express
     it. The divergence report's "targeting" bucket is measured against this.
     """
-    enemies = [e for e in (state.get("enemies") or [])
-               if isinstance(e, dict) and int(e.get("hp", 0)) > 0]
-    if len(enemies) <= 1:
-        return enemies[0].get("id") if enemies else None
-    lowest = min(enemies, key=lambda e: (int(e.get("hp", 0)),
-                                         str(e.get("id"))))
-    return str(lowest.get("id"))
+    enemies = [e for e in adapter.enemy_blobs(state) if int(e.get("hp", 0)) > 0]
+    if not enemies:
+        return None
+    if len(enemies) == 1:
+        return adapter.enemy_id(enemies[0])
+    lowest = min(enemies, key=lambda e: (int(e.get("hp", 0)), adapter.enemy_id(e)))
+    return adapter.enemy_id(lowest)
 
 
 def _why_card(cs, card) -> str:
@@ -165,7 +174,9 @@ def _why_card(cs, card) -> str:
 # ---------------------------------------------------------------- draft ----
 
 def _card_reward(state: dict[str, Any]) -> Counterfactual:
-    offers_raw = state.get("cards") or state.get("options") or []
+    blob = state.get("card_reward") or {}
+    offers_raw = (blob.get("cards") if isinstance(blob, dict) else None) \
+        or state.get("cards") or state.get("options") or []
     offers: list = []
     approx: list[str] = []
     for e in offers_raw:
@@ -180,7 +191,9 @@ def _card_reward(state: dict[str, Any]) -> Counterfactual:
 
     deck = adapter.deck_cards(state)
     pick = t5draft.assigned_policy(policy_rng("draft"), deck, offers, ARCHETYPE)
-    notes = {"approximate_offers": approx, "deck_size": len(deck)}
+    from understudy import deckwatch
+    notes = {"approximate_offers": approx, "deck_size": len(deck),
+             "deck_from": deckwatch.provenance()}
 
     if pick is None:
         return Counterfactual(
@@ -253,7 +266,11 @@ def _map(state: dict[str, Any]) -> Counterfactual:
                    + ", ".join(f"{k}={v:.1f}" for v, _, _, k in scored)
                    + f"; elite bar {bar:.2f} vs hp_frac {st.hp_frac:.2f}"),
         notes={"reduced_from": "whole-map backward induction",
-               "elite_ok": elite_ok})
+               "elite_ok": elite_ok,
+               # A one-option map screen is a corridor, not a choice. Recorded
+               # so the agreement rate can exclude forced moves instead of
+               # being inflated by them.
+               "n_options": len(options)})
 
 
 _KIND_WORDS = {
@@ -280,13 +297,26 @@ def _room_kind(opt: Any) -> str:
 
 # ------------------------------------------------------------- resource ----
 
+def _resolves_to_a_sim_row(card_id: str) -> bool:
+    try:
+        loader.peek_card(card_id)
+        return True
+    except (KeyError, ValueError):
+        return False
+
+
 def _rest(state: dict[str, Any]) -> Counterfactual:
     p = state.get("player") or {}
-    deck_ids = [c.id for c in adapter.deck_cards(state)]
+    # Same guard as the card_select screen: base-game cards and engine tokens
+    # have no sheet row, and rest_action looks every id up. One base-game curse
+    # in the deck ('DEBT') was enough to crash the counterfactual arm.
+    deck_ids = [c.id for c in adapter.deck_cards(state)
+                if _resolves_to_a_sim_row(c.id)]
     what, which = t5model.rest_action(
         deck_ids, int(p.get("hp", 0)), int(p.get("max_hp", 1)),
         archetype=ARCHETYPE, next_fight=False)
-    options = state.get("options") or []
+    blob = state.get("rest_site") or {}
+    options = (blob.get("options") if isinstance(blob, dict) else None)         or state.get("options") or []
     index = _match_rest_option(options, what)
     return Counterfactual(
         category="resource",
@@ -296,7 +326,8 @@ def _rest(state: dict[str, Any]) -> Counterfactual:
         rationale=("tier05.model.rest_action ladder on a deck of "
                    f"{len(deck_ids)} at {p.get('hp')}/{p.get('max_hp')} HP; "
                    "next_fight is passed False because the wire does not show "
-                   "the node after this one"),
+                   "the node after this one; cards with no sim row are "
+                   "excluded from the deck it scores"),
         available=index is not None,
         notes={"sim_choice": what, "sim_target": which})
 
@@ -308,7 +339,8 @@ _REST_WORDS = {"heal": ("rest", "sleep", "heal"), "upgrade": ("smith", "upgrade"
 def _match_rest_option(options: Any, what: str) -> int | None:
     words = _REST_WORDS.get(what, ())
     for i, opt in enumerate(options or []):
-        name = str(opt if isinstance(opt, str) else (opt or {}).get("name", "")).lower()
+        name = (opt if isinstance(opt, str)
+                else " ".join(str((opt or {}).get(k, "")) for k in ("id", "name"))).lower()
         if any(w in name for w in words):
             return i
     return None
@@ -359,6 +391,69 @@ def _shop(state: dict[str, Any]) -> Counterfactual:
         rationale=f"draft policy's pick off the shelf, affordable on {gold}g")
 
 
+def _card_select(state: dict[str, Any]) -> Counterfactual:
+    """Upgrade / remove overlays, answered by the sim's rest-site smith rule.
+
+    `rest_action` is the only place tier05 expresses "which card do I upgrade"
+    and "which card do I remove", so it is the entry point even though no rest
+    site is involved. HP is passed at full deliberately: the ladder's first two
+    rungs are heal decisions about a rest, and this screen is not one. What
+    survives is exactly the smith/thin preference order.
+    """
+    blob = state.get("card_select") or {}
+    screen = str(blob.get("screen_type") or "").lower()
+    entries = [e for e in (blob.get("cards") or []) if isinstance(e, dict)]
+    if not entries:
+        return _unavailable("resource", "no cards on the wire to choose between")
+
+    # Only the deck-management screens map onto a sim decision. A "choose"
+    # overlay (Ethereal Spotlight's Center Stage / Guest Cast) is an in-combat
+    # branch the sim expresses inside the CARD, not as a policy call.
+    if screen not in ("upgrade", "remove"):
+        return _unavailable(
+            "resource",
+            f"'{screen or 'unlabelled'}' overlay: tier05 has no policy for it; "
+            f"only upgrade and remove screens map onto rest_action's ladder")
+
+    ids, approx = [], []
+    for e in entries:
+        card, is_approx = adapter.resolve_card(e)
+        # A card that only LOOKS like a sheet id (the KLEEMOD- token cards the
+        # engine creates, e.g. KLEEMOD-CENTER_STAGE_OPTION) resolves as
+        # approximate. Passing it on would make rest_action raise on a lookup,
+        # which is a crash in the counterfactual arm rather than a finding.
+        ids.append(None if is_approx else card.id)
+        if is_approx:
+            approx.append(card.name)
+
+    sheet_ids = [i for i in ids if i]
+    if not sheet_ids:
+        return _unavailable(
+            "resource", "no option resolves to a sim card row")
+
+    p = state.get("player") or {}
+    max_hp = int(p.get("max_hp", 1))
+    what, target = t5model.rest_action(sheet_ids, max_hp, max_hp,
+                                       archetype=ARCHETYPE, next_fight=False)
+    if what != screen:
+        return _unavailable(
+            "resource",
+            f"the sim's ladder wants to '{what}' but this screen is a "
+            f"'{screen}' screen; delegating across them would be a guess")
+    index = next((i for i, cid in enumerate(ids) if cid == target), None)
+    if index is None:
+        return _unavailable(
+            "resource", f"the sim chose {target!r}, which is not on this screen")
+    return Counterfactual(
+        category="resource",
+        action={"action": "select_card", "index": index},
+        label=f"{what} {target} [{index}]",
+        rationale=("tier05.model.rest_action's smith order (on-plan payoff "
+                   "before enabler) over the offered cards, HP passed at full "
+                   "so the heal rungs cannot fire"),
+        notes={"approximate": approx, "screen_type": screen})
+
+
 # -------------------------------------------------------------- dispatch ----
 
 def counterfactual(state: dict[str, Any]) -> Counterfactual:
@@ -376,6 +471,8 @@ def counterfactual(state: dict[str, Any]) -> Counterfactual:
             return _rest(state)
         if st in ("shop", "fake_merchant"):
             return _shop(state)
+        if st == "card_select":
+            return _card_select(state)
     except Exception as e:                      # noqa: BLE001
         # A crash in the counterfactual arm must never end the run: the run is
         # the expensive half. Record it as a finding and carry on.

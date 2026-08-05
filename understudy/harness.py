@@ -50,7 +50,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from understudy import bridge, policy_v0
+from understudy import adapter, bridge, deckwatch, policy_v0
 
 LOG_DIR = Path(__file__).resolve().parent / "logs"
 STATE_FILE = LOG_DIR / "_harness_state.json"
@@ -62,8 +62,9 @@ def _card_line(i: int, c: dict[str, Any]) -> str:
     bits = [f"[{i}] {c.get('name')}", f"cost {c.get('cost')}"]
     if c.get("type"):
         bits.append(str(c["type"]).lower())
-    if c.get("target") and str(c["target"]).lower() not in ("none", "self"):
-        bits.append(f"tgt:{c['target']}")
+    tt = str(c.get("target_type") or c.get("target") or "").lower()
+    if tt and tt not in ("none", "self", "no_target"):
+        bits.append(f"tgt:{tt}")
     if c.get("can_play") is False:
         bits.append("UNPLAYABLE")
     if c.get("upgraded"):
@@ -85,21 +86,30 @@ def _status_line(blob: Any) -> str:
 
 
 def _enemy_line(e: dict[str, Any]) -> str:
-    intent = e.get("intent") or {}
+    intent = e.get("intents") or e.get("intent") or {}
+    if isinstance(intent, list):
+        intent = intent[0] if intent else {}
     if isinstance(intent, dict):
-        itxt = intent.get("description") or intent.get("type") or intent.get("kind") or "?"
+        itxt = (intent.get("title") or intent.get("type")
+                or intent.get("description") or intent.get("kind") or "?")
+        if intent.get("label"):
+            itxt = f"{itxt} {intent['label']}"
         dmg = intent.get("damage", intent.get("amount"))
         times = intent.get("times", intent.get("hits"))
         if dmg is not None:
             itxt = f"{itxt} {dmg}" + (f"x{times}" if times and int(times) > 1 else "")
     else:
         itxt = str(intent)
-    return (f"  {e.get('id')} {e.get('name')} "
+    return (f"  {e.get('entity_id') or e.get('id')} {e.get('name')} "
             f"{e.get('hp')}/{e.get('max_hp')} blk {e.get('block', 0)} "
             f"| intent: {itxt} | status: {_status_line(e.get('status'))}")
 
 
 def render(state: dict[str, Any]) -> str:
+    # Every render is also a chance to see the deck; combat states are the
+    # only place the wire shows it. Cheap, idempotent, and it means the draft
+    # counterfactual is never scored against nothing.
+    deckwatch.record(state)
     st = str(state.get("state_type"))
     run = state.get("run") or {}
     p = state.get("player") or {}
@@ -115,17 +125,25 @@ def render(state: dict[str, Any]) -> str:
             lines.append("Potions: " + ", ".join(pots))
 
     if st in ("monster", "elite", "boss"):
+        b = state.get("battle") or {}
+        lines[0] += f"  round {b.get('round')} ({b.get('turn')})"
         lines.append("Enemies:")
-        lines += [_enemy_line(e) for e in (state.get("enemies") or [])]
+        lines += [_enemy_line(e) for e in adapter.enemy_blobs(state)]
         lines.append("Hand:")
         lines += ["  " + _card_line(i, c)
                   for i, c in enumerate(p.get("hand") or [])]
         piles = {k: len(p.get(k) or []) for k in ("draw_pile", "discard_pile", "exhaust_pile")}
         lines.append(f"Piles: {piles}")
     elif st == "card_reward":
+        blob = state.get("card_reward") or {}
+        cards = (blob.get("cards") if isinstance(blob, dict) else None) \
+            or state.get("cards") or []
         lines.append("Offers:")
-        lines += ["  " + _card_line(i, c)
-                  for i, c in enumerate(state.get("cards") or state.get("options") or [])]
+        for i, c in enumerate(cards):
+            lines.append("  " + _card_line(c.get("index", i), c))
+            for kw in c.get("keywords") or []:
+                lines.append(f"        - {kw.get('name')}: "
+                             + " ".join(str(kw.get("description") or "").split())[:220])
     elif st == "map":
         m = state.get("map") or {}
         opts = m.get("next_options") or state.get("next_options") or []
@@ -152,6 +170,17 @@ def render(state: dict[str, Any]) -> str:
                          f"{it.get('price', it.get('cost'))}g"
                          + (f" - {' '.join(str(it.get('description') or '').split())}"
                             if it.get("description") else ""))
+    elif st == "rest_site":
+        blob = state.get("rest_site") or {}
+        for o in (blob.get("options") if isinstance(blob, dict) else None) or []:
+            lines.append(f"  [{o.get('index')}] {o.get('name')} - "
+                         + " ".join(str(o.get("description") or "").split())
+                         + ("" if o.get("is_enabled", True) else " DISABLED"))
+    elif st in ("card_select", "bundle_select"):
+        blob = state.get(st) or {}
+        lines.append(f"{blob.get('screen_type', st)}: {blob.get('prompt', '')}")
+        lines += ["  " + _card_line(c.get("index", i), c)
+                  for i, c in enumerate(blob.get("cards") or [])]
     else:
         for key in ("options", "cards", "relics", "message", "menu_screen",
                     "rewards", "selection"):
@@ -232,45 +261,63 @@ def cmd_act(args) -> int:
     cf = policy_v0.counterfactual(state)
 
     try:
-        mine = json.loads(args.action)
+        parsed = json.loads(args.action)
     except json.JSONDecodeError as e:
         print(f"bad action json: {e}", file=sys.stderr)
         return 2
-    if "action" not in mine:
-        print("action json needs an 'action' key", file=sys.stderr)
+    plan = parsed if isinstance(parsed, list) else [parsed]
+    if not all(isinstance(a, dict) and "action" in a for a in plan):
+        print("each action needs an 'action' key", file=sys.stderr)
         return 2
 
-    now = time.time()
-    idx = int(sess.get("decision_index", 0))
-    record = {
-        "i": idx,
-        "ts": now,
-        "wall_ms": int((now - sess.get("last_act_ts", now)) * 1000),
-        "state_type": state.get("state_type"),
-        "act": (state.get("run") or {}).get("act"),
-        "floor": (state.get("run") or {}).get("floor"),
-        "hp": (state.get("player") or {}).get("hp"),
-        "state_chars": len(before),
-        "why_chars": len(args.why or ""),
-        "mine": mine,
-        "why": args.why or "",
-        "policy_v0": cf.as_log(),
-        "agree": _agree(mine, cf.action if cf.available else None),
-        "category": cf.category,
-    }
-
-    result = bridge.post(**mine)
-    record["result"] = result
-    append(seed, record)
-
-    sess["decision_index"] = idx + 1
-    sess["last_act_ts"] = now
-    _save_session(sess)
+    # A PLANNED SEQUENCE is a real thing a player does -- you decide a turn,
+    # not a card -- but it is a different epistemic act from deciding with the
+    # intermediate state in front of you, so it is recorded as one. Each step
+    # still gets its own counterfactual, computed at the state that step
+    # actually faces.
+    planned = len(plan) > 1
+    for step, mine in enumerate(plan):
+        if step > 0:
+            state = bridge.get_state()
+            cf = policy_v0.counterfactual(state)
+            before = render(state)
+        now = time.time()
+        idx = int(sess.get("decision_index", 0))
+        record = {
+            "i": idx,
+            "ts": now,
+            "wall_ms": int((now - sess.get("last_act_ts", now)) * 1000),
+            "state_type": state.get("state_type"),
+            "act": (state.get("run") or {}).get("act"),
+            "floor": (state.get("run") or {}).get("floor"),
+            "hp": (state.get("player") or {}).get("hp"),
+            "state_chars": len(before) if step == 0 else 0,
+            "why_chars": len(args.why or "") if step == 0 else 0,
+            "mine": mine,
+            "why": args.why or "",
+            "planned_sequence": planned,
+            "plan_step": step,
+            "policy_v0": cf.as_log(),
+            "agree": _agree(mine, cf.action if cf.available else None),
+            "category": cf.category,
+        }
+        result = bridge.post(**mine)
+        record["result"] = result
+        append(seed, record)
+        sess["decision_index"] = idx + 1
+        sess["last_act_ts"] = now
+        _save_session(sess)
+        if result.get("status") == "error":
+            print(f"# step {step} ERROR, plan aborted: {result.get('error')}")
+            break
+        if step < len(plan) - 1:
+            time.sleep(args.settle)
 
     time.sleep(args.settle)
     after = bridge.get_state()
     cf2 = policy_v0.counterfactual(after)
-    print(f"# decision {idx} -> {result.get('status')}: {result.get('message', '')}")
+    print(f"# {len(plan)} action(s) posted; last -> {result.get('status')}: "
+          f"{result.get('message', '')}")
     if result.get("status") == "error" or result.get("error"):
         print(f"# ERROR: {result.get('error') or result.get('message')}")
     print()
@@ -279,6 +326,100 @@ def cmd_act(args) -> int:
     print(f"POLICY_V0 [{cf2.category}] "
           + (cf2.label if cf2.available else "NO COUNTERFACTUAL"))
     print(f"  {cf2.rationale}")
+    return 0
+
+
+# --------------------------------------------------- mechanical screens ----
+#
+# Screens where the game asks a question with exactly one answer: dialogue to
+# click through, a reward pile to collect, a single-relic chest. These are not
+# decisions and they must not enter the M2 denominator -- but at ~1 tool call
+# each they would have consumed the session before Act 2, which would have
+# failed M3 for a reason that is about the harness rather than about the task.
+#
+# `auto` walks them and stops the instant a real decision appears. Every step
+# is still logged, as `auto: true`, so the run's action history stays complete
+# and the count of mechanical steps is itself reportable.
+
+DECISION_SCREENS = {"monster", "elite", "boss", "card_reward", "map",
+                    "rest_site", "shop", "fake_merchant", "relic_select",
+                    "card_select", "bundle_select", "hand_select",
+                    "crystal_sphere", "game_over"}
+
+
+def _auto_step(state: dict[str, Any]) -> dict[str, Any] | None:
+    """The single forced action on a mechanical screen, or None to stop."""
+    st = str(state.get("state_type"))
+    if st in DECISION_SCREENS:
+        return None
+    if st == "event":
+        ev = state.get("event") or {}
+        if ev.get("in_dialogue"):
+            return {"action": "advance_dialogue"}
+        opts = [o for o in (ev.get("options") or []) if not o.get("is_locked")]
+        # A one-option event (or a bare "Proceed") is a click, not a choice.
+        if len(opts) == 1:
+            return {"action": "choose_event_option", "index": opts[0].get("index", 0)}
+        return None
+    if st == "rewards":
+        blob = state.get("rewards")
+        items = blob.get("items") if isinstance(blob, dict) else (blob or [])
+        if items:
+            return {"action": "claim_reward", "index": 0}
+        return {"action": "proceed"}
+    if st == "treasure":
+        relics = state.get("relics") or state.get("options") or []
+        if len(relics) == 1:
+            return {"action": "claim_treasure_relic", "index": 0}
+        if not relics:
+            return {"action": "proceed"}
+        return None
+    return None
+
+
+def cmd_auto(args) -> int:
+    sess = _session()
+    seed = sess.get("seed") or "unseeded"
+    steps = 0
+    state = bridge.get_state()
+    while steps < args.max_steps:
+        action = _auto_step(state)
+        if action is None:
+            break
+        idx = int(sess.get("decision_index", 0))
+        now = time.time()
+        result = bridge.post(**action)
+        append(seed, {
+            "i": idx, "ts": now, "wall_ms": 0,
+            "state_type": state.get("state_type"),
+            "act": (state.get("run") or {}).get("act"),
+            "floor": (state.get("run") or {}).get("floor"),
+            "hp": (state.get("player") or {}).get("hp"),
+            "state_chars": 0, "why_chars": 0,
+            "mine": action, "why": "mechanical screen, forced action",
+            "auto": True,
+            "policy_v0": {"category": "mechanical", "available": False,
+                          "action": None, "label": "(none)",
+                          "rationale": "not a decision", "notes": {}},
+            "agree": None, "category": "mechanical",
+            "result": result,
+        })
+        sess["decision_index"] = idx + 1
+        _save_session(sess)
+        steps += 1
+        time.sleep(args.settle)
+        state = bridge.get_state()
+
+    cf = policy_v0.counterfactual(state)
+    print(f"# auto walked {steps} mechanical step(s)")
+    print()
+    print(render(state))
+    print()
+    print(f"POLICY_V0 [{cf.category}] "
+          + (cf.label if cf.available else "NO COUNTERFACTUAL"))
+    print(f"  {cf.rationale}")
+    if cf.notes:
+        print(f"  notes: {json.dumps(cf.notes)}")
     return 0
 
 
@@ -311,6 +452,11 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("state")
     s.add_argument("--raw", action="store_true")
     s.set_defaults(func=cmd_state)
+
+    u = sub.add_parser("auto")
+    u.add_argument("--max-steps", type=int, default=25)
+    u.add_argument("--settle", type=float, default=1.2)
+    u.set_defaults(func=cmd_auto)
 
     a = sub.add_parser("act")
     a.add_argument("action", help="JSON action body, e.g. '{\"action\":\"end_turn\"}'")

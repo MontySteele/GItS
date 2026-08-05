@@ -78,6 +78,8 @@ STATUS_MAP = {
 }
 
 _DMG_RE = re.compile(r"[Dd]eal\s+(\d+)\s+damage")
+_INTENT_RE = re.compile(r"^(\d+)(?:\s*[x\u00d7]\s*(\d+))?$")
+_INTENT_DESC_RE = re.compile(r"[Aa]ttack for (\d+)")
 _BLK_RE = re.compile(r"[Gg]ain\s+(\d+)\s+[Bb]lock")
 
 
@@ -145,23 +147,36 @@ def _statuses(blob: Any) -> tuple[dict[str, int], list[str]]:
 
 
 def _intent(blob: Any) -> list[dict]:
-    """The current intent as a one-entry tier0 intent script."""
+    """The current intent as a one-entry tier0 intent script.
+
+    The wire carries `intents` as a LIST of typed hints -- `{"type":
+    "DebuffStrong", "title": "Strategic", "description": ...}` for a debuff,
+    with numeric fields only on the damaging ones. A non-damaging intent
+    becomes a zero-block beat: the pilot reads intents solely through
+    `_incoming_damage`, and an intent that deals none contributes none.
+    """
+    if isinstance(blob, list):
+        blob = blob[0] if blob else None
     if not isinstance(blob, dict):
-        return [{"kind": "wait", "amount": 0}]
-    dmg = blob.get("damage")
-    if dmg is None:
-        dmg = blob.get("amount")
-    times = blob.get("times") or blob.get("hits") or 1
-    try:
-        times = int(times)
-    except (TypeError, ValueError):
-        times = 1
-    if dmg is None:
         return [{"kind": "block", "amount": 0}]
-    try:
-        dmg = int(dmg)
-    except (TypeError, ValueError):
+    if str(blob.get("type", "")).lower() != "attack":
         return [{"kind": "block", "amount": 0}]
+
+    # The number is in `label`, as the UI string the game prints under the
+    # icon: "7", or "7 x 3" for a multi-hit. There is no numeric field at all.
+    # Missing this reads every attack as zero incoming damage, which silently
+    # disables the pilot's block-panic rung -- the single most consequential
+    # thing this adapter can get wrong.
+    label = str(blob.get("label") or "").strip()
+    m = _INTENT_RE.match(label)
+    if not m:
+        m = _INTENT_DESC_RE.search(str(blob.get("description") or ""))
+    if not m:
+        return [{"kind": "block", "amount": 0}]
+    dmg = int(m.group(1))
+    times = 1
+    if m.lastindex and m.lastindex >= 2 and m.group(2):
+        times = int(m.group(2))
     return [{"kind": "attack", "amount": dmg, "times": times}]
 
 
@@ -170,8 +185,13 @@ def _enemy_aura(entry: dict[str, Any]) -> str | None:
         if not isinstance(st, dict):
             continue
         name = str(st.get("name") or "").strip().lower()
-        if name in ("pyro", "hydro", "electro", "cryo", "anemo", "geo", "dendro"):
-            return name
+        # The wire says "Cryo Aura", not "cryo". Matching the element word
+        # rather than the whole label is what makes the pilot's reaction term
+        # non-zero at all.
+        for element in ("pyro", "hydro", "electro", "cryo",
+                        "anemo", "geo", "dendro"):
+            if name.startswith(element):
+                return element
     return None
 
 
@@ -204,15 +224,32 @@ def build_combat_state(state: dict[str, Any]) -> tuple[CombatState, dict[str, An
     )
 
     enemies: list[Enemy] = []
-    for e in state.get("enemies") or []:
+    for e in enemy_blobs(state):
         epowers, _ = _statuses(e.get("status"))
+        # DOUBLE-COUNTING GUARD. The intent label the wire prints is the
+        # FINAL number the player will take -- the game has already folded in
+        # the attacker's Strength and any Weak on it. tier0's
+        # `_incoming_damage` folds them in again from `powers`, so carrying
+        # them across turned a Jaxfruit with Strength 4 telegraphing 10 into
+        # a 45-damage panic and would have made the pilot block through every
+        # turn it should have been attacking. Powers that modify what an enemy
+        # DEALS are dropped; powers that modify what it RECEIVES are kept.
+        # The guard has to be total, not selective. tier0's damage pipeline
+        # reads several enemy powers on the way out (Vulnerable among them),
+        # and every one of those readings is a second application of something
+        # the label already contains. The pilot consults enemy powers for
+        # nothing else -- `_expected_damage` only looks at them through
+        # `bonus_per_target_power`, which no GItS starter uses -- so the whole
+        # dict is dropped and the aura, which lives in its own field, carries
+        # the only enemy state the scoring actually needs.
+        epowers = {}
         enemies.append(Enemy(
             hp=int(e.get("hp", 0)),
             max_hp=int(e.get("max_hp", e.get("hp", 1)) or 1),
             block=int(e.get("block", 0)),
             powers=epowers,
-            name=str(e.get("name") or e.get("id") or "enemy"),
-            intents=_intent(e.get("intent")),
+            name=str(e.get("name") or e.get("entity_id") or "enemy"),
+            intents=_intent(e.get("intents") or e.get("intent")),
             aura=_enemy_aura(e),
             is_boss=str(state.get("state_type")) == "boss",
         ))
@@ -221,7 +258,7 @@ def build_combat_state(state: dict[str, Any]) -> tuple[CombatState, dict[str, An
         player=player,
         enemies=enemies,
         rng=random.Random(0),      # never consumed: scoring is pure
-        turn=int(state.get("turn", 1) or 1),
+        turn=int((state.get("battle") or {}).get("round", 1) or 1),
     )
     notes = {
         "approximate_cards": approx,
@@ -232,8 +269,24 @@ def build_combat_state(state: dict[str, Any]) -> tuple[CombatState, dict[str, An
     return cs, notes
 
 
+def enemy_blobs(state: dict[str, Any]) -> list[dict[str, Any]]:
+    """Enemies live under `battle`, not at the top level.
+
+    Cost one combat's worth of confusion to learn, so it is a named function
+    with a docstring rather than a `.get` chain repeated in three places.
+    """
+    battle = state.get("battle")
+    if isinstance(battle, dict) and isinstance(battle.get("enemies"), list):
+        return [e for e in battle["enemies"] if isinstance(e, dict)]
+    return [e for e in (state.get("enemies") or []) if isinstance(e, dict)]
+
+
+def enemy_id(e: dict[str, Any]) -> str:
+    return str(e.get("entity_id") or e.get("id") or "")
+
+
 def entity_ids(state: dict[str, Any]) -> list[str]:
-    return [str(e.get("id")) for e in (state.get("enemies") or []) if e.get("id")]
+    return [enemy_id(e) for e in enemy_blobs(state) if enemy_id(e)]
 
 
 def deck_cards(state: dict[str, Any]) -> list[Card]:
@@ -251,8 +304,19 @@ def deck_cards(state: dict[str, Any]) -> list[Card]:
     else:
         for pile in ("hand", "draw_pile", "discard_pile", "exhaust_pile"):
             entries += [e for e in (p.get(pile) or []) if isinstance(e, dict)]
+    if entries:
+        out = []
+        for e in entries:
+            card, _ = resolve_card(e)
+            out.append(card)
+        return out
+
+    # Out of combat the wire carries no deck at all. Fall back to the last
+    # snapshot the deck watcher took during a fight -- see deckwatch.py for
+    # what that costs in staleness.
+    from understudy import deckwatch
     out = []
-    for e in entries:
-        card, _ = resolve_card(e)
+    for cid in deckwatch.current():
+        card, _ = resolve_card({"id": cid})
         out.append(card)
     return out
