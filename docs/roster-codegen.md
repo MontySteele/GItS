@@ -118,3 +118,17 @@ directory is absent or incomplete, it runs pytest with
 `GITS_REFERENCE_MODE=committed-only`: every repository-owned test still runs,
 while the local-reference modules skip exactly as on a fresh clone. Normal
 simulation loading remains fail-closed for partial references.
+
+## Cross-session note pointer — `tempo_band` on the card sheets (2026-08-04)
+
+R92/3b. The card-sheet schema gained one field, `tempo_band:`, on all 219 rows
+of the three personal sheets. `CARD_FIELDS` in `tools/gen_klee_cards.py` gains
+it in the descriptive-metadata block beside `register`: **nothing is emitted
+from it and no manifest number moves.** It is listed there rather than left
+unknown because `card_level_reason` blocks any card carrying a field the
+emitter does not understand, which is the gate that already caught `innate`
+and `retain`.
+
+The note itself, with what the field means and who else reads the surface, is
+in `docs/sprint-axis-validity-track-a-log-2026-08-04.md` (CROSS-SESSION NOTE
+section). This is the mirror.

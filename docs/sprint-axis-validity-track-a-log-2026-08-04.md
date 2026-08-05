@@ -243,3 +243,68 @@ authored `solve`):
 4. Whether a damage card that reads a meter is `frontload`, `scaling`, or both.
    The sheets currently say all three in different places; the suggester picks
    one and 135 divergences ride partly on that choice.
+
+---
+
+# CROSS-SESSION NOTE — the card-sheet schema gains `tempo_band` (2026-08-04)
+
+Filed BEFORE landing, per R92/3b and the standing rule that a change to a
+shared loader takes its note first (`tier0/DECISIONS.md`:431, and the house
+pattern in `docs/animation-sprint-2-log.md`). The mirror of this note is in
+`docs/roster-codegen.md`.
+
+**Who reads the surface.** The three card sheets are read by TWO independent
+consumers, and both of them hard-fail on a field they do not know:
+
+1. `tier0/content/loader.py` → `Card.from_dict`, which raises
+   `unknown fields [...]` for anything not declared on the `Card` dataclass in
+   `tier0/engine/state.py`. That refusal is deliberate (a sheet row declaring a
+   field that does nothing is a card whose author believes it does something).
+2. The C# codegen, `tools/gen_klee_cards.py::CARD_FIELDS` → `card_level_reason`,
+   which returns `card field(s) [...] not understood` and BLOCKS the card. Two
+   fields have already been caught by exactly this gate — `innate` (A9) and
+   `retain` (Fanfare rework Track C.1) — and in both cases the block was the
+   design working.
+
+So adding a field to a sheet without touching both is not a cosmetic change:
+it is a hard loader failure on one side and a blocked card on the other.
+
+**What is changing.** `tempo_band:` lands on all 219 rows of
+`docs/klee-cards.yaml`, `docs/furina-cards.yaml` and `docs/kokomi-cards.yaml`.
+It carries two orthogonal scales, per charter A0:
+
+```yaml
+tempo_band: {fight: [early, mid], run: [early]}
+```
+
+`fight` ∈ {early, mid, late} — when in a FIGHT the card is worth playing.
+`run` ∈ {early, late} — when in a RUN it is draftable and functional.
+Multi-band is legal and normal; a scaling Power is fight-late and must be
+run-early-draftable to be assembled by Act 2, and saying both is the point of
+the axis.
+
+**What is NOT changing, and this is the reason the note is short.** The field
+is **inert on both readers**:
+
+- `Card.tempo_band` is a plain declared field with an empty-dict default. No
+  engine code reads it. It is descriptive metadata of exactly the kind
+  `register` and `solve` already are.
+- `CARD_FIELDS` gains `"tempo_band"` in the descriptive/draft-metadata block
+  beside `register`. Nothing is emitted from it, so no generated C# changes and
+  no manifest number moves.
+
+No op is added, no keyword is added, no subsystem is added. Every value is
+machine-derived by `tools/role_tempo.py::fight_bands` / `run_bands` and written
+by `tools/suggest_role_tempo_tags.py --land`; `--check` fails if a hand edit
+moves one away from the rule that produced it, so the field cannot rot into
+prose.
+
+**Who is affected right now.** The Understudy Phase-0 sprint is live in a
+parallel worktree on `understudy/`, a vendored STS2MCP bridge, and a C# speed
+patch. None of those surfaces is touched here. If that stream regenerates card
+C# it will pick up an unchanged manifest; if it loads the sim it will pick up
+one more inert field. Neither needs action.
+
+**Verification owed by the landing commit** (and paid): the suite proves BOTH
+readers handle the field — the sim loads all three sheets, and the codegen
+`--check` reports the same manifest counts as before the field existed.
