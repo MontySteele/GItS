@@ -8,9 +8,9 @@ Scope: `klee-mod/KleeCode/` — `Powers/`, `Elements/`, `Vfx/`, `Patches/`,
 
 The in-game runtime: a net9.0 Harmony/BaseLib mod DLL (`klee.dll`) that makes the
 Teyvat Spire roster (Klee, Furina, Kokomi) playable inside Slay the Spire 2. It is
-a **port, not a design surface** — every balance number mirrors tier0, the single
-source of truth, and re-deriving one C#-side is the defect this layer exists to
-avoid (`Elements/ReactionTable.cs:22-27`, `Powers/BurstResource.cs:14-18`). It is
+a **port, not a design surface** — every balance number mirrors tier0, and
+re-deriving one C#-side is the defect this layer exists to avoid
+(`Elements/ReactionTable.cs:22-27`, `Powers/BurstResource.cs:14-18`). It is
 explicitly **not a simulator and not a test bed**: there is no C# test project and
 this DLL only executes inside Godot, so nothing here can be run against the sim
 (`Diagnostics/FurinaParityVectors.cs:10-13`). Its second job is **not losing
@@ -70,8 +70,9 @@ In-game there is no CLI: `KleeMod.Initialize` is the only entry
   any numeric `const` in neither `MIRRORED` nor `UNMIRRORED` —
   `tools/lint_constant_parity.py:83,196,348-355`.
 - **Per-type Harmony patching, never `PatchAll`.** One dead lookup disarms one
-  patch; a class arming ZERO methods is a failure even if nothing threw —
-  `KleeMod.cs:33-38`, `KleePatchBootstrap.cs:106-166`.
+  patch; a class arming ZERO methods is a failure even if nothing threw; the
+  `SoftlockGuards` set is `nameof` only, never literals (a literal survives a rename
+  and guards nothing) — `KleeMod.cs:33-38`, `KleePatchBootstrap.cs:53-62,106-166`.
 - **Exactly one `ModHelper.SubscribeForCombatStateHooks` call**, every character's
   hooks concatenated behind it (duplicate ids are silently rejected) —
   `KleeMod.cs:55-61`; pinned at `tier0/tests/test_roster_runtime_contracts.py:160`.
@@ -83,17 +84,17 @@ In-game there is no CLI: `KleeMod.Initialize` is the only entry
 - **Mutable power fields must be deep-cloned** — `MutableClone` is a
   `MemberwiseClone`, so every bombed enemy would share one list
   (`Powers/BombPower.cs:88-96,121-124`).
-- **Loc keys are `Id.Entry`, BaseLib-prefixed** (`KABOOM` → `KLEEMOD-KABOOM`).
-  Plain `CardModel` stubs declare loc in `KleeMod.InjectLocStrings`; anything
-  deriving from `CustomCardModel` uses an `ILocalizationProvider.Localization`
-  override — `KleeMod.cs:74-93`, `Diagnostics/KleeSelfCheck.cs:490-496`.
+- **Loc keys are `Id.Entry`, BaseLib-prefixed** (`KABOOM` → `KLEEMOD-KABOOM`). Plain
+  `CardModel` stubs declare loc in `KleeMod.InjectLocStrings`; `CustomCardModel`
+  subclasses use an `ILocalizationProvider.Localization` override —
+  `KleeMod.cs:74-93`, `Diagnostics/KleeSelfCheck.cs:490-496`.
 - **Loc encoding: SmartFormat uses SINGLE braces, square brackets are BBCode.**
   `{{Damage}}` renders literally; `[Block]` throws "Found end tag center" —
   `KleeMod.cs:76-89`, enforced at `Diagnostics/KleeSelfCheck.cs:544-563`.
 - **Every pck lookup funnels through `KleePck.Path`, which returns null on a miss**
   so callers degrade to base behaviour — `KleePck.cs:20-24,30-45`.
-- **Visuals read state, never own it**; cached values are display-only —
-  `Vfx/GaugeBridge.cs:34-38`.
+- **Visuals read state, never own it**; cached node values are display-only, and
+  bridges must be inert (not throw) when a node is absent — `Vfx/GaugeBridge.cs:34-38`.
 
 ## 4. Rulings that shaped it
 
@@ -103,21 +104,16 @@ In-game there is no CLI: `KleeMod.Initialize` is the only entry
   (`Diagnostics/KleeSelfCheck.cs:397-436`).
 - **R52** (`tier0/DECISIONS.md:1314`) — Kokomi heals no HP, ever; her sustain is
   prevention. Binds every Kokomi power that would otherwise grant healing.
-- **R59** (`tier0/DECISIONS.md:1777`) — shop colorless slot 2 is Uncommon-or-Rare at
-  renormalized odds; mirrored as `SlotTwoUncommonOdds`
-  (`Patches/MerchantCompanionSlots.cs:59,132`).
-- **R60** (`tier0/DECISIONS.md:1796`) — phase 1 REDIRECTS the shop only;
-  `ColorlessCardPool` must stay populated for its six non-shop consumers
-  (`Patches/MerchantCompanionSlots.cs:37-41`).
-- **R61** (`tier0/DECISIONS.md:1813`) — tier 0.5 models the shop channel, so C# and
-  sim must price it the same way.
+- **R59 / R60 / R61** (`tier0/DECISIONS.md:1777`, `:1796`, `:1813`) — the shop's two
+  colorless slots carry companions: slot 2 is Uncommon-or-Rare at renormalized odds
+  (mirrored as `SlotTwoUncommonOdds`), the patch REDIRECTS only so
+  `ColorlessCardPool` stays populated for its six non-shop consumers, and pricing
+  must match tier 0.5's model of the same channel —
+  `Patches/MerchantCompanionSlots.cs:37-41,59,132`.
 - **R69** (`tier0/DECISIONS.md:2164`) — the Orobas upgrade DISPLAYS as "Dodoco
   Tales"; the C# type stays `ExplosiveFrags`, because renaming it moves the runtime
   relic id and that is a co-op desync
   (`Relics/UpgradedStarterRelics.cs:99-118,148`).
-- **R70** (`tier0/DECISIONS.md:2209`) — manifest version is MAJOR-AUTO (commit
-  count); `deploy.ps1` refuses to overwrite an existing zip, `validate.ps1` S3 fails
-  on a stale manifest.
 - **R71** (`tier0/DECISIONS.md:2267`) — `SPOTLIGHT_BASE_MULT = 1.5` ratified;
   mirrored as `SpotlightSystem.GuestCastBaseMultiplier`.
 - **R72** (`tier0/DECISIONS.md:2313`) — Kaboom Beetle Swarm snapshots bombed-state
@@ -144,8 +140,6 @@ In-game there is no CLI: `KleeMod.Initialize` is the only entry
 - **`ProgressSaveManager_EpochCheck_Patch` is a CANARY, not the fix.** If its warn
   line appears, BaseLib's `ICustomModel` guard stopped applying; deleting it removes
   the detector — `KleeMod.cs:396-414`.
-- **`SoftlockGuards` entries must be `nameof`, never literals** — a literal survives
-  a rename and guards nothing — `KleePatchBootstrap.cs:53-62`.
 - **The self-check must never throw** (`Diagnostics/KleeSelfCheck.cs:29-31`) and runs
   as a `Priority.Last` postfix on `ModelDb.Init` so it sees BaseLib's loc injection
   (`:568-583`).

@@ -11,12 +11,12 @@ staged `mods/klee` package (manifest, `klee.dll`, flat card PNGs, `klee.pck` and
 its contract), gates that stage with static rules, and either copies it into the
 game or zips it for co-op handoff. It is deliberately **not** a runtime
 validator — anything needing evaluated values (`StartingRelics`, loc keys after
-BaseLib prefixing, pool rarity) is out of scope and lives in
-`KleeCode/Diagnostics/KleeSelfCheck.cs` (`validate.ps1:1-11`,
-`klee-mod/DECISIONS.md:200-222`). It is also not an art pipeline: pixels are
-produced under `ImageGen/` (Tier F, gitignored) and this layer only imports and
-packs them. `deploy_bridge.ps1` ships a **test harness**, never a shipped
-artifact, and must never enter the handoff zip (`deploy_bridge.ps1:14-17`).
+BaseLib prefixing, pool rarity) lives in `KleeCode/Diagnostics/KleeSelfCheck.cs`
+(`validate.ps1:1-11`, `klee-mod/DECISIONS.md:200-222`) — and not an art
+pipeline: pixels are produced under `ImageGen/` (Tier F, gitignored) and this
+layer only imports and packs them. `deploy_bridge.ps1` ships a **test harness**,
+never a shipped artifact, and it must never enter the handoff zip
+(`deploy_bridge.ps1:14-17`).
 
 ## 2. Entry points
 
@@ -140,20 +140,17 @@ In-process (dot-source `build/version.ps1`): `Get-PackageVersion`,
   `Where-Object { $_.Name -notlike '*_cutout.png' }`; the `-Exclude` form
   silently copied zero images and dropped both characters onto Klee's fallbacks
   (`tools/build_pck.ps1:172-200`).
-- **One scene path = one conversion target.** BaseLib's registry is path-keyed;
-  reusing a scene for rest site and merchant caused the first-campfire softlock,
-  which is why three near-identical sprite scenes exist per character
-  (`tools/build_pck.ps1:498-565`, `klee-mod/pck-src/README.md:21-23`).
-- **No scripts in pck scenes**, ever — the assembly builds with plain
-  `Microsoft.NET.Sdk` and has no ScriptPath mapping
-  (`klee-mod/pck-src/README.md:16-19`, `klee-mod/DECISIONS.md:1704-1712`).
+- **One scene path = one conversion target**, and **no scripts in pck scenes**:
+  BaseLib's registry is path-keyed (reusing a scene for rest site and merchant
+  caused the first-campfire softlock, hence three near-identical sprite scenes
+  per character), and the assembly has no ScriptPath mapping
+  (`tools/build_pck.ps1:498-565`, `klee-mod/pck-src/README.md:16-23`,
+  `klee-mod/DECISIONS.md:1704-1712`).
 - **S7's game_ref decision table is three-way**: absent → committed-only with a
   banner; **incomplete → FAIL** (the stale-reference case that masked a red
   suite); complete → `--verify` then full-suite auto mode
-  (`validate.ps1:517-606`).
-- **`-StaticOnly` is never what deploy uses** and prints a loud banner; a fast
-  mode mistakable for a full pass is R70's failure class inverted
-  (`validate.ps1:25-29`, `:608-616`).
+  (`validate.ps1:517-606`). `-StaticOnly` skips only the suite, prints a loud
+  banner, and is never what deploy passes (`validate.ps1:25-29`, `:608-616`).
 - **The game holds a lock on `klee.dll`.** deploy fails fast if
   `SlayTheSpire2` is running, except under `-Package`, where the zip is built and
   only the local copy is skipped (`deploy.ps1:55-63`, `:221-226`).
