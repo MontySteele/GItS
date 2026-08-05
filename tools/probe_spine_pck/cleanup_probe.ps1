@@ -9,10 +9,13 @@
     3. user settings.save mtime unchanged (the game rewrites it on quit; a
        change is REPORTED, not treated as failure -- launching the game is
        what the probe asked for)
-    4. steam_appid.txt is exactly as it was (it ships with the game; the rule
-       is that the probe leaves no NEW one and does not touch the existing)
+    4. steam_appid.txt ABSENT. It does not ship with the game: the file appears
+       only when the exe is run outside Steam. Any copy found here is removed,
+       whether this session created it or inherited it from another one.
     5. every file in the install root still hashes to its baseline value
-    6. no leftover run: the probe never starts one, so this is a listing check
+    6. no leftover run: save files compared against baseline, across EVERY
+       saves directory -- runs park under steam\<id>\profileN\saves, not under
+       default\1, so checking one profile checks the wrong folder
 
   NOTE: pure ASCII. Windows PowerShell 5.1 reads .ps1 as ANSI without a BOM.
 #>
@@ -54,7 +57,8 @@ if (($nowMods -join '|') -ne ($wasMods -join '|')) {
     Write-Host "OK  mods list unchanged: $($nowMods -join ', ')" -ForegroundColor Green
 }
 
-$settings = Join-Path $env:APPDATA 'SlayTheSpire2\default\1\settings.save'
+$userDir  = if ($baseline.userDir) { $baseline.userDir } else { Join-Path $env:APPDATA 'SlayTheSpire2' }
+$settings = Join-Path $userDir 'default\1\settings.save'
 $nowSettings = if (Test-Path $settings) { (Get-Item $settings).LastWriteTimeUtc.ToString('o') } else { $null }
 if ($nowSettings -ne $baseline.settingsMtime) {
     $note += "settings.save mtime moved ($($baseline.settingsMtime) -> $nowSettings). Expected if the game was launched; it is user state, not install state."
@@ -62,13 +66,52 @@ if ($nowSettings -ne $baseline.settingsMtime) {
     Write-Host "OK  settings.save mtime unchanged" -ForegroundColor Green
 }
 
+# steam_appid.txt: correct end state is ABSENT. The file is written by the exe
+# when it is run outside Steam; it does not ship. Remove it whoever made it.
 $appId = Join-Path $GameDir 'steam_appid.txt'
-$nowAppIdExists = Test-Path $appId
-$nowAppIdMtime  = if ($nowAppIdExists) { (Get-Item $appId).LastWriteTimeUtc.ToString('o') } else { $null }
-if ($nowAppIdExists -ne $baseline.appIdExists -or $nowAppIdMtime -ne $baseline.appIdMtime) {
-    $fail += "steam_appid.txt changed (exists $($baseline.appIdExists)->$nowAppIdExists, mtime $($baseline.appIdMtime)->$nowAppIdMtime)"
+if (Test-Path $appId) {
+    Remove-Item $appId -Force
+    if ($baseline.appIdExistsAtBaseline) {
+        $note += "steam_appid.txt was present at baseline (a leak from another session) and has been REMOVED. End state is absent, as it should be."
+    } else {
+        $note += "steam_appid.txt appeared during this session and has been REMOVED -- something launched the exe directly instead of through Steam."
+    }
 } else {
-    Write-Host "OK  steam_appid.txt untouched (shipped with the game, still as found)" -ForegroundColor Green
+    Write-Host "OK  steam_appid.txt absent (correct end state; it does not ship with the game)" -ForegroundColor Green
+}
+
+# Runs park under steam\<id>\profileN\saves -- NOT under default\1, so a check
+# that looks only at the default profile looks in the wrong place.
+#
+# But not every .save is a run. settings.save / prefs.save / progress.save /
+# profile.save are persistent user state and the game rewrites settings.save
+# on every quit; treating those as "a run was left behind" cries wolf on a
+# clean session (measured: steam\<id>\settings.save went 2949 -> 3062 bytes on
+# a boot that never started a run). Classify, then judge:
+#   - anything under a saves\ directory that is NOT prefs/progress  -> a RUN
+#   - settings/prefs/progress/profile                               -> state
+$stateNames = 'settings.save', 'prefs.save', 'progress.save', 'profile.save'
+function Test-IsRunFile([string]$relPath) {
+    $leaf = Split-Path $relPath -Leaf
+    $leaf = $leaf -replace '\.backup$', ''
+    return ($relPath -match '[\\/]saves[\\/]') -and ($leaf -notin $stateNames)
+}
+
+$nowSaves = @(Get-ChildItem $userDir -Recurse -File -Include '*.save', '*.save.backup' -ErrorAction SilentlyContinue |
+    ForEach-Object { "$($_.FullName.Substring($userDir.Length + 1))|$($_.Length)" } | Sort-Object)
+$wasSaves = @($baseline.saveFiles | ForEach-Object { "$($_.path)|$($_.size)" } | Sort-Object)
+
+$changed  = @($nowSaves | Where-Object { $_ -notin $wasSaves })
+$runFiles = @($changed | Where-Object { Test-IsRunFile ($_ -split '\|')[0] })
+$statey   = @($changed | Where-Object { -not (Test-IsRunFile ($_ -split '\|')[0]) })
+
+if ($runFiles.Count -gt 0) {
+    $fail += "RUN LEFT BEHIND -- new/changed run file(s): $($runFiles -join '; ')"
+} else {
+    Write-Host "OK  no run left behind (all profiles checked, incl. steam\<id>\profileN\saves)" -ForegroundColor Green
+}
+if ($statey.Count -gt 0) {
+    $note += "user-state file(s) rewritten, which a launch does by itself: $($statey -join '; ')"
 }
 
 foreach ($f in $baseline.installRoot) {

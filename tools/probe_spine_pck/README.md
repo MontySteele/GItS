@@ -38,10 +38,23 @@ The difference between the two is the whole experiment at the packing layer.
 ```
 dotnet build tools\probe_spine_pck\SpineProbe\SpineProbe.csproj -c Release
 powershell -File tools\probe_spine_pck\deploy_probe.ps1 -ProjectDir $SCRATCH
-# launch the game, reach the main menu, quit
+start steam://rungameid/2868840     # NEVER SlayTheSpire2.exe directly
+# reach the main menu, quit
 #   %APPDATA%\SlayTheSpire2\logs\godot.log  ->  lines tagged [spineprobe]
 powershell -File tools\probe_spine_pck\cleanup_probe.ps1 -ProjectDir $SCRATCH
 ```
+
+**Launch through Steam.** Running the exe directly makes it write
+`steam_appid.txt` into the install root. That file does **not** ship with the
+game, and a killed session leaves it behind for the next one to mistake for
+pre-existing state. `cleanup_probe.ps1` removes any copy it finds, whoever made
+it; the correct end state is absent.
+
+**Runs park under `steam\<id>\profileN\saves`**, not `default\1`. The cleanup
+check walks every profile, and distinguishes run files from
+`settings`/`prefs`/`progress`/`profile` state — the game rewrites
+`settings.save` on every quit, and calling that "a run was left behind" is a
+false alarm on a clean session.
 
 ### Observables, decided in advance
 

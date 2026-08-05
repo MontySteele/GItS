@@ -28,7 +28,7 @@ Sources used, all read-only:
 |---|---|---|
 | **M-Q1** | Does the installed Downfall pck contain `.skel`/`.atlas` as raw packed files? | **NO — and the distinction turns out not to matter.** It ships `.spskel`/`.spatlas`, but those are the *near-identity* output of the importer: the `.spskel` is the raw Spine binary byte-for-byte, and the `.spatlas` is a four-key JSON envelope around the verbatim `.atlas` text. Neither carries a `.import` descriptor, and neither lives in `.godot/imported/`. §1 |
 | **M-Q2** | Does Downfall's build treat Spine files specially? | **NO.** They do not use `--export-pack` at all. `build/pack_mod.gd` walks the project with `PCKPacker` and `add_file`s everything that is not a raw image or audio file — Spine data is opaque bytes to their packer. **That is the one thing our build does differently**, and it is measurable (§3). |
-| **M-Q3** | Does a probe `.tscn` survive OUR `build_pck` and load in-game? | **PART-ANSWERED. Packing: measured today, offline. Loading: PREPARED — awaiting game window.** §3 |
+| **M-Q3** | Does a probe `.tscn` survive OUR `build_pck` and load in-game? | **YES for `.spskel`/`.spatlas` — measured in-game: `ROOT=SpineSprite`, `data_loaded=true`, and it visibly draws. NO for raw `.skel`/`.atlas`: `No loader found`. The MegaDot editor never knew any of the types.** §3 |
 | **M-Q4** | Which Downfall characters use Spine vs other? | **10 of 11 use Spine; Hexaghost alone does not.** Full per-scene node census in §4. |
 | **M-Q5** | How does Downfall drive animations from C#? | A Harmony **postfix on `NCreature.SetAnimationTrigger`** dispatching to an `IAnimatedVisuals` interface on the scene script, which calls `SpineBody.GetAnimationState()` and sets named clips with explicit per-trigger mix times. **Our router is already the same patch shape**; the delta is the target, not the plumbing. §5 |
 | **M-Q6** | Licence facts | Editor licence is per named person, **$69 Essential / $379 Professional** (measured today), one-time, under a $500k revenue ceiling. **Neither agreement contains any clause about generating skeleton data without the Editor** — and the shipped runtime loads `.spjson` / `.spine-json`. Flagged, not concluded. §6 |
@@ -95,7 +95,7 @@ Two further facts, both load-bearing:
    and the matching `SpineSkeletonFileResource` → `champ.spskel`, with a
    `SpineSkeletonDataResource` **inlined as a `sub_resource`** rather than kept
    in a separate `_skel_data.tres` the way the base game does it.
-2. **The shipped runtime recognises both forms.** Strings in
+2. **The shipped runtime carries its own loaders.** Strings in
    `libspine_godot.windows.template_release.x86_64.dll` — the template_release
    build, the only one the game ships — include
    `SpineSkeletonFileResourceFormatLoader`, `SpineAtlasResourceFormatLoader`,
@@ -104,12 +104,22 @@ Two further facts, both load-bearing:
    `.skel`**; next to `SpineAtlasResource.cpp`'s `load_from_atlas_file`,
    **`spatlas` `.atlas`**.
 
-**So the hypothesis under test is confirmed with one correction.** Mods do not
-need editor import artefacts, and the runtime resolves these types by extension
-through its own `ResourceFormatLoader`s — but Downfall 0.1.7 ships the
-`.spskel`/`.spatlas` spelling, not the raw one. The raw spelling is what their
-*repository* now uses (§2), and the runtime string table says it accepts that
-too.
+   **Do not read that string list as the set of extensions the loader claims.**
+   The in-game probe (§3b) settles it: `.spskel`/`.spatlas` load, and raw
+   `.skel`/`.atlas` produce `No loader found for resource` at the same boot,
+   from the same pack. `load_from_file` accepting a `.skel` *path* and the
+   `ResourceFormatLoader` *recognising* the `.skel` extension are two different
+   things, and only the second one is what a `.tscn` `ext_resource` needs.
+
+**So the hypothesis under test is confirmed, with the spelling pinned down.**
+Mods do not need editor import artefacts — the runtime resolves these types
+itself — but the resolvable spelling is **`.spskel`/`.spatlas`, not raw**. That
+is exactly what Downfall 0.1.7 ships. Their *repository* has since migrated to
+raw `.skel` (§2); that form is not evidenced as working by anything here, and
+our probe says it does not load unaided, so the most likely explanation is that
+their stock-Godot editor imports it and their packer follows the `.import`
+remap. **The conversion we would need is not an importer — it is a file rename
+plus a four-key JSON wrapper.**
 
 **F1 §1d stands exactly as written** — MegaDot has no spine importer, and
 `importer="spine.skel"` cannot run. What this section removes is the *inference*
@@ -247,10 +257,94 @@ Three findings from that table:
 build fails before any question of how the rig looks" — did not occur.** The
 build does not fail. It silently omits four files, and one preset line stops it.
 
-### 3b. Loading half — **PREPARED, awaiting game window**
+### 3b. Loading half — **MEASURED in-game, 2026-08-05**
 
-Not run this pass: the game process belongs to another track. Everything is
-built and staged.
+Deployed as prepared: one new folder `mods\spineprobe` (manifest + 8 KB dll +
+the 527 KB `wide` pack), launched **through Steam** (`steam://rungameid/2868840`
+— never the exe directly, see §3c), main menu reached, quit, removed.
+
+Verbatim from `%APPDATA%\SlayTheSpire2\logs\godot.log`:
+
+```
+[INFO] Loading Godot PCK …\mods\spineprobe\spineprobe.pck
+[INFO] [spineprobe] M-Q3 probe starting.
+[INFO] [spineprobe] res://spineprobe/probe_control.tscn EXISTS=True
+[INFO] [spineprobe] res://spineprobe/probe_control.tscn LOADED=True
+[INFO] [spineprobe] res://spineprobe/probe_control.tscn ROOT=Sprite2D name=Visuals
+[INFO] [spineprobe] res://spineprobe/probe_raw.tscn EXISTS=True
+ERROR: No loader found for resource: res://spineprobe/rig.atlas (expected type: SpineAtlasResource)
+ERROR: No loader found for resource: res://spineprobe/rig.skel (expected type: SpineSkeletonFileResource)
+ERROR: res://spineprobe/probe_raw.tscn:7 - Parse Error: [ext_resource] referenced non-existent resource at: res://spineprobe/rig.atlas.
+ERROR: Failed loading resource: res://spineprobe/probe_raw.tscn.
+[INFO] [spineprobe] res://spineprobe/probe_raw.tscn LOADED=False
+[INFO] [spineprobe] res://spineprobe/probe_imported.tscn EXISTS=True
+[INFO] [spineprobe] res://spineprobe/probe_imported.tscn LOADED=True
+[INFO] [spineprobe] res://spineprobe/probe_imported.tscn ROOT=SpineSprite name=Visuals
+[INFO] [spineprobe] res://spineprobe/probe_imported.tscn SKELETON data_loaded=true
+[INFO] [spineprobe] M-Q3 probe done.
+…
+[INFO] [spineprobe] res://spineprobe/probe_imported.tscn ATTACHED to root at (640,540)
+```
+
+Per arm:
+
+| Arm | EXISTS | LOADED | ROOT | SKELETON | Answer |
+|---|:--:|:--:|---|---|---|
+| `probe_control.tscn` (`Sprite2D`) | ✔ | ✔ | `Sprite2D` | n/a | **YES** — pack and mount are sound, so nothing below is an artefact |
+| `probe_raw.tscn` (`.skel`+`.atlas`) | ✔ | **✘** | — | — | **NO** — packed fine, **type resolution failed**: `No loader found`, for the atlas *and* the skeleton |
+| `probe_imported.tscn` (`.spskel`+`.spatlas`) | ✔ | ✔ | **`SpineSprite`** | **`data_loaded=true`** | **YES** |
+
+**And it draws.** A screen capture at the profile screen shows the
+`punch_construct` rig rendered over the menu at its authoring scale — pale
+segmented limbs and a fist filling the right third of a 1280×720 window. Setup
+pose, since the probe sets no animation. The fifth observable — *everything
+resolves and still nothing draws* — did not occur.
+
+**M-Q3, answered.** A `.tscn` naming `SpineSprite`, `SpineAtlasResource`,
+`SpineSkeletonFileResource` and `SpineSkeletonDataResource`, packed by an editor
+that can parse none of those types and emitted four `ERROR` lines while packing
+it, **loads, resolves, instantiates and renders in the shipped game.** The
+editor importer is not on the path. The one thing that is on the path is the
+file spelling: `.spskel`/`.spatlas`, which is a rename and a JSON wrapper away
+from a Spine export.
+
+Two lines the probe did *not* need but which sharpen the failure taxonomy:
+`probe_raw.tscn` failed at **`LOADED`**, not at `EXISTS` — precisely the
+distinction the arms were designed to separate, and it worked. Had we only
+tested the raw spelling we would have concluded Path A′ was dead.
+
+### 3c. Restoration
+
+Checked against the baseline captured before deployment:
+
+- **mods list unchanged** — `klee, quick_fingers, STS2AutoSlayMod`;
+  `mods\spineprobe` removed.
+- **install root: all 13 files hash to baseline.** Nothing in the install
+  modified.
+- **`steam_appid.txt` ABSENT.** It does **not** ship with the game — it appears
+  only when the exe is run outside Steam. This session never created one
+  (launched via `steam://rungameid/2868840`), and none is present now. *An
+  earlier draft of this memo recorded it as "ships with the game, so the rule is
+  no NEW one" — that was wrong, and it was wrong because the baseline observed a
+  leaked copy from another session. The correct end state is absent.* Both
+  scripts now enforce that.
+- **`default\1\settings.save` mtime unchanged.**
+- **No run left behind.** Checked across every profile including
+  `steam\<id>\profileN\saves`, where runs actually park — not `default\1`. No
+  run file exists in any of them; `progress.save` is byte-identical in both the
+  vanilla and modded profile trees. The one file that did move was
+  `steam\<id>\settings.save` (2949 → 3062 bytes), which the game rewrites on
+  quit. The first cleanup run reported that as a failure; the classifier was too
+  coarse and now separates run files from user state, so a clean session stops
+  crying wolf.
+- Scratch project deleted, **rig copy included**; probe build output deleted.
+  No base-game asset was ever written inside the repo — the generator refuses an
+  `--out` under it.
+
+### 3d. Prepared apparatus (retained)
+
+Everything below stays in the tree so the result is reproducible without
+re-deriving it. It is wired into nothing.
 
 - `tools/probe_spine_pck/SpineProbe/` — a throwaway mod (`spineprobe`,
   `affects_gameplay: false`, no dependencies, no patches, no registrations).
@@ -285,9 +379,14 @@ printed to `godot.log` as `[spineprobe]` lines:
 | `SKELETON data_loaded=` (`is_skeleton_data_loaded`, called by class-name binding, exactly as the game does it per S5) | types resolved, data did not — the **silent no-render** mode |
 | `ATTACHED` + eyes on the menu | everything resolved and still nothing draws |
 
-Run order on the go signal: `dotnet build` → `deploy_probe.ps1` → launch, reach
-the main menu, quit → read `%APPDATA%\SlayTheSpire2\logs\godot.log` →
-`cleanup_probe.ps1` → paste its OK/FAIL block into §3b.
+Run order, as executed: `dotnet build` → `deploy_probe.ps1` → **launch through
+Steam** → main menu → quit → read `godot.log` → `cleanup_probe.ps1`.
+
+**Launch through Steam, never the exe.** Running `SlayTheSpire2.exe` directly
+makes it write `steam_appid.txt` into the install root — a footprint the Steam
+launch does not leave, and one that outlives a killed session. With Steam
+already running, `start steam://rungameid/2868840` costs nothing and leaves
+nothing.
 
 ---
 
@@ -509,7 +608,7 @@ description.**
 
 ---
 
-## 7. M-Q7 — revised cost table (**PROPOSED**, provisional pending §3b)
+## 7. M-Q7 — revised cost table (**PROPOSED** — final for this pass; §3b is in)
 
 Supplement to F1 §4, which is unchanged and remains the reference. New column
 **A′** is the same technology reached without the editor importer.
@@ -517,24 +616,29 @@ Supplement to F1 §4, which is unchanged and remains the reference. New column
 | | **A — Spine (F1, via editor import)** | **A′ — Spine runtime path *(new, PROPOSED)*** | **B — Skeleton2D** | **C — layered Sprite2D** |
 |---|---|---|---|---|
 | Licence $ (per person, one-off) | ~$69 → Professional tier (F1 §1c) | **$69 Essential / $379 Professional, measured §6** — *unless* §6(c) resolves in favour of non-Editor generation, in which case unknown and possibly $0 | $0 | $0 |
-| Tooling gap (one-off) | **BLOCKER: no spine editor extension for MegaDot 4.5.1** (F1 §1d) | **DOWNGRADED: one `include_filter` line in the export preset** (§3a, measured) **+ one open item: in-game load** (§3b) | none known, unproven | none — shipped |
+| Tooling gap (one-off) | **BLOCKER: no spine editor extension for MegaDot 4.5.1** (F1 §1d) | **CLOSED, measured end-to-end: one `include_filter` line in the export preset (§3a) + ship the `.spskel`/`.spatlas` spelling (§3b). No editor extension, no importer, no MegaDot change.** | none known, unproven | none — shipped |
+| Format conversion, one-off | n/a — the importer does it | **~10 lines**: `.skel` → `.spskel` is a rename (bytes identical, §1); `.atlas` → `.spatlas` is a four-key JSON wrapper. Raw spellings **do not load** (§3b), so this step is mandatory and is the whole of it | n/a | n/a |
 | Rig acquisition, per entity | Editor authoring | **Editor authoring, OR generation into `.spjson` — §6(c) unresolved** | — | — |
 | Authoring hours class | 1 day → 5–10 days (F1 §1e) | **unchanged where the Editor is used**; the generated branch is unquantified and no generator exists in this repo | 1 day → 3+ days | 0.5 → 1.5 days |
 | Review rounds | 2–4 | 2–4 | 2–4 | 2–4, measured |
-| Runtime risk | low once loading works | **low–medium**: loaders confirmed present in `template_release` (§1), version skew tolerated in a shipped mod (§4), but our own load is §3b | low–medium | lowest |
+| Runtime risk | low once loading works | **low, measured**: loads, resolves `SpineSprite`, reports `data_loaded=true`, and renders, in our own pack (§3b). Residual risk is combat integration and damage-frame timing, not loading | low–medium | lowest |
 | Visual ceiling | base-game parity | base-game parity — same runtime, same data | true deformation, unproven | rigid layers only |
-| Working example in reach | 101 (base game) | **101 base-game + 10 of 11 Downfall characters, one of which ships a `4.2.11` rig against a `4.2.43` runtime** | 0 | 2 (ours) |
+| Working example in reach | 101 (base game) | **101 base-game + 10 of 11 Downfall characters (one shipping a `4.2.11` rig against a `4.2.43` runtime) + 1 of ours, tonight** | 0 | 2 (ours) |
 
-**The one-line delta:** F1 priced Path A with a pipeline blocker of *"unknown;
-non-zero and possibly large"* sitting in front of the first rig. That blocker,
-as measured, is **an export-preset filter plus an unrun load test**. What
-remains genuinely expensive on Path A is unchanged and was never the tooling:
-**the licence per person and the authoring hours per rig** — a median base-game
-rig being 64 bones and 28 separately-drawn pieces (F1 §1b), which for us is a
-*drawing* bill before it is a rigging bill.
+**The delta, in one line:** F1 priced Path A with a pipeline blocker of
+*"unknown; non-zero and possibly large"* standing in front of the first rig.
+Measured, that blocker is **one export-preset line and a ten-line format
+shim** — and the load it was supposed to prevent has now happened. What remains
+expensive on Path A is unchanged and was never the tooling: **the licence per
+person and the authoring hours per rig**, a median base-game rig being 64 bones
+and 28 separately-drawn pieces (F1 §1b) — which for us is a *drawing* bill
+before it is a rigging bill.
 
-**Provisional.** §3b decides whether A′ survives contact with the engine. If
-`LOADED=false`, A′ collapses back into A and F1's table stands unamended.
+**The parts of F1's Path A that this does NOT touch**, and which remain the
+whole cost: the per-person Editor licence (§6a/b), the authoring hours, the
+review loop, and — unresolved — whether a rig can be produced without the
+Editor at all (§6c). A cleared tooling gap is not a cleared path, and this is
+not a recommendation to take it.
 
 ---
 
@@ -542,12 +646,16 @@ rig being 64 bones and 28 separately-drawn pieces (F1 §1b), which for us is a
 
 Addressed to the `animation-sprint-2` stream.
 
-1. **The spike's Path-A gate has moved.** F1 §6 item 6 — *"that a spine-enabled
-   MegaDot 4.5.1 editor binary can be obtained or built at all"* — is **no
-   longer the gate on everything else**, because nothing in the shipped chain is
-   an imported resource (§1) and our exporter carries the files given one filter
-   line (§3a). The gate is now F1 §6 item 1, *in-engine load of a custom
-   creature skeleton*, which is §3b of this memo and is one game launch away.
+1. **Two of the spike's open items are closed, and neither closed the way it was
+   framed.** F1 §6 item 6 — *"that a spine-enabled MegaDot 4.5.1 editor binary
+   can be obtained or built at all"* — is **moot**: nothing in the shipped chain
+   is an imported resource (§1), and no editor extension is needed to build or
+   to load. F1 §6 item 1 — *"in-engine load of a custom creature skeleton…
+   nothing here proves a non-`Sprite2D` `Visuals` child survives at runtime"* —
+   is **answered YES** (§3b): a `SpineSprite` scene loaded, resolved and drew
+   from our own pack. What is *not* answered is the same item's harder half:
+   the probe parented its node to the menu root, **not** into a creature under
+   `NCreatureVisuals`' name-based bind. See item 4.
 2. **The router does not need rebuilding for any path.**
    `CreatureAnimationRouter` is already the patch shape Downfall runs in
    production on ten characters (§5). Path A′ would add a branch targeting
@@ -559,7 +667,32 @@ Addressed to the `animation-sprint-2` stream.
    at once, with Godot nodes parented to named Spine bones (§5). A future
    character could be a Spine body with layered `Sprite2D` accessories, which is
    a shape neither F1's three-path framing nor ours currently has a name for.
-4. **Two things to be careful about, found in passing, both about our own
+4. **The name-not-type claim is load-bearing and now has evidence on both
+   sides.** F1 §2a rests on `NCreatureVisuals` binding children by NAME — which
+   is what lets a `Sprite2D` sit where the base game puts a `SpineSprite`.
+   Track I's playtest captures record the mirror-image failure: Furina's
+   merchant scene auto-converts to `NMerchantCharacter` and the game then throws
+   **`Expected BoundObject to be a SpineSprite, but it is a Sprite2D!`** — a
+   base-game *Spine* bind site receiving our `Sprite2D` and failing loudly but
+   non-fatally.
+
+   **Attribution, honestly:** that error is Track I's capture, not ours. It does
+   **not** appear in tonight's `godot.log`, and it could not have — the probe
+   boot reached the main menu and never opened a merchant, and the probe's own
+   node was parented to the root rather than into a creature. So it is carried
+   here as corroborating evidence to verify further, not as a Track M
+   measurement.
+
+   What it does establish, taken with §3b: **the name-based contract is not
+   universal.** Some base-game sites bind by name (F1 §2a's placeholder scenes,
+   and our two shipped characters) and at least one binds by *type* and says so.
+   That cuts both ways for the path choice — it is a cost on Paths B and C
+   (every such site is a potential loud failure with a non-Spine `Visuals`) and
+   a *saving* on Path A′ (a real `SpineSprite` satisfies them all). **The
+   remaining Path A′ unknown is therefore not "does it load" but "does it seat"
+   — a `SpineSprite` as an actual creature's `Visuals`, in combat, taking
+   hits.** That is the next probe, and it is a bigger one.
+5. **Two things to be careful about, found in passing, both about our own
    scripts.** `build_pck.ps1` gates on `ERROR` in the *import* log and not the
    *export* log, and the export step is where the spine errors appear (§3a) —
    so a half-packed spine build would look green. And the derived contract is
@@ -567,7 +700,9 @@ Addressed to the `animation-sprint-2` stream.
    resources the `strict` preset did not ship. Neither is a request to change
    anything; both are recorded because they would bite in exactly the scenario
    this memo is about.
-5. **Nothing here is a path decision, and none of it moves the pilot.**
+6. **Nothing here is a path decision, and none of it moves the pilot.** The
+   tooling gap on Path A′ is cleared; the licence, the drawing bill and the
+   review loop are not, and they were always the larger numbers.
 
 ### Kokomi as pilot — carried over unchanged
 
