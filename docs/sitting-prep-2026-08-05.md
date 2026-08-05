@@ -1305,3 +1305,22 @@ justification no longer describes canon — and Lunar-Crystallize's Moondrift
 constructs put Columbina and Zhongli in the same Crystallize space the repo
 fenced to slot 4 (the fence HOLDS in both dossiers). Recorded as facts for
 the slot-5 conversation; no ask attached beyond awareness.
+
+**10.11 (Track B) — the C2 escrow is now rulable: both probes reported.**
+Full findings: `docs/probe-a-block-offset.md`, `docs/probe-b-fanfare-residual.md`.
+Probe (a): the +2 block offset REPRODUCES but the mechanism is **Frail** —
+a status the fight record does not carry, so the replay resolved Block at
+printed value; agreement goes 7/38 → 33/38 once status-loaded, and
+`SPOTLIGHT_BASE_MULT`/`FRAIL_BLOCK_MULT` parity with C# is exact. **C1 is
+family B (reconstruction gap), not a sim infidelity.** Probe (b): the
+Fanfare residual LOCALIZES to (1) the unrecorded Spotlight selector, (2)
+the turn-open sampling seam, (3) a genuine +2 Fanfare per combat on the
+first-designation play — tier0-OPTIMISTIC. With selectors consumed:
+residual median −2.0 → +1.0, under/over 70/22 → 26/66, turn-1 median
+−4.0 → 0.0, per-play income 53/54 exact. **Direction: tier0 is NOT
+pessimistic on fanfare** — the R102 worry (verdicts understated, STOP
+premature) is not supported by the measurement. **The ruling (R102's own
+terms):** either strike the four PROVISIONAL marks (threshold-reach table,
+1.8% STOP, early-half grade, R91/2b posture) as instrument-vindicated, or
+formally re-open any of them — one clean ledger operation either way; the
+probe measures, this pack does not lean.
