@@ -160,7 +160,21 @@ at all is open — needs an answer wherever X2 lands.
 
 ## Slot 3 — F14's siblings: the repair is STAGED on its own branch
 
-**AWAITING [USER]. Approve the merge, or send it back.**
+> **ANSWERED 2026-08-06 (Track Y) — reply: MERGE.** Verbatim: *"MERGE —
+> `staged/f14-siblings` (`eaa83e5`) merges: four repairs + the citation lint.
+> Suite green on the merge commit."* (sixth-wave brief, Track Y item Y-3;
+> transcribed at `docs/sitting-record-predraft-2026-08-06.md` §7.) The branch is
+> merged into `findings/track-y`; suite green on the merge commit (1952 passed /
+> 41 skipped / 14 xfailed, committed-only). One conflict, in
+> `.github/workflows/repo.yml`: both sides added a lint step to the same job,
+> and both steps were kept.
+>
+> The paragraph below headed "what the branch deliberately does NOT touch"
+> **still stands as a live, unlinted fact**: `tools/lint_role_tempo_coverage.py`
+> carries the same misattribution three times, and the lint is scoped away from
+> it on purpose.
+
+~~**AWAITING [USER]. Approve the merge, or send it back.**~~
 
 **The question.** S4 finding F14 named one wrong R-number citation and R107
 fixed it (`docs/role-tempo-floors.yaml`'s generated header now reads R90/1c).
