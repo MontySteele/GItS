@@ -519,3 +519,42 @@ def test_a_live_game_with_a_dead_socket_is_still_the_wire():
     assert sess.exit_code is None
     # --no-setup attaches to someone else's process; it is not ours to judge.
     assert _session_with(None).died(grace=5.0) is False
+
+
+def test_a_bundle_preview_is_confirmed_rather_than_re_picked():
+    """Defect 12. `select_bundle` opens a PREVIEW; the bridge refuses the next
+    one ("A bundle preview is already open - confirm or cancel it first"), so
+    a walker that only knows how to select re-picks index 0 until the watchdog
+    stops the run. Neow's Scroll Boxes ended a run at sixteen actions."""
+    fresh = {"state_type": "bundle_select",
+             "bundle_select": {"preview_showing": False,
+                               "bundles": [{"index": 0}, {"index": 1}]}}
+    assert soak._mechanical_action(fresh) == {"action": "select_bundle",
+                                              "index": 0}
+    previewing = {"state_type": "bundle_select",
+                  "bundle_select": {"preview_showing": True}}
+    assert soak._mechanical_action(previewing) ==         {"action": "confirm_bundle_selection"}
+
+
+def test_a_meter_the_wire_cannot_see_is_recorded_as_unseen():
+    """Encore is a CustomResource, not a power, and the bridge only walks
+    `creature.Powers`. A zero would be a measurement claiming the meter was
+    empty in fights where it demonstrably was not -- the human feed reads 5,
+    10 and 8 on the very turns the bot feed cannot see anything."""
+    state = {"player": {"status": [
+        {"id": "FANFARE_METER_POWER", "name": "Fanfare", "amount": 12},
+        {"id": "SALON_MEMBER_POWER", "name": "Salon Member", "amount": 2},
+    ]}}
+    fanfare, salon, cap, encore = soak._meters(state)
+    assert (fanfare, salon, cap) == (12, 2, soak.SALON_PRINTED_CAP)
+    assert encore == soak.ENCORE_UNSEEN == -1
+
+
+def test_meters_are_read_by_power_id_not_by_display_name():
+    """A display name is loc data and moves with a wording pass."""
+    renamed = {"player": {"status": [
+        {"id": "FANFARE_METER_POWER", "name": "Applause", "amount": 7}]}}
+    assert soak._meters(renamed)[0] == 7
+    unknown = {"player": {"status": [
+        {"id": "SOME_OTHER_POWER", "name": "Fanfare", "amount": 99}]}}
+    assert soak._meters(unknown)[0] == 0

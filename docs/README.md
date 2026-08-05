@@ -52,6 +52,10 @@ otherwise).
 | `epoch-1-log-2026-07-26.md` | EPOCH 1's landing record: what moved, what was archived, and the graded predictions. The current canonical-cell baseline lives here. |
 | `track-a-kickoff-brief.md` | Track A's execution brief (T1–T4). Executed 2026-08-04. |
 | `sprint-axis-validity-track-a-log-2026-08-04.md` | **OPEN, and the doc of record for P1's binding null.** §0 holds the graded predictions; §3 diagnoses why the null fired; §4 is the stop-and-surface list; §6 is what [USER] gate A-G1 most needs to look at. |
+| `handback-note-2026-08-04.md` | [USER]'s hand-back note opening the validation-soak + Track B session, verbatim. |
+| `sprint-understudy-p1-log-2026-08-04.md` | The bot-playtest apparatus. **P1 VALIDATED** (clean N=3, R98); carries the eleven harness defects and the two debts still open. |
+| `sprint-track-b-curves-log-2026-08-04.md` | **OPEN.** Track B's two feeds: what shipped, the live-shared-surface cross-session note, the graded pre-registrations, and the reversibility ledger (incl. the standing mod redeploy). |
+| `track-b-curves.md` | **GENERATED — do not hand-edit.** B1 (demand) and B2 (output) curves, per feed. Rebuild: `python tools/track_b_curves.py --out docs/track-b-curves.md`. Empty cells are empty on purpose. |
 
 ### Live references
 | doc | what it is |

@@ -157,6 +157,20 @@ internal static class PlayTelemetry
                     { round, (int)creature.CurrentHp, (int)creature.Block });
                 record.IncomingByTurn.Add(new[] { round, telegraphed, attackers });
                 record.EnemyPoolByTurn.Add(new[] { round, pool });
+                // REACTIONS RIDE ALONG, because the counter already exists and
+                // sampling it costs one read (the hand-back's "cheap now"
+                // condition). Measurement only: no reaction constant is
+                // touched by this file. `TotalResolved` is GLOBAL rather than
+                // per-player -- in co-op both seats' reactions land in every
+                // seat's row, and a reader who does not know that would divide
+                // by the wrong denominator.
+                if (record.ReactionsAtStart < 0)
+                {
+                    record.ReactionsAtStart = ReactionEffects.TotalResolved;
+                }
+
+                record.ReactionsByTurn.Add(new[]
+                    { round, ReactionEffects.TotalResolved - record.ReactionsAtStart });
                 record.MetersByTurn.Add(new[]
                 {
                     round,
@@ -235,6 +249,12 @@ internal static class PlayTelemetry
             if (target?.Player is { } victim && Open.TryGetValue(victim, out var taken))
             {
                 taken.DamageTaken += amount;
+                if (target.IsDead)
+                {
+                    var over = CombatManager.Instance?.DebugOnlyGetState();
+                    if (over != null) MaybeClose(over);
+                }
+
                 return;
             }
 
@@ -243,6 +263,16 @@ internal static class PlayTelemetry
             var source = cardSource != null ? CardName(cardSource) : "(uncredited)";
             dealt.DamageBySource.TryGetValue(source, out var running);
             dealt.DamageBySource[source] = running + amount;
+
+            // A KILLING BLOW ENDS THE FIGHT, and it has to end the record with
+            // it. The first run-verification recorded every won fight as
+            // `interrupted`, closed by the NEXT fight's stale-flush -- so the
+            // HP ledger swallowed whatever happened in between (a campfire, an
+            // event, a potion) and reported it as damage taken in a fight that
+            // was already over. There is no first-party combat-end hook; the
+            // last enemy dying is the closest thing the game offers.
+            var combat = CombatManager.Instance?.DebugOnlyGetState();
+            if (combat != null) MaybeClose(combat);
         }
         catch (Exception e)
         {
@@ -433,6 +463,10 @@ internal static class PlayTelemetry
         public readonly List<int[]> EnemyPoolByTurn = new();
         public readonly List<int[]> MetersByTurn = new();
         public readonly List<int[]> BlockAtTurnEnd = new();
+        public readonly List<int[]> ReactionsByTurn = new();
+        /// <summary>-1 until the first turn sample; the counter is monotonic
+        /// across combats, so a fight's own count is a difference.</summary>
+        public int ReactionsAtStart = -1;
         public readonly List<(int Round, string Name)> CardsPlayed = new();
         public readonly Dictionary<string, int> DamageBySource = new();
         public int DamageTaken;
@@ -485,6 +519,7 @@ internal static class PlayTelemetry
             Pairs(sb, "enemy_pool_by_turn", EnemyPoolByTurn);
             Pairs(sb, "meters_by_turn", MetersByTurn);
             Pairs(sb, "block_at_turn_end", BlockAtTurnEnd);
+            Pairs(sb, "reactions_by_turn", ReactionsByTurn);
             sb.Append(",\"cards_played\":[");
             for (var i = 0; i < CardsPlayed.Count; i++)
             {

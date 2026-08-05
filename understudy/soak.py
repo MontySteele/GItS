@@ -515,8 +515,17 @@ def _telegraphed(state: dict[str, Any]) -> tuple[int, int]:
 _METER_IDS = {
     "FANFARE_METER_POWER": 0,
     "SALON_MEMBER_POWER": 1,
-    "ENCORE_METER_POWER": 3,
 }
+
+# ENCORE IS NOT ON THE WIRE AND CANNOT BE, so this column reads -1 (unseen)
+# rather than 0 (empty) on the bot feed. `EncoreMeterPower` was retired as a
+# display in animation sprint 2 (E1) -- Encore's ambient home is the Salon
+# stage ribbon -- and the live value is a CustomResource, which the bridge's
+# state builder does not serialise because it only walks `creature.Powers`.
+# The human feed reads it from `FurinaResources.Encore` directly. A zero here
+# would be a measurement claiming the meter was empty in fights where it
+# demonstrably was not.
+ENCORE_UNSEEN = -1
 
 
 def _meters(state: dict[str, Any]) -> list[int]:
@@ -529,7 +538,7 @@ def _meters(state: dict[str, Any]) -> list[int]:
     says so in `cards_played` instead. A number this file cannot see is a
     number it records as unseen, not one it guesses.
     """
-    out = [0, 0, SALON_PRINTED_CAP, 0]
+    out = [0, 0, SALON_PRINTED_CAP, ENCORE_UNSEEN]
     for st in ((state.get("player") or {}).get("status") or []):
         if not isinstance(st, dict):
             continue
@@ -1152,6 +1161,16 @@ def _mechanical_action(state: dict) -> dict | None:
         return ({"action": "select_relic", "index": 0} if relics
                 else {"action": "skip_relic_selection"})
     if st == "bundle_select":
+        # SELECTING A BUNDLE OPENS A PREVIEW; IT DOES NOT TAKE THE BUNDLE, and
+        # the second `select_bundle` is refused in as many words ("A bundle
+        # preview is already open - confirm or cancel it first"). Without the
+        # confirm the walker re-picks index 0 forever, which is how Neow's
+        # Scroll Boxes ended a run at sixteen actions. Same shape as the
+        # Enchant screen (defect 6) and the removal grid (defect 4): a screen
+        # whose select is a preview, not a choice.
+        blob = state.get("bundle_select") or {}
+        if blob.get("preview_showing"):
+            return {"action": "confirm_bundle_selection"}
         return {"action": "select_bundle", "index": 0}
     if st == "hand_select":
         blob = state.get("hand_select") or {}

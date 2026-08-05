@@ -124,8 +124,10 @@ CS = REPO / "klee-mod" / "KleeCode" / "Diagnostics" / "PlayTelemetry.cs"
 # Recorded rather than derived: each asymmetry is a decision, and a test that
 # silently tolerated a new one would be no test at all.
 BOT_ONLY = {"potions_used"}          # no first-party potion hook exists yet
-MOD_ONLY = {"character", "ts"}       # the seat's character; the wall clock
+MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
 #                                      (the soak stamps `ts` in `emit`)
+            "reactions_by_turn"}     # a counter only the C# side can see: the
+#                                      wire does not narrate reactions at all
 
 
 def _csharp_keys() -> set[str]:

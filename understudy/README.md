@@ -198,7 +198,8 @@ Phase 0 could not do.
 | `hp_trajectory` | `[[round, hp, block], ...]`, sampled at each turn opening |
 | `incoming_by_turn` | `[[round, telegraphed_damage, n_attacking_enemies], ...]`, read before block |
 | `enemy_pool_by_turn` | `[[round, enemy hp+block total], ...]` at each turn opening. **The honest output curve**: the drop between two openings is everything that landed, whoever landed it — which `damage_by_source` cannot say |
-| `meters_by_turn` | `[[round, fanfare, salon_members, salon_cap, encore], ...]`. The bot feed records the PRINTED cap (the wire does not carry the live one); the human feed reads the live per-player cap |
+| `meters_by_turn` | `[[round, fanfare, salon_members, salon_cap, encore], ...]`. The bot feed records the PRINTED cap (the wire does not carry the live one) and **`-1` for encore, which it cannot see at all**: `EncoreMeterPower` was retired as a display (animation sprint 2, E1) and the live value is a CustomResource, which the bridge does not serialise. `-1` is *unseen*, not *empty*. The human feed reads both from the resource and the live per-player cap |
+| `reactions_by_turn` | `[[round, reactions resolved since this fight opened]]` — **human feed only**; the wire does not narrate reactions. `ReactionEffects.TotalResolved` is GLOBAL, so in co-op both seats' reactions appear in every seat's row. Measurement only: no reaction constant is read or written |
 | `block_at_turn_end` | `[[round, block]]` as the player ENDED the turn — not the turn-opening block in `hp_trajectory`, which is whatever survived the enemy |
 | `cards_played` | `[[round, card_name], ...]` |
 | `potions_used` | `[[round, potion_name], ...]` — **bot feed only**; no first-party potion hook exists for the mod side yet |
