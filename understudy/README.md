@@ -194,7 +194,7 @@ Phase 0 could not do.
 | `enemies` | `[{name, max_hp}]` as the fight opened |
 | `hp_start`, `hp_end`, `hp_lost`, `max_hp` | the HP ledger |
 | `turns` | highest round reached |
-| `outcome` | `survived` / `died` / `won` / `interrupted` / `superseded` |
+| `outcome` | `survived` / `died` / `won` / `interrupted` / `superseded`. **The human feed cannot observe a win**: the game exposes no first-party combat-END hook, so a fight the player wins is closed by the next fight's stale-flush and reads `interrupted`. `died` is exact. `hp_end` is the last reading taken while the fight was live, so the HP ledger stays honest whenever the close is late |
 | `hp_trajectory` | `[[round, hp, block], ...]`, sampled at each turn opening |
 | `incoming_by_turn` | `[[round, telegraphed_damage, n_attacking_enemies], ...]`, read before block |
 | `enemy_pool_by_turn` | `[[round, enemy hp+block total], ...]` at each turn opening. **The honest output curve**: the drop between two openings is everything that landed, whoever landed it — which `damage_by_source` cannot say |

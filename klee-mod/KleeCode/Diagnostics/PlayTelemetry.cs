@@ -153,6 +153,7 @@ internal static class PlayTelemetry
                 var creature = player.Creature;
                 if (creature == null) continue;
                 record.Turns = Math.Max(record.Turns, round);
+                record.HpLastSeen = (int)creature.CurrentHp;
                 record.HpTrajectory.Add(new[]
                     { round, (int)creature.CurrentHp, (int)creature.Block });
                 record.IncomingByTurn.Add(new[] { round, telegraphed, attackers });
@@ -203,6 +204,7 @@ internal static class PlayTelemetry
                 var creature = player.Creature;
                 if (creature == null) continue;
                 record.BlockAtTurnEnd.Add(new[] { round, (int)creature.Block });
+                record.HpLastSeen = (int)creature.CurrentHp;
             }
 
             MaybeClose(combat);
@@ -303,7 +305,15 @@ internal static class PlayTelemetry
         foreach (var (player, record) in records)
         {
             var creature = player.Creature;
-            record.HpEnd = creature != null ? (int)creature.CurrentHp : record.HpStart;
+            // THE LAST IN-FIGHT READING, NOT THE CURRENT ONE. There is no
+            // first-party combat-END hook, so a won fight is closed by the
+            // NEXT fight's stale-flush -- and reading HP then would charge this
+            // fight for the campfire, the event and the potion in between. The
+            // first run-verification recorded a 6-damage fight as costing 59
+            // HP for exactly that reason.
+            record.HpEnd = record.HpLastSeen >= 0
+                ? record.HpLastSeen
+                : creature != null ? (int)creature.CurrentHp : record.HpStart;
             record.Outcome = creature is { IsDead: true } ? "died" : outcome;
             Write(record);
         }
@@ -467,6 +477,10 @@ internal static class PlayTelemetry
         /// <summary>-1 until the first turn sample; the counter is monotonic
         /// across combats, so a fight's own count is a difference.</summary>
         public int ReactionsAtStart = -1;
+        /// <summary>The last HP read while this fight was still live; -1 until
+        /// the first turn sample. See the flush for why the current value will
+        /// not do.</summary>
+        public int HpLastSeen = -1;
         public readonly List<(int Round, string Name)> CardsPlayed = new();
         public readonly Dictionary<string, int> DamageBySource = new();
         public int DamageTaken;

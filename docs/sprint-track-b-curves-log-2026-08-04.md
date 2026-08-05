@@ -94,12 +94,13 @@ writers in two languages cannot see each other, so
 `tier0/tests/test_track_b_curves.py::test_the_two_feeds_write_the_same_fight_record`
 compares the key sets directly and names each permitted asymmetry
 (`potions_used` is bot-only — no first-party potion hook exists for the mod
-side; `character` and `ts` are mod-only). A drift in either direction is a red
+side; `character`, `ts` and `reactions_by_turn` are mod-only). A drift in either direction is a red
 test, not a discovery six weeks later.
 
 **What changed under that rule in this pass — all ADDITIONS:** `schema`,
 `feed`, `source`, `seats`, `seat_index`, `character`, `enemy_pool_by_turn`,
-`meters_by_turn`, `block_at_turn_end`. Nothing was renamed. Logs written before
+`meters_by_turn`, `block_at_turn_end`, `reactions_by_turn`. Nothing was
+renamed. Logs written before
 today carry none of them, and the reader treats a missing `feed` as `bot`
 rather than as unlabelled — which is what those logs are.
 
@@ -115,7 +116,18 @@ rather than as unlabelled — which is what those logs are.
   wrong one to lay over a demand curve.
 - `meters_by_turn` — the instrument the Salon pre-registration names. Read by
   power ID, not by title: a display name is loc data and moves with a wording
-  pass.
+  pass. **Encore reads `-1` on the bot feed, which means UNSEEN and not empty**:
+  `EncoreMeterPower` was retired as a display (animation sprint 2, E1) and the
+  live value is a CustomResource the bridge does not serialise. The human feed
+  reads 5, 10 and 8 on turns the bot feed cannot see at all, which is how the
+  lie was caught.
+- `reactions_by_turn` — the hand-back's *"reaction events MAY ride the schema if
+  the field is cheap now"*, taken up because it was: `ReactionEffects.
+  TotalResolved` already exists, so the field costs one read per turn.
+  **Measurement only — no reaction constant is read, written or moved.** The
+  counter is GLOBAL rather than per-player, so in co-op both seats' reactions
+  appear in every seat's row; that is in the schema table, because a reader who
+  did not know would divide by the wrong denominator.
 
 ## Guardrail 7, enforced rather than promised
 
@@ -134,7 +146,138 @@ Both carried in from R89/R95 via §7.8 of the Track A log. The grading rule was
 fixed before the numbers existed: **grade only where the data supports it, and
 name the instrument where it does not.**
 
-<!-- GRADES -->
+Sample: **87 fight records, 77 monster and 10 elite, all Act 1, all bot feed**,
+across four soaks (`20260804-221045`, `-222105`, `-224517`, `-225937`). 56 of
+them carry meter samples — the counter landed mid-session, and a fight without
+a sample is counted nowhere rather than as a zero.
+
+### Pre-registration 1 — Fanfare shape, EARLY half (R90/1b, via §7.8)
+
+> *In Act 1, Fanfare-archetype output in fight-turns 1–3 falls short of the
+> demand curve where Salon does not.*
+
+**GRADE: NOT GRADED — and the reason is the instrument, not the data volume.**
+
+B2 as built measures **cards**, not **archetypes-as-decks**. policy_v1 drafts,
+so every deck in this sample is a mixed deck: in fight-turn 1, 224 of the 299
+recorded plays are `generic` — base-game, colorless and companion cards with
+no Furina archetype at all — against 28 fanfare and 27 salon. A per-turn
+archetype total from a mixed deck cannot separate *this archetype produces too
+little* from *this deck drafted little of this archetype*, and the claim is
+about the first. Grading it from these rows would be reading a draft
+distribution as a design finding.
+
+**What the data does say, descriptively and not as a grade** (bot feed, act 1,
+attributed damage per play — attribution-limited, and the denominator is
+`cards_played`):
+
+| turn | salon | fanfare | demand (monster, required output/turn) |
+|---|---|---|---|
+| 1 | 86 over 27 plays = 3.2 | 96 over 28 plays = 3.4 | 10.6 |
+| 2 | 97 over 39 plays = 2.5 | 66 over 28 plays = 2.4 | 10.6 |
+| 3 | 87 over 24 plays = 3.6 | 56 over 24 plays = 2.3 | 10.6 |
+
+The two archetypes are the same size per play in turns 1–2 and Fanfare is
+lower in turn 3 — a difference far inside what an uncontrolled draft can
+produce on its own. **The prediction's direction is not contradicted and not
+supported. It is unmeasured.**
+
+**Instrument named, per the standing rule that a null names its replacement:**
+an **arm-controlled** feed. Three candidates, in cost order — (a) human-feed
+sessions with the deck's intent DECLARED, which needs one line from [USER] per
+run and nothing else (gate item); (b) a soak arm that starts from a fixed
+archetype deck, which policy_v1 cannot do today and which is P1.5-shaped work
+next to the chosen-seed arm R95 already gated; (c) tier-0.5's existing
+archetype arms, which are a SIM instrument — and R90 already ruled that
+pointing this question at the sim was aiming at the wrong instrument.
+
+**LATE half: PENDING, as instructed.** *Underwhelming damage late* wants Act 3,
+Act 3 wants the human feed, and the human feed has recorded nothing yet. The
+instrument is named and built; the data is owed by play, not by code.
+
+### Pre-registration 2 — Salon fill time (R91/2b, via §7.8)
+
+> *The turn the Salon first reaches cap, and the fraction of fight-turns it
+> sits full.*
+
+**REPORTED. Bot feed, act 1, 56 fights carrying a meter sample:**
+
+| measure | value |
+|---|---|
+| fights where the Salon reached cap (3) | **0 of 56** |
+| median turn first at cap | **no such turn** |
+| fraction of fight-turns at cap | **0.0%** |
+| median peak members | **1 of 3** |
+
+**What this is: a bot-limited floor, and an unusually literal one.** It is not
+"the Salon fills slowly" — it is "**this policy never filled it**", median peak
+one member. policy_v1 drafts what the offers give it and plays what it drafted;
+a stage it never staffs is a fact about the pilot before it is a fact about the
+Salon.
+
+**It therefore does NOT discharge R91/2b's revisit condition, in either
+direction.** That condition reads: *if bounded-meter readers plateau early on
+Track B's output curves, the `scaling` tag for those readers is re-argued WITH
+DATA*. A plateau needs a curve of a filling meter, and there is no fill here to
+plateau. **No tag is revisited, nothing is proposed, and the number is reported
+exactly as pre-registered** — which is what "report the number, do not revisit
+the tags yourself" asks for.
+
+The instrument that would discharge it is the same one Pre-registration 1
+needs: a feed where a Salon deck is actually assembled and played. The human
+feed does that by construction the first time [USER] plays one.
+
+### One thing the grading exposed about the bot feed itself
+
+Three quarters of this pilot's recorded plays are `generic`. That is not an
+archetype finding either — but it does mean **the bot feed's value to Track B
+is B1, not B2**. Demand is a property of the fight and the bot measures it
+honestly by standing in front of it; output is a property of a deck, and this
+bot's deck is nobody's deck. Recorded here so the next reader does not go
+looking for archetype conclusions in the dense half of the data.
+
+## What the four soaks cost in defects, and what they were
+
+Twelve runs across four soaks. The validation soak (Item 1) and the final soak
+were both clean N=3; the data soak filed three, none of which halted it (the
+stop-and-surface rule needs TWO of the same shape).
+
+| # | shape | what it was | state |
+|---|---|---|---|
+| 11 | `bridge_unreachable` misfiled | a crashing process still read alive | **FIXED** (R98) |
+| 12 | `no_progress` (cycle) | selecting a bundle opens a PREVIEW; Neow's Scroll Boxes ended a run at 16 actions | **FIXED**, red test |
+| 13 | `no_action` | the bridge answered with no `state_type` at all mid-transition; the driver filed rather than re-read | **FILED, not fixed** — routed to the harness backlog |
+| 14 | `bridge_unreachable` (timeout) | the wire stopped answering while the process stayed alive through the full grace period — the FIRST time this kind was filed correctly rather than as a crash | **FILED, not fixed** — one observation, no reproduction |
+
+13 and 14 are traversal-layer, the expected class, and neither was fixed here:
+Item 2's job was the curves, and a harness the pass keeps re-opening is a
+harness nobody can quote a clean run from. Both are in the debt list and the
+gate package.
+
+**The final soak re-validated the harness at HEAD**, not only at the commit
+R98 was earned on: 3 runs, 10 fights, zero defects, ledger fully REVERTED. That
+matters because the telemetry additions and the bundle fix landed after R98's
+soak, and a validation that only ever held two commits ago is a validation
+somebody will have to re-do.
+
+## The human feed's one declared blind spot
+
+**It cannot see a win.** The game exposes no first-party combat-END hook, so a
+fight the player wins is closed by the NEXT fight's stale-flush and reads
+`interrupted`. Two consequences, both handled rather than hidden:
+
+- `hp_end` is the last reading taken **while the fight was live**. Without that
+  the ledger charges the fight for the campfire in between, and the first
+  run-verification proved it: a fight that took 6 damage was recorded as
+  costing 59 HP.
+- `died` is exact (the player's own death is observable); `won` is not
+  distinguishable from `interrupted`, and the schema says so.
+
+The named instrument for closing this is a Harmony postfix on
+`CombatManager.EndCombatInternal` / `CheckWinCondition`. It is not written
+here: the mod has never patched combat lifecycle, the method is reached through
+an async continuation (finding 21's neighbourhood), and adding a patch there to
+improve a LABEL is not a trade this pass should make unsupervised.
 
 ## Reversibility ledger — game-directory changes this session
 
@@ -144,7 +287,7 @@ name the instrument where it does not.**
 | 2 | `mods\STS2_MCP\` deployed from the vendor pin (three soaks) | `.\build\deploy_bridge.ps1 -Remove` | **REVERTED** |
 | 3 | `SlayTheSpire2.exe` launched directly (three soaks) | terminated at teardown | **REVERTED** |
 | 4 | `FastMode=Instant`, `TimeScale=3.0` via the speed endpoint | `POST {"enabled": false}` | **REVERTED** on soaks 2 and 3; **NOT REVERTED** on soak 1 (the bridge was gone — the game had died). Leak-checked and clean: soak 2 captured `fast_mode: "Fast"` at setup, so `Instant` never reached `settings.save` |
-| 5 | `mods\klee` replaced: **0.2-247 → 0.2-288** | `git checkout 0691724 && cd klee-mod && .\build\deploy.ps1` | **STANDING BY DESIGN** — the human feed cannot record [USER]'s sessions from a build that does not contain it. In the gate package. |
+| 5 | `mods\klee` replaced: **0.2-247 → 0.2-289** | `git checkout 0691724 && cd klee-mod && .\build\deploy.ps1` | **STANDING BY DESIGN** — the human feed cannot record [USER]'s sessions from a build that does not contain it. In the gate package. |
 | 6 | `user://gits_telemetry/` created (`%APPDATA%/SlayTheSpire2/`) | delete the directory | **STANDING BY DESIGN** — this is the human feed's log directory |
 
 Entry 5 is the one that is not self-reverting, and it is deliberate: the point
