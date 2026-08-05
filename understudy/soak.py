@@ -48,6 +48,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -171,9 +172,13 @@ def game_dir() -> Path:
 class Session:
     """Setup, teardown, and the reversibility ledger between them."""
 
-    def __init__(self, stamp: str, do_setup: bool = True):
+    def __init__(self, stamp: str, do_setup: bool = True,
+                 intent: str | None = None):
         self.stamp = stamp
         self.do_setup = do_setup
+        # Passed to the launched game so the mod's own hook labels its
+        # records with the same declaration the bot feed is stamping.
+        self.intent = intent
         self.dir = game_dir()
         self.ledger = Reversibility(LOG_DIR / f"reversibility-{stamp}.json")
         self.proc: subprocess.Popen | None = None
@@ -228,7 +233,18 @@ class Session:
         self._launch_entry = self.ledger.record(
             f"Launched `{GAME_EXE}` directly (Steam must be running)",
             "process terminated at teardown")
+        # THE FEED LABEL IS SET HERE, NOT IN WHOEVER'S SHELL RAN THE SOAK.
+        # The mod's own telemetry hook writes a record for every fight it sees,
+        # labelled `human` unless told otherwise -- so a soak launched from a
+        # shell that did not happen to export this variable writes bot-driven
+        # play into the HUMAN feed, which is the one feed whose whole value is
+        # that a person produced it. The README already claimed this happened
+        # here; as of 2026-08-04 (late) it actually does.
+        env = dict(os.environ)
+        env["GITS_TELEMETRY_FEED"] = "bot"
+        env["GITS_TELEMETRY_INTENT"] = self.intent or ""
         self.proc = subprocess.Popen([str(exe)], cwd=str(self.dir),
+                                     env=env,
                                      stdout=subprocess.DEVNULL,
                                      stderr=subprocess.DEVNULL)
 
@@ -1274,7 +1290,7 @@ def soak(runs: int, character: str, do_setup: bool,
     commit = _committed.normalise(commit)          # refuses an unknown word
     stamp = time.strftime("%Y%m%d-%H%M%S")
     LOG_DIR.mkdir(parents=True, exist_ok=True)
-    session = Session(stamp, do_setup=do_setup)
+    session = Session(stamp, do_setup=do_setup, intent=commit)
     summaries: list[dict] = []
     index = LOG_DIR / f"soak-{stamp}-index.json"
     shapes: dict[str, int] = {}

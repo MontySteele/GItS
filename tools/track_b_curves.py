@@ -163,6 +163,28 @@ def cut_by_intent(fights: Sequence[Fight], intent: str | None) -> list[Fight]:
     return [f for f in fights if f.intent == want]
 
 
+def cut_by_source(fights: Sequence[Fight], source: str | None) -> list[Fight]:
+    """Keep one WRITER's records.
+
+    Why this exists, and it is not hypothetical: when the soak drives the game,
+    BOTH writers see the same fights. `soak.py` writes them from the wire and
+    the mod's own hook writes them from inside the process, and both are
+    honestly labelled `feed: "bot"` — so a reader that groups by feed alone
+    counts every soak fight twice and reports a fight count that is a fact
+    about how many instruments were running. Cutting by `source` is how a
+    measurement picks its instrument on purpose.
+
+    The two are not redundant: `source: "mod"` carries the LIVE Salon cap and a
+    real Encore, which the wire does not serialise at all, while
+    `source: "soak"` carries the potions and the policy's own view. Neither is
+    a better copy of the other, which is exactly why they must not be summed.
+    """
+    if not source:
+        return list(fights)
+    want = source.strip().lower()
+    return [f for f in fights if f.source == want]
+
+
 def load(dirs: Iterable[Path]) -> list[Fight]:
     fights: list[Fight] = []
     for d in dirs:
@@ -470,6 +492,25 @@ def render(fights: Sequence[Fight], intent: str | None = None) -> str:
             "in act 1); the human feed is the only instrument that will.")
         a("")
 
+    # ------------------------------------------------------- the writers ----
+    writers: dict[tuple[str, str], int] = {}
+    for f in fights:
+        writers[(f.feed, f.source)] = writers.get((f.feed, f.source), 0) + 1
+    if len({s for _, s in writers}) > 1:
+        a("**Two writers are present in this corpus.** When the soak drives the "
+          "game, `soak.py` and the mod's own hook both record every fight, and "
+          "both are honestly labelled `bot` — so the counts below are per "
+          "RECORD, not per fight, and a fight seen by both appears twice. Cut "
+          "to one instrument with `--source soak` or `--source mod`. They are "
+          "not copies of each other: `mod` carries the live Salon cap and a "
+          "real Encore, `soak` carries the potions.")
+        a("")
+        a("| feed | writer | records |")
+        a("|---|---|---|")
+        for (feed, src), n in sorted(writers.items()):
+            a(f"| {feed} | {src} | {n} |")
+        a("")
+
     # ---------------------------------------------- declared intent (R99/4a)
     declared: dict[tuple[str, str], int] = {}
     for f in fights:
@@ -616,10 +657,15 @@ def main(argv: Sequence[str] | None = None) -> int:
                     help="R99/4a: cut every curve to fights whose run "
                          "DECLARED this archetype (human feed: intent.txt; "
                          "bot feed: soak --commit). Omit for everything.")
+    ap.add_argument("--source", default=None,
+                    help="keep one WRITER's records (soak / mod). Both write "
+                         "the bot feed when a soak drives the game, so a "
+                         "measurement that must not double-count picks one.")
     args = ap.parse_args(argv)
 
     human = args.human_dir or default_human_dir()
-    fights = cut_by_intent(load([args.bot_dir, human]), args.intent)
+    fights = cut_by_source(load([args.bot_dir, human]), args.source)
+    fights = cut_by_intent(fights, args.intent)
     doc = render(fights, intent=args.intent)
     if args.out:
         args.out.write_text(doc + "\n", encoding="utf-8")

@@ -79,6 +79,21 @@ def test_an_undeclared_fight_reads_as_undeclared_and_is_never_inferred():
     assert _fight(intent="Fanfare ").intent == "fanfare"
 
 
+def test_two_writers_in_one_feed_are_named_rather_than_summed_silently():
+    """When a soak drives the game both writers record every fight and both
+    are honestly `bot`. A reader that only groups by feed reports a fight count
+    that is a fact about how many instruments were running."""
+    fights = [_fight(), _fight(source="mod")]
+    doc = tb.render(fights)
+    assert "Two writers are present" in doc
+    assert len(tb.cut_by_source(fights, "soak")) == 1
+    assert len(tb.cut_by_source(fights, None)) == 2
+
+
+def test_one_writer_alone_gets_no_warning():
+    assert "Two writers are present" not in tb.render([_fight(), _fight()])
+
+
 def test_the_cut_keeps_only_what_was_declared():
     fights = [_fight(intent="fanfare"), _fight(intent="salon"), _fight()]
     assert len(tb.cut_by_intent(fights, "fanfare")) == 1
