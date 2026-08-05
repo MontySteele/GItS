@@ -3175,3 +3175,197 @@ become one through this door.
 
 **Class: MECHANICAL + RULING** -- [USER] acknowledged 2026-08-04. No balance
 value moved.
+
+## R93 -- Understudy policy_v1: all seven revisions approved, the card-name log elevated to a P1 blocker, the block-panic insight routed to the pilot backlog (2026-08-04)
+
+Ruling 1 of the Understudy Phase-0 skim response, countersigned verbatim at
+`docs/understudy-countersign-2026-08-04.md`. The gate the Phase-0 report
+stopped at was "[USER] skims the policy_v1 list before the soak", and it
+passed unamended: **all seven proceed.**
+
+The list, and what each closes, is in the report
+(`docs/understudy-phase0-report.md`, "policy_v1 -- PROPOSED revisions"). What
+this entry records is the two notes the signature attached.
+
+**#7 is a P1 BLOCKER, not a nicety.** The Phase-0 log stores `card_index`, so
+a sequencing divergence can only be categorised by reading the human's prose
+`why` field. That is exactly how this pass produced its 53%/28% table -- by
+hand, over 191 lines. A thousand-run soak cannot be read that way, and a log
+that cannot be analysed automatically **produces heat, not data**. So no soak
+launches until resolved card NAMES are in the log. This is the same structural
+rule the house already applies to prose caveats on numbers: a fact that lives
+only in prose does not survive contact with volume.
+
+**#2's insight belongs to the sim as well, and is routed rather than acted
+on.** Gating the block-panic rung on whether the block on offer can
+meaningfully dent the incoming, and preferring a lethal line when killing a
+body removes more incoming than the block prevents, deliberately makes
+Understudy's policy **smarter than the tier05 pilot it is a reduction of**.
+That direction is intended -- Understudy is not required to be a faithful
+mirror once the measurement it was built for is taken. But the same gap is
+real inside `tier0/pilot/policy.py`, where the rung fires on the ratio of
+incoming to HP alone and will buy 4 block against 39 incoming every time.
+**Nobody changes `tier0/pilot/policy.py` for it now.** It is filed as a note
+on the pilot-improvement backlog (`docs/backlog-2026-07-29.md`), and it stays
+a note until a session is chartered to open it. Changing the sim's pilot
+mid-sprint would move every tier-0.5 number in the repo on the strength of
+one nine-floor observation.
+
+**Scope, restated because the boundary is the whole point:** every one of the
+seven lives in `understudy/`. Nothing in `tier0/`, `tier05/`, the drafter or
+any sheet is touched by this ruling.
+
+**Class: RULING** -- [USER] countersigned 2026-08-04, unamended.
+
+## R94 -- Phase 2's default tier is amended from draft sampling to hard-state turn sampling (2026-08-04)
+
+Ruling 2 of the same package. This one overrides a pre-registration on the
+evidence the pre-registration itself produced, so the reasoning is recorded
+in full rather than summarised.
+
+The kickoff brief pre-registered M3 ("one full LLM-driven run completes in a
+single Code session") with a consequence attached: **if false, Phase 2's
+sampled-decision tier drops to draft-picks-only by default.** M3 FAILED --
+the run reached Act 1 floor 9 of 16 -- so that fallback was technically in
+force the moment the report was written.
+
+**It is amended, and the amendment comes from the same run.** M2 measured
+where the cheap policy and the LLM actually disagree:
+
+| category | agree% | share of all decisions |
+|---|---|---|
+| draft (card reward) | 60% (3 of 5) | 3% |
+| sequencing (combat card play) | 53% overall, **28%** on independent turn-openers | 88% |
+
+Draft is the category the two arms agree on **most**, and it is 5 decisions
+in 9 floors. Sequencing is where all the disagreement lives and where nearly
+nine tenths of the decisions are. **A tier that samples only draft picks
+would spend the LLM budget where it helps least** -- it would buy judgment
+for the question the heuristic already answers.
+
+**Amended default: hard-state turn sampling.** The LLM tier engages at
+turn-openings in states flagged hard by cheap triggers computable straight
+off the wire -- incoming above a set fraction of HP, more than one enemy
+alive, lethal within reach. The economics that make this affordable are M1's
+second finding: **117 of 167 decisions were later steps of a planned turn**,
+issued with no fresh state read. One state read plans a whole turn, so the
+marginal cost of judgment is paid per *turn*, not per *card*.
+
+Draft sampling is **dropped from the default and retained as an option**, not
+deleted -- the 5-decision sample it was judged on is small enough that a
+later run could move it.
+
+**The trigger thresholds are P2 design work and are NOT set here.** This
+ruling fixes the tier's shape; the numbers that decide "hard" are a later
+session's, with data in hand.
+
+**Class: RULING** -- [USER] countersigned 2026-08-04. Supersedes the M3
+fallback clause in `docs/understudy-kickoff-brief.md` (P2 section), which is
+left standing as written so the pre-registration reads as it was registered.
+
+## R95 -- The seed fork: read-back seeds launch P1, chosen seeds are gated at the first cross-build comparison (2026-08-04)
+
+Ruling 3 of the same package, and the one that decides what P1 can and cannot
+be quoted for.
+
+The Phase-0 report's first stop-and-surface is that **the bridge cannot start
+a chosen-seed run through the singleplayer path**: `menu_select` with a `seed`
+requires `charSelect.Lobby != null`, and the Custom-run screen where a seed
+would be entered is not modelled by the bridge at all (selecting it soft-locks
+to a `menu_screen: "main"` with no options and no accepted verb, including
+`back`). Three ways out existed: add a Custom-screen arm to our fork, route
+through the multiplayer lobby, or accept game-generated seeds read back after
+the fact.
+
+**Now, for the P1 launch: read-back.** The soak runs N runs on seeds the game
+generates, and records each one per run from `GET /api/v1/compendium`. For
+what P1 is *for* -- jank filtering, crash and softlock detection, telemetry
+harvest -- N random recorded seeds are statistically fine, and this unblocks
+the soak immediately instead of spending the session on a screen arm.
+
+**Before any build-vs-build number is quoted (P1.5): the Custom-screen arm is
+MANDATORY.** Comparing an old build to a new build requires running the SAME
+seed on both, because one variable per measurement window is the house's
+standing discipline and a seed is the biggest variable in a roguelike. Random
+seeds cannot do that. So the Custom arm is gated **exactly** there: not a
+launch blocker, and not optional the moment a cross-build comparison is
+proposed. **A P1 soak number is never comparable to another build's P1 soak
+number.**
+
+**Noted, not chosen: the lobby route.** Heavier than the Custom arm, but it is
+the one option that pays twice -- Phase 3's two-seat co-op needs the lobby
+modelled anyway. If the Custom arm turns out ugly, **evaluate the lobby before
+building around the ugliness.**
+
+**Class: RULING** -- [USER] countersigned 2026-08-04.
+
+## R96 -- The three sim observations from Phase 0 are ROUTED to their chartered streams, not opened here (2026-08-04)
+
+Ruling 4 of the same package. The Phase-0 report recorded three things that
+look like findings about the SIM rather than about the bot apparatus. None of
+them becomes a new finding or a new ruling: **each goes to the stream already
+chartered to handle its family**, and each is a note in a queue until that
+stream sits down.
+
+1. **`tier05.draft.score_offer` returns exactly 0.0** for The Gallery Stirs, a
+   Power reading "the first time you spend Encore each turn, draw 1 card.
+   Fanfare Cap +5", in a deck whose three Salon members spend Encore every
+   turn. -> **the DRAFTER 13 stream**, as a **regression fixture**. R87(3)
+   already established that DRAFTER 12 prices 42 of 56 ops at zero at offer
+   time; this is almost certainly one of the 42, observed in the wild rather
+   than in a table. The acceptance form the routing note takes: **DRAFTER 13
+   is not done while The Gallery Stirs scores 0.0 at offer.**
+2. **`score_offer` prices Vulnerable as a flat debuff** (`amount * 2` through
+   `_static_power`), so it cannot see a multiplier applied to an engine
+   already producing damage every turn. -> the **`_static_power` repricing
+   session**, as an exhibit alongside the one it already has.
+3. **`tier0.pilot.policy._reaction_value` has no defensive term**, so Frozen
+   -- which halves an incoming attack -- is priced only as expected damage.
+   -> the **reactions-promotion session**. This is "reactions are weather, not
+   strategy" appearing inside the pilot's own head, which makes it a **third
+   independent sighting of the same disease** rather than a new one.
+
+**Why routing and not acting.** Each observation is a claim about the sim made
+from one nine-floor run. Acting on any of them from here would move tier-0.5
+numbers on single-observation evidence, and would do it inside a sprint whose
+non-goals say in as many words that nothing here touches the sim, the drafter
+or any sheet.
+
+**Class: ROUTING** -- [USER] countersigned 2026-08-04. No code changed in
+`tier0/`, `tier05/` or any sheet under this entry. Notes filed at the
+locations named in `docs/sprint-understudy-p1-log-2026-08-04.md` (routed
+findings).
+
+## R97 -- Understudy housekeeping: the readiness check, the leftover run, the merge order, and the adapter-defect list (2026-08-04)
+
+Ruling 5 of the same package, ACKNOWLEDGED rather than argued. Recorded
+because three of the four are cheap now and expensive to rediscover.
+
+**5a -- the soak launcher's readiness check watches the `options` key in the
+menu state, NEVER the HTTP health endpoint.** The bridge's HTTP server answers
+about 5 seconds after launch; the main menu has no buttons for another ~20.
+`GET /` returning ok is therefore not "the game is ready", and a launcher that
+treats it as such acts into an empty menu. Written into the P1 spec while it
+is cheap, and implemented in `understudy/soak.py::wait_for_menu`.
+
+**5b -- the floor-9 run on the local profile (seed `SSRWEGLNRG`) may be
+abandoned at any time.** The measurement it carried is fully captured in
+`understudy/logs/phase0-SSRWEGLNRG.jsonl`; nothing depends on the live save.
+The soak's setup consequently abandons ANY resumable run it finds rather than
+negotiating with it.
+
+**5c -- merge sequencing: Track A's repair fast-forwards main first, then
+Understudy goes on top.** No race, and no rebase of one stream over another
+stream's unlanded work.
+
+**5d -- the five adapter defects stay recorded as MEASUREMENT HISTORY, not as
+open defects.** All five are fixed. They are kept in
+`docs/understudy-phase0-report.md` because **any future adapter against this
+wire meets the same five** -- enemies under `battle`, intent damage only in
+the label, the hand's `target_type`, the aura as `"Cryo Aura"` rather than
+`"cryo"`, and the label already carrying the attacker's Strength. The list is
+the map, and a regression test would not have caught any of them because each
+was a fact about the wire rather than about our code.
+
+**Class: MECHANICAL + RULING** -- [USER] acknowledged 2026-08-04. No balance
+value moved.
