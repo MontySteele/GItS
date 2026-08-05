@@ -35,8 +35,8 @@ def _copy_plain(val):
 # Every container-valued field on Card. Card.__deepcopy__ copies exactly
 # these and shares the rest; test_state.py pins the list against the
 # dataclass definition so a new mutable field cannot be added silently.
-_MUTABLE_FIELDS = ("effects", "solve", "archetypes", "tags", "companion",
-                   "sly", "upgrade", "enchant_effects")
+_MUTABLE_FIELDS = ("effects", "solve", "tempo_band", "archetypes", "tags",
+                   "companion", "sly", "upgrade", "enchant_effects")
 
 # Card fields that a sheet row may NEVER declare again, with the reason the
 # author needs. House pattern: a caught mistake becomes a lint, so the next
@@ -80,6 +80,23 @@ class Card:
     effects: list[dict] = field(default_factory=list)
     exhaust: bool = False
     solve: list[str] = field(default_factory=list)
+    # Charter A0 / R92-3b. Two orthogonal scales:
+    #   {fight: [early|mid|late], run: [early|late]}
+    # `solve` answers "what does this card do"; this answers "WHEN is that
+    # worth anything", which is the coordinate the Act 2 wall lives on -- a
+    # pool can be fully covered on `solve` and still have every one of an
+    # archetype's answers land in the wrong half of the fight.
+    #
+    # INERT HERE BY DESIGN. Nothing in the engine reads it; it is descriptive
+    # metadata of the same class as `register` and `solve` beside it, and the
+    # C# codegen whitelists it the same way. It is DECLARED rather than left
+    # unknown because from_dict below refuses unknown fields, and the sheets
+    # carry it on all 219 rows. Values are machine-derived
+    # (tools/role_tempo.py::fight_bands / run_bands) and written by
+    # tools/suggest_role_tempo_tags.py --land, whose --check fails if a hand
+    # edit moves one away from the rule that produced it. Cross-session note:
+    # docs/sprint-axis-validity-track-a-log-2026-08-04.md.
+    tempo_band: dict = field(default_factory=dict)
     archetypes: list[str] = field(default_factory=list)
     role: str = "glue"
     tags: list[str] = field(default_factory=list)

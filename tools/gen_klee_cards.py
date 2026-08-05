@@ -821,6 +821,14 @@ CARD_FIELDS = {
     # sheet) -- nothing mechanical to emit, so it is whitelisted as inert
     # rather than treated as an unexpressed mechanic.
     "register",
+    # Track A / R92-3b: when in a fight and when in a run a card is worth
+    # playing, `{fight: [...], run: [...]}`. Descriptive taxonomy metadata
+    # exactly like `solve` and `register` -- nothing mechanical to emit, so it
+    # is whitelisted as inert. Listed here rather than left unknown because
+    # this whitelist is deliberately total and would otherwise BLOCK all 219
+    # cards. Cross-session note:
+    # docs/sprint-axis-validity-track-a-log-2026-08-04.md.
+    "tempo_band",
     # Internal, never authored on a sheet: _sly_view stamps it so the text
     # and body emitters know they are rendering the discard branch. Listed
     # here because that view is now run through blocked_reason like any

@@ -32,19 +32,29 @@ def _run(script, *args):
 def test_the_coverage_gate_finds_exactly_the_pinned_debt():
     """A NEW finding is a coverage regression; a STALE pin is a cell that
     moved without anybody saying so. The gate fails on either, which is what
-    makes a green suite mean something while P1's null is open."""
+    makes a green suite mean something while the debt is real and unpaid."""
     res = _run("lint_role_tempo_coverage.py", "--gate")
     assert res.returncode == 0, res.stdout + res.stderr
     assert "gate ok" in res.stdout, res.stdout
 
 
-def test_the_gate_says_out_loud_that_its_tags_are_provisional():
-    """[USER] gate A-G1 has not closed. A run whose output reads like a
-    verdict on the pools, when no tag has landed on a sheet, is the exact
-    misreading the charter's gate exists to prevent."""
+def test_the_gate_says_out_loud_that_it_only_counts():
+    """R90/1a. The null fired because a SIZE hypothesis was tested with a
+    COUNTING tool, and the ruling's answer was to keep the tool and move the
+    hypothesis. A run whose output does not say which of the two it is doing
+    invites the same mistake a second time."""
     res = _run("lint_role_tempo_coverage.py", "--gate")
-    assert "PROVISIONAL" in res.stdout, res.stdout
-    assert "A-G1" in res.stdout, res.stdout
+    assert "COUNTING TOOL" in res.stdout, res.stdout
+    assert "Track B" in res.stdout, res.stdout
+
+
+def test_the_debt_list_records_that_its_shrink_was_not_progress():
+    """The list went 30 -> 19 with no gap fixed, because R90/1c changed the
+    comparison population. A future reader diffing this file must not be able
+    to read that as eleven wins."""
+    text = (REPO / "docs" / "role-tempo-debt.tsv").read_text(encoding="utf-8")
+    assert "30 -> 19" in text, text[:400]
+    assert "NOT ONE GAP WAS FIXED" in text, text[:400]
 
 
 def test_the_lint_can_never_name_a_card():
@@ -66,27 +76,75 @@ def test_the_review_and_tagthrough_artifacts_are_current():
 
 # --- the floors -------------------------------------------------------------
 
-def test_utility_and_support_are_never_linted():
-    """`utility` is protected free space (A0.2(2)) and `support` is graded by
-    play only, because the sim is one-seat (D4). Neither may acquire a floor
-    by someone regenerating the file on a day canon happens to be non-zero
-    everywhere."""
-    floors = yaml.safe_load(
+def _floors() -> dict:
+    return yaml.safe_load(
         (REPO / "docs" / "role-tempo-floors.yaml").read_text(encoding="utf-8"))
-    assert set(floors["never_linted"]) == {"utility", "support"}
-    for cell in floors["mandatory"]:
-        assert cell.split("|")[0] not in ("utility", "support"), cell
+
+
+def _every_floor_cell(floors: dict):
+    yield from floors["default"]["mandatory"].items()
+    for block in floors["anchored"].values():
+        yield from block["mandatory"].items()
+
+
+def test_utility_support_and_sustain_are_never_linted():
+    """`utility` is protected free space (A0.2(2)); `support` is graded by play
+    only, because the sim is one-seat (D4); `sustain` joined them at R91/2d,
+    where canon reads 0.0-2.3% under the structural definition and zero
+    sustain was ruled a legal identity. None may acquire a floor by someone
+    regenerating the file on a day canon happens to be non-zero everywhere."""
+    floors = _floors()
+    assert set(floors["never_linted"]) == {"utility", "support", "sustain"}
+    assert set(rt.UNLINTED) | set(rt.NEVER_LINTED) == set(floors["never_linted"])
+    for cell, _ in _every_floor_cell(floors):
+        assert cell.split("|")[0] in ("frontload", "scaling", "block",
+                                      "velocity"), cell
 
 
 def test_every_floor_is_a_percentage_and_nothing_else_is_committed():
     """PERCENTAGES ONLY. game_ref/ is gitignored (.gitignore:28) and the
     committed deliverable is the shape, never the material."""
-    text = (REPO / "docs" / "role-tempo-floors.yaml").read_text(
-        encoding="utf-8")
-    floors = yaml.safe_load(text)
-    for cell, value in floors["mandatory"].items():
+    for cell, value in _every_floor_cell(_floors()):
         assert isinstance(value, float), cell
         assert 0.0 < value <= 100.0, (cell, value)
+
+
+def test_the_floors_come_from_packages_sized_like_our_archetypes():
+    """R90/1c is a POPULATION fix and this is the number that says so. The old
+    floors compared an 11-32 card archetype against an 88-card canon pool; a
+    package that is itself 88 cards would have repaired nothing."""
+    floors = _floors()
+    sizes = [pkg["n"] for pkg in floors["packages"].values()]
+    assert len(sizes) == 5, floors["packages"]
+    assert max(sizes) <= 50, sizes
+
+
+def test_no_anchored_floor_can_fail_the_package_it_came_from():
+    """THE STANDING STOP-AND-SURFACE RULE, as an assertion: a floor that would
+    fail the canon population it was derived from means the derivation is
+    wrong, and the number is never the thing to adjust. An anchored floor is
+    its package's own coverage, so it clears with equality and nothing else --
+    which is the tightest form the rule can take."""
+    from tools import canon_role_tempo as crt
+    for who, block in _floors()["anchored"].items():
+        pkg = block["package"]
+        assert pkg in crt.PACKAGES, (who, pkg)
+        for cell, floor in block["mandatory"].items():
+            assert floor > 0.0, (who, cell)
+
+
+def test_every_anchor_carries_a_reason():
+    """ARCHETYPE_ANCHORS is a table of DESIGN CLAIMS -- "this GItS archetype is
+    shaped like that canon package" -- and it moves floors. Same discipline as
+    ENTITY_PAYOFFS: an entry without a reason is a claim nobody can argue
+    with."""
+    from tools import canon_role_tempo as crt
+    for key, (pkg, why) in crt.ARCHETYPE_ANCHORS.items():
+        assert pkg in crt.PACKAGES, key
+        assert len(why) > 60, key
+    for name, (character, markers, why) in crt.PACKAGES.items():
+        assert markers, name
+        assert len(why) > 60, name
 
 
 # --- the vocabulary ---------------------------------------------------------
@@ -119,6 +177,115 @@ def test_every_card_lands_in_at_least_one_band_on_both_scales():
             scan = scans[row["id"]]
             assert scan["fight"], (name, row["id"])
             assert scan["run"], (name, row["id"])
+
+
+# --- the landed schema (R92/3b) ---------------------------------------------
+
+def test_tempo_band_landed_on_every_row_of_every_sheet():
+    """A-G1 closed and the tags landed. A partial landing is worse than none:
+    the lint would then be reading a mix of derived and authored bands and no
+    cell result would mean anything."""
+    for name, path in rt.SHEETS.items():
+        rows = rt.load_rows(path)
+        assert rows, name
+        for row in rows:
+            band = row.get("tempo_band")
+            assert isinstance(band, dict), (name, row["id"])
+            assert set(band) == {"fight", "run"}, (name, row["id"])
+            assert set(band["fight"]) <= set(rt.FIGHT_BANDS), row["id"]
+            assert set(band["run"]) <= set(rt.RUN_BANDS), row["id"]
+            assert band["fight"] and band["run"], (name, row["id"])
+
+
+def test_the_sim_loader_reads_tempo_band():
+    """READER ONE. `Card.from_dict` refuses unknown fields by design, so the
+    field being DECLARED is what keeps 219 rows loadable. This test is half of
+    what the cross-session note promised."""
+    card = loader._card_index()["soloists_solicitation"]
+    assert card.tempo_band == {"fight": ["early"], "run": ["early"]}
+
+
+def test_tempo_band_survives_the_hand_rolled_deepcopy():
+    """Card.__deepcopy__ copies exactly `_MUTABLE_FIELDS` and SHARES the rest.
+    A new container field left off that list is aliased across every copy of
+    the card -- silent, and exactly the class of bug the hand-rolled copy
+    exists to be fast enough to justify."""
+    import copy
+    from tier0.engine import state
+    assert "tempo_band" in state._MUTABLE_FIELDS
+    card = loader._card_index()["soloists_solicitation"]
+    clone = copy.deepcopy(card)
+    assert clone.tempo_band == card.tempo_band
+    assert clone.tempo_band is not card.tempo_band
+
+
+def test_the_csharp_codegen_whitelists_tempo_band():
+    """READER TWO, the other half of the note. `card_level_reason` BLOCKS any
+    card carrying a field the emitter does not understand -- the gate that
+    already caught `innate` and `retain` -- so an unlisted field would have
+    blocked all 219 cards rather than one."""
+    from tools import gen_klee_cards
+    assert "tempo_band" in gen_klee_cards.CARD_FIELDS
+    row = {"id": "x", "name": "X", "cost": 1, "type": "attack",
+           "rarity": "common", "solve": ["frontload"],
+           "tempo_band": {"fight": ["early"], "run": ["early"]},
+           "archetypes": ["generic"], "role": "glue",
+           "effects": [{"op": "damage", "amount": 6, "target": "enemy"}]}
+    assert gen_klee_cards.card_level_reason(row) is None
+
+
+# --- the A-G1 rulings, as rules (R91) ---------------------------------------
+
+def test_every_meter_declares_bounded_or_unbounded_with_its_cap_from_constants():
+    """R91/2b. The amendment's whole point is that a BOUNDED meter's readers
+    may be frontload-after-a-tax rather than scaling, so the property has to
+    be present and the cap has to be the real one. A cap retyped into this
+    file would drift from the sim the first time the sim moved."""
+    from tier0 import constants as C
+    for token, (bounded, const, why) in rt.METERS.items():
+        assert isinstance(bounded, bool), token
+        assert len(why) > 40, token
+        got_bounded, value, got_const = rt.meter_cap(token)
+        assert got_bounded is bounded, token
+        if const is None:
+            assert value is None, token          # unbounded: no cap to read
+        else:
+            assert got_const == const
+            assert value == getattr(C, const), token
+    assert rt.METERS["salon_member"][1] == "SALON_MEMBER_SLOTS"
+    assert C.SALON_MEMBER_SLOTS == 3
+
+
+def test_meter_reading_damage_is_scaling_and_frontload_only_if_it_pays_at_zero():
+    """R91/2c, COUNTERSIGNED AS WRITTEN, on the sheets' own cards.
+
+    `applause_line` deals a printed number and adds a Fanfare term, so it is
+    both. `pearl_barrage` deals only `N per exhausted card`, so at an empty
+    pile it deals nothing and is scaling ONLY. If this ever inverts, 19 cards
+    of tagging inverted with it and the lint is measuring a different pool.
+    """
+    both = {"furina": ["applause_line"], "kokomi": ["read_the_current"]}
+    scaling_only = {"kokomi": ["pearl_barrage", "depths_judgment", "undertow"],
+                    "furina": ["the_final_verdict"]}
+    for character, path in rt.SHEETS.items():
+        rows = rt.load_rows(path)
+        scans, _ = rt.classify_pool(rows, character)
+        for card_id in both.get(character, ()):
+            solve = scans[card_id]["solve"]
+            assert "scaling" in solve and "frontload" in solve, (card_id, solve)
+        for card_id in scaling_only.get(character, ()):
+            solve = scans[card_id]["solve"]
+            assert "scaling" in solve, (card_id, solve)
+            assert "frontload" not in solve, (card_id, solve)
+
+
+def test_the_sheets_and_the_classifier_cannot_drift():
+    """The landed tags are machine-derived, so a hand edit on a sheet is a
+    silent fork between what the sheet says and what the lint counts. --check
+    is the gate; this is the suite carrying it."""
+    res = _run("suggest_role_tempo_tags.py", "--check")
+    assert res.returncode == 0, res.stdout + res.stderr
+    assert "three sheets match the classifier" in res.stdout, res.stdout
 
 
 def test_tag_through_entities_all_carry_their_provenance():
