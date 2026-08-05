@@ -36,8 +36,8 @@ otherwise).
 | `teyvat-spire-design-principles.md` | The design constitution, amended through v1.11b. |
 | `klee-character-design.md` | Klee's identity charter (amended in place through pass 3). |
 | `furina-kickoff-v0.1.md` | Furina's governing declaration doc (amended through 2026-07-25). |
-| `kokomi-kickoff-v1.md` | Kokomi's identity-law charter (Laws 1–4 are live and machine-checked; its *numeric* sections are superseded by R56+ — read numbers from the sheets). |
-| `axis-validity-session-charter.md` | The Axis-Validity charter (RATIFIED 2026-08-04, AV-G2 countersigned). Grades R87(1), revises the same-y-pools diagnosis against canon, and opens Tracks A/B/C. A-G1 and B-G1 are still open gates. |
+| `kokomi-kickoff-v1.md` | Kokomi's identity-law charter (Laws 1–4 are live and machine-checked; its *numeric* sections are superseded by R56+ — read numbers from the sheets). **Also superseded, and not numeric: §3's elite-axis declaration.** R51 ruled the elite pair **A2 Scaling + A6 Utility**, replacing the kickoff's "A2 + A4 Utility"; the A4 terminology clash is discharged. (Row widened 2026-08-06, R107 / S4 finding F11 — the old fence covered numeric sections only, so it missed the one identity-level supersession in the doc.) |
+| `axis-validity-session-charter.md` | The Axis-Validity charter (RATIFIED 2026-08-04, AV-G2 countersigned). Grades R87(1), revises the same-y-pools diagnosis against canon, and opens Tracks A/B/C. **A-G1 was DISCHARGED 2026-08-04 (R91); B-G1 remains open** (row corrected 2026-08-06, R107 / S4 finding F7). |
 
 ### Open sprints and live queues
 | doc | what it is |
@@ -49,7 +49,7 @@ otherwise).
 | `run-model-rework-plan.md` | Implemented (Passes 1–4 shipped); kept current for §10.9, the living skip backlog. |
 | `tier05-perf-and-ironclad-act3-notes.md` | Perf pass record; kept current for §1.5.2's open items (out-of-scale boss audit lives only here). |
 | `tech-debt-audit-2026-07-26.md` | The architecture audit; kept current for §9 (the big-push sequencing, with D3's pin-batch pull marked in place) and §10, the horizon list of open design sessions. |
-| `epoch-1-log-2026-07-26.md` | EPOCH 1's landing record: what moved, what was archived, and the graded predictions. The current canonical-cell baseline lives here. |
+| `epoch-1-log-2026-07-26.md` | EPOCH 1's landing record: what moved, what was archived, and the graded predictions, **plus the D10-world canonical-cell baseline — ARCHIVED by the D12 and D13 bumps** (R87(3)). Current anchors: `sprint-sim-hygiene-log-2026-07-29.md`, ratified as measurements by R107(a). (Row corrected 2026-08-06, R107 / S4 finding F16 — it previously called these numbers "the current canonical-cell baseline", two world bumps behind the stamp.) |
 | `track-a-kickoff-brief.md` | Track A's execution brief (T1–T4). Executed 2026-08-04. |
 | `sprint-axis-validity-track-a-log-2026-08-04.md` | **OPEN, and the doc of record for P1's binding null.** §0 holds the graded predictions; §3 diagnoses why the null fired; §4 is the stop-and-surface list; §6 is what [USER] gate A-G1 most needs to look at. |
 | `handback-note-2026-08-04.md` | [USER]'s hand-back note opening the validation-soak + Track B session, verbatim. |
@@ -66,9 +66,9 @@ otherwise).
 | `klee-real-battery-calibration.md` | The real-Ironclad baseline pipeline reference (both reproduce commands live). |
 | `role-tempo-baseline.md` | The five canon pools' (solve × tempo × rarity) matrix, DLL-derived. Percentages only — no canon card text is ever committed (.gitignore:28). Also holds the wiki-vs-DLL count reconciliation. |
 | `role-tempo-floors.yaml` | The machine-readable coverage floors (min-of-canon over the cells all five pools are non-zero in). Read by `tools/lint_role_tempo_coverage.py`. |
-| `role-tempo-review.tsv` | **PROVISIONAL.** Suggested `solve`/`tempo_band` for all 219 GItS cards, beside the authored tags. Nothing here has landed on a sheet; [USER] gate A-G1 closes first. |
+| `role-tempo-review.tsv` | **LANDED 2026-08-04 (R91)** — all 219 rows, both fields, on all three sheets; 135 divergences resolved to zero. Kept as the derivation record. (Row corrected 2026-08-06, R107 / S4 finding F7; it previously read PROVISIONAL and named A-G1 as the blocker.) |
 | `role-tempo-tagthrough.md` | **PROVISIONAL.** Token → roles-cashed-into, per fight band. The artifact A-G1 reviews: a token's payoff set is a design fact. |
-| `role-tempo-debt.tsv` | The 30 pinned coverage gaps the lint's `--gate` measures new findings against. Delete it with P1's null. |
+| `role-tempo-debt.tsv` | The 30 pinned coverage gaps the lint's `--gate` measures new findings against. ~~Delete it with P1's null.~~ **Deletion rule is R90/1a's: the debt list is deleted when the reworks address the gaps, not before** (row corrected 2026-08-06, R107 / S4 finding F7 — the "delete with P1's null" wording survived from the pre-countersign draft). Caveat that travels with the file: 30 → 19 was not eleven wins. |
 | `art-sprint-spec.md` | The art pipeline regime: tiers, SOURCES.tsv/plan.tsv discipline, lint gates. |
 | `art-asset-manifest.md` | The per-character asset bill ("AS SHIPPED" maintained in place). |
 | `furina-art-pass-requirements.md` | Furina's art bill/spec (count delegated to `tools/art_coverage.py`). |

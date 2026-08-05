@@ -2662,6 +2662,19 @@ predate v11 and must be re-measured before being quoted.
 
 ## R84 -- DRAFTER v11 ratified; the power-aware static term and a fresh 3-act roster ordered (2026-07-27)
 
+> **THE "ONLY QUOTABLE ROSTER TABLE" IS ARCHIVED -- annotated 2026-08-06
+> (R107; S4 finding F4).** This entry designates the fresh 3-act roster table
+> in `docs/silent-pilot-review-2026-07-27.md` as *the only quotable roster
+> table*. That table is a DRAFTER 12 world, and **R87(3) archives every
+> drafter-layer number taken under DRAFTER 12 on the stamp bump**, which
+> landed 2026-07-29 (`3e3c243`). The designation and the archive rule cannot
+> both be followed; the archive rule wins, because it is the later ruling and
+> the general one. **Successor:** the D13 roster-anchor run in
+> `docs/sprint-sim-hygiene-log-2026-07-29.md`, ratified as measurements by
+> R107(a), with the n=3000 re-read (`4ee6881`) as the reading of record for
+> any per-arm delta. The table below is not rewritten -- it is a measurement,
+> and it stays exactly as measured.
+
 Ruled by [USER]: "the constants in the draft.py look fine at first
 glance, approved. Let's take on _static_power and then redo the 3-act
 roster for a full fresh recalculation."
@@ -2849,6 +2862,16 @@ asked for. No code, no sheet and no number moved with them.
 > shipped against, and not redesigned against until it reports. The STOP's
 > practical effect -- no Furina balance value moves -- is unchanged by the
 > escrow, which freezes both directions.
+
+> **GOVERNING CONDITION RE-POINTED 2026-08-06 (R107; S4 finding F1).** Item
+> (1)'s trigger fired -- the Furina playtest ran 2026-08-01/02 and was graded
+> BY CONSTRUCTION (`docs/axis-validity-session-charter.md` §1) -- and the
+> condition it converted into ("waiting on Track A's first lint run... until
+> the fanfare cells have floors to fill toward") can never be met: the lint
+> found no fanfare floors, and R90/1b moved the question out of Track A
+> entirely. **Items 1-3 and the fanfare STOP now govern on Track B / B-G1.**
+> The chain is R87(1) -> charter §1 -> R90/1b. Re-pointed, not released: the
+> STOP holds, against a gate that can actually discharge it.
 
 **(1) Items 1-3 DEFERRED, behind one playtest with a pre-registered
 question.** The Furina strength lever + legibility pair, the
@@ -3327,6 +3350,18 @@ stream sits down.
    time; this is almost certainly one of the 42, observed in the wild rather
    than in a table. The acceptance form the routing note takes: **DRAFTER 13
    is not done while The Gallery Stirs scores 0.0 at offer.**
+
+   > **CORRECTION 2026-08-06 (R107; S4 finding F2). The fixture is RE-HOMED to
+   > the `_static_power` repricing session**, item 2's stream, and is no longer
+   > an acceptance condition on DRAFTER 13. "Almost certainly one of the 42"
+   > was wrong: DRAFTER 13 landed 2026-07-29 (`3e3c243`) and prices all 56 ops,
+   > and `score_offer("crowd_work")` still returns **0.0** under the stamped
+   > D13 tree. The zero comes from `_static_power`'s power-name blindness
+   > (`docs/tech-debt-audit-2026-07-26.md` §2.5), which is the stream this item
+   > now belongs to. The original 42-of-56 register entry is struck at
+   > `docs/backlog-2026-07-29.md` §1. **Nothing measured is rewritten** -- the
+   > 0.0 observation stands exactly as recorded; only its acceptance owner
+   > moves.
 2. **`score_offer` prices Vulnerable as a flat debuff** (`amount * 2` through
    `_static_power`), so it cannot see a multiplier applied to an engine
    already producing damage every turn. -> the **`_static_power` repricing

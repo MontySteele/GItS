@@ -73,7 +73,7 @@ Not one of her balance constants has had red-pen. The whole sheet was declared,
 simulated, and written up; none of it has been ratified. Where a number feels
 wrong, the note is evidence, not a complaint.
 
-Two carry specific standing flags:
+Three carry specific standing flags:
 
 - **`KuragePulsePerCharge = 3`** (was 4; R73 ruled 2, and E1 fired the
   pre-committed ×3 fallback — see `tier05/exp_neap_tide_e1.py`). It was
@@ -95,6 +95,13 @@ Two carry specific standing flags:
   column can supply.
 - **`burst_max = 20`** was chosen off a 300-run bracket to hit a pre-registered
   35–50% Burst-uptime band. Q2 is whether that band feels right in a hand.
+- **`kurages_oath = 12`** (added 2026-08-06, R107; S4 finding F9). Ruled at 12 with
+  [USER]'s own flag on the record: *"I feel like that's too strong, but we can rebalance
+  later"* (R56). Disposition: **first knob back** — if anything on Kokomi comes down, this
+  is the first number to move. The flag has existed since 2026-07-26 and had never
+  reached the one instrument that could judge it, which is why it is here now. **Feeds
+  Q4.** A hand's read of whether 12 plays as a purchase or as an autopilot is the part no
+  column supplies.
 
 ### One number has no instrument at all
 
