@@ -27,10 +27,17 @@ pre-drafted where noted, so the reply is the only cost.
 
 | # | Ask | Reply shape | Unblocks | Full text |
 |---|---|---|---|---|
-| Q1 | **F6 / `NT-G5`:** is the 2026-08-01/02 three-seat session "playtest three" for the pre-registered Kokomi fork? | YES / NO | The last unexecuted S4 repair; either the fork becomes a sitting item, or its trigger is renamed so it cannot fire silently again | `docs/awaiting-user-slots-2026-08-06.md` slot 1 (both forms drafted verbatim) |
+| ~~Q1~~ | ~~**F6 / `NT-G5`:** is the 2026-08-01/02 three-seat session "playtest three" for the pre-registered Kokomi fork?~~ | ~~YES / NO~~ | **ANSWERED 2026-08-06 — YES** (Track Y / Y-1): *"YES — the 08-01/02 session is playtest three; the current Kokomi build was played."* Slot 1's YES form landed verbatim in `klee-mod/DECISIONS.md` beneath the fork block. **The fork's evaluation is now row `Q5` below** | ~~`docs/awaiting-user-slots-2026-08-06.md` slot 1~~ → landed; slot marked ANSWERED |
 | Q2 | **X2 audit venue:** does `docs/dockets/companion-pricing.md` own X2 rarity work going forward? | YES / NO | Ownership of the cycling-rarity law's future audits. The `TT-T1` results table stays put either way | `docs/awaiting-user-slots-2026-08-06.md` slot 2 |
 | Q3 | **F14's siblings:** approve the staged repair of four further `R91/1c` misattributions + a new citation lint? | MERGE / SEND BACK | Branch `staged/f14-siblings` (`eaa83e5`), suite green on its own tip, never pushed. Read the "deliberately does NOT touch" paragraph before approving | `docs/awaiting-user-slots-2026-08-06.md` slot 3 |
 | Q4 | **`SW2-S-1`'s stopped deletion:** does deleting `copy_cost_override: 0` from Encore Performance's upgrade now proceed, given the curated exemption is already registered? | YES / NO | The sheet half of the ratified X3 change. Today the exemption in `tools/lint_upgrade_coverage.py::SHEET_EXEMPT` is **pre-positioned, not load-bearing** — `docs/furina-upgrades.yaml` is still untouched | `docs/surplus-week-manifest-2026-08-05.md`, Second Wind replies table row 2 (*new one-liner surfaced by Track W, 2026-08-06*) |
+
+| Q5 | **`NT-G5` fork evaluation — NEW, opened 2026-08-06 by Q1's YES.** Did Neap Tide (Kokomi) **read weak at the table** during the 2026-08-01/02 playtest? Plainly: playing her, did she feel underpowered, or did she feel fine? | WEAK / FINE | **WEAK** → lever 2 is pulled in an isolated cell (one knob, its own arm, measured alone). **FINE** → lever 3 is pulled **and** the sim-calibration offset for exhaust-loop kits is finally written down as a number — it has been asserted three times and never quantified. Until this word arrives no lever moves and `S4-G13`'s fork half stays open | `klee-mod/DECISIONS.md`, "PRE-REGISTERED FORK for playtest three (G5, confirmed)" + its 2026-08-06 [USER] annotation |
+
+**Why `Q5` is not a repeat of `Q1`.** `Q1` asked whether the trigger fired;
+`Q5` asks what the hands said. The pre-registration is explicit that **the hand
+is the tiebreaker, not the sim**, so Code cannot answer `Q5` by measuring — it
+is a memory of play, and it is the only input the fork accepts.
 
 ### Already answered — recorded so they are not re-asked
 
@@ -62,7 +69,7 @@ with their discharges named. **Qualified as `S4-G<n>`** (see
 | `S4-G10` | Shop channel §7 close-out — `SHOP-P1…P3` grading; does the purse ever bind; the 1.15× surcharge; Track A pool migration; **R60 phase-2 fantasy-leak grading** | R60/R63; principles §4.7 notes 2–3 | OPEN — R60's stated trigger has been satisfied since 2026-07-25 |
 | `S4-G11` | **R29d** naming/lore eyes-on pass (Furina); plus Kokomi R58 fill block AUTHORED-NOT-AUDITED and kickoff ask 10 | `tier0/DECISIONS.md` entry 75 + R29d banner; R58 | OPEN |
 | `S4-G12` | = **`CC-G1` + `CC-G2`** (R86): contact-sheet eyes-on (four REHUNT picks + `standing_room_only` overturn) and in-game screenshot review of the twelve Curtain Call cards + the A0 smoke run | `tier0/DECISIONS.md` R86 | OPEN — **materials ready**: `docs/g12-review-2026-08-05.md` (contact sheets verified, all 24 captures). See also §5 row 10.1: five of nineteen art candidates fail lint if picked. |
-| `S4-G13` | Neap Tide standing question — Kokomi below the Ironclad-anchored floor; three levers, *"none is Code's to pull"*; plus the `NT-G5` fork | `klee-mod/DECISIONS.md` E2/E2b + addendum | OPEN — the fork half turns on **Q1** |
+| `S4-G13` | Neap Tide standing question — Kokomi below the Ironclad-anchored floor; three levers, *"none is Code's to pull"*; plus the `NT-G5` fork | `klee-mod/DECISIONS.md` E2/E2b + addendum | OPEN. ~~the fork half turns on **Q1**~~ **Updated 2026-08-06:** Q1 answered YES, so the fork has **fired** and its half of this gate is now the scheduled sitting item **Q5** (weak-or-fine). The standing question itself is unchanged |
 | `S4-G14` | Kokomi protocol playtest (Q1–Q7 + three priority checks; Answers blank) | `docs/kokomi-playtest-protocol.md` | OPEN — blocked on `S4-G6`, and (per backlog §4) on the N1 attribution pass |
 | `S4-G15` | **Corpse detonation settlement** — ~10 s at the table; failure invalidates every sim bomb number vs killable enemies | `klee-mod/DECISIONS.md` "Corpse detonation — OPEN" | OPEN since 2026-07-21, through ≥5 playtests (*nobody checked in playtest 4*) |
 | `S4-G16` | **`G-A5(b)`** fourth shape — one capture of a Power play raising the Fanfare floor | `docs/red-pen-2026-07-26.md` Part 3 | OPEN |
@@ -171,9 +178,12 @@ collision; three energy counters pointing at `ironclad_energy_counter.tscn`;
 
 Recorded rather than guessed, per the no-supplied-assumptions norm.
 
-1. **Is the 2026-08-01/02 session "playtest three"?** (Q1.) Everything about
+1. ~~**Is the 2026-08-01/02 session "playtest three"?** (Q1.) Everything about
    `NT-G5`, `S4-G13`'s fork half, and the unwritten exhaust-loop calibration
-   offset turns on this one word.
+   offset turns on this one word.~~ **SUPPLIED 2026-08-06 (Track Y): YES.** The
+   fact this sweep could not supply has been supplied. What it unblocked is not
+   an answer but a second question, `Q5` — the fork evaluation — and the
+   calibration offset is still unwritten, now owed by that evaluation.
 2. **Do R1–R38 need a back-index, or are they historical?** (§4.) This sweep
    could not resolve them mechanically and did not invent a mapping.
 3. **Where does the payoff-reach / `RARITY_ODDS` registration document live?**

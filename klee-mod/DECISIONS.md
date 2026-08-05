@@ -2378,6 +2378,37 @@ this specific kit. So the hand is the tiebreaker, not the sim.
   `CHARGE_PER_EXHAUST`, not re-anchoring. The multiplier remains explicitly
   NOT the lever.
 
+> **[USER] ANNOTATION 2026-08-06 — the fork's trigger HAS FIRED (S4 finding F6).**
+> The three-seat co-op playtest of **2026-08-01/02** (build 0.2-247;
+> `docs/axis-validity-session-charter.md` §1) **is playtest three** for the
+> purposes of this pre-registration. The fork above is therefore **live and
+> unevaluated**, and evaluating it — reading the hands against "confirm weak"
+> vs "say fine", and pulling lever 2 or lever 3 accordingly — becomes a
+> **[USER] sitting item**. It is not Code's to grade: the pre-registration says
+> the hand is the tiebreaker, not the sim.
+>
+> Two things this annotation does NOT do. It does not pull a lever — no knob
+> moves on the strength of a trigger firing — and it does not grade the
+> session. The registered payoff of the fine-branch, the **logged
+> sim-calibration offset for exhaust-loop kits** ("asserted three times and
+> never written down as a number"), remains **unwritten** and is owed by the
+> evaluation, not by this note.
+>
+> Consequence for the register: G13 (`review/ledger-audit/hygiene-report.md`
+> §3) stops reading "OPEN — none is Code's to pull" for the fork half and
+> becomes a scheduled sitting item. The Neap Tide standing question itself is
+> unchanged.
+
+> **LANDING NOTE, 2026-08-06 (Track Y).** The annotation above is the YES form
+> pre-drafted at `docs/awaiting-user-slots-2026-08-06.md` slot 1, landed
+> verbatim against [USER]'s reply *"YES — the 08-01/02 session is playtest
+> three; the current Kokomi build was played."* (sixth-wave brief, Track Y,
+> item Y-1; transcribed at `docs/sitting-record-predraft-2026-08-06.md` §7).
+> Appended, never rewritten, per R101b: the pre-registration above it is
+> untouched, which is the whole point of pre-registering. The fork's
+> **evaluation** is now its own AWAITING-[USER] row in
+> `docs/registry/user-queue.md` §1.
+
 ### What this addendum found while executing (details in the commits)
 
 Five defects, all of the same shape -- a ruling moved one artifact and a

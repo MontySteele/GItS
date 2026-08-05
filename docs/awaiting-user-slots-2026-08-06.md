@@ -24,8 +24,25 @@ options anticipate, the drafts are void and the item goes back to [USER].
 
 ## Slot 1 — F6: is the 2026-08-01/02 session the G5 fork's trigger?
 
+> **ANSWERED AND LANDED 2026-08-06 (Track Y) — reply: YES.** Verbatim: *"YES —
+> the 08-01/02 session is playtest three; the current Kokomi build was
+> played."* (sixth-wave brief, Track Y item Y-1; transcribed at
+> `docs/sitting-record-predraft-2026-08-06.md` §7.) Form **1-YES** below was
+> landed verbatim, dated 2026-08-06, at its named site: `klee-mod/DECISIONS.md`,
+> appended beneath the "PRE-REGISTERED FORK for playtest three (G5, confirmed)"
+> block.
+>
+> **This file's own house rule said to delete the unselected form and this
+> entry. It is struck instead, not deleted** — R101b (never delete text; strike
+> and banner) is ratified law and outranks a drafting convenience written by
+> the track that opened this file. The struck form below is void as a draft and
+> is kept only so a reader can see what the other answer would have said.
+>
+> Consequence, recorded and NOT resolved: the fork's **evaluation** is now due
+> and is its own AWAITING-[USER] row in `docs/registry/user-queue.md` §1. No
+> lever was pulled by the landing.
 
-**AWAITING [USER]. One word: YES or NO.**
+~~**AWAITING [USER]. One word: YES or NO.**~~
 
 **The question.** S4 finding F6 (`review/ledger-audit/hygiene-report.md` §2,
 F6) is the one item of seventeen that R107 could **not** execute, because its
@@ -48,7 +65,7 @@ silently again."*
 beneath the "PRE-REGISTERED FORK for playtest three (G5, confirmed)" block, as
 a dated annotation (R101b: append, never rewrite the pre-registration).
 
-### 1-YES — draft, lands only if the reply is YES
+### 1-YES — ~~draft, lands only if the reply is YES~~ **LANDED VERBATIM 2026-08-06**
 
 > **[USER] ANNOTATION <DATE> — the fork's trigger HAS FIRED (S4 finding F6).**
 > The three-seat co-op playtest of **2026-08-01/02** (build 0.2-247;
@@ -71,7 +88,7 @@ a dated annotation (R101b: append, never rewrite the pre-registration).
 > becomes a scheduled sitting item. The Neap Tide standing question itself is
 > unchanged.
 
-### 1-NO — draft, lands only if the reply is NO
+### 1-NO — ~~draft, lands only if the reply is NO~~ **VOID 2026-08-06: the reply was YES**
 
 > **[USER] ANNOTATION <DATE> — the fork's trigger has NOT fired (S4 finding
 > F6).** The three-seat co-op playtest of **2026-08-01/02**
