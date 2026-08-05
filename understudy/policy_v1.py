@@ -991,6 +991,13 @@ def decide(state: dict[str, Any], memo: Memo | None = None) -> Decision:
     """
     memo = memo if memo is not None else Memo()
     st = str(state.get("state_type") or "unknown")
+    # A SCREEN'S SELECTION STATE IS PER-VISIT, NOT PER-FLOOR. Furina's starter
+    # relic reopens the same "Choose a card." Spotlight screen every single
+    # turn, with the same key -- so toggles remembered from last turn made the
+    # arm believe every option was already taken and it declined a screen that
+    # cannot be cancelled. Leaving `card_select` is what ends a visit.
+    if st != "card_select" and memo.selected_screens:
+        memo.selected_screens.clear()
     if st in policy_v0.NO_COUNTERFACTUAL:
         d = _unavailable(st, policy_v0.NO_COUNTERFACTUAL[st])
     else:

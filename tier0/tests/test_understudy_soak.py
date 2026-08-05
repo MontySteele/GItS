@@ -443,3 +443,16 @@ def test_every_teardown_step_runs_even_when_an_earlier_one_raises(tmp_path):
     assert states[3] == "REVERTED"
     assert not appid.exists(), "the appid file survived a failing teardown"
     assert "ConnectionResetError" in sess.ledger.table()
+
+
+def test_an_uncancellable_screen_is_answered_not_cancelled():
+    """The bridge rejects `cancel_selection` on a screen reporting
+    `can_cancel: false` / `can_skip: false`, so cancelling as a last resort is
+    a guaranteed loop -- and it produced one."""
+    forced = {"state_type": "card_select",
+              "card_select": {"can_cancel": False, "can_skip": False,
+                              "can_confirm": False, "cards": [{"name": "x"}]}}
+    assert soak._last_resort(forced) == {"action": "select_card", "index": 0}
+    skippable = {"state_type": "card_select",
+                 "card_select": {"can_cancel": True, "cards": []}}
+    assert soak._last_resort(skippable) == {"action": "cancel_selection"}

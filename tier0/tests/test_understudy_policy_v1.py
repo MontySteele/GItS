@@ -551,3 +551,24 @@ def test_a_screen_whose_options_are_exhausted_stops_rather_than_spinning():
     memo = policy_v1.Memo()
     assert policy_v1.decide(state, memo).available is True
     assert policy_v1.decide(state, memo).available is False
+
+
+def test_a_screens_selection_state_does_not_survive_leaving_the_screen():
+    """Furina's starter relic reopens the SAME "Choose a card." Spotlight
+    screen every turn, with the same key. Toggles remembered from last turn
+    made the arm believe every option was already taken, so it declined a
+    screen the bridge will not let anyone cancel ("No skip option available -
+    a card must be chosen") and the run bounced until the watchdog stopped it.
+    """
+    overlay = _overlay(["KLEEMOD-STAGE_PRESENCE"])
+    overlay["card_select"]["prompt"] = "Choose a card."
+    combat = _combat_state([BIG_SWING], [_enemy("A", "One", 40, "5")])
+    memo = policy_v1.Memo()
+    # Two visits with a combat turn in between, which is how the real run goes.
+    policy_v1.decide(overlay, memo)
+    policy_v1.decide(overlay, memo)
+    policy_v1.decide(combat, memo)
+    assert memo.selected_screens == {}, "the visit never ended"
+    again = policy_v1.decide(overlay, memo)
+    assert again.available, "the reopened screen was declined as exhausted"
+    assert again.action["action"] == "select_card"

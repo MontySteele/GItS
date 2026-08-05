@@ -1010,12 +1010,23 @@ def _last_resort(state: dict) -> dict | None:
     has to be able to say so.
     """
     st = str(state.get("state_type"))
+    if st == "card_select":
+        # A SCREEN THAT CANNOT BE CANCELLED MUST BE ANSWERED. The in-combat
+        # "Choose a card." overlay reports `can_cancel: false` and
+        # `can_skip: false`, and the bridge rejects the cancel with "No skip
+        # option available - a card must be chosen" -- so cancelling as a last
+        # resort is a guaranteed loop, which is exactly what it produced.
+        blob = state.get("card_select") or {}
+        if blob.get("can_cancel") or blob.get("can_skip"):
+            return {"action": "cancel_selection"}
+        if blob.get("can_confirm"):
+            return {"action": "confirm_selection"}
+        return {"action": "select_card", "index": 0}
     return {
         "card_reward": {"action": "skip_card_reward"},
         "rest_site": {"action": "proceed"},
         "shop": {"action": "proceed"},
         "fake_merchant": {"action": "proceed"},
-        "card_select": {"action": "cancel_selection"},
         "monster": {"action": "end_turn"},
         "elite": {"action": "end_turn"},
         "boss": {"action": "end_turn"},
