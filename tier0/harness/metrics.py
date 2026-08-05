@@ -6,6 +6,7 @@ normalization lands in M2 once the battery exists to calibrate against.
 
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
 
 from tier0 import constants as C
@@ -125,6 +126,14 @@ class FightStats:
     reactions_by_name: dict[str, int] = field(default_factory=dict)
     conditional_evaluated: dict[str, int] = field(default_factory=dict)
     conditional_fired: dict[str, int] = field(default_factory=dict)
+    # --- O-1 (Track O slice 12, ruled 2026-08-06). A multi-stage encounter
+    # (`gauntlet`) is ONE record but TWO combats, and every per-fight rate
+    # below used to divide the two combats' events by one record. The stage
+    # records this record was merged from are kept here so that a per-COMBAT
+    # denominator is recoverable; EMPTY on a single-combat record, which is
+    # therefore one combat by itself (see `combats` and `per_combat`).
+    # Counts only -- nothing here is read by combat, by an axis, or by C#.
+    stages: list["FightStats"] = field(default_factory=list)
     flags: list[str] = field(default_factory=list)
 
     @property
@@ -159,13 +168,42 @@ class FightStats:
         fight -- an undefined share is reported as no share, never as 1.0."""
         return self.damage_from_reactions / max(1, self.damage_all_ops)
 
+    @property
+    def combats(self) -> int:
+        """How many COMBATS this record is. 1 for an ordinary fight; the
+        stage count for a merged multi-stage encounter. The denominator of
+        every per-fight EVENT rate (O-1)."""
+        return len(self.stages) or 1
+
+
+def per_combat(all_stats: list["FightStats"]) -> list["FightStats"]:
+    """The battery's records expanded to one record per COMBAT.
+
+    O-1: `gauntlet` is two combats behind one merged record, so a rate that
+    divides by `len(all_stats)` carries a different unit on that encounter
+    than on the other five, and a battery-wide row pools the two units.
+    Aggregates that count EVENTS PER FIGHT denominate over this expansion;
+    pooled counts and every ratio-of-sums are identical either way, and the
+    record-level figures that describe the ENCOUNTER ATTEMPT rather than a
+    combat (winrate, avg_turns, hp delta, flags) deliberately do NOT use it --
+    a gauntlet is one attempt whose HP carries across the stage break."""
+    out: list["FightStats"] = []
+    for s in all_stats:
+        out.extend(s.stages or [s])
+    return out
+
 
 def merge_stages(stages: list["FightStats"]) -> "FightStats":
     """Merge back-to-back stage fights (GAUNTLET) into one fight record.
-    Later stages' turn numbers are offset so the damage curve is continuous."""
+    Later stages' turn numbers are offset so the damage curve is continuous.
+
+    The merged record keeps the stage records on `.stages`, so a per-combat
+    denominator survives the merge (O-1). Because they are kept, stage 1 is
+    COPIED rather than accumulated into in place -- the caller's stage records
+    have to still read as the individual combats they were."""
     if len(stages) == 1:
         return stages[0]
-    merged = stages[0]
+    merged = copy.deepcopy(stages[0])
     for s in stages[1:]:
         offset = merged.turns
         for t, v in s.damage_by_turn.items():
@@ -218,6 +256,9 @@ def merge_stages(stages: list["FightStats"]) -> "FightStats":
                 dst[k] = dst.get(k, 0) + v
         merged.flags = sorted(set(merged.flags) | set(s.flags))
     merged.won = all(s.won for s in stages)
+    # The combats this record IS. Set last, and from the ORIGINALS, so the
+    # per-combat denominator is the stages as they were fought (O-1).
+    merged.stages = list(stages)
     return merged
 
 
@@ -397,12 +438,20 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
 
 
 def summarize(all_stats: list[FightStats]) -> dict:
+    """Battery summary. `fights` counts RECORDS (one per encounter attempt);
+    `combats` counts the combats inside them, which is two per `gauntlet`
+    record. The event rates below (`reactions_per_fight`,
+    `auras_wasted_per_fight`, `aura_starved_fights`) denominate over COMBATS
+    per O-1; winrate, turns, HP and flags stay per attempt."""
     n = len(all_stats)
     if n == 0:
         return {}
+    combats = per_combat(all_stats)
+    nc = len(combats)
     wins = sum(s.won for s in all_stats)
     return {
         "fights": n,
+        "combats": nc,
         "winrate": wins / n,
         "avg_turns": sum(s.turns for s in all_stats) / n,
         "avg_hp_delta": sum(s.hp_delta for s in all_stats) / n,
@@ -410,15 +459,17 @@ def summarize(all_stats: list[FightStats]) -> dict:
                        for s in all_stats) / n,
         "avg_energy_per_turn": sum(s.energy_spent / max(1, s.turns)
                                    for s in all_stats) / n,
-        "reactions_per_fight": sum(s.reactions for s in all_stats) / n,
+        "reactions_per_fight": sum(s.reactions for s in combats) / nc,
         # Spec §4.4: healthy reaction-archetype = 25-45% damage share;
         # aura starvation (spec §8) = reaction-deck fights with 0 reactions.
         "reaction_damage_share": (sum(s.reaction_damage for s in all_stats)
                                   / max(1, sum(s.total_damage_dealt
                                                for s in all_stats))),
-        "aura_starved_fights": sum(1 for s in all_stats
-                                   if s.reactions == 0) / n,
-        "auras_wasted_per_fight": sum(s.auras_wasted for s in all_stats) / n,
+        # A COMBAT with no reaction is a starved combat: a starved gauntlet
+        # stage merged with a reacting one used to read as not starved (O-1).
+        "aura_starved_fights": sum(1 for s in combats
+                                   if s.reactions == 0) / nc,
+        "auras_wasted_per_fight": sum(s.auras_wasted for s in combats) / nc,
         "pilot_regret_rate": (sum(s.regrets for s in all_stats)
                               / max(1, sum(s.cards_played for s in all_stats))),
         # §2.2a: fraction of enemy actions negated by companion control.
@@ -447,20 +498,25 @@ def reaction_share(all_stats: list[FightStats]) -> dict:
     n = len(all_stats)
     if n == 0:
         return {}
+    combats = per_combat(all_stats)
+    nc = len(combats)
     total = sum(s.damage_all_ops for s in all_stats)
     react = sum(s.damage_from_reactions for s in all_stats)
     return {
         "fights": n,
+        "combats": nc,
         "damage_all_ops": total,
         "damage_from_reactions": react,
         "damage_from_base_ops": total - react,
         "share": react / max(1, total),
-        "share_by_fight_mean": sum(s.reaction_share for s in all_stats) / n,
+        # Per COMBAT, not per record: a mean over fights has to be a mean over
+        # fights on every encounter, including the two-stage one (O-1).
+        "share_by_fight_mean": sum(s.reaction_share for s in combats) / nc,
         "amp": sum(s.reaction_damage_amp for s in all_stats),
         "splash": sum(s.reaction_damage_splash for s in all_stats),
         "dot": sum(s.reaction_damage_dot for s in all_stats),
         "fights_with_any_reaction_damage": sum(
-            1 for s in all_stats if s.damage_from_reactions),
+            1 for s in combats if s.damage_from_reactions),
     }
 
 
@@ -483,10 +539,16 @@ def aura_profile(all_stats: list[FightStats]) -> dict:
     POOLED counts plus per-fight rates, on the `reaction_share` pattern.
     Reports numbers only; whether an application rate is adequate is a design
     reading and is not made here.
+
+    Per-fight rates denominate over COMBATS (`combats`), not over records
+    (`fights`): the two differ exactly on a multi-stage encounter, and mixing
+    the units made `gauntlet` read double every other encounter (O-1).
     """
     n = len(all_stats)
     if n == 0:
         return {}
+    combats = per_combat(all_stats)
+    nc = len(combats)
 
     def _pool(attr: str) -> dict[str, int]:
         out: dict[str, int] = {}
@@ -502,18 +564,19 @@ def aura_profile(all_stats: list[FightStats]) -> dict:
     turns = sum(s.turns for s in all_stats)
     return {
         "fights": n,
+        "combats": nc,
         "aura_ops": ops,
         "aura_ops_total": sum(ops.values()),
-        "aura_ops_per_fight": sum(ops.values()) / n,
+        "aura_ops_per_fight": sum(ops.values()) / nc,
         "applications": applications,
-        "applications_per_fight": applications / n,
+        "applications_per_fight": applications / nc,
         "applications_per_turn": applications / max(1, turns),
         "applications_by_source": by_source,
         "applications_by_element": by_element,
         "reactions": sum(s.reactions for s in all_stats),
         "reactions_by_name": _pool("reactions_by_name"),
         "auras_wasted": sum(s.auras_wasted for s in all_stats),
-        "fights_with_any_aura": sum(1 for s in all_stats
+        "fights_with_any_aura": sum(1 for s in combats
                                     if s.aura_applications),
     }
 
@@ -533,6 +596,7 @@ def payoff_profile(all_stats: list[FightStats]) -> dict:
     n = len(all_stats)
     if n == 0:
         return {}
+    nc = len(per_combat(all_stats))       # O-1: per COMBAT, see aura_profile
     evaluated: dict[str, int] = {}
     fired: dict[str, int] = {}
     for s in all_stats:
@@ -543,7 +607,7 @@ def payoff_profile(all_stats: list[FightStats]) -> dict:
     by_pred = {
         k: {"evaluated": v, "fired": fired.get(k, 0),
             "rate": fired.get(k, 0) / v if v else 0.0,
-            "evaluated_per_fight": v / n}
+            "evaluated_per_fight": v / nc}
         for k, v in sorted(evaluated.items())
     }
 
@@ -557,6 +621,7 @@ def payoff_profile(all_stats: list[FightStats]) -> dict:
 
     return {
         "fights": n,
+        "combats": nc,
         "by_predicate": by_pred,
         "reaction_payoff": _slice(REACTION_PAYOFF_PREDICATES),
         "aura_payoff": _slice(AURA_PAYOFF_PREDICATES),

@@ -12,6 +12,75 @@ seven archetypes (`assist`, `commander`, `demolition`, `generic`, `priest`,
 The tier 0 battery surface does not draft, so DRAFTER_VERSION is inert there
 and is stamped only for provenance.
 
+---
+
+## ERRATUM — 2026-08-06: the battery surface's per-fight denominators
+
+**Every per-fight rate in §3 and §3.1 as first published was measured per
+RECORD, and the `gauntlet` encounter is two combats behind one record.** Track
+O's instrument red-team (`docs/instrument-redteam-2026-08-05.md`, finding
+**O-1** / slice 12, TOP-5 #1) found that `runner.run_battery` merges the
+gauntlet's two stages into one `FightStats` while `aura_profile`,
+`payoff_profile` and `summarize` divided their per-fight rates by
+`len(all_stats)`. The numerator covered 3500 combats; the denominator counted
+3000 records. At the **2026-08-06 sitting** O-1 was classified
+unambiguous-correct-behavior — *per-combat denominators are correct* — and the
+instrument was fixed (`FightStats.stages` / `.combats` /
+`metrics.per_combat`, pinned by
+`tier0/tests/test_pin_o1_combat_denominators.py`).
+
+§3 and §3.1 below are **republished from a re-run of the same battery, same
+arms, same `--fights 500`, same `seed = 20260805`**. The tables as first
+published are preserved verbatim in **Appendix E**, and the original TSV
+`docs/reactions-corpus-battery-2026-08-05.tsv` is **left untouched**; the
+corrected run is written alongside it as
+`docs/reactions-corpus-battery-2026-08-05-corrected.tsv` (one added column,
+`n_combats`). The **cohort surface (§2, §2.1, §2.2, §4.1) is not affected and
+was not re-run** — tier 0.5 records one `FightStats` per combat and never
+merges stages.
+
+What moved, and what did not:
+
+- **Unmoved, byte-for-byte** across all 91 battery rows: every pooled count
+  (`amp`, `splash`, `dot`, `reactions`, aura ops, aura applications, payoff
+  evaluations and fires) and every ratio of sums (`pooled share` and its
+  bootstrap CI). Verified row by row against the original TSV: **0
+  differences.** The fix moved no fight — it is a denominator, not a sim
+  change.
+- **Moved**: `react/fight`, `aura ops/fight`, `aura apps/fight`, the per-fight
+  **mean** share and its CI, and `fights_with_any_reaction_damage`. Gauntlet
+  rows are exactly halved (every gauntlet fight in this battery reached stage
+  2, so 500 records = 1000 combats); `all` rows are multiplied by 3000/3500,
+  i.e. the published figures were **16.7% overstated**. Example, the arm O
+  drove: `all` aura applications/fight **7.6987 published → 6.5989
+  corrected**.
+
+**Qualitative movements, stated and not re-graded** (interpretation still
+belongs to the reactions design session):
+
+1. **The gauntlet is not the aura-richest encounter.** In 9 of the 12 arms
+   that applied any aura, `gauntlet` carried the largest aura
+   applications/fight in the published table; corrected, it is the largest in
+   **none of them**. On `klee/reaction_weighted` it moves from 12.026 (rank 1
+   of 6) to 6.013 (rank 4 of 6, below `tank_boss` 9.486, `attrition` 9.45 and
+   `swarm` 6.136). The same reordering happens in every arm — the gauntlet row
+   was the only one carrying two combats' events on one record.
+2. **The starved-fights figure is no longer erased.** `aura_starved_fights` is
+   not a published column here, but it is the same instrument: on
+   `klee/reaction_weighted` gauntlet it read 0.0000 and reads **0.0030**
+   corrected, because a starved stage merged with a reacting stage recorded
+   `reactions > 0`.
+3. **The per-fight mean share moves UP on the reacting arms, not down** —
+   `klee/reaction_weighted` `all` goes 0.1909 → 0.1975 — because the two
+   gauntlet stages are each individually a fight, and averaging them
+   separately weights them as two. It is the one moved column whose direction
+   is not simply "smaller".
+
+Nothing else in this document is restated, and no reading of these numbers is
+revised here.
+
+---
+
 ## 1. What was measured, and with what
 
 Three instruments, all log-side, all report-only:
@@ -153,69 +222,80 @@ and the corpus keeps them apart on purpose (§5).
 decks, each character's own archetype pilot. Same CI method as §2; fights here
 are independent, so the bootstrap is not anticonservative on this surface.
 
-| arm (authored deck / pilot) | n fights | pooled share [95% CI] | per-fight mean [95% CI] | amp | splash | dot | react/fight | aura ops/fight | aura apps/fight | reaction payoff | aura payoff |
-|---|---:|---|---|---:|---:|---:|---:|---:|---:|---|---|
-| `klee/starter` / generic | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 2.9433 | absent | absent |
-| `klee/demolition_weighted` / demolition | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 2.9073 | absent | absent |
-| `klee/spark_weighted` / spark | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 3.2503 | absent | absent |
-| `klee/reaction_weighted` / reaction | 3000 | 0.1811 [0.1779, 0.1842] | 0.1909 [0.1870, 0.1949] | 19755 | 53225 | 1281 | 5.5473 | 1.797 | 7.6987 | 218/5031 (4%) | 249/4727 (5%) |
-| `furina/starter` / generic | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 1.5583 | absent | absent |
-| `furina/salon_weighted` / salon | 3000 | 0.0018 [0.0014, 0.0022] | 0.0014 [0.0011, 0.0018] | 148 | 0 | 595 | 0.1873 | 0.9787 | 2.308 | absent | absent |
-| `furina/spotlight_weighted` / spotlight | 3000 | 0.0955 [0.0929, 0.0983] | 0.0908 [0.0880, 0.0937] | 30800 | 5547 | 2319 | 3.2897 | 2.4963 | 6.6477 | 159/244 (65%) | absent |
-| `furina/fanfare_weighted` / fanfare | 3000 | 0.0005 [0.0003, 0.0007] | 0.0004 [0.0002, 0.0005] | 60 | 0 | 133 | 0.0457 | 0.1207 | 0.5643 | absent | absent |
-| `kokomi/starter` / generic | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 3.56 | absent | absent |
-| `kokomi/commander_weighted` / commander | 3000 | 0.0661 [0.0640, 0.0682] | 0.0584 [0.0563, 0.0606] | 4228 | 1076 | 21807 | 2.1293 | 0.509 | 5.2947 | absent | absent |
-| `kokomi/priest_weighted` / priest | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 3.6133 | absent | absent |
-| `kokomi/assist_weighted` / assist | 3000 | 0.0065 [0.0058, 0.0072] | 0.0056 [0.0050, 0.0063] | 404 | 0 | 2140 | 0.2067 | 0.0507 | 4.1847 | absent | absent |
-| `ref_ironclad/starter` / generic | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 0.0 | absent | absent |
+**Corrected 2026-08-06 per the erratum above (O-1).** The `n` column now reads
+`combats (records)`: `gauntlet` is a two-stage encounter, so 500 attempts of it
+are 1000 combats, and 3000 attempts per arm are 3500 combats. Every `/fight`
+column below divides by COMBATS. The counts and the pooled share are unchanged
+from the 2026-08-05 publication; the pre-correction table is Appendix E.
 
-Seven battery arms recorded **zero reactions** across 3000 fights each —
-`klee/starter`, `klee/demolition_weighted`, `klee/spark_weighted`,
-`furina/starter`, `kokomi/starter`, `kokomi/priest_weighted`,
-`ref_ironclad/starter`. All seven also recorded zero aura *ops*. Six of the
-seven still put auras up (1.56–3.61 applications/fight, every one of them
-sourced `hit`); `ref_ironclad/starter` applied none at all.
+| arm (authored deck / pilot) | n combats (records) | pooled share [95% CI] | per-fight mean [95% CI] | amp | splash | dot | react/fight | aura ops/fight | aura apps/fight | reaction payoff | aura payoff |
+|---|---:|---|---|---:|---:|---:|---:|---:|---:|---|---|
+| `klee/starter` / generic | 3500 (3000) | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 2.5229 | absent | absent |
+| `klee/demolition_weighted` / demolition | 3500 (3000) | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 2.492 | absent | absent |
+| `klee/spark_weighted` / spark | 3500 (3000) | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 2.786 | absent | absent |
+| `klee/reaction_weighted` / reaction | 3500 (3000) | 0.1811 [0.1779, 0.1842] | 0.1975 [0.1933, 0.2018] | 19755 | 53225 | 1281 | 4.7549 | 1.5403 | 6.5989 | 218/5031 (4%) | 249/4727 (5%) |
+| `furina/starter` / generic | 3500 (3000) | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 1.3357 | absent | absent |
+| `furina/salon_weighted` / salon | 3500 (3000) | 0.0018 [0.0014, 0.0022] | 0.0013 [0.0010, 0.0016] | 148 | 0 | 595 | 0.1606 | 0.8389 | 1.9783 | absent | absent |
+| `furina/spotlight_weighted` / spotlight | 3500 (3000) | 0.0955 [0.0929, 0.0983] | 0.0876 [0.0848, 0.0904] | 30800 | 5547 | 2319 | 2.8197 | 2.1397 | 5.698 | 159/244 (65%) | absent |
+| `furina/fanfare_weighted` / fanfare | 3500 (3000) | 0.0005 [0.0003, 0.0007] | 0.0003 [0.0002, 0.0005] | 60 | 0 | 133 | 0.0391 | 0.1034 | 0.4837 | absent | absent |
+| `kokomi/starter` / generic | 3500 (3000) | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 3.0514 | absent | absent |
+| `kokomi/commander_weighted` / commander | 3500 (3000) | 0.0661 [0.0640, 0.0682] | 0.0569 [0.0548, 0.0590] | 4228 | 1076 | 21807 | 1.8251 | 0.4363 | 4.5383 | absent | absent |
+| `kokomi/priest_weighted` / priest | 3500 (3000) | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 3.0971 | absent | absent |
+| `kokomi/assist_weighted` / assist | 3500 (3000) | 0.0065 [0.0058, 0.0072] | 0.0053 [0.0047, 0.0058] | 404 | 0 | 2140 | 0.1771 | 0.0434 | 3.5869 | absent | absent |
+| `ref_ironclad/starter` / generic | 3500 (3000) | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 0.0 | absent | absent |
+
+Seven battery arms recorded **zero reactions** across 3000 fights (3500
+combats) each — `klee/starter`, `klee/demolition_weighted`,
+`klee/spark_weighted`, `furina/starter`, `kokomi/starter`,
+`kokomi/priest_weighted`, `ref_ironclad/starter`. All seven also recorded zero
+aura *ops*. Six of the seven still put auras up (**1.34–3.10**
+applications/fight — as published, on record denominators, 1.56–3.61 — every
+one of them sourced `hit`); `ref_ironclad/starter` applied none at all.
 
 ### 3.1 Cut by encounter (arms with any reaction or payoff activity)
 
+Corrected 2026-08-06 (O-1); `n` is `combats (records)`, and only the `gauntlet`
+rows differ from the 2026-08-05 publication, on the `/fight` columns and on
+`n`. Pre-correction table: Appendix E.
+
 | arm | encounter | n | pooled share [95% CI] | amp | splash | dot | react/fight | aura ops/fight | aura apps/fight | reaction payoff | aura payoff |
 |---|---|---:|---|---:|---:|---:|---:|---:|---:|---|---|
-| `klee/reaction_weighted` | attrition | 500 | 0.2287 [0.2229, 0.2345] | 3782 | 13082 | 289 | 7.246 | 2.19 | 9.45 | 35/1034 (3%) | 44/983 (4%) |
-| `klee/reaction_weighted` | burst_check | 500 | 0.1482 [0.1428, 0.1538] | 1654 | 2793 | 0 | 2.474 | 0.688 | 3.232 | 20/404 (5%) | 14/372 (4%) |
-| `klee/reaction_weighted` | gauntlet | 500 | 0.2027 [0.1953, 0.2101] | 4644 | 13814 | 295 | 7.462 | 2.562 | 12.026 | 66/1173 (6%) | 78/1113 (7%) |
-| `klee/reaction_weighted` | punisher | 500 | 0.1493 [0.1453, 0.1535] | 2962 | 5393 | 232 | 5.08 | 1.784 | 5.862 | 39/784 (5%) | 35/715 (5%) |
-| `klee/reaction_weighted` | swarm | 500 | 0.2903 [0.2737, 0.3068] | 1640 | 8459 | 61 | 2.368 | 0.732 | 6.136 | 23/390 (6%) | 35/405 (9%) |
-| `klee/reaction_weighted` | tank_boss | 500 | 0.1263 [0.1234, 0.1291] | 5073 | 9684 | 404 | 8.654 | 2.826 | 9.486 | 35/1246 (3%) | 43/1139 (4%) |
-| `furina/salon_weighted` | attrition | 500 | 0.0040 [0.0025, 0.0058] | 29 | 0 | 274 | 0.38 | 1.266 | 3.752 | absent | absent |
-| `furina/salon_weighted` | burst_check | 500 | 0.0003 [0.0000, 0.0007] | 0 | 0 | 8 | 0.034 | 0.646 | 1.218 | absent | absent |
-| `furina/salon_weighted` | gauntlet | 500 | 0.0006 [0.0003, 0.0009] | 24 | 0 | 30 | 0.144 | 1.17 | 3.616 | absent | absent |
-| `furina/salon_weighted` | punisher | 500 | 0.0011 [0.0006, 0.0016] | 27 | 0 | 34 | 0.14 | 0.884 | 1.32 | absent | absent |
-| `furina/salon_weighted` | swarm | 500 | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.006 | 0.3 | 2.29 | absent | absent |
-| `furina/salon_weighted` | tank_boss | 500 | 0.0026 [0.0019, 0.0035] | 68 | 0 | 249 | 0.42 | 1.606 | 1.652 | absent | absent |
-| `furina/spotlight_weighted` | attrition | 500 | 0.1232 [0.1166, 0.1295] | 6779 | 1898 | 565 | 5.358 | 3.728 | 9.142 | 55/82 (67%) | absent |
-| `furina/spotlight_weighted` | burst_check | 500 | 0.0950 [0.0879, 0.1019] | 2535 | 245 | 71 | 1.522 | 1.19 | 2.624 | 8/17 (47%) | absent |
-| `furina/spotlight_weighted` | gauntlet | 500 | 0.0769 [0.0713, 0.0825] | 5597 | 1049 | 334 | 3.37 | 2.962 | 9.962 | 25/34 (74%) | absent |
-| `furina/spotlight_weighted` | punisher | 500 | 0.0914 [0.0858, 0.0970] | 4243 | 673 | 288 | 2.782 | 2.26 | 4.546 | 20/27 (74%) | absent |
-| `furina/spotlight_weighted` | swarm | 500 | 0.0545 [0.0451, 0.0648] | 1471 | 424 | 12 | 0.646 | 0.722 | 5.478 | 4/8 (50%) | absent |
-| `furina/spotlight_weighted` | tank_boss | 500 | 0.1065 [0.1014, 0.1117] | 10175 | 1258 | 1049 | 6.06 | 4.116 | 8.134 | 47/76 (62%) | absent |
-| `furina/fanfare_weighted` | attrition | 500 | 0.0008 [0.0003, 0.0014] | 13 | 0 | 48 | 0.09 | 0.16 | 1.186 | absent | absent |
-| `furina/fanfare_weighted` | burst_check | 500 | 0.0000 [0.0000, 0.0001] | 1 | 0 | 0 | 0.016 | 0.062 | 0.318 | absent | absent |
-| `furina/fanfare_weighted` | gauntlet | 500 | 0.0002 [0.0000, 0.0005] | 6 | 0 | 11 | 0.024 | 0.136 | 0.548 | absent | absent |
-| `furina/fanfare_weighted` | punisher | 500 | 0.0002 [0.0000, 0.0005] | 6 | 0 | 7 | 0.018 | 0.082 | 0.296 | absent | absent |
-| `furina/fanfare_weighted` | swarm | 500 | 0.0001 [0.0000, 0.0003] | 0 | 0 | 4 | 0.006 | 0.052 | 0.248 | absent | absent |
-| `furina/fanfare_weighted` | tank_boss | 500 | 0.0008 [0.0004, 0.0013] | 34 | 0 | 63 | 0.12 | 0.232 | 0.79 | absent | absent |
-| `kokomi/commander_weighted` | attrition | 500 | 0.0866 [0.0815, 0.0918] | 908 | 216 | 5369 | 2.846 | 0.584 | 5.886 | absent | absent |
-| `kokomi/commander_weighted` | burst_check | 500 | 0.0240 [0.0204, 0.0277] | 359 | 72 | 290 | 1.198 | 0.318 | 2.184 | absent | absent |
-| `kokomi/commander_weighted` | gauntlet | 500 | 0.0579 [0.0535, 0.0622] | 889 | 346 | 4117 | 3.012 | 0.806 | 9.86 | absent | absent |
-| `kokomi/commander_weighted` | punisher | 500 | 0.0728 [0.0679, 0.0778] | 578 | 96 | 3514 | 1.63 | 0.436 | 2.826 | absent | absent |
-| `kokomi/commander_weighted` | swarm | 500 | 0.0324 [0.0265, 0.0387] | 317 | 244 | 573 | 1.384 | 0.372 | 7.016 | absent | absent |
-| `kokomi/commander_weighted` | tank_boss | 500 | 0.0769 [0.0726, 0.0812] | 1177 | 102 | 7944 | 2.706 | 0.538 | 3.996 | absent | absent |
-| `kokomi/assist_weighted` | attrition | 500 | 0.0134 [0.0113, 0.0157] | 179 | 0 | 824 | 0.414 | 0.072 | 4.04 | absent | absent |
-| `kokomi/assist_weighted` | burst_check | 500 | 0.0035 [0.0022, 0.0051] | 30 | 0 | 76 | 0.13 | 0.042 | 1.542 | absent | absent |
-| `kokomi/assist_weighted` | gauntlet | 500 | 0.0034 [0.0023, 0.0048] | 60 | 0 | 238 | 0.216 | 0.064 | 8.26 | absent | absent |
-| `kokomi/assist_weighted` | punisher | 500 | 0.0040 [0.0025, 0.0056] | 18 | 0 | 194 | 0.086 | 0.024 | 2.552 | absent | absent |
-| `kokomi/assist_weighted` | swarm | 500 | 0.0026 [0.0015, 0.0041] | 38 | 0 | 53 | 0.132 | 0.04 | 5.662 | absent | absent |
-| `kokomi/assist_weighted` | tank_boss | 500 | 0.0073 [0.0060, 0.0088] | 79 | 0 | 755 | 0.262 | 0.062 | 3.052 | absent | absent |
+| `klee/reaction_weighted` | attrition | 500 (500) | 0.2287 [0.2229, 0.2345] | 3782 | 13082 | 289 | 7.246 | 2.19 | 9.45 | 35/1034 (3%) | 44/983 (4%) |
+| `klee/reaction_weighted` | burst_check | 500 (500) | 0.1482 [0.1428, 0.1538] | 1654 | 2793 | 0 | 2.474 | 0.688 | 3.232 | 20/404 (5%) | 14/372 (4%) |
+| `klee/reaction_weighted` | gauntlet | 1000 (500) | 0.2027 [0.1953, 0.2101] | 4644 | 13814 | 295 | 3.731 | 1.281 | 6.013 | 66/1173 (6%) | 78/1113 (7%) |
+| `klee/reaction_weighted` | punisher | 500 (500) | 0.1493 [0.1453, 0.1535] | 2962 | 5393 | 232 | 5.08 | 1.784 | 5.862 | 39/784 (5%) | 35/715 (5%) |
+| `klee/reaction_weighted` | swarm | 500 (500) | 0.2903 [0.2737, 0.3068] | 1640 | 8459 | 61 | 2.368 | 0.732 | 6.136 | 23/390 (6%) | 35/405 (9%) |
+| `klee/reaction_weighted` | tank_boss | 500 (500) | 0.1263 [0.1234, 0.1291] | 5073 | 9684 | 404 | 8.654 | 2.826 | 9.486 | 35/1246 (3%) | 43/1139 (4%) |
+| `furina/salon_weighted` | attrition | 500 (500) | 0.0040 [0.0025, 0.0058] | 29 | 0 | 274 | 0.38 | 1.266 | 3.752 | absent | absent |
+| `furina/salon_weighted` | burst_check | 500 (500) | 0.0003 [0.0000, 0.0007] | 0 | 0 | 8 | 0.034 | 0.646 | 1.218 | absent | absent |
+| `furina/salon_weighted` | gauntlet | 1000 (500) | 0.0006 [0.0003, 0.0009] | 24 | 0 | 30 | 0.072 | 0.585 | 1.808 | absent | absent |
+| `furina/salon_weighted` | punisher | 500 (500) | 0.0011 [0.0006, 0.0016] | 27 | 0 | 34 | 0.14 | 0.884 | 1.32 | absent | absent |
+| `furina/salon_weighted` | swarm | 500 (500) | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.006 | 0.3 | 2.29 | absent | absent |
+| `furina/salon_weighted` | tank_boss | 500 (500) | 0.0026 [0.0019, 0.0035] | 68 | 0 | 249 | 0.42 | 1.606 | 1.652 | absent | absent |
+| `furina/spotlight_weighted` | attrition | 500 (500) | 0.1232 [0.1166, 0.1295] | 6779 | 1898 | 565 | 5.358 | 3.728 | 9.142 | 55/82 (67%) | absent |
+| `furina/spotlight_weighted` | burst_check | 500 (500) | 0.0950 [0.0879, 0.1019] | 2535 | 245 | 71 | 1.522 | 1.19 | 2.624 | 8/17 (47%) | absent |
+| `furina/spotlight_weighted` | gauntlet | 1000 (500) | 0.0769 [0.0713, 0.0825] | 5597 | 1049 | 334 | 1.685 | 1.481 | 4.981 | 25/34 (74%) | absent |
+| `furina/spotlight_weighted` | punisher | 500 (500) | 0.0914 [0.0858, 0.0970] | 4243 | 673 | 288 | 2.782 | 2.26 | 4.546 | 20/27 (74%) | absent |
+| `furina/spotlight_weighted` | swarm | 500 (500) | 0.0545 [0.0451, 0.0648] | 1471 | 424 | 12 | 0.646 | 0.722 | 5.478 | 4/8 (50%) | absent |
+| `furina/spotlight_weighted` | tank_boss | 500 (500) | 0.1065 [0.1014, 0.1117] | 10175 | 1258 | 1049 | 6.06 | 4.116 | 8.134 | 47/76 (62%) | absent |
+| `furina/fanfare_weighted` | attrition | 500 (500) | 0.0008 [0.0003, 0.0014] | 13 | 0 | 48 | 0.09 | 0.16 | 1.186 | absent | absent |
+| `furina/fanfare_weighted` | burst_check | 500 (500) | 0.0000 [0.0000, 0.0001] | 1 | 0 | 0 | 0.016 | 0.062 | 0.318 | absent | absent |
+| `furina/fanfare_weighted` | gauntlet | 1000 (500) | 0.0002 [0.0000, 0.0005] | 6 | 0 | 11 | 0.012 | 0.068 | 0.274 | absent | absent |
+| `furina/fanfare_weighted` | punisher | 500 (500) | 0.0002 [0.0000, 0.0005] | 6 | 0 | 7 | 0.018 | 0.082 | 0.296 | absent | absent |
+| `furina/fanfare_weighted` | swarm | 500 (500) | 0.0001 [0.0000, 0.0003] | 0 | 0 | 4 | 0.006 | 0.052 | 0.248 | absent | absent |
+| `furina/fanfare_weighted` | tank_boss | 500 (500) | 0.0008 [0.0004, 0.0013] | 34 | 0 | 63 | 0.12 | 0.232 | 0.79 | absent | absent |
+| `kokomi/commander_weighted` | attrition | 500 (500) | 0.0866 [0.0815, 0.0918] | 908 | 216 | 5369 | 2.846 | 0.584 | 5.886 | absent | absent |
+| `kokomi/commander_weighted` | burst_check | 500 (500) | 0.0240 [0.0204, 0.0277] | 359 | 72 | 290 | 1.198 | 0.318 | 2.184 | absent | absent |
+| `kokomi/commander_weighted` | gauntlet | 1000 (500) | 0.0579 [0.0535, 0.0622] | 889 | 346 | 4117 | 1.506 | 0.403 | 4.93 | absent | absent |
+| `kokomi/commander_weighted` | punisher | 500 (500) | 0.0728 [0.0679, 0.0778] | 578 | 96 | 3514 | 1.63 | 0.436 | 2.826 | absent | absent |
+| `kokomi/commander_weighted` | swarm | 500 (500) | 0.0324 [0.0265, 0.0387] | 317 | 244 | 573 | 1.384 | 0.372 | 7.016 | absent | absent |
+| `kokomi/commander_weighted` | tank_boss | 500 (500) | 0.0769 [0.0726, 0.0812] | 1177 | 102 | 7944 | 2.706 | 0.538 | 3.996 | absent | absent |
+| `kokomi/assist_weighted` | attrition | 500 (500) | 0.0134 [0.0113, 0.0157] | 179 | 0 | 824 | 0.414 | 0.072 | 4.04 | absent | absent |
+| `kokomi/assist_weighted` | burst_check | 500 (500) | 0.0035 [0.0022, 0.0051] | 30 | 0 | 76 | 0.13 | 0.042 | 1.542 | absent | absent |
+| `kokomi/assist_weighted` | gauntlet | 1000 (500) | 0.0034 [0.0023, 0.0048] | 60 | 0 | 238 | 0.108 | 0.032 | 4.13 | absent | absent |
+| `kokomi/assist_weighted` | punisher | 500 (500) | 0.0040 [0.0025, 0.0056] | 18 | 0 | 194 | 0.086 | 0.024 | 2.552 | absent | absent |
+| `kokomi/assist_weighted` | swarm | 500 (500) | 0.0026 [0.0015, 0.0041] | 38 | 0 | 53 | 0.132 | 0.04 | 5.662 | absent | absent |
+| `kokomi/assist_weighted` | tank_boss | 500 (500) | 0.0073 [0.0060, 0.0088] | 79 | 0 | 755 | 0.262 | 0.062 | 3.052 | absent | absent |
 
 ## 4. Payoff-op triggers — the audit's ≈0 claim, with counts
 
@@ -238,7 +318,8 @@ The counts, cohort surface, n=3000 runs/arm:
 | `reaction_triggered_this_turn` | 0 | 0 | none |
 | `target_has_nonpyro_aura` | 17 035 | 1 604 | klee ×3 |
 
-Battery surface, n=3000 fights/arm: `reaction_triggered_by_this` 5275
+Battery surface, n=3000 fights (3500 combats)/arm — these are COUNTS and are
+unmoved by the O-1 correction: `reaction_triggered_by_this` 5275
 evaluations / 377 fires (klee `reaction_weighted`, furina
 `spotlight_weighted`); `target_has_nonpyro_aura` 4727 / 249 (klee
 `reaction_weighted`); `reaction_triggered_this_turn` 0 / 0.
@@ -307,10 +388,16 @@ PYTHONPATH=. python -m tier05.exp_reactions_corpus --cohort \
     --runs 3000 --seed 20260805 --jobs 0 \
     --tsv docs/reactions-corpus-cohort-2026-08-05.tsv
 
-# battery surface -> docs/reactions-corpus-battery-2026-08-05.tsv
+# battery surface, as published 2026-08-05 (record denominators, superseded;
+# the file is kept as it was written and is NOT regenerated by this command
+# any more -- the instrument now denominates per combat)
+#   docs/reactions-corpus-battery-2026-08-05.tsv
+#
+# battery surface, corrected 2026-08-06 (O-1, per-combat denominators)
+# -> docs/reactions-corpus-battery-2026-08-05-corrected.tsv
 PYTHONPATH=. python -m tier05.exp_reactions_corpus --battery \
     --fights 500 --seed 20260805 \
-    --tsv docs/reactions-corpus-battery-2026-08-05.tsv
+    --tsv docs/reactions-corpus-battery-2026-08-05-corrected.tsv
 
 # the same counters on any single battery config, printed
 PYTHONPATH=. python -m tier0.harness.runner --character klee \
@@ -322,6 +409,76 @@ The bootstrap runs on its own dedicated RNG stream — one generator per row,
 seeded `BOOTSTRAP_SEED (8_050_000) + 1000 * arm_index (+ cut)` — constructed
 after every fight in the arm has resolved. It draws nothing from
 `CombatState.rng` and cannot perturb a fight.
+
+---
+
+## Appendix E — §3 and §3.1 exactly as published on 2026-08-05
+
+Preserved unaltered for the paper trail. **Superseded** by the corrected
+tables above: every `/fight` column here divides by RECORDS, so each `gauntlet`
+row and each `all` row counts two combats as one fight (O-1; see the erratum at
+the top of this document). The counts, the pooled shares and their CIs are
+identical in both versions. The TSV these were written from is
+`docs/reactions-corpus-battery-2026-08-05.tsv`, also preserved unaltered.
+
+### E.1 — §3 as published
+
+| arm (authored deck / pilot) | n fights | pooled share [95% CI] | per-fight mean [95% CI] | amp | splash | dot | react/fight | aura ops/fight | aura apps/fight | reaction payoff | aura payoff |
+|---|---:|---|---|---:|---:|---:|---:|---:|---:|---|---|
+| `klee/starter` / generic | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 2.9433 | absent | absent |
+| `klee/demolition_weighted` / demolition | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 2.9073 | absent | absent |
+| `klee/spark_weighted` / spark | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 3.2503 | absent | absent |
+| `klee/reaction_weighted` / reaction | 3000 | 0.1811 [0.1779, 0.1842] | 0.1909 [0.1870, 0.1949] | 19755 | 53225 | 1281 | 5.5473 | 1.797 | 7.6987 | 218/5031 (4%) | 249/4727 (5%) |
+| `furina/starter` / generic | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 1.5583 | absent | absent |
+| `furina/salon_weighted` / salon | 3000 | 0.0018 [0.0014, 0.0022] | 0.0014 [0.0011, 0.0018] | 148 | 0 | 595 | 0.1873 | 0.9787 | 2.308 | absent | absent |
+| `furina/spotlight_weighted` / spotlight | 3000 | 0.0955 [0.0929, 0.0983] | 0.0908 [0.0880, 0.0937] | 30800 | 5547 | 2319 | 3.2897 | 2.4963 | 6.6477 | 159/244 (65%) | absent |
+| `furina/fanfare_weighted` / fanfare | 3000 | 0.0005 [0.0003, 0.0007] | 0.0004 [0.0002, 0.0005] | 60 | 0 | 133 | 0.0457 | 0.1207 | 0.5643 | absent | absent |
+| `kokomi/starter` / generic | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 3.56 | absent | absent |
+| `kokomi/commander_weighted` / commander | 3000 | 0.0661 [0.0640, 0.0682] | 0.0584 [0.0563, 0.0606] | 4228 | 1076 | 21807 | 2.1293 | 0.509 | 5.2947 | absent | absent |
+| `kokomi/priest_weighted` / priest | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 3.6133 | absent | absent |
+| `kokomi/assist_weighted` / assist | 3000 | 0.0065 [0.0058, 0.0072] | 0.0056 [0.0050, 0.0063] | 404 | 0 | 2140 | 0.2067 | 0.0507 | 4.1847 | absent | absent |
+| `ref_ironclad/starter` / generic | 3000 | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.0 | 0.0 | 0.0 | absent | absent |
+
+### E.2 — §3.1 as published
+
+| arm | encounter | n | pooled share [95% CI] | amp | splash | dot | react/fight | aura ops/fight | aura apps/fight | reaction payoff | aura payoff |
+|---|---|---:|---|---:|---:|---:|---:|---:|---:|---|---|
+| `klee/reaction_weighted` | attrition | 500 | 0.2287 [0.2229, 0.2345] | 3782 | 13082 | 289 | 7.246 | 2.19 | 9.45 | 35/1034 (3%) | 44/983 (4%) |
+| `klee/reaction_weighted` | burst_check | 500 | 0.1482 [0.1428, 0.1538] | 1654 | 2793 | 0 | 2.474 | 0.688 | 3.232 | 20/404 (5%) | 14/372 (4%) |
+| `klee/reaction_weighted` | gauntlet | 500 | 0.2027 [0.1953, 0.2101] | 4644 | 13814 | 295 | 7.462 | 2.562 | 12.026 | 66/1173 (6%) | 78/1113 (7%) |
+| `klee/reaction_weighted` | punisher | 500 | 0.1493 [0.1453, 0.1535] | 2962 | 5393 | 232 | 5.08 | 1.784 | 5.862 | 39/784 (5%) | 35/715 (5%) |
+| `klee/reaction_weighted` | swarm | 500 | 0.2903 [0.2737, 0.3068] | 1640 | 8459 | 61 | 2.368 | 0.732 | 6.136 | 23/390 (6%) | 35/405 (9%) |
+| `klee/reaction_weighted` | tank_boss | 500 | 0.1263 [0.1234, 0.1291] | 5073 | 9684 | 404 | 8.654 | 2.826 | 9.486 | 35/1246 (3%) | 43/1139 (4%) |
+| `furina/salon_weighted` | attrition | 500 | 0.0040 [0.0025, 0.0058] | 29 | 0 | 274 | 0.38 | 1.266 | 3.752 | absent | absent |
+| `furina/salon_weighted` | burst_check | 500 | 0.0003 [0.0000, 0.0007] | 0 | 0 | 8 | 0.034 | 0.646 | 1.218 | absent | absent |
+| `furina/salon_weighted` | gauntlet | 500 | 0.0006 [0.0003, 0.0009] | 24 | 0 | 30 | 0.144 | 1.17 | 3.616 | absent | absent |
+| `furina/salon_weighted` | punisher | 500 | 0.0011 [0.0006, 0.0016] | 27 | 0 | 34 | 0.14 | 0.884 | 1.32 | absent | absent |
+| `furina/salon_weighted` | swarm | 500 | 0.0000 [0.0000, 0.0000] | 0 | 0 | 0 | 0.006 | 0.3 | 2.29 | absent | absent |
+| `furina/salon_weighted` | tank_boss | 500 | 0.0026 [0.0019, 0.0035] | 68 | 0 | 249 | 0.42 | 1.606 | 1.652 | absent | absent |
+| `furina/spotlight_weighted` | attrition | 500 | 0.1232 [0.1166, 0.1295] | 6779 | 1898 | 565 | 5.358 | 3.728 | 9.142 | 55/82 (67%) | absent |
+| `furina/spotlight_weighted` | burst_check | 500 | 0.0950 [0.0879, 0.1019] | 2535 | 245 | 71 | 1.522 | 1.19 | 2.624 | 8/17 (47%) | absent |
+| `furina/spotlight_weighted` | gauntlet | 500 | 0.0769 [0.0713, 0.0825] | 5597 | 1049 | 334 | 3.37 | 2.962 | 9.962 | 25/34 (74%) | absent |
+| `furina/spotlight_weighted` | punisher | 500 | 0.0914 [0.0858, 0.0970] | 4243 | 673 | 288 | 2.782 | 2.26 | 4.546 | 20/27 (74%) | absent |
+| `furina/spotlight_weighted` | swarm | 500 | 0.0545 [0.0451, 0.0648] | 1471 | 424 | 12 | 0.646 | 0.722 | 5.478 | 4/8 (50%) | absent |
+| `furina/spotlight_weighted` | tank_boss | 500 | 0.1065 [0.1014, 0.1117] | 10175 | 1258 | 1049 | 6.06 | 4.116 | 8.134 | 47/76 (62%) | absent |
+| `furina/fanfare_weighted` | attrition | 500 | 0.0008 [0.0003, 0.0014] | 13 | 0 | 48 | 0.09 | 0.16 | 1.186 | absent | absent |
+| `furina/fanfare_weighted` | burst_check | 500 | 0.0000 [0.0000, 0.0001] | 1 | 0 | 0 | 0.016 | 0.062 | 0.318 | absent | absent |
+| `furina/fanfare_weighted` | gauntlet | 500 | 0.0002 [0.0000, 0.0005] | 6 | 0 | 11 | 0.024 | 0.136 | 0.548 | absent | absent |
+| `furina/fanfare_weighted` | punisher | 500 | 0.0002 [0.0000, 0.0005] | 6 | 0 | 7 | 0.018 | 0.082 | 0.296 | absent | absent |
+| `furina/fanfare_weighted` | swarm | 500 | 0.0001 [0.0000, 0.0003] | 0 | 0 | 4 | 0.006 | 0.052 | 0.248 | absent | absent |
+| `furina/fanfare_weighted` | tank_boss | 500 | 0.0008 [0.0004, 0.0013] | 34 | 0 | 63 | 0.12 | 0.232 | 0.79 | absent | absent |
+| `kokomi/commander_weighted` | attrition | 500 | 0.0866 [0.0815, 0.0918] | 908 | 216 | 5369 | 2.846 | 0.584 | 5.886 | absent | absent |
+| `kokomi/commander_weighted` | burst_check | 500 | 0.0240 [0.0204, 0.0277] | 359 | 72 | 290 | 1.198 | 0.318 | 2.184 | absent | absent |
+| `kokomi/commander_weighted` | gauntlet | 500 | 0.0579 [0.0535, 0.0622] | 889 | 346 | 4117 | 3.012 | 0.806 | 9.86 | absent | absent |
+| `kokomi/commander_weighted` | punisher | 500 | 0.0728 [0.0679, 0.0778] | 578 | 96 | 3514 | 1.63 | 0.436 | 2.826 | absent | absent |
+| `kokomi/commander_weighted` | swarm | 500 | 0.0324 [0.0265, 0.0387] | 317 | 244 | 573 | 1.384 | 0.372 | 7.016 | absent | absent |
+| `kokomi/commander_weighted` | tank_boss | 500 | 0.0769 [0.0726, 0.0812] | 1177 | 102 | 7944 | 2.706 | 0.538 | 3.996 | absent | absent |
+| `kokomi/assist_weighted` | attrition | 500 | 0.0134 [0.0113, 0.0157] | 179 | 0 | 824 | 0.414 | 0.072 | 4.04 | absent | absent |
+| `kokomi/assist_weighted` | burst_check | 500 | 0.0035 [0.0022, 0.0051] | 30 | 0 | 76 | 0.13 | 0.042 | 1.542 | absent | absent |
+| `kokomi/assist_weighted` | gauntlet | 500 | 0.0034 [0.0023, 0.0048] | 60 | 0 | 238 | 0.216 | 0.064 | 8.26 | absent | absent |
+| `kokomi/assist_weighted` | punisher | 500 | 0.0040 [0.0025, 0.0056] | 18 | 0 | 194 | 0.086 | 0.024 | 2.552 | absent | absent |
+| `kokomi/assist_weighted` | swarm | 500 | 0.0026 [0.0015, 0.0041] | 38 | 0 | 53 | 0.132 | 0.04 | 5.662 | absent | absent |
+| `kokomi/assist_weighted` | tank_boss | 500 | 0.0073 [0.0060, 0.0088] | 79 | 0 | 755 | 0.262 | 0.062 | 3.052 | absent | absent |
 
 ---
 
