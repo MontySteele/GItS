@@ -3000,3 +3000,178 @@ doing both can convert only one.
 sheet/sim movement by charter; the [USER] rulings are the migration spine
 and the "safe half globally" sequencing. Countersign owed; tracked at
 `docs/backlog-2026-07-29.md` §3 item 9.
+
+## R90 -- Track A's P1 null: the lint stays a counting tool, the Fanfare question moves to Track B, the floors are re-derived (2026-08-04)
+
+Countersigned package, filed verbatim at
+`docs/axis-validity-countersign-2026-08-04.md`; this is Ruling 1 (a-c) of
+three. Discharges the STOP the charter's binding null put on Track A
+(`docs/sprint-axis-validity-track-a-log-2026-08-04.md` §0).
+
+**What the null actually was.** P1 predicted the first coverage run would fail
+Furina on (fanfare x frontload x fight-early) and (fanfare x scaling x
+fight-late). It failed nothing: Furina cleared every cell, two of them by 59
+and 36 points, while Klee and Kokomi posted 30 findings on the same
+instrument. The playtest's verdict was *"Fanfare is too slow early and too
+small late"* -- a claim about SIZE and TIMING -- and a coverage lint counts
+cards. **The payoff cards exist; they pay too little.** The prediction was
+registered against an instrument that could not see the hypothesis. That is a
+specification error upstream of the code, not a defect in the taxonomy: the
+same tool discriminated correctly on the other two pools.
+
+**1a -- the lint stays, as a counting tool.** Its whole job is "does a card
+for this job exist at this point in the fight?" It gets no magnitude gate, now
+or later; a magnitude gate would be authoring balance numbers. The Klee and
+Kokomi findings are REAL and stay pinned in `docs/role-tempo-debt.tsv`; the
+gate fails only on NEW findings. The debt list is deleted when the reworks
+address the gaps, not before.
+
+**1b -- the Fanfare size-and-timing question moves to Track B**, re-registered
+in the playtest's own words. Track B measures produced damage and block per
+turn against demanded per turn, which is the instrument that can see "too slow
+early, too small late". **P1's ledger line reads: "prediction aimed at the
+wrong instrument; withdrawn and re-registered, not failed."** It is not graded
+as a failed prediction and it is not quietly deleted either.
+
+**1c -- the floors are re-derived from canon PACKAGES.** The first pass
+compared a GItS archetype (11-32 cards, all one plan) against a whole canon
+character (88 cards spread across everything). An archetype's per-cell density
+is structurally higher, so the bar was generous BY CONSTRUCTION -- that is why
+Furina cleared floors by 40-60 points, and it is a property of the population,
+not a verdict on her pool. The comparison population is now the canon package:
+the cards that touch one mechanic layer, **on both sides** (the card that
+applies Poison and the card that reads the stack are both poison cards).
+Packages run 8-41 cards. Membership is structural, off the decompiled body, so
+no hand-drawn card list enters the repo.
+
+Executed: `tools/canon_role_tempo.py::PACKAGES` (five), `ARCHETYPE_ANCHORS`
+(eight archetypes named to the canon package shaped like them),
+`derive_package_floors`, `check_package_floors`. The standing stop-and-surface
+rule -- *a floor that would fail the canon population it came from means the
+derivation is wrong* -- is asserted on every run rather than argued: an
+anchored package clears its own floor with equality and nothing else.
+
+An archetype with NO named anchor falls back to `min over all five packages`,
+which is the old min-of-canon safety rule with the population repaired. Those
+absences silence findings, so each is stated in the table rather than left to
+be discovered: the three `generic` buckets are glue and canon has no analogue
+for "the cards that hold the deck together", and `kokomi/assist` is co-op,
+where there is no canon support package to anchor to at all.
+
+**Class: RULING** -- [USER] countersigned 2026-08-04. No balance value moved,
+no card was authored or reworked.
+
+## R91 -- A-G1 closes: the seven entities confirmed, the salon double-credit kept with a bounded-meter property, meter-reading damage ruled, sustain bounded (2026-08-04)
+
+Ruling 2 (a-d) of the same package. This is the gate the charter deferred at
+§7 ("tag review, esp. tag-through targets"), and closing it is what let the
+tags LAND on the three sheets -- the REVIEW column retires with it.
+
+**2a -- the seven `ENTITY_PAYOFFS` CONFIRMED as proposed.** Chevalmarin
+sustain; Crabaletta frontload; Usher block; the bomb frontload at mid/late;
+the spark frontload + velocity; the Bake-Kurage block + frontload + scaling;
+the Spotlight scaling at mid/late. Each already carried one line of provenance
+quoting the sheet that defines it, and none read lore-wrong. No code moved for
+this ruling and that is the correct outcome of a confirmation.
+
+**2b -- the `salon_member` double-credit is KEPT, with an amendment.**
+Deploying a member creates two real things: the member, who acts, and a higher
+member count, which other cards read. Both are payoffs of the same play and
+crediting one would understate the card either way. [USER]'s amendment: the
+Salon caps at THREE, so a count-reading card may really be *frontload after a
+setup tax* rather than true scaling -- which depends on how fast the Salon
+fills, and that is unmeasured. **Resolution: tags stay as proposed, and every
+meter gains a bounded/unbounded property whose cap is READ FROM
+`tier0/constants.py`** (`tools/role_tempo.py::METERS`, `meter_cap`). Bounded:
+`salon_member` 3 (`SALON_MEMBER_SLOTS`, whose own comment already read
+"Defect-orb shape"), `fanfare` (derived, `FANFARE_CAP_FRACTION` x maxHP),
+`spark` 3 (`SPARKS_FOR_FREE_ATTACK`). Unbounded: `encore` ("no cap constant by
+design", verbatim), `charge`, `burst`, `exhaust_pile`. Canon's precedents are
+the ones the ruling names: orb slots bounded, Focus and Strength unbounded.
+A cap that lives in a comment is a cap that drifts, so none of these is
+retyped.
+
+**Pre-registered in Track B by this ruling:** the Salon fill-time measurement
+-- the turn the Salon first fills, and the fraction of fight-turns it sits
+full. If bounded-meter readers plateau early on Track B's output curves, the
+`scaling` tag for those readers is revisited WITH DATA IN HAND. Not before,
+and not on intuition.
+
+**2c -- a damage card that reads a meter is `scaling`; it is ALSO `frontload`
+only if it deals damage with the meter at zero.** "Deal 6, plus 1 per 4
+Fanfare" is both. "Deal 1 per 4 Fanfare" is scaling only. The sheets said all
+three things in different places (applause_line vs crescendo vs
+all_streams_flow) and that inconsistency predates this track. Implemented as a
+SUGGESTER RULE, not a hand-ruling per card, because pays-at-zero is checkable
+straight off the sheet: a printed positive `amount` on a line that is not
+sitting behind a gate. A gated line pays nothing at meter zero by definition,
+and `amount: 0` with a bonus_formula is the sheets' own explicit "this pays
+nothing on an empty meter" idiom -- suffering_for_art says so out loud. **19
+cards moved**: 15 gained `scaling` beside their `frontload`, and 4 lost
+`frontload` outright (the_final_verdict, pearl_barrage, undertow,
+depths_judgment) because they deal nothing on an empty meter.
+
+**2d -- `sustain` means in-combat healing and prevention of YOUR OWN HP, and
+nothing else.** The boundary, as clarified in review: your own HP ledger =
+sustain (heals, max HP, Buffer-style prevention); the ENEMY's output = disrupt
+(Weak, Frail); absorbing a hit this turn = block. They are kept apart because
+they play differently -- in co-op one player's Weak protects the whole party
+while block and heals protect one seat. Silent is the worked example: zero
+sustain, excellent mitigation through 0-cost Weak, and that is her identity
+rather than a gap. **Consequence: `sustain` joins `utility` and `support` on
+the never-linted list** (`tools/role_tempo.py::NEVER_LINTED`); under the
+structural definition canon carries 0.0-2.3%, so a sustain floor would measure
+noise. **Zero sustain is a legal identity.** The charter's earlier "Ironclad
+15%" counted between-fight healing, which a combat taxonomy rightly ignores.
+
+**Recorded, not silently collapsed:** `disrupt` gets no `solve` value of its
+own in this implementation. Weak and Frail are the sheets' `utility` voice and
+`utility` is protected free space, so the ruling's load-bearing half -- *they
+are not sustain* -- already holds. Minting a sixth lintable role would be a
+new vocabulary value on three ratified sheets and is outside this repair's
+scope. The pointer is in `tools/role_tempo.py` beside `NEVER_LINTED`, and the
+question the sixth role would have answered -- how well a character preserves
+HP -- is a derived outcome across sustain + disrupt + block that Track B's HP
+trajectory measures directly.
+
+**Class: RULING** -- [USER] countersigned 2026-08-04 (2b with amendment, 2d
+with clarification). The tags landed on all three sheets in the same pass; no
+balance value moved and no card was authored or reworked.
+
+## R92 -- Track A housekeeping: the canon count corrected, tempo_band takes its cross-session note, the support gap goes to Kokomi (2026-08-04)
+
+Ruling 3 (a-c) of the same package, ACKNOWLEDGED rather than argued.
+
+**3a -- "402 canon cards" was an arithmetic slip.** The charter's own per-pool
+wiki figures sum to 456; the DLL prints **439**, of which **410** are
+draftable (5 x 82 common+uncommon+rare). Header corrected. No percentage
+anywhere moves, because every percentage in the charter is within-pool.
+
+**3b -- the cross-session note comes BEFORE `tempo_band` lands, not after.**
+The sheet schema is read by `tier0/content/loader.py` (through
+`Card.from_dict`, which hard-fails on an unknown field) AND by the C# codegen
+(`tools/gen_klee_cards.py::CARD_FIELDS`, which blocks a card carrying a field
+it does not understand). Two readers, one surface, so this is a shared-surface
+change and takes its note first. Note filed at
+`docs/sprint-axis-validity-track-a-log-2026-08-04.md` (CROSS-SESSION NOTE
+section, house pattern per `docs/animation-sprint-2-log.md`), mirrored in
+`docs/roster-codegen.md`. The field landed after it, in a later commit, which
+is the ordering the rule exists to produce. **This is the one shared-schema
+change this repair was authorized to make.**
+
+`tempo_band` is inert on both readers by design: two orthogonal scales
+(`fight: early|mid|late`, `run: early|late`), descriptive metadata like
+`register` and `solve` beside it, nothing emitted and nothing simulated. The
+suite proves both readers handle it.
+
+**3c -- the support gap is a Kokomi rework input, not a lint cell.** `support`
+reads **0% on all three GItS sheets** against 2.3% in every canon pool. No
+GItS row has an ally target, an ally op, or a co-op constraint, so there is
+nothing for a classifier to find -- the finding is structural absence, not
+mis-tagging. Kokomi's Assist archetype is where those cards belong and none
+exist anywhere. Filed to `docs/brief-kokomi-pool-fill.md`, marked NOT LINTED
+(the sim is one-seat; D4) and REWORK-INPUT. It is not a gate and must not
+become one through this door.
+
+**Class: MECHANICAL + RULING** -- [USER] acknowledged 2026-08-04. No balance
+value moved.
