@@ -817,7 +817,24 @@ BANNER_FEATURED_SLOTS = 3
 # exact failure the stamp exists to prevent. If a knob has a pre-committed
 # fallback, this comment is not final until the fallback is graded.
 # Klee / Furina / ref_ironclad carry no Charge and do not move.
-CONSTANTS_VERSION = 4
+# CONSTANTS_VERSION 5 (R110 / S-1, the X3 erratum; APPROVED by [USER]
+# 2026-08-06 in reply to the Second Wind open one-liner (3)): Encore
+# Performance loses its `{op: energy}` refund and its printed cost goes 1 -> 0
+# (`docs/furina-cards.yaml`, regenerated `EncorePerformance.cs`).
+# This is not a knob but it lands under the same comparability criterion the
+# v2 bump wrote down, and the v4 note restated: the size of the edit is not
+# what decides, comparability is. A Furina RARE changed cost AND stopped
+# returning energy, so every drafted Furina deck that could ever have been
+# offered the card prices its turns differently -- her whole energy curve, not
+# one cell. **Every Furina tier-0.5 number measured under v4 or earlier is
+# archive, not a cheaper sample of the same world.** The re-baseline is a
+# COMPUTE decision for the next measurement sprint, not a debt this bump pays;
+# archived numbers are bannered where they are published, never rewritten
+# (R101b).
+# Klee / Kokomi / ref_ironclad / real_ironclad / real_silent draft no Furina
+# card and do not move. DRAFTER_VERSION and RUNTEMPLATE correctly do NOT bump:
+# no offer-time price and no map/route shape changed.
+CONSTANTS_VERSION = 5
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

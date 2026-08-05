@@ -241,6 +241,27 @@ untouched — tier 0.5 never merges stages. No other O finding addressed.
 6. **F14's siblings** (Track R): four further `R91/1c` misattributions in
    `tools/canon_role_tempo.py` sit outside F14's cited scope.
 
+#### Replies of 2026-08-06, and what executed against them (Track W)
+
+Three of the six are answered. **The other three are still AWAITED and nothing
+was executed against them.**
+
+| # | reply | executed |
+|---|---|---|
+| 1 · F6 | **AWAITED** | nothing. Both answer forms are DRAFTED and parked at `docs/awaiting-user-slots-2026-08-06.md`; a one-word reply lands one. |
+| 2 · Encore Performance | *"CURATED EXEMPTION now; the replacement delta is deferred behind FLAG-2."* | Register entry in `tools/lint_upgrade_coverage.py::SHEET_EXEMPT`, carrying the citation and the FLAG-2 removal gate. **`docs/furina-upgrades.yaml` is still untouched** — S-1's stopped deletion is a sheet change and Track W did not take it, so the exemption is pre-positioned rather than load-bearing today. |
+| 3 · CONSTANTS_VERSION 4→5 | **APPROVED** | `tier0/constants.py` `CONSTANTS_VERSION = 5` with its changelog note citing S-1 (R110/X3) as the comparability break; archive banners appended to six documents publishing Furina tier-0.5 numbers. No number rewritten (R101b). |
+| 4 · X7 limb (a) | *"infinite sparks must not be achievable at Common"* — some Common spark generation is fine. | Dated [USER] annotation on R109; re-read of all six candidates against the unboundedness criterion — **3 VIOLATION / 3 CLEARED**, `docs/dockets/klee-rework.md` §2c, lines in `review/redteam/exploit-lines-x7a.json`. |
+| 5 · X2 venue | **AWAITED** | nothing. One-line venue assignment DRAFTED at `docs/awaiting-user-slots-2026-08-06.md`. |
+| 6 · F14's siblings | **AWAITED** | nothing on `main`'s line. The repair + a new attribution lint are **STAGED, never merged**, on branch `staged/f14-siblings`. |
+
+**Owed by the C5 bump, and it is a COMPUTE decision, not a debt this batch
+pays: the Furina tier-0.5 re-baseline belongs to the next measurement
+sprint.** Nothing was re-measured for the bump; the banners label the archive
+and stop there. Until that sprint runs there is **no post-C5 Furina row
+anywhere**, so every Furina winrate in circulation is quotable only with its
+pre-C5 label attached.
+
 ### Suite and lints at the batch tip
 
 Full suite (auto mode, game_ref present):
