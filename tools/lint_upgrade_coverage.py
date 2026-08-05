@@ -69,6 +69,12 @@ SHEET_EXEMPT: dict[str, str] = {
     # have one that means anything, and this entry is the register saying so
     # out loud rather than the lint quietly passing a hollow delta.
     #
+    # LOAD-BEARING as of 2026-08-06. It was pre-positioned when it was written;
+    # [USER]'s Y-4 reply ("YES") then deleted `copy_cost_override: 0` from
+    # `docs/furina-upgrades.yaml`, and this entry is now the only thing holding
+    # Layer 1 green for this card. Verified in both directions at landing:
+    # disable the entry and L1 reports `encore_performance` at once.
+    #
     # REMOVAL CONDITION: when FLAG-2 (X3's two adjacent closures) is ruled, a
     # replacement upgrade delta is authored for `encore_performance` and THIS
     # ENTRY IS DELETED with it. FLAG-2 is HELD; nothing may be built against it,
@@ -108,12 +114,27 @@ def _draftable(card) -> tuple[bool, str]:
 #
 # These ARE debts. Each names the gate that clears it, per the curated-set
 # discipline: an entry with no gate is an entry nobody will ever remove.
-# EMPTY, and kept that way deliberately. `nicole_celestial_gift` was the one
-# entry -- the card the 2026-07-25 playtest named -- and G-C2 paid the debt by
-# moving its delta onto a field the grammar can express. The lint's own
-# stale-curation sweep is what noticed the entry had become a lie, which is
-# the behaviour a curated list is supposed to have.
-CODEGEN_DEBT: dict[str, str] = {}
+# `nicole_celestial_gift` was the one entry -- the card the 2026-07-25 playtest
+# named -- and G-C2 paid the debt by moving its delta onto a field the grammar
+# can express. The lint's own stale-curation sweep is what noticed the entry had
+# become a lie, which is the behaviour a curated list is supposed to have.
+#
+# ONE ENTRY AGAIN as of 2026-08-06, and it is SHEET_EXEMPT's twin rather than a
+# new judgment. [USER]'s Y-4 reply deleted `copy_cost_override: 0` from
+# `docs/furina-upgrades.yaml`, which emptied `encore_performance`'s upgrade. The
+# pre-positioned exemption above was written against LAYER 1 (the sheet) only;
+# regenerating the C# then moved the same single fact into the Furina manifest's
+# `no_upgrade_path`, where LAYER 2 reads it. Two layers see one absent delta, so
+# the curated set needs the card named in both. Same debt, same gate, same
+# removal condition -- and both entries are deleted together or not at all.
+CODEGEN_DEBT: dict[str, str] = {
+    "encore_performance":
+        "DEBT -- twin of SHEET_EXEMPT's entry, not a second decision. The "
+        "sheet delta was deleted by [USER] 2026-08-06 (Y-4) because R110/S-1 "
+        "made the card 0-cost, so the generator correctly emits no upgrade "
+        "path. Gate: FLAG-2 ruled -> author the replacement delta -> delete "
+        "THIS ENTRY AND THE SHEET_EXEMPT ENTRY TOGETHER.",
+}
 
 
 def main() -> int:
@@ -180,16 +201,21 @@ def main() -> int:
                 "sheet -- remove it")
     # NOT swept: "SHEET_EXEMPT names a card that has an applicable delta".
     # That is the natural mirror of CODEGEN_DEBT's sweep below and it was
-    # written, run, and REMOVED on 2026-08-06 -- it fires today, on
-    # `encore_performance`, for a reason that is not staleness. R110's S-1
+    # written, run, and REMOVED on 2026-08-06 because it fired on
+    # `encore_performance` for a reason that was not staleness: R110's S-1 had
     # deleted the card's energy refund but STOPPED short of deleting
-    # `copy_cost_override: 0` from `docs/furina-upgrades.yaml`, because
-    # emptying the entry is what made L1 fail in the first place. So the sheet
-    # still carries a delta that R110 already made meaningless, and the
-    # exemption above is PRE-POSITIONED: it becomes the thing holding L1 green
-    # the moment that deletion lands, and a sweep of this shape would have to
-    # be added with it. Adding the sweep first would only turn a stopped
-    # deletion into a red lint.
+    # `copy_cost_override: 0` from `docs/furina-upgrades.yaml`, so the sheet
+    # still carried a delta R110 had already made meaningless.
+    #
+    # THAT STATE ENDED 2026-08-06. [USER]'s Y-4 reply authorised the stopped
+    # deletion; the sheet entry is gone and the exemption above stopped being
+    # pre-positioned and became LOAD-BEARING -- remove it and L1 reports
+    # `encore_performance` immediately (checked in both directions when the
+    # deletion landed). The sweep this comment describes is therefore now
+    # addable without turning a stopped deletion into a red lint. It is still
+    # NOT added, because adding it is a lint-hardening decision of its own and
+    # Y-4 authorised a deletion, not a new check. Recorded so the next reader
+    # inherits the reason rather than re-deriving it.
     live_gaps = {
         cid
         for path in manifests

@@ -139,7 +139,15 @@ deep_breath:           {remove: exhaust}     # sugar_rush-exact quality upgrade
 
 # ---- RARES (quality over quantity) ----
 # let_the_people_rejoice: NO UPGRADE (kit card, v1.9; Talent Training = v2 design space)
-encore_performance:    {copy_cost_override: 0}   # the copy costs 0 (borrowed_brilliance precedent)
+# encore_performance:  DELETED 2026-08-06 ([USER], Y-4). Was `{copy_cost_override: 0}` —
+#                      "the copy costs 0 (borrowed_brilliance precedent)". R110/S-1 (S13
+#                      family X3) made the base card cost 0, and a 0-cost card cannot be
+#                      discounted to 0, so the delta had already stopped meaning anything.
+#                      The card now has NO upgrade and that is a registered DEBT, not a
+#                      rule: `tools/lint_upgrade_coverage.py::SHEET_EXEMPT` carries the
+#                      entry and its removal condition (FLAG-2 ruled -> author a real
+#                      replacement delta -> delete the exemption). The line is commented
+#                      rather than removed so the deleted value stays readable (R101b).
 singer_of_many_waters: {heal: +2}            # A6 (2026-07-28): 6->8; Exhaust NEVER removes (healing law)
 unheard_confession:    {cost: -1}            # A7 (2026-07-28): 2 -> 1. The Block-per-change stays 1;
                                              # the upgrade buys the tempo, not a bigger tick.

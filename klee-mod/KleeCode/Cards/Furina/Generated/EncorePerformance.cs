@@ -41,7 +41,7 @@ public sealed class EncorePerformance : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Encore Performance"),
-        ("description", "{IfUpgraded:show:Add a copy of a random [gold]Spotlighted[/gold] card in your hand to your hand. The copy costs 0.|Add a copy of a random [gold]Spotlighted[/gold] card in your hand to your hand.}"),
+        ("description", "Add a copy of a random [gold]Spotlighted[/gold] card in your hand to your hand."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -69,10 +69,6 @@ public sealed class EncorePerformance : CustomCardModel, ICharacterCard
                 {
                     var spotlightCopy = CombatState!.CreateCard(
                         ModelDb.GetById<CardModel>(selectedSpotlight.Id), Owner);
-                    if (IsUpgraded)
-                    {
-                        spotlightCopy.EnergyCost.SetThisCombat(0);
-                    }
                     await CardPileCmd.AddGeneratedCardToCombat(
                         spotlightCopy, PileType.Hand, Owner);
                 }
@@ -82,6 +78,6 @@ public sealed class EncorePerformance : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // copy_cost_override: expressed at play time as an IsUpgraded read in OnPlay; the text swaps via {IfUpgraded:show:...}.
+        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
     }
 }
