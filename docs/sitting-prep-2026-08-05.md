@@ -1278,3 +1278,30 @@ document could not be located in the repo (greps over docs/, review/, all
 branches). **Two asks:** (a) where does that registration live, so the
 blind-grading session can find it; (b) should G2/G3's core-attainment
 columns be quarantined from that session until (a) is answered?
+
+**10.8 (Track J) — R88's draft conflicts with ratified R52 and shipped
+content.** Read before signing §5a: R88's reserved-character rule ("reserved
+for a playable slot may not appear as a companion") contradicts R52
+(`tier0/DECISIONS.md:1348–1351`) and already-shipped Neuvillette content,
+and governs the status of all four Fontaine Burst-name reservations (Navia,
+Clorinde, Arlecchino, Neuvillette). Full analysis:
+`docs/zhongli-dossier-2026-08-05.md` §3 + `docs/slot5-candidates-2026-08-05.md`.
+**Pick one:** amend R88 to exempt existing content; amend R52; sign R88 as
+written and accept the contradiction knowingly; or hold R88.
+
+**10.9 (Track J) — §2.2a's stated evidence does not exist.** The design
+principle justifies stun scarcity via "an act-3 Ancient reward at 3 energy +
+Exhaust"; the 440-card extraction contains no such card, and the official
+pool has NO player-applied stun/skip/intent-delay anywhere (the dossier's
+§2 census). The rule may be right while its citation is wrong. **Yes/no:**
+authorize a later session to repair the citation (rule untouched either
+way). Related fact, no ask: the `control_uptime` detector has exactly one
+input (companion Frozen) and may not see a character-sourced turn-denial.
+
+**10.10 (Track J) — Columbina has shipped; A.6's premise expired.** Playable
+since Luna IV (6.3, 2026-01-14), 5★ Hydro Catalyst, Third Harbinger; the
+Lunar-reaction family is live, so Appendix A.6's "deferred alongside Dendro"
+justification no longer describes canon — and Lunar-Crystallize's Moondrift
+constructs put Columbina and Zhongli in the same Crystallize space the repo
+fenced to slot 4 (the fence HOLDS in both dossiers). Recorded as facts for
+the slot-5 conversation; no ask attached beyond awareness.
