@@ -137,3 +137,54 @@ The artifacts merge; the derived work waits.
   `docs/zhongli-dossier-2026-08-05.md` + `docs/slot5-candidates-2026-08-05.md` (Track J),
   `docs/animation-downfall-investigation-2026-08-05.md` (Track M),
   `docs/sitting-prep-2026-08-05.md` (Track L — the sitting's single entry point).
+
+---
+
+## Second Wind batch (2026-08-06)
+
+**What changed about this file's premise.** §4 above lists nine open [USER]
+items and says of surplus week that "the honest answer for thirteen of the
+fifteen streams is: nothing yet. It looked." The sitting of **2026-08-06**
+ruled on two of those nine — the **S4 audit** (item 2) and the **S13 exploit
+ledger** (item 3). They are no longer open, and the derived work §4's closing
+line calls "parked deliberately by the train" is unparked for those two.
+
+**Authority document:** `docs/sitting-record-predraft-2026-08-06.md` — [USER]'s
+verdicts, transcribed and committed verbatim before anything was executed from
+them.
+
+### Track R — the sitting lands
+
+| what | where | note |
+|---|---|---|
+| The sitting record | `docs/sitting-record-predraft-2026-08-06.md` | Verbatim. The source every ruling below is drawn from. |
+| Six rulings | `tier0/DECISIONS.md` **R107–R112** | R107 S4 (F1–F17 approved; DRAFTER 13 entry, which discharges G8) · R108 G1 countersigned, Zhongli slot 4 · R109 two new rarity laws (X2, X7) · R110 three ratified changes (X3, X11, X14b) · R111 the nine families that are not changing · R112 O-1 and N-1 docketed. |
+| S4 repair batch | `docs/backlog-2026-07-29.md`, `docs/README.md`, `tier0/DECISIONS.md` (R84/R87/R96 banners), `docs/teyvat-spire-design-principles.md`, `docs/furina-kickoff-v0.1.md`, `docs/klee-character-design.md`, `docs/kokomi-playtest-protocol.md`, `docs/missed-requirements.md`, `docs/open-playtest-items.md`, `docs/axis-validity-session-charter.md`, `docs/role-tempo-floors.yaml`, `tools/canon_role_tempo.py` | **16 of 17 executed. F6 BLOCKED** — its proposal requires stating whether the 2026-08-01/02 session is the G5 fork's trigger, and no such fact was supplied. Strikes are strikethrough + dated banner; no measured value was rewritten (R101b). |
+| S13 ledger dispositions | `review/redteam/exploit-ledger.md`, `tier0/tests/test_s13_exploit_pins.py` | All 14 families annotated per-family with the verbatim verdict and its routing; each pin carries a one-line disposition. **No pin flipped** — a disposition is not a fix. |
+| Dockets | `docs/dockets/` (`README.md`, `klee-rework.md`, `kokomi-workshop.md`, `companion-pricing.md`, `watch-items.md`) | New directory. Routed, not decided. X7's audit slot is **empty and owned by Track T**. |
+
+**Four HELD flags, carried out of the sitting unresolved and not to be built
+against:** FLAG-1 (X1's second enabler / a structural disposition for the
+shared accumulator), FLAG-2 (X3's two adjacent closures), FLAG-3 (what X5's
+verdict actually covers), FLAG-4 (X14's legs (a) and (c)). Each is recorded
+with its question in R110/R111 and mirrored into the ledger and the dockets.
+
+**One item surfaced, not resolved:** X2's approved mechanical audit (R109) was
+given a law but no docket. Recorded as unrouted in
+`docs/dockets/companion-pricing.md` §2.
+
+### Tracks S / T / U — stubs
+
+Appended by the coordinator when they land. Listed here now so the batch's
+shape is legible and nobody assumes Track R was the whole of it.
+
+- **Track S** — _(stub: to be appended)_
+- **Track T** — _(stub: to be appended)_ — owns the X7 spark-law audit slot in
+  `docs/dockets/klee-rework.md` §2b.
+- **Track U** — _(stub: to be appended)_
+
+### Suite and lints at Track R's tip
+
+`GITS_REFERENCE_MODE=committed-only python -m pytest tier0/tests tier05/tests -q`
+— **1925 passed / 41 skipped / 14 xfailed**. Ten CI lint tools plus the
+duplicate-R/D-number ledger check all exit 0.
