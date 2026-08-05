@@ -38,6 +38,11 @@ sts2_decompiled/
 game_assets/
 # tools/extract_base_game_pool.py output -- regenerate locally, never commit
 game_ref/
+# tools/patch_sentinel.py self-blessed snapshots. Same rule and same reason as
+# game_ref/: their CONTENT is base-game material (relic names, rarities, printed
+# numbers), so they are a local artifact even though the tool that writes them
+# is committed.
+.sentinel/
 *.pck
 *.pck.contract.txt
 *.dll

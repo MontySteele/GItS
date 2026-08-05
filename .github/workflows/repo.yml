@@ -122,3 +122,32 @@ jobs:
                       bad += 1
           sys.exit(1 if bad else 0)
           EOF
+
+  # (d) Patch sentinel -- ADVISORY, NEVER BLOCKING (S12, 2026-08-05).
+  #
+  # Read docs/patch-sentinel.md before touching this job. The sentinel asks
+  # whether the INSTALLED game still agrees with game_ref/. A GitHub runner has
+  # neither -- no Steam install, no gitignored baselines -- so what runs here
+  # is deliberately the smaller half: the diff core's own tests, plus the tool
+  # invoked for real so that an import error or a broken CLI surfaces on the
+  # fresh clone rather than on the one machine that can answer the question.
+  #
+  # The `skipped` line it prints here is the CORRECT output, not a degraded
+  # one. The real comparison is a local `python tools/patch_sentinel.py` run on
+  # a machine that owns the game, and its findings are alarms for a
+  # [USER]-gated pass -- which is exactly why this job must never gate a merge:
+  # an upstream balance patch is not a defect in the pull request that happens
+  # to be open when it lands.
+  patch-sentinel:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pytest pyyaml
+      - name: sentinel diff core (synthetic fixtures only)
+        run: python -m pytest tier0/tests/test_patch_sentinel.py -q
+      - name: sentinel runs (asserts nothing -- no game on a runner)
+        run: python tools/patch_sentinel.py || true

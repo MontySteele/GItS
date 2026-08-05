@@ -31,6 +31,16 @@ generated game_ref headers name it),
 byte-pinned), `gen_furina_stills.py` (byte-pinned, skip-guarded),
 `real_battery_calibration.py` + `klee_survival_sprint.py` (digest only).
 
+## Advisory (CI-visible, never blocking)
+`patch_sentinel.py` — asks whether the INSTALLED sts2.dll still agrees with the
+`game_ref/` baselines (cards, character facts) and with its own relic/DLL
+snapshots in `.sentinel/`. Its CI job is `continue-on-error` and prints
+"skipped" on a runner, because a runner has neither the game nor the
+baselines; the real run is local. **Findings are alarms for a [USER]-gated
+pass and are never auto-acted on** — see `docs/patch-sentinel.md`. Its diff
+core is suite-gated on synthetic fixtures
+(`tier0/tests/test_patch_sentinel.py`).
+
 ## Manual live instruments
 `gen_klee_cards.py` (the roster codegen itself), `art_fetch.py`,
 `art_process.py`, `art_hunt.py`, `art_contact_sheet.py`,
