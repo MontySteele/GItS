@@ -62,7 +62,38 @@ the file?"* attached.
 
 ## TOP 5 BY SEVERITY
 
-### 1. Track D's hydro uptime reads 95% where the truth is 15% (slice 7)
+### 1. The gauntlet stage-merge overstates every published Track H per-fight rate (slice 12)
+
+`gauntlet` has two stages; the other five encounters have one.
+`runner.run_battery:46` merges the two into ONE `FightStats`, and then
+`aura_profile`/`summarize` divide by `len(all_stats)` — **records, not
+combats**. The numerator covers 3500 combats; the denominator counts 3000
+records. Driving the shipped corpus (klee/reaction_weighted, 500/encounter,
+seed 20260805) reproduces every per-encounter figure in
+`docs/reactions-corpus-2026-08-05.md` §3.1 **byte-exactly**, and then shows what
+those figures should be:
+
+| figure | published | true (per combat) |
+|---|---:|---:|
+| gauntlet `aura apps/fight` | **12.026** | **6.013** |
+| `all` row `aura apps/fight` | **7.6987** | **6.5989** (16.7% overstated) |
+| `all` row `aura ops/fight` | 1.797 | 1.5403 |
+| payoff `evaluated_per_fight` | 1.6770 | 1.4374 |
+| gauntlet `aura_starved_fights` | **0.0000** | **0.0030** |
+
+12.026 is the largest value in that column and reads as "gauntlet is the
+aura-richest encounter"; per combat it is mid-pack, **below** attrition (9.45)
+and tank_boss (9.486) — the merge inverts the ranking the table is read for.
+The starved-fights row is erased outright, because a starved stage merged with a
+reacting stage reads as `reactions > 0`. `merge_stages`' docstring declares the
+merge; **nothing declares that the resulting per-fight rates are not comparable
+across encounters.** Pooled counts and every ratio-of-sums (`share`,
+`applications_per_turn`) are unaffected — the defect is exactly in the
+per-record denominators. *Surfaced fix: carry `combats: int = 1` on
+`FightStats`, summed by `merge_stages`, and denominate per-fight rates by
+`sum(s.combats)`.*
+
+### 2. Track D's hydro uptime reads 95% where the truth is 15% (slice 7)
 
 `tick_auras` walks only `state.living_enemies` (`reactions.py:71`), so an aura
 on an enemy that **dies** never emits its expiry and the interval runs to the
@@ -77,7 +108,7 @@ length after the kill, which is precisely what differs between the arms
 `exp_curtain_call.py` prints side by side. Reproducer:
 `python review/redteam/fixtures/track_o/s07-repro.py`.
 
-### 2. The P1.5 acceptance condition is satisfied by absence (slices 1, 4, 5)
+### 3. The P1.5 acceptance condition is satisfied by absence (slices 1, 4, 5)
 
 See the headline above. `render_compare("S04C","S04C")` over an index whose run
 JSONLs are absent prints `VERDICT: identical traces`. `read_run_log` returns
@@ -88,7 +119,7 @@ gitignored, so absence is the normal state of a fresh clone.** Compounding it,
 trace identity silently omits `outcome` and `turns` *without declaring them*, so
 a won 2-turn run and a lost 5-turn run also compare `IDENTICAL`.
 
-### 3. The reaction amp is sampled before the multipliers that scale it (slice 8)
+### 4. The reaction amp is sampled before the multipliers that scale it (slice 8)
 
 `amp_delta` is emitted at `reactions.py:164-166` from `effects.py:363` — above
 `modify_damage_taken` (367), Slow (372) and the overkill clamp (381). Base 20
@@ -103,7 +134,7 @@ declared bias moves further from the truth**. Blast radius exceeds Track D:
 (`metrics.py:74-76`), and Superconduct applies Vulnerable, so reaction decks
 manufacture their own under-read.
 
-### 4. `--max-fights` burns every other seed, silently (slice 9)
+### 5. `--max-fights` burns every other seed, silently (slice 9)
 
 `soak()`'s restart gate fires on `outcome == "defect"` only
 (`soak.py:1575`), so a `bounded` stop never restarts the game and leaves the
@@ -118,7 +149,9 @@ issues and the cascade is unbroken: one seed of six. The surviving sample is a
 `| 2 | None | unexpected_start_state |` directly beneath the sentence "Each row
 is reproducible from its seed".
 
-### 5. A partially degraded resource read becomes a hard 0, charged to the sim (slice 3)
+### Also severity 5 (outside the top five only because their blast radius is narrower)
+
+**A partially degraded resource read becomes a hard 0, charged to the sim (slice 3).**
 
 `GitsResources.cs:42-43` and `:104-107` declare a **two-state** contract: empty
 map ⇔ nothing registered; absent key ⇔ pre-P1.5 bridge. The writer's own
@@ -426,3 +459,178 @@ only the last clause. The other empty-script pass,
 | O10-5 | The docstring promises a degeneracy-break exemption the code does not implement (harmless — leftovers never become misses) | doc/code drift | 1 |
 | O10-6 | `cards_played_in_turn` counts pilot intent, not engine play events | tested, **CLEAN** (9 == 9) | — |
 | O10-7 | Stale `replay-results.json` masking a broken line | tested, **CLEAN** (zero verdict flips) | — |
+
+### Slice 11 — v14 `core_complete` limbs under adversarial deck compositions
+
+Limbs enumerated: reaction (`appliers>=2 && amps>=1`), spotlight
+(`access>=2 && machinery>=1`), fanfare (`generation>=5 && floor>=5.0 &&
+drafted_readers>=1`), generic/v14 (`on_plan>=DRAFT_CORE_SIZE && payoffs>=1`),
+their four `_core_progress` mirrors, and the two consumers `model.py:704
+plan_live` and `model.py:728 time_to_online`.
+
+**The predicate itself is mechanically sound.** Driven against synthetic
+adversarial multisets and 500+ real `model.run_one` runs, it is
+order-independent on every limb, pure (no mutation of the shared `peek_card`
+prototypes), and **never vacuously True** — every bar is >=1, and an empty deck
+gives 0.0 progress on all archetype strings including unknown ones and the empty
+string. `_core_progress == 1.0` iff `core_complete` on **all four** limbs, not
+merely the salon one `test_m5` pins. The spotlight `not _is_spotlight_access`
+guard is load-bearing and correct. **No SILENT-LIE inside `core_complete`.** The
+vacuous-True hypothesis in the brief is refuted, not merely untested.
+
+| ID | Limb | Adversarial deck | Class | Sev |
+|---|---|---|---|---|
+| S11-2 | generic v14 | `core_complete(deck,"generic")` on the generic anchors | SILENT-LIE (metric-level) | 3 |
+| S11-1 | generic v14 | 4 copies of one on-plan **payoff**, zero enablers | DECLARED-LIMIT (asymmetry), reachable | 3 |
+| S11-7/8 | reaction, spotlight | 2 copies of ONE applier / ONE companion | ambiguity: bar met from one *distinct* card | 2 |
+| S11-14 | consumers | `run_metrics.py:50` truthiness vs `ab.py:126` `is not None` | latent, not live | 2 |
+| S11-12 | fanfare | Furina starter alone: generation **5.0** against a bar of 5 | DECLARED-LIMIT | 2 |
+| S11-3/4/5/15 | all four | order battery, empty deck, threshold+-1, purity over 24 runs | **not defects** — verified clean | — |
+| S11-6 | generic v14 | base + upgraded copy counts as 2 cards | DECLARED-LIMIT | 1 |
+| S11-11 | generic v14 | core bent to `cost=99, exhaust=True` still complete | undeclared scope, unreachable from content | 1 |
+
+S11-2: `core_complete(deck, "generic")` is **unreachable** on the klee and
+furina generic anchors — 0/40 runs each (klee max deck `(1,1)`, furina max
+`(3,2)`), against kokomi/generic at 9/40. So `plan_live` is True on 100% of
+their screens and `time_to_online` is None for 100% of their runs, and
+`online_rate`/`median_time_to_online` are structurally `0.0`/`None` rather than
+measured — **indistinguishable from a real achievability failure**. Not caused
+by v14 (the pre-v14 bar gives the same 0/40); it is the `generic` tag being
+nearly absent from those characters' draftable pools, surfacing through the
+instrument. A [USER] ruling.
+
+S11-1 is classed DECLARED-LIMIT (the docstring's letter permits it exactly,
+`draft.py:281-284`) but recorded because it is **reachable**: v14 closed
+"enablers with no payoff" and left the mirror open, and the drafter lands there
+on **15% of kokomi/priest online decks (3/20)** and 12.5% of commander. The
+justification in `d294b51` ("Four enablers and no payoff was never an assembled
+deck") is symmetric and unaddressed. Closing it is a DRAFTER_VERSION 15 bump and
+a design ruling, not a bug fix.
+
+### Slice 12 — Track H aura/payoff counters: `aura_ops` vs `applications`, absent-vs-zero, pooling
+
+As the code actually implements them:
+
+- **`aura_ops`** — `dict[op_name] -> count of aura_op events`; one per
+  *resolution* of `apply_aura`/`swirl`/`refresh_all_auras`, regardless of target
+  count or whether anything landed. One card play is 2 ops under the Salon
+  replacement multiplier.
+- **`aura_applications`** — one per `aura_applied` event, emitted **once per
+  enemy** that received a *sticking* aura onto a previously clean body.
+  Same-element refreshes and anemo/geo emit nothing.
+
+Op-resolutions versus per-body landings. Measured `applications/aura_ops` on one
+deck: 3.25 (punisher), 4.67 (gauntlet), **8.84** (swarm).
+
+| ID | Axis | Title | Class | Sev |
+|---|---|---|---|---|
+| S12-A | pooling | Gauntlet stage-merge collides two combats into one record in every per-fight rate | SILENT-LIE | 4 |
+| S12-B | absent/zero | `absent` payoff slices written to the TSV as `evaluated=0, fired=0, rate=0.0` | SILENT-LIE | 3 |
+| S12-C | definitions | `swirl_op` is a declared application source that **can never be recorded** | SILENT-LIE | 2 |
+| S12-E | pooling | `merge_stages` writes into `stages[0]`; re-merging silently doubles every counter | UNTESTED-PATH (latent) | 2 |
+| S12-D | definitions | ops and applications printed adjacent as "/fight" though different units | DECLARED-LIMIT; **no shipped consumer divides them** (all use sites grepped) | 1 |
+| S12-F/G | pooling | act-cut `zip` truncation (0/60 misaligned); `damage_by_turn` offset collision (0/200) | **checked, holds** | — |
+
+**The pooled counts are correct** — `aura_profile`/`payoff_profile` sum
+key-wise, do not mutate inputs, and are order-independent. The lies are in the
+denominators and the labels. S12-A is TOP-5 #1 above.
+
+S12-B: only the string column `{prefix}_absent` preserves absent-vs-zero;
+**16 of 40** cohort rows and **77 of 91** battery rows are in that state. Over
+the 10 cohort `all` arms the pooled rate is **0.5173**, the unweighted mean over
+all 10 rows **0.3501**, and over the 6 carrying arms **0.5834** — three
+different numbers a reader could take off the same TSV. In the dicts "zero" is
+only ever expressed as key *absence*; an explicit 0 is never written. *Fix:
+write the empty string, not `0` — the pattern `payoff_cards_drafted` already
+uses.*
+
+S12-C: `swirl_op` is declared as a provenance in `metrics.py:105-110`,
+`tier0/README.md:71-73` and the corpus doc, is passed at exactly one site
+(`effects.py:957`, element anemo), and `reactions.apply_aura:60-62` returns
+before emitting for anything outside `AURA_ELEMENTS`. **0 occurrences in both
+committed corpora**; a 100-fight swarm battery resolved 44 `swirl` ops and
+recorded 0 `swirl_op` against 132 `swirl_spread`. Its absence is structural, not
+a measurement of Swirl.
+
+---
+
+## Honest negatives
+
+Recorded because a red-team that reports only hits is itself an instrument that
+lies. Each was driven, not merely read.
+
+- **`SPOTLIGHT_FORCE` does not leak on the exception path** (slice 6). The save
+  is restored in a real `finally`; the nested case hands an outer force back
+  intact; `KeyboardInterrupt`/`SystemExit` pass through the same block. The
+  brief's predicted defect is not there.
+- **Family A has no granted-play cousin in tier 0** (slice 8). Both paths were
+  driven with the same card and all ten new counters diffed; the only difference
+  is `energy_spent`, which the free-play contract declares. Pinned.
+- **`core_complete` is never vacuously True, and is order-independent** (slice
+  11). The empty-pool hypothesis is refuted across 8 archetype strings.
+- **A truncated fight is never counted as a loss** (slice 5). No replayer
+  aggregates a fight `outcome`; the fight is dropped, not miscounted. The
+  brief's stated hypothesis is wrong — though `report.py`'s run-level outcome
+  comes from the index, so the index's claim outlives the telemetry behind it.
+- **The S13 ledger's 71/71 reproduces at 91e9258** with zero verdict flips
+  (slice 10). Nothing is stale.
+- **Track H's pooled counts are correct** (slice 12); only the denominators lie.
+- **A `cards_played` row of the wrong arity fails loudly** (slice 5, S05-14), as
+  does an unknown card, relic, encounter, metric, op or claim-kind in the S13
+  harness (slice 10). Where these instruments are strict, they are strict.
+
+---
+
+## Two process findings, surfaced not fixed
+
+Neither is a code defect; both silently degrade measurement, and both bit this
+track during the run.
+
+**P-1 — `game_ref/` was destroyed a third time, mid-session.** The memory note
+`game-ref-recovery` predicted it ("Expect a third time"). It emptied while this
+batch ran: the suite silently went from `1873 passed / 6 skipped` to
+`1917 passed / 41 skipped` — **35 tests stopped running with no failure and no
+banner**, which is precisely the failure class this track exists to catch. All
+four non-regenerable files survive with real content (verified by *reading* them,
+not by filename — the stub-backup trap) in seven sibling worktrees, e.g.
+`.claude/worktrees/s7-fidelity/game_ref/` (26 files, `silent_pool.yaml`
+present). This track restored **only its own worktree** from that donor and
+deliberately did not touch the shared checkout. *Owed to [USER]: restore
+`GItS/game_ref/`, and note the likely mechanism — a `Remove-Item -Recurse -Force`
+on a directory **junction** into `game_ref` deletes through the link into the
+target. Sibling worktrees that junction `game_ref` are a standing loaded gun;
+`cmd /c rmdir <link>` removes the link only.*
+
+**P-2 — the harness-pinned worktree is contended.** `.claude/worktrees/land2`
+was cycled to `findings/track-p` and then `findings/track-q` by other leads
+while this track's slices were mid-run, and two commits landed on it from
+another track. This track's branch survived only because its artifacts were
+untracked; a `git clean` from any co-tenant would have destroyed them. Work was
+moved to a dedicated worktree. *Owed: one worktree per track lead, or an
+explicit lock.*
+
+---
+
+## Counts
+
+| Slice | Instrument | SILENT-LIE | DECLARED-LIMIT | UNTESTED-PATH |
+|---|---|---:|---:|---:|
+| 1 | P1.5 bridge seed | 8 | 4 | 8 |
+| 2 | selector recording | 9 | 3 | 5 |
+| 3 | resource reader | 12 | 1 | 7 |
+| 4 | replayer cross-feed | 6 | 2 | 4 |
+| 5 | malformed/truncated logs | 10 | 0 | 6 |
+| 6 | `--use-selectors` / SPOTLIGHT_FORCE | 4 | 1 | 4 |
+| 7 | Track D under partial fights | 6 | 0 | 4 |
+| 8 | Family A cousins | 3 | 3 | 4 |
+| 9 | soak `unexpected_start_state` | 8 | 0 | 4 |
+| 10 | the S13 harness itself | 3 | 1 | 4 |
+| 11 | v14 `core_complete` | 1 | 10 | 5 |
+| 12 | Track H aura/payoff pooling | 3 | 1 | 5 |
+| **total** | | **73** | **26** | **60** |
+
+Pins: **87** across 12 files (`tier0/tests/test_track_o_s01..s06, s08..s10,
+s12.py`; `tier05/tests/test_track_o_s07.py`, `test_track_o_s11.py`).
+Suite at this commit: **1960 passed, 6 skipped, 14 xfailed** — baseline
+`91e9258` was 1873/6/14, so every one of the 87 pins passes and nothing
+regressed. No finding is pinned; no instrument file was modified.

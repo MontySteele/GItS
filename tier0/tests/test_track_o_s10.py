@@ -35,7 +35,7 @@ def harness():
 
 @pytest.fixture(scope="module")
 def a_real_line():
-    lines = json.loads(LINES_JSON.read_text())
+    lines = json.loads(LINES_JSON.read_text(encoding="utf-8"))
     by_id = {line["line_id"]: line for line in lines}
     return by_id["klee_spark_1_bright_idea_refund_infinite"]
 
