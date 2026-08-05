@@ -280,7 +280,8 @@ def core_complete(deck: list[Card], archetype: str) -> bool:
     by drafting, so requiring it in the DECK measured pool odds, not
     assembly. That 10% 'ever saw the Burst' factor was the binding term in
     reaction's 5.8% achievability. Other archetypes: DRAFT_CORE_SIZE
-    on-plan enabler/payoff cards.)"""
+    on-plan enabler/payoff cards, AT LEAST ONE of which is a payoff --
+    DRAFTER_VERSION 14, see the generic limb below.)"""
     if archetype == "reaction":
         appliers = sum(1 for c in deck if _is_applier(c))
         amps = sum(1 for c in deck if _is_amp_payoff(c))
@@ -301,9 +302,30 @@ def core_complete(deck: list[Card], archetype: str) -> bool:
             and _fanfare_floor_total(deck) >= FANFARE_FLOOR_COVERAGE
             and _drafted_readers(deck) >= FANFARE_PAYOFF_COVERAGE
         )
-    on_plan = sum(1 for c in deck if archetype in c.archetypes
-                  and c.role in ("enabler", "payoff"))
-    return on_plan >= C.DRAFT_CORE_SIZE
+    # DRAFTER_VERSION 14: the generic limb is TWO limbs, for the same reason
+    # the fanfare limb became three at v10. Counting enablers and payoffs
+    # together answers "did the resource engine assemble", not "did the deck
+    # assemble": four on-plan enablers and zero payoffs read ONLINE, which is
+    # precisely the failure the fanfare close-out named ("it measures when
+    # the RESOURCE assembles, not when the DECK does"). The bar on the payoff
+    # limb is ONE, matching every other archetype's low single-card threshold
+    # -- `core_complete` asks whether the plan is ONLINE, not whether it is
+    # finished. How many payoffs an archetype SHOULD hold is the draft-reach
+    # question and does not belong in the instrument.
+    on_plan, payoffs = _generic_core_counts(deck, archetype)
+    return on_plan >= C.DRAFT_CORE_SIZE and payoffs >= GENERIC_PAYOFF_COVERAGE
+
+
+def _generic_core_counts(deck: list[Card], archetype: str) -> tuple[int, int]:
+    """(on-plan enabler+payoff cards, on-plan payoff cards) for one deck.
+
+    One place, so `core_complete` and `_core_progress` cannot drift apart --
+    the v10 fanfare fix had to move both limbs for the same reason.
+    """
+    on_plan = [c for c in deck
+               if archetype in c.archetypes
+               and c.role in ("enabler", "payoff")]
+    return len(on_plan), sum(1 for c in on_plan if c.role == "payoff")
 
 
 def _core_progress(deck: list[Card], archetype: str) -> float:
@@ -328,9 +350,15 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
         # actually reaches for a payoff instead of only for inputs.
         payoff = min(1.0, _drafted_readers(deck) / FANFARE_PAYOFF_COVERAGE)
         return (generation + baseline + payoff) / 3
-    on_plan = sum(1 for c in deck if archetype in c.archetypes
-                  and c.role in ("enabler", "payoff"))
-    return min(1.0, on_plan / C.DRAFT_CORE_SIZE)
+    # DRAFTER_VERSION 14: the payoff limb, weighted equally with the
+    # assembly limb -- the same shape the v10 fanfare fix used, and the half
+    # with teeth. Progress feeds `score_offer`'s +3.0 core-advance bonus, so
+    # a generic-limb archetype now reaches for a payoff instead of counting
+    # any four on-plan cards as a finished plan.
+    on_plan, payoffs = _generic_core_counts(deck, archetype)
+    assembly = min(1.0, on_plan / C.DRAFT_CORE_SIZE)
+    payoff = min(1.0, payoffs / GENERIC_PAYOFF_COVERAGE)
+    return (assembly + payoff) / 2
 
 
 # Ops whose price is computed by a dedicated branch of `effect_power` above,
@@ -1106,6 +1134,13 @@ FANFARE_FLOOR_COVERAGE = 5.0
 # draft-reach question, and it belongs to the pool-sweep pass with this
 # instrument in hand, not to the instrument itself.
 FANFARE_PAYOFF_COVERAGE = 1
+# DRAFTER_VERSION 14: the generic limb's sibling of the constant above, and
+# it is deliberately the SAME number. `core_complete` asks whether the plan
+# is online; one printed payoff is the smallest deck that can cash whatever
+# the enablers assemble. It lives here rather than in tier0/constants.py
+# beside DRAFT_CORE_SIZE because it is a drafter-instrument bar with no C#
+# counterpart -- the constant-parity lint compares tier0 against the mod.
+GENERIC_PAYOFF_COVERAGE = 1
 FANFARE_FIRST_FLOOR = 2.0     # was FANFARE_FIRST_CONVERTER
 FANFARE_LATER_FLOOR = 1.5     # was FANFARE_LATER_CONVERTER
 FANFARE_READER_VALUE = 1.0

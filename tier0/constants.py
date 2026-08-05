@@ -914,7 +914,24 @@ CONSTANTS_VERSION = 4
 # raise_fanfare_cap, crash_fanfare, strip_block, transform_in_hand,
 # remember_card) each carry their measurement or their reason at the
 # constant, in tier05/draft.py.
-DRAFTER_VERSION = 13
+# DRAFTER_VERSION 14 ("Last Call" track E, 2026-08-05): the generic limb of
+# `core_complete`/`_core_progress` now requires at least one on-plan PAYOFF,
+# not just DRAFT_CORE_SIZE on-plan enabler-or-payoff cards. This is the v10
+# fanfare fix applied to the branch it was never applied to: the fanfare
+# close-out's diagnosis -- "it measures when the RESOURCE assembles, not when
+# the DECK does" -- was true of the generic limb too, where four enablers and
+# zero payoffs read ONLINE.
+# NOT bookkeeping, and the bump is not optional: `core_complete` gates
+# `model.py`'s plan-live divergence check and `_core_progress` feeds
+# `score_offer`'s +3.0 core-advance bonus, so every arm that resolves to the
+# generic limb -- assist, commander, demolition, generic, priest, salon,
+# spark -- drafts differently. reaction, spotlight and fanfare keep their own
+# limbs untouched. Every pre-v14 number for those seven archetypes is
+# incomparable with v14 output; nothing has been re-measured here.
+# The spotlight limb was examined and deliberately NOT changed -- see the
+# track E report: whether `_is_spotlight_machinery` (enabler OR payoff) is
+# "a payoff" is a definitional question, not a mechanical one.
+DRAFTER_VERSION = 14
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).

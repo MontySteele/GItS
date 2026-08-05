@@ -302,6 +302,87 @@ def test_spotlight_core_requires_cast_access_and_machinery():
             > draft.score_offer(companion, starter, "generic"))
 
 
+def test_generic_core_requires_a_drafted_payoff():
+    """DRAFTER_VERSION 14. The generic limb used to count enablers and
+    payoffs together, so a deck of four on-plan ENABLERS read ONLINE with
+    nothing in it that cashes what they assemble -- the fanfare close-out's
+    diagnosis ("it measures when the RESOURCE assembles, not when the DECK
+    does") applied verbatim to the branch it was never applied to.
+    """
+    starter = _cards(*loader.starting_deck("furina"))
+    assert not draft.core_complete(starter, "salon")
+
+    # Four on-plan enablers: the OLD definition's core, exactly.
+    enablers = _cards("salon_debut", "casting_call", "gentilhomme_usher",
+                      "usher_the_waves")
+    resource_only = starter + enablers
+    assert len(enablers) >= C.DRAFT_CORE_SIZE
+    assert not draft.core_complete(resource_only, "salon")
+
+    # One payoff closes it, and the bar really is ONE.
+    payoff = loader.get_card("grand_salon")
+    assert draft.core_complete(resource_only + [payoff], "salon")
+
+    # ...but a payoff alone is not a core either: the assembly limb still
+    # has to clear DRAFT_CORE_SIZE. Both limbs bite, neither subsumes.
+    assert not draft.core_complete(starter + [payoff], "salon")
+
+    # The same shape on a second character, so this is the limb and not a
+    # property of Furina's sheet.
+    klee = _cards(*loader.starting_deck("klee"))
+    klee_enablers = _cards("jumpy_dumpty", "pop", "mine_toss", "double_pop")
+    assert not draft.core_complete(klee + klee_enablers, "demolition")
+    assert draft.core_complete(
+        klee + klee_enablers + _cards("remote_detonator"), "demolition")
+
+
+def test_generic_core_progress_tracks_the_payoff_limb():
+    """The half with teeth: `_core_progress` feeds `score_offer`'s +3.0
+    core-advance bonus, so the payoff limb has to be visible there too or
+    the drafter keeps reaching for enablers it no longer needs.
+    """
+    starter = _cards(*loader.starting_deck("furina"))
+    enablers = _cards("salon_debut", "casting_call", "gentilhomme_usher",
+                      "usher_the_waves")
+    resource_only = starter + enablers
+    payoff = loader.get_card("grand_salon")
+
+    # Assembly limb full, payoff limb empty -> exactly half, not 1.0.
+    assert draft._core_progress(resource_only, "salon") == 0.5
+    assert draft._core_progress(resource_only + [payoff], "salon") == 1.0
+    # A fifth enabler advances nothing; the payoff does.
+    assert (draft._core_progress(resource_only + _cards("undercurrent"),
+                                 "salon")
+            == draft._core_progress(resource_only, "salon"))
+    assert (draft._core_progress(resource_only + [payoff], "salon")
+            > draft._core_progress(resource_only, "salon"))
+
+    # And the two functions agree at the boundary: progress is 1.0 exactly
+    # when the predicate is True. They drifted apart once (v10 had to move
+    # both limbs of the fanfare fix); `_generic_core_counts` is why they
+    # cannot drift again.
+    for deck in (starter, resource_only, resource_only + [payoff],
+                 starter + [payoff]):
+        assert (draft._core_progress(deck, "salon") == 1.0) \
+            is draft.core_complete(deck, "salon")
+
+
+def test_fanfare_and_reaction_limbs_are_untouched_by_the_generic_fix():
+    """The generic limb is its own branch. `core_complete("fanfare")` is a
+    trap with its own history (DRAFTER_VERSION 10, G-E1) and the v14 fix
+    must not reach into it, nor into reaction's or spotlight's.
+    """
+    furina = _cards(*loader.starting_deck("furina"))
+    both = loader.get_card("rapturous_applause")
+    assert draft.core_complete(furina + [both], "fanfare")
+    klee = _cards(*loader.starting_deck("klee"))
+    assert draft.core_complete(
+        klee + _cards("dahlia_sacramental_shower", "kaeya_frostgnaw",
+                      "sizzle"), "reaction")
+    assert draft.core_complete(
+        furina + _cards("lynette_box_trick", "limelight"), "spotlight")
+
+
 def test_fanfare_core_is_native_generation_plus_output_converter():
     starter = _cards(*loader.starting_deck("furina"))
     assert draft._fanfare_generation_total(starter) \

@@ -25,7 +25,7 @@ that is installed **right now** and prints where they disagree.
 | Surface | Baseline | Fields compared |
 | --- | --- | --- |
 | `cards` | `game_ref/<char>.json` for each canon pool that has one | every field the extractor records: cost, type, rarity, `vars`, `upgrades`, `cmds`, `generic_cmds`, `powers`, `orbs`, `keywords`, `target`, `exhaust`, `innate`, `mp_only`, `body_lines` — plus cards added to / removed from the pool |
-| `characters` | `game_ref/<char>_char_facts.yaml` | `StartingHp`, starting-deck **size**, starting-relic **count** |
+| `characters` | `game_ref/<char>_char_facts.yaml` | `StartingHp`, starting-deck **size**, starting-relic **count** — all five canon characters since 2026-08-05 |
 | `relics` | `.sentinel/relics.json`, blessed by the tool itself | rarity, printed `vars`, `cmds`, `generic_cmds`, `powers`, `orbs`, relic-pool membership, `body_lines` — plus relics added/removed |
 | `dll` | `.sentinel/dll.json` | size + sha256 of the assembly |
 
@@ -47,9 +47,15 @@ sentinel is otherwise easy to over-read.
   moves. `body_lines` is a crude tripwire for exactly this, not a guarantee.
 - **Anything with no baseline.** Potions, events, encounters, monsters, acts,
   enchantments, badges, map generation. The `characters` surface only watches
-  the two characters that have a `char_facts` baseline; the `cards` surface
+  characters that have a `char_facts` baseline; the `cards` surface
   only watches pools with a `game_ref/<char>.json`. Unwatched surfaces are
   reported as notes ("not watched"), never as clean.
+- **What a starting relic DOES, for three of the five.** Cracked Core channels
+  an orb, Bound Phylactery summons a pet, Divine Right grants Stars — tier0
+  has none of those three concepts, so those sheets name the relic under
+  `unmodelled_starting_relics` and the surface watches only that the COUNT is
+  still one. If MegaCrit rewrote Cracked Core to channel two orbs, nothing
+  here would move.
 - **Anything on a CI runner.** No game install and no `game_ref/` there, so CI
   can only prove the tool runs.
 - **Relics before the first bless.** No relic baseline existed anywhere in this
@@ -139,3 +145,27 @@ the installed DLL field-for-field: **zero card findings, zero character
 findings**. The relic and DLL snapshots were established on that run, so both
 start from a clean slate by construction. Per the standing rule above, no
 finding was acted on — there were none to act on.
+
+## Character coverage completed, 2026-08-05 (R105)
+
+`defect_char_facts.yaml`, `necrobinder_char_facts.yaml` and
+`regent_char_facts.yaml` were written from the same decompiled read the other
+two use, so the `characters` surface now watches **five of five** instead of
+two. Re-run against the installed DLL on the day they landed: **zero
+findings**.
+
+| | HP | deck size | starting relics |
+| --- | --- | --- | --- |
+| Defect | 75 | 10 | 1 (Cracked Core — unmodelled) |
+| Necrobinder | 66 | 10 | 1 (Bound Phylactery — unmodelled) |
+| Regent | 75 | 10 | 1 (Divine Right — unmodelled) |
+
+These three are **baseline only**: no sheet builder consumes them, there is no
+`char_real_defect.yaml`, and no anchor is measured against them. They exist so
+that a patch moving Necrobinder's 66 is loud instead of silent.
+
+The third relic spelling, `unmodelled_starting_relics`, was added for them.
+All three starting relics do something tier0 has no vocabulary for, and the
+two alternatives were both worse: leave the sheets at zero relics and let the
+sentinel manufacture a finding every run, or invent a hook name nothing
+implements. Naming the relic keeps the count honest and the claim narrow.
