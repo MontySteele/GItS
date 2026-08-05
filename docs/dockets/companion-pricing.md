@@ -50,4 +50,33 @@ Common instances are to be **flagged for a bump**.
 That is companion-rarity work and it is plausibly this docket's business, but
 the routing was not given and Track R does not assign it. **Recorded here as
 unrouted**, so it is visible rather than lost, and surfaced to the coordinator.
-No findings are collected under it until someone routes it.
+
+**Coordinator note, 2026-08-06:** the audit itself was Track T's brief and it
+ran the same night (`docs/track-t-audits-2026-08-06.md` §T-1); its *results*
+are recorded below so they are not lost, while the *venue* question — whether
+this docket owns X2 rarity work going forward — stays open for [USER].
+
+### X2 audit results (Track T, 2026-08-06)
+
+Sweep of all 298 committed rows; predicate = printed cost 0, non-exhaust, net
+hand delta ≥ 0. Three matches:
+
+| card | pool | rarity | disposition |
+|---|---|---|---|
+| `sayu_naptime` | inazuma companions | uncommon | compliant, no action |
+| `sucrose_gust` | mondstadt companions | **common → UNCOMMON** | the verdict's ratified conditional executed (rarity field only, no stat change) — it is `sayu_naptime`'s shape line for line, and S13's own corpus runs 14 copies of it as the engine of `klee_bombs_3` (verified infinite) |
+| `florid_cadenza` | furina-cards | uncommon | compliant, no action |
+
+Borderline, **no action taken**: `quick_fuse+`, `to_the_front+`, `moon_signal+`
+(all Common, all self-replacing only *after upgrade*, none a companion —
+`to_the_front+` is the sharpest, hand-positive). Also noted:
+`barbara_shining_idol` (uncommon, needs X1's discount to reach 0),
+`curtain_cue` (uncommon, conditional draw).
+
+Rider forced by the bump: `sucrose_gust` now strictly dominates `moon_signal`
+at cost 0, so `tools/lint_strict_domination.py` gained an allowlist entry
+beside the identical, already-red-pen-queued `sayu_naptime`→`moon_signal` pair.
+
+**Parity question for the implementer:** the C# side reads companion rarity
+from `Star`, not the sheet's `rarity` field — this bump moves the sim/design
+sheet, and whether the cycling-rarity gate is enforceable in C# at all is open.

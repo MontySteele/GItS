@@ -173,18 +173,77 @@ with its question in R110/R111 and mirrored into the ledger and the dockets.
 given a law but no docket. Recorded as unrouted in
 `docs/dockets/companion-pricing.md` §2.
 
-### Tracks S / T / U — stubs
+### Track S — the three ratified errata (R110), both engines
 
-Appended by the coordinator when they land. Listed here now so the batch's
-shape is legible and nobody assumes Track R was the whole of it.
+The batch's only behavior changes.
 
-- **Track S** — _(stub: to be appended)_
-- **Track T** — _(stub: to be appended)_ — owns the X7 spark-law audit slot in
-  `docs/dockets/klee-rework.md` §2b.
-- **Track U** — _(stub: to be appended)_
+| change | where | note |
+|---|---|---|
+| S-1 (X3): Encore Performance loses the energy refund and becomes 0-cost | `docs/furina-cards.yaml`, regenerated `klee-mod/.../EncorePerformance.cs`, new cost pin in `tier0/tests/test_furina_sheet.py` | "The energy rider" read as the `{op: energy}` refund (keeping a refund on a 0-cost card would be energy-positive, contradicting FLAG-2's premise). **The upgrade's `copy_cost_override: 0` deletion is STOPPED** — it is the upgrade's only content, and deleting it makes `lint_upgrade_coverage` fail L1; the remedy (replacement delta or curated exemption) is a design call. `docs/furina-upgrades.yaml` untouched, one-liner owed. |
+| S-2 (X11): `replay_next_companion` scoped to the writing turn | `tier0/engine/combat.py` (clear moved from next turn's open to this turn's close), new test in `tier0/tests/test_furina.py` | Write-side scoping chosen because spend-side needs per-stack metadata the C# `Counter` power cannot carry; C# already expired at `AfterSideTurnEnd`, so tier0 was the divergent half. One boundary covers both twins (Study Buddy, Duet). In tier0 the change is behaviorally **inert** — a parity/legibility fix, not a nerf. |
+| S-3 (X14 leg b): ethereal-spotlight hand-full fallback (random discard first) | `tier0/engine/effects.py`, `klee-mod/.../EtherealSpotlightRelic.cs`, three tests | New stochastic surface → dedicated RNG stream (tier0 `selector_rng` at seed+4e9; C# `furina_spotlight_hand_full` per the banner idiom); `understudy/rng.py` now carries an actual stream registry. Victim pool follows `_op_discard`'s kit-cards-never-fodder rule; a kit-only hand keeps the old skip. |
 
-### Suite and lints at Track R's tip
+**No S13 pin flipped, and correctly so** — each of the three families is
+pinned by a leg the errata do not touch (X3's pin caps on self-copies alone;
+X11's line stacks and spends inside one turn; X14's pin is leg (a), which is
+HELD). The pins' docstrings record this. Post-errata harness re-run on 9
+affected lines: all 9 still verified, byte-identical observed fields.
+Line-quality finding: `stall_softlock_4`, the
+ledger's own leg-(b) line, never actually starves the selector — its stall
+claim holds for a different reason than its mechanism.
 
-`GITS_REFERENCE_MODE=committed-only python -m pytest tier0/tests tier05/tests -q`
-— **1925 passed / 41 skipped / 14 xfailed**. Ten CI lint tools plus the
-duplicate-R/D-number ledger check all exit 0.
+C# build clean, bite-check 14 patch classes armed, nothing deployed. Parity
+lints (constant/op/handwritten/upgrade-coverage) all OK; fanfare parity
+vectors unaffected (verified, not assumed).
+
+### Track T — the three sweeps (R109/R111 audits)
+
+`docs/track-t-audits-2026-08-06.md`. One ratified conditional action taken:
+**`sucrose_gust` Common → Uncommon** (rarity field only, per R109's "if this
+is Common, it needs a bump"; `sayu_naptime` was already Uncommon). Findings
+wired into `docs/dockets/klee-rework.md` §2b/§3 (X7 spark law: 6-or-0 limb-(a)
+violations depending on a reading left open, 1 limb-(b) violation
+`cant_catch_me`; X8: two Common term-1 writers undercut "fine at higher
+rarity"; the ratified `bomb_damage_up ≤ 4` cap was never implemented) and
+`docs/dockets/companion-pricing.md` §2 (X2 results + the C# `Star` parity
+question). Population caveat: no `game_ref/` in the audit worktree, so
+base-game pools were not swept.
+
+### Track U — O-1 repaired, corpus republished with erratum (R112)
+
+`run_battery`'s stage-merge keeps one record per encounter *attempt* but now
+carries its stages, and every reaction/aura/payoff rate denominates
+**per combat** (`tier0/harness/metrics.py`; 10-test pin
+`tier0/tests/test_pin_o1_combat_denominators.py`). The corpus re-read moved
+**zero pooled counts across all 91 rows** — pure denominator defect, the
+predicted 16.7% overstatement exact. Erratum atop
+`docs/reactions-corpus-2026-08-05.md` (originals preserved in Appendix E;
+corrected TSV alongside, original byte-untouched). Stated, not re-graded:
+the gauntlet aura-ranking inversion O predicted occurred in every arm; starved
+combats reappear; the per-fight mean *share* moves up. Cohort surface
+untouched — tier 0.5 never merges stages. No other O finding addressed.
+
+### Open one-liners this batch generated for [USER]
+
+1. **F6** (Track R, blocked): is the 2026-08-01/02 session the G5 fork's
+   trigger? The S4 proposal needs that fact stated to execute.
+2. **Encore Performance's upgrade** (Track S, stopped): deleting
+   `copy_cost_override: 0` empties the upgrade entry and fails L1 — replacement
+   delta, or curated exemption?
+3. **CONSTANTS_VERSION 4→5?** (Track S, surfaced): S-1 moves a Furina rare's
+   cost + deletes an energy op; under the constant's own comparability
+   criterion, prior Furina tier-0.5 numbers are no longer strictly comparable.
+   DRAFTER_VERSION and RUNTEMPLATE correctly do not bump.
+4. **X7 limb-(a) reading** (Track T): broad = 6 Common violations, strict = 0.
+   Which does the law mean?
+5. **X2 audit venue** (Track R/T): does `docs/dockets/companion-pricing.md`
+   own X2 rarity work going forward?
+6. **F14's siblings** (Track R): four further `R91/1c` misattributions in
+   `tools/canon_role_tempo.py` sit outside F14's cited scope.
+
+### Suite and lints at the batch tip
+
+Full suite (auto mode, game_ref present):
+`python -m pytest tier0/tests tier05/tests -q` — **1975 passed / 6 skipped /
+14 xfailed** after all four tracks. Committed-only mode green at every track's
+own tip. Lints incl. duplicate-R/D-number check exit 0.

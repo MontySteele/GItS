@@ -61,15 +61,31 @@ making a design decision that this docket has not been given.
 Mechanism the law is aimed at, from the ledger: the spark printer's only bound
 is Exhaust, and the shipped upgrade is exactly `{remove: exhaust}`.
 
-### 2b. Audit findings — **EMPTY, owned by Track T**
+### 2b. Audit findings — filled by Track T, 2026-08-06
 
-> **SLOT. Do not fill speculatively.** A sweep of the Klee pool for cards that
-> violate **both** limbs of §2a — i.e. repeatable spark generation below
-> Uncommon *and* below-Rare cards that are both spark source and draw enabler.
-> The auditor **reports**; the auditor does not bump, reprice or rework. Every
-> finding lands here with a card id, its rarity, and which limb it fails.
->
-> _(no findings recorded — the audit has not run)_
+Sweep methodology and full tables: `docs/track-t-audits-2026-08-06.md` §T-2.
+Findings only; no card was changed.
+
+**Limb (a) — repeatable spark generation below Uncommon.** The count depends
+on a reading the auditor did not pick:
+
+- **Broad reading** (any non-exhaust repeatable generation): **6 Common
+  violations** — `crackle`, `skip_and_hop`, `sparkly_treasure`, `snap`,
+  `spark_collection`, `warm_glow`. No basics violate. All power-based
+  generation (`spark_per_turn`, `bomb_and_spark_per_turn`,
+  `reaction_bonus_spark_energy`, `sparks_n_splash`) is Uncommon+ and compliant.
+- **Strict reading** ("repeatable" = loops / multi-fires per play): **0
+  violations** — the only loop is `sugar_rush+`/`bright_idea`, both Uncommon.
+
+Which reading the law means is a design call; both counts are on the page.
+
+**Limb (b) — no card below Rare that is both spark source and draw enabler:**
+**1 violation** index-wide — `cant_catch_me` (uncommon: gain_spark 1 + draw 1).
+Borderline, no verdict taken: `crackle` (discard-enabler, not draw) and
+`eager_to_help` (spark-keyed draw that mints nothing).
+
+One non-Klee spark card exists index-wide: `prune_witch_hunt` (uncommon
+companion), compliant on both limbs.
 
 ---
 
@@ -84,14 +100,38 @@ for the rarity fact, which nobody has. Mechanism, from the ledger:
 per-bomb or per-turn limit, and bomb damage is the product of two uncapped
 terms.
 
-### Findings — **EMPTY**
+### Findings — filled by Track T, 2026-08-06
 
-> **SLOT. Do not fill speculatively.** A rarity check on the carrier cards of
-> **both** uncapped terms. Report card id, term carried, current rarity. No
-> bumps, no proposals: "not a problem at higher rarity" becomes a finding only
-> once the rarities are on the page.
->
-> _(no findings recorded — the check has not run)_
+Sweep methodology and full tables: `docs/track-t-audits-2026-08-06.md` §T-3.
+Findings only; no card was changed.
+
+**Term 1 — the additive per-bomb damage bonus** (`tier0/engine/effects.py:443`).
+Four uncapped writers:
+
+| card | rarity | note |
+|---|---|---|
+| `chain_fuse` | **common** | +3→+5, board-wide scope, non-exhaust |
+| `careful_arrangement` | **common** | +2→+4, non-exhaust |
+| `remote_detonator` | uncommon | +2→+4 |
+| `explosives_workshop` | uncommon | `bomb_damage_up` +2/copy |
+
+**Term 2 — `detonations_total`** (`tier0/engine/effects.py:444`, monotonic,
+never decays). Single uncapped **reader**: `grand_finale` ("The Big One"),
+**rare** — the only consumer of `N_per_detonation_this_combat` in 298 rows.
+But the counter's **growth** is ungated: producers run from 3 detonators
+(`quick_fuse` common / `remote_detonator` uncommon / `chained_reactions` rare)
+down through 15 bomb placers at **basic** rarity, and bombs auto-detonate at
+turn start (`tier0/engine/combat.py:452-454`) with no card in the loop at all.
+
+**Against the verdict's pricing:** "not a problem at higher rarity" holds for
+term 2's read (one Rare) but **not** for term 1's writers (two non-exhaust
+Commons) nor for term 2's growth.
+
+**Adjacent defect surfaced by the sweep** (finding, not a fix):
+`docs/klee-character-design.md:50` records a ratified `bomb_damage_up ≤ 4` cap
+that is **not implemented** — `max_stacks` only ever arrives from a card row
+and no Klee row carries one, so every Klee scaling power is uncapped for the
+same reason.
 
 ---
 
