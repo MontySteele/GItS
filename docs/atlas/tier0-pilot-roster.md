@@ -145,7 +145,7 @@ Live inventory today: 298 cards, 5 character sheets (3 roster + 2 reference),
 - **R67 (with R33)** — nine dead constants DELETED, each leaving a tombstone
   comment; a swept knob must record a real read through the PEP 562
   `__getattr__` hook, and the gate "may not be satisfied by adding artificial
-  reads" (`DECISIONS.md:2065-2118`; `constants.py:565-568`, `:960-1013`).
+  reads" (`DECISIONS.md:2065-2118`; `constants.py:562-567`, `:960-1013`).
 - **R83** — `real_silent`'s pilot weights stay **PLACEHOLDER** (measured a dead
   lever, 24.2% vs 24.5% over 1000 runs), no poison term is added, and the
   authorized lever is the draft scorer, not this file
@@ -190,7 +190,7 @@ Live inventory today: 298 cards, 5 character sheets (3 roster + 2 reference),
 - **Frozen files that read like tunables**: `content/encounters/battery.yaml:3`
   is marked `*** FROZEN 2026-07-19 — do not retune; all comparisons depend on
   it ***`, and `block: 1.2` is frozen in *every* pilot entry
-  (`content/pilots/archetypes.yaml:4-6`, and each `# FROZEN. do not tune.`).
+  (`content/pilots/archetypes.yaml:1-3`, and each `# FROZEN. do not tune.`).
 - **Always `loader.reset_caches()`, never a single `cache_clear()`** —
   `_card_prototype` is derived from `_card_index`, so clearing one serves
   prototypes built from a content tree that no longer exists
