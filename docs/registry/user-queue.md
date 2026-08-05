@@ -15,8 +15,14 @@ full text — **this file is an index, not a replacement.** Their "open items"
 sections now point here.
 
 **Standing discipline this file obeys.** HELD flags are copied in as held
-(FLAG-1…FLAG-4). The R102 escrow stays frozen. Awaited one-liners are recorded
+(FLAG-1…FLAG-4). ~~The R102 escrow stays frozen.~~ Awaited one-liners are recorded
 as awaited; recording is not answering.
+
+> **UPDATED 2026-08-06 (Cold Reading, R113–R116).** The R102 escrow is
+> **released** (R113) and all four HELD flags are **ruled** (R114), so this
+> file's two standing postures above have both been discharged by [USER] rather
+> than by a track. Struck rather than rewritten, per R101b. What is still held
+> is listed as held; §1 and §3 say which.
 
 ---
 
@@ -101,7 +107,7 @@ Full questions: `docs/registry/identifiers.md` §6, and R110/R111 verbatim.
 
 | Item | What is asked | Unblocks | Full text |
 |---|---|---|---|
-| **R102 escrow release** | Strike the four PROVISIONAL fanfare marks as instrument-vindicated, **or** formally re-open any of them. One clean ledger operation either way. **Both probes have now reported** — direction: tier0 is NOT pessimistic on fanfare, so R102's stated worry is unsupported. | Four fanfare conclusions currently frozen: the threshold-reach table, the 1.8% STOP, the early-half grade, and the R91/2b posture | `tier0/DECISIONS.md` R102; `docs/sitting-prep-2026-08-05.md` §10.11; `docs/probe-a-block-offset.md`, `docs/probe-b-fanfare-residual.md`. **FROZEN pending this ruling — Track X did not touch it.** |
+| ~~**R102 escrow release**~~ | ~~Strike the four PROVISIONAL fanfare marks as instrument-vindicated, **or** formally re-open any of them.~~ | **ANSWERED 2026-08-06 — SIGNED, STRUCK** (Track AA / R113): *"agreed - signed."* All four marks struck; the grades stand exactly as ratified and no number moved. Companion clauses C-a…C-d landed: term 3 (+2 Fanfare per combat, tier0-optimistic) filed to `docs/s7-classification.md` as bounded/direction-known with its fix **queued** as Errata Batch 2 item 1; the blind-replay column re-read rule stated once; S13 re-verification **NO** with the Family-A grep null attached; the probes' standing limits carried onto every struck banner | ~~`tier0/DECISIONS.md` R102~~ → `tier0/DECISIONS.md` **R113** |
 | **S2 event-gallery checkboxes** | Curation sitting: 47 events, 141 drafted variants → 130 kept / 11 cut, 4 demotions | The event layer's conversion pass | `review/event-gallery/gallery.md` |
 | **S14 canonicity rulings** | Four named questions: **NC-1** (companion/power damage skipping the damage pipeline in C#), **shop slot 1** (`NC-10`, can never roll a Rare in the mod), **Frozen** (`NC-7`, two different mechanics), **`spend_potion`** (`NC-8`, never paid) | The rest of the 174-finding S14 triage | `review/parity-sweep/noncard-triage-memo.md`; restated by R112 |
 | **S13 residual sitting items** | The four HELD flags above; plus paperwork one-liner 4 in §6 (do S13's 71 lines need re-verification against `S7-C1`/`S7-C2` and the S14 routings before any family is treated as a game fact?) | Treating any exploit family as a game fact | `review/redteam/exploit-ledger.md`; `docs/sitting-prep-2026-08-05.md` §8 item 4 |
@@ -130,8 +136,8 @@ None was ruled at the 2026-08-06 sitting except where noted.
 | 10.8 | **R88's draft conflicts with ratified R52 and shipped content** — the reserved-character rule vs Neuvillette. **Read before signing.** R108 countersigned the slot; this conflict is not thereby resolved | pick one of four |
 | 10.9 | §2.2a's stated evidence does not exist (the act-3 Ancient stun reward). Authorize a later citation repair? Rule untouched either way | yes/no |
 | 10.10 | Columbina has shipped; Appendix A.6's premise expired | awareness only, no ask |
-| 10.11 | **The C2 escrow is now rulable** — see §4, R102 escrow release | strike or re-open |
-| 10.12 | Family-A dependency hits in the S13 ledger: **none found**. Accept the null as closing the C-c order, or order a wider derivation test? | yes/no |
+| ~~10.11~~ | ~~**The C2 escrow is now rulable** — see §4, R102 escrow release~~ | **RULED 2026-08-06 — STRUCK** (R113). *"agreed - signed."* |
+| ~~10.12~~ | ~~Family-A dependency hits in the S13 ledger: **none found**. Accept the null as closing the C-c order, or order a wider derivation test?~~ | **RULED 2026-08-06 — null ACCEPTED** (R113 clause C-c). No wider derivation test is ordered; the null is attached to the ruling as its evidence |
 | 10.13 | **Probe (d) registration** — `docs/probe-d-registration-draft.md`, drafted and unsigned; nothing has been run | countersign yes/no |
 | 10.14 | N + O ledgers, read top-5-first — see §4 | read |
 
@@ -146,7 +152,7 @@ ambiguous statement in a live artifact if declined. Full text:
 1. **S15 pin-table sum mismatch** — headline 111 vs a counted 133 test functions; the per-module table lists 0 for four files that carry tests. Authorise correcting the table and headline, or leave.
 2. **S8 header 42-vs-51 miscount** — one preamble line in `review/potion-relic-gallery/gallery.md`. Authorise correcting to 51, or leave.
 3. **`review/enemy-dossiers` stale branch pointer** — points at `e07fb4c`; the content landed via `ec15028` + `28759f0`. Delete / repoint / leave.
-4. **S13 re-verification against `S7-C1`/`S7-C2`** — re-verify all 71 lines, only the block- and fanfare-dependent families, or proceed on the caveat as written.
+4. ~~**S13 re-verification against `S7-C1`/`S7-C2`** — re-verify all 71 lines, only the block- and fanfare-dependent families, or proceed on the caveat as written.~~ **ANSWERED 2026-08-06 — proceed on the caveat as written** (R113 clause C-c: re-verification **NO**, with the Family-A dependency null attached as evidence). Both C1 and C2 have since been reclassified away from tier0 infidelity anyway — C1 is family B, C2 is written off — so the caveat's premise has weakened in the direction that made re-verification cheapest to decline.
 
 ---
 
@@ -191,5 +197,6 @@ Recorded rather than guessed, per the no-supplied-assumptions norm.
 3. **Where does the payoff-reach / `RARITY_ODDS` registration document live?**
    (§5 row 10.7(a).) Greps over `docs/`, `review/` and all branches found
    nothing; the document may not be in the repo.
-4. **Does the S13 pin corpus need re-verification** before any family is
-   treated as a game fact? (§6 item 4.)
+4. ~~**Does the S13 pin corpus need re-verification** before any family is
+   treated as a game fact? (§6 item 4.)~~ **SUPPLIED 2026-08-06 (R113/C-c):
+   NO.** The caveat stands as written and no line is re-run.

@@ -931,10 +931,18 @@ their thresholds were live. The predicates are now visible to play selection
 and test-locked. This was a real accuracy bug but not the balance cause:
 1,500-run Fanfare Act clears remained 9.5%.
 
-> **PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05).** The
+> ~~**PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05).** The
 > threshold-reach table in the paragraph below is one of the four conclusions
 > escrowed pending the C2 probe: not citable as load-bearing, not shipped
-> against, and not redesigned against until it reports.
+> against, and not redesigned against until it reports.~~
+>
+> **STRUCK 2026-08-06 (R113) -- escrow released, instrument vindicated.** Both
+> probes reported and C2 is written off as a family-C infidelity: tier0's
+> Fanfare generation and decay are at parity
+> (`docs/probe-b-fanfare-residual.md`). The table below **stands exactly as
+> ratified** -- the strike restores its pre-escrow status and re-measures
+> nothing. R113's clause C-d rides with it: the vindicating measurement is
+> bot-limited, Furina-only, and taken with the salon empty throughout.
 
 RESOURCE TRACE, 1,500 realistic runs at seed 11: per reached fight, Furina
 gained 24.6 Fanfare, spent only 3.2, peaked at 22.7, and ended at 21.4.
@@ -2863,12 +2871,20 @@ consolidated owed-item register produced by the four read-only sweeps of
 2026-07-29). Four rulings, taken together in one sitting, exactly as §3
 asked for. No code, no sheet and no number moved with them.
 
-> **PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05).** Item
+> ~~**PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05).** Item
 > (1)'s compensation STOP at 1.8% against the 2.0% floor is one of the four
 > conclusions escrowed pending the C2 probe: not citable as load-bearing, not
 > shipped against, and not redesigned against until it reports. The STOP's
 > practical effect -- no Furina balance value moves -- is unchanged by the
-> escrow, which freezes both directions.
+> escrow, which freezes both directions.~~
+>
+> **STRUCK 2026-08-06 (R113) -- escrow released, instrument vindicated.** C2 is
+> written off; the 1.8% STOP **stands exactly as ratified**. Recorded because
+> the escrow's worry ran the other way: R102 feared the STOP was *premature*
+> because tier0 might be pessimistic about fanfare. Probe (b) measured the sign
+> and it flipped -- with the selector known, tier0 is neutral-to-marginally
+> optimistic. The STOP is not premature on the instrument's account. R113's
+> clause C-d rides with it (bot-limited, Furina-only, salon empty throughout).
 
 > **GOVERNING CONDITION RE-POINTED 2026-08-06 (R107; S4 finding F1).** Item
 > (1)'s trigger fired -- the Furina playtest ran 2026-08-01/02 and was graded
@@ -3563,9 +3579,16 @@ becomes gradeable against a deck that actually is one, and Salon fill time gets
 re-measured with the bot-doesn't-build-salons confound removed. Until it
 reports, the 0-of-56 fill result stands recorded as **AMBIGUOUS** -- design
 finding versus policy gap, undecided -- and **R91/2b's revisit stays open**.
-*(**PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05)**: the
+*(~~**PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05)**: the
 R91/2b revisit posture is one of the four escrowed conclusions. It stays open,
-and it does not move in either direction until the C2 probe reports.)*
+and it does not move in either direction until the C2 probe reports.~~
+**STRUCK 2026-08-06 (R113)** -- escrow released, C2 written off, instrument
+vindicated. The posture **stands exactly as ratified**: R91/2b's revisit stays
+open on its own terms, now unfrozen. R113's clause C-d rides with it -- and one
+of its limits bites here specifically, so it is repeated rather than pointed
+at: **the salon was empty throughout every measurement**, so the 0-of-56 fill
+result is untouched by the vindication and remains AMBIGUOUS for the reason it
+already was.)*
 What the committed arm reports is a number for [USER] to rule on; this pass
 reports it and revisits no tag.
 
@@ -4103,3 +4126,109 @@ silently dropped from it.
 
 **Class: MECHANICAL.** Two findings take a docket and a queue is copied
 forward. Nothing is graded, priced or decided.
+
+## R113 -- The C2 escrow is RELEASED: the four fanfare marks are struck as instrument-vindicated, and the residual's one real term is filed (2026-08-06)
+
+Sitting of 2026-08-06, third sitting, Track AA. **Verbatim: *"agreed -
+signed."*** Recorded before execution
+(`docs/sitting-record-predraft-2026-08-06.md` §8).
+
+R102 escrowed four conclusions "in both directions, until the C2 probe
+reports", and stated its own two outcomes: **if C2 confirms, they re-open; if
+C2 is written off, the PROVISIONAL marks are struck and the grades stand
+exactly as ratified.** Both probes have reported
+(`docs/probe-a-block-offset.md`, `docs/probe-b-fanfare-residual.md`;
+`docs/sitting-prep-2026-08-05.md` §10.11). **C2 is written off as a family-C
+infidelity**, so the second branch is the one that fires. This entry fires it.
+
+**The four PROVISIONAL marks are STRUCK, and the grades stand exactly as
+ratified.** Enumerated here in R102's own order and words, so the strike cannot
+be read as covering more or less than the escrow did:
+
+1. **the threshold-reach table** (94.1% at 10, 80.8% at 15, 64.8% at 20, 40.8%
+   at the cap) -- R44, banner struck in place;
+2. **the compensation STOP at 1.8%** against the 2.0% floor -- R87(1), banner
+   struck in place;
+3. **the Fanfare early-half grade "prediction NOT SUPPORTED"** --
+   `docs/sprint-track-b-gate-log-2026-08-05.md` GRADE (a), banner struck in
+   place;
+4. **the R91/2b revisit posture** -- R99(4), banner struck in place.
+
+**No number moves and no grade is re-read upward.** A strike restores the
+status these four had before the escrow; it is not a re-ratification and it is
+not new evidence for any of them. What the probe supplies is the negative:
+tier0's Fanfare generation and decay are at parity, so the instrument that
+produced them was sound, so the escrow's condition is discharged.
+
+### Companion clauses C-a ... C-d
+
+**C-a -- term 3 is filed to the S7 ledger as bounded and direction-known, and
+its fix is QUEUEABLE, not executed.** Probe (b) localized the residual into
+three terms: (1) the unrecorded Spotlight selector -- a family-B reconstruction
+gap, not a sim fact; (2) the turn-open sampling seam; (3) **the fight's first
+Spotlight -- tier0 credits the play that SETS the designation, the engine does
+not: exactly +2 Fanfare per combat, once, in tier0's favour**
+(`docs/probe-b-fanfare-residual.md` Ledger 2, 26 of 27 plays agree exactly).
+Term 3 is the only genuine tier0-side term, it is **bounded** (+2/fight) and
+its **direction is known** (tier0-optimistic, the opposite of the direction
+R102 worried about). It is filed to `docs/s7-classification.md` family C as a
+named, bounded, direction-known item. **The fix candidate -- credit only plays
+covered by a standing designation -- is formally QUEUEABLE and joins the next
+errata batch as item 1** (Errata Batch 2, §10 of the sitting record). It is
+not executed by this entry and no constant, card or sheet moves under it.
+
+**C-b -- the blind-replay column re-read rule.** Any S7 column produced by a
+reconstruction that did **not** carry the recorded status strip and the
+recorded Spotlight selector is a **reconstruction reading, not a fidelity
+reading**, and may not be cited as evidence of a tier0 infidelity without being
+re-read selector-aware and status-loaded first. Named instances, because a rule
+with no instances is a slogan: `l2.block_at_turn_end` (probe (a): "the S7
+`l2.block_at_turn_end` column should be read that way"; 7/38 -> 33/38 agreement
+once status-loaded), and `l2.fanfare_after_turn` /
+`l2.fanfare_next_open_post_decay` (probe (b): both "compare across a seam
+containing two income channels the replayed turn does not contain", and neither
+is the fair column S7 was looking for). The rule is stated once here so it does
+not have to be re-derived at every future citation.
+
+**C-c -- S13 re-verification against `S7-C1`/`S7-C2`: NO.** The 71-line S13
+corpus is **not** re-verified, and the caveat stands as written. Attached as the
+evidence, per the order this clause carried: the **Family-A dependency scan
+returned zero hits** (`docs/sitting-prep-2026-08-05.md` §10.12) -- no S13
+metric verdict quotes `cards_played` or anything derived from it; the 40 metric
+verdicts use seven other metric names, and the remaining 31 read the engine's
+own degeneracy detector. The structural reason is recorded with it: Family A is
+a defect in the soak writer, and the S13 harness never loads it. **This clause
+discharges two open asks at once** -- `docs/sitting-prep-2026-08-05.md` §10.12
+("accept the null as closing the C-c order": accepted, no wider derivation test
+is ordered) and paperwork one-liner 4 of §8 / `docs/registry/user-queue.md` §6
+("proceed on the caveat as written").
+
+**C-d -- the probes' standing limits are carried onto the annotations.** The
+strike is only as wide as the measurement behind it, so the measurement's own
+declared limits ride with it wherever a struck mark is now cited: **bot-limited**
+(Guardrail 7 -- every engine number came from a bot or a fixed script; nothing
+in either probe is a balance finding); **salon empty throughout** (every
+`salon_members` reading is 0, as in every measurement to date -- Fanfare
+interactions with a populated salon are untested); **one character** (Furina
+only); and **the Encore split is unreadable on this wire** (absorption vs
+upkeep, bounding the boundary reconciliation at +/-2). A struck mark is a mark
+that is no longer frozen. It is not a mark that has been re-measured on a
+broader corpus.
+
+### What was reconstructed, and from what
+
+Track AA's text cites a pre-draft, `ruling-predraft-r102-escrow-2026-08-05.md`,
+**which does not exist in this repo on any branch.** Recorded rather than
+smoothed over, because a ruling that cites a missing source should say so. The
+clauses above are reconstructed from the paper that does exist, and each names
+its source: the enumeration of the four marks from **R102's own text**
+(verified word-for-word against it, and against probe (b)'s "For the ruling
+session" restatement); C-a from **probe (b) Ledger 2** and the sitting record's
+Errata Batch 2; C-b from **probe (a)'s closing section** and **probe (b)'s
+"Mechanically, what it means"**; C-c from **§10.12** and its grep manifest;
+C-d from **both probes' declared confounder sections**. No clause was invented,
+and nothing in the brief's C-a...C-d parenthetical is left unlanded.
+
+**Class: SUBSTANTIVE.** Four ratified conclusions change status, in the
+direction R102 pre-committed to. **No value moves anywhere in this entry**, and
+the one real defect the probes found is filed and queued rather than fixed.

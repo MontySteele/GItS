@@ -56,6 +56,22 @@ clean single-mechanism turns. No declared confounder produces a systematic
 *under*, not over. Something makes real block resolve 2 lower than tier0's
 arithmetic, or samples it after a 2-point loss. This is the strongest
 infidelity candidate in the corpus.
+> **RECLASSIFIED 2026-08-06 (R113, escrow clause C-b) — C1 is FAMILY B, not
+> family C.** Probe (a) (`docs/probe-a-block-offset.md`) reproduced the offset
+> and named it: **Frail**, a player debuff the fight record does not carry, so
+> the replay resolved every Block card at printed value while the engine
+> resolved it at three-quarters. Agreement goes **7/38 → 33/38** once the
+> status strip is loaded, and every one of the 26 positive divergences closes
+> to zero. tier0 already models Frail exactly.
+>
+> **The standing rule this instance produced (R113/C-b, stated once for reuse):**
+> an S7 column produced by a reconstruction that did not carry the recorded
+> status strip and the recorded Spotlight selector is a **reconstruction
+> reading, not a fidelity reading**, and may not be cited as evidence of a
+> tier0 infidelity until it is re-read status-loaded and selector-aware.
+> Named instances: `l2.block_at_turn_end` (this entry),
+> `l2.fanfare_after_turn` and `l2.fanfare_next_open_post_decay` (C2, below).
+
 **Battery exposure: broad but shallow.** Tier0 over-blocking inflates
 survivability in every arm symmetrically, so relative comparisons — the only
 load-bearing use of battery numbers since D3 — largely survive; absolute
@@ -70,6 +86,27 @@ reconstruction gap explained everything, later-turn rows should tighten once
 turn-1 income is written off — they don't obviously do so, and the decay
 direction suggests tier0 may decay harder or generate later than the C#
 engine.
+> **RESOLVED 2026-08-06 (R113, escrow clause C-a) — C2 is WRITTEN OFF as a
+> family-C infidelity, and one bounded term survives it.** Probe (b)
+> (`docs/probe-b-fanfare-residual.md`) split the residual into three named
+> terms: (1) the unrecorded Spotlight selector — **family B**, a reconstruction
+> gap, and ~64% of the total income; (2) the turn-open sampling seam; (3) **the
+> fight's first Spotlight.** The paragraph above's stated mechanism ("tier0 may
+> decay harder or generate later") is **NOT REPRODUCED**: per-play income is
+> exact on 26 of 27 plays and the decay law lands on the engine's number
+> exactly on every boundary where nothing else moved.
+>
+> **Term 3 is filed here as the residual's only genuine tier0-side term, and it
+> is bounded and direction-known:** tier0 credits the play that SETS a fight's
+> first designation and the engine does not — **exactly +2 Fanfare per combat,
+> once, tier0-OPTIMISTIC.** That is the opposite of the direction this entry
+> feared. **Fix candidate, QUEUEABLE and not executed:** credit only plays
+> covered by a standing designation (Errata Batch 2, item 1).
+>
+> Direction, restated for the reader who stops here: **tier0 is NOT pessimistic
+> about fanfare.** The four conclusions this entry escrowed are struck by R113
+> and stand as ratified.
+
 **Battery exposure: narrow but deep — this is the ranked #1 flag.** Every
 recent fanfare-archetype verdict leans on tier0 fanfare accounting: the
 threshold-reach table (94.1%@10 / 80.8%@15 / 64.8%@20 / 40.8%@30), the

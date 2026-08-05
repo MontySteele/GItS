@@ -108,8 +108,11 @@ Nothing in this section is scheduled. Each is a decision waiting on the table.
    No fixes authored, by design.
 4. **S14 non-card parity triage sitting.** 174 findings across 173 entities.
    No fixes authored, by design.
-5. **C2 escrow release (R102).** Four fanfare conclusions remain PROVISIONAL
-   pending probe (b).
+5. ~~**C2 escrow release (R102).** Four fanfare conclusions remain PROVISIONAL
+   pending probe (b).~~ **DISCHARGED 2026-08-06 by R113** — [USER]: *"agreed -
+   signed."* Probe (b) reported, C2 was written off, and all four PROVISIONAL
+   marks are struck as instrument-vindicated. The grades stand exactly as
+   ratified; no number moved.
 6. **Build 0.2-296 distribution + telemetry notice** to the table.
 7. **R105 fact-sheet item** — carried in tonight's Track E.
 8. **S7 §4 probes.** The two family-C candidates (+2 block offset, Fanfare

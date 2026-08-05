@@ -206,7 +206,7 @@ minted in `klee-mod/DECISIONS.md` (Neap Tide), R39–R112 in
 | R1–R38 | prose entries and archived ruling docs | **Not mechanically resolvable.** S4 §4 lead 3: *"no index maps R-number → dated entry."* Several (R8, R13, R14, R24, R25, R29d, R34–R38) are cited as standing law. Resolving them is an open paper item — see `docs/registry/user-queue.md` §4. |
 | R39–R72 | `tier0/DECISIONS.md`, `## R<n>` headings | dated, resolvable |
 | R73–R80 | `klee-mod/DECISIONS.md`, Neap Tide v2.1 | dated, resolvable |
-| R81–R112 | `tier0/DECISIONS.md` | dated, resolvable. **Current maximum: R112** (2026-08-06). |
+| R81–R113 | `tier0/DECISIONS.md` | dated, resolvable. **Current maximum: R113** (2026-08-06). |
 
 Sub-clause citation shape is `R<n>/<clause>` (e.g. `R90/1c`, `R91/2b`) or
 `R<n>(<letter>)` (e.g. `R107(a)`). Clause letters belong to their own ruling:
@@ -286,7 +286,7 @@ not a "while we're in there" (`docs/dockets/README.md` house rule 3).
 | S4 | Ledger consistency audit → F1–F17 + the 20-gate queue | **SAT 2026-08-06** (R107) |
 | S5 | Animation-tech peek: the answer is Spine | landed |
 | S6 | Mutation audit, 114 mutants / 46 survived | pinned by S15 |
-| S7 | Understudy fidelity audit → families A–D, candidates `S7-C1`/`S7-C2` | probes reported; escrow ruling owed |
+| S7 | Understudy fidelity audit → families A–D, candidates `S7-C1`/`S7-C2` | **CLOSED for both candidates 2026-08-06 (R113):** `S7-C1` reclassified to family B (Frail, a reconstruction gap); `S7-C2` written off, escrow released, four marks struck. One bounded term survives and is queued (term 3, +2 Fanfare/combat, tier0-optimistic). |
 | S8 | Potion + relic gallery, 51 items | 8 flagged items open |
 | S9 | Weekly-boss dossiers, 11 bosses | landed |
 | S10 | Enemy-family atlas + reskin candidates | candidates open |
