@@ -337,6 +337,13 @@ for itself twice.
    per the hand-back note; the evidence is "P1 VALIDATED" above. Kept as a
    struck line because a debt list that quietly loses rows is a debt list
    nobody trusts.
+2b. **Two more traversal defects were filed the same evening and NOT fixed**
+   (13: the bridge answering with no `state_type` mid-transition; 14: the wire
+   timing out while the process stayed alive). Both are recorded in
+   `docs/sprint-track-b-curves-log-2026-08-04.md`; both are the expected class.
+   Note that the FINAL soak of that session was a second clean N=3 at HEAD, so
+   R98's validation holds for the code as landed and not only for the commit
+   that earned it.
 3. **Runs die in Act 1.** Deepest reach across every soak was the Act 1 boss,
    beaten once. This is a **bot-limited floor and says nothing about
    difficulty** — but it does mean the current policy will not produce Act 2
