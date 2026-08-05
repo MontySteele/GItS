@@ -74,6 +74,37 @@ SOLVE = ("frontload", "scaling", "block", "sustain", "velocity", "support",
          "utility")
 # A0.2(2): protected free space. Never linted, never split, never a floor.
 UNLINTED = ("utility",)
+# R91/2d, the sustain/disrupt/block boundary as countersigned:
+#
+#   your own HP ledger          = sustain  (heals, max HP, Buffer-style
+#                                           PREVENTION of damage to you)
+#   the ENEMY's output          = disrupt  (Weak, Frail) -- and in THIS
+#                                           implementation disrupt has no
+#                                           `solve` value of its own: those
+#                                           effects are the sheets' `utility`
+#                                           voice (POWER_ROLE below maps weak
+#                                           and vulnerable there) and utility
+#                                           is protected free space. The
+#                                           ruling's load-bearing half is that
+#                                           they are NOT sustain, which is
+#                                           already true here; naming a sixth
+#                                           lintable role would be a new
+#                                           vocabulary value on three ratified
+#                                           sheets and is out of this repair's
+#                                           scope. Recorded, not silently
+#                                           collapsed.
+#   absorbing a hit THIS TURN   = block
+#
+# ROLES THAT ARE NEVER LINTED, and why each:
+#   utility -- A0.2(2) protected free space.
+#   support -- one-seat sim, play-graded only (D4 clause, charter A0).
+#   sustain -- R91/2d: under the structural definition canon barely has any
+#              (0.0-2.3%), so a sustain floor would be measuring noise. ZERO
+#              SUSTAIN IS A LEGAL IDENTITY -- Silent is the worked example,
+#              and "how well does a character preserve HP" is a derived
+#              outcome across sustain + disrupt + block that Track B's HP
+#              trajectory measures directly, not a tag.
+NEVER_LINTED = ("support", "sustain")
 FIGHT_BANDS = ("early", "mid", "late")
 RUN_BANDS = ("early", "late")
 MODIFIERS = ("aoe",)
@@ -243,6 +274,79 @@ STATE_READS = {
     "burst_energy": "burst",
     "per_aura": "aura",
 }
+
+# --- METERS: bounded / unbounded (R91/2b amendment) -------------------------
+#
+# [USER]'s amendment to the salon double-credit: the Salon caps at three, so a
+# count-reading card may really be "frontload after a setup tax" rather than
+# true scaling. Whether it is depends on how fast the meter fills, which is
+# UNMEASURED. The resolution keeps the tags as proposed and makes the property
+# visible instead, so the revisit has something to key on.
+#
+# Every cap here is READ FROM `tier0/constants.py`, never retyped. A cap that
+# lives in a comment is a cap that drifts.
+#
+#   canon precedent, both halves named in the ruling:
+#     BOUNDED   -- Defect's orb slots (a fixed number of active orbs)
+#     UNBOUNDED -- Focus (a stack that just keeps going), and Strength
+#
+# Each entry is (bounded, cap_constant, note). `cap_constant` is a name in
+# tier0.constants or None; a bounded meter with a DERIVED cap says so.
+METERS = {
+    "salon_member": (
+        True, "SALON_MEMBER_SLOTS",
+        "Three stage slots. The constant's own comment already reads "
+        "'Defect-orb shape: fixed active company' -- the canon bounded "
+        "precedent, named in the sheet before the ruling asked for it."),
+    "fanfare": (
+        True, "FANFARE_CAP_FRACTION",
+        "DERIVED cap: fraction of maxHP, not a fixed integer. Demoted to a "
+        "high safety rail by the Tide Turns sprint (F-A5) -- bounded on "
+        "paper, and the W2 cells reported 0.0% at-cap, so it rarely binds."),
+    "spark": (
+        True, "SPARKS_FOR_FREE_ATTACK",
+        "Threshold-and-consume at 3: the meter cannot sit above its cap "
+        "because reaching it spends it."),
+    "encore": (
+        False, None,
+        "tier0/constants.py, verbatim: 'Encore is unbounded per-combat "
+        "(v1.6) -- no cap constant by design.'"),
+    "charge": (
+        False, None,
+        "Accrues CHARGE_PER_EXHAUST per exhaust with no ceiling constant; "
+        "Burst is a spend window, not a cap."),
+    "burst": (
+        False, None,
+        "Burst energy accrues from several sources and is gated by "
+        "`requires: burst_N` spends. No cap constant exists."),
+    "exhaust_pile": (
+        False, None,
+        "Monotonically growing counter bounded only by deck size. The canon "
+        "unbounded shape (Focus, Strength)."),
+}
+
+
+def meter_cap(token: str):
+    """(bounded, cap value or None, constant name) -- cap READ from constants.
+
+    Deliberately imports at call time: `tools/` is used from contexts that do
+    not want tier0 loaded, and a meter table that hard-imports the sim would
+    make the taxonomy depend on the engine it is supposed to describe.
+    """
+    if token not in METERS:
+        return (None, None, None)
+    bounded, const, _why = METERS[token]
+    if const is None:
+        return (bounded, None, None)
+    from tier0 import constants as C
+    return (bounded, getattr(C, const), const)
+
+
+# METERS is also the 2c predicate's population: a "meter-reading damage card"
+# means one of THESE, not any state a formula can name. `bonus_vs_aura` reads a
+# boolean board state, `bombed` reads a per-enemy flag; neither is a counter
+# that grows, so neither turns a damage card into a scaling card.
+METER_TOKENS = frozenset(METERS)
 
 # --- ENTITY payoffs (the hand-auditable half of A0.1) -----------------------
 #
@@ -449,21 +553,44 @@ def scan_row(row: dict, character: str = "") -> dict:
         if str(target).startswith("all_") or target == "random_enemies":
             aoe = True
 
-        role = DIRECT_ROLE.get(op)
-        if op == "damage" and target == "self":
-            role = None            # self-damage is a cost, never a job
-        if role:
-            direct.add(role)
-            delivered.add(role)
-
         # This effect's own reads: its formulas, plus every gate it sits
         # behind. Both are "this resource is why the number happened".
+        # Computed BEFORE the role, because R91/2c makes the role depend on it.
         here = {t for text in _formula_strings(fx)
                 if (t := _state_token(text))} | {g for g in gates if g}
+
+        role = DIRECT_ROLE.get(op)
+        roles_here = {role} if role else set()
+        if op == "damage" and target == "self":
+            roles_here = set()     # self-damage is a cost, never a job
+        elif op in ("damage", "repeat_this") and (here & METER_TOKENS):
+            # R91/2c, COUNTERSIGNED AS WRITTEN. A damage card that reads a
+            # meter is `scaling`; it is ALSO `frontload` only if it deals
+            # damage with the meter at ZERO.
+            #
+            #   "deal 6, plus 1 per 4 Fanfare"   -> frontload AND scaling
+            #   "deal 1 per 4 Fanfare"           -> scaling only
+            #
+            # Checkable straight off the sheet, which is why it is a rule here
+            # and not a hand-ruling per card: pays-at-zero is exactly "there is
+            # a printed positive `amount` and this line is not sitting behind a
+            # gate". A gated line pays nothing at meter zero BY DEFINITION --
+            # the gate is the meter test. `amount: 0` with a bonus_formula is
+            # the sheets' own explicit "this pays nothing on an empty meter"
+            # idiom (suffering_for_art says so out loud), so it fails the test
+            # too, and it fails it by reading the sheet rather than by
+            # anybody's opinion about the card.
+            pays_at_zero = (not gated
+                            and isinstance(fx.get("amount"), (int, float))
+                            and fx["amount"] > 0)
+            roles_here = {"scaling"} | ({"frontload"} if pays_at_zero else set())
+        direct |= roles_here
+        delivered |= roles_here
+
         for token in here:
             reads.add(token)
-            if role:
-                read_roles.setdefault(token, set()).add(role)
+            if roles_here:
+                read_roles.setdefault(token, set()).update(roles_here)
 
         if op == "apply_power":
             power = str(fx.get("power", ""))

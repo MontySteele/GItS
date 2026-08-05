@@ -12,37 +12,54 @@ answer the same question fails.
 
 WHAT IT READS
 -------------
-  docs/role-tempo-floors.yaml   canon-derived, percentages only. A cell is
-                                mandatory when all five canon pools are
-                                non-zero in it; the floor is the minimum of
-                                the five, so no canon character can fail its
-                                own floor.
-  docs/role-tempo-review.tsv    the PROVISIONAL tags from
-                                tools/suggest_role_tempo_tags.py.
+  docs/role-tempo-floors.yaml   canon-derived, percentages only. TWO LAYERS
+                                since R91/1c:
 
-THE SECOND INPUT IS PROVISIONAL AND THE OUTPUT SAYS SO ON EVERY RUN. [USER]
-gate A-G1 has not closed; no tag here has landed on a sheet. Read this run as
-"what the taxonomy says today", not as a verdict on the pools.
+      default:   for an archetype with no named anchor. A cell is mandatory
+                 when all five canon PACKAGES are non-zero in it; the floor is
+                 the minimum of the five, so no canon package can fail it.
+      anchored:  for an archetype that names the canon package shaped like it
+                 (canon_role_tempo.ARCHETYPE_ANCHORS). The floor is that
+                 package's OWN coverage, which it clears with equality and
+                 nothing else.
 
-`utility` and `support` are never linted. The first is protected free space
-(A0.2(2)); the second is graded by play sessions only, because the sim is
-one-seat (D4 clause, charter A0).
+  the three sheets              the LANDED `solve` and `tempo_band` fields.
+                                Recomputed through tools/role_tempo.py rather
+                                than read off the TSV, because a cell is
+                                per-BAND and the TSV's solve is the union.
+
+R91/1c IS WHY THE POPULATION CHANGED. The first run compared a GItS archetype
+(11-32 cards, one plan) against a whole canon character (88 cards spread across
+everything), so the bar was generous by construction and Furina cleared some
+floors by 40-60 points. The comparison population is now the canon PACKAGE --
+Silent's poison cards, Defect's orb cards, Necrobinder's summon cards -- which
+run 8-41 and are the same kind of object as an archetype.
+
+A-G1 CLOSED 2026-08-04 (R91). The tags this reads are LANDED on the sheets, so
+the old "PROVISIONAL, nothing has been written to a sheet" banner is gone. What
+has NOT changed: this is a COUNTING TOOL and R90/1a says so out loud. It answers
+"does a card for this job exist at this point in the fight?" and nothing more.
+Size and timing -- how MUCH a card pays and how fast the meter fills -- are
+Track B's, per R90/1b.
+
+`utility`, `support` and `sustain` are never linted. Protected free space
+(A0.2(2)); one-seat sim, play-graded only (D4); and R91/2d respectively -- canon
+carries 0.0-2.3% sustain under the structural definition, so zero sustain is a
+legal identity and a sustain floor would be measuring noise.
 
 --gate AND THE DEBT LIST
 ------------------------
-The first run found 30 findings and P1's binding null fired in the same run
-(docs/sprint-axis-validity-track-a-log-2026-08-04.md §0), so the taxonomy is
-back with design and the findings are real but not yet actionable. Suite-green
-at a track boundary is a standing rule, and the house pattern for exactly this
-is the Silent anchor's: PIN the known findings and fail only on NEW ones.
+Per R90/1a the Klee/Kokomi findings are REAL and stay pinned; the lint fails
+only on NEW ones. Suite-green at a track boundary is a standing rule and the
+house pattern for exactly this is the Silent anchor's.
 
-`--gate` therefore passes while the findings are a subset of
-`docs/role-tempo-debt.tsv`, and fails on a thirty-first finding OR on a pinned
-finding that has silently disappeared. A stale pin is as much a defect as a new
-gap: it means a cell moved and nobody said so.
+`--gate` passes while the findings are a subset of `docs/role-tempo-debt.tsv`,
+and fails on a new finding OR on a pinned finding that has silently
+disappeared. A stale pin is as much a defect as a new gap: it means a cell moved
+and nobody said so.
 
-NO FLOOR WAS ADJUSTED TO MAKE THIS PASS, and none may be. The debt list is
-worthless the day the null is resolved and should be deleted with it.
+NO FLOOR WAS EVER ADJUSTED TO MAKE THIS PASS, and none may be. The debt list is
+deleted the day the Klee and Kokomi reworks address the gaps in it.
 """
 from __future__ import annotations
 
@@ -83,18 +100,15 @@ def load_floors() -> dict:
     return yaml.safe_load(FLOORS.read_text(encoding="utf-8"))
 
 
-def load_review() -> list[dict]:
-    lines = REVIEW.read_text(encoding="utf-8").splitlines()
-    head = lines[0].split("\t")
-    return [dict(zip(head, line.split("\t"))) for line in lines[1:] if line]
-
-
 def coverage() -> dict:
     """{(character, archetype): {cell: percent}} plus the sub-pool sizes.
 
-    Recomputed from the sheets rather than read off the TSV's `solve_suggested`
-    column, because a cell is per-BAND and the TSV's suggested solve is the
-    union over bands. The TSV is the reviewable rendering; this is the number.
+    Recomputed through the classifier rather than read off the TSV's `solve`
+    column, because a cell is per-BAND and the TSV's solve is the union over
+    bands. The TSV is the readable rendering; this is the number. The sheets'
+    landed tags and this computation cannot drift -- the same classifier wrote
+    them, and `suggest_role_tempo_tags.py --check` fails if a hand edit moves
+    one.
     """
     out: dict[tuple[str, str], dict[str, float]] = {}
     sizes: dict[tuple[str, str], int] = {}
@@ -131,15 +145,16 @@ def main(argv=None) -> int:
         args.quiet = True
 
     floors = load_floors()
-    mandatory = floors["mandatory"]
+    default = floors["default"]["mandatory"]
+    anchored = floors.get("anchored") or {}
     data = coverage()
     cov, sizes = data["coverage"], data["sizes"]
 
     print("role x tempo coverage -- FLOORS ONLY, no card can fail.")
-    print("Tags are PROVISIONAL: [USER] gate A-G1 has not closed and nothing")
-    print("in docs/role-tempo-review.tsv has been written to a sheet.")
-    print(f"Floors: {len(mandatory)} mandatory cells, min-of-canon over five "
-          "pools.")
+    print("A COUNTING TOOL (R90/1a): does a card for this job exist at this")
+    print("point in the fight? Size and timing are Track B's (R90/1b).")
+    print(f"Floors: canon PACKAGES (R91/1c). {len(default)} default-mandatory "
+          f"cells; {len(anchored)} archetypes anchored to a named package.")
     print()
 
     findings, unmeasurable = [], []
@@ -150,11 +165,15 @@ def main(argv=None) -> int:
         if n < MIN_SUBPOOL:
             unmeasurable.append((character, archetype, n))
             continue
+        block = anchored.get(f"{character}/{archetype}")
+        mandatory = block["mandatory"] if block else default
+        source = (f"anchor {block['package']} (n={block['n']})" if block
+                  else "default (min over five canon packages)")
         under = [(cell, cells.get(cell, 0.0), floor)
                  for cell, floor in sorted(mandatory.items())
                  if cells.get(cell, 0.0) < floor]
         if not args.quiet:
-            print(f"  {character}/{archetype}  ({n} cards)")
+            print(f"  {character}/{archetype}  ({n} cards)  -- {source}")
             for cell, floor in sorted(mandatory.items()):
                 have = cells.get(cell, 0.0)
                 mark = "UNDER" if have < floor else "ok   "
