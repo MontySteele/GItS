@@ -1,0 +1,4 @@
+# Ephemeral harness scratch: the session cursor and the deck snapshot are
+# state for the CURRENT run, not evidence about one. The decision log
+# (phase0-<seed>.jsonl) is the instrument and IS committed.
+_*
