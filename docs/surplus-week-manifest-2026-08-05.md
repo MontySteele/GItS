@@ -117,3 +117,13 @@ Nothing in this section is scheduled. Each is a decision waiting on the table.
 **Parked deliberately by the train:** ledger-repair pre-drafts and any
 S2/S4-derived amendment; any S13/S14 finding resolution; the escrowed numbers.
 The artifacts merge; the derived work waits.
+
+---
+
+## Addendum (Last Call / House Lights, 2026-08-05 late)
+
+- **G12 eyes-on materials are ready:** `docs/g12-review-2026-08-05.md` — contact
+  sheets verified + all 24 in-game captures; the five-minute look the gate wanted.
+- **Optional sitting material (no review obligation):** `review/ancients-gallery/gallery.md`
+  and `review/boss-pool-gallery/gallery.md` — curated best-first, checkbox-per-entity.
+- The batch's own asks live in `docs/sitting-prep-2026-08-05.md` §10.
