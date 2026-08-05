@@ -156,10 +156,17 @@ def cut_by_intent(fights: Sequence[Fight], intent: str | None) -> list[Fight]:
     committed soak arm the same way.
 
     `None` keeps everything, which is what every reader before this flag got.
+    The literal word `none` is the OTHER cut and it is the one the baseline
+    document needs: keep only the runs nobody declared anything for. Without it
+    there is no way to regenerate an uncommitted curve once a committed arm has
+    written into the same directory, and "the baseline is whatever was in the
+    folder that day" is not a baseline.
     """
     if not intent:
         return list(fights)
     want = intent.strip().lower()
+    if want == "none":
+        return [f for f in fights if not f.intent]
     return [f for f in fights if f.intent == want]
 
 
@@ -455,7 +462,14 @@ def render(fights: Sequence[Fight], intent: str | None = None) -> str:
     a("")
     a(BANNER)
     a("")
-    if intent:
+    if intent and intent.strip().lower() == "none":
+        a("> **CUT TO UNDECLARED RUNS ONLY (`--intent none`).** Every table "
+          "below is restricted to fights whose run declared no archetype — the "
+          "baseline arm. Committed soak arms and declared human sessions are "
+          "excluded, because a curve that quietly absorbed a constrained arm "
+          "would be a baseline in name only.")
+        a("")
+    elif intent:
         a(f"> **CUT BY DECLARED INTENT: `{intent}`.** Every table below is "
           f"restricted to fights whose run declared this archetype — a human "
           f"session that wrote it in `intent.txt`, or a bot soak run under "
@@ -656,7 +670,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap.add_argument("--intent", default=None,
                     help="R99/4a: cut every curve to fights whose run "
                          "DECLARED this archetype (human feed: intent.txt; "
-                         "bot feed: soak --commit). Omit for everything.")
+                         "bot feed: soak --commit). `none` keeps only "
+                         "undeclared runs, which is the baseline document. "
+                         "Omit for everything.")
     ap.add_argument("--source", default=None,
                     help="keep one WRITER's records (soak / mod). Both write "
                          "the bot feed when a soak drives the game, so a "

@@ -100,6 +100,14 @@ def test_the_cut_keeps_only_what_was_declared():
     assert len(tb.cut_by_intent(fights, None)) == 3
 
 
+def test_the_baseline_cut_survives_a_committed_arm_writing_beside_it():
+    """`--intent none` is the only way to regenerate an uncommitted curve once
+    a committed soak has written into the same directory. Without it the
+    baseline document becomes "whatever was in the folder that day"."""
+    fights = [_fight(intent="fanfare"), _fight(), _fight()]
+    assert len(tb.cut_by_intent(fights, "none")) == 2
+
+
 def test_a_cut_document_says_it_is_cut_and_says_what_a_declaration_is():
     """A cut curve that reads like an uncut one is a number waiting to be
     quoted against the wrong denominator."""
