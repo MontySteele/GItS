@@ -1,0 +1,1636 @@
+fight_id	turn	field	sim_value	engine_value	action_context	suspected_reading_corruption
+soak-20260804-221045-run001#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run001#f1		record.cards_played[Soloist's Solicitation]	4	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run001#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run001#f2		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run001#f3	4	l1.damage	7	8	card=Chevreuse — Interdiction Fire target=Skulking Colony target_hp=40->32 n_enemies=1	0
+soak-20260804-221045-run001#f3	6	l1.damage	7	4	card=Chevreuse — Interdiction Fire target=Skulking Colony target_hp=7->3 n_enemies=1	0
+soak-20260804-221045-run001#f3	6	l1.damage	6	0	card=Soloist's Solicitation target=Skulking Colony target_hp=3->3 n_enemies=1	0
+soak-20260804-221045-run001#f3		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run001#f4		record.cards_played[Chevreuse — Interdiction Fire]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run001#f4		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run001#f5	4	l1.damage	6	7	card=House Call target=Terror Eel target_hp=120->113 n_enemies=1	0
+soak-20260804-221045-run001#f5	7	l1.damage	6	7	card=Soloist's Solicitation target=Terror Eel target_hp=98->91 n_enemies=1	0
+soak-20260804-221045-run001#f5		record.cards_played[Ethereal Spotlight]	0	8	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run001#f5		record.cards_played[Slip Backstage]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run002#f1	2	l1.damage	6	9	card=Freminet — Pers, Deploy! target=Fuzzy Wurm Crawler target_hp=45->36 n_enemies=1	0
+soak-20260804-221045-run002#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run002#f1		record.cards_played[Soloist's Solicitation]	5	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run002#f2		record.cards_played[Ethereal Spotlight]	0	8	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run002#f2		record.cards_played[Soloist's Solicitation]	6	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run002#f3	3	l1.damage	6	10	card=Freminet — Pers, Deploy! target=Shrinker Beetle target_hp=20->10 n_enemies=1	0
+soak-20260804-221045-run002#f3	3	l1.damage	6	4	card=Soloist's Solicitation target=Shrinker Beetle target_hp=10->6 n_enemies=1	0
+soak-20260804-221045-run002#f3		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run002#f4		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run002#f5		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run002#f5		record.cards_played[Soloist's Solicitation]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run002#f6		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run003#f1	3	l1.damage	7	-21	card=Chevreuse — Interdiction Fire target=Corpse Slug target_hp=6->27 n_enemies=2	1
+soak-20260804-221045-run003#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run003#f1		record.cards_played[Freminet — Pers, Deploy!]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run003#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-221045-run003#f2		record.cards_played[Freminet — Pers, Deploy!]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run001#f1		record.cards_played[Ball Lightning]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run001#f1		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run001#f2	2	l1.damage	6	4	card=Soloist's Solicitation target=Sludge Spinner target_hp=31->27 n_enemies=1	0
+soak-20260804-222105-run001#f2	4	l1.damage	6	4	card=Soloist's Solicitation target=Sludge Spinner target_hp=9->5 n_enemies=1	0
+soak-20260804-222105-run001#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run001#f3		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run001#f3		record.cards_played[Undercurrent]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run001#f4		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run001#f5		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run001#f6	6	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Living Fog target_hp=15->5 n_enemies=1	0
+soak-20260804-222105-run001#f6		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run001#f6		record.cards_played[Undercurrent]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run001#f7		record.cards_played[Breathless]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run001#f7		record.cards_played[Ethereal Spotlight]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run002#f1	1	l1.damage	6	9	card=Freminet — Pers, Deploy! target=Seapunk target_hp=44->35 n_enemies=1	0
+soak-20260804-222105-run002#f1	3	l1.damage	6	9	card=Kaeya — Frostgnaw target=Seapunk target_hp=23->14 n_enemies=1	0
+soak-20260804-222105-run002#f1	3	l1.damage	6	9	card=Freminet — Pers, Deploy! target=Seapunk target_hp=14->5 n_enemies=1	0
+soak-20260804-222105-run002#f1		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run002#f1		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run002#f2	4	l1.damage	6	-19	card=Freminet — Pers, Deploy! target=Toadpole target_hp=4->23 n_enemies=2	1
+soak-20260804-222105-run002#f2	5	l1.damage	6	9	card=Freminet — Pers, Deploy! target=Toadpole target_hp=17->8 n_enemies=2	0
+soak-20260804-222105-run002#f2		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run002#f2		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run002#f3		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run002#f3		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run002#f4		record.cards_played[Ethereal Spotlight]	0	10	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run002#f4		record.cards_played[Torrential Turn]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run003#f1	3	l1.damage	7	5	card=Chevreuse — Interdiction Fire target=Nibbit target_hp=25->20 n_enemies=1	0
+soak-20260804-222105-run003#f1		record.cards_played[Chevreuse — Interdiction Fire]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run003#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run003#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run003#f2		record.cards_played[Flood of Emotion]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run003#f3	1	l1.damage	14	15	card=Flood of Emotion target=Bygone Effigy target_hp=127->112 n_enemies=1	0
+soak-20260804-222105-run003#f3	1	l1.damage	6	7	card=Soloist's Solicitation target=Bygone Effigy target_hp=112->105 n_enemies=1	0
+soak-20260804-222105-run003#f3	2	l1.damage	7	11	card=Chevreuse — Interdiction Fire target=Bygone Effigy target_hp=105->94 n_enemies=1	0
+soak-20260804-222105-run003#f3	3	l1.damage	6	13	card=Crescendo target=Bygone Effigy target_hp=94->81 n_enemies=1	0
+soak-20260804-222105-run003#f3	4	l1.damage	14	30	card=Flood of Emotion target=Bygone Effigy target_hp=78->48 n_enemies=1	0
+soak-20260804-222105-run003#f3	4	l1.damage	7	12	card=Chevreuse — Interdiction Fire target=Bygone Effigy target_hp=48->36 n_enemies=1	0
+soak-20260804-222105-run003#f3		record.cards_played[Chevreuse — Interdiction Fire]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run003#f3		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run003#f4	2	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Fuzzy Wurm Crawler target_hp=39->29 n_enemies=1	0
+soak-20260804-222105-run003#f4	2	l1.damage	6	9	card=Crescendo target=Fuzzy Wurm Crawler target_hp=29->20 n_enemies=1	0
+soak-20260804-222105-run003#f4		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run003#f4		record.cards_played[Soloist's Solicitation]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run003#f5		record.cards_played[Crescendo]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run003#f5		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run003#f6		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run003#f6		record.cards_played[Fischl — Nightrider]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-222105-run003#f7	4	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Phrog Parasite target_hp=17->7 n_enemies=1	0
+soak-20260804-222105-run003#f7		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run001#f1	3	l1.damage	7	2	card=Chevreuse — Interdiction Fire target=Nibbit target_hp=29->27 n_enemies=1	0
+soak-20260804-224517-run001#f1	1	l2.enemy_pool_drop	10	7	cards=4/4 hand_unresolved=0 n_enemies=1 pool=42->35	0
+soak-20260804-224517-run001#f1	1	l2.fanfare_after_turn	0	3	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f1	1	l2.fanfare_next_open_post_decay	0	3	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f1	2	l2.enemy_pool_drop	6	1	cards=5/5 hand_unresolved=0 n_enemies=1 pool=35->34	0
+soak-20260804-224517-run001#f1	2	l2.fanfare_after_turn	3	9	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f1	2	l2.fanfare_next_open_post_decay	2	9	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f1	2	l2.encore_after_turn	5	0	cards=5/5 hand_unresolved=0 n_enemies=1	1
+soak-20260804-224517-run001#f1	3	l2.block_at_turn_end	6	7	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f1	3	l2.enemy_pool_drop	16	13	cards=4/4 hand_unresolved=0 n_enemies=1 pool=34->21	0
+soak-20260804-224517-run001#f1	3	l2.fanfare_after_turn	9	12	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f1	3	l2.fanfare_next_open_post_decay	7	12	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f1	3	l2.encore_after_turn	5	0	cards=4/4 hand_unresolved=0 n_enemies=1	1
+soak-20260804-224517-run001#f1	4	l2.enemy_pool_drop	6	7	cards=4/4 hand_unresolved=0 n_enemies=1 pool=21->14	0
+soak-20260804-224517-run001#f1	4	l2.fanfare_after_turn	12	16	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f1	4	l2.fanfare_next_open_post_decay	10	16	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f1	5	l2.enemy_pool_drop	14	8	cards=4/4 hand_unresolved=0 n_enemies=1 pool=14->6	0
+soak-20260804-224517-run001#f1	5	l2.fanfare_after_turn	16	20	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f1	5	l2.fanfare_next_open_post_decay	13	20	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f1		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run001#f1		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run001#f2	3	l1.damage	6	4	card=Soloist's Solicitation target=Shrinker Beetle target_hp=9->5 n_enemies=1	0
+soak-20260804-224517-run001#f2	1	l2.enemy_pool_drop	22	19	cards=4/4 hand_unresolved=0 n_enemies=1 pool=38->19	0
+soak-20260804-224517-run001#f2	1	l2.fanfare_after_turn	0	3	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f2	1	l2.fanfare_next_open_post_decay	0	3	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f2	2	l2.block_at_turn_end	3	5	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f2	2	l2.enemy_pool_drop	0	10	cards=4/4 hand_unresolved=0 n_enemies=1 pool=19->9	0
+soak-20260804-224517-run001#f2	2	l2.fanfare_after_turn	3	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f2	2	l2.fanfare_next_open_post_decay	2	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f2	2	l2.encore_after_turn	5	0	cards=4/4 hand_unresolved=0 n_enemies=1	1
+soak-20260804-224517-run001#f2	3	l2.block_at_turn_end	6	4	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f2		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run001#f3	1	l2.enemy_pool_drop	22	19	cards=4/4 hand_unresolved=0 n_enemies=1 pool=56->37	0
+soak-20260804-224517-run001#f3	1	l2.fanfare_after_turn	0	6	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f3	1	l2.fanfare_next_open_post_decay	0	6	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f3	2	l2.enemy_pool_drop	0	10	cards=5/5 hand_unresolved=0 n_enemies=1 pool=37->27	0
+soak-20260804-224517-run001#f3	2	l2.fanfare_after_turn	14	15	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f3	2	l2.fanfare_next_open_post_decay	11	15	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f3	2	l2.encore_after_turn	5	0	cards=5/5 hand_unresolved=0 n_enemies=1	1
+soak-20260804-224517-run001#f3	3	l2.enemy_pool_drop	16	22	cards=4/4 hand_unresolved=0 n_enemies=1 pool=27->5	0
+soak-20260804-224517-run001#f3	3	l2.fanfare_after_turn	20	21	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f3	3	l2.fanfare_next_open_post_decay	16	21	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f3		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run001#f3		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run001#f4	2	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Twig Slime (M) target_hp=23->13 n_enemies=2	0
+soak-20260804-224517-run001#f4	1	l2.enemy_pool_drop	0	5	cards=5/5 hand_unresolved=0 n_enemies=2 pool=77->72	0
+soak-20260804-224517-run001#f4	1	l2.fanfare_after_turn	13	10	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run001#f4	1	l2.fanfare_next_open_post_decay	13	10	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run001#f4	2	l2.block_at_turn_end	2	3	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run001#f4	2	l2.enemy_pool_drop	16	21	cards=4/4 hand_unresolved=0 n_enemies=2 pool=72->51	0
+soak-20260804-224517-run001#f4	2	l2.fanfare_after_turn	10	19	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run001#f4	2	l2.fanfare_next_open_post_decay	8	19	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run001#f4	2	l2.encore_after_turn	5	0	cards=4/4 hand_unresolved=0 n_enemies=2	1
+soak-20260804-224517-run001#f4	3	l2.block_at_turn_end	6	4	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run001#f4	3	l2.enemy_pool_drop	6	14	cards=4/4 hand_unresolved=0 n_enemies=2 pool=51->37	0
+soak-20260804-224517-run001#f4	3	l2.fanfare_after_turn	25	24	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run001#f4	3	l2.fanfare_next_open_post_decay	20	24	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run001#f4	4	l2.block_at_turn_end	10	8	cards=4/4 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run001#f4	4	l2.enemy_pool_drop	6	18	cards=4/4 hand_unresolved=1 n_enemies=2 pool=37->19	0
+soak-20260804-224517-run001#f4	4	l2.fanfare_next_open_post_decay	19	24	cards=4/4 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run001#f4	5	l2.block_at_turn_end	18	13	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run001#f4		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run001#f5	1	l1.damage	10	15	card=Chevreuse — Ring of Bursting Grenades target=Fogmog target_hp=74->59 n_enemies=1	0
+soak-20260804-224517-run001#f5	1	l2.enemy_pool_drop	25	19	cards=3/3 hand_unresolved=0 n_enemies=1 pool=74->55	0
+soak-20260804-224517-run001#f5	2	l2.enemy_pool_drop	12	6	cards=4/4 hand_unresolved=0 n_enemies=1 pool=55->49	0
+soak-20260804-224517-run001#f5	2	l2.fanfare_after_turn	11	9	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f5	3	l2.enemy_pool_drop	10	0	cards=5/5 hand_unresolved=0 n_enemies=1 pool=49->49	0
+soak-20260804-224517-run001#f5	3	l2.fanfare_after_turn	9	14	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f5	3	l2.fanfare_next_open_post_decay	7	14	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f5	4	l2.block_at_turn_end	19	17	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f5	4	l2.fanfare_after_turn	19	20	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f5	4	l2.fanfare_next_open_post_decay	15	20	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f5	5	l2.enemy_pool_drop	21	16	cards=3/3 hand_unresolved=0 n_enemies=1 pool=49->33	0
+soak-20260804-224517-run001#f5	5	l2.fanfare_after_turn	20	24	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f5	5	l2.fanfare_next_open_post_decay	16	24	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run001#f5	6	l2.block_at_turn_end	16	14	cards=4/4 hand_unresolved=2 n_enemies=1	0
+soak-20260804-224517-run001#f5		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run003#f1	1	l2.block_at_turn_end	7	6	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run003#f1	1	l2.fanfare_after_turn	0	5	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run003#f1	1	l2.fanfare_next_open_post_decay	0	5	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run003#f1	1	l2.encore_after_turn	5	0	cards=5/5 hand_unresolved=0 n_enemies=3	1
+soak-20260804-224517-run003#f1	2	l2.enemy_pool_drop	9	5	cards=4/4 hand_unresolved=0 n_enemies=3 pool=44->39	0
+soak-20260804-224517-run003#f1	2	l2.fanfare_after_turn	5	10	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run003#f1	2	l2.fanfare_next_open_post_decay	4	10	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run003#f1	3	l2.enemy_pool_drop	6	9	cards=4/4 hand_unresolved=2 n_enemies=3 pool=39->30	0
+soak-20260804-224517-run003#f1	3	l2.fanfare_after_turn	16	15	cards=4/4 hand_unresolved=2 n_enemies=3	0
+soak-20260804-224517-run003#f1	3	l2.fanfare_next_open_post_decay	13	15	cards=4/4 hand_unresolved=2 n_enemies=3	0
+soak-20260804-224517-run003#f1	4	l2.enemy_pool_drop	11	15	cards=4/4 hand_unresolved=1 n_enemies=3 pool=30->15	0
+soak-20260804-224517-run003#f1	4	l2.fanfare_after_turn	15	16	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260804-224517-run003#f1	4	l2.fanfare_next_open_post_decay	12	16	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260804-224517-run003#f1	5	l2.block_at_turn_end	4	6	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run003#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run003#f2	4	l1.damage	6	4	card=Freminet — Pers, Deploy! target=Shrinker Beetle target_hp=9->5 n_enemies=1	0
+soak-20260804-224517-run003#f2	1	l2.block_at_turn_end	7	5	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run003#f2	1	l2.enemy_pool_drop	15	12	cards=4/4 hand_unresolved=1 n_enemies=1 pool=40->28	0
+soak-20260804-224517-run003#f2	1	l2.fanfare_after_turn	0	1	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run003#f2	1	l2.fanfare_next_open_post_decay	0	1	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run003#f2	2	l2.enemy_pool_drop	6	13	cards=4/4 hand_unresolved=0 n_enemies=1 pool=28->15	0
+soak-20260804-224517-run003#f2	2	l2.fanfare_after_turn	7	13	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run003#f2	2	l2.fanfare_next_open_post_decay	6	13	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run003#f2	2	l2.encore_after_turn	3	0	cards=4/4 hand_unresolved=0 n_enemies=1	1
+soak-20260804-224517-run003#f2	3	l2.enemy_pool_drop	0	6	cards=3/3 hand_unresolved=0 n_enemies=1 pool=15->9	0
+soak-20260804-224517-run003#f2	3	l2.fanfare_after_turn	17	21	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run003#f2	3	l2.fanfare_next_open_post_decay	14	21	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run003#f2	3	l2.encore_after_turn	3	0	cards=3/3 hand_unresolved=0 n_enemies=1	1
+soak-20260804-224517-run003#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run003#f2		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run003#f3	1	l2.block_at_turn_end	7	5	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run003#f3	1	l2.enemy_pool_drop	0	2	cards=3/3 hand_unresolved=0 n_enemies=1 pool=56->54	0
+soak-20260804-224517-run003#f3	1	l2.fanfare_after_turn	0	2	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run003#f3	1	l2.fanfare_next_open_post_decay	0	2	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run003#f3	1	l2.encore_after_turn	3	0	cards=3/3 hand_unresolved=0 n_enemies=1	1
+soak-20260804-224517-run003#f3	2	l2.enemy_pool_drop	17	21	cards=4/4 hand_unresolved=1 n_enemies=1 pool=54->33	0
+soak-20260804-224517-run003#f3	2	l2.fanfare_after_turn	8	9	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run003#f3	2	l2.fanfare_next_open_post_decay	6	9	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run003#f3	3	l2.block_at_turn_end	2	3	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run003#f3	3	l2.enemy_pool_drop	15	21	cards=5/5 hand_unresolved=0 n_enemies=1 pool=33->12	0
+soak-20260804-224517-run003#f3	3	l2.fanfare_after_turn	9	20	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run003#f3	3	l2.fanfare_next_open_post_decay	7	20	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run003#f3	3	l2.encore_after_turn	5	0	cards=5/5 hand_unresolved=0 n_enemies=1	1
+soak-20260804-224517-run003#f3	4	l2.enemy_pool_drop	5	11	cards=3/3 hand_unresolved=1 n_enemies=1 pool=12->1	0
+soak-20260804-224517-run003#f3	4	l2.fanfare_next_open_post_decay	19	24	cards=3/3 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run003#f3	4	l2.encore_after_turn	3	0	cards=3/3 hand_unresolved=1 n_enemies=1	1
+soak-20260804-224517-run003#f3		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run003#f3		record.cards_played[Freminet — Pers, Deploy!]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run003#f4	2	l1.damage	7	2	card=Chevreuse — Interdiction Fire target=Nibbit target_hp=37->35 n_enemies=2	0
+soak-20260804-224517-run003#f4	4	l1.damage	7	12	card=Chevreuse — Interdiction Fire target=Nibbit target_hp=29->17 n_enemies=2	0
+soak-20260804-224517-run003#f4	7	l1.damage	6	5	card=Freminet — Pers, Deploy! target=Nibbit target_hp=36->31 n_enemies=2	0
+soak-20260804-224517-run003#f4	8	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Nibbit target_hp=27->17 n_enemies=2	0
+soak-20260804-224517-run003#f4	8	l1.damage	6	8	card=Soloist's Solicitation target=Nibbit target_hp=17->9 n_enemies=2	0
+soak-20260804-224517-run003#f4	1	l2.enemy_pool_drop	5	0	cards=6/6 hand_unresolved=0 n_enemies=2 pool=87->87	0
+soak-20260804-224517-run003#f4	1	l2.fanfare_after_turn	8	6	cards=6/6 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f4	1	l2.fanfare_next_open_post_decay	8	6	cards=6/6 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f4	2	l2.enemy_pool_drop	10	9	cards=3/3 hand_unresolved=0 n_enemies=2 pool=87->78	0
+soak-20260804-224517-run003#f4	2	l2.fanfare_after_turn	6	18	cards=3/3 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f4	2	l2.fanfare_next_open_post_decay	5	18	cards=3/3 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f4	2	l2.encore_after_turn	3	0	cards=3/3 hand_unresolved=0 n_enemies=2	1
+soak-20260804-224517-run003#f4	3	l2.block_at_turn_end	16	14	cards=4/4 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run003#f4	3	l2.enemy_pool_drop	9	4	cards=4/4 hand_unresolved=1 n_enemies=2 pool=78->74	0
+soak-20260804-224517-run003#f4	3	l2.fanfare_after_turn	18	24	cards=4/4 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run003#f4	3	l2.fanfare_next_open_post_decay	14	24	cards=4/4 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run003#f4	4	l2.block_at_turn_end	15	14	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f4	4	l2.enemy_pool_drop	15	18	cards=5/5 hand_unresolved=0 n_enemies=2 pool=74->56	0
+soak-20260804-224517-run003#f4	4	l2.fanfare_after_turn	24	26	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f4	4	l2.fanfare_next_open_post_decay	19	26	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f4	4	l2.encore_after_turn	5	0	cards=5/5 hand_unresolved=0 n_enemies=2	1
+soak-20260804-224517-run003#f4	5	l2.enemy_pool_drop	5	8	cards=4/4 hand_unresolved=0 n_enemies=2 pool=56->48	0
+soak-20260804-224517-run003#f4	5	l2.fanfare_after_turn	30	25	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f4	5	l2.fanfare_next_open_post_decay	24	25	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f4	6	l2.block_at_turn_end	11	12	cards=4/4 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run003#f4	6	l2.enemy_pool_drop	16	11	cards=4/4 hand_unresolved=1 n_enemies=2 pool=48->37	0
+soak-20260804-224517-run003#f4	6	l2.fanfare_after_turn	25	26	cards=4/4 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run003#f4	6	l2.fanfare_next_open_post_decay	20	26	cards=4/4 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run003#f4	6	l2.encore_after_turn	5	0	cards=4/4 hand_unresolved=1 n_enemies=2	1
+soak-20260804-224517-run003#f4	7	l2.block_at_turn_end	12	10	cards=3/3 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run003#f4	7	l2.enemy_pool_drop	9	10	cards=3/3 hand_unresolved=1 n_enemies=2 pool=37->27	0
+soak-20260804-224517-run003#f4	7	l2.fanfare_after_turn	26	24	cards=3/3 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run003#f4	7	l2.fanfare_next_open_post_decay	21	24	cards=3/3 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run003#f4	8	l2.enemy_pool_drop	21	26	cards=4/4 hand_unresolved=0 n_enemies=2 pool=27->1	0
+soak-20260804-224517-run003#f4	8	l2.fanfare_next_open_post_decay	19	24	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f4		record.cards_played[Ethereal Spotlight]	0	9	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run003#f4		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run003#f5	1	l1.damage	6	10	card=Freminet — Pers, Deploy! target=Shrinker Beetle target_hp=31->21 n_enemies=2	0
+soak-20260804-224517-run003#f5	3	l1.damage	4	2	card=Lynette — Magic Trick: Astonishing Shift target=Shrinker Beetle target_hp=12->10 n_enemies=2	0
+soak-20260804-224517-run003#f5	6	l1.damage	5	11	card=Usher the Waves target=Fuzzy Wurm Crawler target_hp=33->22 n_enemies=2	0
+soak-20260804-224517-run003#f5	1	l2.enemy_pool_drop	31	23	cards=4/4 hand_unresolved=1 n_enemies=2 pool=95->72	0
+soak-20260804-224517-run003#f5	1	l2.fanfare_after_turn	0	5	cards=4/4 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run003#f5	1	l2.fanfare_next_open_post_decay	0	5	cards=4/4 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run003#f5	2	l2.enemy_pool_drop	0	3	cards=3/3 hand_unresolved=0 n_enemies=2 pool=72->69	0
+soak-20260804-224517-run003#f5	2	l2.fanfare_after_turn	9	11	cards=3/3 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f5	2	l2.fanfare_next_open_post_decay	7	11	cards=3/3 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f5	2	l2.encore_after_turn	3	0	cards=3/3 hand_unresolved=0 n_enemies=2	1
+soak-20260804-224517-run003#f5	3	l2.block_at_turn_end	13	11	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f5	3	l2.enemy_pool_drop	12	7	cards=5/5 hand_unresolved=0 n_enemies=2 pool=69->62	0
+soak-20260804-224517-run003#f5	3	l2.fanfare_after_turn	11	24	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f5	3	l2.fanfare_next_open_post_decay	9	24	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f5	4	l2.enemy_pool_drop	22	14	cards=4/4 hand_unresolved=1 n_enemies=2 pool=62->48	0
+soak-20260804-224517-run003#f5	4	l2.fanfare_next_open_post_decay	19	24	cards=4/4 hand_unresolved=1 n_enemies=2	0
+soak-20260804-224517-run003#f5	5	l2.block_at_turn_end	10	8	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f5	5	l2.enemy_pool_drop	6	9	cards=4/4 hand_unresolved=0 n_enemies=2 pool=48->39	0
+soak-20260804-224517-run003#f5	5	l2.fanfare_next_open_post_decay	19	24	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run003#f5		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run004#f1	1	l2.enemy_pool_drop	20	14	cards=4/4 hand_unresolved=1 n_enemies=3 pool=56->42	0
+soak-20260804-224517-run004#f1	1	l2.fanfare_after_turn	0	6	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260804-224517-run004#f1	1	l2.fanfare_next_open_post_decay	0	6	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260804-224517-run004#f1	2	l2.block_at_turn_end	10	8	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run004#f1	2	l2.fanfare_after_turn	6	10	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run004#f1	2	l2.fanfare_next_open_post_decay	5	10	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run004#f1	3	l2.enemy_pool_drop	8	20	cards=4/4 hand_unresolved=1 n_enemies=3 pool=42->22	0
+soak-20260804-224517-run004#f1	3	l2.fanfare_after_turn	10	14	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260804-224517-run004#f1	3	l2.fanfare_next_open_post_decay	8	14	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260804-224517-run004#f1	4	l2.block_at_turn_end	9	11	cards=5/5 hand_unresolved=1 n_enemies=3	0
+soak-20260804-224517-run004#f1	4	l2.enemy_pool_drop	8	17	cards=5/5 hand_unresolved=1 n_enemies=3 pool=22->5	0
+soak-20260804-224517-run004#f1	4	l2.fanfare_after_turn	14	17	cards=5/5 hand_unresolved=1 n_enemies=3	0
+soak-20260804-224517-run004#f1	4	l2.fanfare_next_open_post_decay	11	17	cards=5/5 hand_unresolved=1 n_enemies=3	0
+soak-20260804-224517-run004#f1	4	l2.encore_after_turn	5	0	cards=5/5 hand_unresolved=1 n_enemies=3	1
+soak-20260804-224517-run004#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run004#f2	3	l1.damage	7	5	card=Chevreuse — Interdiction Fire target=Nibbit target_hp=24->19 n_enemies=1	0
+soak-20260804-224517-run004#f2	5	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Nibbit target_hp=12->2 n_enemies=1	0
+soak-20260804-224517-run004#f2	1	l2.fanfare_after_turn	6	14	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f2	1	l2.fanfare_next_open_post_decay	6	14	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f2	1	l2.encore_after_turn	5	0	cards=4/4 hand_unresolved=1 n_enemies=1	1
+soak-20260804-224517-run004#f2	2	l2.block_at_turn_end	7	5	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f2	2	l2.enemy_pool_drop	10	5	cards=4/4 hand_unresolved=0 n_enemies=1 pool=31->26	0
+soak-20260804-224517-run004#f2	2	l2.fanfare_after_turn	14	15	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f2	2	l2.fanfare_next_open_post_decay	11	15	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f2	3	l2.block_at_turn_end	7	5	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f2	3	l2.fanfare_after_turn	15	17	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f2	3	l2.fanfare_next_open_post_decay	12	17	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f2	4	l2.block_at_turn_end	20	21	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f2	4	l2.enemy_pool_drop	0	4	cards=4/4 hand_unresolved=1 n_enemies=1 pool=16->12	0
+soak-20260804-224517-run004#f2	4	l2.fanfare_after_turn	23	22	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f2	4	l2.fanfare_next_open_post_decay	18	22	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f2	4	l2.encore_after_turn	5	0	cards=4/4 hand_unresolved=1 n_enemies=1	1
+soak-20260804-224517-run004#f2		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run004#f2		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run004#f3	1	l2.enemy_pool_drop	20	14	cards=4/4 hand_unresolved=0 n_enemies=1 pool=56->42	0
+soak-20260804-224517-run004#f3	1	l2.fanfare_after_turn	0	1	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f3	1	l2.fanfare_next_open_post_decay	0	1	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f3	2	l2.enemy_pool_drop	6	9	cards=4/4 hand_unresolved=1 n_enemies=1 pool=42->33	0
+soak-20260804-224517-run004#f3	2	l2.fanfare_after_turn	7	8	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f3	2	l2.fanfare_next_open_post_decay	6	8	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f3	2	l2.encore_after_turn	5	0	cards=4/4 hand_unresolved=1 n_enemies=1	1
+soak-20260804-224517-run004#f3	3	l2.block_at_turn_end	7	5	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f3	3	l2.fanfare_after_turn	8	16	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f3	3	l2.fanfare_next_open_post_decay	6	16	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f3	4	l2.fanfare_after_turn	16	18	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f3	4	l2.fanfare_next_open_post_decay	13	18	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f3		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run004#f3		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run004#f4	1	l2.block_at_turn_end	7	5	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f4	1	l2.enemy_pool_drop	16	13	cards=4/4 hand_unresolved=1 n_enemies=1 pool=83->70	0
+soak-20260804-224517-run004#f4	1	l2.fanfare_after_turn	0	11	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f4	1	l2.fanfare_next_open_post_decay	0	11	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f4	2	l2.enemy_pool_drop	9	10	cards=4/4 hand_unresolved=0 n_enemies=1 pool=70->60	0
+soak-20260804-224517-run004#f4	2	l2.fanfare_after_turn	11	14	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f4	2	l2.fanfare_next_open_post_decay	9	14	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f4	3	l2.enemy_pool_drop	16	13	cards=5/5 hand_unresolved=0 n_enemies=1 pool=60->47	0
+soak-20260804-224517-run004#f4	3	l2.fanfare_after_turn	14	24	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f4	3	l2.fanfare_next_open_post_decay	11	24	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f4	4	l2.block_at_turn_end	7	9	cards=4/5 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f4	4	l2.enemy_pool_drop	16	13	cards=4/5 hand_unresolved=1 n_enemies=1 pool=47->34	0
+soak-20260804-224517-run004#f4	4	l2.fanfare_next_open_post_decay	19	24	cards=4/5 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f4	5	l2.enemy_pool_drop	9	10	cards=4/4 hand_unresolved=0 n_enemies=1 pool=34->24	0
+soak-20260804-224517-run004#f4	5	l2.fanfare_next_open_post_decay	19	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run004#f4	6	l2.block_at_turn_end	13	12	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f4	6	l2.fanfare_next_open_post_decay	19	24	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-224517-run004#f4	6	l2.encore_after_turn	5	0	cards=4/4 hand_unresolved=1 n_enemies=1	1
+soak-20260804-224517-run004#f4		record.cards_played[Ethereal Spotlight]	0	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run004#f4		record.cards_played[Soloist's Solicitation]	4	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run004#f5	1	l2.enemy_pool_drop	20	10	cards=4/4 hand_unresolved=1 n_enemies=4 pool=83->73	0
+soak-20260804-224517-run004#f5	1	l2.fanfare_after_turn	0	1	cards=4/4 hand_unresolved=1 n_enemies=4	0
+soak-20260804-224517-run004#f5	1	l2.fanfare_next_open_post_decay	0	1	cards=4/4 hand_unresolved=1 n_enemies=4	0
+soak-20260804-224517-run004#f5	1	l2.encore_after_turn	5	0	cards=4/4 hand_unresolved=1 n_enemies=4	1
+soak-20260804-224517-run004#f5	2	l2.block_at_turn_end	7	5	cards=3/3 hand_unresolved=0 n_enemies=4	0
+soak-20260804-224517-run004#f5	2	l2.enemy_pool_drop	24	18	cards=3/3 hand_unresolved=0 n_enemies=4 pool=73->55	0
+soak-20260804-224517-run004#f5	2	l2.fanfare_after_turn	1	18	cards=3/3 hand_unresolved=0 n_enemies=4	0
+soak-20260804-224517-run004#f5	2	l2.fanfare_next_open_post_decay	0	18	cards=3/3 hand_unresolved=0 n_enemies=4	0
+soak-20260804-224517-run004#f5	3	l2.enemy_pool_drop	23	19	cards=4/4 hand_unresolved=1 n_enemies=4 pool=55->36	0
+soak-20260804-224517-run004#f5	3	l2.fanfare_next_open_post_decay	14	18	cards=4/4 hand_unresolved=1 n_enemies=4	0
+soak-20260804-224517-run004#f5	4	l2.block_at_turn_end	15	17	cards=4/4 hand_unresolved=1 n_enemies=4	0
+soak-20260804-224517-run004#f5	4	l2.fanfare_after_turn	18	19	cards=4/4 hand_unresolved=1 n_enemies=4	0
+soak-20260804-224517-run004#f5	4	l2.fanfare_next_open_post_decay	14	19	cards=4/4 hand_unresolved=1 n_enemies=4	0
+soak-20260804-224517-run004#f5	5	l2.block_at_turn_end	4	6	cards=3/3 hand_unresolved=1 n_enemies=4	0
+soak-20260804-224517-run004#f5	5	l2.enemy_pool_drop	24	6	cards=3/3 hand_unresolved=1 n_enemies=4 pool=20->14	0
+soak-20260804-224517-run004#f5	5	l2.fanfare_after_turn	19	20	cards=3/3 hand_unresolved=1 n_enemies=4	0
+soak-20260804-224517-run004#f5	5	l2.fanfare_next_open_post_decay	15	20	cards=3/3 hand_unresolved=1 n_enemies=4	0
+soak-20260804-224517-run004#f5	5	l2.encore_after_turn	5	0	cards=3/3 hand_unresolved=1 n_enemies=4	1
+soak-20260804-224517-run004#f5	6	l2.block_at_turn_end	0	4	cards=3/4 hand_unresolved=5 n_enemies=4	0
+soak-20260804-224517-run004#f5	6	l2.enemy_pool_drop	10	13	cards=3/4 hand_unresolved=5 n_enemies=4 pool=14->1	0
+soak-20260804-224517-run004#f5	6	l2.fanfare_next_open_post_decay	18	22	cards=3/4 hand_unresolved=5 n_enemies=4	0
+soak-20260804-224517-run004#f5		record.cards_played[Ethereal Spotlight]	0	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run004#f5		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run005#f1	1	l1.damage	6	9	card=Freminet — Pers, Deploy! target=Seapunk target_hp=46->37 n_enemies=1	0
+soak-20260804-224517-run005#f1	4	l1.damage	6	0	card=Freminet — Pers, Deploy! target=Seapunk target_hp=13->13 n_enemies=1	0
+soak-20260804-224517-run005#f1	1	l2.fanfare_after_turn	0	3	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f1	1	l2.fanfare_next_open_post_decay	0	3	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f1	2	l2.fanfare_after_turn	9	7	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f1	3	l2.block_at_turn_end	7	5	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f1	3	l2.enemy_pool_drop	12	5	cards=4/4 hand_unresolved=0 n_enemies=1 pool=25->20	0
+soak-20260804-224517-run005#f1	3	l2.fanfare_after_turn	7	10	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f1	3	l2.fanfare_next_open_post_decay	6	10	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f1	4	l2.enemy_pool_drop	9	7	cards=4/4 hand_unresolved=0 n_enemies=1 pool=20->13	0
+soak-20260804-224517-run005#f1	4	l2.fanfare_after_turn	10	13	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f1	4	l2.fanfare_next_open_post_decay	8	13	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f1	5	l2.block_at_turn_end	15	17	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f1	5	l2.fanfare_after_turn	13	17	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f1	5	l2.fanfare_next_open_post_decay	10	17	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f1	5	l2.encore_after_turn	5	0	cards=4/4 hand_unresolved=0 n_enemies=1	1
+soak-20260804-224517-run005#f1		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run005#f1		record.cards_played[Soloist's Solicitation]	5	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run005#f2	3	l1.damage	6	9	card=Freminet — Pers, Deploy! target=Corpse Slug target_hp=16->7 n_enemies=2	0
+soak-20260804-224517-run005#f2	1	l2.enemy_pool_drop	18	15	cards=4/4 hand_unresolved=0 n_enemies=2 pool=51->36	0
+soak-20260804-224517-run005#f2	1	l2.fanfare_after_turn	0	3	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run005#f2	1	l2.fanfare_next_open_post_decay	0	3	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run005#f2	2	l2.fanfare_next_open_post_decay	9	11	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run005#f2	2	l2.encore_after_turn	5	0	cards=5/5 hand_unresolved=0 n_enemies=2	1
+soak-20260804-224517-run005#f2	3	l2.block_at_turn_end	14	11	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run005#f2	3	l2.fanfare_next_open_post_decay	9	11	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-224517-run005#f2		record.cards_played[Crashing Waves+]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run005#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run005#f3	2	l2.block_at_turn_end	8	7	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f3	2	l2.enemy_pool_drop	0	3	cards=4/4 hand_unresolved=0 n_enemies=1 pool=21->18	0
+soak-20260804-224517-run005#f3	2	l2.fanfare_after_turn	6	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f3	2	l2.fanfare_next_open_post_decay	5	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f3	2	l2.encore_after_turn	5	0	cards=4/4 hand_unresolved=0 n_enemies=1	1
+soak-20260804-224517-run005#f3	3	l2.block_at_turn_end	9	8	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f3	3	l2.enemy_pool_drop	9	8	cards=5/5 hand_unresolved=0 n_enemies=1 pool=18->10	0
+soak-20260804-224517-run005#f3	3	l2.fanfare_after_turn	11	15	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f3	3	l2.fanfare_next_open_post_decay	9	15	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f3	3	l2.encore_after_turn	5	0	cards=5/5 hand_unresolved=0 n_enemies=1	1
+soak-20260804-224517-run005#f3		record.cards_played[Crashing Waves+]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run005#f3		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run005#f4	1	l2.enemy_pool_drop	19	16	cards=4/4 hand_unresolved=0 n_enemies=1 pool=53->37	0
+soak-20260804-224517-run005#f4	1	l2.fanfare_after_turn	0	8	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f4	1	l2.fanfare_next_open_post_decay	0	8	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f4	2	l2.block_at_turn_end	13	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f4	2	l2.fanfare_after_turn	8	12	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f4	2	l2.fanfare_next_open_post_decay	6	12	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f4	3	l2.block_at_turn_end	21	17	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f4	3	l2.fanfare_after_turn	12	17	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f4	3	l2.fanfare_next_open_post_decay	10	17	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f4	3	l2.encore_after_turn	2	0	cards=6/6 hand_unresolved=0 n_enemies=1	1
+soak-20260804-224517-run005#f4	4	l2.enemy_pool_drop	24	21	cards=4/4 hand_unresolved=0 n_enemies=1 pool=28->7	0
+soak-20260804-224517-run005#f4	4	l2.fanfare_after_turn	17	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f4	4	l2.fanfare_next_open_post_decay	14	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-224517-run005#f4		record.cards_played[Crashing Waves+]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run005#f4		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run005#f5	2	l1.damage	6	-10	card=Soloist's Solicitation target=Corpse Slug target_hp=6->16 n_enemies=3	1
+soak-20260804-224517-run005#f5	1	l2.block_at_turn_end	7	5	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run005#f5	1	l2.fanfare_after_turn	0	12	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run005#f5	1	l2.fanfare_next_open_post_decay	0	12	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run005#f5	2	l2.enemy_pool_drop	15	17	cards=4/4 hand_unresolved=0 n_enemies=3 pool=39->22	0
+soak-20260804-224517-run005#f5	2	l2.fanfare_after_turn	12	14	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run005#f5	2	l2.fanfare_next_open_post_decay	10	14	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run005#f5	3	l2.block_at_turn_end	21	14	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run005#f5	3	l2.enemy_pool_drop	0	5	cards=4/4 hand_unresolved=0 n_enemies=3 pool=22->17	0
+soak-20260804-224517-run005#f5	3	l2.fanfare_after_turn	20	18	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run005#f5	3	l2.fanfare_next_open_post_decay	16	18	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-224517-run005#f5		record.cards_played[Crashing Waves+]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run005#f5		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run001#f1	3	l1.damage	6	1	card=Freminet — Pers, Deploy! target=Nibbit target_hp=25->24 n_enemies=1	0
+soak-20260804-225937-run001#f1	1	l2.block_at_turn_end	0	1	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run001#f1	1	l2.fanfare_after_turn	0	15	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run001#f1	1	l2.fanfare_next_open_post_decay	0	15	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run001#f1	2	l2.enemy_pool_drop	9	1	cards=4/4 hand_unresolved=0 n_enemies=1 pool=31->30	0
+soak-20260804-225937-run001#f1	2	l2.fanfare_after_turn	15	18	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run001#f1	2	l2.fanfare_next_open_post_decay	12	18	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run001#f1	3	l2.enemy_pool_drop	21	18	cards=4/4 hand_unresolved=0 n_enemies=1 pool=30->12	0
+soak-20260804-225937-run001#f1	3	l2.fanfare_after_turn	18	20	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run001#f1	3	l2.fanfare_next_open_post_decay	14	20	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run001#f1	4	l2.block_at_turn_end	17	15	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run001#f1	4	l2.fanfare_after_turn	20	19	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run001#f1	4	l2.fanfare_next_open_post_decay	16	19	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run001#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run001#f1		record.cards_played[Soloist's Solicitation]	4	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run001#f2		record.cards_played[Ethereal Spotlight]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run002#f1	1	l2.block_at_turn_end	0	1	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260804-225937-run002#f1	1	l2.enemy_pool_drop	13	7	cards=5/5 hand_unresolved=0 n_enemies=3 pool=53->46	0
+soak-20260804-225937-run002#f1	1	l2.fanfare_after_turn	0	5	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260804-225937-run002#f1	1	l2.fanfare_next_open_post_decay	0	5	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260804-225937-run002#f1	2	l2.block_at_turn_end	13	11	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-225937-run002#f1	2	l2.fanfare_after_turn	5	9	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-225937-run002#f1	2	l2.fanfare_next_open_post_decay	4	9	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-225937-run002#f1	3	l2.block_at_turn_end	5	6	cards=4/4 hand_unresolved=2 n_enemies=3	0
+soak-20260804-225937-run002#f1	3	l2.enemy_pool_drop	7	6	cards=4/4 hand_unresolved=2 n_enemies=3 pool=40->34	0
+soak-20260804-225937-run002#f1	3	l2.fanfare_after_turn	9	12	cards=4/4 hand_unresolved=2 n_enemies=3	0
+soak-20260804-225937-run002#f1	3	l2.fanfare_next_open_post_decay	7	12	cards=4/4 hand_unresolved=2 n_enemies=3	0
+soak-20260804-225937-run002#f1	4	l2.enemy_pool_drop	7	12	cards=4/4 hand_unresolved=0 n_enemies=3 pool=34->22	0
+soak-20260804-225937-run002#f1	4	l2.fanfare_next_open_post_decay	14	18	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-225937-run002#f1	5	l2.block_at_turn_end	7	5	cards=3/3 hand_unresolved=1 n_enemies=3	0
+soak-20260804-225937-run002#f1	5	l2.fanfare_next_open_post_decay	14	18	cards=3/3 hand_unresolved=1 n_enemies=3	0
+soak-20260804-225937-run002#f1	6	l2.block_at_turn_end	7	8	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260804-225937-run002#f1	6	l2.enemy_pool_drop	7	6	cards=4/4 hand_unresolved=1 n_enemies=3 pool=16->10	0
+soak-20260804-225937-run002#f1	6	l2.fanfare_after_turn	18	19	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260804-225937-run002#f1	6	l2.fanfare_next_open_post_decay	14	19	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260804-225937-run002#f1	7	l2.fanfare_after_turn	21	18	cards=2/2 hand_unresolved=3 n_enemies=3	0
+soak-20260804-225937-run002#f1	7	l2.fanfare_next_open_post_decay	17	18	cards=2/2 hand_unresolved=3 n_enemies=3	0
+soak-20260804-225937-run002#f1	8	l2.fanfare_next_open_post_decay	16	20	cards=2/2 hand_unresolved=4 n_enemies=3	0
+soak-20260804-225937-run002#f1		record.cards_played[Ethereal Spotlight]	0	9	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run002#f1		record.cards_played[Soloist's Solicitation]	6	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run002#f2	3	l1.damage	6	1	card=Soloist's Solicitation target=Nibbit target_hp=24->23 n_enemies=1	0
+soak-20260804-225937-run002#f2	1	l2.fanfare_after_turn	6	9	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f2	1	l2.fanfare_next_open_post_decay	6	9	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f2	2	l2.block_at_turn_end	7	5	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f2	2	l2.enemy_pool_drop	15	7	cards=6/6 hand_unresolved=0 n_enemies=1 pool=36->29	0
+soak-20260804-225937-run002#f2	2	l2.fanfare_after_turn	9	13	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f2	2	l2.fanfare_next_open_post_decay	7	13	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f2	3	l2.block_at_turn_end	3	5	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f2	3	l2.fanfare_after_turn	13	17	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f2	3	l2.fanfare_next_open_post_decay	10	17	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f2	4	l2.block_at_turn_end	13	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f2	4	l2.enemy_pool_drop	9	6	cards=4/4 hand_unresolved=0 n_enemies=1 pool=17->11	0
+soak-20260804-225937-run002#f2	4	l2.fanfare_after_turn	17	19	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f2	4	l2.fanfare_next_open_post_decay	14	19	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f2		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run002#f2		record.cards_played[Soloist's Solicitation]	4	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run002#f3	2	l1.damage	6	10	card=Freminet — Pers, Deploy! target=Phrog Parasite target_hp=50->40 n_enemies=1	0
+soak-20260804-225937-run002#f3	4	l1.damage	6	10	card=Freminet — Pers, Deploy! target=Phrog Parasite target_hp=15->5 n_enemies=1	0
+soak-20260804-225937-run002#f3	7	l1.damage	7	-13	card=Chevreuse — Interdiction Fire target=Wriggler target_hp=5->18 n_enemies=1	1
+soak-20260804-225937-run002#f3	8	l1.damage	6	12	card=Undercurrent target=Wriggler target_hp=18->6 n_enemies=1	0
+soak-20260804-225937-run002#f3	1	l2.block_at_turn_end	7	5	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f3	1	l2.enemy_pool_drop	16	13	cards=5/5 hand_unresolved=0 n_enemies=1 pool=63->50	0
+soak-20260804-225937-run002#f3	1	l2.fanfare_after_turn	0	3	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f3	1	l2.fanfare_next_open_post_decay	0	3	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f3	2	l2.enemy_pool_drop	15	16	cards=4/4 hand_unresolved=0 n_enemies=1 pool=50->34	0
+soak-20260804-225937-run002#f3	2	l2.fanfare_after_turn	3	14	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f3	2	l2.fanfare_next_open_post_decay	2	14	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run002#f3	3	l2.enemy_pool_drop	16	19	cards=3/3 hand_unresolved=1 n_enemies=1 pool=34->15	0
+soak-20260804-225937-run002#f3	3	l2.fanfare_after_turn	14	17	cards=3/3 hand_unresolved=1 n_enemies=1	0
+soak-20260804-225937-run002#f3	3	l2.fanfare_next_open_post_decay	11	17	cards=3/3 hand_unresolved=1 n_enemies=1	0
+soak-20260804-225937-run002#f3	4	l2.enemy_pool_drop	15	-59	cards=4/4 hand_unresolved=1 n_enemies=1 pool=15->74	1
+soak-20260804-225937-run002#f3	4	l2.fanfare_after_turn	17	18	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-225937-run002#f3	4	l2.fanfare_next_open_post_decay	14	18	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-225937-run002#f3	5	l2.block_at_turn_end	13	11	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-225937-run002#f3	5	l2.fanfare_after_turn	18	22	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-225937-run002#f3	5	l2.fanfare_next_open_post_decay	14	22	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260804-225937-run002#f3	6	l2.enemy_pool_drop	9	6	cards=4/4 hand_unresolved=2 n_enemies=1 pool=68->62	0
+soak-20260804-225937-run002#f3	6	l2.fanfare_after_turn	22	28	cards=4/4 hand_unresolved=2 n_enemies=1	0
+soak-20260804-225937-run002#f3	6	l2.fanfare_next_open_post_decay	18	28	cards=4/4 hand_unresolved=2 n_enemies=1	0
+soak-20260804-225937-run002#f3	7	l2.block_at_turn_end	10	11	cards=4/4 hand_unresolved=2 n_enemies=1	0
+soak-20260804-225937-run002#f3	7	l2.enemy_pool_drop	10	5	cards=4/4 hand_unresolved=2 n_enemies=1 pool=62->57	0
+soak-20260804-225937-run002#f3	7	l2.fanfare_next_open_post_decay	22	28	cards=4/4 hand_unresolved=2 n_enemies=1	0
+soak-20260804-225937-run002#f3	8	l2.block_at_turn_end	7	5	cards=3/3 hand_unresolved=3 n_enemies=1	0
+soak-20260804-225937-run002#f3	8	l2.enemy_pool_drop	6	36	cards=3/3 hand_unresolved=3 n_enemies=1 pool=57->21	0
+soak-20260804-225937-run002#f3	8	l2.fanfare_next_open_post_decay	22	28	cards=3/3 hand_unresolved=3 n_enemies=1	0
+soak-20260804-225937-run002#f3		record.cards_played[Ethereal Spotlight]	0	9	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run003#f1	2	l1.damage	6	7	card=The House Rises target=Toadpole target_hp=15->8 n_enemies=2	0
+soak-20260804-225937-run003#f1	1	l2.block_at_turn_end	7	6	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f1	1	l2.fanfare_after_turn	0	4	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f1	1	l2.fanfare_next_open_post_decay	0	4	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f1	2	l2.enemy_pool_drop	21	20	cards=5/5 hand_unresolved=0 n_enemies=2 pool=40->20	0
+soak-20260804-225937-run003#f1	2	l2.fanfare_after_turn	4	14	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f1	2	l2.fanfare_next_open_post_decay	3	14	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f1	3	l2.block_at_turn_end	7	3	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f1	3	l2.enemy_pool_drop	12	8	cards=4/4 hand_unresolved=0 n_enemies=2 pool=20->12	0
+soak-20260804-225937-run003#f1	3	l2.fanfare_after_turn	14	18	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f1	3	l2.fanfare_next_open_post_decay	11	18	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f1		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run003#f1		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run003#f2	3	l1.damage	3	4	card=Shinobu — Sanctifying Ring target=Seapunk target_hp=29->25 n_enemies=1	0
+soak-20260804-225937-run003#f2	4	l1.damage	6	2	card=Freminet — Pers, Deploy! target=Seapunk target_hp=16->14 n_enemies=1	0
+soak-20260804-225937-run003#f2	1	l2.block_at_turn_end	13	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f2	1	l2.fanfare_after_turn	0	3	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f2	1	l2.fanfare_next_open_post_decay	0	3	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f2	2	l2.enemy_pool_drop	15	10	cards=5/5 hand_unresolved=0 n_enemies=1 pool=39->29	0
+soak-20260804-225937-run003#f2	2	l2.fanfare_after_turn	3	9	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f2	2	l2.fanfare_next_open_post_decay	2	9	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f2	3	l2.block_at_turn_end	6	4	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f2	3	l2.enemy_pool_drop	10	6	cards=3/3 hand_unresolved=0 n_enemies=1 pool=29->23	0
+soak-20260804-225937-run003#f2	3	l2.fanfare_after_turn	9	10	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f2	3	l2.fanfare_next_open_post_decay	7	10	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f2	4	l2.block_at_turn_end	13	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f2	4	l2.fanfare_after_turn	10	12	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f2	4	l2.fanfare_next_open_post_decay	8	12	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f2	5	l2.enemy_pool_drop	14	10	cards=4/4 hand_unresolved=0 n_enemies=1 pool=14->4	0
+soak-20260804-225937-run003#f2	5	l2.fanfare_after_turn	12	18	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f2	5	l2.fanfare_next_open_post_decay	10	18	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f2		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run003#f2		record.cards_played[Shinobu — Sanctifying Ring]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run003#f3	1	l2.block_at_turn_end	7	5	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f3	1	l2.enemy_pool_drop	19	16	cards=5/5 hand_unresolved=0 n_enemies=2 pool=51->35	0
+soak-20260804-225937-run003#f3	1	l2.fanfare_after_turn	0	6	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f3	1	l2.fanfare_next_open_post_decay	0	6	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f3	2	l2.block_at_turn_end	6	4	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f3	2	l2.enemy_pool_drop	12	10	cards=4/4 hand_unresolved=0 n_enemies=2 pool=35->25	0
+soak-20260804-225937-run003#f3	2	l2.fanfare_after_turn	6	11	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f3	2	l2.fanfare_next_open_post_decay	5	11	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f3	3	l2.enemy_pool_drop	29	24	cards=4/4 hand_unresolved=0 n_enemies=2 pool=25->1	0
+soak-20260804-225937-run003#f3	3	l2.fanfare_after_turn	11	14	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f3	3	l2.fanfare_next_open_post_decay	9	14	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260804-225937-run003#f3		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run003#f3		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run003#f4	1	l1.damage	6	0	card=Freminet — Pers, Deploy! target=Sewer Clam target_hp=56->56 n_enemies=1	0
+soak-20260804-225937-run003#f4	1	l1.damage	4	2	card=Charlotte — Framing: Freezing Point Composition target=Sewer Clam target_hp=56->54 n_enemies=1	0
+soak-20260804-225937-run003#f4	2	l1.damage	6	0	card=Soloist's Solicitation target=Sewer Clam target_hp=54->54 n_enemies=1	0
+soak-20260804-225937-run003#f4	4	l1.damage	6	3	card=Freminet — Pers, Deploy! target=Sewer Clam target_hp=49->46 n_enemies=1	0
+soak-20260804-225937-run003#f4	4	l1.damage	4	6	card=Charlotte — Framing: Freezing Point Composition target=Sewer Clam target_hp=46->40 n_enemies=1	0
+soak-20260804-225937-run003#f4	5	l1.damage	6	4	card=Freminet — Pers, Deploy! target=Sewer Clam target_hp=31->27 n_enemies=1	0
+soak-20260804-225937-run003#f4	6	l1.damage	5	3	card=Fischl — Nightrider target=Sewer Clam target_hp=18->15 n_enemies=1	0
+soak-20260804-225937-run003#f4	1	l2.enemy_pool_drop	15	2	cards=4/4 hand_unresolved=0 n_enemies=1 pool=64->62	0
+soak-20260804-225937-run003#f4	1	l2.fanfare_after_turn	0	5	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f4	1	l2.fanfare_next_open_post_decay	0	5	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f4	2	l2.block_at_turn_end	7	5	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f4	2	l2.enemy_pool_drop	13	6	cards=5/5 hand_unresolved=0 n_enemies=1 pool=62->56	0
+soak-20260804-225937-run003#f4	2	l2.fanfare_after_turn	5	9	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f4	2	l2.fanfare_next_open_post_decay	4	9	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f4	3	l2.enemy_pool_drop	7	1	cards=4/4 hand_unresolved=0 n_enemies=1 pool=56->55	0
+soak-20260804-225937-run003#f4	3	l2.fanfare_after_turn	14	16	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f4	3	l2.fanfare_next_open_post_decay	11	16	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f4	4	l2.enemy_pool_drop	21	19	cards=4/4 hand_unresolved=0 n_enemies=1 pool=55->36	0
+soak-20260804-225937-run003#f4	4	l2.fanfare_next_open_post_decay	13	16	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f4	5	l2.block_at_turn_end	7	5	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f4	5	l2.enemy_pool_drop	15	14	cards=4/4 hand_unresolved=0 n_enemies=1 pool=36->22	0
+soak-20260804-225937-run003#f4	5	l2.fanfare_after_turn	16	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f4	5	l2.fanfare_next_open_post_decay	13	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260804-225937-run003#f4		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run003#f4		record.cards_played[The House Rises]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run003#f5	1	l2.block_at_turn_end	13	11	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-225937-run003#f5	1	l2.fanfare_after_turn	0	6	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-225937-run003#f5	1	l2.fanfare_next_open_post_decay	0	6	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-225937-run003#f5	2	l2.enemy_pool_drop	21	18	cards=4/4 hand_unresolved=0 n_enemies=3 pool=63->45	0
+soak-20260804-225937-run003#f5	2	l2.fanfare_after_turn	6	21	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-225937-run003#f5	2	l2.fanfare_next_open_post_decay	5	21	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260804-225937-run003#f5		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-225937-run003#f5		record.cards_played[Slip Backstage]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-205730-run002#f1		record.cards_played[Ethereal Spotlight]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-205730-run002#f2		record.cards_played[Ethereal Spotlight]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-205730-run002#f3		record.cards_played[Ethereal Spotlight]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-205730-run002#f4		record.cards_played[Ethereal Spotlight]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-205730-run002#f5	4	l1.damage	10	15	card=Freminet — Pressurized Floe: Backstroke target=Fuzzy Wurm Crawler target_hp=21->6 n_enemies=1	0
+soak-20260804-205730-run002#f5		record.cards_played[Soloist's Solicitation]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-210235-run001#f1	3	l1.damage	6	8	card=Freminet — Pers, Deploy! target=Seapunk target_hp=28->20 n_enemies=1	0
+soak-20260804-210235-run001#f1	4	l1.damage	6	1	card=Kaeya — Frostgnaw target=Seapunk target_hp=12->11 n_enemies=1	0
+soak-20260804-210235-run001#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-210235-run001#f1		record.cards_played[Freminet — Pers, Deploy!]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-210736-run001#f1	2	l1.damage	6	4	card=Freminet — Pers, Deploy! target=Sludge Spinner target_hp=31->27 n_enemies=1	0
+soak-20260804-210736-run001#f1		record.cards_played[Ethereal Spotlight]	0	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-210736-run001#f1		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-210736-run001#f2	3	l1.damage	10	13	card=Torrential Turn target=Seapunk target_hp=25->12 n_enemies=1	0
+soak-20260804-210736-run001#f2		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-210736-run001#f2		record.cards_played[Torrential Turn]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-210736-run002#f1	4	l1.damage	6	-22	card=Freminet — Pers, Deploy! target=Corpse Slug target_hp=4->26 n_enemies=2	1
+soak-20260804-210736-run002#f1		record.cards_played[Ethereal Spotlight]	0	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-210736-run002#f1		record.cards_played[Soloist's Solicitation]	5	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-210736-run002#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-210736-run002#f2		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f1		record.cards_played[Chevreuse — Interdiction Fire]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f1		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f2	1	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Seapunk target_hp=44->34 n_enemies=1	0
+soak-20260804-211110-run001#f2	2	l1.damage	5	7	card=Matinée Performance target=Seapunk target_hp=34->27 n_enemies=1	0
+soak-20260804-211110-run001#f2	4	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Seapunk target_hp=15->5 n_enemies=1	0
+soak-20260804-211110-run001#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f2		record.cards_played[Matinée Performance]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f3		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f3		record.cards_played[Matinée Performance]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f4	4	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Phantasmal Gardener target_hp=13->3 n_enemies=4	0
+soak-20260804-211110-run001#f4	5	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Phantasmal Gardener target_hp=13->3 n_enemies=4	0
+soak-20260804-211110-run001#f4		record.cards_played[Ethereal Spotlight]	0	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f4		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f5	3	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Skulking Colony target_hp=51->41 n_enemies=1	0
+soak-20260804-211110-run001#f5		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f5		record.cards_played[Matinée Performance]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f6		record.cards_played[Chevreuse — Interdiction Fire]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f6		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f6		record.cards_played[Ethereal Spotlight+]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f7	4	l1.damage	5	13	card=Matinée Performance target=Punch Construct target_hp=18->5 n_enemies=1	0
+soak-20260804-211110-run001#f7		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f7		record.cards_played[Soloist's Solicitation]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run001#f8	1	l1.damage	7	0	card=Chevreuse — Interdiction Fire target=Lagavulin Matriarch target_hp=222->222 n_enemies=1	0
+soak-20260804-211110-run001#f8	5	l1.damage	8	16	card=Let the People Rejoice target=Lagavulin Matriarch target_hp=178->162 n_enemies=1	0
+soak-20260804-211110-run001#f8	9	l1.damage	7	1	card=Chevreuse — Interdiction Fire target=Lagavulin Matriarch target_hp=113->112 n_enemies=1	0
+soak-20260804-211110-run001#f8	9	l1.damage	6	4	card=Soloist's Solicitation target=Lagavulin Matriarch target_hp=112->108 n_enemies=1	0
+soak-20260804-211110-run001#f8		record.cards_played[Ethereal Spotlight]	0	11	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run002#f1	3	l1.damage	6	4	card=Freminet — Pers, Deploy! target=Nibbit target_hp=25->21 n_enemies=1	0
+soak-20260804-211110-run002#f1	3	l1.damage	4	6	card=Charlotte — Framing: Freezing Point Composition target=Nibbit target_hp=21->15 n_enemies=1	0
+soak-20260804-211110-run002#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run002#f1		record.cards_played[Freminet — Pers, Deploy!]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run002#f2	2	l1.damage	6	11	card=Soloist's Solicitation target=Shrinker Beetle target_hp=25->14 n_enemies=1	0
+soak-20260804-211110-run002#f2	4	l1.damage	6	5	card=Soloist's Solicitation target=Shrinker Beetle target_hp=8->3 n_enemies=1	0
+soak-20260804-211110-run002#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run002#f2		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run002#f3	1	l1.damage	6	8	card=Soloist's Solicitation target=Fuzzy Wurm Crawler target_hp=56->48 n_enemies=1	0
+soak-20260804-211110-run002#f3	4	l1.damage	6	8	card=Soloist's Solicitation target=Fuzzy Wurm Crawler target_hp=24->16 n_enemies=1	0
+soak-20260804-211110-run002#f3		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run002#f3		record.cards_played[Freminet — Pers, Deploy!]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run003#f1		record.cards_played[Chevreuse — Interdiction Fire]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run003#f1		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run003#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run003#f3	3	l1.damage	14	-23	card=Itto — Superlative Superstrength target=Corpse Slug target_hp=3->26 n_enemies=2	1
+soak-20260804-211110-run003#f3		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-211110-run003#f3		record.cards_played[Itto — Superlative Superstrength]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212122-run001#f1	1	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Corpse Slug target_hp=25->15 n_enemies=2	0
+soak-20260804-212122-run001#f1		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212122-run002#f1	3	l1.damage	10	15	card=Freminet — Pressurized Floe: Backstroke target=Seapunk target_hp=25->10 n_enemies=1	0
+soak-20260804-212122-run002#f1		record.cards_played[Chevreuse — Interdiction Fire]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212122-run002#f1		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212122-run002#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212122-run002#f2		record.cards_played[Freminet — Pressurized Floe: Backstroke]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212122-run002#f3	1	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Corpse Slug target_hp=25->15 n_enemies=2	0
+soak-20260804-212122-run002#f3	2	l1.damage	6	-11	card=Soloist's Solicitation target=Corpse Slug target_hp=15->26 n_enemies=2	1
+soak-20260804-212122-run002#f3		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212122-run003#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212122-run003#f1		record.cards_played[Freminet — Pers, Deploy!]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run001#f1	4	l1.damage	7	13	card=Chevreuse — Interdiction Fire target=Toadpole target_hp=21->8 n_enemies=2	0
+soak-20260804-212539-run001#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run001#f1		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run001#f2	3	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Sludge Spinner target_hp=19->9 n_enemies=1	0
+soak-20260804-212539-run001#f2		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run001#f3	4	l1.damage	6	0	card=House Call target=Seapunk target_hp=20->20 n_enemies=1	0
+soak-20260804-212539-run001#f3		record.cards_played[Ethereal Spotlight]	0	8	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run001#f3		record.cards_played[House Call]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run001#f4	5	l1.damage	6	10	card=House Call target=Gremlin Merc target_hp=14->4 n_enemies=1	0
+soak-20260804-212539-run001#f4	6	l1.damage	7	5	card=Chevreuse — Interdiction Fire target=Sneaky Gremlin target_hp=13->8 n_enemies=1	0
+soak-20260804-212539-run001#f4		record.cards_played[Ethereal Spotlight]	0	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run001#f5	5	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Terror Eel target_hp=92->82 n_enemies=1	0
+soak-20260804-212539-run001#f5		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f1		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f1		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f2	2	l1.damage	7	4	card=Chevreuse — Interdiction Fire target=Shrinker Beetle target_hp=32->28 n_enemies=1	0
+soak-20260804-212539-run002#f2	3	l1.damage	7	4	card=Chevreuse — Interdiction Fire target=Shrinker Beetle target_hp=24->20 n_enemies=1	0
+soak-20260804-212539-run002#f2	5	l1.damage	7	4	card=Chevreuse — Interdiction Fire target=Shrinker Beetle target_hp=12->8 n_enemies=1	0
+soak-20260804-212539-run002#f2		record.cards_played[Ethereal Spotlight]	0	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f2		record.cards_played[Soloist's Solicitation]	5	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f3	2	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Fuzzy Wurm Crawler target_hp=43->33 n_enemies=1	0
+soak-20260804-212539-run002#f3	4	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Fuzzy Wurm Crawler target_hp=15->5 n_enemies=1	0
+soak-20260804-212539-run002#f3		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f3		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f4	7	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Slithering Strangler target_hp=32->22 n_enemies=2	0
+soak-20260804-212539-run002#f4	7	l1.damage	8	14	card=Let the People Rejoice target=Slithering Strangler target_hp=22->8 n_enemies=2	0
+soak-20260804-212539-run002#f4		record.cards_played[Ethereal Spotlight]	0	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f5	4	l1.damage	6	10	card=Kaeya — Frostgnaw target=Phrog Parasite target_hp=36->26 n_enemies=1	0
+soak-20260804-212539-run002#f5	9	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Wriggler target_hp=14->4 n_enemies=1	0
+soak-20260804-212539-run002#f5		record.cards_played[Ethereal Spotlight]	0	12	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f5		record.cards_played[Let the People Rejoice]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f6	3	l1.damage	15	22	card=High Tide target=Vine Shambler target_hp=51->29 n_enemies=1	0
+soak-20260804-212539-run002#f6		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f6		record.cards_played[High Tide]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f7	1	l1.damage	10	11	card=Crashing Waves+ target=Bygone Effigy target_hp=127->116 n_enemies=1	0
+soak-20260804-212539-run002#f7	1	l1.damage	6	7	card=Soloist's Solicitation target=Bygone Effigy target_hp=116->109 n_enemies=1	0
+soak-20260804-212539-run002#f7	3	l1.damage	19	39	card=High Tide+ target=Bygone Effigy target_hp=95->56 n_enemies=1	0
+soak-20260804-212539-run002#f7	4	l1.damage	19	34	card=High Tide+ target=Bygone Effigy target_hp=56->22 n_enemies=1	0
+soak-20260804-212539-run002#f7	4	l1.damage	7	12	card=Chevreuse — Interdiction Fire target=Bygone Effigy target_hp=22->10 n_enemies=1	0
+soak-20260804-212539-run002#f7		record.cards_played[Crashing Waves+]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f7		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f8	3	l1.damage	19	43	card=High Tide+ target=Ceremonial Beast target_hp=223->180 n_enemies=1	0
+soak-20260804-212539-run002#f8	6	l1.damage	19	34	card=High Tide+ target=Ceremonial Beast target_hp=157->123 n_enemies=1	0
+soak-20260804-212539-run002#f8	6	l1.damage	6	8	card=House Call target=Ceremonial Beast target_hp=116->108 n_enemies=1	0
+soak-20260804-212539-run002#f8	7	l1.damage	19	51	card=High Tide+ target=Ceremonial Beast target_hp=98->47 n_enemies=1	0
+soak-20260804-212539-run002#f8		record.cards_played[Ethereal Spotlight]	0	8	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run002#f8		record.cards_played[Stage Presence]	13	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run003#f1	2	l1.damage	6	-14	card=Soloist's Solicitation target=Toadpole target_hp=11->25 n_enemies=2	1
+soak-20260804-212539-run003#f1		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run003#f1		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run003#f2	1	l1.damage	6	9	card=Freminet — Pers, Deploy! target=Sludge Spinner target_hp=37->28 n_enemies=1	0
+soak-20260804-212539-run003#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run003#f2		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run003#f3		record.cards_played[Ethereal Spotlight]	0	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run003#f3		record.cards_played[Soloist's Solicitation]	5	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run003#f4	2	l1.damage	6	0	card=Freminet — Pers, Deploy! target=Punch Construct target_hp=49->49 n_enemies=1	0
+soak-20260804-212539-run003#f4	3	l1.damage	7	13	card=Matinée Performance+ target=Punch Construct target_hp=41->28 n_enemies=1	0
+soak-20260804-212539-run003#f4		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run003#f4		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run003#f5	2	l1.damage	7	1	card=Matinée Performance+ target=Sewer Clam target_hp=56->55 n_enemies=1	0
+soak-20260804-212539-run003#f5		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run003#f5		record.cards_played[House Call]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run003#f6	4	l1.damage	7	9	card=Matinée Performance+ target=Terror Eel target_hp=97->88 n_enemies=1	0
+soak-20260804-212539-run003#f6	8	l1.damage	7	11	card=Matinée Performance+ target=Terror Eel target_hp=35->24 n_enemies=1	0
+soak-20260804-212539-run003#f6		record.cards_played[Ethereal Spotlight]	0	9	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-212539-run003#f6		record.cards_played[House Call]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run001#f1	6	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Twig Slime (M) target_hp=11->1 n_enemies=3	0
+soak-20260805-003056-run001#f1	1	l2.block_at_turn_end	10	8	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run001#f1	1	l2.fanfare_after_turn	0	3	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run001#f1	1	l2.fanfare_next_open_post_decay	0	3	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run001#f1	2	l2.enemy_pool_drop	15	9	cards=4/4 hand_unresolved=0 n_enemies=3 pool=42->33	0
+soak-20260805-003056-run001#f1	2	l2.fanfare_after_turn	3	14	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run001#f1	2	l2.fanfare_next_open_post_decay	2	14	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run001#f1	3	l2.block_at_turn_end	7	5	cards=3/3 hand_unresolved=2 n_enemies=3	0
+soak-20260805-003056-run001#f1	3	l2.enemy_pool_drop	6	5	cards=3/3 hand_unresolved=2 n_enemies=3 pool=33->28	0
+soak-20260805-003056-run001#f1	3	l2.fanfare_next_open_post_decay	11	14	cards=3/3 hand_unresolved=2 n_enemies=3	0
+soak-20260805-003056-run001#f1	4	l2.fanfare_after_turn	20	18	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260805-003056-run001#f1	4	l2.fanfare_next_open_post_decay	16	18	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260805-003056-run001#f1	5	l2.block_at_turn_end	7	5	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260805-003056-run001#f1	5	l2.enemy_pool_drop	6	11	cards=4/4 hand_unresolved=1 n_enemies=3 pool=22->11	0
+soak-20260805-003056-run001#f1	5	l2.fanfare_after_turn	18	19	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260805-003056-run001#f1	5	l2.fanfare_next_open_post_decay	14	19	cards=4/4 hand_unresolved=1 n_enemies=3	0
+soak-20260805-003056-run001#f1		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run001#f1		record.cards_played[Soloist's Solicitation]	5	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run001#f2	3	l1.damage	6	1	card=Soloist's Solicitation target=Nibbit target_hp=29->28 n_enemies=1	0
+soak-20260805-003056-run001#f2	1	l2.fanfare_after_turn	6	5	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f2	1	l2.fanfare_next_open_post_decay	6	5	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f2	2	l2.block_at_turn_end	7	5	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f2	2	l2.enemy_pool_drop	16	8	cards=4/4 hand_unresolved=0 n_enemies=1 pool=42->34	0
+soak-20260805-003056-run001#f2	2	l2.fanfare_after_turn	5	8	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f2	2	l2.fanfare_next_open_post_decay	4	8	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f2	3	l2.enemy_pool_drop	12	22	cards=4/4 hand_unresolved=0 n_enemies=1 pool=34->12	0
+soak-20260805-003056-run001#f2	3	l2.fanfare_next_open_post_decay	11	14	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f2	4	l2.block_at_turn_end	13	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run001#f3	2	l1.damage	6	4	card=Soloist's Solicitation target=Shrinker Beetle target_hp=27->23 n_enemies=1	0
+soak-20260805-003056-run001#f3	3	l1.damage	6	4	card=Soloist's Solicitation target=Shrinker Beetle target_hp=23->19 n_enemies=1	0
+soak-20260805-003056-run001#f3	4	l1.damage	7	4	card=Chevreuse — Interdiction Fire target=Shrinker Beetle target_hp=19->15 n_enemies=1	0
+soak-20260805-003056-run001#f3	5	l1.damage	7	4	card=Chevreuse — Interdiction Fire target=Shrinker Beetle target_hp=15->11 n_enemies=1	0
+soak-20260805-003056-run001#f3	5	l1.damage	6	4	card=Soloist's Solicitation target=Shrinker Beetle target_hp=11->7 n_enemies=1	0
+soak-20260805-003056-run001#f3	1	l2.block_at_turn_end	0	1	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f3	1	l2.enemy_pool_drop	16	13	cards=4/4 hand_unresolved=0 n_enemies=1 pool=40->27	0
+soak-20260805-003056-run001#f3	1	l2.fanfare_after_turn	0	3	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f3	1	l2.fanfare_next_open_post_decay	0	3	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f3	2	l2.enemy_pool_drop	6	4	cards=4/4 hand_unresolved=0 n_enemies=1 pool=27->23	0
+soak-20260805-003056-run001#f3	2	l2.fanfare_next_open_post_decay	7	9	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f3	3	l2.enemy_pool_drop	6	4	cards=4/4 hand_unresolved=0 n_enemies=1 pool=23->19	0
+soak-20260805-003056-run001#f3	3	l2.fanfare_after_turn	15	14	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f3	3	l2.fanfare_next_open_post_decay	12	14	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f3	4	l2.block_at_turn_end	10	9	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f3	4	l2.enemy_pool_drop	10	4	cards=4/4 hand_unresolved=0 n_enemies=1 pool=19->15	0
+soak-20260805-003056-run001#f3	4	l2.fanfare_next_open_post_decay	11	14	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f3	5	l2.enemy_pool_drop	15	12	cards=4/4 hand_unresolved=0 n_enemies=1 pool=15->3	0
+soak-20260805-003056-run001#f3	5	l2.fanfare_after_turn	14	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f3	5	l2.fanfare_next_open_post_decay	11	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f3	6	l2.block_at_turn_end	10	8	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f3	6	l2.fanfare_after_turn	24	22	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f3	6	l2.fanfare_next_open_post_decay	19	22	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f3		record.cards_played[Ethereal Spotlight]	0	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run001#f3		record.cards_played[Soloist's Solicitation]	5	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run001#f4	8	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Slithering Strangler target_hp=12->2 n_enemies=2	0
+soak-20260805-003056-run001#f4	2	l2.block_at_turn_end	10	8	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	2	l2.enemy_pool_drop	16	8	cards=4/4 hand_unresolved=0 n_enemies=2 pool=80->72	0
+soak-20260805-003056-run001#f4	2	l2.fanfare_after_turn	6	14	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	2	l2.fanfare_next_open_post_decay	5	14	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	3	l2.enemy_pool_drop	0	8	cards=4/4 hand_unresolved=0 n_enemies=2 pool=72->64	0
+soak-20260805-003056-run001#f4	3	l2.fanfare_after_turn	20	19	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	3	l2.fanfare_next_open_post_decay	16	19	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	4	l2.block_at_turn_end	10	8	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	4	l2.enemy_pool_drop	16	14	cards=4/4 hand_unresolved=0 n_enemies=2 pool=64->50	0
+soak-20260805-003056-run001#f4	4	l2.fanfare_after_turn	19	26	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	4	l2.fanfare_next_open_post_decay	15	26	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	5	l2.block_at_turn_end	9	10	cards=3/3 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	5	l2.enemy_pool_drop	10	14	cards=3/3 hand_unresolved=0 n_enemies=2 pool=50->36	0
+soak-20260805-003056-run001#f4	5	l2.fanfare_next_open_post_decay	21	26	cards=3/3 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	6	l2.block_at_turn_end	12	10	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	6	l2.enemy_pool_drop	12	15	cards=4/4 hand_unresolved=0 n_enemies=2 pool=36->21	0
+soak-20260805-003056-run001#f4	6	l2.fanfare_after_turn	26	28	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	6	l2.fanfare_next_open_post_decay	21	28	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	7	l2.block_at_turn_end	13	11	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	7	l2.enemy_pool_drop	6	9	cards=4/4 hand_unresolved=0 n_enemies=2 pool=21->12	0
+soak-20260805-003056-run001#f4	7	l2.fanfare_after_turn	28	27	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4	7	l2.fanfare_next_open_post_decay	22	27	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run001#f4		record.cards_played[Ethereal Spotlight]	0	8	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run001#f4		record.cards_played[Soloist's Solicitation]	6	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run001#f5	2	l2.block_at_turn_end	14	16	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f5	2	l2.enemy_pool_drop	10	7	cards=4/4 hand_unresolved=0 n_enemies=1 pool=58->51	0
+soak-20260805-003056-run001#f5	2	l2.fanfare_after_turn	6	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f5	2	l2.fanfare_next_open_post_decay	5	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f5	3	l2.block_at_turn_end	11	9	cards=3/3 hand_unresolved=1 n_enemies=1	0
+soak-20260805-003056-run001#f5	3	l2.fanfare_after_turn	11	12	cards=3/3 hand_unresolved=1 n_enemies=1	0
+soak-20260805-003056-run001#f5	3	l2.fanfare_next_open_post_decay	9	12	cards=3/3 hand_unresolved=1 n_enemies=1	0
+soak-20260805-003056-run001#f5	4	l2.enemy_pool_drop	16	13	cards=4/4 hand_unresolved=1 n_enemies=1 pool=45->32	0
+soak-20260805-003056-run001#f5	4	l2.fanfare_after_turn	12	22	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260805-003056-run001#f5	4	l2.fanfare_next_open_post_decay	10	22	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260805-003056-run001#f5	5	l2.enemy_pool_drop	0	12	cards=3/3 hand_unresolved=1 n_enemies=1 pool=32->20	0
+soak-20260805-003056-run001#f5	5	l2.fanfare_after_turn	26	24	cards=3/3 hand_unresolved=1 n_enemies=1	0
+soak-20260805-003056-run001#f5	5	l2.fanfare_next_open_post_decay	21	24	cards=3/3 hand_unresolved=1 n_enemies=1	0
+soak-20260805-003056-run001#f5	6	l2.enemy_pool_drop	12	18	cards=4/4 hand_unresolved=0 n_enemies=1 pool=20->2	0
+soak-20260805-003056-run001#f5	6	l2.fanfare_after_turn	30	28	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f5	6	l2.fanfare_next_open_post_decay	24	28	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run001#f5	7	l2.block_at_turn_end	13	11	cards=3/3 hand_unresolved=2 n_enemies=1	0
+soak-20260805-003056-run001#f5	7	l2.enemy_pool_drop	0	-74	cards=3/3 hand_unresolved=2 n_enemies=1 pool=2->76	1
+soak-20260805-003056-run001#f5	7	l2.fanfare_after_turn	28	26	cards=3/3 hand_unresolved=2 n_enemies=1	0
+soak-20260805-003056-run001#f5	7	l2.fanfare_next_open_post_decay	22	26	cards=3/3 hand_unresolved=2 n_enemies=1	0
+soak-20260805-003056-run001#f5	8	l2.enemy_pool_drop	10	13	cards=2/2 hand_unresolved=4 n_enemies=1 pool=76->63	0
+soak-20260805-003056-run001#f5	8	l2.fanfare_after_turn	26	28	cards=2/2 hand_unresolved=4 n_enemies=1	0
+soak-20260805-003056-run001#f5	8	l2.fanfare_next_open_post_decay	21	28	cards=2/2 hand_unresolved=4 n_enemies=1	0
+soak-20260805-003056-run001#f5	9	l2.block_at_turn_end	14	15	cards=2/2 hand_unresolved=4 n_enemies=1	0
+soak-20260805-003056-run001#f5		record.cards_played[Ethereal Spotlight]	0	9	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run002#f1	3	l1.damage	6	1	card=Dahlia — Sacramental Shower target=Nibbit target_hp=33->32 n_enemies=1	0
+soak-20260805-003056-run002#f1	1	l2.block_at_turn_end	17	15	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f1	1	l2.enemy_pool_drop	9	6	cards=4/4 hand_unresolved=0 n_enemies=1 pool=45->39	0
+soak-20260805-003056-run002#f1	1	l2.fanfare_after_turn	5	6	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f1	1	l2.fanfare_next_open_post_decay	5	6	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f1	2	l2.enemy_pool_drop	6	1	cards=5/5 hand_unresolved=0 n_enemies=1 pool=39->38	0
+soak-20260805-003056-run002#f1	2	l2.fanfare_after_turn	14	13	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f1	2	l2.fanfare_next_open_post_decay	11	13	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f1	3	l2.block_at_turn_end	7	5	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f1	3	l2.enemy_pool_drop	15	12	cards=4/4 hand_unresolved=0 n_enemies=1 pool=38->26	0
+soak-20260805-003056-run002#f1	3	l2.fanfare_after_turn	13	14	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f1	3	l2.fanfare_next_open_post_decay	10	14	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f1	4	l2.enemy_pool_drop	15	18	cards=4/4 hand_unresolved=0 n_enemies=1 pool=26->8	0
+soak-20260805-003056-run002#f1	4	l2.fanfare_after_turn	19	23	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f1	4	l2.fanfare_next_open_post_decay	15	23	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run002#f1		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run002#f2	2	l1.damage	6	12	card=Freminet — Pers, Deploy! target=Fuzzy Wurm Crawler target_hp=48->36 n_enemies=1	0
+soak-20260805-003056-run002#f2	4	l1.damage	6	12	card=Freminet — Pers, Deploy! target=Fuzzy Wurm Crawler target_hp=22->10 n_enemies=1	0
+soak-20260805-003056-run002#f2	1	l2.block_at_turn_end	7	5	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f2	1	l2.enemy_pool_drop	6	7	cards=4/4 hand_unresolved=0 n_enemies=1 pool=55->48	0
+soak-20260805-003056-run002#f2	1	l2.fanfare_after_turn	0	3	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f2	1	l2.fanfare_next_open_post_decay	0	3	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f2	2	l2.block_at_turn_end	0	2	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f2	2	l2.enemy_pool_drop	15	20	cards=4/4 hand_unresolved=0 n_enemies=1 pool=48->28	0
+soak-20260805-003056-run002#f2	2	l2.fanfare_after_turn	3	8	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f2	2	l2.fanfare_next_open_post_decay	2	8	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f2	3	l2.block_at_turn_end	14	10	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f2	3	l2.enemy_pool_drop	0	6	cards=5/5 hand_unresolved=0 n_enemies=1 pool=28->22	0
+soak-20260805-003056-run002#f2	3	l2.fanfare_after_turn	8	13	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f2	3	l2.fanfare_next_open_post_decay	6	13	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run002#f2		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run002#f3	4	l1.damage	6	10	card=Freminet — Pers, Deploy! target=Shrinker Beetle target_hp=11->1 n_enemies=1	0
+soak-20260805-003056-run002#f3	1	l2.enemy_pool_drop	15	13	cards=6/6 hand_unresolved=0 n_enemies=1 pool=40->27	0
+soak-20260805-003056-run002#f3	1	l2.fanfare_after_turn	0	5	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f3	1	l2.fanfare_next_open_post_decay	0	5	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f3	2	l2.block_at_turn_end	12	14	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f3	2	l2.enemy_pool_drop	6	13	cards=4/4 hand_unresolved=0 n_enemies=1 pool=27->14	0
+soak-20260805-003056-run002#f3	2	l2.fanfare_after_turn	10	15	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f3	2	l2.fanfare_next_open_post_decay	8	15	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f3	3	l2.enemy_pool_drop	0	3	cards=4/4 hand_unresolved=0 n_enemies=1 pool=14->11	0
+soak-20260805-003056-run002#f3	3	l2.fanfare_after_turn	15	18	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f3	3	l2.fanfare_next_open_post_decay	12	18	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f3		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run002#f3		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run002#f4	5	l1.damage	3	4	card=Shinobu — Sanctifying Ring target=Byrdonis target_hp=61->57 n_enemies=1	0
+soak-20260805-003056-run002#f4	6	l1.damage	6	9	card=Soloist's Solicitation target=Byrdonis target_hp=48->39 n_enemies=1	0
+soak-20260805-003056-run002#f4	1	l2.block_at_turn_end	13	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	1	l2.fanfare_after_turn	0	8	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	1	l2.fanfare_next_open_post_decay	0	8	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	2	l2.block_at_turn_end	13	14	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	2	l2.enemy_pool_drop	9	6	cards=5/5 hand_unresolved=0 n_enemies=1 pool=77->71	0
+soak-20260805-003056-run002#f4	2	l2.fanfare_after_turn	13	17	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	2	l2.fanfare_next_open_post_decay	10	17	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	3	l2.block_at_turn_end	13	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	3	l2.fanfare_after_turn	17	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	3	l2.fanfare_next_open_post_decay	14	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	4	l2.block_at_turn_end	16	14	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	4	l2.fanfare_after_turn	29	24	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	4	l2.fanfare_next_open_post_decay	23	24	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	5	l2.block_at_turn_end	6	4	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	5	l2.enemy_pool_drop	17	13	cards=3/3 hand_unresolved=0 n_enemies=1 pool=61->48	0
+soak-20260805-003056-run002#f4	5	l2.fanfare_next_open_post_decay	19	24	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	6	l2.enemy_pool_drop	12	18	cards=4/4 hand_unresolved=0 n_enemies=1 pool=48->30	0
+soak-20260805-003056-run002#f4	6	l2.fanfare_after_turn	30	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4	7	l2.block_at_turn_end	19	17	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run002#f4		record.cards_played[Ethereal Spotlight]	0	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f1	5	l1.damage	6	12	card=Soloist's Solicitation target=Corpse Slug target_hp=13->1 n_enemies=2	0
+soak-20260805-003056-run003#f1	1	l2.enemy_pool_drop	15	12	cards=4/4 hand_unresolved=0 n_enemies=2 pool=53->41	0
+soak-20260805-003056-run003#f1	1	l2.fanfare_after_turn	0	3	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run003#f1	1	l2.fanfare_next_open_post_decay	0	3	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run003#f1	2	l2.block_at_turn_end	9	6	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run003#f1	2	l2.fanfare_after_turn	11	15	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run003#f1	2	l2.fanfare_next_open_post_decay	9	15	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run003#f1	3	l2.enemy_pool_drop	15	10	cards=4/4 hand_unresolved=0 n_enemies=2 pool=35->25	0
+soak-20260805-003056-run003#f1	3	l2.fanfare_after_turn	15	17	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run003#f1	3	l2.fanfare_next_open_post_decay	12	17	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run003#f1	4	l2.fanfare_after_turn	17	18	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run003#f1	4	l2.fanfare_next_open_post_decay	14	18	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-003056-run003#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f1		record.cards_played[Sayu — Yoohoo Art: Fuuin Dash]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f2	2	l1.damage	6	4	card=Freminet — Pers, Deploy! target=Sludge Spinner target_hp=31->27 n_enemies=1	0
+soak-20260805-003056-run003#f2	1	l2.block_at_turn_end	10	11	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f2	1	l2.fanfare_after_turn	0	5	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f2	1	l2.fanfare_next_open_post_decay	0	5	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f2	2	l2.enemy_pool_drop	15	10	cards=6/6 hand_unresolved=0 n_enemies=1 pool=31->21	0
+soak-20260805-003056-run003#f2	2	l2.fanfare_after_turn	5	16	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f2	2	l2.fanfare_next_open_post_decay	4	16	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f2	3	l2.enemy_pool_drop	16	17	cards=4/4 hand_unresolved=0 n_enemies=1 pool=21->4	0
+soak-20260805-003056-run003#f2	3	l2.fanfare_after_turn	22	20	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f2	3	l2.fanfare_next_open_post_decay	18	20	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f2		record.cards_played[Freminet — Pers, Deploy!]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f3	1	l1.damage	5	6	card=Applause Line+ target=Seapunk target_hp=46->40 n_enemies=1	0
+soak-20260805-003056-run003#f3	1	l1.damage	3	5	card=Applause Line target=Seapunk target_hp=40->35 n_enemies=1	0
+soak-20260805-003056-run003#f3	2	l1.damage	6	12	card=Freminet — Pers, Deploy! target=Seapunk target_hp=30->18 n_enemies=1	0
+soak-20260805-003056-run003#f3	3	l1.damage	6	12	card=Soloist's Solicitation target=Seapunk target_hp=13->1 n_enemies=1	0
+soak-20260805-003056-run003#f3	1	l2.enemy_pool_drop	11	16	cards=7/7 hand_unresolved=0 n_enemies=1 pool=46->30	0
+soak-20260805-003056-run003#f3	2	l2.enemy_pool_drop	9	17	cards=4/4 hand_unresolved=0 n_enemies=1 pool=30->13	0
+soak-20260805-003056-run003#f3	2	l2.fanfare_after_turn	10	13	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f3	2	l2.fanfare_next_open_post_decay	8	13	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f3		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f3		record.cards_played[Soloist's Solicitation]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f4	1	l2.enemy_pool_drop	24	22	cards=5/5 hand_unresolved=0 n_enemies=1 pool=80->58	0
+soak-20260805-003056-run003#f4	1	l2.fanfare_after_turn	0	6	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f4	1	l2.fanfare_next_open_post_decay	0	6	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f4	2	l2.enemy_pool_drop	13	7	cards=3/3 hand_unresolved=0 n_enemies=1 pool=58->51	0
+soak-20260805-003056-run003#f4	2	l2.fanfare_after_turn	10	14	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f4	2	l2.fanfare_next_open_post_decay	8	14	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f4	3	l2.enemy_pool_drop	6	7	cards=2/2 hand_unresolved=0 n_enemies=1 pool=51->44	0
+soak-20260805-003056-run003#f4	3	l2.fanfare_after_turn	14	24	cards=2/2 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f4	3	l2.fanfare_next_open_post_decay	11	24	cards=2/2 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f4	4	l2.enemy_pool_drop	11	5	cards=2/2 hand_unresolved=0 n_enemies=1 pool=44->39	0
+soak-20260805-003056-run003#f4	4	l2.fanfare_after_turn	26	24	cards=2/2 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f4	4	l2.fanfare_next_open_post_decay	21	24	cards=2/2 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f4	5	l2.enemy_pool_drop	36	29	cards=5/5 hand_unresolved=0 n_enemies=1 pool=39->10	0
+soak-20260805-003056-run003#f4	5	l2.fanfare_next_open_post_decay	19	24	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f4		record.cards_played[Applause Line+]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f4		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f5	4	l1.damage	10	11	card=Applause Line+ target=Two-Tailed Rat target_hp=12->1 n_enemies=3	0
+soak-20260805-003056-run003#f5	1	l2.fanfare_after_turn	0	14	cards=6/6 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f5	1	l2.fanfare_next_open_post_decay	0	14	cards=6/6 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f5	2	l2.block_at_turn_end	12	8	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f5	2	l2.enemy_pool_drop	12	8	cards=4/4 hand_unresolved=0 n_enemies=3 pool=40->32	0
+soak-20260805-003056-run003#f5	2	l2.fanfare_after_turn	20	19	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f5	2	l2.fanfare_next_open_post_decay	16	19	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f5	3	l2.block_at_turn_end	6	3	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f5	3	l2.enemy_pool_drop	17	20	cards=5/5 hand_unresolved=0 n_enemies=3 pool=32->12	0
+soak-20260805-003056-run003#f5	3	l2.fanfare_after_turn	19	23	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f5	3	l2.fanfare_next_open_post_decay	15	23	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f5	4	l2.enemy_pool_drop	10	-7	cards=3/3 hand_unresolved=0 n_enemies=3 pool=12->19	1
+soak-20260805-003056-run003#f5	4	l2.fanfare_after_turn	23	24	cards=3/3 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f5	4	l2.fanfare_next_open_post_decay	18	24	cards=3/3 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f5	5	l2.enemy_pool_drop	12	15	cards=4/4 hand_unresolved=0 n_enemies=3 pool=19->4	0
+soak-20260805-003056-run003#f5	5	l2.fanfare_after_turn	30	24	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f5		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f5		record.cards_played[Freminet — Pers, Deploy!]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f6	1	l1.damage	5	7	card=Applause Line+ target=Terror Eel target_hp=131->124 n_enemies=1	0
+soak-20260805-003056-run003#f6	6	l1.damage	11	12	card=Applause Line+ target=Terror Eel target_hp=36->24 n_enemies=1	0
+soak-20260805-003056-run003#f6	1	l2.fanfare_after_turn	10	8	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f6	1	l2.fanfare_next_open_post_decay	10	8	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f6	2	l2.fanfare_after_turn	8	13	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f6	2	l2.fanfare_next_open_post_decay	6	13	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f6	3	l2.block_at_turn_end	3	4	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f6	3	l2.enemy_pool_drop	18	12	cards=4/4 hand_unresolved=0 n_enemies=1 pool=105->93	0
+soak-20260805-003056-run003#f6	3	l2.fanfare_after_turn	13	19	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f6	3	l2.fanfare_next_open_post_decay	10	19	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f6	4	l2.block_at_turn_end	6	4	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f6	4	l2.enemy_pool_drop	15	12	cards=5/5 hand_unresolved=0 n_enemies=1 pool=93->81	0
+soak-20260805-003056-run003#f6	4	l2.fanfare_after_turn	19	24	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f6	4	l2.fanfare_next_open_post_decay	15	24	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f6	5	l2.enemy_pool_drop	32	36	cards=5/5 hand_unresolved=0 n_enemies=1 pool=81->45	0
+soak-20260805-003056-run003#f6	5	l2.fanfare_next_open_post_decay	19	24	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f6	6	l2.fanfare_after_turn	30	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f6	7	l2.fanfare_next_open_post_decay	19	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f6		record.cards_played[Applause Line+]	4	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f6		record.cards_played[Ethereal Spotlight]	0	7	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f6		record.cards_played[Ethereal Spotlight+]	0	1	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f7	1	l1.damage	5	6	card=Applause Line+ target=Haunted Ship target_hp=51->45 n_enemies=1	0
+soak-20260805-003056-run003#f7	2	l1.damage	6	4	card=Dahlia — Sacramental Shower target=Haunted Ship target_hp=40->36 n_enemies=1	0
+soak-20260805-003056-run003#f7	3	l1.damage	6	4	card=Freminet — Pers, Deploy! target=Haunted Ship target_hp=36->32 n_enemies=1	0
+soak-20260805-003056-run003#f7	1	l2.fanfare_after_turn	8	6	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f7	1	l2.fanfare_next_open_post_decay	8	6	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f7	2	l2.enemy_pool_drop	9	4	cards=5/5 hand_unresolved=0 n_enemies=1 pool=40->36	0
+soak-20260805-003056-run003#f7	2	l2.fanfare_after_turn	6	12	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f7	2	l2.fanfare_next_open_post_decay	5	12	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f7	3	l2.block_at_turn_end	7	8	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f7	3	l2.enemy_pool_drop	15	14	cards=4/4 hand_unresolved=0 n_enemies=1 pool=36->22	0
+soak-20260805-003056-run003#f7	3	l2.fanfare_after_turn	12	18	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f7	3	l2.fanfare_next_open_post_decay	10	18	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f7	4	l2.block_at_turn_end	17	18	cards=5/5 hand_unresolved=1 n_enemies=1	0
+soak-20260805-003056-run003#f7	4	l2.enemy_pool_drop	9	6	cards=5/5 hand_unresolved=1 n_enemies=1 pool=22->16	0
+soak-20260805-003056-run003#f7	4	l2.fanfare_after_turn	26	22	cards=5/5 hand_unresolved=1 n_enemies=1	0
+soak-20260805-003056-run003#f7	4	l2.fanfare_next_open_post_decay	21	22	cards=5/5 hand_unresolved=1 n_enemies=1	0
+soak-20260805-003056-run003#f7		record.cards_played[Applause Line+]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f7		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f8	1	l2.block_at_turn_end	3	4	cards=3/3 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	1	l2.fanfare_after_turn	0	11	cards=3/3 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	1	l2.fanfare_next_open_post_decay	0	11	cards=3/3 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	2	l2.block_at_turn_end	17	12	cards=6/6 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	2	l2.enemy_pool_drop	9	10	cards=6/6 hand_unresolved=0 n_enemies=3 pool=66->56	0
+soak-20260805-003056-run003#f8	2	l2.fanfare_after_turn	21	18	cards=6/6 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	2	l2.fanfare_next_open_post_decay	17	18	cards=6/6 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	3	l2.block_at_turn_end	10	8	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	3	l2.enemy_pool_drop	6	3	cards=4/4 hand_unresolved=0 n_enemies=3 pool=56->53	0
+soak-20260805-003056-run003#f8	3	l2.fanfare_after_turn	18	21	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	3	l2.fanfare_next_open_post_decay	14	21	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	4	l2.block_at_turn_end	9	7	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	4	l2.enemy_pool_drop	25	26	cards=5/5 hand_unresolved=0 n_enemies=3 pool=53->27	0
+soak-20260805-003056-run003#f8	4	l2.fanfare_after_turn	21	23	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	4	l2.fanfare_next_open_post_decay	17	23	cards=5/5 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	5	l2.block_at_turn_end	14	9	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	5	l2.enemy_pool_drop	13	15	cards=4/4 hand_unresolved=0 n_enemies=3 pool=27->12	0
+soak-20260805-003056-run003#f8	5	l2.fanfare_after_turn	23	24	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8	5	l2.fanfare_next_open_post_decay	18	24	cards=4/4 hand_unresolved=0 n_enemies=3	0
+soak-20260805-003056-run003#f8		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f8		record.cards_played[Soloist's Solicitation]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-003056-run003#f9	2	l1.damage	5	0	card=Applause Line+ target=Lagavulin Matriarch target_hp=222->222 n_enemies=1	0
+soak-20260805-003056-run003#f9	3	l1.damage	6	0	card=Dahlia — Sacramental Shower target=Lagavulin Matriarch target_hp=222->222 n_enemies=1	0
+soak-20260805-003056-run003#f9	5	l1.damage	6	9	card=Soloist's Solicitation target=Lagavulin Matriarch target_hp=185->176 n_enemies=1	0
+soak-20260805-003056-run003#f9	8	l1.damage	12	10	card=Showstopper target=Lagavulin Matriarch target_hp=150->140 n_enemies=1	0
+soak-20260805-003056-run003#f9	8	l1.damage	6	4	card=Freminet — Pers, Deploy! target=Lagavulin Matriarch target_hp=140->136 n_enemies=1	0
+soak-20260805-003056-run003#f9	11	l1.damage	12	0	card=Showstopper target=Lagavulin Matriarch target_hp=110->110 n_enemies=1	0
+soak-20260805-003056-run003#f9	11	l1.damage	6	3	card=Freminet — Pers, Deploy! target=Lagavulin Matriarch target_hp=110->107 n_enemies=1	0
+soak-20260805-003056-run003#f9	1	l2.enemy_pool_drop	6	0	cards=3/3 hand_unresolved=0 n_enemies=1 pool=234->234	0
+soak-20260805-003056-run003#f9	1	l2.fanfare_after_turn	4	3	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	1	l2.fanfare_next_open_post_decay	4	3	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	2	l2.enemy_pool_drop	5	1	cards=4/4 hand_unresolved=0 n_enemies=1 pool=234->233	0
+soak-20260805-003056-run003#f9	2	l2.fanfare_after_turn	3	9	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	2	l2.fanfare_next_open_post_decay	2	9	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	3	l2.block_at_turn_end	6	4	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	3	l2.enemy_pool_drop	9	14	cards=5/5 hand_unresolved=0 n_enemies=1 pool=233->219	0
+soak-20260805-003056-run003#f9	3	l2.fanfare_after_turn	9	13	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	3	l2.fanfare_next_open_post_decay	7	13	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	4	l2.block_at_turn_end	7	8	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	4	l2.enemy_pool_drop	27	34	cards=5/5 hand_unresolved=0 n_enemies=1 pool=219->185	0
+soak-20260805-003056-run003#f9	4	l2.fanfare_after_turn	13	24	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	4	l2.fanfare_next_open_post_decay	10	24	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	5	l2.block_at_turn_end	6	4	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	5	l2.enemy_pool_drop	12	21	cards=4/4 hand_unresolved=0 n_enemies=1 pool=185->164	0
+soak-20260805-003056-run003#f9	5	l2.fanfare_next_open_post_decay	19	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	6	l2.enemy_pool_drop	12	4	cards=4/4 hand_unresolved=0 n_enemies=1 pool=164->160	0
+soak-20260805-003056-run003#f9	6	l2.fanfare_after_turn	30	25	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	6	l2.fanfare_next_open_post_decay	24	25	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	7	l2.enemy_pool_drop	9	10	cards=3/3 hand_unresolved=0 n_enemies=1 pool=160->150	0
+soak-20260805-003056-run003#f9	7	l2.fanfare_after_turn	25	24	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	7	l2.fanfare_next_open_post_decay	20	24	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	8	l2.block_at_turn_end	6	5	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	8	l2.enemy_pool_drop	32	30	cards=5/5 hand_unresolved=0 n_enemies=1 pool=150->120	0
+soak-20260805-003056-run003#f9	8	l2.fanfare_next_open_post_decay	19	24	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	9	l2.block_at_turn_end	20	17	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	9	l2.enemy_pool_drop	0	2	cards=3/3 hand_unresolved=0 n_enemies=1 pool=120->118	0
+soak-20260805-003056-run003#f9	9	l2.fanfare_after_turn	28	25	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	9	l2.fanfare_next_open_post_decay	22	25	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	10	l2.block_at_turn_end	14	6	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	10	l2.enemy_pool_drop	9	-3	cards=5/5 hand_unresolved=0 n_enemies=1 pool=118->121	1
+soak-20260805-003056-run003#f9	10	l2.fanfare_after_turn	25	24	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	10	l2.fanfare_next_open_post_decay	20	24	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	11	l2.enemy_pool_drop	27	20	cards=4/4 hand_unresolved=0 n_enemies=1 pool=121->101	0
+soak-20260805-003056-run003#f9	11	l2.fanfare_next_open_post_decay	19	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	12	l2.block_at_turn_end	16	9	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	12	l2.fanfare_after_turn	28	24	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	12	l2.fanfare_next_open_post_decay	22	24	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9	13	l2.block_at_turn_end	18	7	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-003056-run003#f9		record.cards_played[Ethereal Spotlight]	0	13	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run001#f1	1	l2.enemy_pool_drop	6	16	cards=3/4 hand_unresolved=1 n_enemies=1 pool=39->23	0
+soak-20260805-004135-run001#f1	1	l2.fanfare_after_turn	0	5	cards=3/4 hand_unresolved=1 n_enemies=1	0
+soak-20260805-004135-run001#f1	1	l2.fanfare_next_open_post_decay	0	5	cards=3/4 hand_unresolved=1 n_enemies=1	0
+soak-20260805-004135-run001#f1	2	l2.enemy_pool_drop	6	4	cards=5/5 hand_unresolved=0 n_enemies=1 pool=23->19	0
+soak-20260805-004135-run001#f1	2	l2.fanfare_after_turn	13	14	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run001#f1	2	l2.fanfare_next_open_post_decay	10	14	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run001#f1		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run001#f1		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run001#f2	1	l2.enemy_pool_drop	6	16	cards=3/4 hand_unresolved=1 n_enemies=1 pool=44->28	0
+soak-20260805-004135-run001#f2	1	l2.fanfare_after_turn	0	7	cards=3/4 hand_unresolved=1 n_enemies=1	0
+soak-20260805-004135-run001#f2	1	l2.fanfare_next_open_post_decay	0	7	cards=3/4 hand_unresolved=1 n_enemies=1	0
+soak-20260805-004135-run001#f2	2	l2.fanfare_after_turn	13	12	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260805-004135-run001#f2	2	l2.fanfare_next_open_post_decay	10	12	cards=4/4 hand_unresolved=1 n_enemies=1	0
+soak-20260805-004135-run001#f2		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run001#f2		record.cards_played[Soloist's Solicitation]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run001#f3	1	l2.block_at_turn_end	1	7	cards=4/5 hand_unresolved=1 n_enemies=2	0
+soak-20260805-004135-run001#f3	1	l2.enemy_pool_drop	6	8	cards=4/5 hand_unresolved=1 n_enemies=2 pool=52->44	0
+soak-20260805-004135-run001#f3	2	l2.enemy_pool_drop	16	22	cards=5/6 hand_unresolved=1 n_enemies=2 pool=44->22	0
+soak-20260805-004135-run001#f3	2	l2.fanfare_after_turn	6	11	cards=5/6 hand_unresolved=1 n_enemies=2	0
+soak-20260805-004135-run001#f3	2	l2.fanfare_next_open_post_decay	5	11	cards=5/6 hand_unresolved=1 n_enemies=2	0
+soak-20260805-004135-run001#f3	3	l2.block_at_turn_end	6	4	cards=3/4 hand_unresolved=1 n_enemies=2	0
+soak-20260805-004135-run001#f3	3	l2.enemy_pool_drop	0	17	cards=3/4 hand_unresolved=1 n_enemies=2 pool=22->5	0
+soak-20260805-004135-run001#f3	3	l2.fanfare_after_turn	15	22	cards=3/4 hand_unresolved=1 n_enemies=2	0
+soak-20260805-004135-run001#f3	3	l2.fanfare_next_open_post_decay	12	22	cards=3/4 hand_unresolved=1 n_enemies=2	0
+soak-20260805-004135-run001#f3		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run001#f3		record.cards_played[Matinée Performance]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run001#f4	1	l2.enemy_pool_drop	9	10	cards=3/4 hand_unresolved=1 n_enemies=4 pool=112->102	0
+soak-20260805-004135-run001#f4	1	l2.fanfare_after_turn	5	10	cards=3/4 hand_unresolved=1 n_enemies=4	0
+soak-20260805-004135-run001#f4	1	l2.fanfare_next_open_post_decay	5	10	cards=3/4 hand_unresolved=1 n_enemies=4	0
+soak-20260805-004135-run001#f4	2	l2.block_at_turn_end	6	12	cards=5/6 hand_unresolved=1 n_enemies=4	0
+soak-20260805-004135-run001#f4	2	l2.fanfare_after_turn	18	20	cards=5/6 hand_unresolved=1 n_enemies=4	0
+soak-20260805-004135-run001#f4	2	l2.fanfare_next_open_post_decay	14	20	cards=5/6 hand_unresolved=1 n_enemies=4	0
+soak-20260805-004135-run001#f4	3	l2.block_at_turn_end	15	13	cards=4/4 hand_unresolved=0 n_enemies=4	0
+soak-20260805-004135-run001#f4	3	l2.fanfare_after_turn	20	24	cards=4/4 hand_unresolved=0 n_enemies=4	0
+soak-20260805-004135-run001#f4	3	l2.fanfare_next_open_post_decay	16	24	cards=4/4 hand_unresolved=0 n_enemies=4	0
+soak-20260805-004135-run001#f4	4	l2.block_at_turn_end	19	16	cards=4/4 hand_unresolved=0 n_enemies=4	0
+soak-20260805-004135-run001#f4	4	l2.enemy_pool_drop	9	6	cards=4/4 hand_unresolved=0 n_enemies=4 pool=96->90	0
+soak-20260805-004135-run001#f4	4	l2.fanfare_after_turn	24	30	cards=4/4 hand_unresolved=0 n_enemies=4	0
+soak-20260805-004135-run001#f4	4	l2.fanfare_next_open_post_decay	19	30	cards=4/4 hand_unresolved=0 n_enemies=4	0
+soak-20260805-004135-run001#f4	5	l2.block_at_turn_end	7	15	cards=4/5 hand_unresolved=2 n_enemies=4	0
+soak-20260805-004135-run001#f4	5	l2.enemy_pool_drop	6	9	cards=4/5 hand_unresolved=2 n_enemies=4 pool=90->81	0
+soak-20260805-004135-run001#f4	5	l2.fanfare_after_turn	30	31	cards=4/5 hand_unresolved=2 n_enemies=4	0
+soak-20260805-004135-run001#f4	5	l2.fanfare_next_open_post_decay	24	31	cards=4/5 hand_unresolved=2 n_enemies=4	0
+soak-20260805-004135-run001#f4	6	l2.enemy_pool_drop	0	13	cards=3/4 hand_unresolved=1 n_enemies=4 pool=81->68	0
+soak-20260805-004135-run001#f4	6	l2.fanfare_next_open_post_decay	24	30	cards=3/4 hand_unresolved=1 n_enemies=4	0
+soak-20260805-004135-run001#f4	7	l2.fanfare_next_open_post_decay	24	30	cards=4/4 hand_unresolved=0 n_enemies=4	0
+soak-20260805-004135-run001#f4	8	l2.block_at_turn_end	9	6	cards=3/4 hand_unresolved=1 n_enemies=4	0
+soak-20260805-004135-run001#f4		record.cards_played[Ethereal Spotlight]	0	8	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run002#f1	3	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Toadpole target_hp=25->15 n_enemies=2	0
+soak-20260805-004135-run002#f1	1	l2.block_at_turn_end	6	7	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-004135-run002#f1	1	l2.fanfare_after_turn	0	5	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-004135-run002#f1	1	l2.fanfare_next_open_post_decay	0	5	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-004135-run002#f1	2	l2.enemy_pool_drop	16	13	cards=5/5 hand_unresolved=0 n_enemies=2 pool=40->27	0
+soak-20260805-004135-run002#f1	2	l2.fanfare_after_turn	5	13	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260805-004135-run002#f1	2	l2.fanfare_next_open_post_decay	4	13	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260805-004135-run002#f1	3	l2.enemy_pool_drop	27	18	cards=4/4 hand_unresolved=0 n_enemies=2 pool=27->9	0
+soak-20260805-004135-run002#f1	3	l2.fanfare_after_turn	13	19	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-004135-run002#f1	3	l2.fanfare_next_open_post_decay	10	19	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-004135-run002#f1	4	l2.fanfare_after_turn	25	20	cards=4/4 hand_unresolved=0 n_enemies=2	0
+soak-20260805-004135-run002#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run002#f1		record.cards_played[Soloist's Solicitation]	4	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run002#f2	4	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Seapunk target_hp=16->6 n_enemies=1	0
+soak-20260805-004135-run002#f2	1	l2.enemy_pool_drop	16	13	cards=4/4 hand_unresolved=0 n_enemies=1 pool=46->33	0
+soak-20260805-004135-run002#f2	1	l2.fanfare_after_turn	0	7	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f2	1	l2.fanfare_next_open_post_decay	0	7	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f2	2	l2.block_at_turn_end	9	10	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f2	2	l2.enemy_pool_drop	11	17	cards=6/6 hand_unresolved=0 n_enemies=1 pool=33->16	0
+soak-20260805-004135-run002#f2	2	l2.fanfare_after_turn	16	14	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f2	2	l2.fanfare_next_open_post_decay	13	14	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f2	3	l2.block_at_turn_end	6	9	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f2	3	l2.fanfare_after_turn	15	19	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f2	3	l2.fanfare_next_open_post_decay	12	19	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run002#f2		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run002#f3	3	l1.damage	6	10	card=Freminet — Pers, Deploy! target=Sludge Spinner target_hp=18->8 n_enemies=1	0
+soak-20260805-004135-run002#f3	1	l2.enemy_pool_drop	16	13	cards=5/5 hand_unresolved=0 n_enemies=1 pool=38->25	0
+soak-20260805-004135-run002#f3	1	l2.fanfare_after_turn	0	6	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f3	1	l2.fanfare_next_open_post_decay	0	6	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f3	2	l2.block_at_turn_end	5	10	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f3	2	l2.fanfare_after_turn	7	15	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f3	2	l2.fanfare_next_open_post_decay	6	15	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f3	3	l2.enemy_pool_drop	25	23	cards=4/4 hand_unresolved=0 n_enemies=1 pool=25->2	0
+soak-20260805-004135-run002#f3	3	l2.fanfare_after_turn	15	23	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f3	3	l2.fanfare_next_open_post_decay	12	23	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f3	4	l2.block_at_turn_end	14	16	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f3		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run002#f4	2	l1.damage	7	2	card=Chevreuse — Interdiction Fire target=Punch Construct target_hp=55->53 n_enemies=1	0
+soak-20260805-004135-run002#f4	3	l1.damage	6	12	card=Soloist's Solicitation target=Punch Construct target_hp=44->32 n_enemies=1	0
+soak-20260805-004135-run002#f4	1	l2.enemy_pool_drop	0	-8	cards=5/5 hand_unresolved=0 n_enemies=1 pool=55->63	1
+soak-20260805-004135-run002#f4	1	l2.fanfare_after_turn	9	8	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f4	1	l2.fanfare_next_open_post_decay	9	8	cards=5/5 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f4	2	l2.enemy_pool_drop	10	13	cards=4/4 hand_unresolved=0 n_enemies=1 pool=63->50	0
+soak-20260805-004135-run002#f4	2	l2.fanfare_after_turn	8	12	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f4	2	l2.fanfare_next_open_post_decay	6	12	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f4	3	l2.enemy_pool_drop	21	27	cards=4/4 hand_unresolved=0 n_enemies=1 pool=50->23	0
+soak-20260805-004135-run002#f4	3	l2.fanfare_after_turn	12	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f4	3	l2.fanfare_next_open_post_decay	10	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f4	4	l2.block_at_turn_end	6	7	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f4	4	l2.enemy_pool_drop	10	4	cards=4/4 hand_unresolved=0 n_enemies=1 pool=23->19	0
+soak-20260805-004135-run002#f4	4	l2.fanfare_after_turn	25	26	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f4	4	l2.fanfare_next_open_post_decay	20	26	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f4	5	l2.block_at_turn_end	14	11	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f4	5	l2.enemy_pool_drop	15	17	cards=3/3 hand_unresolved=0 n_enemies=1 pool=19->2	0
+soak-20260805-004135-run002#f4	5	l2.fanfare_after_turn	26	25	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f4	5	l2.fanfare_next_open_post_decay	21	25	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f4		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run002#f4		record.cards_played[Freminet — Pers, Deploy!]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run002#f5	1	l1.damage	6	0	card=Soloist's Solicitation target=Sewer Clam target_hp=56->56 n_enemies=1	0
+soak-20260805-004135-run002#f5	2	l1.damage	7	0	card=Chevreuse — Interdiction Fire target=Sewer Clam target_hp=52->52 n_enemies=1	0
+soak-20260805-004135-run002#f5	5	l1.damage	7	10	card=Chevreuse — Interdiction Fire target=Sewer Clam target_hp=36->26 n_enemies=1	0
+soak-20260805-004135-run002#f5	1	l2.enemy_pool_drop	12	4	cards=5/5 hand_unresolved=0 n_enemies=1 pool=64->60	0
+soak-20260805-004135-run002#f5	2	l2.enemy_pool_drop	16	6	cards=4/4 hand_unresolved=0 n_enemies=1 pool=60->54	0
+soak-20260805-004135-run002#f5	2	l2.fanfare_after_turn	9	12	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f5	2	l2.fanfare_next_open_post_decay	7	12	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f5	3	l2.enemy_pool_drop	9	4	cards=3/3 hand_unresolved=0 n_enemies=1 pool=54->50	0
+soak-20260805-004135-run002#f5	3	l2.fanfare_after_turn	12	24	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f5	3	l2.fanfare_next_open_post_decay	10	24	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f5	4	l2.enemy_pool_drop	5	14	cards=4/4 hand_unresolved=0 n_enemies=1 pool=50->36	0
+soak-20260805-004135-run002#f5	4	l2.fanfare_after_turn	30	26	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f5	4	l2.fanfare_next_open_post_decay	24	26	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f5	5	l2.enemy_pool_drop	17	19	cards=4/4 hand_unresolved=0 n_enemies=1 pool=36->17	0
+soak-20260805-004135-run002#f5	5	l2.fanfare_after_turn	26	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f5	5	l2.fanfare_next_open_post_decay	21	24	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run002#f5		record.cards_played[Ethereal Spotlight]	0	6	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run002#f5		record.cards_played[Soloist's Solicitation]	2	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run002#f6	1	l2.block_at_turn_end	10	8	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260805-004135-run002#f6	1	l2.enemy_pool_drop	10	7	cards=5/5 hand_unresolved=0 n_enemies=2 pool=94->87	0
+soak-20260805-004135-run002#f6	1	l2.fanfare_after_turn	0	3	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260805-004135-run002#f6	1	l2.fanfare_next_open_post_decay	0	3	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260805-004135-run002#f6	2	l2.fanfare_after_turn	4	10	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260805-004135-run002#f6	2	l2.fanfare_next_open_post_decay	3	10	cards=5/5 hand_unresolved=0 n_enemies=2	0
+soak-20260805-004135-run002#f6		record.cards_played[Ethereal Spotlight]	0	3	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run003#f1	4	l1.damage	7	0	card=Chevreuse — Interdiction Fire target=Seapunk target_hp=19->19 n_enemies=1	0
+soak-20260805-004135-run003#f1	1	l2.enemy_pool_drop	19	13	cards=6/6 hand_unresolved=0 n_enemies=1 pool=44->31	0
+soak-20260805-004135-run003#f1	1	l2.fanfare_after_turn	0	5	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run003#f1	1	l2.fanfare_next_open_post_decay	0	5	cards=6/6 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run003#f1	2	l2.block_at_turn_end	7	9	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run003#f1	2	l2.fanfare_after_turn	5	10	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run003#f1	2	l2.fanfare_next_open_post_decay	4	10	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run003#f1	3	l2.enemy_pool_drop	6	-1	cards=3/3 hand_unresolved=0 n_enemies=1 pool=25->26	1
+soak-20260805-004135-run003#f1	3	l2.fanfare_after_turn	10	13	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run003#f1	3	l2.fanfare_next_open_post_decay	8	13	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run003#f1	4	l2.enemy_pool_drop	16	13	cards=4/4 hand_unresolved=0 n_enemies=1 pool=26->13	0
+soak-20260805-004135-run003#f1	4	l2.fanfare_after_turn	13	20	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run003#f1	4	l2.fanfare_next_open_post_decay	10	20	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run003#f1		record.cards_played[Ethereal Spotlight]	0	5	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run003#f1		record.cards_played[Soloist's Solicitation]	3	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run003#f2	2	l1.damage	10	11	card=Freminet — Pressurized Floe: Backstroke target=Sludge Spinner target_hp=33->22 n_enemies=1	0
+soak-20260805-004135-run003#f2	2	l2.enemy_pool_drop	25	18	cards=3/3 hand_unresolved=0 n_enemies=1 pool=33->15	0
+soak-20260805-004135-run003#f2	2	l2.fanfare_next_open_post_decay	5	6	cards=3/3 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run003#f2	3	l2.block_at_turn_end	12	9	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run003#f2	3	l2.enemy_pool_drop	15	10	cards=4/4 hand_unresolved=0 n_enemies=1 pool=15->5	0
+soak-20260805-004135-run003#f2	3	l2.fanfare_after_turn	6	10	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run003#f2	3	l2.fanfare_next_open_post_decay	5	10	cards=4/4 hand_unresolved=0 n_enemies=1	0
+soak-20260805-004135-run003#f2		record.cards_played[Chevreuse — Interdiction Fire]	1	2	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260805-004135-run003#f2		record.cards_played[Ethereal Spotlight]	0	4	fight.cards_played vs posted play_card actions (same log)	1
+soak-20260804-224517-run001#f1		xfeed.damage_dealt	46.0	41	soak vs mod feed	1
+soak-20260804-224517-run001#f1		xfeed.n_cards_played	16	23	soak vs mod feed	1
+soak-20260804-224517-run001#f1		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run001#f1	3	xfeed.meters.encore	0	5	soak vs mod feed	1
+soak-20260804-224517-run001#f1	4	xfeed.meters.encore	0	10	soak vs mod feed	1
+soak-20260804-224517-run001#f1	5	xfeed.meters.encore	0	8	soak vs mod feed	1
+soak-20260804-224517-run001#f1	6	xfeed.meters.encore	0	5	soak vs mod feed	1
+soak-20260804-224517-run001#f2		xfeed.damage_taken	0	6	soak vs mod feed	1
+soak-20260804-224517-run001#f2		xfeed.n_cards_played	10	13	soak vs mod feed	1
+soak-20260804-224517-run001#f2		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run001#f2	3	xfeed.meters.encore	0	3	soak vs mod feed	1
+soak-20260804-224517-run001#f3		xfeed.n_cards_played	10	15	soak vs mod feed	1
+soak-20260804-224517-run001#f3		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run001#f3	3	xfeed.meters.encore	0	3	soak vs mod feed	1
+soak-20260804-224517-run001#f4		xfeed.damage_dealt	34.0	32	soak vs mod feed	1
+soak-20260804-224517-run001#f4		xfeed.n_cards_played	16	21	soak vs mod feed	1
+soak-20260804-224517-run001#f4		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run003#f1		xfeed.damage_dealt	41.0	30	soak vs mod feed	1
+soak-20260804-224517-run003#f1		xfeed.n_cards_played	16	21	soak vs mod feed	1
+soak-20260804-224517-run003#f1		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run003#f1	2	xfeed.meters.encore	0	5	soak vs mod feed	1
+soak-20260804-224517-run003#f1	3	xfeed.meters.encore	0	3	soak vs mod feed	1
+soak-20260804-224517-run003#f1	4	xfeed.meters.encore	0	2	soak vs mod feed	1
+soak-20260804-224517-run003#f1	5	xfeed.meters.encore	0	1	soak vs mod feed	1
+soak-20260804-224517-run003#f2		xfeed.hp_end	52	44	soak vs mod feed	1
+soak-20260804-224517-run003#f2		xfeed.hp_lost	8	16	soak vs mod feed	1
+soak-20260804-224517-run003#f2		xfeed.damage_dealt	27.0	21	soak vs mod feed	1
+soak-20260804-224517-run003#f2		xfeed.n_cards_played	9	14	soak vs mod feed	1
+soak-20260804-224517-run003#f2		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run003#f3		xfeed.damage_dealt	42.0	36	soak vs mod feed	1
+soak-20260804-224517-run003#f3		xfeed.n_cards_played	11	17	soak vs mod feed	1
+soak-20260804-224517-run003#f3		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run003#f3	2	xfeed.meters.encore	0	2	soak vs mod feed	1
+soak-20260804-224517-run003#f3	3	xfeed.meters.encore	0	1	soak vs mod feed	1
+soak-20260804-224517-run003#f4		xfeed.hp_end	13	31	soak vs mod feed	1
+soak-20260804-224517-run003#f4		xfeed.hp_lost	24	6	soak vs mod feed	1
+soak-20260804-224517-run003#f4		xfeed.damage_dealt	81.0	65	soak vs mod feed	1
+soak-20260804-224517-run003#f4		xfeed.n_cards_played	25	35	soak vs mod feed	1
+soak-20260804-224517-run003#f4		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run003#f4	5	xfeed.meters.encore	0	3	soak vs mod feed	1
+soak-20260804-224517-run003#f4	7	xfeed.meters.encore	0	3	soak vs mod feed	1
+soak-20260804-224517-run003#f4	8	xfeed.meters.encore	0	1	soak vs mod feed	1
+soak-20260804-224517-run003#f5		xfeed.damage_dealt	69.0	56	soak vs mod feed	1
+soak-20260804-224517-run003#f5		xfeed.n_cards_played	18	24	soak vs mod feed	1
+soak-20260804-224517-run003#f5		xfeed.outcome	survived	died	soak vs mod feed	1
+soak-20260804-224517-run003#f5	3	xfeed.meters.encore	0	1	soak vs mod feed	1
+soak-20260804-224517-run004#f1		xfeed.damage_dealt	39.0	29	soak vs mod feed	1
+soak-20260804-224517-run004#f1		xfeed.n_cards_played	15	20	soak vs mod feed	1
+soak-20260804-224517-run004#f1		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run004#f1	5	xfeed.meters.encore	0	4	soak vs mod feed	1
+soak-20260804-224517-run004#f2		xfeed.damage_dealt	36.0	34	soak vs mod feed	1
+soak-20260804-224517-run004#f2		xfeed.n_cards_played	14	20	soak vs mod feed	1
+soak-20260804-224517-run004#f2		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run004#f2	5	xfeed.meters.encore	0	3	soak vs mod feed	1
+soak-20260804-224517-run004#f3		xfeed.hp_end	48	60	soak vs mod feed	1
+soak-20260804-224517-run004#f3		xfeed.hp_lost	2	-10	soak vs mod feed	1
+soak-20260804-224517-run004#f3		xfeed.n_cards_played	14	20	soak vs mod feed	1
+soak-20260804-224517-run004#f3		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run004#f3	3	xfeed.meters.encore	0	4	soak vs mod feed	1
+soak-20260804-224517-run005#f1		xfeed.damage_dealt	51.0	45	soak vs mod feed	1
+soak-20260804-224517-run005#f1		xfeed.n_cards_played	18	25	soak vs mod feed	1
+soak-20260804-224517-run005#f1		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run005#f1	6	xfeed.meters.encore	0	5	soak vs mod feed	1
+soak-20260804-224517-run005#f2		xfeed.damage_dealt	44.0	34	soak vs mod feed	1
+soak-20260804-224517-run005#f2		xfeed.n_cards_played	10	15	soak vs mod feed	1
+soak-20260804-224517-run005#f2		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run005#f2	3	xfeed.meters.encore	0	4	soak vs mod feed	1
+soak-20260804-224517-run005#f2	4	xfeed.meters.encore	0	3	soak vs mod feed	1
+soak-20260804-224517-run005#f3		xfeed.n_cards_played	12	17	soak vs mod feed	1
+soak-20260804-224517-run005#f3		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run005#f3	3	xfeed.meters.encore	0	4	soak vs mod feed	1
+soak-20260804-224517-run005#f3	4	xfeed.meters.encore	0	8	soak vs mod feed	1
+soak-20260804-224517-run005#f4		xfeed.n_cards_played	14	20	soak vs mod feed	1
+soak-20260804-224517-run005#f4		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-224517-run005#f4	4	xfeed.meters.encore	0	1	soak vs mod feed	1
+soak-20260804-225937-run001#f2		xfeed.hp_start	1	60	soak vs mod feed	1
+soak-20260804-225937-run001#f2		xfeed.hp_end	0	1	soak vs mod feed	1
+soak-20260804-225937-run001#f2		xfeed.hp_lost	1	59	soak vs mod feed	1
+soak-20260804-225937-run001#f2		xfeed.max_hp	1	60	soak vs mod feed	1
+soak-20260804-225937-run001#f2		xfeed.turns	1	5	soak vs mod feed	1
+soak-20260804-225937-run001#f2		xfeed.damage_dealt	15.0	35	soak vs mod feed	1
+soak-20260804-225937-run001#f2		xfeed.damage_taken	0	6	soak vs mod feed	1
+soak-20260804-225937-run001#f2		xfeed.n_cards_played	3	18	soak vs mod feed	1
+soak-20260804-225937-run001#f2		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-225937-run001#f2		xfeed.floor	8	2	soak vs mod feed	1
+soak-20260804-225937-run001#f2	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run001#f2	1	xfeed.enemy_pool	81	43	soak vs mod feed	1
+soak-20260804-225937-run001#f2	1	xfeed.hp_trajectory	(1, 0)	(60, 0)	soak vs mod feed (hp,block)	1
+soak-20260804-225937-run002#f1		xfeed.damage_dealt	49.0	42	soak vs mod feed	1
+soak-20260804-225937-run002#f1		xfeed.n_cards_played	20	30	soak vs mod feed	1
+soak-20260804-225937-run002#f1		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-225937-run002#f1	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run002#f1	2	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260804-225937-run002#f1	3	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260804-225937-run002#f1	4	xfeed.meters.encore	-1	10	soak vs mod feed	1
+soak-20260804-225937-run002#f1	5	xfeed.meters.encore	-1	8	soak vs mod feed	1
+soak-20260804-225937-run002#f1	6	xfeed.meters.encore	-1	8	soak vs mod feed	1
+soak-20260804-225937-run002#f1	7	xfeed.meters.encore	-1	13	soak vs mod feed	1
+soak-20260804-225937-run002#f1	8	xfeed.meters.encore	-1	13	soak vs mod feed	1
+soak-20260804-225937-run002#f1	9	xfeed.meters.encore	-1	10	soak vs mod feed	1
+soak-20260804-225937-run002#f2		xfeed.damage_dealt	42.0	37	soak vs mod feed	1
+soak-20260804-225937-run002#f2		xfeed.n_cards_played	16	22	soak vs mod feed	1
+soak-20260804-225937-run002#f2		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-225937-run002#f2	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run002#f2	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run002#f2	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run002#f2	4	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260804-225937-run002#f2	5	xfeed.meters.encore	-1	2	soak vs mod feed	1
+soak-20260804-225937-run002#f3		xfeed.damage_dealt	123.0	112	soak vs mod feed	1
+soak-20260804-225937-run002#f3		xfeed.n_cards_played	26	35	soak vs mod feed	1
+soak-20260804-225937-run002#f3		xfeed.outcome	survived	died	soak vs mod feed	1
+soak-20260804-225937-run002#f3	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run002#f3	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run002#f3	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run002#f3	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run002#f3	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run002#f3	6	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run002#f3	7	xfeed.meters.salon_cap	3	4	soak vs mod feed	1
+soak-20260804-225937-run002#f3	7	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run002#f3	8	xfeed.meters.salon_cap	3	4	soak vs mod feed	1
+soak-20260804-225937-run002#f3	8	xfeed.meters.encore	-1	2	soak vs mod feed	1
+soak-20260804-225937-run002#f3	9	xfeed.meters.salon_cap	3	4	soak vs mod feed	1
+soak-20260804-225937-run002#f3	9	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f1		xfeed.damage_dealt	40.0	38	soak vs mod feed	1
+soak-20260804-225937-run003#f1		xfeed.n_cards_played	11	16	soak vs mod feed	1
+soak-20260804-225937-run003#f1		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-225937-run003#f1	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f1	2	xfeed.meters.encore	-1	4	soak vs mod feed	1
+soak-20260804-225937-run003#f1	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f1	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f2		xfeed.damage_dealt	48.0	41	soak vs mod feed	1
+soak-20260804-225937-run003#f2		xfeed.n_cards_played	15	22	soak vs mod feed	1
+soak-20260804-225937-run003#f2		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-225937-run003#f2	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f2	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f2	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f2	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f2	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f2	6	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f3		xfeed.damage_dealt	50.0	46	soak vs mod feed	1
+soak-20260804-225937-run003#f3		xfeed.n_cards_played	10	15	soak vs mod feed	1
+soak-20260804-225937-run003#f3		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-225937-run003#f3	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f3	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f3	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f3	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f4		xfeed.damage_dealt	79.0	41	soak vs mod feed	1
+soak-20260804-225937-run003#f4		xfeed.n_cards_played	17	24	soak vs mod feed	1
+soak-20260804-225937-run003#f4		xfeed.outcome	survived	interrupted	soak vs mod feed	1
+soak-20260804-225937-run003#f4	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f4	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f4	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f4	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f4	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260804-225937-run003#f4	6	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f1		xfeed.damage_dealt	42.0	34	soak vs mod feed	1
+soak-20260805-003056-run001#f1		xfeed.n_cards_played	15	22	soak vs mod feed	1
+soak-20260805-003056-run001#f1		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run001#f1	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f1	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f1	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f1	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f1	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f1	6	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f2		xfeed.damage_dealt	32.0	27	soak vs mod feed	1
+soak-20260805-003056-run001#f2		xfeed.n_cards_played	12	16	soak vs mod feed	1
+soak-20260805-003056-run001#f2		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run001#f2	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f2	2	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-003056-run001#f2	3	xfeed.meters.encore	-1	4	soak vs mod feed	1
+soak-20260805-003056-run001#f2	4	xfeed.meters.encore	-1	3	soak vs mod feed	1
+soak-20260805-003056-run001#f3		xfeed.n_cards_played	17	25	soak vs mod feed	1
+soak-20260805-003056-run001#f3		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run001#f3	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f3	2	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-003056-run001#f3	3	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-003056-run001#f3	4	xfeed.meters.encore	-1	4	soak vs mod feed	1
+soak-20260805-003056-run001#f3	5	xfeed.meters.encore	-1	9	soak vs mod feed	1
+soak-20260805-003056-run001#f3	6	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f3	7	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f4		xfeed.damage_dealt	68.0	64	soak vs mod feed	1
+soak-20260805-003056-run001#f4		xfeed.n_cards_played	21	30	soak vs mod feed	1
+soak-20260805-003056-run001#f4		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run001#f4	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f4	2	xfeed.meters.encore	-1	1	soak vs mod feed	1
+soak-20260805-003056-run001#f4	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f4	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f4	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f4	6	xfeed.meters.encore	-1	3	soak vs mod feed	1
+soak-20260805-003056-run001#f4	7	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f4	8	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f5		xfeed.hp_end	0	1	soak vs mod feed	1
+soak-20260805-003056-run001#f5		xfeed.hp_lost	24	23	soak vs mod feed	1
+soak-20260805-003056-run001#f5		xfeed.n_cards_played	20	29	soak vs mod feed	1
+soak-20260805-003056-run001#f5		xfeed.outcome	survived	died	soak vs mod feed	1
+soak-20260805-003056-run001#f5	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f5	2	xfeed.meters.encore	-1	1	soak vs mod feed	1
+soak-20260805-003056-run001#f5	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f5	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f5	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f5	6	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f5	7	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f5	8	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run001#f5	9	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run002#f1		xfeed.damage_dealt	48.0	37	soak vs mod feed	1
+soak-20260805-003056-run002#f1		xfeed.n_cards_played	14	20	soak vs mod feed	1
+soak-20260805-003056-run002#f1		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run002#f1	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run002#f1	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run002#f1	3	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-003056-run002#f1	4	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-003056-run002#f1	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run002#f2		xfeed.hp_end	48	51	soak vs mod feed	1
+soak-20260805-003056-run002#f2		xfeed.hp_lost	3	0	soak vs mod feed	1
+soak-20260805-003056-run002#f2		xfeed.damage_dealt	36.0	30	soak vs mod feed	1
+soak-20260805-003056-run002#f2		xfeed.n_cards_played	12	16	soak vs mod feed	1
+soak-20260805-003056-run002#f2		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run002#f2	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run002#f2	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run002#f2	3	xfeed.meters.encore	-1	4	soak vs mod feed	1
+soak-20260805-003056-run002#f2	4	xfeed.meters.encore	-1	2	soak vs mod feed	1
+soak-20260805-003056-run002#f3		xfeed.damage_dealt	32.0	20	soak vs mod feed	1
+soak-20260805-003056-run002#f3		xfeed.n_cards_played	13	18	soak vs mod feed	1
+soak-20260805-003056-run002#f3		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run002#f3	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run002#f3	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run002#f3	3	xfeed.meters.encore	-1	4	soak vs mod feed	1
+soak-20260805-003056-run002#f3	4	xfeed.meters.encore	-1	8	soak vs mod feed	1
+soak-20260805-003056-run002#f4		xfeed.hp_end	0	1	soak vs mod feed	1
+soak-20260805-003056-run002#f4		xfeed.hp_lost	60	59	soak vs mod feed	1
+soak-20260805-003056-run002#f4		xfeed.n_cards_played	20	27	soak vs mod feed	1
+soak-20260805-003056-run002#f4		xfeed.outcome	survived	died	soak vs mod feed	1
+soak-20260805-003056-run002#f4	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run002#f4	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run002#f4	3	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-003056-run002#f4	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run002#f4	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run002#f4	6	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run002#f4	7	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f1		xfeed.damage_dealt	48.0	40	soak vs mod feed	1
+soak-20260805-003056-run003#f1		xfeed.n_cards_played	15	21	soak vs mod feed	1
+soak-20260805-003056-run003#f1		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run003#f1	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f1	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f1	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f1	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f1	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f2		xfeed.n_cards_played	11	16	soak vs mod feed	1
+soak-20260805-003056-run003#f2		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run003#f2	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f2	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f2	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f2	4	xfeed.meters.encore	-1	4	soak vs mod feed	1
+soak-20260805-003056-run003#f3		xfeed.damage_dealt	35.0	23	soak vs mod feed	1
+soak-20260805-003056-run003#f3		xfeed.n_cards_played	10	14	soak vs mod feed	1
+soak-20260805-003056-run003#f3		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run003#f3	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f3	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f3	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f4		xfeed.damage_dealt	89.0	82	soak vs mod feed	1
+soak-20260805-003056-run003#f4		xfeed.n_cards_played	13	20	soak vs mod feed	1
+soak-20260805-003056-run003#f4		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run003#f4	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f4	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f4	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f4	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f4	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f4	6	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f5		xfeed.damage_dealt	56.0	47	soak vs mod feed	1
+soak-20260805-003056-run003#f5		xfeed.n_cards_played	17	24	soak vs mod feed	1
+soak-20260805-003056-run003#f5		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run003#f5	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f5	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f5	3	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-003056-run003#f5	4	xfeed.meters.encore	-1	1	soak vs mod feed	1
+soak-20260805-003056-run003#f5	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f5	6	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f6		xfeed.damage_dealt	136.0	130	soak vs mod feed	1
+soak-20260805-003056-run003#f6		xfeed.n_cards_played	28	37	soak vs mod feed	1
+soak-20260805-003056-run003#f6		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run003#f6	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f6	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f6	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f6	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f6	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f6	6	xfeed.meters.encore	-1	2	soak vs mod feed	1
+soak-20260805-003056-run003#f6	7	xfeed.meters.encore	-1	2	soak vs mod feed	1
+soak-20260805-003056-run003#f6	8	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f7		xfeed.damage_dealt	59.0	53	soak vs mod feed	1
+soak-20260805-003056-run003#f7		xfeed.n_cards_played	18	24	soak vs mod feed	1
+soak-20260805-003056-run003#f7		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run003#f7	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f7	2	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-003056-run003#f7	3	xfeed.meters.encore	-1	4	soak vs mod feed	1
+soak-20260805-003056-run003#f7	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f7	5	xfeed.meters.encore	-1	2	soak vs mod feed	1
+soak-20260805-003056-run003#f8		xfeed.damage_dealt	72.0	61	soak vs mod feed	1
+soak-20260805-003056-run003#f8		xfeed.n_cards_played	18	25	soak vs mod feed	1
+soak-20260805-003056-run003#f8		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-003056-run003#f8	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f8	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f8	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-003056-run003#f8	4	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-003056-run003#f8	5	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-003056-run003#f8	6	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run001#f1		xfeed.n_cards_played	9	13	soak vs mod feed	1
+soak-20260805-004135-run001#f1		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-004135-run001#f1	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run001#f1	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run001#f1	3	xfeed.meters.encore	-1	2	soak vs mod feed	1
+soak-20260805-004135-run001#f2		xfeed.damage_dealt	43.0	37	soak vs mod feed	1
+soak-20260805-004135-run001#f2		xfeed.n_cards_played	8	12	soak vs mod feed	1
+soak-20260805-004135-run001#f2		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-004135-run001#f2	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run001#f2	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run001#f2	3	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-004135-run001#f3		xfeed.damage_dealt	39.0	36	soak vs mod feed	1
+soak-20260805-004135-run001#f3		xfeed.n_cards_played	12	17	soak vs mod feed	1
+soak-20260805-004135-run001#f3		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-004135-run001#f3	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run001#f3	2	xfeed.meters.encore	-1	4	soak vs mod feed	1
+soak-20260805-004135-run001#f3	3	xfeed.meters.encore	-1	3	soak vs mod feed	1
+soak-20260805-004135-run001#f3	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run001#f4		xfeed.hp_end	0	7	soak vs mod feed	1
+soak-20260805-004135-run001#f4		xfeed.hp_lost	52	45	soak vs mod feed	1
+soak-20260805-004135-run001#f4		xfeed.damage_dealt	30.0	45	soak vs mod feed	1
+soak-20260805-004135-run001#f4		xfeed.damage_taken	45	48	soak vs mod feed	1
+soak-20260805-004135-run001#f4		xfeed.n_cards_played	27	35	soak vs mod feed	1
+soak-20260805-004135-run001#f4		xfeed.outcome	survived	died	soak vs mod feed	1
+soak-20260805-004135-run001#f4	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run001#f4	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run001#f4	3	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run001#f4	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run001#f4	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run001#f4	6	xfeed.meters.encore	-1	3	soak vs mod feed	1
+soak-20260805-004135-run001#f4	7	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run001#f4	8	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f1		xfeed.damage_dealt	43.0	41	soak vs mod feed	1
+soak-20260805-004135-run002#f1		xfeed.n_cards_played	13	19	soak vs mod feed	1
+soak-20260805-004135-run002#f1		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-004135-run002#f1	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f1	2	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-004135-run002#f1	3	xfeed.meters.encore	-1	2	soak vs mod feed	1
+soak-20260805-004135-run002#f1	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f1	5	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-004135-run002#f2		xfeed.damage_dealt	40.0	34	soak vs mod feed	1
+soak-20260805-004135-run002#f2		xfeed.n_cards_played	12	17	soak vs mod feed	1
+soak-20260805-004135-run002#f2		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-004135-run002#f2	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f2	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f2	3	xfeed.meters.encore	-1	3	soak vs mod feed	1
+soak-20260805-004135-run002#f2	4	xfeed.meters.encore	-1	10	soak vs mod feed	1
+soak-20260805-004135-run002#f3		xfeed.n_cards_played	14	18	soak vs mod feed	1
+soak-20260805-004135-run002#f3		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-004135-run002#f3	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f3	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f3	3	xfeed.meters.encore	-1	7	soak vs mod feed	1
+soak-20260805-004135-run002#f3	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f4		xfeed.damage_dealt	54.0	34	soak vs mod feed	1
+soak-20260805-004135-run002#f4		xfeed.n_cards_played	15	22	soak vs mod feed	1
+soak-20260805-004135-run002#f4		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-004135-run002#f4	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f4	2	xfeed.meters.encore	-1	10	soak vs mod feed	1
+soak-20260805-004135-run002#f4	3	xfeed.meters.encore	-1	9	soak vs mod feed	1
+soak-20260805-004135-run002#f4	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f4	5	xfeed.meters.encore	-1	1	soak vs mod feed	1
+soak-20260805-004135-run002#f4	6	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f5		xfeed.damage_dealt	65.0	40	soak vs mod feed	1
+soak-20260805-004135-run002#f5		xfeed.n_cards_played	16	22	soak vs mod feed	1
+soak-20260805-004135-run002#f5		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-004135-run002#f5	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f5	2	xfeed.meters.encore	-1	1	soak vs mod feed	1
+soak-20260805-004135-run002#f5	3	xfeed.meters.encore	-1	1	soak vs mod feed	1
+soak-20260805-004135-run002#f5	4	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f5	5	xfeed.meters.encore	-1	4	soak vs mod feed	1
+soak-20260805-004135-run002#f5	6	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f6		xfeed.hp_end	0	9	soak vs mod feed	1
+soak-20260805-004135-run002#f6		xfeed.hp_lost	10	1	soak vs mod feed	1
+soak-20260805-004135-run002#f6		xfeed.damage_taken	1	5	soak vs mod feed	1
+soak-20260805-004135-run002#f6		xfeed.n_cards_played	10	13	soak vs mod feed	1
+soak-20260805-004135-run002#f6		xfeed.outcome	survived	died	soak vs mod feed	1
+soak-20260805-004135-run002#f6	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f6	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run002#f6	3	xfeed.meters.encore	-1	3	soak vs mod feed	1
+soak-20260805-004135-run003#f1		xfeed.damage_dealt	45.0	38	soak vs mod feed	1
+soak-20260805-004135-run003#f1		xfeed.n_cards_played	14	20	soak vs mod feed	1
+soak-20260805-004135-run003#f1		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-004135-run003#f1	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run003#f1	2	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run003#f1	3	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-004135-run003#f1	4	xfeed.meters.encore	-1	5	soak vs mod feed	1
+soak-20260805-004135-run003#f1	5	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run003#f2		xfeed.n_cards_played	8	13	soak vs mod feed	1
+soak-20260805-004135-run003#f2		xfeed.outcome	survived	won	soak vs mod feed	1
+soak-20260805-004135-run003#f2	1	xfeed.meters.encore	-1	0	soak vs mod feed	1
+soak-20260805-004135-run003#f2	2	xfeed.meters.encore	-1	4	soak vs mod feed	1
+soak-20260805-004135-run003#f2	3	xfeed.meters.encore	-1	4	soak vs mod feed	1
+soak-20260805-004135-run003#f2	4	xfeed.meters.encore	-1	2	soak vs mod feed	1
