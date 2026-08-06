@@ -49,6 +49,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history, for exactly one consumer: lint_p_ledger.py rule 2
+          # shows every P-ledger handle commit to prove it touched no
+          # [USER]-gated register, and a depth-1 clone cannot see ancestors.
+          # On a shallow clone that rule degrades to per-handle SKIPPED notes,
+          # so this line is what makes CI the enforcing venue.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -110,6 +117,15 @@ jobs:
       # -- see the module docstring.
       - name: R-number citations (canon_role_tempo)
         run: python tools/lint_r_citations.py
+      # Class-P purge (P-B), 2026-08-06. The charter's two suite-failure
+      # conditions, verbatim from docs/class-p-charter-2026-08-06.md §3
+      # (R119): a P-ledger row without a five-line attestation fails; a
+      # ledger-referenced commit touching a file owned by a [USER]-gated
+      # register fails. The owned-register definition is a fixed conservative
+      # glob list in the module header -- read it before widening OR
+      # narrowing. Needs the fetch-depth: 0 checkout above.
+      - name: P-ledger (attestations + gated-register guard)
+        run: python tools/lint_p_ledger.py
       # Understudy 2026-08-04. vendor/ carries third-party source pinned to an
       # exact upstream commit; this asserts the tree still is what the
       # provenance note says it is, in both directions. Cheap, and the one
