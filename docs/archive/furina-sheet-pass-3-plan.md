@@ -1,5 +1,7 @@
 # Furina Sheet Pass 3 — Plan (pre-registered)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Authorized:** R32 (scope) + R33 (window zero),
 furina-pass3-rulings.md. **Governing:** R16–R22, R26, R29–R33,
 DECISIONS 69–88, kickoff v0.1, principles v1.10.

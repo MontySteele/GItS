@@ -1,5 +1,7 @@
 # Track A sprint log — Axis-Validity, 2026-08-04
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Charter: `docs/axis-validity-session-charter.md` (RATIFIED, AV-G2 countersigned).
 Brief: `docs/track-a-kickoff-brief.md`. Worktree-per-session (G4).
 

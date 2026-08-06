@@ -1,5 +1,7 @@
 # Playtest — co-op A0, 2026-07-25 (Klee + Furina)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 Two players, both A8 regulars in the base game. Ascension 0. **Full clear, "by
 the skin of our teeth."** This is the input that produced the "Ship What We
 Know" sprint (docs/ship-what-we-know-sprint-plan.md).

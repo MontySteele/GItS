@@ -1,5 +1,7 @@
 # Furina pass 3 — chat ratifications + design-pass scope (2026-07-20)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Provenance:** written in chat with the user after the pass-2 wrap; every
 ruling below is USER-RATIFIED in conversation. This is v2 of the chat
 notes — v1 recommended ratifying the SPOTLIGHT_BASE_MULT record and

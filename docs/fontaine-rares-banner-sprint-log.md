@@ -1,5 +1,7 @@
 # Fontaine Rares & the Banner Goes Live — sprint log
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Executed:** 2026-07-25. **Rulings:** R64, R65, D2 (in `tier0/DECISIONS.md`).
 **Origin:** shop-companion-channel close-out, open item 7 — the coverage lint's
 live finding that Fontaine designed zero Rare companions, graded by [USER] as a

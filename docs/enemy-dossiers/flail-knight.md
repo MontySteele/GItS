@@ -1,5 +1,7 @@
 # Flail Knight
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `FlailKnight` (`MonsterModel`)
 - **Kind:** elite — one of three bodies in the `KnightsElite` encounter
 - **Act:** Act 3 (Glory; act index 2). Its subclass `MysteriousKnight` also appears in **Act 2** (Hive) as the combat half of the `TheLanternKey` event — see §4.2.

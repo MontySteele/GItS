@@ -1,5 +1,7 @@
 # Knowledge Demon
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `KnowledgeDemon` (`MonsterModel`)
 - **Kind:** boss
 - **Act:** Act 2 — the Hive. One of the act's three boss options (`KnowledgeDemonBoss`), second in the act's boss discovery order, with its own act-2 boss BGM and custom background.

@@ -1,5 +1,7 @@
 # Surplus Week — landing manifest
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Status:** INDEX. This file is a pointer table, not a finding. It says what
 landed, where it lives, and what is still owed. It resolves nothing, grades
 nothing, and carries zero design authority.

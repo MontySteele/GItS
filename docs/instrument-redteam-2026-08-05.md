@@ -1,5 +1,7 @@
 # Instrument red-team — Track O, "House Lights"
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Date: 2026-08-05. Branch `findings/track-o`, cut from main at `91e9258`.
 Twelve Opus slices, each holding one instrument. **No game was launched and no
 C# was built** — every finding below reproduces from a committed fixture by

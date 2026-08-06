@@ -1,5 +1,7 @@
 # Zhongli dossier — canon kit, precedent scan, open questions
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-08-05 · **Track J1 of the "Last Call, Round Two" addendum.
 Findings-only RESEARCH.** No game process was launched. No design content
 appears in this document.

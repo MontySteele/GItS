@@ -1,5 +1,7 @@
 # Silent pilot review — the act-1 regression, explained (2026-07-27)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 The SCHEDULED REVIEW from `tier0/content/pilots/archetypes.yaml` (trigger:
 pool completion — FIRED). Ruled order: (b) explain the regression first,
 then (a) the weights, then (c) the scorer question. Protocol throughout:

@@ -1,5 +1,7 @@
 # Scroll of Biting
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `ScrollOfBiting`
 - **Kind:** normal
 - **Act:** 3 (Glory, act index 2)

@@ -1,5 +1,7 @@
 # Worknote — Klee Session (chat → Code)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. Five items, roughly in priority order. Items 1–2 are
 sheet/errata work, 3 is a display ruling, 4 is art follow-ups, 5 is a
 cross-session obligation with a test waiting on it.

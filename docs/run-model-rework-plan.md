@@ -1,5 +1,7 @@
 # Run-Model Rework: a realistic tier0.5 gauntlet
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 > # ARCHIVED — DO NOT QUOTE UNLABELLED
 >
 > **This doc describes the RUNTEMPLATE 3→5 / DRAFTER 5 world.** The current

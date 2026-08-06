@@ -1,3 +1,4 @@
+# Lifecycle: LIVING — expected to change; read it to work on the project. Status index: docs/registry/identifiers.md §15.  (lint-ok)
 # Klee + Mondstadt upgrade deltas — v0.6 (companion file to klee-cards.yaml / mondstadt-companions.yaml)
 # Semantics: keys are DELTAS or replacements applied to the base card on upgrade.
 #   damage/block/heal/etc: +N = add N to that amount | cost: -1 = reduce | remove: <keyword> | add: <effect>

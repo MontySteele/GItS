@@ -1,5 +1,7 @@
 # Triage Execution — Report (splash cap, compensator, re-measure, pity)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-19. **Input:** errata-m5-triage.md. All four rulings executed; 124 tests green, no xfails. One new decision-ready finding at the bottom — the reaction-assembly re-measure decomposed into something more interesting than a pool-odds tweak.
 
 ## Ruling 1 — splash cap: ARMED ✓

@@ -1,5 +1,7 @@
 # The Adversary Mk 2 — behavior dossier
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `TheAdversaryMkTwo`
 - **Kind:** boss
 - **Act:** **unassigned in the shipped data.** No act's boss-discovery list, no encounter model, and no other class in the tree references this monster; the only mention outside its own file is the type-registry table. Its power band places it squarely between Mk 1 and Mk 3 (see below), i.e. it reads as the **Act 2 rung of a three-rung boss ladder**, but nothing in code routes a run into it. Treat it as bestiary / test / unshipped content.

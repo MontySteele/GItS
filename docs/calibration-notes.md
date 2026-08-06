@@ -1,5 +1,7 @@
 # Difficulty calibration — working notes
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Phase after the relic/potion/ancient layer (`docs/archive/relic-potion-layer-plan.md`).
 The runs are now "realistic" (full player-side power budget), so per the
 ratified order we calibrate difficulty against a character that carries a real

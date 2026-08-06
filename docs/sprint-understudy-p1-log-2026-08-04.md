@@ -1,5 +1,7 @@
 # Sprint log — Understudy P1: policy_v1 and the soak harness (2026-08-04)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Sprint: Understudy (bot playtest apparatus). Phase: **P1**. Worktree G4.
 Brief: `docs/understudy-kickoff-brief.md`. Phase-0 measurement:
 `docs/understudy-phase0-report.md`. The signed package this pass executes:

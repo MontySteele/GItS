@@ -1,5 +1,7 @@
 # Aeonglass
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `Aeonglass`
 - **Kind:** boss
 - **Act:** 3 (Glory, act index 2)

@@ -1,5 +1,7 @@
 # Lore-fidelity audit — 2026-08-05
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Track N of the House Lights swarm batch. **Findings only.** This document
 inventories and adjudicates; it proposes nothing and it rewrites nothing. No
 card text, sheet, string or gallery line was touched by this pass — an audit

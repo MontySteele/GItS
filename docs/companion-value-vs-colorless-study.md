@@ -1,5 +1,7 @@
 # Companion Pool Value vs. the Base-Game Colorless Bar — A Balance Study
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Author:** balance-research pass (Claude Code)
 **Date:** 2026-07-21
 **Question under test:** The mod replaces StS2's base colorless card pool with the custom *Companion* pool. Colorless cards are conventionally costed **above** value-per-energy (acontextual premium splash). Companion cards were deliberately balanced **below** base-kit power (the enabler-not-carry principle, principles §4.3). Have we accidentally made the companion pool *trash* relative to the colorless value bar it now has to fill?

@@ -1,5 +1,7 @@
 # StS2 map generation + event research (wiki harvest)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 > # MIXED WORLD — DO NOT QUOTE UNLABELLED
 >
 > **This doc accreted across three run-layer worlds and its sections do not

@@ -1,5 +1,7 @@
 # Companion art pass — pipeline + plan.tsv addendum (2026-07-21, chat + user)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 Method: chat hunted sources and built contact sheets + crop prototypes;
 user did eyes-on. This doc carries the AUTO defaults (mechanical, chat) and
 marks every taste call as USER-OWED (chat can't vibe-check newer

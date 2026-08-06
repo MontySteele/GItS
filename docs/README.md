@@ -1,5 +1,7 @@
 # Docs index
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 Reorganized 2026-07-26 (project recap). Two kinds of documents live here:
 
 - **`docs/*.md`** — the current set: anything still governing, still open, or

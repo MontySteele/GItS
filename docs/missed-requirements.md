@@ -1,5 +1,7 @@
 # Missed requirements — recap audit, 2026-07-26
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Findings from a full read of all 89 project docs, cross-checked against the
 code (`tier0/`, `tier05/`, `klee-mod/KleeCode/`, `tools/`, the design-sheet
 YAMLs, `art/plan.tsv`) and against the two live ledgers

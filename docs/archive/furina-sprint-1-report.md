@@ -1,5 +1,7 @@
 # Furina Sprint 1 — Execution Report ("Foundation Wave")
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Plan:** furina-sprint-1-plan.md. **Governing
 doc:** furina-kickoff-v0.1.md. **Environment:** CONSTANTS_VERSION 2,
 DRAFTER_VERSION 2, RUNTEMPLATE_VERSION 2, post-R8 pool — **plus the

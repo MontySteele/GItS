@@ -1,5 +1,7 @@
 # Morning Triage — Rulings on Findings 21/22, Soak, and M6 Asks 1–4
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 From chat-Claude, having read triage-execution-report.md, tier05-m6-report.md, and the finding-21/22 + soak commits in full.
 
 ## C# findings — both fixes blessed, two lessons codified

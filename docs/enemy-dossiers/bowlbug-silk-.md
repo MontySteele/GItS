@@ -1,5 +1,7 @@
 # Bowlbug (Silk)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `BowlbugSilk`
 - **Kind:** normal
 - **Act:** Act 2 (`Hive`, act index 1)

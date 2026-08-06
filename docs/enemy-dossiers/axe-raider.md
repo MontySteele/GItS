@@ -1,5 +1,7 @@
 # Enemy Dossier — Axe Raider
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `AxeRubyRaider`
 - **Kind:** normal
 - **Act:** Act 1 (`Overgrowth`, act index 0) — the only act whose encounter pool contains the Ruby Raiders fight

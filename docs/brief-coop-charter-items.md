@@ -1,5 +1,7 @@
 # Design brief — the two co-op charter items: build or waive (2026-07-29)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Status: BRIEF. Nothing here is ruled and nothing here is a recommendation.**
 Two items, each with what was promised, what exists, and options. No numbers
 are PROPOSED; the numbers come after a direction is picked.

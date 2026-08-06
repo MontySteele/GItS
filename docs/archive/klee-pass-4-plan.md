@@ -1,5 +1,7 @@
 # Klee Pass 4 — Design-Pass Brief ("The Statline Reconciliation")
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-21. **Authorized:** user ruling this session — *"let's go
 with the design spec. Scaling needs a nerf, and utility needs a buff"*,
 followed by *"this might actually need a design pass."*

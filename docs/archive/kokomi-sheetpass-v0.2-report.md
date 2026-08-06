@@ -1,5 +1,7 @@
 # Kokomi Sheet Pass v0.2/v0.3 — Report, Act-Sim Diagnosis & Charge-Curve Pass
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-24. Governing rulings: R51 (elite axes A2+A6, stability
 band, debuff texture) and R52 (batch closure of every kickoff gate).
 Predecessors: docs/kokomi-kickoff-v1.md, docs/kokomi-roster-v0.1-report.md.

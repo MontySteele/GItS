@@ -1,5 +1,7 @@
 # Open playtest items, all sprints
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 > ## SUPERSEDED AS THE CROSS-SPRINT REGISTER — see `docs/backlog-2026-07-29.md`
 >
 > This file stopped being the owed-item register on 2026-07-26. The live

@@ -1,5 +1,7 @@
 # Klee design review — "how do we make her stop imploding?"
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 Ratified next step out of the difficulty-calibration phase
 (`docs/calibration-notes.md`). Calibration established the finding: **Klee
 takes Ironclad-level damage without Ironclad-level sustain** — worst net %HP

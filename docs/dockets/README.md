@@ -1,5 +1,7 @@
 # Dockets — index
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Status:** INDEX. A docket is a holding place for items that have been
 *routed* and not *decided*. Nothing in this directory carries design
 authority, and nothing in it is scheduled work until the session it names

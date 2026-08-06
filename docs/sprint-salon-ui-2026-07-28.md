@@ -1,5 +1,7 @@
 # Sprint brief — Salon UI legibility + measurement (Group 3 residue, 2026-07-28)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Delegated sprint. Parent doc: `docs/playtest2-triage-2026-07-28.md` (Group 3).
 All design questions in scope are ANSWERED — this sprint is implementation and
 measurement only. Anything marked PROPOSED or "report back" returns to [USER]

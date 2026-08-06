@@ -1,5 +1,7 @@
 # The Insatiable
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `TheInsatiable` (`MonsterModel`)
 - **Kind:** boss
 - **Act:** Act 2 — the Hive. One of the act's three boss options (`TheInsatiableBoss`), **first** in the act's boss discovery order, with its own act-2 boss BGM, custom background, custom ambience, and a slightly pulled-back camera (0.9× scaling).

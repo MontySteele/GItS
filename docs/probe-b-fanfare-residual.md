@@ -1,5 +1,7 @@
 # Probe B3 (S7 probe (b)) — the Fanfare accounting residual
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Date: 2026-08-05. Authority: R103, probe order (c) → (a) → **(b)**. Input: the
 S7 audit's C2 cluster (`docs/s7-fidelity-audit.md` §4.1,
 `docs/s7-classification.md` family C, C2). This is a **live measurement**: the

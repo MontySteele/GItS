@@ -1,5 +1,7 @@
 # Tier 0.5 M7 — Report (v1.9 Burst-as-kit, upgrades, CONSTANTS_VERSION 2)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 > **ARCHIVED 2026-07-20 — drafter-v1 / template-v1 snapshot.** The
 > m7-rulings execution (tier05-m8-report.md) superseded this world twice:
 > DRAFTER_VERSION 2 (assigned adopts the power term; the §4/§7 gap story

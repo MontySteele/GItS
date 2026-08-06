@@ -1,5 +1,7 @@
 # Silent Anchor — sprint plan (execution brief)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 2026-07-27. Design + rationale: `docs/silent-anchor-kickoff-v1.md` (read
 it first; §5's wiring table and §6's gap table are the map). Executor:
 Opus. Ratification asks A1–A5 in the kickoff are [USER]-only — build up to

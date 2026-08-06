@@ -1,5 +1,7 @@
 # Kokomi Art Pass Requirements
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-25
 **Status:** card shortlists built and provisionally applied (77 faces, awaiting
 the [USER] taste pass); **character-shell track DONE** — see §5a

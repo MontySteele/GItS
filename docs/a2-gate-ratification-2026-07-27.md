@@ -1,5 +1,7 @@
 # A2 Gate Ratification — Ruling Update (complete two-anchor data)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Date: 2026-07-27. Supersedes silent-anchor-sprint-log §6.5, whose draft was
 written against a 22-card partial Silent and self-suspended pending coverage
 ≥ ~70%. That condition is met: Silent extracted at 85/86 (99%), and today's

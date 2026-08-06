@@ -1,5 +1,7 @@
 # Sprint brief — the pilot gap (Furina power ceiling, 2026-07-28)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Delegated sprint. MEASURE ONLY: no lever, no card change, no constant change.
 Every lever this sprint informs is [USER] red-pen and out of scope.
 

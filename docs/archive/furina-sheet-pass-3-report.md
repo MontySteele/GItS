@@ -1,5 +1,7 @@
 # Furina Sheet Pass 3 — Report ("The Designation World")
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Plan:** furina-sheet-pass-3-plan.md
 (pre-registered). **Authorized:** R32 + R33 (furina-pass3-rulings.md;
 renumbered from the chat draft — see that doc's collision table).

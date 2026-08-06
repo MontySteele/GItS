@@ -1,5 +1,7 @@
 # Upgrade Conventions — Mined Grammar & Our Rules
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Source:** programmatic mining of all 910 card files in the Downfall StS2 codebase (which demonstrably carries base-game values — the most frequent damage pair in the corpus is 6→+3, i.e. Strike itself; Defend's 5→+3 tops block). Samples: 283 damage upgrades, 157 block, 243 power-stack, 92 cost, 62 keyword.
 
 ## The mined grammar

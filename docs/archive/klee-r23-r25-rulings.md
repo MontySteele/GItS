@@ -1,5 +1,7 @@
 # Rulings R23–R25 + companion scoping note (2026-07-20, chat → Code)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 Ruled after the post-worknote inventory of remaining Klee cards/mechanics.
 The inventory's suggested build order is APPROVED as the standing plan:
 aura application → Burst-energy spike (CustomResource) → power cards (the

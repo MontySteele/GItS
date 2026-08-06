@@ -1,5 +1,7 @@
 # Playtest 3 notes — Furina, ascension 0 (2026-07-28)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Build `0.2-230` (the merged salon-UI sprint). Solo, salon build heavy on
 powers, picking up Fanfare scaling cards late.
 

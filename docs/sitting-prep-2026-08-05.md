@@ -1,5 +1,7 @@
 # Sitting prep — 2026-08-05
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Status:** PREP PACK. This document carries **zero design authority**. It
 gathers, quotes and locates; it rules on nothing, recommends nothing, and
 executes nothing. Every section below is material for one batched [USER]

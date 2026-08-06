@@ -1,5 +1,7 @@
 # Klee — Character Design Doc (v0.1)
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Files:** `klee-cards.yaml` (75-card pool), `mondstadt-companions.yaml` (16 companion cards). Governed by `teyvat-spire-design-principles.md`; tested per `tier0-simulator-spec.md`.
 
 ## 1. Identity

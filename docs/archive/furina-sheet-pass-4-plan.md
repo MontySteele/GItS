@@ -1,5 +1,7 @@
 # Furina Sheet Pass 4 — Plan (pre-registered)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-24. **Source:** the 2026-07-24 playtest workshop queue
 (Q1/Q2/Q3, USER-ratified directions marked there). **Governing:** kickoff
 v0.1 (§4 amendment proposed in Q2), principles v1.6+ (Regent-star Encore /

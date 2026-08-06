@@ -1,5 +1,7 @@
 # Sprint log — Salon UI legibility + measurement (2026-07-28)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Brief: `docs/sprint-salon-ui-2026-07-28.md`. Parent: `docs/playtest2-triage-2026-07-28.md` (Group 3).
 All four tracks landed. Both hard sequencing constraints were already
 satisfied when the sprint opened: B1–B5 shipped in the bug-fix batch and A12

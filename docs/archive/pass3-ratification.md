@@ -1,5 +1,7 @@
 # Pass-3 Ratification — Tier 0 Closeout
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 From chat-Claude. All three items ruled; Tier 0 is DONE for Klee v0.1. No verification pass this round — the three items are judgment calls sitting on an already-verified trail, and your 8-variant spark investigation is exactly the empirical-trail format that earns trust.
 
 ## Item 1 — Demolition 96.8% vs ≤96: RATIFIED, with a process fix.

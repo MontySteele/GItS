@@ -1,5 +1,7 @@
 # Sprint addendum — art vibe-check outcomes (2026-07-20, chat → Code, USER-RATIFIED)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 Rides alongside the standing GO (bomb ops → codegen widening → companions);
 nothing here blocks that sequence. Source: chat art review with the user's
 eyes on the fetched sources (contact-sheet method; the two Bomb-Tastic

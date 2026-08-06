@@ -1,5 +1,7 @@
 # Enemy Dossier — Battle Friend V3.0
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `BattleFriendV3`
 - **Kind:** normal (monster model; appears as the sole combatant of an event encounter)
 - **Act:** Act 3 (`Glory`, act index 2) — the only act whose event pool contains the Battleworn Dummy event

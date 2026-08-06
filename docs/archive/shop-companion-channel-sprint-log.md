@@ -1,5 +1,7 @@
 # Sprint Log — Shop Companion Channel (§4.7 build-out)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Executed 2026-07-25.** Plan of record:
 `docs/shop-companion-channel-sprint.md` (PRE-REGISTERED, rulings R59–R62).
 Decision record it superseded: `docs/shop-companion-channel-plan.md`.

@@ -1,5 +1,7 @@
 # M8 Rulings (chat → Code)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Input:** tier05-m8-report.md (all sections + asks).
 Independently verified chat-side before ruling: sheet landings (Snap, three
 R8 conversions verbatim), law test present, RUNTEMPLATE_VERSION 2 stamped,

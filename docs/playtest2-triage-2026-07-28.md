@@ -1,5 +1,7 @@
 # Playtest 2 triage — Furina co-op feedback + deck review (2026-07-28)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Source: co-op playtest 2 (Monty = Kokomi, guest pilot = Furina) plus Monty's own
 sweep of the Furina deck. Items are triaged into three groups per the red-pen
 note of 2026-07-28. Groups 1 and 2 are sprint-ready for delegation; Group 3

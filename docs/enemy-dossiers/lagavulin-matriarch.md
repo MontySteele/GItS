@@ -1,5 +1,7 @@
 # Lagavulin Matriarch
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `LagavulinMatriarch` (`MonsterModel`)
 - **Kind:** boss (sole monster of the `LagavulinMatriarchBoss` encounter)
 - **Act:** Act 2 — Underdocks (act index 1; one of the act's three boss options, third in the boss discovery order behind Waterfall Giant and Soul Fysh)

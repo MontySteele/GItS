@@ -1,5 +1,7 @@
 # The Architect
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `Architect` (`MonsterModel`)
 - **Kind:** boss (registered as an encounter monster; in practice a scripted epilogue actor)
 - **Act:** Epilogue — the victory room entered after the final act

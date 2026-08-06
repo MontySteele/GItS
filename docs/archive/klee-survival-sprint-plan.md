@@ -1,5 +1,7 @@
 # Klee survival sprint — frontload as defense
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Status:** implementation checkpoint reached, 2026-07-22; the candidate is
 measured but awaits the legacy tank-boss-band ruling. See
 `docs/klee-survival-sprint-report.md`.

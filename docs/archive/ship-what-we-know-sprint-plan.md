@@ -1,5 +1,7 @@
 # Implementation Sprint — "Ship What We Know"
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 Verbatim record of the governing sprint doc from the 2026-07-25 co-op playtest
 review (house rule: no chat-side-only artifacts). Execution log:
 docs/ship-what-we-know-sprint-log.md.

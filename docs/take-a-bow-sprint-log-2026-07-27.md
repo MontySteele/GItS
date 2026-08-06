@@ -1,5 +1,7 @@
 # "Take a Bow" — Curtain Call consolidation sprint log
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-27
 **Branch:** `take-a-bow-consolidation` (off `main` @ 7e74efe)
 **Character:** MECHANICAL. Zero design decisions, per the sprint charter.

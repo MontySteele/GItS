@@ -1,5 +1,7 @@
 # Animation — Sprint 2 Plan ("Furina Takes the Stage")
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 > Verbatim record of the governing sprint doc from the 2026-07-24 planning
 > discussion (house rule: no chat-side-only artifacts). Execution log:
 > docs/animation-sprint-2-log.md. Predecessor: docs/archive/animation-sprint-1-plan.md

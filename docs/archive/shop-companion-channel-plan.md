@@ -1,5 +1,7 @@
 # Sprint Design Pass — the Shop Companion Channel (§4.7)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Status: SUPERSEDED 2026-07-25 — retained as the DECISION RECORD, not a build
 input.** D1/D2/D3 below were answered as R59/R60/R61 (`tier0/DECISIONS.md`);
 the sprint that executed them is `docs/shop-companion-channel-sprint.md` and

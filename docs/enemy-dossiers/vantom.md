@@ -1,5 +1,7 @@
 # Vantom
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `Vantom`
 - **Kind:** boss
 - **Act:** 1 (Overgrowth, act index 0)

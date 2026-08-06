@@ -1,5 +1,7 @@
 # Furina Fanfare Sprint — "The Tide Turns" — execution log
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 Opened 2026-07-24. Governing plan: the sprint doc recorded verbatim in the
 session of the same date (house rule: no chat-side-only artifacts). Direction
 RATIFIED by user; every NUMBER is PROPOSED pending red-pen.

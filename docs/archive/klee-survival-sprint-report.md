@@ -1,5 +1,7 @@
 # Klee survival sprint — implementation checkpoint
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-22
 **Status:** candidate implementation measured; not merge-ready until the
 legacy tank-boss-band collision is ruled.

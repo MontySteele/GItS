@@ -1,5 +1,7 @@
 # Worknote — Kokomi kickoff session (Code workstream)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-23. This is the CROSS-SESSION NOTE required by the
 standing rule (DECISIONS ~431 / R20 lineage: changes to shared loaders and
 shared schema land only after this note exists). Written BEFORE the changes

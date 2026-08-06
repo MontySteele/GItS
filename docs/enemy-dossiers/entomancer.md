@@ -1,5 +1,7 @@
 # Entomancer
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `Entomancer` (`MonsterModel`)
 - **Kind:** elite
 - **Act:** Act 2 (the Hive; act index 1). One of that act's elite pool alongside `DecimillipedeElite` and `InfestedPrismsElite`.

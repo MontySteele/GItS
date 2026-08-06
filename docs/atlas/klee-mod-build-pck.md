@@ -1,5 +1,7 @@
 # Atlas — klee-mod-build-pck
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 Scope: `klee-mod/build/` (deploy, validate, version, deploy_bridge, bitecheck),
 `klee-mod/pck-src/`, `klee-mod/Klee/manifest.json`, plus the pck producer that
 lives outside the directory but belongs to this pipeline: `tools/build_pck.ps1`.

@@ -1,5 +1,7 @@
 # Downfall animation-pipeline investigation — Track M
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-08-05 · **Findings only.** This memo informs the animation path
 choice. It decides nothing, licenses nothing, authors no rig, and changes no
 pipeline. It is a **supplement** to `docs/animation-capability-memo.md`

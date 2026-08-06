@@ -1,5 +1,7 @@
 # Hand-Back Note — Next Session Kickoff (Validation Soak + Track B)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Filed verbatim, per the house rule that chat is not a record. Received
 2026-08-04 (evening); executed the same evening — the sprint log is
 `docs/sprint-track-b-curves-log-2026-08-04.md`, the acceptance it set is

@@ -1,5 +1,7 @@
 # Real-build synthetic-battery calibration
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-22
 **Status:** Klee and real-Ironclad surfaces complete. No bands have been
 changed yet.

@@ -1,5 +1,7 @@
 # Countersign Package — Understudy Phase-0 Skim Response
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Filed verbatim, as signed.** House convention for a signed package (cf.
 `docs/axis-validity-countersign-2026-08-04.md`, `docs/a2-gate-ratification-2026-07-27.md`):
 the text [USER] signed is committed unedited, and the repo's own commentary

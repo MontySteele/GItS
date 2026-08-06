@@ -1,5 +1,7 @@
 # Kokomi Roster v0.1 — Code-Workstream Response & Early Sims
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-24. **Governing doc:** docs/kokomi-kickoff-v1.md (archived
 verbatim). **Status:** kickoff roster built and simulated; EVERYTHING here is
 PROPOSED — no ruling ask is closed, no number ratified, no band declared.

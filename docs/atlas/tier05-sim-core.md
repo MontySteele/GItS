@@ -1,5 +1,7 @@
 # Atlas — tier05-sim-core
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 Scope: `tier05/model.py`, `acts.py`, `runner.py`, `draft.py`, `route.py`,
 `maps.py`, `cells.py` — the run-level simulator and the drafter.
 

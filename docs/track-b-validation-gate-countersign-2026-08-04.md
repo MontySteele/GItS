@@ -1,5 +1,7 @@
 # Countersign Package — Track B / Validation Gate (Seven Items)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Filed verbatim, as signed.** House convention for a signed package (cf.
 `docs/understudy-countersign-2026-08-04.md`,
 `docs/axis-validity-countersign-2026-08-04.md`,

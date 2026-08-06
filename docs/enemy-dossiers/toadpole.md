@@ -1,5 +1,7 @@
 # Toadpole — behavior dossier
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `Toadpole`
 - **Kind:** normal (non-elite, non-boss)
 - **Act:** Act 1 (`Underdocks`, act index 0 — the alternate Act 1 biome, unlocked rather than default)

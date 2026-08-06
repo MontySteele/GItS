@@ -1,5 +1,7 @@
 # Brief — Kokomi pool fill, 15 proposals (2026-07-29)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **PROPOSALS ONLY. NO YAML SHEET IS EDITED BY THIS DOC.** Nothing here is
 ratified and nothing here is in the measured pool — an unratified card in
 `docs/kokomi-cards.yaml` would silently enter every drafting arm and change

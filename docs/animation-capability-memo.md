@@ -1,5 +1,7 @@
 # Animation capability memo — north-star v0.2
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-08-05 · **Track F1, findings-only.** Options with costs. Nothing
 here is a decision, a recommendation of a technology, or a pipeline change. No
 game process was launched; every measurement is an offline read of

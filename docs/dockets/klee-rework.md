@@ -1,5 +1,7 @@
 # Docket — the Klee rework
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Status:** DOCKET. Routed, not decided, not scheduled. Zero design authority:
 nothing here proposes a card, a number or a fix. Opened 2026-08-06 (Track R)
 against the sitting of 2026-08-06

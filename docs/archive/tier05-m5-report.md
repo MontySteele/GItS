@@ -1,5 +1,7 @@
 # Tier 0.5 M5 — Report (run loop, rewards, assigned policy, fragility)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-19. **Input:** tier05-draft-sim-spec.md §§2–6 (M5 slice). 120 tests across both tiers (1 xfail = the pending demolition ruling). M5 is built and instrumented; two structural findings below need your eyes before M6's metrics get built on top of them.
 
 ## Built per spec

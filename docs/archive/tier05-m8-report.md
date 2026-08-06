@@ -1,5 +1,7 @@
 # Tier 0.5 M8 — Report (m7-rulings execution: R1–R7)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Input:** m7-rulings.md (all rulings + directives).
 **World stamps this report spans:** CONSTANTS_VERSION 2 throughout;
 DRAFTER_VERSION 1→2 (R2, mid-report, always labeled); RUNTEMPLATE_VERSION

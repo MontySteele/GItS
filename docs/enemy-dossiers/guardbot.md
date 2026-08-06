@@ -1,5 +1,7 @@
 # Guardbot — behavior dossier
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `Guardbot`
 - **Kind:** normal (non-elite, non-boss) — but never a starting monster; it only ever enters play as a Fabricator spawn
 - **Act:** Act 3 (`Glory`, act index 2)

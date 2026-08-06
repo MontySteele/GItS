@@ -1,5 +1,7 @@
 # Sprint log — the Fanfare rework (2026-07-28)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 > # ARCHIVE BANNER — the Furina rows here are pre-CONSTANTS-5
 >
 > **Appended 2026-08-06 (Track W). Every Furina tier-0.5 number in this

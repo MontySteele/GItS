@@ -1,5 +1,7 @@
 # Furina Sheet Pass 2 — Plan ("The R16 World")
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Authorized:** R28 (GO, full queued scope).
 **Governing:** R16–R22 (furina-pass1-rulings.md), R26 (adjacent-rarity
 domination law), DECISIONS 69–78, kickoff v0.1, principles v1.10.

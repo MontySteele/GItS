@@ -1,5 +1,7 @@
 # Mutation round — the code tonight's batch added
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 > Last Call, Round Two, track K. 2026-08-05. **ZERO design authority.**
 > S6's mutation audit (`review/mutation-audit/blind-spot-report.md`) ran over
 > the tree as it stood BEFORE tonight's five merges. This is the same method

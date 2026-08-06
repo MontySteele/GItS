@@ -1,5 +1,7 @@
 # Furina — Character Kickoff Doc v0.1
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Status:** kickoff declarations per template §3 —
 statline and systems ratified this session; card sheet not yet begun.
 **Inputs:** principles v1.9, furina-predesign-notes.md (Part 2 resource

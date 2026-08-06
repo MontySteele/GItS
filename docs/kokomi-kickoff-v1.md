@@ -1,5 +1,7 @@
 # Kokomi Character Kickoff — v1
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 (Received from design chat 2026-07-23; archived verbatim per the
 no-chat-side-only-artifacts rule. The Code-workstream response is
 docs/archive/kokomi-roster-v0.1-report.md.)

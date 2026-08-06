@@ -1,5 +1,7 @@
 # Kokomi playtest protocol — first play, artefact `0.2-247` (commit `29f5ce6`)
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 > **RE-ANCHORED 2026-08-06 ([USER] ruling; `S4-G6` + `S4-G14`; R115).** This
 > protocol run is anchored to **the post-rework Kokomi build**, not to the
 > build named in the title line or in the 2026-07-29 re-stamp below. Neither

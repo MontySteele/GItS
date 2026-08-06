@@ -1,5 +1,7 @@
 # The [USER] queue — single source of truth
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Status: REGISTER.** Opened 2026-08-06 by the housekeeping sweep (Track X) of
 the "Strike the Set" batch. **Zero design authority.** Nothing here is decided,
 scheduled, graded or priced. Every row is copied from the document that owns it;

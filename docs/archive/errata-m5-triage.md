@@ -1,5 +1,7 @@
 # Errata + Tier 0.5 M5 Triage — Rulings
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 From chat-Claude, on `klee-errata-report.md` and `tier05-m5-report.md`.
 
 ## Errata items

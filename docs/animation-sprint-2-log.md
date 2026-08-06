@@ -1,5 +1,7 @@
 # Animation Sprint 2 — Execution Log
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Governing doc: docs/animation-sprint-2-plan.md. Opened 2026-07-24.
 DECISIONS entry: "Animation sprint 2 opens: the Funnel Contract".
 Predecessor: docs/archive/animation-sprint-1-log.md (CLOSED 2026-07-24).

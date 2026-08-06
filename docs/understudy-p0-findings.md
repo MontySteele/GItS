@@ -1,5 +1,7 @@
 # Understudy P0 - Findings and Ruling Proposals
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Sprint: Understudy (bot playtest apparatus). Phase: P0, evaluate only.
 Brief: `docs/understudy-kickoff-brief.md`. Date: 2026-08-04. Worktree G4.
 Status: **RATIFIED 2026-08-04.** The three ruling proposals below were

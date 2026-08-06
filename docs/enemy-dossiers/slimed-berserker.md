@@ -1,5 +1,7 @@
 # Enemy Dossier — Slimed Berserker
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `SlimedBerserker`
 - **Kind:** normal
 - **Act:** Act 3 (`Glory`, act index 2) — the only act pool it appears in

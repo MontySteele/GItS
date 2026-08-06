@@ -1,5 +1,7 @@
 # Prepared landing slots — AWAITING [USER], 2026-08-06
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Status: NOTHING HERE IS EXECUTED, and nothing here is a decision.** Opened by
 Track W of the "Strike the Set" batch against [USER]'s replies of 2026-08-06 to
 the Second Wind open one-liners

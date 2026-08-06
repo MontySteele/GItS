@@ -1,5 +1,7 @@
 # Furina Sheet Red-pen — Salon / Fanfare / Basics / Generic (chat structural pass)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. Scope per R22: the stable worlds only — the
 Spotlight list is deliberately NOT red-penned (R16 re-authors it).
 Verdict up front: **this is a good sheet.** The R8 conversions are

@@ -1,5 +1,7 @@
 # G4 — Session isolation policy (RULED: ADOPTED 2026-07-27)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Status: ADOPTED**, Serenitea Sweep II track B2. All three parts — (a)
 worktree per workstream, (b) PR-to-`main` with the `repo` workflow as a
 required check, (c) the junction rule — were ruled in.

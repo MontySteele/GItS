@@ -1,5 +1,7 @@
 # Devoted Sculptor — behavior dossier
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `DevotedSculptor`
 - **Kind:** normal (non-elite, non-boss)
 - **Act:** Act 3 (`Glory`, act index 2)

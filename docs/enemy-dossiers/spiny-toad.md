@@ -1,5 +1,7 @@
 # Enemy Dossier — Spiny Toad
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `SpinyToad`
 - **Kind:** normal
 - **Act:** Act 2 (`Hive`, act index 1) — the only act pool it appears in

@@ -1,5 +1,7 @@
 # The Merchant??? — behavior dossier
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `FakeMerchantMonster`
 - **Kind:** elite
 - **Act:** Acts 2–3 (the parent event refuses to appear while the run's act index is below 1)

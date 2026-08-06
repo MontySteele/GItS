@@ -1,5 +1,7 @@
 # Furina — Sprint 1 Plan ("Foundation Wave")
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Inputs:** furina-kickoff-v0.1.md (governing),
 fontaine-companions.yaml v0.1 (ratified draft), principles v1.9,
 m7-rulings (R8 conjunctive healing law), Klee pass 1–3 process precedent.
