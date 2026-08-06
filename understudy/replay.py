@@ -303,7 +303,7 @@ def _standing_choice(fight: dict, rnd: Any) -> str | None:
     designation that was standing when the play resolved. Probe (b) Ledger 2
     measured that term exactly — 26 of 27 plays agree, the mismatch is the
     fight's first Spotlight, +2 per combat in tier0's favour
-    (`docs/probe-b-fanfare-residual.md`).
+    (`docs/archive/probe-b-fanfare-residual.md`).
 
     The round's OWN answer is not discarded: it is still pushed through
     `effects.SPOTLIGHT_FORCE`, so the designating card sets it when it

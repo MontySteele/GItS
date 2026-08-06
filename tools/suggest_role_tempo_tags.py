@@ -13,7 +13,7 @@ A-G1 IS CLOSED (2026-08-04) AND THE TAGS HAVE LANDED
 -----------------------------------------------------
 This tool used to refuse to touch a sheet, because `solve` is a ratified field
 and a token's payoff set is a DESIGN FACT that the machine may propose and may
-not ratify. [USER] ratified it: `docs/axis-validity-countersign-2026-08-04.md`,
+not ratify. [USER] ratified it: `docs/archive/axis-validity-countersign-2026-08-04.md`,
 recorded as R91. So `--land` now exists and writes both fields onto the three
 sheets, and the REVIEW COLUMN RETIRES -- `diverges` is empty on every row the
 moment the sheets and the classifier agree.
@@ -102,7 +102,7 @@ def build() -> tuple[str, str]:
         "design fact, so the machine may propose it and may not ratify it.",
         "",
         "**A-G1 CLOSED 2026-08-04** "
-        "(`docs/axis-validity-countersign-2026-08-04.md`, recorded as R91).",
+        "(`docs/archive/axis-validity-countersign-2026-08-04.md`, recorded as R91).",
         "The seven `ENTITY_PAYOFFS` were confirmed as proposed; the",
         "`salon_member` double-credit was kept; these tags are LANDED on the",
         "three sheets and this file is now the parity record, not a proposal.",

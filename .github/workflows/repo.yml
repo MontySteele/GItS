@@ -95,7 +95,7 @@ jobs:
       # tags are a committed review file, so neither needs game_ref/. The
       # coverage gate runs in --gate mode against the pinned debt list while
       # P1's binding null is open -- see
-      # docs/sprint-axis-validity-track-a-log-2026-08-04.md §0 and §5.
+      # docs/archive/sprint-axis-validity-track-a-log-2026-08-04.md §0 and §5.
       - name: role/tempo review artifacts current
         run: python tools/suggest_role_tempo_tags.py --check
       - name: role/tempo coverage (floors only, against the debt list)
@@ -111,6 +111,15 @@ jobs:
       # gets deleted and takes the registry with it.
       - name: identifier registry
         run: python tools/lint_identifier_registry.py
+      # R121 `Q20` (MOVE-WITH-RESOLVER), 2026-08-06. A DECISIONS volume is
+      # append-only, so a citation inside one can never be repointed when its
+      # target moves -- rail 1. This checks that every docs/ path the ledgers
+      # cite either exists or resolves through the moved-path table in
+      # docs/registry/identifiers.md section 17. Stale-but-resolving is GREEN
+      # on purpose; stale-and-unresolvable is the failure. The table is parsed
+      # from the registry, never duplicated here or in the tool.
+      - name: doc-path citations resolve (moved-path resolver)
+        run: python tools/lint_doc_citations.py --all
       # S4 finding F14 and its four siblings, 2026-08-06. One file's R-number
       # citations, checked against the clauses DECISIONS.md actually declares.
       # Scoped to `tools/canon_role_tempo.py` alone and meant to stay that way

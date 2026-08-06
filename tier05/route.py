@@ -12,7 +12,7 @@ characters or rosters. So the same countermeasures apply and are not optional:
   - every headline finding must survive the A/B across them.
   (The research doc's third countermeasure, a `route_regret` sampler
   analogous to draft_regret, was NEVER BUILT -- see
-  docs/missed-requirements.md §2.1. This header used to claim it existed.)
+  docs/archive/missed-requirements.md §2.1. This header used to claim it existed.)
 
 THE ACCEPTANCE TARGET (research doc §1.3, user domain authority): a competent
 player fights a median of ~2.5 elites per act, range 1-4, because elites are

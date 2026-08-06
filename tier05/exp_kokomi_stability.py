@@ -7,7 +7,7 @@ winrate margin, as her acceptance signature. Two things then happened, in this
 order, and the second is why this script exists:
 
 1. `run_metrics.stability_profile` was built (Serenitea Sweep I, E1) and lands
-   DARK by design. `docs/missed-requirements.md` s1.3 still says the instrument
+   DARK by design. `docs/archive/missed-requirements.md` s1.3 still says the instrument
    "was never built"; it is STALE as of E1, and the entry should be amended.
 2. Nothing ever RAN it. There is no experiment script and no report on record
    that prints a stability number, so what did not exist was not the metric but

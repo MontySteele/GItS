@@ -777,7 +777,7 @@ DRAFT_LEAN_RARE_BAR = 4.0
 #                             not veto the first real block card (Deflect
 #                             carries +25.3 lift), and the rest policy is
 #                             already removing basics.
-# Values are the round-2 sweep winner (docs/silent-pilot-review-2026-07-27.md
+# Values are the round-2 sweep winner (docs/archive/silent-pilot-review-2026-07-27.md
 # s5): at 1000 paired-seed runs the winner reads real_silent 28.8% act-1
 # clear (baseline 23.3%) and real_ironclad 33.3% (baseline 26.9%), with the
 # take-when-offered tails finally aligned to the measured lifts (anticipate
@@ -805,7 +805,7 @@ GENERIC_PLAN_BONUS_MULT = 0.25
 # DRAFTER_VERSION 12 -- the power-aware static term (R84, the Footwork
 # residual paid). Two structural proxies were built and swept (16-cell
 # grid, 300 runs/cell, seed 11, bare 1-act, serial; winners confirmed at
-# 1000 paired-seed runs -- docs/silent-pilot-review-2026-07-27.md s6):
+# 1000 paired-seed runs -- docs/archive/silent-pilot-review-2026-07-27.md s6):
 #   STATIC_DEXTERITY_VALUE   permanent self Dexterity, the exact mirror of
 #                            STATIC_STRENGTH_VALUE: two future Block gains.
 #                            DELIBERATELY excludes `temp_dexterity` -- a

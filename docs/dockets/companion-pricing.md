@@ -4,7 +4,7 @@
 
 **Status:** DOCKET. Candidates only. **Nothing in this file is ratified.**
 Zero design authority. Opened 2026-08-06 (Track R) against the sitting of
-2026-08-06 (`docs/sitting-record-predraft-2026-08-06.md`); ruling R111.
+2026-08-06 (`docs/archive/sitting-record-predraft-2026-08-06.md`); ruling R111.
 
 ---
 
@@ -52,7 +52,7 @@ which stays xfail(strict) because a candidate is not a fix.
 > pre-drafted at `docs/awaiting-user-slots-2026-08-06.md` slot 2, landed
 > verbatim against [USER]'s reply *"YES — companion-pricing docket owns X2
 > rarity work"* (sixth-wave brief, Track Y item Y-2; transcribed at
-> `docs/sitting-record-predraft-2026-08-06.md` §7). The section's **"Recorded
+> `docs/archive/sitting-record-predraft-2026-08-06.md` §7). The section's **"Recorded
 > here as unrouted" standing is cleared** — struck below, not deleted (R101b) —
 > and the heading is amended to say what is now true. The X2 audit results
 > table is untouched: it never moved, under either answer.
@@ -78,7 +78,7 @@ coordinator.~~ **MARKER CLEARED 2026-08-06 by the venue assignment above: the
 work is routed, and this docket is where it is routed to.**
 
 **Coordinator note, 2026-08-06:** the audit itself was Track T's brief and it
-ran the same night (`docs/track-t-audits-2026-08-06.md` §T-1); its *results*
+ran the same night (`docs/archive/track-t-audits-2026-08-06.md` §T-1); its *results*
 are recorded below so they are not lost, while the *venue* question — whether
 this docket owns X2 rarity work going forward — ~~stays open for [USER]~~
 **was answered YES on 2026-08-06; see the banner at the head of this section.**

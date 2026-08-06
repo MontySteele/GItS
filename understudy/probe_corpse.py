@@ -4,7 +4,7 @@
 script written down in advance so that the readings it produces have no policy
 in them. It exercises no design authority, changes no mod behaviour, and
 concludes nothing: the registration is
-`docs/probe-e-corpse-detonation-registration-draft.md` (COUNTERSIGNED
+`docs/archive/probe-e-corpse-detonation-registration-draft.md` (COUNTERSIGNED
 2026-08-06) and the answer lands in the probe report, not here.
 
 The pre-registered question it exists to answer, verbatim:

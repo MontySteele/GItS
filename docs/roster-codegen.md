@@ -132,5 +132,5 @@ emitter does not understand, which is the gate that already caught `innate`
 and `retain`.
 
 The note itself, with what the field means and who else reads the surface, is
-in `docs/sprint-axis-validity-track-a-log-2026-08-04.md` (CROSS-SESSION NOTE
+in `docs/archive/sprint-axis-validity-track-a-log-2026-08-04.md` (CROSS-SESSION NOTE
 section). This is the mirror.

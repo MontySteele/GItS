@@ -30,7 +30,7 @@
 > describing "the build" describes that one. Two changes since the protocol
 > was written that this file does *not* otherwise account for: her character
 > shell is now her own (see the art note below) and the C# bug-fix pass of
-> 2026-07-29 (`docs/sprint-bugfix-log-2026-07-29.md`) changed player-visible
+> 2026-07-29 (`docs/archive/sprint-bugfix-log-2026-07-29.md`) changed player-visible
 > behaviour in five places, none Kokomi-specific.
 
 The Kokomi sprint's own definition of done is *"[USER] has played her — not
@@ -52,7 +52,7 @@ first.
 > 2026-07-25: her **character shell** — select portrait, locked portrait, char
 > icon, map marker, selection splash, select backdrop, transition wipe and
 > combat model — is hers, shipped, and has had **no eyes on it in-game**.
-> `docs/open-playtest-items.md` §2.2 asks you to judge exactly those, and
+> `docs/archive/open-playtest-items.md` §2.2 asks you to judge exactly those, and
 > **§2.2 is the authoritative instruction where the two disagree.** What §2.2
 > asks: does she sit left of centre over the Watatsumi reef with the right
 > third clear for the info panel; are the char icon and map marker centred on
@@ -312,7 +312,7 @@ only accepted input; the sim may not answer it.)*
 
 | Gap | Status |
 |-----|--------|
-| ~~All personal art is Klee's~~ | **Corrected 2026-07-29** — the character SHELL is hers and is a *review ask* (`open-playtest-items.md` §2.2). Still owed and not worth reporting: Track D's 58 card faces + 15 companion faces |
+| ~~All personal art is Klee's~~ | **Corrected 2026-07-29** — the character SHELL is hers and is a *review ask* (`docs/archive/open-playtest-items.md` §2.2). Still owed and not worth reporting: Track D's 58 card faces + 15 companion faces |
 | `kokomi/model/combat.tscn` missing | Expected — no rig until the art pass; logged as EXPECTED MISSING at boot |
 | Ancient card's 3 Charge/turn is unmeasured | Known — no instrument exists for Ancients |
 | Every balance number is PROPOSED | Known — none has had red-pen |

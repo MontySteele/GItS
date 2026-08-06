@@ -54,15 +54,15 @@ for what is open and for whom.
 | World stamps | `RT<n>` / `D<n>` / `P<n>` / `C<n>` | RT7 / D14 / P3 / C5 | `tier0/constants.py`, `tier05/draft.py` | **yes** |
 | Gates & sprint task-ids | `<Letter><n>` | very large | every sprint plan/log | **yes, heavily** — see §2 |
 | S4 hygiene findings | `F<n>` | F1–F17 | `review/ledger-audit/hygiene-report.md` | **yes** — with sprint task-ids `F1`/`F2` |
-| Held flags | `FLAG-<n>` | FLAG-1…FLAG-4 | `docs/sitting-record-predraft-2026-08-06.md`, R110/R111 | no |
+| Held flags | `FLAG-<n>` | FLAG-1…FLAG-4 | `docs/archive/sitting-record-predraft-2026-08-06.md`, R110/R111 | no |
 | Exploit families | `X<n>` | X1–X14 | `review/redteam/exploit-ledger.md` | **yes** — with batch track letter X |
-| Surplus streams | `S<n>` | S1–S15 | `docs/surplus-week-manifest-2026-08-05.md` | **yes** — with Track S errata `S-1…S-3` |
-| Second Wind Track S errata | `S-<n>` | S-1, S-2, S-3 | `docs/surplus-week-manifest-2026-08-05.md` §"Track S" | **yes** — with surplus streams |
+| Surplus streams | `S<n>` | S1–S15 | `docs/archive/surplus-week-manifest-2026-08-05.md` | **yes** — with Track S errata `S-1…S-3` |
+| Second Wind Track S errata | `S-<n>` | S-1, S-2, S-3 | `docs/archive/surplus-week-manifest-2026-08-05.md` §"Track S" | **yes** — with surplus streams |
 | Non-card parity findings | `NC-<n>` | NC-1…NC-20 | `review/parity-sweep/noncard-triage-memo.md` | no |
 | Card parity families | `SYS-<n>` | SYS-1…SYS-14 | `review/parity-sweep/triage-memo.md` | no |
 | Lint candidates | `L<n>` | L1–L8 (S1 memo); L1–L12 (art_lint) | `review/parity-sweep/triage-memo.md`; `tools/art_lint.py` | **yes** |
 | House Lights findings | `N-<n>`, `O-<n>`, `O<slice>-<n>` | N-1; O-1; O1-1…O12-n | `docs/archive/lore-fidelity-audit-2026-08-05.md`, `docs/archive/instrument-redteam-2026-08-05.md` | no |
-| Track T audits | `T-<n>` | T-1, T-2, T-3 | `docs/track-t-audits-2026-08-06.md` | **yes** — with Track A's task-ids T1–T4 |
+| Track T audits | `T-<n>` | T-1, T-2, T-3 | `docs/archive/track-t-audits-2026-08-06.md` | **yes** — with Track A's task-ids T1–T4 |
 | Understudy phases | `P<n>` | P0, P1, P1.5, P2 | `docs/understudy-kickoff-brief.md` + R93–R104 | **yes** — with POLICY stamp and predictions |
 | Scorecard axes | `A<n>` | A1–A7 | `tier0/harness/axes.py` (law), `docs/archive/tier0-simulator-spec.md` §6 (historical) | **yes** — with Klee pass asks A3/A5 and sprint task-ids |
 | Track letters | `Track <A–X>` | reused every batch | each batch's kickoff | **yes, by design** — always qualified by batch |
@@ -85,10 +85,10 @@ changed.
 | Qualified form | Bare form as written | Meaning | Minting document | Status |
 |---|---|---|---|---|
 | `S4-G1` … `S4-G20` | `G1`…`G20` | The 20-row undischarged **[USER] gate queue** of the S4 ledger audit | `review/ledger-audit/hygiene-report.md` §3 | see `docs/registry/user-queue.md` §2 |
-| `CC-G1`, `CC-G2` | `G1`, `G2` | R86 / "Take a Bow" **Curtain Call art gates**: contact-sheet eyes-on; in-game screenshot review of the twelve cards + A0 smoke run | `tier0/DECISIONS.md` R86; `docs/archive/take-a-bow-sprint-log-2026-07-27.md` §3 | OPEN — materials ready at `docs/g12-review-2026-08-05.md`. Tracked as `S4-G12`. |
+| `CC-G1`, `CC-G2` | `G1`, `G2` | R86 / "Take a Bow" **Curtain Call art gates**: contact-sheet eyes-on; in-game screenshot review of the twelve cards + A0 smoke run | `tier0/DECISIONS.md` R86; `docs/archive/take-a-bow-sprint-log-2026-07-27.md` §3 | OPEN — materials ready at `docs/archive/g12-review-2026-08-05.md`. Tracked as `S4-G12`. |
 | `SS-G1` … `SS-G4` | `G1`…`G4` | **Serenitea Sweep I** track-G items: sheet-comment lint; the `mondstadt-companions.yaml` correction; the CI proposal; the session-isolation (worktree-per-session) policy | `docs/archive/serenitea-sweep-log-2026-07-26.md` §§G1–G4 | all ADOPTED. `SS-G3` → `.github/workflows/repo.yml`; `SS-G4` → `docs/worktree-workflow.md` |
 | `NT-G2`, `NT-G3`, `NT-G5`, `NT-G6`, `NT-G7`, `NT-G8` | `G2`, `G3`, `G5`, `G6`, `G7`, `G8` | **Neap Tide v2.1** batch item labels (Kokomi pass): G2 = `before_sun_and_moon` stacking ratified over a ban; G3 = flavor-text segregation convention; G5 = the pre-registered playtest-three fork; G6 = `tactical_retreat` starter migration; G7 = the R79 verb-partition law; G8 = `swift_currents` merged into `moonlit_offering` | `klee-mod/DECISIONS.md`, "Neap Tide v2.1" + addendum | landed, except `NT-G5` (fork unfired/unevaluated — see queue) |
-| `AS2-G1`, `AS2-G2` | `G1`, `G2` | **Animation sprint 2** track-G tasks: extract the common bridge base; rename `KleeAnimationRouter` → `CreatureAnimationRouter` | `docs/animation-sprint-2-plan.md` §G | both ✅ done (`docs/animation-sprint-2-log.md`) |
+| `AS2-G1`, `AS2-G2` | `G1`, `G2` | **Animation sprint 2** track-G tasks: extract the common bridge base; rename `KleeAnimationRouter` → `CreatureAnimationRouter` | `docs/animation-sprint-2-plan.md` §G | both ✅ done (`docs/archive/animation-sprint-2-log.md`) |
 | `LF-G1` … `LF-G5` | `G1`…`G5` | **Track N lore-fidelity audit** coverage gaps in `lint_furina_registers.py` | `docs/archive/lore-fidelity-audit-2026-08-05.md` §"Coverage gaps" | findings only; part of the N TOP-5 review |
 | `RA-G1`, `RA-G2` | `G1`, `G2` | **Track G roster-anchor v14** document sections: the v14 anchor table; the paired D13→D14 diff | `docs/archive/roster-anchor-v14-2026-08-05.md` §§2–3 | PROPOSED — designate-or-hold ask, sitting-prep §10.2 |
 | `A-G1` | *(already qualified)* | Axis-Validity **Track A gate** — tag review | `docs/axis-validity-session-charter.md` §7 | **DISCHARGED 2026-08-04 (R91)** |
@@ -105,7 +105,7 @@ without the registry lint reporting an unregistered token: `S4-G1`, `S4-G2`,
 `S4-G19`, `S4-G20`. Their per-gate meanings and statuses live in
 `docs/registry/user-queue.md` §2; this list is a resolver, not a second index.
 
-**Pre-existing resolvers this table does not disturb.** `docs/g12-review-2026-08-05.md`
+**Pre-existing resolvers this table does not disturb.** `docs/archive/g12-review-2026-08-05.md`
 already states in its own header that *"G12 (hygiene-report row G12) = R86's G1
 and G2"* — i.e. `S4-G12` = {`CC-G1`, `CC-G2`}. That statement is correct and
 stands; this table simply makes it findable without opening the file.
@@ -129,7 +129,7 @@ stands; this table simply makes it findable without opening the file.
 | Qualified form | Meaning | Minting document |
 |---|---|---|
 | `MOD-C1` … `MOD-C3` | **C# build milestones** (three characters shipped, codegen, localization) | `klee-mod/DECISIONS.md`; `docs/archive/csharp-build-spec.md` |
-| `S7-C1`, `S7-C2` | **S7 family-C candidate infidelities** — C1 the +2 block offset; C2 the Fanfare accounting residual. Both probed (`docs/probe-a-block-offset.md`, `docs/probe-b-fanfare-residual.md`) | `docs/s7-classification.md` |
+| `S7-C1`, `S7-C2` | **S7 family-C candidate infidelities** — C1 the +2 block offset; C2 the Fanfare accounting residual. Both probed (`docs/archive/probe-a-block-offset.md`, `docs/archive/probe-b-fanfare-residual.md`) | `docs/archive/s7-classification.md` |
 | `CONSTANTS-C3` … `CONSTANTS-C5` | **CONSTANTS world stamps** — `CONSTANTS_VERSION`. Current: **5** (bumped by Track W for S-1's Furina cost change). | `tier0/constants.py:837` |
 | `SS-C1` … `SS-C6`, `SSII-C4`, `SSII-C6` | Serenitea Sweep I/II track-C items | the two sweep logs |
 | `AS2-C1` … `AS2-C4` | Animation sprint 2 track-C tasks | `docs/animation-sprint-2-plan.md` §C |
@@ -142,21 +142,21 @@ stands; this table simply makes it findable without opening the file.
 | `POLICY-P3` | **POLICY world stamp** — `POLICY_VERSION` in `tier05/draft.py`. Current: **3**. The `P3` of the `RT7 / D14 / P3 / C5` world string. | `tier05/draft.py:1329` |
 | `NT-P1` … `NT-P9` | **Neap Tide predictions** P1–P9, graded in place | `klee-mod/DECISIONS.md`, "Predictions" |
 | `SHOP-P1` … `SHOP-P3` | Shop-companion-channel phases, graded at §7 close-out | `docs/archive/shop-companion-channel-sprint-log.md`; R63 |
-| `BUG-P1`, `BUG-P2` | Backlog §1 bug priority bands (C# P1 / C# P2) | `docs/backlog-2026-07-29.md` §1 |
+| `BUG-P1`, `BUG-P2` | Backlog §1 bug priority bands (C# P1 / C# P2) | `docs/archive/backlog-2026-07-29.md` §1 |
 
 ### 2.5 `T<n>` / `T-<n>`
 
 | Qualified form | Meaning | Minting document |
 |---|---|---|
 | `TA-T1` … `TA-T4` | **Track A execution brief tasks** (role/tempo tooling) | `docs/track-a-kickoff-brief.md` |
-| `TT-T1`, `TT-T2`, `TT-T3` | **Track T audit sweeps** of the Second Wind batch — T-1 = family X2, T-2 = family X7, T-3 = family X8 | `docs/track-t-audits-2026-08-06.md` |
+| `TT-T1`, `TT-T2`, `TT-T3` | **Track T audit sweeps** of the Second Wind batch — T-1 = family X2, T-2 = family X7, T-3 = family X8 | `docs/archive/track-t-audits-2026-08-06.md` |
 
 ### 2.6 `S<n>` / `S-<n>`
 
 | Qualified form | Meaning | Minting document |
 |---|---|---|
-| `SW-S1` … `SW-S15` | **Surplus-week streams** (see §7) | `docs/surplus-week-manifest-2026-08-05.md` §1 |
-| `SW2-S-1`, `SW2-S-2`, `SW2-S-3` | **Second Wind Track S errata** — the batch's only behaviour changes (X3 Encore Performance; X11 `replay_next_companion`; X14b ethereal-spotlight fallback) | `docs/surplus-week-manifest-2026-08-05.md` §"Track S" |
+| `SW-S1` … `SW-S15` | **Surplus-week streams** (see §7) | `docs/archive/surplus-week-manifest-2026-08-05.md` §1 |
+| `SW2-S-1`, `SW2-S-2`, `SW2-S-3` | **Second Wind Track S errata** — the batch's only behaviour changes (X3 Encore Performance; X11 `replay_next_companion`; X14b ethereal-spotlight fallback) | `docs/archive/surplus-week-manifest-2026-08-05.md` §"Track S" |
 | `VAL-S7` | A step id in `klee-mod/build/validate.ps1` (the auto-mode suite step), cited in `.github/workflows/repo.yml` | `.github/workflows/repo.yml` |
 
 ### 2.7 `X<n>`
@@ -192,11 +192,11 @@ sweep are all in §2.1–§2.8, plus:
 | Token | Escaped meaning | Minting document |
 |---|---|---|
 | `A1`…`A7` | The **seven scorecard axes** (A2 Scaling, A6 Utility, …). Cited constantly outside any sprint. | `tier0/harness/axes.py`; historical definitions in `docs/archive/tier0-simulator-spec.md` §6 |
-| `A3`, `A5` (Klee) | **Klee pass-4 asks** A3 (archetype-band deviation) and A5 (scorecard invariants) — *not* axes A3/A5 | `docs/archive/klee-pass-4-plan.md`; `docs/missed-requirements.md` §2.5, Tier 5 |
+| `A3`, `A5` (Klee) | **Klee pass-4 asks** A3 (archetype-band deviation) and A5 (scorecard invariants) — *not* axes A3/A5 | `docs/archive/klee-pass-4-plan.md`; `docs/archive/missed-requirements.md` §2.5, Tier 5 |
 | `A0` | The **A0 smoke run** — a co-op boot check, not an axis | `docs/archive/playtest-2026-07-25-coop-a0.md`; R86 |
 | `F1`, `F2` (Serenitea Sweep II) | Track-F items: `F1` the roster registry + gate; `F2` the bootstrap headline | `docs/archive/serenitea-sweep-ii-log-2026-07-27.md` |
 | `E1`, `E2`, `E2b` (Neap Tide) | Kokomi measurement cells; `E2b` is the accrual-arm decomposition | `klee-mod/DECISIONS.md` |
-| `B2`, `B3` (Last Call) | The two probes in flight at the Last Call batch tip | `docs/surplus-week-manifest-2026-08-05.md` addendum |
+| `B2`, `B3` (Last Call) | The two probes in flight at the Last Call batch tip | `docs/archive/surplus-week-manifest-2026-08-05.md` addendum |
 
 ---
 
@@ -325,7 +325,7 @@ Stage R-C / P-4; excision-log row E-4.)*
 
 ## 7. `S<n>` — surplus-week streams
 
-`docs/surplus-week-manifest-2026-08-05.md` §1 is the authoritative table
+`docs/archive/surplus-week-manifest-2026-08-05.md` §1 is the authoritative table
 (tip commits and artifacts). Summary only, here:
 
 | Stream | What | Sitting status |
@@ -407,7 +407,7 @@ All fourteen carry a disposition (R109/R110/R111). Verbatim verdicts live in
 | `LF-G1`…`LF-G5` | Track N coverage gaps in `lint_furina_registers.py` | same |
 | `O-1` | Track O's top finding — the gauntlet stage-merge denominator defect. **REPAIRED** by Track U (R112). | `docs/archive/instrument-redteam-2026-08-05.md` |
 | `O1-1`…`O12-n` | Track O per-slice findings; the digit before the dash is the slice | same |
-| `T-1`, `T-2`, `T-3` | Track T audit sweeps → `TT-T1/2/3` | `docs/track-t-audits-2026-08-06.md` |
+| `T-1`, `T-2`, `T-3` | Track T audit sweeps → `TT-T1/2/3` | `docs/archive/track-t-audits-2026-08-06.md` |
 
 ---
 
@@ -536,6 +536,23 @@ repointed, rail 1). *(Figures corrected 2026-08-06, R-B close-out `a0c28d5`:
 the missed sixteenth bucket-D file makes it **44** moved and root count
 116 → **72**; the manifest carries all 44.)*
 
+*Location note, second pass (2026-08-06, R121 `Q20` — MOVE-WITH-RESOLVER):*
+the 45 held ledger-cited REFERENCE files moved too, on the same terms
+(verbatim under a dated banner, live citers repointed in the move commit).
+`docs/*.md` root count **74 → 29**. Statuses again did not change. The
+citations that could not be repointed — the ledger ones, rail 1 — are
+redirected by **§17, the moved-path resolver**, and
+`tools/lint_doc_citations.py` fails if any of them stops resolving. Two root
+REFERENCE files were deliberately left behind and §17 names them:
+`track-a-kickoff-brief.md` (Z-4 freeze-over-move, pinned by name in the pin
+test) and `roster-anchor-v14-v6-2026-08-06.md` (the quotable standing table,
+R118 / 10.2; also **deferred pending the unmerged Q19 shield track**). Three
+more stayed because they are not in the ruled 45:
+`dispatch-2026-08-06-status-pass-order.md`,
+`dispatch-2026-08-06e-six-replies.md` and `awaiting-user-slots-2026-08-06.md`
+— the first is ledger-clean, the other two entered or gained their ledger
+citation with the R121 landing itself, after the set of 45 was fixed.
+
 *Mechanical recount (2026-08-06, Track R-E wave-8 acceptance) — counted from
 lifecycle headers alone, `docs/**` `.md` + `.yaml`:*
 
@@ -616,8 +633,10 @@ LIVING one, not in the record.
 
 ### 15.4 ARCHIVED
 
-*(Update 2026-08-06, Track R-B: `docs/archive/` additionally holds 43
-relocated REFERENCE records — see the location note in §15.1. The paragraph
+*(Update 2026-08-06, Track R-B: `docs/archive/` additionally holds 44
+relocated REFERENCE records, and — after R121 `Q20` — **45 more**, for 89
+in total; see both location notes in §15.1 and the resolver in §17. The
+paragraph
 below is the diet's own record and describes the state before R-B; its "every
 file is cited" reasoning is exactly what R-B's same-commit repointing paid
 down.)*
@@ -683,3 +702,95 @@ corpus is grandfathered and never fights it. Two escape hatches, both cheap:
 - give the document the **REFERENCE** or **ARCHIVED** lifecycle header — a
   frozen record is allowed to restate the history of an item; or
 - add the marker `open-items: allow-elsewhere` anywhere in the file.
+
+---
+
+## 17. Moved-path resolver — old `docs/` path → new path
+
+Opened 2026-08-06 by **R121 `Q20`** (verbatim: *"agreed,
+MOVE-WITH-RESOLVER"*), which resumed Clear the Stage Track R-B over the 45
+root REFERENCE files that an **append-only DECISIONS volume cites by path**.
+
+**Why this table exists.** Rail 1 says a frozen record is never rewritten, so
+a ledger citation cannot be repointed when its target moves. Before `Q20` that
+made those 45 files unmovable and put the charter's `docs/*.md` ≤ 15 target
+out of reach. `Q20`'s answer is the third option: **move the file, leave the
+ledger byte alone, and write the redirect down here.** A stale path in a
+frozen record is not a defect if it resolves; it is a defect only if it
+resolves to nothing.
+
+**How it is used.** `tools/lint_doc_citations.py` (CI, `lints` job) parses the
+table below — this file is the single source of truth, the mapping is not
+duplicated in code — and checks every `docs/`/`review/` path cited from the
+DECISIONS volumes. A path that exists is green; a path that does not exist but
+resolves through a row here to a file that does is green; anything else fails.
+The tool's `--all` mode applies the same rule to `tools/`, and
+`tier0/tests/test_doc_citation_targets.py` pins both directions.
+
+**Scope, stated honestly.** The 44 files moved by wave 8's first R-B pass are
+**not** in this table: no DECISIONS volume cites any of their old paths (they
+were movable precisely because of that), and their knowingly-staled
+REFERENCE-to-REFERENCE pointers are logged in `registry/excision-log.md` under
+the M2 rule rather than resolved here. If a future move stales a *ledger*
+path, its row belongs below.
+
+**Maintenance.** One row per moved file, added in the same commit as the move.
+Rows are never deleted — a resolver that forgets is worse than no resolver.
+Per-file citer detail (who was repointed, who was knowingly left stale) is
+`review/stage-clear/rb-move-manifest.tsv`.
+
+| Old path (as cited in frozen records) | New path | Moved | Authority |
+|---|---|---|---|
+| `docs/a2-gate-ratification-2026-07-27.md` | `docs/archive/a2-gate-ratification-2026-07-27.md` | 2026-08-06 | R121 `Q20` |
+| `docs/animation-sprint-2-log.md` | `docs/archive/animation-sprint-2-log.md` | 2026-08-06 | R121 `Q20` |
+| `docs/axis-validity-countersign-2026-08-04.md` | `docs/archive/axis-validity-countersign-2026-08-04.md` | 2026-08-06 | R121 `Q20` |
+| `docs/backlog-2026-07-29.md` | `docs/archive/backlog-2026-07-29.md` | 2026-08-06 | R121 `Q20` |
+| `docs/brief-coop-charter-items.md` | `docs/archive/brief-coop-charter-items.md` | 2026-08-06 | R121 `Q20` |
+| `docs/brief-kokomi-pool-fill.md` | `docs/archive/brief-kokomi-pool-fill.md` | 2026-08-06 | R121 `Q20` |
+| `docs/brief-unheard-confession-rework.md` | `docs/archive/brief-unheard-confession-rework.md` | 2026-08-06 | R121 `Q20` |
+| `docs/calibration-notes.md` | `docs/archive/calibration-notes.md` | 2026-08-06 | R121 `Q20` |
+| `docs/curtain-call-sprint-log-2026-07-27.md` | `docs/archive/curtain-call-sprint-log-2026-07-27.md` | 2026-08-06 | R121 `Q20` |
+| `docs/dispatch-2026-08-06-q13-q14-q15.md` | `docs/archive/dispatch-2026-08-06-q13-q14-q15.md` | 2026-08-06 | R121 `Q20` |
+| `docs/dispatch-2026-08-06b-eleven-replies.md` | `docs/archive/dispatch-2026-08-06b-eleven-replies.md` | 2026-08-06 | R121 `Q20` |
+| `docs/dispatch-2026-08-06d-four-replies.md` | `docs/archive/dispatch-2026-08-06d-four-replies.md` | 2026-08-06 | R121 `Q20` |
+| `docs/enchantments-design-2026-07-27.md` | `docs/archive/enchantments-design-2026-07-27.md` | 2026-08-06 | R121 `Q20` |
+| `docs/epoch-1-log-2026-07-26.md` | `docs/archive/epoch-1-log-2026-07-26.md` | 2026-08-06 | R121 `Q20` |
+| `docs/fontaine-rares-banner-sprint-log.md` | `docs/archive/fontaine-rares-banner-sprint-log.md` | 2026-08-06 | R121 `Q20` |
+| `docs/g12-review-2026-08-05.md` | `docs/archive/g12-review-2026-08-05.md` | 2026-08-06 | R121 `Q20` |
+| `docs/handback-note-2026-08-04.md` | `docs/archive/handback-note-2026-08-04.md` | 2026-08-06 | R121 `Q20` |
+| `docs/missed-requirements.md` | `docs/archive/missed-requirements.md` | 2026-08-06 | R121 `Q20` |
+| `docs/open-playtest-items.md` | `docs/archive/open-playtest-items.md` | 2026-08-06 | R121 `Q20` |
+| `docs/probe-a-block-offset.md` | `docs/archive/probe-a-block-offset.md` | 2026-08-06 | R121 `Q20` |
+| `docs/probe-b-fanfare-residual.md` | `docs/archive/probe-b-fanfare-residual.md` | 2026-08-06 | R121 `Q20` |
+| `docs/probe-d-registration-draft.md` | `docs/archive/probe-d-registration-draft.md` | 2026-08-06 | R121 `Q20` |
+| `docs/probe-e-corpse-detonation-registration-draft.md` | `docs/archive/probe-e-corpse-detonation-registration-draft.md` | 2026-08-06 | R121 `Q20` |
+| `docs/probe-e-corpse-detonation.md` | `docs/archive/probe-e-corpse-detonation.md` | 2026-08-06 | R121 `Q20` |
+| `docs/s7-classification.md` | `docs/archive/s7-classification.md` | 2026-08-06 | R121 `Q20` |
+| `docs/s7-fidelity-audit.md` | `docs/archive/s7-fidelity-audit.md` | 2026-08-06 | R121 `Q20` |
+| `docs/s7-probe-c.md` | `docs/archive/s7-probe-c.md` | 2026-08-06 | R121 `Q20` |
+| `docs/silent-pilot-review-2026-07-27.md` | `docs/archive/silent-pilot-review-2026-07-27.md` | 2026-08-06 | R121 `Q20` |
+| `docs/sitting-prep-2026-08-05.md` | `docs/archive/sitting-prep-2026-08-05.md` | 2026-08-06 | R121 `Q20` |
+| `docs/sitting-record-predraft-2026-08-06.md` | `docs/archive/sitting-record-predraft-2026-08-06.md` | 2026-08-06 | R121 `Q20` |
+| `docs/slot5-candidates-2026-08-05.md` | `docs/archive/slot5-candidates-2026-08-05.md` | 2026-08-06 | R121 `Q20` |
+| `docs/sprint-art-and-a7-log-2026-07-29.md` | `docs/archive/sprint-art-and-a7-log-2026-07-29.md` | 2026-08-06 | R121 `Q20` |
+| `docs/sprint-axis-validity-track-a-log-2026-08-04.md` | `docs/archive/sprint-axis-validity-track-a-log-2026-08-04.md` | 2026-08-06 | R121 `Q20` |
+| `docs/sprint-bugfix-log-2026-07-29.md` | `docs/archive/sprint-bugfix-log-2026-07-29.md` | 2026-08-06 | R121 `Q20` |
+| `docs/sprint-sim-hygiene-log-2026-07-29.md` | `docs/archive/sprint-sim-hygiene-log-2026-07-29.md` | 2026-08-06 | R121 `Q20` |
+| `docs/sprint-track-b-curves-log-2026-08-04.md` | `docs/archive/sprint-track-b-curves-log-2026-08-04.md` | 2026-08-06 | R121 `Q20` |
+| `docs/sprint-track-b-gate-log-2026-08-05.md` | `docs/archive/sprint-track-b-gate-log-2026-08-05.md` | 2026-08-06 | R121 `Q20` |
+| `docs/sprint-understudy-p1-log-2026-08-04.md` | `docs/archive/sprint-understudy-p1-log-2026-08-04.md` | 2026-08-06 | R121 `Q20` |
+| `docs/surplus-week-manifest-2026-08-05.md` | `docs/archive/surplus-week-manifest-2026-08-05.md` | 2026-08-06 | R121 `Q20` |
+| `docs/tech-debt-audit-2026-07-26.md` | `docs/archive/tech-debt-audit-2026-07-26.md` | 2026-08-06 | R121 `Q20` |
+| `docs/track-b-validation-gate-countersign-2026-08-04.md` | `docs/archive/track-b-validation-gate-countersign-2026-08-04.md` | 2026-08-06 | R121 `Q20` |
+| `docs/track-t-audits-2026-08-06.md` | `docs/archive/track-t-audits-2026-08-06.md` | 2026-08-06 | R121 `Q20` |
+| `docs/understudy-countersign-2026-08-04.md` | `docs/archive/understudy-countersign-2026-08-04.md` | 2026-08-06 | R121 `Q20` |
+| `docs/understudy-phase0-report.md` | `docs/archive/understudy-phase0-report.md` | 2026-08-06 | R121 `Q20` |
+| `docs/zhongli-dossier-2026-08-05.md` | `docs/archive/zhongli-dossier-2026-08-05.md` | 2026-08-06 | R121 `Q20` |
+
+**Not moved, and why — the two root REFERENCE files a reader will look for
+here.**
+
+| File | Why it stayed at the root |
+|---|---|
+| `docs/track-a-kickoff-brief.md` | Z-4 chose freeze-over-move: four `tools/` modules cite it by path and `tier0/tests/test_doc_citation_targets.py::test_the_flagged_case_is_still_pinned` pins that path by name. Ledger-clean, so `Q20` does not reach it. |
+| `docs/roster-anchor-v14-v6-2026-08-06.md` | THE quotable standing table (R118 / 10.2) — on the never-move list. It also gained a ledger citation only with the R121 landing, and an unmerged shield track is editing it; **deferred pending the Q19 shield track**, to be re-put to R-B afterwards rather than moved across a live branch. |

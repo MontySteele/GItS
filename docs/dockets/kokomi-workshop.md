@@ -4,7 +4,7 @@
 
 **Status:** DOCKET. Routed, not decided, not scheduled. Zero design authority.
 Opened 2026-08-06 (Track R) against the sitting of 2026-08-06
-(`docs/sitting-record-predraft-2026-08-06.md`); ruling R111.
+(`docs/archive/sitting-record-predraft-2026-08-06.md`); ruling R111.
 
 The workshop is already queued third in the pool-rework order. This docket
 exists so the item below arrives with the session rather than being

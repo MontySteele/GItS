@@ -1,6 +1,6 @@
 """Track O slice 08 pins: GRANTED PLAYS against the Track D / Track H counters.
 
-Family A (`docs/s7-probe-c.md`) was an after-state gate in `understudy/soak.py`
+Family A (`docs/archive/s7-probe-c.md`) was an after-state gate in `understudy/soak.py`
 that dropped a play whose resolution moved the state off a plain combat screen
 -- so overlay plays and killing blows were never written down. The obvious
 place for a cousin is the GRANTED play: a card played by another card's effect

@@ -40,7 +40,7 @@ diagnose as if it were the game's fault.
 
 REVERSIBILITY. Every game-dir write is recorded in a ledger with its undo, the
 ledger is written to disk BEFORE the change is made, and teardown walks it in
-reverse. Appendix A of `docs/understudy-phase0-report.md` is the format this
+reverse. Appendix A of `docs/archive/understudy-phase0-report.md` is the format this
 inherits and the checklist it is measured against.
 """
 

@@ -6,7 +6,7 @@ resource cashes into.* This is that table, and it is the artifact
 [USER] gate **A-G1** existed to review — a token's payoff set is a
 design fact, so the machine may propose it and may not ratify it.
 
-**A-G1 CLOSED 2026-08-04** (`docs/axis-validity-countersign-2026-08-04.md`, recorded as R91).
+**A-G1 CLOSED 2026-08-04** (`docs/archive/axis-validity-countersign-2026-08-04.md`, recorded as R91).
 The seven `ENTITY_PAYOFFS` were confirmed as proposed; the
 `salon_member` double-credit was kept; these tags are LANDED on the
 three sheets and this file is now the parity record, not a proposal.

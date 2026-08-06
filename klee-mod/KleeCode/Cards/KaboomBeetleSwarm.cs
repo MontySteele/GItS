@@ -47,7 +47,7 @@ public sealed class KaboomBeetleSwarm : CustomCardModel, IElementalCard
     // state, and under the snapshot the enemy stops being Bombed after hit 1
     // while still paying the bonus on hits 2-3. The sheet is ratified, so the
     // rewording is a red-pen call, not an executor's; queued in
-    // docs/open-playtest-items.md 6.2.
+    // docs/archive/open-playtest-items.md 6.2.
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaboom Beetle Swarm"),

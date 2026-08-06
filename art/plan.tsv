@@ -684,7 +684,7 @@ relic_ethereal_spotlight	ImageGen/images/furina/relics/ethereal_spotlight.png	25
 # OVERTURN LANDED (queue row 10.1, [USER] 2026-08-06, option (a)): the Take a Bow
 # overturn's own answer -- Opera Epiclese at nation scale, cover/y0.30 -- is now
 # rank 1. grand_gala released the source (see its block above), so the L1 that
-# blocked this pick in docs/g12-review-2026-08-05.md sec.2 no longer fires. The
+# blocked this pick in docs/archive/g12-review-2026-08-05.md sec.2 no longer fires. The
 # incumbent ticket glyph and its sibling drop to r2/r3. After landing, re-run
 # `python tools/art_process.py` in the primary checkout so the out-path picks up
 # the new crop; until then the shipped PNG still shows the ticket render.

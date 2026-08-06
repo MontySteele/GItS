@@ -8,7 +8,7 @@ tested here and the game is never involved.
 
 What is deliberately NOT tested here: the live loop. A test that mocks the
 bridge deeply enough to drive a run would be testing the mock. The live loop
-is validated by running it (H4, `docs/sprint-understudy-p1-log-2026-08-04.md`).
+is validated by running it (H4, `docs/archive/sprint-understudy-p1-log-2026-08-04.md`).
 """
 
 import json

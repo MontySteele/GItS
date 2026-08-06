@@ -4,7 +4,7 @@
 
 **Status:** REGISTER. Zero design authority. Opened 2026-08-06 (Track R)
 against the sitting of 2026-08-06
-(`docs/sitting-record-predraft-2026-08-06.md`); ruling R111.
+(`docs/archive/sitting-record-predraft-2026-08-06.md`); ruling R111.
 
 **What a watch item is** (R111, recorded once for reuse): not a deferral and
 not a queue entry. It is a **blessing of the mechanism** plus a **named

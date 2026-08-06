@@ -232,7 +232,7 @@ Deferred until artifacts exist: **A-G1** (tag review, esp. tag-through
 targets) · **B-G1** (per-axis disposition).
 
 > **A-G1 DISCHARGED 2026-08-04.** Countersigned at
-> `docs/axis-validity-countersign-2026-08-04.md`; recorded as R90 (the null's
+> `docs/archive/axis-validity-countersign-2026-08-04.md`; recorded as R90 (the null's
 > direction), R91 (the tag review), R92 (housekeeping). The seven entity
 > payoffs confirmed as proposed, the salon double-credit kept with a
 > bounded-meter amendment, meter-reading damage ruled, the sustain boundary

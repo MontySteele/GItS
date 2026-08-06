@@ -38,7 +38,7 @@ gate's scope was a filesystem accident. `sucrose_catalyst_conversion` lives
 in mondstadt-companions.yaml and `moonlit_offering` in kokomi-cards.yaml,
 and no rule in this repo could see that the shared Uncommon is strictly
 better than the personal Rare. The precedent is on the record:
-docs/fontaine-rares-banner-sprint-log.md item 2, the Clorinde/Raiden pair
+docs/archive/fontaine-rares-banner-sprint-log.md item 2, the Clorinde/Raiden pair
 "flagged BY HAND because no lint could see it".
 
 The comparability rules are IDENTICAL cross-sheet (same group tuple, same

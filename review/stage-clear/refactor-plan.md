@@ -272,3 +272,66 @@ regenerated TSVs): buckets are now A17 / B5 / C33 / D36; the inventory's
 "zero live citers" for bucket A was scoped to the graph's citing dirs — a
 repo-wide sweep found CODE citers in `tier0/pilot/`, `tier05/` and
 `tier0/README.md`, all repointed in the bucket-A commit.
+
+---
+
+## R-B execution addendum 2 -- 2026-08-06, R121 `Q20` (additive; plan text above unchanged)
+
+**M3 is discharged by ruling, not by exception.** [USER]'s reply to `Q20` was
+*"agreed, MOVE-WITH-RESOLVER."* The plan's M3 ("ledger-cited files do not
+move") is superseded for exactly the reason it was written: it assumed the
+only two options were *break the ledger citation* or *do not move*. The ruling
+supplies the third -- move the file, leave the ledger byte alone, and write the
+redirect down where a lint can read it.
+
+**Executed.** The **45** held ledger-cited root REFERENCE files moved verbatim
+to `docs/archive/` under a dated banner naming R121 `Q20`. Live citers (CODE,
+LIVING, and the two unbannered live indexes) repointed in the same commit --
+162 path citations across 53 files, plus 63 bare-filename index references in
+`docs/README.md` and three live docs, the wave-8 idiom. Frozen citers keep
+their stale paths (M2). New manifest rows carry bucket `Q20-B/C/D`.
+
+**Set reconciliation, stated because the derived number moved.** Re-deriving
+the bucket table at this branch's base returns **48**, not 45. The delta is
+entirely post-R-B arrivals, none of them in the ruled set:
+`dispatch-2026-08-06e-six-replies.md` and `awaiting-user-slots-2026-08-06.md`
+(new or newly-ledger-cited with the R121 landing itself) and
+`roster-anchor-v14-v6-2026-08-06.md` (the never-move quotable table, which
+gained its first ledger citation in the same landing). The 45 executed here are
+exactly the rows the R-B close-out fixed -- verified row-by-row against the
+committed `_rb_table.txt` at `0e57466`.
+
+**Extractor fix, same commit.** `extract_citations.py` did not scan
+`tier0/DECISIONS-archive-R39-R99.md`, so every citation the R-D volume split
+moved out of `DECISIONS.md` had silently stopped counting as LEDGER -- which is
+why an un-fixed re-derivation showed bucket A as non-empty and the bucket-B
+five as ledger-clean. The archive volume is now a `CITING_FILE` and a `LEDGER`
+status, and the re-derivation reconciles to 45 exactly.
+
+**The resolver.** `docs/registry/identifiers.md` §17, one row per moved file,
+the single source of truth. `tools/lint_doc_citations.py` (CI `lints` job,
+`--all`) parses it and checks every `docs/`/`review/` path cited from the three
+DECISIONS volumes -- and, under `--all`, from `tools/`: exists = green, stale
+but resolves to a real file = green, anything else = FAIL. The 44 wave-8 moves
+are **not** in the table, and the check says why: **no DECISIONS volume cites
+any of their old paths** (that is what made them movable in the first place).
+Measured, not assumed -- of 92 distinct doc paths the ledgers cite, 44 are now
+stale and all 44 are covered; zero pre-existing stale ledger citations existed.
+Both directions are pinned in `tier0/tests/test_doc_citation_targets.py`.
+
+**Acceptance count, re-run per the ruling.** Root `docs/*.md`: **74 -> 29**
+(charter target: <= 15). The remainder, honestly:
+
+| What stays | Count | Why |
+|---|---|---|
+| LIVING documents | 19 | Out of R-B's scope by construction -- R-B demotes REFERENCE. Pruning these is **Track R-C**, and rail 2 lets it cut only what a named superseder retires. |
+| Unbannered instrument / draft files | 5 | `role-tempo-baseline.md`, `role-tempo-tagthrough.md`, `track-b-curves.md` are generated (§15.5 index-only -- a producer would overwrite a move banner); `payoff-reach-reregistration-draft-2026-08-06.md` is a live draft; `animation-spike-skeleton2d-kokomi-2026-08-06.md` is an open spike. |
+| REFERENCE, named and held | 5 | `track-a-kickoff-brief.md` (Z-4 freeze-over-move, pinned by name in the pin test); `roster-anchor-v14-v6-2026-08-06.md` (quotable standing table, R118/10.2 -- **and deferred pending the unmerged Q19 shield track**, which is editing it); `dispatch-2026-08-06-status-pass-order.md`, `dispatch-2026-08-06e-six-replies.md`, `awaiting-user-slots-2026-08-06.md` (post-set arrivals, not in the ruled 45). |
+
+**So <= 15 remains unreached, and R-B is now out of moves.** The residual gap
+is 14 files and every one of them is either LIVING (R-C's call), generated, or
+individually named and held. R-B's own list is empty.
+
+**Rail 1 verified.** `git diff` over `tier0/DECISIONS.md`,
+`tier0/DECISIONS-archive-R39-R99.md` and `klee-mod/DECISIONS.md` is empty for
+this track. That is the point of the resolver.
