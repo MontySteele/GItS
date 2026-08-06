@@ -28,9 +28,10 @@ THE RULINGS PINNED HERE, and the register they share:
   * `NC-1` (R116, batch item 3) -- power-sourced DAMAGE runs the full damage
     pipeline: Strength, then Weak x0.75, then Vulnerable x1.5.
   * `NC-11` (R116, batch item 4) -- power-sourced BLOCK is RAW: exempt from
-    both Dexterity and Frail. Added by that item; named here because the two
-    are adjacent, opposite, and R116 recorded them together precisely because
-    they will otherwise be misremembered as one rule.
+    both Dexterity and Frail.
+
+They are adjacent, opposite, and R116 recorded them together precisely
+because they will otherwise be misremembered as one rule.
 """
 
 from __future__ import annotations
@@ -111,6 +112,45 @@ def _damage(amount: int, strength: int, weak: int, vulnerable: int) -> int:
     return int(dmg)
 
 
+# --------------------------------------------------------------------------
+# NC-11 -- power-sourced block is raw
+# --------------------------------------------------------------------------
+#
+# The vector's SUBJECT is the exemption, so every row carries a Dexterity and
+# a Frail that would move a CARD's block and must not move this one. The
+# comparison row is what the card funnel answers for the same inputs: a table
+# where raw and funnelled agreed would pin nothing.
+#
+# Amounts are the three named grants' own numbers -- Metallicize stacks, the
+# Ceremonial Garment rider (`GARMENT_ATTACK_BLOCK`) and the Kurage pulse
+# (`KURAGE_PULSE_BLOCK` plus ward) -- so a retune of any of them is visible
+# here rather than only in play.
+_BLOCK_CASES = [
+    (5, 0, 0),
+    (5, 3, 0),
+    (5, 0, 1),
+    (5, 3, 1),
+    (2, 2, 1),
+    (8, -2, 0),
+    (0, 4, 1),
+    (12, 5, 1),
+]
+
+
+def _block(amount: int, dexterity: int, frail: int) -> tuple[int, int]:
+    """(raw, funnelled) for the same inputs.
+
+    RAW is what the three exempt writers do -- `fighter.block += amount`,
+    reaching neither funnel. FUNNELLED is `powers.modify_block_gained`, the
+    card-block path, and it is here only as the contrast: the ruling is that
+    these two numbers may differ and the mod must answer the first.
+    """
+    fighter = Player(character_id="kokomi", hp=70, max_hp=70)
+    fighter.powers["dexterity"] = dexterity
+    fighter.powers["frail"] = frail
+    return amount, powers.modify_block_gained(fighter, amount)
+
+
 def _derive() -> dict:
     return {
         "_comment": (
@@ -124,6 +164,11 @@ def _derive() -> dict:
             {"amount": a, "strength": s, "weak": w, "vulnerable": v,
              "dealt": _damage(a, s, w, v)}
             for a, s, w, v in _DAMAGE_CASES
+        ],
+        "power_block": [
+            {"amount": a, "dexterity": d, "frail": f,
+             "raw": _block(a, d, f)[0], "funnelled": _block(a, d, f)[1]}
+            for a, d, f in _BLOCK_CASES
         ],
     }
 
@@ -161,9 +206,56 @@ def test_power_damage_actually_scales():
     assert _damage(8, -20, 0, 0) == 0          # clamped, never negative
 
 
+def test_power_block_is_exempt_from_both_dials():
+    """NC-11's content: the raw answer ignores Dexterity AND Frail, and the
+    card funnel does not. The second half is the one that makes the first
+    mean something."""
+    for amount, dex, frail in _BLOCK_CASES:
+        raw, funnelled = _block(amount, dex, frail)
+        assert raw == amount
+    assert _block(5, 3, 0)[1] != 5      # Dexterity moves card block
+    assert _block(5, 0, 1)[1] != 5      # Frail moves card block
+
+
+_POWERS_DIR = (Path(__file__).resolve().parents[2] / "klee-mod" / "KleeCode"
+               / "Powers")
+
+
+def test_the_three_exempt_block_grants_are_unpowered_in_csharp():
+    """NC-11's mod-side fix, pinned as source text.
+
+    The C# cannot be executed from here and the exemption is not arithmetic
+    -- it is a FLAG. `ValueProp.Unpowered` is the predicate that Frail's
+    multiplicative hook and Dexterity's additive hook both gate on, so the
+    whole of the fix is which enum each of the three grants passes. Reading
+    the call sites is the achievable check, and the same idiom
+    `test_a7_port.py` already uses for an Unpowered claim.
+
+    A grant that goes back to `ValueProp.Move` re-arms exactly the divergence
+    R116 ruled against, and would otherwise be invisible until someone
+    measured a Frail fight in game.
+    """
+    companions = (_POWERS_DIR / "CompanionPowers.cs").read_text(encoding="utf-8")
+    kurage = (_POWERS_DIR / "KuragePowers.cs").read_text(encoding="utf-8")
+
+    metallicize = companions.split("class MetallicizePower")[1]
+    assert "GainBlock(Owner, Amount, ValueProp.Unpowered" in metallicize, (
+        "Metallicize's block grant is not Unpowered -- NC-11 (R116) exempts "
+        "power-sourced block from Frail and Dexterity")
+
+    assert ("GainBlock(Owner, block, ValueProp.Unpowered" in kurage), (
+        "the Kurage pulse's block grant is not Unpowered -- NC-11 (R116)")
+    assert ("KokomiConstants.GarmentAttackBlock, ValueProp.Unpowered"
+            in kurage), (
+        "the Ceremonial Garment rider's block grant is not Unpowered -- "
+        "NC-11 (R116). The Attack is its trigger, not its source")
+
+
 _DMG_ROW = re.compile(
     r"new\(\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,"
     r"\s*(-?\d+)\s*\)")
+_BLK_ROW = re.compile(
+    r"new\(\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*\)")
 
 
 def test_csharp_vectors_match_the_sim():
@@ -182,6 +274,13 @@ def test_csharp_vectors_match_the_sim():
     want = [(r["amount"], r["strength"], r["weak"], r["vulnerable"],
              r["dealt"]) for r in derived["power_damage"]]
     assert got == want, f"C# power-damage vectors differ\n got={got}\nwant={want}"
+
+    block = src.split("PowerBlockVectors")[1].split("};")[0]
+    bgot = [tuple(int(g) for g in m) for m in _BLK_ROW.findall(block)]
+    bwant = [(r["amount"], r["dexterity"], r["frail"], r["raw"])
+             for r in derived["power_block"]]
+    assert bgot == bwant, (
+        f"C# power-block vectors differ\n got={bgot}\nwant={bwant}")
 
 
 if __name__ == "__main__":

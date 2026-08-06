@@ -115,5 +115,63 @@
       "vulnerable": 1,
       "dealt": 36
     }
+  ],
+  "power_block": [
+    {
+      "amount": 5,
+      "dexterity": 0,
+      "frail": 0,
+      "raw": 5,
+      "funnelled": 5
+    },
+    {
+      "amount": 5,
+      "dexterity": 3,
+      "frail": 0,
+      "raw": 5,
+      "funnelled": 8
+    },
+    {
+      "amount": 5,
+      "dexterity": 0,
+      "frail": 1,
+      "raw": 5,
+      "funnelled": 3
+    },
+    {
+      "amount": 5,
+      "dexterity": 3,
+      "frail": 1,
+      "raw": 5,
+      "funnelled": 6
+    },
+    {
+      "amount": 2,
+      "dexterity": 2,
+      "frail": 1,
+      "raw": 2,
+      "funnelled": 3
+    },
+    {
+      "amount": 8,
+      "dexterity": -2,
+      "frail": 0,
+      "raw": 8,
+      "funnelled": 6
+    },
+    {
+      "amount": 0,
+      "dexterity": 4,
+      "frail": 1,
+      "raw": 0,
+      "funnelled": 0
+    },
+    {
+      "amount": 12,
+      "dexterity": 5,
+      "frail": 1,
+      "raw": 12,
+      "funnelled": 12
+    }
   ]
 }

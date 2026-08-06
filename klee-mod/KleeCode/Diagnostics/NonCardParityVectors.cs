@@ -86,6 +86,38 @@ internal static class NonCardParityVectors
     }
 
     /// <summary>
+    /// NC-11 (Errata Batch 2 item 4): power-sourced block is RAW.
+    ///
+    /// (amount, dexterity, frail, block). Every row carries a Dexterity and a
+    /// Frail that WOULD move a card's block, so a row that came back scaled
+    /// is a row that went back through the funnel. Amounts are the three
+    /// named grants' own numbers -- Metallicize stacks, the Ceremonial
+    /// Garment rider, the Kurage pulse plus ward.
+    ///
+    /// The C# side of this one is not arithmetic, it is a FLAG: the three
+    /// grants pass <c>ValueProp.Unpowered</c>, which is the predicate
+    /// FrailPower's multiplicative hook and DexterityPower's additive hook
+    /// both gate on. <see cref="Check"/> can therefore only verify that the
+    /// table says what the sim says; that the grants carry the right flag is
+    /// verified by reading the three call sites, which is what the ruling's
+    /// own citation does.
+    /// </summary>
+    internal readonly record struct BlockVector(
+        int Amount, int Dexterity, int Frail, int Block);
+
+    internal static readonly BlockVector[] PowerBlockVectors =
+    {
+        new(5, 0, 0, 5),
+        new(5, 3, 0, 5),
+        new(5, 0, 1, 5),
+        new(5, 3, 1, 5),
+        new(2, 2, 1, 2),
+        new(8, -2, 0, 8),
+        new(0, 4, 1, 0),
+        new(12, 5, 1, 12),
+    };
+
+    /// <summary>
     /// Runs every vector and returns one human-readable finding per failure.
     /// Never throws: a validator that bricks the boot is the failure mode it
     /// exists to prevent.
@@ -104,6 +136,22 @@ internal static class NonCardParityVectors
                     "Power-damage pipeline parity (NC-1): {0} with strength "
                   + "{1}, weak {2}, vulnerable {3} -> {4}, sim says {5}",
                     v.Amount, v.Strength, v.Weak, v.Vulnerable, got, v.Dealt));
+            }
+        }
+
+        foreach (var v in PowerBlockVectors)
+        {
+            // The raw grant is the identity on its amount, by definition of
+            // the exemption. Stated as a check anyway, because the row that
+            // would fail it is a row somebody edited by hand.
+            if (v.Block != v.Amount)
+            {
+                findings.Add(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Power-block exemption parity (NC-11): {0} with dexterity "
+                  + "{1}, frail {2} -> table says {3}, and raw block must be "
+                  + "the amount",
+                    v.Amount, v.Dexterity, v.Frail, v.Block));
             }
         }
 

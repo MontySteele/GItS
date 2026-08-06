@@ -557,6 +557,14 @@ public sealed class MetallicizePower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Player player)
     {
         if (player.Creature != Owner) return;
-        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null);
+        // NC-11 (R116, Errata Batch 2 item 4): power-sourced block is RAW.
+        // Unpowered, not Move -- StS applies Frail to CARD block via
+        // AbstractCard.applyPowersToBlock, and Dexterity's additive hook
+        // carries the same `IsPoweredCardOrMonsterMoveBlock` predicate, so
+        // passive block (Metallicize, Crystallize, Solar Isotoma) is exempt
+        // from both. tier0 writes `fighter.block +=` at
+        // `powers.on_turn_start` for exactly that reason, and R116 ruled the
+        // exemption canonical.
+        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null);
     }
 }

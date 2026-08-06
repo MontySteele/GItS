@@ -97,7 +97,12 @@ public sealed class KurageSummonPower : PowerModel, ILocalizationProvider
                     + KurageWardPower.WardAmount(Owner);
         if (block > 0)
         {
-            await CreatureCmd.GainBlock(Owner, block, ValueProp.Move, null);
+            // NC-11 (R116, Errata Batch 2 item 4): power-sourced block is
+            // RAW. Unpowered, not Move, so neither Frail nor Dexterity sees
+            // it -- tier0 writes `p.block +=` here, deliberately bypassing
+            // `powers.modify_block_gained` (the funnel exemption documented
+            // at powers.py:75-81, ruled canonical).
+            await CreatureCmd.GainBlock(Owner, block, ValueProp.Unpowered, null);
         }
 
         await PowerCmd.TickDownDuration(this);
@@ -355,8 +360,12 @@ public sealed class KokomiGarmentHooks : AbstractModel
         if (cardPlay.Card.Type != CardType.Attack) return;
         if (!CeremonialGarmentPower.IsUp(owner)) return;
 
+        // NC-11 (R116, Errata Batch 2 item 4): the rider is POWER-sourced,
+        // not card-printed -- the Attack is only its trigger -- so it is
+        // Unpowered and exempt from Frail and Dexterity, matching tier0's
+        // raw `p.block +=` (effects.py, `ceremonial_garment`).
         await CreatureCmd.GainBlock(
-            owner!, KokomiConstants.GarmentAttackBlock, ValueProp.Move,
+            owner!, KokomiConstants.GarmentAttackBlock, ValueProp.Unpowered,
             cardPlay);
     }
 }
