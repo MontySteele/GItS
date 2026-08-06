@@ -161,6 +161,9 @@ def companion_shop_offer(
         # different odds tables: slot 1 the floor's conditioned odds, slot 2
         # RARITY_ODDS itself. See tier0/constants.py for the conditioning and
         # for the stated-split reading that was surfaced and not chosen.
+        # RESOLVED BY Q16, 2026-08-06 (R117 rider / R118, verbatim
+        # "Condition."): the conditioning shipped here IS the ruled reading;
+        # the stated-split alternative was declined. No value changed.
         nation = home if slot == 0 else None
         odds = C.SHOP_COMPANION_RARITY_ODDS if slot == 0 else C.RARITY_ODDS
         rarity = _roll_companion_rarity(rng, odds)

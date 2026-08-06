@@ -3391,11 +3391,19 @@ def build_body(
                     "                        spotlightCopy.EnergyCost"
                     f".SetThisCombat({override});\n"
                     "                    }\n")
+            # AB-s1 (Q9 / R118, verbatim "Yes."): the copy pool excludes KIT
+            # cards, matching the sheet and the sim (effects.py:1231-1232's
+            # `not c.kit_card`). KitGrant.NotKitCard is the same predicate
+            # every other kit-exempt pool in the codebase rides (Crackle,
+            # bright_idea, the Kokomi selectors). Recorded as a MOD BEHAVIOUR
+            # CHANGE, not a parity repair -- the undiscardable copied kit
+            # Burst stops being reachable in game.
             lines.append(
                 "{\n"
                 "            var spotlightTargets = CardPile.Get("
                 "PileType.Hand, Owner)?.Cards\n"
-                "                .Where(SpotlightSystem.IsSpotlighted)"
+                "                .Where(SpotlightSystem.IsSpotlighted)\n"
+                "                .Where(KitGrant.NotKitCard)"
                 ".ToList();\n"
                 "            if (spotlightTargets != null "
                 "&& spotlightTargets.Count > 0)\n"

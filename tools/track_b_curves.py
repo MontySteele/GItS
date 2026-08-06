@@ -108,7 +108,11 @@ def _fight(rec: dict[str, Any]) -> Fight:
     return Fight(
         feed=str(rec.get("feed") or "bot"),
         source=str(rec.get("source") or "soak"),
-        # A DECLARATION, NEVER AN INFERENCE (R99/4a). Absent key and empty
+        # A DECLARATION, NEVER AN INFERENCE (R99 item 4(a) -- spelled the
+        # way the ledger spells it; the Q15-widened citation lint reads
+        # `R<n>/<clause>` against the `**<clause> --` idiom, and R99
+        # declares this clause as a lettered sub-item instead). Absent key
+        # and empty
         # string are the same reading: nobody said what this deck was trying
         # to be. Nothing here looks at `cards_played` and guesses.
         intent=str(rec.get("intent") or "").strip().lower(),
@@ -147,7 +151,7 @@ def read_jsonl(path: Path) -> list[dict]:
 
 
 def cut_by_intent(fights: Sequence[Fight], intent: str | None) -> list[Fight]:
-    """R99/4a — the declared-intent cut.
+    """R99 item 4(a) — the declared-intent cut.
 
     B2's Fanfare question could not be graded from mixed decks. The cut is the
     cheap half of the answer: keep only the fights whose run DECLARED the
@@ -525,7 +529,7 @@ def render(fights: Sequence[Fight], intent: str | None = None) -> str:
             a(f"| {feed} | {src} | {n} |")
         a("")
 
-    # ---------------------------------------------- declared intent (R99/4a)
+    # ------------------------------------ declared intent (R99 item 4(a))
     declared: dict[tuple[str, str], int] = {}
     for f in fights:
         declared[(f.feed, f.intent or "(none)")] = \
@@ -675,7 +679,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap.add_argument("--human-dir", type=Path, default=None)
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--intent", default=None,
-                    help="R99/4a: cut every curve to fights whose run "
+                    help="R99 item 4(a): cut every curve to fights whose run "
                          "DECLARED this archetype (human feed: intent.txt; "
                          "bot feed: soak --commit). `none` keeps only "
                          "undeclared runs, which is the baseline document. "

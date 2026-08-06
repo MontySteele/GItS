@@ -132,8 +132,21 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         powers.apply_power(state, enemy, "dot", C.ELECTROCHARGED_DOT)
     elif pair == frozenset(("hydro", "cryo")):
         name = "frozen"
-        if enemy.is_boss:
-            # Bosses take Vulnerable instead (round 3; stands post-errata).
+        # NC-7 alpha (Q13 / R117, verbatim "I'd say A"): the Vulnerable
+        # substitution is keyed on BOSS ROOM x NON-MINION -- the sim's
+        # mirror of the mod's `RoomType == Boss && no MinionPower`
+        # predicate (ReactionEffects.cs). Under alpha the freezable set in
+        # a boss room is minion-flagged creatures ONLY, so a boss-room
+        # helper (kaiser_rocket, a slotted monster, not a minion) now
+        # takes Vulnerable where the pre-alpha per-creature `is_boss` read
+        # froze it. That is R116's stated second-claw consequence,
+        # DELIBERATELY overridden by [USER]'s alpha selection -- a chosen
+        # reading, not a missed example. Room membership reads
+        # state.enemies (not living_enemies), like the mod's RoomType,
+        # which does not change when the boss dies first.
+        boss_room = any(e.is_boss for e in state.enemies)
+        if boss_room and not enemy.is_minion:
+            # Substitution (round 3; stands post-errata, alpha-scoped).
             powers.apply_power(state, enemy, "vulnerable", C.FROZEN_BOSS_VULN)
         else:
             # v1.5: soft control — actions at -50%, shatterable. No skip.
@@ -157,7 +170,8 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
             powers.apply_power(state, enemy, "weak", n)
         if p.burst_max:
             resources.gain_burst(state, C.BURST_PER_REACTION, "reaction")
-        # Catalytic Conversion: reactions grant bonus sparks + burst energy.
+        # Catalytic Converter (R120 rename; id catalytic_conversion unchanged):
+        # reactions grant bonus sparks + burst energy.
         bonus = p.powers.get("reaction_bonus_spark_energy", 0)
         if bonus:
             p.sparks += bonus

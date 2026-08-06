@@ -13,7 +13,7 @@ answer the same question fails.
 WHAT IT READS
 -------------
   docs/role-tempo-floors.yaml   canon-derived, percentages only. TWO LAYERS
-                                since R91/1c:
+                                since R90/1c:
 
       default:   for an archetype with no named anchor. A cell is mandatory
                  when all five canon PACKAGES are non-zero in it; the floor is
@@ -28,7 +28,9 @@ WHAT IT READS
                                 than read off the TSV, because a cell is
                                 per-BAND and the TSV's solve is the union.
 
-R91/1c IS WHY THE POPULATION CHANGED. The first run compared a GItS archetype
+R90/1c IS WHY THE POPULATION CHANGED. (Citation repaired 2026-08-06 per Q15 /
+R117 -- this file carried F14's misattribution three times over; clause 1c is
+R90's, not R91's.) The first run compared a GItS archetype
 (11-32 cards, one plan) against a whole canon character (88 cards spread across
 everything), so the bar was generous by construction and Furina cleared some
 floors by 40-60 points. The comparison population is now the canon PACKAGE --
@@ -163,7 +165,7 @@ def main(argv=None) -> int:
     print("role x tempo coverage -- FLOORS ONLY, no card can fail.")
     print("A COUNTING TOOL (R90/1a): does a card for this job exist at this")
     print("point in the fight? Size and timing are Track B's (R90/1b).")
-    print(f"Floors: canon PACKAGES (R91/1c). {len(default)} default-mandatory "
+    print(f"Floors: canon PACKAGES (R90/1c). {len(default)} default-mandatory "
           f"cells; {len(anchored)} archetypes anchored to a named package.")
     print()
 

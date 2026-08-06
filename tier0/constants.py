@@ -85,7 +85,7 @@ WITCHS_FLAME_BURST = 3            # Durin: Burst Energy per consumed Pyro aura
 SOLAR_ISOTOMA_BLOCK = 3           # block per attack hit vs aura'd enemy
 CELESTIAL_GIFT_BLOCK = 4          # Nicole: block at start of turn
 MASQUE_BOND_BLOCK = 5             # Arlecchino: Bond of Life, Block owed per turn
-CATALYTIC_BURST_PER_REACTION = 5  # Catalytic Conversion bonus burst/reaction
+CATALYTIC_BURST_PER_REACTION = 5  # Catalytic Converter bonus burst/reaction
 
 # --- Furina: Spotlight (kickoff §3) ---
 SPOTLIGHT_BASE_MULT = 1.5     # RATIFIED (R71, 2026-07-26). The W0
@@ -722,6 +722,12 @@ SHOP_COMPANION_SLOTS = 2
 # Rare may be the wrong price for it -- and it is a [USER] call, not this
 # one. Nothing below was tuned; conditioning was applied and the result is
 # the identity on the existing values.
+# RESOLVED BY Q16, 2026-08-06 (R117 rider, answered R118, verbatim
+# "Condition."): [USER] chose the CONDITION reading -- the odds below ARE
+# RARITY_ODDS renormalized over the >=Uncommon pool, exactly as shipped.
+# The stated-split alternative above was declined; a fresh split would be
+# its own row in its own window. No value changed by the ruling: the
+# conditioning was already the identity on these numbers.
 SHOP_COMPANION_RARITY_ODDS = {"uncommon": 0.875, "rare": 0.125}
 # SLOT 2's odds are RARITY_ODDS itself, unconditioned -- "any companion
 # card" is the absence of a filter, and the absence of a filter is the
@@ -861,7 +867,25 @@ BANNER_FEATURED_SLOTS = 3
 # Klee / Kokomi / ref_ironclad / real_ironclad / real_silent draft no Furina
 # card and do not move. DRAFTER_VERSION and RUNTEMPLATE correctly do NOT bump:
 # no offer-time price and no map/route shape changed.
-CONSTANTS_VERSION = 5
+# CONSTANTS_VERSION 6 (R117/Q14, verbatim "14) Yes"; wave 8, 2026-08-06):
+# "Frozen unified + alpha boss-room scope + shop-slot spec" as ONE batch
+# boundary. Contents: (a) NC-7 Frozen unified (Errata Batch 2, db3318e) --
+# the sim adopted the mod's DURATION COUNTER (end-of-enemy-side tick,
+# stacking extends, Shatter clears the counter); (b) the alpha boss-room
+# scope (R117/Q13, verbatim "I'd say A") -- in a boss ROOM only
+# minion-flagged creatures freeze, every other creature takes the
+# Vulnerable substitution, which deliberately overrides R116's stated
+# Kaiser-Crab-second-claw consequence; (c) the NC-10 shop-slot spec
+# (Errata Batch 2, both engines) with Q16's CONDITION reading (R118,
+# verbatim "Condition.") -- SHOP_COMPANION_RARITY_ODDS renormalizes over
+# the >=Uncommon pool, a conditioning change with NO new values.
+# Frozen appears across the roster's fights, so (a)+(b) archive EVERY
+# pre-batch combat number for EVERY character -- not one kit's curve this
+# time; (c) archives the tier-0.5 shop maths in both engines. Archive
+# banners go where the numbers are published, nothing rewritten (R101b).
+# DRAFTER_VERSION and RUNTEMPLATE correctly do NOT bump: no offer-time
+# price and no map/route shape changed.
+CONSTANTS_VERSION = 6
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

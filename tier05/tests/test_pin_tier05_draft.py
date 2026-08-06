@@ -88,14 +88,22 @@ def test_draft_regret_needs_a_full_point_of_hindsight_advantage():
     rival that merely outscores the pick by a fraction is not a regret."""
     assert C.DRAFT_REGRET_SAMPLE == 0.10
     final_deck = _cards(*loader.starting_deck("klee"))
+    # FIXTURE SWAP 2026-08-06 (R118 10.2 rider): the near-miss rival used to
+    # be `cleave_like`, but the ref_ironclad package cards gained
+    # `archetypes: [generic]` for the anchor instrumentation, and the
+    # drafter's off-plan generic term (+0.8) moved cleave_like's score to an
+    # exact tie with blast_radius -- no longer "beaten by a fraction".
+    # `sizzle` carries the same 0-< delta <-1 shape (0.8) with no tag in
+    # play. The pin's invariant (a regret needs MORE THAN a full point of
+    # hindsight advantage) is untouched.
     score = {cid: draft.score_offer(loader.get_card(cid), final_deck,
                                     "demolition")
-             for cid in ("blast_radius", "cleave_like", "rapid_fire")}
+             for cid in ("blast_radius", "sizzle", "rapid_fire")}
 
     # Rival beats the pick, but by less than a point -- not a regret.
-    assert 0 < score["blast_radius"] - score["cleave_like"] < 1.0
-    near_miss = {"offers": _cards("cleave_like", "blast_radius"),
-                 "picked": "cleave_like"}
+    assert 0 < score["blast_radius"] - score["sizzle"] < 1.0
+    near_miss = {"offers": _cards("sizzle", "blast_radius"),
+                 "picked": "sizzle"}
     assert draft.draft_regret(_AlwaysSample(), [near_miss], final_deck,
                               "demolition") == 0
 

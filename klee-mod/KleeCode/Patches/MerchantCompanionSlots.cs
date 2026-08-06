@@ -66,6 +66,11 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
     /// than inherited from the reward table. Conditioning is the reading that
     /// introduces no new number, so it is the one implemented; the split is a
     /// [USER] call. See tier0/constants.py, same note.
+    ///
+    /// RESOLVED BY Q16, 2026-08-06 (R117 rider / R118, verbatim
+    /// "Condition."): [USER] chose the CONDITION reading -- the value below
+    /// IS the ruled implementation. The stated-split alternative was
+    /// declined; no value changed.
     /// </summary>
     private const float SlotOneUncommonOdds = 0.875f;
 

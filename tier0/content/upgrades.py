@@ -138,7 +138,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "add":
             card.effects.append(copy.deepcopy(val))
         elif key == "innate":
-            # R37 (Catalytic Conversion+): boolean, only True is a ruling.
+            # R37 (Catalytic Converter+): boolean, only True is a ruling.
             if val is not True:
                 raise ValueError(f"innate delta on {base_id!r} must be true")
             card.innate = True

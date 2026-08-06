@@ -171,7 +171,8 @@ internal static class ReactionEffects
             KokomiResources.GainBurst(
                 dealer, KokomiConstants.BurstPerReaction);
 
-            // Catalytic Conversion, right after the flat +5 exactly as in the
+            // Catalytic Converter (R120 rename), right after the flat +5
+            // exactly as in the
             // sim (reactions.py _react): +Amount Sparks and +Amount x 5 Burst
             // Energy per reaction. Same funnel, so it can neither miss a
             // reaction nor double-count one.
@@ -205,7 +206,22 @@ internal static class ReactionEffects
                 // Boss rooms consume the aura but receive Vulnerable rather
                 // than Frozen. This preserves the intended boss immunity to
                 // action control while retaining a useful reaction payoff.
-                if (target.CombatState?.Encounter?.RoomType == RoomType.Boss)
+                //
+                // NC-7 alpha (Q13 / R117, verbatim "I'd say A"), completing
+                // the half Errata Batch 2 stopped: the substitution is
+                // per-CREATURE inside the boss room, keyed on the game's
+                // MinionPower -- the assembly's only per-creature
+                // "secondary enemy" fact (reflection findings in
+                // review/parity-sweep/noncard-triage-memo.md, NC-7). A
+                // boss-room creature carrying MinionPower gets Frozen;
+                // every other creature gets Vulnerable. Kaiser Crab's claws
+                // are slotted monsters, NOT minions, so under alpha the
+                // second claw takes Vulnerable -- R116's stated consequence,
+                // deliberately overridden by [USER]'s alpha selection.
+                // The sim's mirror predicate is reactions.py's
+                // `boss_room and not enemy.is_minion`.
+                if (target.CombatState?.Encounter?.RoomType == RoomType.Boss
+                    && !target.Powers.OfType<MinionPower>().Any())
                 {
                     await PowerCmd.Apply<VulnerablePower>(
                         choiceContext, target,

@@ -154,7 +154,7 @@ packages:
     - double_pop
     - ammo_scavenging
     - secret_stash
-  # R37 measurement cells (2026-07-20): Catalytic Conversion's upgrade is
+  # R37 measurement cells (2026-07-20): Catalytic Converter's upgrade is
   # now {innate: true} -- sim-expressible, so the R24 no-unmeasured-upgrades
   # law is SATISFIED, not waived. Two cells, ONE variable (the +): the
   # reaction deck with the power drawn normally vs opening-hand. Not an

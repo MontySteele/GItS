@@ -1,10 +1,12 @@
-"""Every clause-bearing R-number citation in `canon_role_tempo.py` must resolve.
+"""Every clause-bearing R-number citation in `tools/*.py` must resolve.
 
 WHY THIS IS A LINT AND NOT FIVE MORE EDITS
 ------------------------------------------
 S4 finding F14 caught ONE wrong citation: the generated header of
-`docs/role-tempo-floors.yaml` cited "R91/1c" for a clause that is R90's. R107
-fixed that one. The surplus-week sweep then found the generator carrying the
+`docs/role-tempo-floors.yaml` cited R91 for clause 1c, a clause that is R90's.
+R107 fixed that one. (The defect is spelled out in words here rather than in
+citation form, because since the Q15 widening this file sweeps itself and a
+verbatim bad example would be its own finding.) The surplus-week sweep then found the generator carrying the
 SAME misattribution in four more places -- one comment, one docstring, and two
 strings the generator writes into `docs/role-tempo-baseline.md`. Five instances
 of one defect, produced by one file, none of them catchable by any existing
@@ -13,23 +15,26 @@ and no instrument in the repo reads a citation.
 
 That is the house pattern for a structurally invisible defect, at the count
 where it graduates: the human catch becomes a curated check that runs. Prose is
-where a stale citation does its damage -- someone resolving "R91/1c" lands on
-the tag-review ruling, reads clauses 2a-2d, finds nothing about packages, and
-either guesses or gives up.
+where a stale citation does its damage -- someone resolving the bad citation
+(R91, clause 1c) lands on the tag-review ruling, reads clauses 2a-2d, finds
+nothing about packages, and either guesses or gives up.
 
-WHAT IT CHECKS, AND THE NARROWNESS IS DELIBERATE
-------------------------------------------------
-Scope is exactly ONE file (`TARGET`). This is not a repo-wide citation checker
-and must not quietly become one: the same misattribution is live in
-`tools/lint_role_tempo_coverage.py` and in the generated
-`docs/role-tempo-baseline.md`, and widening the scope to sweep them is a
-separate decision that has not been taken. A lint whose scope grew by accident
-is a lint nobody can reason about.
+WHAT IT CHECKS, AND HOW THE SCOPE GOT HERE
+------------------------------------------
+Scope is `tools/*.py` (non-recursive, the queue row's own words). It began as
+exactly ONE file (`canon_role_tempo.py`), deliberately: the same
+misattribution was known to be live in `tools/lint_role_tempo_coverage.py`,
+and widening a lint's scope is a decision, not a repair. That decision was
+then taken: **WIDENED 2026-08-06 per Q15 (R117, verbatim "15) Widen")** — the
+sweep extends to `tools/*.py` and the three occurrences in
+`lint_role_tempo_coverage.py` were repaired to satisfy it, comments and
+docstrings only. A lint whose scope grew by accident is a lint nobody can
+reason about; this one's growth is on the record.
 
-Within that file it checks CLAUSE-BEARING citations only, in the two forms the
-file actually writes:
+Within those files it checks CLAUSE-BEARING citations only, in the two forms
+the tools actually write:
 
-    R90/1c            R91 (Ruling 1c)
+    R90/1c            R90 (Ruling 1c)
 
 A citation resolves when (1) `tier0/DECISIONS.md` has an entry `## R<n> ...`
 and (2) that entry's body declares the clause, in DECISIONS' own clause idiom
@@ -51,7 +56,14 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 DECISIONS = REPO / "tier0" / "DECISIONS.md"
-TARGET = REPO / "tools" / "canon_role_tempo.py"
+
+
+def _targets() -> list[Path]:
+    """`tools/*.py`, non-recursive (Q15's own scope wording) -- the archive
+    subdirectory holds retired tools and stays out, exactly as a shell glob
+    would leave it. This file sweeps itself: its own docstring examples must
+    resolve like anyone else's."""
+    return sorted((REPO / "tools").glob("*.py"))
 
 # `## R90 -- ...` opens an entry; the next `## ` closes it.
 _ENTRY = re.compile(r"^##\s+R(\d+)\b", re.M)
@@ -84,34 +96,39 @@ def _declares(body: str, clause: str) -> bool:
 
 def main() -> int:
     entries = _entries(DECISIONS.read_text(encoding="utf-8"))
-    src = TARGET.read_text(encoding="utf-8").splitlines()
 
-    seen: set[tuple[int, str, str]] = set()
+    targets = _targets()
     findings: list[str] = []
     checked = 0
-    for lineno, line in enumerate(src, 1):
-        for pattern in _CITES:
-            for number, clause in pattern.findall(line):
-                key = (lineno, number, clause)
-                if key in seen:
-                    continue
-                seen.add(key)
-                checked += 1
-                body = entries.get(number)
-                if body is None:
-                    findings.append(
-                        f"{TARGET.name}:{lineno}: cites R{number}/{clause}, but "
-                        f"tier0/DECISIONS.md has no entry R{number}")
-                elif not _declares(body, clause):
-                    owners = sorted(
-                        n for n, b in entries.items() if _declares(b, clause))
-                    hint = (f" -- clause {clause} is declared by "
-                            f"{', '.join('R' + o for o in owners)}"
-                            if owners else
-                            f" -- no entry declares a clause {clause}")
-                    findings.append(
-                        f"{TARGET.name}:{lineno}: cites R{number}/{clause}, but "
-                        f"R{number} declares no clause {clause}{hint}")
+    for target in targets:
+        src = target.read_text(encoding="utf-8").splitlines()
+        seen: set[tuple[int, str, str]] = set()
+        for lineno, line in enumerate(src, 1):
+            for pattern in _CITES:
+                for number, clause in pattern.findall(line):
+                    key = (lineno, number, clause)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    checked += 1
+                    body = entries.get(number)
+                    if body is None:
+                        findings.append(
+                            f"{target.name}:{lineno}: cites "
+                            f"R{number}/{clause}, but tier0/DECISIONS.md has "
+                            f"no entry R{number}")
+                    elif not _declares(body, clause):
+                        owners = sorted(
+                            n for n, b in entries.items()
+                            if _declares(b, clause))
+                        hint = (f" -- clause {clause} is declared by "
+                                f"{', '.join('R' + o for o in owners)}"
+                                if owners else
+                                f" -- no entry declares a clause {clause}")
+                        findings.append(
+                            f"{target.name}:{lineno}: cites "
+                            f"R{number}/{clause}, but R{number} declares no "
+                            f"clause {clause}{hint}")
 
     if findings:
         print(f"R-citations: {len(findings)} finding(s)")
@@ -119,8 +136,9 @@ def main() -> int:
             print(f"  {finding}")
         return 1
 
-    print(f"R-citations OK: {checked} clause-bearing citation(s) in "
-          f"{TARGET.relative_to(REPO)} resolve against tier0/DECISIONS.md")
+    print(f"R-citations OK: {checked} clause-bearing citation(s) across "
+          f"{len(targets)} file(s) in tools/*.py resolve against "
+          f"tier0/DECISIONS.md")
     return 0
 
 

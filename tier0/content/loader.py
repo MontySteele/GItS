@@ -544,6 +544,10 @@ def build_encounter(encounter_id: str) -> list[Enemy]:
                 hp=e["hp"], max_hp=e["hp"], name=e["name"],
                 intents=copy.deepcopy(e["intents"]),
                 is_boss=e.get("is_boss", False),
+                # NC-7 alpha (Q13 / R117): the MinionPower mirror, same
+                # authored-passthrough shape as is_boss. No committed
+                # encounter sets it today.
+                is_minion=e.get("is_minion", False),
                 sleep_turns=e.get("sleep_turns", 0)))
     return enemies
 

@@ -2,6 +2,22 @@
 
 > **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
 
+> # ARCHIVE BANNER — the shop-channel numbers here are pre-CONSTANTS-6
+>
+> **Appended 2026-08-06 (Track V, wave 8). `CONSTANTS_VERSION` 5 → 6 was
+> approved by [USER] on 2026-08-06 (Q14 / R117, verbatim *"14) Yes"*), and
+> the v6 batch's shop half is `NC-10` (R116, Errata Batch 2, both engines):
+> slot 1 became "Uncommon or higher from the home region", slot 2 became
+> "any companion card", and Q16's CONDITION reading (R118, verbatim
+> *"Condition."*) fixed `SHOP_COMPANION_RARITY_ODDS` as the reward odds
+> renormalized over ≥Uncommon — a conditioning change, no new values.**
+> The tier-0.5 shop maths this document measured predate that spec in both
+> engines, so **every measured shop-channel number here is archive and is
+> NOT comparable to output taken under 6.** Quote these numbers only with
+> the pre-v6 label attached. Nothing above or below is rewritten (R101b);
+> the v6 re-baseline sweep is Track M's, after the v6 code lands. Source of
+> the bump: `tier0/constants.py`, the `CONSTANTS_VERSION 6` note.
+
 **Executed 2026-07-25.** Plan of record:
 `docs/shop-companion-channel-sprint.md` (PRE-REGISTERED, rulings R59–R62).
 Decision record it superseded: `docs/shop-companion-channel-plan.md`.

@@ -112,7 +112,7 @@ class Card:
     # returns to the kit (no pile) after play so a refill re-grants it.
     kit_card: bool = False
     # R37: starts in the opening hand (top of the shuffled draw pile).
-    # Today only upgrades set this ({innate: true} -- Catalytic Conversion+);
+    # Today only upgrades set this ({innate: true} -- Catalytic Converter+);
     # sparks_n_splash's "innate-on-charge" is its OWN mechanism, untouched.
     innate: bool = False
     # Ordinary Retain. Burst cards also retain through their kit tag, but a
@@ -421,6 +421,18 @@ class Enemy(Fighter):
     # engine from becoming permanent Weak against bosses.
     bomb_suppression_spent: bool = False
     is_boss: bool = False
+    # NC-7 alpha (Q13 / R117, verbatim "I'd say A"): the sim's mechanical
+    # mirror of the game's `MinionPower` fact -- the assembly's ONLY
+    # per-creature "secondary enemy" concept (reflection findings recorded in
+    # review/parity-sweep/noncard-triage-memo.md, NC-7 EXECUTION NOTE).
+    # Read by reactions._react: in a boss ROOM, only minion-flagged creatures
+    # can be Frozen; every other creature takes the Vulnerable substitution.
+    # Set True by combat's summon intent (the game applies MinionPower to
+    # summoned adds -- gas-bomb/guardbot/parafright/tough-egg dossiers) and
+    # authorable per-enemy in yaml, same passthrough as is_boss. No authored
+    # roster enemy carries it today: Kaiser Crab's claws are slotted
+    # monsters, NOT minions, verified by reflection in the execution note.
+    is_minion: bool = False
     sleep_turns: int = 0        # skips its turn while > 0 (BURST CHECK)
     # NC-7 (R116, Errata Batch 2 item 5): a DURATION COUNTER, not a one-shot
     # boolean. Turns remaining, decremented once at the end of the enemy side

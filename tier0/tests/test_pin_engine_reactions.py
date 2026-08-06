@@ -2,7 +2,7 @@
 (mutation sweep s15, engine-reactions group).
 
 Two rules live here: Crystallize's Block is ADDED to whatever Block the
-player is already holding (it never replaces it), and Catalytic Conversion's
+player is already holding (it never replaces it), and Catalytic Converter's
 bonus burst energy scales with the number of reaction_bonus_spark_energy
 stacks rather than paying a flat amount per reaction.
 """
@@ -49,7 +49,7 @@ def test_two_crystallizes_in_a_row_stack_their_block():
 # --- Catalytic burst scales per stack (HIGH-8) ---
 
 def test_catalytic_burst_scales_with_reaction_bonus_stacks():
-    """Catalytic Conversion pays CATALYTIC_BURST_PER_REACTION burst energy
+    """Catalytic Converter pays CATALYTIC_BURST_PER_REACTION burst energy
     PER STACK of reaction_bonus_spark_energy: at two stacks one reaction
     grants double the burst (and double the sparks) of one stack."""
     state = make_state()
