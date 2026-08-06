@@ -235,5 +235,31 @@
       "sides": 5,
       "remaining": 0
     }
+  ],
+  "frozen_boss_room": [
+    {
+      "boss_room": 0,
+      "is_minion": 0,
+      "frozen": 1,
+      "vulnerable": 0
+    },
+    {
+      "boss_room": 0,
+      "is_minion": 1,
+      "frozen": 1,
+      "vulnerable": 0
+    },
+    {
+      "boss_room": 1,
+      "is_minion": 0,
+      "frozen": 0,
+      "vulnerable": 2
+    },
+    {
+      "boss_room": 1,
+      "is_minion": 1,
+      "frozen": 1,
+      "vulnerable": 0
+    }
   ]
 }

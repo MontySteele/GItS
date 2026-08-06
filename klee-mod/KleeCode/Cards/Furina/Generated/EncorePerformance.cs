@@ -61,7 +61,8 @@ public sealed class EncorePerformance : CustomCardModel, ICharacterCard
     {
         {
             var spotlightTargets = CardPile.Get(PileType.Hand, Owner)?.Cards
-                .Where(SpotlightSystem.IsSpotlighted).ToList();
+                .Where(SpotlightSystem.IsSpotlighted)
+                .Where(KitGrant.NotKitCard).ToList();
             if (spotlightTargets != null && spotlightTargets.Count > 0)
             {
                 var selectedSpotlight = Owner.RunState.Rng.CombatTargets.NextItem(spotlightTargets);

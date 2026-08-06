@@ -105,6 +105,19 @@ is new authored content data covering every base-game boss room. Surfaced, not c
 > not Frozen. This is a chosen reading, not a missed example: chat flagged the
 > contradiction to [USER] before the dispatch was drafted, and the α selection
 > stands with that consequence stated. No re-litigation.
+>
+> **EXECUTED 2026-08-06 (Track V, wave 8, v6 window).** Mod: the Frozen case
+> in `ReactionEffects.cs` keys the boss-room substitution on the target NOT
+> carrying `MinionPower` — minions freeze, everything else takes Vulnerable.
+> Sim: `Enemy.is_minion` mirrors the `MinionPower` fact (summon-spawned adds
+> carry it, per the gas-bomb/guardbot/parafright/tough-egg dossiers; no
+> authored roster enemy does — the claws are slotted monsters), and
+> `reactions._react` substitutes on `boss_room and not enemy.is_minion`,
+> where boss-room membership reads the full enemy list like the mod's
+> `RoomType`. Parity vector family `frozen_boss_room` (a boss-room minion, a
+> boss-room non-minion helper, and two non-boss controls) added to
+> `docs/noncard-parity-vectors.json` + `NonCardParityVectors.cs`, derived
+> from the shipped sim path.
 
 ### NC-8 · HIGH · `spend_potion` is never paid — one defect, four filings
 

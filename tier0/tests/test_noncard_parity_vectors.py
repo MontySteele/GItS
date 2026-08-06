@@ -42,12 +42,13 @@ because they will otherwise be misremembered as one rule.
 from __future__ import annotations
 
 import json
+import random
 import re
 from pathlib import Path
 
 from tier0 import constants as C
 from tier0.engine import powers
-from tier0.engine.state import Enemy, Player
+from tier0.engine.state import CombatState, Enemy, Player
 
 _VECTORS = (Path(__file__).resolve().parents[2]
             / "docs" / "noncard-parity-vectors.json")
@@ -193,6 +194,52 @@ def _frozen_remaining(applications: int, sides: int) -> int:
     return enemy.frozen
 
 
+# --------------------------------------------------------------------------
+# NC-7 alpha -- the boss-room substitution is per-creature, minions only
+# --------------------------------------------------------------------------
+#
+# (boss room, target is minion) -> (frozen turns applied, vulnerable stacks).
+# Q13 / R117, verbatim "I'd say A": in a boss ROOM, a creature carrying the
+# game's MinionPower gets Frozen and every other creature gets the Vulnerable
+# substitution. The two boss-room rows are the ruling's own required pair --
+# (a) a minion, (b) a non-minion helper (Kaiser Crab's second claw, whose
+# R116-stated freezability alpha deliberately overrides). The two non-boss
+# rows are the negative control: outside a boss room the substitution never
+# fires, minion or not.
+#
+# The C# side of this one is a PREDICATE, not arithmetic: RoomType == Boss
+# and no MinionPower on the target (ReactionEffects.cs). The sim's mirror is
+# `any(e.is_boss for e in state.enemies) and not enemy.is_minion`
+# (reactions._react), and the derivation below runs that real path.
+_FROZEN_BOSS_ROOM_CASES = [
+    (0, 0),
+    (0, 1),
+    (1, 0),
+    (1, 1),
+]
+
+
+def _frozen_boss_room(boss_room: int, is_minion: int) -> tuple[int, int]:
+    """(frozen, vulnerable) after one hydro->cryo freeze on the target.
+
+    The real reaction path: aura up, then the triggering hit through
+    `reactions.resolve_hit`, so the vector pins the shipped predicate rather
+    than a re-implementation of it.
+    """
+    from tier0.engine import reactions
+    target = Enemy(hp=100, max_hp=100, name="vector_target", intents=[],
+                   is_minion=bool(is_minion))
+    enemies = [target]
+    if boss_room:
+        enemies.append(Enemy(hp=200, max_hp=200, name="vector_boss",
+                             intents=[], is_boss=True))
+    state = CombatState(player=Player(character_id="klee", hp=70, max_hp=70),
+                        enemies=enemies, rng=random.Random(0))
+    reactions.apply_aura(state, target, "hydro")
+    reactions.resolve_hit(state, target, "cryo", 0.0)
+    return target.frozen, target.powers.get("vulnerable", 0)
+
+
 def _derive() -> dict:
     return {
         "_comment": (
@@ -216,6 +263,12 @@ def _derive() -> dict:
             {"applications": n, "sides": s,
              "remaining": _frozen_remaining(n, s)}
             for n, s in _FROZEN_CASES
+        ],
+        "frozen_boss_room": [
+            {"boss_room": b, "is_minion": m,
+             "frozen": _frozen_boss_room(b, m)[0],
+             "vulnerable": _frozen_boss_room(b, m)[1]}
+            for b, m in _FROZEN_BOSS_ROOM_CASES
         ],
     }
 
@@ -337,6 +390,32 @@ def test_csharp_vectors_match_the_sim():
              for r in derived["frozen"]]
     assert fgot == fwant, (
         f"C# frozen vectors differ\n got={fgot}\nwant={fwant}")
+
+    # Split on the DECLARATION: the array's name also appears in a doc
+    # comment's <see cref> above the FrozenVectors table, and splitting there
+    # would scan the wrong block.
+    block = src.split("FrozenBossRoomVectors =")[1].split("};")[0]
+    rgot = [tuple(int(g) for g in m) for m in _BLK_ROW.findall(block)]
+    rwant = [(r["boss_room"], r["is_minion"], r["frozen"], r["vulnerable"])
+             for r in derived["frozen_boss_room"]]
+    assert rgot == rwant, (
+        f"C# frozen boss-room vectors differ\n got={rgot}\nwant={rwant}")
+
+
+def test_frozen_boss_room_substitution_is_alpha():
+    """NC-7 alpha's content, stated as behaviour rather than as a table.
+
+    Q13 / R117: minions only. The boss-room minion FREEZES, the boss-room
+    non-minion helper takes the Vulnerable substitution instead, and outside
+    a boss room the substitution never fires. The helper row is the ruling's
+    own overridden example -- Kaiser Crab's second claw takes Vulnerable
+    under alpha, not Frozen (R116's stated consequence, deliberately
+    overridden; annotated at R116 and on the NC-7 execution note).
+    """
+    assert _frozen_boss_room(0, 0) == (1, 0)
+    assert _frozen_boss_room(0, 1) == (1, 0)
+    assert _frozen_boss_room(1, 0) == (0, C.FROZEN_BOSS_VULN)
+    assert _frozen_boss_room(1, 1) == (1, 0)
 
 
 if __name__ == "__main__":

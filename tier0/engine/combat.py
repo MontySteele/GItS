@@ -750,9 +750,15 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
                            intent["amount"], applier=enemy)
     elif kind == "summon":
         for spawn in intent["wave"]:
+            # is_minion=True: the game applies MinionPower to summoned adds
+            # (gas-bomb/guardbot/parafright/tough-egg dossiers), and NC-7
+            # alpha (Q13 / R117) keys Frozen's boss-room substitution on
+            # exactly that fact. Set beside counts_for_fatal=False, which
+            # already mirrors the same secondary-enemy concept's death rule.
             state.enemies.append(Enemy(hp=spawn["hp"], max_hp=spawn["hp"],
                                        name=spawn.get("name", "add"),
                                        intents=spawn["intents"],
+                                       is_minion=True,
                                        counts_for_fatal=False))
     elif kind == "inject":
         # §10.2 (RATIFIED 2026-07-23): shuffle status cards into a player

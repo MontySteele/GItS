@@ -16,7 +16,10 @@ public static class ReactionKitConstants
 }
 
 /// <summary>
-/// Catalytic Conversion: every Elemental Reaction additionally grants Amount
+/// Catalytic Converter (renamed from "Catalytic Conversion" per R120,
+/// 2026-08-06 -- separation from Sucrose's canon "Catalyst Conversion"; the
+/// id and this class name are unchanged, a string pass only): every
+/// Elemental Reaction additionally grants Amount
 /// Sparks and Amount x 5 Burst Energy (sim: reactions.py _react, the
 /// `reaction_bonus_spark_energy` block right after the flat +5). Read in the
 /// <see cref="ReactionEffects.Resolve"/> funnel -- the same single funnel as
@@ -32,7 +35,7 @@ public sealed class ReactionBonusSparkEnergyPower : PowerModel, ILocalizationPro
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Catalytic Conversion"),
+        ("title", "Catalytic Converter"),
         ("description",
             "[gold]Elemental Reactions[/gold] grant {Amount} extra "
           + "[gold]Spark[/gold]{Amount:plural:|s} and 5 extra "

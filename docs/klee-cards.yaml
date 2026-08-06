@@ -152,7 +152,7 @@
 - {id: sugar_rush, name: "Sugar Rush", cost: 1, type: skill, rarity: uncommon, solve: [frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [spark], role: glue, exhaust: true,
    effects: [{op: energy, amount: 1}, {op: gain_spark, amount: 1}]}
 # Reaction (6)
-- {id: catalytic_conversion, name: "Catalytic Conversion", cost: 1, type: power, rarity: uncommon, solve: [velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [reaction], role: payoff,
+- {id: catalytic_conversion, name: "Catalytic Converter", cost: 1, type: power, rarity: uncommon, solve: [velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [reaction], role: payoff,
    effects: [{op: apply_power, power: reaction_bonus_spark_energy, amount: 1, target: self}]}
 - {id: perfect_timing, name: "Perfect Timing", cost: 1, type: attack, rarity: uncommon, solve: [frontload], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [reaction], role: payoff,
    effects: [{op: damage, amount: 8, target: enemy}, {op: conditional, if: reaction_triggered_by_this, then: [{op: repeat_this, times: 1}]}]}

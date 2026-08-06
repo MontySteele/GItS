@@ -1002,6 +1002,14 @@ in OnUpgrade (keywords are instance-owned LocalKeywords; Innate is the
 base game's own keyword, driving opening-hand placement and card text).
 hot_hands adopting the same disposition stays QUEUED for the user.
 
+> **RENAME NOTE, 2026-08-06 (R120, verbatim "yes, we can slightly tweak the
+> Klee card to keep them separate (Catalytic Converter?)").** The card this
+> entry measures is now displayed **"Catalytic Converter"** (upgrade
+> "Catalytic Converter+") -- a string pass separating it from Sucrose's
+> canon "Catalyst Conversion". The id `catalytic_conversion`, the cell ids
+> `catalytic_cell_base` / `catalytic_cell_innate`, and every measured number
+> above are UNCHANGED; the entry's own text stands as written (R101b).
+
 ## Full-suite discipline + R25 errata + R38 -- the gate catches its first bug (2026-07-20 night)
 
 **The finding (user-diagnosed):** "188 tier0 tests green" was a true

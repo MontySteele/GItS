@@ -36,7 +36,7 @@ public sealed class CatalyticConversion : CustomCardModel
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Catalytic Conversion"),
+        ("title", "Catalytic Converter"),
         ("description", "[gold]Elemental Reactions[/gold] grant 1 extra [gold]Spark[/gold] and 5 extra [gold]Burst Energy[/gold]."),
     };
 

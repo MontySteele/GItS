@@ -64,6 +64,12 @@ ENCOUNTER_KEYS = frozenset({"id", "name", "enemies"})
 ENEMY_KEYS = frozenset({
     "name", "hp", "intents", "count",
     "is_boss",         # boss accounting (and the audit's typo example)
+    # NOT "is_minion": the sim's MinionPower mirror (NC-7 alpha, Q13/R117)
+    # is set by the SUMMON spawn path (tier0/engine/combat.py), which is the
+    # only mechanical source -- no authored pool enemy carries the fact
+    # (Kaiser Crab's claws are slotted monsters, verified by reflection), and
+    # test_content_boundaries forbids allowlisting a key no pool uses. Add it
+    # here (and in `spawn` below) the day a pool authors one.
     "phases",          # multi-phase bosses
     "on_ally_death",   # reaction to a sibling dying
     "skittish", "slow", "stagger", "sleep_turns",

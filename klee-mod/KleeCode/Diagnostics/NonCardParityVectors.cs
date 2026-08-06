@@ -131,6 +131,11 @@ internal static class NonCardParityVectors
     /// substitution -- is NOT pinned here. It is not arithmetic, and the
     /// implementer stopped it: the game exposes no per-creature boss fact to
     /// key it on. See the batch report.
+    ///
+    /// UPDATE 2026-08-06 (Q13 / R117, alpha): the stop above is resolved.
+    /// [USER] selected alpha (minions only), the per-creature fact is the
+    /// game's MinionPower, and the predicate IS pinned now -- see
+    /// <see cref="FrozenBossRoomVectors"/> below.
     /// </summary>
     internal readonly record struct FrozenVector(
         int Applications, int Sides, int Remaining);
@@ -164,6 +169,52 @@ internal static class NonCardParityVectors
             if (n > 0) n--;
         }
         return n;
+    }
+
+    /// <summary>
+    /// NC-7 alpha (Q13 / R117, verbatim "I'd say A"): the boss-room
+    /// substitution is per-CREATURE, minions only.
+    ///
+    /// (boss room, target is minion, frozen turns applied, vulnerable
+    /// stacks). In a boss room a creature carrying the game's MinionPower
+    /// gets Frozen; every other creature gets the Vulnerable substitution.
+    /// The boss-room non-minion row is the ruling's own overridden example
+    /// -- Kaiser Crab's second claw (a slotted monster, not a minion) takes
+    /// Vulnerable under alpha, R116's stated consequence deliberately
+    /// overridden. The two non-boss rows are the negative control.
+    ///
+    /// The C# side of this one is the predicate in ReactionEffects.cs
+    /// (RoomType == Boss and no MinionPower on the target); the sim's
+    /// mirror is reactions.py's `boss_room and not enemy.is_minion`.
+    /// </summary>
+    internal readonly record struct FrozenBossRoomVector(
+        int BossRoom, int IsMinion, int Frozen, int Vulnerable);
+
+    internal static readonly FrozenBossRoomVector[] FrozenBossRoomVectors =
+    {
+        new(0, 0, 1, 0),
+        new(0, 1, 1, 0),
+        new(1, 0, 0, 2),
+        new(1, 1, 1, 0),
+    };
+
+    /// <summary>
+    /// The pure form of the ReactionEffects predicate: a freeze lands
+    /// unless the room is a boss room AND the target is not a minion, in
+    /// which case the target takes FrozenBossVuln Vulnerable instead. Kept
+    /// deliberately identical in shape to the shipped branch, same reason
+    /// as <see cref="Damage"/>: a Check that re-implemented something else
+    /// would be worthless.
+    /// </summary>
+    private static (int Frozen, int Vulnerable) FrozenApplication(
+        int bossRoom, int isMinion)
+    {
+        if (bossRoom != 0 && isMinion == 0)
+        {
+            return (0, ReactionConstants.FrozenBossVuln);
+        }
+
+        return (1, 0);
     }
 
     /// <summary>
@@ -214,6 +265,21 @@ internal static class NonCardParityVectors
                     "Frozen timer parity (NC-7): {0} application(s) after {1} "
                   + "enemy side(s) -> {2}, sim says {3}",
                     v.Applications, v.Sides, got, v.Remaining));
+            }
+        }
+
+        foreach (var v in FrozenBossRoomVectors)
+        {
+            var got = FrozenApplication(v.BossRoom, v.IsMinion);
+            if (got.Frozen != v.Frozen || got.Vulnerable != v.Vulnerable)
+            {
+                findings.Add(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Frozen boss-room substitution parity (NC-7 alpha, "
+                  + "Q13/R117): boss_room {0}, is_minion {1} -> frozen {2} / "
+                  + "vulnerable {3}, sim says frozen {4} / vulnerable {5}",
+                    v.BossRoom, v.IsMinion, got.Frozen, got.Vulnerable,
+                    v.Frozen, v.Vulnerable));
             }
         }
 

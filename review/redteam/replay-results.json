@@ -768,15 +768,15 @@
   "executed": true,
   "misses": [],
   "plays_made": 15,
-  "claim_holds": true,
-  "verified": true,
+  "claim_holds": false,
+  "verified": false,
   "observed": {
-   "damage_dealt_by_turn": 240
+   "damage_dealt_by_turn": 83
   },
   "degeneracy_events": [],
   "fight": {
    "won": true,
-   "turns": 2,
+   "turns": 4,
    "hp_left": 60,
    "damage_dealt_total": 240
   }

@@ -134,7 +134,7 @@ Live inventory today: 298 cards, 5 character sheets (3 roster + 2 reference),
   sustain probe is the anchor's exempt relic trickle injected via
   `package_relic_hooks`: never on `starter`, never in tier05 runs
   (`DECISIONS.md:305-317`; `loader.py:427-431`).
-- **R37 / R24** — an upgrade must be sim-expressible: Catalytic Conversion's
+- **R37 / R24** — an upgrade must be sim-expressible: Catalytic Converter's
   delta became `{innate: true}` and left `UNAPPLIABLE`, satisfying the
   no-unmeasured-upgrades law rather than waiving it
   (`klee-mod/DECISIONS.md:992-1004`; `upgrades.py:56-72`, `:140-144`).
