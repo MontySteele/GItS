@@ -1351,7 +1351,31 @@ CONSTANTS_VERSION = 11
 # is defensible here." -- it is the row that stands in the quotable table,
 # and it is an untagged-under-CONSTANTS-6 baseline, not a restoration of the
 # archived CONSTANTS 5 number. See R121's 2026-08-06 addendum.
-DRAFTER_VERSION = 14
+# Reasons (b) and (c) above are SPENT as of 2026-08-24: the payoff-reach
+# sprint ran under D14 and was graded blind, and 15 is now taken by the
+# EB-43 landing below, which is what (c) was reserving it for. The non-bump
+# stands on (a) alone -- restores-not-redefines -- which is the ground R125
+# carried the widened shield on (it rode RUNTEMPLATE v8, not a D bump).
+# DRAFTER_VERSION 15 (R120 / 10.3, verbatim "Yes"; authored 2026-08-06 on
+# `staged/d15-spotlight-payoff`, LANDED 2026-08-24 as EB-43): payoff-presence
+# extends to the SPOTLIGHT limb -- the one branch v14 deliberately left
+# alone, because enabler-vs-payoff machinery was a definitional question.
+# [USER] answered it. `core_complete` and `_core_progress` gain a
+# machinery-PAYOFF limb (bar ONE, every limb's standard), so `limelight` --
+# the only enabler-role machinery card, the measured blast radius -- alone
+# stops satisfying the limb.
+# NOT bookkeeping, and the bump is not optional: `_core_progress` feeds
+# `score_offer`'s +3.0 core-advance bonus, so every spotlight arm drafts
+# differently, and every pre-v15 spotlight number is incomparable with v15
+# output. SEQUENCING RAIL (R120, recorded in full, now DISCHARGED): this
+# change sat staged until R121's six-step order reached step (5) -- the
+# payoff-reach pre-registration was pinned to a drafter version, and landing
+# D15 before its blind grade could have invalidated it. Step (4), the blind
+# grade, landed 2026-08-24; this is step (5). The re-baseline stamp law asks
+# for lands WITH this bump, in the same window and no other change beside
+# it: `review/active/sitting-reads-2026-08-24.md`, the twelve-arm table at
+# `RT12/D15/P7/C11`.
+DRAFTER_VERSION = 15
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).
