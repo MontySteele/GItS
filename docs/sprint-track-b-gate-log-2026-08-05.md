@@ -308,14 +308,25 @@ attribution-limited in the direction the Track B log already declares
 NOT SUPPORTED. The comparison to Salon is NOT GRADED, because the Salon arm is
 not a contrast.**
 
-> **PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05).** This
+> ~~**PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05).** This
 > grade is one of the four conclusions escrowed pending the S7 C2 probe (a
 > candidate infidelity in tier0's Fanfare accounting,
 > `docs/s7-classification.md` family C): **not citable as load-bearing, not
 > shipped against, and not redesigned against** until the probe reports. If C2
 > confirms, the grade re-opens formally and is re-graded against the corrected
 > sim; if C2 is written off, this mark is struck and the grade stands exactly
-> as written.
+> as written.~~
+>
+> **STRUCK 2026-08-06 (R113) -- escrow released, instrument vindicated.** The
+> second branch of the sentence above is the one that fired: **C2 is written
+> off** as a family-C infidelity (`docs/probe-b-fanfare-residual.md`: tier0's
+> Fanfare generation and decay are both at parity; the residual is a
+> reconstruction gap, a sampling seam, and one bounded +2-per-combat term in
+> tier0's favour). **The grade stands exactly as written** and is no longer
+> frozen. R113's clause C-d rides with it: the vindicating measurement is
+> bot-limited (Guardrail 7), Furina-only, and taken with the salon empty
+> throughout -- which is the same salon caveat this grade already carries in
+> its own second half.
 
 The first half is now gradeable and that is the change this pass bought: the
 committed-Fanfare deck is 24.9% Fanfare by plays against a baseline 8.7%, so

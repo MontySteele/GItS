@@ -1,5 +1,25 @@
 # Kokomi playtest protocol — first play, artefact `0.2-247` (commit `29f5ce6`)
 
+> **RE-ANCHORED 2026-08-06 ([USER] ruling; `S4-G6` + `S4-G14`; R115).** This
+> protocol run is anchored to **the post-rework Kokomi build**, not to the
+> build named in the title line or in the 2026-07-29 re-stamp below. Neither
+> stamp is edited — they are the record of what this document was written
+> against, and R101b keeps them.
+>
+> **What that means for whoever runs this.** The run that fills in the Answers
+> block is **the confirmatory playtest** for `DEC-D5`'s stability band, and the
+> build it is run against is the post-rework one. The co-op session of
+> 2026-08-01/02 and playtest 4 are **EXPLORATORY** — sources of understanding,
+> graded against nothing — which is why the partial answers already recorded
+> below do not consume this protocol.
+>
+> **`DEC-D5` clauses 2–4 are intact and are not softened by the re-anchor:**
+> the band is declared from design intent with its provenance recorded, the
+> declaration happens **before** this run, and **the band may not be revised
+> against this run.** No band is declared by the re-anchor and nothing is
+> graded by it. This protocol stays blocked on `S4-G6` (the declaration) and on
+> the N1 attribution pass.
+
 > **Build pin re-stamped 2026-07-29.** This protocol was written against
 > `750a9cc` and that pin went ~70 commits stale. The current deployed
 > artefact is **0.2-247**, built from commit **`29f5ce6`** on a clean tree
@@ -201,6 +221,49 @@ exactly like "commander feels bad" from inside the run.
 
 ---
 
+---
+
+## Observation task OT-1 — Neap Tide, deliberately drawn and played
+
+> **Added 2026-08-06 (R115; `NT-G5`).** This is not a question about feel like
+> Q1–Q7. It is a **task**: something to do during the run, whose omission is
+> itself the failure this task exists to prevent.
+
+**What happened, stated plainly, because it is the reason this section
+exists.** A pre-registered fork (`klee-mod/DECISIONS.md`, "PRE-REGISTERED FORK
+for playtest three") turns on whether Neap Tide **reads weak at the table**.
+Playtest three fired the trigger. Then the evaluation could not be made:
+*"I don't remember seeing the card during the playtest, so it did not stand out
+one way or another."* The card was not exercised, so the hand — which the
+pre-registration names as the tiebreaker, explicitly over the sim — had nothing
+to say.
+
+**The task.** During this run:
+
+1. **Draw Neap Tide deliberately.** If the draft does not offer it, say so —
+   "it was never offered" is a real answer and a structural one.
+2. **Play it, more than once if the run allows**, in situations you would
+   normally route around it.
+3. **Report the read.** One sentence is enough, and the sentence the fork
+   accepts is **weak or fine**.
+
+**Why the two answers are not symmetric, so the report is worth making
+carefully:**
+
+| read | what it pulls |
+|---|---|
+| **WEAK** | lever 2, in an isolated cell — one knob, its own arm, measured alone |
+| **FINE** | lever 3, **and** the sim-calibration offset for exhaust-loop kits finally gets written down as a number. It has been asserted three times and never quantified |
+
+**"I didn't see it" is a third outcome and is a legitimate one** — but it means
+the fork re-anchors again, so if the draft is not cooperating, say that rather
+than leaving the row blank.
+
+**No lever moves before this report**, and nothing in this task asks you to
+judge the fix. It asks whether the card, played, felt underpowered.
+
+---
+
 ## Answers
 
 > Fill in during or immediately after the run. Verbatim reactions are more
@@ -236,6 +299,10 @@ three seats, three acts, no black screen, no desync (notes §5).
 **Cards that felt dead (name them — a dead card is worth more than a weak one):**
 
 **Cards that felt broken:**
+
+**`OT-1` — Neap Tide, deliberately drawn and played (added 2026-08-06):**
+*(WEAK / FINE / never offered — one sentence. This row is the `NT-G5` fork's
+only accepted input; the sim may not answer it.)*
 
 ---
 

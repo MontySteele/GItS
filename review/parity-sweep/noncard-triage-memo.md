@@ -14,6 +14,8 @@ high-confidence without further reading.
 ## Ranked systemic defects
 
 ### NC-1 · HIGH · Companion/power damage skips the damage pipeline in C# (†)
+
+**DISPOSITION 2026-08-06 — RULED, SIM CANONICAL (R116).** Verbatim: *"They are supposed to also scale with you like your own cards."* C# routes companion-power damage through the full damage pipeline (Strength, Weak ×0.75, Vulnerable ×1.5); parity vectors updated; the Durin's Witch's Flame line evidence below becomes the regression test. **Errata Batch 2 item 3, mod-only; not executed by the paper track.** **NC-11 is explicitly NOT covered** — see its own disposition.
 tier0 routes companion-power damage through the full pipeline (Strength, Weak ×0.75,
 Vulnerable ×1.5); the mod deals it as raw, dealer-less Unpowered hits. Found from both
 sides for Durin's Witch's Flame (`effects.py:2560-2568` vs `CompanionPowers.cs`), and
@@ -60,6 +62,8 @@ other side with new line evidence — the family is confirmed, not new; filed he
 the merge.
 
 ### NC-7 · HIGH · Frozen is two different mechanics (†)
+
+**DISPOSITION 2026-08-06 — RULED, EACH ENGINE ADOPTS THE OTHER'S HALF (R116).** Verbatim: *"Ticks down per-turn, applies per-creature."* Canonical Frozen is a **duration counter** decrementing at end of enemy side, stacking extends (the mod's semantics — **the sim adopts the timer**), with **per-creature** substitution (the sim's semantics — **the mod adopts per-creature**, so Kaiser Crab's boss-room adds become freezable in game). Not a win for either engine; reading it as one produces the wrong fix. **Shipped-boss-fight impact noted in the batch. Version-stamp question surfaced** — this changes sim combat math wherever Frozen appears. **Errata Batch 2 item 5, both engines.**
 Sim: one-shot boolean consumed when the enemy *acts*, idempotent on re-freeze, kept by
 a sleeping enemy. Mod: stacking Counter on an unconditional end-of-enemy-side clock —
 double-freeze extends, sleepers lose it, post-action freezes are wiped. And the boss
@@ -68,6 +72,8 @@ per-*room* in C#, so boss-room adds (Kaiser Crab's second claw) are un-freezable
 game. Three findings across two agents; touches a shipped boss fight.
 
 ### NC-8 · HIGH · `spend_potion` is never paid — one defect, four filings
+
+**DISPOSITION 2026-08-06 — RULED BY INCLUSION (R116): potions are consumed.** The queue carried "potions are consumed" as the *presumptive* answer awaiting one word; the final dispatch supplies it by listing the fix as **Errata Batch 2 item 2**, and inclusion in a ratified batch is the answer. Recorded as ruled rather than presumptive so nobody re-opens it looking for a quoted sentence. **Sim-only (`tier05/events.py` throwaway-copy fix); not executed by the paper track.**
 The event resolver pops the potion from a **throwaway copy** of the bag
 (`tier05/events.py:384-385`) and the run layer never copies it back: "The Future of
 Potions?" grants its reward free, potion retained. Filed once per potion id by the
@@ -86,6 +92,8 @@ draw in C#, before it in sim; The Gallery Stirs' spend-draw can slip a full phas
 question.** Treat as one family for any future repair session.
 
 ### NC-10 · HIGH · Shop companion slot 1 can never roll a Rare in the mod
+
+**DISPOSITION 2026-08-06 — RULED, BOTH ENGINES DEFECTIVE (R116).** Verbatim: *"Slot 1 should be 'Uncommon or higher from the home region'; slot 2 should be 'any companion card'; this is a defect."* Neither engine implements that spec; both now do — slot 1 filters the home-region pool to **Uncommon+**, slot 2 is **unrestricted**. **One question is surfaced and deliberately NOT chosen:** rarity-odds renormalization within the Uncommon+ pool (condition the existing `SHOP_COMPANION_RARITY_ODDS` on ≥Uncommon vs. a stated split) — a renormalization picked by an implementer is a balance value picked by an implementer. **Cross-noted to the companion-pricing docket: the shop is now a real Rare source in both slots' math.** **Errata Batch 2 item 6, both engines.**
 Sim rolls `SHOP_COMPANION_RARITY_ODDS` for both slots (`tier05/shop.py:151-154`); the
 mod hard-wires slot 1 (home-nation) to Uncommon. The value the parity lint compares
 (0.875) matches, so the lint is green while the *behavior* diverges — the flagship
@@ -95,9 +103,15 @@ example of exactly the semantic-parity gap this sweep was chartered to find.
 Metallicize, the Ceremonial Garment rider, and the Kurage pulse are added raw in tier0
 by documented design (`powers.py:75-81`: deliberately exempt from Frail/Dexterity);
 C# grants all three as powered move-scoped block — Frail cuts them 25% and Dexterity
-inflates them in game only. **Direct consequence for S13's X10 (Metallicize
+inflates them in game only. ~~**Direct consequence for S13's X10 (Metallicize
 treadmill): the exploit's numbers are sim-side; in the mod, Frail alone changes the
-wall's arithmetic.** The S13 ledger's S7-caveat applies with named evidence now.
+wall's arithmetic.** The S13 ledger's S7-caveat applies with named evidence now.~~
+
+**DISPOSITION 2026-08-06 — RULED, SIM CANONICAL (R116).** Verbatim: *"I think that the answer is no; my recollection is that power-sourced block in the base game's kits ignores both of those."* The sim's documented funnel exemption (`powers.py:75-81`) is **canonical**; the **mod is the defect side** and stops routing Metallicize, the Ceremonial Garment rider and the Kurage pulse through Frail/Dexterity. **Errata Batch 2 item 4, mod-only.**
+
+**The X10 caveat above is STRUCK, and resolves post-fix.** Once C# stops applying Frail to power-sourced block, the treadmill's **sim-side numbers hold in the mod too** — so the caveat's premise (Frail alone changes the wall's arithmetic in game) no longer describes the shipped engine. Struck, not deleted, per R101b: it was true when written. `X10`'s own disposition (CANDIDATE, explicitly not ratified — R111) is untouched by this.
+
+**The register this pair creates, recorded for future card work:** power-sourced **damage** runs the damage pipeline (`NC-1`); power-sourced **block** is **raw** (`NC-11`). Adjacent, opposite, and both are the base game's own shape.
 
 ### NC-12 · HIGH · Cost-override lifetime — confirms S1's SYS-3, and arms S13's X3
 Guest-star generation: sheet and C# say "costs 0 *this turn*" (Discovery parity,

@@ -30,7 +30,7 @@ for what is open and for whom.
 
 1. **A short code you don't recognise** (`G6`, `D5`, `C1`, `P1.5`, `X5`, `NC-1`, `S-2`) → §1 for the namespace, §2 for the collision table, which names the qualified form and the document that minted it.
 2. **"Is this still open, and whose is it?"** → `docs/registry/user-queue.md`: §1 the four one-word replies, §2 the reconciled S4 gate queue, §3 the four HELD flags, §4 the owed sittings, §5–§8 the rest.
-3. **"What did we actually decide?"** → `tier0/DECISIONS.md` (R39–R112, `DEC-D2`–`DEC-D5`) and `klee-mod/DECISIONS.md` (R73–R80); one shared R-sequence, CI-checked for duplicates. R1–R38 are not mechanically resolvable — see §3.
+3. **"What did we actually decide?"** → `tier0/DECISIONS.md` (R39–R116, `DEC-D2`–`DEC-D5`) and `klee-mod/DECISIONS.md` (R73–R80); one shared R-sequence, CI-checked for duplicates. R1–R38 are not mechanically resolvable — see §3.
 4. **"Which document is current?"** → `docs/README.md`: current set above the archive map, plus the 2026-08-06 archive review that says which near-miss documents were deliberately kept live and why.
 5. **"Can I quote this number?"** → check its world stamp against §4 (`RT7 / D14 / P3 / C5` today). A bump archives the numbers below it; archived numbers are bannered where they are published, never rewritten (R101b).
 
@@ -40,7 +40,7 @@ for what is open and for whom.
 
 | Namespace | Shape | Population | Minting authority | Collides? |
 |---|---|---|---|---|
-| Rulings | `R<n>` | R1–R112 | `tier0/DECISIONS.md` + `klee-mod/DECISIONS.md` (one shared sequence) | R1–R38 unresolvable as citations — see §3 |
+| Rulings | `R<n>` | R1–R116 | `tier0/DECISIONS.md` + `klee-mod/DECISIONS.md` (one shared sequence) | R1–R38 unresolvable as citations — see §3 |
 | D-series rulings | `D<n>` | D2–D5 | `tier0/DECISIONS.md` | **yes** — with DRAFTER stamps and with sprint task-ids |
 | Milestones | `M<n>` | M1–M8 | `tier0/DECISIONS.md`, `klee-mod/DECISIONS.md` | no |
 | C# milestones | `C<n>` | C1–C3 | `klee-mod/DECISIONS.md` | **yes** — with world stamps and S7 candidates |
@@ -197,7 +197,7 @@ sweep are all in §2.1–§2.8, plus:
 
 **One shared sequence across two ledgers.** `tier0/DECISIONS.md` and
 `klee-mod/DECISIONS.md` draw from the *same* R-number space — R73–R80 are
-minted in `klee-mod/DECISIONS.md` (Neap Tide), R39–R112 in
+minted in `klee-mod/DECISIONS.md` (Neap Tide), R39–R116 in
 `tier0/DECISIONS.md`. CI enforces no duplicates across both files
 (`.github/workflows/repo.yml`, job `ledger`).
 
@@ -206,7 +206,14 @@ minted in `klee-mod/DECISIONS.md` (Neap Tide), R39–R112 in
 | R1–R38 | prose entries and archived ruling docs | **Not mechanically resolvable.** S4 §4 lead 3: *"no index maps R-number → dated entry."* Several (R8, R13, R14, R24, R25, R29d, R34–R38) are cited as standing law. Resolving them is an open paper item — see `docs/registry/user-queue.md` §4. |
 | R39–R72 | `tier0/DECISIONS.md`, `## R<n>` headings | dated, resolvable |
 | R73–R80 | `klee-mod/DECISIONS.md`, Neap Tide v2.1 | dated, resolvable |
-| R81–R112 | `tier0/DECISIONS.md` | dated, resolvable. **Current maximum: R112** (2026-08-06). |
+| R81–R116 | `tier0/DECISIONS.md` | dated, resolvable. **Current maximum: R116** (2026-08-06). |
+
+**The Cold Reading batch (2026-08-06) minted four**, listed so they resolve
+without opening the ledger: **`R113`** the C2 escrow released and its four
+fanfare marks struck; **`R114`** the four held flags ruled; **`R115`** the
+`NT-G5` fork's non-observation record, the Kokomi gate re-anchor, and the
+corpse-detonation probe staged; **`R116`** five S14 canonicity questions ruled
+and Errata Batch 2 constituted.
 
 Sub-clause citation shape is `R<n>/<clause>` (e.g. `R90/1c`, `R91/2b`) or
 `R<n>(<letter>)` (e.g. `R107(a)`). Clause letters belong to their own ruling:
@@ -266,10 +273,14 @@ not a "while we're in there" (`docs/dockets/README.md` house rule 3).
 
 | Flag | Family | Question | Recorded at |
 |---|---|---|---|
-| FLAG-1 | `S13-X1` | Does the accumulator note also ride the Kokomi pool-rework docket, and does the shared uncapped state take a structural disposition? | R111; `docs/dockets/klee-rework.md` |
-| FLAG-2 | `S13-X3` | Two adjacent closures undisposed: copied `sucrose_catalyst_conversion` outrunning its Exhaust bound; unscoped `cost_override` | R110 |
-| FLAG-3 | `S13-X5` | Does "seems fine" cover decay-proof fanfare-floor stacking, or only the cantrip leg? | R111 |
-| FLAG-4 | `S13-X14` | Legs (a) `curse_poor_sleep` retain-jam and (c) Powers → `result_pile: none` remain undisposed | R110 |
+| ~~FLAG-1~~ | `S13-X1` | ~~Does the accumulator note also ride the Kokomi pool-rework docket, and does the shared uncapped state take a structural disposition?~~ | **RULED 2026-08-06 by R114** — ratified change, accumulator scopes to the writing turn in both engines |
+| ~~FLAG-2~~ | `S13-X3` | ~~Two adjacent closures undisposed: copied `sucrose_catalyst_conversion` outrunning its Exhaust bound; unscoped `cost_override`~~ | **RULED 2026-08-06 by R114** — both fixes ratified; residue staged as `AB-s1` |
+| ~~FLAG-3~~ | `S13-X5` | ~~Does "seems fine" cover decay-proof fanfare-floor stacking, or only the cantrip leg?~~ | **RULED 2026-08-06 by R114** — INTENDED, both legs; re-registered as watch item `W4` |
+| ~~FLAG-4~~ | `S13-X14` | ~~Legs (a) `curse_poor_sleep` retain-jam and (c) Powers → `result_pile: none` remain undisposed~~ | **RULED 2026-08-06 by R114** — leg (c) intended, no guard; leg (a)'s root staged as `AB-s2` |
+
+> **ALL FOUR FLAGS DISCHARGED 2026-08-06 (R114).** The `FLAG-<n>` namespace is
+> closed unless a future sitting mints new ones. Struck rather than deleted:
+> the flags are part of how these four families were decided.
 
 ---
 
@@ -286,7 +297,7 @@ not a "while we're in there" (`docs/dockets/README.md` house rule 3).
 | S4 | Ledger consistency audit → F1–F17 + the 20-gate queue | **SAT 2026-08-06** (R107) |
 | S5 | Animation-tech peek: the answer is Spine | landed |
 | S6 | Mutation audit, 114 mutants / 46 survived | pinned by S15 |
-| S7 | Understudy fidelity audit → families A–D, candidates `S7-C1`/`S7-C2` | probes reported; escrow ruling owed |
+| S7 | Understudy fidelity audit → families A–D, candidates `S7-C1`/`S7-C2` | **CLOSED for both candidates 2026-08-06 (R113):** `S7-C1` reclassified to family B (Frail, a reconstruction gap); `S7-C2` written off, escrow released, four marks struck. One bounded term survives and is queued (term 3, +2 Fanfare/combat, tier0-optimistic). |
 | S8 | Potion + relic gallery, 51 items | 8 flagged items open |
 | S9 | Weekly-boss dossiers, 11 bosses | landed |
 | S10 | Enemy-family atlas + reskin candidates | candidates open |
@@ -318,7 +329,13 @@ All fourteen carry a disposition (R109/R110/R111). Verbatim verdicts live in
 | X11 | `replay_next_companion` stacking | RATIFIED CHANGE (`SW2-S-2`) |
 | X12 | Cross-element reaction splashes | WATCH ITEM (blocked on O-1, now repaired) |
 | X13 | 14-relic weakness eraser | NO ACTION |
-| X14 | Structural softlocks | leg (b) RATIFIED (`SW2-S-3`) · legs (a)/(c) **FLAG-4** |
+| X14 | Structural softlocks | leg (b) RATIFIED (`SW2-S-3`) · ~~legs (a)/(c) **FLAG-4**~~ **leg (c) RULED INTENDED (R114), leg (a)'s root STAGED as `AB-s2`** |
+
+> **All fourteen dispositions are now final or queued (R114, 2026-08-06).** The
+> four HELD flags are discharged; `X5` is the only family whose pin changed
+> polarity, because it is the only one ruled *intended*. `X1`, `X3` and `X14`
+> queue fixes to Errata Batch 2 and keep their `xfail(strict)` markers, since a
+> ruling is not a fix.
 
 ---
 
@@ -328,8 +345,18 @@ All fourteen carry a disposition (R109/R110/R111). Verbatim verdicts live in
   `review/parity-sweep/triage-memo.md`. 41 distinct defects behind them.
 - **`NC-1` … `NC-20`** — S14 non-card parity families,
   `review/parity-sweep/noncard-triage-memo.md`. 174 findings across 173
-  entities. `NC-1`, shop slot 1 (`NC-10`), Frozen (`NC-7`) and `spend_potion`
-  (`NC-8`) are the four canonicity rulings owed by [USER].
+  entities. ~~`NC-1`, shop slot 1 (`NC-10`), Frozen (`NC-7`) and `spend_potion`
+  (`NC-8`) are the four canonicity rulings owed by [USER].~~
+  **RULED 2026-08-06 (R116): five of them, not four.** `NC-1` sim canonical
+  (companions scale with the player); `NC-7` each engine adopts the other's
+  half; `NC-10` both engines defective against a stated slot spec; `NC-8` ruled
+  by inclusion in the batch; and **`NC-11`**, minted as a *new* question by the
+  fourth sitting (because `NC-1` was ruled and explicitly did not cover it) and
+  ruled by the final dispatch — power-sourced block stays **raw**, sim
+  canonical. **The standing register the pair creates:** power-sourced *damage*
+  runs the damage pipeline (`NC-1`); power-sourced *block* is raw (`NC-11`).
+  All five fixes are Errata Batch 2 items and none is written. The rest of the
+  triage is untouched.
 
 ---
 
@@ -377,6 +404,8 @@ and the **A0** co-op smoke run.
 | Last Call / House Lights | 2026-08-05 | A–P (G roster anchor, H reactions, I captures, J dossiers, K mutation, L sitting pack, M Downfall, N lore, O instrument, P probe-d) |
 | Second Wind | 2026-08-06 | R (sitting), S (errata `SW2-S-1…3`), T (audits `TT-T1…3`), U (O-1 repair), W (replies) |
 | Strike the Set | 2026-08-06 | S, T, U, W, **X (this registry)** |
+| Empty the Green Room | 2026-08-06 | Y (answers landing), Z (docs diet) |
+| Cold Reading | 2026-08-06 | AA (R102 escrow), AB (flag resolutions; staged `AB-s1`/`AB-s2`), AC (fork, gates, S14 canonicity) |
 
 ---
 

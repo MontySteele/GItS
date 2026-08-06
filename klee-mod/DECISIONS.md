@@ -1641,6 +1641,28 @@ spark-on-detonation is the tell.
 
 NOT self-closed from the repo: this needs the eyes-on result.
 
+> **INSTRUMENT CHANGE STAGED 2026-08-06 (Cold Reading, `AC-4`; R115) — the
+> question is unchanged, the way of answering it is not.** [USER] on the
+> settlement above, after five playtests in which nobody happened to be holding
+> the relic on the killing turn: ***"who knows when it closes."***
+>
+> A **bridge-driven scripted probe** is registered instead:
+> `docs/probe-e-corpse-detonation-registration-draft.md` — scripted fight, a
+> known bomb count on a killable enemy, the killing blow landed deliberately,
+> both tells read (the relic spark AND the HP deltas on the wire), with a
+> negative-control arm and the sim's behaviour read off the sim rather than off
+> this entry's prose.
+>
+> **The registration is STAGED FOR COUNTERSIGN and NOTHING HAS BEEN RUN.** A
+> new probe is a pre-registered question under standing law, so it is paper
+> until it is signed.
+>
+> **The ~10-second table settlement above survives as FALLBACK ONLY** and is
+> not retired: if the probe is declined or stops short, the eyes-on check still
+> closes this the moment somebody is holding Pounding Surprise on the right
+> turn. `S4-G15` stays OPEN either way, and this entry's STATUS line above is
+> unchanged — do not baseline bomb numbers against it.
+
 ## Furina character-select crash: preload paths and hook id collision (2026-07-23)
 
 Windows playtest reached character select, then crashed in
@@ -2408,6 +2430,53 @@ this specific kit. So the hand is the tiebreaker, not the sim.
 > untouched, which is the whole point of pre-registering. The fork's
 > **evaluation** is now its own AWAITING-[USER] row in
 > `docs/registry/user-queue.md` §1.
+
+> ~~**[USER] EVALUATION 2026-08-06 (third sitting) — DEFERRED to the next
+> playtest.** Verbatim: *"nothing stood out besides the charge stacking /
+> missing animation; let's review next playtest."* Read as: playtest three
+> produced **no observed Neap Tide weakness**, and the fork's evaluation is
+> **deferred by [USER]** to the next playtest. No lever is pulled. The
+> calibration offset remains registered to the fine-branch and unwritten.~~
+>
+> **SUPERSEDED THE SAME DAY — see the clarification below. The record above is
+> struck and kept, never rewritten (R101b), because the difference between
+> these two readings is the whole content of the correction.**
+
+> **[USER] EVALUATION 2026-08-06 (fourth sitting) — INCONCLUSIVE BY
+> NON-OBSERVATION. This is the operative record.**
+>
+> Clarification, verbatim: ***"I don't remember seeing the card during the
+> playtest, so it did not stand out one way or another."***
+>
+> **What this changes, and it is not a nuance.** The earlier reading treated
+> "nothing stood out" as a favourable read — the hands did not call her weak.
+> The clarification says the card **was not exercised**: it did not stand out
+> because it was not seen. A pre-registered fork whose tiebreaker is the hand
+> cannot be evaluated by a session in which the hand never touched the card.
+> **Playtest three did not exercise Neap Tide, so the fork's evaluation was not
+> possible there** — favourable-read notwithstanding.
+>
+> **The new record.** The fork is **OPEN**. Its evaluation **re-anchors to the
+> next Kokomi playtest**, and it re-anchors **with an explicit observation
+> task**: Neap Tide is to be **deliberately drawn and played, and the read
+> reported**. That task is written into the playtest checklist itself
+> (`docs/kokomi-playtest-protocol.md`, "Observation task OT-1") rather than
+> left as an intention, precisely because the failure this record corrects was
+> an intention that nobody executed.
+>
+> **The candidate alternative, recorded and NOT chosen:** fold the fork's
+> evaluation into the queued Kokomi pool-rework session instead of anchoring it
+> to a playtest. It is a real option — the pool rework will look at this kit
+> anyway — and it is recorded so the choice is visible rather than defaulted
+> into. **The observation task is the default; the fold-in is the candidate;
+> the preference is [USER]'s and is an open queue row.**
+>
+> **Unchanged, and restated because two evaluations in one day invite the
+> mistake:** no lever is pulled, neither by the deferral nor by its
+> supersession. The fine-branch's **logged sim-calibration offset for
+> exhaust-loop kits** is still unwritten and is still owed by the eventual
+> evaluation. `S4-G13`'s fork half stays open, and the Neap Tide standing
+> question is untouched.
 
 ### What this addendum found while executing (details in the commits)
 

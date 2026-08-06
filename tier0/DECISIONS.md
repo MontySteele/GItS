@@ -931,10 +931,18 @@ their thresholds were live. The predicates are now visible to play selection
 and test-locked. This was a real accuracy bug but not the balance cause:
 1,500-run Fanfare Act clears remained 9.5%.
 
-> **PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05).** The
+> ~~**PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05).** The
 > threshold-reach table in the paragraph below is one of the four conclusions
 > escrowed pending the C2 probe: not citable as load-bearing, not shipped
-> against, and not redesigned against until it reports.
+> against, and not redesigned against until it reports.~~
+>
+> **STRUCK 2026-08-06 (R113) -- escrow released, instrument vindicated.** Both
+> probes reported and C2 is written off as a family-C infidelity: tier0's
+> Fanfare generation and decay are at parity
+> (`docs/probe-b-fanfare-residual.md`). The table below **stands exactly as
+> ratified** -- the strike restores its pre-escrow status and re-measures
+> nothing. R113's clause C-d rides with it: the vindicating measurement is
+> bot-limited, Furina-only, and taken with the salon empty throughout.
 
 RESOURCE TRACE, 1,500 realistic runs at seed 11: per reached fight, Furina
 gained 24.6 Fanfare, spent only 3.2, peaked at 22.7, and ended at 21.4.
@@ -2565,6 +2573,42 @@ written; it was true on its date.
 
 **Class: RULING** (this record) -- provenance and schedule, no behavior change.
 
+> **[USER] RULING 2026-08-06 -- `S4-G6` and `S4-G14` re-anchor to the
+> post-rework Kokomi build; `DEC-D5`'s declare-before-playtest law is INTACT.**
+>
+> The confirmatory playtest named by `DEC-D5` clause 3 is **the protocol run
+> against the post-rework Kokomi build**, not any session that preceded it. The
+> co-op playtest of 2026-08-01/02 and playtest 4 are **EXPLORATORY** in exactly
+> the sense clause 1 already defines: sources of understanding, graded against
+> nothing. That designation is not a demotion of what they found -- playtest
+> four's closed priority check and its two "unjudgeable" answers stand as
+> findings -- it is a statement about what may be graded.
+>
+> **Every clause of `DEC-D5` survives unchanged and is restated here so the
+> re-anchor cannot be read as a softening:** the band is declared from **design
+> intent**, with its provenance (including which exploratory data was already
+> seen) recorded as part of the record; **declaration precedes** the
+> confirmatory playtest; and **the band may not be revised against the playtest
+> that grades it.** If the re-anchored playtest says the band is wrong, that is
+> a finding, ruled on separately and afterwards.
+>
+> **`S4-G14` follows `S4-G6`, unchanged in content.** The protocol's Q1-Q7 and
+> three priority checks are the same questions; only the build they are asked
+> against is fixed. Its existing blockers stand: it remains blocked on `S4-G6`
+> and on the N1 attribution pass.
+>
+> **What this does NOT do.** It does not declare the band -- no number is
+> written by this ruling -- does not schedule the playtest, does not discharge
+> either gate, and does not grade Kokomi against anything.
+
+> **LANDING NOTE, 2026-08-06 (Cold Reading, Track AC / R115).** The annotation
+> above is the YES form pre-drafted at
+> `docs/awaiting-user-slots-2026-08-06.md` slot 5 (Y-9(b)), landed verbatim
+> against [USER]'s reply: *"deferral APPROVED -- land staged slot (b)."*
+> Appended, never rewritten, per R101b: `DEC-D5`'s four clauses above are
+> untouched, which is the point -- the re-anchor moves *which* playtest is
+> confirmatory and moves nothing about the order of operations.
+
 ## R81 -- Distinctness gate ratified on the two-anchor floor (2026-07-27)
 
 Full evidence and derivation: docs/a2-gate-ratification-2026-07-27.md
@@ -2863,12 +2907,20 @@ consolidated owed-item register produced by the four read-only sweeps of
 2026-07-29). Four rulings, taken together in one sitting, exactly as §3
 asked for. No code, no sheet and no number moved with them.
 
-> **PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05).** Item
+> ~~**PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05).** Item
 > (1)'s compensation STOP at 1.8% against the 2.0% floor is one of the four
 > conclusions escrowed pending the C2 probe: not citable as load-bearing, not
 > shipped against, and not redesigned against until it reports. The STOP's
 > practical effect -- no Furina balance value moves -- is unchanged by the
-> escrow, which freezes both directions.
+> escrow, which freezes both directions.~~
+>
+> **STRUCK 2026-08-06 (R113) -- escrow released, instrument vindicated.** C2 is
+> written off; the 1.8% STOP **stands exactly as ratified**. Recorded because
+> the escrow's worry ran the other way: R102 feared the STOP was *premature*
+> because tier0 might be pessimistic about fanfare. Probe (b) measured the sign
+> and it flipped -- with the selector known, tier0 is neutral-to-marginally
+> optimistic. The STOP is not premature on the instrument's account. R113's
+> clause C-d rides with it (bot-limited, Furina-only, salon empty throughout).
 
 > **GOVERNING CONDITION RE-POINTED 2026-08-06 (R107; S4 finding F1).** Item
 > (1)'s trigger fired -- the Furina playtest ran 2026-08-01/02 and was graded
@@ -3563,9 +3615,16 @@ becomes gradeable against a deck that actually is one, and Salon fill time gets
 re-measured with the bot-doesn't-build-salons confound removed. Until it
 reports, the 0-of-56 fill result stands recorded as **AMBIGUOUS** -- design
 finding versus policy gap, undecided -- and **R91/2b's revisit stays open**.
-*(**PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05)**: the
+*(~~**PROVISIONAL -- instrument under audit (R102, C2 escrow, 2026-08-05)**: the
 R91/2b revisit posture is one of the four escrowed conclusions. It stays open,
-and it does not move in either direction until the C2 probe reports.)*
+and it does not move in either direction until the C2 probe reports.~~
+**STRUCK 2026-08-06 (R113)** -- escrow released, C2 written off, instrument
+vindicated. The posture **stands exactly as ratified**: R91/2b's revisit stays
+open on its own terms, now unfrozen. R113's clause C-d rides with it -- and one
+of its limits bites here specifically, so it is repeated rather than pointed
+at: **the salon was empty throughout every measurement**, so the 0-of-56 fill
+result is untouched by the vindication and remains AMBIGUOUS for the reason it
+already was.)*
 What the committed arm reports is a number for [USER] to rule on; this pass
 reports it and revisits no tag.
 
@@ -4103,3 +4162,526 @@ silently dropped from it.
 
 **Class: MECHANICAL.** Two findings take a docket and a queue is copied
 forward. Nothing is graded, priced or decided.
+
+## R113 -- The C2 escrow is RELEASED: the four fanfare marks are struck as instrument-vindicated, and the residual's one real term is filed (2026-08-06)
+
+Sitting of 2026-08-06, third sitting, Track AA. **Verbatim: *"agreed -
+signed."*** Recorded before execution
+(`docs/sitting-record-predraft-2026-08-06.md` §8).
+
+R102 escrowed four conclusions "in both directions, until the C2 probe
+reports", and stated its own two outcomes: **if C2 confirms, they re-open; if
+C2 is written off, the PROVISIONAL marks are struck and the grades stand
+exactly as ratified.** Both probes have reported
+(`docs/probe-a-block-offset.md`, `docs/probe-b-fanfare-residual.md`;
+`docs/sitting-prep-2026-08-05.md` §10.11). **C2 is written off as a family-C
+infidelity**, so the second branch is the one that fires. This entry fires it.
+
+**The four PROVISIONAL marks are STRUCK, and the grades stand exactly as
+ratified.** Enumerated here in R102's own order and words, so the strike cannot
+be read as covering more or less than the escrow did:
+
+1. **the threshold-reach table** (94.1% at 10, 80.8% at 15, 64.8% at 20, 40.8%
+   at the cap) -- R44, banner struck in place;
+2. **the compensation STOP at 1.8%** against the 2.0% floor -- R87(1), banner
+   struck in place;
+3. **the Fanfare early-half grade "prediction NOT SUPPORTED"** --
+   `docs/sprint-track-b-gate-log-2026-08-05.md` GRADE (a), banner struck in
+   place;
+4. **the R91/2b revisit posture** -- R99(4), banner struck in place.
+
+**No number moves and no grade is re-read upward.** A strike restores the
+status these four had before the escrow; it is not a re-ratification and it is
+not new evidence for any of them. What the probe supplies is the negative:
+tier0's Fanfare generation and decay are at parity, so the instrument that
+produced them was sound, so the escrow's condition is discharged.
+
+### Companion clauses C-a ... C-d
+
+**C-a -- term 3 is filed to the S7 ledger as bounded and direction-known, and
+its fix is QUEUEABLE, not executed.** Probe (b) localized the residual into
+three terms: (1) the unrecorded Spotlight selector -- a family-B reconstruction
+gap, not a sim fact; (2) the turn-open sampling seam; (3) **the fight's first
+Spotlight -- tier0 credits the play that SETS the designation, the engine does
+not: exactly +2 Fanfare per combat, once, in tier0's favour**
+(`docs/probe-b-fanfare-residual.md` Ledger 2, 26 of 27 plays agree exactly).
+Term 3 is the only genuine tier0-side term, it is **bounded** (+2/fight) and
+its **direction is known** (tier0-optimistic, the opposite of the direction
+R102 worried about). It is filed to `docs/s7-classification.md` family C as a
+named, bounded, direction-known item. **The fix candidate -- credit only plays
+covered by a standing designation -- is formally QUEUEABLE and joins the next
+errata batch as item 1** (Errata Batch 2, §10 of the sitting record). It is
+not executed by this entry and no constant, card or sheet moves under it.
+
+**C-b -- the blind-replay column re-read rule.** Any S7 column produced by a
+reconstruction that did **not** carry the recorded status strip and the
+recorded Spotlight selector is a **reconstruction reading, not a fidelity
+reading**, and may not be cited as evidence of a tier0 infidelity without being
+re-read selector-aware and status-loaded first. Named instances, because a rule
+with no instances is a slogan: `l2.block_at_turn_end` (probe (a): "the S7
+`l2.block_at_turn_end` column should be read that way"; 7/38 -> 33/38 agreement
+once status-loaded), and `l2.fanfare_after_turn` /
+`l2.fanfare_next_open_post_decay` (probe (b): both "compare across a seam
+containing two income channels the replayed turn does not contain", and neither
+is the fair column S7 was looking for). The rule is stated once here so it does
+not have to be re-derived at every future citation.
+
+**C-c -- S13 re-verification against `S7-C1`/`S7-C2`: NO.** The 71-line S13
+corpus is **not** re-verified, and the caveat stands as written. Attached as the
+evidence, per the order this clause carried: the **Family-A dependency scan
+returned zero hits** (`docs/sitting-prep-2026-08-05.md` §10.12) -- no S13
+metric verdict quotes `cards_played` or anything derived from it; the 40 metric
+verdicts use seven other metric names, and the remaining 31 read the engine's
+own degeneracy detector. The structural reason is recorded with it: Family A is
+a defect in the soak writer, and the S13 harness never loads it. **This clause
+discharges two open asks at once** -- `docs/sitting-prep-2026-08-05.md` §10.12
+("accept the null as closing the C-c order": accepted, no wider derivation test
+is ordered) and paperwork one-liner 4 of §8 / `docs/registry/user-queue.md` §6
+("proceed on the caveat as written").
+
+**C-d -- the probes' standing limits are carried onto the annotations.** The
+strike is only as wide as the measurement behind it, so the measurement's own
+declared limits ride with it wherever a struck mark is now cited: **bot-limited**
+(Guardrail 7 -- every engine number came from a bot or a fixed script; nothing
+in either probe is a balance finding); **salon empty throughout** (every
+`salon_members` reading is 0, as in every measurement to date -- Fanfare
+interactions with a populated salon are untested); **one character** (Furina
+only); and **the Encore split is unreadable on this wire** (absorption vs
+upkeep, bounding the boundary reconciliation at +/-2). A struck mark is a mark
+that is no longer frozen. It is not a mark that has been re-measured on a
+broader corpus.
+
+### What was reconstructed, and from what
+
+Track AA's text cites a pre-draft, `ruling-predraft-r102-escrow-2026-08-05.md`,
+**which does not exist in this repo on any branch.** Recorded rather than
+smoothed over, because a ruling that cites a missing source should say so. The
+clauses above are reconstructed from the paper that does exist, and each names
+its source: the enumeration of the four marks from **R102's own text**
+(verified word-for-word against it, and against probe (b)'s "For the ruling
+session" restatement); C-a from **probe (b) Ledger 2** and the sitting record's
+Errata Batch 2; C-b from **probe (a)'s closing section** and **probe (b)'s
+"Mechanically, what it means"**; C-c from **§10.12** and its grep manifest;
+C-d from **both probes' declared confounder sections**. No clause was invented,
+and nothing in the brief's C-a...C-d parenthetical is left unlanded.
+
+**Class: SUBSTANTIVE.** Four ratified conclusions change status, in the
+direction R102 pre-committed to. **No value moves anywhere in this entry**, and
+the one real defect the probes found is filed and queued rather than fixed.
+
+## R114 -- The four held flags are RULED: one intended, two ratified changes, and a curse whose root is still one word away (2026-08-06)
+
+Sitting of 2026-08-06, third and fourth sittings, Track AB. Verdicts verbatim;
+routing is this entry's. FLAG-1...FLAG-4 were opened by R110/R111 and carried
+into `docs/registry/user-queue.md` §3 under the docket house rule that nothing
+may be built against a held flag. **All four are discharged here.** Every fix
+named below is **queued to Errata Batch 2 and executed by no part of this
+entry** -- the paper track implements nothing in engine code.
+
+### FLAG-3 (`S13-X5`) -- RESOLVED, INTENDED. X5 closes fully, both legs.
+
+**Verbatim: *"We deliberately allowed for powers to raise the fanfare floor
+(without decaying) as a sort of strength-style scaling effect. I think this is
+fine."***
+
+FLAG-3 asked whether "seems fine" covered the decay-proof floor stacking or
+only the cantrip leg. **It covers both, and the answer arrives with its
+design intent stated:** the floor is a **strength-style scaling effect**, and
+its immunity to decay is the point of it rather than an oversight in it. The
+question the flag was holding is answered, so **X5 leaves the held register and
+takes a disposition.**
+
+**The disposition is X6's, exactly: the strategy is blessed, the power level is
+watched.** A new watch item (`W4`, `docs/dockets/watch-items.md`) rides the
+register with the magnitudes the S13 replay actually verified as its named
+quantity -- **240 damage from one card** (`furina_fanfare_2`) and a **turn-2
+boss kill** (`furina_fanfare_3`). Those two lines are what a future reading is
+compared against; they are recorded so the trigger is falsifiable rather than a
+feeling, per R111's definition of a watch item.
+
+**Pin transition, and it is the first one in this corpus.** The X5 pin in
+`tier0/tests/test_s13_exploit_pins.py` **converts from `xfail(strict=True)` to a
+documented-behaviour test**: it now asserts that the mechanism **REPRODUCES**,
+with no marker, citing this ruling. The polarity flip is the whole content of
+the change -- the other thirteen pins assert the correct behaviour and are
+xfail because the exploit is live; X5's behaviour **is** the correct behaviour
+now, so the assertion that would have been the alarm becomes the assertion that
+is the record. If X5 ever stops reproducing, that pin goes red, and it should:
+a ruled-intended mechanism disappearing is a regression, not a repair.
+
+### FLAG-1 (`S13-X1`) -- RESOLVED, RATIFIED CHANGE. The accumulator scopes to the writing turn.
+
+**Verbatim: *"Limit the cost discount to the current turn? Yes."***
+
+`state.companion_cost_delta_this_turn` is additive and uncapped, and its
+discount currently outlives the turn that wrote it. **The accumulator scopes to
+the writing turn, in both engines, mirroring the X11 boundary** that R110
+already ratified for `replay_next_companion`. One boundary idiom, now used
+twice.
+
+**Distinct from FLAG-2(ii), and they may not be conflated.** `cost_override`
+(FLAG-2(ii)) is a different mechanism with a different fix; two mechanisms, two
+fixes, one shared boundary idiom. The flag's other half -- whether the note also
+rides the Kokomi pool-rework docket, given `honor_guard` is the second enabler
+-- is answered by the ruling being **engine-wide** rather than kit-local: a
+turn-scoped accumulator closes the Klee leg and the Kokomi leg in one move, so
+there is no live leg left for a second docket to carry.
+
+**What the change does NOT close, stated because the finding invites the
+mistake.** The **within-turn** free-companion loop survives this change **by
+design**. A same-turn bound does not touch a mechanism that accumulates and
+spends inside one turn -- the same shape R110's X11 errata already hit, and the
+same shape the X11 pin still reports. That loop is governed by the **X2 rarity
+law** (R109: infinite cycling engines gate to Uncommon or higher), and its
+engines now sit at Uncommon, which is consistent with the X2 framework rather
+than an exception to it. **Pin behaviour: report, do not force.** The X1 pin
+stays `xfail(strict=True)` and its docstring says why.
+
+**Implementation: Errata Batch 2 item 7.** Both engines.
+
+### FLAG-2 (`S13-X3`) -- RESOLVED, BOTH FIXES RATIFIED.
+
+**Verbatim: *"Yes."*** -- to both halves.
+
+**(i) Copy ops inherit the printed card's bounds.** A copied
+`sucrose_catalyst_conversion` respects its Exhaust limit; the copy op no longer
+deletes the sheet's stated bound. This was the half R110 called a design call,
+and the design call is made: **the printed bound travels with the copy.**
+
+**(ii) `cost_override` aligns to the sheet and C# semantics -- "costs 0 *this
+turn*".** This is **NC-12 / `SYS-3`'s sim-side fix**, and its direction is worth
+recording: **C# is already correct**, so (ii) is a **sim-only parity repair**,
+not a design change. tier0 writes `pick.cost = 0` permanently on the token where
+sheet and mod both scope it to the turn.
+
+**Implementation: Errata Batch 2 item 8.** (ii) sim-only; (i) as the batch
+scopes it.
+
+**STAGED, one word owed -- `AB-s1`.** NC-12's adjacent inversion is **not**
+ruled here: C#'s Encore Performance does **not** exclude kit cards from the
+copy pool, where the sheet and the sim both do, so a copied kit Burst clogs a
+hand slot in game. It is a sheet-vs-mod parity fix and the fix is mod-side --
+staged rather than landed because it is a **mod behaviour change** that has not
+been explicitly blessed. Full draft text: `docs/awaiting-user-slots-2026-08-06.md`
+slot 6.
+
+### FLAG-4 (`S13-X14`) -- leg (a) clarified with its root staged; leg (c) RULED intended.
+
+**Leg (a) -- clarification recorded, root staged.** [USER]'s fallback
+restatement **matches the shipped `S-3` spotlight path**, which is R110's leg
+(b) and is already in the code. **Leg (a)'s root is a different thing and the
+clarification does not reach it:** `curse_poor_sleep` is typed both `status`
+(unplayable) and `retain: true` (never flushed). **The jam is the typing, not
+the spotlight.** No fallback on the spotlight path can unjam a hand held by ten
+cards that are unplayable and unflushable by their own type.
+
+**STAGED, one word owed -- `AB-s2`.** Two options, drafted in full and neither
+landed: **(α)** drop `retain` from the curse -- narrow, one card, a data repair;
+**(β)** rule that status-typed cards always flush at end of turn, engine-wide,
+on the StS precedent -- broad, a law, and it would close every future instance
+of this typing class at once. Full text:
+`docs/awaiting-user-slots-2026-08-06.md` slot 7.
+
+**Leg (c) -- RULED, INTENDED. Verbatim: *"You deck out... don't do that."***
+
+An all-Power deck erases itself into empty turns because Power cards route to
+`result_pile: none` -- removed from combat, not exhausted. **This is intended
+and takes the StS-precedent shrug: no guard is added.** Decking out is a thing
+the player does to themselves, and the engine is not obliged to prevent it.
+Recorded as **documented behaviour** in two places, so the next reader of
+`refpowers.result_pile` does not re-file it: the function's own docstring, and
+the X14 entry in `review/redteam/exploit-ledger.md`. **Leg (c) drops from the
+queue.**
+
+**The X14 pin does NOT convert.** Its representative line is
+`stall_softlock_3` -- leg (a), the curse jam -- which is still governed by the
+staged `AB-s2` and is not ruled. Only the ruled-intended leg would have earned
+a conversion, and it is not the leg the pin runs. The pin stays
+`xfail(strict=True)`.
+
+### Version-stamp questions, surfaced per precedent
+
+FLAG-1 and FLAG-2(ii) are **sim combat-math changes** when they land: a
+turn-scoped accumulator and a turn-scoped `cost_override` both change what a
+tier0 run costs and therefore what it measures. Surfaced here, decided by the
+batch that lands them, per the R101/`CONSTANTS_VERSION` precedent -- the paper
+track does not stamp a version for code it has not written. NC-7 raises the
+same question at greater breadth and is surfaced with it (R115).
+
+**Class: SUBSTANTIVE.** One mechanism is ruled intended and re-registered as a
+watch item; three engine behaviours are ruled changed and queued. **No engine
+code moves under this entry**, and the two staged items move nothing at all.
+
+## R115 -- The fork was never evaluated, the Kokomi gates re-anchor, and a five-playtest table item becomes an instrument (2026-08-06)
+
+Sitting of 2026-08-06, third and fourth sittings, Track AC, items `AC-1`
+through `AC-5`. Records and reclassifications; **no lever is pulled and no
+value moves anywhere in this entry.**
+
+### AC-1 -- the `NT-G5` fork: INCONCLUSIVE BY NON-OBSERVATION, and the record shows its own correction
+
+Two readings arrived on the same day and the second supersedes the first. Both
+are on the record at `klee-mod/DECISIONS.md`, beneath the pre-registration,
+the earlier one struck and kept (R101b).
+
+**The superseded reading, verbatim: *"nothing stood out besides the charge
+stacking / missing animation; let's review next playtest."*** Recorded at the
+time as: no Neap Tide weakness observed, evaluation deferred.
+
+**The operative reading, verbatim: *"I don't remember seeing the card during
+the playtest, so it did not stand out one way or another."***
+
+**Why the difference is the whole content of the correction.** The first
+reading treats "nothing stood out" as a favourable read -- the hands did not
+call her weak. The second says the card **was not exercised**: it did not stand
+out because it was not seen. The pre-registration is explicit that **the hand
+is the tiebreaker, not the sim**, so a session in which the hand never touched
+the card cannot evaluate the fork at all. **Playtest three did not exercise
+Neap Tide.** The fork's evaluation was not deferred; it was **not possible**.
+
+**New record: the fork is OPEN, and its evaluation re-anchors to the next
+Kokomi playtest WITH AN EXPLICIT OBSERVATION TASK.** Neap Tide is to be
+deliberately drawn, played, and reported. The task is written into
+`docs/kokomi-playtest-protocol.md` as **`OT-1`**, with its own Answers row,
+rather than carried as an intention -- because the failure this record corrects
+was exactly an intention nobody executed. "Never offered" is recorded as a
+legitimate third outcome, structural rather than evaluative.
+
+**Candidate alternative, recorded and NOT chosen:** fold the fork's evaluation
+into the queued Kokomi pool-rework session instead of anchoring it to a
+playtest. It is a real option and it is written down so the choice is visible
+rather than defaulted into. **The observation task is the default, the fold-in
+is the candidate, and the preference is [USER]'s -- an open queue row, not a
+decision taken here.**
+
+**Unchanged, and restated because two evaluations in one day invite the
+mistake:** no lever is pulled by either reading. The fine-branch's **logged
+sim-calibration offset for exhaust-loop kits** remains unwritten and is still
+owed by the eventual evaluation. `S4-G13`'s fork half stays open.
+
+### AC-2 -- `S4-G6` and `S4-G14` re-anchor to the post-rework Kokomi build
+
+**Verbatim: *"deferral APPROVED -- land staged slot (b): stability band +
+protocol playtest re-anchor to the post-rework Kokomi build; declare-before-
+playtest law intact."***
+
+The YES form pre-drafted at `docs/awaiting-user-slots-2026-08-06.md` slot 5
+(Y-9(b)) is landed verbatim at all three of its named sites: `DEC-D5` (a dated
+annotation beneath clause 4), `docs/kokomi-playtest-protocol.md`'s header, and
+the queue. **`DEC-D5` clauses 2-4 survive intact** -- declared from design
+intent with provenance, declared BEFORE the grading playtest, never revised
+against the playtest that grades it. The re-anchor moves **which** playtest is
+confirmatory and moves nothing about the order of operations, which is the
+whole value of the gate.
+
+**Recorded because the reply's own words invite the misreading:** "deferral
+APPROVED" approves the **re-anchor**, not a postponement of the band. No band
+is declared here, nothing is graded, and neither gate is discharged. The
+co-op session of 2026-08-01/02 and playtest 4 are designated **EXPLORATORY** in
+clause 1's existing sense -- which is a statement about what may be graded, not
+a demotion of what they found.
+
+### AC-3 -- `S4-G5` / `B-G1`: STILL AWAITING, and it stays a queue row
+
+The narrow-to-Fanfare-axis disposition (slot 4, Y-9(a)) has **no reply**.
+Recorded here so a reader of this batch does not infer that everything staged
+by Y-9 landed: slot 5 landed, **slot 4 did not**. The row keeps its
+plain-language form and nothing is built against it.
+
+### AC-4 -- corpse detonation converts from table-luck to instrument, STAGED
+
+**Verbatim, on the odds of the table item closing on its own: *"who knows when
+it closes."***
+
+`S4-G15` has been a *"~10 seconds at the table"* settlement since 2026-07-21
+and has survived at least five playtests unanswered -- nobody has been holding
+Pounding Surprise, on the bombed enemy, on the killing turn, while remembering
+to look. **The question does not change; the way of answering it does.** A
+bridge-driven scripted probe is registered:
+`docs/probe-e-corpse-detonation-registration-draft.md` -- scripted fight, a
+known bomb count on a killable enemy, the killing blow landed deliberately,
+**two independent tells** (the relic spark and the HP deltas on the wire), a
+negative-control arm, and the sim's behaviour read off the sim rather than off
+the ledger's prose, which `NC-18` reports as backwards.
+
+**The registration is STAGED FOR COUNTERSIGN and nothing has been run.** A new
+probe is a pre-registered question under standing law, so it is paper until it
+is signed. **The `S4-G15` table item survives as FALLBACK ONLY** and is not
+retired -- if the probe is declined or stops short, the eyes-on check still
+closes the question the moment somebody is holding the relic on the right turn.
+
+### AC-5 -- the S2 event gallery becomes INSPIRATION-OPTIONAL
+
+The event-gallery curation sitting (47 events, 141 drafted variants -> 130 kept
+/ 11 cut, 4 demotions) **leaves the active-ask section of the queue** and joins
+the Ancients and boss-pool galleries in the inspiration-optional section.
+**Nothing is blocked on it**, which is the whole content of the
+reclassification: the event layer's conversion pass no longer waits on a
+checkbox sitting, and the gallery is read when somebody wants to read it.
+
+Two things this does NOT do. It does not cut, keep or demote anything -- the
+gallery's own recommendations stay exactly as drafted and unratified -- and it
+does not retire the gallery. One cross-reference rides with it: `NC-15`'s Brain
+Leech mismatch (shipped gallery text promises two cards, the option grants a
+pick-1-of-3) is the same event as the S2 flag, so whenever either is answered
+both are.
+
+**Class: MECHANICAL** for `AC-2`, `AC-4` and `AC-5` -- an annotation landed
+from a pre-drafted form, a registration staged, a status changed.
+**Class: SUBSTANTIVE** for `AC-1`, because a recorded evaluation is withdrawn
+and replaced, which changes what the fork is waiting on.
+
+## R116 -- S14 canonicity: five questions ruled, a register for future card work, and Errata Batch 2 is constituted (2026-08-06)
+
+Sitting of 2026-08-06, fourth sitting and final dispatch, Track AC item
+`AC-6`. Source: `review/parity-sweep/noncard-triage-memo.md` (S14, 174 findings
+across 173 entities). Verdicts verbatim; routing is this entry's. **Every fix
+named below is an Errata Batch 2 item and none is executed here** -- the paper
+track implements nothing in engine code.
+
+### NC-1 -- companion and power damage scales with the player. SIM CANONICAL; the mod is the defect.
+
+**Verbatim: *"They are supposed to also scale with you like your own cards."***
+
+tier0 routes companion-power damage through the full damage pipeline --
+Strength, Weak x0.75, Vulnerable x1.5 -- and the mod deals it as raw,
+dealer-less hits. **The sim is right.** C# routes companion-power damage
+through the full pipeline; **parity vectors are updated with the fix**, and
+`NC-1`'s own line evidence (Durin's Witch's Flame, found independently from
+both the companion and the powers side) **becomes the regression test.**
+
+**Implementation: Errata Batch 2 item 3.** Mod-only.
+
+**Explicitly NOT covered by this verdict: `NC-11`.** The verdict says so
+itself, and the reason it has to is that the two look like one question and cut
+opposite ways. Ruled separately below.
+
+### NC-7 -- Frozen is the timer, applied per-creature. Each engine adopts the other's half.
+
+**Verbatim: *"Ticks down per-turn, applies per-creature."***
+
+Frozen was two different mechanics. **Canonical Frozen, as ruled:** a
+**duration counter** that decrements at the end of the enemy side each turn,
+with stacking extending it -- which is **the mod's** semantics, so **the sim
+adopts the timer** and drops its one-shot boolean. And the boss substitution is
+**per-creature** -- which is **the sim's** semantics, so **the mod adopts
+per-creature**, and Kaiser Crab's boss-room adds become freezable in game where
+they are currently not.
+
+**Each engine gives up its own half.** Recorded that way deliberately: this is
+not "one side was right", and reading it as a win for either engine will
+produce the wrong fix.
+
+**Shipped-boss-fight impact is real and is noted in the batch**, not
+discovered by it: this touches a boss encounter that has shipped.
+**Version-stamp question surfaced per precedent** -- this changes sim combat
+math wherever Frozen appears, which is broader than any card. The stamp is
+decided by the batch that lands it, not by the paper.
+
+**Implementation: Errata Batch 2 item 5.** Both engines.
+
+### NC-10 -- the shop slots are specified, and both engines are defective against the spec
+
+**Verbatim: *"Slot 1 should be 'Uncommon or higher from the home region'; slot
+2 should be 'any companion card'; this is a defect."***
+
+Neither engine implements that. The sim rolls `SHOP_COMPANION_RARITY_ODDS` for
+both slots; the mod hard-wires slot 1 to Uncommon. **Both engines implement the
+spec:** slot 1 filters the home-region pool to **Uncommon or higher**, slot 2
+is **unrestricted**.
+
+**One implementation question is surfaced and deliberately NOT chosen here.**
+Rarity-odds renormalization *within* the Uncommon+ pool has at least two
+readable answers -- condition the existing `SHOP_COMPANION_RARITY_ODDS` on
+>= Uncommon, or state a fresh split -- and the implementer **surfaces the
+candidate readings rather than picking one**. A renormalization chosen by an
+implementer is a balance value chosen by an implementer.
+
+**Cross-noted to the companion-pricing docket:** the shop is now a **real Rare
+source in both slots' math**, which changes the acquisition assumptions that
+docket prices against. `R59`'s slot-2 floor and `R60`'s override live in the
+same neighbourhood and are named so the docket reads them together.
+
+**Implementation: Errata Batch 2 item 6.** Both engines.
+
+### NC-11 -- power-sourced block stays raw. SIM CANONICAL; the mod is the defect side.
+
+**Verbatim: *"I think that the answer is no; my recollection is that
+power-sourced block in the base game's kits ignores both of those."***
+
+`NC-11` was minted as a **new** question by the fourth sitting, precisely
+because `NC-1` was ruled and this one was named as not covered by it. It is
+ruled here.
+
+The sim's documented funnel exemption (`tier0/engine/powers.py:75-81`) is
+**canonical**: Metallicize, the Ceremonial Garment rider and the Kurage pulse
+add block **raw**, exempt from Frail and Dexterity. The mod is the defect side
+and stops routing all three through Frail/Dexterity.
+
+**The register this pair creates, recorded once for future card work**, because
+the two rulings are adjacent, opposite, and will be misremembered otherwise:
+
+> **Power-sourced DAMAGE runs the damage pipeline (`NC-1`).
+> Power-sourced BLOCK is raw (`NC-11`).**
+
+That is not an inconsistency; it is the base game's own shape, and a future
+card that grants both from one power obeys both lines.
+
+**Cross-note on `X10`, which this ruling closes.** S14 filed a caveat against
+S13's Metallicize treadmill: *"the exploit's numbers are sim-side; in the mod,
+Frail alone changes the wall's arithmetic."* **Post-fix that caveat resolves**
+-- the mod stops applying Frail to power-sourced block, so the treadmill's
+sim-side numbers hold in the mod too. The caveat is struck at its site with a
+banner citing this ruling; `X10`'s own disposition (CANDIDATE, not ratified,
+R111) is untouched.
+
+**Implementation: Errata Batch 2 item 4.** Mod-only.
+
+### NC-8 -- potions are actually consumed. RULED by inclusion.
+
+`NC-8` -- the event resolver pops the potion from a **throwaway copy** of the
+bag, so "The Future of Potions?" grants its reward free and the potion is
+retained -- carried a **presumptive** answer in the queue ("potions are
+consumed") awaiting one word. **The final dispatch supplies it by listing the
+fix as Errata Batch 2 item 2**, which is a ruling in the operative sense: the
+fix is ratified and executable.
+
+Recorded as ruled rather than as still-presumptive, and recorded *why*, so the
+next reader does not re-open it looking for a quoted sentence: **inclusion in a
+ratified batch is the answer**, and the presumptive reading was the one
+included.
+
+**Implementation: Errata Batch 2 item 2.** Sim-only (`tier05/events.py`).
+
+### Errata Batch 2 is constituted, ordered, and owned by a later track
+
+**One batch, both engines where applicable, suite green at each boundary.**
+Contents in the dispatch's own order:
+
+| # | item | engines |
+|---|---|---|
+| 1 | term-3 fanfare credit -- tier0 credits only plays covered by a standing designation (R113 clause C-a's queued fix) | sim only |
+| 2 | `NC-8` -- potions actually consumed (`tier05/events.py`) | sim only |
+| 3 | `NC-1` -- companion-power damage through the full pipeline | mod only |
+| 4 | `NC-11` -- power-sourced block raw | mod only |
+| 5 | `NC-7` -- Frozen unified: sim adopts the timer, mod adopts per-creature | both |
+| 6 | `NC-10` -- shop slot spec; odds renormalization surfaced, not chosen | both |
+| 7 | `FLAG-1` -- companion cost-delta accumulator scoped to the writing turn (R114) | both |
+| 8 | `FLAG-2` (i)/(ii) -- copies inherit printed bounds; `cost_override` = "this turn" (R114) | (i) as scoped; (ii) sim only |
+
+**After the batch:** parity vectors plus all lints; **S13 harness
+characterization on the affected lines -- report transitions, do not grade**;
+version-stamp questions surfaced in one place (`NC-7` at minimum, and R114
+surfaced FLAG-1/FLAG-2(ii) alongside it).
+
+**Two paper items land with the paper and are NOT batch items**, stated so the
+batch does not re-do them: FLAG-4 leg (c)'s documented-behaviour note (landed,
+R114) and the FLAG-3 / `X5` pin conversion (landed, R114).
+
+**Still staged or awaiting, and NOT in this batch:** `AB-s1`, `AB-s2`, `AC-3`,
+`AC-4`'s probe registration, and the Neap Tide fork's anchoring preference.
+
+**Class: SUBSTANTIVE.** Five parity questions take a canonical side and one
+standing register enters the constitution's orbit. **No engine code moves under
+this entry**, and the one implementation question with a balance shape
+(`NC-10`'s renormalization) is surfaced rather than answered.

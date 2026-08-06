@@ -14,6 +14,13 @@ generated for [USER]"). Three of the six were answered and executed elsewhere.
 > dispositions, drafted in full so a one-word reply lands them. Nothing in slots
 > 4–5 is executed and nothing in them is a decision.
 
+> **STATUS UPDATE 2026-08-06 (Cold Reading).** Slot 5 is now **ANSWERED and
+> LANDED** — YES, the `S4-G6`/`S4-G14` re-anchor (`AC-2`); slot 4 is **still
+> AWAITING** (`AC-3`). **Two further slots, 6 and 7, were opened by Track AB**
+> and are AWAITING [USER]: `AB-s1` (mod-side copy-pool kit exclusion) and
+> `AB-s2` (the curse's typing). Nothing in slots 4, 6 or 7 is executed and
+> nothing in them is a decision.
+
 The purpose of this file is narrow: each open item has its landing text written
 out *in advance*, in every form its answer can take, so that a **one-word
 reply** lets a future track paste the right one into the right file and delete
@@ -313,7 +320,22 @@ rewrite):**
 
 ## Slot 5 — `S4-G6` + `S4-G14`: re-anchor Kokomi's band and protocol to the post-rework build?
 
-**AWAITING [USER]. One word: YES or NO.**
+> **ANSWERED AND LANDED 2026-08-06 (Cold Reading, Track AC / `AC-2`) — reply:
+> YES.** Verbatim: *"deferral APPROVED — land staged slot (b): stability band +
+> protocol playtest re-anchor to the post-rework Kokomi build; declare-before-
+> playtest law intact."* (seventh-wave brief, Track AC item AC-2; transcribed at
+> `docs/sitting-record-predraft-2026-08-06.md` §8.) Form **5-YES** below was
+> landed verbatim, dated 2026-08-06, at all three of its named sites:
+> `tier0/DECISIONS.md` `DEC-D5` (annotation beneath clause 4),
+> `docs/kokomi-playtest-protocol.md` (header), and
+> `docs/registry/user-queue.md` §2/§7. The 5-NO form is **void**. Struck, not
+> deleted (R101b).
+>
+> Recorded because the reply's own words invite the misreading: **"deferral
+> APPROVED" approves the re-anchor, not a postponement of the band.** No band
+> is declared, nothing is graded, and `DEC-D5` clauses 2–4 survive intact.
+
+~~**AWAITING [USER]. One word: YES or NO.**~~
 
 **The question, in plain language first.** Kokomi's stability band was supposed
 to be declared before a confirmatory playtest and then graded by it. The build
@@ -343,7 +365,7 @@ value of the gate.
 3. `docs/registry/user-queue.md` §2, rows `S4-G6` and `S4-G14`, and §7's table
    row for the protocol playtest.
 
-### 5-YES — draft, lands only if the reply is YES
+### 5-YES — ~~draft, lands only if the reply is YES~~ **LANDED VERBATIM 2026-08-06**
 
 > **[USER] RULING <DATE> — `S4-G6` and `S4-G14` re-anchor to the post-rework
 > Kokomi build; `DEC-D5`'s declare-before-playtest law is INTACT.**
@@ -373,7 +395,7 @@ value of the gate.
 > by this ruling — does not schedule the playtest, does not discharge either
 > gate, and does not grade Kokomi against anything.
 
-### 5-NO — draft, lands only if the reply is NO
+### 5-NO — ~~draft, lands only if the reply is NO~~ **VOID 2026-08-06: the reply was YES**
 
 > **[USER] RULING <DATE> — no re-anchor; `S4-G6` and `S4-G14` stay as
 > registered.**
@@ -384,3 +406,154 @@ value of the gate.
 > written, and the mismatch is a finding somebody will have to rule on later.
 > Nothing is unblocked by this answer; `S4-G14` stays blocked on `S4-G6` and on
 > the N1 attribution pass either way.
+
+---
+
+# Slots opened 2026-08-06 by Cold Reading, Track AB — **AWAITING [USER], nothing landed**
+
+> **These two are the residue of FLAG-2 and FLAG-4.** Both flags were ruled
+> (R114); each left exactly one adjacent question that the verdict did not
+> reach, and each is staged here in full so a one-word reply lands it. Same
+> house rule as every slot above, with the same R101b amendment: the unselected
+> form is **struck, not deleted.**
+>
+> Restated because these two are easy to over-read: **nothing below is
+> executed, and neither is a design decision already taken.** R114 ruled the
+> flags. It did not rule these.
+
+## Slot 6 — `AB-s1`: does C#'s Encore Performance stop copying kit cards?
+
+**AWAITING [USER]. One word: YES or NO.**
+
+**The question, in plain language first.** Furina's Encore Performance copies a
+card. The card sheet says it should never copy a *kit* card — the big signature
+cards each character starts with — and the simulation obeys that. **The shipped
+mod does not.** So in a real game, Encore Performance can hand you a copy of a
+kit Burst, and because that copy cannot be discarded, it sits in your hand for
+the rest of the fight taking up a slot you cannot use.
+
+**This is a sheet-vs-mod parity gap, and the fix is on the mod side**, because
+the sheet and the sim already agree with each other and with the design intent.
+Source: `review/parity-sweep/noncard-triage-memo.md`, NC-12's "adjacent
+inversion"; sim side at `tier0/engine/effects.py:1231-1232`.
+
+**Why it is staged rather than mechanical.** Every other repair in this family
+moved the *sim* toward the shipped game. This one moves the **shipped game**,
+and a mod behaviour change is not a parity repair even when it is written down
+as one. Nobody has blessed it, so nobody may land it — the standing rule about
+building against unruled behaviour cuts both ways.
+
+**Blast radius, stated so the reply is cheap:** one card's copy pool, mod-side
+only. No sim number moves under either answer, no card sheet changes, and no
+tier0 test flips.
+
+**Landing sites for either form, appended and dated:**
+1. `tier0/DECISIONS.md`, R114 — a dated annotation beneath the FLAG-2 section.
+2. `review/parity-sweep/noncard-triage-memo.md`, NC-12 — a dated disposition
+   line, on the pattern the S13 ledger's entries use.
+3. `docs/registry/user-queue.md` §1 — status only.
+
+### 6-YES — draft, lands only if the reply is YES
+
+> **[USER] RULING \<DATE\> — `AB-s1` APPROVED: the mod's copy pool excludes kit
+> cards, matching the sheet and the sim.**
+>
+> C#'s Encore Performance adopts the sim's exclusion: **kit cards are not legal
+> copy targets.** The sheet was always the specification here and both other
+> surfaces already implement it; this closes the third. The undiscardable
+> copied kit Burst that clogs a hand slot in game stops being reachable.
+>
+> **Class: this is a MOD BEHAVIOUR CHANGE, recorded as one and not as a parity
+> repair.** It ships with the next errata batch that touches C#, with parity
+> vectors updated; it does not ride the paper. No sim behaviour moves, because
+> the sim was already correct.
+
+### 6-NO — draft, lands only if the reply is NO
+
+> **[USER] RULING \<DATE\> — `AB-s1` DECLINED: the mod's copy pool keeps kit
+> cards in it, and the SHEET is what changes.**
+>
+> The mod's behaviour is canonical: Encore Performance may copy kit cards. The
+> divergence is then real but is resolved on the other side — **the sheet's
+> exclusion and the sim's `effects.py:1231-1232` filter are the defect**, and
+> they are queued for repair so all three surfaces agree.
+>
+> Recorded plainly because it is the cost of this answer: the undiscardable
+> copied kit Burst is thereby ruled a feature, and the hand slot it occupies is
+> the player's problem — which is a legitimate answer and the same shrug
+> FLAG-4 leg (c) received, but it should be given deliberately rather than by
+> declining to answer.
+
+---
+
+## Slot 7 — `AB-s2`: how does the never-flushed curse stop jamming the hand?
+
+**AWAITING [USER]. One word: ALPHA or BETA.** (Or NEITHER, which is also an
+answer and is recorded as one.)
+
+**The question, in plain language first.** `curse_poor_sleep` is marked two
+ways at once: it is a **status** card, so it can never be played, and it is
+**retained**, so it is never discarded at end of turn. A card that cannot leave
+your hand and cannot be played out of it is a card that occupies a hand slot
+permanently. Collect ten of them and the hand is full of cards that do nothing,
+every draw bounces, and the fight cannot proceed.
+
+**What the fourth sitting already settled, so it is not re-asked.** The fallback
+[USER] described — if the hand is full, discard one random card before adding
+the spotlight — **is already shipped** (`S-3`, the spotlight path, R110's leg
+(b)). It is the right fix for the leg it was written for and it does not reach
+this one. **The jam is the typing, not the spotlight**: no fallback on the
+spotlight path can unjam a hand held by cards that are unplayable and
+unflushable by their own type.
+
+**Two options, and they differ in width rather than in effect on this card.**
+
+### 7-ALPHA — narrow: drop `retain` from the curse
+
+> **[USER] RULING \<DATE\> — `AB-s2` = (α): `curse_poor_sleep` loses `retain`.**
+>
+> The curse is typed `status` and **not** `retain`. It flushes at end of turn
+> like any other unplayed card, and the permanent hand jam
+> (`stall_softlock_3`) stops being reachable.
+>
+> **Read as what it is: a data repair on one card, not a law.** Any other card
+> that is ever typed both `status` and `retain: true` will reproduce this jam
+> and will need its own repair. That is the cost of the narrow option, and it
+> is accepted knowingly.
+
+### 7-BETA — broad: an engine-wide status-flush law
+
+> **[USER] RULING \<DATE\> — `AB-s2` = (β): status-typed cards ALWAYS flush at
+> end of turn, engine-wide.**
+>
+> **NEW LAW.** A card typed `status` is flushed at end of turn regardless of
+> any `retain` marking it carries; `retain` and `status` are not composable,
+> and where they collide, `status` wins. StS precedent: statuses are things
+> that clog your draw, not things that homestead your hand.
+>
+> `curse_poor_sleep` is fixed as a consequence rather than as a special case,
+> and **every future instance of this typing class is fixed in advance** —
+> which is the whole reason to prefer this option over (α).
+>
+> **Both engines**, since a hand-flush rule that differs between them is a
+> parity defect by construction. Scope note: this rules on the *interaction* of
+> two markings and moves no card's own type or retain flag except where they
+> co-occur.
+
+### 7-NEITHER — draft, lands only if the reply declines both
+
+> **[USER] RULING \<DATE\> — `AB-s2` DECLINED: the typing stands.**
+>
+> A card may be both unplayable and unflushable, and a hand jammed by ten
+> copies of one curse is the run the player drafted. Recorded plainly because
+> it is the cost of this answer: `stall_softlock_3` stays live and its S13 pin
+> stays `xfail(strict=True)` forever, which is a legitimate state but should be
+> a chosen one.
+
+**Landing sites, whichever form is selected, appended and dated:**
+1. `tier0/DECISIONS.md`, R114 — a dated annotation beneath the FLAG-4 section
+   (for (β), the law also takes its own numbered entry).
+2. `review/redteam/exploit-ledger.md`, X14 — leg (a)'s disposition line.
+3. `tier0/tests/test_s13_exploit_pins.py` — the X14 pin's docstring, which
+   currently records leg (a) as the undisposed leg its representative line runs.
+4. `docs/registry/user-queue.md` §1 — status only.

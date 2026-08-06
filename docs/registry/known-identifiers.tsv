@@ -64,12 +64,18 @@ token	gate	RA-G1
 token	gate	RA-G2
 token	gate	S4-G1
 token	gate	S4-G12
+token	gate	S4-G13
+token	gate	S4-G14
+token	gate	S4-G15
 token	gate	S4-G2
 token	gate	S4-G20
+token	gate	S4-G3
+token	gate	S4-G4
 token	gate	S4-G5
 token	gate	S4-G6
 token	gate	S4-G7
 token	gate	S4-G8
+token	gate	S4-G9
 token	gate	SS-G1
 token	gate	SS-G2
 token	gate	SS-G3
@@ -107,6 +113,10 @@ token	ruling	R109
 token	ruling	R110
 token	ruling	R111
 token	ruling	R112
+token	ruling	R113
+token	ruling	R114
+token	ruling	R115
+token	ruling	R116
 token	ruling	R13
 token	ruling	R39
 token	ruling	R40
@@ -420,6 +430,7 @@ file	docs/playtest4-triage-2026-08-04.md
 file	docs/probe-a-block-offset.md
 file	docs/probe-b-fanfare-residual.md
 file	docs/probe-d-registration-draft.md
+file	docs/probe-e-corpse-detonation-registration-draft.md
 file	docs/punch-off-crash-memo.md
 file	docs/reactions-corpus-2026-08-05.md
 file	docs/red-pen-2026-07-26.md
