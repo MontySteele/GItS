@@ -281,8 +281,25 @@ public sealed class WitchsFlamePower : PowerModel, ILocalizationProvider
             if (aura?.Element != Element.Pyro) continue;
 
             await PowerCmd.Remove(aura);
+            // NC-1 (R116, Errata Batch 2 item 3): companion/power damage
+            // scales with the player. The sim deals this through
+            // `deal_damage_to_enemy` (effects.py, `witchs_flame`), which is
+            // the full pipeline -- Strength and Weak x0.75 on the dealer,
+            // Vulnerable x1.5 on the target. This hit is Unpowered, so the
+            // game's native powers gate themselves out of it and the sim's
+            // modifiers have to be mirrored explicitly, exactly as
+            // `ElementalHit.Deal` does for the summon pulses. It cannot USE
+            // `ElementalHit.Deal`: the sim passes `element=None` here (the
+            // aura is consumed, not re-applied), so there is no element to
+            // hit with and no reaction to amplify. Truncate ONCE at the end,
+            // the sim's single `int()`.
+            //
+            // Note the register this ruling half-belongs to: power-sourced
+            // DAMAGE runs the pipeline (NC-1); power-sourced BLOCK stays raw
+            // (NC-11). Adjacent, opposite, and both are the base game's shape.
+            var dealt = SimDamagePipeline.DealerMods(Owner, Amount);
             await CreatureCmd.Damage(
-                choiceContext, target, (int)Amount,
+                choiceContext, target, (int)SimDamagePipeline.TargetMods(target, dealt),
                 ValueProp.Unpowered, dealer: null, cardSource: null);
             await KleeBurstResource.Gain(
                 choiceContext, Owner, CompanionConstants.WitchsFlameBurst,

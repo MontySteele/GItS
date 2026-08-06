@@ -1,0 +1,190 @@
+"""Errata Batch 2: the sim/C# parity vectors for the NON-CARD rulings.
+
+The sibling of `test_furina_fanfare_parity.py`, built the same way and for the
+same reason: there is no C# test project -- the mod DLL only executes inside
+the game -- so "run both implementations and diff" is not available. What IS
+available is to make the two implementations answer the same question sheet.
+
+  1. This module derives the answers from the SIM, which R116 made the design
+     of record for every ruling below, and writes them to
+     `docs/noncard-parity-vectors.json`.
+  2. `klee-mod/KleeCode/Diagnostics/NonCardParityVectors.cs` carries the same
+     tables as C# literals, and `KleeSelfCheck` runs the C# arithmetic against
+     them at boot.
+  3. `test_csharp_vectors_match_the_sim` (below) parses that C# file and
+     asserts its tables are the sim's.
+
+So the Python suite guarantees the two TABLES agree and the in-game self-check
+guarantees the C# CODE agrees with its table. Neither half is load-bearing
+alone; the composition is the parity claim.
+
+WHY THIS FILE IS SEPARATE FROM THE FANFARE ONE. That fixture is a Furina
+resource fixture and its C# mirror lives beside `FurinaResources`. These
+vectors are engine-wide -- a companion power's damage, a passive's block, a
+status timer -- and belong to no kit. Same idiom, different subject.
+
+THE RULINGS PINNED HERE, and the register they share:
+
+  * `NC-1` (R116, batch item 3) -- power-sourced DAMAGE runs the full damage
+    pipeline: Strength, then Weak x0.75, then Vulnerable x1.5.
+  * `NC-11` (R116, batch item 4) -- power-sourced BLOCK is RAW: exempt from
+    both Dexterity and Frail. Added by that item; named here because the two
+    are adjacent, opposite, and R116 recorded them together precisely because
+    they will otherwise be misremembered as one rule.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+from tier0 import constants as C
+from tier0.engine import powers
+from tier0.engine.state import Enemy, Player
+
+_VECTORS = (Path(__file__).resolve().parents[2]
+            / "docs" / "noncard-parity-vectors.json")
+_CSHARP = (Path(__file__).resolve().parents[2] / "klee-mod" / "KleeCode"
+           / "Diagnostics" / "NonCardParityVectors.cs")
+
+
+# --------------------------------------------------------------------------
+# NC-1 -- power-sourced damage through the full pipeline
+# --------------------------------------------------------------------------
+#
+# Chosen to hit every branch rather than to look plausible. `amount` 6 and 8
+# are Durin's Witch's Flame at base and upgraded (`WITCHS_FLAME` power stacks,
+# `docs/mondstadt-companions.yaml`) -- NC-1's own line evidence, which R116
+# ruled becomes the regression vector.
+#
+#   (0,0,0)  no modifier at all -- the identity row. If this one moves, the
+#            fix broke the base case rather than the modifiers.
+#   strength only     -- additive, and it lands BEFORE the multipliers.
+#   weak only         -- x0.75, floored.
+#   vulnerable only   -- x1.5 on the target, AFTER the dealer's half.
+#   weak + vulnerable -- 0.75 * 1.5 = 1.125, the row that catches a chain
+#                        applied in the wrong order or truncated twice.
+#   strength + both   -- all three at once, the shape a real buffed fight has.
+#   strength 5 on 6   -- 11 * 0.75 = 8.25 -> 8: the truncation is at the END,
+#                        so an implementation that truncated after the Weak
+#                        step and then multiplied by 1.5 answers differently.
+#   negative strength -- the clamp at zero. `powers._floor` exists because the
+#                        chain must not deliver negative damage.
+_DAMAGE_CASES = [
+    (6, 0, 0, 0),
+    (6, 3, 0, 0),
+    (6, 0, 1, 0),
+    (6, 0, 0, 1),
+    (6, 0, 1, 1),
+    (6, 3, 1, 1),
+    (6, 5, 1, 0),
+    (6, 5, 1, 1),
+    (8, 0, 0, 0),
+    (8, 4, 0, 1),
+    (8, 0, 1, 1),
+    (8, -20, 0, 0),
+    (1, 0, 1, 0),
+    (1, 0, 0, 1),
+    (3, 2, 1, 1),
+    (25, 7, 1, 1),
+]
+
+
+def _damage(amount: int, strength: int, weak: int, vulnerable: int) -> int:
+    """The sim's own funnels, in the sim's own order.
+
+    `effects.deal_damage_to_enemy` is `modify_damage_dealt` ->  reaction
+    amplification -> `modify_damage_taken` -> a single `int()`. Witch's Flame
+    passes `element=None` (the aura is consumed, not re-applied), so the
+    amplification step is the identity and these two funnels are the whole
+    pipeline for this family.
+    """
+    dealer = Player(character_id="klee", hp=70, max_hp=70)
+    dealer.powers["strength"] = strength
+    dealer.powers["weak"] = weak
+    target = Enemy(hp=999, max_hp=999, name="vector", intents=[])
+    target.powers["vulnerable"] = vulnerable
+    dmg = powers.modify_damage_dealt(dealer, amount)
+    dmg = powers.modify_damage_taken(target, dmg, attacker=dealer,
+                                     from_card=False)
+    return int(dmg)
+
+
+def _derive() -> dict:
+    return {
+        "_comment": (
+            "GENERATED by tier0/tests/test_noncard_parity_vectors.py from "
+            "the sim. Do not hand-edit; regenerate. The C# mirror is "
+            "klee-mod/KleeCode/Diagnostics/NonCardParityVectors.cs and is "
+            "checked against this."),
+        "weak_dealt_mult": C.WEAK_DEALT_MULT,
+        "vulnerable_taken_mult": C.VULNERABLE_TAKEN_MULT,
+        "power_damage": [
+            {"amount": a, "strength": s, "weak": w, "vulnerable": v,
+             "dealt": _damage(a, s, w, v)}
+            for a, s, w, v in _DAMAGE_CASES
+        ],
+    }
+
+
+# --------------------------------------------------------------------------
+# the tests
+# --------------------------------------------------------------------------
+
+def test_fixture_matches_the_sim():
+    """The committed fixture is what the sim says today."""
+    assert _VECTORS.exists(), f"missing fixture: {_VECTORS}"
+    on_disk = json.loads(_VECTORS.read_text(encoding="utf-8"))
+    assert on_disk == _derive(), (
+        "docs/noncard-parity-vectors.json is stale -- regenerate with "
+        "`python -m tier0.tests.test_noncard_parity_vectors`")
+
+
+def test_power_damage_actually_scales():
+    """NC-1's content, stated as behaviour rather than as a table.
+
+    A vector table that happened to be all-identity would pass every
+    comparison in this file and pin nothing, so the claim is asserted once
+    directly: the modifiers move the number, in the ruled directions.
+    """
+    base = _damage(6, 0, 0, 0)
+    assert base == 6
+    assert _damage(6, 3, 0, 0) > base          # Strength adds
+    assert _damage(6, 0, 1, 0) < base          # Weak cuts
+    assert _damage(6, 0, 0, 1) > base          # Vulnerable amplifies
+    # order: the dealer's half resolves before the target's, and the chain
+    # truncates once at the end. 11 * 0.75 * 1.5 = 12.375 -> 12; truncating
+    # after Weak would give 8 * 1.5 = 12 as well, so the discriminating row
+    # is the one where the intermediate is not itself near-integral.
+    assert _damage(6, 5, 1, 1) == int((6 + 5) * 0.75 * 1.5)
+    assert _damage(8, -20, 0, 0) == 0          # clamped, never negative
+
+
+_DMG_ROW = re.compile(
+    r"new\(\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,"
+    r"\s*(-?\d+)\s*\)")
+
+
+def test_csharp_vectors_match_the_sim():
+    """The C# mirror carries the same tables.
+
+    A source-text check, deliberately: the C# cannot be executed from here, so
+    the achievable guarantee is that the question sheet is identical on both
+    sides. KleeSelfCheck does the other half in-game.
+    """
+    assert _CSHARP.exists(), f"missing C# mirror: {_CSHARP}"
+    src = _CSHARP.read_text(encoding="utf-8")
+    derived = _derive()
+
+    block = src.split("PowerDamageVectors")[1].split("};")[0]
+    got = [tuple(int(g) for g in m) for m in _DMG_ROW.findall(block)]
+    want = [(r["amount"], r["strength"], r["weak"], r["vulnerable"],
+             r["dealt"]) for r in derived["power_damage"]]
+    assert got == want, f"C# power-damage vectors differ\n got={got}\nwant={want}"
+
+
+if __name__ == "__main__":
+    _VECTORS.write_text(
+        json.dumps(_derive(), indent=2) + "\n", encoding="utf-8")
+    print(f"wrote {_VECTORS}")

@@ -82,6 +82,15 @@ internal static class KleeSelfCheck
             {
                 Fail("R19", finding);
             }
+
+            // R116 (Errata Batch 2). The non-card parity vectors: the same
+            // two-halves construction, for rulings that belong to no kit --
+            // power-sourced damage runs the damage pipeline (NC-1), and
+            // power-sourced block is raw (NC-11).
+            foreach (var finding in NonCardParityVectors.Check())
+            {
+                Fail("R116", finding);
+            }
         }
         catch (Exception e)
         {
