@@ -7,8 +7,8 @@
 >
 > **Carried forward 2026-08-06 (Track M, wave 8) from
 > `docs/roster-anchor-v14-2026-08-05.md`'s banner, which governs this table
-> equally.** [USER], verbatim (2026-08-06, queue row 10.7): *"Let's yes to
-> both and see if it turns up on local."* — the **`RA-G1`/`RA-G2`
+> equally.** [USER] approved both halves of queue row 10.7 (2026-08-06;
+> verbatim words in this file's git history) — the **`RA-G1`/`RA-G2`
 > core-attainment columns are QUARANTINED** until the payoff-reach/
 > `RARITY_ODDS` registration is re-established.
 >
@@ -32,9 +32,9 @@
 >
 > ### ADDENDUM, 2026-08-06 — the `tto` column JOINS this quarantine (`Q18` / R121)
 >
-> **Same banner, extended; not a second banner.** [USER], verbatim (2026-08-06,
-> dispatch (e), `docs/dispatch-2026-08-06e-six-replies.md`): ***"agreed,
-> countersigned, tto quarantined."*** The rider the banner above left open —
+> **Same banner, extended; not a second banner.** [USER] countersigned `Q18`
+> and quarantined `tto` (2026-08-06, dispatch (e),
+> `docs/dispatch-2026-08-06e-six-replies.md`). The rider the banner above left open —
 > *"whether it joins the quarantine is [USER]'s to say at `Q18`"* — is
 > answered **YES**.
 >
@@ -53,8 +53,8 @@
 > blind-first (step 4). Nothing lifts earlier, and the lift is a paper act at
 > the queue row, not here. Ruling: `tier0/DECISIONS.md` **R121**.
 
-**Designation (R118, queue row 10.2, [USER] verbatim *"Yes, and rider
-yes."*):** the roster-anchor v14 n=3000 table **as re-produced under v6** is
+**Designation (R118, queue row 10.2, [USER] approved together with its
+rider):** the roster-anchor v14 n=3000 table **as re-produced under v6** is
 the quotable standing table — the designation names the recipe and its v6
 re-run, not the archived v5 read. This document is that re-run. All numbers
 below are **measured-under-v6 / DRAFTER 14**.
@@ -118,7 +118,7 @@ separated at this n.
 | real_silent | generic | 14 | 20260729 | 3000 | **1.70%** | [1.3, 2.2] | **60.90%** | [59.1, 62.6] | 62.47% | [60.7, 64.2] | 7.37 | 0.75 | 21.5 | 11.6 |
 
 † QUARANTINED — see the banner. ‡ ~~flagged-not-quarantined per the Q18
-rider~~ **QUARANTINED 2026-08-06 — the rider is answered *"tto quarantined"*
+rider~~ **QUARANTINED 2026-08-06 — the rider is answered YES
 (`Q18` / R121); see the banner's addendum.** Legend struck, not rewritten
 (R101b). § **The `ref_ironclad` row is the SHIELDED re-measurement, republished
 2026-08-06 — see "Republication note" below. It is the ONLY row this document
@@ -173,9 +173,9 @@ say; it is surfaced in the sweep doc and the hand-back.
 
 ## Republication note, 2026-08-06 — the `ref_ironclad` row is now the SHIELDED reading (R121 `Q19`, option (a))
 
-**Authority.** R121 `Q19`, [USER] verbatim: *"let's shield it, plus a note for
-any future sim work to take a look and figure out what went wrong (why did
-winrate go down, basically)."* The shield landed
+**Authority.** R121 `Q19`: [USER] directed the shield, plus a dated note
+asking future sim work to diagnose why the winrate went down. The shield
+landed
 (`tier05/draft.py::_core_advance_view`: `score_offer`'s +3.0 core-advance
 bonus is blind to the anchor arm's tags; `core_complete` and every other
 reader still sees them), and the `ref_ironclad` arm **alone** was re-measured
@@ -187,8 +187,8 @@ under this document's own recipe — `n=3000`, `seed 20260729`,
 stated tripwire was that a shielded reading which does not restore the
 archived ordering stops the track. It did not restore it — it **overshot**:
 13.83% is **z = +3.16 above the archived 11.13%**, past the sweep's 12-arm
-Bonferroni bar of 2.87. The track stopped and surfaced three options; [USER],
-verbatim (2026-08-06): ***"Yeah, I think A) is defensible here."*** Option (a)
+Bonferroni bar of 2.87. The track stopped and surfaced three options; [USER]
+called option (a) defensible and released it (2026-08-06). Option (a)
 was *land the shield as-is and republish with a dated note naming the
 confound.* This is that note. The addendum on R121 records the discharge.
 

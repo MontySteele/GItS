@@ -22,9 +22,9 @@ a defect that had already shipped.
 
   LAYER 3 -- THE EMITTED C#. Layer 2 asks the manifest and believes it. The
   manifest is written by the generator, so layer 2 believes the generator's
-  own account of what the generator did -- and SYS-8 is what that costs: the
-  generator dropped a delta, emitted an empty OnUpgrade whose comment says
-  "Flagged in manifest", and then did not flag it in the manifest. Layer 3
+  own account of what the generator did -- and one shipped bug is what that
+  costs: a generator that drops a delta, emits an empty OnUpgrade whose
+  comment says "Flagged in manifest", and never flags the manifest. Layer 3
   reads the shipped .cs instead and needs nothing to be true about the
   manifest for its finding to fire.
 
@@ -302,12 +302,9 @@ def main() -> int:
     # actually wrote", which is true and is exactly the problem: the component
     # that writes the manifest is the component that decides whether to emit an
     # upgrade, so one bug in it produces a matching pair of lies and layer 2
-    # prints green. That bug was real (SYS-8). The generator dropped a delta,
-    # emitted `OnUpgrade() { }` with the comment "R24: NO upgrade path -- None.
-    # Flagged in manifest.", and did not add the card to `no_upgrade_path`.
-    # `blocking_notes` shipped without its ratified `bonus_slope: +1` and every
-    # check in this file passed it. A second witness has to be the artifact the
-    # player actually runs: the .cs.
+    # prints green (that exact shape has shipped: an empty OnUpgrade carrying
+    # the no-path marker, unregistered in the manifest). A second witness has
+    # to be the artifact the player actually runs: the .cs.
     #
     # EMPTY means NO STATEMENTS -- whitespace and comments only, decided on the
     # masked body so a `{...}` inside a comment cannot be mistaken for code.

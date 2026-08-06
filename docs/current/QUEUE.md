@@ -112,6 +112,8 @@ behavior / money call before any code moves.
 | kokomi-workshop `X9` | Kokomi charge bank ("probably too strong, parse carefully") — the next kit workshop | dockets/kokomi-workshop |
 | `shared_billing` | The only Common with a cost upgrade (1→0), which the delta-grammar convention forbids — needs a [USER] call (sheet and C# agree; the conflict is with the ruled convention) | triage-memo |
 | Template heal/elite economy | Node composition and pathing-agency — a structural design question | tier05-perf §1.5.2(2) |
+| `BFF-dedupe` | `best_friends_forever` replay pool identity: the sim records instance ids (`foo` and `foo+` are distinct entries, both replay), C# dedupes base ids (one replay). R114/FLAG-2 rules what state a copy carries, not whether an upgraded companion is the same pool entry as its base — no ruling covers it | PR #13 review; split from BACKLOG `BFF-copy` |
+| `DOCS-ref` | CLAUDE.md's "closed items leave HEAD, no supersession banners" norm contradicts the kept frozen records: `backlog/missed-requirements.md` and `playtest/open-playtest-items.md` carry "RETIRED AS A REGISTER" banners in HEAD. Either the records move to tag-only retrieval (note: live QUEUE rows `M1`–`M3`, `M5`, `M10`–`M11`, `S4-G18` cite them as provenance) or the norm gains a "Lifecycle: REFERENCE" carve-out. Rides with it: seven remaining [USER]-verbatim quotes across six docs/current files (the roster-anchor's are already paraphrased per the norm) — sweep them into commit messages, or let the carve-out cover them | PR #12/#13 review |
 
 ---
 
