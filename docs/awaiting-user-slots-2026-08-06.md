@@ -1,6 +1,15 @@
 # Prepared landing slots — AWAITING [USER], 2026-08-06
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
+> **FROZEN 2026-08-06 (Clear the Stage, Track R-C, plan item P-1; excision-log
+> row E-2).** All seven slots are ANSWERED and LANDED — slots 1/2/3 (Track Y,
+> transcribed at `docs/sitting-record-predraft-2026-08-06.md` §7), slot 5
+> (`AC-2` / R115), slots 4/6/7 (Q7/Q9/Q10, R118) — and the wave-8 banner below
+> records *"No slot in this file is still AWAITING."* The diet's own §15.2 row
+> kept this file LIVING only *"until a future diet freezes it"*; this is that
+> freeze. **Nothing in the body was cut** — the file freezes verbatim as the
+> slot record. Status flip only; the file does not move.
 
 > **KEPT LIVING BY THE DOCS DIET, 2026-08-06 (Track Z / Z-3), and why.** Slots
 > **4, 6 and 7** are still AWAITING, and each one holds its landing text
