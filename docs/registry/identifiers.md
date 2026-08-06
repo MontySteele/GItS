@@ -224,7 +224,7 @@ klee-mod's R73–R80 unchanged. This table is the resolver:
 | R39–R72 | `tier0/DECISIONS-archive-R39-R99.md`, `## R<n>` headings | dated, resolvable (D2 rides between R65/R66) |
 | R73–R80 | `klee-mod/DECISIONS.md`, Neap Tide v2.1 | dated, resolvable — **not split**, per the plan of record |
 | R81–R99 | `tier0/DECISIONS-archive-R39-R99.md` | dated, resolvable (D3–D5 ride between R72/R81) |
-| R100–R120 | `tier0/DECISIONS.md` (live) | dated, resolvable. **Current maximum: R120** (2026-08-06). The live file also carries the GENERATED current-law digest (`tools/gen_decisions_digest.py`) — never hand-edit it. |
+| R100–R121 | `tier0/DECISIONS.md` (live) | dated, resolvable. **Current maximum: ~~R120~~ R121** (2026-08-06). The live file also carries the GENERATED current-law digest (`tools/gen_decisions_digest.py`) — never hand-edit it. |
 
 **The Cold Reading batch (2026-08-06) minted four**, listed so they resolve
 without opening the ledger: **`R113`** the C2 escrow released and its four
@@ -243,6 +243,13 @@ and the "Clear the Stage" refactor charter authorized in full; **`R120`**
 dispatch (d)'s four replies (the Klee "Catalytic Converter" rename, 10.1's
 `grand_gala` art release, 10.3 staged as D15 pending 10.7, probe (d)
 countersigned).
+
+**The 2026-08-06(e) dispatch minted one**: **`R121`** — six replies execute
+(`Q18` the payoff-reach re-registration countersigned with `tto` quarantined
+and a six-step order that does not reorder; `Q19` SHIELD on the anchor's tags
+plus the `EB-46` diagnosis row; `Q20` MOVE-WITH-RESOLVER for the 45
+ledger-cited files; and the sidecar's last three DOUBT rows resolved — `R59`
+`SUPERSEDED-BY:R116`, `R103` `OPERATIVE-NARROWED`, `R107` `AMENDED-BY:R118`).
 
 Sub-clause citation shape is `R<n>/<clause>` (e.g. `R90/1c`, `R91/2b`) or
 `R<n>(<letter>)` (e.g. `R107(a)`). Clause letters belong to their own ruling:
@@ -535,9 +542,9 @@ lifecycle headers alone, `docs/**` `.md` + `.yaml`:*
 | Status | Headered files | + index-only (§15.5) | Total |
 |---|---|---|---|
 | LIVING | 52 | 11 | **63** |
-| REFERENCE | ~~209~~ **211** *(incl. `registry/stage-clear-digest-2026-08-06.md`, new that wave; +2 from the 2026-08-06 status pass: `dispatch-2026-08-06-status-pass-order.md` and `registry/status-pass-digest-2026-08-06.md`)* | 6 | ~~**215**~~ **217** |
+| REFERENCE | ~~209~~ ~~**211**~~ **213** *(incl. `registry/stage-clear-digest-2026-08-06.md`, new that wave; +2 from the 2026-08-06 status pass: `dispatch-2026-08-06-status-pass-order.md` and `registry/status-pass-digest-2026-08-06.md`; +2 from the 2026-08-06(e) dispatch / R121: `dispatch-2026-08-06e-six-replies.md`, and `payoff-reach-reregistration-draft-2026-08-06.md`, which gained a status for the first time when `Q18` countersigned it)* | 6 | ~~**215**~~ ~~**217**~~ **219** |
 | ARCHIVED | 66 | — | **66** |
-| **carrying a status** | ~~**327**~~ **329** | **17** | ~~**344**~~ **346** |
+| **carrying a status** | ~~**327**~~ ~~**329**~~ **331** | **17** | ~~**344**~~ ~~**346**~~ **348** |
 
 The running figures in the table above (60/206/332) had drifted: the wave's
 own new REFERENCE records (the R117/R118/R120 dispatches, the probe-d/e
@@ -547,8 +554,11 @@ This recount is the mechanical baseline; future edits update it, not the
 older figures. **Two files carry no status anywhere** and are named as
 drift, not silently absorbed: `docs/animation-spike-skeleton2d-kokomi-2026-08-06.md`
 (choosing its status is `EB-44`'s judgment) and
-`docs/payoff-reach-reregistration-draft-2026-08-06.md` (minted by Track S2;
-its status follows the `Q18` countersign). §15.5's own headline says 18
+~~`docs/payoff-reach-reregistration-draft-2026-08-06.md` (minted by Track S2;
+its status follows the `Q18` countersign)~~ **— the second is RESOLVED
+2026-08-06: `Q18` countersigned (R121), the document converted from DRAFT to
+the sprint's registration in place, and its banner now declares **REFERENCE**.
+One file, not two, still carries no status.** §15.5's own headline says 18
 files but lists 17 — one more small drift, recorded here rather than
 re-derived.
 
@@ -598,7 +608,7 @@ LIVING one, not in the record.
 | Countersign packages and gate records | 6 | `axis-validity-countersign-2026-08-04.md`, `understudy-countersign-2026-08-04.md`, `track-b-validation-gate-countersign-2026-08-04.md`, `a2-gate-ratification-2026-07-27.md`, `handback-note-2026-08-04.md`, `sitting-record-predraft-2026-08-06.md` |
 | Playtest records and triage | 6 | `playtest2-triage-*`, `playtest3-notes-*`, `playtest4-notes-*`, `playtest4-triage-*`, `g12-review-*`, `punch-off-crash-memo.md` |
 | Probe registrations (unsigned, awaiting countersign) | 4 | `probe-a-block-offset.md`, `probe-b-fanfare-residual.md`, `probe-d-registration-draft.md`, `probe-e-corpse-detonation-registration-draft.md` — **probes (d) and (e) COUNTERSIGNED 2026-08-06 (10.13 / R120 and Q11 / R118); ~~both runs are owed, Track M~~ both RUN AND REPORTED 2026-08-06 (Track M, wave 8): `probe-d-aria-block.md` (divergence closes, family B) and `probe-e-corpse-detonation.md` (no detonation on the killing blow, sim and game agree; `S4-G15` closed)** |
-| [USER] dispatch records (wave 8) | ~~3~~ **4** | `dispatch-2026-08-06-q13-q14-q15.md`, `dispatch-2026-08-06b-eleven-replies.md`, `dispatch-2026-08-06d-four-replies.md` — the verbatim ruling dispatches R117/R118/R120 execute; `dispatch-2026-08-06-status-pass-order.md` — the status-pass order, which carries no ruling of its own (it directs a Class-P pass; digest: `registry/status-pass-digest-2026-08-06.md`) |
+| [USER] dispatch records (wave 8) | ~~3~~ ~~**4**~~ **5** | `dispatch-2026-08-06-q13-q14-q15.md`, `dispatch-2026-08-06b-eleven-replies.md`, `dispatch-2026-08-06d-four-replies.md`, `dispatch-2026-08-06e-six-replies.md` — the verbatim ruling dispatches R117/R118/R120/**R121** execute; `dispatch-2026-08-06-status-pass-order.md` — the status-pass order, which carries no ruling of its own (it directs a Class-P pass; digest: `registry/status-pass-digest-2026-08-06.md`). *(+1 2026-08-06: the (e) dispatch, six replies.)* |
 | Research harvests and audits | 12 | `act2-act3-roster-research.md`, `sts2-map-and-events-research.md`, `sts2-events-harvest.txt`, `companion-value-vs-colorless-study.md`, `lore-fidelity-audit-2026-08-05.md`, `instrument-redteam-2026-08-05.md`, `reactions-corpus-*`, `s7-*`, `zhongli-dossier-*`, `slot5-candidates-*` |
 | Retired open-item registers (Z-3) | 5 | `backlog-2026-07-29.md`, `open-playtest-items.md`, `missed-requirements.md`, `sitting-prep-2026-08-05.md`, `surplus-week-manifest-2026-08-05.md` |
 | Adopted proposals, retained | 3 | `pending/` |

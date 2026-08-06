@@ -17,7 +17,10 @@ digest restates rather than re-derives: OPERATIVE is an ABSENCE claim -- no
 citable superseder was found, search scope recorded in the row -- a
 moved status (`AMENDED-BY` / `SUPERSEDED-BY` / `DISCHARGED-BY:R<n>`) is
 recorded only on an explicit citation quoted in the row, and DOUBT means
-supersession is arguable and is a live [USER] queue row. The rendered header
+supersession is arguable and is a live [USER] queue row. `OPERATIVE-NARROWED`
+(vocabulary added 2026-08-06 by R121) is an OPERATIVE row whose operating scope
+[USER] stated explicitly -- still an absence claim, so it is counted beside
+OPERATIVE and never among the moved rows. The rendered header
 below counts the three categories mechanically, so it cannot drift from the
 file it reads.
 
@@ -150,17 +153,23 @@ def render() -> str:
         raise SystemExit("gen_decisions_digest: " + "; ".join(problems))
 
     operative = sum(1 for s in statuses.values() if s == "OPERATIVE")
+    narrowed = sum(1 for s in statuses.values() if s == "OPERATIVE-NARROWED")
     doubt = sum(1 for s in statuses.values() if s == "DOUBT")
     unreviewed = sum(1 for s in statuses.values() if s == "UNREVIEWED")
-    moved = len(statuses) - operative - doubt - unreviewed
+    moved = len(statuses) - operative - narrowed - doubt - unreviewed
     unread = (f", {unreviewed} UNREVIEWED (not yet read by any pass)"
               if unreviewed else "")
+    # OPERATIVE-NARROWED (R121) is an OPERATIVE row whose operating scope
+    # [USER] stated. Nothing is superseded/amended/discharged, so it is
+    # counted beside OPERATIVE and never among the moved rows.
+    narrow = (f", {narrowed} OPERATIVE-NARROWED (operative, with the scope "
+              "[USER] stated on the row)" if narrowed else "")
 
     lines = [
         BEGIN,
         "",
         f"**{len(statuses)} rulings across the volumes — "
-        f"{operative} OPERATIVE, {moved} moved by an explicit citation, "
+        f"{operative} OPERATIVE{narrow}, {moved} moved by an explicit citation, "
         f"{doubt} DOUBT{unread}.** **OPERATIVE is an absence claim** — no "
         "citable superseder was found, with the search scope recorded in the "
         "row — and not a finding that a ruling is beyond re-opening. A moved "

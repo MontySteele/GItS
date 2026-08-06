@@ -46,8 +46,8 @@ def test_check_mode_is_green():
 def test_sidecar_covers_exactly_the_volumized_range():
     mod = _module()
     rows = mod._sidecar()
-    assert sorted(rows) == list(range(39, 121)), (
-        "sidecar must hold exactly R39-R120: the volumized range plus the "
+    assert sorted(rows) == list(range(39, 122)), (
+        "sidecar must hold exactly R39-R121: the volumized range plus the "
         "live file's rulings, nothing invented below R39")
 
 
@@ -70,9 +70,10 @@ def test_the_header_counts_the_categories_rather_than_hiding_them():
     rows = mod._sidecar()
     header = block.split("\n\n")[1]
     operative = sum(1 for s in rows.values() if s == "OPERATIVE")
+    narrowed = sum(1 for s in rows.values() if s == "OPERATIVE-NARROWED")
     doubt = sum(1 for s in rows.values() if s == "DOUBT")
     unreviewed = sum(1 for s in rows.values() if s == "UNREVIEWED")
-    moved = len(rows) - operative - doubt - unreviewed
+    moved = len(rows) - operative - narrowed - doubt - unreviewed
     assert f"{len(rows)} rulings" in header
     assert f"{operative} OPERATIVE" in header
     assert f"{moved} moved" in header
@@ -80,6 +81,10 @@ def test_the_header_counts_the_categories_rather_than_hiding_them():
     # The original honesty clause, still binding: an unread row must be
     # visible in the headline the moment one exists.
     assert (f"{unreviewed} UNREVIEWED" in header) == bool(unreviewed)
+    # Same clause, same shape, for the OPERATIVE-NARROWED word R121 added:
+    # a scoped-operative row is counted beside OPERATIVE, never among the
+    # moved rows, and it is visible in the headline whenever one exists.
+    assert (f"{narrowed} OPERATIVE-NARROWED" in header) == bool(narrowed)
 
 
 def test_a_missing_marker_pair_is_loud_not_silent():
