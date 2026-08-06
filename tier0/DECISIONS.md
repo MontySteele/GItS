@@ -3011,10 +3011,27 @@ reverse). Record in DECISIONS.md."), corroborated by the comment at
 **Ruled (as reconstructed).** (1) **Slot 4 is Zhongli.** This supersedes
 roster amendment A1's open Itto-vs-Zhongli item, which is closed by this
 and by no later doc. (2) **Itto is therefore eligible for the Inazuma
-companion pool**, by the reserved-character pattern read in reverse: a
+companion pool**, ~~by the reserved-character pattern read in reverse: a
 character reserved for a playable slot may not appear as a companion, so
 a character who LOSES the slot is released to the companion pool.
-Neuvillette is the forward instance of the same rule.
+Neuvillette is the forward instance of the same rule.~~
+
+> **AMENDED 2026-08-06 (R118, §5 row 10.8) — the exclusivity clause above is
+> STRUCK.** [USER], verbatim: *"This is a prior ruling that seems to have
+> gotten twisted. A character may be playable and still have a companion
+> card."* Playability and companion-card existence are compatible, full stop.
+> Itto's eligibility itself stands (and was in any case settled directly by
+> R108's addendum clause); what is struck is the justification's exclusivity
+> rule — "reserved for a playable slot may not appear as a companion" — and
+> its read-in-reverse "release" mechanism. Consequences, recorded per the
+> dispatch:
+> 1. **The Neuvillette contradiction dissolves; R52 needs no amendment.**
+> 2. **The four Fontaine Burst-name reservations stop being rule-enforced** —
+>    if a future card wants one of those names, that is a taste question then,
+>    not a rule violation now.
+> 3. **R108's Itto addendum stands unchanged**; its "released to the companion
+>    pool" justification is superseded by the cleaner principle (release was
+>    never needed). Dated note on the addendum, nothing re-decided.
 
 **Built, unrecorded.** The consequence shipped -- Itto is authored in
 `docs/inazuma-companions.yaml` -- while the record was not, which is the
@@ -3147,6 +3164,35 @@ turn against demanded per turn, which is the instrument that can see "too slow
 early, too small late". **P1's ledger line reads: "prediction aimed at the
 wrong instrument; withdrawn and re-registered, not failed."** It is not graded
 as a failed prediction and it is not quietly deleted either.
+
+> **[USER] RULING 2026-08-06 — `B-G1` is NARROWED to the Fanfare axis; the other
+> six axes close permanently.** *(Q7, verbatim reply "Yes."; the slot-4 YES form
+> of `docs/awaiting-user-slots-2026-08-06.md`, landed verbatim per R118.)*
+>
+> Six of the seven axis scorecards are **CLOSED as reportable-only,
+> permanently**. `DEC-D3` clause 3's *"reportable, not load-bearing"* stops
+> being a temporary posture awaiting disposition and becomes the **final**
+> disposition for those six: their numbers may be published, cited and read as
+> description, and they may never be used as an acceptance target, a gate, or a
+> justification for moving a value. No number is retired, deleted or restated by
+> this closure — the instrument keeps producing them and readers keep reading
+> them; what ends is the expectation that a future sitting will promote them.
+>
+> **`B-G1` now asks exactly one question:** the disposition of the **Fanfare
+> axis** — the axis carrying the Fanfare P1 that `R90/1b` withdrew from Track A
+> and re-registered here. That question stays OPEN and is unchanged in
+> substance; only its scope shrinks.
+>
+> **The `R107/F1` fence re-points to the narrowed form.** Backlog items 1–3 and
+> the fanfare STOP were fenced behind `B-G1` as a seven-axis gate; they are now
+> fenced behind `B-G1` as the Fanfare-axis gate. Nothing is unfenced by this
+> ruling — the condition is the same condition, stated at the width that
+> actually binds.
+>
+> **What this does NOT do.** It does not grade the Fanfare axis, does not
+> ratify any axis band (the charter's standing non-goal), does not move a
+> balance value, and does not discharge `S4-G5`. It does not touch `A-G1`,
+> already discharged, or `AV-G2`, already countersigned.
 
 **1c -- the floors are re-derived from canon PACKAGES.** The first pass
 compared a GItS archetype (11-32 cards, all one plan) against a whole canon
@@ -3938,6 +3984,13 @@ occupied.
 >
 > Cross-noted, dated, at `docs/slot5-candidates-2026-08-05.md` §2.3 and §2.5.
 
+> **DATED NOTE, 2026-08-06 (R118, §5 row 10.8).** The addendum above stands
+> unchanged. Its "released to the companion pool" justification — inherited
+> from R88's reserved-character rule read in reverse — is **superseded by the
+> cleaner principle**: [USER], verbatim, *"A character may be playable and
+> still have a companion card."* Release was never needed. Nothing is
+> re-decided by this note; Itto's registration is COMPANION CARD as ruled.
+
 ## R109 -- S13 yields two rarity laws, each arriving with a mechanical audit attached (2026-08-06)
 
 Sitting of 2026-08-06, section 3, families X2 and X7. Source:
@@ -4365,6 +4418,21 @@ staged rather than landed because it is a **mod behaviour change** that has not
 been explicitly blessed. Full draft text: `docs/awaiting-user-slots-2026-08-06.md`
 slot 6.
 
+> **[USER] RULING 2026-08-06 — `AB-s1` APPROVED: the mod's copy pool excludes kit
+> cards, matching the sheet and the sim.** *(Q9, verbatim reply "Yes."; the
+> slot-6 YES form, landed verbatim per R118. The mod code change itself is Track
+> V's this wave; this annotation is the ruling of record.)*
+>
+> C#'s Encore Performance adopts the sim's exclusion: **kit cards are not legal
+> copy targets.** The sheet was always the specification here and both other
+> surfaces already implement it; this closes the third. The undiscardable
+> copied kit Burst that clogs a hand slot in game stops being reachable.
+>
+> **Class: this is a MOD BEHAVIOUR CHANGE, recorded as one and not as a parity
+> repair.** It ships with the next errata batch that touches C#, with parity
+> vectors updated; it does not ride the paper. No sim behaviour moves, because
+> the sim was already correct.
+
 ### FLAG-4 (`S13-X14`) -- leg (a) clarified with its root staged; leg (c) RULED intended.
 
 **Leg (a) -- clarification recorded, root staged.** [USER]'s fallback
@@ -4381,6 +4449,25 @@ landed: **(α)** drop `retain` from the curse -- narrow, one card, a data repair
 on the StS precedent -- broad, a law, and it would close every future instance
 of this typing class at once. Full text:
 `docs/awaiting-user-slots-2026-08-06.md` slot 7.
+
+> **[USER] RULING 2026-08-06 — `AB-s2` DECLINED: the typing stands.** *(Q10,
+> verbatim reply "Neither - leave it alone."; the slot-7 NEITHER form, landed
+> verbatim per R118.)*
+>
+> A card may be both unplayable and unflushable, and a hand jammed by ten
+> copies of one curse is the run the player drafted. Recorded plainly because
+> it is the cost of this answer: `stall_softlock_3` stays live and its S13 pin
+> stays `xfail(strict=True)` forever, which is a legitimate state but should be
+> a chosen one.
+>
+> **The reason, ecosystem fact, verbatim:** *"I recognize that card (it's from
+> an event) - it's not possible to duplicate in normal play, so this whole
+> concern is a false positive."* Consequences per R118: `curse_poor_sleep`
+> keeps both typings; a single stuck copy is accepted behaviour; the multi-copy
+> jam is annotated a false positive at `S13-X14` in the exploit ledger; **BETA
+> was declined, not deferred** — a future status+retain card is a new row, not
+> a re-ask. The surface-only verification of X14's acquisition vector is
+> delegated to Track V.
 
 **Leg (c) -- RULED, INTENDED. Verbatim: *"You deck out... don't do that."***
 
@@ -4580,6 +4667,18 @@ decided by the batch that lands it, not by the paper.
 
 **Implementation: Errata Batch 2 item 5.** Both engines.
 
+> **REQUIRED ANNOTATION, 2026-08-06 (R117, Q13).** This ruling's stated
+> consequence — Kaiser Crab's second claw remaining freezable ("Kaiser Crab's
+> boss-room adds become freezable in game", above) — is **overridden
+> deliberately** by [USER]'s α selection on Q13, verbatim *"I'd say A"*,
+> 2026-08-06. Under α (minions only: a boss-room creature carrying the game's
+> `MinionPower` gets Frozen, every other creature gets the Vulnerable
+> substitution) the second claw takes **Vulnerable, not Frozen**. This is a
+> chosen reading, not a missed example: chat flagged the contradiction to
+> [USER] before the dispatch was drafted, and the α selection stands with that
+> consequence stated. No re-litigation. Mirrored on the `NC-7` execution note
+> in `review/parity-sweep/noncard-triage-memo.md`.
+
 ### NC-10 -- the shop slots are specified, and both engines are defective against the spec
 
 **Verbatim: *"Slot 1 should be 'Uncommon or higher from the home region'; slot
@@ -4685,3 +4784,280 @@ R114) and the FLAG-3 / `X5` pin conversion (landed, R114).
 standing register enters the constitution's orbit. **No engine code moves under
 this entry**, and the one implementation question with a balance shape
 (`NC-10`'s renormalization) is surfaced rather than answered.
+
+## R117 -- Q13/Q14/Q15 are ruled in three words, and the shop-odds rider is minted as Q16 (2026-08-06)
+
+Wave-8 dispatch of 2026-08-06, landed at
+`docs/dispatch-2026-08-06-q13-q14-q15.md` (REFERENCE). **Verbatim, [USER],
+2026-08-06:**
+
+> ***"14) Yes · 13) I'd say A · 15) Widen"***
+
+**Q14 -- YES: the world stamp goes up.** `CONSTANTS_VERSION` **5 -> 6**.
+Archive banners go on every published number below the stamp, **where it is
+published** -- nothing rewritten (R101b). Affected surfaces per the batch's own
+naming: all pre-batch combat numbers (Frozen rules changed) and the tier-0.5
+shop maths in both engines (`NC-10`). **Execution is code-side and is Track
+V's this wave**; this entry is the ruling of record.
+
+**Q13 -- α (minions only).** The stopped mod half of `NC-7` completes: in boss
+rooms, a creature carrying the game's `MinionPower` gets Frozen; every other
+creature gets the Vulnerable substitution. The sim predicate **aligns to α
+semantics** (parity, not design) and a parity vector is added for a boss room
+with (a) a minion and (b) a non-minion helper. **The required annotation is
+placed on R116's NC-7 section and mirrored on the execution note in
+`review/parity-sweep/noncard-triage-memo.md`:** R116's stated consequence --
+Kaiser Crab's second claw remaining freezable -- is **overridden deliberately**
+by the α selection; under α the second claw takes Vulnerable. A chosen
+reading, not a missed example; chat flagged the contradiction before the
+dispatch was drafted; no re-litigation. **Code execution is Track V's.**
+
+**Q15 -- WIDEN.** The citation lint's sweep extends to `tools/*.py`, and the
+three occurrences in `tools/lint_role_tempo_coverage.py` are repaired to
+satisfy it. Blast radius per the queue row: comments and docstrings only -- no
+behaviour, no number, no test. **Lint-scope and repair execution is Track
+V's** (widening a lint's scope is a code change; the paper track does not
+touch it).
+
+**The Q14 rider is NOT answered by "Yes" and is minted as `Q16`** in
+`docs/registry/user-queue.md`, exactly as the dispatch specifies: inside the
+shop's new Uncommon-or-higher pool, do the existing
+`SHOP_COMPANION_RARITY_ODDS` simply renormalize over >=Uncommon (CONDITION),
+or does [USER] state a fresh split (FRESH-SPLIT)? Not to be built against
+until answered; chat's recommendation (CONDITION, the one-variable reading) is
+carried into the row. *Same-wave note: Q16 was answered by the second
+dispatch's "Condition." and is struck in the same commit that minted it --
+both kept visible so the record shows the rider was asked and answered.*
+
+**Ordering and the measurement window, as the dispatch states it:** all three
+items land inside the same v6 window, before any re-measurement. The α scope
+change is itself a Frozen-rules change, so v6 means "Frozen unified + α
+boss-room scope + shop-slot spec" as one batch boundary. No v6 re-baseline
+sweep and no new quotable combat or shop number until Q14's stamp and Q13's α
+are both green. Q15 is orthogonal and may land in any order.
+
+**Class: RULING** -- [USER] 2026-08-06, verbatim above. Paper lands here; code
+is Track V's; the v6 re-baseline is Track M's.
+
+## R118 -- The sitting batch 2026-08-06(b): eleven replies execute, and R88 loses its twisted clause (2026-08-06)
+
+Wave-8 dispatch of 2026-08-06, landed at
+`docs/dispatch-2026-08-06b-eleven-replies.md` (REFERENCE). Replies are
+[USER]'s, verbatim; routing is this entry's. Zero new design authority beyond
+the answers.
+
+### §1 one-worders
+
+**Q7 -- Verbatim: *"Yes."*** The drafted YES form (slot 4 of
+`docs/awaiting-user-slots-2026-08-06.md`) lands verbatim at its three named
+sites (R90 clause 1b annotation; `docs/axis-validity-session-charter.md` §7;
+queue row `S4-G5`). Six axes close permanently as informational -- numbers
+stay publishable as description, never acceptance targets; the Fanfare axis
+survives as the whole of `S4-G5`/`B-G1`; the R107/F1 fence re-points to the
+narrowed gate. **Unfenced by this stroke:** Furina backlog items 1-3 and the
+fanfare STOP (`S4-G7`).
+
+**Q11 -- Verbatim: *"Countersign."*** Probe E (corpse detonation, scripted)
+converts from paper to work under its own registration
+(`docs/probe-e-corpse-detonation-registration-draft.md`): two tells,
+negative-control arm, nine confounders, cost ceiling, stop-and-re-register
+tripwire. The table check survives as fallback until the probe reports;
+`S4-G15` remains open until either answers. **The run itself is Track M's**
+and, per the wave's sequencing note, happens after the v6 code lands.
+
+**Q9 -- Verbatim: *"Yes."*** The mod-side kit-exclusion fix for Encore
+Performance's copy pool lands; game matches sheet and sim. Blast radius: one
+card's copy pool; no sim number, no test flip expected -- if one flips, stop
+and surface. The slot-6 YES form lands at its named sites; **the mod code
+change itself is Track V's.**
+
+**Q10 -- Verbatim: *"Neither - leave it alone."* Rationale, verbatim:** *"I
+recognize that card (it's from an event) - it's not possible to duplicate in
+normal play, so this whole concern is a false positive."* The slot-7 NEITHER
+form lands with the ecosystem fact attached as the reason. Consequences:
+`curse_poor_sleep` keeps both typings and a single stuck copy is accepted
+behaviour; `S13-X14` is annotated in the exploit ledger (multi-copy jam is a
+false positive per the ecosystem ruling, quoted verbatim); **BETA
+(status-beats-retain law) was declined, not deferred** -- a future status+retain
+card is a new row, not a re-ask. **Verification task, surface-only, delegated
+to Track V:** check what X14's recipe actually uses to acquire multiple
+copies; if it reaches ten copies through normal-play acquisition, that
+contradicts the false-positive premise -- come back with the finding as a
+question, never bury or re-litigate.
+
+**Q6 -- Verbatim: *"Repair."*** Drop the `+` from
+`furina_salon_3_gala_bow_storm`'s upgraded set; re-verify at the card's
+now-printed 0 cost; the pin returns from SKIP to a live verdict. X6's
+mechanism remains R111's watch item. **Editing the exploit corpus and the pin
+is instrument/code work: Track V's.**
+
+**Q5 -- Verbatim: *"Playtest."*** The default stands confirmed: `OT-1` on the
+next Kokomi protocol playtest is the fork's venue and its only accepted input.
+The POOL-REWORK alternative is struck with the reply attached, in the queue
+and at the fork block's records (`klee-mod/DECISIONS.md`).
+
+**Q16 -- Verbatim: *"Condition."*** `SHOP_COMPANION_RARITY_ODDS` renormalizes
+over the >=Uncommon pool; both engines; no new numbers stated. Lands inside
+the v6 window with the rest of `NC-10`'s completion, before the re-baseline
+sweep. **Code is Track V's.**
+
+**Animation -- Verbatim: *"Let's do FREE-SPIKE and reconsider if the results
+disappoint."*** The Path B (Skeleton2D) spike becomes a normal Code sprint:
+Kokomi pilot, the computed-weights-from-layer-masks idea attached, Path C
+layered remains the shipped fallback throughout. **The reconsider trigger,
+recorded verbatim as the dispatch requires: disappointing spike results
+re-open the Spine licence question ($379 Pro; Essential cannot author meshes)
+without a new sitting.** The "animation path session" leaves the design queue;
+the sprint is docketed (`docs/dockets/engineering-backlog.md`).
+
+### §2 short picks
+
+**10.2 -- Verbatim: *"Yes, and rider yes."*** The roster-anchor v14 n=3000
+table is designated the quotable standing table -- **as re-produced under
+v6**: the designation names the recipe and its v6 re-run, not the archived v5
+read. Rider: `ref_ironclad`'s `archetype_package` gains `Card.archetypes`
+tags. [USER]'s stated reason, on record: the tags are needed so the
+instrumentation reads the anchor properly -- confirmed correct; without them
+the core-attainment/payoff-reach columns cannot see the anchor at all. **The
+tag change is Track V's; the v6 re-run is Track M's.**
+
+**10.7 -- Verbatim: *"Let's yes to both and see if it turns up on local."***
+(a) Search-and-repair authorized for the payoff-reach/`RARITY_ODDS`
+registration -- sweep local worktrees first per [USER]'s note, then all
+branches again (**in flight this wave as Track S2**). (b) `RA-G1`/`RA-G2`
+core-attainment columns are **QUARANTINED** until the document is found or
+re-established. If truly lost: re-register **before** any new number is read,
+never retro-fit a registration to existing reads.
+
+**10.8 -- ruled by principle. Verbatim: *"This is a prior ruling that seems to
+have gotten twisted. A character may be playable and still have a companion
+card."*** Executed: **R88 is amended** -- the exclusivity clause ("reserved
+for a playable slot may not appear as a companion") is struck at R88 itself,
+strikethrough + dated banner, never deleted. Consequences, recorded at the
+amendment: (1) the Neuvillette contradiction dissolves and R52 needs no
+amendment; (2) the four Fontaine Burst-name reservations stop being
+rule-enforced -- future use is a taste question then, not a rule violation
+now; (3) R108's Itto addendum stands unchanged with a dated note that its
+"released to the companion pool" justification is superseded by the cleaner
+principle (release was never needed).
+
+### §3 paperwork trio -- Verbatim: *"correct, correct, repoint"*
+
+(1) The S15 pin-table headline and per-module rows are corrected to the
+counted **133** (`review/suite-hardening/summary.md`; the stale headline read
+111 and four per-module rows read 0 for files that carry tests). (2) The S8
+gallery header is corrected to **51** (`review/potion-relic-gallery/gallery.md`;
+was "42 items"). (3) The `review/enemy-dossiers` branch pointer: the correct
+single target is unambiguous -- **`28759f0`** (which contains `ec15028`;
+`28759f0` is the pure-rename repair of `ec15028`'s misfiled files) -- and the
+queue row is corrected to say so. **The branch move itself is BLOCKED and
+surfaced, not silently skipped:** the branch is checked out in another live
+worktree, so `git branch -f` refuses from this one, and the remote still
+points at `e07fb4c`. The move (`git branch -f review/enemy-dossiers 28759f0`
++ push) is owed once that worktree is gone.
+
+**Class: RULING** -- [USER] 2026-08-06, verbatim throughout. Paper lands with
+this entry; every code-side execution is named to its track above; nothing
+quotable until the v6 sweep is green.
+
+## R119 -- Two charters are SIGNED: Class-P authority operates, and "Clear the Stage" is authorized in full (2026-08-06)
+
+Mid-turn messages of 2026-08-06, same sitting day as R117/R118.
+
+**(1) The Class-P charter (`docs/class-p-charter-2026-08-06.md`) is SIGNED.**
+[USER], verbatim: ***"Oops - yes, charter is AUTHORIZEd"***. The charter's §5
+R-draft becomes law by this entry, with that verbatim signature attached:
+
+> **R-draft (Class-P authority).** Items passing all five §2 tests may be
+> resolved recommend-and-proceed by agents, recorded in the P-ledger with
+> attestation and revert handle, subject to per-batch digest and unlimited
+> no-argument veto. Silence after digest ratifies a batch. Doubt on any test
+> disqualifies. Taste, numbers, behaviour, laws, money, probes, and gated
+> items are never eligible. The standing triage rule of §4 takes effect on
+> signature.
+
+The §4 standing triage rule takes effect from this ruling. The purge swarm
+(P-A / P-B / P-C) is authorized to run. Queue row `Q17` (the signature ask)
+was minted and struck in the same commit, Q16 precedent, so the record shows
+the ask and its answer together.
+
+**(2) The "Clear the Stage" /docs refactor charter
+(`docs/clear-the-stage-charter-2026-08-06.md`) is delivered FULLY
+AUTHORIZED.** [USER]'s framing line, verbatim: ***"And another cleanup pass
+after thatg - also fully AUTHORIZEd:"*** (typo preserved). Against the
+charter's own §6 three-option form, "fully AUTHORIZEd" = **AUTHORIZE, all
+tracks including R-D** (ledger volumization). **Sequencing, per the charter's
+own §5 non-goals: the refactor does not operate inside the open v6
+measurement window -- execution begins after the v6 re-baseline sweep is
+green** (the sweep is in flight this wave as Tracks V/M).
+
+**Class: RULING** -- [USER] 2026-08-06, both signatures verbatim above. Two
+charters move from draft to operating law; no design authority is created
+beyond what their own texts define, and both texts bind their swarms to zero
+design decisions.
+
+## R120 -- Dispatch (d): four replies execute -- the Klee rename, the art release, a staged drafter change, and probe (d)'s countersign (2026-08-06)
+
+Fourth dispatch of 2026-08-06, delivered with the verbatim framing line
+*"Thanks! One more batch for you from the design chat -"*; landed at
+`docs/dispatch-2026-08-06d-four-replies.md` (REFERENCE). Replies are
+[USER]'s, verbatim; routing is this entry's. Zero new design authority beyond
+the answers.
+
+**Klee rename -- Verbatim: *"yes, we can slightly tweak the Klee card to keep
+them separate (Catalytic Converter?)"*** RENAME-POWER executes with
+**"Catalytic Converter"** as the chosen string: the Klee card, its upgrade
+(`Catalytic Converter+`), the mod power class title, the constants comment,
+R37 cell labels, and test docstrings all follow in one string pass. Two notes
+were flagged to [USER] in-channel before landing, neither blocking, recorded
+here: (1) the name is also the automotive emissions device -- read as an
+intentional Klee-flavored pun unless [USER] says otherwise; (2) the
+separation from Sucrose's "Catalyst Conversion" is partial (both remain
+Cataly\*-Conver\*-shaped). The pass is cheap to re-run; one word swaps the
+string at any time. **Sucrose's card is untouched -- it was always correct.**
+**The string pass (both engines + docs) is Track V's this wave.**
+
+**10.1 -- Verbatim: *"let's go with a)"*** `grand_gala` releases Opera
+Epiclese; `standing_room_only`'s overturn lands on it with a clean lint.
+`grand_gala` enters the re-hunt flow (art_fetch -> contact sheet); its
+replacement candidates join the `S4-G12` eyes-on so [USER] picks once, not
+twice. The other four lint failures stay as noted per-item in the review page
+(no ruling owed unless a listed fallback is picked). **The art
+release/overturn/re-hunt is Track AR's this wave**; the paper mints the
+`grand_gala` art-debt row.
+
+**10.3 -- Verbatim: *"Yes"* -- and the change is STAGED, NOT LANDED, on its
+own sequencing rail, recorded in full.** Payoff-presence extends to the
+spotlight limb (`tier05/draft.py`); `limelight` alone stops satisfying the
+limb. This is a **drafter behaviour change, i.e. DRAFTER 15, with a
+re-baseline sweep under stamp law.** The payoff-reach sprint's
+pre-registration (whereabouts unknown; the 10.7 search is running as Track
+S2) was registered against a specific drafter version. Until that document is
+found and its pinned version read, landing D15 could invalidate a blind
+pre-registration -- the exact thing the escrow discipline exists to prevent.
+So: the change sits staged with this note; it lands as D15 immediately after
+10.7 resolves, either after the sprint runs under its registered version or
+after a clean re-registration if the document is truly lost. No prediction is
+read, nothing re-litigated. **The staged branch is Track V's (pushed,
+unmerged, never landing this wave); the hold is docketed as a
+staged-pending-10.7 row in `docs/dockets/engineering-backlog.md`, not the
+user queue.**
+
+**10.13 -- Verbatim: *"countersigned"*** Probe (d) (`Aria of Recompense`'s
+unreconstructed Block, `docs/probe-d-registration-draft.md`) converts from
+paper to work under its own registration: confounder list, cost ceiling,
+stop-and-re-register tripwire all as written. **Results adjudicate B2's
+declared residual and nothing else; Guardrail 7 unchanged.** **The run itself
+is Track M's**, under the registration as countersigned -- the runner
+respects the registration's own harness design.
+
+**Queue hygiene, as the dispatch orders it:** all four rows struck with their
+verbatim replies where they live (10.1 / 10.3 / 10.13 in the queue's §5; the
+Klee rename lived un-rowed inside the N-ledger's near-collision cluster and
+is recorded as answered in the queue's answered table); `grand_gala` gains an
+art-debt row; D15 gains its staged-pending-10.7 engineering-backlog row.
+
+**Class: RULING** -- [USER] 2026-08-06, verbatim throughout. Paper lands with
+this entry; the string pass, the art work, the staged branch and the probe
+run are named to their tracks above. No card sheet, code or art moves under
+this entry.

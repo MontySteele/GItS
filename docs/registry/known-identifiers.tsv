@@ -122,6 +122,10 @@ token	ruling	R113
 token	ruling	R114
 token	ruling	R115
 token	ruling	R116
+token	ruling	R117
+token	ruling	R118
+token	ruling	R119
+token	ruling	R120
 token	ruling	R13
 token	ruling	R39
 token	ruling	R40
@@ -287,8 +291,13 @@ file	docs/brief-coop-charter-items.md
 file	docs/brief-kokomi-pool-fill.md
 file	docs/brief-unheard-confession-rework.md
 file	docs/calibration-notes.md
+file	docs/class-p-charter-2026-08-06.md
+file	docs/clear-the-stage-charter-2026-08-06.md
 file	docs/companion-value-vs-colorless-study.md
 file	docs/curtain-call-sprint-log-2026-07-27.md
+file	docs/dispatch-2026-08-06-q13-q14-q15.md
+file	docs/dispatch-2026-08-06b-eleven-replies.md
+file	docs/dispatch-2026-08-06d-four-replies.md
 file	docs/dockets/README.md
 file	docs/dockets/companion-pricing.md
 file	docs/dockets/engineering-backlog.md

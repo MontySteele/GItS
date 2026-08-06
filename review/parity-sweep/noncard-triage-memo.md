@@ -92,6 +92,20 @@ so it contradicts R116's stated consequence. **(β) a named non-boss roster** �
 the sim's own `is_boss` data as a monster-id list; matches R116's example exactly, and
 is new authored content data covering every base-game boss room. Surfaced, not chosen.
 
+> **RESOLVED 2026-08-06 (Q13 / R117) — [USER] selects (α), verbatim: *"I'd say
+> A"*.** Minions only: a boss-room creature carrying the game's `MinionPower`
+> gets Frozen; every other creature gets the Vulnerable substitution. The sim
+> predicate aligns to α semantics (parity, not design) and a parity vector is
+> added for a boss room with (a) a minion and (b) a non-minion helper — code
+> execution is Track V's, inside the v6 window.
+>
+> **Required annotation, mirrored from R116:** the ruling's stated consequence
+> — Kaiser Crab's second claw remaining freezable — is **overridden
+> deliberately** by the α selection. Under α the second claw takes Vulnerable,
+> not Frozen. This is a chosen reading, not a missed example: chat flagged the
+> contradiction to [USER] before the dispatch was drafted, and the α selection
+> stands with that consequence stated. No re-litigation.
+
 ### NC-8 · HIGH · `spend_potion` is never paid — one defect, four filings
 
 **DISPOSITION 2026-08-06 — RULED BY INCLUSION (R116): potions are consumed.** The queue carried "potions are consumed" as the *presumptive* answer awaiting one word; the final dispatch supplies it by listing the fix as **Errata Batch 2 item 2**, and inclusion in a ratified batch is the answer. Recorded as ruled rather than presumptive so nobody re-opens it looking for a quoted sentence. **Sim-only (`tier05/events.py` throwaway-copy fix); not executed by the paper track.**
@@ -135,6 +149,8 @@ wall's arithmetic.** The S13 ledger's S7-caveat applies with named evidence now.
 **The register this pair creates, recorded for future card work:** power-sourced **damage** runs the damage pipeline (`NC-1`); power-sourced **block** is **raw** (`NC-11`). Adjacent, opposite, and both are the base game's own shape.
 
 ### NC-12 · HIGH · Cost-override lifetime — confirms S1's SYS-3, and arms S13's X3
+
+**DISPOSITION (adjacent inversion) 2026-08-06 — `AB-s1` APPROVED (Q9 / R118).** Verbatim: *"Yes."* The mod's copy pool excludes kit cards, matching the sheet and the sim: C#'s Encore Performance adopts the sim's exclusion (`effects.py:1231-1232`), and the undiscardable copied kit Burst stops being reachable. Recorded as a **mod behaviour change, not a parity repair**; ships with the next errata batch that touches C# with parity vectors updated — the code change is Track V's. Blast radius: one card's copy pool; no sim number, no test flip expected — if one flips, stop and surface.
 Guest-star generation: sheet and C# say "costs 0 *this turn*" (Discovery parity,
 `EnergyCost.SetThisTurn`); tier0 writes `pick.cost = 0` permanently on the token
 (`effects.py:1205-1206`). Same defect S1 filed as SYS-3, now with the C# leg read.

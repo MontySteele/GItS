@@ -1663,6 +1663,17 @@ NOT self-closed from the repo: this needs the eyes-on result.
 > turn. `S4-G15` stays OPEN either way, and this entry's STATUS line above is
 > unchanged — do not baseline bomb numbers against it.
 
+> **COUNTERSIGNED 2026-08-06 (Q11 / R118) — the probe converts from paper to
+> work.** [USER], verbatim: *"Countersign."* The registration at
+> `docs/probe-e-corpse-detonation-registration-draft.md` is **REGISTERED**, no
+> longer a draft awaiting signature: it runs under its own terms — two tells,
+> negative-control arm, nine confounders, cost ceiling, stop-and-re-register
+> tripwire. **The run itself is Track M's** and, per the wave-8 sequencing
+> note, happens after the v6 code lands. `S4-G15` **stays OPEN until the probe
+> reports**, the ~10-second table settlement above **survives as the
+> fallback**, and this entry's STATUS line is still unchanged — do not
+> baseline bomb numbers against it until either instrument answers.
+
 ## Furina character-select crash: preload paths and hook id collision (2026-07-23)
 
 Windows playtest reached character select, then crashed in
@@ -2464,12 +2475,19 @@ this specific kit. So the hand is the tiebreaker, not the sim.
 > left as an intention, precisely because the failure this record corrects was
 > an intention that nobody executed.
 >
-> **The candidate alternative, recorded and NOT chosen:** fold the fork's
+> ~~**The candidate alternative, recorded and NOT chosen:** fold the fork's
 > evaluation into the queued Kokomi pool-rework session instead of anchoring it
 > to a playtest. It is a real option — the pool rework will look at this kit
 > anyway — and it is recorded so the choice is visible rather than defaulted
 > into. **The observation task is the default; the fold-in is the candidate;
-> the preference is [USER]'s and is an open queue row.**
+> the preference is [USER]'s and is an open queue row.**~~
+>
+> **RULED 2026-08-06 (Q5 / R118) — the POOL-REWORK alternative is STRUCK.**
+> [USER], verbatim: *"Playtest."* The default stands confirmed: observation
+> task `OT-1` on the next Kokomi protocol playtest is the fork's venue and its
+> only accepted input. No lever moves, `S4-G13`'s fork half stays open, and
+> the fine-branch's exhaust-loop calibration offset stays unwritten and owed
+> by that evaluation.
 >
 > **Unchanged, and restated because two evaluations in one day invite the
 > mistake:** no lever is pulled, neither by the deferral nor by its

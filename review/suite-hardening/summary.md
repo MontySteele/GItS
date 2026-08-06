@@ -9,7 +9,16 @@ skipped as untestable.
 
 ## Headline
 
-- **111 pin-test functions** across **22 new test files** (17 module files + 5 card-batch files).
+> **CORRECTED 2026-08-06 (wave 8 / R118, [USER] verbatim: *"correct, correct,
+> repoint"* — §3 item 1).** The headline read **111** and did not sum: four
+> per-module rows below listed **0** pins for files that carry tests
+> (engine-effects **7**, engine-reactions **5**, tier0-pilot **4**,
+> tier05-economy **6** — each count stated in that module's own agent notes
+> further down this file, and re-counted against the test files on
+> 2026-08-06). The counted total is **133**. Wrong values struck, never
+> deleted (R101b).
+
+- ~~**111 pin-test functions**~~ **133 pin-test functions** across **22 new test files** (17 module files + 5 card-batch files).
 - Full suite after the sweep: **1629 passed, 61 skipped** (cloud box; local-asset tests skip here) — up from 1496 passed before it. Green on every commit in the batch.
 - Blind-spot coverage: **46/46 S6 surviving mutants pinned** — the full survivor set.
 - S1 arm: all **64 clean-but-untested cards** (25 Klee / 12 Furina / 27 Kokomi — verified CLEAN by the parity sweep yet referenced by zero test files) now each have a behavior pin.
@@ -20,19 +29,19 @@ skipped as untestable.
 | module | file | pins | survivors covered |
 |---|---|---|---|
 | engine-combat | /home/user/GItS/tier0/tests/test_pin_engine_combat.py | 3 | HIGH-1, HIGH-2 |
-| engine-effects | /home/user/GItS/tier0/tests/test_pin_engine_effects.py | 0 | HIGH-3, HIGH-4, MEDIUM-1 |
+| engine-effects | /home/user/GItS/tier0/tests/test_pin_engine_effects.py | ~~0~~ **7** *(corrected 2026-08-06, R118)* | HIGH-3, HIGH-4, MEDIUM-1 |
 | engine-potions | /home/user/GItS/tier0/tests/test_pin_engine_potions.py | 9 | HIGH-12, HIGH-13, HIGH-14, HIGH-15, HIGH-16, MEDIUM-6, MEDIUM-7 |
 | engine-powers | /home/user/GItS/tier0/tests/test_pin_engine_powers.py | 5 | HIGH-5, MEDIUM-2 |
-| engine-reactions | /home/user/GItS/tier0/tests/test_pin_engine_reactions.py | 0 | HIGH-8, HIGH-9 |
+| engine-reactions | /home/user/GItS/tier0/tests/test_pin_engine_reactions.py | ~~0~~ **5** *(corrected 2026-08-06, R118)* | HIGH-8, HIGH-9 |
 | engine-relics | tier0/tests/test_pin_engine_relics.py | 2 | HIGH-10, MEDIUM-5 |
 | engine-resources | /home/user/GItS/tier0/tests/test_pin_engine_resources.py | 2 | HIGH-7 |
 | engine-state | /home/user/GItS/tier0/tests/test_pin_engine_state.py | 3 | HIGH-11, LOW-1 |
 | engine-statuses | /home/user/GItS/tier0/tests/test_pin_engine_statuses.py | 3 | HIGH-6, MEDIUM-3, MEDIUM-4 |
 | tier0-harness | /home/user/GItS/tier0/tests/test_pin_tier0_harness.py | 3 | HIGH-19, MEDIUM-9, MEDIUM-10 |
-| tier0-pilot | /home/user/GItS/tier0/tests/test_pin_tier0_pilot.py | 0 | HIGH-18, LOW-2 |
+| tier0-pilot | /home/user/GItS/tier0/tests/test_pin_tier0_pilot.py | ~~0~~ **4** *(corrected 2026-08-06, R118)* | HIGH-18, LOW-2 |
 | tier0-roster | /home/user/GItS/tier0/tests/test_pin_tier0_roster.py | 3 | HIGH-17, MEDIUM-8 |
 | tier05-draft | /home/user/GItS/tier05/tests/test_pin_tier05_draft.py | 3 | HIGH-20, HIGH-21, MEDIUM-11 |
-| tier05-economy | /home/user/GItS/tier05/tests/test_pin_tier05_economy.py | 0 | HIGH-26, HIGH-27, MEDIUM-13 |
+| tier05-economy | /home/user/GItS/tier05/tests/test_pin_tier05_economy.py | ~~0~~ **6** *(corrected 2026-08-06, R118)* | HIGH-26, HIGH-27, MEDIUM-13 |
 | tier05-metrics | /home/user/GItS/tier05/tests/test_pin_tier05_metrics.py | 2 | HIGH-24, HIGH-25 |
 | tier05-model | /home/user/GItS/tier05/tests/test_pin_tier05_model.py | 4 | HIGH-22, HIGH-23, MEDIUM-12 |
 | tier05-route | /home/user/GItS/tier05/tests/test_pin_tier05_route.py | 5 | HIGH-28, HIGH-29, HIGH-30, HIGH-31 |
