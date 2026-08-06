@@ -751,90 +751,90 @@ Amend here, not in chat history.
 
 <!-- BEGIN GENERATED current-law digest -- tools/gen_decisions_digest.py -- DO NOT HAND-EDIT -->
 
-**82 rulings across the volumes — 5 status-derived mechanically from explicit strikes/banners, 77 UNREVIEWED.** UNREVIEWED means the sidecar's [USER] red-pen pass (queue: `docs/registry/user-queue.md` §4) has not read that row; it is not a judgment that the ruling is or is not current law. Statuses and evidence: `tier0/decisions-status.tsv`. Volume resolution: `docs/registry/identifiers.md` §3.
+**82 rulings across the volumes — 68 OPERATIVE, 11 moved by an explicit citation, 3 DOUBT.** **OPERATIVE is an absence claim** — no citable superseder was found, with the search scope recorded in the row — and not a finding that a ruling is beyond re-opening. A moved status names the citing ruling and states how much of the entry the move covers; **DOUBT** means supersession is arguable and the row is a live [USER] queue item. Statuses and evidence: `tier0/decisions-status.tsv`; the pass that set them: `docs/registry/status-pass-digest-2026-08-06.md`. Volume resolution: `docs/registry/identifiers.md` §3.
 
-- **R39** (2026-07-21) — spark-reading effects see the bank at play time — `UNREVIEWED`
-- **R40** (2026-07-22) — Furina runner rulings and Salon replacement pass — `UNREVIEWED`
-- **R41** (2026-07-22) — Spotlight two-mode rework and spendable Fanfare — `UNREVIEWED`
-- **R42** (2026-07-22) — Spotlight machinery efficiency and starter-density bracket — `UNREVIEWED`
-- **R43** (2026-07-22) — Post-Klee companion rerun and Fontaine starter pair — `UNREVIEWED`
-- **R44** (2026-07-22) — Fanfare conversion diagnosis — `UNREVIEWED`
-- **R45** (2026-07-22) — Fanfare conversion-efficiency dose and ceiling boundary — `UNREVIEWED`
-- **R46** (2026-07-23) — Fanfare offer trace and targeted floor repairs — `UNREVIEWED`
-- **R47** (2026-07-23) — Klee second-playtest card and Burst pass — `UNREVIEWED`
-- **R48** (2026-07-23) — Contextual Fanfare drafting before further card buffs — `UNREVIEWED`
-- **R49** (2026-07-23) — Thunderous Ovation defensive converter — `UNREVIEWED`
-- **R50** (2026-07-23) — Dry Salon floor valve and playtest-ready aggregate — `UNREVIEWED`
-- **R51** (2026-07-24) — Kokomi elite axes: A2+A6, stability band owns the healer fantasy — `UNREVIEWED`
-- **R52** (2026-07-24) — Kokomi kickoff asks: batch closure — `UNREVIEWED`
-- **R53** (2026-07-24) — Kokomi basics stay at Strike parity; v0.3 committed for review — `UNREVIEWED`
+- **R39** (2026-07-21) — spark-reading effects see the bank at play time — `OPERATIVE`
+- **R40** (2026-07-22) — Furina runner rulings and Salon replacement pass — `OPERATIVE`
+- **R41** (2026-07-22) — Spotlight two-mode rework and spendable Fanfare — `OPERATIVE`
+- **R42** (2026-07-22) — Spotlight machinery efficiency and starter-density bracket — `OPERATIVE`
+- **R43** (2026-07-22) — Post-Klee companion rerun and Fontaine starter pair — `OPERATIVE`
+- **R44** (2026-07-22) — Fanfare conversion diagnosis — `OPERATIVE`
+- **R45** (2026-07-22) — Fanfare conversion-efficiency dose and ceiling boundary — `OPERATIVE`
+- **R46** (2026-07-23) — Fanfare offer trace and targeted floor repairs — `OPERATIVE`
+- **R47** (2026-07-23) — Klee second-playtest card and Burst pass — `OPERATIVE`
+- **R48** (2026-07-23) — Contextual Fanfare drafting before further card buffs — `OPERATIVE`
+- **R49** (2026-07-23) — Thunderous Ovation defensive converter — `OPERATIVE`
+- **R50** (2026-07-23) — Dry Salon floor valve and playtest-ready aggregate — `OPERATIVE`
+- **R51** (2026-07-24) — Kokomi elite axes: A2+A6, stability band owns the healer fantasy — `OPERATIVE`
+- **R52** (2026-07-24) — Kokomi kickoff asks: batch closure — `OPERATIVE`
+- **R53** (2026-07-24) — Kokomi basics stay at Strike parity; v0.3 committed for review — `OPERATIVE`
 - **R54** (2026-07-26) — Kokomi v0.4: O4 is the primary arm, O1 rejected, O2 in reserve — `AMENDED-BY:R56`
 - **R55** (2026-07-26) — Kokomi lore overlay: the rename batch and the voice law — `AMENDED-BY:R56`
 - **R56** (2026-07-26) — Kokomi v0.4b: the 12-card starter, the x4 bank read, Kurage's Oath — `SUPERSEDED-BY:R73`
-- **R57** (2026-07-25) — Playtest sprint Track P: pins, telemetry, and a world that moved — `UNREVIEWED`
-- **R58** (2026-07-25) — Kokomi v0.5 partial fill: the pool was half-sized — `UNREVIEWED`
-- **R59** (2026-07-25) — Shop slot 2 floor: Uncommon — `UNREVIEWED`
-- **R60** (2026-07-25) — Base colorless pool: shop-only override now, removal deferred — `UNREVIEWED`
-- **R61** (2026-07-25) — The sim models the shop channel — `UNREVIEWED`
-- **R62** (2026-07-25) — `sucrose_astable`: free + Exhaust, restoring the v1.11a numbers — `UNREVIEWED`
-- **R63** (2026-07-25) — §4.7 shop channel executed: three amendments and a purse that never binds — `UNREVIEWED`
-- **R64** (2026-07-25) — The Featured Banner goes live — `UNREVIEWED`
-- **R65** (2026-07-25) — Unreleased-nation placement rule — `UNREVIEWED`
-- **R66** (2026-07-26) — Kokomi archetype vocabulary: the sheet is canonical — `UNREVIEWED`
-- **R67** (2026-07-26) — Dead-knob deletion and the sweep-harness KNOB_READS gate — `UNREVIEWED`
-- **R68** (2026-07-26) — Canonical cell object and mandatory run stamps — `UNREVIEWED`
-- **R69** (2026-07-26) — The Orobas relic upgrade is renamed "Dodoco Tales" — `UNREVIEWED`
-- **R70** (2026-07-26) — Manifest version policy: MAJOR.AUTO with overwrite refusal — `UNREVIEWED`
-- **R71** (2026-07-26) — SPOTLIGHT_BASE_MULT 1.5 and Selector v3 constants ratified — `UNREVIEWED`
-- **R72** (2026-07-26) — Kaboom Beetle Swarm: bombed-state snapshots at cast — `UNREVIEWED`
-- **R73** — `KURAGE_PULSE_PER_CHARGE` 4 -> 2 -> 3. — `UNREVIEWED`
-- **R74** — Ceremonial Garment loses its entry splash; pure state-entry. — `UNREVIEWED`
-- **R75** — Honor Guard drops the conscript, gains Exhaust, and is — `UNREVIEWED`
-- **R76** — Charge gauge styling + infield Kurage sprite -> animation sprint 2. — `UNREVIEWED`
-- **R77** — Surging Shoal 7 -> 6 (upgrade 8). Vow of the Tides CONFIRMED — `UNREVIEWED`
-- **R78** — Muster is a keyword. Nine cards each restated ~90 characters of — `UNREVIEWED`
-- **R79** — Verb-partition law, executed on the narrow (self-Exhaust) — `UNREVIEWED`
-- **R80** — Charge is never spent. Standing law, healing-law register. Already — `UNREVIEWED`
-- **R81** (2026-07-27) — Distinctness gate ratified on the two-anchor floor — `UNREVIEWED`
-- **R82** (2026-07-27) — Enchantments: the rider ships, the subsystem stays out, the space stays open — `UNREVIEWED`
-- **R83** (2026-07-27) — Pilot review ruled: weights stay PLACEHOLDER, no poison term, the scorer pass runs — `UNREVIEWED`
-- **R84** (2026-07-27) — DRAFTER v11 ratified; the power-aware static term and a fresh 3-act roster ordered — `UNREVIEWED`
-- **R85** (2026-07-27) — "Curtain Call": the register convention lands and the Furina pool takes the official shape — `UNREVIEWED`
-- **R86** (2026-07-27) — "Take a Bow": the Curtain Call deferral is paid off and deleted — `UNREVIEWED`
-- **R87** (2026-07-29) — The sweep backlog ruled: three deferrals, a rework, a DRAFTER world, and a design pass — `UNREVIEWED`
+- **R57** (2026-07-25) — Playtest sprint Track P: pins, telemetry, and a world that moved — `OPERATIVE`
+- **R58** (2026-07-25) — Kokomi v0.5 partial fill: the pool was half-sized — `OPERATIVE`
+- **R59** (2026-07-25) — Shop slot 2 floor: Uncommon — `DOUBT`
+- **R60** (2026-07-25) — Base colorless pool: shop-only override now, removal deferred — `OPERATIVE`
+- **R61** (2026-07-25) — The sim models the shop channel — `OPERATIVE`
+- **R62** (2026-07-25) — `sucrose_astable`: free + Exhaust, restoring the v1.11a numbers — `OPERATIVE`
+- **R63** (2026-07-25) — §4.7 shop channel executed: three amendments and a purse that never binds — `OPERATIVE`
+- **R64** (2026-07-25) — The Featured Banner goes live — `OPERATIVE`
+- **R65** (2026-07-25) — Unreleased-nation placement rule — `OPERATIVE`
+- **R66** (2026-07-26) — Kokomi archetype vocabulary: the sheet is canonical — `OPERATIVE`
+- **R67** (2026-07-26) — Dead-knob deletion and the sweep-harness KNOB_READS gate — `OPERATIVE`
+- **R68** (2026-07-26) — Canonical cell object and mandatory run stamps — `OPERATIVE`
+- **R69** (2026-07-26) — The Orobas relic upgrade is renamed "Dodoco Tales" — `OPERATIVE`
+- **R70** (2026-07-26) — Manifest version policy: MAJOR.AUTO with overwrite refusal — `OPERATIVE`
+- **R71** (2026-07-26) — SPOTLIGHT_BASE_MULT 1.5 and Selector v3 constants ratified — `OPERATIVE`
+- **R72** (2026-07-26) — Kaboom Beetle Swarm: bombed-state snapshots at cast — `OPERATIVE`
+- **R73** — `KURAGE_PULSE_PER_CHARGE` 4 -> 2 -> 3. — `OPERATIVE`
+- **R74** — Ceremonial Garment loses its entry splash; pure state-entry. — `OPERATIVE`
+- **R75** — Honor Guard drops the conscript, gains Exhaust, and is — `OPERATIVE`
+- **R76** — Charge gauge styling + infield Kurage sprite -> animation sprint 2. — `OPERATIVE`
+- **R77** — Surging Shoal 7 -> 6 (upgrade 8). Vow of the Tides CONFIRMED — `OPERATIVE`
+- **R78** — Muster is a keyword. Nine cards each restated ~90 characters of — `OPERATIVE`
+- **R79** — Verb-partition law, executed on the narrow (self-Exhaust) — `OPERATIVE`
+- **R80** — Charge is never spent. Standing law, healing-law register. Already — `OPERATIVE`
+- **R81** (2026-07-27) — Distinctness gate ratified on the two-anchor floor — `OPERATIVE`
+- **R82** (2026-07-27) — Enchantments: the rider ships, the subsystem stays out, the space stays open — `OPERATIVE`
+- **R83** (2026-07-27) — Pilot review ruled: weights stay PLACEHOLDER, no poison term, the scorer pass runs — `OPERATIVE`
+- **R84** (2026-07-27) — DRAFTER v11 ratified; the power-aware static term and a fresh 3-act roster ordered — `AMENDED-BY:R107`
+- **R85** (2026-07-27) — "Curtain Call": the register convention lands and the Furina pool takes the official shape — `OPERATIVE`
+- **R86** (2026-07-27) — "Take a Bow": the Curtain Call deferral is paid off and deleted — `OPERATIVE`
+- **R87** (2026-07-29) — The sweep backlog ruled: three deferrals, a rework, a DRAFTER world, and a design pass — `AMENDED-BY:R107`
 - **R88** — (DRAFT -- reconstructed, needs [USER] countersign) -- Zhongli takes roster slot 4; Itto becomes Inazuma-companion eligible — `AMENDED-BY:R118`
-- **R89** — ~~(DRAFT -- reconstructed, needs [USER] countersign)~~ **SIGNED 2026-08-06** -- Furina legibility: the preview-truth fix, and why the doc's own migration was the wrong one — `UNREVIEWED`
-- **R90** (2026-08-04) — Track A's P1 null: the lint stays a counting tool, the Fanfare question moves to Track B, the floors are re-derived — `UNREVIEWED`
-- **R91** (2026-08-04) — A-G1 closes: the seven entities confirmed, the salon double-credit kept with a bounded-meter property, meter-reading damage ruled, sustain bounded — `UNREVIEWED`
-- **R92** (2026-08-04) — Track A housekeeping: the canon count corrected, tempo_band takes its cross-session note, the support gap goes to Kokomi — `UNREVIEWED`
-- **R93** (2026-08-04) — Understudy policy_v1: all seven revisions approved, the card-name log elevated to a P1 blocker, the block-panic insight routed to the pilot backlog — `UNREVIEWED`
-- **R94** (2026-08-04) — Phase 2's default tier is amended from draft sampling to hard-state turn sampling — `UNREVIEWED`
-- **R95** (2026-08-04) — The seed fork: read-back seeds launch P1, chosen seeds are gated at the first cross-build comparison — `UNREVIEWED`
-- **R96** (2026-08-04) — The three sim observations from Phase 0 are ROUTED to their chartered streams, not opened here — `UNREVIEWED`
-- **R97** (2026-08-04) — Understudy housekeeping: the readiness check, the leftover run, the merge order, and the adapter-defect list — `UNREVIEWED`
-- **R98** (2026-08-04) — P1 is VALIDATED: the clean N=3 landed, debt #2 is deleted, and the eleventh harness defect is the same class as the other ten — `UNREVIEWED`
-- **R99** (2026-08-04) — The validation gate's first four items: the build ships, Punch Off is SUSPECTED-OURS, 13/14 go to the next traversal pass, and deck-intent gets both instruments — `UNREVIEWED`
-- **R100** (2026-08-04) — Win visibility lands on a first-party hook rather than a Harmony patch, the meters were already there, and R98 stays MECHANICAL — `UNREVIEWED`
-- **R101** (2026-08-05) — The S7 counter defect is confirmed and fixed at the writer, and every curve it fed is annotated rather than rewritten — `UNREVIEWED`
+- **R89** — ~~(DRAFT -- reconstructed, needs [USER] countersign)~~ **SIGNED 2026-08-06** -- Furina legibility: the preview-truth fix, and why the doc's own migration was the wrong one — `OPERATIVE`
+- **R90** (2026-08-04) — Track A's P1 null: the lint stays a counting tool, the Fanfare question moves to Track B, the floors are re-derived — `AMENDED-BY:R118`
+- **R91** (2026-08-04) — A-G1 closes: the seven entities confirmed, the salon double-credit kept with a bounded-meter property, meter-reading damage ruled, sustain bounded — `OPERATIVE`
+- **R92** (2026-08-04) — Track A housekeeping: the canon count corrected, tempo_band takes its cross-session note, the support gap goes to Kokomi — `OPERATIVE`
+- **R93** (2026-08-04) — Understudy policy_v1: all seven revisions approved, the card-name log elevated to a P1 blocker, the block-panic insight routed to the pilot backlog — `OPERATIVE`
+- **R94** (2026-08-04) — Phase 2's default tier is amended from draft sampling to hard-state turn sampling — `OPERATIVE`
+- **R95** (2026-08-04) — The seed fork: read-back seeds launch P1, chosen seeds are gated at the first cross-build comparison — `OPERATIVE`
+- **R96** (2026-08-04) — The three sim observations from Phase 0 are ROUTED to their chartered streams, not opened here — `AMENDED-BY:R107`
+- **R97** (2026-08-04) — Understudy housekeeping: the readiness check, the leftover run, the merge order, and the adapter-defect list — `OPERATIVE`
+- **R98** (2026-08-04) — P1 is VALIDATED: the clean N=3 landed, debt #2 is deleted, and the eleventh harness defect is the same class as the other ten — `OPERATIVE`
+- **R99** (2026-08-04) — The validation gate's first four items: the build ships, Punch Off is SUSPECTED-OURS, 13/14 go to the next traversal pass, and deck-intent gets both instruments — `OPERATIVE`
+- **R100** (2026-08-04) — Win visibility lands on a first-party hook rather than a Harmony patch, the meters were already there, and R98 stays MECHANICAL — `OPERATIVE`
+- **R101** (2026-08-05) — The S7 counter defect is confirmed and fixed at the writer, and every curve it fed is annotated rather than rewritten — `OPERATIVE`
 - **R102** (2026-08-05) — The four fanfare conclusions go into escrow, in both directions, until the C2 probe reports — `DISCHARGED-BY:R113`
-- **R103** (2026-08-05) — The three probes are approved in cost order, and what each one is allowed to touch — `UNREVIEWED`
-- **R104** (2026-08-05) — P1.5 is promoted to next in the Understudy queue: three demands converge on one bridge fork — `UNREVIEWED`
-- **R105** (2026-08-05) — The patch sentinel is accepted as shipped, and the cheapest way to shrink "not watched" is queued — `UNREVIEWED`
-- **R106** (2026-08-05) — The merge train is acknowledged and HELD, and its stated order is not achievable as an order — `UNREVIEWED`
-- **R107** (2026-08-06) — The S4 hygiene report is approved entire, and its two HIGH findings give three dangling items a governing condition again — `UNREVIEWED`
-- **R108** (2026-08-06) — G1 is COUNTERSIGNED: Zhongli takes roster slot 4, and the deep dive is unblocked — `UNREVIEWED`
-- **R109** (2026-08-06) — S13 yields two rarity laws, each arriving with a mechanical audit attached — `UNREVIEWED`
-- **R110** (2026-08-06) — S13's three ratified changes: Encore Performance, replay_next_companion, and the spotlight fallback — `UNREVIEWED`
-- **R111** (2026-08-06) — S13's other nine families: what is not changing, and what "watching" obliges — `UNREVIEWED`
-- **R112** (2026-08-06) — The two swarm findings are docketed, and the [USER]-side queue is restated without growing — `UNREVIEWED`
-- **R113** (2026-08-06) — The C2 escrow is RELEASED: the four fanfare marks are struck as instrument-vindicated, and the residual's one real term is filed — `UNREVIEWED`
-- **R114** (2026-08-06) — The four held flags are RULED: one intended, two ratified changes, and a curse whose root is still one word away — `UNREVIEWED`
-- **R115** (2026-08-06) — The fork was never evaluated, the Kokomi gates re-anchor, and a five-playtest table item becomes an instrument — `UNREVIEWED`
-- **R116** (2026-08-06) — S14 canonicity: five questions ruled, a register for future card work, and Errata Batch 2 is constituted — `UNREVIEWED`
-- **R117** (2026-08-06) — Q13/Q14/Q15 are ruled in three words, and the shop-odds rider is minted as Q16 — `UNREVIEWED`
-- **R118** (2026-08-06) — The sitting batch 2026-08-06(b): eleven replies execute, and R88 loses its twisted clause — `UNREVIEWED`
-- **R119** (2026-08-06) — Two charters are SIGNED: Class-P authority operates, and "Clear the Stage" is authorized in full — `UNREVIEWED`
-- **R120** (2026-08-06) — Dispatch (d): four replies execute -- the Klee rename, the art release, a staged drafter change, and probe (d)'s countersign — `UNREVIEWED`
+- **R103** (2026-08-05) — The three probes are approved in cost order, and what each one is allowed to touch — `DOUBT`
+- **R104** (2026-08-05) — P1.5 is promoted to next in the Understudy queue: three demands converge on one bridge fork — `OPERATIVE`
+- **R105** (2026-08-05) — The patch sentinel is accepted as shipped, and the cheapest way to shrink "not watched" is queued — `OPERATIVE`
+- **R106** (2026-08-05) — The merge train is acknowledged and HELD, and its stated order is not achievable as an order — `OPERATIVE`
+- **R107** (2026-08-06) — The S4 hygiene report is approved entire, and its two HIGH findings give three dangling items a governing condition again — `DOUBT`
+- **R108** (2026-08-06) — G1 is COUNTERSIGNED: Zhongli takes roster slot 4, and the deep dive is unblocked — `AMENDED-BY:R118`
+- **R109** (2026-08-06) — S13 yields two rarity laws, each arriving with a mechanical audit attached — `OPERATIVE`
+- **R110** (2026-08-06) — S13's three ratified changes: Encore Performance, replay_next_companion, and the spotlight fallback — `OPERATIVE`
+- **R111** (2026-08-06) — S13's other nine families: what is not changing, and what "watching" obliges — `OPERATIVE`
+- **R112** (2026-08-06) — The two swarm findings are docketed, and the [USER]-side queue is restated without growing — `OPERATIVE`
+- **R113** (2026-08-06) — The C2 escrow is RELEASED: the four fanfare marks are struck as instrument-vindicated, and the residual's one real term is filed — `OPERATIVE`
+- **R114** (2026-08-06) — The four held flags are RULED: one intended, two ratified changes, and a curse whose root is still one word away — `OPERATIVE`
+- **R115** (2026-08-06) — The fork was never evaluated, the Kokomi gates re-anchor, and a five-playtest table item becomes an instrument — `OPERATIVE`
+- **R116** (2026-08-06) — S14 canonicity: five questions ruled, a register for future card work, and Errata Batch 2 is constituted — `AMENDED-BY:R117`
+- **R117** (2026-08-06) — Q13/Q14/Q15 are ruled in three words, and the shop-odds rider is minted as Q16 — `OPERATIVE`
+- **R118** (2026-08-06) — The sitting batch 2026-08-06(b): eleven replies execute, and R88 loses its twisted clause — `OPERATIVE`
+- **R119** (2026-08-06) — Two charters are SIGNED: Class-P authority operates, and "Clear the Stage" is authorized in full — `OPERATIVE`
+- **R120** (2026-08-06) — Dispatch (d): four replies execute -- the Klee rename, the art release, a staged drafter change, and probe (d)'s countersign — `OPERATIVE`
 
 <!-- END GENERATED current-law digest -->
 

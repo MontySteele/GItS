@@ -6,8 +6,15 @@ Track R-D (Clear the Stage, 2026-08-06). Three facts pinned:
    render (this is also a CI step; here it runs with the rest of the suite).
 2. The sidecar covers exactly R39–R120, one row each — the volumization's
    stated range, no invented pre-R39 entries, no gaps.
-3. UNREVIEWED rows render AS unreviewed: the digest must not pretend the
-   [USER] red-pen pass happened (it has not; queue s.4 row).
+3. EVERY row renders as the status the sidecar gives it, and the header
+   counts the categories rather than hiding them. This started life as an
+   UNREVIEWED-only honesty clause -- the digest must not pretend a pass
+   happened that had not. The 2026-08-06 Class-P status pass ran and left
+   zero UNREVIEWED rows, so the clause is GENERALIZED rather than deleted:
+   the same contract now binds every status value, and the UNREVIEWED half
+   still binds the moment a new ruling lands unread. A test that only
+   watched one value would have gone quiet at exactly the point the file
+   started making claims.
 """
 
 from __future__ import annotations
@@ -44,15 +51,35 @@ def test_sidecar_covers_exactly_the_volumized_range():
         "live file's rulings, nothing invented below R39")
 
 
-def test_unreviewed_rows_say_so_in_the_rendered_block():
+def test_every_row_renders_as_the_status_the_sidecar_gives_it():
     mod = _module()
     block = mod.render()
     rows = mod._sidecar()
+    seen = set(rows.values())
+    assert seen, "a sidecar with no statuses renders nothing to check"
+    for status in seen:
+        assert block.count(f"`{status}`") == sum(1 for s in rows.values()
+                                                 if s == status), (
+            f"digest lines carrying `{status}` must equal the sidecar's rows "
+            "with that status -- the digest renders, it never re-judges")
+
+
+def test_the_header_counts_the_categories_rather_than_hiding_them():
+    mod = _module()
+    block = mod.render()
+    rows = mod._sidecar()
+    header = block.split("\n\n")[1]
+    operative = sum(1 for s in rows.values() if s == "OPERATIVE")
+    doubt = sum(1 for s in rows.values() if s == "DOUBT")
     unreviewed = sum(1 for s in rows.values() if s == "UNREVIEWED")
-    # The honesty contract: every UNREVIEWED sidecar row is an UNREVIEWED
-    # digest line, and the header states the count rather than hiding it.
-    assert block.count("`UNREVIEWED`") == unreviewed
-    assert f"{unreviewed} UNREVIEWED" in block
+    moved = len(rows) - operative - doubt - unreviewed
+    assert f"{len(rows)} rulings" in header
+    assert f"{operative} OPERATIVE" in header
+    assert f"{moved} moved" in header
+    assert f"{doubt} DOUBT" in header
+    # The original honesty clause, still binding: an unread row must be
+    # visible in the headline the moment one exists.
+    assert (f"{unreviewed} UNREVIEWED" in header) == bool(unreviewed)
 
 
 def test_a_missing_marker_pair_is_loud_not_silent():
