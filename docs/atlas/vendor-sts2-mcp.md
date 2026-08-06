@@ -51,7 +51,7 @@ Route table (the whole surface): `/`, `/api/v1/singleplayer`,
 - **Singleplayer and multiplayer endpoints are mutually exclusive; mismatch is
   HTTP 409**, hard-blocked before dispatch so the non-sync-safe `end_turn` path
   cannot be reached during MP (`McpMod.cs:198-232`;
-  `docs/raw-simplified.md:15`). The check is best-effort on the HTTP thread and
+  `vendor/STS2_MCP/docs/raw-simplified.md:15`). The check is best-effort on the HTTP thread and
   swallows exceptions during run transitions (`McpMod.cs:288-296`).
 - **All JSON is snake_case, UTF-8, null-omitting, relaxed-escaped**, set once in
   a single serializer options object used by every response
@@ -65,7 +65,7 @@ Route table (the whole surface): `/`, `/api/v1/singleplayer`,
   and drained at most 10 per frame (`McpMod.cs:127-158`). The HTTP thread blocks
   on the result, so a POST returns only after the frame that ran it.
 - **Targets are `entity_id` strings** (e.g. `"JAW_WORM_0"`), synthesized by the
-  bridge, not combat ids (`docs/raw-full.md:346`, `docs/raw-simplified.md:113`).
+  bridge, not combat ids (`vendor/STS2_MCP/docs/raw-full.md:346`, `vendor/STS2_MCP/docs/raw-simplified.md:113`).
   Every other selector on the wire is an integer `index` into the array the same
   GET response just returned.
 - **Only `localhost`/`127.0.0.1` are bound, with no authentication and
@@ -120,7 +120,7 @@ Route table (the whole surface): `/`, `/api/v1/singleplayer`,
   binary instead of building this snapshot is the one way to reproduce the
   version-pin failure the kickoff brief worried about.
 - **Two error shapes, and the docs only describe one.** Action results are
-  `{"status": "ok"|"error", "message": …}` (`docs/raw-simplified.md:55`), but
+  `{"status": "ok"|"error", "message": …}` (`vendor/STS2_MCP/docs/raw-simplified.md:55`), but
   transport-level failures (400/404/405/409) are `{"error": …}` with **no
   `status` key** (`McpMod.Helpers.cs:152-156`), and GET failures add
   `exception_type` + `stack_trace` (`McpMod.cs:322-328`). `understudy/bridge.py`
@@ -140,7 +140,7 @@ Route table (the whole surface): `/`, `/api/v1/singleplayer`,
   `charSelect.Lobby != null` (`McpMod.Actions.cs:1621-1627`) — the mechanism
   behind R95.
 - **`state_type: "overlay"` and a menu with no `options` are the two shapes a
-  soft-lock takes; neither raises** (`docs/raw-simplified.md:49`,
+  soft-lock takes; neither raises** (`vendor/STS2_MCP/docs/raw-simplified.md:49`,
   `understudy/bridge.py:13-16`).
 - **The five wire facts** (R97/5d, `docs/understudy-phase0-report.md:97-104`):
   enemies live under `battle.enemies` not top level; intent damage exists only in
