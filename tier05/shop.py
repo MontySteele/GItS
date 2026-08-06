@@ -99,11 +99,17 @@ def shop_offer(rng: random.Random, character: str,
 def companion_shop_offer(
         rng: random.Random, character: str,
         banner: frozenset[str] | None = None) -> list[tuple[Card, int]]:
-    """The §4.7 companion channel: TWO priced slots (R59/R61).
+    """The §4.7 companion channel: TWO priced slots (R59/R61, respecified by
+    R116/NC-10).
 
     Slot 1 draws the character's HOME NATION at an Uncommon floor -- the
-    targeted "buy your dream support" slot. Slot 2 is a wildcard at the same
-    floor, rarity rolled on SHOP_COMPANION_RARITY_ODDS. Returns
+    targeted "buy your dream support" slot. Slot 2 is "any companion card":
+    no nation and NO FLOOR, so it rolls the full reward odds and can offer a
+    Common at the Common band. That is R116's spec and it supersedes R59's
+    reading of the floor as covering both slots; the shop is now a real Rare
+    source in slot 1's math and a real Common source in slot 2's, which is
+    cross-noted to the companion-pricing docket because it moves the
+    acquisition assumptions that docket prices against. Returns
     ``(card, price)`` pairs because the two slots are priced by DRAWN RARITY,
     which is the whole balance story: §4.7 lets the paid channel roll
     payoff-grade 5-stars precisely because gold, not a stat nerf, is the
@@ -149,17 +155,31 @@ def companion_shop_offer(
     offers: list[tuple[Card, int]] = []
     taken: list[Card] = []
     for slot in range(C.SHOP_COMPANION_SLOTS):
-        # Slot 1 is home-nation; every later slot is wildcard.
+        # NC-10 (R116, Errata Batch 2 item 6): slot 1 is "Uncommon or higher
+        # from the home region"; slot 2 is "any companion card" -- no nation
+        # and no floor. The two slots differ in BOTH filters, so they read
+        # different odds tables: slot 1 the floor's conditioned odds, slot 2
+        # RARITY_ODDS itself. See tier0/constants.py for the conditioning and
+        # for the stated-split reading that was surfaced and not chosen.
         nation = home if slot == 0 else None
-        rarity = _roll_companion_rarity(rng)
+        odds = C.SHOP_COMPANION_RARITY_ODDS if slot == 0 else C.RARITY_ODDS
+        rarity = _roll_companion_rarity(rng, odds)
         cards = eligible(rarity, nation, taken)
         if not cards and nation is not None:
             cards = eligible(rarity, None, taken)
         if not cards:
-            other = "rare" if rarity == "uncommon" else "uncommon"
-            cards = eligible(other, None, taken)
-            if cards:
-                rarity = other
+            # The rarity rung, generalized because slot 2's table now has
+            # three entries instead of two: try the slot's OWN remaining
+            # rarities, in the table's order. Order is the odds table's, not
+            # a preference of this function's -- picking a "best" fallback
+            # rarity would be a balance choice hiding in an error path.
+            for other in odds:
+                if other == rarity:
+                    continue
+                cards = eligible(other, None, taken)
+                if cards:
+                    rarity = other
+                    break
         if not cards:
             continue                      # slot omitted -- see the docstring
         pick = rng.choice(cards)
@@ -168,15 +188,22 @@ def companion_shop_offer(
     return offers
 
 
-def _roll_companion_rarity(rng: random.Random) -> str:
-    """Uncommon-or-Rare at renormalized reward odds (R59)."""
+def _roll_companion_rarity(rng: random.Random, odds: dict) -> str:
+    """One draw from a rarity table.
+
+    NC-10 (R116) gave the two slots different tables -- slot 1 the reward
+    odds conditioned on >= Uncommon, slot 2 the reward odds themselves -- so
+    the table is an argument now rather than a constant this function reads.
+    The fallback returns the table's FIRST key, which is the table's own
+    commonest rarity in both cases; it is only reachable on float slop.
+    """
     roll = rng.random()
     acc = 0.0
-    for rarity, odds in C.SHOP_COMPANION_RARITY_ODDS.items():
-        acc += odds
+    for rarity, weight in odds.items():
+        acc += weight
         if roll < acc:
             return rarity
-    return "uncommon"
+    return next(iter(odds))
 
 
 @dataclass

@@ -115,9 +115,18 @@ MIRRORED: dict[str, object] = {
     "CompanionSlot.UncommonOdds": C.RARITY_ODDS["uncommon"],
     "CompanionSlot.SameNationShare": C.SAME_NATION_REWARD_SHARE,
     "CompanionSlot.NationWeight": C.NATION_WEIGHTS["mondstadt"],
-    # §4.7 shop channel, slot 2's renormalized Uncommon share (R59).
-    "MerchantInventory_CompanionColorlessSlots_Patch.SlotTwoUncommonOdds":
+    # §4.7 shop channel, respecified by NC-10 (R116). The two slots read two
+    # tables now: slot 1 the reward odds CONDITIONED on >= Uncommon (its
+    # floor), slot 2 the reward odds themselves ("any companion card").
+    # SlotTwoUncommonOdds used to hold the conditioned value and now holds
+    # the unconditioned one -- the rename of the CONCEPT is why the constant
+    # kept its name and changed its mirror.
+    "MerchantInventory_CompanionColorlessSlots_Patch.SlotOneUncommonOdds":
         C.SHOP_COMPANION_RARITY_ODDS["uncommon"],
+    "MerchantInventory_CompanionColorlessSlots_Patch.SlotTwoCommonOdds":
+        C.RARITY_ODDS["common"],
+    "MerchantInventory_CompanionColorlessSlots_Patch.SlotTwoUncommonOdds":
+        C.RARITY_ODDS["uncommon"],
 
     # Furina.
     "FurinaResourceConstants.FanfareDecayFraction": C.FANFARE_DECAY_FRACTION,

@@ -140,6 +140,13 @@ def main() -> int:
     slots = C.SHOP_COMPANION_SLOTS
     rarities = list(C.SHOP_COMPANION_RARITY_ODDS)
 
+    # NC-10 (R116): slot 2 is "any companion card", so the wildcard side of
+    # this lint has to look at every band the reward table can draw, not just
+    # the two that survive slot 1's floor. Commons became drawable the day
+    # that ruling landed, and an empty Common tier is the same softlock class
+    # this file exists to prevent.
+    wild_rarities = list(C.RARITY_ODDS)
+
     for character in CHARACTERS:
         home = loader.character_nation(character)
         if home is None:
@@ -148,7 +155,7 @@ def main() -> int:
                 "slot 1 can never be home-region")
             continue
 
-        for rarity in rarities:
+        for rarity in wild_rarities:
             wild = eligible(character, rarity, None)
             if len(wild) < slots:
                 findings.append(
@@ -156,6 +163,7 @@ def main() -> int:
                     f"offerable at ANY nation, but the shop stocks {slots} "
                     "slots without replacement -- a slot can strand")
 
+        for rarity in rarities:
             home_tier = eligible(character, rarity, home)
             if home_tier:
                 continue
@@ -200,7 +208,8 @@ def main() -> int:
         print(f"\ncompanion shop coverage: {len(findings)} finding(s)")
         return 1
     print(f"companion shop coverage OK: {len(CHARACTERS)} characters x "
-          f"{len(rarities)} rarities x {C.SHOP_COMPANION_SLOTS} slots")
+          f"{len(wild_rarities)} wildcard rarities and {len(rarities)} "
+          f"home-region rarities x {C.SHOP_COMPANION_SLOTS} slots")
     return 0
 
 
