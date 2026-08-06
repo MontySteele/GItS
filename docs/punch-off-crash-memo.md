@@ -8,6 +8,14 @@ directory. Every check below is an offline read and is re-runnable.
 
 ---
 
+> **RECLASSIFICATION EXECUTED 2026-08-06 (Class-P, R119 / P-B item C-3 —
+> dated annotation; the frozen memo below is untouched).** The recommendation
+> this memo closes on — SUSPECTED-OURS → game-side/spine-side — is now the
+> classification of record: `EB-1`'s owner note flips and queue row 10.6 is
+> struck. The rotation caveat is preserved verbatim (the 2026-08-04 crash log
+> is gone; this memo's quotations are the surviving copy). Ledger:
+> `docs/registry/p-ledger.md`.
+
 ## Verdict, up front
 
 **Does the double-connect hypothesis survive static reading? NO.**
