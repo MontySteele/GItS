@@ -368,7 +368,7 @@ Flagged for v0.2+ planning: characters whose Genshin identity is *support* (Colu
   no runtime minification"* (`docs/art-asset-manifest.md`, enforced in
   `tools/cut_salon_members.py` and `tier0/tests/test_visual_contract_gaps.py`).
   It is **already amended in code** and the amendment is recorded nowhere but a
-  playtest note — `docs/playtest3-notes-2026-07-28.md` (answer 2), following
+  playtest note — `docs/archive/playtest3-notes-2026-07-28.md` (answer 2), following
   **A12**, which promoted the Salon member cap from a constant to a per-player
   stat.
 

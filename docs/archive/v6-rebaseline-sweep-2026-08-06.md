@@ -1,3 +1,9 @@
+> **MOVED 2026-08-06 — Clear the Stage, Track R-B (charter R119, rail 1).**
+> Old path: `docs/v6-rebaseline-sweep-2026-08-06.md` — new path: `docs/archive/v6-rebaseline-sweep-2026-08-06.md`.
+> Verbatim move: everything below this banner is byte-identical to the
+> pre-move file. Citers repointed in the move commit; see
+> `review/stage-clear/rb-move-manifest.tsv`.
+
 # v6 re-baseline sweep — the standing batteries re-run under CONSTANTS 6 (Track M, wave 8)
 
 > **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.

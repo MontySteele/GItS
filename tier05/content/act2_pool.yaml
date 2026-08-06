@@ -1,7 +1,7 @@
 # Act 2 roster: the HIVE -- multi-act extension §10.3 (RATIFIED 2026-07-23).
 #
 # REAL StS2 numbers (slaythespire.wiki.gg harvest 2026-07-23,
-# docs/act2-act3-roster-research.md §1). HP is a spawn-time RANGE [lo, hi]
+# docs/archive/act2-act3-roster-research.md §1). HP is a spawn-time RANGE [lo, hi]
 # rolled per spawn via the run rng (tier05.acts.spawn); a bare int is fixed.
 #
 # Intents use the engine kinds attack / block / buff / debuff / summon plus

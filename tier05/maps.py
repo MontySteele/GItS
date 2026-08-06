@@ -1,7 +1,7 @@
 """Act maps: the real StS2 map DAG (16 modelled floors), generated per act (§11).
 
 Replaces the fixed `RUN_NODE_TEMPLATE` spine. Research and the numbers behind
-every constant: `docs/sts2-map-and-events-research.md` §1.
+every constant: `docs/archive/sts2-map-and-events-research.md` §1.
 
 Shape (wiki-real, A0):
   - MAP_FLOORS = 16 modelled floors (the wiki's floor 17, the boss chest, is

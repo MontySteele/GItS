@@ -61,7 +61,7 @@ for what is open and for whom.
 | Non-card parity findings | `NC-<n>` | NC-1…NC-20 | `review/parity-sweep/noncard-triage-memo.md` | no |
 | Card parity families | `SYS-<n>` | SYS-1…SYS-14 | `review/parity-sweep/triage-memo.md` | no |
 | Lint candidates | `L<n>` | L1–L8 (S1 memo); L1–L12 (art_lint) | `review/parity-sweep/triage-memo.md`; `tools/art_lint.py` | **yes** |
-| House Lights findings | `N-<n>`, `O-<n>`, `O<slice>-<n>` | N-1; O-1; O1-1…O12-n | `docs/lore-fidelity-audit-2026-08-05.md`, `docs/archive/instrument-redteam-2026-08-05.md` | no |
+| House Lights findings | `N-<n>`, `O-<n>`, `O<slice>-<n>` | N-1; O-1; O1-1…O12-n | `docs/archive/lore-fidelity-audit-2026-08-05.md`, `docs/archive/instrument-redteam-2026-08-05.md` | no |
 | Track T audits | `T-<n>` | T-1, T-2, T-3 | `docs/track-t-audits-2026-08-06.md` | **yes** — with Track A's task-ids T1–T4 |
 | Understudy phases | `P<n>` | P0, P1, P1.5, P2 | `docs/understudy-kickoff-brief.md` + R93–R104 | **yes** — with POLICY stamp and predictions |
 | Scorecard axes | `A<n>` | A1–A7 | `tier0/harness/axes.py` (law), `docs/archive/tier0-simulator-spec.md` §6 (historical) | **yes** — with Klee pass asks A3/A5 and sprint task-ids |
@@ -85,12 +85,12 @@ changed.
 | Qualified form | Bare form as written | Meaning | Minting document | Status |
 |---|---|---|---|---|
 | `S4-G1` … `S4-G20` | `G1`…`G20` | The 20-row undischarged **[USER] gate queue** of the S4 ledger audit | `review/ledger-audit/hygiene-report.md` §3 | see `docs/registry/user-queue.md` §2 |
-| `CC-G1`, `CC-G2` | `G1`, `G2` | R86 / "Take a Bow" **Curtain Call art gates**: contact-sheet eyes-on; in-game screenshot review of the twelve cards + A0 smoke run | `tier0/DECISIONS.md` R86; `docs/take-a-bow-sprint-log-2026-07-27.md` §3 | OPEN — materials ready at `docs/g12-review-2026-08-05.md`. Tracked as `S4-G12`. |
-| `SS-G1` … `SS-G4` | `G1`…`G4` | **Serenitea Sweep I** track-G items: sheet-comment lint; the `mondstadt-companions.yaml` correction; the CI proposal; the session-isolation (worktree-per-session) policy | `docs/serenitea-sweep-log-2026-07-26.md` §§G1–G4 | all ADOPTED. `SS-G3` → `.github/workflows/repo.yml`; `SS-G4` → `docs/worktree-workflow.md` |
+| `CC-G1`, `CC-G2` | `G1`, `G2` | R86 / "Take a Bow" **Curtain Call art gates**: contact-sheet eyes-on; in-game screenshot review of the twelve cards + A0 smoke run | `tier0/DECISIONS.md` R86; `docs/archive/take-a-bow-sprint-log-2026-07-27.md` §3 | OPEN — materials ready at `docs/g12-review-2026-08-05.md`. Tracked as `S4-G12`. |
+| `SS-G1` … `SS-G4` | `G1`…`G4` | **Serenitea Sweep I** track-G items: sheet-comment lint; the `mondstadt-companions.yaml` correction; the CI proposal; the session-isolation (worktree-per-session) policy | `docs/archive/serenitea-sweep-log-2026-07-26.md` §§G1–G4 | all ADOPTED. `SS-G3` → `.github/workflows/repo.yml`; `SS-G4` → `docs/worktree-workflow.md` |
 | `NT-G2`, `NT-G3`, `NT-G5`, `NT-G6`, `NT-G7`, `NT-G8` | `G2`, `G3`, `G5`, `G6`, `G7`, `G8` | **Neap Tide v2.1** batch item labels (Kokomi pass): G2 = `before_sun_and_moon` stacking ratified over a ban; G3 = flavor-text segregation convention; G5 = the pre-registered playtest-three fork; G6 = `tactical_retreat` starter migration; G7 = the R79 verb-partition law; G8 = `swift_currents` merged into `moonlit_offering` | `klee-mod/DECISIONS.md`, "Neap Tide v2.1" + addendum | landed, except `NT-G5` (fork unfired/unevaluated — see queue) |
 | `AS2-G1`, `AS2-G2` | `G1`, `G2` | **Animation sprint 2** track-G tasks: extract the common bridge base; rename `KleeAnimationRouter` → `CreatureAnimationRouter` | `docs/animation-sprint-2-plan.md` §G | both ✅ done (`docs/animation-sprint-2-log.md`) |
-| `LF-G1` … `LF-G5` | `G1`…`G5` | **Track N lore-fidelity audit** coverage gaps in `lint_furina_registers.py` | `docs/lore-fidelity-audit-2026-08-05.md` §"Coverage gaps" | findings only; part of the N TOP-5 review |
-| `RA-G1`, `RA-G2` | `G1`, `G2` | **Track G roster-anchor v14** document sections: the v14 anchor table; the paired D13→D14 diff | `docs/roster-anchor-v14-2026-08-05.md` §§2–3 | PROPOSED — designate-or-hold ask, sitting-prep §10.2 |
+| `LF-G1` … `LF-G5` | `G1`…`G5` | **Track N lore-fidelity audit** coverage gaps in `lint_furina_registers.py` | `docs/archive/lore-fidelity-audit-2026-08-05.md` §"Coverage gaps" | findings only; part of the N TOP-5 review |
+| `RA-G1`, `RA-G2` | `G1`, `G2` | **Track G roster-anchor v14** document sections: the v14 anchor table; the paired D13→D14 diff | `docs/archive/roster-anchor-v14-2026-08-05.md` §§2–3 | PROPOSED — designate-or-hold ask, sitting-prep §10.2 |
 | `A-G1` | *(already qualified)* | Axis-Validity **Track A gate** — tag review | `docs/axis-validity-session-charter.md` §7 | **DISCHARGED 2026-08-04 (R91)** |
 | `B-G1` | *(already qualified)* | Axis-Validity **Track B gate** — per-axis disposition of the seven-axis scorecard; carries the re-registered Fanfare P1 | `docs/axis-validity-session-charter.md` §4/§7; R90/1b | OPEN. Tracked as `S4-G5`. Now the governing condition on backlog items 1–3 and the fanfare STOP (R107/F1). |
 | `AV-G2` | *(already qualified)* | Axis-Validity **charter gate** — countersign the §6.1 ratification bundle | `docs/axis-validity-session-charter.md` §7 | COUNTERSIGNED 2026-08-04 |
@@ -117,7 +117,7 @@ stands; this table simply makes it findable without opening the file.
 | `DEC-D2` … `DEC-D5` | The **D-series of `tier0/DECISIONS.md`** — D2 Neuvillette dual identity; D3 pass-4 ask A5 deferred to the axis-validity session; D4 instrument-visibility law for predictions; D5 Kokomi stability-band provenance and schedule. (`D1` was never minted.) | `tier0/DECISIONS.md` |
 | `DRAFTER-D10` … `DRAFTER-D14` | **DRAFTER world stamps** — `DRAFTER_VERSION` in `tier05/draft.py`/`tier0/constants.py`. Current: **14**. A bump archives every drafter-layer number taken under the previous stamp (R87(3)). | `tier0/constants.py:951` |
 | `AS2-D1` … `AS2-D5` | **Animation sprint 2** track-D tasks (the Salon stage rework). `AS2-D4` = bridge update; `AS2-D5` = the [USER] layout/composition pass, capture required. | `docs/animation-sprint-2-plan.md` §D |
-| `SS-D1` … `SS-D3`, `SSII-D1`, `SSII-D4`, `SSII-D5` | Serenitea Sweep I/II track-D items | `docs/serenitea-sweep-log-2026-07-26.md`, `docs/serenitea-sweep-ii-log-2026-07-27.md` |
+| `SS-D1` … `SS-D3`, `SSII-D1`, `SSII-D4`, `SSII-D5` | Serenitea Sweep I/II track-D items | `docs/archive/serenitea-sweep-log-2026-07-26.md`, `docs/archive/serenitea-sweep-ii-log-2026-07-27.md` |
 
 > **R107(a) already ruled on this collision** and its reasoning is the precedent
 > this registry follows: *"the D-series in this file is the difficulty series
@@ -194,7 +194,7 @@ sweep are all in §2.1–§2.8, plus:
 | `A1`…`A7` | The **seven scorecard axes** (A2 Scaling, A6 Utility, …). Cited constantly outside any sprint. | `tier0/harness/axes.py`; historical definitions in `docs/archive/tier0-simulator-spec.md` §6 |
 | `A3`, `A5` (Klee) | **Klee pass-4 asks** A3 (archetype-band deviation) and A5 (scorecard invariants) — *not* axes A3/A5 | `docs/archive/klee-pass-4-plan.md`; `docs/missed-requirements.md` §2.5, Tier 5 |
 | `A0` | The **A0 smoke run** — a co-op boot check, not an axis | `docs/archive/playtest-2026-07-25-coop-a0.md`; R86 |
-| `F1`, `F2` (Serenitea Sweep II) | Track-F items: `F1` the roster registry + gate; `F2` the bootstrap headline | `docs/serenitea-sweep-ii-log-2026-07-27.md` |
+| `F1`, `F2` (Serenitea Sweep II) | Track-F items: `F1` the roster registry + gate; `F2` the bootstrap headline | `docs/archive/serenitea-sweep-ii-log-2026-07-27.md` |
 | `E1`, `E2`, `E2b` (Neap Tide) | Kokomi measurement cells; `E2b` is the accrual-arm decomposition | `klee-mod/DECISIONS.md` |
 | `B2`, `B3` (Last Call) | The two probes in flight at the Last Call batch tip | `docs/surplus-week-manifest-2026-08-05.md` addendum |
 
@@ -384,7 +384,7 @@ All fourteen carry a disposition (R109/R110/R111). Verbatim verdicts live in
 
 | Namespace | Meaning | Document |
 |---|---|---|
-| `N-1` | Track N lore audit's top finding (`gorget` / Concealed Unguis provenance). Docketed by R112. | `docs/lore-fidelity-audit-2026-08-05.md` |
+| `N-1` | Track N lore audit's top finding (`gorget` / Concealed Unguis provenance). Docketed by R112. | `docs/archive/lore-fidelity-audit-2026-08-05.md` |
 | `LF-G1`…`LF-G5` | Track N coverage gaps in `lint_furina_registers.py` | same |
 | `O-1` | Track O's top finding — the gauntlet stage-merge denominator defect. **REPAIRED** by Track U (R112). | `docs/archive/instrument-redteam-2026-08-05.md` |
 | `O1-1`…`O12-n` | Track O per-slice findings; the digit before the dash is the slice | same |

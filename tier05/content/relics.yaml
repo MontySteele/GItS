@@ -179,7 +179,7 @@ neow:
 # After each NON-FINAL act boss the Ancient heals 100% of missing HP (that
 # part is structural, in tier05/model.py) and offers a 1-of-3 pick from this
 # pool. Representative sample of the REAL StS2 Act-2/3 Ancient boons (wiki
-# harvest 2026-07-23, docs/act2-act3-roster-research.md), ratified sampling
+# harvest 2026-07-23, docs/archive/act2-act3-roster-research.md), ratified sampling
 # rule: only boons that map 1:1 onto EXISTING hooks. Transform / UI-choice /
 # card-content boons are out of scope (skip-loudly, §10.9). Wiki caveat: the
 # 100%-missing-HP heal number is from the Mobalytics guide; the wiki proper

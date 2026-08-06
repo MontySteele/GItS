@@ -19,7 +19,7 @@ commits and 43 unreachable blobs, not in the primary checkout's untracked
 files, not in session scratchpads or project memory. Full negative record:
 `docs/archive/registration-hunt-report-2026-08-06.md`. The hunt's central finding: the
 **only** repo statement asserting that a pre-registration *exists* is Track
-G's own scope fence (`docs/roster-anchor-v14-2026-08-05.md` §4, commit
+G's own scope fence (`docs/archive/roster-anchor-v14-2026-08-05.md` §4, commit
 `f77e14a`, 2026-08-05); no earlier commit anywhere in history writes the
 words "pre-registered payoff-reach". The document may never have existed in
 the repo at all.
@@ -52,7 +52,7 @@ by [USER]-countersigned registration at kickoff, before any number is read.
      (payoff reach fell 2.12 → 1.26/deck: rarity promotion cuts offer
      frequency under RARITY_ODDS)"*.
 2. **Track G asserts a pre-registration exists and fences itself off it**
-   (`docs/roster-anchor-v14-2026-08-05.md` §4): *"`RARITY_ODDS` was not read
+   (`docs/archive/roster-anchor-v14-2026-08-05.md` §4): *"`RARITY_ODDS` was not read
    for a decision and not touched. The pre-registered payoff-reach /
    `RARITY_ODDS` sprint is a separate sprint with its own written predictions;
    nothing above is graded against them, and no statement about how many
@@ -127,7 +127,7 @@ Q-C. *(from §1.2)* What the original registered as "how many payoffs an
    (house probe-registration shape, per the Q11 / probe (d) precedents).
 4. The quarantine-lift linkage: on countersign, the `RA-G1`/`RA-G2`
    core-attainment quarantine (banner on
-   `docs/roster-anchor-v14-2026-08-05.md`) becomes liftable per queue row
+   `docs/archive/roster-anchor-v14-2026-08-05.md`) becomes liftable per queue row
    10.7 — a paper act at the queue row.
 
 **Countersign line (one word, [USER]): COUNTERSIGN / REVISE / DECLINE**

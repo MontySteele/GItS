@@ -641,7 +641,7 @@ RUN_ACTS = (
 )
 
 # --- Act maps (§11, 2026-07-24): the real StS2 17-floor DAG --------------
-# Research + sources: docs/sts2-map-and-events-research.md §1. These replace
+# Research + sources: docs/archive/sts2-map-and-events-research.md §1. These replace
 # RUN_NODE_TEMPLATE, which authored a fixed 11-node spine with 2 forced elites
 # and zero Unknown rooms. WIKI-REAL at Ascension 0 unless marked OPEN.
 # 16 walkable floors, 0-based. The wiki counts 17 because floor 17 is the
