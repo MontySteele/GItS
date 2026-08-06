@@ -17,6 +17,11 @@
 > the pre-v6 label attached. Nothing above or below is rewritten (R101b);
 > the v6 re-baseline sweep is Track M's, after the v6 code lands. Source of
 > the bump: `tier0/constants.py`, the `CONSTANTS_VERSION 6` note.
+>
+> **SWEEP LANDED 2026-08-06 (Track M, wave 8):** the §4.7 channel cell was
+> re-run under v6, paired v5↔v6
+> (`docs/v6-rebaseline-sweep-2026-08-06.md` §3): unmoved at the
+> instrument's resolution; the P1/P2 out-of-band findings reproduce.
 
 **Executed 2026-07-25.** Plan of record:
 `docs/shop-companion-channel-sprint.md` (PRE-REGISTERED, rulings R59–R62).

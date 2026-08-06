@@ -18,6 +18,11 @@
 > pre-v6 label attached. Nothing above or below is rewritten (R101b); the v6
 > re-baseline sweep is Track M's, after the v6 code lands. Source of the
 > bump: `tier0/constants.py`, the `CONSTANTS_VERSION 6` note.
+>
+> **SWEEP LANDED 2026-08-06 (Track M, wave 8):** the 12-arm n=600 combat
+> rows were re-run under v6, paired v5↔v6
+> (`docs/v6-rebaseline-sweep-2026-08-06.md` §2); the 56-op repricing
+> table is a design-cost ledger and was not re-run, stated there.
 
 > # ARCHIVE BANNER — the Furina rows here are pre-CONSTANTS-5
 >

@@ -1,0 +1,22 @@
+C:\Users\Monty\AppData\Local\Temp\claude\C--Users-Monty-Documents-GitHub-GItS\3f220450-cb85-4a28-b367-05cb4e8c71c3\scratchpad\wt-v5\tier05\relics.py:78: UserWarning: relic 'bronze_scales' SKIPPED: Thorns now exists (2026-07-27); un-skipping is a [USER] ruling because it arms a relic and moves the tier 0.5 world -- not implemented, not faked (house rule).
+  return dict(_pool().get("neow") or {})
+C:\Users\Monty\AppData\Local\Temp\claude\C--Users-Monty-Documents-GitHub-GItS\3f220450-cb85-4a28-b367-05cb4e8c71c3\scratchpad\wt-v5\tier05\relics.py:78: UserWarning: relic 'oddly_smooth_stone' SKIPPED: Dexterity now exists (2026-07-27); un-skipping is a [USER] ruling because it arms a relic and moves the tier 0.5 world -- not implemented, not faked (house rule).
+  return dict(_pool().get("neow") or {})
+C:\Users\Monty\AppData\Local\Temp\claude\C--Users-Monty-Documents-GitHub-GItS\3f220450-cb85-4a28-b367-05cb4e8c71c3\scratchpad\wt-v5\tier05\relics.py:78: UserWarning: relic 'juzu_bracelet' SKIPPED: held relics have no channel into maps.resolve_unknown -- not implemented, not faked (house rule).
+  return dict(_pool().get("neow") or {})
+§4.7 companion channel -- 500 runs/arm, seed 20260725
+
+klee     demolition   off   5.0%  on   5.8%  delta +0.80pp  (on 95% CI 4.1%-8.2%)
+furina   salon        off  11.8%  on  11.6%  delta -0.20pp  (on 95% CI 9.1%-14.7%)
+kokomi   priest       off   4.0%  on   2.6%  delta -1.40pp  (on 95% CI 1.5%-4.4%)
+
+P1  slot-1 buy rate: 52.6% (1563/2973 visits)   OUT OF BAND (10-35%)
+P2  mean winrate delta: -0.27pp   OUT OF BAND (positive, <= +2.00pp)
+P3  slot-2 purchases: 97.3% uncommon of 619   IN BAND (>= 60%, DIAGNOSTIC)
+    slot-2 OFFERED mix: {'common': 1740, 'uncommon': 1085, 'rare': 148}
+    total gold spent on companions: 88000
+
+CROWD-OUT CHECK (does the channel take gold from the other doors, or just get there first?)
+    removals   off       0   on       0     +0.0%
+    relics     off    1008   on     699    -30.7%
+    gold_left  off  312695   on  307917     -1.5%

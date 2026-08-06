@@ -1,0 +1,13 @@
+{
+  "character": "furina",
+  "archetype": "salon",
+  "stamp": "cell=roster-anchors[archetype=salon,character=furina] seed=20260729 runs=3000 RT7/D14/P3/C6",
+  "n": 3000,
+  "win": 0.112,
+  "act1": 0.606,
+  "acts": 0.9823333333333333,
+  "deck": 23.014333333333333,
+  "fights": 12.975333333333333,
+  "core_attain": 0.6396666666666667,
+  "tto": 5.853048462741011
+}

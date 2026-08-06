@@ -1,0 +1,13 @@
+{
+  "character": "ref_ironclad",
+  "archetype": "generic",
+  "stamp": "cell=roster-anchors[archetype=generic,character=ref_ironclad] seed=20260729 runs=3000 RT7/D14/P3/C5",
+  "n": 3000,
+  "win": 0.11133333333333334,
+  "act1": 0.7123333333333334,
+  "acts": 1.188,
+  "deck": 22.569333333333333,
+  "fights": 15.411,
+  "core_attain": 0.0,
+  "tto": null
+}
