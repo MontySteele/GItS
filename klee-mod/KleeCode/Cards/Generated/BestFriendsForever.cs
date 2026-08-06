@@ -59,10 +59,14 @@ public sealed class BestFriendsForever : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        foreach (var companionId in CompanionPlays.PlayedThisCombat(CombatState!, Owner))
+        foreach (var companionPlay in CompanionPlays.PlayedThisCombat(CombatState!, Owner))
         {
             var playedToken = CombatState!.CreateCard(
-                ModelDb.GetById<CardModel>(companionId), Owner);
+                ModelDb.GetById<CardModel>(companionPlay.Id), Owner);
+            if (companionPlay.IsUpgraded)
+            {
+                playedToken.UpgradeInternal();
+            }
             playedToken.EnergyCost.SetThisCombat(0);
             await CardPileCmd.AddGeneratedCardToCombat(playedToken, PileType.Hand, Owner);
         }

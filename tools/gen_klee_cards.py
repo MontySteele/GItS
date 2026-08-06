@@ -3533,10 +3533,21 @@ def build_body(
             # query has to name whose plays it wants -- unfiltered, this card
             # copied the co-op partner's companions.
             lines.append(
-                "foreach (var companionId in CompanionPlays.PlayedThisCombat(CombatState!, Owner))\n"
+                "foreach (var companionPlay in CompanionPlays.PlayedThisCombat(CombatState!, Owner))\n"
                 "        {\n"
                 "            var playedToken = CombatState!.CreateCard(\n"
-                "                ModelDb.GetById<CardModel>(companionId), Owner);\n"
+                "                ModelDb.GetById<CardModel>(companionPlay.Id), Owner);\n"
+                # R114 / FLAG-2(i), the same rule as the two copy ops above:
+                # the PRINTED card travels, and so does the UPGRADE. The sim
+                # records `card.id` at play time (combat.py:269), which is
+                # `foo+` for an upgraded companion, so its replay is upgraded;
+                # the C# ledger carries the flag beside the id because
+                # ModelDb.GetById rebuilds pristine (BFF-copy). UpgradeInternal
+                # provenance: vendor/STS2_MCP/McpMod.Helpers.cs:54-66.
+                "            if (companionPlay.IsUpgraded)\n"
+                "            {\n"
+                "                playedToken.UpgradeInternal();\n"
+                "            }\n"
                 + override_line
                 + "            await CardPileCmd.AddGeneratedCardToCombat(playedToken, PileType.Hand, Owner);\n"
                 "        }"
