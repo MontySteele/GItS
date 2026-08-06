@@ -56,7 +56,7 @@ are resource counters (cheap). Salon rides existing summon machinery
 pending the check-if-solved audit (§5). Pneuma/Ousia is **pure flavor,
 zero mechanics** (ratified). Nothing else novel ships in her v1.
 
-> **DRAFT ANNOTATION 2026-08-06 (R107; S4 finding F3) — §3.1–3.2 describe the RETIRED designation model.** Read them as the v1.10 design they were, not as law. Live since R41 (2026-07-22): **CENTER STAGE**, under which Furina's own cards generate Fanfare and *"receive no numeric Spotlight bonus"*, and **GUEST CAST**, which *"designates the Companion category rather than one character"* — confirmed at `docs/red-pen-2026-07-26.md` R2(a). The "reduced rate on Furina herself" asymmetry below is therefore not the shipped anti-self-buff lever. Mirrors the v1.14 DRAFT annotation on `docs/teyvat-spire-design-principles.md` §4.5; ratification rides with it.
+> **DRAFT ANNOTATION 2026-08-06 (R107; S4 finding F3) — §3.1–3.2 describe the RETIRED designation model.** Read them as the v1.10 design they were, not as law. Live since R41 (2026-07-22): **CENTER STAGE**, under which Furina's own cards generate Fanfare and *"receive no numeric Spotlight bonus"*, and **GUEST CAST**, which *"designates the Companion category rather than one character"* — confirmed at `docs/archive/red-pen-2026-07-26.md` R2(a). The "reduced rate on Furina herself" asymmetry below is therefore not the shipped anti-self-buff lever. Mirrors the v1.14 DRAFT annotation on `docs/teyvat-spire-design-principles.md` §4.5; ratification rides with it.
 
 ### 3.1 Designation (character-level)
 

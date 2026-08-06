@@ -19,7 +19,7 @@ median encounter is 99-100% winnable in every act, and the difficulty is
 concentrated in a handful of bosses. Runs die to the HP LEDGER across a
 mostly-free roster, not to fight difficulty -- so a global difficulty
 multiplier would make an already-free roster freer in order to fix three
-encounters. See docs/tier05-perf-and-ironclad-act3-notes.md 1.3.
+encounters. See docs/archive/tier05-perf-and-ironclad-act3-notes.md 1.3.
 """
 import random
 import statistics

@@ -1,6 +1,6 @@
 """The Fanfare compensation battery — did reader density move the two numbers?
 
-Registered in docs/sprint-fanfare-compensation-2026-07-28.md. The parent
+Registered in docs/archive/sprint-fanfare-compensation-2026-07-28.md. The parent
 sprint (the Fanfare rework, a197294) shipped single-leg generation as ruled
 and left two numbers outside a playable band. This battery exists to answer
 whether this pass moved THEM, not whether some other number improved:

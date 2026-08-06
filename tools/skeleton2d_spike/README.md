@@ -3,7 +3,7 @@
 One question: **can a Godot-native `Skeleton2D` + weighted `Polygon2D` rig,
 with every vertex weight COMPUTED from layer-mask images instead of
 hand-painted, survive our pack build and load back out of the pack?**
-Path B of `docs/animation-capability-memo.md` had zero working examples
+Path B of `docs/archive/animation-capability-memo.md` had zero working examples
 anywhere in reach; this directory built one, with Kokomi as the pilot.
 
 Findings live in `docs/animation-spike-skeleton2d-kokomi-2026-08-06.md`.

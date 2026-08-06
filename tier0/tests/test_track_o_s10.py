@@ -7,7 +7,7 @@ could not be followed, and must be deterministic for a fixed seed.
 
 Deliberately NOT pinned: that a claim satisfied by the null case still returns
 ``verified: True`` (Track O finding O10-1). Pinning that would ratify the
-defect. See docs/instrument-redteam-2026-08-05.md.
+defect. See docs/archive/instrument-redteam-2026-08-05.md.
 """
 from __future__ import annotations
 

@@ -1,7 +1,7 @@
 """The Fanfare compensation pass (2026-07-28) — reader density and R7.
 
-Registered in docs/sprint-fanfare-compensation-2026-07-28.md. The parent
-sprint (docs/sprint-fanfare-rework-2026-07-28.md) cut single-leg Fanfare in
+Registered in docs/archive/sprint-fanfare-compensation-2026-07-28.md. The parent
+sprint (docs/archive/sprint-fanfare-rework-2026-07-28.md) cut single-leg Fanfare in
 and left two out-of-band numbers; this pass exists to move them, and these
 tests pin the mechanics it shipped rather than the numbers, which are all
 PROPOSED.

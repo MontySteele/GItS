@@ -21,7 +21,7 @@ The landed file keeps the name it landed with; this one moved. **Which module
 P1.5's acceptance clause meant is a question for the red pen, not for a
 session** -- but the clause's own words are "reconstruction only, no rules
 retyped", and that describes this file rather than the one that drives an
-engine. Surfaced in `docs/sprint-understudy-p15-log-2026-08-05.md`.
+engine. Surfaced in `docs/archive/sprint-understudy-p15-log-2026-08-05.md`.
 
 THE REASON THIS FILE EXISTS AT ALL. P1.5 item 1 makes two soaks
 runnable on the SAME seed; item 3 puts the selector answers in the fight

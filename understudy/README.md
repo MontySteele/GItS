@@ -2,7 +2,7 @@
 
 Opened 2026-08-04 by the Understudy sprint. Brief:
 `docs/understudy-kickoff-brief.md`. P0 findings and the three ratified
-rulings: `docs/understudy-p0-findings.md`. Phase-0 measurement:
+rulings: `docs/archive/understudy-p0-findings.md`. Phase-0 measurement:
 `docs/understudy-phase0-report.md`. The Phase-0 skim response, signed:
 `docs/understudy-countersign-2026-08-04.md` (R93–R97 in `tier0/DECISIONS.md`).
 
@@ -130,7 +130,7 @@ override as that screen opens and the run is generated inside the confirm.
 Upstream's `menu_select(seed=...)` arm is deliberately NOT used: it refuses
 singleplayer on a guard the decompile contradicts, and rewriting an upstream
 refusal means owning it. Full reasoning: `vendor/STS2_MCP/gits/GitsSeed.cs`
-and `docs/sprint-understudy-p15-log-2026-08-05.md`.
+and `docs/archive/sprint-understudy-p15-log-2026-08-05.md`.
 
 **The read-back is the verification.** A run whose seed reads back different
 from the one chosen files `seed_not_honoured` — a harness-side defect, because
@@ -222,7 +222,7 @@ it is called out here as loudly as a rename would be: a reader who assumed
 
 **Addition of 2026-08-05 (P1.5), BOT FEED ONLY, no renames:** `selectors`.
 The note for this landing is §"Cross-session note" in
-`docs/sprint-understudy-p15-log-2026-08-05.md`. It is a **declared
+`docs/archive/sprint-understudy-p15-log-2026-08-05.md`. It is a **declared
 asymmetry** (`BOT_ONLY` in `tier0/tests/test_track_b_curves.py`, beside
 `potions_used`): the soak records a selector answer because it POSTED it,
 while the mod sees a card leave a pile rather than an offer being taken from a

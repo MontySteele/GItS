@@ -93,7 +93,7 @@ debt is worked off by the pool-sweep pass.
 
 THE SECOND ANCHOR, AND WHY NO THRESHOLD READ OFF IT HAS HELD STILL
 (2026-07-27, Silent anchor sprint; full analysis in
-docs/silent-anchor-sprint-log-2026-07-27.md). This docstring used to say
+docs/archive/silent-anchor-sprint-log-2026-07-27.md). This docstring used to say
 "Ratify after a SECOND official anchor". The second anchor arrived, and its
 `uniq` moved SIX times across seven readings in one day as more of her pool
 became expressible. Every reading is kept, because the SEQUENCE is the

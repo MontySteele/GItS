@@ -327,7 +327,7 @@ public sealed class PearlOfInsightRelic : CustomRelicModel
 /// routes through it — but an upgraded Furina never FIRES it again, so the
 /// Spotlight beam goes quiet for that run. The cross-session note was filed in
 /// BOTH logs before this landed, per the contract's own rule:
-/// docs/animation-sprint-2-log.md and docs/red-pen-2026-07-26.md.
+/// docs/animation-sprint-2-log.md and docs/archive/red-pen-2026-07-26.md.
 ///
 /// THIS DELIBERATELY BREAKS the "no new behaviour in a starter upgrade" rule,
 /// by user authority. The rule is OVERRIDDEN, not reinterpreted, and the

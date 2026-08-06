@@ -101,11 +101,11 @@ Route table (the whole surface): `/`, `/api/v1/singleplayer`,
 - **R97/5d** (`tier0/DECISIONS.md:3360-3368`) — the five adapter defects are
   **facts about this wire**, kept as measurement history because any future
   adapter meets the same five.
-- **P0 ruling 1**, RATIFIED 2026-08-04 (`docs/understudy-p0-findings.md:224-248`)
+- **P0 ruling 1**, RATIFIED 2026-08-04 (`docs/archive/understudy-p0-findings.md:224-248`)
   — ADOPT STS2MCP as a pinned vendored fork rather than depend on the release
   binary; writing our own bridge was costed and rejected as the more expensive
   path.
-- **P0 ruling 3**, RATIFIED 2026-08-04 (`docs/understudy-p0-findings.md:413-419`)
+- **P0 ruling 3**, RATIFIED 2026-08-04 (`docs/archive/understudy-p0-findings.md:413-419`)
   — BUILD the speed affordance ourselves inside this fork (`gits/GitsSpeed.cs`),
   ADOPT nothing for speed.
 

@@ -61,7 +61,7 @@ for what is open and for whom.
 | Non-card parity findings | `NC-<n>` | NC-1…NC-20 | `review/parity-sweep/noncard-triage-memo.md` | no |
 | Card parity families | `SYS-<n>` | SYS-1…SYS-14 | `review/parity-sweep/triage-memo.md` | no |
 | Lint candidates | `L<n>` | L1–L8 (S1 memo); L1–L12 (art_lint) | `review/parity-sweep/triage-memo.md`; `tools/art_lint.py` | **yes** |
-| House Lights findings | `N-<n>`, `O-<n>`, `O<slice>-<n>` | N-1; O-1; O1-1…O12-n | `docs/lore-fidelity-audit-2026-08-05.md`, `docs/instrument-redteam-2026-08-05.md` | no |
+| House Lights findings | `N-<n>`, `O-<n>`, `O<slice>-<n>` | N-1; O-1; O1-1…O12-n | `docs/lore-fidelity-audit-2026-08-05.md`, `docs/archive/instrument-redteam-2026-08-05.md` | no |
 | Track T audits | `T-<n>` | T-1, T-2, T-3 | `docs/track-t-audits-2026-08-06.md` | **yes** — with Track A's task-ids T1–T4 |
 | Understudy phases | `P<n>` | P0, P1, P1.5, P2 | `docs/understudy-kickoff-brief.md` + R93–R104 | **yes** — with POLICY stamp and predictions |
 | Scorecard axes | `A<n>` | A1–A7 | `tier0/harness/axes.py` (law), `docs/archive/tier0-simulator-spec.md` §6 (historical) | **yes** — with Klee pass asks A3/A5 and sprint task-ids |
@@ -386,7 +386,7 @@ All fourteen carry a disposition (R109/R110/R111). Verbatim verdicts live in
 |---|---|---|
 | `N-1` | Track N lore audit's top finding (`gorget` / Concealed Unguis provenance). Docketed by R112. | `docs/lore-fidelity-audit-2026-08-05.md` |
 | `LF-G1`…`LF-G5` | Track N coverage gaps in `lint_furina_registers.py` | same |
-| `O-1` | Track O's top finding — the gauntlet stage-merge denominator defect. **REPAIRED** by Track U (R112). | `docs/instrument-redteam-2026-08-05.md` |
+| `O-1` | Track O's top finding — the gauntlet stage-merge denominator defect. **REPAIRED** by Track U (R112). | `docs/archive/instrument-redteam-2026-08-05.md` |
 | `O1-1`…`O12-n` | Track O per-slice findings; the digit before the dash is the slice | same |
 | `T-1`, `T-2`, `T-3` | Track T audit sweeps → `TT-T1/2/3` | `docs/track-t-audits-2026-08-06.md` |
 

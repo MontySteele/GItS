@@ -1,7 +1,7 @@
 # vendor/ — third-party source we carry, pinned
 
 This directory did not exist before the Understudy sprint (2026-08-04). It is
-opened by [USER] ruling 1 of `docs/understudy-p0-findings.md`: *ADOPT STS2MCP
+opened by [USER] ruling 1 of `docs/archive/understudy-p0-findings.md`: *ADOPT STS2MCP
 as a pinned vendored fork.* The house had no vendoring precedent, so the rules
 below are the precedent, and they are deliberately narrow.
 
