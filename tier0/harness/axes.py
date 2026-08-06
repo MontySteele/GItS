@@ -19,7 +19,8 @@ not about its arithmetic. The mechanical repairs it still owes (eps guard
 on zero-baseline axes, loud failure on a missing attrition/swarm encounter
 id, the `or 1.0` turn-10 default) stay queued in the pin batch, because
 they make the instrument honest without asserting it is right.
-See tier0/DECISIONS.md D3.
+See tier0/DECISIONS-archive-R39-R99.md D3 (moved with the R39-R99 range in
+the 2026-08-06 R-D ledger split; docs/registry/identifiers.md s.3 resolves).
 """
 
 from __future__ import annotations

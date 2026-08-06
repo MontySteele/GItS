@@ -34,7 +34,7 @@ otherwise).
 ### State of the project (start here)
 | doc | what it is |
 |---|---|
-| `tier0/DECISIONS.md`, `klee-mod/DECISIONS.md` | The living decision logs (sim-side and mod-side). The project's spine. |
+| `tier0/DECISIONS.md`, `klee-mod/DECISIONS.md` | The living decision logs (sim-side and mod-side). The project's spine. Since 2026-08-06 (R-D split) the tier0 ledger's R39–R99 range lives verbatim in `tier0/DECISIONS-archive-R39-R99.md`; resolve any R-number via `registry/identifiers.md` §3, and grep the `DECISIONS*.md` globs, not one file. |
 | `dockets/engineering-backlog.md` | **The engineering half of "what is open".** Work that needs no [USER] ruling to start: confirmed defects, measurement defects, unbuilt instruments, content work with nothing in front of it. Opened 2026-08-06 (Track Z). |
 | `archive/red-pen-2026-07-26.md` | REFERENCE (moved to the archive 2026-08-06, Track R-B). The most recent ratification record; carries its own errata and the one still-owed Queue 5 cell (`S4-G16`). |
 | `open-playtest-items.md`, `missed-requirements.md`, `backlog-2026-07-29.md`, `sitting-prep-2026-08-05.md`, `surplus-week-manifest-2026-08-05.md` | **RETIRED AS REGISTERS 2026-08-06 (Track Z / Z-3), now REFERENCE.** Each keeps its full text and its evidence, and each carries a banner saying where its open rows went — the [USER] ones to `registry/user-queue.md` §10, the engineering ones to `dockets/engineering-backlog.md`. Read them for *reasoning*, never for *status*. |

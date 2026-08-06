@@ -47,7 +47,7 @@ for what is open and for whom.
 
 | Namespace | Shape | Population | Minting authority | Collides? |
 |---|---|---|---|---|
-| Rulings | `R<n>` | R1–R120 | `tier0/DECISIONS.md` + `klee-mod/DECISIONS.md` (one shared sequence) | R1–R38 unresolvable as citations — see §3 |
+| Rulings | `R<n>` | R1–R120 | the DECISIONS volumes per §3's range table (one shared sequence; since the 2026-08-06 R-D split: `tier0/DECISIONS-archive-R39-R99.md`, `tier0/DECISIONS.md`, `klee-mod/DECISIONS.md`) | R1–R38 unresolvable as citations — see §3 |
 | D-series rulings | `D<n>` | D2–D5 | `tier0/DECISIONS.md` | **yes** — with DRAFTER stamps and with sprint task-ids |
 | Milestones | `M<n>` | M1–M8 | `tier0/DECISIONS.md`, `klee-mod/DECISIONS.md` | no |
 | C# milestones | `C<n>` | C1–C3 | `klee-mod/DECISIONS.md` | **yes** — with world stamps and S7 candidates |
@@ -207,15 +207,24 @@ sweep are all in §2.1–§2.8, plus:
 minted in `klee-mod/DECISIONS.md` (Neap Tide), R39–~~R116~~R120 in
 `tier0/DECISIONS.md` *(prose figure corrected 2026-08-06, one batch stale
 against this section's own table — Class-P, R119 / P-B item C-9, per §14's
-mandate)*. CI enforces no duplicates across both files
-(`.github/workflows/repo.yml`, job `ledger`).
+mandate)*. CI enforces no duplicates across all volumes as **one namespace**
+(`.github/workflows/repo.yml`, job `ledger` → `tools/lint_ledger_numbers.py`,
+globs `tier0/DECISIONS*.md` + `klee-mod/DECISIONS*.md`).
+
+**Volume layout since 2026-08-06** (Track R-D ledger split, "Clear the Stage"
+R119; notice: `docs/registry/ledger-layout-note-2026-08-06.md`): the tier0
+ledger's R39–R99 range — including the interleaved D-series entries **D2–D5**
+— moved verbatim into an archive volume; the live file keeps R100+. The rule
+is mechanical: **R39–R99 → the archive volume, R100+ → the live file**, with
+klee-mod's R73–R80 unchanged. This table is the resolver:
 
 | Range | Where | Note |
 |---|---|---|
-| R1–R38 | prose entries and archived ruling docs | **Not mechanically resolvable.** S4 §4 lead 3: *"no index maps R-number → dated entry."* Several (R8, R13, R14, R24, R25, R29d, R34–R38) are cited as standing law. Resolving them is an open paper item — see `docs/registry/user-queue.md` §4. |
-| R39–R72 | `tier0/DECISIONS.md`, `## R<n>` headings | dated, resolvable |
-| R73–R80 | `klee-mod/DECISIONS.md`, Neap Tide v2.1 | dated, resolvable |
-| R81–R120 | `tier0/DECISIONS.md` | dated, resolvable. **Current maximum: R120** (2026-08-06). |
+| R1–R38 | prose entries and archived ruling docs — **in no volume** | **Not mechanically resolvable.** S4 §4 lead 3: *"no index maps R-number → dated entry."* Several (R8, R13, R14, R24, R25, R29d, R34–R38) are cited as standing law. Resolving them is an open paper item — see `docs/registry/user-queue.md` §4. |
+| R39–R72 | `tier0/DECISIONS-archive-R39-R99.md`, `## R<n>` headings | dated, resolvable (D2 rides between R65/R66) |
+| R73–R80 | `klee-mod/DECISIONS.md`, Neap Tide v2.1 | dated, resolvable — **not split**, per the plan of record |
+| R81–R99 | `tier0/DECISIONS-archive-R39-R99.md` | dated, resolvable (D3–D5 ride between R72/R81) |
+| R100–R120 | `tier0/DECISIONS.md` (live) | dated, resolvable. **Current maximum: R120** (2026-08-06). The live file also carries the GENERATED current-law digest (`tools/gen_decisions_digest.py`) — never hand-edit it. |
 
 **The Cold Reading batch (2026-08-06) minted four**, listed so they resolve
 without opening the ledger: **`R113`** the C2 escrow released and its four
@@ -474,6 +483,11 @@ anywhere in the file. Refresh the snapshot with
 A third rule, added 2026-08-06 by the docs diet (Track Z), fails a **new**
 document that mints an open-item row outside the queue and the dockets. See
 §16.
+
+One law the volume split (2026-08-06, Track R-D) makes explicit: **renumbering
+across volumes is forbidden, ever** ("Clear the Stage" charter §5). A ruling's
+number is its identity in one shared sequence; volumes change where a number
+lives, never what it is.
 
 ---
 

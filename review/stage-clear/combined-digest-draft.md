@@ -214,3 +214,52 @@ route, surfaced not cut: the X14 pin docstring in
 `tier0/tests/test_s13_exploit_pins.py` still reads "one word owed" for a
 question R118 answered — that is Track V's still-owed annotation (named on
 Q10's compact row), not an R-C cut.
+
+---
+
+## R-D — ledger volumization (appended 2026-08-06; the "million lines" move)
+
+**What moved: the tier0 ledger's R39–R99 range — 2,943 lines — into
+`tier0/DECISIONS-archive-R39-R99.md`, byte-identical below a dated volume
+banner.** Verified mechanically at split time (the moved bytes compare equal),
+and nothing inside any ruling changed: strikes, DRAFT markers and banners
+travel with their rulings, including the interleaved D-series entries D2–D5.
+The live `tier0/DECISIONS.md` (5,063 → 2,177 lines) keeps its header, the
+pre-R39 prose record, and R100+, with a volume-pointer block and a
+**generated current-law digest** where the range used to be. R1–R38 were
+never headed entries anywhere; no entries were invented, and their back-index
+question stays queue §4. **The Klee ledger was deliberately not split**, per
+the plan: its still-operative prose entries (E2/E2b, the fork block) are
+interleaved with history, and separating them would take exactly the
+judgment calls this track is not allowed to make.
+
+**The status sidecar, honestly: 5 derived, 77 UNREVIEWED.** One row per
+ruling R39–R120 in `tier0/decisions-status.tsv`. The plan says statuses get
+one [USER] red-pen pass; that pass has not happened, so no
+operative/superseded judgment was authored. The five statuses recorded are
+the mechanically derivable ones, each with quoted evidence: R54/R55 (R56's
+preamble names their statline conclusions superseded), R56 (its own
+SUPERSEDED-BY-R73 banner), R88 (the exclusivity clause struck per R118),
+R102 (the escrow released and its banners struck per R113). The other 77
+rows say UNREVIEWED, and the digest renders them as unreviewed — listed,
+counted, and explicitly not judged. **The red-pen pass is now a queue row**
+(`docs/registry/user-queue.md` §4, "Decisions-status sidecar red-pen").
+
+**Every reader of the spine was taught the layout, and the notice posted
+first.** Before the split commit: `docs/registry/ledger-layout-note-2026-08-06.md`
+(the plan's drafted paragraph). In the same landing: the identifier registry's
+§1/§3 now resolve every R-number to its volume by a mechanical rule (R39–R99 →
+archive, R100+ → live) and §14 states the no-renumbering law; the citation
+lint resolves against both tier0 volumes (its 41 clause citations — mostly
+R90/R91, now archive-resident — still resolve); the P-ledger's gated-register
+guard covers `DECISIONS*.md` so the archive is as write-protected as the live
+file; the identifier lint scans and mines the archive; `tier0/harness/axes.py`'s
+D3 citation and the docs README's spine row repointed. The CI duplicate-number
+check graduated from an inline per-file script to `tools/lint_ledger_numbers.py`
+— one R/D namespace across all volumes, with red-and-green tests — and a new
+CI step fails the build if the generated digest goes stale or gets hand-edited.
+
+**Vacation-test summary:** the spine's closed range changed address, byte
+for byte, and every tool and index that reads it follows; the one thing that
+would make the digest say "current law" — your red-pen pass over 77
+unreviewed statuses — is written on your queue, not guessed at.

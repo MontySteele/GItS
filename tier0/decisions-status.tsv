@@ -1,0 +1,103 @@
+# decisions-status.tsv — sidecar status table for the ruling ledger (Track R-D,
+# Clear the Stage, 2026-08-06; plan of record review/stage-clear/refactor-plan.md §R-D).
+# One row per ruling R39–R120, across all volumes (tier0 DECISIONS volumes + klee-mod).
+#
+# STATUS DISCIPLINE — read before editing:
+#   The plan says statuses need one [USER] red-pen pass. That pass HAS NOT
+#   HAPPENED (queue row: docs/registry/user-queue.md §4, "Decisions-status
+#   sidecar red-pen"). Until it does, no operative/superseded judgment is
+#   authored here. Only two kinds of status appear:
+#     - MECHANICALLY DERIVED: the ledger text itself carries an explicit
+#       superseded/amended/discharged strike or banner, or a later ruling names
+#       it so in its own text. The citing evidence is in the evidence column.
+#     - UNREVIEWED: everything else. UNREVIEWED is not a judgment — it means
+#       "the red-pen pass has not read this row", nothing more.
+#   After the red-pen pass, statuses move to the plan's full vocabulary
+#   (OPERATIVE | SUPERSEDED-BY:R<n> | DISCHARGED | HISTORICAL), one judgment
+#   recorded once, [USER]'s.
+#
+# The digest generator (tools/gen_decisions_digest.py) is a pure reader of this
+# file; it renders UNREVIEWED rows as unreviewed rather than pretending.
+# ruling	status	evidence
+R39	UNREVIEWED
+R40	UNREVIEWED
+R41	UNREVIEWED
+R42	UNREVIEWED
+R43	UNREVIEWED
+R44	UNREVIEWED
+R45	UNREVIEWED
+R46	UNREVIEWED
+R47	UNREVIEWED
+R48	UNREVIEWED
+R49	UNREVIEWED
+R50	UNREVIEWED
+R51	UNREVIEWED
+R52	UNREVIEWED
+R53	UNREVIEWED
+R54	AMENDED-BY:R56	R56 preamble, verbatim: "USER RULING, same day as R54/R55 and SUPERSEDING their statline conclusions. R54 chose meter 20 on a 10-card starter with a /4 bank read; this ruling rebuilds the starting deck and flips the read to a multiplier. R54's act numbers are a superseded world -- never compare them unlabeled."
+R55	AMENDED-BY:R56	R56 preamble names R54/R55 jointly: "SUPERSEDING their statline conclusions" (statline conclusions only; the rest of R55 — the rename batch and voice law — is not named and is NOT judged here).
+R56	SUPERSEDED-BY:R73	In-entry banner at R56, verbatim: "SUPERSEDED BY R73 (Neap Tide v2.1, 2026-07-26; addendum A7 pointer.) ... every Kokomi number in this entry is archive." The banner's own carve-out (the withdrawal "still stands on its own terms") travels with it.
+R57	UNREVIEWED
+R58	UNREVIEWED
+R59	UNREVIEWED
+R60	UNREVIEWED
+R61	UNREVIEWED
+R62	UNREVIEWED
+R63	UNREVIEWED
+R64	UNREVIEWED
+R65	UNREVIEWED
+R66	UNREVIEWED
+R67	UNREVIEWED
+R68	UNREVIEWED
+R69	UNREVIEWED
+R70	UNREVIEWED
+R71	UNREVIEWED
+R72	UNREVIEWED
+R73	UNREVIEWED
+R74	UNREVIEWED
+R75	UNREVIEWED
+R76	UNREVIEWED
+R77	UNREVIEWED
+R78	UNREVIEWED
+R79	UNREVIEWED
+R80	UNREVIEWED
+R81	UNREVIEWED
+R82	UNREVIEWED
+R83	UNREVIEWED
+R84	UNREVIEWED
+R85	UNREVIEWED
+R86	UNREVIEWED
+R87	UNREVIEWED
+R88	AMENDED-BY:R118	The exclusivity clause is struck at R88 itself with a dated banner: "AMENDED 2026-08-06 (R118, §5 row 10.8) -- the exclusivity clause above is ... superseded by the cleaner principle"; R118's own text: "R88 is amended -- the exclusivity clause ... struck". The rest of R88 (the slot-4 grant, countersigned at R108) is not struck and is NOT judged here.
+R89	UNREVIEWED
+R90	UNREVIEWED
+R91	UNREVIEWED
+R92	UNREVIEWED
+R93	UNREVIEWED
+R94	UNREVIEWED
+R95	UNREVIEWED
+R96	UNREVIEWED
+R97	UNREVIEWED
+R98	UNREVIEWED
+R99	UNREVIEWED
+R100	UNREVIEWED
+R101	UNREVIEWED
+R102	DISCHARGED-BY:R113	R102's escrow was its operative content ("until the C2 probe reports"); R113's heading releases it and each of the three escrow banners R102 planted is struck with the citation "STRUCK 2026-08-06 (R113) -- escrow released, instrument vindicated."
+R103	UNREVIEWED
+R104	UNREVIEWED
+R105	UNREVIEWED
+R106	UNREVIEWED
+R107	UNREVIEWED
+R108	UNREVIEWED
+R109	UNREVIEWED
+R110	UNREVIEWED
+R111	UNREVIEWED
+R112	UNREVIEWED
+R113	UNREVIEWED
+R114	UNREVIEWED
+R115	UNREVIEWED
+R116	UNREVIEWED
+R117	UNREVIEWED
+R118	UNREVIEWED
+R119	UNREVIEWED
+R120	UNREVIEWED

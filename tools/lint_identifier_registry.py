@@ -63,7 +63,10 @@ BASELINE = REPO / "docs" / "registry" / "known-identifiers.tsv"
 # carry historical inline labels that are self-qualifying in context
 # ("G8 (Neap Tide v2.1)") and linting them would be pure noise.
 SCAN_ROOTS = ("docs", "review")
-EXTRA_FILES = ("tier0/DECISIONS.md", "klee-mod/DECISIONS.md", "README.md")
+# The archive volume (R-D ledger split, 2026-08-06) is scanned like the live
+# ledger; missing-file entries are skipped, so this is safe pre- and post-split.
+EXTRA_FILES = ("tier0/DECISIONS.md", "tier0/DECISIONS-archive-R39-R99.md",
+               "klee-mod/DECISIONS.md", "README.md")
 
 # The registry and its snapshot are the resolver; they name every token by
 # construction and must not be scanned as if they minted them.
@@ -116,7 +119,8 @@ PATTERNS = {
 }
 
 # Ruling / D-series headings, mined only from the two ledgers' `## R12` form.
-LEDGERS = ("tier0/DECISIONS.md", "klee-mod/DECISIONS.md")
+LEDGERS = ("tier0/DECISIONS.md", "tier0/DECISIONS-archive-R39-R99.md",
+           "klee-mod/DECISIONS.md")
 HEADING = re.compile(r"(?m)^##\s+(R\d+|D\d+)\b")
 
 
