@@ -1682,6 +1682,22 @@ NOT self-closed from the repo: this needs the eyes-on result.
 > fallback**, and this entry's STATUS line is still unchanged — do not
 > baseline bomb numbers against it until either instrument answers.
 
+> **PROBE RUN 2026-08-06 (Track M, wave 8) — ANSWERED: no detonation on the
+> killing blow, sim and game agree; `S4-G15` CLOSED.** Report:
+> `docs/probe-e-corpse-detonation.md`. The killing blow does **not**
+> early-detonate the bombs in either instrument: the game showed no Spark and
+> no detonation damage on a scripted killing blow against a bombed 1-HP
+> target (relic tell verified live twice in the same sitting — on-hit while
+> alive, and the normal start-of-turn schedule), and tier0, **executed rather
+> than quoted**, carries an alive-guard on the on-hit path and does not
+> detonate either. The missing `IsDead` guard in
+> `BombPower.AfterDamageReceived` is harmless **for this hook**, measured.
+> **Second finding, surfaced not fixed:** this entry's STAKES paragraph
+> ("the sim detonates unconditionally") states the sim's behaviour backwards,
+> as `NC-18` claimed — its correction remains [USER]'s ruling; nothing above
+> is rewritten (R101b). The ~10-second table settlement is retired by the
+> answer it was waiting for.
+
 ## Furina character-select crash: preload paths and hook id collision (2026-07-23)
 
 Windows playtest reached character select, then crashed in

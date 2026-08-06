@@ -49,8 +49,16 @@ def _status_map(row: dict) -> dict:
     return out
 
 
+# Probe (d) (R120 / 10.13): the meter-loaded reconstruction sets cap and
+# floor EXPLICITLY so a loaded level cannot be silently clipped by
+# `min(p.fanfare_cap, ...)`. Printed in the table header per the
+# registration's method step 4.
+METERS_FANFARE_CAP = 999
+METERS_FANFARE_FLOOR = 0
+
+
 def sim_block(names: Names, card_name: str, arm: str, character: str = "furina",
-              status: dict | None = None):
+              status: dict | None = None, fanfare: int | None = None):
     card = names.card(card_name, played=True)
     if card is None:
         return None
@@ -67,6 +75,14 @@ def sim_block(names: Names, card_name: str, arm: str, character: str = "furina",
     for name, amount in (status or {}).items():
         if name in ("frail", "weak", "vulnerable", "strength", "dexterity"):
             player.powers[name] = amount
+    # Probe (d)'s third column: the recorded Fanfare level written onto the
+    # reconstructed player before `effects.resolve_card`. Reconstruction,
+    # not a rule -- the existing `1_per_4_fanfare` arm of
+    # `effects._bonus_formula` is what gets exercised, unmodified.
+    if fanfare is not None:
+        player.fanfare_cap = METERS_FANFARE_CAP
+        player.fanfare_floor = METERS_FANFARE_FLOOR
+        player.fanfare = int(fanfare)
     spot = ARM_SPOTLIGHT[arm]
     player.spotlight = spot if spot else player.character_id
     enemy = Enemy(hp=200, max_hp=200, name="probe", intents=[])
@@ -79,15 +95,39 @@ def sim_block(names: Names, card_name: str, arm: str, character: str = "furina",
     return state.player.block - before
 
 
+def _fanfare_of(row: dict):
+    """The wire's recorded Fanfare level at a reading, or None."""
+    res = row.get("resources")
+    if isinstance(res, dict) and "KLEEMOD_FANFARE" in res:
+        return int(res["KLEEMOD_FANFARE"])
+    return None
+
+
 def main(argv: list[str]) -> int:
+    # Probe (d) (R120 / 10.13): `--meters` adds the meter-loaded
+    # reconstruction column and its layer-2 sub-fork (meter read BEFORE the
+    # play vs AFTER the play's own Fanfare income lands). Without the flag
+    # the output is byte-identical to B2's published table.
+    meters = "--meters" in argv
+    argv = [a for a in argv if a != "--meters"]
     paths: list[str] = []
     for pat in argv or ["understudy/logs/soak/probe-b2-*.jsonl"]:
         paths.extend(sorted(globmod.glob(pat)))
     names = Names()
-    print("arm\tround\tcard\tengine\tsim_blind\tdiff_blind\tsim_status\tdiff_status\tfrail\tblock_before\tblock_after")
+    header = ("arm\tround\tcard\tengine\tsim_blind\tdiff_blind\tsim_status"
+              "\tdiff_status\tfrail\tblock_before\tblock_after")
+    if meters:
+        print("== --meters reconstruction: fanfare_cap=%d fanfare_floor=%d "
+              "(set explicitly; never left to build_player) =="
+              % (METERS_FANFARE_CAP, METERS_FANFARE_FLOOR))
+        header += ("\tfanfare_pre\tsim_m_pre\tdiff_m_pre"
+                   "\tfanfare_post\tsim_m_post\tdiff_m_post")
+    print(header)
     agg: "collections.Counter[tuple]" = collections.Counter()
     diff_blind: "collections.Counter[int]" = collections.Counter()
     diff_status: "collections.Counter[int]" = collections.Counter()
+    diff_m_pre: "collections.Counter[int]" = collections.Counter()
+    diff_m_post: "collections.Counter[int]" = collections.Counter()
     relics: set = set()
     enemies: set = set()
     estat: set = set()
@@ -114,9 +154,31 @@ def main(argv: list[str]) -> int:
                     estat.add(str(tuple(s)))
             d1 = "" if not isinstance(sim, int) else sim - eng
             d2 = "" if not isinstance(sim2, int) else sim2 - eng
-            print("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s"
-                  % (arm, cur.get("round"), card, eng, sim, d1, sim2, d2,
-                     status.get("frail", 0), cur["block"], nxt["block"]))
+            line = ("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s"
+                    % (arm, cur.get("round"), card, eng, sim, d1, sim2, d2,
+                       status.get("frail", 0), cur["block"], nxt["block"]))
+            if meters:
+                # The layer-2 fork, run as two sub-columns rather than
+                # chosen: the meter as read BEFORE the play (this reading)
+                # and AFTER the play's own income landed (the next reading).
+                f_pre = _fanfare_of(cur)
+                f_post = _fanfare_of(nxt)
+                m1 = (sim_block(names, card, arm, status=status,
+                                fanfare=f_pre)
+                      if f_pre is not None else "")
+                m2 = (sim_block(names, card, arm, status=status,
+                                fanfare=f_post)
+                      if f_post is not None else "")
+                dm1 = m1 - eng if isinstance(m1, int) else ""
+                dm2 = m2 - eng if isinstance(m2, int) else ""
+                if isinstance(m1, int):
+                    diff_m_pre[m1 - eng] += 1
+                if isinstance(m2, int):
+                    diff_m_post[m2 - eng] += 1
+                line += ("\t%s\t%s\t%s\t%s\t%s\t%s"
+                         % ("" if f_pre is None else f_pre, m1, dm1,
+                            "" if f_post is None else f_post, m2, dm2))
+            print(line)
             if isinstance(sim, int):
                 agg[(arm, card, eng, sim, sim2, status.get("frail", 0))] += 1
                 diff_blind[sim - eng] += 1
@@ -135,6 +197,13 @@ def main(argv: list[str]) -> int:
           " agree=%d/%d" % (diff_blind[0], sum(diff_blind.values())))
     print("  selector-known, status-LOADED :", dict(sorted(diff_status.items())),
           " agree=%d/%d" % (diff_status[0], sum(diff_status.values())))
+    if meters:
+        print("  status+meter (PRE-play)       :",
+              dict(sorted(diff_m_pre.items())),
+              " agree=%d/%d" % (diff_m_pre[0], sum(diff_m_pre.values())))
+        print("  status+meter (POST-play)      :",
+              dict(sorted(diff_m_post.items())),
+              " agree=%d/%d" % (diff_m_post[0], sum(diff_m_post.values())))
     print()
     print("relics seen on the wire:", sorted(relics))
     print("enemies seen:", sorted(enemies))
