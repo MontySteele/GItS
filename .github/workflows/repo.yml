@@ -117,6 +117,12 @@ jobs:
       # -- see the module docstring.
       - name: R-number citations (canon_role_tempo)
         run: python tools/lint_r_citations.py
+      # Ledger volumization (Track R-D, Clear the Stage, 2026-08-06). The
+      # current-law digest block in tier0/DECISIONS.md is GENERATED and never
+      # hand-edited; this regenerates and byte-diffs, so a hand edit or a
+      # stale block (new ruling headed, digest not re-run) fails loudly.
+      - name: decisions digest staleness
+        run: python tools/gen_decisions_digest.py --check
       # Class-P purge (P-B), 2026-08-06. The charter's two suite-failure
       # conditions, verbatim from docs/class-p-charter-2026-08-06.md §3
       # (R119): a P-ledger row without a five-line attestation fails; a
@@ -140,8 +146,12 @@ jobs:
       - name: art coverage (runs; asserts nothing about art)
         run: python tools/art_coverage.py
 
-  # (c) Ledger integrity. Finds nothing today (36 rulings, 0 duplicates) and is
-  # proposed as a standing guard on a hand-maintained sequence. Drop it freely.
+  # (c) Ledger integrity — a standing guard on a hand-maintained sequence.
+  # Widened 2026-08-06 (Track R-D ledger split): the inline per-file script
+  # graduated to tools/lint_ledger_numbers.py, which scans the volume globs
+  # tier0/DECISIONS*.md + klee-mod/DECISIONS*.md as ONE namespace, so a number
+  # headed in two volumes (the failure mode the split created) is a finding.
+  # Tested in tier0/tests/test_ledger_numbers_lint.py, both directions.
   ledger:
     runs-on: ubuntu-latest
     steps:
@@ -149,24 +159,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: no duplicate R/D numbers
-        run: |
-          python - <<'EOF'
-          import collections, pathlib, re, sys
-          bad = 0
-          for f in ("tier0/DECISIONS.md", "klee-mod/DECISIONS.md"):
-              p = pathlib.Path(f)
-              if not p.exists():
-                  continue
-              seen = collections.Counter(
-                  m.group(0) for m in
-                  re.finditer(r"(?m)^##\s+[RD]\d+\b", p.read_text(encoding="utf-8")))
-              for heading, n in sorted(seen.items()):
-                  if n > 1:
-                      print(f"{f}: {heading.strip()} appears {n} times")
-                      bad += 1
-          sys.exit(1 if bad else 0)
-          EOF
+      - name: no duplicate R/D numbers across volumes
+        run: python tools/lint_ledger_numbers.py
 
   # (d) Patch sentinel -- ADVISORY, NEVER BLOCKING (S12, 2026-08-05).
   #

@@ -104,7 +104,12 @@ def _harvest() -> dict[int, tuple[str, str, str]]:
             if not title:
                 title = after.strip()
             out.setdefault(int(m.group(1)), ("", title, rel))
-    return out
+    # R1-R38 are OUT OF SCOPE by design: they were never written as headed
+    # entries, resolving them is the open queue s.4 back-index question, and
+    # this tool must not invent the index. (klee-mod carries bold `**R24.`-
+    # style lines for a few of them; whether those ARE the entries is exactly
+    # the judgment the queue row owns.)
+    return {n: v for n, v in out.items() if n >= 39}
 
 
 def _sidecar() -> dict[int, str]:
