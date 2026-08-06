@@ -28,7 +28,7 @@ an open-item row anywhere else; the rule and its two escape hatches are
 
 **House rules for this directory, so a docket cannot quietly become a plan.**
 
-> **QUEUE POINTER, added 2026-08-06 by the housekeeping sweep (Track X).** The single source of truth for what is open and for whom is now **`docs/registry/user-queue.md`**. This section keeps its full text and stays the place the detail lives; the queue file is the index that says which items are still open, which were discharged and by which ruling. Where the two disagree about a *status*, the queue file is the later reconciliation. Identifier collisions (`G1`, `D5`, `C1`, `P1`, `S4`, `X<n>`) resolve at `docs/registry/identifiers.md`.
+> **QUEUE POINTER** (Track X, 2026-08-06; compressed by Track Z, Z-6). Status for everything below lives in `docs/registry/user-queue.md`; short codes resolve at `docs/registry/identifiers.md`. Full rule: `docs/registry/identifiers.md` §16.
 
 
 1. A docket entry records a verdict, a routing and a question. It does not

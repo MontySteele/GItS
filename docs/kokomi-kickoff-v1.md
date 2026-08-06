@@ -20,10 +20,13 @@ Slot: 3 (per roster amendment A1)
   Itto-vs-Zhongli open item in A1. Consequence: Itto is now eligible for the
   Inazuma companion pool (mirror of the Neuvillette-reserved pattern in
   reverse). Record in DECISIONS.md.
-- Healing law (conjunctive): true in-combat healing is Rare AND Exhaust;
-  sub-Rare sustain routes through Block (incl. pre-emptive/delayed Block) or
-  capped buffer pools. Potions and relic-scale trickles exempt by existing
-  policy.
+- Healing law (conjunctive) — **stated once, in the constitution**: the R8 law
+  is `docs/teyvat-spire-design-principles.md` Guardrail 6, with its potion and
+  relic-trickle exemptions. Read it there. This charter takes no exception to
+  it; §2's "no healing exception taken" below is the whole of Kokomi's
+  disposition. Pointer substituted for the restatement 2026-08-06 (docs diet,
+  Track Z / Z-6); no word of the law changed, and the canonical text is
+  untouched.
 - Volatility/stability axis (standing): Furina = HP volatility, Kokomi = HP
   stability. Element spread accepted (second Hydro).
 - SUPPORT_CARRY / enabler-not-carry, control_uptime detector, KNOB_READS law,
