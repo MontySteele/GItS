@@ -287,9 +287,12 @@ Wind batch (Track R), **F6 blocked** on a fact nobody supplied.
 
 ## 6. `FLAG-<n>` — held flags
 
-Four clarifications carried out of the sitting of 2026-08-06 unresolved.
-**Nothing may be built against a held flag** — not a probe, not a pre-draft,
-not a "while we're in there" (`docs/dockets/README.md` house rule 3).
+This section's operative prose — the four then-unresolved clarifications and
+the nothing-built-against-a-held-flag framing — is superseded: all four flags
+were RULED 2026-08-06 (R114), and the law itself lives at
+`docs/dockets/README.md` house rule 3, which governs any future flag. The
+struck table below is kept as the record. *(Pointerized 2026-08-06, Clear the
+Stage R-C / P-4; excision-log row E-4.)*
 
 | Flag | Family | Question | Recorded at |
 |---|---|---|---|
