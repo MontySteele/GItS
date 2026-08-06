@@ -10,13 +10,16 @@ heading/entry line, and the sidecar status.
 
 THE GENERATOR CARRIES NO JUDGMENT
 ---------------------------------
-Statuses come from `tier0/decisions-status.tsv`, and that sidecar has NOT had
-its [USER] red-pen pass yet (queue: `docs/registry/user-queue.md` §4). So
-almost every row is UNREVIEWED, and the digest says so per row rather than
-pretending a current-law determination exists. The few non-UNREVIEWED rows are
-mechanically derived from explicit strikes/banners in the ledger text; their
-evidence is in the sidecar. When the red-pen pass lands, the sidecar gains real
-statuses and this digest becomes the current-law surface with zero code change.
+Statuses come from `tier0/decisions-status.tsv` and this tool authors none of
+them. The sidecar's rows were triaged by the Class-P status pass of 2026-08-06
+(`docs/registry/status-pass-digest-2026-08-06.md`), under a decision rule the
+digest restates rather than re-derives: OPERATIVE is an ABSENCE claim -- no
+citable superseder was found, search scope recorded in the row -- a
+moved status (`AMENDED-BY` / `SUPERSEDED-BY` / `DISCHARGED-BY:R<n>`) is
+recorded only on an explicit citation quoted in the row, and DOUBT means
+supersession is arguable and is a live [USER] queue row. The rendered header
+below counts the three categories mechanically, so it cannot drift from the
+file it reads.
 
 Titles are mechanical: for the tier0 volumes, the `## R<n> -- title (date)`
 heading line; for `klee-mod/DECISIONS.md`, the `**R<n>. ...**` entry line of
@@ -146,20 +149,27 @@ def render() -> str:
     if problems:
         raise SystemExit("gen_decisions_digest: " + "; ".join(problems))
 
+    operative = sum(1 for s in statuses.values() if s == "OPERATIVE")
+    doubt = sum(1 for s in statuses.values() if s == "DOUBT")
     unreviewed = sum(1 for s in statuses.values() if s == "UNREVIEWED")
-    derived = len(statuses) - unreviewed
+    moved = len(statuses) - operative - doubt - unreviewed
+    unread = (f", {unreviewed} UNREVIEWED (not yet read by any pass)"
+              if unreviewed else "")
 
     lines = [
         BEGIN,
         "",
         f"**{len(statuses)} rulings across the volumes — "
-        f"{derived} status-derived mechanically from explicit "
-        f"strikes/banners, {unreviewed} UNREVIEWED.** UNREVIEWED means the "
-        "sidecar's [USER] red-pen pass (queue: "
-        "`docs/registry/user-queue.md` §4) has not read that row; it is not "
-        "a judgment that the ruling is or is not current law. Statuses and "
-        "evidence: `tier0/decisions-status.tsv`. Volume resolution: "
-        "`docs/registry/identifiers.md` §3.",
+        f"{operative} OPERATIVE, {moved} moved by an explicit citation, "
+        f"{doubt} DOUBT{unread}.** **OPERATIVE is an absence claim** — no "
+        "citable superseder was found, with the search scope recorded in the "
+        "row — and not a finding that a ruling is beyond re-opening. A moved "
+        "status names the citing ruling and states how much of the entry the "
+        "move covers; **DOUBT** means supersession is arguable and the row is "
+        "a live [USER] queue item. Statuses and evidence: "
+        "`tier0/decisions-status.tsv`; the pass that set them: "
+        "`docs/registry/status-pass-digest-2026-08-06.md`. Volume "
+        "resolution: `docs/registry/identifiers.md` §3.",
         "",
     ]
     for n in sorted(statuses):

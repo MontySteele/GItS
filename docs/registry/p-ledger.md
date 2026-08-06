@@ -143,6 +143,31 @@ registry's §14 mandates exactly this class of correction.
 4. Predictability — mechanical grep; no judgment.
 5. No gate collision — registry hygiene; nothing gated.
 
+## C-13 — the decisions-status sidecar's 77 UNREVIEWED rows are triaged (queue §4)
+
+**What:** the standing red-pen row asked for one judgment per ruling. The
+[USER] status-pass order of 2026-08-06
+(`docs/dispatch-2026-08-06-status-pass-order.md`, verbatim) routes it through
+Class-P by supplying a decision rule that removes the judgment: **OPERATIVE is
+an absence claim** (no citable superseder found, search scope recorded in the
+row), **a moved status requires an explicit citation** quoted in the row with
+its scope stated, and **arguable supersession is DOUBT** and stays a queue
+item. Executed over all 77: **68 OPERATIVE, 6 moved on in-entry dated banners
+that name their citing ruling (R84/R87/R96 → R107, R90/R108 → R118, R116 →
+R117), 3 DOUBT** (R59, R103, R107 — one queue row, riding `S4-G9`). The five
+pre-derived rows are byte-identical. Digest:
+`docs/registry/status-pass-digest-2026-08-06.md`.
+**Predictability:** the order states the rule and the rule is a search, not a
+verdict — every recorded move quotes the banner that makes it, and every row
+where the answer needed taste is DOUBT rather than resolved.
+**Handle:** `e0b563c`
+**Attestation:**
+1. Zero design authority — a status column on a record index; no card, number, player-facing text, law, or money moves, and no ruling's text is touched.
+2. Truth-restoring — replaces 77 rows of "nobody has read this" with what a full citation search actually found, and says out loud that OPERATIVE means absence-of-citation rather than endorsement.
+3. Reversible in one commit — `git revert e0b563c` restores all 77 rows and the header. Blast radius of the follow-up: the generated digest block re-renders with `python tools/gen_decisions_digest.py --write` (tool-owned output, not a hand edit — which is exactly why it rides the follow-up commit and not the handle, keeping the handle clear of every [USER]-gated register); the generator's header prose and `tier0/tests/test_decisions_digest.py`'s honesty clause are **generalized, not weakened** — from "UNREVIEWED rows must render as UNREVIEWED" to "every row renders as its status and the header counts every category", with the UNREVIEWED half still binding the moment a new ruling lands unread.
+4. Predictability — the order fixes the decision rule in advance and forbids inference; the six moves each quote a dated banner naming their citer, and the three rows where a reasonable owner could answer differently are recorded as DOUBT, not resolved.
+5. No gate collision — the sidecar is not [USER]-gated (the ledger volumes it indexes are, and none is written here), not escrowed, not a pre-registration, and not a measurement surface; the DECISIONS ledgers themselves are untouched apart from the generated digest block, which the generator owns and CI checks.
+
 ---
 
 ## NOT landed — the doubt set, recorded so the digest can say why (no rows above cover these)
