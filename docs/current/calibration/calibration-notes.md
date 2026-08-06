@@ -1,15 +1,6 @@
-> **MOVED 2026-08-06 — Clear the Stage, Track R-B resumption (R121 `Q20`, MOVE-WITH-RESOLVER; charter R119, rail 1).**
-> Old path: `docs/calibration-notes.md` — new path: `docs/archive/calibration-notes.md`.
-> Verbatim move: everything below this banner is byte-identical to the
-> pre-move file. Live citers repointed in the move commit; ledger and other
-> frozen citations keep the old path on purpose (rail 1: ledger bytes are
-> never rewritten) and resolve through the moved-path resolver table,
-> `docs/registry/identifiers.md` §17. Per-file map:
-> `review/stage-clear/rb-move-manifest.tsv`.
-
 # Difficulty calibration — working notes
 
-> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
 Phase after the relic/potion/ancient layer (`docs/archive/relic-potion-layer-plan.md`).
 The runs are now "realistic" (full player-side power budget), so per the

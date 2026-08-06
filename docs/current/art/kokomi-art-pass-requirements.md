@@ -1,6 +1,6 @@
 # Kokomi Art Pass Requirements
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 **Date:** 2026-07-25
 **Status:** card shortlists built and provisionally applied (77 faces, awaiting
@@ -19,7 +19,7 @@ the [USER] taste pass); **character-shell track DONE** — see §5a
 *(Stale since later the same day — recap note 2026-07-26: the shell track
 shipped (§5a, commit `68fb11b`) and all 73 faces carry applied provisional
 rank-1 picks (`6f1b969`); "zero exist" described the pre-pass world. The
-[USER] taste pass is what remains — `docs/archive/open-playtest-items.md` §6.1.)*
+[USER] taste pass is what remains — `docs/current/playtest/open-playtest-items.md` §6.1.)*
 
 *(Bill correction 2026-07-26, post-merge sweep: **58 → 62**. The Neap Tide
 amendment added four faces this table did not follow — R73's
@@ -208,8 +208,8 @@ the inventory that is not scarce relative to its lane.
 
 ## 5. Order of work
 
-1. ~~Hunt the real inventory~~ — **done**, this document.
-2. ~~Ban what fails on sight~~ — **done**, `art_lint.BANNED_SOURCE_FAMILIES`.
+1. Hunt the real inventory — **done**, this document.
+2. Ban what fails on sight — **done**, `art_lint.BANNED_SOURCE_FAMILIES`.
 3. Build `art/plan.tsv` shortlists — 3 ranked candidates per face, 73 faces.
    Companions first (mechanical), then Kokomi by lane.
 4. `python tools/art_fetch.py` → `art/raw/` + `art/SOURCES.tsv`.

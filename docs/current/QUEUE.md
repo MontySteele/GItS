@@ -32,7 +32,7 @@
 | `S4-G6` | Declare Kokomi's HP stability band **from design intent, before her confirmatory playtest** (may not be revised against it) | OPEN — gates her protocol playtest; re-anchored to post-rework build | user-queue §2; `DEC-D5` clauses 2–4 |
 | `S4-G13` | Kokomi measures below the Ironclad-anchored floor — **pick one of three levers** (Code may build any, may pull none); plus the `NT-G5` fork evaluation (weak-or-fine), whose only accepted input is `OT-1` | OPEN | user-queue §2; `klee-mod/DECISIONS.md` E2/E2b |
 | `S4-G14` / `OT-1` | Play the Kokomi protocol playtest deliberately against the written question list (exploratory runs cannot be graded); `OT-1` = draw and play Neap Tide, report weak or fine | OPEN — table time; blocked on `S4-G6` + N1 attribution pass | user-queue §2/§7; `docs/current/playtest/kokomi-playtest-protocol.md` |
-| `M8` | Three Kokomi card-art rulings: crop-reuse budget (state a number or eyes-on per card); whether Watatsumi/shrine environment art counts as a card face (Furina rejected "a random hallway"); whether to hand-crop the banned `Character Details 1` for a Rare | OPEN | user-queue §10; `docs/kokomi-art-pass-requirements.md` §6 |
+| `M8` | Three Kokomi card-art rulings: crop-reuse budget (state a number or eyes-on per card); whether Watatsumi/shrine environment art counts as a card face (Furina rejected "a random hallway"); whether to hand-crop the banned `Character Details 1` for a Rare | OPEN | user-queue §10; `docs/current/art/kokomi-art-pass-requirements.md` §6 |
 | `M9` | Three Kokomi v0.4 leftovers: ratify the meter-20 number on the 500-run confirm; rename `epiphany_of_the_deep` → "Song of Pearls"; keep or drop the commander Garment-uptime watch | OPEN | user-queue §10; `docs/archive/kokomi-v0.4-report.md` §6 |
 
 ## 3. Klee — archetype bands and scorecard invariants
@@ -86,7 +86,7 @@
 | `S4-G20` | A bundle of small leftovers: Standing Ovation boost expiry (text-vs-intent); sim-vs-C# salon RNG divergence (accept or fix); three taste passes (Kokomi 58 faces + 15 companions, L12 duplicate pairs, `kaboom == spark_knight_style`); two infra toggles (branch protection / `gh`; manifest MAJOR bump, dormant by design) | OPEN | user-queue §2; backlog §1 P3-cluster + §5 |
 | N + O TOP-5 | Read the top five findings of the lore-fidelity and instrument-redteam ledgers (both worst-first); includes `N-1` and the PROVISIONAL reactions-corpus caveat | OPEN — read | user-queue §4; `docs/archive/lore-fidelity-audit-2026-08-05.md`, `docs/archive/instrument-redteam-2026-08-05.md` |
 | S8 + S10 galleries | Taste calls on two proposal galleries: eight flagged potions/relics (S8), and enemies that could be reskinned rather than redesigned (S10 — RESKIN/REDESIGN is [USER]'s per north-star) | OPEN — taste | user-queue §4; `docs/current/dossiers/content/potion-relic-conversion-gallery.md`, `docs/current/dossiers/remap/reskin-gallery.md` |
-| Art debt | Kokomi 58 faces + 15 companions awaiting picks; four missing Kokomi portraits; `curtain_cue` wordmark; `breathless` mood; A7 + six Curtain Call power sigils; `AS2-E2` icon re-hunt (4 of 7); `grand_gala` re-hunt; two `ART-L12` duplicate pairs (`blazing_delight==true_spark_knight`, `crowd_work==standing_ovation`) awaiting a re-pick ruling | OPEN — mostly taste | user-queue §8; `docs/archive/backlog-2026-07-29.md` §5; `docs/kokomi-art-pass-requirements.md` §2a |
+| Art debt | Kokomi 58 faces + 15 companions awaiting picks; four missing Kokomi portraits; `curtain_cue` wordmark; `breathless` mood; A7 + six Curtain Call power sigils; `AS2-E2` icon re-hunt (4 of 7); `grand_gala` re-hunt; two `ART-L12` duplicate pairs (`blazing_delight==true_spark_knight`, `crowd_work==standing_ovation`) awaiting a re-pick ruling | OPEN — mostly taste | user-queue §8; `docs/archive/backlog-2026-07-29.md` §5; `docs/current/art/kokomi-art-pass-requirements.md` §2a |
 
 ## 10. Fontaine Rares close-out
 
@@ -120,3 +120,9 @@ behavior / money call before any code moves.
 Engineering follow-through lives in **BACKLOG.md**; the rules these decisions
 settle in **LAW.md**. Closed and answered items leave HEAD — they are in git
 history at tag `pre-simplification-2026-08-06`.
+
+Provenance entries are frozen citations: identifiers (`user-queue §2`,
+`eng-backlog`, `dockets/…`, the DECISIONS ledgers) and any path not in HEAD
+(`docs/archive/…`, `docs/registry/…`, retired sprint plans) name their
+source as it stood when the row migrated. Retrieve any of them with
+`git show pre-simplification-2026-08-06:<path>`.

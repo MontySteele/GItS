@@ -1,6 +1,6 @@
 # Atlas — tier05-metrics
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 Scope: `tier05/run_metrics.py`, `stats.py`, `sweeps.py`, `ab.py`, the seven
 `*_telemetry.py` modules, and the `exp_*` experiment-file convention.
@@ -196,7 +196,7 @@ definitions and names the sprint doc it belongs to, and a `Usage:` line
   older tables (`exp_roster_anchors.py:1-20`), and why every rate column now
   carries a Wilson interval so a point estimate cannot be quoted bare
   (`exp_roster_anchors.py:26-33`;
-  `docs/archive/sprint-sim-hygiene-log-2026-07-29.md:159`).
+  `docs/current/calibration/sprint-sim-hygiene-log-2026-07-29.md:159`).
 
 ## 6. Reading order
 

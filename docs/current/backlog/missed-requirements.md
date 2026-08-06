@@ -1,15 +1,6 @@
-> **MOVED 2026-08-06 — Clear the Stage, Track R-B resumption (R121 `Q20`, MOVE-WITH-RESOLVER; charter R119, rail 1).**
-> Old path: `docs/missed-requirements.md` — new path: `docs/archive/missed-requirements.md`.
-> Verbatim move: everything below this banner is byte-identical to the
-> pre-move file. Live citers repointed in the move commit; ledger and other
-> frozen citations keep the old path on purpose (rail 1: ledger bytes are
-> never rewritten) and resolve through the moved-path resolver table,
-> `docs/registry/identifiers.md` §17. Per-file map:
-> `review/stage-clear/rb-move-manifest.tsv`.
-
 # Missed requirements — recap audit, 2026-07-26
 
-> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
 > ## RETIRED AS A REGISTER 2026-08-06 — the open rows moved out
 >
@@ -20,14 +11,15 @@
 > that is what the migrated rows cite.
 >
 > Where its items went: §1.1, §1.2, §1.5, §2.5, §3.7, §4.4 and two Tier-5
-> debts → `docs/registry/user-queue.md` §10 (`M1`–`M5`, `M10`–`M12`); §1.3 →
+> debts → `docs/current/QUEUE.md` (`M1`–`M5`, `M10`–`M12`); §1.3 →
 > `S4-G6`; Tier-5's R29d → `S4-G11`; §3.3, §3.4 → `S4-G9`; Klee ask A3 →
 > `S4-G18`. Everything that needs only engineering — §2.1, §2.2, §2.3, §2.4,
 > §3.1, §3.2, §3.5, §3.6, §3.9, §4.1, §4.2, §4.5, §4.6 — →
-> `docs/dockets/engineering-backlog.md`. **Four of its items have since
+> `docs/current/BACKLOG.md`. **Four of its items have since
 > closed** (§1.4, §3.6's `SPOTLIGHT_BASE_MULT`, §3.8, Tier-5's two stale sheet
-> comments) and one more, §4.3's sprite-scale fix, is now shipped; that
-> docket's §8 names what discharged each.
+> comments) and one more, §4.3's sprite-scale fix, is now shipped; the retired
+> engineering-backlog docket's §8 (at tag `pre-simplification-2026-08-06`)
+> names what discharged each.
 
 Findings from a full read of all 89 project docs, cross-checked against the
 code (`tier0/`, `tier05/`, `klee-mod/KleeCode/`, `tools/`, the design-sheet

@@ -1,6 +1,6 @@
 # Atlas: tier0-harness-tests
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 Scope: `tier0/harness/` (axes, metrics, report, runner) and `tier0/tests/`.
 

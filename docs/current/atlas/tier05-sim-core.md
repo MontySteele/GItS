@@ -1,6 +1,6 @@
 # Atlas — tier05-sim-core
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 Scope: `tier05/model.py`, `acts.py`, `runner.py`, `draft.py`, `route.py`,
 `maps.py`, `cells.py` — the run-level simulator and the drafter.
@@ -134,7 +134,7 @@ fixture (`tier05/tests/conftest.py:17-38`), which patches `model.build_act_map`.
   diverged, 2/40 win flips — `draft.py:1475-1480`).
 - **`route_regret` does not exist**, though the research doc mandates it and
   `route.py`'s header once claimed it shipped (`route.py:13-15`,
-  `docs/archive/missed-requirements.md:93-104`); hunter-vs-cautious is the only real
+  `docs/current/backlog/missed-requirements.md:93-104`); hunter-vs-cautious is the only real
   route countermeasure. And do **NOT** calibrate `MAP_ROOM_ODDS` or the route
   policies against a winrate — the target is player behaviour (median ~2.5
   elites fought per act, range 1-4), and tuning a difficulty dial to a winrate

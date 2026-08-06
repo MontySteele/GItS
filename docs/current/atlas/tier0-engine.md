@@ -1,6 +1,6 @@
 # Atlas — tier0-engine
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 Scope: `tier0/engine/` — combat, effects, powers, statuses, reactions,
 resources, relics, potions, refpowers, state.

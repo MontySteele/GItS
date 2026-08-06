@@ -1,6 +1,6 @@
 # Atlas: understudy
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 Scope: `understudy/` — the bot playtest apparatus. Tests live at
 `tier0/tests/test_understudy_{rng,soak,policy_v1}.py` (1128 lines).

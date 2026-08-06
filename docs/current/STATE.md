@@ -42,7 +42,7 @@ absent on a fresh clone.
 
 ## Content inventory
 
-Live sim inventory (`docs/atlas/tier0-pilot-roster.md` §2): **298 cards, 5
+Live sim inventory (`docs/current/atlas/tier0-pilot-roster.md` §2): **298 cards, 5
 character sheets** (3 roster + 2 reference), **6 encounters, 15 pilot weight
 sets**. The battery encounters are frozen (`content/encounters/battery.yaml`,
 FROZEN 2026-07-19). Card sheets: `docs/klee-cards.yaml`, `docs/furina-cards.yaml`,
@@ -98,7 +98,8 @@ are never comparable across a stamp boundary unless labeled.
 
 ## Mod build environment (pinned)
 
-Per `klee-mod/DECISIONS.md`: Slay the Spire 2 **v0.107.1**, commit `59260271`
+Per the retired klee-mod DECISIONS ledger (frozen at tag
+`pre-simplification-2026-08-06`): Slay the Spire 2 **v0.107.1**, commit `59260271`
 (2026-06-18), Steam buildid `23811903`, appid `2868840`, branch `public`.
 MegaDot v4.5.1, BaseLib 3.3.7.0, .NET SDK 9.0.316, ilspycmd 8.2.0.7535. The PCK
 contract version is `roster-pck-v2`.
@@ -108,19 +109,19 @@ contract version is `roster-pck-v2`.
 - **tier0 combat kernel** — op interpreter, powers, statuses, reactions,
   resources; comparability-first and emit-only toward the run layer. 7-axis
   scorecard, anchor `(ref_ironclad, starter) = 3.0`, frozen battery.
-  (`docs/atlas/tier0-engine.md`, `tier0-harness-tests.md`)
+  (`docs/current/atlas/tier0-engine.md`, `tier0-harness-tests.md`)
 - **tier0.5 run sim + drafter** — run-level model, acts, runner, draft, and the
-  real StS2 16-floor map/route policy. (`docs/atlas/tier05-sim-core.md`,
+  real StS2 16-floor map/route policy. (`docs/current/atlas/tier05-sim-core.md`,
   `tier05-economy.md`, `tier05-metrics.md`)
 - **understudy** — the bot playtest bridge driving the real game (Guardrail-7,
-  no-fun rule). (`docs/atlas/understudy.md`)
+  no-fun rule). (`docs/current/atlas/understudy.md`)
 - **klee-mod** — the C# character mod (`KleeCode/`) plus the PCK build/deploy
-  pipeline. (`docs/atlas/klee-mod-cards.md`, `klee-mod-runtime.md`,
+  pipeline. (`docs/current/atlas/klee-mod-cards.md`, `klee-mod-runtime.md`,
   `klee-mod-build-pck.md`)
 - **vendor STS2_MCP bridge** — the vendored wire contract the understudy speaks.
-  (`docs/atlas/vendor-sts2-mcp.md`)
+  (`docs/current/atlas/vendor-sts2-mcp.md`)
 - **art pipeline** — `ImageGen/` card/UI/model art staged into the roster mod
-  and packed by `tools/build_pck.ps1`. (`docs/atlas/tools.md`)
+  and packed by `tools/build_pck.ps1`. (`docs/current/atlas/tools.md`)
 
 ## Active workstreams
 
@@ -141,4 +142,5 @@ Blessed mechanisms with a named quantity and a named trigger — monitored, not
 open decisions, and nothing is tuned on the strength of being watched. Each
 returns to [USER] only when its trigger fires: `W1` X4 (block-side Guest Cast),
 `W2` X6 (salon power level), `W3` X12 (co-op reaction potency — its instrument
-blocked on `O-1`, BACKLOG), `W4` X5 (fanfare floor). (`docs/dockets/watch-items.md`)
+blocked on `O-1`, BACKLOG), `W4` X5 (fanfare floor). (Migrated from the
+retired watch-items docket, frozen at tag `pre-simplification-2026-08-06`.)

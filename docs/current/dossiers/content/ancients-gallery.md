@@ -84,7 +84,7 @@ and quoted the article body and infobox directly.
 
 **What an "Ancient" is here.** In Slay the Spire 2 each act BEGINS by meeting an Ancient
 who heals the traveller and offers a choice of three durable boons
-(`docs/act2-act3-roster-research.md:199-205`). Act 1 is always Neow; the Act 2 pool is
+(`docs/current/research/act2-act3-roster-research.md:199-205`). Act 1 is always Neow; the Act 2 pool is
 Orobas / Pael / Tezcatara + Darv; the Act 3 pool is Nonupeipe / Tanx / Vakuu + Darv.
 Eight entities, and Darv recurs in both pools.
 
@@ -312,7 +312,7 @@ Stated so a script could check them. Each predicate runs over a candidate entity
 
 #### Register implications
 
-New register family implied by all three drafts: **Ancient dragons & Sovereigns** (Durin/Dragonspine, Apep/Apep's Oasis, Azhdaha/The Chasm). No existing block in `review/event-gallery/gallery.md` covers dragon speakers, so this is additive, not a conflict — with one boundary case flagged below.
+New register family implied by all three drafts: **Ancient dragons & Sovereigns** (Durin/Dragonspine, Apep/Apep's Oasis, Azhdaha/The Chasm). No existing block in `docs/current/dossiers/content/event-conversion-gallery.md` covers dragon speakers, so this is additive, not a conflict — with one boundary case flagged below.
 
 - A dragon speaker **always** names its gifts as parts of its own body (blood, wing, tooth, eye, scale, tears) and **never** as items, loot, rewards, prizes, or currency.
 - A Sovereign or ancient dragon is **always** older than the nation it lies in, and **always** establishes this by naming what stood there before it (Vindagnyr, the ancient Sumeru, the earth beneath Liyue Harbor); it **never** dates itself in human years, Archon reigns, or "five hundred years ago."
@@ -390,7 +390,7 @@ New register family implied by all three drafts: **Ancient dragons & Sovereigns*
 
 #### Register implications
 
-- ⚑ **No Natlan register block exists in `review/event-gallery/gallery.md`.** The existing blocks cover Melusines, Sangonomiya resistance, Akademiya, Forest Rangers & Aranara, Hilichurls, Adventurers' Guild, Knights of Favonius, Chinju Forest youkai, Liyue mercantile, and Fatui/Northland Bank — Natlan appears in none of them. Variant 2 is the first Natlan-sited draft I know of; opening a Natlan block is a [USER] call, not mine.
+- ⚑ **No Natlan register block exists in `docs/current/dossiers/content/event-conversion-gallery.md`.** The existing blocks cover Melusines, Sangonomiya resistance, Akademiya, Forest Rangers & Aranara, Hilichurls, Adventurers' Guild, Knights of Favonius, Chinju Forest youkai, Liyue mercantile, and Fatui/Northland Bank — Natlan appears in none of them. Variant 2 is the first Natlan-sited draft I know of; opening a Natlan block is a [USER] call, not mine.
 - **Hospitality-faction entities ALWAYS name a boon after a food or recipe entry that exists on the wiki (Chili-Mince Cornbread Buns, Tatacos, Grainfruit Meat Soup, Adeptus' Temptation, Blazed Meat Stew); they NEVER name it after an invented dish, an invented restaurant, or an invented drink.** Lint predicate: any capitalized dish-shaped noun phrase in a hospitality draft must resolve to a live Genshin wiki page title.
 - **A hospitality host ALWAYS gives the meal before any exchange is discussed, and NEVER states a price, tab, or debt for it.** This is the rule that keeps hospitality entities out of the gallery's Liyue-mercantile register ("everything is always a contract: price stated before service, terms recited, ledgers signed"). ⚑ Consequence for [USER]: a Liyue *restaurateur* (Chef Mao, Wanmin Restaurant) cannot voice an Ancient without one of the two rules bending — either the mercantile block gains a hospitality exemption, or Liyue Ancients are restricted to adepti/god hosts (variants 1 and 3), which is why I drafted it that way.
 - **Adepti and gods in a hospitality scene ALWAYS withhold the full history and let it be discovered afterwards; they NEVER narrate their own downfall to the player.** Marchosius cannot speak at all, and Madame Ping's canon habit is explicitly to let people find out for themselves. Compatible with the existing youkai rule ("youkai never explain themselves; consequences are folkloric and discovered after"); no conflict flagged.
@@ -454,7 +454,7 @@ New register family implied by all three drafts: **Ancient dragons & Sovereigns*
 - **Dainsleif, the Bough Keeper** — REJECTED under the playable-character precedent. He is the strongest thematic match in Genshin for "a being met once per act who returns what belongs to your own buried past", but his infobox reads `type = Upcoming` and the article states he "is an upcoming playable character in *Genshin Impact*" and "was announced to be an upcoming playable character on September 27, 2020" — `https://genshin-impact.fandom.com/api.php?action=query&prop=revisions&rvslots=main&rvprop=content&format=json&titles=Dainsleif`. Announced-playable is playable for register purposes. ⚑ [USER] may overrule if the register admits "announced but unreleased".
 - **Lisa Minci** — REJECTED, playable roster character. Recorded because canon explicitly nominates her for this exact office: Shatir calls Lisa "Mondstadt's Grand Conservator" and says she would have been his first pick for the House of Daena position had she stayed in Sumeru (`…&titles=House%20of%20Daena`, Lore). The librarian silhouette is therefore canon-endorsed even though this specific holder is unusable.
 - **Jifang** (Wanwen Bookhouse) — NOT rejected on type (Open-World NPC), but demoted: she is a vendor whose posture is "Pay first, read later" and "…You buying or not?", which reads as a shop, and Ancient rarity is precisely the thing shops filter out. Her husband Langqing carries the same lore without the till.
-- **The Akasha Terminal** — not drafted. `review/event-gallery/gallery.md` rations dead-Akasha-hardware scenes gallery-wide (Brain Leech's literal owns the device); a rogue-terminal Darv would be redundancy. Variant 1 uses the Akasha only as offstage backstory for why the library is a last-resort channel, never as onstage hardware.
+- **The Akasha Terminal** — not drafted. `docs/current/dossiers/content/event-conversion-gallery.md` rations dead-Akasha-hardware scenes gallery-wide (Brain Leech's literal owns the device); a rogue-terminal Darv would be redundancy. Variant 1 uses the Akasha only as offstage backstory for why the library is a last-resort channel, never as onstage hardware.
 
 #### Register implications
 
@@ -463,7 +463,7 @@ New register block, **Archives & Keepers of Record** (libraries, presses, privat
 - An archive-keeper **ALWAYS** gates access by credential, catalogue rule, permit, or editorial judgement, and **NEVER** by price. Predicate: in any scene whose speaker's `affiliation` is a library, archive, or press, the option/flavor text **NEVER** contains a currency token (`Mora`, `Gold`, a numeric price, "buy", "sell", "pay"). A keeper who charges is a merchant and belongs in the mercantile register instead.
 - The retrieved item is **ALWAYS** framed as already the traveller's own — borrowed against their name, written by their hand, filed under their record — and **NEVER** as new stock from the world. Predicate: keeper scenes **ALWAYS** contain a possessive referring to the recipient ("your", "yours", "back") in the line that hands the item over; they **NEVER** use acquisition verbs of first origin ("we found this", "a stranger left this", "newly arrived").
 - Keepers **ALWAYS** name the gate they are opening (restricted shelf, sealed record, unpublished proof) and **NEVER** claim the item is common. Predicate: at least one scarcity/restriction noun per keeper scene.
-- Akademiya-affiliated keepers **ALWAYS** inherit the existing **Akademiya** block in `review/event-gallery/gallery.md` on top of this one: dry and publication-obsessed diction, institutional disapproval offstage, never onstage enforcement, never slapstick. Variant 1 is written to satisfy both; **no conflict with the Akademiya block is asserted**. The one point of contact to watch: the Akademiya block makes the Sages/Matra the *offstage* antagonist, so a librarian's restricted-shelf gift **NEVER** triggers an onstage guard, arrest, or chase.
+- Akademiya-affiliated keepers **ALWAYS** inherit the existing **Akademiya** block in `docs/current/dossiers/content/event-conversion-gallery.md` on top of this one: dry and publication-obsessed diction, institutional disapproval offstage, never onstage enforcement, never slapstick. Variant 1 is written to satisfy both; **no conflict with the Akademiya block is asserted**. The one point of contact to watch: the Akademiya block makes the Sages/Matra the *offstage* antagonist, so a librarian's restricted-shelf gift **NEVER** triggers an onstage guard, arrest, or chase.
 - ⚑ Recurring Ancients (present in more than one act pool — currently only Darv) **ALWAYS** carry one display name and one voice across both appearances, and the name **NEVER** encodes a zone or act ("of the Dharma Forest", "of Act II"). Only [USER] can rule whether the second meeting acknowledges the first in text.
 - Display-name check: none of `Katayoun`, `Langqing`, `Hirayama`, `House of Daena`, `Grand Conservator` collide with `docs/reserved-card-names.txt` (grepped, no hits), and none equals a run-resource noun (Gold, Mora, Energy).
 
@@ -528,7 +528,7 @@ New register block, **Archives & Keepers of Record** (libraries, presses, privat
 #### Register implications
 
 - An Ancient's offer is **always** framed as a gift, bequest, or leaving-behind — three things set down, one taken, nothing owed — and is **never** framed as a priced transaction, a contract, or a debt. Predicate: in any Ancient mapping, the boon-offer text contains no price, no fee, no Mora figure, no "in exchange," and no terms recited before the choice.
-- ⚑ Therefore a **Liyue mercantile** speaker (Qixing, Feiyun, diviners, Wangsheng) is **never** an Ancient voice, because that faction's gallery-wide rule (`review/event-gallery/gallery.md`: "Everything is **always** a contract: price stated before service, terms recited, ledgers signed") is the exact predicate an Ancient must fail. This is stated as a *scoping* rule, not a conflict: the mercantile block governs event scenes, and I am not proposing to amend it. Liyue may still supply Ancients — variant 3 uses a pre-Harbor god of the Guili Assembly, who predates the Harbor's contract culture entirely — but a Liyue Ancient must be voiced from the **god/adeptus** register, never the merchant one. ⚑ [USER] decides whether that scoping is written into the register block or kept as a Track Q-local rule.
+- ⚑ Therefore a **Liyue mercantile** speaker (Qixing, Feiyun, diviners, Wangsheng) is **never** an Ancient voice, because that faction's gallery-wide rule (`docs/current/dossiers/content/event-conversion-gallery.md`: "Everything is **always** a contract: price stated before service, terms recited, ledgers signed") is the exact predicate an Ancient must fail. This is stated as a *scoping* rule, not a conflict: the mercantile block governs event scenes, and I am not proposing to amend it. Liyue may still supply Ancients — variant 3 uses a pre-Harbor god of the Guili Assembly, who predates the Harbor's contract culture entirely — but a Liyue Ancient must be voiced from the **god/adeptus** register, never the merchant one. ⚑ [USER] decides whether that scoping is written into the register block or kept as a Track Q-local rule.
 - An Ancient is **always** mapped to an entity whose wiki infobox `type` is a non-playable value (`Mentioned`, `Quest NPC`, `Quest and Event NPC`) and **never** to one whose infobox reads `type = Playable`, **and never** to a page that redirects into a playable character's namespace (e.g. `Rex Lapis` → `Zhongli/Storyline`). Predicate: fetch the mapped page's infobox `type`; fail on `Playable` or on a `#REDIRECT` whose target contains a playable character name.
 - ⚑ Open: whether that rule extends to **combat companions of playable characters** (Guoba/Marchosius, Oz, Yue Yuanren). Variant 3 is the test case and is delivered rather than cut.
 - Display names in this fragment are entity names only and collide with nothing in `docs/reserved-card-names.txt`; none of them equals a run-resource noun (Gold, Mora, Energy). The one near-miss to watch is *Domus Aurea* / "golden house," which is Fontaine's, not Liyue's Golden House — do not let a future draft merge the two.
@@ -538,11 +538,11 @@ New register block, **Archives & Keepers of Record** (libraries, presses, privat
 ## - [ ] Tanx
 *Act 3 Ancient pool · silhouette: the "Khimera King" — a chimera-based multi-headed beast met at the start of Act 3 who heals the traveller and offers a choice of 3 relics drawn from a 10-item pool that is entirely **armaments** (Claws, Crossbow, Iron Club, Meat Cleaver, Sai, Spiked Gauntlets, Tanx's Whistle, Throwing Axe, War Hammer, and the conditional Tri-Boomerang) · sourcing: FIRM — slaythespire.wiki.gg's Tanx page, cross-checked against TheGamer's Ancients guide; the two agree on all ten boons and their effect text*
 
-**Silhouette research note:** Tanx IS in the StS2 wiki and the repo's gap at `docs/act2-act3-roster-research.md:215-224` is an attribution gap, not a knowledge gap — the wiki does attribute per-Ancient. Fetched: `https://slaythespire.wiki.gg/wiki/Tanx` and `https://slaythespire.wiki.gg/wiki/Slay_the_Spire_2:Tanx` (same content; "Tanx: Khimera King", based on the Chimera of Greek myth, mane composed of petals, earlier dev design a floral head with a single large eye). Cross-check `https://www.thegamer.com/slay-the-spire-2-ancients-blessings-offerings-list-guide/` returns the identical ten-item list. Boon text, verbatim from the wiki: **Claws** "Upon pickup, Transform up to 6 cards into Maul." · **Crossbow** "At the start of your turn, add a random Attack into your Hand. It costs 0 this turn." · **Iron Club** "Every 4 cards you play, draw 1 card." · **Meat Cleaver** "You may remove 2 cards from your Deck and gain 5 Max HP at Rest Sites." · **Sai** "At the start of your turn, gain 7 Block." · **Spiked Gauntlets** "Gain 1 energy at the start of each turn. Powers cost 1 more energy." · **Tanx's Whistle** "Upon pickup, add 1 Whistle to your Deck." · **Throwing Axe** "The first card you play each combat is played an extra time." · **War Hammer** "Whenever you kill an Elite, Upgrade 4 random cards." · **Tri-Boomerang** (conditional) "Choose 3 Attacks in your Deck. Enchant them with Instinct."
+**Silhouette research note:** Tanx IS in the StS2 wiki and the repo's gap at `docs/current/research/act2-act3-roster-research.md:215-224` is an attribution gap, not a knowledge gap — the wiki does attribute per-Ancient. Fetched: `https://slaythespire.wiki.gg/wiki/Tanx` and `https://slaythespire.wiki.gg/wiki/Slay_the_Spire_2:Tanx` (same content; "Tanx: Khimera King", based on the Chimera of Greek myth, mane composed of petals, earlier dev design a floral head with a single large eye). Cross-check `https://www.thegamer.com/slay-the-spire-2-ancients-blessings-offerings-list-guide/` returns the identical ten-item list. Boon text, verbatim from the wiki: **Claws** "Upon pickup, Transform up to 6 cards into Maul." · **Crossbow** "At the start of your turn, add a random Attack into your Hand. It costs 0 this turn." · **Iron Club** "Every 4 cards you play, draw 1 card." · **Meat Cleaver** "You may remove 2 cards from your Deck and gain 5 Max HP at Rest Sites." · **Sai** "At the start of your turn, gain 7 Block." · **Spiked Gauntlets** "Gain 1 energy at the start of each turn. Powers cost 1 more energy." · **Tanx's Whistle** "Upon pickup, add 1 Whistle to your Deck." · **Throwing Axe** "The first card you play each combat is played an extra time." · **War Hammer** "Whenever you kill an Elite, Upgrade 4 random cards." · **Tri-Boomerang** (conditional) "Choose 3 Attacks in your Deck. Enchant them with Instinct."
 
 Voice, verbatim from the wiki's dialogue section — this is the thing to map, and it is all-caps and broken: generic first visit **"SO WEAK! BUT YOU HAVE POTENTIAL! USE THIS WEAPON!!"**; per-character lines "FIGHT ME, IRONCLAD!" / "YEEES!! MIGHTY FIGHT, TAKE WEAPON!", "FIGHT ME, SILENT!!" / "WHERE DID YOU GO!!!", "ORANGE!? HOW IS THIS BEING ORANGE!??" (Regent), "FIGHT ME, OSTY!!" (Necrobinder), "ORBS ARE WEAPONS!?" (Defect). So the silhouette is: a shouting composite beast-king who demands a fight, judges you weak, and shoves an armament at you anyway.
 
-⚑ Two repo-facing notes for [USER], neither a mechanics change: (a) `docs/act2-act3-roster-research.md:215-224` lists Meat Cleaver, Sai, and the enchant/transform boons as unattributed NOT-shipped items — the wiki attributes all of them to Tanx, so that backlog paragraph is now sourceable per-Ancient. (b) The wiki's own header says "3 random relics from the following" and lists ten with Tri-Boomerang marked conditional; whether the repo models a 9-item pool + 1 conditional or a flat 10 is a modelling call, not mine.
+⚑ Two repo-facing notes for [USER], neither a mechanics change: (a) `docs/current/research/act2-act3-roster-research.md:215-224` lists Meat Cleaver, Sai, and the enchant/transform boons as unattributed NOT-shipped items — the wiki attributes all of them to Tanx, so that backlog paragraph is now sourceable per-Ancient. (b) The wiki's own header says "3 random relics from the following" and lists ten with Tri-Boomerang marked conditional; whether the repo models a 9-item pool + 1 conditional or a flat 10 is a modelling call, not mine.
 
 `docs/reserved-card-names.txt` (131 lines): NO collisions — none of Whistle, Claws, Maul, Sai, Crossbow, Iron Club, Meat Cleaver, Throwing Axe, War Hammer, Tri-Boomerang, Spiked Gauntlets, Tanx, Azhdaha, Andrius, Boreas, or Lawachurl appears.
 
@@ -570,7 +570,7 @@ Voice, verbatim from the wiki's dialogue section — this is the thing to map, a
 
 **Why this entity fits the silhouette:** This is the closest thing Teyvat has to Tanx's actual voice — a huge weapon-carrying brute who shouts, judges you by whether you can fight, and communicates by shoving armament at you. The kingship is canon rather than invented: "lawa" is the address the rest of the tribe uses for it. The Lawachurl line also has the composite-elemental streak the Khimera King needs — Stonehide is the Geo one, and its stone hide is literally environmental element fused into flesh, so the family reads as one beast wearing whichever element it grew up in.
 
-⚑ **Register conflict, [USER] to rule:** `review/event-gallery/gallery.md:56` already binds this faction — "Hilichurls **always** speak only quoted hilichurlian ('Mosi mita,' 'Valo'), **never** translated in full; a Guild scout or notice supplies the human-side reading" — and `:57` adds that hilichurls are "**never** menacing" at a trade scene. Tanx's entire identity is intelligible shouted threat. The draft above obeys the gallery (untranslated noise + gesture, no menace beyond bluster) and therefore loses most of Tanx's voice; obeying Tanx would break the gallery. Either the rule gets a scoped lawa-class carve-out or this variant stays deliberately muted.
+⚑ **Register conflict, [USER] to rule:** `docs/current/dossiers/content/event-conversion-gallery.md:56` already binds this faction — "Hilichurls **always** speak only quoted hilichurlian ('Mosi mita,' 'Valo'), **never** translated in full; a Guild scout or notice supplies the human-side reading" — and `:57` adds that hilichurls are "**never** menacing" at a trade scene. Tanx's entire identity is intelligible shouted threat. The draft above obeys the gallery (untranslated noise + gesture, no menace beyond bluster) and therefore loses most of Tanx's voice; obeying Tanx would break the gallery. Either the rule gets a scoped lawa-class carve-out or this variant stays deliberately muted.
 
 **Canon claims & citations:**
 - "This huge hilichurl is referred to as a 'lawa' by its brethren. The abundant Geo energies in the environment have become part of their flesh, blood, and skin, which look as if they were chiseled out of mountain rock." — `https://library.keqingmains.com/enemy-data/hilichurls/lawachurls/stonehide-lawachurl` (fetched; verbatim in-game archive text).
@@ -692,7 +692,7 @@ Register rules, stated **lint-ably** in the S2 idiom: each is a rule a script co
 with its predicate spelled out, so future Ancient drafts can be verified mechanically
 rather than by taste. These are **proposed**, not ratified — the curation pass decides
 which are adopted, and only [USER] can amend an existing block in
-`review/event-gallery/gallery.md`.
+`docs/current/dossiers/content/event-conversion-gallery.md`.
 
 The per-Ancient fragments above each carry their own `#### Register implications`
 section; this section collects the rules that are **gallery-wide** — the ones eight
@@ -745,7 +745,7 @@ independent drafters converged on, or that govern more than one entry.
 - ⚑ **RQ1-B2 — the consequence [USER] must rule on.** RQ1-B1 is the *exact inverse* of
   the gallery's existing **Liyue mercantile** predicate ("Everything is **always** a
   contract: price stated before service, terms recited, ledgers signed",
-  `review/event-gallery/gallery.md:70-73`). Taken together they mean a Liyue mercantile
+  `docs/current/dossiers/content/event-conversion-gallery.md:70-73`). Taken together they mean a Liyue mercantile
   speaker can **never** voice an Ancient. Three drafters proposed the same resolution —
   scope it rather than amend it: Liyue may still supply Ancients, but only from the
   **god / adeptus** register (a pre-Harbor Guili god, an adeptus), never the merchant one.
@@ -768,7 +768,7 @@ independent drafters converged on, or that govern more than one entry.
 ## RQ1-C — Proposed new blocks (additive; no conflict asserted with existing blocks)
 
 Three drafters proposed genuinely new faction blocks. They are additive — nothing in
-`review/event-gallery/gallery.md` currently covers dragons, dead gods, or archives. Full
+`docs/current/dossiers/content/event-conversion-gallery.md` currently covers dragons, dead gods, or archives. Full
 text lives in each fragment; the headline predicates:
 
 - **Dead gods & divine remnants** (Neow fragment; Orobashi, Elynas, Egeria, any deceased
@@ -817,7 +817,7 @@ text lives in each fragment; the headline predicates:
 
 ## RQ1-E — Open register questions ([USER] only)
 
-- ⚑ **No Natlan block exists.** `review/event-gallery/gallery.md` covers Melusines,
+- ⚑ **No Natlan block exists.** `docs/current/dossiers/content/event-conversion-gallery.md` covers Melusines,
   Sangonomiya resistance, Akademiya, Forest Rangers & Aranara, Hilichurls, Adventurers'
   Guild, Knights of Favonius, Chinju Forest youkai, Liyue mercantile, and Fatui/Northland
   Bank — Natlan appears in none of them. Tezcatara variant 2 is the first Natlan-sited
@@ -873,7 +873,7 @@ with the complete boon list for each:
   voice (*"SO WEAK! BUT YOU HAVE POTENTIAL! USE THIS WEAPON!!"*) — with **ten**
   weapon-named boons: Claws / Crossbow / Iron Club / Meat Cleaver / Sai / Spiked
   Gauntlets / Tanx's Whistle / Throwing Axe / War Hammer / Tri-Boomerang (conditional).
-  ⚑ **This attributes three of the boons that `docs/act2-act3-roster-research.md:215-224`
+  ⚑ **This attributes three of the boons that `docs/current/research/act2-act3-roster-research.md:215-224`
   currently lists as unattributed backlog items** (Meat Cleaver, Sai, and the
   transform/enchant family) to Tanx specifically. That is a *research* correction, not a
   mechanical one, and nothing was changed — but the roster-research doc is now known to be

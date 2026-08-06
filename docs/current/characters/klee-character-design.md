@@ -1,6 +1,6 @@
 # Klee — Character Design Doc (v0.1)
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 **Files:** `klee-cards.yaml` (75-card pool), `mondstadt-companions.yaml` (16 companion cards). Governed by `teyvat-spire-design-principles.md`; tested per `tier0-simulator-spec.md`.
 
@@ -28,7 +28,7 @@ Companion appetite: **Standard**. Balance check: 4–5 on exactly two primary ax
 
 ## 4. Archetypes (tag matrix validated by `validate.py` output)
 1. **Demolition** (28 cards, enabler-rich) — default plan. Setup/payoff rhythm; payoffs: Blazing Delight, Chained Reactions, The Big One.
-2. **Spark Spray** (21 cards, even role mix) — velocity plan; zero-cost volume, Gleeful Barrage as the scaler. Structural Shiv-analogue. Matchup texture (pass-3, ratified): act-fight specialist; ~~boss band 45–65% under plausible drafts~~ **boss FLOOR 45% only — upper bands retired R47, floors-only since the Burst-meter-40 world** (annotated 2026-08-06, R107; S4 finding F10). `tier0/content/characters/klee.yaml` reads `spark_weighted: [0.45, null]`; Tier 0.5 owns the upper-power comparison, so a >65% boss cell is not a violation and the code no longer flags it.
+2. **Spark Spray** (21 cards, even role mix) — velocity plan; zero-cost volume, Gleeful Barrage as the scaler. Structural Shiv-analogue. Matchup texture (pass-3, ratified): act-fight specialist; **boss FLOOR 45% only — upper bands retired R47 (previously a 45–65% band), floors-only since the Burst-meter-40 world** (annotated 2026-08-06, R107; S4 finding F10). `tier0/content/characters/klee.yaml` reads `spark_weighted: [0.45, null]`; Tier 0.5 owns the upper-power comparison, so a >65% boss cell is not a violation and the code no longer flags it.
 3. **Reaction** (14 personal cards, **payoff-heavy by design; co-op-primary, boss-weak by ruling** — see pass-2 round-3 rulings: solo tank_boss floor ~35% is her accepted hard matchup; the archetype's home is co-op and act fights) — DELIBERATE ASYMMETRY: this archetype's *enablers live in the companion pool* (Dahlia/Fischl/Kaeya appliers, Sucrose/Prune triggers, Durin amp). Her personal cards only reward auras (Sizzle, Perfect Timing, Flame Dance) or accelerate Burst. Aura-starvation detector (Tier 0 §8) is this archetype's health metric; target <15% zero-reaction fights in a Reaction-weighted deck.
 Bridges: Sorry Jean (block↔demolition), Sparkly Explosion (demolition↔spark), Friendly Visit / Study Buddy / Best Friends Forever (anything↔companions).
 

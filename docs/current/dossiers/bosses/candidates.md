@@ -3,7 +3,7 @@
 > **CURATED 2026-08-05 — see §Curation below.** Drafts intact; nothing deleted.
 > House Lights batch, Track Q (cloud). 2026-08-05. Drafting: one Opus agent per act slot,
 > 2–3 candidate Genshin weekly-boss mappings per base boss, sourced from the S9
-> weekly-boss dossiers (`review/boss-dossiers/dossiers.md`, `pattern-memo.md`).
+> weekly-boss dossiers (`docs/current/dossiers/bosses/dossiers.md`, `pattern-memo.md`).
 > **Mechanics are FROZEN** — every base boss's intent list, HP, phase structure and
 > unimplemented-op list is *described* from `tier05/content/act{1,2,3}_pool.yaml`, never
 > altered. Conversion decides nothing. This document has **zero design authority**.
@@ -101,7 +101,7 @@ duration) must not be quoted as settled.
 > Mechanics are FROZEN: every silhouette below is described from the shipped YAML
 > (`tier05/content/act1_pool.yaml:150-190`) and never altered. Childe / Tartaglia is a
 > fixed point elsewhere in the pool and is not drafted here.
-> Every canon claim is carried by `review/boss-dossiers/dossiers.md` and cited by line;
+> Every canon claim is carried by `docs/current/dossiers/bosses/dossiers.md` and cited by line;
 > no claim in this fragment rests on model memory.
 
 ---
@@ -120,12 +120,12 @@ duration) must not be quoted as settled.
 **Trade-off:** You buy the pool's cleanest burst-race argument by using only the first third of a five-beat canon fight; the Frozen Pillars and the phantom wolves that make Andrius *Andrius* have nowhere to sit.
 
 **Claims & citations:**
-- open-world Wolvendom arena, not a Trounce Domain; scales to World Level; despawns if you leave — `review/boss-dossiers/dossiers.md:12`, `:34`
-- opener is Wolf Leap, telegraphed by an ice circle painted on the ground — `review/boss-dossiers/dossiers.md:13`
-- baseline is a short randomized menu with a Repositioning recovery beat after hind-leg attacks (the fight's clearest free-hit window) — `review/boss-dossiers/dossiers.md:13`, `:51`
-- burst-gate phase skipping: enough damage in one strike bypasses the Interlude and/or Phase 2 — `review/boss-dossiers/dossiers.md:31`, `:53`
-- low-HP escalation is add frequency, not bigger hits — `review/boss-dossiers/dossiers.md:19`, `:30`
-- launch weekly boss (28 September 2020), quest-gated behind Razor's Story Quest — `review/boss-dossiers/dossiers.md:9`
+- open-world Wolvendom arena, not a Trounce Domain; scales to World Level; despawns if you leave — `docs/current/dossiers/bosses/dossiers.md:12`, `:34`
+- opener is Wolf Leap, telegraphed by an ice circle painted on the ground — `docs/current/dossiers/bosses/dossiers.md:13`
+- baseline is a short randomized menu with a Repositioning recovery beat after hind-leg attacks (the fight's clearest free-hit window) — `docs/current/dossiers/bosses/dossiers.md:13`, `:51`
+- burst-gate phase skipping: enough damage in one strike bypasses the Interlude and/or Phase 2 — `docs/current/dossiers/bosses/dossiers.md:31`, `:53`
+- low-HP escalation is add frequency, not bigger hits — `docs/current/dossiers/bosses/dossiers.md:19`, `:30`
+- launch weekly boss (28 September 2020), quest-gated behind Razor's Story Quest — `docs/current/dossiers/bosses/dossiers.md:9`
 - shipped Vantom silhouette (173 HP, four intents, Slippery/Wound unimplemented) — `tier05/content/act1_pool.yaml:156-168`
 
 ### 2. La Signora — "The Fair Lady," Eighth of the Fatui Harbingers — Snezhnaya (fought at Tenshukaku, Inazuma) — loose
@@ -136,16 +136,16 @@ duration) must not be quoted as settled.
 
 **Why this boss fits the silhouette:** Signora's Phase 1 is a fixed scripted opener plus a mid-range menu (`dossiers.md:270`, `:288`), which is the shape of a short deterministic intent list, and The Frozen Void — a spear that lands and then detonates on a delay (`dossiers.md:271`) — is the announce-then-land grammar Vantom's Prepare→Dismember beat already runs. Pain for Pain, her per-instance cap that nullifies overkill and retaliates (`dossiers.md:271`, `:281`, `:303`), is the closest thing in the eleven-boss pool to Vantom's *unimplemented* Slippery 9. ⚑ That is also the mismatch, and it is a real one: Pain for Pain teaches "do not burst," and Vantom's ratified role is a burst race — the strongest canon rhyme here argues against the base's own design intent, and it rhymes with a mechanic the sim does not run.
 
-**Trade-off:** The mapping's best argument is written on a mechanic flagged UNIMPLEMENTED (`act1_pool.yaml:159`; cf. `review/enemy-atlas/reskin-gallery.md:117` — art must not promise the missing cap), and her defining Cryo→Pyro mirror-flip has no second phase to live in on a 173 HP body.
+**Trade-off:** The mapping's best argument is written on a mechanic flagged UNIMPLEMENTED (`act1_pool.yaml:159`; cf. `docs/current/dossiers/remap/reskin-gallery.md:117` — art must not promise the missing cap), and her defining Cryo→Pyro mirror-flip has no second phase to live in on a 173 HP body.
 
 **Claims & citations:**
-- scripted opener every run: Ice Shards + Frozen Wheel — `review/boss-dossiers/dossiers.md:270`, `:288`
-- The Frozen Void: impact then a 4-second delayed detonation — `review/boss-dossiers/dossiers.md:271`
-- Pain for Pain: per-instance damage cap (30% P1 / 20% P2), excess nullified, retaliation nova — `review/boss-dossiers/dossiers.md:271`, `:281`, `:303`
-- nearly every attack leaves Frosted Floor, progressively converting the ground — `review/boss-dossiers/dossiers.md:271`, `:283`
-- hard Cryo→Pyro phase mirror with the cocoon interphase at 20% of Phase 1 HP — `review/boss-dossiers/dossiers.md:272`, `:280`
-- Version 2.1 (2021-09-01), Trounce Domain Narukami Island: Tenshukaku — `review/boss-dossiers/dossiers.md:267`
-- unimplemented-mechanic warning for reskin arguments — `review/enemy-atlas/reskin-gallery.md:117`
+- scripted opener every run: Ice Shards + Frozen Wheel — `docs/current/dossiers/bosses/dossiers.md:270`, `:288`
+- The Frozen Void: impact then a 4-second delayed detonation — `docs/current/dossiers/bosses/dossiers.md:271`
+- Pain for Pain: per-instance damage cap (30% P1 / 20% P2), excess nullified, retaliation nova — `docs/current/dossiers/bosses/dossiers.md:271`, `:281`, `:303`
+- nearly every attack leaves Frosted Floor, progressively converting the ground — `docs/current/dossiers/bosses/dossiers.md:271`, `:283`
+- hard Cryo→Pyro phase mirror with the cocoon interphase at 20% of Phase 1 HP — `docs/current/dossiers/bosses/dossiers.md:272`, `:280`
+- Version 2.1 (2021-09-01), Trounce Domain Narukami Island: Tenshukaku — `docs/current/dossiers/bosses/dossiers.md:267`
+- unimplemented-mechanic warning for reskin arguments — `docs/current/dossiers/remap/reskin-gallery.md:117`
 
 ### 3. The Knave (Arlecchino) — "Cinder of Two Worlds' Flames" — Fontaine (Fatui) — loose
 
@@ -158,13 +158,13 @@ duration) must not be quoted as settled.
 **Trade-off:** ⚑ Stature: she is the ninth weekly boss added (4.6) and a Harbinger of the first rank — spending the roster's heaviest Fatui name on a 173 HP first-act body, in a pool that already has Childe fixed elsewhere, risks reading the whole boss pool as a Fatui bracket.
 
 **Claims & citations:**
-- Phase 1 baseline: four short self-contained melee intents, punish window in the recovery; no enrage timer, no adds — `review/boss-dossiers/dossiers.md:626`
-- Reaper Dive (rises and dives, 100% ATK) as the heavy — `review/boss-dossiers/dossiers.md:626`
-- zero summons/minions across both phases — `review/boss-dossiers/dossiers.md:643`
-- Ranged Immunity: outright dodge (pre-70%) then block, a nullify state rather than a resistance — `review/boss-dossiers/dossiers.md:626`, `:638`
-- Bond of Life economy: 1.5% Max HP to attack, 3% refunded on connect — `review/boss-dossiers/dossiers.md:633`, `:639`
-- most compact state space in the pool; no adds, no hazards, no timers, plain arena by design — `review/boss-dossiers/pattern-memo.md:136`
-- Version 4.6 (2024-04-24), Scattered Ruins, Mont Esus East, Fontaine; archive name "Cinder of Two Worlds' Flames" — `review/boss-dossiers/dossiers.md:621`, `:622`
+- Phase 1 baseline: four short self-contained melee intents, punish window in the recovery; no enrage timer, no adds — `docs/current/dossiers/bosses/dossiers.md:626`
+- Reaper Dive (rises and dives, 100% ATK) as the heavy — `docs/current/dossiers/bosses/dossiers.md:626`
+- zero summons/minions across both phases — `docs/current/dossiers/bosses/dossiers.md:643`
+- Ranged Immunity: outright dodge (pre-70%) then block, a nullify state rather than a resistance — `docs/current/dossiers/bosses/dossiers.md:626`, `:638`
+- Bond of Life economy: 1.5% Max HP to attack, 3% refunded on connect — `docs/current/dossiers/bosses/dossiers.md:633`, `:639`
+- most compact state space in the pool; no adds, no hazards, no timers, plain arena by design — `docs/current/dossiers/bosses/pattern-memo.md:136`
+- Version 4.6 (2024-04-24), Scattered Ruins, Mont Esus East, Fontaine; archive name "Cinder of Two Worlds' Flames" — `docs/current/dossiers/bosses/dossiers.md:621`, `:622`
 
 ---
 
@@ -182,13 +182,13 @@ duration) must not be quoted as settled.
 **Trade-off:** ⚑ Stature: this is an Archon's manifestation, quest-gated behind Raiden's Story Quest (`dossiers.md:334`) — the biggest name any Act 1 slot could carry, and the pool's answer to Vantom becomes a god.
 
 **Claims & citations:**
-- Ominous Destiny meter: 900 cap, +20 every 2s passively, +40 when she lands a hit; no HP threshold anywhere in the fight — `review/boss-dossiers/dossiers.md:343`, `:349`
-- Baleful Shadowlord: Electro shield, +210% global RES while shielded, self-drains ~8.3% per 10s and eventually expires on its own — `review/boss-dossiers/dossiers.md:344`, `:355`
-- active character loses 20 Energy every 5s in that state; the only Genshin boss whose signature mechanic attacks resource generation rather than HP — `review/boss-dossiers/dossiers.md:344`, `:356`
-- shield break = full party Energy refund plus a stunned, RES-reduced boss; the cycle then repeats indefinitely — `review/boss-dossiers/dossiers.md:346`
-- two-stance normal state with explicit switch moves and teleport-direction tells — `review/boss-dossiers/dossiers.md:338`, `:341`, `:350`
-- Version 2.5, End of the Oneiric Euthymia, gated behind Imperatrix Umbrosa Act II — `review/boss-dossiers/dossiers.md:334`
-- pool-wide: Raiden is gauge-only, zero HP gates — `review/boss-dossiers/pattern-memo.md:17`, `:21`
+- Ominous Destiny meter: 900 cap, +20 every 2s passively, +40 when she lands a hit; no HP threshold anywhere in the fight — `docs/current/dossiers/bosses/dossiers.md:343`, `:349`
+- Baleful Shadowlord: Electro shield, +210% global RES while shielded, self-drains ~8.3% per 10s and eventually expires on its own — `docs/current/dossiers/bosses/dossiers.md:344`, `:355`
+- active character loses 20 Energy every 5s in that state; the only Genshin boss whose signature mechanic attacks resource generation rather than HP — `docs/current/dossiers/bosses/dossiers.md:344`, `:356`
+- shield break = full party Energy refund plus a stunned, RES-reduced boss; the cycle then repeats indefinitely — `docs/current/dossiers/bosses/dossiers.md:346`
+- two-stance normal state with explicit switch moves and teleport-direction tells — `docs/current/dossiers/bosses/dossiers.md:338`, `:341`, `:350`
+- Version 2.5, End of the Oneiric Euthymia, gated behind Imperatrix Umbrosa Act II — `docs/current/dossiers/bosses/dossiers.md:334`
+- pool-wide: Raiden is gauge-only, zero HP gates — `docs/current/dossiers/bosses/pattern-memo.md:17`, `:21`
 - shipped Lagavulin silhouette (222 HP, sleep 3, five beats, Plating/Soul-Siphon-drain unimplemented) — `tier05/content/act1_pool.yaml:170-190`
 
 ### 2. Azhdaha, Sealed Lord of Vishaps — Liyue — loose
@@ -199,17 +199,17 @@ duration) must not be quoted as settled.
 
 **Why this boss fits the silhouette:** The dormancy is his premise, not a flourish — he is the *Sealed* Lord, and he opens the encounter by shattering a containment forcefield in a sealed arena (`dossiers.md:204`, `:208`, `:228`), which is the only canon opener in the pool that reads as three turns of a boss not yet fighting. His escalation is done by keeping every intent's skeleton and animation and bolting riders onto it while his resistances climb (`dossiers.md:211`, `:217`, `:219`, `:243`) — the same cycle coming round harder, which is what Soul Siphon's kept +2 Str does to the shipped five-beat rotation. The armor argument is real too: 70% Geo / 40% Physical from the first second plus scripted damage floors at each transition (`dossiers.md:217`, `:222`). ⚑ Mismatch, and it is the load-bearing one: Azhdaha has no enrage timer and no soft enrage of any kind (`dossiers.md:209`, `:213`; `pattern-memo.md:65`) — the clock is precisely the thing he does not have, so this mapping serves the silhouette's *body* and not its stated role.
 
-**Trade-off:** ⚑ Collision: Azhdaha is already claimed as a candidate (P) for the Act 3 boss **Test Subject** in `review/enemy-atlas/reskin-gallery.md:72`, on the argument that three phases re-element the whole kit — taking him for Act 1 spends that body and that argument.
+**Trade-off:** ⚑ Collision: Azhdaha is already claimed as a candidate (P) for the Act 3 boss **Test Subject** in `docs/current/dossiers/remap/reskin-gallery.md:72`, on the argument that three phases re-element the whole kit — taking him for Act 1 spends that body and that argument.
 
 **Claims & citations:**
-- "Sealed Lord of Vishaps"; sealed arena beneath the Dragon-Queller; opens by shattering a containment forcefield — `review/boss-dossiers/dossiers.md:204`, `:208`, `:228`
-- two-stage infusion at HP gates keeps every intent's skeleton and animation, lowers the multiplier, appends a rider — `review/boss-dossiers/dossiers.md:211`, `:219`, `:243`
-- compounding resistance wall: 70% Geo / 40% Physical baseline, +60% then +50% to the infused elements — `review/boss-dossiers/dossiers.md:217`
-- phase-transition invulnerability and damage floors (cannot be driven below 65% / 35% before the transition resolves) — `review/boss-dossiers/dossiers.md:222`, `:238`
-- no adds at any point; pure single-target duel throughout — `review/boss-dossiers/dossiers.md:225`
-- no enrage timer of any kind, in either Phase 1 or the terminal phase — `review/boss-dossiers/dossiers.md:209`, `:213`; `review/boss-dossiers/pattern-memo.md:65`
-- Version 1.5 (2021-04-28), Trounce Domain "Beneath the Dragon-Queller", Minlin, Liyue — `review/boss-dossiers/dossiers.md:205`
-- existing competing claim on this body — `review/enemy-atlas/reskin-gallery.md:72`
+- "Sealed Lord of Vishaps"; sealed arena beneath the Dragon-Queller; opens by shattering a containment forcefield — `docs/current/dossiers/bosses/dossiers.md:204`, `:208`, `:228`
+- two-stage infusion at HP gates keeps every intent's skeleton and animation, lowers the multiplier, appends a rider — `docs/current/dossiers/bosses/dossiers.md:211`, `:219`, `:243`
+- compounding resistance wall: 70% Geo / 40% Physical baseline, +60% then +50% to the infused elements — `docs/current/dossiers/bosses/dossiers.md:217`
+- phase-transition invulnerability and damage floors (cannot be driven below 65% / 35% before the transition resolves) — `docs/current/dossiers/bosses/dossiers.md:222`, `:238`
+- no adds at any point; pure single-target duel throughout — `docs/current/dossiers/bosses/dossiers.md:225`
+- no enrage timer of any kind, in either Phase 1 or the terminal phase — `docs/current/dossiers/bosses/dossiers.md:209`, `:213`; `docs/current/dossiers/bosses/pattern-memo.md:65`
+- Version 1.5 (2021-04-28), Trounce Domain "Beneath the Dragon-Queller", Minlin, Liyue — `docs/current/dossiers/bosses/dossiers.md:205`
+- existing competing claim on this body — `docs/current/dossiers/remap/reskin-gallery.md:72`
 
 ### 3. All-Devouring Narwhal — Fontaine — loose
 
@@ -222,12 +222,12 @@ duration) must not be quoted as settled.
 **Trade-off:** ⚑ Stature and gating: a world-devouring leviathan behind the Fontaine Archon Quest finale (`dossiers.md:545`) is a large register jump for a first-act slot, and the mapping quietly discards the devour — the boss's entire identity.
 
 **Claims & citations:**
-- Fury meter: 1/sec for the first 80 seconds then 2/sec permanently, +1 per 1% Max HP lost, +30 per Eye destroyed, 120 threshold; Phase 1 is not HP-gated at all — `review/boss-dossiers/dossiers.md:559`, `:577`
-- the fight accelerates rather than escalating — a compressing cycle, the closest thing to an enrage — `review/boss-dossiers/dossiers.md:572`; `review/boss-dossiers/pattern-memo.md:65`
-- submerge-gated targetability: long invulnerable travel beat, one surfaced attack, re-submerge — `review/boss-dossiers/dossiers.md:549`, `:581`
-- the transition is the boss swallowing the party into a second arena with a second boss on its own HP bar — `review/boss-dossiers/dossiers.md:560`, `:578`, `:587`
-- sub-20% lockout: the devour switches off permanently and the fight collapses into a straight damage race — `review/boss-dossiers/dossiers.md:574`
-- Version 4.2 (2023-11-08), "Shadow of Another World," Salacia Plain; gated behind the Fontaine Archon Quest "Finale" — `review/boss-dossiers/dossiers.md:545`
+- Fury meter: 1/sec for the first 80 seconds then 2/sec permanently, +1 per 1% Max HP lost, +30 per Eye destroyed, 120 threshold; Phase 1 is not HP-gated at all — `docs/current/dossiers/bosses/dossiers.md:559`, `:577`
+- the fight accelerates rather than escalating — a compressing cycle, the closest thing to an enrage — `docs/current/dossiers/bosses/dossiers.md:572`; `docs/current/dossiers/bosses/pattern-memo.md:65`
+- submerge-gated targetability: long invulnerable travel beat, one surfaced attack, re-submerge — `docs/current/dossiers/bosses/dossiers.md:549`, `:581`
+- the transition is the boss swallowing the party into a second arena with a second boss on its own HP bar — `docs/current/dossiers/bosses/dossiers.md:560`, `:578`, `:587`
+- sub-20% lockout: the devour switches off permanently and the fight collapses into a straight damage race — `docs/current/dossiers/bosses/dossiers.md:574`
+- Version 4.2 (2023-11-08), "Shadow of Another World," Salacia Plain; gated behind the Fontaine Archon Quest "Finale" — `docs/current/dossiers/bosses/dossiers.md:545`
 
 ### 4. Stormterror Dvalin — Mondstadt — loose
 
@@ -242,33 +242,33 @@ duration) must not be quoted as settled.
 **Trade-off:** The arena *is* Dvalin's difficulty — permanent platform corruption, verticality, a load-bearing fixed camera — and the memo ranks him the most spatially and temporally load-bearing fight in the pool (`pattern-memo.md:156`); a five-intent single body keeps almost none of it. ⚑ Pairing note for curation: Andrius and Dvalin are the two 1.0 launch weeklies, built as a deliberate pair (`dossiers.md:9`, `:72`), so an Andrius/Dvalin pool is a canon set at the lowest stature in the roster — but it commits Act 1's entire boss pool to Mondstadt, which trips register rule 3 below.
 
 **Claims & citations:**
-- non-elemental ward worth 20% Max HP gating all real HP damage; break → long paralysis → fresh ward, loop repeats — `review/boss-dossiers/dossiers.md:87`
-- break/cash loop is the most turn-legible structure in the pool — `review/boss-dossiers/pattern-memo.md:103`
-- dual-gated phase advance on cumulative break count OR wall clock, with **no HP thresholds anywhere** — `review/boss-dossiers/dossiers.md:88`; `review/boss-dossiers/pattern-memo.md:17`
-- terminal phase is a pure sustain-versus-DPS race lost to the compounding floor tick, not to a burst check — `review/boss-dossiers/dossiers.md:84`
-- zero add spawns across all five phases; strict 1v1 — `review/boss-dossiers/dossiers.md:97`
-- only Trounce Domain that cannot be run in co-op, and the only one with a cutscene before difficulty select — `review/boss-dossiers/dossiers.md:72`
-- both Dvalin and Andrius are 1.0 launch weeklies (28 September 2020) — `review/boss-dossiers/dossiers.md:9`, `:72`
-- most spatially/temporally load-bearing fight in the pool — `review/boss-dossiers/pattern-memo.md:156`
+- non-elemental ward worth 20% Max HP gating all real HP damage; break → long paralysis → fresh ward, loop repeats — `docs/current/dossiers/bosses/dossiers.md:87`
+- break/cash loop is the most turn-legible structure in the pool — `docs/current/dossiers/bosses/pattern-memo.md:103`
+- dual-gated phase advance on cumulative break count OR wall clock, with **no HP thresholds anywhere** — `docs/current/dossiers/bosses/dossiers.md:88`; `docs/current/dossiers/bosses/pattern-memo.md:17`
+- terminal phase is a pure sustain-versus-DPS race lost to the compounding floor tick, not to a burst check — `docs/current/dossiers/bosses/dossiers.md:84`
+- zero add spawns across all five phases; strict 1v1 — `docs/current/dossiers/bosses/dossiers.md:97`
+- only Trounce Domain that cannot be run in co-op, and the only one with a cutscene before difficulty select — `docs/current/dossiers/bosses/dossiers.md:72`
+- both Dvalin and Andrius are 1.0 launch weeklies (28 September 2020) — `docs/current/dossiers/bosses/dossiers.md:9`, `:72`
+- most spatially/temporally load-bearing fight in the pool — `docs/current/dossiers/bosses/pattern-memo.md:156`
 - Lore (not in the dossiers, verified this pass): Dvalin is the Anemo dragon and Dragon of the East among Mondstadt's Four Winds; grievously injured by the corrupted black dragon Durin in the Cataclysm, he settled in Decarabian's abandoned tower to recuperate for five hundred years while the Abyssal poison in Durin's veins tormented him, and was corrupted further on waking, earning the name "Stormterror" — WebSearch aggregate over genshin-impact.fandom.com/wiki/Dvalin, the Fandom "Four Winds" page, and villains.fandom.com/wiki/Stormterror. ⚑ The Fandom MediaWiki API returned **HTTP 402 through the proxy** on this pass, so this is snippet-level corroboration from three sources, not a wikitext read.
 
 ---
 
 #### Register implications
 
-Stated lint-ably in the S2 idiom (`review/event-gallery/gallery.md:24-77`). Each rule names an explicit predicate a script could run over a boss-entity register.
+Stated lint-ably in the S2 idiom (`docs/current/dossiers/content/event-conversion-gallery.md:24-77`). Each rule names an explicit predicate a script could run over a boss-entity register.
 
 1. **Weekly-boss entities ALWAYS carry their enemy-archive name, NEVER the playable character's name**, where the two differ. Predicate: for any entity in a boss pool sourced from the weekly-boss dossiers, `entity.name ∉ playable_roster_names`; fail on "Raiden Shogun", "Scaramouche", "Arlecchino", "Tartaglia" as a *bare* entity name. The dossiers themselves are written this way — "Magatsu Mitake Narukami no Mikoto", "Shouki no Kami, the Prodigal", "The Knave" (`dossiers.md:333`, `:465`, `:621`). Playable names may appear only in a parenthetical.
 2. **Fatui Harbinger bosses ALWAYS carry both a personal name and an archive title in the entity line, NEVER a bare given name.** Predicate: if `entity.faction == "Fatui"` and `entity.tier == "boss"`, then the name string must contain a separator (`—`, `,`, or `"`) and both a proper name and a title substring — "La Signora — The Fair Lady, Eighth of the Fatui Harbingers"; "The Knave — Cinder of Two Worlds' Flames." Consistent with the gallery's Fatui/Northland Bank block, which already legislates naming precision for that faction ("always the 'Marechaussee Phantom' … never 'Marechaussee Hunters'", `gallery.md:74-76`); no conflict found.
 3. **A single act's boss pool NEVER draws every entry from one nation.** Predicate: `distinct(nation(entry) for entry in act.boss_pool) >= 2`. This is the register-side twin of the ratified §10.0/§10.5 "check opposite shapes" rule (`act1_pool.yaml:150-154`) — two bosses that oppose mechanically but share a homeland read as one fight in two costumes. ⚑ Live case in this fragment: La Signora (slot A) and Magatsu Mitake Narukami (slot B) are Snezhnayan and Inazuman by faction, but both fights are *staged* in Inazuma (Tenshukaku; End of the Oneiric Euthymia, `dossiers.md:267`, `:334`) — if the predicate reads staging rather than faction, that pair trips it. [USER] to decide which field the lint reads.
-4. **A boss body claimed by an entry in `review/enemy-atlas/reskin-gallery.md` NEVER appears as an unflagged candidate for a different base body.** Predicate: intersect candidate entity names against the reskin-gallery candidate column; any hit must carry a ⚑. Live hit in this fragment: Azhdaha (claimed for Act 3's Test Subject, `reskin-gallery.md:72`), flagged above.
+4. **A boss body claimed by an entry in `docs/current/dossiers/remap/reskin-gallery.md` NEVER appears as an unflagged candidate for a different base body.** Predicate: intersect candidate entity names against the reskin-gallery candidate column; any hit must carry a ⚑. Live hit in this fragment: Azhdaha (claimed for Act 3's Test Subject, `reskin-gallery.md:72`), flagged above.
 5. **Candidate arguments NEVER rest on a mechanic flagged UNIMPLEMENTED in the shipped YAML without saying so in the same line.** Predicate: if a variant's "why it fits" cites Slippery, Plating-as-cap, Wound injection, or Soul Siphon's player-side drain, the trade-off line must name the flag. Inherited verbatim from `reskin-gallery.md:117`; La Signora (Slippery ↔ Pain for Pain) and Azhdaha (Plating ↔ resistance wall) are the two variants here that trip it, and both declare it.
 
 6. **Mondstadt's Four Winds ALWAYS appear under both folk name and archive title, NEVER as an anonymous beast.** Predicate: if the entity name matches a Four Winds member, the string must contain both tokens — "Andrius, Lupus Boreas"; "Stormterror Dvalin" — and the flavor block must not describe it as a nameless or mindless animal. They are titled protectors gone wrong. (Andrius as one of the Four Winds, "Dominator of Wolves," founder of the Lupical packs of Wolvendom: WebSearch aggregate over republicworld.com, gamerant.com, the Fandom "Four Winds"/"Andrius" pages, sportskeeda.com — Fandom API 402'd through the proxy this pass.)
 7. **A dragon sealed or corrupted by a named power ALWAYS names that power in its flavor block, and is NEVER presented as mindless.** Predicate: flavor block contains "sealed" or "corrupted" ⇒ must also contain the sealer/corruptor's name. Azhdaha ⇒ Morax/Zhongli and the Dragon-Queller (verified: he fought alongside Morax, was granted sight, was bound by contract, succumbed to erosion, and was sealed beneath the Dragon-Queller — WebSearch aggregate over en.wikipedia.org/wiki/Azdaha_(Genshin_Impact), genshin-impact.fandom.com/wiki/Zhongli/Storyline, villains.fandom.com, screenrant.com). Dvalin ⇒ Durin's poison and the Anemo Archon. This is what keeps Track Q's dragons from collapsing into the atlas's Geovishap register.
 8. **Weekly-boss entity lines ALWAYS use the canon arena name and NEVER invent a location.** Predicate: the location token must match a name attested in the dossiers — Wolvendom, Beneath the Dragon-Queller, Narukami Island: Tenshukaku, End of the Oneiric Euthymia, Scattered Ruins, Shadow of Another World / Salacia Plain, Stormterror's Lair. Direct mirror of the Melusine rule that the Fontaine research body is always the canon institute and never an invented name (`gallery.md:36`).
 
-⚑ **Whole-row collision, both slots.** `review/enemy-atlas/reskin-gallery.md:29-30` already carries a full candidate list for these same two base bodies from the *normal-enemy* atlas (Vantom → Kongamato / Black Serpent Windcutter / Fatui Pyro Agent…; Lagavulin Matriarch → Primo Geovishap / Cryo Regisvine / Frostarm Lawachurl…). Every variant in this fragment competes with that list for the same base, and the Lagavulin row is additionally noted there as a ratified [USER] pick whose signature drain is backlogged ("touching her identity is a bigger call than any other row"). Which gallery owns the Act 1 boss slots is not a drafter's call.
+⚑ **Whole-row collision, both slots.** `docs/current/dossiers/remap/reskin-gallery.md:29-30` already carries a full candidate list for these same two base bodies from the *normal-enemy* atlas (Vantom → Kongamato / Black Serpent Windcutter / Fatui Pyro Agent…; Lagavulin Matriarch → Primo Geovishap / Cryo Regisvine / Frostarm Lawachurl…). Every variant in this fragment competes with that list for the same base, and the Lagavulin row is additionally noted there as a ratified [USER] pick whose signature drain is backlogged ("touching her identity is a bigger call than any other row"). Which gallery owns the Act 1 boss slots is not a drafter's call.
 
 ---
 
@@ -297,14 +297,14 @@ Shipped shape being reskinned, unchanged: a single `is_boss` body at 379 HP whos
 
 **Claims & citations:**
 - enemy entity name is "Everlasting Lord of Arcane Wisdom", title "Shouki no Kami, the Prodigal", type Weekly Bosses — `curl` of `https://genshin-impact.fandom.com/api.php?...&titles=Everlasting%20Lord%20of%20Arcane%20Wisdom` (HTTP 200 raw wikitext, 2026-08-05: `|name = Everlasting Lord of Arcane Wisdom`, `|title = Shouki no Kami, the Prodigal`, `|type = Weekly Bosses`); the same page opens `{{About|the Weekly Boss|the playable character|Wanderer}}` — confirming the sibling-established fact that the body is a playable character
-- Phase 1 is a fixed non-ambulatory torso on a small circular altar platform — `review/boss-dossiers/dossiers.md:469`
-- floor-corruption DoT (Raw Frost 5% ATK/0.5s, Remnant Flame 15% ATK/0.5s) — `review/boss-dossiers/dossiers.md:493`
-- shield is a RES gate depleted by the Terminal, not an HP pool; no self-heal in kit — `review/boss-dossiers/dossiers.md:488`, `:520`
-- Sumeru / Joururi Workshop, Version 3.2 — `review/boss-dossiers/dossiers.md:466`
+- Phase 1 is a fixed non-ambulatory torso on a small circular altar platform — `docs/current/dossiers/bosses/dossiers.md:469`
+- floor-corruption DoT (Raw Frost 5% ATK/0.5s, Remnant Flame 15% ATK/0.5s) — `docs/current/dossiers/bosses/dossiers.md:493`
+- shield is a RES gate depleted by the Terminal, not an HP pool; no self-heal in kit — `docs/current/dossiers/bosses/dossiers.md:488`, `:520`
+- Sumeru / Joururi Workshop, Version 3.2 — `docs/current/dossiers/bosses/dossiers.md:466`
 
 ⚑ Sibling contention: the Act 3 drafter used Shouki for **Aeonglass**. Both slots cannot have him.
 ⚑ [USER] ruling: this body is a **playable character** (Wanderer). Using him as a live Act 2 boss puts a party member on the enemy side of the board; the register rule below proposes naming him only by the enemy entity name, but whether the mapping is allowed at all is a curation call.
-⚑ Register conflict risk: the Neo Akasha Terminal is Akasha hardware, and `review/event-gallery/gallery.md:49` rations dead-Akasha-hardware scenes gallery-wide (Brain Leech's literal owns the device). If this mapping's flavor introduces another rogue terminal, it collides with that rule.
+⚑ Register conflict risk: the Neo Akasha Terminal is Akasha hardware, and `docs/current/dossiers/content/event-conversion-gallery.md:49` rations dead-Akasha-hardware scenes gallery-wide (Brain Leech's literal owns the device). If this mapping's flavor introduces another rogue terminal, it collides with that rule.
 
 ### 2. Guardian of Apep's Oasis — Sumeru — loose
 
@@ -318,10 +318,10 @@ Shipped shape being reskinned, unchanged: a single `is_boss` body at 379 HP whos
 
 **Claims & citations:**
 - two named forms with wiki titles "Evolved From an Apocalyptic Millennium" (Warden of the Last Oasis) and (second infobox) the Revived form — `curl` of `https://genshin-impact.fandom.com/api.php?...&titles=Guardian%20of%20Apep's%20Oasis` (HTTP 200, 2026-08-05: two `{{Enemy Infobox}}` blocks, `|name = Warden of the Last Oasis`, `|title = Evolved From an Apocalyptic Millennium`, `|weakpoint = no`) — matches the sibling-established fact
-- boss leaves the field, is revitalized, and returns transformed — `review/boss-dossiers/dossiers.md:402`, `:407`, `:409`, `:413`
-- stat direction across the revival (HP ratio 18→16, ATK ratio 6→10; Physical P1 → wholly Dendro P3) — `review/boss-dossiers/dossiers.md:406`, `:409`, `:414`
-- Phase 2 is an add-defense interlude, i.e. the part that does not fit — `review/boss-dossiers/dossiers.md:408`, `:447`
-- Sumeru / The Realm of Beginnings, Version 3.6 — `review/boss-dossiers/dossiers.md:402`
+- boss leaves the field, is revitalized, and returns transformed — `docs/current/dossiers/bosses/dossiers.md:402`, `:407`, `:409`, `:413`
+- stat direction across the revival (HP ratio 18→16, ATK ratio 6→10; Physical P1 → wholly Dendro P3) — `docs/current/dossiers/bosses/dossiers.md:406`, `:409`, `:414`
+- Phase 2 is an add-defense interlude, i.e. the part that does not fit — `docs/current/dossiers/bosses/dossiers.md:408`, `:447`
+- Sumeru / The Realm of Beginnings, Version 3.6 — `docs/current/dossiers/bosses/dossiers.md:402`
 
 ⚑ Sibling contention: the Act 3 drafter used Apep for **Test Subject**. Also contended inside this fragment — Apep is my slot-B #1.
 ⚑ Nation commitment: pairing this with Shouki above would make the entire Act 2 boss pool Sumeru.
@@ -337,12 +337,12 @@ Shipped shape being reskinned, unchanged: a single `is_boss` body at 379 HP whos
 **Trade-off:** the block-ignoring half of the base body's identity actively contradicts his most quotable rule, and the "demon of knowledge" reading has to be argued rather than seen.
 
 **Claims & citations:**
-- no add spawns at any point; pure single-target for the whole fight — `review/boss-dossiers/dossiers.md:225`, `:248`
-- elemental mark: persistent DoT applied on unshielded hits, shield prevents application entirely (binary gate) — `review/boss-dossiers/dossiers.md:218`, `:240`
-- two-stage infusion at HP gates with +60%/+50% RES growth, weekly readable variant pair — `review/boss-dossiers/dossiers.md:216-217`, `:229`
-- Liyue / Beneath the Dragon-Queller, Version 1.5 — `review/boss-dossiers/dossiers.md:205`
+- no add spawns at any point; pure single-target for the whole fight — `docs/current/dossiers/bosses/dossiers.md:225`, `:248`
+- elemental mark: persistent DoT applied on unshielded hits, shield prevents application entirely (binary gate) — `docs/current/dossiers/bosses/dossiers.md:218`, `:240`
+- two-stage infusion at HP gates with +60%/+50% RES growth, weekly readable variant pair — `docs/current/dossiers/bosses/dossiers.md:216-217`, `:229`
+- Liyue / Beneath the Dragon-Queller, Version 1.5 — `docs/current/dossiers/bosses/dossiers.md:205`
 
-⚑ Collision, `review/enemy-atlas/reskin-gallery.md:72`: **Azhdaha is already a listed candidate for the Act 3 boss Test Subject** ("three phases that re-element the whole kit"). Both sibling drafters also used him (Act 1 Lagavulin, Act 3 Test Subject) — the most triple-booked body in this dispatch.
+⚑ Collision, `docs/current/dossiers/remap/reskin-gallery.md:72`: **Azhdaha is already a listed candidate for the Act 3 boss Test Subject** ("three phases that re-element the whole kit"). Both sibling drafters also used him (Act 1 Lagavulin, Act 3 Test Subject) — the most triple-booked body in this dispatch.
 
 ---
 
@@ -364,11 +364,11 @@ Shipped shape being reskinned, unchanged: **Kaiser Crusher** 209 HP, the melee h
 **Trade-off:** two bodies that canon says are one creature at two times; also spends Sumeru's biggest silhouette on the pool's second slot.
 
 **Claims & citations:**
-- two named Warden forms on one page, sequential, with the interlude between — `curl` of `https://genshin-impact.fandom.com/api.php?...&titles=Guardian%20of%20Apep's%20Oasis` (HTTP 200, 2026-08-05, two `{{Enemy Infobox}}` blocks) + `review/boss-dossiers/dossiers.md:401`, `:413`
-- Phase 1 kit is 100% Physical melee incl. a guarded/positional punish — `review/boss-dossiers/dossiers.md:406`, `:414`
-- Phase 3 kit is marked-zone airstrike + sustained projectile volume, all Dendro — `review/boss-dossiers/dossiers.md:410`, `:414`
-- positional conditionals exist in both forms — `review/boss-dossiers/dossiers.md:424`, `:440`
-- no weekly boss is canonically a matched pair; the strict-1v1 list — `review/boss-dossiers/pattern-memo.md:47-53`
+- two named Warden forms on one page, sequential, with the interlude between — `curl` of `https://genshin-impact.fandom.com/api.php?...&titles=Guardian%20of%20Apep's%20Oasis` (HTTP 200, 2026-08-05, two `{{Enemy Infobox}}` blocks) + `docs/current/dossiers/bosses/dossiers.md:401`, `:413`
+- Phase 1 kit is 100% Physical melee incl. a guarded/positional punish — `docs/current/dossiers/bosses/dossiers.md:406`, `:414`
+- Phase 3 kit is marked-zone airstrike + sustained projectile volume, all Dendro — `docs/current/dossiers/bosses/dossiers.md:410`, `:414`
+- positional conditionals exist in both forms — `docs/current/dossiers/bosses/dossiers.md:424`, `:440`
+- no weekly boss is canonically a matched pair; the strict-1v1 list — `docs/current/dossiers/bosses/pattern-memo.md:47-53`
 
 ⚑ Sibling contention: Apep is claimed by the Act 3 drafter for **Test Subject**, and by me above for slot A. Curation must pick at most one.
 
@@ -383,12 +383,12 @@ Shipped shape being reskinned, unchanged: **Kaiser Crusher** 209 HP, the melee h
 **Trade-off:** the strongest thematic pair in the pool is also the one where "pair" is literally false — she is one woman in two states.
 
 **Claims & citations:**
-- two named forms, Cryo Fair Lady → Pyro Crimson Witch of Embers, each resisting its own element — `review/boss-dossiers/dossiers.md:266-267`, `:280`
-- Pain for Pain: per-instance cap nullifying overkill, retaliating with 125% ATK nova + instant full gauge, 30%→20% by phase — `review/boss-dossiers/dossiers.md:281`, `:303`
-- mirrored floor/gauge/corner-object systems across the two forms — `review/boss-dossiers/dossiers.md:282-283`, `:292-293`
-- transition is sequential through the Carmine Chrysalis cocoon at 20% Phase 1 HP — `review/boss-dossiers/dossiers.md:272`, `:284`
-- domain subtitle is "Memories: Duel to the Fiery Death" — `review/boss-dossiers/dossiers.md:266-267`
-- strict no-adds fight (i.e. no canon partner exists) — `review/boss-dossiers/pattern-memo.md:53`
+- two named forms, Cryo Fair Lady → Pyro Crimson Witch of Embers, each resisting its own element — `docs/current/dossiers/bosses/dossiers.md:266-267`, `:280`
+- Pain for Pain: per-instance cap nullifying overkill, retaliating with 125% ATK nova + instant full gauge, 30%→20% by phase — `docs/current/dossiers/bosses/dossiers.md:281`, `:303`
+- mirrored floor/gauge/corner-object systems across the two forms — `docs/current/dossiers/bosses/dossiers.md:282-283`, `:292-293`
+- transition is sequential through the Carmine Chrysalis cocoon at 20% Phase 1 HP — `docs/current/dossiers/bosses/dossiers.md:272`, `:284`
+- domain subtitle is "Memories: Duel to the Fiery Death" — `docs/current/dossiers/bosses/dossiers.md:266-267`
+- strict no-adds fight (i.e. no canon partner exists) — `docs/current/dossiers/bosses/pattern-memo.md:53`
 
 ⚑ Sibling contention: the Act 1 drafter used La Signora for **Vantom** and the Act 3 drafter used her for **Test Subject**. Triple-claimed.
 ⚑ Register-mandatory: the sibling rule applies at full force — her page carries `deceased` ("Executed by Raiden Shogun in *Duel Before the Throne*"), so this mapping is **only** legal as memory/re-enactment. The domain subtitle supplies the in-world framing for free; live present tense is not available.
@@ -404,11 +404,11 @@ Shipped shape being reskinned, unchanged: **Kaiser Crusher** 209 HP, the melee h
 **Trade-off:** promotes a mid-fight add puzzle to boss stature, which inflates 3-hit copies into a headline encounter — and spends a full Archon on a pair slot.
 
 **Claims & citations:**
-- Illusions: four copies, 3 hits each, special copy has a distinguishing tell, killing it stuns her; killing the diametrically opposite copy makes it explode for 33.3% ATK; loops three times if unresolved — `review/boss-dossiers/dossiers.md:353`, `:376`
-- two-stance normal state with explicit switch moves and distinct melee/ranged movesets — `review/boss-dossiers/dossiers.md:340-342`, `:350`, `:372`
-- deterministic teleport tells (left = Slash Combo 3, right = Lightning Summon) — `review/boss-dossiers/dossiers.md:342`, `:373`
+- Illusions: four copies, 3 hits each, special copy has a distinguishing tell, killing it stuns her; killing the diametrically opposite copy makes it explode for 33.3% ATK; loops three times if unresolved — `docs/current/dossiers/bosses/dossiers.md:353`, `:376`
+- two-stance normal state with explicit switch moves and distinct melee/ranged movesets — `docs/current/dossiers/bosses/dossiers.md:340-342`, `:350`, `:372`
+- deterministic teleport tells (left = Slash Combo 3, right = Lightning Summon) — `docs/current/dossiers/bosses/dossiers.md:342`, `:373`
 - title "Raiden no Inazuma Tono", type Weekly Bosses — `curl` of `https://genshin-impact.fandom.com/api.php?...&titles=Magatsu%20Mitake%20Narukami%20no%20Mikoto` (HTTP 200 raw wikitext, 2026-08-05)
-- Raiden is on the add-running side of the pool, not the strict-1v1 side — `review/boss-dossiers/pattern-memo.md:49`
+- Raiden is on the add-running side of the pool, not the strict-1v1 side — `docs/current/dossiers/bosses/pattern-memo.md:49`
 
 ⚑ Sibling contention: the Act 1 drafter used Raiden for **Lagavulin**.
 ⚑ [USER] stature call: this is a living Archon and a playable character used as an Act 2 (mid-run) boss body. Act-placement mismatch, same class of problem as Shouki above.
@@ -421,13 +421,13 @@ Rules my drafts imply, stated so a script can check them. Each names its predica
 
 1. **⚑ Deceased/resolved bodies are memory-framed.** ALWAYS: if a mapped Genshin entity's wiki page carries `deceased`, or its Archon Quest has resolved it, the flavor text MUST contain at least one memory marker (`memory`, `memories`, `re-enactment`, `record`, `echo`, `as it was`, `remembered`) and MUST NOT open with a present-tense arrival verb (`arrives`, `enters`, `emerges`, `appears`) applied to that entity. Consistent with the sibling rule; La Signora above is the affected row (her domain subtitle "Memories: Duel to the Fiery Death" satisfies it in-world).
 2. **Playable characters are named by their enemy entity name.** ALWAYS: when a mapped body's wiki page is a weekly boss whose `{{About}}` line points to a playable character (Shouki no Kami → Wanderer; Magatsu Mitake Narukami → Raiden Shogun), boss-facing text MUST use the enemy entity name or its enemy title ("Everlasting Lord of Arcane Wisdom", "Shouki no Kami, the Prodigal", "Magatsu Mitake Narukami no Mikoto", "Raiden no Inazuma Tono") and MUST NEVER use the playable name (`Wanderer`, `Scaramouche`, `Balladeer`, `Raiden Shogun`).
-3. **Akademiya register carries the Knowledge Demon slot.** ALWAYS: any Knowledge Demon flavor using an Akademiya/darshan/Matra frame is dry and publication-obsessed, is candid about dubious methodology without apologizing, and keeps institutional disapproval (Sages, Matra, safety filings) offstage. NEVER slapstick; NEVER onstage Matra enforcement. Predicate source: `review/event-gallery/gallery.md:45-49`.
-4. **⚑ Akasha hardware is rationed.** NEVER introduce a new rogue/dead-Akasha-terminal scene in Act 2 boss flavor — the gallery rations these and Brain Leech's literal owns the device (`review/event-gallery/gallery.md:49`). The Shouki mapping's Neo Akasha Terminal is the flagged collision: it may be described as a fixture of the boss's own arena, never as another loose terminal the player finds.
-5. **Flavor never promises an unimplemented mechanic.** NEVER let Act 2 boss text describe the pick-your-poison arms (draw/hand/energy), Back Attack positioning, or Enlarging Strike growth as things that happen — all three are marked UNIMPLEMENTED in `act2_pool.yaml:221-243`. This restates the atlas's own art-unsafe warning (`review/enemy-atlas/reskin-gallery.md:117`) at the boss tier: several candidates above argue partly from positional conditionals and resource-drain arms that the sim does not run.
+3. **Akademiya register carries the Knowledge Demon slot.** ALWAYS: any Knowledge Demon flavor using an Akademiya/darshan/Matra frame is dry and publication-obsessed, is candid about dubious methodology without apologizing, and keeps institutional disapproval (Sages, Matra, safety filings) offstage. NEVER slapstick; NEVER onstage Matra enforcement. Predicate source: `docs/current/dossiers/content/event-conversion-gallery.md:45-49`.
+4. **⚑ Akasha hardware is rationed.** NEVER introduce a new rogue/dead-Akasha-terminal scene in Act 2 boss flavor — the gallery rations these and Brain Leech's literal owns the device (`docs/current/dossiers/content/event-conversion-gallery.md:49`). The Shouki mapping's Neo Akasha Terminal is the flagged collision: it may be described as a fixture of the boss's own arena, never as another loose terminal the player finds.
+5. **Flavor never promises an unimplemented mechanic.** NEVER let Act 2 boss text describe the pick-your-poison arms (draw/hand/energy), Back Attack positioning, or Enlarging Strike growth as things that happen — all three are marked UNIMPLEMENTED in `act2_pool.yaml:221-243`. This restates the atlas's own art-unsafe warning (`docs/current/dossiers/remap/reskin-gallery.md:117`) at the boss tier: several candidates above argue partly from positional conditionals and resource-drain arms that the sim does not run.
 6. **A two-body base encounter takes one source.** ALWAYS: both halves of KAISER CRAB come from a single Genshin entity (its two forms/copies) or a single faction of a single nation. NEVER mix nations or unrelated entities across the pair — the base bodies share `on_ally_death`, so the fiction must supply a reason the survivor inherits.
 7. **⚑ One-nation pool check.** The Act 2 pool draws 1 of 2. If both slots resolve to Sumeru bodies (e.g. Shouki + Apep, or Apep in both), every Act 2 boss a player can ever see is Sumeru. Lint predicate: the two slot winners' nation fields MUST NOT be identical unless [USER] has explicitly ratified a single-nation Act 2.
 
-#### Collisions checked against `review/enemy-atlas/reskin-gallery.md`
+#### Collisions checked against `docs/current/dossiers/remap/reskin-gallery.md`
 
 - **Knowledge Demon** (`reskin-gallery.md:53`) already carries two candidates — Abyss Lector: Violet Lightning (P) and Mystifying Megachurl (P, existence-unverified). Neither is a weekly boss, so there is no body collision; the row is explicitly listed as **plausible-only, soft-cover** in the flags (`:100`), which is why a weekly-boss candidate is being drafted at all.
 - **Kaiser Crab** (`reskin-gallery.md:54`) already carries Coral Defenders (S), Icewind Suite (S), Stonehide + Thunderhelm Lawachurl (S), Ruin Guard + Ruin Hunter (P), Herald + Lector (X) — all non-weekly bodies, and the atlas notes Coral Defenders is natively a single two-body boss encounter. ⚑ No body collision, but a real curation fork: the atlas's answer to this slot is *better* on pair-hood than any weekly boss can be, so [USER] must decide whether the boss slot should take a weekly-boss body at all.
@@ -440,7 +440,7 @@ Rules my drafts imply, stated so a script can check them. Each names its predica
 
 **Scope:** identity / name / flavor only. Every mechanical sentence below *describes* the already-committed intent list in `tier05/content/act3_pool.yaml:214-270`. Nothing here proposes, alters, rebalances, adds or removes a number, an intent, an HP value or a structure. Candidates only — the checkbox is [USER]'s.
 
-**Fixed point carried in as context:** Childe / Tartaglia is already committed elsewhere (north-star v0.2) and is deliberately **not** drafted here. This is worth stating in the curation pass rather than silently omitting, because Childe is the single closest structural match in the whole weekly pool to TEST SUBJECT: the pattern memo puts him and the Guardian of Apep alone in the "sequential full-bar depletion — each phase is its own HP pool rather than a threshold on one bar" bucket (`review/boss-dossiers/pattern-memo.md:16`), and his three stat blocks swap the entire moveset per phase (`review/boss-dossiers/pattern-memo.md:73`, `:138`; dossier section at `review/boss-dossiers/dossiers.md:139-203`). With Childe removed, exactly **one** true sequential-full-bar boss remains in the pool (Apep); everything else in the TEST SUBJECT list below approximates the shape with HP gates on a single bar, and that is stated per entry.
+**Fixed point carried in as context:** Childe / Tartaglia is already committed elsewhere (north-star v0.2) and is deliberately **not** drafted here. This is worth stating in the curation pass rather than silently omitting, because Childe is the single closest structural match in the whole weekly pool to TEST SUBJECT: the pattern memo puts him and the Guardian of Apep alone in the "sequential full-bar depletion — each phase is its own HP pool rather than a threshold on one bar" bucket (`docs/current/dossiers/bosses/pattern-memo.md:16`), and his three stat blocks swap the entire moveset per phase (`docs/current/dossiers/bosses/pattern-memo.md:73`, `:138`; dossier section at `docs/current/dossiers/bosses/dossiers.md:139-203`). With Childe removed, exactly **one** true sequential-full-bar boss remains in the pool (Apep); everything else in the TEST SUBJECT list below approximates the shape with HP gates on a single bar, and that is stated per entry.
 
 ---
 
@@ -458,12 +458,12 @@ Rules my drafts imply, stated so a script can check them. Each names its predica
 **Trade-off:** The fight's most famous minute — defending the Heart of Oasis against a role-typed add roster — has no body in the base entity at all, so the reskin buys the three-form arc by spending Apep's actual centerpiece.
 
 **Claims & citations:**
-- Sequential full-bar depletion; Phase 1 HP to zero transitions rather than kills — `review/boss-dossiers/dossiers.md:405`, `:413`; `review/boss-dossiers/pattern-memo.md:16`
-- Two named forms, Warden of the Last Oasis → Warden of Oasis Prime — `review/boss-dossiers/dossiers.md:401`
-- Phase 1 all-Physical, Phase 3 all-Dendro on the same skeleton — `review/boss-dossiers/dossiers.md:414`
-- Phase 2 is off-field, HP bar replaced by a cleansing meter starting ~27% — `review/boss-dossiers/dossiers.md:407`, `:415`
-- Emerging Strike resurfaces at the player's position as the universal reposition verb — `review/boss-dossiers/dossiers.md:423`
-- Domain, region and version (The Realm of Beginnings, Apep's Resort, Sumeru; 3.6) — `review/boss-dossiers/dossiers.md:402`
+- Sequential full-bar depletion; Phase 1 HP to zero transitions rather than kills — `docs/current/dossiers/bosses/dossiers.md:405`, `:413`; `docs/current/dossiers/bosses/pattern-memo.md:16`
+- Two named forms, Warden of the Last Oasis → Warden of Oasis Prime — `docs/current/dossiers/bosses/dossiers.md:401`
+- Phase 1 all-Physical, Phase 3 all-Dendro on the same skeleton — `docs/current/dossiers/bosses/dossiers.md:414`
+- Phase 2 is off-field, HP bar replaced by a cleansing meter starting ~27% — `docs/current/dossiers/bosses/dossiers.md:407`, `:415`
+- Emerging Strike resurfaces at the player's position as the universal reposition verb — `docs/current/dossiers/bosses/dossiers.md:423`
+- Domain, region and version (The Realm of Beginnings, Apep's Resort, Sumeru; 3.6) — `docs/current/dossiers/bosses/dossiers.md:402`
 - Both forms carry in-game *titles* as well as names: "Warden of the Last Oasis / Evolved From an Apocalyptic Millennium" and "Warden of Oasis Prime / Revived By the Fire Seed" — `https://genshin-impact.fandom.com/api.php?action=query&prop=revisions&rvslots=main&rvprop=content&format=json&titles=Guardian%20of%20Apep%27s%20Oasis` (re-fetched via curl 2026-08-05; the plain article URL and the API through WebFetch both returned HTTP 402 through the proxy tonight, curl direct succeeded. The page carries two Enemy Infobox blocks whose `name`/`title` fields confirm both strings, with `weakpoint = no` on both.) "Revived By the Fire Seed" is a canon in-game name for the revive beat and is available as flavor for a bar-to-bar transition.
 
 ### 2. Azhdaha, Sealed Lord of Vishaps — Liyue (Nantianmen, Minlin) — loose
@@ -477,13 +477,13 @@ Rules my drafts imply, stated so a script can check them. Each names its predica
 **Trade-off:** Azhdaha has no small first form and no "small thing that got bigger"; his Phase 1 is already the full dragon, so the 100 → 200 → 300 escalation reads as him powering up rather than as him regrowing.
 
 **Claims & citations:**
-- Two-stage infusion at 75%/45% HP gates with damage floors at 65%/35% — `review/boss-dossiers/dossiers.md:208`, `:210`, `:212`, `:222`
-- Infusion re-skins existing intents rather than replacing the moveset — `review/boss-dossiers/dossiers.md:219`, `:243`
-- Weekly-readable element pair on the two domain seals; 4-variant rotation — `review/boss-dossiers/dossiers.md:216`, `:229`
-- Enclosed cavern under the Dragon-Queller, Stone Steles, opening forcefield shatter — `review/boss-dossiers/dossiers.md:228`
-- No adds at any point; pure single-target duel — `review/boss-dossiers/dossiers.md:225`
-- Classified as HP-gated, not sequential-full-bar — `review/boss-dossiers/pattern-memo.md:12`, `:16`
-- ⚑ Already listed as candidate #2 for this exact base entity in `review/enemy-atlas/reskin-gallery.md:72` (S10 atlas, "three phases that re-element the whole kit; no small phase-1 form"). That is agreement between two independent streams, not a collision — but [USER] should decide whether a body may be claimed by both the atlas and Track Q, or whether one stream yields.
+- Two-stage infusion at 75%/45% HP gates with damage floors at 65%/35% — `docs/current/dossiers/bosses/dossiers.md:208`, `:210`, `:212`, `:222`
+- Infusion re-skins existing intents rather than replacing the moveset — `docs/current/dossiers/bosses/dossiers.md:219`, `:243`
+- Weekly-readable element pair on the two domain seals; 4-variant rotation — `docs/current/dossiers/bosses/dossiers.md:216`, `:229`
+- Enclosed cavern under the Dragon-Queller, Stone Steles, opening forcefield shatter — `docs/current/dossiers/bosses/dossiers.md:228`
+- No adds at any point; pure single-target duel — `docs/current/dossiers/bosses/dossiers.md:225`
+- Classified as HP-gated, not sequential-full-bar — `docs/current/dossiers/bosses/pattern-memo.md:12`, `:16`
+- ⚑ Already listed as candidate #2 for this exact base entity in `docs/current/dossiers/remap/reskin-gallery.md:72` (S10 atlas, "three phases that re-element the whole kit; no small phase-1 form"). That is agreement between two independent streams, not a collision — but [USER] should decide whether a body may be claimed by both the atlas and Track Q, or whether one stream yields.
 
 ### 3. ⚑ La Signora, the Fair Lady — Snezhnaya / Fatui (fought at Tenshukaku, Inazuma) — loose
 
@@ -496,15 +496,15 @@ Rules my drafts imply, stated so a script can check them. Each names its predica
 **Trade-off:** You get the best rebirth in the pool and lose the count: mapping a two-form boss onto three bars means the middle bar is doing work Signora's fight does not have, and her two defining systems (the parallel temperature gauge and Pain for Pain's per-instance damage cap) are attached to nothing in the base entity.
 
 **Claims & citations:**
-- Carmine Chrysalis at 20% of Phase 1 HP; cocoon break ends Phase 1 outright — `review/boss-dossiers/dossiers.md:272`, `:284`
-- Phase 2 is a fresh, roughly doubled HP pool with a mirror-flipped kit — `review/boss-dossiers/dossiers.md:274`, `:275`
-- Whirling Blaze is an untargetable enrage on a dual HP/time trigger, not a third bar — `review/boss-dossiers/dossiers.md:276`, `:286`
-- Scripted opener (Ice Shards + Frozen Wheel) every run; Fireball as scripted follow-up — `review/boss-dossiers/dossiers.md:270`, `:288`
-- Frosted Floor / Embered Earth persistent ground conversion — `review/boss-dossiers/dossiers.md:283`
-- Domain and subtitle; second form titled Crimson Witch of Embers — `review/boss-dossiers/dossiers.md:266`
+- Carmine Chrysalis at 20% of Phase 1 HP; cocoon break ends Phase 1 outright — `docs/current/dossiers/bosses/dossiers.md:272`, `:284`
+- Phase 2 is a fresh, roughly doubled HP pool with a mirror-flipped kit — `docs/current/dossiers/bosses/dossiers.md:274`, `:275`
+- Whirling Blaze is an untargetable enrage on a dual HP/time trigger, not a third bar — `docs/current/dossiers/bosses/dossiers.md:276`, `:286`
+- Scripted opener (Ice Shards + Frozen Wheel) every run; Fireball as scripted follow-up — `docs/current/dossiers/bosses/dossiers.md:270`, `:288`
+- Frosted Floor / Embered Earth persistent ground conversion — `docs/current/dossiers/bosses/dossiers.md:283`
+- Domain and subtitle; second form titled Crimson Witch of Embers — `docs/current/dossiers/bosses/dossiers.md:266`
 - Real name Rosalyne-Kruzchka Lohefalter; titles "The Fair Lady" / "The Eighth of the Eleven Fatui Harbingers" / "Crimson Witch of Embers"; and the wiki records her as **deceased — "Executed by [[Raiden Shogun]] in *Duel Before the Throne*"** — `https://genshin-impact.fandom.com/api.php?action=query&prop=revisions&rvslots=main&rvprop=content&format=json&titles=Signora` (fetched via curl 2026-08-05; Character Infobox `realname`, `deceased`, `title`/`title2`/`title3` fields)
 - ⚑ Consequence of the line above, for [USER]: she is the only candidate on this page with an on-screen, irreversible canon death, and her domain is explicitly a *memory* ("Memories: Duel to the Fiery Death"). A rotating pool re-draws her run after run, which either commits Act 3 to a recollection framing or quietly de-canonizes the execution.
-- ⚑ Stature/identity call for [USER]: Signora is a named Harbinger with an authored death in the Inazuma Archon Quest. Casting her as the anonymous, beast-shaped **TEST SUBJECT** is a body-type and narrative-weight decision no drafter should make. The Fatui register in `review/event-gallery/gallery.md:74-77` also constrains how she may speak.
+- ⚑ Stature/identity call for [USER]: Signora is a named Harbinger with an authored death in the Inazuma Archon Quest. Casting her as the anonymous, beast-shaped **TEST SUBJECT** is a body-type and narrative-weight decision no drafter should make. The Fatui register in `docs/current/dossiers/content/event-conversion-gallery.md:74-77` also constrains how she may speak.
 
 ---
 
@@ -522,12 +522,12 @@ Rules my drafts imply, stated so a script can check them. Each names its predica
 **Trade-off:** Taking the enshrined-torso reading throws away the entire second half of a two-act fight (the ambulatory god, Setsuna Shoumetsu, the Nirvana Engines); taking the whole boss throws away the one-bar shape the base entity has.
 
 **Claims & citations:**
-- Phase 1 is a fixed, non-ambulatory upper body on the altar — a stationary turret boss — `review/boss-dossiers/dossiers.md:469`, `:499`
-- Laser Array: a ring of rotating cannons firing sweeping 100% ATK Electro beams — `review/boss-dossiers/dossiers.md:470`
-- Shield is +200% RES (soft immunity), not an HP sponge, depleted by the Terminal — `review/boss-dossiers/dossiers.md:478`, `:488`, `:520`
-- Raw Frost / Remnant Flame floor corruption with a typed cleanse — `review/boss-dossiers/dossiers.md:493`, `:523`
-- Phase 1 and Phase 2 are separate stat blocks with separate HP pools — `review/boss-dossiers/dossiers.md:475`, `:509`
-- Domain, region, version (Joururi Workshop, Chinvat Ravine, Avidya Forest, Sumeru; 3.2) — `review/boss-dossiers/dossiers.md:466`
+- Phase 1 is a fixed, non-ambulatory upper body on the altar — a stationary turret boss — `docs/current/dossiers/bosses/dossiers.md:469`, `:499`
+- Laser Array: a ring of rotating cannons firing sweeping 100% ATK Electro beams — `docs/current/dossiers/bosses/dossiers.md:470`
+- Shield is +200% RES (soft immunity), not an HP sponge, depleted by the Terminal — `docs/current/dossiers/bosses/dossiers.md:478`, `:488`, `:520`
+- Raw Frost / Remnant Flame floor corruption with a typed cleanse — `docs/current/dossiers/bosses/dossiers.md:493`, `:523`
+- Phase 1 and Phase 2 are separate stat blocks with separate HP pools — `docs/current/dossiers/bosses/dossiers.md:475`, `:509`
+- Domain, region, version (Joururi Workshop, Chinvat Ravine, Avidya Forest, Sumeru; 3.2) — `docs/current/dossiers/bosses/dossiers.md:466`
 - ⚑ Entity-reuse call for [USER]: this boss body *is* Scaramouche / the Wanderer, a playable character. Using it as a recurring Act 3 boss commits a name that may be wanted on the roster side.
 - ⚑ Nation-commitment call: pairing this with Guardian of Apep's Oasis (slot A #1) makes the entire two-boss Act 3 pool Sumeru.
 
@@ -542,13 +542,13 @@ Rules my drafts imply, stated so a script can check them. Each names its predica
 **Trade-off:** You buy the best pollution-and-block match in the pool at the cost of the silhouette's stillness, and the boss's signature difficulty axis (three permanent stages of arena collapse) has no referent in a one-bar body.
 
 **Claims & citations:**
-- Attrition: stacking counter, delayed resolution, HP loss that bypasses shields — `review/boss-dossiers/dossiers.md:727`, `:747`
-- Void Ward: hit-count immunity shield, durability tiers 50 / 40 / 24 / 3 — `review/boss-dossiers/dossiers.md:728`, `:748`
-- Fixed intent chains (Abyssal Orbs → Downward Cleave; Dual Sword Slash; Cloudform A-B-A) — `review/boss-dossiers/dossiers.md:697`, `:718`, `:720`, `:750`
-- Phase entry is event-driven, not HP-gated; wings and dual swords afterward — `review/boss-dossiers/dossiers.md:704`, `:713`; `pattern-memo.md:17`
-- Four-voice possession (Xbalanque, Cochanina, Xumucul, Ndenge) with per-attack attribution — `review/boss-dossiers/dossiers.md:734`
-- Purple-versus-orange as the fight's visual grammar — `review/boss-dossiers/dossiers.md:689`
-- Domain and region (Stone Stele Records, Tezcatepetonco Range, Natlan; 5.3) — `review/boss-dossiers/dossiers.md:689`
+- Attrition: stacking counter, delayed resolution, HP loss that bypasses shields — `docs/current/dossiers/bosses/dossiers.md:727`, `:747`
+- Void Ward: hit-count immunity shield, durability tiers 50 / 40 / 24 / 3 — `docs/current/dossiers/bosses/dossiers.md:728`, `:748`
+- Fixed intent chains (Abyssal Orbs → Downward Cleave; Dual Sword Slash; Cloudform A-B-A) — `docs/current/dossiers/bosses/dossiers.md:697`, `:718`, `:720`, `:750`
+- Phase entry is event-driven, not HP-gated; wings and dual swords afterward — `docs/current/dossiers/bosses/dossiers.md:704`, `:713`; `pattern-memo.md:17`
+- Four-voice possession (Xbalanque, Cochanina, Xumucul, Ndenge) with per-attack attribution — `docs/current/dossiers/bosses/dossiers.md:734`
+- Purple-versus-orange as the fight's visual grammar — `docs/current/dossiers/bosses/dossiers.md:689`
+- Domain and region (Stone Stele Records, Tezcatepetonco Range, Natlan; 5.3) — `docs/current/dossiers/bosses/dossiers.md:689`
 
 ### 3. ⚑ Stormterror Dvalin — Mondstadt (Stormterror's Lair) — loose
 
@@ -561,28 +561,28 @@ Rules my drafts imply, stated so a script can check them. Each names its predica
 **Trade-off:** The best structural match (one bar, no HP gates, regenerating ward, permanent escalating pollution) sits on the body least like a static edifice, and the memo ranks him the most spatially and temporally load-bearing fight in the pool — the most is lost in translation here of any candidate on this page.
 
 **Claims & citations:**
-- No HP thresholds; phases advance on cumulative ward breaks (1/3/5/6) or a wall clock — `review/boss-dossiers/dossiers.md:88`, `:112`; `review/boss-dossiers/pattern-memo.md:17`, `:20`
-- Regenerating non-elemental ward worth 20% Max HP gating all real HP damage; break → paralysis → fresh ward — `review/boss-dossiers/dossiers.md:87`, `:111`
-- Caelestinum Finale Termini: permanent, never-cleansed floor corruption, cast exactly three times, escalating per-instance DoT — `review/boss-dossiers/dossiers.md:91`, `:102`, `:114`
-- Energy Lightning is an irreversible enrage applying a permanent condition to every platform — `review/boss-dossiers/dossiers.md:95`, `:115`
-- No add spawns across all five phases — `review/boss-dossiers/dossiers.md:97`
-- Fixed non-tracking camera; separated platforms with real out-of-bounds — `review/boss-dossiers/dossiers.md:100`, `:105`
-- Ranked the most spatially/temporally load-bearing fight in the pool — `review/boss-dossiers/pattern-memo.md:156`
+- No HP thresholds; phases advance on cumulative ward breaks (1/3/5/6) or a wall clock — `docs/current/dossiers/bosses/dossiers.md:88`, `:112`; `docs/current/dossiers/bosses/pattern-memo.md:17`, `:20`
+- Regenerating non-elemental ward worth 20% Max HP gating all real HP damage; break → paralysis → fresh ward — `docs/current/dossiers/bosses/dossiers.md:87`, `:111`
+- Caelestinum Finale Termini: permanent, never-cleansed floor corruption, cast exactly three times, escalating per-instance DoT — `docs/current/dossiers/bosses/dossiers.md:91`, `:102`, `:114`
+- Energy Lightning is an irreversible enrage applying a permanent condition to every platform — `docs/current/dossiers/bosses/dossiers.md:95`, `:115`
+- No add spawns across all five phases — `docs/current/dossiers/bosses/dossiers.md:97`
+- Fixed non-tracking camera; separated platforms with real out-of-bounds — `docs/current/dossiers/bosses/dossiers.md:100`, `:105`
+- Ranked the most spatially/temporally load-bearing fight in the pool — `docs/current/dossiers/bosses/pattern-memo.md:156`
 - ⚑ Co-op call for [USER]: Confront Stormterror is the **only** Trounce Domain that cannot be run in Co-Op Mode, attributed to its fixed camera (`dossiers.md:72`, `:105`). The mod ships co-op; a boss whose canon identity includes "single-player only" is a flavor decision, not a drafter's.
 
 ---
 
 #### Register implications
 
-Stated in the S2 idiom of `review/event-gallery/gallery.md:24-77` — each is a predicate a script can check over a gallery file. These extend the existing register blocks; no conflict with them was found, and the one adjacency (Fatui) is called out explicitly.
+Stated in the S2 idiom of `docs/current/dossiers/content/event-conversion-gallery.md:24-77` — each is a predicate a script can check over a gallery file. These extend the existing register blocks; no conflict with them was found, and the one adjacency (Fatui) is called out explicitly.
 
 **Weekly bosses (Trounce Domain entities) — new register block.**
-- A weekly-boss mapping **always** names the canonical Trounce Domain and its region in the flavor paragraph (e.g. "The Realm of Beginnings, Apep's Resort, Desert of Hadramaveth, Sumeru"); it **never** invents an arena, domain, or altar name. *Predicate:* for every `### N.` block whose base entity is in the `boss:` list of an act pool, the flavor paragraph must contain a domain string that appears in `review/boss-dossiers/dossiers.md`.
+- A weekly-boss mapping **always** names the canonical Trounce Domain and its region in the flavor paragraph (e.g. "The Realm of Beginnings, Apep's Resort, Desert of Hadramaveth, Sumeru"); it **never** invents an arena, domain, or altar name. *Predicate:* for every `### N.` block whose base entity is in the `boss:` list of an act pool, the flavor paragraph must contain a domain string that appears in `docs/current/dossiers/bosses/dossiers.md`.
 - A weekly boss **never** bargains, trades, prices, or offers a choice to the player. Trounce entities are not merchants and not event NPCs; the Liyue-mercantile and Adventurers'-Guild registers (`gallery.md:70-73`, `:59-61`) **never** apply to a boss body. *Predicate:* no bracketed `[choice]` line and no price/contract vocabulary inside a weekly-boss block.
 - A weekly boss's minions **always** carry their published canonical names (Proliferating Organism variants, Nirvana Engines, Tenebrous Mimiflora, Crimson Lotus Moths); a boss that publishes add names **never** gets invented ones. *Predicate:* any minion noun inside a weekly-boss block must appear in that boss's dossier section.
 
 **One body, one slot.**
-- A Genshin weekly boss is **always** claimed by at most one base entity across the reskin/gallery corpus; the same weekly-boss name **never** appears as a candidate under two different base entities. *Predicate:* over `review/enemy-atlas/reskin-gallery.md` plus the Track Q fragments, `count(distinct base-entity headings citing boss X) <= 1`. **Currently satisfied** — the only cross-file recurrence is Azhdaha, and it recurs on the *same* base entity (TEST SUBJECT), which is concordance, not a claim conflict. ⚑ [USER] to confirm that same-entity recurrence across two streams is permitted rather than requiring one stream to yield.
+- A Genshin weekly boss is **always** claimed by at most one base entity across the reskin/gallery corpus; the same weekly-boss name **never** appears as a candidate under two different base entities. *Predicate:* over `docs/current/dossiers/remap/reskin-gallery.md` plus the Track Q fragments, `count(distinct base-entity headings citing boss X) <= 1`. **Currently satisfied** — the only cross-file recurrence is Azhdaha, and it recurs on the *same* base entity (TEST SUBJECT), which is concordance, not a claim conflict. ⚑ [USER] to confirm that same-entity recurrence across two streams is permitted rather than requiring one stream to yield.
 
 **Boss-pool nation spread.**
 - An act's boss pool **never** draws all of its committed entries from a single nation. *Predicate:* for each `boss:` list in an act pool, `count(distinct nation over chosen mappings) >= 2`. ⚑ This is the rule the Apep + Shouki pairing would break (both Sumeru); Apep + Eroded Primal Fire (Sumeru + Natlan) and Azhdaha + Shouki (Liyue + Sumeru) satisfy it.
@@ -599,7 +599,7 @@ Stated in the S2 idiom of `review/event-gallery/gallery.md:24-77` — each is a 
 
 A second Track Q drafter was dispatched onto this same slot and found the page above already complete and sound; rather than clobber it, the additive material was merged in place (the two verified-citation blocks under Apep and Signora, the dead-body register rule above, and these flags). The second pass independently reached the same slot-A #1 (Apep) and the same shortlist for slot B, differing only in ordering — it would have led slot B with **Azhdaha** on the "enormous static edifice / mark-on-unshielded-hit / compounding resistance wall" reading (`dossiers.md:217`, `:218`, `:225`, `:228`) and placed Shouki on slot A for the "separate stat blocks, nothing carries over, two distinct encounters stapled together" reading (`dossiers.md:475-476`, `:508`). Both are recorded here as ordering alternatives, not new entries — the six variants above are the deliverable.
 
-- ⚑ **Atlas displacement, both slots.** `review/enemy-atlas/reskin-gallery.md:72-73` already carries curated top picks for both base bodies from the S10 stream: **Iniquitous Baptist (S)** for Test Subject ("the only body in Teyvat built as phase-gated moveset swaps") and **Abyss Lector: Fathomless Flames (S)** for Aeonglass, whose Wither ↔ Brand of the Abyssal Flame match the atlas calls "the strongest single boss argument in the atlas." Track Q's weekly-boss layer *competes with* those rows rather than extending them. The Azhdaha recurrence is already flagged above as concordance; the two S-rated atlas picks are the real conflict, and whether an Act 3 boss should be weekly-tier at all is a call above this fragment.
+- ⚑ **Atlas displacement, both slots.** `docs/current/dossiers/remap/reskin-gallery.md:72-73` already carries curated top picks for both base bodies from the S10 stream: **Iniquitous Baptist (S)** for Test Subject ("the only body in Teyvat built as phase-gated moveset swaps") and **Abyss Lector: Fathomless Flames (S)** for Aeonglass, whose Wither ↔ Brand of the Abyssal Flame match the atlas calls "the strongest single boss argument in the atlas." Track Q's weekly-boss layer *competes with* those rows rather than extending them. The Azhdaha recurrence is already flagged above as concordance; the two S-rated atlas picks are the real conflict, and whether an Act 3 boss should be weekly-tier at all is a call above this fragment.
 - ⚑ **Stature, pool-wide.** All six candidates are Trounce (weekly) bosses — the top of Genshin's enemy-stature ladder. Filling both Act 3 slots from that tier sets a ceiling every Act 1–2 mapping must then sit below, and spends two of only eleven weekly bodies on a pool that draws one per run.
 - ⚑ **Sumeru concentration, restated with the new ordering.** The nation-spread rule above is broken by Apep (slot A #1) + Shouki (slot B #1) as currently ordered — both Sumeru. Every other pairing among the six satisfies it.
 - Draft-time infobox verification for the remaining three bodies, all fetched via curl 2026-08-05 against `https://genshin-impact.fandom.com/api.php?action=query&prop=revisions&rvslots=main&rvprop=content&format=json&titles=…`: **Azhdaha (Weekly Boss)** — title "Sealed Lord of Vishaps", Geo primary with Cryo/Electro/Hydro/Pyro secondaries, `weakpoint = no`, ability tags "Elemental Conversion" and "Invincibility Frames"; **Everlasting Lord of Arcane Wisdom** — that is the entity name, with "Shouki no Kami, the Prodigal" as the *title* field (the reverse of how the dossier heading reads it), location Joururi Workshop, ability tags Shield / Energy Drain / Vacuum Field / HP Loss / Self HP Loss / Teleport; **Lord of Eroded Primal Fire** — title "The Slain Dragon Molded", group "Tenebrous Mimesis", location Stone Stele Records, ability tags Void Ward / HP Loss / Teleport / Pushing Vacuum Field, with the page hatnote confirming Gosoythoth as the entity and Xiuhcoatl as the imitated dragon. No claim above was contradicted by these fetches.
@@ -638,7 +638,7 @@ rules that are **pool-wide** or that three drafters reached independently.
   for that faction.
 - **RQ2-A3 — A weekly-boss entity line ALWAYS uses the canon arena name and NEVER invents
   a location.** Predicate: the location token must match a name attested in
-  `review/boss-dossiers/dossiers.md` — Wolvendom, Beneath the Dragon-Queller, Narukami
+  `docs/current/dossiers/bosses/dossiers.md` — Wolvendom, Beneath the Dragon-Queller, Narukami
   Island: Tenshukaku, End of the Oneiric Euthymia, Scattered Ruins, The Realm of
   Beginnings, Joururi Workshop, Stone Stele Records, Stormterror's Lair, Shadow of Another
   World. Direct mirror of the Melusine rule that Fontaine's research body is always the
@@ -701,11 +701,11 @@ rules that are **pool-wide** or that three drafters reached independently.
   base bodies share `on_ally_death`, so the fiction must supply a reason the survivor
   inherits.
 - **RQ2-C3 — A Genshin weekly boss is claimed by at most ONE base entity across the
-  reskin/gallery corpus.** Predicate: over `review/enemy-atlas/reskin-gallery.md` plus
+  reskin/gallery corpus.** Predicate: over `docs/current/dossiers/remap/reskin-gallery.md` plus
   these fragments, `count(distinct base-entity headings citing boss X) <= 1`.
   ⚑ **Currently breached** — see assembly note 2; the eleven-boss pool is oversubscribed
   by design of the parallel drafting, and spending it is a curation act.
-- **RQ2-C4 — A boss body already claimed in `review/enemy-atlas/reskin-gallery.md` for a
+- **RQ2-C4 — A boss body already claimed in `docs/current/dossiers/remap/reskin-gallery.md` for a
   different base body NEVER appears here as an unflagged candidate.** Predicate: intersect
   candidate names against the reskin-gallery candidate column; any hit must carry a ⚑.
 
@@ -775,7 +775,7 @@ fragment rather than buried per-variant, and it is the single strongest argument
 fork in note 4.
 
 **4. ⚑ The fork that outranks every variant here: should the boss slots take weekly-boss
-bodies at all?** The S10 atlas (`review/enemy-atlas/reskin-gallery.md`) already carries
+bodies at all?** The S10 atlas (`docs/current/dossiers/remap/reskin-gallery.md`) already carries
 curated candidates for these same base bodies from the *normal-enemy* families, and three
 of them are S-rated and better on the merits than anything Track Q can offer:
 - **Coral Defenders** for KAISER CRAB (`:54`) — natively a single two-body boss

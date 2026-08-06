@@ -199,7 +199,7 @@ Chinju Forest, an hour past the shrine. The straw hat that dropped onto your sho
 
 [Shake It Loose (Rip the Leech Off)] It leaves without letting go first. Lose 5 HP. Gain a Colorless 2 card reward — two companion (Colorless) charms shaken from its belt as it bolts for the canopy.
 
-- **Cut:** ~~Specimen 14, Flooded Annex~~ — Lore error: invents an 'Institute of Natural Philosophy' where the gallery's canon org is the Fontaine Research Institute of Kinetic Energy Engineering (named correctly in Battleworn Dummy and Tinker Time).
+- **Cut:** Specimen 14, Flooded Annex — Lore error: invents an 'Institute of Natural Philosophy' where the gallery's canon org is the Fontaine Research Institute of Kinetic Energy Engineering (named correctly in Battleworn Dummy and Tinker Time).
 
 ---
 
@@ -330,7 +330,7 @@ Level 3:
 [Draw Off the Sap] Gain 135 Gold.
 [Enter the Heart-Chamber] Lose 7 HP. Obtain Elynas Heartseed (Pollinous Core).
 
-- **Cut:** ~~The Ledgered Lily~~ — Lore strain: a windmill-scale, lung-scouring Glaze Lily breaks the flower's sacred-and-delicate canon register, and the Whopperflower variant already owns the literal mapping.
+- **Cut:** The Ledgered Lily — Lore strain: a windmill-scale, lung-scouring Glaze Lily breaks the flower's sacred-and-delicate canon register, and the Whopperflower variant already owns the literal mapping.
 
 ---
 
@@ -428,7 +428,7 @@ A dry sub-level of the Fontaine Research Institute of Kinetic Energy Engineering
 
 [Wind Every One and Watch Them Move] Lose 15 HP to the mainsprings' backlash. Choose 1 of 3 clockwork meka dolls (Doll Relics).
 
-- **Cut:** ~~The Guili Figurine Alcove~~ — Lore stretch (Guili Assembly funerary figurines relocated to the Chasm) plus the weakest HP-cost justification of the three ('stale air' vs. mainspring backlash and blood-seals).
+- **Cut:** The Guili Figurine Alcove — Lore stretch (Guili Assembly funerary figurines relocated to the Chasm) plus the weakest HP-cost justification of the three ('stale air' vs. mainspring backlash and blood-seals).
 
 ---
 
@@ -453,7 +453,7 @@ Deep in the Chasm's Underground Mines, the old seams have weathered into alcoves
 
 [Resist] You retreat by lamplight; the surveyor files you as unremarkable and confiscates two items for the record. Remove 2 cards from your Deck. Add Normality (curse) to your Deck.
 
-- **Cut:** ~~The Fitting Room Off Vasari Passage~~ — Register violation: a bright-menacing Melusine ('the house does not guarantee you will still be shaped like yourself') contradicts the faction's earnest, warn-honestly register everywhere else in the gallery.
+- **Cut:** The Fitting Room Off Vasari Passage — Register violation: a bright-menacing Melusine ('the house does not guarantee you will still be shaped like yourself') contradicts the faction's earnest, warn-honestly register everywhere else in the gallery.
 
 ---
 
@@ -571,7 +571,7 @@ At Chihu Rock a Feiyun Commerce Guild factor slides a sealed contract across the
 
 [Split the Contract] Gain 35-65 Mora (Gold).
 
-- **Cut:** ~~The Tanglewood of Erinnyes~~ — Lore error: 'off duty from the Marechaussee Hunters' uses an artifact-set name for the Marechaussee Phantom, which the gallery names correctly in Ranwid, Stone of All Time, and The Lantern Key.
+- **Cut:** The Tanglewood of Erinnyes — Lore error: 'off duty from the Marechaussee Hunters' uses an artifact-set name for the Marechaussee Phantom, which the gallery names correctly in Ranwid, Stone of All Time, and The Lantern Key.
 
 ---
 
@@ -623,7 +623,7 @@ Deep in the Avidya Forest, a day's walk past Gandharva Ville, a ring of trees st
 
 [Walk the Ridge Alone] You decline, climb above the canopy, and sleep under open sky with nobody's dream leaking into yours. The forest air does you good: Gain 5 Max HP.
 
-- **Cut:** ~~The Melusine Conservatory~~ — Frames the punishing Group branch (all Mora gone, 2 random transforms) as sincere communal kindness, failing the trickster/dream-bargain framing the event's own resistance note says it requires.
+- **Cut:** The Melusine Conservatory — Frames the punishing Group branch (all Mora gone, 2 random transforms) as sincere communal kindness, failing the trickster/dream-bargain framing the event's own resistance note says it requires.
 
 ---
 
@@ -708,7 +708,7 @@ Out in the Guili Plains, a Stone Tablet Compilation surveyor has turned up a ste
 
 [Break the Stele] Both faces spill into a hundred whole copies, and one of them is not a copy. Duplicate your entire Deck. Add Ill Omen (Bad Luck) (curse) to your Deck.
 
-- **Cut:** ~~Akasha Echo ohcE ahsakA~~ — Gallery redundancy: third rogue-Akasha-terminal scene (after Brain Leech's literal and Zen Weaver's filaments); the Mirror Maiden variant already owns this event's device cleanly.
+- **Cut:** Akasha Echo ohcE ahsakA — Gallery redundancy: third rogue-Akasha-terminal scene (after Brain Leech's literal and Zen Weaver's filaments); the Mirror Maiden variant already owns this event's device cleanly.
 
 ---
 
@@ -832,7 +832,7 @@ In Merusea Village a small Melusine in a rain hat presses a hand-stitched pamphl
 
 (Each reading is offered only if you hold a card of that type to enchant; Thank Her and Go is offered only when you hold none.)
 
-- **Cut:** ~~The Drillmaster's Three Lessons~~ — Gallery redundancy: beat-for-beat duplicate of Bugslayer's Watatsumi drillmaster (same Sangonomiya terraces, same archetype), and the thinner of the two scenes.
+- **Cut:** The Drillmaster's Three Lessons — Gallery redundancy: beat-for-beat duplicate of Bugslayer's Watatsumi drillmaster (same Sangonomiya terraces, same archetype), and the thinner of the two scenes.
 
 ---
 
@@ -928,7 +928,7 @@ Deep under the Opera Epiclese, in the machine-gallery that swings the stage, a c
 ## - [ ] Symbiote
 *Acts: act2/act3 · not in tier05 pool · base text: `docs/sts2-events-harvest.txt`*
 
-> **FLAG — [USER] decision needed:** The Corrupted Enchant is on the repo's skip-loudly/not-codeable list (docs/sts2-map-and-events-research.md §3.3) — the event cannot ship until the Enchant op lands, whatever the skin.
+> **FLAG — [USER] decision needed:** The Corrupted Enchant is on the repo's skip-loudly/not-codeable list (docs/current/research/sts2-map-and-events-research.md §3.3) — the event cannot ship until the Enchant op lands, whatever the skin.
 
 ### 1. Defilement at Serpent's Head — Inazuma / Sangonomiya resistance — loose (loose)
 
@@ -1188,7 +1188,7 @@ Below the waterline, where the Fortress of Meropide recycles its own air, a brok
 
 [—] <<NO OPTIONS SECTION ON PAGE>> — base lists no options, so none are written. Every mechanic — option count, costs, rewards, curses, escalation — carries over from base unchanged; only the framing is Fontainian.
 
-- **Cut:** ~~The Offering Log at Stormbearer Point~~ — Gallery redundancy: duplicates Relic Trader's hilichurl swap-stall — same coast, same Guild-scout framing, same quoted 'Valo! Mosi mita?' line.
+- **Cut:** The Offering Log at Stormbearer Point — Gallery redundancy: duplicates Relic Trader's hilichurl swap-stall — same coast, same Guild-scout framing, same quoted 'Valo! Mosi mita?' line.
 
 ---
 
@@ -1380,7 +1380,7 @@ Beneath the Palais Mermonia, past Gardemek that no longer recognize anyone's war
 
 * If a Lantern Key remains in your deck afterwards, the other seal must also be opened.
 
-- **Cut:** ~~The Chanter's Coffers~~ — Continuity error: invents on-site key provenance ('the key you pried off the camp's lamp-pole'), contradicting the Lantern Key card carried in from The Lantern Key event.
+- **Cut:** The Chanter's Coffers — Continuity error: invents on-site key provenance ('the key you pried off the camp's lamp-pole'), contradicting the Lantern Key card carried in from The Lantern Key event.
 
 ---
 
@@ -1417,7 +1417,7 @@ Below Sangonomiya Shrine, a canvas tent holds everything the resistance has stri
 
 Your slip shows the running Tally and how far to 2000, where a Sangonomiya Commendation Ribbon (Wongo Customer Appreciation Badge) is issued. It does nothing.
 
-- **Cut:** ~~The Merusea Salvage Fair~~ — Register strain: the sincere Melusine voice cannot carry the unexplained inverted points curve or the punitive [Leave] downgrade, as the entry's own resistance note concedes.
+- **Cut:** The Merusea Salvage Fair — Register strain: the sincere Melusine voice cannot carry the unexplained inverted points curve or the punitive [Leave] downgrade, as the entry's own resistance note concedes.
 
 ---
 
@@ -1731,7 +1731,7 @@ Every NOT-APPLIED temptation recorded by the drafters, collected verbatim. Inven
 - **Slippery Bridge**: The core loop maps cleanly — a "keep paying escalating HP to reroll, or accept the loss" structure is naturally a physical bridge crossing — but "card" is an abstract deck entry, so each variant must quietly treat techniques and supplies as droppable physical cargo. The other friction is the reroll: randomizing which card is offered needs an in-world randomizer (shifting wind, a ballast wheel, a slipping knot) rather than an actor making a choice.
 - **Spirit Grafter**: Almost none: a spirit that wants to inhabit you maps cleanly onto Teyvat's possession lore (Chinju Forest youkai, Withering-adjacent grafts, Fontemer growths), and Metamorphosis reads naturally as the parasite's permanent trace. The only awkward seam is that Rejection's deck removal is mechanically a benefit, so every variant has to frame the removal as theft or amnesia rather than relief, otherwise the 9 HP reads as a fee for a favor.
 - **Stone of All Time**: Very little resistance — a two-option "immovable ancient rock, drink-and-lift or raw-shove" premise maps directly onto Teyvat, which is full of genuinely ancient stonework (Guyun's spear-stones especially). The only friction is that "lose a random potion" reads oddly in-fiction when the scene shows a character deliberately choosing a flask, and Vigorous is a Spire keyword with no Genshin analogue, so it stays untranslated by name.
-- **Symbiote**: The core beat is an Enchant, which this repo lists as skip-loudly/not-codeable (docs/sts2-map-and-events-research.md §3.3), and "Corrupted" has no single pan-Teyvat analogue — corruption is nation-scoped (Abyss, Tatarigami, Withering), so the enchant's flavor has to be re-sourced per variant while the keyword name stays literal. The second beat is also mechanically counter-intuitive: burning the parasite yields a *different* card rather than destroying one, so every setting needs a reason fire converts rather than consumes.
+- **Symbiote**: The core beat is an Enchant, which this repo lists as skip-loudly/not-codeable (docs/current/research/sts2-map-and-events-research.md §3.3), and "Corrupted" has no single pan-Teyvat analogue — corruption is nation-scoped (Abyss, Tatarigami, Withering), so the enchant's flavor has to be re-sourced per variant while the keyword name stays literal. The second beat is also mechanically counter-intuitive: burning the parasite yields a *different* card rather than destroying one, so every setting needs a reason fire converts rather than consumes.
 - **Tablet of Truth**: The escalating max-HP ladder re-skins cleanly, but Stage 5 ("lose all but 1 Max HP") is hard to voice in Teyvat without an NPC who would plainly stop you — every faction I gave it to needed a line explaining why nobody watching intervenes. Also worth flagging for the gallery: tier05/content/events.yaml deliberately omits Stage 5 (flagged in-file as needing an "all but 1" max-HP op), so the Stage 5 flavor above is written to the harvest but is currently unreachable in the sim.
 - **Tea Master**: Almost no resistance: tea houses and pre-battle tea are native to both Liyue and Inazuma, and Gold maps to Mora one-for-one. The only strain is that Strength has no Genshin stat analogue, so Ember Tea's flavor has to read as plain bodily vigor rather than an elemental buff, and the free-cup penalty (2 Dazed) has to land as social rudeness rather than as an obviously bad deal.
 - **The Future of Potions_**: The option list is generated at runtime from the player's own potion belt (first three slots, leftmost priority) and each option's Attack/Skill/Power axis is rolled randomly, so no scene can name the specific brews being handed over or promise a particular reward type — the flavor has to stay generic about what goes in and what comes out. Genshin's alchemy is also a crafting/refinement idiom rather than a "consume a potion to learn a card" one, so the literal Sumeru version needs an invented-but-plausible Akademiya apparatus to carry the read-the-brew-as-knowledge conceit.
