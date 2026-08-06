@@ -1,3 +1,9 @@
+> **MOVED 2026-08-06 — Clear the Stage, Track R-B (charter R119, rail 1).**
+> Old path: `docs/registration-hunt-report-2026-08-06.md` — new path: `docs/archive/registration-hunt-report-2026-08-06.md`.
+> Verbatim move: everything below this banner is byte-identical to the
+> pre-move file. Citers repointed in the move commit; see
+> `review/stage-clear/rb-move-manifest.tsv`.
+
 # Registration hunt report — the payoff-reach / RARITY_ODDS pre-registration (queue row 10.7)
 
 > **Lifecycle: REFERENCE once landed.** Track S2 of the wave-8 batch,

@@ -1,3 +1,9 @@
+> **MOVED 2026-08-06 — Clear the Stage, Track R-B (charter R119, rail 1).**
+> Old path: `docs/playtest2-triage-2026-07-28.md` — new path: `docs/archive/playtest2-triage-2026-07-28.md`.
+> Verbatim move: everything below this banner is byte-identical to the
+> pre-move file. Citers repointed in the move commit; see
+> `review/stage-clear/rb-move-manifest.tsv`.
+
 # Playtest 2 triage — Furina co-op feedback + deck review (2026-07-28)
 
 > **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.

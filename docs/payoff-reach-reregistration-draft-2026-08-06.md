@@ -17,7 +17,7 @@ registration to existing reads."*
 files, not in the stash (empty), not among the object store's 117 unreachable
 commits and 43 unreachable blobs, not in the primary checkout's untracked
 files, not in session scratchpads or project memory. Full negative record:
-`docs/registration-hunt-report-2026-08-06.md`. The hunt's central finding: the
+`docs/archive/registration-hunt-report-2026-08-06.md`. The hunt's central finding: the
 **only** repo statement asserting that a pre-registration *exists* is Track
 G's own scope fence (`docs/roster-anchor-v14-2026-08-05.md` §4, commit
 `f77e14a`, 2026-08-05); no earlier commit anywhere in history writes the

@@ -1,3 +1,9 @@
+> **MOVED 2026-08-06 — Clear the Stage, Track R-B (charter R119, rail 1).**
+> Old path: `docs/s5-animation-tech-note.md` — new path: `docs/archive/s5-animation-tech-note.md`.
+> Verbatim move: everything below this banner is byte-identical to the
+> pre-move file. Citers repointed in the move commit; see
+> `review/stage-clear/rb-move-manifest.tsv`.
+
 # S5 — What the base game animates enemies with
 
 > **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.

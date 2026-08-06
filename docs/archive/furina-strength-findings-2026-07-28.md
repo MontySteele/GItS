@@ -1,3 +1,9 @@
+> **MOVED 2026-08-06 — Clear the Stage, Track R-B (charter R119, rail 1).**
+> Old path: `docs/furina-strength-findings-2026-07-28.md` — new path: `docs/archive/furina-strength-findings-2026-07-28.md`.
+> Verbatim move: everything below this banner is byte-identical to the
+> pre-move file. Citers repointed in the move commit; see
+> `review/stage-clear/rb-move-manifest.tsv`.
+
 # Furina strength battery — findings (2026-07-28)
 
 > **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.

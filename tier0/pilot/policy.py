@@ -568,7 +568,7 @@ STOKE_FUEL_SATED = 0.15     # per point beyond it -- not zero: surplus still
 def _stoke_value(state: CombatState, card: Card) -> float:
     """Furina's SALON machinery: deploy the stage, then keep it fuelled.
 
-    The sprint hypothesis (docs/sprint-pilot-gap-2026-07-28.md) is that the
+    The sprint hypothesis (docs/archive/sprint-pilot-gap-2026-07-28.md) is that the
     sim/table divergence is a PILOT gap, not an arithmetic one: a stage that
     is dry half the time is a stage nobody is stoking. Two things the greedy
     pilot cannot see:

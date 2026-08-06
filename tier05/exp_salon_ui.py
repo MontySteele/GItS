@@ -1,6 +1,6 @@
 """Salon UI sprint — measurement battery (Tracks 3 and 4, 2026-07-28).
 
-Registered in docs/sprint-salon-ui-2026-07-28.md. Both cells are MEASURE
+Registered in docs/archive/sprint-salon-ui-2026-07-28.md. Both cells are MEASURE
 ONLY: they ship an instrument and a baseline, and the levers they inform
 (D8's Encore economy, D4's re-authoring of the Slip Backstage condition) are
 [USER] red-pen and out of scope.

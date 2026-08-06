@@ -1,6 +1,6 @@
 """The pilot gap — Furina's greedy pilot against one that runs the wheel.
 
-Registered in docs/sprint-pilot-gap-2026-07-28.md. MEASURE ONLY: no lever, no
+Registered in docs/archive/sprint-pilot-gap-2026-07-28.md. MEASURE ONLY: no lever, no
 card change, no constant change. Every lever this battery informs is [USER]
 red-pen and out of scope.
 
@@ -302,7 +302,7 @@ def p4(base: cells.Cell) -> None:
                   "ONCE, on the way out. The counterfactual this cell used to"
                   "\n      price is the shipped world; the pre-nerf numbers "
                   "(47.2% greedy / 61.6%\n      stoker, -11.7% / -16.3%) are "
-                  "ARCHIVE, in docs/sprint-pilot-gap-log-2026-07-28.md.")
+                  "ARCHIVE, in docs/archive/sprint-pilot-gap-log-2026-07-28.md.")
             print(f"    encore_spent             "
                   f"{legs['encore_spent'] / total:6.1%} of all generation "
                   f"(the surviving leg)")
