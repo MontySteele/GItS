@@ -53,11 +53,28 @@ public static class CompanionConstants
 /// Uniqueness is PER OWNER, not global: if both players play Oz, both should
 /// get an Oz back. Deduplicating across owners would fix the leak by creating
 /// a subtler one.
+///
+/// THE ENTRY CARRIES THE UPGRADE (R114/FLAG-2(i), BACKLOG BFF-copy). A
+/// ModelId alone is the PRINTED card, and `ModelDb.GetById` rebuilds it
+/// pristine -- so recording ids only replayed every companion unupgraded.
+/// The sim has no such gap: `combat.py:269` appends `card.id`, which IS
+/// `foo+` for an upgraded companion, so the upgrade travels with the copy the
+/// way the ruling requires. C# keeps the upgrade in the entry beside the id
+/// and Best Friends Forever re-applies it, the same repair SYS-4 made for the
+/// other copy ops (`UpgradeInternal`, vendor/STS2_MCP/McpMod.Helpers.cs:54-66).
+///
+/// The DEDUPE KEY is deliberately unchanged: `(Owner, Id)`, so `foo` and
+/// `foo+` remain ONE entry here where the sim's `dict.fromkeys` over instance
+/// ids makes them two. That divergence is a separate open ruling (QUEUE
+/// BFF-dedupe) about pool identity, not about what state a copy carries;
+/// widening the key would settle it by accident. With one entry, the upgrade
+/// recorded is the FIRST play's -- which is what the entry has always meant.
 /// </summary>
 public static class CompanionPlays
 {
     private static ICombatState? _combat;
-    private static readonly List<(Player Owner, ModelId Id)> _played = new();
+    private static readonly List<(Player Owner, ModelId Id, bool IsUpgraded)>
+        _played = new();
 
     public static void Record(ICombatState? combatState, CardModel card)
     {
@@ -75,24 +92,25 @@ public static class CompanionPlays
         if (!_played.Any(entry => ReferenceEquals(entry.Owner, owner)
                                   && entry.Id == card.Id))
         {
-            _played.Add((owner, card.Id));
+            _played.Add((owner, card.Id, card.IsUpgraded));
         }
     }
 
     /// <summary>
     /// The companions <paramref name="owner"/> played this combat, in
-    /// first-play order. Never another player's.
+    /// first-play order, each with the upgrade state its copy must carry
+    /// (R114/FLAG-2(i)). Never another player's.
     /// </summary>
-    public static IReadOnlyList<ModelId> PlayedThisCombat(
+    public static IReadOnlyList<(ModelId Id, bool IsUpgraded)> PlayedThisCombat(
         ICombatState combatState, Player? owner)
     {
         if (!ReferenceEquals(combatState, _combat) || owner == null)
         {
-            return System.Array.Empty<ModelId>();
+            return System.Array.Empty<(ModelId Id, bool IsUpgraded)>();
         }
         return _played
             .Where(entry => ReferenceEquals(entry.Owner, owner))
-            .Select(entry => entry.Id)
+            .Select(entry => (entry.Id, entry.IsUpgraded))
             .ToList();
     }
 }

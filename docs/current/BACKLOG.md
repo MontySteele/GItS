@@ -46,7 +46,6 @@
 | `EB-2` | Salon upkeep vs All the World's a Stage income race — two powers in the same `AfterPlayerTurnStart` broadcast with no guaranteed order (`SalonPowers.cs:352` vs `FurinaResources.cs:1122`); nondeterministic tick rate | eng-backlog §1; `NC-9` seam |
 | `EB-18` | The mod's per-fight telemetry (C2) was never built — JSON-lines per fight; `tier1/analyze.py` reads per-**run** granularity. Answers the corpse-detonation count for free | eng-backlog §3; missed-requirements §2.3 |
 | `EB-19` | The sim-pipeline-step → C#-hook sweep is still owed — Superconduct, Shatter, aura-tick ordering all reduce to PRE/POST hook misplacement; no pass has systematically mapped each sim step to its C# hook | eng-backlog §3; missed-requirements §2.4 |
-| `BFF-copy` | `best_friends_forever` replays companions un-upgraded — C# `CompanionPlays` records base ids and `ModelDb.GetById` rebuilds pristine, dropping the printed upgrade that R114/FLAG-2(i) rules travels with every copy (the sim's `combat.py:269` carries it). Same root already settled for the other copy ops. The pool-identity half (dedupe) is a separate open ruling: `BFF-dedupe` in QUEUE §11 | parity-sys-cluster sprint follow-on |
 | `NC-parity` | The C# side reads companion rarity from `Star`, not the sheet's `rarity` field — whether the cycling-rarity gate (X2 law) is enforceable in C# at all is open | dockets/companion-pricing §2 |
 | `EB-14` | `selectors` is bot-feed only — a mod-side hook into the selection screens is the open item | eng-backlog §2 |
 
@@ -54,7 +53,6 @@
 
 | ID | Item | Provenance |
 |---|---|---|
-| `EB-3` | Two unlintable hand-written kit cards: `LetThePeopleRejoice.cs:57-82` and `AllTheWorldsAStage.cs:49,68` (+5 Encore/turn, outside the sheets) — extend the parity gate or add sheet rows | eng-backlog §1 |
 | `EB-4` | Two p90s that disagree (`run_metrics._percentile` interpolates, `elite_blitz._percentile` nearest-rank while claiming to match) + two `wilson` impls with different return shapes — unify each; verify which convention the ratified bands used first | eng-backlog §1 |
 | `EB-6` | Error-laundering fixes (five bare-except sites): `refpowers.py:1130`, `render_card_gallery.py:215`, `card_distinctness_report.py:435`, `extract_base_game_pool.py:528`, `exp_furina_strength.py:771` | eng-backlog §2 |
 | `EB-7` | Waiver-set staleness tests — add the `KNOWN_IDENTICAL`-style guard to `PENDING_UNDERSIZE`/`PENDING_BANNED_FAMILY`/`PENDING_RED_PEN` in `art_lint.py`; also stop the two image checks `continue`-ing past unreadable files (:483,:532) | eng-backlog §2 |

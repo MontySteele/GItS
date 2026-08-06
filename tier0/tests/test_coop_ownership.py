@@ -39,7 +39,9 @@ def test_companion_plays_are_recorded_with_their_owner():
     """
     src = _COMPANION_POWERS.read_text(encoding="utf-8")
     assert re.search(r"_played\s*=\s*new\(\)", src), "tracker list not found"
-    assert "List<(Player Owner, ModelId Id)>" in src, (
+    # The entry may carry MORE than owner+id -- BFF-copy added the upgrade
+    # flag the copy has to travel with -- but never less.
+    assert re.search(r"List<\(Player Owner, ModelId Id[,)]", src), (
         "CompanionPlays no longer records an owner alongside the card id -- "
         "ownership becomes unrecoverable and Best Friends Forever copies the "
         "co-op partner's companions again (G-B1)")
@@ -49,7 +51,7 @@ def test_played_this_combat_requires_an_owner():
     """The query cannot be asked without saying whose plays it wants."""
     src = _COMPANION_POWERS.read_text(encoding="utf-8")
     signature = re.search(
-        r"public static IReadOnlyList<ModelId> PlayedThisCombat\(([^)]*)\)",
+        r"public static IReadOnlyList<.+?> PlayedThisCombat\(([^)]*)\)",
         src, re.S)
     assert signature, "PlayedThisCombat signature not found"
     params = signature.group(1)
@@ -58,6 +60,24 @@ def test_played_this_combat_requires_an_owner():
         "the bug (G-B1)")
     assert "ReferenceEquals(entry.Owner, owner)" in src, (
         "PlayedThisCombat no longer filters by owner")
+
+
+def test_the_entry_carries_the_upgrade_the_copy_has_to_travel_with():
+    """BFF-copy (R114/FLAG-2(i)), pinned here because this tracker is the
+    only record the replay has to read.
+
+    An id alone names the PRINTED card and `ModelDb.GetById` rebuilds it
+    pristine, so a ledger of bare ModelIds replays every companion
+    un-upgraded. The sim never had the gap -- it appends `card.id`, which is
+    `foo+` when the played card was upgraded. Same class as the ownership bug
+    above: state that was never recorded cannot be recovered downstream.
+    """
+    src = _COMPANION_POWERS.read_text(encoding="utf-8")
+    assert re.search(r"_played\.Add\(\(owner,\s*card\.Id,\s*card\.IsUpgraded\)\)",
+                     src), (
+        "CompanionPlays no longer records the played card's upgrade state -- "
+        "Best Friends Forever replays upgraded companions un-upgraded again "
+        "(BFF-copy)")
 
 
 def test_uniqueness_is_per_owner_not_global():
@@ -89,7 +109,7 @@ def test_no_caller_asks_the_combat_wide_question():
                 args = call.group(1)
                 # The declaration itself carries the parameter list, which
                 # legitimately names its types rather than passing values.
-                if "IReadOnlyList<ModelId> PlayedThisCombat" in line:
+                if re.search(r"IReadOnlyList<.+?> PlayedThisCombat", line):
                     continue
                 if "," not in args:
                     offenders.append(

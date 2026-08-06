@@ -1076,6 +1076,16 @@ def test_copy_paths_carry_printed_upgrade_state():
     encore = (gen.FURINA_PROFILE.out_dir
               / "EncorePerformance.cs").read_text(encoding="utf-8")
     assert ".Where(KitGrant.NotKitCard)" in encore
+    # copy_companions_played_this_combat is the same root through a LEDGER
+    # rather than a live card: the entry carries the upgrade flag because
+    # ModelDb.GetById rebuilds the printed card pristine (BFF-copy). Ordered
+    # before the cost override, or the upgrade would overwrite the free copy.
+    bff = (gen.KLEE_PROFILE.out_dir
+           / "BestFriendsForever.cs").read_text(encoding="utf-8")
+    assert "if (companionPlay.IsUpgraded)" in bff
+    assert "playedToken.UpgradeInternal();" in bff
+    assert bff.index("UpgradeInternal();") < bff.index(
+        "playedToken.EnergyCost.SetThisCombat(0);")
 
 
 def test_salon_replacement_multiplier_is_never_a_bare_literal():

@@ -159,6 +159,32 @@ def test_best_friends_forever_copies_each_companion_played_this_combat():
     assert [c.id for c in state.player.exhaust_pile] == ["best_friends_forever"]
 
 
+def test_best_friends_forever_replays_an_upgraded_companion_upgraded():
+    """R114/FLAG-2(i): the printed card travels with a copy, and PRINTED
+    includes the upgrade.
+
+    The sim expresses it by recording the played card's id -- `foo+` for an
+    upgraded companion (combat.py, `companions_played.append(card.id)`) -- so
+    the replay reloads the upgraded sheet row and Barbara's copy still blocks
+    8. C# had to be taught this separately: its ledger stored a base ModelId
+    and `ModelDb.GetById` rebuilt the card pristine (BACKLOG BFF-copy).
+
+    One companion, played once: this pins what a copy CARRIES and stays clear
+    of what counts as one pool entry (`foo` vs `foo+`), which is the open
+    BFF-dedupe ruling.
+    """
+    state = make_state()
+    _play(state, "barbara_melody+", energy=1)
+
+    _play(state, "best_friends_forever", energy=1)
+
+    assert [c.id for c in state.player.hand] == ["barbara_melody+"]
+    replay = state.player.hand[0]
+    assert replay.cost == 0                     # the card's own cost_override
+    assert replay.effects == loader.get_card("barbara_melody+").effects
+    assert [e["amount"] for e in replay.effects if e["op"] == "block"] == [8]
+
+
 # --- generic ---
 
 def test_spirited_away_is_a_flat_twelve_block():
