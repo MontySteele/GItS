@@ -18,6 +18,11 @@
 > pre-v6 label attached. Nothing above or below is rewritten (R101b); the v6
 > re-baseline sweep is Track M's, after the v6 code lands. Source of the
 > bump: `tier0/constants.py`, the `CONSTANTS_VERSION 6` note.
+>
+> **SWEEP LANDED 2026-08-06 (Track M, wave 8):** the n=3000 standing-table
+> recipe here was re-run under v6, paired v5↔v6
+> (`docs/v6-rebaseline-sweep-2026-08-06.md` §1); the quotable successor
+> table is `docs/roster-anchor-v14-v6-2026-08-06.md`.
 
 > # ARCHIVE BANNER — the Furina rows here are pre-CONSTANTS-5
 >

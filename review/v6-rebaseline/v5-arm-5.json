@@ -1,0 +1,13 @@
+{
+  "character": "furina",
+  "archetype": "fanfare",
+  "stamp": "cell=roster-anchors[archetype=fanfare,character=furina] seed=20260729 runs=3000 RT7/D14/P3/C5",
+  "n": 3000,
+  "win": 0.022,
+  "act1": 0.5816666666666667,
+  "acts": 0.7383333333333333,
+  "deck": 20.983333333333334,
+  "fights": 11.253333333333334,
+  "core_attain": 0.43533333333333335,
+  "tto": 7.771822358346095
+}
