@@ -999,7 +999,22 @@ CONSTANTS_VERSION = 6
 # The spotlight limb was examined and deliberately NOT changed -- see the
 # track E report: whether `_is_spotlight_machinery` (enabler OR payoff) is
 # "a payoff" is a definitional question, not a mechanical one.
-DRAFTER_VERSION = 14
+# DRAFTER_VERSION 15 (R120 / 10.3, verbatim "Yes"; 2026-08-06, STAGED on
+# EB-43's rail): payoff-presence extends to the SPOTLIGHT limb -- the one
+# branch v14 deliberately left alone, because enabler-vs-payoff machinery
+# was a definitional question. [USER] answered it. `core_complete` and
+# `_core_progress` gain a machinery-PAYOFF limb (bar ONE, every limb's
+# standard), so `limelight` -- the only enabler-role machinery card, the
+# measured blast radius -- alone stops satisfying the limb.
+# NOT bookkeeping, and the bump is not optional: `_core_progress` feeds
+# `score_offer`'s +3.0 core-advance bonus, so every spotlight arm drafts
+# differently, and every pre-v15 spotlight number is incomparable with v15
+# output. SEQUENCING RAIL (R120, recorded in full): this change sits on
+# `staged/d15-spotlight-payoff` and LANDS ONLY after queue row 10.7
+# resolves -- the payoff-reach pre-registration was pinned to a specific
+# drafter version, and landing D15 first could invalidate a blind
+# pre-registration. Re-baseline under stamp law when it lands.
+DRAFTER_VERSION = 15
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).

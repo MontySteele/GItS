@@ -295,8 +295,16 @@ def test_spotlight_core_requires_cast_access_and_machinery():
     assert not draft.core_complete(starter, "spotlight")
     access = starter + _cards("lynette_box_trick")
     assert not draft.core_complete(access, "spotlight")
-    online = access + _cards("limelight")
+    # DRAFTER_VERSION 15 (R120 / 10.3): `limelight` is the only enabler-role
+    # machinery card, and it alone no longer satisfies the limb -- the deck
+    # must also hold a machinery PAYOFF (bar ONE, every limb's standard).
+    machinery_only = access + _cards("limelight")
+    assert not draft.core_complete(machinery_only, "spotlight")
+    online = machinery_only + _cards("top_billing")
     assert draft.core_complete(online, "spotlight")
+    # ...and a payoff alone does not skip the access limb: both bite.
+    assert not draft.core_complete(starter + _cards("top_billing"),
+                                   "spotlight")
     companion = loader.get_card("chevreuse_interdiction_fire")
     assert (draft.score_offer(companion, starter, "spotlight")
             > draft.score_offer(companion, starter, "generic"))
@@ -379,8 +387,16 @@ def test_fanfare_and_reaction_limbs_are_untouched_by_the_generic_fix():
     assert draft.core_complete(
         klee + _cards("dahlia_sacramental_shower", "kaeya_frostgnaw",
                       "sizzle"), "reaction")
-    assert draft.core_complete(
+    # DRAFTER_VERSION 15 (R120 / 10.3): spotlight's limb now carries its own
+    # payoff-presence requirement, so the D14-complete deck below needs a
+    # machinery payoff too. The claim this test pins is unchanged: the
+    # GENERIC fix (v14) did not reach into the dedicated limbs -- spotlight
+    # moved by its own ruling, not by v14's.
+    assert not draft.core_complete(
         furina + _cards("lynette_box_trick", "limelight"), "spotlight")
+    assert draft.core_complete(
+        furina + _cards("lynette_box_trick", "limelight", "top_billing"),
+        "spotlight")
 
 
 def test_fanfare_core_is_native_generation_plus_output_converter():

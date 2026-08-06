@@ -172,6 +172,17 @@ def _is_spotlight_machinery(card: Card) -> bool:
             and not _is_spotlight_access(card))
 
 
+def _spotlight_payoff_machinery(deck: list[Card]) -> int:
+    """Machinery cards whose authored role is PAYOFF.
+
+    DRAFTER_VERSION 15 (R120 / 10.3): one helper, read by both
+    `core_complete` and `_core_progress`, so the two limbs cannot drift --
+    the same single-definition rule `_generic_core_counts` follows.
+    """
+    return sum(1 for c in deck
+               if _is_spotlight_machinery(c) and c.role == "payoff")
+
+
 def _fanfare_generation(card: Card) -> float:
     """Printed Fanfare access supplied by one card.
 
@@ -287,9 +298,17 @@ def core_complete(deck: list[Card], archetype: str) -> bool:
         amps = sum(1 for c in deck if _is_amp_payoff(c))
         return appliers >= 2 and amps >= 1
     if archetype == "spotlight":
+        # DRAFTER_VERSION 15 (R120 / 10.3, verbatim "Yes"): payoff-presence
+        # extends to the spotlight limb -- the v14 note deliberately left
+        # this branch alone because enabler-vs-payoff machinery was a
+        # definitional question, and [USER] answered it. `limelight` (the
+        # only enabler-role machinery card) alone no longer satisfies the
+        # machinery limb; the deck must also hold a machinery PAYOFF, the
+        # same one-card bar every other limb's payoff half uses.
         access = sum(1 for c in deck if _is_spotlight_access(c))
         machinery = sum(1 for c in deck if _is_spotlight_machinery(c))
-        return access >= 2 and machinery >= 1
+        payoffs = _spotlight_payoff_machinery(deck)
+        return access >= 2 and machinery >= 1 and payoffs >= 1
     if archetype == "fanfare":
         # Furina's starter already supplies the first half in practice, but
         # keep the definition honest for synthetic/modified decks.
@@ -334,10 +353,16 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
         amps = min(1, sum(1 for c in deck if _is_amp_payoff(c)))
         return (appliers + amps) / 3
     if archetype == "spotlight":
+        # DRAFTER_VERSION 15: the payoff limb, weighted equally -- the same
+        # shape the v10 fanfare fix and the v14 generic fix used, and the
+        # half with teeth: progress feeds score_offer's +3.0 core-advance
+        # bonus, so a spotlight deck now reaches for a machinery payoff
+        # instead of counting `limelight` as a finished engine.
         access = min(2, sum(1 for c in deck if _is_spotlight_access(c)))
         machinery = min(1, sum(
             1 for c in deck if _is_spotlight_machinery(c)))
-        return (access + machinery) / 3
+        payoff = min(1, _spotlight_payoff_machinery(deck))
+        return (access + machinery + payoff) / 4
     if archetype == "fanfare":
         generation = min(
             1.0,
