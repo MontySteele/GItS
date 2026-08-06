@@ -1221,8 +1221,38 @@ def _generate(state: CombatState, fx: dict, which: str) -> None:
             pick = loader.get_card(pick.id + upgrades.SUFFIX)
         if which == "guest_star":
             pick.generated_by_guest_star = True
-        if "cost_override" in fx:                   # upgraded form: 0 this turn
-            pick.cost = fx["cost_override"]
+        if "cost_override" in fx:
+            # FLAG-2(ii) / NC-12 / SYS-3 (R114, Errata Batch 2 item 8):
+            # "costs 0 THIS TURN", which is what the sheet prints ("They cost
+            # 0 this turn") and what the mod does --
+            # `GuestStarGenerator.Generate` ends in
+            # `generated.EnergyCost.SetThisTurn(cost)`, verified at the three
+            # cards that reach it (An Invitation, Guest List, Command
+            # Performance). C# was already correct, so this is a SIM-ONLY
+            # parity repair, not a design change.
+            #
+            # tier0 used to write `pick.cost = 0` onto the token, permanently:
+            # a guest generated on turn 2 was still free on turn 9, and a
+            # 0-cost token that got copied carried the zero into its copies
+            # (the `copy_dup_5` taint). The turn-scoped per-instance fields
+            # already exist for exactly this -- they are the base game's
+            # `EnergyCost.SetToFreeThisTurn` / `AddThisTurn` -- and
+            # `refpowers` sweeps them across every pile at the turn boundary,
+            # so a freed token that is discarded and redrawn is not still
+            # free.
+            #
+            # DISTINCT FROM FLAG-1's accumulator, which R114 said may not be
+            # conflated with this: that one is state on the PLAYER, this one
+            # is state on the CARD.
+            override = fx["cost_override"]
+            if override == 0:
+                pick.free_this_turn = True
+            else:
+                # `free_this_turn` is a set-to-zero, so a non-zero override
+                # rides the turn-scoped delta instead. No sheet prints one
+                # today; the branch exists because `SetThisTurn` takes a
+                # value and a silent no-op here would be the worse failure.
+                pick.cost_delta_this_turn = override - pick.cost
         _add_token(state, pick, fx.get("to", "hand"))
         if which == "guest_star":
             state.emit("guest_star_generated", card=pick.id)
@@ -1238,12 +1268,30 @@ def _op_generate_from_pool(state: CombatState, fx: dict, card: Card) -> None:
     _generate(state, fx, fx.get("pool", "character"))
 
 
+    # FLAG-2(i) (R114, Errata Batch 2 item 8): THE COPY IS BUILT FROM THE
+    # PRINTED CARD, not deep-copied from the instance in hand. Verbatim:
+    # "Copy ops inherit the printed card's bounds... the printed bound
+    # travels with the copy."
+    #
+    # `loader.get_card` returns a fresh copy of the SHEET's card, and the
+    # upgraded form rides the `+` id convention, so an upgraded target still
+    # copies as upgraded. What no longer travels is whatever the instance
+    # picked up during this combat -- an Exhaust the sheet prints and some
+    # effect stripped, a cost another copy op zeroed (the `copy_dup_5`
+    # taint), a damage number that grew in play. That is exactly what the mod
+    # does: `CombatState.CreateCard(ModelDb.GetById<CardModel>(id))` copies
+    # the canonical model, and a printed keyword like Exhaust is declared per
+    # MODEL, so the C# copy has always carried it.
+    #
+    # WHAT THIS DOES NOT CLOSE: X3's loop. A copy is still an extra USE of an
+    # Exhaust card, and no bound the sheet prints on one instance can limit
+    # the number of instances. The pin reports accordingly.
 def _op_copy_spotlighted_in_hand(state: CombatState, fx: dict,
                                  card: Card) -> None:
     """Encore Performance (kickoff §9): duplicate a Spotlighted card in
     hand. Dead without a designation and a drafted target — BY DESIGN
     (duplication deepens a committed kit; it must not conjure one)."""
-    import copy as _copy
+    from tier0.content import loader
     p = state.player
     if not p.spotlight:
         return
@@ -1252,9 +1300,9 @@ def _op_copy_spotlighted_in_hand(state: CombatState, fx: dict,
     if not targets:
         return
     for _ in range(fx.get("amount", 1)):
-        chosen = _copy.deepcopy(state.rng.choice(targets))
+        chosen = loader.get_card(state.rng.choice(targets).id)
         if "cost_override" in fx:
-            chosen.cost = fx["cost_override"]
+            chosen.cost_delta_this_combat = fx["cost_override"] - chosen.cost
         _add_token(state, chosen, "hand")
         state.emit("encore_performance_copy", card=chosen.id)
 
@@ -1730,14 +1778,21 @@ def _op_chance_bomb_per_detonation(state: CombatState, fx: dict,
 
 
 def _op_copy_companion_in_hand(state: CombatState, fx: dict, card: Card) -> None:
-    import copy as _copy
+    """Borrowed Brilliance. FLAG-2(i): built from the printed card, for the
+    reasons written out above `_op_copy_spotlighted_in_hand`."""
+    from tier0.content import loader
     comps = [c for c in state.player.hand if c.is_companion]
     if not comps:
         return
     for _ in range(fx.get("amount", 1)):
-        chosen = _copy.deepcopy(state.rng.choice(comps))
+        chosen = loader.get_card(state.rng.choice(comps).id)
         if "cost_override" in fx:            # Borrowed Brilliance upgrade
-            chosen.cost = fx["cost_override"]
+            # THIS COMBAT, not this turn: the mod's twin is
+            # `EnergyCost.SetThisCombat(0)` (BorrowedBrilliance.cs), and a
+            # token that exists only for this combat cannot tell the two
+            # apart today -- writing the scope down is what stops the next
+            # reader assuming it inherits FLAG-2(ii)'s turn bound.
+            chosen.cost_delta_this_combat = fx["cost_override"] - chosen.cost
         _add_token(state, chosen, "hand")
 
 
