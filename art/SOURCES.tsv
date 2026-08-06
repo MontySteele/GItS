@@ -224,7 +224,9 @@ art/candidates/endless_waltz/r2.png	https://static.wikia.nocookie.net/gensin-imp
 art/candidates/endless_waltz/r3.png	https://static.wikia.nocookie.net/gensin-impact/images/7/7f/Furina_Character_Notes_2_2.png/revision/latest?cb=20251021125554	F	high
 art/candidates/grand_gala/r1.png	https://static.wikia.nocookie.net/gensin-impact/images/2/25/Opera_Epiclese.png/revision/latest?cb=20240428170211	F	high
 art/candidates/grand_gala/r2.png	https://static.wikia.nocookie.net/gensin-impact/images/8/80/Item_Furina_Banquet.png/revision/latest?cb=20231108032121	F	high
-art/candidates/grand_gala/r3.png	https://static.wikia.nocookie.net/gensin-impact/images/8/80/Item_Furina_Banquet.png/revision/latest?cb=20231108032121	F	high
+art/candidates/grand_gala/r3.png	https://static.wikia.nocookie.net/gensin-impact/images/1/14/Opera_Epiclese_-_Neuvillette%27s_Seat.png/revision/latest?cb=20230923182536	F	high
+art/candidates/grand_gala/r4.png	https://static.wikia.nocookie.net/gensin-impact/images/b/bf/Savoring_the_Breeze_Wallpaper_Furina.png/revision/latest?cb=20240501222218	F	high
+art/candidates/grand_gala/r5.png	https://static.wikia.nocookie.net/gensin-impact/images/9/97/Starlit_Letter_Wallpaper_Furina.png/revision/latest?cb=20240119045258	F	high
 art/candidates/the_sea_is_my_stage/r1.png	https://static.wikia.nocookie.net/gensin-impact/images/2/27/Furina_Card.png/revision/latest?cb=20230925100151	F	high
 art/candidates/the_sea_is_my_stage/r2.png	https://static.wikia.nocookie.net/gensin-impact/images/6/6d/Furina_Wallpaper_without_Watermark.png/revision/latest?cb=20231112102405	F	high
 art/candidates/the_sea_is_my_stage/r3.png	https://static.wikia.nocookie.net/gensin-impact/images/6/6d/Furina_Wallpaper_without_Watermark.png/revision/latest?cb=20231112102405	F	high
@@ -510,9 +512,9 @@ art/candidates/power_celestial_gift/r2.png	https://static.wikia.nocookie.net/gen
 art/candidates/relic_ethereal_spotlight/r1.png	https://static.wikia.nocookie.net/gensin-impact/images/0/05/Item_Shining_Spotlight.png/revision/latest?cb=20230713112523	F	medium
 art/candidates/relic_ethereal_spotlight/r2.png	https://static.wikia.nocookie.net/gensin-impact/images/1/1f/Item_Festival_Spotlight.png/revision/latest?cb=20220125041938	F	medium
 art/candidates/relic_ethereal_spotlight/r3.png	https://static.wikia.nocookie.net/gensin-impact/images/3/3a/Item_Theater_Tickets.png/revision/latest?cb=20231221033949	F	medium
-art/candidates/standing_room_only/r1.png	https://static.wikia.nocookie.net/gensin-impact/images/3/3a/Item_Theater_Tickets.png/revision/latest?cb=20231221033949	F	high
-art/candidates/standing_room_only/r2.png	https://static.wikia.nocookie.net/gensin-impact/images/9/99/The_Opera_of_Noirceur_and_Blancheur_Ticket.png/revision/latest?cb=20231111210150	F	high
-art/candidates/standing_room_only/r3.png	https://static.wikia.nocookie.net/gensin-impact/images/2/25/Opera_Epiclese.png/revision/latest?cb=20240428170211	F	high
+art/candidates/standing_room_only/r1.png	https://static.wikia.nocookie.net/gensin-impact/images/2/25/Opera_Epiclese.png/revision/latest?cb=20240428170211	F	high
+art/candidates/standing_room_only/r2.png	https://static.wikia.nocookie.net/gensin-impact/images/3/3a/Item_Theater_Tickets.png/revision/latest?cb=20231221033949	F	high
+art/candidates/standing_room_only/r3.png	https://static.wikia.nocookie.net/gensin-impact/images/9/99/The_Opera_of_Noirceur_and_Blancheur_Ticket.png/revision/latest?cb=20231111210150	F	high
 ImageGen/images/furina/model/furina_wikipedia_cutout.png	https://upload.wikimedia.org/wikipedia/en/5/56/Furina_%28Genshin_Impact%29.png	F	high
 ImageGen/images/furina/model/layers/furina_layer_coat_back.png	https://upload.wikimedia.org/wikipedia/en/5/56/Furina_%28Genshin_Impact%29.png	F	high
 ImageGen/images/furina/model/layers/combat/furina_combat_coat_back.png	https://upload.wikimedia.org/wikipedia/en/5/56/Furina_%28Genshin_Impact%29.png	F	high
