@@ -999,6 +999,28 @@ CONSTANTS_VERSION = 6
 # The spotlight limb was examined and deliberately NOT changed -- see the
 # track E report: whether `_is_spotlight_machinery` (enabler OR payoff) is
 # "a payoff" is a definitional question, not a mechanical one.
+# NOT BUMPED by the R121 SHIELD (2026-08-06, `Q19`), and the non-bump is
+# FLAGGED rather than settled -- read this before quoting a `ref_ironclad`
+# number. The shield (`draft._core_advance_view`) makes the +3.0 core-advance
+# bonus blind to the reference anchor's instrumentation tags, which moves how
+# ONE arm drafts, and the stamp law would ordinarily call that a bump. Three
+# reasons it is left at 14 for a ruling to settle rather than taken here:
+# (a) the tags that caused the movement (R118's 10.2 rider) landed WITHOUT a
+# bump, so the shield restores the scorer to the behaviour v14 was stamped
+# for rather than defining a new one; (b) R121's own execution order says
+# "the sprint runs under D14", and a bump here would move the world the
+# countersigned re-registration is pinned to; (c) 15 is already claimed by
+# the staged spotlight-limb change (`EB-43`, `staged/d15-spotlight-payoff`,
+# unmerged), which R121 fixes as step (5) of an order in which no step
+# reorders -- taking 15 here would collide with it. Every other arm is
+# untouched by the shield (`_core_advance_view` returns its argument
+# unchanged when no anchor card is present), so no non-anchor number is
+# affected either way. The shielded `ref_ironclad` reading tripped R121's
+# stop-and-surface rule (it overshot the archived ordering) and was released
+# for publication anyway on [USER]'s option (a), verbatim "Yeah, I think A)
+# is defensible here." -- it is the row that stands in the quotable table,
+# and it is an untagged-under-CONSTANTS-6 baseline, not a restoration of the
+# archived CONSTANTS 5 number. See R121's 2026-08-06 addendum.
 DRAFTER_VERSION = 14
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this

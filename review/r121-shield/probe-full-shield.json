@@ -1,0 +1,16 @@
+{
+  "probe": "DIAGNOSTIC ONLY -- NOT committed behaviour, NOT the R121 shield",
+  "question": "if the WHOLE of score_offer is blind to the anchor's tags -- the scorer seeing exactly the pre-rider cards while core_complete keeps reading them -- where does the arm read?",
+  "method": "review/r121-shield/anchor_arm.py, arm 9, with ONE line temporarily inserted at the top of tier05/draft.py::score_offer and reverted immediately after the run: `card, deck = _core_advance_view([card])[0], _core_advance_view(deck)`. Source-level on purpose: an earlier monkeypatch attempt was INVALID because jobs=0 fans out to worker processes that re-import tier05.draft and lose the patch -- it reproduced the narrow-shield row to the last digit, which is how the mistake was caught.",
+  "character": "ref_ironclad",
+  "archetype": "generic",
+  "stamp": "cell=roster-anchors[archetype=generic,character=ref_ironclad] seed=20260729 runs=3000 RT7/D14/P3/C6",
+  "n": 3000,
+  "win": 0.132,
+  "act1": 0.7226666666666667,
+  "acts": 1.2363333333333333,
+  "deck": 23.18166666666667,
+  "fights": 15.726,
+  "core_attain": 0.25833333333333336,
+  "tto": 9.84258064516129
+}
