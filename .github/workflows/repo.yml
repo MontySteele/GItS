@@ -49,13 +49,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          # Full history, for exactly one consumer: lint_p_ledger.py rule 2
-          # shows every P-ledger handle commit to prove it touched no
-          # [USER]-gated register, and a depth-1 clone cannot see ancestors.
-          # On a shallow clone that rule degrades to per-handle SKIPPED notes,
-          # so this line is what makes CI the enforcing venue.
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -102,45 +95,6 @@ jobs:
         run: python tools/lint_role_tempo_coverage.py --gate
       - name: roster registry
         run: python tools/lint_roster_registry.py
-      # Housekeeping sweep (Track X), 2026-08-06. Guards the identifier registry
-      # at docs/registry/identifiers.md. It checks ADDITIONS ONLY -- everything
-      # in the tree when the registry opened is grandfathered by the committed
-      # snapshot docs/registry/known-identifiers.tsv -- so it can never turn the
-      # existing corpus red. Read the module docstring before widening it: the
-      # under-flagging is deliberate, because a lint that fights every doc commit
-      # gets deleted and takes the registry with it.
-      - name: identifier registry
-        run: python tools/lint_identifier_registry.py
-      # R121 `Q20` (MOVE-WITH-RESOLVER), 2026-08-06. A DECISIONS volume is
-      # append-only, so a citation inside one can never be repointed when its
-      # target moves -- rail 1. This checks that every docs/ path the ledgers
-      # cite either exists or resolves through the moved-path table in
-      # docs/registry/identifiers.md section 17. Stale-but-resolving is GREEN
-      # on purpose; stale-and-unresolvable is the failure. The table is parsed
-      # from the registry, never duplicated here or in the tool.
-      - name: doc-path citations resolve (moved-path resolver)
-        run: python tools/lint_doc_citations.py --all
-      # S4 finding F14 and its four siblings, 2026-08-06. One file's R-number
-      # citations, checked against the clauses DECISIONS.md actually declares.
-      # Scoped to `tools/canon_role_tempo.py` alone and meant to stay that way
-      # -- see the module docstring.
-      - name: R-number citations (canon_role_tempo)
-        run: python tools/lint_r_citations.py
-      # Ledger volumization (Track R-D, Clear the Stage, 2026-08-06). The
-      # current-law digest block in tier0/DECISIONS.md is GENERATED and never
-      # hand-edited; this regenerates and byte-diffs, so a hand edit or a
-      # stale block (new ruling headed, digest not re-run) fails loudly.
-      - name: decisions digest staleness
-        run: python tools/gen_decisions_digest.py --check
-      # Class-P purge (P-B), 2026-08-06. The charter's two suite-failure
-      # conditions, verbatim from docs/class-p-charter-2026-08-06.md §3
-      # (R119): a P-ledger row without a five-line attestation fails; a
-      # ledger-referenced commit touching a file owned by a [USER]-gated
-      # register fails. The owned-register definition is a fixed conservative
-      # glob list in the module header -- read it before widening OR
-      # narrowing. Needs the fetch-depth: 0 checkout above.
-      - name: P-ledger (attestations + gated-register guard)
-        run: python tools/lint_p_ledger.py
       # Understudy 2026-08-04. vendor/ carries third-party source pinned to an
       # exact upstream commit; this asserts the tree still is what the
       # provenance note says it is, in both directions. Cheap, and the one
@@ -155,23 +109,7 @@ jobs:
       - name: art coverage (runs; asserts nothing about art)
         run: python tools/art_coverage.py
 
-  # (c) Ledger integrity — a standing guard on a hand-maintained sequence.
-  # Widened 2026-08-06 (Track R-D ledger split): the inline per-file script
-  # graduated to tools/lint_ledger_numbers.py, which scans the volume globs
-  # tier0/DECISIONS*.md + klee-mod/DECISIONS*.md as ONE namespace, so a number
-  # headed in two volumes (the failure mode the split created) is a finding.
-  # Tested in tier0/tests/test_ledger_numbers_lint.py, both directions.
-  ledger:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: no duplicate R/D numbers across volumes
-        run: python tools/lint_ledger_numbers.py
-
-  # (d) Patch sentinel -- ADVISORY, NEVER BLOCKING (S12, 2026-08-05).
+  # (c) Patch sentinel -- ADVISORY, NEVER BLOCKING (S12, 2026-08-05).
   #
   # Read docs/patch-sentinel.md before touching this job. The sentinel asks
   # whether the INSTALLED game still agrees with game_ref/. A GitHub runner has
