@@ -114,3 +114,40 @@ wired into CI like the other lints).
 individually revertable by one word from you; five things that looked like
 paperwork turned out to need a person and are parked where you'll find them.
 No number, card, behaviour, or law moved.
+
+---
+
+## R-B — execution (appended 2026-08-06; REFERENCE demotion, the big move)
+
+**What landed: 44 frozen records moved out of the docs root into the
+archive, verbatim.** Every moved file keeps every byte it had, under a dated
+banner naming its old path, new path and this track. Every live citer — the
+index files, the registries, the queue, the dockets, tools, tests, the
+understudy harness, even comments in the mod's C# and the tier-0.5 content
+YAMLs — was repointed in the same commit as its move, so nothing live points
+at a gap. The per-file map (what moved, who was repointed, which frozen
+pointers were knowingly left stale) is `rb-move-manifest.tsv`.
+
+**Counts.** Root `docs/*.md`: **116 before, 72 after.** Moves by bucket:
+17 with no live citers at all (bucket A), 11 cited by code (bucket C, code
+repointed and smoke-run), 16 cited only by index-layer documents (bucket D).
+The citation pin test, both suites and all lints are green at every batch
+boundary.
+
+**The gap, stated plainly: the root cannot reach the charter's 15 files
+without you.** 45 of the remaining frozen records are cited by the
+append-only decision ledgers, whose text is never edited — moving any of
+them breaks a spine citation permanently. All 45 stayed put, and the policy
+question is now **queue row Q20**: either the registry gains a resolver
+table that maps old paths to new ones (ledger text stays verbatim, the move
+proceeds), or ledger-cited records stay at the root and the 15-file target
+is formally amended. Your call; R-B took neither.
+
+**Also deliberately not moved, though nothing blocked them mechanically:**
+`track-a-kickoff-brief.md` (an earlier pass chose freeze-over-move for
+exactly this file and pinned its path in a named test) and
+`roster-anchor-v14-v6-2026-08-06.md` (THE quotable standing table).
+
+**Vacation-test summary:** forty-four frozen records changed address and
+nothing else; every live pointer follows them; the one question a move pass
+cannot answer alone is written on your queue as Q20.

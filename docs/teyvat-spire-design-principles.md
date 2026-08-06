@@ -325,7 +325,7 @@ Flagged for v0.2+ planning: characters whose Genshin identity is *support* (Colu
   card played)"*. **The "Encore gained" leg is dead.** Ruled [USER]
   2026-07-28 (post-playtest-3) and shipped the same day in both engines —
   `docs/archive/sprint-fanfare-rework-2026-07-28.md` Track A, executed and measured in
-  `docs/sprint-fanfare-rework-log-2026-07-28.md`.
+  `docs/archive/sprint-fanfare-rework-log-2026-07-28.md`.
 
   Proposed replacement text: *Fanfare prints when Encore goes DOWN, never when
   it goes up.* All three reduction paths qualify — salon upkeep ticks, explicit

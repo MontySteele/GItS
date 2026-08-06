@@ -497,9 +497,18 @@ cannot carry one and are indexed here instead — see "Index-only" below.
 | Status | Files |
 |---|---|
 | LIVING | 59 → 61 *(2026-08-06, P-B: `registry/excision-log.md` + `registry/p-ledger.md` opened, both charter-mandated)* |
-| REFERENCE | 205 |
+| REFERENCE | 205 *(unchanged by R-B: the 43 moved files keep their REFERENCE status, relocated)* |
 | ARCHIVED | 66 |
 | **total under `docs/`** | **330 → 332** *(same two files)* |
+
+*Location note (2026-08-06, Clear the Stage Track R-B):* 43 REFERENCE files
+moved verbatim from the `docs/` root into `docs/archive/`, each with a dated
+move banner; `docs/*.md` root count 116 → 73. Statuses did not change — a
+moved file is still REFERENCE; `docs/archive/` now holds both ARCHIVED
+(superseded) and relocated REFERENCE (frozen, still-cited) records. Per-file
+map: `review/stage-clear/rb-move-manifest.tsv`. Ledger-cited REFERENCE files
+stayed at root pending the Q20 ruling (the append-only ledgers cannot be
+repointed, rail 1).
 
 ### 15.2 The LIVING set, in full
 
@@ -554,6 +563,12 @@ LIVING one, not in the record.
 | Everything else | 15 | briefs, memos, design notes, calibration records |
 
 ### 15.4 ARCHIVED
+
+*(Update 2026-08-06, Track R-B: `docs/archive/` additionally holds 43
+relocated REFERENCE records — see the location note in §15.1. The paragraph
+below is the diet's own record and describes the state before R-B; its "every
+file is cited" reasoning is exactly what R-B's same-commit repointing paid
+down.)*
 
 All 66 live in `docs/archive/` and were archived before this diet. The archive
 map — one line per document, saying why it closed and where its live successor
