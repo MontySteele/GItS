@@ -2,13 +2,23 @@
 
 > **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
 
-> **DRAFT — FOR [USER] COUNTERSIGN. NOT RUN.** Nothing below is a measurement.
+> **COUNTERSIGNED 2026-08-06 (10.13 / R120) — REGISTERED, STILL NOT RUN.**
+> [USER], verbatim: *"countersigned"*. The registration converts from paper to
+> **registered work** under its own terms below: confounder list, cost
+> ceiling, stop-and-re-register tripwire all as written. **Results adjudicate
+> B2's declared residual and nothing else; Guardrail 7 unchanged.** The run
+> itself is Track M's, under this registration as countersigned — the runner
+> respects the registration's own harness design. The draft banner below is
+> struck, not deleted (R101b).
+
+> ~~**DRAFT — FOR [USER] COUNTERSIGN. NOT RUN.**~~ Nothing below is a measurement.
 > No game was launched, no run was taken, no number in this file was read off
 > any wire. This document exists so that the question, the method, the
 > confounder list and the licensing limits are fixed **before** any reading is
 > taken — the same discipline probes (a)/(b) were run under, applied in advance
-> rather than written up afterwards. The probe is neither scheduled nor
-> resourced; countersign converts it into work, and until then it is paper.
+> rather than written up afterwards. ~~The probe is neither scheduled nor
+> resourced; countersign converts it into work, and until then it is paper.~~
+> *(Countersigned 2026-08-06 — see the banner above.)*
 
 Date drafted: 2026-08-05. Track P of the "House Lights" batch. Input: the
 residual declared and deliberately left unadjudicated by probe B2

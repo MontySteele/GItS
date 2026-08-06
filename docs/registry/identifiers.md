@@ -31,7 +31,7 @@ for what is open and for whom.
 ## How to find anything now — five lines
 
 1. **"Is this still open, and whose is it?"** → `docs/registry/user-queue.md` if it needs [USER]; `docs/dockets/` if it is routed and not decided. Those two are the **only** homes an open item has (§16), and a lint keeps it that way.
-2. **"What did we actually decide?"** → `tier0/DECISIONS.md` (R39–R119, `DEC-D2`–`DEC-D5`) and `klee-mod/DECISIONS.md` (R73–R80); one shared R-sequence, CI-checked for duplicates. R1–R38 are not mechanically resolvable — see §3.
+2. **"What did we actually decide?"** → `tier0/DECISIONS.md` (R39–R120, `DEC-D2`–`DEC-D5`) and `klee-mod/DECISIONS.md` (R73–R80); one shared R-sequence, CI-checked for duplicates. R1–R38 are not mechanically resolvable — see §3.
 3. **"Do I have to read this document?"** → its **lifecycle header**, the line under the title: LIVING = yes, keep it true; REFERENCE = only when something cites it; ARCHIVED = history only. The full per-status index is §15; the 59 LIVING files are listed there.
 4. **A short code you don't recognise** (`G6`, `D5`, `C1`, `P1.5`, `X5`, `NC-1`, `S-2`) → §1 for the namespace, §2 for the collision table, which names the qualified form and the document that minted it.
 5. **"Can I quote this number?"** → check its world stamp against §4 (`RT7 / D14 / P3 / C5` today). A bump archives the numbers below it; archived numbers are bannered where they are published, never rewritten (R101b).
@@ -47,7 +47,7 @@ for what is open and for whom.
 
 | Namespace | Shape | Population | Minting authority | Collides? |
 |---|---|---|---|---|
-| Rulings | `R<n>` | R1–R119 | `tier0/DECISIONS.md` + `klee-mod/DECISIONS.md` (one shared sequence) | R1–R38 unresolvable as citations — see §3 |
+| Rulings | `R<n>` | R1–R120 | `tier0/DECISIONS.md` + `klee-mod/DECISIONS.md` (one shared sequence) | R1–R38 unresolvable as citations — see §3 |
 | D-series rulings | `D<n>` | D2–D5 | `tier0/DECISIONS.md` | **yes** — with DRAFTER stamps and with sprint task-ids |
 | Milestones | `M<n>` | M1–M8 | `tier0/DECISIONS.md`, `klee-mod/DECISIONS.md` | no |
 | C# milestones | `C<n>` | C1–C3 | `klee-mod/DECISIONS.md` | **yes** — with world stamps and S7 candidates |
@@ -213,7 +213,7 @@ minted in `klee-mod/DECISIONS.md` (Neap Tide), R39–R116 in
 | R1–R38 | prose entries and archived ruling docs | **Not mechanically resolvable.** S4 §4 lead 3: *"no index maps R-number → dated entry."* Several (R8, R13, R14, R24, R25, R29d, R34–R38) are cited as standing law. Resolving them is an open paper item — see `docs/registry/user-queue.md` §4. |
 | R39–R72 | `tier0/DECISIONS.md`, `## R<n>` headings | dated, resolvable |
 | R73–R80 | `klee-mod/DECISIONS.md`, Neap Tide v2.1 | dated, resolvable |
-| R81–R119 | `tier0/DECISIONS.md` | dated, resolvable. **Current maximum: R119** (2026-08-06). |
+| R81–R120 | `tier0/DECISIONS.md` | dated, resolvable. **Current maximum: R120** (2026-08-06). |
 
 **The Cold Reading batch (2026-08-06) minted four**, listed so they resolve
 without opening the ledger: **`R113`** the C2 escrow released and its four
@@ -228,7 +228,10 @@ boss-room scope, citation-lint widening) and the `Q16` rider minted;
 **`R118`** the eleven-reply sitting batch (Q5/Q6/Q7/Q9/Q10/Q11/Q16/animation
 FREE-SPIKE; 10.2/10.7/10.8 incl. the R88 amendment; the §3 paperwork trio);
 **`R119`** the Class-P charter signed (*"Oops - yes, charter is AUTHORIZEd"*)
-and the "Clear the Stage" refactor charter authorized in full.
+and the "Clear the Stage" refactor charter authorized in full; **`R120`**
+dispatch (d)'s four replies (the Klee "Catalytic Converter" rename, 10.1's
+`grand_gala` art release, 10.3 staged as D15 pending 10.7, probe (d)
+countersigned).
 
 Sub-clause citation shape is `R<n>/<clause>` (e.g. `R90/1c`, `R91/2b`) or
 `R<n>(<letter>)` (e.g. `R107(a)`). Clause letters belong to their own ruling:
@@ -540,8 +543,8 @@ LIVING one, not in the record.
 | Completed sprint logs, plans and reports | 42 | `docs/sprint-*.md`, `docs/*-sprint-log-*.md`, `docs/*-sprint-plan.md` |
 | Countersign packages and gate records | 6 | `axis-validity-countersign-2026-08-04.md`, `understudy-countersign-2026-08-04.md`, `track-b-validation-gate-countersign-2026-08-04.md`, `a2-gate-ratification-2026-07-27.md`, `handback-note-2026-08-04.md`, `sitting-record-predraft-2026-08-06.md` |
 | Playtest records and triage | 6 | `playtest2-triage-*`, `playtest3-notes-*`, `playtest4-notes-*`, `playtest4-triage-*`, `g12-review-*`, `punch-off-crash-memo.md` |
-| Probe registrations (unsigned, awaiting countersign) | 4 | `probe-a-block-offset.md`, `probe-b-fanfare-residual.md`, `probe-d-registration-draft.md`, `probe-e-corpse-detonation-registration-draft.md` — **probe (e) COUNTERSIGNED 2026-08-06 (Q11 / R118); the run is owed, Track M** |
-| [USER] dispatch records (wave 8) | 2 | `dispatch-2026-08-06-q13-q14-q15.md`, `dispatch-2026-08-06b-eleven-replies.md` — the verbatim ruling dispatches R117/R118 execute |
+| Probe registrations (unsigned, awaiting countersign) | 4 | `probe-a-block-offset.md`, `probe-b-fanfare-residual.md`, `probe-d-registration-draft.md`, `probe-e-corpse-detonation-registration-draft.md` — **probes (d) and (e) COUNTERSIGNED 2026-08-06 (10.13 / R120 and Q11 / R118); both runs are owed, Track M** |
+| [USER] dispatch records (wave 8) | 3 | `dispatch-2026-08-06-q13-q14-q15.md`, `dispatch-2026-08-06b-eleven-replies.md`, `dispatch-2026-08-06d-four-replies.md` — the verbatim ruling dispatches R117/R118/R120 execute |
 | Research harvests and audits | 12 | `act2-act3-roster-research.md`, `sts2-map-and-events-research.md`, `sts2-events-harvest.txt`, `companion-value-vs-colorless-study.md`, `lore-fidelity-audit-2026-08-05.md`, `instrument-redteam-2026-08-05.md`, `reactions-corpus-*`, `s7-*`, `zhongli-dossier-*`, `slot5-candidates-*` |
 | Retired open-item registers (Z-3) | 5 | `backlog-2026-07-29.md`, `open-playtest-items.md`, `missed-requirements.md`, `sitting-prep-2026-08-05.md`, `surplus-week-manifest-2026-08-05.md` |
 | Adopted proposals, retained | 3 | `pending/` |

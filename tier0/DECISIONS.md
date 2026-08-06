@@ -4995,3 +4995,69 @@ green** (the sweep is in flight this wave as Tracks V/M).
 charters move from draft to operating law; no design authority is created
 beyond what their own texts define, and both texts bind their swarms to zero
 design decisions.
+
+## R120 -- Dispatch (d): four replies execute -- the Klee rename, the art release, a staged drafter change, and probe (d)'s countersign (2026-08-06)
+
+Fourth dispatch of 2026-08-06, delivered with the verbatim framing line
+*"Thanks! One more batch for you from the design chat -"*; landed at
+`docs/dispatch-2026-08-06d-four-replies.md` (REFERENCE). Replies are
+[USER]'s, verbatim; routing is this entry's. Zero new design authority beyond
+the answers.
+
+**Klee rename -- Verbatim: *"yes, we can slightly tweak the Klee card to keep
+them separate (Catalytic Converter?)"*** RENAME-POWER executes with
+**"Catalytic Converter"** as the chosen string: the Klee card, its upgrade
+(`Catalytic Converter+`), the mod power class title, the constants comment,
+R37 cell labels, and test docstrings all follow in one string pass. Two notes
+were flagged to [USER] in-channel before landing, neither blocking, recorded
+here: (1) the name is also the automotive emissions device -- read as an
+intentional Klee-flavored pun unless [USER] says otherwise; (2) the
+separation from Sucrose's "Catalyst Conversion" is partial (both remain
+Cataly\*-Conver\*-shaped). The pass is cheap to re-run; one word swaps the
+string at any time. **Sucrose's card is untouched -- it was always correct.**
+**The string pass (both engines + docs) is Track V's this wave.**
+
+**10.1 -- Verbatim: *"let's go with a)"*** `grand_gala` releases Opera
+Epiclese; `standing_room_only`'s overturn lands on it with a clean lint.
+`grand_gala` enters the re-hunt flow (art_fetch -> contact sheet); its
+replacement candidates join the `S4-G12` eyes-on so [USER] picks once, not
+twice. The other four lint failures stay as noted per-item in the review page
+(no ruling owed unless a listed fallback is picked). **The art
+release/overturn/re-hunt is Track AR's this wave**; the paper mints the
+`grand_gala` art-debt row.
+
+**10.3 -- Verbatim: *"Yes"* -- and the change is STAGED, NOT LANDED, on its
+own sequencing rail, recorded in full.** Payoff-presence extends to the
+spotlight limb (`tier05/draft.py`); `limelight` alone stops satisfying the
+limb. This is a **drafter behaviour change, i.e. DRAFTER 15, with a
+re-baseline sweep under stamp law.** The payoff-reach sprint's
+pre-registration (whereabouts unknown; the 10.7 search is running as Track
+S2) was registered against a specific drafter version. Until that document is
+found and its pinned version read, landing D15 could invalidate a blind
+pre-registration -- the exact thing the escrow discipline exists to prevent.
+So: the change sits staged with this note; it lands as D15 immediately after
+10.7 resolves, either after the sprint runs under its registered version or
+after a clean re-registration if the document is truly lost. No prediction is
+read, nothing re-litigated. **The staged branch is Track V's (pushed,
+unmerged, never landing this wave); the hold is docketed as a
+staged-pending-10.7 row in `docs/dockets/engineering-backlog.md`, not the
+user queue.**
+
+**10.13 -- Verbatim: *"countersigned"*** Probe (d) (`Aria of Recompense`'s
+unreconstructed Block, `docs/probe-d-registration-draft.md`) converts from
+paper to work under its own registration: confounder list, cost ceiling,
+stop-and-re-register tripwire all as written. **Results adjudicate B2's
+declared residual and nothing else; Guardrail 7 unchanged.** **The run itself
+is Track M's**, under the registration as countersigned -- the runner
+respects the registration's own harness design.
+
+**Queue hygiene, as the dispatch orders it:** all four rows struck with their
+verbatim replies where they live (10.1 / 10.3 / 10.13 in the queue's §5; the
+Klee rename lived un-rowed inside the N-ledger's near-collision cluster and
+is recorded as answered in the queue's answered table); `grand_gala` gains an
+art-debt row; D15 gains its staged-pending-10.7 engineering-backlog row.
+
+**Class: RULING** -- [USER] 2026-08-06, verbatim throughout. Paper lands with
+this entry; the string pass, the art work, the staged branch and the probe
+run are named to their tracks above. No card sheet, code or art moves under
+this entry.
