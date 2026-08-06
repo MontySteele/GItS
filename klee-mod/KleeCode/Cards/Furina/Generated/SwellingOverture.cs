@@ -41,7 +41,7 @@ public sealed class SwellingOverture : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Compose Herself"),
-        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. If you have at least 8 Encore: draw {DrawThen:diff()} card{DrawThen:plural:|s}."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. If you have at least 8 [gold]Encore[/gold]: draw {DrawThen:diff()} card{DrawThen:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

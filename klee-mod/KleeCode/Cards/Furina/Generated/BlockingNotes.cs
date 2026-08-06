@@ -70,6 +70,6 @@ public sealed class BlockingNotes : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- None. Flagged in manifest.
+        DynamicVars["CalculationExtra"].UpgradeValueBy(1m);
     }
 }

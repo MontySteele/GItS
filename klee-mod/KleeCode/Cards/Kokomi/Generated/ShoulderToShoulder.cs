@@ -80,6 +80,10 @@ public sealed class ShoulderToShoulder : CustomCardModel, ICharacterCard
                 {
                     var copyToken = CombatState!.CreateCard(
                         ModelDb.GetById<CardModel>(pickedCompanion.Id), Owner);
+                    if (pickedCompanion.IsUpgraded)
+                    {
+                        copyToken.UpgradeInternal();
+                    }
                     if (IsUpgraded)
                     {
                         copyToken.EnergyCost.SetThisCombat(0);

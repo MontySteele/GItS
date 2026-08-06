@@ -965,3 +965,145 @@ def test_crackle_prints_the_sentence_its_semantics_were_pinned_against():
     # the text. The sentence is only honest while this clamp is here.
     assert ('Math.Min(DynamicVars["Sparks"].IntValue, picked.Count)'
             in crackle), crackle
+
+
+# ---------------------------------------------------------------------------
+# S1 parity sweep hardening (L1b / L2 / L8 / SYS-14). Every test below sweeps
+# the SHIPPED artifacts on disk across ALL generated profiles -- the classes
+# the game actually loads -- because each pins a defect that shipped green
+# while the generator-level checks passed.
+
+_ALL_GENERATED_DIRS = [
+    gen.KLEE_PROFILE.out_dir,
+    gen.FURINA_PROFILE.out_dir,
+    gen.KOKOMI_PROFILE.out_dir,
+]
+
+
+def _all_generated_sources() -> dict[str, str]:
+    out = {}
+    for d in _ALL_GENERATED_DIRS:
+        for path in sorted(d.glob("*.cs")):
+            out[str(path.relative_to(gen.REPO))] = path.read_text(
+                encoding="utf-8")
+    return out
+
+
+def test_onupgrade_bumped_vars_have_a_reader():
+    """L1b (SYS-1): a var bumped in OnUpgrade must be READ somewhere --
+    OnPlay, the description, or a Calculated*Var that consumes it. The
+    inert-var shape is how tideline_watch and sayu_daruma_gift shipped
+    upgrades that displayed and granted the base number: OnUpgrade moved
+    `BlockNextTurn` and nothing ever read it back.
+
+    CalculationBase / CalculationExtra / ExtraDamage are exempt only when a
+    Calculated*Var is declared (it consumes them at runtime) -- the same
+    conditional exemption lint_generated_structure applies to orphan vars.
+    """
+    import re
+    trio = {"CalculationBase", "CalculationExtra", "ExtraDamage"}
+    bump = re.compile(
+        r'DynamicVars(?:\["(?P<q>\w+)"\]|\.(?P<p>\w+))\.UpgradeValueBy')
+    offenders = []
+    for rel, src in _all_generated_sources().items():
+        for m in bump.finditer(src):
+            name = m.group("q") or m.group("p")
+            if name in trio and "new Calculated" in src:
+                continue
+            # Occurrences that are not the OnUpgrade bump and not the
+            # declaration: a face token {Name:...}, an OnPlay read, or a
+            # snapshot through the var.
+            reads = (
+                src.count(f"{{{name}:")                     # face token
+                + src.count(f'DynamicVars["{name}"].IntValue')
+                + src.count(f'DynamicVars["{name}"]).Calculate')
+                + src.count(f"DynamicVars.{name}.BaseValue")
+                + src.count(f"DynamicVars.{name}.Calculate")
+                + src.count(f"DynamicVars.{name}, ")        # passed whole
+                + src.count(f"DynamicVars.{name})")
+            )
+            if reads == 0:
+                offenders.append(f"{rel}: OnUpgrade bumps {name}")
+    assert not offenders, (
+        "OnUpgrade moves a number nothing reads back (the SYS-1 inert-var "
+        "shape):\n  " + "\n  ".join(offenders))
+
+
+def test_cadence_comment_comes_from_the_profile():
+    """L2 (SYS-10): the cadence doc-comment must match the PROFILE, never a
+    hardcoded character branch -- all 18 elemental Kokomi cards shipped
+    carrying Furina's skill-grade sentence while her ruled cadence (R52) is
+    catalyst."""
+    for profile in (gen.KLEE_PROFILE, gen.FURINA_PROFILE, gen.KOKOMI_PROFILE):
+        for path in sorted(profile.out_dir.glob("*.cs")):
+            src = path.read_text(encoding="utf-8")
+            if "public Element Element =>" not in src:
+                continue
+            if "this companion attack applies its element" in src:
+                continue                       # companion cadence exemption
+            if profile.cadence == "catalyst_attack":
+                assert "catalyst-grade cadence" in src, path
+                assert "damaging Skills" not in src, (
+                    f"{path}: carries the skill-grade sentence on a "
+                    "catalyst profile")
+            else:
+                assert "damaging Skills, Burst-tagged cards" in src, path
+
+
+def test_copy_paths_carry_printed_upgrade_state():
+    """L8 (SYS-4, R114/FLAG-2(i)): a copy is built from the PRINTED card --
+    combat-acquired state does not travel -- but an upgraded target still
+    copies as upgraded. The sim rides the `+` id convention; the C# rebuild
+    must transfer the upgrade explicitly. UpgradeInternal is the game's own
+    instance-upgrade call (vendor/STS2_MCP/McpMod.Helpers.cs:54-66).
+
+    Also pins R118/Q9: the spotlight copy pool excludes kit cards.
+    """
+    for cls, picked in (("EncorePerformance", "selectedSpotlight"),
+                        ("BorrowedBrilliance", "pickedCompanion")):
+        src = None
+        for d in _ALL_GENERATED_DIRS:
+            p = d / f"{cls}.cs"
+            if p.exists():
+                src = p.read_text(encoding="utf-8")
+        assert src is not None, cls
+        assert f"if ({picked}.IsUpgraded)" in src, cls
+        assert "UpgradeInternal();" in src, cls
+    shoulder = (gen.KOKOMI_PROFILE.out_dir
+                / "ShoulderToShoulder.cs").read_text(encoding="utf-8")
+    assert "if (pickedCompanion.IsUpgraded)" in shoulder
+    assert "UpgradeInternal();" in shoulder
+    encore = (gen.FURINA_PROFILE.out_dir
+              / "EncorePerformance.cs").read_text(encoding="utf-8")
+    assert ".Where(KitGrant.NotKitCard)" in encore
+
+
+def test_salon_replacement_multiplier_is_never_a_bare_literal():
+    """SYS-14 (lint candidate L5): the replacement multipliers reach the
+    emitted C# only as SalonConstants members, never as inline `? 2 : 1` /
+    `? 3 : 1` -- a bare literal escapes the constant-parity gate, which is
+    how SalonDebut and OverflowingHospitality shipped one."""
+    for rel, src in _all_generated_sources().items():
+        # The precise expression, not any `? 2 : 1` -- an IsUpgraded literal
+        # swap (CurtainCue) is a different, legitimate shape.
+        assert ("salonReplacements > 0 ? 2 : 1" not in src
+                and "salonReplacements > 0 ? 3 : 1" not in src), (
+            f"{rel}: bare replacement multiplier literal")
+
+
+def test_salon_debut_added_encore_renders_replacement_scaled():
+    """SYS-6: the upgrade-appended encore on a salon-deploy card renders and
+    resolves through the CalculatedVar + ReplacementDelta trio -- the
+    IsUpgraded literal printed "Gain 2 Encore" while a replacement deploy
+    granted 4."""
+    src = _generated_source("SalonDebut")
+    assert "{IfUpgraded:show:Gain {Encore:diff()} [gold]Encore[/gold].|}" in src
+    assert ("SalonMemberPower.ReplacementDelta(card, 1, "
+            "SalonConstants.ReplacementNumericMultiplier)") in src
+    assert "GainEncore(Owner.Creature, (int)salonScaledEncore);" in src
+    # The capture happens at the top of OnPlay, against the pre-play company
+    # the face read -- after the deploy it would price the stage the card
+    # itself just changed.
+    body = src[src.index("OnPlay"):]
+    assert body.index("salonScaledEncore = ") < body.index(
+        "SalonMemberPower.Deploy")

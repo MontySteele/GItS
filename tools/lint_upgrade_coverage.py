@@ -5,8 +5,8 @@ the card, and gets nothing -- and nothing in the build complains, because
 "absent" is not an error anywhere. It shipped, and it was found by a playtester
 rather than by us.
 
-TWO LAYERS, because the playtest's actual defect was in the second one and a
-lint that only checked the first would have reported all-clear.
+THREE LAYERS, each one added because the layer before it reported all-clear on
+a defect that had already shipped.
 
   LAYER 1 -- SHEET. Every draftable card has a delta in some *-upgrades.yaml,
   and that delta is applicable (non-empty, not `_unexpressible`, not in
@@ -19,6 +19,14 @@ lint that only checked the first would have reported all-clear.
   `nicole_celestial_gift`, the card the 2026-07-25 playtest named: it has
   `{block_per_turn: +2}` in klee-upgrades.yaml, so layer 1 passes it, and its
   generated OnUpgrade does nothing at all.
+
+  LAYER 3 -- THE EMITTED C#. Layer 2 asks the manifest and believes it. The
+  manifest is written by the generator, so layer 2 believes the generator's
+  own account of what the generator did -- and SYS-8 is what that costs: the
+  generator dropped a delta, emitted an empty OnUpgrade whose comment says
+  "Flagged in manifest", and then did not flag it in the manifest. Layer 3
+  reads the shipped .cs instead and needs nothing to be true about the
+  manifest for its finding to fire.
 
 Layer 2 is why this is a lint and not a spot-fix, and why the two layers get
 separate exemption lists: "we have not authored a delta yet" and "the delta
@@ -36,6 +44,7 @@ Exit 1 with findings on stdout.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -45,6 +54,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from tier0.content import loader, upgrades          # noqa: E402
+from tools.gen_klee_cards import pascal             # noqa: E402
 
 # --- Layer 1 exemptions: cards that legitimately have no sheet delta. --------
 #
@@ -137,6 +147,103 @@ CODEGEN_DEBT: dict[str, str] = {
 }
 
 
+# --- Layer 3 plumbing: reading the emitted C# -------------------------------
+#
+# Text extraction, not a C# parser -- the house pattern for a lint that has to
+# read the mod (tools/lint_handwritten_parity.py regex-extracts every idiom it
+# checks). Generated OnUpgrade bodies are a handful of lines emitted by one
+# template, so a brace match is enough and a parser dependency would not be.
+#
+# The one place naive brace matching would misread is a brace inside a comment
+# or a string -- `florid_cadenza`'s body carries `{IfUpgraded:show:...}` in its
+# comment today. So the match runs over a MASKED copy with comment and literal
+# CONTENT blanked to spaces, offsets preserved: the mask says where the body
+# ends and how much of it is statements, the original says what it says.
+
+MARKERS = ("Flagged in manifest", "NO upgrade path")
+_ONUPGRADE_RE = re.compile(r"OnUpgrade\s*\([^)]*\)\s*\{")
+
+
+def _mask(text: str) -> str:
+    """`text` with comment and string-literal content blanked, offsets kept."""
+    out = list(text)
+    i, n = 0, len(text)
+
+    def blank(j: int) -> None:
+        if out[j] != "\n":
+            out[j] = " "
+
+    while i < n:
+        pair = text[i:i + 2]
+        if pair == "//":
+            while i < n and text[i] != "\n":
+                blank(i)
+                i += 1
+        elif pair == "/*":
+            blank(i)
+            i += 1
+            while i < n and text[i:i + 2] != "*/":
+                blank(i)
+                i += 1
+            for _ in range(2):
+                if i < n:
+                    blank(i)
+                    i += 1
+        elif pair == '@"':                      # verbatim string: "" escapes "
+            blank(i)
+            blank(i + 1)
+            i += 2
+            while i < n:
+                if text[i] == '"' and text[i:i + 2] != '""':
+                    blank(i)
+                    i += 1
+                    break
+                blank(i)
+                i += 1
+        elif text[i] in "\"'":                  # ordinary or $-interpolated
+            quote = text[i]
+            blank(i)
+            i += 1
+            while i < n:
+                if text[i] == "\\" and i + 1 < n:
+                    blank(i)
+                    blank(i + 1)
+                    i += 2
+                    continue
+                closing = text[i] == quote
+                blank(i)
+                i += 1
+                if closing:
+                    break
+        else:
+            i += 1
+    return "".join(out)
+
+
+def _onupgrade_body(text: str) -> tuple[str, str] | None:
+    """(body as written, body with comments/literals blanked), or None.
+
+    None means the file has no OnUpgrade() whose braces balance -- either it is
+    not a card file at all (the generated roster/registry classes) or the emit
+    is malformed. The caller decides which, from whether the class name maps to
+    a sheet id.
+    """
+    masked = _mask(text)
+    match = _ONUPGRADE_RE.search(masked)
+    if match is None:
+        return None
+    depth, i = 1, match.end()
+    while i < len(masked) and depth:
+        if masked[i] == "{":
+            depth += 1
+        elif masked[i] == "}":
+            depth -= 1
+        i += 1
+    if depth:
+        return None
+    return text[match.end():i - 1], masked[match.end():i - 1]
+
+
 def main() -> int:
     findings: list[str] = []
 
@@ -188,6 +295,126 @@ def main() -> int:
                 f"[L2] {card_id}: generated card ships with NO upgrade path "
                 f"-- {why} ({path.relative_to(REPO)})")
 
+    # ---------------- Layer 3: the emitted C# ----------------
+    #
+    # WHY THE MANIFEST IS NOT A WITNESS TO ITSELF. Layer 2 reads
+    # `upgrades.no_upgrade_path` because "the manifest is what the generator
+    # actually wrote", which is true and is exactly the problem: the component
+    # that writes the manifest is the component that decides whether to emit an
+    # upgrade, so one bug in it produces a matching pair of lies and layer 2
+    # prints green. That bug was real (SYS-8). The generator dropped a delta,
+    # emitted `OnUpgrade() { }` with the comment "R24: NO upgrade path -- None.
+    # Flagged in manifest.", and did not add the card to `no_upgrade_path`.
+    # `blocking_notes` shipped without its ratified `bonus_slope: +1` and every
+    # check in this file passed it. A second witness has to be the artifact the
+    # player actually runs: the .cs.
+    #
+    # EMPTY means NO STATEMENTS -- whitespace and comments only, decided on the
+    # masked body so a `{...}` inside a comment cannot be mistaken for code.
+    #
+    # BUT AN EMPTY BODY IS NOT ITSELF A DEFECT, and this is the discrimination
+    # the layer turns on. Most Furina and Kokomi upgrades are structural
+    # (`encore: +1`, `add: {op: draw}`, `copy_cost_override: 0`); the generator
+    # expresses them by having OnPlay READ IsUpgraded, so OnUpgrade correctly
+    # has nothing to do and carries a comment saying where the upgrade went
+    # ("expressed at play time as an IsUpgraded read"). Those cards are
+    # upgradable and appear in neither the manifest nor CODEGEN_DEBT. So
+    # comment-presence cannot be the discriminator -- both the healthy and the
+    # broken bodies are one comment long.
+    #
+    # THE DISCRIMINATOR IS THE CLAIM THE COMMENT MAKES. A body carrying
+    # MARKERS ("NO upgrade path" / "Flagged in manifest") asserts that this
+    # card has no upgrade and that the manifest says so; that assertion is
+    # checkable and is checked. A body with no marker asserts the opposite --
+    # the upgrade exists and lives in OnPlay -- and is held to the sheet
+    # instead: it must have an applicable delta, which is the fact the play-time
+    # emission is derived from. An empty body with NO comment at all claims
+    # nothing and is the silent-drop shape itself, so it fails outright.
+    #
+    # Scope matches layer 1's: guest stars, kit cards and tokens are skipped by
+    # the same `_draftable` predicate, for the same reason (their generated
+    # files carry the marker legitimately -- a guest-star token is not a
+    # campfire pick and its generator card is what upgrades).
+    by_class = {pascal(card.id): card for card in cards}
+    gaps_cache: dict[Path, dict] = {}
+    bodies_read = 0
+    for path in sorted(
+            (REPO / "klee-mod" / "KleeCode" / "Cards").rglob("Generated/*.cs")):
+        text = path.read_text(encoding="utf-8")
+        body = _onupgrade_body(text)
+        card = by_class.get(path.stem)
+        where = path.relative_to(REPO)
+        if card is None:
+            # The generated roster/registry classes (CompanionRoster.cs,
+            # FurinaCardRoster.cs, ...) are not cards and have no OnUpgrade.
+            # They are recognised by THAT rather than by a name list, so a real
+            # card whose class name stops matching its sheet id is a finding
+            # instead of a silent skip.
+            if body is not None:
+                findings.append(
+                    f"[L3] {where}: has an OnUpgrade() but its class name maps "
+                    "to no id on any docs sheet -- nothing checks this card")
+            continue
+        if not _draftable(card)[0]:
+            continue
+
+        manifest = path.parent / "manifest.json"
+        if manifest not in gaps_cache:
+            written_manifest = json.loads(
+                manifest.read_text(encoding="utf-8")
+            ) if manifest.is_file() else {}
+            gaps_cache[manifest] = written_manifest.get(
+                "upgrades", {}).get("no_upgrade_path", {})
+        gaps = gaps_cache[manifest]
+        registered = card.id in gaps or card.id in CODEGEN_DEBT
+
+        delta = upgrades._upgrade_index().get(card.id)
+        # Severity, spelled out in the finding: an unupgradable live card whose
+        # delta is RATIFIED is a promise the sheet makes and the build breaks,
+        # and the sim has been measuring the upgraded card all along.
+        sheet_note = (
+            f"; docs/*-upgrades.yaml carries a ratified delta {delta} that the "
+            "live card does not have" if delta else
+            "; no sheet delta either, so nothing anywhere upgrades this card")
+
+        if body is None:
+            findings.append(
+                f"[L3] {card.id}: no OnUpgrade() with balanced braces in "
+                f"{where} -- the card cannot express an upgrade at all")
+            continue
+        written, statements = body
+        bodies_read += 1
+
+        if statements.strip():
+            if registered:
+                findings.append(
+                    f"[L3] {card.id}: {where} emits upgrade statements, but "
+                    "the card is registered as having no upgrade path "
+                    "(manifest no_upgrade_path / CODEGEN_DEBT) -- it is stale "
+                    "and layer 2 is suppressing a card that works")
+            continue
+
+        # --- empty body from here down ---
+        if any(marker in written for marker in MARKERS):
+            if not registered:
+                findings.append(
+                    f"[L3] {card.id}: {where} has an EMPTY OnUpgrade() whose "
+                    f"comment claims the manifest flags it, but "
+                    f"{manifest.relative_to(REPO)} does not list it and it is "
+                    f"not in CODEGEN_DEBT{sheet_note}")
+        elif not registered:
+            if not written.strip():
+                findings.append(
+                    f"[L3] {card.id}: {where} has an EMPTY OnUpgrade() with no "
+                    "comment at all -- a dropped delta leaves exactly this "
+                    f"shape{sheet_note}")
+            elif not upgrades.has_upgrade(card.id):
+                findings.append(
+                    f"[L3] {card.id}: {where} has an EMPTY OnUpgrade() whose "
+                    "comment claims the upgrade is expressed at play time, but "
+                    "the sheet has no applicable delta for it to be derived "
+                    "from")
+
     # ---------------- Stale curation ----------------
     #
     # An exemption that no longer applies is worse than no exemption: it reads
@@ -236,9 +463,13 @@ def main() -> int:
         return 1
 
     drafted = sum(1 for c in cards if _draftable(c)[0])
+    # The L3 count is printed for the same reason lint_unique_names prints its
+    # relic line: a layer that read ZERO files reports the same clean word as
+    # one that read them all, and this one globs for its inputs.
     print(f"upgrade coverage OK: {drafted} draftable cards across "
           f"{len(loader.DOCS_CARD_SHEETS)} sheets, "
-          f"{len(CODEGEN_DEBT)} curated codegen debt(s)")
+          f"{len(CODEGEN_DEBT)} curated codegen debt(s), "
+          f"{bodies_read} generated OnUpgrade bodies read")
     return 0
 
 

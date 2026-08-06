@@ -41,6 +41,7 @@ public static class FurinaRiderTips
         CardModel card,
         int fanfarePer = 0,
         int fanfareStep = 0,
+        bool grantsBlock = false,
         int auraBonus = 0,
         int salonPer = 0,
         bool salonGrantsBlock = false,
@@ -52,7 +53,7 @@ public static class FurinaRiderTips
         {
             yield return new HoverTip(
                 new LocString(Table, FanfareKey + ".title"),
-                FanfareBody(card, fanfarePer, fanfareStep));
+                FanfareBody(card, fanfarePer, fanfareStep, grantsBlock));
         }
 
         if (auraBonus > 0)
@@ -82,15 +83,17 @@ public static class FurinaRiderTips
     /// <summary>The rate, plus what it is worth at this moment. Out of combat
     /// (deck view, reward screen) there is no meter to read, so the rate
     /// stands alone rather than printing a misleading zero.</summary>
-    private static string FanfareBody(CardModel card, int per, int step)
+    private static string FanfareBody(
+        CardModel card, int per, int step, bool grantsBlock)
     {
-        var rate = $"+{per} damage per {step} Fanfare you hold.";
+        var noun = grantsBlock ? "Block" : "damage";
+        var rate = $"+{per} {noun} per {step} Fanfare you hold.";
         var owner = card.Owner?.Creature;
         if (owner == null || card.CombatState == null) return rate;
 
         var fanfare = FurinaResources.ReadableFanfare(owner);
         return $"{rate} You hold {fanfare} Fanfare: +{fanfare / step * per} "
-             + "damage, already counted in the number above.";
+             + $"{noun}, already counted in the number above.";
     }
 
     /// <summary>A13/A14: the per-member slope, plus what the stage is paying

@@ -371,7 +371,8 @@ public sealed class EncoreSpendDrawPower : PowerModel, ILocalizationProvider
     {
         ("title", "The Gallery Stirs"),
         ("description",
-            "The first time you spend Encore each turn, draw {Amount} card."),
+            "The first time you spend Encore each turn, draw "
+          + "{Amount} card{Amount:plural:|s}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -386,7 +387,8 @@ public sealed class FirstAttackDrawPower : PowerModel, ILocalizationProvider
     {
         ("title", "Quick Change"),
         ("description",
-            "The first Attack you play each turn draws {Amount} card."),
+            "The first Attack you play each turn draws "
+          + "{Amount} card{Amount:plural:|s}."),
     };
 
     public override PowerType Type => PowerType.Buff;

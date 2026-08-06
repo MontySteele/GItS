@@ -66,6 +66,10 @@ public sealed class BorrowedBrilliance : CustomCardModel
                 {
                     var copyToken = CombatState!.CreateCard(
                         ModelDb.GetById<CardModel>(pickedCompanion.Id), Owner);
+                    if (pickedCompanion.IsUpgraded)
+                    {
+                        copyToken.UpgradeInternal();
+                    }
                     copyToken.EnergyCost.SetThisCombat(0);
                     await CardPileCmd.AddGeneratedCardToCombat(copyToken, PileType.Hand, Owner);
                 }

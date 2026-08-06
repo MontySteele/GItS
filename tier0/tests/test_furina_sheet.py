@@ -555,6 +555,50 @@ def test_the_copy_carries_the_printed_bound_not_the_instance_s():
     assert made and made[0].exhaust == printed_exhaust
 
 
+def test_the_copy_reads_the_upgraded_sheet_and_none_of_the_instance():
+    """FLAG-2(i) (R114, Errata Batch 2 item 8), the half the pin above leaves
+    open: "Copy ops inherit the printed card's bounds... the printed bound
+    travels with the copy."
+
+    PRINTED includes the upgrade. `loader.get_card` keys off the instance's
+    id and the upgraded form rides the `+` convention, so an upgraded target
+    copies as upgraded -- a base-id reload would silently downgrade it. What
+    stays behind is combat-acquired instance state: a discount some conscript
+    wrote into `cost_delta_this_combat` is not on the sheet, so the copy
+    arrives at the printed cost and has to be paid for again.
+
+    R118/Q9's `not c.kit_card` exclusion is pinned here too, since nothing
+    else in this file reads it through the copy op: her Burst can be
+    Spotlighted and in hand and is still not a legal target.
+    """
+    st = furina_state()
+    p = st.player
+    p.spotlight = "furina"
+    target = hand_card(st, "limelight+")
+    printed_cost = loader.get_card("limelight").cost
+    target.cost_delta_this_combat = -1               # what a conscript leaves
+    assert combat.card_cost(st, target) == printed_cost - 1
+    effects.resolve_card(st, loader.get_card("encore_performance"))
+    copies = [c for c in p.hand if c is not target]
+    assert len(copies) == 1
+    copy_ = copies[0]
+    assert copy_.id == "limelight+"          # the upgrade is printed: it rides
+    assert copy_.effects == loader.get_card("limelight+").effects
+    assert copy_.cost_delta_this_combat == 0
+    assert combat.card_cost(st, copy_) == printed_cost, (
+        "the instance's combat discount travelled to a card the sheet prints "
+        "at full price")
+
+    # R118/Q9: the kit is not draftable and not copyable either.
+    st2 = furina_state()
+    p2 = st2.player
+    p2.spotlight = "furina"
+    burst = hand_card(st2, "let_the_people_rejoice")
+    assert effects.is_spotlighted(st2, burst) and burst.kit_card
+    effects.resolve_card(st2, loader.get_card("encore_performance"))
+    assert p2.hand == [burst]                        # no target, so no copy
+
+
 def test_encore_performance_copies_only_the_spotlighted_character():
     st = furina_state()
     p = st.player

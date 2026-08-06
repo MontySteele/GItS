@@ -513,7 +513,7 @@ public sealed class SpotlightDrawPower
         ("title", "Supporting Cast"),
         ("description",
             "The first [gold]Spotlighted[/gold] card each turn draws "
-          + "{Amount} card."),
+          + "{Amount} card{Amount:plural:|s}."),
     };
 }
 

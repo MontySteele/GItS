@@ -41,7 +41,7 @@ public sealed class CurtainUp : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "In the Wings"),
-        ("description", "Gain {IfUpgraded:show:3|2} [gold]Encore[/gold]. Look at the top 1 cards of your draw pile; discard one."),
+        ("description", "Gain {IfUpgraded:show:3|2} [gold]Encore[/gold]. Look at the top card of your draw pile; discard it."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -41,7 +41,7 @@ public sealed class SupportingCast : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Supporting Cast"),
-        ("description", "The first [gold]Spotlighted[/gold] card each turn draws {PowerAmount:diff()} card. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
+        ("description", "The first [gold]Spotlighted[/gold] card each turn draws {PowerAmount:diff()} card{PowerAmount:plural:|s}. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

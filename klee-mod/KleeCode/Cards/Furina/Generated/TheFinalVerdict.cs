@@ -77,6 +77,6 @@ public sealed class TheFinalVerdict : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- None. Flagged in manifest.
+        DynamicVars["FloorDrop"].UpgradeValueBy(-10m);
     }
 }

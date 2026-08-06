@@ -406,8 +406,11 @@ public sealed class PreventExhaustWardPower : PowerModel, ILocalizationProvider
     private bool _usedThisTurn;
 
     /// <summary>
-    /// Raw incoming damage for the hit currently resolving, captured in
-    /// <see cref="BeforeDamageReceived"/>.
+    /// UNBLOCKED residual of the hit currently resolving -- what is left
+    /// after Block and before the ward -- captured in
+    /// <see cref="BeforeDamageReceived"/>. Not the raw incoming: the sim
+    /// wards only the residual (combat.py, `dmg - blocked`), so a fully
+    /// blocked hit must leave this at zero and cost the ward nothing.
     ///
     /// This field exists because <see cref="ModifyDamageAdditive"/> is NOT a
     /// real-hit hook. The engine also calls it to answer damage PREVIEWS --
@@ -428,7 +431,17 @@ public sealed class PreventExhaustWardPower : PowerModel, ILocalizationProvider
     /// So: the modifier is PURE, and every mutation lives in the
     /// Before/After hooks, which only ever run on hits that really happened.
     /// </summary>
-    private decimal _incomingThisHit;
+    private decimal _unblockedThisHit;
+
+    /// <summary>
+    /// What the ward actually reads: the hit as it stands AFTER Block, which
+    /// is the sim's `dmg - blocked` (combat.py, the enemy-attack branch).
+    /// Block is not yet spent at either hook that calls this, so both the
+    /// modifier and the Before hook see the same standing Block and can
+    /// never disagree about whether the ward is owed a proc.
+    /// </summary>
+    private decimal UnblockedPortion(decimal amount) =>
+        System.Math.Max(0m, amount - Owner.Block);
 
     public override Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
@@ -455,15 +468,21 @@ public sealed class PreventExhaustWardPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Creature target, decimal amount,
         ValueProp props, Creature? dealer, CardModel? cardSource)
     {
-        // Real hits only. Capturing the amount here rather than in the
-        // modifier is what lets AfterDamageReceived tell a hit apart from a
-        // preview without the modifier having to remember anything.
-        if (target == Owner) _incomingThisHit = amount;
+        // Real hits only. Capturing here rather than in the modifier is what
+        // lets AfterDamageReceived tell a hit apart from a preview without
+        // the modifier having to remember anything.
+        //
+        // The ward is an ATTACK ward on both sides of the bridge: the sim
+        // reaches it only from the enemy attack branch, and both printed
+        // descriptions say "attack damage".
+        _unblockedThisHit = target == Owner && props.IsPoweredAttack()
+            ? UnblockedPortion(amount)
+            : 0m;
         return Task.CompletedTask;
     }
 
     /// <summary>
-    /// PURE -- mutating anything here desyncs co-op (see _incomingThisHit).
+    /// PURE -- mutating anything here desyncs co-op (see _unblockedThisHit).
     /// Returning the same reduction for a preview and for the real hit is
     /// the correct answer to both questions: the preview asks what this hit
     /// would do, and what it would do is the reduced number.
@@ -473,11 +492,21 @@ public sealed class PreventExhaustWardPower : PowerModel, ILocalizationProvider
         CardModel cardSource)
     {
         if (target != Owner || _usedThisTurn || amount <= 0) return 0m;
+        if (!props.IsPoweredAttack()) return 0m;   // attacks only, per the text
         if (!HasFuel()) return 0m;       // defenceless: the deck is spent
-        // Block resolves first in the sim (the ward reads what is left
-        // UNBLOCKED), and the engine applies Block after additive modifiers,
-        // so the reduction is capped at the ward rather than at the raw hit.
-        return -System.Math.Min(amount, Amount);
+        // The ward sits AFTER Block, before HP (sim: prevent_damage_exhaust
+        // is handed `dmg - blocked`). This hook runs BEFORE the engine
+        // spends Block, so the residual has to be computed here rather than
+        // read off the hit -- subtracting from the raw amount would ward
+        // damage Block was already going to eat.
+        //
+        // Reducing by min(residual, Amount) leaves `amount` still at or above
+        // the standing Block whenever the residual is positive, so the engine
+        // consumes exactly the Block the sim consumes. HP and Block both land
+        // on the sim's numbers on a partially blocked hit.
+        var unblocked = UnblockedPortion(amount);
+        if (unblocked <= 0m) return 0m;
+        return -System.Math.Min(unblocked, Amount);
     }
 
     /// <summary>
@@ -492,13 +521,18 @@ public sealed class PreventExhaustWardPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Creature target, DamageResult result,
         ValueProp props, Creature dealer, CardModel cardSource)
     {
-        var incoming = _incomingThisHit;
-        _incomingThisHit = 0m;
+        var unblocked = _unblockedThisHit;
+        _unblockedThisHit = 0m;
 
         // The same predicate the modifier just answered with. Because the
         // modifier mutates nothing, it is still true here on a hit the ward
         // actually reduced -- and false on every hit it declined.
-        if (target != Owner || _usedThisTurn || incoming <= 0) return;
+        //
+        // `unblocked`, never the raw hit: the sim returns 0 without latching
+        // or exhausting when the residual is <= 0 (effects.py
+        // prevent_damage_exhaust). A hit Block ate completely deals nothing,
+        // so it may not cost a card out of the draw pile.
+        if (target != Owner || _usedThisTurn || unblocked <= 0) return;
         if (Owner.Player == null) return;
 
         // tier0 order: reshuffle FIRST, and only then decide the ward is out
@@ -519,5 +553,37 @@ public sealed class PreventExhaustWardPower : PowerModel, ILocalizationProvider
         {
             await CardCmd.Exhaust(choiceContext, victim);
         }
+    }
+
+    /// <summary>
+    /// The sheet's stack cap (kokomi-cards.yaml, `max_stacks: 6`), enforced
+    /// engine-side in the sim at apply_power (`new = min(new, max_stacks)`).
+    /// Clamped on the RESULTING COUNTER rather than on the delta, following
+    /// <see cref="SalonMemberPower"/>.
+    ///
+    /// This row uses the SINGLE-APPLICATION encoding -- max_stacks EQUALS the
+    /// applied amount, and the upgrade moves both together (6/6 -> 8/8, see
+    /// kokomi-upgrades.yaml and tier0's
+    /// test_vigil_upgrade_moves_the_cap_with_the_amount). Under that encoding
+    /// min(Amount + amount, amount) is just `amount`, so the ward SETS rather
+    /// than adds: a second copy re-asserts the magnitude instead of doubling
+    /// it. The magnitude is the knob, not the copy count.
+    ///
+    /// Deriving the cap from the application instead of hard-coding 6 is what
+    /// keeps the upgraded copy at its printed 8 -- a literal cap would swallow
+    /// the upgrade, which is the exact defect the sim's pass-2 errata fixed.
+    /// </summary>
+    public override bool TryModifyPowerAmountReceived(
+        PowerModel canonicalPower, Creature target, decimal amount,
+        Creature? applier, out decimal modifiedAmount)
+    {
+        modifiedAmount = amount;
+        if (canonicalPower is not PreventExhaustWardPower || target != Owner)
+        {
+            return false;
+        }
+        if (amount <= 0) return false;      // removal still lands in full
+        modifiedAmount = amount - Amount;
+        return modifiedAmount != amount;
     }
 }

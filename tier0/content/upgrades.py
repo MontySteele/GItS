@@ -432,8 +432,10 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                               if fx.get("op") == "summon_kurage"),
                              "amount", val)
         elif key == "generate_cost_override":
-            # Discovery-parity upgrade: the generated card costs 0 this
-            # combat (kickoff §9 upgrade grammar).
+            # Discovery-parity upgrade: the generated card costs 0 THIS TURN
+            # (R114 / FLAG-2(ii): effects.py owns the lifetime and the mod's
+            # SetThisTurn was ruled the correct leg; "this combat" here was
+            # the drifted claim).
             hit = next((fx for fx in top
                         if fx.get("op") == "generate_guest_star"), None)
             ok = hit is not None

@@ -189,7 +189,8 @@ public sealed class FanfareResource : BasicCustomResource
 /// Kept as its own resource rather than folded into the floor because the sim
 /// models cap and floor as two independent fields that merely happen to move
 /// together today. Mirroring that shape means <see cref="FurinaResources.RaiseFanfareCap"/>
-/// (retired grammar, no sheet user) stays expressible without a rewrite.
+/// (un-retired by Track B -- the "Fanfare Cap +X" keyword's runtime, ~16
+/// sheet users) stays expressible without a rewrite.
 /// </summary>
 public sealed class FanfareCapBonusResource : BasicCustomResource
 {

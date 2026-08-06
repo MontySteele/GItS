@@ -38,7 +38,7 @@ public sealed class HeldBreath : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, fanfarePer: 1, fanfareStep: 4);
+        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, fanfarePer: 1, fanfareStep: 4, grantsBlock: true);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("held_breath");
 

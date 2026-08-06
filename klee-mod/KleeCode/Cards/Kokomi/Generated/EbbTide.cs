@@ -41,7 +41,7 @@ public sealed class EbbTide : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ebb Tide"),
-        ("description", "Discard a random card. [gold]Exhaust[/gold] {Exhausts:diff()} cards from your hand."),
+        ("description", "Discard a random card. [gold]Exhaust[/gold] {Exhausts:diff()} card{Exhausts:plural:|s} from your hand."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
