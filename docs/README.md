@@ -17,7 +17,7 @@ card/relic/companion data and are read directly by the sims and codegen —
 they are not documentation and are not part of this index's scope.
 
 Chat is not a record. Rulings, worksheets, and results enter the repo or they
-don't exist (house rule; see `red-pen-2026-07-26.md` for what happens
+don't exist (house rule; see `archive/red-pen-2026-07-26.md` for what happens
 otherwise).
 
 ---
@@ -36,7 +36,7 @@ otherwise).
 |---|---|
 | `tier0/DECISIONS.md`, `klee-mod/DECISIONS.md` | The living decision logs (sim-side and mod-side). The project's spine. |
 | `dockets/engineering-backlog.md` | **The engineering half of "what is open".** Work that needs no [USER] ruling to start: confirmed defects, measurement defects, unbuilt instruments, content work with nothing in front of it. Opened 2026-08-06 (Track Z). |
-| `red-pen-2026-07-26.md` | REFERENCE. The most recent ratification record; carries its own errata and the one still-owed Queue 5 cell (`S4-G16`). |
+| `archive/red-pen-2026-07-26.md` | REFERENCE (moved to the archive 2026-08-06, Track R-B). The most recent ratification record; carries its own errata and the one still-owed Queue 5 cell (`S4-G16`). |
 | `open-playtest-items.md`, `missed-requirements.md`, `backlog-2026-07-29.md`, `sitting-prep-2026-08-05.md`, `surplus-week-manifest-2026-08-05.md` | **RETIRED AS REGISTERS 2026-08-06 (Track Z / Z-3), now REFERENCE.** Each keeps its full text and its evidence, and each carries a banner saying where its open rows went — the [USER] ones to `registry/user-queue.md` §10, the engineering ones to `dockets/engineering-backlog.md`. Read them for *reasoning*, never for *status*. |
 
 ### Lifecycle statuses — what a header line means
@@ -97,8 +97,8 @@ it on new documents (`registry/identifiers.md` §16).
 | `sitting-prep-2026-08-05.md` | The Last Call sitting's single entry point. **Still live for §8 (the four paperwork one-liners) and §10 (the batch's own asks)** — status for both is reconciled in `registry/user-queue.md` §5/§6. Indexed 2026-08-06 (Track X). |
 | `surplus-week-manifest-2026-08-05.md` | INDEX for surplus week (`SW-S1…S15`), the Last Call/House Lights addendum, and the Second Wind batch's landings and replies. Indexed 2026-08-06 (Track X). |
 | `pending/` | Adopted-but-retained proposal documents (`SS-G3` the CI argument, `SS-G4` the session-isolation argument), kept as the standing reasoning behind two live policies. Index: `pending/README.md`. **Indexed 2026-08-06 (Track X) — S4 §4 lead 6 recorded that this directory was indexed nowhere.** |
-| `run-model-rework-plan.md` | Implemented (Passes 1–4 shipped); kept current for §10.9, the living skip backlog. |
-| `tier05-perf-and-ironclad-act3-notes.md` | Perf pass record; kept current for §1.5.2's open items (out-of-scale boss audit lives only here). |
+| `archive/run-model-rework-plan.md` | Implemented (Passes 1–4 shipped); kept current for §10.9, the living skip backlog. |
+| `archive/tier05-perf-and-ironclad-act3-notes.md` | Perf pass record; kept current for §1.5.2's open items (out-of-scale boss audit lives only here). |
 | `tech-debt-audit-2026-07-26.md` | The architecture audit; kept current for §9 (the big-push sequencing, with D3's pin-batch pull marked in place) and §10, the horizon list of open design sessions. |
 | `epoch-1-log-2026-07-26.md` | EPOCH 1's landing record: what moved, what was archived, and the graded predictions, **plus the D10-world canonical-cell baseline — ARCHIVED by the D12 and D13 bumps** (R87(3)). Current anchors: `sprint-sim-hygiene-log-2026-07-29.md`, ratified as measurements by R107(a). (Row corrected 2026-08-06, R107 / S4 finding F16 — it previously called these numbers "the current canonical-cell baseline", two world bumps behind the stamp.) |
 | `track-a-kickoff-brief.md` | Track A's execution brief (T1–T4). Executed 2026-08-04. |
@@ -119,7 +119,7 @@ it on new documents (`registry/identifiers.md` §16).
 | `roster-codegen.md` | Codegen + build-path reference (see dated correction note in-file). |
 | `upgrade-conventions.md` | Mined StS2 upgrade grammar (durable) + house rules (see dated correction note in-file). |
 | `calibration-notes.md` | Battery-calibration law ("battery adapts to the roster") + the parked A3/A4 axis questions. |
-| `klee-real-battery-calibration.md` | The real-Ironclad baseline pipeline reference (both reproduce commands live). |
+| `archive/klee-real-battery-calibration.md` | The real-Ironclad baseline pipeline reference (both reproduce commands live). |
 | `role-tempo-baseline.md` | The five canon pools' (solve × tempo × rarity) matrix, DLL-derived. Percentages only — no canon card text is ever committed (.gitignore:28). Also holds the wiki-vs-DLL count reconciliation. |
 | `role-tempo-floors.yaml` | The machine-readable coverage floors (min-of-canon over the cells all five pools are non-zero in). Read by `tools/lint_role_tempo_coverage.py`. |
 | `role-tempo-review.tsv` | **LANDED 2026-08-04 (R91)** — all 219 rows, both fields, on all three sheets; 135 divergences resolved to zero. Kept as the derivation record. (Row corrected 2026-08-06, R107 / S4 finding F7; it previously read PROVISIONAL and named A-G1 as the blocker.) |
@@ -133,9 +133,9 @@ it on new documents (`registry/identifiers.md` §16).
 ### Research (inputs, still ground truth)
 | doc | what it is |
 |---|---|
-| `sts2-map-and-events-research.md` | Map/events wiki harvest; fidelity ruling and §5 constants stamped. |
-| `act2-act3-roster-research.md` | Act 2/3 enemy roster harvest the curated pools were cut from. |
-| `companion-value-vs-colorless-study.md` | Empirical backing for principles §4.7 and R59. |
+| `archive/sts2-map-and-events-research.md` | Map/events wiki harvest; fidelity ruling and §5 constants stamped. |
+| `archive/act2-act3-roster-research.md` | Act 2/3 enemy roster harvest the curated pools were cut from. |
+| `archive/companion-value-vs-colorless-study.md` | Empirical backing for principles §4.7 and R59. |
 
 ---
 
@@ -183,7 +183,7 @@ status header instead.* Recorded so the pass is not re-run blind:
 | Candidate | Why it looked archivable | Why it stayed live |
 |---|---|---|
 | `track-a-kickoff-brief.md` | Track A executed 2026-08-04; the track log is the doc of record | Four `tools/` modules cite it by path in their module docstrings (`canon_role_tempo.py`, `suggest_role_tempo_tags.py`, `lint_role_tempo_coverage.py`, `role_tempo.py`). Moving it makes four live citations stale to fix one index row. **Status header added in-file instead.** |
-| `understudy-kickoff-brief.md`, `understudy-phase0-report.md`, `understudy-p0-findings.md` | Phase 0 closed; rulings landed as R93–R97 | The Understudy sprint is open (`UND-P1.5` is next, R104), and `understudy/README.md`, `understudy/soak.py`, `vendor/README.md`, `vendor/STS2_MCP/PROVENANCE.md` and `docs/atlas/vendor-sts2-mcp.md` all cite them as live provenance |
+| `understudy-kickoff-brief.md`, `understudy-phase0-report.md`, `archive/understudy-p0-findings.md` | Phase 0 closed; rulings landed as R93–R97 | The Understudy sprint is open (`UND-P1.5` is next, R104), and `understudy/README.md`, `understudy/soak.py`, `vendor/README.md`, `vendor/STS2_MCP/PROVENANCE.md` and `docs/atlas/vendor-sts2-mcp.md` all cite them as live provenance |
 | `sitting-record-predraft-2026-08-06.md` | Its content landed as R107–R112 | It is the **verbatim** [USER] authority document those six rulings are drawn from; the rulings cite it |
 | `handback-note-2026-08-04.md` | The session it opened has closed | Verbatim [USER] text, cited by R97; verbatim records are not edited or relocated by a paper sweep |
 | `pending/serenitea-g3-ci-proposal.md`, `pending/serenitea-g4-session-isolation.md` | Both ADOPTED | `pending/README.md` explicitly retains them as the standing argument — *"read it before adding a job"* |
@@ -193,6 +193,18 @@ status header instead.* Recorded so the pass is not re-run blind:
 
 Grouped by thread; each line says why the doc is closed and where its live
 successor is. "→" = superseded by / continued in.
+
+### Clear the Stage, Track R-B — 2026-08-06 (43 REFERENCE records)
+
+The R-B demotion (charter R119, rail 1) moved **43 REFERENCE files verbatim**
+from the docs root into `docs/archive/`. Each carries a dated move banner
+naming its old and new path; the per-file map — old path, new path, which
+citers were repointed, which frozen citers were knowingly left stale (M2) —
+is `review/stage-clear/rb-move-manifest.tsv`. Their lifecycle status is
+unchanged (REFERENCE, relocated); nothing below a move banner was edited.
+Ledger-cited REFERENCE files did **not** move (rail 1: the append-only
+DECISIONS ledgers cannot be repointed) — that policy question is queue row
+**Q20**.
 
 ### Tier 0 / Tier 0.5 simulator thread
 - `tier0-simulator-spec.md` — origin charter (M1–M4). The world outgrew it on

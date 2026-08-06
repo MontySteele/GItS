@@ -1,7 +1,7 @@
 # Act 3 roster: GLORY -- multi-act extension §10.4 (RATIFIED 2026-07-23).
 #
 # REAL StS2 numbers (slaythespire.wiki.gg harvest 2026-07-23,
-# docs/act2-act3-roster-research.md §2). HP is a spawn-time RANGE [lo, hi];
+# docs/archive/act2-act3-roster-research.md §2). HP is a spawn-time RANGE [lo, hi];
 # a bare int is fixed. Intents use the engine kinds plus the §10.2
 # promotions (`inject`, `heal`, `phases`, `on_ally_death`). Bundled real
 # cards split into beats (battery precedent); every skip is flagged

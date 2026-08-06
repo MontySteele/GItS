@@ -29,7 +29,7 @@ differ only on the tier 0 battery's two-stage `gauntlet`, where one attempt is
 two combats. Every per-fight EVENT rate here divides by `n_combats`; the
 pooled counts and the pooled share are ratios of sums and are the same either
 way. The battery TSV published on 2026-08-05 predates this and divided by
-records throughout -- see the erratum in docs/reactions-corpus-2026-08-05.md.
+records throughout -- see the erratum in docs/archive/reactions-corpus-2026-08-05.md.
 
 CONFIDENCE INTERVALS. The pooled share is a ratio of sums, not a mean, so its
 interval is a percentile BOOTSTRAP resampling FIGHTS (the independent unit --

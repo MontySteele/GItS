@@ -239,3 +239,36 @@ python review/stage-clear/_rb_table.py           # R-B bucket table (_rb_table.t
 ```
 Both are pure readers of the working tree; neither edits anything outside
 `review/stage-clear/`.
+
+---
+
+## R-B execution addendum — 2026-08-06 (Track R-B; additive note, plan text above unchanged)
+
+**Executed.** 44 REFERENCE files moved verbatim from `docs/` root to
+`docs/archive/` (17 bucket A, 11 bucket C, 16 bucket D), each with a dated
+move banner, every live citer repointed in the same commit. Per-file map:
+`rb-move-manifest.tsv` (old path, new path, citers repointed, frozen citers
+knowingly left stale per M2). Root `docs/*.md`: **116 -> 72**.
+
+**The Bucket-B gap, recorded honestly (M3 discharged as a queue row).**
+45 root REFERENCE files carry >=1 citation from an append-only DECISIONS
+ledger (5 ledger-only bucket B + 40 bucket-C/D files with a nonzero ledger
+column, including all three wave-8 dispatch records). Rail 1 forbids
+repointing a ledger, so moving any of them stales a spine citation with no
+repair path. **None were moved.** The charter's <=15 root target is therefore
+unreachable this track: the honest floor without a ruling is ~72. The policy
+question is now **queue row Q20** (`docs/registry/user-queue.md` s.1), reply
+shape MOVE-WITH-RESOLVER / KEEP-AT-ROOT — R-B did not choose.
+
+**Held on their own grounds (ledger-clean but not moved):**
+- `track-a-kickoff-brief.md` — Z-4 chose freeze-over-move and pinned the
+  path by name in `test_doc_citation_targets.py::test_the_flagged_case_is_still_pinned`;
+  the plan body above flags any move of it to [USER].
+- `roster-anchor-v14-v6-2026-08-06.md` — THE quotable standing table
+  (R118 / 10.2); the quotable table is on the never-move list.
+
+**Bucket deltas found by the pre-move re-derivation** (committed with the
+regenerated TSVs): buckets are now A17 / B5 / C33 / D36; the inventory's
+"zero live citers" for bucket A was scoped to the graph's citing dirs — a
+repo-wide sweep found CODE citers in `tier0/pilot/`, `tier05/` and
+`tier0/README.md`, all repointed in the bucket-A commit.

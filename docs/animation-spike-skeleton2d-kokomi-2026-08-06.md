@@ -11,9 +11,9 @@ results re-open the Spine licence question (**$379 Professional; Essential
 cannot author meshes**) without a new sitting. The reconsider decision itself
 is [USER]'s; §6 gives this spike's self-assessment against that trigger.
 
-Builds on `docs/animation-capability-memo.md` (F1: three paths, Path B
+Builds on `docs/archive/animation-capability-memo.md` (F1: three paths, Path B
 "unconstrained but zero working examples") and
-`docs/animation-downfall-investigation-2026-08-05.md` (M-Q3: the probe harness
+`docs/archive/animation-downfall-investigation-2026-08-05.md` (M-Q3: the probe harness
 this spike reuses; a SpineSprite rig packs and renders via our pipeline when
 spelled `.spskel`/`.spatlas`).
 

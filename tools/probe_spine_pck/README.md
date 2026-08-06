@@ -4,7 +4,7 @@ One question: **does a `.tscn` naming `SpineSprite` / `SpineSkeletonFileResource
 / `SpineAtlasResource` survive our pack build and load in-game, when the MegaDot
 4.5.1 editor that builds the pack has no spine support at all?**
 
-Findings live in `docs/animation-downfall-investigation-2026-08-05.md`. This
+Findings live in `docs/archive/animation-downfall-investigation-2026-08-05.md`. This
 directory is the apparatus, kept so the result is reproducible and so the undo
 is a script rather than a memory. It is wired into nothing: no lint, no gate, no
 `build_pck.ps1` change, no CI.

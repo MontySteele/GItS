@@ -1,6 +1,6 @@
 """O-1 pinned: a per-fight rate is per COMBAT, not per merged record.
 
-Track O slice 12 (`docs/instrument-redteam-2026-08-05.md`, TOP-5 #1) found
+Track O slice 12 (`docs/archive/instrument-redteam-2026-08-05.md`, TOP-5 #1) found
 that `runner.run_battery` merges the two stages of the `gauntlet` encounter
 into ONE `FightStats`, while `aura_profile` / `payoff_profile` / `summarize`
 divide their per-fight rates by `len(all_stats)` -- records, not combats. The

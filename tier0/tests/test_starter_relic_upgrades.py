@@ -50,7 +50,7 @@ STARTERS: dict[str, str] = {
 # to invent one because every candidate broke either the sprint's
 # "no new behaviour in a starter upgrade" rule or her no-passive-accrual law,
 # and the ruling OVERRODE the first of those by user authority rather than
-# reinterpreting it. See docs/red-pen-2026-07-26.md R2.
+# reinterpreting it. See docs/archive/red-pen-2026-07-26.md R2.
 #
 # Kept as an empty dict rather than deleted, per the standing curated-set
 # discipline: the invariant is then asserted positively and the next gap has

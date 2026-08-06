@@ -1,5 +1,5 @@
 # Event pool (§11). Source + full 46-event catalogue:
-# docs/sts2-map-and-events-research.md §2, docs/sts2-events-harvest.txt.
+# docs/archive/sts2-map-and-events-research.md §2, docs/sts2-events-harvest.txt.
 #
 # CURATION RULE: an event ships only if every one of its options is expressible
 # with real ops. No option is ever approximated to get an event in -- the

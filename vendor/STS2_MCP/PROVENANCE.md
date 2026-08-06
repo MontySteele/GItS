@@ -8,7 +8,7 @@ license: MIT
 license-holder: Yikun Ji (Kunologist)
 vendored: 2026-08-04
 vendored-by: Understudy sprint, work item W1
-ruling: docs/understudy-p0-findings.md ruling 1, RATIFIED by [USER] 2026-08-04
+ruling: docs/archive/understudy-p0-findings.md ruling 1, RATIFIED by [USER] 2026-08-04
 
 ## Why this pin and not a release
 

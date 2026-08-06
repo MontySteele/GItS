@@ -1,6 +1,6 @@
 """A7 -- Unheard Confession reaches the actual game (2026-07-29).
 
-Registered in docs/sprint-art-and-a7-2026-07-29.md, Track B. The card was
+Registered in docs/archive/sprint-art-and-a7-2026-07-29.md, Track B. The card was
 deferred from C# twice on a structural gap: the Fanfare mutators are
 synchronous and every Block grant in the mod is `await CreatureCmd.GainBlock`.
 The port settles that with a note-then-flush deferral, and these tests pin the

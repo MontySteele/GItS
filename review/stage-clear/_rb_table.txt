@@ -1,91 +1,51 @@
-### bucket A (17)
-| `fight-class-taxonomy.md` | — | 0 | 3 |
-| `furina-strength-findings-2026-07-28.md` | — | 0 | 2 |
-| `mutation-round-2026-08-05.md` | — | 0 | 2 |
-| `playtest2-triage-2026-07-28.md` | — | 0 | 3 |
-| `playtest4-triage-2026-08-04.md` | — | 0 | 4 |
-| `reactions-corpus-2026-08-05.md` | — | 0 | 6 |
-| `registration-hunt-report-2026-08-06.md` | — | 0 | 2 |
-| `s5-animation-tech-note.md` | — | 0 | 3 |
-| `silent-anchor-kickoff-v1.md` | — | 0 | 3 |
-| `silent-anchor-sprint-plan.md` | — | 0 | 3 |
-| `sprint-fanfare-compensation-log-2026-07-28.md` | — | 0 | 2 |
-| `sprint-kokomi-instrument-log-2026-07-29.md` | — | 0 | 5 |
-| `sprint-pilot-gap-2026-07-28.md` | — | 0 | 2 |
-| `sprint-pilot-gap-log-2026-07-28.md` | — | 0 | 3 |
-| `sprint-salon-ui-2026-07-28.md` | — | 0 | 2 |
-| `sprint-salon-ui-log-2026-07-28.md` | — | 0 | 1 |
-| `sprint-tooling-hardening-log-2026-07-29.md` | — | 0 | 1 |
-### bucket B (6)
+### bucket A (0)
+### bucket B (5)
 | `brief-unheard-confession-rework.md` | — | 1 | 3 |
 | `curtain-call-sprint-log-2026-07-27.md` | — | 1 | 4 |
 | `s7-fidelity-audit.md` | — | 1 | 8 |
 | `silent-pilot-review-2026-07-27.md` | — | 1 | 4 |
 | `sprint-art-and-a7-log-2026-07-29.md` | — | 1 | 2 |
-| `zhongli-dossier-2026-08-05.md` | — | 1 | 5 |
-### bucket C (30)
+### bucket C (22)
 | `a2-gate-ratification-2026-07-27.md` | `docs/registry/identifiers.md`; `tier0/tests/test_distinctness_gate.py`; `tools/card_distinctness_report.py` | 1 | 6 |
-| `animation-capability-memo.md` | `docs/dockets/engineering-backlog.md`; `tools/skeleton2d_spike/README.md`; `tools/skeleton2d_spike/gen_kokomi_rig.py` | 0 | 4 |
-| `animation-downfall-investigation-2026-08-05.md` | `tools/probe_spine_pck/README.md`; `tools/probe_spine_pck/SpineProbe/manifest.json` | 0 | 3 |
-| `animation-sprint-2-log.md` | `docs/README.md`; `docs/animation-sprint-2-plan.md`; `docs/registry/identifiers.md`; `tier0/tests/test_visual_contract_gaps.py`; `understudy/README.md` | 2 | 13 |
+| `animation-sprint-2-log.md` | `docs/README.md`; `docs/animation-sprint-2-plan.md`; `docs/registry/identifiers.md`; `docs/registry/user-queue.md`; `tier0/tests/test_visual_contract_gaps.py`; `understudy/README.md` | 2 | 13 |
 | `axis-validity-countersign-2026-08-04.md` | `docs/axis-validity-session-charter.md`; `docs/registry/identifiers.md`; `tools/suggest_role_tempo_tags.py` | 1 | 6 |
+| `brief-coop-charter-items.md` | `docs/registry/p-ledger.md`; `docs/registry/user-queue.md`; `tier0/tests/test_card_play_hook_guards.py` | 1 | 4 |
 | `enchantments-design-2026-07-27.md` | `docs/registry/user-queue.md`; `tools/extract_base_game_pool.py` | 1 | 2 |
 | `fontaine-rares-banner-sprint-log.md` | `docs/README.md`; `docs/registry/user-queue.md`; `tier0/tests/test_sheet_lints.py`; `tools/lint_strict_domination.py` | 1 | 7 |
-| `instrument-redteam-2026-08-05.md` | `docs/registry/identifiers.md`; `docs/registry/user-queue.md`; `tier0/tests/test_pin_o1_combat_denominators.py`; `tier0/tests/test_track_o_s10.py` | 0 | 4 |
 | `missed-requirements.md` | `docs/README.md`; `docs/atlas/tier05-sim-core.md`; `docs/dockets/engineering-backlog.md`; `docs/registry/identifiers.md`; `docs/registry/user-queue.md`; `tier0/tests/test_visual_contract_gaps.py` | 1 | 10 |
 | `open-playtest-items.md` | `docs/README.md`; `docs/dockets/engineering-backlog.md`; `docs/kokomi-art-pass-requirements.md`; `docs/kokomi-playtest-protocol.md`; `docs/registry/identifiers.md`; `docs/registry/user-queue.md`; `docs/roster-codegen.md`; `tier0/tests/test_pulse_multiplier_claims.py` | 1 | 13 |
 | `probe-a-block-offset.md` | `docs/dockets/engineering-backlog.md`; `docs/registry/identifiers.md`; `tier0/tests/test_understudy_replay_selectors.py`; `understudy/README.md`; `understudy/probe_block.py` | 1 | 8 |
 | `probe-b-fanfare-residual.md` | `docs/registry/identifiers.md`; `tier0/tests/test_understudy_replay_selectors.py`; `understudy/README.md`; `understudy/replay.py` | 1 | 9 |
-| `red-pen-2026-07-26.md` | `docs/README.md`; `docs/furina-kickoff-v0.1.md`; `docs/registry/user-queue.md`; `docs/teyvat-spire-design-principles.md`; `tier0/tests/test_starter_relic_upgrades.py` | 0 | 9 |
+| `probe-e-corpse-detonation-registration-draft.md` | `docs/registry/identifiers.md`; `docs/registry/user-queue.md`; `tier0/tests/test_p_ledger_lint.py`; `tools/probe_e_sim.py`; `understudy/probe_corpse.py` | 2 | 2 |
+| `roster-anchor-v14-v6-2026-08-06.md` | `docs/registry/user-queue.md`; `tier0/tests/test_p_ledger_lint.py` | 0 | 4 |
 | `s7-probe-c.md` | `tier0/tests/test_track_o_s08.py`; `tools/track_b_curves.py` | 1 | 4 |
-| `silent-anchor-sprint-log-2026-07-27.md` | `docs/registry/user-queue.md`; `tools/card_distinctness_report.py` | 0 | 3 |
 | `sitting-record-predraft-2026-08-06.md` | `docs/README.md`; `docs/awaiting-user-slots-2026-08-06.md`; `docs/dockets/companion-pricing.md`; `docs/dockets/klee-rework.md`; `docs/dockets/kokomi-workshop.md`; `docs/dockets/watch-items.md`; `docs/registry/identifiers.md`; `docs/teyvat-spire-design-principles.md`; `tier0/tests/test_s13_exploit_pins.py` | 2 | 4 |
-| `sprint-art-and-a7-2026-07-29.md` | `tier0/tests/test_a7_port.py` | 0 | 2 |
 | `sprint-axis-validity-track-a-log-2026-08-04.md` | `docs/README.md`; `docs/roster-codegen.md`; `tools/gen_klee_cards.py`; `tools/lint_role_tempo_coverage.py` | 1 | 6 |
-| `sprint-fanfare-compensation-2026-07-28.md` | `tier0/tests/test_fanfare_compensation.py` | 0 | 2 |
-| `sprint-fanfare-rework-2026-07-28.md` | `docs/teyvat-spire-design-principles.md`; `tier0/tests/test_fanfare_compensation.py` | 0 | 4 |
 | `sprint-track-b-curves-log-2026-08-04.md` | `docs/README.md`; `docs/dockets/engineering-backlog.md`; `understudy/README.md` | 1 | 6 |
 | `sprint-understudy-p1-log-2026-08-04.md` | `docs/README.md`; `tier0/tests/test_understudy_soak.py` | 1 | 6 |
-| `sprint-understudy-p15-log-2026-08-05.md` | `docs/dockets/engineering-backlog.md`; `understudy/README.md`; `understudy/trace_replay.py` | 0 | 2 |
 | `surplus-week-manifest-2026-08-05.md` | `docs/README.md`; `docs/awaiting-user-slots-2026-08-06.md`; `docs/registry/identifiers.md`; `docs/registry/user-queue.md`; `tools/lint_upgrade_coverage.py` | 1 | 9 |
 | `tech-debt-audit-2026-07-26.md` | `docs/README.md`; `docs/registry/user-queue.md`; `tools/README.md` | 1 | 8 |
-| `tier05-perf-and-ironclad-act3-notes.md` | `docs/README.md`; `docs/dockets/engineering-backlog.md`; `tools/encounter_audit.py` | 0 | 3 |
 | `track-a-kickoff-brief.md` | `docs/README.md`; `docs/registry/identifiers.md`; `tier0/tests/test_doc_citation_targets.py`; `tools/canon_role_tempo.py`; `tools/lint_role_tempo_coverage.py`; `tools/role_tempo.py`; `tools/suggest_role_tempo_tags.py` | 0 | 2 |
 | `understudy-countersign-2026-08-04.md` | `docs/registry/identifiers.md`; `understudy/README.md` | 1 | 6 |
-| `understudy-p0-findings.md` | `docs/README.md`; `docs/atlas/vendor-sts2-mcp.md`; `understudy/README.md` | 0 | 2 |
 | `understudy-phase0-report.md` | `docs/README.md`; `docs/atlas/vendor-sts2-mcp.md`; `docs/dockets/engineering-backlog.md`; `understudy/README.md`; `understudy/soak.py` | 1 | 4 |
-### bucket D (34)
-| `act2-act3-roster-research.md` | `docs/README.md`; `docs/registry/identifiers.md` | 0 | 8 |
+### bucket D (20)
 | `backlog-2026-07-29.md` | `docs/README.md`; `docs/atlas/tier0-pilot-roster.md`; `docs/dockets/engineering-backlog.md`; `docs/registry/identifiers.md`; `docs/registry/user-queue.md`; `docs/teyvat-spire-design-principles.md` | 1 | 17 |
-| `brief-coop-charter-items.md` | `docs/registry/user-queue.md` | 1 | 4 |
 | `brief-kokomi-pool-fill.md` | `docs/dockets/engineering-backlog.md` | 1 | 6 |
 | `calibration-notes.md` | `docs/README.md` | 1 | 2 |
-| `companion-value-vs-colorless-study.md` | `docs/README.md`; `docs/registry/identifiers.md`; `docs/teyvat-spire-design-principles.md` | 0 | 4 |
 | `dispatch-2026-08-06-q13-q14-q15.md` | `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 1 | 1 |
 | `dispatch-2026-08-06b-eleven-replies.md` | `docs/awaiting-user-slots-2026-08-06.md`; `docs/dockets/engineering-backlog.md`; `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 1 | 1 |
 | `dispatch-2026-08-06d-four-replies.md` | `docs/dockets/engineering-backlog.md`; `docs/registry/identifiers.md` | 1 | 1 |
 | `epoch-1-log-2026-07-26.md` | `docs/README.md` | 1 | 4 |
 | `g12-review-2026-08-05.md` | `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 1 | 3 |
 | `handback-note-2026-08-04.md` | `docs/README.md`; `docs/registry/identifiers.md` | 1 | 2 |
-| `klee-real-battery-calibration.md` | `docs/README.md` | 0 | 1 |
-| `lore-fidelity-audit-2026-08-05.md` | `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 0 | 3 |
-| `playtest3-notes-2026-07-28.md` | `docs/teyvat-spire-design-principles.md` | 0 | 4 |
-| `playtest4-notes-2026-08-04.md` | `docs/kokomi-playtest-protocol.md` | 0 | 3 |
-| `probe-d-registration-draft.md` | `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 1 | 4 |
-| `probe-e-corpse-detonation-registration-draft.md` | `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 2 | 1 |
-| `punch-off-crash-memo.md` | `docs/registry/identifiers.md` | 0 | 2 |
-| `roster-anchor-v14-2026-08-05.md` | `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 0 | 5 |
-| `run-model-rework-plan.md` | `docs/README.md`; `docs/atlas/tier05-economy.md`; `docs/dockets/engineering-backlog.md` | 0 | 8 |
+| `probe-d-registration-draft.md` | `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 1 | 5 |
+| `probe-e-corpse-detonation.md` | `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 1 | 1 |
 | `s7-classification.md` | `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 1 | 8 |
-| `serenitea-sweep-ii-log-2026-07-27.md` | `docs/registry/identifiers.md` | 0 | 1 |
-| `serenitea-sweep-log-2026-07-26.md` | `docs/registry/identifiers.md` | 0 | 3 |
-| `sitting-prep-2026-08-05.md` | `docs/README.md`; `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 1 | 8 |
+| `sitting-prep-2026-08-05.md` | `docs/README.md`; `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 1 | 9 |
 | `slot5-candidates-2026-08-05.md` | `docs/inazuma-companions.yaml`; `docs/registry/user-queue.md` | 1 | 3 |
 | `sprint-bugfix-log-2026-07-29.md` | `docs/kokomi-playtest-protocol.md` | 1 | 6 |
-| `sprint-fanfare-rework-log-2026-07-28.md` | `docs/teyvat-spire-design-principles.md` | 0 | 4 |
-| `sprint-sim-hygiene-log-2026-07-29.md` | `docs/README.md`; `docs/atlas/tier05-metrics.md`; `docs/registry/user-queue.md` | 1 | 5 |
+| `sprint-sim-hygiene-log-2026-07-29.md` | `docs/README.md`; `docs/atlas/tier05-metrics.md`; `docs/registry/user-queue.md` | 1 | 6 |
 | `sprint-track-b-gate-log-2026-08-05.md` | `docs/dockets/engineering-backlog.md` | 1 | 4 |
-| `sts2-map-and-events-research.md` | `docs/README.md`; `docs/atlas/tier05-economy.md`; `docs/dockets/engineering-backlog.md`; `docs/registry/identifiers.md` | 0 | 8 |
-| `take-a-bow-sprint-log-2026-07-27.md` | `docs/registry/identifiers.md` | 0 | 1 |
 | `track-b-validation-gate-countersign-2026-08-04.md` | `docs/registry/identifiers.md` | 1 | 3 |
 | `track-t-audits-2026-08-06.md` | `docs/dockets/companion-pricing.md`; `docs/dockets/klee-rework.md`; `docs/mondstadt-companions.yaml`; `docs/registry/identifiers.md` | 1 | 2 |
+| `zhongli-dossier-2026-08-05.md` | `docs/registry/excision-log.md`; `docs/registry/p-ledger.md`; `docs/registry/user-queue.md`; `docs/teyvat-spire-design-principles.md` | 1 | 5 |

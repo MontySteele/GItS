@@ -136,8 +136,8 @@ roll_banner / character_pool`, `shop.visit_shop / companion_shop_offer`,
 
 ## 5. Traps
 
-- **`docs/run-model-rework-plan.md` is ARCHIVED — DO NOT QUOTE UNLABELLED** (its
-  banner, lines 2-15). Same for `docs/sts2-map-and-events-research.md` §3–§3.6;
+- **`docs/archive/run-model-rework-plan.md` is ARCHIVED — DO NOT QUOTE UNLABELLED** (its
+  banner, lines 2-15). Same for `docs/archive/sts2-map-and-events-research.md` §3–§3.6;
   only **§3.7** carries today's stamp (that doc's lines 11-15).
 - **Skip lists are load-bearing and noisy by design.** Any access to
   `relics._pool()` emits a `UserWarning` per skipped relic (`relics.py:62-67`).

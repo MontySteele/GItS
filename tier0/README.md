@@ -83,7 +83,7 @@ Two more hang off it (Last Call track H, 2026-08-05), same fence:
   which reads the log directly.
 
 See `tests/test_track_h_telemetry.py`, and
-`docs/reactions-corpus-2026-08-05.md` for the harvest these fed.
+`docs/archive/reactions-corpus-2026-08-05.md` for the harvest these fed.
 
 ```sh
 # H1 + H2 at battery level, printed

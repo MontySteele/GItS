@@ -279,7 +279,7 @@ judge the fix. It asks whether the card, played, felt underpowered.
 > beats a blank table; the graded solo run is still owed, and per the triage
 > it now also wants the N1 attribution pass first — Q1/Q2/Q4 are unanswerable
 > while the pulse renders nothing.
-> Source: `docs/playtest4-notes-2026-08-04.md`.
+> Source: `docs/archive/playtest4-notes-2026-08-04.md`.
 
 **Run 1 (co-op guest seat, second-hand)** — date: 2026-08-01/02 ·
 ascension: not recorded · result: run completed through act 3 ·
