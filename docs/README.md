@@ -30,6 +30,7 @@ otherwise).
 | `registry/identifiers.md` | **The resolver.** What every short code in this repo means — R/D/M/C numbers, world stamps, gates, findings, streams, exploit families, track letters — plus the collision table that assigns qualified forms (`S4-G1` vs `CC-G1` vs `SS-G1`…). Opened 2026-08-06 (housekeeping sweep, Track X). Zero design authority. |
 | `registry/user-queue.md` | **The [USER] queue, single source of truth.** Every open item, what is asked, what it unblocks, and where the full text lives — the four one-word replies, the reconciled S4 gate queue, the four HELD flags, the owed sittings, the Last Call asks, the four paperwork one-liners, table time, art debt. Other documents keep their full text and point here for *status*. |
 | `registry/known-identifiers.tsv` | **GENERATED — do not hand-edit.** The grandfathering snapshot `tools/lint_identifier_registry.py` diffs against. Refresh: `python tools/lint_identifier_registry.py --update-baseline`. |
+| `registry/stage-clear-digest-2026-08-06.md` | REFERENCE. **The one-page digest of the R119 charter work** (Class-P purge + Clear the Stage): what landed with its revert handles, what stayed, what is asked of [USER]. Opens the Class-P §3 objection window — flagged rows revert by handle; silence ratifies. |
 
 ### State of the project (start here)
 | doc | what it is |

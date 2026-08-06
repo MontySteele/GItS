@@ -1,5 +1,11 @@
 # Combined digest — inventory phase (Strike the Paperwork + Clear the Stage)
 
+> **FINALIZED 2026-08-06 (Track R-E, wave 8).** The delivered one-page digest
+> is `docs/registry/stage-clear-digest-2026-08-06.md` — that page opens the
+> Class-P §3 objection window and is the copy [USER] reads. This draft is
+> retained verbatim below as the working record (the P-ledger's batch-1 row
+> cites its P-B section); nothing below was edited at finalization.
+
 > **Lifecycle: REFERENCE** — the inventory-phase section of the one-page
 > digest both charters require. The execution sections (what actually landed,
 > revert handles) are P-B/P-C's and R-E's to append after the v6 window
