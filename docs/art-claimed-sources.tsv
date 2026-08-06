@@ -1,7 +1,7 @@
 # DERIVED FILE -- regenerate with tools/dump_claimed_sources.py.
 # Diff every art candidate against the CLAIMED block before proposing it.
 # See the tool's docstring for what each block means.
-# CLAIMED: 267 effective card picks
+# CLAIMED: 271 effective card picks
 2024 7 5 amusement park art.png	universal_revelry
 4th Anniversary Wallpaper 1.png	thunderous_ovation
 A Commemorative Photo Aether 1.png	audience_participation
@@ -67,9 +67,11 @@ Firework - Festival Spotlight.png	ethereal_spotlight
 Fischl Character Card.png	fischl_oz
 Fragrant Fantasy Furina 1.png	quick_change
 Fragrant Fantasy Furina 2.png	high_tide
+Fragrant Fantasy Furina 3.png	held_breath
 Fragrant Fantasy Furina Wallpaper.png	dress_rehearsal
 Freminet Character Card.png	freminet_pers_deploy
 Freminet Wish.png	freminet_pressurized_floe
+Furina Birthday 2024 - Shorts.png	applause_line
 Furina Birthday 2024.png	rain_of_roses
 Furina Birthday 2025.png	lasting_impression
 Furina Card 2.png	reginas_mercy
@@ -149,7 +151,6 @@ Item Slumbering Fireworks.png	endless_fireworks
 Item Sparkly Shiny Dodoco!.png	sparkly_treasure
 Item Special Jumpy Dumpty Dodoco.png	quick_fuse
 Item Supersized Firework.png	boom_goes_the_dynamite
-Item Theater Tickets.png	standing_room_only
 JTP Encounter Jumpy Dumpty.png	jumpy_dumpty_mk2
 KR Official Radio Artwork 3.png	florid_cadenza
 Kaboom! Plunging Preview.gif	bombs_away
@@ -187,12 +188,13 @@ Neuvillette Wish.png	guest_neuvillette_droplets
 On-Hit Effect Furina.png	poised_riposte
 Opera Epiclese (The Final Feast).png	the_final_verdict
 Opera Epiclese - After The Forgotten Thief.png	curtain_up
+Opera Epiclese - Furina's Seat.png	casting_call
 Opera Epiclese Courtroom.png	courtroom_drama
 Opera Epiclese Courtroom.png	witness_stand
 Opera Epiclese Support Card Golden.png	pit_orchestra
 Opera Epiclese Support Card Platinum.png	grand_salon
 Opera Epiclese Support Card.png	shared_billing
-Opera Epiclese.png	grand_gala
+Opera Epiclese.png	standing_room_only
 Pounding Surprise Explosive Spark Effect.png	crackle
 Prune Wish.png	prune_witch_hunt
 Ride the Waves to a Rendezvous in Fontaine Opera Epiclese Concept Art 2.png	curtain_cue
@@ -241,12 +243,14 @@ Sangonomiya Kokomi Wish.png	epiphany_of_the_deep
 Sangonomiya Kokomi Wish.png	prayer_to_the_moon
 Sangonomiya Kokomi Wish.png	sango_prayer
 Sangonomiya Kokomi Wish.png	vigil_of_the_deep
+Savoring the Breeze Furina.png	breathless
 Sayu Character Card.png	sayu_yoohoo_windwheel
 Sayu Wish.png	sayu_daruma_gift
 Soloist's Prologue Computer Graphic.png	soloists_solicitation
 Sparkling Steps 2021-06-09 - Klee Emoji 1.png	sugar_rush
 Sparkling Steps 2021-06-09 - Klee Emoji 2.png	surprise_visit
 Sparkling Steps 2021-06-09 - Klee Emoji 3.png	rapid_fire
+Starlight Reverie Wallpaper Furina.png	take_your_bow
 Starlit Letter Portrait Furina.png	unheard_confession
 Starlit Sky Firework Card 1.png	sparkly_explosion
 Starlit Sky Firework Card 10.png	cluster_charge
@@ -270,7 +274,7 @@ VIPAD Furina.png	showstopper
 Version 4.2 Wallpaper 2.png	waters_embrace
 Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 #
-# FREE: 155 fetched titles no card claims
+# FREE: 151 fetched titles no card claims
 # 4th Anniversary Wallpaper 3.jpg
 # A Commemorative Photo Aether 2.png
 # A Commemorative Photo Lumine 1.png
@@ -330,11 +334,9 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Fischl Introduction Card.png
 # Fragmented Memories Archive 3.png
 # Fragmented Memories Puzzle 2.png
-# Fragrant Fantasy Furina 3.png
 # Fragrant Fantasy Wallpaper.png
 # Freminet Character Card Golden.png
 # Freminet Character Card Platinum.png
-# Furina Birthday 2024 - Shorts.png
 # Furina Icon.png	[non-card]
 # Furina Introduction Banner 2.png
 # Furina Introduction Banner.png
@@ -349,6 +351,7 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Item Festival Spotlight.png
 # Item Invitation to an Auction.png
 # Item Jumbo Sparks 'n' Splash Statue.png	[non-card]
+# Item Theater Tickets.png
 # Jumpy Dumpty Preview.gif
 # Klee Icon.png	[non-card]
 # Klee Side Icon.png	[non-card]
@@ -369,7 +372,6 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # New Year's Advice from Teyvat Furina.png
 # Nicole Icon.png	[non-card]
 # Nicole Introduction Card.png
-# Opera Epiclese - Furina's Seat.png
 # Opera Epiclese - Neuvillette's Seat.png
 # Oz Summon.png	[non-card]
 # Paimon's Paintings Set 26.png
@@ -384,7 +386,6 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Sangonomiya Kokomi Expression 1.png
 # Sangonomiya Kokomi Expression 3.png
 # Sangonomiya Kokomi Multi Wish.png
-# Savoring the Breeze Furina.png
 # Savoring the Breeze Wallpaper Furina.png
 # Sayu Character Card Platinum.png
 # Sayu Portrait.png
@@ -392,7 +393,6 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Side by Side We Venture Character Kokomi.png
 # Solar Isotoma Summon.png
 # Sparks 'n' Splash Buff Icon.png	[non-card]
-# Starlight Reverie Wallpaper Furina.png
 # Starlit Letter Wallpaper Furina.png
 # Status Frozen Enemy.gif
 # Status Frozen Player.gif	[non-card]
