@@ -26,6 +26,7 @@ pick by a full point. Instrument, not a target.
 from __future__ import annotations
 
 import random
+from dataclasses import replace
 from typing import Optional
 
 from tier0 import constants as C
@@ -314,6 +315,44 @@ def core_complete(deck: list[Card], archetype: str) -> bool:
     # question and does not belong in the instrument.
     on_plan, payoffs = _generic_core_counts(deck, archetype)
     return on_plan >= C.DRAFT_CORE_SIZE and payoffs >= GENERIC_PAYOFF_COVERAGE
+
+
+# R121 (2026-08-06, [USER] verbatim: "let's shield it"). The reference
+# anchor's own cards, by OWNERSHIP -- the loader stamps `character` on every
+# draftable row of `ironclad_starter.yaml` / `ironclad_package.yaml`
+# (`loader.REF_CARD_SHEETS`), and the anchor arm is authored as
+# ("ref_ironclad", "generic") in `tier05/exp_roster_anchors.py`.
+ANCHOR_TAG_SHIELD_CHARACTER = "ref_ironclad"
+
+
+def _core_advance_view(cards: list[Card]) -> list[Card]:
+    """`cards` as the +3.0 core-advance bonus alone is allowed to see them.
+
+    R121 SHIELD, and this comment states the constraint because the code
+    cannot show it: the 10.2 rider (R118) put `archetypes: [generic]` on the
+    reference anchor's package so the core-attainment instrument could read
+    the arm at all -- it was structurally 0.00% without them. Those tags then
+    also reached this scorer, and the anchor's DRAFTING moved with them
+    (roster-anchor v14/v6, n=3000 seed 20260729: win 11.13% -> 7.50%,
+    z = -4.84). [USER] ruled SHIELD, not accept.
+
+    The blindness is scoped to THE ANCHOR ARM'S TAGS and nowhere else.
+    `core_complete` -- the instrument that sets `RunResult.time_to_online`
+    and populates the RA-G1/RA-G2 core-attainment columns -- still reads
+    them, as do every other term in `score_offer`, `offer_advances_plan` and
+    `plan_live`. Scoping is by owning character rather than by the tag value,
+    so a future non-anchor card tagged `generic` is untouched.
+
+    WHY the tags lowered the winrate is not answered here and is not this
+    shield's to answer: it is minted as `EB-46` in the engineering backlog.
+    """
+    if not any(c.character == ANCHOR_TAG_SHIELD_CHARACTER and c.archetypes
+               for c in cards):
+        return cards                       # the common case: nothing copied
+    return [replace(c, archetypes=[])
+            if c.character == ANCHOR_TAG_SHIELD_CHARACTER and c.archetypes
+            else c
+            for c in cards]
 
 
 def _generic_core_counts(deck: list[Card], archetype: str) -> tuple[int, int]:
@@ -1187,7 +1226,16 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     # role glue, scored 2.83 and carries +25.3) -- so how much plan value
     # a label is worth on an anchor is a measured dial, not an assumption.
     plan_mult = GENERIC_PLAN_BONUS_MULT if archetype == "generic" else 1.0
-    if _core_progress(deck + [card], archetype) > progress:
+    # R121 SHIELD: this bonus, and ONLY this bonus, reads the deck through
+    # `_core_advance_view` -- the anchor arm's instrumentation tags are
+    # invisible here. `progress` above is the unshielded number and stays
+    # that way: every other term below (the enabler decay, the payoff gate,
+    # the skip threshold) is outside the ruling's scope.
+    blind = _core_advance_view(deck)
+    blind_progress = progress if blind is deck else _core_progress(blind,
+                                                                   archetype)
+    if _core_progress(_core_advance_view(deck + [card]),
+                      archetype) > blind_progress:
         s += 3.0 * plan_mult
     # DRAFTER_VERSION 3: v2's raw-power term now includes conservative
     # Bomb/debuff/conditional-Block proxies. A plan-committed drafter that
