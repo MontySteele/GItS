@@ -142,22 +142,12 @@ with their discharges named. **Qualified as `S4-G<n>`** (see
 
 ## 3. Held flags — ~~not to be built against~~ **ALL FOUR RULED 2026-08-06 (R114)**
 
-~~Four clarifications carried out of the sitting of 2026-08-06 **unresolved**.~~
-`docs/dockets/README.md` house rule 3: nothing may be built against a held flag.
-Full questions: `docs/registry/identifiers.md` §6, and R110/R111 verbatim.
-
-> **DISCHARGED 2026-08-06 (Cold Reading, Track AB / R114).** This section is
-> kept, struck rather than deleted, because the flags are part of the record of
-> how these families were decided. **Nothing here is held any more.** Two
-> *new* questions were raised by the answers and are open — `AB-s1` and
-> `AB-s2`, rows `Q9` and `Q10` of §1 — and they are not these flags.
-
-| Flag | Family | One-line | Ruling |
-|---|---|---|---|
-| ~~FLAG-1~~ | `S13-X1` | ~~The accumulator's second enabler (Kokomi `honor_guard`) / a structural disposition for the shared uncapped state~~ | **RATIFIED CHANGE** — *"Limit the cost discount to the current turn? Yes."* Scoped to the writing turn, both engines; the engine-wide fix closes both enablers at once. Errata Batch 2 item 7 |
-| ~~FLAG-2~~ | `S13-X3` | ~~Two adjacent closures: copy-outruns-Exhaust (design call) and unscoped `cost_override` (reads as a straight bug)~~ | **BOTH FIXES RATIFIED** — *"Yes."* (i) copies inherit printed bounds; (ii) `cost_override` = "this turn" (sim-only; C# is already correct). Errata Batch 2 item 8. Residue staged as `AB-s1` |
-| ~~FLAG-3~~ | `S13-X5` | ~~Does "seems fine" cover decay-proof fanfare-floor stacking, or only the cantrip leg?~~ | **INTENDED, both legs** — the floor is a deliberate strength-style scaling effect. X5 closes; watch item `W4` takes the power level; the X5 pin converted from xfail to a documented-behaviour test |
-| ~~FLAG-4~~ | `S13-X14` | ~~Legs (a) `curse_poor_sleep` retain-jam and (c) all-Power deck self-erasure~~ | **(c) RULED INTENDED** — *"You deck out... don't do that."* No guard; documented in `refpowers.result_pile`. **(a) clarified, root staged as `AB-s2`** — the jam is the typing, not the spotlight |
+This section held the four HELD flags (`FLAG-1`…`FLAG-4`) and their verdicts;
+**all four were RULED 2026-08-06 by R114** (`tier0/DECISIONS.md`, verbatim), the
+struck record table survives at `docs/registry/identifiers.md` §6, and the
+held-flag law itself lives at `docs/dockets/README.md` house rule 3. The only
+residue is `AB-s1`/`AB-s2` — §1 rows `Q9`/`Q10`, both since answered (R118).
+*(Collapsed 2026-08-06, Clear the Stage R-C / P-2; excision-log row E-3.)*
 
 ---
 
