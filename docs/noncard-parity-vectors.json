@@ -173,5 +173,67 @@
       "raw": 12,
       "funnelled": 12
     }
+  ],
+  "frozen": [
+    {
+      "applications": 0,
+      "sides": 0,
+      "remaining": 0
+    },
+    {
+      "applications": 0,
+      "sides": 1,
+      "remaining": 0
+    },
+    {
+      "applications": 0,
+      "sides": 3,
+      "remaining": 0
+    },
+    {
+      "applications": 1,
+      "sides": 0,
+      "remaining": 1
+    },
+    {
+      "applications": 1,
+      "sides": 1,
+      "remaining": 0
+    },
+    {
+      "applications": 1,
+      "sides": 2,
+      "remaining": 0
+    },
+    {
+      "applications": 2,
+      "sides": 0,
+      "remaining": 2
+    },
+    {
+      "applications": 2,
+      "sides": 1,
+      "remaining": 1
+    },
+    {
+      "applications": 2,
+      "sides": 2,
+      "remaining": 0
+    },
+    {
+      "applications": 2,
+      "sides": 3,
+      "remaining": 0
+    },
+    {
+      "applications": 3,
+      "sides": 1,
+      "remaining": 2
+    },
+    {
+      "applications": 3,
+      "sides": 5,
+      "remaining": 0
+    }
   ]
 }

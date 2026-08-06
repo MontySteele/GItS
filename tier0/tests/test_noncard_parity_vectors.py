@@ -32,6 +32,11 @@ THE RULINGS PINNED HERE, and the register they share:
 
 They are adjacent, opposite, and R116 recorded them together precisely
 because they will otherwise be misremembered as one rule.
+
+  * `NC-7` (R116, batch item 5) -- Frozen is a DURATION COUNTER, decremented
+    once at the end of each enemy side, with stacking extending it. The mod
+    already implemented the timer and the sim adopted it; the vectors are the
+    shared law rather than one side's answer.
 """
 
 from __future__ import annotations
@@ -151,6 +156,43 @@ def _block(amount: int, dexterity: int, frail: int) -> tuple[int, int]:
     return amount, powers.modify_block_gained(fighter, amount)
 
 
+# --------------------------------------------------------------------------
+# NC-7 -- Frozen is a duration counter
+# --------------------------------------------------------------------------
+#
+# (applications, enemy sides elapsed) -> turns of freeze remaining. The whole
+# content of the timer half of the ruling, as arithmetic:
+#
+#   * one application lasts one enemy side -- the old boolean's behaviour,
+#     which is why the change is invisible on single freezes;
+#   * TWO applications last two, which is the half the sim adopted;
+#   * the counter floors at zero and does not go negative, so a long fight
+#     after the freeze expired is not carrying a debt;
+#   * zero applications is zero at every elapsed count -- the row that would
+#     catch a clock that granted a freeze by decrementing an absent one.
+#
+# The clock is UNCONDITIONAL in both engines: it does not ask whether the
+# enemy acted. That is a property of the hook, not of this table, and it is
+# pinned behaviourally in `tier0/tests/test_reactions.py`.
+_FROZEN_CASES = [
+    (0, 0), (0, 1), (0, 3),
+    (1, 0), (1, 1), (1, 2),
+    (2, 0), (2, 1), (2, 2), (2, 3),
+    (3, 1), (3, 5),
+]
+
+
+def _frozen_remaining(applications: int, sides: int) -> int:
+    """The sim's own counter, stepped the way `combat._run_rounds` steps it."""
+    enemy = Enemy(hp=999, max_hp=999, name="vector", intents=[])
+    for _ in range(applications):
+        enemy.frozen += 1                      # stacking extends
+    for _ in range(sides):
+        if enemy.frozen > 0:
+            enemy.frozen -= 1
+    return enemy.frozen
+
+
 def _derive() -> dict:
     return {
         "_comment": (
@@ -169,6 +211,11 @@ def _derive() -> dict:
             {"amount": a, "dexterity": d, "frail": f,
              "raw": _block(a, d, f)[0], "funnelled": _block(a, d, f)[1]}
             for a, d, f in _BLOCK_CASES
+        ],
+        "frozen": [
+            {"applications": n, "sides": s,
+             "remaining": _frozen_remaining(n, s)}
+            for n, s in _FROZEN_CASES
         ],
     }
 
@@ -256,6 +303,8 @@ _DMG_ROW = re.compile(
     r"\s*(-?\d+)\s*\)")
 _BLK_ROW = re.compile(
     r"new\(\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*\)")
+_FRZ_ROW = re.compile(
+    r"new\(\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*\)")
 
 
 def test_csharp_vectors_match_the_sim():
@@ -281,6 +330,13 @@ def test_csharp_vectors_match_the_sim():
              for r in derived["power_block"]]
     assert bgot == bwant, (
         f"C# power-block vectors differ\n got={bgot}\nwant={bwant}")
+
+    block = src.split("FrozenVectors")[1].split("};")[0]
+    fgot = [tuple(int(g) for g in m) for m in _FRZ_ROW.findall(block)]
+    fwant = [(r["applications"], r["sides"], r["remaining"])
+             for r in derived["frozen"]]
+    assert fgot == fwant, (
+        f"C# frozen vectors differ\n got={fgot}\nwant={fwant}")
 
 
 if __name__ == "__main__":

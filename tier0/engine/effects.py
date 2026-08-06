@@ -358,7 +358,7 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     if (source == "attack" and enemy.aura
             and state.player.powers.get("solar_isotoma", 0)):
         state.player.block += C.SOLAR_ISOTOMA_BLOCK
-    was_frozen = enemy.frozen       # snapshot: a hit can't shatter the
+    was_frozen = enemy.frozen > 0   # snapshot: a hit can't shatter the
     dmg = powers.modify_damage_dealt(state.player, base)  # freeze it applies
     dmg = reactions.resolve_hit(state, enemy, element, dmg)
     # `source` names what dealt it; "card" and "attack" are the two card
@@ -384,8 +384,12 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
                base=base, source=source)
     # Frozen v2 Shatter (v1.5): the first Attack hit on a frozen enemy
     # deals bonus damage and removes Frozen. Direct HP, like splash.
-    if was_frozen and enemy.frozen and source == "attack" and enemy.alive:
-        enemy.frozen = False
+    if was_frozen and enemy.frozen > 0 and source == "attack" and enemy.alive:
+        # NC-7 (R116): Shatter clears the WHOLE timer, not one turn of it --
+        # the mod's `PowerCmd.Remove` removes the power with all its stacks,
+        # and a Shatter that left a stack behind would be a freeze the
+        # player paid to end and did not.
+        enemy.frozen = 0
         # shatter_bonus (Freminet, Shattering Pressure): flat rider on the
         # Shatter itself. Burst-direction growth -- every Shatter still
         # ENDS a freeze, so this cannot become control uptime.

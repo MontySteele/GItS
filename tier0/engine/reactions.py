@@ -136,8 +136,10 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
             # Bosses take Vulnerable instead (round 3; stands post-errata).
             powers.apply_power(state, enemy, "vulnerable", C.FROZEN_BOSS_VULN)
         else:
-            # v1.5: soft control — next action -50%, shatterable. No skip.
-            enemy.frozen = True
+            # v1.5: soft control — actions at -50%, shatterable. No skip.
+            # NC-7 (R116): STACKING EXTENDS. One more turn on the timer per
+            # application, which is what the mod's Counter power already did.
+            enemy.frozen += 1
             enemy.frozen_by_companion = state.current_card_companion
 
     if name:

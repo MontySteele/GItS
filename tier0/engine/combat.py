@@ -91,7 +91,7 @@ def _settle_phases(state: CombatState) -> None:
             e.aura = None
             e.aura_turns_left = 0
             e.bombs = []
-            e.frozen = False
+            e.frozen = 0
             e.sleep_turns = 0
             if not e.phases:
                 e.counts_for_fatal = True     # the last bar is a real death
@@ -642,10 +642,11 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
     intent = enemy.current_intent()
     kind = intent["kind"]
     # Frozen v2 (v1.5): the enemy still acts, but its action deals -50%
-    # damage. Consumed by acting (or by Shatter before this turn).
-    frozen = enemy.frozen
+    # damage. NC-7 (R116): acting no longer CONSUMES the freeze -- the timer
+    # is spent by the clock at the end of the enemy side, not by the action,
+    # so a two-stack freeze halves two actions. Shatter still clears it.
+    frozen = enemy.frozen > 0
     if frozen:
-        enemy.frozen = False
         state.emit("frozen_action", enemy=enemy.name, kind=kind,
                    by_companion=enemy.frozen_by_companion)
     state.emit("intent", enemy=enemy.name, kind=kind,
@@ -800,6 +801,20 @@ def _run_rounds(state: CombatState, pilot: Pilot) -> None:
             # doing either at the PLAYER's turn end instead makes Flame Barrier
             # do literally nothing.
             refpowers.after_enemy_side_turn_end(state)
+            # NC-7 (R116, Errata Batch 2 item 5): Frozen's clock. The mod's
+            # FrozenPower ticks in `AfterSideTurnEnd(side == Enemy)`, and
+            # R116 ruled that timer canonical, so this is the sim's mirror of
+            # the same hook -- one decrement per enemy side, for every enemy
+            # that carries the status.
+            #
+            # UNCONDITIONAL, deliberately, because the mod's is: it does not
+            # ask whether the enemy acted. A sleeping enemy loses its freeze,
+            # and a freeze applied after an enemy has already acted is spent
+            # by this same side-end. Making it conditional would be a second
+            # ruling, not an implementation detail of this one.
+            for enemy in state.enemies:
+                if enemy.frozen > 0:
+                    enemy.frozen -= 1
         # INSTRUMENT ONLY, log-side, no game state read or written: the
         # authoritative end-of-round player HP, for the HP-trajectory half of
         # Kokomi's stability instrument (R51 / D5). It is sampled HERE rather

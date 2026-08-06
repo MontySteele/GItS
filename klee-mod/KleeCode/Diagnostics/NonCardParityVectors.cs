@@ -118,6 +118,55 @@ internal static class NonCardParityVectors
     };
 
     /// <summary>
+    /// NC-7 (Errata Batch 2 item 5): Frozen is a DURATION COUNTER.
+    ///
+    /// (applications, enemy sides elapsed, turns remaining). This is the half
+    /// of NC-7 the SIM adopted from here -- <see cref="FrozenPower"/> was
+    /// already a <c>PowerStackType.Counter</c> on an unconditional
+    /// <c>AfterSideTurnEnd(Enemy)</c> clock, and R116 ruled that canonical.
+    /// The table is therefore the shared law rather than either side's
+    /// answer, and its job is to keep the two from drifting apart later.
+    ///
+    /// The other half of NC-7 -- per-creature rather than per-room boss
+    /// substitution -- is NOT pinned here. It is not arithmetic, and the
+    /// implementer stopped it: the game exposes no per-creature boss fact to
+    /// key it on. See the batch report.
+    /// </summary>
+    internal readonly record struct FrozenVector(
+        int Applications, int Sides, int Remaining);
+
+    internal static readonly FrozenVector[] FrozenVectors =
+    {
+        new(0, 0, 0),
+        new(0, 1, 0),
+        new(0, 3, 0),
+        new(1, 0, 1),
+        new(1, 1, 0),
+        new(1, 2, 0),
+        new(2, 0, 2),
+        new(2, 1, 1),
+        new(2, 2, 0),
+        new(2, 3, 0),
+        new(3, 1, 2),
+        new(3, 5, 0),
+    };
+
+    /// <summary>
+    /// The pure form of the Counter clock: apply N stacks, tick S enemy
+    /// sides, never below zero. `PowerCmd.TickDownDuration` removes the power
+    /// at zero, which is the same observable as a floor at zero.
+    /// </summary>
+    private static int FrozenRemaining(int applications, int sides)
+    {
+        var n = applications;
+        for (var i = 0; i < sides; i++)
+        {
+            if (n > 0) n--;
+        }
+        return n;
+    }
+
+    /// <summary>
     /// Runs every vector and returns one human-readable finding per failure.
     /// Never throws: a validator that bricks the boot is the failure mode it
     /// exists to prevent.
@@ -152,6 +201,19 @@ internal static class NonCardParityVectors
                   + "{1}, frail {2} -> table says {3}, and raw block must be "
                   + "the amount",
                     v.Amount, v.Dexterity, v.Frail, v.Block));
+            }
+        }
+
+        foreach (var v in FrozenVectors)
+        {
+            var got = FrozenRemaining(v.Applications, v.Sides);
+            if (got != v.Remaining)
+            {
+                findings.Add(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Frozen timer parity (NC-7): {0} application(s) after {1} "
+                  + "enemy side(s) -> {2}, sim says {3}",
+                    v.Applications, v.Sides, got, v.Remaining));
             }
         }
 

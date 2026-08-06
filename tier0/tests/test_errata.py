@@ -75,6 +75,11 @@ def test_control_uptime_counts_companion_frozen_attacks():
     assert e.frozen and e.frozen_by_companion
     e.intents = [{"kind": "attack", "amount": 8}]
     _enemy_turn(st, e)                      # halved action: 0.5 negated
+    # NC-7 (R116): the freeze is spent by the CLOCK at the end of the enemy
+    # side, not by the action. `_enemy_turn` is called directly here, so the
+    # side boundary has to be stepped by hand -- one decrement, exactly what
+    # `combat._run_rounds` does after `after_enemy_side_turn_end`.
+    e.frozen -= 1
     _enemy_turn(st, e)                      # normal action
     st.emit("fight_end", won=True, turns=st.turn)
     stats = metrics.extract(st, hp_start=st.player.max_hp)
