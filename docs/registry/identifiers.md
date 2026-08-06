@@ -496,10 +496,10 @@ cannot carry one and are indexed here instead — see "Index-only" below.
 
 | Status | Files |
 |---|---|
-| LIVING | 59 |
+| LIVING | 59 → 61 *(2026-08-06, P-B: `registry/excision-log.md` + `registry/p-ledger.md` opened, both charter-mandated)* |
 | REFERENCE | 205 |
 | ARCHIVED | 66 |
-| **total under `docs/`** | **330** |
+| **total under `docs/`** | **330 → 332** *(same two files)* |
 
 ### 15.2 The LIVING set, in full
 
@@ -514,6 +514,7 @@ the same row.
 | `teyvat-spire-design-principles.md` | budget | the design constitution |
 | `registry/identifiers.md`, `registry/user-queue.md` | budget | the resolver and the open-item register |
 | `registry/known-identifiers.tsv` | budget | the lint's grandfathering snapshot; regenerated, never frozen |
+| `registry/excision-log.md`, `registry/p-ledger.md` | budget | the two registers the R119-signed charters mandate (Clear-the-Stage rail 3; Class-P charter §3); opened 2026-08-06 by the purge swarm (P-B) |
 | `dockets/README.md`, `dockets/klee-rework.md`, `dockets/kokomi-workshop.md`, `dockets/companion-pricing.md`, `dockets/watch-items.md`, `dockets/engineering-backlog.md` | budget | routed-not-decided inboxes; one of the two places an open item may live |
 | `furina-cards.yaml`, `furina-upgrades.yaml`, `klee-cards.yaml`, `klee-upgrades.yaml`, `kokomi-cards.yaml`, `kokomi-upgrades.yaml`, `fontaine-companions.yaml`, `inazuma-companions.yaml`, `mondstadt-companions.yaml`, `ref-ironclad-upgrades.yaml` | budget | the design sheets; read directly by both sims and by codegen |
 | `axis-validity-session-charter.md` | budget | the one charter of the open Axis-Validity sprint |
