@@ -287,9 +287,12 @@ Wind batch (Track R), **F6 blocked** on a fact nobody supplied.
 
 ## 6. `FLAG-<n>` — held flags
 
-Four clarifications carried out of the sitting of 2026-08-06 unresolved.
-**Nothing may be built against a held flag** — not a probe, not a pre-draft,
-not a "while we're in there" (`docs/dockets/README.md` house rule 3).
+This section's operative prose — the four then-unresolved clarifications and
+the nothing-built-against-a-held-flag framing — is superseded: all four flags
+were RULED 2026-08-06 (R114), and the law itself lives at
+`docs/dockets/README.md` house rule 3, which governs any future flag. The
+struck table below is kept as the record. *(Pointerized 2026-08-06, Clear the
+Stage R-C / P-4; excision-log row E-4.)*
 
 | Flag | Family | Question | Recorded at |
 |---|---|---|---|
@@ -496,8 +499,8 @@ cannot carry one and are indexed here instead — see "Index-only" below.
 
 | Status | Files |
 |---|---|
-| LIVING | 59 → 61 *(2026-08-06, P-B: `registry/excision-log.md` + `registry/p-ledger.md` opened, both charter-mandated)* |
-| REFERENCE | 205 *(unchanged by R-B: the 43 moved files keep their REFERENCE status, relocated)* |
+| LIVING | 59 → 61 *(2026-08-06, P-B: `registry/excision-log.md` + `registry/p-ledger.md` opened, both charter-mandated)* → 60 *(2026-08-06, R-C / P-1: `awaiting-user-slots-2026-08-06.md` frozen to REFERENCE)* |
+| REFERENCE | 205 *(unchanged by R-B: the 43 moved files keep their REFERENCE status, relocated)* → 206 *(the same R-C freeze)* |
 | ARCHIVED | 66 |
 | **total under `docs/`** | **330 → 332** *(same two files)* |
 
@@ -531,7 +534,7 @@ the same row.
 | `animation-sprint-2-plan.md` | budget | the one charter of the open animation sprint |
 | `README.md` | **exception** | the docs index; a stale index is worse than no index |
 | `atlas/` (14 files) | **exception** | the code map — each file tracks a live module and changes when that module does |
-| `awaiting-user-slots-2026-08-06.md` | **exception** | holds the pre-drafted landing text for slots 4/6/7 ~~, which are still AWAITING~~ — **all landed 2026-08-06 (wave 8, R118)**; kept LIVING as the slot record until a future diet freezes it |
+| ~~`awaiting-user-slots-2026-08-06.md`~~ | ~~**exception**~~ | ~~holds the pre-drafted landing text for slots 4/6/7, which are still AWAITING — **all landed 2026-08-06 (wave 8, R118)**; kept LIVING as the slot record until a future diet freezes it~~ **FROZEN to REFERENCE 2026-08-06 (Clear the Stage R-C, plan P-1; excision-log E-2)** — the anticipated freeze arrived; all seven slots landed (R115/R118 + Track Y), verbatim body untouched |
 | `class-p-charter-2026-08-06.md`, `clear-the-stage-charter-2026-08-06.md` | budget | the charters of the two SIGNED operating protocols (R119); LIVING while their swarms operate, per their own lifecycle headers |
 | `kokomi-playtest-protocol.md` | **exception** | its "Answers" block is filled at the table; `OT-1` was added to it on 2026-08-06 |
 | `klee-character-design.md`, `furina-kickoff-v0.1.md`, `kokomi-kickoff-v1.md` | **exception** | identity charters, amended in place; they are law for their character in the way the principles doc is law for the project |

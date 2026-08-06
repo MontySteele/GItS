@@ -74,7 +74,8 @@ it on new documents (`registry/identifiers.md` §16).
 > **Read this table with the lifecycle headers, 2026-08-06 (Track Z / Z-4).**
 > Only four documents in it are LIVING: `animation-sprint-2-plan.md`,
 > `kokomi-playtest-protocol.md`, `awaiting-user-slots-2026-08-06.md` and
-> `track-b-curves.md`. Every other row is a **completed-sprint log or a landing
+> `track-b-curves.md`. *(Update 2026-08-06, R-C / P-1: the slots file is now
+> also REFERENCE — three of the four remain LIVING.)* Every other row is a **completed-sprint log or a landing
 > record**, and those are now REFERENCE: frozen, indexed, out of the living
 > set. Their *rulings* live in the two DECISIONS ledgers; the logs are the
 > derivation record. A row below that says "OPEN" means the **work stream** is
@@ -92,7 +93,7 @@ it on new documents (`registry/identifiers.md` §16).
 | `animation-sprint-2-log.md` | Open sprint log; doc of record for the two unfixed Playtest-2 defects. |
 | `fontaine-rares-banner-sprint-log.md` | Sprint closed in code, open on four [USER] items (§"Open, and owned by [USER]"). |
 | `kokomi-playtest-protocol.md` | The protocol for Kokomi's first table time ~~(never played)~~ — **the *protocol* run has not happened (its "Answers" block is blank), but Kokomi has had table time**: exploratory plays 2026-07-25/26 (`DEC-D5`-designated as contaminating-exploratory) and a seat in the three-seat co-op holdout of 2026-08-01/02. (Row corrected 2026-08-06 by the housekeeping sweep, Track X — same class as S4 finding F17, which R107 executed on `open-playtest-items.md` §2 but which was never swept through this index row.) Where it conflicts with `open-playtest-items.md` §2, the latter wins (newer). |
-| `awaiting-user-slots-2026-08-06.md` | Three prepared landing slots, **AWAITING [USER]**, each with its answer text drafted in advance in every form the reply can take. Nothing in it is executed. Indexed 2026-08-06 (Track X). |
+| `awaiting-user-slots-2026-08-06.md` | ~~Three prepared landing slots, **AWAITING [USER]**~~ — grew to seven slots, **all ANSWERED and LANDED 2026-08-06** (Track Y; R115; R118); each landed form marked in place, unselected forms struck. **FROZEN to REFERENCE 2026-08-06** (Clear the Stage R-C / P-1, excision-log E-2). Indexed 2026-08-06 (Track X). |
 | `sitting-record-predraft-2026-08-06.md` | [USER]'s verdicts of 2026-08-06, transcribed **verbatim** and committed before anything was executed from them. The authority document behind R107–R112. Indexed 2026-08-06 (Track X). |
 | `sitting-prep-2026-08-05.md` | The Last Call sitting's single entry point. **Still live for §8 (the four paperwork one-liners) and §10 (the batch's own asks)** — status for both is reconciled in `registry/user-queue.md` §5/§6. Indexed 2026-08-06 (Track X). |
 | `surplus-week-manifest-2026-08-05.md` | INDEX for surplus week (`SW-S1…S15`), the Last Call/House Lights addendum, and the Second Wind batch's landings and replies. Indexed 2026-08-06 (Track X). |
