@@ -204,8 +204,10 @@ sweep are all in §2.1–§2.8, plus:
 
 **One shared sequence across two ledgers.** `tier0/DECISIONS.md` and
 `klee-mod/DECISIONS.md` draw from the *same* R-number space — R73–R80 are
-minted in `klee-mod/DECISIONS.md` (Neap Tide), R39–R116 in
-`tier0/DECISIONS.md`. CI enforces no duplicates across both files
+minted in `klee-mod/DECISIONS.md` (Neap Tide), R39–~~R116~~R120 in
+`tier0/DECISIONS.md` *(prose figure corrected 2026-08-06, one batch stale
+against this section's own table — Class-P, R119 / P-B item C-9, per §14's
+mandate)*. CI enforces no duplicates across both files
 (`.github/workflows/repo.yml`, job `ledger`).
 
 | Range | Where | Note |
