@@ -113,32 +113,51 @@ separated at this n.
 | kokomi | priest | 14 | 20260729 | 3000 | **2.47%** | [2.0, 3.1] | **42.83%** | [41.1, 44.6] | 48.33% | [46.5, 50.1] | 6.80 | 0.56 | 21.4 | 9.4 |
 | kokomi | commander | 14 | 20260729 | 3000 | **3.00%** | [2.4, 3.7] | **51.33%** | [49.5, 53.1] | 28.23% | [26.7, 29.9] | 8.47 | 0.69 | 22.2 | 10.6 |
 | kokomi | assist | 14 | 20260729 | 3000 | **0.63%** | [0.4, 1.0] | **35.30%** | [33.6, 37.0] | 9.17% | [8.2, 10.3] | 9.55 | 0.40 | 19.9 | 8.1 |
-| ref_ironclad | generic | 14 | 20260729 | 3000 | **7.50%** | [6.6, 8.5] | **64.77%** | [63.0, 66.5] | 60.73% | [59.0, 62.5] | 7.43 | 0.98 | 22.9 | 13.7 |
+| ref_ironclad§ | generic | 14 | 20260729 | 3000 | **13.83%** | [12.6, 15.1] | **72.47%** | [70.8, 74.0] | 26.10% | [24.6, 27.7] | 9.74 | 1.26 | 23.8 | 15.9 |
 | real_ironclad | generic | 14 | 20260729 | 3000 | **8.53%** | [7.6, 9.6] | **69.87%** | [68.2, 71.5] | 69.23% | [67.6, 70.9] | 8.33 | 1.06 | 22.1 | 14.2 |
 | real_silent | generic | 14 | 20260729 | 3000 | **1.70%** | [1.3, 2.2] | **60.90%** | [59.1, 62.6] | 62.47% | [60.7, 64.2] | 7.37 | 0.75 | 21.5 | 11.6 |
 
 † QUARANTINED — see the banner. ‡ ~~flagged-not-quarantined per the Q18
 rider~~ **QUARANTINED 2026-08-06 — the rider is answered *"tto quarantined"*
 (`Q18` / R121); see the banner's addendum.** Legend struck, not rewritten
-(R101b); no number in the table moved.
+(R101b). § **The `ref_ironclad` row is the SHIELDED re-measurement, republished
+2026-08-06 — see "Republication note" below. It is the ONLY row this document
+has ever moved; the other eleven stand exactly as first published.**
 
-Ordering facts a reader may take from the winrate column, both continuous
+~~Ordering facts a reader may take from the winrate column, both continuous
 with the archived tables: `furina/salon` (11.20%) sits at the top —
 `ref_ironclad/generic`, its archived co-leader, has moved (see the factual
-note below and the sweep doc); `kokomi/assist` (0.63%) sits at the bottom,
-below the `real_silent` floor (1.70% [1.3, 2.2] vs 0.63% [0.4, 1.0] — these
-intervals do NOT overlap at this n). `furina/fanfare` (2.23% [1.8, 2.8])
+note below and the sweep doc)~~ **Superseded 2026-08-06 by the republication
+below; struck, not rewritten (R101b).** Ordering facts a reader may take from
+the winrate column as it now stands: **`ref_ironclad/generic` (13.83%
+[12.6, 15.1]) sits at the top, alone** — it clears `furina/salon` (11.20%
+[10.1, 12.4]) with no interval overlap at this n (z = +3.08), where the
+archived tables had the two as co-leaders. `kokomi/assist` (0.63%) sits at the
+bottom, below the `real_silent` floor (1.70% [1.3, 2.2] vs 0.63% [0.4, 1.0] —
+these intervals do NOT overlap at this n). `furina/fanfare` (2.23% [1.8, 2.8])
 and `real_silent` still overlap.
 
 ## Factual note — `ref_ironclad` under the Track V archetype tags (the 10.2 rider)
 
 Reported as fact; **interpretation stays quarantined with the columns.**
 Under the rider's tags (`ref_ironclad`'s `archetype_package` now carries
-`Card.archetypes`), the core-attainment column **can see the anchor: 60.73%
-[59.0, 62.5], tto 7.43** — against a structural 0.00% / `tto = None` on all
-runs in every pre-tag table. [USER]'s stated reason for the tags — the
-instrumentation could not read the anchor at all without them — is
-confirmed by the reading itself.
+`Card.archetypes`), the core-attainment column **can see the anchor** —
+against a structural 0.00% / `tto = None` on all runs in every pre-tag table.
+[USER]'s stated reason for the tags — the instrumentation could not read the
+anchor at all without them — is confirmed by the reading itself, and **that
+conclusion is untouched by the shield**: the instrument still reads the tags,
+which is the whole of what the shield left alone.
+
+**What the shield changed about this number, stated so the prose stays true
+(2026-08-06, R121 `Q19`).** The figure this note originally quoted —
+~~**60.73% [59.0, 62.5], tto 7.43**~~ — was the TAGGED-SCORER reading and is
+preserved here struck rather than rewritten (R101b). The table's cell now
+carries the shielded reading, **26.10% [24.6, 27.7], tto 9.74**. Nothing
+about the instrument moved; the DECK it reads did. Core attainment is a
+property of what the drafter assembled, so a scorer that no longer chases the
+anchor's tagged cards attains the core less often and later. Both readings
+remain **QUARANTINED** — the drop from 60.73% to 26.10% is a fact about two
+drafters, not a finding anyone may grade until the banner lifts.
 
 **Second half of the fact, stated so nobody discovers it later:** the tags
 are not instrumentation-only in effect. `draft.core_complete` gates
@@ -151,3 +170,58 @@ bar, and the movement is attributable to the tags, not to Frozen-α or the
 shop conditioning (every other arm is statistically unmoved; five are
 bit-identical). Where that leaves the anchor's role is not this table's to
 say; it is surfaced in the sweep doc and the hand-back.
+
+## Republication note, 2026-08-06 — the `ref_ironclad` row is now the SHIELDED reading (R121 `Q19`, option (a))
+
+**Authority.** R121 `Q19`, [USER] verbatim: *"let's shield it, plus a note for
+any future sim work to take a look and figure out what went wrong (why did
+winrate go down, basically)."* The shield landed
+(`tier05/draft.py::_core_advance_view`: `score_offer`'s +3.0 core-advance
+bonus is blind to the anchor arm's tags; `core_complete` and every other
+reader still sees them), and the `ref_ironclad` arm **alone** was re-measured
+under this document's own recipe — `n=3000`, `seed 20260729`,
+`RT7/D14/P3/C6`, same per-arm harness body, checkpoint
+`review/r121-shield/shielded-arm-9.json`.
+
+**The tripwire fired, and [USER] released the republication anyway.** R121's
+stated tripwire was that a shielded reading which does not restore the
+archived ordering stops the track. It did not restore it — it **overshot**:
+13.83% is **z = +3.16 above the archived 11.13%**, past the sweep's 12-arm
+Bonferroni bar of 2.87. The track stopped and surfaced three options; [USER],
+verbatim (2026-08-06): ***"Yeah, I think A) is defensible here."*** Option (a)
+was *land the shield as-is and republish with a dated note naming the
+confound.* This is that note. The addendum on R121 records the discharge.
+
+**All three readings of this arm, preserved together.** Nothing below is
+rewritten; the row above is the only cell this table has moved.
+
+| reading | scorer sees the tags? | constants | win | 95% | act-1 | core attain† | tto‡ |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| archived, pre-rider (v5 half) | no tags existed | **C5** | 11.13% | — | 71.23% | 0.00% | None |
+| tagged — this table as first published | yes | C6 | 7.50% | [6.6, 8.5] | 64.77% | 60.73% | 7.43 |
+| **shielded — the row above** | **no (bonus only)** | **C6** | **13.83%** | **[12.6, 15.1]** | **72.47%** | **26.10%** | **9.74** |
+
+**The confound, stated plainly, because it is why this row and not the
+archived one is the baseline.** The archived 11.13% lives in a **different
+constants world**: it is a CONSTANTS 5 measurement, and every shielded
+reading is CONSTANTS 6. So "the tags moved the anchor" and "C5→C6 moved the
+anchor" are **not separated** by the paired halves — the sweep's attribution
+rested on the other eleven arms being statistically unmoved, which is
+evidence about those arms and not about this one. **An untagged-under-C6
+reading of this arm did not exist before this one.** A second,
+diagnostic-only measurement that shields the WHOLE of `score_offer` — the
+scorer seeing exactly the pre-rider cards — reads **13.20%** (z = +2.45 vs
+11.13%; `review/r121-shield/probe-full-shield.json`, **not** committed
+behaviour), so the residual is not a leftover tag-reading term in the scorer.
+
+**Therefore: this row is the honest untagged-C6 baseline going forward.** The
+archived 11.13% is quotable only as a C5 number and never as this row's
+predecessor across the constants bump. `DRAFTER_VERSION` is **not** bumped by
+the shield and the non-bump is flagged at the constant itself
+(`tier0/constants.py`, above `DRAFTER_VERSION = 14`).
+
+**The open question is `EB-46`**, in `docs/dockets/engineering-backlog.md`:
+separate the tag effect from the v6 effect on this arm. It is a diagnosis
+question for future sim work — no deadline, no design authority, and nothing
+in this table waits on it. † ‡ Both columns remain **QUARANTINED** under the
+banner at the head of this document, in both their old and new readings.

@@ -2270,6 +2270,46 @@ backlog as **`EB-46`**: *why did tag-visible scoring lower the anchor's winrate
 no design authority**. **The code change, the re-measurement and the
 republished row are a follow-up track's; this entry is paper only.**
 
+> **DATED ADDENDUM, 2026-08-06 (`Q19`) -- the tripwire FIRED, and [USER]
+> released the republication anyway.** The follow-up track
+> (`findings/track-e5-shield`) landed the shield and re-measured the
+> `ref_ironclad` arm alone under the table's own recipe (n=3000, seed
+> 20260729, `RT7/D14/P3/C6`; checkpoint
+> `review/r121-shield/shielded-arm-9.json`). The shielded reading is **win
+> 13.83% [12.6, 15.1]**, and it does **not** restore the archived ordering --
+> it **overshoots** it: **z = +3.16 vs the archived 11.13%** (past the
+> sweep's 12-arm Bonferroni bar of 2.87) and **z = +3.08 vs `furina/salon`
+> 11.20%**, whose interval it no longer overlaps, so the anchor moves from
+> archived co-leader to **sole leader**. Per the tripwire the track stopped
+> and surfaced without republishing.
+>
+> **Three options were posed and one was chosen.** (a) land the shield as-is
+> and republish 13.83% with a dated note naming the CONSTANTS 5 / CONSTANTS 6
+> confound, making **untagged-under-C6 the honest baseline**; (b) hold the
+> row pending the `EB-46` diagnosis; (c) revert to ACCEPT and keep the tagged
+> 7.50%. **[USER], verbatim (2026-08-06): *"Yeah, I think A) is
+> defensible here."*** **Option (a) executes.**
+>
+> **The confound, recorded because it is the whole reason (a) needs saying
+> out loud:** the archived 11.13% is a **CONSTANTS 5** number and every
+> shielded reading is **CONSTANTS 6**, so "the tags moved the anchor" and
+> "C5->C6 moved the anchor" are not separated by the paired halves -- the
+> sweep's attribution rested on the other eleven arms being unmoved, which
+> does not establish that this arm was. An untagged-under-C6 reading did not
+> exist before this one. A second, diagnostic-only measurement that shields
+> the WHOLE of `score_offer` (`review/r121-shield/probe-full-shield.json`;
+> **not** committed behaviour) reads **13.20%**, z = +2.45 vs 11.13% -- so
+> the residual is not a leftover tag-reading term in the scorer.
+>
+> **What this addendum discharges and what it does not.** The stop-and-surface
+> clause is **DISCHARGED for this measurement**: the row republishes, with its
+> dated note, in `docs/roster-anchor-v14-v6-2026-08-06.md`. **`EB-46` remains
+> the live diagnosis question**, now posed cleanly -- separate the tag effect
+> from the v6 effect on this arm. `DRAFTER_VERSION` is **not** bumped and the
+> non-bump is flagged at the constant (the shield restores the behaviour v14
+> was stamped for; step (3) of `Q18`'s order runs under D14; 15 is claimed by
+> staged `EB-43`). Nothing in the quarantine banner moves.
+
 **`Q20` -- Verbatim: *"agreed, MOVE-WITH-RESOLVER."*** Track R-B resumes: the
 **45 held ledger-cited files** move to `docs/archive/` verbatim-under-banner;
 `docs/registry/identifiers.md` gains an **old-path -> new-path resolver

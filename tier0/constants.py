@@ -1015,8 +1015,12 @@ CONSTANTS_VERSION = 6
 # reorders -- taking 15 here would collide with it. Every other arm is
 # untouched by the shield (`_core_advance_view` returns its argument
 # unchanged when no anchor card is present), so no non-anchor number is
-# affected either way. The shielded `ref_ironclad` reading is NOT published
-# in the quotable table: it tripped R121's stop-and-surface rule.
+# affected either way. The shielded `ref_ironclad` reading tripped R121's
+# stop-and-surface rule (it overshot the archived ordering) and was released
+# for publication anyway on [USER]'s option (a), verbatim "Yeah, I think A)
+# is defensible here." -- it is the row that stands in the quotable table,
+# and it is an untagged-under-CONSTANTS-6 baseline, not a restoration of the
+# archived CONSTANTS 5 number. See R121's 2026-08-06 addendum.
 DRAFTER_VERSION = 14
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
