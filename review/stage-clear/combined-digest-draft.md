@@ -151,3 +151,66 @@ exactly this file and pinned its path in a named test) and
 **Vacation-test summary:** forty-four frozen records changed address and
 nothing else; every live pointer follows them; the one question a move pass
 cannot answer alone is written on your queue as Q20.
+
+---
+
+## R-C — the LIVING prune (2026-08-06)
+
+**What was pruned (four cuts, five certified candidates, each its own
+commit + excision-log row E-2…E-5):**
+
+- **P-1** — `docs/awaiting-user-slots-2026-08-06.md` froze LIVING →
+  REFERENCE, verbatim, no move. All seven slots are answered and landed
+  (Track Y; `AC-2`/R115; Q7/Q9/Q10 per R118) and the file's own §15.2 row
+  anticipated exactly this freeze. LIVING count 61 → 60. (E-2, `8983890`)
+- **P-2** — the queue's §3 held-flags table (all four RULED, R114)
+  collapsed to a pointer: verdicts at R114, struck record at identifiers
+  §6, the law at dockets/README rule 3. (E-3, `9024d4f`)
+- **P-3** — queue §1 rows `Q1`–`Q17`, all ANSWERED (R113–R120), compacted
+  into the "Already answered" table — verbatim verdicts kept byte-for-byte,
+  residuals named per row. Its sequencing condition (Tracks V/M landing)
+  was re-verified against current main first: Track V's execution commit
+  `0189e46` covers Q6/Q9/Q13/Q14/Q15/Q16, Track M closed the v6 window
+  green. **One delegation could not be found landed** and is named on the
+  compact Q10 row: Track V's surface-only verification of the X14 line's
+  acquisition vector + the pin-docstring annotation — the task stays
+  recorded verbatim on the exploit ledger's X14 leg-(a) line, which is its
+  register. (E-5, `e673933`)
+- **P-4** — identifiers §6's held-flag framing prose replaced by a
+  one-line pointer (R114; the rule's home is dockets/README rule 3); the
+  struck table stays as the record. (E-4, `9ed4f79`)
+- **P-5** — nothing left to do: the §3 prose R-range figure was already
+  corrected by Class-P (R119 / P-B item C-9, handle `9907f3b`); verified in
+  place, not double-logged.
+- **P-6** — not a prune by the plan's own words: the README index rows for
+  R-B's moved files were repointed in the move commits; spot-checked (no
+  stale root-path pointer in README/registries; the citation pin test
+  guards it mechanically). No R-C action.
+
+**What stayed, with the doubt named (all five DOUBT rows verified still
+surfaced where the plan holds them, §R-C of
+`review/stage-clear/refactor-plan.md`):** D-1 (axis charter's earlier
+sections vs the R118 closure — needs a section-by-section read), D-2
+(design-principles restatements Z-6 did not finish — each cut needs its own
+citation), D-3 (character kickoffs — must NOT be pruned while queue rows
+`M1`/`M2` are open; both rows confirmed open in queue §10), D-4 (art
+manifest — an art-debt question, queue §8 confirmed carrying it), D-5
+(§15.1's 330-file recount — a sequencing choice; R-B left a location note,
+the recount is still owed once). None was touched.
+
+**The acceptance gap, stated honestly.** The charter's R-C acceptance is
+"no LIVING doc restates a ruling it can point to; excision log complete."
+The six-candidate scope does not achieve that: this pass executed only what
+the R-A inventory could certify with a named superseder, and the inventory
+itself says it did not read all ~59 LIVING files section-by-section — that
+reading remains the unexecuted bulk of R-C. A follow-up batch could
+certify, in rough order of confidence: (a) the axis charter's superseded
+gate prose once D-1's read is done against the landed R118 form; (b) the
+principles-doc restatements (D-2) one ruling-citation at a time; (c) the
+queue's own struck banners in §0/§4/§5 that restate discharged postures
+each above a named ruling (same shape as P-2, not in this pass's certified
+six); (d) the kickoffs — only after `M1`/`M2` are ruled. Also noticed en
+route, surfaced not cut: the X14 pin docstring in
+`tier0/tests/test_s13_exploit_pins.py` still reads "one word owed" for a
+question R118 answered — that is Track V's still-owed annotation (named on
+Q10's compact row), not an R-C cut.
