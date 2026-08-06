@@ -18,10 +18,6 @@ Every script, mapped to what actually runs it. "validate" = invoked by
 | `lint_vendor_pin.py` | not a validate.ps1 rule (the bridge is a harness, not shipped) but gated three ways: CI, `test_vendor_pin.py`, and `klee-mod/build/deploy_bridge.ps1` refuses to install a drifted snapshot |
 
 ## Suite-gated (pytest only — no deploy gate)
-`lint_r_citations.py` (also CI-gated; the clause-bearing R-number citations in
-`canon_role_tempo.py` against the clauses `DECISIONS.md` declares — S4's F14
-plus its four siblings, graduated to a check at five instances. Scoped to that
-one file **on purpose**; widening it is a separate decision),
 `lint_strict_domination.py`, `lint_unique_names.py`, `lint_upgrade_coverage.py`,
 `lint_kokomi_decksize.py`, `lint_companion_shop_coverage.py`,
 `lint_sheet_comments.py` (currently gated on furina-cards.yaml ONLY — 35 open

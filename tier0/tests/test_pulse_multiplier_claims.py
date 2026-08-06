@@ -51,12 +51,12 @@ LIVE_CLAIMS: dict[str, list[str]] = {
         # A1b: the restored WATCH block's worked example.
         "WORKED EXAMPLE, at the LANDED x{v}",
     ],
-    "docs/kokomi-playtest-protocol.md": [
+    "docs/current/playtest/kokomi-playtest-protocol.md": [
         # The standing-flag list -- what playtest three is told to watch.
         "`KuragePulsePerCharge = {v}`",
         "reads the bank at ×{v}",
     ],
-    "docs/archive/open-playtest-items.md": [
+    "docs/current/playtest/open-playtest-items.md": [
         "the multiplier is now **{v}**",
         "reads the bank at ×{v}",
     ],

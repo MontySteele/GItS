@@ -19,10 +19,10 @@
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
 | `S4-G7` | Three fenced Furina calls: how strong her hidden Power bonus is and whether to print it; three viable plans or one (dead-archetype); what to do about her strongest plan running above its anchor (salon leak) | OPEN — fenced behind `S4-G5`/`B-G1` | user-queue §2; backlog §3 items 1–3; R107/F1 |
-| `M1` | Furina's charter co-op Fanfare mechanic (partner damage + Encore swings feeding her meter, plus the self-damage audit): **BUILD or WAIVE** — the "Tier 2" deferral condition has lapsed | OPEN | user-queue §10; `docs/archive/missed-requirements.md` §1.1 |
-| `M2` | Second charter co-op mechanic — can co-op players pass a Spotlight to each other: **BUILD or WAIVE** | OPEN | user-queue §10; `docs/archive/missed-requirements.md` §1.2 |
-| `M3` | One Furina Encore card upgrading to Innate (measured green, never shipped): **SHIP or DROP** | OPEN | user-queue §10; `docs/archive/missed-requirements.md` §1.5 |
-| `M5` | Furina's declared elite axis A6 has measured short for two weeks (median 3.5 vs 4.2): **pick one of three routes** put to red-pen | OPEN | user-queue §10; `docs/archive/missed-requirements.md` §3.7 |
+| `M1` | Furina's charter co-op Fanfare mechanic (partner damage + Encore swings feeding her meter, plus the self-damage audit): **BUILD or WAIVE** — the "Tier 2" deferral condition has lapsed | OPEN | user-queue §10; `docs/current/backlog/missed-requirements.md` §1.1 |
+| `M2` | Second charter co-op mechanic — can co-op players pass a Spotlight to each other: **BUILD or WAIVE** | OPEN | user-queue §10; `docs/current/backlog/missed-requirements.md` §1.2 |
+| `M3` | One Furina Encore card upgrading to Innate (measured green, never shipped): **SHIP or DROP** | OPEN | user-queue §10; `docs/current/backlog/missed-requirements.md` §1.5 |
+| `M5` | Furina's declared elite axis A6 has measured short for two weeks (median 3.5 vs 4.2): **pick one of three routes** put to red-pen | OPEN | user-queue §10; `docs/current/backlog/missed-requirements.md` §3.7 |
 | `Q-C` (payoff-reach) | Author the payoff-reach / `RARITY_ODDS` sprint's **written predictions at kickoff** — direction + threshold per question, plus the Q-C target band (or its explicit deletion) — before any number is read. Q18 countersign is done; this is step (2) of its execution order | OPEN — design-side authoring | → review/active/payoff-reach-reregistration.md §4 |
 
 ## 2. Kokomi — band, playtest, pool, and art
@@ -31,7 +31,7 @@
 |---|---|---|---|
 | `S4-G6` | Declare Kokomi's HP stability band **from design intent, before her confirmatory playtest** (may not be revised against it) | OPEN — gates her protocol playtest; re-anchored to post-rework build | user-queue §2; `DEC-D5` clauses 2–4 |
 | `S4-G13` | Kokomi measures below the Ironclad-anchored floor — **pick one of three levers** (Code may build any, may pull none); plus the `NT-G5` fork evaluation (weak-or-fine), whose only accepted input is `OT-1` | OPEN | user-queue §2; `klee-mod/DECISIONS.md` E2/E2b |
-| `S4-G14` / `OT-1` | Play the Kokomi protocol playtest deliberately against the written question list (exploratory runs cannot be graded); `OT-1` = draw and play Neap Tide, report weak or fine | OPEN — table time; blocked on `S4-G6` + N1 attribution pass | user-queue §2/§7; `docs/kokomi-playtest-protocol.md` |
+| `S4-G14` / `OT-1` | Play the Kokomi protocol playtest deliberately against the written question list (exploratory runs cannot be graded); `OT-1` = draw and play Neap Tide, report weak or fine | OPEN — table time; blocked on `S4-G6` + N1 attribution pass | user-queue §2/§7; `docs/current/playtest/kokomi-playtest-protocol.md` |
 | `M8` | Three Kokomi card-art rulings: crop-reuse budget (state a number or eyes-on per card); whether Watatsumi/shrine environment art counts as a card face (Furina rejected "a random hallway"); whether to hand-crop the banned `Character Details 1` for a Rare | OPEN | user-queue §10; `docs/kokomi-art-pass-requirements.md` §6 |
 | `M9` | Three Kokomi v0.4 leftovers: ratify the meter-20 number on the 500-run confirm; rename `epiphany_of_the_deep` → "Song of Pearls"; keep or drop the commander Garment-uptime watch | OPEN | user-queue §10; `docs/archive/kokomi-v0.4-report.md` §6 |
 
@@ -39,7 +39,7 @@
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `S4-G18` | Klee's three archetypes carry 28/21/14 cards each vs the constitution's 15–20 band — **amend the rule or fix the pools** (never done either) | OPEN | user-queue §2; `docs/archive/missed-requirements.md` Tier 5 |
+| `S4-G18` | Klee's three archetypes carry 28/21/14 cards each vs the constitution's 15–20 band — **amend the rule or fix the pools** (never done either) | OPEN | user-queue §2; `docs/current/backlog/missed-requirements.md` Tier 5 |
 | `M4` | Klee pass-4 ask A5: enforce the scorecard's two invariants (≤4.0 A2 ceiling; A1+A6 elite pairing) as **suite failures or report flags** — the ask was always *which*, not *whether*; today neither exists | OPEN | user-queue §10; `docs/archive/klee-pass-4-plan.md` §3.4 |
 
 ## 4. The seven-axis scorecard
@@ -59,7 +59,7 @@
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
 | `S4-G10` | Companion-shop close-out: grade `SHOP-P1…P3`; settle whether money is ever the constraint (~220 unspent gold); the 1.15× surcharge; Track A pool migration; R60 phase-2 fantasy-leak grading. **New agenda item (not an answer):** should slot 2 carry a rarity floor at all? (wants empirical Common offer/pick/skip data) | OPEN | user-queue §2; R60/R63; principles §4.7 |
-| `M11` | Two shop close-out items tracked nowhere: **§7.6 R60 phase-2 fantasy-leak grading** (gates the deferred colorless-removal sprint) and §7.7 the Track D fallback taste check; plus the joined `R59` slot-2 rarity-floor design question | OPEN — rides the `S4-G10` sitting | user-queue §10; `docs/archive/missed-requirements.md` Tier 5 |
+| `M11` | Two shop close-out items tracked nowhere: **§7.6 R60 phase-2 fantasy-leak grading** (gates the deferred colorless-removal sprint) and §7.7 the Track D fallback taste check; plus the joined `R59` slot-2 rarity-floor design question | OPEN — rides the `S4-G10` sitting | user-queue §10; `docs/current/backlog/missed-requirements.md` Tier 5 |
 | `X10` | `gorou_heart_of_the_clan` looks underpriced (the Metallicize treadmill): a **CANDIDATE, explicitly not ratified** — Uncommon promotion + power adjustment, **priced at a sitting** | OPEN — money/pricing call | user-queue §4; → review/active/companion-pricing §1 (docket); review/redteam/exploit-ledger.md X10 |
 
 ## 7. Systems and data-model rulings
@@ -73,7 +73,7 @@
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `M6` | Kaboom Beetle Swarm's printed text now describes something the card no longer does (post-R72 snapshot-at-cast): **APPROVE the reword or LEAVE** | OPEN | user-queue §10; `docs/archive/open-playtest-items.md` §6.2 |
+| `M6` | Kaboom Beetle Swarm's printed text now describes something the card no longer does (post-R72 snapshot-at-cast): **APPROVE the reword or LEAVE** | OPEN | user-queue §10; `docs/current/playtest/open-playtest-items.md` §6.2 |
 
 ## 9. Eyes-on reviews and taste
 
@@ -81,18 +81,18 @@
 |---|---|---|---|
 | `S4-G11` | **Read card names and lore text by eye before they ship** (R29d Furina pass; Kokomi's 20 authored-but-unaudited fill cards; kickoff ask 10) — ruled to have no substitute | OPEN | user-queue §2; `tier0/DECISIONS.md` entry 75 + R29d |
 | `S4-G12` / `CC-G1` / `CC-G2` | Art contact-sheet eyes-on (three re-hunt candidates incl. `grand_gala`; confirm the `standing_room_only` crop by eye) + in-game screenshot review of the twelve Curtain Call cards and the A0 smoke run | OPEN — **materials ready** | user-queue §2; `docs/archive/g12-review-2026-08-05.md` |
-| `S4-G16` / `G-A5(b)` | **One screenshot: a Power being played and the Fanfare floor going up because of it** — the last of four evidence shapes (eyes-on acceptance, not telemetry) | OPEN | user-queue §2; `docs/archive/red-pen-2026-07-26.md` Part 3 |
+| `S4-G16` / `G-A5(b)` | **One screenshot: a Power being played and the Fanfare floor going up because of it** — the last of four evidence shapes (eyes-on acceptance, not telemetry) | OPEN | user-queue §2; `review/active/red-pen-2026-07-26.md` Part 3 |
 | `S4-G17` | Four running-game looks (no full playtest): `AS2-D5` salon capture; `AS2-B5` motion pass + facing taste; `AS2-E2` icon picks (4 REHUNT); hover-targets | OPEN — urgency reduced (hover-targets closed pt.4; B5 "not noticed") | user-queue §2/§7; `docs/animation-sprint-2-plan.md` (B5/D5/E2), §"Gates & rulings" |
 | `S4-G20` | A bundle of small leftovers: Standing Ovation boost expiry (text-vs-intent); sim-vs-C# salon RNG divergence (accept or fix); three taste passes (Kokomi 58 faces + 15 companions, L12 duplicate pairs, `kaboom == spark_knight_style`); two infra toggles (branch protection / `gh`; manifest MAJOR bump, dormant by design) | OPEN | user-queue §2; backlog §1 P3-cluster + §5 |
 | N + O TOP-5 | Read the top five findings of the lore-fidelity and instrument-redteam ledgers (both worst-first); includes `N-1` and the PROVISIONAL reactions-corpus caveat | OPEN — read | user-queue §4; `docs/archive/lore-fidelity-audit-2026-08-05.md`, `docs/archive/instrument-redteam-2026-08-05.md` |
-| S8 + S10 galleries | Taste calls on two proposal galleries: eight flagged potions/relics (S8), and enemies that could be reskinned rather than redesigned (S10 — RESKIN/REDESIGN is [USER]'s per north-star) | OPEN — taste | user-queue §4; `review/potion-relic-gallery/gallery.md`, `review/enemy-atlas/reskin-gallery.md` |
+| S8 + S10 galleries | Taste calls on two proposal galleries: eight flagged potions/relics (S8), and enemies that could be reskinned rather than redesigned (S10 — RESKIN/REDESIGN is [USER]'s per north-star) | OPEN — taste | user-queue §4; `docs/current/dossiers/content/potion-relic-conversion-gallery.md`, `docs/current/dossiers/remap/reskin-gallery.md` |
 | Art debt | Kokomi 58 faces + 15 companions awaiting picks; four missing Kokomi portraits; `curtain_cue` wordmark; `breathless` mood; A7 + six Curtain Call power sigils; `AS2-E2` icon re-hunt (4 of 7); `grand_gala` re-hunt; two `ART-L12` duplicate pairs (`blazing_delight==true_spark_knight`, `crowd_work==standing_ovation`) awaiting a re-pick ruling | OPEN — mostly taste | user-queue §8; `docs/archive/backlog-2026-07-29.md` §5; `docs/kokomi-art-pass-requirements.md` §2a |
 
 ## 10. Fontaine Rares close-out
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `M10` | Four items the Fontaine Rares sprint left owned by [USER]: companion art picks (Navia/Clorinde/Neuvillette/Arlecchino); the v1.7 lore/naming eyes-on audit (non-delegable); the C2 grading countersign; and close-out ratification. Design note parked with them: Neuvillette graded WEAK/DEFERRED with the "different facet" question open | OPEN | user-queue §10; `docs/archive/missed-requirements.md` §4.4 |
+| `M10` | Four items the Fontaine Rares sprint left owned by [USER]: companion art picks (Navia/Clorinde/Neuvillette/Arlecchino); the v1.7 lore/naming eyes-on audit (non-delegable); the C2 grading countersign; and close-out ratification. Design note parked with them: Neuvillette graded WEAK/DEFERRED with the "different facet" question open | OPEN | user-queue §10; `docs/current/backlog/missed-requirements.md` §4.4 |
 
 ## 11. Design calls routed from the dockets & findings
 

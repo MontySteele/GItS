@@ -1,9 +1,0 @@
-### bucket A (0)
-### bucket B (0)
-### bucket C (2)
-| `roster-anchor-v14-v6-2026-08-06.md` | `docs/dockets/engineering-backlog.md`; `docs/registry/identifiers.md`; `docs/registry/user-queue.md`; `tier0/tests/test_p_ledger_lint.py` | 1 | 5 |
-| `track-a-kickoff-brief.md` | `docs/README.md`; `docs/registry/identifiers.md`; `tier0/tests/test_doc_citation_targets.py`; `tools/canon_role_tempo.py`; `tools/lint_role_tempo_coverage.py`; `tools/role_tempo.py`; `tools/suggest_role_tempo_tags.py` | 0 | 2 |
-### bucket D (3)
-| `awaiting-user-slots-2026-08-06.md` | `docs/README.md`; `docs/axis-validity-session-charter.md`; `docs/dockets/companion-pricing.md`; `docs/registry/excision-log.md`; `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 3 | 4 |
-| `dispatch-2026-08-06-status-pass-order.md` | `docs/registry/identifiers.md`; `docs/registry/p-ledger.md`; `docs/registry/user-queue.md` | 0 | 1 |
-| `dispatch-2026-08-06e-six-replies.md` | `docs/dockets/engineering-backlog.md`; `docs/registry/identifiers.md`; `docs/registry/user-queue.md` | 1 | 3 |
