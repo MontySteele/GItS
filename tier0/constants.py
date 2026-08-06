@@ -520,6 +520,30 @@ POTION_BIG_HIT_FRACTION = 0.35    # a telegraphed enemy attack this large a
 
 # --- Pilot policy (spec §6) ---
 BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP
+# EB-5. The combat pilot's scoring WEIGHT SET has its own version stamp, same
+# archive discipline as CONSTANTS_VERSION and DRAFTER_VERSION: two pilot
+# numbers taken under different weight sets are not the same measurement, and
+# until now the set had no name to put in a row.
+#
+# WHAT IT LABELS: every `PILOT_*` weight in the block below, plus the `STOKE_*`
+# block in `tier0/pilot/policy.py` (which stays out of this file for the reason
+# written at its head -- constants.py is the surface the C# parity gate
+# compares by value, and a pilot heuristic has no C# counterpart). The stamp
+# lives HERE, with the bulk of the set, on the DRAFTER_VERSION idiom: that
+# stamp also sits in constants.py while most of what it labels lives in
+# tier05/draft.py.
+#
+# WHAT IT IS NOT: this stamp does NOT enter the RT/D/P/C run-cell stamp
+# (tier05/cells.py). It is an instrument version on the A6_INSTRUMENT_VERSION
+# pattern -- a label for the weight set, read by whoever is comparing two pilot
+# readings, not a fourth axis of the run cell. Adding it moved no value.
+#
+# v1 = the set as it has stood since the 2026-07-29 sim-hygiene sprint moved
+# the first sixteen weights here, plus the EB-5 completion of the same move
+# (the damage-estimator, scaling and charge weights below). MOVED, NOT RETUNED
+# at both steps: every value is byte-identical to the literal it replaced.
+# Bump when a weight's VALUE changes; a pure rename or regrouping does not.
+PILOT_WEIGHTS_VERSION = 1
 # Sim-hygiene sprint 2026-07-29 (task 4): the inline scoring weights that had
 # been living as bare floats inside tier0/pilot/policy.py. MOVED, NOT RETUNED
 # -- every value below is byte-identical to the literal it replaced, and the
@@ -559,6 +583,30 @@ PILOT_SPOTLIGHT_COPY_VALUE = 3.5     # dead without a target, and it knows it
 # Scaling term (_scaling_value): setup is worth less as the fight winds down.
 # The taper hits zero at this turn number.
 PILOT_SETUP_TAPER_TURNS = 12.0
+# --- EB-5 completion. The weights the 2026-07-29 move left inline, moved on
+# the same terms: MOVED, NOT RETUNED, every value byte-identical to the
+# literal it replaced, and their calibration notes stay at the call sites.
+# Scaling term (_scaling_value), the rest of it. The self-buff cap and its
+# per-stack price are the pair `test_pin_tier0_pilot` pins: percent-stack
+# powers (Vermillion Pact 25, Durin 30) would otherwise dwarf everything.
+PILOT_SELF_POWER_STACK_CAP = 6       # per-power stacks counted, at most
+PILOT_SELF_POWER_VALUE = 3           # per counted stack of a SELF power
+PILOT_ENEMY_DEBUFF_VALUE = 2         # per stack of an ENEMY debuff
+# Damage-estimator terms (_expected_damage). Self-damage is a COST, and the
+# two futurity discounts price damage that arrives over the coming turns
+# (the Burst payoff and the Kurage's pulses) rather than this turn.
+PILOT_SELF_DAMAGE_COST_WEIGHT = 0.5
+PILOT_FUTURE_DAMAGE_DISCOUNT = 0.8
+# Charge term (_charge_value), Kokomi's engine machinery. Values only the
+# MACHINERY; the payoff damage already flows through _expected_damage.
+PILOT_CHARGE_GAIN_VALUE = 0.6        # per point of banked Charge
+PILOT_CONSCRIPT_CREATE_VALUE = 3.0   # create mode NETS a card
+PILOT_CONSCRIPT_TRANSFORM_VALUE = 2.0    # transform mode pays one
+PILOT_EXHAUST_ALL_ESTIMATE = 3       # "all" (Stoke grammar) is worth ~3 cards
+PILOT_DELIBERATE_EXHAUST_VALUE = 0.8     # Charge + thinning, casket on
+PILOT_SELF_MILL_VALUE = 0.5          # self-mill is fuel, not just loss
+PILOT_GARMENT_CHARGE_VALUE = 1.2     # per turn per banked-Charge read
+PILOT_GARMENT_BASE_VALUE = 2.0       # the garment itself
 # PILOT_REGRET_SAMPLE_RATE: DELETED by R67 (2026-07-26). Zero readers, and
 # actively misleading while it existed -- pilot/policy._log_regret fires on
 # EVERY play, so every regret rate this repo has ever reported is a full

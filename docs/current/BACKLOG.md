@@ -14,7 +14,6 @@
 
 | ID | Item | Provenance |
 |---|---|---|
-| `EB-5` | The combat pilot's scoring weights are unstamped inline literals (`tier0/pilot/policy.py:426-504`) — move to constants + version-stamp, no behavior change | eng-backlog §1 |
 | `EB-17` | Klee played-when-drawn / dead-in-hand / force-first-copy telemetry — zero matches across `tier0/`,`tier05/`,`tools/`; a **live gate** (bodyless draw/resource engines may not be buffed without it) | eng-backlog §3; missed-requirements §2.2 |
 | `X8-cap` | Ratified `bomb_damage_up ≤ 4` cap (`docs/current/characters/klee-character-design.md` §9) is **not implemented** — `max_stacks` only ever arrives from a card row and no Klee row carries one, so every Klee scaling power is uncapped | dockets/klee-rework §3 |
 | `S13→S7` | Sim-infidelity cross-checks owed before any design session reads them as game facts: swirl aura self-refresh (`reactions.py:96-99`), detonation-order Vulnerable self-amp (`effects.py:474-476`), conscript nation hard-default `'inazuma'` (`effects.py:2018`), Kurage direct `p.block +=` bypass (`effects.py:2549`), per-effect-dict relic no-dedupe (`relics.py:133-136`) | exploit-ledger "Routed to S7" |
@@ -33,7 +32,6 @@
 | `EB-31` | Orobas not modelled in the sim — Klee's variant now is; still unmodelled: Furina's R2 upgraded form and Kokomi's variant | eng-backlog §4; open-playtest-items §6.3 |
 | `EB-43` | **D15 (spotlight-limb payoff-presence) — STAGED, HELD.** Drafter behaviour change (`DRAFTER 15`) + re-baseline sweep; `Q18` countersigned, pinned DRAFTER 14. **Lands as step (5) of a fixed six-step order** — must not land before blind-first grading (4) or it invalidates the registration | eng-backlog §6; R121 |
 | `EB-46` | Diagnose why tag-visible scoring moved the `ref_ironclad` anchor: separate the tag effect from the v6 (C5→C6) effect on this arm. No deadline, no design authority | eng-backlog §6; Q19; `review/r121-shield/` (at tag `pre-simplification-2026-08-06`) |
-| `O-1` | `run_battery` merges the gauntlet's two stages into one `FightStats` while rates divide by records, so every published per-fight reaction rate overstates (7.70 → 6.60, +16.7%); blocks the X12 co-op potency reading | watch-items W3; R112 |
 | `perf-1.5.2(3)` | Re-instrument on `real_ironclad`, not `ref_ironclad`, before reading any "can an average player clear this" claim — needs `game_ref/` rebuilt | tier05-perf §1.5.2(3) |
 | `SKIP-10.9` | Living skip-backlog of un-modelled enemy mechanics to promote when a pass needs them: Back Attack (Kaiser Crab), untargetable Burrow (Tunneler), Ethereal/Hex auras (Knight Gang), Intangible (Test Subject P3), damage caps (Hard to Kill / Plating / Hardened Shell), and the two Ancient relic hooks — Blessed Antler and Philosopher's Stone | run-model-rework-plan §10.9 |
 

@@ -173,6 +173,76 @@ def test_the_stage_records_survive_the_merge_unmutated():
     assert merged is not stages[0]
 
 
+# --- the pooled row, where the overstatement was measured -----------------
+
+def _mixed_battery() -> list[metrics.FightStats]:
+    """A battery whose records are NOT all one combat each -- three
+    single-stage records and two two-stage ones. This is the shape of the
+    `all` row that carried O-1's +16.7%: single-stage encounters pooled with
+    the gauntlet, one denominator over both units.
+
+    Every combat here contributes 3 aura applications and 1 reaction, so the
+    correct per-combat rates are exactly 3.0 and 1.0 whatever the mix is --
+    the arithmetic is fixed by construction and the only free variable is the
+    denominator under test. 7 combats live behind 5 records.
+    """
+    def one():
+        return _combat(reactions=1, reactions_by_name={"melt": 1},
+                       aura_ops={"apply_aura": 1},
+                       aura_applications_by_source={"hit": 3},
+                       aura_applications_by_element={"pyro": 3},
+                       conditional_evaluated={"reaction_triggered_by_this": 2},
+                       conditional_fired={"reaction_triggered_by_this": 1})
+    return [one(), one(), one(),
+            metrics.merge_stages([one(), one()]),
+            metrics.merge_stages([one(), one()])]
+
+
+def test_a_mixed_battery_rate_is_the_known_per_combat_rate():
+    """O-1's headline: 5 records, 7 combats, 21 applications and 7 reactions.
+    The per-fight rates are the KNOWN 3.0 and 1.0 -- one combat's worth --
+    and the record denominator read them as 4.2 and 1.4, overstating by
+    exactly 7/5 = +40% on this mix."""
+    battery = _mixed_battery()
+    aura = metrics.aura_profile(battery)
+    assert aura["fights"] == 5 and aura["combats"] == 7
+    assert aura["applications"] == 21 and aura["aura_ops_total"] == 7
+    assert aura["applications_per_fight"] == 3.0
+    assert aura["aura_ops_per_fight"] == 1.0
+    s = metrics.summarize(battery)
+    assert s["fights"] == 5 and s["combats"] == 7
+    assert s["reactions_per_fight"] == 1.0
+    # The defect, stated as the number it produced: dividing the same pooled
+    # counts by RECORDS overstates by combats/records on any mixed row.
+    assert aura["applications"] / s["fights"] == 4.2
+    assert aura["applications"] / s["fights"] == 3.0 * 7 / 5
+
+
+def test_a_mixed_battery_rate_does_not_move_when_the_mix_does():
+    """The point of the per-combat denominator: a rate that is 3.0/combat is
+    3.0 whether the battery is all single-stage, all two-stage, or mixed.
+    Under the record denominator the same world read 3.0, 6.0 and 4.2 --
+    which is why a gauntlet row could not be compared with a punisher row."""
+    def one():
+        return _combat(reactions=1, aura_applications_by_source={"hit": 3})
+    all_single = [one(), one(), one(), one()]
+    all_double = [metrics.merge_stages([one(), one()]) for _ in range(2)]
+    rate = 3.0
+    for battery in (all_single, all_double, _mixed_battery()):
+        assert metrics.aura_profile(battery)["applications_per_fight"] == rate
+        assert metrics.summarize(battery)["reactions_per_fight"] == 1.0
+
+
+def test_the_payoff_rate_on_the_mixed_battery_is_per_combat_too():
+    """Same battery, the H2 surface: 14 evaluations over 7 combats is 2.0."""
+    pay = metrics.payoff_profile(_mixed_battery())
+    assert pay["fights"] == 5 and pay["combats"] == 7
+    row = pay["by_predicate"]["reaction_triggered_by_this"]
+    assert row["evaluated"] == 14 and row["fired"] == 7
+    assert row["evaluated_per_fight"] == 2.0
+    assert row["rate"] == 0.5                  # ratio-of-sums: unmoved
+
+
 # --- on a real battery ---------------------------------------------------
 
 def test_the_gauntlet_battery_reports_more_combats_than_records():

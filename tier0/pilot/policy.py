@@ -178,7 +178,8 @@ def _expected_damage(state: CombatState, card: Card) -> float:
     for fx in _active_effects(state, card.effects):
         if fx["op"] == "damage":
             if fx.get("target") == "self":
-                total -= fx["amount"] * 0.5          # HP loss is a cost
+                # HP loss is a cost
+                total -= fx["amount"] * C.PILOT_SELF_DAMAGE_COST_WEIGHT
                 continue
             n_targets = len(living) if fx.get("target") == "all_enemies" else 1
             times = _est(state, fx.get("times", 1), 1)
@@ -217,7 +218,8 @@ def _expected_damage(state: CombatState, card: Card) -> float:
               and fx.get("power") == "sparks_n_splash"):
             # The Burst payoff: stacks x 4 hits x 5 dmg over coming turns.
             total += (fx["amount"] * C.SPARKS_N_SPLASH_HITS
-                      * C.SPARKS_N_SPLASH_HIT_DMG * 0.8)
+                      * C.SPARKS_N_SPLASH_HIT_DMG
+                      * C.PILOT_FUTURE_DAMAGE_DISCOUNT)
         elif fx["op"] == "summon_kurage":
             # v0.4: the jellyfish's pulses are real damage arriving over the
             # coming turns, same futurity discount as the Burst above. Without
@@ -231,7 +233,7 @@ def _expected_damage(state: CombatState, card: Card) -> float:
                          C.KURAGE_DURATION)
             per_pulse = (C.KURAGE_PULSE_BASE
                          + state.player.charge * C.KURAGE_PULSE_PER_CHARGE)
-            total += turns * per_pulse * 0.8
+            total += turns * per_pulse * C.PILOT_FUTURE_DAMAGE_DISCOUNT
         elif fx["op"] == "detonate":
             # Early detonation realizes bomb damage now but forfeits the
             # next-turn detonation it would get anyway — value it only
@@ -335,9 +337,10 @@ def _scaling_value(state: CombatState, card: Card) -> float:
         if fx["op"] == "apply_power" and fx.get("target", "self") == "self":
             # Cap per-power contribution: percent-stack powers (Vermillion
             # Pact 25, Durin 30) would otherwise dwarf everything.
-            val += min(amount, 6) * 3
+            val += (min(amount, C.PILOT_SELF_POWER_STACK_CAP)
+                    * C.PILOT_SELF_POWER_VALUE)
         elif fx["op"] == "apply_power":                  # enemy debuff
-            val += amount * 2
+            val += amount * C.PILOT_ENEMY_DEBUFF_VALUE
             if fx.get("target") == "enemy":
                 applied_to_target[fx["power"]] = (
                     applied_to_target.get(fx["power"], 0) + amount)
@@ -527,27 +530,34 @@ def _charge_value(state: CombatState, card: Card) -> float:
     for fx in _active_effects(state, card.effects):
         op = fx["op"]
         if op == "gain_charge":
-            val += _est(state, fx.get("amount", 1), 1) * 0.6
+            val += (_est(state, fx.get("amount", 1), 1)
+                    * C.PILOT_CHARGE_GAIN_VALUE)
         elif op == "conscript":
             # A recruit in hand at a discount, plus its Exhaust feeds the
             # meter later. Create mode nets a card; transform pays one.
             n = _est(state, fx.get("amount", 1), 1)
-            val += n * (3.0 if fx.get("mode") == "create" else 2.0)
+            val += n * (C.PILOT_CONSCRIPT_CREATE_VALUE
+                        if fx.get("mode") == "create"
+                        else C.PILOT_CONSCRIPT_TRANSFORM_VALUE)
         elif op == "exhaust_from" and engine_live:
             # Deliberate exhausts are Charge + deck-thinning when the
             # casket is on. amount can be "all" (Stoke grammar).
             n = fx.get("amount", 1)
-            n = 3 if n == "all" else _est(state, n, 1)
-            val += n * 0.8
+            n = (C.PILOT_EXHAUST_ALL_ESTIMATE if n == "all"
+                 else _est(state, n, 1))
+            val += n * C.PILOT_DELIBERATE_EXHAUST_VALUE
     if engine_live and card.exhaust and not card.kit_card:
-        val += 0.5                       # self-mill is fuel, not just loss
+        # self-mill is fuel, not just loss
+        val += C.PILOT_SELF_MILL_VALUE
     # The garment state: worth its remaining-turn Charge read. Scored here
     # (not _scaling_value) because its value RISES with banked Charge.
     for fx in card.effects:
         if (fx["op"] == "apply_power"
                 and fx.get("power") == "ceremonial_garment"):
             turns = fx.get("amount", C.CEREMONIAL_GARMENT_TURNS)
-            val += turns * (p.charge // C.GARMENT_CHARGE_DIVISOR) * 1.2 + 2.0
+            val += (turns * (p.charge // C.GARMENT_CHARGE_DIVISOR)
+                    * C.PILOT_GARMENT_CHARGE_VALUE
+                    + C.PILOT_GARMENT_BASE_VALUE)
     return val
 
 
@@ -556,6 +566,9 @@ def _charge_value(state: CombatState, card: Card) -> float:
 # by value, and a pilot heuristic has no C# counterpart to compare against --
 # the mod ships no bot. These are PILOT JUDGMENT, not balance, and the sprint
 # log records that they were picked by hand and never swept.
+# Stamped by C.PILOT_WEIGHTS_VERSION all the same (EB-5): the stamp labels the
+# pilot's whole scoring weight set, and where a weight is FILED is not what
+# decides which readings are comparable.
 STOKE_DEPLOY_OPEN = 6.0     # a member entering an EMPTY slot: pure addition
 STOKE_DEPLOY_FULL = 1.5     # a member entering a FULL stage: a bow trigger,
                             # which is a different decision (§Track 1.1)
