@@ -34,10 +34,31 @@ otherwise).
 ### State of the project (start here)
 | doc | what it is |
 |---|---|
-| `open-playtest-items.md` | The live queue of everything needing a human at the game, plus the desk-ruling queue (§6). Dated addendum carries post-compile corrections. |
-| `red-pen-2026-07-26.md` | The most recent ratification record; carries its own errata and the one still-owed Queue 5 cell. |
-| `missed-requirements.md` | Recap audit (2026-07-26): every requirement that was directed, never built, and tracked nowhere — with evidence. |
 | `tier0/DECISIONS.md`, `klee-mod/DECISIONS.md` | The living decision logs (sim-side and mod-side). The project's spine. |
+| `dockets/engineering-backlog.md` | **The engineering half of "what is open".** Work that needs no [USER] ruling to start: confirmed defects, measurement defects, unbuilt instruments, content work with nothing in front of it. Opened 2026-08-06 (Track Z). |
+| `red-pen-2026-07-26.md` | REFERENCE. The most recent ratification record; carries its own errata and the one still-owed Queue 5 cell (`S4-G16`). |
+| `open-playtest-items.md`, `missed-requirements.md`, `backlog-2026-07-29.md`, `sitting-prep-2026-08-05.md`, `surplus-week-manifest-2026-08-05.md` | **RETIRED AS REGISTERS 2026-08-06 (Track Z / Z-3), now REFERENCE.** Each keeps its full text and its evidence, and each carries a banner saying where its open rows went — the [USER] ones to `registry/user-queue.md` §10, the engineering ones to `dockets/engineering-backlog.md`. Read them for *reasoning*, never for *status*. |
+
+### Lifecycle statuses — what a header line means
+
+Every `.md` and `.yaml` file under `docs/` opens with one of three lifecycle
+headers, added 2026-08-06 by the docs diet (Track Z / Z-1):
+
+- **LIVING** — expected to change; read it to work on the project. 59 files.
+- **REFERENCE** — a frozen record: sprint logs, countersign packages, playtest
+  records, research harvests, retired registers. Read it when something cites
+  it; do not maintain it. 205 files.
+- **ARCHIVED** — superseded, kept verbatim, never updated; lives in
+  `docs/archive/`. 66 files.
+
+Eighteen files (generated artifacts, TSV/JSON/TXT/PNG) cannot carry a header
+and are indexed instead. The full per-status index — including the LIVING set
+with a reason on every entry outside the living-doc budget — is
+`registry/identifiers.md` §15.
+
+**Where an open item may live:** `registry/user-queue.md` if it needs [USER],
+`dockets/` if it is routed and not decided. Nowhere else, and a lint enforces
+it on new documents (`registry/identifiers.md` §16).
 
 ### Law and charters
 | doc | what it is |
@@ -74,7 +95,7 @@ otherwise).
 ### Dockets (routed, not decided)
 | doc | what it is |
 |---|---|
-| `dockets/` | Holding places for items that have been **routed** and not decided. Opened 2026-08-06 by the sitting's S13 routings (R109–R111): `klee-rework.md` (X1 note + FLAG-1 held, X7 law + Track T's audit slot, X8 findings slot), `kokomi-workshop.md` (X9), `companion-pricing.md` (X10 as a CANDIDATE, explicitly not ratified), `watch-items.md` (X4/X6/X12 with their triggers). Index and house rules: `dockets/README.md`. |
+| `dockets/` | Holding places for items that have been **routed** and not decided. Opened 2026-08-06 by the sitting's S13 routings (R109–R111): `klee-rework.md` (X1 note + FLAG-1 held, X7 law + Track T's audit slot, X8 findings slot), `kokomi-workshop.md` (X9), `companion-pricing.md` (X10 as a CANDIDATE, explicitly not ratified), `watch-items.md` (X4/X6/X12 with their triggers), and — added 2026-08-06 by Track Z — `engineering-backlog.md` (`EB-1`…`EB-41`). Index and house rules: `dockets/README.md`. |
 
 ### Live references
 | doc | what it is |

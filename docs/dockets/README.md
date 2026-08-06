@@ -17,6 +17,14 @@ documents. Rulings: `tier0/DECISIONS.md` R109, R110, R111.
 | `kokomi-workshop.md` | The next Kokomi kit workshop's inbox: X9's charge-bank note. |
 | `companion-pricing.md` | Companion pricing candidates. X10 lives here as a CANDIDATE — explicitly not ratified. |
 | `watch-items.md` | The watch-item register: X4, X6, X12, each with the quantity watched and the trigger that brings it back. |
+| `engineering-backlog.md` | Open work that needs **no [USER] ruling to start**: confirmed defects, measurement defects, instruments that were directed and never built, content work with nothing in front of it. Opened 2026-08-06 by the docs diet (Track Z / Z-3) so that the three retired registers had somewhere to put their engineering half. |
+
+**Where an open item may live.** As of 2026-08-06 there are exactly two homes:
+`docs/registry/user-queue.md` for anything that needs [USER], and this
+directory for anything routed and not decided.
+`tools/lint_identifier_registry.py` RULE 3 fails a **new** document that mints
+an open-item row anywhere else; the rule and its two escape hatches are
+`docs/registry/identifiers.md` §16.
 
 **House rules for this directory, so a docket cannot quietly become a plan.**
 

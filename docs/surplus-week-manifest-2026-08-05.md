@@ -2,6 +2,15 @@
 
 > **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
 
+> ## RETIRED AS A REGISTER 2026-08-06 — status lives in the queue now
+>
+> As of 2026-08-06 (docs diet, Track Z / Z-3) this manifest is **the landing
+> record of surplus week**, not a live open-item register. Nothing was deleted
+> or reworded. §4's "Open [USER] items", the Last Call addendum and the Second
+> Wind batch's one-liners are all reconciled in `docs/registry/user-queue.md`
+> — §1 (`Q4` came from here), §5, §7 and §8 — and where the two disagree the
+> queue is the later reconciliation.
+
 **Status:** INDEX. This file is a pointer table, not a finding. It says what
 landed, where it lives, and what is still owed. It resolves nothing, grades
 nothing, and carries zero design authority.

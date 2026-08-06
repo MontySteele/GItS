@@ -2,6 +2,16 @@
 
 > **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
 
+> **KEPT LIVING BY THE DOCS DIET, 2026-08-06 (Track Z / Z-3), and why.** Slots
+> **4, 6 and 7** are still AWAITING, and each one holds its landing text
+> pre-drafted *in every form the reply can take*. That text is the whole point
+> of the file: it is what makes a one-word reply landable. Moving it into the
+> queue rows would either bloat the queue past the vacation test or force the
+> reply to wait on a re-draft, so the diet kept the file at this path and
+> LIVING, and the queue rows (`Q7`, `Q9`, `Q10`) point at the slot by number.
+> **The queue says what is being asked; this file says what gets pasted where.**
+> Landed slots stay in place, struck rather than deleted, per R101b.
+
 **Status: NOTHING HERE IS EXECUTED, and nothing here is a decision.** Opened by
 Track W of the "Strike the Set" batch against [USER]'s replies of 2026-08-06 to
 the Second Wind open one-liners

@@ -2,6 +2,20 @@
 
 > **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
 
+> ## RETIRED AS A REGISTER 2026-08-06 — status lives in the queue now
+>
+> The sitting this pack was assembled for has happened (2026-08-06, four
+> sittings; verbatim record `docs/sitting-record-predraft-2026-08-06.md`). As
+> of 2026-08-06 (docs diet, Track Z / Z-3) this file is **the prep pack, not a
+> register**: nothing was deleted or reworded, and it remains the place the
+> inline texts live — §8's four paperwork one-liners and §10's fourteen asks
+> are quoted here in full and are *why* the queue points back at this path.
+>
+> Their **status** is reconciled in `docs/registry/user-queue.md` §5 (the §10
+> asks) and §6 (the §8 one-liners). Where the two disagree, the queue is the
+> later reconciliation. `10.11`, `10.12` and one-liner 4 have since been ruled
+> (R113); the rest are open as the queue records them.
+
 **Status:** PREP PACK. This document carries **zero design authority**. It
 gathers, quotes and locates; it rules on nothing, recommends nothing, and
 executes nothing. Every section below is material for one batched [USER]
