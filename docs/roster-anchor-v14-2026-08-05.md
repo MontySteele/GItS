@@ -30,6 +30,38 @@
 > re-measured for this banner and none is owed by it. Source of the bump:
 > `tier0/constants.py`, the `CONSTANTS_VERSION 5` note.
 
+> # QUARANTINE BANNER — the core-attainment columns are quarantined pending
+> # re-registration (queue row 10.7, [USER] 2026-08-06)
+>
+> **Appended 2026-08-06 (Track S2, the 10.7 search).** [USER], verbatim
+> (2026-08-06, queue row 10.7): *"Let's yes to both and see if it turns up on
+> local."* — (b) the **`RA-G1`/`RA-G2` core-attainment columns are
+> QUARANTINED** until the payoff-reach/`RARITY_ODDS` sprint's registration
+> document is found or re-established.
+>
+> **What is quarantined:** in §2 (`RA-G1`), the **`core attain`** column and
+> its printed interval (**`core 95%`**); in §3 (`RA-G2`), the
+> **`core D13` / `core D14` / `Δ` / `z`** columns. These cells sit in the
+> measurement neighbourhood of "payoff reach"
+> (`docs/sitting-prep-2026-08-05.md` §10.7), and the registration that fences
+> that neighbourhood cannot be produced. **Flagged, not quarantined by this
+> banner** (the authority names the core-attainment columns and nothing else):
+> the `tto` columns come from the same uncommitted throwaway harness
+> (`RunResult.time_to_online`, §1) — whether they ride the quarantine is the
+> coordinator's paper call, surfaced in the hunt report.
+>
+> **What quarantine means:** the numbers **stand exactly as published —
+> nothing is rewritten** (R101b). They are quarantined-pending-re-registration:
+> not quotable, not gradable, and not readable as input to any decision until
+> the fence is re-established. The 2026-08-06 search (branch
+> `findings/track-s2-registration-hunt`, report
+> `docs/registration-hunt-report-2026-08-06.md`) did **NOT** find the
+> registration; the clean re-registration draft is
+> `docs/payoff-reach-reregistration-draft-2026-08-06.md`, awaiting [USER]
+> countersign. Lifting this quarantine is a paper act recorded at the queue
+> row, not here. Every other column of both tables (win, act-1, acts, deck,
+> fights, decks-differ) is untouched by this banner.
+
 **Status: PROPOSED. Filed as successor CANDIDATE to the archived standing
 roster table.** Designation is [USER]'s (F4 pattern). Nothing in this document
 is ratified, and nothing here is a design recommendation: Track G carried
