@@ -174,6 +174,91 @@ def test_ambiguous_number_derivation_reads_the_registry(lint, tmp_path):
 
 
 # --------------------------------------------------------------------------
+# RULE 3 -- a NEW document may not mint an open-item row outside the two homes
+#           an open item has (docs diet, Track Z / Z-3).
+# --------------------------------------------------------------------------
+
+
+def _new_doc_with_open_rows(root: pathlib.Path, name: str, header: str = "") -> None:
+    (root / "docs" / name).parent.mkdir(parents=True, exist_ok=True)
+    (root / "docs" / name).write_text(
+        f"# A brand new note\n\n{header}\n"
+        "identifier-registry: allow-bare\n\n"
+        "- **Ribbon legibility** -- AWAITING [USER], nobody has looked at it.\n"
+        "- **The pulse has no visual** -- **OPEN**, needs a ruling.\n",
+        encoding="utf-8",
+    )
+
+
+def test_rule3_new_document_minting_open_items_fails(lint, tmp_path, capsys):
+    root = _fixture_repo(tmp_path)
+    _point(lint, root)
+    lint.write_baseline(*lint.harvest())
+    _new_doc_with_open_rows(root, "brand-new-sprint.md")
+    assert lint.check() == 1
+    out = capsys.readouterr().out
+    assert "RULE 3" in out and "brand-new-sprint.md" in out
+
+
+def test_rule3_the_queue_itself_is_allowed(lint, tmp_path):
+    root = _fixture_repo(tmp_path)
+    _point(lint, root)
+    lint.write_baseline(*lint.harvest())
+    _new_doc_with_open_rows(root, "registry/user-queue.md")
+    assert lint.check() == 0
+
+
+def test_rule3_a_docket_is_allowed(lint, tmp_path):
+    root = _fixture_repo(tmp_path)
+    _point(lint, root)
+    lint.write_baseline(*lint.harvest())
+    _new_doc_with_open_rows(root, "dockets/new-thing.md")
+    assert lint.check() == 0
+
+
+def test_rule3_frozen_lifecycle_header_exempts(lint, tmp_path):
+    """A REFERENCE record restates the history of an item; it does not mint work."""
+    root = _fixture_repo(tmp_path)
+    _point(lint, root)
+    lint.write_baseline(*lint.harvest())
+    _new_doc_with_open_rows(
+        root, "brand-new-sprint.md", header="> **Lifecycle: REFERENCE** -- frozen record.\n"
+    )
+    assert lint.check() == 0
+
+
+def test_rule3_escape_hatch_passes(lint, tmp_path):
+    root = _fixture_repo(tmp_path)
+    _point(lint, root)
+    lint.write_baseline(*lint.harvest())
+    _new_doc_with_open_rows(root, "brand-new-sprint.md", header="open-items: allow-elsewhere\n")
+    assert lint.check() == 0
+
+
+def test_rule3_prose_mentioning_an_open_question_is_not_a_row(lint, tmp_path):
+    """Under-flagging is the deliberate posture: only a bullet or table row that
+    carries an open marker is a minted row."""
+    root = _fixture_repo(tmp_path)
+    _point(lint, root)
+    lint.write_baseline(*lint.harvest())
+    (root / "docs" / "brand-new-sprint.md").write_text(
+        "# Note\n\nidentifier-registry: allow-bare\n\n"
+        "The axis question is still open, and the queue tracks it as AWAITING.\n",
+        encoding="utf-8",
+    )
+    assert lint.check() == 0
+
+
+def test_rule3_grandfathered_documents_never_fight_it(lint, tmp_path):
+    """An existing register full of open rows stays green forever."""
+    root = _fixture_repo(tmp_path)
+    _point(lint, root)
+    _new_doc_with_open_rows(root, "old-register.md")
+    lint.write_baseline(*lint.harvest())
+    assert lint.check() == 0
+
+
+# --------------------------------------------------------------------------
 # The real tree.
 # --------------------------------------------------------------------------
 

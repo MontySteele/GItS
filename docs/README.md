@@ -70,6 +70,22 @@ it on new documents (`registry/identifiers.md` §16).
 | `axis-validity-session-charter.md` | The Axis-Validity charter (RATIFIED 2026-08-04, AV-G2 countersigned). Grades R87(1), revises the same-y-pools diagnosis against canon, and opens Tracks A/B/C. **A-G1 was DISCHARGED 2026-08-04 (R91); B-G1 remains open** (row corrected 2026-08-06, R107 / S4 finding F7). |
 
 ### Open sprints and live queues
+
+> **Read this table with the lifecycle headers, 2026-08-06 (Track Z / Z-4).**
+> Only four documents in it are LIVING: `animation-sprint-2-plan.md`,
+> `kokomi-playtest-protocol.md`, `awaiting-user-slots-2026-08-06.md` and
+> `track-b-curves.md`. Every other row is a **completed-sprint log or a landing
+> record**, and those are now REFERENCE: frozen, indexed, out of the living
+> set. Their *rulings* live in the two DECISIONS ledgers; the logs are the
+> derivation record. A row below that says "OPEN" means the **work stream** is
+> open, not that the document is maintained — the open rows themselves were
+> migrated to `registry/user-queue.md` and `dockets/` by Z-3.
+>
+> REFERENCE documents do not move. Four `tools/` modules cite
+> `track-a-kickoff-brief.md` by path in their docstrings, and 37 `docs/` paths
+> are cited from `tools/` in total; `tier0/tests/test_doc_citation_targets.py`
+> now fails if a paper pass moves or renames any of them.
+
 | doc | what it is |
 |---|---|
 | `animation-sprint-2-plan.md` | Open sprint: gates B5/D5/E2/F2 (and the Funnel Contract §3, still binding). |

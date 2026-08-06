@@ -547,6 +547,13 @@ blind: every file under `docs/` is cited by at least one live artifact, test,
 tool or ledger, so archiving any of them would have broken a citation to fix a
 status. REFERENCE-in-place gives the same reader benefit at zero citation cost.
 
+**The citation guarantee that makes REFERENCE safe.** A frozen document does
+not move. 37 distinct `docs/` paths are cited from `tools/` — four modules cite
+`docs/track-a-kickoff-brief.md` alone, which is why the 2026-08-06 archive
+review kept it live. `tier0/tests/test_doc_citation_targets.py` now fails if
+any of those 37 stops resolving, so the next paper pass that renames a
+citation target finds out from the suite rather than from a broken tool.
+
 ### 15.5 Index-only files (18)
 
 These carry no header, either because the format has no comment syntax that
