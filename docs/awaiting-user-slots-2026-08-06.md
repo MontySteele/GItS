@@ -320,7 +320,22 @@ rewrite):**
 
 ## Slot 5 — `S4-G6` + `S4-G14`: re-anchor Kokomi's band and protocol to the post-rework build?
 
-**AWAITING [USER]. One word: YES or NO.**
+> **ANSWERED AND LANDED 2026-08-06 (Cold Reading, Track AC / `AC-2`) — reply:
+> YES.** Verbatim: *"deferral APPROVED — land staged slot (b): stability band +
+> protocol playtest re-anchor to the post-rework Kokomi build; declare-before-
+> playtest law intact."* (seventh-wave brief, Track AC item AC-2; transcribed at
+> `docs/sitting-record-predraft-2026-08-06.md` §8.) Form **5-YES** below was
+> landed verbatim, dated 2026-08-06, at all three of its named sites:
+> `tier0/DECISIONS.md` `DEC-D5` (annotation beneath clause 4),
+> `docs/kokomi-playtest-protocol.md` (header), and
+> `docs/registry/user-queue.md` §2/§7. The 5-NO form is **void**. Struck, not
+> deleted (R101b).
+>
+> Recorded because the reply's own words invite the misreading: **"deferral
+> APPROVED" approves the re-anchor, not a postponement of the band.** No band
+> is declared, nothing is graded, and `DEC-D5` clauses 2–4 survive intact.
+
+~~**AWAITING [USER]. One word: YES or NO.**~~
 
 **The question, in plain language first.** Kokomi's stability band was supposed
 to be declared before a confirmatory playtest and then graded by it. The build
@@ -350,7 +365,7 @@ value of the gate.
 3. `docs/registry/user-queue.md` §2, rows `S4-G6` and `S4-G14`, and §7's table
    row for the protocol playtest.
 
-### 5-YES — draft, lands only if the reply is YES
+### 5-YES — ~~draft, lands only if the reply is YES~~ **LANDED VERBATIM 2026-08-06**
 
 > **[USER] RULING <DATE> — `S4-G6` and `S4-G14` re-anchor to the post-rework
 > Kokomi build; `DEC-D5`'s declare-before-playtest law is INTACT.**
@@ -380,7 +395,7 @@ value of the gate.
 > by this ruling — does not schedule the playtest, does not discharge either
 > gate, and does not grade Kokomi against anything.
 
-### 5-NO — draft, lands only if the reply is NO
+### 5-NO — ~~draft, lands only if the reply is NO~~ **VOID 2026-08-06: the reply was YES**
 
 > **[USER] RULING <DATE> — no re-anchor; `S4-G6` and `S4-G14` stay as
 > registered.**

@@ -2573,6 +2573,42 @@ written; it was true on its date.
 
 **Class: RULING** (this record) -- provenance and schedule, no behavior change.
 
+> **[USER] RULING 2026-08-06 -- `S4-G6` and `S4-G14` re-anchor to the
+> post-rework Kokomi build; `DEC-D5`'s declare-before-playtest law is INTACT.**
+>
+> The confirmatory playtest named by `DEC-D5` clause 3 is **the protocol run
+> against the post-rework Kokomi build**, not any session that preceded it. The
+> co-op playtest of 2026-08-01/02 and playtest 4 are **EXPLORATORY** in exactly
+> the sense clause 1 already defines: sources of understanding, graded against
+> nothing. That designation is not a demotion of what they found -- playtest
+> four's closed priority check and its two "unjudgeable" answers stand as
+> findings -- it is a statement about what may be graded.
+>
+> **Every clause of `DEC-D5` survives unchanged and is restated here so the
+> re-anchor cannot be read as a softening:** the band is declared from **design
+> intent**, with its provenance (including which exploratory data was already
+> seen) recorded as part of the record; **declaration precedes** the
+> confirmatory playtest; and **the band may not be revised against the playtest
+> that grades it.** If the re-anchored playtest says the band is wrong, that is
+> a finding, ruled on separately and afterwards.
+>
+> **`S4-G14` follows `S4-G6`, unchanged in content.** The protocol's Q1-Q7 and
+> three priority checks are the same questions; only the build they are asked
+> against is fixed. Its existing blockers stand: it remains blocked on `S4-G6`
+> and on the N1 attribution pass.
+>
+> **What this does NOT do.** It does not declare the band -- no number is
+> written by this ruling -- does not schedule the playtest, does not discharge
+> either gate, and does not grade Kokomi against anything.
+
+> **LANDING NOTE, 2026-08-06 (Cold Reading, Track AC / R115).** The annotation
+> above is the YES form pre-drafted at
+> `docs/awaiting-user-slots-2026-08-06.md` slot 5 (Y-9(b)), landed verbatim
+> against [USER]'s reply: *"deferral APPROVED -- land staged slot (b)."*
+> Appended, never rewritten, per R101b: `DEC-D5`'s four clauses above are
+> untouched, which is the point -- the re-anchor moves *which* playtest is
+> confirmatory and moves nothing about the order of operations.
+
 ## R81 -- Distinctness gate ratified on the two-anchor floor (2026-07-27)
 
 Full evidence and derivation: docs/a2-gate-ratification-2026-07-27.md
@@ -4375,3 +4411,277 @@ same question at greater breadth and is surfaced with it (R115).
 **Class: SUBSTANTIVE.** One mechanism is ruled intended and re-registered as a
 watch item; three engine behaviours are ruled changed and queued. **No engine
 code moves under this entry**, and the two staged items move nothing at all.
+
+## R115 -- The fork was never evaluated, the Kokomi gates re-anchor, and a five-playtest table item becomes an instrument (2026-08-06)
+
+Sitting of 2026-08-06, third and fourth sittings, Track AC, items `AC-1`
+through `AC-5`. Records and reclassifications; **no lever is pulled and no
+value moves anywhere in this entry.**
+
+### AC-1 -- the `NT-G5` fork: INCONCLUSIVE BY NON-OBSERVATION, and the record shows its own correction
+
+Two readings arrived on the same day and the second supersedes the first. Both
+are on the record at `klee-mod/DECISIONS.md`, beneath the pre-registration,
+the earlier one struck and kept (R101b).
+
+**The superseded reading, verbatim: *"nothing stood out besides the charge
+stacking / missing animation; let's review next playtest."*** Recorded at the
+time as: no Neap Tide weakness observed, evaluation deferred.
+
+**The operative reading, verbatim: *"I don't remember seeing the card during
+the playtest, so it did not stand out one way or another."***
+
+**Why the difference is the whole content of the correction.** The first
+reading treats "nothing stood out" as a favourable read -- the hands did not
+call her weak. The second says the card **was not exercised**: it did not stand
+out because it was not seen. The pre-registration is explicit that **the hand
+is the tiebreaker, not the sim**, so a session in which the hand never touched
+the card cannot evaluate the fork at all. **Playtest three did not exercise
+Neap Tide.** The fork's evaluation was not deferred; it was **not possible**.
+
+**New record: the fork is OPEN, and its evaluation re-anchors to the next
+Kokomi playtest WITH AN EXPLICIT OBSERVATION TASK.** Neap Tide is to be
+deliberately drawn, played, and reported. The task is written into
+`docs/kokomi-playtest-protocol.md` as **`OT-1`**, with its own Answers row,
+rather than carried as an intention -- because the failure this record corrects
+was exactly an intention nobody executed. "Never offered" is recorded as a
+legitimate third outcome, structural rather than evaluative.
+
+**Candidate alternative, recorded and NOT chosen:** fold the fork's evaluation
+into the queued Kokomi pool-rework session instead of anchoring it to a
+playtest. It is a real option and it is written down so the choice is visible
+rather than defaulted into. **The observation task is the default, the fold-in
+is the candidate, and the preference is [USER]'s -- an open queue row, not a
+decision taken here.**
+
+**Unchanged, and restated because two evaluations in one day invite the
+mistake:** no lever is pulled by either reading. The fine-branch's **logged
+sim-calibration offset for exhaust-loop kits** remains unwritten and is still
+owed by the eventual evaluation. `S4-G13`'s fork half stays open.
+
+### AC-2 -- `S4-G6` and `S4-G14` re-anchor to the post-rework Kokomi build
+
+**Verbatim: *"deferral APPROVED -- land staged slot (b): stability band +
+protocol playtest re-anchor to the post-rework Kokomi build; declare-before-
+playtest law intact."***
+
+The YES form pre-drafted at `docs/awaiting-user-slots-2026-08-06.md` slot 5
+(Y-9(b)) is landed verbatim at all three of its named sites: `DEC-D5` (a dated
+annotation beneath clause 4), `docs/kokomi-playtest-protocol.md`'s header, and
+the queue. **`DEC-D5` clauses 2-4 survive intact** -- declared from design
+intent with provenance, declared BEFORE the grading playtest, never revised
+against the playtest that grades it. The re-anchor moves **which** playtest is
+confirmatory and moves nothing about the order of operations, which is the
+whole value of the gate.
+
+**Recorded because the reply's own words invite the misreading:** "deferral
+APPROVED" approves the **re-anchor**, not a postponement of the band. No band
+is declared here, nothing is graded, and neither gate is discharged. The
+co-op session of 2026-08-01/02 and playtest 4 are designated **EXPLORATORY** in
+clause 1's existing sense -- which is a statement about what may be graded, not
+a demotion of what they found.
+
+### AC-3 -- `S4-G5` / `B-G1`: STILL AWAITING, and it stays a queue row
+
+The narrow-to-Fanfare-axis disposition (slot 4, Y-9(a)) has **no reply**.
+Recorded here so a reader of this batch does not infer that everything staged
+by Y-9 landed: slot 5 landed, **slot 4 did not**. The row keeps its
+plain-language form and nothing is built against it.
+
+### AC-4 -- corpse detonation converts from table-luck to instrument, STAGED
+
+**Verbatim, on the odds of the table item closing on its own: *"who knows when
+it closes."***
+
+`S4-G15` has been a *"~10 seconds at the table"* settlement since 2026-07-21
+and has survived at least five playtests unanswered -- nobody has been holding
+Pounding Surprise, on the bombed enemy, on the killing turn, while remembering
+to look. **The question does not change; the way of answering it does.** A
+bridge-driven scripted probe is registered:
+`docs/probe-e-corpse-detonation-registration-draft.md` -- scripted fight, a
+known bomb count on a killable enemy, the killing blow landed deliberately,
+**two independent tells** (the relic spark and the HP deltas on the wire), a
+negative-control arm, and the sim's behaviour read off the sim rather than off
+the ledger's prose, which `NC-18` reports as backwards.
+
+**The registration is STAGED FOR COUNTERSIGN and nothing has been run.** A new
+probe is a pre-registered question under standing law, so it is paper until it
+is signed. **The `S4-G15` table item survives as FALLBACK ONLY** and is not
+retired -- if the probe is declined or stops short, the eyes-on check still
+closes the question the moment somebody is holding the relic on the right turn.
+
+### AC-5 -- the S2 event gallery becomes INSPIRATION-OPTIONAL
+
+The event-gallery curation sitting (47 events, 141 drafted variants -> 130 kept
+/ 11 cut, 4 demotions) **leaves the active-ask section of the queue** and joins
+the Ancients and boss-pool galleries in the inspiration-optional section.
+**Nothing is blocked on it**, which is the whole content of the
+reclassification: the event layer's conversion pass no longer waits on a
+checkbox sitting, and the gallery is read when somebody wants to read it.
+
+Two things this does NOT do. It does not cut, keep or demote anything -- the
+gallery's own recommendations stay exactly as drafted and unratified -- and it
+does not retire the gallery. One cross-reference rides with it: `NC-15`'s Brain
+Leech mismatch (shipped gallery text promises two cards, the option grants a
+pick-1-of-3) is the same event as the S2 flag, so whenever either is answered
+both are.
+
+**Class: MECHANICAL** for `AC-2`, `AC-4` and `AC-5` -- an annotation landed
+from a pre-drafted form, a registration staged, a status changed.
+**Class: SUBSTANTIVE** for `AC-1`, because a recorded evaluation is withdrawn
+and replaced, which changes what the fork is waiting on.
+
+## R116 -- S14 canonicity: five questions ruled, a register for future card work, and Errata Batch 2 is constituted (2026-08-06)
+
+Sitting of 2026-08-06, fourth sitting and final dispatch, Track AC item
+`AC-6`. Source: `review/parity-sweep/noncard-triage-memo.md` (S14, 174 findings
+across 173 entities). Verdicts verbatim; routing is this entry's. **Every fix
+named below is an Errata Batch 2 item and none is executed here** -- the paper
+track implements nothing in engine code.
+
+### NC-1 -- companion and power damage scales with the player. SIM CANONICAL; the mod is the defect.
+
+**Verbatim: *"They are supposed to also scale with you like your own cards."***
+
+tier0 routes companion-power damage through the full damage pipeline --
+Strength, Weak x0.75, Vulnerable x1.5 -- and the mod deals it as raw,
+dealer-less hits. **The sim is right.** C# routes companion-power damage
+through the full pipeline; **parity vectors are updated with the fix**, and
+`NC-1`'s own line evidence (Durin's Witch's Flame, found independently from
+both the companion and the powers side) **becomes the regression test.**
+
+**Implementation: Errata Batch 2 item 3.** Mod-only.
+
+**Explicitly NOT covered by this verdict: `NC-11`.** The verdict says so
+itself, and the reason it has to is that the two look like one question and cut
+opposite ways. Ruled separately below.
+
+### NC-7 -- Frozen is the timer, applied per-creature. Each engine adopts the other's half.
+
+**Verbatim: *"Ticks down per-turn, applies per-creature."***
+
+Frozen was two different mechanics. **Canonical Frozen, as ruled:** a
+**duration counter** that decrements at the end of the enemy side each turn,
+with stacking extending it -- which is **the mod's** semantics, so **the sim
+adopts the timer** and drops its one-shot boolean. And the boss substitution is
+**per-creature** -- which is **the sim's** semantics, so **the mod adopts
+per-creature**, and Kaiser Crab's boss-room adds become freezable in game where
+they are currently not.
+
+**Each engine gives up its own half.** Recorded that way deliberately: this is
+not "one side was right", and reading it as a win for either engine will
+produce the wrong fix.
+
+**Shipped-boss-fight impact is real and is noted in the batch**, not
+discovered by it: this touches a boss encounter that has shipped.
+**Version-stamp question surfaced per precedent** -- this changes sim combat
+math wherever Frozen appears, which is broader than any card. The stamp is
+decided by the batch that lands it, not by the paper.
+
+**Implementation: Errata Batch 2 item 5.** Both engines.
+
+### NC-10 -- the shop slots are specified, and both engines are defective against the spec
+
+**Verbatim: *"Slot 1 should be 'Uncommon or higher from the home region'; slot
+2 should be 'any companion card'; this is a defect."***
+
+Neither engine implements that. The sim rolls `SHOP_COMPANION_RARITY_ODDS` for
+both slots; the mod hard-wires slot 1 to Uncommon. **Both engines implement the
+spec:** slot 1 filters the home-region pool to **Uncommon or higher**, slot 2
+is **unrestricted**.
+
+**One implementation question is surfaced and deliberately NOT chosen here.**
+Rarity-odds renormalization *within* the Uncommon+ pool has at least two
+readable answers -- condition the existing `SHOP_COMPANION_RARITY_ODDS` on
+>= Uncommon, or state a fresh split -- and the implementer **surfaces the
+candidate readings rather than picking one**. A renormalization chosen by an
+implementer is a balance value chosen by an implementer.
+
+**Cross-noted to the companion-pricing docket:** the shop is now a **real Rare
+source in both slots' math**, which changes the acquisition assumptions that
+docket prices against. `R59`'s slot-2 floor and `R60`'s override live in the
+same neighbourhood and are named so the docket reads them together.
+
+**Implementation: Errata Batch 2 item 6.** Both engines.
+
+### NC-11 -- power-sourced block stays raw. SIM CANONICAL; the mod is the defect side.
+
+**Verbatim: *"I think that the answer is no; my recollection is that
+power-sourced block in the base game's kits ignores both of those."***
+
+`NC-11` was minted as a **new** question by the fourth sitting, precisely
+because `NC-1` was ruled and this one was named as not covered by it. It is
+ruled here.
+
+The sim's documented funnel exemption (`tier0/engine/powers.py:75-81`) is
+**canonical**: Metallicize, the Ceremonial Garment rider and the Kurage pulse
+add block **raw**, exempt from Frail and Dexterity. The mod is the defect side
+and stops routing all three through Frail/Dexterity.
+
+**The register this pair creates, recorded once for future card work**, because
+the two rulings are adjacent, opposite, and will be misremembered otherwise:
+
+> **Power-sourced DAMAGE runs the damage pipeline (`NC-1`).
+> Power-sourced BLOCK is raw (`NC-11`).**
+
+That is not an inconsistency; it is the base game's own shape, and a future
+card that grants both from one power obeys both lines.
+
+**Cross-note on `X10`, which this ruling closes.** S14 filed a caveat against
+S13's Metallicize treadmill: *"the exploit's numbers are sim-side; in the mod,
+Frail alone changes the wall's arithmetic."* **Post-fix that caveat resolves**
+-- the mod stops applying Frail to power-sourced block, so the treadmill's
+sim-side numbers hold in the mod too. The caveat is struck at its site with a
+banner citing this ruling; `X10`'s own disposition (CANDIDATE, not ratified,
+R111) is untouched.
+
+**Implementation: Errata Batch 2 item 4.** Mod-only.
+
+### NC-8 -- potions are actually consumed. RULED by inclusion.
+
+`NC-8` -- the event resolver pops the potion from a **throwaway copy** of the
+bag, so "The Future of Potions?" grants its reward free and the potion is
+retained -- carried a **presumptive** answer in the queue ("potions are
+consumed") awaiting one word. **The final dispatch supplies it by listing the
+fix as Errata Batch 2 item 2**, which is a ruling in the operative sense: the
+fix is ratified and executable.
+
+Recorded as ruled rather than as still-presumptive, and recorded *why*, so the
+next reader does not re-open it looking for a quoted sentence: **inclusion in a
+ratified batch is the answer**, and the presumptive reading was the one
+included.
+
+**Implementation: Errata Batch 2 item 2.** Sim-only (`tier05/events.py`).
+
+### Errata Batch 2 is constituted, ordered, and owned by a later track
+
+**One batch, both engines where applicable, suite green at each boundary.**
+Contents in the dispatch's own order:
+
+| # | item | engines |
+|---|---|---|
+| 1 | term-3 fanfare credit -- tier0 credits only plays covered by a standing designation (R113 clause C-a's queued fix) | sim only |
+| 2 | `NC-8` -- potions actually consumed (`tier05/events.py`) | sim only |
+| 3 | `NC-1` -- companion-power damage through the full pipeline | mod only |
+| 4 | `NC-11` -- power-sourced block raw | mod only |
+| 5 | `NC-7` -- Frozen unified: sim adopts the timer, mod adopts per-creature | both |
+| 6 | `NC-10` -- shop slot spec; odds renormalization surfaced, not chosen | both |
+| 7 | `FLAG-1` -- companion cost-delta accumulator scoped to the writing turn (R114) | both |
+| 8 | `FLAG-2` (i)/(ii) -- copies inherit printed bounds; `cost_override` = "this turn" (R114) | (i) as scoped; (ii) sim only |
+
+**After the batch:** parity vectors plus all lints; **S13 harness
+characterization on the affected lines -- report transitions, do not grade**;
+version-stamp questions surfaced in one place (`NC-7` at minimum, and R114
+surfaced FLAG-1/FLAG-2(ii) alongside it).
+
+**Two paper items land with the paper and are NOT batch items**, stated so the
+batch does not re-do them: FLAG-4 leg (c)'s documented-behaviour note (landed,
+R114) and the FLAG-3 / `X5` pin conversion (landed, R114).
+
+**Still staged or awaiting, and NOT in this batch:** `AB-s1`, `AB-s2`, `AC-3`,
+`AC-4`'s probe registration, and the Neap Tide fork's anchoring preference.
+
+**Class: SUBSTANTIVE.** Five parity questions take a canonical side and one
+standing register enters the constitution's orbit. **No engine code moves under
+this entry**, and the one implementation question with a balance shape
+(`NC-10`'s renormalization) is surfaced rather than answered.

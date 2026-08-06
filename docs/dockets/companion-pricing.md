@@ -105,3 +105,37 @@ beside the identical, already-red-pen-queued `sayu_naptime`→`moon_signal` pair
 **Parity question for the implementer:** the C# side reads companion rarity
 from `Star`, not the sheet's `rarity` field — this bump moves the sim/design
 sheet, and whether the cycling-rarity gate is enforceable in C# at all is open.
+
+---
+
+## 3. Cross-notes landed on this docket by the Cold Reading sitting (2026-08-06)
+
+Neither is a price and neither is this docket's to decide. Both change the
+**assumptions** the pricing sitting works from, which is why they are here
+rather than in a log somebody has to remember to read.
+
+**`NC-10` — the shop is now a real Rare source, in both slots (R116).**
+Verbatim: *"Slot 1 should be 'Uncommon or higher from the home region'; slot 2
+should be 'any companion card'; this is a defect."* Both engines implement the
+spec. **What that does to this docket:** every companion-acquisition assumption
+priced against "slot 1 caps at Uncommon" is now wrong in the generous
+direction — a Rare companion is reachable through the shop in both slots, so
+Rare-companion scarcity is not what the old readings assumed. `R59`'s slot-2
+floor and `R60`'s shop-only override sit in the same neighbourhood and should
+be read together with it.
+
+**One question is deliberately open and is NOT this docket's to close by
+default:** rarity-odds **renormalization within the Uncommon+ pool** — condition
+the existing `SHOP_COMPANION_RARITY_ODDS` on ≥Uncommon, or state a fresh split.
+R116 surfaced the candidate readings rather than choosing, because a
+renormalization chosen by an implementer is a balance value chosen by an
+implementer. If the pricing sitting wants to choose it, it may; it may not be
+chosen silently on the way to something else.
+
+**`NC-11` — `X10`'s S14 caveat resolves, and §1's candidate is unaffected
+(R116).** S14 had filed that X10's numbers were sim-side because Frail changes
+the wall's arithmetic in the mod. `NC-11` is ruled: **power-sourced block is
+raw**, the sim's exemption is canonical, and the mod is the defect side. So
+post-fix, **the treadmill's sim-side numbers hold in the mod too**, and §1's
+candidate is priced against numbers that describe both engines rather than one.
+§1's status is untouched — still a CANDIDATE, explicitly not ratified.
