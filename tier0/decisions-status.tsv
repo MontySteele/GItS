@@ -1,103 +1,116 @@
-# decisions-status.tsv — sidecar status table for the ruling ledger (Track R-D,
+# decisions-status.tsv -- sidecar status table for the ruling ledger (Track R-D,
 # Clear the Stage, 2026-08-06; plan of record review/stage-clear/refactor-plan.md §R-D).
-# One row per ruling R39–R120, across all volumes (tier0 DECISIONS volumes + klee-mod).
+# One row per ruling R39-R120, across all volumes (tier0 DECISIONS volumes + klee-mod).
 #
-# STATUS DISCIPLINE — read before editing:
-#   The plan says statuses need one [USER] red-pen pass. That pass HAS NOT
-#   HAPPENED (queue row: docs/registry/user-queue.md §4, "Decisions-status
-#   sidecar red-pen"). Until it does, no operative/superseded judgment is
-#   authored here. Only two kinds of status appear:
-#     - MECHANICALLY DERIVED: the ledger text itself carries an explicit
-#       superseded/amended/discharged strike or banner, or a later ruling names
-#       it so in its own text. The citing evidence is in the evidence column.
-#     - UNREVIEWED: everything else. UNREVIEWED is not a judgment — it means
-#       "the red-pen pass has not read this row", nothing more.
-#   After the red-pen pass, statuses move to the plan's full vocabulary
-#   (OPERATIVE | SUPERSEDED-BY:R<n> | DISCHARGED | HISTORICAL), one judgment
-#   recorded once, [USER]'s.
+# STATUS DISCIPLINE -- read before editing:
+#   Every row has now been READ. The Class-P status pass of 2026-08-06
+#   (order: docs/dispatch-2026-08-06-status-pass-order.md; digest:
+#   docs/registry/status-pass-digest-2026-08-06.md; P-ledger row + revert
+#   handle: docs/registry/p-ledger.md) triaged the 77 rows that used to say
+#   UNREVIEWED, under the order's own decision rule:
+#     - OPERATIVE means NO CITABLE SUPERSEDER WAS FOUND. It is an absence
+#       claim with its search scope recorded in the evidence column, not a
+#       judgment that the ruling is wise, current in spirit, or beyond
+#       re-opening. Anyone holding a citation this pass missed should file it.
+#     - AMENDED-BY / SUPERSEDED-BY / DISCHARGED-BY:R<n> is recorded ONLY on an
+#       explicit citation -- a later ruling or a dated in-entry banner naming
+#       the R-number in strike/amend/discharge/override language -- quoted in
+#       the evidence column, with the scope of the move stated. Where the move
+#       is partial, the evidence says so and the rest of the ruling is
+#       explicitly NOT judged.
+#     - DOUBT means supersession is ARGUABLE and this pass refuses to guess:
+#       a partial amendment, or a scope a later ruling narrowed without naming
+#       the ruling. Doubt disqualifies (Class-P charter §2). The DOUBT rows
+#       are a single [USER] queue row riding the S4-G9 sitting.
+#   The interpretive line this pass drew, recorded so it can be overruled in
+#   one place: a LATER BALANCE DOSE ON THE SAME CARD OR KNOB IS NOT A
+#   SUPERSEDER of the ruling that shipped the earlier number. Each dose is a
+#   number in a declared sequence, taken in its own stamped world, and every
+#   such ruling stands as the record of what it shipped. Only a ruling that
+#   names another ruling moves that ruling's status here.
 #
 # The digest generator (tools/gen_decisions_digest.py) is a pure reader of this
-# file; it renders UNREVIEWED rows as unreviewed rather than pretending.
+# file; it renders each row's status and never authors one.
 # ruling	status	evidence
-R39	UNREVIEWED
-R40	UNREVIEWED
-R41	UNREVIEWED
-R42	UNREVIEWED
-R43	UNREVIEWED
-R44	UNREVIEWED
-R45	UNREVIEWED
-R46	UNREVIEWED
-R47	UNREVIEWED
-R48	UNREVIEWED
-R49	UNREVIEWED
-R50	UNREVIEWED
-R51	UNREVIEWED
-R52	UNREVIEWED
-R53	UNREVIEWED
+R39	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R40	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R41	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R42	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R43	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R44	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs); the only in-entry banner is R102's escrow mark, STRUCK by R113 -- "the strike restores its pre-escrow status" -- so the threshold-reach table stands as ratified, with R113 clause C-d's limits riding.
+R45	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R46	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R47	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R48	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R49	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R50	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R51	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R52	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs); affirmed rather than superseded by R118 §5 row 10.8, verbatim: "the Neuvillette contradiction dissolves and R52 needs no amendment".
+R53	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
 R54	AMENDED-BY:R56	R56 preamble, verbatim: "USER RULING, same day as R54/R55 and SUPERSEDING their statline conclusions. R54 chose meter 20 on a 10-card starter with a /4 bank read; this ruling rebuilds the starting deck and flips the read to a multiplier. R54's act numbers are a superseded world -- never compare them unlabeled."
 R55	AMENDED-BY:R56	R56 preamble names R54/R55 jointly: "SUPERSEDING their statline conclusions" (statline conclusions only; the rest of R55 — the rename batch and voice law — is not named and is NOT judged here).
 R56	SUPERSEDED-BY:R73	In-entry banner at R56, verbatim: "SUPERSEDED BY R73 (Neap Tide v2.1, 2026-07-26; addendum A7 pointer.) ... every Kokomi number in this entry is archive." The banner's own carve-out (the withdrawal "still stands on its own terms") travels with it.
-R57	UNREVIEWED
-R58	UNREVIEWED
-R59	UNREVIEWED
-R60	UNREVIEWED
-R61	UNREVIEWED
-R62	UNREVIEWED
-R63	UNREVIEWED
-R64	UNREVIEWED
-R65	UNREVIEWED
-R66	UNREVIEWED
-R67	UNREVIEWED
-R68	UNREVIEWED
-R69	UNREVIEWED
-R70	UNREVIEWED
-R71	UNREVIEWED
-R72	UNREVIEWED
-R73	UNREVIEWED
-R74	UNREVIEWED
-R75	UNREVIEWED
-R76	UNREVIEWED
-R77	UNREVIEWED
-R78	UNREVIEWED
-R79	UNREVIEWED
-R80	UNREVIEWED
-R81	UNREVIEWED
-R82	UNREVIEWED
-R83	UNREVIEWED
-R84	UNREVIEWED
-R85	UNREVIEWED
-R86	UNREVIEWED
-R87	UNREVIEWED
+R57	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R58	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R59	DOUBT	arguable partial supersession: R116's NC-10 rules slot 2 "any companion card" / "unrestricted", which is incompatible with R59's Uncommon-or-Rare slot-2 floor, and R116 names R59 in the same section ("`R59`'s slot-2 floor and `R60`'s override live in the same neighbourhood") -- but as a docket cross-note, never as a strike. Cited-and-contradicted is not cited-as-superseded.
+R60	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs); R116's NC-10 names "`R60`'s override" as a docket cross-note only, and NC-10's slot spec does not touch the shop-only override or the deferred phase-2 removal that are R60's content.
+R61	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R62	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R63	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R64	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R65	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R66	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R67	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R68	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R69	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R70	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R71	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R72	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R73	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R74	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R75	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R76	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R77	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R78	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R79	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R80	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R81	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R82	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R83	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R84	AMENDED-BY:R107	in-entry dated banner at R84, verbatim: "THE 'ONLY QUOTABLE ROSTER TABLE' IS ARCHIVED -- annotated 2026-08-06 (R107; S4 finding F4)" ... "the archive rule wins, because it is the later ruling and the general one". Scope: only the quotable-table designation is archived (successor named in the banner; re-designated again by R118 §2 row 10.2 under v6). R84's three rulings -- v11 constants RATIFIED, `_static_power` authorized, fresh 3-act recalculation ordered -- are not struck and are NOT judged here.
+R85	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R86	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R87	AMENDED-BY:R107	in-entry dated banner at R87, verbatim: "GOVERNING CONDITION RE-POINTED 2026-08-06 (R107; S4 finding F1)" -- item (1)'s condition "can never be met" and items 1-3 plus the fanfare STOP "now govern on Track B / B-G1". Scope: the governing condition only, "Re-pointed, not released"; R118 §1 Q7 later re-points the same fence to the narrowed Fanfare-axis form. R87's other three rulings are not struck and are NOT judged here. (The separate R102 escrow banner on item (1) was STRUCK by R113; the 1.8% STOP stands as ratified.)
 R88	AMENDED-BY:R118	The exclusivity clause is struck at R88 itself with a dated banner: "AMENDED 2026-08-06 (R118, §5 row 10.8) -- the exclusivity clause above is ... superseded by the cleaner principle"; R118's own text: "R88 is amended -- the exclusivity clause ... struck". The rest of R88 (the slot-4 grant, countersigned at R108) is not struck and is NOT judged here.
-R89	UNREVIEWED
-R90	UNREVIEWED
-R91	UNREVIEWED
-R92	UNREVIEWED
-R93	UNREVIEWED
-R94	UNREVIEWED
-R95	UNREVIEWED
-R96	UNREVIEWED
-R97	UNREVIEWED
-R98	UNREVIEWED
-R99	UNREVIEWED
-R100	UNREVIEWED
-R101	UNREVIEWED
+R89	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R90	AMENDED-BY:R118	in-entry dated banner at R90 clause 1b, verbatim: "[USER] RULING 2026-08-06 -- `B-G1` is NARROWED to the Fanfare axis; the other six axes close permanently" (Q7, "landed verbatim per R118"). Scope: the gate 1b re-registered the question to -- "only its scope shrinks". Clauses 1a and 1c are not struck and are NOT judged here.
+R91	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R92	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R93	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R94	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R95	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R96	AMENDED-BY:R107	in-entry dated banner at R96 item 1, verbatim: "CORRECTION 2026-08-06 (R107; S4 finding F2). The fixture is RE-HOMED to the `_static_power` repricing session ... and is no longer an acceptance condition on DRAFTER 13." Scope: item 1's acceptance owner only -- "Nothing measured is rewritten"; items 2 and 3 are not struck and are NOT judged here.
+R97	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R98	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R99	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs); the only in-entry banner is R102's escrow mark on item 4, STRUCK by R113 -- the R91/2b revisit posture "stands exactly as ratified" and stays open on its own terms, with clause C-d's salon-empty limit repeated at the site.
+R100	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R101	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
 R102	DISCHARGED-BY:R113	R102's escrow was its operative content ("until the C2 probe reports"); R113's heading releases it and each of the three escrow banners R102 planted is struck with the citation "STRUCK 2026-08-06 (R113) -- escrow released, instrument vindicated."
-R103	UNREVIEWED
-R104	UNREVIEWED
-R105	UNREVIEWED
-R106	UNREVIEWED
-R107	UNREVIEWED
-R108	UNREVIEWED
-R109	UNREVIEWED
-R110	UNREVIEWED
-R111	UNREVIEWED
-R112	UNREVIEWED
-R113	UNREVIEWED
-R114	UNREVIEWED
-R115	UNREVIEWED
-R116	UNREVIEWED
-R117	UNREVIEWED
-R118	UNREVIEWED
-R119	UNREVIEWED
-R120	UNREVIEWED
+R103	DOUBT	arguable partial supersession by events rather than by text: R103(b) gates the selector-recorded fanfare trace on P1.5 ("It cannot run before the bridge records the Center Stage / Guest Cast choice"), and R104 restates that gate -- yet R113 writes C2 off on a probe (b) whose own residual names "the unrecorded Spotlight selector" as term 1. Whether R103(b)'s gate was discharged, narrowed, or simply describes a different instrument than the probe that reported is arguable, and no ruling names R103.
+R104	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R105	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R106	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R107	DOUBT	arguable partial supersession: R118 §1 Q7 says "the R107/F1 fence re-points to the narrowed gate", naming `R107/F1` explicitly, while R90's landed banner insists "the condition is the same condition, stated at the width that actually binds" and "Nothing is unfenced". Amendment of R107's F1 clause versus restatement of it at a narrower gate is exactly the call this row will not make on its own authority.
+R108	AMENDED-BY:R118	in-entry dated banner beneath R108's addendum clause, verbatim: "DATED NOTE, 2026-08-06 (R118, §5 row 10.8) ... Its 'released to the companion pool' justification ... is **superseded by the cleaner principle**". Scope: the addendum's justification only -- "The addendum above stands unchanged", "Nothing is re-decided by this note", Itto's registration is COMPANION CARD and Zhongli still holds slot 4. R108's own subject is not struck and is NOT judged here.
+R109	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R110	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R111	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R112	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R113	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R114	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R115	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R116	AMENDED-BY:R117	in-entry dated banner at R116's NC-7 section, verbatim: "REQUIRED ANNOTATION, 2026-08-06 (R117, Q13). This ruling's stated consequence -- Kaiser Crab's second claw remaining freezable ... is **overridden deliberately** by [USER]'s alpha selection". Scope: NC-7's stated boss-room consequence only; NC-7's canonical Frozen and the other four canonicity rulings are not struck and are NOT judged here.
+R117	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R118	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R119	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R120	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
