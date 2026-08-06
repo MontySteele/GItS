@@ -438,10 +438,11 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         p.block = 0
 
     state.companion_plays_this_turn = 0          # Blocking Notes' slope
-    state.companion_cost_delta_this_turn = 0     # Friendly Visit expires
-    # replay_next_companion is NOT cleared here any more -- it expires at the
-    # END of the turn it was written on (see `in_player_turn = False` below).
-    # Sitting 2026-08-06, family X11: "Cap those effects to 'same turn only'".
+    # NEITHER `replay_next_companion` NOR `companion_cost_delta_this_turn` is
+    # cleared here any more: both expire at the END of the turn that wrote
+    # them (see `in_player_turn = False` below). X11 first, ratified by R110;
+    # X1's accumulator joined it under FLAG-1 (R114) -- "Limit the cost
+    # discount to the current turn? Yes." One boundary idiom, used twice.
     state.splash_procs_this_turn = 0             # detonation_splash cap
     state.reactions_this_turn = 0                # Chevreuse predicate window
     state.spotlighted_cards_this_turn = 0        # Ovation / reserve cap
@@ -603,6 +604,21 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # writing turn's end, and ReplayNextCompanionPower.AfterSideTurnEnd already
     # does exactly this. One mechanism, one boundary, both parity twins covered.
     state.replay_next_companion = 0
+    # FLAG-1 (R114, Errata Batch 2 item 7): the SAME boundary, for the OTHER
+    # mechanism. `companion_cost_delta_this_turn` is additive and uncapped,
+    # and its discount used to be cleared at the next player turn's OPEN --
+    # so a stack written on turn N was still standing through the enemy side
+    # and into turn N+1's opening. It now dies with the turn that wrote it.
+    #
+    # DISTINCT FROM FLAG-2(ii)'s `cost_override`, and they may not be
+    # conflated: two mechanisms, two fixes, one shared boundary idiom.
+    #
+    # WHAT THIS DOES NOT CLOSE, stated because the fix invites the mistake:
+    # the WITHIN-turn free-companion loop survives BY DESIGN. A same-turn
+    # bound does not touch a mechanism that accumulates and spends inside one
+    # turn -- the same shape X11's errata hit, and the same shape the X1 pin
+    # still reports. That loop is governed by the X2 rarity law (R109).
+    state.companion_cost_delta_this_turn = 0
     # INSTRUMENT ONLY (pair of `turn_open`): the block standing when the player
     # hands the turn over, which is the quantity a demand curve is read against.
     # A turn that ended by killing the last enemy or by the player dying never

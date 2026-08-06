@@ -865,6 +865,28 @@ def test_replay_next_companion_dies_with_the_turn_that_wrote_it():
     assert st.replay_next_companion == 0
 
 
+def test_companion_cost_delta_dies_with_the_turn_that_wrote_it():
+    """FLAG-1 (R114, Errata Batch 2 item 7): "Limit the cost discount to the
+    current turn? Yes."
+
+    The SAME write-side boundary as the test above, for a different
+    mechanism -- `companion_cost_delta_this_turn` is additive and uncapped,
+    and its discount used to be cleared at the next player turn's OPEN, so a
+    stack written on turn N was still standing through the enemy side and
+    into the opening of turn N+1. Two mechanisms, two fixes, one idiom.
+
+    NOT `cost_override` (FLAG-2(ii)), which is per-CARD state and has its own
+    fix. R114 said in as many words that the two may not be conflated.
+    """
+    def discount_then_stop(state):
+        state.companion_cost_delta_this_turn = -3   # written, never spent
+        return None
+
+    st = furina_state()
+    combat._player_turn(st, discount_then_stop)
+    assert st.companion_cost_delta_this_turn == 0
+
+
 def test_selector_hand_full_discards_one_card_first():
     """X14 leg (b), closed by sitting 2026-08-06: "if the hand is full, one
     random card is discarded before the spotlight is added."
