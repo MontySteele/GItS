@@ -109,7 +109,8 @@ take_your_bow:         {add: {op: gain_encore, amount: 3}}
                                              # stage in two plays and turn the probe into a combo piece before
                                              # anyone has measured the first one.
 full_ensemble:         {cost: -1}            # 2->1 after the rework reprice (uncommon cost slot; bombs_away precedent)
-grand_salon:           {power_amount: +1}    # A10 (2026-07-28): +1->+2, cap 6 unchanged
+grand_salon:           {power_amount: +1}    # A10 (2026-07-28): +1->+2. No stack cap to preserve --
+                                             # salon_damage_up's was dropped 2026-07-24 (uncap-all).
 many_waters_melody:    {encore: +1}          # 4->5 base; the member wall stays 5 (Curtain Call C)
 dress_rehearsal:       {encore_cost: -1}     # Spend 2 -> Spend 1 (condition-soften class)
 crashing_waves:        {damage: +2}          # 8->10 all; aura bonus stays 5
@@ -121,18 +122,24 @@ florid_cadenza:        {condition: unconditional}  # F-B1: the upgrade DROPS THE
                                              # upgraded it is the pre-sprint card (3 draw, 0 cost), and the base
                                              # version is the one that now has to earn it.
 hearts_swelling:       {encore: +2}          # 7->9
-rapturous_applause:    {power_amount: +1}    # +1->+2 per 10 Fanfare, cap 2 unchanged
+rapturous_applause:    {power_amount: +1}    # +1->+2 per 10 Fanfare. No stack cap to preserve --
+                                             # fanfare_attack_per10's was dropped 2026-07-24 (uncap-all).
 pit_orchestra:         {power_amount: +2}    # bow-block 5->7; the Encore half stays 2 (first apply_power gets the bump)
 flood_of_emotion:      {damage: +3}          # first strike 14->17; threshold strike stays 14; applies hydro again (shrink clause)
 leading_role:          {cost: -1}            # 1->0 (endless_fireworks engine-power precedent)
 supporting_cast:       {power_amount: +1}    # first Spotlighted card draws 1->2
 guest_list:            {generate_cost_override: 0}   # Discovery parity
 directors_cut:         {draw: +1}            # both branches: 2->3 / 1->2
-top_billing:           {cost: -1}            # 1->0 (mined power-cost line); the boost and its two-copy ceiling stay
+top_billing:           {cost: -1}            # 1->0 (mined power-cost line); the +25% boost is authored, not
+                                             # upgraded (R16), and stacks per copy with no ceiling -- the
+                                             # two-copy cap was dropped 2026-07-24 (uncap-all)
 duet:                  {draw: +1}            # 1->2
-standing_ovation:      {cost: -1}            # 1->0 after the machinery-efficiency pass. R32.1 flip:
-                                             # upgrading the +10%/spend amount would outgrow the two-copy cap
-                                             # (20 != amount, applier correctly won't bump it) — cost is the lever.
+standing_ovation:      {cost: -1}            # 1->0 after the machinery-efficiency pass. R32.1 flip: the
+                                             # +10%/spend amount is left authored rather than upgraded. NOTE the
+                                             # original reasoning here ("would outgrow the two-copy cap") is VOID:
+                                             # ovation_spend_boost's ceiling was dropped 2026-07-24 (uncap-all)
+                                             # and it now stacks per copy. Cost stays the lever by ratification,
+                                             # not by that argument.
 fortissimo_guard:      {power_amount: +2}    # deploy-block 5->7 (Curtain Call B: skill->power; block delta retired with the flat body)
 courtroom_drama:       {power_amount: +1}    # cross_examination 1->2 (both counts grow together by design)
 quick_change:          {power_amount: +1}    # first-Attack draw 1->2 (Curtain Call B: skill->power)

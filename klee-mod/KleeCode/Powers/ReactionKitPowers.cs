@@ -26,10 +26,14 @@ public static class ReactionKitConstants
 /// the base reaction grant, so it can neither miss a reaction nor
 /// double-count one.
 ///
-/// NO UPGRADE PATH: the sim's upgrade engine marks catalytic_conversion
-/// UNAPPLIABLE (CATALYTIC_BURST_PER_REACTION is a constant, upgrades.py), so
-/// its sheet upgrade was never measured. Same disposition as hot_hands --
-/// awaiting user ruling; do not invent an upgrade game-side.
+/// UPGRADE: {innate: true} (klee-upgrades.yaml, R37 2026-07-20) -- the card
+/// starts in the opening hand; the per-reaction magnitude does NOT move,
+/// because CATALYTIC_BURST_PER_REACTION is a constant rather than a card
+/// field. catalytic_conversion LEFT tier0 upgrades.UNAPPLIABLE with that
+/// ruling (the set is empty today), so the delta is sim-expressible and
+/// measured. hot_hands settled the same way, at {retain: true} (playtest
+/// 2026-07-22). Neither is "awaiting a ruling" any more; still do not
+/// invent an upgrade game-side -- the sheet is the source of truth.
 /// </summary>
 public sealed class ReactionBonusSparkEnergyPower : PowerModel, ILocalizationProvider
 {

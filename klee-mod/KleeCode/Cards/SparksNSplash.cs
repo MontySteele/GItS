@@ -15,11 +15,15 @@ namespace KleeMod.Cards;
 /// Sparks 'n' Splash -- the kit Burst card (sheet: rare power, cost 0,
 /// kit_card, requires burst_energy_full; v1.9: the Burst is kit, not loot).
 ///
-/// Hand-written: its lifecycle is machinery, not ops. NEVER in
-/// KleeCardPool.GenerateAllCards -- the card is granted to hand by
-/// <see cref="KitGrant"/> when the Burst meter fills and is otherwise
-/// unobtainable (not draftable, not transformable; the sim's loader excludes
-/// kit cards from every pool).
+/// Hand-written: its lifecycle is machinery, not ops. It IS listed in
+/// KleeCardPool.GenerateAllCards (via KleeOffPoolCards) -- CardModel.Pool
+/// resolves against AllCards and a poolless card crashes the moment it is
+/// drawn -- but KleeCardPool.FilterThroughEpochs strips it from
+/// GetUnlockedCards, which is the only path into reward rolls and card
+/// transforms. So the card is granted to hand by <see cref="KitGrant"/> when
+/// the Burst meter fills and is otherwise unobtainable (not draftable, not
+/// transformable; the sim's loader excludes kit cards from every pool).
+/// See KleeOffPoolCards for the full story.
 ///
 /// Cost model: 0 energy (normal EnergyCost) PLUS a BaseLib custom-resource
 /// cost of the full meter -- SetCanonicalCost(40) wires CanAfford (>= 40)
@@ -57,8 +61,10 @@ public sealed class SparksNSplash : CustomCardModel
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Retain };
 
-    // autoAdd: false -- and deliberately NOT in KleeCardPool either (kit is
-    // never draftable). The custom-resource cost is per-instance state;
+    // autoAdd: false -- KleeCardPool owns membership (see Kaboom), and it
+    // registers this one through KleeOffPoolCards: in AllCards so Pool
+    // resolves, out of GetUnlockedCards so nothing can roll it. The kit is
+    // never draftable. The custom-resource cost is per-instance state;
     // setting it in the ctor covers the canonical and every CreateCard copy.
     public SparksNSplash()
         : base(0, CardType.Power, CardRarity.Rare, TargetType.Self, autoAdd: false)

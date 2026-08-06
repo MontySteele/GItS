@@ -16,8 +16,10 @@ namespace KleeMod.Cards;
 
 /// <summary>
 /// Sheet: uncommon skill, cost 2, refresh all elemental auras, draw 1 card
-/// per aura. Hand-written (R23). Port of tier0 _op_refresh_all_auras +
-/// _op_draw's per_aura formula: count first, refresh each, draw the count.
+/// per aura, and gain 8 Block if the default-aim target has a non-Pyro aura.
+/// Hand-written (R23). Port of tier0 _op_refresh_all_auras + _op_draw's
+/// per_aura formula (count first, refresh each, draw the count) plus the
+/// `target_has_nonpyro_aura` conditional block branch.
 ///
 /// Skills carry no element (sheet header), so playing this never applies or
 /// consumes anything -- it only resets durations, which is why it reads the

@@ -41,7 +41,9 @@
 # NO passive accrual anywhere on this sheet — no per-turn Encore or Fanfare trickle exists, and none may be added (a per-turn Encore
 # power would launder passive Fanfare through the gain hook; deliberately not designed — see sheet-pass plan §5).
 # SPOTLIGHT v5: Center Stage gives Furina plays Fanfare but no numeric boost; Guest Cast empowers every Companion card
-# and gives no Spotlight-derived Fanfare. Fanfare payoffs spend the capped pool so generation can keep cycling.
+# and gives no Spotlight-derived Fanfare. Fanfare payoffs READ the pool -- "The Tide Turns" (F-A4) retired
+# fanfare_cost and no card spends it; the_final_verdict is the one card that lowers it, by crashing it to a floor
+# it also drops.
 
 # ---------- BASIC (5) ----------
 - {id: soloists_solicitation, name: "Soloist's Solicitation", register: salon, cost: 1, type: attack, rarity: basic, solve: [frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
@@ -551,8 +553,9 @@
    # sustain ON the declared shape — and long-fight survival must come from the rider-swap windows' debuff
    # texture, not from re-fattening the buffer (absorption compounds with survival; the axis bills it all).
    # The identity is FLUX: the buffer moves BOTH ways. Was: gain 2 Encore per Spotlighted play, no spend
-   # trigger (the hot-sustain root cause, R31). Boost has a two-copy ceiling (10+10,
-   # top_billing's cap grammar); the trickle never stacks. Header law honored: the trickle is ACTIVITY-gated
+   # trigger (the hot-sustain root cause, R31). Both halves now stack per copy with no ceiling -- the boost's
+   # two-copy cap went with top_billing's in the same uncap-all ruling, and the trickle's went with the other
+   # first-play riders (leading_role / supporting_cast). Header law honored: the trickle is ACTIVITY-gated
    # (first Spotlighted PLAY each turn — a silent turn pays nothing), not passive per-turn accrual.
    # PROPOSED pending red-pen. (lint-ok: pct points)
 # Generic (4)

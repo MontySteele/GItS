@@ -110,12 +110,13 @@
    effects: [{op: summon_kurage, amount: 1}, {op: gain_charge, amount: 1}]}
    # Signature basic: the jellyfish takes the field — and STAYS there. v0.4 O4 salvage (plan §1.1): the one-shot
    # body is replaced by a persistent summon that holds for KURAGE_DURATION turns and pulses at each turn end
-   # for KURAGE_PULSE_BASE + Charge/KURAGE_PULSE_DIVISOR damage, hydro application, and KURAGE_PULSE_BLOCK
+   # for KURAGE_PULSE_BASE + Charge x KURAGE_PULSE_PER_CHARGE damage, hydro application, and KURAGE_PULSE_BLOCK
    # Block. The old body's three lines all survive inside the pulse — application, Block, and the meter — but
    # now they repeat and they SCALE, which is the point: v0.3 bought its act-1 clear by making the BURST a
    # metronome (meter 10), and the ratio instrument correctly read that as frontload. Canon keeps the metronome
    # on the summon, so this is where it goes. Small at Charge 0, real by node 4: an A2 signature carrying the
-   # fight-1 survival math that meter 10 was buying. The `amount: 3` mirrors KURAGE_DURATION (test-pinned).
+   # fight-1 survival math that meter 10 was buying. The `amount: 1` mirrors KURAGE_DURATION (test-pinned;
+   # the v0.4 starter rework took the duration 3 -> 1, and this row followed it).
    # skill_tag = burst particles. The meter is NAMED for this card (kickoff §2.1).
    # v0.3: +1 Charge — the signature basic TEACHES the meter from fight 1 (the Regent-common lesson: the
    # scaling currency rides on ordinary plays, it is not a separate purchase). Kept verbatim.
@@ -524,10 +525,14 @@
    # HER BURST (kit, v1.9: granted on charge, Retain, never in pool) — SHAPE B, the kickoff recommendation: enter
    # the state for 3 turns (CEREMONIAL_GARMENT_TURNS; test-pinned to the constant); while it holds, her attack
    # cards read Charge (+1 damage per GARMENT_CHARGE_DIVISOR=2 Charge, per play — v0.3 charge-curve pass: /4 was
-   # decoration, /2 makes a priest-median bank a Burst-tier window). Entry splash 5 -> 7 (clears Skittish 6). (lint-ok: v0.3 history)
-   # Cost 0: the charged meter IS the cost (Klee/Furina precedent). Meter 10 (v0.3, PROPOSED — the pass's
-   # decisive lever, grid in sheetpass report §6): a FAST-CYCLING Burst, her Salon-member analogue. Particles:
-   # skill tags (5), reactions (5), exhaust events (KOKOMI_BURST_PER_EXHAUST=2). Two bake plays fill it. (lint-ok: engine constants, not this row)
+   # decoration, /2 makes a priest-median bank a Burst-tier window). There is NO entry splash — R74 removed it
+   # (see the note above); the state IS the whole card.
+   # Cost 0: the charged meter IS the cost (Klee/Furina precedent). Meter 20 (lint-ok: engine constant burst_max)
+   # — v0.4 O4 salvage, PROPOSED: burst_max 10 -> 20 once the Kurage took over the periodic output, and the W2 (lint-ok: engine constant burst_max)
+   # bracket lives on that constant in tier0/content/characters/kokomi.yaml.
+   # It is a real Burst WINDOW again, not the fast-cycling metronome the
+   # v0.3 meter made it — that reading was the §6.4 frontload tension O4 exists to answer. Particles:
+   # skill tags (5), reactions (5), exhaust events (KOKOMI_BURST_PER_EXHAUST=2). Four bake plays fill it. (lint-ok: engine constants, not this row)
    # FINISHER SHAPE IS RULING ASK 6: this roster ships the recommended both-with-capstone world (state as kit,
    # nuke as rate-limited Rare below) so the early sims can inform the ruling, not preempt it.
 - {id: nereids_ascension, name: "Nereid's Ascension", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [priest, generic], role: payoff, exhaust: true,
