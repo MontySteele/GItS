@@ -24,6 +24,7 @@ REPO = Path(loader.__file__).resolve().parents[2]
 
 sys.path.insert(0, str(REPO / "tools"))
 import lint_strict_domination as dom     # noqa: E402
+import lint_handwritten_parity as hwp    # noqa: E402
 
 
 def _sheet_paths():
@@ -288,6 +289,69 @@ def test_handwritten_cards_match_their_sheets():
         [sys.executable, str(REPO / "tools" / "lint_handwritten_parity.py")],
         capture_output=True, text=True)
     assert res.returncode == 0, res.stdout + res.stderr
+    # EB-3: the gate must be running the Ancient witness too. A lint that
+    # silently stopped covering a category still exits 0.
+    assert "sheetless Ancients witnessed" in res.stdout, res.stdout
+
+
+def _row(sheet_name: str, card_id: str) -> dict:
+    import yaml
+    rows = yaml.safe_load(
+        (loader.DOCS_DIR / sheet_name).read_text(encoding="utf-8"))
+    return next(r for r in rows if r["id"] == card_id)
+
+
+def test_furina_kit_burst_numbers_come_from_her_sheet():
+    """EB-3. `let_the_people_rejoice` was the last named deferral in the
+    hand-written parity gate: its ops (gain_encore, and a Fanfare damage
+    rider) had no parity rule, so four numbers in
+    Cards/Furina/LetThePeopleRejoice.cs -- 8, 1, 4 and 6 -- existed in C# with
+    nothing comparing them to docs/furina-cards.yaml.
+
+    Asserted here at the RULE level rather than only through the lint's exit
+    code, because the failure mode that matters is a rule that stops firing:
+    a walk that quietly produced no Encore expectation would still leave the
+    lint green, since the C# side would then match an empty expectation.
+    """
+    assert "let_the_people_rejoice" not in hwp.ROSTER_DEFERRED
+
+    row = _row("furina-cards.yaml", "let_the_people_rejoice")
+    exp = hwp.Expected()
+    hwp.walk_effects(row["effects"], exp, row)
+    assert sorted(exp.vars) == [1, 8]        # base damage + the rider's step
+    assert exp.encore == [6]                 # gain_encore, not a DynamicVar
+    assert exp.fanfare_riders == [(1, 4)]    # 1_per_4_fanfare
+
+    path = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina"
+            / "LetThePeopleRejoice.cs")
+    got = hwp.extract_cs(path.read_text(encoding="utf-8"))
+    assert hwp.furina_number_findings(exp, got, path.name) == []
+    # And it bites: the Encore literal is a bare int argument, which is the
+    # reason it needed a category of its own.
+    drifted = hwp.extract_cs(
+        path.read_text(encoding="utf-8").replace(
+            "GainEncore(Owner.Creature, 6)", "GainEncore(Owner.Creature, 7)"))
+    assert hwp.furina_number_findings(exp, drifted, path.name)
+
+
+def test_every_ancient_card_carries_a_pinned_witness():
+    """EB-3, the other half. Ancient-rarity cards have no sheet row and never
+    will -- the sim models neither events nor relics -- so `+5 Encore per
+    turn` on AllTheWorldsAStage lived in exactly one place in the repo and any
+    edit to it was self-consistent by definition.
+
+    ANCIENT_WITNESS pins each one's numbers by value. The pin does not claim
+    the number is right (nothing can, for an Ancient); it claims the number is
+    what it was when someone last looked, so a change has to be made twice.
+
+    Checked in both directions, like every table in that file: an unpinned
+    Ancient and a pin whose card is gone are both findings.
+    """
+    assert hwp.ancient_witness() == []
+    assert "AllTheWorldsAStage" in hwp.ANCIENT_WITNESS
+    for name, pin in hwp.ANCIENT_WITNESS.items():
+        assert pin.get("why"), f"{name}: a witness without a reason is a shrug"
+        assert all(k in pin for k in hwp.WITNESSED_CATEGORIES), name
 
 
 def test_every_draftable_card_can_be_upgraded():
