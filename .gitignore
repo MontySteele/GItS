@@ -5,6 +5,10 @@ __pycache__/
 *.csv
 .DS_Store
 
+# Claude Code sibling worktrees live here; the checkouts are local scratch and
+# never repo content. Their tips are archived to origin as archive/* branches.
+.claude/worktrees/
+
 # Tier F art (principles §9: never ships, never distributed — repo is public).
 # Only the ledgers (SOURCES.tsv, plan.tsv) and tools are tracked.
 art/raw/
