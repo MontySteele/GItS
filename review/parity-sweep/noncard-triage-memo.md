@@ -71,6 +71,27 @@ substitution (`FROZEN_BOSS_VULN`) is per-*creature* in sim and the design doc bu
 per-*room* in C#, so boss-room adds (Kaiser Crab's second claw) are un-freezable in
 game. Three findings across two agents; touches a shipped boss fight.
 
+**EXECUTION NOTE 2026-08-06 (Errata Batch 2 item 5) — the SIM half LANDED, the MOD
+half is STOPPED and surfaced.** The sim adopted the timer (`Enemy.frozen` is now a
+duration counter decremented at the end of the enemy side, stacking extends, Shatter
+clears the whole counter). The mod half did not land, because **the game exposes no
+per-creature boss fact to key the substitution on**, and choosing one is a design
+call the ruling did not make. Verified by reflection over `sts2.dll`: `MonsterModel`
+has no boss/rank/tier member; `Creature` has none; `EncounterModel` carries
+`RoomType`, `Tags` (a flavour enum: Slimes, Thieves, Knights…), `MonstersWithSlots`
+and `SpawnedEnemies`; the only per-creature "secondary enemy" concept in the assembly
+is `MinionPower.OwnerIsSecondaryEnemy`, which Kaiser Crab's claws do not carry —
+`KaiserCrabBoss` declares both of them as slotted monsters (`_crusherSlot`,
+`_rocketSlot`). The sim's `is_boss` is authored per-enemy data (`kaiser_crusher`
+`is_boss: true`, `kaiser_rocket` absent, `tier05/content/act2_pool.yaml`) and the mod
+has no equivalent. Two readable predicates, and they disagree on the ruling's own
+example: **(α) minions only** — a boss-room creature carrying `MinionPower` gets
+Frozen, everything else gets Vulnerable; mechanical, uses the game's only per-creature
+secondary-enemy concept, and does **not** make Kaiser Crab's second claw freezable,
+so it contradicts R116's stated consequence. **(β) a named non-boss roster** — mirror
+the sim's own `is_boss` data as a monster-id list; matches R116's example exactly, and
+is new authored content data covering every base-game boss room. Surfaced, not chosen.
+
 ### NC-8 · HIGH · `spend_potion` is never paid — one defect, four filings
 
 **DISPOSITION 2026-08-06 — RULED BY INCLUSION (R116): potions are consumed.** The queue carried "potions are consumed" as the *presumptive* answer awaiting one word; the final dispatch supplies it by listing the fix as **Errata Batch 2 item 2**, and inclusion in a ratified batch is the answer. Recorded as ruled rather than presumptive so nobody re-opens it looking for a quoted sentence. **Sim-only (`tier05/events.py` throwaway-copy fix); not executed by the paper track.**

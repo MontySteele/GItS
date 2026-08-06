@@ -697,16 +697,37 @@ SHOP_REMOVAL_PRICE_STEP = 25     # §5: "rising per use" -- +25 each removal
 #                                  only bites once multi-act adds a 2nd shop.
 SHOP_CARD_OFFERS = 3             # "a few cards" (§5). OPEN NUMBER -- §8 does
 #                                  not fix a count; 3 mirrors REWARD_CARD_OFFERS.
-# --- §4.7 companion channel (R59/R61) -------------------------------------
-# The shop's TWO colorless slots carry companions. Slot 1 draws the run
-# character's home nation; slot 2 is wildcard. Both floor at Uncommon (R59):
-# base StS2's slot 2 is a guaranteed Rare, so a wildcard at full reward odds
-# (~60% common) would make the mod's shop WORSE than base at the one slot
-# whose entire argument is that it is the premium paid channel.
+# --- §4.7 companion channel (R59/R61, respecified by R116/NC-10) ----------
+# The shop's TWO colorless slots carry companions.
+#
+# THE SPEC, verbatim from R116: "Slot 1 should be 'Uncommon or higher from
+# the home region'; slot 2 should be 'any companion card'." Slot 1 keeps the
+# floor and the nation; slot 2 keeps NEITHER. That supersedes R59's reading
+# of the floor as covering both slots -- the paragraph that used to stand
+# here argued a wildcard at full reward odds would make this shop worse than
+# base's guaranteed-Rare slot 2, and NC-10 ruled the spec anyway. It is
+# recorded rather than deleted because it was the live reasoning until R116.
 SHOP_COMPANION_SLOTS = 2
-# RARITY_ODDS renormalized onto {uncommon, rare} -- the Uncommon floor is the
-# ruling, this is just what the surviving odds weigh once commons are cut.
+# SLOT 1's odds: RARITY_ODDS CONDITIONED on >= Uncommon, i.e. renormalized
+# over the rarities that survive the floor -- 0.35/0.40 and 0.05/0.40. That
+# is the only reading of "Uncommon or higher" that introduces no new number,
+# and the values below are unchanged from when the floor covered both slots.
+#
+# THE ALTERNATIVE READING, surfaced and NOT chosen (R116 required this
+# explicitly: "a renormalization chosen by an implementer is a balance value
+# chosen by an implementer"): the floor could instead carry its own STATED
+# SPLIT, a fresh pair of odds designed for the premium slot rather than
+# inherited from the reward table. That is a balance decision with a
+# defensible case -- slot 1 is the "buy your dream support" slot and 12.5%
+# Rare may be the wrong price for it -- and it is a [USER] call, not this
+# one. Nothing below was tuned; conditioning was applied and the result is
+# the identity on the existing values.
 SHOP_COMPANION_RARITY_ODDS = {"uncommon": 0.875, "rare": 0.125}
+# SLOT 2's odds are RARITY_ODDS itself, unconditioned -- "any companion
+# card" is the absence of a filter, and the absence of a filter is the
+# reward table with nothing cut out of it. No second constant: the shop
+# reads RARITY_ODDS directly, so the two slots visibly share one source and
+# the conditioning above stays legible as conditioning.
 # Priced by DRAWN RARITY (§4.7: gold is the balance governor, not a stat nerf).
 # These are the REAL StS2 shop bands, read off MerchantCardEntry.GetCost, so
 # the sim and the mod charge the same gold for the same companion. They are
@@ -717,7 +738,13 @@ SHOP_COMPANION_RARITY_ODDS = {"uncommon": 0.875, "rare": 0.125}
 # `card.Pool is ColorlessCardPool`, and companions do not resolve to that pool
 # (see klee-mod CompanionPool), so neither side charges the colorless
 # surcharge. Both sides agree; both are ~15% under base's premium channel.
-SHOP_COMPANION_PRICE = {"uncommon": 75, "rare": 150}
+#
+# The COMMON band (50) joins the table under R116/NC-10, which opened slot 2
+# to any companion card and therefore to Commons. It is READ OFF THE SAME
+# METHOD as the other two, not invented: `MerchantCardEntry.GetCost`'s IL
+# carries `ldc.i4 150`, `ldc.i4.s 75`, `ldc.i4.s 50` and the 1.15 colorless
+# multiplier, in that order. Same provenance, same paragraph, no new number.
+SHOP_COMPANION_PRICE = {"common": 50, "uncommon": 75, "rare": 150}
 # W2 relic granting cadence: shops stock 1-2 Common-pool relics for sale at
 # this price. NEW economy number (relics were a stub before W2); auto-take-all
 # policy buys an offered relic iff gold allows (relics are near-strictly-good).

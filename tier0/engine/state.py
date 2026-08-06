@@ -422,8 +422,20 @@ class Enemy(Fighter):
     bomb_suppression_spent: bool = False
     is_boss: bool = False
     sleep_turns: int = 0        # skips its turn while > 0 (BURST CHECK)
-    frozen: bool = False        # v1.5: next action -50% dmg; first attack
-                                # hit Shatters (bonus dmg, removes Frozen)
+    # NC-7 (R116, Errata Batch 2 item 5): a DURATION COUNTER, not a one-shot
+    # boolean. Turns remaining, decremented once at the end of the enemy side
+    # (combat._run_rounds); stacking EXTENDS it. While it is above zero the
+    # enemy's actions deal FROZEN_DAMAGE_MULT, and the first Attack hit
+    # Shatters (bonus damage, and Shatter clears the whole counter).
+    #
+    # The mod's `FrozenPower` was already a `PowerStackType.Counter` on an
+    # unconditional `AfterSideTurnEnd(Enemy)` clock; the sim carried a boolean
+    # consumed by ACTING. R116 ruled the mod's timer canonical and this is the
+    # sim adopting it. Consequences that follow from the timer rather than
+    # from any separate decision: a double freeze lasts two enemy sides, a
+    # sleeping or skipping enemy loses its freeze anyway, and a freeze that
+    # lands after the enemy has already acted is spent by that same side-end.
+    frozen: int = 0
     frozen_by_companion: bool = False   # control_uptime provenance (§2.2a)
     # Base-game parity: ShouldOwnerDeathTriggerFatal. The game gates Fatal
     # effects (Feed) on the target's powers all agreeing the death counts --

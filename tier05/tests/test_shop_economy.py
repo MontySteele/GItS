@@ -128,9 +128,13 @@ def test_no_buy_when_gold_short(monkeypatch):
                         lambda rng, ch, n=C.SHOP_CARD_OFFERS:
                         [loader.get_card("mine_toss")])
     deck = loader.starting_deck("klee")
+    # `companions=False`, like its sibling above. NC-10 (R116) opened shop
+    # slot 2 to Commons at the 50-gold band, so a purse one gold short of a
+    # CARD is no longer short of everything on the shelf -- and this test's
+    # question is about the card channel, not about what else is for sale.
     out = shop.visit_shop(random.Random(0), "klee", deck,
                           C.SHOP_CARD_PRICE - 1, "demolition",
-                          draft.assigned_policy)
+                          draft.assigned_policy, companions=False)
     assert out.purchases == []                 # can't afford it
     assert out.gold == C.SHOP_CARD_PRICE - 1
     assert out.deck_ids == deck

@@ -103,6 +103,19 @@ engine.
 > feared. **Fix candidate, QUEUEABLE and not executed:** credit only plays
 > covered by a standing designation (Errata Batch 2, item 1).
 >
+> **FIXED 2026-08-06 (Errata Batch 2 item 1).** The fix landed in
+> `understudy/replay.py`: the turn is now seeded with the designation STANDING
+> at its opening (an earlier round's recorded answer) and the round's own
+> answer arrives through `effects.SPOTLIGHT_FORCE` when the designating card
+> resolves — which is when the engine sets it. **The term was reconstruction-
+> side, not engine-side, and that is a finding of the fix rather than of the
+> probe:** `combat.play_card` credits Fanfare BEFORE the card resolves and
+> `run_fight` opens every combat undesignated, so tier0's own runs never
+> credited a fight's first Spotlight. **No battery, run or telemetry number
+> moves under this item**; what moves is the S7 replay's fanfare columns, by
+> at most the measured +2/fight. Pinned by
+> `tier0/tests/test_understudy_replay_selectors.py`.
+>
 > Direction, restated for the reader who stops here: **tier0 is NOT pessimistic
 > about fanfare.** The four conclusions this entry escrowed are struck by R113
 > and stand as ratified.

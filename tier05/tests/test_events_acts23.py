@@ -292,3 +292,44 @@ def test_every_event_in_every_act_resolves(act):
         assert st.max_hp >= 1
         for cid in st.deck_ids:
             assert loader.peek_card(cid) is not None
+
+
+# --- NC-8: the potion is actually consumed ---------------------------------
+
+def _future_of_potions():
+    for ev in _all_events():
+        if ev["id"] == "the_future_of_potions":
+            return ev
+    raise AssertionError("the_future_of_potions left the pool")
+
+
+def test_spend_potion_removes_the_potion_from_the_real_bag():
+    """NC-8 (R116, Errata Batch 2 item 2).
+
+    `EventState.potions` is a SNAPSHOT -- `model.py` builds it with
+    `list(bag.potions)` because the event layer is pure over the run's
+    holdings. The resolver popped only the snapshot, so "The Future of
+    Potions?" paid out three upgraded card rewards and left the potion in
+    the bag: a free reward, once per run, on every seed that met the event
+    with a potion in hand.
+    """
+    from tier05 import potions as potion_pool
+    ev = _future_of_potions()
+    opt = next(o for o in ev["options"] if o.get("spend_potion"))
+    bag = potion_pool.PotionBag(potions=["fire_potion", "block_potion"], slots=3)
+    st = _st(potions=list(bag.potions), potion_slots=bag.slots)
+    events.resolve(random.Random(3), ev, opt, st, bag=bag)
+    assert len(bag.potions) == 1
+    # the same potion left both: the snapshot and the bag stay in agreement
+    assert sorted(bag.potions) == sorted(st.potions)
+
+
+def test_spend_potion_without_a_bag_still_only_touches_the_snapshot():
+    """The bagless call path (tests, and `grant_potions` off) must not raise:
+    there is nothing to consume from, and the snapshot pop is the whole of
+    the accounting."""
+    ev = _future_of_potions()
+    opt = next(o for o in ev["options"] if o.get("spend_potion"))
+    st = _st(potions=["fire_potion"], potion_slots=3)
+    events.resolve(random.Random(3), ev, opt, st)
+    assert st.potions == []

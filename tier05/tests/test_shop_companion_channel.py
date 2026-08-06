@@ -42,15 +42,50 @@ def test_both_slots_fill_for_every_character(character):
 
 
 @pytest.mark.parametrize("character", CHARACTERS)
-def test_uncommon_floor_holds(character):
-    """R59: NEITHER slot may offer a Common. The floor is the ruling -- base
-    slot 2 is a guaranteed Rare, so a wildcard at full reward odds would make
-    this shop worse than the one it replaces."""
+def test_the_floor_is_slot_ones_and_the_home_region_is_too(character):
+    """NC-10 (R116, Errata Batch 2 item 6) -- the spec, verbatim: "Slot 1
+    should be 'Uncommon or higher from the home region'; slot 2 should be
+    'any companion card'."
+
+    This REPLACES the old `test_uncommon_floor_holds`, which asserted R59's
+    floor across BOTH slots. R116 respecified the channel and the floor is
+    now slot 1's alone; the old assertion is not weakened, it is relocated.
+    Slot 2's own invariant is below: it must actually reach the rarities the
+    absence of a filter admits, or "unrestricted" is a comment rather than a
+    behaviour.
+    """
     for seed in range(200):
-        for card, _ in shop.companion_shop_offer(random.Random(seed), character):
-            assert card.rarity in ("uncommon", "rare"), (
-                f"{character} was offered {card.id} ({card.rarity}) -- the "
-                "R59 Uncommon floor is broken")
+        offers = shop.companion_shop_offer(random.Random(seed), character)
+        if not offers:
+            continue
+        card, _ = offers[0]
+        assert card.rarity in ("uncommon", "rare"), (
+            f"{character} was offered {card.id} ({card.rarity}) in SLOT 1 -- "
+            "the Uncommon-or-higher floor is broken")
+        assert card.nation == loader.character_nation(character), (
+            f"{character} was offered off-region {card.id} in SLOT 1")
+
+
+@pytest.mark.parametrize("character", CHARACTERS)
+def test_slot_two_is_unrestricted_in_both_filters(character):
+    """The other half of the same spec. "Any companion card" has to be
+    observable: over enough seeds slot 2 offers Commons, and it offers cards
+    from outside the home region."""
+    rarities = set()
+    nations = set()
+    for seed in range(400):
+        offers = shop.companion_shop_offer(random.Random(seed), character)
+        if len(offers) < 2:
+            continue
+        card, _ = offers[1]
+        rarities.add(card.rarity)
+        nations.add(card.nation)
+    assert "common" in rarities, (
+        f"{character}'s slot 2 never offered a Common -- R116 removed the "
+        "floor from this slot, and a floor that survives in the code is the "
+        "defect NC-10 named")
+    assert rarities >= {"common", "uncommon", "rare"}
+    assert len(nations) > 1
 
 
 @pytest.mark.parametrize("character", CHARACTERS)

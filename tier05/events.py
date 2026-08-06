@@ -382,7 +382,16 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
         lo, hi = opt["gold"]
         st.gold = max(0, st.gold + rng.randint(min(lo, hi), max(lo, hi)))
     if opt.get("spend_potion") and st.potions:
-        st.potions.pop(rng.randrange(len(st.potions)))
+        # NC-8 (R116, Errata Batch 2 item 2): the potion is ACTUALLY consumed.
+        # `st.potions` is a snapshot -- `model.py` builds EventState with
+        # `list(bag.potions)` because the event layer is pure over the run's
+        # holdings -- so popping it alone spent nothing: "The Future of
+        # Potions?" granted its reward AND left the potion in the bag. The
+        # snapshot is still popped (it is what the rest of this resolve and
+        # the next option read), and the same potion now leaves the real bag.
+        spent = st.potions.pop(rng.randrange(len(st.potions)))
+        if bag is not None and spent in bag.potions:
+            bag.potions.remove(spent)
 
     # --- deck ---
     # BEFORE any add: "Duplicate your entire Deck. Add Bad Luck" copies the

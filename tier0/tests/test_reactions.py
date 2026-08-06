@@ -70,20 +70,85 @@ def test_electrocharged_applies_dot(state):
 
 
 def test_frozen_soft_control(state):
-    # Frozen v2 (principles v1.5): no skip — next action -50% damage.
+    # Frozen v2 (principles v1.5): no skip — the action deals -50% damage.
+    # NC-7 (R116): the freeze is a TIMER, so acting no longer consumes it;
+    # the clock at the end of the enemy side does.
     from tier0.engine.combat import _enemy_turn
     e = state.enemies[0]
     e.intents = [{"kind": "attack", "amount": 10}]
     hit(state, e, "hydro", 0)
     hit(state, e, "cryo", 5)
-    assert e.frozen
+    assert e.frozen == 1
     hp = state.player.hp
     _enemy_turn(state, e)
     assert state.player.hp == hp - int(10 * C.FROZEN_DAMAGE_MULT)
-    assert not e.frozen                     # consumed by acting
+    assert e.frozen == 1                    # acting does NOT spend it
+    e.frozen -= 1                           # the side-end clock does
     hp = state.player.hp
     _enemy_turn(state, e)
     assert state.player.hp == hp - 10       # back to full damage
+
+
+def test_frozen_stacking_extends_the_timer(state):
+    """NC-7 (R116): stacking EXTENDS. Two applications, two halved actions.
+
+    This is the half the sim adopted from the mod, whose FrozenPower was
+    already a Counter. Under the old boolean a second freeze was inert.
+    """
+    from tier0.engine.combat import _enemy_turn
+    e = state.enemies[0]
+    e.intents = [{"kind": "attack", "amount": 10}]
+    hit(state, e, "hydro", 0)
+    hit(state, e, "cryo", 5)
+    hit(state, e, "hydro", 0)
+    hit(state, e, "cryo", 5)
+    assert e.frozen == 2
+    for _ in range(2):
+        hp = state.player.hp
+        _enemy_turn(state, e)
+        assert state.player.hp == hp - int(10 * C.FROZEN_DAMAGE_MULT)
+        e.frozen -= 1                       # one enemy side each
+    assert e.frozen == 0
+    hp = state.player.hp
+    _enemy_turn(state, e)
+    assert state.player.hp == hp - 10
+
+
+def test_the_frozen_clock_does_not_ask_whether_the_enemy_acted():
+    """NC-7 (R116): the tick is unconditional, because the mod's is.
+
+    A sleeping enemy loses its freeze anyway. Stated as a test because the
+    conditional version is the natural thing to write and would be a second
+    ruling rather than an implementation of this one.
+    """
+    from tier0.engine.combat import _run_rounds
+    st = make_state(enemies=[make_enemy(hp=400, name="sleeper")])
+    e = st.enemies[0]
+    e.intents = [{"kind": "attack", "amount": 1}]
+    e.frozen = 1
+    e.sleep_turns = 3                       # it will not act at all
+    st.player.hand = []
+    st.player.draw_pile = []
+    st.player.discard_pile = []
+    _run_rounds(st, lambda _state: None)    # a pilot that plays nothing
+    assert e.sleep_turns < 3                # the enemy side did run
+    assert e.frozen == 0
+
+
+def test_shatter_clears_the_whole_timer(state):
+    """NC-7 (R116): Shatter removes the status, not one turn of it -- the
+    mod's `PowerCmd.Remove` takes every stack with it, and a Shatter that
+    left a stack standing would be a freeze the player paid to end and did
+    not."""
+    from tier0.engine.effects import deal_damage_to_enemy
+    e = state.enemies[0]
+    hit(state, e, "hydro", 0)
+    hit(state, e, "cryo", 5)
+    hit(state, e, "hydro", 0)
+    hit(state, e, "cryo", 5)
+    assert e.frozen == 2
+    deal_damage_to_enemy(state, e, 5, element=None, source="attack")
+    assert e.frozen == 0
 
 
 def test_shatter_on_attack_hit(state):

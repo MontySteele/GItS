@@ -99,9 +99,29 @@ public static class CompanionPlays
 
 /// <summary>
 /// Friendly Visit: Companion cards cost Amount less this turn (tier0
-/// companion_cost_delta_this_turn, reset at the next player turn start).
-/// Rides the same Hook.ModifyEnergyCostInCombat surface as SparkPower's
-/// zeroing; the game clamps at 0 via GetAmountToSpend's Math.Max.
+/// companion_cost_delta_this_turn). Rides the same
+/// Hook.ModifyEnergyCostInCombat surface as SparkPower's zeroing; the game
+/// clamps at 0 via GetAmountToSpend's Math.Max.
+///
+/// FLAG-1 (R114, Errata Batch 2 item 7): the discount SCOPES TO THE WRITING
+/// TURN. It used to be removed at the next player turn's START, so a stack
+/// written on turn N survived the whole enemy side and was still standing
+/// when turn N+1 opened -- an additive, uncapped accumulator whose discount
+/// outlived the turn that wrote it, and one half of the S13-X1 family.
+/// Verbatim: "Limit the cost discount to the current turn? Yes."
+///
+/// One boundary idiom, now used twice: this is exactly what
+/// `ReplayNextCompanionPower` below does for X11 (R110), and the sim's
+/// mirror sits beside `state.in_player_turn = False` in
+/// tier0/engine/combat.py. WRITE-SIDE scoping in both engines, for the same
+/// reason it was chosen there: a `PowerStackType.Counter`'s stacks carry no
+/// per-stack metadata, so neither engine can stamp a grant with its turn and
+/// filter at spend time, but both can bound the counter's LIFETIME.
+///
+/// WHAT THIS DOES NOT CLOSE, stated because the fix invites the mistake:
+/// the WITHIN-turn free-companion loop survives by design. A same-turn
+/// bound does not touch a mechanism that accumulates and spends inside one
+/// turn. That loop is governed by the X2 rarity law (R109).
 /// </summary>
 public sealed class CompanionCostThisTurnPower : PowerModel, ILocalizationProvider
 {
@@ -127,10 +147,13 @@ public sealed class CompanionCostThisTurnPower : PowerModel, ILocalizationProvid
         return true;
     }
 
-    public override async Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
     {
-        if (player.Creature != Owner) return;
+        // Expires with the turn it was written on (FLAG-1, R114) -- not at
+        // the next player turn's start, which let it ride the enemy side.
+        if (side != CombatSide.Player) return;
         await PowerCmd.Remove(this);
     }
 }
@@ -281,8 +304,25 @@ public sealed class WitchsFlamePower : PowerModel, ILocalizationProvider
             if (aura?.Element != Element.Pyro) continue;
 
             await PowerCmd.Remove(aura);
+            // NC-1 (R116, Errata Batch 2 item 3): companion/power damage
+            // scales with the player. The sim deals this through
+            // `deal_damage_to_enemy` (effects.py, `witchs_flame`), which is
+            // the full pipeline -- Strength and Weak x0.75 on the dealer,
+            // Vulnerable x1.5 on the target. This hit is Unpowered, so the
+            // game's native powers gate themselves out of it and the sim's
+            // modifiers have to be mirrored explicitly, exactly as
+            // `ElementalHit.Deal` does for the summon pulses. It cannot USE
+            // `ElementalHit.Deal`: the sim passes `element=None` here (the
+            // aura is consumed, not re-applied), so there is no element to
+            // hit with and no reaction to amplify. Truncate ONCE at the end,
+            // the sim's single `int()`.
+            //
+            // Note the register this ruling half-belongs to: power-sourced
+            // DAMAGE runs the pipeline (NC-1); power-sourced BLOCK stays raw
+            // (NC-11). Adjacent, opposite, and both are the base game's shape.
+            var dealt = SimDamagePipeline.DealerMods(Owner, Amount);
             await CreatureCmd.Damage(
-                choiceContext, target, (int)Amount,
+                choiceContext, target, (int)SimDamagePipeline.TargetMods(target, dealt),
                 ValueProp.Unpowered, dealer: null, cardSource: null);
             await KleeBurstResource.Gain(
                 choiceContext, Owner, CompanionConstants.WitchsFlameBurst,
@@ -540,6 +580,14 @@ public sealed class MetallicizePower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Player player)
     {
         if (player.Creature != Owner) return;
-        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null);
+        // NC-11 (R116, Errata Batch 2 item 4): power-sourced block is RAW.
+        // Unpowered, not Move -- StS applies Frail to CARD block via
+        // AbstractCard.applyPowersToBlock, and Dexterity's additive hook
+        // carries the same `IsPoweredCardOrMonsterMoveBlock` predicate, so
+        // passive block (Metallicize, Crystallize, Solar Isotoma) is exempt
+        // from both. tier0 writes `fighter.block +=` at
+        // `powers.on_turn_start` for exactly that reason, and R116 ruled the
+        // exemption canonical.
+        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null);
     }
 }

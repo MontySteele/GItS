@@ -9,7 +9,7 @@ import pytest
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier0.engine import combat, effects
+from tier0.engine import combat, effects, refpowers
 from tier0.engine.state import Card, CombatState
 from tier0.tests.conftest import make_enemy
 
@@ -487,12 +487,73 @@ def test_generators_exhaust_and_generate_to_hand():
 
 
 def test_upgraded_generator_discounts_the_guest():
+    """FLAG-2(ii) (R114, Errata Batch 2 item 8): "costs 0 THIS TURN".
+
+    THE ASSERTION THAT MOVED. It used to read `hand[0].cost == 0`, because
+    tier0 wrote the override onto the token's printed cost and left it there
+    forever. The sheet says "They cost 0 this turn" and the mod says
+    `EnergyCost.SetThisTurn(0)`; tier0 was the only one of the three that
+    meant "for the rest of the fight". The cost is now asked of
+    `combat.card_cost`, which is the only place that can answer a question
+    with a turn in it.
+    """
     st = furina_state()
     effects.resolve_card(st, loader.get_card("an_invitation+"))
-    assert st.player.hand[0].cost == 0              # Discovery parity
+    guest = st.player.hand[0]
+    assert combat.card_cost(st, guest) == 0         # Discovery parity
+    assert guest.free_this_turn
+    assert guest.cost > 0, (
+        "the PRINTED cost must survive: a turn-scoped discount that ate the "
+        "printed number has nothing to expire back to")
+
+    # and it expires with the turn that granted it
+    refpowers.reset_turn_counters(st)
+    assert not guest.free_this_turn
+    assert combat.card_cost(st, guest) == guest.cost
 
 
 # --- Encore Performance (the duplication rare; DECISIONS 64) ---
+
+def test_the_copy_carries_the_printed_bound_not_the_instance_s():
+    """FLAG-2(i) (R114, Errata Batch 2 item 8): "Copy ops inherit the printed
+    card's bounds... the printed bound travels with the copy."
+
+    The copy used to be a deepcopy of the card in hand, so it inherited
+    whatever that instance had picked up in combat -- including the LOSS of a
+    bound the sheet prints. It is built from `loader.get_card` now, which is
+    what the mod has always done (`CreateCard(ModelDb.GetById(id))`, and a
+    printed keyword like Exhaust is declared per MODEL).
+
+    WHAT THIS DOES NOT CLOSE, so nobody reads a green bar as X3's repair: a
+    copy is still an extra USE of an Exhaust card. No bound printed on one
+    instance can limit the number of instances, and the X3 pin still reports.
+    """
+    st = furina_state()
+    p = st.player
+    p.spotlight = "furina"
+    victim = hand_card(st, "an_invitation")
+    victim.exhaust = True                    # pretend the sheet prints it
+    printed_cost = victim.cost
+    victim.cost = 99                         # and that combat mangled the rest
+    effects.resolve_card(st, loader.get_card("encore_performance"))
+    copies = [c for c in p.hand if c.id == "an_invitation" and c is not victim]
+    assert len(copies) == 1
+    copy_ = copies[0]
+    assert copy_.cost == printed_cost, "the instance's mangled cost travelled"
+
+    # and the direction that matters: a bound STRIPPED from the instance is
+    # restored on the copy, because the copy reads the sheet.
+    st2 = furina_state()
+    p2 = st2.player
+    p2.spotlight = "furina"
+    stripped = hand_card(st2, "an_invitation")
+    printed_exhaust = loader.get_card("an_invitation").exhaust
+    stripped.exhaust = not printed_exhaust
+    effects.resolve_card(st2, loader.get_card("encore_performance"))
+    made = [c for c in p2.hand
+            if c.id == "an_invitation" and c is not stripped]
+    assert made and made[0].exhaust == printed_exhaust
+
 
 def test_encore_performance_copies_only_the_spotlighted_character():
     st = furina_state()

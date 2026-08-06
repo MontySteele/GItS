@@ -139,9 +139,64 @@ def test_guest_cast_empowers_companion_block_and_center_stage_does_not():
 
 # ----------------------------------------------------------- the ledger ----
 
+# ------------------------------------- the standing designation (item 1) ----
+#
+# Errata Batch 2 item 1 / R113 clause C-a. Probe (b) Ledger 2 measured the
+# term this section pins: 26 of 27 plays agree exactly with the engine, and
+# the single mismatch is the fight's FIRST Ethereal Spotlight -- engine +0,
+# tier0 +2, because the reconstruction seeded the turn with the answer the
+# turn itself gave, so the play that SET the designation was already covered
+# by it. +2 Fanfare per combat, once, in tier0's favour
+# (`docs/probe-b-fanfare-residual.md`).
+
+def test_standing_choice_is_the_latest_earlier_round_s_answer():
+    fight = _fight([[1, "choose", 0, "Center Stage", SPOTLIGHT_PAIR],
+                    [3, "choose", 1, "Guest Cast", SPOTLIGHT_PAIR]])
+    assert replay._standing_choice(fight, 1) is None      # nothing before it
+    assert replay._standing_choice(fight, 2) == "self"
+    assert replay._standing_choice(fight, 3) == "self"    # round 3's own
+    assert replay._standing_choice(fight, 4) == "companion"  # answer excluded
+
+
+def test_the_fight_s_first_spotlight_is_not_credited_for_setting_itself():
+    """Probe (b) Ledger 2's one mismatch, pinned on the sim side.
+
+    The engine scores a play against the designation standing when the play
+    RESOLVES, and the first Ethereal Spotlight of a combat has none. The
+    round's recorded answer still arrives -- through `SPOTLIGHT_FORCE`, when
+    the designating card resolves -- so the SAME turn's later Furina card is
+    income exactly as the engine credits it. Two plays, one credit.
+    """
+    spec = _spec([[1, "choose", 0, "Center Stage", SPOTLIGHT_PAIR]],
+                 ["Ethereal Spotlight", "Stage Presence"])
+    ledger: list[dict] = []
+    replay.l2_rows(spec, replay.Names(), "furina", collections.Counter(),
+                   use_selectors=True, ledger=ledger)
+    assert ledger[0]["sim_income"] == C.FANFARE_PER_SPOTLIGHT_CARD
+
+
+def test_the_engine_itself_already_scores_against_the_standing_designation():
+    """The other half of the same law, and the reason item 1 moves no run
+    number: `combat.play_card` credits BEFORE the card resolves, and
+    `run_fight` opens every combat undesignated -- so tier0's own first
+    Spotlight was never credited. Only the reconstruction's seed was."""
+    from tier0.content import loader
+    player = replay._fresh_player("furina", 60, 60, 0, {})
+    assert player.spotlight is None
+    state = replay.CombatState(player=player,
+                               enemies=[replay._enemy("probe", 50)],
+                               rng=replay.random.Random(0), turn=1)
+    card = loader.get_card("ethereal_spotlight")
+    player.hand.append(card)
+    player.energy = 3
+    replay.combat.play_card(state, card)
+    assert player.spotlight == "furina"      # the designation is now standing
+    assert player.fanfare == 0               # the setting play is not covered
+
+
 def test_ledger_row_decomposes_income_decay_and_the_hp_seam():
     spec = _spec([[1, "choose", 0, "Center Stage", SPOTLIGHT_PAIR]],
-                 ["Stage Presence"])
+                 ["Ethereal Spotlight", "Stage Presence"])
     ledger: list[dict] = []
     replay.l2_rows(spec, replay.Names(), "furina", collections.Counter(),
                    use_selectors=True, ledger=ledger)
