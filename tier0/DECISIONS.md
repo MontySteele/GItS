@@ -751,7 +751,7 @@ Amend here, not in chat history.
 
 <!-- BEGIN GENERATED current-law digest -- tools/gen_decisions_digest.py -- DO NOT HAND-EDIT -->
 
-**82 rulings across the volumes — 68 OPERATIVE, 11 moved by an explicit citation, 3 DOUBT.** **OPERATIVE is an absence claim** — no citable superseder was found, with the search scope recorded in the row — and not a finding that a ruling is beyond re-opening. A moved status names the citing ruling and states how much of the entry the move covers; **DOUBT** means supersession is arguable and the row is a live [USER] queue item. Statuses and evidence: `tier0/decisions-status.tsv`; the pass that set them: `docs/registry/status-pass-digest-2026-08-06.md`. Volume resolution: `docs/registry/identifiers.md` §3.
+**83 rulings across the volumes — 69 OPERATIVE, 1 OPERATIVE-NARROWED (operative, with the scope [USER] stated on the row), 13 moved by an explicit citation, 0 DOUBT.** **OPERATIVE is an absence claim** — no citable superseder was found, with the search scope recorded in the row — and not a finding that a ruling is beyond re-opening. A moved status names the citing ruling and states how much of the entry the move covers; **DOUBT** means supersession is arguable and the row is a live [USER] queue item. Statuses and evidence: `tier0/decisions-status.tsv`; the pass that set them: `docs/registry/status-pass-digest-2026-08-06.md`. Volume resolution: `docs/registry/identifiers.md` §3.
 
 - **R39** (2026-07-21) — spark-reading effects see the bank at play time — `OPERATIVE`
 - **R40** (2026-07-22) — Furina runner rulings and Salon replacement pass — `OPERATIVE`
@@ -773,7 +773,7 @@ Amend here, not in chat history.
 - **R56** (2026-07-26) — Kokomi v0.4b: the 12-card starter, the x4 bank read, Kurage's Oath — `SUPERSEDED-BY:R73`
 - **R57** (2026-07-25) — Playtest sprint Track P: pins, telemetry, and a world that moved — `OPERATIVE`
 - **R58** (2026-07-25) — Kokomi v0.5 partial fill: the pool was half-sized — `OPERATIVE`
-- **R59** (2026-07-25) — Shop slot 2 floor: Uncommon — `DOUBT`
+- **R59** (2026-07-25) — Shop slot 2 floor: Uncommon — `SUPERSEDED-BY:R116`
 - **R60** (2026-07-25) — Base colorless pool: shop-only override now, removal deferred — `OPERATIVE`
 - **R61** (2026-07-25) — The sim models the shop channel — `OPERATIVE`
 - **R62** (2026-07-25) — `sucrose_astable`: free + Exhaust, restoring the v1.11a numbers — `OPERATIVE`
@@ -817,11 +817,11 @@ Amend here, not in chat history.
 - **R100** (2026-08-04) — Win visibility lands on a first-party hook rather than a Harmony patch, the meters were already there, and R98 stays MECHANICAL — `OPERATIVE`
 - **R101** (2026-08-05) — The S7 counter defect is confirmed and fixed at the writer, and every curve it fed is annotated rather than rewritten — `OPERATIVE`
 - **R102** (2026-08-05) — The four fanfare conclusions go into escrow, in both directions, until the C2 probe reports — `DISCHARGED-BY:R113`
-- **R103** (2026-08-05) — The three probes are approved in cost order, and what each one is allowed to touch — `DOUBT`
+- **R103** (2026-08-05) — The three probes are approved in cost order, and what each one is allowed to touch — `OPERATIVE-NARROWED`
 - **R104** (2026-08-05) — P1.5 is promoted to next in the Understudy queue: three demands converge on one bridge fork — `OPERATIVE`
 - **R105** (2026-08-05) — The patch sentinel is accepted as shipped, and the cheapest way to shrink "not watched" is queued — `OPERATIVE`
 - **R106** (2026-08-05) — The merge train is acknowledged and HELD, and its stated order is not achievable as an order — `OPERATIVE`
-- **R107** (2026-08-06) — The S4 hygiene report is approved entire, and its two HIGH findings give three dangling items a governing condition again — `DOUBT`
+- **R107** (2026-08-06) — The S4 hygiene report is approved entire, and its two HIGH findings give three dangling items a governing condition again — `AMENDED-BY:R118`
 - **R108** (2026-08-06) — G1 is COUNTERSIGNED: Zhongli takes roster slot 4, and the deep dive is unblocked — `AMENDED-BY:R118`
 - **R109** (2026-08-06) — S13 yields two rarity laws, each arriving with a mechanical audit attached — `OPERATIVE`
 - **R110** (2026-08-06) — S13's three ratified changes: Encore Performance, replay_next_companion, and the spotlight fallback — `OPERATIVE`
@@ -835,6 +835,7 @@ Amend here, not in chat history.
 - **R118** (2026-08-06) — The sitting batch 2026-08-06(b): eleven replies execute, and R88 loses its twisted clause — `OPERATIVE`
 - **R119** (2026-08-06) — Two charters are SIGNED: Class-P authority operates, and "Clear the Stage" is authorized in full — `OPERATIVE`
 - **R120** (2026-08-06) — Dispatch (d): four replies execute -- the Klee rename, the art release, a staged drafter change, and probe (d)'s countersign — `OPERATIVE`
+- **R121** (2026-08-06) — Dispatch (e): six replies execute -- a registration is countersigned, the anchor is shielded, the moves get a resolver, and the last three DOUBT rows resolve — `OPERATIVE`
 
 <!-- END GENERATED current-law digest -->
 
@@ -2220,3 +2221,98 @@ art-debt row; D15 gains its staged-pending-10.7 engineering-backlog row.
 this entry; the string pass, the art work, the staged branch and the probe
 run are named to their tracks above. No card sheet, code or art moves under
 this entry.
+
+## R121 -- Dispatch (e): six replies execute -- a registration is countersigned, the anchor is shielded, the moves get a resolver, and the last three DOUBT rows resolve (2026-08-06)
+
+Fifth dispatch of 2026-08-06, landed at
+`docs/dispatch-2026-08-06e-six-replies.md` (REFERENCE). Replies are [USER]'s,
+verbatim; routing is this entry's. Zero new design authority beyond the
+answers. **Paper lands with this entry; the Q19 code shield/re-measurement and
+the Q20 file moves are named to follow-up tracks below and land nowhere near
+this commit.**
+
+**`Q18` -- Verbatim: *"agreed, countersigned, tto quarantined."*** The
+payoff-reach / `RARITY_ODDS` re-registration
+(`docs/payoff-reach-reregistration-draft-2026-08-06.md`) converts **from DRAFT
+to the sprint's registration**, pinned **DRAFTER 14**, predictions still blank
+by design. The dispatch's execution order is law and is recorded verbatim:
+
+> Execution order, strictly: (1) the tto columns join the RA-G1/RA-G2
+> quarantine under the same banner; (2) at sprint kickoff, predictions are
+> authored design-side and appended to the registration as their own commit --
+> before any measurement runs; (3) the sprint runs under D14; (4) blind-first
+> grading; (5) staged D15 (EB-43) lands with its re-baseline; (6) the
+> quarantine -- now including tto -- lifts on the graded read. No step
+> reorders.
+
+**Step (1) executes with this entry**: the `tto` column joins the
+`RA-G1`/`RA-G2` core-attainment quarantine **under the same banner** -- a dated
+addendum on the existing quarantine banner in
+`docs/roster-anchor-v14-v6-2026-08-06.md`, not a second banner. Steps (2)-(6)
+are recorded and **not executed**: they are future sprint steps, and the order
+is not reorderable by any track. The registration converts **in place** (the
+`-draft` filename is retained): frozen records already cite the path -- the
+quarantine banner, `EB-43`, the queue -- and rail 1 forbids repointing a
+citation inside a frozen record, so renaming would strand them permanently.
+The document's own banner, not its filename, carries its status.
+
+**`Q19` -- Verbatim: *"let's shield it, plus a note for any future sim work to
+take a look and figure out what went wrong (why did winrate go down,
+basically)."*** **SHIELD executes:** `score_offer`'s core-advance bonus is made
+blind to the anchor arm's tags (instrumentation continues to read them); the
+`ref_ironclad` arm **alone** is re-measured under the same recipe; the quotable
+table's row is republished with a dated note. **The tripwire is [USER]'s and is
+recorded as stated: if the shielded re-measurement does not restore the
+archived ordering, stop and surface -- that would mean the mover wasn't the
+tags.** The investigation question is minted verbatim in the engineering
+backlog as **`EB-46`**: *why did tag-visible scoring lower the anchor's winrate
+(11.13% -> 7.50%)?* -- a diagnosis question for future sim work, **no deadline,
+no design authority**. **The code change, the re-measurement and the
+republished row are a follow-up track's; this entry is paper only.**
+
+**`Q20` -- Verbatim: *"agreed, MOVE-WITH-RESOLVER."*** Track R-B resumes: the
+**45 held ledger-cited files** move to `docs/archive/` verbatim-under-banner;
+`docs/registry/identifiers.md` gains an **old-path -> new-path resolver
+table**; the citation lint learns to resolve ledger paths through it -- **a
+stale path that resolves is green; one that doesn't is a failure**. **Ledger
+bytes untouched, per rail 1.** The charter's acceptance count is re-run when
+the moves are done. **The moves, the resolver table and the lint change are
+Track R-B's; this entry is paper only.**
+
+**`R59` -- Verbatim: *"superceded but flag it for future design discussions
+(SHOULD it be rarity limited to avoid serving up crap cards, or is it fine to
+offer commons?) - this might need empirical data during a future round on the
+companion cards."*** (typo preserved.) The sidecar row moves to
+**`SUPERSEDED-BY:R116`**, **scope limited to the slot-2 floor clause**, with
+the reply verbatim in the evidence column. The design question is **minted onto
+the `S4-G10` / `M11` shop close-out agenda** -- its natural home -- as: *should
+slot 2 carry a rarity floor at all*, with the recorded note that the answer
+**wants empirical data (Common offer / pick / skip rates) from a future
+companion-card measurement round, not an a priori ruling**. The agenda gains an
+item, not an answer; `S4-G10` stays OPEN and [USER]-gated.
+
+**`R103` -- Verbatim: *"OPERATIVE-NARROWED."*** The sidecar row records the
+narrowed scope as briefed: **R103(b)'s gate still binds any future
+selector-recorded fanfare trace**, and **the escrow strike stands unaffected**
+-- different question, different instrument. **No re-litigation of R113.**
+`OPERATIVE-NARROWED` enters the sidecar's status vocabulary by this entry: it
+is an OPERATIVE row whose operating scope is stated, counted with OPERATIVE in
+the generated digest because nothing was superseded, amended or discharged.
+
+**`R107` -- Verbatim: *"AMENDED-BY:R118."*** The sidecar row moves to
+**`AMENDED-BY:R118`**, scope **"fence target only."** R90's banner and R118's
+re-point are now formally reconciled **as amendment, zero behavioural
+difference**.
+
+**Queue hygiene, as the dispatch orders it:** the three DOUBT rows resolve and
+the **`S4-G9`-riding queue row closes** -- `S4-G9`'s sitting shrinks by one;
+`Q18`/`Q19`/`Q20` strike verbatim with their replies attached; the generated
+status digest is regenerated (`python tools/gen_decisions_digest.py --write`;
+CI fails stale); the suite is green at every boundary. The status-pass digest
+(`docs/registry/status-pass-digest-2026-08-06.md`) gains a dated resolution
+note rather than a rewrite of its tables -- **the pass's record of what it
+refused to guess stays exactly as delivered.**
+
+**Class: RULING** -- [USER] 2026-08-06, verbatim throughout. Paper lands with
+this entry. No number moved, no measurement ran, and no ledger byte inside a
+frozen entry was rewritten. **Zero DOUBT rows remain in the sidecar.**

@@ -27,6 +27,31 @@
 > fence is re-established. **Lifting this quarantine is a paper act recorded
 > at the queue row, not here.** Every other column (win, act-1, acts, deck,
 > fights) is untouched by this banner.
+>
+> ---
+>
+> ### ADDENDUM, 2026-08-06 — the `tto` column JOINS this quarantine (`Q18` / R121)
+>
+> **Same banner, extended; not a second banner.** [USER], verbatim (2026-08-06,
+> dispatch (e), `docs/dispatch-2026-08-06e-six-replies.md`): ***"agreed,
+> countersigned, tto quarantined."*** The rider the banner above left open —
+> *"whether it joins the quarantine is [USER]'s to say at `Q18`"* — is
+> answered **YES**.
+>
+> **What changes:** the **`tto`** column moves from *flagged* to
+> **QUARANTINED**, on exactly the terms stated above — numbers stand as
+> published, nothing rewritten; not quotable, not gradable, not readable as
+> input to any decision. **What does not change:** everything else. The
+> `core attain` / `core 95%` columns were already quarantined and stay so;
+> win, act-1, acts, deck and fights remain untouched by this banner.
+>
+> **When it lifts:** `Q18` countersigned the re-registration
+> (`docs/payoff-reach-reregistration-draft-2026-08-06.md`) together with a
+> **fixed six-step execution order in which no step reorders**. The lift is
+> **step (6)** — *"the quarantine — now including tto — lifts on the graded
+> read"* — after the sprint runs under DRAFTER 14 (step 3) and is graded
+> blind-first (step 4). Nothing lifts earlier, and the lift is a paper act at
+> the queue row, not here. Ruling: `tier0/DECISIONS.md` **R121**.
 
 **Designation (R118, queue row 10.2, [USER] verbatim *"Yes, and rider
 yes."*):** the roster-anchor v14 n=3000 table **as re-produced under v6** is
@@ -92,7 +117,10 @@ separated at this n.
 | real_ironclad | generic | 14 | 20260729 | 3000 | **8.53%** | [7.6, 9.6] | **69.87%** | [68.2, 71.5] | 69.23% | [67.6, 70.9] | 8.33 | 1.06 | 22.1 | 14.2 |
 | real_silent | generic | 14 | 20260729 | 3000 | **1.70%** | [1.3, 2.2] | **60.90%** | [59.1, 62.6] | 62.47% | [60.7, 64.2] | 7.37 | 0.75 | 21.5 | 11.6 |
 
-† QUARANTINED — see the banner. ‡ flagged-not-quarantined per the Q18 rider.
+† QUARANTINED — see the banner. ‡ ~~flagged-not-quarantined per the Q18
+rider~~ **QUARANTINED 2026-08-06 — the rider is answered *"tto quarantined"*
+(`Q18` / R121); see the banner's addendum.** Legend struck, not rewritten
+(R101b); no number in the table moved.
 
 Ordering facts a reader may take from the winrate column, both continuous
 with the archived tables: `furina/salon` (11.20%) sits at the top —

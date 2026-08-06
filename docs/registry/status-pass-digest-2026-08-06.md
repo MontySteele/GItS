@@ -112,3 +112,34 @@ replaced.
 handle commit(s) touch no [USER]-gated register"*), `lint_ledger_numbers`,
 `lint_r_citations`, `lint_identifier_registry`, `gen_decisions_digest --check`
 and the full suite green at the batch boundary.*
+
+---
+
+## RESOLUTION NOTE — 2026-08-06 (dispatch (e) / R121): the 3 DOUBT rows are answered
+
+> **The tables above are NOT rewritten.** This page is the record of what the
+> status pass found and what it refused to guess, and it stays exactly as
+> delivered — including the "3 DOUBT" headline and the "why each refuses to
+> resolve" table. This note is the answer arriving afterwards, appended.
+
+[USER] resolved all three by name in the 2026-08-06(e) dispatch
+(`docs/dispatch-2026-08-06e-six-replies.md`; ruling `tier0/DECISIONS.md`
+**R121**). The verdicts, verbatim, with the scope each carries into
+`tier0/decisions-status.tsv`:
+
+| row | verdict | [USER], verbatim | scope recorded on the sidecar row |
+|---|---|---|---|
+| **R59** | `SUPERSEDED-BY:R116` | *"superceded but flag it for future design discussions (SHOULD it be rarity limited to avoid serving up crap cards, or is it fine to offer commons?) - this might need empirical data during a future round on the companion cards."* | **The slot-2 floor clause only.** R116's `NC-10` supersedes R59's Uncommon-or-Rare floor on slot 2; the rest of R59 is not named and is NOT judged. The flagged design question — *should slot 2 carry a rarity floor at all* — is minted on the `S4-G10`/`M11` shop close-out agenda, with the note that it wants empirical Common offer/pick/skip data from a future companion-card measurement round rather than an a priori ruling |
+| **R103** | `OPERATIVE-NARROWED` | *"OPERATIVE-NARROWED."* | **R103(b)'s gate still binds any future selector-recorded fanfare trace**; the escrow strike stands unaffected (different question, different instrument). **No re-litigation of R113.** New status vocabulary, added by R121: an OPERATIVE row whose operating scope [USER] stated — still an absence claim, counted beside OPERATIVE and never among the moved rows |
+| **R107** | `AMENDED-BY:R118` | *"AMENDED-BY:R118."* | **"Fence target only."** R90's banner and R118's re-point are formally reconciled as amendment, **zero behavioural difference**. R107's other findings are not named and are NOT judged |
+
+**What this changes about the page above.** The headline's `DOUBT | 3` row is
+now historical: as of this note the sidecar carries **zero** DOUBT rows. The
+"one queue item" this page asked for — the three rows riding the `S4-G9`
+sitting — is **CLOSED**, and `S4-G9`'s sitting shrinks by one. Nothing else on
+this page moves: the 68 OPERATIVE rows, the 6 moved rows, the interpretive line
+and the `e0b563c` revert handle all stand as delivered.
+
+**Counts after the resolution** (mechanical, from the sidecar): **83 rows**
+(R39–R121, R121 itself added by this dispatch) — **69 OPERATIVE**, **1
+OPERATIVE-NARROWED**, **13 moved on an explicit citation**, **0 DOUBT**.

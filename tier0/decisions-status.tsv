@@ -1,6 +1,6 @@
 # decisions-status.tsv -- sidecar status table for the ruling ledger (Track R-D,
 # Clear the Stage, 2026-08-06; plan of record review/stage-clear/refactor-plan.md §R-D).
-# One row per ruling R39-R120, across all volumes (tier0 DECISIONS volumes + klee-mod).
+# One row per ruling R39-R121, across all volumes (tier0 DECISIONS volumes + klee-mod).
 #
 # STATUS DISCIPLINE -- read before editing:
 #   Every row has now been READ. The Class-P status pass of 2026-08-06
@@ -22,6 +22,15 @@
 #       a partial amendment, or a scope a later ruling narrowed without naming
 #       the ruling. Doubt disqualifies (Class-P charter §2). The DOUBT rows
 #       are a single [USER] queue row riding the S4-G9 sitting.
+#       DOUBT ROWS RESOLVED 2026-08-06 by [USER] (dispatch (e) / R121):
+#       R59 -> SUPERSEDED-BY:R116 (slot-2 floor clause only), R103 ->
+#       OPERATIVE-NARROWED, R107 -> AMENDED-BY:R118 (fence target only).
+#       Zero DOUBT rows remain; the queue row that rode S4-G9 is CLOSED.
+#     - OPERATIVE-NARROWED (vocabulary added 2026-08-06 by R121) is an
+#       OPERATIVE row whose OPERATING SCOPE [USER] stated explicitly. It is
+#       still an absence claim -- no ruling is named as superseder, amender
+#       or discharger -- so the digest counts it beside OPERATIVE and never
+#       among the moved rows. The scope itself lives in this column.
 #   The interpretive line this pass drew, recorded so it can be overruled in
 #   one place: a LATER BALANCE DOSE ON THE SAME CARD OR KNOB IS NOT A
 #   SUPERSEDER of the ruling that shipped the earlier number. Each dose is a
@@ -52,7 +61,7 @@ R55	AMENDED-BY:R56	R56 preamble names R54/R55 jointly: "SUPERSEDING their statli
 R56	SUPERSEDED-BY:R73	In-entry banner at R56, verbatim: "SUPERSEDED BY R73 (Neap Tide v2.1, 2026-07-26; addendum A7 pointer.) ... every Kokomi number in this entry is archive." The banner's own carve-out (the withdrawal "still stands on its own terms") travels with it.
 R57	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
 R58	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
-R59	DOUBT	arguable partial supersession: R116's NC-10 rules slot 2 "any companion card" / "unrestricted", which is incompatible with R59's Uncommon-or-Rare slot-2 floor, and R116 names R59 in the same section ("`R59`'s slot-2 floor and `R60`'s override live in the same neighbourhood") -- but as a docket cross-note, never as a strike. Cited-and-contradicted is not cited-as-superseded.
+R59	SUPERSEDED-BY:R116	[USER] 2026-08-06 (dispatch (e) / R121), verbatim: "superceded but flag it for future design discussions (SHOULD it be rarity limited to avoid serving up crap cards, or is it fine to offer commons?) - this might need empirical data during a future round on the companion cards." SCOPE: the slot-2 floor clause ONLY -- R116's NC-10 ("slot 2 should be 'any companion card'") supersedes R59's Uncommon-or-Rare floor on slot 2; the rest of R59 is not named and is NOT judged here. The design question the reply flags -- should slot 2 carry a rarity floor at all, wanting empirical Common offer/pick/skip data from a future companion-card measurement round rather than an a priori ruling -- is minted on the S4-G10/M11 shop close-out agenda (user-queue), not decided by this row. Was DOUBT (status pass 2026-08-06); resolved by [USER].
 R60	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs); R116's NC-10 names "`R60`'s override" as a docket cross-note only, and NC-10's slot spec does not touch the shop-only override or the deferred phase-2 removal that are R60's content.
 R61	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
 R62	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
@@ -96,11 +105,11 @@ R99	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs
 R100	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
 R101	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
 R102	DISCHARGED-BY:R113	R102's escrow was its operative content ("until the C2 probe reports"); R113's heading releases it and each of the three escrow banners R102 planted is struck with the citation "STRUCK 2026-08-06 (R113) -- escrow released, instrument vindicated."
-R103	DOUBT	arguable partial supersession by events rather than by text: R103(b) gates the selector-recorded fanfare trace on P1.5 ("It cannot run before the bridge records the Center Stage / Guest Cast choice"), and R104 restates that gate -- yet R113 writes C2 off on a probe (b) whose own residual names "the unrecorded Spotlight selector" as term 1. Whether R103(b)'s gate was discharged, narrowed, or simply describes a different instrument than the probe that reported is arguable, and no ruling names R103.
+R103	OPERATIVE-NARROWED	[USER] 2026-08-06 (dispatch (e) / R121), verbatim: "OPERATIVE-NARROWED." SCOPE, as briefed: R103(b)'s gate STILL BINDS any future selector-recorded fanfare trace -- it is not discharged by R113 -- and the escrow strike stands unaffected, because it answers a different question on a different instrument. No re-litigation of R113. OPERATIVE-NARROWED is an OPERATIVE row whose operating scope is stated: nothing was superseded, amended or discharged, so no citing ruling is named. Was DOUBT (status pass 2026-08-06); resolved by [USER].
 R104	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
 R105	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
 R106	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
-R107	DOUBT	arguable partial supersession: R118 §1 Q7 says "the R107/F1 fence re-points to the narrowed gate", naming `R107/F1` explicitly, while R90's landed banner insists "the condition is the same condition, stated at the width that actually binds" and "Nothing is unfenced". Amendment of R107's F1 clause versus restatement of it at a narrower gate is exactly the call this row will not make on its own authority.
+R107	AMENDED-BY:R118	[USER] 2026-08-06 (dispatch (e) / R121), verbatim: "AMENDED-BY:R118." SCOPE: "fence target only." R118 s1 Q7, verbatim: "the R107/F1 fence re-points to the narrowed gate" -- R90's landed banner ("the condition is the same condition, stated at the width that actually binds"; "Nothing is unfenced") and R118's re-point are formally reconciled as AMENDMENT, with zero behavioural difference. R107's other findings are not named and are NOT judged here. Was DOUBT (status pass 2026-08-06); resolved by [USER].
 R108	AMENDED-BY:R118	in-entry dated banner beneath R108's addendum clause, verbatim: "DATED NOTE, 2026-08-06 (R118, §5 row 10.8) ... Its 'released to the companion pool' justification ... is **superseded by the cleaner principle**". Scope: the addendum's justification only -- "The addendum above stands unchanged", "Nothing is re-decided by this note", Itto's registration is COMPANION CARD and Zhongli still holds slot 4. R108's own subject is not struck and is NOT judged here.
 R109	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
 R110	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
@@ -114,3 +123,4 @@ R117	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, doc
 R118	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
 R119	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
 R120	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)
+R121	OPERATIVE	no superseder cited (searched DECISIONS*.md, klee-mod ledger, docs)

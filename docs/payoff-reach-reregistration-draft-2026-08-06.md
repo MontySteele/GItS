@@ -1,11 +1,58 @@
-# Payoff-reach / RARITY_ODDS sprint — clean re-registration (DRAFT)
+# Payoff-reach / RARITY_ODDS sprint — clean re-registration (~~DRAFT~~ **SIGNED / COUNTERSIGNED 2026-08-06**)
 
-> **Lifecycle: DRAFT — [USER] countersign REQUIRED before anything here
+> # SIGNED / COUNTERSIGNED — 2026-08-06 (`Q18` / R121)
+>
+> **This document is no longer a draft. It is THE SPRINT'S REGISTRATION.**
+> [USER], verbatim (2026-08-06, dispatch (e),
+> `docs/dispatch-2026-08-06e-six-replies.md`): ***"agreed, countersigned, tto
+> quarantined."*** Ruling: `tier0/DECISIONS.md` **R121**.
+>
+> **What the countersign fixed, and what it deliberately did not.**
+>
+> - **Pin: `DRAFTER_VERSION` 14**, as §3 below states it. The pin is
+>   countersigned as written; nothing re-pins it silently.
+> - **Predictions remain BLANK — by design, not by omission.** They are
+>   authored design-side **at sprint kickoff** and appended to this document as
+>   **their own commit, before any measurement runs**. Until that commit
+>   exists, this registration is countersigned and unpredicted, and no number
+>   may be read against it.
+> - **The `tto` rider is answered YES**: the `tto` columns join the
+>   `RA-G1`/`RA-G2` quarantine, under the *same* banner, in
+>   `docs/roster-anchor-v14-v6-2026-08-06.md` (dated addendum, executed
+>   2026-08-06).
+>
+> **The execution order, verbatim from the dispatch — no step reorders:**
+>
+> > Execution order, strictly: (1) the tto columns join the RA-G1/RA-G2
+> > quarantine under the same banner; (2) at sprint kickoff, predictions are
+> > authored design-side and appended to the registration as their own commit —
+> > before any measurement runs; (3) the sprint runs under D14; (4) blind-first
+> > grading; (5) staged D15 (EB-43) lands with its re-baseline; (6) the
+> > quarantine — now including tto — lifts on the graded read. No step
+> > reorders.
+>
+> **Step (1) is EXECUTED** (2026-08-06, with R121). **Steps (2)–(6) have not
+> run**: they are the sprint's own steps, in that order, and no track may
+> reorder them.
+>
+> **Filename note, recorded so nobody "fixes" it.** The `-draft` in this
+> file's name is **retained deliberately**. Frozen records already cite this
+> path — the quarantine banner, `EB-43`, the queue rows — and rail 1 forbids
+> repointing a citation inside a frozen record, so a rename would strand them
+> permanently with no repair path. **The banner, not the filename, carries the
+> status.**
+>
+> **Lifecycle: REFERENCE** — a countersigned registration is a frozen record.
+> The one appendment it still expects is the predictions commit of step (2);
+> nothing else is maintained here.
+
+> ~~**Lifecycle: DRAFT — [USER] countersign REQUIRED before anything here
 > operates.** A re-registration is a new probe registration, and probe
 > countersigns stay with [USER] by standing pre-registration law (Class-P
-> charter §2 explicitly excludes them). Nothing below is a prediction that has
-> been graded, a number that has been read, or a measurement that has been run.
-> **No measurement was run to produce this document.**
+> charter §2 explicitly excludes them).~~ *(Struck 2026-08-06 by the
+> countersign above; kept visible per R101b.)* Nothing below is a prediction
+> that has been graded, a number that has been read, or a measurement that has
+> been run. **No measurement was run to produce this document.**
 
 **Authority:** [USER], verbatim (2026-08-06, queue row 10.7): *"Let's yes to
 both and see if it turns up on local."* — search-and-repair authorized; and:
@@ -130,7 +177,13 @@ Q-C. *(from §1.2)* What the original registered as "how many payoffs an
    `docs/archive/roster-anchor-v14-2026-08-05.md`) becomes liftable per queue row
    10.7 — a paper act at the queue row.
 
-**Countersign line (one word, [USER]): COUNTERSIGN / REVISE / DECLINE**
+~~**Countersign line (one word, [USER]): COUNTERSIGN / REVISE / DECLINE**~~
+**ANSWERED 2026-08-06 — COUNTERSIGN.** [USER], verbatim: ***"agreed,
+countersigned, tto quarantined."*** (dispatch (e) / R121). Item 4 of the list
+above is executed as ordered — the `tto` columns joined the quarantine rather
+than the quarantine lifting; **the lift is step (6) of the countersigned
+execution order, on the graded read, and nowhere earlier.** Items 1–3 are step
+(2)'s work at kickoff, unwritten by design.
 
 — drafted 2026-08-06, Track S2 (the 10.7 search), branch
 `findings/track-s2-registration-hunt`. Zero design authority exercised.
