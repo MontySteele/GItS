@@ -41,7 +41,7 @@ public sealed class TidelineWatch : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tideline Watch"),
-        ("description", "[gold]Exhaust[/gold] 1 card from your hand. At the start of your next turn, gain 8 [gold]Block[/gold]."),
+        ("description", "[gold]Exhaust[/gold] 1 card from your hand. At the start of your next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -70,7 +70,7 @@ public sealed class TidelineWatch : CustomCardModel, ICharacterCard
                 await CardCmd.Exhaust(choiceContext, victim);
             }
         }
-        await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, Owner.Creature, 8, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, Owner.Creature, DynamicVars["BlockNextTurn"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

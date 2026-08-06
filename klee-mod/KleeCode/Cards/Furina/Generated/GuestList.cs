@@ -44,7 +44,7 @@ public sealed class GuestList : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Guest List"),
-        ("description", "Add 1 random Uncommon [gold]Companion[/gold] card to your hand. {IfUpgraded:show:They cost 0 this turn.|} Gain 1 Energy."),
+        ("description", "Add 1 random Uncommon [gold]Companion[/gold] card to your hand. {IfUpgraded:show:It costs 0 this turn.|} Gain 1 Energy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

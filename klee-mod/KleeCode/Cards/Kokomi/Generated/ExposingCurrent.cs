@@ -34,7 +34,7 @@ namespace KleeMod.Cards.Kokomi.Generated;
 
 public sealed class ExposingCurrent : CustomCardModel, IElementalCard, ICharacterCard
 {
-    /// <summary>Sheet cadence: damaging Skills, Burst-tagged cards, and skill-tagged cards apply Hydro.</summary>
+    /// <summary>Sheet: all Kokomi attacks apply Hydro (catalyst-grade cadence).</summary>
     public Element Element => Element.Hydro;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>

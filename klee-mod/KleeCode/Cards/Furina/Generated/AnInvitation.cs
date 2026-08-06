@@ -44,7 +44,7 @@ public sealed class AnInvitation : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "An Invitation"),
-        ("description", "Add 1 random Common [gold]Companion[/gold] card to your hand. {IfUpgraded:show:They cost 0 this turn.|}"),
+        ("description", "Add 1 random Common [gold]Companion[/gold] card to your hand. {IfUpgraded:show:It costs 0 this turn.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

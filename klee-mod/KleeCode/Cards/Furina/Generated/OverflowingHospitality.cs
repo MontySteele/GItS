@@ -71,7 +71,7 @@ public sealed class OverflowingHospitality : CustomCardModel, ICharacterCard, IS
         var salonReplacements = 0;
         var salonScaledEncore = ((CalculatedVar)DynamicVars["Encore"]).Calculate(null);
         salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Chevalmarin);
-        for (var salonRepeat = 0; salonRepeat < (salonReplacements > 0 ? 2 : 1); salonRepeat++)
+        for (var salonRepeat = 0; salonRepeat < (salonReplacements > 0 ? SalonConstants.ReplacementNumericMultiplier : 1); salonRepeat++)
         {
             {
                 var auraCandidates = CombatState!.HittableEnemies.ToList();

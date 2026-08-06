@@ -41,7 +41,7 @@ public sealed class HeartsSwelling : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Innate };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, fanfarePer: 1, fanfareStep: 4);
+        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, fanfarePer: 1, fanfareStep: 4, grantsBlock: true);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("hearts_swelling");
 

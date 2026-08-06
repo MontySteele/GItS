@@ -41,7 +41,7 @@ public sealed class TacticalRetreat : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tactical Retreat"),
-        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. Discard {Discards:diff()} random card(s)."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. Discard {Discards:diff()} random card{Discards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

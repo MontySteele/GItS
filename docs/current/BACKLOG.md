@@ -46,10 +46,7 @@
 | `EB-2` | Salon upkeep vs All the World's a Stage income race — two powers in the same `AfterPlayerTurnStart` broadcast with no guaranteed order (`SalonPowers.cs:352` vs `FurinaResources.cs:1122`); nondeterministic tick rate | eng-backlog §1; `NC-9` seam |
 | `EB-18` | The mod's per-fight telemetry (C2) was never built — JSON-lines per fight; `tier1/analyze.py` reads per-**run** granularity. Answers the corpse-detonation count for free | eng-backlog §3; missed-requirements §2.3 |
 | `EB-19` | The sim-pipeline-step → C#-hook sweep is still owed — Superconduct, Shatter, aura-tick ordering all reduce to PRE/POST hook misplacement; no pass has systematically mapped each sim step to its C# hook | eng-backlog §3; missed-requirements §2.4 |
-| `SYS-1` | Codegen drops or inert-wires ratified upgrade deltas — sim upgrades, C# doesn't: `blocking_notes`, `the_final_verdict`, `tideline_watch`; OnUpgrade emitter has no branch. 4th instance `SayuDarumaGift` outside sweep scope | parity findings-ledger; triage-memo SYS-1 |
-| `SYS-2` | `PreventExhaustWardPower` (`vigil_of_the_deep`) diverges from sim (LAW) on four axes: ward-before-Block vs after; fully-blocked hit still burns the latch; fires on any damage not just powered attacks; `max_stacks: 6` in sim, uncapped in C# | triage-memo SYS-2 |
-| `SYS-4` | Copy-by-model-id rebuild drops instance state vs sim's deepcopy — `shoulder_to_shoulder` loses conscript −1 cost + `ExhaustOnNextPlay`; `encore_performance` copy comes out unupgraded | triage-memo SYS-4 |
-| `SYS-6` | `salon_debut` prints "Gain 2 Encore" but grants 4 on a replacement deploy — the upgrade path emits an `IsUpgraded` literal instead of the `CalculatedVar`/`ReplacementDelta` path every sibling uses | triage-memo SYS-6 |
+| `BFF-copy` | `best_friends_forever` replays companions un-upgraded and dedupes differently than the sim — `combat.py:269` records instance ids (`foo+` distinct from `foo`, both can copy; upgrade travels), while C# `CompanionPlays` records base ids and `ModelDb.GetById` rebuilds pristine. Same root R114/FLAG-2(i) settled for the other copy ops; the dedupe half may need a ruling | parity-sys-cluster sprint follow-on |
 | `NC-parity` | The C# side reads companion rarity from `Star`, not the sheet's `rarity` field — whether the cycling-rarity gate (X2 law) is enforceable in C# at all is open | dockets/companion-pricing §2 |
 | `EB-14` | `selectors` is bot-feed only — a mod-side hook into the selection screens is the open item | eng-backlog §2 |
 
@@ -64,15 +61,9 @@
 | `EB-8` | Cross-sheet strict-domination check — the gate sweeps within-sheet only and prints `CLEAN` for two of six sheets; the Clorinde/Raiden pair was caught by hand | eng-backlog §2 |
 | `EB-21` | `char_facts` baselines for Defect, Necrobinder and Regent — the patch sentinel reports three of five characters "not watched" for lack of `<char>_char_facts.yaml`; cheap, no design content | eng-backlog §3 |
 | `EB-41` | Refactors, only if budget remains (big, safe, boring): `run_one` 518-line split; codegen driver unification (F3); telemetry-module template dedupe; `exp_*` script archive move; `apply_upgrade` op-coverage guard | eng-backlog §7 |
-| `SYS-7` | Fanfare-rider hover tip hardcodes noun "damage" on pure-Block cards — `FurinaRiderTips.FanfareBody` has no `grantsBlock` flag (5 cards) | triage-memo SYS-7 |
-| `SYS-8` | "Flagged in manifest" is false — both `no_upgrade_path` manifests are `{}`, yet `lint_upgrade_coverage.py:134-140` reads exactly that dict, so SYS-1 shipped green | triage-memo SYS-8 |
-| `SYS-9` | Codegen grammar/plural/styling template gaps (11 findings, 10 cards): singular target on gleeful_barrage, "draws 2 card", "top 1 cards", "card(s)"/"Exhaust 1 cards" literals, un-golded Encore | triage-memo SYS-9 |
-| `SYS-10` | Kokomi cards carry Furina's cadence doc-comment — `gen_klee_cards.py:4833-4843` hardcodes the skill-cadence line for every non-Klee roster (18 files); comment-only, runtime correct | triage-memo SYS-10 |
 | `SYS-11` | Ratified changes not swept through prose (19 findings): stale before/after annotations in `kokomi-upgrades.yaml`, uncap-all stale cap comments, Fanfare-rework/v0.4 stale prose | triage-memo SYS-11 |
 | `SYS-12` | Stale doc comments in code (9 findings): kaboom/sizzle/flame_dance sheet-number comments, catalytic_conversion "NO UPGRADE PATH", sparks_n_splash pool-membership | triage-memo SYS-12 |
-| `SYS-13` | One stale comment filed three times: `FurinaResources.cs:191-192` "RaiseFanfareCap (retired grammar, no sheet user)" — ~16 Furina cards are live users post-Track-B | triage-memo SYS-13 |
-| `SYS-14` | Salon replacement multiplier as a bare literal `2` — `SalonDebut.cs:73`, `OverflowingHospitality.cs:74` instead of `SalonConstants.ReplacementNumericMultiplier`; escapes the constant-parity gate | triage-memo SYS-14 |
-| `L1`–`L8` | Lint candidates hardening SYS-1…14: upgrade-delta completeness (L1, fixes SYS-1/8); cadence-comment-from-profile (L2, SYS-10); rider-tip-noun-matches-op (L3, SYS-7); flat effect-list scans (L4); literal-vs-named numerics (L5, SYS-14); grammar/plural pass (L6, SYS-9); comment-arithmetic on upgrade sheets (L7, SYS-11a); copy/generate emitter contract + cross-engine parity test (L8, SYS-3/4/5) | triage-memo Lint L1–L8 |
+| `L4`/`L7` | Remaining lint candidates from the S1 sweep: flat effect-list scans (L4 — shared `iter_effects()` recursing then/else; sparkly_explosion, pearl_barrage, `rider_tip_args` charge gap) and comment-arithmetic on upgrade sheets (L7 — recompute `# a->b` annotations, flags SYS-11a/b). L5/L6 landed only for their swept instances (replacement multiplier; draw/exhaust/discard plurals) — a general pass is still open | triage-memo Lint L1–L8 |
 
 ## tests — pins & filed-not-fixed
 

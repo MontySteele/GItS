@@ -70,6 +70,10 @@ public sealed class EncorePerformance : CustomCardModel, ICharacterCard
                 {
                     var spotlightCopy = CombatState!.CreateCard(
                         ModelDb.GetById<CardModel>(selectedSpotlight.Id), Owner);
+                    if (selectedSpotlight.IsUpgraded)
+                    {
+                        spotlightCopy.UpgradeInternal();
+                    }
                     await CardPileCmd.AddGeneratedCardToCombat(
                         spotlightCopy, PileType.Hand, Owner);
                 }

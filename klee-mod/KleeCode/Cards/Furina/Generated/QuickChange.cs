@@ -41,7 +41,7 @@ public sealed class QuickChange : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Quick Change"),
-        ("description", "The first Attack you play each turn draws {PowerAmount:diff()} card. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
+        ("description", "The first Attack you play each turn draws {PowerAmount:diff()} card{PowerAmount:plural:|s}. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

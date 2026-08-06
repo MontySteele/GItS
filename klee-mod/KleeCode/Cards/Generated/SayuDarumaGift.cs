@@ -48,7 +48,7 @@ public sealed class SayuDarumaGift : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sayu — Muji-Muji Daruma"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. At the start of your next turn, gain 4 [gold]Block[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. At the start of your next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -71,7 +71,7 @@ public sealed class SayuDarumaGift : CustomCardModel, ICompanionCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
-        await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, Owner.Creature, (int)SpotlightSystem.PrintedBlock(this, 4), applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, Owner.Creature, (int)SpotlightSystem.PrintedBlock(this, DynamicVars["BlockNextTurn"].IntValue), applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

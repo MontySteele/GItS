@@ -48,13 +48,15 @@ public sealed class SalonDebut : CustomCardModel, ICharacterCard, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Salon Début"),
-        ("description", "Add 1 [gold]random Salon Member[/gold] to your [gold]Salon[/gold]. {IfUpgraded:show:Gain 2 [gold]Encore[/gold].|}"),
+        ("description", "Add 1 [gold]random Salon Member[/gold] to your [gold]Salon[/gold]. {IfUpgraded:show:Gain {Encore:diff()} [gold]Encore[/gold].|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new CalculationBaseVar(2m),
+            new CalculationExtraVar(1m),
+            new CalculatedVar("Encore").WithMultiplier(static (card, _) => SalonMemberPower.ReplacementDelta(card, 1, SalonConstants.ReplacementNumericMultiplier))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -67,10 +69,11 @@ public sealed class SalonDebut : CustomCardModel, ICharacterCard, ISkillTagCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var salonReplacements = 0;
+        var salonScaledEncore = ((CalculatedVar)DynamicVars["Encore"]).Calculate(null);
         salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, null);
         if (IsUpgraded)
         {
-            FurinaResources.GainEncore(Owner.Creature, 2 * (salonReplacements > 0 ? 2 : 1));
+            FurinaResources.GainEncore(Owner.Creature, (int)salonScaledEncore);
         }
     }
 

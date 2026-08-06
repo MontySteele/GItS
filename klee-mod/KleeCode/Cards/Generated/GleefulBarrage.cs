@@ -47,7 +47,7 @@ public sealed class GleefulBarrage : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gleeful Barrage"),
-        ("description", "Deal {Damage:diff()} damage to a random enemy, 2+[gold]Sparks[/gold] times."),
+        ("description", "Deal {Damage:diff()} damage to random enemies, 2+[gold]Sparks[/gold] times."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

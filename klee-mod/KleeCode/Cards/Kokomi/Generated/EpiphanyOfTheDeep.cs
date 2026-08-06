@@ -41,7 +41,7 @@ public sealed class EpiphanyOfTheDeep : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Song of Pearls"),
-        ("description", "Whenever a card is [gold]Exhausted[/gold], draw 1 card(s)."),
+        ("description", "Whenever a card is [gold]Exhausted[/gold], draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
