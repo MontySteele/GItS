@@ -196,7 +196,7 @@ definitions and names the sprint doc it belongs to, and a `Usage:` line
   older tables (`exp_roster_anchors.py:1-20`), and why every rate column now
   carries a Wilson interval so a point estimate cannot be quoted bare
   (`exp_roster_anchors.py:26-33`;
-  `docs/sprint-sim-hygiene-log-2026-07-29.md:159`).
+  `docs/archive/sprint-sim-hygiene-log-2026-07-29.md:159`).
 
 ## 6. Reading order
 

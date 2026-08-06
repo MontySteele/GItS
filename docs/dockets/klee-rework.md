@@ -5,7 +5,7 @@
 **Status:** DOCKET. Routed, not decided, not scheduled. Zero design authority:
 nothing here proposes a card, a number or a fix. Opened 2026-08-06 (Track R)
 against the sitting of 2026-08-06
-(`docs/sitting-record-predraft-2026-08-06.md`); rulings R109 and R111.
+(`docs/archive/sitting-record-predraft-2026-08-06.md`); rulings R109 and R111.
 
 Source for every item: `review/redteam/exploit-ledger.md` (S13 — 71 lines,
 71/71 replay-verified, 14 mechanism families). Pins:
@@ -65,7 +65,7 @@ is Exhaust, and the shipped upgrade is exactly `{remove: exhaust}`.
 
 ### 2b. Audit findings — filled by Track T, 2026-08-06
 
-Sweep methodology and full tables: `docs/track-t-audits-2026-08-06.md` §T-2.
+Sweep methodology and full tables: `docs/archive/track-t-audits-2026-08-06.md` §T-2.
 Findings only; no card was changed.
 
 **Limb (a) — repeatable spark generation below Uncommon.** The count depends
@@ -186,7 +186,7 @@ terms.
 
 ### Findings — filled by Track T, 2026-08-06
 
-Sweep methodology and full tables: `docs/track-t-audits-2026-08-06.md` §T-3.
+Sweep methodology and full tables: `docs/archive/track-t-audits-2026-08-06.md` §T-3.
 Findings only; no card was changed.
 
 **Term 1 — the additive per-bomb damage bonus** (`tier0/engine/effects.py:443`).

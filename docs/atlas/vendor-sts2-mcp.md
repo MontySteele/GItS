@@ -142,7 +142,7 @@ Route table (the whole surface): `/`, `/api/v1/singleplayer`,
 - **`state_type: "overlay"` and a menu with no `options` are the two shapes a
   soft-lock takes; neither raises** (`vendor/STS2_MCP/docs/raw-simplified.md:49`,
   `understudy/bridge.py:13-16`).
-- **The five wire facts** (R97/5d, `docs/understudy-phase0-report.md:97-104`):
+- **The five wire facts** (R97/5d, `docs/archive/understudy-phase0-report.md:97-104`):
   enemies live under `battle.enemies` not top level; intent damage exists only in
   `label` ("7", "6 x 3") with no numeric field; the hand's field is `target_type`
   not `target`; auras read `"Cryo Aura"` not `"cryo"`; and the intent label

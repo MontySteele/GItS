@@ -2,7 +2,7 @@
 
 Reads the combat event log; changes nothing (the fanfare_telemetry
 contract). The metric definition is REGISTERED in
-docs/curtain-call-sprint-log-2026-07-27.md §4 and fixed for the sweep:
+docs/archive/curtain-call-sprint-log-2026-07-27.md §4 and fixed for the sweep:
 
 - uptime      fraction of PLAYER TURNS during which at least one enemy
               carried a LIVE hydro aura at any point in the turn. An aura

@@ -11,7 +11,7 @@ took exactly this guard one method away (`FurinaBurstResource.DrainOnPlay`),
 which is what makes it a slip rather than a judgement call.
 
 WHY A SOURCE LINT. There is no C# test project (in-repo statement of the fact:
-docs/brief-coop-charter-items.md, the "no sim backstop" framing; an earlier
+docs/archive/brief-coop-charter-items.md, the "no sim backstop" framing; an earlier
 revision cited docs/coop-no-sim-backstop.md, a chat-memory topic name that was
 never a repo file -- repaired 2026-08-06, Class-P R119 / P-B item C-8),
 the mod's bite-check harness only patches and reports (it cannot construct a

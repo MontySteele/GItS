@@ -7,7 +7,7 @@
 #   character." His presence on this sheet stops being an inference from the reserved-character rule (unsigned R88,
 #   in tension with ratified R52) and becomes a direct registration: COMPANION CARD, no roster slot, not a slot-5
 #   candidate. NOTHING ON THIS SHEET CHANGED — no card was drafted, no rarity moved, no row was added by the ruling.
-#   Cross-refs: tier0/DECISIONS.md R108 addendum; docs/slot5-candidates-2026-08-05.md §2.3/§2.5.
+#   Cross-refs: tier0/DECISIONS.md R108 addendum; docs/archive/slot5-candidates-2026-08-05.md §2.3/§2.5.
 # Conventions: 4-star caps at Uncommon; heals below Rare convert to Block (Charlotte precedent); 5-star Rares are the
 # only true-heal slots (none designed here yet). All applies_element flags EXPLICIT (catalyst-cadence drafters must not
 # auto-apply through companion hits; the Fontaine-sheet discipline).

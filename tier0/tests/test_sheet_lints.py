@@ -99,7 +99,7 @@ def test_within_only_says_the_cross_pass_did_not_run():
 def test_the_cross_sheet_sweep_catches_the_clorinde_raiden_shape(tmp_path):
     """THE RED DEMONSTRATION, rebuilt from the case that needed a human.
 
-    docs/fontaine-rares-banner-sprint-log.md item 2: a Clorinde (Fontaine) /
+    docs/archive/fontaine-rares-banner-sprint-log.md item 2: a Clorinde (Fontaine) /
     Raiden (Inazuma) dominating pair "was flagged BY HAND because no lint could
     see it". Two companion sheets, one shared reward pool, and a per-file lint.
     The pair was resolved by buffing Raiden, so the live sheets no longer carry

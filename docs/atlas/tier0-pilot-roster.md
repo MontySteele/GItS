@@ -156,7 +156,7 @@ Live inventory today: 298 cards, 5 character sheets (3 roster + 2 reference),
   incoming-vs-HP ratio alone and "will buy 4 block against 39 incoming every
   time") is **filed to the backlog, not fixed**: "Nobody changes
   `tier0/pilot/policy.py` for it now" (`DECISIONS.md:3179-3216`;
-  `policy.py:45-49`, `docs/backlog-2026-07-29.md`).
+  `policy.py:45-49`, `docs/archive/backlog-2026-07-29.md`).
 
 ## 5. Traps
 

@@ -10,7 +10,7 @@ Companion cards) for **Slay the Spire 2**, designed simulation-first:
   single source of truth; the sims read them directly.
 
 Project documentation lives in `docs/` — see `docs/README.md` for the index
-(current docs vs. `docs/archive/`, plus `docs/missed-requirements.md`, the
+(current docs vs. `docs/archive/`, plus `docs/archive/missed-requirements.md`, the
 2026-07-26 recap audit of requirements that were never built).
 
 Two lookup files sit above the index:

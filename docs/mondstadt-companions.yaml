@@ -38,7 +38,7 @@
    # gated to Uncommon rarity or higher. If this is Common, it needs a bump."). This row is
    # `sayu_naptime`'s exact shape: 0-cost, non-exhaust, draws its own replacement, so it is
    # hand- and energy-neutral and cycles without bound. Rarity field ONLY -- no stat touched.
-   # Sweep: docs/track-t-audits-2026-08-06.md sec.1.
+   # Sweep: docs/archive/track-t-audits-2026-08-06.md sec.1.
 - {id: sucrose_astable, name: "Sucrose — Astable Anemohypostasis", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 0, type: skill, exhaust: true,
    effects: [{op: swirl, target: enemy}, {op: burst_energy, amount: 8}]}
    # R62 (red-pen 2026-07-25): the v1.11a numbers are RESTORED and main's interim rebalance is

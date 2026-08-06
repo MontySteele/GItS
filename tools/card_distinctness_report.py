@@ -69,7 +69,7 @@ to the official rows.
   python tools/card_distinctness_report.py --gate         # exit 1 on breach
 
 GATE (RATIFIED [USER] 2026-07-27, TWO-ANCHOR: derivation and evidence in
-docs/a2-gate-ratification-2026-07-27.md; supersedes the PROPOSED 2026-07-26
+docs/archive/a2-gate-ratification-2026-07-27.md; supersedes the PROPOSED 2026-07-26
 single-anchor draft of uniq>=75/maxclu<=4/neardup<=0.33). Hard floors sit
 at the official FLOOR (Silent, the themed anchor) with modding headroom:
 
@@ -233,7 +233,7 @@ TARGET_CLASS = {
 }
 
 # Gate thresholds. RATIFIED [USER] 2026-07-27 against the COMPLETE
-# two-anchor band (docs/a2-gate-ratification-2026-07-27.md): hard floors
+# two-anchor band (docs/archive/a2-gate-ratification-2026-07-27.md): hard floors
 # sit at the official FLOOR with modest modding headroom, and the official
 # band is printed as an advisory line so "passes the gate" is never
 # mistaken for "matches Ironclad".

@@ -16,7 +16,7 @@ import pytest
 
 from tools import card_distinctness_report as cdr
 
-# Known debt at ratification time (docs/a2-gate-ratification-2026-07-27.md,
+# Known debt at ratification time (docs/archive/a2-gate-ratification-2026-07-27.md,
 # "Where the roster lands"). An entry here is DEBT, not a pass. Remove each
 # as its pool-sweep pass clears it; the staleness test below forces the
 # removal so this list can only shrink.
@@ -40,7 +40,7 @@ def test_no_new_gate_breaches():
            if (pool, metric) not in KNOWN_FAILING]
     assert not new, (
         "NEW distinctness-gate regression (thresholds RATIFIED 2026-07-27, "
-        "docs/a2-gate-ratification-2026-07-27.md): " + "; ".join(new))
+        "docs/archive/a2-gate-ratification-2026-07-27.md): " + "; ".join(new))
 
 
 def test_known_failing_list_is_not_stale():

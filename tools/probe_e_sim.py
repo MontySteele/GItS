@@ -1,6 +1,6 @@
 """Probe (e)'s sim-side reading: tier0 run on the identical scripted sequence.
 
-Registration: `docs/probe-e-corpse-detonation-registration-draft.md`, method
+Registration: `docs/archive/probe-e-corpse-detonation-registration-draft.md`, method
 step 4 — "Read the sim's own behaviour on the identical scripted sequence, so
 that the comparison is sim-vs-game on one script rather than game-vs-prose."
 The `klee-mod/DECISIONS.md` prose describing the sim's behaviour is under an

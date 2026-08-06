@@ -58,7 +58,7 @@ from tier0.content import loader, upgrades          # noqa: E402
 # silences.
 SHEET_EXEMPT: dict[str, str] = {
     # CURATED EXEMPTION -- [USER] reply of 2026-08-06 to the Second Wind open
-    # one-liner (2) (`docs/surplus-week-manifest-2026-08-05.md`, "Open
+    # one-liner (2) (`docs/archive/surplus-week-manifest-2026-08-05.md`, "Open
     # one-liners this batch generated for [USER]"): *"curated exemption now;
     # the replacement delta is deferred behind FLAG-2."*
     #

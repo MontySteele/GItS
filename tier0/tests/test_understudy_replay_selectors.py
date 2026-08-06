@@ -18,7 +18,7 @@ makes it rather than a rule:
 
 WHAT A GREEN BAR HERE DOES NOT SAY. Nothing about whether tier0 is faithful.
 The probe answers are measurements taken against the real game and they live
-in `docs/probe-a-block-offset.md` and `docs/probe-b-fanfare-residual.md`.
+in `docs/archive/probe-a-block-offset.md` and `docs/archive/probe-b-fanfare-residual.md`.
 """
 
 from __future__ import annotations
@@ -147,7 +147,7 @@ def test_guest_cast_empowers_companion_block_and_center_stage_does_not():
 # tier0 +2, because the reconstruction seeded the turn with the answer the
 # turn itself gave, so the play that SET the designation was already covered
 # by it. +2 Fanfare per combat, once, in tier0's favour
-# (`docs/probe-b-fanfare-residual.md`).
+# (`docs/archive/probe-b-fanfare-residual.md`).
 
 def test_standing_choice_is_the_latest_earlier_round_s_answer():
     fight = _fight([[1, "choose", 0, "Center Stage", SPOTLIGHT_PAIR],

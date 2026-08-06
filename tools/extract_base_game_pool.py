@@ -1545,7 +1545,7 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
     # key. The conventional name keeps this generic for future characters.
     #
     # ENCHANTMENTS -- the standing category (R82, 2026-07-27, ruled at
-    # docs/enchantments-design-2026-07-27.md). The base game's run-wide
+    # docs/archive/enchantments-design-2026-07-27.md). The base game's run-wide
     # enchantment SUBSYSTEM (deck-enchant screens, rest options, relics that
     # grant enchantments run-wide, the EnchantmentModel hierarchy) is OUTSIDE
     # the parity world, same category as relics and events: this extractor

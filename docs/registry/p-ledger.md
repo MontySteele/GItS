@@ -77,7 +77,7 @@ inferred-not-observed.
 (the act-3 Ancient stun reward, which no extraction contains) is struck —
 kept visible, R101b — and replaced by the true, stronger citation: the
 official pool has no player-applied stun/skip/intent-delay anywhere
-(`docs/zhongli-dossier-2026-08-05.md` §2). The rule's content and force are
+(`docs/archive/zhongli-dossier-2026-08-05.md` §2). The rule's content and force are
 unchanged. Opens `docs/registry/excision-log.md` (Clear-the-Stage rail 3)
 with this strike as row E-1.
 **Predictability:** no owner keeps a citation to a card that does not exist
@@ -113,7 +113,7 @@ the correct expansion is stated in the same file.
 **What:** `tier0/tests/test_card_play_hook_guards.py` cited
 `docs/coop-no-sim-backstop.md` — a chat-memory topic name that was never a
 repo file. The docstring now points at the in-repo statement of the same fact
-(`docs/brief-coop-charter-items.md`) and records the repair. The two frozen
+(`docs/archive/brief-coop-charter-items.md`) and records the repair. The two frozen
 docs repeating the phantom path stay verbatim per rail 1. No assertion
 changes.
 **Predictability:** no owner keeps a dangling citation in live code when the

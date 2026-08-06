@@ -51,7 +51,7 @@ Damage tagged element E hitting an enemy holding aura A ≠ E consumes A and tri
 | Anemo trigger | Swirl | Copy target's aura to all enemies |
 | Geo trigger | Crystallize | Gain Block |
 
-**§2.2a — Hard-CC pricing rule (v1.5).** Base StS2 deliberately makes reliable stun scarce ~~(an act-3 Ancient reward at 3 energy + Exhaust; looping it is a known degenerate win)~~ *(citation repaired 2026-08-06 — Class-P, R119 / P-B item C-4, authorized by queue row 10.9; rule untouched: no such Ancient-reward card exists in the 440-card extraction. The true, stronger evidence is the census: the official pool contains **no player-applied stun, skip, or intent-delay anywhere** — `docs/zhongli-dossier-2026-08-05.md` §2. Excision logged: `docs/registry/excision-log.md`)*. No reaction, and no companion card, may produce an intent-skip at repeatable-common economics. Frozen's base effect is soft control (above); **full stun is payoff-tier design space only** (rare character cards, artifact sets, 5-star kits), priced at or above the base game's stun scarcity, with per-combat diminishing returns (an enemy that thaws gains Freeze Resist). Detector: `control_uptime` — % of enemy actions negated by companion-sourced effects; winning fights above threshold flag SUPPORT_CARRY.
+**§2.2a — Hard-CC pricing rule (v1.5).** Base StS2 deliberately makes reliable stun scarce ~~(an act-3 Ancient reward at 3 energy + Exhaust; looping it is a known degenerate win)~~ *(citation repaired 2026-08-06 — Class-P, R119 / P-B item C-4, authorized by queue row 10.9; rule untouched: no such Ancient-reward card exists in the 440-card extraction. The true, stronger evidence is the census: the official pool contains **no player-applied stun, skip, or intent-delay anywhere** — `docs/archive/zhongli-dossier-2026-08-05.md` §2. Excision logged: `docs/registry/excision-log.md`)*. No reaction, and no companion card, may produce an intent-skip at repeatable-common economics. Frozen's base effect is soft control (above); **full stun is payoff-tier design space only** (rare character cards, artifact sets, 5-star kits), priced at or above the base game's stun scarcity, with per-combat diminishing returns (an enemy that thaws gains Freeze Resist). Detector: `control_uptime` — % of enemy actions negated by companion-sourced effects; winning fights above threshold flag SUPPORT_CARRY.
 
 **§2.2a extension (v1.10):** Spotlight empowerment applies to numbers only — **never turn-economy effects**. Character-level designation touches a companion's entire kit; if any companion ever ships a soft-control card, Spotlight must not be the thing that upgrades it into stun economics. *(Engine note: enforced structurally for damage and Block; element-application counts are covered by the law and will join the plumbing when a card first prints a numeric count — documented gap in `spotlight_mult`.)*
 
@@ -264,7 +264,7 @@ Flagged for v0.2+ planning: characters whose Genshin identity is *support* (Colu
 
 > **RATIFIED 2026-08-06, and the fence comes down — recorded, not silently.**
 > Second sitting of 2026-08-06 (sixth-wave brief, Track Y item Y-7;
-> transcribed at `docs/sitting-record-predraft-2026-08-06.md` §7): *"v1.12/v1.13
+> transcribed at `docs/archive/sitting-record-predraft-2026-08-06.md` §7): *"v1.12/v1.13
 > amendments RATIFIED; unratified banners drop; law text now matches shipped
 > code."* Gates `S4-G3` (v1.12) and `S4-G4` (v1.13) are discharged. **Both
 > entries below are LAW.** They keep their position in the file rather than
@@ -317,7 +317,7 @@ Flagged for v0.2+ planning: characters whose Genshin identity is *support* (Colu
 > altered. Both record changes that have **already shipped in code** while the
 > principles text still states the superseded rule — which is the situation
 > the fence existed to make visible. Filed by the doc de-drift pass
-> (`docs/backlog-2026-07-29.md` §2).
+> (`docs/archive/backlog-2026-07-29.md` §2).
 
 - **v1.12 — ~~DRAFT (unratified)~~ RATIFIED 2026-08-06: Fanfare generation is SINGLE-LEG on Encore.**
   Amends the v1.10 entry's Fanfare definition, which still reads *"generation
@@ -358,7 +358,7 @@ Flagged for v0.2+ planning: characters whose Genshin identity is *support* (Colu
 
   **Status: ~~DRAFT~~ RATIFIED 2026-08-06 (Track Y / Y-7); `S4-G3` discharged.**
   The direction is [USER]-ruled; the X values remain
-  PROPOSED (`docs/backlog-2026-07-29.md` §3 item 9, the ratification batch),
+  PROPOSED (`docs/archive/backlog-2026-07-29.md` §3 item 9, the ratification batch),
   and the fanfare archetype itself is under a pre-registered STOP at 1.8%
   against its 2.0% floor. Ratifying this text does **not** ratify those
   numbers.

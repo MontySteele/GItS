@@ -84,7 +84,7 @@ by [USER]-countersigned registration at kickoff, before any number is read.
 ## 1. What the repo says the sprint is (every citation)
 
 1. **The question was minted as a named follow-on by Curtain Call**
-   (`docs/curtain-call-sprint-log-2026-07-27.md`):
+   (`docs/archive/curtain-call-sprint-log-2026-07-27.md`):
    - line 321–323: *"**Payoff-reach follow-on (from prediction 4):** the
      archetype-scorer / RARITY_ODDS question, explicitly out of scope under
      D12-frozen; this is the same named follow-on §9 already carried, now with
@@ -106,7 +106,7 @@ by [USER]-countersigned registration at kickoff, before any number is read.
    payoffs an archetype should reach for, or about rarity, appears in this
    document."*
 3. **The fence adjacency that forced 10.7**
-   (`docs/sitting-prep-2026-08-05.md` §10.7): *"The re-baseline's
+   (`docs/archive/sitting-prep-2026-08-05.md` §10.7): *"The re-baseline's
    core-attainment columns are measurement in the neighbourhood of 'payoff
    reach', and the payoff-reach/`RARITY_ODDS` sprint's registration document
    could not be located in the repo (greps over docs/, review/, all

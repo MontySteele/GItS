@@ -10,7 +10,7 @@ Reorganized 2026-07-26 (project recap). Two kinds of documents live here:
   rulings/specs. **Archived docs are records: they are kept verbatim and are
   not updated.** Where an archived doc contains a claim that is no longer
   true, the correction lives in the superseding doc named below or in
-  `missed-requirements.md`.
+  `archive/missed-requirements.md`.
 
 The design-sheet YAMLs (`docs/*.yaml`) are the single source of truth for
 card/relic/companion data and are read directly by the sims and codegen —
@@ -38,7 +38,7 @@ otherwise).
 | `tier0/DECISIONS.md`, `klee-mod/DECISIONS.md` | The living decision logs (sim-side and mod-side). The project's spine. Since 2026-08-06 (R-D split) the tier0 ledger's R39–R99 range lives verbatim in `tier0/DECISIONS-archive-R39-R99.md`; resolve any R-number via `registry/identifiers.md` §3, and grep the `DECISIONS*.md` globs, not one file. |
 | `dockets/engineering-backlog.md` | **The engineering half of "what is open".** Work that needs no [USER] ruling to start: confirmed defects, measurement defects, unbuilt instruments, content work with nothing in front of it. Opened 2026-08-06 (Track Z). |
 | `archive/red-pen-2026-07-26.md` | REFERENCE (moved to the archive 2026-08-06, Track R-B). The most recent ratification record; carries its own errata and the one still-owed Queue 5 cell (`S4-G16`). |
-| `open-playtest-items.md`, `missed-requirements.md`, `backlog-2026-07-29.md`, `sitting-prep-2026-08-05.md`, `surplus-week-manifest-2026-08-05.md` | **RETIRED AS REGISTERS 2026-08-06 (Track Z / Z-3), now REFERENCE.** Each keeps its full text and its evidence, and each carries a banner saying where its open rows went — the [USER] ones to `registry/user-queue.md` §10, the engineering ones to `dockets/engineering-backlog.md`. Read them for *reasoning*, never for *status*. |
+| `archive/open-playtest-items.md`, `archive/missed-requirements.md`, `archive/backlog-2026-07-29.md`, `archive/sitting-prep-2026-08-05.md`, `archive/surplus-week-manifest-2026-08-05.md` | **RETIRED AS REGISTERS 2026-08-06 (Track Z / Z-3), now REFERENCE.** Each keeps its full text and its evidence, and each carries a banner saying where its open rows went — the [USER] ones to `registry/user-queue.md` §10, the engineering ones to `dockets/engineering-backlog.md`. Read them for *reasoning*, never for *status*. |
 
 ### Lifecycle statuses — what a header line means
 
@@ -91,23 +91,23 @@ it on new documents (`registry/identifiers.md` §16).
 | doc | what it is |
 |---|---|
 | `animation-sprint-2-plan.md` | Open sprint: gates B5/D5/E2/F2 (and the Funnel Contract §3, still binding). |
-| `animation-sprint-2-log.md` | Open sprint log; doc of record for the two unfixed Playtest-2 defects. |
-| `fontaine-rares-banner-sprint-log.md` | Sprint closed in code, open on four [USER] items (§"Open, and owned by [USER]"). |
-| `kokomi-playtest-protocol.md` | The protocol for Kokomi's first table time ~~(never played)~~ — **the *protocol* run has not happened (its "Answers" block is blank), but Kokomi has had table time**: exploratory plays 2026-07-25/26 (`DEC-D5`-designated as contaminating-exploratory) and a seat in the three-seat co-op holdout of 2026-08-01/02. (Row corrected 2026-08-06 by the housekeeping sweep, Track X — same class as S4 finding F17, which R107 executed on `open-playtest-items.md` §2 but which was never swept through this index row.) Where it conflicts with `open-playtest-items.md` §2, the latter wins (newer). |
+| `archive/animation-sprint-2-log.md` | Open sprint log; doc of record for the two unfixed Playtest-2 defects. |
+| `archive/fontaine-rares-banner-sprint-log.md` | Sprint closed in code, open on four [USER] items (§"Open, and owned by [USER]"). |
+| `kokomi-playtest-protocol.md` | The protocol for Kokomi's first table time ~~(never played)~~ — **the *protocol* run has not happened (its "Answers" block is blank), but Kokomi has had table time**: exploratory plays 2026-07-25/26 (`DEC-D5`-designated as contaminating-exploratory) and a seat in the three-seat co-op holdout of 2026-08-01/02. (Row corrected 2026-08-06 by the housekeeping sweep, Track X — same class as S4 finding F17, which R107 executed on `archive/open-playtest-items.md` §2 but which was never swept through this index row.) Where it conflicts with `archive/open-playtest-items.md` §2, the latter wins (newer). |
 | `awaiting-user-slots-2026-08-06.md` | ~~Three prepared landing slots, **AWAITING [USER]**~~ — grew to seven slots, **all ANSWERED and LANDED 2026-08-06** (Track Y; R115; R118); each landed form marked in place, unselected forms struck. **FROZEN to REFERENCE 2026-08-06** (Clear the Stage R-C / P-1, excision-log E-2). Indexed 2026-08-06 (Track X). |
-| `sitting-record-predraft-2026-08-06.md` | [USER]'s verdicts of 2026-08-06, transcribed **verbatim** and committed before anything was executed from them. The authority document behind R107–R112. Indexed 2026-08-06 (Track X). |
-| `sitting-prep-2026-08-05.md` | The Last Call sitting's single entry point. **Still live for §8 (the four paperwork one-liners) and §10 (the batch's own asks)** — status for both is reconciled in `registry/user-queue.md` §5/§6. Indexed 2026-08-06 (Track X). |
-| `surplus-week-manifest-2026-08-05.md` | INDEX for surplus week (`SW-S1…S15`), the Last Call/House Lights addendum, and the Second Wind batch's landings and replies. Indexed 2026-08-06 (Track X). |
+| `archive/sitting-record-predraft-2026-08-06.md` | [USER]'s verdicts of 2026-08-06, transcribed **verbatim** and committed before anything was executed from them. The authority document behind R107–R112. Indexed 2026-08-06 (Track X). |
+| `archive/sitting-prep-2026-08-05.md` | The Last Call sitting's single entry point. **Still live for §8 (the four paperwork one-liners) and §10 (the batch's own asks)** — status for both is reconciled in `registry/user-queue.md` §5/§6. Indexed 2026-08-06 (Track X). |
+| `archive/surplus-week-manifest-2026-08-05.md` | INDEX for surplus week (`SW-S1…S15`), the Last Call/House Lights addendum, and the Second Wind batch's landings and replies. Indexed 2026-08-06 (Track X). |
 | `pending/` | Adopted-but-retained proposal documents (`SS-G3` the CI argument, `SS-G4` the session-isolation argument), kept as the standing reasoning behind two live policies. Index: `pending/README.md`. **Indexed 2026-08-06 (Track X) — S4 §4 lead 6 recorded that this directory was indexed nowhere.** |
 | `archive/run-model-rework-plan.md` | Implemented (Passes 1–4 shipped); kept current for §10.9, the living skip backlog. |
 | `archive/tier05-perf-and-ironclad-act3-notes.md` | Perf pass record; kept current for §1.5.2's open items (out-of-scale boss audit lives only here). |
-| `tech-debt-audit-2026-07-26.md` | The architecture audit; kept current for §9 (the big-push sequencing, with D3's pin-batch pull marked in place) and §10, the horizon list of open design sessions. |
-| `epoch-1-log-2026-07-26.md` | EPOCH 1's landing record: what moved, what was archived, and the graded predictions, **plus the D10-world canonical-cell baseline — ARCHIVED by the D12 and D13 bumps** (R87(3)). Current anchors: `sprint-sim-hygiene-log-2026-07-29.md`, ratified as measurements by R107(a). (Row corrected 2026-08-06, R107 / S4 finding F16 — it previously called these numbers "the current canonical-cell baseline", two world bumps behind the stamp.) |
+| `archive/tech-debt-audit-2026-07-26.md` | The architecture audit; kept current for §9 (the big-push sequencing, with D3's pin-batch pull marked in place) and §10, the horizon list of open design sessions. |
+| `archive/epoch-1-log-2026-07-26.md` | EPOCH 1's landing record: what moved, what was archived, and the graded predictions, **plus the D10-world canonical-cell baseline — ARCHIVED by the D12 and D13 bumps** (R87(3)). Current anchors: `archive/sprint-sim-hygiene-log-2026-07-29.md`, ratified as measurements by R107(a). (Row corrected 2026-08-06, R107 / S4 finding F16 — it previously called these numbers "the current canonical-cell baseline", two world bumps behind the stamp.) |
 | `track-a-kickoff-brief.md` | Track A's execution brief (T1–T4). Executed 2026-08-04. |
-| `sprint-axis-validity-track-a-log-2026-08-04.md` | **OPEN, and the doc of record for P1's binding null.** §0 holds the graded predictions; §3 diagnoses why the null fired; §4 is the stop-and-surface list; §6 is what [USER] gate A-G1 most needs to look at. |
-| `handback-note-2026-08-04.md` | [USER]'s hand-back note opening the validation-soak + Track B session, verbatim. |
-| `sprint-understudy-p1-log-2026-08-04.md` | The bot-playtest apparatus. **P1 VALIDATED** (clean N=3, R98); carries the eleven harness defects and the two debts still open. |
-| `sprint-track-b-curves-log-2026-08-04.md` | **OPEN.** Track B's two feeds: what shipped, the live-shared-surface cross-session note, the graded pre-registrations, and the reversibility ledger (incl. the standing mod redeploy). |
+| `archive/sprint-axis-validity-track-a-log-2026-08-04.md` | **OPEN, and the doc of record for P1's binding null.** §0 holds the graded predictions; §3 diagnoses why the null fired; §4 is the stop-and-surface list; §6 is what [USER] gate A-G1 most needs to look at. |
+| `archive/handback-note-2026-08-04.md` | [USER]'s hand-back note opening the validation-soak + Track B session, verbatim. |
+| `archive/sprint-understudy-p1-log-2026-08-04.md` | The bot-playtest apparatus. **P1 VALIDATED** (clean N=3, R98); carries the eleven harness defects and the two debts still open. |
+| `archive/sprint-track-b-curves-log-2026-08-04.md` | **OPEN.** Track B's two feeds: what shipped, the live-shared-surface cross-session note, the graded pre-registrations, and the reversibility ledger (incl. the standing mod redeploy). |
 | `track-b-curves.md` | **GENERATED — do not hand-edit.** B1 (demand) and B2 (output) curves, per feed. Rebuild: `python tools/track_b_curves.py --out docs/track-b-curves.md`. Empty cells are empty on purpose. |
 
 ### Dockets (routed, not decided)
@@ -120,7 +120,7 @@ it on new documents (`registry/identifiers.md` §16).
 |---|---|
 | `roster-codegen.md` | Codegen + build-path reference (see dated correction note in-file). |
 | `upgrade-conventions.md` | Mined StS2 upgrade grammar (durable) + house rules (see dated correction note in-file). |
-| `calibration-notes.md` | Battery-calibration law ("battery adapts to the roster") + the parked A3/A4 axis questions. |
+| `archive/calibration-notes.md` | Battery-calibration law ("battery adapts to the roster") + the parked A3/A4 axis questions. |
 | `archive/klee-real-battery-calibration.md` | The real-Ironclad baseline pipeline reference (both reproduce commands live). |
 | `role-tempo-baseline.md` | The five canon pools' (solve × tempo × rarity) matrix, DLL-derived. Percentages only — no canon card text is ever committed (.gitignore:28). Also holds the wiki-vs-DLL count reconciliation. |
 | `role-tempo-floors.yaml` | The machine-readable coverage floors (min-of-canon over the cells all five pools are non-zero in). Read by `tools/lint_role_tempo_coverage.py`. |
@@ -185,9 +185,9 @@ status header instead.* Recorded so the pass is not re-run blind:
 | Candidate | Why it looked archivable | Why it stayed live |
 |---|---|---|
 | `track-a-kickoff-brief.md` | Track A executed 2026-08-04; the track log is the doc of record | Four `tools/` modules cite it by path in their module docstrings (`canon_role_tempo.py`, `suggest_role_tempo_tags.py`, `lint_role_tempo_coverage.py`, `role_tempo.py`). Moving it makes four live citations stale to fix one index row. **Status header added in-file instead.** |
-| `understudy-kickoff-brief.md`, `understudy-phase0-report.md`, `archive/understudy-p0-findings.md` | Phase 0 closed; rulings landed as R93–R97 | The Understudy sprint is open (`UND-P1.5` is next, R104), and `understudy/README.md`, `understudy/soak.py`, `vendor/README.md`, `vendor/STS2_MCP/PROVENANCE.md` and `docs/atlas/vendor-sts2-mcp.md` all cite them as live provenance |
-| `sitting-record-predraft-2026-08-06.md` | Its content landed as R107–R112 | It is the **verbatim** [USER] authority document those six rulings are drawn from; the rulings cite it |
-| `handback-note-2026-08-04.md` | The session it opened has closed | Verbatim [USER] text, cited by R97; verbatim records are not edited or relocated by a paper sweep |
+| `understudy-kickoff-brief.md`, `archive/understudy-phase0-report.md`, `archive/understudy-p0-findings.md` | Phase 0 closed; rulings landed as R93–R97 | The Understudy sprint is open (`UND-P1.5` is next, R104), and `understudy/README.md`, `understudy/soak.py`, `vendor/README.md`, `vendor/STS2_MCP/PROVENANCE.md` and `docs/atlas/vendor-sts2-mcp.md` all cite them as live provenance |
+| `archive/sitting-record-predraft-2026-08-06.md` | Its content landed as R107–R112 | It is the **verbatim** [USER] authority document those six rulings are drawn from; the rulings cite it |
+| `archive/handback-note-2026-08-04.md` | The session it opened has closed | Verbatim [USER] text, cited by R97; verbatim records are not edited or relocated by a paper sweep |
 | `pending/serenitea-g3-ci-proposal.md`, `pending/serenitea-g4-session-isolation.md` | Both ADOPTED | `pending/README.md` explicitly retains them as the standing argument — *"read it before adding a job"* |
 | `brief-*.md` (three) | Briefs, not sprints | All three are cited as the live filing target by R87, R92/3c and the backlog |
 
@@ -208,6 +208,21 @@ Ledger-cited REFERENCE files did **not** move (rail 1: the append-only
 DECISIONS ledgers cannot be repointed) — that policy question is queue row
 **Q20**.
 
+### Clear the Stage, Track R-B resumed — 2026-08-06 (45 more, R121 `Q20`)
+
+`Q20` came back **MOVE-WITH-RESOLVER**, so the 45 held ledger-cited files
+moved on the same terms: verbatim under a dated banner, live citers repointed
+in the move commit, ledger bytes untouched. The citations that rail 1 forbids
+repointing are redirected instead by the **moved-path resolver**,
+`registry/identifiers.md` §17 — one row per moved file, parsed by
+`tools/lint_doc_citations.py` in CI. A stale path that resolves is green; one
+that resolves to nothing is a failure.
+
+Acceptance: `docs/*.md` root count **74 → 29** (the charter's target is ≤ 15).
+What is left is 19 LIVING documents, 5 unbannered instrument/draft files, and
+5 REFERENCE files named in §17 — R-B is out of REFERENCE files it may move,
+and the rest of the gap belongs to Track R-C (the LIVING prune), not here.
+
 ### Tier 0 / Tier 0.5 simulator thread
 - `tier0-simulator-spec.md` — origin charter (M1–M4). The world outgrew it on
   purpose: cards live in `docs/*.yaml` not `content/cards/`, Frozen is v2,
@@ -225,7 +240,7 @@ DECISIONS ledgers cannot be repointed) — that policy question is queue row
   structurally suppress Frozen) is preserved in DECISIONS.
 - `csharp-build-spec.md` — C1–C3 delivered (three characters, not one);
   localization shipped inline rather than as JSON. The never-built C2
-  per-fight telemetry is logged in `missed-requirements.md` §2.3.
+  per-fight telemetry is logged in `archive/missed-requirements.md` §2.3.
 - `c3-codegen-gap-list.md` — every gap closed (68 generated + 8 hand-written,
   zero system-blocked).
 - `relic-potion-layer-plan.md` — W1/W2/W3 fully implemented
@@ -243,15 +258,15 @@ DECISIONS ledgers cannot be repointed) — that policy question is queue row
   pass reports; v0.1 baseline replaced by `V02_MEDIAN`.
 - `klee-pass-4-plan.md` — its headline numbers are all false now (the survival
   sprint fixed A6 via its own option (c)); asks A3/A5 were never ruled — logged
-  in `missed-requirements.md` §2.5, Tier 5.
+  in `archive/missed-requirements.md` §2.5, Tier 5.
 - `klee-r23-r25-rulings.md`, `klee-session-worknote.md`, `klee-errata-report.md`
   — executed ruling/worknote records.
 - `klee-design-review.md` — framing (40% Ironclad target) invalidated by
   `klee-real-battery-calibration.md`; two of its four dead-card reworks never
-  landed — logged in `missed-requirements.md` §3.4.
+  landed — logged in `archive/missed-requirements.md` §3.4.
 - `klee-survival-sprint-plan.md` → `klee-survival-sprint-report.md` — shipped;
   bands went floor-only per its recommendation. The telemetry gate it imposed
-  is logged in `missed-requirements.md` §2.2.
+  is logged in `archive/missed-requirements.md` §2.2.
 - `klee-art-redpen-round2.md` → `klee-art-redpen-round3.md` — art verdicts
   re-litigated at true card size, then ruled 2026-07-21 (record in
   `art/plan.tsv` DECLINE rows).
@@ -263,17 +278,17 @@ DECISIONS ledgers cannot be repointed) — that policy question is queue row
   and resolved.
 - `furina-pass1-rulings.md`, `furina-pass3-rulings.md` — R16/R17 architecture
   retired by R40–R43. R29d's owed naming/lore pass is logged in
-  `missed-requirements.md` Tier 5.
+  `archive/missed-requirements.md` Tier 5.
 - `furina-sheet-pass-{1,2,3}-plan/-report.md` — sheet passes; every measured
   world (CONSTANTS/DRAFTER/RUNTEMPLATE) since replaced. Pass-3's unruled asks
-  are logged in `missed-requirements.md` §3.6/§3.7.
+  are logged in `archive/missed-requirements.md` §3.6/§3.7.
 - `furina-sheet-pass-4-plan.md` — Q1 re-ruled, Q2 dissolved by the fanfare
-  sprint; the orphaned Q3 directive is logged in `missed-requirements.md` §1.5.
+  sprint; the orphaned Q3 directive is logged in `archive/missed-requirements.md` §1.5.
 - `furina-sheet-redpen.md` — flags executed or ruled; flag 8's convergence
   cell is the one still owed, tracked in `red-pen-2026-07-26.md`.
 - `furina-principles-amendment-batch.md` — ratified as principles v1.10.
 - `furina-salon-rework-plan.md` — Salon v2 shipped (R40); its §6(c)/(d)
-  residue is logged in `missed-requirements.md` §3.6.
+  residue is logged in `archive/missed-requirements.md` §3.6.
 - `furina-tier05-baseline.md` — diagnostic; superseded by R40–R43; Spotlight
   redesign inheritance tracked in the pool-sweep backlog.
 - `furina-legibility-sprint-log.md`, `furina-fanfare-sprint-log.md` — closed
@@ -286,7 +301,7 @@ DECISIONS ledgers cannot be repointed) — that policy question is queue row
   `kokomi-v0.4-plan.md` → `kokomi-v0.4-report.md` — the v0.1/meter-50 →
   v0.4b/R56 arc; each superseded by the next, final numbers by R57/R58.
   Unbuilt asks (stability band, multiplicative cell, P3/P4) are logged in
-  `missed-requirements.md` §§1.3, 1.4, 3.2.
+  `archive/missed-requirements.md` §§1.3, 1.4, 3.2.
 
 ### Art / animation thread
 - `art-taste-pass.md` — → `klee-art-redpen-round2/3.md`; its four process
@@ -295,17 +310,17 @@ DECISIONS ledgers cannot be repointed) — that policy question is queue row
   `sprint-addendum-art.md` — executed in full (cover_autocrop, sibling
   carve-out, Dahlia renames, dedupe lint).
 - `animation-sprint-1-plan.md` / `-log.md` — sprint 1 CLOSED 2026-07-24; its
-  deferred "polish sprint" scenes are logged in `missed-requirements.md` §4.5.
+  deferred "polish sprint" scenes are logged in `archive/missed-requirements.md` §4.5.
 - `icon-gap-2026-07-24.md` — sweep landed; **caution:** its "all 78 Furina
   card portraits resolve" claim checked path resolution, not files — see
-  `missed-requirements.md` §4.1.
+  `archive/missed-requirements.md` §4.1.
 
 ### Shop / ship-what-we-know / playtests
 - `shop-companion-channel-plan.md` → `shop-companion-channel-sprint.md`
   (pre-registration, kept verbatim) → `shop-companion-channel-sprint-log.md`
   — built and measured; §7 close-out items tracked in
-  `open-playtest-items.md` §6.2 except §7.6/§7.7 (logged in
-  `missed-requirements.md` Tier 5). Its "Fontaine has zero Rares" note is
+  `archive/open-playtest-items.md` §6.2 except §7.6/§7.7 (logged in
+  `archive/missed-requirements.md` Tier 5). Its "Fontaine has zero Rares" note is
   stale since `15fc78f`.
 - `ship-what-we-know-sprint-plan.md` / `-log.md` — sprint CLOSED at the
   red-pen; the log's "What is NOT done" list is mostly overtaken by

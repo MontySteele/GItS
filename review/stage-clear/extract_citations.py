@@ -23,7 +23,10 @@ REPO = pathlib.Path(__file__).resolve().parents[2]
 OUT = REPO / "review" / "stage-clear" / "citation-graph.tsv"
 
 CITING_DIRS = ["docs", "review", "tools", "tier0/tests", "tier05/tests", "understudy"]
-CITING_FILES = ["tier0/DECISIONS.md", "klee-mod/DECISIONS.md"]
+# The ledger is volumized (R-D, 2026-08-06): the archive volume is an
+# append-only frozen record exactly like the live file, so it cites as LEDGER.
+CITING_FILES = ["tier0/DECISIONS.md", "tier0/DECISIONS-archive-R39-R99.md",
+                "klee-mod/DECISIONS.md"]
 CITING_EXT = {".md", ".py", ".yaml", ".yml", ".txt", ".tsv", ".json", ".toml", ".cfg", ".ini"}
 
 # Rule 1: explicit path-shaped references into docs/ or review/.
@@ -88,7 +91,8 @@ def doc_status(rel: str) -> str:
     Reads the file's own header banner where present; falls back to location
     (docs/archive/ => ARCHIVED) and to CODE for the code-side citers.
     """
-    if rel in ("tier0/DECISIONS.md", "klee-mod/DECISIONS.md"):
+    if rel in ("tier0/DECISIONS.md", "tier0/DECISIONS-archive-R39-R99.md",
+               "klee-mod/DECISIONS.md"):
         return "LEDGER"
     if rel.startswith(("tools/", "tier0/", "tier05/", "understudy/")):
         return "CODE"

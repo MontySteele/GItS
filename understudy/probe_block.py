@@ -3,7 +3,7 @@
 **A MEASUREMENT, NOT A POLICY.** This module drives the real game through a
 script written down in advance so that the block reading it produces has no
 policy in it. It exercises no design authority, changes no mod behaviour, and
-concludes nothing: the answer is in `docs/probe-a-block-offset.md`.
+concludes nothing: the answer is in `docs/archive/probe-a-block-offset.md`.
 
 The pre-registered question it exists to answer:
 

@@ -157,7 +157,7 @@ class Card:
     # card-played hooks, counts toward cards_played_this_turn, and routes to
     # its own result pile afterwards. Kokomi's `sly` resolves an authored
     # effect list instead and plays nothing. The unification of the two is
-    # filed as tech debt (docs/tech-debt-audit-2026-07-26.md); until it
+    # filed as tech debt (docs/archive/tech-debt-audit-2026-07-26.md); until it
     # lands, the trigger site in effects._op_discard handles both and the
     # extractor maps CardKeyword.Sly onto THIS field only.
     sly_keyword: bool = False
@@ -212,7 +212,7 @@ class Card:
     # Hand Trick grants Sly for one turn only. Kept separate from the printed
     # `sly_keyword` so the grant expires without editing what the card prints.
     sly_this_turn: bool = False
-    # Enchantment rider (R82, docs/enchantments-design-2026-07-27.md).
+    # Enchantment rider (R82, docs/archive/enchantments-design-2026-07-27.md).
     # Per-INSTANCE like the cost fields above: two Shivs may differ in
     # enchantment, and deepcopy clone sites (Anger/Nightmare shapes) carry
     # the rider with the instance -- the correct base-game answer. The

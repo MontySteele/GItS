@@ -56,7 +56,7 @@ LIVE_CLAIMS: dict[str, list[str]] = {
         "`KuragePulsePerCharge = {v}`",
         "reads the bank at ×{v}",
     ],
-    "docs/open-playtest-items.md": [
+    "docs/archive/open-playtest-items.md": [
         "the multiplier is now **{v}**",
         "reads the bank at ×{v}",
     ],

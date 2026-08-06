@@ -19,7 +19,7 @@ the [USER] taste pass); **character-shell track DONE** — see §5a
 *(Stale since later the same day — recap note 2026-07-26: the shell track
 shipped (§5a, commit `68fb11b`) and all 73 faces carry applied provisional
 rank-1 picks (`6f1b969`); "zero exist" described the pre-pass world. The
-[USER] taste pass is what remains — `open-playtest-items.md` §6.1.)*
+[USER] taste pass is what remains — `docs/archive/open-playtest-items.md` §6.1.)*
 
 *(Bill correction 2026-07-26, post-merge sweep: **58 → 62**. The Neap Tide
 amendment added four faces this table did not follow — R73's
