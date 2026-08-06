@@ -1,0 +1,376 @@
+# LAW
+
+The normative constraints that govern future work — design, behavior,
+engineering, art. Rules only; a line earns its place only if it constrains what
+future work may do. Status and shipped facts live in `STATE.md`; open decisions
+in `QUEUE.md`; measurement *method* in `EXPERIMENTS.md`; the working *norms*
+(hygiene vs. [USER] calls, audit triage, closed-items-leave-HEAD, worktrees) in
+`CLAUDE.md` and are not restated here.
+
+Provenance strings (`R44`, `principles §2.2`, `kokomi Law 2`, …) are plain
+pointers into the tagged history — uncounted, unlinted. **Current numbers and
+shipped behavior are not law here; they live in the YAML sheets and the code,
+which are their own source of truth.**
+
+---
+
+## Pillars (conflicts resolve upward)
+
+1. **Spire first.** This is a good StS2 mod that happens to be Genshin, not a
+   Genshin fangame in StS2 clothes. StS2 conventions (energy, rarity, intents,
+   keyword style) win over Genshin fidelity when they conflict.
+2. **Reactions are earned, not given** (Combat, below).
+3. **Character identity = statline asymmetry** — declared, not measured-gated
+   (see Design governance).
+4. **Co-op is amplified, never required** — every character clears solo.
+
+When two rules below conflict, the higher pillar wins.
+
+**Deliberately not adopted (durable exclusions — do not add these):** elemental
+resistance matrices; crit rate/damage as stats; Energy Recharge / Elemental
+Mastery as numeric stats (their *roles* are absorbed by relics and card design);
+stamina; cooldowns; any open-world system. Genshin's stat sheet stays home; its
+combat grammar comes with us. (principles §1)
+
+---
+
+## Combat — elements & reactions
+
+- **Reactions are earned, not given.** No character card applies an off-element
+  aura; off-element access comes only from companions or a co-op partner.
+  (principles Pillar 2 / Guardrail 2)
+- **Amplifiers are per-hit and consume the aura.** No reaction ever produces a
+  persistent or compounding damage multiplier — this is the iron rule and the
+  balance governor. (Whether a particular card's scaling that happens to get
+  duplicated is *too strong* is a balance question, not a law.) (principles §2.2)
+- **One aura per enemy (v1), 2 player-turns, refreshed by same-element hit.**
+  Anemo/Geo leave no aura — they only trigger. (principles §2.1)
+- **Canonical Frozen is a per-turn-decrementing, per-creature duration counter.**
+  Non-boss Frozen = −50% next-action damage + Shatter (first Attack hit only,
+  direct HP damage, cannot shatter the freeze it just applied). In boss rooms
+  only creatures carrying `MinionPower` are Frozen; every other creature takes
+  the Vulnerable substitution. (principles §2.2; R44; R116 NC-7 / R117 Q13)
+- **Hard CC is payoff-tier only.** No reaction and no companion card produces an
+  intent-skip/stun at repeatable-common economics; full stun is priced at or
+  above base-game stun scarcity with per-combat diminishing returns. Companions
+  never source hard CC (the `control_uptime` / `SUPPORT_CARRY` detector enforces
+  it). (principles §2.2a, §4.3; R45)
+- **Reaction credit — damage attribution and Burst energy — goes to the
+  triggering player;** auras live on shared enemies so cross-player reactions
+  need no special-casing. (principles §2.5)
+- **Overload splash (to all enemies) and Electro-Charged (stacking DoT) bypass
+  Block and are damage-pipeline-free** (no strength/vulnerable recursion).
+  **Shatter** is separate: bonus damage on the first Attack hit against a Frozen
+  enemy, which removes Frozen — it is not a DoT. (M1; principles §2.2)
+- **Application cadence is a per-character dial** — catalyst-grade (every attack
+  applies, low base numbers) vs. skill-grade (only Skill/Burst-tagged cards
+  apply, higher base numbers). (principles §2.3)
+- **Spotlight/empowerment boosts numbers only, never turn-economy effects.**
+  (principles §2.2a, v1.10)
+
+## Economy — companion pool, shop, banner, artifacts
+
+- **The companion pool is the mod's sole colorless content;** the mod ships no
+  base StS2 colorless cards. *Live tension:* principles §4.7 states the base
+  pool is removed, but ship reality is a shop-only override (R60 phase 1); full
+  removal needs a seven-consumer audit and is deferred, not rejected — treat the
+  pool as sole-colorless in design, but do not assume the base pool is gone in
+  code. (principles §4.7; R60)
+- **Companion cards route power through your character, never around them**
+  (Applier / Buffer / Trigger). **The delete-test always holds, unmodified, no
+  detector carve-outs:** removing your character's own cards from a winning deck
+  must gut it — if companions win anyway, that is `SUPPORT_CARRY`, a real failure
+  even for a support character. A **High-appetite** archetype (§4.4 — a
+  hypothetical swirl-fisher) may make companion-fishing the *dominant* plan; a
+  **companion-synergy** mechanic like Furina's Spotlight / Guest Cast may route a
+  character's damage through *empowered* companions. In both cases it is the
+  character's own enabling cards that the delete-test deletes, and deleting them
+  must still gut the deck. (Furina is Standard-appetite, not the High-appetite
+  case.) (principles §4.3, §4.4; furina §8)
+- **Rarity grades:** 4-star companions ≤ uncommon power; 5-star companions are
+  Rares, **exactly one card per 5-star**, payoff-grade only as *support* (buff /
+  amplify / aura) — never an independent or self-scaling damage engine.
+  Availability is a **runtime** governor, not an authoring cap: the designed
+  5-star roster per nation may grow without limit, and the Featured Banner (3
+  per nation per run) is what gates it.
+- **Personal-pool companions are the character's kit, and may carry.** A
+  character's own signature companions (e.g. Klee's Prune) are **drafted
+  normally** — rewards, shop, a possible randomized starter — and kept to the
+  **rarity guardrails** (power tracks rarity), but are **exempt from the
+  enabler-not-carry power limit**: a personal-pool card may be deliberately
+  **load-bearing / deck-warping**, not only a flavorful assist. Because they *are*
+  the character's own cards, the **delete-test still governs them** (deleting them
+  must gut the deck). This is distinct from **generated Guest Star cameos**, which
+  are minted mid-combat and are neither draftable nor banner-governed
+  (equal-rarity, this-combat-only, Exhausting — see the Furina Guest Star
+  guardrails). (principles §4.2, §4.3, §4.5; furina §9)
+- **Free reward channel is enabler-grade and stochastic,** nation-weighted ~50%
+  same-nation; its value is capability (off-element access), not per-energy
+  stats — a whiff is never a dead pick. (principles §4.1, §4.7)
+- **Shop is the paid premium channel, two colorless slots:** slot 1 = home-region,
+  guaranteed Uncommon-or-higher (`SHOP_COMPANION_RARITY_ODDS` renormalizes over
+  the ≥Uncommon pool); slot 2 = wildcard, any nation, unrestricted rarity.
+  (principles §4.7; R116 NC-10; R117/R118 Q16)
+- **Gold price is the balance governor, never a stat nerf.** Companion pricing is
+  50/75/150 by rarity; the ×1.15 colorless surcharge applies to `ColorlessCardPool`
+  only, so companions are exempt. (principles §4.7; R61, R63)
+- **Neutral action-energy / draw / thin are legal enabler-grade companion utility**
+  (one-shot, Exhaust-gated, costed) — the pool must let any character draft a
+  kit-gap fix. **Burst-meter (`burst_energy`) generation stays character-kit-scoped**
+  and must never be cheaply repeatable from companions. (principles §4.7, §2.4)
+- **The Featured Banner governs 5-star availability:** each run rolls
+  min(roster, slots) limited 5-stars per nation, without replacement, fixed for
+  the run, per-player in co-op; 4-stars never gated; reward slot, shop slot 1,
+  and sim are wired together. Standard-banner 5-stars carry `standard: true` so
+  an off-banner floor is one flag, not a redesign. (principles §4.2, v1.8; R64)
+- **An unreleased-nation character sits in their nation of operation until their
+  home sheet ships** (Arlecchino→Fontaine, Childe→Liyue). (R65)
+- **Artifacts are relic subcategories with 2-piece set bonuses** — no 4-piece
+  sets, no main/substat rolls; themed to reaction styles, not characters
+  (cross-character content). (principles §5)
+- **Infinite cycling engines gate to Uncommon+** (a hand- and energy-neutral
+  self-replacing card is a cycling engine whatever else it does). (R109 X2; R114
+  FLAG-1)
+
+## Character identity — Klee
+
+- **Pyro, catalyst-grade:** every attack applies Pyro, base numbers run low;
+  enables any reaction, triggers none alone. (klee §1)
+- **Declared statline is load-bearing:** elite A1 (frontload) and A6
+  (utility/AoE); weak A3 (block) and A4 (sustain ~0.5). **Her scaling never tops
+  her frontload — A2 < A1 and A2 ≤ 4.0** (Klee-scoped, not mod-wide), scaling
+  powers stack-capped. (klee §2, §9; R52 ask 3)
+- **Bombs detonate at the start of Klee's turn,** early on any Attack-card hit;
+  multiple bombs stack independently, each keeping its own damage. (klee §3)
+- **Repeatable spark generation satisfies one of two limbs:** it sits at
+  Uncommon+, or no sub-Rare card is simultaneously a spark source and a draw
+  enabler — infinite sparks unreachable at Common (an unboundedness test, not a
+  ban on Common spark-minting). X-cost attacks are exempt from spark-spend.
+  (R109 X7 + [USER] annotation; R34)
+- **The Burst (Sparks 'n' Splash) is kit, not loot:** never draftable, granted to
+  hand on meter fill, casting empties the whole meter (overflow lost at cast),
+  re-granted on refill, carries Retain. (principles §2.4, v1.9)
+- **Detonation lifesteal patches A4 at relic rarity, not card rarity.** (klee §5)
+
+## Character identity — Furina
+
+- **Hydro, skill-grade support-protagonist:** modest numbers, scaling routes
+  through others (elite A4 sustain + A6 utility; weak A1 + A7). (furina §1, §2)
+- **Spotlight runs in exactly two modes** (the retired self-Spotlight model is
+  not law): **CENTER STAGE** designates Furina — her cards generate Fanfare, no
+  numeric bonus; **GUEST CAST** designates the Companion *category* — companion
+  cards get the +50% multiplier and Spotlight texture, generate no Fanfare. The
+  `character:` field, invalid-target rule, freely-movable persisting designation,
+  inert duplicate selectors, per-player registry, and the per-turn Spotlighted-card
+  cap stay live. (R41; principles §4.5 v1.14; furina §3)
+- **Encore is an unbounded per-combat buffer** absorbing after Block and before
+  HP (overdraw drains true HP); **Encore absorption credits A4, never A3.**
+  (principles v1.10; furina §2, §4)
+- **Fanfare is capped at %maxHP; generation is activity-based, never passive.**
+  Design invariant: **every point of damage past Block prints exactly 1 Fanfare.**
+  Live legs: HP lost / Encore spent / Encore absorbed / Spotlighted card played.
+  Cards use printed `Fanfare Cap +X` (raises cap) and `Fanfare +X` (full grant,
+  rare POWER payoff only); cards raise a permanent floor (`gain_fanfare_floor`),
+  not the cap. Fanfare is a global pool on Furina surviving Spotlight moves.
+  (principles v1.12 RATIFIED; furina §4; R41; R114 FLAG-3)
+- **Delete-test applies unmodified, no detector carve-outs:** deleting Furina's
+  cards from a winning Spotlight deck must gut it; companions winning anyway is
+  `SUPPORT_CARRY`. **Self-carry must not be the median-best plan** (Salon and
+  Spotlight beat self-carry at median draft quality; self-carry owns the ceiling
+  only on cracked-Rare draws). The Ethereal Spotlight selector is kit machinery
+  and does not count toward A5. (furina §8, §2; R61)
+- **Guest Star generators — four guardrails:** this-combat-only; generators
+  Exhaust; equal-rarity (sub-Rare cannot create 5-star Rares); pull only from the
+  shared companion pool + purpose-built Guest Star sets, never playable pools.
+  Guest cameos are Furina-personal-pool only. (furina §9; principles §4.5; D2)
+- **Fontaine Cryo-convergence is managed in kit, not roster exclusion:**
+  Charlotte and Freminet each get one Cryo-applying card; Chevreuse is the
+  authored Overload/Vaporize counterweight (buff other routes, never nerf
+  freeze); Fontaine's zero 4-star Electro is scarce by construction, not a bug.
+  Freminet is one applier + one defensive/trigger + one enabler — no fake-support
+  reflavor of a DPS kit. (furina §10)
+
+## Character identity — Kokomi
+
+- **No self-damage anywhere** in her kit or personal pool (extends to shared-pool
+  errata); her risk axis is tempo and card economy only. (Law 1)
+- **No healing exception:** the conjunctive healing law stands unmodified for
+  her; her healer fantasy is Block, Charge, and prevention — no healing
+  amendment, ever. (Law 2; R52 ask 1)
+- **Flawless Strategy: Kokomi cannot gain Strength** — any Strength she would
+  gain becomes Charge. (Law 3)
+- **Deck-size grammar:** in her personal pool, Common cards never increase deck
+  size (net delta ≤ 0); only Uncommon/Rare may create cards. Machine-checked;
+  her personal pool only. (Law 4)
+- **Charge is never spent** — uncapped, read but never consumed, card-event-driven
+  with no passive accrual. The engine is kit-level (relic + starter), never
+  draft-gated; the relic holds only bookkeeping, all payoff magnitude lives in
+  cards. (kokomi §0, §2.1; R80; R16)
+- **Elite pair A2 Scaling + A6 Utility;** acceptance signature is HP-trajectory
+  flatness (the stability band); ward prevention stays reported telemetry, never
+  axis-credited. Canonical archetypes: priest / commander / assist (+ generic).
+  (R51; R66)
+- **VOICE LAW: Exhaust is rotation, never sacrifice.** Weak/Vulnerable enter her
+  pool only as riders on exhaust/Sly engine pieces. Conscripted companions count
+  as self-sourced kit for `SUPPORT_CARRY`; drafted Inazuma-pool cards count
+  normally. (R55; R51; R52 ask 7)
+
+## Roster
+
+- **Playability and a companion card are compatible** — the exclusivity clause is
+  struck. Itto is a COMPANION CARD (no roster slot); Zhongli holds slot 4
+  (countersigned, unscheduled); Kokomi slot 3. (R118 §2 10.8; R108)
+- **Every playable character ships to the §3 template:** element + cadence +
+  7-axis statline declared before card design; exactly one Ghostflames-scale
+  signature subsystem; three archetypes (default / draft-gated ceiling /
+  velocity) separated by card-slot competition; ~75-card pool; talent-relic +
+  kit-Burst + character relics/potions. (principles §3)
+- **Identity = statline asymmetry:** every character scores 4–5 on exactly two of
+  seven axes and ≤2 on at least one; the weakness is load-bearing. This is
+  **declared design intent, not a measured acceptance gate** — the measured axis
+  numbers stay reportable-only (see Design governance). **Every character clears
+  solo; co-op is amplified, never required.** (principles Pillars 3–4)
+- **All art and audio is original or commissioned "in the StS style"** — no
+  extracted HoYoverse assets ship publicly (placeholder art in private builds is
+  fine). Naming: constellations for rares/upgrades, talent names for relics,
+  voice lines for flavor. (principles §9, §3)
+
+## Content authoring — card-sheet rules
+
+- **True in-combat healing is Rare-tier AND Exhausts (conjunctive R8 law);**
+  below Rare, sustain routes through Block or buffer pools; no 4-star companion
+  true-heals (potions and relic-scale trickles exempt). A rider otherwise banned
+  is legal only conjunctively — dropping one half is not a "simplification."
+  (principles Guardrail 6; R8; R79/B4)
+- **No card starts the game with AoE;** AoE must be drafted, never in any
+  starter. (R56)
+- **Strict-domination is scoped to adjacent rarities:** a card must not be a
+  strictly-better superset of another at similar weight; two-step gaps are
+  informational. Self-damage/discard/spend_encore count as costs; prefer base-StS
+  "twist" shapes over pure supersets. (R26/R77)
+- **Threshold predicates pay a flat printed bonus once, not proportional reads;**
+  charge/meter bars are Uncommon+; thresholds encode base-plus-bonus so the
+  always-live half moves on upgrade and the bar cannot drift down (lowering a
+  threshold is forbidden). (R58, invoking R1)
+- **A meter-reading damage card is tagged `scaling`, and also `frontload` only if
+  it deals damage at meter zero.** `sustain` = healing/prevention of your own HP
+  only; zero sustain is a legal identity and `sustain` is never linted. (R91 2c,
+  2d)
+- **≤2 new keywords per character beyond the shared element system;**
+  support-protagonists may carry one extra via logged amendment with compensating
+  cuts. Muster's definition attaches from the card's OP. (principles Guardrail 5;
+  furina §6; R78)
+- **Every card carries a per-character `register` field** (shared schema column,
+  per-character vocabulary; Focalors register caps at two Rares). **The register
+  guides art selection only** — nothing under `tier0/engine` or `tier05` may read
+  it, codegen ignores it, and moving a card between registers must never move win
+  rate. (R85; R86)
+- **Upgraded starters get a distinct name, not a "+" suffix;** display names live
+  in the unique-names namespace, reserved names annotated with the owning kind. A
+  full-sheet reserved-names lint runs before any C-milestone; the naming/lore
+  audit is [USER]-only and eyes-on. (R69; R29d)
+- **Distinctness gate (red test):** uniq ≥ 70, maxclu ≤ 5, neardup ≤ 0.40/card;
+  `top%`/`vocab` carry no permanent gate; a partial-pool anchor can only loosen a
+  threshold, never certify it. (R81)
+- **Enchantment support is a minimal per-card rider;** the run-wide enchantment
+  subsystem stays outside the parity world. Encore Performance is 0-cost with no
+  energy-positive loop; copies inherit printed bounds; kit cards are not legal
+  copy targets. `replay_next_companion` / cost-delta accumulators are
+  writing-turn-scoped. (R82; R110 X3/X11; R114 FLAG-1/2; R118 Q9)
+- **Ancient-tier pool gaps are fixed with real content, never option removal;**
+  each character needs one Ancient card, gated by a deploy lint that fails on an
+  empty ledger. (klee-mod Ancient ruling)
+
+## Design governance & measurement authority
+
+- **The simulator's authority is relative deltas and structural findings, not
+  absolute human-play winrates;** a ratification resting on an absolute winrate
+  rests on the wrong number. (principles §7)
+- **Seven-axis numbers are reportable, not load-bearing:** six axes are
+  permanently CLOSED as reportable-only (never a gate, target, or justification
+  to move a value). Only the Fanfare axis stays open — that open decision (B-G1)
+  is `QUEUE.md`, not a rule. (principles §7; D3; R90 Q7)
+- **Every archetype passes aura-starvation / bricking checks in the sim before
+  implementation;** test packages model plausible drafts, never monocultures.
+  (principles Guardrail 4)
+- **Ratified 1000-fight winrate bands change only by ruling, with archives;**
+  small-n heuristic locks may be retuned to measured-noise reality only with a
+  dated comment and disclosure. Authored Tier-0 25-card batteries are
+  ceiling-saturated and keep only their matchup floors; Tier 0.5 owns the
+  upper-power comparison. (R62; R47)
+- Measurement *method* (stamp law, one-variable windows, versioning,
+  pre-registration + blind grading, instrument visibility) is in `EXPERIMENTS.md`.
+
+## Engineering invariants
+
+- **Every C# numeric balance constant is classified — mirrored or explicitly
+  unmirrored.** A mirrored constant is LAW from tier0, parity-linted, and a
+  divergence is fixed in both engines; an unclassified `public const int` is a
+  lint finding, not a skip. (`lint_constant_parity` / `lint_op_parity`, total by
+  construction; R63 is the economy-is-LAW mirror specifically.)
+- **Any shared-loader / shared-schema change** (a field read by both `loader.py`
+  and codegen, or by both engines) is called out in the PR/commit and updates
+  **every** consumer atomically in the same change — never land one side and
+  leave the other to a follow-up. (R20; R92)
+- **Version stamps and game version are read live at call time** from the
+  canonical source (`constants.py`, `release_info.json`), never stored or read
+  from a comment/exe. **manifest.json version is MAJOR-AUTO:** MAJOR bumped only
+  by [USER] at release; deploy refuses to overwrite a versioned zip; dirty builds
+  append `+dirty`. (R68; R70)
+- **State-reading damage/spark riders snapshot state at cast;** because "when
+  state is read" is invisible to the sim, the timing is pinned by a C#-side
+  source-text check. Rules read the resource, never the badge (display may lag
+  only within one card play). (R72; R39)
+- **Every meter carries a bounded/unbounded property whose cap is read from
+  `constants.py`** (bounded: salon_member 3, spark 3, fanfare; unbounded: encore,
+  charge, burst, exhaust_pile). (R91 2b)
+- **A structurally-invisible defect gets a machine-readable allowlist/manifest +
+  a lint or boot check** (house pattern; the allowlist checks itself for rot):
+  empty starting relics, pool rarity coverage, Ancient coverage, required-node
+  contracts. (klee-mod findings 21/24/27)
+- **Sweep BaseLib and the decompiled game for an existing solution before
+  building infrastructure;** derive from `CustomCharacterModel`/BaseLib
+  abstractions, never raw game types. Downfall is reference-reading only —
+  patterns may be mirrored; scene files, art, and code are never copied verbatim.
+  (klee-mod standing rule; license note)
+- **Build output never lives under the game's `mods/` tree** (ModManager parses
+  every `*.json` as a manifest). **Custom models declare loc via the
+  `ILocalizationProvider.Localization` override**, never a hand-rolled dict; an id
+  is an API — any `Id.Entry` change is followed by a consumer sweep (loc keys,
+  asset paths, saves, epoch strings). (klee-mod findings 7/15/23)
+
+## Art & visual layer
+
+- **Ship pre-sized art, no runtime minification** — except where the layout pitch
+  is a per-player stat, where bounded runtime fitting is allowed with the bound
+  written down and asserted (Salon members capped at 0.5). (principles v1.13
+  RATIFIED)
+- **Visuals bind to funnels, never to values (Funnel Contract):** a number a kit
+  redesign moves must not be able to break a display. Contracted binding points:
+  Salon = 3 slot-index-keyed slots (duplicates legal); Encore-absorbs-before-HP;
+  Spotlight-is-a-designation-event. A breach = stop-work on that track, flagged
+  in the PR/commit; visuals never chase an unlanded kit change. (animation-sprint-2)
+- **The centered-overhead creature-space slot is the cross-character Burst
+  indicator;** gauge skins are unique per character. A mirror belongs above the
+  animated node, never on it; **never write `Visuals.Scale`** (a sign flip inverts
+  the hitbox — a gameplay bug in visual-bug clothing). A node a bridge depends on
+  is a contract with a side-effect-free boot check. (animation-sprint-2 C4;
+  klee-mod placement rules)
+- **Art dedupe (`art_lint` L1):** effective pick = auto or shortlist rank 1 unless
+  red-pen resolves; register-crossing reuse is legal; known collisions sit in a
+  `PENDING_RED_PEN` allowlist until resolved, then the entry is deleted so the
+  lint guards the resolution. **No Spine for v1** (script-less layered rigs) —
+  though the authorized animation-path spike may reopen the licence question.
+  (klee-mod art addendum; animation-sprint-2)
+
+## Process constraints that bind design
+
+- **[USER]-only closures:** pre-registrations, probe countersigns, band
+  ratifications, PROPOSED-number ratification, and art/lore/naming taste are
+  never resolved without [USER]. (class-p-charter §2; kokomi §0)
+- **A WATCH ITEM is a blessing of the mechanism + a named quantity + a named
+  trigger;** it does not return until the trigger fires, and then it returns with
+  a reading, not an argument. (R111)
+- **An active decision packet is self-contained** — it carries the context it
+  needs; reference-by-incorporation to unregistered or deleted documents is a
+  known anti-pattern. (klee-mod Neap Tide addendum)
