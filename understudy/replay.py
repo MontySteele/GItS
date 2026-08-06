@@ -290,6 +290,50 @@ def _selector_choice(fight: dict, rnd: Any) -> str | None:
     return out
 
 
+def _standing_choice(fight: dict, rnd: Any) -> str | None:
+    """The designation STANDING at this round's opening — the answer recorded
+    on the latest EARLIER round, or None when no round before this one carries
+    one.
+
+    Errata Batch 2 item 1 (R113 clause C-a). The reconstruction used to seed
+    the turn with the answer recorded for the turn ITSELF, which makes the
+    play that SETS the designation already covered by it: tier0 credited the
+    fight's first Ethereal Spotlight `FANFARE_PER_SPOTLIGHT_CARD` where the
+    engine credits nothing, because the engine scores a play against the
+    designation that was standing when the play resolved. Probe (b) Ledger 2
+    measured that term exactly — 26 of 27 plays agree, the mismatch is the
+    fight's first Spotlight, +2 per combat in tier0's favour
+    (`docs/probe-b-fanfare-residual.md`).
+
+    The round's OWN answer is not discarded: it is still pushed through
+    `effects.SPOTLIGHT_FORCE`, so the designating card sets it when it
+    resolves — which is exactly when the engine sets it. This function only
+    decides what is standing BEFORE that, which is what `_fresh_player`'s
+    docstring already claimed the seed was.
+    """
+    try:
+        here = int(rnd)
+    except (TypeError, ValueError):
+        return None
+    best: tuple[int, str] | None = None
+    for row in fight.get("selectors") or []:
+        if not row or len(row) < 5:
+            continue
+        try:
+            there = int(row[0])
+        except (TypeError, ValueError):
+            continue
+        if there >= here:
+            continue
+        offered = {str(o).strip().lower() for o in (row[4] or [])}
+        if not offered.issuperset(SPOTLIGHT_OFFERS):
+            continue
+        arm = SPOTLIGHT_FORCE_BY_CHOICE.get(str(row[3] or "").strip().lower())
+        if arm and (best is None or there >= best[0]):
+            best = (there, arm)
+    return best[1] if best else None
+
+
 def _spotlight_target(arm: str | None, character_id: str) -> str | None:
     if arm == "self":
         return character_id
@@ -449,11 +493,16 @@ def l2_rows(spec: dict, names: Names, character_id: str, tally: dict,
         if not traj:
             continue
         arm = _selector_choice(fight, rnd) if use_selectors else None
+        # Errata Batch 2 item 1 (R113/C-a): the SEED is the designation
+        # standing at the turn's open (an earlier round's answer); the round's
+        # OWN answer arrives through SPOTLIGHT_FORCE when the designating card
+        # resolves. Seeding the round's own answer credited the setting play.
+        standing = _standing_choice(fight, rnd) if use_selectors else None
         pool_open = _pool_at(fight, rnd)
         pool_next = _pool_at(fight, (rnd or 0) + 1)
         player = _fresh_player(
             character_id, traj.get("hp"), fight.get("max_hp"), traj.get("block"), meters,
-            spotlight=_spotlight_target(arm, character_id),
+            spotlight=_spotlight_target(standing, character_id),
         )
         hand = []
         skipped = 0
