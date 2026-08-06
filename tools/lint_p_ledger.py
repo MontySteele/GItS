@@ -31,8 +31,8 @@ WHAT "OWNED BY A [USER]-GATED REGISTER" MEANS HERE, MECHANICALLY
 Defined conservatively as a fixed glob list, not inferred from content. A path
 is owned when it is one of:
 
-  - the two DECISIONS ledgers (the ruling bodies themselves; a Class-P item
-    may cite them, never write them);
+  - the DECISIONS ledgers, archive volumes included (the ruling bodies
+    themselves; a Class-P item may cite them, never write them);
   - pre-registration documents and their probe reports (`docs/probe-*.md`,
     `docs/*registration*.md`) -- pre-registrations stay [USER] by standing law
     and a probe report is the registration's escrowed output;
@@ -73,8 +73,11 @@ REPO = Path(__file__).resolve().parent.parent
 LEDGER = REPO / "docs" / "registry" / "p-ledger.md"
 
 OWNED_BY_USER_GATED_REGISTERS = (
-    "tier0/DECISIONS.md",
-    "klee-mod/DECISIONS.md",
+    # Widened to the volume globs 2026-08-06 (Track R-D ledger split, a
+    # recorded widening per the note above: archive volumes are the same
+    # frozen spine -- see docs/registry/ledger-layout-note-2026-08-06.md).
+    "tier0/DECISIONS*.md",
+    "klee-mod/DECISIONS*.md",
     "docs/probe-*.md",
     "docs/*registration*.md",
     "docs/kokomi-playtest-protocol.md",

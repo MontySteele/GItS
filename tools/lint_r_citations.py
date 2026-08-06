@@ -36,7 +36,7 @@ the tools actually write:
 
     R90/1c            R90 (Ruling 1c)
 
-A citation resolves when (1) `tier0/DECISIONS.md` has an entry `## R<n> ...`
+A citation resolves when (1) a tier0 DECISIONS volume has an entry `## R<n> ...`
 and (2) that entry's body declares the clause, in DECISIONS' own clause idiom
 `**<clause> --`. A BARE ruling reference with no clause ("R91 leaves that
 designation standing") is NOT checked: whether a ruling supports a paraphrase
@@ -55,7 +55,15 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-DECISIONS = REPO / "tier0" / "DECISIONS.md"
+
+
+def _decision_volumes() -> list[Path]:
+    """Every tier0 DECISIONS volume. A glob, not a single path, since the R-D
+    ledger split (2026-08-06, `docs/registry/ledger-layout-note-2026-08-06.md`):
+    R39-R99 live in `tier0/DECISIONS-archive-R39-R99.md`, R100+ in the live
+    file, and the citations this lint checks (R90/1c and kin) are mostly in
+    the archive range -- so the resolver reads BOTH files, one namespace."""
+    return sorted((REPO / "tier0").glob("DECISIONS*.md"))
 
 
 def _targets() -> list[Path]:
@@ -95,7 +103,12 @@ def _declares(body: str, clause: str) -> bool:
 
 
 def main() -> int:
-    entries = _entries(DECISIONS.read_text(encoding="utf-8"))
+    entries: dict[str, str] = {}
+    for volume in _decision_volumes():
+        for number, body in _entries(volume.read_text(encoding="utf-8")).items():
+            # Union across volumes, same reason as within one: a clause
+            # declared in either half of a twice-headed number must resolve.
+            entries[number] = entries.get(number, "") + body
 
     targets = _targets()
     findings: list[str] = []
@@ -115,8 +128,8 @@ def main() -> int:
                     if body is None:
                         findings.append(
                             f"{target.name}:{lineno}: cites "
-                            f"R{number}/{clause}, but tier0/DECISIONS.md has "
-                            f"no entry R{number}")
+                            f"R{number}/{clause}, but no tier0 DECISIONS "
+                            f"volume has an entry R{number}")
                     elif not _declares(body, clause):
                         owners = sorted(
                             n for n, b in entries.items()
@@ -138,7 +151,7 @@ def main() -> int:
 
     print(f"R-citations OK: {checked} clause-bearing citation(s) across "
           f"{len(targets)} file(s) in tools/*.py resolve against "
-          f"tier0/DECISIONS.md")
+          f"the tier0 DECISIONS volumes")
     return 0
 
 

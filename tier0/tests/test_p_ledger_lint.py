@@ -68,13 +68,14 @@ def test_a_commit_touching_a_gated_register_is_visible():
     mod = _module()
     hit = mod.owned_paths([
         "tier0/DECISIONS.md",
+        "tier0/DECISIONS-archive-R39-R99.md",   # R-D archive volume: same spine
         "klee-mod/DECISIONS.md",
         "docs/probe-e-corpse-detonation-registration-draft.md",
         "docs/payoff-reach-reregistration-draft-2026-08-06.md",
         "docs/roster-anchor-v14-v6-2026-08-06.md",
         "docs/kokomi-playtest-protocol.md",
     ])
-    assert len(hit) == 6, hit
+    assert len(hit) == 7, hit
     # And the surfaces Class-P legitimately edits stay unowned -- the charter
     # directs the swarm to strike queue rows, so flagging them would make
     # every legitimate landing a finding.
