@@ -1135,14 +1135,36 @@ def _upgraded(state: CombatState, card: Card) -> Card:
     A card with no `+` entry is NOT quietly handed over un-upgraded: the move
     half is implemented, the upgrade half is logged loudly so the sheet gap is
     visible in the event stream rather than biasing Aggression's rating down.
+
+    ONLY A SHEET GAP IS LOGGED. `except Exception` used to cover this call and
+    report every failure as "no upgrade entry", which is a claim about the
+    SHEET made without knowing what threw. The three things this path can
+    raise are not one fact:
+
+      - `KeyError` -- the base id is not in the card index at all (a synthetic
+        id, or an already-upgraded card whose `++` has no base);
+      - `ValueError("no applicable upgrade ...")` -- the id is real and the
+        sheet has no expressible `+` delta for it;
+      - any other `ValueError` -- `apply_upgrade` rejecting a MALFORMED delta
+        (`innate delta must be true`, a bad field, a duplicate upgrade id).
+
+    The first two are the gap this event exists to record, and they are
+    recorded apart because they want different fixes. The third is a defect in
+    the upgrade sheet; filing it as "this card has no upgrade" would hide a
+    broken row behind an ordinary-looking absence, so it propagates.
     """
     from tier0.content import loader, upgrades
     try:
         return loader.get_card(card.id + upgrades.SUFFIX)
-    except Exception:
-        state.emit("UNIMPLEMENTED", power="aggression", card=card.id,
-                   reason="no upgrade entry for this card id; moved unupgraded")
-        return card
+    except KeyError:
+        reason = "no card-sheet entry for this id; moved unupgraded"
+    except ValueError as exc:
+        if "no applicable upgrade" not in str(exc):
+            raise
+        reason = "no upgrade entry for this card id; moved unupgraded"
+    state.emit("UNIMPLEMENTED", power="aggression", card=card.id,
+               reason=reason)
+    return card
 
 
 def player_turn_start_late(state: CombatState) -> None:

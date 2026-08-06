@@ -748,6 +748,34 @@ def test_aggression_logs_unimplemented_rather_than_handing_over_unupgraded():
                for e in state.log)
 
 
+def test_aggression_does_not_file_a_broken_upgrade_row_as_a_missing_one(
+        monkeypatch):
+    """A MALFORMED `+` delta must not be laundered into "no upgrade entry".
+
+    The recall used to wrap `get_card` in `except Exception` and emit the
+    same "no upgrade entry for this card id" for anything that threw. A
+    sheet row that `apply_upgrade` rejects (bad field, `innate` delta that
+    is not true) would then read in the event stream as the ordinary,
+    expected absence -- a broken row hiding behind a routine one, on the
+    surface that exists to make sheet gaps visible.
+    """
+    state = bound_state()
+    p = state.player
+    p.powers["aggression"] = 1
+    p.discard_pile = [card("malformed_upgrade")]
+
+    from tier0.content import loader
+
+    def boom(card_id):
+        raise ValueError(f"innate delta on {card_id!r} must be true")
+
+    monkeypatch.setattr(loader, "get_card", boom)
+    with pytest.raises(ValueError, match="innate delta"):
+        refpowers.side_turn_start_early(state)
+    assert not [e for e in state.log if e["event"] == "UNIMPLEMENTED"
+                and e.get("power") == "aggression"]
+
+
 # --- Group C: refused -------------------------------------------------------
 
 def test_the_refused_powers_are_refused_loudly():

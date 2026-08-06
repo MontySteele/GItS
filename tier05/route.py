@@ -11,8 +11,11 @@ characters or rosters. So the same countermeasures apply and are not optional:
     below), and
   - every headline finding must survive the A/B across them.
   (The research doc's third countermeasure, a `route_regret` sampler
-  analogous to draft_regret, was NEVER BUILT -- see
-  docs/archive/missed-requirements.md §2.1. This header used to claim it existed.)
+  analogous to draft_regret, IS NOT BUILT: `run_metrics` defines no such
+  function, and this header used to claim it did. Tracked as BACKLOG EB-16;
+  see docs/current/backlog/missed-requirements.md §2.1 for what still rests
+  on it -- the hunter-vs-cautious gap behind the "relics are underpriced"
+  finding is exactly the comparison the sampler was meant to make readable.)
 
 THE ACCEPTANCE TARGET (research doc §1.3, user domain authority): a competent
 player fights a median of ~2.5 elites per act, range 1-4, because elites are

@@ -23,7 +23,6 @@
 
 | ID | Item | Provenance |
 |---|---|---|
-| `EB-10` | `tier05/route.py:13` docstring advertises `route_regret` as existing — stop advertising an unbuilt instrument | eng-backlog §1 |
 | `EB-16` | `route_regret` — advertised in code, never written; `run_metrics.py` defines no such function. §3.7.5's "relics underpriced" finding rests on this comparison | eng-backlog §3; missed-requirements §2.1 |
 | `EB-20` | Instrumentation for D8 (Encore economy census: 19/78 grant, 1 spends, absorption automatic) — measurement open though the lever is ruled-direction, unpicked | eng-backlog §3 |
 | `EB-25` | Lagavulin Matriarch's Soul Siphon player-stat-drain half — no stat-drain op anywhere in `tier05/` or `tier0/engine/`; silently biases the Act-1 boss split. "single highest-leverage backlog item for boss identity" | eng-backlog §4; missed-requirements §3.1; run-model §10.9 |
@@ -54,10 +53,8 @@
 | ID | Item | Provenance |
 |---|---|---|
 | `EB-4` | Two p90s that disagree (`run_metrics._percentile` interpolates, `elite_blitz._percentile` nearest-rank while claiming to match) + two `wilson` impls with different return shapes — unify each; verify which convention the ratified bands used first | eng-backlog §1 |
-| `EB-6` | Error-laundering fixes (five bare-except sites): `refpowers.py:1130`, `render_card_gallery.py:215`, `card_distinctness_report.py:435`, `extract_base_game_pool.py:528`, `exp_furina_strength.py:771` | eng-backlog §2 |
-| `EB-7` | Waiver-set staleness tests — add the `KNOWN_IDENTICAL`-style guard to `PENDING_UNDERSIZE`/`PENDING_BANNED_FAMILY`/`PENDING_RED_PEN` in `art_lint.py`; also stop the two image checks `continue`-ing past unreadable files (:483,:532) | eng-backlog §2 |
+| `L10-trunc` | art_lint's unreadable-file rule (L10) probes `Image.open().size`, which is header-only for PNG/JPEG — a truncated download passes L10 and the one pixel-touching rule (L6 `clip_warnings`, `:578-582`) still `continue`s past it. Either L10 gains a full `load()` (real cost across ~1076 plan rows) or L6's warn-only channel gains a hard finding. Unverifiable in a worktree without PIL + `art/raw` | fix-sweep-1; EB-7 residual |
 | `EB-8` | Cross-sheet strict-domination check — the gate sweeps within-sheet only and prints `CLEAN` for two of six sheets; the Clorinde/Raiden pair was caught by hand | eng-backlog §2 |
-| `EB-21` | `char_facts` baselines for Defect, Necrobinder and Regent — the patch sentinel reports three of five characters "not watched" for lack of `<char>_char_facts.yaml`; cheap, no design content | eng-backlog §3 |
 | `EB-41` | Refactors, only if budget remains (big, safe, boring): `run_one` 518-line split; codegen driver unification (F3); telemetry-module template dedupe; `exp_*` script archive move; `apply_upgrade` op-coverage guard | eng-backlog §7 |
 | `SYS-11` | Ratified changes not swept through prose (19 findings): stale before/after annotations in `kokomi-upgrades.yaml`, uncap-all stale cap comments, Fanfare-rework/v0.4 stale prose | triage-memo SYS-11 |
 | `SYS-12` | Stale doc comments in code (9 findings): kaboom/sizzle/flame_dance sheet-number comments, catalytic_conversion "NO UPGRADE PATH", sparks_n_splash pool-membership | triage-memo SYS-12 |
