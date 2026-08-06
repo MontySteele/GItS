@@ -525,7 +525,32 @@ moved file is still REFERENCE; `docs/archive/` now holds both ARCHIVED
 (superseded) and relocated REFERENCE (frozen, still-cited) records. Per-file
 map: `review/stage-clear/rb-move-manifest.tsv`. Ledger-cited REFERENCE files
 stayed at root pending the Q20 ruling (the append-only ledgers cannot be
-repointed, rail 1).
+repointed, rail 1). *(Figures corrected 2026-08-06, R-B close-out `a0c28d5`:
+the missed sixteenth bucket-D file makes it **44** moved and root count
+116 → **72**; the manifest carries all 44.)*
+
+*Mechanical recount (2026-08-06, Track R-E wave-8 acceptance) — counted from
+lifecycle headers alone, `docs/**` `.md` + `.yaml`:*
+
+| Status | Headered files | + index-only (§15.5) | Total |
+|---|---|---|---|
+| LIVING | 52 | 11 | **63** |
+| REFERENCE | 209 *(incl. `registry/stage-clear-digest-2026-08-06.md`, new this wave)* | 6 | **215** |
+| ARCHIVED | 66 | — | **66** |
+| **carrying a status** | **327** | **17** | **344** |
+
+The running figures in the table above (60/206/332) had drifted: the wave's
+own new REFERENCE records (the R117/R118/R120 dispatches, the probe-d/e
+reports, the sitting record, the two signed charters as LIVING, etc.) were
+never tallied here — only the register openings and the P-1 freeze were.
+This recount is the mechanical baseline; future edits update it, not the
+older figures. **Two files carry no status anywhere** and are named as
+drift, not silently absorbed: `docs/animation-spike-skeleton2d-kokomi-2026-08-06.md`
+(choosing its status is `EB-44`'s judgment) and
+`docs/payoff-reach-reregistration-draft-2026-08-06.md` (minted by Track S2;
+its status follows the `Q18` countersign). §15.5's own headline says 18
+files but lists 17 — one more small drift, recorded here rather than
+re-derived.
 
 ### 15.2 The LIVING set, in full
 
