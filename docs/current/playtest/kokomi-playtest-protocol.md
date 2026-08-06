@@ -1,6 +1,6 @@
 # Kokomi playtest protocol — first play, artefact `0.2-247` (commit `29f5ce6`)
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 > **RE-ANCHORED 2026-08-06 ([USER] ruling; `S4-G6` + `S4-G14`; R115).** This
 > protocol run is anchored to **the post-rework Kokomi build**, not to the
@@ -52,7 +52,7 @@ first.
 > 2026-07-25: her **character shell** — select portrait, locked portrait, char
 > icon, map marker, selection splash, select backdrop, transition wipe and
 > combat model — is hers, shipped, and has had **no eyes on it in-game**.
-> `docs/archive/open-playtest-items.md` §2.2 asks you to judge exactly those, and
+> `docs/current/playtest/open-playtest-items.md` §2.2 asks you to judge exactly those, and
 > **§2.2 is the authoritative instruction where the two disagree.** What §2.2
 > asks: does she sit left of centre over the Watatsumi reef with the right
 > third clear for the info panel; are the char icon and map marker centred on
@@ -76,11 +76,10 @@ id-derived path that does not exist, the background preloader fails, and the
 run crashes later with an incomplete `AssetCache`. Shipping the fallback is
 what makes her playable before the art exists.
 
-~~**So: do not report art.** Her portrait, her combat model, her select
-background and her relic icon are all Klee's~~ — **superseded 2026-07-29:
-the shell is hers (see the corrected note above); the fallback machinery is
-what shipped her before it existed, and is recorded here for why a null
-override is not safe.** What remains true: `tools/art_coverage.py` says the
+**The shell is hers** (corrected 2026-07-29 — this note originally said
+"do not report art, everything is Klee's," which is superseded; see the
+corrected note above). The fallback machinery is what shipped her before the
+art existed, and is recorded here for why a null override is not safe. What remains true: `tools/art_coverage.py` says the
 bill is **58 personal faces + 15 Inazuma companion faces**, that ledger is
 already accurate, and a note saying "the card art is a guess" tells us
 nothing new.
@@ -312,7 +311,7 @@ only accepted input; the sim may not answer it.)*
 
 | Gap | Status |
 |-----|--------|
-| ~~All personal art is Klee's~~ | **Corrected 2026-07-29** — the character SHELL is hers and is a *review ask* (`docs/archive/open-playtest-items.md` §2.2). Still owed and not worth reporting: Track D's 58 card faces + 15 companion faces |
+| "All personal art is Klee's" (withdrawn) | **Corrected 2026-07-29** — the character SHELL is hers and is a *review ask* (`docs/current/playtest/open-playtest-items.md` §2.2). Still owed and not worth reporting: Track D's 58 card faces + 15 companion faces |
 | `kokomi/model/combat.tscn` missing | Expected — no rig until the art pass; logged as EXPECTED MISSING at boot |
 | Ancient card's 3 Charge/turn is unmeasured | Known — no instrument exists for Ancients |
 | Every balance number is PROPOSED | Known — none has had red-pen |

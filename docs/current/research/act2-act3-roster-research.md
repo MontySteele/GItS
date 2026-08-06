@@ -1,12 +1,6 @@
-> **MOVED 2026-08-06 — Clear the Stage, Track R-B (charter R119, rail 1).**
-> Old path: `docs/act2-act3-roster-research.md` — new path: `docs/archive/act2-act3-roster-research.md`.
-> Verbatim move: everything below this banner is byte-identical to the
-> pre-move file. Citers repointed in the move commit; see
-> `review/stage-clear/rb-move-manifest.tsv`.
-
 # Act 2 / Act 3 roster research (STS2 wiki harvest)
 
-> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
 **Status:** RESEARCH NOTES — 2026-07-23. Raw source data for the multi-act
 extension (`run-model-rework-plan.md` §10). Nothing here is a modeling

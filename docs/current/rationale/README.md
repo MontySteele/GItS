@@ -1,6 +1,6 @@
 # `docs/pending/` — prepared, awaiting [USER]
 
-> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
 Everything in this directory was **Track G of the Serenitea Sweep**: work
 prepared in full and deliberately **not landed**, because it needed a

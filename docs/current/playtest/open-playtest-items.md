@@ -1,39 +1,24 @@
-> **MOVED 2026-08-06 — Clear the Stage, Track R-B resumption (R121 `Q20`, MOVE-WITH-RESOLVER; charter R119, rail 1).**
-> Old path: `docs/open-playtest-items.md` — new path: `docs/archive/open-playtest-items.md`.
-> Verbatim move: everything below this banner is byte-identical to the
-> pre-move file. Live citers repointed in the move commit; ledger and other
-> frozen citations keep the old path on purpose (rail 1: ledger bytes are
-> never rewritten) and resolve through the moved-path resolver table,
-> `docs/registry/identifiers.md` §17. Per-file map:
-> `review/stage-clear/rb-move-manifest.tsv`.
-
 # Open playtest items, all sprints
 
-> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
 > ## RETIRED AS A REGISTER 2026-08-06 — the open rows moved out
 >
 > This file stopped being the cross-sprint register on 2026-07-26 (see the
 > banner below) and stopped being *any* register on 2026-08-06 (docs diet,
 > Track Z / Z-3). Nothing was deleted or reworded. Its still-open rows now
-> live in one of two places: the table agenda in
-> `docs/registry/user-queue.md` §7 and its desk-queue rulings in that file's
-> §2 and §10; the engineering items — the Ancient card's unmeasurable 3
-> Charge/turn and the residual Orobas divergence — in
-> `docs/dockets/engineering-backlog.md` (`EB-30`, `EB-31`). The full text and
+> live in one of two places: the [USER] decisions in
+> `docs/current/QUEUE.md`; the engineering items — the Ancient card's
+> unmeasurable 3 Charge/turn and the residual Orobas divergence — in
+> `docs/current/BACKLOG.md` (`EB-30`, `EB-31`). The full text and
 > the reasoning stay here, which is why the queue points back at this path.
 
-> ## SUPERSEDED AS THE CROSS-SPRINT REGISTER — see `docs/backlog-2026-07-29.md`
->
-> This file stopped being the owed-item register on 2026-07-26. The live
-> register is **`docs/backlog-2026-07-29.md`**, which carries the desk queue
-> (§6 here), the ruling queue, the bug list and the art debt, and whose own
-> retirement rule is "strike through with a commit reference, never delete."
->
 > What is still worth reading here: **§1–§5**, the *table* agenda — the
-> questions that need a human at the game, which the backlog deliberately
-> does not restate at this length. §6 is kept for its reasoning, but its
-> status column is maintained in the backlog now.
+> questions that need a human at the game, which no successor register
+> restates at this length. §6 is kept for its reasoning; its status lives in
+> `docs/current/QUEUE.md`. (This file stopped being the owed-item register on
+> 2026-07-26; the intermediate registers it handed off to are in git history
+> at tag `pre-simplification-2026-08-06`.)
 >
 > Corrections that used to live in the §7 addendum have been **folded into
 > the text they correct** (2026-07-29 doc de-drift pass) — every closed item
@@ -49,10 +34,10 @@ queues have different costs and the desk queue keeps getting mixed into
 playtest agendas where it silently expands them.
 
 Sources swept: `docs/animation-sprint-{1,2}-log.md`,
-`docs/kokomi-playtest-protocol.md`, `docs/archive/kokomi-v0.4-report.md`,
+`docs/current/playtest/kokomi-playtest-protocol.md`, `docs/archive/kokomi-v0.4-report.md`,
 `docs/archive/ship-what-we-know-sprint-log.md`,
 `docs/archive/shop-companion-channel-sprint-log.md`,
-`docs/kokomi-art-pass-requirements.md`, `docs/archive/icon-gap-2026-07-24.md`,
+`docs/current/art/kokomi-art-pass-requirements.md`, `docs/archive/icon-gap-2026-07-24.md`,
 `klee-mod/DECISIONS.md`.
 
 ---
@@ -71,7 +56,7 @@ These are ordered by *cost of not knowing*, not by sprint.
 
 ## 2. Kokomi — never played, and the build just changed under her twice
 
-~~She has had **no table time at all**.~~ **CORRECTED 2026-08-06 (R107; S4 finding F17):** she has been played **exploratory** (2026-07-25/26, designated contaminating-exploratory by D5) and in the **08-01/02 three-seat holdout**. What has *not* run is the **protocol** playtest — `docs/kokomi-playtest-protocol.md`'s "Answers" section is still blank. Frame the next session as that, not as a first exposure. Two changes landed since the sim last
+~~She has had **no table time at all**.~~ **CORRECTED 2026-08-06 (R107; S4 finding F17):** she has been played **exploratory** (2026-07-25/26, designated contaminating-exploratory by D5) and in the **08-01/02 three-seat holdout**. What has *not* run is the **protocol** playtest — `docs/current/playtest/kokomi-playtest-protocol.md`'s "Answers" section is still blank. Frame the next session as that, not as a first exposure. Two changes landed since the sim last
 measured her, so the protocol's questions are live rather than confirmatory:
 
 - **v0.4b starter rework (R56):** twelve-card Silent-shape starter, and the
@@ -86,7 +71,7 @@ measured her, so the protocol's questions are live rather than confirmatory:
 
 ### 2.1 The seven protocol questions
 
-Full text and the specific failure modes: `docs/kokomi-playtest-protocol.md`.
+Full text and the specific failure modes: `docs/current/playtest/kokomi-playtest-protocol.md`.
 
 | Q | Question | What a useful answer looks like |
 |---|---|---|
@@ -196,7 +181,7 @@ So the playtest is read against the right baseline.
 
 ## 6. NOT playtest items — the desk queue
 
-> **QUEUE POINTER** (Track X, 2026-08-06; compressed by Track Z, Z-6). Status for everything below lives in `docs/registry/user-queue.md`; short codes resolve at `docs/registry/identifiers.md`. Full rule: `docs/registry/identifiers.md` §16.
+> **QUEUE POINTER** (Track X, 2026-08-06; compressed by Track Z, Z-6). Status for everything below lives in `docs/current/QUEUE.md`; the retired short-code registers are in git history at tag `pre-simplification-2026-08-06`.
 
 
 Listed so they stop being smuggled into playtest agendas. None of these needs
@@ -219,7 +204,7 @@ the game running.
 
 ### 6.2 Rulings
 
-- **Kokomi art §6** (`docs/kokomi-art-pass-requirements.md`): the crop-reuse
+- **Kokomi art §6** (`docs/current/art/kokomi-art-pass-requirements.md`): the crop-reuse
   budget; whether Watatsumi environment art counts as a card face given
   Furina's pass rejected an empty corridor as "a random hallway"; whether to
   hand-crop the banned `Character Details 1` for a rare.
@@ -231,7 +216,7 @@ the game running.
   delta, G-C3(b)'s two relic tune-ups. The sprint's own gate says this happens
   once, late, over the whole set.~~
   **CLOSED 2026-07-26** — the session happened; all seven numbers RATIFIED and
-  APPLIED (`docs/red-pen-2026-07-26.md` Part 1). *(Item 1 of that list,
+  APPLIED (`review/active/red-pen-2026-07-26.md` Part 1). *(Item 1 of that list,
   G-A5(b)'s live capture, had already been captured on 2026-07-25.)*
 - ~~**Furina's starter has no upgraded form.** Touch of Orobas still hands her a
   Circlet, and she is the character the playtest was played on. Every available
@@ -284,7 +269,7 @@ the game running.
 ## 7. Recap addendum (2026-07-26) — corrections to the compile above
 
 Dated addendum from the 2026-07-26 recap audit. Full audit:
-`docs/missed-requirements.md`.
+`docs/current/backlog/missed-requirements.md`.
 
 **The "closed since compile" list that used to sit here has been FOLDED INTO
 THE TEXT IT CORRECTS** (2026-07-29 doc de-drift pass). All five items —
@@ -295,10 +280,12 @@ scrolls to is not a correction. Nothing was deleted; the closures moved.
 
 What remains below is the half of the addendum that is *not* a correction to
 §1–§6: findings the 2026-07-26 audit surfaced that this file never listed at
-all. They are all carried forward in `docs/backlog-2026-07-29.md`.
+all. They are all carried forward — still-open ones in
+`docs/current/QUEUE.md` / `docs/current/BACKLOG.md`, the closed chain in git
+history at tag `pre-simplification-2026-08-06`.
 
 **Newly surfaced, untracked above** (full list with evidence in
-`docs/missed-requirements.md` — the top items):
+`docs/current/backlog/missed-requirements.md` — the top items):
 
 - Three shipped cards render the BETA placeholder with no plan.tsv row:
   `spotlight_center_stage`, `spotlight_guest_cast`, `confiscated` (§4.1 there).

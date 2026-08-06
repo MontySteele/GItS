@@ -1,11 +1,11 @@
 # Atlas — vendor-sts2-mcp
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 Scope: `vendor/STS2_MCP/` — **the wire contract only**. The C# screen/action
 implementation (`McpMod.StateBuilder.cs`, `McpMod.Actions.cs`, …) is upstream's
 and is read here only where it defines the wire. The Python client side is
-`docs/atlas/understudy.md`.
+`docs/current/atlas/understudy.md`.
 
 ## 1. Purpose
 

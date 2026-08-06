@@ -1,6 +1,6 @@
 # G3 — CI proposal (RULED: ADOPTED 2026-07-27)
 
-> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
 **Status: ADOPTED**, Serenitea Sweep II track B1. [USER] ruled all three jobs
 in, (c) included — "cheap insurance", explicitly confirmed. The NOT-doing list

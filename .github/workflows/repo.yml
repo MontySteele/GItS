@@ -1,9 +1,10 @@
-# ADOPTED 2026-07-27 -- Serenitea Sweep II, track B1. All three jobs kept,
-# ledger check included ([USER]-confirmed: cheap insurance on a hand-maintained
-# sequence). The argument, and the recorded NOT-doing list -- no Windows runner,
-# no pck build, no deploy automation, no coverage number, no scheduled runs --
-# live in docs/pending/serenitea-g3-ci-proposal.md. Read that before adding a
-# job here; each refusal is a decision, not an oversight.
+# ADOPTED 2026-07-27 -- Serenitea Sweep II, track B1. All three jobs kept.
+# The original ledger check retired with the ledgers (2026-08-06
+# simplification); its successor is the R-number namespace lint below. The
+# argument, and the recorded NOT-doing list -- no Windows runner, no pck
+# build, no deploy automation, no coverage number, no scheduled runs -- live
+# in docs/current/rationale/serenitea-g3-ci-proposal.md. Read that before
+# adding a job here; each refusal is a decision, not an oversight.
 #
 # The consumer is the NEXT SESSION, not a hypothetical contributor: this is a
 # pre-session guarantee that every session inherits a green world on the fresh
@@ -87,14 +88,20 @@ jobs:
       # construction: the floors are a committed percentages-only file and the
       # tags are a committed review file, so neither needs game_ref/. The
       # coverage gate runs in --gate mode against the pinned debt list while
-      # P1's binding null is open -- see
-      # docs/archive/sprint-axis-validity-track-a-log-2026-08-04.md §0 and §5.
+      # P1's binding null is open -- see the retired sprint log, §0 and §5:
+      # git show pre-simplification-2026-08-06:docs/archive/sprint-axis-validity-track-a-log-2026-08-04.md
       - name: role/tempo review artifacts current
         run: python tools/suggest_role_tempo_tags.py --check
       - name: role/tempo coverage (floors only, against the debt list)
         run: python tools/lint_role_tempo_coverage.py --gate
       - name: roster registry
         run: python tools/lint_roster_registry.py
+      # Successor to the ledger check (retired 2026-08-06 with the ledgers).
+      # The R/D namespace is frozen at tag pre-simplification-2026-08-06; this
+      # guards docs/current against citing unissued numbers or re-declaring
+      # frozen ones. Runs from committed state only -- no tags needed.
+      - name: R-number namespace
+        run: python tools/lint_r_numbers.py
       # Understudy 2026-08-04. vendor/ carries third-party source pinned to an
       # exact upstream commit; this asserts the tree still is what the
       # provenance note says it is, in both directions. Cheap, and the one

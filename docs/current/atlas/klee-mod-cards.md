@@ -1,6 +1,6 @@
 # Atlas — klee-mod-cards
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 Scope: `klee-mod/KleeCode/Cards/` (handwritten + `*/Generated/`), the three
 `Generated/manifest.json` ledgers, and the codegen contract with

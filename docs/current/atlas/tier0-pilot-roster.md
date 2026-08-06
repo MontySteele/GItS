@@ -1,6 +1,6 @@
 # Atlas — tier0-pilot-roster
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 Scope: `tier0/pilot/policy.py`, `tier0/roster.py`, `tier0/constants.py`,
 `tier0/content/` (`loader.py`, `upgrades.py`, `local_reference.py`, and the

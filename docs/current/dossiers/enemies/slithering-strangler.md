@@ -1,6 +1,6 @@
 # Enemy Dossier — Slithering Strangler
 
-> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
 - **Class:** `SlitheringStrangler`
 - **Kind:** normal

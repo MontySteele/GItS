@@ -1,6 +1,6 @@
 # Architecture Atlas
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 > Written by surplus-dispatch-2 stream S11 (2026-08-05), one agent per module, every
 > invariant and trap carrying a file:line or DECISIONS.md cite. Purpose: stop every

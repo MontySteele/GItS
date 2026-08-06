@@ -1,6 +1,6 @@
 # Spectral Knight
 
-> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
 - **Class:** `SpectralKnight` (`MonsterModel`, sealed)
 - **Kind:** elite — one of three bodies in the `KnightsElite` encounter

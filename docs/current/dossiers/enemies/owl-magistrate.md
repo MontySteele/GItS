@@ -1,6 +1,6 @@
 # Owl Magistrate — behavior dossier
 
-> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
 - **Class:** `OwlMagistrate`
 - **Kind:** normal (non-elite, non-boss)

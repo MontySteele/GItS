@@ -1,6 +1,6 @@
 # Calcified Cultist — behavior dossier
 
-> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
 - **Class:** `CalcifiedCultist`
 - **Kind:** normal (non-elite, non-boss)

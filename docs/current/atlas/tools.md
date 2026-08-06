@@ -1,13 +1,13 @@
 # Atlas — tools
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 Scope: `tools/` — the roster codegen entry points (`gen_*`), the art pipeline
 (`art_*`, `cut_*`, `*_stills`), every `lint_*`, the canon extractors
 (`extract_base_game_pool.py`, `canon_role_tempo.py`, `role_tempo.py`), and
 `tools/combat_layer_fences/`. `tools/build_pck.ps1` lives here but is documented
-in `docs/atlas/klee-mod-build-pck.md`; the generator's card contract is
-`docs/atlas/klee-mod-cards.md`.
+in `docs/current/atlas/klee-mod-build-pck.md`; the generator's card contract is
+`docs/current/atlas/klee-mod-cards.md`.
 
 ## 1. Purpose
 

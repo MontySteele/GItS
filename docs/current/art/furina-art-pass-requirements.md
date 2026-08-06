@@ -1,6 +1,6 @@
 # Furina Art Pass Requirements
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 **Date:** 2026-07-23
 

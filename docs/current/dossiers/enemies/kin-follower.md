@@ -1,6 +1,6 @@
 # Kin Follower
 
-> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
 - **Class:** `KinFollower`
 - **Kind:** boss (boss-encounter member, not a solo boss)

@@ -220,7 +220,7 @@ predecessor across the constants bump. `DRAFTER_VERSION` is **not** bumped by
 the shield and the non-bump is flagged at the constant itself
 (`tier0/constants.py`, above `DRAFTER_VERSION = 14`).
 
-**The open question is `EB-46`**, in `docs/dockets/engineering-backlog.md`:
+**The open question is `EB-46`**, in `docs/current/BACKLOG.md`:
 separate the tag effect from the v6 effect on this arm. It is a diagnosis
 question for future sim work — no deadline, no design authority, and nothing
 in this table waits on it. † ‡ Both columns remain **QUARANTINED** under the

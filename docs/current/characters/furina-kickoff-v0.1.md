@@ -1,6 +1,6 @@
 # Furina — Character Kickoff Doc v0.1
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 **Date:** 2026-07-20. **Status:** kickoff declarations per template §3 —
 statline and systems ratified this session; card sheet not yet begun.
@@ -56,7 +56,7 @@ are resource counters (cheap). Salon rides existing summon machinery
 pending the check-if-solved audit (§5). Pneuma/Ousia is **pure flavor,
 zero mechanics** (ratified). Nothing else novel ships in her v1.
 
-> **DRAFT ANNOTATION 2026-08-06 (R107; S4 finding F3) — §3.1–3.2 describe the RETIRED designation model.** Read them as the v1.10 design they were, not as law. Live since R41 (2026-07-22): **CENTER STAGE**, under which Furina's own cards generate Fanfare and *"receive no numeric Spotlight bonus"*, and **GUEST CAST**, which *"designates the Companion category rather than one character"* — confirmed at `docs/archive/red-pen-2026-07-26.md` R2(a). The "reduced rate on Furina herself" asymmetry below is therefore not the shipped anti-self-buff lever. Mirrors the v1.14 DRAFT annotation on `docs/teyvat-spire-design-principles.md` §4.5; ratification rides with it.
+> **DRAFT ANNOTATION 2026-08-06 (R107; S4 finding F3) — §3.1–3.2 describe the RETIRED designation model.** Read them as the v1.10 design they were, not as law. Live since R41 (2026-07-22): **CENTER STAGE**, under which Furina's own cards generate Fanfare and *"receive no numeric Spotlight bonus"*, and **GUEST CAST**, which *"designates the Companion category rather than one character"* — confirmed at `review/active/red-pen-2026-07-26.md` R2(a). The "reduced rate on Furina herself" asymmetry below is therefore not the shipped anti-self-buff lever. Mirrors the v1.14 DRAFT annotation on `docs/teyvat-spire-design-principles.md` §4.5; ratification rides with it.
 
 ### 3.1 Designation (character-level)
 
@@ -117,7 +117,7 @@ predates the v1.6 amendment).
   m7-rulings R8).
 - **Fanfare:** **capped at %maxHP** (Rare uncappers at nasty setup cost);
   stacks grant flat power bonuses. **Generation is activity-based, never
-  passive:** HP lost, ~~Encore gained~~, Encore spent, and — the Ovation merge
+  passive:** HP lost, Encore spent, and — the Ovation merge
   — **each Spotlighted card played grants Fanfare**.
   > **THE "ENCORE GAINED" LEG IS DEAD — annotated 2026-08-06 (R107; S4 finding
   > F12).** Ruled [USER] 2026-07-28 (post-playtest-3) and shipped the same day
@@ -310,9 +310,9 @@ the archetype's median from its ceiling. Null results binding as usual.
 
 ## Open items (in order)
 
-1. ~~Fontaine 4-star roster~~ — ratified (§10): all four, with kit-design
+1. Fontaine 4-star roster — ratified (§10): all four, with kit-design
    levers for Cryo convergence. Next: sketch the four 3-card kits.
-2. ~~Personal-pool signature~~ — resolved: the Guest Star generation
+2. Personal-pool signature — resolved: the Guest Star generation
    suite (§9; full spec in fontaine-companions.yaml open items).
 3. Self-Spotlight reduced rate (sweep at sheet pass).
 3. Burst design + meter size (sheet pass).

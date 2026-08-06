@@ -1,6 +1,6 @@
 # Mysterious Knight
 
-> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
 - **Class:** `MysteriousKnight` (subclass of `FlailKnight`, which is a `MonsterModel`)
 - **Kind:** elite — elite-grade body, but fought in a `Monster`-room encounter (`MysteriousKnightEventEncounter`) reached through an event, not from an elite map node
