@@ -139,6 +139,41 @@ it on new documents (`registry/identifiers.md` §16).
 
 ---
 
+## Docs diet — 2026-08-06 (Track Z, "Empty the Green Room")
+
+Paper only. **No ruling, measured value, verdict or countersigned text was
+deleted or reworded**, and nothing was moved: content that changed status
+changed it in place, with a banner saying so.
+
+**Counts, before and after.**
+
+| | before | after |
+|---|---|---|
+| files under `docs/` declaring a lifecycle status | 0 | 312 in-file + 18 indexed = **330** |
+| documents this index presented as current/live | 54 rows | **59 LIVING** |
+| REFERENCE (frozen; read when cited) | — | **205** |
+| ARCHIVED (in `docs/archive/`) | 66 | **66** — nothing new was archived |
+| registers answering "what is open" | 8 | **2** — `registry/user-queue.md` and `dockets/` |
+
+**Why the archive is unchanged.** Every file under `docs/` is cited by at
+least one live artifact, test, tool or ledger; archiving any of them would
+break a citation to fix a status. REFERENCE-in-place gives the same reader
+benefit at zero citation cost, and
+`tier0/tests/test_doc_citation_targets.py` now fails if a future pass moves a
+citation target anyway.
+
+**The acceptance test — "what do I read to get current?"** Six documents:
+
+1. `registry/user-queue.md` — everything open, and whose it is.
+2. `tier0/DECISIONS.md` — what was decided, sim side.
+3. `klee-mod/DECISIONS.md` — what was decided, mod side.
+4. `teyvat-spire-design-principles.md` — the law the decisions answer to.
+5. `dockets/README.md` — what is routed and not decided.
+6. `README.md` (this file) — which document is which.
+
+Everything else is reached from one of those six. The five-line "how to find
+anything" note is `registry/identifiers.md`, above §1.
+
 ## Archive review — 2026-08-06 (housekeeping sweep, Track X)
 
 A conservative archive pass ran over the current set. **Nothing was moved.**
