@@ -15,7 +15,6 @@
 | ID | Item | Provenance |
 |---|---|---|
 | `EB-17` | Klee played-when-drawn / dead-in-hand / force-first-copy telemetry — zero matches across `tier0/`,`tier05/`,`tools/`; a **live gate** (bodyless draw/resource engines may not be buffed without it) | eng-backlog §3; missed-requirements §2.2 |
-| `X8-cap` | Ratified `bomb_damage_up ≤ 4` cap (`docs/current/characters/klee-character-design.md` §9) is **not implemented** — `max_stacks` only ever arrives from a card row and no Klee row carries one, so every Klee scaling power is uncapped | dockets/klee-rework §3 |
 | `S13→S7` | Sim-infidelity cross-checks owed before any design session reads them as game facts: swirl aura self-refresh (`reactions.py:96-99`), detonation-order Vulnerable self-amp (`effects.py:474-476`), conscript nation hard-default `'inazuma'` (`effects.py:2018`), Kurage direct `p.block +=` bypass (`effects.py:2549`), per-effect-dict relic no-dedupe (`relics.py:133-136`) | exploit-ledger "Routed to S7" |
 
 ## tier0.5 — draft / run layer / measurement
