@@ -1,5 +1,7 @@
 # Companion Lore Errata — Xingqiu → Dahlia (mechanical no-op)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 For Claude Code, mid-C2. User caught a lore error: Xingqiu is Liyue (Feiyun Commerce Guild), not Mondstadt. His two cards re-flavor onto Dahlia (Mondstadt 4-star Hydro, Church of Favonius deacon) whose actual kit maps 1:1 onto the same two effects — his Skill zone deals damage + applies Hydro; his Burst grants a shield. **Effects, costs, rarities, roles unchanged. Sim results carry; no re-runs.**
 
 Rename map (apply everywhere: companions yaml, klee.yaml packages, C2 slice list, any generated C#/localization, telemetry ids):

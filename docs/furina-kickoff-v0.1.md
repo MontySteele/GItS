@@ -1,5 +1,7 @@
 # Furina — Character Kickoff Doc v0.1
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Status:** kickoff declarations per template §3 —
 statline and systems ratified this session; card sheet not yet begun.
 **Inputs:** principles v1.9, furina-predesign-notes.md (Part 2 resource
@@ -82,11 +84,12 @@ zero mechanics** (ratified). Nothing else novel ships in her v1.
 - **Baseline (v1, boring on purpose):** Spotlighted character's cards get
   **+50% printed numbers** — damage, Block, element-application counts.
   Flat rate is the knob; texture lives in cards, not the baseline.
-- **§2.2a guard (goes into principles verbatim):** Spotlight empowerment
-  applies to numbers only — **never turn-economy effects**. Character-level
-  designation touches a companion's entire kit; if any companion ever ships
-  a soft-control card, Spotlight must not be the thing that upgrades it
-  into stun economics.
+- **§2.2a guard — RATIFIED, and the law now lives in the principles doc.**
+  It went in verbatim as the **§2.2a extension (v1.10)**; read it there, not
+  here (`docs/teyvat-spire-design-principles.md` §2.2a extension), which is
+  also where its engine note about element-application counts lives. Pointer
+  substituted for the restatement 2026-08-06 (docs diet, Track Z / Z-6); no
+  word of the law changed, and the canonical text is untouched.
 - **Self-Spotlight = the solo fallback, at reduced rate** (Appendix A.4
   mandate, satisfied structurally): full rate on a companion character or
   co-op teammate; reduced rate (number TBD at sheet pass; sweep it) on

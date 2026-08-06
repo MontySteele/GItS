@@ -1,5 +1,7 @@
 # S7 — divergence classification (Fable pass)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Date: 2026-08-05. Status: REVIEW — Surplus Dispatch 2, S7 touchpoint. Input:
 `docs/s7-divergences.tsv` (1 635 rows) + `docs/s7-fidelity-audit.md` (the
 worker pass, including its §2.1 confounders). This pass names families and

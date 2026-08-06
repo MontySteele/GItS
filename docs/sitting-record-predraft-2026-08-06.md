@@ -1,5 +1,7 @@
 # Sitting Record Pre-Draft — 2026-08-06 ([USER] verdicts, transcribed and routed)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Status:** PRE-DRAFT for ledger entry; R-numbers to be assigned at landing against current DECISIONS.md max. Verbatim verdicts are [USER]'s; routing and flags are chat-session synthesis. Nothing below is executed until this lands as a ruling.
 
 ## 1. S4 hygiene report — ALL F PROPOSALS APPROVED

@@ -1,5 +1,7 @@
 # Enemy Dossier — The Adversary Mk 3
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `TheAdversaryMkThree` (`MonsterModel`, sealed)
 - **Kind:** boss
 - **Act:** Act 3 tier of the Adversary ladder (Mk 1 / Mk 2 / Mk 3 are a 100 / 200 / 300 HP escalation of one identical script). No encounter registration for any Adversary appears anywhere in the decompiled tree, so the act slot is **inferred from the ladder position, not confirmed** — treat the act field as provisional.

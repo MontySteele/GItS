@@ -1,5 +1,7 @@
 # Enchantments design pass (2026-07-27)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 The pass [USER] ordered in sprint log §13, which sent Blade Of Ink out of
 the pool until it happened. §13's five questions are answered in its own
 order, each from evidence read off the DLL today (described, never

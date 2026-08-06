@@ -1,5 +1,7 @@
 # Probe (d) — `Aria of Recompense`'s unreconstructed Block — REGISTRATION
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 > **DRAFT — FOR [USER] COUNTERSIGN. NOT RUN.** Nothing below is a measurement.
 > No game was launched, no run was taken, no number in this file was read off
 > any wire. This document exists so that the question, the method, the

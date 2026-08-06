@@ -1,5 +1,7 @@
 # Act 2 / Act 3 roster research (STS2 wiki harvest)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Status:** RESEARCH NOTES — 2026-07-23. Raw source data for the multi-act
 extension (`run-model-rework-plan.md` §10). Nothing here is a modeling
 decision; the curated codeable subsets live in the plan doc.

@@ -1,5 +1,7 @@
 # Teyvat Spire — Mod Design Principles (v1)
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Project:** Genshin Impact character mod for Slay the Spire 2 (working title: "Teyvat Spire")
 **Status:** Master design doc. Governs all character/card/system design. Changes here ripple everywhere — amend deliberately, log amendments at the bottom.
 **Companion docs:** `tier0-simulator-spec.md` (testing harness), Klee character doc (forthcoming).

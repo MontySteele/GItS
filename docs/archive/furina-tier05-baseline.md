@@ -1,5 +1,7 @@
 # Furina Tier 0.5 realistic-run baseline
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-22  
 **Status:** diagnostic baseline; no balance change authorized or applied.  
 **World:** assigned draft policy, `RUNTEMPLATE_VERSION 3`, relic granting and

@@ -1,5 +1,7 @@
 # Tier 0.5: runtime pass + the Ironclad act-3 diagnosis (2026-07-24)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Two asks, one session:
 
 1. Why is the Ironclad anchor's act-3 winrate so low — is the sim unusually

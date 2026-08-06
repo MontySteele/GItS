@@ -1,5 +1,7 @@
 # Sprint log — the pilot gap (2026-07-28)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Brief: `docs/sprint-pilot-gap-2026-07-28.md`. MEASURE ONLY, and it stayed
 that way: no lever moved, no card changed, no balance constant changed.
 

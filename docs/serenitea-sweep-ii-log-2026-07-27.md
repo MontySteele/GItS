@@ -1,5 +1,7 @@
 # Serenitea Sweep II — quick clearance (2026-07-27)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 One session. Every track landed. Suite green on a bare clone after each.
 
 **Standing discipline this sprint ran under:** R68 stamps, module-alias

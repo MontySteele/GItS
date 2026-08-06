@@ -1,5 +1,7 @@
 # Track A Kickoff Brief — Role×Tempo Taxonomy and Coverage Lint
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 For: local Code agent (Opus). From: chat session 2026-08-04.
 Charter: `docs/axis-validity-session-charter.md` (v0.2, PROPOSED — read §3
 before touching anything; this brief is the execution slice of Track A only).

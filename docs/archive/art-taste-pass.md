@@ -1,5 +1,7 @@
 # Art Taste Pass — Full Candidate Sweep (chat-side, all 113 card tiles reviewed)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. Method: fetched the full plan via art_fetch.py, rendered
 every candidate at its actual plan crop (mode/focus applied), reviewed on
 labeled contact sheets. Verdicts are TONAL-FIT calls per card intent; the

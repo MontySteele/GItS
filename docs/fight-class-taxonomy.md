@@ -1,5 +1,7 @@
 # Fight-Class Taxonomy — S3 Synthesis
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Date: 2026-08-05. Status: REVIEW — Surplus Week S3, Fable synthesis pass
 (touchpoint 3 of 4). Inputs: the 111 enemy dossiers in `docs/enemy-dossiers/`
 (one Opus agent per enemy, decompile-derived, behavioral notes only). This

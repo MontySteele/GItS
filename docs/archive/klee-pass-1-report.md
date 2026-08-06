@@ -1,5 +1,7 @@
 # Klee Tier 0 Pass 1 — Scorecard Report
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-19. **Input:** `klee-cards.yaml` (75 cards), `mondstadt-companions.yaml` (16), sim per `tier0-simulator-spec.md` with review rulings 1–8 applied. All 80 tests green; frozen battery untouched (A7 recalibrated per ruling #3 only).
 
 **DSL coverage: 75/75 cards run — nothing stubbed.** All §6 ops implemented including the companion-copy trio, so Reaction rows are readable this pass (review item 7's caveat doesn't apply). One engine addition beyond §6: the review's pilot bomb-sequencing rule (attacks before placements) and early-detonation valuation.

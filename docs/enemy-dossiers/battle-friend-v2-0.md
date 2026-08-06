@@ -1,5 +1,7 @@
 # Battle Friend V2.0
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `BattleFriendV2`
 - **Kind:** normal
 - **Act:** Act 3 (`Glory`, act index 2) — event-only

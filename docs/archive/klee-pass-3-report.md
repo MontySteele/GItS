@@ -1,5 +1,7 @@
 # Klee Tier 0 Pass 3 — Report (& v0.1 scorecard baseline)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-19. **Input:** sheet v0.3 + round-3 rulings. 96 tests green. Everything on the pass-3 checklist is implemented; the grid is green except **two tank_boss band deviations**, documented below with trails per protocol. Requesting band ratification — everything else is done.
 
 ## Implemented per checklist

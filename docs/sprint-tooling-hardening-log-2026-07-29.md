@@ -1,5 +1,7 @@
 # Tooling hardening sprint — 2026-07-29
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 > **Provenance note.** This sprint ran concurrently with the Kokomi instrument
 > sprint in one working tree. Its file contents were swept into commit
 > `4ee6881` ("The fanfare +1.0 was noise") by that sprint's broad `git add`

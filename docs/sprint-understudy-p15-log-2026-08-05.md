@@ -1,5 +1,7 @@
 # Sprint log — Understudy P1.5, the bridge fork (2026-08-05)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Promoted at **R104**: three independent demands converge on one fork —
 chosen seeds (R95's original gate), resource/meter visibility on the wire
 (R100/6b's binding condition), and selector recording (R103(b)'s C2 probe and

@@ -1,5 +1,7 @@
 # Reactions corpus — 2026-08-05
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Last Call, Round Two, **Track H**: the measurement harvest for a future
 reactions design session. Measurement only — no constant moved, no design
 question answered here. Every number below is a count or a ratio of counts.

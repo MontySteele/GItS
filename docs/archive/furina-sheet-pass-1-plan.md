@@ -1,5 +1,7 @@
 # Furina Sheet Pass 1 — Plan ("The Card Pass")
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Authorized:** furina-sprint-1-redpen.md ("Sheet
 pass 1 is now fully unblocked") + user go. **Governing docs:** kickoff
 v0.1 (statline CLEARED), principles v1.10, DECISIONS 61–64.

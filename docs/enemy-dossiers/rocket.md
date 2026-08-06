@@ -1,5 +1,7 @@
 # Rocket
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `Rocket` (`MonsterModel`)
 - **Kind:** boss — the *right arm* of the Kaiser Crab boss encounter
 - **Act:** Act 2 (act index 1). One of that act's boss options.

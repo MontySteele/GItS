@@ -1,5 +1,7 @@
 # Axis-Validity Design Session — Charter (v0.2, PROPOSED)
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 Date: 2026-08-04. Status: **RATIFIED 2026-08-04 — AV-G2 countersigned via [USER] go-ahead** (A-G1 and B-G1 remain deferred gates).
 Discharges the session opened by **D3** (2026-07-26). Supersedes the v0.1 draft
 of the same day; v0.2 folds in three review passes conducted in-session:

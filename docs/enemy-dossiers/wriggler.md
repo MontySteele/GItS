@@ -1,5 +1,7 @@
 # Wriggler — behavior dossier
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `Wriggler`
 - **Kind:** normal (non-elite, non-boss)
 - **Act:** Act 1 (`Overgrowth`, act index 0 — the alternate Act 1 alongside `Underdocks`)

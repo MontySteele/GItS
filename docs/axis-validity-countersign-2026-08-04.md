@@ -1,5 +1,7 @@
 # Countersign Package — Track A Null Direction + Tag Review (A-G1)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Filed verbatim, as signed.** House convention for a signed package (cf.
 `docs/a2-gate-ratification-2026-07-27.md`): the text [USER] signed is committed
 unedited, and the repo's own commentary lives elsewhere — the R-numbers in

@@ -1,5 +1,7 @@
 # Sprint Plan — Shop Companion Channel (§4.7 build-out)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Status: PRE-REGISTERED 2026-07-25. Rulings R59–R62 ratified.**
 **EXECUTED 2026-07-25 — outcome in `docs/shop-companion-channel-sprint-log.md`.**
 This document supersedes the DRAFT-FOR-RED-PEN plan

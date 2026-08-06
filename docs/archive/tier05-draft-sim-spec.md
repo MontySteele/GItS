@@ -1,5 +1,7 @@
 # Tier 0.5 — Draft-Level Simulator Spec & Handoff
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Slots after:** pass-3 grid green (Tier 0 frozen as Klee's design baseline). **Before:** any C#.
 **Audience:** Claude (in Claude Code). Same drill: commentary first, it explains what to avoid.
 

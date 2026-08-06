@@ -1,3 +1,4 @@
+# Lifecycle: LIVING — expected to change; read it to work on the project. Status index: docs/registry/identifiers.md §15.  (lint-ok)
 # Mondstadt companion pool — v0.1 (ships with Klee)
 # Shared colorless-style pool. Roles: applier | buffer | trigger (see principles doc §4.3)
 # 4-star = common/uncommon (multi-card kits allowed). 5-star = rare, ONE card each, max 3.

@@ -1,5 +1,7 @@
 # Worktree workflow — one working directory per workstream
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Status: ADOPTED 2026-07-27** (Serenitea Sweep II, B2). Ruling recorded
 against G4; the argument and the incident evidence are in
 `docs/pending/serenitea-g4-session-isolation.md`.

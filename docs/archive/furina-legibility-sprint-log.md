@@ -1,5 +1,7 @@
 # Furina Legibility Sprint — Execution Log ("Read the Stage")
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Opened:** 2026-07-24. Governing doc: the "Furina Legibility — Sprint Plan"
 (playtest workshop 2026-07-24). This log is the required no-chat-side-only
 record. Zero gameplay/sim/sheet changes remain the rule.

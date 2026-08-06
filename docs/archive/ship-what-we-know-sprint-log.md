@@ -1,5 +1,7 @@
 # Implementation Sprint — "Ship What We Know" — execution log
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 Sprint doc: **docs/ship-what-we-know-sprint-plan.md**, recorded verbatim there
 per the house rule that no artifact lives only in chat (the `*-plan.md` /
 `*-log.md` pairing follows the animation-sprint and sheet-pass precedents).

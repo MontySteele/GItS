@@ -1,5 +1,7 @@
 # Gas Bomb — behavior dossier
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `GasBomb`
 - **Kind:** normal (non-elite, non-boss) — but never a starting body
 - **Act:** Act 1 (`Underdocks`, act index 0)

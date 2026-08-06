@@ -1,5 +1,7 @@
 # Tier 0.5 M6 — Report (adaptive policy, divergence, relevance, achievability)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 > **ARCHIVED (CONSTANTS_VERSION 1).** All four asks below were ruled in
 > docs/morning-triage-rulings.md, and every number in this report predates
 > three changes that move it: companion archetype tagging (commit f885ea3),

@@ -23,12 +23,20 @@ things:
             `G<n>` whose number is minted by two or more namespaces in the
             registry's collision table, instead of the qualified form.
 
-Both are cheap to satisfy: add the row, or write `S4-G6` instead of `G6`. The
-deliberate-bare escape hatch is the marker
+  RULE 3 -- a NEW document mints an OPEN-ITEM ROW outside the two homes an open
+            item has: `docs/registry/user-queue.md` and `docs/dockets/`.
+            Added 2026-08-06 by the docs diet (Track Z, Z-3), which retired
+            five parallel registers into those two. See the registry's 16.
 
-    identifier-registry: allow-bare
+All three are cheap to satisfy: add the row, write `S4-G6` instead of `G6`, or
+put the open item in the queue. The escape hatches are the markers
 
-anywhere in the offending file.
+    identifier-registry: allow-bare      (RULE 2)
+    open-items: allow-elsewhere          (RULE 3)
+
+anywhere in the offending file. RULE 3 additionally exempts any document whose
+lifecycle header (Z-1) says REFERENCE or ARCHIVED: a frozen record is allowed
+to restate the history of an item it does not own.
 
 Deletions are never an error. Re-use of an existing token in an existing file is
 never an error. Better to under-flag than to make every future doc commit fight
@@ -66,6 +74,31 @@ EXCLUDE = {
 }
 
 ALLOW_BARE_MARKER = "identifier-registry: allow-bare"
+ALLOW_OPEN_ITEM_MARKER = "open-items: allow-elsewhere"
+
+# RULE 3 -- the two homes an open item is allowed to live in.
+OPEN_ITEM_HOMES = ("docs/registry/user-queue.md", "docs/dockets/")
+
+# A lifecycle header (Z-1) of REFERENCE or ARCHIVED exempts a file: a frozen
+# record restates history, it does not mint work.
+FROZEN_LIFECYCLE = re.compile(r"\*\*Lifecycle:\s*(REFERENCE|ARCHIVED)\b")
+
+# What "minting an open-item row" looks like. Deliberately narrow: the line must
+# BE a row (a bullet or a table cell) and must carry a marker that declares the
+# item open in this document. Prose that merely mentions an open question is not
+# a row and is not flagged.
+OPEN_ITEM_ROW = re.compile(
+    r"(?mi)^\s*(?:[-*+]\s|\|)"          # a bullet or a table row
+    r"(?=.*(?:"
+    r"AWAITING\s+\[USER\]"              # the standing marker for an owed reply
+    r"|\*\*OPEN\*\*"                    # the standing marker for an owed item
+    r"|\bOPEN ITEM\b"
+    r"|\bTODO\b"
+    r"|\bNEEDS (?:A )?RULING\b"
+    r"|\bSTILL OWED\b"
+    r"))"
+    r".*$"
+)
 
 # Tracked namespaces. Narrow, high-precision patterns -- a namespace earns a
 # row here only when its tokens travel outside their minting document.
@@ -208,6 +241,28 @@ def check() -> int:
                 f"numbers are minted by two or more namespaces.\n"
                 f"        Use the qualified form (see {rel(REGISTRY)} 2.1), or add "
                 f"the marker `{ALLOW_BARE_MARKER}` if the bare use is deliberate."
+            )
+
+    # RULE 3 -- new documents may not mint open-item rows outside queue/dockets.
+    for path_str in sorted(files - base_files):
+        if path_str.startswith(OPEN_ITEM_HOMES):
+            continue
+        text = (REPO / path_str).read_text(encoding="utf-8", errors="replace")
+        if ALLOW_OPEN_ITEM_MARKER in text or FROZEN_LIFECYCLE.search(text):
+            continue
+        hits = [m.group(0).strip() for m in OPEN_ITEM_ROW.finditer(text)]
+        if hits:
+            shown = "\n".join(f"          {h[:110]}" for h in hits[:3])
+            more = f"\n          ... and {len(hits) - 3} more" if len(hits) > 3 else ""
+            problems.append(
+                f"RULE 3: new document {path_str} mints {len(hits)} open-item "
+                f"row(s), but an open item lives in "
+                f"docs/registry/user-queue.md or docs/dockets/ (see "
+                f"{rel(REGISTRY)} 16).\n{shown}{more}\n"
+                f"        Move the row to the queue or a docket and point here "
+                f"instead; or, if this document is a frozen record, give it the "
+                f"REFERENCE/ARCHIVED lifecycle header; or add the marker "
+                f"`{ALLOW_OPEN_ITEM_MARKER}`."
             )
 
     if problems:

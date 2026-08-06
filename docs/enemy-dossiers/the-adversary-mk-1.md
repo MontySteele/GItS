@@ -1,5 +1,7 @@
 # The Adversary Mk 1
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `TheAdversaryMkOne`
 - **Kind:** boss
 - **Act:** unassigned — no encounter model in the build references this monster

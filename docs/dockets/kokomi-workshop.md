@@ -1,5 +1,7 @@
 # Docket — the next Kokomi kit workshop
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Status:** DOCKET. Routed, not decided, not scheduled. Zero design authority.
 Opened 2026-08-06 (Track R) against the sitting of 2026-08-06
 (`docs/sitting-record-predraft-2026-08-06.md`); ruling R111.

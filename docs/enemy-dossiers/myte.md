@@ -1,5 +1,7 @@
 # Myte — behavior dossier
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `Myte`
 - **Kind:** normal (non-elite, non-boss)
 - **Act:** Act 2 (`Hive`, act index 1)

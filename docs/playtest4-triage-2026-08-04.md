@@ -1,5 +1,7 @@
 # Playtest 4 triage — mapping the co-op weekend onto the register (2026-08-04)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Source: `docs/playtest4-notes-2026-08-04.md` (raw input), against the register
 `docs/backlog-2026-07-29.md`. Unlike the playtest-2 triage, **nothing here is
 ruled** — this pass sorts findings into closed / unblocked / new / unmoved and

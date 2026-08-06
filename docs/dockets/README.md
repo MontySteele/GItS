@@ -1,5 +1,7 @@
 # Dockets — index
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Status:** INDEX. A docket is a holding place for items that have been
 *routed* and not *decided*. Nothing in this directory carries design
 authority, and nothing in it is scheduled work until the session it names
@@ -15,10 +17,18 @@ documents. Rulings: `tier0/DECISIONS.md` R109, R110, R111.
 | `kokomi-workshop.md` | The next Kokomi kit workshop's inbox: X9's charge-bank note. |
 | `companion-pricing.md` | Companion pricing candidates. X10 lives here as a CANDIDATE — explicitly not ratified. |
 | `watch-items.md` | The watch-item register: X4, X6, X12, each with the quantity watched and the trigger that brings it back. |
+| `engineering-backlog.md` | Open work that needs **no [USER] ruling to start**: confirmed defects, measurement defects, instruments that were directed and never built, content work with nothing in front of it. Opened 2026-08-06 by the docs diet (Track Z / Z-3) so that the three retired registers had somewhere to put their engineering half. |
+
+**Where an open item may live.** As of 2026-08-06 there are exactly two homes:
+`docs/registry/user-queue.md` for anything that needs [USER], and this
+directory for anything routed and not decided.
+`tools/lint_identifier_registry.py` RULE 3 fails a **new** document that mints
+an open-item row anywhere else; the rule and its two escape hatches are
+`docs/registry/identifiers.md` §16.
 
 **House rules for this directory, so a docket cannot quietly become a plan.**
 
-> **QUEUE POINTER, added 2026-08-06 by the housekeeping sweep (Track X).** The single source of truth for what is open and for whom is now **`docs/registry/user-queue.md`**. This section keeps its full text and stays the place the detail lives; the queue file is the index that says which items are still open, which were discharged and by which ruling. Where the two disagree about a *status*, the queue file is the later reconciliation. Identifier collisions (`G1`, `D5`, `C1`, `P1`, `S4`, `X<n>`) resolve at `docs/registry/identifiers.md`.
+> **QUEUE POINTER** (Track X, 2026-08-06; compressed by Track Z, Z-6). Status for everything below lives in `docs/registry/user-queue.md`; short codes resolve at `docs/registry/identifiers.md`. Full rule: `docs/registry/identifiers.md` §16.
 
 
 1. A docket entry records a verdict, a routing and a question. It does not

@@ -1,5 +1,7 @@
 # Bygone Effigy — behavior dossier
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `BygoneEffigy`
 - **Kind:** elite
 - **Act:** Act 1 (`Overgrowth`, act index 0)

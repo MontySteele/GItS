@@ -1,5 +1,7 @@
 # Track T — mechanical audits ordered by the 2026-08-06 sitting (families X2, X7, X8)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Batch: "Second Wind". Base: `main` @ e43d57c. Branch: `findings/track-t`.
 Authority: [USER]'s 2026-08-06 sitting verdicts on the S13 exploit ledger
 (`review/redteam/exploit-ledger.md`, families X2 / X7 / X8).

@@ -1,5 +1,7 @@
 # Sprint brief — the Fanfare rework (single-leg + keywords + redesigns, 2026-07-28)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Delegated sprint. Parent findings: `docs/sprint-pilot-gap-log-2026-07-28.md`
 and Opus's 38d7769 census. Every direction below is RULED by [USER]
 (2026-07-28, post-playtest-3); every number marked PROPOSED returns at

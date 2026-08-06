@@ -1,5 +1,7 @@
 # Atlas — tier05-metrics
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 Scope: `tier05/run_metrics.py`, `stats.py`, `sweeps.py`, `ab.py`, the seven
 `*_telemetry.py` modules, and the `exp_*` experiment-file convention.
 

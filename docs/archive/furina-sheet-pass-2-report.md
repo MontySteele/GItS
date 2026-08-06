@@ -1,5 +1,7 @@
 # Furina Sheet Pass 2 — Report ("The R16 World")
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Plan:** furina-sheet-pass-2-plan.md (experiments
 pre-registered there). **Authorized:** R28. **Governing:** R16–R22, R26,
 DECISIONS 69–78, kickoff v0.1, principles v1.10.

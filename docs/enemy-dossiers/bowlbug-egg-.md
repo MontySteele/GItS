@@ -1,5 +1,7 @@
 # Bowlbug (Egg) — behavior dossier
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `BowlbugEgg`
 - **Kind:** normal
 - **Act:** Act 2 (the Hive; act index 1)

@@ -1,5 +1,7 @@
 # Atlas — tools
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 Scope: `tools/` — the roster codegen entry points (`gen_*`), the art pipeline
 (`art_*`, `cut_*`, `*_stills`), every `lint_*`, the canon extractors
 (`extract_base_game_pool.py`, `canon_role_tempo.py`, `role_tempo.py`), and

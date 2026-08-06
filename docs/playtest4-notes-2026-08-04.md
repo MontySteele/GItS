@@ -1,5 +1,7 @@
 # Playtest 4 notes — three-seat co-op, full roster (2026-08-04)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Build `0.2-247` (`e0097bd`, the bug-fix pass deploy), mod `klee-v0.2.0`,
 weekend of 2026-08-01/02. Three seats: [USER] = Furina, guest = Kokomi,
 guest = Klee. Run completed through act 3.

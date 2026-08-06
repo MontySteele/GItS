@@ -1,5 +1,7 @@
 # Klee art red-pen — round 2 (2026-07-21, chat → Code, USER-RATIFIED)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 Eyes-on vibe check of the 20 portraitless Klee cards, plus a name-collision
 fix and a new validation lint. Sources fetched from the wiki and reviewed on
 a contact sheet (`docs/klee-art-hunt-contactsheet.png`). Effect text pulled

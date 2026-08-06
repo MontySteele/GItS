@@ -1,5 +1,7 @@
 # Sprint log — the C# bug-fix pass (2026-07-29)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Parent: the consolidated backlog (`82af10f`, `docs/backlog-2026-07-29.md`) and
 the read-only sweep that produced it. Delegated IMPLEMENTATION pass: ten items
 handed over as a verified list, plus four explicitly held back as design

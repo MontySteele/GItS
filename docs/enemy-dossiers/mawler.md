@@ -1,5 +1,7 @@
 # Enemy Dossier — Mawler
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `Mawler`
 - **Kind:** normal
 - **Act:** Act 1 (`Overgrowth`, act index 0) — the only act pool it appears in

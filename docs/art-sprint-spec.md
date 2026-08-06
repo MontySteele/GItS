@@ -1,5 +1,7 @@
 # Art Sprint Spec — Slice Assets (Tier F, private build)
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Runs:** before/alongside C1. **Executor:** Claude Code on the user's machine (wiki-hosted official assets are automatable; anything requiring taste gets a shortlist for the user to pick from). **Governing docs:** art-asset-manifest.md (dims/counts), principles §9 (Tier F never ships).
 
 ## 0. Policy, stated precisely

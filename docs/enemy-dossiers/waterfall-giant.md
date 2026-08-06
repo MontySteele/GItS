@@ -1,5 +1,7 @@
 # Waterfall Giant
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `WaterfallGiant` (`MonsterModel`)
 - **Kind:** boss (sole monster of the `WaterfallGiantBoss` encounter)
 - **Act:** Act 1 — Underdocks (act index 0, the alternate first act; first in that act's boss discovery order, ahead of Soul Fysh and Lagavulin Matriarch)

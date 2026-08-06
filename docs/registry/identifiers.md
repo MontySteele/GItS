@@ -1,5 +1,7 @@
 # Identifier registry — what every short code in this repo means
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Status: RESOLVER.** Opened 2026-08-06 by the housekeeping sweep (Track X) of
 the "Strike the Set" batch. This file carries **zero design authority**. It
 decides nothing, grades nothing, and rewrites nothing: every meaning below is
@@ -28,11 +30,16 @@ for what is open and for whom.
 
 ## How to find anything now — five lines
 
-1. **A short code you don't recognise** (`G6`, `D5`, `C1`, `P1.5`, `X5`, `NC-1`, `S-2`) → §1 for the namespace, §2 for the collision table, which names the qualified form and the document that minted it.
-2. **"Is this still open, and whose is it?"** → `docs/registry/user-queue.md`: §1 the four one-word replies, §2 the reconciled S4 gate queue, §3 the four HELD flags, §4 the owed sittings, §5–§8 the rest.
-3. **"What did we actually decide?"** → `tier0/DECISIONS.md` (R39–R116, `DEC-D2`–`DEC-D5`) and `klee-mod/DECISIONS.md` (R73–R80); one shared R-sequence, CI-checked for duplicates. R1–R38 are not mechanically resolvable — see §3.
-4. **"Which document is current?"** → `docs/README.md`: current set above the archive map, plus the 2026-08-06 archive review that says which near-miss documents were deliberately kept live and why.
+1. **"Is this still open, and whose is it?"** → `docs/registry/user-queue.md` if it needs [USER]; `docs/dockets/` if it is routed and not decided. Those two are the **only** homes an open item has (§16), and a lint keeps it that way.
+2. **"What did we actually decide?"** → `tier0/DECISIONS.md` (R39–R116, `DEC-D2`–`DEC-D5`) and `klee-mod/DECISIONS.md` (R73–R80); one shared R-sequence, CI-checked for duplicates. R1–R38 are not mechanically resolvable — see §3.
+3. **"Do I have to read this document?"** → its **lifecycle header**, the line under the title: LIVING = yes, keep it true; REFERENCE = only when something cites it; ARCHIVED = history only. The full per-status index is §15; the 59 LIVING files are listed there.
+4. **A short code you don't recognise** (`G6`, `D5`, `C1`, `P1.5`, `X5`, `NC-1`, `S-2`) → §1 for the namespace, §2 for the collision table, which names the qualified form and the document that minted it.
 5. **"Can I quote this number?"** → check its world stamp against §4 (`RT7 / D14 / P3 / C5` today). A bump archives the numbers below it; archived numbers are bannered where they are published, never rewritten (R101b).
+
+**"What do I read to get current?"** — six documents, in this order:
+`docs/registry/user-queue.md` → `tier0/DECISIONS.md` → `klee-mod/DECISIONS.md`
+→ `docs/teyvat-spire-design-principles.md` → `docs/dockets/README.md` →
+`docs/README.md`. Everything else is reached from one of those six.
 
 ---
 
@@ -447,3 +454,149 @@ Both are escapable — add the row, or use the qualified form. The escape hatch
 for a deliberate bare use is the marker `identifier-registry: allow-bare`
 anywhere in the file. Refresh the snapshot with
 `python tools/lint_identifier_registry.py --update-baseline`.
+
+A third rule, added 2026-08-06 by the docs diet (Track Z), fails a **new**
+document that mints an open-item row outside the queue and the dockets. See
+§16.
+
+---
+
+## 15. Lifecycle status index — LIVING / REFERENCE / ARCHIVED
+
+Opened 2026-08-06 by the docs diet (Track Z). **Zero design authority**, like
+the rest of this file: a status says how a document is *maintained*, never
+whether its contents are true or ratified.
+
+**The three statuses.**
+
+| Status | Meaning | What you do with it |
+|---|---|---|
+| **LIVING** | Expected to change. Must be read to work on the project. | Read it. Keep it true. |
+| **REFERENCE** | A frozen record — sprint logs, countersign packages, playtest records, research harvests, retired registers. | Read it when something cites it. Do not maintain it; corrections land in the superseding doc. |
+| **ARCHIVED** | Superseded. Kept verbatim as a record, never updated. Lives in `docs/archive/`. | Read it only for history. |
+
+Every `.md` and `.yaml` file under `docs/` carries its status as a header line
+(a blockquote in Markdown, a leading `#` comment in YAML). Eighteen files
+cannot carry one and are indexed here instead — see "Index-only" below.
+
+### 15.1 Counts (2026-08-06, after the diet)
+
+| Status | Files |
+|---|---|
+| LIVING | 59 |
+| REFERENCE | 205 |
+| ARCHIVED | 66 |
+| **total under `docs/`** | **330** |
+
+### 15.2 The LIVING set, in full
+
+The living-doc budget (Track Z, Z-2) is: the two DECISIONS ledgers (outside
+`docs/`), the design principles, the registry pair, `docs/dockets/`, the
+card/upgrade/companion sheets, and at most one charter per active sprint.
+Everything below beyond that budget is an **exception**, and its reason is in
+the same row.
+
+| File | In budget? | Why it is LIVING |
+|---|---|---|
+| `teyvat-spire-design-principles.md` | budget | the design constitution |
+| `registry/identifiers.md`, `registry/user-queue.md` | budget | the resolver and the open-item register |
+| `registry/known-identifiers.tsv` | budget | the lint's grandfathering snapshot; regenerated, never frozen |
+| `dockets/README.md`, `dockets/klee-rework.md`, `dockets/kokomi-workshop.md`, `dockets/companion-pricing.md`, `dockets/watch-items.md`, `dockets/engineering-backlog.md` | budget | routed-not-decided inboxes; one of the two places an open item may live |
+| `furina-cards.yaml`, `furina-upgrades.yaml`, `klee-cards.yaml`, `klee-upgrades.yaml`, `kokomi-cards.yaml`, `kokomi-upgrades.yaml`, `fontaine-companions.yaml`, `inazuma-companions.yaml`, `mondstadt-companions.yaml`, `ref-ironclad-upgrades.yaml` | budget | the design sheets; read directly by both sims and by codegen |
+| `axis-validity-session-charter.md` | budget | the one charter of the open Axis-Validity sprint |
+| `understudy-kickoff-brief.md` | budget | the one charter of the open Understudy sprint |
+| `animation-sprint-2-plan.md` | budget | the one charter of the open animation sprint |
+| `README.md` | **exception** | the docs index; a stale index is worse than no index |
+| `atlas/` (14 files) | **exception** | the code map — each file tracks a live module and changes when that module does |
+| `awaiting-user-slots-2026-08-06.md` | **exception** | holds the pre-drafted landing text for slots 4/6/7, which are still AWAITING; it changes every time a slot lands |
+| `kokomi-playtest-protocol.md` | **exception** | its "Answers" block is filled at the table; `OT-1` was added to it on 2026-08-06 |
+| `klee-character-design.md`, `furina-kickoff-v0.1.md`, `kokomi-kickoff-v1.md` | **exception** | identity charters, amended in place; they are law for their character in the way the principles doc is law for the project |
+| `art-asset-manifest.md`, `furina-art-pass-requirements.md`, `kokomi-art-pass-requirements.md` | **exception** | art bills maintained "AS SHIPPED"; they are the current state of the art surface, not a record of a pass |
+| `art-sprint-spec.md` | **exception** | the art-pipeline regime the art lints enforce; changing the regime means changing this file |
+| `roster-codegen.md`, `upgrade-conventions.md` | **exception** | build-path and grammar references maintained in place; both carry dated correction notes rather than being superseded |
+| `patch-sentinel.md` | **exception** | describes a surface that changes with every base-game patch |
+| `worktree-workflow.md` | **exception** | the canonical statement of the worktree policy (`SS-G4`); Z-6 points three other sites at it |
+| `role-tempo-floors.yaml`, `role-tempo-debt.tsv`, `role-tempo-review.tsv`, `track-b-curves.md` | **exception** | generated or machine-read instrument data; they regenerate rather than freeze |
+| `art-claimed-sources.tsv`, `reserved-card-names.txt`, `card_keywords.json`, `noncard-parity-vectors.json`, `furina-fanfare-parity-vectors.json`, `s7-divergences.tsv` | **exception** | machine-read data files, rewritten by their producers |
+
+### 15.3 REFERENCE — by class
+
+Nothing in this class is maintained. If one of them contradicts a LIVING
+document, the LIVING document wins and the contradiction is a defect in the
+LIVING one, not in the record.
+
+| Class | Count | Where |
+|---|---|---|
+| Enemy dossiers | 112 | `docs/enemy-dossiers/` (+ `fight-class-labels.yaml`) |
+| Completed sprint logs, plans and reports | 42 | `docs/sprint-*.md`, `docs/*-sprint-log-*.md`, `docs/*-sprint-plan.md` |
+| Countersign packages and gate records | 6 | `axis-validity-countersign-2026-08-04.md`, `understudy-countersign-2026-08-04.md`, `track-b-validation-gate-countersign-2026-08-04.md`, `a2-gate-ratification-2026-07-27.md`, `handback-note-2026-08-04.md`, `sitting-record-predraft-2026-08-06.md` |
+| Playtest records and triage | 6 | `playtest2-triage-*`, `playtest3-notes-*`, `playtest4-notes-*`, `playtest4-triage-*`, `g12-review-*`, `punch-off-crash-memo.md` |
+| Probe registrations (unsigned, awaiting countersign) | 4 | `probe-a-block-offset.md`, `probe-b-fanfare-residual.md`, `probe-d-registration-draft.md`, `probe-e-corpse-detonation-registration-draft.md` |
+| Research harvests and audits | 12 | `act2-act3-roster-research.md`, `sts2-map-and-events-research.md`, `sts2-events-harvest.txt`, `companion-value-vs-colorless-study.md`, `lore-fidelity-audit-2026-08-05.md`, `instrument-redteam-2026-08-05.md`, `reactions-corpus-*`, `s7-*`, `zhongli-dossier-*`, `slot5-candidates-*` |
+| Retired open-item registers (Z-3) | 5 | `backlog-2026-07-29.md`, `open-playtest-items.md`, `missed-requirements.md`, `sitting-prep-2026-08-05.md`, `surplus-week-manifest-2026-08-05.md` |
+| Adopted proposals, retained | 3 | `pending/` |
+| Everything else | 15 | briefs, memos, design notes, calibration records |
+
+### 15.4 ARCHIVED
+
+All 66 live in `docs/archive/` and were archived before this diet. The archive
+map — one line per document, saying why it closed and where its live successor
+is — is `docs/README.md` § "Archive map". **The docs diet moved nothing new
+into the archive**, and the reason is worth recording so the pass is not re-run
+blind: every file under `docs/` is cited by at least one live artifact, test,
+tool or ledger, so archiving any of them would have broken a citation to fix a
+status. REFERENCE-in-place gives the same reader benefit at zero citation cost.
+
+**The citation guarantee that makes REFERENCE safe.** A frozen document does
+not move. 37 distinct `docs/` paths are cited from `tools/` — four modules cite
+`docs/track-a-kickoff-brief.md` alone, which is why the 2026-08-06 archive
+review kept it live. `tier0/tests/test_doc_citation_targets.py` now fails if
+any of those 37 stops resolving, so the next paper pass that renames a
+citation target finds out from the suite rather than from a broken tool.
+
+### 15.5 Index-only files (18)
+
+These carry no header, either because the format has no comment syntax that
+their readers tolerate, or because a generator would overwrite it. Their status
+lives here and nowhere else.
+
+| File | Status | Why index-only |
+|---|---|---|
+| `registry/known-identifiers.tsv` | LIVING | generated TSV |
+| `role-tempo-debt.tsv`, `role-tempo-review.tsv`, `s7-divergences.tsv` | LIVING | machine-read TSV |
+| `art-claimed-sources.tsv` | LIVING | machine-read TSV |
+| `reserved-card-names.txt` | LIVING | machine-read list |
+| `card_keywords.json`, `noncard-parity-vectors.json`, `furina-fanfare-parity-vectors.json` | LIVING | JSON has no comments |
+| `role-tempo-floors.yaml`, `role-tempo-baseline.md`, `role-tempo-tagthrough.md`, `track-b-curves.md` | LIVING (floors, curves) / REFERENCE (baseline, tagthrough) | fully machine-generated; a header would be overwritten on the next rebuild |
+| `reactions-corpus-battery-2026-08-05.tsv`, `-corrected.tsv`, `reactions-corpus-cohort-2026-08-05.tsv` | REFERENCE | machine-read TSV |
+| `sts2-events-harvest.txt` | REFERENCE | raw harvest |
+| `animation-sprint-1-a4-gate.png` | REFERENCE | image |
+
+---
+
+## 16. Where an open item may live — and the lint that keeps it there
+
+Opened 2026-08-06 by the docs diet (Track Z, Z-3). Before it, "what is open"
+was spread across at least eight registers; five of them are now REFERENCE
+husks whose still-open rows were migrated verbatim.
+
+**The rule, stated once.** An open item lives in exactly one of two places:
+
+1. **`docs/registry/user-queue.md`** — anything that needs [USER]: a reply, a
+   ruling, a countersign, a taste pick, or time at the table.
+2. **`docs/dockets/`** — anything routed and not decided, including
+   `dockets/engineering-backlog.md`, which owns open *engineering* work that
+   needs no ruling to start.
+
+Any other document may *describe* an open item at length — that is what the
+"Full text" column of the queue points at — but the row that says **"this is
+open"** lives in the queue or a docket, so that "what is open" has one answer.
+
+**The lint.** `tools/lint_identifier_registry.py` RULE 3 fails a **new**
+document (one absent from the grandfathering snapshot) that mints an open-item
+row outside those two homes. Like RULES 1 and 2 it is diff-shaped: the existing
+corpus is grandfathered and never fights it. Two escape hatches, both cheap:
+
+- give the document the **REFERENCE** or **ARCHIVED** lifecycle header — a
+  frozen record is allowed to restate the history of an item; or
+- add the marker `open-items: allow-elsewhere` anywhere in the file.

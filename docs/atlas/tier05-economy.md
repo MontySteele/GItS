@@ -1,5 +1,7 @@
 # Atlas — tier05-economy
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 Scope: `tier05/events.py`, `rewards.py`, `shop.py`, `potions.py`, `relics.py`,
 and the `tier05/content/` pools (`events.yaml`, `potions.yaml`, `relics.yaml`,
 `act{1,2,3}_pool.yaml`).

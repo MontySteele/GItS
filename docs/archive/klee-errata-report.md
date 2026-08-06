@@ -1,5 +1,7 @@
 # Klee Errata Pass — Report (Frozen v2 + closeout of the ratification)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-19. **Input:** pass3-ratification.md + furina-predesign-notes.md Part 1. 107 tests (1 xfail, see the ask). The directive's re-run is done; **v0.1 is frozen and regression-locked** — with one pre-registered deviation coming back to you, per your own clause.
 
 ## Implemented

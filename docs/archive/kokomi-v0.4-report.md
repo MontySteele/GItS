@@ -1,5 +1,7 @@
 # Kokomi v0.4 — O4 Salvage + Lore Overlay: EXECUTION REPORT
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-26. Governing doc: `docs/kokomi-v0.4-plan.md` ([USER]-ratified;
 ruling answers in its §7). Rulings logged as R54 (the O-ruling + graded
 predictions) and R55 (the rename batch + voice law) in `tier0/DECISIONS.md`.

@@ -1,5 +1,7 @@
 # "Curtain Call" — Furina distinctness / register / structure sweep — SPRINT LOG
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Date: 2026-07-27. Status: EXECUTING (this file opens before any measuring
 cell runs and closes with the graded predictions; sections are appended in
 execution order, never rewritten). Pre-registration: the sprint doc ratified

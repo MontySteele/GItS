@@ -1,5 +1,7 @@
 # Furina Sprint 1 — Red-pen & Rulings (chat → Code)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. Independently verified chat-side: 195 green locally;
 spotlight_mult read at source (numbers-only confirmed structural — no
 draw/energy path exists); personal-pool exclusion confirmed in rewards.py.

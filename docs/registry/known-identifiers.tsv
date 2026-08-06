@@ -63,10 +63,15 @@ token	gate	NT-G8
 token	gate	RA-G1
 token	gate	RA-G2
 token	gate	S4-G1
+token	gate	S4-G10
+token	gate	S4-G11
 token	gate	S4-G12
 token	gate	S4-G13
 token	gate	S4-G14
 token	gate	S4-G15
+token	gate	S4-G16
+token	gate	S4-G18
+token	gate	S4-G19
 token	gate	S4-G2
 token	gate	S4-G20
 token	gate	S4-G3
@@ -286,6 +291,7 @@ file	docs/companion-value-vs-colorless-study.md
 file	docs/curtain-call-sprint-log-2026-07-27.md
 file	docs/dockets/README.md
 file	docs/dockets/companion-pricing.md
+file	docs/dockets/engineering-backlog.md
 file	docs/dockets/klee-rework.md
 file	docs/dockets/kokomi-workshop.md
 file	docs/dockets/watch-items.md

@@ -1,5 +1,7 @@
 # M7 Rulings & Directives (chat → Code)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Input:** tier05-m7-report.md (all sections + asks), user
 ruling on real-game campfire economy (§R7, verbatim). Principles v1.9,
 CONSTANTS_VERSION 2 baseline.

@@ -1,3 +1,4 @@
+# Lifecycle: LIVING — expected to change; read it to work on the project. Status index: docs/registry/identifiers.md §15.  (lint-ok)
 # Furina + Fontaine upgrade deltas — v0.1 (companion file to furina-cards.yaml / fontaine-companions.yaml)
 # Grammar authority: upgrade-conventions.md (mined base-game grammar). Same semantics as klee-upgrades.yaml.
 # Bursts excluded (kit, v1.9; Talent Training = v2). Guest Stars excluded (generated mid-combat — rest-smithing

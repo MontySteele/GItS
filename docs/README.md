@@ -1,5 +1,7 @@
 # Docs index
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 Reorganized 2026-07-26 (project recap). Two kinds of documents live here:
 
 - **`docs/*.md`** — the current set: anything still governing, still open, or
@@ -32,10 +34,31 @@ otherwise).
 ### State of the project (start here)
 | doc | what it is |
 |---|---|
-| `open-playtest-items.md` | The live queue of everything needing a human at the game, plus the desk-ruling queue (§6). Dated addendum carries post-compile corrections. |
-| `red-pen-2026-07-26.md` | The most recent ratification record; carries its own errata and the one still-owed Queue 5 cell. |
-| `missed-requirements.md` | Recap audit (2026-07-26): every requirement that was directed, never built, and tracked nowhere — with evidence. |
 | `tier0/DECISIONS.md`, `klee-mod/DECISIONS.md` | The living decision logs (sim-side and mod-side). The project's spine. |
+| `dockets/engineering-backlog.md` | **The engineering half of "what is open".** Work that needs no [USER] ruling to start: confirmed defects, measurement defects, unbuilt instruments, content work with nothing in front of it. Opened 2026-08-06 (Track Z). |
+| `red-pen-2026-07-26.md` | REFERENCE. The most recent ratification record; carries its own errata and the one still-owed Queue 5 cell (`S4-G16`). |
+| `open-playtest-items.md`, `missed-requirements.md`, `backlog-2026-07-29.md`, `sitting-prep-2026-08-05.md`, `surplus-week-manifest-2026-08-05.md` | **RETIRED AS REGISTERS 2026-08-06 (Track Z / Z-3), now REFERENCE.** Each keeps its full text and its evidence, and each carries a banner saying where its open rows went — the [USER] ones to `registry/user-queue.md` §10, the engineering ones to `dockets/engineering-backlog.md`. Read them for *reasoning*, never for *status*. |
+
+### Lifecycle statuses — what a header line means
+
+Every `.md` and `.yaml` file under `docs/` opens with one of three lifecycle
+headers, added 2026-08-06 by the docs diet (Track Z / Z-1):
+
+- **LIVING** — expected to change; read it to work on the project. 59 files.
+- **REFERENCE** — a frozen record: sprint logs, countersign packages, playtest
+  records, research harvests, retired registers. Read it when something cites
+  it; do not maintain it. 205 files.
+- **ARCHIVED** — superseded, kept verbatim, never updated; lives in
+  `docs/archive/`. 66 files.
+
+Eighteen files (generated artifacts, TSV/JSON/TXT/PNG) cannot carry a header
+and are indexed instead. The full per-status index — including the LIVING set
+with a reason on every entry outside the living-doc budget — is
+`registry/identifiers.md` §15.
+
+**Where an open item may live:** `registry/user-queue.md` if it needs [USER],
+`dockets/` if it is routed and not decided. Nowhere else, and a lint enforces
+it on new documents (`registry/identifiers.md` §16).
 
 ### Law and charters
 | doc | what it is |
@@ -47,6 +70,22 @@ otherwise).
 | `axis-validity-session-charter.md` | The Axis-Validity charter (RATIFIED 2026-08-04, AV-G2 countersigned). Grades R87(1), revises the same-y-pools diagnosis against canon, and opens Tracks A/B/C. **A-G1 was DISCHARGED 2026-08-04 (R91); B-G1 remains open** (row corrected 2026-08-06, R107 / S4 finding F7). |
 
 ### Open sprints and live queues
+
+> **Read this table with the lifecycle headers, 2026-08-06 (Track Z / Z-4).**
+> Only four documents in it are LIVING: `animation-sprint-2-plan.md`,
+> `kokomi-playtest-protocol.md`, `awaiting-user-slots-2026-08-06.md` and
+> `track-b-curves.md`. Every other row is a **completed-sprint log or a landing
+> record**, and those are now REFERENCE: frozen, indexed, out of the living
+> set. Their *rulings* live in the two DECISIONS ledgers; the logs are the
+> derivation record. A row below that says "OPEN" means the **work stream** is
+> open, not that the document is maintained — the open rows themselves were
+> migrated to `registry/user-queue.md` and `dockets/` by Z-3.
+>
+> REFERENCE documents do not move. Four `tools/` modules cite
+> `track-a-kickoff-brief.md` by path in their docstrings, and 37 `docs/` paths
+> are cited from `tools/` in total; `tier0/tests/test_doc_citation_targets.py`
+> now fails if a paper pass moves or renames any of them.
+
 | doc | what it is |
 |---|---|
 | `animation-sprint-2-plan.md` | Open sprint: gates B5/D5/E2/F2 (and the Funnel Contract §3, still binding). |
@@ -72,7 +111,7 @@ otherwise).
 ### Dockets (routed, not decided)
 | doc | what it is |
 |---|---|
-| `dockets/` | Holding places for items that have been **routed** and not decided. Opened 2026-08-06 by the sitting's S13 routings (R109–R111): `klee-rework.md` (X1 note + FLAG-1 held, X7 law + Track T's audit slot, X8 findings slot), `kokomi-workshop.md` (X9), `companion-pricing.md` (X10 as a CANDIDATE, explicitly not ratified), `watch-items.md` (X4/X6/X12 with their triggers). Index and house rules: `dockets/README.md`. |
+| `dockets/` | Holding places for items that have been **routed** and not decided. Opened 2026-08-06 by the sitting's S13 routings (R109–R111): `klee-rework.md` (X1 note + FLAG-1 held, X7 law + Track T's audit slot, X8 findings slot), `kokomi-workshop.md` (X9), `companion-pricing.md` (X10 as a CANDIDATE, explicitly not ratified), `watch-items.md` (X4/X6/X12 with their triggers), and — added 2026-08-06 by Track Z — `engineering-backlog.md` (`EB-1`…`EB-41`). Index and house rules: `dockets/README.md`. |
 
 ### Live references
 | doc | what it is |
@@ -99,6 +138,41 @@ otherwise).
 | `companion-value-vs-colorless-study.md` | Empirical backing for principles §4.7 and R59. |
 
 ---
+
+## Docs diet — 2026-08-06 (Track Z, "Empty the Green Room")
+
+Paper only. **No ruling, measured value, verdict or countersigned text was
+deleted or reworded**, and nothing was moved: content that changed status
+changed it in place, with a banner saying so.
+
+**Counts, before and after.**
+
+| | before | after |
+|---|---|---|
+| files under `docs/` declaring a lifecycle status | 0 | 312 in-file + 18 indexed = **330** |
+| documents this index presented as current/live | 54 rows | **59 LIVING** |
+| REFERENCE (frozen; read when cited) | — | **205** |
+| ARCHIVED (in `docs/archive/`) | 66 | **66** — nothing new was archived |
+| registers answering "what is open" | 8 | **2** — `registry/user-queue.md` and `dockets/` |
+
+**Why the archive is unchanged.** Every file under `docs/` is cited by at
+least one live artifact, test, tool or ledger; archiving any of them would
+break a citation to fix a status. REFERENCE-in-place gives the same reader
+benefit at zero citation cost, and
+`tier0/tests/test_doc_citation_targets.py` now fails if a future pass moves a
+citation target anyway.
+
+**The acceptance test — "what do I read to get current?"** Six documents:
+
+1. `registry/user-queue.md` — everything open, and whose it is.
+2. `tier0/DECISIONS.md` — what was decided, sim side.
+3. `klee-mod/DECISIONS.md` — what was decided, mod side.
+4. `teyvat-spire-design-principles.md` — the law the decisions answer to.
+5. `dockets/README.md` — what is routed and not decided.
+6. `README.md` (this file) — which document is which.
+
+Everything else is reached from one of those six. The five-line "how to find
+anything" note is `registry/identifiers.md`, above §1.
 
 ## Archive review — 2026-08-06 (housekeeping sweep, Track X)
 

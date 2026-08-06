@@ -1,5 +1,7 @@
 # Silent Anchor — Kickoff v0.1 (design doc)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 2026-07-27. Status: DRAFT for red-pen; execution brief lives in
 `docs/silent-anchor-sprint-plan.md` (handed to Opus).
 

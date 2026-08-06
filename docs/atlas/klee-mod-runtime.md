@@ -1,5 +1,7 @@
 # Atlas — klee-mod-runtime
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 Scope: `klee-mod/KleeCode/` — `Powers/`, `Elements/`, `Vfx/`, `Patches/`,
 `Relics/`, `Diagnostics/`, plus the root entry files (`KleeMod.cs`,
 `KleePatchBootstrap.cs`, `KleePck.cs`, `KleeAssetPathFallback.cs`).

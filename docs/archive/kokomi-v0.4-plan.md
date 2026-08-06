@@ -1,5 +1,7 @@
 # Kokomi v0.4 — O4 Salvage + Lore Overlay (GOVERNING PLAN)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Status:** [USER]-ratified 2026-07-26; handed to the Kokomi Code
 workstream. The plan text below is the design-chat output archived
 verbatim (§0–§6). The ruling answers to §5 are recorded in

@@ -1,5 +1,7 @@
 # Furina Sheet Pass 1 — Report ("The Card Pass")
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Plan:** furina-sheet-pass-1-plan.md. **Governing:**
 kickoff v0.1 (statline CLEARED), principles v1.10, DECISIONS 61–68.
 **Environment:** CONSTANTS_VERSION 2, DRAFTER_VERSION 2,

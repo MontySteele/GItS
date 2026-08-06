@@ -1,5 +1,7 @@
 # Sprint log — the art gap and the A7 port (2026-07-29)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Brief: `docs/sprint-art-and-a7-2026-07-29.md`. Both tracks SHIPPED.
 
 **Headline: the pool is playtest-ready.** art_coverage 271/271, manifest

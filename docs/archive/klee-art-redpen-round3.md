@@ -1,5 +1,7 @@
 # Klee art red-pen — round 3 (final verdicts) (2026-07-21, chat + user)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 Eyes-on review of the 20 portraitless Klee cards AND the splash-reprocess
 set, rendered at true 500x380 card size (the render is what surfaced the
 cover-clip failures below). All calls USER-RATIFIED. Feeds plan.tsv +

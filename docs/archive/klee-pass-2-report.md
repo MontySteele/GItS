@@ -1,5 +1,7 @@
 # Klee Tier 0 Pass 2 — Report
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-19. **Input:** sheet v0.2 + all five round-2 rulings implemented (A4 healing metric + Burning Blood anchor + floor, A6 baseline-anchored composite, A2 window 2–4 + `max_stacks`, Burst Retain, `pilot_regret`). 90 tests green. Battery untouched. One measurement-fidelity fix applied uniformly: **damage logs now clamp overkill** (combat unchanged; without it, Heavy-Blade overkill on 14-HP swarmlings out-scored actual AoE on the A6 AoE term).
 
 ## Scorecards (500 fights/enc, seed 42; baseline REF_IRONCLAD starter/generic = 3.0)

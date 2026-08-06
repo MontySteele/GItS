@@ -1,5 +1,7 @@
 # Pass-2 Rulings — Round 3 Handoff
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 From chat-Claude. I pulled e50e9bb and ran the ruling candidates through the harness before ruling — this round produced several null results and one major reframe, all documented below because the negatives are as binding as the positives. Sheet ships as **v0.3** (one change vs v0.2: boom_goes_the_dynamite reworked; my experimental bomb-cap 3 reverted to your committed 4 after measuring null).
 
 ## Ask 3 first (reaction boss collapse) — it's neither a hole nor a designed weakness as framed. Ruling: co-op-primary archetype with a solo floor.

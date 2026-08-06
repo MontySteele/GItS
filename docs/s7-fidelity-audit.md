@@ -1,5 +1,7 @@
 # S7 — the sim fidelity replay audit
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Opened and closed 2026-08-05, Surplus Dispatch 2, item S7. Worker pass only:
 this document **inventories, measures and files**. It classifies nothing and
 proposes nothing. A separate pass reads `docs/s7-divergences.tsv` and decides

@@ -1,5 +1,7 @@
 # Relic + Potion + Ancient-Reward Layer: making the run "realistic"
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 Status: **DRAFT — awaiting red-pen 2026-07-21.** Successor to
 `run-model-rework-plan.md`, which built the realistic Act-1 *gauntlet* (roster,
 template, gold economy) but deliberately deferred relics, potions, and the

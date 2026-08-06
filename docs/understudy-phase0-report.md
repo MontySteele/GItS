@@ -1,5 +1,7 @@
 # Understudy Phase 0 — the measured run
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Sprint: Understudy (bot playtest apparatus). Phase: 0, the pre-registered
 measurement. Brief: `docs/understudy-kickoff-brief.md`. P0 findings and the
 three ratified rulings: `docs/understudy-p0-findings.md`. Date: 2026-08-04.

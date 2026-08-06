@@ -1,5 +1,7 @@
 # Enemy Dossier — Skulking Colony
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `SkulkingColony`
 - **Kind:** elite
 - **Act:** Act 1 (`Underdocks`, act index 0 — the alternate Act 1 pool alongside `Overgrowth`)

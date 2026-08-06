@@ -1,5 +1,7 @@
 # Torch Head Amalgam
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `TorchHeadAmalgam`
 - **Kind:** boss (boss-tier creature; mechanically a *secondary* enemy)
 - **Act:** 3 (Glory, act index 2)

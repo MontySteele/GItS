@@ -1,5 +1,7 @@
 # "Serenitea Sweep" — tech-debt clearance, landing log (opened 2026-07-26)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Running record for the sprint doc of the same name. Governing inputs:
 `docs/tech-debt-audit-2026-07-26.md`, `docs/missed-requirements.md`,
 `tier0/DECISIONS.md` R66–R72 + D3, `docs/epoch-1-log-2026-07-26.md`.

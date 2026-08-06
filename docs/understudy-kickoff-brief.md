@@ -1,5 +1,7 @@
 # Bot Playtest Apparatus — Kickoff Brief ("Understudy")
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 For: local Code agent. From: chat session 2026-08-04. Status: PROPOSED.
 Worktree-per-session (G4). Suite green at every phase boundary. New mod
 component — cross-session note required before anything touches shared

@@ -1,5 +1,7 @@
 # S7 probe (c) — the `cards_played` counter key
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Date: 2026-08-05. Authority: R103 (probe order (c) → (a) → (b)). Input: the
 S7 audit's family A cluster (`docs/s7-fidelity-audit.md` §4.1,
 `docs/s7-classification.md` family A) plus `docs/s7-divergences.tsv`. This is a

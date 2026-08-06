@@ -1,5 +1,7 @@
 # Architecture & tech-debt audit — 2026-07-26
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 > # ARCHIVED SNAPSHOT — DO NOT QUOTE UNLABELLED
 >
 > **This audit reads the tree as it stood on 2026-07-26: the RUNTEMPLATE 6 /

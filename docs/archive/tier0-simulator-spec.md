@@ -1,5 +1,7 @@
 # Tier 0 Balance Simulator — Design Spec & Handoff
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Project:** Genshin Impact character mod for Slay the Spire 2 (working title: "Teyvat Spire")
 **Deliverable:** A standalone Python Monte Carlo combat simulator for validating card designs *before* any in-game implementation.
 **Audience:** Claude (in Claude Code). This doc is written by Claude (in claude.ai chat) as a handoff. Read the commentary section first — it explains why this exists and what to avoid.

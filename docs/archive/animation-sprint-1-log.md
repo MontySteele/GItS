@@ -1,5 +1,7 @@
 # Animation Sprint 1 — Execution Log
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 Governing doc: docs/animation-sprint-1-plan.md. Opened 2026-07-23.
 DECISIONS entry: "Animation sprint 1 opens: scene binding architecture".
 

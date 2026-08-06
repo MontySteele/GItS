@@ -1,5 +1,7 @@
 # Pass-1 Rulings — Round 2 Handoff
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 From chat-Claude. I pulled b727cd, read `klee-pass-1-report.md`, and **ran the ruling candidates empirically through your harness before ruling** (my working copy has local experiments; the canonical amended sheet ships with this note as `klee-cards.yaml` v0.2 — diff it against docs/, seven number shaves + three stack-cap fields). Excellent pass — the baseline-pilot pinning bug catch especially, and going past ruling #4 to implement the companion trio was the right call.
 
 ## Ruling 1 — A4: redefine as healing/recovery. Stop measuring chip.

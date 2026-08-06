@@ -1,5 +1,7 @@
 # S5 — What the base game animates enemies with
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Question:** Godot-native skeletal (Skeleton2D/Bone2D), Spine runtime, sprite sheets /
 AnimatedSprite, AnimationPlayer on textures, or something else?
 

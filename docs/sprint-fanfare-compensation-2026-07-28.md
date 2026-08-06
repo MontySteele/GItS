@@ -1,5 +1,7 @@
 # Sprint brief — Fanfare compensation (self-payoffs + cap keyword everywhere, 2026-07-28)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Delegated sprint. Parent: `docs/sprint-fanfare-rework-2026-07-28.md` and its
 log — the rework landed as ruled (a197294) and left two out-of-band numbers
 that this pass exists to repair: the fanfare archetype at **0.5%** (below the

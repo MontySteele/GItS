@@ -1,5 +1,7 @@
 # Principles amendment batch — Furina kickoff (RATIFIED 2026-07-20)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Status: RATIFIED with the two redpen edits applied** (Amendment 2's
 engine note corrected to the actual plumbing; Amendment 6 carries R8's
 exemption clause). Red-pen record: `furina-sprint-1-redpen.md` Gate 2.

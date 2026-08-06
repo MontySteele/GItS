@@ -1,5 +1,16 @@
 # Surplus Week — landing manifest
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
+> ## RETIRED AS A REGISTER 2026-08-06 — status lives in the queue now
+>
+> As of 2026-08-06 (docs diet, Track Z / Z-3) this manifest is **the landing
+> record of surplus week**, not a live open-item register. Nothing was deleted
+> or reworded. §4's "Open [USER] items", the Last Call addendum and the Second
+> Wind batch's one-liners are all reconciled in `docs/registry/user-queue.md`
+> — §1 (`Q4` came from here), §5, §7 and §8 — and where the two disagree the
+> queue is the later reconciliation.
+
 **Status:** INDEX. This file is a pointer table, not a finding. It says what
 landed, where it lives, and what is still owed. It resolves nothing, grades
 nothing, and carries zero design authority.
@@ -95,7 +106,7 @@ the stream's paperwork, not the train's.
 
 ## 4. Open [USER] items
 
-> **QUEUE POINTER, added 2026-08-06 by the housekeeping sweep (Track X).** The single source of truth for what is open and for whom is now **`docs/registry/user-queue.md`**. This section keeps its full text and stays the place the detail lives; the queue file is the index that says which items are still open, which were discharged and by which ruling. Where the two disagree about a *status*, the queue file is the later reconciliation. Identifier collisions (`G1`, `D5`, `C1`, `P1`, `S4`, `X<n>`) resolve at `docs/registry/identifiers.md`.
+> **QUEUE POINTER** (Track X, 2026-08-06; compressed by Track Z, Z-6). Status for everything below lives in `docs/registry/user-queue.md`; short codes resolve at `docs/registry/identifiers.md`. Full rule: `docs/registry/identifiers.md` §16.
 
 
 Nothing in this section is scheduled. Each is a decision waiting on the table.

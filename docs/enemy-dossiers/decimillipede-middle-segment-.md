@@ -1,5 +1,7 @@
 # Decimillipede (Middle Segment) — behavior dossier
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `DecimillipedeSegmentMiddle`
 - **Kind:** elite
 - **Act:** Act 2 (`Hive`, act index 1)

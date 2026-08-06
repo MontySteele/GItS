@@ -1,5 +1,7 @@
 # Furina Salon v2 + energy rebalance — pass plan (2026-07-23)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 USER DIRECTIVE (2026-07-23, verbatim intent): the flat 4-damage member tick
 "ain't it". Salon members should (a) do something UNIQUE while holding an
 active slot, (b) be globally buffed by Fanfare "similar to Focus scaling on

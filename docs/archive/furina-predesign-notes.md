@@ -1,5 +1,7 @@
 # Furina — Pre-Design Notes (+ Pass-3 Ratification Errata)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 ## Part 1 — ERRATA to pass-3 ratification (for Claude Code, before Tier 0.5 M5)
 
 User review caught an ecosystem mismatch the sim cannot see (it validates internal consistency; base-game *pricing* lives outside it): base StS2's only reliable stun is an act-3 Ancient reward at 3 energy + Exhaust, and looping it is a known degenerate win condition. Our non-boss Frozen was a repeatable intent-skip at ~2 energy of common companion cards — an order of magnitude under the game's own stun pricing, and it means reaction's elite/act winrates were partly control-carried by supports ("supports freeze it while Klee does stuff" = enabler-not-carry violated on the control axis).

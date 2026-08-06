@@ -1,5 +1,7 @@
 # Silent Anchor — sprint log, 2026-07-27
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Executor: Opus. Plan: `docs/silent-anchor-sprint-plan.md`. Design:
 `docs/silent-anchor-kickoff-v1.md`. Commits `e6b57dc` (A), `18e24f3`
 (B + C-1/2/3), `8bf6435` (C-7 + D).

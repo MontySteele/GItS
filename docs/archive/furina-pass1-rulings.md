@@ -1,5 +1,7 @@
 # Furina Sheet Pass 1 — Rulings (chat → Code)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. Independently verified: 220 green locally; sheet at
 76 cards; healing law (2 heals, both rare) and off-element guardrail
 (zero non-hydro applications) confirmed at source. Rulings on asks 1–7;

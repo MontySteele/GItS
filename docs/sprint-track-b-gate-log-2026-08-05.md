@@ -1,5 +1,7 @@
 # Sprint log — the Track B validation gate, seven items (2026-08-04 late / 08-05)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 The signed package this pass executes, verbatim:
 `docs/track-b-validation-gate-countersign-2026-08-04.md`. Rulings:
 `tier0/DECISIONS.md` **R99** (items 1–4) and **R100** (items 5–7). Worktree G4.

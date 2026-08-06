@@ -1,5 +1,7 @@
 # Soul Fysh
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `SoulFysh` (`MonsterModel`)
 - **Kind:** boss (sole monster of the `SoulFyshBoss` encounter)
 - **Act:** Act 1 — Underdocks (act index 0, the non-default Act 1 branch; second in the act's boss discovery order, behind Waterfall Giant and ahead of Lagavulin Matriarch)

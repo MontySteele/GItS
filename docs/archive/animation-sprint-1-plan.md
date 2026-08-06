@@ -1,5 +1,7 @@
 # Animation — Sprint 1 Plan ("Bring Them to Life")
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 > Verbatim record of the governing sprint doc from the 2026-07-23 planning
 > discussion (house rule: no chat-side-only artifacts). Execution log:
 > docs/animation-sprint-1-log.md.

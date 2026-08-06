@@ -1,5 +1,7 @@
 # Sprint brief — the art gap and the A7 port (pre-playtest close-out, 2026-07-29)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Delegated sprint. Parent: the 2026-07-29 pool audit (clean verdict; this
 brief is its two action items). Goal: after this sprint the pool is
 playtest-ready — every card has art, and every card on the sheet exists in

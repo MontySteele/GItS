@@ -1,5 +1,7 @@
 # Eye with Teeth — behavior dossier
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `EyeWithTeeth`
 - **Kind:** normal (non-elite, non-boss); in practice a **summoned minion**, never a headline body
 - **Act:** Act 1 (`Overgrowth`, act index 0)

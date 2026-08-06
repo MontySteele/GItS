@@ -1,5 +1,7 @@
 # C-Milestones — Klee In-Game Build Spec (Boots → Playtest Slice)
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Audience:** Claude (in Claude Code), running ON THE USER'S MACHINE with access rights to triage and debug setup issues directly. That changes the rules from the sim work: you're touching a real Steam install and real save data now. Read §0 before running anything.
 
 ---

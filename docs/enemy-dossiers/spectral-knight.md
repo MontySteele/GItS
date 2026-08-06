@@ -1,5 +1,7 @@
 # Spectral Knight
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `SpectralKnight` (`MonsterModel`, sealed)
 - **Kind:** elite — one of three bodies in the `KnightsElite` encounter
 - **Act:** Act 3 (Glory; act index 2). Appears nowhere else — no subclass, no event variant, no second encounter references it.

@@ -1,5 +1,17 @@
 # Prepared landing slots — AWAITING [USER], 2026-08-06
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
+> **KEPT LIVING BY THE DOCS DIET, 2026-08-06 (Track Z / Z-3), and why.** Slots
+> **4, 6 and 7** are still AWAITING, and each one holds its landing text
+> pre-drafted *in every form the reply can take*. That text is the whole point
+> of the file: it is what makes a one-word reply landable. Moving it into the
+> queue rows would either bloat the queue past the vacation test or force the
+> reply to wait on a re-draft, so the diet kept the file at this path and
+> LIVING, and the queue rows (`Q7`, `Q9`, `Q10`) point at the slot by number.
+> **The queue says what is being asked; this file says what gets pasted where.**
+> Landed slots stay in place, struck rather than deleted, per R101b.
+
 **Status: NOTHING HERE IS EXECUTED, and nothing here is a decision.** Opened by
 Track W of the "Strike the Set" batch against [USER]'s replies of 2026-08-06 to
 the Second Wind open one-liners
@@ -34,7 +46,7 @@ options anticipate, the drafts are void and the item goes back to [USER].
 
 ---
 
-> **QUEUE POINTER, added 2026-08-06 by the housekeeping sweep (Track X).** The single source of truth for what is open and for whom is now **`docs/registry/user-queue.md`**. This section keeps its full text and stays the place the detail lives; the queue file is the index that says which items are still open, which were discharged and by which ruling. Where the two disagree about a *status*, the queue file is the later reconciliation. Identifier collisions (`G1`, `D5`, `C1`, `P1`, `S4`, `X<n>`) resolve at `docs/registry/identifiers.md`.
+> **QUEUE POINTER** (Track X, 2026-08-06; compressed by Track Z, Z-6). Status for everything below lives in `docs/registry/user-queue.md`; short codes resolve at `docs/registry/identifiers.md`. Full rule: `docs/registry/identifiers.md` §16.
 
 ## Slot 1 — F6: is the 2026-08-01/02 session the G5 fork's trigger?
 

@@ -1,5 +1,7 @@
 # Docket — companion pricing
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Status:** DOCKET. Candidates only. **Nothing in this file is ratified.**
 Zero design authority. Opened 2026-08-06 (Track R) against the sitting of
 2026-08-06 (`docs/sitting-record-predraft-2026-08-06.md`); ruling R111.

@@ -1,5 +1,7 @@
 # Two-Tailed Rat — behavior dossier
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 - **Class:** `TwoTailedRat`
 - **Kind:** normal (non-elite, non-boss)
 - **Act:** Act 1 (`Underdocks`, act index 0 — the alternate/unlockable Act 1, same index as `Overgrowth`)

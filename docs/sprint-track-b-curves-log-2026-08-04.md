@@ -1,5 +1,7 @@
 # Sprint log — Track B: the two feeds and the first curves (2026-08-04)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 Session: the hand-back note of 2026-08-04 evening
 (`docs/handback-note-2026-08-04.md`), executed in order. Worktree G4.
 Item 1 (the clean N=3) is recorded as **R98** and in

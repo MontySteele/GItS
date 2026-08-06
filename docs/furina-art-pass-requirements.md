@@ -1,5 +1,7 @@
 # Furina Art Pass Requirements
 
+> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-23
 
 **Status:** implementation handoff; art work is intentionally separate from the Furina codegen pass

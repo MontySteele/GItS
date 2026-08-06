@@ -1,5 +1,7 @@
 # Design brief — the `unheard_confession` rework (2026-07-29)
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Status: BRIEF. Nothing here is ruled and nothing here is a recommendation.**
 Options are laid out so they can be struck through with a pen rather than
 argued with. No number below is PROPOSED — the numbers come after a direction

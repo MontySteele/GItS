@@ -1,5 +1,7 @@
 # Punch Off crash (seed `8B97LMCL2F`) — static reading
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-08-05 · **Track F2, findings-only.** No game process was launched
 for this memo and nothing was written to the game install or the Godot user
 directory. Every check below is an offline read and is re-runnable.

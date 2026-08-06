@@ -1,5 +1,7 @@
 # C3 codegen — gap list
 
+> **Lifecycle: ARCHIVED** — superseded; kept verbatim as a record and never updated. Status index: `docs/registry/identifiers.md` §15.
+
 **Date:** 2026-07-20. **Status:** 21 of 75 sheet cards generated, 3 hand-written,
 **51 blocked**. Produced for the overnight queue's "C3 codegen for the remaining
 ~44 cards — generation only, gap-list what needs hands".

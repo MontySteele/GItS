@@ -1,5 +1,19 @@
 # Open playtest items, all sprints
 
+> **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
+
+> ## RETIRED AS A REGISTER 2026-08-06 — the open rows moved out
+>
+> This file stopped being the cross-sprint register on 2026-07-26 (see the
+> banner below) and stopped being *any* register on 2026-08-06 (docs diet,
+> Track Z / Z-3). Nothing was deleted or reworded. Its still-open rows now
+> live in one of two places: the table agenda in
+> `docs/registry/user-queue.md` §7 and its desk-queue rulings in that file's
+> §2 and §10; the engineering items — the Ancient card's unmeasurable 3
+> Charge/turn and the residual Orobas divergence — in
+> `docs/dockets/engineering-backlog.md` (`EB-30`, `EB-31`). The full text and
+> the reasoning stay here, which is why the queue points back at this path.
+
 > ## SUPERSEDED AS THE CROSS-SPRINT REGISTER — see `docs/backlog-2026-07-29.md`
 >
 > This file stopped being the owed-item register on 2026-07-26. The live
@@ -173,7 +187,7 @@ So the playtest is read against the right baseline.
 
 ## 6. NOT playtest items — the desk queue
 
-> **QUEUE POINTER, added 2026-08-06 by the housekeeping sweep (Track X).** The single source of truth for what is open and for whom is now **`docs/registry/user-queue.md`**. This section keeps its full text and stays the place the detail lives; the queue file is the index that says which items are still open, which were discharged and by which ruling. Where the two disagree about a *status*, the queue file is the later reconciliation. Identifier collisions (`G1`, `D5`, `C1`, `P1`, `S4`, `X<n>`) resolve at `docs/registry/identifiers.md`.
+> **QUEUE POINTER** (Track X, 2026-08-06; compressed by Track Z, Z-6). Status for everything below lives in `docs/registry/user-queue.md`; short codes resolve at `docs/registry/identifiers.md`. Full rule: `docs/registry/identifiers.md` §16.
 
 
 Listed so they stop being smuggled into playtest agendas. None of these needs
