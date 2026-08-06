@@ -181,6 +181,14 @@ compared. Pinned by a test.
 
 ## The reader — `understudy/trace_replay.py`, and a name collision
 
+> **ANSWERED 2026-08-06 (Class-P, R119 / P-B item C-2 — dated annotation; the
+> frozen prose below is untouched).** The module the acceptance clause meant is
+> **`understudy/trace_replay.py`**, confirmed from this section's own stated
+> evidence (*"reconstruction only, no rules retyped"* describes the recording
+> comparator, not the engine driver). The red-pen flag below asked for
+> authority, not evidence; the Class-P charter supplies it. Queue row: 10.5,
+> struck. Ledger: `docs/registry/p-ledger.md`.
+
 **It did not exist, and then it did, and it was somebody else's.** The P1.5
 spec's acceptance clause says "`understudy/replay.py` can consume the new
 fields (extend it minimally if needed)". There was no such file at the commit
