@@ -2,13 +2,23 @@
 
 > **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained. Status index: `docs/registry/identifiers.md` §15.
 
-> **DRAFT — FOR [USER] COUNTERSIGN. NOT RUN.** Nothing below is a measurement.
+> **COUNTERSIGNED 2026-08-06 (Q11 / R118) — REGISTERED, STILL NOT RUN.**
+> [USER], verbatim: *"Countersign."* The registration converts from draft to
+> **registered work**: it runs under its own terms below — two tells,
+> negative-control arm, nine confounders, cost ceiling, stop-and-re-register
+> tripwire. The run itself is Track M's and, per the wave-8 sequencing note,
+> happens after the v6 code lands. `S4-G15` stays open until the probe
+> reports; the table check survives as fallback. The draft banner below is
+> struck, not deleted (R101b).
+
+> ~~**DRAFT — FOR [USER] COUNTERSIGN. NOT RUN.**~~ Nothing below is a measurement.
 > No game was launched, no run was taken, no number in this file was read off
 > any wire. This document exists so that the question, the method, the
 > confounder list and the licensing limits are fixed **before** any reading is
 > taken — the same discipline probes (a) and (b) were run under, and the same
-> form probe (d) was registered in. The probe is neither scheduled nor
-> resourced; countersign converts it into work, and until then it is paper.
+> form probe (d) was registered in. ~~The probe is neither scheduled nor
+> resourced; countersign converts it into work, and until then it is paper.~~
+> *(Countersigned 2026-08-06 — see the banner above.)*
 
 Date drafted: 2026-08-06. Cold Reading, Track AC (`AC-4`). Input: the standing
 open question at `klee-mod/DECISIONS.md`, "Corpse detonation — OPEN parity

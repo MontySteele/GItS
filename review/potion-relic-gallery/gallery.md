@@ -8,7 +8,13 @@
 
 # S8 Teyvat Gallery — Curation Pass (Fable touchpoint 2/4, dispatch 2) · 2026-08-05
 
-42 items (9 potions + 33 relics), 126 draft mappings → **79 kept, 47 cut** (14 canon errors, 32 cross-gallery redundancies, 1 reserved-naming collision). Hard gate: **0 set-shaped mappings found** — no draft named an artifact set, set bonus, or piece count. **8 items flagged ⚑** for a [USER] ruling.
+> **CORRECTED 2026-08-06 (wave 8 / R118, [USER] verbatim: *"correct, correct,
+> repoint"* — §3 item 2).** The line below read "42 items (9 potions + 33
+> relics)" — a miscount the drafting preamble itself flagged. The gallery
+> holds **51 items (9 potions + 42 relics)**, matching the drafting header
+> above and the checklist below. Wrong values struck, never deleted (R101b).
+
+~~42 items (9 potions + 33 relics)~~ **51 items (9 potions + 42 relics)**, 126 draft mappings → **79 kept, 47 cut** (14 canon errors, 32 cross-gallery redundancies, 1 reserved-naming collision). Hard gate: **0 set-shaped mappings found** — no draft named an artifact set, set bonus, or piece count. **8 items flagged ⚑** for a [USER] ruling.
 
 Canon claims were verified against the Genshin wikis (Fandom / game8 / HoYoWiki / Honey Hunter). Seven dish-effect claims proved fabricated: no dish named "Jueyun Guoba" exists; Jueyun Chili Chicken is a CRIT-Rate dish, not flat ATK; Flaming Red Bolognese, Grilled Tiger Fish, Chicken-Mushroom Skewer and Tricolor Dango are HP-restoring dishes; Mora Meat and Flash-Fried Filet are revive dishes; Berry & Mint Burst is a CRIT drink. Two material drop-sources were wrong (Ley Line Sprout = Abyss Mages, not Ruin machines; Dandelion Gladiator line = Cecilia Garden domain, not Andrius), and one lore identity (Madame Ping is not Cloud Retainer's mortal guise). All cut where load-bearing. Verified-good claims of note: Sweet Madame's 20% Max-HP figure, Chili-Mince Cornbread Buns' Shield Strength line, Fisherman's Toast DEF, Poissonchant Pie, Konda Cuisine, Fontainian Foie Gras, both Serenitea-Pot beds, A Huge Bag of Mora.
 

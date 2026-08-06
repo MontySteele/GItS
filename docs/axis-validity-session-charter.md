@@ -240,5 +240,35 @@ targets) · **B-G1** (per-axis disposition).
 > schema. **B-G1 remains deferred**, and §3's P1 now lives there: per R90/1b
 > it was *aimed at the wrong instrument; withdrawn and re-registered, not
 > failed.*
+
+> **[USER] RULING 2026-08-06 — `B-G1` is NARROWED to the Fanfare axis; the other
+> six axes close permanently.** *(Q7, verbatim reply "Yes."; slot-4 YES form of
+> `docs/awaiting-user-slots-2026-08-06.md`, landed verbatim per R118.)*
+>
+> Six of the seven axis scorecards are **CLOSED as reportable-only,
+> permanently**. `DEC-D3` clause 3's *"reportable, not load-bearing"* stops
+> being a temporary posture awaiting disposition and becomes the **final**
+> disposition for those six: their numbers may be published, cited and read as
+> description, and they may never be used as an acceptance target, a gate, or a
+> justification for moving a value. No number is retired, deleted or restated by
+> this closure — the instrument keeps producing them and readers keep reading
+> them; what ends is the expectation that a future sitting will promote them.
+>
+> **`B-G1` now asks exactly one question:** the disposition of the **Fanfare
+> axis** — the axis carrying the Fanfare P1 that `R90/1b` withdrew from Track A
+> and re-registered here. That question stays OPEN and is unchanged in
+> substance; only its scope shrinks.
+>
+> **The `R107/F1` fence re-points to the narrowed form.** Backlog items 1–3 and
+> the fanfare STOP were fenced behind `B-G1` as a seven-axis gate; they are now
+> fenced behind `B-G1` as the Fanfare-axis gate. Nothing is unfenced by this
+> ruling — the condition is the same condition, stated at the width that
+> actually binds.
+>
+> **What this does NOT do.** It does not grade the Fanfare axis, does not
+> ratify any axis band (the charter's standing non-goal), does not move a
+> balance value, and does not discharge `S4-G5`. It does not touch `A-G1`,
+> already discharged, or `AV-G2`, already countersigned.
+
 Discharged in session: vocabulary review (validated against ~~402~~ **439** canon
 cards); the Zhongli fork (held, per §6.4, silence = stands).

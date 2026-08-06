@@ -33,6 +33,13 @@ generated for [USER]"). Three of the six were answered and executed elsewhere.
 > `AB-s2` (the curse's typing). Nothing in slots 4, 6 or 7 is executed and
 > nothing in them is a decision.
 
+> **STATUS UPDATE 2026-08-06 (wave 8, Track P / R118).** Slots **4, 6 and 7
+> are all ANSWERED and LANDED** — slot 4 YES (Q7), slot 6 YES (Q9, paper half;
+> the mod change is Track V's), slot 7 NEITHER (Q10, with the verbatim
+> ecosystem rationale attached). Each is marked in place with the reply
+> verbatim and its landing sites; unselected forms are void, struck not
+> deleted. **No slot in this file is still AWAITING.**
+
 The purpose of this file is narrow: each open item has its landing text written
 out *in advance*, in every form its answer can take, so that a **one-word
 reply** lets a future track paste the right one into the right file and delete
@@ -252,7 +259,20 @@ not taken here — flag it if you want it swept.
 
 ## Slot 4 — `S4-G5` / `B-G1`: narrow the axis gate to the Fanfare axis?
 
-**AWAITING [USER]. One word: YES or NO.**
+> **ANSWERED AND LANDED 2026-08-06 (wave 8, Track P / R118) — reply: YES.**
+> Verbatim (Q7, dispatch `docs/dispatch-2026-08-06b-eleven-replies.md` §1):
+> *"Yes."* Form **4-YES** below was landed verbatim, dated 2026-08-06, at all
+> three of its named sites: `tier0/DECISIONS.md` R90 (annotation beneath
+> clause 1b), `docs/axis-validity-session-charter.md` §7 (beneath the `A-G1`
+> discharge note), and `docs/registry/user-queue.md` §2 row `S4-G5`. The 4-NO
+> form is **void**. Struck, not deleted (R101b).
+>
+> Recorded per the dispatch's own wording: **unfenced by this stroke are
+> Furina backlog items 1–3 and the fanfare STOP (`S4-G7`)** — unfenced, that
+> is, from the six closed axes; they remain fenced behind `B-G1` in its
+> narrowed, Fanfare-axis form, exactly as the landed text states.
+
+~~**AWAITING [USER]. One word: YES or NO.**~~
 
 **The question, in plain language first.** The project built a seven-axis
 scorecard to grade characters. Six of those seven axes have never been used to
@@ -283,7 +303,7 @@ rewrite):**
    discharge note, where `B-G1` is recorded as deferred.
 3. `docs/registry/user-queue.md` §2, row `S4-G5` — status only.
 
-### 4-YES — draft, lands only if the reply is YES
+### 4-YES — ~~draft, lands only if the reply is YES~~ **LANDED VERBATIM 2026-08-06**
 
 > **[USER] RULING <DATE> — `B-G1` is NARROWED to the Fanfare axis; the other
 > six axes close permanently.**
@@ -313,7 +333,7 @@ rewrite):**
 > balance value, and does not discharge `S4-G5`. It does not touch `A-G1`,
 > already discharged, or `AV-G2`, already countersigned.
 
-### 4-NO — draft, lands only if the reply is NO
+### 4-NO — ~~draft, lands only if the reply is NO~~ **VOID 2026-08-06: the reply was YES**
 
 > **[USER] RULING <DATE> — `B-G1` stays SEVEN-AXIS; no axis closes.**
 >
@@ -435,7 +455,20 @@ value of the gate.
 
 ## Slot 6 — `AB-s1`: does C#'s Encore Performance stop copying kit cards?
 
-**AWAITING [USER]. One word: YES or NO.**
+> **ANSWERED AND LANDED (paper half) 2026-08-06 (wave 8, Track P / R118) —
+> reply: YES.** Verbatim (Q9, dispatch
+> `docs/dispatch-2026-08-06b-eleven-replies.md` §1): *"Yes."* Form **6-YES**
+> below was landed verbatim, dated 2026-08-06, at its named sites:
+> `tier0/DECISIONS.md` R114 (annotation beneath the FLAG-2 section),
+> `review/parity-sweep/noncard-triage-memo.md` NC-12 (disposition line), and
+> `docs/registry/user-queue.md` §1. The 6-NO form is **void**. Struck, not
+> deleted (R101b).
+>
+> **The mod code change itself is Track V's this wave** — the paper records
+> the ruling; the C# copy-pool exclusion ships with the errata batch that
+> touches C#, with parity vectors updated, exactly as the landed form states.
+
+~~**AWAITING [USER]. One word: YES or NO.**~~
 
 **The question, in plain language first.** Furina's Encore Performance copies a
 card. The card sheet says it should never copy a *kit* card — the big signature
@@ -465,7 +498,7 @@ tier0 test flips.
    line, on the pattern the S13 ledger's entries use.
 3. `docs/registry/user-queue.md` §1 — status only.
 
-### 6-YES — draft, lands only if the reply is YES
+### 6-YES — ~~draft, lands only if the reply is YES~~ **LANDED VERBATIM 2026-08-06**
 
 > **[USER] RULING \<DATE\> — `AB-s1` APPROVED: the mod's copy pool excludes kit
 > cards, matching the sheet and the sim.**
@@ -480,7 +513,7 @@ tier0 test flips.
 > vectors updated; it does not ride the paper. No sim behaviour moves, because
 > the sim was already correct.
 
-### 6-NO — draft, lands only if the reply is NO
+### 6-NO — ~~draft, lands only if the reply is NO~~ **VOID 2026-08-06: the reply was YES**
 
 > **[USER] RULING \<DATE\> — `AB-s1` DECLINED: the mod's copy pool keeps kit
 > cards in it, and the SHEET is what changes.**
@@ -500,8 +533,25 @@ tier0 test flips.
 
 ## Slot 7 — `AB-s2`: how does the never-flushed curse stop jamming the hand?
 
-**AWAITING [USER]. One word: ALPHA or BETA.** (Or NEITHER, which is also an
-answer and is recorded as one.)
+> **ANSWERED AND LANDED 2026-08-06 (wave 8, Track P / R118) — reply: NEITHER.**
+> Verbatim (Q10, dispatch `docs/dispatch-2026-08-06b-eleven-replies.md` §1):
+> *"Neither - leave it alone."* Ecosystem rationale, verbatim and attached to
+> the landed form as the reason: *"I recognize that card (it's from an event) -
+> it's not possible to duplicate in normal play, so this whole concern is a
+> false positive."* Form **7-NEITHER** below was landed verbatim, dated
+> 2026-08-06, at its docs-side sites: `tier0/DECISIONS.md` R114 (annotation
+> beneath the FLAG-4 section), `review/redteam/exploit-ledger.md` X14 (leg (a)
+> disposition line, with the false-positive annotation and the
+> BETA-declined-not-deferred clause), and `docs/registry/user-queue.md` §1.
+> The 7-ALPHA and 7-BETA forms are **void**. Struck, not deleted (R101b).
+>
+> Landing site 3 (the X14 pin's docstring in
+> `tier0/tests/test_s13_exploit_pins.py`) and the surface-only verification of
+> X14's acquisition vector are **Track V's** — the paper track does not touch
+> the pin test or the JSON corpus.
+
+~~**AWAITING [USER]. One word: ALPHA or BETA.** (Or NEITHER, which is also an
+answer and is recorded as one.)~~
 
 **The question, in plain language first.** `curse_poor_sleep` is marked two
 ways at once: it is a **status** card, so it can never be played, and it is
@@ -520,7 +570,7 @@ unflushable by their own type.
 
 **Two options, and they differ in width rather than in effect on this card.**
 
-### 7-ALPHA — narrow: drop `retain` from the curse
+### 7-ALPHA — narrow: drop `retain` from the curse — **VOID 2026-08-06: the reply was NEITHER**
 
 > **[USER] RULING \<DATE\> — `AB-s2` = (α): `curse_poor_sleep` loses `retain`.**
 >
@@ -533,7 +583,7 @@ unflushable by their own type.
 > and will need its own repair. That is the cost of the narrow option, and it
 > is accepted knowingly.
 
-### 7-BETA — broad: an engine-wide status-flush law
+### 7-BETA — broad: an engine-wide status-flush law — **VOID 2026-08-06: the reply was NEITHER (declined, not deferred)**
 
 > **[USER] RULING \<DATE\> — `AB-s2` = (β): status-typed cards ALWAYS flush at
 > end of turn, engine-wide.**
@@ -552,7 +602,7 @@ unflushable by their own type.
 > two markings and moves no card's own type or retain flag except where they
 > co-occur.
 
-### 7-NEITHER — draft, lands only if the reply declines both
+### 7-NEITHER — ~~draft, lands only if the reply declines both~~ **LANDED VERBATIM 2026-08-06**
 
 > **[USER] RULING \<DATE\> — `AB-s2` DECLINED: the typing stands.**
 >
