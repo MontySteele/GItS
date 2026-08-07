@@ -188,11 +188,19 @@ public sealed class MasqueRedDeathPower : PowerModel, ILocalizationProvider
             choiceContext, Owner, Amount, applier: Owner, cardSource: null);
     }
 
-    public override async Task BeforeSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
+    /// <summary>
+    /// NOT A BROADCAST OVERRIDE ANY MORE (EB-19/races-a). Driven by
+    /// TurnEndSequencer, which fires the four end-of-turn tenants that share
+    /// the player's Block and the enemy reaction board in the sim's fixed
+    /// order. The Bond is paid FIRST, strictly before the Kurage pulse's
+    /// Block grant: tier0 `effects.player_turn_end_triggers` deducts
+    /// MASQUE_BOND_BLOCK at the top of the function and only reaches
+    /// `kurage_summon` afterwards, so on a Kokomi+Arlecchino board the Bond
+    /// eats what the turn actually produced rather than the jellyfish's
+    /// mending -- a 5-Block-per-turn swing when the two race.
+    /// </summary>
+    public async Task PayBondOfLife()
     {
-        if (side != CombatSide.Player) return;
         if (Owner == null || Owner.Block <= 0) return;
         var paid = System.Math.Min(
             Owner.Block, CompanionConstants.MasqueBondBlock);

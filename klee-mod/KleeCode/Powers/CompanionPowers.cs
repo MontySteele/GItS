@@ -269,11 +269,14 @@ public sealed class OzSummonPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override async Task BeforeSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
+    /// <summary>
+    /// NOT A BROADCAST OVERRIDE ANY MORE (EB-19/races-c). The ELECTRO leg of
+    /// the three end-of-turn volleys, fired SECOND by TurnEndSequencer --
+    /// tier0 `effects.player_turn_end_triggers` orders them Pyro -> Electro ->
+    /// Hydro.
+    /// </summary>
+    public async Task FireVolley(PlayerChoiceContext choiceContext)
     {
-        if (side != CombatSide.Player) return;
         if (Owner.Player == null) return;
 
         var candidates = CombatState.HittableEnemies.ToList();

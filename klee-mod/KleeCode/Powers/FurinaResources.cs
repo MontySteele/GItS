@@ -950,6 +950,35 @@ public sealed class FurinaResourceHooks : AbstractModel
         }
     }
 
+    /// <summary>
+    /// The this-turn Spotlight windows close here (EB-19/races-b).
+    ///
+    /// AfterSideTurnEnd is StS2 site M, which the sim names as the site of
+    /// `powers.on_turn_end` -- the function that pops powers.EXPIRING, i.e.
+    /// `spotlight_mult_bonus_turn`. SpotlightSpendBoostResource is that
+    /// power's C# twin, so it expires here rather than in the turn-start
+    /// broadcast that mints it. The two POWER-shaped members of the same
+    /// tuple (SpotlightMultBonusTurnPower, SpotlightFlatDamageTurnPower)
+    /// already self-expire in this broadcast; this puts the resource-shaped
+    /// third member alongside them.
+    ///
+    /// No co-tenant of AfterSideTurnEnd reads the Spotlight multiplier: it is
+    /// a printed-value modifier for CARD plays, and no card is played from a
+    /// turn-end broadcast.
+    /// </summary>
+    public override Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return Task.CompletedTask;
+        foreach (var creature in participants)
+        {
+            if (!FurinaResources.IsFurina(creature)) continue;
+            SpotlightSystem.ClearSpendBoost(creature);
+        }
+        return Task.CompletedTask;
+    }
+
     public override async Task AfterDamageReceived(
         PlayerChoiceContext choiceContext, Creature target,
         DamageResult result, ValueProp props, Creature? dealer,
@@ -1123,10 +1152,44 @@ public sealed class EncorePerTurnPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override async Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
+    /// <summary>
+    /// STAGED INTO BeforeSideTurnStart, NOT AfterPlayerTurnStart. THIS IS THE
+    /// EB-2 FIX and it must not be tidied back.
+    ///
+    /// The race: SalonMemberPower's upkeep SPENDS Encore from
+    /// AfterPlayerTurnStart, and this power MINTS it. Two same-side co-tenants
+    /// of one broadcast have no guaranteed relative order, so the Salon either
+    /// ran on this turn's income or on last turn's leftovers depending on
+    /// listener iteration -- a nondeterministic tick rate that fixed-seed
+    /// parity cannot catch.
+    ///
+    /// The sim states which way it falls: `effects.player_turn_start_triggers`
+    /// places `encore_per_turn` ABOVE `salon_tick` (and above the whole
+    /// per-turn income group below it) so that the card's printed "at the
+    /// start of your turn" funds the SAME turn's member ticks. Pinned at the
+    /// site by tier0/tests/test_eb30m_ancients.py::
+    /// test_ancient_income_is_sourced_above_the_salon_upkeep, with the
+    /// behavioural half in test_the_stage_funds_the_same_turn_s_salon_ticks.
+    ///
+    /// BeforeSideTurnStart is the strictly earlier broadcast (see
+    /// TURN_START_BROADCAST_ORDER in
+    /// tier0/tests/test_reaction_phase_parity.py -- AfterSideTurnStart is the
+    /// LAST turn-start broadcast, not the first, so "earlier" is this one and
+    /// only this one). The same staging idiom CurtainCallHooks.ResetTurn and
+    /// EtherealSpotlightRelic already use, for the same reason.
+    ///
+    /// PRE-DRAW AND PRE-BLOCK-CLEAR is inert for this power: GainEncore prints
+    /// no Fanfare (Track A ruling -- Fanfare prints on the way DOWN), grants
+    /// no Block and reads no hand, so no BeforeSideTurnStart co-tenant sees a
+    /// resource it touches. FurinaResourceHooks' decay + delta-block settle in
+    /// this same broadcast is therefore unaffected either way.
+    /// </summary>
+    public override async Task BeforeSideTurnStart(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IReadOnlyList<Creature> participants, ICombatState combatState)
     {
-        if (player.Creature != Owner) return;
+        if (side != CombatSide.Player) return;
+        if (Owner?.Player == null) return;
         FurinaResources.GainEncore(Owner, (int)Amount);
         await FurinaResources.SyncMeters(choiceContext, Owner);
     }

@@ -328,8 +328,19 @@ def test_damage_modifiers_are_pure(rel, hook, body):
 # turn structure is strictly sequential -- so two same-side tenants that touch
 # one resource are a nondeterministic divergence FIXED-SEED PARITY CANNOT
 # CATCH: the C# can match the sim's order on every replayed seed and still
-# not guarantee it. All four filed races (EB-2, EB-19/races-a/b/c) are this
-# shape, and each was found by hand.
+# not guarantee it. Four races of this shape were filed and each was found by
+# hand; all four were closed on 2026-08-07 and their tenants have moved, which
+# is why no row below cites one any more.
+#
+# TWO FIX IDIOMS, and the second is new. Where the racing tenants can be
+# separated by BROADCAST, they are: the Ancient income powers moved to
+# BeforeSideTurnStart (strictly earlier than the Salon upkeep that spends what
+# they mint), and the Standing Ovation spend-boost's clear moved to
+# AfterSideTurnEnd (the sim's own expiry site). Where they cannot -- turn end
+# offers only two broadcasts and the four end-of-turn tenants needed four
+# positions -- one listener now DRIVES them in the sim's order instead:
+# TurnEndSequencer. A sequencer is the heavier idiom and should stay the
+# exception; prefer staging while staging can express the order.
 #
 # The structural catch is registration: the sweep below finds every override
 # of a turn broadcast, and each must hold a row here. A new tenant landing in
@@ -454,6 +465,24 @@ CO_TENANCY_LEDGER = {
             "here from AfterPlayerTurnStart; random discard only on a full "
             "retained hand -- the X14(b) softlock safety). No co-tenant "
             "touches the hand",
+        ("Powers/FurinaResources.cs", "EncorePerTurnPower"):
+            "All the World's a Stage Encore mint. STAGED HERE from "
+            "AfterPlayerTurnStart to settle the Salon-income race: the upkeep "
+            "SPENDS Encore from AfterPlayerTurnStart, and the sim sources the "
+            "income above it (effects.player_turn_start_triggers, pinned by "
+            "tier0/tests/test_eb30m_ancients.py::"
+            "test_ancient_income_is_sourced_above_the_salon_upkeep plus the "
+            "behavioural half test_the_stage_funds_the_same_turn_s_salon_"
+            "ticks). Pre-draw and pre-block-clear are inert for it: GainEncore "
+            "prints no Fanfare, grants no Block and reads no hand, so it "
+            "shares nothing with the decay/delta-block settle that also lives "
+            "in this broadcast",
+        ("Powers/KokomiResources.cs", "ChargePerTurnPower"):
+            "Princess of Watatsumi Charge mint. Staged here for the same "
+            "reason and by the same pin: the sim reads charge_per_turn above "
+            "the upkeep and above the whole per-turn income group, and every "
+            "consumer of the meter (KokomiResourceHooks' kit-grant check) is "
+            "an AfterPlayerTurnStart tenant. Moves a meter only",
     },
     "AfterSideTurnStart": {
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
@@ -477,23 +506,27 @@ CO_TENANCY_LEDGER = {
         ("Powers/FontainePowers.cs", "MasqueRedDeathPower"):
             "per-turn Strength mint",
         ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
-            "SpotlightSystem.ResetTurn + pending-draw flush. RACE "
-            "EB-19/races-b: clears the Standing Ovation spend-boost the "
-            "Salon upkeep mints in this same broadcast",
-        ("Powers/FurinaResources.cs", "EncorePerTurnPower"):
-            "All the World's a Stage Encore mint. RACE EB-2: the Salon "
-            "upkeep spends Encore in this same broadcast",
+            "SpotlightSystem.ResetTurn (the MOVED and PLAYS windows only -- "
+            "the sim zeroes those at the top of the player turn) + "
+            "pending-draw flush + fanfare-delta settle. The spend-boost clear "
+            "that used to sit in ResetTurn has moved to this class's "
+            "AfterSideTurnEnd override, so nothing here reads or writes a "
+            "resource the Salon upkeep touches",
         ("Powers/KokomiResources.cs", "KokomiResourceHooks"):
-            "Kokomi kit-grant check: adds a card when charged",
-        ("Powers/KokomiResources.cs", "ChargePerTurnPower"):
-            "per-turn Charge mint",
+            "Kokomi kit-grant check: adds a card when charged. Its input, the "
+            "Charge meter, is minted a broadcast earlier (see "
+            "ChargePerTurnPower under BeforeSideTurnStart), so the grant "
+            "cannot see a half-paid bank",
         ("Powers/KuragePowers.cs", "PreventExhaustWardPower"):
             "resets the Vigil once-per-turn latch; consumed only from "
             "damage hooks, never by a co-tenant",
         ("Powers/SalonPowers.cs", "SalonMemberPower"):
             "Salon upkeep: spends Encore, ticks stage damage, mints the "
-            "spend-boost. RACE EB-2 + EB-19/races-b (the other half of "
-            "both)",
+            "Standing Ovation spend-boost. Both resources it touches are now "
+            "ordered against it by BROADCAST rather than by luck -- the "
+            "Encore income is minted in BeforeSideTurnStart and the "
+            "spend-boost is cleared in AfterSideTurnEnd, so the upkeep is the "
+            "only tenant of THIS broadcast that reads either",
         ("Powers/SparkKitPowers.cs", "SparkPerTurnPower"):
             "per-turn Spark mint",
         ("Powers/SpotlightSystem.cs", "SpotlightDiscountPower"):
@@ -504,28 +537,31 @@ CO_TENANCY_LEDGER = {
             "site)",
     },
     "BeforeSideTurnEnd": {
-        ("Powers/CompanionPowers.cs", "OzSummonPower"):
-            "Electro volley. RACE EB-19/races-c: unordered vs the sim's "
-            "fixed Pyro->Electro->Hydro (effects.py:2596-2658)",
         ("Powers/CompanionPowers.cs", "SolarIsotomaPower"):
             "duration tick-down of itself, player side",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):
             "kit-grant check, turn-end site; its body documents the "
             "models-after-powers broadcast order it leans on",
-        ("Powers/FontainePowers.cs", "MasqueRedDeathPower"):
-            "Bond-of-Life payment. RACE EB-19/races-a: vs the Kurage "
-            "pulse's Block grant (sim pays strictly first, "
-            "effects.py:2588)",
         ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
             "last-chance pending-draw flush, so an end-of-turn spend "
             "cannot strand into the next turn",
-        ("Powers/KitBurst.cs", "SparksNSplashPower"):
-            "Pyro volley. RACE EB-19/races-c",
         ("Powers/KokomiResources.cs", "KokomiResourceHooks"):
             "Kokomi kit-grant check, turn-end site",
-        ("Powers/KuragePowers.cs", "KurageSummonPower"):
-            "Hydro pulse: Block grant + volley. RACE EB-19/races-a + "
-            "EB-19/races-c (a tenant of both)",
+        ("Powers/TurnEndSequencer.cs", "TurnEndSequencer"):
+            "THE ONLY ORDERED TENANT, and the reason four powers no longer "
+            "override this broadcast at all. It drives, per player-side "
+            "creature and in this order: MasqueRedDeathPower.PayBondOfLife, "
+            "SparksNSplashPower.FireVolley (Pyro), OzSummonPower.FireVolley "
+            "(Electro), KurageSummonPower.FirePulse (Hydro + Block) -- the "
+            "top-to-bottom reading of tier0 effects.player_turn_end_triggers. "
+            "Two things depended on that order and neither could be expressed "
+            "by staging, because turn end has only two broadcasts and "
+            "AfterSideTurnEnd is already spoken for (WitchsFlamePower eats "
+            "what the volleys applied): the Bond consumes the turn's first 5 "
+            "Block while the Hydro pulse GRANTS Block, and the three volleys "
+            "both pick which reactions fire and draw in sequence from the "
+            "shared Rng.CombatTargets stream. See "
+            "test_the_turn_end_sequence_is_the_sims_order",
     },
     "AfterSideTurnEnd": {
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
@@ -546,6 +582,18 @@ CO_TENANCY_LEDGER = {
             "window",
         ("Powers/FrozenPower.cs", "FrozenPower"):
             "duration tick-down, enemy side",
+        ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
+            "closes the this-turn Spotlight windows: clears the Standing "
+            "Ovation spend-boost resource. AfterSideTurnEnd is StS2 site M, "
+            "which is where the sim's powers.on_turn_end pops powers.EXPIRING "
+            "(tier0/engine/powers.py:23, :156) -- and "
+            "SpotlightSpendBoostResource is the C# twin of "
+            "spotlight_mult_bonus_turn, one of that tuple's two members. It "
+            "used to be cleared from the turn-START broadcast whose Salon "
+            "upkeep mints it, which is the race this move closes. Its two "
+            "POWER-shaped siblings below expire in the same broadcast; no "
+            "co-tenant reads the Spotlight multiplier, which only modifies "
+            "printed values on CARD plays",
         ("Powers/KuragePowers.cs", "CeremonialGarmentPower"):
             "duration tick-down, player side",
         ("Powers/SpotlightSystem.cs", "SpotlightMultBonusTurnPower"):
@@ -643,6 +691,79 @@ def test_filed_race_citations_in_the_ledger_are_live():
                 assert f"`{row_id}`" in backlog, (
                     f"{key} cites {row_id}, which BACKLOG.md no longer "
                     "files")
+
+
+# --- the turn-end sequence, pinned ------------------------------------------
+
+# (call the sequencer makes, the sim line that puts it here)
+TURN_END_SEQUENCE = (
+    ("PayBondOfLife",
+     "effects.player_turn_end_triggers pays masque_red_death's Bond FIRST, "
+     "at the top of the function, so it eats the Block the turn produced "
+     "rather than the Kurage pulse's mending"),
+    ("SparksNSplashPower",
+     "sparks_n_splash, the Pyro volley, is the first of the three"),
+    ("OzSummonPower",
+     "oz_summon, the Electro volley, is the second"),
+    ("KurageSummonPower",
+     "kurage_summon, the Hydro pulse, is the last -- and its Block grant is "
+     "therefore strictly after the Bond payment"),
+)
+
+
+def _sequencer_body() -> str:
+    return method_body(
+        (SOURCE / "Powers" / "TurnEndSequencer.cs").read_text(encoding="utf-8"),
+        r"public\s+override\s+async\s+Task\s+BeforeSideTurnEnd\s*\(")
+
+
+def test_the_turn_end_sequence_is_the_sims_order():
+    """Bond -> Pyro -> Electro -> Hydro, top to bottom.
+
+    This is the whole content of the fix: the four used to be independent
+    BeforeSideTurnEnd overrides with no relative order, and a fixed-seed
+    parity run passes either way because the C# happens to iterate listeners
+    in SOME order on any given replay. Only the source can say the order is
+    guaranteed.
+    """
+    body = _sequencer_body()
+    positions = []
+    for token, why in TURN_END_SEQUENCE:
+        assert token in body, f"TurnEndSequencer no longer fires {token}: {why}"
+        positions.append(body.index(token))
+    assert positions == sorted(positions), (
+        "TurnEndSequencer reordered. The sim's order is "
+        + " -> ".join(t for t, _ in TURN_END_SEQUENCE)
+        + " (tier0/engine/effects.py player_turn_end_triggers, read top to "
+        "bottom).")
+
+
+@pytest.mark.parametrize("rel,cls", [
+    ("Powers/FontainePowers.cs", "MasqueRedDeathPower"),
+    ("Powers/KitBurst.cs", "SparksNSplashPower"),
+    ("Powers/CompanionPowers.cs", "OzSummonPower"),
+    ("Powers/KuragePowers.cs", "KurageSummonPower"),
+])
+def test_the_sequenced_powers_do_not_take_the_broadcast_back(rel, cls):
+    """The revert this guards: re-adding `override BeforeSideTurnEnd`.
+
+    A power that overrides the broadcast AND is driven by the sequencer fires
+    twice, in an order that is once again undefined. The co-tenancy sweep
+    would also fail (unregistered tenant) -- this names the class so the
+    failure reads as the reverted decision rather than as a bookkeeping miss.
+    """
+    assert (rel, cls) not in CO_TENANCY_LEDGER["BeforeSideTurnEnd"]
+    source = (SOURCE / rel).read_text(encoding="utf-8")
+    spans = _class_spans(source)
+    mine = [s for s in spans if s[0] == cls]
+    assert mine, f"{cls} not found in {rel}"
+    start, end = mine[0][1], mine[0][2]
+    hit = re.search(
+        r"public\s+override\s+\S+(?:\s+\S+)?\s+BeforeSideTurnEnd\s*\(",
+        source[start:end])
+    assert not hit, (
+        f"{cls} overrides BeforeSideTurnEnd again. TurnEndSequencer already "
+        "drives it; both would fire, unordered.")
 
 
 def test_vigil_pays_its_fuel_through_the_reshuffle():

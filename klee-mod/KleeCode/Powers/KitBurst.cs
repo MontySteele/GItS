@@ -71,11 +71,16 @@ public sealed class SparksNSplashPower : PowerModel, ILocalizationProvider
     /// the tick must run AFTER the volley, so the power owns its own decay.</summary>
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override async Task BeforeSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
+    /// <summary>
+    /// NOT A BROADCAST OVERRIDE ANY MORE (EB-19/races-c). The PYRO leg of the
+    /// three end-of-turn elemental volleys, fired FIRST by TurnEndSequencer:
+    /// tier0 `effects.player_turn_end_triggers` runs sparks_n_splash (Pyro)
+    /// -> oz_summon (Electro) -> kurage_summon (Hydro), and that order decides
+    /// both which reactions the board sees and the order of draws from the
+    /// shared Rng.CombatTargets stream.
+    /// </summary>
+    public async Task FireVolley(PlayerChoiceContext choiceContext)
     {
-        if (side != CombatSide.Player) return;
         if (Owner.Player == null) return;
 
         for (var i = 0; i < KitBurstConstants.VolleyHits; i++)
