@@ -134,6 +134,37 @@ internal static class ReactionEffects
         && (DealerReactionsThisTurn.TryGetValue(dealer, out var seen)
             ? seen : 0) == 0;
 
+    /// <summary>
+    /// PURE forecast of the boss-room Frozen substitution (EB-19/M1b): would a
+    /// Frozen reaction on this target apply Vulnerable instead of Frozen?
+    ///
+    /// The read-only twin of the predicate inside <see cref="Resolve"/>'s
+    /// Frozen branch -- and its ONLY statement, so the question the damage
+    /// pipeline asks one phase early and the answer Resolve acts on can never
+    /// drift apart. The substitution itself (the PowerCmd.Apply) stays in
+    /// Resolve: this decides nothing, it only reports.
+    ///
+    /// Why the pipeline needs to ask: the sim applies FROZEN_BOSS_VULN from
+    /// INSIDE `_react` (reactions.py:147-150) and only then runs
+    /// modify_damage_taken, so tier0's triggering hit is itself x1.5. C#
+    /// reaches Resolve from AuraPower.AfterDamageReceived, one hook after that
+    /// hit's number is final -- exactly the Superconduct / Courtroom Drama
+    /// shape, one reaction over. See AuraPower.ModifyDamageMultiplicative.
+    ///
+    /// UNCONDITIONAL sim-side, unlike Courtroom Drama: there is no
+    /// first-reaction gate on the boss branch, so every boss-room Frozen on a
+    /// non-minion amplifies its own hit.
+    ///
+    /// Called from AuraPower.ModifyDamageMultiplicative, which the UI calls
+    /// speculatively for damage previews -- so every read is null-tolerant
+    /// (no combat, no encounter, no target during preview enumeration all
+    /// answer `false`) and nothing here writes.
+    /// </summary>
+    public static bool FrozenBossVulnWillApply(Creature? target) =>
+        target != null
+        && target.CombatState?.Encounter?.RoomType == RoomType.Boss
+        && !target.Powers.OfType<MinionPower>().Any();
+
     public static async Task Resolve(
         PlayerChoiceContext choiceContext,
         Reaction reaction,
@@ -235,8 +266,12 @@ internal static class ReactionEffects
                 // deliberately overridden by [USER]'s alpha selection.
                 // The sim's mirror predicate is reactions.py's
                 // `boss_room and not enemy.is_minion`.
-                if (target.CombatState?.Encounter?.RoomType == RoomType.Boss
-                    && !target.Powers.OfType<MinionPower>().Any())
+                //
+                // The predicate lives in FrozenBossVulnWillApply so the damage
+                // pipeline can ask it one phase earlier (EB-19/M1b) without a
+                // second copy to keep in sync. This is still the only site
+                // that ACTS on the answer.
+                if (FrozenBossVulnWillApply(target))
                 {
                     await PowerCmd.Apply<VulnerablePower>(
                         choiceContext, target,
