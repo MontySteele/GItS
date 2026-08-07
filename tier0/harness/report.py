@@ -151,6 +151,78 @@ def print_card_flow(encounter: str, flow: dict, top: int = 25) -> None:
         print(f"    ... {len(rows) - top} more card ids")
 
 
+def _num(v, fmt: str = ".2f") -> str:
+    """A figure, or '-' when the split it came from was empty. The `_pct`
+    rule one type over: None is not zero (metrics keeps the two apart on
+    purpose, and a ratio over nothing is not a ratio of nothing)."""
+    return "-" if v is None else format(v, fmt)
+
+
+def print_encore_census(encounter: str, census: dict, top: int = 25) -> None:
+    """EB-20's aggregate, printed. Same fence as print_card_flow and the rest:
+    this surface makes the census readable and reads nothing into it -- no
+    saturation verdict, no target grant/drain ratio, no opinion on whether 19
+    granters against 1 spender is the shape the character wants. D8's value is
+    [USER]'s to pick and a pick does not happen in a print function.
+
+    Silent on a cohort with no Encore in it (an empty profile), so a Klee run
+    with the flag on prints nothing rather than a row of zeroes wearing
+    Furina's vocabulary.
+
+    Card rows are sorted by Encore granted, most first, because that is the
+    order the "19 of 78 grant" sentence is asked in; `top` bounds them.
+    """
+    if not census:
+        return
+    print(f"  encore      [{encounter}] "
+          f"granted {census['granted']} "
+          f"({census['granted_per_combat']:.2f}/combat)  "
+          f"drained {census['drained']} "
+          f"= {census['spent']} spent + {census['absorbed']} absorbed  "
+          f"gain/drain {_num(census['gain_drain_ratio'])}  "
+          f"overdrew {census['overdrawn']} HP  "
+          f"({census['encore_combats']} of {census['combats']} combats)")
+    print(f"  encore held [{encounter}] "
+          f"residual {_num(census['residual_per_combat'], '.2f')}/combat "
+          f"({census['residual']} over {census['residual_samples']} combats, "
+          f"{_pct(census['residual_share_of_granted'])} of grants)  "
+          f"peak mean {census['peak_mean']:.2f} max {census['peak_max']}  "
+          f"empty at {census['zero_turns']}/{census['turns_sampled']} turn "
+          f"snapshots ({_pct(census['zero_turn_rate'])})")
+    grants = ", ".join(f"{k} {v}" for k, v
+                       in sorted(census["granted_by_source"].items())) or "none"
+    spends = ", ".join(f"{k} {v}" for k, v
+                       in sorted(census["spent_by_source"].items())) or "none"
+    absorbs = ", ".join(
+        f"{k} {v}" for k, v
+        in sorted(census["absorbed_by_source"].items())) or "none"
+    print(f"  encore src  [{encounter}] grants: {grants} | "
+          f"spends: {spends} | absorbs: {absorbs}")
+    legs = ", ".join(
+        f"{leg} {v['applied']} ({_pct(v['share'])}"
+        + (f", {v['wasted']} wasted" if v["wasted"] else "") + ")"
+        for leg, v in census["fanfare_by_leg"].items()) or "none"
+    absent = (f"  absent: {', '.join(census['legs_absent'])}"
+              if census["legs_absent"] else "")
+    odd = (f"  UNREGISTERED LEGS: {', '.join(census['legs_unexpected'])}"
+           if census["legs_unexpected"] else "")
+    print(f"  fanfare leg [{encounter}] {census['fanfare_applied']} applied; "
+          f"encore legs {census['fanfare_from_encore']} "
+          f"({_pct(census['fanfare_from_encore_share'])}): {legs}"
+          f"{absent}{odd}")
+    rows = sorted(census["by_card"].items(),
+                  key=lambda kv: (-kv[1]["granted"], kv[0]))
+    for cid, r in rows[:top]:
+        print(f"    {cid:<28} granted {r['granted']:>6} "
+              f"({_pct(r['share_of_granted'])}, "
+              f"{r['granted_per_combat']:.2f}/combat, "
+              f"{r['combats_granting']} combats)  "
+              f"spent {r['spent']:>6} ({_pct(r['share_of_spent'])}, "
+              f"{r['combats_spending']} combats)")
+    if len(rows) > top:
+        print(f"    ... {len(rows) - top} more card ids")
+
+
 def print_summary(character: str, deck: str, encounter: str, s: dict) -> None:
     flags = f"  FLAGS: {','.join(s['flags'])} ({s['flagged_fights']} fights)" \
         if s.get("flags") else ""

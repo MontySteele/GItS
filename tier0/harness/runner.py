@@ -188,6 +188,13 @@ def main(argv: list[str] | None = None) -> int:
                          "played-when-drawn, dead-in-hand, force-first-copy "
                          "conversion and its winrate split) for each "
                          "encounter and for the battery as a whole")
+    ap.add_argument("--encore-census", action="store_true",
+                    help="print EB-20's Encore economy census (grants and "
+                         "spends by source card, the automatic absorption "
+                         "sink, end-of-combat residual, peak held, empty-turn "
+                         "rate and the Fanfare legs Encore prints) for each "
+                         "encounter and for the battery as a whole. Silent on "
+                         "a cohort with no Encore in it")
     ap.add_argument("--score", action="store_true",
                     help="run full battery + baseline and print the "
                          "7-axis scorecard")
@@ -248,6 +255,9 @@ def main(argv: list[str] | None = None) -> int:
                                      metrics.payoff_profile(stats))
         if args.card_flow:
             report.print_card_flow(enc, metrics.card_flow_profile(stats))
+        if args.encore_census:
+            report.print_encore_census(enc,
+                                       metrics.encore_census_profile(stats))
         for i, s in enumerate(stats):
             rows.append({"encounter": enc, "fight": i, "won": s.won,
                          "turns": s.turns, "hp_delta": s.hp_delta,
@@ -287,6 +297,20 @@ def main(argv: list[str] | None = None) -> int:
                          "card_draws": sum(s.card_draws.values()),
                          "played_when_drawn": sum(s.played_when_drawn.values()),
                          "dead_in_hand": sum(s.dead_in_hand.values()),
+                         # EB-20, per-fight: scalars only, same convention --
+                         # the by-card and by-source cuts are tables and live
+                         # in `--encore-census`. `encore_absorbed` is the
+                         # pre-existing A4 figure and is written here for the
+                         # first time only because the census makes the other
+                         # three sides of it readable beside it.
+                         "encore_granted": s.encore_granted,
+                         "encore_spent": s.encore_spent,
+                         "encore_absorbed": s.encore_absorbed,
+                         "encore_overdrawn": s.encore_overdrawn,
+                         "encore_residual": s.encore_residual,
+                         "encore_peak": s.encore_peak,
+                         "encore_zero_turns": s.encore_zero_turns,
+                         "encore_turns_sampled": s.encore_turns_sampled,
                          "flags": "|".join(s.flags)})
             # D2: the per-turn record is a row per TURN, not a cell stuffed
             # into the per-fight row -- a trajectory pickled into CSV text is
@@ -311,6 +335,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.card_flow and len(encounters) > 1:
         report.print_card_flow("ALL ENCOUNTERS",
                                metrics.card_flow_profile(every_stat))
+    if args.encore_census and len(encounters) > 1:
+        report.print_encore_census("ALL ENCOUNTERS",
+                                   metrics.encore_census_profile(every_stat))
 
     if args.csv:
         with open(args.csv, "w", newline="", encoding="utf-8") as f:
