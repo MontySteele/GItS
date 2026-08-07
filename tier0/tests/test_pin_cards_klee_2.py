@@ -164,14 +164,14 @@ def test_best_friends_forever_replays_an_upgraded_companion_upgraded():
     includes the upgrade.
 
     The sim expresses it by recording the played card's id -- `foo+` for an
-    upgraded companion (combat.py, `companions_played.append(card.id)`) -- so
-    the replay reloads the upgraded sheet row and Barbara's copy still blocks
-    8. C# had to be taught this separately: its ledger stored a base ModelId
-    and `ModelDb.GetById` rebuilt the card pristine (BACKLOG BFF-copy).
+    upgraded companion (combat._finish_play) -- so the replay reloads the
+    upgraded sheet row and Barbara's copy still blocks 8. C# had to be taught
+    this separately: its ledger stored a base ModelId and `ModelDb.GetById`
+    rebuilt the card pristine (BACKLOG BFF-copy).
 
-    One companion, played once: this pins what a copy CARRIES and stays clear
-    of what counts as one pool entry (`foo` vs `foo+`), which is the open
-    BFF-dedupe ruling.
+    One companion, played once: this pins what a copy CARRIES. What counts as
+    one pool entry (`foo` vs `foo+`) is BFF-dedupe, ruled 2026-08-06 and
+    pinned in the two tests below.
     """
     state = make_state()
     _play(state, "barbara_melody+", energy=1)
@@ -183,6 +183,68 @@ def test_best_friends_forever_replays_an_upgraded_companion_upgraded():
     assert replay.cost == 0                     # the card's own cost_override
     assert replay.effects == loader.get_card("barbara_melody+").effects
     assert [e["amount"] for e in replay.effects if e["op"] == "block"] == [8]
+
+
+def test_an_upgraded_companion_is_the_same_pool_entry_as_its_base():
+    """BFF-dedupe, RULED 2026-08-06: an upgraded companion IS the same pool
+    entry as its base -- Best Friends Forever replays each companion once, no
+    surprise duplication.
+
+    The sim used to disagree with the shipped C# here: it recorded INSTANCE
+    ids, so `barbara_melody` and `barbara_melody+` were two entries and the
+    pool handed back two Barbaras. The ruling made C# (dedupe on the base
+    ModelId, at the record site) the correct behaviour, and the sim now
+    strips the `+` when it records.
+
+    Base first, so the entry kept is the un-upgraded one: 6 Block, not 8.
+    """
+    state = make_state()
+    _play(state, "barbara_melody", energy=1)
+    _play(state, "barbara_melody+", energy=1)
+
+    _play(state, "best_friends_forever", energy=1)
+
+    assert [c.id for c in state.player.hand] == ["barbara_melody"]
+    replay = state.player.hand[0]
+    assert replay.cost == 0
+    assert [e["amount"] for e in replay.effects if e["op"] == "block"] == [6]
+
+
+def test_the_pool_entry_keeps_the_first_plays_upgrade_state():
+    """The other order, and the half of BFF-dedupe that decides what the one
+    copy CARRIES (2026-08-06 ruling; R114/FLAG-2(i) for the copy state).
+
+    Upgraded first, so the single entry is the upgraded one and the copy
+    blocks 8 -- the base play that follows does not downgrade it. This is C#
+    exactly: `CompanionPlays.Record` adds `(owner, card.Id, card.IsUpgraded)`
+    on the FIRST play and the `(Owner, Id)` guard drops every later play of
+    the same base card, upgraded or not.
+    """
+    state = make_state()
+    _play(state, "barbara_melody+", energy=1)
+    _play(state, "barbara_melody", energy=1)
+
+    _play(state, "best_friends_forever", energy=1)
+
+    assert [c.id for c in state.player.hand] == ["barbara_melody+"]
+    replay = state.player.hand[0]
+    assert replay.cost == 0
+    assert [e["amount"] for e in replay.effects if e["op"] == "block"] == [8]
+
+
+def test_two_different_companions_are_still_two_pool_entries():
+    """The dedupe is per COMPANION, not a global cap: BFF-dedupe collapses
+    `foo`/`foo+`, and nothing else. Pinned beside the two above so a future
+    key change (say, deduping on something coarser) cannot pass by making
+    the pool smaller everywhere.
+    """
+    state = make_state()
+    _play(state, "barbara_melody", energy=1)
+    _play(state, "fischl_oz", energy=1)
+
+    _play(state, "best_friends_forever", energy=1)
+
+    assert [c.id for c in state.player.hand] == ["barbara_melody", "fischl_oz"]
 
 
 # --- generic ---

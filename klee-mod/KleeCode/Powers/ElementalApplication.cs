@@ -85,8 +85,9 @@ public sealed class KleeElementalHooks : AbstractModel
             KleeBurstResource.GainPreResolution(
                 skillTagOwner, BurstConstants.PerSkillTag);
         }
-        // Best Friends Forever's ledger (tier0 play_card appends
-        // companions_played before resolution; once per play).
+        // Best Friends Forever's ledger (tier0 _finish_play records
+        // companions_played before resolution; once per play, deduped on the
+        // base id -- BFF-dedupe, ruled 2026-08-06).
         if (cardPlay.Card is ICompanionCard && cardPlay.IsFirstInSeries)
         {
             CompanionPlays.Record(cardPlay.Card.CombatState, cardPlay.Card);

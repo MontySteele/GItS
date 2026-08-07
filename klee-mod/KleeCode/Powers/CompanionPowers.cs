@@ -57,18 +57,22 @@ public static class CompanionConstants
 /// THE ENTRY CARRIES THE UPGRADE (R114/FLAG-2(i), BACKLOG BFF-copy). A
 /// ModelId alone is the PRINTED card, and `ModelDb.GetById` rebuilds it
 /// pristine -- so recording ids only replayed every companion unupgraded.
-/// The sim has no such gap: `combat.py:269` appends `card.id`, which IS
-/// `foo+` for an upgraded companion, so the upgrade travels with the copy the
-/// way the ruling requires. C# keeps the upgrade in the entry beside the id
-/// and Best Friends Forever re-applies it, the same repair SYS-4 made for the
-/// other copy ops (`UpgradeInternal`, vendor/STS2_MCP/McpMod.Helpers.cs:54-66).
+/// The sim expresses the same rule through the id itself: it records
+/// `card.id`, which IS `foo+` for an upgraded companion, so the upgrade
+/// travels with the copy the way the ruling requires. C# keeps the upgrade in
+/// the entry beside the id and Best Friends Forever re-applies it, the same
+/// repair SYS-4 made for the other copy ops (`UpgradeInternal`,
+/// vendor/STS2_MCP/McpMod.Helpers.cs:54-66).
 ///
-/// The DEDUPE KEY is deliberately unchanged: `(Owner, Id)`, so `foo` and
-/// `foo+` remain ONE entry here where the sim's `dict.fromkeys` over instance
-/// ids makes them two. That divergence is a separate open ruling (QUEUE
-/// BFF-dedupe) about pool identity, not about what state a copy carries;
-/// widening the key would settle it by accident. With one entry, the upgrade
-/// recorded is the FIRST play's -- which is what the entry has always meant.
+/// The DEDUPE KEY is `(Owner, Id)` -- a BASE ModelId, so `foo` and `foo+` are
+/// ONE entry. RATIFIED by the owner's BFF-dedupe ruling (2026-08-06): an
+/// upgraded companion IS the same pool entry as its base, and Best Friends
+/// Forever replays each companion once with no surprise duplication. This
+/// side was already correct; the sim changed to match, and now strips the
+/// `+` suffix at ITS record site (combat.py `_finish_play`, `_base_card_id`)
+/// so both ledgers dedupe on the same key at the same moment. With one entry,
+/// the upgrade recorded is the FIRST play's -- which is what the entry has
+/// always meant, and what the sim's first-play instance id now carries too.
 /// </summary>
 public static class CompanionPlays
 {

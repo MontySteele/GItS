@@ -1801,8 +1801,17 @@ def _op_replay_next_companion(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_copy_companions_played(state: CombatState, fx: dict, card: Card) -> None:
+    """Best Friends Forever: one copy of each companion played this combat.
+
+    The ledger is ALREADY unique in first-play order -- combat._finish_play
+    dedupes on the BASE id when it records (BFF-dedupe, RULED 2026-08-06: an
+    upgraded companion is the same pool entry as its base), the same place
+    and the same key as C#'s CompanionPlays.Record. So this loop is a plain
+    walk: a second dedupe here would either be a no-op or, if it used a
+    different key, silently outrank the ruled one.
+    """
     from tier0.content import loader
-    for cid in dict.fromkeys(state.companions_played):  # unique, in order
+    for cid in state.companions_played:
         token = loader.get_card(cid)
         if "cost_override" in fx:
             token.cost = fx["cost_override"]
