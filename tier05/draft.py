@@ -1411,7 +1411,15 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # `audience_participation`'s unconditional else-glue scored ~0 and the card
 # measured drawn 974 / played 0. Turn-level counter, known exactly at score
 # time; `reaction_triggered_by_this` stays excluded (mid-resolution).
-POLICY_VERSION = 5
+#
+# POLICY_VERSION 6 (EB-29t, 2026-08-07). The promoted Test Subject reads
+# (R128): Skills are taxed by living enemies' Enrage (each play grants
+# permanent Strength; priced over ENRAGE_TAX_TURNS future attack turns),
+# and per-hit damage into an Intangible target prices the
+# INTANGIBLE_DAMAGE_CAP it will actually deal. Both are universal
+# board-state reads, live for every pilot; only cells whose encounters
+# carry those powers move (act-3 test_subject).
+POLICY_VERSION = 6
 
 # F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one
 # place a character's archetype vocabulary is declared -- and where it is
