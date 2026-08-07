@@ -52,7 +52,7 @@
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `S4-G9` | One sitting turning ~14 proposed numbers/small design calls into ratified ones (fanfare-rework X values; conversion clauses; `lasting_impression`; negative-floor semantics; D6 bow space; `kurages_oath`=12 re-file; pulse 2-vs-3; Curtain Call's four follow-ons; `scattering_spray` 7→6; Spotlight ten-icons-vs-family; Klee dead-card reworks) — the reason much shipped content is still PROPOSED | OPEN | user-queue §2; backlog §3 item 9 |
+| `S4-G9` | The proposed-numbers ratification sitting. **Packet ready** (`review/active/s4-g9-ratification-packet.md`, 2026-08-07): 15 items in ratify-by-exception form, each with the shipped value, its support, blast radius, and a recommendation — everything unvetoed ratifies in one commit. Items needing more than a yes: `lasting_impression` needs a commissioned body, not a ratify (item 7); Track 2.4 touches the starter and is the one flagged veto candidate (item 6); the Spotlight icon call should precede `S4-G17`'s picks (item 14). Two named sub-items excluded as owned elsewhere: the name audit (`S4-G11`) and the payoff-reach follow-on (`Q-C` six-step order) | OPEN — packet awaiting sitting | user-queue §2; backlog §3 item 9; S4-G9 packet |
 
 ## 6. Shop, pricing, and money
 
