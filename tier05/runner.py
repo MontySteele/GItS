@@ -19,6 +19,7 @@ import time
 from tier0 import constants as C
 from tier0 import roster
 from tier0.content import loader
+from tier0.harness import report as t0_report
 from tier05 import (ab, draft, elite_blitz, kurage_telemetry, model,
                     overlap_telemetry, reaction_telemetry, route, run_metrics)
 
@@ -215,6 +216,13 @@ def main(argv: list[str] | None = None) -> int:
         reaction_telemetry.aggregate(results))
     if block:
         print(block)
+    # EB-20w: the EB-20 Encore census, pooled over the cohort's fights. On the
+    # DEFAULT report for the C4 reason, and silent for any cohort with no
+    # Encore in it (print_encore_census skips an empty profile), so only
+    # Furina runs pay the column inches. Printed by the same function as the
+    # fight-side `--encore-census` so the two surfaces cannot drift.
+    t0_report.print_encore_census(
+        "run cohort", run_metrics.encore_census(results))
     print(f"\n({args.runs} runs in {time.perf_counter() - t0:.1f}s)")
 
     if args.csv:
