@@ -56,17 +56,23 @@ are resource counters (cheap). Salon rides existing summon machinery
 pending the check-if-solved audit (§5). Pneuma/Ousia is **pure flavor,
 zero mechanics** (ratified). Nothing else novel ships in her v1.
 
-> **DRAFT ANNOTATION 2026-08-06 (R107; S4 finding F3) — §3.1–3.2 describe the RETIRED designation model.** Read them as the v1.10 design they were, not as law. Live since R41 (2026-07-22): **CENTER STAGE**, under which Furina's own cards generate Fanfare and *"receive no numeric Spotlight bonus"*, and **GUEST CAST**, which *"designates the Companion category rather than one character"* — confirmed at `review/active/red-pen-2026-07-26.md` R2(a). The "reduced rate on Furina herself" asymmetry below is therefore not the shipped anti-self-buff lever. Mirrors the v1.14 DRAFT annotation on `docs/teyvat-spire-design-principles.md` §4.5; ratification rides with it.
+### 3.1 Designation (two modes — R41, v1.14)
 
-### 3.1 Designation (character-level)
-
+- Spotlight runs in **exactly two modes**. **CENTER STAGE** designates
+  Furina herself: her own cards generate Fanfare when played and receive
+  **no numeric Spotlight bonus**. **GUEST CAST** designates the
+  **Companion category**, not one character: companion cards receive the
+  empowerment multiplier and Spotlight texture, and generate no Fanfare
+  (`review/active/red-pen-2026-07-26.md` R2(a); LAW "Character identity —
+  Furina").
 - Every card gains a **`character:` schema field** (shared schema change,
   not Furina-private — Columbina inherits it). Companion cards carry their
   character implicitly; Klee's cards tag Klee; Furina's tag Furina. Cards
   with no tag are **invalid Spotlight targets** (selector greys them out).
 - **Delivery:** her starting relic adds an **Ethereal Spotlight selector**
-  card to hand each turn. Applying it to a card in your hand reads that
-  card's character tag and designates that character. In co-op, the
+  card to hand each turn. Applying it to a companion card designates
+  Guest Cast; applying it to one of Furina's own cards designates Center
+  Stage. In co-op, the
   selector may instead be passed to a teammate, who applies it to one of
   their own cards (first cross-player designation — Appendix A.4's
   engineering, arriving early).
@@ -75,26 +81,26 @@ zero mechanics** (ratified). Nothing else novel ships in her v1.
   rewarded through Fanfare throughput (§4), never enforced through rules —
   drafting a second companion or a 5-star splash must never feel like a
   pre-nerfed pick.
-- **Global registry:** one Spotlighted character per Furina player at a
+- **Global registry:** one live designation per Furina player at a
   time, tracked globally; duplicate selector cards are inert. Registry is
   per-player in co-op (two Furinas = two independent Spotlights).
 
 ### 3.2 Empowerment
 
-- **Baseline (v1, boring on purpose):** Spotlighted character's cards get
-  **+50% printed numbers** — damage, Block, element-application counts.
-  Flat rate is the knob; texture lives in cards, not the baseline.
-- **§2.2a guard — RATIFIED, and the law now lives in the principles doc.**
-  It went in verbatim as the **§2.2a extension (v1.10)**; read it there, not
-  here (`docs/teyvat-spire-design-principles.md` §2.2a extension), which is
-  also where its engine note about element-application counts lives. Pointer
-  substituted for the restatement 2026-08-06 (docs diet, Track Z / Z-6); no
-  word of the law changed, and the canonical text is untouched.
-- **Self-Spotlight = the solo fallback, at reduced rate** (Appendix A.4
-  mandate, satisfied structurally): full rate on a companion character or
-  co-op teammate; reduced rate (number TBD at sheet pass; sweep it) on
-  Furina herself. The asymmetry is the primary anti-self-buff-dominance
-  lever and is legible on card text.
+- **Baseline (v1, boring on purpose):** under Guest Cast, companion cards
+  get **+50% printed numbers** — damage, Block, element-application
+  counts. Center Stage grants no numeric bonus; its payoff is Fanfare
+  throughput (§4). Flat rate is the knob; texture lives in cards, not the
+  baseline.
+- **§2.2a guard — RATIFIED law:** Spotlight/empowerment boosts numbers
+  only, never turn-economy effects. Canonical text in
+  `docs/current/LAW.md` ("Combat & reactions"); the retired principles
+  doc's §2.2a extension (v1.10) reads at the pre-simplification tag.
+- **Center Stage = the solo fallback** (Appendix A.4 mandate, satisfied
+  structurally): a companion-poor run holds the stage herself and
+  converts play volume into Fanfare instead of a multiplier. The
+  anti-self-buff lever is structural — her own cards receive no numeric
+  bonus at all, legible on card text.
 - **Held in reserve, schematized but OFF:** per-turn Spotlighted-card cap
   (raiseable via powers as design space). Turns on only if Tier 0 shows
   asymmetry alone fails the §6 acceptance criterion.
@@ -115,32 +121,18 @@ predates the v1.6 amendment).
   priced. **True healing is Rare-tier AND Exhausts** (Pneuma/Singer
   identity; tightened from v1.5's disjunctive form by user ruling — see
   m7-rulings R8).
-- **Fanfare:** **capped at %maxHP** (Rare uncappers at nasty setup cost);
-  stacks grant flat power bonuses. **Generation is activity-based, never
-  passive:** HP lost, Encore spent, and — the Ovation merge
-  — **each Spotlighted card played grants Fanfare**.
-  > **THE "ENCORE GAINED" LEG IS DEAD — annotated 2026-08-06 (R107; S4 finding
-  > F12).** Ruled [USER] 2026-07-28 (post-playtest-3) and shipped the same day
-  > in both engines. Fanfare prints when Encore goes **DOWN**, never when it
-  > goes up. The live generation set is **HP lost / Encore spent / Encore
-  > absorbed / Spotlighted card played** — `encore_absorbed` is a new leg.
-  > Mirrors the v1.12 DRAFT in `docs/teyvat-spire-design-principles.md`;
-  > ratification rides on that amendment's countersign. No per-turn passive
-  accrual, ever (passive accrual = stall payoff; the healing policy exists
-  to kill exactly that).
-  > **RETIRED GRAMMAR (G-F1, 2026-07-25) — the parenthetical only.** "Rare
-  > uncappers at nasty setup cost" no longer describes anything: the
-  > uncapper clause died with "The Tide Turns" (F-A5), and no sheet carries
-  > `raise_fanfare_cap`. Cards raise a permanent **floor** instead
-  > (`gain_fanfare_floor`), and the cap was demoted from a first-order dial
-  > to a high safety rail that decay means nothing reaches. `%maxHP` is
-  > still where the rail sits. See the DECISIONS entry "Implementation
-  > sprint: C# parity, co-op ownership, upgrade lint, known-card fixes".
-  >
-  > **This is an annotation, not an amendment.** The no-passive-accrual law
-  > in the sentence above is untouched and remains binding — a floor is
-  > static value that does not grow with time, so stalling still earns
-  > nothing. F-B4's reasoning for not reopening the law also stands.
+- **Fanfare: capped at %maxHP** — the cap is a high safety rail, not a
+  first-order dial: no sheet carries `raise_fanfare_cap` (the uncapper
+  clause died with "The Tide Turns", F-A5); cards raise a permanent
+  **floor** instead (`gain_fanfare_floor`), and proportional decay means
+  nothing reaches the rail. Stacks grant flat power bonuses.
+  **Generation is activity-based, never passive** (v1.12): the live legs
+  are **HP lost / Encore spent / Encore absorbed / Spotlighted card
+  played**. Fanfare prints when Encore goes **down**, never when it goes
+  up (ruled 2026-07-28, post-playtest-3; shipped in both engines). No
+  per-turn passive accrual, ever — passive accrual = stall payoff, the
+  healing policy exists to kill exactly that, and a floor is static value
+  that does not grow with time, so stalling still earns nothing.
 - **Fanfare is a global pool on Furina** — it survives Spotlight moves.
   Commitment texture comes from throughput (a deep single-partner kit
   plays more Spotlighted cards per turn), not from reset punishment. The

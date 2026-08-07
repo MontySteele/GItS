@@ -346,7 +346,8 @@ class Player(Fighter):
     node_kind: str = ""           # "", "normal", "elite", or "boss"
     kit_cards: list[Card] = field(default_factory=list)    # v1.9: the Burst(s)
     # --- Furina (kickoff §3/§4); inert defaults for everyone else ---
-    character_id: str = ""        # who this player IS (self-Spotlight rate)
+    character_id: str = ""        # who this player IS (Center Stage owner;
+                                  # which cards read as "hers" vs Guest Cast)
     # --- Kokomi (kickoff v1 §2.1): the Bake-Kurage meter. Uncapped, never
     # expended, read (not consumed) by finisher effects; accrues ONLY at
     # the exhaust funnel + explicit gain_charge lines + converted Strength.
@@ -665,9 +666,51 @@ class CombatState:
     block_gain_card_plays_this_turn: int = 0   # Unmovable's per-turn allowance
     no_energy_gain_ceiling: Optional[int] = None  # NoEnergyGain, seeded when
                                           # the power lands (not at the refill)
+    # --- EB-17, the card-flow instrument (Klee survival sprint plan §4;
+    # missed-requirements §2.2). BOOKKEEPING ONLY, and the whole of it is
+    # log-side: nothing in the engine, the pilot, an axis or the C# side reads
+    # either dict, and no branch anywhere is gated on them. They exist so that
+    # `draw` and `play` can carry the two facts a log reader cannot recover on
+    # its own -- WHICH INSTANCE was drawn and WHEN -- because Card is a
+    # dataclass and two copies of one card id compare equal, so a per-id tally
+    # over the event stream cannot tell a card that sat in hand all fight from
+    # a fresh copy of the same card played the turn it arrived.
+    #
+    #   drawn_in_hand    id(card) -> (card, turn drawn, is-first-copy), for
+    #                    the instances CURRENTLY IN HAND BY A DRAW. The Card
+    #                    itself is held in the tuple deliberately: a live
+    #                    reference is what makes id() safe as a key, since an
+    #                    object that cannot be collected cannot have its
+    #                    address handed to a later card. Entries are dropped
+    #                    when the instance leaves hand (played, or flushed --
+    #                    combat.py owns both sites) and the map is rebuilt to
+    #                    the retained hand at every turn flush, so a card that
+    #                    leaves hand through an effects.py path (a discard op,
+    #                    an exhaust op) is stale for at most one turn.
+    #   first_copy_drawn card id -> the FIRST instance of that id to be drawn
+    #                    this combat. Keyed by the instance and not by a
+    #                    boolean so that the first copy stays the first copy
+    #                    across a discard and a re-draw -- "did the forced
+    #                    copy convert" is a question about the copy, not
+    #                    about the turn it happened to arrive on.
+    drawn_in_hand: dict[int, tuple] = field(default_factory=dict)
+    first_copy_drawn: dict[str, "Card"] = field(default_factory=dict)
 
     def emit(self, event: str, **data: Any) -> None:
         self.log.append({"turn": self.turn, "event": event, **data})
+
+    def drawn_context(self, card: "Card") -> tuple[int, bool]:
+        """EB-17: `(turn this instance was drawn, is-first-copy)` for a card
+        sitting in hand, or `(-1, False)` when this instance did not reach
+        hand by a draw (a token added to hand, a kit Burst, a status injected
+        into hand, or a card auto-played out of a pile).
+
+        Identity-checked against the stored Card, never by id() alone: -1 is
+        "not drawn" and is never confused with turn 0."""
+        entry = self.drawn_in_hand.get(id(card))
+        if entry is None or entry[0] is not card:
+            return -1, False
+        return entry[1], entry[2]
 
     @property
     def living_enemies(self) -> list[Enemy]:
@@ -703,13 +746,22 @@ class CombatState:
             card = p.draw_pile.pop(0)
             p.hand.append(card)
             self.cards_drawn_this_combat += 1
+            # EB-17. `setdefault(...) is card` is the whole first-copy rule:
+            # the first instance of an id to be drawn claims the slot and
+            # keeps it for the rest of the combat, so a copy that is drawn,
+            # flushed and drawn again is still the same first copy.
+            first_copy = self.first_copy_drawn.setdefault(card.id, card) is card
+            self.drawn_in_hand[id(card)] = (card, self.turn, first_copy)
             # EscapePlan reads the TYPE of the card its own draw produced
             # (`(await Draw(1)).FirstOrDefault()`, then `.Type == Skill`).
             # Cleared at card start, so a card that drew NOTHING -- empty
             # piles, full hand -- reads as the source's null and pays out
             # nothing, rather than seeing whatever the last card drew.
             self.last_drawn_type = card.type
-            self.emit("draw", card=card.id)
+            # `first_copy` is EB-17's only addition to this row: an added key
+            # on an event that already fired per card drawn, so the instrument
+            # costs one dict entry and no new event.
+            self.emit("draw", card=card.id, first_copy=first_copy)
             # Hook.AfterCardDrawn, per CARD. CorrosiveWave and Speedster are
             # the only readers today and both are dead branches without a
             # Silent power up, but the site has to be inside the loop: they

@@ -7,10 +7,11 @@ these can.
 from __future__ import annotations
 
 import math
+import random
 from collections import Counter
 
 from tier0 import constants as C
-from tier05 import stats
+from tier05 import route, stats
 from tier05.model import RunResult
 
 
@@ -128,6 +129,92 @@ def route_profile(results: list[RunResult]) -> dict:
         "event_options": dict(Counter(
             f"{e['event']}:{e['option']}" for r in results
             for e in r.events).most_common(8)),
+    }
+
+
+# --- route_regret (§4.2's third countermeasure) -----------------------------
+#
+# A full point of hindsight advantage, the same bar `draft_regret` sets
+# (draft.py:1635, C.DRAFT_REGRET_SAMPLE's neighbour). The units are NOT the
+# same -- a draft score is one card's worth of printed damage/Block, a path
+# value is a sum of room `want`s over sixteen floors -- so a point is a much
+# smaller relative gap here, and this margin is a placeholder for a measured
+# one, not a calibrated threshold. `mean_regret` and the percentiles are the
+# reportable numbers; `regretted` exists for symmetry with the drafter.
+ROUTE_REGRET_MARGIN = 1.0
+# Every real choice, where the drafter samples a tenth (C.DRAFT_REGRET_SAMPLE).
+# The drafter re-scores INSIDE the run loop, thousands of runs deep; this is an
+# offline pure-map instrument that re-plans one act, so sampling it down would
+# buy nothing and cost determinism. Overridable per call.
+ROUTE_REGRET_SAMPLE = 1.0
+
+
+def route_regret(rng: random.Random, act_map, decisions: list[dict],
+                 hindsight: route.RouteState, policy_name: str,
+                 sample: float = ROUTE_REGRET_SAMPLE,
+                 margin: float = ROUTE_REGRET_MARGIN) -> dict:
+    """The road not taken, re-priced in hindsight (research §4.2).
+
+    `decisions` come from `route.walk_decisions`; `hindsight` is the state the
+    alternatives are re-planned in. Regret for one decision is
+
+        max(0, best OTHER option's path value - the taken option's), both
+        under `policy_name`'s own value function, in `hindsight`
+
+    which is the drafter's construction one level up: `draft_regret` re-scores
+    sampled offers in the FINAL DECK context and asks whether some other card
+    then outscores the pick. Here the final deck's counterpart is the final RUN
+    STATE, because state is the only thing a route policy's valuation depends
+    on -- `_make_value` reads `hp_frac` for the rest discount and the elite
+    gate, and nothing else.
+
+    WHY HINDSIGHT IS THE WHOLE INSTRUMENT. In the deciding state this number is
+    zero by construction: `_route` takes the argmax over exactly these path
+    values, so no alternative can beat the pick. A regret is therefore never a
+    planner bug and always the thing §4.2 asked for -- the lane that was worth
+    taking while the run was healthy and was not worth it by the time the run
+    arrived. That is precisely the hunter-vs-cautious comparison the "elite
+    relics are underpriced" finding rests on, made per-decision instead of
+    per-cohort.
+
+    Floors with a single successor are FORCED, not chosen, and are excluded
+    from the denominator (reported as `forced`) -- a road with no fork has no
+    road not taken, and counting them would dilute the rate with the map's
+    shape rather than the policy's judgement.
+
+    Returns the gap distribution, not just a count: the drafter's integer works
+    because a card either regrets or does not, whereas a route regret has a
+    magnitude and the magnitude is what an A/B between two policies reads.
+    """
+    gaps: list[float] = []
+    forced = regretted = 0
+    for d in decisions:
+        options = d["options"]
+        if len(options) < 2:
+            forced += 1
+            continue
+        if rng.random() >= sample:
+            continue
+        picked = d["picked"]
+        taken = route.path_value(act_map, picked, policy_name, hindsight)[0]
+        best_alt = max(route.path_value(act_map, r, policy_name, hindsight)[0]
+                       for r in options if r.id != picked.id)
+        gap = max(0.0, best_alt - taken)
+        gaps.append(gap)
+        if gap > margin:
+            regretted += 1
+    n = len(gaps)
+    return {
+        "policy": policy_name,
+        "decisions": len(decisions),
+        "forced": forced,
+        "sampled": n,
+        "regretted": regretted,
+        "regret_rate": regretted / n if n else 0.0,
+        "mean_regret": (sum(gaps) / n) if n else 0.0,
+        "p50_regret": _percentile(gaps, 0.50),
+        "p90_regret": _percentile(gaps, 0.90),
+        "max_regret": max(gaps) if gaps else 0.0,
     }
 
 

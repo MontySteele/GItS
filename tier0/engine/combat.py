@@ -217,9 +217,16 @@ def play_card(state: CombatState, card: Card) -> None:
     p.energy -= cost
     if card.encore_cost:
         resources.spend_encore(state, card.encore_cost)   # gated playable
+    # EB-17: read the draw context BEFORE the instance leaves hand, then
+    # release it -- an instance that is no longer in hand has no draw context,
+    # and holding the entry past the play is what would let a freed card's
+    # address be reused by a later one.
+    drawn_turn, first_copy = state.drawn_context(card)
     remove_instance(p.hand, card)
+    state.drawn_in_hand.pop(id(card), None)
     state.cards_played_this_turn += 1
-    state.emit("play", card=card.id, cost=cost, energy_left=p.energy)
+    state.emit("play", card=card.id, cost=cost, energy_left=p.energy,
+               drawn_turn=drawn_turn, first_copy=first_copy)
     if effects.is_spotlighted(state, card):
         # Spotlight texture applies in both modes. Only Center Stage creates
         # Fanfare; Guest Cast spends the light on Companion empowerment.
@@ -423,8 +430,15 @@ def resolve_free_play(state: CombatState, card: Card,
         if card.cost == "X":
             state.current_x = p.energy
         state.cards_played_this_turn += 1
+        # EB-17, same read as play_card's. An auto-play usually comes from a
+        # pile rather than from hand -- the caller has already removed it from
+        # wherever it was -- and then reads (-1, False), which is the honest
+        # answer: a card the player never held cannot have been played when
+        # drawn. A Sly discard IS a hand card, and does carry its context.
+        drawn_turn, first_copy = state.drawn_context(card)
+        state.drawn_in_hand.pop(id(card), None)
         state.emit("play", card=card.id, cost=0, energy_left=p.energy,
-                   free=True)
+                   free=True, drawn_turn=drawn_turn, first_copy=first_copy)
         _finish_play(state, card, force_exhaust=force_exhaust)
     finally:
         for name, value in saved:
@@ -609,11 +623,30 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # the same card compare EQUAL, and a value check here would drop the
     # unretained twin from every pile -- a silent deck-shrink.
     retained_ids = {id(c) for c in retained}
+    # EB-17, dead-in-hand half one: everything the flush takes away. Both
+    # destinations count -- a card discarded unplayed and an unplayed Ethereal
+    # burned to exhaust are the same finding ("it was in hand and it did
+    # nothing"), and a RETAINED card is deliberately not here, because it is
+    # still in play next turn and is only dead once it finally leaves unplayed
+    # or the combat ends on it. Computed against `p.hand` before the rebind
+    # below, which is the last moment the flushed cards are enumerable.
+    flushed = [c for c in p.hand if id(c) not in retained_ids]
     p.discard_pile.extend(c for c in p.hand
                           if "burst" not in c.tags and not c.retain
                           and "ethereal" not in c.tags
                           and id(c) not in retained_ids)
     p.hand = retained
+    for c in flushed:
+        turn_drawn, _ = state.drawn_context(c)
+        if turn_drawn >= 0:      # DRAWN instances only -- see the emit note
+            state.emit("dead_in_hand", card=c.id, drawn_turn=turn_drawn,
+                       reason="flush")
+    # Rebuild the draw-context map to exactly the hand that survives. This is
+    # the sweep that keeps it from accumulating entries for cards an effects.py
+    # path pulled out of hand (a discard op, an exhaust op) without passing
+    # either of the two release sites combat.py owns.
+    state.drawn_in_hand = {id(c): state.drawn_in_hand[id(c)]
+                           for c in p.hand if id(c) in state.drawn_in_hand}
     for c in ethereal:
         # DarkEmbrace counts ethereal exhausts instead of drawing on them; the
         # deferred draw is flushed in powers.on_turn_end below, i.e. AFTER this
@@ -922,6 +955,17 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     finally:
         refpowers.bind(outer)
     won = bool(state.player.alive) and not state.living_enemies
+    # EB-17, dead-in-hand half two: the cards the combat ENDED on. A fight that
+    # ends inside a player turn never reaches the hand flush, and a Retained
+    # card can sit in hand for the whole fight and never meet one either, so
+    # without this half the instrument would silently under-count exactly the
+    # cards it exists to find. EMIT-ONLY and after `won` is decided, so nothing
+    # here can move the result.
+    for c in state.player.hand:
+        turn_drawn, _ = state.drawn_context(c)
+        if turn_drawn >= 0:
+            state.emit("dead_in_hand", card=c.id, drawn_turn=turn_drawn,
+                       reason="fight_end")
     if won and "heal_after_won_fight" in state.player.relic_hooks:
         # Burning Blood (ruling 1): post-fight, can't affect combat —
         # counts toward the A4 healing metric, not hp_left.

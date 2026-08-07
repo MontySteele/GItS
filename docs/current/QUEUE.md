@@ -112,7 +112,6 @@ behavior / money call before any code moves.
 | kokomi-workshop `X9` | Kokomi charge bank ("probably too strong, parse carefully") — the next kit workshop | dockets/kokomi-workshop |
 | `shared_billing` | The only Common with a cost upgrade (1→0), which the delta-grammar convention forbids — needs a [USER] call (sheet and C# agree; the conflict is with the ruled convention) | triage-memo |
 | Template heal/elite economy | Node composition and pathing-agency — a structural design question | tier05-perf §1.5.2(2) |
-| `F-kickoff-ann` | `furina-kickoff-v0.1.md:59` and `:131` carry draft annotations ("§3.1–3.2 describe the RETIRED designation model"; "RETIRED GRAMMAR (G-F1) — the parenthetical only") that each state "this is an annotation, not an amendment — ratification rides with it". Editing the prose in place *is* the amendment, so the no-banner norm can't be applied without [USER] ratifying the amendment. The doc is `Lifecycle: LIVING`, making these the strongest remaining norm tension in docs/current | DOCS-ref execution sweep, 2026-08-06 |
 
 ---
 

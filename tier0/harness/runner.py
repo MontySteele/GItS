@@ -183,6 +183,11 @@ def main(argv: list[str] | None = None) -> int:
                     help="print H1/H2's aura-op frequency and conditional "
                          "payoff-predicate trigger counts for each encounter "
                          "and for the battery as a whole")
+    ap.add_argument("--card-flow", action="store_true",
+                    help="print EB-17's per-card flow (draws, "
+                         "played-when-drawn, dead-in-hand, force-first-copy "
+                         "conversion and its winrate split) for each "
+                         "encounter and for the battery as a whole")
     ap.add_argument("--score", action="store_true",
                     help="run full battery + baseline and print the "
                          "7-axis scorecard")
@@ -241,6 +246,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.aura_payoff:
             report.print_aura_payoff(enc, metrics.aura_profile(stats),
                                      metrics.payoff_profile(stats))
+        if args.card_flow:
+            report.print_card_flow(enc, metrics.card_flow_profile(stats))
         for i, s in enumerate(stats):
             rows.append({"encounter": enc, "fight": i, "won": s.won,
                          "turns": s.turns, "hp_delta": s.hp_delta,
@@ -273,6 +280,13 @@ def main(argv: list[str] | None = None) -> int:
                          "aura_payoff_fired": sum(
                              s.conditional_fired.get(p, 0)
                              for p in metrics.AURA_PAYOFF_PREDICATES),
+                         # EB-17, per-fight: totals only, on the D1/H1
+                         # convention -- the per-card cut is a table and a
+                         # table pickled into a CSV cell is a number nobody
+                         # reads twice. `--card-flow` prints the per-card rows.
+                         "card_draws": sum(s.card_draws.values()),
+                         "played_when_drawn": sum(s.played_when_drawn.values()),
+                         "dead_in_hand": sum(s.dead_in_hand.values()),
                          "flags": "|".join(s.flags)})
             # D2: the per-turn record is a row per TURN, not a cell stuffed
             # into the per-fight row -- a trajectory pickled into CSV text is
@@ -294,6 +308,9 @@ def main(argv: list[str] | None = None) -> int:
         report.print_aura_payoff("ALL ENCOUNTERS",
                                 metrics.aura_profile(every_stat),
                                 metrics.payoff_profile(every_stat))
+    if args.card_flow and len(encounters) > 1:
+        report.print_card_flow("ALL ENCOUNTERS",
+                               metrics.card_flow_profile(every_stat))
 
     if args.csv:
         with open(args.csv, "w", newline="", encoding="utf-8") as f:

@@ -126,6 +126,67 @@ class FightStats:
     reactions_by_name: dict[str, int] = field(default_factory=dict)
     conditional_evaluated: dict[str, int] = field(default_factory=dict)
     conditional_fired: dict[str, int] = field(default_factory=dict)
+    # --- EB-17, the card-flow counters (Klee survival sprint plan §4, owed
+    # again as next-step 3 of the sprint report; missed-requirements §2.2).
+    # The plan's words: "Do not use raw pick rate as the redesign trigger. The
+    # current static drafter values only printed damage and Block, so draw,
+    # debuffs, generation, Bombs, and many engines are invisible. First add or
+    # run paired evidence for: offered / picked / played-when-drawn;
+    # conditional activation and dead-in-hand rate; ...; force-first-copy
+    # paired winrate." Offered/picked are DRAFT-side and already exist
+    # (tools/archive/klee_dead_cards.py); these three are the combat-side half.
+    #
+    # LOG-SIDE ONLY, on the track-H fence: every one is a tally of events the
+    # engine emits, all of them keyed BY CARD ID (the unit the dead-card
+    # question is asked in), and none of them is read by combat, by the pilot,
+    # by an axis or by the C# side. Nothing here grades anything.
+    #
+    #   card_draws            draws of this id (the denominator for the two
+    #                         rates below). Counts DRAWS, not copies: a card
+    #                         drawn, flushed and redrawn counts twice.
+    #   card_plays            plays of this id, from any source.
+    #   played_when_drawn     plays whose INSTANCE was drawn into hand on the
+    #                         same player turn it was played on. The literal
+    #                         reading of the plan's phrase. `card_plays` minus
+    #                         this is the rest: cards Retained into a later
+    #                         turn, tokens created into hand, kit Bursts, and
+    #                         auto-plays out of a pile -- none of which was
+    #                         "played when drawn" and all of which used to be
+    #                         indistinguishable in a per-id tally.
+    #   dead_in_hand          DRAWN instances that left hand UNPLAYED: thrown
+    #                         away by the end-of-turn flush (to discard, or to
+    #                         exhaust for an unplayed Ethereal), or still held
+    #                         in hand when the combat ended. Retention is not
+    #                         death -- a Retained card is counted only once it
+    #                         finally leaves unplayed or the fight ends on it.
+    #                         Instances that leave hand some OTHER way (a
+    #                         discard op, an exhaust op) are neither played
+    #                         when drawn nor dead in hand: they were consumed,
+    #                         which is a third outcome and not this one, so
+    #                         the two rates do not sum to 1 and are not meant
+    #                         to.
+    #   force_first_copy      0/1 per card id per COMBAT: the first copy of
+    #                         this id to be drawn was also PLAYED. This is the
+    #                         fight-side half of the plan's "force-first-copy
+    #                         paired winrate" -- the register asks what a deck
+    #                         does when one copy is forced into it, and the
+    #                         part a combat can answer is whether that copy
+    #                         converted. Forcing the copy into the deck and
+    #                         pairing the seeds is the CALLER's (tier0's
+    #                         kernel builds no decks and rolls no rewards);
+    #                         card_flow_profile() below carries the winrate
+    #                         split that the pairing is read against.
+    #   force_first_copy_drawn 0/1 per card id per COMBAT: the first copy
+    #                         reached hand at all. The denominator of
+    #                         force_first_copy -- a copy that was never drawn
+    #                         did not fail to convert, it never got the
+    #                         chance, and the two must not be pooled.
+    card_draws: dict[str, int] = field(default_factory=dict)
+    card_plays: dict[str, int] = field(default_factory=dict)
+    played_when_drawn: dict[str, int] = field(default_factory=dict)
+    dead_in_hand: dict[str, int] = field(default_factory=dict)
+    force_first_copy: dict[str, int] = field(default_factory=dict)
+    force_first_copy_drawn: dict[str, int] = field(default_factory=dict)
     # --- O-1 (Track O slice 12, ruled 2026-08-06). A multi-stage encounter
     # (`gauntlet`) is ONE record but TWO combats, and every per-fight rate
     # below used to divide the two combats' events by one record. The stage
@@ -250,10 +311,24 @@ def merge_stages(stages: list["FightStats"]) -> "FightStats":
         # key-wise addition (no turn offset: none of them is turn-keyed).
         for attr in ("aura_ops", "aura_applications_by_source",
                      "aura_applications_by_element", "reactions_by_name",
-                     "conditional_evaluated", "conditional_fired"):
+                     "conditional_evaluated", "conditional_fired",
+                     # EB-17's three COUNTS merge the same way. Their two
+                     # indicators do not -- see below.
+                     "card_draws", "card_plays", "played_when_drawn",
+                     "dead_in_hand"):
             dst, src = getattr(merged, attr), getattr(s, attr)
             for k, v in src.items():
                 dst[k] = dst.get(k, 0) + v
+        # EB-17's first-copy pair is 0/1 PER COMBAT, so it merges by OR and
+        # not by addition: a gauntlet whose stage 1 converted the copy and
+        # whose stage 2 did not is one attempt in which it converted, and a
+        # summed 2 would read as two conversions out of one denominator. Each
+        # stage record keeps its own 0/1, so per_combat() still recovers the
+        # per-combat unit -- which is what card_flow_profile() denominates on.
+        for attr in ("force_first_copy", "force_first_copy_drawn"):
+            dst, src = getattr(merged, attr), getattr(s, attr)
+            for k, v in src.items():
+                dst[k] = 1 if (dst.get(k, 0) or v) else 0
         merged.flags = sorted(set(merged.flags) | set(s.flags))
     merged.won = all(s.won for s in stages)
     # The combats this record IS. Set last, and from the ORIGINALS, so the
@@ -289,6 +364,13 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
     reactions_by_name: dict[str, int] = {}
     cond_eval: dict[str, int] = {}
     cond_fired: dict[str, int] = {}
+    # EB-17: the card-flow tallies, all keyed by card id.
+    card_draws: dict[str, int] = {}
+    card_plays: dict[str, int] = {}
+    pwd: dict[str, int] = {}
+    dead: dict[str, int] = {}
+    ffc: dict[str, int] = {}
+    ffc_drawn: dict[str, int] = {}
     won = False
     turns = state.turn
 
@@ -321,6 +403,26 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
             cards_played += 1
             energy_by_turn[ev["turn"]] = (energy_by_turn.get(ev["turn"], 0)
                                           + ev["cost"])
+            cid = ev["card"]
+            card_plays[cid] = card_plays.get(cid, 0) + 1
+            # EB-17. `drawn_turn` is -1 for an instance that never reached
+            # hand by a draw, and -1 can never equal a turn number, so the
+            # comparison needs no separate "was it drawn" branch.
+            if ev.get("drawn_turn", -1) == ev["turn"]:
+                pwd[cid] = pwd.get(cid, 0) + 1
+            if ev.get("first_copy"):
+                # 0/1 per combat: the same first copy can be played twice in
+                # one fight (played, discarded, redrawn, played again) and
+                # that is still ONE copy that converted.
+                ffc[cid] = 1
+        elif e == "dead_in_hand":
+            cid = ev["card"]
+            dead[cid] = dead.get(cid, 0) + 1
+        elif e == "draw":
+            cid = ev["card"]
+            card_draws[cid] = card_draws.get(cid, 0) + 1
+            if ev.get("first_copy"):
+                ffc_drawn[cid] = 1      # 0/1 per combat, as above
         elif e == "pilot_regret":
             regrets += 1
         elif e == "extra_draw":
@@ -434,6 +536,12 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
         reactions_by_name=reactions_by_name,
         conditional_evaluated=cond_eval,
         conditional_fired=cond_fired,
+        card_draws=card_draws,
+        card_plays=card_plays,
+        played_when_drawn=pwd,
+        dead_in_hand=dead,
+        force_first_copy=ffc,
+        force_first_copy_drawn=ffc_drawn,
         flags=sorted(set(flags)))
 
 
@@ -625,6 +733,101 @@ def payoff_profile(all_stats: list[FightStats]) -> dict:
         "by_predicate": by_pred,
         "reaction_payoff": _slice(REACTION_PAYOFF_PREDICATES),
         "aura_payoff": _slice(AURA_PAYOFF_PREDICATES),
+    }
+
+
+def card_flow_profile(all_stats: list[FightStats]) -> dict:
+    """EB-17's aggregate hook: what happened to each card between the draw
+    that produced it and the pile it ended in, pooled over a battery.
+
+    One row per card id that the cohort DREW or PLAYED. A card the cohort
+    never saw is ABSENT rather than zero, the payoff_profile rule: "no deck
+    carried it" and "every deck carried it and nobody played it" are different
+    findings and pooling them is exactly what this instrument exists to stop.
+
+    Per-fight units denominate over COMBATS (O-1), like every other aggregate
+    here: a `gauntlet` record is two combats, each of which drew its own deck.
+
+    Reports numbers only. Whether a played-when-drawn rate is low, or a
+    dead-in-hand rate high enough to redesign a card, is a design reading and
+    is not made here -- which is the whole point of the gate this closes: the
+    sprint plan's rule is "do not use raw pick rate as the redesign trigger",
+    and a trigger needs a number before it can be argued about.
+
+    The `force_first_copy` block is the fight-side half of the register's
+    "force-first-copy paired winrate". `winrate_first_copy_played` and
+    `winrate_first_copy_dead` split the combats that DREW the first copy by
+    whether it converted; the delta between them is a within-arm split and is
+    deliberately NOT called the paired winrate, because the register's pairing
+    is two arms on the same seeds (a deck with the copy forced in against the
+    same deck without it) and tier0's kernel neither builds decks nor drafts.
+    Forcing the copy is the caller's; this is what the caller reads afterwards.
+    """
+    n = len(all_stats)
+    if n == 0:
+        return {}
+    combats = per_combat(all_stats)
+    nc = len(combats)
+
+    def _pool(attr: str) -> dict[str, int]:
+        out: dict[str, int] = {}
+        for s in combats:
+            for k, v in getattr(s, attr).items():
+                out[k] = out.get(k, 0) + v
+        return out
+
+    draws = _pool("card_draws")
+    plays = _pool("card_plays")
+    pwd = _pool("played_when_drawn")
+    dead = _pool("dead_in_hand")
+    ffc = _pool("force_first_copy")
+    ffc_drawn = _pool("force_first_copy_drawn")
+
+    def _split(cid: str) -> tuple[list, list]:
+        """The combats that DREW the first copy of `cid`, split by whether it
+        converted into a play. Combats that never drew it are in NEITHER --
+        they are the denominator of a different question."""
+        played = [s for s in combats
+                  if s.force_first_copy_drawn.get(cid)
+                  and s.force_first_copy.get(cid)]
+        deadc = [s for s in combats
+                 if s.force_first_copy_drawn.get(cid)
+                 and not s.force_first_copy.get(cid)]
+        return played, deadc
+
+    def _wr(rows) -> float | None:
+        """Winrate over `rows`, or None on an empty split. None and not 0.0:
+        an undefined winrate is not a loss, and a report that prints 0% for
+        "never happened" is a report that will be misread."""
+        return (sum(s.won for s in rows) / len(rows)) if rows else None
+
+    by_card: dict[str, dict] = {}
+    for cid in sorted(set(draws) | set(plays)):
+        d = draws.get(cid, 0)
+        seen = ffc_drawn.get(cid, 0)
+        played_rows, dead_rows = _split(cid)
+        by_card[cid] = {
+            "draws": d,
+            "draws_per_fight": d / nc,
+            "plays": plays.get(cid, 0),
+            "played_when_drawn": pwd.get(cid, 0),
+            "played_when_drawn_rate": (pwd.get(cid, 0) / d) if d else None,
+            "dead_in_hand": dead.get(cid, 0),
+            "dead_in_hand_rate": (dead.get(cid, 0) / d) if d else None,
+            "first_copy_drawn_combats": seen,
+            "force_first_copy": ffc.get(cid, 0),
+            "force_first_copy_rate": (ffc.get(cid, 0) / seen) if seen else None,
+            "winrate_first_copy_played": _wr(played_rows),
+            "winrate_first_copy_dead": _wr(dead_rows),
+        }
+    return {
+        "fights": n,
+        "combats": nc,
+        "by_card": by_card,
+        "draws": sum(draws.values()),
+        "plays": sum(plays.values()),
+        "played_when_drawn": sum(pwd.values()),
+        "dead_in_hand": sum(dead.values()),
     }
 
 
