@@ -183,11 +183,19 @@ def test_add_card_adds_exactly_that_card():
 
 def test_event_cards_are_never_offered_as_loot():
     """exterminate/squash are colorless event cards. If they leaked into a
-    character's reward pool they would be free uncommons for everyone."""
+    character's reward pool they would be free uncommons for everyone.
+
+    The three Ancients (R127 / EB-30m) ride the same mechanism -- no
+    RARITY_ODDS row, therefore no pool -- and are swept here rather than
+    somewhere of their own, because "which cards can never be looted" is one
+    question and should have one answer to read.
+    """
+    from tier0 import roster
     from tier05 import rewards
-    for ch in ("ref_ironclad", "klee", "furina"):
+    unreachable = {"exterminate", "squash"} | set(roster.ANCIENTS.values())
+    for ch in ("ref_ironclad", "klee", "furina", "kokomi"):
         ids = {c.id for cs in rewards.character_pool(ch).values() for c in cs}
-        assert not ids & {"exterminate", "squash"}
+        assert not ids & unreachable
 
 
 def test_downgrade_then_upgrade_order():

@@ -26,7 +26,7 @@ from pathlib import Path
 
 import yaml
 
-from tier0 import constants as C
+from tier0 import constants as C, roster
 from tier0.content import loader, upgrades
 from tier05 import draft, potions as potion_pool, rewards
 
@@ -63,6 +63,11 @@ OPTION_KEYS = frozenset({
     "card_reward", "card_screens", "pick_cards", "add_card", "random_card",
     "remove", "remove_random", "upgrade", "upgrade_random", "downgrade_random",
     "duplicate_deck", "transform", "curse", "upgraded",
+    # The Dusty Tome (R127 / EB-30m): add THIS character's Ancient, upgraded.
+    # A key rather than an `add_card` id because the card is per-character and
+    # the option cannot name one; `roster.ANCIENTS` is the lookup. Carrying it
+    # also GATES the event -- see `pool_for`.
+    "add_ancient",
     # objects
     "relic", "relic_id", "potion", "spend_potion",
     # gating / structure
@@ -100,7 +105,21 @@ def _act_key(act: int) -> str:
     return f"act{act + 1}"
 
 
-def pool_for(act: int) -> list[dict]:
+def _needs_an_ancient(event: dict) -> bool:
+    """Does any of this event's options grant the character's Ancient?
+
+    The first CHARACTER-conditional availability in the pool. Every other
+    gate in this module is per-option and lives in `available` (gold, potions,
+    an empty filtered draw), because every other option is offerable to
+    somebody. This one is not: `add_ancient` reads `roster.ANCIENTS`, the
+    reference anchors (ref_ironclad, real_*) are not roster characters and
+    have no Ancient, and an event whose payout does not exist for you must
+    not consume one of the run's Unknown rooms.
+    """
+    return any(o.get("add_ancient") for o in options_of(event))
+
+
+def pool_for(act: int, character: str | None = None) -> list[dict]:
     """Events reachable in this act: its own, the all-acts set, and anything
     from another act that declares this one in `also_acts` -- minus the hidden
     escalation stages (reachable only by `escalate`).
@@ -111,6 +130,11 @@ def pool_for(act: int) -> list[dict]:
     under `all` would leak them into acts the wiki says they never appear in,
     and duplicating the entry would let the two copies drift. Acts are 1-BASED
     here, matching the section names.
+
+    `character` is OPTIONAL and omitting it means "every event this act can
+    hold", which is what the content sweeps want. A run passes it, and gets
+    the events that character can actually meet -- today that is the Ancient
+    gate above and nothing else.
     """
     raw = _pool()
     want = act + 1
@@ -124,6 +148,8 @@ def pool_for(act: int) -> list[dict]:
             if key == _act_key(act) or want in (e.get("also_acts") or ()):
                 out.append(e)
     out += [e for e in (raw.get("all") or []) if not e.get("hidden")]
+    if character is not None and character not in roster.ANCIENTS:
+        out = [e for e in out if not _needs_an_ancient(e)]
     return out
 
 
@@ -164,10 +190,14 @@ def materialize(rng: random.Random, event: dict) -> dict:
             "id": event["id"], "variant": v.get("name", "?")}
 
 
-def roll_event(rng: random.Random, act: int, seen: set[str]) -> dict | None:
+def roll_event(rng: random.Random, act: int, seen: set[str],
+               character: str | None = None) -> dict | None:
     """Draw an unseen event for this act; None once the pool is exhausted
-    (the real game does not repeat an event within a run either)."""
-    choices = [e for e in pool_for(act) if e["id"] not in seen]
+    (the real game does not repeat an event within a run either).
+
+    `character` is forwarded to `pool_for`, so an event this character cannot
+    meet is never rolled and never lands in `seen`."""
+    choices = [e for e in pool_for(act, character) if e["id"] not in seen]
     if not choices:
         return None
     return choices[rng.randrange(len(choices))]
@@ -223,6 +253,12 @@ CURSE_HP = -14.0       # a permanent dead card; deliberately painful
 
 _LOOKAHEAD_DEPTH = 8   # ladders are 4 deep; this is a cycle guard, not a tune
 
+# Rarities a `transform:` option may not consume. Deliberately narrower than
+# C.ACQUISITION_ONLY_RARITIES: a curse or a basic really is transformable in
+# the real game, and only Ancient is filtered out of transform generation on
+# the C# side. See the citation at the transform branch.
+_NEVER_TRANSFORMED = frozenset({"ancient"})
+
 
 def _filtered_pool(st: EventState, spec: dict) -> list:
     """Character pool cards matching a `random_card` filter (type and/or
@@ -264,7 +300,14 @@ def option_value(opt: dict, st: EventState, _depth: int = 0) -> float:
     v += CARD_HP * opt.get("card_screens", 0)
     if opt.get("pick_cards"):
         v += CARD_HP * opt["pick_cards"]["take"]
-    if opt.get("add_card"):
+    if opt.get("add_card") or opt.get("add_ancient"):
+        # The Ancient rides `add_card`'s flat CARD_HP rather than getting a
+        # rarity premium. Same known limitation the Bugslayer comment names
+        # (events.yaml): the valuation cannot tell one named card from
+        # another, and inventing a number for "an upgraded Ancient" here
+        # would be a tuning decision wearing a pricing function's clothes.
+        # It does not change the pick -- the Tome's other option is a
+        # walk-away worth 0 -- but it is stated rather than assumed.
         v += CARD_HP
     if opt.get("random_card"):
         v += RANDOM_CARD_HP * opt["random_card"].get("n", 1)
@@ -340,12 +383,21 @@ def choose(rng: random.Random, event: dict, st: EventState) -> dict | None:
 # Resolution.
 # ---------------------------------------------------------------------------
 
-def _worst_cards(st: EventState, n: int) -> list[str]:
+def _worst_cards(st: EventState, n: int,
+                 exclude_rarities: frozenset[str] = frozenset()) -> list[str]:
     """The n cards the DRAFTER would least want, curses first. Reuses the
-    draft valuation so removal policy and draft policy cannot disagree."""
+    draft valuation so removal policy and draft policy cannot disagree.
+
+    `exclude_rarities` holds cards out of the CANDIDATE set entirely rather
+    than down-ranking them, so an excluded card can never be picked however
+    badly it scores. Only the transform branch passes it -- removal has no
+    such exclusion, because giving an Ancient up is a real choice.
+    """
     cards = [loader.peek_card(cid) for cid in st.deck_ids]
     scored = []
     for i, c in enumerate(cards):
+        if c.rarity in exclude_rarities:
+            continue
         if c.rarity == "curse":
             scored.append((-1000.0, i, c.id))
             continue
@@ -405,7 +457,15 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
             st.deck_ids.pop(rng.randrange(len(st.deck_ids)))
     if opt.get("transform"):
         # Remove the drafter's worst, add a random pool card of that rarity.
-        for cid in _worst_cards(st, opt["transform"]):
+        #
+        # ANCIENTS ARE NEVER TRANSFORMED (R127 / EB-30m), mirroring the
+        # decompiled CardFactory, where transform generation filters
+        # CardRarity.Ancient out upstream exactly as reward and shop
+        # generation do. Without the exclusion this is a one-way leak: an
+        # Ancient's rarity has no row in `rewards.character_pool`, so the
+        # `.get(rarity) or <whole pool>` fallback below would take the run's
+        # single once-per-run card and hand back a random draftable common.
+        for cid in _worst_cards(st, opt["transform"], _NEVER_TRANSFORMED):
             rarity = loader.peek_card(cid).rarity
             st.deck_ids.remove(cid)
             same = rewards.character_pool(st.character).get(rarity) \
@@ -417,6 +477,25 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
         st.deck_ids.append(opt["curse"])
     if opt.get("add_card"):
         st.deck_ids.append(opt["add_card"])
+    if opt.get("add_ancient"):
+        # The Dusty Tome grants the card ALREADY UPGRADED (C#
+        # DustyTome.AfterObtained), which is why ANCIENT_WITNESS pins these
+        # three at their upgraded numbers.
+        try:
+            ancient = roster.ANCIENTS[st.character]
+        except KeyError:
+            # Unreachable through `visit`: `pool_for` hides an add_ancient
+            # event from a character with no entry. Loud rather than a
+            # silent no-grant, because reaching it means that gate was
+            # bypassed and the run would otherwise carry on looking fine.
+            raise KeyError(
+                f"{st.character!r} has no Ancient card, so the Dusty Tome "
+                "has nothing to grant. Registered: "
+                f"{', '.join(roster.ANCIENTS)}. Adding one means a row in "
+                "tier0/roster.ANCIENTS and a card in "
+                "tier0/content/cards/ancients.yaml (EB-30m / R127)."
+            ) from None
+        st.deck_ids.append(ancient + upgrades.SUFFIX)
     if opt.get("random_card"):
         spec = opt["random_card"]
         pool = _filtered_pool(st, spec)
@@ -513,7 +592,7 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
 def visit(rng: random.Random, act: int, st: EventState, seen: set[str],
           held=None, bag=None, policy=None) -> None:
     """One Unknown-room-turned-event, escalation ladders included."""
-    event = roll_event(rng, act, seen)
+    event = roll_event(rng, act, seen, st.character)
     if event is None:
         return
     while True:

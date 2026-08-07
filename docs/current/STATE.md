@@ -42,7 +42,8 @@ absent on a fresh clone.
 
 ## Content inventory
 
-Live sim inventory (`docs/current/atlas/tier0-pilot-roster.md` §2): **298 cards, 5
+Live sim inventory (`docs/current/atlas/tier0-pilot-roster.md` §2): **301 cards
+(3 acquisition-only Ancient side-sheet rows), 5
 character sheets** (3 roster + 2 reference), **6 encounters, 15 pilot weight
 sets**. The battery encounters are frozen (`content/encounters/battery.yaml`,
 FROZEN 2026-07-19). Card sheets: `docs/klee-cards.yaml`, `docs/furina-cards.yaml`,
@@ -73,8 +74,8 @@ are never comparable across a stamp boundary unless labeled.
 
 | stamp | value | source | meaning |
 |---|---|---|---|
-| `C` `CONSTANTS_VERSION` | **7** | `tier0/constants.py` | R128: Test Subject's real mechanics (Enrage / Painful Stabs / Nemesis-Intangible, per-hit cap at direct-HP sites). C6 was Frozen-unified + alpha boss-room scope + shop-slot spec (R117/Q14). |
-| `RT` `RUNTEMPLATE_VERSION` | **8** | `tier0/constants.py` | R125/R126: widened tag shield reaches the smith + event upgrade; Orobas Ancient weights live. v7 was acts 2–3 event pools on real StS2 maps. |
+| `C` `CONSTANTS_VERSION` | **8** | `tier0/constants.py` | EB-30m/R127: `charge_per_turn` / `encore_per_turn` income powers, income pinned before the Salon upkeep (EB-2's parity target). Latent at the bump — no encounter or ratified deck carries them. C7 was R128's Test Subject mechanics (Enrage / Painful Stabs / Nemesis-Intangible, per-hit cap at direct-HP sites). |
+| `RT` `RUNTEMPLATE_VERSION` | **9** | `tier0/constants.py` | EB-30m: the Darv/Dusty Tome act-2 event — the single Ancient acquisition door, grants upgraded; act-2 event-pool odds move for every character. v8 was R125/R126 (widened tag shield reaches the smith + event upgrade; Orobas Ancient weights live). |
 | `D` `DRAFTER_VERSION` | **14** | `tier0/constants.py` | Generic-limb `core_complete` now requires an on-plan payoff. Held at 14 — the payoff-reach registration's pin (R121, six-step order; R125 widened the shield under the restores-not-redefines argument, no bump). |
 | `P` `POLICY_VERSION` | **6** | `tier05/draft.py` | EB-29t: Enrage skill tax + Intangible per-hit cap (the promoted Test Subject reads). v5 was EB-24p's `reaction_triggered_this_turn` read; v4 was R124's both-Spotlight-modes read. |
 

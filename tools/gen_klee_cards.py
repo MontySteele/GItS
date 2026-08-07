@@ -769,6 +769,14 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "encore",
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
 BONUS_OPS = ("detonate", "move_bombs", "modify_bombs")
 
+# `ancient` is DELIBERATELY ABSENT, and the KeyError a row of that rarity
+# would raise here is enforcement rather than a gap. Every Ancient's C# class
+# is hand-written (JumpyDumptyMkOmega.cs and the two beside it) and witnessed
+# by tools/lint_handwritten_parity.py's ANCIENT_WITNESS; generating one would
+# mean two classes for one card, free to drift apart. The rows live in a
+# side-sheet this generator never reads (tier0/content/cards/ancients.yaml),
+# so the KeyError is the second lock on an already-shut door -- keep it shut.
+# R127 / EB-30m.
 RARITY_CS = {
     "basic": "CardRarity.Basic",
     "common": "CardRarity.Common",

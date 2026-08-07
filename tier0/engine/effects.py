@@ -2516,6 +2516,28 @@ def player_turn_start_triggers(state: CombatState) -> None:
         # will not see this gain unless it is rerouted on purpose.
         p.block += n
         state.emit("block", amount=n)
+    # --- the two Ancient income powers (R127 / EB-30m) ------------------
+    # PLACED ABOVE `salon_tick` DELIBERATELY, and above the whole income
+    # group below it (celestial_gift / masque_red_death / spark_per_turn all
+    # sit AFTER the upkeep). That asymmetry is the point rather than an
+    # accident of insertion order: EB-2 is the C#-side race between
+    # SalonPowers' upkeep and FurinaResources' Encore income inside one
+    # `AfterPlayerTurnStart` broadcast, and this is the sim declaring which
+    # way that race is supposed to fall -- income BEFORE upkeep, so the
+    # card's printed "at the start of your turn" funds the Salon ticks of
+    # the same turn instead of the next one. Do not tidy these down to join
+    # the other per-turn blocks; tier0/tests/test_eb30m_ancients.py pins the
+    # order against exactly that edit.
+    #
+    # The C# broadcast also fires AFTER the draw while this hook runs BEFORE
+    # it. That divergence is inert for these two: neither power reads the
+    # hand, the deck or the energy -- each only moves a meter.
+    n = p.powers.get("charge_per_turn", 0)         # Princess of Watatsumi
+    if n:
+        resources.gain_charge(state, n, "charge_per_turn")
+    n = p.powers.get("encore_per_turn", 0)         # All the World's a Stage
+    if n:
+        resources.gain_encore(state, n, source="encore_per_turn")
     salon_tick(state)                                   # Furina (kickoff §5)
     # Nicole -- REDESIGNED 2026-07-26 (red-pen, item 4). Was "+N flat attack
     # damage, and 4 Block each turn"; is now "gain N Strength and 4 Block each

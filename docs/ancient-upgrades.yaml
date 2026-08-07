@@ -1,0 +1,25 @@
+# Lifecycle: LIVING — expected to change; read it to work on the project.  (lint-ok)
+# ANCIENT upgrade deltas (R127, EB-30m) — companion file to
+# tier0/content/cards/ancients.yaml.
+#
+# WHY THIS IS A SEPARATE SHEET. These three cards have no row in any
+# docs/<char>-cards.yaml, because their C# classes are hand-written and
+# codegen must never try to emit them. Folding the deltas into a character
+# upgrade sheet would put them back in front of the generator:
+# `tools/gen_klee_cards.UPGRADE_SHEETS` reads exactly the three character
+# files and this one is deliberately absent from it, the same arrangement
+# `ref-ironclad-upgrades.yaml` already has. Registration is therefore in
+# `tier0/content/upgrades.py` UPGRADE_SHEETS ONLY.
+#
+# THESE DELTAS ARE THE PLAYED NUMBERS, not a smithing option. The Dusty Tome
+# grants the Ancient already upgraded (C# DustyTome.AfterObtained), so the
+# `+` form is what a run actually holds and what
+# tools/lint_handwritten_parity.py's ANCIENT_WITNESS pins. The base rows exist
+# for the smith-less acquisition paths the C# headers name.
+#
+# Grammar authority: docs/upgrade-conventions.md. No new applier keys were
+# needed — `damage`, `bomb_damage` and `power_amount` all already exist.
+
+jumpy_dumpty_mk_omega: {damage: +4, bomb_damage: +4}   # hits 12->16; bomb 12->16
+princess_of_watatsumi: {power_amount: +1}              # 3->4 Charge per turn
+all_the_worlds_a_stage: {power_amount: +2}             # 5->7 Encore per turn
