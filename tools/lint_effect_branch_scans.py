@@ -1,25 +1,15 @@
 #!/usr/bin/env python3
 """L4: nothing may read a card's `effects` as a flat list by accident.
 
-THE INCIDENT (S1 parity sweep, review/parity-sweep/triage-memo.md L4).
 A card row's `effects` is a tree -- `conditional` hangs `then:` and `else:`
-lists off itself -- and three unrelated tools had each written their own
-`for eff in card["effects"]` loop. Every one of them was silently answering
-its question about the TOP LEVEL only:
-
-  * `sparkly_explosion` places two Bombs inside its kill-conditional's
-    `then:`. `gen_klee_cards.emit`'s `includes_bomb_rules` scan is flat, so
-    the shipped card names the Bomb mechanic and ships
-    `includesBombRules: false` -- no rules text for the thing it does.
-  * `pearl_barrage` pays a printed 5 through `amount_formula.base`, which
-    `role_tempo`'s `pays_at_zero` never read, so the card is tagged as
-    paying nothing on an empty pile.
-  * `rider_tip_args` knew the fanfare/salon/companion rider formulas and not
-    `1_per_2_charge`, so `all_streams_flow`'s rate is displayed nowhere.
-
-Fixing three call sites would not have closed the class; the fourth author
-writes the fourth flat loop. So this gate has two halves, and they fail in
-opposite directions on purpose.
+lists off itself -- so a hand-rolled `for eff in card["effects"]` loop
+silently answers its question about the TOP LEVEL only. Three unrelated
+tools had done exactly that (S1 parity sweep, finding L4; the incident
+record reads at
+`git show pre-simplification-2026-08-06:review/parity-sweep/triage-memo.md`),
+and fixing the call sites would not have closed the class -- the fourth
+author writes the fourth flat loop. So this gate has two halves, and they
+fail in opposite directions on purpose.
 
 SOURCE half -- no scanner iterates the field raw
 ------------------------------------------------

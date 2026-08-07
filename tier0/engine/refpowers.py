@@ -344,7 +344,8 @@ def result_pile(state: CombatState, card: Card) -> str:
     A played Power card is removed from combat, so a deck made ENTIRELY of
     Power cards erases itself: the draw pile empties, the discard pile never
     refills it, and the fight runs out its turn limit with an empty hand
-    (S13 line `stall_softlock_5`, `review/redteam/exploit-ledger.md` X14(c)).
+    (S13 line `stall_softlock_5`, exploit ledger X14(c) — retired from HEAD;
+    `git show pre-simplification-2026-08-06:review/redteam/exploit-ledger.md`).
 
     That is INTENDED and there is deliberately NO GUARD. Verbatim: "You deck
     out... don't do that." -- the StS precedent, where decking yourself out is

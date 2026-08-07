@@ -1,10 +1,12 @@
 """EB-20: the Encore economy census (the instrument for the D8 lever).
 
-The requirement, verbatim from `docs/current/BACKLOG.md`:
+The requirement, as the EB-20 BACKLOG row filed it (the row has since
+retired into `EB-20w` -- run-layer wiring -- and the census itself
+corrected the filed counts to 18/82 granting, 5 spending; see QUEUE
+`D8-def`):
 
-    Instrumentation for D8 (Encore economy census: 19/78 grant, 1 spends,
-    absorption automatic) -- measurement open though the lever is
-    ruled-direction, unpicked.
+    Instrumentation for D8 (Encore economy census) -- measurement open
+    though the lever is ruled-direction, unpicked.
 
 D8's DIRECTION is ruled and its VALUE is [USER]'s to pick. Nothing in this
 file, in `metrics.encore_census_profile` or in `report.print_encore_census`

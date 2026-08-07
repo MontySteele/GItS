@@ -1,24 +1,18 @@
 #!/usr/bin/env python3
 """L7: the `# a -> b` arithmetic on an upgrade row must still be true.
 
-THE INCIDENT (SYS-11a/b, S1 parity sweep). An upgrades sheet row is two
-claims wearing one line:
+An upgrades sheet row is two claims wearing one line:
 
     surging_shoal:  {damage: +2}          # 4->6
 
 the DELTA (machine-read, applied by tier0/content/upgrades.py) and the
 ARITHMETIC (prose, read by humans, applied by nobody). When a card is
 repriced, the delta usually does not move -- it is the BASE that moves --
-so the delta stays correct and the arithmetic silently stops being. The
-sweep found six of them on `kokomi-upgrades.yaml` alone, and
-`surging_shoal`'s had been wrong through two successive repricings, "in
-the file whose whole job is to say what a card becomes" (its own note, now
-in the sheet).
-
-That is the worst shape a stale comment can take: it is not vague, it is
-ARITHMETIC. A reader checks it, the numbers add up, and they conclude the
-row is verified -- when what they verified is that the old base and the old
-result still differ by the delta.
+so the delta stays correct and the arithmetic silently stops being true.
+That stale comment is the worst shape: a reader checks it, the numbers add
+up, and they conclude the row is verified -- when what they verified is
+that the old base and the old result still differ by the delta. (The
+incident class is SYS-11a/b, S1 parity sweep.)
 
 WHY A SCAN RATHER THAN A CURATED CLAIM LIST. `test_pulse_multiplier_claims`
 argues the other way for prose ("a regex cannot tell a record from a claim;
@@ -26,9 +20,7 @@ an author can"), and it is right about prose. It is not right about this
 file. Upgrade rows are UNIFORM: one id, one delta mapping, and a comment
 whose `a -> b` is by convention about THIS row's card. So the check is
 mechanical, and both halves of it are anchored in data the lint reads
-rather than in a table someone has to maintain -- which matters, because a
-registry of 200 upgrade rows is a second copy of the sheet and would go
-stale in exactly the way the sheet did.
+rather than in a table someone has to maintain.
 
 Historical records DO occur here, and they are the norm on this file rather
 than the exception: a repricing that moves a base is usually NARRATED in the
@@ -59,10 +51,9 @@ TWO CHECKS PER PAIR, and they catch different things:
 
 Neither alone is enough: SYS-11a's rows all passed the arithmetic check.
 
-Plus SYS-11b, one line of the same family: a comment claiming a CAP is
-preserved ("proc cap 3 unchanged") when the card row carries no such cap
-field. The uncap-all ruling of 2026-07-24 dropped five stack ceilings and
-left five comments still promising them.
+Plus the cap check, one line of the same family: a comment claiming a CAP
+is preserved ("proc cap 3 unchanged") when the card row carries no such cap
+field (the uncap-all ruling of 2026-07-24 is how those go stale).
 
 Run:  python tools/lint_upgrade_comment_arithmetic.py [sheet ...]
 Exit 0 clean; exit 1 with one finding per line.

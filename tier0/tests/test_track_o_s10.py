@@ -114,7 +114,9 @@ def test_scripted_card_absent_from_hand_is_a_miss_and_blocks_verification(
 def test_run_line_is_deterministic_for_a_fixed_seed(harness, a_real_line):
     """The ledger's re-executability claim rests on this.
 
-    `review/redteam/exploit-ledger.md` states every line "is re-executable ...
+    The S13 exploit ledger (retired from HEAD; read it at
+    `git show pre-simplification-2026-08-06:review/redteam/exploit-ledger.md`)
+    states every line "is re-executable ...
     reproduces replay-results.json deterministically per seed". If two runs of
     one line disagree, no verdict in that ledger means anything.
     """
