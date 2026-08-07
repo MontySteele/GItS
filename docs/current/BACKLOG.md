@@ -68,7 +68,6 @@
 | `EB-12` | Understudy Defect 14 — `bridge_unreachable` by timeout with the process alive; one observation, no reproduction; **FILED, NOT FIXED** | eng-backlog §2 |
 | `EB-13` | Understudy Defect 15 — `no_progress`, the map↔rest_site bounce (seed `43MLG7MG9L`); **FILED, NOT FIXED** | eng-backlog §2 |
 | `EB-15` | The seed's `lobby` route never fired in three live runs; the lobby arm is retained and reports itself — nobody should read "two routes work" out of it | eng-backlog §2 |
-| `EB-19/L` | `test_reaction_phase_parity`'s PHASE_LEDGER is keyed on *phase* and has no row shape for **broadcast co-tenancy** ("these two models share a broadcast and the sim orders them") — the shape that produced EB-2 and all three `EB-19/races-*` rows. Build the companion ledger so the class is caught structurally | fix-sweep-4; EB-19 sweep |
 
 ## art — production work (the *picks* are [USER]'s in QUEUE; these are not)
 
