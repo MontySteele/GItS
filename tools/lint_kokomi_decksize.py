@@ -32,6 +32,10 @@ from pathlib import Path
 
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from tools.effect_walk import iter_effects as _walk  # noqa: E402
+
 # Every op that MINTS a card into a pile. The first three were the whole
 # list until the v0.5 sheet fill wanted a Commander common that duplicates
 # a mustered unit -- at which point `copy_companion_in_hand` turned out to
@@ -46,13 +50,6 @@ CREATE_OPS = {
 }
 CHECKED_RARITIES = {"basic", "common"}
 ALL_SENTINEL = 10                    # MAX_HAND_SIZE: "all" burns the hand
-
-
-def _walk(effects: list[dict]):
-    for fx in effects or []:
-        yield fx
-        yield from _walk(fx.get("then", []))
-        yield from _walk(fx.get("else", []))
 
 
 def _amount(fx: dict) -> int:

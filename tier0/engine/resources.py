@@ -261,7 +261,20 @@ def note_fanfare_read(state: CombatState, kind: str,
                at_floor=p.fanfare <= p.fanfare_floor)
 
 
-def gain_encore(state: CombatState, n: int) -> None:
+# EB-20 (D8's census): what a caller writes when it hands the buffer points
+# or takes them away without saying where from. A BUCKET, not a silence --
+# `gain_encore` and `spend_encore` used to be the only meters in this module
+# with no provenance at all (contrast `gain_burst`, whose whole docstring is
+# about why it has some), so a source added here and forgotten at a new call
+# site shows up as a labelled row in the census rather than as a number that
+# quietly belongs to nobody. Every engine call site names itself; the default
+# exists for direct callers that are probing the primitive itself (the pin
+# tests), where a fabricated source would be a fiction in the log.
+UNATTRIBUTED = "unattributed"
+
+
+def gain_encore(state: CombatState, n: int, source: str = UNATTRIBUTED,
+                card: str | None = None) -> None:
     """Fill the buffer. Prints NO Fanfare (Track A, RULED 2026-07-28).
 
     Fanfare prints when Encore goes DOWN, never when it goes up. The
@@ -270,21 +283,35 @@ def gain_encore(state: CombatState, n: int) -> None:
     was 47% of all generation under the greedy pilot and 62% under the
     stoker. A flywheel whose majority output is itself is not a flywheel with
     a tuning problem; it is a flywheel with a shape problem.
+
+    `source` is the MECHANISM that filled the buffer and `card` the card id
+    that caused it, or None when no card did (EB-20, emit-only). The two are
+    kept apart rather than folded into one string on the `gain_burst`
+    precedent for `source`: a Salon bow and a Spotlight trickle are different
+    mechanisms that a card may or may not stand behind, and a per-card census
+    that had to parse mechanism names out of its own keys would be pooling
+    the two questions D8 asks separately.
     """
     p = state.player
     p.encore += n
-    state.emit("gain_encore", amount=n, total=p.encore)
+    state.emit("gain_encore", amount=n, total=p.encore, source=source,
+               card=card)
 
 
-def spend_encore(state: CombatState, n: int) -> int:
+def spend_encore(state: CombatState, n: int, source: str = UNATTRIBUTED,
+                 card: str | None = None) -> int:
     """Drain up to n from the buffer; returns what was actually drained.
     Spending is Fanfare flux (the drain->refill->spend cycle) and burst
-    particles (kickoff §1: her economy leans on Encore spend)."""
+    particles (kickoff §1: her economy leans on Encore spend).
+
+    `source`/`card`: see gain_encore. The amount emitted is what was actually
+    DRAINED, never what was asked for -- a spend against a dry buffer emits
+    nothing at all, and the shortfall is `encore_overdraw`'s to report."""
     p = state.player
     spent = min(p.encore, n)
     if spent:
         p.encore -= spent
-        state.emit("encore_spent", amount=spent)
+        state.emit("encore_spent", amount=spent, source=source, card=card)
         gain_fanfare(state, spent * C.FANFARE_PER_ENCORE_SPENT, "encore_spent")
         if p.burst_max:
             gain_burst(state, spent * C.BURST_PER_ENCORE_SPENT,
@@ -314,19 +341,25 @@ def spend_encore(state: CombatState, n: int) -> int:
     return spent
 
 
-def spend_encore_or_hp(state: CombatState, n: int) -> None:
+def spend_encore_or_hp(state: CombatState, n: int,
+                       source: str = UNATTRIBUTED,
+                       card: str | None = None) -> None:
     """The overdraw primitive shared by the spend_encore op and the Salon
     tick upkeep: drain Encore first, any shortfall drains TRUE HP --
-    greed is legal and priced (kickoff §4/§5)."""
-    spent = spend_encore(state, n)
+    greed is legal and priced (kickoff §4/§5).
+
+    `source`/`card` pass straight through to both halves, so the census can
+    read a spend and the HP it overdrew off the same provenance."""
+    spent = spend_encore(state, n, source, card)
     short = n - spent
     if short:
         state.player.hp -= short
-        state.emit("encore_overdraw", amount=short)
+        state.emit("encore_overdraw", amount=short, source=source, card=card)
         note_player_hp_loss(state, short)
 
 
-def absorb_into_encore(state: CombatState, dmg: int) -> int:
+def absorb_into_encore(state: CombatState, dmg: int,
+                       source: str = UNATTRIBUTED) -> int:
     """Route incoming player damage through the Encore buffer AFTER block.
     Returns the damage that still reaches HP. The emitted event is what
     metrics route to A4 -- it must never be folded into `blocked`.
@@ -342,12 +375,17 @@ def absorb_into_encore(state: CombatState, dmg: int) -> int:
     buffer eats it, through note_player_hp_loss if HP does. Before this
     change absorbed damage printed 0 and the same hit paid differently
     depending on a buffer the player could not see the far side of.
+
+    `source` is WHAT the buffer ate (EB-20, emit-only): an enemy attack that
+    got past Block, or a DoT tick, which is the only other thing that reaches
+    this path. No `card` key -- absorption is automatic and no card of hers
+    causes it, which is itself one of D8's three stated facts.
     """
     p = state.player
     absorbed = min(p.encore, dmg)
     if absorbed:
         p.encore -= absorbed
-        state.emit("encore_absorb", amount=absorbed)
+        state.emit("encore_absorb", amount=absorbed, source=source)
         gain_fanfare(state, absorbed * C.FANFARE_PER_ENCORE_ABSORBED,
                      "encore_absorbed")
     return dmg - absorbed

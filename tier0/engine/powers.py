@@ -127,7 +127,7 @@ def on_turn_start(state: CombatState, fighter: Fighter) -> None:
         hp_loss = dot
         if getattr(fighter, "encore", 0) > 0:
             from tier0.engine import resources
-            hp_loss = resources.absorb_into_encore(state, dot)
+            hp_loss = resources.absorb_into_encore(state, dot, "dot")
         # Overkill clamped OUT of the emitted accounting, per the EPOCH 1
         # reactions._splash fix: HP still takes the full hit, but a 5-tick into
         # a 2 HP add is 2 points of damage dealt, not 5. Nothing read dot_tick

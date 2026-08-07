@@ -195,11 +195,11 @@ ancient:
     # MODELLED NARROWLY AND ON PURPOSE ([USER] ruling 2026-07-26, option 1).
     # Vanilla's Touch of Orobas swaps the starting relic for an upgraded form,
     # so what it DOES depends entirely on who holds it -- there is no single
-    # effect to model. Rather than build a relic-upgrade table for two known
-    # cases, each character's variant is its own owner-gated entry. Furina's
-    # (R2, always-on Spotlight selector) and Kokomi's are NOT here yet; when
-    # they land they are siblings of this row, and the day there is a third
-    # roster character wanting one, that is the day the table earns itself.
+    # effect to model. Rather than build a relic-upgrade table for three known
+    # cases, each character's variant is its own owner-gated entry: this row,
+    # `touch_of_orobas_kokomi` and `touch_of_orobas_furina` below. The day
+    # there is a FOURTH roster character wanting one is the day the table
+    # earns itself; three siblings that share no effect vocabulary do not.
     #
     # Klee's upgraded form is Dodoco Tales (displayed as "Explosive Frags"
     # until R69 renamed it off the card): her per-detonation Spark income
@@ -211,6 +211,79 @@ ancient:
     owner: [klee]
     effects:
       - {hook: combat_start_spark, amount: 3}
+
+  touch_of_orobas_kokomi:
+    name: "Pearl of Insight"        # Orobas (Act 2): Kokomi's upgraded starter
+    # Sibling of touch_of_orobas_klee above; same ruling, same narrow shape.
+    # C# `PearlOfInsightRelic` (klee-mod/KleeCode/Relics/UpgradedStarterRelics.cs).
+    #
+    # DOUBLED PER-EXHAUST ACCRUAL, and it REPLACES the base rate rather than
+    # adding to it -- the funnel picks one value or the other
+    # (`KokomiResourceHooks.ExhaustCharge/ExhaustBurst`), so these are RATES,
+    # not riders. Both numbers are `KokomiConstants.<x> * 2` in C#, i.e.
+    # CHARGE_PER_EXHAUST 1 -> 2 and KOKOMI_BURST_PER_EXHAUST 2 -> 4. The
+    # doubling is the upgrade's design; the base halves are tier0 constants.
+    #
+    # Shape UNLIKE Klee's on purpose, and the difference is the C#'s, not a
+    # modelling choice: hers is a RATE where his is a windfall. The rate that
+    # was rejected at red-pen was a rate on a DETONATION economy, which
+    # compounds with every bomb in the deck; an exhaust rate is paid once per
+    # card the deck spends and is bounded by the deck's own card economy.
+    #
+    # A no-op with a lying tooltip until EPOCH 2 / D1 (audit sec.1.1): these
+    # constants existed C#-side and were read by nothing except the relic's own
+    # description string, so the panel promised doubled accrual and the funnel
+    # granted the base rate. The sim half is this row; the engine reads it at
+    # the funnel (tier0/engine/relics.py `exhaust_accrual`), never restating
+    # the numbers at the grant site, which is how the two came to disagree.
+    #
+    # The companion reward slot rides along UNCHANGED and needs no row here:
+    # it is a C#-side card-reward hook with no tier05 counterpart, and the sim
+    # never removes a starter's own hooks.
+    owner: [kokomi]
+    effects:
+      - {hook: charge_per_exhaust, amount: 2}
+      - {hook: burst_per_exhaust, amount: 4}
+
+  touch_of_orobas_furina:
+    name: "The Curtain Never Falls"  # Orobas (Act 2): Furina's upgraded starter
+    # Sibling of the two rows above. RATIFIED 2026-07-26 as red-pen ruling R2,
+    # a [USER] design superseding all three worksheet options and deliberately
+    # OVERRIDING the sprint's "no new behaviour in a starter upgrade" rule by
+    # user authority. C# `CurtainNeverFalls`
+    # (klee-mod/KleeCode/Relics/UpgradedStarterRelics.cs).
+    #
+    # THE ONLY ROW IN THIS FILE WITH NO NUMBER, because the relic has none: it
+    # is a FLAG. Every gate lives in C# `SpotlightSystem`, keyed off
+    # `BothModes`, and the sim mirrors that shape -- the hook carries no
+    # amount and `tier0/engine/relics.py spotlight_both_modes` is the single
+    # place the four Spotlight readers ask about it. A relic that is a flag
+    # cannot drift from the system that reads it.
+    #
+    # WHAT IT DOES, all three halves ruled together:
+    #   1. Both Spotlight modes permanently in force -- her cards mint Fanfare
+    #      (Center Stage) AND Companions are multiplied (Guest Cast).
+    #   2. R2 reading 1 ([USER], ruled during implementation): the upgrade
+    #      removes the modes' EXCLUSIVITY, never their TARGETING. No numeric
+    #      boost leaks onto her own cards and her Companions still mint no
+    #      Fanfare. What she gains is that she never has to choose.
+    #   3. Conditions keying off "moved the Spotlight this turn" are ALWAYS
+    #      ON. Not a side effect -- with the selector gone there is no
+    #      designation event left to move, so without it every selector-payoff
+    #      card on her sheet would become dead text the moment the relic was
+    #      taken, and the upgrade would silently subtract from her pool.
+    # And the cost, which is real: THE SELECTOR CARD STOPS ARRIVING. With both
+    # modes on it has nothing left to choose.
+    #
+    # THIS ROW CLOSES A GAP THE C# RECORDED AGAINST ITSELF. `CurtainNeverFalls`
+    # shipped saying "SIM PARITY: NOT MODELLED ... tier05 has no Spotlight-mode
+    # model to make always-on", so a tier-0.5 Furina never received the upgrade
+    # and its value was unpriced. The premise was the inaccurate half: tier0
+    # models the modes exactly (`Player.spotlight`, one designation at a time),
+    # and what was missing was not a model but the always-on read.
+    owner: [furina]
+    effects:
+      - {hook: spotlight_both_modes}
 
   yummy_cookie:
     name: "Yummy Cookie"            # Tezcatara (Act 2): upgrade 4 cards

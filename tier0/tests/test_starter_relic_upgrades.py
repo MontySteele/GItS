@@ -273,3 +273,84 @@ def test_the_kokomi_exhaust_funnel_reads_the_relic_not_the_base_constant():
         "it does")
     assert "PearlOfInsightRelic.ChargePerExhaust" in resources
     assert "PearlOfInsightRelic.BurstPerExhaust" in resources
+
+
+# --- EB-31: every upgraded starter is modelled in the sim too -------------
+
+# Upgraded-form class -> the tier05 ancient-relic row that models it.
+#
+# WHY THIS MAP EXISTS. Touch of Orobas is modelled NARROWLY ([USER] ruling
+# 2026-07-26, option 1): no relic-upgrade table, one owner-gated row per
+# character. The cost of that shape is that "is this variant modelled?" has no
+# structural answer -- a fourth character could ship an upgraded starter with
+# no sim row and nothing would notice, which is exactly what happened to
+# Furina and Kokomi for eleven days (EB-31). Klee's row landed at red-pen and
+# theirs did not, and the C# recorded the gap against itself
+# ("SIM PARITY: NOT MODELLED") rather than anything checking it.
+#
+# Read as: the sim ROW must exist and be owner-gated to the right character.
+# What it DOES is asserted behaviourally in test_orobas_upgraded_starters.py;
+# this is the membership gate, in the file that owns the Orobas invariants.
+SIM_ROWS = {
+    "ExplosiveFrags": ("touch_of_orobas_klee", "klee"),
+    "PearlOfInsightRelic": ("touch_of_orobas_kokomi", "kokomi"),
+    "CurtainNeverFalls": ("touch_of_orobas_furina", "furina"),
+}
+
+
+def _ancient_pool() -> dict:
+    """The tier05 ancient pool, read as YAML rather than imported.
+
+    Deliberately not `from tier05 import relics`: this is a tier0 test and the
+    layer boundary runs the other way (tier05 imports tier0, never the
+    reverse). test_relics_combat_start.py keeps the same discipline by
+    inlining the effect dicts verbatim.
+    """
+    import yaml
+    path = _ROOT / "tier05" / "content" / "relics.yaml"
+    return (yaml.safe_load(path.read_text(encoding="utf-8"))
+            or {}).get("ancient") or {}
+
+
+def test_every_upgraded_starter_has_an_owner_gated_sim_row():
+    pool = _ancient_pool()
+    for upgraded, (relic_id, character) in SIM_ROWS.items():
+        assert relic_id in pool, (
+            f"{upgraded} is an upgraded starter with no row in "
+            f"tier05/content/relics.yaml. A tier-0.5 {character} never "
+            f"receives the upgrade, so no cell measures it and its value is "
+            f"unpriced -- the EB-31 gap, reopened.")
+        owner = pool[relic_id].get("owner")
+        assert owner == [character], (
+            f"{relic_id} must be owner-gated to [{character!r}]; got "
+            f"{owner!r}. An ungated Orobas variant is offered to characters "
+            f"whose kit it does not touch, which prices it against the wrong "
+            f"runs.")
+
+
+def test_no_upgraded_starter_is_modelled_without_being_declared_here():
+    """The other direction: a sim row whose C# class this map does not know.
+
+    Cheap, and it is the half that rots. Someone adding a fourth variant is
+    far likelier to write the yaml row (visible, adjacent to its siblings)
+    than to find this map.
+    """
+    modelled = {rid for rid in _ancient_pool()
+                if rid.startswith("touch_of_orobas_")}
+    declared = {relic_id for relic_id, _ in SIM_ROWS.values()}
+    assert modelled == declared, (
+        f"tier05 models {sorted(modelled - declared)} with no SIM_ROWS entry "
+        f"(or SIM_ROWS claims {sorted(declared - modelled)} which is not "
+        f"modelled). The map is the only thing relating the two.")
+
+
+def test_the_sim_row_set_matches_the_starter_set():
+    """No starter may be upgraded C#-side and unmodelled sim-side.
+
+    STARTERS is the C#-side curated set and SIM_ROWS the sim-side one; keeping
+    them equal is what makes a fourth character's gap loud in both directions
+    at once, instead of only in whichever file its author happened to open.
+    """
+    assert set(STARTERS.values()) == set(SIM_ROWS), (
+        f"C# upgraded forms {sorted(set(STARTERS.values()))} and sim-modelled "
+        f"forms {sorted(SIM_ROWS)} disagree.")

@@ -215,11 +215,22 @@ UNMIRRORED: dict[str, str] = {
         "touch_of_orobas_klee landed -- OpeningSparks is now MIRRORED against "
         "that row.",
     "PearlOfInsightRelic.ChargePerExhaust":
-        "derived: KokomiConstants.ChargePerExhaust * 2. The compiler enforces "
-        "the link, so mirroring the doubling here would just be a second place "
-        "to forget. The x2 itself is the upgrade's design, not a sim number.",
+        "derived: KokomiConstants.ChargePerExhaust * 2, an EXPRESSION rather "
+        "than a literal, so parse_number cannot read it and MIRRORED cannot "
+        "compare it. The compiler enforces the link to the base constant, "
+        "which is itself mirrored. "
+        "NOTE: this entry used to add 'the x2 itself is the upgrade's design, "
+        "not a sim number', which stopped being true when "
+        "touch_of_orobas_kokomi landed -- the doubled value IS a sim number "
+        "now (tier05/content/relics.yaml, `charge_per_exhaust: 2`), and the "
+        "only thing still keeping this row here is the C# side not being a "
+        "literal. Make it one and this becomes MIRRORED against "
+        "_ancient_hook('touch_of_orobas_kokomi', 'charge_per_exhaust'), on "
+        "ExplosiveFrags.OpeningSparks's precedent.",
     "PearlOfInsightRelic.BurstPerExhaust":
-        "derived: KokomiConstants.BurstPerExhaust * 2, same reasoning.",
+        "derived: KokomiConstants.BurstPerExhaust * 2, same reasoning and the "
+        "same stale-note correction -- its sim counterpart is "
+        "touch_of_orobas_kokomi's `burst_per_exhaust: 4`.",
 
     # --- surfaced by widening the lint past `int` (§4.7 shop sprint) ---
     "FurinaParityVectors.DecayFraction":

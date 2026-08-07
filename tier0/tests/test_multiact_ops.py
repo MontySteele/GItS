@@ -172,6 +172,39 @@ def test_phased_boss_fight_runs_through_both_bars():
     assert end.player.alive
 
 
+def test_turn_start_damage_that_empties_a_bar_revives_instead_of_winning():
+    """EB-29a: Salon upkeep damages enemies inside player_turn_start_triggers,
+    which sat between the last _settle_phases and the state.over early-return.
+    A phased boss killed there ended the combat as a WIN with bars still
+    queued -- 66% of Furina/test_subject wins were counterfeit."""
+    e = _phased_boss()
+    e.hp = 6                                     # crabaletta's tick kills it
+    st = make_state(enemies=[e])
+    st.player.draw_pile = _clog()
+    st.player.salon = ["crabaletta"]
+    st.player.encore = 5
+    combat._player_turn(st, NULL_PILOT)
+    assert e.alive and e.max_hp == 30            # revived into the queued bar
+    assert not st.over
+
+
+def test_revive_costs_the_boss_its_respawn_turn():
+    """EB-29b: the real Test Subject spends a full enemy turn reviving and
+    deals nothing on it (dossier :51-58,129,134); the sim revived instantly,
+    silently denying the player one free turn per knockdown."""
+    e = _phased_boss()
+    st = make_state(enemies=[e])
+    e.hp = 0
+    combat._settle_phases(st)
+    assert e.sleep_turns == 1
+    hp_before = st.player.hp
+    combat._enemy_turn(st, e)                    # the respawn turn: skipped
+    assert st.player.hp == hp_before
+    assert e.current_intent()["amount"] == 9     # intent did not advance
+    combat._enemy_turn(st, e)                    # next turn: acts normally
+    assert st.player.hp < hp_before
+
+
 # --- intent ramps (2026-07-24: the Test Subject act-3 diagnosis) ------------
 #
 # `ramp` is per TURN and counts from the start of the enemy's CURRENT phase;
@@ -268,6 +301,9 @@ def test_test_subject_second_bar_opens_at_its_authored_number():
     st.turn = 12                              # kill. A realistic first bar.
     boss.hp = 0
     combat._settle_phases(st)
+    st.turn += 1
+    combat._enemy_turn(st, boss)   # EB-29b: the revive spends the respawn
+    #                                turn first; the curve starts after it
     seen = []
     for _ in range(6):
         if boss.current_intent()["kind"] == "attack":

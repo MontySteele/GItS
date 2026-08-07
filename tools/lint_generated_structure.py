@@ -67,6 +67,7 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from tools.effect_walk import iter_effects  # noqa: E402
 from tools.gen_klee_cards import (  # noqa: E402
     FURINA_PROFILE,
     KLEE_PROFILE,
@@ -112,7 +113,13 @@ class Mechanic:
 
 
 def _effects(card: dict) -> list[dict]:
-    return [e for e in card.get("effects", []) or [] if isinstance(e, dict)]
+    """The card's WHOLE effect tree (L4): every mechanic in the table below
+    is just as invisible-in-the-text when it sits in a conditional's `then:`
+    as when it sits at the top level, and the emitter has to leave its
+    marker either way. Nothing on the live sheets is branch-nested today,
+    so adopting the shared walk changed no verdict -- which is the point of
+    adopting it before something is."""
+    return list(iter_effects(card.get("effects")))
 
 
 def _has_literal_times(card: dict) -> bool:

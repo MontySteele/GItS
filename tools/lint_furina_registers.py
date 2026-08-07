@@ -85,16 +85,12 @@ from pathlib import Path
 import yaml
 
 REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+
+from tools.effect_walk import iter_effects as _leaf_ops  # noqa: E402
+
 SHEET = REPO / "docs" / "furina-cards.yaml"
 REGISTERS = ("salon", "archon", "private")
-
-
-def _leaf_ops(effects: list[dict]):
-    for fx in effects or ():
-        yield fx
-        for branch in ("then", "else"):
-            if fx.get(branch):
-                yield from _leaf_ops(fx[branch])
 
 
 # The two printed keywords (Track B). Only the FULL GRANT is Fanfare-touching

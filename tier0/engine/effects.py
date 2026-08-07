@@ -304,9 +304,43 @@ def reset_knob_reads() -> None:
 SPOTLIGHT_FORCE: Optional[str] = None
 
 
+def both_spotlight_modes(state: CombatState) -> bool:
+    """Furina's upgraded starter (Touch of Orobas -> The Curtain Never Falls,
+    red-pen R2): both Spotlight modes permanently in force.
+
+    Thin wrapper so the four Spotlight readers below say what they mean and
+    the relic test lives in one place. Late import: `relics` imports
+    `refpowers`, so a module-level import here would close a cycle.
+    """
+    from tier0.engine import relics                  # late import (cycle)
+    return relics.spotlight_both_modes(state.player)
+
+
+def center_stage_active(state: CombatState, card: Card) -> bool:
+    """Center Stage's half for THIS card: does playing it mint Fanfare?
+
+    Her own cards only, in both worlds. Under the mode that is implied (only
+    her cards are lit at all); under R2's upgrade it has to be said, because
+    Companions are lit too and Guest Cast's "their plays generate no Fanfare"
+    clause survives the upgrade -- R2 reading 1 drops the exclusivity, not
+    the targeting. Mirrors C# `SpotlightSystem.CenterStageActive(owner) &&
+    card is ICharacterCard { CharacterId: "furina" }`.
+    """
+    p = state.player
+    if both_spotlight_modes(state):
+        return bool(p.character_id and card.character == p.character_id)
+    return p.spotlight == p.character_id
+
+
 def is_spotlighted(state: CombatState, card: Card) -> bool:
     """Whether a card receives Spotlight play texture in the active mode."""
-    target = state.player.spotlight
+    p = state.player
+    if both_spotlight_modes(state):
+        # C# SpotlightSystem.IsSpotlighted: each half keeps its own card
+        # class, and under the upgrade both halves are live at once.
+        return bool(card.is_companion
+                    or (p.character_id and card.character == p.character_id))
+    target = p.spotlight
     if target == C.SPOTLIGHT_GUEST_CAST:
         return card.is_companion
     return bool(target and card.character == target)
@@ -314,6 +348,13 @@ def is_spotlighted(state: CombatState, card: Card) -> bool:
 
 def is_outward_spotlighted(state: CombatState, card: Card) -> bool:
     """Whether Spotlight may change this card's printed numbers."""
+    if both_spotlight_modes(state):
+        # Guest Cast's half ONLY. Without the card-class test the multiplier
+        # would leak onto her own cards, which Center Stage explicitly does
+        # not do (C# OutwardMultiplier keeps the same gate for the same
+        # reason). No `spotlight` read: under the upgrade the designation is
+        # irrelevant, which is the whole point of the ruling.
+        return is_spotlighted(state, card) and card.is_companion
     return (is_spotlighted(state, card)
             and state.player.spotlight != state.player.character_id)
 
@@ -738,7 +779,7 @@ def _salon_bow(state: CombatState, member: str) -> None:
             reactions.resolve_hit(state, enemy, "hydro", 0)
     enc = spec.get("encore", 0)
     if enc:
-        resources.gain_encore(state, enc)
+        resources.gain_encore(state, enc, "salon_final_bow")
     if p.burst_max:
         resources.gain_burst(state, C.SALON_TICK_BURST, "salon_final_bow")
     # Stagehands (Curtain Call B, R85): the crew strikes the set behind
@@ -750,7 +791,7 @@ def _salon_bow(state: CombatState, member: str) -> None:
         state.emit("block", amount=blk)
     enc2 = p.powers.get("salon_bow_encore", 0)
     if enc2:
-        resources.gain_encore(state, enc2)
+        resources.gain_encore(state, enc2, "salon_bow_encore")
     state.emit("salon_final_bow", member=member)
 
 
@@ -1030,7 +1071,7 @@ def _op_gain_encore(state: CombatState, fx: dict, card: Card) -> None:
     amount = _amount(state, fx["amount"])
     if state.salon_replacements_this_card:
         amount *= C.SALON_REPLACE_NUMERIC_MULT
-    resources.gain_encore(state, amount)
+    resources.gain_encore(state, amount, "gain_encore_op", card.id)
 
 
 def _op_spend_encore(state: CombatState, fx: dict, card: Card) -> None:
@@ -1038,7 +1079,8 @@ def _op_spend_encore(state: CombatState, fx: dict, card: Card) -> None:
     first; any shortfall drains TRUE HP -- greed is legal and priced.
     Cards that must not overdraw use the encore_cost field (playability
     gate in combat.card_playable) instead of this op."""
-    resources.spend_encore_or_hp(state, _amount(state, fx["amount"]))
+    resources.spend_encore_or_hp(state, _amount(state, fx["amount"]),
+                                 "spend_encore_op", card.id)
 
 
 def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
@@ -1721,7 +1763,14 @@ def _predicate(state: CombatState, name: str) -> bool:
     if name == "spotlight_set":
         return state.player.spotlight is not None
     if name == "spotlight_moved_this_turn":
-        return state.spotlight_moved_this_turn
+        # R2 makes the upgraded starter the SELECTOR-PAYOFF ENABLER: with the
+        # selector card gone there is no designation event left to move, so
+        # without this every selector-payoff card on her sheet (curtain_cue,
+        # directors_cut) would become dead text the moment the relic was
+        # taken -- the upgrade would silently SUBTRACT from her pool while
+        # appearing to add to it. Mirrors C# SpotlightSystem.MovedThisTurn,
+        # which is `BothModes(creature) || <the resource>` for this reason.
+        return both_spotlight_modes(state) or state.spotlight_moved_this_turn
     if name == "spotlight_unmoved_this_combat":
         # Commitment payoff: designated once and never re-aimed. False
         # while nothing is designated (an empty stage is not commitment).
@@ -2413,12 +2462,21 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int) -> int:
 
 def player_turn_start_triggers(state: CombatState) -> None:
     p = state.player
-    if "ethereal_spotlight" in p.relic_hooks:           # Furina's relic
+    if ("ethereal_spotlight" in p.relic_hooks           # Furina's relic
+            and not both_spotlight_modes(state)):
         # Selector to hand each turn (kickoff §3.1). Ethereal: unplayed
         # copies vanish at end of turn (combat loop), so the deck never
         # silts up with selectors. Emits its own event, NOT add_card --
         # whether selector cadence counts toward A5 velocity is an open
         # accounting ruling; until ruled it must not inflate the axis.
+        #
+        # THE SELECTOR STOPS ARRIVING under R2's upgrade: with both modes
+        # always on it has nothing left to choose, so C# CurtainNeverFalls
+        # deliberately does NOT override AfterPlayerTurnStart the way the
+        # base EtherealSpotlightRelic does. Funnel Contract §3 is intact --
+        # the designation funnel is not removed, moved or renamed and every
+        # existing caller (a drafted `spotlight_designate` card) still routes
+        # through it. An upgraded Furina simply never FIRES it again.
         from tier0.content import loader                # late import (cycle)
         if not any(c.id == "ethereal_spotlight" for c in p.hand):
             # HAND-FULL FALLBACK (sitting 2026-08-06, family X14 leg (b)):
@@ -2515,7 +2573,11 @@ def salon_tick(state: CombatState) -> None:
         paid = p.encore >= C.SALON_TICK_ENCORE_COST
         state.emit("salon_tick", member=member, paid=paid)
         if paid:
-            resources.spend_encore(state, C.SALON_TICK_ENCORE_COST)
+            # No `card`: the upkeep bill is the STAGE's, not any one card's,
+            # and the per-member cut already exists on the `salon_tick` row
+            # that tier05.encore_telemetry reads.
+            resources.spend_encore(state, C.SALON_TICK_ENCORE_COST,
+                                   "salon_upkeep")
 
         def _num(base: int) -> int:
             amt = _salon_amount(state, base)

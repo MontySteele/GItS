@@ -246,6 +246,152 @@ def test_the_comment_lint_still_catches_real_drift(tmp_path):
     assert "comment cites 8" in res.stdout
 
 
+# --- L4 / L7 (S1 parity sweep) --------------------------------------------
+
+def test_no_scanner_reads_effects_as_a_flat_list():
+    """L4. Three tools had each written the same `for eff in card["effects"]`
+    loop and each was silently answering about the TOP LEVEL only:
+    sparkly_explosion's branch-nested Bombs, pearl_barrage's
+    `amount_formula.base`, and rider_tip_args' missing charge formula.
+
+    Wired into pytest rather than into the CI lints job on purpose: this is
+    not a softlock class, it is a "the tool is answering a narrower question
+    than it appears to" class, and the moment to learn that is while writing
+    the loop -- which is a pytest run.
+    """
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_effect_branch_scans.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+    # The dead-gate direction: a run that walked no sheets and found no scan
+    # sites prints the same CLEAN line as a full one.
+    assert "card row(s) read" in res.stdout
+    assert " 0 card row(s) read" not in res.stdout
+    assert "registered flat scan site(s)" in res.stdout
+
+
+def test_the_branch_scan_lint_sees_a_new_flat_loop():
+    """The red half, on the SOURCE side. Written against a synthetic module
+    dropped into the scanned directory rather than by breaking a real one:
+    the gate has to fail for a loop it has never seen, which is the only case
+    that matters."""
+    sys.path.insert(0, str(REPO / "tools"))
+    import lint_effect_branch_scans as l4
+
+    probe = REPO / "tools" / "_probe_flat_scan_delete_me.py"
+    probe.write_text(
+        "def count_damage(card):\n"
+        "    return sum(1 for e in card['effects'] if e['op'] == 'damage')\n",
+        encoding="utf-8")
+    try:
+        findings, _ = l4.source_findings()
+    finally:
+        probe.unlink()
+    assert any("_probe_flat_scan_delete_me.py::count_damage" in f
+               and "FLAT EFFECT SCAN" in f for f in findings), findings
+    # ...and green again once it is gone.
+    assert l4.source_findings()[0] == []
+
+
+def test_the_branch_scan_lint_sees_a_newly_hidden_keyword_op():
+    """The red half, on the DATA side. sparkly_explosion is the live case and
+    is registered; the gate must still fire for a card that is NOT."""
+    sys.path.insert(0, str(REPO / "tools"))
+    import lint_effect_branch_scans as l4
+
+    saved = l4.BRANCH_ONLY_KNOWN
+    try:
+        l4.BRANCH_ONLY_KNOWN = {}
+        findings, census = l4.data_findings()
+    finally:
+        l4.BRANCH_ONLY_KNOWN = saved
+    assert census["rules_bearing"] >= 1
+    assert any("sparkly_explosion" in f and "BRANCH-HIDDEN RULES" in f
+               for f in findings), findings
+
+
+def test_upgrade_comment_arithmetic_still_adds_up():
+    """L7 (SYS-11a/b). `# 6->9` on an upgrade row is arithmetic, which is the
+    worst thing a stale comment can be: a reader checks it, the numbers add
+    up, and what they actually verified is that the OLD base and the OLD
+    result still differ by the delta. surging_shoal's had been wrong through
+    two repricings.
+    """
+    res = subprocess.run(
+        [sys.executable,
+         str(REPO / "tools" / "lint_upgrade_comment_arithmetic.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+    # Denominator, not just a verdict -- most rows carry no `a -> b` at all,
+    # and a run that recomputed nothing must not read like a full sweep.
+    assert "pair(s) recomputed" in res.stdout
+    assert "(0 pair(s) recomputed)" not in res.stdout
+    for sheet in ("klee-upgrades.yaml", "furina-upgrades.yaml",
+                  "kokomi-upgrades.yaml", "ref-ironclad-upgrades.yaml"):
+        assert f"scope {sheet}:" in res.stdout, res.stdout
+
+
+def test_the_upgrade_arithmetic_lint_catches_both_drift_shapes(tmp_path):
+    """The red half, and it must be red for BOTH checks separately.
+
+    A delta that moved (arithmetic disagrees) and a base that moved (the
+    arithmetic still adds up and describes a card that no longer exists) are
+    different bugs. SYS-11a was entirely the second kind, so a lint with only
+    the first check would have reported those six rows clean.
+    """
+    lint = str(REPO / "tools" / "lint_upgrade_comment_arithmetic.py")
+    sheet = tmp_path / "probe-upgrades.yaml"
+
+    # Against the REAL `strike` row (base 6): the point of the base check is
+    # that it reads the card, so a synthetic card the lint cannot index would
+    # test the wrong half.
+    def run(text):
+        sheet.write_text(text, encoding="utf-8")
+        return subprocess.run([sys.executable, lint, str(sheet)],
+                              capture_output=True, text=True, cwd=str(REPO))
+
+    # Shape 1: the delta moved, the comment did not.
+    bad_delta = run("strike: {damage: +2}   # 6->9\n")
+    assert bad_delta.returncode == 1, bad_delta.stdout
+    assert "a change of +3" in bad_delta.stdout, bad_delta.stdout
+
+    # Shape 2 (SYS-11a): the arithmetic adds up, the BASE is gone.
+    stale_base = run("strike: {damage: +3}   # 4->7\n")
+    assert stale_base.returncode == 1, stale_base.stdout
+    assert "is not a number the card prints" in stale_base.stdout
+
+    # And the honest row passes.
+    ok = run("strike: {damage: +3}   # 6->9\n")
+    assert ok.returncode == 0, ok.stdout + ok.stderr
+
+
+def test_a_lint_ok_marker_excuses_its_pair_and_nothing_else(tmp_path):
+    """The marker is NARROWED on purpose. A repricing is usually narrated on
+    the row it moved ("was 7->9"), so the live arithmetic and its history
+    share a line -- and a whole-line exemption there would switch off the
+    check for the number that is still supposed to be true."""
+    lint = str(REPO / "tools" / "lint_upgrade_comment_arithmetic.py")
+    sheet = tmp_path / "probe-upgrades.yaml"
+
+    def run(text):
+        sheet.write_text(text, encoding="utf-8")
+        return subprocess.run([sys.executable, lint, str(sheet)],
+                              capture_output=True, text=True, cwd=str(REPO))
+
+    # The history is excused; the live pair on the same line is not.
+    good = run("strike: {damage: +3}   # 6->9 (was 4->7; lint-ok: 4->7)\n")
+    assert good.returncode == 0, good.stdout + good.stderr
+
+    bad = run("strike: {damage: +3}   # 6->8 (was 4->7; lint-ok: 4->7)\n")
+    assert bad.returncode == 1, bad.stdout
+    assert "a change of +2" in bad.stdout
+
+    # A marker that outlived its claim is itself a finding.
+    stale = run("strike: {damage: +3}   # 6->9 (lint-ok: 4->7)\n")
+    assert stale.returncode == 1, stale.stdout
+    assert "excuses a pair that is not on this line" in stale.stdout
+
+
 def test_kokomi_decksize_grammar():
     """Kokomi kickoff §1 law 4 (user-authored, machine-checkable → gate):
     Commons in HER pool net card delta <= 0. Scope is her personal sheet

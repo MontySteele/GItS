@@ -187,6 +187,93 @@ class FightStats:
     dead_in_hand: dict[str, int] = field(default_factory=dict)
     force_first_copy: dict[str, int] = field(default_factory=dict)
     force_first_copy_drawn: dict[str, int] = field(default_factory=dict)
+    # --- EB-20, the Encore economy census (BACKLOG EB-20, instrument for the
+    # D8 lever: "19/78 grant, 1 spends, absorption automatic"). D8's DIRECTION
+    # is ruled and its VALUE is unpicked; nothing here picks it. Same fence as
+    # tracks D and H and EB-17: every counter is a tally of events the engine
+    # emits, none is read by combat, by the pilot, by an axis or by the C#
+    # side, and none of them grades anything.
+    #
+    # The engine side of this is provenance ONLY -- `source` and `card` keys
+    # added to `gain_encore` / `encore_spent` / `encore_overdraw`, `source` to
+    # `encore_absorb`. Every quantity below was already in the log; what was
+    # missing was WHO. `encore_absorbed` above is the pre-existing total and
+    # keeps its exact value: it feeds the ratified A4 axis and this track
+    # moves no number that anything reads.
+    #
+    #   encore_granted            points the buffer RECEIVED, pooled, and the
+    #   _by_card / _by_source     same points keyed by the card that caused
+    #                             them and by the mechanism that delivered
+    #                             them. A grant with no card behind it
+    #                             (`salon_final_bow`, `salon_bow_encore`) is
+    #                             ABSENT from _by_card, never a zero row and
+    #                             never bucketed under a fake id.
+    #   encore_spent              points DELIBERATELY drained, ditto. Kept
+    #   _by_card / _by_source     apart from absorption on purpose: LAW makes
+    #                             them two Fanfare legs, and D8's sentence
+    #                             counts spenders (1 card) separately from
+    #                             the automatic sink.
+    #   encore_overdrawn          TRUE HP paid when a spend outran the buffer
+    #                             (`encore_overdraw`). Not Encore at all --
+    #                             it is what a spend cost when there was no
+    #                             Encore to spend, and pooling it with
+    #                             `encore_spent` would inflate the sink.
+    #   encore_absorbed_by_source the automatic sink split by what it ate:
+    #                             `enemy_hit` or `dot`. No card key exists
+    #                             because no card causes absorption.
+    #   encore_residual           Encore still held when the combat ENDED, off
+    #   encore_residual_samples   the `encore_end` row -- generated and never
+    #                             needed. The sample count is the denominator
+    #                             and is 0 for a character with no Encore
+    #                             resource at all, which is how "no residual"
+    #                             stays distinguishable from "residual zero".
+    #   encore_peak               the highest the buffer ever stood this
+    #                             combat, reconstructed from the log (the
+    #                             three mutation sites all emit, and
+    #                             `gain_encore` carries the running total).
+    #   encore_zero_turns         turn snapshots that found the buffer EMPTY,
+    #   encore_turns_sampled      out of the snapshots taken. Sampled at the
+    #                             `fanfare_turn` row -- after turn-start
+    #                             triggers, Salon upkeep, energy and draw,
+    #                             before the first card -- because that is the
+    #                             state the pilot decides in and the state the
+    #                             enemy phase will arrive against. The
+    #                             PRE-upkeep sample is a different number and
+    #                             already exists on `salon_upkeep`
+    #                             (tier05.encore_telemetry reads it).
+    #   encore_at_turn            the same snapshot kept per turn, so the
+    #                             trajectory is readable and not only its two
+    #                             summary statistics. Turn-keyed like
+    #                             damage_by_turn, and offset the same way on a
+    #                             gauntlet merge.
+    #   fanfare_by_leg            Fanfare that LANDED, keyed by generation leg
+    #   fanfare_wasted_by_leg     (`hp_lost` / `encore_spent` /
+    #                             `encore_absorbed` / `center_stage`), and the
+    #                             generation thrown away at the cap. The two
+    #                             Encore legs are the ones EB-20 is about;
+    #                             all four are recorded so their share has a
+    #                             denominator. There is deliberately no
+    #                             `encore_gained` leg to record -- Fanfare
+    #                             prints when Encore goes DOWN, never up
+    #                             (LAW; Track A 2026-07-28), and an empty
+    #                             bucket here is the instrument's own check on
+    #                             that rule rather than a hole in it.
+    encore_granted: int = 0
+    encore_granted_by_card: dict[str, int] = field(default_factory=dict)
+    encore_granted_by_source: dict[str, int] = field(default_factory=dict)
+    encore_spent: int = 0
+    encore_spent_by_card: dict[str, int] = field(default_factory=dict)
+    encore_spent_by_source: dict[str, int] = field(default_factory=dict)
+    encore_overdrawn: int = 0
+    encore_absorbed_by_source: dict[str, int] = field(default_factory=dict)
+    encore_residual: int = 0
+    encore_residual_samples: int = 0
+    encore_peak: int = 0
+    encore_zero_turns: int = 0
+    encore_turns_sampled: int = 0
+    encore_at_turn: dict[int, int] = field(default_factory=dict)
+    fanfare_by_leg: dict[str, int] = field(default_factory=dict)
+    fanfare_wasted_by_leg: dict[str, int] = field(default_factory=dict)
     # --- O-1 (Track O slice 12, ruled 2026-08-06). A multi-stage encounter
     # (`gauntlet`) is ONE record but TWO combats, and every per-fight rate
     # below used to divide the two combats' events by one record. The stage
@@ -230,6 +317,20 @@ class FightStats:
         return self.damage_from_reactions / max(1, self.damage_all_ops)
 
     @property
+    def encore_drained(self) -> int:
+        """Every point that LEFT the buffer: deliberate spends PLUS the
+        automatic sink. The denominator the grant total is read against.
+
+        Absorption belongs in here and this is not a judgement call: absorbed
+        points did the job the buffer exists for, and reading grants against
+        spends alone reports every point the buffer ATE as a point it wasted.
+        tier05.encore_telemetry's first run made exactly that error and its
+        module note records it; the rule is restated here rather than
+        cross-referenced because a denominator that is wrong in one place is
+        wrong everywhere it is copied to."""
+        return self.encore_spent + self.encore_absorbed
+
+    @property
     def combats(self) -> int:
         """How many COMBATS this record is. 1 for an ordinary fight; the
         stage count for a merged multi-stage encounter. The denominator of
@@ -271,6 +372,10 @@ def merge_stages(stages: list["FightStats"]) -> "FightStats":
             merged.damage_by_turn[t + offset] = v
         for t, v in s.energy_by_turn.items():
             merged.energy_by_turn[t + offset] = v
+        # EB-20's trajectory, offset with the other turn-keyed curves: a
+        # gauntlet's stage-2 turn 1 is the run's turn (stage-1 turns + 1).
+        for t, v in s.encore_at_turn.items():
+            merged.encore_at_turn[t + offset] = v
         # Concatenation, not key-offsetting: a staged gauntlet's HP curve runs
         # continuously across the stage break (stage 2 opens on stage 1's HP),
         # so the rounds simply follow one another.
@@ -290,6 +395,20 @@ def merge_stages(stages: list["FightStats"]) -> "FightStats":
         merged.energy_generated_extra += s.energy_generated_extra
         merged.healing += s.healing
         merged.encore_absorbed += s.encore_absorbed
+        # EB-20. The buffer RESETS to 0 at the top of every combat
+        # (run_fight), so a gauntlet's two stages each run their own economy:
+        # the counts sum, the residual sums (both stages generated Encore they
+        # never needed, and `encore_residual_samples` sums with it so the mean
+        # per combat stays honest), and the PEAK is a max -- two stages that
+        # each reached 9 did not reach 18.
+        merged.encore_granted += s.encore_granted
+        merged.encore_spent += s.encore_spent
+        merged.encore_overdrawn += s.encore_overdrawn
+        merged.encore_residual += s.encore_residual
+        merged.encore_residual_samples += s.encore_residual_samples
+        merged.encore_peak = max(merged.encore_peak, s.encore_peak)
+        merged.encore_zero_turns += s.encore_zero_turns
+        merged.encore_turns_sampled += s.encore_turns_sampled
         merged.debuff_stacks_applied += s.debuff_stacks_applied
         merged.debuffed_intents += s.debuffed_intents
         merged.aura_intents += s.aura_intents
@@ -315,7 +434,14 @@ def merge_stages(stages: list["FightStats"]) -> "FightStats":
                      # EB-17's three COUNTS merge the same way. Their two
                      # indicators do not -- see below.
                      "card_draws", "card_plays", "played_when_drawn",
-                     "dead_in_hand"):
+                     "dead_in_hand",
+                     # EB-20's provenance tables, likewise: plain tallies,
+                     # none of them turn-keyed. `encore_at_turn` IS turn-keyed
+                     # and is offset below with the other curves.
+                     "encore_granted_by_card", "encore_granted_by_source",
+                     "encore_spent_by_card", "encore_spent_by_source",
+                     "encore_absorbed_by_source",
+                     "fanfare_by_leg", "fanfare_wasted_by_leg"):
             dst, src = getattr(merged, attr), getattr(s, attr)
             for k, v in src.items():
                 dst[k] = dst.get(k, 0) + v
@@ -371,6 +497,22 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
     dead: dict[str, int] = {}
     ffc: dict[str, int] = {}
     ffc_drawn: dict[str, int] = {}
+    # EB-20: the Encore census. `enc_now` is the buffer reconstructed as the
+    # log is walked -- exact, not estimated: the buffer has exactly three
+    # mutation sites in the engine (gain / spend / absorb) and all three emit,
+    # and `gain_encore` carries the post-gain running total, so the walk
+    # re-anchors on every gain instead of accumulating drift.
+    enc_granted = enc_spent = enc_overdrawn = 0
+    enc_grant_card: dict[str, int] = {}
+    enc_grant_src: dict[str, int] = {}
+    enc_spend_card: dict[str, int] = {}
+    enc_spend_src: dict[str, int] = {}
+    enc_absorb_src: dict[str, int] = {}
+    enc_at_turn: dict[int, int] = {}
+    fanfare_leg: dict[str, int] = {}
+    fanfare_wasted: dict[str, int] = {}
+    enc_now = enc_peak = enc_zero_turns = enc_turns_sampled = 0
+    enc_residual = enc_residual_samples = 0
     won = False
     turns = state.turn
 
@@ -435,6 +577,51 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
             healing += ev["amount"]
         elif e == "encore_absorb":
             encore_absorbed += ev["amount"]
+            # EB-20. `encore_absorbed` above is the pre-existing A4 figure and
+            # is untouched; the split beside it is the new read.
+            enc_now -= ev["amount"]
+            src = ev.get("source", "unattributed")
+            enc_absorb_src[src] = enc_absorb_src.get(src, 0) + ev["amount"]
+        elif e == "gain_encore":
+            enc_granted += ev["amount"]
+            # The emitted `total` is the buffer AFTER the gain -- authoritative,
+            # so the walk cannot drift.
+            enc_now = ev["total"]
+            enc_peak = max(enc_peak, enc_now)
+            src = ev.get("source", "unattributed")
+            enc_grant_src[src] = enc_grant_src.get(src, 0) + ev["amount"]
+            cid = ev.get("card")
+            if cid is not None:
+                enc_grant_card[cid] = enc_grant_card.get(cid, 0) + ev["amount"]
+        elif e == "encore_spent":
+            enc_spent += ev["amount"]
+            enc_now -= ev["amount"]
+            src = ev.get("source", "unattributed")
+            enc_spend_src[src] = enc_spend_src.get(src, 0) + ev["amount"]
+            cid = ev.get("card")
+            if cid is not None:
+                enc_spend_card[cid] = enc_spend_card.get(cid, 0) + ev["amount"]
+        elif e == "encore_overdraw":
+            # HP, not Encore: the buffer was already empty. Never added to
+            # enc_now, and never pooled with the spend.
+            enc_overdrawn += ev["amount"]
+        elif e == "fanfare_turn":
+            # The Furina-guarded turn snapshot, taken at the point the pilot
+            # decides. See the FightStats note for why this sample point and
+            # not `turn_open`.
+            enc_turns_sampled += 1
+            enc_at_turn[ev["turn"]] = enc_now
+            if enc_now == 0:
+                enc_zero_turns += 1
+        elif e == "gain_fanfare":
+            leg = ev["source"]
+            fanfare_leg[leg] = fanfare_leg.get(leg, 0) + ev["amount"]
+            w = ev.get("wasted", 0)
+            if w:
+                fanfare_wasted[leg] = fanfare_wasted.get(leg, 0) + w
+        elif e == "encore_end":
+            enc_residual = ev["encore"]
+            enc_residual_samples = 1
         elif e == "prevent_exhaust":
             prevented += ev["amount"]
         elif e == "gain_charge":
@@ -542,6 +729,22 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
         dead_in_hand=dead,
         force_first_copy=ffc,
         force_first_copy_drawn=ffc_drawn,
+        encore_granted=enc_granted,
+        encore_granted_by_card=enc_grant_card,
+        encore_granted_by_source=enc_grant_src,
+        encore_spent=enc_spent,
+        encore_spent_by_card=enc_spend_card,
+        encore_spent_by_source=enc_spend_src,
+        encore_overdrawn=enc_overdrawn,
+        encore_absorbed_by_source=enc_absorb_src,
+        encore_residual=enc_residual,
+        encore_residual_samples=enc_residual_samples,
+        encore_peak=enc_peak,
+        encore_zero_turns=enc_zero_turns,
+        encore_turns_sampled=enc_turns_sampled,
+        encore_at_turn=enc_at_turn,
+        fanfare_by_leg=fanfare_leg,
+        fanfare_wasted_by_leg=fanfare_wasted,
         flags=sorted(set(flags)))
 
 
@@ -828,6 +1031,173 @@ def card_flow_profile(all_stats: list[FightStats]) -> dict:
         "plays": sum(plays.values()),
         "played_when_drawn": sum(pwd.values()),
         "dead_in_hand": sum(dead.values()),
+    }
+
+
+# The Fanfare generation legs, in LAW's order (kickoff §4; LAW "Fanfare is
+# capped at %maxHP" bullet). Named here so the census and the tests read the
+# same list, and so a leg added to engine/resources.py without being added
+# here shows up in `legs_unexpected` rather than silently joining a total.
+# There is deliberately no `encore_gained` entry: Fanfare prints when Encore
+# goes DOWN, never up (Track A, RULED 2026-07-28), and the fact that the
+# cohort never emits one is a reading of the log, not an assumption of it.
+FANFARE_LEGS = ("hp_lost", "encore_spent", "encore_absorbed", "center_stage")
+# The two legs EB-20 is about. The other two are carried so these have a
+# denominator -- a share with no denominator is a number nobody can argue with.
+ENCORE_FANFARE_LEGS = ("encore_spent", "encore_absorbed")
+
+
+def encore_census_profile(all_stats: list[FightStats]) -> dict:
+    """EB-20's aggregate hook: where Furina's Encore comes from, where it
+    goes, and what it was still holding when the music stopped.
+
+    The instrument for the D8 lever, whose direction is ruled and whose value
+    is unpicked. It picks nothing. There is no target here, no band, no
+    "healthy" grant/drain ratio and no verdict on whether 19 granters against
+    1 spender is the right shape -- that is [USER]'s call and a design act does
+    not happen in an aggregate function. Same fence as reaction_share,
+    aura_profile, payoff_profile and card_flow_profile.
+
+    ENCORE-LIVE COMBATS ONLY. Every per-combat figure denominates over
+    `encore_combats` -- combats that granted, absorbed, or reported an
+    end-of-combat residual -- and not over every combat in the battery. Encore
+    is Furina's alone in content, so pooling a Klee battery's zero rows into
+    the denominator would halve every rate for no reason but the cohort's
+    composition. `combats` is reported beside it so the filter is visible.
+    Returns {} when the cohort has no Encore in it at all, which is the honest
+    answer for a battery that was never about this resource.
+
+    RESIDUAL is `encore_end` -- the buffer at the final bell, generated and
+    never needed. It sums across a gauntlet's stages because the buffer resets
+    per combat and each stage wasted its own; `residual_samples` sums with it,
+    so the mean stays per combat.
+
+    DRAINED is spends PLUS absorption, never spends alone. See
+    FightStats.encore_drained for why, and for the instrument that got it
+    wrong first.
+    """
+    n = len(all_stats)
+    if n == 0:
+        return {}
+    combats = per_combat(all_stats)
+    live = [s for s in combats
+            if s.encore_granted or s.encore_absorbed
+            or s.encore_residual_samples]
+    if not live:
+        return {}
+    nl = len(live)
+
+    def _pool(attr: str) -> dict[str, int]:
+        out: dict[str, int] = {}
+        for s in live:
+            for k, v in getattr(s, attr).items():
+                out[k] = out.get(k, 0) + v
+        return out
+
+    granted_card = _pool("encore_granted_by_card")
+    spent_card = _pool("encore_spent_by_card")
+    granted = sum(s.encore_granted for s in live)
+    spent = sum(s.encore_spent for s in live)
+    absorbed = sum(s.encore_absorbed for s in live)
+    drained = spent + absorbed
+    residual = sum(s.encore_residual for s in live)
+    residual_n = sum(s.encore_residual_samples for s in live)
+    sampled = sum(s.encore_turns_sampled for s in live)
+    zeros = sum(s.encore_zero_turns for s in live)
+    peaks = [s.encore_peak for s in live]
+
+    by_card: dict[str, dict] = {}
+    for cid in sorted(set(granted_card) | set(spent_card)):
+        g, sp = granted_card.get(cid, 0), spent_card.get(cid, 0)
+        by_card[cid] = {
+            "granted": g,
+            "granted_per_combat": g / nl,
+            # Which side of D8's "19 grant, 1 spends" sentence this card is
+            # on, measured rather than counted off the sheet: a card that
+            # prints a grant and never resolves one is not a granter in play.
+            "share_of_granted": (g / granted) if granted else None,
+            "spent": sp,
+            "spent_per_combat": sp / nl,
+            "share_of_spent": (sp / spent) if spent else None,
+            "combats_granting": sum(1 for s in live
+                                    if s.encore_granted_by_card.get(cid)),
+            "combats_spending": sum(1 for s in live
+                                    if s.encore_spent_by_card.get(cid)),
+        }
+
+    applied = _pool("fanfare_by_leg")
+    wasted = _pool("fanfare_wasted_by_leg")
+    total_applied = sum(applied.values())
+    legs = {
+        leg: {"applied": applied.get(leg, 0),
+              "wasted": wasted.get(leg, 0),
+              "share": (applied.get(leg, 0) / total_applied)
+              if total_applied else None}
+        for leg in FANFARE_LEGS if leg in applied or leg in wasted
+    }
+    encore_leg_applied = sum(applied.get(leg, 0)
+                             for leg in ENCORE_FANFARE_LEGS)
+    return {
+        "fights": n,
+        "combats": len(combats),
+        "encore_combats": nl,
+        # One row per card id that GRANTED or SPENT a point in this cohort. A
+        # card that prints an Encore grant and never resolved one is ABSENT
+        # rather than zero -- the payoff_profile rule again, and here it is
+        # exactly the question: "19 of 78 cards grant" is a sheet count, and
+        # what a battery can say is how many of them a fight actually sees.
+        "by_card": by_card,
+        "granted": granted,
+        "granted_per_combat": granted / nl,
+        "granted_by_card": granted_card,
+        "granted_by_source": _pool("encore_granted_by_source"),
+        "spent": spent,
+        "spent_per_combat": spent / nl,
+        "spent_by_card": spent_card,
+        "spent_by_source": _pool("encore_spent_by_source"),
+        "absorbed": absorbed,
+        "absorbed_per_combat": absorbed / nl,
+        "absorbed_by_source": _pool("encore_absorbed_by_source"),
+        # HP, not Encore. Reported beside the spend it belongs to and never
+        # inside it.
+        "overdrawn": sum(s.encore_overdrawn for s in live),
+        "overdrawn_per_combat": sum(s.encore_overdrawn for s in live) / nl,
+        "drained": drained,
+        "drained_per_combat": drained / nl,
+        # Above 1.0 means the cohort minted Encore it never used. None, not
+        # 0.0 or infinity, when nothing was ever drained: a buffer that filled
+        # and was never touched is the most saturated case there is, and
+        # reporting it as a ratio's extreme prints the strongest finding as a
+        # divide-by-zero.
+        "gain_drain_ratio": (granted / drained) if drained else None,
+        "residual": residual,
+        "residual_samples": residual_n,
+        "residual_per_combat": (residual / residual_n) if residual_n else None,
+        # Residual over grants: the fraction of everything she made that was
+        # still sitting there at the end. The most direct statement of the
+        # saturation D8 is a lever over.
+        "residual_share_of_granted": (residual / granted) if granted else None,
+        "peak_mean": sum(peaks) / nl,
+        "peak_max": max(peaks),
+        "turns_sampled": sampled,
+        "zero_turns": zeros,
+        "zero_turn_rate": (zeros / sampled) if sampled else None,
+        "combats_with_any_grant": sum(1 for s in live if s.encore_granted),
+        "combats_with_any_spend": sum(1 for s in live if s.encore_spent),
+        "combats_with_any_absorb": sum(1 for s in live if s.encore_absorbed),
+        "fanfare_applied": total_applied,
+        "fanfare_by_leg": legs,
+        # A leg that no fight in the cohort generated is ABSENT from
+        # `fanfare_by_leg` and listed here instead -- the payoff_profile rule:
+        # "nothing generated it" and "it generated zero" are different
+        # findings. `legs_unexpected` is the other direction and should stay
+        # empty: a leg name the engine emits that LAW does not list is either
+        # a new leg nobody registered or `encore_gained` coming back.
+        "legs_absent": [leg for leg in FANFARE_LEGS if leg not in legs],
+        "legs_unexpected": sorted(set(applied) - set(FANFARE_LEGS)),
+        "fanfare_from_encore": encore_leg_applied,
+        "fanfare_from_encore_share": ((encore_leg_applied / total_applied)
+                                      if total_applied else None),
     }
 
 

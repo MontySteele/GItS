@@ -216,7 +216,9 @@ boss:
     name: "TEST SUBJECT"
     # THE phase boss (§10.2 op): 100 -> 200 -> 300 HP, revives with a new
     # moveset each bar (600 total). Approximations, all §10.9-logged:
-    # P1 Enrage 2 skipped; P2's grow-a-hit-per-turn Multi-Claw is +3 per hit
+    # Enrage 2 skipped (live from setup for the WHOLE fight in the real
+    # boss, carrying across revives -- not P1-scoped; dossier :227-240);
+    # P2's grow-a-hit-per-turn Multi-Claw is +3 per hit
     # PER USE (30 -> 39 -> 48 vs real 30 -> 40 -> 50) and Painful Stabs'
     # on-unblocked Wounds become an inject beat (every other turn); P3
     # Intangible skipped (the 300 bar carries the weight).

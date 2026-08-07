@@ -28,6 +28,12 @@ HOOK VOCABULARY (combat-scoped -- the ONLY hooks acted on here):
     on_first_hp_loss_draw    {hook, amount}                 once per combat
     card_name_damage_bonus   {hook, substring, amount}      flat +dmg rider
     conditional_power        {hook, power, amount, when, threshold}   Red Skull
+    charge_per_exhaust       {hook, amount}                 Kokomi only (RATE)
+    burst_per_exhaust        {hook, amount}                 Kokomi only (RATE)
+    spotlight_both_modes     {hook}                         Furina only (FLAG)
+
+The last three are RULE CHANGES rather than effects, and are dispatched
+differently for that reason -- see "Touch of Orobas" below.
 
 RUN-SCOPED hooks (applied in tier05, NOT here) are recognised and IGNORED
 silently so they never trip the UNIMPLEMENTED alarm; anything in NEITHER set is
@@ -46,6 +52,7 @@ COMBAT_HOOKS = frozenset({
     "combat_start_aoe", "combat_start_spark",
     "every_n_turns_energy", "every_n_turns_draw",
     "on_first_hp_loss_draw", "card_name_damage_bonus", "conditional_power",
+    "charge_per_exhaust", "burst_per_exhaust", "spotlight_both_modes",
 })
 
 # Hooks handled in the run layer (tier05/model.py, tier05/relics.py). They may
@@ -169,6 +176,85 @@ def _heal(state: CombatState, amount: int) -> None:
     if healed > 0:
         p.hp += healed
         state.emit("heal", amount=healed, source="relic")
+
+
+# ---------------------------------------------------------------------------
+# Touch of Orobas: the upgraded-starter reads.
+#
+# Orobas (act-2 Ancient) swaps the STARTER relic for an upgraded form, so what
+# it does depends entirely on who holds it. Modelled narrowly and per character
+# ([USER] ruling 2026-07-26, option 1): one owner-gated row per variant in
+# tier05/content/relics.yaml, no relic-upgrade table.
+#
+# Klee's variant ADDS an effect (`combat_start_spark`), which is why it is a
+# branch in apply_combat_start above like every other relic. The other two do
+# not add anything -- they CHANGE A RULE the kit already runs every fight:
+#
+#   Kokomi  Pearl of Insight       the exhaust funnel's accrual RATE
+#   Furina  The Curtain Never Falls  the Spotlight's mode EXCLUSIVITY
+#
+# A rule change has no site at combat start to fire from; it has to be read
+# where the rule runs. So these two are READS rather than writes, called from
+# refpowers.after_card_exhausted and effects/combat's Spotlight path. Same
+# layer discipline either way: both open on `if not player.relic_effects`, so
+# the frozen battery never reaches them.
+#
+# THE NUMBERS LIVE ON THE RELIC, and are read off it rather than restated at
+# the grant site. That is the C#'s own shape and the reason for it is on the
+# record: `PearlOfInsightRelic` declared doubled constants that were read by
+# nothing but its own description string, so the relic panel promised doubled
+# accrual and the funnel granted the base rate (audit sec.1.1, pinned by
+# tier0/tests/test_starter_relic_upgrades.py). Restating the numbers at the
+# grant site is exactly how the two came to disagree.
+# ---------------------------------------------------------------------------
+
+def exhaust_accrual(player, charge: int, burst: int) -> tuple[int, int]:
+    """Kokomi's per-exhaust (Charge, Burst) rates, after any relic override.
+
+    `charge`/`burst` are the BASE rates the caller would otherwise grant
+    (C.CHARGE_PER_EXHAUST / C.KOKOMI_BURST_PER_EXHAUST). A held Pearl of
+    Insight REPLACES them -- it is not additive, mirroring
+    `KokomiResourceHooks.ExhaustCharge/ExhaustBurst`, which pick one value or
+    the other rather than summing.
+
+    The caller is already inside the `tamakushi_casket` gate, so this needs no
+    economy test of its own: a player with no Charge engine never asks.
+    """
+    if not player.relic_effects:
+        return charge, burst
+    for fx in player.relic_effects:
+        hook = fx.get("hook")
+        if hook == "charge_per_exhaust":
+            charge = int(fx["amount"])
+        elif hook == "burst_per_exhaust":
+            burst = int(fx["amount"])
+    return charge, burst
+
+
+def spotlight_both_modes(player) -> bool:
+    """Furina's upgraded starter (The Curtain Never Falls, red-pen R2).
+
+    Both Spotlight modes in force permanently: her own cards mint Fanfare
+    (Center Stage's half) AND Companions are multiplied (Guest Cast's half).
+    R2 reading 1: the upgrade removes the two modes' EXCLUSIVITY, never their
+    TARGETING -- neither half reaches across to the other's card class, so an
+    upgraded Furina still gets no numeric boost on her own cards and her
+    Companions still mint no Fanfare.
+
+    Gated on `ethereal_spotlight` in `relic_hooks` for the same reason
+    `combat_start_spark` is gated on `spark_on_detonation`: the honest test
+    for "this player runs the Spotlight economy" is the starter's own hook,
+    which the upgrade keeps rather than removes (C# `CurtainNeverFalls` is a
+    FLAG -- `SpotlightSystem` holds every gate, the relic holds none). An
+    owner-gated row should never reach anyone else; this is the belt as well
+    as the braces.
+    """
+    if not player.relic_effects:
+        return False
+    if "ethereal_spotlight" not in player.relic_hooks:
+        return False
+    return any(fx.get("hook") == "spotlight_both_modes"
+               for fx in player.relic_effects)
 
 
 # ---------------------------------------------------------------------------

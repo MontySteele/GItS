@@ -21,7 +21,10 @@ Every script, mapped to what actually runs it. "validate" = invoked by
 `lint_strict_domination.py`, `lint_unique_names.py`, `lint_upgrade_coverage.py`,
 `lint_kokomi_decksize.py`, `lint_companion_shop_coverage.py`,
 `lint_sheet_comments.py` (currently gated on furina-cards.yaml ONLY — 35 open
-findings on the other five sheets, see audit §3.8), `art_coverage.py`
+findings on the other five sheets, see audit §3.8),
+`lint_effect_branch_scans.py` + `lint_upgrade_comment_arithmetic.py` (S1
+sweep L4/L7; both in `test_sheet_lints.py`, green and red halves each),
+`art_coverage.py`
 (invariants, deliberately not completeness), `art_lint.py` (unit-level only;
 its L12 pixel gate is dead on clean checkouts — audit §3.7),
 `extract_base_game_pool.py`, `build_official_sheet.py` (+ its thin
@@ -50,6 +53,14 @@ core is suite-gated on synthetic fixtures
 `dump_claimed_sources.py` (owns the committed
 `docs/art-claimed-sources.tsv`; regenerate after any plan.tsv change —
 nothing enforces freshness yet).
+
+## Shared library (imported, never run)
+`effect_walk.py` — the one walk over a card row's effect TREE
+(`iter_effects`, recursing `then:`/`else:`) plus `printed_floor`, which
+normalizes `amount` against `amount_formula.base`. Every scanner here that
+used to iterate `card["effects"]` by hand now imports it;
+`lint_effect_branch_scans.py` is the gate that keeps it that way, and carries
+the register of the sites that are top-level-only on purpose.
 
 ## archive/
 One-shot experiments whose results were ratified, and superseded tools.

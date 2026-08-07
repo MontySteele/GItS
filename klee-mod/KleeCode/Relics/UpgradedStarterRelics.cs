@@ -337,14 +337,23 @@ public sealed class PearlOfInsightRelic : CustomRelicModel
 /// NAME is authored theatrical flavour like the rest of her sheet and rides the
 /// pending v1.7 lore/constellation audit.
 ///
-/// SIM PARITY: NOT MODELLED, recorded rather than silent. tier05 has no
-/// Spotlight-mode model to make always-on, and the narrow relic-upgrade
-/// approach ([USER], option 1) means there is no table to hang it off. So
-/// Furina's Orobas variant has no row in tier05/content/relics.yaml, unlike
-/// touch_of_orobas_klee. Consequence: a tier-0.5 Furina never receives this
-/// upgrade, so no anchor or free-draft cell measures it, and its value is
-/// unpriced. That is a real gap and belongs to the pool-sweep pass, where
-/// Spotlight is already the subject.
+/// SIM PARITY: MODELLED (EB-31). `touch_of_orobas_furina` in
+/// tier05/content/relics.yaml, owner-gated to her like its two siblings, with
+/// a single amount-less `spotlight_both_modes` hook -- the relic is a FLAG on
+/// both sides of the bridge, and tier0/engine/relics.py `spotlight_both_modes`
+/// is the sim's `BothModes`.
+///
+/// THIS BLOCK USED TO SAY "NOT MODELLED ... tier05 has no Spotlight-mode model
+/// to make always-on", and the premise was the wrong half. tier0 models the
+/// modes exactly -- `Player.spotlight` holds one designation at a time -- so
+/// what was missing was never a model, only the always-on READ. Recorded
+/// because the claim sat here for eleven days and was the reason nobody
+/// looked: a tier-0.5 Furina never received the upgrade, so no anchor or
+/// free-draft cell measured it and its value was unpriced.
+///
+/// The narrow relic-upgrade approach ([USER], option 1) is unchanged and is
+/// why there is still no table: three owner-gated rows that share no effect
+/// vocabulary, one per character.
 /// </summary>
 public sealed class CurtainNeverFalls : CustomRelicModel
 {
