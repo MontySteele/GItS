@@ -34,9 +34,10 @@ namespace KleeMod.Powers;
 ///
 /// X-cost attacks are EXEMPT from both sides, deliberately: zeroing an X-card
 /// sets X = 0 and makes the card do nothing, which converts the buff into a
-/// trap. The sim does apply sparks to X-attacks; divergence recorded in
-/// DECISIONS finding 26 rather than silently shipped. Klee's two X-cost cards
-/// are C3-blocked, so nothing observable differs yet.
+/// trap. Since R34 the sim exempts them identically (combat.py returns
+/// before the spark branch on X; the spend guard checks cost != "X"), so
+/// the divergence DECISIONS finding 26 recorded no longer exists --
+/// behaviour matches on both sides.
 /// </summary>
 public sealed class SparkPower : PowerModel, ILocalizationProvider
 {

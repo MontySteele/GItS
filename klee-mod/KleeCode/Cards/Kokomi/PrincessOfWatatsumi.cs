@@ -38,9 +38,10 @@ namespace KleeMod.Cards.Kokomi;
 /// It is also the only Charge in the game that does not cost her a card,
 /// which is the point of an Ancient: the one door out of her central bargain.
 ///
-/// Hand-written and outside the ratified sheets, like every Ancient: the sim
-/// models neither events nor relics, so these are game-side-only content and
-/// their numbers cannot be measured by tier0/tier05. PROPOSED, and flagged as
+/// Hand-written and outside the ratified sheets, like every Ancient: these
+/// are game-side-only content. (tier05 now models events and relics; what
+/// keeps the Ancients unmeasured is tier0's no-passive-accrual law, which
+/// bars this card's per-turn Charge shape.) PROPOSED, and flagged as
 /// such in R58 -- this one wants red-pen more than most, because no
 /// instrument can tell us it is wrong.
 ///

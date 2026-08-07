@@ -219,8 +219,12 @@ boss:
   - id: knowledge_demon
     name: "KNOWLEDGE DEMON"
     # Curse of Knowledge is modeled as the engine's decaying `dot` power at
-    # 6 stacks (ignores block, ticks 6,5,4,...) -- the cycle re-applies it,
-    # approximating the real constant Disintegration 6/turn. UNIMPLEMENTED:
+    # 6 stacks (ticks 6,5,4,...) -- the cycle re-applies it, approximating
+    # the real constant Disintegration 6/turn. Two disclosed divergences:
+    # the engine `dot` decays where Disintegration is permanent, AND it
+    # ignores block where the real tick is absorbed by leftover block
+    # (dossier knowledge-demon.md:115-117) -- weaker on one axis, harder on
+    # the other. UNIMPLEMENTED:
     # the pick-your-poison choice (draw/hand/energy arms, §10.9). Ponder
     # split into attack + self-heal + Str beats (§10.2 heal op).
     enemies:
@@ -239,8 +243,9 @@ boss:
     name: "KAISER CRAB"
     # Two claws fought at once; when one dies the survivor triggers Crab
     # Rage (§10.2 on_ally_death: +6 Str and 99 block at its next turn
-    # start). UNIMPLEMENTED: Back Attack positioning (§10.9); Enlarging
-    # Strike's growth (kept at its printed 4).
+    # start). UNIMPLEMENTED: Back Attack positioning (§10.9). Enlarging
+    # Strike really is a flat 4 -- "the move name is aspirational: it has
+    # no self-scaling of its own" (dossier crusher.md:56); no skip here.
     enemies:
       - name: kaiser_crusher
         hp: 209

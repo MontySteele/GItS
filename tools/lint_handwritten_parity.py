@@ -603,9 +603,11 @@ def roster_handwritten_parity() -> list[str]:
 # --------------------------------------------------------------------------
 #
 # Everything above compares C# to a ratified sheet. The Ancients have no sheet
-# row and are never going to get one: the sim models neither events nor relics,
-# so Ancient cards are game-side-only content (DECISIONS 2026-07-23) and Dusty
-# Tome is their single acquisition door. That is a real answer to "where does
+# row: they are game-side-only content (DECISIONS 2026-07-23) and Dusty Tome
+# is their single acquisition door. (The 2026-07-23 wording said "the sim
+# models neither events nor relics"; tier05 has modelled both since the
+# relic-content pass -- the sheetless status now rests on tier0's
+# no-passive-accrual law, which bars the Ancients' per-turn shapes.) That is a real answer to "where does
 # this number come from", and it left them with no gate at all -- `+5 Encore
 # per turn` on AllTheWorldsAStage existed in exactly one place in the repo, so
 # any edit to it was self-consistent by definition.
