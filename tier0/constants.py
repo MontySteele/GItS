@@ -944,7 +944,22 @@ BANNER_FEATURED_SLOTS = 3
 # banners go where the numbers are published, nothing rewritten (R101b).
 # DRAFTER_VERSION and RUNTEMPLATE correctly do NOT bump: no offer-time
 # price and no map/route shape changed.
-CONSTANTS_VERSION = 6
+# CONSTANTS_VERSION 7 (R128, 2026-08-07 sitting: EB-29q ruled PROMOTE --
+# "aim to make the sims realistic when possible - let's try to close the
+# mechanics gaps"). Test Subject's three §10.9 approximations become the
+# real mechanics: Enrage 2 at setup for the whole fight (every Skill played
+# feeds permanent Strength, carried across revives), Painful Stabs 1 on the
+# 200 bar (a Wound per unblocked HIT), and Nemesis on the 300 bar
+# (Intangible 1 toggled per acting enemy turn, capping damage at
+# INTANGIBLE_DAMAGE_CAP per hit -- now enforced at the direct-HP sites too:
+# shatter, splashes, unpowered/unblockable helpers; unblockable was never
+# uncappable). Multi-Claw's per-use growth becomes the real gains-a-hit
+# shape (times_ramp_per_use). Every archived test_subject number -- 12.2%
+# anchor, the EB-29q instrument set -- is C6-world archive; the C7 re-read
+# lands with this bump. Other encounters do not carry these powers and do
+# not move, EXCEPT any fight where a raw-damage site now caps -- no enemy
+# outside Test Subject P3 ever holds Intangible, so none today.
+CONSTANTS_VERSION = 7
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

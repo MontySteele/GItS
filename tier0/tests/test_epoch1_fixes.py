@@ -62,7 +62,8 @@ def test_klee_and_furina_tuples_did_not_move():
 
 
 def test_the_policy_stamp_bumped():
-    assert draft.POLICY_VERSION == 3
+    # 3 was R66's bump; 4 is R124 (EB-31p, the pilot's both-modes read).
+    assert draft.POLICY_VERSION == 4
 
 
 def test_the_starvation_alarm_keys_on_the_cohorts_own_archetypes():

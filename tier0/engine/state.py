@@ -527,6 +527,23 @@ class Enemy(Fighter):
                 self.intent_index % len(self.intents), 0)
         return amount
 
+    def ramped_times(self, intent: dict) -> int:
+        """This intent's HIT COUNT, with the per-use growth shape.
+
+        `times_ramp_per_use` is Multi-Claw's real mechanic (R128): the
+        intent permanently gains hits each time it is taken -- 3, then 4,
+        then 5. Until R128 this was approximated as `ramp_per_use` on the
+        AMOUNT (30 -> 39 -> 48 against the real 30 -> 40 -> 50), which
+        matched the totals within a hit but got the hit count wrong -- and
+        hit count is load-bearing once per-hit powers exist: Painful Stabs
+        wounds per hit, Intangible caps per hit."""
+        times = intent.get("times", 1)
+        per_use = intent.get("times_ramp_per_use", 0)
+        if per_use:
+            times += per_use * self.intent_uses.get(
+                self.intent_index % len(self.intents), 0)
+        return times
+
 
 @dataclass
 class CombatState:

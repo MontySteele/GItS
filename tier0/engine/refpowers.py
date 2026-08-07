@@ -107,7 +107,7 @@ def unpowered_damage(state: CombatState, enemy: Enemy, amount: int) -> int:
     Block still applies (Unpowered is not Unblockable). Bombs do not detonate
     and Shatter does not fire, matching a non-Attack source.
     """
-    dmg = int(amount)
+    dmg = int(_intangible_cap(enemy, int(amount)))    # R128: cap is per hit
     if dmg <= 0:
         return 0
     blocked = min(enemy.block, dmg)
@@ -131,8 +131,8 @@ def unblockable_unpowered_damage(state: CombatState, enemy: Enemy,
     Split from unpowered_damage rather than parameterised so the two call
     sites read as the two different ValueProp combinations they are.
     """
-    dmg = int(amount)
-    if dmg <= 0:
+    dmg = int(_intangible_cap(enemy, int(amount)))    # R128: unblockable is
+    if dmg <= 0:                                      # not uncappable
         return 0
     was_alive = enemy.alive
     effective = min(dmg, max(0, enemy.hp))

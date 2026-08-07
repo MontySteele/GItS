@@ -98,7 +98,20 @@ def _settle_phases(state: CombatState) -> None:
             e.phase_start_turn = state.turn
             e.intent_uses = {}
             e.block = 0
-            e.powers = {}
+            # A new bar is a new body -- EXCEPT Strength and Enrage, which
+            # the real boss keeps across knockdowns ("only the Adaptable and
+            # Painful Stabs powers are cleaned up at the second revive, not
+            # Strength", dossier :240). Enrage is fight-long by the same
+            # line; per-phase powers arrive from the phase spec below.
+            e.powers = {k: v for k, v in e.powers.items()
+                        if k in ("strength", "enrage")}
+            for pname, amt in (ph.get("powers") or {}).items():
+                e.powers[pname] = int(amt)
+            # Nemesis opens its phase Intangible: stack 1 at the revive, so
+            # the first ACTING turn (after the respawn sleep) is capped --
+            # the dossier's turn-1 row. The end-of-turn toggle owns it after.
+            if e.powers.get("nemesis", 0):
+                e.powers["intangible"] = 1
             e.aura = None
             e.aura_turns_left = 0
             e.bombs = []
@@ -329,6 +342,16 @@ def _finish_play(state: CombatState, card: Card,
         if state.replay_next_companion > 0:   # Study Buddy
             replays += state.replay_next_companion
             state.replay_next_companion = 0
+    # Enrage (§10.9 promotion, R128): every Skill played feeds every living
+    # enemy carrying the power -- permanent Strength, never telegraphed by an
+    # intent (test-subject dossier :227-240). Once per card PLAY, not per
+    # replay: a replay is one card being resolved twice.
+    if card.type == "skill":
+        for e in state.living_enemies:
+            n = e.powers.get("enrage", 0)
+            if n:
+                powers.apply_power(state, e, "strength", n)
+                state.emit("enrage_trigger", enemy=e.name, amount=n)
     # OneTwoPunch resolves the play COUNT once, but Before/AfterCardPlayed fire
     # per play index -- so a doubled attack pays Rage twice, counts twice for
     # Juggling, and burns two FreeAttack stacks.
@@ -761,7 +784,7 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             bool(enemy.bombs) and not enemy.bomb_suppression_spent
         )
         amount = enemy.ramped_amount(intent, state.turn)
-        for _ in range(intent.get("times", 1)):
+        for _ in range(enemy.ramped_times(intent)):
             dmg = powers.modify_damage_dealt(enemy, amount)
             if frozen:
                 dmg *= C.FROZEN_DAMAGE_MULT
@@ -801,6 +824,17 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # cannot answer "how hard did this turn hit".
             state.emit("player_hit", amount=hp_loss, blocked=blocked,
                        block_before=block_before, incoming=dmg)
+            # Painful Stabs (§10.9 promotion, R128): every UNBLOCKED hit adds
+            # a Wound to the discard, per hit of a multi-hit intent. Block is
+            # the gate -- the ward and Encore absorb after it and do not
+            # prevent the Wound (dossier :191-200: "every unblocked hit").
+            stabs = enemy.powers.get("painful_stabs", 0)
+            if stabs and dmg - blocked > 0:
+                from tier0.engine import statuses    # late import, as inject
+                for _s in range(stabs):
+                    state.player.discard_pile.append(
+                        statuses.make_status("wound"))
+                state.emit("painful_stabs", enemy=enemy.name, count=stabs)
             # AfterDamageReceived fires per HIT, not per intent -- FlameBarrier
             # retaliates against every hit of a multi-hit attack. Inferno and
             # Rupture are silent here: both require CurrentSide == Owner.Side,
@@ -877,6 +911,21 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
 
     enemy.advance_intent()
     powers.on_turn_end(state, enemy)
+    # Nemesis (§10.9 promotion, R128): at the end of every ACTING enemy turn
+    # the power toggles Intangible 1 on its owner -- applied on odd toggles,
+    # removed on even (dossier :205-218). The phase opens Intangible
+    # (_settle_phases applies stack 1 at the revive, and the respawn sleep
+    # turn returns above before reaching this), so the first acting turn is
+    # capped, the second is open, alternating -- the dossier's turn table.
+    # Enemy-side Intangible never auto-decays (the after_enemy_side_turn_end
+    # decrement is player-only), so this toggle is the stack's one owner.
+    if enemy.alive and enemy.powers.get("nemesis", 0):
+        if enemy.powers.get("intangible", 0):
+            del enemy.powers["intangible"]
+        else:
+            enemy.powers["intangible"] = 1
+        state.emit("nemesis_toggle", enemy=enemy.name,
+                   intangible=bool(enemy.powers.get("intangible", 0)))
 
 
 def surface_innate(draw_pile: list) -> None:
