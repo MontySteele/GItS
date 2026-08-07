@@ -205,6 +205,86 @@ def test_revive_costs_the_boss_its_respawn_turn():
     assert st.player.hp < hp_before
 
 
+# --- R128: the promoted Test Subject mechanics (EB-29q, 2026-08-07) ---------
+
+def _skill(cid="a_skill"):
+    return Card(id=cid, name="skill", cost=0, type="skill", effects=[])
+
+
+def test_enrage_feeds_strength_per_skill_and_survives_revives():
+    e = _phased_boss()
+    e.powers["enrage"] = 2
+    st = make_state(enemies=[e])
+    combat._finish_play(st, _skill())
+    assert e.powers["strength"] == 2
+    combat._finish_play(st, Card(id="atk", name="atk", cost=0,
+                                 type="attack", effects=[]))
+    assert e.powers["strength"] == 2             # attacks feed nothing
+    e.hp = 0
+    combat._settle_phases(st)                    # revive: a new body EXCEPT
+    assert e.powers["strength"] == 2             # Strength and Enrage
+    assert e.powers["enrage"] == 2               # (dossier :240)
+    combat._finish_play(st, _skill("b_skill"))
+    assert e.powers["strength"] == 4
+
+
+def test_painful_stabs_wounds_per_unblocked_hit():
+    e = Enemy(hp=50, max_hp=50, name="ts2",
+              intents=[{"kind": "attack", "amount": 10, "times": 3}],
+              powers={"painful_stabs": 1})
+    st = make_state(enemies=[e])
+    st.player.hp = st.player.max_hp = 200
+    combat._enemy_turn(st, e)
+    wounds = [c for c in st.player.discard_pile if c.id == "status_wound"]
+    assert len(wounds) == 3                      # one per unblocked HIT
+    st.player.discard_pile.clear()
+    st.player.block = 100                        # fully blocked: no wounds
+    combat._enemy_turn(st, e)
+    assert not [c for c in st.player.discard_pile if c.id == "status_wound"]
+
+
+def test_nemesis_toggles_intangible_and_the_phase_opens_capped():
+    e = Enemy(hp=20, max_hp=20, name="ts",
+              intents=[{"kind": "attack", "amount": 5}],
+              phases=[{"hp": 30, "powers": {"nemesis": 1},
+                       "intents": [{"kind": "attack", "amount": 5}]}])
+    st = make_state(enemies=[e])
+    st.player.hp = st.player.max_hp = 200
+    e.hp = 0
+    combat._settle_phases(st)
+    assert e.powers["nemesis"] == 1
+    assert e.powers["intangible"] == 1           # the phase opens capped
+    combat._enemy_turn(st, e)                    # respawn sleep: no toggle
+    assert e.powers["intangible"] == 1
+    combat._enemy_turn(st, e)                    # acting turn 1 ends: off
+    assert "intangible" not in e.powers
+    combat._enemy_turn(st, e)                    # acting turn 2 ends: on
+    assert e.powers["intangible"] == 1
+
+
+def test_intangible_caps_the_direct_hp_sites_too():
+    from tier0.engine import refpowers
+    e = make_enemy(hp=40)
+    st = make_state(enemies=[e])
+    e.powers["intangible"] = 1
+    refpowers.unblockable_unpowered_damage(st, e, 30)
+    assert e.hp == 40 - C.INTANGIBLE_DAMAGE_CAP  # unblockable != uncappable
+    refpowers.unpowered_damage(st, e, 25)
+    assert e.hp == 40 - 2 * C.INTANGIBLE_DAMAGE_CAP
+
+
+def test_times_ramp_per_use_grows_the_hit_count():
+    e = Enemy(hp=500, max_hp=500, name="ts2",
+              intents=[{"kind": "attack", "amount": 10, "times": 3,
+                        "times_ramp_per_use": 1}])
+    st = make_state(enemies=[e])
+    st.player.hp = st.player.max_hp = 500
+    combat._enemy_turn(st, e)
+    assert st.player.hp == 500 - 30              # 3 hits of 10
+    combat._enemy_turn(st, e)
+    assert st.player.hp == 500 - 30 - 40         # then 4 -- the real claw
+
+
 # --- intent ramps (2026-07-24: the Test Subject act-3 diagnosis) ------------
 #
 # `ramp` is per TURN and counts from the start of the enemy's CURRENT phase;
@@ -293,7 +373,10 @@ def test_pilot_and_enemy_turn_agree_on_a_ramped_intent():
 
 
 def test_test_subject_second_bar_opens_at_its_authored_number():
-    """End-to-end on the shipped roster row: the sheet says 30 -> 39 -> 48."""
+    """End-to-end on the shipped roster row. R128 promoted Multi-Claw to the
+    real gains-a-hit shape, so the curve is the dossier's 30 -> 40 -> 50
+    (3, then 4, then 5 hits of 10) -- not the retired 30 -> 39 -> 48
+    amount-ramp approximation this test used to pin."""
     from tier05 import acts
     spec = next(s for s in acts.boss_pool(2) if s["id"] == "test_subject")
     boss = acts.spawn(spec, random.Random(0))[0]
@@ -305,13 +388,13 @@ def test_test_subject_second_bar_opens_at_its_authored_number():
     combat._enemy_turn(st, boss)   # EB-29b: the revive spends the respawn
     #                                turn first; the curve starts after it
     seen = []
-    for _ in range(6):
+    for _ in range(3):
         if boss.current_intent()["kind"] == "attack":
             seen.append(boss.ramped_amount(boss.current_intent(), st.turn)
-                        * boss.current_intent().get("times", 1))
+                        * boss.ramped_times(boss.current_intent()))
         st.turn += 1
         combat._enemy_turn(st, boss)
-    assert seen == [30, 39, 48]
+    assert seen == [30, 40, 50]
 
 
 # --- Slow / Skittish (§10.9 promotions, red-pen 2026-07-23) -----------------

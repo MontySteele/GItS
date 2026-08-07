@@ -164,8 +164,13 @@ def test_every_pool_hook_is_weighted_or_pending_and_unknown_is_loud():
     dead = relic_pool._NEOW_WEIGHT_PENDING - pool_hooks
     assert not dead, f"pending hooks no pool boon carries: {sorted(dead)}"
 
-    # pending scores 0 (never beats a weighted boon); unknown raises.
-    assert relic_pool._hook_weight("spotlight_both_modes") == 0
+    # R126 priced the Orobas four: each variant totals 13, one above the
+    # generic ceiling, so the pilot narrowly prefers its own starter's
+    # upgrade. Unknown hooks still raise (EB-31h's guard outlives the park).
+    assert relic_pool._hook_weight("spotlight_both_modes") == 13
+    assert relic_pool._hook_weight("combat_start_spark") == 13
+    assert (relic_pool._hook_weight("charge_per_exhaust")
+            + relic_pool._hook_weight("burst_per_exhaust")) == 13
     with pytest.raises(KeyError):
         relic_pool._hook_weight("hook_nobody_priced")
 

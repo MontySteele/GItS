@@ -127,7 +127,10 @@ def rest_action(deck_ids: list[str], hp: int, max_hp: int,
         return "heal", None
     deck = [loader.peek_card(cid) for cid in deck_ids]     # read-only scoring
     upgradable = [c for c in deck if upgrades.has_upgrade(c.id)]
-    on_plan = [c for c in upgradable if archetype in c.archetypes]
+    # R125: behavioural tag read -- the anchor's instrumentation tags must
+    # not steer the smith (the widened R121 shield).
+    on_plan = [c for c in upgradable
+               if archetype in draft.behavioural_archetypes(c)]
     if on_plan:
         best = max(on_plan, key=lambda c: (c.role == "payoff",
                                            c.role == "enabler"))

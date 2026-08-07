@@ -73,12 +73,19 @@ ENEMY_KEYS = frozenset({
     "phases",          # multi-phase bosses
     "on_ally_death",   # reaction to a sibling dying
     "skittish", "slow", "stagger", "sleep_turns",
+    "powers",          # R128: setup powers (Test Subject's Enrage)
+})
+
+PHASE_KEYS = frozenset({
+    "hp", "intents",
+    "powers",          # R128: per-phase powers (Painful Stabs, Nemesis)
 })
 
 INTENT_KEYS = frozenset({
     "kind", "amount", "times", "count",
     "power", "status", "pile",     # buff / debuff / status payloads
     "ramp", "ramp_after",          # escalating intents
+    "times_ramp_per_use",          # R128: the gains-a-hit shape (Multi-Claw)
     "wave",                        # summon waves
 })
 
@@ -106,6 +113,13 @@ def _validate_pool(pool_file: str, raw: dict) -> dict:
                 check(f"{tier}/{eid}/{name}", enemy, ENEMY_KEYS)
                 for intent in enemy.get("intents") or []:
                     check(f"{tier}/{eid}/{name}/intent", intent, INTENT_KEYS)
+                # R128: phases were never validated -- the same silent-no-op
+                # hole this guard exists for, one level down.
+                for ph in enemy.get("phases") or []:
+                    check(f"{tier}/{eid}/{name}/phase", ph, PHASE_KEYS)
+                    for intent in ph.get("intents") or []:
+                        check(f"{tier}/{eid}/{name}/phase/intent",
+                              intent, INTENT_KEYS)
     return raw
 
 
@@ -178,6 +192,11 @@ def spawn(encounter: dict, rng: random.Random) -> list[Enemy]:
                 is_boss=espec.get("is_boss", False),
                 sleep_turns=espec.get("sleep_turns", 0),
                 intent_index=idx,
+                # R128: setup powers (Test Subject's Enrage) -- live from
+                # turn 1, and _settle_phases carries enrage/strength across
+                # revives. Per-PHASE powers ride the phase specs instead.
+                powers={k: int(v)
+                        for k, v in (espec.get("powers") or {}).items()},
                 # §10.9 promotions: per-card-played counterplay powers.
                 slow=espec.get("slow", 0),
                 skittish=espec.get("skittish", 0),

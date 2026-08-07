@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Cards.Furina;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -16,9 +18,15 @@ using MegaCrit.Sts2.Core.Runs;
 namespace KleeMod.Relics;
 
 /// <summary>
-/// Furina's starter talent. After the normal turn draw, it adds the one-use
-/// Spotlight selector to hand. It also hosts Furina's fourth companion reward
-/// option, mirroring Klee's always-present starter-relic hook.
+/// Furina's starter talent. BEFORE the normal turn draw (R123, sitting
+/// 2026-08-07), it adds the one-use Spotlight selector to hand -- matching
+/// the sim's pre-draw grant site (`effects.py`, turn-start triggers). The
+/// earlier form granted post-draw, which made the X14(b) hand-full discard
+/// fire on ordinary jam turns; ruled as a safety measure for softlock edge
+/// cases, it should almost never fire, and pre-draw (a hand of retained
+/// cards only) is what makes it rare. It also hosts Furina's fourth
+/// companion reward option, mirroring Klee's always-present starter-relic
+/// hook.
 /// </summary>
 public sealed class EtherealSpotlightRelic : CustomRelicModel
 {
@@ -82,10 +90,18 @@ public sealed class EtherealSpotlightRelic : CustomRelicModel
     /// </summary>
     private const string HandFullRngStream = "furina_spotlight_hand_full";
 
-    public override async Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
+    /// <summary>
+    /// PRE-DRAW SITE (R123): BeforeSideTurnStart is the game's site A --
+    /// before the block clear and before the draw -- so the hand here holds
+    /// only retained cards, the same hand the sim's grant sees. The
+    /// selector must be in hand before the draw resolves, not after.
+    /// </summary>
+    public override async Task BeforeSideTurnStart(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IReadOnlyList<Creature> participants, ICombatState combatState)
     {
-        if (player != Owner || player.Character is not Furina) return;
+        if (side != CombatSide.Player) return;
+        if (Owner is not { } player || player.Character is not Furina) return;
         var hand = CardPile.Get(PileType.Hand, player);
         if (hand == null || hand.Cards.Any(card => card is EtherealSpotlight))
         {
@@ -94,9 +110,10 @@ public sealed class EtherealSpotlightRelic : CustomRelicModel
 
         // HAND-FULL FALLBACK (sitting 2026-08-06, family X14 leg (b)):
         // "if the hand is full, one random card is discarded before the
-        // spotlight is added." Before this the grant was simply skipped, so
-        // the relic that exists to guarantee Furina a play was exactly what a
-        // jammed hand starved.
+        // spotlight is added." Ruled as a softlock safety measure, and under
+        // the pre-draw site that is all it is: it needs a 10-card RETAINED
+        // hand to fire, which is the edge case, not the jam-turn norm the
+        // post-draw site made it.
         //
         // The victim pool is the sim's _op_discard pool rule -- KitGrant
         // .NotKitCard, because kit cards are never fodder (the v1.9

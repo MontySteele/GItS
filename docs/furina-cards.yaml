@@ -40,6 +40,8 @@
 #     Fanfare Cap may ALSO ride a non-Power (lasting_impression, reginas_mercy); "Fanfare +X" may not.
 # NO passive accrual anywhere on this sheet — no per-turn Encore or Fanfare trickle exists, and none may be added (a per-turn Encore
 # power would launder passive Fanfare through the gain hook; deliberately not designed — see sheet-pass plan §5).
+# ONE exception, off-sheet by construction: the Ancient carve-out (R127, LAW card-sheet rules) — All the World's a
+# Stage, Ancient rarity, Dusty Tome's single door. Ancients are not sheet rows, so this sheet's ban stands as written.
 # SPOTLIGHT v5: Center Stage gives Furina plays Fanfare but no numeric boost; Guest Cast empowers every Companion card
 # and gives no Spotlight-derived Fanfare. Fanfare payoffs READ the pool -- "The Tide Turns" (F-A4) retired
 # fanfare_cost and no card spends it; the_final_verdict is the one card that lowers it, by crashing it to a floor

@@ -362,8 +362,12 @@ CO_TENANCY_LEDGER = {
             "sim's reset-then-detonate (combat.py:501 vs :511)",
         ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
             "purges the Salon company map, clears Curtain Call per-turn "
-            "windows; touches nothing its (Klee-side, co-op-only) "
-            "co-tenants read",
+            "windows; touches nothing its co-tenants read",
+        ("Relics/EtherealSpotlightRelic.cs", "EtherealSpotlightRelic"):
+            "grants the Ethereal Spotlight selector PRE-draw (R123 moved it "
+            "here from AfterPlayerTurnStart; random discard only on a full "
+            "retained hand -- the X14(b) softlock safety). No co-tenant "
+            "touches the hand",
     },
     "AfterSideTurnStart": {
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
@@ -409,11 +413,6 @@ CO_TENANCY_LEDGER = {
         ("Powers/SpotlightSystem.cs", "SpotlightDiscountPower"):
             "resets its qualifying-plays latch; consumed only from card "
             "plays",
-        ("Relics/EtherealSpotlightRelic.cs", "EtherealSpotlightRelic"):
-            "grants the Ethereal Spotlight to the hand (random discard at "
-            "hand-full). Shares the HAND with the pending-draw flush; that "
-            "seam belongs to the deferred-settle machinery's SKIP-10.9 "
-            "caveat (C#-only structure, parity rests on flush sites)",
         ("Relics/UpgradedStarterRelics.cs", "ExplosiveFrags"):
             "turn-1-only opening Spark windfall (the sim's combat_start "
             "site)",

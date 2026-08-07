@@ -198,8 +198,10 @@ def test_shipped_act_pools_validate(pool_file):
 
 
 def test_act_allowlists_carry_nothing_the_pools_do_not_use():
-    """The rot direction, across all three acts at once."""
-    seen_enc, seen_enemy, seen_intent = set(), set(), set()
+    """The rot direction, across all three acts at once. Phase specs and
+    phase intents count as uses (R128 validates them too): a key only a
+    phase carries -- times_ramp_per_use, phase powers -- is a used key."""
+    seen_enc, seen_enemy, seen_phase, seen_intent = set(), set(), set(), set()
     for pool_file in POOL_FILES:
         for encounters in acts._load(pool_file).values():
             for enc in encounters:
@@ -208,8 +210,13 @@ def test_act_allowlists_carry_nothing_the_pools_do_not_use():
                     seen_enemy.update(enemy)
                     for intent in enemy.get("intents") or []:
                         seen_intent.update(intent)
+                    for ph in enemy.get("phases") or []:
+                        seen_phase.update(ph)
+                        for intent in ph.get("intents") or []:
+                            seen_intent.update(intent)
     assert acts.ENCOUNTER_KEYS - seen_enc == set()
     assert acts.ENEMY_KEYS - seen_enemy == set()
+    assert acts.PHASE_KEYS - seen_phase == set()
     assert acts.INTENT_KEYS - seen_intent == set()
 
 

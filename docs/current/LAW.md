@@ -166,7 +166,8 @@ combat grammar comes with us. (principles §1)
 - **Encore is an unbounded per-combat buffer** absorbing after Block and before
   HP (overdraw drains true HP); **Encore absorption credits A4, never A3.**
   (principles v1.10; furina §2, §4)
-- **Fanfare is capped at %maxHP; generation is activity-based, never passive.**
+- **Fanfare is capped at %maxHP; generation is activity-based, never passive**
+  *(Encore's per-turn-trickle ban carries the same Ancient carve-out: R127)*.
   Design invariant: **every point of damage past Block prints exactly 1 Fanfare.**
   Live legs: HP lost / Encore spent / Encore absorbed / Spotlighted card played.
   Cards use printed `Fanfare Cap +X` (raises cap) and `Fanfare +X` (full grant,
@@ -203,7 +204,8 @@ combat grammar comes with us. (principles §1)
   size (net delta ≤ 0); only Uncommon/Rare may create cards. Machine-checked;
   her personal pool only. (Law 4)
 - **Charge is never spent** — uncapped, read but never consumed, card-event-driven
-  with no passive accrual. The engine is kit-level (relic + starter), never
+  with no passive accrual *(Ancient carve-out: R127, see card-sheet rules)*.
+  The engine is kit-level (relic + starter), never
   draft-gated; the relic holds only bookkeeping, all payoff magnitude lives in
   cards. (kokomi §0, §2.1; R80; R16)
 - **Elite pair A2 Scaling + A6 Utility;** acceptance signature is HP-trajectory
@@ -244,6 +246,14 @@ combat grammar comes with us. (principles §1)
   (principles Guardrail 6; R8; R79/B4)
 - **No card starts the game with AoE;** AoE must be drafted, never in any
   starter. (R56)
+- **Ancient carve-out (R127, 2026-08-07):** an Ancient-rarity card — Dusty
+  Tome's single acquisition door, one visible Ancient per roster character —
+  may grant per-turn accrual that its owner's resource laws otherwise ban
+  (Kokomi's no-passive-accrual Charge; Furina's no-per-turn-Encore trickle).
+  A bounded, opt-in, once-per-run power spike is the rarity's design: the one
+  door out of the character's central bargain. Scoped to Ancient rarity
+  exactly — no other rarity, no relic, and no event may inherit the
+  exception. (EB-30q)
 - **Strict-domination is scoped to adjacent rarities:** a card must not be a
   strictly-better superset of another at similar weight; two-step gaps are
   informational. Self-damage/discard/spend_encore count as costs; prefer base-StS

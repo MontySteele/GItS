@@ -325,6 +325,26 @@ def core_complete(deck: list[Card], archetype: str) -> bool:
 ANCHOR_TAG_SHIELD_CHARACTER = "ref_ironclad"
 
 
+def behavioural_archetypes(card: Card) -> list[str]:
+    """A card's tags as BEHAVIOUR is allowed to read them.
+
+    R125 (2026-08-07) widened the R121 shield to all four behavioural tag
+    readers. EB-46 measured what the narrow shield left open: the smith
+    (`model.rest_action`), the event upgrade (`events.py`) and the plan
+    bonuses below still read the anchor's instrumentation tags, worth
+    +2.17 pp (z = +6.42) on the shipped row against the reproducible
+    untagged baseline of 11.13%. Same scoping rule as `_core_advance_view`
+    and the same restores-not-redefines argument for the untouched
+    DRAFTER_VERSION: the tags landed with R118, after v14 was stamped, so
+    blinding behaviour to them returns the scorer to the world v14
+    measured. Instruments -- `core_complete`, the RA-G1/RA-G2 columns --
+    still read `card.archetypes` directly, which is the whole point of the
+    split: the tags exist FOR the instruments."""
+    if card.character == ANCHOR_TAG_SHIELD_CHARACTER and card.archetypes:
+        return []
+    return card.archetypes
+
+
 def _core_advance_view(cards: list[Card]) -> list[Card]:
     """`cards` as the +3.0 core-advance bonus alone is allowed to see them.
 
@@ -1255,10 +1275,11 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
     # mode too, which would move the frozen M5 numbers for a reason that has
     # nothing to do with the drafting question they were measuring.
     if (archetype == "fanfare"
-            and "fanfare" in card.archetypes
+            and "fanfare" in behavioural_archetypes(card)
             and not card.is_companion):
         s += _fanfare_plan_score(card, deck, online)
-    elif archetype in card.archetypes and not card.is_companion:
+    elif (archetype in behavioural_archetypes(card)
+          and not card.is_companion):
         if card.role == "enabler":
             s += 3.0 * max(0.25, 1.0 - progress) * plan_mult
         elif card.role == "payoff":
@@ -1268,7 +1289,7 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
                 s += (4.0 if online else 1.0) * plan_mult
         else:
             s += 1.5 * plan_mult
-    elif "generic" in card.archetypes:
+    elif "generic" in behavioural_archetypes(card):
         s += 0.8
     if card.is_companion:
         if archetype == "reaction":
@@ -1374,7 +1395,16 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # tuples are untouched and their numbers do not move. Assigned-plan Kokomi
 # numbers (the R56 battery) STAND: they route through runner.py's plan
 # registry, which was always correct.
-POLICY_VERSION = 3
+#
+# POLICY_VERSION 4 (R124, 2026-08-07). EB-31p: the pilot's Spotlight
+# valuation (`tier0/pilot/policy.py _spotlight_value`) now reads the
+# both-modes flag the four engine readers use -- under The Curtain Never
+# Falls, designates score dead, Guest Cast reads live, and
+# copy_spotlighted_in_hand sees its targets. Latent at the bump: the relic
+# only arrives through the Ancient pick, whose Orobas weights land in the
+# same window (R125, EB-31q) -- Furina cells move when that does. No other
+# character reads any of the three branches.
+POLICY_VERSION = 4
 
 # F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one
 # place a character's archetype vocabulary is declared -- and where it is

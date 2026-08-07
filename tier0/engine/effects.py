@@ -435,6 +435,10 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
         # Shatter itself. Burst-direction growth -- every Shatter still
         # ENDS a freeze, so this cannot become control uptime.
         shatter = C.SHATTER_DAMAGE + state.player.powers.get("shatter_bonus", 0)
+        from tier0.engine import refpowers          # late import (cycle)
+        shatter = int(refpowers._intangible_cap(enemy, shatter))  # R128: the
+        #                            cap is per hit, and a direct-HP hit is
+        #                            still a hit -- unblockable != uncappable
         sh = min(shatter, max(0, enemy.hp))
         enemy.hp -= shatter
         state.emit("damage", target=enemy.name, amount=sh, blocked=0,
@@ -509,8 +513,10 @@ def detonate_bombs(state: CombatState, enemy: Enemy, bonus: int = 0) -> None:
                 # these emitted amounts. Detonation splash hits EVERY living
                 # enemy at once, so it over-read hardest against wide boards
                 # of small adds -- the demolition archetype's whole premise.
-                effective = min(splash, max(0, other.hp))
-                other.hp -= splash
+                from tier0.engine import refpowers  # late import (cycle)
+                sp = int(refpowers._intangible_cap(other, splash))  # R128
+                effective = min(sp, max(0, other.hp))
+                other.hp -= sp
                 state.emit("damage", target=other.name, amount=effective,
                            source="detonation_splash")
             if p.burst_max:

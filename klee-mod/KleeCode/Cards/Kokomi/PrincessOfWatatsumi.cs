@@ -39,11 +39,12 @@ namespace KleeMod.Cards.Kokomi;
 /// which is the point of an Ancient: the one door out of her central bargain.
 ///
 /// Hand-written and outside the ratified sheets, like every Ancient: these
-/// are game-side-only content. (tier05 now models events and relics; what
-/// keeps the Ancients unmeasured is tier0's no-passive-accrual law, which
-/// bars this card's per-turn Charge shape.) PROPOSED, and flagged as
+/// are game-side-only content. (tier05 now models events and relics; the
+/// no-passive-accrual law that barred this card's per-turn Charge shape
+/// gained its Ancient carve-out -- R127, 2026-08-07 -- and the sim twin is
+/// filed as EB-30m.) PROPOSED, and flagged as
 /// such in R58 -- this one wants red-pen more than most, because no
-/// instrument can tell us it is wrong.
+/// instrument can tell us it is wrong until EB-30m lands.
 ///
 /// NAME: "Princess of Watatsumi" is her canon innate passive (wiki-verified
 /// in the sheet header) and was unused by the pool. Still subject to the

@@ -215,36 +215,40 @@ boss:
   - id: test_subject
     name: "TEST SUBJECT"
     # THE phase boss (§10.2 op): 100 -> 200 -> 300 HP, revives with a new
-    # moveset each bar (600 total). Approximations, all §10.9-logged:
-    # Enrage 2 skipped (live from setup for the WHOLE fight in the real
-    # boss, carrying across revives -- not P1-scoped; dossier :227-240);
-    # P2's grow-a-hit-per-turn Multi-Claw is +3 per hit
-    # PER USE (30 -> 39 -> 48 vs real 30 -> 40 -> 50) and Painful Stabs'
-    # on-unblocked Wounds become an inject beat (every other turn); P3
-    # Intangible skipped (the 300 bar carries the weight).
-    #
-    # Multi-Claw was `ramp: 3` until 2026-07-24, which is per TURN counted
-    # from combat start -- so on top of the phase-relative bug (fixed in the
-    # engine, see Enemy.ramped_amount) it also grew on the inject beats it
-    # sits between. Delivered 84 -> 102 -> 120 against a 30 -> 39 -> 48
-    # authored line, i.e. an act-3 boss no measured deck could beat at any
-    # HP. `ramp_per_use` is the shape the real move actually has (it gains a
-    # HIT each time it is taken), and unlike a turn ramp it does not silently
-    # retune if a beat is added to the rotation.
+    # moveset each bar (600 total). The three §10.9 approximations were
+    # PROMOTED to the real mechanics by R128 (2026-08-07 sitting, EB-29q):
+    #   - Enrage 2 at setup, whole fight: every Skill played feeds the boss
+    #     +2 Strength, permanently, carried across revives (dossier
+    #     :227-240; combat._finish_play trigger, _settle_phases carry rule).
+    #   - Painful Stabs 1 on the 200 bar: a Wound per UNBLOCKED HIT, per
+    #     hit of the multi-hit claw (dossier :191-200). The every-other-turn
+    #     inject beat it replaced is gone, and with it the extra beat in
+    #     P2's rotation: Multi-Claw follows onto itself, as the real one
+    #     does.
+    #   - Nemesis on the 300 bar: Intangible 1 toggled at the end of every
+    #     acting enemy turn, phase opening capped (dossier :205-225).
+    # Multi-Claw's growth is now the real shape too: the intent GAINS A HIT
+    # each use (times_ramp_per_use, 30 -> 40 -> 50), replacing the
+    # +3-damage-per-use approximation -- hit count is load-bearing once
+    # Wounds arrive per hit and Intangible caps per hit. (Its `ramp: 3`
+    # ancestry and the phase-relative bug it exposed: see
+    # Enemy.ramped_amount.)
     enemies:
       - name: test_subject
         hp: 100
         is_boss: true
+        powers: {enrage: 2}
         intents:
           - {kind: attack, amount: 20}                  # Bite
           - {kind: attack, amount: 14}                  # Skull Bash
           - {kind: debuff, power: vulnerable, amount: 1}  # Bash's Vuln (beat)
         phases:
           - hp: 200
+            powers: {painful_stabs: 1}
             intents:
-              - {kind: attack, amount: 10, times: 3, ramp_per_use: 3}  # Multi-Claw
-              - {kind: inject, status: wound, count: 1}  # Painful Stabs
+              - {kind: attack, amount: 10, times: 3, times_ramp_per_use: 1}  # Multi-Claw
           - hp: 300
+            powers: {nemesis: 1}
             intents:
               - {kind: attack, amount: 10, times: 3}    # Lacerate
               - {kind: attack, amount: 45}              # Big Pounce

@@ -201,6 +201,8 @@ def _splash(state: CombatState, enemy: Enemy, amount: int) -> None:
 
     HP still takes the full unclamped hit; only the accounting is clamped.
     """
+    from tier0.engine import refpowers              # late import (cycle)
+    amount = int(refpowers._intangible_cap(enemy, amount))    # R128: per hit
     effective = min(amount, max(0, enemy.hp))
     enemy.hp -= amount
     state.emit("damage", target=enemy.name, amount=effective,

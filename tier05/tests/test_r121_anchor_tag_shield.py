@@ -118,3 +118,59 @@ def test_the_shield_leaves_the_card_prototypes_alone():
     draft.score_offer(card, [_anchor(ANCHOR_ENABLERS[0])], "generic")
     assert loader.get_card(ANCHOR_PAYOFF).archetypes == before
     assert loader.peek_card(ANCHOR_PAYOFF).archetypes == before
+
+
+# --- R125 (Q19b): the WIDENED shield -- all four behavioural readers -------
+#
+# EB-46 measured what R121's narrow scope left open: the smith, the event
+# upgrade and score_offer's plan bonuses still read the anchor's
+# instrumentation tags, worth +2.17 pp (z = +6.42) on the shipped row. R125
+# routes all three through `draft.behavioural_archetypes`, which sees the
+# anchor's tags as absent. Instruments keep reading `card.archetypes`
+# directly -- the split test_instrumentation_still_reads... above pins from
+# the other side.
+
+def test_behavioural_archetypes_is_blind_to_the_anchor_and_only_the_anchor():
+    anchor = _anchor(ANCHOR_PAYOFF)
+    assert anchor.archetypes and not draft.behavioural_archetypes(anchor)
+    foreign = next(c for c in loader._card_index().values()
+                   if "generic" in c.archetypes
+                   and c.character != draft.ANCHOR_TAG_SHIELD_CHARACTER)
+    assert draft.behavioural_archetypes(foreign) is foreign.archetypes
+
+
+def test_plan_bonuses_do_not_fire_from_the_anchor_s_tags():
+    """Scoring an anchor offer equals scoring its tag-stripped copy: every
+    tag-gated term in score_offer is now behind the shield, so the tags'
+    only remaining readers are the instruments."""
+    from dataclasses import replace
+    deck = [_anchor(ANCHOR_ENABLERS[0])]
+    offer = _anchor(ANCHOR_PAYOFF)
+    assert (draft.score_offer(offer, deck, "generic")
+            == draft.score_offer(replace(offer, archetypes=[]),
+                                 deck, "generic"))
+
+
+def test_the_smith_does_not_read_the_anchor_s_tags():
+    """A healthy anchor deck smiths by the untagged fallback (first
+    upgradable, deck order), never by tag-elected payoff-first."""
+    from tier05 import model
+    deck_ids = [ANCHOR_ENABLERS[0], ANCHOR_PAYOFF]
+    action, cid = model.rest_action(deck_ids, hp=80, max_hp=80,
+                                    archetype="generic")
+    assert (action, cid) == ("upgrade", ANCHOR_ENABLERS[0])
+
+
+def test_the_event_upgrade_does_not_read_the_anchor_s_tags():
+    """Same shield at the event layer: the upgrade option takes the deck in
+    order, not the tag-elected on-plan payoff first."""
+    import random as _random
+    from tier0.content import upgrades
+    from tier05 import events
+    st = events.EventState(
+        character=draft.ANCHOR_TAG_SHIELD_CHARACTER, archetype="generic",
+        hp=80, max_hp=80, gold=0,
+        deck_ids=[ANCHOR_ENABLERS[0], ANCHOR_PAYOFF])
+    events.resolve(_random.Random(7), {"id": "x"}, {"upgrade": 1}, st)
+    assert st.deck_ids[0] == ANCHOR_ENABLERS[0] + upgrades.SUFFIX
+    assert st.deck_ids[1] == ANCHOR_PAYOFF
