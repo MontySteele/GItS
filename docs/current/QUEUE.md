@@ -24,7 +24,6 @@
 | `M3` | One Furina Encore card upgrading to Innate (measured green, never shipped): **SHIP or DROP** | OPEN | user-queue §10; `git show aa09b97:docs/current/backlog/missed-requirements.md` §1.5 |
 | `M5` | Furina's declared elite axis A6 has measured short for two weeks (median 3.5 vs 4.2): **pick one of three routes** put to red-pen | OPEN | user-queue §10; `git show aa09b97:docs/current/backlog/missed-requirements.md` §3.7 |
 | `Q-C` (payoff-reach) | Author the payoff-reach / `RARITY_ODDS` sprint's **written predictions at kickoff** — direction + threshold per question, plus the Q-C target band (or its explicit deletion) — before any number is read. Q18 countersign is done; this is step (2) of its execution order | OPEN — design-side authoring | → review/active/payoff-reach-reregistration.md §4 |
-| `EB-19/M4` | Ethereal Spotlight selector timing: the sim grants **pre-draw** (`effects.py:2416`), where the ruled X14(b) hand-full discard needs a 10-card retained hand and is effectively dead; C# grants **post-draw** (`EtherealSpotlightRelic.cs:85`, class doc: "after the normal turn draw"), where it is live. Same final hand size, different contents and a visible discard on jam turns. Pick one; the other side moves | OPEN | fix-sweep-4; EB-19 sweep |
 
 ## 2. Kokomi — band, playtest, pool, and art
 
