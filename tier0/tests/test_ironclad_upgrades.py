@@ -15,9 +15,14 @@ from tier05 import model, shop
 
 
 UPGRADE_PATH = upgrades.EXTERNAL_UPGRADE_SHEETS[0]
+# The pool is required too: the deltas name pool card ids, and a game_ref
+# holding only extractor output (extract_base_game_pool done,
+# build_official_sheet not yet run) is a legitimate mid-pipeline state, not
+# a loadable real_ironclad.
 pytestmark = pytest.mark.skipif(
-    not UPGRADE_PATH.exists(),
-    reason="real Ironclad upgrades are a local game_ref artifact",
+    not (UPGRADE_PATH.exists()
+         and (loader.GAME_REF_DIR / "ironclad_pool.yaml").exists()),
+    reason="real Ironclad pool+upgrades are local game_ref artifacts",
 )
 
 
