@@ -23,16 +23,14 @@
 
 | ID | Item | Provenance |
 |---|---|---|
-| `EB-17` | Klee played-when-drawn / dead-in-hand / force-first-copy telemetry — zero matches across `tier0/`,`tier05/`,`tools/`; a **live gate** (bodyless draw/resource engines may not be buffed without it) | eng-backlog §3; missed-requirements §2.2 |
-| `S13→S7` | Sim-infidelity cross-checks owed before any design session reads them as game facts: swirl aura self-refresh (`reactions.py:96-99`), detonation-order Vulnerable self-amp (`effects.py:474-476`), conscript nation hard-default `'inazuma'` (`effects.py:2018`), Kurage direct `p.block +=` bypass (`effects.py:2549`), per-effect-dict relic no-dedupe (`relics.py:133-136`) | exploit-ledger "Routed to S7" |
+| `EB-17p` | Force-first-copy **paired** winrate — the register's actual phrase: two decks on the same seeds, one with a copy forced in, one without. Deck construction is barred from the tier0 kernel, so this is a tier05 experiment under EXPERIMENTS pre-registration. The fight-side half ships (`metrics.card_flow_profile`, `--card-flow`) and explicitly declines to call its within-arm split the pairing | fix-sweep-2; EB-17 residual |
 
 ## tier0.5 — draft / run layer / measurement
 
 | ID | Item | Provenance |
 |---|---|---|
-| `EB-16` | `route_regret` — advertised in code, never written; `run_metrics.py` defines no such function. §3.7.5's "relics underpriced" finding rests on this comparison | eng-backlog §3; missed-requirements §2.1 |
+| `EB-16w` | Wire `route_regret` into the live run layer: `model.run_one` walks incrementally and `RunResult` records no route decisions, so nothing calls the sampler on a real run yet (`route.walk_decisions` exists for it); promote the sample-rate default to `tier0/constants.py` and calibrate `ROUTE_REGRET_MARGIN` (the 1.0 is a literal `draft_regret` analogy, not a measured threshold). Then §3.7.5's "relics underpriced" comparison can actually be re-run | fix-sweep-2; EB-16 residual |
 | `EB-20` | Instrumentation for D8 (Encore economy census: 19/78 grant, 1 spends, absorption automatic) — measurement open though the lever is ruled-direction, unpicked | eng-backlog §3 |
-| `EB-25` | Lagavulin Matriarch's Soul Siphon player-stat-drain half — no stat-drain op anywhere in `tier05/` or `tier0/engine/`; silently biases the Act-1 boss split. "single highest-leverage backlog item for boss identity" | eng-backlog §4; missed-requirements §3.1; run-model §10.9 |
 | `EB-27` | Two tier0.5 spec features never built: `choose3` standalone slot mode (`model.py:246-250` raises `ValueError`) and the Prune signature event (`events.py` offers none) | eng-backlog §4; missed-requirements §3.5 |
 | `EB-28` | The drafter's salon-deploy blindness — `tier05/draft.py:_static_power` has no `salon_member` term, so cross-plan the members are invisible | eng-backlog §4; missed-requirements §3.6 |
 | `EB-29` | Out-of-scale boss audit (`test_subject`, `knowledge_demon`, `kaiser_crab`) — `test_subject`'s sheet inflates HP to stand in for a skipped mechanic (`act3_pool.yaml:217-222`), the fake-it-quietly pattern the house rules forbid | eng-backlog §4; missed-requirements §3.9; tier05-perf §1.5.2(1) |
@@ -58,9 +56,7 @@
 
 | ID | Item | Provenance |
 |---|---|---|
-| `EB-4` | Two p90s that disagree (`run_metrics._percentile` interpolates, `elite_blitz._percentile` nearest-rank while claiming to match) + two `wilson` impls with different return shapes — unify each; verify which convention the ratified bands used first | eng-backlog §1 |
 | `L10-trunc` | art_lint's unreadable-file rule (L10) probes `Image.open().size`, which is header-only for PNG/JPEG — a truncated download passes L10 and the one pixel-touching rule (L6 `clip_warnings`, `:578-582`) still `continue`s past it. Either L10 gains a full `load()` (real cost across ~1076 plan rows) or L6's warn-only channel gains a hard finding. Unverifiable in a worktree without PIL + `art/raw` | fix-sweep-1; EB-7 residual |
-| `EB-8` | Cross-sheet strict-domination check — the gate sweeps within-sheet only and prints `CLEAN` for two of six sheets; the Clorinde/Raiden pair was caught by hand | eng-backlog §2 |
 | `EB-41` | Refactors, only if budget remains (big, safe, boring): `run_one` 518-line split; codegen driver unification (F3); telemetry-module template dedupe; `exp_*` script archive move; `apply_upgrade` op-coverage guard | eng-backlog §7 |
 | `SYS-11r` | Two stale-comment fixes blocked on owner-known facts, left in place: `docs/ref-ironclad-upgrades.yaml:4-5` header counts ("klee/furina 71/71 pool + 10/10 starter", kokomi "31/31") match no derivable decomposition of the live sheets (klee pool is 76, kokomi ~60); and `docs/klee-cards.yaml:145-149` errata block sits under `hot_hands` (no block op) but describes `cant_catch_me`, with "warm_glow (block 2 < 3)" matching nothing current (`warm_glow` is block 6) | fix-sweep-1; SYS-11/12 residual |
 | `L4`/`L7` | Remaining lint candidates from the S1 sweep: flat effect-list scans (L4 — shared `iter_effects()` recursing then/else; sparkly_explosion, pearl_barrage, `rider_tip_args` charge gap) and comment-arithmetic on upgrade sheets (L7 — recompute `# a->b` annotations, flags SYS-11a/b). L5/L6 landed only for their swept instances (replacement multiplier; draw/exhaust/discard plurals) — a general pass is still open | triage-memo Lint L1–L8 |
@@ -69,7 +65,6 @@
 
 | ID | Item | Provenance |
 |---|---|---|
-| `EB-9` | `test_art_coverage.py::test_stale_file_is_not_counted_as_coverage` fails on any checkout without the gitignored `ImageGen/images/` tree — a machine-dependent test its own docstring warns against | eng-backlog §1 |
 | `EB-11` | Understudy Defect 13 — `no_action` on a state with no `state_type`; **FILED, NOT FIXED** (next traversal pass) | eng-backlog §2 |
 | `EB-12` | Understudy Defect 14 — `bridge_unreachable` by timeout with the process alive; one observation, no reproduction; **FILED, NOT FIXED** | eng-backlog §2 |
 | `EB-13` | Understudy Defect 15 — `no_progress`, the map↔rest_site bounce (seed `43MLG7MG9L`); **FILED, NOT FIXED** | eng-backlog §2 |
