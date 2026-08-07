@@ -142,11 +142,12 @@
    effects: [{op: damage, amount: 3, target: random_enemy, times_formula: 2_plus_sparks}]}
 - {id: hot_hands, name: "Hot Hands", cost: 1, type: skill, rarity: uncommon, solve: [frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [spark], role: enabler,
    effects: [{op: gain_spark, amount: 3}, {op: damage, amount: 2, target: self}]}
-# ERRATA LANDED (R25 batch, 2026-07-20): block 4 -> 2. Queued behind the
-# R36 Crackle window per the sequencing rule; the window ran (bands hold,
-# spark tank_boss 56.8% in [45,65]) and the user released the batch. This
-# ends the strict domination over the old warm_glow (block 2 < 3) -- the
-# lint's KNOWN allowlist entry is retired with this row.
+# cant_catch_me ERRATA LANDED (R25 batch, 2026-07-20): block 4 -> 2. Queued
+# behind the R36 Crackle window per the sequencing rule; the window ran (bands
+# hold, spark tank_boss 56.8% in [45,65]) and the user released the batch.
+# Ended the then-strict domination over warm_glow, whose block was 3 at the
+# time (2 < 3; warm_glow has since been rebuilt to block 6) -- the lint's
+# KNOWN allowlist entry retired with this row.
 - {id: cant_catch_me, name: "Can't Catch Me!", cost: 1, type: skill, rarity: uncommon, solve: [block, frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [spark], role: glue,
    effects: [{op: block, amount: 2}, {op: gain_spark, amount: 1}, {op: draw, amount: 1}]}
 - {id: sugar_rush, name: "Sugar Rush", cost: 1, type: skill, rarity: uncommon, solve: [frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [spark], role: glue, exhaust: true,
