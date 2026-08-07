@@ -1,8 +1,9 @@
 # Lifecycle: LIVING — expected to change; read it to work on the project. Status index: docs/registry/identifiers.md §15.  (lint-ok)
 # REF_IRONCLAD upgrade deltas -- the anchor's missing power axis.
 #
-# Every designed character has 100% upgrade coverage (klee/furina 71/71 pool +
-# 10/10 starter, kokomi 31/31). ref_ironclad has 0/6 and 0/10, so rest-site
+# Every designed character's upgrade sheet covers its full pool and companion
+# roster; only the granted burst kit cards go without (they are never smithed).
+# ref_ironclad has 0/6 and 0/10, so rest-site
 # smithing, Sand Castle, Yummy Cookie, War Paint and Whetstone are ALL dead
 # branches on the character the whole world is calibrated against -- measured:
 # 0 upgraded cards in 300 runs, 0 smiths out of 683 rests.

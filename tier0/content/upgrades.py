@@ -53,6 +53,17 @@ EXTERNAL_UPGRADE_SHEETS = (_GAME_REF / "ironclad-upgrades.yaml",
                            _GAME_REF / "silent-upgrades.yaml")
 SUFFIX = "+"
 
+
+def _external_pool_for(sheet: Path) -> Path:
+    """The pool an external upgrades sheet rides with (<char>_pool.yaml).
+
+    The deltas name pool card ids, so a game_ref holding only extractor
+    output (extract_base_game_pool run, build_official_sheet not yet) must
+    read as ABSENT here, exactly as it does in the loader -- otherwise
+    has_upgrade says yes to ids get_card cannot resolve.
+    """
+    return sheet.with_name(sheet.name.split("-")[0] + "_pool.yaml")
+
 # Deltas the engine cannot express per-card yet (constants-encoded).
 # catalytic_conversion LEFT this set with R37 (2026-07-20): its upgrade is
 # now {innate: true}, which IS sim-expressible -- the R24 no-unmeasured-
@@ -77,6 +88,9 @@ def _upgrade_index() -> dict[str, dict]:
     merged: dict[str, dict] = {}
     for sheet in (*UPGRADE_SHEETS, *EXTERNAL_UPGRADE_SHEETS):
         if not sheet.exists():
+            continue
+        if (sheet in EXTERNAL_UPGRADE_SHEETS
+                and not _external_pool_for(sheet).exists()):
             continue
         entries = yaml.safe_load(sheet.read_text(encoding="utf-8")) or {}
         dupes = set(entries) & set(merged)

@@ -38,7 +38,7 @@
 | `EB-31` | Orobas not modelled in the sim — Klee's variant now is; still unmodelled: Furina's R2 upgraded form and Kokomi's variant | eng-backlog §4; open-playtest-items §6.3 |
 | `EB-43` | **D15 (spotlight-limb payoff-presence) — STAGED, HELD.** Drafter behaviour change (`DRAFTER 15`) + re-baseline sweep; `Q18` countersigned, pinned DRAFTER 14. **Lands as step (5) of a fixed six-step order** — must not land before blind-first grading (4) or it invalidates the registration | eng-backlog §6; R121 |
 | `EB-46` | Diagnose why tag-visible scoring moved the `ref_ironclad` anchor: separate the tag effect from the v6 (C5→C6) effect on this arm. No deadline, no design authority | eng-backlog §6; Q19; `review/r121-shield/` (at tag `pre-simplification-2026-08-06`) |
-| `perf-1.5.2(3)` | Re-instrument on `real_ironclad`, not `ref_ironclad`, before reading any "can an average player clear this" claim — needs `game_ref/` rebuilt | tier05-perf §1.5.2(3) |
+| `perf-1.5.2(3)` | Re-instrument on `real_ironclad`, not `ref_ironclad`, before reading any "can an average player clear this" claim. The DLL-derived half of `game_ref/` now rebuilds on the Mac (extractor found the `.app` layout itself once `klee-mod/local.props` existed; 87 cards parsed 2026-08-06). Still needed: the hand-authored supplement layers (`ironclad_pool_pass4-6.yaml`, `ironclad_char_facts.yaml`, plus the silent set) — reviewed judgment, not tool-regenerable, living only on the Windows machine — copied into `game_ref/`, then `build_official_sheet --verify`, then the instrument run | tier05-perf §1.5.2(3); fix-sweep-3 |
 | `SKIP-10.9` | Living skip-backlog of un-modelled enemy mechanics to promote when a pass needs them: Back Attack (Kaiser Crab), untargetable Burrow (Tunneler), Ethereal/Hex auras (Knight Gang), Intangible (Test Subject P3), damage caps (Hard to Kill / Plating / Hardened Shell), and the two Ancient relic hooks — Blessed Antler and Philosopher's Stone | run-model-rework-plan §10.9 |
 
 ## klee-mod — C# implementation & parity
@@ -56,9 +56,7 @@
 
 | ID | Item | Provenance |
 |---|---|---|
-| `L10-trunc` | art_lint's unreadable-file rule (L10) probes `Image.open().size`, which is header-only for PNG/JPEG — a truncated download passes L10 and the one pixel-touching rule (L6 `clip_warnings`, `:578-582`) still `continue`s past it. Either L10 gains a full `load()` (real cost across ~1076 plan rows) or L6's warn-only channel gains a hard finding. Unverifiable in a worktree without PIL + `art/raw` | fix-sweep-1; EB-7 residual |
 | `EB-41` | Refactors, only if budget remains (big, safe, boring): `run_one` 518-line split; codegen driver unification (F3); telemetry-module template dedupe; `exp_*` script archive move; `apply_upgrade` op-coverage guard | eng-backlog §7 |
-| `SYS-11r` | Two stale-comment fixes blocked on owner-known facts, left in place: `docs/ref-ironclad-upgrades.yaml:4-5` header counts ("klee/furina 71/71 pool + 10/10 starter", kokomi "31/31") match no derivable decomposition of the live sheets (klee pool is 76, kokomi ~60); and `docs/klee-cards.yaml:145-149` errata block sits under `hot_hands` (no block op) but describes `cant_catch_me`, with "warm_glow (block 2 < 3)" matching nothing current (`warm_glow` is block 6) | fix-sweep-1; SYS-11/12 residual |
 | `L4`/`L7` | Remaining lint candidates from the S1 sweep: flat effect-list scans (L4 — shared `iter_effects()` recursing then/else; sparkly_explosion, pearl_barrage, `rider_tip_args` charge gap) and comment-arithmetic on upgrade sheets (L7 — recompute `# a->b` annotations, flags SYS-11a/b). L5/L6 landed only for their swept instances (replacement multiplier; draw/exhaust/discard plurals) — a general pass is still open | triage-memo Lint L1–L8 |
 
 ## tests — pins & filed-not-fixed

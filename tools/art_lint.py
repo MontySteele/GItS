@@ -445,6 +445,15 @@ def undecodable(effective) -> list[str]:
     .png name, or a WEBP with no decoder in this Pillow build all passed L8
     (undersize) and the L6 aspect warn in silence.
 
+    The probe is a full pixel `load()`, not `Image.open().size`. `open` reads
+    only the header, and a truncated download is precisely the file whose
+    header is fine and whose tail is missing -- header-only L10 passed it,
+    then L6's decode failed and `continue`d on the claim that L10 had already
+    reported it, which was false. Decoding every present raw source costs
+    real time but bounded time (measured 2026-08-06: the 92-file fetched
+    corpus full-decodes in 1.5s -- plan rows share sources, so the row count
+    wildly overstates the file count), and it runs only where the files are.
+
     The DOCUMENTED skips are kept and are different in kind, because both are
     facts about the machine rather than about the pick:
 
@@ -467,7 +476,8 @@ def undecodable(effective) -> list[str]:
         if not src.exists():
             continue
         try:
-            Image.open(src).size
+            with Image.open(src) as img:
+                img.load()
         except Exception as exc:
             problems.append(
                 f"L10 {r['asset_id']}: raw source '{src.name}' exists but "
