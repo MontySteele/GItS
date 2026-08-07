@@ -157,6 +157,11 @@ def _active_effects(state: CombatState, effect_list: list[dict]):
             elif name.startswith("encore_at_least_"):
                 ready = (state.player.encore
                          >= int(name.rsplit("_", 1)[1]))
+            elif name == "reaction_triggered_this_turn":
+                # EB-24p: turn-level counter, known exactly at score time
+                # (unlike reaction_triggered_by_this, which is mid-resolution
+                # and stays excluded). Same read as the engine's predicate.
+                ready = state.reactions_this_turn > 0
             else:
                 continue
             branch = fx["then"] if ready else fx.get("else", [])

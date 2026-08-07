@@ -1404,7 +1404,14 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # only arrives through the Ancient pick, whose Orobas weights land in the
 # same window (R125, EB-31q) -- Furina cells move when that does. No other
 # character reads any of the three branches.
-POLICY_VERSION = 4
+#
+# POLICY_VERSION 5 (EB-24p, 2026-08-07). `policy._active_effects` reads
+# `reaction_triggered_this_turn` (the Chevreuse window) -- an unlisted
+# predicate skips the WHOLE conditional, both branches, so
+# `audience_participation`'s unconditional else-glue scored ~0 and the card
+# measured drawn 974 / played 0. Turn-level counter, known exactly at score
+# time; `reaction_triggered_by_this` stays excluded (mid-resolution).
+POLICY_VERSION = 5
 
 # F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one
 # place a character's archetype vocabulary is declared -- and where it is
