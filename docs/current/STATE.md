@@ -76,7 +76,7 @@ are never comparable across a stamp boundary unless labeled.
 | `C` `CONSTANTS_VERSION` | **7** | `tier0/constants.py` | R128: Test Subject's real mechanics (Enrage / Painful Stabs / Nemesis-Intangible, per-hit cap at direct-HP sites). C6 was Frozen-unified + alpha boss-room scope + shop-slot spec (R117/Q14). |
 | `RT` `RUNTEMPLATE_VERSION` | **8** | `tier0/constants.py` | R125/R126: widened tag shield reaches the smith + event upgrade; Orobas Ancient weights live. v7 was acts 2–3 event pools on real StS2 maps. |
 | `D` `DRAFTER_VERSION` | **14** | `tier0/constants.py` | Generic-limb `core_complete` now requires an on-plan payoff. Held at 14 — the payoff-reach registration's pin (R121, six-step order; R125 widened the shield under the restores-not-redefines argument, no bump). |
-| `P` `POLICY_VERSION` | **4** | `tier05/draft.py` | R124: the pilot reads both-Spotlight-modes (EB-31p). v3 was R66's character-aware registry. |
+| `P` `POLICY_VERSION` | **6** | `tier05/draft.py` | EB-29t: Enrage skill tax + Intangible per-hit cap (the promoted Test Subject reads). v5 was EB-24p's `reaction_triggered_this_turn` read; v4 was R124's both-Spotlight-modes read. |
 
 - **Run template string** `RUN_NODE_TEMPLATE = "NNNRETN$ERB"` is DEAD as of v6,
   kept only as the archived-world name and for tests that pin a node sequence.
@@ -91,8 +91,8 @@ are never comparable across a stamp boundary unless labeled.
   (`0.5*aoe + 0.3*debuff + 0.2*uptime`), anchored ADDITIVELY so `ref_ironclad`
   stays exactly 3.00. This is a **scorecard** instrument version, separate from
   the run-cell stamp above; v1 and v2 A6 numbers are discontinuous by design.
-- **Pilot policy:** `POLICY_VERSION = 4` lives in `tier05/draft.py` and enters
-  the cell stamp as `P`. Heuristic weights live in
+- **Pilot policy:** `POLICY_VERSION` lives in `tier05/draft.py` (current value
+  in the stamp table above) and enters the cell stamp as `P`. Heuristic weights live in
   `content/pilots/archetypes.yaml` and `pilot/policy.py`; `STOKE_*` are
   deliberately NOT in `constants.py`.
 

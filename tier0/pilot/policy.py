@@ -157,6 +157,11 @@ def _active_effects(state: CombatState, effect_list: list[dict]):
             elif name.startswith("encore_at_least_"):
                 ready = (state.player.encore
                          >= int(name.rsplit("_", 1)[1]))
+            elif name == "reaction_triggered_this_turn":
+                # EB-24p: turn-level counter, known exactly at score time
+                # (unlike reaction_triggered_by_this, which is mid-resolution
+                # and stays excluded). Same read as the engine's predicate.
+                ready = state.reactions_this_turn > 0
             else:
                 continue
             branch = fx["then"] if ready else fx.get("else", [])
@@ -211,7 +216,20 @@ def _expected_damage(state: CombatState, card: Card) -> float:
             # is where the engine folds it in (_deal_damage: spotlight scales
             # the PRINTED number, the flat bonus rides on top, per hit).
             per_hit += flat
-            total += per_hit * times * n_targets
+            # EB-29t: Intangible caps every hit at INTANGIBLE_DAMAGE_CAP
+            # (Nemesis alternates it turn-by-turn) -- price the capped
+            # number, per target, so an attack dumped into a closed turn
+            # scores what it will actually deal.
+            hit_targets = (living if fx.get("target") == "all_enemies"
+                           else [effects._default_target(state)])
+            hit_targets = [t for t in hit_targets if t is not None]
+            if hit_targets:
+                total += times * sum(
+                    min(per_hit, C.INTANGIBLE_DAMAGE_CAP)
+                    if t.powers.get("intangible") else per_hit
+                    for t in hit_targets)
+            else:
+                total += per_hit * times * n_targets
         elif fx["op"] == "place_bomb":
             total += fx["bomb_damage"] * _est(state, fx.get("amount", 1), 1)
         elif (fx["op"] == "apply_power"
@@ -587,6 +605,15 @@ STOKE_FUEL_HUNGRY = 1.2     # per point that CLOSES the runway gap
 STOKE_FUEL_SATED = 0.15     # per point beyond it -- not zero: surplus still
                             # absorbs, which is the whole D8 argument
 
+# EB-29t (POLICY 6): the promoted Test Subject reads (R128). The Strength an
+# Enrage trigger grants is PERMANENT, but the greedy pilot prices it over a
+# deliberately short horizon of future attack turns -- understating a
+# long-fight cost is the safe direction to be wrong (the Kurage-bank
+# precedent above). Not character machinery: Enrage and Intangible are
+# board-state facts every pilot should read, like Frozen/Shatter.
+ENRAGE_TAX_TURNS = 2.0      # future attack turns a +Strength grant is priced
+                            # over, discounted by PILOT_FUTURE_DAMAGE_DISCOUNT
+
 
 def _stoke_value(state: CombatState, card: Card) -> float:
     """Furina's SALON machinery: deploy the stage, then keep it fuelled.
@@ -675,6 +702,23 @@ def _score(state: CombatState, card: Card, w: dict,
     kw = w.get("stoke", 0.0)
     if kw:
         total += kw * _stoke_value(state, card)
+    # EB-29t: every Skill played feeds each Enraged enemy its enrage stacks
+    # in PERMANENT Strength (R128 _finish_play). Priced as +n damage on each
+    # of the enemy's hits over ENRAGE_TAX_TURNS future attack turns; hits
+    # read from the current intent (its ramp included), 1 when it is not
+    # attacking -- the greedy read, understating a long fight on purpose.
+    if card.type == "skill":
+        tax = 0.0
+        for e in state.living_enemies:
+            n = e.powers.get("enrage", 0)
+            if not n:
+                continue
+            intent = e.current_intent()
+            hits = (e.ramped_times(intent)
+                    if intent.get("kind") == "attack" else 1)
+            tax += n * hits
+        if tax:
+            total -= tax * ENRAGE_TAX_TURNS * C.PILOT_FUTURE_DAMAGE_DISCOUNT
     return total
 
 

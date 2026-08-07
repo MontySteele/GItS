@@ -40,6 +40,11 @@ pilot fix, filed as BACKLOG `EB-24p` (a POLICY-stamp surface, so it lands
 in its own window, not inside C7). Re-census after the fix; only if the
 card is still dead with a sighted pilot does a design question exist.
 
+**CLOSED 2026-08-07 (POLICY 5):** the fix landed and the re-census reads
+**drawn 656 / played 162** (furina/salon realistic, 500 runs, seed 42,
+`RT8/D14/P5/C7`) — the card is alive with a sighted pilot, so no design
+question exists. EB-24p retired from BACKLOG.
+
 ## Bottom line
 
 EB-24's QUEUE row retires: its ask ("propose reworked conditions") was
