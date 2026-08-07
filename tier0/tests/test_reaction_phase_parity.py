@@ -318,6 +318,243 @@ def test_damage_modifiers_are_pure(rel, hook, body):
         "belongs one hook over.")
 
 
+# --- broadcast co-tenancy, swept repo-wide (EB-19/L) ------------------------
+#
+# PHASE_LEDGER pins WHICH hook a decision rides. This ledger pins the other
+# axis the EB-2 / EB-19/races-* class lives on: WHO ELSE rides the same
+# turn-lifecycle broadcast. The engine guarantees allies-before-enemies across
+# listener iteration (R35, DetonationSplashPower's ordering proof) but gives
+# SAME-SIDE co-tenants of one broadcast no relative order, while the sim's
+# turn structure is strictly sequential -- so two same-side tenants that touch
+# one resource are a nondeterministic divergence FIXED-SEED PARITY CANNOT
+# CATCH: the C# can match the sim's order on every replayed seed and still
+# not guarantee it. All four filed races (EB-2, EB-19/races-a/b/c) are this
+# shape, and each was found by hand.
+#
+# The structural catch is registration: the sweep below finds every override
+# of a turn broadcast, and each must hold a row here. A new tenant landing in
+# an occupied broadcast fails the test and forces the question "does the sim
+# order you against your co-tenants?" before the code ships. Same curation
+# rule as PHASE_LEDGER: a row is an examined tenant, not "where the code is
+# today" -- adding one means the question above was answered; a row whose
+# annotation names a filed race retires WITH that race's BACKLOG row when the
+# fix idiom (stage into a strictly earlier/later broadcast) moves the tenant
+# out, because moving it breaks the sweep match.
+#
+# Annotations state what the tenant does in the broadcast and cite the filed
+# race where one is filed. They are roles and receipts, not a pairwise
+# commutativity proof -- the registration is the guarantee.
+
+TURN_BROADCASTS = (
+    "BeforeSideTurnStart", "AfterSideTurnStart", "AfterPlayerTurnStart",
+    "BeforeSideTurnEnd", "AfterSideTurnEnd",
+)
+
+CO_TENANCY_LEDGER = {
+    "BeforeSideTurnStart": {
+        ("Powers/BombPower.cs", "BombPower"):
+            "turn-start detonation of last turn's bombs (enemy-attached; "
+            "sim: combat.py detonate_bombs)",
+        ("Powers/DemolitionPowers.cs", "DetonationSplashPower"):
+            "zeroes the Blazing Delight splash-proc cap. Ordered before any "
+            "enemy BombPower detonation by allies-before-enemies iteration "
+            "(R35 -- the ordering proof in the class comment), matching the "
+            "sim's reset-then-detonate (combat.py:501 vs :511)",
+        ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
+            "purges the Salon company map, clears Curtain Call per-turn "
+            "windows; touches nothing its (Klee-side, co-op-only) "
+            "co-tenants read",
+    },
+    "AfterSideTurnStart": {
+        ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
+            "diagnostics observer; reads, never writes board state",
+        ("Powers/AuraPower.cs", "AuraPower"):
+            "aura duration tick (PHASE_LEDGER "
+            "aura-ticks-after-side-turn-start); only the observer shares "
+            "the broadcast",
+    },
+    "AfterPlayerTurnStart": {
+        ("Powers/CompanionPowers.cs", "CelestialGiftPower"):
+            "per-turn Strength + Block mint; its body notes the sim's "
+            "Strength-then-Block order is bookkeeping, not a dependency",
+        ("Powers/CompanionPowers.cs", "MetallicizePower"):
+            "raw per-turn Block mint (R116)",
+        ("Powers/DemolitionPowers.cs", "BombAndSparkPerTurnPower"):
+            "per-turn bomb + Spark mint",
+        ("Powers/ElementalApplication.cs", "KleeElementalHooks"):
+            "Klee kit-grant check: adds a card to the hand when the meter "
+            "is charged",
+        ("Powers/FontainePowers.cs", "MasqueRedDeathPower"):
+            "per-turn Strength mint",
+        ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
+            "SpotlightSystem.ResetTurn + pending-draw flush. RACE "
+            "EB-19/races-b: clears the Standing Ovation spend-boost the "
+            "Salon upkeep mints in this same broadcast",
+        ("Powers/FurinaResources.cs", "EncorePerTurnPower"):
+            "All the World's a Stage Encore mint. RACE EB-2: the Salon "
+            "upkeep spends Encore in this same broadcast",
+        ("Powers/KokomiResources.cs", "KokomiResourceHooks"):
+            "Kokomi kit-grant check: adds a card when charged",
+        ("Powers/KokomiResources.cs", "ChargePerTurnPower"):
+            "per-turn Charge mint",
+        ("Powers/KuragePowers.cs", "PreventExhaustWardPower"):
+            "resets the Vigil once-per-turn latch; consumed only from "
+            "damage hooks, never by a co-tenant",
+        ("Powers/SalonPowers.cs", "SalonMemberPower"):
+            "Salon upkeep: spends Encore, ticks stage damage, mints the "
+            "spend-boost. RACE EB-2 + EB-19/races-b (the other half of "
+            "both)",
+        ("Powers/SparkKitPowers.cs", "SparkPerTurnPower"):
+            "per-turn Spark mint",
+        ("Powers/SpotlightSystem.cs", "SpotlightDiscountPower"):
+            "resets its qualifying-plays latch; consumed only from card "
+            "plays",
+        ("Relics/EtherealSpotlightRelic.cs", "EtherealSpotlightRelic"):
+            "grants the Ethereal Spotlight to the hand (random discard at "
+            "hand-full). Shares the HAND with the pending-draw flush; that "
+            "seam belongs to the deferred-settle machinery's SKIP-10.9 "
+            "caveat (C#-only structure, parity rests on flush sites)",
+        ("Relics/UpgradedStarterRelics.cs", "ExplosiveFrags"):
+            "turn-1-only opening Spark windfall (the sim's combat_start "
+            "site)",
+    },
+    "BeforeSideTurnEnd": {
+        ("Powers/CompanionPowers.cs", "OzSummonPower"):
+            "Electro volley. RACE EB-19/races-c: unordered vs the sim's "
+            "fixed Pyro->Electro->Hydro (effects.py:2596-2658)",
+        ("Powers/CompanionPowers.cs", "SolarIsotomaPower"):
+            "duration tick-down of itself, player side",
+        ("Powers/ElementalApplication.cs", "KleeElementalHooks"):
+            "kit-grant check, turn-end site; its body documents the "
+            "models-after-powers broadcast order it leans on",
+        ("Powers/FontainePowers.cs", "MasqueRedDeathPower"):
+            "Bond-of-Life payment. RACE EB-19/races-a: vs the Kurage "
+            "pulse's Block grant (sim pays strictly first, "
+            "effects.py:2588)",
+        ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
+            "last-chance pending-draw flush, so an end-of-turn spend "
+            "cannot strand into the next turn",
+        ("Powers/KitBurst.cs", "SparksNSplashPower"):
+            "Pyro volley. RACE EB-19/races-c",
+        ("Powers/KokomiResources.cs", "KokomiResourceHooks"):
+            "Kokomi kit-grant check, turn-end site",
+        ("Powers/KuragePowers.cs", "KurageSummonPower"):
+            "Hydro pulse: Block grant + volley. RACE EB-19/races-a + "
+            "EB-19/races-c (a tenant of both)",
+    },
+    "AfterSideTurnEnd": {
+        ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
+            "diagnostics observer; reads, never writes board state",
+        ("Powers/CompanionPowers.cs", "CompanionCostThisTurnPower"):
+            "self-expiry of the per-turn cost-discount accumulator (R114 "
+            "boundary)",
+        ("Powers/CompanionPowers.cs", "ReplayNextCompanionPower"):
+            "self-expiry at the end of the turn that wrote it (R110)",
+        ("Powers/CompanionPowers.cs", "WitchsFlamePower"):
+            "consumes Pyro auras for damage + Burst, player side; runs "
+            "after the BeforeSideTurnEnd volleys by broadcast order, so it "
+            "eats what they applied",
+        ("Powers/CompanionPowers.cs", "AttackUpThisTurnPower"):
+            "self-expiry of a this-turn attack buff",
+        ("Powers/ElementalApplication.cs", "KleeElementalHooks"):
+            "MarkTurnStart on the enemy side: opens the next reaction "
+            "window",
+        ("Powers/FrozenPower.cs", "FrozenPower"):
+            "duration tick-down, enemy side",
+        ("Powers/KuragePowers.cs", "CeremonialGarmentPower"):
+            "duration tick-down, player side",
+        ("Powers/SpotlightSystem.cs", "SpotlightMultBonusTurnPower"):
+            "self-expiry of a this-turn Spotlight bonus",
+        ("Powers/SpotlightSystem.cs", "SpotlightFlatDamageTurnPower"):
+            "self-expiry of a this-turn Spotlight bonus",
+    },
+}
+
+_CLASS_DECL = re.compile(r"\bclass\s+(\w+)")
+
+
+def _class_spans(source: str) -> list[tuple[str, int, int]]:
+    """(name, body_start, body_end) for every class declaration."""
+    spans = []
+    for match in _CLASS_DECL.finditer(source):
+        try:
+            start = source.index("{", match.end())
+        except ValueError:
+            continue
+        depth = 0
+        for i in range(start, len(source)):
+            if source[i] == "{":
+                depth += 1
+            elif source[i] == "}":
+                depth -= 1
+                if depth == 0:
+                    spans.append((match.group(1), start, i))
+                    break
+    return spans
+
+
+def _broadcast_tenants() -> set[tuple[str, str, str]]:
+    """(hook, file, class) for every turn-broadcast override in the mod."""
+    found = set()
+    for path in sorted(SOURCE.rglob("*.cs")):
+        if any(part in ("bin", "obj") for part in path.parts):
+            continue
+        source = path.read_text(encoding="utf-8")
+        spans = _class_spans(source)
+        for hook in TURN_BROADCASTS:
+            pattern = rf"public\s+override\s+\S+(?:\s+\S+)?\s+{hook}\s*\("
+            for match in re.finditer(pattern, source):
+                covering = [s for s in spans if s[1] <= match.start() <= s[2]]
+                assert covering, (
+                    f"{path}: {hook} override outside any class body")
+                name = min(covering, key=lambda s: s[2] - s[1])[0]
+                found.add((hook, str(path.relative_to(SOURCE)), name))
+    return found
+
+
+def test_the_sweep_actually_sees_the_broadcast_tenants():
+    """A zero-row sweep is a green test that checks nothing."""
+    rows = _broadcast_tenants()
+    assert len(rows) >= 30, f"only found {len(rows)} broadcast tenants"
+
+
+@pytest.mark.parametrize("hook", TURN_BROADCASTS)
+def test_broadcast_co_tenancy_is_registered(hook):
+    found = {(f, c) for h, f, c in _broadcast_tenants() if h == hook}
+    ledger = set(CO_TENANCY_LEDGER[hook])
+    unregistered = found - ledger
+    assert not unregistered, (
+        f"unregistered tenant(s) of {hook}: {sorted(unregistered)}.\n"
+        "Same-side co-tenants of one broadcast have no guaranteed relative "
+        "order, and the sim's turn structure is strictly sequential -- the "
+        "EB-2 / EB-19/races-* class, which fixed-seed parity cannot catch. "
+        "Before registering: does the sim order this tenant against any "
+        "co-tenant it shares a resource with? If yes, stage it into a "
+        "strictly earlier/later broadcast (the in-repo fix idiom) or file "
+        "the race in BACKLOG; then add the row with that answer as its "
+        "annotation.")
+    stale = ledger - found
+    assert not stale, (
+        f"ledger row(s) for {hook} match no override: {sorted(stale)}.\n"
+        "The tenant moved or died. If it staged out of the broadcast to fix "
+        "a filed race, retire that BACKLOG row in the same commit.")
+
+
+def test_filed_race_citations_in_the_ledger_are_live():
+    """A ledger row citing a race that BACKLOG no longer files is stale --
+    either the race was fixed (then the tenant should have moved and the
+    sweep test above should be failing too) or the row id is wrong."""
+    backlog = (ROOT / "docs" / "current" / "BACKLOG.md")\
+        .read_text(encoding="utf-8")
+    for rows in CO_TENANCY_LEDGER.values():
+        for key, note in rows.items():
+            for row_id in re.findall(r"EB-19/races-[a-z]|EB-2(?![0-9])",
+                                     note):
+                assert f"`{row_id}`" in backlog, (
+                    f"{key} cites {row_id}, which BACKLOG.md no longer "
+                    "files")
+
+
 def test_vigil_pays_its_fuel_through_the_reshuffle():
     """tier0 prevent_damage_exhaust reshuffles BEFORE declaring itself out.
 

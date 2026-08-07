@@ -125,3 +125,51 @@ def test_bare_runner_preserves_historical_defaults(monkeypatch):
 def test_furina_rejects_klee_only_adaptive_ab():
     with pytest.raises(SystemExit):
         runner.main(["--character", "furina", "--ab"])
+
+
+# --- EB-20w: the Encore census on the run report ---
+
+def test_encore_census_pools_fight_stats_and_delegates(monkeypatch):
+    """run_metrics.encore_census is a POOLING call, not a second definition:
+    every fight record, in run order, goes to the one fight-side profile."""
+    seen = {}
+    def fake_profile(stats):
+        seen["stats"] = stats
+        return {"marker": True}
+
+    monkeypatch.setattr(runner.run_metrics.t0_metrics,
+                        "encore_census_profile", fake_profile)
+    a, b, c = object(), object(), object()
+    results = [SimpleNamespace(fight_stats=[a, b]),
+               SimpleNamespace(fight_stats=[]),
+               SimpleNamespace(fight_stats=[c])]
+    assert runner.run_metrics.encore_census(results) == {"marker": True}
+    assert seen["stats"] == [a, b, c]
+
+
+def test_run_report_wires_the_encore_census(monkeypatch):
+    """The default report reaches print_encore_census (no flag to remember --
+    the C4 rule); the printer's own empty-profile silence is what keeps it
+    off non-Encore rosters, and that half is pinned in
+    tier0/tests/test_eb20_encore_census.py."""
+    seen = {}
+
+    def fake_run_many(*args, **kwargs):
+        return [SimpleNamespace(node_kinds=[], hp_by_node=[], n_acts=1,
+                                events=[], deck_ids=[], kurage_traces=[],
+                                overlap_traces=[], won=False,
+                                fight_stats=[], relics_by_act=[])]
+
+    monkeypatch.setattr(runner.model, "run_many", fake_run_many)
+    monkeypatch.setattr(runner.run_metrics, "summarize_runs", lambda _: {})
+    monkeypatch.setattr(runner.run_metrics, "survival_profile",
+                        lambda _results, _max_hp: {})
+    monkeypatch.setattr(runner.run_metrics, "print_run_report",
+                        lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(runner.t0_report, "print_encore_census",
+                        lambda label, census: seen.update(
+                            label=label, census=census))
+
+    assert runner.main(["--runs", "1"]) == 0
+    assert seen["label"] == "run cohort"
+    assert seen["census"] == {}         # no Encore in the stand-in cohort
