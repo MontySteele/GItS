@@ -350,6 +350,92 @@ TURN_BROADCASTS = (
     "BeforeSideTurnEnd", "AfterSideTurnEnd",
 )
 
+# --- resolved turn-start broadcast order (EB-19/M7) -------------------------
+#
+# The fix idiom the co-tenancy ledger prescribes -- "stage into a strictly
+# earlier/later broadcast" -- is only as good as the repo's belief about which
+# broadcast IS earlier. Two in-repo docs asserted incompatible orders:
+# refpowers.py's site table put AfterPlayerTurnStart and AfterSideTurnStart
+# AFTER the hand draw, in that order; AuraPower.cs's phase-correction comment
+# claimed AfterSideTurnStart ran "strictly before energy reset and the hand
+# draw". Settled by decompile, not by argument (StS2 v0.107.1, commit
+# 59260271, ilspycmd 8.2.0.7535). refpowers.py was right; the AuraPower.cs
+# clause was corrected in place and now cites this tuple.
+#
+# CombatManager.StartTurn, decompiled:
+#   :454  Creature.BeforeTurnStart          (snapshots power amounts)
+#   :459  await Hook.BeforeSideTurnStart
+#   :497  await Creature.AfterTurnStart     -> ClearBlock (Creature.cs:696,
+#                                             Hook.ShouldClearBlock :725)
+#   :505  await Hook.AfterBlockCleared
+#   :516  await SetupPlayerTurn(player, ctx), whose body is
+#           :642  Hook.ShouldPlayerResetEnergy / ResetEnergy
+#           :651  await Hook.AfterEnergyReset
+#           :653  await Hook.BeforeHandDraw
+#           :655  Hook.ModifyHandDraw  (+ :656 AfterModifyingHandDraw)
+#           :674  await CardPileCmd.Draw(..., fromHandDraw: true)
+#           :676  await Hook.AfterPlayerTurnStart
+#   :523  await Hook.AfterSideTurnStart
+#
+# So AfterSideTurnStart is the LAST turn-start broadcast, not the first, and
+# AfterPlayerTurnStart is strictly earlier than it -- the opposite of the
+# reading a "side-wide before per-player" intuition gives. Anything staged
+# out of AfterPlayerTurnStart to land LATER goes to AfterSideTurnStart;
+# anything staged EARLIER goes to BeforeSideTurnStart, which is the only
+# broadcast that precedes the block clear.
+#
+# ONE CAVEAT, and it is load-bearing for the fix idiom. :516 awaits
+# SetupPlayerTurn through WaitForPauseOrCompletionWithoutAssigningTask
+# (HookPlayerChoiceContext.cs:129), which returns on the task completing OR on
+# the setup pausing for a player choice. A turn-start hook that opens a choice
+# therefore lets :523 AfterSideTurnStart run while that player's
+# AfterPlayerTurnStart is still pending -- the setup task is only rejoined at
+# :569. The order below is the no-choice order: it holds for every tenant in
+# CO_TENANCY_LEDGER (none of them prompt), and a future tenant that DOES
+# prompt during turn-start setup breaks it and must not be used as a staging
+# target.
+TURN_START_BROADCAST_ORDER = (
+    "BeforeSideTurnStart",
+    "block clear",
+    "AfterBlockCleared",
+    "energy reset",
+    "hand draw",
+    "AfterPlayerTurnStart",
+    "AfterSideTurnStart",
+)
+
+
+def test_the_resolved_order_covers_every_registered_turn_start_broadcast():
+    """A staging target absent from the resolved order is an unsettled one."""
+    start_broadcasts = [
+        h for h in TURN_BROADCASTS
+        if h in ("BeforeSideTurnStart", "AfterSideTurnStart",
+                 "AfterPlayerTurnStart")]
+    for hook in start_broadcasts:
+        assert hook in TURN_START_BROADCAST_ORDER, hook
+    assert (TURN_START_BROADCAST_ORDER.index("AfterPlayerTurnStart")
+            < TURN_START_BROADCAST_ORDER.index("AfterSideTurnStart"))
+
+
+def test_no_doc_reasserts_the_refuted_pre_draw_order():
+    """The losing assertion, pinned so it cannot come back by paraphrase.
+
+    AuraPower.cs claimed AfterSideTurnStart ran before the draw for a year.
+    The correction only sticks if re-adding it fails a test.
+    """
+    aura = (SOURCE / "Powers" / "AuraPower.cs").read_text(encoding="utf-8")
+    assert not re.search(r"strictly before\s+(?:\S+\s+){0,4}energy reset",
+                         aura), (
+        "AuraPower.cs re-asserts an AfterSideTurnStart-before-energy/draw "
+        "order. The decompile (CombatManager.cs:516 vs :523) says the "
+        "per-player setup -- energy reset, hand draw, AfterPlayerTurnStart "
+        "-- is awaited FIRST. See TURN_START_BROADCAST_ORDER.")
+    refpowers = (ROOT / "tier0" / "engine" / "refpowers.py")\
+        .read_text(encoding="utf-8")
+    assert "E/F are AFTER the draw" in refpowers, (
+        "refpowers.py's site table is the doc that won EB-19/M7; its "
+        "post-draw claim is the ground truth this file records.")
+
 CO_TENANCY_LEDGER = {
     "BeforeSideTurnStart": {
         ("Powers/BombPower.cs", "BombPower"):
@@ -507,7 +593,12 @@ def _broadcast_tenants() -> set[tuple[str, str, str]]:
                 assert covering, (
                     f"{path}: {hook} override outside any class body")
                 name = min(covering, key=lambda s: s[2] - s[1])[0]
-                found.add((hook, str(path.relative_to(SOURCE)), name))
+                # as_posix, not str: the ledger keys are written with forward
+                # slashes, and on Windows str() yields backslashes -- which
+                # made every registered tenant read as unregistered AND every
+                # ledger row read as stale, i.e. the whole sweep was red on
+                # one platform and told you nothing on it.
+                found.add((hook, path.relative_to(SOURCE).as_posix(), name))
     return found
 
 

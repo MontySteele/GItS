@@ -173,8 +173,20 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     /// AfterSideTurnStart is the right slot and needs no ordering assumption
     /// between two enemy-owned powers: CombatManager awaits
     /// Hook.BeforeSideTurnStart (where bombs detonate) to completion, then
-    /// AfterBlockCleared, then Hook.AfterSideTurnStart -- all strictly before
-    /// energy reset and the hand draw. Separate broadcasts, guaranteed order.
+    /// AfterBlockCleared, then Hook.AfterSideTurnStart. Separate broadcasts,
+    /// guaranteed order -- which is the whole argument, and it stands.
+    ///
+    /// ORDER CORRECTION (EB-19/M7, decompile 2026-08-07). This comment used to
+    /// add a claim that all three of those ran ahead of the energy reset and
+    /// the hand draw. That was FALSE, and it contradicted refpowers.py's site
+    /// table, which is right.
+    /// AfterSideTurnStart is the LAST of the turn-start broadcasts: the
+    /// per-player SetupPlayerTurn (energy reset -> BeforeHandDraw -> the draw
+    /// -> AfterPlayerTurnStart) is awaited BEFORE it. The resolved order and
+    /// its decompile citations live in tier0/tests/test_reaction_phase_parity
+    /// .py::TURN_START_BROADCAST_ORDER. Nothing here depended on the false
+    /// clause -- the aura tick is deliberately post-draw-safe either way --
+    /// so no behaviour changed with the wording.
     /// </summary>
     public override async Task AfterSideTurnStart(
         CombatSide side, IReadOnlyList<Creature> participants, ICombatState combatState)
