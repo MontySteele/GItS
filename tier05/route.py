@@ -9,13 +9,15 @@ characters or rosters. So the same countermeasures apply and are not optional:
 
   - two structurally DIFFERENT policies ship together (`hunter` and `cautious`
     below), and
-  - every headline finding must survive the A/B across them.
-  (The research doc's third countermeasure, a `route_regret` sampler
-  analogous to draft_regret, IS NOT BUILT: `run_metrics` defines no such
-  function, and this header used to claim it did. Tracked as BACKLOG EB-16;
-  see `git show aa09b97:docs/current/backlog/missed-requirements.md` §2.1
-  for what still rests on it -- the hunter-vs-cautious gap behind the "relics are underpriced"
-  finding is exactly the comparison the sampler was meant to make readable.)
+  - every headline finding must survive the A/B across them, and
+  - the third countermeasure, a `route_regret` sampler analogous to
+    draft_regret, is `run_metrics.route_regret` (built for BACKLOG EB-16;
+    this header claimed it existed for a while before it did). It samples the
+    road not taken: `walk_decisions` below records the option set every floor
+    chose from, and the sampler re-plans those alternatives in the run's
+    HINDSIGHT state, so a lane that only looked good while the run was
+    healthy is visible as regret. Zero by construction when hindsight is the
+    deciding state -- the planner already took the argmax there.
 
 THE ACCEPTANCE TARGET (research doc §1.3, user domain authority): a competent
 player fights a median of ~2.5 elites per act, range 1-4, because elites are
@@ -116,6 +118,13 @@ def _route(act_map, st: RouteState, options: list[Room],
     return max(scored, key=lambda t: t[:2])[2]
 
 
+def _hunter_prefs(st: RouteState) -> tuple[dict[str, float], bool]:
+    want = {ELITE: 10.0, SHOP: 5.0, TREASURE: 5.0, UNKNOWN: 4.0,
+            REST: 6.0, NORMAL: 2.0}
+    bar = 0.55 + 0.15 * st.elites_taken
+    return want, st.hp_frac >= bar and st.elites_taken < 4
+
+
 def hunter(rng: random.Random, act_map, options: list[Room],
            st: RouteState) -> Room:
     """Value-seeking: elites are relics, and relics win runs.
@@ -125,11 +134,13 @@ def hunter(rng: random.Random, act_map, options: list[Room],
     decision rather than a reflex and a bruised run stops hunting. Sits at the
     top of the realistic 1-4 range.
     """
-    want = {ELITE: 10.0, SHOP: 5.0, TREASURE: 5.0, UNKNOWN: 4.0,
-            REST: 6.0, NORMAL: 2.0}
-    bar = 0.55 + 0.15 * st.elites_taken
-    elite_ok = st.hp_frac >= bar and st.elites_taken < 4
-    return _route(act_map, st, options, want, elite_ok)
+    return _route(act_map, st, options, *_hunter_prefs(st))
+
+
+def _cautious_prefs(st: RouteState) -> tuple[dict[str, float], bool]:
+    want = {REST: 8.0, UNKNOWN: 6.0, TREASURE: 5.0, SHOP: 4.0,
+            NORMAL: 3.0, ELITE: 1.0}
+    return want, st.hp_frac >= 0.9
 
 
 def cautious(rng: random.Random, act_map, options: list[Room],
@@ -140,28 +151,66 @@ def cautious(rng: random.Random, act_map, options: list[Room],
     It is NOT meant to be the better policy -- it is the other end of the A/B,
     and if it wins outright that is itself a finding (elite relics underpriced).
     """
-    want = {REST: 8.0, UNKNOWN: 6.0, TREASURE: 5.0, SHOP: 4.0,
-            NORMAL: 3.0, ELITE: 1.0}
-    return _route(act_map, st, options, want, st.hp_frac >= 0.9)
+    return _route(act_map, st, options, *_cautious_prefs(st))
 
 
 POLICIES = {"hunter": hunter, "cautious": cautious}
+# The same two policies as their (preferences, elite gate) pair, which is what
+# a RE-scoring caller needs and `POLICIES` cannot give it: a policy callable
+# only ever answers "which room now", never "what was that other lane worth".
+# Split out rather than duplicated so `route_regret` cannot drift away from
+# the policy it claims to be scoring -- the drafter learned that one first
+# (draft.score_offer is the single scorer for both the pick and the regret).
+POLICY_PREFS = {"hunter": _hunter_prefs, "cautious": _cautious_prefs}
 
 
-def walk(rng: random.Random, act_map, policy, state_for) -> list[Room]:
-    """Walk floor 1 -> boss, re-planning at every floor.
+def path_value(act_map, start: Room, policy_name: str,
+               st: RouteState) -> tuple[float, list[Room]]:
+    """What `policy_name` thinks the best path from `start` is worth, in state
+    `st`. The public form of the planner the policies route with: `_route`
+    calls exactly this for every option and takes the max, so re-planning an
+    option here reproduces the number the live decision was made on.
+
+    Exposed for `run_metrics.route_regret`, which needs to price the roads NOT
+    taken -- and to price them in a state that is not the one the decision was
+    made in, which is the whole point of the instrument.
+    """
+    want, elite_ok = POLICY_PREFS[policy_name](st)
+    return _plan(act_map, start, _make_value(want, st, elite_ok))
+
+
+def walk_decisions(rng: random.Random, act_map, policy, state_for) -> list[dict]:
+    """Walk floor 1 -> boss and keep the DECISIONS, not just the path.
+
+    One record per floor: `{"floor", "options", "picked", "state"}` -- the
+    rooms that were on offer, the one the policy took, and the RouteState it
+    was read in. Deliberately the same shape `draft.draft_regret` consumes for
+    card offers, because `run_metrics.route_regret` is its analogue and the
+    road not taken is only recoverable if the option set was written down at
+    the time.
 
     `state_for()` returns the CURRENT RouteState and is called fresh each
     floor rather than passed once, because the whole point is that routing
     responds to run state as the run degrades.
+    """
+    decisions: list[dict] = []
+    options = act_map.rooms_on(0)
+    while True:
+        st = state_for()
+        picked = policy(rng, act_map, options, st)
+        decisions.append({"floor": picked.floor, "options": list(options),
+                          "picked": picked, "state": st})
+        options = act_map.successors(picked)
+        if not options:
+            return decisions
+
+
+def walk(rng: random.Random, act_map, policy, state_for) -> list[Room]:
+    """The path `walk_decisions` walks, without the option sets.
 
     This pure-map version is for tests and the route-regret sampler; the live
     run walks incrementally in model.run_one so fights resolve between
     decisions.
     """
-    path = [policy(rng, act_map, act_map.rooms_on(0), state_for())]
-    while True:
-        nxt = act_map.successors(path[-1])
-        if not nxt:
-            return path
-        path.append(policy(rng, act_map, nxt, state_for()))
+    return [d["picked"]
+            for d in walk_decisions(rng, act_map, policy, state_for)]
