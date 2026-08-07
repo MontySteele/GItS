@@ -103,7 +103,12 @@ def _settle_phases(state: CombatState) -> None:
             e.aura_turns_left = 0
             e.bombs = []
             e.frozen = 0
-            e.sleep_turns = 0
+            # Respawn costs the boss its next turn: the real Test Subject
+            # spends a full enemy turn reviving and deals nothing on it, once
+            # per knockdown (dossiers/enemies/test-subject.md:51-58,129,134).
+            # sleep_turns already skips a turn without advancing the intent
+            # (_enemy_turn above), which is exactly Respawn's shape.
+            e.sleep_turns = 1
             if not e.phases:
                 e.counts_for_fatal = True     # the last bar is a real death
             state.emit("phase_change", enemy=e.name, hp=e.hp,
@@ -216,7 +221,11 @@ def play_card(state: CombatState, card: Card) -> None:
     state.current_card_cost = cost
     p.energy -= cost
     if card.encore_cost:
-        resources.spend_encore(state, card.encore_cost)   # gated playable
+        # Gated playable -- the "Spend N Encore:" cost line, which is a
+        # different sink from the spend_encore OP and is kept apart in the
+        # census for that reason (EB-20).
+        resources.spend_encore(state, card.encore_cost, "encore_cost",
+                               card.id)
     # EB-17: read the draw context BEFORE the instance leaves hand, then
     # release it -- an instance that is no longer in hand has no draw context,
     # and holding the entry past the play is what would let a freed card's
@@ -241,7 +250,12 @@ def play_card(state: CombatState, card: Card) -> None:
         if not isinstance(card.cost, int) or card.cost >= 1:
             state.spotlighted_paid_cards_this_turn += 1
         state.emit("spotlight_card_played", card=card.id)
-        if p.spotlight == p.character_id:
+        # Center Stage's half, asked PER CARD rather than per mode: under
+        # Furina's upgraded starter (R2) both halves are live, so "is Center
+        # Stage the mode" stops being the same question as "does this card
+        # mint Fanfare". Companions are lit under the upgrade and still mint
+        # nothing -- the upgrade drops the exclusivity, not the targeting.
+        if effects.center_stage_active(state, card):
             resources.gain_fanfare(
                 state, C.FANFARE_PER_SPOTLIGHT_CARD, "center_stage")
         # Card-level Spotlight texture (sheet pass 1, ratified design
@@ -258,10 +272,11 @@ def play_card(state: CombatState, card: Card) -> None:
                 state.emit("extra_draw", amount=n)
             n = p.powers.get("spotlight_encore_first", 0)
             if n:
-                resources.gain_encore(state, n)
+                resources.gain_encore(state, n, "spotlight_encore_first",
+                                      card.id)
         n = p.powers.get("spotlight_encore", 0)
         if n:
-            resources.gain_encore(state, n)
+            resources.gain_encore(state, n, "spotlight_encore", card.id)
     if card.requires == "burst_energy_full":
         p.burst_energy = 0                    # playing the Burst empties it
         state.emit("burst_cast", card=card.id)
@@ -498,10 +513,17 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     _settle_phases(state)
     reactions.tick_auras(state)
     powers.on_turn_start(state, p)
+    _settle_phases(state)        # aura ticks / DoT can drop a phased boss;
+    #                              without a settle before the over-check, a
+    #                              queued bar reads as a WIN
     _revive_player_if_needed(state)             # player DoT can be lethal
     if not p.alive or state.over:
         return
     effects.player_turn_start_triggers(state)
+    _settle_phases(state)        # Salon upkeep damages enemies inside the
+    #                              triggers -- same hole as above (EB-29a:
+    #                              66% of Furina/test_subject wins were
+    #                              counterfeit before this settle)
     _revive_player_if_needed(state)             # Salon upkeep can overdraw HP
     if not p.alive or state.over:
         return
@@ -764,7 +786,7 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # event stream credits A4 sustain -- NEVER folded into
             # `blocked` (§2 harness note, Tier 0 binding).
             hp_loss = resources.absorb_into_encore(
-                state, dmg - blocked - prevented)
+                state, dmg - blocked - prevented, "enemy_hit")
             state.player.hp -= hp_loss
             resources.note_player_hp_loss(state, hp_loss)
             # Combat-side relic on_first_hp_loss_draw (dead branch on the

@@ -281,6 +281,7 @@ def after_card_exhausted(state: CombatState, card: Card,
     # Dead branch for every player without the relic hook.
     if "tamakushi_casket" in p.relic_hooks:
         from tier0.engine import resources    # late import (module graph)
+        from tier0.engine import relics       # late import (relics -> here)
         # C5: a MUSTERED recruit's rotation is reported separately from every
         # other exhaust. P8 is a claim specifically about conscript income
         # ("mustered-companion exhausts, top-two in commander decks"), and a
@@ -289,9 +290,16 @@ def after_card_exhausted(state: CombatState, card: Card,
         # `Card.conscripted` is the stamp the conscript op already sets.
         kind = "exhaust_muster" if getattr(card, "conscripted", False) \
             else "exhaust"
-        resources.gain_charge(state, C.CHARGE_PER_EXHAUST, kind)
+        # Touch of Orobas -> Pearl of Insight (Kokomi's upgraded starter)
+        # REPLACES both rates rather than adding to them, so the rates are
+        # asked for here instead of granted from the constants directly. The
+        # base constants stay the argument, not the answer: a run without the
+        # upgrade gets exactly the pre-Orobas numbers back.
+        charge, burst = relics.exhaust_accrual(
+            p, C.CHARGE_PER_EXHAUST, C.KOKOMI_BURST_PER_EXHAUST)
+        resources.gain_charge(state, charge, kind)
         if p.burst_max:
-            resources.gain_burst(state, C.KOKOMI_BURST_PER_EXHAUST, kind)
+            resources.gain_burst(state, burst, kind)
     if card.on_exhaust_energy:
         # DrumOfBattle uses PlayerCmd.GainEnergy, so ExpectAFight's
         # NoEnergyGain hook must deny this payout too. Normal on-play energy
