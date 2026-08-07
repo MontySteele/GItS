@@ -1374,7 +1374,16 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # tuples are untouched and their numbers do not move. Assigned-plan Kokomi
 # numbers (the R56 battery) STAND: they route through runner.py's plan
 # registry, which was always correct.
-POLICY_VERSION = 3
+#
+# POLICY_VERSION 4 (R124, 2026-08-07). EB-31p: the pilot's Spotlight
+# valuation (`tier0/pilot/policy.py _spotlight_value`) now reads the
+# both-modes flag the four engine readers use -- under The Curtain Never
+# Falls, designates score dead, Guest Cast reads live, and
+# copy_spotlighted_in_hand sees its targets. Latent at the bump: the relic
+# only arrives through the Ancient pick, whose Orobas weights land in the
+# same window (R125, EB-31q) -- Furina cells move when that does. No other
+# character reads any of the three branches.
+POLICY_VERSION = 4
 
 # F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one
 # place a character's archetype vocabulary is declared -- and where it is

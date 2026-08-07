@@ -470,15 +470,24 @@ def _spotlight_value(state: CombatState, card: Card) -> float:
     anchor-drafted-nothing failure M5 logged (DECISIONS 53)."""
     p = state.player
     val = 0.0
+    # EB-31p (R124): the pilot reads the same both-modes flag the four
+    # engine readers do. Under The Curtain Never Falls a designate is
+    # functionally dead (both halves live regardless of p.spotlight, and
+    # the moved-this-turn window is always-on -- effects.py:1773), Guest
+    # Cast's half is permanently live, and is_spotlighted has targets with
+    # p.spotlight still None.
+    both_modes = effects.both_spotlight_modes(state)
     companion_waiting = any(c.is_companion and not c.kit_card for c in p.hand)
     generator_waiting = any(
         any(fx.get("op") == "generate_guest_star" for fx in c.effects)
         for c in p.hand)
     for fx in card.effects:
         if fx["op"] == "spotlight_designate":
+            if both_modes:
+                pass                    # dead op: nothing left to choose
             # When a generator is waiting, invite first so this same selector
             # can put the resulting Companion into Guest Cast.
-            if companion_waiting:
+            elif companion_waiting:
                 # sequencing priority: light, then play
                 val += C.PILOT_SPOTLIGHT_DESIGNATE_SEQUENCING
             elif generator_waiting:
@@ -496,7 +505,8 @@ def _spotlight_value(state: CombatState, card: Card) -> float:
             # (combat-scoped stacks compound; turn windows want same-turn
             # Spotlighted plays). ovation_spend_boost (R32.1 flip) is a
             # combat-scoped engine like top_billing's mult.
-            guest_mode_live = p.spotlight == C.SPOTLIGHT_GUEST_CAST
+            guest_mode_live = (both_modes
+                               or p.spotlight == C.SPOTLIGHT_GUEST_CAST)
             if guest_mode_live or companion_waiting:
                 val += (C.PILOT_SPOTLIGHT_BOOST_COMBAT
                         if fx["power"] in ("spotlight_mult_bonus",
@@ -509,7 +519,7 @@ def _spotlight_value(state: CombatState, card: Card) -> float:
             # a card in hand, roughly
             val += C.PILOT_GUEST_STAR_VALUE * fx.get("amount", 1)
         elif fx["op"] == "copy_spotlighted_in_hand":
-            has_target = p.spotlight and any(
+            has_target = (p.spotlight or both_modes) and any(
                 effects.is_spotlighted(state, c) and not c.kit_card
                 for c in p.hand)
             # dead without a target, and the pilot knows it
