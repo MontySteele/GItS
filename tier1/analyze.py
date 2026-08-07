@@ -34,10 +34,25 @@ draft the way Tier 0.5's pilots draft. That makes this soak:
 
 So `--predict` is off by default and prints a banner when you ask for it.
 
+PER-FIGHT GRANULARITY (EB-18). The run history above is the run's OUTCOME: one
+record per run, and a fight inside it is invisible. The mod's own human feed
+(`klee-mod/KleeCode/Diagnostics/PlayTelemetry.cs`) writes one JSON-lines record
+per seat per FIGHT into `%APPDATA%/SlayTheSpire2/gits_telemetry/*.jsonl`, and
+since EB-18 those records carry `run_id` -- the run's string seed, which is the
+same token the run history writes as `seed`. That is the join, and it is why
+this file can now read both granularities without a second instrument.
+
+Everything about the fight stream is OPTIONAL and ADDITIVE here. A machine with
+no fight logs, or logs written before EB-18, analyses exactly as it did before:
+the run report is unchanged, missing keys read as absent rather than as zero,
+and a half-written last line (the crash that JSON-lines exists to survive) is
+skipped rather than fatal.
+
 Usage:
     python -m tier1.analyze                 # summarize the soak
     python -m tier1.analyze --crashes       # only runs that ended abnormally
     python -m tier1.analyze --predict       # vs Tier 0.5 (read the caveat)
+    python -m tier1.analyze --fights        # the per-fight stream only
 """
 
 from __future__ import annotations
@@ -76,6 +91,14 @@ CHARACTER = DEFAULT_CHARACTER      # back-compat for callers that imported it
 # The game writes under a `modded/` profile when any mod is loaded; an unmodded
 # run of the same profile writes beside it. We only ever want the modded tree.
 DEFAULT_ROOT = Path(os.environ.get("APPDATA", "")) / "SlayTheSpire2" / "steam"
+
+# The human feed's directory, fixed by `PlayTelemetry.Root()`: the game's own
+# profile root, deliberately OUTSIDE the mod directory (deploy.ps1 deletes and
+# re-copies `mods/klee`, which would destroy the log exactly when it holds the
+# newest data). Kept as its own constant rather than derived from DEFAULT_ROOT
+# because the two trees are siblings by coincidence, not by rule.
+DEFAULT_FIGHT_ROOT = Path(os.environ.get("APPDATA", "")) / "SlayTheSpire2" \
+    / "gits_telemetry"
 
 
 def find_history_dirs(root: Path = DEFAULT_ROOT) -> list[Path]:
@@ -188,6 +211,163 @@ def suspicious(runs: list[dict]) -> list[tuple[dict, str]]:
     return out
 
 
+# --------------------------------------------------------------- fights ----
+#
+# EB-18. Everything below reads the mod's per-fight JSON-lines stream. It is a
+# SECOND source with a different failure mode from the run history, and the two
+# are only ever joined on `run_id`; nothing here infers a fight from a run or a
+# run from a fight.
+
+def find_fight_logs(root: Path = DEFAULT_FIGHT_ROOT) -> list[Path]:
+    """Every per-fight log under `root`, oldest first.
+
+    `play-*.jsonl` is what the mod names its files; the glob is wider than that
+    on purpose, because a log copied off a soak box under another name is still
+    the same records and refusing to read it would be a naming rule pretending
+    to be a schema rule.
+    """
+    if not root.is_dir():
+        return []
+    return sorted(root.glob("*.jsonl"), key=lambda p: p.stat().st_mtime)
+
+
+def load_fights(root: Path = DEFAULT_FIGHT_ROOT) -> list[dict]:
+    """Fight records from every log under `root`.
+
+    TOLERANT BY CONSTRUCTION, which is the whole reason the stream is
+    JSON-lines: a crashed or killed game leaves a half-written final line, and
+    one bad line must cost one fight rather than the file. Anything that is not
+    a `record: "fight"` object is skipped in silence -- a future record type is
+    not an error here.
+    """
+    fights = []
+    for f in find_fight_logs(root):
+        try:
+            text = f.read_text(encoding="utf-8")
+        except OSError as e:
+            print(f"  ! unreadable {f.name}: {e}", file=sys.stderr)
+            continue
+        for line in text.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                continue            # truncated tail, or a line from a crash
+            if not isinstance(rec, dict) or rec.get("record") != "fight":
+                continue
+            rec["_file"] = f
+            fights.append(rec)
+    return fights
+
+
+def fights_by_run(fights: list[dict]) -> dict[str, list[dict]]:
+    """Fights grouped by the run they belong to, in fight order.
+
+    A record with no `run_id` (every record written before EB-18) groups under
+    `""` and is reported as UNLINKED rather than merged into a run -- an empty
+    id is one absent join key per record, not one shared run.
+    """
+    out: dict[str, list[dict]] = {}
+    for f in fights:
+        out.setdefault(f.get("run_id", ""), []).append(f)
+    for rows in out.values():
+        rows.sort(key=lambda r: (r.get("fight_index", 0), r.get("ts", 0)))
+    return out
+
+
+def summarize_fights(fights: list[dict]) -> dict:
+    if not fights:
+        return {}
+    by_run = fights_by_run(fights)
+    linked = {k: v for k, v in by_run.items() if k}
+    # `corpse_detonations` is ABSENT on a pre-EB-18 record and 0 on a fight
+    # that had none. The two are different facts and the denominator says so:
+    # a rate over records that never carried the key would be a reading about
+    # the log format.
+    scored = [f for f in fights if "corpse_detonations" in f]
+    return {
+        "fights": len(fights),
+        "runs": len(linked),
+        "unlinked": len(by_run.get("", [])),
+        "outcomes": Counter(f.get("outcome", "unknown") for f in fights),
+        "encounters": Counter(f.get("encounter") or "(unrecorded)"
+                              for f in fights),
+        "characters": Counter(f.get("character", "unknown") for f in fights),
+        "feeds": Counter(f"{f.get('feed', 'unknown')}/{f.get('source', 'unknown')}"
+                         for f in fights),
+        "coop_fights": sum(1 for f in fights if (f.get("seats") or 1) > 1),
+        "hp_lost": sum(f.get("hp_lost", 0) for f in fights),
+        "turns": sum(f.get("turns", 0) for f in fights),
+        "detonation_fights": len(scored),
+        "detonations": sum(f.get("detonations", 0) for f in scored),
+        "corpse_detonations": sum(f.get("corpse_detonations", 0) for f in scored),
+        "fights_with_corpse": sum(1 for f in scored
+                                  if f.get("corpse_detonations", 0) > 0),
+    }
+
+
+def join_fights_to_runs(runs: list[dict], fights: list[dict]) -> dict:
+    """How much of the fight stream belongs to runs this analysis loaded.
+
+    Reported rather than enforced. A fight whose run is not in the history is
+    ordinarily a run still in progress (the history entry is written when the
+    run ENDS), which is exactly the case per-fight telemetry exists to make
+    visible -- so it is a count, never a warning.
+    """
+    seeds = {r.get("seed") for r in runs if r.get("seed")}
+    by_run = fights_by_run(fights)
+    matched = {k: v for k, v in by_run.items() if k and k in seeds}
+    return {
+        "runs_with_fights": len(matched),
+        "fights_matched": sum(len(v) for v in matched.values()),
+        "fights_unmatched": len(fights) - sum(len(v) for v in matched.values()),
+    }
+
+
+def print_fight_report(s: dict, join: dict | None = None) -> None:
+    if not s:
+        return
+    print(f"\n=== per-fight stream - {s['fights']} fight records ===")
+    print(f"  runs (by run_id)   {s['runs']}"
+          + (f"   [{s['unlinked']} unlinked - pre-EB-18 records]"
+             if s["unlinked"] else ""))
+    feeds = ", ".join(f"{k} x{n}" for k, n in s["feeds"].most_common())
+    print(f"  feed/source        {feeds}")
+    chars = ", ".join(f"{k} {n}" for k, n in s["characters"].most_common())
+    print(f"  seats recorded     {chars}")
+    print(f"  co-op fight rows   {s['coop_fights']}")
+    outcomes = ", ".join(f"{k} {n}" for k, n in s["outcomes"].most_common())
+    print(f"  outcomes           {outcomes}")
+    print(f"  turns / hp lost    {s['turns']} / {s['hp_lost']}")
+
+    print("\n  -- most-fought encounters --")
+    for enc, n in s["encounters"].most_common(8):
+        print(f"    {n:>4}  {enc}")
+
+    # THE COUNT EB-18 EXISTS FOR. A detonation that resolved on an
+    # already-dead body -- probe (e) / Q11's question, answered from ordinary
+    # play instead of a scripted two-arm run. Reported, never graded.
+    print(f"\n  -- bombs, over {s['detonation_fights']} fight(s) carrying the counters --")
+    if s["detonation_fights"]:
+        print(f"    detonations          {s['detonations']}")
+        print(f"    corpse detonations   {s['corpse_detonations']}"
+              f"  (in {s['fights_with_corpse']} fight(s))")
+        print("    NOTE: >0 is a fact. 0 is not proof of absence -- a corpse")
+        print("    detonation from the blow that ended the fight can land")
+        print("    after the record is written (PlayTelemetry.FlushAll).")
+    else:
+        print("    no record carries them (logs predate EB-18)")
+
+    if join:
+        print("\n  -- joined to run history --")
+        print(f"    runs with fights   {join['runs_with_fights']}")
+        print(f"    fights matched     {join['fights_matched']}")
+        print(f"    fights unmatched   {join['fights_unmatched']}"
+              "   (a run still in progress writes no history entry)")
+
+
 def print_report(s: dict, runs: list[dict], label: str = "roster") -> None:
     if not s:
         print(f"No {label} runs found. Is the soak pointed at a modded profile?")
@@ -236,6 +416,14 @@ def main(argv: list[str] | None = None) -> int:
                     help="only list runs that ended abnormally")
     ap.add_argument("--predict", action="store_true",
                     help="compare against Tier 0.5 (read the scope caveat)")
+    # EB-18. `--fights` is the fight stream ALONE, which is the mode a machine
+    # that has played but not finished a run needs: the run history is empty
+    # until a run ends, and refusing to report without it would hide the
+    # granularity this option exists to add.
+    ap.add_argument("--fights", action="store_true",
+                    help="report the per-fight stream only (no run history)")
+    ap.add_argument("--fights-root", type=Path, default=DEFAULT_FIGHT_ROOT,
+                    help="where the mod's per-fight jsonl logs live")
     # E3. Default is the WHOLE roster, not Klee. The old default was Klee by
     # construction rather than by choice, and it made "the soak" mean "the
     # third of the soak this tool happened to look at".
@@ -246,6 +434,17 @@ def main(argv: list[str] | None = None) -> int:
 
     by_name = {v: k for k, v in ROSTER.items()}
     character = None if args.character == "all" else by_name[args.character]
+
+    fights = load_fights(args.fights_root)
+    if args.fights:
+        if not fights:
+            print(f"No per-fight records under {args.fights_root}. The mod "
+                  "writes them from normal play; a machine that has not "
+                  "played the deployed build has none.", file=sys.stderr)
+            return 1
+        print(f"reading {args.fights_root}")
+        print_fight_report(summarize_fights(fights))
+        return 0
 
     dirs = find_history_dirs(args.root)
     if not dirs:
@@ -274,6 +473,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     print_report(summarize(runs), runs, label)
+
+    # Additive: a machine with no fight logs prints exactly what it printed
+    # before EB-18.
+    if fights:
+        print_fight_report(summarize_fights(fights),
+                           join_fights_to_runs(runs, fights))
 
     if args.predict:
         print("\n" + "=" * 68)

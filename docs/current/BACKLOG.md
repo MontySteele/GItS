@@ -40,7 +40,6 @@
 | ID | Item | Provenance |
 |---|---|---|
 | `EB-1` | **Punch Off crash** (reclassified GAME-SIDE/SPINE-SIDE) — the animation stream keeps the watch; not done while seed `8B97LMCL2F` crashes in Punch Off | eng-backlog §1 |
-| `EB-18` | The mod's per-fight telemetry (C2) was never built — JSON-lines per fight; `tier1/analyze.py` reads per-**run** granularity. Answers the corpse-detonation count for free | eng-backlog §3; missed-requirements §2.3 |
 | `EB-14` | `selectors` is bot-feed only — a mod-side hook into the selection screens is the open item | eng-backlog §2 |
 | `EB-19/M1b` | Boss-room Frozen substitution has the M1 shape one reaction over: the sim applies `FROZEN_BOSS_VULN` Vulnerable inside `_react` (the `boss_room and not enemy.is_minion` branch), amplifying its own hit; C# lands it via `ReactionEffects.Resolve` from `AfterDamageReceived`, one hook too late. Not covered by the M1 fix (the `vulnerableFromThisReaction` predicate names only Superconduct + Courtroom Drama); the mirror needs a `RoomType`/minion read inside a hook the UI calls speculatively | EB-19/M1 follow-on, found 2026-08-07 |
 
