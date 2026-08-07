@@ -171,11 +171,19 @@ boss:
     name: "LAGAVULIN MATRIARCH"
     # §10.5 second Act-1 boss (Underdocks; wiki harvest 2026-07-23). Sleeps
     # 3 turns (free setup), then Slash 19 · Disembowel 9x2 · Slash 12 (+12
-    # block beat) · Soul Siphon -- her +2 Str half is kept, so every cycle
-    # she hits harder: the long fight gets strictly worse.
-    # UNIMPLEMENTED (§10.9): Plating 12 damage-cap while asleep; Soul
-    # Siphon's PLAYER stat-drain (-2 Str / -2 Dex permanently -- the
-    # stat-theft op). Both skipped loudly, never faked.
+    # block beat) · Soul Siphon. Soul Siphon is a THEFT: she takes +2 Str and
+    # the player loses 2 Str / 2 Dex. Neither strength nor dexterity decays
+    # (powers.DECAYING carries neither), so both halves are permanent for the
+    # fight -- every cycle she hits harder AND the player hits and blocks
+    # softer. The long fight gets strictly worse in both directions, which is
+    # the whole reason this boss is the anti-turtle clock.
+    # Soul Siphon spends THREE sim beats for one game action, the same
+    # "(beat)" convention the Slash block beat above and Sting's Weak+Frail
+    # pair in act3_pool use: one intent per enemy turn is the grammar, so a
+    # multi-effect action is authored as consecutive beats. Her attack
+    # density is therefore 3-of-7 beats, not 3-of-5.
+    # UNIMPLEMENTED (§10.9): Plating 12 damage-cap while asleep -- skipped
+    # loudly, never faked.
     enemies:
       - name: lagavulin_matriarch
         hp: 222
@@ -187,3 +195,5 @@ boss:
           - {kind: attack, amount: 12}                  # Slash (second)
           - {kind: block, amount: 12}                   # Slash's +12 block (beat)
           - {kind: buff, power: strength, amount: 2}     # Soul Siphon (her half)
+          - {kind: debuff, power: strength, amount: -2}  # Soul Siphon (player half, beat)
+          - {kind: debuff, power: dexterity, amount: -2} # Soul Siphon (player half, beat)
