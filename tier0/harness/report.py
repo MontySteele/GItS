@@ -105,6 +105,52 @@ def print_aura_payoff(encounter: str, aura: dict, payoff: dict) -> None:
                   f"{sl['evaluated']} evaluations: {rows}{absent}")
 
 
+def _pct(v) -> str:
+    """A rate, or '-' when the split it came from was empty. None is not 0%
+    (metrics.card_flow_profile keeps the two apart on purpose)."""
+    return "-" if v is None else f"{v:.0%}"
+
+
+def print_card_flow(encounter: str, flow: dict, top: int = 25) -> None:
+    """EB-17's aggregate, printed. Same fence as print_reaction_share and
+    print_aura_payoff: this surface makes the counts readable and reads
+    nothing into them -- no threshold, no dead-card verdict, no redesign
+    trigger. The sprint plan's rule is that the trigger is a design act, and
+    a design act does not happen in a print function.
+
+    Sorted by dead-in-hand count, most-dead first, because that is the order
+    the question is asked in; `top` bounds the rows so a 90-card pool does not
+    scroll the summary away.
+    """
+    if not flow:
+        return
+    print(f"  card flow   [{encounter}] {flow['draws']} draws, "
+          f"{flow['plays']} plays, "
+          f"{flow['played_when_drawn']} played-when-drawn, "
+          f"{flow['dead_in_hand']} dead-in-hand "
+          f"({flow['combats']} combats)")
+    rows = sorted(flow["by_card"].items(),
+                  key=lambda kv: (-kv[1]["dead_in_hand"], kv[0]))
+    for cid, r in rows[:top]:
+        # `plays` is printed beside `draws` and not folded into it: a kit
+        # Burst is granted to hand and never drawn, so it reads 0 draws and a
+        # positive play count, and a row that showed only draws made that look
+        # like a card nobody ever saw.
+        print(f"    {cid:<28} draws {r['draws']:>5}  "
+              f"plays {r['plays']:>5}  "
+              f"pwd {r['played_when_drawn']:>5} "
+              f"({_pct(r['played_when_drawn_rate'])})  "
+              f"dead {r['dead_in_hand']:>5} "
+              f"({_pct(r['dead_in_hand_rate'])})  "
+              f"first-copy {r['force_first_copy']}/"
+              f"{r['first_copy_drawn_combats']} "
+              f"({_pct(r['force_first_copy_rate'])})  "
+              f"win {_pct(r['winrate_first_copy_played'])} played vs "
+              f"{_pct(r['winrate_first_copy_dead'])} dead")
+    if len(rows) > top:
+        print(f"    ... {len(rows) - top} more card ids")
+
+
 def print_summary(character: str, deck: str, encounter: str, s: dict) -> None:
     flags = f"  FLAGS: {','.join(s['flags'])} ({s['flagged_fights']} fights)" \
         if s.get("flags") else ""
