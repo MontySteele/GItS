@@ -9,7 +9,8 @@
 # ---- BASICS (generous; signature basic gets the Bash-style dual-nature privilege) ----
 soloists_solicitation: {damage: +3}          # A15 (2026-07-28): 6->9. Delta held at +3 per the ruling
                                              # ("unchanged unless red-penned"); it is no longer Strike-exact,
-                                             # which was a property of the retired 4->7 pair, not of the delta.
+                                             # which was a property of the retired 4->7 pair (lint-ok: 4->7 is
+                                             # the retired pair this sentence is about), not of the delta.
 stage_presence:        {block: +3}           # 6->9
 regal_bearing:         {block: +2}           # 3->5; the glance stays 1 Weak
 # Q3 (USER directive 2026-07-24), SHIPPED by EPOCH 2 (2026-07-26). "One Encore

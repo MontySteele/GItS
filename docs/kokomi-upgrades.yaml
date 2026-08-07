@@ -38,8 +38,10 @@ cleansing_tide:    {block: +4}           # 10->14, still eats two cards
 undertow_shuffle:  {draw: +1}            # 3->4; discard stays 2 (the two Sly bells are the identity)
 moon_signal:       {draw: +1}            # discard 1, see 2
 drifting_lantern:  {block: +2}           # played 4->6; the Sly branch stays 4 (header gap note)
-surging_shoal:     {damage: +2}          # R77: 6->8 all (was 7->9). The delta is unchanged; the base moved.
-                                         # The old comment here read "4->6", which had been stale since the
+surging_shoal:     {damage: +2}          # R77: 6->8 all (was 7->9; lint-ok: 7->9 superseded pair). The delta
+                                         # is unchanged; the base moved.
+                                         # The old comment here read "4->6" (lint-ok: 4->6 quoted stale
+                                         # annotation), which had been stale since the
                                          # v0.3 repricing to 7 -- two bases out of date, in the file whose
                                          # whole job is to say what a card becomes.
 jade_bulwark:      {block: +2}           # 6->8, warm_glow-exact
@@ -52,7 +54,8 @@ field_promotion:   {draw: +1}            # 1->2
 reinforcements:    {cost: -1}            # 2->1 (uncommon cost slot 2)
 mercy_of_the_deep: {power_amount: +1}    # feel_no_pain 3->4
 pearl_barrage:     {formula_per: +1}     # 5 + 2/exhausted card (gleeful_barrage-class scaling bump;
-                                         # the base moved 3 -> 5 at v0.3, the slope is what upgrades)
+                                         # the base moved 3 -> 5 at v0.3 (lint-ok: 3->5 is that base move,
+                                         # not this row's delta), the slope is what upgrades)
 communion_of_tides: {draw: +1}           # burn 1, see 3
 rearguard_action:  {block: +3}           # 7->10, dodge_roll-parity
 # swift_currents: MERGED INTO moonlit_offering (G8). Its old delta was {energy: +1} with the Exhaust
@@ -161,7 +164,8 @@ sara_crowfeather_cover:  {buff: +2}      # +4->+6 (bennett_passion-parity)
 sara_tengu_stormcall:    {damage: +2}    # 4->6; the Strength stays 2 (in Kokomi's hands: still exactly 2 Charge)
 itto_superlative_superstrength: {damage: +3}   # 14->17; Block stays 6
 raiden_musou_no_hitotachi: {damage: +10} # 40->50. RATIFIED 2026-07-25 [USER] as a sanity check, from the +4
-                                         # that was left over when the base went 18->40 earlier the same day
+                                         # that was left over when the base went 18->40 (lint-ok: 18->40 is
+                                         # that base move, not an upgrade delta) earlier the same day
                                          # (the buff ruling named the BASE only, so the delta was carried
                                          # forward unchanged and FLAGGED rather than inferred -- this is that
                                          # flag being answered). +10 restores the proportion: +4 was ~22% of
