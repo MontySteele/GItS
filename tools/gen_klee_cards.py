@@ -662,8 +662,10 @@ HAND_WRITTEN |= {"sizzle", "flame_dance", "kaboom_beetle_swarm", "elemental_ecst
 
 # Kit-grant sprint (2026-07-20): the Burst card is hand-written because its
 # lifecycle is machinery, not ops -- granted by KitGrant at a full meter,
-# BaseLib custom-resource cost (SetCanonicalCost 60 / full-meter Spend),
-# Retain keyword, never pool-registered. See Powers/KitBurst.cs.
+# BaseLib custom-resource cost (SetCanonicalCost BurstConstants.KleeMax = 40,
+# klee.yaml burst_max / full-meter Spend), Retain keyword, and pool-registered
+# only through KleeOffPoolCards (in AllCards so CardModel.Pool resolves, out
+# of GetUnlockedCards so no generator can reach it). See Powers/KitBurst.cs.
 HAND_WRITTEN |= {"sparks_n_splash"}
 
 # Non-Klee hand-written cards. A SEPARATE set from HAND_WRITTEN above, which

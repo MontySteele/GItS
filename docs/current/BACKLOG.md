@@ -14,16 +14,13 @@
 
 | ID | Item | Provenance |
 |---|---|---|
-| `EB-5` | The combat pilot's scoring weights are unstamped inline literals (`tier0/pilot/policy.py:426-504`) — move to constants + version-stamp, no behavior change | eng-backlog §1 |
 | `EB-17` | Klee played-when-drawn / dead-in-hand / force-first-copy telemetry — zero matches across `tier0/`,`tier05/`,`tools/`; a **live gate** (bodyless draw/resource engines may not be buffed without it) | eng-backlog §3; missed-requirements §2.2 |
-| `X8-cap` | Ratified `bomb_damage_up ≤ 4` cap (`docs/current/characters/klee-character-design.md` §9) is **not implemented** — `max_stacks` only ever arrives from a card row and no Klee row carries one, so every Klee scaling power is uncapped | dockets/klee-rework §3 |
 | `S13→S7` | Sim-infidelity cross-checks owed before any design session reads them as game facts: swirl aura self-refresh (`reactions.py:96-99`), detonation-order Vulnerable self-amp (`effects.py:474-476`), conscript nation hard-default `'inazuma'` (`effects.py:2018`), Kurage direct `p.block +=` bypass (`effects.py:2549`), per-effect-dict relic no-dedupe (`relics.py:133-136`) | exploit-ledger "Routed to S7" |
 
 ## tier0.5 — draft / run layer / measurement
 
 | ID | Item | Provenance |
 |---|---|---|
-| `EB-10` | `tier05/route.py:13` docstring advertises `route_regret` as existing — stop advertising an unbuilt instrument | eng-backlog §1 |
 | `EB-16` | `route_regret` — advertised in code, never written; `run_metrics.py` defines no such function. §3.7.5's "relics underpriced" finding rests on this comparison | eng-backlog §3; missed-requirements §2.1 |
 | `EB-20` | Instrumentation for D8 (Encore economy census: 19/78 grant, 1 spends, absorption automatic) — measurement open though the lever is ruled-direction, unpicked | eng-backlog §3 |
 | `EB-25` | Lagavulin Matriarch's Soul Siphon player-stat-drain half — no stat-drain op anywhere in `tier05/` or `tier0/engine/`; silently biases the Act-1 boss split. "single highest-leverage backlog item for boss identity" | eng-backlog §4; missed-requirements §3.1; run-model §10.9 |
@@ -34,7 +31,6 @@
 | `EB-31` | Orobas not modelled in the sim — Klee's variant now is; still unmodelled: Furina's R2 upgraded form and Kokomi's variant | eng-backlog §4; open-playtest-items §6.3 |
 | `EB-43` | **D15 (spotlight-limb payoff-presence) — STAGED, HELD.** Drafter behaviour change (`DRAFTER 15`) + re-baseline sweep; `Q18` countersigned, pinned DRAFTER 14. **Lands as step (5) of a fixed six-step order** — must not land before blind-first grading (4) or it invalidates the registration | eng-backlog §6; R121 |
 | `EB-46` | Diagnose why tag-visible scoring moved the `ref_ironclad` anchor: separate the tag effect from the v6 (C5→C6) effect on this arm. No deadline, no design authority | eng-backlog §6; Q19; `review/r121-shield/` (at tag `pre-simplification-2026-08-06`) |
-| `O-1` | `run_battery` merges the gauntlet's two stages into one `FightStats` while rates divide by records, so every published per-fight reaction rate overstates (7.70 → 6.60, +16.7%); blocks the X12 co-op potency reading | watch-items W3; R112 |
 | `perf-1.5.2(3)` | Re-instrument on `real_ironclad`, not `ref_ironclad`, before reading any "can an average player clear this" claim — needs `game_ref/` rebuilt | tier05-perf §1.5.2(3) |
 | `SKIP-10.9` | Living skip-backlog of un-modelled enemy mechanics to promote when a pass needs them: Back Attack (Kaiser Crab), untargetable Burrow (Tunneler), Ethereal/Hex auras (Knight Gang), Intangible (Test Subject P3), damage caps (Hard to Kill / Plating / Hardened Shell), and the two Ancient relic hooks — Blessed Antler and Philosopher's Stone | run-model-rework-plan §10.9 |
 
@@ -54,13 +50,10 @@
 | ID | Item | Provenance |
 |---|---|---|
 | `EB-4` | Two p90s that disagree (`run_metrics._percentile` interpolates, `elite_blitz._percentile` nearest-rank while claiming to match) + two `wilson` impls with different return shapes — unify each; verify which convention the ratified bands used first | eng-backlog §1 |
-| `EB-6` | Error-laundering fixes (five bare-except sites): `refpowers.py:1130`, `render_card_gallery.py:215`, `card_distinctness_report.py:435`, `extract_base_game_pool.py:528`, `exp_furina_strength.py:771` | eng-backlog §2 |
-| `EB-7` | Waiver-set staleness tests — add the `KNOWN_IDENTICAL`-style guard to `PENDING_UNDERSIZE`/`PENDING_BANNED_FAMILY`/`PENDING_RED_PEN` in `art_lint.py`; also stop the two image checks `continue`-ing past unreadable files (:483,:532) | eng-backlog §2 |
+| `L10-trunc` | art_lint's unreadable-file rule (L10) probes `Image.open().size`, which is header-only for PNG/JPEG — a truncated download passes L10 and the one pixel-touching rule (L6 `clip_warnings`, `:578-582`) still `continue`s past it. Either L10 gains a full `load()` (real cost across ~1076 plan rows) or L6's warn-only channel gains a hard finding. Unverifiable in a worktree without PIL + `art/raw` | fix-sweep-1; EB-7 residual |
 | `EB-8` | Cross-sheet strict-domination check — the gate sweeps within-sheet only and prints `CLEAN` for two of six sheets; the Clorinde/Raiden pair was caught by hand | eng-backlog §2 |
-| `EB-21` | `char_facts` baselines for Defect, Necrobinder and Regent — the patch sentinel reports three of five characters "not watched" for lack of `<char>_char_facts.yaml`; cheap, no design content | eng-backlog §3 |
 | `EB-41` | Refactors, only if budget remains (big, safe, boring): `run_one` 518-line split; codegen driver unification (F3); telemetry-module template dedupe; `exp_*` script archive move; `apply_upgrade` op-coverage guard | eng-backlog §7 |
-| `SYS-11` | Ratified changes not swept through prose (19 findings): stale before/after annotations in `kokomi-upgrades.yaml`, uncap-all stale cap comments, Fanfare-rework/v0.4 stale prose | triage-memo SYS-11 |
-| `SYS-12` | Stale doc comments in code (9 findings): kaboom/sizzle/flame_dance sheet-number comments, catalytic_conversion "NO UPGRADE PATH", sparks_n_splash pool-membership | triage-memo SYS-12 |
+| `SYS-11r` | Two stale-comment fixes blocked on owner-known facts, left in place: `docs/ref-ironclad-upgrades.yaml:4-5` header counts ("klee/furina 71/71 pool + 10/10 starter", kokomi "31/31") match no derivable decomposition of the live sheets (klee pool is 76, kokomi ~60); and `docs/klee-cards.yaml:145-149` errata block sits under `hot_hands` (no block op) but describes `cant_catch_me`, with "warm_glow (block 2 < 3)" matching nothing current (`warm_glow` is block 6) | fix-sweep-1; SYS-11/12 residual |
 | `L4`/`L7` | Remaining lint candidates from the S1 sweep: flat effect-list scans (L4 — shared `iter_effects()` recursing then/else; sparkly_explosion, pearl_barrage, `rider_tip_args` charge gap) and comment-arithmetic on upgrade sheets (L7 — recompute `# a->b` annotations, flags SYS-11a/b). L5/L6 landed only for their swept instances (replacement multiplier; draw/exhaust/discard plurals) — a general pass is still open | triage-memo Lint L1–L8 |
 
 ## tests — pins & filed-not-fixed

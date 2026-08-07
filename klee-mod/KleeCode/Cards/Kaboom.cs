@@ -15,7 +15,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Cards;
 
 /// <summary>
-/// Klee's basic attack. Sheet: cost 1, damage 6, single target.
+/// Klee's basic attack. Sheet: cost 1, damage 7, single target.
 /// Mechanically identical to StrikeSilent — this is the intended reskin.
 /// </summary>
 public sealed class Kaboom : CustomCardModel, IElementalCard

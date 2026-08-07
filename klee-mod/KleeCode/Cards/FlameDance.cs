@@ -16,7 +16,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Cards;
 
 /// <summary>
-/// Sheet: uncommon attack, cost 2, 7 damage to ALL enemies, +4 vs enemies
+/// Sheet: uncommon attack, cost 2, 9 damage to ALL enemies, +4 vs enemies
 /// with any aura. Hand-written (R23).
 ///
 /// The per-target bonus lives in ModifyDamageAdditive -- cards in piles are

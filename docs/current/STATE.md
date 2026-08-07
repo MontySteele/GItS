@@ -11,7 +11,7 @@
 - **Tier 0 v0.1 — LOCKED.** Frozen v2 errata implemented — non-boss Frozen is
   **soft control** (−50% next action + Shatter on the first Attack hit); bosses
   take **Vulnerable 2** instead (§2.2; R44). The v0.1 scorecard baseline and
-  median identity are regression-locked (`test_errata.V01_MEDIAN`).
+  median identity are regression-locked (`test_errata.V02_MEDIAN`).
 - **Tier 0.5 M5 — SHIPPED.** The M5–M8 archive world was the v1 run template;
   the live run model is now the real StS2 map (see Versions below). Older
   run-layer numbers are archived, never compared across template versions
@@ -141,6 +141,7 @@ Named here for status only. Open items are in
 Blessed mechanisms with a named quantity and a named trigger — monitored, not
 open decisions, and nothing is tuned on the strength of being watched. Each
 returns to [USER] only when its trigger fires: `W1` X4 (block-side Guest Cast),
-`W2` X6 (salon power level), `W3` X12 (co-op reaction potency — its instrument
-blocked on `O-1`, BACKLOG), `W4` X5 (fanfare floor). (Migrated from the
+`W2` X6 (salon power level), `W3` X12 (co-op reaction potency — instrument
+unblocked since `O-1` closed; a new reading runs under EXPERIMENTS law),
+`W4` X5 (fanfare floor). (Migrated from the
 retired watch-items docket, frozen at tag `pre-simplification-2026-08-06`.)

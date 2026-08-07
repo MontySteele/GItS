@@ -382,7 +382,7 @@ ENTITY_PAYOFFS = {
     "bake_kurage": (
         ("frontload", "block", "scaling"), ("mid", "late"),
         "kokomi-cards.yaml bake_kurage: 'pulses at each turn end for "
-        "KURAGE_PULSE_BASE + Charge/KURAGE_PULSE_DIVISOR damage, hydro "
+        "KURAGE_PULSE_BASE + Charge x KURAGE_PULSE_PER_CHARGE damage, hydro "
         "application, and KURAGE_PULSE_BLOCK Block'. The Charge term is what "
         "makes it scaling; kurages_oath adds the ward on top."),
     "spark": (

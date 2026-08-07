@@ -16,7 +16,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Cards;
 
 /// <summary>
-/// Sheet: common attack, cost 1, 7 damage; +5 more if the target has a
+/// Sheet: common attack, cost 1, 8 damage; +6 more if the target has a
 /// non-Pyro aura. Hand-written (R23): the conditional op is aura state, and
 /// aura state now exists.
 ///

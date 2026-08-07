@@ -88,7 +88,7 @@ internal static class UpgradedStarterRelics
 /// THE MEASUREMENT TABLE ABOVE GRADES THIS RELIC, NOT THE CARD. Red-pen Part 1
 /// item 5 is titled "Explosive Frags", and until R69 that name belonged to two
 /// different game objects reachable in the same run: this relic and the Rare
-/// Power card `explosive_frags` (docs/klee-cards.yaml:193), which have
+/// Power card `explosive_frags` (docs/klee-cards.yaml), which have
 /// unrelated effects. The audit flagged the citation as ambiguous. It is
 /// resolved here explicitly: the +2.3 / +7.1 / +5.0 figures are THIS object's,
 /// measured as the Orobas upgrade, and item 5's ratification at 3 opening
