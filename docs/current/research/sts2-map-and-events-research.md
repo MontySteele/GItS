@@ -345,7 +345,6 @@ instrument attached.
 
 ### 3.5 Deliberate gaps
 
-- ~~**Acts 2-3 event pools are empty.**~~ CLOSED by §11.2 below.
 - **No `route_regret`.** The A/B ships; the road-not-taken sampler does not.
 - **Events that start a fight** (Dense Vegetation, Battleworn Dummy, The
   Lantern Key) are deferred — resolving combat inside an event would hand the

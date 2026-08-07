@@ -7,8 +7,9 @@ winrate margin, as her acceptance signature. Two things then happened, in this
 order, and the second is why this script exists:
 
 1. `run_metrics.stability_profile` was built (Serenitea Sweep I, E1) and lands
-   DARK by design. `docs/archive/missed-requirements.md` s1.3 still says the instrument
-   "was never built"; it is STALE as of E1, and the entry should be amended.
+   DARK by design. The recap audit's s1.3 still says the instrument
+   "was never built" (`git show aa09b97:docs/current/backlog/missed-requirements.md`);
+   it is STALE as of E1, and the entry is retired rather than amended.
 2. Nothing ever RAN it. There is no experiment script and no report on record
    that prints a stability number, so what did not exist was not the metric but
    the READING -- and a dark instrument nobody points at a cohort is

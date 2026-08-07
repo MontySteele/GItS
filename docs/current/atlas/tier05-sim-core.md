@@ -133,8 +133,9 @@ fixture (`tier05/tests/conftest.py:17-38`), which patches `model.build_act_map`.
   added without it silently re-labels adaptive runs (measured: 5/40 seeds
   diverged, 2/40 win flips — `draft.py:1475-1480`).
 - **`route_regret` does not exist**, though the research doc mandates it and
-  `route.py`'s header once claimed it shipped (`route.py:13-15`,
-  `docs/current/backlog/missed-requirements.md:93-104`); hunter-vs-cautious is the only real
+  `route.py`'s header once claimed it shipped (`route.py:13-15`;
+  `git show aa09b97:docs/current/backlog/missed-requirements.md` §2.1);
+  hunter-vs-cautious is the only real
   route countermeasure. And do **NOT** calibrate `MAP_ROOM_ODDS` or the route
   policies against a winrate — the target is player behaviour (median ~2.5
   elites fought per act, range 1-4), and tuning a difficulty dial to a winrate

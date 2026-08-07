@@ -8,6 +8,15 @@
 > **OPERATIONS.md**. Identifiers are preserved from their source registers;
 > closed items are in git history (tag `pre-simplification-2026-08-06`).
 
+> **Resolving a provenance identifier.** `eng-backlog`, `dockets/…`,
+> `user-queue` and the retired sprint docs read at
+> `git show pre-simplification-2026-08-06:<path>`. The two recap registers —
+> `missed-requirements` and `open-playtest-items` — left HEAD after their
+> rows migrated here; read them at
+> `git show aa09b97:docs/current/backlog/missed-requirements.md` and
+> `git show aa09b97:docs/current/playtest/open-playtest-items.md`
+> (`git fetch --depth=1 origin aa09b97` first on a shallow clone).
+
 ---
 
 ## tier0 — engine, pilot, constants
