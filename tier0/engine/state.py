@@ -75,7 +75,13 @@ class Card:
     name: str
     cost: Any                     # int or "X"
     type: str                     # attack | skill | power
-    rarity: str = "common"        # basic | common | uncommon | rare
+    # TWO vocabularies, split by C.RARITY_ODDS membership. Offered (draft,
+    # reward, shop): common | uncommon | rare. Only ever REACHED, because
+    # they have no odds row at all: basic | token | status | curse | event |
+    # ancient. The split is declared in constants.py (RARITY_ODDS +
+    # ACQUISITION_ONLY_RARITIES) and a rarity in neither table is a typo the
+    # suite fails on, rather than a card that quietly leaves every pool.
+    rarity: str = "common"
     element: str = "none"
     effects: list[dict] = field(default_factory=list)
     exhaust: bool = False

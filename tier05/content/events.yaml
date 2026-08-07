@@ -17,6 +17,10 @@
 #   card_screens: N    N INDEPENDENT reward screens ("gain 2 card rewards")
 #   pick_cards: {of: M, take: N}   choose N of M random pool cards
 #   add_card: <id>     add one NAMED card (an event-only colorless card)
+#   add_ancient: true  add THIS character's Ancient, UPGRADED (the Dusty
+#                      Tome; map is tier0/roster.ANCIENTS). Carrying this key
+#                      also gates the whole event: a character with no
+#                      Ancient never rolls it (events.pool_for)
 #   random_card: {type: t, cost: c, n: N}   add N random pool cards matching
 #                      the filter; the option is LOCKED if nothing matches
 #   remove: N          remove N cards (worst-first, drafter's valuation)
@@ -205,6 +209,33 @@ act2:
     options:
       - {label: "Learn Extermination Technique", add_card: exterminate}
       - {label: "Learn Squash Technique", add_card: squash}
+
+  - id: darv
+    name: "Darv"
+    # THE SINGLE ANCIENT DOOR (R127 / EB-30m). The Ancient met at the start
+    # of an act; his event rolls the Dusty Tome roughly half the time, and
+    # the Tome draws a random Ancient-rarity card from YOUR OWN pool and
+    # grants it already upgraded. Reward rolls, transforms and shop inventory
+    # all filter Ancient rarity out upstream, so this is the only way one of
+    # those three cards ever enters a deck.
+    #
+    # MODELLED MINIMALLY, and that is a statement rather than a shortcut: the
+    # event BODY is base-game (Darv and DustyTome live in the decompiled
+    # core, not in klee-mod/), so the repo has no authored text, cost or boon
+    # table to copy. What the mod owns -- and what this row therefore
+    # mirrors exactly -- is the grant: RosterAncientCards.cs says which card,
+    # DustyTome.AfterObtained says it arrives upgraded. The real event offers
+    # a choice of three boons of which the Tome is one; here it is one take
+    # and one walk-away, so the ~50% Tome roll is NOT modelled and this pool
+    # entry is strictly more generous than the game. Logged, not hidden: the
+    # boon table is the thing to add when the base-game side is extracted.
+    #
+    # Darv also appears in the act-3 pool in the real game. Filed here only
+    # until the act-3 half is authored, because a run must not be able to
+    # meet the Tome twice and hold two Ancients.
+    options:
+      - {label: "Accept the Dusty Tome", add_ancient: true}
+      - {label: "Leave"}
 
 # --- act 3: Glory ---------------------------------------------------------
 # The THINNEST pool by far -- 2 own + 3 all-acts -- and the reason is a

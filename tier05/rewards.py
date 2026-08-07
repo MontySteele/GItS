@@ -39,8 +39,16 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
         cards = [loader.get_card(cid) for cid in sorted(ids)]
         pool: dict[str, list[Card]] = {}
         for c in cards:
-            pool.setdefault(c.rarity if c.rarity in C.RARITY_ODDS
-                            else "common", []).append(c)
+            # SKIP, never remap. This branch used to refile any off-table
+            # rarity as `common`, which is a silent promotion: a basic, a
+            # status or an Ancient landing in his package would have started
+            # appearing on his reward screens wearing common's odds. The
+            # general branch below drops off-table rarities outright, and
+            # this one now agrees with it -- an anchor's pool must not be
+            # the one place where the rarity vocabulary is lenient.
+            if c.rarity not in C.RARITY_ODDS:
+                continue
+            pool.setdefault(c.rarity, []).append(c)
         return pool
     index = loader._card_index()
     pool = {}
@@ -78,7 +86,15 @@ def companion_pool() -> dict[str, list[Card]]:
     for c in loader._card_index().values():
         # guest_star (Furina kickoff §9): generated cameos, personal-pool
         # scoped. Never offered as rewards -- the only door is a generator.
-        if c.is_companion and not c.guest_star:
+        #
+        # The rarity gate mirrors `character_pool` above rather than
+        # answering a live defect: no companion carries an acquisition-only
+        # rarity today. It is here so the two reward pools cannot disagree
+        # about what "offerable" means -- the asymmetry is exactly how an
+        # Ancient (or a status, or a curse) would find a door on the
+        # companion slot that it does not have on the character slot.
+        if (c.is_companion and not c.guest_star
+                and c.rarity in C.RARITY_ODDS):
             pool.setdefault(c.rarity, []).append(c)
     return {r: sorted(cs, key=lambda c: c.id) for r, cs in pool.items()}
 

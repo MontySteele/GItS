@@ -48,7 +48,17 @@ UPGRADE_SHEETS = (_DOCS / "klee-upgrades.yaml",
                   # upgraded cards and 0 smiths in 300 runs. Real base-game
                   # numbers; the tier 0 battery never upgrades, so the frozen
                   # scorecard and the anchor lock are untouched.
-                  _DOCS / "ref-ironclad-upgrades.yaml")
+                  _DOCS / "ref-ironclad-upgrades.yaml",
+                  # EB-30m / R127: the three Ancients. Registered HERE and
+                  # nowhere else, on the ref-ironclad precedent directly
+                  # above -- `gen_klee_cards.UPGRADE_SHEETS` names the three
+                  # character files and must keep not naming this one, because
+                  # the Ancients' C# classes are hand-written and codegen
+                  # seeing a delta for them would try to regenerate them.
+                  # The Dusty Tome grants its card already upgraded, so for
+                  # these three the `+` form is the played card rather than a
+                  # smithing option.
+                  _DOCS / "ancient-upgrades.yaml")
 EXTERNAL_UPGRADE_SHEETS = (_GAME_REF / "ironclad-upgrades.yaml",
                            _GAME_REF / "silent-upgrades.yaml")
 SUFFIX = "+"

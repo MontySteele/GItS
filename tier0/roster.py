@@ -143,6 +143,30 @@ ROSTER: tuple[Character, ...] = (
 BY_ID: dict[str, Character] = {c.id: c for c in ROSTER}
 IDS: tuple[str, ...] = tuple(c.id for c in ROSTER)
 
+# character id -> the one Ancient-rarity card that character's Dusty Tome
+# grants. The sim twin of `klee-mod/KleeCode/RosterAncientCards.cs`, which
+# exists because a character whose pool holds no Ancient makes the act-2 Darv
+# event NRE and softlocks the run on room entry.
+#
+# Held here rather than on `Character` for the reason the class docstring
+# gives about `plans`: it is a routing table for one event, not a design fact
+# about the character -- and the C# ledger it mirrors is a separate file from
+# the character classes for exactly that reason too.
+#
+# Deliberately not `.get()`-shaped at the call site: `tier05.events.resolve`
+# indexes this map directly, so an unregistered character raises rather than
+# silently granting nothing. That raise is a backstop and not the mechanism
+# -- `events.pool_for` hides the Darv event from any character missing here,
+# which is what keeps the reference anchors (ref_ironclad, real_*) out of it.
+#
+# The cards live in `tier0/content/cards/ancients.yaml`; what the Tome grants
+# is their UPGRADED form (upgrades.SUFFIX), matching DustyTome.AfterObtained.
+ANCIENTS: dict[str, str] = {
+    "klee": "jumpy_dumpty_mk_omega",
+    "furina": "all_the_worlds_a_stage",
+    "kokomi": "princess_of_watatsumi",
+}
+
 
 def get(character_id: str) -> Character:
     """Registered character, or a loud failure naming the whole roster.

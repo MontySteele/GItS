@@ -719,7 +719,14 @@ def run_bands(row: dict, scan: dict) -> list[str]:
     if rarity in ("basic", "common") or (rarity == "uncommon"
                                          and role != "payoff"):
         bands.add("early")
-    if rarity == "rare" or role == "payoff" or reads_only:
+    # `ancient` bands with `rare`, matching canon_role_tempo.run_bands, which
+    # reads the C# and has always grouped the two. Unreachable today -- the
+    # Ancients live in a side-sheet outside SHEETS -- but a rule that
+    # disagrees with its own canon twin is a defect waiting for the first row
+    # that reaches it, and the disagreement was silent: without this an
+    # Ancient fell through to the `or ["early"]` default and would have been
+    # reported as an act-1 draft.
+    if rarity in ("rare", "ancient") or role == "payoff" or reads_only:
         bands.add("late")
     return [b for b in RUN_BANDS if b in bands] or ["early"]
 

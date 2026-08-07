@@ -395,9 +395,16 @@ def gain_charge(state: CombatState, n: int, source: str) -> None:
     """Kokomi's Charge (kickoff v1 §2.1): uncapped, never expended,
     card-event-driven only. Callers gate on the tamakushi_casket relic
     hook (the accrual laws live ON the relic; a player without it has no
-    Charge engine and this is never reached). No passive per-turn accrual
-    path exists in this module or anywhere else — same law as Fanfare
-    above, same reason (stall payoff), deliberately not designed."""
+    Charge engine and this is never reached).
+
+    EXACTLY ONE passive per-turn accrual path exists, and it is a ruled
+    carve-out rather than a leak: the `charge_per_turn` power that Princess
+    of Watatsumi applies (R127, the Ancient carve-out; the tick lives in
+    effects.player_turn_start_triggers). An Ancient is a once-per-run,
+    opt-in, single-door card, and R127 scopes the exception to that rarity
+    exactly — no other rarity, relic or event may reach this function on a
+    timer. Everything else here is still card-event-driven only, on the same
+    law as Fanfare above and for the same reason (stall payoff)."""
     if n <= 0:
         return
     p = state.player

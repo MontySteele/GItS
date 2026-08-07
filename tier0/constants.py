@@ -684,7 +684,10 @@ WINRATE_BAND_MIN_FIGHTS = 1000    # ratification process fix: winrate band
 #      acquisition that v7 realistic runs never had. DRAFTER_VERSION stays 14
 #      on the R121 restores-not-redefines argument; the payoff-reach pin is
 #      untouched.
-RUNTEMPLATE_VERSION = 8
+# v9 (EB-30m): the Darv/Dusty Tome act-2 event -- the single Ancient
+#      acquisition door, grants upgraded; act-2 event-pool odds move for
+#      every character.
+RUNTEMPLATE_VERSION = 9
 # DEAD as of v6; kept as the name of the world every pre-§11 measurement was
 # taken in, and still used by tests that pin a node sequence deliberately.
 RUN_NODE_TEMPLATE = "NNNRETN$ERB"
@@ -863,6 +866,20 @@ REST_PREFIGHT_HEAL_THRESHOLD = 0.90
 # --- Tier 0.5 rewards (spec §3 — the thing under test) ---
 REWARD_CARD_OFFERS = 3
 RARITY_ODDS = {"common": 0.60, "uncommon": 0.35, "rare": 0.05}
+# The other half of the rarity vocabulary: every rarity that is REACHED
+# rather than offered. Absence from RARITY_ODDS is what makes a card
+# invisible to draft, reward and shop generation -- that absence is the
+# mechanism, not a gap, and it is how `event`, `curse` and now `ancient`
+# (R127 / EB-30m) all stay out of every pool without one filter naming them.
+#
+# The PAIR of tables is the point. Membership in NEITHER is a typo, and a
+# typo'd rarity disappears from every pool silently with every gate green --
+# so tier0/tests/test_eb30m_ancients.py asserts that every rarity in the card
+# index is in one table or the other. This set gives the intentional half of
+# that vocabulary somewhere to be declared, which is what turns a silent
+# vanishing into a loud one.
+ACQUISITION_ONLY_RARITIES = frozenset({"basic", "token", "status", "curse",
+                                       "event", "ancient"})
 # §4.1 made real (Furina kickoff §10, sprint 1): the companion reward slot
 # concentrates SAME_NATION_REWARD_SHARE of its weight on the run
 # character's own nation; the remainder spreads across ALL nations
@@ -959,7 +976,11 @@ BANNER_FEATURED_SLOTS = 3
 # lands with this bump. Other encounters do not carry these powers and do
 # not move, EXCEPT any fight where a raw-damage site now caps -- no enemy
 # outside Test Subject P3 ever holds Intangible, so none today.
-CONSTANTS_VERSION = 7
+# CONSTANTS_VERSION 8 (EB-30m, R127): charge_per_turn / encore_per_turn
+# income powers, income pinned before Salon upkeep (EB-2's parity target).
+# Latent at the bump -- no encounter or ratified deck carries the powers;
+# cells move only through the Ancient door.
+CONSTANTS_VERSION = 8
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:
