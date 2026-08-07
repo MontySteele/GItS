@@ -99,7 +99,8 @@ public static class FurinaResourceConstants
 ///
 /// BaseLib owns reset, affordability, cloning, and card-cost visuals. Encore
 /// card costs are exceptional only in their timing: the sim spends them
-/// BEFORE card effects (combat.py play_card line 180, above the replay loop).
+/// BEFORE card effects (combat.py play_card :236-241, right after the energy
+/// debit and above the replay loop).
 /// <see cref="FurinaResourceHooks.BeforeCardPlayed"/> performs that spend, so
 /// BaseLib's own is a deliberate no-op here.
 ///
@@ -762,28 +763,51 @@ public sealed class FurinaResourceHooks : AbstractModel
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
         if (!cardPlay.IsFirstInSeries) return Task.CompletedTask;
-        // Sim order (combat.py play_card): the requires-full drain first,
-        // then the skill-tag bonus, then the Encore cost line.
-        FurinaBurstResource.DrainOnPlay(cardPlay.Card);
+        // SIM ORDER (combat.py play_card), corrected EB-19/M8. The three
+        // lines below used to run drain -> skill-tag -> cost under a comment
+        // asserting that WAS the sim's order. It is the reverse of it. The
+        // sim spends the Encore cost line first, at :236-241, immediately
+        // after the energy debit and well before resolution; the requires-full
+        // Burst drain (`p.burst_energy = 0`) is at :293-295 and the skill-tag
+        // bonus at :296-297, both at the far end of the same function.
+        //
+        // LATENT at the time of the fix -- no sheet card carries an
+        // `encore_cost` AND `requires: burst_energy_full`, so no play today
+        // reaches both lines. Fixed anyway because the trigger for it becoming
+        // reachable is a SHEET edit, which is not a place anyone would think
+        // to check a C# hook's statement order. The two orders differ for
+        // exactly that card: the drain zeroes Burst, and an Encore spend can
+        // print Fanfare and feed Burst back (FurinaResources.SpendEncore), so
+        // drain-then-spend leaves Burst the spend's income where the sim
+        // leaves it zero.
+        //
         // An OWNERLESS play is a real state: autoplay and token paths hand a
         // card to this broadcast with no Player attached. This hook fires for
         // every card every player plays, and it runs inside CombatManager's
         // async continuation, where an NRE is not an exception the player ever
-        // sees -- it is a black screen. Same guard DrainOnPlay already takes
-        // one line above.
+        // sees -- it is a black screen. DrainOnPlay self-guards, which is why
+        // it is the one line that still runs for an ownerless card.
         var card = cardPlay.Card;
-        if (card?.Owner?.Creature is not { } owner) return Task.CompletedTask;
-        if (card is ISkillTagCard && FurinaResources.IsFurina(owner))
+        if (card?.Owner?.Creature is not { } owner)
         {
-            FurinaResources.GainBurst(
-                owner,
-                FurinaResourceConstants.BurstPerSkillTag);
+            // The drain self-guards and is the only one of the four lines
+            // that needs no owner; the other three do, so an ownerless play
+            // ends here exactly as it did before the reorder.
+            FurinaBurstResource.DrainOnPlay(cardPlay.Card);
+            return Task.CompletedTask;
         }
         var cost = CustomResources<EncoreResource>.Cost(card)
             ?.GetAmountToSpend() ?? 0;
         if (cost > 0)
         {
             FurinaResources.SpendEncore(owner, cost);
+        }
+        FurinaBurstResource.DrainOnPlay(card);
+        if (card is ISkillTagCard && FurinaResources.IsFurina(owner))
+        {
+            FurinaResources.GainBurst(
+                owner,
+                FurinaResourceConstants.BurstPerSkillTag);
         }
         SpotlightSystem.NotePlay(cardPlay);
         return Task.CompletedTask;
@@ -948,6 +972,35 @@ public sealed class FurinaResourceHooks : AbstractModel
             await FurinaResources.SyncMeters(choiceContext, creature);
             await FurinaKitGrant.GrantIfCharged(choiceContext, player);
         }
+    }
+
+    /// <summary>
+    /// The this-turn Spotlight windows close here (EB-19/races-b).
+    ///
+    /// AfterSideTurnEnd is StS2 site M, which the sim names as the site of
+    /// `powers.on_turn_end` -- the function that pops powers.EXPIRING, i.e.
+    /// `spotlight_mult_bonus_turn`. SpotlightSpendBoostResource is that
+    /// power's C# twin, so it expires here rather than in the turn-start
+    /// broadcast that mints it. The two POWER-shaped members of the same
+    /// tuple (SpotlightMultBonusTurnPower, SpotlightFlatDamageTurnPower)
+    /// already self-expire in this broadcast; this puts the resource-shaped
+    /// third member alongside them.
+    ///
+    /// No co-tenant of AfterSideTurnEnd reads the Spotlight multiplier: it is
+    /// a printed-value modifier for CARD plays, and no card is played from a
+    /// turn-end broadcast.
+    /// </summary>
+    public override Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return Task.CompletedTask;
+        foreach (var creature in participants)
+        {
+            if (!FurinaResources.IsFurina(creature)) continue;
+            SpotlightSystem.ClearSpendBoost(creature);
+        }
+        return Task.CompletedTask;
     }
 
     public override async Task AfterDamageReceived(
@@ -1123,10 +1176,44 @@ public sealed class EncorePerTurnPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override async Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
+    /// <summary>
+    /// STAGED INTO BeforeSideTurnStart, NOT AfterPlayerTurnStart. THIS IS THE
+    /// EB-2 FIX and it must not be tidied back.
+    ///
+    /// The race: SalonMemberPower's upkeep SPENDS Encore from
+    /// AfterPlayerTurnStart, and this power MINTS it. Two same-side co-tenants
+    /// of one broadcast have no guaranteed relative order, so the Salon either
+    /// ran on this turn's income or on last turn's leftovers depending on
+    /// listener iteration -- a nondeterministic tick rate that fixed-seed
+    /// parity cannot catch.
+    ///
+    /// The sim states which way it falls: `effects.player_turn_start_triggers`
+    /// places `encore_per_turn` ABOVE `salon_tick` (and above the whole
+    /// per-turn income group below it) so that the card's printed "at the
+    /// start of your turn" funds the SAME turn's member ticks. Pinned at the
+    /// site by tier0/tests/test_eb30m_ancients.py::
+    /// test_ancient_income_is_sourced_above_the_salon_upkeep, with the
+    /// behavioural half in test_the_stage_funds_the_same_turn_s_salon_ticks.
+    ///
+    /// BeforeSideTurnStart is the strictly earlier broadcast (see
+    /// TURN_START_BROADCAST_ORDER in
+    /// tier0/tests/test_reaction_phase_parity.py -- AfterSideTurnStart is the
+    /// LAST turn-start broadcast, not the first, so "earlier" is this one and
+    /// only this one). The same staging idiom CurtainCallHooks.ResetTurn and
+    /// EtherealSpotlightRelic already use, for the same reason.
+    ///
+    /// PRE-DRAW AND PRE-BLOCK-CLEAR is inert for this power: GainEncore prints
+    /// no Fanfare (Track A ruling -- Fanfare prints on the way DOWN), grants
+    /// no Block and reads no hand, so no BeforeSideTurnStart co-tenant sees a
+    /// resource it touches. FurinaResourceHooks' decay + delta-block settle in
+    /// this same broadcast is therefore unaffected either way.
+    /// </summary>
+    public override async Task BeforeSideTurnStart(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IReadOnlyList<Creature> participants, ICombatState combatState)
     {
-        if (player.Creature != Owner) return;
+        if (side != CombatSide.Player) return;
+        if (Owner?.Player == null) return;
         FurinaResources.GainEncore(Owner, (int)Amount);
         await FurinaResources.SyncMeters(choiceContext, Owner);
     }

@@ -59,6 +59,11 @@ public static class KleeMod
                     .Concat(Powers.FurinaResourceHooks.Subscribe(combatState))
                     .Concat(Powers.KokomiResourceHooks.Subscribe(combatState))
                     .Concat(Powers.KokomiGarmentHooks.Subscribe(combatState))
+                    // EB-19/races-a + races-c: the four end-of-turn tenants
+                    // that share the player's Block and the enemy reaction
+                    // board no longer each override BeforeSideTurnEnd. This
+                    // one listener drives them in the sim's fixed order.
+                    .Concat(Powers.TurnEndSequencer.Subscribe(combatState))
                     // Track B's human feed: per-fight telemetry from normal
                     // play, in the schema the soak writes. Reads only -- see
                     // the three rules in PlayTelemetry.cs, the first of which
@@ -193,6 +198,11 @@ public static class KleeMod
                         "Bake-Kurage pulse",
                     [Cards.KokomiRiderTips.GarmentKey + ".title"] =
                         "Ceremonial Garment is active",
+                    // L4b: the printed Charge rider's rate. Unlike the two
+                    // above, the NUMBER was always visible -- this row titles
+                    // the tip that says what the number is made of.
+                    [Cards.KokomiRiderTips.ChargeKey + ".title"] =
+                        "Charge scaling",
                 };
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))

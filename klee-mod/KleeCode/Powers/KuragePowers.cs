@@ -69,11 +69,19 @@ public sealed class KurageSummonPower : PowerModel, ILocalizationProvider
         KokomiConstants.KuragePulsePerCharge
         + (owner?.Powers.OfType<KurageAmpPower>().FirstOrDefault()?.Amount ?? 0);
 
-    public override async Task BeforeSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
+    /// <summary>
+    /// NOT A BROADCAST OVERRIDE ANY MORE. This method is a tenant of BOTH
+    /// filed end-of-turn races and TurnEndSequencer settles both at once:
+    ///
+    /// EB-19/races-c -- the HYDRO leg of the three volleys, fired LAST
+    /// (tier0 order Pyro -> Electro -> Hydro).
+    /// EB-19/races-a -- its Block grant lands strictly AFTER
+    /// MasqueRedDeathPower.PayBondOfLife, because the sim pays the Bond at the
+    /// top of `effects.player_turn_end_triggers` and only then reaches
+    /// `kurage_summon`.
+    /// </summary>
+    public async Task FirePulse(PlayerChoiceContext choiceContext)
     {
-        if (side != CombatSide.Player) return;
         if (Owner.Player == null) return;
 
         var damage = PulseDamage(Owner);

@@ -190,8 +190,28 @@ BOT_ONLY = {"potions_used",          # no first-party potion hook exists yet
             "selectors"}
 MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
 #                                      (the soak stamps `ts` in `emit`)
-            "reactions_by_turn"}     # a counter only the C# side can see: the
+            "reactions_by_turn",     # a counter only the C# side can see: the
 #                                      wire does not narrate reactions at all
+            # EB-18. Per-fight identity and the bomb counters, MOD FEED ONLY,
+            # all four ADDED (no rename, no repurpose -- an addition is free).
+            #
+            #   run_id, fight_index, encounter -- the mod reads the live run
+            #     state (`RunState.Rng.StringSeed`, `CombatRoom.Encounter`).
+            #     The soak drives the game from outside and its adapter
+            #     narrates a fight, not the run object around it; giving the
+            #     bot feed these means new wire surface, which is a piece of
+            #     work and not this one.
+            #   detonations, corpse_detonations -- read straight off
+            #     `BombPower`'s per-combat, per-player counters. There is no
+            #     wire equivalent at all: a corpse detonation is a fact about
+            #     the ORDER of two internal hooks, which no external observer
+            #     can see. Probe (e) needed a scripted two-arm run to infer it
+            #     once, which is the measurement this counter replaces.
+            #
+            # SURFACED, not smuggled: any Track B cut on these is a HUMAN-FEED
+            # cut until a wire route for them lands.
+            "run_id", "fight_index", "encounter",
+            "detonations", "corpse_detonations"}
 
 
 def _csharp_keys() -> set[str]:

@@ -17,9 +17,12 @@ namespace KleeMod;
 /// live here and in the shop together on 2026-07-25 (R64), when Fontaine
 /// shipped a 4th Rare -- see CompanionBanner.
 ///
-/// Law mirrored exactly: roll a rarity on RARITY_ODDS (5-star companions
-/// ARE the rare tier), fall through rare -> uncommon -> common when a tier
-/// is empty, then a NATION-WEIGHTED pick inside the tier.
+/// Law mirrored exactly: roll a rarity on RARITY_ODDS, fall through
+/// rare -> uncommon -> common when a tier is empty, then a NATION-WEIGHTED
+/// pick inside the tier. Rarity is the sheet's rarity field (codegen'd as
+/// CardRarity); Star is a separate 4/5 banner concept read only by
+/// CompanionBanner -- the two happen to coincide at rare/5-star today, but
+/// nothing here reads Star.
 ///
 /// Nation weighting went live with the Fontaine roster (2026-07-21 ruling:
 /// "it's fine for Fontaine companions to show up as long as the 50%

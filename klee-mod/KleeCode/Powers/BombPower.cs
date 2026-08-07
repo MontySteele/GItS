@@ -414,6 +414,25 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     private static ICombatState? _countCombat;
     private static readonly Dictionary<Player, int> _detonationsByPlayer = new();
 
+    /// <summary>
+    /// EB-18 — CORPSE DETONATIONS, the same count keyed the same way.
+    ///
+    /// A corpse detonation is a detonation that resolved on a target that was
+    /// ALREADY DEAD when the charge went off: the killing blow's own
+    /// <see cref="AfterDamageReceived"/> early-detonation firing after the
+    /// blow killed the enemy. Probe (e) (R118 / Q11) asked exactly that
+    /// question of the live game and had to script a fixed two-arm run to
+    /// answer it once; a counter answers it on every fight anybody plays, for
+    /// the price of one bool.
+    ///
+    /// REPORTS, NEVER GRADES, and touches nothing. It is read only by
+    /// `PlayTelemetry` — no card, relic or formula reads it, and in particular
+    /// The Big One's bonus still reads
+    /// <see cref="DetonationsThisCombat"/>, which counts corpse detonations
+    /// among its total exactly as it did before this counter existed.
+    /// </summary>
+    private static readonly Dictionary<Player, int> _corpseDetonationsByPlayer = new();
+
     public static int DetonationsThisCombat(ICombatState combatState, Player? player)
     {
         if (!ReferenceEquals(combatState, _countCombat) || player == null)
@@ -423,13 +442,24 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         return _detonationsByPlayer.TryGetValue(player, out var count) ? count : 0;
     }
 
-    private static void RecordDetonation(ICombatState? combatState, Creature? applier)
+    public static int CorpseDetonationsThisCombat(ICombatState combatState, Player? player)
+    {
+        if (!ReferenceEquals(combatState, _countCombat) || player == null)
+        {
+            return 0;
+        }
+        return _corpseDetonationsByPlayer.TryGetValue(player, out var count) ? count : 0;
+    }
+
+    private static void RecordDetonation(ICombatState? combatState, Creature? applier,
+                                         bool onCorpse)
     {
         if (combatState == null) return;
         if (!ReferenceEquals(combatState, _countCombat))
         {
             _countCombat = combatState;
             _detonationsByPlayer.Clear();
+            _corpseDetonationsByPlayer.Clear();
         }
         // An applier with no Player is an enemy-sourced or orphaned detonation.
         // It still happened, but it is nobody's Big One bonus.
@@ -437,6 +467,9 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         if (player == null) return;
         _detonationsByPlayer[player] =
             (_detonationsByPlayer.TryGetValue(player, out var n) ? n : 0) + 1;
+        if (!onCorpse) return;
+        _corpseDetonationsByPlayer[player] =
+            (_corpseDetonationsByPlayer.TryGetValue(player, out var c) ? c : 0) + 1;
     }
 
     private async Task<int> Detonate(PlayerChoiceContext choiceContext, int bonus = 0)
@@ -468,7 +501,12 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         {
             // Sim order: detonations_total increments before the damage
             // lands (effects.py detonate_bombs).
-            RecordDetonation(combatState, applier);
+            //
+            // The corpse test is read PER BOMB and BEFORE this bomb's damage,
+            // which is the only reading that says what it means: the bomb that
+            // lands the kill detonated on a live enemy, and every bomb behind
+            // it in the same payload detonated on a corpse.
+            RecordDetonation(combatState, applier, onCorpse: target is { IsDead: true });
 
             // R23: each detonation is a Pyro-tagged hit (tier0 detonate_bombs
             // -> deal_damage_to_enemy(element=bomb.element), default pyro).

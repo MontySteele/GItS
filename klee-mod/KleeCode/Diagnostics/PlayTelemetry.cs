@@ -102,6 +102,22 @@ internal static class PlayTelemetry
     private static bool _writeFailed;
     private static readonly Dictionary<Player, FightRecord> Open = new();
 
+    /// <summary>EB-18 — RUN LINKAGE. The run's own string seed, which is the
+    /// same token `RunHistoryUtilities.CreateRunHistoryEntry` writes as `seed`
+    /// in the `.run` history file `tier1/analyze.py` already reads. That is the
+    /// whole join: a fight row and a run row that carry the same `run_id` are
+    /// the same run, and per-fight granularity stops being a separate island.
+    ///
+    /// `fight_index` counts fights WITHIN a run, from 0, in the order this
+    /// process saw them. It restarts when the run id changes rather than when
+    /// the session does, so a session that plays two runs numbers each from
+    /// zero and a run resumed in a later session numbers from zero again — a
+    /// gap a reader can see (floor jumps) beats a number that silently
+    /// continues across a boundary it cannot see.</summary>
+    private static string _runId = string.Empty;
+
+    private static int _fightIndex;
+
     // -------------------------------------------------------------- open ---
 
     /// <summary>Opens one record per seat. Any record still open from a
@@ -124,6 +140,16 @@ internal static class PlayTelemetry
             // shape that quietly drags a median down.
             if (run.CurrentRoom is not CombatRoom room) return;
             var kind = room.RoomType.ToString().ToLowerInvariant();
+
+            var runId = RunId(run);
+            if (!string.Equals(runId, _runId, StringComparison.Ordinal))
+            {
+                _runId = runId;
+                _fightIndex = 0;
+            }
+
+            var fightIndex = _fightIndex++;
+            var encounter = EncounterId(room, combat);
             var enemies = combat.Enemies
                 .Where(e => e.IsAlive)
                 .Select(e => (Name: NameOf(e), MaxHp: (int)e.MaxHp))
@@ -137,6 +163,9 @@ internal static class PlayTelemetry
                 if (creature == null) continue;
                 Open[player] = new FightRecord
                 {
+                    RunId = runId,
+                    FightIndex = fightIndex,
+                    Encounter = encounter,
                     Act = run.CurrentActIndex + 1,
                     Floor = run.TotalFloor,
                     Kind = kind,
@@ -205,10 +234,39 @@ internal static class PlayTelemetry
                     FurinaResources.IsFurina(creature) ? FurinaResources.Encore(creature) : 0,
                 });
             }
+
+            SampleDetonations(combat);
         }
         catch (Exception e)
         {
             Warn("OpenTurn", e);
+        }
+    }
+
+    /// <summary>
+    /// EB-18 — the bomb counters, sampled rather than hooked.
+    ///
+    /// <see cref="BombPower"/> already keeps a per-combat, PER-PLAYER
+    /// detonation total (the co-op ownership fix, EPOCH 2 / D2) and now a
+    /// corpse-detonation total beside it. Both are monotonic within a combat,
+    /// so reading them at each turn boundary and at combat end — taking the
+    /// MAX, never the last value — costs two dictionary lookups per seat and
+    /// cannot go backwards if a stale-flush reads a record after the next
+    /// combat has already reset the counters.
+    ///
+    /// Sampling, not a hook, on purpose: a listener on the detonation bus
+    /// would put telemetry inside the damage path of a lockstep co-op game for
+    /// a number that is fully recoverable from outside it.
+    /// </summary>
+    private static void SampleDetonations(ICombatState combat)
+    {
+        foreach (var (player, record) in Open)
+        {
+            record.Detonations = Math.Max(
+                record.Detonations, BombPower.DetonationsThisCombat(combat, player));
+            record.CorpseDetonations = Math.Max(
+                record.CorpseDetonations,
+                BombPower.CorpseDetonationsThisCombat(combat, player));
         }
     }
 
@@ -231,6 +289,7 @@ internal static class PlayTelemetry
                 record.HpLastSeen = (int)creature.CurrentHp;
             }
 
+            SampleDetonations(combat);
             MaybeClose(combat);
         }
         catch (Exception e)
@@ -385,6 +444,23 @@ internal static class PlayTelemetry
     internal static void FlushAll(string outcome)
     {
         if (Open.Count == 0) return;
+
+        // LAST SAMPLE BEFORE THE WRITE. Cheap, and it is what makes a fight
+        // that ended between two turn boundaries carry its bomb counters.
+        //
+        // ONE RACE STAYS, DECLARED. A killing blow on the LAST living enemy
+        // closes the record from inside `Damage`, and the corpse detonation
+        // that same blow may trigger is another `AfterDamageReceived` listener
+        // in the same iteration -- so if the bomb runs after this listener, the
+        // final enemy's corpse detonation lands after its record is written and
+        // is not counted. Every earlier enemy is unaffected (no flush happens),
+        // which is why the counter is a per-fight COUNT and not an existence
+        // claim: `corpse_detonations > 0` is a fact, `== 0` on a fight that
+        // ended on a bombed enemy is not proof of absence. The live smoke is
+        // what settles the listener order.
+        var open = CombatManager.Instance?.DebugOnlyGetState();
+        if (open != null) SampleDetonations(open);
+
         var records = Open.ToList();
         Open.Clear();
         foreach (var (player, record) in records)
@@ -542,6 +618,39 @@ internal static class PlayTelemetry
         return (total, attackers);
     }
 
+    /// <summary>The run's string seed — the token the game's own run history
+    /// writes as `seed`, which is what makes this the join key rather than an
+    /// invented id. `""` when there is no run to ask (and a reader must treat
+    /// an empty run id as unjoinable rather than as one big run).</summary>
+    private static string RunId(RunState run)
+    {
+        try
+        {
+            return run.Rng?.StringSeed ?? string.Empty;
+        }
+        catch (Exception)
+        {
+            return string.Empty;
+        }
+    }
+
+    /// <summary>The encounter's model id (`ENCOUNTER.…`), which names WHICH
+    /// fight this was — the enemy list alone does not, because two encounters
+    /// can spawn the same bodies. Room first, combat second: they are the same
+    /// object in the ordinary case, and the fallback costs nothing.</summary>
+    private static string EncounterId(CombatRoom room, ICombatState combat)
+    {
+        try
+        {
+            var encounter = room.Encounter ?? combat.Encounter;
+            return encounter?.Id.Entry ?? string.Empty;
+        }
+        catch (Exception)
+        {
+            return string.Empty;
+        }
+    }
+
     private static string NameOf(Creature creature)
     {
         try
@@ -587,6 +696,11 @@ internal static class PlayTelemetry
 
     private sealed class FightRecord
     {
+        public string RunId = string.Empty;
+        public int FightIndex;
+        public string Encounter = string.Empty;
+        public int Detonations;
+        public int CorpseDetonations;
         public int Act;
         public int Floor;
         public string Kind = "unknown";
@@ -638,6 +752,13 @@ internal static class PlayTelemetry
             // R99/4a. Empty when nobody declared anything -- which is a
             // reading, not a gap, so the key is always present.
             Str(sb, "intent", Intent());
+            // EB-18. The join key and the position of this fight inside the
+            // run it belongs to; both always present, empty run id and all.
+            sb.Append(',');
+            Str(sb, "run_id", RunId);
+            sb.Append(",\"fight_index\":").Append(FightIndex);
+            sb.Append(',');
+            Str(sb, "encounter", Encounter);
             sb.Append(",\"seats\":").Append(Seats);
             sb.Append(",\"seat_index\":").Append(SeatIndex);
             sb.Append(',');
@@ -693,6 +814,11 @@ internal static class PlayTelemetry
             sb.Append('}');
             sb.Append(",\"damage_dealt\":").Append(DamageBySource.Values.Sum());
             sb.Append(",\"damage_taken\":").Append(DamageTaken);
+            // EB-18. This seat's bombs, and how many of them went off on a
+            // body that was already dead (probe (e) / Q11's question, asked of
+            // every fight instead of one scripted pair).
+            sb.Append(",\"detonations\":").Append(Detonations);
+            sb.Append(",\"corpse_detonations\":").Append(CorpseDetonations);
             sb.Append(",\"ts\":").Append(
                 (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0)
                     .ToString("F3", CultureInfo.InvariantCulture));

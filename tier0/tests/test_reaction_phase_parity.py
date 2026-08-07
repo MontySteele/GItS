@@ -80,6 +80,24 @@ PHASE_LEDGER = [
         "multiplicative phase.",
     ),
     (
+        "courtroom-drama-vulnerable-is-multiplicative",
+        "Powers/AuraPower.cs",
+        "ModifyDamageMultiplicative",
+        r"public\s+override\s+decimal\s+ModifyDamageMultiplicative\s*\(",
+        ["CurtainCallHooks.CourtroomDramaWillAmplify",
+         "ReactionConstants.VulnerableTakenMult"],
+        ["CurtainCallHooks.CourtroomDramaWillAmplify"],
+        "EB-19/M1, the Superconduct shape one power over. Courtroom Drama's "
+        "Vulnerable is applied from CurtainCallHooks.NoteFirstReaction, which "
+        "ReactionEffects.Resolve reaches from AfterDamageReceived -- one hook "
+        "after the triggering hit's number is final. The sim applies it "
+        "inside reactions._react (the `reactions_this_turn == 1` block) and "
+        "runs modify_damage_taken afterwards, so tier0's triggering hit is "
+        "itself x1.5. Same two-payout tell as Superconduct: the bomb path "
+        "already amplified, because ElementalHit.Deal resolves the reaction "
+        "before SimDamagePipeline.TargetMods reads Vulnerable.",
+    ),
+    (
         "shatter-is-dealt-from-after-damage-received",
         "Powers/FrozenPower.cs",
         "AfterDamageReceived",
@@ -214,6 +232,86 @@ def test_superconduct_multiplier_is_pure():
             "speculatively by preview/tooltip paths and must stay pure")
 
 
+# A real assignment, not `==`, `!=`, `<=`, `>=`, `+=` or a lambda arrow.
+_ASSIGNMENT = re.compile(r"(?<![=!<>+\-*/%&|^])=(?![=>])")
+
+
+def test_the_two_reaction_vulnerables_share_one_multiplier():
+    """Superconduct + Courtroom Drama on one hit is x1.5, not x2.25.
+
+    Both sim sites write the SAME `vulnerable` stack, and
+    powers.modify_damage_taken is a flat multiply on any nonzero stack rather
+    than one per source. Two separate `mult *=` statements in this hook would
+    be correct on either source alone and wrong on the hit that is both --
+    which is a live combination (Cryo aura + Electro attack, first reaction of
+    the turn, with Courtroom Drama installed).
+    """
+    body = method_body(
+        (SOURCE / "Powers" / "AuraPower.cs").read_text(encoding="utf-8"),
+        r"public\s+override\s+decimal\s+ModifyDamageMultiplicative\s*\(")
+    assert body.count("ReactionConstants.VulnerableTakenMult") == 1, body
+
+
+def test_the_reaction_vulnerable_mirror_cannot_double_pay_the_bomb_path():
+    """The bomb path amplifies for real; this hook must not amplify it again.
+
+    ElementalHit.Deal applies the reaction's Vulnerable through
+    ReactionEffects.Resolve and only then reads it back in
+    SimDamagePipeline.TargetMods, so a bomb-triggered Superconduct or first
+    reaction already gets its x1.5 from the target's real VulnerablePower. The
+    hit is emitted Unpowered, and the IsPoweredAttack gate at the top of the
+    modifier is what keeps the mirror off it. Drop either and the bomb pays
+    twice -- the exact defect EB-19/M1 fixed, with the sign flipped.
+    """
+    aura = method_body(
+        (SOURCE / "Powers" / "AuraPower.cs").read_text(encoding="utf-8"),
+        r"public\s+override\s+decimal\s+ModifyDamageMultiplicative\s*\(")
+    gate = aura.index("IsPoweredAttack()")
+    assert gate < aura.index("ReactionConstants.VulnerableTakenMult"), aura
+
+    hit = (SOURCE / "Powers" / "ElementalHit.cs").read_text(encoding="utf-8")
+    deal = method_body(hit, r"public\s+static\s+async\s+Task\s+Deal\s*\(")
+    assert "ValueProp.Unpowered" in deal, deal
+    # ...and the order that makes the bomb path's amplification real.
+    assert deal.index("ReactionEffects.Resolve") < deal.index(
+        "SimDamagePipeline.TargetMods"), deal
+
+
+def test_the_courtroom_drama_forecast_is_a_read():
+    """The predicate the pure modifier calls must itself be pure.
+
+    ModifyDamageMultiplicative runs in preview and tooltip paths, so a
+    forecast that CONSUMED the once-per-turn window would spend Courtroom
+    Drama on a hit that was never thrown. The single increment site stays in
+    ReactionEffects.Resolve.
+    """
+    # Both forecasts are expression-bodied on purpose -- a `=>` member cannot
+    # hold a statement, so "it only reads" is enforced by the shape as well as
+    # by the text below. method_body() would run past a `=>` member's end, so
+    # these are matched as expressions.
+    curtain = (SOURCE / "Powers" / "CurtainCallPowers.cs").read_text(
+        encoding="utf-8")
+    forecast = re.search(
+        r"public\s+static\s+bool\s+CourtroomDramaWillAmplify\s*\([^)]*\)\s*=>"
+        r"(.*?);", curtain, re.S)
+    assert forecast, "CourtroomDramaWillAmplify is no longer expression-bodied"
+    for forbidden in ("Cmd.", "await"):
+        assert forbidden not in forecast.group(1), (
+            f"CourtroomDramaWillAmplify contains {forbidden!r}; it is called "
+            "from a speculative damage-preview path and must only read.")
+    assert not _ASSIGNMENT.search(forecast.group(1)), forecast.group(1)
+
+    reactions = (SOURCE / "Powers" / "ReactionEffects.cs").read_text(
+        encoding="utf-8")
+    inner = re.search(
+        r"public\s+static\s+bool\s+NextReactionIsFirstFor\s*\([^)]*\)\s*=>"
+        r"(.*?);", reactions, re.S)
+    assert inner, "NextReactionIsFirstFor is no longer expression-bodied"
+    assert "DealerReactionsThisTurn" in inner.group(1)
+    # One write site, still in Resolve.
+    assert reactions.count("DealerReactionsThisTurn[dealer] =") == 1, reactions
+
+
 # --- damage-modifier purity, swept repo-wide -------------------------------
 #
 # The test above pins ONE power by naming the commands it must not call. The
@@ -328,8 +426,19 @@ def test_damage_modifiers_are_pure(rel, hook, body):
 # turn structure is strictly sequential -- so two same-side tenants that touch
 # one resource are a nondeterministic divergence FIXED-SEED PARITY CANNOT
 # CATCH: the C# can match the sim's order on every replayed seed and still
-# not guarantee it. All four filed races (EB-2, EB-19/races-a/b/c) are this
-# shape, and each was found by hand.
+# not guarantee it. Four races of this shape were filed and each was found by
+# hand; all four were closed on 2026-08-07 and their tenants have moved, which
+# is why no row below cites one any more.
+#
+# TWO FIX IDIOMS, and the second is new. Where the racing tenants can be
+# separated by BROADCAST, they are: the Ancient income powers moved to
+# BeforeSideTurnStart (strictly earlier than the Salon upkeep that spends what
+# they mint), and the Standing Ovation spend-boost's clear moved to
+# AfterSideTurnEnd (the sim's own expiry site). Where they cannot -- turn end
+# offers only two broadcasts and the four end-of-turn tenants needed four
+# positions -- one listener now DRIVES them in the sim's order instead:
+# TurnEndSequencer. A sequencer is the heavier idiom and should stay the
+# exception; prefer staging while staging can express the order.
 #
 # The structural catch is registration: the sweep below finds every override
 # of a turn broadcast, and each must hold a row here. A new tenant landing in
@@ -350,6 +459,92 @@ TURN_BROADCASTS = (
     "BeforeSideTurnEnd", "AfterSideTurnEnd",
 )
 
+# --- resolved turn-start broadcast order (EB-19/M7) -------------------------
+#
+# The fix idiom the co-tenancy ledger prescribes -- "stage into a strictly
+# earlier/later broadcast" -- is only as good as the repo's belief about which
+# broadcast IS earlier. Two in-repo docs asserted incompatible orders:
+# refpowers.py's site table put AfterPlayerTurnStart and AfterSideTurnStart
+# AFTER the hand draw, in that order; AuraPower.cs's phase-correction comment
+# claimed AfterSideTurnStart ran "strictly before energy reset and the hand
+# draw". Settled by decompile, not by argument (StS2 v0.107.1, commit
+# 59260271, ilspycmd 8.2.0.7535). refpowers.py was right; the AuraPower.cs
+# clause was corrected in place and now cites this tuple.
+#
+# CombatManager.StartTurn, decompiled:
+#   :454  Creature.BeforeTurnStart          (snapshots power amounts)
+#   :459  await Hook.BeforeSideTurnStart
+#   :497  await Creature.AfterTurnStart     -> ClearBlock (Creature.cs:696,
+#                                             Hook.ShouldClearBlock :725)
+#   :505  await Hook.AfterBlockCleared
+#   :516  await SetupPlayerTurn(player, ctx), whose body is
+#           :642  Hook.ShouldPlayerResetEnergy / ResetEnergy
+#           :651  await Hook.AfterEnergyReset
+#           :653  await Hook.BeforeHandDraw
+#           :655  Hook.ModifyHandDraw  (+ :656 AfterModifyingHandDraw)
+#           :674  await CardPileCmd.Draw(..., fromHandDraw: true)
+#           :676  await Hook.AfterPlayerTurnStart
+#   :523  await Hook.AfterSideTurnStart
+#
+# So AfterSideTurnStart is the LAST turn-start broadcast, not the first, and
+# AfterPlayerTurnStart is strictly earlier than it -- the opposite of the
+# reading a "side-wide before per-player" intuition gives. Anything staged
+# out of AfterPlayerTurnStart to land LATER goes to AfterSideTurnStart;
+# anything staged EARLIER goes to BeforeSideTurnStart, which is the only
+# broadcast that precedes the block clear.
+#
+# ONE CAVEAT, and it is load-bearing for the fix idiom. :516 awaits
+# SetupPlayerTurn through WaitForPauseOrCompletionWithoutAssigningTask
+# (HookPlayerChoiceContext.cs:129), which returns on the task completing OR on
+# the setup pausing for a player choice. A turn-start hook that opens a choice
+# therefore lets :523 AfterSideTurnStart run while that player's
+# AfterPlayerTurnStart is still pending -- the setup task is only rejoined at
+# :569. The order below is the no-choice order: it holds for every tenant in
+# CO_TENANCY_LEDGER (none of them prompt), and a future tenant that DOES
+# prompt during turn-start setup breaks it and must not be used as a staging
+# target.
+TURN_START_BROADCAST_ORDER = (
+    "BeforeSideTurnStart",
+    "block clear",
+    "AfterBlockCleared",
+    "energy reset",
+    "hand draw",
+    "AfterPlayerTurnStart",
+    "AfterSideTurnStart",
+)
+
+
+def test_the_resolved_order_covers_every_registered_turn_start_broadcast():
+    """A staging target absent from the resolved order is an unsettled one."""
+    start_broadcasts = [
+        h for h in TURN_BROADCASTS
+        if h in ("BeforeSideTurnStart", "AfterSideTurnStart",
+                 "AfterPlayerTurnStart")]
+    for hook in start_broadcasts:
+        assert hook in TURN_START_BROADCAST_ORDER, hook
+    assert (TURN_START_BROADCAST_ORDER.index("AfterPlayerTurnStart")
+            < TURN_START_BROADCAST_ORDER.index("AfterSideTurnStart"))
+
+
+def test_no_doc_reasserts_the_refuted_pre_draw_order():
+    """The losing assertion, pinned so it cannot come back by paraphrase.
+
+    AuraPower.cs claimed AfterSideTurnStart ran before the draw for a year.
+    The correction only sticks if re-adding it fails a test.
+    """
+    aura = (SOURCE / "Powers" / "AuraPower.cs").read_text(encoding="utf-8")
+    assert not re.search(r"strictly before\s+(?:\S+\s+){0,4}energy reset",
+                         aura), (
+        "AuraPower.cs re-asserts an AfterSideTurnStart-before-energy/draw "
+        "order. The decompile (CombatManager.cs:516 vs :523) says the "
+        "per-player setup -- energy reset, hand draw, AfterPlayerTurnStart "
+        "-- is awaited FIRST. See TURN_START_BROADCAST_ORDER.")
+    refpowers = (ROOT / "tier0" / "engine" / "refpowers.py")\
+        .read_text(encoding="utf-8")
+    assert "E/F are AFTER the draw" in refpowers, (
+        "refpowers.py's site table is the doc that won EB-19/M7; its "
+        "post-draw claim is the ground truth this file records.")
+
 CO_TENANCY_LEDGER = {
     "BeforeSideTurnStart": {
         ("Powers/BombPower.cs", "BombPower"):
@@ -368,6 +563,24 @@ CO_TENANCY_LEDGER = {
             "here from AfterPlayerTurnStart; random discard only on a full "
             "retained hand -- the X14(b) softlock safety). No co-tenant "
             "touches the hand",
+        ("Powers/FurinaResources.cs", "EncorePerTurnPower"):
+            "All the World's a Stage Encore mint. STAGED HERE from "
+            "AfterPlayerTurnStart to settle the Salon-income race: the upkeep "
+            "SPENDS Encore from AfterPlayerTurnStart, and the sim sources the "
+            "income above it (effects.player_turn_start_triggers, pinned by "
+            "tier0/tests/test_eb30m_ancients.py::"
+            "test_ancient_income_is_sourced_above_the_salon_upkeep plus the "
+            "behavioural half test_the_stage_funds_the_same_turn_s_salon_"
+            "ticks). Pre-draw and pre-block-clear are inert for it: GainEncore "
+            "prints no Fanfare, grants no Block and reads no hand, so it "
+            "shares nothing with the decay/delta-block settle that also lives "
+            "in this broadcast",
+        ("Powers/KokomiResources.cs", "ChargePerTurnPower"):
+            "Princess of Watatsumi Charge mint. Staged here for the same "
+            "reason and by the same pin: the sim reads charge_per_turn above "
+            "the upkeep and above the whole per-turn income group, and every "
+            "consumer of the meter (KokomiResourceHooks' kit-grant check) is "
+            "an AfterPlayerTurnStart tenant. Moves a meter only",
     },
     "AfterSideTurnStart": {
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
@@ -391,23 +604,27 @@ CO_TENANCY_LEDGER = {
         ("Powers/FontainePowers.cs", "MasqueRedDeathPower"):
             "per-turn Strength mint",
         ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
-            "SpotlightSystem.ResetTurn + pending-draw flush. RACE "
-            "EB-19/races-b: clears the Standing Ovation spend-boost the "
-            "Salon upkeep mints in this same broadcast",
-        ("Powers/FurinaResources.cs", "EncorePerTurnPower"):
-            "All the World's a Stage Encore mint. RACE EB-2: the Salon "
-            "upkeep spends Encore in this same broadcast",
+            "SpotlightSystem.ResetTurn (the MOVED and PLAYS windows only -- "
+            "the sim zeroes those at the top of the player turn) + "
+            "pending-draw flush + fanfare-delta settle. The spend-boost clear "
+            "that used to sit in ResetTurn has moved to this class's "
+            "AfterSideTurnEnd override, so nothing here reads or writes a "
+            "resource the Salon upkeep touches",
         ("Powers/KokomiResources.cs", "KokomiResourceHooks"):
-            "Kokomi kit-grant check: adds a card when charged",
-        ("Powers/KokomiResources.cs", "ChargePerTurnPower"):
-            "per-turn Charge mint",
+            "Kokomi kit-grant check: adds a card when charged. Its input, the "
+            "Charge meter, is minted a broadcast earlier (see "
+            "ChargePerTurnPower under BeforeSideTurnStart), so the grant "
+            "cannot see a half-paid bank",
         ("Powers/KuragePowers.cs", "PreventExhaustWardPower"):
             "resets the Vigil once-per-turn latch; consumed only from "
             "damage hooks, never by a co-tenant",
         ("Powers/SalonPowers.cs", "SalonMemberPower"):
             "Salon upkeep: spends Encore, ticks stage damage, mints the "
-            "spend-boost. RACE EB-2 + EB-19/races-b (the other half of "
-            "both)",
+            "Standing Ovation spend-boost. Both resources it touches are now "
+            "ordered against it by BROADCAST rather than by luck -- the "
+            "Encore income is minted in BeforeSideTurnStart and the "
+            "spend-boost is cleared in AfterSideTurnEnd, so the upkeep is the "
+            "only tenant of THIS broadcast that reads either",
         ("Powers/SparkKitPowers.cs", "SparkPerTurnPower"):
             "per-turn Spark mint",
         ("Powers/SpotlightSystem.cs", "SpotlightDiscountPower"):
@@ -418,28 +635,31 @@ CO_TENANCY_LEDGER = {
             "site)",
     },
     "BeforeSideTurnEnd": {
-        ("Powers/CompanionPowers.cs", "OzSummonPower"):
-            "Electro volley. RACE EB-19/races-c: unordered vs the sim's "
-            "fixed Pyro->Electro->Hydro (effects.py:2596-2658)",
         ("Powers/CompanionPowers.cs", "SolarIsotomaPower"):
             "duration tick-down of itself, player side",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):
             "kit-grant check, turn-end site; its body documents the "
             "models-after-powers broadcast order it leans on",
-        ("Powers/FontainePowers.cs", "MasqueRedDeathPower"):
-            "Bond-of-Life payment. RACE EB-19/races-a: vs the Kurage "
-            "pulse's Block grant (sim pays strictly first, "
-            "effects.py:2588)",
         ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
             "last-chance pending-draw flush, so an end-of-turn spend "
             "cannot strand into the next turn",
-        ("Powers/KitBurst.cs", "SparksNSplashPower"):
-            "Pyro volley. RACE EB-19/races-c",
         ("Powers/KokomiResources.cs", "KokomiResourceHooks"):
             "Kokomi kit-grant check, turn-end site",
-        ("Powers/KuragePowers.cs", "KurageSummonPower"):
-            "Hydro pulse: Block grant + volley. RACE EB-19/races-a + "
-            "EB-19/races-c (a tenant of both)",
+        ("Powers/TurnEndSequencer.cs", "TurnEndSequencer"):
+            "THE ONLY ORDERED TENANT, and the reason four powers no longer "
+            "override this broadcast at all. It drives, per player-side "
+            "creature and in this order: MasqueRedDeathPower.PayBondOfLife, "
+            "SparksNSplashPower.FireVolley (Pyro), OzSummonPower.FireVolley "
+            "(Electro), KurageSummonPower.FirePulse (Hydro + Block) -- the "
+            "top-to-bottom reading of tier0 effects.player_turn_end_triggers. "
+            "Two things depended on that order and neither could be expressed "
+            "by staging, because turn end has only two broadcasts and "
+            "AfterSideTurnEnd is already spoken for (WitchsFlamePower eats "
+            "what the volleys applied): the Bond consumes the turn's first 5 "
+            "Block while the Hydro pulse GRANTS Block, and the three volleys "
+            "both pick which reactions fire and draw in sequence from the "
+            "shared Rng.CombatTargets stream. See "
+            "test_the_turn_end_sequence_is_the_sims_order",
     },
     "AfterSideTurnEnd": {
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
@@ -460,6 +680,18 @@ CO_TENANCY_LEDGER = {
             "window",
         ("Powers/FrozenPower.cs", "FrozenPower"):
             "duration tick-down, enemy side",
+        ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
+            "closes the this-turn Spotlight windows: clears the Standing "
+            "Ovation spend-boost resource. AfterSideTurnEnd is StS2 site M, "
+            "which is where the sim's powers.on_turn_end pops powers.EXPIRING "
+            "(tier0/engine/powers.py:23, :156) -- and "
+            "SpotlightSpendBoostResource is the C# twin of "
+            "spotlight_mult_bonus_turn, one of that tuple's two members. It "
+            "used to be cleared from the turn-START broadcast whose Salon "
+            "upkeep mints it, which is the race this move closes. Its two "
+            "POWER-shaped siblings below expire in the same broadcast; no "
+            "co-tenant reads the Spotlight multiplier, which only modifies "
+            "printed values on CARD plays",
         ("Powers/KuragePowers.cs", "CeremonialGarmentPower"):
             "duration tick-down, player side",
         ("Powers/SpotlightSystem.cs", "SpotlightMultBonusTurnPower"):
@@ -507,7 +739,12 @@ def _broadcast_tenants() -> set[tuple[str, str, str]]:
                 assert covering, (
                     f"{path}: {hook} override outside any class body")
                 name = min(covering, key=lambda s: s[2] - s[1])[0]
-                found.add((hook, str(path.relative_to(SOURCE)), name))
+                # as_posix, not str: the ledger keys are written with forward
+                # slashes, and on Windows str() yields backslashes -- which
+                # made every registered tenant read as unregistered AND every
+                # ledger row read as stale, i.e. the whole sweep was red on
+                # one platform and told you nothing on it.
+                found.add((hook, path.relative_to(SOURCE).as_posix(), name))
     return found
 
 
@@ -552,6 +789,194 @@ def test_filed_race_citations_in_the_ledger_are_live():
                 assert f"`{row_id}`" in backlog, (
                     f"{key} cites {row_id}, which BACKLOG.md no longer "
                     "files")
+
+
+# --- the turn-end sequence, pinned ------------------------------------------
+
+# (call the sequencer makes, the sim line that puts it here)
+TURN_END_SEQUENCE = (
+    ("PayBondOfLife",
+     "effects.player_turn_end_triggers pays masque_red_death's Bond FIRST, "
+     "at the top of the function, so it eats the Block the turn produced "
+     "rather than the Kurage pulse's mending"),
+    ("SparksNSplashPower",
+     "sparks_n_splash, the Pyro volley, is the first of the three"),
+    ("OzSummonPower",
+     "oz_summon, the Electro volley, is the second"),
+    ("KurageSummonPower",
+     "kurage_summon, the Hydro pulse, is the last -- and its Block grant is "
+     "therefore strictly after the Bond payment"),
+)
+
+
+def _sequencer_body() -> str:
+    return method_body(
+        (SOURCE / "Powers" / "TurnEndSequencer.cs").read_text(encoding="utf-8"),
+        r"public\s+override\s+async\s+Task\s+BeforeSideTurnEnd\s*\(")
+
+
+def test_the_turn_end_sequence_is_the_sims_order():
+    """Bond -> Pyro -> Electro -> Hydro, top to bottom.
+
+    This is the whole content of the fix: the four used to be independent
+    BeforeSideTurnEnd overrides with no relative order, and a fixed-seed
+    parity run passes either way because the C# happens to iterate listeners
+    in SOME order on any given replay. Only the source can say the order is
+    guaranteed.
+    """
+    body = _sequencer_body()
+    positions = []
+    for token, why in TURN_END_SEQUENCE:
+        assert token in body, f"TurnEndSequencer no longer fires {token}: {why}"
+        positions.append(body.index(token))
+    assert positions == sorted(positions), (
+        "TurnEndSequencer reordered. The sim's order is "
+        + " -> ".join(t for t, _ in TURN_END_SEQUENCE)
+        + " (tier0/engine/effects.py player_turn_end_triggers, read top to "
+        "bottom).")
+
+
+@pytest.mark.parametrize("rel,cls", [
+    ("Powers/FontainePowers.cs", "MasqueRedDeathPower"),
+    ("Powers/KitBurst.cs", "SparksNSplashPower"),
+    ("Powers/CompanionPowers.cs", "OzSummonPower"),
+    ("Powers/KuragePowers.cs", "KurageSummonPower"),
+])
+def test_the_sequenced_powers_do_not_take_the_broadcast_back(rel, cls):
+    """The revert this guards: re-adding `override BeforeSideTurnEnd`.
+
+    A power that overrides the broadcast AND is driven by the sequencer fires
+    twice, in an order that is once again undefined. The co-tenancy sweep
+    would also fail (unregistered tenant) -- this names the class so the
+    failure reads as the reverted decision rather than as a bookkeeping miss.
+    """
+    assert (rel, cls) not in CO_TENANCY_LEDGER["BeforeSideTurnEnd"]
+    source = (SOURCE / rel).read_text(encoding="utf-8")
+    spans = _class_spans(source)
+    mine = [s for s in spans if s[0] == cls]
+    assert mine, f"{cls} not found in {rel}"
+    start, end = mine[0][1], mine[0][2]
+    hit = re.search(
+        r"public\s+override\s+\S+(?:\s+\S+)?\s+BeforeSideTurnEnd\s*\(",
+        source[start:end])
+    assert not hit, (
+        f"{cls} overrides BeforeSideTurnEnd again. TurnEndSequencer already "
+        "drives it; both would fire, unordered.")
+
+
+# --- the card-play broadcasts (EB-19/M5, EB-19/M8) --------------------------
+#
+# The turn-lifecycle ledgers above pin WHICH broadcast a decision rides and WHO
+# ELSE rides it. Card play has a third failure mode, and both rows below are
+# instances of it: the sim's play_card is a single straight-line function, and
+# the mod splits it across BeforeCardPlayed / OnPlay / AfterCardPlayed. Where
+# the split falls decides what a line can SEE.
+#
+# ENUMERATION POINT, settled by decompile (StS2 v0.107.1, commit 59260271,
+# ilspycmd 8.2.0.7535), because M5 turns on it. CardModel's play loop is:
+#
+#     await Hook.BeforeCardPlayed(combatState, cardPlay)
+#     await OnPlay(choiceContext, cardPlay)          // the card resolves here
+#     await Hook.AfterCardPlayed(combatState, choiceContext, cardPlay)
+#
+# per index in the playCount loop, with a fresh CardPlay object each index.
+# Both Hook methods `foreach` over CombatState.IterateHookListeners(), an
+# ITERATOR whose List<AbstractModel> (creature Powers, relics, potions, every
+# pile's cards, modifiers, badges) is built inside its FIRST MoveNext -- i.e.
+# when the foreach starts, not when the play started. Hook.BeforeCardPlayed
+# goes through IterateCombatHookListeners, which is the same enumeration behind
+# a combat-is-over guard.
+#
+# So: a power ADDED during OnPlay is absent from the BeforeCardPlayed listener
+# list and PRESENT in the AfterCardPlayed one. That asymmetry is the whole of
+# M5 -- it is why Navia's own play paid itself in C# and does not in the sim --
+# and it is also the fix, used as a presence snapshot.
+
+def test_navias_own_play_does_not_pay_itself():
+    """EB-19/M5. The sim states the rule; the C# had to be taught it.
+
+    combat.play_card reads `cannon_fire_support` beside the companions_played
+    record site, BEFORE resolve_card, and says so in-line: "Sitting before
+    resolve_card also means Navia's own play does not pay itself: the power is
+    not up yet." The C# equivalent is not a power read but a listener
+    enumeration, and AfterCardPlayed enumerates after OnPlay installed the
+    power -- so she paid. BeforeCardPlayed is the only broadcast that
+    enumerates early enough to answer "was this power already up", and it
+    cannot award Block (no PlayerChoiceContext), which is why the pay still
+    settles at AfterCardPlayed off a snapshot.
+    """
+    source = (SOURCE / "Powers" / "FontainePowers.cs").read_text(
+        encoding="utf-8")
+    spans = _class_spans(source)
+    mine = [s for s in spans if s[0] == "CannonFireSupportPower"]
+    assert mine, "CannonFireSupportPower not found"
+    start, end = mine[0][1], mine[0][2]
+    body = source[start:end]
+
+    assert re.search(
+        r"public\s+override\s+Task\s+BeforeCardPlayed\s*\(", body), (
+        "CannonFireSupportPower no longer snapshots at BeforeCardPlayed, the "
+        "only card-play broadcast that enumerates before OnPlay installs a "
+        "power. Without it her own play pays itself again.")
+
+    after = method_body(
+        body, r"public\s+override\s+async\s+Task\s+AfterCardPlayed\s*\(")
+    # The pay is gated on the snapshot, and the snapshot check comes first.
+    assert "_presentAtPlayStart.Remove(cardPlay)" in after, after
+    assert after.index("_presentAtPlayStart") < after.index(
+        "CreatureCmd.GainBlock"), after
+
+    sim = (ROOT / "tier0" / "engine" / "combat.py").read_text(encoding="utf-8")
+    assert "Navia's own play does not pay itself" in sim, (
+        "combat.py no longer states the rule this mirrors; if the sim moved, "
+        "this decision needs re-deriving, not re-pinning.")
+
+
+def test_the_navia_snapshot_survives_nested_plays():
+    """A field would be clobbered by a card that plays a card.
+
+    Order for a nested play is Before(A), OnPlay(A) -> Before(B), OnPlay(B),
+    After(B), After(A). A single `_lastSeen` field holds B by the time After(A)
+    runs, so A silently stops paying. CardPlay is a class with reference
+    identity and one fresh instance per play index, so a set keyed on it is
+    exact.
+    """
+    source = (SOURCE / "Powers" / "FontainePowers.cs").read_text(
+        encoding="utf-8")
+    assert "HashSet<CardPlay>" in source, source
+
+
+def test_furina_spends_the_encore_cost_before_draining_burst():
+    """EB-19/M8. The sim's play_card order, which the comment used to invert.
+
+    tier0 spends the "Spend N Encore:" cost line at the top of play_card,
+    right after the energy debit, and empties Burst for a requires-full card
+    near the bottom -- cost, THEN drain, THEN the skill-tag bonus. The mod ran
+    drain -> skill-tag -> cost under a comment claiming that was the sim's
+    order. Latent (no sheet card carries encore_cost on a requires-full Burst
+    card) and fixed anyway, because the thing that makes it reachable is a
+    SHEET edit, which is not where anyone checks a C# hook's statement order.
+    """
+    body = method_body(
+        (SOURCE / "Powers" / "FurinaResources.cs").read_text(encoding="utf-8"),
+        r"public\s+override\s+Task\s+BeforeCardPlayed\s*\(")
+    spend = body.index("FurinaResources.SpendEncore")
+    # The owner-guarded drain, not the ownerless early-return one.
+    drain = body.index("FurinaBurstResource.DrainOnPlay(card)")
+    skill_tag = body.index("BurstPerSkillTag")
+    assert spend < drain < skill_tag, (
+        "FurinaResourceHooks.BeforeCardPlayed no longer runs cost -> drain -> "
+        "skill-tag. tier0 combat.play_card does, in that order.")
+
+
+def test_no_comment_reasserts_the_refuted_drain_first_order():
+    """The losing claim, pinned so it cannot come back by paraphrase."""
+    source = (SOURCE / "Powers" / "FurinaResources.cs").read_text(
+        encoding="utf-8")
+    assert "the requires-full drain first" not in source, (
+        "FurinaResources.cs re-asserts a drain-before-Encore-cost sim order. "
+        "combat.play_card spends the cost line first; see "
+        "test_furina_spends_the_encore_cost_before_draining_burst.")
 
 
 def test_vigil_pays_its_fuel_through_the_reshuffle():

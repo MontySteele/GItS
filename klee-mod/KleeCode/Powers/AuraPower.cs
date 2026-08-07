@@ -89,6 +89,24 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     /// (ElementalHit resolves the reaction before its TargetMods) -- one
     /// reaction, two payouts.
     ///
+    /// COURTROOM DRAMA (EB-19/M1, 2026-08-07): the identical shape, one power
+    /// over. Cross Examination's Vulnerable is applied from
+    /// CurtainCallHooks.NoteFirstReaction, which ReactionEffects.Resolve
+    /// reaches from AfterDamageReceived -- one hook too late to amplify the
+    /// hit that caused the reaction. The sim applies it inside `_react`
+    /// (reactions.py, the `reactions_this_turn == 1` block) and runs
+    /// modify_damage_taken afterwards, so tier0's triggering hit IS x1.5.
+    /// Same two-payout tell as Superconduct: the bomb path already amplifies,
+    /// because ElementalHit.Deal resolves the reaction before
+    /// SimDamagePipeline.TargetMods reads Vulnerable -- and that path is
+    /// Unpowered, so the IsPoweredAttack gate above keeps it out of here and
+    /// the two can never both pay.
+    ///
+    /// The two sources share ONE multiplier, deliberately. In the sim both
+    /// write the same `vulnerable` stack and modify_damage_taken is a flat
+    /// x1.5 on any nonzero stack, so a hit that is both a Superconduct and
+    /// the turn's first reaction is x1.5, not x2.25.
+    ///
     /// The already-Vulnerable guard is what keeps that faithful: the sim's
     /// modify_damage_taken is a flat x1.5 on any nonzero vulnerable stack, not
     /// per stack, so when the target is already Vulnerable the native pipeline
@@ -112,7 +130,14 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         // (sim _amp_mult). The amp-cap detector lives inside the overload.
         var mult = ReactionTable.AmplifierMultiplier(reaction, dealer);
 
-        if (reaction == Reaction.Superconduct
+        // The two sim sites that put Vulnerable on the target from INSIDE
+        // _react, i.e. in time to scale the hit that triggered them.
+        var vulnerableFromThisReaction =
+            reaction == Reaction.Superconduct
+            || (reaction != Reaction.None
+                && CurtainCallHooks.CourtroomDramaWillAmplify(dealer));
+
+        if (vulnerableFromThisReaction
             && !target.Powers.OfType<VulnerablePower>().Any())
         {
             mult *= ReactionConstants.VulnerableTakenMult;
@@ -173,8 +198,20 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     /// AfterSideTurnStart is the right slot and needs no ordering assumption
     /// between two enemy-owned powers: CombatManager awaits
     /// Hook.BeforeSideTurnStart (where bombs detonate) to completion, then
-    /// AfterBlockCleared, then Hook.AfterSideTurnStart -- all strictly before
-    /// energy reset and the hand draw. Separate broadcasts, guaranteed order.
+    /// AfterBlockCleared, then Hook.AfterSideTurnStart. Separate broadcasts,
+    /// guaranteed order -- which is the whole argument, and it stands.
+    ///
+    /// ORDER CORRECTION (EB-19/M7, decompile 2026-08-07). This comment used to
+    /// add a claim that all three of those ran ahead of the energy reset and
+    /// the hand draw. That was FALSE, and it contradicted refpowers.py's site
+    /// table, which is right.
+    /// AfterSideTurnStart is the LAST of the turn-start broadcasts: the
+    /// per-player SetupPlayerTurn (energy reset -> BeforeHandDraw -> the draw
+    /// -> AfterPlayerTurnStart) is awaited BEFORE it. The resolved order and
+    /// its decompile citations live in tier0/tests/test_reaction_phase_parity
+    /// .py::TURN_START_BROADCAST_ORDER. Nothing here depended on the false
+    /// clause -- the aura tick is deliberately post-draw-safe either way --
+    /// so no behaviour changed with the wording.
     /// </summary>
     public override async Task AfterSideTurnStart(
         CombatSide side, IReadOnlyList<Creature> participants, ICombatState combatState)

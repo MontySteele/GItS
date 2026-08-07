@@ -2520,18 +2520,21 @@ def player_turn_start_triggers(state: CombatState) -> None:
     # PLACED ABOVE `salon_tick` DELIBERATELY, and above the whole income
     # group below it (celestial_gift / masque_red_death / spark_per_turn all
     # sit AFTER the upkeep). That asymmetry is the point rather than an
-    # accident of insertion order: EB-2 is the C#-side race between
+    # accident of insertion order: EB-2 was the C#-side race between
     # SalonPowers' upkeep and FurinaResources' Encore income inside one
     # `AfterPlayerTurnStart` broadcast, and this is the sim declaring which
-    # way that race is supposed to fall -- income BEFORE upkeep, so the
-    # card's printed "at the start of your turn" funds the Salon ticks of
-    # the same turn instead of the next one. Do not tidy these down to join
-    # the other per-turn blocks; tier0/tests/test_eb30m_ancients.py pins the
-    # order against exactly that edit.
+    # way that race falls -- income BEFORE upkeep, so the card's printed
+    # "at the start of your turn" funds the Salon ticks of the same turn
+    # instead of the next one. Do not tidy these down to join the other
+    # per-turn blocks; tier0/tests/test_eb30m_ancients.py pins the order
+    # against exactly that edit.
     #
-    # The C# broadcast also fires AFTER the draw while this hook runs BEFORE
-    # it. That divergence is inert for these two: neither power reads the
-    # hand, the deck or the energy -- each only moves a meter.
+    # THE C# NOW MATCHES BY CONSTRUCTION (2026-08-07): both income powers
+    # were staged out of `AfterPlayerTurnStart` into `BeforeSideTurnStart`,
+    # a strictly earlier broadcast, so the upkeep can no longer run first.
+    # That puts them before the C# hand draw as well, which is where this
+    # hook already sat -- and it is inert either way, because neither power
+    # reads the hand, the deck or the energy: each only moves a meter.
     n = p.powers.get("charge_per_turn", 0)         # Princess of Watatsumi
     if n:
         resources.gain_charge(state, n, "charge_per_turn")

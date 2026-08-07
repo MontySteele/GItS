@@ -301,10 +301,28 @@ public static class SpotlightSystem
     {
         var moved = Resource<SpotlightMovedResource>(creature);
         var plays = Resource<SpotlightPlaysResource>(creature);
-        var spendBoost = Resource<SpotlightSpendBoostResource>(creature);
         if (moved != null) moved.Amount = 0;
         if (plays != null) plays.Amount = 0;
-        if (spendBoost != null) spendBoost.Amount = 0;
+        // THE SPEND-BOOST IS NOT CLEARED HERE (EB-19/races-b). It used to be,
+        // and that put the clear in the very broadcast whose Salon upkeep
+        // MINTS it -- SalonMemberPower.AfterPlayerTurnStart spends Encore,
+        // every spend runs OnEncoreSpent, and two same-side co-tenants of one
+        // broadcast have no guaranteed relative order. Standing Ovation's
+        // boost therefore survived or evaporated by listener iteration.
+        //
+        // The sim clears it at the OWNER'S TURN END: SpotlightSpendBoostResource
+        // is the C# twin of `spotlight_mult_bonus_turn`, which sits in
+        // powers.EXPIRING (tier0/engine/powers.py:23) and is popped by
+        // powers.on_turn_end (:156) -- StS2 site M, AfterSideTurnEnd. See
+        // FurinaResourceHooks.AfterSideTurnEnd, which is where the clear now
+        // lives, alongside the self-expiry of SpotlightMultBonusTurnPower and
+        // SpotlightFlatDamageTurnPower -- the two powers that model the same
+        // EXPIRING tuple.
+        //
+        // `moved` and `plays` stay here: the sim zeroes THOSE at the top of
+        // the player turn (combat.py's spotlight_moved_this_turn /
+        // spotlighted_cards_this_turn resets), so they are turn-start state
+        // and this is their site.
         // C3: null-tolerant. This walked `play.Card.Owner.Creature` unguarded,
         // which throws on exactly the half-torn-down entry the purge exists to
         // clear -- and a throw in ResetTurn takes the turn reset with it.
@@ -382,6 +400,18 @@ public static class SpotlightSystem
         var amount = pending.Amount;
         await CardPileCmd.Draw(
             choiceContext, amount, cardPlay.Card.Owner);
+    }
+
+    /// <summary>
+    /// End the Standing Ovation window (EB-19/races-b). Called from
+    /// FurinaResourceHooks.AfterSideTurnEnd(Player), mirroring the sim's
+    /// powers.on_turn_end pop of `spotlight_mult_bonus_turn` from
+    /// powers.EXPIRING. Deliberately NOT in ResetTurn -- see the note there.
+    /// </summary>
+    public static void ClearSpendBoost(Creature creature)
+    {
+        var spendBoost = Resource<SpotlightSpendBoostResource>(creature);
+        if (spendBoost != null) spendBoost.Amount = 0;
     }
 
     public static void OnEncoreSpent(Creature creature)

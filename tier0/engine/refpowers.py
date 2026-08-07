@@ -38,6 +38,13 @@ tier0's pre-existing `powers.on_turn_start` runs BEFORE energy and BEFORE the
 draw, so anything implemented there is a POST step running at a PRE site. That
 is why DemonForm, Plating, CrimsonMantle and Inferno all use the late hook.
 
+CONFIRMED BY DECOMPILE (EB-19/M7, 2026-08-07): CombatManager awaits the
+per-player SetupPlayerTurn -- energy reset, hand draw, then E -- before
+broadcasting F. This table is the ground truth; the AuraPower.cs comment that
+contradicted it lost and was corrected. The resolved order and its citations
+are recorded in tier0/tests/test_reaction_phase_parity.py, as
+TURN_START_BROADCAST_ORDER.
+
 FUNNEL GRANULARITY
 ------------------
 The block funnel observes the total amount across one CardPlay, while

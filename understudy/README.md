@@ -229,6 +229,21 @@ while the mod sees a card leave a pile rather than an offer being taken from a
 list. **A selector cut is a bot-feed cut** until a mod-side hook into the
 selection screens lands.
 
+**Additions of 2026-08-07 (EB-18), HUMAN FEED ONLY, no renames:** `run_id`,
+`fight_index`, `encounter`, `detonations`, `corpse_detonations`. The first
+three are per-fight identity — `run_id` is the run's string seed, which is the
+same token the game's own run history writes as `seed`, so `tier1/analyze.py`
+can join a fight row to a run row without either side minting an id. The last
+two are read off `BombPower`'s per-combat, per-player counters; a **corpse
+detonation** is one that resolved on a body that was already dead, which is
+probe (e) / Q11's question asked of every fight instead of one scripted pair.
+All five are **declared asymmetries** (`MOD_ONLY` in
+`tier0/tests/test_track_b_curves.py`, beside `reactions_by_turn`): the soak
+drives the game from outside and has no wire route to the run object or to an
+internal hook ORDER, so **a cut on any of them is a human-feed cut** until such
+a route lands. `corpse_detonations > 0` is a fact; `== 0` is not proof of
+absence (see `PlayTelemetry.FlushAll` for the one declared race).
+
 **And two changes of MEANING in the same pass, called out as loudly as renames
 would be.** Both live inside `meters_by_turn`; neither key was renamed and
 neither changed type:

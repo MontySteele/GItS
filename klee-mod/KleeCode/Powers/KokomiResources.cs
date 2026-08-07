@@ -431,10 +431,33 @@ public sealed class ChargePerTurnPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
+    /// <summary>
+    /// STAGED INTO BeforeSideTurnStart, NOT AfterPlayerTurnStart (EB-2's
+    /// twin). The sim sources both Ancient income ticks ABOVE the per-turn
+    /// group and above the Salon upkeep -- `effects.player_turn_start_triggers`
+    /// reads `charge_per_turn` before `salon_tick`, pinned by
+    /// tier0/tests/test_eb30m_ancients.py::
+    /// test_ancient_income_is_sourced_above_the_salon_upkeep. Every consumer
+    /// of that income (KokomiResourceHooks' kit-grant check, the Salon upkeep,
+    /// the other per-turn mints) is an AfterPlayerTurnStart tenant, and
+    /// same-broadcast co-tenants have no guaranteed relative order -- so the
+    /// income is staged one broadcast EARLIER, where the ordering is the
+    /// engine's rather than an assumption. BeforeSideTurnStart is the only
+    /// turn-start broadcast that precedes AfterPlayerTurnStart's whole
+    /// dependency fan (see TURN_START_BROADCAST_ORDER in
+    /// tier0/tests/test_reaction_phase_parity.py).
+    ///
+    /// PRE-DRAW AND PRE-BLOCK-CLEAR, and that is inert here: this power only
+    /// moves a meter. It reads no hand, no deck, no energy and grants no
+    /// Block, which is the same argument the sim's own comment at the
+    /// insertion point makes for the divergence in the other direction.
+    /// </summary>
+    public override Task BeforeSideTurnStart(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IReadOnlyList<Creature> participants, ICombatState combatState)
     {
-        if (player.Creature != Owner) return Task.CompletedTask;
+        if (side != CombatSide.Player) return Task.CompletedTask;
+        if (Owner?.Player == null) return Task.CompletedTask;
         KokomiResources.GainCharge(Owner, (int)Amount);
         return Task.CompletedTask;
     }
