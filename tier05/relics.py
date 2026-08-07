@@ -183,20 +183,27 @@ _NEOW_HOOK_WEIGHT = {
     "post_rest_heal": 3,
     "shop_heal": 3,
     "gold_on_pickup": 2,
+    # R126 (EB-31q, 2026-08-07): the Orobas upgraded-starter hooks, priced
+    # so each variant's TOTAL is 13 -- one point above the table's generic
+    # ceiling (every_n_turns_energy 12). The design sentence: your own
+    # starter's upgrade narrowly outbids the best generic boon. Klee's was
+    # measured before ratification at +2.3..+7.1 win-rate points (act-2
+    # acquisition); the pilot taking its variant nearly whenever offered is
+    # the intended read, not an artifact. Kokomi's two hooks share one
+    # relic, and the pick sums hooks, so her pair splits the 13.
+    "combat_start_spark": 13,     # touch_of_orobas_klee
+    "charge_per_exhaust": 7,      # touch_of_orobas_kokomi
+    "burst_per_exhaust": 6,       # touch_of_orobas_kokomi
+    "spotlight_both_modes": 13,   # touch_of_orobas_furina
 }
 
-# Hooks whose weight is an open [USER] pricing call (QUEUE `EB-31q`): they
-# score 0 HERE, ON PURPOSE, until the ruling lands -- which means the pilot
-# never picks their boons over any weighted one (all three Touch of Orobas
-# variants are in this state). A hook in neither table is an ERROR, not a
-# silent 0: an unpriced boon must fail loudly at the pick, never vanish from
-# the pilot's play without a trace (EB-31h).
-_NEOW_WEIGHT_PENDING = frozenset({
-    "combat_start_spark",     # touch_of_orobas_klee
-    "charge_per_exhaust",     # touch_of_orobas_kokomi
-    "burst_per_exhaust",      # touch_of_orobas_kokomi
-    "spotlight_both_modes",   # touch_of_orobas_furina
-})
+# Hooks whose weight is an open [USER] pricing call: they score 0, ON
+# PURPOSE, until the ruling lands -- the pilot never picks their boons over
+# any weighted one. Empty since R126 priced the Orobas four; the mechanism
+# stays because a hook in NEITHER table is an ERROR, not a silent 0: an
+# unpriced boon must fail loudly at the pick, never vanish from the pilot's
+# play without a trace (EB-31h).
+_NEOW_WEIGHT_PENDING: frozenset[str] = frozenset()
 
 
 def _hook_weight(hook: str) -> int:

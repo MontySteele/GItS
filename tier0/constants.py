@@ -673,7 +673,18 @@ WINRATE_BAND_MIN_FIGHTS = 1000    # ratification process fix: winrate band
 #      than at face value (a myopic policy never climbed one, so every ladder
 #      past its first rung was unreachable content). v6 event numbers do not
 #      carry across.
-RUNTEMPLATE_VERSION = 7
+# v8 (2026-08-07 sitting): two run-layer behaviour changes in one window.
+#      (a) R125 widened the R121 tag shield to the run layer's two readers --
+#      the rest-site smith and the event upgrade now read tags through
+#      `draft.behavioural_archetypes`, so the reference anchor's
+#      instrumentation tags no longer steer them (EB-46 measured the open
+#      channels at +2.17 pp; the anchor returns to its untagged 11.13%
+#      world). (b) R126 priced the Orobas hooks (each variant totals 13), so
+#      the Ancient pick now takes the character's own upgraded starter --
+#      acquisition that v7 realistic runs never had. DRAFTER_VERSION stays 14
+#      on the R121 restores-not-redefines argument; the payoff-reach pin is
+#      untouched.
+RUNTEMPLATE_VERSION = 8
 # DEAD as of v6; kept as the name of the world every pre-§11 measurement was
 # taken in, and still used by tests that pin a node sequence deliberately.
 RUN_NODE_TEMPLATE = "NNNRETN$ERB"

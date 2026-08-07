@@ -437,8 +437,9 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
     n_up = opt.get("upgrade", 0)
     if n_up:
         cards = [loader.peek_card(cid) for cid in st.deck_ids]
+        # R125: behavioural tag read -- same widened shield as the smith.
         on_plan = [c for c in cards if upgrades.has_upgrade(c.id)
-                   and st.archetype in c.archetypes]
+                   and st.archetype in draft.behavioural_archetypes(c)]
         rest = [c for c in cards if upgrades.has_upgrade(c.id)
                 and c not in on_plan]
         for c in (on_plan + rest)[:n_up]:

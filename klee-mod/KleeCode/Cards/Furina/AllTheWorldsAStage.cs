@@ -22,8 +22,9 @@ namespace KleeMod.Cards.Furina;
 /// effect ... scaled to the rest of the Ancient rewards". A steady Encore
 /// drip is Furina's whole economy at once: it funds Salon ticks, absorbs
 /// post-Block damage, and every point gained mints Fanfare. Hand-written and
-/// outside the ratified sheets: the sim models neither events nor relics,
-/// so Ancient cards are game-side-only content (DECISIONS entry 2026-07-23).
+/// outside the ratified sheets (DECISIONS entry 2026-07-23); the
+/// Encore-trickle ban that kept it unmodelled gained its Ancient carve-out
+/// (R127, 2026-08-07) and the sim twin is filed as EB-30m.
 /// Title pending the naming/lore audit.
 /// </summary>
 public sealed class AllTheWorldsAStage : CustomCardModel, ICharacterCard
