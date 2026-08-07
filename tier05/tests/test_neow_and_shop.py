@@ -140,6 +140,36 @@ def test_neow_pick_takes_highest_valuation_tie_by_id():
     assert relic_pool.neow_pick([], CHAR) is None
 
 
+def test_every_pool_hook_is_weighted_or_pending_and_unknown_is_loud():
+    """EB-31h: an unpriced hook must never be a silent 0.
+
+    Every hook reachable from a Neow or Ancient boon is either weighted in
+    `_NEOW_HOOK_WEIGHT` or explicitly parked in `_NEOW_WEIGHT_PENDING`
+    (the EB-31q pricing call); a hook in neither table raises at the pick.
+    The pending set must also stay honest both ways: no member that has
+    since gained a weight (stale park), no member absent from the pools
+    (dead park)."""
+    pool_hooks = {fx.get("hook")
+                  for pool in (relic_pool.neow_pool(), relic_pool.ancient_pool())
+                  for spec in pool.values()
+                  for fx in (spec.get("effects") or [])}
+    unpriced = {h for h in pool_hooks
+                if h not in relic_pool._NEOW_HOOK_WEIGHT
+                and h not in relic_pool._NEOW_WEIGHT_PENDING}
+    assert not unpriced, (
+        f"pool hooks with no weight and no EB-31q pending entry: "
+        f"{sorted(unpriced)}")
+    stale = relic_pool._NEOW_WEIGHT_PENDING & set(relic_pool._NEOW_HOOK_WEIGHT)
+    assert not stale, f"pending hooks that now HAVE weights: {sorted(stale)}"
+    dead = relic_pool._NEOW_WEIGHT_PENDING - pool_hooks
+    assert not dead, f"pending hooks no pool boon carries: {sorted(dead)}"
+
+    # pending scores 0 (never beats a weighted boon); unknown raises.
+    assert relic_pool._hook_weight("spotlight_both_modes") == 0
+    with pytest.raises(KeyError):
+        relic_pool._hook_weight("hook_nobody_priced")
+
+
 # ---------------------------------------------------------------------------
 # A grant_relics run APPLIES the Neow relic's effect.
 # ---------------------------------------------------------------------------

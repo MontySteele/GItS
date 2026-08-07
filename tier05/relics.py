@@ -185,12 +185,35 @@ _NEOW_HOOK_WEIGHT = {
     "gold_on_pickup": 2,
 }
 
+# Hooks whose weight is an open [USER] pricing call (QUEUE `EB-31q`): they
+# score 0 HERE, ON PURPOSE, until the ruling lands -- which means the pilot
+# never picks their boons over any weighted one (all three Touch of Orobas
+# variants are in this state). A hook in neither table is an ERROR, not a
+# silent 0: an unpriced boon must fail loudly at the pick, never vanish from
+# the pilot's play without a trace (EB-31h).
+_NEOW_WEIGHT_PENDING = frozenset({
+    "combat_start_spark",     # touch_of_orobas_klee
+    "charge_per_exhaust",     # touch_of_orobas_kokomi
+    "burst_per_exhaust",      # touch_of_orobas_kokomi
+    "spotlight_both_modes",   # touch_of_orobas_furina
+})
+
+
+def _hook_weight(hook: str) -> int:
+    if hook in _NEOW_HOOK_WEIGHT:
+        return _NEOW_HOOK_WEIGHT[hook]
+    if hook in _NEOW_WEIGHT_PENDING:
+        return 0
+    raise KeyError(
+        f"Neow/Ancient hook {hook!r} has no _NEOW_HOOK_WEIGHT entry and is "
+        f"not in _NEOW_WEIGHT_PENDING -- weigh it or file it under EB-31q")
+
 
 def _neow_value(rid: str, character: str) -> int:
     spec = get_relic(rid)
     if not _owner_ok(spec, character):
         return 0
-    return sum(_NEOW_HOOK_WEIGHT.get(fx.get("hook"), 0)
+    return sum(_hook_weight(fx.get("hook"))
                for fx in (spec.get("effects") or []))
 
 
