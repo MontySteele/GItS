@@ -1,15 +1,13 @@
-"""S7 sim-infidelity cross-checks: the five behaviours the S13 exploit ledger
-routed here, each resolved against the C# mod and pinned.
+"""S7 sim-infidelity cross-checks: five sim behaviours resolved against the
+C# mod and pinned.
 
-WHY THIS FILE EXISTS
---------------------
-`review/redteam/exploit-ledger.md` § "Routed to S7" lists five sim behaviours
-that "smell like implementation artifacts rather than rules" and asks for a
-tier0-vs-C# verdict *before any design session treats them as game facts*.
 All five were read against `klee-mod/KleeCode/` and all five came back
 MATCHING -- the C# does the same thing, and in four of the five cases its own
-comments name the sim line it was ported from. So the exploit lines that rest
-on them are design material after all, not sim artifacts.
+comments name the sim line it was ported from -- so the exploit lines that
+rest on them are design material, not sim artifacts. (Routed here by the S13
+exploit ledger, retired from HEAD; read it at
+`git show pre-simplification-2026-08-06:review/redteam/exploit-ledger.md`,
+§ "Routed to S7".)
 
 These are PARITY PINS, not balance opinions. Each test cites the sim site and
 the C# site it locks together; if either side moves, the pin goes red and
