@@ -28,9 +28,9 @@ become cover for the next flat loop in the same function.
 `gen_klee_cards.py` is excluded, in `EXEMPT_MODULES`, with its reason: it is
 an emitter, its forty reads are positional (`card["effects"].index(eff)`,
 one statement emitted per effect), and whether a given one should recurse is
-a codegen question per call site rather than a scan to deepen. Its two known
-branch-blind reads are not thereby forgiven -- they are the DATA half's
-`sparkly_explosion` entry, below.
+a codegen question per call site rather than a scan to deepen. Its
+whole-card questions ("does this card carry Bomb rules") go through
+`effect_walk` anyway, via its own `_effects_everywhere`.
 
 DATA half -- no card hides printed rules in a branch unnoticed
 --------------------------------------------------------------
@@ -75,10 +75,13 @@ EXEMPT_MODULES = {
         " one C# statement emitted per effect, indices taken with"
         " `card['effects'].index(eff)` -- so 'recurse' is a per-call-site"
         " codegen decision (what would a branch statement even be emitted"
-        " INTO?) rather than a scan to deepen. Its two known branch-blind"
-        " reads (aura keywords, includes_bomb_rules) are carried by"
-        " BRANCH_ONLY_KNOWN['sparkly_explosion'] instead, where the finding"
-        " is about the shipped card rather than about the loop."),
+        " INTO?) rather than a scan to deepen. The reads that ask a"
+        " WHOLE-CARD question route through its `_effects_everywhere`, which"
+        " is `effect_walk.iter_effects` -- `includes_bomb_rules` was the last"
+        " one that did not (the L4 incident). The remaining branch-blind"
+        " read is `aura_elements`/`preview_element_cs`, still announced by"
+        " `apply_aura`/`swirl` in RULES_BEARING_OPS if a card ever hides"
+        " one."),
     "effect_walk.py": (
         "the shared walk itself; `iter_effects_top` is the flat read by"
         " definition."),
@@ -107,28 +110,20 @@ TOP_LEVEL_ONLY: dict[str, str] = {
         " one that always deals 18, which inverts the whole comparison. The"
         " conditional is kept as one opaque key so the branch still"
         " distinguishes two cards without being credited to either."),
-    "lint_handwritten_parity.py::lint": (
-        "BOTH SIDES WRONG, deliberately and temporarily. `exp_bomb_tips`"
-        " mirrors `gen_klee_cards.emit`'s flat `includes_bomb_rules` scan so"
-        " the gate reports what is actually emitted. Deepening it here alone"
-        " turns a generator defect into a red gate with no fix in reach --"
-        " the fix is a generator change plus a regen, and it is filed as the"
-        " sparkly_explosion entry below. When that lands, this entry comes"
-        " out and the lint goes red until the C# is regenerated, which is the"
-        " correct order."),
 }
 
 # Ops that make a card carry PRINTED RULES -- keyword text, a tooltip, or a
 # structural marker some tool has to emit. Each name is here because a flat
 # scan in this repo reads it; the comment says which one.
 RULES_BEARING_OPS: dict[str, str] = {
-    # gen_klee_cards.emit `includes_bomb_rules`; lint_handwritten_parity
-    # `exp_bomb_tips`. Both flat.
-    "place_bomb": "Bomb rules text",
-    "detonate": "Bomb rules text",
-    "modify_bombs": "Bomb rules text",
-    "move_bombs": "Bomb rules text",
-    "chance_bomb_per_detonation": "Bomb rules text",
+    # The five Bomb ops LEFT this table when the L4 incident was fixed: their
+    # only two flat readers -- `gen_klee_cards.emit`'s `includes_bomb_rules`
+    # and `lint_handwritten_parity`'s `exp_bomb_tips` -- both walk the whole
+    # tree now, so a branch-nested Bomb op is no longer a miss to announce.
+    # (The emitter's `target_type` loop still reads `place_bomb`/`detonate`/
+    # `move_bombs` positionally, but that loop asks "which effect aims this
+    # card FIRST" -- an ordering question about the printed body, not a
+    # rules-text scan, and it is covered by the EXEMPT_MODULES entry.)
     # gen_klee_cards.emit `aura_elements` / `preview_element_cs`. Both flat.
     "apply_aura": "element keyword + reaction preview",
     "swirl": "element keyword + reaction preview",
@@ -142,18 +137,15 @@ RULES_BEARING_OPS: dict[str, str] = {
 }
 
 # {card id: (branch-only rules-bearing ops, what was done about it)}
-BRANCH_ONLY_KNOWN: dict[str, tuple[tuple[str, ...], str]] = {
-    "sparkly_explosion": (
-        ("place_bomb",),
-        "THE L4 INCIDENT ITSELF. The kill-conditional's `then:` places 2"
-        " Bombs at 6, and `gen_klee_cards.emit` computes"
-        " `includes_bomb_rules` off the top level only, so"
-        " SparklyExplosion.cs ships `includesBombRules: false` -- the card"
-        " names Bombs and prints no Bomb rules. NOT FIXED HERE: the fix is a"
-        " generator change plus a regen of the emitted C#, which is a"
-        " content change, not a lint. Filed for triage; delete this entry"
-        " when the regen lands."),
-}
+#
+# EMPTY IS THE HEALTHY STATE, not a disabled gate: the DATA half below still
+# reads every row of every sheet, and the first card to hide a rules-bearing
+# op in a branch fails until someone proves the readers see it. The one entry
+# this dict ever held was `sparkly_explosion` -- THE L4 INCIDENT ITSELF, whose
+# kill-conditional `then:` places 2 Bombs at 6 while the shipped card said
+# `includesBombRules: false` -- retired when the generator and the parity gate
+# both learned to walk the tree and the C# was regenerated.
+BRANCH_ONLY_KNOWN: dict[str, tuple[tuple[str, ...], str]] = {}
 
 
 # ---------------------------------------------------------------------------

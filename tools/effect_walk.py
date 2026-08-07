@@ -10,12 +10,13 @@ tools, because each tool had rediscovered the flat loop for itself:
 
   * `sparkly_explosion` (klee) places two Bombs and names them, but the
     `place_bomb` sits in the kill-conditional's `then:` branch. The
-    generator's `includes_bomb_rules` scan walks the top level, so the
-    shipped card carries `includesBombRules: false` -- it names a
-    mechanic and withholds the rules text for it. `lint_handwritten_parity`
-    computes `exp_bomb_tips` with the SAME flat scan, so the gate agrees
-    with the defect instead of catching it (both-sides-wrong: see the
-    TOP_LEVEL_ONLY entry there).
+    generator's `includes_bomb_rules` scan walked the top level, so the
+    card shipped `includesBombRules: false` -- it named a mechanic and
+    withheld the rules text for it, and `lint_handwritten_parity` computed
+    `exp_bomb_tips` with the SAME flat scan, so the gate agreed with the
+    defect instead of catching it. FIXED (L4a): both scans walk this tree
+    now, in one commit with the regen, because deepening either alone turns
+    the other into a red gate.
   * `pearl_barrage` (kokomi) reads `amount_formula: {base: 5, ...}`. The
     role/tempo classifier's `pays_at_zero` test only ever looked at a
     literal `amount:`, so a card with a printed floor of 5 was tagged
@@ -24,7 +25,8 @@ tools, because each tool had rediscovered the flat loop for itself:
   * `rider_tip_args` (generator) matched only the fanfare/salon/companion
     rider formulas, so `1_per_2_charge` on `all_streams_flow` rendered no
     rate anywhere. Not a recursion miss, but the same shape: one scanner's
-    private vocabulary standing in for the sheet's.
+    private vocabulary standing in for the sheet's. FIXED (L4b): the charge
+    branch renders through `KokomiRiderTips.ForChargeRider`.
 
 So: ONE walk, imported, rather than N private ones. `iter_effects` yields
 the whole tree; `printed_floor` normalizes `amount` vs

@@ -49,8 +49,6 @@
 | ID | Item | Provenance |
 |---|---|---|
 | `EB-41` | Refactors, only if budget remains (big, safe, boring): `run_one` 518-line split; codegen driver unification (F3); telemetry-module template dedupe; `exp_*` script archive move; `apply_upgrade` op-coverage guard | eng-backlog §7 |
-| `L4a` | `sparkly_explosion` ships `includesBombRules: false` — its `place_bomb` sits in the kill-conditional's `then:` (`klee-cards.yaml:198`), invisible to `gen_klee_cards.py:4955`'s flat scan, and `lint_handwritten_parity.py:836` mirrors the same flat scan so the gate agrees with the defect. Fix the generator AND deepen the parity gate in the same commit (else the gate flips red), regen C# (Windows validation), then retire `lint_effect_branch_scans`' `TOP_LEVEL_ONLY[lint_handwritten_parity]` + `BRANCH_ONLY_KNOWN[sparkly_explosion]` entries | fix-sweep-4; L4 verified live |
-| `L4b` | The `1_per_2_charge` rate is rendered nowhere on `all_streams_flow` / `nereids_ascension` / `read_the_current`: `gen_klee_cards.rider_tip_args` has no `chargePer` branch and no C# tip argument exists. Generator + KokomiRiderTips + regen (Windows validation) | fix-sweep-4; L4 verified live |
 
 ## tests — pins & filed-not-fixed
 

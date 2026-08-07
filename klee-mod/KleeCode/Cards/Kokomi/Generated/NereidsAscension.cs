@@ -44,7 +44,7 @@ public sealed class NereidsAscension : CustomCardModel, IElementalCard, ICharact
         new[] { CardKeyword.Exhaust, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
+        KokomiRiderTips.ForGarmentAttack(KokomiRiderTips.ForChargeRider(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, chargePer: 1, chargeStep: 2), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("nereids_ascension");
 

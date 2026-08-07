@@ -198,6 +198,11 @@ public static class KleeMod
                         "Bake-Kurage pulse",
                     [Cards.KokomiRiderTips.GarmentKey + ".title"] =
                         "Ceremonial Garment is active",
+                    // L4b: the printed Charge rider's rate. Unlike the two
+                    // above, the NUMBER was always visible -- this row titles
+                    // the tip that says what the number is made of.
+                    [Cards.KokomiRiderTips.ChargeKey + ".title"] =
+                        "Charge scaling",
                 };
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))

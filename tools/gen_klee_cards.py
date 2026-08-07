@@ -41,6 +41,15 @@ NEWLINE = chr(10)
 NEWLINE_JOIN = NEWLINE
 
 REPO = Path(__file__).resolve().parent.parent
+
+# The repo's ONE effect-tree walk (L4). The generator is exempt from
+# lint_effect_branch_scans' source half because its ~40 reads of the field are
+# positional, but the reads that ask a whole-card question -- "does this card
+# carry Bomb rules", "how many gain_encore sites are there" -- go through the
+# shared walk like everyone else's.
+sys.path.insert(0, str(REPO))
+from tools.effect_walk import iter_effects  # noqa: E402
+
 SHEET = REPO / "docs" / "klee-cards.yaml"
 # Mirrors tier0/content/upgrades.py UPGRADE_SHEETS, in the same order.
 UPGRADE_SHEETS = (REPO / "docs" / "klee-upgrades.yaml",
@@ -1659,8 +1668,16 @@ def salon_calc_rider(card: dict, eff: dict) -> tuple[int, int, str, str] | None:
     return int(eff["amount"]), deploys, var, mult
 
 
-def rider_tip_args(card: dict) -> str:
-    """Track L-C: the C# arguments for the re-homed rider tip, or "".
+def rider_tip_args(card: dict) -> tuple[str, str]:
+    """Track L-C: the C# arguments for the re-homed rider tips.
+
+    Returns `(furina_args, kokomi_args)` -- the arguments for
+    `FurinaRiderTips.ForCard` and for `KokomiRiderTips.ForChargeRider`
+    respectively, each "" when that class has nothing to say. Two strings
+    rather than one because the tip helpers are per-character classes, and a
+    Charge rate has no business being explained by Furina's helper; the
+    SCAN is shared because "which rider did this card convert" is one
+    question about one sheet vocabulary.
 
     Only riders that were CONVERTED get a tip, because only those have had
     their arithmetic removed from the card text. An unconverted rider (the
@@ -1668,6 +1685,7 @@ def rider_tip_args(card: dict) -> str:
     face, so re-homing it would delete the only place the player could read
     it."""
     args = []
+    kokomi_args = []
     for eff in card.get("effects", []):
         # B1: a converted BLOCK rider has had its arithmetic removed from the
         # face exactly as a converted damage rider has, so it earns the same
@@ -1681,6 +1699,14 @@ def rider_tip_args(card: dict) -> str:
                                eff.get("bonus_formula", ""))
         companions = re.fullmatch(r"(\d+)_per_companion_played_this_turn",
                                   eff.get("bonus_formula", ""))
+        # L4b: Kokomi's Charge rider took the same bargain as the Fanfare one
+        # -- the face was cut to "Scales with Charge" and the arithmetic
+        # renders inside {CalculatedDamage} -- but no branch here matched
+        # `N_per_M_charge`, so the RATE was printed nowhere at all: not on the
+        # face, not in a tip. The player could see a number move and never
+        # learn what moved it.
+        charge = re.fullmatch(r"(\d+)_per_(\d+)_charge",
+                              eff.get("bonus_formula", ""))
         if m:
             args.append(f"fanfarePer: {int(m.group(1))}")
             args.append(f"fanfareStep: {int(m.group(2))}")
@@ -1699,9 +1725,15 @@ def rider_tip_args(card: dict) -> str:
             # Track C.3: same bargain again. The face says it scales; the tip
             # carries the rate and the live count.
             args.append(f"companionPer: {int(companions.group(1))}")
+        elif charge:
+            # Same two arguments the Fanfare rider takes, and for the same
+            # reason: a rate is a numerator AND a denominator, and "+1 per
+            # Charge" is a different card from "+1 per 2 Charge".
+            kokomi_args.append(f"chargePer: {int(charge.group(1))}")
+            kokomi_args.append(f"chargeStep: {int(charge.group(2))}")
         elif "bonus_vs_aura" in eff:
             args.append(f"auraBonus: {int(eff['bonus_vs_aura'])}")
-    return ", ".join(args)
+    return ", ".join(args), ", ".join(kokomi_args)
 
 
 def merged_deploy_text(card: dict) -> tuple[dict[int, int], set[int]]:
@@ -2588,13 +2620,16 @@ def branch_draw_upgrade(card: dict) -> int:
 
 
 def _effects_everywhere(card: dict) -> list[dict]:
-    out = []
-    for e in card.get("effects", []):
-        out.append(e)
-        if e.get("op") == "conditional":
-            out.extend(e.get("then", []))
-            out.extend(e.get("else", []))
-    return out
+    """Every effect on the card, branches included -- the shared walk.
+
+    L4: this used to be a private one-level walk (top level, plus a top-level
+    conditional's `then:`/`else:`). It now delegates to
+    `tools/effect_walk.iter_effects`, the repo's single walk, so a conditional
+    nested inside a branch is visible here too and the generator cannot drift
+    from the lints that read the same tree. Identical output on today's sheets
+    (no sheet nests a conditional inside a branch).
+    """
+    return list(iter_effects(card.get("effects", [])))
 
 
 def power_upgrade(card: dict) -> int:
@@ -4960,10 +4995,15 @@ def emit(
         if e.get("op") == "apply_aura" and e.get("element") in aura_keyword_by_element:
             aura_elements.append(e["element"])
     aura_elements = list(dict.fromkeys(aura_elements))
+    # L4: the Bomb rules text is a question about the WHOLE effect tree, not
+    # about the top level. `sparkly_explosion` places its two Bombs inside the
+    # kill-conditional's `then:`, so the flat scan this replaced shipped the
+    # card with `includesBombRules: false` -- it named a mechanic and withheld
+    # the rules for it. A branch-gated Bomb is still a Bomb on the face.
     includes_bomb_rules = any(e.get("op") in {
         "place_bomb", "detonate", "modify_bombs", "move_bombs",
         "chance_bomb_per_detonation"
-    } for e in card.get("effects", []))
+    } for e in _effects_everywhere(card))
 
     # The card's declared TargetType follows its FIRST damaging effect; a card
     # that only blocks or draws targets Self.
@@ -5164,11 +5204,19 @@ def emit(
             f"{confiscated_arg})")
     # Track L-C: the arithmetic the card text no longer carries. Wraps the
     # element/bomb tips when both apply, so one override yields both lists.
-    rider_args = rider_tip_args(card)
+    rider_args, charge_rider_args = rider_tip_args(card)
     if rider_args:
         tips_expr = (
             f"FurinaRiderTips.ForCard({tips_expr or 'base.ExtraHoverTips'}, "
             f"this, {rider_args})")
+    # L4b: the Charge rate, in Kokomi's own tip class. Same bargain as above
+    # -- the face keeps the short "Scales with Charge" marker, the rate and
+    # what it is paying right now live in the tip.
+    if charge_rider_args:
+        tips_expr = (
+            "KokomiRiderTips.ForChargeRider("
+            f"{tips_expr or 'base.ExtraHoverTips'}, this, "
+            f"{charge_rider_args})")
     # B5: a deploy card carries the tip for every member it can field, plus
     # the cap rules its face no longer prints. Attached from the EFFECT, not
     # from a card list, so a new deploy card cannot ship naming a member that

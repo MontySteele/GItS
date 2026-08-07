@@ -293,20 +293,35 @@ def test_the_branch_scan_lint_sees_a_new_flat_loop():
     assert l4.source_findings()[0] == []
 
 
-def test_the_branch_scan_lint_sees_a_newly_hidden_keyword_op():
-    """The red half, on the DATA side. sparkly_explosion is the live case and
-    is registered; the gate must still fire for a card that is NOT."""
+def test_the_branch_scan_lint_sees_a_newly_hidden_keyword_op(tmp_path):
+    """The red half, on the DATA side -- synthetic, like the source half.
+
+    It used to assert against the live `sparkly_explosion` row, which was the
+    L4 incident's own card. L4a fixed that card's readers (both Bomb scans
+    walk the tree now, so the Bomb ops left RULES_BEARING_OPS) and the
+    assertion went with it -- which is the lesson: a red-half test anchored to
+    one shipped row stops testing the gate the moment that row is fixed. A
+    synthetic sheet keeps the gate under test with no live case at all, which
+    is the state the pool is now in."""
     sys.path.insert(0, str(REPO / "tools"))
     import lint_effect_branch_scans as l4
 
-    saved = l4.BRANCH_ONLY_KNOWN
+    sheet = tmp_path / "probe-cards.yaml"
+    sheet.write_text(
+        '- {id: probe, name: "Probe", cost: 1, type: attack, rarity: common,\n'
+        '   effects: [{op: damage, amount: 10, target: enemy},\n'
+        '             {op: conditional, if: killed_target,\n'
+        '              then: [{op: apply_aura, element: pyro,\n'
+        '                      target: enemy}]}]}\n',
+        encoding="utf-8")
+    saved_docs, saved_sheets = l4.DOCS, l4.SHEETS
     try:
-        l4.BRANCH_ONLY_KNOWN = {}
+        l4.DOCS, l4.SHEETS = tmp_path, (sheet.name,)
         findings, census = l4.data_findings()
     finally:
-        l4.BRANCH_ONLY_KNOWN = saved
-    assert census["rules_bearing"] >= 1
-    assert any("sparkly_explosion" in f and "BRANCH-HIDDEN RULES" in f
+        l4.DOCS, l4.SHEETS = saved_docs, saved_sheets
+    assert census["rules_bearing"] == 1, census
+    assert any("probe" in f and "BRANCH-HIDDEN RULES" in f
                for f in findings), findings
 
 

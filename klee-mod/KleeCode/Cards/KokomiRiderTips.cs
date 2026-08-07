@@ -7,7 +7,7 @@ using MegaCrit.Sts2.Core.Models;
 namespace KleeMod.Cards;
 
 /// <summary>
-/// Live arithmetic for Kokomi's two hidden scaling reads, following
+/// Live arithmetic for Kokomi's hidden scaling reads, following
 /// <see cref="FurinaRiderTips"/>'s shape.
 ///
 /// THE PROBLEM THESE SOLVE is specific to her. Furina's riders render inside
@@ -18,6 +18,10 @@ namespace KleeMod.Cards;
 ///     have moved by then, so the summon card's face can never print it;
 ///   - the Ceremonial Garment rider lands on OTHER cards -- every attack she
 ///     plays while the state holds -- so no single face owns it.
+///
+/// A third read (L4b, <see cref="ForChargeRider"/>) fails the other way: the
+/// printed Charge rider's TOTAL renders fine, inside the card's own number,
+/// and it was the RATE that no surface carried.
 ///
 /// Both are therefore invisible: the numbers are real, large, and computed
 /// somewhere the player cannot see. That is the exact failure the Furina
@@ -36,6 +40,52 @@ public static class KokomiRiderTips
     public const string PulseKey = "KLEEMOD-KURAGE_PULSE_RIDER";
     public const string GarmentKey = "KLEEMOD-GARMENT_RIDER";
     public const string MusterKey = "KLEEMOD-MUSTER";
+    public const string ChargeKey = "KLEEMOD-CHARGE_RIDER";
+
+    /// <summary>
+    /// L4b: the printed Charge rider's RATE.
+    ///
+    /// This is the third failure shape in the same family, and the quietest.
+    /// The pulse and the Garment rider are invisible because they resolve
+    /// where no face can print them. `all_streams_flow` / `nereids_ascension`
+    /// are the opposite: their rider renders INSIDE the card's own number
+    /// (CalculatedDamageVar), so the face shows a live, correct total -- and
+    /// the face text was cut to "Scales with [gold]Charge[/gold]" on the
+    /// strength of that. What no surface carried was the RATE. A player could
+    /// watch the number move and never learn it moves by 1 per 2 Charge, so
+    /// they could not price a Charge before spending one, which is the only
+    /// decision the meter asks them to make.
+    ///
+    /// Same bargain, and the same shape as <see cref="FurinaRiderTips"/>'s
+    /// Fanfare tip: the face keeps the short marker naming the mechanism, the
+    /// arithmetic lives here, and out of combat the rate stands alone rather
+    /// than printing a misleading zero.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForChargeRider(
+        IEnumerable<IHoverTip> inherited,
+        CardModel card,
+        int chargePer = 0,
+        int chargeStep = 0)
+    {
+        foreach (var tip in inherited) yield return tip;
+        if (chargePer <= 0 || chargeStep <= 0) yield break;
+        yield return new HoverTip(
+            new LocString(Table, ChargeKey + ".title"),
+            ChargeBody(card, chargePer, chargeStep));
+    }
+
+    /// <summary>The rate, plus what it is worth right now -- the
+    /// FurinaRiderTips.FanfareBody wording, one meter over.</summary>
+    private static string ChargeBody(CardModel card, int per, int step)
+    {
+        var rate = $"+{per} damage per {step} [gold]Charge[/gold] you hold.";
+        var owner = card.Owner?.Creature;
+        if (owner == null || card.CombatState == null) return rate;
+
+        var charge = KokomiResources.GetCharge(owner);
+        return $"{rate} You hold {charge} Charge: +{charge / step * per} "
+             + "damage, already counted in the number above.";
+    }
 
     /// <summary>
     /// R78: the [gold]Muster[/gold] keyword, defined ONCE.

@@ -40,7 +40,7 @@ public sealed class SparklyExplosion : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: true);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("sparkly_explosion");
 
