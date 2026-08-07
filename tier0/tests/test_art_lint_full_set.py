@@ -330,6 +330,38 @@ def test_l10_reports_a_source_it_cannot_decode(tmp_path, monkeypatch):
     assert any(p.startswith("L10 probe_card:") for p in art_lint.lint([row]))
 
 
+def test_l10_catches_a_truncated_file_whose_header_is_intact(tmp_path,
+                                                             monkeypatch):
+    """The fix-sweep-1 EB-7 residual, pinned.
+
+    An HTML error page (above) fails at `Image.open` -- even a header-only
+    probe caught that. A TRUNCATED download is the harder input: its header
+    is fine, so `Image.open().size` succeeds and only a full pixel `load()`
+    hits the missing tail. This is the input the header-only L10 provably
+    passed; if the probe ever regresses to `.size`, this test goes red.
+    """
+    Image = pytest.importorskip("PIL.Image")
+    raw = tmp_path / "art" / "raw"
+    raw.mkdir(parents=True)
+    intact = tmp_path / "intact.png"
+    Image.new("RGBA", (800, 600), (200, 30, 30, 255)).save(intact, "PNG")
+    data = intact.read_bytes()
+    (raw / "Torn_Source.png").write_bytes(data[:int(len(data) * 0.6)])
+    monkeypatch.setattr(art_lint, "__file__", str(tmp_path / "tools" / "x.py"))
+
+    row = {"asset_id": "probe_card", "title": "Torn Source.png",
+           "out": "ImageGen/images/cards/klee/probe_card.png", "pick": "auto",
+           "rank": None, "register": "splash", "mode": "cover", "focus": "c",
+           "source": "png", "frame": None, "w": 500, "h": 380,
+           "source_group": None}
+    # the premise: the header really is intact, so open() alone sees nothing
+    with Image.open(raw / "Torn_Source.png") as img:
+        assert img.size == (800, 600)
+    problems = art_lint.undecodable([row])
+    assert len(problems) == 1, problems
+    assert problems[0].startswith("L10 probe_card:")
+
+
 def test_l10_stays_silent_on_the_two_documented_skips(tmp_path, monkeypatch):
     """Absence of a decoder and absence of the raw file are facts about the
     MACHINE, not about the pick, and the plan must stay lintable under both.
