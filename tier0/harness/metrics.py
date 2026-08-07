@@ -1058,6 +1058,15 @@ def encore_census_profile(all_stats: list[FightStats]) -> dict:
     not happen in an aggregate function. Same fence as reaction_share,
     aura_profile, payoff_profile and card_flow_profile.
 
+    Two census words ARE ruled (R122, 2026-08-07), both by "read the meter,
+    not the sheet": the `encore_cost` GATE is not a spender -- a sink that
+    fired 0 of 17,709 observed spends is not part of the measured economy --
+    and power-sourced Encore (`spotlight_encore_first`, 5.9% of grants)
+    counts toward the grant side, because the D8 saturation read is about
+    what refills the bar, not which sheet row fed it. Sheet-side counts
+    (18/82 granting, 5 taking off the buffer) stay reported beside the
+    measured ones; the lever's VALUE stays open.
+
     ENCORE-LIVE COMBATS ONLY. Every per-combat figure denominates over
     `encore_combats` -- combats that granted, absorbed, or reported an
     end-of-combat residual -- and not over every combat in the battery. Encore

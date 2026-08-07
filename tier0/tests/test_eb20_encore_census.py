@@ -3,7 +3,8 @@
 The requirement, as the EB-20 BACKLOG row filed it (the run-layer wiring
 has since shipped too -- `run_metrics.encore_census`, EB-20w -- and the
 census itself corrected the filed counts to 18/82 granting, 5 spending;
-see QUEUE `D8-def`):
+R122 ruled the census's two definitional words -- see
+`metrics.encore_census_profile`'s docstring):
 
     Instrumentation for D8 (Encore economy census) -- measurement open
     though the lever is ruled-direction, unpicked.
