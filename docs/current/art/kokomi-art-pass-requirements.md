@@ -16,12 +16,8 @@ the [USER] taste pass); **character-shell track DONE** — see §5a
 | Companions (Inazuma) | 15 |
 | **Total card-sized outputs** | **77** |
 
-*(Stale since later the same day — recap note 2026-07-26: the shell track
-shipped (§5a, commit `68fb11b`) and all 73 faces carry applied provisional
-rank-1 picks (`6f1b969`); "zero exist" described the pre-pass world. The
-[USER] taste pass is what remains — `docs/current/playtest/open-playtest-items.md` §6.1.)*
-
-*(Bill correction 2026-07-26, post-merge sweep: **58 → 62**. The Neap Tide
+*(Bill history 2026-07-26, post-merge sweep: the personal-sheet row read
+**58** and is now **62**. The Neap Tide
 amendment added four faces this table did not follow — R73's
 `before_sun_and_moon` and the three F4 Sly-lane bridge rows (`ebb_tide`,
 `salt_line`, `undertow`). All four are now planned, rendered and ledgered, and
@@ -32,20 +28,24 @@ between art passes is invisible until someone runs the tool. This is the same
 sheet-moved-projection-did-not shape as the five defects in the Neap Tide
 addendum, with the art bill as the projection.)*
 
-Zero currently exist. She ships playable on Klee's assets via
-`build_pck.ps1`'s `Copy-KokomiFallback`, so **the game looks finished and this
-bill is invisible everywhere except the coverage tool.** That is the whole
-reason the tool was taught the roster before this pass started.
+The shell track shipped (§5a, commit `68fb11b`) and the faces carry applied
+provisional rank-1 picks (`6f1b969`); what remains is the [USER] taste pass —
+`docs/current/QUEUE.md`, the §9 "Art debt" row. She ships playable on Klee's
+assets via `build_pck.ps1`'s `Copy-KokomiFallback`, so **the game looks
+finished and an unfilled bill is invisible everywhere except the coverage
+tool.** That is the whole reason the tool was taught the roster before this
+pass started.
 
 Policy is unchanged and binding: **Tier F (found/official) is private-playtest
 only**; a public build needs Tier O. See `teyvat-spire-design-principles.md` §9.
 
 ## 2. THE SCARCITY RULING WAS MADE ON AN INCOMPLETE INVENTORY
 
-The standing ruling (2026-07-25, [USER]) reads: *"Kokomi has only ~8 usable
-large illos for 38 personal faces (Furina had ~25 for 76). Ruled **widen the
-source pool** — TCG/event splashes/manga/promo on top of the Furina hybrid §2
-split, accepting a mixed visual register and a longer SOURCES ledger."*
+The standing ruling (2026-07-25, [USER]; verbatim words in this file's git
+history) counted roughly 8 usable large illos against 38 personal faces —
+Furina had about 25 for 76 — and ruled the source pool **widened**: TCG/event
+splashes/manga/promo on top of the Furina hybrid §2 split, accepting a mixed
+visual register and a longer SOURCES ledger.
 
 **The direction was right. The count was not, in both directions.** A real
 hunt (`tools/art_hunt.py`, 2026-07-25) found more than 8 — and then eyes-on

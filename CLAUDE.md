@@ -35,6 +35,14 @@ git fetch --depth=1 origin tag pre-simplification-2026-08-06
 git show pre-simplification-2026-08-06:<old-path>
 ```
 
+Some citations name a commit instead of the tag — that means the file's HEAD
+content differed from the tag copy, so the commit is the retrieval point:
+
+```
+git fetch --depth=1 origin <commit>
+git show <commit>:<path>
+```
+
 ## Norms
 
 - **Hygiene fixes** (typos, dead references, obvious defects) are normal
@@ -49,7 +57,9 @@ git show pre-simplification-2026-08-06:<old-path>
   artifact, never committed prose.
 - **Closed items leave HEAD.** No strikethroughs, no supersession banners —
   edit in place. [USER]'s verbatim words belong in the commit message, not a
-  doc.
+  doc. The one exception is existing LAW, not a carve-out: a published
+  measurement record stands as published, struck rather than rewritten
+  (R101b).
 - **One worktree per workstream, sibling directories only.** Never link a
   gitignored asset directory into a worktree (`OPERATIONS.md` has the rule and
   the reason).

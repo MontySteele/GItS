@@ -47,46 +47,33 @@ first.
 
 ### Art: the shell IS hers now, and it wants judging — the card faces do not
 
-> **CORRECTED 2026-07-29.** The blanket "do not report art" below was written
-> when *every* Kokomi surface was a Klee fallback. That stopped being true on
-> 2026-07-25: her **character shell** — select portrait, locked portrait, char
-> icon, map marker, selection splash, select backdrop, transition wipe and
-> combat model — is hers, shipped, and has had **no eyes on it in-game**.
-> `docs/current/playtest/open-playtest-items.md` §2.2 asks you to judge exactly those, and
-> **§2.2 is the authoritative instruction where the two disagree.** What §2.2
-> asks: does she sit left of centre over the Watatsumi reef with the right
-> third clear for the info panel; are the char icon and map marker centred on
-> her *head* rather than her bounding box; does the 240x280 static combat
-> model read acceptably flat next to Furina (she has **no layered combat
-> rig** — no idle, no lunge, no death animation, and that is expected); does
-> the rising-tide transition wipe read.
->
-> Still not worth reporting, and this is the part the section below gets
-> right: her **58 card faces and 15 Inazuma companion faces** are provisional
-> rank-1 picks nobody has chosen (Track D taste pass). "The card art is a
-> guess" is already in the ledger. Report card art only if it looks *broken*
-> rather than *unchosen*.
+Her **character shell** — select portrait, locked portrait, char icon, map
+marker, selection splash, select backdrop, transition wipe and combat model —
+has been hers since 2026-07-25, is shipped, and has had **no eyes on it
+in-game**. Judge it: does she sit left of centre over the Watatsumi reef with
+the right third clear for the info panel; are the char icon and map marker
+centred on her *head* rather than on her bounding box; does the 240x280 static
+combat model read acceptably flat next to Furina (she has **no layered combat
+rig** — no idle, no lunge, no death animation, and that is expected); does the
+rising-tide transition wipe read.
 
-### Her card faces are provisional, on purpose (the original note)
+Her **58 card faces and 15 Inazuma companion faces** are the opposite ask:
+provisional rank-1 picks nobody has chosen (Track D taste pass). "The card art
+is a guess" is already in the ledger, so report card art only if it looks
+*broken* rather than *unchosen* — a missing gauge, a card face with a raw loc
+key, text that overflows its box.
+
+### Why she ships on borrowed machinery at all
 
 `tools/build_pck.ps1` copies eight required assets from Klee's directories into
 Kokomi's paths (`Copy-KokomiFallback`). This is not laziness — a null
 `Custom*Path` override does *not* fall back safely. It resolves to an
 id-derived path that does not exist, the background preloader fails, and the
 run crashes later with an incomplete `AssetCache`. Shipping the fallback is
-what makes her playable before the art exists.
-
-**The shell is hers** (corrected 2026-07-29 — this note originally said
-"do not report art, everything is Klee's," which is superseded; see the
-corrected note above). The fallback machinery is what shipped her before the
-art existed, and is recorded here for why a null override is not safe. What remains true: `tools/art_coverage.py` says the
-bill is **58 personal faces + 15 Inazuma companion faces**, that ledger is
-already accurate, and a note saying "the card art is a guess" tells us
-nothing new.
-
-The one visual thing worth reporting is anything that looks *broken* rather
-than *borrowed* — a missing gauge, a card face with a raw loc key, text that
-overflows its box.
+what made her playable before the art existed, and it is recorded here for the
+reason a null override is unsafe. `tools/art_coverage.py` says the bill is
+**58 personal faces + 15 Inazuma companion faces**, and that ledger is already
+accurate.
 
 ### Every number on her is PROPOSED
 
@@ -117,8 +104,8 @@ Three carry specific standing flags:
 - **`burst_max = 20`** was chosen off a 300-run bracket to hit a pre-registered
   35–50% Burst-uptime band. Q2 is whether that band feels right in a hand.
 - **`kurages_oath = 12`** (added 2026-08-06, R107; S4 finding F9). Ruled at 12 with
-  [USER]'s own flag on the record: *"I feel like that's too strong, but we can rebalance
-  later"* (R56). Disposition: **first knob back** — if anything on Kokomi comes down, this
+  [USER]'s own flag on the record — it reads too strong, rebalance later (R56;
+  verbatim words in this file's git history). Disposition: **first knob back** — if anything on Kokomi comes down, this
   is the first number to move. The flag has existed since 2026-07-26 and had never
   reached the one instrument that could judge it, which is why it is here now. **Feeds
   Q4.** A hand's read of whether 12 plays as a purchase or as an autopilot is the part no
@@ -234,8 +221,9 @@ exactly like "commander feels bad" from inside the run.
 exists.** A pre-registered fork (`klee-mod/DECISIONS.md`, "PRE-REGISTERED FORK
 for playtest three") turns on whether Neap Tide **reads weak at the table**.
 Playtest three fired the trigger. Then the evaluation could not be made:
-*"I don't remember seeing the card during the playtest, so it did not stand out
-one way or another."* The card was not exercised, so the hand — which the
+[USER] did not remember seeing the card during the playtest, so it stood out
+neither way (verbatim words in this file's git history). The card was not
+exercised, so the hand — which the
 pre-registration names as the tiebreaker, explicitly over the sim — had nothing
 to say.
 
@@ -311,7 +299,7 @@ only accepted input; the sim may not answer it.)*
 
 | Gap | Status |
 |-----|--------|
-| "All personal art is Klee's" (withdrawn) | **Corrected 2026-07-29** — the character SHELL is hers and is a *review ask* (`docs/current/playtest/open-playtest-items.md` §2.2). Still owed and not worth reporting: Track D's 58 card faces + 15 companion faces |
+| Personal art | The character SHELL is hers and is a *review ask* (see the art section above). Still owed and not worth reporting: Track D's 58 card faces + 15 companion faces |
 | `kokomi/model/combat.tscn` missing | Expected — no rig until the art pass; logged as EXPECTED MISSING at boot |
 | Ancient card's 3 Charge/turn is unmeasured | Known — no instrument exists for Ancients |
 | Every balance number is PROPOSED | Known — none has had red-pen |

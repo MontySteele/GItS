@@ -5,12 +5,14 @@
 > # ARCHIVE BANNER — every combat number here is pre-CONSTANTS-6
 >
 > **Appended 2026-08-06 (Track V, wave 8). `CONSTANTS_VERSION` 5 → 6 was
-> approved by [USER] on 2026-08-06 (Q14 / R117, verbatim *"14) Yes"*), for
+> approved by [USER] on 2026-08-06 (Q14 / R117; verbatim words in this file's
+> git history), for
 > the v6 batch "Frozen unified + α boss-room scope + shop-slot spec" as one
 > batch boundary.** The Frozen rules changed twice inside it: Errata Batch 2
 > (`db3318e` — Frozen is a duration counter, both engines) and the α
-> boss-room scope (Q13 / R117, verbatim *"I'd say A"* — in a boss room only
-> minion-flagged creatures freeze; every other creature takes Vulnerable).
+> boss-room scope, where [USER] took option A (Q13 / R117; verbatim words in
+> this file's git history) — in a boss room only
+> minion-flagged creatures freeze; every other creature takes Vulnerable.
 > Frozen appears across the roster's fights, so **every tier-0 / tier-0.5
 > combat number in this document measured before the batch is archive — for
 > every character, not only the rows earlier banners covered — and is NOT

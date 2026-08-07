@@ -19,10 +19,10 @@
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
 | `S4-G7` | Three fenced Furina calls: how strong her hidden Power bonus is and whether to print it; three viable plans or one (dead-archetype); what to do about her strongest plan running above its anchor (salon leak) | OPEN — fenced behind `S4-G5`/`B-G1` | user-queue §2; backlog §3 items 1–3; R107/F1 |
-| `M1` | Furina's charter co-op Fanfare mechanic (partner damage + Encore swings feeding her meter, plus the self-damage audit): **BUILD or WAIVE** — the "Tier 2" deferral condition has lapsed | OPEN | user-queue §10; `docs/current/backlog/missed-requirements.md` §1.1 |
-| `M2` | Second charter co-op mechanic — can co-op players pass a Spotlight to each other: **BUILD or WAIVE** | OPEN | user-queue §10; `docs/current/backlog/missed-requirements.md` §1.2 |
-| `M3` | One Furina Encore card upgrading to Innate (measured green, never shipped): **SHIP or DROP** | OPEN | user-queue §10; `docs/current/backlog/missed-requirements.md` §1.5 |
-| `M5` | Furina's declared elite axis A6 has measured short for two weeks (median 3.5 vs 4.2): **pick one of three routes** put to red-pen | OPEN | user-queue §10; `docs/current/backlog/missed-requirements.md` §3.7 |
+| `M1` | Furina's charter co-op Fanfare mechanic (partner damage + Encore swings feeding her meter, plus the self-damage audit): **BUILD or WAIVE** — the "Tier 2" deferral condition has lapsed | OPEN | user-queue §10; `git show aa09b97:docs/current/backlog/missed-requirements.md` §1.1 |
+| `M2` | Second charter co-op mechanic — can co-op players pass a Spotlight to each other: **BUILD or WAIVE** | OPEN | user-queue §10; `git show aa09b97:docs/current/backlog/missed-requirements.md` §1.2 |
+| `M3` | One Furina Encore card upgrading to Innate (measured green, never shipped): **SHIP or DROP** | OPEN | user-queue §10; `git show aa09b97:docs/current/backlog/missed-requirements.md` §1.5 |
+| `M5` | Furina's declared elite axis A6 has measured short for two weeks (median 3.5 vs 4.2): **pick one of three routes** put to red-pen | OPEN | user-queue §10; `git show aa09b97:docs/current/backlog/missed-requirements.md` §3.7 |
 | `Q-C` (payoff-reach) | Author the payoff-reach / `RARITY_ODDS` sprint's **written predictions at kickoff** — direction + threshold per question, plus the Q-C target band (or its explicit deletion) — before any number is read. Q18 countersign is done; this is step (2) of its execution order | OPEN — design-side authoring | → review/active/payoff-reach-reregistration.md §4 |
 
 ## 2. Kokomi — band, playtest, pool, and art
@@ -39,7 +39,7 @@
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `S4-G18` | Klee's three archetypes carry 28/21/14 cards each vs the constitution's 15–20 band — **amend the rule or fix the pools** (never done either) | OPEN | user-queue §2; `docs/current/backlog/missed-requirements.md` Tier 5 |
+| `S4-G18` | Klee's three archetypes carry 28/21/14 cards each vs the constitution's 15–20 band — **amend the rule or fix the pools** (never done either) | OPEN | user-queue §2; `git show aa09b97:docs/current/backlog/missed-requirements.md` Tier 5 |
 | `M4` | Klee pass-4 ask A5: enforce the scorecard's two invariants (≤4.0 A2 ceiling; A1+A6 elite pairing) as **suite failures or report flags** — the ask was always *which*, not *whether*; today neither exists | OPEN | user-queue §10; `docs/archive/klee-pass-4-plan.md` §3.4 |
 
 ## 4. The seven-axis scorecard
@@ -59,7 +59,7 @@
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
 | `S4-G10` | Companion-shop close-out: grade `SHOP-P1…P3`; settle whether money is ever the constraint (~220 unspent gold); the 1.15× surcharge; Track A pool migration; R60 phase-2 fantasy-leak grading. **New agenda item (not an answer):** should slot 2 carry a rarity floor at all? (wants empirical Common offer/pick/skip data) | OPEN | user-queue §2; R60/R63; principles §4.7 |
-| `M11` | Two shop close-out items tracked nowhere: **§7.6 R60 phase-2 fantasy-leak grading** (gates the deferred colorless-removal sprint) and §7.7 the Track D fallback taste check; plus the joined `R59` slot-2 rarity-floor design question | OPEN — rides the `S4-G10` sitting | user-queue §10; `docs/current/backlog/missed-requirements.md` Tier 5 |
+| `M11` | Two shop close-out items tracked nowhere: **§7.6 R60 phase-2 fantasy-leak grading** (gates the deferred colorless-removal sprint) and §7.7 the Track D fallback taste check; plus the joined `R59` slot-2 rarity-floor design question | OPEN — rides the `S4-G10` sitting | user-queue §10; `git show aa09b97:docs/current/backlog/missed-requirements.md` Tier 5 |
 | `X10` | `gorou_heart_of_the_clan` looks underpriced (the Metallicize treadmill): a **CANDIDATE, explicitly not ratified** — Uncommon promotion + power adjustment, **priced at a sitting** | OPEN — money/pricing call | user-queue §4; → review/active/companion-pricing §1 (docket); review/redteam/exploit-ledger.md X10 |
 
 ## 7. Systems and data-model rulings
@@ -73,7 +73,7 @@
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `M6` | Kaboom Beetle Swarm's printed text now describes something the card no longer does (post-R72 snapshot-at-cast): **APPROVE the reword or LEAVE** | OPEN | user-queue §10; `docs/current/playtest/open-playtest-items.md` §6.2 |
+| `M6` | Kaboom Beetle Swarm's printed text now describes something the card no longer does (post-R72 snapshot-at-cast): **APPROVE the reword or LEAVE** | OPEN | user-queue §10; `git show aa09b97:docs/current/playtest/open-playtest-items.md` §6.2 |
 
 ## 9. Eyes-on reviews and taste
 
@@ -92,7 +92,7 @@
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `M10` | Four items the Fontaine Rares sprint left owned by [USER]: companion art picks (Navia/Clorinde/Neuvillette/Arlecchino); the v1.7 lore/naming eyes-on audit (non-delegable); the C2 grading countersign; and close-out ratification. Design note parked with them: Neuvillette graded WEAK/DEFERRED with the "different facet" question open | OPEN | user-queue §10; `docs/current/backlog/missed-requirements.md` §4.4 |
+| `M10` | Four items the Fontaine Rares sprint left owned by [USER]: companion art picks (Navia/Clorinde/Neuvillette/Arlecchino); the v1.7 lore/naming eyes-on audit (non-delegable); the C2 grading countersign; and close-out ratification. Design note parked with them: Neuvillette graded WEAK/DEFERRED with the "different facet" question open | OPEN | user-queue §10; `git show aa09b97:docs/current/backlog/missed-requirements.md` §4.4 |
 
 ## 11. Design calls routed from the dockets & findings
 
@@ -112,9 +112,7 @@ behavior / money call before any code moves.
 | kokomi-workshop `X9` | Kokomi charge bank ("probably too strong, parse carefully") — the next kit workshop | dockets/kokomi-workshop |
 | `shared_billing` | The only Common with a cost upgrade (1→0), which the delta-grammar convention forbids — needs a [USER] call (sheet and C# agree; the conflict is with the ruled convention) | triage-memo |
 | Template heal/elite economy | Node composition and pathing-agency — a structural design question | tier05-perf §1.5.2(2) |
-| `BFF-dedupe` | `best_friends_forever` replay pool identity: the sim records instance ids (`foo` and `foo+` are distinct entries, both replay), C# dedupes base ids (one replay). R114/FLAG-2 rules what state a copy carries, not whether an upgraded companion is the same pool entry as its base — no ruling covers it | PR #13 review; split from BACKLOG `BFF-copy` |
-| `X8-cap` | Which Klee-cap ruling stands? Design doc §9 ratifies stack caps (`bomb_damage_up ≤4`, `zero_cost_attacks_up ≤4`, `bomb_and_spark_per_turn` unique) — but the caps were implemented and then removed by [USER]'s playtest rebalance (`b5bb92e`, 2026-07-22), and the removal is pinned in HEAD (`test_pass2.py` asserts uncapped stacking; `klee-upgrades.yaml` "duplicate Powers stack without a cap"). If the caps are re-ratified: measured free at the locked baseline (0.000 scorecard movement — the frozen battery never stacks these past 2) and the mechanism is the standard `max_stacks` row field. If the rebalance stands: §9's changelog line is the stale artifact to fix | fix-sweep-1; BACKLOG `X8-cap` reclassified (the sweep that filed it read §9 against HEAD without checking history) |
-| `DOCS-ref` | CLAUDE.md's "closed items leave HEAD, no supersession banners" norm contradicts the kept frozen records: `backlog/missed-requirements.md` and `playtest/open-playtest-items.md` carry "RETIRED AS A REGISTER" banners in HEAD. Either the records move to tag-only retrieval (note: live QUEUE rows `M1`–`M3`, `M5`, `M10`–`M11`, `S4-G18` cite them as provenance) or the norm gains a "Lifecycle: REFERENCE" carve-out. Rides with it: seven remaining [USER]-verbatim quotes across six docs/current files (the roster-anchor's are already paraphrased per the norm) — sweep them into commit messages, or let the carve-out cover them | PR #12/#13 review |
+| `F-kickoff-ann` | `furina-kickoff-v0.1.md:59` and `:131` carry draft annotations ("§3.1–3.2 describe the RETIRED designation model"; "RETIRED GRAMMAR (G-F1) — the parenthetical only") that each state "this is an annotation, not an amendment — ratification rides with it". Editing the prose in place *is* the amendment, so the no-banner norm can't be applied without [USER] ratifying the amendment. The doc is `Lifecycle: LIVING`, making these the strongest remaining norm tension in docs/current | DOCS-ref execution sweep, 2026-08-06 |
 
 ---
 
@@ -129,3 +127,8 @@ Provenance entries are frozen citations: identifiers (`user-queue §2`,
 (`docs/archive/…`, `docs/registry/…`, retired sprint plans) name their
 source as it stood when the row migrated. Retrieve any of them with
 `git show pre-simplification-2026-08-06:<path>`.
+
+A citation written as a whole `git show <commit>:<path>` command is one whose
+content differs from the tag copy, so the commit — not the tag — is the
+retrieval point. On a shallow clone, fetch it first:
+`git fetch --depth=1 origin <commit>`.

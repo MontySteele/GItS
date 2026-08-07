@@ -40,7 +40,8 @@ namespace KleeMod.Powers;
 /// IsFirstInSeries: one grant per card PLAY, not per replay. Study Buddy's
 /// replay is one card resolved twice; paying it twice would make those two
 /// cards a combo instead of each doing its own job -- the same line tier0
-/// draws by appending to companions_played once.
+/// draws by granting once beside its companions_played record site, outside
+/// the replay loop.
 /// </summary>
 public sealed class CannonFireSupportPower : PowerModel, ILocalizationProvider
 {

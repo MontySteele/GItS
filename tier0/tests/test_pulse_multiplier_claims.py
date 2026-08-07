@@ -9,8 +9,9 @@ about it were updated in none, and there were five of them:
     that never shipped (A1c);
   * `exp_neap_tide_e1`'s docstring called x2 "the shipped value" -- in the very
     script whose result was that x2 does not ship;
-  * `kokomi-playtest-protocol.md` and `open-playtest-items.md` each stated x4
-    twice, in the standing-flag list and the Q4 row that playtest three reads.
+  * `kokomi-playtest-protocol.md` stated x4 twice (as did the since-retired
+    `open-playtest-items.md` register), in the standing-flag list and the Q4
+    row that playtest three reads.
 
 None of that is catchable by `lint_constant_parity`, which compares C# constants
 against Python constants and never reads a sentence. And prose is exactly where
@@ -54,10 +55,6 @@ LIVE_CLAIMS: dict[str, list[str]] = {
     "docs/current/playtest/kokomi-playtest-protocol.md": [
         # The standing-flag list -- what playtest three is told to watch.
         "`KuragePulsePerCharge = {v}`",
-        "reads the bank at ×{v}",
-    ],
-    "docs/current/playtest/open-playtest-items.md": [
-        "the multiplier is now **{v}**",
         "reads the bank at ×{v}",
     ],
 }

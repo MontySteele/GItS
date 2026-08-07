@@ -3,8 +3,9 @@
 > **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
 **Status: ADOPTED**, Serenitea Sweep II track B1. [USER] ruled all three jobs
-in, (c) included — "cheap insurance", explicitly confirmed. The NOT-doing list
-below was confirmed as written, Windows-runner refusal and all.
+in, (c) included and explicitly confirmed as cheap insurance (verbatim words
+in this file's git history). The NOT-doing list below was confirmed as
+written, Windows-runner refusal and all.
 
 The workflow now lives at **`.github/workflows/repo.yml`**. This document is
 retained as the argument behind it: the reasons a job exists, and the reasons

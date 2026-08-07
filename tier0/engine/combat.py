@@ -21,6 +21,17 @@ from tier0.engine.state import (Card, CombatState, Enemy, Player,
 Pilot = Callable[[CombatState], Card | None]
 
 
+def _base_card_id(card_id: str) -> str:
+    """`foo+` -> `foo`. The sim's card ids carry the upgrade in the id
+    itself (upgrades.SUFFIX); C# carries it as a flag beside a base ModelId.
+    Anywhere the two sides must agree on card IDENTITY rather than card
+    STATE, the sim has to strip the suffix to see what C# sees."""
+    from tier0.content import upgrades        # late import, avoids a cycle
+    if card_id.endswith(upgrades.SUFFIX):
+        return card_id[:-len(upgrades.SUFFIX)]
+    return card_id
+
+
 def spark_threshold(state: CombatState) -> int:
     # True Spark Knight: free attack at 2 sparks instead of 3.
     return max(1, C.SPARKS_FOR_FREE_ATTACK
@@ -266,7 +277,22 @@ def _finish_play(state: CombatState, card: Card,
     p = state.player
     replays = 1
     if card.is_companion:
-        state.companions_played.append(card.id)
+        # BFF-dedupe, RULED 2026-08-06: an upgraded companion IS the same
+        # pool entry as its base, so `foo` and `foo+` are ONE entry in the
+        # Best Friends Forever pool and it replays each companion once.
+        #
+        # The dedupe lives HERE, at the record site, because that is where
+        # C# does it (CompanionPlays.Record keys on `(Owner, Id)`, and an
+        # STS2 ModelId is the base card -- upgrade is a flag beside it). The
+        # entry kept is the FIRST play's instance id, so the upgrade state a
+        # copy carries is the first play's, matching C#'s `card.IsUpgraded`
+        # recorded on the first Add. The replay site (effects.
+        # _op_copy_companions_played) therefore reads a list that is already
+        # unique, in first-play order, and does not dedupe again.
+        base_id = _base_card_id(card.id)
+        if all(_base_card_id(cid) != base_id
+               for cid in state.companions_played):
+            state.companions_played.append(card.id)
         state.companion_plays_this_turn += 1
         # Navia, Cannon Fire Support: the pool pays the pool. Fires once per
         # CARD PLAY, here beside companions_played, not once per replay inside

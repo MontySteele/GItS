@@ -8,8 +8,9 @@
 
 # S8 Teyvat Gallery — Curation Pass (Fable touchpoint 2/4, dispatch 2) · 2026-08-05
 
-> **CORRECTED 2026-08-06 (wave 8 / R118, [USER] verbatim: *"correct, correct,
-> repoint"* — §3 item 2).** The line below read "42 items (9 potions + 33
+> **CORRECTED 2026-08-06 (wave 8 / R118 §3 item 2 — [USER] confirmed both
+> corrections and directed the repoint; verbatim words in this file's git
+> history).** The line below read "42 items (9 potions + 33
 > relics)" — a miscount the drafting preamble itself flagged. The gallery
 > holds **51 items (9 potions + 42 relics)**, matching the drafting header
 > above and the checklist below. Wrong values struck, never deleted (R101b).

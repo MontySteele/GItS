@@ -3541,11 +3541,16 @@ def build_body(
                 "                ModelDb.GetById<CardModel>(companionPlay.Id), Owner);\n"
                 # R114 / FLAG-2(i), the same rule as the two copy ops above:
                 # the PRINTED card travels, and so does the UPGRADE. The sim
-                # records `card.id` at play time (combat.py:269), which is
-                # `foo+` for an upgraded companion, so its replay is upgraded;
-                # the C# ledger carries the flag beside the id because
-                # ModelDb.GetById rebuilds pristine (BFF-copy). UpgradeInternal
-                # provenance: vendor/STS2_MCP/McpMod.Helpers.cs:54-66.
+                # records `card.id` at play time (combat._finish_play), which
+                # is `foo+` for an upgraded companion, so its replay is
+                # upgraded; the C# ledger carries the flag beside the id
+                # because ModelDb.GetById rebuilds pristine (BFF-copy).
+                # UpgradeInternal provenance:
+                # vendor/STS2_MCP/McpMod.Helpers.cs:54-66. Pool IDENTITY is a
+                # separate, now-settled question: BFF-dedupe (ruled
+                # 2026-08-06) makes `foo` and `foo+` one entry on BOTH sides,
+                # so each companion is replayed once, in the upgrade state of
+                # its FIRST play.
                 "            if (companionPlay.IsUpgraded)\n"
                 "            {\n"
                 "                playedToken.UpgradeInternal();\n"

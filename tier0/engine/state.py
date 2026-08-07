@@ -589,6 +589,10 @@ class CombatState:
     current_x: int = 0                    # X-cost cards
     sparks_at_play: int = 0               # bank BEFORE this card's own spark
                                           # spend (Gleeful Barrage; R39)
+    # Best Friends Forever's pool: the companions played this COMBAT, unique
+    # by BASE id and in first-play order (`foo` and `foo+` are one entry --
+    # BFF-dedupe, ruled 2026-08-06). combat._finish_play is the only writer
+    # and owns that uniqueness; readers walk the list as-is.
     companions_played: list[str] = field(default_factory=list)
     # Blocking Notes' slope (rework Track C.3, 2026-07-28). A per-TURN count
     # where companions_played above is a per-COMBAT list, so the two cannot be
