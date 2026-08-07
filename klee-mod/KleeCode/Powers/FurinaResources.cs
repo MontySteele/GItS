@@ -99,7 +99,8 @@ public static class FurinaResourceConstants
 ///
 /// BaseLib owns reset, affordability, cloning, and card-cost visuals. Encore
 /// card costs are exceptional only in their timing: the sim spends them
-/// BEFORE card effects (combat.py play_card line 180, above the replay loop).
+/// BEFORE card effects (combat.py play_card :236-241, right after the energy
+/// debit and above the replay loop).
 /// <see cref="FurinaResourceHooks.BeforeCardPlayed"/> performs that spend, so
 /// BaseLib's own is a deliberate no-op here.
 ///
@@ -762,28 +763,51 @@ public sealed class FurinaResourceHooks : AbstractModel
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
         if (!cardPlay.IsFirstInSeries) return Task.CompletedTask;
-        // Sim order (combat.py play_card): the requires-full drain first,
-        // then the skill-tag bonus, then the Encore cost line.
-        FurinaBurstResource.DrainOnPlay(cardPlay.Card);
+        // SIM ORDER (combat.py play_card), corrected EB-19/M8. The three
+        // lines below used to run drain -> skill-tag -> cost under a comment
+        // asserting that WAS the sim's order. It is the reverse of it. The
+        // sim spends the Encore cost line first, at :236-241, immediately
+        // after the energy debit and well before resolution; the requires-full
+        // Burst drain (`p.burst_energy = 0`) is at :293-295 and the skill-tag
+        // bonus at :296-297, both at the far end of the same function.
+        //
+        // LATENT at the time of the fix -- no sheet card carries an
+        // `encore_cost` AND `requires: burst_energy_full`, so no play today
+        // reaches both lines. Fixed anyway because the trigger for it becoming
+        // reachable is a SHEET edit, which is not a place anyone would think
+        // to check a C# hook's statement order. The two orders differ for
+        // exactly that card: the drain zeroes Burst, and an Encore spend can
+        // print Fanfare and feed Burst back (FurinaResources.SpendEncore), so
+        // drain-then-spend leaves Burst the spend's income where the sim
+        // leaves it zero.
+        //
         // An OWNERLESS play is a real state: autoplay and token paths hand a
         // card to this broadcast with no Player attached. This hook fires for
         // every card every player plays, and it runs inside CombatManager's
         // async continuation, where an NRE is not an exception the player ever
-        // sees -- it is a black screen. Same guard DrainOnPlay already takes
-        // one line above.
+        // sees -- it is a black screen. DrainOnPlay self-guards, which is why
+        // it is the one line that still runs for an ownerless card.
         var card = cardPlay.Card;
-        if (card?.Owner?.Creature is not { } owner) return Task.CompletedTask;
-        if (card is ISkillTagCard && FurinaResources.IsFurina(owner))
+        if (card?.Owner?.Creature is not { } owner)
         {
-            FurinaResources.GainBurst(
-                owner,
-                FurinaResourceConstants.BurstPerSkillTag);
+            // The drain self-guards and is the only one of the four lines
+            // that needs no owner; the other three do, so an ownerless play
+            // ends here exactly as it did before the reorder.
+            FurinaBurstResource.DrainOnPlay(cardPlay.Card);
+            return Task.CompletedTask;
         }
         var cost = CustomResources<EncoreResource>.Cost(card)
             ?.GetAmountToSpend() ?? 0;
         if (cost > 0)
         {
             FurinaResources.SpendEncore(owner, cost);
+        }
+        FurinaBurstResource.DrainOnPlay(card);
+        if (card is ISkillTagCard && FurinaResources.IsFurina(owner))
+        {
+            FurinaResources.GainBurst(
+                owner,
+                FurinaResourceConstants.BurstPerSkillTag);
         }
         SpotlightSystem.NotePlay(cardPlay);
         return Task.CompletedTask;

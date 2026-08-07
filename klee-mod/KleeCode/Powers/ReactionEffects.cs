@@ -119,6 +119,21 @@ internal static class ReactionEffects
     /// </summary>
     public static int ReactionsThisTurn => TotalResolved - _turnStartTotal;
 
+    /// <summary>
+    /// Would the NEXT reaction this dealer causes be their first this turn?
+    ///
+    /// The read-only twin of the gate inside <see cref="Resolve"/> (`already
+    /// == 0`), pulled out so the damage pipeline can ASK the question one
+    /// phase before Resolve ANSWERS it -- see
+    /// <see cref="CurtainCallHooks.CourtroomDramaWillAmplify"/>. Pure: it
+    /// only reads the map, and the increment stays in Resolve so there is
+    /// still exactly one write site.
+    /// </summary>
+    public static bool NextReactionIsFirstFor(Creature? dealer) =>
+        dealer != null
+        && (DealerReactionsThisTurn.TryGetValue(dealer, out var seen)
+            ? seen : 0) == 0;
+
     public static async Task Resolve(
         PlayerChoiceContext choiceContext,
         Reaction reaction,

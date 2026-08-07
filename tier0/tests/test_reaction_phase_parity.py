@@ -80,6 +80,24 @@ PHASE_LEDGER = [
         "multiplicative phase.",
     ),
     (
+        "courtroom-drama-vulnerable-is-multiplicative",
+        "Powers/AuraPower.cs",
+        "ModifyDamageMultiplicative",
+        r"public\s+override\s+decimal\s+ModifyDamageMultiplicative\s*\(",
+        ["CurtainCallHooks.CourtroomDramaWillAmplify",
+         "ReactionConstants.VulnerableTakenMult"],
+        ["CurtainCallHooks.CourtroomDramaWillAmplify"],
+        "EB-19/M1, the Superconduct shape one power over. Courtroom Drama's "
+        "Vulnerable is applied from CurtainCallHooks.NoteFirstReaction, which "
+        "ReactionEffects.Resolve reaches from AfterDamageReceived -- one hook "
+        "after the triggering hit's number is final. The sim applies it "
+        "inside reactions._react (the `reactions_this_turn == 1` block) and "
+        "runs modify_damage_taken afterwards, so tier0's triggering hit is "
+        "itself x1.5. Same two-payout tell as Superconduct: the bomb path "
+        "already amplified, because ElementalHit.Deal resolves the reaction "
+        "before SimDamagePipeline.TargetMods reads Vulnerable.",
+    ),
+    (
         "shatter-is-dealt-from-after-damage-received",
         "Powers/FrozenPower.cs",
         "AfterDamageReceived",
@@ -212,6 +230,86 @@ def test_superconduct_multiplier_is_pure():
         assert forbidden not in body, (
             f"{forbidden} in the multiplicative phase: this hook is called "
             "speculatively by preview/tooltip paths and must stay pure")
+
+
+# A real assignment, not `==`, `!=`, `<=`, `>=`, `+=` or a lambda arrow.
+_ASSIGNMENT = re.compile(r"(?<![=!<>+\-*/%&|^])=(?![=>])")
+
+
+def test_the_two_reaction_vulnerables_share_one_multiplier():
+    """Superconduct + Courtroom Drama on one hit is x1.5, not x2.25.
+
+    Both sim sites write the SAME `vulnerable` stack, and
+    powers.modify_damage_taken is a flat multiply on any nonzero stack rather
+    than one per source. Two separate `mult *=` statements in this hook would
+    be correct on either source alone and wrong on the hit that is both --
+    which is a live combination (Cryo aura + Electro attack, first reaction of
+    the turn, with Courtroom Drama installed).
+    """
+    body = method_body(
+        (SOURCE / "Powers" / "AuraPower.cs").read_text(encoding="utf-8"),
+        r"public\s+override\s+decimal\s+ModifyDamageMultiplicative\s*\(")
+    assert body.count("ReactionConstants.VulnerableTakenMult") == 1, body
+
+
+def test_the_reaction_vulnerable_mirror_cannot_double_pay_the_bomb_path():
+    """The bomb path amplifies for real; this hook must not amplify it again.
+
+    ElementalHit.Deal applies the reaction's Vulnerable through
+    ReactionEffects.Resolve and only then reads it back in
+    SimDamagePipeline.TargetMods, so a bomb-triggered Superconduct or first
+    reaction already gets its x1.5 from the target's real VulnerablePower. The
+    hit is emitted Unpowered, and the IsPoweredAttack gate at the top of the
+    modifier is what keeps the mirror off it. Drop either and the bomb pays
+    twice -- the exact defect EB-19/M1 fixed, with the sign flipped.
+    """
+    aura = method_body(
+        (SOURCE / "Powers" / "AuraPower.cs").read_text(encoding="utf-8"),
+        r"public\s+override\s+decimal\s+ModifyDamageMultiplicative\s*\(")
+    gate = aura.index("IsPoweredAttack()")
+    assert gate < aura.index("ReactionConstants.VulnerableTakenMult"), aura
+
+    hit = (SOURCE / "Powers" / "ElementalHit.cs").read_text(encoding="utf-8")
+    deal = method_body(hit, r"public\s+static\s+async\s+Task\s+Deal\s*\(")
+    assert "ValueProp.Unpowered" in deal, deal
+    # ...and the order that makes the bomb path's amplification real.
+    assert deal.index("ReactionEffects.Resolve") < deal.index(
+        "SimDamagePipeline.TargetMods"), deal
+
+
+def test_the_courtroom_drama_forecast_is_a_read():
+    """The predicate the pure modifier calls must itself be pure.
+
+    ModifyDamageMultiplicative runs in preview and tooltip paths, so a
+    forecast that CONSUMED the once-per-turn window would spend Courtroom
+    Drama on a hit that was never thrown. The single increment site stays in
+    ReactionEffects.Resolve.
+    """
+    # Both forecasts are expression-bodied on purpose -- a `=>` member cannot
+    # hold a statement, so "it only reads" is enforced by the shape as well as
+    # by the text below. method_body() would run past a `=>` member's end, so
+    # these are matched as expressions.
+    curtain = (SOURCE / "Powers" / "CurtainCallPowers.cs").read_text(
+        encoding="utf-8")
+    forecast = re.search(
+        r"public\s+static\s+bool\s+CourtroomDramaWillAmplify\s*\([^)]*\)\s*=>"
+        r"(.*?);", curtain, re.S)
+    assert forecast, "CourtroomDramaWillAmplify is no longer expression-bodied"
+    for forbidden in ("Cmd.", "await"):
+        assert forbidden not in forecast.group(1), (
+            f"CourtroomDramaWillAmplify contains {forbidden!r}; it is called "
+            "from a speculative damage-preview path and must only read.")
+    assert not _ASSIGNMENT.search(forecast.group(1)), forecast.group(1)
+
+    reactions = (SOURCE / "Powers" / "ReactionEffects.cs").read_text(
+        encoding="utf-8")
+    inner = re.search(
+        r"public\s+static\s+bool\s+NextReactionIsFirstFor\s*\([^)]*\)\s*=>"
+        r"(.*?);", reactions, re.S)
+    assert inner, "NextReactionIsFirstFor is no longer expression-bodied"
+    assert "DealerReactionsThisTurn" in inner.group(1)
+    # One write site, still in Resolve.
+    assert reactions.count("DealerReactionsThisTurn[dealer] =") == 1, reactions
 
 
 # --- damage-modifier purity, swept repo-wide -------------------------------
@@ -764,6 +862,121 @@ def test_the_sequenced_powers_do_not_take_the_broadcast_back(rel, cls):
     assert not hit, (
         f"{cls} overrides BeforeSideTurnEnd again. TurnEndSequencer already "
         "drives it; both would fire, unordered.")
+
+
+# --- the card-play broadcasts (EB-19/M5, EB-19/M8) --------------------------
+#
+# The turn-lifecycle ledgers above pin WHICH broadcast a decision rides and WHO
+# ELSE rides it. Card play has a third failure mode, and both rows below are
+# instances of it: the sim's play_card is a single straight-line function, and
+# the mod splits it across BeforeCardPlayed / OnPlay / AfterCardPlayed. Where
+# the split falls decides what a line can SEE.
+#
+# ENUMERATION POINT, settled by decompile (StS2 v0.107.1, commit 59260271,
+# ilspycmd 8.2.0.7535), because M5 turns on it. CardModel's play loop is:
+#
+#     await Hook.BeforeCardPlayed(combatState, cardPlay)
+#     await OnPlay(choiceContext, cardPlay)          // the card resolves here
+#     await Hook.AfterCardPlayed(combatState, choiceContext, cardPlay)
+#
+# per index in the playCount loop, with a fresh CardPlay object each index.
+# Both Hook methods `foreach` over CombatState.IterateHookListeners(), an
+# ITERATOR whose List<AbstractModel> (creature Powers, relics, potions, every
+# pile's cards, modifiers, badges) is built inside its FIRST MoveNext -- i.e.
+# when the foreach starts, not when the play started. Hook.BeforeCardPlayed
+# goes through IterateCombatHookListeners, which is the same enumeration behind
+# a combat-is-over guard.
+#
+# So: a power ADDED during OnPlay is absent from the BeforeCardPlayed listener
+# list and PRESENT in the AfterCardPlayed one. That asymmetry is the whole of
+# M5 -- it is why Navia's own play paid itself in C# and does not in the sim --
+# and it is also the fix, used as a presence snapshot.
+
+def test_navias_own_play_does_not_pay_itself():
+    """EB-19/M5. The sim states the rule; the C# had to be taught it.
+
+    combat.play_card reads `cannon_fire_support` beside the companions_played
+    record site, BEFORE resolve_card, and says so in-line: "Sitting before
+    resolve_card also means Navia's own play does not pay itself: the power is
+    not up yet." The C# equivalent is not a power read but a listener
+    enumeration, and AfterCardPlayed enumerates after OnPlay installed the
+    power -- so she paid. BeforeCardPlayed is the only broadcast that
+    enumerates early enough to answer "was this power already up", and it
+    cannot award Block (no PlayerChoiceContext), which is why the pay still
+    settles at AfterCardPlayed off a snapshot.
+    """
+    source = (SOURCE / "Powers" / "FontainePowers.cs").read_text(
+        encoding="utf-8")
+    spans = _class_spans(source)
+    mine = [s for s in spans if s[0] == "CannonFireSupportPower"]
+    assert mine, "CannonFireSupportPower not found"
+    start, end = mine[0][1], mine[0][2]
+    body = source[start:end]
+
+    assert re.search(
+        r"public\s+override\s+Task\s+BeforeCardPlayed\s*\(", body), (
+        "CannonFireSupportPower no longer snapshots at BeforeCardPlayed, the "
+        "only card-play broadcast that enumerates before OnPlay installs a "
+        "power. Without it her own play pays itself again.")
+
+    after = method_body(
+        body, r"public\s+override\s+async\s+Task\s+AfterCardPlayed\s*\(")
+    # The pay is gated on the snapshot, and the snapshot check comes first.
+    assert "_presentAtPlayStart.Remove(cardPlay)" in after, after
+    assert after.index("_presentAtPlayStart") < after.index(
+        "CreatureCmd.GainBlock"), after
+
+    sim = (ROOT / "tier0" / "engine" / "combat.py").read_text(encoding="utf-8")
+    assert "Navia's own play does not pay itself" in sim, (
+        "combat.py no longer states the rule this mirrors; if the sim moved, "
+        "this decision needs re-deriving, not re-pinning.")
+
+
+def test_the_navia_snapshot_survives_nested_plays():
+    """A field would be clobbered by a card that plays a card.
+
+    Order for a nested play is Before(A), OnPlay(A) -> Before(B), OnPlay(B),
+    After(B), After(A). A single `_lastSeen` field holds B by the time After(A)
+    runs, so A silently stops paying. CardPlay is a class with reference
+    identity and one fresh instance per play index, so a set keyed on it is
+    exact.
+    """
+    source = (SOURCE / "Powers" / "FontainePowers.cs").read_text(
+        encoding="utf-8")
+    assert "HashSet<CardPlay>" in source, source
+
+
+def test_furina_spends_the_encore_cost_before_draining_burst():
+    """EB-19/M8. The sim's play_card order, which the comment used to invert.
+
+    tier0 spends the "Spend N Encore:" cost line at the top of play_card,
+    right after the energy debit, and empties Burst for a requires-full card
+    near the bottom -- cost, THEN drain, THEN the skill-tag bonus. The mod ran
+    drain -> skill-tag -> cost under a comment claiming that was the sim's
+    order. Latent (no sheet card carries encore_cost on a requires-full Burst
+    card) and fixed anyway, because the thing that makes it reachable is a
+    SHEET edit, which is not where anyone checks a C# hook's statement order.
+    """
+    body = method_body(
+        (SOURCE / "Powers" / "FurinaResources.cs").read_text(encoding="utf-8"),
+        r"public\s+override\s+Task\s+BeforeCardPlayed\s*\(")
+    spend = body.index("FurinaResources.SpendEncore")
+    # The owner-guarded drain, not the ownerless early-return one.
+    drain = body.index("FurinaBurstResource.DrainOnPlay(card)")
+    skill_tag = body.index("BurstPerSkillTag")
+    assert spend < drain < skill_tag, (
+        "FurinaResourceHooks.BeforeCardPlayed no longer runs cost -> drain -> "
+        "skill-tag. tier0 combat.play_card does, in that order.")
+
+
+def test_no_comment_reasserts_the_refuted_drain_first_order():
+    """The losing claim, pinned so it cannot come back by paraphrase."""
+    source = (SOURCE / "Powers" / "FurinaResources.cs").read_text(
+        encoding="utf-8")
+    assert "the requires-full drain first" not in source, (
+        "FurinaResources.cs re-asserts a drain-before-Encore-cost sim order. "
+        "combat.play_card spends the cost line first; see "
+        "test_furina_spends_the_encore_cost_before_draining_burst.")
 
 
 def test_vigil_pays_its_fuel_through_the_reshuffle():

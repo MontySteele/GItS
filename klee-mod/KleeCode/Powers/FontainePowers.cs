@@ -37,6 +37,36 @@ namespace KleeMod.Powers;
 /// card in any sheet does (the pool's Block cards all write). If one is ever
 /// written, this is the note that says where to look.
 ///
+/// SELF-PAYMENT, closed EB-19/M5. That divergence had a second consequence the
+/// note above missed: NAVIA'S OWN PLAY paid itself. The sim says explicitly
+/// that it must not -- combat.py play_card reads
+/// `p.powers.get("cannon_fire_support")` beside the companions_played record
+/// site, ahead of resolve_card, with the comment "Sitting before resolve_card
+/// also means Navia's own play does not pay itself: the power is not up yet."
+/// The C# read is a LISTENER ENUMERATION, not a power read, and the decompile
+/// says that enumeration happens too late to agree:
+///
+///   CardModel.PlayInternal  ->  Hook.BeforeCardPlayed(combatState, cardPlay)
+///                           ->  OnPlay(...)          // the power is ADDED here
+///                           ->  Hook.AfterCardPlayed(combatState, ...)
+///
+/// and both Hook methods `foreach` over `CombatState.IterateHookListeners()`,
+/// an ITERATOR that materializes its `List&lt;AbstractModel&gt;` (creature
+/// Powers, relics, potions, piles, modifiers) inside its first MoveNext --
+/// i.e. at the moment the foreach starts, not when the play started. So a
+/// power added during OnPlay is absent from the BeforeCardPlayed list and
+/// PRESENT in the AfterCardPlayed one. (Hook.BeforeCardPlayed goes through
+/// IterateCombatHookListeners, which is the same enumeration behind a
+/// combat-is-over guard.)
+///
+/// The fix uses exactly that asymmetry as the signal. BeforeCardPlayed records
+/// the CardPlay it saw; AfterCardPlayed pays only for a CardPlay in that set.
+/// Navia's own play never entered it, so it never pays -- while every LATER
+/// companion play does. A set rather than a field because card plays nest (a
+/// card that plays a card), and CardPlay is a class with reference identity,
+/// one fresh instance per play index (CardPlay.cs, `new CardPlay { ... }` per
+/// `i` in the playCount loop), so entries can never collide or go stale.
+///
 /// IsFirstInSeries: one grant per card PLAY, not per replay. Study Buddy's
 /// replay is one card resolved twice; paying it twice would make those two
 /// cards a combo instead of each doing its own job -- the same line tier0
@@ -57,16 +87,42 @@ public sealed class CannonFireSupportPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
+    /// <summary>
+    /// The plays this power was already installed for, snapshotted at the one
+    /// broadcast that runs before the card resolves. Reference identity on
+    /// CardPlay; every entry is removed by the AfterCardPlayed of the same
+    /// play, so this holds only the plays currently open (normally one).
+    /// </summary>
+    private readonly HashSet<CardPlay> _presentAtPlayStart = new();
+
+    public override Task BeforeCardPlayed(CardPlay cardPlay)
+    {
+        if (Eligible(cardPlay)) _presentAtPlayStart.Add(cardPlay);
+        return Task.CompletedTask;
+    }
+
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (cardPlay.Card is not ICompanionCard) return;
-        if (cardPlay.Card.Owner?.Creature != Owner) return;
-        if (!cardPlay.IsFirstInSeries) return;
+        // Remove unconditionally: a play that resolved is closed whether or
+        // not it pays, and an entry left behind would outlive its CardPlay.
+        var wasPresent = _presentAtPlayStart.Remove(cardPlay);
+        if (!wasPresent) return;
+        if (!Eligible(cardPlay)) return;
 
         await CreatureCmd.GainBlock(
             Owner, Amount, ValueProp.Unpowered, null, fast: true);
     }
+
+    /// <summary>
+    /// Asked at both ends so the snapshot and the settle agree. Re-asked at
+    /// AfterCardPlayed because ownership can change mid-play (a card handed
+    /// to another player), and the sim's read is of the player who played it.
+    /// </summary>
+    private bool Eligible(CardPlay cardPlay) =>
+        cardPlay.Card is ICompanionCard
+        && cardPlay.Card.Owner?.Creature == Owner
+        && cardPlay.IsFirstInSeries;
 }
 
 /// <summary>

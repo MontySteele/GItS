@@ -260,6 +260,34 @@ public static class CurtainCallHooks
     /// read; in co-op it means your partner's reaction does not spend your
     /// once-per-turn window, which is the Best Friends Forever lesson.
     /// </summary>
+    /// <summary>
+    /// PURE forecast of <see cref="NoteFirstReaction"/>: will the reaction
+    /// this hit is about to cause put Vulnerable on the target?
+    ///
+    /// EB-19/M1. NoteFirstReaction runs from ReactionEffects.Resolve, which
+    /// AuraPower reaches in AfterDamageReceived -- so the Vulnerable it
+    /// applies lands AFTER the triggering hit's number is final and cannot
+    /// amplify it. The sim applies it INSIDE resolve_hit (reactions.py
+    /// `_react`, the `cross_examination` block) and only then runs
+    /// modify_damage_taken (effects.deal_damage_to_enemy), so in tier0 the
+    /// triggering hit is itself x1.5. Exactly the 2026-07-21 Superconduct
+    /// shape, one power over -- and it showed as one reaction with two
+    /// payouts for the same reason: the BOMB path already amplifies, because
+    /// ElementalHit.Deal resolves the reaction before SimDamagePipeline
+    /// .TargetMods reads the target's Vulnerable.
+    ///
+    /// Read off the DEALER for the same reason NoteFirstReaction is (a power
+    /// belongs to somebody), and only true while the once-per-turn window is
+    /// still open, so a reaction storm amplifies its first hit alone.
+    ///
+    /// Called from AuraPower.ModifyDamageMultiplicative, which the UI calls
+    /// speculatively -- this must stay a read.
+    /// </summary>
+    public static bool CourtroomDramaWillAmplify(Creature? dealer) =>
+        dealer != null
+        && PowerAmount<CrossExaminationPower>(dealer) > 0
+        && ReactionEffects.NextReactionIsFirstFor(dealer);
+
     public static async Task NoteFirstReaction(
         PlayerChoiceContext choiceContext, Creature target, Creature? dealer,
         CardModel? cardSource)

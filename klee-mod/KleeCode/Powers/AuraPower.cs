@@ -89,6 +89,24 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     /// (ElementalHit resolves the reaction before its TargetMods) -- one
     /// reaction, two payouts.
     ///
+    /// COURTROOM DRAMA (EB-19/M1, 2026-08-07): the identical shape, one power
+    /// over. Cross Examination's Vulnerable is applied from
+    /// CurtainCallHooks.NoteFirstReaction, which ReactionEffects.Resolve
+    /// reaches from AfterDamageReceived -- one hook too late to amplify the
+    /// hit that caused the reaction. The sim applies it inside `_react`
+    /// (reactions.py, the `reactions_this_turn == 1` block) and runs
+    /// modify_damage_taken afterwards, so tier0's triggering hit IS x1.5.
+    /// Same two-payout tell as Superconduct: the bomb path already amplifies,
+    /// because ElementalHit.Deal resolves the reaction before
+    /// SimDamagePipeline.TargetMods reads Vulnerable -- and that path is
+    /// Unpowered, so the IsPoweredAttack gate above keeps it out of here and
+    /// the two can never both pay.
+    ///
+    /// The two sources share ONE multiplier, deliberately. In the sim both
+    /// write the same `vulnerable` stack and modify_damage_taken is a flat
+    /// x1.5 on any nonzero stack, so a hit that is both a Superconduct and
+    /// the turn's first reaction is x1.5, not x2.25.
+    ///
     /// The already-Vulnerable guard is what keeps that faithful: the sim's
     /// modify_damage_taken is a flat x1.5 on any nonzero vulnerable stack, not
     /// per stack, so when the target is already Vulnerable the native pipeline
@@ -112,7 +130,14 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         // (sim _amp_mult). The amp-cap detector lives inside the overload.
         var mult = ReactionTable.AmplifierMultiplier(reaction, dealer);
 
-        if (reaction == Reaction.Superconduct
+        // The two sim sites that put Vulnerable on the target from INSIDE
+        // _react, i.e. in time to scale the hit that triggered them.
+        var vulnerableFromThisReaction =
+            reaction == Reaction.Superconduct
+            || (reaction != Reaction.None
+                && CurtainCallHooks.CourtroomDramaWillAmplify(dealer));
+
+        if (vulnerableFromThisReaction
             && !target.Powers.OfType<VulnerablePower>().Any())
         {
             mult *= ReactionConstants.VulnerableTakenMult;
