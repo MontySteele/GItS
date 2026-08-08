@@ -57,13 +57,24 @@ def test_all_my_treasures_arms_six_bombs_and_banks_two_sparks():
     assert card not in state.player.hand
 
 
-def test_secret_stash_creates_two_free_demolition_commons_in_hand():
-    """Secret Stash hands you two cards drawn from the demolition-common
-    pool, each cost-overridden to 0, and exhausts itself doing it."""
-    state = make_state()
+def test_secret_stash_sweeps_for_eight_then_creates_two_free_commons():
+    """Secret Stash sweeps the board for 8 and hands you two cards drawn
+    from the demolition-common pool, each cost-overridden to 0, exhausting
+    itself doing it.
+
+    The 8-to-all body is the R130 dead-card rework (2026-08-07): the card
+    was picked 0% in the generic pool and 0% in demolition, its own
+    archetype, because a one-shot Exhaust RARE that only hands over two
+    commons is a rare slot spent to be two commons. The add clause is
+    unchanged -- it is the card's identity -- so this pin covers both the
+    new body and the old promise it must not have disturbed.
+    """
+    enemies = [make_enemy(hp=30), make_enemy(hp=30)]
+    state = make_state(enemies=enemies)
 
     _play(state, "secret_stash", energy=1)
 
+    assert [e.hp for e in enemies] == [22, 22]   # every living enemy, 8 each
     pool_ids = {c.id for c in loader.cards_in_pool("demolition_commons")}
     assert len(state.player.hand) == 2
     assert all(c.id in pool_ids for c in state.player.hand)

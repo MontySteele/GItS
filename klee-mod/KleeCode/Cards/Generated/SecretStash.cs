@@ -40,12 +40,13 @@ public sealed class SecretStash : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Secret Stash"),
-        ("description", "Add {Stash:diff()} random [gold]demolition[/gold] Common cards to your hand. They cost 0 this combat."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. Add {Stash:diff()} random [gold]demolition[/gold] Common cards to your hand. They cost 0 this combat."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new DamageVar(8m, ValueProp.Move),
             new DynamicVar("Stash", 2m)
         };
 
@@ -53,12 +54,18 @@ public sealed class SecretStash : CustomCardModel
     // GenerateAllCards. BaseLib's auto-registration would need a [Pool]
     // attribute and would register every card a second time.
     public SecretStash()
-        : base(1, CardType.Skill, CardRarity.Rare, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Rare, TargetType.AllEnemies, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+            .FromCard(this)
+            .TargetingAllOpponents(CombatState!)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .SpawningHitVfxOnEachCreature()
+            .Execute(choiceContext);
         {
             var stashPool = new List<CardModel>
             {

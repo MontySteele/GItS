@@ -246,17 +246,19 @@ def _drafted_readers(deck: list[Card]) -> int:
     """Readers the DRAFT put in the deck -- basics excluded.
 
     The exclusion arrived with the compensation pass (2026-07-28, Track 2.4),
-    which put a low-slope Fanfare read on `aria_of_recompense`. That is the
-    STARTER: one copy is in every Furina deck before a single card is offered.
-    Counted plainly, the reader limb of the fanfare core would be closed at
-    run start, forever, for every deck -- and this limb exists precisely to
-    ask whether the DRAFT assembled a plan that cashes the meter. A limb that
-    is always satisfied answers nothing and, worse, feeds `_core_progress`'s
-    +3.0 core-advance bonus with a constant, which would push the drafter off
-    real payoffs by telling it a third of the plan is free.
+    whose PROPOSED low-slope Fanfare read on `aria_of_recompense` -- the
+    STARTER, one copy in every Furina deck before a single card is offered --
+    would have closed this limb at run start, forever, for every deck. That
+    body was VETOED at the R130 sitting (2026-08-07) and aria is a pure Encore
+    card again, so no basic reads the meter today. The exclusion stays anyway,
+    on the argument that outlived the card: this limb exists precisely to ask
+    whether the DRAFT assembled a plan that cashes the meter, and a limb a
+    free card can satisfy answers nothing -- worse, it would feed
+    `_core_progress`'s +3.0 core-advance bonus with a constant, pushing the
+    drafter off real payoffs by telling it a third of the plan is free.
 
-    The generation and floor limbs are TOTALS over printed amounts, so the
-    starter's contribution to those is a real quantity that scales -- only the
+    The generation and floor limbs are TOTALS over printed amounts, so a
+    basic's contribution to those is a real quantity that scales -- only the
     reader limb is a COUNT, and only a count can be gamed by a free card.
     """
     return sum(1 for c in deck if c.rarity != "basic" and _reads_fanfare(c))

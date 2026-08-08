@@ -64,6 +64,8 @@ from pathlib import Path
 
 import yaml
 
+from tools.effect_walk import printed_floor
+
 REPO = Path(__file__).resolve().parent.parent
 DOCS = REPO / "docs"
 
@@ -572,17 +574,30 @@ def scan_row(row: dict, character: str = "") -> dict:
             #   "deal 1 per 4 Fanfare"           -> scaling only
             #
             # Checkable straight off the sheet, which is why it is a rule here
-            # and not a hand-ruling per card: pays-at-zero is exactly "there is
-            # a printed positive `amount` and this line is not sitting behind a
+            # and not a hand-ruling per card: pays-at-zero is exactly "this
+            # line has a positive PRINTED FLOOR and is not sitting behind a
             # gate". A gated line pays nothing at meter zero BY DEFINITION --
             # the gate is the meter test. `amount: 0` with a bonus_formula is
             # the sheets' own explicit "this pays nothing on an empty meter"
             # idiom (suffering_for_art says so out loud), so it fails the test
             # too, and it fails it by reading the sheet rather than by
             # anybody's opinion about the card.
+            #
+            # L4q / R129 (2026-08-07) ADOPTED `effect_walk.printed_floor` here.
+            # The floor is whatever the line pays with every meter it reads at
+            # zero, and `amount: 5` and `amount_formula: {base: 5, per: ...}`
+            # are THE SAME PROMISE TO THE PLAYER -- five, before the meter says
+            # anything. The old literal-`amount` read saw only the first
+            # spelling, so three kokomi cards that print a floor
+            # (`pearl_barrage` 5+, `undertow` 4+, `depths_judgment` 10+) were
+            # classified as paying nothing on an empty pile, contradicting
+            # their own sheet comments. Measured diff of the swap across all
+            # three sheets: exactly those three cards GAIN `frontload`, nothing
+            # loses a role, no inheritance ripple.
+            floor = printed_floor(fx)
             pays_at_zero = (not gated
-                            and isinstance(fx.get("amount"), (int, float))
-                            and fx["amount"] > 0)
+                            and isinstance(floor, int)
+                            and floor > 0)
             roles_here = {"scaling"} | ({"frontload"} if pays_at_zero else set())
         direct |= roles_here
         delivered |= roles_here

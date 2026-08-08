@@ -12,10 +12,13 @@
 # ---- BASICS ----
 waters_edge:       {damage: +3}          # 6->9 (R53: base stays at Strike parity; Strike+ slope)
 coral_guard:       {block: +3}           # 5->8, Defend-exact
-kurages_oath:      {innate: true}        # [USER]: the upgrade buys INNATE ONLY — the Block does not move.
-                                         # At 12 the printed number is already flagged as maybe-too-strong,
-                                         # so the upgrade sells consistency (online turn 1, not drawn on
-                                         # turn 6) instead of more of it.
+kurages_oath:      {kurage_ward: +2}     # 5->7 (R130, 2026-08-07). The INNATE-ONLY upgrade was tied to the
+                                         # 12: at a printed number already flagged as maybe-too-strong the
+                                         # upgrade sold consistency (online turn 1, not drawn on turn 6)
+                                         # instead of more of it. The 12 retired at R130 and that rationale
+                                         # retires with it — at 5 there is nothing to be shy about, so the
+                                         # upgrade sells the +2 the ruling prints. Name-matched delta key;
+                                         # its applier sits beside weak/vulnerable in tier0/content/upgrades.py.
 bake_kurage:       {kurage_turns: +1}    # v0.4 starter rework: 1->2 turns on the field, i.e. ONE extra
                                          # pulse — which at the bank read (x3 since R73, was x4) is the whole upgrade. The pulse numbers are constants and
                                          # the +1 Charge never moves (resource-curve law) — duration is the

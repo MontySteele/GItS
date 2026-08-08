@@ -405,6 +405,13 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
 # method-scope locals a second time -- restrict them to declaration-free ops.
 REPEAT_SAFE_OPS = {"damage", "block", "draw", "gain_spark", "burst_energy"}
 
+# The same restriction for a repeat an UPGRADE appends (`add: {op:
+# repeat_this}`, R130's take_your_bow+). Superset of REPEAT_SAFE_OPS by
+# exactly `salon_bow`, which is a single awaited call with no locals -- the
+# only op the new grammar has a card for. Anything else blocks the upgrade
+# path loudly rather than emitting an unverified replay.
+UPGRADE_REPEAT_OPS = REPEAT_SAFE_OPS | {"salon_bow"}
+
 # Field whitelists for the bomb ops (UNPARSEABLE discipline: an unknown
 # field encodes a mechanic; block loudly, never approximate).
 DETONATE_FIELDS = {"op", "target", "bonus"}
@@ -639,7 +646,10 @@ SALON_MEMBER_NAMES = {
 # Solar Isotoma) and `buff` (both Bennetts) join it because the "amount" of
 # those powers IS the duration / the attack bonus.
 POWER_UPGRADE_KEYS = {"power_amount", "amp_percent", "splash_damage", "vulnerable",
-                      "weak", "duration", "buff"}
+                      "weak", "duration", "buff",
+                      # R130 (2026-08-07): Kurage's Oath 5 -> 7. NAME-MATCHED
+                      # like weak/vulnerable, which is how the sim binds it.
+                      "kurage_ward"}
 
 # Ops the POWER_UPGRADE_KEYS deltas may land on, in the sim's own precedence:
 # `next(fx for fx in top if fx["op"] in (...))` -- the FIRST top-level one
@@ -2387,20 +2397,45 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         if key not in EXPRESSIBLE_DELTAS:
             return {}, f"delta key '{key}: {value}' not expressible by codegen (structural upgrade)"
         if key == "add":
-            if not (isinstance(value, dict)
-                    and set(value) == {"op", "amount"}
-                    and value.get("op") in {"draw", "gain_encore"}
-                    and isinstance(value.get("amount"), int)
-                    and value["amount"] > 0):
+            added_op = value.get("op") if isinstance(value, dict) else None
+            if added_op == "repeat_this":
+                # R130 (take_your_bow+): the upgrade appends the repeat rather
+                # than a number. Sim law is resolve_card's -- the effect list
+                # minus the repeat machinery re-resolves `times` more times --
+                # so the emission is the SAME for-block the repeat-conditional
+                # tail uses, gated on IsUpgraded instead of a predicate.
+                if not (set(value) <= {"op", "times"}
+                        and isinstance(value.get("times", 1), int)
+                        and value.get("times", 1) > 0):
+                    return {}, (
+                        f"delta 'add: {value}' (repeat_this times must be a "
+                        "positive literal int)")
+                bad = [e["op"] for e in effects
+                       if e["op"] not in UPGRADE_REPEAT_OPS]
+                if bad:
+                    return {}, (
+                        f"delta 'add: repeat_this' beside op(s) {sorted(set(bad))} "
+                        "(no verified re-emission for the repeated body)")
+                if any(e.get("op") == "conditional" and any(
+                        x.get("op") == "repeat_this" for x in e.get("then", []))
+                       for e in effects):
+                    return {}, ("delta 'add: repeat_this' on a card that "
+                                "already repeats (repeatTimes collision)")
+            elif not (isinstance(value, dict)
+                      and set(value) == {"op", "amount"}
+                      and value.get("op") in {"draw", "gain_encore"}
+                      and isinstance(value.get("amount"), int)
+                      and value["amount"] > 0):
                 return {}, (
                     f"delta 'add: {value}' (only a positive draw or "
-                    "gain_encore effect is expressible)")
-            if value["op"] == "draw" and any(
+                    "gain_encore effect, or a repeat_this, is expressible)")
+            if added_op == "draw" and any(
                     e.get("op") == "draw" for e in everywhere):
                 return {}, "delta 'add: draw' on a card with an existing draw (Cards var collision)"
-            if any(e.get("op") == "conditional" and any(
-                    x.get("op") == "repeat_this" for x in e.get("then", []))
-                   for e in effects):
+            if added_op != "repeat_this" and any(
+                    e.get("op") == "conditional" and any(
+                        x.get("op") == "repeat_this" for x in e.get("then", []))
+                    for e in effects):
                 return {}, "delta 'add: draw' on a repeating card (repeat semantics not expressible)"
         if key == "condition" and value != "unconditional":
             return {}, f"delta 'condition: {value}' (only 'unconditional' is tier0 grammar)"
@@ -2428,6 +2463,19 @@ def added_encore_upgrade(card: dict) -> int:
     return (int(added["amount"])
             if isinstance(added, dict)
             and added.get("op") == "gain_encore" else 0)
+
+
+def added_repeat_upgrade(card: dict) -> int:
+    """Extra resolutions of a `repeat_this` appended by `add`, or zero.
+
+    R130's take_your_bow+ is the first card in this grammar. Shape is
+    validated in upgrade_plan (positive literal `times`, every top-level op
+    in UPGRADE_REPEAT_OPS, no second repeat); callers only need the count.
+    """
+    added = upgrade_plan(card)[0].get("add")
+    return (int(added.get("times", 1))
+            if isinstance(added, dict)
+            and added.get("op") == "repeat_this" else 0)
 
 
 def added_encore_salon(card: dict) -> tuple[int, int] | None:
@@ -2683,6 +2731,11 @@ def power_upgrade_effect(card: dict) -> dict | None:
         word = "vuln" if key == "vulnerable" else "weak"
         hit = next((fx for fx in effects if fx.get("op") == "apply_power"
                     and word in fx.get("power", "")), None)
+    elif key == "kurage_ward":
+        # R130: the key IS the power name, same name-matched binding the sim
+        # uses (upgrades.py, beside weak/vulnerable).
+        hit = next((fx for fx in effects if fx.get("op") == "apply_power"
+                    and fx.get("power") == "kurage_ward"), None)
     else:
         hit = next((fx for fx in effects
                     if fx.get("op") in POWER_UPGRADE_OPS), None)
@@ -3917,40 +3970,68 @@ def build_body(
             "        }"
         )
 
-    # Repeat tail (sim resolve_card): a repeat-conditional re-resolves the
-    # effect list minus the repeat machinery, `times` more times. The
-    # replayed ops are REPEAT_SAFE_OPS only (blocked_reason), so the block
-    # declares no method-scope locals twice.
+    # Repeat tail (sim resolve_card): a repeat re-resolves the effect list
+    # minus the repeat machinery, `times` more times. The replayed ops are
+    # REPEAT_SAFE_OPS / UPGRADE_REPEAT_OPS only (upgrade_plan and
+    # blocked_reason both gate on it), so the block declares no method-scope
+    # locals twice.
     rep = next((e for e in card["effects"] if e.get("op") == "conditional"
                 and any(x.get("op") == "repeat_this"
                         for x in e.get("then", []))), None)
     if rep is not None:
-        body: list[str] = []
-        for eff in card["effects"]:
-            if eff is rep:
-                continue
-            op = eff["op"]
-            if op == "damage":
-                _emit_damage(card, eff, body, ctx, "DynamicVars.Damage.BaseValue")
-            elif op == "block":
-                body.append(
-                    "await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);"
-                )
-            elif op == "draw":
-                body.append(
-                    "await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);"
-                )
-            elif op == "gain_spark":
-                body.append(_stmt_gain_spark(card, eff))
-            elif op == "burst_energy":
-                body.append(_stmt_burst_energy(card, eff))
         lines.append(
             "for (var r = 0; r < repeatTimes; r++)\n        {\n"
-            + "\n".join("            " + s.replace("\n", "\n    ") for s in body)
+            + _repeat_body(card, ctx, skip=rep)
             + "\n        }"
+        )
+    elif added_repeat_upgrade(card):
+        # R130: the repeat arrives from the UPGRADE (`add: {op: repeat_this}`)
+        # rather than from a printed conditional, so the gate is IsUpgraded
+        # and `times` is the literal the sheet ruled. Same body, same law.
+        lines.append(
+            f"if (IsUpgraded)\n        {{\n"
+            f"            for (var r = 0; r < {added_repeat_upgrade(card)}; r++)\n"
+            "            {\n"
+            + _repeat_body(card, ctx, skip=None, indent=16)
+            + "\n            }\n        }"
         )
 
     return lines
+
+
+def _repeat_body(card: dict, ctx: dict, skip: dict | None,
+                 indent: int = 12) -> str:
+    """The replayed effect list for a repeat, as an indented C# block.
+
+    Mirrors resolve_card: every effect except the repeat machinery itself.
+    Shared by the printed repeat-conditional tail and the R130 upgrade-added
+    repeat so the two cannot drift.
+    """
+    body: list[str] = []
+    for eff in card["effects"]:
+        if skip is not None and eff is skip:
+            continue
+        op = eff["op"]
+        if op == "damage":
+            _emit_damage(card, eff, body, ctx, "DynamicVars.Damage.BaseValue")
+        elif op == "block":
+            body.append(
+                "await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);"
+            )
+        elif op == "draw":
+            body.append(
+                "await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);"
+            )
+        elif op == "gain_spark":
+            body.append(_stmt_gain_spark(card, eff))
+        elif op == "burst_energy":
+            body.append(_stmt_burst_energy(card, eff))
+        elif op == "salon_bow":
+            body.append(
+                "await SalonMemberPower.BowLeftmost("
+                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
+    pad = " " * indent
+    return "\n".join(pad + s.replace("\n", "\n" + " " * 4) for s in body)
 
 
 def _branch_text(card: dict, branch: list[dict], in_then: bool) -> str:
@@ -4620,6 +4701,14 @@ def build_description(card: dict) -> str:
             parts.append(
                 "{IfUpgraded:show:Gain "
                 f"{n} [gold]Encore[/gold].|}}")
+    if added_repeat_upgrade(card):
+        # Same sentence the printed repeat-conditional uses ("play this card
+        # again"), swapped in on upgrade. Pipe-free payload, as the swap-parse
+        # requires.
+        n = added_repeat_upgrade(card)
+        again = ("Play this card again." if n == 1
+                 else f"Play this card {n} more times.")
+        parts.append("{IfUpgraded:show:" + again + "|}")
 
     # Sly. DEFECT FIX (v0.5 fill): the discard hook generated correctly from
     # the first Sly card onward, but the card FACE never mentioned it -- so
@@ -4898,6 +4987,11 @@ def build_upgrade(card: dict) -> list[str]:
             lines.append(
                 "// add: draw -- expressed at play time as an IsUpgraded-gated "
                 "draw appended after the base effects.")
+        elif add_op == "repeat_this":
+            lines.append(
+                "// add: repeat_this -- expressed at play time as an "
+                "IsUpgraded-gated replay of the base effects (sim "
+                "resolve_card).")
         else:
             lines.append(
                 "// add: gain_encore -- expressed at play time as an "

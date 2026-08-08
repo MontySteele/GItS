@@ -102,13 +102,19 @@ undercurrent:          {times: +2}           # A5 (2026-07-28): 3 -> 5 hits of 2
 standing_room_only:    {damage: +2}          # 5->7 all base; the 1_per_4_fanfare read stays (Curtain Call C)
 
 # ---- UNCOMMONS (bump OR keyword/condition; two cost slots + one 1->0) ----
-take_your_bow:         {add: {op: gain_encore, amount: 3}}
-                                             # FANFARE REWORK Track D (2026-07-28), PROPOSED. The card is
-                                             # already cost 0, so the upgrade cannot buy tempo; it buys the
-                                             # thing the probe is FOR -- a bow that also refills. Deliberately
-                                             # NOT a second bow: two bows on one card would empty a three-slot
-                                             # stage in two plays and turn the probe into a combo piece before
-                                             # anyone has measured the first one.
+take_your_bow:         {add: {op: repeat_this, times: 1}}
+                                             # FANFARE REWORK Track D (2026-07-28) proposed an Encore rider and
+                                             # argued AGAINST a second bow. OVERRIDDEN at the R130 sitting
+                                             # (2026-08-07): the upgrade IS the second bow. The base was too
+                                             # weak measured against Dualcast -- the Defect starter, 1(0)
+                                             # energy for a double payoff -- and a cost-0 uncommon whose
+                                             # upgrade buys 3 Encore is not in that conversation. At Uncommon
+                                             # the ruled price for Dualcast-equivalent power is the repeat, so
+                                             # the upgrade buys the second bow and the base stays the probe.
+                                             # The old "combo piece before anyone measured the first one"
+                                             # worry is answered by that split: the UNUPGRADED card is what
+                                             # the playtest reads, and emptying a three-slot stage in two
+                                             # plays now costs a smith.
 full_ensemble:         {cost: -1}            # 2->1 after the rework reprice (uncommon cost slot; bombs_away precedent)
 grand_salon:           {power_amount: +1}    # A10 (2026-07-28): +1->+2. No stack cap to preserve --
                                              # salon_damage_up's was dropped 2026-07-24 (uncap-all).

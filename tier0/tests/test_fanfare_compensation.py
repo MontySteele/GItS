@@ -3,8 +3,10 @@
 Registered in docs/archive/sprint-fanfare-compensation-2026-07-28.md. The parent
 sprint (docs/archive/sprint-fanfare-rework-2026-07-28.md) cut single-leg Fanfare in
 and left two out-of-band numbers; this pass exists to move them, and these
-tests pin the mechanics it shipped rather than the numbers, which are all
-PROPOSED.
+tests pin the mechanics it shipped rather than the numbers. Those numbers were
+PROPOSED when this file was written and were RATIFIED at the R130 sitting
+(2026-08-07) with exactly one exception: Track 2.4, the starter's reader
+clause, was VETOED and reverted.
 
 Each test here was seen to FAIL against the defect it names before it was
 kept -- the house rule. The mutation used is recorded in each docstring.
@@ -14,6 +16,7 @@ from __future__ import annotations
 import random
 import subprocess
 import sys
+from dataclasses import replace
 
 import yaml
 
@@ -250,15 +253,22 @@ def test_hearts_swelling_pays_on_the_turn_it_is_guaranteed_to_be_played():
     assert st.player.block == 3
 
 
-def test_the_starter_reads_the_meter_now():
-    """Track 2.4, the act-1 lever, and the one number in the sprint that
-    cannot be aimed at a single archetype: this card is in every Furina deck.
+def test_the_starter_does_not_read_the_meter():
+    """Track 2.4 VETOED at the R130 sitting (2026-08-07).
+
+    The starter was the sprint's act-1 lever and the one number that could not
+    be aimed at a single archetype -- it is in every Furina deck, so it moved
+    the salon and spotlight arms too. [USER] vetoed exactly that: the starter
+    gets no payoff, Encore generation alone is fine for a starter. This is the
+    veto pin -- a Fanfare of 16 (four ticks of the commons rate) buys aria
+    nothing. The tier rule and the five other bodies stand; only this one
+    reverted.
     """
     assert "aria_of_recompense" in loader.starting_deck("furina")
     st = _furina_state(fanfare=16)
     play(st, "aria_of_recompense")
     assert st.player.encore == 5
-    assert st.player.block == 4
+    assert st.player.block == 0
 
 
 def test_every_new_reader_goes_through_the_clamp():
@@ -277,20 +287,32 @@ def test_every_new_reader_goes_through_the_clamp():
 # The drafter consequence of putting a reader on a basic
 # --------------------------------------------------------------------------
 
-def test_the_starter_reader_does_not_close_the_drafts_reader_limb():
+def test_a_basic_reader_could_not_close_the_drafts_reader_limb():
     """A free card cannot be evidence that a DRAFT assembled a plan.
 
-    Found by an existing test going red rather than by design: once the
-    starter read the meter, `core_complete(starter + [one floor source])`
-    returned True for the fanfare plan, so the reader limb was satisfied at
-    run start for every deck forever -- and it feeds score_offer's core-advance
-    bonus, so the drafter would have been told a third of the plan was free.
-    Mutation: drop the `rarity != basic` filter in `draft._drafted_readers`
-    and this test fails on the first assertion.
+    Found by an existing test going red rather than by design: while the
+    starter read the meter (Track 2.4), `core_complete(starter + [one floor
+    source])` returned True for the fanfare plan, so the reader limb was
+    satisfied at run start for every deck forever -- and it feeds
+    score_offer's core-advance bonus, so the drafter was being told a third
+    of the plan was free.
+
+    R130 (2026-08-07) vetoed that body, so NO basic reads the meter today and
+    the starter can no longer supply the premise. The rule outlived the card
+    and stays in `draft._drafted_readers`, so the pin is rebuilt around a
+    basic-rarity reader constructed here rather than drawn from the sheet:
+    the filter must hold for the next basic anyone proposes as a reader, and
+    a pin that can only fire while one exists is a pin that quietly retires.
+    Mutation: drop the `rarity != basic` filter and the second assertion goes
+    1 == 0.
     """
     starter = [loader.get_card(cid) for cid in loader.starting_deck("furina")]
-    assert any(draft._reads_fanfare(c) for c in starter)
+    assert not any(draft._reads_fanfare(c) for c in starter)   # R130 veto
     assert draft._drafted_readers(starter) == 0
+
+    basic_reader = replace(loader.get_card("applause_line"), rarity="basic")
+    assert draft._reads_fanfare(basic_reader)                  # it IS a reader
+    assert draft._drafted_readers(starter + [basic_reader]) == 0
 
     drafted = starter + [loader.get_card("applause_line")]
     assert draft._drafted_readers(drafted) == 1

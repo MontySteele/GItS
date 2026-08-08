@@ -33,7 +33,7 @@
 | `S4-G13` | Kokomi measures below the Ironclad-anchored floor — **pick one of three levers** (Code may build any, may pull none); plus the `NT-G5` fork evaluation (weak-or-fine), whose only accepted input is `OT-1` | OPEN | user-queue §2; `klee-mod/DECISIONS.md` E2/E2b |
 | `S4-G14` / `OT-1` | Play the Kokomi protocol playtest deliberately against the written question list (exploratory runs cannot be graded); `OT-1` = draw and play Neap Tide, report weak or fine | OPEN — table time; blocked on `S4-G6` + N1 attribution pass | user-queue §2/§7; `docs/current/playtest/kokomi-playtest-protocol.md` |
 | `M8` | Three Kokomi card-art rulings: crop-reuse budget (state a number or eyes-on per card); whether Watatsumi/shrine environment art counts as a card face (Furina rejected "a random hallway"); whether to hand-crop the banned `Character Details 1` for a Rare | OPEN | user-queue §10; `docs/current/art/kokomi-art-pass-requirements.md` §6 |
-| `M9` | Three Kokomi v0.4 leftovers: ratify the meter-20 number on the 500-run confirm; rename `epiphany_of_the_deep` → "Song of Pearls"; keep or drop the commander Garment-uptime watch | OPEN | user-queue §10; `docs/archive/kokomi-v0.4-report.md` §6 |
+| `M9` | Two Kokomi v0.4 leftovers: ratify the meter-20 number on the 500-run confirm; keep or drop the commander Garment-uptime watch (the `epiphany_of_the_deep` → "Song of Pearls" rename ratified at R133) | OPEN | user-queue §10; `docs/archive/kokomi-v0.4-report.md` §6 |
 
 ## 3. Klee — archetype bands and scorecard invariants
 
@@ -52,7 +52,7 @@
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `S4-G9` | The proposed-numbers ratification sitting. **Packet ready** (`review/active/s4-g9-ratification-packet.md`, 2026-08-07): 15 items in ratify-by-exception form, each with the shipped value, its support, blast radius, and a recommendation — everything unvetoed ratifies in one commit. Items needing more than a yes: `lasting_impression` needs a commissioned body, not a ratify (item 7); Track 2.4 touches the starter and is the one flagged veto candidate (item 6); the Spotlight icon call should precede `S4-G17`'s picks (item 14). Two named sub-items excluded as owned elsewhere: the name audit (`S4-G11`) and the payoff-reach follow-on (`Q-C` six-step order) | OPEN — packet awaiting sitting | user-queue §2; backlog §3 item 9; S4-G9 packet |
+| `S4-G9r` | `lasting_impression` body: commissioned at the R130 sitting (item 7 — "needs a rework", not a ratify). Pick a reader-clause body from → `review/active/lasting-impression-body-worksheet.md` | OPEN | S4-G9 item 7; R130 |
 
 ## 6. Shop, pricing, and money
 
@@ -70,32 +70,26 @@
 | `M7` | Should the simulator **model enchantments at all** (a data-model call — state on a card vs the sim's creature-scoped modifiers)? Exactly one Silent card needs it | OPEN — MODEL / DON'T | user-queue §10; `docs/archive/enchantments-design-2026-07-27.md` |
 | `M12` | `ROUTE_REGRET_MARGIN` (and its twin, `draft_regret`'s `+ 1.0` at `draft.py:1692`) has **no recorded derivation** — the draft literal is pinned load-bearing (MEDIUM-11) but never derived, and EB-16w's wiring inherited the analogy explicitly uncalibrated. Setting it needs either a pre-registered measurement or a ruling; until then only the margin-free reads (`mean/p50/p90/max_regret`) are quotable, and `regretted`/`regret_rate` carry the caveat in-code | OPEN — measurement or ruling | EB-16w close-out 2026-08-07; `tier05/run_metrics.py` margin note |
 
-## 8. Card text and decision-record corrections
-
-| ID | Decision needed | Status | Provenance |
-|---|---|---|---|
-| `M6` | Kaboom Beetle Swarm's printed text now describes something the card no longer does (post-R72 snapshot-at-cast): **APPROVE the reword or LEAVE** | OPEN | user-queue §10; `git show aa09b97:docs/current/playtest/open-playtest-items.md` §6.2 |
-
-## 9. Eyes-on reviews and taste
+## 8. Eyes-on reviews and taste
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
 | `S4-G11` | **Read card names and lore text by eye before they ship** (R29d Furina pass; Kokomi's 20 authored-but-unaudited fill cards; kickoff ask 10) — ruled to have no substitute | OPEN | user-queue §2; `tier0/DECISIONS.md` entry 75 + R29d |
 | `S4-G12` / `CC-G1` / `CC-G2` | Art contact-sheet eyes-on (three re-hunt candidates incl. `grand_gala`; confirm the `standing_room_only` crop by eye) + in-game screenshot review of the twelve Curtain Call cards and the A0 smoke run | OPEN — **materials ready** | user-queue §2; `docs/archive/g12-review-2026-08-05.md` |
 | `S4-G16` / `G-A5(b)` | **One screenshot: a Power being played and the Fanfare floor going up because of it** — the last of four evidence shapes (eyes-on acceptance, not telemetry) | OPEN | user-queue §2; `review/active/red-pen-2026-07-26.md` Part 3 |
-| `S4-G17` | Four running-game looks (no full playtest): `AS2-D5` salon capture; `AS2-B5` motion pass + facing taste; `AS2-E2` icon picks (4 REHUNT); hover-targets | OPEN — urgency reduced (hover-targets closed pt.4; B5 "not noticed") | user-queue §2/§7; `docs/animation-sprint-2-plan.md` (B5/D5/E2), §"Gates & rulings" |
+| `S4-G17` | Four running-game looks (no full playtest): `AS2-D5` salon capture; `AS2-B5` motion pass + facing taste; `AS2-E2` icon picks (4 REHUNT) — icon disposition RULED R130 — ten distinct stand, so the picks are no longer blocked on it; hover-targets | OPEN — urgency reduced (hover-targets closed pt.4; B5 "not noticed") | user-queue §2/§7; `docs/animation-sprint-2-plan.md` (B5/D5/E2), §"Gates & rulings" |
 | `S4-G20` | A bundle of small leftovers: Standing Ovation boost expiry (text-vs-intent); sim-vs-C# salon RNG divergence (accept or fix); three taste passes (Kokomi 58 faces + 15 companions, L12 duplicate pairs, `kaboom == spark_knight_style`); two infra toggles (branch protection / `gh`; manifest MAJOR bump, dormant by design) | OPEN | user-queue §2; backlog §1 P3-cluster + §5 |
 | N + O TOP-5 | Read the top five findings of the lore-fidelity and instrument-redteam ledgers (both worst-first); includes `N-1` and the PROVISIONAL reactions-corpus caveat | OPEN — read | user-queue §4; `docs/archive/lore-fidelity-audit-2026-08-05.md`, `docs/archive/instrument-redteam-2026-08-05.md` |
 | S8 + S10 galleries | Taste calls on two proposal galleries: eight flagged potions/relics (S8), and enemies that could be reskinned rather than redesigned (S10 — RESKIN/REDESIGN is [USER]'s per north-star) | OPEN — taste | user-queue §4; `docs/current/dossiers/content/potion-relic-conversion-gallery.md`, `docs/current/dossiers/remap/reskin-gallery.md` |
 | Art debt | Kokomi 58 faces + 15 companions awaiting picks; four missing Kokomi portraits; `curtain_cue` wordmark; `breathless` mood; A7 + six Curtain Call power sigils; `AS2-E2` icon re-hunt (4 of 7); `grand_gala` re-hunt; two `ART-L12` duplicate pairs (`blazing_delight==true_spark_knight`, `crowd_work==standing_ovation`) awaiting a re-pick ruling; the three placeholder-rendering cards `art_coverage` newly bills (`spotlight_center_stage`, `spotlight_guest_cast`, `confiscated` — EB-36's engineering half is done, the picks are not) | OPEN — mostly taste | user-queue §8; `docs/archive/backlog-2026-07-29.md` §5; `docs/current/art/kokomi-art-pass-requirements.md` §2a |
 
-## 10. Fontaine Rares close-out
+## 9. Fontaine Rares close-out
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
 | `M10` | Four items the Fontaine Rares sprint left owned by [USER]: companion art picks (Navia/Clorinde/Neuvillette/Arlecchino); the v1.7 lore/naming eyes-on audit (non-delegable); the C2 grading countersign; and close-out ratification. Design note parked with them: Neuvillette graded WEAK/DEFERRED with the "different facet" question open | OPEN | user-queue §10; `git show aa09b97:docs/current/backlog/missed-requirements.md` §4.4 |
 
-## 11. Design calls routed from the dockets & findings
+## 10. Design calls routed from the dockets & findings
 
 Surfaced by engineering triage, but each needs a [USER] design / taste /
 behavior / money call before any code moves.
@@ -113,8 +107,6 @@ behavior / money call before any code moves.
 | kokomi-workshop `X9` | Kokomi charge bank ("probably too strong, parse carefully") — the next kit workshop | dockets/kokomi-workshop |
 | `shared_billing` | The only Common with a cost upgrade (1→0), which the delta-grammar convention forbids — needs a [USER] call (sheet and C# agree; the conflict is with the ruled convention) | triage-memo |
 | Template heal/elite economy | Node composition and pathing-agency — a structural design question | tier05-perf §1.5.2(2) |
-| `EB-29s` | **Test Subject is out of scale as authored.** With the real mechanics (R128) AND a pilot taught the dossier's counterplay (EB-29t, POLICY 6: Enrage skill tax + Intangible per-hit cap — the reads verifiably bite: strength fed per fight fell 15.1→13.1), the full-HP instrument still reads **0.0 / 4.6 / 0.0 / 0.0%** across ref/real/klee/furina vs 90–98% for every other act-3 boss under the same decks and method. Not a pilot artifact and not a mechanics gap: the authored numbers (Enrage 2 whole-fight, Multi-Claw 30→40→50 hit ramp, Nemesis alternating a 1-per-hit cap) out-scale act-3 decks — even attack-only lines lose (starter deck 0/50 at ~7 turns). Call needed: retune the boss's numbers, accept an intentionally brutal outlier, or re-read the dossier's tuning intent | R128; EB-29t re-read 2026-08-07 |
-| `L4q` | `pays_at_zero` tag semantics: adopt `effect_walk.printed_floor` or ratify the literal-amount pin. **Worksheet ready** (`review/active/l4q-pays-at-zero-worksheet.md`, 2026-08-07): the full-pipeline diff under printed_floor is exactly **three cards gaining `frontload`** (`pearl_barrage`, `undertow`, `depths_judgment`) with no inheritance ripple — the pin's "19 cards inverted" warning does not materialize on today's sheets, and its docstring premise ("pearl_barrage deals nothing at an empty pile") contradicts the shipped `base: 5` the v0.3 comment says was raised so "the floor must be playable". Recommendation in the worksheet: adopt; ratifying instead means fixing the sheets or the pin's prose, since the current state asserts both halves of a contradiction | fix-sweep-4; L4 verified live; L4q worksheet |
 
 ---
 

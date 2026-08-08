@@ -411,9 +411,12 @@ KURAGE_PULSE_PER_CHARGE = 3   # pulse gains this much damage PER POINT of
                               # R73 (Neap Tide v2.1, 2026-07-26): x4 -> x2,
                               # then x2 -> x3 when E1 graded P6 and the
                               # pre-committed weak-side fallback FIRED. The
-                              # landed value is x3; x2 is measured, rejected,
-                              # and kept on the record below because the
-                              # rejection is the reason x3 is here.
+                              # landed value is x3 — RATIFIED at the R130
+                              # sitting, 2026-08-07, so the fallback's landing
+                              # is the ruled number and not a pending read;
+                              # x2 is measured, rejected, and kept on the
+                              # record below because the rejection is the
+                              # reason x3 is here.
                               # The x4 WATCH note this replaces was right and
                               # is kept as the reason: Charge is uncapped and
                               # never spent (R80), so this term only ever

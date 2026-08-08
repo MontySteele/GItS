@@ -657,12 +657,17 @@ def test_oath_ward_is_pinned_to_the_pulse_frequency_it_was_measured_at():
     """P1 coupling pin (playtest sprint, Track P).
 
     Kurage's Oath pays its ward ONCE PER PULSE, so what a run actually gets
-    is (ward x pulses per play). The 12 was measured against a summon that
+    is (ward x pulses per play). The ward is measured against a summon that
     pulses ONCE per play -- KURAGE_DURATION 1, doubling to twice once
     bake_kurage is upgraded (kurage_turns +1). Neither of those numbers is
     the Oath's own, and neither is guarded by the Oath's own tests, so a
-    duration change silently reprices a card that already carries a
-    [USER] "maybe too strong" flag as the first knob back.
+    duration change silently reprices the card.
+
+    THE WARD IS 5 (7 upgraded) as of R130, 2026-08-07: [USER]'s live-playtest
+    read overrode the 500-run bracket's 12 -- multiple copies turned it into a
+    block solve, the stacking shape a single-copy instrument never priced. The
+    pin moved here in the same change as the sheet row and the upgrade delta,
+    which is exactly the contract below.
 
     If this fails, you moved the pulse frequency. That is allowed. It is not
     allowed SILENTLY: re-measure the Oath at the new frequency, then move
@@ -675,7 +680,13 @@ def test_oath_ward_is_pinned_to_the_pulse_frequency_it_was_measured_at():
     assert summon["amount"] == 2
     (ward,) = [fx for fx in loader.get_card("kurages_oath").effects
                if fx.get("power") == "kurage_ward"]
-    assert ward["amount"] == 12
+    assert ward["amount"] == 5
+    # The upgrade is the OTHER half of the ruled statline, and it is the same
+    # coupling: 7 per pulse, not 7 per play. Pinned here so the delta cannot
+    # be retuned without re-reading the frequency argument above.
+    (ward_plus,) = [fx for fx in loader.get_card("kurages_oath+").effects
+                    if fx.get("power") == "kurage_ward"]
+    assert ward_plus["amount"] == 7
 
 
 def test_vigil_upgrade_moves_the_cap_with_the_amount():

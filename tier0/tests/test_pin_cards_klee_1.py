@@ -180,23 +180,29 @@ def test_combustion_study_meters_ten_burst_plus_its_skill_tag_and_draws_one():
     assert [c.id for c in meterless.player.hand] == ["strike"]
 
 
-def test_study_of_explosions_bins_the_worst_of_the_top_two_for_free():
-    """Study of Explosions costs nothing, looks at the top 2 of the draw
-    pile and bins the worse one (the non-attack), then meters 5 Burst from
-    its row plus 5 for its Skill tag."""
-    state = make_state()
+def test_study_of_explosions_pokes_for_four_and_meters_ten_burst_for_free():
+    """Study of Explosions costs nothing, throws 4 at a random enemy, then
+    meters 5 Burst from its row plus 5 for its Skill tag.
+
+    R130 dead-card rework (2026-08-07): the row used to open with
+    `scry_discard 2`, and the card was picked 0% of the time in the generic
+    pool AND 0% in its own reaction archetype -- a cost-0 skill whose visible
+    half is deck manipulation reads as doing nothing. The scry is gone and a
+    small aimed hit takes its place. What did NOT change is what the card is
+    FOR: cost 0, and 10 Burst, because `skill_tag` still contributes its +5
+    on top of the printed 5. Both halves are asserted here so a retype or a
+    tag drop cannot quietly halve the meter.
+    """
+    enemy = make_enemy(hp=40)
+    state = make_state(enemies=[enemy])
     state.player.burst_max = 100
-    state.player.draw_pile = [loader.get_card("strike"),
-                              loader.get_card("defend"),
-                              loader.get_card("bash")]
 
     _play(state, "study_of_explosions", energy=2)
 
     assert state.player.energy == 2            # printed cost 0
-    assert [ev["card"] for ev in _events(state, "scry_discard")] == ["defend"]
-    assert [c.id for c in state.player.draw_pile] == ["strike", "bash"]
-    assert state.player.discard_pile[0].id == "defend"
-    assert state.player.burst_energy == 10
+    assert enemy.hp == 36                      # 4, to the only enemy alive
+    assert _events(state, "scry_discard") == []
+    assert state.player.burst_energy == 10     # printed 5 + skill_tag 5
 
 
 # --- generic block / utility ---

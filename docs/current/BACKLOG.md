@@ -39,6 +39,7 @@
 |---|---|---|
 | `EB-1` | **Punch Off crash** (reclassified GAME-SIDE/SPINE-SIDE) — the animation stream keeps the watch; not done while seed `8B97LMCL2F` crashes in Punch Off | eng-backlog §1 |
 | `EB-14` | `selectors` is bot-feed only — a mod-side hook into the selection screens is the open item | eng-backlog §2 |
+| `EB-47` | **Windows compile validation of the 2026-08-07 sitting's C#** — five regenerated cards (`AriaOfRecompense` reverted to pure Encore; `TakeYourBow` gained the first upgrade-added `repeat_this` emission; `KuragesOath` gained a `PowerAmount` var where it had none; `StudyOfExplosions` and `SecretStash` gained damage bodies and `TargetType` changes) plus the hand-written `KaboomBeetleSwarm` description string. All were generated/edited on macOS where the mod cannot build; nothing here is compile-verified | R130–R132 |
 
 ## tools — codegen, lint, scripts, refactors
 

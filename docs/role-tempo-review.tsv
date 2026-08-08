@@ -70,7 +70,7 @@ klee	fish_blasting	rare	generic	payoff	frontload,velocity	frontload,velocity		la
 klee	true_spark_knight	rare	spark	payoff	frontload,scaling,velocity	frontload,scaling,velocity		mid,late	late		spark	spark		frontload,velocity	frontload,velocity
 klee	da_da_da	rare	spark	payoff	frontload,velocity	frontload,velocity		early	late		spark			frontload,velocity	frontload,velocity
 klee	grand_finale	rare	demolition	payoff	frontload	frontload		mid,late	late			bomb			
-klee	secret_stash	rare	demolition	glue	velocity	velocity		early	late						
+klee	secret_stash	rare	demolition	glue	frontload,velocity	frontload,velocity		early	late	aoe					
 klee	vermillion_pact	rare	reaction	payoff	scaling	scaling		late	late						
 klee	playtime_forever	rare	demolition,spark	payoff	frontload,scaling	frontload,scaling		late	late		bomb	bomb		frontload	frontload
 klee	best_friends_forever	rare	reaction	payoff	velocity	velocity		early	late						
@@ -78,7 +78,7 @@ klee	no_holding_back	rare	generic	payoff	frontload	frontload		early	late	aoe
 furina	soloists_solicitation	basic	generic	glue	frontload	frontload		early	early						
 furina	stage_presence	basic	generic	glue	block	block		early	early						
 furina	regal_bearing	basic	generic	glue	block,utility	block,utility		early	early						
-furina	aria_of_recompense	basic	generic,fanfare	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early,mid,late	early,late		encore	fanfare	block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
+furina	aria_of_recompense	basic	generic,fanfare	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early	early		encore		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 furina	salon_debut	basic	salon	enabler	block,frontload,scaling,sustain,utility,velocity	block,frontload,scaling,sustain,utility,velocity		early,mid,late	early		salon_member,salon_member_chevalmarin,salon_member_crabaletta,salon_member_usher	salon_member	block,frontload,scaling,velocity	block,frontload,scaling,sustain,utility,velocity	block,frontload,scaling,sustain,utility,velocity
 furina	casting_call	common	salon	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		late	early		fanfare,salon_member	salon_member	block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 furina	gentilhomme_usher	common	salon	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early,mid,late	early		salon_member,salon_member_usher	salon_member	block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
@@ -195,7 +195,7 @@ kokomi	mass_mobilization	uncommon	commander	enabler	block,frontload,scaling,velo
 kokomi	field_promotion	uncommon	commander	enabler	block,frontload,velocity	block,frontload,velocity		early	early		conscript		block,frontload,velocity	block,frontload,velocity	block,frontload,velocity
 kokomi	reinforcements	uncommon	commander	payoff	block,frontload,scaling,utility,velocity	block,frontload,scaling,utility,velocity		mid	late		charge,conscript		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 kokomi	mercy_of_the_deep	uncommon	priest	payoff	block	block		late	late						
-kokomi	pearl_barrage	uncommon	priest	payoff	scaling	scaling		late	late			exhaust_pile			
+kokomi	pearl_barrage	uncommon	priest	payoff	frontload,scaling	frontload,scaling		late	late			exhaust_pile			
 kokomi	communion_of_tides	uncommon	priest,assist	glue	frontload,scaling,utility,velocity	frontload,scaling,utility,velocity		early	early		charge		frontload,scaling	frontload,scaling	frontload,scaling
 kokomi	rearguard_action	uncommon	assist	glue	block,velocity	block,velocity		early	early						
 kokomi	shell_of_sanctuary	uncommon	generic	glue	block	block		mid	early						
@@ -207,7 +207,7 @@ kokomi	moonlit_offering	rare	priest,assist	enabler	velocity	velocity		early	late
 kokomi	read_the_current	uncommon	priest,generic	payoff	frontload,scaling	frontload,scaling		early,mid,late	late			charge			
 kokomi	quiet_harbor	uncommon	assist	payoff	block,velocity	block,velocity		early	late						
 kokomi	driftglass	uncommon	assist,generic	glue	frontload	frontload		early	early						
-kokomi	undertow	uncommon	assist	payoff	scaling,velocity	scaling,velocity		early,mid,late	late			exhaust_pile			
+kokomi	undertow	uncommon	assist	payoff	frontload,scaling,velocity	frontload,scaling,velocity		early,mid,late	late			exhaust_pile			
 kokomi	pearl_current	uncommon	generic	payoff	block	block		late	late						
 kokomi	the_tide_remembers	uncommon	priest,generic	payoff	frontload,scaling	frontload,scaling		mid,late	late	aoe		exhaust_pile			
 kokomi	ceremonial_garment	rare	generic	payoff	scaling	scaling		late	late			burst,charge			
@@ -215,6 +215,6 @@ kokomi	nereids_ascension	rare	priest,generic	payoff	frontload,scaling	frontload,
 kokomi	sango_prayer	rare	priest,generic	payoff	block,utility	block,utility		early	late	aoe					
 kokomi	vigil_of_the_deep	rare	priest,generic	payoff	sustain	sustain		mid,late	late						
 kokomi	grand_conscription	rare	commander	payoff	block,frontload,scaling,velocity	block,frontload,scaling,velocity		mid	late		charge,conscript		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
-kokomi	depths_judgment	rare	priest	payoff	scaling	scaling		mid,late	late			exhaust_pile			
+kokomi	depths_judgment	rare	priest	payoff	frontload,scaling	frontload,scaling		mid,late	late			exhaust_pile			
 kokomi	epiphany_of_the_deep	rare	priest,assist	payoff	velocity	velocity		mid,late	late						
 kokomi	prayer_to_the_moon	rare	priest,generic	payoff	block,frontload,scaling	block,frontload,scaling		early	late		charge		frontload,scaling	frontload,scaling	frontload,scaling

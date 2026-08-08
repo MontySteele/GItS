@@ -103,13 +103,17 @@ Three carry specific standing flags:
   column can supply.
 - **`burst_max = 20`** was chosen off a 300-run bracket to hit a pre-registered
   35–50% Burst-uptime band. Q2 is whether that band feels right in a hand.
-- **`kurages_oath = 12`** (added 2026-08-06, R107; S4 finding F9). Ruled at 12 with
-  [USER]'s own flag on the record — it reads too strong, rebalance later (R56;
-  verbatim words in this file's git history). Disposition: **first knob back** — if anything on Kokomi comes down, this
-  is the first number to move. The flag has existed since 2026-07-26 and had never
-  reached the one instrument that could judge it, which is why it is here now. **Feeds
-  Q4.** A hand's read of whether 12 plays as a purchase or as an autopilot is the part no
-  column supplies.
+- **`kurages_oath = 5` (7 upgraded)** (R130, 2026-08-07; was 12 from 2026-08-06,
+  R107; S4 finding F9). The knob was pulled BY RULING before this protocol ever
+  ran: [USER]'s live-playtest read found the card stood out and that multiple
+  copies turn it into a block solve, so the 12 came down to 5 and the upgrade
+  now sells +2 instead of Innate. The "first knob back" flag that had sat on
+  the record since 2026-07-26 is spent. Disposition **inverts**: the question
+  is no longer whether 5 plays as an autopilot but whether it is **playable at
+  all** — the 500-run bracket measured a single copy at ward 5 as a TRAP PICK
+  (priest 3.8% with the card vs 5.8% without), and that reading is what a hand
+  now has to confirm or overturn. **Feeds Q4.** Watch the stacking case too:
+  the ruling's reason is multi-copy behaviour no column measured.
 
 ### One number has no instrument at all
 

@@ -227,8 +227,13 @@ def readable(player) -> int:
 
     The single chokepoint for the Track C.2 negative-floor semantics. Every
     reader goes through here so "effects shut off, they do not invert" is one
-    fact in one place, and so the [USER] flip to StS-style inversion at
-    review is a one-line change rather than a hunt.
+    fact in one place.
+
+    RATIFIED at the R130 sitting (2026-08-07). The clamp shipped flagged for
+    review with the harsher StS-style inversion named as a one-line flip
+    here; the sitting took the clamp as written, so this is ruled semantics
+    and no longer a placeholder. The argument that held: negative member
+    ticks chipping her own stage would read as a bug, not as a cost.
 
     Deliberately takes a PLAYER rather than a CombatState: several readers
     (the pilot's valuation terms, the C# mirror's tests) hold a player and no

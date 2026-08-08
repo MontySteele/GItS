@@ -111,17 +111,11 @@ def test_starter_invitation_and_aria_curve():
 
     aria = loader.get_card("aria_of_recompense")
     aria_plus = loader.get_card("aria_of_recompense+")
-    # COMPENSATION Track 2.4 (2026-07-28): the starter is the act-1 lever, so
-    # it carries a low-slope Fanfare read now. The upgrade still moves ONLY the
-    # Encore number and the Innate flag -- the rate is not an upgrade surface.
-    assert aria.effects == [
-        {"op": "gain_encore", "amount": 5},
-        {"op": "block", "amount": 0, "bonus_formula": "1_per_4_fanfare"},
-    ]
-    assert aria_plus.effects == [
-        {"op": "gain_encore", "amount": 8},
-        {"op": "block", "amount": 0, "bonus_formula": "1_per_4_fanfare"},
-    ]
+    # COMPENSATION Track 2.4 VETOED (R130, 2026-08-07): the starter does not
+    # get a payoff. Aria is a PURE Encore card -- no Fanfare reader clause --
+    # and the upgrade moves only the Encore number and the Innate flag.
+    assert aria.effects == [{"op": "gain_encore", "amount": 5}]
+    assert aria_plus.effects == [{"op": "gain_encore", "amount": 8}]
 
     stage = loader.get_card("stage_presence")
     stage_plus = loader.get_card("stage_presence+")

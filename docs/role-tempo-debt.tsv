@@ -13,6 +13,16 @@
 # of subject, and reading it as progress is the mistake this comment
 # exists to prevent.
 #
+# SAID OUT LOUD, 2026-08-07 (L4q / R129): 19 -> 18. The cell that left is
+# kokomi/priest frontload|late, and it left for the SECOND kind of reason
+# -- the INSTRUMENT moved, not the pool. R129 adopted
+# effect_walk.printed_floor for the pays_at_zero tag, so the three kokomi
+# pile-readers that print a base (pearl_barrage 5+, undertow 4+,
+# depths_judgment 10+) now carry `frontload` alongside `scaling`. Nobody
+# wrote a card. The cell is covered because the tag rule stopped
+# disagreeing with the sheets' own comments; read it as a re-measurement,
+# not as progress.
+#
 # Every line is a COVERAGE GAP in a pool. No line names a card, and none
 # ever can: this lint is floors-only (charter A0.2(1)).
 character	archetype	cell
@@ -31,7 +41,6 @@ klee	spark	block|late
 klee	spark	block|mid
 kokomi	priest	block|late
 kokomi	priest	block|mid
-kokomi	priest	frontload|late
 kokomi	priest	scaling|late
 kokomi	priest	velocity|late
 kokomi	priest	velocity|mid

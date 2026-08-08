@@ -75,7 +75,15 @@
 - {id: boom_goes_the_dynamite, name: "Boom Goes the Dynamite", cost: 2, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [mid, late], run: [early, late]}, archetypes: [reaction], role: payoff,
    effects: [{op: damage, amount: 18, target: enemy}, {op: conditional, if: reaction_triggered_by_this, then: [{op: repeat_this, times: 1}]}]}
 - {id: study_of_explosions, name: "Study of Explosions", cost: 0, type: skill, rarity: common, solve: [frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [reaction], role: glue, tags: [skill_tag],
-   effects: [{op: scry_discard, amount: 2}, {op: burst_energy, amount: 5}]}
+   effects: [{op: damage, amount: 4, target: random_enemy}, {op: burst_energy, amount: 5}]}
+   # DEAD-CARD REWORK, RATIFIED R130 (2026-08-07) at the modest numbers. The card was picked 0% of the time in
+   # the generic pool AND 0% in its own reaction archetype — a card nobody takes even when it is on-plan is not
+   # a weak card, it is an absent one, and `scry_discard 2` was the whole reason: a cost-0 skill whose visible
+   # half is deck manipulation reads as doing nothing. Swapping the scry for a small aimed hit gives the free
+   # play a reason to exist without touching what it is FOR (the Burst grant, which skill_tag still feeds).
+   # The rework sim (tools/archive/klee_rework_sim.py, the machine-readable source for these bodies) resurrects
+   # it to 13-43% picked across arms at a winrate delta inside ±1% — bought pick rate, paid nothing.
+   # Cost 0, common, skill and skill_tag all stand: the shape was never the problem.
 - {id: friendly_visit, name: "Friendly Visit", cost: 1, type: skill, rarity: common, solve: [block, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [reaction], role: glue,
    effects: [{op: block, amount: 5}, {op: cost_mod, scope: companion_cards, delta: -1, duration: this_turn}, {op: draw, amount: 1}]}
 # Generic block/utility (6)
@@ -211,8 +219,15 @@
 # Renamed display-only; the id stays grand_finale per the id-stability rule.
 - {id: grand_finale, name: "The Big One", cost: 2, type: attack, rarity: rare, solve: [frontload], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [demolition], role: payoff,
    effects: [{op: damage, amount: 10, target: enemy, bonus_formula: 2_per_detonation_this_combat}]}
-- {id: secret_stash, name: "Secret Stash", cost: 1, type: skill, rarity: rare, solve: [velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [demolition], role: glue, exhaust: true,
-   effects: [{op: add_card, pool: demolition_commons, amount: 2, zone: hand, cost_override: 0}]}
+- {id: secret_stash, name: "Secret Stash", cost: 1, type: skill, rarity: rare, solve: [frontload, velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [demolition], role: glue, exhaust: true,
+   effects: [{op: damage, amount: 8, target: all_enemies}, {op: add_card, pool: demolition_commons, amount: 2, zone: hand, cost_override: 0}]}
+   # DEAD-CARD REWORK, RATIFIED R130 (2026-08-07) at the modest numbers. Same finding as study_of_explosions:
+   # 0% picked in the generic pool and 0% in demolition, its own archetype. A one-shot Exhaust rare that only
+   # hands you two commons spends a RARE slot to be two commons, and the draft priced that honestly. The add
+   # clause is kept VERBATIM — it is the card's identity — and a body is prepended so the rare slot buys
+   # something on the turn it is played. Rework sim (tools/archive/klee_rework_sim.py, the machine-readable
+   # source for these bodies): 13-43% picked, winrate-neutral within ±1%.
+   # Cost 1, rare and Exhaust all stand; the upgrade still buys a third common ({cards: +1}).
 - {id: vermillion_pact, name: "Vermillion Pact", cost: 1, type: power, rarity: rare, solve: [scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [reaction], role: payoff,
    effects: [{op: apply_power, power: amp_reaction_up, amount: 100, target: self, note: "PERCENT: doubles the base Vaporize/Melt amplifier. Watch the 4x amp-cap detector."}]}
 - {id: playtime_forever, name: "Playtime Forever", cost: 3, type: power, rarity: rare, solve: [frontload, scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [demolition, spark], role: payoff,
