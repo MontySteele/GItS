@@ -14,8 +14,11 @@ is evidence about whether the recorder records what it says it records.
 
 from __future__ import annotations
 
+import json
+
 import pytest
 
+from understudy import report
 from understudy import soak
 from understudy import trace_replay as replay
 
@@ -92,6 +95,117 @@ def test_a_fight_count_divergence_is_reported_in_either_direction(
 
     findings = replay.compare_runs(("a", 1), ("b", 1))
     assert any(f.startswith("FIGHT COUNT:") for f in findings)
+
+
+# ------------------------------------- EB-59: acceptance by absence -------
+#
+# The acceptance condition is an EMPTY FINDING LIST, so every way of getting
+# one without comparing anything is a false pass. One test per leg.
+
+def test_two_recordings_that_do_not_exist_are_not_identical(tmp_path,
+                                                            monkeypatch):
+    """Leg 1 + leg 5. The log dir is gitignored, so a fresh clone's normal
+    state is NO LOGS AT ALL -- and the reader that returned `[]` for a missing
+    file made that state look exactly like a clean comparison."""
+    monkeypatch.setattr(report, "LOG_DIR", tmp_path)
+    findings = replay.compare_runs(("nope", 1), ("nope", 2))
+    assert len(findings) == 1 and findings[0].startswith("NO RECORDING:")
+
+
+def test_a_log_with_unparseable_lines_refuses_rather_than_reads_short(
+        tmp_path, monkeypatch):
+    """Leg 5. A dropped line is a hole in the record. `read_run_log` counts it
+    and refuses; the morning report, which must still render, reads the same
+    file through `read_run_log_checked` and PRINTS the count instead."""
+    monkeypatch.setattr(report, "LOG_DIR", tmp_path)
+    (tmp_path / "soak-X-run001.jsonl").write_text(
+        json.dumps(SEED_A) + "\n{not json}\n", encoding="utf-8")
+
+    log = report.read_run_log_checked("X", 1)
+    assert log.unreadable == 1 and not log.sound and log.records == [SEED_A]
+    with pytest.raises(report.UnreadableRunLog):
+        report.read_run_log("X", 1)
+
+
+def test_a_missing_log_raises_where_a_claim_is_being_made(tmp_path,
+                                                          monkeypatch):
+    monkeypatch.setattr(report, "LOG_DIR", tmp_path)
+    assert report.read_run_log_checked("X", 1).missing
+    with pytest.raises(report.MissingRunLog):
+        report.read_run_log("X", 1)
+
+
+def test_the_morning_report_says_which_logs_it_could_not_read(tmp_path,
+                                                              monkeypatch):
+    """The report renders over a damaged night rather than crashing -- but it
+    says so above the defects, because the counts below it are then taken over
+    what survived and not over the runs the index claims."""
+    monkeypatch.setattr(report, "LOG_DIR", tmp_path)
+    (tmp_path / "soak-X-index.json").write_text(json.dumps(
+        {"stamp": "X", "character": "furina", "policy": "p",
+         "requested_runs": 2,
+         "runs": [{"run": 1, "seed": "A"}, {"run": 2, "seed": "B"}]}),
+        encoding="utf-8")
+    (tmp_path / "soak-X-run001.jsonl").write_text(
+        json.dumps(SEED_A) + "\n", encoding="utf-8")
+
+    out = report.render("X")
+    assert "could not be read whole" in out
+    assert "run 2" in out and "no run log at" in out
+
+
+def test_two_runs_with_no_seed_on_either_side_are_not_compared(monkeypatch):
+    """Leg 2. The seed guard was `seed_a != seed_b`, and `None != None` is
+    False -- so the one path where the harness does NOT know what it ran was
+    the path that skipped the check and compared anyway."""
+    _logs(monkeypatch, {"a": [_fight()], "b": [_fight()]})
+    findings = replay.compare_runs(("a", 1), ("b", 1))
+    assert len(findings) == 1 and findings[0].startswith("SEED:")
+    assert "neither run recorded a seed" in findings[0]
+
+
+def test_two_runs_with_no_fights_are_not_identical(monkeypatch):
+    """Leg 3's other half, at the run level: `zip` over two empty lists
+    iterates zero times, and zero comparisons is not agreement."""
+    _logs(monkeypatch, {"a": [SEED_A], "b": [SEED_A]})
+    findings = replay.compare_runs(("a", 1), ("b", 1))
+    assert len(findings) == 1 and findings[0].startswith("NO FIGHTS:")
+
+
+def test_a_recorder_with_no_column_does_not_agree_with_an_empty_one(
+        monkeypatch):
+    """Leg 3. Two recordings of one seed, one of them written by a build that
+    never had the selector column: that is a fact about the two builds, which
+    is the entire subject of this comparison."""
+    old = _fight()
+    del old["selectors"]
+    _logs(monkeypatch, {"a": [SEED_A, old],
+                        "b": [SEED_A, _fight(selectors=[])]})
+    findings = replay.compare_runs(("a", 1), ("b", 1))
+    assert len(findings) == 1 and "selectors diverges" in findings[0]
+    assert "(not recorded)" in findings[0]
+
+
+@pytest.mark.parametrize("key,value", [("outcome", "died"), ("turns", 9)])
+def test_a_fight_that_ended_differently_is_reported(monkeypatch, key, value):
+    """Leg 4. `outcome` and `turns` are still outside the trace IDENTITY --
+    they are output, like hp and damage -- but the undeclared version of that
+    rule let a won 2-turn fight and a lost 5-turn fight print IDENTICAL.
+    Declared and reported: the comparison names the field and lets the reader
+    read it."""
+    _logs(monkeypatch, {"a": [SEED_A, _fight()],
+                        "b": [SEED_A, _fight(**{key: value})]})
+    findings = replay.compare_runs(("a", 1), ("b", 1))
+    assert len(findings) == 1 and f": {key} " in findings[0]
+
+
+def test_an_index_with_no_runs_compares_nothing_and_says_so(monkeypatch):
+    """Leg 1 at the top of the funnel: the per-run loop runs zero times over
+    an empty index, and the verdict line printed a clean bill anyway."""
+    monkeypatch.setattr(replay, "load", lambda stamp: {"runs": []})
+    out = replay.render_compare("a", "b")
+    assert "VERDICT: nothing compared" in out
+    assert "identical" not in out
 
 
 def test_the_verdict_says_identical_only_when_nothing_diverged(monkeypatch):

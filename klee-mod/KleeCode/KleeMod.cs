@@ -142,7 +142,7 @@ public static class KleeMod
                     ["KLEEMOD-MELT_PREVIEW.title"] = "Reaction preview: Melt",
                     ["KLEEMOD-MELT_PREVIEW.description"] =
                         "This card supplies Pyro or Cryo while an enemy has the other aura. The triggering hit deals 1.75x damage and consumes the aura.",
-                    ["KLEEMOD-OVERLOAD_PREVIEW.title"] = "Reaction preview: Overload",
+                    ["KLEEMOD-OVERLOAD_PREVIEW.title"] = "Reaction preview: Overloaded",
                     ["KLEEMOD-OVERLOAD_PREVIEW.description"] =
                         "This card supplies Pyro or Electro while an enemy has the other aura. It deals 6 splash damage to all enemies and applies 1 Weak to the reacted enemy.",
                     ["KLEEMOD-SUPERCONDUCT_PREVIEW.title"] = "Reaction preview: Superconduct",
