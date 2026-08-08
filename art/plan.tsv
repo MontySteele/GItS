@@ -1074,3 +1074,52 @@ applause_line	ImageGen/images/cards/furina/applause_line.png	500	380	cover	cente
 applause_line	ImageGen/images/cards/furina/applause_line.png	500	380	cover	y0.40	shortlist	2	png	Starlit Letter Wallpaper Furina.png		splash	furina_pool
 breathless	ImageGen/images/cards/furina/breathless.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Savoring the Breeze Furina.png		sticker	furina_pool
 breathless	ImageGen/images/cards/furina/breathless.png	500	380	cover	y0.50	shortlist	2	png	Savoring the Breeze Wallpaper Furina.png		splash	furina_pool
+# === EB-54 art production runs, 2026-08-08 (candidates only) ===
+# Every row below is rank >= 2 BY DESIGN: art_process only promotes rank 1 to an
+# out-path, so a candidate set can land without making a pick. Picks are [USER]'s
+# (QUEUE Art-debt row). Do not renumber these to rank 1 without a ruling.
+# -- run 1: grand_gala re-hunt (its Opera Epiclese r1 went to standing_room_only) --
+grand_gala	ImageGen/images/cards/furina/grand_gala.png	500	380	cover_autocrop	cover@0.06	shortlist	6	png	Namecard Background Celebration Lavish Gala.png		splash
+grand_gala	ImageGen/images/cards/furina/grand_gala.png	500	380	cover_autocrop	contain@0.08	shortlist	7	png	Item Celebration Lavish Gala.png		item
+grand_gala	ImageGen/images/cards/furina/grand_gala.png	500	380	cover_autocrop	cover@0.06	shortlist	8	png	The Great Banquet of the Adepti.png		splash
+# -- run 2: AS2-E2 icon re-hunt, the 4 weak marks (AS2 log, 'Open [USER] items') --
+power_furina_standing_ovation	ImageGen/images/furina/powers/standing_ovation.png	256	256	contain	center	shortlist	2	png	Talent Conclusive Ovation.png		icon
+power_furina_standing_ovation	ImageGen/images/furina/powers/standing_ovation.png	256	256	contain	center	shortlist	3	png	Conclusive Ovation Equipment Card.png		icon
+power_furina_ovation_trickle	ImageGen/images/furina/powers/ovation_trickle.png	256	256	contain	center	shortlist	2	png	Item Ovations That Ceased Upon Festivity.png		icon
+power_furina_ovation_trickle	ImageGen/images/furina/powers/ovation_trickle.png	256	256	contain	center	shortlist	3	png	Conclusive Ovation Equipment Card Golden.png		icon
+power_friendly_visit	ImageGen/images/powers/friendly_visit.png	256	256	contain	center	shortlist	2	png	Item Gift.png		icon
+power_friendly_visit	ImageGen/images/powers/friendly_visit.png	256	256	contain	center	shortlist	3	png	Trifolium.png		icon
+power_study_buddy	ImageGen/images/powers/study_buddy.png	256	256	contain	center	shortlist	2	png	Book Ragged Notebook.png		icon
+power_study_buddy	ImageGen/images/powers/study_buddy.png	256	256	contain	center	shortlist	3	png	Trifolium Shape.png		icon
+# -- run 5: curtain_cue re-hunt (r1 is L9 PENDING_BANNED_FAMILY, uncroppable wordmark) --
+curtain_cue	ImageGen/images/cards/furina/curtain_cue.png	500	380	cover_autocrop	cover@0.06	shortlist	4	png	The Curtain Never Falls on Magic.png		splash	furina_pool
+curtain_cue	ImageGen/images/cards/furina/curtain_cue.png	500	380	cover_autocrop	contain@0.08	shortlist	5	png	Item Embroidered Curtains.png		item	furina_pool
+curtain_cue	ImageGen/images/cards/furina/curtain_cue.png	500	380	cover_autocrop	contain@0.08	shortlist	6	png	Item Silk Curtains Fetching the Sanguine Sky.png		item	furina_pool
+# -- run 6: breathless mood re-hunt (r1 shipped 'right register, wrong mood') --
+breathless	ImageGen/images/cards/furina/breathless.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Icon Emoji Paimon's Paintings 26 Furina 1.png		sticker	furina_pool
+breathless	ImageGen/images/cards/furina/breathless.png	500	380	cover_autocrop	cover@0.06	shortlist	4	png	Icon Emoji Paimon's Paintings 28 Furina 3.png		sticker	furina_pool
+breathless	ImageGen/images/cards/furina/breathless.png	500	380	cover_autocrop	cover@0.06	shortlist	5	png	Icon Emoji Paimon's Paintings 28 Furina 4.png		sticker	furina_pool
+# -- run 7: A7 + six Curtain Call power sigils (validate.ps1 $pckDeferred) --
+#    NO rank 1 on purpose: a rank-1 row would write the out-path, and S12 fails a
+#    deferred path that IS in the pck. The deferral stays valid until a pick lands.
+power_furina_unheard_confession	ImageGen/images/furina/powers/unheard_confession.png	256	256	contain	center	shortlist	2	png	Animula Choragi.png		icon
+power_furina_unheard_confession	ImageGen/images/furina/powers/unheard_confession.png	256	256	contain	center	shortlist	3	png	Item Fontaine Attunement.png		icon
+power_furina_fortissimo_guard	ImageGen/images/furina/powers/fortissimo_guard.png	256	256	contain	center	shortlist	2	png	Item Fontaine Completeness.png		icon
+power_furina_fortissimo_guard	ImageGen/images/furina/powers/fortissimo_guard.png	256	256	contain	center	shortlist	3	png	Sword Hydro.png		icon
+power_furina_stagehands	ImageGen/images/furina/powers/stagehands.png	256	256	contain	center	shortlist	2	png	Item Movable Small Spotlight.png		icon
+power_furina_stagehands	ImageGen/images/furina/powers/stagehands.png	256	256	contain	center	shortlist	3	png	Icon Opera Epiclese.png		icon
+power_furina_stagehands_encore	ImageGen/images/furina/powers/stagehands_encore.png	256	256	contain	center	shortlist	2	png	Item Ovations That Ceased Upon Festivity.png		icon
+power_furina_stagehands_encore	ImageGen/images/furina/powers/stagehands_encore.png	256	256	contain	center	shortlist	3	png	Item Festival Spotlight.png		icon
+power_furina_courtroom_drama	ImageGen/images/furina/powers/courtroom_drama.png	256	256	contain	center	shortlist	2	png	Item Fontaine Judgment.png		icon
+power_furina_courtroom_drama	ImageGen/images/furina/powers/courtroom_drama.png	256	256	contain	center	shortlist	3	png	Icon The Duke's Office.png		icon
+power_furina_the_gallery_stirs	ImageGen/images/furina/powers/the_gallery_stirs.png	256	256	contain	center	shortlist	2	png	Item Fontaine Big News.png		icon
+power_furina_the_gallery_stirs	ImageGen/images/furina/powers/the_gallery_stirs.png	256	256	contain	center	shortlist	3	png	Item Theater Tickets.png		icon
+power_furina_quick_change	ImageGen/images/furina/powers/quick_change.png	256	256	contain	center	shortlist	2	png	Item Fontaine Redemption.png		icon
+power_furina_quick_change	ImageGen/images/furina/powers/quick_change.png	256	256	contain	center	shortlist	3	png	Item Fontaine Lucine.png		icon
+# -- run 8 (EB-36 hunt half): the three placeholder-rendering mod art keys --
+spotlight_center_stage	ImageGen/images/cards/furina/spotlight_center_stage.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Tabletop Troupe Pros Furina.png		splash	furina_pool
+spotlight_center_stage	ImageGen/images/cards/furina/spotlight_center_stage.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Festival Spotlight.png		item	furina_pool
+spotlight_guest_cast	ImageGen/images/cards/furina/spotlight_guest_cast.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Opera Epiclese - Neuvillette's Seat.png		splash	furina_pool
+spotlight_guest_cast	ImageGen/images/cards/furina/spotlight_guest_cast.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Tabletop Troupe Pros Navia.png		splash	furina_pool
+confiscated	ImageGen/images/cards/klee/confiscated.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Klee Shorts 2023-06-12.png		splash
+confiscated	ImageGen/images/cards/klee/confiscated.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Klee Birthday 2022 - Shorts.png		splash
