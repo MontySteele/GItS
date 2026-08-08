@@ -265,6 +265,588 @@ def node_template() -> list[str]:
     return list(C.RUN_NODE_TEMPLATE)
 
 
+@dataclass
+class _RunCtx:
+    """One run's state in one object (EB-41 split of the 518-line run_one).
+
+    Every local the single-function version carried lives here, including the
+    per-ACT fields its two closures used to capture. The node phases are
+    methods because each of them reads AND writes most of the run -- HP, gold,
+    deck, relics, potions and the RunResult move together -- so passing them
+    as parameters would rename the coupling rather than remove it.
+
+    Module-level names (`run_fight`, `_potion_slots`, `build_act_map`,
+    `build_node_encounter`) are deliberately still called UNQUALIFIED from
+    these methods: the suite monkeypatches them on the module, and that seam
+    has to keep working.
+    """
+    character: str
+    archetype: str
+    policy: DraftPolicy
+    rng: random.Random
+    pilot: object
+    banner: frozenset
+    route_policy: Callable
+    res: RunResult
+    deck_ids: list[str]
+    hp: int
+    max_hp: int
+    gold: int
+    n: int
+    seed_ids: set
+    grant_relics: bool = False
+    grant_potions: bool = False
+    always_choose3: bool = False
+    pity_k: Optional[int] = None
+    held: "Optional[relic_pool.HeldRelics]" = None
+    bag: "Optional[potion_pool.PotionBag]" = None
+    removal_uses: int = 0
+    screens_since_companion: int = 0
+    just_rested: bool = False
+    fights: int = 0
+    seen_events: set = field(default_factory=set)
+    # Per-ACT, all reset by begin_act: the map being walked, its encounter
+    # draw, the run's Unknown pity table and the ACT-LOCAL route counters.
+    act_i: int = 0
+    act_map: object = None
+    act_draw: object = None
+    act_walk: dict = field(default_factory=dict)
+    unknown_weights: object = None
+    elites_taken: int = 0
+    rests_taken: int = 0
+
+    # -- shared helpers -------------------------------------------------
+
+    def plan(self) -> str:
+        """The plan label the ADAPTIVE sites act on. Policies flagged
+        emergent_plan buy, smith and answer events toward the deck's own
+        dominant shape, never the assigned label -- the A/B contract is that
+        adaptive ignores the label everywhere, so every one of those sites
+        asks this and none of them reads `archetype` directly."""
+        if getattr(self.policy, "emergent_plan", False):
+            return draft.dominant_archetype(
+                [loader.peek_card(cid) for cid in self.deck_ids])
+        return self.archetype
+
+    def route_state(self) -> route.RouteState:
+        return route.RouteState(
+            hp=self.hp, max_hp=self.max_hp, gold=self.gold,
+            deck_size=len(self.deck_ids),
+            floor=len(self.res.node_kinds) % C.MAP_FLOORS, act=self.act_i,
+            elites_taken=self.elites_taken, rests_taken=self.rests_taken)
+
+    def pick(self, options):
+        st = self.route_state()
+        picked = self.route_policy(self.rng, self.act_map, options, st)
+        self.act_walk["decisions"].append(
+            {"floor": picked.floor, "options": list(options),
+             "picked": picked, "state": st})
+        return picked
+
+    def mark_hindsight(self):
+        """EB-16w: the hindsight state, refreshed after every resolved node
+        and at both death exits -- never after the act loop, where an
+        all-acts-empty run would have no act to snapshot at all."""
+        self.res.route_hindsight = self.act_walk["hindsight"] = \
+            self.route_state()
+
+    def exit_dead(self, i: int) -> RunResult:
+        """The shared death exit (fight loss, stall-out, or a killing event).
+        The FULL held set is written back here -- without it an event death
+        reported ONLY its event-granted relics (audit 2026-07-26 §1.5),
+        mixing two populations in every relic-frequency read."""
+        self.res.death_node = i
+        self.res.deck_ids = self.deck_ids
+        if self.held is not None:
+            self.res.relics = [r for r in self.held.ids
+                               if r not in self.seed_ids]
+        if self.bag is not None:
+            self.res.potions_end = list(self.bag.potions)
+        self.mark_hindsight()
+        return self.res
+
+    def finish(self) -> RunResult:
+        self.res.won = True
+        self.res.deck_ids = self.deck_ids
+        if self.held is not None:
+            # W2: relics GRANTED this run (held minus any seed), in acquisition
+            # order -- includes commons pulled by a grant_random_common boon.
+            self.res.relics = [r for r in self.held.ids
+                               if r not in self.seed_ids]
+        if self.bag is not None:
+            self.res.potions_end = list(self.bag.potions)
+        return self.res
+
+    # -- act setup ------------------------------------------------------
+
+    def begin_act(self, act_i: int) -> bool:
+        """Open act `act_i`; False for a scripted empty act (tests), which
+        has nothing to walk."""
+        self.act_i = act_i
+        self.act_map = build_act_map(self.rng, act_i)
+        if not self.act_map.floors:
+            return False
+        # Per-ACT encounter draw (§4/§10): easy/hard identity, the elite draw
+        # and the boss-pool draw are fixed at each act's start from the run
+        # rng, so the roster replays under the same seed.
+        self.act_draw = acts.ActDraw(self.rng, act_i)
+        self.unknown_weights = maps.fresh_unknown_weights()
+        self.elites_taken = self.rests_taken = 0
+        # EB-16w: the live walk RECORDS its decisions, in `walk_decisions`'
+        # shape, so `run_metrics.route_regret` can price the roads not taken on
+        # a real run. Recording only -- no rng is drawn and no decision changes,
+        # so every existing seeded run is byte-identical.
+        # `hindsight` is THIS ACT'S terminal state, refreshed after every
+        # resolved node so the last write is the end-of-act snapshot (and a
+        # death exit's write is the act's real end). It exists because
+        # `RouteState.elites_taken` / `rests_taken` are ACT-LOCAL -- they reset
+        # just above -- while `res.route_hindsight` is the FINAL act's state.
+        # Repricing act 0 against act 2's snapshot fed act-2 elite counts into
+        # `hunter`'s elite gate, so an earlier act's regret moved with what a
+        # later act did: hindsight the run did not have at that decision.
+        self.act_walk = {"act": act_i, "map": self.act_map, "decisions": [],
+                         "hindsight": None}
+        self.res.route_decisions.append(self.act_walk)
+        return True
+
+    # -- node phases ----------------------------------------------------
+
+    def resolve_treasure(self):
+        """T: the gold lump, plus a Common-pool relic on grant_relics runs."""
+        self.gold += C.TREASURE_GOLD
+        if self.grant_relics and self.held is not None:
+            # W2: the 'ancient' step grants one Common-pool relic IN
+            # ADDITION to the gold lump.
+            rid = relic_pool.roll_relic_reward(self.rng, self.held,
+                                               self.character)
+            if rid is not None:
+                self.hp, self.max_hp, self.gold = self.held.add(
+                    rid, self.character, self.hp, self.max_hp, self.gold,
+                    self.deck_ids, self.rng)
+        else:
+            shop.grant_treasure_relic(self.character, self.deck_ids)  # no-op stub
+        self.res.gold = self.gold
+        self.res.hp_by_node.append(self.hp)   # non-fight: HP carries, index holds
+
+    def resolve_shop(self):
+        """$ (§5): buy from the character's OWN pool, then the relic shelf
+        (W2) and the potion shelf (potion pass)."""
+        outcome = shop.visit_shop(self.rng, self.character, self.deck_ids,
+                                  self.gold, self.plan(), self.policy,
+                                  self.removal_uses)
+        self.deck_ids = outcome.deck_ids
+        self.gold = outcome.gold
+        self.removal_uses = outcome.removal_uses
+        self.res.shop.extend(outcome.purchases)
+        self.res.shop_companion_offers.extend(outcome.companion_offers)
+        self.res.removal_uses = self.removal_uses
+        self.res.gold = self.gold
+        if self.held is not None:
+            # Book of Five Rings counts cards bought here; Meal Ticket heals.
+            added = sum(1 for p in outcome.purchases
+                        if p.get("buy") == "card")
+            self.hp = self.held.note_cards_added(added, self.hp, self.max_hp)
+            heal = self.held.shop_heal()
+            if heal:
+                self.hp = min(self.max_hp, self.hp + heal)
+        if self.grant_relics and self.held is not None:
+            # W2: stock 1-2 Common-pool relics for sale; auto-take-all
+            # (relics are near-strictly-good) -- buy each iff gold allows.
+            # A distinct shelf is rolled so no relic is offered twice.
+            exclude = set(self.held.ids)
+            shelf: list[str] = []
+            for _ in range(self.rng.randint(1, 2)):
+                stock = relic_pool.unowned_common(exclude, self.character)
+                if not stock:
+                    break
+                rid = self.rng.choice(stock)
+                shelf.append(rid)
+                exclude.add(rid)
+            for rid in shelf:
+                if self.gold >= C.SHOP_RELIC_PRICE:
+                    self.gold -= C.SHOP_RELIC_PRICE
+                    self.hp, self.max_hp, self.gold = self.held.add(
+                        rid, self.character, self.hp, self.max_hp, self.gold,
+                        self.deck_ids, self.rng)
+                    outcome.purchases.append(
+                        {"buy": "relic", "id": rid,
+                         "price": C.SHOP_RELIC_PRICE})
+            self.res.shop.extend(p for p in outcome.purchases
+                                 if p.get("buy") == "relic")
+            self.res.gold = self.gold
+        if self.grant_potions and self.bag is not None:
+            # Potion pass: stock 1-2 potions; auto-buy each iff a slot is
+            # free AND gold allows. The shelf is rolled first (deterministic
+            # off the run rng); an unaffordable / no-slot potion is simply
+            # not bought (no swap prompt in this model).
+            self.bag.slots = _potion_slots(self.held)
+            for _ in range(self.rng.randint(1, 2)):
+                pid = potion_pool.roll_potion(self.rng)
+                if not self.bag.full() and self.gold >= C.POTION_PRICE:
+                    self.gold -= C.POTION_PRICE
+                    self.bag.add(pid)
+                    self.res.shop.append({"buy": "potion", "id": pid,
+                                          "price": C.POTION_PRICE})
+            self.res.gold = self.gold
+        self.res.hp_by_node.append(self.hp)
+
+    def resolve_rest(self, i: int, room):
+        """R: heal / thin / smith (M7), with the DRAFTER_VERSION 5 lookahead
+        now read off the ROUTE rather than a template -- what actually comes
+        next is whichever room this rest leads to, and under a map that can
+        be anything. A rest that leads only into E/B is the "top up before
+        the big fight" case; a rest with a safe exit is not."""
+        nxt = self.act_map.successors(room)
+        action, target = rest_action(
+            self.deck_ids, self.hp, self.max_hp, self.plan(),
+            next_fight=bool(nxt) and all(
+                r.kind in ("E", "B") for r in nxt))
+        if action == "heal":
+            self.hp = min(self.max_hp,
+                          self.hp + round(C.REST_HEAL_FRACTION * self.max_hp))
+        elif action == "remove":
+            self.deck_ids.remove(target)
+        else:                               # M7: rest-site smithing
+            self.deck_ids[self.deck_ids.index(target)] = target + upgrades.SUFFIX
+        if self.held is not None:
+            # Regal Pillow: extra heal at the campfire. Venerable Tea Set's
+            # post_rest_energy is injected into the NEXT fight (just_rested).
+            heal = self.held.post_rest_heal()
+            if heal:
+                self.hp = min(self.max_hp, self.hp + heal)
+        self.just_rested = True
+        self.res.rests.append((i, action, target))
+        self.res.hp_by_node.append(self.hp)
+
+    def resolve_event(self, i: int) -> bool:
+        """An Unknown that resolved to an Event (§11). The resolver is pure
+        over deck/HP/gold/relics/potions, so it is handed a snapshot and its
+        results are copied back -- no run local is reachable from event
+        content. True when the event killed the run (a real rule)."""
+        est = events.EventState(
+            character=self.character, archetype=self.plan(), hp=self.hp,
+            max_hp=self.max_hp, gold=self.gold, deck_ids=self.deck_ids,
+            potions=list(self.bag.potions) if self.bag else [],
+            potion_slots=self.bag.slots if self.bag else 0)
+        events.visit(self.rng, self.act_i, est, self.seen_events,
+                     held=self.held, bag=self.bag, policy=self.policy)
+        self.hp, self.max_hp, self.gold = est.hp, est.max_hp, est.gold
+        self.deck_ids = est.deck_ids
+        self.res.events.extend(est.log)
+        if self.grant_relics:
+            self.res.relics.extend(est.relics_granted)
+        if self.hp <= 0:
+            self.res.hp_by_node.append(0)
+            self.exit_dead(i)
+            return True
+        self.res.gold = self.gold
+        self.res.hp_by_node.append(self.hp)
+        return False
+
+    def resolve_fight(self, i: int, kind: str) -> bool:
+        """N / E / B. True when the run is over (death or stall-out)."""
+        enemies = build_node_encounter(kind, self.rng, self.act_draw)
+        # Context-dependent combat effects (spec): base held-relic combat
+        # effects + post_rest_energy (if we just rested) + elite_combat_start
+        # (on E nodes). None when no relics are held -> identical to before.
+        relic_fx = None
+        if self.held is not None:
+            relic_fx = self.held.combat_effects_for(kind, self.just_rested)
+            self.just_rested = False
+        if self.grant_potions and self.bag is not None:
+            # Potion pass: build the fight with the held bag + node_kind context
+            # so the combat use-policy can drink (offensive drinks gated to
+            # elite/boss by node_kind). A COPY of bag.potions goes in; combat
+            # mutates the player's own list, which we sync back after the fight.
+            self.bag.slots = _potion_slots(self.held)
+            potions_before = list(self.bag.potions)
+            player = loader.build_player_from_ids(
+                self.character, self.deck_ids, relic_effects=relic_fx,
+                potions=list(self.bag.potions), potion_slots=self.bag.slots,
+                node_kind=_NODE_KIND_CTX.get(kind, ""))
+        else:
+            potions_before = None
+            player = loader.build_player_from_ids(
+                self.character, self.deck_ids, relic_effects=relic_fx)
+        player.hp = self.hp
+        player.max_hp = self.max_hp
+        hp_start = self.hp
+        state = run_fight(player, enemies, self.pilot,
+                          seed=self.rng.randrange(2 ** 31))
+        self.res.fight_stats.append(t0_metrics.extract(state, hp_start))
+        self._record_traces(state)
+        self.fights += 1
+        self.hp = state.player.hp
+        # Combat-scoped effects such as Feed can raise max HP permanently.
+        # Keep that mutation on the existing run-local state so the next
+        # fight is not rebuilt with the old ceiling (a fuller RunState object
+        # is a separate architecture decision, not required for correctness).
+        self.max_hp = state.player.max_hp
+        fight_won = state.player.alive and not state.living_enemies
+        if self.grant_potions and self.bag is not None:
+            # Sync consumed potions back: combat removed each drunk/spent potion
+            # (incl. an auto-consumed Fairy) from player.potions, so the survivor
+            # list IS the bag, and the difference is what was used this fight.
+            self.res.potions_used.extend(
+                _consumed(potions_before, state.player.potions))
+            self.bag.potions = list(state.player.potions)
+        if fight_won:
+            self._pay_fight_win(kind, player)
+        self.res.hp_by_node.append(max(0, self.hp))
+        if not fight_won:                   # death OR stall-out = run over
+            self.exit_dead(i)
+            return True
+        final_act = self.act_i == self.n - 1
+        if kind == "B":
+            self.res.acts_completed += 1
+            # C2 (Neap Tide addendum): relic count AT the act boundary,
+            # recorded here because res.relics is overwritten wholesale
+            # at each exit and therefore only ever describes run END.
+            # An act that was never finished contributes no entry, which
+            # is the honest shape: there is no boundary to measure.
+            self.res.relics_by_act.append(
+                0 if self.held is None
+                else len([r for r in self.held.ids
+                          if r not in self.seed_ids]))
+        if kind != "B" or not final_act:
+            self._reward_screens(i, kind, state)
+        if kind == "B" and not final_act:
+            self._act_boundary()
+        return False
+
+    def _record_traces(self, state):
+        """The per-fight telemetry, act-tagged. ALL of it is taken here
+        because `state.log` does not survive onto the RunResult -- anything
+        not reduced at this point is unrecoverable -- and act-tagged because
+        every question these answer ("by act 3...") is a per-act one that no
+        fight-level or run-level average can reach. Each trace is empty for
+        rosters the mechanism does not exist on, so it costs them nothing."""
+        act_i = self.act_i
+        log = state.log
+        self.res.fanfare_traces.append(                # pass 4 Q1a
+            (act_i, fanfare_telemetry.trace(log)))
+        self.res.kurage_traces.append(                 # P2 (playtest sprint)
+            (act_i, kurage_telemetry.trace(log)))
+        self.res.burst_traces.append(                  # C5 (Neap Tide v2.1)
+            (act_i, burst_telemetry.trace(log)))
+        self.res.overlap_traces.append(                # C4 (Neap Tide addendum)
+            (act_i, overlap_telemetry.trace(log)))
+        self.res.aura_traces.append(                   # Curtain Call R85 Track D
+            (act_i, aura_telemetry.trace(log)))
+        self.res.encore_traces.append(                 # Salon UI Track 3
+            (act_i, encore_telemetry.trace(log)))
+        self.res.conditional_traces.append(            # Salon UI Track 4
+            (act_i, conditional_telemetry.trace(log)))
+
+    def _pay_fight_win(self, kind: str, player):
+        """What a won fight pays: the run-layer heal, gold income, relic
+        payouts and the potion drop."""
+        # Burning Blood in the RUN LAYER (run-model rework §2): heal after
+        # each won fight for relic-bearing characters. combat.py stays
+        # emit-only; the heal that carries HP across fights lives ONLY
+        # here, capped at max_hp.
+        if "heal_after_won_fight" in player.relic_hooks:
+            self.hp = min(self.max_hp, self.hp + C.BURNING_BLOOD_HEAL)
+        self.gold += C.GOLD_INCOME.get(kind, 0)     # §5 per-fight income
+        # Run-layer relic payouts on a won fight: gold_per_fight (Amethyst/
+        # Aubergine) and fishing_rod's every-3rd-N-win upgrade.
+        if self.held is not None:
+            self.gold, self.hp = self.held.post_fight(
+                kind, self.gold, self.hp, self.max_hp, self.deck_ids, self.rng)
+        # W2: ELITE and BOSS wins grant a relic (Common pool -- boss-tier
+        # relics are out of scope this pass). Normals give cards, not
+        # relics, so N wins grant nothing here.
+        if self.grant_relics and self.held is not None and kind in ("E", "B"):
+            rid = relic_pool.roll_relic_reward(self.rng, self.held,
+                                               self.character)
+            if rid is not None:
+                self.hp, self.max_hp, self.gold = self.held.add(
+                    rid, self.character, self.hp, self.max_hp, self.gold,
+                    self.deck_ids, self.rng)
+        # Potion pass: a POTION_DROP_CHANCE drop after a won NORMAL/ELITE
+        # fight (bosses end the run, so no boss drop). Slot-permitting: a
+        # full bag discards the drop (logged in bag.discarded).
+        if self.grant_potions and self.bag is not None and kind in ("N", "E"):
+            if self.rng.random() < C.POTION_DROP_CHANCE:
+                self.bag.slots = _potion_slots(self.held)
+                self.bag.add(potion_pool.roll_potion(self.rng))
+        self.res.gold = self.gold
+
+    def _reward_screens(self, i: int, kind: str, state):
+        """The reward screen. A FINAL boss ends the run with no reward; a
+        non-final boss shows the act-transition screen (§10.1): the CARD
+        offers are forced Rare -- the ratified "choice-of-3 Rares" boss drop
+        -- and the companion slot is forced Rare too. (Shipped Pass 1 forced
+        only the companion slot; a no-companion character got ordinary
+        commons at the boundary -- the Ironclad-0.6% diagnosis, 2026-07-23.)"""
+        n_comp = 1
+        if self.always_choose3:
+            n_comp = 3                  # choose3: every slot is
+            #             a pick of three (spec §3). Applies to
+            #             the act-boundary screen too -- it is a
+            #             companion slot like any other, forced
+            #             to Rare rather than exempted.
+        elif (self.pity_k is not None
+                and self.screens_since_companion >= self.pity_k):
+            n_comp = 3                  # pity fires: choose-3 slot
+        # THE FIGHT'S OWN SCREEN, then any screen the fight EARNED.
+        # The Hunt's extra reward is granted here and only here:
+        # combat recorded that it happened (state.extra_card_screens)
+        # and the run layer is what owns rolling and drafting, the
+        # same division the Burning Blood heal keeps above. An extra
+        # screen is CARD-ONLY -- no companion slot, no pity credit,
+        # and never the boss's forced-Rare tier, because it is an
+        # ordinary CardReward the room hands over after the fight.
+        # (Lost fights never reach here at all, so a Hunt that fires
+        # in a fight the player then loses pays nothing, exactly as
+        # in the base game -- there is no rewards screen to pay on.)
+        screens = [(n_comp, "rare" if kind == "B" else None)]
+        screens += [(0, None)] * state.extra_card_screens
+        for n_comp_i, forced in screens:
+            offers = rewards.roll_rewards(
+                self.rng, self.character, companion_offers=n_comp_i,
+                banner=self.banner, companion_rarity=forced,
+                card_rarity=forced)
+            # Read-only: the drafter, the relevance probes and the core
+            # check below only SCORE the deck. Copying it three times per
+            # screen was the run layer's single biggest cost.
+            deck_cards = [loader.peek_card(cid) for cid in self.deck_ids]
+            # Relevance is judged on the deck as it stood WHEN THE SCREEN WAS
+            # SHOWN, before the pick lands -- judging after would let the pick
+            # itself change the answer.
+            advanced = draft.offer_advances_plan(offers, deck_cards,
+                                                 self.archetype)
+            # Whether there was still a plan to advance. Core progress caps at
+            # 1.0, so once the core is online NOTHING can advance it and
+            # `advanced` is structurally False for the rest of the run. Without
+            # this flag, relevance charges those screens to the pool as misses
+            # -- and half of demolition's screens fall after its core completes.
+            plan_live = not draft.core_complete(deck_cards, self.archetype)
+            engaging = draft.offer_worth_engaging(offers, deck_cards,
+                                                  self.archetype)
+            pick = self.policy(self.rng, deck_cards, offers, self.archetype)
+            self.res.decisions.append({
+                "node": i, "offers": offers,
+                "picked": pick.id if pick else None,
+                "advanced_plan": advanced,
+                "plan_live": plan_live,
+                "engaging": engaging})
+            if pick is not None:
+                self.deck_ids.append(pick.id)
+                if self.held is not None:      # Book of Five Rings tally
+                    self.hp = self.held.note_cards_added(1, self.hp,
+                                                         self.max_hp)
+            if n_comp_i == 0:
+                # A card-only screen cannot produce a companion, so
+                # counting it toward the pity clock would let The
+                # Hunt accelerate the companion pity timer -- an
+                # interaction nobody designed and nothing prints.
+                pass
+            elif pick is not None and pick.is_companion:
+                self.screens_since_companion = 0
+            else:
+                self.screens_since_companion += 1
+            if (self.res.time_to_online is None
+                    and draft.core_complete(
+                        [loader.peek_card(cid) for cid in self.deck_ids],
+                        self.archetype)):
+                self.res.time_to_online = self.fights
+
+    def _act_boundary(self):
+        """Act boundary (§10.1): the Ancient heals 100% of missing HP, and on
+        grant_relics runs offers a 1-of-3 Ancient-relic pick. Deck, gold,
+        relics and potions persist in their run locals; only HP resets."""
+        self.hp = self.max_hp
+        if self.grant_relics and self.held is not None:
+            offer = relic_pool.ancient_offer(self.rng, self.held,
+                                             self.character)
+            pick = relic_pool.ancient_pick(offer, self.character)
+            if pick is not None:
+                self.hp, self.max_hp, self.gold = self.held.add(
+                    pick, self.character, self.hp, self.max_hp, self.gold,
+                    self.deck_ids, self.rng)
+
+
+def _setup_run(character: str, archetype: str, pilot_id: str,
+               policy: DraftPolicy, seed: int, slot_mode: str,
+               relics: list[str] | None, grant_relics: bool,
+               grant_potions: bool, n_acts: int | None,
+               route_name: str) -> _RunCtx:
+    """Run start: the slot mode, the three rng streams, the starting deck and
+    the seeded/Neow relics and the potion bag. Everything up to the first
+    node. Argument meanings are documented on run_one, the public entry."""
+    pity_k = None
+    always_choose3 = slot_mode == "choose3"
+    if slot_mode.startswith("pity(") and slot_mode.endswith(")"):
+        pity_k = int(slot_mode[5:-1])
+    elif slot_mode not in ("standard", "choose3"):
+        raise ValueError(f"unknown slot mode {slot_mode!r}")
+    rng = random.Random(seed)
+    # v1.8 Featured Banner: rolled once per run and fixed for its duration.
+    # DEDICATED rng stream, the same trick draft_regret uses, for a specific
+    # reason: drawing the banner from `rng` would advance the main stream and
+    # silently renumber every existing measurement, including the frozen v0.1
+    # snapshot. Seed-determined either way, which is all the spec asks for.
+    # `nations` is passed EXPLICITLY rather than left to the default. This call
+    # site is the entire reason the default was wrong for as long as it was:
+    # it took the argument-free form, so the banner covered Mondstadt alone and
+    # every other nation's 5-stars were filtered out of every offer in the run.
+    # Naming the set here means the audit is visible where the run is built.
+    banner = rewards.roll_banner(random.Random(seed + 2 * 10 ** 9),
+                                 nations=rewards.designed_nations())
+    pilot = make_pilot(loader.pilot_weights(pilot_id))
+    # Dedicated stream: randomized starters are seed-replayable but do not
+    # renumber encounters, reward rolls, shops, or any calibrated run result.
+    starter_rng = random.Random(seed + 3 * 10 ** 9)
+    deck_ids = loader.starting_deck(character, starter_rng)
+    max_hp = loader._character_index()[character]["hp"]
+    hp = max_hp
+    gold = C.GOLD_START
+    # Held relics (the run-layer half). Constructed ONLY when a run actually
+    # holds relics, so relics=None keeps every relic branch dead. Pickup relics
+    # (max-HP / gold / deck upgrades) are applied ONCE, here at run start.
+    held = None
+    seed_ids = set(relics or [])
+    if relics:
+        held = relic_pool.HeldRelics.hold(relics, character)
+        hp, max_hp, gold = held.apply_pickups(hp, max_hp, gold, deck_ids, rng)
+    if grant_relics:
+        # W2 granting cadence. Build an empty holder if the run wasn't seeded,
+        # so relics accrue onto it. Honour BOTH when seeded: seed first (above),
+        # then the Neow pick. All accrual is gated on grant_relics, so a seeded
+        # run with grant_relics=False never grants -- the W1 world is intact.
+        if held is None:
+            held = relic_pool.HeldRelics.empty(character)
+        offer = relic_pool.neow_offer(rng)                  # 1-of-3 (positive)
+        pick = relic_pool.neow_pick(offer, character)
+        if pick is not None:
+            hp, max_hp, gold = held.add(pick, character, hp, max_hp, gold,
+                                        deck_ids, rng)
+    # Held-potion bag (potion pass). Constructed ONLY on grant_potions runs, so
+    # a grant_potions=False run never holds potions and every combat is built
+    # exactly as before. Slot count is recomputed at each use site from `held`
+    # so a Potion Belt granted mid-run raises the cap immediately.
+    bag = None
+    if grant_potions:
+        bag = potion_pool.PotionBag(potions=[], slots=_potion_slots(held))
+    total_acts = acts.n_acts()
+    n = total_acts if n_acts is None else n_acts
+    if not 1 <= n <= total_acts:
+        raise ValueError(f"n_acts={n} out of range: {total_acts} act(s) "
+                         f"registered in RUN_ACTS")
+    res = RunResult(seed=seed, won=False, death_node=None, hp_by_node=[],
+                    deck_ids=deck_ids, node_kinds=[], banner=banner,
+                    n_acts=n, route=route_name)
+    return _RunCtx(character=character, archetype=archetype, policy=policy,
+                   rng=rng, pilot=pilot, banner=banner,
+                   route_policy=route.POLICIES[route_name], res=res,
+                   deck_ids=deck_ids, hp=hp, max_hp=max_hp, gold=gold, n=n,
+                   seed_ids=seed_ids, grant_relics=grant_relics,
+                   grant_potions=grant_potions,
+                   always_choose3=always_choose3, pity_k=pity_k,
+                   held=held, bag=bag)
+
+
 def run_one(character: str, archetype: str, pilot_id: str,
             policy: DraftPolicy, seed: int,
             slot_mode: str = "standard",
@@ -304,75 +886,13 @@ def run_one(character: str, archetype: str, pilot_id: str,
     builds each fight with the held bag + node_kind context (so the combat
     use-policy can drink). Default False. When grant_potions=False the bag is
     never constructed and potions are never passed to build_player_from_ids, so
-    the potions=None path is byte-identical to the pre-potion model."""
-    pity_k = None
-    always_choose3 = slot_mode == "choose3"
-    if slot_mode.startswith("pity(") and slot_mode.endswith(")"):
-        pity_k = int(slot_mode[5:-1])
-    elif slot_mode not in ("standard", "choose3"):
-        raise ValueError(f"unknown slot mode {slot_mode!r}")
-    screens_since_companion = 0
-    rng = random.Random(seed)
-    # v1.8 Featured Banner: rolled once per run and fixed for its duration.
-    # DEDICATED rng stream, the same trick draft_regret uses, for a specific
-    # reason: drawing the banner from `rng` would advance the main stream and
-    # silently renumber every existing measurement, including the frozen v0.1
-    # snapshot. Seed-determined either way, which is all the spec asks for.
-    # `nations` is passed EXPLICITLY rather than left to the default. This call
-    # site is the entire reason the default was wrong for as long as it was:
-    # it took the argument-free form, so the banner covered Mondstadt alone and
-    # every other nation's 5-stars were filtered out of every offer in the run.
-    # Naming the set here means the audit is visible where the run is built.
-    banner = rewards.roll_banner(random.Random(seed + 2 * 10 ** 9),
-                                 nations=rewards.designed_nations())
-    pilot = make_pilot(loader.pilot_weights(pilot_id))
-    # Dedicated stream: randomized starters are seed-replayable but do not
-    # renumber encounters, reward rolls, shops, or any calibrated run result.
-    starter_rng = random.Random(seed + 3 * 10 ** 9)
-    deck_ids = loader.starting_deck(character, starter_rng)
-    max_hp = loader._character_index()[character]["hp"]
-    hp = max_hp
-    gold = C.GOLD_START
-    removal_uses = 0
-    # Held relics (the run-layer half). Constructed ONLY when a run actually
-    # holds relics, so relics=None keeps every relic branch dead. Pickup relics
-    # (max-HP / gold / deck upgrades) are applied ONCE, here at run start.
-    held = None
-    seed_ids = set(relics or [])
-    if relics:
-        held = relic_pool.HeldRelics.hold(relics, character)
-        hp, max_hp, gold = held.apply_pickups(hp, max_hp, gold, deck_ids, rng)
-    if grant_relics:
-        # W2 granting cadence. Build an empty holder if the run wasn't seeded,
-        # so relics accrue onto it. Honour BOTH when seeded: seed first (above),
-        # then the Neow pick. All accrual is gated on grant_relics, so a seeded
-        # run with grant_relics=False never grants -- the W1 world is intact.
-        if held is None:
-            held = relic_pool.HeldRelics.empty(character)
-        offer = relic_pool.neow_offer(rng)                  # 1-of-3 (positive)
-        pick = relic_pool.neow_pick(offer, character)
-        if pick is not None:
-            hp, max_hp, gold = held.add(pick, character, hp, max_hp, gold,
-                                        deck_ids, rng)
-    # Held-potion bag (potion pass). Constructed ONLY on grant_potions runs, so
-    # a grant_potions=False run never holds potions and every combat is built
-    # exactly as before. Slot count is recomputed at each use site from `held`
-    # so a Potion Belt granted mid-run raises the cap immediately.
-    bag = None
-    if grant_potions:
-        bag = potion_pool.PotionBag(potions=[], slots=_potion_slots(held))
-    just_rested = False
-    total_acts = acts.n_acts()
-    n = total_acts if n_acts is None else n_acts
-    if not 1 <= n <= total_acts:
-        raise ValueError(f"n_acts={n} out of range: {total_acts} act(s) "
-                         f"registered in RUN_ACTS")
-    route_policy = route.POLICIES[route_name]
-    res = RunResult(seed=seed, won=False, death_node=None, hp_by_node=[],
-                    deck_ids=deck_ids, node_kinds=[], banner=banner,
-                    n_acts=n, route=route_name)
-    fights = 0
-    seen_events: set[str] = set()
+    the potions=None path is byte-identical to the pre-potion model.
+
+    EB-41: the walk itself is this function; run start, the per-act setup and
+    each node kind are phases on `_RunCtx` above."""
+    ctx = _setup_run(character, archetype, pilot_id, policy, seed, slot_mode,
+                     relics, grant_relics, grant_potions, n_acts, route_name)
+    res = ctx.res
 
     # RUNTEMPLATE_VERSION 6 (§11): the fixed 11-node spine is gone. Each act
     # generates a real 16-floor map and a route policy walks it, so node KINDS
@@ -380,457 +900,42 @@ def run_one(character: str, archetype: str, pilot_id: str,
     # len(node_kinds) stays MAP_FLOORS * n_acts and the index IS the floor
     # index -- which is what keeps the funnel and the death heatmap meaningful
     # (they are per-floor now, not per-authored-node).
-    for act_i in range(n):
-        act_map = build_act_map(rng, act_i)
-        if not act_map.floors:      # scripted empty act (tests); nothing to walk
+    for act_i in range(ctx.n):
+        if not ctx.begin_act(act_i):    # scripted empty act (tests)
             continue
-        # Per-ACT encounter draw (§4/§10): easy/hard identity, the elite draw
-        # and the boss-pool draw are fixed at each act's start from the run
-        # rng, so the roster replays under the same seed.
-        act_draw = acts.ActDraw(rng, act_i)
-        unknown_weights = maps.fresh_unknown_weights()
-        elites_taken = rests_taken = 0
-
-        def _route_state():
-            return route.RouteState(
-                hp=hp, max_hp=max_hp, gold=gold, deck_size=len(deck_ids),
-                floor=len(res.node_kinds) % C.MAP_FLOORS, act=act_i,
-                elites_taken=elites_taken, rests_taken=rests_taken)
-
-        # EB-16w: the live walk RECORDS its decisions, in `walk_decisions`'
-        # shape, so `run_metrics.route_regret` can price the roads not taken on
-        # a real run. Recording only -- no rng is drawn and no decision changes,
-        # so every existing seeded run is byte-identical.
-        # `hindsight` is THIS ACT'S terminal state, refreshed after every
-        # resolved node so the last write is the end-of-act snapshot (and a
-        # death exit's write is the act's real end). It exists because
-        # `RouteState.elites_taken` / `rests_taken` are ACT-LOCAL -- they reset
-        # just above -- while `res.route_hindsight` is the FINAL act's state.
-        # Repricing act 0 against act 2's snapshot fed act-2 elite counts into
-        # `hunter`'s elite gate, so an earlier act's regret moved with what a
-        # later act did: hindsight the run did not have at that decision.
-        act_walk = {"act": act_i, "map": act_map, "decisions": [],
-                    "hindsight": None}
-        res.route_decisions.append(act_walk)
-
-        def _pick(options):
-            st = _route_state()
-            picked = route_policy(rng, act_map, options, st)
-            act_walk["decisions"].append(
-                {"floor": picked.floor, "options": list(options),
-                 "picked": picked, "state": st})
-            return picked
-
-        room = _pick(act_map.rooms_on(0))
+        room = ctx.pick(ctx.act_map.rooms_on(0))
         while True:
             i = len(res.node_kinds)
             kind = room.kind
             if kind == maps.UNKNOWN:
                 # Resolved AT ENTRY, through the run's pity table (§1).
-                kind = maps.resolve_unknown(rng, unknown_weights)
+                kind = maps.resolve_unknown(ctx.rng, ctx.unknown_weights)
             res.node_kinds.append(kind)
-            elites_taken += kind == "E"
-            rests_taken += kind == "R"
-            final_act = act_i == n - 1
+            ctx.elites_taken += kind == "E"
+            ctx.rests_taken += kind == "R"
             if kind == "T":                     # treasure: gold lump + relic
-                gold += C.TREASURE_GOLD
-                if grant_relics and held is not None:
-                    # W2: the 'ancient' step grants one Common-pool relic IN
-                    # ADDITION to the gold lump.
-                    rid = relic_pool.roll_relic_reward(rng, held, character)
-                    if rid is not None:
-                        hp, max_hp, gold = held.add(rid, character, hp, max_hp,
-                                                    gold, deck_ids, rng)
-                else:
-                    shop.grant_treasure_relic(character, deck_ids)   # no-op stub
-                res.gold = gold
-                res.hp_by_node.append(hp)       # non-fight: HP carries, index holds
-            elif kind == "$":                     # shop (§5): buy from OWN pool
-                # Adaptive policies buy toward the deck's emergent shape, never
-                # the assigned label -- same contract as rest-site smithing.
-                shop_plan = archetype
-                if getattr(policy, "emergent_plan", False):
-                    shop_plan = draft.dominant_archetype(
-                        [loader.peek_card(cid) for cid in deck_ids])
-                outcome = shop.visit_shop(rng, character, deck_ids, gold,
-                                          shop_plan, policy, removal_uses)
-                deck_ids = outcome.deck_ids
-                gold = outcome.gold
-                removal_uses = outcome.removal_uses
-                res.shop.extend(outcome.purchases)
-                res.shop_companion_offers.extend(outcome.companion_offers)
-                res.removal_uses = removal_uses
-                res.gold = gold
-                if held is not None:
-                    # Book of Five Rings counts cards bought here; Meal Ticket heals.
-                    added = sum(1 for p in outcome.purchases
-                                if p.get("buy") == "card")
-                    hp = held.note_cards_added(added, hp, max_hp)
-                    heal = held.shop_heal()
-                    if heal:
-                        hp = min(max_hp, hp + heal)
-                if grant_relics and held is not None:
-                    # W2: stock 1-2 Common-pool relics for sale; auto-take-all
-                    # (relics are near-strictly-good) -- buy each iff gold allows.
-                    # A distinct shelf is rolled so no relic is offered twice.
-                    exclude = set(held.ids)
-                    shelf: list[str] = []
-                    for _ in range(rng.randint(1, 2)):
-                        stock = relic_pool.unowned_common(exclude, character)
-                        if not stock:
-                            break
-                        rid = rng.choice(stock)
-                        shelf.append(rid)
-                        exclude.add(rid)
-                    for rid in shelf:
-                        if gold >= C.SHOP_RELIC_PRICE:
-                            gold -= C.SHOP_RELIC_PRICE
-                            hp, max_hp, gold = held.add(rid, character, hp, max_hp,
-                                                        gold, deck_ids, rng)
-                            outcome.purchases.append(
-                                {"buy": "relic", "id": rid,
-                                 "price": C.SHOP_RELIC_PRICE})
-                    res.shop.extend(p for p in outcome.purchases
-                                    if p.get("buy") == "relic")
-                    res.gold = gold
-                if grant_potions and bag is not None:
-                    # Potion pass: stock 1-2 potions; auto-buy each iff a slot is
-                    # free AND gold allows. The shelf is rolled first (deterministic
-                    # off the run rng); an unaffordable / no-slot potion is simply
-                    # not bought (no swap prompt in this model).
-                    bag.slots = _potion_slots(held)
-                    for _ in range(rng.randint(1, 2)):
-                        pid = potion_pool.roll_potion(rng)
-                        if not bag.full() and gold >= C.POTION_PRICE:
-                            gold -= C.POTION_PRICE
-                            bag.add(pid)
-                            res.shop.append({"buy": "potion", "id": pid,
-                                             "price": C.POTION_PRICE})
-                    res.gold = gold
-                res.hp_by_node.append(hp)
+                ctx.resolve_treasure()
+            elif kind == "$":                   # shop (§5): buy from OWN pool
+                ctx.resolve_shop()
             elif kind == "R":
-                # Policies flagged emergent_plan (adaptive) smith toward the
-                # deck's own dominant shape, never the assigned label -- the
-                # A/B contract is that adaptive ignores the label everywhere.
-                rest_plan = archetype
-                if getattr(policy, "emergent_plan", False):
-                    rest_plan = draft.dominant_archetype(
-                        [loader.peek_card(cid) for cid in deck_ids])
-                # The pre-fight lookahead (DRAFTER_VERSION 5) now reads the
-                # ROUTE rather than a template: what actually comes next is
-                # whichever room this rest leads to, and under a map that can
-                # be anything. A rest that leads only into E/B is the "top up
-                # before the big fight" case; a rest with a safe exit is not.
-                nxt = act_map.successors(room)
-                action, target = rest_action(
-                    deck_ids, hp, max_hp, rest_plan,
-                    next_fight=bool(nxt) and all(
-                        r.kind in ("E", "B") for r in nxt))
-                if action == "heal":
-                    hp = min(max_hp, hp + round(C.REST_HEAL_FRACTION * max_hp))
-                elif action == "remove":
-                    deck_ids.remove(target)
-                else:                               # M7: rest-site smithing
-                    deck_ids[deck_ids.index(target)] = target + upgrades.SUFFIX
-                if held is not None:
-                    # Regal Pillow: extra heal at the campfire. Venerable Tea Set's
-                    # post_rest_energy is injected into the NEXT fight (just_rested).
-                    heal = held.post_rest_heal()
-                    if heal:
-                        hp = min(max_hp, hp + heal)
-                just_rested = True
-                res.rests.append((i, action, target))
-                res.hp_by_node.append(hp)
+                ctx.resolve_rest(i, room)
             elif kind == "event":
-                # An Unknown that resolved to an Event (§11). The resolver is
-                # pure over deck/HP/gold/relics/potions, so it is handed a
-                # snapshot and its results are copied back -- no run local is
-                # reachable from event content.
-                # Adaptive policies act on the deck's emergent shape, never
-                # the assigned label -- same contract as rest smithing and
-                # shop buying. Without this the event layer is a fresh label
-                # channel and adaptive runs stop being label-independent.
-                event_plan = archetype
-                if getattr(policy, "emergent_plan", False):
-                    event_plan = draft.dominant_archetype(
-                        [loader.peek_card(cid) for cid in deck_ids])
-                est = events.EventState(
-                    character=character, archetype=event_plan, hp=hp,
-                    max_hp=max_hp, gold=gold, deck_ids=deck_ids,
-                    potions=list(bag.potions) if bag else [],
-                    potion_slots=bag.slots if bag else 0)
-                events.visit(rng, act_i, est, seen_events, held=held, bag=bag,
-                             policy=policy)
-                hp, max_hp, gold = est.hp, est.max_hp, est.gold
-                deck_ids = est.deck_ids
-                res.events.extend(est.log)
-                if grant_relics:
-                    res.relics.extend(est.relics_granted)
-                if hp <= 0:                 # an event CAN kill (real rule)
-                    res.death_node = i
-                    res.deck_ids = deck_ids
-                    # Same full-held-set overwrite as the fight-death and
-                    # run-end exits -- without it an event death reported ONLY
-                    # its event-granted relics (audit 2026-07-26 §1.5), mixing
-                    # two populations in every relic-frequency read.
-                    if held is not None:
-                        res.relics = [r for r in held.ids if r not in seed_ids]
-                    if bag is not None:
-                        res.potions_end = list(bag.potions)
-                    res.hp_by_node.append(0)
-                    res.route_hindsight = act_walk["hindsight"] = \
-                        _route_state()    # EB-16w (per-act since 2026-08-08)
+                if ctx.resolve_event(i):
                     return res
-                res.gold = gold
-                res.hp_by_node.append(hp)
             else:                               # N / E / B: a fight
-                enemies = build_node_encounter(kind, rng, act_draw)
-                # Context-dependent combat effects (spec): base held-relic combat
-                # effects + post_rest_energy (if we just rested) + elite_combat_start
-                # (on E nodes). None when no relics are held -> identical to before.
-                relic_fx = None
-                if held is not None:
-                    relic_fx = held.combat_effects_for(kind, just_rested)
-                    just_rested = False
-                if grant_potions and bag is not None:
-                    # Potion pass: build the fight with the held bag + node_kind context
-                    # so the combat use-policy can drink (offensive drinks gated to
-                    # elite/boss by node_kind). A COPY of bag.potions goes in; combat
-                    # mutates the player's own list, which we sync back after the fight.
-                    bag.slots = _potion_slots(held)
-                    potions_before = list(bag.potions)
-                    player = loader.build_player_from_ids(
-                        character, deck_ids, relic_effects=relic_fx,
-                        potions=list(bag.potions), potion_slots=bag.slots,
-                        node_kind=_NODE_KIND_CTX.get(kind, ""))
-                else:
-                    potions_before = None
-                    player = loader.build_player_from_ids(character, deck_ids,
-                                                          relic_effects=relic_fx)
-                player.hp = hp
-                player.max_hp = max_hp
-                hp_start = hp
-                state = run_fight(player, enemies, pilot,
-                                  seed=rng.randrange(2 ** 31))
-                res.fight_stats.append(t0_metrics.extract(state, hp_start))
-                # Pass 4 Q1a: Fanfare trajectory per fight, tagged with the act
-                # it happened in -- the saturation question is "by act 3", which
-                # a fight-level or run-level average cannot answer. Empty
-                # (turns == 0) for characters with no Fanfare pool, so this
-                # costs other rosters nothing.
-                res.fanfare_traces.append(
-                    (act_i, fanfare_telemetry.trace(state.log)))
-                # P2 (playtest sprint): same act-tagged shape, same reason --
-                # the runaway question is "by act 3", which no run-level
-                # average can answer. Empty for every character without a
-                # fielded Kurage, so the rest of the roster pays nothing.
-                res.kurage_traces.append(
-                    (act_i, kurage_telemetry.trace(state.log)))
-                # C5 (Neap Tide v2.1): burst income by SOURCE, act-tagged for
-                # the same reason as the two above. Taken here because the
-                # fight log does not survive onto the RunResult -- only the
-                # reduced trace does.
-                res.burst_traces.append(
-                    (act_i, burst_telemetry.trace(state.log)))
-                # C4 (Neap Tide addendum): plays of the watched carry cards,
-                # act-tagged like the three above and taken here for the same
-                # reason -- the fight log is gone by the time anything else
-                # can look at it.
-                res.overlap_traces.append(
-                    (act_i, overlap_telemetry.trace(state.log)))
-                # Curtain Call (R85, Track D): hydro-application uptime,
-                # act-tagged like the four above and taken here for the same
-                # reason. Empty (turns == 0 only when the log is empty) but
-                # near-zero-cost for rosters that never apply hydro.
-                res.aura_traces.append(
-                    (act_i, aura_telemetry.trace(state.log)))
-                # Salon UI sprint (2026-07-28), Tracks 3 and 4: Encore
-                # saturation and conditional-rider fire rates. Same act-tagged
-                # shape and taken in the same place as the five above, for the
-                # same reason -- state.log does not survive onto the
-                # RunResult, so anything not reduced here is unrecoverable.
-                res.encore_traces.append(
-                    (act_i, encore_telemetry.trace(state.log)))
-                res.conditional_traces.append(
-                    (act_i, conditional_telemetry.trace(state.log)))
-                fights += 1
-                hp = state.player.hp
-                # Combat-scoped effects such as Feed can raise max HP permanently.
-                # Keep that mutation on the existing run-local state so the next
-                # fight is not rebuilt with the old ceiling (a fuller RunState object
-                # is a separate architecture decision, not required for correctness).
-                max_hp = state.player.max_hp
-                fight_won = state.player.alive and not state.living_enemies
-                if grant_potions and bag is not None:
-                    # Sync consumed potions back: combat removed each drunk/spent potion
-                    # (incl. an auto-consumed Fairy) from player.potions, so the survivor
-                    # list IS the bag, and the difference is what was used this fight.
-                    res.potions_used.extend(
-                        _consumed(potions_before, state.player.potions))
-                    bag.potions = list(state.player.potions)
-                if fight_won:
-                    # Burning Blood in the RUN LAYER (run-model rework §2): heal after
-                    # each won fight for relic-bearing characters. combat.py stays
-                    # emit-only; the heal that carries HP across fights lives ONLY
-                    # here, capped at max_hp.
-                    if "heal_after_won_fight" in player.relic_hooks:
-                        hp = min(max_hp, hp + C.BURNING_BLOOD_HEAL)
-                    gold += C.GOLD_INCOME.get(kind, 0)     # §5 per-fight income
-                    # Run-layer relic payouts on a won fight: gold_per_fight (Amethyst/
-                    # Aubergine) and fishing_rod's every-3rd-N-win upgrade.
-                    if held is not None:
-                        gold, hp = held.post_fight(kind, gold, hp, max_hp,
-                                                   deck_ids, rng)
-                    # W2: ELITE and BOSS wins grant a relic (Common pool -- boss-tier
-                    # relics are out of scope this pass). Normals give cards, not
-                    # relics, so N wins grant nothing here.
-                    if grant_relics and held is not None and kind in ("E", "B"):
-                        rid = relic_pool.roll_relic_reward(rng, held, character)
-                        if rid is not None:
-                            hp, max_hp, gold = held.add(rid, character, hp, max_hp,
-                                                        gold, deck_ids, rng)
-                    # Potion pass: a POTION_DROP_CHANCE drop after a won NORMAL/ELITE
-                    # fight (bosses end the run, so no boss drop). Slot-permitting: a
-                    # full bag discards the drop (logged in bag.discarded).
-                    if grant_potions and bag is not None and kind in ("N", "E"):
-                        if rng.random() < C.POTION_DROP_CHANCE:
-                            bag.slots = _potion_slots(held)
-                            bag.add(potion_pool.roll_potion(rng))
-                    res.gold = gold
-                res.hp_by_node.append(max(0, hp))
-                if not fight_won:                   # death OR stall-out = run over
-                    res.death_node = i
-                    res.deck_ids = deck_ids
-                    if held is not None:
-                        res.relics = [r for r in held.ids if r not in seed_ids]
-                    if bag is not None:
-                        res.potions_end = list(bag.potions)
-                    res.route_hindsight = act_walk["hindsight"] = \
-                        _route_state()    # EB-16w (per-act since 2026-08-08)
+                if ctx.resolve_fight(i, kind):
                     return res
-                final_act = act_i == n - 1
-                if kind == "B":
-                    res.acts_completed += 1
-                    # C2 (Neap Tide addendum): relic count AT the act boundary,
-                    # recorded here because res.relics is overwritten wholesale
-                    # at each exit and therefore only ever describes run END.
-                    # An act that was never finished contributes no entry, which
-                    # is the honest shape: there is no boundary to measure.
-                    res.relics_by_act.append(
-                        0 if held is None
-                        else len([r for r in held.ids if r not in seed_ids]))
-                if kind != "B" or not final_act:
-                    # Reward screen. A FINAL boss ends the run with no reward; a
-                    # non-final boss shows the act-transition screen (§10.1): the
-                    # CARD offers are forced Rare -- the ratified "choice-of-3
-                    # Rares" boss drop -- and the companion slot is forced Rare
-                    # too. (Shipped Pass 1 forced only the companion slot; a
-                    # no-companion character got ordinary commons at the boundary
-                    # -- the Ironclad-0.6% diagnosis, 2026-07-23.)
-                    n_comp = 1
-                    if always_choose3:
-                        n_comp = 3                  # choose3: every slot is
-                        #             a pick of three (spec §3). Applies to
-                        #             the act-boundary screen too -- it is a
-                        #             companion slot like any other, forced
-                        #             to Rare rather than exempted.
-                    elif pity_k is not None and screens_since_companion >= pity_k:
-                        n_comp = 3                  # pity fires: choose-3 slot
-                    # THE FIGHT'S OWN SCREEN, then any screen the fight EARNED.
-                    # The Hunt's extra reward is granted here and only here:
-                    # combat recorded that it happened (state.extra_card_screens)
-                    # and the run layer is what owns rolling and drafting, the
-                    # same division the Burning Blood heal keeps above. An extra
-                    # screen is CARD-ONLY -- no companion slot, no pity credit,
-                    # and never the boss's forced-Rare tier, because it is an
-                    # ordinary CardReward the room hands over after the fight.
-                    # (Lost fights never reach here at all, so a Hunt that fires
-                    # in a fight the player then loses pays nothing, exactly as
-                    # in the base game -- there is no rewards screen to pay on.)
-                    screens = [(n_comp, "rare" if kind == "B" else None)]
-                    screens += [(0, None)] * state.extra_card_screens
-                    for n_comp_i, forced in screens:
-                        offers = rewards.roll_rewards(
-                            rng, character, companion_offers=n_comp_i,
-                            banner=banner, companion_rarity=forced,
-                            card_rarity=forced)
-                        # Read-only: the drafter, the relevance probes and the core
-                        # check below only SCORE the deck. Copying it three times per
-                        # screen was the run layer's single biggest cost.
-                        deck_cards = [loader.peek_card(cid) for cid in deck_ids]
-                        # Relevance is judged on the deck as it stood WHEN THE SCREEN WAS
-                        # SHOWN, before the pick lands -- judging after would let the pick
-                        # itself change the answer.
-                        advanced = draft.offer_advances_plan(offers, deck_cards, archetype)
-                        # Whether there was still a plan to advance. Core progress caps at
-                        # 1.0, so once the core is online NOTHING can advance it and
-                        # `advanced` is structurally False for the rest of the run. Without
-                        # this flag, relevance charges those screens to the pool as misses
-                        # -- and half of demolition's screens fall after its core completes.
-                        plan_live = not draft.core_complete(deck_cards, archetype)
-                        engaging = draft.offer_worth_engaging(offers, deck_cards,
-                                                              archetype)
-                        pick = policy(rng, deck_cards, offers, archetype)
-                        res.decisions.append({
-                            "node": i, "offers": offers,
-                            "picked": pick.id if pick else None,
-                            "advanced_plan": advanced,
-                            "plan_live": plan_live,
-                            "engaging": engaging})
-                        if pick is not None:
-                            deck_ids.append(pick.id)
-                            if held is not None:           # Book of Five Rings tally
-                                hp = held.note_cards_added(1, hp, max_hp)
-                        if n_comp_i == 0:
-                            # A card-only screen cannot produce a companion, so
-                            # counting it toward the pity clock would let The
-                            # Hunt accelerate the companion pity timer -- an
-                            # interaction nobody designed and nothing prints.
-                            pass
-                        elif pick is not None and pick.is_companion:
-                            screens_since_companion = 0
-                        else:
-                            screens_since_companion += 1
-                        if (res.time_to_online is None
-                                and draft.core_complete(
-                                    [loader.peek_card(cid) for cid in deck_ids],
-                                    archetype)):
-                            res.time_to_online = fights
-                if kind == "B" and not final_act:
-                    # Act boundary (§10.1): the Ancient heals 100% of missing HP,
-                    # and on grant_relics runs offers a 1-of-3 Ancient-relic pick.
-                    # Deck, gold, relics and potions persist in their run locals;
-                    # only HP resets.
-                    hp = max_hp
-                    if grant_relics and held is not None:
-                        offer = relic_pool.ancient_offer(rng, held, character)
-                        pick = relic_pool.ancient_pick(offer, character)
-                        if pick is not None:
-                            hp, max_hp, gold = held.add(pick, character, hp, max_hp,
-                                                        gold, deck_ids, rng)
 
             # Route to the next room. The decision is made HERE, after the
             # node has resolved, so it sees post-fight HP -- which is the
             # whole mechanism behind "a hurt run ducks the next elite".
-            # EB-16w: the hindsight state, refreshed after every resolved node.
-            # Assigned here (and at the two death exits) rather than after the
-            # act loop, where `_route_state` may not exist at all -- an all-acts
-            # -empty run never enters the body that defines it.
-            res.route_hindsight = act_walk["hindsight"] = _route_state()
-            succ = act_map.successors(room)
+            ctx.mark_hindsight()
+            succ = ctx.act_map.successors(room)
             if not succ:
                 break
-            room = _pick(succ)
+            room = ctx.pick(succ)
 
-    res.won = True
-    res.deck_ids = deck_ids
-    if held is not None:
-        # W2: relics GRANTED this run (held minus any seed), in acquisition
-        # order -- includes commons pulled by a grant_random_common boon.
-        res.relics = [r for r in held.ids if r not in seed_ids]
-    if bag is not None:
-        res.potions_end = list(bag.potions)
-    return res
+    return ctx.finish()
 
 
 def _run_range(character: str, archetype: str, pilot_id: str,
