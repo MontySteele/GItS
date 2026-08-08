@@ -1187,6 +1187,20 @@ class RunDriver:
                     # singleplayer on a guard the decompile contradicts; see
                     # vendor/STS2_MCP/gits/GitsSeed.cs.
                     self.session.note_seed_channel()
+                    # EB-15: WHICH ROUTE FIRED IS NOT ENOUGH TO DIAGNOSE WHY.
+                    # Three live runs took `debug_override` and the record
+                    # could not say whether the character-select screen was
+                    # missed or the lobby on it was null, because `route` was
+                    # the only key kept off a report that answers both. The
+                    # endpoint's own precondition -- `charSelect != null` and
+                    # `charSelect.Lobby != null` (vendor/STS2_MCP/gits/
+                    # GitsSeed.cs, GitsSeedApply) -- is read once BEFORE the
+                    # POST and once from the POST's own report, so a fourth
+                    # observation says which half of the guard failed.
+                    try:
+                        before = bridge.get_seed()
+                    except bridge.BridgeError as exc:
+                        before = {"error": str(exc)}
                     report = bridge.set_seed(self.chosen_seed)
                     # THE CANONICAL FORM COMES BACK FROM THE GAME, and it is
                     # taken rather than computed. `SeedHelper.CanonicalizeSeed`
@@ -1203,7 +1217,15 @@ class RunDriver:
                                "seed": self.chosen_seed,
                                "route": report.get("route"),
                                "status": report.get("status"),
-                               "message": report.get("message")})
+                               "message": report.get("message"),
+                               # EB-15 diagnosis keys. Adding keys to a log
+                               # record is free; these are read, not driven on.
+                               "on_char_select": report.get("on_char_select"),
+                               "lobby_seed": report.get("lobby_seed"),
+                               "debug_override": report.get("debug_override"),
+                               "before_on_char_select":
+                                   before.get("on_char_select"),
+                               "before_lobby_seed": before.get("lobby_seed")})
                 if pick is None:
                     if picks < 3 and self.character.lower() in [o.lower()
                                                                 for o in opts]:
@@ -1244,25 +1266,56 @@ class RunDriver:
     def _settle_transient(self, state: dict[str, Any],
                           tries: int = 60,
                           delay: float = 0.5) -> dict[str, Any]:
-        """Ride out `state_type: "unknown"`, which is a MOMENT, not a screen.
+        """Ride out a state that is a MOMENT, not a screen.
 
-        The bridge documents `unknown` as "unrecognized room or null state",
-        and the moment right after embarking is exactly that: act 1, floor 0,
-        the run generated and no room entered yet. The third validation soak
-        embarked cleanly and then filed `no_action` against it within a second,
-        because the driver treated a transition as a screen it could not drive.
+        Two shapes qualify, and they are the same moment wearing two faces:
 
-        A genuinely stuck `unknown` is still caught -- it just gets caught by
-        the no-progress watchdog with a fingerprint history behind it, which is
-        a far better defect record than an instant refusal.
+          `state_type: "unknown"`  -- the bridge documents it as "unrecognized
+            room or null state", and the instant after embarking is exactly
+            that: act 1, floor 0, the run generated and no room entered yet.
+            The third validation soak embarked cleanly and then filed
+            `no_action` against it within a second, because the driver treated
+            a transition as a screen it could not drive.
+
+          NO `state_type` KEY AT ALL (EB-11 / understudy defect 13) -- the same
+            transition read one frame earlier, before `StateBuilder` has a room
+            to name. `str(state.get("state_type"))` renders that as the string
+            `"None"`, which matched neither the `unknown` test above nor any
+            screen below it, so the missing key fell all the way through to
+            `policy_v1` declining and `_last_resort` returning None: a run
+            ended by `no_action` against a state that was never a screen.
+            Riding it out is the same answer the `unknown` face already gets.
+
+        A settle that never lands is NOT swallowed. `unknown` is handed back
+        for the no-progress watchdog to catch with a fingerprint history behind
+        it, which is a better record than an instant refusal. A missing
+        `state_type` cannot be caught that way -- nothing downstream can post an
+        action against it, so the watchdog never gets a second sample -- and it
+        is therefore filed here, under its own kind, with the settle it was
+        given stated. Loud, classified, and not disguised as `no_action`.
         """
-        if str(state.get("state_type")) != "unknown":
+        st = state.get("state_type")
+        if st is not None and str(st) != "unknown":
             return state
+        waited = 0.0
         for _ in range(tries):
             time.sleep(delay)
+            waited += delay
             state = bridge.get_state()
-            if str(state.get("state_type")) != "unknown":
+            st = state.get("state_type")
+            if st is not None and str(st) != "unknown":
+                self.emit({"record": "transient_settled",
+                           "waited_s": round(waited, 1),
+                           "settled_to": str(st)})
                 return state
+        if state.get("state_type") is None:
+            raise Defect(
+                "state_type_missing",
+                f"the bridge answered with no `state_type` key for "
+                f"{waited:.0f}s ({tries} reads); a state with no screen name "
+                f"cannot be driven and no action can be posted against it, so "
+                f"the no-progress watchdog would never see a second sample",
+                state)
         return state
 
     def _await_leaving_menu(self, tries: int = 60,
@@ -1487,9 +1540,30 @@ def _last_resort(state: dict) -> dict | None:
         if blob.get("can_confirm"):
             return {"action": "confirm_selection"}
         return {"action": "select_card", "index": 0}
+    if st == "rest_site":
+        # EB-13, AND THE SAME LESSON AS `card_select` ABOVE: a screen that
+        # refuses the exit must be answered, not exited. A rest site reports
+        # `can_proceed: false` until its one option has been spent, and the
+        # bridge says so in as many words ("No proceed button available or
+        # enabled"). `proceed` used to be the unconditional answer here, so a
+        # rest site whose options the policy could not match spent every
+        # remaining action of the run posting a verb the screen had already
+        # refused -- the `no_progress` defect filed against seed `43MLG7MG9L`.
+        #
+        # The answer is the screen's own: take the first ENABLED option, in
+        # offered order. Deterministic and declared -- not a policy, the same
+        # always-heads coin `_mechanical_action` spends on events, and counted
+        # as a `forced_default` so the telemetry says the choice was not the
+        # sim's.
+        blob = state.get("rest_site") or {}
+        options = ((blob.get("options") if isinstance(blob, dict) else None)
+                   or state.get("options") or [])
+        for i, opt in enumerate(options):
+            if not isinstance(opt, dict) or opt.get("is_enabled") is not False:
+                return {"action": "choose_rest_option", "index": i}
+        return {"action": "proceed"}
     return {
         "card_reward": {"action": "skip_card_reward"},
-        "rest_site": {"action": "proceed"},
         "shop": {"action": "proceed"},
         "fake_merchant": {"action": "proceed"},
         "monster": {"action": "end_turn"},
@@ -1626,9 +1700,13 @@ def _needs_restart(outcome: str, alive: bool) -> bool:
 # `seed_not_honoured` is HERE and not on the build's side of the line: the
 # game rolling its own seed is the game behaving normally, and the thing that
 # failed is this harness's claim to have chosen one.
+# `state_type_missing` sits here for the same reason `bridge_unreachable` does:
+# not because the wire is the harness's fault, but because a soak that keeps
+# arriving at a state it cannot name produces no telemetry, and two of them is
+# the signal to stop rather than to burn the night.
 _HARNESS_SIDE = {"no_embark_path", "no_embark", "embark_loop", "menu_loop",
                  "unexpected_start_state", "bridge_unreachable", "no_action",
-                 "seed_not_honoured"}
+                 "seed_not_honoured", "state_type_missing"}
 
 
 def main(argv: list[str] | None = None) -> int:
