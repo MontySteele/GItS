@@ -269,8 +269,15 @@ def run_one(character: str, archetype: str, pilot_id: str,
             grant_potions: bool = False,
             n_acts: int | None = None,
             route_name: str = "hunter") -> RunResult:
-    """slot_mode: 'standard' (1 companion offer) or 'pity(k)' — k screens
-    without taking a companion make the next slot a choose-3.
+    """slot_mode: the draft-sim spec's three modes (§3, "build all three
+    now") -- 'standard' (1 companion offer), 'choose3' (every companion slot
+    is a pick of three), or 'pity(k)' (k screens without taking a companion
+    make the NEXT slot a choose-3). Mode set per-config; default standard.
+    `choose3` is the standalone mode EB-27 found never built: the mechanism
+    existed only as pity's payload, so the fishable arm of the dream-team
+    metric (spec §5, "deliberately fishable under choose3/pity") had no
+    choose3 half to read. It is INERT until a caller asks for it -- nothing
+    in the live instruments passes it, and `standard` is byte-identical.
 
     n_acts (§10.1): how many acts the run spans -- None (default) spans every
     act registered in constants.RUN_ACTS; an explicit count must not exceed
@@ -295,9 +302,10 @@ def run_one(character: str, archetype: str, pilot_id: str,
     never constructed and potions are never passed to build_player_from_ids, so
     the potions=None path is byte-identical to the pre-potion model."""
     pity_k = None
+    always_choose3 = slot_mode == "choose3"
     if slot_mode.startswith("pity(") and slot_mode.endswith(")"):
         pity_k = int(slot_mode[5:-1])
-    elif slot_mode != "standard":
+    elif slot_mode not in ("standard", "choose3"):
         raise ValueError(f"unknown slot mode {slot_mode!r}")
     screens_since_companion = 0
     rng = random.Random(seed)
@@ -705,7 +713,13 @@ def run_one(character: str, archetype: str, pilot_id: str,
                     # no-companion character got ordinary commons at the boundary
                     # -- the Ironclad-0.6% diagnosis, 2026-07-23.)
                     n_comp = 1
-                    if pity_k is not None and screens_since_companion >= pity_k:
+                    if always_choose3:
+                        n_comp = 3                  # choose3: every slot is
+                        #             a pick of three (spec §3). Applies to
+                        #             the act-boundary screen too -- it is a
+                        #             companion slot like any other, forced
+                        #             to Rare rather than exempted.
+                    elif pity_k is not None and screens_since_companion >= pity_k:
                         n_comp = 3                  # pity fires: choose-3 slot
                     # THE FIGHT'S OWN SCREEN, then any screen the fight EARNED.
                     # The Hunt's extra reward is granted here and only here:
