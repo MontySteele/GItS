@@ -188,7 +188,7 @@ definitions and names the sprint doc it belongs to, and a `Usage:` line
   encoding rule is structural (`tier0/tests/test_encoding_gate.py:1-22`).
 - **A failed `exp_furina_strength` arm holds its ROW** and prints `ARM FAILED`;
   it used to vanish from `rows` and leave the comparison looking authoritative
-  (`exp_furina_strength.py:765-790`;
+  (`exp_furina_strength.py:622-676`;
   `tier0/tests/test_exp_strength_missing_arm.py`).
 - **Every published number is world-stamped and worlds are not comparable** —
   RUNTEMPLATE / DRAFTER / POLICY bumps archive their predecessors, which is why

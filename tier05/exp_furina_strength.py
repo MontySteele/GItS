@@ -22,7 +22,8 @@ same row's absolute 15% tells you nothing about the game.
 R14: diagnostics feeding a ruling. No acceptance targets in this file, and
 no balance change is proposed by it.
 
-Usage: python -m tier05.exp_furina_strength [s0|s1|s2|s3|all] [--runs N]
+Usage: python -m tier05.exp_furina_strength
+       [s0|s1|s1b|s1c|s2|s3|s4|s5|s7|s8|all] [--runs N]
 """
 
 from __future__ import annotations
@@ -122,8 +123,9 @@ def s0(runs: int = RUNS) -> None:
                       f"{label} {value:.1f}")
             print(f"    NOTE: the C# cap is MaxHp/2 + grants, so a HELD 80-90 "
                   f"needs ~160+ max HP or\n          cap grants, and only 3 "
-                  f"cards in the pool raise the floor/cap at all. That "
-                  f"points\n          at the GENERATED reading -- but it is "
+                  f"cards in the pool raise the FLOOR at all (\"Fanfare Cap "
+                  f"+X\"\n          buys headroom and grants nothing). That "
+                  f"points at the GENERATED reading --\n          but it is "
                   f"the table's number to disambiguate.")
 
 
@@ -360,23 +362,28 @@ def s1c(runs: int = RUNS) -> None:
     limited -- which makes "where does it come from" the question T1's
     "harder to build" actually turns on.
 
-    Both Encore channels are swept together because they are one economy:
-    every point of Encore generates Fanfare on the way in AND on the way
-    out, so a card that grants 3 Encore is worth 6 Fanfare across its life.
-    With 19 of 78 cards granting Encore (S2), this is the join between T2
-    and T1 -- and cell (0, 0) is the counterfactual "Encore stops feeding
-    Fanfare at all".
+    Both REDUCTION channels are swept together because they are one
+    economy: Fanfare prints when Encore goes down and never when it goes up,
+    so a point of Encore pays the meter exactly once, whichever way it
+    leaves the buffer. With 19 of 78 cards granting Encore (S2), this is the
+    join between T2 and T1 -- and cell (0, 0) is the counterfactual "Encore
+    stops feeding Fanfare at all".
+
+    OFF-DIAGONAL CELLS ARE COUNTERFACTUAL INSTRUMENTS, NOT CANDIDATE
+    SETTINGS. Absorption is pinned to FANFARE_PER_HP_LOST by the invariant
+    that every point of damage past Block prints exactly one Fanfare
+    (test_every_point_past_block_prints_exactly_one_fanfare), so any row
+    that moves absorbed alone is a world the shipped rules forbid.
     """
     print("=" * 78)
     print(f"S1C (T1 x T2). Encore -> Fanfare conversion — {runs} runs/cell, "
           f"seed {SEED}")
-    print(f"    shipped: {C.FANFARE_PER_ENCORE_GAINED} Fanfare per Encore "
-          f"GAINED, {C.FANFARE_PER_ENCORE_SPENT} per Encore SPENT.")
-    print("    Every point of Encore therefore prints Fanfare twice. 19 of "
-          "78 cards grant Encore.")
+    print(f"    shipped: {C.FANFARE_PER_ENCORE_ABSORBED} Fanfare per Encore "
+          f"ABSORBED, {C.FANFARE_PER_ENCORE_SPENT} per Encore SPENT.")
+    print("    Encore GAINED prints nothing. 19 of 78 cards grant Encore.")
     print("=" * 78)
 
-    def cell(gained, spent):
+    def cell(absorbed, spent):
         results = _runs("salon", "salon", runs)
         traces = [tr for r in results for _, tr in r.fanfare_traces]
         agg = fanfare_telemetry.aggregate(traces)
@@ -389,12 +396,12 @@ def s1c(runs: int = RUNS) -> None:
                       / max(1, sum(len(r.fight_stats) for r in results)),
         }
 
-    print(f"\n  {'gained':>7} {'spent':>6} {'winrate':>9} {'acts':>6} "
+    print(f"\n  {'absorbed':>8} {'spent':>6} {'winrate':>9} {'acts':>6} "
           f"{'mean held':>10} {'dmg/fight':>10}")
     for row, res in sweeps.sweep_pairs(
-            ("FANFARE_PER_ENCORE_GAINED", "FANFARE_PER_ENCORE_SPENT"),
+            ("FANFARE_PER_ENCORE_ABSORBED", "FANFARE_PER_ENCORE_SPENT"),
             ((1, 1), (1, 0), (0, 1), (0, 0)), cell):
-        print(f"  {row[0]:>7} {row[1]:>6} {res['winrate']:>8.1%} "
+        print(f"  {row[0]:>8} {row[1]:>6} {res['winrate']:>8.1%} "
               f"{res['acts']:>6.2f} {res['held']:>10.1f} "
               f"{res['damage']:>10.1f}")
     print("\n  ((0, 0) is the counterfactual: Encore stops feeding Fanfare "
@@ -445,80 +452,6 @@ def s5(runs: int = RUNS) -> None:
     print("\n  (A steep column here means the archetype's power is the STAGE, "
           "not the scaling --\n   and that A12's cap raise is a bigger lever "
           "than any Fanfare number.)")
-
-
-# =====================================================================
-# S6 -- the floor, which is where the Fanfare actually comes from
-# =====================================================================
-
-def s6(runs: int = RUNS) -> None:
-    """CORRECTION to this file's own earlier framing (2026-07-28, same day).
-
-    S0 noted that only three cards carry a `gain_fanfare_floor` effect and
-    concluded that a HELD 80-90 would need ~160 max HP. That was wrong, and
-    wrong in the way a census is wrong when it counts the wrong thing: the
-    dominant floor source is not a card effect at all. It is a RULE --
-    playing any POWER permanently raises the floor by
-    FANFARE_FLOOR_PER_POWER (rare: _RARE), and GainFanfareFloor raises the
-    floor, the cap AND the current value together.
-
-    So a power-heavy deck ramps its own ceiling. Ten powers is +50 to +80
-    floor, which is exactly the band the playtest reported holding -- and it
-    means the report was HELD Fanfare after all, with no large max HP
-    required.
-
-    This cell measures the slope of that rule, and how many powers the sim's
-    decks actually run, because that is the S0 gap in one number.
-    """
-    print("=" * 78)
-    print(f"S6. FANFARE_FLOOR_PER_POWER sweep — {runs} runs/cell, "
-          f"seed {SEED}")
-    print(f"    shipped {C.FANFARE_FLOOR_PER_POWER} per power "
-          f"({C.FANFARE_FLOOR_PER_POWER_RARE} rare), PERMANENT, and it "
-          f"raises the cap with it.")
-    print("    This is the ramp. The cap was demoted to a safety rail by "
-          "F-A5; the floor is the dial.")
-    print("=" * 78)
-
-    def cell(value):
-        results = _runs("salon", "salon", runs)
-        traces = [tr for r in results for _, tr in r.fanfare_traces]
-        agg = fanfare_telemetry.aggregate(traces)
-        powers = 0
-        for r in results:
-            powers += sum(1 for cid in r.deck_ids if _is_power(cid))
-        return {
-            "winrate": sum(r.won for r in results) / len(results),
-            "acts": sum(r.acts_completed for r in results) / len(results),
-            "held": agg.get("mean_at_read", 0.0),
-            "floor": agg.get("floor_granted_per_combat", 0.0),
-            "powers": powers / len(results),
-            "damage": sum(s.total_damage_dealt
-                          for r in results for s in r.fight_stats)
-                      / max(1, sum(len(r.fight_stats) for r in results)),
-        }
-
-    print(f"\n  {'PER_POWER':>10} {'winrate':>9} {'acts':>6} {'mean held':>10} "
-          f"{'powers/deck':>12} {'dmg/fight':>10}")
-    for value, res in sweeps.sweep("FANFARE_FLOOR_PER_POWER",
-                                   (0, 5, 10, 20), cell):
-        print(f"  {value:>10} {res['winrate']:>8.1%} {res['acts']:>6.2f} "
-              f"{res['held']:>10.1f} {res['powers']:>12.1f} "
-              f"{res['damage']:>10.1f}")
-    print("\n  powers/deck is the S0 gap in one number: the playtest deck was "
-          "'heavy on powers',\n  and every power is a permanent +5 (+8 rare) "
-          "to the floor AND the ceiling.")
-
-
-_POWER_IDS: set[str] = set()
-
-
-def _is_power(card_id: str) -> bool:
-    if not _POWER_IDS:
-        for row in _sheet_rows():
-            if row.get("type") == "power":
-                _POWER_IDS.add(row["id"])
-    return re.sub(r"\+$", "", card_id) in _POWER_IDS
 
 
 # =====================================================================
@@ -586,7 +519,8 @@ def s7(fights: int = 60) -> None:
               f"floor granted {agg['floor_granted_per_combat']:5.1f}/combat")
     print("\n  (This is the closest the model gets to the table. If the "
           "power-heavy arm's Fanfare\n   lands near the reported 80-90, the "
-          "report is HELD Fanfare and the floor rule explains it.)")
+          "report is HELD Fanfare and the printed floor\n   grants explain "
+          "it.)")
 
 
 # =====================================================================
@@ -594,11 +528,13 @@ def s7(fights: int = 60) -> None:
 # =====================================================================
 
 FANFARE_SOURCES = (
-    # (source tag as emitted, rule, constant)
-    ("encore_gained", "per point of Encore GAINED, by any means",
-     "FANFARE_PER_ENCORE_GAINED"),
+    # (source tag as emitted, rule, constant). The tags are the `source`
+    # field resources.gain_fanfare actually emits; these four are the whole
+    # generation set, and Fanfare prints only when Encore goes DOWN.
     ("encore_spent", "per point of Encore SPENT, including salon upkeep",
      "FANFARE_PER_ENCORE_SPENT"),
+    ("encore_absorbed", "per point of Encore eaten by an incoming hit",
+     "FANFARE_PER_ENCORE_ABSORBED"),
     ("hp_lost", "per point of TRUE HP lost (after Block and absorption)",
      "FANFARE_PER_HP_LOST"),
     ("center_stage", "per card played while SHE holds the Spotlight",
@@ -610,11 +546,12 @@ def s8(runs: int = 60) -> None:
     """"I often see I gain it for unclear reasons" -- so here is every path,
     with how much of the total each one actually pays.
 
-    There are only four generation sources plus the floor rule, and three of
-    the four are INDIRECT: they fire off Encore movement and damage taken,
-    not off anything the card text mentions. That is the legibility problem
-    in one line -- a card that grants Encore also silently prints Fanfare
-    twice, once on the way in and once on the way out.
+    There are four generation sources and ALL FOUR are INDIRECT: they fire
+    off Encore leaving the buffer and off damage taken, never off anything a
+    card's text mentions. That is the legibility problem in one line, and it
+    is also what the printed keywords rest on -- "Fanfare +X" and "Fanfare
+    Cap +X" can name the permanent grant unambiguously precisely because no
+    card grants transient Fanfare directly (register lint L12).
     """
     from tier0.content import loader
     from tier0.engine.combat import run_fight
@@ -626,17 +563,21 @@ def s8(runs: int = 60) -> None:
     print("\n  GENERATION (raises current, clamped at cap):")
     for tag, rule, const in FANFARE_SOURCES:
         print(f"    {tag:<15} {getattr(C, const):>2} per event   {rule}")
-    print(f"\n  FLOOR (raises floor AND cap AND current together, permanent "
-          f"for the combat):")
-    print(f"    power played    {C.FANFARE_FLOOR_PER_POWER:>2} common/uncommon,"
-          f" {C.FANFARE_FLOOR_PER_POWER_RARE} rare   -- a RULE, not printed "
-          f"on the card")
-    print(f"    gain_fanfare_floor op                    -- the 3 cards that "
-          f"say so on their face")
+    # The two printed keywords, which are the only things a card face says
+    # about Fanfare. Neither is generation: one moves the baseline, the
+    # other moves the ceiling alone.
+    print(f"\n  FLOOR — \"Fanfare +X\" (raises floor AND cap AND current "
+          f"together, permanent for the combat):")
+    print(f"    gain_fanfare_floor                       -- RARE POWERS "
+          f"only, the 3 cards that say so on their face")
+    print(f"\n  CEILING — \"Fanfare Cap +X\" (headroom only; grants nothing):")
+    print(f"    raise_fanfare_cap                        -- commons, "
+          f"uncommons and Exhaust skills")
     print(f"\n  DECAY: the meter fades {C.FANFARE_DECAY_FRACTION:.0%} per "
           f"turn, clamped at the floor.")
-    print(f"  CAP: MaxHp/2 + floor grants. Demoted to a safety rail (F-A5); "
-          f"it does not bind.")
+    print(f"  CAP: {C.FANFARE_CAP_FRACTION:.0%} of MaxHp, plus every "
+          f"\"Fanfare Cap +X\" and floor grant. Demoted to a safety rail "
+          f"(F-A5);\n       it does not bind.")
 
     rows = _sheet_rows()
     powers = [r["id"] for r in rows if r.get("type") == "power"
@@ -647,6 +588,7 @@ def s8(runs: int = 60) -> None:
     pilot = make_pilot(loader.pilot_weights("salon"))
     by_source: dict[str, int] = {}
     floors = 0
+    caps = 0
     for i in range(runs):
         player = loader.build_player_from_ids("furina", list(deck))
         state = run_fight(player, loader.build_encounter("tank_boss"), pilot,
@@ -657,85 +599,20 @@ def s8(runs: int = 60) -> None:
                                            + ev["requested"])
             elif ev["event"] == "fanfare_floor_granted":
                 floors += ev["amount"]
+            elif ev["event"] == "fanfare_cap_raised":
+                caps += ev["amount"]
     total = sum(by_source.values()) or 1
     print(f"\n  MEASURED share, power-heavy deck vs tank_boss, {runs} fights:")
     for source, amount in sorted(by_source.items(), key=lambda kv: -kv[1]):
         print(f"    {source:<15} {amount / runs:6.1f}/fight  "
               f"{amount / total:5.1%} of generation")
+    # Both keyword lines are held OUT of the share: neither mints a point of
+    # Fanfare, so folding them in would inflate the denominator the reader
+    # is using to ask where the meter comes from.
     print(f"    {'floor grants':<15} {floors / runs:6.1f}/fight  "
           f"(separate: this is baseline, not generation)")
-
-
-# =====================================================================
-# S9 -- what the "powers raise cap, not floor" ruling would cost
-# =====================================================================
-
-def s9(fights: int = 80) -> None:
-    """[USER] idea 1: powers should raise the CAP but not the FLOOR.
-
-    Two things have to be said before this is priced.
-
-    First, it is NOT a coding mistake. The floor-per-power rule is the F-A3
-    constellation grant, and constants.py carries its reasoning: a grant is
-    STATIC value rather than accrual, so it keeps the no-passive-accrual law
-    (kickoff §4) intact while still rewarding investment.
-
-    Second, the cap half of the proposal is INERT as things stand. F-A5
-    demoted the cap to a safety rail and it does not bind -- 0.0-0.4% of
-    reads sit at it, and an 8x cap sweep moved nothing (S1B). So "raise cap,
-    not floor" is, in effect, "powers stop granting anything", and what is
-    actually being priced here is the removal of the ramp.
-
-    Measured in the POWER-HEAVY deck, because that is the deck the ruling is
-    about -- the drafter's 2.4-power decks would understate it.
-    """
-    from tier0.content import loader
-    from tier0.engine.combat import run_fight
-    from tier0.harness import metrics
-    from tier0.pilot.policy import make_pilot
-
-    rows = _sheet_rows()
-    powers = [r["id"] for r in rows if r.get("type") == "power"
-              and set(r.get("archetypes") or []) & {"salon", "fanfare"}][:10]
-    core = ["mademoiselle_crabaletta", "gentilhomme_usher",
-            "surintendante_chevalmarin", "house_call", "dinner_service"]
-    deck = loader.starting_deck("furina") + core + powers
-    pilot = make_pilot(loader.pilot_weights("salon"))
-
-    print("=" * 78)
-    print(f"S9. Pricing 'powers raise the cap, not the floor' — "
-          f"{fights} fights/encounter")
-    print(f"    power-heavy deck ({len(powers)} powers). 0 = the ruling's "
-          f"effective outcome; 5 = shipped.")
-    print("=" * 78)
-
-    def cell(value):
-        stats, traces = [], []
-        for enc in ("punisher", "attrition", "tank_boss"):
-            for i in range(fights):
-                player = loader.build_player_from_ids("furina", list(deck))
-                state = run_fight(player, loader.build_encounter(enc), pilot,
-                                  seed=SEED + i)
-                stats.append(metrics.extract(state, player.max_hp))
-                traces.append(fanfare_telemetry.trace(state.log))
-        peaks = [max(t.held) for t in traces if t.held]
-        agg = fanfare_telemetry.aggregate(traces)
-        return {
-            "winrate": sum(1 for s in stats if s.won) / len(stats),
-            "damage": sum(s.total_damage_dealt for s in stats) / len(stats),
-            "held": agg.get("mean_at_read", 0.0),
-            "peak": sum(peaks) / len(peaks) if peaks else 0.0,
-            "hp_end": sum(s.hp_end for s in stats) / len(stats),
-        }
-
-    print(f"\n  {'PER_POWER':>10} {'winrate':>9} {'mean held':>10} "
-          f"{'peak held':>10} {'dmg/fight':>10} {'hp left':>9}")
-    for value, res in sweeps.sweep("FANFARE_FLOOR_PER_POWER", (0, 2, 5), cell):
-        tag = "  <- the ruling" if value == 0 else (
-            "  <- shipped" if value == 5 else "")
-        print(f"  {value:>10} {res['winrate']:>8.1%} {res['held']:>10.1f} "
-              f"{res['peak']:>10.1f} {res['damage']:>10.1f} "
-              f"{res['hp_end']:>9.1f}{tag}")
+    print(f"    {'cap raises':<15} {caps / runs:6.1f}/fight  "
+          f"(separate: headroom only, it grants nothing)")
 
 
 # =====================================================================
@@ -805,7 +682,8 @@ def main(argv: list[str]) -> None:
     if "--runs" in argv:
         runs = int(argv[argv.index("--runs") + 1])
     for name, fn in (("s0", s0), ("s1", s1), ("s1b", s1b), ("s2", s2),
-                     ("s1c", s1c), ("s3", s3), ("s4", s4), ("s5", s5), ("s6", s6), ("s7", s7), ("s8", s8), ("s9", s9)):
+                     ("s1c", s1c), ("s3", s3), ("s4", s4), ("s5", s5),
+                     ("s7", s7), ("s8", s8)):
         if cell in (name, "all"):
             fn(runs)
 

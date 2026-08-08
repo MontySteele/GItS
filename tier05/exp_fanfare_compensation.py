@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import sys
 
-from tier05 import cells, fanfare_telemetry
+from tier05 import cells, fanfare_telemetry, rework_sim
 
 # Every arm varies from the ratified cell. The PLAN differs between rows, so
 # unlike the pilot-gap battery these rows are not each other's controls --
@@ -60,9 +60,10 @@ ARMS: tuple[tuple[str, str, str | None, str], ...] = (
 # therefore joins BY HAND, and R135 (2026-08-08) is one -- lasting_impression
 # got the commons-rate Block clause as its ruled body, and a reader nobody
 # fire-rate-checks is exactly the D4 mistake this cell exists to prevent.
-# KNOWN GAP (BACKLOG `EB-49`, clause c): these keys are BASE ids while the
-# `fanfare_read` event carries the PLAYED card's id, so `<id>+` copies are
-# silently excluded from every row here.
+# These keys are BASE ids while the `fanfare_read` event carries the PLAYED
+# card's id, so C3 folds sample ids through `rework_sim.base_id` -- an `<id>+`
+# copy is the same reader and belongs in the same row. The step is the base
+# card's: no upgrade delta on this sheet moves a reader's step.
 NEW_READERS: tuple[tuple[str, int], ...] = (
     ("applause_line", 4),
     ("held_breath", 4),
@@ -177,7 +178,7 @@ def c3(base: cells.Cell) -> None:
         by_card: dict[str, list[int]] = {}
         for tr in _traces(a["results"]):
             for cid, samples in tr.reads_by_card.items():
-                by_card.setdefault(cid, []).extend(samples)
+                by_card.setdefault(rework_sim.base_id(cid), []).extend(samples)
         rows = [(cid, step, by_card.get(cid, [])) for cid, step in NEW_READERS]
         rows = [r for r in rows if r[2]]
         if not rows:
