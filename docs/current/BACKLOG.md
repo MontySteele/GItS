@@ -24,7 +24,6 @@
 | ID | Item | Provenance |
 |---|---|---|
 | `EB-17p` | Force-first-copy **paired** winrate — the register's actual phrase: two decks on the same seeds, one with a copy forced in, one without. Deck construction is barred from the tier0 kernel, so this is a tier05 experiment under EXPERIMENTS pre-registration. The fight-side half ships (`metrics.card_flow_profile`, `--card-flow`) and explicitly declines to call its within-arm split the pairing | fix-sweep-2; EB-17 residual |
-| `EB-50` | Implement the scorecard's two invariants (≤4.0 A2 ceiling; A1+A6 elite pairing) as **report flags** — the M4 fork collapsed: the suite-failure branch is illegal under the descriptive-only axis closure and `test_axes_honesty.py:195-207` guards against reinstating it; today neither invariant is enforced anywhere | user-queue §10; M4 retired 2026-08-08 (R136) |
 
 ## tier0.5 — draft / run layer / measurement
 

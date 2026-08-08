@@ -113,6 +113,13 @@ def score_config(character: str, deck: str, pilot_id: str, fights: int,
         "heuristic_flags": (constraint_flags
                             if target_is_baseline or deck != "starter"
                             else axes.heuristic_flags(scores) + constraint_flags),
+        # EB-50: the two declared invariants, on the same scope as the shape
+        # heuristic above and for the same reason -- a monoculture package
+        # reads extreme on both. Reported, never asserted (D3).
+        # None, not [], where the reading is out of scope: an empty list means
+        # "checked, both hold", and the report prints that verdict.
+        "invariant_flags": (None if target_is_baseline or deck != "starter"
+                            else axes.invariant_flags(scores)),
         "stats": stats,
     }
 
@@ -158,7 +165,12 @@ def score_character(character: str, fights: int, seed: int) -> dict:
                         f"WINRATE BAND: {deck} vs {enc} {wr:.1%} "
                         f"outside [{lo:.0%}, {hi_s}]")
     return {"per_deck": results, "median_scores": median_scores,
-            "median_flags": median_flags, "band_flags": band_flags}
+            "median_flags": median_flags, "band_flags": band_flags,
+            # EB-50: the median is the reading the invariants were declared
+            # against (klee-pass-4-plan §0 measures them on the archetype
+            # median). Kept out of `median_flags` so nothing that consumes
+            # that list as a pass/fail sees them.
+            "median_invariant_flags": axes.invariant_flags(median_scores)}
 
 
 def main(argv: list[str] | None = None) -> int:
