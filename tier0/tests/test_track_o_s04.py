@@ -33,15 +33,19 @@ def _fight_record() -> dict:
 
 # ------------------------------------------------------- trace_replay ----
 
-def test_trace_reads_missing_keys_as_empty():
-    """`trace`'s docstring: a record written by a pre-P1.5 soak carries no
-    `selectors`, and the honest report on that is "recorded no selector
-    answers", not a crash. Absent and empty are therefore ONE reading.
+def test_trace_reads_a_missing_key_as_not_recorded_and_not_as_empty():
+    """AMENDED BY `EB-59`. `trace` still refuses to crash on a pre-P1.5
+    record that carries no `selectors` -- that half of the docstring was
+    always right. What it no longer does is call such a record EQUAL to one
+    whose recorder had the column and found nothing to put in it. Absence is
+    not evidence of sameness, and an acceptance condition made of "no
+    divergence found" cannot afford a reading that manufactures agreement.
     """
     absent = {"act": 1, "floor": 2, "kind": "monster"}
     empty = dict(absent, cards_played=[], selectors=[], meters_by_turn=[])
-    assert tr.trace(absent) == tr.trace(empty)
-    assert tr.trace(absent) == {k: [] for k in tr.TRACE_KEYS}
+    assert tr.trace(absent) != tr.trace(empty)
+    assert tr.trace(absent) == {k: tr.NOT_RECORDED for k in tr.TRACE_KEYS}
+    assert tr.trace(empty) == {k: [] for k in tr.TRACE_KEYS}
 
 
 def test_trace_identity_excludes_hp_and_damage():

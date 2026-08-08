@@ -298,7 +298,8 @@ def cut(cfg, out_dir):
         print(f"{name:9s} {x1 - x0}x{y1 - y0} "
               f"offset=({meta[name]['offset_x']:+.1f},{meta[name]['offset_y']:+.1f})")
     (out_dir / "layers.json").write_text(
-        json.dumps({"canvas": [W, H], "layers": meta}, indent=2))
+        json.dumps({"canvas": [W, H], "layers": meta}, indent=2),
+        encoding="utf-8")
 
     # combat-scale derivatives: the same box the static model used
     CW, CH = cfg.combat_box
@@ -322,7 +323,8 @@ def cut(cfg, out_dir):
         print(f"combat {name:9s} {x1 - x0}x{y1 - y0} "
               f"offset=({cmeta[name]['offset_x']:+.1f},{cmeta[name]['offset_y']:+.1f})")
     (out_dir / "combat" / "layers_combat.json").write_text(
-        json.dumps({"canvas": [CW, CH], "layers": cmeta}, indent=2))
+        json.dumps({"canvas": [CW, CH], "layers": cmeta}, indent=2),
+        encoding="utf-8")
     print("The combat.tscn sprite offsets must match layers_combat.json.")
 
 

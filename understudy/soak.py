@@ -1572,11 +1572,21 @@ def soak(runs: int, character: str, do_setup: bool,
             # rows that are all the same row. Relaunching is the only recovery
             # the wire actually offers: there is no verb that escapes an
             # arbitrary mid-run screen.
-            needs_restart = (s["outcome"] == "defect") or not session.alive()
-            if needs_restart and do_setup and i < runs:
-                print("    restarting the game to clear the run state",
-                      flush=True)
-                session.restart()
+            needs_restart = _needs_restart(s["outcome"], session.alive())
+            if needs_restart and i < runs:
+                if do_setup:
+                    print("    restarting the game to clear the run state",
+                          flush=True)
+                    session.restart()
+                else:
+                    # --no-setup MAY NOT RESTART -- it promised the game dir
+                    # it would change nothing -- so the one thing it can do
+                    # is say out loud that the runs after this one start
+                    # from a run state it did not clear.
+                    print(f"    WARNING: run {i} ended '{s['outcome']}' and "
+                          f"needs a restart, but --no-setup forbids one; the "
+                          f"remaining runs start from an uncleared game",
+                          flush=True)
     finally:
         session.teardown()
 
@@ -1591,6 +1601,24 @@ def soak(runs: int, character: str, do_setup: bool,
     print("REVERSIBILITY LOG (game dir)")
     print(session.ledger.table())
     return result
+
+
+# Outcomes that leave the game PARKED INSIDE A RUN. `died` and `won` walk out
+# through game-over on their own; these two do not, and the next run's first
+# read is then `unexpected_start_state` -- one run manufacturing the next
+# one's defect.
+#
+# `bounded` is here because `--max-fights` stops mid-run BY DESIGN: the run
+# ends on a rewards screen with the map still open. The first version of this
+# gate listed `defect` only, so a bounded soak restarted for nothing and
+# killed every even-numbered run -- a `runs=6, max_fights=4` drive measured
+# seeds 1 and 3 and reported six. A clean stop still leaves an unclean game.
+_PARKED_OUTCOMES = frozenset({"defect", "bounded"})
+
+
+def _needs_restart(outcome: str, alive: bool) -> bool:
+    """Whether the NEXT run can start from what this run left behind."""
+    return (outcome in _PARKED_OUTCOMES) or not alive
 
 
 # Defect kinds that indicate the HARNESS is broken rather than the build.

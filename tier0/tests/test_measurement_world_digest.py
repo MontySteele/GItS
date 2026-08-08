@@ -43,10 +43,10 @@ def test_content_difference_changes_digest(
         game_ref_digest, _isolated_game_ref):
     ref = _isolated_game_ref
     ref.mkdir()
-    (ref / "ironclad_pool.yaml").write_text("hp: 80\n")
+    (ref / "ironclad_pool.yaml").write_text("hp: 80\n", encoding="utf-8")
     machine_a = game_ref_digest()
 
-    (ref / "ironclad_pool.yaml").write_text("hp: 82\n")
+    (ref / "ironclad_pool.yaml").write_text("hp: 82\n", encoding="utf-8")
     machine_b = game_ref_digest()
 
     assert machine_a != machine_b
@@ -59,10 +59,10 @@ def test_file_set_difference_changes_digest(
         game_ref_digest, _isolated_game_ref):
     ref = _isolated_game_ref
     ref.mkdir()
-    (ref / "ironclad_pool.yaml").write_text("hp: 80\n")
+    (ref / "ironclad_pool.yaml").write_text("hp: 80\n", encoding="utf-8")
     base = game_ref_digest()
 
-    (ref / "ironclad_pool_pass4.yaml").write_text("hp: 80\n")
+    (ref / "ironclad_pool_pass4.yaml").write_text("hp: 80\n", encoding="utf-8")
     layered = game_ref_digest()
 
     assert base != layered
@@ -76,14 +76,14 @@ def test_a_second_anchors_layer_moves_the_digest(
     silent difference between two runs someone later compares."""
     ref = _isolated_game_ref
     ref.mkdir()
-    (ref / "ironclad_pool.yaml").write_text("hp: 80\n")
+    (ref / "ironclad_pool.yaml").write_text("hp: 80\n", encoding="utf-8")
     ironclad_only = game_ref_digest()
 
-    (ref / "silent_pool.yaml").write_text("hp: 70\n")
+    (ref / "silent_pool.yaml").write_text("hp: 70\n", encoding="utf-8")
     both = game_ref_digest()
     assert ironclad_only != both
 
-    (ref / "silent_pool_pass1.yaml").write_text("hp: 70\n")
+    (ref / "silent_pool_pass1.yaml").write_text("hp: 70\n", encoding="utf-8")
     assert game_ref_digest() != both
 
 
@@ -101,7 +101,7 @@ def test_committed_only_mode_is_labeled(
         game_ref_digest, _isolated_game_ref, monkeypatch):
     ref = _isolated_game_ref
     ref.mkdir()
-    (ref / "ironclad_pool.yaml").write_text("hp: 80\n")
+    (ref / "ironclad_pool.yaml").write_text("hp: 80\n", encoding="utf-8")
     monkeypatch.setenv(
         local_reference.REFERENCE_MODE_ENV, local_reference.COMMITTED_ONLY)
     assert game_ref_digest() == "committed-only"

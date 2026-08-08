@@ -36,7 +36,7 @@ def _walk(effects_list):
 
 @pytest.fixture(scope="module")
 def deltas():
-    return yaml.safe_load(UPGRADE_PATH.read_text())
+    return yaml.safe_load(UPGRADE_PATH.read_text(encoding="utf-8"))
 
 
 def _card_with(deltas, key):

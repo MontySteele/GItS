@@ -19,9 +19,10 @@ break without any suite noticing:
     3. A DUPLICATED SELECTOR ROUND IS LAST-WINS. `replay._selector_choice`
        states it: "The LAST matching row for the round wins: a turn that
        re-designates has the later answer standing".
-    4. A MISSING TRACE KEY READS AS EMPTY. `trace_replay.trace` states it:
-       "Missing keys read as empty rather than raising", because a pre-P1.5
-       record carries no `selectors`.
+    4. A MISSING TRACE KEY DOES NOT RAISE -- and, since `EB-59`, does not
+       read as EMPTY either. A pre-P1.5 record carries no `selectors`, so
+       `trace_replay.trace` returns `NOT_RECORDED` for it: no crash, and no
+       false agreement with a run that was offered none.
 
 Fixtures: `review/redteam/fixtures/track_o/s05-*` (built by `s05_build.py`).
 """
@@ -150,9 +151,15 @@ def test_a_selector_row_without_both_offers_is_declined():
 
 
 # --------------------------------------------------------------------------
-# 4. a missing trace key reads as empty, never as a raise
+# 4. a missing trace key reads as NOT RECORDED, never as a raise and never
+#    as empty (amended by `EB-59`)
 # --------------------------------------------------------------------------
 
-def test_trace_reads_a_missing_key_as_empty():
-    assert trace_replay.trace({}) == {k: [] for k in trace_replay.TRACE_KEYS}
-    assert trace_replay.trace({"selectors": None})["selectors"] == []
+def test_trace_reads_a_missing_key_as_not_recorded():
+    assert trace_replay.trace({}) == {k: trace_replay.NOT_RECORDED
+                                      for k in trace_replay.TRACE_KEYS}
+    # An explicit null is the same fact as an absent key: no column here.
+    assert (trace_replay.trace({"selectors": None})["selectors"]
+            is trace_replay.NOT_RECORDED)
+    # And it is still not a raise, which is the half of the rule that stands.
+    assert set(trace_replay.trace({})) == set(trace_replay.TRACE_KEYS)

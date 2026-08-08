@@ -292,10 +292,12 @@ def test_replay_reads_the_new_fields_into_a_trace():
 
 def test_replay_tolerates_a_pre_p15_record():
     """A record written before P1.5 has no `selectors`. The honest reading is
-    "this run recorded no selector answers", not a crash."""
+    "this run recorded no selector answers", not a crash -- and, since
+    `EB-59`, not `[]` either: `[]` is what a recorder that HAD the column and
+    saw nothing in it writes, and the two must not compare equal."""
     rec = _fight_record()
     del rec["selectors"]
-    assert replay.trace(rec)["selectors"] == []
+    assert replay.trace(rec)["selectors"] is replay.NOT_RECORDED
 
 
 def test_replay_reconstructs_the_offer_list_not_just_the_answer():

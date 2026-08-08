@@ -142,7 +142,7 @@ public static class KleeMod
                     ["KLEEMOD-MELT_PREVIEW.title"] = "Reaction preview: Melt",
                     ["KLEEMOD-MELT_PREVIEW.description"] =
                         "This card supplies Pyro or Cryo while an enemy has the other aura. The triggering hit deals 1.75x damage and consumes the aura.",
-                    ["KLEEMOD-OVERLOAD_PREVIEW.title"] = "Reaction preview: Overload",
+                    ["KLEEMOD-OVERLOAD_PREVIEW.title"] = "Reaction preview: Overloaded",
                     ["KLEEMOD-OVERLOAD_PREVIEW.description"] =
                         "This card supplies Pyro or Electro while an enemy has the other aura. It deals 6 splash damage to all enemies and applies 1 Weak to the reacted enemy.",
                     ["KLEEMOD-SUPERCONDUCT_PREVIEW.title"] = "Reaction preview: Superconduct",
@@ -177,6 +177,15 @@ public static class KleeMod
                         "Elemental aura bonus",
                     [Cards.FurinaRiderTips.SalonKey + ".title"] =
                         "Salon scaling",
+                    // The fourth rider tip had no row and shipped as the raw
+                    // key: `Blocking Notes+` rendered
+                    // "card_keywords.KLEEMOD-COMPANION_RIDER.title" on the
+                    // card-reward screen of a live run (0.2-589). The pck's
+                    // card_keywords.json carries none of these four either, so
+                    // this dictionary is their only source and a missing entry
+                    // is directly player-visible.
+                    [Cards.FurinaRiderTips.CompanionKey + ".title"] =
+                        "Companion scaling",
 
                     // B5: the member tips the deploy faces hand off to. Only
                     // the TITLES are rows -- the bodies are built live in

@@ -91,6 +91,29 @@ def test_the_harness_side_defect_list_excludes_game_side_failures():
     assert "bridge_unreachable" in soak._HARNESS_SIDE
 
 
+# --------------------------------------------------------------- restart ---
+
+def test_a_bounded_stop_needs_a_restart_just_like_a_defect():
+    """`--max-fights` stops the run on a rewards screen with the map still
+    open. It is a CLEAN stop and an UNCLEAN game, and the gate cares only
+    about the second: without a restart the next run's first read is
+    `unexpected_start_state`, so a bounded soak measures every other seed and
+    reports all of them."""
+    assert soak._needs_restart("bounded", alive=True)
+    assert soak._needs_restart("defect", alive=True)
+
+
+def test_a_run_that_reached_game_over_leaves_a_clean_game():
+    """`won` and `died` walk out through game-over themselves. Restarting
+    after them would spend a launch per run for nothing."""
+    assert not soak._needs_restart("won", alive=True)
+    assert not soak._needs_restart("died", alive=True)
+
+
+def test_a_dead_process_needs_a_restart_whatever_the_outcome_says():
+    assert soak._needs_restart("won", alive=False)
+
+
 # ------------------------------------------------------------- telemetry ---
 
 def test_damage_is_attributed_to_the_card_that_was_named():
