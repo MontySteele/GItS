@@ -1143,6 +1143,20 @@ DIVERGENCE_STARVATION_ALARM = 0.10  # alarm if an archetype falls below this
 RELEVANCE_FLOOR = 0.35
 ACHIEVABILITY_ALARM_FIGHTS = 7    # alarm if median time-to-online exceeds this
 DRAFT_REGRET_SAMPLE = 0.10        # fraction of decisions re-scored post-run
+# Its route twin (EB-16w): the fraction of ROUTE decisions `run_metrics.
+# route_regret` re-prices in the run's end state. 1.0, not the drafter's 0.10,
+# and the asymmetry is deliberate -- the drafter re-scores whole card offers
+# inside the run loop thousands of runs deep, while a route re-price is one
+# backward-induction pass over a 16-floor DAG per forked floor. Sampling it
+# down would buy no wall clock worth having and would cost the seeded A/B its
+# stability. Overridable per call (the sampler takes `sample=`).
+# NOT a balance knob and NOT a CONSTANTS_VERSION bump: it is measurement
+# machinery on a dedicated rng stream (model.py, +5e9), read-only over a
+# finished run, so no run, deck, encounter or cell moves. Same reading the R67
+# sweep-instrumentation block below took, and the criterion the v2/v4/v5 notes
+# above wrote down is comparability -- nothing measured under C8 becomes
+# incomparable because a road not taken got priced afterwards.
+ROUTE_REGRET_SAMPLE = 1.0
 
 # Powers that AMPLIFY reactions rather than causing them. Lives here rather
 # than in tier05.draft because the content loader also needs it, and tier0 must

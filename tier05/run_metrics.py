@@ -130,29 +130,70 @@ def route_profile(results: list[RunResult]) -> dict:
         "event_options": dict(Counter(
             f"{e['event']}:{e['option']}" for r in results
             for e in r.events).most_common(8)),
+        "regret": pooled_route_regret(results),      # EB-16w
+    }
+
+
+def pooled_route_regret(results: list[RunResult]) -> dict:
+    """The route twin of `summarize_runs`' `regretted_decisions`: every act of
+    every run's `route_regret` output, pooled (EB-16w).
+
+    `RunResult.route_regret` holds ONE sampler dict per act, because a run
+    walks one map per act and the sampler re-plans within a map. Pooling is
+    additive on the counts and sample-weighted on `mean_regret`.
+
+    NO POOLED PERCENTILES. p50/p90 are not recoverable from per-act summaries,
+    and inventing them by averaging act medians would produce a number that
+    looks like a distribution read and is not one. A caller that needs the
+    pooled distribution should sample the gaps itself off `route_decisions`.
+    `max_regret` pools honestly (a max of maxes is a max) and is reported."""
+    per_act = [d for r in results for d in r.route_regret]
+    if not per_act:
+        return {}
+    sampled = sum(d["sampled"] for d in per_act)
+    return {
+        "acts_sampled": len(per_act),
+        "decisions": sum(d["decisions"] for d in per_act),
+        "forced": sum(d["forced"] for d in per_act),
+        "sampled": sampled,
+        "regretted": sum(d["regretted"] for d in per_act),
+        "regret_rate": (sum(d["regretted"] for d in per_act) / sampled
+                        if sampled else 0.0),
+        "mean_regret": (sum(d["mean_regret"] * d["sampled"] for d in per_act)
+                        / sampled) if sampled else 0.0,
+        "max_regret": max(d["max_regret"] for d in per_act),
+        "margin": ROUTE_REGRET_MARGIN,   # uncalibrated; see its comment
     }
 
 
 # --- route_regret (§4.2's third countermeasure) -----------------------------
 #
-# A full point of hindsight advantage, the same bar `draft_regret` sets
-# (draft.py:1635, C.DRAFT_REGRET_SAMPLE's neighbour). The units are NOT the
-# same -- a draft score is one card's worth of printed damage/Block, a path
-# value is a sum of room `want`s over sixteen floors -- so a point is a much
-# smaller relative gap here, and this margin is a placeholder for a measured
-# one, not a calibrated threshold. `mean_regret` and the percentiles are the
-# reportable numbers; `regretted` exists for symmetry with the drafter.
+# UNCALIBRATED, AND KNOWN TO BE (EB-16w, 2026-08-07). A full point of
+# hindsight advantage, the same bar `draft_regret` sets -- but that bar is
+# itself a hardcoded literal in `draft.py` (the `+ 1.0` at the regret
+# comparison), pinned by a mutation-audit test (MEDIUM-11,
+# test_pin_tier05_draft.py) and never derived from a measurement or a ruling.
+# There is therefore NO mechanical calibration procedure to copy: this value is
+# a literal analogy of a literal, and EB-16w's "calibrate it" half stays open
+# until either a pre-registered measurement or a [USER] ruling sets it.
+# The units are not even the same -- a draft score is one card's worth of
+# printed damage/Block, a path value is a sum of room `want`s over sixteen
+# floors -- so a point is a much smaller relative gap here.
+# READ THE DISTRIBUTION, NOT THE RATE, until that is settled: `mean_regret`,
+# `p50/p90_regret` and `max_regret` are margin-free and are the reportable
+# numbers; `regretted` / `regret_rate` are the only two keys this threshold
+# touches, and they exist for symmetry with the drafter.
 ROUTE_REGRET_MARGIN = 1.0
-# Every real choice, where the drafter samples a tenth (C.DRAFT_REGRET_SAMPLE).
-# The drafter re-scores INSIDE the run loop, thousands of runs deep; this is an
-# offline pure-map instrument that re-plans one act, so sampling it down would
-# buy nothing and cost determinism. Overridable per call.
-ROUTE_REGRET_SAMPLE = 1.0
+# The sample rate is homed in tier0/constants.py beside its draft twin
+# (EB-16w), where the reason for the 1.0 and the no-version-bump reading are
+# written down. Re-exported under the module name it shipped with so callers
+# and tests that reach for `run_metrics.ROUTE_REGRET_SAMPLE` keep working.
+ROUTE_REGRET_SAMPLE = C.ROUTE_REGRET_SAMPLE
 
 
 def route_regret(rng: random.Random, act_map, decisions: list[dict],
                  hindsight: route.RouteState, policy_name: str,
-                 sample: float = ROUTE_REGRET_SAMPLE,
+                 sample: float = C.ROUTE_REGRET_SAMPLE,
                  margin: float = ROUTE_REGRET_MARGIN) -> dict:
     """The road not taken, re-priced in hindsight (research §4.2).
 

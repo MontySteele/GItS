@@ -18,6 +18,10 @@ characters or rosters. So the same countermeasures apply and are not optional:
     HINDSIGHT state, so a lane that only looked good while the run was
     healthy is visible as regret. Zero by construction when hindsight is the
     deciding state -- the planner already took the argmax there.
+    LIVE since EB-16w: `model.run_one`'s walk records the same decision shape
+    as `walk_decisions` (it cannot call it -- fights resolve between floors),
+    the run carries `route_hindsight`, and `_run_range` samples every act.
+    Its MARGIN is still an uncalibrated analogy; read the gap distribution.
 
 THE ACCEPTANCE TARGET (research doc §1.3, user domain authority): a competent
 player fights a median of ~2.5 elites per act, range 1-4, because elites are

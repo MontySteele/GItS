@@ -68,6 +68,7 @@
 |---|---|---|---|
 | `S4-G19` | Two mechanics do nearly the same thing (Sly unification) — **say whether they become one** | OPEN | user-queue §2; `docs/archive/tech-debt-audit-2026-07-26.md` §5 |
 | `M7` | Should the simulator **model enchantments at all** (a data-model call — state on a card vs the sim's creature-scoped modifiers)? Exactly one Silent card needs it | OPEN — MODEL / DON'T | user-queue §10; `docs/archive/enchantments-design-2026-07-27.md` |
+| `M12` | `ROUTE_REGRET_MARGIN` (and its twin, `draft_regret`'s `+ 1.0` at `draft.py:1692`) has **no recorded derivation** — the draft literal is pinned load-bearing (MEDIUM-11) but never derived, and EB-16w's wiring inherited the analogy explicitly uncalibrated. Setting it needs either a pre-registered measurement or a ruling; until then only the margin-free reads (`mean/p50/p90/max_regret`) are quotable, and `regretted`/`regret_rate` carry the caveat in-code | OPEN — measurement or ruling | EB-16w close-out 2026-08-07; `tier05/run_metrics.py` margin note |
 
 ## 8. Card text and decision-record corrections
 

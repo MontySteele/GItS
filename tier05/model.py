@@ -188,6 +188,23 @@ class RunResult:
     events: list[dict] = field(default_factory=list)   # §11: event rooms
     #                    visited, in order: {"event": id, "option": label}
     route: str = "hunter"               # §11: the route policy that walked it
+    route_decisions: list[dict] = field(default_factory=list)   # EB-16w: the
+    #                    ROUTE twin of `decisions` above. One entry per ACT --
+    #                    {"act", "map", "decisions"} -- because the road not
+    #                    taken is only re-pricable against the map it was on,
+    #                    and each act has its own. The inner records are
+    #                    exactly `route.walk_decisions`' shape ({"floor",
+    #                    "options", "picked", "state"}), written by the live
+    #                    incremental walk in run_one rather than by that
+    #                    pure-map helper, which cannot resolve fights.
+    route_hindsight: Optional[route.RouteState] = None   # EB-16w: the run's
+    #                    LAST route state -- at death, or after the final node.
+    #                    The counterpart of `deck_ids` for draft_regret: the
+    #                    state the alternatives get re-planned in.
+    route_regret: list[dict] = field(default_factory=list)   # EB-16w: one
+    #                    `run_metrics.route_regret` summary per act, filled in
+    #                    after the run by _run_range (the drafter's
+    #                    `regret_samples` is filled at the same site).
     n_acts: int = 1                     # §11: acts this run spans. Every path
     #                    visits exactly one room per floor, so node_kinds is
     #                    always MAP_FLOORS * n_acts long and index == floor
@@ -368,7 +385,22 @@ def run_one(character: str, archetype: str, pilot_id: str,
                 floor=len(res.node_kinds) % C.MAP_FLOORS, act=act_i,
                 elites_taken=elites_taken, rests_taken=rests_taken)
 
-        room = route_policy(rng, act_map, act_map.rooms_on(0), _route_state())
+        # EB-16w: the live walk RECORDS its decisions, in `walk_decisions`'
+        # shape, so `run_metrics.route_regret` can price the roads not taken on
+        # a real run. Recording only -- no rng is drawn and no decision changes,
+        # so every existing seeded run is byte-identical.
+        act_walk = {"act": act_i, "map": act_map, "decisions": []}
+        res.route_decisions.append(act_walk)
+
+        def _pick(options):
+            st = _route_state()
+            picked = route_policy(rng, act_map, options, st)
+            act_walk["decisions"].append(
+                {"floor": picked.floor, "options": list(options),
+                 "picked": picked, "state": st})
+            return picked
+
+        room = _pick(act_map.rooms_on(0))
         while True:
             i = len(res.node_kinds)
             kind = room.kind
@@ -525,6 +557,7 @@ def run_one(character: str, archetype: str, pilot_id: str,
                     if bag is not None:
                         res.potions_end = list(bag.potions)
                     res.hp_by_node.append(0)
+                    res.route_hindsight = _route_state()    # EB-16w
                     return res
                 res.gold = gold
                 res.hp_by_node.append(hp)
@@ -650,6 +683,7 @@ def run_one(character: str, archetype: str, pilot_id: str,
                         res.relics = [r for r in held.ids if r not in seed_ids]
                     if bag is not None:
                         res.potions_end = list(bag.potions)
+                    res.route_hindsight = _route_state()    # EB-16w
                     return res
                 final_act = act_i == n - 1
                 if kind == "B":
@@ -749,10 +783,15 @@ def run_one(character: str, archetype: str, pilot_id: str,
             # Route to the next room. The decision is made HERE, after the
             # node has resolved, so it sees post-fight HP -- which is the
             # whole mechanism behind "a hurt run ducks the next elite".
+            # EB-16w: the hindsight state, refreshed after every resolved node.
+            # Assigned here (and at the two death exits) rather than after the
+            # act loop, where `_route_state` may not exist at all -- an all-acts
+            # -empty run never enters the body that defines it.
+            res.route_hindsight = _route_state()
             succ = act_map.successors(room)
             if not succ:
                 break
-            room = route_policy(rng, act_map, succ, _route_state())
+            room = _pick(succ)
 
     res.won = True
     res.deck_ids = deck_ids
@@ -782,6 +821,21 @@ def _run_range(character: str, archetype: str, pilot_id: str,
         r.regret_samples = draft.draft_regret(
             random.Random(seed + i + 10 ** 9), r.decisions,
             [loader.peek_card(cid) for cid in r.deck_ids], archetype)
+        # route_regret (EB-16w): the same construction one layer out -- sampled
+        # re-scoring of recorded decisions in the run's END state, on its own
+        # +5e9 stream (the offset registry lives in understudy/rng.py). Per
+        # ACT, because a path value only means anything against its own map;
+        # ONE hindsight state for all of them, exactly as the drafter re-scores
+        # every screen against one final deck.
+        # The import is deferred on purpose: run_metrics imports RunResult from
+        # this module, so a module-level import would close the cycle.
+        from tier05 import run_metrics
+        if r.route_hindsight is not None:
+            r.route_regret = [
+                run_metrics.route_regret(
+                    random.Random(seed + i + 5 * 10 ** 9), w["map"],
+                    w["decisions"], r.route_hindsight, route_name)
+                for w in r.route_decisions]
         out.append(r)
     return out
 

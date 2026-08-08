@@ -29,7 +29,6 @@
 
 | ID | Item | Provenance |
 |---|---|---|
-| `EB-16w` | Wire `route_regret` into the live run layer: `model.run_one` walks incrementally and `RunResult` records no route decisions, so nothing calls the sampler on a real run yet (`route.walk_decisions` exists for it); promote the sample-rate default to `tier0/constants.py` and calibrate `ROUTE_REGRET_MARGIN` (the 1.0 is a literal `draft_regret` analogy, not a measured threshold). Then §3.7.5's "relics underpriced" comparison can actually be re-run | fix-sweep-2; EB-16 residual |
 | `EB-27` | Two tier0.5 spec features never built: `choose3` standalone slot mode (`model.py:246-250` raises `ValueError`) and the Prune signature event (`events.py` offers none) | eng-backlog §4; missed-requirements §3.5 |
 | `EB-28` | The drafter's salon-deploy blindness — `tier05/draft.py:_static_power` has no `salon_member` term, so cross-plan the members are invisible | eng-backlog §4; missed-requirements §3.6 |
 | `EB-43` | **D15 (spotlight-limb payoff-presence) — STAGED, HELD.** Drafter behaviour change (`DRAFTER 15`) + re-baseline sweep; `Q18` countersigned, pinned DRAFTER 14. **Lands as step (5) of a fixed six-step order** — must not land before blind-first grading (4) or it invalidates the registration | eng-backlog §6; R121 |
