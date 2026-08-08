@@ -40,7 +40,10 @@ record per run, and a fight inside it is invisible. The mod's own human feed
 per seat per FIGHT into `%APPDATA%/SlayTheSpire2/gits_telemetry/*.jsonl`, and
 since EB-18 those records carry `run_id` -- the run's string seed, which is the
 same token the run history writes as `seed`. That is the join, and it is why
-this file can now read both granularities without a second instrument.
+this file can now read both granularities without a second instrument. A seed is
+not a run, though -- replaying one is a supported arm -- so the fight side also
+carries `run_instance`, and GROUPING is on the pair while the JOIN stays on the
+seed.
 
 Everything about the fight stream is OPTIONAL and ADDITIVE here. A machine with
 no fight logs, or logs written before EB-18, analyses exactly as it did before:
@@ -216,7 +219,8 @@ def suspicious(runs: list[dict]) -> list[tuple[dict, str]]:
 # EB-18. Everything below reads the mod's per-fight JSON-lines stream. It is a
 # SECOND source with a different failure mode from the run history, and the two
 # are only ever joined on `run_id`; nothing here infers a fight from a run or a
-# run from a fight.
+# run from a fight. `run_instance` never crosses the join -- it only separates
+# fight groups the seed alone cannot tell apart.
 
 def find_fight_logs(root: Path = DEFAULT_FIGHT_ROOT) -> list[Path]:
     """Every per-fight log under `root`, oldest first.
@@ -262,16 +266,34 @@ def load_fights(root: Path = DEFAULT_FIGHT_ROOT) -> list[dict]:
     return fights
 
 
-def fights_by_run(fights: list[dict]) -> dict[str, list[dict]]:
+def run_key(fight: dict) -> tuple[str, str]:
+    """The identity of the RUN a fight belongs to: `(run_id, run_instance)`.
+
+    A SEED IS NOT A RUN. `run_id` is the run's string seed -- the token the
+    game's own history writes, and the only thing that joins the two sources --
+    but replaying a seed is a first-class arm (P1.5 / R104), so one session can
+    hold two DIFFERENT runs that carry the same `run_id`. `run_instance` is the
+    mod's per-`RunState` token (`<session stamp>#<ordinal>`), which is what
+    makes the pair unique where the seed alone is not.
+
+    BACKWARD COMPATIBLE BY CONSTRUCTION. A record written before the token
+    existed carries `""` and so groups exactly as it used to: one group per
+    seed, ambiguous under a replayed seed, and reported as such rather than
+    silently repaired.
+    """
+    return (fight.get("run_id", ""), fight.get("run_instance", ""))
+
+
+def fights_by_run(fights: list[dict]) -> dict[tuple[str, str], list[dict]]:
     """Fights grouped by the run they belong to, in fight order.
 
     A record with no `run_id` (every record written before EB-18) groups under
-    `""` and is reported as UNLINKED rather than merged into a run -- an empty
-    id is one absent join key per record, not one shared run.
+    an empty id and is reported as UNLINKED rather than merged into a run -- an
+    empty id is one absent join key per record, not one shared run.
     """
-    out: dict[str, list[dict]] = {}
+    out: dict[tuple[str, str], list[dict]] = {}
     for f in fights:
-        out.setdefault(f.get("run_id", ""), []).append(f)
+        out.setdefault(run_key(f), []).append(f)
     for rows in out.values():
         rows.sort(key=lambda r: (r.get("fight_index", 0), r.get("ts", 0)))
     return out
@@ -281,7 +303,7 @@ def summarize_fights(fights: list[dict]) -> dict:
     if not fights:
         return {}
     by_run = fights_by_run(fights)
-    linked = {k: v for k, v in by_run.items() if k}
+    linked = {k: v for k, v in by_run.items() if k[0]}
     # `corpse_detonations` is ABSENT on a pre-EB-18 record and 0 on a fight
     # that had none. The two are different facts and the denominator says so:
     # a rate over records that never carried the key would be a reading about
@@ -290,7 +312,13 @@ def summarize_fights(fights: list[dict]) -> dict:
     return {
         "fights": len(fights),
         "runs": len(linked),
-        "unlinked": len(by_run.get("", [])),
+        "unlinked": sum(len(v) for k, v in by_run.items() if not k[0]),
+        # Linked fights that predate `run_instance`. They group by seed alone,
+        # so two runs of one seed among them are ONE group here and there is no
+        # way to tell from the record that they were two -- a caveat on the
+        # count, printed beside it rather than quietly folded into it.
+        "seed_only": sum(len(v) for k, v in by_run.items()
+                         if k[0] and not k[1]),
         "outcomes": Counter(f.get("outcome", "unknown") for f in fights),
         "encounters": Counter(f.get("encounter") or "(unrecorded)"
                               for f in fights),
@@ -315,10 +343,16 @@ def join_fights_to_runs(runs: list[dict], fights: list[dict]) -> dict:
     ordinarily a run still in progress (the history entry is written when the
     run ENDS), which is exactly the case per-fight telemetry exists to make
     visible -- so it is a count, never a warning.
+
+    THE JOIN IS STILL THE SEED, and only the seed: `run_instance` is the mod's
+    own token and the run history has never heard of it. It splits the fight
+    side into the runs it really was; both halves of a replayed seed then match
+    that seed's history entries, which is correct -- the history holds two
+    entries for two runs of one seed too.
     """
     seeds = {r.get("seed") for r in runs if r.get("seed")}
     by_run = fights_by_run(fights)
-    matched = {k: v for k, v in by_run.items() if k and k in seeds}
+    matched = {k: v for k, v in by_run.items() if k[0] and k[0] in seeds}
     return {
         "runs_with_fights": len(matched),
         "fights_matched": sum(len(v) for v in matched.values()),
@@ -330,9 +364,13 @@ def print_fight_report(s: dict, join: dict | None = None) -> None:
     if not s:
         return
     print(f"\n=== per-fight stream - {s['fights']} fight records ===")
-    print(f"  runs (by run_id)   {s['runs']}"
+    print(f"  runs (id+instance) {s['runs']}"
           + (f"   [{s['unlinked']} unlinked - pre-EB-18 records]"
              if s["unlinked"] else ""))
+    if s.get("seed_only"):
+        print(f"  {s['seed_only']} fight row(s) predate `run_instance` and group "
+              "by seed alone;")
+        print("    two runs of one seed among them read as one run.")
     feeds = ", ".join(f"{k} x{n}" for k, n in s["feeds"].most_common())
     print(f"  feed/source        {feeds}")
     chars = ", ".join(f"{k} {n}" for k, n in s["characters"].most_common())

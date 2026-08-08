@@ -230,14 +230,23 @@ list. **A selector cut is a bot-feed cut** until a mod-side hook into the
 selection screens lands.
 
 **Additions of 2026-08-07 (EB-18), HUMAN FEED ONLY, no renames:** `run_id`,
-`fight_index`, `encounter`, `detonations`, `corpse_detonations`. The first
-three are per-fight identity — `run_id` is the run's string seed, which is the
-same token the game's own run history writes as `seed`, so `tier1/analyze.py`
-can join a fight row to a run row without either side minting an id. The last
-two are read off `BombPower`'s per-combat, per-player counters; a **corpse
-detonation** is one that resolved on a body that was already dead, which is
-probe (e) / Q11's question asked of every fight instead of one scripted pair.
-All five are **declared asymmetries** (`MOD_ONLY` in
+`run_instance`, `fight_index`, `encounter`, `detonations`,
+`corpse_detonations`. The first four are per-fight identity — `run_id` is the
+run's string seed, which is the same token the game's own run history writes as
+`seed`, so `tier1/analyze.py` can join a fight row to a run row without either
+side minting an id. **A seed is not a run**, though: replaying one is a
+first-class arm (P1.5 / R104), and the first cut of this restarted
+`fight_index` when the seed changed, so a seed played twice in one session read
+as a single run with fights numbered 0,1,2,6,7,8. `run_instance`
+(`<session stamp>#<ordinal>`) is minted once per `RunState` the mod sees —
+`RunManager.State` is assigned once per run and nulled on cleanup, so object
+identity is the game's own answer to "same run?" — and `(run_id,
+run_instance)` is unique where the seed alone is not. Records written before it
+carry no token and group by seed alone, which is ambiguous under a replayed
+seed and reported as such. The last two are read off `BombPower`'s per-combat,
+per-player counters; a **corpse detonation** is one that resolved on a body that
+was already dead, which is probe (e) / Q11's question asked of every fight
+instead of one scripted pair. All six are **declared asymmetries** (`MOD_ONLY` in
 `tier0/tests/test_track_b_curves.py`, beside `reactions_by_turn`): the soak
 drives the game from outside and has no wire route to the run object or to an
 internal hook ORDER, so **a cut on any of them is a human-feed cut** until such
