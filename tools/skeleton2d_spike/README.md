@@ -7,7 +7,11 @@ Path B of the animation capability memo had zero working examples anywhere in
 reach (`git show pre-simplification-2026-08-06:docs/archive/animation-capability-memo.md`);
 this directory built one, with Kokomi as the pilot.
 
-Findings live in the spike's verdict memo: `git show d69b7a0`.
+Findings live in the spike's verdict memo: `git show d69b7a0`. The one link
+that memo could not test offline — **does the rig seat as creature Visuals in a
+LIVE combat** — was probed on 2026-08-08 and came back **YES** on every leg:
+`PROBE-2026-08-08.md`, next to this file.
+
 This is the apparatus, kept so the result is regenerable. It is wired into
 nothing: no lint, no gate, no `build_pck.ps1` change, no CI, and **Path C
 (layered `Sprite2D`) remains the shipped fallback untouched.**
@@ -17,8 +21,11 @@ nothing: no lint, no gate, no `build_pck.ps1` change, no CI, and **Path C
 - **Pixels never enter the repo.** The rig texture derives from the Tier F
   Kokomi portrait cutout (`ImageGen/images/kokomi/model/`, machine-local);
   `gen_kokomi_rig.py` *refuses* an `--out` inside the repo.
-- **Nothing is deployed.** No game process is launched by anything here; the
-  in-game seat is the recorded remaining unknown.
+- **Nothing is deployed.** No game process is launched by anything here. The
+  in-game seat was answered by a separate probe that built its own throwaway
+  package and reverted it (`PROBE-2026-08-08.md`); nothing in this directory
+  ships, and Kokomi's shipped visuals are still the static
+  `combat_model.png`.
 - **No hand work.** The whole rig — masks, mesh, weights, clips, scene text —
   is regenerable from this script, the same invariant Path C's `--check`
   enforces.
@@ -53,4 +60,8 @@ Also: in a `--script` SceneTree run, the root window enters the tree only when
 iteration starts — `Skeleton2D.get_bone_count()` errors during
 `_initialize()`, so checks run on the first `_process` frame. Under the
 headless dummy renderer the skeleton's RenderingServer RID reports invalid;
-render-side skinning is unobservable offline.
+render-side skinning is unobservable offline. **Both halves of that behave
+differently live** (`PROBE-2026-08-08.md`): the RID is valid, and it is valid
+*before* the bone count is — at `tree_entered` the skeleton still answers
+`bones=0` while its RID already reads valid, so a live reader must sample a
+frame late, not at construction.
