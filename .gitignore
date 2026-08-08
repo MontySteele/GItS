@@ -32,6 +32,10 @@ docs/mockups/
 # game dir at the start of I2 — a save file, not art, but equally not repo
 # content.
 art/g12_captures/
+# Live-game capture packets. Same rule and the same reason: every frame is the
+# whole running game with Tier F art in it. Cited by path from
+# review/active/livegame-captures-2026-08-08.md.
+art/eb52_captures/
 
 # Raw art asset zips are shared out-of-band and dropped in the repo root on
 # purpose. They must never be committed (same §9 reasoning as above).
