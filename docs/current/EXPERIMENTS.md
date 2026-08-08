@@ -43,6 +43,11 @@ registration packets themselves live under `review/active/` — one home, not tw
   countersigned; the open step is authoring the kickoff predictions (`Q-C` in
   `docs/current/QUEUE.md`) *before* any number is read →
   `review/active/payoff-reach-reregistration.md`.
+- **EB-17p force-first-copy paired winrate** — **DRAFT, uncountersigned**:
+  nothing in it operates, no seed has been run, and the predictions are
+  [USER]'s to write before the sweep launches →
+  `review/active/eb17p-registration-draft-2026-08-08.md`. Listed at draft so
+  the packet has one home; it becomes an active registration on countersign.
 - **Kokomi stability band (D5)** — no band is declared yet (the declaration
   is QUEUE `S4-G6`; until it lands, the band rides DARK, `band = None`); its
   grading playtest is `docs/current/playtest/kokomi-playtest-protocol.md`
