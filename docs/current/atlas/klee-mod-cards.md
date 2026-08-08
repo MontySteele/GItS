@@ -19,7 +19,7 @@ implemented runtime is NOT emitted... A generator that emits a
 plausible-looking wrong body is worse than one that emits nothing"
 (`tools/gen_klee_cards.py:11-18`). `Generated/` is **not** editable source: every
 file carries a DO-NOT-EDIT header and the directory is deleted and rewritten on
-each regen (`:5219-5221`). The handwritten cards in `Cards/` and
+each regen (`_write_plan`). The handwritten cards in `Cards/` and
 `Cards/{Furina,Kokomi}/` exist only because their lifecycle is machinery rather
 than ops; they are the one place sheet↔C# drift is possible, hence their lint.
 
@@ -42,9 +42,11 @@ PYTHONPATH=. python3 -m pytest tier0/tests/test_roster_codegen.py \
     tier0/tests/test_generated_structure.py tier0/tests/test_sheet_lints.py -q
 ```
 
-In-process: `gen.blocked_reason(card, profile)` (`gen_klee_cards.py:921`),
-`gen.emit(card, profile)` (`:4674`), `gen.upgrade_plan(card)` (`:2194`),
-`gen.pascal(id)` (`:850`), profiles in `gen.PROFILES` (`:159`).
+In-process: `gen.blocked_reason(card, profile)` (`gen_klee_cards.py:961`),
+`gen.emit(card, profile)` (`:5052`), `gen.upgrade_plan(card)` (`:2279`),
+`gen.pascal(id)` (`:881`), profiles in `gen.PROFILES` (`:168`); the one driver
+is `gen._run_profile(profile, check)` (`:5997`), planning through
+`gen.PLAN_BUILDERS`.
 Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
 3 Guest Stars; kokomi 60/61; 277 card classes, all pooled.
 
@@ -54,7 +56,9 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
   sheet, "DO NOT EDIT. Edits are lost on the next regen"
   (`gen_klee_cards.py:20-22`; e.g. `Cards/Generated/QuickFuse.cs:1-7`).
 - **`--check` compares three things**: per-card content, *extra* `.cs` files in
-  the out dir, and the manifest bytes (`:5194-5215`).
+  the out dir, and the manifest bytes (`_check_plan`) — one implementation for
+  all three profiles since F3, reading the same `ProfilePlan` the write path
+  writes.
 - **`CARD_FIELDS` is deliberately total** — an unknown card-level field blocks
   the card by name rather than being ignored (`:790-837`, `card_level_reason`
   `:840-847`). It caught `innate` and `retain` (`:791-813`); `tempo_band` had to
@@ -72,9 +76,10 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
   (guarded by `profile is KLEE_PROFILE`), `HAND_WRITTEN_ROSTER` is
   Furina/Kokomi (`:653-676`, `:941-945`).
 - **A blocked companion or Guest Star is a build failure**, not a manifest row
-  — `SystemExit` (`:5124-5130`, `:5355-5359`).
+  — `SystemExit` (`_plan_klee`'s companion loop, `_plan_roster`'s Guest Star
+  loop).
 - **Generated classes are `autoAdd: false`; pool classes own membership**
-  (`:4987-4993`, `:5077`); every `CustomCardModel` must be reachable from a
+  (`:5384-5389`, `:5474`); every `CustomCardModel` must be reachable from a
   character pool or `CardModel.Pool` falls through to `MockCardPool` and throws
   "You monster!" on draw (`tools/lint_pool_membership.py:1-27`, ledger `:41-58`).
 - **Cadence is profile business, never per-card**: Klee/Kokomi
@@ -128,16 +133,17 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
 ## 5. Traps
 
 - **`Cards/*/Generated/` is wiped on every regen** — anything hand-added there
-  vanishes silently (`gen_klee_cards.py:5219-5221`).
+  vanishes silently (`gen_klee_cards.py::_write_plan`).
 - **Klee's manifest has a different SHAPE**: `generated`/`companions`/`blocked`/
   `upgrades`, with no `profile`, `coverage`, or `runtime_clusters`
-  (`:5177-5192` vs `:5398-5426`) — code reading `coverage` KeyErrors on Klee.
+  (`_plan_klee` vs `_plan_roster`) — code reading `coverage` KeyErrors on Klee.
+  F3 unified the *driver*, not the schemas: those bytes are committed output.
 - **`Cards/Generated/` holds Klee's cards AND all 48 companions** from three
   `*-companions.yaml` sheets, plus `CompanionRoster.cs`; only the manifest
-  separates them (`:5110-5150`).
+  separates them (`_plan_klee`).
 - **`"hand-written"` in a `blocked` map is a finished decision, not a gap** —
   checked first so completed work never re-reports as an open workstream
-  (`:5240-5248`).
+  (`_furina_runtime_cluster`, `_kokomi_runtime_cluster`).
 - **Text-identical mechanism loss is the standing defect class**: `exhaust`,
   `innate`, `retain`, literal `times`, `bonus_formula`, the fanfare keyword
   grants and `crash_fanfare` render the same face with or without the
@@ -168,7 +174,7 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
 
 1. `tools/gen_klee_cards.py:1-160` — the refusal contract, sheet/out-dir
    constants, and the three `CharacterProfile`s.
-2. `tools/gen_klee_cards.py:790-1010` — `CARD_FIELDS`, `card_level_reason`, top
+2. `tools/gen_klee_cards.py:821-1020` — `CARD_FIELDS`, `card_level_reason`, top
    of `blocked_reason`: everything that decides *not* to emit.
 3. `klee-mod/KleeCode/Cards/Generated/manifest.json` then
    `Cards/Furina/Generated/manifest.json` — the two manifest shapes side by side.
