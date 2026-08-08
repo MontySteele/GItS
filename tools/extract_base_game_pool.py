@@ -145,7 +145,8 @@ def game_dll() -> Path:
     """Read GameDir from local.props so machine paths live in one place."""
     if not LOCAL_PROPS.exists():
         sys.exit(f"missing {LOCAL_PROPS} -- copy local.props.example first")
-    m = re.search(r"<GameDir>(.*?)</GameDir>", LOCAL_PROPS.read_text())
+    m = re.search(r"<GameDir>(.*?)</GameDir>",
+                  LOCAL_PROPS.read_text(encoding="utf-8"))
     if not m:
         sys.exit("no <GameDir> in local.props")
     game_dir = Path(m.group(1)).expanduser()
@@ -220,7 +221,7 @@ def _read_decompiled_type(root: Path, type_name: str) -> str:
     )
     matches: list[tuple[Path, str]] = []
     for path in root.rglob(f"{short_name}.cs"):
-        src = path.read_text()
+        src = path.read_text(encoding="utf-8")
         if namespace_decl.search(src):
             matches.append((path, src))
     if not matches:
@@ -241,7 +242,7 @@ def _read_decompiled_short(root: Path, short_name: str) -> str:
         listing = "\n  ".join(str(p.relative_to(root)) for p in paths)
         sys.exit(f"multiple decompiled files matched {short_name}:\n"
                  f"  {listing}")
-    return paths[0].read_text()
+    return paths[0].read_text(encoding="utf-8")
 
 
 def _single_card_tag(src: str, power_cls: str) -> str:
@@ -1581,7 +1582,8 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
         emitted_ids = {row["id"] for row in rows}
         seen: set[str] = set()
         for supplement in supplements:
-            supplement_rows = yaml.safe_load(supplement.read_text()) or []
+            supplement_rows = yaml.safe_load(
+                supplement.read_text(encoding="utf-8")) or []
             if not isinstance(supplement_rows, list) or not supplement_rows:
                 sys.exit(f"{supplement}: expected a non-empty list of cards")
             count = 0
@@ -1643,7 +1645,7 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
             "not want.\nunavailable:")
         for cid, info in sorted(unavailable.items()):
             out.append(f"  {cid}: {_flow(info)}")
-    sheet.write_text("\n".join(out) + "\n")
+    sheet.write_text("\n".join(out) + "\n", encoding="utf-8")
 
     # R20: upgrades live in their OWN sheet, never inline on a card row.
     ups = OUT_DIR / f"{character.lower()}-upgrades.yaml"
@@ -1657,7 +1659,7 @@ def emit_sheet(cards: list[dict], sources: dict[str, str],
              "not faked."]
     for cid, delta in sorted(upgrades.items()):
         lines.append(f"{cid}: {_delta_flow(delta)}")
-    ups.write_text("\n".join(lines) + "\n")
+    ups.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     print(f"\n=== sheet: {len(rows)} emitted / {len(excluded)} excluded "
           f"of {n_sp} ===")
@@ -1695,7 +1697,7 @@ def run_one(root: Path, character: str, json_out: Path | None,
     OUT_DIR.mkdir(exist_ok=True)
     out = json_out or OUT_DIR / f"{character.lower()}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(cards, indent=1))
+    out.write_text(json.dumps(cards, indent=1), encoding="utf-8")
     print(f"\n  wrote {out.relative_to(REPO)}  "
           f"(gitignored -- reference only, do not commit)")
 

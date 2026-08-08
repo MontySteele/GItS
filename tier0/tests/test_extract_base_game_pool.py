@@ -65,7 +65,7 @@ def _spec(tmp_path: Path, **overrides) -> build.CharacterSpec:
 def _write_type(root: Path, relative: str, namespace: str, body: str) -> Path:
     path = root / relative
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(f"namespace {namespace};\n\n{body}\n")
+    path.write_text(f"namespace {namespace};\n\n{body}\n", encoding="utf-8")
     return path
 
 
@@ -78,8 +78,8 @@ def test_game_dll_finds_macos_app_layout(tmp_path, monkeypatch):
     props = tmp_path / "local.props"
     props.write_text(
         f"<Project><PropertyGroup><GameDir>{install}</GameDir>"
-        "</PropertyGroup></Project>"
-    )
+        "</PropertyGroup></Project>",
+        encoding="utf-8")
     monkeypatch.setattr(extract, "LOCAL_PROPS", props)
 
     assert extract.game_dll() == dll
@@ -361,8 +361,8 @@ def test_supplement_upgrade_keys_cover_bounded_history_shapes():
 def test_builder_merges_required_supplement_layers(tmp_path, monkeypatch):
     first = tmp_path / "pass4.yaml"
     second = tmp_path / "pass5.yaml"
-    first.write_text("- {id: two}\n")
-    second.write_text("- {id: three}\n")
+    first.write_text("- {id: two}\n", encoding="utf-8")
+    second.write_text("- {id: three}\n", encoding="utf-8")
     spec = _spec(tmp_path, supplements=(first, second))
     monkeypatch.setattr(build, "_doc1_cards", lambda _spec: [{"id": "one"}])
 
@@ -374,8 +374,8 @@ def test_builder_merges_required_supplement_layers(tmp_path, monkeypatch):
 def test_builder_rejects_cross_layer_overlap(tmp_path, monkeypatch):
     first = tmp_path / "pass4.yaml"
     second = tmp_path / "pass5.yaml"
-    first.write_text("- {id: repeated}\n")
-    second.write_text("- {id: repeated}\n")
+    first.write_text("- {id: repeated}\n", encoding="utf-8")
+    second.write_text("- {id: repeated}\n", encoding="utf-8")
     spec = _spec(tmp_path, supplements=(first, second))
     monkeypatch.setattr(build, "_doc1_cards", lambda _spec: [{"id": "one"}])
 
@@ -389,7 +389,7 @@ def test_builder_fails_closed_on_a_missing_required_layer(tmp_path,
     absent is an error, never a quietly smaller pool. game_ref/ has been
     destroyed twice; a glob would have made both losses silent."""
     present = tmp_path / "pass4.yaml"
-    present.write_text("- {id: two}\n")
+    present.write_text("- {id: two}\n", encoding="utf-8")
     spec = _spec(tmp_path, supplements=(present, tmp_path / "pass5.yaml"))
     monkeypatch.setattr(build, "_doc1_cards", lambda _spec: [{"id": "one"}])
 
@@ -414,7 +414,7 @@ def test_every_registered_character_derives_the_same_path_convention():
 
 def test_loader_rejects_a_missing_required_external_layer(
         tmp_path, monkeypatch):
-    (tmp_path / "pool.yaml").write_text("- {id: one}\n")
+    (tmp_path / "pool.yaml").write_text("- {id: one}\n", encoding="utf-8")
     monkeypatch.setattr(loader, "GAME_REF_DIR", tmp_path)
     monkeypatch.setattr(loader, "EXTERNAL_CARD_SHEETS",
                         {"pool.yaml": "reference"})
@@ -426,7 +426,8 @@ def test_loader_rejects_a_missing_required_external_layer(
 
 
 def test_builder_rejects_partial_upgrade_coverage(tmp_path):
-    (tmp_path / "upgrades.yaml").write_text("one: {damage: 1}\n")
+    (tmp_path / "upgrades.yaml").write_text("one: {damage: 1}\n",
+                                            encoding="utf-8")
     spec = _spec(tmp_path)
 
     with pytest.raises(SystemExit, match="missing upgrades for.*two"):
@@ -463,12 +464,12 @@ def test_single_card_tag_requires_exactly_one_tag():
 def test_read_decompiled_short_fails_closed(tmp_path):
     (tmp_path / "a").mkdir()
     (tmp_path / "b").mkdir()
-    (tmp_path / "a" / "FooPower.cs").write_text("x")
+    (tmp_path / "a" / "FooPower.cs").write_text("x", encoding="utf-8")
     assert extract._read_decompiled_short(tmp_path, "FooPower") == "x"
     with pytest.raises(SystemExit):
         extract._read_decompiled_short(tmp_path, "MissingPower")
     # An ambiguous match is a real error, same as _read_decompiled_type.
-    (tmp_path / "b" / "FooPower.cs").write_text("y")
+    (tmp_path / "b" / "FooPower.cs").write_text("y", encoding="utf-8")
     with pytest.raises(SystemExit):
         extract._read_decompiled_short(tmp_path, "FooPower")
 

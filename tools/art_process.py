@@ -299,7 +299,7 @@ def process(row, dest):
 
 def apply_picks(rows, picks_path):
     picks = {}
-    for line in Path(picks_path).read_text().splitlines():
+    for line in Path(picks_path).read_text(encoding="utf-8").splitlines():
         if line.strip() and not line.startswith("#"):
             aid, rank = line.split("\t")[:2]
             picks[aid] = int(rank)
@@ -318,7 +318,7 @@ def apply_picks(rows, picks_path):
 def update_manifest(status_by_asset):
     if not MANIFEST.exists():
         return
-    lines = MANIFEST.read_text().splitlines()
+    lines = MANIFEST.read_text(encoding="utf-8").splitlines()
     out = [lines[0]]
     for line in lines[1:]:
         cells = next(csv.reader([line]))
@@ -333,7 +333,7 @@ def update_manifest(status_by_asset):
         w = csv.writer(_ListWriter(buf))
         w.writerow(cells)
         out.append(buf[0].rstrip("\r\n"))
-    MANIFEST.write_text("\n".join(out) + "\n")
+    MANIFEST.write_text("\n".join(out) + "\n", encoding="utf-8")
 
 
 class _ListWriter:

@@ -168,7 +168,8 @@ def test_every_reference_card_has_an_applicable_upgrade(ref_cards):
     assert len(ref_cards) == 87
     pool_ids = {card.id for card in ref_cards}
     for layer_name in loader.EXTERNAL_CARD_LAYERS["silent_pool.yaml"]:
-        layer = yaml.safe_load((loader.GAME_REF_DIR / layer_name).read_text())
+        layer = yaml.safe_load(
+            (loader.GAME_REF_DIR / layer_name).read_text(encoding="utf-8"))
         assert {row["id"] for row in layer} <= pool_ids
     assert all(upgrades.has_upgrade(c.id) for c in ref_cards)
     for card in ref_cards:

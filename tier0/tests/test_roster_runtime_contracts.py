@@ -13,11 +13,11 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "klee-mod" / "KleeCode"
-PCK_BUILDER = (ROOT / "tools" / "build_pck.ps1").read_text()
+PCK_BUILDER = (ROOT / "tools" / "build_pck.ps1").read_text(encoding="utf-8")
 
 CHARACTERS = {
-    "Klee": (SOURCE / "Klee.cs").read_text(),
-    "Furina": (SOURCE / "Furina.cs").read_text(),
+    "Klee": (SOURCE / "Klee.cs").read_text(encoding="utf-8"),
+    "Furina": (SOURCE / "Furina.cs").read_text(encoding="utf-8"),
 }
 
 REQUIRED_PRELOAD_OVERRIDES = {
@@ -122,8 +122,9 @@ def test_the_pck_contract_is_derived_from_the_build_not_written_by_hand():
 
 
 def test_deploy_rejects_an_old_or_mismatched_pck():
-    deploy = (ROOT / "klee-mod" / "build" / "deploy.ps1").read_text()
-    validate = (ROOT / "klee-mod" / "build" / "validate.ps1").read_text()
+    build_dir = ROOT / "klee-mod" / "build"
+    deploy = (build_dir / "deploy.ps1").read_text(encoding="utf-8")
+    validate = (build_dir / "validate.ps1").read_text(encoding="utf-8")
 
     assert "pck.contract.txt" in deploy
     # v2 is stale BY DEFINITION, not merely by age: a v2 contract is a
@@ -158,7 +159,7 @@ def test_the_built_contract_names_every_referenced_scene():
 
 
 def test_roster_uses_one_combined_combat_hook_subscription():
-    entry = (SOURCE / "KleeMod.cs").read_text()
+    entry = (SOURCE / "KleeMod.cs").read_text(encoding="utf-8")
     calls = re.findall(
         r"(?m)^\s*ModHelper\.SubscribeForCombatStateHooks\(",
         entry,
@@ -169,7 +170,8 @@ def test_roster_uses_one_combined_combat_hook_subscription():
 
 
 def test_runtime_self_check_sweeps_resolved_character_assets():
-    self_check = (SOURCE / "Diagnostics" / "KleeSelfCheck.cs").read_text()
+    self_check = (SOURCE / "Diagnostics" / "KleeSelfCheck.cs").read_text(
+        encoding="utf-8")
     assert "character.AssetPaths" in self_check
     assert "character.AssetPathsCharacterSelect" in self_check
     assert "ResourceLoader.Exists(path)" in self_check
@@ -177,7 +179,7 @@ def test_runtime_self_check_sweeps_resolved_character_assets():
 
 
 def test_frozen_power_supplies_the_localization_checked_by_r8():
-    frozen = (SOURCE / "Powers" / "FrozenPower.cs").read_text()
+    frozen = (SOURCE / "Powers" / "FrozenPower.cs").read_text(encoding="utf-8")
     assert "FrozenPower : PowerModel, ILocalizationProvider" in frozen
     assert '("title", "Frozen")' in frozen
     assert '("description",' in frozen
@@ -189,7 +191,7 @@ def test_bomb_suppression_latch_is_per_creature_and_snapshotted():
     latch on the enemy). The port once re-derived eligibility live per hit
     and kept the latch in process-global statics keyed by combat reference
     equality, which reload or a second live combat silently reset."""
-    bomb = (SOURCE / "Powers" / "BombPower.cs").read_text()
+    bomb = (SOURCE / "Powers" / "BombPower.cs").read_text(encoding="utf-8")
     # Spent latch lives on the enemy creature, not in combat-keyed statics.
     assert "SpireField<Creature, bool> SuppressionSpent" in bomb
     assert "_suppressionCombat" not in bomb
@@ -211,7 +213,8 @@ def test_beetle_swarm_snapshots_bombed_state_at_cast():
     The failure it guards is a silent revert to the live per-hit read: that
     version compiles, plays, and differs from the sim by exactly the +6 the
     ruling restored."""
-    card = (SOURCE / "Cards" / "KaboomBeetleSwarm.cs").read_text()
+    card = (SOURCE / "Cards" / "KaboomBeetleSwarm.cs").read_text(
+        encoding="utf-8")
     # The snapshot is taken in OnPlay, before the damage series is executed.
     play = card.split("protected override async Task OnPlay", 1)[1]
     snapshot_at = play.index("_bombedAtCast =")

@@ -84,7 +84,7 @@ def card_delta(row: dict) -> int:
 def lint(paths: list[str]) -> list[str]:
     findings = []
     for path in paths:
-        rows = yaml.safe_load(Path(path).read_text()) or []
+        rows = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or []
         for row in rows:
             if row.get("rarity") not in CHECKED_RARITIES:
                 continue

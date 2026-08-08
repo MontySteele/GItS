@@ -137,7 +137,7 @@ def _pure_encore(card: dict) -> bool:
 
 
 def main() -> int:
-    cards = yaml.safe_load(SHEET.read_text())
+    cards = yaml.safe_load(SHEET.read_text(encoding="utf-8"))
     errors: list[str] = []
     focalors: list[dict] = []
     census = {r: 0 for r in REGISTERS}

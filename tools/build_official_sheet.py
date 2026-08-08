@@ -203,7 +203,8 @@ def _doc1_cards(spec: CharacterSpec) -> list[dict]:
         _fail(f"missing {_rel(spec.extractor_sheet)} -- run "
               f"extract_base_game_pool.py {spec.character.capitalize()} "
               "--emit-sheet first (needs the local sts2.dll).")
-    docs = list(yaml.safe_load_all(spec.extractor_sheet.read_text()))
+    docs = list(yaml.safe_load_all(
+        spec.extractor_sheet.read_text(encoding="utf-8")))
     if not docs or not isinstance(docs[0], list):
         _fail(f"{spec.extractor_sheet.name}: document 1 is not a card list.")
     return docs[0]
@@ -212,7 +213,7 @@ def _doc1_cards(spec: CharacterSpec) -> list[dict]:
 def _dump(obj, header: str, path: Path) -> None:
     body = yaml.safe_dump(obj, sort_keys=False, default_flow_style=False,
                           allow_unicode=True, width=100)
-    path.write_text(header + body)
+    path.write_text(header + body, encoding="utf-8")
 
 
 # --- validation shared by build and verify ------------------------------
@@ -230,7 +231,7 @@ def _validated_pool_cards(spec: CharacterSpec) -> list[dict]:
             _fail(f"missing {_rel(path)} -- refusing to write a partial pool. "
                   "Restore the reviewed local layer; --split can recover it "
                   "only when an existing pool makes its boundary unambiguous.")
-        rows = yaml.safe_load(path.read_text()) or []
+        rows = yaml.safe_load(path.read_text(encoding="utf-8")) or []
         if not isinstance(rows, list) or not rows:
             _fail(f"{path.name} is not a non-empty card list.")
         dupes = _dup_ids(rows)
@@ -251,7 +252,7 @@ def _char_facts(spec: CharacterSpec) -> dict:
         _fail(f"missing {_rel(spec.char_facts)} -- cannot build the character "
               f"entry. Recover it with --split from an existing "
               f"{spec.char_out.name}.")
-    facts = yaml.safe_load(spec.char_facts.read_text()) or {}
+    facts = yaml.safe_load(spec.char_facts.read_text(encoding="utf-8")) or {}
     missing = [k for k in CHAR_FIELDS if k not in facts]
     if missing:
         _fail(f"{spec.char_facts.name} missing required fields {missing}.")
@@ -266,7 +267,7 @@ def _validated_upgrades(spec: CharacterSpec,
     if not spec.upgrades.exists():
         _fail(f"missing {_rel(spec.upgrades)} -- rerun extract_base_game_pool.py "
               "with --emit-sheet after restoring every supplement layer.")
-    deltas = yaml.safe_load(spec.upgrades.read_text()) or {}
+    deltas = yaml.safe_load(spec.upgrades.read_text(encoding="utf-8")) or {}
     if not isinstance(deltas, dict):
         _fail(f"{spec.upgrades.name} is not an id-to-delta mapping.")
     pool_ids = {card["id"] for card in cards}
@@ -298,7 +299,7 @@ def do_split(spec: CharacterSpec) -> None:
              "Char": spec.character.capitalize()}
     doc1_ids = {c["id"] for c in _doc1_cards(spec)}
     if spec.pool.exists():
-        pool = yaml.safe_load(spec.pool.read_text()) or []
+        pool = yaml.safe_load(spec.pool.read_text(encoding="utf-8")) or []
         missing = [path for path in spec.supplements if not path.exists()]
         if len(missing) > 1:
             _fail("multiple supplement layers are missing; the merged pool "
@@ -308,8 +309,8 @@ def do_split(spec: CharacterSpec) -> None:
             known = set(doc1_ids)
             for path in spec.supplements:
                 if path.exists():
-                    known.update(c["id"] for c in
-                                 (yaml.safe_load(path.read_text()) or []))
+                    known.update(c["id"] for c in (yaml.safe_load(
+                        path.read_text(encoding="utf-8")) or []))
             recovered = sorted((c for c in pool if c["id"] not in known),
                                key=lambda c: c["id"])
             if not recovered:
@@ -323,7 +324,7 @@ def do_split(spec: CharacterSpec) -> None:
         print(f"no {spec.pool.name}; skipped supplement bootstrap.",
               file=sys.stderr)
     if spec.char_out.exists():
-        cur = yaml.safe_load(spec.char_out.read_text()) or {}
+        cur = yaml.safe_load(spec.char_out.read_text(encoding="utf-8")) or {}
         facts = {k: cur[k] for k in CHAR_FIELDS + CHAR_OPTIONAL_FIELDS
                  if k in cur}
         miss = [k for k in CHAR_FIELDS if k not in facts]
@@ -358,7 +359,7 @@ def do_build(spec: CharacterSpec) -> None:
 def do_verify(spec: CharacterSpec) -> None:
     if not spec.pool.exists():
         _fail(f"--verify needs an existing {_rel(spec.pool)}.")
-    current = yaml.safe_load(spec.pool.read_text()) or []
+    current = yaml.safe_load(spec.pool.read_text(encoding="utf-8")) or []
     cur_dup = _dup_ids(current)
     if cur_dup:
         _fail(f"{spec.pool.name} has duplicate ids: {cur_dup}")
@@ -384,7 +385,7 @@ def do_verify(spec: CharacterSpec) -> None:
         print(f"  missing {_rel(spec.char_out)} -- {spec.char_id} cannot "
               "instantiate.")
     else:
-        cur = yaml.safe_load(spec.char_out.read_text()) or {}
+        cur = yaml.safe_load(spec.char_out.read_text(encoding="utf-8")) or {}
         miss = [k for k in CHAR_FIELDS if k not in cur]
         if miss:
             ok = False
