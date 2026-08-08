@@ -58,7 +58,7 @@ fixture (`tier05/tests/conftest.py:17-38`), which patches `model.build_act_map`.
   (`model.py:19-21`, `acts.py:21-24`, `maps.py:22-23`). Side measurements take
   DEDICATED streams so they cannot renumber a run: banner `seed+2e9`
   (`model.py:284-295`), starting deck `seed+3e9` (`:298-300`), draft_regret
-  `seed+i+1e9` (`:779-781`). The boss draw consumes an rng call even from a
+  `seed+i+1e9` (`:779-781`), route_regret `seed+i+5e9` (EB-16w, same site). The boss draw consumes an rng call even from a
   1-entry pool, so growing a pool renumbers nothing (`acts.py:211-212`).
 - **`len(node_kinds) == MAP_FLOORS * n_acts`, and the index IS the floor
   index** — one room per floor, act boundaries at multiples of `C.MAP_FLOORS`
@@ -132,11 +132,14 @@ fixture (`tier05/tests/conftest.py:17-38`), which patches `model.build_act_map`.
   events (`model.py:396-400`, `:461-465`, `:497-500`). A fourth decision channel
   added without it silently re-labels adaptive runs (measured: 5/40 seeds
   diverged, 2/40 win flips — `draft.py:1475-1480`).
-- **`route_regret` does not exist**, though the research doc mandates it and
-  `route.py`'s header once claimed it shipped (`route.py:13-15`;
-  `git show aa09b97:docs/current/backlog/missed-requirements.md` §2.1);
-  hunter-vs-cautious is the only real
-  route countermeasure. And do **NOT** calibrate `MAP_ROOM_ODDS` or the route
+- **`route_regret` is live but its margin is not calibrated** (EB-16w). The
+  live walk records its option sets (`model.py`, `run_one`'s `_pick`), the run
+  ends holding `route_hindsight`, and `_run_range` calls
+  `run_metrics.route_regret` per act on a dedicated `seed+i+5e9` stream;
+  `route_profile["regret"]` is the pooled read. `C.ROUTE_REGRET_SAMPLE` is 1.0.
+  `ROUTE_REGRET_MARGIN` is still the literal 1.0 copied from `draft_regret`'s
+  own uncalibrated literal, so read the gap DISTRIBUTION (`mean/p50/p90/max`),
+  not `regret_rate`. And do **NOT** calibrate `MAP_ROOM_ODDS` or the route
   policies against a winrate — the target is player behaviour (median ~2.5
   elites fought per act, range 1-4), and tuning a difficulty dial to a winrate
   already had to be retracted once here (`route.py:17-27`,

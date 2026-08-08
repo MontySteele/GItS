@@ -1,7 +1,9 @@
 """Reward generation (spec §3) — OUR design, the thing under test.
 
 After each fight: REWARD_CARD_OFFERS character cards rarity-rolled, plus
-the companion slot (standard mode in M5; choose3/pity land in M7). Skip
+the companion slot. All three spec slot modes now exist -- standard (M5),
+pity(k) (triage ruling 4), choose3 (EB-27) -- and `model.run_one` is what
+decides how many offers the slot shows on any given screen. Skip
 is always allowed — the draft policy decides.
 
 5-star companions appear at rare odds only; 4-stars fill common/uncommon.

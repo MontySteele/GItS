@@ -44,7 +44,8 @@ def _fight(**over) -> dict:
     """One record in the shape `PlayTelemetry.ToJson` writes it."""
     base = {
         "record": "fight", "schema": "1", "feed": "human", "source": "mod",
-        "intent": "", "run_id": "SEEDONE", "fight_index": 0,
+        "intent": "", "run_id": "SEEDONE", "run_instance": "20260807-2200#0",
+        "fight_index": 0,
         "encounter": "ENCOUNTER.TOADPOLES", "seats": 1, "seat_index": 0,
         "character": "Klee", "act": 1, "floor": 1, "kind": "monster",
         "enemies": [{"name": "Toadpole", "max_hp": 30}],
@@ -105,8 +106,9 @@ def test_fights_group_by_run_and_sort_by_fight_index(tmp_path):
          _fight(run_id="A", fight_index=0),
          _fight(run_id="B", fight_index=0))
     grouped = analyze.fights_by_run(analyze.load_fights(tmp_path))
-    assert set(grouped) == {"A", "B"}
-    assert [f["fight_index"] for f in grouped["A"]] == [0, 1]
+    assert {k[0] for k in grouped} == {"A", "B"}
+    a = grouped[("A", "20260807-2200#0")]
+    assert [f["fight_index"] for f in a] == [0, 1]
 
 
 def test_records_with_no_run_id_are_unlinked_rather_than_one_big_run(tmp_path):
@@ -128,6 +130,72 @@ def test_the_join_is_on_the_run_seed_the_history_already_writes():
     # A run still in progress writes no history entry; that is a count, not a
     # warning, and it is exactly the case per-fight telemetry makes visible.
     assert join["fights_unmatched"] == 1
+
+
+# ------------------------------------------------------- the replayed seed --
+#
+# The defect the live smoke of EB-18 found: `PlayTelemetry` restarted
+# `fight_index` when the run ID CHANGED, on the reasoning that two runs in a
+# session have different seeds. Replaying a seed is a first-class arm
+# (P1.5 / R104), so that reasoning is false in ordinary use -- seed 8B97LMCL2F
+# played twice in one session gave one `run_id` whose fights ran 0,1,2,6,7,8,
+# with no floor gap for a reader to see, and this reader folded the two runs
+# into one.
+
+def test_two_runs_of_one_seed_are_two_runs(tmp_path):
+    """Same `run_id`, different `run_instance`: two groups, and each numbers
+    its own fights from zero."""
+    _log(tmp_path,
+         _fight(run_instance="S#0", fight_index=0, character="Klee"),
+         _fight(run_instance="S#0", fight_index=1, character="Klee"),
+         _fight(run_instance="S#1", fight_index=0, character="Furina"),
+         _fight(run_instance="S#1", fight_index=1, character="Furina"))
+    fights = analyze.load_fights(tmp_path)
+    grouped = analyze.fights_by_run(fights)
+    assert set(grouped) == {("SEEDONE", "S#0"), ("SEEDONE", "S#1")}
+    assert analyze.summarize_fights(fights)["runs"] == 2
+
+
+def test_the_replayed_seed_still_joins_to_its_history_entries():
+    """The instance token splits the FIGHT side only. Both halves match the
+    one seed, because the run history holds an entry for each run too."""
+    runs = [{"seed": "SEEDONE"}]
+    fights = [_fight(run_instance="S#0"), _fight(run_instance="S#1")]
+    join = analyze.join_fights_to_runs(runs, fights)
+    assert join["runs_with_fights"] == 2
+    assert join["fights_matched"] == 2
+    assert join["fights_unmatched"] == 0
+
+
+def test_records_without_the_token_group_exactly_as_they_used_to(tmp_path):
+    """Backward compatibility, stated as a test: a pre-fix record has no
+    `run_instance`, so a replayed seed among them is ONE group -- ambiguous,
+    which is what it always was, and never a crash."""
+    old = _fight()
+    del old["run_instance"]
+    other = _fight(fight_index=1)
+    del other["run_instance"]
+    _log(tmp_path, old, other)
+    fights = analyze.load_fights(tmp_path)
+    assert set(analyze.fights_by_run(fights)) == {("SEEDONE", "")}
+    s = analyze.summarize_fights(fights)
+    assert s["runs"] == 1
+    assert s["unlinked"] == 0
+    assert s["seed_only"] == 2
+
+
+def test_the_report_names_the_ambiguity_instead_of_hiding_it(capsys):
+    old = _fight()
+    del old["run_instance"]
+    analyze.print_fight_report(analyze.summarize_fights([old]))
+    out = capsys.readouterr().out
+    assert "predate `run_instance`" in out
+    assert "read as one run" in out
+
+
+def test_a_run_carrying_the_token_prints_no_ambiguity_note(capsys):
+    analyze.print_fight_report(analyze.summarize_fights([_fight()]))
+    assert "predate `run_instance`" not in capsys.readouterr().out
 
 
 def test_a_coop_fight_is_two_rows_that_share_a_run_and_a_fight_index():
@@ -200,9 +268,21 @@ def _csharp_keys() -> set[str]:
 
 def test_the_mod_writes_the_join_key_and_the_counters():
     keys = _csharp_keys()
-    for key in ("run_id", "fight_index", "encounter",
+    for key in ("run_id", "run_instance", "fight_index", "encounter",
                 "detonations", "corpse_detonations"):
         assert key in keys, f"the human feed stopped writing {key}"
+
+
+def test_the_new_run_signal_is_the_run_object_and_not_the_seed():
+    """`RunManager.State` is assigned once per run (`SetUpNew*` throws if it is
+    already set) and nulled in `CleanUp`, so a second embark is necessarily a
+    different `RunState` instance. Comparing the SEED instead is the defect
+    this test exists to keep out: it reads a replayed seed as one run."""
+    src = CS_TELEMETRY.read_text(encoding="utf-8")
+    assert "ReferenceEquals(seen, run)" in src
+    assert "WeakReference<RunState>" in src
+    # the old signal, by its shape: fight numbering keyed off a cached run id
+    assert "_runId" not in src
 
 
 def test_the_run_id_is_the_games_own_seed_and_not_an_invented_id():

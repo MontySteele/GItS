@@ -29,6 +29,7 @@ import random
 #   3e9  randomized starter    tier05/model.py
 #   4e9  hand-full selector    tier0/engine/combat.py (CombatState.selector_rng;
 #                              sitting 2026-08-06, family X14 leg (b))
+#   5e9  route regret          tier05/model.py (EB-16w, 2026-08-07)
 #   7e9  understudy policy     this module
 # Understudy takes 7e9 and leaves room between.
 UNDERSTUDY_STREAM_OFFSET = 7 * 10**9

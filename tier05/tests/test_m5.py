@@ -559,6 +559,49 @@ def test_pity_slot_fires_after_k_companionless_screens():
     assert 3 in counts                      # then the choose-3 fires
 
 
+def test_choose3_offers_three_companions_on_every_slot():
+    # EB-27: the standalone `choose3` slot mode, the third of the draft-sim
+    # spec's "build all three now" modes. Unlike pity it has no clock -- the
+    # FIRST screen already offers three, and taking one does not reset
+    # anything. Same seed-scan as the pity test above, and for the same
+    # reason: a fixed seed would make this a test of how long Klee lives.
+    def no_companions(rng, deck, offers, archetype):
+        picks = [c for c in offers if not c.is_companion]
+        return picks[0] if picks else None
+
+    counts = None
+    for s in range(40):
+        r = model.run_one("klee", "demolition", "demolition", no_companions,
+                          SEED + s, slot_mode="choose3")
+        c = [sum(1 for card in d["offers"] if card.is_companion)
+             for d in r.decisions]
+        if len(c) >= 3:
+            counts = c
+            break
+    assert counts is not None, "no run survived 3 reward screens in 40 seeds"
+    assert all(n == 3 for n in counts), counts   # no clock, no standard slot
+
+
+def test_choose3_leaves_the_standard_slot_alone():
+    # The mode is opt-in: `standard` must be byte-identical to the run the
+    # instruments already measure, so a choose3 landing cannot renumber a
+    # single shipped tier0.5 figure.
+    def take_first(rng, deck, offers, archetype):
+        return offers[0] if offers else None
+
+    a = model.run_one("klee", "demolition", "demolition", take_first, SEED)
+    b = model.run_one("klee", "demolition", "demolition", take_first, SEED,
+                      slot_mode="standard")
+    assert a.deck_ids == b.deck_ids
+    assert a.won == b.won and a.hp_by_node == b.hp_by_node
+
+
+def test_unknown_slot_mode_still_raises():
+    with pytest.raises(ValueError):
+        model.run_one("klee", "demolition", "demolition",
+                      draft.POLICIES["assigned"], SEED, slot_mode="choose4")
+
+
 def test_core_advance_never_dead_pick():
     # Regression for the reaction deadlock: an amp payoff must outscore
     # nothing-burger offers even before the core is online.

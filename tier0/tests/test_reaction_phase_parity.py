@@ -98,6 +98,26 @@ PHASE_LEDGER = [
         "before SimDamagePipeline.TargetMods reads Vulnerable.",
     ),
     (
+        "boss-frozen-vulnerable-is-multiplicative",
+        "Powers/AuraPower.cs",
+        "ModifyDamageMultiplicative",
+        r"public\s+override\s+decimal\s+ModifyDamageMultiplicative\s*\(",
+        ["ReactionEffects.FrozenBossVulnWillApply",
+         "ReactionConstants.VulnerableTakenMult"],
+        ["ReactionEffects.FrozenBossVulnWillApply"],
+        "EB-19/M1b, the same shape one reaction over. Under the NC-7 alpha "
+        "substitution (R117) a Frozen reaction in a boss room on a non-minion "
+        "applies Vulnerable instead of Frozen. The sim applies it INSIDE "
+        "reactions._react (reactions.py:147-150, `boss_room and not "
+        "enemy.is_minion`) and only then runs modify_damage_taken via "
+        "effects.deal_damage_to_enemy, so tier0's triggering hit is itself "
+        "x1.5; C# lands it from ReactionEffects.Resolve, reached from "
+        "AfterDamageReceived, one hook after that number is final. "
+        "UNCONDITIONAL, unlike Courtroom Drama -- the boss branch carries no "
+        "first-reaction gate, so EVERY qualifying boss-room Frozen was short "
+        "by a third of its own hit.",
+    ),
+    (
         "shatter-is-dealt-from-after-damage-received",
         "Powers/FrozenPower.cs",
         "AfterDamageReceived",
@@ -236,15 +256,17 @@ def test_superconduct_multiplier_is_pure():
 _ASSIGNMENT = re.compile(r"(?<![=!<>+\-*/%&|^])=(?![=>])")
 
 
-def test_the_two_reaction_vulnerables_share_one_multiplier():
-    """Superconduct + Courtroom Drama on one hit is x1.5, not x2.25.
+def test_the_reaction_vulnerables_share_one_multiplier():
+    """Two of these on one hit is x1.5, not x2.25.
 
-    Both sim sites write the SAME `vulnerable` stack, and
+    All three sim sites write the SAME `vulnerable` stack, and
     powers.modify_damage_taken is a flat multiply on any nonzero stack rather
     than one per source. Two separate `mult *=` statements in this hook would
     be correct on either source alone and wrong on the hit that is both --
-    which is a live combination (Cryo aura + Electro attack, first reaction of
-    the turn, with Courtroom Drama installed).
+    and both live combinations exist: Superconduct as the turn's first
+    reaction with Courtroom Drama installed (Cryo aura + Electro attack), and
+    a boss-room Frozen (Cryo attack into a Hydro aura, no MinionPower) that is
+    also the turn's first reaction.
     """
     body = method_body(
         (SOURCE / "Powers" / "AuraPower.cs").read_text(encoding="utf-8"),
@@ -310,6 +332,140 @@ def test_the_courtroom_drama_forecast_is_a_read():
     assert "DealerReactionsThisTurn" in inner.group(1)
     # One write site, still in Resolve.
     assert reactions.count("DealerReactionsThisTurn[dealer] =") == 1, reactions
+
+
+def _frozen_boss_forecast() -> str:
+    """The expression body of ReactionEffects.FrozenBossVulnWillApply."""
+    reactions = (SOURCE / "Powers" / "ReactionEffects.cs").read_text(
+        encoding="utf-8")
+    match = re.search(
+        r"public\s+static\s+bool\s+FrozenBossVulnWillApply\s*\([^)]*\)\s*=>"
+        r"(.*?);", reactions, re.S)
+    assert match, "FrozenBossVulnWillApply is no longer expression-bodied"
+    return match.group(1)
+
+
+def test_the_boss_frozen_forecast_is_a_read():
+    """The predicate the pure modifier calls must itself be pure (EB-19/M1b).
+
+    ModifyDamageMultiplicative runs in preview and tooltip paths, so a
+    forecast that APPLIED the substitution -- or cached anything about it --
+    would put Vulnerable on a boss for a hit that was never thrown. The
+    PowerCmd.Apply stays in ReactionEffects.Resolve; this only reports.
+
+    Expression-bodied on purpose: a `=>` member cannot hold a statement, so
+    "it only reads" is enforced by the shape as well as by the text below.
+    """
+    body = _frozen_boss_forecast()
+    for forbidden in ("Cmd.", "await"):
+        assert forbidden not in body, (
+            f"FrozenBossVulnWillApply contains {forbidden!r}; it is called "
+            "from a speculative damage-preview path and must only read.")
+    assert not _ASSIGNMENT.search(body), body
+
+
+def test_the_boss_frozen_forecast_is_null_tolerant():
+    """Preview enumeration can ask before there is a combat to answer from.
+
+    The reads walk target -> CombatState -> Encounter -> RoomType, any link of
+    which is absent outside a live boss encounter (and `target` itself is
+    nullable on the hook's signature). A hard dereference here throws from a
+    tooltip, so every hop is guarded and the answer outside combat is `false`
+    -- which is also the correct answer: no boss room, no substitution.
+    """
+    body = _frozen_boss_forecast()
+    assert re.search(r"target\s*!=\s*null", body), body
+    assert "CombatState?." in body, body
+    assert "Encounter?." in body, body
+
+
+def test_the_boss_frozen_mirror_exempts_minions_and_non_boss_rooms():
+    """The negative half of the sim predicate, which is where it earns its keep.
+
+    `boss_room and not enemy.is_minion` (reactions.py:147-148): a minion in a
+    boss room, or anything at all outside one, takes FrozenPower and no
+    Vulnerable -- so the mirror must not amplify those hits either. Both
+    clauses live in the forecast, and the substitution reads it rather than
+    keeping a second copy that could drift from the one the pipeline asks.
+    """
+    body = _frozen_boss_forecast()
+    assert "RoomType.Boss" in body, body
+    assert re.search(r"!\s*target\.Powers\.OfType<MinionPower>", body), body
+
+    reactions = (SOURCE / "Powers" / "ReactionEffects.cs").read_text(
+        encoding="utf-8")
+    # Exactly one copy of the predicate in the file: the forecast. A second
+    # `RoomType.Boss` test would be a fork between what the preview forecasts
+    # and what Resolve then does.
+    assert reactions.count("RoomType.Boss") == 1, reactions
+    assert reactions.count("FrozenBossVulnWillApply(target)") == 1, reactions
+
+    # ...and the mirror only fires on the reaction that substitutes.
+    aura = method_body(
+        (SOURCE / "Powers" / "AuraPower.cs").read_text(encoding="utf-8"),
+        r"public\s+override\s+decimal\s+ModifyDamageMultiplicative\s*\(")
+    assert re.search(
+        r"reaction\s*==\s*Reaction\.Frozen\s*\r?\n?\s*"
+        r"&&\s*ReactionEffects\.FrozenBossVulnWillApply", aura), aura
+
+
+def test_the_boss_frozen_mirror_cannot_double_pay_the_bomb_path():
+    """Same sign-flipped defect as M1, one reaction over.
+
+    A bomb-triggered boss-room Frozen already gets its x1.5 for real:
+    ElementalHit.Deal routes through ReactionEffects.Resolve (which applies
+    the substituted VulnerablePower) before SimDamagePipeline.TargetMods reads
+    it back. That hit is Unpowered, so the IsPoweredAttack gate at the top of
+    the modifier is what keeps this mirror off it.
+    """
+    aura = method_body(
+        (SOURCE / "Powers" / "AuraPower.cs").read_text(encoding="utf-8"),
+        r"public\s+override\s+decimal\s+ModifyDamageMultiplicative\s*\(")
+    gate = aura.index("IsPoweredAttack()")
+    assert gate < aura.index("ReactionEffects.FrozenBossVulnWillApply"), aura
+
+    hit = (SOURCE / "Powers" / "ElementalHit.cs").read_text(encoding="utf-8")
+    deal = method_body(hit, r"public\s+static\s+async\s+Task\s+Deal\s*\(")
+    assert "ValueProp.Unpowered" in deal, deal
+    assert deal.index("ReactionEffects.Resolve") < deal.index(
+        "SimDamagePipeline.TargetMods"), deal
+
+
+def test_the_boss_frozen_mirror_matches_the_sim_predicate_verbatim():
+    """The receipt: the sim site the ledger row cites still says what it says.
+
+    Source-text on the SIM side, unusually -- the row's claim is a
+    correspondence between two files, and pinning only the C# half lets the
+    sim move out from under it. Two things must hold: the predicate is
+    `boss_room and not enemy.is_minion`, and it is UNCONDITIONAL (no
+    first-reaction gate like Courtroom Drama's), which is why the C# mirror
+    has no NextReactionIsFirstFor in its Frozen clause.
+    """
+    sim = (ROOT / "tier0" / "engine" / "reactions.py").read_text(
+        encoding="utf-8")
+    react = sim[sim.index("def _react("):sim.index("def _splash(")]
+    frozen = react[react.index('name = "frozen"'):]
+    apply_line = frozen.index("C.FROZEN_BOSS_VULN")
+    guard = frozen.index("if boss_room and not enemy.is_minion:")
+    assert guard < apply_line, frozen
+    # No gate between the guard and the write.
+    between = frozen[guard:apply_line]
+    assert "reactions_this_turn" not in between, between
+
+    # And the sim really does apply it before the vulnerable multiply: the
+    # whole reason the C# hook is one phase too late.
+    effects = (ROOT / "tier0" / "engine" / "effects.py").read_text(
+        encoding="utf-8")
+    pipeline = method_body_py(effects, "def deal_damage_to_enemy(")
+    assert pipeline.index("reactions.resolve_hit") < pipeline.index(
+        "powers.modify_damage_taken"), pipeline
+
+
+def method_body_py(source: str, signature: str) -> str:
+    """Crude python-function slice: from the def to the next top-level def."""
+    start = source.index(signature)
+    nxt = source.find("\ndef ", start + 1)
+    return source[start:nxt if nxt != -1 else len(source)]
 
 
 # --- damage-modifier purity, swept repo-wide -------------------------------

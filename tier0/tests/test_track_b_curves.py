@@ -193,14 +193,17 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             "reactions_by_turn",     # a counter only the C# side can see: the
 #                                      wire does not narrate reactions at all
             # EB-18. Per-fight identity and the bomb counters, MOD FEED ONLY,
-            # all four ADDED (no rename, no repurpose -- an addition is free).
+            # all of them ADDED (no rename, no repurpose -- an addition is
+            # free).
             #
-            #   run_id, fight_index, encounter -- the mod reads the live run
-            #     state (`RunState.Rng.StringSeed`, `CombatRoom.Encounter`).
-            #     The soak drives the game from outside and its adapter
-            #     narrates a fight, not the run object around it; giving the
-            #     bot feed these means new wire surface, which is a piece of
-            #     work and not this one.
+            #   run_id, run_instance, fight_index, encounter -- the mod reads
+            #     the live run state (`RunState.Rng.StringSeed`,
+            #     `CombatRoom.Encounter`, and the `RunState` object's own
+            #     identity, which is what tells a REPLAYED seed's second run
+            #     from its first). The soak drives the game from outside and
+            #     its adapter narrates a fight, not the run object around it;
+            #     giving the bot feed these means new wire surface, which is a
+            #     piece of work and not this one.
             #   detonations, corpse_detonations -- read straight off
             #     `BombPower`'s per-combat, per-player counters. There is no
             #     wire equivalent at all: a corpse detonation is a fact about
@@ -210,7 +213,7 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             #
             # SURFACED, not smuggled: any Track B cut on these is a HUMAN-FEED
             # cut until a wire route for them lands.
-            "run_id", "fight_index", "encounter",
+            "run_id", "run_instance", "fight_index", "encounter",
             "detonations", "corpse_detonations"}
 
 

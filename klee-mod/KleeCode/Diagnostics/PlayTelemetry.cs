@@ -98,6 +98,7 @@ internal static class PlayTelemetry
     private static readonly Regex BbCode = new(@"\[/?[^\]]*\]", RegexOptions.Compiled);
 
     private static string? _path;
+    private static string? _session;
     private static string? _intent;
     private static bool _writeFailed;
     private static readonly Dictionary<Player, FightRecord> Open = new();
@@ -105,18 +106,60 @@ internal static class PlayTelemetry
     /// <summary>EB-18 — RUN LINKAGE. The run's own string seed, which is the
     /// same token `RunHistoryUtilities.CreateRunHistoryEntry` writes as `seed`
     /// in the `.run` history file `tier1/analyze.py` already reads. That is the
-    /// whole join: a fight row and a run row that carry the same `run_id` are
-    /// the same run, and per-fight granularity stops being a separate island.
+    /// join to the run history, and per-fight granularity stops being a
+    /// separate island.
     ///
-    /// `fight_index` counts fights WITHIN a run, from 0, in the order this
-    /// process saw them. It restarts when the run id changes rather than when
-    /// the session does, so a session that plays two runs numbers each from
-    /// zero and a run resumed in a later session numbers from zero again — a
-    /// gap a reader can see (floor jumps) beats a number that silently
+    /// A SEED IS NOT A RUN, which is what the first cut of this got wrong. It
+    /// restarted `fight_index` when the run ID CHANGED, on the reasoning that
+    /// two runs in a session have different seeds. Replaying a seed is a
+    /// first-class arm (P1.5 / R104), so that reasoning is false in ordinary
+    /// use: playing seed X twice in one session produced one `run_id` with
+    /// fights numbered 0,1,2,6,7,8 and no gap a reader could see, and the
+    /// tier1 join folded the two runs into one.
+    ///
+    /// THE NEW-RUN SIGNAL IS THE RUN OBJECT ITSELF. `RunManager.State` is
+    /// assigned exactly once per run — `SetUpNew*`/`SetUpSaved*` throw
+    /// `InvalidOperationException` if it is already set — and nulled in
+    /// `CleanUp`, so a second embark is necessarily a DIFFERENT `RunState`
+    /// instance. Reference identity against the state we last saw is therefore
+    /// the game's own answer to "is this the same run", not a heuristic built
+    /// out of floors or characters, and it costs no subscription: the
+    /// alternative signal, `RunManager.RunStarted`, is an event, and an
+    /// exception from a handler on it lands inside `Launch()` and takes the run
+    /// with it (rule 2). Held weakly so a finished run is not kept alive by its
+    /// own telemetry.
+    ///
+    /// `run_instance` is what a READER gets: `&lt;session stamp&gt;#&lt;ordinal&gt;`,
+    /// minted once per run seen, sharing the stamp with this session's log file
+    /// name. `run_id` + `run_instance` is unique where `run_id` alone is not.
+    ///
+    /// `fight_index` counts fights WITHIN a run instance, from 0, in the order
+    /// this process saw them. A run RESUMED in a later session is a fresh
+    /// `RunState` and so numbers from zero again under a new instance token —
+    /// a gap a reader can see (floor jumps) beats a number that silently
     /// continues across a boundary it cannot see.</summary>
-    private static string _runId = string.Empty;
+    private static WeakReference<RunState>? _run;
+
+    private static string _runInstance = string.Empty;
+
+    private static int _runOrdinal;
 
     private static int _fightIndex;
+
+    /// <summary>Notes which run we are in, and starts a new instance — new
+    /// token, fight numbering back to zero — the first time a given
+    /// <see cref="RunState"/> is seen.</summary>
+    private static void NoteRun(RunState run)
+    {
+        if (_run != null && _run.TryGetTarget(out var seen) && ReferenceEquals(seen, run))
+        {
+            return;
+        }
+
+        _run = new WeakReference<RunState>(run);
+        _runInstance = $"{Session()}#{_runOrdinal++}";
+        _fightIndex = 0;
+    }
 
     // -------------------------------------------------------------- open ---
 
@@ -142,12 +185,8 @@ internal static class PlayTelemetry
             var kind = room.RoomType.ToString().ToLowerInvariant();
 
             var runId = RunId(run);
-            if (!string.Equals(runId, _runId, StringComparison.Ordinal))
-            {
-                _runId = runId;
-                _fightIndex = 0;
-            }
-
+            NoteRun(run);
+            var runInstance = _runInstance;
             var fightIndex = _fightIndex++;
             var encounter = EncounterId(room, combat);
             var enemies = combat.Enemies
@@ -164,6 +203,7 @@ internal static class PlayTelemetry
                 Open[player] = new FightRecord
                 {
                     RunId = runId,
+                    RunInstance = runInstance,
                     FightIndex = fightIndex,
                     Encounter = encounter,
                     Act = run.CurrentActIndex + 1,
@@ -506,13 +546,19 @@ internal static class PlayTelemetry
     private static string Root() =>
         Path.Combine(ProjectSettings.GlobalizePath("user://"), "gits_telemetry");
 
+    /// <summary>This session's stamp, fixed at first use. It names the log file
+    /// AND prefixes every `run_instance` written into it, so a token found in a
+    /// row says which session minted it without a lookup.</summary>
+    private static string Session() =>
+        _session ??= DateTime.Now.ToString("yyyyMMdd-HHmmss",
+                                           CultureInfo.InvariantCulture);
+
     private static string? LogPath()
     {
         if (_path != null) return _path;
         var root = Root();
         Directory.CreateDirectory(root);
-        var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
-        _path = Path.Combine(root, $"play-{stamp}.jsonl");
+        _path = Path.Combine(root, $"play-{Session()}.jsonl");
         var intent = Intent();
         Log.Info($"[{KleeMod.ModId}] play telemetry ({Feed()} feed"
                + (intent.Length > 0 ? $", intent '{intent}'" : ", no declared intent")
@@ -697,6 +743,7 @@ internal static class PlayTelemetry
     private sealed class FightRecord
     {
         public string RunId = string.Empty;
+        public string RunInstance = string.Empty;
         public int FightIndex;
         public string Encounter = string.Empty;
         public int Detonations;
@@ -753,9 +800,15 @@ internal static class PlayTelemetry
             // reading, not a gap, so the key is always present.
             Str(sb, "intent", Intent());
             // EB-18. The join key and the position of this fight inside the
-            // run it belongs to; both always present, empty run id and all.
+            // run it belongs to; all three always present, empty run id and
+            // all. `run_instance` is the ADDITION that makes the pair unique
+            // under a replayed seed -- adding a key is free at this schema
+            // version (understudy/README.md), and a reader that does not know
+            // it drops back to the old, seed-only grouping.
             sb.Append(',');
             Str(sb, "run_id", RunId);
+            sb.Append(',');
+            Str(sb, "run_instance", RunInstance);
             sb.Append(",\"fight_index\":").Append(FightIndex);
             sb.Append(',');
             Str(sb, "encounter", Encounter);

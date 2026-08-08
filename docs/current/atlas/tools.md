@@ -82,7 +82,10 @@ python3 -m pytest tier0/tests/test_sheet_lints.py tier0/tests/test_art_lint_full
   `GENERATOR_OWNED` map is itself verified — named script must exist and must
   contain the filename (`art_lint.py:354-411`).
 - **art_coverage reports three disjoint sets** — COVERED / MISSING / STALE — off
-  the canonical sheets, never a prose bill (`art_coverage.py:9-16`, `:50`); still
+  the canonical sheets, never a prose bill (`art_coverage.py:9-16`, `:65`). Its
+  universe is the sheets **plus** every portrait key the shipped mod requests
+  (`RosterArt.CardPortrait("id")`, scanned — `:90-91`, `:155`): billing the sheets alone
+  hid three cards that ship with no sheet row (D4 / EB-36). Still
   surfaces frame off the ALPHA BBOX, never the image frame, and that rule lives
   once, in `char_stills.py:9-13`, because two copies drift.
 - **Layer cuts are a hard partition, asserted**: at-rest recomposition is

@@ -103,7 +103,7 @@ Per the retired klee-mod DECISIONS ledger (frozen at tag
 `pre-simplification-2026-08-06`): Slay the Spire 2 **v0.107.1**, commit `59260271`
 (2026-06-18), Steam buildid `23811903`, appid `2868840`, branch `public`.
 MegaDot v4.5.1, BaseLib 3.3.7.0, .NET SDK 9.0.316, ilspycmd 8.2.0.7535. The PCK
-contract version is `roster-pck-v2`.
+contract version is `roster-pck-v3`.
 
 ## Systems
 
