@@ -187,3 +187,48 @@ execution order, on the graded read, and nowhere earlier.** Items 1–3 are step
 
 — drafted 2026-08-06, Track S2 (the 10.7 search), branch
 `findings/track-s2-registration-hunt`. Zero design authority exercised.
+
+---
+
+## 5. Addendum — Q-C re-methodized (R137, 2026-08-08)
+
+[USER], verbatim (2026-08-08): *"This sounds like a weird game of telephone
+with bad intent. I think the question itself is invalid. A better methodology
+would be to look at all 5 of the canonical characters and their archetypes,
+see what payoffs exists and at what rarity, and use them to establish
+'reasonable bands', then aim our own characters as high-medium-low within
+that space."*
+
+**What this rules.** The reconstructed Q-C — a target band authored from
+bare design intent — is **INVALID as posed**. §2 already reserved the band
+as "written at countersign or not at all"; R137 answers: not at all, not
+that way. The band is **derived, not invented**: census the five base-game
+characters' pools (Ironclad, Silent, Defect, Necrobinder, Regent —
+`tools/canon_role_tempo.py` CHARACTERS) for which cards are archetype
+payoffs and at what rarity; that space defines the reasonable bands; each
+roster archetype is then **aimed high / medium / low within it** by [USER].
+
+**Step (2) is re-shaped, not reordered.** Everything below still lands as
+one predictions commit appended here, **before the sprint's instrument
+runs**:
+
+- (2a) the canonical payoff census (engineering — BACKLOG `EB-56`); the
+  payoff-classification rubric ships **with** the census for [USER]
+  ratification, since a census over a self-serving rubric is no census;
+- (2b) candidate bands derived from the census space;
+- (2c) [USER] aims each roster archetype high / medium / low within the
+  bands — **this is the Q-C answer** — and states direction + threshold
+  for Q-A / Q-B;
+- (2d) arms, n, seed, route, cost ceiling, controls, tripwire (§4 items
+  2–3, unchanged).
+
+**Contamination statement (D4/D5).** The census reads canonical CONTENT —
+the extracted sheets under `game_ref/` — never the sprint's instrument
+(`exp_furina_ghostcheck`) and no tier-0.5 number. The blind discipline of
+steps (3)–(6) is intact, and the `DRAFTER_VERSION = 14` pin is untouched.
+
+**Data held at ruling date:** Ironclad and Silent pools (`game_ref/`,
+re-verified 2026-08-07). Defect, Necrobinder and Regent need one
+`--characters` extraction run against the game install
+(`tools/extract_base_game_pool.py`, decompiles once, walks the pools) —
+Windows-batch work, riding the next `EB-47` sitting.
