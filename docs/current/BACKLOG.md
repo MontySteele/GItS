@@ -58,10 +58,8 @@
 
 | ID | Item | Provenance |
 |---|---|---|
-| `EB-11` | Understudy Defect 13 — `no_action` on a state with no `state_type`; **FILED, NOT FIXED** (next traversal pass) | eng-backlog §2 |
-| `EB-12` | Understudy Defect 14 — `bridge_unreachable` by timeout with the process alive; one observation, no reproduction; **FILED, NOT FIXED** | eng-backlog §2 |
-| `EB-13` | Understudy Defect 15 — `no_progress`, the map↔rest_site bounce (seed `43MLG7MG9L`); **FILED, NOT FIXED** | eng-backlog §2 |
-| `EB-15` | The seed's `lobby` route never fired in three live runs; the lobby arm is retained and reports itself — nobody should read "two routes work" out of it | eng-backlog §2 |
+| `EB-12` | Understudy Defect 14 — `bridge_unreachable` by timeout with the process alive; one observation, no reproduction; **FILED, NOT FIXED**. Swept again on the 2026-08-08 traversal pass (two live runs): **no second observation**, so the row is unchanged and still rests on one | eng-backlog §2; review/active/traversal-pass-2026-08-08.md |
+| `EB-15` | The seed's `lobby` route never fired in three live runs — **DIAGNOSED 2026-08-08, and it never will on this arm.** Observation four read the endpoint's guard on both sides of the POST: `on_char_select` true, and `lobby_seed` reading back the seed *afterwards* — only reachable if the lobby was non-null, `SetSeed` assigned `Seed`, and then threw. `godot.log` names the throw, `Seed should not be changed in standard mode!`, so `StartRunLobby.SetSeed` refuses on the **GameMode**, not on `NetService.Type` as the file's header claimed, and `InitializeSingleplayer` builds its lobby with `GameMode.Standard`. The lobby route is **unreachable by construction** for standard singleplayer; `debug_override` is not the fallback here, it is the route. Header comment corrected in place (comment-only — no rebuild owed); the arm is **kept**, being what a Custom-run or hosted lobby would take, and it still reports itself. Whether to delete a correct-but-unreachable arm is a taste call, not a defect fix, so nothing was deleted | eng-backlog §2; review/active/traversal-pass-2026-08-08.md |
 
 ## art — production work (the *picks* are [USER]'s in QUEUE; these are not)
 
