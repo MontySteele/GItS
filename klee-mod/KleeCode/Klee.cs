@@ -143,8 +143,16 @@ public sealed class Klee : CustomCharacterModel
     public override string? CustomIconTexturePath =>
         KleePck.Path("klee/ui/char_icon.png");
 
+    /// <summary>The halo BEHIND the icon, not a stroke around it. The base
+    /// game's own outline texture is the fill's silhouette re-emitted as pure
+    /// white with the shape entirely in alpha, grown ~4.5px on an 85px canvas
+    /// (measured off character_icon_ironclad_outline.png in the shipped pack);
+    /// NMultiplayerVoteContainer and NAncientDialogueLine both parent it under
+    /// an "Outline" TextureRect. Returning the FILL here -- which all three
+    /// characters did until EB-37 -- draws the icon twice and the halo never
+    /// appears. tools/gen_char_icon_outlines.py derives it from the fill.</summary>
     public override string? CustomIconOutlineTexturePath =>
-        KleePck.Path("klee/ui/char_icon.png");
+        KleePck.Path("klee/ui/char_icon_outline.png");
 
     // CharacterModel.AssetPaths preloads four id-derived scenes before any
     // room starts. CreateCustomVisuals and the texture overrides below affect

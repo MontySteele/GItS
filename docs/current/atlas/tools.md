@@ -56,6 +56,7 @@ python3 tools/art_fetch.py && python3 tools/art_process.py [--apply-picks art/pi
 python3 tools/art_hunt.py Furina ; python3 tools/art_contact_sheet.py --list
 .venv/Scripts/python tools/cut_combat_layers.py klee [--check]
 .venv/Scripts/python tools/gen_furina_stills.py    # and gen_kokomi_stills.py
+.venv/Scripts/python tools/gen_char_icon_outlines.py [--check]
 
 python3 -m pytest tier0/tests/test_sheet_lints.py tier0/tests/test_art_lint_full_set.py \
     tier0/tests/test_encoding_gate.py tier0/tests/test_char_stills.py -q

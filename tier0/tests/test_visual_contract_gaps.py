@@ -1,14 +1,16 @@
 """Two shipped visual contracts whose consumer was never wired.
 
 `missed-requirements.md` sec.4.2 and sec.4.3. Both were billed, both were
-written up, neither landed, and neither is visible anywhere the suite looks —
-they live in a requirements doc and a sprint log, which is precisely the class
+written up, neither landed, and neither was visible anywhere the suite looked —
+they lived in a requirements doc and a sprint log, which is precisely the class
 of debt that gets rediscovered by playing the game instead of by running the
-tests.
+tests. **Both have since been closed** (sec.4.3 by playtest 3, sec.4.2 by
+EB-37), and the assertions stayed: what each one now pins is that the fix
+holds and that the next character cannot re-open the gap quietly.
 
-CURATED KNOWN-GAP LEDGER, not an aspirational assertion. Track B is
-tests-only, so these do not fix anything; what they do is make each gap
-**structural**. Two properties matter and both are asserted:
+CURATED KNOWN-GAP LEDGER, not an aspirational assertion. Track B was
+tests-only, so these did not fix anything themselves; what they do is make
+each gap **structural**. Two properties matter and both are asserted:
 
   * the arithmetic that IS settled is pinned hard, so the numbers a future fix
     will be written against cannot drift out from under it while nobody is
@@ -38,20 +40,21 @@ PCK_SRC = ROOT / "klee-mod" / "pck-src"
 # Every character ships an icon SCENE (CustomIconPath -> character_icon.tscn)
 # whose texture is the FILL icon, and separately an outline TEXTURE path.
 # art-asset-manifest.md bills "Character icon 88x88 -- 1 (+outline) -- 2":
-# two assets. One was made.
+# two assets. For a year only one was made; the second is now derived from the
+# first by tools/gen_char_icon_outlines.py (EB-37).
 ROSTER_ICONS = ["Klee", "Furina", "Kokomi"]
 
 # id -> the reason the outline path returns the fill asset. Delete an entry
 # the day that character gets a real outline; the test below then ENFORCES
 # the separation for it and fails if the wiring was forgotten.
-OUTLINE_IS_FILL = {
-    "Klee": "art-asset-manifest.md billed 88x88 icon '+outline' = 2 assets; "
-            "only the fill was ever produced. No outline row exists in "
-            "art/plan.tsv or art/SOURCES.tsv.",
-    "Furina": "same missing asset; rediscovered independently as "
-              "animation-sprint-2-log.md Playtest 2 Finding 1.",
-    "Kokomi": "same missing asset; she ships on the shared bill.",
-}
+#
+# EMPTY as of EB-37 (2026-08-08): all three outlines are produced by
+# tools/gen_char_icon_outlines.py and all three Custom*Path sites are wired,
+# so the ledger emptied itself exactly the way it was built to. It stays here
+# rather than being deleted because the ledger runs in BOTH directions -- the
+# assertion below is what stops character four from inheriting the gap in
+# silence, and an empty dict is the strictest state it can be in.
+OUTLINE_IS_FILL: dict[str, str] = {}
 
 
 def _character_source(name: str) -> str:
