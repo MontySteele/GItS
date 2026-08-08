@@ -412,10 +412,10 @@ count, Ironclad's three around card-**name** subsets and pile sizes. None of
 those is a field `tools/extract_base_game_pool.py` currently emits — the
 `TOKEN_CREATE` regex exists in that file but `parse_card` does not surface it,
 and a `CalculatedVar`'s *arguments* (which name the state it reads) are
-dropped entirely. Filed as `EB-57`: one extraction change would attribute most
+dropped entirely. Filed as `EB-63`: one extraction change would attribute most
 of these and tighten both axes. **The bands in §5 should be read as a floor on
 canon's payoff density, not as its measured value**, and if that gap matters
-to the aim, `EB-57` lands before step (2c) rather than after.
+to the aim, `EB-63` lands before step (2c) rather than after.
 
 ### 6.4 Two known inherited limitations
 
@@ -442,7 +442,7 @@ to the aim, `EB-57` lands before step (2c) rather than after.
    the v14 stamp's "definitional question, not a mechanical one" answered for
    canon, and the strength layer's double zero is the price. CONFIRM or
    OVERRULE.
-3. **Whether `EB-57` gates step (2c)** (§6.3) — the bands are a floor while
+3. **Whether `EB-63` gates step (2c)** (§6.3) — the bands are a floor while
    60% of payoff-shaped cards sit unattributed. Aim inside a floor, or resolve
    first.
 
