@@ -190,17 +190,21 @@ class RunResult:
     route: str = "hunter"               # §11: the route policy that walked it
     route_decisions: list[dict] = field(default_factory=list)   # EB-16w: the
     #                    ROUTE twin of `decisions` above. One entry per ACT --
-    #                    {"act", "map", "decisions"} -- because the road not
-    #                    taken is only re-pricable against the map it was on,
-    #                    and each act has its own. The inner records are
+    #                    {"act", "map", "decisions", "hindsight"} -- because the
+    #                    road not taken is only re-pricable against the map it
+    #                    was on, and each act has its own. The inner records are
     #                    exactly `route.walk_decisions`' shape ({"floor",
     #                    "options", "picked", "state"}), written by the live
     #                    incremental walk in run_one rather than by that
     #                    pure-map helper, which cannot resolve fights.
+    #                    `hindsight` is THAT ACT'S terminal RouteState (2026-08
+    #                    -08): elites_taken / rests_taken are act-local, so this
+    #                    is the only state act i's regret may be priced against.
     route_hindsight: Optional[route.RouteState] = None   # EB-16w: the run's
     #                    LAST route state -- at death, or after the final node.
-    #                    The counterpart of `deck_ids` for draft_regret: the
-    #                    state the alternatives get re-planned in.
+    #                    The run's end, and identical to the final act's
+    #                    `route_decisions[-1]["hindsight"]`. NOT the repricing
+    #                    input for earlier acts -- see _run_range.
     route_regret: list[dict] = field(default_factory=list)   # EB-16w: one
     #                    `run_metrics.route_regret` summary per act, filled in
     #                    after the run by _run_range (the drafter's
@@ -397,7 +401,16 @@ def run_one(character: str, archetype: str, pilot_id: str,
         # shape, so `run_metrics.route_regret` can price the roads not taken on
         # a real run. Recording only -- no rng is drawn and no decision changes,
         # so every existing seeded run is byte-identical.
-        act_walk = {"act": act_i, "map": act_map, "decisions": []}
+        # `hindsight` is THIS ACT'S terminal state, refreshed after every
+        # resolved node so the last write is the end-of-act snapshot (and a
+        # death exit's write is the act's real end). It exists because
+        # `RouteState.elites_taken` / `rests_taken` are ACT-LOCAL -- they reset
+        # just above -- while `res.route_hindsight` is the FINAL act's state.
+        # Repricing act 0 against act 2's snapshot fed act-2 elite counts into
+        # `hunter`'s elite gate, so an earlier act's regret moved with what a
+        # later act did: hindsight the run did not have at that decision.
+        act_walk = {"act": act_i, "map": act_map, "decisions": [],
+                    "hindsight": None}
         res.route_decisions.append(act_walk)
 
         def _pick(options):
@@ -565,7 +578,8 @@ def run_one(character: str, archetype: str, pilot_id: str,
                     if bag is not None:
                         res.potions_end = list(bag.potions)
                     res.hp_by_node.append(0)
-                    res.route_hindsight = _route_state()    # EB-16w
+                    res.route_hindsight = act_walk["hindsight"] = \
+                        _route_state()    # EB-16w (per-act since 2026-08-08)
                     return res
                 res.gold = gold
                 res.hp_by_node.append(hp)
@@ -691,7 +705,8 @@ def run_one(character: str, archetype: str, pilot_id: str,
                         res.relics = [r for r in held.ids if r not in seed_ids]
                     if bag is not None:
                         res.potions_end = list(bag.potions)
-                    res.route_hindsight = _route_state()    # EB-16w
+                    res.route_hindsight = act_walk["hindsight"] = \
+                        _route_state()    # EB-16w (per-act since 2026-08-08)
                     return res
                 final_act = act_i == n - 1
                 if kind == "B":
@@ -801,7 +816,7 @@ def run_one(character: str, archetype: str, pilot_id: str,
             # Assigned here (and at the two death exits) rather than after the
             # act loop, where `_route_state` may not exist at all -- an all-acts
             # -empty run never enters the body that defines it.
-            res.route_hindsight = _route_state()
+            res.route_hindsight = act_walk["hindsight"] = _route_state()
             succ = act_map.successors(room)
             if not succ:
                 break
@@ -836,20 +851,31 @@ def _run_range(character: str, archetype: str, pilot_id: str,
             random.Random(seed + i + 10 ** 9), r.decisions,
             [loader.peek_card(cid) for cid in r.deck_ids], archetype)
         # route_regret (EB-16w): the same construction one layer out -- sampled
-        # re-scoring of recorded decisions in the run's END state, on its own
-        # +5e9 stream (the offset registry lives in understudy/rng.py). Per
-        # ACT, because a path value only means anything against its own map;
-        # ONE hindsight state for all of them, exactly as the drafter re-scores
-        # every screen against one final deck.
+        # re-scoring of recorded decisions in hindsight, on its own +5e9 stream
+        # (the offset registry lives in understudy/rng.py). Per ACT, because a
+        # path value only means anything against its own map -- AND, since
+        # 2026-08-08, against its OWN act's terminal state.
+        # NOT one state for all of them. The drafter can re-score every screen
+        # against one final deck because a deck accumulates across the whole
+        # run; a RouteState does not. `elites_taken` / `rests_taken` reset at
+        # each act boundary, and `hunter`'s elite gate reads `elites_taken`
+        # twice -- so pricing act 0 against the FINAL act's snapshot let a
+        # later act's elites move an earlier act's regret. That is hindsight
+        # the run never had at that decision: a leak, not a re-pricing.
+        # `res.route_hindsight` still holds the final act's state, unchanged,
+        # for readers that want the run's end.
         # The import is deferred on purpose: run_metrics imports RunResult from
         # this module, so a module-level import would close the cycle.
         from tier05 import run_metrics
-        if r.route_hindsight is not None:
-            r.route_regret = [
-                run_metrics.route_regret(
-                    random.Random(seed + i + 5 * 10 ** 9), w["map"],
-                    w["decisions"], r.route_hindsight, route_name)
-                for w in r.route_decisions]
+        # An act that resolved no node has no terminal state to price in and
+        # is skipped -- so every summary carries its `act`, and a skip can
+        # never misalign a positional reader.
+        r.route_regret = [
+            {**run_metrics.route_regret(
+                random.Random(seed + i + 5 * 10 ** 9), w["map"],
+                w["decisions"], w["hindsight"], route_name),
+             "act": w["act"]}
+            for w in r.route_decisions if w["hindsight"] is not None]
         out.append(r)
     return out
 

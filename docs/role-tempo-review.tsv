@@ -88,7 +88,7 @@ furina	dinner_service	common	salon	glue	block	block		early,mid,late	early,late		
 furina	usher_the_waves	common	salon	enabler	frontload,utility	frontload,utility		early	early						
 furina	house_call	common	salon	glue	frontload,scaling	frontload,scaling		early,mid,late	early,late			salon_member			
 furina	suffering_for_art	common	fanfare	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early,mid,late	early,late		encore	fanfare	block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
-furina	lasting_impression	common	fanfare	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early	early		encore,fanfare		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
+furina	lasting_impression	common	fanfare	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early,mid,late	early		encore,fanfare	fanfare	block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 furina	warmup_act	common	fanfare,generic	glue	block,frontload	block,frontload		early,mid,late	early						
 furina	ebb_and_flow	common	fanfare	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early	early		encore		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 furina	applause_line	common	fanfare,generic	glue	frontload,scaling	frontload,scaling		early,mid,late	early,late			fanfare			

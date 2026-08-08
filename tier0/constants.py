@@ -979,6 +979,10 @@ BANNER_FEATURED_SLOTS = 3
 # lands with this bump. Other encounters do not carry these powers and do
 # not move, EXCEPT any fight where a raw-damage site now caps -- no enemy
 # outside Test Subject P3 ever holds Intangible, so none today.
+# R131 (2026-08-07, closes EB-29s): the C7-world ~0% full-HP read on
+# test_subject is an ACCEPTED OUTLIER -- working as intended, the pilot is
+# worse than a real player; any quoted test_subject winrate carries this
+# caveat. Ruling: `git show 41319eb`.
 # CONSTANTS_VERSION 8 (EB-30m, R127): charge_per_turn / encore_per_turn
 # income powers, income pinned before Salon upkeep (EB-2's parity target).
 # Latent at the bump -- no encounter or ratified deck carries the powers;
@@ -1147,7 +1151,9 @@ RELEVANCE_FLOOR = 0.35
 ACHIEVABILITY_ALARM_FIGHTS = 7    # alarm if median time-to-online exceeds this
 DRAFT_REGRET_SAMPLE = 0.10        # fraction of decisions re-scored post-run
 # Its route twin (EB-16w): the fraction of ROUTE decisions `run_metrics.
-# route_regret` re-prices in the run's end state. 1.0, not the drafter's 0.10,
+# route_regret` re-prices in the ACT's end state (per-act since 2026-08-08 --
+# elites_taken/rests_taken are act-local, so the run's end state leaked a later
+# act's elites into an earlier act's gate). 1.0, not the drafter's 0.10,
 # and the asymmetry is deliberate -- the drafter re-scores whole card offers
 # inside the run loop thousands of runs deep, while a route re-price is one
 # backward-induction pass over a 16-floor DAG per forked floor. Sampling it

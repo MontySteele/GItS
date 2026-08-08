@@ -156,15 +156,34 @@ def test_two_runs_of_one_seed_are_two_runs(tmp_path):
     assert analyze.summarize_fights(fights)["runs"] == 2
 
 
-def test_the_replayed_seed_still_joins_to_its_history_entries():
-    """The instance token splits the FIGHT side only. Both halves match the
-    one seed, because the run history holds an entry for each run too."""
+def test_the_replayed_seed_joins_one_group_per_history_entry():
+    """The join is COUNTED, not broadcast (2026-08-08 fix). The instance token
+    splits the FIGHT side only, and the history side cannot be split to match
+    -- so two groups against ONE history entry is one match and one surplus.
+
+    Before the fix this reported runs_with_fights=2 / fights_unmatched=0, i.e.
+    two finished runs where the history knew one: the second group is the
+    replay still IN PROGRESS, which is precisely what this stream exists to
+    show. It now surfaces as `ambiguous_replays`."""
     runs = [{"seed": "SEEDONE"}]
+    fights = [_fight(run_instance="S#0"), _fight(run_instance="S#1")]
+    join = analyze.join_fights_to_runs(runs, fights)
+    assert join["runs_with_fights"] == 1
+    assert join["fights_matched"] == 1
+    assert join["fights_unmatched"] == 1
+    assert join["ambiguous_replays"] == 1
+
+
+def test_both_halves_of_a_replayed_seed_match_when_history_holds_both():
+    """The other side of the cardinality rule: two history entries for the
+    seed, two fight groups, nothing ambiguous."""
+    runs = [{"seed": "SEEDONE"}, {"seed": "SEEDONE"}]
     fights = [_fight(run_instance="S#0"), _fight(run_instance="S#1")]
     join = analyze.join_fights_to_runs(runs, fights)
     assert join["runs_with_fights"] == 2
     assert join["fights_matched"] == 2
     assert join["fights_unmatched"] == 0
+    assert join["ambiguous_replays"] == 0
 
 
 def test_records_without_the_token_group_exactly_as_they_used_to(tmp_path):

@@ -171,6 +171,37 @@ def test_targeted_fanfare_floor_repairs():
     ]
 
 
+def test_lasting_impressions_ruled_body_is_exactly_three_ops():
+    """R135 (2026-08-08): the body S4-G9 item 7 commissioned, landed.
+
+    The R130 sitting refused to ratify this row -- "needs a rework" -- and
+    the worksheet's candidate A was picked after measurement: the cap raise
+    and the Encore rider keep their numbers and a commons-rate Block reader
+    joins them, so the card reads the meter it raises. Pinned as an EXACT
+    list, in order, because a ruled body is the one thing on this sheet that
+    must not drift by accident: an op appended, dropped or re-rated here is
+    a second ruling, not an edit.
+
+    The upgrade is asserted alongside it for the same reason the sheet's
+    comment says the delta "chains on top unchanged" -- `{fanfare_cap: +2}`
+    moves ONE number (5 -> 7) and must leave the reader clause and its rate
+    exactly where they are.
+    """
+    card = loader.get_card("lasting_impression")
+    assert card.cost == 1 and card.rarity == "common" and card.type == "skill"
+    assert card.exhaust is True
+    assert card.effects == [
+        {"op": "raise_fanfare_cap", "amount": 5},
+        {"op": "gain_encore", "amount": 4},
+        {"op": "block", "amount": 0, "bonus_formula": "1_per_4_fanfare"},
+    ]
+    assert loader.get_card("lasting_impression+").effects == [
+        {"op": "raise_fanfare_cap", "amount": 7},
+        {"op": "gain_encore", "amount": 4},
+        {"op": "block", "amount": 0, "bonus_formula": "1_per_4_fanfare"},
+    ]
+
+
 def test_every_archetype_has_the_template_shape():
     """Each archetype: enablers commons-heavy, rares as payoffs (§3.3)."""
     cards = [c for c in loader._card_index().values()

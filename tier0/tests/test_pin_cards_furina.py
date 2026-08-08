@@ -185,7 +185,14 @@ def test_rain_of_roses_soaks_every_enemy_in_hydro_and_banks_five_encore():
 
 def test_lasting_impression_raises_the_cap_banks_encore_and_exhausts():
     """Lasting Impression raises the Fanfare CAP by 5 -- headroom only, the
-    meter itself does not move -- gains 4 Encore, and exhausts on play."""
+    meter itself does not move -- gains 4 Encore, and exhausts on play.
+
+    R135 (2026-08-08) added the third clause, the ruled body: Block 0 on the
+    commons rate. At an empty meter that is ZERO Block, which is the half of
+    the card that has to be asserted rather than assumed -- a base-0 reader
+    reads as "no Block clause at all" on every empty-meter pin, so the paying
+    case lives in the test below it.
+    """
     state = furina_state()
     cap_before = state.player.fanfare_cap
 
@@ -194,8 +201,27 @@ def test_lasting_impression_raises_the_cap_banks_encore_and_exhausts():
     assert state.player.fanfare_cap == cap_before + 5
     assert state.player.fanfare == 0          # cap is headroom, not a grant
     assert state.player.encore == 4
+    assert state.player.block == 0            # base 0, empty meter (R135)
     assert [c.id for c in state.player.exhaust_pile] == ["lasting_impression"]
     assert state.player.discard_pile == []
+
+
+def test_lasting_impression_pays_block_off_the_meter_it_raises():
+    """R135 (2026-08-08), the ruled body -- candidate A, the Block reader.
+
+    The point of the clause is that the card finally touches the meter it
+    moves: the cap raise is headroom, and the Block line is what reads the
+    Fanfare already banked. At 14 (the meter's working range) the commons
+    rate pays 3. Mutation: drop the `bonus_formula` from the sheet row and
+    this goes 3 == 0 while the pin above stays green.
+    """
+    state = furina_state()
+    state.player.fanfare = 14
+
+    play(state, "lasting_impression")
+
+    assert state.player.block == 14 // 4      # commons rate, 1 per 4
+    assert state.player.fanfare == 14         # a read never spends the meter
 
 
 def test_prima_donna_installs_both_spotlight_powers_and_raises_the_cap():

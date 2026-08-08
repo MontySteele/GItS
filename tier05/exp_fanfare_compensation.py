@@ -54,11 +54,21 @@ ARMS: tuple[tuple[str, str, str | None, str], ...] = (
 # The readers this pass added or changed. Every one of them has to answer the
 # fire-rate question, including the two that were already on the sheet -- a
 # converted card is a new reader in every sense that matters here.
+#
+# STATIC BY CONSTRUCTION, not derived from the sheet: the step is per-card and
+# the set is "what a pass changed", which no sheet field records. A new reader
+# therefore joins BY HAND, and R135 (2026-08-08) is one -- lasting_impression
+# got the commons-rate Block clause as its ruled body, and a reader nobody
+# fire-rate-checks is exactly the D4 mistake this cell exists to prevent.
+# KNOWN GAP (BACKLOG `EB-49`, clause c): these keys are BASE ids while the
+# `fanfare_read` event carries the PLAYED card's id, so `<id>+` copies are
+# silently excluded from every row here.
 NEW_READERS: tuple[tuple[str, int], ...] = (
     ("applause_line", 4),
     ("held_breath", 4),
     ("suffering_for_art", 4),
     ("hearts_swelling", 4),
+    ("lasting_impression", 4),      # R135, 2026-08-08 (the ruled body)
 )
 
 _CACHE: list | None = None

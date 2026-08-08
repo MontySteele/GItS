@@ -20,7 +20,10 @@ characters or rosters. So the same countermeasures apply and are not optional:
     deciding state -- the planner already took the argmax there.
     LIVE since EB-16w: `model.run_one`'s walk records the same decision shape
     as `walk_decisions` (it cannot call it -- fights resolve between floors),
-    the run carries `route_hindsight`, and `_run_range` samples every act.
+    each act carries its OWN terminal hindsight state, and `_run_range`
+    samples every act against that act's snapshot -- per-act because
+    `elites_taken`/`rests_taken` below are act-local, so the run's end state
+    leaked a later act's elites into an earlier act's gate (2026-08-08).
     Its MARGIN is still an uncalibrated analogy; read the gap distribution.
 
 THE ACCEPTANCE TARGET (research doc §1.3, user domain authority): a competent

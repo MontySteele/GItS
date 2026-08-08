@@ -30,7 +30,7 @@ addendum, with the art bill as the projection.)*
 
 The shell track shipped (§5a, commit `68fb11b`) and the faces carry applied
 provisional rank-1 picks (`6f1b969`); what remains is the [USER] taste pass —
-`docs/current/QUEUE.md`, the §9 "Art debt" row. She ships playable on Klee's
+`docs/current/QUEUE.md`, the §7 "Art debt" row. She ships playable on Klee's
 assets via `build_pck.ps1`'s `Copy-KokomiFallback`, so **the game looks
 finished and an unfilled bill is invisible everywhere except the coverage
 tool.** That is the whole reason the tool was taught the roster before this

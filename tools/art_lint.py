@@ -253,7 +253,19 @@ PENDING_RED_PEN = {
 }
 
 
-def lint(rows) -> list[str]:
+def lint(rows, *, pixel_check: bool = True) -> list[str]:
+    """The plan lint. `rows` are plan rows; the return is problem strings.
+
+    `pixel_check` gates the ONE rule that reads the filesystem instead of the
+    rows: L12 (`identical_crops`), which hashes `ImageGen/images/cards/**`.
+    That directory is gitignored Tier F and machine-local, so on a machine that
+    has run an art pass it makes every caller's result depend on art the caller
+    never passed in -- which is how five synthetic single-row tests below
+    started failing on real duplicates in shipped art they had nothing to do
+    with. Tests that pass invented rows set it False; every caller linting the
+    REAL plan (`main()`, and art_process's import) keeps the True default, so
+    the C3 repair -- L12 reachable from `lint()`, not only from `main()` --
+    holds everywhere it was meant to."""
     problems = []
     effective = [
         r for r in rows
@@ -338,7 +350,11 @@ def lint(rows) -> list[str]:
     # C3: L12 belongs HERE, not only in main(). It used to be reachable solely
     # by running this file as a script, so art_process -- the thing that WRITES
     # the crops -- imported lint() and never pixel-checked its own output.
-    problems.extend(identical_crops())
+    # Off only for callers that passed synthetic rows (see `pixel_check`): this
+    # rule reads the shipped package, not `rows`, so for them it is noise from
+    # another population, never a finding about what they asked about.
+    if pixel_check:
+        problems.extend(identical_crops())
 
     for note in clip_warnings(effective):
         print(note)

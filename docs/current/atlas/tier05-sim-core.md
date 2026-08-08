@@ -133,9 +133,12 @@ fixture (`tier05/tests/conftest.py:17-38`), which patches `model.build_act_map`.
   added without it silently re-labels adaptive runs (measured: 5/40 seeds
   diverged, 2/40 win flips — `draft.py:1475-1480`).
 - **`route_regret` is live but its margin is not calibrated** (EB-16w). The
-  live walk records its option sets (`model.py`, `run_one`'s `_pick`), the run
-  ends holding `route_hindsight`, and `_run_range` calls
-  `run_metrics.route_regret` per act on a dedicated `seed+i+5e9` stream;
+  live walk records its option sets (`model.py`, `run_one`'s `_pick`), each act
+  ends holding its OWN terminal hindsight state (act-local `elites_taken` is
+  why: the run's end state leaked a later act's elites into an earlier act's
+  gate, fixed 2026-08-08), and `_run_range` calls
+  `run_metrics.route_regret` per act on that act's snapshot, on a dedicated
+  `seed+i+5e9` stream;
   `route_profile["regret"]` is the pooled read. `C.ROUTE_REGRET_SAMPLE` is 1.0.
   `ROUTE_REGRET_MARGIN` is still the literal 1.0 copied from `draft_regret`'s
   own uncalibrated literal, so read the gap DISTRIBUTION (`mean/p50/p90/max`),
