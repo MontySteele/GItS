@@ -11,6 +11,16 @@ main checkout at `51f673a` (`tools\build_pck.ps1` then `klee-mod\build\deploy.ps
 (klee, STS2_MCP, STS2AutoSlayMod), PCK contract `roster-pck-v3`.
 **Bridge:** vendored STS2MCP pin `55e0648`, `localhost:15526`.
 
+**Second session, 2026-08-08b** (the residuals of the above). Rebuilt and
+redeployed from the main checkout at `6d352d7` — package **`0.2-612`**,
+`validate: OK`, PCK contract `roster-pck-v3`, game `v0.107.1`, mods loaded = 3.
+Everything below marked `0.2-612` is from that session; the `0.2-589` captures
+are unchanged. Runs: Furina `UGFHVXH64P`, `LPR6SNKX0Z`, `VDWNEQHLAV`; Klee
+`3SS1V6YP07`, `UJY6VYPURT`. No seed was chosen (`set_seed` never called — the
+seed endpoint read back `chosen: null, route: none` at teardown), the
+understudy speed override stayed OFF, and `steam_appid.txt` was created at
+launch and removed at teardown.
+
 **Where the files are.** `art/eb52_captures/` in the **main checkout**, and
 **gitignored** for the same reason `art/g12_captures/` is
 (`docs/archive/g12-review-2026-08-05.md` §3/§5): every frame is the running
@@ -79,6 +89,21 @@ amount 5, which in that frame matches both `Encore` (5) and the
 `Fanfare Cap +5` bonus, so the capture alone does not name which power owns it.
 Filed as a BACKLOG defect; it is an asset/coverage gap, not a taste call.
 
+**Named 2026-08-08b on `0.2-612`: it is `Fortissimo Guard`
+(`SalonDeployBlockPower`), and the missing key is
+`res://furina/powers/fortissimo_guard.png`.** The naming is by elimination and
+the elimination is measured. `KleePowerIcons.PathFor` wires seven Furina paths
+ahead of their art; `KleePck.Path` returns null while a file is absent, the
+prefix falls through, and the base getter renders `NOPE`. Of those seven only
+`salon_bow_block` (Stagehands) and `salon_deploy_block` (Fortissimo Guard) are
+printed at 5. Stagehands was reproduced live and applies BOTH its halves from
+one card, so it always renders a NOPE **pair** at 5 and 2 —
+`eb65_nope_pair_combat.png`, with the hover tooltip naming it in
+`eb65_nope_tooltip_stagehands.png` / `_crop_eb65_tooltip.png`. The `0.2-589`
+frame has ONE NOPE at 5 beside a correctly-rendered `salon_member` badge at 2,
+so it is not Stagehands. See BACKLOG `EB-65`; the art production is `EB-54`'s
+"A7 + six Curtain Call power sigils", which is exactly these seven keys.
+
 ## 4. `EB-1` Punch Off — the observation
 
 See BACKLOG `EB-1` for the finding. The raw evidence is
@@ -103,21 +128,99 @@ so it labelled itself `bot` and left the human feed alone.)
 
 **That record is the FINAL-enemy case, not the one that was owed.** Its
 `enemies` array has one entry, so the payload's later bombs landed on the body
-the fight ended on. Across 35 fight records written tonight it is the only
-nonzero. The non-final case was attempted three times and not landed; the recipe
-and the live calibration are written down in the session's scratch arms so the
-next attempt is short rather than exploratory:
+the fight ended on. Across 35 fight records written that night it was the only
+nonzero.
 
-- The shape needs **two bombs on one enemy inside one payload**, the enemy at or
-  under the first bomb's damage, and a second enemy left alive.
-- Bomb placers that carry attack damage (`Fish-Flavored Bait`, `Jumpy Dumpty`)
-  detonate the payload early and can kill the victim before the payload exists;
-  the usable placers are the damage-free ones (`Pop!` targeted, `Double Pop`
-  targeted ×2, `Mine Toss` / `Ammo Scavenging` / `Sorry, Jean...` / `Chain Fuse`
-  random). `Quick Fuse` fires a chosen enemy's payload on command, which keeps
-  the whole shape inside one observed turn.
-- **Measured, not printed:** a `Fish-Flavored Bait` printed at 5 damage landed
-  exactly 5, but a printed 5+5 two-bomb payload landed **7 total**, so a single
-  bomb lands nearer 3–4 than 5. Size the victim off that, not off the card face.
-- `Double Pop+` (two bombs, one chosen target, no attack damage) collapses the
-  whole arrangement into one card and is the thing to draft for.
+### The non-final case — LANDED 2026-08-08b on `0.2-612`
+
+```
+run_id UJY6VYPURT  run_instance 20260808-122551#4  fight_index 1
+encounter TOADPOLES_WEAK  enemies [TOADPOLE 25, TOADPOLE 22]
+detonations 3  corpse_detonations 1  turns 5  outcome won
+character Klee  act 1  floor 3  schema "1"  feed "bot"  source "mod"
+```
+
+(`%APPDATA%/SlayTheSpire2/gits_telemetry/play-20260808-122551.jsonl`.) The
+`enemies` array has **two** entries — it is snapshotted at fight start from
+`combat.Enemies.Where(e => e.IsAlive)` — and the second Toadpole was alive at
+9 HP at the moment the corpse detonation resolved, so no flush and no
+final-enemy race is anywhere near this reading. **The owed smoke is
+discharged.**
+
+The arrangement, in four moves, on `TOADPOLE_1`:
+
+| turn | move | victim HP after |
+|---|---|---|
+| 1 | `Kaboom!` (7) then `Pop!` (bomb 5, no attack damage) | 22 -> 15, bomb armed |
+| 2 | payload fires at turn start (5) ; `Kaboom!` (7) | 10 -> 3 |
+| 3–4 | block only; the other Toadpole whittled to 9, never killed | 3 |
+| 4 | **`Double Pop`** — two bombs, one chosen target, no attack damage | 3, `Bomb 8` |
+| 5 | payload fires at turn start: bomb 1 (4) kills, bomb 2 (4) lands on the body | dead |
+
+Frames: `eb18_payload_armed_2bombs.png` (the `Bomb 8` badge on a 3-HP Toadpole
+with the second Toadpole at 9) and
+`eb18_after_payload_second_enemy_alive.png` (victim gone, second enemy alive).
+
+**Three calibration facts this run fixes, replacing last session's guesses.**
+
+1. **Bombs land their printed damage.** A printed 7 + printed 5 payload showed
+   a `Bomb 12` badge and took a Twig Slime (M) from 28 to 16 — exactly 12. The
+   earlier "a printed 5+5 payload landed 7, so size the victim off 3–4" note
+   was reading something else (block or a Weak on the applier); **size the
+   victim off the printed number**, and off the FIRST bomb in the payload, not
+   the sum.
+2. **Order inside the payload is placement order,** so the victim must be at or
+   under the damage of the bomb placed *first*. `Double Pop` (4+4) collapses
+   that to one card and one decision and is the thing to draft; two `Trip Wire`
+   plays (7+7) is the uncommon alternative.
+3. **The bomb schedule is "start of your next turn, or early on unblocked
+   Attack damage"** (`BombPower.BeforeSideTurnStart` / `AfterDamageReceived`,
+   and the in-game Bomb keyword says so verbatim). Both bombs therefore have to
+   be placed **in the same turn** — a bomb placed on turn N is gone by turn
+   N+1 and can never share a payload with one placed later.
+
+### The route that does NOT work, and why it matters
+
+The obvious shape — bomb an enemy, then kill it with an Attack so its own
+`AfterDamageReceived` early-detonation fires on the corpse — **does not count**.
+Measured twice on `0.2-612` (Klee run `3SS1V6YP07`, `NIBBITS_WEAK` and
+`SLIMES_WEAK`): an exactly-lethal `Kaboom!` on a bombed enemy gives
+`detonations 1 / corpse_detonations 0` each time, because `RecordDetonation`
+tests `target is { IsDead: true }` and inside `AfterDamageReceived` the creature
+that just reached 0 HP is not yet flagged dead. That is the *exact* case
+`BombPower`'s own docstring names as the definition of a corpse detonation, so
+the counter and its documentation disagree. Filed as BACKLOG `EB-66`; it is a
+measurement-semantics call, not a typo, and nothing but `PlayTelemetry` reads
+the number.
+
+---
+
+## 6. `EB-64` — the CompanionKey loc row, run-verified
+
+**VERIFIED, and the row is closed.** The build that produced `0.2-612` is the
+compile verification; `eb64_companion_rider_tip.png` is the run verification —
+`Blocking Notes` hovered on a live card-reward screen (Furina run
+`UGFHVXH64P`, act 1 floor 6), the same surface that showed the raw key on
+`0.2-589`. The tip renders **"Companion scaling / +2 Block per Companion card
+you have played this turn, including Guest Stars."** — prose, no
+`card_keywords.KLEEMOD-COMPANION_RIDER.title` anywhere on screen.
+`_crop_eb64_tip.png` is the 1.4k-wide crop of the tip alone;
+`eb64_card_reward_no_hover.png` is the same screen un-hovered, for the
+before/after.
+
+## 7. Capture manifest — files added 2026-08-08b
+
+All in the same gitignored `art/eb52_captures/`, all full 4K primary screen
+with the game's debug corner (build, seed, content hash) in frame.
+
+| file | what it is |
+|---|---|
+| `eb64_card_reward_no_hover.png` | the card-reward screen, `Blocking Notes` un-hovered |
+| `eb64_companion_rider_tip.png` | the same screen with the Companion rider tip open — the `EB-64` verification |
+| `_crop_eb64_tip.png` | crop of the tip alone |
+| `eb65_nope_pair_combat.png` | Stagehands live: the NOPE **pair** at 5 and 2 in Furina's power strip |
+| `eb65_nope_tooltip_stagehands.png` | the same, with the badge hovered — the tooltip names the power and shows NOPE in its own icon slot |
+| `_crop_eb65_tooltip.png` | crop of that tooltip |
+| `eb18_before_killing_blow.png` / `eb18_after_killing_blow.png` | the route that does NOT count: a bombed 7-HP Twig Slime and the exactly-lethal `Kaboom!` |
+| `eb18_payload_armed_2bombs.png` | `Double Pop` armed: `Bomb 8` on a 3-HP Toadpole, second Toadpole at 9 |
+| `eb18_after_payload_second_enemy_alive.png` | the payload fired, victim gone, second enemy alive |
