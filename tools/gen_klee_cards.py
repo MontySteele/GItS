@@ -19,7 +19,7 @@ semantic reason.
 Every emitted file carries a DO-NOT-EDIT header naming this script and the
 sheet, so a hand edit is visibly wrong rather than quietly lost on regen.
 
-Usage:  python tools/gen_klee_cards.py [--check] [--character klee|furina|all]
+Usage:  python tools/gen_klee_cards.py [--check] [--character klee|furina|kokomi|all]
         python tools/gen_roster_cards.py [--check]
         --check exits nonzero if regenerating would change anything (CI guard).
 """
@@ -883,22 +883,31 @@ def pascal(card_id: str) -> str:
     return "".join(p.capitalize() for p in re.split(r"[_\-]", card_id) if p)
 
 
-_sheet_cards_cache: list | None = None
+_sheet_cards_cache: dict[Path, list] = {}
 
 
-def _sheet_cards() -> list[dict]:
-    global _sheet_cards_cache
-    if _sheet_cards_cache is None:
-        _sheet_cards_cache = yaml.safe_load(SHEET.read_text(encoding="utf-8"))
-    return _sheet_cards_cache
+def _sheet_cards(sheet: Path) -> list[dict]:
+    """The parsed rows of one character sheet, read at most once per run."""
+    if sheet not in _sheet_cards_cache:
+        _sheet_cards_cache[sheet] = yaml.safe_load(
+            sheet.read_text(encoding="utf-8"))
+    return _sheet_cards_cache[sheet]
 
 
-def _pool_members(pool: str) -> list[dict]:
+def _pool_members(
+    pool: str, profile: CharacterProfile = KLEE_PROFILE
+) -> list[dict]:
     """tier0 loader.cards_in_pool, resolved against the sheet at generation
-    time (archetype/rarity live only there): '<archetype>_<rarity>s'."""
+    time (archetype/rarity live only there): '<archetype>_<rarity>s'.
+
+    The pool is resolved against the PROFILE'S sheet. It used to be Klee's
+    sheet for every profile -- harmless only because `pool:` appears on
+    exactly one row repo-wide, and that row is Klee's; a Furina card naming a
+    pool would have silently drawn Klee's cards into her token list.
+    """
     archetype, _, rarity = pool.rpartition("_")
     rarity = rarity.rstrip("s")
-    return sorted((c for c in _sheet_cards()
+    return sorted((c for c in _sheet_cards(profile.sheet)
                    if c.get("rarity") == rarity
                    and archetype in c.get("archetypes", [])
                    and not c.get("kit_card")),
@@ -1315,12 +1324,12 @@ def blocked_reason(
             if zone not in ("hand", "discard"):
                 return f"add_card zone '{zone}'"
             if "pool" in eff:
-                members = _pool_members(eff["pool"])
+                members = _pool_members(eff["pool"], profile)
                 if not members:
                     return f"add_card pool '{eff['pool']}' resolves empty"
                 # Every member must itself generate: CreateCard needs a class.
                 bad = [m["id"] for m in members
-                       if m["id"] == card["id"] or blocked_reason(m)]
+                       if m["id"] == card["id"] or blocked_reason(m, profile)]
                 if bad:
                     return (f"add_card pool '{eff['pool']}' contains "
                             f"ungenerated card(s) {bad}")
@@ -3853,7 +3862,7 @@ def build_body(
                 # WITH replacement (tier0: rng.choice per pick), each pick a
                 # fresh instance. AddGeneratedCardToCombat's own full-hand
                 # rule (redirect to discard) is the sim's _add_token rule.
-                members = _pool_members(eff["pool"])
+                members = _pool_members(eff["pool"], profile)
                 count = ('DynamicVars["Stash"].IntValue'
                          if stash_upgrade(card) else str(n))
                 model_list = ",\n".join(
@@ -5479,19 +5488,190 @@ public sealed class {cls} : {interfaces}
 '''
 
 
-def _run_klee(check: bool) -> int:
-    cards = yaml.safe_load(SHEET.read_text(encoding="utf-8"))
+# --- the driver ---------------------------------------------------------------
+#
+# ONE driver (F3, 2026-08-08). Reading a sheet, splitting it into emitted /
+# blocked / no-upgrade-path, emitting a roster class, comparing or writing the
+# output tree, and printing the summary are the same job for every character.
+# They used to be written three times -- `_run_klee` / `_run_furina` /
+# `_run_kokomi`, with the ~50-line check-and-write block copied verbatim into
+# each -- which is how Kokomi's copy ended up silently dropping the R24
+# "no upgrade path" report its two siblings print.
+#
+# What is genuinely per-character is DATA, and only that is left per-character
+# below: the extra sheets a profile draws from (Klee's companions, Furina's
+# Guest Stars), its manifest SCHEMA -- Klee's is a different shape and STAYS a
+# different shape, because it is committed output -- and the vocabulary it
+# clusters its blockers under.
 
-    generated, blocked, no_upgrade = {}, {}, {}
+
+@dataclass(frozen=True)
+class ProfilePlan:
+    """Everything one profile's regen would write, computed before it writes.
+
+    `--check` and the real write then read the same object through the same
+    code, which is the property three hand-kept copies could not hold.
+    """
+
+    generated: dict[str, str]       # card id -> emitted .cs source
+    manifest_src: str               # exact manifest bytes, newline included
+    stale_label: str                # "" | "Furina " | "Kokomi "
+    up_to_date: str                 # the exact --check success line
+    summary: list[str]              # printed only after a real write
+
+
+def _script_name(profile: CharacterProfile) -> str:
+    """`tools/gen_roster_cards.py` -> `gen_roster_cards`, for log prefixes."""
+    return Path(profile.generator_script).stem
+
+
+def _emit_sheet(
+    profile: CharacterProfile,
+) -> tuple[list[dict], dict[str, str], dict[str, str], dict[str, str]]:
+    """Split one character sheet into emitted / blocked / no-upgrade-path.
+
+    Returns the raw rows too: the blocked-cluster mappers need the card a
+    reason came from, not just the reason.
+    """
+    cards = yaml.safe_load(profile.sheet.read_text(encoding="utf-8"))
+    generated: dict[str, str] = {}
+    blocked: dict[str, str] = {}
+    no_upgrade: dict[str, str] = {}
     for card in cards:
-        reason = blocked_reason(card)
+        reason = blocked_reason(card, profile)
         if reason:
             blocked[card["id"]] = reason
-        else:
-            generated[card["id"]] = emit(card)
-            _, upgrade_reason = upgrade_plan(card)
-            if upgrade_reason:
-                no_upgrade[card["id"]] = upgrade_reason
+            continue
+        generated[card["id"]] = emit(card, profile)
+        _, upgrade_reason = upgrade_plan(card)
+        if upgrade_reason:
+            no_upgrade[card["id"]] = upgrade_reason
+    return cards, generated, blocked, no_upgrade
+
+
+def _roster_class(
+    *,
+    profile: CharacterProfile,
+    source_sheet: Path,
+    note: str,
+    cls: str,
+    card_ids,
+    summary: str = "",
+) -> str:
+    """A generated `public static class <cls>` holding one ModelDb card list.
+
+    The three rosters (companions, a character's personal pool, Guest Stars)
+    are the same file with a different second header line, class name and
+    membership, so the shape lives here once.
+    """
+    entries = NEWLINE_JOIN.join(
+        f"        ModelDb.Card<{pascal(card_id)}>()," for card_id in sorted(card_ids))
+    sheet_rel = source_sheet.relative_to(REPO).as_posix()
+    return f'''// <auto-generated>
+//     Generated by {profile.generator_script} from {sheet_rel}.
+//     {note}
+// </auto-generated>
+
+#nullable enable
+
+using System.Collections.Generic;
+using MegaCrit.Sts2.Core.Models;
+
+namespace {profile.namespace};
+
+{summary}public static class {cls}
+{{
+    private static List<CardModel>? _all;
+
+    public static IReadOnlyList<CardModel> All => _all ??= new List<CardModel>
+    {{
+{entries}
+    }};
+}}
+'''
+
+
+# Klee's companion roster is the one roster class carrying a doc comment: the
+# 4th reward slot is not obvious from the class name, and the "NOT in the pool"
+# half is exactly the mistake a reader would otherwise make.
+COMPANION_ROSTER_SUMMARY = """/// <summary>
+/// Every companion card. The 4th reward slot (CompanionSlot) draws from
+/// here; companions are NOT in KleeCardPool (tier05 character_pool excludes
+/// them -- the slot is their only door).
+/// </summary>
+"""
+
+
+def _blocked_clusters(
+    cards: list[dict], blocked: dict[str, str], cluster_of
+) -> dict[str, list[str]]:
+    """Group blocked ids by the runtime system they wait on."""
+    cards_by_id = {card["id"]: card for card in cards}
+    clusters: dict[str, list[str]] = {}
+    for card_id, reason in blocked.items():
+        clusters.setdefault(
+            cluster_of(cards_by_id[card_id], reason), []).append(card_id)
+    return clusters
+
+
+def _check_plan(profile: CharacterProfile, plan: ProfilePlan) -> int:
+    """--check: per-card content, EXTRA .cs files in the out dir, and the
+    manifest bytes. All three, or a deleted sheet row lingers as a live class.
+    """
+    stale = []
+    for card_id, source in plan.generated.items():
+        path = profile.out_dir / f"{pascal(card_id)}.cs"
+        if not path.exists() or path.read_text(encoding="utf-8") != source:
+            stale.append(card_id)
+    expected_files = {f"{pascal(card_id)}.cs" for card_id in plan.generated}
+    # `glob` on a directory that does not exist yields nothing rather than
+    # raising, so a never-generated character reads as "everything is stale".
+    actual_files = {path.name for path in profile.out_dir.glob("*.cs")}
+    extra_files = sorted(actual_files - expected_files)
+    manifest_stale = (
+        not profile.manifest.exists()
+        or profile.manifest.read_text(encoding="utf-8") != plan.manifest_src
+    )
+    if stale or extra_files or manifest_stale:
+        if stale:
+            print(
+                f"stale {plan.stale_label}generated cards: "
+                f"{', '.join(sorted(stale))}",
+                file=sys.stderr,
+            )
+        if extra_files:
+            print(
+                f"stale {plan.stale_label}generated files: "
+                f"{', '.join(extra_files)}",
+                file=sys.stderr,
+            )
+        if manifest_stale:
+            print(f"stale {plan.stale_label}generated manifest", file=sys.stderr)
+        return 1
+    print(plan.up_to_date)
+    return 0
+
+
+def _write_plan(profile: CharacterProfile, plan: ProfilePlan) -> None:
+    profile.out_dir.mkdir(parents=True, exist_ok=True)
+    # Clear stale files so a card removed from the sheet does not linger.
+    for old in profile.out_dir.glob("*.cs"):
+        old.unlink()
+    for card_id, source in plan.generated.items():
+        path = profile.out_dir / f"{pascal(card_id)}.cs"
+        path.write_text(source, encoding="utf-8")
+    profile.manifest.write_text(plan.manifest_src, encoding="utf-8")
+
+
+def _plan_klee(profile: CharacterProfile) -> ProfilePlan:
+    """Klee: her own sheet PLUS every companion sheet and the reward roster.
+
+    Her manifest keeps its own shape -- `generated`/`companions`/`blocked`/
+    `upgrades`, with no `profile`, `coverage` or `runtime_clusters` -- because
+    those bytes are committed output, not a style choice this refactor gets to
+    settle.
+    """
+    _, generated, blocked, no_upgrade = _emit_sheet(profile)
 
     # Companions -- a blocked companion is a build failure, not a manifest
     # entry. Both rosters are user-ratified in scope (Mondstadt 2026-07-21;
@@ -5500,19 +5680,19 @@ def _run_klee(check: bool) -> int:
     # cameos generated mid-combat by her own cards, never offered in a reward
     # slot (tier05 companion_pool filters `not c.guest_star`), and nothing in
     # the Klee mod can create one.
-    companions = {}
+    companions: dict[str, str] = {}
     for sheet_path, nation in COMPANION_SHEETS:
         for card in yaml.safe_load(sheet_path.read_text(encoding="utf-8")):
             if card.get("guest_star"):
                 continue
             card.setdefault("nation", nation)
-            reason = blocked_reason(card)
+            reason = blocked_reason(card, profile)
             if reason:
                 raise SystemExit(
-                    f"gen_klee_cards: companion {card['id']} blocked: {reason} "
-                    "-- the whole roster is ratified in scope; extend the "
-                    "generator, do not skip.")
-            companions[card["id"]] = emit(card)
+                    f"{_script_name(profile)}: companion {card['id']} blocked: "
+                    f"{reason} -- the whole roster is ratified in scope; "
+                    "extend the generator, do not skip.")
+            companions[card["id"]] = emit(card, profile)
 
             # MANIFEST HOLE CLOSED (bug hunt 2026-07-21). This loop used to
             # skip upgrade_plan entirely, so no_upgrade_path listed only
@@ -5529,39 +5709,20 @@ def _run_klee(check: bool) -> int:
 
     # The roster class the reward slot draws from (CompanionSlot.Roll):
     # generated so the sheet stays the single source of truth.
-    roster_entries = "\n".join(
-        f"        ModelDb.Card<{pascal(cid)}>()," for cid in sorted(companions))
-    generated["companion_roster"] = f'''// <auto-generated>
-//     Generated by tools/gen_klee_cards.py from docs/mondstadt-companions.yaml.
-//     DO NOT EDIT. Edits are lost on the next regen -- change the sheet instead.
-// </auto-generated>
-
-#nullable enable
-
-using System.Collections.Generic;
-using MegaCrit.Sts2.Core.Models;
-
-namespace KleeMod.Cards.Generated;
-
-/// <summary>
-/// Every companion card. The 4th reward slot (CompanionSlot) draws from
-/// here; companions are NOT in KleeCardPool (tier05 character_pool excludes
-/// them -- the slot is their only door).
-/// </summary>
-public static class CompanionRoster
-{{
-    private static List<CardModel>? _all;
-
-    public static IReadOnlyList<CardModel> All => _all ??= new List<CardModel>
-    {{
-{roster_entries}
-    }};
-}}
-'''
+    generated["companion_roster"] = _roster_class(
+        profile=profile,
+        source_sheet=COMPANION_SHEETS[0][0],
+        note=("DO NOT EDIT. Edits are lost on the next regen -- change the "
+              "sheet instead."),
+        cls="CompanionRoster",
+        card_ids=companions,
+        summary=COMPANION_ROSTER_SUMMARY,
+    )
 
     manifest = {
         "_comment": (
-            "Generated by tools/gen_klee_cards.py from docs/klee-cards.yaml. "
+            f"Generated by {profile.generator_script} from "
+            f"{profile.sheet.relative_to(REPO).as_posix()}. "
             "'blocked' cards need systems or hand-finishing; the reason names what stopped codegen."
         ),
         "generated": sorted(set(generated) - set(companions)
@@ -5577,52 +5738,24 @@ public static class CompanionRoster
             "no_upgrade_path": dict(sorted(no_upgrade.items())),
         },
     }
-    manifest_src = json.dumps(manifest, indent=2) + "\n"
 
-    if check:
-        stale = []
-        for cid, src in generated.items():
-            p = OUT_DIR / f"{pascal(cid)}.cs"
-            if not p.exists() or p.read_text(encoding="utf-8") != src:
-                stale.append(cid)
-        expected_files = {f"{pascal(cid)}.cs" for cid in generated}
-        actual_files = {p.name for p in OUT_DIR.glob("*.cs")}
-        extra_files = sorted(actual_files - expected_files)
-        manifest_stale = (
-            not MANIFEST.exists()
-            or MANIFEST.read_text(encoding="utf-8") != manifest_src
-        )
-        if stale or extra_files or manifest_stale:
-            if stale:
-                print(f"stale generated cards: {', '.join(sorted(stale))}", file=sys.stderr)
-            if extra_files:
-                print(f"stale generated files: {', '.join(extra_files)}", file=sys.stderr)
-            if manifest_stale:
-                print("stale generated manifest", file=sys.stderr)
-            return 1
-        print("gen_klee_cards: up to date")
-        return 0
-
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    # Clear stale files so a card removed from the sheet does not linger.
-    for old in OUT_DIR.glob("*.cs"):
-        old.unlink()
-
-    for cid, src in generated.items():
-        (OUT_DIR / f"{pascal(cid)}.cs").write_text(src, encoding="utf-8")
-
-    MANIFEST.write_text(manifest_src, encoding="utf-8")
-
-    print(f"generated {len(generated)} cards, blocked {len(blocked)}")
     by_reason: dict[str, int] = {}
     for reason in blocked.values():
         key = reason.split("(")[0].strip()
         by_reason[key] = by_reason.get(key, 0) + 1
-    for reason, n in sorted(by_reason.items(), key=lambda kv: -kv[1]):
-        print(f"  blocked x{n}: {reason}")
-    for cid, why in sorted(no_upgrade.items()):
-        print(f"  no upgrade path: {cid} -- {why}")
-    return 0
+    summary = [f"generated {len(generated)} cards, blocked {len(blocked)}"]
+    summary += [f"  blocked x{n}: {reason}"
+                for reason, n in sorted(by_reason.items(), key=lambda kv: -kv[1])]
+    summary += [f"  no upgrade path: {cid} -- {why}"
+                for cid, why in sorted(no_upgrade.items())]
+
+    return ProfilePlan(
+        generated=generated,
+        manifest_src=json.dumps(manifest, indent=2) + NEWLINE,
+        stale_label="",
+        up_to_date=f"{_script_name(profile)}: up to date",
+        summary=summary,
+    )
 
 
 def _furina_runtime_cluster(card: dict, reason: str) -> str:
@@ -5680,342 +5813,6 @@ def _furina_runtime_cluster(card: dict, reason: str) -> str:
     return "shared_emitter_gap"
 
 
-def _run_furina(check: bool) -> int:
-    """Emit the runtime-safe Furina subset and a complete blocker manifest.
-
-    A partial character pool is intentionally inert: generated classes use
-    autoAdd:false and no Furina pool references them until all runtime clusters
-    exist. This lets codegen advance without accidentally shipping a partial
-    reward pool.
-    """
-    cards = yaml.safe_load(FURINA_PROFILE.sheet.read_text(encoding="utf-8"))
-    generated: dict[str, str] = {}
-    blocked: dict[str, str] = {}
-    no_upgrade: dict[str, str] = {}
-
-    for card in cards:
-        reason = blocked_reason(card, FURINA_PROFILE)
-        if reason:
-            blocked[card["id"]] = reason
-            continue
-        generated[card["id"]] = emit(card, FURINA_PROFILE)
-        _, upgrade_reason = upgrade_plan(card)
-        if upgrade_reason:
-            no_upgrade[card["id"]] = upgrade_reason
-
-    main_generated_ids = set(generated)
-
-    main_entries = "\n".join(
-        f"        ModelDb.Card<{pascal(card_id)}>(),"
-        for card_id in sorted(main_generated_ids))
-    generated["furina_card_roster"] = f'''// <auto-generated>
-//     Generated by tools/gen_roster_cards.py from docs/furina-cards.yaml.
-//     Every generated personal-pool card; FurinaCardPool owns membership.
-// </auto-generated>
-
-#nullable enable
-
-using System.Collections.Generic;
-using MegaCrit.Sts2.Core.Models;
-
-namespace KleeMod.Cards.Furina.Generated;
-
-public static class FurinaCardRoster
-{{
-    private static List<CardModel>? _all;
-
-    public static IReadOnlyList<CardModel> All => _all ??= new List<CardModel>
-    {{
-{main_entries}
-    }};
-}}
-'''
-
-    # Guest Stars are temporary Companion cards generated only by Furina's
-    # personal-pool cards. They are emitted beside Furina (not into the shared
-    # reward roster), and are intentionally not smithable.
-    guest_star_ids: list[str] = []
-    fontaine_sheet = next(
-        path for path, nation in COMPANION_SHEETS if nation == "fontaine")
-    for guest in yaml.safe_load(fontaine_sheet.read_text(encoding="utf-8")):
-        if not guest.get("guest_star"):
-            continue
-        guest.setdefault("nation", "fontaine")
-        reason = blocked_reason(guest, FURINA_PROFILE)
-        if reason:
-            raise SystemExit(
-                f"gen_roster_cards: guest star {guest['id']} blocked: "
-                f"{reason}")
-        generated[guest["id"]] = emit(guest, FURINA_PROFILE)
-        guest_star_ids.append(guest["id"])
-
-    guest_entries = "\n".join(
-        f"        ModelDb.Card<{pascal(card_id)}>(),"
-        for card_id in sorted(guest_star_ids))
-    generated["guest_star_roster"] = f'''// <auto-generated>
-//     Generated by tools/gen_roster_cards.py from docs/fontaine-companions.yaml.
-//     Guest Stars are temporary Furina generation targets, never reward cards.
-// </auto-generated>
-
-#nullable enable
-
-using System.Collections.Generic;
-using MegaCrit.Sts2.Core.Models;
-
-namespace KleeMod.Cards.Furina.Generated;
-
-public static class GuestStarRoster
-{{
-    private static List<CardModel>? _all;
-
-    public static IReadOnlyList<CardModel> All => _all ??= new List<CardModel>
-    {{
-{guest_entries}
-    }};
-}}
-'''
-
-    clusters: dict[str, list[str]] = {}
-    cards_by_id = {card["id"]: card for card in cards}
-    for card_id, reason in blocked.items():
-        cluster = _furina_runtime_cluster(cards_by_id[card_id], reason)
-        clusters.setdefault(cluster, []).append(card_id)
-
-    manifest = {
-        "_comment": (
-            "Generated by tools/gen_roster_cards.py from docs/furina-cards.yaml. "
-            "Only cards whose complete runtime grammar is implemented are emitted. "
-            "Blocked cards are not auto-registered or added to a partial pool."
-        ),
-        "profile": {
-            "character": FURINA_PROFILE.character_id,
-            "element": FURINA_PROFILE.native_element,
-            "cadence": (
-                "damage on Skill, skill_tag, or burst_tag cards applies Hydro; "
-                "plain Attacks do not"
-            ),
-            "namespace": FURINA_PROFILE.namespace,
-        },
-        "coverage": {
-            "total": len(cards),
-            "generated": len(main_generated_ids),
-            "blocked": len(blocked),
-        },
-        "generated": sorted(main_generated_ids),
-        "guest_stars": sorted(guest_star_ids),
-        "blocked": dict(sorted(blocked.items())),
-        "runtime_clusters": {
-            key: sorted(value) for key, value in sorted(clusters.items())
-        },
-        "upgrades": {
-            "_comment": (
-                "docs/furina-upgrades.yaml is authoritative. A generated card "
-                "listed below ships without an upgrade until its full delta is "
-                "expressible; partial upgrade application is forbidden."
-            ),
-            "no_upgrade_path": dict(sorted(no_upgrade.items())),
-        },
-    }
-    manifest_src = json.dumps(manifest, indent=2) + "\n"
-
-    if check:
-        stale = []
-        for card_id, source in generated.items():
-            path = FURINA_PROFILE.out_dir / f"{pascal(card_id)}.cs"
-            if not path.exists() or path.read_text(encoding="utf-8") != source:
-                stale.append(card_id)
-        expected_files = {f"{pascal(card_id)}.cs" for card_id in generated}
-        actual_files = {
-            path.name for path in FURINA_PROFILE.out_dir.glob("*.cs")
-        }
-        extra_files = sorted(actual_files - expected_files)
-        manifest_stale = (
-            not FURINA_PROFILE.manifest.exists()
-            or FURINA_PROFILE.manifest.read_text(encoding="utf-8")
-            != manifest_src
-        )
-        if stale or extra_files or manifest_stale:
-            if stale:
-                print(
-                    f"stale Furina generated cards: {', '.join(sorted(stale))}",
-                    file=sys.stderr,
-                )
-            if extra_files:
-                print(
-                    f"stale Furina generated files: {', '.join(extra_files)}",
-                    file=sys.stderr,
-                )
-            if manifest_stale:
-                print("stale Furina generated manifest", file=sys.stderr)
-            return 1
-        print("gen_roster_cards: furina up to date")
-        return 0
-
-    FURINA_PROFILE.out_dir.mkdir(parents=True, exist_ok=True)
-    for old in FURINA_PROFILE.out_dir.glob("*.cs"):
-        old.unlink()
-    for card_id, source in generated.items():
-        path = FURINA_PROFILE.out_dir / f"{pascal(card_id)}.cs"
-        path.write_text(source, encoding="utf-8")
-    FURINA_PROFILE.manifest.write_text(manifest_src, encoding="utf-8")
-
-    print(
-        f"furina: generated {len(main_generated_ids)} cards "
-        f"(+{len(guest_star_ids)} Guest Stars), "
-        f"blocked {len(blocked)}"
-    )
-    for cluster, card_ids in sorted(clusters.items()):
-        print(f"  {cluster}: {len(card_ids)}")
-    for card_id, why in sorted(no_upgrade.items()):
-        print(f"  no upgrade path: {card_id} -- {why}")
-    return 0
-
-
-def _run_kokomi(check: bool) -> int:
-    """Emit the runtime-safe Kokomi subset and a complete blocker manifest.
-
-    Same discipline as Furina's path: a partial pool is intentionally INERT.
-    Generated classes use autoAdd:false and no Kokomi pool references them, so
-    codegen can advance card by card without ever shipping a half-built reward
-    pool. Blocked cards are named, counted, and clustered rather than silently
-    dropped -- an unlisted card is a bug, an unlisted BLOCKER is a lie.
-    """
-    cards = yaml.safe_load(KOKOMI_PROFILE.sheet.read_text(encoding="utf-8"))
-    generated: dict[str, str] = {}
-    blocked: dict[str, str] = {}
-    no_upgrade: dict[str, str] = {}
-
-    for card in cards:
-        reason = blocked_reason(card, KOKOMI_PROFILE)
-        if reason:
-            blocked[card["id"]] = reason
-            continue
-        generated[card["id"]] = emit(card, KOKOMI_PROFILE)
-        _, upgrade_reason = upgrade_plan(card)
-        if upgrade_reason:
-            no_upgrade[card["id"]] = upgrade_reason
-
-    main_generated_ids = set(generated)
-
-    main_entries = NEWLINE_JOIN.join(
-        f"        ModelDb.Card<{pascal(card_id)}>(),"
-        for card_id in sorted(main_generated_ids))
-    generated["kokomi_card_roster"] = f'''// <auto-generated>
-//     Generated by tools/gen_roster_cards.py from docs/kokomi-cards.yaml.
-//     Every generated personal-pool card; KokomiCardPool owns membership.
-// </auto-generated>
-
-#nullable enable
-
-using System.Collections.Generic;
-using MegaCrit.Sts2.Core.Models;
-
-namespace KleeMod.Cards.Kokomi.Generated;
-
-public static class KokomiCardRoster
-{{
-    private static List<CardModel>? _all;
-
-    public static IReadOnlyList<CardModel> All => _all ??= new List<CardModel>
-    {{
-{main_entries}
-    }};
-}}
-'''
-
-    clusters: dict[str, list[str]] = {}
-    cards_by_id = {card["id"]: card for card in cards}
-    for card_id, reason in blocked.items():
-        clusters.setdefault(
-            _kokomi_runtime_cluster(cards_by_id[card_id], reason),
-            []).append(card_id)
-
-    manifest = {
-        "_comment": (
-            "Generated by tools/gen_roster_cards.py from docs/kokomi-cards.yaml. "
-            "Only cards whose complete runtime grammar is implemented are emitted. "
-            "Blocked cards are not auto-registered or added to a partial pool."
-        ),
-        "profile": {
-            "character": KOKOMI_PROFILE.character_id,
-            "element": KOKOMI_PROFILE.native_element,
-            "cadence": (
-                "CATALYST (R52 ask N1): every Attack applies Hydro. Application "
-                "uptime is structural, not authored per card."
-            ),
-            "namespace": KOKOMI_PROFILE.namespace,
-        },
-        "coverage": {
-            "total": len(cards),
-            "generated": len(main_generated_ids),
-            "blocked": len(blocked),
-        },
-        "generated": sorted(main_generated_ids),
-        "blocked": dict(sorted(blocked.items())),
-        "runtime_clusters": {
-            key: sorted(value) for key, value in sorted(clusters.items())
-        },
-        "upgrades": {
-            "_comment": (
-                "docs/kokomi-upgrades.yaml is authoritative. A generated card "
-                "listed below ships without an upgrade until its full delta is "
-                "expressible; partial upgrade application is forbidden."
-            ),
-            "no_upgrade_path": dict(sorted(no_upgrade.items())),
-        },
-    }
-    manifest_src = json.dumps(manifest, indent=2) + NEWLINE
-
-    if check:
-        stale = []
-        for card_id, source in generated.items():
-            path = KOKOMI_PROFILE.out_dir / f"{pascal(card_id)}.cs"
-            if not path.exists() or path.read_text(encoding="utf-8") != source:
-                stale.append(card_id)
-        expected_files = {f"{pascal(card_id)}.cs" for card_id in generated}
-        actual_files = {
-            path.name for path in KOKOMI_PROFILE.out_dir.glob("*.cs")
-        } if KOKOMI_PROFILE.out_dir.exists() else set()
-        extra_files = sorted(actual_files - expected_files)
-        manifest_stale = (
-            not KOKOMI_PROFILE.manifest.exists()
-            or KOKOMI_PROFILE.manifest.read_text(encoding="utf-8")
-            != manifest_src
-        )
-        if stale or extra_files or manifest_stale:
-            if stale:
-                print(
-                    f"stale Kokomi generated cards: {', '.join(sorted(stale))}",
-                    file=sys.stderr,
-                )
-            if extra_files:
-                print(
-                    f"stale Kokomi generated files: {', '.join(extra_files)}",
-                    file=sys.stderr,
-                )
-            if manifest_stale:
-                print("stale Kokomi generated manifest", file=sys.stderr)
-            return 1
-        print("gen_roster_cards: kokomi up to date")
-        return 0
-
-    KOKOMI_PROFILE.out_dir.mkdir(parents=True, exist_ok=True)
-    for old in KOKOMI_PROFILE.out_dir.glob("*.cs"):
-        old.unlink()
-    for card_id, source in generated.items():
-        path = KOKOMI_PROFILE.out_dir / f"{pascal(card_id)}.cs"
-        path.write_text(source, encoding="utf-8")
-    KOKOMI_PROFILE.manifest.write_text(manifest_src, encoding="utf-8")
-
-    print(
-        f"kokomi: generated {len(main_generated_ids)} cards, "
-        f"blocked {len(blocked)}"
-    )
-    for cluster, card_ids in sorted(clusters.items()):
-        print(f"  {cluster}: {len(card_ids)}")
-    return 0
-
-
 def _kokomi_runtime_cluster(card: dict, reason: str) -> str:
     """Group blockers by the RUNTIME SYSTEM they wait on, not by card.
 
@@ -6045,6 +5842,169 @@ def _kokomi_runtime_cluster(card: dict, reason: str) -> str:
     return "shared_emitter_gap"
 
 
+def _plan_roster(
+    profile: CharacterProfile,
+    *,
+    cadence: str,
+    cluster_of,
+    guest_stars: bool = False,
+) -> ProfilePlan:
+    """The roster-character plan: Furina and Kokomi share it exactly.
+
+    A partial character pool is intentionally INERT. Generated classes use
+    autoAdd:false and no character pool references them until every runtime
+    cluster exists, so codegen can advance card by card without ever shipping
+    a half-built reward pool. Blocked cards are named, counted and clustered
+    rather than silently dropped -- an unlisted card is a bug, an unlisted
+    BLOCKER is a lie.
+    """
+    cards, generated, blocked, no_upgrade = _emit_sheet(profile)
+    main_generated_ids = set(generated)
+    cs_name = pascal(profile.character_id)
+
+    generated[f"{profile.character_id}_card_roster"] = _roster_class(
+        profile=profile,
+        source_sheet=profile.sheet,
+        note=(f"Every generated personal-pool card; {cs_name}CardPool owns "
+              "membership."),
+        cls=f"{cs_name}CardRoster",
+        card_ids=main_generated_ids,
+    )
+
+    # Guest Stars are temporary Companion cards generated only by Furina's
+    # personal-pool cards. They are emitted beside her (not into the shared
+    # reward roster), and are intentionally not smithable.
+    guest_star_ids: list[str] | None = None
+    if guest_stars:
+        guest_star_ids = []
+        fontaine_sheet = next(
+            path for path, nation in COMPANION_SHEETS if nation == "fontaine")
+        for guest in yaml.safe_load(
+                fontaine_sheet.read_text(encoding="utf-8")):
+            if not guest.get("guest_star"):
+                continue
+            guest.setdefault("nation", "fontaine")
+            reason = blocked_reason(guest, profile)
+            if reason:
+                raise SystemExit(
+                    f"{_script_name(profile)}: guest star {guest['id']} "
+                    f"blocked: {reason}")
+            generated[guest["id"]] = emit(guest, profile)
+            guest_star_ids.append(guest["id"])
+        generated["guest_star_roster"] = _roster_class(
+            profile=profile,
+            source_sheet=fontaine_sheet,
+            note=(f"Guest Stars are temporary {cs_name} generation targets, "
+                  "never reward cards."),
+            cls="GuestStarRoster",
+            card_ids=guest_star_ids,
+        )
+
+    clusters = _blocked_clusters(cards, blocked, cluster_of)
+
+    sheet_rel = profile.sheet.relative_to(REPO).as_posix()
+    manifest: dict = {
+        "_comment": (
+            f"Generated by {profile.generator_script} from {sheet_rel}. "
+            "Only cards whose complete runtime grammar is implemented are emitted. "
+            "Blocked cards are not auto-registered or added to a partial pool."
+        ),
+        "profile": {
+            "character": profile.character_id,
+            "element": profile.native_element,
+            "cadence": cadence,
+            "namespace": profile.namespace,
+        },
+        "coverage": {
+            "total": len(cards),
+            "generated": len(main_generated_ids),
+            "blocked": len(blocked),
+        },
+        "generated": sorted(main_generated_ids),
+    }
+    if guest_star_ids is not None:
+        manifest["guest_stars"] = sorted(guest_star_ids)
+    manifest["blocked"] = dict(sorted(blocked.items()))
+    manifest["runtime_clusters"] = {
+        key: sorted(value) for key, value in sorted(clusters.items())
+    }
+    manifest["upgrades"] = {
+        "_comment": (
+            f"docs/{profile.character_id}-upgrades.yaml is authoritative. A "
+            "generated card listed below ships without an upgrade until its "
+            "full delta is expressible; partial upgrade application is "
+            "forbidden."
+        ),
+        "no_upgrade_path": dict(sorted(no_upgrade.items())),
+    }
+
+    guest_note = (
+        f" (+{len(guest_star_ids)} Guest Stars)" if guest_star_ids else "")
+    summary = [
+        f"{profile.character_id}: generated {len(main_generated_ids)} cards"
+        f"{guest_note}, blocked {len(blocked)}"
+    ]
+    summary += [f"  {cluster}: {len(card_ids)}"
+                for cluster, card_ids in sorted(clusters.items())]
+    # Kokomi's copy of this driver never printed the R24 line; that was the
+    # triplication losing a report, not a decision. Her no_upgrade map is
+    # empty today, so unifying it changes no output that exists.
+    summary += [f"  no upgrade path: {card_id} -- {why}"
+                for card_id, why in sorted(no_upgrade.items())]
+
+    return ProfilePlan(
+        generated=generated,
+        manifest_src=json.dumps(manifest, indent=2) + NEWLINE,
+        stale_label=f"{cs_name} ",
+        up_to_date=(
+            f"{_script_name(profile)}: {profile.character_id} up to date"),
+        summary=summary,
+    )
+
+
+def _plan_furina(profile: CharacterProfile) -> ProfilePlan:
+    return _plan_roster(
+        profile,
+        cadence=(
+            "damage on Skill, skill_tag, or burst_tag cards applies Hydro; "
+            "plain Attacks do not"
+        ),
+        cluster_of=_furina_runtime_cluster,
+        guest_stars=True,
+    )
+
+
+def _plan_kokomi(profile: CharacterProfile) -> ProfilePlan:
+    return _plan_roster(
+        profile,
+        cadence=(
+            "CATALYST (R52 ask N1): every Attack applies Hydro. Application "
+            "uptime is structural, not authored per card."
+        ),
+        cluster_of=_kokomi_runtime_cluster,
+    )
+
+
+# Character #4 lands here, and `lint_roster_registry` (S11) fails until it
+# does: the registry sweep looks for `def _plan_<id>(` in this file.
+PLAN_BUILDERS = {
+    "klee": _plan_klee,
+    "furina": _plan_furina,
+    "kokomi": _plan_kokomi,
+}
+
+
+def _run_profile(profile: CharacterProfile, check: bool) -> int:
+    """The one driver: plan, then either compare or write."""
+    plan = PLAN_BUILDERS[profile.character_id](profile)
+    if check:
+        return _check_plan(profile, plan)
+    _write_plan(profile, plan)
+    for line in plan.summary:
+        print(line)
+    return 0
+
+
 def main(
     argv: list[str] | None = None, *, default_character: str = "klee"
 ) -> int:
@@ -6060,14 +6020,10 @@ def main(
     )
     args = ap.parse_args(argv)
 
-    results = []
-    if args.character in ("klee", "all"):
-        results.append(_run_klee(args.check))
-    if args.character in ("furina", "all"):
-        results.append(_run_furina(args.check))
-    if args.character in ("kokomi", "all"):
-        results.append(_run_kokomi(args.check))
-    return max(results, default=0)
+    selected = PROFILES.values() if args.character == "all" else (
+        PROFILES[args.character],)
+    return max((_run_profile(profile, args.check) for profile in selected),
+               default=0)
 
 
 if __name__ == "__main__":

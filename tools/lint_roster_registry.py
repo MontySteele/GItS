@@ -103,15 +103,17 @@ CLOSED_LISTS = [
     ("codegen character profiles",
      REPO / "tools" / "gen_klee_cards.py",
      lambda c: f'character_id="{c.id}"'),
-    # The per-character driver, NOT gen_roster_cards.py -- that file is a
+    # The per-character PLAN, NOT gen_roster_cards.py -- that file is a
     # four-line wrapper around gen_klee_cards.main and carries no roster list
     # at all. (Pointing this row at the wrapper was the lint's first finding,
     # against itself, which is the correct thing for it to have caught.)
-    # These three `_run_*` functions are 590 lines of triplicated driver with
-    # three divergent manifest schemas -- F3's target, still open.
-    ("codegen per-character driver",
+    # F3 landed 2026-08-08: the three `_run_*` copies became one
+    # `_run_profile`, so what a new character still has to author is its PLAN
+    # -- the extra sheets it draws from, its manifest schema, its blocker
+    # vocabulary -- and that is what this row now names.
+    ("codegen per-character plan",
      REPO / "tools" / "gen_klee_cards.py",
-     lambda c: f"def _run_{c.id}("),
+     lambda c: f"def _plan_{c.id}("),
 ]
 
 
