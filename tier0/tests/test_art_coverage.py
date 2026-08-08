@@ -6,10 +6,13 @@ defects, this one checks the sheets against what art actually exists on disk.
 Deliberately does NOT assert a missing-count. Missing is 101 today and walks
 to 0 as the Furina art pass lands; pinning it would make every promoted
 portrait a test edit. What IS pinned is the pair of invariants that can
-silently rot: stale files must never read as coverage, and a portrait that
-already exists must never be re-billed as missing.
+silently rot: stale files must never read as coverage, a portrait that
+already exists must never be re-billed as missing, and a card that SHIPS must
+appear in the accounting even when no sheet describes it (EB-36 / D4 -- three
+cards rendered the BETA placeholder while the bill read zero missing).
 """
 
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -166,6 +169,78 @@ def test_existing_portrait_is_not_rebilled_as_missing():
     assert "dahlia_sacramental_shower" in covered, "the existing portrait must read as covered"
 
 
+def test_mod_art_key_scan_reads_literal_portrait_requests(tmp_path):
+    """Unit half of the D4 fix: the second universe is READ, never listed.
+
+    Hermetic on purpose -- it builds its own two-file C# tree in tmp_path
+    rather than asserting against klee-mod/, so it pins the scanner's contract
+    (literal keys in, definition site and interpolated calls out) and stays
+    true whatever the real mod happens to contain today.
+    """
+    sys.path.insert(0, str(REPO / "tools"))
+    import art_coverage
+
+    (tmp_path / "Cards").mkdir()
+    (tmp_path / "Cards" / "ProbeCard.cs").write_text(
+        'public override Texture2D? CustomPortrait =>\n'
+        '    RosterArt.CardPortrait("probe_card");\n', encoding="utf-8")
+    # The definition site itself takes a variable. It requests no art and must
+    # not enter the bill as a card called `cardId`.
+    (tmp_path / "ProbeArt.cs").write_text(
+        "public static Texture2D? CardPortrait(string cardId) =>\n"
+        "    RosterArt.CardPortrait(cardId);\n", encoding="utf-8")
+
+    keys = art_coverage.mod_art_keys(tmp_path)
+    assert set(keys) == {"probe_card"}
+    assert keys["probe_card"].name == "ProbeCard.cs"
+    # A tree that is not there at all is an empty universe, not a crash: a
+    # clone without the mod must still get its sheet bill.
+    assert art_coverage.mod_art_keys(tmp_path / "nope") == {}
+
+
+def test_shipped_card_with_no_sheet_row_is_billed():
+    """The EB-36 defect: shipped art keys with no sheet row were INVISIBLE.
+
+    `spotlight_center_stage`, `spotlight_guest_cast` and `confiscated` render
+    the BETA placeholder in game. Before the D4 fix the report showed neither a
+    COVERED row, a MISSING row nor a STALE line for any of them, because the
+    tool's whole universe was the sheets -- and the first two have no sheet at
+    all while the third is a rarity:status tokens.yaml row that the
+    rarity:token filter drops. "Art bill 0 missing" was true and wrong.
+
+    Asserted DERIVED, against the same subtraction the tool makes rather than
+    against the three names: when their picks land they move from MISSING to
+    covered, and the invariant that must not rot is that a shipped key is
+    ACCOUNTED FOR either way. A literal name list here would have to be edited
+    the day the art ships, which is the failure mode
+    `test_bill_is_derived_from_canonical_sheets` exists to prevent.
+    """
+    sys.path.insert(0, str(REPO / "tools"))
+    import art_coverage
+
+    sheet_ids = set()
+    for path, _outdir, _label in art_coverage.SHEETS:
+        rows = yaml.safe_load(path.read_text(encoding="utf-8"))
+        sheet_ids |= {r["id"] for r in rows if isinstance(r, dict) and "id" in r}
+    tokens = yaml.safe_load(
+        (REPO / "tier0" / "content" / "cards" / "tokens.yaml").read_text(encoding="utf-8"))
+    sheet_ids |= {r["id"] for r in tokens
+                  if isinstance(r, dict) and r.get("rarity") == "token"}
+
+    extras = [k for k in art_coverage.mod_art_keys() if k not in sheet_ids]
+    body = run_tool().stdout
+    for key in extras:
+        assert key in body, f"shipped art key {key} is invisible to the bill:\n{body}"
+    # Positive control on the accounting, not on the art: an unpainted extra
+    # belongs to the MISSING bill specifically. Vacuous only once every extra
+    # is painted, at which point the loop above is the whole invariant.
+    unpainted = [k for k in extras
+                 if not any((d / f"{k}.png").exists() for d in art_coverage.CARD_DIRS)]
+    missing_section = body.split("MISSING (the art bill)")[1].split("STALE")[0]
+    for key in unpainted:
+        assert key in missing_section, f"{key} has no art and is not billed"
+
+
 def test_bill_is_derived_from_canonical_sheets():
     """Every expected id traces to a canonical sheet -- no hardcoded inventory.
 
@@ -190,6 +265,21 @@ def test_bill_is_derived_from_canonical_sheets():
     tokens = yaml.safe_load(
         (REPO / "tier0" / "content" / "cards" / "tokens.yaml").read_text(encoding="utf-8"))
     expected += sum(1 for r in tokens if isinstance(r, dict) and r.get("rarity") == "token")
+    # D4's second universe, re-derived here the same way the sheet half is:
+    # the tool supplies the PATH, this test does its own scan. Shipped C# art
+    # keys the sheets do not expect are real expected outputs and must
+    # reconcile too -- they were the invisible three (EB-36).
+    sheet_ids = set()
+    for path, _outdir, _label in art_coverage.SHEETS:
+        rows = yaml.safe_load(path.read_text(encoding="utf-8"))
+        sheet_ids |= {r["id"] for r in rows if isinstance(r, dict) and "id" in r}
+    sheet_ids |= {r["id"] for r in tokens
+                  if isinstance(r, dict) and r.get("rarity") == "token"}
+    scanned = set()
+    for cs in (REPO / "klee-mod" / "KleeCode").rglob("*.cs"):
+        scanned |= set(re.findall(r'Art\.CardPortrait\("([a-z0-9_]+)"\)',
+                                  cs.read_text(encoding="utf-8")))
+    expected += len(scanned - sheet_ids)
 
     res = run_tool()
     line = [ln for ln in res.stdout.splitlines() if "TOTAL card-sized outputs expected" in ln]
