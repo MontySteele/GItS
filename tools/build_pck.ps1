@@ -170,6 +170,19 @@ if (-not (Test-Path $salonSrc)) { Note-Skip 'furina\salon' $salonSrc } else {
     if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
+# EB-53/N1 (the attribution pass): the Bake-Kurage entity for the end-of-turn
+# docket, cut by tools/cut_kurage_summon.py. Its own namespace rather than
+# kokomi\powers because it is a CREATURE on the field, not a status badge --
+# the same distinction furina\salon draws, and the reason it takes the same
+# shape of block.
+$kurageSrc = Join-Path $src 'kokomi\summon'
+if (-not (Test-Path $kurageSrc)) { Note-Skip 'kokomi\summon' $kurageSrc } else {
+    $to = Join-Path $work 'kokomi\summon'
+    New-Item -ItemType Directory -Force -Path $to | Out-Null
+    $files = Get-ChildItem $kurageSrc -Filter *.png -ErrorAction SilentlyContinue
+    if ($files) { Copy-Item $files.FullName -Destination $to }
+}
+
 # WORKING FILES MUST NOT SHIP. The still generators (gen_furina_stills.py,
 # gen_kokomi_stills.py) cache their governing render next to the outputs, in
 # model\, because that is where the source of truth for a character's framing

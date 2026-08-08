@@ -48,6 +48,8 @@ internal static class KleeSceneTelemetry
         "kokomi/ui/character_icon.tscn",
         "kokomi/ui/char_select_bg_kokomi.tscn",
         "shared/gauge.tscn",
+        // EB-53/N1: the end-of-turn attribution docket, shared across seats.
+        "shared/turn_end_docket.tscn",
         "klee/vfx/bomb_lob.tscn",
         "klee/vfx/dodoco_pop.tscn",
         "furina/vfx/spotlight_shine.tscn",
@@ -72,6 +74,9 @@ internal static class KleeSceneTelemetry
         ("furina/model/combat.tscn", "AnimationTree"),
         ("furina/ui/salon_stage.tscn", "RibbonLabel"),
         ("shared/gauge.tscn", "ValueLabel"),
+        // Without ChipLabel1 the docket renders slots with no numbers, which
+        // is the exact silent failure this table exists to make loud.
+        ("shared/turn_end_docket.tscn", "ChipLabel1"),
     };
 
     public static void LogStatus()

@@ -383,6 +383,7 @@ GENERATOR_OWNED = {
     "ImageGen/images/furina/salon/glyph_damage.png":        "gen_salon_glyphs.py",
     "ImageGen/images/furina/salon/glyph_block.png":         "gen_salon_glyphs.py",
     "ImageGen/images/furina/salon/glyph_support.png":       "gen_salon_glyphs.py",
+    "ImageGen/images/kokomi/summon/bake_kurage.png":        "cut_kurage_summon.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
 }

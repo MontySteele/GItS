@@ -3,7 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using MegaCrit.Sts2.Core.Combat;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 
@@ -43,6 +45,14 @@ namespace KleeMod.Powers;
 ///     oz_summon         (Electro volley)
 ///     kurage_summon     (Hydro pulse + Block)
 ///
+/// ...and as of EB-53/N1 it is written down exactly once, in
+/// <see cref="TurnEndAttribution.Order"/>, which this loop walks. The four
+/// hand-written statements that used to live here are now that table's
+/// <c>Resolve</c> delegates, lifted verbatim. The move is not tidying: the
+/// attribution display has to name these four in FIRING order, and a display
+/// built from a second hand-written list would be able to disagree with this
+/// one. Now it cannot, because there is no second list.
+///
 /// Per CREATURE, not per step: each player-side creature runs the whole
 /// sequence before the next one does. The sim models one seat, so it states
 /// nothing about interleaving between two co-op players; grouping by creature
@@ -74,33 +84,67 @@ public sealed class TurnEndSequencer : AbstractModel
         {
             if (creature.Player == null) continue;
 
-            // 1. Bond of Life, before anything can grant Block.
-            foreach (var masque in creature.Powers
-                         .OfType<MasqueRedDeathPower>().ToList())
+            foreach (var source in TurnEndAttribution.Order)
             {
-                await masque.PayBondOfLife();
+                // The docket slot for this source flashes as it fires, so an
+                // off-seat volley resolves on top of the widget that names it
+                // (EB-53/N1: "off-seat bursts are invisible inside end-of-turn
+                // noise"). Pure draw -- no state, no RNG -- so it takes no
+                // position in the race this class exists to settle, and a
+                // headless/co-op peer that renders nothing is unaffected.
+                Vfx.TurnEndPreviewBridge.NoteFiring(creature, source);
+                await source.Resolve(creature, choiceContext);
             }
+        }
 
-            // 2-4. Pyro -> Electro -> Hydro. ToList() each time: a volley can
-            // kill, and a power can remove itself on the tick-down, so the
-            // collection is re-read rather than held across an await.
-            foreach (var pyro in creature.Powers
-                         .OfType<SparksNSplashPower>().ToList())
-            {
-                await pyro.FireVolley(choiceContext);
-            }
+        // The volleys have spent their turn and ticked down; redraw before the
+        // player looks at the board again.
+        RefreshAll(participants);
+    }
 
-            foreach (var electro in creature.Powers
-                         .OfType<OzSummonPower>().ToList())
-            {
-                await electro.FireVolley(choiceContext);
-            }
+    /// <summary>
+    /// Redraw funnels for the attribution docket. All three are PURE redraws
+    /// with no stake in any ordering -- they read the same accessors the
+    /// resolution reads and write nothing -- so co-tenancy in these broadcasts
+    /// (WitchsFlamePower owns AfterSideTurnEnd's real work) is safe by
+    /// construction.
+    ///
+    /// They live on the sequencer rather than in a new hooks model because the
+    /// sequencer already owns the end-of-turn concept and is already
+    /// registered; a second AbstractModel would be one more subscription to
+    /// keep alive for a display.
+    ///
+    /// AfterCardPlayed is the one that matters: fielding a jellyfish, casting
+    /// a Burst and banking Charge all happen inside a play, and none of them
+    /// has a funnel this class could otherwise watch.
+    /// </summary>
+    public override Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        Vfx.TurnEndPreviewBridge.Refresh(cardPlay.Card?.Owner?.Creature);
+        return Task.CompletedTask;
+    }
 
-            foreach (var hydro in creature.Powers
-                         .OfType<KurageSummonPower>().ToList())
-            {
-                await hydro.FirePulse(choiceContext);
-            }
+    public override Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        Vfx.TurnEndPreviewBridge.Refresh(player.Creature);
+        return Task.CompletedTask;
+    }
+
+    public override Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side == CombatSide.Player) RefreshAll(participants);
+        return Task.CompletedTask;
+    }
+
+    private static void RefreshAll(IEnumerable<Creature> participants)
+    {
+        foreach (var creature in participants.ToList())
+        {
+            Vfx.TurnEndPreviewBridge.Refresh(creature);
         }
     }
 }

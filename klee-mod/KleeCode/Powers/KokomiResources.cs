@@ -194,6 +194,10 @@ public static class KokomiResources
         if (resource == null) return;
         resource.ModifyAmount(amount);
         Vfx.GaugeBridge.Refresh(creature!);
+        // EB-53/N1: Charge IS the Bake-Kurage pulse's variable, so the docket's
+        // pulse number moves on every gain. Same funnel and the same reason as
+        // the gauge above -- a display may not go stale behind a mutation.
+        Vfx.TurnEndPreviewBridge.Refresh(creature);
     }
 
     /// <summary>

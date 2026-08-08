@@ -97,6 +97,16 @@ In-game there is no CLI: `KleeMod.Initialize` is the only entry
   so callers degrade to base behaviour — `KleePck.cs:20-24,30-45`.
 - **Visuals read state, never own it**; cached node values are display-only, and
   bridges must be inert (not throw) when a node is absent — `Vfx/GaugeBridge.cs:34-38`.
+- **A preview reads the resolution's own accessor, never its own arithmetic.**
+  The three creature-tracked bridges (`Vfx/GaugeBridge.cs`,
+  `Vfx/SalonVisualsBridge.cs`, `Vfx/TurnEndPreviewBridge.cs`) all share
+  `Vfx/TrackedDisplayBridge.cs` and all print numbers computed by the code that
+  resolves them — `SalonMemberPower.TickValue`, `KurageSummonPower.PulseDamage`.
+  The end-of-turn docket goes one step further: the four sources it names ARE
+  `Powers/TurnEndAttribution.cs`'s `Order`, the same list `TurnEndSequencer`
+  walks, so the display cannot name them in an order they are not fired in
+  (EB-53/N1; pinned by `test_the_turn_end_sequence_is_the_sims_order` and
+  `test_the_sequencer_walks_the_table`).
 
 ## 4. Rulings that shaped it
 
