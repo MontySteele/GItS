@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
@@ -164,21 +165,30 @@ public static class KokomiRiderTips
     /// reward screen) there is no bank to read, so the rate stands alone
     /// rather than printing a misleading zero -- the FurinaRiderTips rule.
     /// </summary>
-    private static string PulseBody(CardModel card)
+    private static string PulseBody(CardModel card) =>
+        PulseBody(card.Owner?.Creature, inCombat: card.CombatState != null);
+
+    /// <summary>
+    /// Creature overload (EB-53/N1). The end-of-turn docket's Bake-Kurage slot
+    /// has no card to ask, and the copy MUST NOT FORK -- the same bargain
+    /// <see cref="SalonMemberTips"/> struck when the Salon stage started
+    /// hovering the member paragraphs the deploy cards print (D1 §4). One
+    /// paragraph, two surfaces.
+    /// </summary>
+    public static string PulseBody(Creature? owner, bool inCombat)
     {
         // R73/A2: in combat the rate is the AMPED one. Before Sun and Moon
         // raises the multiplier, and a tip that kept quoting the base would
         // understate the pulse by exactly the card the player just bought --
         // the drift the legibility sprint exists to prevent. Out of combat
         // there is no owner to read copies off, so the base rate stands.
-        var owner = card.Owner?.Creature;
         var perCharge = owner == null
             ? KokomiConstants.KuragePulsePerCharge
             : KurageSummonPower.PulseMultiplier(owner);
         var rate = $"The pulse deals {KokomiConstants.KuragePulseBase} damage "
                  + $"plus {perCharge} per "
                  + "[gold]Charge[/gold] you hold, at the END of your turn.";
-        if (owner == null || card.CombatState == null) return rate;
+        if (owner == null || !inCombat) return rate;
 
         var charge = KokomiResources.GetCharge(owner);
         return $"{rate} You hold {charge} Charge: the next pulse hits for "

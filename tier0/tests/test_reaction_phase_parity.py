@@ -789,6 +789,15 @@ CO_TENANCY_LEDGER = {
         ("Relics/UpgradedStarterRelics.cs", "ExplosiveFrags"):
             "turn-1-only opening Spark windfall (the sim's combat_start "
             "site)",
+        ("Powers/TurnEndSequencer.cs", "TurnEndSequencer"):
+            "EB-53/N1: redraws the end-of-turn attribution docket, nothing "
+            "else. It has NO stake in this broadcast's order because it "
+            "writes no game state at all -- it reads the same accessors the "
+            "resolution reads (KurageSummonPower.PulseDamage and the volley "
+            "constants) and pushes text into Godot nodes. Whatever order it "
+            "lands in relative to the mints above, the numbers it draws are "
+            "re-read on the next redraw; the sim has no counterpart because "
+            "there is nothing here to model",
     },
     "BeforeSideTurnEnd": {
         ("Powers/CompanionPowers.cs", "SolarIsotomaPower"):
@@ -814,8 +823,13 @@ CO_TENANCY_LEDGER = {
             "what the volleys applied): the Bond consumes the turn's first 5 "
             "Block while the Hydro pulse GRANTS Block, and the three volleys "
             "both pick which reactions fire and draw in sequence from the "
-            "shared Rng.CombatTargets stream. See "
-            "test_the_turn_end_sequence_is_the_sims_order",
+            "shared Rng.CombatTargets stream. The four steps are now the "
+            "Resolve delegates of TurnEndAttribution.Order and this tenant "
+            "WALKS that table (EB-53/N1) -- the order is written down once so "
+            "the end-of-turn attribution docket cannot name the four in an "
+            "order they are not fired in. See "
+            "test_the_turn_end_sequence_is_the_sims_order and "
+            "test_the_sequencer_walks_the_table",
     },
     "AfterSideTurnEnd": {
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
@@ -854,6 +868,14 @@ CO_TENANCY_LEDGER = {
             "self-expiry of a this-turn Spotlight bonus",
         ("Powers/SpotlightSystem.cs", "SpotlightFlatDamageTurnPower"):
             "self-expiry of a this-turn Spotlight bonus",
+        ("Powers/TurnEndSequencer.cs", "TurnEndSequencer"):
+            "EB-53/N1: redraws the attribution docket after the volleys have "
+            "fired and ticked down, so the numbers the player looks at next "
+            "are the new ones. Pure draw, writes no game state, reads only "
+            "accessors the resolution already called -- so it shares nothing "
+            "with WitchsFlamePower's aura consumption or the this-turn "
+            "expiries in this broadcast, and has no position to defend in "
+            "their order",
     },
 }
 
@@ -971,6 +993,25 @@ def _sequencer_body() -> str:
         r"public\s+override\s+async\s+Task\s+BeforeSideTurnEnd\s*\(")
 
 
+def _order_table() -> str:
+    """The ordered table itself (EB-53/N1).
+
+    The four calls used to sit in the sequencer's own body, and this gate read
+    that body. They moved into `TurnEndAttribution.Order` when the end-of-turn
+    attribution docket landed, because the display has to NAME the four in
+    firing order and a display built from a second hand-written list would be
+    able to disagree with the resolution. Reading the table is reading the
+    single source both halves now use, so the gate got STRONGER rather than
+    looser: it now pins the order the player is shown as well as the order
+    that fires. test_the_sequencer_walks_the_table below is the other half.
+    """
+    text = (SOURCE / "Powers" / "TurnEndAttribution.cs").read_text(
+        encoding="utf-8")
+    start = text.index("Order = new TurnEndSource[]")
+    end = text.index("public static IReadOnlyList<TurnEndSource> Standing")
+    return text[start:end]
+
+
 def test_the_turn_end_sequence_is_the_sims_order():
     """Bond -> Pyro -> Electro -> Hydro, top to bottom.
 
@@ -980,16 +1021,35 @@ def test_the_turn_end_sequence_is_the_sims_order():
     in SOME order on any given replay. Only the source can say the order is
     guaranteed.
     """
-    body = _sequencer_body()
+    body = _order_table()
     positions = []
     for token, why in TURN_END_SEQUENCE:
-        assert token in body, f"TurnEndSequencer no longer fires {token}: {why}"
+        assert token in body, (
+            f"TurnEndAttribution.Order no longer fires {token}: {why}")
         positions.append(body.index(token))
     assert positions == sorted(positions), (
-        "TurnEndSequencer reordered. The sim's order is "
+        "TurnEndAttribution.Order reordered. The sim's order is "
         + " -> ".join(t for t, _ in TURN_END_SEQUENCE)
         + " (tier0/engine/effects.py player_turn_end_triggers, read top to "
         "bottom).")
+
+
+def test_the_sequencer_walks_the_table():
+    """The order table is only law if the sequencer actually reads it.
+
+    Without this, a future edit could leave TurnEndAttribution.Order correct
+    (and the gate above green) while the sequencer went back to four
+    hand-written statements -- which is exactly the arrangement that let the
+    display and the resolution drift apart in the first place.
+    """
+    body = _sequencer_body()
+    assert "TurnEndAttribution.Order" in body, (
+        "TurnEndSequencer stopped walking TurnEndAttribution.Order. The order "
+        "is defined there ONCE so the attribution docket and the resolution "
+        "cannot disagree; a hand-written sequence here re-opens that gap.")
+    assert "source.Resolve" in body, (
+        "TurnEndSequencer iterates the table but no longer resolves through "
+        "it. Each entry's Resolve delegate IS the step it fires.")
 
 
 @pytest.mark.parametrize("rel,cls", [

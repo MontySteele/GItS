@@ -284,6 +284,23 @@ UNMIRRORED: dict[str, str] = {
     "SalonVisualsBridge.SlotSpacingMax":
         "presentation: the shipped three-slot pitch in pixels, kept as the "
         "maximum gap so a cap raise tightens the row instead of widening it.",
+    # EB-53/N1, the end-of-turn attribution docket. The whole widget is a
+    # READ: every number it prints comes from the accessor the resolution
+    # itself calls (KurageSummonPower.PulseDamage, KitBurstConstants.*,
+    # CompanionConstants.*), and those are classified above where they live.
+    # What is left here is geometry, and geometry has no sim counterpart --
+    # the same classification the two sibling bridges carry.
+    "TurnEndPreviewBridge.SceneSlots":
+        "presentation: how many slot nodes shared/turn_end_docket.tscn ships. "
+        "The RULE is the length of TurnEndAttribution.Order, which IS the "
+        "sim's player_turn_end_triggers sequence; this is the ceiling on what "
+        "the scene can draw, and the bridge logs the excess rather than "
+        "hiding it.",
+    "TurnEndPreviewBridge.SlotSpacing":
+        "presentation: docket slot pitch in pixels.",
+    "TurnEndPreviewBridge.SpriteScaleMax":
+        "presentation: the largest scale a docket entity is drawn at. A "
+        "rendering ratio; the sim has no sprites.",
 }
 
 CLASS_RE = re.compile(

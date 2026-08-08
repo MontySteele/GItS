@@ -49,6 +49,9 @@ core is suite-gated on synthetic fixtures
 `art_process.py`, `art_hunt.py`, `art_contact_sheet.py`,
 `gen_kokomi_stills.py` (NO byte-pin twin, unlike Furina's),
 `gen_transition_wipe.py`, `cut_combat_layers.py`, `cut_salon_members.py`,
+`cut_kurage_summon.py` (the Bake-Kurage field entity for the end-of-turn
+docket; hand polygon and `--check` twin, same shape as `cut_salon_members.py`,
+and its out-path is registered in `art_lint.py`'s L11 producer table),
 `encounter_audit.py`, `pilot_error_audit.py`, `measure_realistic_act1.py`,
 `dump_claimed_sources.py` (owns the committed
 `docs/art-claimed-sources.tsv`; regenerate after any plan.tsv change —

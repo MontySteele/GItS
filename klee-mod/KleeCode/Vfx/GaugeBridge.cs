@@ -421,6 +421,10 @@ internal static class NCombatUi_Activate_GaugeSetup
         {
             GaugeBridge.Setup(combatRoom, player);
             SalonVisualsBridge.Setup(combatRoom, player);
+            // EB-53/N1. EVERY seat, not only the local one -- the whole point
+            // of the docket is that a partner's end of turn is legible, and
+            // state.Players is already the all-seats enumeration.
+            TurnEndPreviewBridge.Setup(combatRoom, player);
         }
     }
 }
