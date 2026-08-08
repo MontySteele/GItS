@@ -39,7 +39,10 @@
    effects: [{op: block, amount: 4}, {op: block_next_turn, amount: 4}]}
    # REDESIGNED per healing-policy tightening (heal = Rare AND Exhaust; sub-Rare sustain = Block only).
    # Pre-emptive block: 4 now + 4 at start of next turn — sustain-over-time identity without true healing.
-   # Named for her actual passive. NEW OP: block_next_turn. Spotlighted in a Furina deck the empowered
+   # "Enduring Frosthelm" is authored flavor, NOT a canon talent — her passives are Moment of Impact /
+   # Diversified Investigation / First-Person Shutter. The title is a [USER] call (QUEUE N3+N4); this
+   # comment only stops the sheet from attesting a talent that does not exist.
+   # NEW OP: block_next_turn. Spotlighted in a Furina deck the empowered
    # block is still Encore-adjacent tempo; the quiet synergy survives the conversion.
 - {id: charlotte_snappy_silhouette, name: "Charlotte — Snappy Silhouette", star: 4, rarity: uncommon, role_c: buffer, element: cryo, cost: 1, type: skill,
    effects: [{op: apply_power, power: vulnerable, amount: 2, target: enemy}, {op: draw, amount: 1}]}
