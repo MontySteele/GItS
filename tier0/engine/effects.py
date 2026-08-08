@@ -401,20 +401,26 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
         state.player.block += C.SOLAR_ISOTOMA_BLOCK
     was_frozen = enemy.frozen > 0   # snapshot: a hit can't shatter the
     dmg = powers.modify_damage_dealt(state.player, base)  # freeze it applies
+    unamped = dmg                   # EB-57: the pre-amplifier counterfactual
+    log_mark = len(state.log)
     dmg = reactions.resolve_hit(state, enemy, element, dmg)
+    amped = dmg != unamped
+    from_card = source in ("card", "attack")
     # `source` names what dealt it; "card" and "attack" are the two card
     # sources, everything else (bombs, summon pulses, shatter, splash) is
     # the base game's `cardSource == null` case.
-    dmg = powers.modify_damage_taken(enemy, dmg,
-                                     from_card=source in ("card", "attack"))
+    dmg = powers.modify_damage_taken(enemy, dmg, from_card=from_card)
     # Slow (§10.9 promotion): +N% damage from Attacks per card played this
     # turn. cards_played_this_turn increments at play, BEFORE resolution, so
     # the attacking card counts itself -- the base-game trigger order.
-    if enemy.slow and source == "attack":
-        dmg *= 1 + enemy.slow * state.cards_played_this_turn / 100.0
+    slow_mult = (1 + enemy.slow * state.cards_played_this_turn / 100.0
+                 if enemy.slow and source == "attack" else 1.0)
+    if slow_mult != 1.0:
+        dmg *= slow_mult
     dmg = int(dmg)
     if base > 0 and dmg > base * C.AMP_STACK_LIMIT:
         state.emit("amp_stack_warning", base=base, final=dmg, target=enemy.name)
+    block_before, hp_before = enemy.block, enemy.hp
     blocked = min(enemy.block, dmg)
     enemy.block -= blocked
     hp_dmg = dmg - blocked
@@ -423,6 +429,27 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     enemy.hp -= hp_dmg
     state.emit("damage", target=enemy.name, amount=effective, blocked=blocked,
                base=base, source=source)
+    if amped:
+        # EB-57: the amp counter is settled HERE, not at the moment the aura
+        # was consumed. `reactions._react` can only see `out - damage`, which
+        # sits ABOVE every multiplier that scales the amplified hit
+        # (Vulnerable/Cruelty/DoubleDamage via modify_damage_taken, the Slow
+        # term) and above block and the overkill clamp -- so an amped hit into
+        # a Vulnerable body under-reported its own uplift, and Superconduct
+        # applies Vulnerable, so reaction decks manufactured that under-read.
+        # The honest quantity is REALIZED uplift: run the unamplified hit
+        # through the identical downstream chain against the SAME pre-hit
+        # block and HP, and report the difference in damage that actually
+        # landed. An amp whose whole contribution was overkill (or eaten by
+        # block) therefore reports 0, which is the same clamp `_splash` and
+        # the `damage` emit already use.
+        un = powers.modify_damage_taken(enemy, unamped, from_card=from_card)
+        if slow_mult != 1.0:
+            un *= slow_mult
+        un = int(un)
+        un_hp = un - min(block_before, un)
+        realized = effective - min(un_hp, max(0, hp_before))
+        reactions.settle_amp_delta(state, log_mark, realized)
     # Frozen v2 Shatter (v1.5): the first Attack hit on a frozen enemy
     # deals bonus damage and removes Frozen. Direct HP, like splash.
     if was_frozen and enemy.frozen > 0 and source == "attack" and enemy.alive:

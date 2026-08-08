@@ -64,17 +64,31 @@ class FightStats:
     # THREE ways a reaction puts damage on the board, kept apart because they
     # are not the same claim and a future session will want to say which one it
     # is talking about:
-    #   amp    -- the Vaporize/Melt multiplier's DELTA over the unamplified hit
-    #             (the base hit is a base op's damage; only the uplift is the
-    #             reaction's), read off the `reaction` event's amp_delta;
+    #   amp    -- the Vaporize/Melt multiplier's REALIZED DELTA over the
+    #             unamplified hit (the base hit is a base op's damage; only the
+    #             uplift is the reaction's), read off the `reaction` event's
+    #             amp_delta. EB-57: that key is settled at the BOTTOM of
+    #             effects.deal_damage_to_enemy, so it carries every multiplier
+    #             that scales the amplified hit (Vulnerable/Cruelty/
+    #             DoubleDamage, Slow) and is clamped by block and by overkill
+    #             exactly like the `damage` emit -- an amp that only added
+    #             overkill reports 0. It was previously sampled at the moment
+    #             the aura was consumed, i.e. ABOVE all of that, which
+    #             OVER-read on overkill and blocked hits and UNDER-read on
+    #             every hit into a Vulnerable body (and Superconduct applies
+    #             Vulnerable). Reads taken before that fix are not comparable;
     #   splash -- Overload's explosion, overkill-clamped at the emit site;
     #   dot    -- Electro-Charged's DoT ticking on an ENEMY. This one is NOT
     #             inside total_damage_dealt: dot_tick is not a `damage` event,
     #             so the denominator has to be widened for it -- see
     #             damage_all_ops.
-    # `reaction_damage` above is amp + splash and keeps its exact pre-instrument
-    # value: it feeds the ratified A6 axis and summarize()'s
-    # reaction_damage_share, and this track moves no number that anything reads.
+    # `reaction_damage` above is amp + splash and feeds summarize()'s
+    # reaction_damage_share. Track D itself moved no number; EB-57 does -- the
+    # amp term is now the realized uplift, so `reaction_damage` and
+    # `reaction_damage_share` are not comparable across that fix. `axes.raw`
+    # reads none of these (A6 is swarm DPT + debuff stacks + aura_intents), so
+    # the ratified A6 scores and the ref_ironclad/starter = 3.00 anchor are
+    # untouched by it.
     reaction_damage_amp: int = 0
     reaction_damage_splash: int = 0
     reaction_damage_dot: int = 0
