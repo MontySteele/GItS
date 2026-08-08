@@ -113,7 +113,8 @@ def build(out_dir):
         print(f"  {name:12s} {sprite.width:3d}x{sprite.height:3d}  "
               f"fill {opaque * 100:.0f}%")
     (out_dir / "members.json").write_text(
-        json.dumps({"target_h": TARGET_H, "members": meta}, indent=2))
+        json.dumps({"target_h": TARGET_H, "members": meta}, indent=2),
+        encoding="utf-8")
     return meta
 
 

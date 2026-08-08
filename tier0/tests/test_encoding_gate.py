@@ -15,56 +15,33 @@ could have caught it -- there was no gate, and CI runs the platform that
 works.
 
 The content path (tier0/content/, tier05/ pool loaders, both CSV writers) was
-fixed at ratification. What remains is curated below as DEBT, not as a pass:
-tools and tests that read .cs/.tsv/.ps1 fixtures, where the same class is
-live but the blast radius is one script rather than every consumer of the
-card index.
+fixed at ratification, and the remaining debt -- tools and tests reading
+.cs/.tsv/.ps1/.yaml fixtures -- was paid off in full on 2026-08-08. DEBT is
+now empty and the tests below hold it there.
 """
 from tools import lint_text_encoding as lint
 
-# Undeclared text read/write calls per file at ratification. Counts, not line
-# numbers, so ordinary edits above an offence do not churn this list -- but a
-# NEW offence in an already-listed file still trips the gate, because it
-# pushes the count above the recorded one.
+# Undeclared text read/write calls per file. Counts, not line numbers, so
+# ordinary edits above an offence do not churn this list -- but a NEW offence
+# in an already-listed file still trips the gate, because it pushes the count
+# above the recorded one.
 #
 # An entry here is DEBT. Work it off by adding `encoding="utf-8"` and lowering
 # the number; the staleness test below forces that edit, so this list can only
 # shrink.
 #
-# RECOUNTED 2026-07-29. TWENTY of these were never offences at all. The `open`
-# arm keyed on
-# the attribute NAME, so every `Image.open(...)` in the repo -- a binary decoder
-# with no `encoding=` parameter to declare -- counted as an undeclared text
-# read. The tooling-hardening sprint (2026-07-29) exempted image opens, which
-# is why four files leave the list entirely and four more drop their counts.
-# That miscount was not cosmetic: the gate compares a per-file COUNT, so
-# `tools/art_lint.py: 2` was a live allowance for two REAL bare `open()` calls
-# to hide behind, on the file this sprint was editing.
-DEBT: dict[str, int] = {
-    "tier0/tests/test_extract_base_game_pool.py": 11,
-    "tier0/tests/test_ironclad_upgrades.py": 1,
-    "tier0/tests/test_measurement_world_digest.py": 8,
-    "tier0/tests/test_real_ironclad.py": 1,
-    "tier0/tests/test_real_silent.py": 1,
-    "tier0/tests/test_roster_runtime_contracts.py": 10,
-    "tier0/tests/test_upgrades.py": 1,
-    "tools/art_process.py": 3,           # was 8; 5 were Image.open
-    "tools/build_official_sheet.py": 10,
-    "tools/cut_combat_layers.py": 2,     # was 3
-    "tools/cut_salon_members.py": 1,     # was 2
-    "tools/extract_base_game_pool.py": 7,
-    "tools/lint_furina_registers.py": 1,
-    "tools/lint_kokomi_decksize.py": 1,
-    # LEFT THE LIST ENTIRELY, all four because every entry they carried was an
-    # Image.open: tools/archive/autocrop_card_art.py (1), tools/art_lint.py (2),
-    # tools/gen_furina_stills.py (2), tools/gen_kokomi_stills.py (2).
-    #
-    # tools/lint_unique_names.py was here at 1 and is a REAL payoff: sprint
-    # item 6 turned `yaml.safe_load(open(path))` into the standard
-    # `with open(path, encoding="utf-8")`. Removed rather than lowered to 0 --
-    # test_debt_list_is_not_stale forces the deletion, and a zero entry is an
-    # allowance for the next offence in the file.
-}
+# It is empty, and that is the end state, not a starting one. Two clean-ups
+# got it here. RECOUNTED 2026-07-29: twenty entries were never offences at all
+# -- the `open` arm keyed on the attribute NAME, so every `Image.open(...)`, a
+# binary decoder with no `encoding=` parameter to declare, counted as an
+# undeclared text read; exempting them dropped four files off the list
+# entirely. That miscount was not cosmetic, because the gate compares a
+# per-file COUNT: `tools/art_lint.py: 2` was a live allowance for two REAL
+# bare `open()` calls to hide behind. PAID 2026-08-08: the surviving 58 calls
+# across 14 files all took `encoding="utf-8"`, so the list empties rather than
+# zeroing out -- a zero entry is an allowance for the next offence in the
+# file, which is why `test_debt_list_is_not_stale` forces deletion instead.
+DEBT: dict[str, int] = {}
 
 
 def test_no_new_undeclared_encodings():

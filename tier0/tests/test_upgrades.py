@@ -27,7 +27,7 @@ def test_no_inline_upgrades_on_docs_sheets():
         path = loader.DOCS_DIR / sheet
         if not path.exists():
             continue
-        rows = yaml.safe_load(path.read_text())
+        rows = yaml.safe_load(path.read_text(encoding="utf-8"))
         inline = [d["id"] for d in rows if "upgrade" in d]
         assert not inline, (
             f"{sheet}: inline `upgrade:` on {inline} — R20 rules these "
