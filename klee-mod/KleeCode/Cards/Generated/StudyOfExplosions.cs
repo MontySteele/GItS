@@ -40,12 +40,13 @@ public sealed class StudyOfExplosions : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Study of Explosions"),
-        ("description", "Look at the top 2 cards of your draw pile; discard one. Gain {BurstEnergy:diff()} [gold]Burst Energy[/gold]."),
+        ("description", "Deal {Damage:diff()} damage to a random enemy. Gain {BurstEnergy:diff()} [gold]Burst Energy[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new DamageVar(4m, ValueProp.Move),
             new DynamicVar("BurstEnergy", 5m)
         };
 
@@ -53,22 +54,17 @@ public sealed class StudyOfExplosions : CustomCardModel, ISkillTagCard
     // GenerateAllCards. BaseLib's auto-registration would need a [Pool]
     // attribute and would register every card a second time.
     public StudyOfExplosions()
-        : base(0, CardType.Skill, CardRarity.Common, TargetType.Self, autoAdd: false)
+        : base(0, CardType.Skill, CardRarity.Common, TargetType.AllEnemies, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        {
-            var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take(2).ToList();
-            if (top != null && top.Count > 0)
-            {
-                var scryPick = (await CardSelectCmd.FromSimpleGrid(
-                    choiceContext, top, Owner,
-                    new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 1))).ToList();
-                await CardCmd.Discard(choiceContext, scryPick);
-            }
-        }
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+            .FromCard(this)
+            .TargetingRandomOpponents(CombatState!)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .Execute(choiceContext);
         await KleeBurstResource.Gain(choiceContext, Owner.Creature, DynamicVars["BurstEnergy"].IntValue, this);
     }
 

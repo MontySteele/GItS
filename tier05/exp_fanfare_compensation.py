@@ -59,7 +59,6 @@ NEW_READERS: tuple[tuple[str, int], ...] = (
     ("held_breath", 4),
     ("suffering_for_art", 4),
     ("hearts_swelling", 4),
-    ("aria_of_recompense", 4),
 )
 
 _CACHE: list | None = None

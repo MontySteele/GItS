@@ -257,16 +257,23 @@ def test_every_meter_declares_bounded_or_unbounded_with_its_cap_from_constants()
 
 
 def test_meter_reading_damage_is_scaling_and_frontload_only_if_it_pays_at_zero():
-    """R91/2c, COUNTERSIGNED AS WRITTEN, on the sheets' own cards.
+    """R91/2c, COUNTERSIGNED AS WRITTEN, on the sheets' own cards — read
+    through the PRINTED FLOOR (L4q / R129, 2026-08-07).
 
     `applause_line` deals a printed number and adds a Fanfare term, so it is
-    both. `pearl_barrage` deals only `N per exhausted card`, so at an empty
-    pile it deals nothing and is scaling ONLY. If this ever inverts, 19 cards
-    of tagging inverted with it and the lint is measuring a different pool.
+    both. `pearl_barrage` prints `5 + 1 per exhausted card`: the v0.3 base
+    raise (3 -> 5, "the floor must be playable before the pile exists") gave
+    it a floor AFTER this test's original sentence was written, so the old
+    premise -- "deals nothing at an empty pile" -- had gone stale against the
+    shipped sheet. R129 adopts `effect_walk.printed_floor`: `amount: 5` and
+    `amount_formula: {base: 5, ...}` are the same promise to the player, so
+    the three kokomi pile-readers that print a base are both. What stays
+    scaling-ONLY is a line with no printed floor at all: `the_final_verdict`.
     """
-    both = {"furina": ["applause_line"], "kokomi": ["read_the_current"]}
-    scaling_only = {"kokomi": ["pearl_barrage", "depths_judgment", "undertow"],
-                    "furina": ["the_final_verdict"]}
+    both = {"furina": ["applause_line"],
+            "kokomi": ["read_the_current", "pearl_barrage", "depths_judgment",
+                       "undertow"]}
+    scaling_only = {"furina": ["the_final_verdict"]}
     for character, path in rt.SHEETS.items():
         rows = rt.load_rows(path)
         scans, _ = rt.classify_pool(rows, character)

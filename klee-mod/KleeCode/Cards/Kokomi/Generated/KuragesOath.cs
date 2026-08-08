@@ -41,13 +41,13 @@ public sealed class KuragesOath : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage's Oath"),
-        ("description", "Each [gold]Bake-Kurage[/gold] pulse also grants 12 Block."),
+        ("description", "Each [gold]Bake-Kurage[/gold] pulse also grants {PowerAmount:diff()} Block."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -59,11 +59,11 @@ public sealed class KuragesOath : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<KurageWardPower>(choiceContext, Owner.Creature, 12, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<KurageWardPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
     }
 }

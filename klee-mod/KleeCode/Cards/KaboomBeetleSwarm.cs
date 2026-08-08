@@ -42,18 +42,16 @@ public sealed class KaboomBeetleSwarm : CustomCardModel, IElementalCard
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("kaboom_beetle_swarm");
 
-    // WORDING FLAGGED FOR [USER] (R72 item 4, 2026-07-26), deliberately NOT
-    // changed here: "Bombed enemies take ... more per hit" reads as live
-    // state, and under the snapshot the enemy stops being Bombed after hit 1
-    // while still paying the bonus on hits 2-3. The sheet is ratified, so the
-    // rewording is a red-pen call, not an executor's; queued in
-    // docs/archive/open-playtest-items.md 6.2.
+    // COUNTERSIGNED (R132, 2026-08-07): the snapshot-at-cast wording is
+    // approved. The old face read as live state -- under the snapshot the
+    // enemy stops being Bombed after hit 1 while still paying the bonus on
+    // hits 2-3 -- and "when this is cast" says which reading is real.
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaboom Beetle Swarm"),
         ("description",
             "Deal {Damage:diff()} damage to random enemies 3 times. "
-          + "[gold]Bombed[/gold] enemies take {ExtraDamage:diff()} more per hit."),
+          + "Enemies [gold]Bombed[/gold] when this is cast take {ExtraDamage:diff()} more per hit."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

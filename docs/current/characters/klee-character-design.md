@@ -2,7 +2,7 @@
 
 > **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
-**Files:** `klee-cards.yaml` (75-card pool), `mondstadt-companions.yaml` (16 companion cards). Governed by `teyvat-spire-design-principles.md`; tested per `tier0-simulator-spec.md`.
+**Files:** `klee-cards.yaml` (76-card pool), `mondstadt-companions.yaml` (17 companion cards). Governed by `teyvat-spire-design-principles.md`; tested per `tier0-simulator-spec.md`.
 
 ## 1. Identity
 The Spark Knight. Pyro, **catalyst-grade cadence** (every attack applies Pyro — maximum reaction fuel, so base numbers run low). Delayed explosives, random targeting, gleeful fragility. She enables any reaction instantly and can trigger none alone.

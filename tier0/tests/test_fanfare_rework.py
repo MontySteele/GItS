@@ -329,6 +329,47 @@ def test_the_bow_probe_fires_every_bow_rider():
     assert p.block >= 5                        # rider + usher's own bow block
 
 
+def test_the_upgraded_bow_probe_bows_TWICE():
+    """R130 (2026-08-07) overrode Track D's upgrade: the Encore rider became
+    `repeat_this`, so `take_your_bow+` is the second bow the original comment
+    argued against. The ruling's reason is the Dualcast comparison -- the
+    Defect starter buys a double payoff for 1(0) energy, and a cost-0 uncommon
+    whose upgrade prints 3 Encore is not in that conversation.
+
+    Asserted on a DISTINCT stage: the repeat re-resolves the effect list minus
+    `repeat_this`, so the second `salon_bow` pops the NEW leftmost rather than
+    re-bowing the member the first pass already took off the stage.
+    """
+    st = furina_state()
+    p = st.player
+    p.salon = ["chevalmarin", "usher", "crabaletta"]
+    p.powers["salon_member"] = 3
+    p.encore = 0
+
+    effects.resolve_card(st, loader.get_card("take_your_bow+"))
+
+    assert p.salon == ["crabaletta"]               # two members left, in order
+    assert p.powers["salon_member"] == 1
+    # Chevalmarin's Encore AND the usher's own bow block: two DIFFERENT
+    # members' unique payoffs fired, which is what "twice" has to mean.
+    assert p.encore == C.SALON_MEMBERS["chevalmarin"]["bow"]["encore"]
+    assert p.block == C.SALON_MEMBERS["usher"]["bow"]["block"]
+
+
+def test_the_upgraded_bow_probe_is_still_inert_on_an_empty_stage():
+    """A repeat of a no-op is a no-op. The upgraded form must not raise on the
+    second pass either -- `salon_bow` breaks on the empty queue both times."""
+    st = furina_state()
+    st.player.salon = []
+    st.player.powers["salon_member"] = 0
+
+    effects.resolve_card(st, loader.get_card("take_your_bow+"))
+
+    assert st.player.salon == []
+    assert st.player.powers["salon_member"] == 0
+    assert st.player.encore == 0
+
+
 def test_the_bow_probe_stops_at_an_empty_stage_rather_than_over_bowing():
     """`amount` is a count of bows, not a demand. A three-bow card on a
     one-member stage takes one bow -- the loop breaks rather than popping

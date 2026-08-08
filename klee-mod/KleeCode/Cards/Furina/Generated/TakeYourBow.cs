@@ -41,7 +41,7 @@ public sealed class TakeYourBow : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Take Your Bow"),
-        ("description", "The leftmost member of your [gold]Salon[/gold] takes their bow. {IfUpgraded:show:Gain 3 [gold]Encore[/gold].|}"),
+        ("description", "The leftmost member of your [gold]Salon[/gold] takes their bow. {IfUpgraded:show:Play this card again.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -62,12 +62,15 @@ public sealed class TakeYourBow : CustomCardModel, ICharacterCard
         await SalonMemberPower.BowLeftmost(choiceContext, Owner.Creature, 1);
         if (IsUpgraded)
         {
-            FurinaResources.GainEncore(Owner.Creature, 3);
+            for (var r = 0; r < 1; r++)
+            {
+                await SalonMemberPower.BowLeftmost(choiceContext, Owner.Creature, 1);
+            }
         }
     }
 
     protected override void OnUpgrade()
     {
-        // add: gain_encore -- expressed at play time as an IsUpgraded-gated effect appended after the base effects.
+        // add: repeat_this -- expressed at play time as an IsUpgraded-gated replay of the base effects (sim resolve_card).
     }
 }

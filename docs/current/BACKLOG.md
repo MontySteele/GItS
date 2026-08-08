@@ -39,12 +39,14 @@
 |---|---|---|
 | `EB-1` | **Punch Off crash** (reclassified GAME-SIDE/SPINE-SIDE) — the animation stream keeps the watch; not done while seed `8B97LMCL2F` crashes in Punch Off | eng-backlog §1 |
 | `EB-14` | `selectors` is bot-feed only — a mod-side hook into the selection screens is the open item | eng-backlog §2 |
+| `EB-47` | **Windows compile validation of the 2026-08-07 sitting's C#** — five regenerated cards (`AriaOfRecompense` reverted to pure Encore; `TakeYourBow` gained the first upgrade-added `repeat_this` emission; `KuragesOath` gained a `PowerAmount` var where it had none; `StudyOfExplosions` and `SecretStash` gained damage bodies and `TargetType` changes) plus the hand-written `KaboomBeetleSwarm` description string. All were generated/edited on macOS where the mod cannot build; nothing here is compile-verified | R130–R132 |
 
 ## tools — codegen, lint, scripts, refactors
 
 | ID | Item | Provenance |
 |---|---|---|
 | `EB-41` | Refactors, only if budget remains (big, safe, boring): `run_one` 518-line split; codegen driver unification (F3); telemetry-module template dedupe; `exp_*` script archive move; `apply_upgrade` op-coverage guard | eng-backlog §7 |
+| `EB-48` | Two Furina experiment scripts read the DELETED fanfare constants and now die on import-time attribute access: `tier05/exp_furina_strength.py:476-477,503,631-632,733` and `tier05/exp_furina_parity_trace.py:125` reference `C.FANFARE_FLOOR_PER_POWER(_RARE)`, deleted by the 2026-07-28 Fanfare rework (`tier0/constants.py:248-256` records the deletion) — `AttributeError` on today's constants, and the S6 cell's thesis describes the deleted invisible-rule world. Fix or move to `tools/archive/` before any `S4-G7` re-measure runs into them | staleness audit 2026-08-07 |
 
 ## tests — pins & filed-not-fixed
 

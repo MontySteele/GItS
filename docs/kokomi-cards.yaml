@@ -215,28 +215,33 @@
    # damage plays, and the plain swing meets Klee's 7 instead of undercutting it. (lint-ok: Klee comp)
 
 - {id: kurages_oath, name: "Kurage's Oath", cost: 1, type: power, rarity: common, solve: [block, frontload, scaling], tempo_band: {fight: [late], run: [early, late]}, archetypes: [priest, generic], role: payoff,
-   effects: [{op: apply_power, power: kurage_ward, amount: 12, target: self}]}
+   effects: [{op: apply_power, power: kurage_ward, amount: 5, target: self}]}
    # v0.4 ([USER]): the jellyfish's canon SECOND job. Bake-Kurage in the game deals Hydro DMG *and heals nearby
    # characters at set intervals* — the pulse ships the damage half baseline, and this power drafts the mending
    # half back in as Block (R52 healing law: her HP bar never moves, the incoming does). While it holds, every
-   # Kurage pulse also grants 12 Block. Priced off the Regent precedent [USER] named: a 2-cost power paying 13 (lint-ok: Regent precedent's number)
-   # Block per 2-cost finisher play. Hers triggers off a 1-cost summon, and the summon only pulses once
-   # per play at KURAGE_DURATION 1 — so the honest read is "12 Block per Bake-Kurage", doubled once the summon
-   # is upgraded to two turns.
+   # Kurage pulse also grants 5 Block (7 upgraded). Priced off the Regent precedent [USER] named: a 2-cost (lint-ok: Regent precedent's number)
+   # power paying 13 Block per 2-cost finisher play. Hers triggers off a 1-cost summon, and the summon only (lint-ok: Regent precedent's number)
+   # pulses once per play at KURAGE_DURATION 1 — so the honest read is "5 Block per Bake-Kurage", doubled
+   # once the summon is upgraded to two turns.
    # COUPLING PIN (playtest sprint P1). This card's value is (ward x pulses per play), and it owns only the
    # first factor. The second lives in KURAGE_DURATION (1) and the bake_kurage `kurage_turns: +1` delta —
    # both outside this row, neither guarded by this card's own tests. Moving either reprices the Oath without
    # touching it. `test_oath_ward_is_pinned_to_the_pulse_frequency_it_was_measured_at` fails if that is
    # attempted silently: re-measure at the new frequency, then move the pin and this note in the same change.
-   # THE NUMBER IS 12, MEASURED, NOT REASONED. The first draft was 5, priced by ratio off Regent (13 Block off a (lint-ok: ward-bracket measurement)
+   # THE MEASURED HISTORY, ON THE RECORD. The first draft was 5, priced by ratio off Regent (13 Block off a (lint-ok: ward-bracket measurement)
    # 2-cost finisher, so ~5 off a 1-cost summon). That measured as a TRAP PICK — priest run winrate 5.8% with no (lint-ok: ward-bracket measurement)
    # card at all vs 3.8% with it, i.e. drafting it made her worse. Bracket at 500 runs/plan --realistic: (lint-ok: run count + winrates)
    # ward 5 -> priest 3.8% / commander 5.4%; ward 8 -> 4.8% / 5.8%; ward 12 -> 6.2% / 5.8% (no-card baseline (lint-ok: ward-bracket measurement)
-   # 5.8% / 6.0%). The ratio had to go UP for the cheaper trigger, not down: Regent's finisher gets played (lint-ok: ward-bracket winrates)
-   # reliably, while Bake-Kurage is ONE copy in a growing deck that pulses ONCE per play at duration 1. Correct
-   # for frequency and you land back on essentially the Regent number.
-   # [USER] WATCHLIST (2026-07-26): "I feel like that's too strong, but we can rebalance later." Shipped at 12
-   # with that flag ON THE RECORD — first knob back if the priest lane runs hot in a later pass.
+   # 5.8% / 6.0%). That bracket landed 12, and it is why the card shipped at 12. (lint-ok: ward-bracket winrates)
+   # R130 OVERRIDES IT TO 5 (7 upgraded), 2026-08-07, on [USER]'s live-playtest read (lint-ok: the upgraded
+   # statline, which lives in kokomi-upgrades.yaml): the card stood out in
+   # play, and MULTIPLE COPIES turn it into a block solve. That is the stacking failure mode the bracket's
+   # instrument never priced — every arm above measured ONE copy in the deck, so the whole table is silent
+   # about the shape [USER] saw. A single-copy measurement cannot outrank a multi-copy observation about
+   # multi-copy behaviour; the numbers are not wrong, they answered a narrower question. The old trap-pick
+   # reading of 5 is now the thing to watch (playtest protocol), not the too-strong reading of 12. (lint-ok: retired number)
+   # The [USER] WATCHLIST flag from 2026-07-26 ("I feel like that's too strong, but we can rebalance later")
+   # is hereby SPENT: this was the rebalance, and 12 was the first knob back exactly as recorded. (lint-ok: retired number)
    # NAME: "Kurage's Oath" is her actual Elemental Skill (wiki-verified) and was unused
    # by this pool; the oath is that she mends. [USER]-only naming audit as ever.
 - {id: before_sun_and_moon, name: "Before Sun and Moon", cost: 1, type: power, rarity: uncommon, solve: [block, frontload, scaling], tempo_band: {fight: [late], run: [late]},
@@ -309,6 +314,8 @@
    effects: [{op: damage, amount: 5, target: all_enemies}, {op: discard, amount: 1}, {op: draw, amount: 1}]}
    # The assist lane's own AoE: less than surging_shoal's 6, and it churns. The draw is not decoration — without (lint-ok: sibling card's number)
    # it this is strictly worse than the shoal at the same cost, which the domination lint would (rightly) call.
+   # The correction that put the sibling's REAL number in that sentence is RETROACTIVELY BLESSED (R130,
+   # 2026-08-07): a comment misquoting the card it compares against is a defect, and fixing it needed no ruling.
 # Assist, F4 BRIDGE (+2 — the ratified Sly-lane direction, first rows to land)
 # THE GAP F4 CLOSES, stated once for all three bridge rows. Her Charge and Burst meters BOTH pay on the
 # EXHAUST verb and only on it (CHARGE_PER_EXHAUST, KOKOMI_BURST_PER_EXHAUST — see the double-wage note in
@@ -385,7 +392,7 @@
    effects: [{op: apply_power, power: feel_no_pain, amount: 3, target: self}]}
    # Block-per-exhaust (the Feel No Pain rail, already engine-proven): every burn is also a guard. With the
    # ward this is the stability loop closing — getting hit exhausts, exhausting blocks.
-- {id: pearl_barrage, name: "Pearl Barrage", cost: 1, type: attack, rarity: uncommon, solve: [scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [priest], role: payoff,
+- {id: pearl_barrage, name: "Pearl Barrage", cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [priest], role: payoff,
    effects: [{op: damage, amount_formula: {base: 5, per: 1, count: exhaust_pile}, target: enemy}]}
    # Ashen-Strike rail: 5 + 1 per exhausted card (v0.3: base 3 -> 5 — the floor must be playable before the
    # pile exists). Bounded by the fight's real burn (not the uncapped meter) — pile-limited by construction.
@@ -481,7 +488,7 @@
    effects: [{op: damage, amount: 8, target: enemy}]}
    # The first Sly ATTACK on any sheet: 8 aimed, or 5 at whoever is nearest when it goes over the side. Nothing
    # else in her pool makes a random discard into damage, and the assist lane needed a reason to be in a fight.
-- {id: undertow, name: "Undertow", cost: 1, type: attack, rarity: uncommon, solve: [scaling, velocity], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [assist], role: payoff,
+- {id: undertow, name: "Undertow", cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling, velocity], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [assist], role: payoff,
    sly: [{op: energy, amount: 1}],
    effects: [{op: damage, amount_formula: {base: 4, per: 1, count: exhaust_pile}, target: enemy}]}
    # F4's third bridge row, and the one that closes the loop: the payoff that READS the pile the lane has been
@@ -558,7 +565,7 @@
    # Commander's rare swing — the hand becomes an army, and the army rotates off the field having WON its
    # position. VOICE LAW (v0.4 §3): rotation, never sacrifice. Watatsumi's doctrine is minimal casualties;
    # nobody here is fuel. This comment is the marked example the sweep was written against.
-- {id: depths_judgment, name: "Sango Isshin", cost: 2, type: attack, rarity: rare, solve: [scaling], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [priest], role: payoff,
+- {id: depths_judgment, name: "Sango Isshin", cost: 2, type: attack, rarity: rare, solve: [frontload, scaling], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [priest], role: payoff,
    effects: [{op: damage, amount_formula: {base: 10, per: 2, count: exhaust_pile}, target: enemy}]}
    # The pile-reader's ceiling: 10 + 2 per exhausted card, single target, REPEATABLE — bounded by the fight's
    # finite fuel rather than the uncapped meter (deliberate §2.1 anti-stall geometry). Watchlist with Nereid's.
