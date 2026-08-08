@@ -47,13 +47,7 @@
 |---|---|---|---|
 | `S4-G5` / `B-G1` | Per-axis disposition of the **Fanfare axis** (the other six axes are closed as reportable-only). Carries the re-registered Fanfare P1; governs `S4-G7` and the fanfare STOP via the R107/F1 fence | OPEN — narrowed, not discharged | user-queue §2; `docs/axis-validity-session-charter.md` §4/§7 |
 
-## 5. The ratification batch
-
-| ID | Decision needed | Status | Provenance |
-|---|---|---|---|
-| `S4-G9r` | `lasting_impression` body: commissioned at the R130 sitting (item 7 — "needs a rework", not a ratify). Pick a reader-clause body from → `review/active/lasting-impression-body-worksheet.md` | OPEN | S4-G9 item 7; R130 |
-
-## 6. Shop, pricing, and money
+## 5. Shop, pricing, and money
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
@@ -62,7 +56,7 @@
 | `EB-42q` | **Spine licence reconsider ($379).** The Skeleton2D spike came back PROMISING (`d69b7a0`); the remaining unknown is the live-combat seat (BACKLOG `EB-42`). Buy Spine, stay on Path C layered (the shipped fallback), or wait on the seating probe | OPEN — money call | `tools/skeleton2d_spike/README.md`; `git show d69b7a0` |
 | `X10` | `gorou_heart_of_the_clan` looks too strong (the Metallicize treadmill): a **CANDIDATE, explicitly not ratified** — power adjustment, **priced at a sitting**; the exploit lines (81 hits) target the power, not the price (already Uncommon) | OPEN — money/pricing call | user-queue §4; docs/dockets/companion-pricing.md §1 and review/redteam/exploit-ledger.md X10 (both at tag `pre-simplification-2026-08-06`) |
 
-## 7. Systems and data-model rulings
+## 6. Systems and data-model rulings
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
@@ -70,7 +64,7 @@
 | `M7` | The enchantment **op**: R82 already settled the data-model half (per-instance `enchant_damage` / `enchant_effects` ship on Card, "open house design space" — the MODEL direction, narrowly). What remains open is whether to build the Enchant *op* those fields await: the event-conversion gallery carries a live `FLAG — [USER] decision needed` on Stone of All Time "blocked on the unmodeled Enchant op" (plus Blade of Ink, the original Silent demand site). BUILD the op / keep the fields dormant | OPEN — narrowed 2026-08-07 | user-queue §10; `docs/archive/enchantments-design-2026-07-27.md` (at tag); R82; `docs/current/dossiers/content/event-conversion-gallery.md` |
 | `M12` | `ROUTE_REGRET_MARGIN` (and its twin, `draft_regret`'s `+ 1.0` at `draft.py:1692`) has **no recorded derivation** — the draft literal is pinned load-bearing (MEDIUM-11) but never derived, and EB-16w's wiring inherited the analogy explicitly uncalibrated. Setting it needs either a pre-registered measurement or a ruling; until then only the margin-free reads (`mean/p50/p90/max_regret`) are quotable, and `regretted`/`regret_rate` carry the caveat in-code | OPEN — measurement or ruling | EB-16w close-out 2026-08-07; `tier05/run_metrics.py` margin note |
 
-## 8. Eyes-on reviews and taste
+## 7. Eyes-on reviews and taste
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
@@ -83,13 +77,13 @@
 | S8 + S10 galleries | Taste calls on two proposal galleries: eight flagged potions/relics (S8), and enemies that could be reskinned rather than redesigned (S10 — RESKIN/REDESIGN is [USER]'s per north-star) | OPEN — taste | user-queue §4; `docs/current/dossiers/content/potion-relic-conversion-gallery.md`, `docs/current/dossiers/remap/reskin-gallery.md` |
 | Art debt | Kokomi 58 faces + 15 companions awaiting picks; four missing Kokomi portraits; `curtain_cue` wordmark; `breathless` mood; A7 + six Curtain Call power sigils; `AS2-E2` icon re-hunt (4 of 7); `grand_gala` re-hunt; two `ART-L12` duplicate pairs (`blazing_delight==true_spark_knight`, `crowd_work==standing_ovation`) awaiting a re-pick ruling; the three placeholder-rendering cards `art_coverage` newly bills (`spotlight_center_stage`, `spotlight_guest_cast`, `confiscated` — EB-36's engineering half is done, the picks are not) | OPEN — mostly taste | user-queue §8; `docs/archive/backlog-2026-07-29.md` §5; `docs/current/art/kokomi-art-pass-requirements.md` §2a |
 
-## 9. Fontaine Rares close-out
+## 8. Fontaine Rares close-out
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
 | `M10` | Four items the Fontaine Rares sprint left owned by [USER]: companion art picks (Navia/Clorinde/Neuvillette/Arlecchino); the v1.7 lore/naming eyes-on audit (non-delegable); the C2 grading countersign; and close-out ratification. Design note parked with them: Neuvillette graded WEAK/DEFERRED with the "different facet" question open | OPEN | user-queue §10; `git show aa09b97:docs/current/backlog/missed-requirements.md` §4.4 |
 
-## 10. Design calls routed from the dockets & findings
+## 9. Design calls routed from the dockets & findings
 
 Surfaced by engineering triage, but each needs a [USER] design / taste /
 behavior / money call before any code moves.

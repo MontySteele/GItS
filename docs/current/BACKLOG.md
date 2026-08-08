@@ -39,7 +39,7 @@
 |---|---|---|
 | `EB-1` | **Punch Off crash** (reclassified GAME-SIDE/SPINE-SIDE) — the animation stream keeps the watch; not done while seed `8B97LMCL2F` crashes in Punch Off | eng-backlog §1 |
 | `EB-14` | `selectors` is bot-feed only — a mod-side hook into the selection screens is the open item | eng-backlog §2 |
-| `EB-47` | **Windows compile validation of the 2026-08-07 sitting's C#** — five regenerated cards (`AriaOfRecompense` reverted to pure Encore; `TakeYourBow` gained the first upgrade-added `repeat_this` emission; `KuragesOath` gained a `PowerAmount` var where it had none; `StudyOfExplosions` and `SecretStash` gained damage bodies and `TargetType` changes) plus the hand-written `KaboomBeetleSwarm` description string. All were generated/edited on macOS where the mod cannot build; nothing here is compile-verified | R130–R132 |
+| `EB-47` | **Windows compile validation of the 2026-08-07 sitting's C#, plus R135** — six regenerated cards (`AriaOfRecompense` reverted to pure Encore; `TakeYourBow` gained the first upgrade-added `repeat_this` emission; `KuragesOath` gained a `PowerAmount` var where it had none; `StudyOfExplosions` and `SecretStash` gained damage bodies and `TargetType` changes; `LastingImpression` gained the `1_per_4_fanfare` Block clause — `HoverTips` using-directive, the three calculation vars and the `GainBlock` await, R135 2026-08-08) plus the hand-written `KaboomBeetleSwarm` description string. All were generated/edited on macOS where the mod cannot build; nothing here is compile-verified | R130–R132; R135 |
 
 ## tools — codegen, lint, scripts, refactors
 
@@ -47,6 +47,7 @@
 |---|---|---|
 | `EB-41` | Refactors, only if budget remains (big, safe, boring): `run_one` 518-line split; codegen driver unification (F3); telemetry-module template dedupe; `exp_*` script archive move; `apply_upgrade` op-coverage guard | eng-backlog §7 |
 | `EB-48` | Two Furina experiment scripts read the DELETED fanfare constants and now die on import-time attribute access: `tier05/exp_furina_strength.py:476-477,503,631-632,733` and `tier05/exp_furina_parity_trace.py:125` reference `C.FANFARE_FLOOR_PER_POWER(_RARE)`, deleted by the 2026-07-28 Fanfare rework (`tier0/constants.py:248-256` records the deletion) — `AttributeError` on today's constants, and the S6 cell's thesis describes the deleted invisible-rule world. Fix or move to `tools/archive/` before any `S4-G7` re-measure runs into them | staleness audit 2026-08-07 |
+| `EB-49` | The in-process rework-sim idiom (`tools/archive/klee_rework_sim.py`) silently measures the shipped card in three ways: (a) `loader._card_prototype` is lru_cached, so patching `_card_index()[cid].effects` after any run leaves every upgraded `<id>+` prototype holding the shipped effects — the patch must be followed by `loader._card_prototype.cache_clear()`; (b) `model.run_many(jobs>1)` crosses a `ProcessPoolExecutor` boundary the patch does not survive, so a parallel rework sim A/Bs the shipped card against itself — rework sims must run `jobs=1`; (c) `exp_fanfare_compensation` C3 keys fire-rate on the base id only, excluding upgraded copies. Fix the archive script or promote a hardened `rework_sim` helper; found 2026-08-08 during the S4-G9r measurement | S4-G9r measurement session |
 
 ## tests — pins & filed-not-fixed
 

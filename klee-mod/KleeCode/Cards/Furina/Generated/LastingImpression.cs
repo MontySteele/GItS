@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -39,18 +40,24 @@ public sealed class LastingImpression : CustomCardModel, ICharacterCard
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Exhaust };
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, fanfarePer: 1, fanfareStep: 4, grantsBlock: true);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("lasting_impression");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lasting Impression"),
-        ("description", "[gold]Fanfare Cap[/gold] +{FanfareCap:diff()}. Gain 4 [gold]Encore[/gold]."),
+        ("description", "[gold]Fanfare Cap[/gold] +{FanfareCap:diff()}. Gain 4 [gold]Encore[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Scales with [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("FanfareCap", 5m)
+            new DynamicVar("FanfareCap", 5m),
+            new CalculationBaseVar(0m),
+            new CalculationExtraVar(1m),
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.ReadableFanfare(card.Owner.Creature) / 4)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,6 +71,7 @@ public sealed class LastingImpression : CustomCardModel, ICharacterCard
     {
         FurinaResources.RaiseFanfareCap(Owner.Creature, DynamicVars["FanfareCap"].IntValue);
         FurinaResources.GainEncore(Owner.Creature, 4);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 
     protected override void OnUpgrade()
