@@ -346,17 +346,41 @@ def join_fights_to_runs(runs: list[dict], fights: list[dict]) -> dict:
 
     THE JOIN IS STILL THE SEED, and only the seed: `run_instance` is the mod's
     own token and the run history has never heard of it. It splits the fight
-    side into the runs it really was; both halves of a replayed seed then match
-    that seed's history entries, which is correct -- the history holds two
-    entries for two runs of one seed too.
+    side into the runs it really was -- but the history side cannot be split
+    the same way, so THE JOIN IS COUNTED, NOT BROADCAST. For each seed, with H
+    history entries and G fight groups, min(G, H) groups match; the surplus
+    G - H groups do NOT, because the history holds no entry to match them to.
+    Broadcasting instead (every group matching the seed) reported two runs
+    where the history knew one, which is the in-progress replay this count
+    exists to make visible.
+
+    WHICH groups match when G > H is genuinely unknowable here -- the history
+    carries no `run_instance` to pick by -- so the choice is deterministic
+    rather than correct: groups sort by `run_instance` and the first H win.
+    The surplus lands in `ambiguous_replays` (groups) and its fights in
+    `fights_unmatched`, so the two are never silently folded together.
     """
-    seeds = {r.get("seed") for r in runs if r.get("seed")}
+    seed_counts = Counter(r.get("seed") for r in runs if r.get("seed"))
     by_run = fights_by_run(fights)
-    matched = {k: v for k, v in by_run.items() if k[0] and k[0] in seeds}
+    by_seed: dict[str, list[tuple[str, str]]] = {}
+    for k in by_run:
+        if k[0] and k[0] in seed_counts:
+            by_seed.setdefault(k[0], []).append(k)
+
+    matched: dict[tuple[str, str], list[dict]] = {}
+    ambiguous = 0
+    for seed, keys in by_seed.items():
+        keys.sort(key=lambda k: k[1])
+        take = seed_counts[seed]
+        for k in keys[:take]:
+            matched[k] = by_run[k]
+        ambiguous += max(0, len(keys) - take)
+
     return {
         "runs_with_fights": len(matched),
         "fights_matched": sum(len(v) for v in matched.values()),
         "fights_unmatched": len(fights) - sum(len(v) for v in matched.values()),
+        "ambiguous_replays": ambiguous,
     }
 
 
@@ -404,6 +428,10 @@ def print_fight_report(s: dict, join: dict | None = None) -> None:
         print(f"    fights matched     {join['fights_matched']}")
         print(f"    fights unmatched   {join['fights_unmatched']}"
               "   (a run still in progress writes no history entry)")
+        if join.get("ambiguous_replays"):
+            print(f"    ambiguous replays  {join['ambiguous_replays']}"
+                  "   (more fight groups on a seed than history entries;")
+            print("                          the surplus is unmatched, not folded in)")
 
 
 def print_report(s: dict, runs: list[dict], label: str = "roster") -> None:

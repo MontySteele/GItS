@@ -3,10 +3,11 @@
 One question: **can a Godot-native `Skeleton2D` + weighted `Polygon2D` rig,
 with every vertex weight COMPUTED from layer-mask images instead of
 hand-painted, survive our pack build and load back out of the pack?**
-Path B of `docs/archive/animation-capability-memo.md` had zero working examples
-anywhere in reach; this directory built one, with Kokomi as the pilot.
+Path B of the animation capability memo had zero working examples anywhere in
+reach (`git show pre-simplification-2026-08-06:docs/archive/animation-capability-memo.md`);
+this directory built one, with Kokomi as the pilot.
 
-Findings live in `docs/animation-spike-skeleton2d-kokomi-2026-08-06.md`.
+Findings live in the spike's verdict memo: `git show d69b7a0`.
 This is the apparatus, kept so the result is regenerable. It is wired into
 nothing: no lint, no gate, no `build_pck.ps1` change, no CI, and **Path C
 (layered `Sprite2D`) remains the shipped fallback untouched.**

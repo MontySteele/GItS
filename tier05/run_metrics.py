@@ -205,10 +205,18 @@ def route_regret(rng: random.Random, act_map, decisions: list[dict],
 
     which is the drafter's construction one level up: `draft_regret` re-scores
     sampled offers in the FINAL DECK context and asks whether some other card
-    then outscores the pick. Here the final deck's counterpart is the final RUN
-    STATE, because state is the only thing a route policy's valuation depends
-    on -- `_make_value` reads `hp_frac` for the rest discount and the elite
-    gate, and nothing else.
+    then outscores the pick. Here the deck's counterpart is the run STATE,
+    because state is the only thing a route policy's valuation depends on --
+    `_make_value` reads `hp_frac` for the rest discount, and the policy prefs
+    read `elites_taken` (twice: the rising HP bar and the `< 4` cap) for the
+    elite gate.
+
+    THE STATE MUST BE THE ACT'S OWN TERMINAL STATE, not the run's. Unlike a
+    deck, a RouteState does not accumulate across the run: `elites_taken` and
+    `rests_taken` are ACT-LOCAL and reset at every boundary. Pricing act 0
+    against act 2's snapshot therefore fed act-2 elites into act-0's elite gate
+    -- hindsight the run did not possess at that decision (fixed 2026-08-08;
+    `model._run_range` passes `route_decisions[i]["hindsight"]`).
 
     WHY HINDSIGHT IS THE WHOLE INSTRUMENT. In the deciding state this number is
     zero by construction: `_route` takes the argmax over exactly these path

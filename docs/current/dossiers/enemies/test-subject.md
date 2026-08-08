@@ -2,12 +2,6 @@
 
 > **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 
-> **ACCEPTED OUTLIER (R131, 2026-08-07; closes `EB-29s`).** The full-HP
-> instrument reads ~0% winrate here against 90–98% for every other act-3 boss.
-> That is WORKING AS INTENDED: the sim pilot is worse than a real player, the
-> sim stays accurate to the game rather than to the pilot, and the brutal
-> numbers below stand as authored. Any quoted `test_subject` winrate cites this.
-
 - **Class:** `TestSubject`
 - **Kind:** boss
 - **Act:** 3 (Glory, act index 2)

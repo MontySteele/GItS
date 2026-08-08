@@ -6,6 +6,15 @@ differ by crop, while two unrelated cards sharing a source is the original L1
 defect. `source_group` is what separates those cases, so both directions are
 pinned here -- a rule that only ever gets exercised in its passing direction
 is not a gate.
+
+EVERY ROW HERE IS INVENTED, so every call passes `pixel_check=False`. L12
+(`identical_crops`) reads `ImageGen/images/cards/**` off disk rather than the
+rows it was handed -- gitignored Tier F, machine-local -- so on a machine that
+has run an art pass these five tests failed on real duplicates in shipped art
+they never mentioned. `assert problems == []` has to mean "no problem with
+THESE rows", and the pixel rule is not about these rows at all. L12's own
+coverage stays in `test_art_lint_full_set.py`: the @needs_art pair, plus the
+call-graph pin that `lint()` reaches `identical_crops()` at all.
 """
 
 import sys
@@ -47,7 +56,7 @@ def test_sibling_reuse_with_different_crops_is_legal():
             focus="cover@0.10", group="chevreuse"),
         row("chevreuse_bursting_grenades", "Chevreuse Wish.png",
             mode="cover", focus="top", group="chevreuse"),
-    ])
+    ], pixel_check=False)
     assert problems == [], problems
 
 
@@ -56,7 +65,7 @@ def test_sibling_reuse_with_identical_crop_is_L7():
     problems = art_lint.lint([
         row("lynette_box_trick", "Lynette Wish.png", group="lynette"),
         row("lynette_enigmatic_feint", "Lynette Wish.png", group="lynette"),
-    ])
+    ], pixel_check=False)
     assert len(problems) == 1, problems
     assert problems[0].startswith("L7 lynette_enigmatic_feint")
     assert "IDENTICAL crop" in problems[0]
@@ -69,7 +78,7 @@ def test_cross_family_reuse_is_still_L1():
             focus="cover@0.02", group="chevreuse"),
         row("lynette_box_trick", "Fontaine Group Wish.png",
             focus="cover@0.10", group="lynette"),
-    ])
+    ], pixel_check=False)
     assert len(problems) == 1, problems
     assert problems[0].startswith("L1 lynette_box_trick")
     assert "cross-family reuse is illegal" in problems[0]
@@ -88,7 +97,7 @@ def test_ungrouped_rows_keep_strict_L1():
             out="ImageGen/images/cards/furina/high_tide.png"),
         row("crashing_waves", "Furina Wish.png", focus="cover@0.10",
             out="ImageGen/images/cards/furina/crashing_waves.png"),
-    ])
+    ], pixel_check=False)
     assert len(problems) == 1, problems
     assert problems[0].startswith("L1 crashing_waves")
 
@@ -99,6 +108,6 @@ def test_one_sided_group_does_not_pair():
         row("dahlia_favonian_favor", "Dahlia Wish.png", group="dahlia"),
         row("deep_breath", "Dahlia Wish.png", focus="top",
             out="ImageGen/images/cards/furina/deep_breath.png"),
-    ])
+    ], pixel_check=False)
     assert len(problems) == 1, problems
     assert problems[0].startswith("L1 deep_breath")

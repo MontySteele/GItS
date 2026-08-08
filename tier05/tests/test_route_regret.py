@@ -238,6 +238,49 @@ def test_run_many_calls_the_sampler_on_every_act_of_a_real_run():
             assert d["max_regret"] >= 0.0
 
 
+def test_each_act_is_priced_against_its_own_end_of_act_state():
+    """THE HINDSIGHT LEAK (found 2026-08-08). `RouteState` is not a deck.
+
+    `draft_regret` may re-score every screen against ONE final deck because a
+    deck accumulates across the whole run. `elites_taken` and `rests_taken` do
+    not -- they are act-local and reset at every boundary (`route.py`, and
+    `model.run_one`'s per-act reset) -- and `hunter`'s elite gate reads
+    `elites_taken` twice. Repricing act 0 against the FINAL act's snapshot
+    therefore let a later act's elites move an earlier act's regret: hindsight
+    the run did not have at that decision.
+
+    So: each act carries its own terminal snapshot, and act i's summary is the
+    one its own snapshot produces -- NOT the one the final snapshot would."""
+    results = model.run_many("klee", "demolition", "spark",
+                             draft.assigned_policy, 24, 99,
+                             n_acts=3, route_name="hunter")
+
+    def priced(w, state, seed):
+        return run_metrics.route_regret(random.Random(seed + 5 * 10 ** 9),
+                                        w["map"], w["decisions"], state,
+                                        "hunter")
+
+    moved = 0
+    for r in results:
+        assert len(r.route_regret) == len(r.route_decisions)
+        for act_i, w in enumerate(r.route_decisions):
+            own = w["hindsight"]
+            assert own is not None and own.act == act_i
+            assert r.route_regret[act_i] == {**priced(w, own, r.seed),
+                                             "act": act_i}
+            if own is not r.route_hindsight:
+                leaked = {**priced(w, r.route_hindsight, r.seed),
+                          "act": act_i}
+                moved += r.route_regret[act_i] != leaked
+        # The run still ends holding the final act's state, unchanged.
+        assert r.route_hindsight is r.route_decisions[-1]["hindsight"]
+
+    # The fixture has to actually contain the bug, or the assertions above are
+    # pinning an identity. Multi-act runs whose earlier act reprices
+    # DIFFERENTLY under the final snapshot are the leak, counted.
+    assert moved > 0, "fixture no longer reaches act 2 / no longer diverges"
+
+
 def test_live_route_regret_is_deterministic():
     """The drafter's pin (test_m5.test_draft_regret_deterministic), one layer
     out: the sampler runs on a DEDICATED stream, so the same seed gives the

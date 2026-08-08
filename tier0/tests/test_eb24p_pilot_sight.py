@@ -4,7 +4,8 @@
 its allowlist — both branches, including an unconditional else. With
 `reaction_triggered_this_turn` unlisted, `audience_participation`'s honest
 else-glue (2 Encore + 1 draw) scored ~0 and the card measured drawn 974 /
-played 0 (EB-20 census; `review/active/eb24-dead-riders-worksheet.md`).
+played 0 (EB-20 census;
+`git show 12f4a21:review/active/eb24-dead-riders-worksheet.md`).
 These pin the read on the real sheet card, both branch states.
 """
 

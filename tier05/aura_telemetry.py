@@ -19,17 +19,9 @@ R14: diagnostics feeding a ruling. No acceptance targets live here -- the
 bound lives in the sprint log's prediction 7. (The log retired from HEAD;
 read it at `git show 230ab3b:docs/curtain-call-sprint-log-2026-07-27.md`.)
 
-PREDICTION 7 CLOSED -- BASELINE ACCEPTED (R130 item 11, 2026-08-07).
-[USER]: "Re-measure after the tweaks proposed here, then accept." The
-residual uptime breach (spotlight -11.5% / fanfare -17.3% post-shrink) is
-accepted rather than chased; the compensation tracks ratified at the same
-sitting are its "application elsewhere". The accepted baseline, measured
-under RT9/D14/P6/C8 AFTER the sitting's card changes (not comparable to
-the pre-rework cell-0 numbers, which stand at the retrieval point above):
-
-    uptime %            salon  spotlight  fanfare
-    seed 11 /  600 runs  45.5     26.3      25.6
-    seed 12 / 1000 runs  43.6     26.0      25.7   (rider)
+PREDICTION 7 CLOSED -- baseline accepted (R130 item 11); the accepted
+residual (spotlight -11.5% / fanfare -17.3% post-shrink) rides the same
+sitting's compensation tracks. Numbers and ruling: `git show a64297d`.
 
 Re-run: `python -m tier05.exp_curtain_call` (add `--seed 12 --runs 1000`
 for the rider). Numbers after a stamp move are a NEW baseline, not a
