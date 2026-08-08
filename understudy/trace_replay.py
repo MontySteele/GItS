@@ -54,6 +54,20 @@ identity: they are the OUTPUT a comparison is trying to measure, and folding
 them into the identity would make every interesting result an inequality of
 the thing being compared with itself.
 
+`outcome` and `turns` are the same kind of field and are excluded from the
+trace for the same reason -- BUT THEY ARE REPORTED (`RESULT_KEYS`), because
+the undeclared version of this rule let a won 2-turn fight and a lost 5-turn
+fight print IDENTICAL. A recording that ended differently is not an identical
+recording, whatever the reason; the report says which field ended differently
+and leaves the reading of it to the reader.
+
+AND THE COMPARISON REFUSES RATHER THAN PASSES. An empty finding list is this
+module's acceptance condition, so every way of producing one by accident is a
+false pass: a log that does not exist, a log that half-parsed, a run with no
+fights in it, two runs whose seed is unknown on both sides. Each of those is a
+finding here, never a silence -- the log directory is gitignored, so "no logs"
+is the normal state of a fresh clone and would otherwise be the usual verdict.
+
 GUARDRAIL-7 STILL APPLIES. Two identical traces prove the harness is
 deterministic. They are not evidence about balance, difficulty or fun.
 """
@@ -66,7 +80,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from understudy.report import LOG_DIR, latest_stamp, load, read_run_log
+from understudy.report import (LOG_DIR, MissingRunLog, UnreadableRunLog,
+                               latest_stamp, load, read_run_log)
 
 # The fight-record keys that make up a trace. Ordered, because the report
 # prints the first disagreement and a stable order makes two reports of the
@@ -75,6 +90,29 @@ TRACE_KEYS = ("cards_played", "selectors", "meters_by_turn")
 
 # Fields that IDENTIFY a fight within a run, as opposed to describing it.
 FIGHT_KEYS = ("act", "floor", "kind")
+
+# How the fight ENDED. Not part of the trace identity (see the module
+# docstring) and reported anyway, because two recordings of one seed that
+# ended differently are not two identical recordings.
+RESULT_KEYS = ("outcome", "turns")
+
+
+class _NotRecorded:
+    """The key was not in the record at all.
+
+    Distinct from `[]`, which is a recorder that had the column and recorded
+    nothing in it. `fight.get(k) or []` collapsed the two, so a pre-P1.5 log
+    with no `selectors` key compared EQUAL to a run that was offered no
+    selectors -- absence reading as evidence of sameness.
+    """
+
+    __slots__ = ()
+
+    def __repr__(self) -> str:            # what the divergence report prints
+        return "(not recorded)"
+
+
+NOT_RECORDED = _NotRecorded()
 
 
 def fights(stamp: str, run_index: int) -> list[dict]:
@@ -100,11 +138,24 @@ def seed_of(stamp: str, run_index: int) -> dict[str, Any]:
 def trace(fight: dict) -> dict[str, Any]:
     """The comparable part of one fight record.
 
-    Missing keys read as empty rather than raising: a record written by a
-    pre-P1.5 soak carries no `selectors`, and the honest report on that is
-    "this run recorded no selector answers", not a crash.
+    A missing key reads as `NOT_RECORDED` rather than raising: a record
+    written by a pre-P1.5 soak carries no `selectors`, and the honest report
+    on that is "this run recorded no selector answers", not a crash. It is
+    also not `[]` -- "the recorder had no such column" and "the column was
+    empty" are different facts, and only one of them is evidence.
     """
-    return {k: fight.get(k) or [] for k in TRACE_KEYS}
+    out: dict[str, Any] = {}
+    for k in TRACE_KEYS:
+        v = fight.get(k, NOT_RECORDED)
+        out[k] = NOT_RECORDED if v is NOT_RECORDED or v is None else v
+    return out
+
+
+def _show(value: Any) -> str:
+    """A trace value as the divergence report prints it."""
+    if value is NOT_RECORDED:
+        return repr(value)
+    return json.dumps(value)[:300]
 
 
 def selector_lines(fight: dict) -> list[str]:
@@ -156,20 +207,39 @@ def compare_runs(a: tuple[str, int], b: tuple[str, int]) -> list[str]:
     (sa, ia), (sb, ib) = a, b
     findings: list[str] = []
 
-    seed_a, seed_b = seed_of(sa, ia), seed_of(sb, ib)
+    # UNREADABLE IS A FINDING, NOT A SILENCE. `read_run_log` raises on a log
+    # that is absent or half-parsed; catching it here rather than letting it
+    # escape keeps the refusal inside the finding list, which is the thing
+    # the acceptance condition actually reads.
+    try:
+        seed_a, seed_b = seed_of(sa, ia), seed_of(sb, ib)
+        fa, fb = fights(sa, ia), fights(sb, ib)
+    except (MissingRunLog, UnreadableRunLog) as exc:
+        return [f"NO RECORDING: {exc} -- there is nothing here to compare"]
+
+    if seed_a["seed"] is None and seed_b["seed"] is None:
+        findings.append(
+            "SEED: neither run recorded a seed -- two runs that cannot be "
+            "shown to be the same run are not compared")
+        return findings
     if seed_a["seed"] != seed_b["seed"]:
         findings.append(
             f"SEED: {seed_a['seed']} != {seed_b['seed']} -- these are two "
             f"different runs, and nothing below is a comparison")
         return findings
 
-    fa, fb = fights(sa, ia), fights(sb, ib)
+    if not fa and not fb:
+        findings.append(
+            "NO FIGHTS: neither recording holds a closed fight -- an empty "
+            "comparison is not an identical one")
+        return findings
+
     if len(fa) != len(fb):
         findings.append(f"FIGHT COUNT: {len(fa)} != {len(fb)}")
 
     for i, (x, y) in enumerate(zip(fa, fb)):
         where = f"fight {i} (act {x.get('act')} floor {x.get('floor')})"
-        for key in FIGHT_KEYS:
+        for key in FIGHT_KEYS + RESULT_KEYS:
             if x.get(key) != y.get(key):
                 findings.append(f"{where}: {key} {x.get(key)!r} != {y.get(key)!r}")
         ta, tb = trace(x), trace(y)
@@ -177,8 +247,8 @@ def compare_runs(a: tuple[str, int], b: tuple[str, int]) -> list[str]:
             if ta[key] != tb[key]:
                 findings.append(
                     f"{where}: {key} diverges\n"
-                    f"      A: {json.dumps(ta[key])[:300]}\n"
-                    f"      B: {json.dumps(tb[key])[:300]}")
+                    f"      A: {_show(ta[key])}\n"
+                    f"      B: {_show(tb[key])}")
     return findings
 
 
@@ -205,6 +275,14 @@ def render_compare(stamp_a: str, stamp_b: str, run: int | None = None) -> str:
     runs_a = load(stamp_a).get("runs") or []
     runs = [run] if run is not None else list(range(1, len(runs_a) + 1))
     out = [f"REPLAY COMPARE  A={stamp_a}  B={stamp_b}", ""]
+    # NOTHING COMPARED IS NOT A PASS. Without this the loop below runs zero
+    # times over an index with no runs and the verdict line still reads
+    # "identical traces" -- a clean bill over a comparison that never happened.
+    if not runs:
+        out.append(f"soak {stamp_a} indexes no runs")
+        out.append("")
+        out.append("VERDICT: nothing compared -- there is no acceptance here")
+        return "\n".join(out)
     clean = True
     for i in runs:
         findings = compare_runs((stamp_a, i), (stamp_b, i))
@@ -234,10 +312,15 @@ def main(argv: list[str] | None = None) -> int:
     stamp = args.stamp or latest_stamp()
     if stamp is None:
         raise SystemExit(f"no soak logs under {LOG_DIR}")
-    if args.other:
-        print(render_compare(stamp, args.other, args.run))
-    else:
-        print(render(stamp, args.run))
+    try:
+        if args.other:
+            print(render_compare(stamp, args.other, args.run))
+        else:
+            print(render(stamp, args.run))
+    except (MissingRunLog, UnreadableRunLog) as exc:
+        # A message, not a traceback -- but an EXIT, not a report. The one
+        # thing this must never do is print a page over logs it could not read.
+        raise SystemExit(str(exc))
     return 0
 
 

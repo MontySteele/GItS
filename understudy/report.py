@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -52,11 +53,56 @@ def load(stamp: str) -> dict[str, Any]:
     return json.loads(p.read_text(encoding="utf-8"))
 
 
-def read_run_log(stamp: str, run_index: int) -> list[dict]:
+class MissingRunLog(RuntimeError):
+    """A run the index claims happened has no log on disk."""
+
+
+class UnreadableRunLog(RuntimeError):
+    """A run log carries lines this reader could not parse."""
+
+
+@dataclass(frozen=True)
+class RunLog:
+    """A run log AND what was wrong with it.
+
+    The two failure facts travel WITH the records because the reader that
+    wants them (the morning report, which must still render) and the reader
+    that must refuse them (the trace comparison, whose acceptance condition is
+    an empty finding list) need the same read to end differently. Absence and
+    corruption used to be indistinguishable from a clean empty run, which is
+    how a comparison over two logs that do not exist printed IDENTICAL.
+    """
+
+    path: Path
+    records: list[dict]
+    missing: bool = False
+    unreadable: int = 0
+
+    @property
+    def sound(self) -> bool:
+        return not self.missing and self.unreadable == 0
+
+    def complaint(self) -> str | None:
+        if self.missing:
+            return f"no run log at {self.path}"
+        if self.unreadable:
+            return (f"{self.unreadable} unparseable line(s) in {self.path.name}"
+                    f" -- the records below are an incomplete read")
+        return None
+
+
+def read_run_log_checked(stamp: str, run_index: int) -> RunLog:
+    """Read a run log and REPORT what went wrong, rather than raising.
+
+    For callers that must still produce output over a damaged night. Callers
+    that are making a claim about the recording use `read_run_log`, which
+    refuses instead.
+    """
     p = LOG_DIR / f"soak-{stamp}-run{run_index:03d}.jsonl"
     if not p.exists():
-        return []
-    out = []
+        return RunLog(path=p, records=[], missing=True)
+    out: list[dict] = []
+    unreadable = 0
     for line in p.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line:
@@ -64,8 +110,28 @@ def read_run_log(stamp: str, run_index: int) -> list[dict]:
         try:
             out.append(json.loads(line))
         except json.JSONDecodeError:
-            continue
-    return out
+            # COUNTED, NEVER SWALLOWED. A dropped line is a hole in the
+            # record, and a hole that nobody counts reads downstream as a
+            # thing that did not happen.
+            unreadable += 1
+    return RunLog(path=p, records=out, unreadable=unreadable)
+
+
+def read_run_log(stamp: str, run_index: int) -> list[dict]:
+    """The records of one run, or an exception.
+
+    ABSENCE IS LOUD. This reader returned `[]` for a log that did not exist,
+    and `[]` is also what a run with no records looks like -- so every
+    downstream "no divergence" over a missing pair of logs was indistinguishable
+    from a passing comparison. The log dir is gitignored, so absence is the
+    NORMAL state of a fresh clone, which made the quiet answer the usual one.
+    """
+    log = read_run_log_checked(stamp, run_index)
+    if log.missing:
+        raise MissingRunLog(log.complaint())
+    if log.unreadable:
+        raise UnreadableRunLog(log.complaint())
+    return log.records
 
 
 def _median(xs: list[float]) -> float:
@@ -85,8 +151,13 @@ def render(stamp: str | None = None) -> str:
     fights: list[dict] = []
     defects: list[dict] = []
     forced: list[dict] = []
+    unsound: list[str] = []
     for r in runs:
-        for rec in read_run_log(stamp, r["run"]):
+        log = read_run_log_checked(stamp, r["run"])
+        complaint = log.complaint()
+        if complaint:
+            unsound.append(f"run {r['run']}: {complaint}")
+        for rec in log.records:
             kind = rec.get("record")
             if kind == "fight":
                 rec["_run"] = r["run"]
@@ -106,6 +177,18 @@ def render(stamp: str | None = None) -> str:
     a("")
     a("> " + GUARDRAIL.replace("\n", " "))
     a("")
+
+    # ------------------------------------------------------- log integrity
+    # PRINTED ABOVE THE DEFECTS, because it says how much of the night this
+    # page is even reading. A missing or half-parsed log is not a quiet run.
+    if unsound:
+        a(f"**{len(unsound)} run log(s) could not be read whole.** Every "
+          f"count below is taken over what survived, not over the runs the "
+          f"index claims:")
+        a("")
+        for line in unsound:
+            a(f"- {line}")
+        a("")
 
     # ------------------------------------------------------------ defects
     a("## 1. Defects")
