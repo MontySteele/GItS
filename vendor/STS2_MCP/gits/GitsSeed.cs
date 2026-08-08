@@ -21,6 +21,10 @@
 //   StartRunLobby.SetSeed(string? seed)
 //       if ((uint)(NetService.Type - 1) > 1u) throw;   // Singleplayer=1, Host=2
 //
+// (That is the NetService guard, and it is the one this file read. It is NOT
+// the only guard in `SetSeed` -- see the EB-15 note below, which cost four
+// live runs to find: a second check refuses `GameMode.Standard` outright.)
+//
 // So singleplayer DOES have a lobby and SetSeed DOES accept singleplayer. The
 // upstream guard is defensive, not descriptive. This file therefore does not
 // fight it: it sets the seed through its OWN endpoint, before the embark that
@@ -42,7 +46,29 @@
 // screen uses and it is scoped to the run being started. `debug_override` is
 // the fallback for the moment the lobby genuinely is null; it is GLOBAL and
 // STICKY, which is why `Clear` exists and why the harness is expected to call
-// it. NCharacterSelectScreen.AfterInitialized() sets DebugSeedOverride = null
+// it.
+//
+// EB-15: ON THE STANDARD SINGLEPLAYER ARM THE PREFERENCE IS ACADEMIC -- THE
+// LOBBY ROUTE CANNOT FIRE, AND THE REASON IS NOT THE GUARD NAMED ABOVE. Four
+// live runs took `debug_override`; the fourth read the endpoint's own report
+// on both sides of the POST and the game said why in godot.log:
+//
+//   [STS2 MCP][GItS] seed: lobby route failed
+//       (Seed should not be changed in standard mode!)
+//
+// So the lobby is NOT null (`on_char_select: true`, and `lobby_seed` reads
+// back the seed afterwards because SetSeed assigns `Seed` and THEN throws).
+// `StartRunLobby.SetSeed` refuses on the GameMode, not on `NetService.Type`,
+// and `InitializeSingleplayer` builds its lobby with `GameMode.Standard` --
+// so every standard singleplayer run fails this route by construction. The
+// stranded `Lobby.Seed` is harmless: `DebugSeedOverride` outranks it at
+// BeginRun and `Clear` empties both channels.
+//
+// The arm is KEPT rather than deleted, because it is the route a Custom-run
+// or a hosted lobby would take and it reports itself accurately either way.
+// Nobody should read "two routes work" out of this file.
+//
+// NCharacterSelectScreen.AfterInitialized() sets DebugSeedOverride = null
 // when the screen opens, so a seed set while ON character select survives to
 // embark and a seed set before it does not -- the endpoint reports which route
 // fired so a caller never has to guess.

@@ -199,6 +199,20 @@ public static class KleeMod
                     [Cards.SalonMemberTips.SalonRulesKey + ".title"] =
                         "Salon",
 
+                    // EB-53/N1: the end-of-turn docket's per-slot hovers.
+                    // TITLES only, the same bargain as the member tips above --
+                    // every body is built live in TurnEndAttribution from the
+                    // constants the resolution reads, so a repricing cannot
+                    // leave a row quoting a retired number.
+                    [Powers.TurnEndAttribution.MasqueKey + ".title"] =
+                        "Bond of Life",
+                    [Powers.TurnEndAttribution.SparksKey + ".title"] =
+                        "Sparks 'n' Splash",
+                    [Powers.TurnEndAttribution.OzKey + ".title"] =
+                        "Oz, at Your Side",
+                    [Powers.TurnEndAttribution.KurageKey + ".title"] =
+                        "Bake-Kurage",
+
                     // Kokomi's two hidden reads (KokomiRiderTips). Both
                     // resolve somewhere no card face can print -- the pulse at
                     // end of turn, the Garment rider on OTHER cards -- so the

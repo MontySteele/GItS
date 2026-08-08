@@ -363,6 +363,16 @@ class _FakeBridge:
     def current_seed(self):
         return "FAKESEED01"
 
+    # A fake that does not answer an endpoint the driver reads is not a fake of
+    # this bridge. EB-15 made the driver read the seed report BEFORE the POST
+    # as well as after, so both halves of the guard live here.
+    BridgeError = soak.bridge.BridgeError
+
+    def get_seed(self):
+        return {"status": "ok", "chosen": None, "route": "none",
+                "lobby_seed": None, "debug_override": None,
+                "on_char_select": self.screen == "character_select"}
+
 
 def test_the_embark_path_confirms_instead_of_re_picking_forever(monkeypatch):
     fake = _FakeBridge()
@@ -651,3 +661,165 @@ def test_meters_are_read_by_power_id_not_by_display_name():
     unknown = {"player": {"status": [
         {"id": "SOME_OTHER_POWER", "name": "Fanfare", "amount": 99}]}}
     assert soak._meters(unknown)[0] == 0
+
+
+# ------------------------------------------------- EB-11 / defect 13 ------
+
+class _TransientBridge:
+    """A bridge that answers with a transition for `misses` reads, then lands.
+
+    `shape` is the transition face: the recorded defect-13 shape is a state
+    dict with NO `state_type` key at all, and `unknown` is the same moment one
+    frame later.
+    """
+
+    def __init__(self, shape, misses, landed=None):
+        self.shape, self.misses, self.reads = shape, misses, 0
+        self.landed = landed or {"state_type": "map", "run": {"act": 1,
+                                                              "floor": 1}}
+
+    def get_state(self):
+        self.reads += 1
+        if self.reads <= self.misses:
+            return dict(self.shape)
+        return dict(self.landed)
+
+
+def _no_state_type():
+    """The recorded shape: run/player present, the screen name absent."""
+    return {"run": {"act": 1, "floor": 0},
+            "player": {"hp": 71, "max_hp": 71, "hand": []}, "options": []}
+
+
+def test_a_state_with_no_state_type_is_ridden_out_not_refused(monkeypatch):
+    """EB-11, understudy defect 13. The bridge answered mid-transition with no
+    `state_type` at all; `str(None)` is `"None"`, which matched neither the
+    `unknown` settle nor any screen, so a transition fell through to
+    `policy_v1` declining and ended a run as `no_action`. It is the same MOMENT
+    `unknown` names, and it gets the same answer."""
+    fake = _TransientBridge(_no_state_type(), misses=3)
+    monkeypatch.setattr(soak, "bridge", fake)
+    d = _driver()
+    landed = d._settle_transient(_no_state_type(), tries=10, delay=0)
+    assert landed["state_type"] == "map", "the transition was not ridden out"
+    assert fake.reads == 4
+
+
+def test_an_unknown_state_type_is_still_ridden_out(monkeypatch):
+    """The original face of the same settle, pinned so the EB-11 widening did
+    not cost it."""
+    fake = _TransientBridge({"state_type": "unknown"}, misses=2)
+    monkeypatch.setattr(soak, "bridge", fake)
+    d = _driver()
+    landed = d._settle_transient({"state_type": "unknown"}, tries=10, delay=0)
+    assert landed["state_type"] == "map"
+
+
+def test_a_state_type_that_never_arrives_is_filed_under_its_own_kind(
+        monkeypatch):
+    """Skipped LOUDLY. A missing `state_type` cannot reach the no-progress
+    watchdog the way a stuck `unknown` can -- nothing downstream can post an
+    action against a state with no screen, so there is never a second
+    fingerprint sample. It is therefore filed here, and NOT as `no_action`,
+    which named the wrong thing and pointed the reader at the policy."""
+    fake = _TransientBridge(_no_state_type(), misses=10000)
+    monkeypatch.setattr(soak, "bridge", fake)
+    d = _driver()
+    try:
+        d._settle_transient(_no_state_type(), tries=4, delay=0)
+    except soak.Defect as exc:
+        assert exc.kind == "state_type_missing", exc.kind
+        assert "state_type" in exc.detail
+    else:
+        raise AssertionError("a state_type that never arrived was swallowed")
+
+
+def test_a_stuck_unknown_is_handed_back_to_the_watchdog(monkeypatch):
+    """The asymmetry is deliberate: `unknown` IS drivable enough to post
+    against, so the fingerprint history the watchdog builds is a better defect
+    record than an instant refusal. Only the un-nameable state is filed here."""
+    fake = _TransientBridge({"state_type": "unknown"}, misses=10000)
+    monkeypatch.setattr(soak, "bridge", fake)
+    d = _driver()
+    out = d._settle_transient({"state_type": "unknown"}, tries=3, delay=0)
+    assert out["state_type"] == "unknown"
+
+
+def test_state_type_missing_halts_a_soak_rather_than_burning_the_night():
+    """Same seat as `bridge_unreachable`: not the harness's fault, but a soak
+    that keeps arriving somewhere it cannot name is producing nothing."""
+    assert "state_type_missing" in soak._HARNESS_SIDE
+
+
+# ------------------------------------------------- EB-13 / defect 15 ------
+
+def _rest_site_43MLG7MG9L():
+    """The state the seed `43MLG7MG9L` bounce was filed against, verbatim from
+    `soak-20260808-145030-run001.jsonl`: two enabled options, neither of them
+    the removal the sim asked for, and NO proceed."""
+    return {"state_type": "rest_site",
+            "run": {"act": 1, "floor": 7, "ascension": 0},
+            "player": {"hp": 57, "max_hp": 66, "gold": 188},
+            "rest_site": {"can_proceed": False, "options": [
+                {"index": 0, "id": "HEAL", "name": "Rest",
+                 "description": "Heal for 30% of your Max HP (19).",
+                 "is_enabled": True},
+                {"index": 1, "id": "SMITH", "name": "Smith",
+                 "description": "Upgrade a card in your Deck.",
+                 "is_enabled": True}]}}
+
+
+def test_a_rest_site_that_refuses_proceed_is_answered_not_exited():
+    """EB-13. `tier05.model.rest_action` returned `remove` at an act-1 rest
+    site selling only HEAL and SMITH; the old fallback posted `proceed` and the
+    bridge answered "No proceed button available or enabled" for every one of
+    the run's remaining actions. Same lesson as `card_select`: a screen that
+    refuses the exit has to be answered."""
+    action = soak._last_resort(_rest_site_43MLG7MG9L())
+    assert action == {"action": "choose_rest_option", "index": 0}, action
+
+
+def test_a_rest_site_last_resort_skips_the_options_the_screen_greyed_out():
+    state = _rest_site_43MLG7MG9L()
+    state["rest_site"]["options"][0]["is_enabled"] = False
+    assert soak._last_resort(state) == {"action": "choose_rest_option",
+                                        "index": 1}
+
+
+def test_a_rest_site_with_nothing_left_to_spend_still_proceeds():
+    """The other half: once the option is spent the screen enables its exit,
+    and the exit is what should be taken."""
+    state = _rest_site_43MLG7MG9L()
+    state["rest_site"] = {"can_proceed": True, "options": []}
+    assert soak._last_resort(state) == {"action": "proceed"}
+
+
+def test_the_rest_arm_declines_rather_than_posting_a_refused_verb():
+    """The policy half of EB-13. Declining routes the screen to
+    `_last_resort`, which COUNTS the answer as a `forced_default`; the old
+    shape spent the same action while reporting itself as a decision."""
+    state = _rest_site_43MLG7MG9L()
+    state["player"]["deck"] = [{"id": "KLEEMOD-SOLOISTS_SOLICITATION"}]
+    memo = soak.policy_v1.Memo()
+    memo.next_node_kinds = ["?"]
+    d = soak.policy_v1.decide(state, memo)
+    if d.notes.get("sim_choice") == "remove":
+        assert not d.available, "a rest site with no matching option decided"
+        assert d.action is None
+        assert d.notes["option_matched"] is False
+        # The diagnosis survives the decline -- it is what made EB-13 readable.
+        assert "next_fight" in d.notes
+    else:                                   # pragma: no cover - sheet moved
+        assert d.action["action"] == "choose_rest_option"
+
+
+def test_a_greyed_out_rest_option_is_not_a_match():
+    """`policy_v0._match_rest_option` reads `id`/`name` and not `is_enabled`,
+    and policy_v0 is FROZEN. The screen therefore happens in policy_v1."""
+    state = _rest_site_43MLG7MG9L()
+    for opt in state["rest_site"]["options"]:
+        opt["is_enabled"] = False
+    memo = soak.policy_v1.Memo()
+    memo.next_node_kinds = ["?"]
+    d = soak.policy_v1.decide(state, memo)
+    assert not d.available, "a disabled option was chosen"

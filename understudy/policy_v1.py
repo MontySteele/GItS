@@ -694,10 +694,46 @@ def _rest(state: dict[str, Any], memo: Memo) -> Decision:
     options = ((blob.get("options") if isinstance(blob, dict) else None)
                or state.get("options") or [])
     index = policy_v0._match_rest_option(options, what)
+    # EB-13. `_match_rest_option` matches on `id`/`name` and does not read
+    # `is_enabled`, because the wire key did not exist when it was written and
+    # `policy_v0.py` is FROZEN -- it is one arm of a published measurement.
+    # Screening the match HERE is the same answer without moving a quoted
+    # number: an option the screen has greyed out is not an option.
+    if index is not None:
+        opt = options[index] if index < len(options) else None
+        if isinstance(opt, dict) and opt.get("is_enabled") is False:
+            index = None
+    if index is None:
+        # THE SIM ASKED FOR SOMETHING THIS SCREEN DOES NOT SELL, and this arm
+        # DECLINES rather than inventing. It used to emit `proceed`, which is
+        # how the seed `43MLG7MG9L` run ended: `tier05.model.rest_action`
+        # returned `remove` at an act-1 rest site offering only HEAL and SMITH,
+        # the fallback posted `proceed`, and the screen answered
+        # "No proceed button available or enabled" (`can_proceed: false`) --
+        # forever, until the no-progress watchdog stopped the run. A refused
+        # verb is not a fallback; it is a loop with a rationale attached.
+        #
+        # Declining routes it to `soak._last_resort`, which is the module's
+        # existing seat for "the policy has no answer and the screen still has
+        # to be answered" and which COUNTS every use as a `forced_default`. The
+        # old shape spent the same action while reporting itself as a decision.
+        declined = _unavailable(
+            "rest_site",
+            f"tier05.model.rest_action chose '{what}'"
+            + (f" ({which})" if which else "")
+            + f", which this rest site does not offer as an enabled option "
+              f"(offered: {[str((o or {}).get('id')) for o in options if isinstance(o, dict)] or options})")
+        # The diagnosis keys survive the decline. What the sim wanted and what
+        # the lookahead said are the whole reason this row is readable at all;
+        # dropping them because no action came out would throw away the record
+        # that made EB-13 diagnosable.
+        declined.notes = {"sim_choice": what, "sim_target": which,
+                          "next_fight": next_fight, "next_node_kinds": kinds,
+                          "option_matched": False}
+        return declined
     return Decision(
         category="resource",
-        action=({"action": "choose_rest_option", "index": index}
-                if index is not None else {"action": "proceed"}),
+        action={"action": "choose_rest_option", "index": index},
         label=f"{what}" + (f" ({which})" if which else ""),
         rationale=("R93 #5: tier05.model.rest_action on a deck of "
                    f"{len(deck_ids)} at {p.get('hp')}/{p.get('max_hp')} HP, "
@@ -706,7 +742,7 @@ def _rest(state: dict[str, Any], memo: Memo) -> Decision:
         revision="v1.5",
         notes={"sim_choice": what, "sim_target": which,
                "next_fight": next_fight, "next_node_kinds": kinds,
-               "option_matched": index is not None})
+               "option_matched": True})
 
 
 # ------------------- revision #6: the in-combat choice overlay arm ----------
