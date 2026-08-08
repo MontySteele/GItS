@@ -66,8 +66,8 @@ def q1b(runs: int = RUNS) -> None:
     print(f"Q1B. Fanfare saturation baseline — {runs} realistic runs/arm, "
           f"seed {SEED}")
     print(f"     constants: FANFARE_CAP_FRACTION {C.FANFARE_CAP_FRACTION}, "
-          f"per-HP {C.FANFARE_PER_HP_LOST}, per-Encore-gained "
-          f"{C.FANFARE_PER_ENCORE_GAINED}, per-Encore-spent "
+          f"per-HP {C.FANFARE_PER_HP_LOST}, per-Encore-absorbed "
+          f"{C.FANFARE_PER_ENCORE_ABSORBED}, per-Encore-spent "
           f"{C.FANFARE_PER_ENCORE_SPENT}, per-Spotlight-card "
           f"{C.FANFARE_PER_SPOTLIGHT_CARD}, SALON_FOCUS_PER "
           f"{C.SALON_FOCUS_PER}")

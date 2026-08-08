@@ -5,10 +5,10 @@ The arithmetic half of parity is machine-checked on both sides -- see
 tier0/tests/test_furina_fanfare_parity.py and
 klee-mod/KleeCode/Diagnostics/FurinaParityVectors.cs. What no automated check
 on either side can reach is ORDER: that decay lands at the true top of the
-player turn, before the block clear and before Salon upkeep; that a Power's
-constellation grant lands after the card resolves; that a doubled Power grants
-once. There is no C# test project, so the only executable copy of the C# layer
-is the game itself.
+player turn, before the block clear and before Salon upkeep; that a card's
+"Fanfare +X" grant lands in its own printed effect order; that a doubled card
+grants once per resolution. There is no C# test project, so the only
+executable copy of the C# layer is the game itself.
 
 So this prints the sim's answer, turn by turn, for a fully deterministic
 scripted fight. G-A5(b)'s live capture plays the same cards in the same order
@@ -23,8 +23,9 @@ WHAT TO WATCH, in the order the failures are likely:
   2. `decay` arriving AFTER a turn-start generator. If the number decays a
      meter that already includes this turn's Salon tick or draw income, the
      hook is too late -- decay must eat inventory, not income.
-  3. A Power granting its floor BEFORE its own effect resolves. Watch a Power
-     that also reads Fanfare: the read must see the pre-grant level.
+  3. A "Fanfare +X" card granting its floor out of its printed effect order.
+     Watch a card that also reads Fanfare: the read must see whatever the
+     order in front of it says, and the two sides must agree on which.
   4. Any `spend` line at all. Fanfare is read-only; there is no spend.
 
 Usage: python -m tier05.exp_furina_parity_trace
@@ -47,25 +48,29 @@ SEED = 11                     # the sprint's registered seed
 # id and played in this order, skipping any the hand does not hold that turn.
 #
 # Chosen to exercise every branch of the ported behaviour in as few turns as
-# possible: a common Power (floor +5), a rare Power (floor +8), an Encore gain
-# (generation), a threshold reader, and at least two turns of pure decay with
-# no generation at all so the fade is visible in isolation.
+# possible: the "Fanfare Cap +X" keyword (ceiling only), the "Fanfare +X"
+# keyword on a rare Power (floor, cap and current together), an Encore SPEND
+# (generation -- the one source that stays deterministic once the enemy is
+# forbidden to hit, see the punching bag below), a threshold reader, and at
+# least two turns of pure decay so the fade is visible in isolation.
 SCRIPT: list[list[str]] = [
     ["an_invitation"],              # T1: generate. No decay this turn.
-    ["lasting_impression"],         # T2: first decay, THEN a floor grant
-    [],                             # T3: pure decay onto the new floor
-    ["the_sea_is_my_stage"],        # T4: a RARE POWER -- floor +15 (card)
+    ["lasting_impression"],         # T2: first decay, THEN Encore +4 and
+                                    #     "Fanfare Cap +5" -- ceiling only
+    ["breathless"],                 # T3: decay, THEN spend 4 Encore -> the
+                                    #     meter has something to fade
+    ["the_sea_is_my_stage"],        # T4: a RARE POWER -- "Fanfare +15"
     [],                             # T5: pure decay, now clamped by the floor
     [],                             # T6: still on the floor: fade must stop
 ]
 
 # A small fixed deck rather than Furina's starter. The starter holds neither
-# floor source, and shuffling ten cards makes "was it in hand" a property of
-# the seed rather than of the design under test. Six cards against a five-card
+# keyword, and shuffling ten cards makes "was it in hand" a property of the
+# seed rather than of the design under test. Six cards against a five-card
 # draw means everything is reachable by turn 2.
 DECK: list[str] = [
     "an_invitation", "lasting_impression", "the_sea_is_my_stage",
-    "soloists_solicitation", "stage_presence", "soloists_solicitation",
+    "breathless", "stage_presence", "soloists_solicitation",
 ]
 
 
@@ -99,7 +104,7 @@ def _scripted_pilot(script: list[list[str]]):
 
 def _fanfare_events(log: list) -> list[dict]:
     kinds = {"gain_fanfare", "fanfare_decay", "fanfare_floor_granted",
-             "fanfare_read", "play"}
+             "fanfare_cap_raised", "fanfare_read", "play"}
     return [e for e in log if e.get("event") in kinds]
 
 
@@ -121,18 +126,19 @@ def main() -> int:
 
     print("=" * 78)
     print(f"FURINA FANFARE PARITY TRACE — seed {SEED}, "
-          f"decay {C.FANFARE_DECAY_FRACTION:.0%}, floor "
-          f"+{C.FANFARE_FLOOR_PER_POWER} / +{C.FANFARE_FLOOR_PER_POWER_RARE} "
-          f"rare")
+          f"decay {C.FANFARE_DECAY_FRACTION:.0%}, "
+          f"absorbed +{C.FANFARE_PER_ENCORE_ABSORBED} / spent "
+          f"+{C.FANFARE_PER_ENCORE_SPENT} / HP lost "
+          f"+{C.FANFARE_PER_HP_LOST}")
     print(f"  cap = {C.FANFARE_CAP_FRACTION:.0%} of {max_hp} maxHP = {cap} "
           f"(a safety rail under decay, not a dial -- F-A5)")
     # The deck below cannot be forced in-game, so G-A5(b) is a QUALITATIVE
     # capture, not a diff: the four shapes printed here are what to look for.
     print("  Live capture (G-A5b) checks these four shapes, not exact numbers:")
     print("    1. turn 1 shows NO decay line;  2. the meter falls every later "
-          "turn;")
-    print("    3. a Power play raises the floor and the fall then STOPS on "
-          "it;")
+          "turn it is above its floor;")
+    print("    3. a \"Fanfare +X\" card raises the floor and the fall then "
+          "STOPS on it;")
     print("    4. no card ever spends Fanfare.")
     print("=" * 78)
 
@@ -158,7 +164,7 @@ def main() -> int:
                 note += f" WASTED={e['wasted']} (at cap)"
         elif kind == "fanfare_decay":
             note = "resting on floor" if e.get("at_floor") else ""
-        elif kind == "fanfare_floor_granted":
+        elif kind in ("fanfare_floor_granted", "fanfare_cap_raised"):
             note = f"source={e.get('source', '')}"
         elif kind == "fanfare_read":
             note = f"kind={e.get('kind', '')}"

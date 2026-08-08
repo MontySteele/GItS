@@ -12,8 +12,7 @@ Proposed reworks (draft numbers, for ratification):
 from __future__ import annotations
 import sys
 from collections import defaultdict
-from tier0.content import loader
-from tier05 import draft, model
+from tier05 import draft, rework_sim
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -44,18 +43,21 @@ SEED = 11
 def measure():
     out = {}
     for arch in ARCHES:
-        res = model.run_many("klee", arch, "generic", draft.POLICIES["assigned"],
-                             RUNS, SEED, grant_relics=True, grant_potions=True,
-                             n_acts=1)   # §10: Act-1 instrument, pinned
+        res = rework_sim.run_many(
+            "klee", arch, "generic", draft.POLICIES["assigned"],
+            RUNS, SEED, grant_relics=True, grant_potions=True,
+            n_acts=1)   # §10: Act-1 instrument, pinned
         won = sum(1 for r in res if r.won)
         off = defaultdict(int)
         pick = defaultdict(int)
         for r in res:
             for d in r.decisions:
+                # base_id: an upgraded offer is the reworked card too, and
+                # keying on the raw id would drop every `<id>+` copy.
                 for c in d["offers"]:
-                    off[c.id] += 1
+                    off[rework_sim.base_id(c.id)] += 1
                 if d["picked"]:
-                    pick[d["picked"]] += 1
+                    pick[rework_sim.base_id(d["picked"])] += 1
         out[arch] = {"win": won / len(res),
                      "rates": {cid: (off[cid], pick[cid]) for cid in IDS}}
     return out
@@ -74,11 +76,10 @@ def show(label, data):
 
 if __name__ == "__main__":
     base = measure()
-    # apply reworks to the cached index (get_card deepcopies from it)
-    idx = loader._card_index()
-    for cid, fx in REWORKS.items():
-        idx[cid].effects = [dict(e) for e in fx]
-    after = measure()
+    # The baseline pass already warmed the upgraded prototypes, so the patch
+    # has to invalidate them -- `patched_cards` is what does that (EB-49).
+    with rework_sim.patched_cards(REWORKS):
+        after = measure()
 
     show("BASELINE (current cards)", base)
     show("AFTER REWORKS", after)

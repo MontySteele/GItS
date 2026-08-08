@@ -56,9 +56,11 @@ public static class FurinaResourceConstants
     public const int FanfarePerEncoreAbsorbed = 1;
 
     // --- "The Tide Turns" (F-A1/F-A3), ported by G-A1 2026-07-25. Mirrors
-    // tier0/constants.py FANFARE_DECAY_FRACTION / FANFARE_FLOOR_PER_POWER*.
+    // tier0/constants.py FANFARE_DECAY_FRACTION; floor/cap movement is the
+    // two printed keywords ("Fanfare +X" gain_fanfare_floor, "Fanfare Cap +X"
+    // raise_fanfare_cap) since the 2026-07-28 Fanfare rework.
     // Fanfare is a READ-ONLY momentum stat: activity generates it, it fades
-    // each turn, and permanent constellation grants give it a floor. No card
+    // each turn, and printed floor grants give it a floor. No card
     // spends it -- that grammar (fanfare_cost) was retired by F-A4 and no
     // sheet carries it any more.
 
