@@ -165,7 +165,11 @@ CI's `lints` job invokes the standalone lints directly (`.github/workflows/*.yml
 - **`heuristic_flags` may report shape but must never become an assertion**
   anywhere in the suite — D3's scope guard lives at
   `tier0/tests/test_axes_honesty.py:196-208`; deleting that test is the act of
-  reinstating the pulled invariants.
+  reinstating the pulled invariants. The two declared invariants themselves
+  (≤4.0 A2 ceiling; the A1+A6 elite pairing) ship under that same fence as
+  `axes.invariant_flags` — printed by the scorecard and the archetype-median
+  report, out of scope on the anchor and on package decks, and pinned as
+  non-asserting at `tier0/tests/test_axes_honesty.py:211-229` (EB-50).
 - **Two fixture hazards.** Reusing one `FightStats` object under two encounter keys
   doubles the A2 sample count and silently changes which battery you measured
   (`tier0/tests/test_axes_honesty.py:140-160`); and `score_config(..., base_stats=)`

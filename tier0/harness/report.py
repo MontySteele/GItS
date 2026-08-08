@@ -20,6 +20,22 @@ def _bar(score: float, width: int = 20) -> str:
     return "█" * filled + "·" * (width - filled)
 
 
+def _print_invariants(flags: list | None) -> None:
+    """EB-50's two declared invariants, printed as advice.
+
+    `None` means the reading was out of scope (baseline, or a package deck),
+    and silence is the honest output there -- an empty list is the verdict
+    "checked, both hold" and says so. The marker is `·`, not `⚠`: D3 leaves
+    the axes descriptive, so a breach is a finding to read, not a failure.
+    """
+    if flags is None:
+        return
+    for flag in flags:
+        print(f"  · INVARIANT {flag}")
+    if not flags:
+        print("  ✓ both declared scorecard invariants hold")
+
+
 def print_scorecard(character: str, deck: str, result: dict) -> None:
     print(f"\n=== Scorecard: {character}/{deck} "
           f"(REF_IRONCLAD starter = 3.0) ===")
@@ -39,6 +55,7 @@ def print_scorecard(character: str, deck: str, result: dict) -> None:
         print(f"  ⚠ {flag}")
     if not result["heuristic_flags"]:
         print("  ✓ statline shape passes the balance heuristic")
+    _print_invariants(result.get("invariant_flags"))
 
 
 def print_median(character: str, rep: dict) -> None:
@@ -55,6 +72,7 @@ def print_median(character: str, rep: dict) -> None:
         print(f"  {marker} {flag}")
     if rep.get("band_flags") == []:
         print("  ✓ all ratified winrate bands hold")
+    _print_invariants(rep.get("median_invariant_flags"))
 
 
 def print_reaction_share(encounter: str, r: dict) -> None:

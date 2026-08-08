@@ -264,3 +264,45 @@ def heuristic_flags(scores: dict[str, float]) -> list[str]:
     if not weak:
         flags.append("NO_WEAKNESS (no axis <= 2: broken)")
     return flags
+
+
+# --- the two declared scorecard invariants, as REPORT FLAGS ---------------
+
+A2_CEILING = 4.0
+ELITE_THRESHOLD = 4.0
+DECLARED_ELITE_PAIR = ("A1_frontload", "A6_utility")
+
+
+def invariant_flags(scores: dict[str, float], *,
+                    a2_ceiling: float = A2_CEILING,
+                    elite_pair: tuple[str, ...] = DECLARED_ELITE_PAIR
+                    ) -> list[str]:
+    """The two declared scorecard invariants, REPORTED and never asserted.
+
+    Source text, from `klee-pass-4-plan.md` §0: *"elite pair **A1 4.5 + A6
+    4.0**, A2 capped **≤4.0**"*; ask A5 asked which form to encode, and M4
+    (`user-queue.md` §10) restates them as *"the ≤4.0 A2 ceiling and the
+    'exactly two elite axes, specifically A1+A6' pairing"*. Until this they
+    were unencoded in any form -- `heuristic_flags` counts how MANY axes are
+    ≥4.0 without caring WHICH, so an A1+A2 character and an A1+A6 character
+    read identically to it, and the invariant passed by coincidence.
+
+    Descriptive only. D3's axis closure is standing (see this module's
+    docstring) and `tier0/tests/test_axes_honesty.py` guards it: a violation
+    prints, and the suite stays green. Nothing here raises, and nothing here
+    may become an assertion without that ruling being reopened first.
+
+    The declared pair is a parameter because it is declared per character and
+    lives in prose, not in the character yamls; the default is the A1+A6 the
+    source names.
+    """
+    flags = []
+    a2 = scores["A2_scaling"]
+    if a2 > a2_ceiling:
+        flags.append(f"A2_CEILING ({a2:.2f} > {a2_ceiling}: the declared "
+                     "scaling ceiling is breached)")
+    elite = sorted(a for a, v in scores.items() if v >= ELITE_THRESHOLD)
+    if elite != sorted(elite_pair):
+        flags.append(f"ELITE_PAIRING (elite axes {elite} are not the declared "
+                     f"pair {sorted(elite_pair)})")
+    return flags

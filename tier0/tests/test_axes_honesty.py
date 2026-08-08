@@ -206,3 +206,24 @@ def test_the_pulled_invariants_are_still_pulled():
     assert "NO_WEAKNESS (no axis <= 2: broken)" in flags
     # Reported as advice, never raised: nothing in heuristic_flags asserts.
     assert isinstance(flags, list)
+
+
+def test_the_invariants_report_and_do_not_assert():
+    """EB-50 answers ask A5's *which* the only way D3 leaves open.
+
+    `axes.invariant_flags` encodes the two invariants the test above keeps
+    pulled -- and encodes them as OUTPUT. That distinction is the whole
+    ruling: the scorecard may now SAY that a reading breaches the <= 4.0 A2
+    ceiling or is not the declared A1+A6 pair, and may not DECIDE anything by
+    it. So a reading that fires both flags has to leave the suite green, which
+    is what this test is -- it breaches both and nothing goes red.
+
+    A later pass that makes either invariant fail a run has to delete this
+    test and the one above it, and deleting them means reading why they exist.
+    """
+    breaching = dict({ax: 3.0 for ax in axes.AXES},
+                     A1_frontload=4.1, A2_scaling=4.1, A6_utility=3.6)
+    flags = axes.invariant_flags(breaching)
+    assert isinstance(flags, list) and len(flags) == 2
+    # Both invariants are broken here, both said so, and this test passes.
+    # That is the closure, stated as an executable sentence.
