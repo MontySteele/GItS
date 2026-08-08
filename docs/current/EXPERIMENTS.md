@@ -43,9 +43,10 @@ registration packets themselves live under `review/active/` — one home, not tw
   countersigned; the open step is authoring the kickoff predictions (`Q-C` in
   `docs/current/QUEUE.md`) *before* any number is read →
   `review/active/payoff-reach-reregistration.md`.
-- **Kokomi stability band (D5)** — declared DARK; its grading playtest is
-  `docs/current/playtest/kokomi-playtest-protocol.md` (unrun; Answers block
-  still blank).
+- **Kokomi stability band (D5)** — no band is declared yet (the declaration
+  is QUEUE `S4-G6`; until it lands, the band rides DARK, `band = None`); its
+  grading playtest is `docs/current/playtest/kokomi-playtest-protocol.md`
+  (unrun; Answers block still blank).
 
 New registrations add a pointer here and land their packet under
 `review/active/`; when a registration is graded and closed, both leave HEAD.
