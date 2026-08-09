@@ -200,10 +200,14 @@ three unclassified constants.
 
 ---
 
-## 6. OWED to the next live session
+## 6. OWED to the next live session — DISCHARGED IN PART 2026-08-08
 
-The game is owned by another agent this session, so **nothing below was run**.
-`deploy.ps1` was not invoked and the game was not launched.
+**§7 below is the live session's record.** Six of the nine captures are taken
+and the widget is run-verified; three (`C5`, `C6`, `C7`) are still owed, and one
+of them is **structurally unreachable as written** — see §7.4.
+
+The game was owned by another agent when this packet was drafted, so nothing
+below was run *then*. `deploy.ps1` has since been invoked; see §7.
 
 ### Build steps (main checkout, in order)
 
@@ -248,3 +252,129 @@ The game is owned by another agent this session, so **nothing below was run**.
 Kokomi protocol playtest, whose Q1/Q4 this gates — becomes askable. The
 corpse-detonation check (`EB-66`) was sequenced behind a legible end of turn
 for the same reason.
+
+---
+
+## 7. Live session record — 2026-08-08
+
+**Build under capture:** package **`0.2-634`**, built and deployed from the main
+checkout at `cee2f60` (branch `sitting-prep-2026-08-08`). `validate: OK`, S7
+suite included, 272 card images, `klee.pck` 9 094 976 bytes. **No `build_pck`
+rerun was needed** — the pck at `cee2f60` already carries both new resources
+(`resource=res://shared/turn_end_docket.tscn` and
+`resource=res://kokomi/summon/bake_kurage.png` are both in
+`klee.pck.contract.txt`; pck build id `20260808-192339+a8e6f38`). Game
+`v0.107.1`, mods loaded = 3 (klee, STS2_MCP, STS2AutoSlayMod). Bridge: vendored
+STS2MCP pin `55e0648` on `localhost:15526`, deployed at session start and
+**removed at teardown**; `steam_appid.txt` created at launch and **removed at
+teardown**; the speed override was never enabled, so every frame is the pacing a
+player sees.
+
+**Boot telemetry (packet §6 step 3):** `godot.log` reads
+`[INFO] [klee] convention scene ok: res://shared/turn_end_docket.tscn
+root=Node2D`. The telemetry line reports the ROOT only and never names a child,
+so "`ChipLabel1` present" is not a claim this line can carry — the chips were
+verified on screen instead (C1/C2/C3).
+
+**Runs:** three, all singleplayer, all dead in act 1 under bot-grade play —
+Kokomi `YYR035ECBH` (ascension 3, died floor 6), Klee `GQ0AFG1W7L` (died act 1),
+Klee `A5QGDZKHXZ` and `A23BBXC8RH` (burst-farming attempts, died floor 2 and
+floor 1). No `?` room was entered blind where another route existed; the four
+that were entered were `THIS_OR_THAT`, `SUNKEN_STATUE`,
+`WATERLOGGED_SCRIPTORIUM` and `TRASH_HEAP` — **Punch Off was never reached and
+the game never hung** (`godot.log` finished the session at 171 KB).
+
+### 7.1 Capture manifest
+
+All in the gitignored `art/eb52_captures/` (the precedent this packet is silent
+about — same directory, same reason: Tier F art in a public repo). Every frame
+is the game's full 4K screen with the debug corner (build, seed, content hash)
+in it.
+
+| # | file | verdict |
+|---|---|---|
+| C1 | `n1_c1_kokomi_docket_whole_creature.png` (+ `_crop_n1_c1_docket.png`) | **VERIFIED.** Whole creature in frame; the docket sits clear above the Charge (`6`) and Burst (`7/20`) gauges, no collision with the rig, the HP bar or the state display |
+| C2 | `n1_c2_chip_moved_after_charge.png` (+ `_crop_n1_c2_chip.png`) | **VERIFIED.** Chip moved `22 → 25` as Charge went `6 → 7`. Honest caveat: the Charge came from Pearl of Wisdom's *exhaust* hook during a card play, not from a play-free source — a play-free Charge gain was never offered |
+| C3 | `n1_c3a_chip_unamped.png` / `n1_c3_chip_amped_green.png` | **VERIFIED.** `10` white → `12` in the modified-value green after `Before Sun and Moon`. `n1_extra_chip_two_amps.png` is the two-copy case: chip `14` green while `KurageSummonPower`'s own badge text still says "4 plus 3 per Charge" — i.e. the exact gap `KurageAmpPower` flagged, closed on the chip and still open on the power text |
+| C4 | `n1_c4_kurage_slot_hover.png` (+ `_crop_n1_c4_tip.png`) and `n1_c4b_bake_kurage_card_hover.png` | **VERIFIED word-for-word.** Both read "The pulse deals 4 damage plus 3 per Charge you hold, at the END of your turn. You hold N Charge: the next pulse hits for X. Charge banked before the pulse counts, so the number can still move." The docket hover appends "Lasts 1 more turn(s)." — which a card in hand cannot say — and titles itself `Bake-Kurage` where the card tip titles itself `Bake-Kurage pulse` |
+| C5 | — | **OWED.** See §7.3 |
+| C6 | — | **OWED (co-op).** The solo half of T8 is proven: `n1_c6a_solo_fire_flash_frame.png` / `_decay` / `_after` (frames 3–5 of the 34-frame burst `n1_fire_solo_f000..033.png`, 100 ms pitch) show a bright plate flashing behind the jellyfish slot at the instant the pulse resolves, gone two frames later. Whether the same flash reads over a PARTNER'S creature is untestable in singleplayer |
+| C7 | — | **OWED, and unreachable as written.** See §7.4 |
+| C8 | `n1_c8_docket_absent_no_sources.png` | **VERIFIED.** Kokomi turn 1, nothing standing: both gauges render and the docket band above them is empty. T4 also confirmed at the other end — the whole docket vanishes the moment the summon wears off (`n1_fire_solo_f006+`) |
+| C9 | `n1_c9_kurage_slot_final_scale.png` | **VERIFIED, un-zoomed.** At final render scale the silhouette reads as a jellyfish: dome + bright core + tapering skirt. T11's crop call holds |
+| bonus | `n1_bonus_char_select_outlines.png` | The freshly shipped character-icon outlines on the character-select strip: Kokomi's selected icon carries its halo, Furina's and Klee's unselected icons are the greyed variants |
+| extra | `n1_extra_shop_screen.png` | The shop screen carrying the `MUSTER` raw-loc-key defect (§7.5) |
+
+### 7.2 Run-verification verdict, per leg
+
+| check | verdict |
+|---|---|
+| **the docket renders** | **PASS.** Spawns into the combat container, tracks the creature, `END OF TURN` header, one slot, no warning in `godot.log` |
+| **the jellyfish renders from the 420×720 art with a live chip** | **PASS.** The cut sprite renders as a standing entity and the chip prints `PulseDamage` exactly: `4 + 3×6 = 22`, `4 + 3×7 = 25`, `4 + 4×2 = 12`, `4 + 5×2 = 14` — four readings, four exact matches, including both amp levels |
+| **the four sources fire in `TurnEndAttribution`'s order** | **NOT VERIFIED — not verifiable in the runs played.** Only ever ONE source stood at a time. The order gate is pinned in tests; the *displayed* order was never exercised against two or more live slots. See §7.4 for why this is harder than it looks |
+| **burst attribution / countdown / flash over a partner** | **PARTIAL.** The flash mechanism is proven on the owner's own slot (C6 note above). Position-as-attribution and the partner countdown need a second seat and were not reachable — the bridge drives singleplayer only |
+| **T5 (a "1" in the turns corner is suppressed)** | **PASS,** unintentionally decisive: `KURAGE_DURATION` is 1, so every jellyfish captured this session was a `1` and none of them printed one |
+| **T1/T2 (−380 clears the rig at combat zoom)** | **PASS on Kokomi.** Untested on Furina's rig and on the Salon stage |
+| **hover vs enemy intents / targeting arrows** | **NO COLLISION OBSERVED** on the one rig tested. Not a general answer |
+
+### 7.3 Why C5 is still owed
+
+`Sparks 'n' Splash` is granted to hand only when Klee's Burst meter fills at 40,
+and the meter **resets to 0 at the start of every fight**. Measured live: an
+Elemental Skill pays 4–5, `Imaginary Friend` pays 8 (5 tag + 3 printed), and
+`Duck and Cover` pays nothing. Three Klee runs reached **24**, **32** and
+**37** of 40 before the run died — the last one three points short, in round 17
+of a single fight, at 4 HP. Reaching the Burst is a deck-quality problem, not a
+widget problem: it wants a run that survives to draft two or three
+skill-tagged cards, which bot-grade play did not deliver in the session's time
+box. Nothing about the leg is blocked; it needs one better Klee run.
+
+### 7.4 C7 is not reachable as written, and that is a finding
+
+C7 asks for "a creature with **all four** sources standing (Kokomi + Arlecchino
++ a fielded Oz + a Burst)". The four sources are `MasqueRedDeathPower`
+(Arlecchino, a companion card), `SparksNSplashPower` (**Klee's** kit Burst),
+`OzSummonPower` (Fischl, a companion card) and `KurageSummonPower`
+(**Kokomi's** basic `Bake-Kurage`).
+
+Sparks 'n' Splash is granted only to Klee, and Bake-Kurage is only in Kokomi's
+pool. **No single creature can ever hold both**, so the four-slot row cannot be
+staged at all — in singleplayer or in co-op. The reachable maximum is **three**:
+Masque + Oz + (Kurage on Kokomi, or Sparks on Klee). T12's fourth scene slot is
+therefore unreachable by construction rather than merely rare, and the
+"does four slots plus a header read as one row or as clutter" question in §6 has
+no experiment behind it. Either the capture is re-specified as a three-slot row,
+or `SceneSlots` is a deliberate 3+1 headroom decision — a [USER] call, not this
+session's.
+
+The three-slot row itself remains capturable; it needs a run that drafts both
+companion cards, which the three runs did not offer (the companion channel
+rolled Sayu, Gorou, Lynette, Kujou Sara, Dahlia, Barbara, Prune, Shinobu,
+Kaeya, Albedo and Sucrose — never Fischl or Arlecchino).
+
+### 7.5 Defects the session caught
+
+One filed to BACKLOG, one fixed in place as hygiene, one observation that is
+deliberately filed nowhere.
+
+1. **`EB-67` — Kokomi power/relic icons render the red `NOPE` placeholder.**
+   Two instances captured: `Pearl of Wisdom` in the relic strip (character
+   select AND in-run, beside a correctly-rendered `Lost Coffer`) and the
+   `Bake-Kurage` power badge under Kokomi's HP bar. `KleePck.Path` returns null
+   for `kokomi/relics/pearl_of_wisdom.png` — the pck's `kokomi/` block carries
+   `model/`, `ui/` and now `summon/`, and **no `relics/` or `powers/` entries at
+   all** — so the base getter renders `NOPE`. Exactly `EB-65`'s mechanism, one
+   character over. Frames: `n1_bonus_char_select_outlines.png`,
+   `n1_c1_kokomi_docket_whole_creature.png`.
+2. **Filed nowhere, on purpose:** the companion channel never offered Fischl or
+   Arlecchino across three runs (Sayu, Gorou, Lynette, Kujou Sara, Dahlia,
+   Barbara, Prune, Shinobu, Kaeya, Albedo, Sucrose did come up). Eleven draws is
+   not evidence of anything about a pool, so this is a note about why the
+   three-slot capture did not happen, not a defect.
+3. **Fixed in place (hygiene, `EB-64`'s shape one key over):**
+   `card_keywords.KLEEMOD-MUSTER.title` had no row in `KleeMod.cs`'s keyword
+   fallback and shipped as the **raw key**, rendered live as the keyword name on
+   `Reinforcements` in a shop (`n1_extra_shop_screen.png`). One dictionary line
+   added: `"Muster"`. **Compile-verified only** — the deployed `0.2-634` that
+   produced these captures does NOT carry it, deliberately, so the capture build
+   and the manifest above stay one artifact.
