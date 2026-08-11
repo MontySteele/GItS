@@ -77,10 +77,11 @@ def test_self_power_scaling_value_still_decays_with_the_setup_taper():
 # commit why the reading did not move). That is the DRAFTER_VERSION
 # discipline made mechanical rather than remembered.
 #
-# v1 is the set as EB-5 found it. Nothing here was retuned; the whole item
-# was naming and stamping, and the values are byte-identical to the inline
-# literals they replaced.
-PILOT_WEIGHT_SET_V1 = {
+# v1 was the set as EB-5 found it -- nothing retuned, values byte-identical to
+# the inline literals they replaced. v2 (POLICY 7, R176) is v1 plus one NEW
+# weight, `PILOT_COMPANION_COPY_VALUE`, filed in the policy.py half: no v1
+# value moved, but the SET did, which is what the stamp labels.
+PILOT_WEIGHT_SET_V2 = {
     "PILOT_REACTION_TRIGGER_VALUE": 6.0,
     "PILOT_REACTION_SEED_VALUE": 2.0,
     "PILOT_DRAW_WHILE_VALUE": 2.0,
@@ -113,20 +114,22 @@ PILOT_WEIGHT_SET_V1 = {
 }
 # The half that stays in policy.py for the C# parity reason written at its
 # head. Filed elsewhere, stamped the same.
-STOKE_WEIGHT_SET_V1 = {
+POLICY_FILED_WEIGHT_SET_V2 = {
     "STOKE_DEPLOY_OPEN": 6.0,
     "STOKE_DEPLOY_FULL": 1.5,
     "STOKE_RUNWAY_TURNS": 2.0,
     "STOKE_FUEL_HUNGRY": 1.2,
     "STOKE_FUEL_SATED": 0.15,
+    # v2, POLICY 7 (R176): the companion-copy valuation in `_tempo_value`.
+    "PILOT_COMPANION_COPY_VALUE": 1.5,
 }
 
 
-def test_the_pilot_weight_set_is_stamped_at_v1():
-    assert C.PILOT_WEIGHTS_VERSION == 1
-    for name, value in PILOT_WEIGHT_SET_V1.items():
+def test_the_pilot_weight_set_is_stamped_at_v2():
+    assert C.PILOT_WEIGHTS_VERSION == 2
+    for name, value in PILOT_WEIGHT_SET_V2.items():
         assert getattr(C, name) == value, name
-    for name, value in STOKE_WEIGHT_SET_V1.items():
+    for name, value in POLICY_FILED_WEIGHT_SET_V2.items():
         assert getattr(policy, name) == value, name
 
 
@@ -136,7 +139,7 @@ def test_every_pilot_weight_in_constants_is_in_the_stamped_set():
     what keeps the stamp honest as the pilot grows."""
     live = {n for n in dir(C)
             if n.startswith("PILOT_") and n != "PILOT_WEIGHTS_VERSION"}
-    assert live == set(PILOT_WEIGHT_SET_V1)
+    assert live == set(PILOT_WEIGHT_SET_V2)
 
 
 def test_the_pilot_stamp_is_not_part_of_the_run_cell_stamp():

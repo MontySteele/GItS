@@ -64,8 +64,11 @@ def test_klee_and_furina_tuples_did_not_move():
 def test_the_policy_stamp_bumped():
     # 3 was R66's bump; 4 is R124 (EB-31p); 5 is EB-24p (the pilot reads
     # reaction_triggered_this_turn); 6 is EB-29t (Enrage skill tax +
-    # Intangible per-hit cap, the promoted Test Subject reads).
-    assert draft.POLICY_VERSION == 6
+    # Intangible per-hit cap, the promoted Test Subject reads); 7 is R176
+    # (the pilot values copy_companion_in_hand / replay_next_companion --
+    # EB-17p's 40,396 draws / 0 plays was pilot scoring, not an unreachable
+    # in-hand condition; every Klee tier0.5 number moves with it).
+    assert draft.POLICY_VERSION == 7
 
 
 def test_the_starvation_alarm_keys_on_the_cohorts_own_archetypes():
