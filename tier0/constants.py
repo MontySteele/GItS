@@ -1030,6 +1030,24 @@ BANNER_FEATURED_SLOTS = 3
 # FURTHER ERRATA MAY JOIN C9 while it is open: until a number is published
 # under this stamp, an erratum that lands here widens this entry rather than
 # opening C10.
+#
+# ERRATUM JOINED 2026-08-10 under exactly that clause -- no number has been
+# published under C9, so this widens rather than opening C10. THE X7 + X8
+# RARITY PROMOTIONS (R161, R162): `friendly_visit`, `chain_fuse` and
+# `careful_arrangement` all move Common -> Uncommon in `docs/klee-cards.yaml`.
+# Costs, amounts, tags and text are unchanged on all three; only the band
+# they are drafted at moves. `skip_and_hop`, `sparkly_treasure` and `crackle`
+# were ruled to STAY Common, and `lynette_box_trick` was deliberately left
+# alone (watch item W5 in STATE) -- those are rulings, not deferrals.
+# Why this belongs in the constants stamp at all: card-sheet rarity sits
+# outside `RT/D/P/C`, so a rarity edit moves the drafted world with no
+# version signal of its own (that gap is QUEUE M15, unratified). Batching it
+# here gives it one. Two downstream effects follow mechanically and are NOT
+# separate decisions: Klee's pool reads 29 Common / 28 Uncommon (was 32/25,
+# total unchanged at 76), and `secret_stash`, whose add-pool is derived as
+# "demolition Commons", stops offering `chain_fuse` and `careful_arrangement`.
+# EB-17p supplies the measured warrant for the friendly_visit half: it graded
+# PREDICTED-strong (+3.04 / +4.46) on the forced-first-copy sweep, 2026-08-10.
 # DRAFTER_VERSION and RUNTEMPLATE correctly do NOT bump: no offer-time price
 # and no map/route shape changed.
 CONSTANTS_VERSION = 9

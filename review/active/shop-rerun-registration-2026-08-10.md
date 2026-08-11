@@ -3,6 +3,8 @@
 > **Status: DRAFT. Nothing here has been run.** No number in this document was
 > measured. The instrument was repaired and the shop world was changed on
 > 2026-08-10; this packet asks to re-run the measurement in the new world.
+> **That world is `RT10/D14/P6/C9`, `C9` including the X7/X8 rarity erratum
+> — §2 enumerates it in full, and it is the world the re-run measures.**
 > The predictions in §5 are deliberately blank — they are [USER]'s to fill in
 > before any seed is run.
 
@@ -51,17 +53,52 @@ rarity instead of a guess from its price.
 
 ## 2. One window, one world
 
-The floor restoration and the instrument repair land together, in the same
-commit range, under one stamp (`CONSTANTS_VERSION` 9).
+**The registered world is `RT10/D14/P6/C9`, including the X7/X8 rarity
+erratum.** In plain English, and as the standing requirement for this
+re-run: this is the world the re-run measures. Everything listed below is
+inside one window, and a run of this instrument that does not report this
+exact stamp is not the registered measurement.
 
-This is deliberate and it satisfies the one-variable rule rather than bending
-it. The rule (EXPERIMENTS, D4) is that one measurement window contains one
-change to the *world*. There is exactly one world change here: the slot-2
-floor. The instrument repair changes no game behaviour at all — it changes
-only what we write down about a game that plays identically either way. The
-new fields are additive: nothing reads them to make a decision and none of
-them draws from the run's random number stream, so a run plays out the same
-whether or not they are recorded.
+What that one window contains, in full:
+
+1. **The slot-2 rarity floor, restored** ([USER] 2026-08-10, S4-G10). The
+   shop's wildcard companion slot rolls Uncommon-or-better in both engines;
+   Commons leave the paid channel and the 50-gold band is unreachable.
+2. **The instrument fixes** to `exp_shop_companion_channel` — per-visit
+   purchase attribution, true slot-2 purchase rarity, and the
+   gold/affordability/crowd-out logging.
+3. **The five R82-reopen enchant events**, which arrived with
+   `RUNTEMPLATE_VERSION` 10 and move the event-pool odds in every act for
+   every character. This is why the stamp reads RT10 and not RT9, and it is
+   why no number from the original cell is a cheaper sample of this one.
+4. **The three rarity promotions** (R161/R162): `friendly_visit`,
+   `chain_fuse` and `careful_arrangement` move Common → Uncommon. They joined
+   `C9` under its own open-window clause, before any number was published
+   under `C9`. They are named here because they change what Klee's draft
+   offers, and Klee is one of the three characters this cell runs — the
+   companion channel is not the only thing competing for the purse.
+
+The floor restoration, the instrument repair and the rarity erratum land
+together, in the same commit range, under one stamp (`CONSTANTS_VERSION` 9).
+
+On the one-variable rule (EXPERIMENTS, D4: one measurement window contains
+one change to the *world*), stated without softening:
+
+- The **instrument repair** is not a world change at all. It changes only
+  what we write down about a game that plays identically either way. The new
+  fields are additive: nothing reads them to make a decision and none of them
+  draws from the run's random number stream, so a run plays out the same
+  whether or not they are recorded.
+- The **slot-2 floor** is the world change this cell is *about*, and it is
+  the only change inside the channel under measurement.
+- The **enchant events** and the **rarity promotions** are world changes
+  outside the channel. They are not variables this cell manipulates — they
+  are the same in both arms, and the arms differ only by the `companions`
+  flag — but they are honestly part of the world, and that is why they are
+  named above rather than left to the stamp to imply. The cost of carrying
+  them is that this cell's absolute numbers are not comparable to any
+  pre-C9 read; the within-cell arm contrast, which is what Q1–Q4 ask, is
+  unaffected because both arms sit in the same world.
 
 Landing them apart would be worse, not better. It would mean either measuring
 the new world with a broken instrument, or measuring the old world with the
@@ -112,8 +149,10 @@ the channel should be re-priced or re-stocked. That is a design call and it is
   only difference between the two arms; same seeds, same characters, same
   policy, same everything else.
 - Characters: unchanged — `klee`/demolition, `furina`/salon, `kokomi`/priest.
-- World: `CONSTANTS_VERSION` 9. The report must carry the full run-cell stamp
-  (`RT/D/P/C`) or it is not citable (R68).
+- World: **`RT10/D14/P6/C9`**, `C9` including the X7/X8 rarity erratum — the
+  world enumerated in §2. The report must carry the full run-cell stamp
+  (`RT/D/P/C`) or it is not citable (R68), and it must read `RT10/D14/P6/C9`
+  or it is not *this* registration's measurement.
 - Every output line the instrument printed before the repair still prints, so
   the pre-existing reads stay reproducible. The new reads are printed on lines
   labelled `NEW`.

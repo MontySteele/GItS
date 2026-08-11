@@ -55,8 +55,8 @@ registration packets themselves live under `review/active/` — one home, not tw
   `review/active/eb17p-registration-draft-2026-08-08.md` §13;
   `review/active/eb17p-results-2026-08-10.txt`.
 - **Shop companion channel re-run (`S4-G10` / `C9`)** — **DRAFT, awaiting
-  [USER] countersign at QUEUE `M14`, unrun.** The packet is now in HEAD
-  (BACKLOG `EB-79`). The channel's world moved ([USER] restored slot 2's
+  [USER] countersign at QUEUE `M14`, unrun.** The packet is in HEAD as of the
+  `shop-floor-2026-08-10` merge. The channel's world moved ([USER] restored slot 2's
   Uncommon floor, `CONSTANTS_VERSION` 9) and the instrument's two defects were
   repaired, both on 2026-08-10; the packet asks to re-measure in the new world.
   Predictions are explicit [USER] slots and are still blank →
