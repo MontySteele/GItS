@@ -792,11 +792,13 @@
    # the card's identity or its convergence-cell membership. ALTERNATIVE for red-pen, more conservative:
    # hold the old cost and raise the Encore rider instead. Chosen against because a two-energy skill
    # that neither damages nor blocks is fighting the energy curve, not the number.
-   # NOTE for red-pen: this card is a WATCHLIST convergence-cell member (with undercurrent and
-   # guest_neuvillette_judgment). A cost cut moves the whole mass-application cell, so that measurement
+   # NOTE for red-pen: this card is a WATCHLIST convergence-cell member (with guest_neuvillette_judgment).
+   # A cost cut moves the whole mass-application cell, so that measurement
    # should be retaken after ratification rather than before.
    # Mass application + buffer. A6's rare ceiling. WATCHLIST (redpen flag 8): hydro+cryo convergence CELL member,
-   # with undercurrent and guest_neuvillette_judgment (one measurement covers the full mass-application set).
+   # with guest_neuvillette_judgment (one measurement covers the full mass-application set).
+   # M12(a) RULED 2026-08-10 (R147): the cell is TWO -- {rain_of_roses, guest_neuvillette_judgment}. The
+   # four-name premise cited a phantom line; undercurrent and standing_room_only are not members.
 - {id: the_final_verdict, name: "The Final Verdict", register: archon, cost: 2, type: attack, rarity: rare, solve: [scaling], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [fanfare], role: payoff,
    effects: [{op: damage, amount: 0, bonus_formula: 1_per_1_fanfare, target: enemy},
              {op: crash_fanfare, amount: 30}]}
