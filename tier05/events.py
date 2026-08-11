@@ -27,7 +27,7 @@ from pathlib import Path
 import yaml
 
 from tier0 import constants as C, roster
-from tier0.content import loader, upgrades
+from tier0.content import enchantments, loader, upgrades
 from tier05 import draft, potions as potion_pool, rewards
 
 _POOL_PATH = Path(__file__).parent / "content" / "events.yaml"
@@ -68,10 +68,17 @@ OPTION_KEYS = frozenset({
     # the option cannot name one; `roster.ANCIENTS` is the lookup. Carrying it
     # also GATES the event -- see `pool_for`.
     "add_ancient",
+    # R82 reopened (2026-08-10): attach a NAMED enchantment to a card in the
+    # DECK, permanently. `{name, amount}` -- see `_enchant_targets`.
+    "enchant",
     # objects
     "relic", "relic_id", "potion", "spend_potion",
     # gating / structure
     "requires_gold", "escalate",
+    # Self-Help Book's null branch: offered ONLY when every other option on
+    # the event is locked for want of a legal enchant target. The wiki states
+    # it as an availability rule on the option, so it is one here too.
+    "if_no_enchant_target",
 })
 
 
@@ -272,6 +279,44 @@ def _filtered_pool(st: EventState, spec: dict) -> list:
     return out
 
 
+ENCHANT_HP = UPGRADE_HP    # see _enchant_targets' docstring for why
+
+
+def _enchant_targets(opt: dict, st: EventState) -> list[int]:
+    """Deck INDICES this option's enchantment may legally land on.
+
+    The selection rule is the enchantment's own eligibility (Sharp wants an
+    Attack, Soul's Power wants a card that Exhausts, Sown wants anything)
+    plus the base game's two universal rules: a card holds exactly one
+    enchantment and it can never be replaced, and curses/statuses/kit cards
+    are not enchantable at all. Both live in `content/enchantments.eligible`
+    / `.decorate` so this function cannot drift from the tier-0 side.
+
+    EMPTY IS A REAL ANSWER, and it is the reason this returns indices rather
+    than a bool: `available` drops an option with no legal target, which is
+    the lock the wiki states verbatim on Grave of the Forgotten, Wood
+    Carvings and every branch of Self-Help Book.
+
+    On VALUATION, which is `ENCHANT_HP` above: an enchantment is priced at
+    exactly one upgrade. That is a statement, not a tune. The valuation
+    already refuses to tell one NAMED card from another (`add_card` rides a
+    flat CARD_HP -- see the Bugslayer note in events.yaml), and pricing
+    Vigorous 8 above Nimble 2 here would be inventing a per-enchantment
+    number with no measurement behind it. An enchantment is the same SHAPE
+    as an upgrade -- a permanent buff to one card the player picks -- so it
+    carries the same price and no free parameter enters the policy.
+    """
+    spec = opt["enchant"]
+    name = spec["name"]
+    out = []
+    for i, cid in enumerate(st.deck_ids):
+        if enchantments.enchantment_of(cid) is not None:
+            continue
+        if enchantments.eligible(loader.peek_card(cid), name):
+            out.append(i)
+    return out
+
+
 def option_value(opt: dict, st: EventState, _depth: int = 0) -> float:
     """What this option is worth, in HP. Positive is good.
 
@@ -321,6 +366,8 @@ def option_value(opt: dict, st: EventState, _depth: int = 0) -> float:
     v += REMOVE_HP * (opt.get("remove", 0) + opt.get("remove_random", 0) * 0.5)
     v += UPGRADE_HP * (opt.get("upgrade", 0) + opt.get("upgrade_random", 0) * 0.7)
     v -= UPGRADE_HP * opt.get("downgrade_random", 0) * 0.7
+    if opt.get("enchant"):
+        v += ENCHANT_HP
     v += 2.0 * opt.get("transform", 0)       # a coin flip on a card, not a gain
     v += CURSE_HP if opt.get("curse") else 0.0
     v += RELIC_HP * int(opt.get("relic") or 0)      # `relic: true` -> 1
@@ -336,8 +383,18 @@ def option_value(opt: dict, st: EventState, _depth: int = 0) -> float:
 
 
 def available(event: dict, st: EventState) -> list[dict]:
+    # Self-Help Book's null branch is offered ONLY when nothing else is:
+    # "Move On is only available if you have no valid cards". Computed once
+    # over the whole event rather than per option, because that is what the
+    # rule is about -- the state of the OFFER, not of this option.
+    any_target = any(_enchant_targets(o, st)
+                     for o in event["options"] if o.get("enchant"))
     out = []
     for opt in event["options"]:
+        if opt.get("if_no_enchant_target") and any_target:
+            continue
+        if opt.get("enchant") and not _enchant_targets(opt, st):
+            continue
         if opt.get("requires_gold", 0) > st.gold:
             continue
         if opt.get("spend_potion") and not st.potions:
@@ -529,6 +586,28 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
         if cand:
             i = cand[rng.randrange(len(cand))]
             st.deck_ids[i] = st.deck_ids[i] + upgrades.SUFFIX
+
+    # R82 reopened: attach a named enchantment to ONE deck card, for the rest
+    # of the run. The attachment is a decoration on the deck-list id
+    # (`<id>@<name>-<amount>`), so it survives every later deck operation and
+    # every fight for free -- the run layer rebuilds the player from
+    # `deck_ids` each combat, and `loader` resolves the mark.
+    #
+    # THE SELECTION RULE IS THE PLAYER'S, and the events state it as "choose
+    # a card": the pick is the drafter's HIGHEST-valued legal target, the
+    # mirror image of `_worst_cards`, so enchant policy and draft policy
+    # cannot disagree any more than removal policy can. Ties break to the
+    # earliest deck slot, which is the declaration-order rule `choose` uses.
+    if opt.get("enchant"):
+        idxs = _enchant_targets(opt, st)
+        if idxs:
+            cards = [loader.peek_card(cid) for cid in st.deck_ids]
+            best = max(idxs, key=lambda i: (
+                draft.score_offer(cards[i], cards, st.archetype), -i))
+            st.deck_ids[best] = enchantments.decorate(
+                st.deck_ids[best], opt["enchant"]["name"],
+                opt["enchant"].get("amount"))
+            entry["enchanted"] = st.deck_ids[best]
 
     if opt.get("pick_cards"):
         spec = opt["pick_cards"]

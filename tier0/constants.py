@@ -690,7 +690,16 @@ WINRATE_BAND_MIN_FIGHTS = 1000    # ratification process fix: winrate band
 # v9 (EB-30m): the Darv/Dusty Tome act-2 event -- the single Ancient
 #      acquisition door, grants upgraded; act-2 event-pool odds move for
 #      every character.
-RUNTEMPLATE_VERSION = 9
+# v10 (R82 reopened, [USER] 2026-08-10, M7): the enchant events. Five events
+#      built on Enchant join the pools -- Sapphire Seed (act 1), Field of
+#      Man-Sized Holes / Stone of All Time / Symbiote (act 2; Symbiote also
+#      act 3), Self-Help Book (all acts) -- so the event-pool odds move in
+#      every act for every character, the same way the single act-2 addition
+#      moved them at v9. Enchantments themselves are post-draft only: the
+#      drafter is not taught about them, so DRAFTER_VERSION and
+#      draft.POLICY_VERSION are both untouched and the payoff-reach pin
+#      stands. v9 event numbers do not carry across.
+RUNTEMPLATE_VERSION = 10
 # DEAD as of v6; kept as the name of the world every pre-§11 measurement was
 # taken in, and still used by tests that pin a node sequence deliberately.
 RUN_NODE_TEMPLATE = "NNNRETN$ERB"

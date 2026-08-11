@@ -37,6 +37,19 @@
 #   spend_potion: true requires a held potion; consumes it
 #   requires_gold: N   option is unavailable below N gold
 #   escalate: <id>     after resolving, offer this event again (the ladder)
+#   enchant: {name: n, amount: X}   attach the NAMED enchantment to one deck
+#                      card, permanently (R82 reopened, [USER] 2026-08-10).
+#                      The vocabulary is tier0/content/enchantments.CATALOG
+#                      and it holds exactly the names these events grant. The
+#                      TARGET is the drafter's best legal card, where legal =
+#                      the enchantment's own type rule (Sharp wants an
+#                      Attack, Soul's Power wants a card that Exhausts) and
+#                      the base game's "one enchantment per card, never
+#                      replaced". No legal target LOCKS the option, which is
+#                      the rule the wiki states on these events verbatim.
+#   if_no_enchant_target: true   offer this option only when every enchant
+#                      option on the event is locked (Self-Help Book's
+#                      "Move On is only available if you have no valid cards")
 #
 # Event-level keys:
 #   hidden: true       reachable only by `escalate`, never rolled directly
@@ -146,6 +159,17 @@ act1:
     options:
       - {label: "Eat the Egg", max_hp: 7}
 
+  - id: sapphire_seed
+    name: "Sapphire Seed"
+    # R82 REOPENED ([USER], 2026-08-10, M7). The event resists drama rather
+    # than mapping: both options are pure upside and the only tension is
+    # now-versus-later, which is exactly the trade the HP valuation is built
+    # to read (heal + upgrade, or a permanent per-card Energy refund).
+    # `sown` takes no amount -- the wiki prints no number on it.
+    options:
+      - {label: "Consume", heal: 9, upgrade: 1}
+      - {label: "Plant and Nourish", enchant: {name: sown}}
+
   - id: luminous_choir
     name: "Luminous Choir"
     options:
@@ -209,6 +233,47 @@ act2:
     options:
       - {label: "Learn Extermination Technique", add_card: exterminate}
       - {label: "Learn Squash Technique", add_card: squash}
+
+  - id: field_of_man_sized_holes
+    name: "Field of Man-Sized Holes"
+    # R82 REOPENED ([USER], 2026-08-10, M7). Both branches are now exact.
+    # Enter Your Hole is Perfect Fit, which is a SHUFFLE placement rather
+    # than an on-play rider -- it rides `enchant_top_of_draw` at the engine's
+    # two shuffle sites (combat.surface_innate and
+    # state.shuffle_discard_into_draw), sharing innate's placement.
+    # Resist adds Normality, and Normality is the first curse in
+    # tier0/content/cards/curses.yaml expressed EXACTLY rather than softened:
+    # its 3-card turn cap is a real hand read, not a guessed trigger.
+    options:
+      - {label: "Enter Your Hole", enchant: {name: perfect_fit}}
+      - {label: "Resist", remove: 2, curse: curse_normality}
+
+  - id: stone_of_all_time
+    name: "Stone of All Time"
+    # R82 REOPENED ([USER], 2026-08-10, M7). "Lose a random potion" is
+    # `spend_potion` -- which is exactly a random held potion, consumed for
+    # real (NC-8 / R116) -- so Drink and Lift locks itself when the bag is
+    # empty, the real rule. Push is Vigorous 8 on an Attack: a first-play-
+    # per-combat flat rider, which is why it needed its own field rather
+    # than the shipped flat one.
+    options:
+      - {label: "Drink and Lift", spend_potion: true, max_hp: 10}
+      - {label: "Push", hp: -6, enchant: {name: vigorous, amount: 8}}
+
+  - id: symbiote
+    name: "Symbiote"
+    also_acts: [3]                    # Hive + Glory, per the wiki's own line
+    # R82 REOPENED ([USER], 2026-08-10, M7). Corrupted is the one enchantment
+    # in the converted set that is a COST as well as a gain: +50% damage on
+    # the card, 2 HP every time it is played. The HP half rides the shipped
+    # `enchant_effects` list (a self-damage row, Inky's pipe); the damage
+    # half needed a multiplier. The option valuation cannot see the recurring
+    # HP cost -- it prices an enchantment as one upgrade, flat -- so this
+    # option reads slightly better to the policy than it plays. Stated here
+    # rather than corrected with an invented number.
+    options:
+      - {label: "Approach", enchant: {name: corrupted}}
+      - {label: "Kill with Fire", transform: 1}
 
   - id: darv
     name: "Darv"
@@ -294,6 +359,30 @@ all:
       - {label: "Overcome", remove_random: 1}
       - {label: "Hold On", hp: -3, remove: 1}
 
+  - id: self_help_book
+    name: "Self-Help Book"
+    # R82 REOPENED ([USER], 2026-08-10, M7). An all-acts event (research §2.1;
+    # the harvest page states no location) and the purest test of the enchant
+    # op: no HP, no gold, no numbers at all -- three type-gated enchantments
+    # and a null branch whose availability is the INVERSE of theirs. Each
+    # reading is offered only while a card of its type is still enchantable,
+    # and Move On appears only when none of the three is, which is the
+    # `if_no_enchant_target` key.
+    #
+    # KNOWN LIMITATION, measured not assumed (400 klee runs, seed 0-399):
+    # every enchantment prices at a flat ENCHANT_HP, so all three readings
+    # score identically and the tie falls to declaration order -- Sharp wins
+    # every time a deck holds an Attack, which is every time. Nimble and
+    # Swift are therefore reachable content that the POLICY never reaches,
+    # exactly the shape of the Bugslayer note above. The fix is a per-
+    # enchantment valuation, which is a tuning decision with no measurement
+    # behind it yet; visible here rather than papered over with a number.
+    options:
+      - {label: "Read the Back", enchant: {name: sharp, amount: 2}}
+      - {label: "Read a Random Passage", enchant: {name: nimble, amount: 2}}
+      - {label: "Read the Entire Book", enchant: {name: swift, amount: 2}}
+      - {label: "Move On", if_no_enchant_target: true}
+
   - id: the_future_of_potions
     name: "The Future of Potions?"
     options:
@@ -309,9 +398,32 @@ all:
 # the specific missing mechanic, so this list is an engine backlog with
 # per-item costs, not a shrug.
 #
-# Enchant is not a mechanic we have:  Self-Help Book, Sapphire Seed,
-#     Wood Carvings, Field of Man-Sized Holes, Grave of the Forgotten,
-#     Stone of All Time, Symbiote
+# Enchant IS a mechanic we have, as of R82 reopened ([USER], 2026-08-10, M7).
+#     Five of the seven enchant events converted this pass and are in the
+#     pools above: Sapphire Seed (act 1), Field of Man-Sized Holes,
+#     Stone of All Time, Symbiote (act 2 / act 2+3), Self-Help Book (all).
+#     The vocabulary is tier0/content/enchantments.CATALOG -- eight named
+#     enchantments, exactly the ones these events grant, no registry and no
+#     enchantment economy. Two events did NOT convert, and neither is
+#     blocked on Enchant any more:
+#   Grave of the Forgotten   BLOCKED ON A RELIC, not on the enchant op. Its
+#       Confront branch (Decay + Soul's Power on a card that Exhausts) is
+#       fully built and the enchantment is in the CATALOG; its Accept branch
+#       hands out Forgotten Soul -- "whenever you Exhaust a card, deal 1
+#       damage to a random enemy" -- which needs a `damage_per_exhaust`
+#       combat hook the engine does not have. The event-relic admission rule
+#       forbids inventing one (see the `event:` header in
+#       tier05/content/relics.yaml: a named event relic ships only onto a
+#       hook the engine ALREADY honors, and nothing substitutes for it), so
+#       the event waits on that hook and not on this pass.
+#   Wood Carvings            THREE options, all three blocked, and none of
+#       them by the enchant op alone. Bird and Torus transform a starter into
+#       Peck and Toric Toughness -- named base-game colorless cards that do
+#       not exist in any of our pools. Snake enchants with Slither, which
+#       randomises a card's cost ON DRAW: `state.draw` has no per-card
+#       callback and cost is read at play time, so Slither is new machinery
+#       rather than a rider (named in enchantments.UNEXPRESSED). Shipping two
+#       of three options is not a conversion, so it stays here whole.
 # Quest cards are not modeled:        The Legends Were True, The Lantern Key,
 #     War Historian Repy, Byrdonis Nest's Take-the-Egg branch (the event
 #     ships one-option)
