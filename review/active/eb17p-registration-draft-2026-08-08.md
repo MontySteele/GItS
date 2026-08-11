@@ -592,6 +592,41 @@ this packet, and none was recorded.**
 The probe is also where §5.2 (the `X+` rewrite) and §2.2 (the RNG-consuming
 relic pickups) were found rather than assumed.
 
+### 11.1 Declared contamination — a 12-pair read on registered seeds
+
+**What happened.** On 2026-08-10, while building the §10 sweep script, the
+first "does it run" check was executed with the script's default seed base —
+which is the **registered** base, 11. It ran 12 pairs per arm, seeds 11–22,
+and its output (winrates, deltas, McNemar counts, compliance and card-flow
+rows) was displayed to the engineer who wrote the script.
+
+**Recorded here rather than anywhere else.** No number from that check appears
+in any commit, any file, or any part of this packet. It is disclosed because a
+grader reading this packet later has no other way to learn of it, and an
+undisclosed read is the thing pre-registration exists to prevent.
+
+**Why it does not contaminate the predictions.** §8's predictions and §8.1's
+trigger are [USER]'s, and [USER] supplied them in full — in the words quoted
+in their commit message — **before** any code in this session ran. They were
+fixed before the read and were transcribed unchanged, so no retro-fit was
+possible. The read cannot have shaped a prediction that already existed.
+
+**Why it does not contaminate the sweep.** Seeds 11–22 are 12 of the 2,400
+registered pairs and will be re-run as part of the full sweep at the pinned
+stamp. Nothing about them is excluded, adjusted or re-rolled; excluding them
+now would be a post-hoc change to §4's registered range, which would be worse
+than the disclosure.
+
+**What changed as a result.** The sweep script gained a `--smoke` flag that
+moves every arm onto the §4-excluded seed base (`424242`) and prints a banner
+saying nothing below it may be quoted. Every subsequent check ran under it.
+The safe path is now the flagged one; the registered range takes a deliberate
+act to touch.
+
+**Open to [USER].** Whether this read is material to the grade is [USER]'s
+call, not the engineer's. If it is, the remedy is a re-registration of §4's
+seed range, not an edit to this section.
+
 ## 12. Known limits, declared
 
 - **ITT, not per-protocol** (§2.3). A removed or upgraded copy stays in its
