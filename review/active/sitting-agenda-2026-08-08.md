@@ -57,8 +57,9 @@ them.
 ## What this is
 
 This is one consolidated sitting. It covers all 35 QUEUE rows, plus one
-BACKLOG-side countersign (`EB-17p`). Items are sorted into what can close today
-and what cannot. The order keeps related material in front of you at the same
+BACKLOG-side countersign (`EB-17p`) and two BACKLOG-side `EB-53` calls whose
+materials arrived on 2026-08-08 (items 17a and 17b). Items are sorted into what
+can close today and what cannot. The order keeps related material in front of you at the same
 time.
 
 Every fresh number quoted here comes from the world stamped **`RT9/D14/P6/C8`**.
@@ -94,7 +95,7 @@ with them.
 Furina table fell under the current world. Nothing else about any row's
 structural claim changed.
 
-**Counts:** 33 items ready to close. 3 items explicitly out.
+**Counts:** 35 items ready to close. 4 items cannot close at this sitting.
 
 ---
 
@@ -406,6 +407,51 @@ files sit under the gitignored `art/eb52_captures/`, from package `0.2-589`.
 
 **Note.** The row's own status says urgency is reduced.
 
+### 17a. `EB-53` captures — the end-of-turn docket, judged by eye
+
+This is a BACKLOG-side taste review, carried here because the materials are now
+in hand.
+
+**What you are deciding.** Whether the end-of-turn docket looks right. The
+docket is the small overhead row that says, before you end your turn, what is
+about to fire and for how much. Its visual choices were made by copying
+precedent, and every one of them reverses in a single edit. Your job is to
+accept them or name the ones to change.
+
+**What to look at.** `review/active/n1-kokomi-burst-legs-2026-08-08.md` §3 is
+the list of choices, T1 through T13. §7.1 is the capture manifest. The frames
+sit under the gitignored `art/eb52_captures/`, from package `0.2-634`.
+
+**What the captures cover.** Six of the nine are taken: C1, C2, C3, C4, C8, C9,
+plus the solo half of C6. Between them they show the docket's height against
+Kokomi's rig and gauges (T1, T2), the chip rather than a ribbon (T3), the docket
+disappearing when nothing is standing (T4), a suppressed "1" in the turns corner
+(T5), the jellyfish silhouette at final scale (T11), and the fire flash on the
+creature's own slot (T8, owner side only).
+
+**What the captures cannot answer yet.** T7 — how a multi-slot row re-centres —
+has no frame behind it, because only one source ever stood at a time. Neither
+does the partner half of T8. Those wait on the owed captures in section B.
+
+### 17b. `EB-53` `C7` — re-spec the capture, or keep the fourth slot as headroom
+
+**What you are deciding.** The docket has four scene slots. The `C7` capture was
+written to fill all four at once, and it cannot be: the four sources are
+Klee-only, Kokomi-only, and two companion cards, so no single creature can ever
+hold more than **three**. Either the capture is re-written as a three-slot row,
+or the fourth slot is declared deliberate headroom for a source that does not
+exist yet. One of the two.
+
+**What to look at.**
+`review/active/n1-kokomi-burst-legs-2026-08-08.md` §7.4, which states the
+question and shows the elimination.
+
+**What follows from it.** If the fourth slot stays as headroom, the "do four
+slots plus a header read as one row or as clutter" question in §6 has no
+experiment behind it and never will. The three-slot row is still capturable; it
+needs a run that drafts both companion cards, which the three runs played did
+not offer.
+
 ### 18. `S4-G20` — a bundle of small leftovers
 
 **What you are deciding.** Four small things:
@@ -612,20 +658,36 @@ Four items cannot close at this sitting.
 
 This needs table time. It is blocked on two things at once: `S4-G6` (item 23
 above), and the `EB-53` N1 attribution pass. The pass has two engineering legs.
-Both are built, but neither is run-verified. So the playtest cannot be asked for
-yet.
+Both are built, and both are now **LIVE-VERIFIED** on package `0.2-634`. But the
+pass is not closed: three captures are still owed, and your review of the six
+already taken has not happened. So the playtest still cannot be asked for.
 
-### `EB-53` capture review — BACKLOG side
+### `EB-53` — the three still-owed captures
 
-**The captures have not been taken.**
-`review/active/n1-kokomi-burst-legs-2026-08-08.md` §6 lists nine owed captures,
-C1 through C9. It states that the game was owned by another agent this session,
-so `deploy.ps1` was never invoked and the game was never launched. The build,
-deploy and `godot.log` verification steps are owed first.
+**Six of the nine captures are taken.** A live session on 2026-08-08 built,
+deployed and played package `0.2-634`, and took C1, C2, C3, C4, C8 and C9, plus
+the solo half of C6. The docket renders and tracks, the jellyfish renders from
+the named art, and its chip matched the real damage number exactly on four
+readings. The manifest is
+`review/active/n1-kokomi-burst-legs-2026-08-08.md` §7.1. Judging those six is a
+call you can take today — it is item 17a above.
 
-The **R89 half** of `EB-53` is also out. It is a countersign, but there is no
-draft in HEAD to countersign. The BACKLOG row names "the R89 draft" without
-giving a path.
+**Three are still owed, and all three are engineering-side, not yours:**
+
+- `C5` — Klee with his Burst up. Klee's Burst meter resets at the start of every
+  fight, and three runs died at 24, 32 and 37 of the 40 it needs. One better run
+  closes it.
+- `C6`'s co-op half. The bridge drives singleplayer only, so a partner's slot
+  cannot be filmed here.
+- The **displayed** firing order. No run exercised it, because only one source
+  ever stood at a time.
+
+`C7` is a fourth owed capture on paper, but it is **unreachable as written** —
+that turned into a decision for you, and it is item 17b above.
+
+The **R89 half** of `EB-53` is out. It is a countersign, but there is no draft
+in HEAD to countersign. The BACKLOG row names "the R89 draft" without giving a
+path.
 
 Its Klee bomb-variety leg is rework-scoped design, and is untouched by design.
 
@@ -658,7 +720,8 @@ is not a QUEUE row and it is not on this agenda.
   payoff cards, either goes first or is deferred. `EB-43` / D15 remains held as
   step (5), after blind-first grading.
 - **`S4-G6`.** Kokomi's protocol playtest (`S4-G14` / `OT-1`) becomes askable,
-  but only once `EB-53` also run-verifies. `OT-1` is in turn the only accepted
+  but only once `EB-53`'s three owed captures land and you have reviewed the six
+  already taken (item 17a). `OT-1` is in turn the only accepted
   input to the `NT-G5` fork inside `S4-G13`.
 - **`EB-22` and `EB-26` ratify.** Sheet edits to `docs/kokomi-cards.yaml` and
   `docs/kokomi-upgrades.yaml`, then codegen, then whatever re-measurement
