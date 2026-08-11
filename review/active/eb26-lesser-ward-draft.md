@@ -225,6 +225,9 @@ Notes on what each of those actually buys:
 
 ### 4.1 Runtime probe — the card actually works, and the cap matters
 
+**This probe used the UNUPGRADED Rare only. The upgraded Rare is ward 8 / cap
+8, and against it the conclusion below does not hold — see §7.**
+
 Played through `combat.play_card` on a real Kokomi state:
 
 ```
@@ -339,3 +342,265 @@ Recorded so the ratify call knows what it is buying:
 4. `art/plan.tsv` row + a claimed source, or an explicit art debt entry.
 5. Full gate wall: `python -m pytest tier0/tests tier05/tests -q`.
 6. Whatever D7 rules about re-measurement.
+
+---
+
+## 7. D2 addendum (2026-08-10): the upgraded Vigil
+
+§4.1 probed the wrong Vigil. It only played the **unupgraded** Rare — ward 6,
+cap 6 — and concluded that `max_stacks: 6` on the candidate "can only ever top
+up". That conclusion is false as soon as the Rare is upgraded.
+
+`vigil_of_the_deep+` is ward **8**, cap **8** (`docs/kokomi-upgrades.yaml:147`;
+the applier carries the cap along because this row encodes cap == amount,
+`tier0/content/upgrades.py:509-511`). The engine clamps the **running total**,
+not the increment (`tier0/engine/powers.py:182-184`: `new = min(existing +
+stacks, max_stacks)`). So a candidate whose cap is 6, played on top of a
+standing 8, sets the ward **down to 6**. The player loses 2 prevention by
+playing a card.
+
+Re-probed with the real applier and real `combat.play_card` on a
+loader-built Kokomi (scratchpad harness, not committed).
+
+### 7.1 The full interaction matrix
+
+Printed statlines, as the applier produces them:
+
+| card | ward amount | `max_stacks` |
+| --- | --- | --- |
+| `vigil_of_the_deep` | 6 | 6 |
+| `vigil_of_the_deep+` | 8 | 8 |
+| candidate (as drafted) | 3 | 6 |
+| candidate+ (as drafted) | 5 | 6 |
+
+Ward stack after the first card, then after the second. Both orders, all four
+pairs:
+
+| order | after 1st | after 2nd | |
+| --- | --- | --- | --- |
+| `vigil` -> candidate | 6 | **6** | no change (3 would overflow the cap) |
+| candidate -> `vigil` | 3 | 6 | top-up, as intended |
+| `vigil` -> candidate+ | 6 | **6** | no change |
+| candidate+ -> `vigil` | 5 | 6 | top-up |
+| **`vigil+` -> candidate** | 8 | **6** | **DROP of 2** |
+| candidate -> `vigil+` | 3 | 8 | top-up |
+| **`vigil+` -> candidate+** | 8 | **6** | **DROP of 2** |
+| candidate+ -> `vigil+` | 5 | 8 | top-up |
+
+Copies of one card, played four times in a row:
+
+| card | stacks after each play |
+| --- | --- |
+| candidate (cap 6) | 3, 6, 6, 6 |
+| candidate+ (cap 6) | 5, 6, 6, 6 |
+| `vigil` | 6, 6, 6, 6 |
+| `vigil+` | 8, 8, 8, 8 |
+
+So the defect is exactly two cells wide, and it is order-dependent: it fires
+only when the **upgraded** Rare is standing and the candidate is played after
+it. Nothing else in the table moves.
+
+**One more thing the matrix does not show, and D2 has to know it:** the C#
+side does not implement the sim's rule at all. `PreventExhaustWardPower`
+(`klee-mod/KleeCode/Powers/KuragePowers.cs:566-596`) derives the cap from the
+incoming application — it subtracts the standing amount from the incoming one,
+so the power always **becomes** whatever the last card printed. In the mod,
+`vigil+` (8) then the candidate (3) would leave **3**, not 6, and three copies
+of the candidate would leave 3, not 6. That class also carries the Rare's own
+title and text in its tooltip ("Vigil of the Deep"), so a second card applying
+the same power shows the Rare's name in the power display. Whichever of the
+options below is picked, the C# power is part of the work.
+
+### 7.2 The four options, re-costed against cap 8
+
+#### (a) Raise the candidate's `max_stacks` to 8
+
+Probed: with the candidate at cap 8, every drop disappears. `vigil+` ->
+candidate is 8 -> 8; `vigil` -> candidate is 6 -> 8 (a real top-up from the
+lesser card). But the ceiling moves for the lesser card **alone**, and it now
+climbs there on copy count:
+
+| card, played repeatedly | stacks after each play |
+| --- | --- |
+| candidate at cap 8 | 3, 6, **8**, 8 |
+| candidate+ at cap 8 | 5, **8**, 8, 8 |
+
+So yes: the lesser uncommon alone banks the upgraded Rare's number — **three
+copies unupgraded, two copies upgraded**. That is the thing `vigil_of_the_deep`'s
+own sheet comment refuses ("the magnitude is the knob, not the copy count"),
+now reaching the Rare's *upgraded* magnitude off uncommons.
+
+There is also a hard blocker in the toolchain. The codegen registry stores
+**one cap per power id** and cross-checks every sheet row against it
+(`tools/gen_klee_cards.py:470` registers `prevent_exhaust_ward` at 6;
+`:1183-1189` raises `SystemExit` when a row disagrees). Two rows of the same
+power with different caps cannot both pass. Option (a) therefore also requires
+a decision about what the registry cap becomes, and a matching change to the
+C# power.
+
+#### (b) Keep `max_stacks: 6`, accept the trap, document it
+
+Nothing changes in code or sheets. Two cells of the matrix stay wrong: a
+player holding an upgraded Vigil loses 2 ward by playing the lesser card.
+It is silent — no message, no preview — and it is only reachable by a player
+who drafted both cards and upgraded the Rare.
+
+#### (c) Re-read `max_stacks` as a per-application cap (engine surgery)
+
+D2's "third option". Instead of clamping the running total, clamp only the
+incoming amount, then add — or, in the shape the C# already uses, let the cap
+mean "one application may not exceed this". The one-line site is
+`tier0/engine/powers.py:182-184`.
+
+The blast radius, enumerated honestly. **Code that would change or need a
+ruling:**
+
+1. `tier0/engine/powers.py:182-184` — the clamp itself. The only place the
+   running total is bounded.
+2. `tier0/engine/effects.py:881, 927-928, 948-949` — `_op_apply_power`, the
+   **only** caller that ever passes `max_stacks` (self branch and enemy
+   branch). Every other `apply_power` caller — relics, potions, companions,
+   intents, `refpowers` — passes nothing and is unaffected.
+3. `tier0/content/upgrades.py:506-511` — the "cap rides along when cap ==
+   amount" branch. Its whole justification is the running-total reading; under
+   a per-application reading, cap == amount means something different and the
+   branch needs re-ruling.
+
+**Content that relies on the current reading:**
+
+4. `docs/kokomi-cards.yaml:557` — `vigil_of_the_deep` is the **only live row in
+   all six sheets** carrying `max_stacks`. Furina's caps were dropped by the
+   2026-07-24 ruling and survive only as comments
+   (`docs/furina-cards.yaml:773-775`). So the content blast radius is one row,
+   plus this candidate if ratified.
+5. `docs/kokomi-upgrades.yaml:147` — the cap-rides-along delta for that row.
+
+**Tests that pin the current reading (all would fail, each needs a re-rule,
+not a re-baseline):**
+
+6. `tier0/tests/test_pin_engine_powers.py:59-70` —
+   `test_capped_power_stops_at_max_stacks_across_applications`, which asserts
+   the running-total meaning in its name.
+7. `tier0/tests/test_pin_engine_powers.py:72-80` —
+   `test_single_application_over_the_cap_lands_exactly_on_the_cap`. This one
+   survives a per-application reading; it is listed because it is the other
+   half of the pinned pair and should be re-read with it.
+8. `tier0/tests/test_kokomi.py:692-698` —
+   `test_vigil_upgrade_moves_the_cap_with_the_amount`.
+9. `tier0/tests/test_furina_sheet.py:815-886` — the pass-2 errata tests, whose
+   prose states "max_stacks is in POWER UNITS (engine caps the total)" as the
+   settled reading and records that the applier branch is otherwise unexercised
+   by live content.
+
+**Tooling that encodes the current semantics:**
+
+10. `tools/gen_klee_cards.py:422-426` (registry docstring: "stack cap"),
+    `:470` (the cap 6 entry), `:1183-1189` (the sheet-vs-registry cross-check).
+11. `tools/lint_upgrade_comment_arithmetic.py:108` — `max_stacks` is in
+    `CAP_FIELDS`, so upgrade-comment arithmetic is recomputed against it.
+12. `tools/lint_handwritten_parity.py:180-184` — `max_stacks` is excluded from
+    the card-side parity key set on the grounds that it carries no card-side
+    meaning.
+13. `tools/lint_sheet_comments.py:10` — `max_stacks` is on the list of things a
+    sheet comment must explain.
+
+**C# mirror:**
+
+14. `klee-mod/KleeCode/Powers/KuragePowers.cs:566-596` — as noted, this already
+    implements a third rule (set-to-incoming). Any ruling here has to say what
+    the mod does, and `SalonPowers.cs:468` /
+    `KokomiResources.cs:395` use the same `TryModifyPowerAmountReceived`
+    chokepoint, so the pattern is shared even though the numbers are not.
+
+Not implemented, per the ask.
+
+#### (d) A "never lower it" apply mode — the engine's existing idiom
+
+The engine already owns this exact shape, at a different site. When the
+Ceremonial Garment refreshes a fielded Bake-Kurage, `effects.py:915-925` takes
+`max(standing, new)` rather than assigning — added by the 2026-07-26 audit
+(EPOCH 1) precisely because the assignment version pulled an upgraded summon's
+duration *down* and deleted the turn the upgrade had paid for. That is the same
+defect as this one, in the same file, already ruled once.
+
+The equivalent here is a floor, not a clamp: an application never lowers a
+standing stack. There is **no such mode in the apply vocabulary today** —
+`_op_apply_power` understands `amount`, `amount_formula`, `target`, `times`,
+`max_stacks`, `guard`, `payload`, `member`, `target_all_if_power`, and nothing
+else. So this is still engine work, but it is narrower than (c): a new opt-in
+field on the row, `max_stacks` untouched, no existing pin re-ruled. Its blast
+radius is items 1, 2, 10 and 14 from the (c) list — the apply site, the op, the
+codegen field allowlist (`APPLY_POWER_FIELDS`, `gen_klee_cards.py:610`, which
+rejects unknown fields loudly by design), and the C# power.
+
+### 7.3 What each option costs, in plain English
+
+**(a) Cap 8.** The player never gets punished for playing a card, ever, in any
+order — that is the whole win. What they get instead is a lesser ward that
+reaches the big number on its own if they draft enough copies: three of the
+plain one, or two upgraded. Engineering side it is one number in the sheet plus
+a decision about the codegen registry, which today stores one cap per power and
+will refuse two rows that disagree, plus the C# power that hardcodes the same
+6. Re-measurement: the card's power level changes at multi-copy densities, so
+the drafting arms would want a fresh Kokomi read rather than the single-copy
+read a ratification usually implies.
+
+**(b) Cap 6, trap documented.** Zero engineering. Zero re-measurement. The cost
+is entirely on the player: someone who owns an upgraded Vigil and plays the
+lesser ward after it quietly loses 2 prevention, with nothing on screen saying
+so. It is rare — it needs both cards, the upgrade, and that play order — and it
+is exactly the kind of thing a playtest report describes as "the card did
+nothing" rather than "the card hurt me".
+
+**(c) Per-application cap.** Nothing about this card changes on the surface;
+what changes is what the word "cap" means everywhere. It fixes the whole class
+at once, including any future ward. It is surgery on a shipped power: one
+engine line, one op, one upgrade branch, four tests that state the old meaning
+in their names and prose, four tools, and a C# power that currently implements
+neither reading. Re-measurement: the only live capped row is the Vigil, so the
+sim numbers that could move are Kokomi's, and only where two ward applications
+meet — but the pinned tests are *rulings*, so they need [USER] to re-rule, not
+a re-run.
+
+**(d) Floor mode.** The player experience is the same as (a) — no card ever
+lowers your ward — but the lesser ward keeps its own ceiling of 6, so copies of
+it never reach 8. Engineering is a new optional field on the card row, one
+branch at the apply site, one entry in the codegen field allowlist, and the C#
+power. No existing pin is re-ruled, because `max_stacks` keeps meaning what it
+means. Re-measurement: nothing moves that a single-copy read would not already
+cover; the card is strictly the drafted card, minus the trap.
+
+No recommendation is made here. The pick is [USER]'s.
+
+### 7.4 The ask-list, restated in full
+
+A GPT review of this packet answered D2–D6 and skipped two items. Both are
+still open, and the list below is the complete ask.
+
+- **D1 — the name (STILL OPEN).** "Watch of the Shallows" is **authored
+  flavor, not wiki-verified canon**. It was built as the lesser twin of
+  "Vigil of the Deep" (shallows/deep, watch/vigil). The machine checks in §4
+  only prove it is unique against the internal and reserved namespaces; they
+  say nothing about whether it reads right. `S4-G11` — read card names and
+  lore text by eye before they ship — applies to this row, and `S4-G11` is
+  ruled to have no substitute. So this needs an eye-read, and the eye is
+  [USER]'s.
+- **D2 — the stack cap (REOPENED by this addendum).** Now a choice between
+  (a) cap 8, (b) cap 6 with the trap accepted, (c) per-application cap
+  (engine surgery), (d) a floor mode. §7.2 and §7.3 above. The §4.1
+  recommendation of cap 6 was made against the unupgraded Rare only and does
+  not stand on its own.
+- **D3 — magnitude and cost: 3 at 1 energy.** Unchanged (§5).
+- **D4 — lane: `archetypes: [generic]`.** Unchanged (§5).
+- **D5 — `tempo_band`.** Unchanged (§5).
+- **D6 — upgrade `power_amount: +2` (ward 3 -> 5).** Unchanged (§5).
+- **D7(a) — does ratifying trigger a Kokomi re-baseline**, or does the card
+  land and wait for the next scheduled measurement? Note that the D2 pick
+  feeds this: option (a) changes the card's multi-copy power level, and the
+  others do not.
+- **D7(b) — P3 is still unowned (STILL OPEN).** `missed-requirements.md` §3.2
+  names **P3** — "a ticking body for the commander", i.e. no persistent
+  recruit above the basic `bake_kurage` — in the same finding that produced
+  P4, and **neither P3 option was ever explicitly chosen**. P3 is outside
+  `EB-26`'s scope as written. It is open, and it belongs to nobody. Naming an
+  owner is the ask; it is not answered by ratifying this card.
