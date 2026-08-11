@@ -3,7 +3,7 @@
 > **Status: DRAFT. Nothing here has been run.** No number in this document was
 > measured. The instrument was repaired and the shop world was changed on
 > 2026-08-10; this packet asks to re-run the measurement in the new world.
-> **That world is `RT10/D14/P6/C9`, `C9` including the X7/X8 rarity erratum
+> **That world is `RT10/D14/P7/C9`, `C9` including the X7/X8 rarity erratum
 > — §2 enumerates it in full, and it is the world the re-run measures.**
 > The predictions in §5 are deliberately blank — they are [USER]'s to fill in
 > before any seed is run.
@@ -67,7 +67,7 @@ events rather than by asserting that none occurred.
 
 ## 2. One window, one world
 
-**The registered world is `RT10/D14/P6/C9`, including the X7/X8 rarity
+**The registered world is `RT10/D14/P7/C9`, including the X7/X8 rarity
 erratum.** In plain English, and as the standing requirement for this
 re-run: this is the world the re-run measures. Everything listed below is
 inside one window, and a run of this instrument that does not report this
@@ -120,9 +120,33 @@ What that one window contains, in full:
    under `C9`. They are named here because they change what Klee's draft
    offers, and Klee is one of the three characters this cell runs — the
    companion channel is not the only thing competing for the purse.
+5. **`POLICY_VERSION` 7** (R176, `fbe6e13`, 2026-08-11). The pilot — the
+   automatic player that plays the cards the drafter picked — now places a
+   value on two card effects it previously valued at nothing: copying a
+   companion held in hand, and replaying the next companion played
+   (`PILOT_COMPANION_COPY_VALUE` = 1.5 inside `_tempo_value`;
+   `PILOT_WEIGHTS_VERSION` 1 → 2). Cards carrying those effects used to score
+   at or below zero and so were never played at all; now they are reachable.
+   **Said plainly: this moves every Klee tier0.5 number.** Klee (demolition) is
+   one of the three characters this cell runs, so the Klee arm's baseline is
+   not the baseline any P6-era intuition was formed against. **Write the §5
+   predictions knowing that.** The stamp reads `P7`, not `P6`, for this reason,
+   and no pre-P7 Klee number is a cheaper sample of this one.
+6. **The Nimble enchantment repair** (`5c9c01a`, 2026-08-11). Three defects in
+   the enchantment rider that grants Block: it was being bought more than once
+   per card play, it was inert on cards that gain Block *next* turn, and it
+   could weld itself onto a skill that gains no Block at all. This is defect
+   work and it rides inside `RUNTEMPLATE` 10 with no version bump, because it
+   moves no number that this cell reads: the three profiles this cell runs —
+   `klee`/demolition, `furina`/salon, `kokomi`/priest — were re-run on the same
+   seeds either side of the repair and came back byte-identical. It is named
+   here for completeness, not because it changes the world under measurement.
 
 The floor restoration, the instrument repair and the rarity erratum land
 together, in the same commit range, under one stamp (`CONSTANTS_VERSION` 9).
+The pilot change is a separate stamp component (`POLICY_VERSION`), and it
+landed after them, on 2026-08-11; the registered world is the one that holds
+all of it.
 
 On the one-variable rule (EXPERIMENTS, D4: one measurement window contains
 one change to the *world*), stated without softening:
@@ -144,6 +168,13 @@ one change to the *world*), stated without softening:
   them is that this cell's absolute numbers are not comparable to any
   pre-C9 read; the within-cell arm contrast, which is what Q1–Q4 ask, is
   unaffected because both arms sit in the same world.
+- The **pilot change (P7)** is the same kind of thing: a world change outside
+  the channel. It is identical in both arms, so it cannot create or hide an
+  arm difference. What it does do is move the Klee arm's absolute level, which
+  is why it is named rather than left to the stamp. Any Klee number from
+  before 2026-08-11 is a different world.
+- The **Nimble repair** is not a world change for this cell at all: the three
+  profiles it runs are byte-identical across it on the same seeds.
 
 Landing them apart would be worse, not better. It would mean either measuring
 the new world with a broken instrument, or measuring the old world with the
@@ -214,9 +245,9 @@ the channel should be re-priced or re-stocked. That is a design call and it is
   only difference between the two arms; same seeds, same characters, same
   policy, same everything else.
 - Characters: unchanged — `klee`/demolition, `furina`/salon, `kokomi`/priest.
-- World: **`RT10/D14/P6/C9`**, `C9` including the X7/X8 rarity erratum — the
+- World: **`RT10/D14/P7/C9`**, `C9` including the X7/X8 rarity erratum — the
   world enumerated in §2. The report must carry the full run-cell stamp
-  (`RT/D/P/C`) or it is not citable (R68), and it must read `RT10/D14/P6/C9`
+  (`RT/D/P/C`) or it is not citable (R68), and it must read `RT10/D14/P7/C9`
   or it is not *this* registration's measurement.
 - Every output line the instrument printed before the repair still prints, so
   the pre-existing reads stay reproducible. The new reads are printed on lines
