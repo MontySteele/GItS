@@ -172,9 +172,12 @@ class RunResult:
     shop_companion_offers: list[dict] = field(default_factory=list)
     #                    §4.7 channel (R61): what the two companion slots
     #                    OFFERED, per visit -- {"slot", "id", "rarity",
-    #                    "price"}. Deliberately NOT folded into `shop`, which
-    #                    is a purchase log that callers sum prices over; an
-    #                    offer is not a purchase. The buy RATE needs both.
+    #                    "price", "visit", "gold_at_visit", "affordable"}.
+    #                    Deliberately NOT folded into `shop`, which is a
+    #                    purchase log that callers sum prices over; an offer is
+    #                    not a purchase. The buy RATE needs both -- and it
+    #                    needs "visit" to join them, because both lists are
+    #                    flattened across every shop the run walked into.
     removal_uses: int = 0               # §5: running removal count (rising price)
     relics: list[str] = field(default_factory=list)  # W2: relics GRANTED this
     #                    run (Neow + treasure + elite + boss + shop + events,
@@ -301,6 +304,11 @@ class _RunCtx:
     held: "Optional[relic_pool.HeldRelics]" = None
     bag: "Optional[potion_pool.PotionBag]" = None
     removal_uses: int = 0
+    # Which shop this is, counted across the whole run (0-based). Stamped onto
+    # every shop record so the run-level OFFER log and the run-level PURCHASE
+    # log can be joined back together -- see shop.ShopOutcome. Bookkeeping
+    # only: nothing branches on it and it draws no rng.
+    shop_visits: int = 0
     screens_since_companion: int = 0
     just_rested: bool = False
     fights: int = 0
@@ -431,9 +439,11 @@ class _RunCtx:
     def resolve_shop(self):
         """$ (§5): buy from the character's OWN pool, then the relic shelf
         (W2) and the potion shelf (potion pass)."""
+        visit = self.shop_visits
+        self.shop_visits += 1
         outcome = shop.visit_shop(self.rng, self.character, self.deck_ids,
                                   self.gold, self.plan(), self.policy,
-                                  self.removal_uses)
+                                  self.removal_uses, visit=visit)
         self.deck_ids = outcome.deck_ids
         self.gold = outcome.gold
         self.removal_uses = outcome.removal_uses
@@ -470,7 +480,7 @@ class _RunCtx:
                         self.deck_ids, self.rng)
                     outcome.purchases.append(
                         {"buy": "relic", "id": rid,
-                         "price": C.SHOP_RELIC_PRICE})
+                         "price": C.SHOP_RELIC_PRICE, "visit": visit})
             self.res.shop.extend(p for p in outcome.purchases
                                  if p.get("buy") == "relic")
             self.res.gold = self.gold
@@ -486,7 +496,8 @@ class _RunCtx:
                     self.gold -= C.POTION_PRICE
                     self.bag.add(pid)
                     self.res.shop.append({"buy": "potion", "id": pid,
-                                          "price": C.POTION_PRICE})
+                                          "price": C.POTION_PRICE,
+                                          "visit": visit})
             self.res.gold = self.gold
         self.res.hp_by_node.append(self.hp)
 

@@ -54,10 +54,13 @@ registration packets themselves live under `review/active/` — one home, not tw
   instrument caveat →
   `review/active/eb17p-registration-draft-2026-08-08.md` §13;
   `review/active/eb17p-results-2026-08-10.txt`.
-- **Shop rerun (`S4-G10` / `C9`)** — registration **DRAFTED in the
-  `shop-floor-2026-08-10` worktree, awaiting [USER] countersign** at QUEUE
-  `M14`; the packet lands in HEAD with that branch (BACKLOG `EB-79`) →
-  `review/active/shop-rerun-registration-2026-08-10.md` *(incoming)*.
+- **Shop companion channel re-run (`S4-G10` / `C9`)** — **DRAFT, awaiting
+  [USER] countersign at QUEUE `M14`, unrun.** The packet is now in HEAD
+  (BACKLOG `EB-79`). The channel's world moved ([USER] restored slot 2's
+  Uncommon floor, `CONSTANTS_VERSION` 9) and the instrument's two defects were
+  repaired, both on 2026-08-10; the packet asks to re-measure in the new world.
+  Predictions are explicit [USER] slots and are still blank →
+  `review/active/shop-rerun-registration-2026-08-10.md`.
 - **Kokomi stability band (D5)** — no band is declared yet (the declaration
   is QUEUE `S4-G6`; until it lands, the band rides DARK, `band = None`); its
   grading playtest is `docs/current/playtest/kokomi-playtest-protocol.md`

@@ -273,7 +273,7 @@ Three shifts, all favouring the pool: (1) no colorless commons → bottom rung v
 ### 7.4 Design implications for §4.7 (the shop split)
 
 - **Slot 1 (guaranteed Uncommon+) is faithful.** StS2 colorless is inherently uncommon/rare, so a shop slot that never dips below uncommon mirrors base StS2 exactly. No change needed.
-- **Slot 2 (card-reward odds, ~60% common) is a deliberate DEPARTURE.** It will frequently surface companion *commons*, which base-StS2 colorless never does. Fine — the wildcard slot is where cheap appliers get a home — but it's a conscious deviation, not accidental fidelity. **Decision point:** keep it (cheap-applier wildcard flavour), or raise slot 2 to Uncommon+ too (stricter fidelity, but then commons appear *only* in the free reward slot). *Leaning keep; logged for the user.*
+- **Slot 2 is Uncommon+ too, and that decision point is CLOSED.** This bullet used to describe slot 2 as a deliberate departure — card-reward odds, ~60% common, "the wildcard slot is where cheap appliers get a home" — and logged the choice for [USER] with a *leaning keep*. [USER] chose the other option on **2026-08-10** (S4-G10 close-out): slot 2 is raised to Uncommon+, so commons now appear **only** in the free reward slot, which is the stricter-fidelity reading this bullet offered. The study's own fidelity argument is what survives; only the leaning was overruled.
 - **Bonus — the Ancients bucket just got a gift.** StS2 files **Whistle** ("33 dmg + stun the enemy") and **Wish** as rarity **Ancient**. The stun effect §2.2a treats as the mod's scarcity anchor is *literally an Ancient-tier card* in base StS2 — direct confirmation for how to price the Archon-boon reskin when we get to it.
 
 ## 8. Utility-coverage audit (§4.7 checklist, resolved)

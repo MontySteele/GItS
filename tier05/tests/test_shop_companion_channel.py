@@ -47,12 +47,11 @@ def test_the_floor_is_slot_ones_and_the_home_region_is_too(character):
     should be 'Uncommon or higher from the home region'; slot 2 should be
     'any companion card'."
 
-    This REPLACES the old `test_uncommon_floor_holds`, which asserted R59's
-    floor across BOTH slots. R116 respecified the channel and the floor is
-    now slot 1's alone; the old assertion is not weakened, it is relocated.
-    Slot 2's own invariant is below: it must actually reach the rarities the
-    absence of a filter admits, or "unrestricted" is a comment rather than a
-    behaviour.
+    AMENDED 2026-08-10: the floor is no longer slot 1's alone. This test
+    replaced `test_uncommon_floor_holds` (which asserted R59's floor across
+    BOTH slots) when R116 made the floor slot 1's; [USER] then restored slot
+    2's floor, so the two slots share it again and what this test still owns
+    uniquely is the HOME-REGION assertion. Slot 2's own invariant is below.
     """
     for seed in range(200):
         offers = shop.companion_shop_offer(random.Random(seed), character)
@@ -67,10 +66,18 @@ def test_the_floor_is_slot_ones_and_the_home_region_is_too(character):
 
 
 @pytest.mark.parametrize("character", CHARACTERS)
-def test_slot_two_is_unrestricted_in_both_filters(character):
-    """The other half of the same spec. "Any companion card" has to be
-    observable: over enough seeds slot 2 offers Commons, and it offers cards
-    from outside the home region."""
+def test_slot_two_is_wildcard_nation_but_keeps_the_floor(character):
+    """The other half of the same spec, AS AMENDED.
+
+    THIS TEST PINS A WORLD A RULING CHANGED, and it is rewritten rather than
+    deleted. It used to be `test_slot_two_is_unrestricted_in_both_filters` and
+    asserted the opposite of its first clause: that slot 2 DOES offer Commons,
+    because R116/NC-10 had removed the rarity floor from it. [USER] restored
+    the floor on 2026-08-10 (S4-G10 close-out, CONSTANTS_VERSION 9) on R59's
+    original rationale -- the paid premium channel does not sell Commons -- so
+    the Common assertion inverts and the nation assertion stands unchanged.
+    Slot 2 is now wildcard in ONE filter, not two.
+    """
     rarities = set()
     nations = set()
     for seed in range(400):
@@ -80,12 +87,17 @@ def test_slot_two_is_unrestricted_in_both_filters(character):
         card, _ = offers[1]
         rarities.add(card.rarity)
         nations.add(card.nation)
-    assert "common" in rarities, (
-        f"{character}'s slot 2 never offered a Common -- R116 removed the "
-        "floor from this slot, and a floor that survives in the code is the "
-        "defect NC-10 named")
-    assert rarities >= {"common", "uncommon", "rare"}
-    assert len(nations) > 1
+    assert "common" not in rarities, (
+        f"{character}'s slot 2 offered a Common -- the Uncommon floor [USER] "
+        "restored on 2026-08-10 is broken, and the paid channel is selling "
+        "50-gold Commons again")
+    assert rarities == {"uncommon", "rare"}, (
+        f"{character}'s slot 2 reached {sorted(rarities)}; the floor admits "
+        "exactly Uncommon and Rare, and a band it never reaches is a dead "
+        "table entry")
+    assert len(nations) > 1, (
+        "slot 2 is still the WILDCARD-NATION slot -- the floor's restoration "
+        "moved the rarity filter only")
 
 
 @pytest.mark.parametrize("character", CHARACTERS)
@@ -245,6 +257,34 @@ def test_the_drafter_can_actually_buy_a_companion():
                       if p["buy"] == "card"
                       and loader.peek_card(p["id"]).is_companion)
     assert bought > 0, "the drafter never bought a companion in 60 flush shops"
+
+
+def test_every_record_carries_the_visit_it_came_from():
+    """THE P1 ATTRIBUTION BUG, pinned (2026-08-10).
+
+    `RunResult.shop` and `RunResult.shop_companion_offers` are both flattened
+    across every shop a run enters. Without a visit stamp the only join key is
+    the slot, and a slot-1 purchase at the third shop reads as a slot-1
+    purchase at the first two as well -- which is exactly how the measured P1
+    buy rate came to count declines as buys. The stamp is what makes the join
+    (visit, slot); if it stops being emitted, the instrument silently goes
+    back to over-counting and nothing else would notice.
+    """
+    for visit in (0, 3):
+        out = shop.visit_shop(random.Random(11), "klee",
+                              loader.starting_deck("klee"), 400, "demolition",
+                              draft.assigned_policy, visit=visit)
+        assert out.companion_offers, "no companion offers to check"
+        for offer in out.companion_offers:
+            assert offer["visit"] == visit
+            # The money read the purchase log cannot supply.
+            assert offer["gold_at_visit"] == 400
+            assert offer["affordable"] is (offer["price"] <= 400)
+        for p in out.purchases:
+            assert p["visit"] == visit
+            if p.get("channel") == "companion":
+                # TRUE rarity, not a guess from the price band.
+                assert p["rarity"] == loader.peek_card(p["id"]).rarity
 
 
 def test_gold_is_conserved_across_a_mixed_price_shelf():
