@@ -16,6 +16,11 @@
   the live run model is now the real StS2 map (see Versions below). Older
   run-layer numbers are archived, never compared across template versions
   unlabeled.
+- **Kokomi meter-20 — RATIFIED (R139, 2026-08-10)** on the fresh
+  `RT9/D14/P6/C8` read (`review/active/sitting-reads-2026-08-08.md` §3). **The
+  current build is the comparison baseline from now on** — the dead v0.3 W1
+  comparator is not rebuilt, and later Kokomi numbers are compared against this
+  state, not against the archived world.
 - **Roster slot 4 — Zhongli countersigned (R108), not yet scheduled.** The deep
   dive is unblocked; the pre-slot-4 gate is the roster registry (`tier0/roster.py`).
 
@@ -144,5 +149,8 @@ open decisions, and nothing is tuned on the strength of being watched. Each
 returns to [USER] only when its trigger fires: `W1` X4 (block-side Guest Cast),
 `W2` X6 (salon power level), `W3` X12 (co-op reaction potency — instrument
 unblocked since `O-1` closed; a new reading runs under EXPERIMENTS law),
-`W4` X5 (fanfare floor). (Migrated from the
-retired watch-items docket, frozen at tag `pre-simplification-2026-08-06`.)
+`W4` X5 (fanfare floor), `W5` `lynette_box_trick` (X7, R161 — deliberately left
+alone at its current rarity; as a companion card it is close to "what if I
+high-roll a colorless option". **Trigger:** playtest shows it overperforming).
+(Migrated from the retired watch-items docket, frozen at tag
+`pre-simplification-2026-08-06`; `W5` added 2026-08-10.)

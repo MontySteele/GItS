@@ -43,12 +43,18 @@ registration packets themselves live under `review/active/` — one home, not tw
   countersigned; the open step is authoring the kickoff predictions (`Q-C` in
   `docs/current/QUEUE.md`) *before* any number is read →
   `review/active/payoff-reach-reregistration.md`.
-- **EB-17p force-first-copy paired winrate** — **COUNTERSIGNED 2026-08-10**,
-  not launched. The engineering prerequisites (§10) have landed and the
-  `force_cards` seam is pinned; no seed in the registered range has been run.
-  Two things still gate the sweep: the §7 cost ceiling, and §8's predictions
-  as their own commit →
+- **EB-17p force-first-copy paired winrate** — **COUNTERSIGNED COMPLETE
+  2026-08-10; launching.** `N` = 2400 pairs, Strike as the filler negative
+  control, a 4h wall-clock ceiling with stop-and-report, §8 predictions
+  committed ahead of any run (`eb67706`), §6.1b a co-primary. §10 prerequisites
+  landed and the `force_cards` seam is pinned. §11.1 discloses a 12-pair read on
+  registered seeds 11–22; **[USER] ruled it immaterial (R173)** and the
+  registered range runs unchanged →
   `review/active/eb17p-registration-draft-2026-08-08.md`.
+- **Shop rerun (`S4-G10` / `C9`)** — registration **DRAFTED in the
+  `shop-floor-2026-08-10` worktree, awaiting [USER] countersign** at QUEUE
+  `M14`; the packet lands in HEAD with that branch (BACKLOG `EB-79`) →
+  `review/active/shop-rerun-registration-2026-08-10.md` *(incoming)*.
 - **Kokomi stability band (D5)** — no band is declared yet (the declaration
   is QUEUE `S4-G6`; until it lands, the band rides DARK, `band = None`); its
   grading playtest is `docs/current/playtest/kokomi-playtest-protocol.md`
