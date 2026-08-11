@@ -224,3 +224,44 @@ with the game's debug corner (build, seed, content hash) in frame.
 | `eb18_before_killing_blow.png` / `eb18_after_killing_blow.png` | the route that does NOT count: a bombed 7-HP Twig Slime and the exactly-lethal `Kaboom!` |
 | `eb18_payload_armed_2bombs.png` | `Double Pop` armed: `Bomb 8` on a 3-HP Toadpole, second Toadpole at 9 |
 | `eb18_after_payload_second_enemy_alive.png` | the payload fired, victim gone, second enemy alive |
+
+## 8. `EB-52`(a) — Fanfare-floor acquisition attempts (moved from the BACKLOG row under R177)
+
+The target: one of the three RARE `gain_fanfare_floor` Powers
+(`unheard_confession`, `the_sea_is_my_stage`, `rapturous_applause`) in a deck,
+played on camera. The instrument is confirmed present on both sessions: the
+bridge publishes `KLEEMOD_FANFARE`, `KLEEMOD_FANFARE_FLOOR` and
+`KLEEMOD_FANFARE_CAP_BONUS` on every singleplayer GET (`player.resources`), so
+the before/after read is one request either side of the play. The wall is
+acquisition — the same one `docs/archive/g12-review-2026-08-05.md` §4 hit.
+
+**Doors tried and measured 2026-08-08:** shops — three visited, seven cards
+each, zero rares in two of the three (the "a shop always stocks rares"
+assumption is wrong); card rewards — fifteen screens, no rare Power among
+them; Neow — `Hefty Tablet` (choose 1 of 3 Rares) is the one readable 3-draw
+door, ~1 Neow screen in 5, and a 3-draw from a 19-rare pool hits one of the
+three targets ~42% of the time. **The reroll loop needs a game restart per
+attempt**: the bridge cannot leave a run (`menu_select` answers "Not on a menu
+screen" in-run), so abandon-and-retry only works from the main menu at launch
+— eight restarts in a row read back one seed and one Neow offer before that
+was understood.
+
+**Second attempt 2026-08-08b, package `0.2-612`: still not acquired.** Three
+fresh Furina runs (`UGFHVXH64P`, `LPR6SNKX0Z`, `VDWNEQHLAV`) drew six cards
+from the 19-card rare pool and hit none of the three: Neow `Arcane Scroll`
+(1 draw → The Final Verdict), two rares across eleven card-reward screens
+(Flood of Emotion, Endless Waltz), and Neow `Hefty Tablet` (3 draws →
+Showstopper / Rain of Roses / The Regina's Mercy). At 3/19 per draw that is
+P(0 hits) = 0.842^6 = **36%** — an ordinary miss, not evidence the door is
+shut.
+
+**Two door facts the first session did not have.** (i) `Arcane Scroll`
+(obtain 1 random Rare) is a second readable Neow rare door, worth ~15.8%
+against Hefty Tablet's ~42%; a Neow screen carried a rare door 2 times in 3.
+(ii) Card rewards do offer rares — 2 in 11 screens that session, 2 in 26
+combined (~8%/screen); none was a Power, so "no rare Power among them" stands
+as an observation about which rares appear, not whether rares appear at all.
+
+**Shops remain unmeasured on the second session** — zero shop nodes were
+reached in three runs, all dead in act 1 under the bot policy. The acquisition
+cost is bounded below by run survival, which is the real obstacle.
